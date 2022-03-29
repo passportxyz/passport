@@ -2,10 +2,16 @@
   "name": "root",
   "private": true,
   "devDependencies": {
+    "@commitlint/cli": "^16.2.3",
+    "@commitlint/config-conventional": "^16.2.1",
+    "husky": "^7.0.0",
     "lerna": "^4.0.0"
   },
   "workspaces": [
     "app",
     "schemas"
-  ]
+  ],
+  "scripts": {
+    "prepare": "husky install"
+  }
 }
