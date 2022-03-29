@@ -13,5 +13,9 @@
   ],
   "scripts": {
     "prepare": "husky install"
+  },
+  "engines" : { 
+    "npm" : ">=7.0.0",
+    "node" : ">=16.0.0"
   }
 }
