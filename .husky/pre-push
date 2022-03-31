@@ -3,3 +3,6 @@
 
 cd app
 yarn run test
+
+cd ../vite-app
+yarn run test
