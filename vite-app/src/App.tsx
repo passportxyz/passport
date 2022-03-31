@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 
-import { initWeb3Onboard } from "/src/utils/onboard.ts";
+import { initWeb3Onboard } from "./utils/onboard";
 import { useConnectWallet, useSetChain, useWallets } from "@web3-onboard/react";
 import { EIP1193Provider } from "@web3-onboard/common";
 
@@ -12,7 +12,7 @@ function App() {
   const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();
   const connectedWallets = useWallets();
 
-  const [web3Onboard, setWeb3Onboard] = useState(null);
+  const [web3Onboard, setWeb3Onboard] = useState<any>(null);
   const [label, setLabel] = useState<string | undefined>();
   const [address, setAddress] = useState<string | undefined>();
   const [accounts, setAccounts] = useState<Record<string, any> | undefined>();
@@ -77,16 +77,22 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <button
-          data-testid="connectWalletButton"
-          className="bg-yellow-100 text-gray-900"
-          onClick={handleConnection}
-        >
-          {address ? `Disconnect from ${label}` : "Connect"}
-        </button>
-      </header>
+      <img src={logo} className="App-logo" alt="logo" />
+      <button
+        data-testid="connectWalletButton"
+        className="bg-yellow-100 text-gray-900"
+        onClick={handleConnection}
+      >
+        {address ? `Disconnect from ${label}` : "Connect"}
+      </button>
+      {connectedWallets.map(({ label, accounts }) => {
+        return (
+          <div key={label}>
+            <div>{label}</div>
+            <div>Accounts: {JSON.stringify(accounts, null, 2)}</div>
+          </div>
+        );
+      })}
     </div>
   );
 }
