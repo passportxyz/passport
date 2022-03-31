@@ -9,7 +9,7 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "plugin:prettier/recommended",
-    // "plugin:jest/recommended",
+    "plugin:jest/recommended",
     "plugin:react/recommended",
     "prettier",
   ],
@@ -23,7 +23,7 @@ module.exports = {
     tsconfigRootDir: __dirname,
     project: ["./tsconfig.json"],
   },
-  plugins: ["@typescript-eslint", "prettier", "react"],
+  plugins: ["@typescript-eslint", "prettier", "jest", "react"],
   rules: {
     quotes: ["error", "double"],
     "no-console": "warn",
