@@ -3,3 +3,6 @@
 
 cd app
 yarn run lint
+
+cd ../vite-app
+yarn run lint
