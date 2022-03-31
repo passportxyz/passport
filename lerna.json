@@ -1,5 +1,5 @@
 {
-  "packages": ["app", "schemas"],
+  "packages": ["vite-app", "schemas"],
   "npmClient": "yarn",
   "version": "independent",
   "useWorkspaces": true,
