@@ -54,10 +54,16 @@ function App() {
     // retrieve localstorage state
     const previouslyConnectedWallets = JSON.parse(
       window.localStorage.getItem("connectedWallets") || "[]",
-    );
+    ) as string[];
     if (previouslyConnectedWallets?.length) {
+      /* eslint-disable no-inner-declarations */
       async function setWalletFromLocalStorage() {
-        await connect({ autoSelect: previouslyConnectedWallets[0] });
+        await connect({
+          autoSelect: {
+            label: previouslyConnectedWallets[0],
+            disableModals: false,
+          },
+        });
       }
       // restore from localstorage
       setWalletFromLocalStorage();
@@ -65,7 +71,7 @@ function App() {
   }, [web3Onboard, connect]);
 
   // Toggle connect/disconnect
-  const handleConnection = async () => {
+  const handleConnection = () => {
     if (!address) {
       connect({});
     } else {
@@ -83,7 +89,7 @@ function App() {
         className="bg-yellow-100 text-gray-900"
         onClick={handleConnection}
       >
-        {address ? `Disconnect from ${label}` : "Connect"}
+        {address ? `Disconnect from ${label || ""}` : "Connect"}
       </button>
       {connectedWallets.map(({ label, accounts }) => {
         return (
