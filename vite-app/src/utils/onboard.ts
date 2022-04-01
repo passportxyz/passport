@@ -31,8 +31,8 @@ export const initWeb3Onboard = init({
   ],
   appMetadata: {
     name: "Gitcoin - dPopp",
-    icon: "/Logo.png",
-    logo: "/Logo.png",
+    icon: "/src/assets/dpoppLogo.svg",
+    logo: "/src/assets/dpoppLogo.svg",
     description: "Decentralise Proof of Personhood Passport",
     recommendedInjectedWallets: [
       { name: "Coinbase", url: "https://wallet.coinbase.com/" },
