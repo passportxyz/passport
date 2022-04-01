@@ -5,6 +5,10 @@ import walletConnectModule from "@web3-onboard/walletconnect";
 import walletLinkModule from "@web3-onboard/walletlink";
 
 // RPC urls
+const MAINNET_RPC_URL = `https://mainnet.infura.io/v3/${
+  // import.meta.env.VITE_INFURA_KEY
+  "460f40a260564ac4a4f4b3fffb032dad"
+}`;
 const RINKEBY_RPC_URL = `https://rinkeby.infura.io/v3/${
   // import.meta.env.VITE_INFURA_KEY
   "460f40a260564ac4a4f4b3fffb032dad"
@@ -22,6 +26,12 @@ const ledger = ledgerModule();
 export const initWeb3Onboard = init({
   wallets: [injected, ledger, walletLink, walletConnect],
   chains: [
+    {
+        id: "0x1",
+        token: "ETH",
+        label: "Ethereum Mainnet",
+        rpcUrl: MAINNET_RPC_URL,
+    },
     {
       id: "0x4",
       token: "ETH",
