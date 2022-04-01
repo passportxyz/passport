@@ -1,8 +1,5 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-cd app
-yarn run lint
-
-cd ../vite-app
+cd vite-app
 yarn run lint
