@@ -1,8 +1,9 @@
 const identity = {};
 
 // pass a false proof
-identity.parseProofs = jest.fn(() => ({
-  username: 'proof',
+identity.generateMerkle = jest.fn(() => ({
+  proofs: ['proof'],
+  root: "merkleRoot",
 }));
 // always verifies
 identity.verifyCredential = jest.fn(() => true);
