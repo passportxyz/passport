@@ -2,7 +2,7 @@
 import { generateMerkle } from './merkle';
 
 // ---- Types
-import { ChallengeRecord, MerkleRecord, Payload } from '@dpopp/types';
+import { ChallengeRecord, MerkleRecord } from '@dpopp/types';
 
 // Utility to add a number of days to a date
 const addSeconds = (date: Date, seconds: number) => {
@@ -90,20 +90,19 @@ export const issueMerkleCredential = async (DIDKit: { [k: string]: any }, key: s
         '@context': [
           {
             root: 'https://schema.org/Text',
-            proofs: 'https://schema.org/Text',
           },
         ],
         id: `did:ethr:${record.address}#${record.type}`,
         // custom fields to verify a merkleTree of content that the user might voluntarily share with 3rd parties
         // *loosely defined atm - How do we enforce only valid content can enter the tree?
-        root: root?.toString('base64'),
-        proofs: Buffer.from(JSON.stringify(proofs)).toString('base64'),
+        root: root?.toString('base64')
       },
     });
 
     // didkit-wasm-node returns credential as a string - parse for JSON
     return {
       credential,
+      record
     };
   } catch (e: any) {
     return {

@@ -18,7 +18,7 @@ import { SimpleProvider } from './providers/simple';
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
-  // Example provider which verfies the payload when `payload.proofs.valid === "true"`
+  // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
 ]);
 
@@ -107,16 +107,19 @@ app.post('/api/v0.0.0/verify', async (req, res) => {
       } as MerkleRecord;
 
       // generate a VC for the given payload
-      const credential = await issueMerkleCredential(DIDKit, key, record);
+      const { credential } = await issueMerkleCredential(DIDKit, key, record);
 
       // check error state and run safety check to ensure we're returning a valid VC
-      if (credential.error || !(await verifyCredential(DIDKit, credential.credential))) {
+      if (credential.error || !(await verifyCredential(DIDKit, credential))) {
         // return error msg indicating a failure producing VC
         return errorRes(res, 'Unable to produce a verifiable credential');
       }
 
       // return the verifiable credential
-      return res.json(credential);
+      return res.json({
+        record,
+        credential,
+      });
     } else {
       // return error message if an error present
       return errorRes(res, (verified.error && verified.error.join(', ')) || 'Unable to verify proofs');

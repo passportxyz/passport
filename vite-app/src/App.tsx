@@ -12,7 +12,7 @@ import { useConnectWallet, useSetChain, useWallets } from '@web3-onboard/react';
 import { EIP1193Provider } from '@web3-onboard/common';
 
 // --- Identity Tools
-import { verifyCredential, verifyMerkleProof, parseProofs } from '@dpopp/identity/src';
+import { verifyCredential, verifyMerkleProof, generateMerkle } from '@dpopp/identity/src';
 // - @ hacky-workaround to import @spruceid/didkit-wasm
 // issue: when imported directly vite separates the .wasm from the .js and bindings fail
 // fix: copying the library into a workspace avoids .vites caching mechanism
@@ -22,36 +22,43 @@ import * as DIDKit from '@dpopp/identity/dist/didkit-browser';
 (async () => {
   // Given a VC...
   const verifiableCredential = {
-    '@context': ['https://www.w3.org/2018/credentials/v1'],
-    type: ['VerifiableCredential'],
-    credentialSubject: {
-      id: 'did:ethr:0x010#Simple',
-      root: 'w00pQ9isjFAZm4hOqeH3oelwlfbbG8ZeKUdxtglsQiY=',
-      '@context': [
-        {
-          proofs: 'https://schema.org/Text',
-          root: 'https://schema.org/Text',
-        },
-      ],
-      proofs:
-        'eyJ0eXBlIjpbeyJyaWdodCI6ImViYjFiNDA4ZTM4OGI3N2ZhNWVkODU2OGQyMmZkNTI1YzdmMDU3NTllYWRjM2NiZWZjYTk0MDFjNTU3OTNiZDcifSx7InJpZ2h0IjoiNGNiYzA4YjgzZWM2OTdlODA0YTllODMxZWQwZmJkYjljOTQ2MjQyNjc5YjA3NWNhZjI0YzhiZGVkYWVhYjZjYSJ9XSwiYWRkcmVzcyI6W3sibGVmdCI6IjNmZWU5NWRhNWFiNjllYmZkYzE2ZWM4OTJiNzU0MTA1YTExYzIwMjAzMDU0YTZjNmJjYzBhNjAxNzY4OTEwNDMifSx7InJpZ2h0IjoiNGNiYzA4YjgzZWM2OTdlODA0YTllODMxZWQwZmJkYjljOTQ2MjQyNjc5YjA3NWNhZjI0YzhiZGVkYWVhYjZjYSJ9XSwidmVyc2lvbiI6W3sicmlnaHQiOiI5Zjg2ZDA4MTg4NGM3ZDY1OWEyZmVhYTBjNTVhZDAxNWEzYmY0ZjFiMmIwYjgyMmNkMTVkNmMxNWIwZjAwYTA4In0seyJsZWZ0IjoiODQzOTI5NzBmZTllNDFjODlhZDkzYjAwNjcwYTExMjZlZmFmNmFmMzgyMTk3ZTMwNmIxNzM0ZTQ0ZjgwYjAyNyJ9XSwidXNlcm5hbWUiOlt7ImxlZnQiOiJmMGI4Yzc3ZDk3OGQ3YjRhZWJlYjFkZjVhMmMwYTZhYTcwMzkzNjg5ODE5ZGQ0MDYwODI2YWI2ZDM2YjVlYTkwIn0seyJsZWZ0IjoiODQzOTI5NzBmZTllNDFjODlhZDkzYjAwNjcwYTExMjZlZmFmNmFmMzgyMTk3ZTMwNmIxNzM0ZTQ0ZjgwYjAyNyJ9XX0=',
+    "@context": [
+        "https://www.w3.org/2018/credentials/v1"
+    ],
+    "type": [
+        "VerifiableCredential"
+    ],
+    "credentialSubject": {
+        "id": "did:ethr:0x010#Simple",
+        "@context": [
+            {
+                "root": "https://schema.org/Text"
+            }
+        ],
+        "root": "w00pQ9isjFAZm4hOqeH3oelwlfbbG8ZeKUdxtglsQiY="
     },
-    issuer: 'did:key:z6Mkmhp2sE9s4AxFrKUXQjcNxbDV7WTM8xdh1FDNmNDtogdw',
-    issuanceDate: '2022-04-03T20:52:16.707Z',
-    proof: {
-      type: 'Ed25519Signature2018',
-      proofPurpose: 'assertionMethod',
-      verificationMethod:
-        'did:key:z6Mkmhp2sE9s4AxFrKUXQjcNxbDV7WTM8xdh1FDNmNDtogdw#z6Mkmhp2sE9s4AxFrKUXQjcNxbDV7WTM8xdh1FDNmNDtogdw',
-      created: '2022-04-03T20:52:16.707Z',
-      jws: 'eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..pX5YajGztOk2e_Xg-yEddqInu8duvmEJLYXWDo-9nyQi5xOeen_OXN7-kJqooIr6Zxh6WuDSgXv9y_77smsHBw',
+    "issuer": "did:key:z6Mkmhp2sE9s4AxFrKUXQjcNxbDV7WTM8xdh1FDNmNDtogdw",
+    "issuanceDate": "2022-04-04T18:27:40.075Z",
+    "proof": {
+        "type": "Ed25519Signature2018",
+        "proofPurpose": "assertionMethod",
+        "verificationMethod": "did:key:z6Mkmhp2sE9s4AxFrKUXQjcNxbDV7WTM8xdh1FDNmNDtogdw#z6Mkmhp2sE9s4AxFrKUXQjcNxbDV7WTM8xdh1FDNmNDtogdw",
+        "created": "2022-04-04T18:27:40.075Z",
+        "jws": "eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..8NnZByaUSpflYEWdECSuE35g0pQBUlW-kwFCbiNHzbIQv3eD0mT7ktPEgv6YghdDSI56hvhO7xkfiL0yqDwUAQ"
     },
-    expirationDate: '2022-05-03T20:52:16.707Z',
+    "expirationDate": "2022-05-04T18:27:40.075Z"
   };
-  // parse the proofs from base64 to JSON
-  const parsedProofs = parseProofs(verifiableCredential.credentialSubject.proofs);
+  // This is the information stored at the root
+  const record = {
+    "type": "Simple",
+    "address": "0x010",
+    "version": "0.0.0",
+    "username": "test"
+  };
+  // Recreate the merkle root
+  const merkle = generateMerkle(record);
   // extract a single proof to test is a _secret matches the _proof in the _root
-  const matchingProof = parsedProofs.username;
+  const matchingProof = merkle.proofs.username;
   const matchingSecret = 'test';
   const matchingRoot = verifiableCredential.credentialSubject.root;
   // check if the proof verifies this content
