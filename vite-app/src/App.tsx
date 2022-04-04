@@ -59,7 +59,7 @@ import * as DIDKit from '@dpopp/identity/dist/didkit-browser';
   const merkle = generateMerkle(record);
   // extract a single proof to test is a _secret matches the _proof in the _root
   const matchingProof = merkle.proofs.username;
-  const matchingSecret = 'test';
+  const matchingSecret = record.username;
   const matchingRoot = verifiableCredential.credentialSubject.root;
   // check if the proof verifies this content
   const verifiedProof = await verifyMerkleProof(matchingProof, matchingSecret, matchingRoot);
