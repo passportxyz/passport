@@ -4,7 +4,7 @@ import { Provider } from './provider';
 // ---- Types
 import { Payload, Challenge, Verification } from '@dpopp/types';
 
-// ---- Return crypto challenges
+// ---- Return randomBytes as a challenge
 import crypto from 'crypto';
 
 // Collate all Providers to abstract verify logic
@@ -14,7 +14,7 @@ export class Providers {
 
   // construct an array of providers
   constructor(_providers: Provider[]) {
-    // redurce unique entries into _providers object
+    // reduce unique entries into _providers object
     this._providers = _providers.reduce((providers, provider) => {
       if (!providers[provider._type]) {
         providers[provider._type] = provider;

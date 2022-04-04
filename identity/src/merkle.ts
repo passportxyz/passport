@@ -48,12 +48,6 @@ export const generateMerkle = (record: MerkleRecord) => {
   };
 };
 
-// parse a given set of base64 encoded proofs
-export const parseProofs = (proofs: string) => {
-  // parse the proofs
-  return JSON.parse(Buffer.from(proofs, 'base64').toString());
-};
-
 // Verify that a given value fits into the merkle root
 export const verifyMerkleProof = (proof: Proof<string | Buffer>, value: string, root: string) => {
   // create a new merkleTree
