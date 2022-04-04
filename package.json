@@ -29,6 +29,7 @@
     "build:identity": "yarn workspace @dpopp/identity build",
     "build:iam": "yarn workspace @dpopp/iam build",
     "build:vite-app": "yarn workspace @dpopp/vite-app build",
+    "postinstall": "yarn build:identity",
     "start": "yarn build:identity && concurrently --kill-others \"yarn start:iam\" \"yarn start:app\"",
     "start:iam": "yarn workspace @dpopp/iam start",
     "start:app": "yarn workspace @dpopp/vite-app dev",
