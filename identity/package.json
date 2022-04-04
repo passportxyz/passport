@@ -1,0 +1,36 @@
+{
+  "name": "@dpopp/identity",
+  "version": "0.0.1",
+  "license": "MIT",
+  "main": "src/index.js",
+  "directories": {
+    "src": "src",
+    "dist": "dist"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@dpopp/types": "0.0.1",
+    "@spruceid/didkit-wasm": "^0.2.1",
+    "@spruceid/didkit-wasm-node": "^0.2.1",
+    "merkle-tools": "^1.4.1",
+    "typescript": "~4.6.3"
+  },
+  "devDependencies": {
+    "copyfiles": "^2.4.1"
+  },
+  "scripts": {
+    "clean": "rimraf dist node_modules",
+    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
+    "postbuild": "copyfiles -u 4 ../node_modules/@spruceid/didkit-wasm/* ./dist/didkit-browser",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\"",
+    "lint": "tslint -c tslint.json -p tsconfig.json --fix",
+    "prettier": "prettier --write ."
+  }
+}
