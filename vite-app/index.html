@@ -13,10 +13,8 @@
       let global = globalThis;
     </script>
     <script type="module">
-      import { Buffer } from 'buffer';
-      import process from 'process';
-      window.Buffer = Buffer;
-      window.process = process;
+      import { Buffer } from "buffer";
+      globalThis.Buffer = Buffer;
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
