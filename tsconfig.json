@@ -1,0 +1,11 @@
+{
+  "files": [],
+  "references": [
+    { "path": "vite-app" },
+    { "path": "iam" },
+    { "path": "identity" },
+    { "path": "types" },
+    { "path": "utils" }
+  ],
+  "exclude": ["node_modules"]
+}

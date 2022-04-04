@@ -1,21 +1,45 @@
 {
-  "name": "root",
+  "name": "dpopp",
   "private": true,
   "devDependencies": {
     "@commitlint/cli": "^16.2.3",
     "@commitlint/config-conventional": "^16.2.1",
+    "@types/node": "^17.0.23",
+    "concurrently": "^7.0.0",
     "husky": "^7.0.0",
-    "lerna": "^4.0.0"
+    "lerna": "^4.0.0",
+    "prettier": "^2.2.1",
+    "rimraf": "^3.0.2"
   },
   "workspaces": [
     "vite-app",
-    "schemas"
+    "iam",
+    "schemas",
+    "identity",
+    "types"
   ],
   "scripts": {
-    "prepare": "husky install"
+    "clean": "lerna run clean",
+    "nuke": "yarn clean && rimraf node_modules",
+    "prepare": "husky install",
+    "lint": "lerna run lint",
+    "test": "lerna run test",
+    "prettier": "lerna run prettier",
+    "build": "yarn build:identity && yarn build:iam && yarn build:vite-app",
+    "build:identity": "yarn workspace @dpopp/identity build",
+    "build:iam": "yarn workspace @dpopp/iam build",
+    "build:vite-app": "yarn workspace @dpopp/vite-app build",
+    "start": "yarn build:identity && concurrently --kill-others \"yarn start:iam\" \"yarn start:app\"",
+    "start:iam": "yarn workspace @dpopp/iam start",
+    "start:app": "yarn workspace @dpopp/vite-app dev",
+    "vite-app": "yarn workspace @dpopp/vite-app",
+    "schemas": "yarn workspace @dpopp/schemas",
+    "iam": "yarn workspace @dpopp/iam",
+    "identity": "yarn workspace @dpopp/identity",
+    "types": "yarn workspace @dpopp/types"
   },
   "engines": {
-    "npm": ">=7.0.0",
+    "yarn": ">=1.22.10",
     "node": ">=16.0.0"
   }
 }

@@ -1,0 +1,22 @@
+0 silly argv {
+0 silly argv   _: [ 'run' ],
+0 silly argv   lernaVersion: '4.0.0',
+0 silly argv   '$0': '/Users/graham/dpopp-repo/node_modules/.bin/lerna',
+0 silly argv   script: 'lint'
+0 silly argv }
+1 notice cli v4.0.0
+2 verbose rootPath /Users/graham/dpopp-repo
+3 info versioning independent
+4 error JSONError: Unexpected token "}" (0x7D) in JSON at position 470 while parsing near "...nfig.json --fix\",\n  },\n  \"dependencies\":..." in iam/package.json
+4 error
+4 error [0m [90m 14 |[39m     [32m"prettier"[39m[33m:[39m [32m"prettier --write ."[39m[33m,[39m[0m
+4 error [0m [90m 15 |[39m     [32m"lint"[39m[33m:[39m [32m"tslint -c tslint.json -p tsconfig.json --fix"[39m[33m,[39m[0m
+4 error [0m[31m[1m>[22m[39m[90m 16 |[39m   }[33m,[39m[0m
+4 error [0m [90m    |[39m   [31m[1m^[22m[39m[0m
+4 error [0m [90m 17 |[39m   [32m"dependencies"[39m[33m:[39m {[0m
+4 error [0m [90m 18 |[39m     [32m"@dpopp/identity"[39m[33m:[39m [32m"^0.0.1"[39m[33m,[39m[0m
+4 error [0m [90m 19 |[39m     [32m"@dpopp/types"[39m[33m:[39m [32m"^0.0.1"[39m[33m,[39m[0m
+4 error
+4 error     at parseJson (/Users/graham/dpopp-repo/node_modules/parse-json/index.js:29:21)
+4 error     at parse (/Users/graham/dpopp-repo/node_modules/load-json-file/index.js:15:9)
+4 error     at module.exports (/Users/graham/dpopp-repo/node_modules/load-json-file/index.js:18:47)

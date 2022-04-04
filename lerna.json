@@ -1,5 +1,12 @@
 {
-  "packages": ["vite-app", "schemas"],
+  "packages": [
+    "vite-app",
+    "schemas",
+    "iam",
+    "identity",
+    "types",
+    "utils"
+  ],
   "npmClient": "yarn",
   "version": "independent",
   "useWorkspaces": true,
