@@ -12,7 +12,7 @@ import { useConnectWallet, useSetChain, useWallets } from '@web3-onboard/react';
 import { EIP1193Provider } from '@web3-onboard/common';
 
 // --- Identity Tools
-import { verifyCredential, verifyMerkleProof, parseProofs } from '@dpopp/identity';
+import { verifyCredential, verifyMerkleProof, parseProofs } from '@dpopp/identity/src';
 // - @ hacky-workaround to import @spruceid/didkit-wasm
 // issue: when imported directly vite separates the .wasm from the .js and bindings fail
 // fix: copying the library into a workspace avoids .vites caching mechanism

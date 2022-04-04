@@ -8,4 +8,10 @@ identity.parseProofs = jest.fn(() => ({
 identity.verifyCredential = jest.fn(() => true);
 identity.verifyMerkleProof = jest.fn(() => true);
 
+// mock nested directory
+identity.dist = {
+    'didkit-browser.js': {}
+};
+
+// return full mock
 module.exports = identity;
