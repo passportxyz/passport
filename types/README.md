@@ -1,8 +1,8 @@
-# @dgrants/types
+# @dpopp/types
 
-Shared types for the dgrants repo.
+Shared types for the dpopp repo.
 
 Instructions:
 
-- Ensure @dgrants/types is included as a package dependency
-- Import like so: `import { Grant } from "@dgrants/types"`
+- Ensure @dpopp/types is included as a package dependency
+- Import like so: `import { VerifiableCredential } from "@dpopp/types"`
