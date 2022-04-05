@@ -1,10 +1,10 @@
 // ----- Types
-import { Payload, Verification } from '@dpopp/types';
+import { Payload, Verification } from "@dpopp/types";
 
 // Base Provider which all Providers must extend
 export class Provider {
   // This should be the name of the Identity Provider in TitleCase
-  _type = 'Base';
+  _type = "Base";
   // Set of options to influence the verify procedure
   _options = {};
 

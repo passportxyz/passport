@@ -1,11 +1,11 @@
 // ---- Base Provider instance that all Providers will inherit
-import { Provider } from './provider';
+import { Provider } from "./provider";
 
 // ---- Types
-import { Payload, Challenge, Verification } from '@dpopp/types';
+import { Payload, Challenge, Verification } from "@dpopp/types";
 
 // ---- Return randomBytes as a challenge
-import crypto from 'crypto';
+import crypto from "crypto";
 
 // Collate all Providers to abstract verify logic
 export class Providers {
@@ -34,7 +34,7 @@ export class Providers {
       return {
         valid: true,
         record: {
-          challenge: crypto.randomBytes(32).toString('hex'),
+          challenge: crypto.randomBytes(32).toString("hex"),
           address: payload.address,
           type: payload.type,
         },
@@ -43,7 +43,7 @@ export class Providers {
       // unable to create a challenge without address
       return {
         valid: false,
-        error: ['Missing address'],
+        error: ["Missing address"],
       };
     }
   }
@@ -62,7 +62,7 @@ export class Providers {
     // unable to verify without provider
     return {
       valid: false,
-      error: ['Missing provider'],
+      error: ["Missing provider"],
     };
   }
 }

@@ -6,13 +6,13 @@
   "license": "MIT",
   "scripts": {
     "clean": "rimraf dist node_modules",
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
+    "prebuild": "yarn run lint",
     "build": "tsc",
     "prestart": "yarn run build",
-    "start": "node .",
-    "test": "echo \"Error: no test specified\"",
+    "start": "node main",
+    "test": "jest",
     "prettier": "prettier --write .",
-    "lint": "tslint -c tslint.json -p tsconfig.json --fix"
+    "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx ."
   },
   "dependencies": {
     "@dpopp/identity": "^0.0.1",
@@ -27,5 +27,10 @@
     "merkle-tools": "^1.4.1",
     "tslint": "^6.1.3",
     "typescript": "~4.6.3"
+  },
+  "devDependencies": {
+    "@types/supertest": "^2.0.12",
+    "jest": "^27.5.1",
+    "supertest": "^6.2.2"
   }
 }
