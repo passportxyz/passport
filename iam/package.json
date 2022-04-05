@@ -22,6 +22,7 @@
     "@types/node": "16",
     "@types/webpack-env": "^1.16.3",
     "cors": "^2.8.5",
+    "ethers": "^5.0.32",
     "express": "4",
     "merkle-tools": "^1.4.1",
     "tslint": "^6.1.3",
