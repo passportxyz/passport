@@ -1,7 +1,3 @@
-// /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-// /* eslint-disable @typescript-eslint/no-unsafe-argument */
-// /* eslint-disable @typescript-eslint/ban-ts-comment */
-// // @ts-nocheck
 // // ---- Server
 import express from "express";
 // import cors from "cors";
