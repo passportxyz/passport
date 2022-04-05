@@ -1,38 +1,38 @@
 // --- React Methods
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 // --- Assets/Artefacts
 // import logo from './logo.svg';
-import './App.css';
-import dpoppLogofrom from './assets/dpoppLogo.svg';
+import "./App.css";
+import dpoppLogofrom from "./assets/dpoppLogo.svg";
 
 // --- Wallet connection utilities
-import { initWeb3Onboard } from './utils/onboard';
-import { Account, OnboardAPI } from '@web3-onboard/core/dist/types';
-import { useConnectWallet, useWallets } from '@web3-onboard/react';
-import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
+import { initWeb3Onboard } from "./utils/onboard";
+import { Account, OnboardAPI } from "@web3-onboard/core/dist/types";
+import { useConnectWallet, useWallets } from "@web3-onboard/react";
+import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
 // import { EIP1193Provider } from '@web3-onboard/common';
 
 // --- Identity Tools
-import { MerkleRecord, VerifiableCredential } from '@dpopp/types';
-import { verifyCredential, verifyMerkleProof, generateMerkle, Proof } from '@dpopp/identity/src';
+import { MerkleRecord, VerifiableCredential } from "@dpopp/types";
+import { verifyCredential, verifyMerkleProof, generateMerkle, Proof } from "@dpopp/identity/src";
 // - @ hacky-workaround to import @spruceid/didkit-wasm
 // issue: when imported directly vite separates the .wasm from the .js and bindings fail
 // fix: copying the library into a workspace avoids .vites caching mechanism
-import * as DIDKit from '@dpopp/identity/dist/didkit-browser';
+import * as DIDKit from "@dpopp/identity/dist/didkit-browser";
 
 // Fetch a verifiable challenge credential
 const fetchChallengeCredential = async (address: string) => {
   // fetch challenge as a credential from api
-  const response = await fetch('http://localhost:65535/api/v0.0.0/challenge', {
-    method: 'POST',
+  const response = await fetch("http://localhost:65535/api/v0.0.0/challenge", {
+    method: "POST",
     headers: {
-      'content-type': 'application/json;charset=UTF-8',
+      "content-type": "application/json;charset=UTF-8",
     },
     body: JSON.stringify({
       payload: {
         address: address,
-        type: 'Simple',
+        type: "Simple",
       },
     }),
   });
@@ -53,18 +53,18 @@ const fetchVerifiableCredential = async (address: string | undefined, signer: Js
     // sign the challenge provided by the IAM
     const signature = signer && (await signer.signMessage(challenge.credential.credentialSubject.challenge)).toString();
     // fetch a credential from the API
-    const response = await fetch('http://localhost:65535/api/v0.0.0/verify', {
-      method: 'POST',
+    const response = await fetch("http://localhost:65535/api/v0.0.0/verify", {
+      method: "POST",
       headers: {
-        'content-type': 'application/json;charset=UTF-8',
+        "content-type": "application/json;charset=UTF-8",
       },
       body: JSON.stringify({
         payload: {
           address: address,
-          type: 'Simple',
+          type: "Simple",
           proofs: {
-            valid: 'true',
-            username: 'test',
+            valid: "true",
+            username: "test",
             signature: signature,
           },
         },
@@ -141,14 +141,14 @@ function App(): JSX.Element {
       // flaten array for storage
       const connectedWalletsLabelArray = connectedWallets.map(({ label }) => label);
       // store in localstorage
-      window.localStorage.setItem('connectedWallets', JSON.stringify(connectedWalletsLabelArray));
+      window.localStorage.setItem("connectedWallets", JSON.stringify(connectedWalletsLabelArray));
     }
   }, [connectedWallets]);
 
   // Connect wallet on reload
   useEffect(() => {
     // retrieve localstorage state
-    const previouslyConnectedWallets = JSON.parse(window.localStorage.getItem('connectedWallets') || '[]') as string[];
+    const previouslyConnectedWallets = JSON.parse(window.localStorage.getItem("connectedWallets") || "[]") as string[];
     if (previouslyConnectedWallets?.length) {
       /* eslint-disable no-inner-declarations */
       async function setWalletFromLocalStorage() {
@@ -174,7 +174,7 @@ function App(): JSX.Element {
       });
     } else {
       disconnect({
-        label: label || '',
+        label: label || "",
       }).catch((e) => {
         throw e;
       });
@@ -205,7 +205,7 @@ function App(): JSX.Element {
                 className="bg-gray-100 text-violet-500 rounded-lg py-4 px-20 min-w-full"
                 onClick={handleConnection}
               >
-                <p className="text-base">{address ? `Disconnect from ${label || ''}` : 'Get Started'}</p>
+                <p className="text-base">{address ? `Disconnect from ${label || ""}` : "Get Started"}</p>
               </button>
               {address ? <div className="pt-3">Connected to: {JSON.stringify(address, null, 2)}</div> : null}
               {/* {accounts &&
@@ -257,7 +257,7 @@ function App(): JSX.Element {
                     const merkle = generateMerkle(record);
                     // extract a single proof to test is a secret matches the proof in the root
                     const matchingProof = merkle.proofs.username as Proof<string | Buffer>;
-                    const matchingSecret = record.username || '';
+                    const matchingSecret = record.username || "";
                     const matchingRoot = credential.credentialSubject.root;
                     // check if the proof verifies this content
                     const verifiedProof = verifyMerkleProof(matchingProof, matchingSecret, matchingRoot);
