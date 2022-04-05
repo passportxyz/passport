@@ -1,16 +1,16 @@
 // ----- Types
-import { Payload, Verification } from '@dpopp/types';
+import { Payload, Verification } from "@dpopp/types";
 
 // ---- Base Provider
-import { Provider } from '../utils/provider';
+import { Provider } from "../utils/provider";
 
 // Export a simple Provider as an example
 export class SimpleProvider extends Provider {
   // Give the provider a type so that we can select it with a payload
-  _type = 'Simple';
+  _type = "Simple";
   // Options can be set here and/or via the constructor
   _options = {
-    valid: 'true',
+    valid: "true",
   };
 
   // construct this and its super
@@ -26,7 +26,7 @@ export class SimpleProvider extends Provider {
     return {
       valid: payload?.proofs?.valid === this._options.valid,
       record: {
-        username: payload?.proofs?.username || '',
+        username: payload?.proofs?.username || "",
       },
     };
   }
