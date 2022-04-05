@@ -43,3 +43,23 @@ export type Verification = {
   // This will overwrite the record presented in the Payload
   record?: { [k: string]: string };
 };
+
+// rough outline of a VerifiableCredential
+export type VerifiableCredential = {
+  '@context': string[];
+  type: string[];
+  credentialSubject: {
+    id: string;
+    '@context': { [key: string]: string }[];
+  } & { [key: string]: string };
+  issuer: string;
+  issuanceDate: string;
+  expirationDate: string;
+  proof: {
+    type: string;
+    proofPurpose: string;
+    verificationMethod: string;
+    created: string;
+    jws: string;
+  };
+};
