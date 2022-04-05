@@ -4,8 +4,7 @@
     "schemas",
     "iam",
     "identity",
-    "types",
-    "utils"
+    "types"
   ],
   "npmClient": "yarn",
   "version": "independent",

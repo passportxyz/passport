@@ -1,9 +1,6 @@
 import { defineConfig } from 'vite';
 import path from 'path';
 import react from '@vitejs/plugin-react';
-import inject from '@rollup/plugin-inject';
-
-// import polyfillNode from 'rollup-plugin-polyfill-node';
 
 import wasm from 'vite-plugin-wasm';
 import topLevelAwait from 'vite-plugin-top-level-await';
@@ -13,7 +10,6 @@ import topLevelAwait from 'vite-plugin-top-level-await';
 export default defineConfig({
   plugins: [
     react(),
-    // polyfillNode(),
     wasm({
       filter: /.*\.wasm$/,
     }),
@@ -28,6 +24,6 @@ export default defineConfig({
   },
   build: {
     target: 'modules',
-    minify: 'terser'
+    minify: 'terser',
   },
 });

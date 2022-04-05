@@ -4,7 +4,7 @@ import { generateMerkle } from './merkle';
 // ---- Types
 import { ChallengeRecord, MerkleRecord } from '@dpopp/types';
 
-// Utility to add a number of days to a date
+// Utility to add a number of seconds to a date
 const addSeconds = (date: Date, seconds: number) => {
   const result = new Date(date);
   result.setSeconds(result.getSeconds() + seconds);
@@ -51,7 +51,7 @@ const _issueCredential = async (
 export const issueChallengeCredential = async (DIDKit: { [k: string]: any }, key: string, record: ChallengeRecord) => {
   // attempt to create a VC for the given payload
   try {
-    // generate a verifiableCredential
+    // generate a verifiableCredential (60s ttl)
     const credential = await _issueCredential(DIDKit, key, 60, {
       credentialSubject: {
         '@context': [
@@ -95,14 +95,14 @@ export const issueMerkleCredential = async (DIDKit: { [k: string]: any }, key: s
         id: `did:ethr:${record.address}#${record.type}`,
         // custom fields to verify a merkleTree of content that the user might voluntarily share with 3rd parties
         // *loosely defined atm - How do we enforce only valid content can enter the tree?
-        root: root?.toString('base64')
+        root: root?.toString('base64'),
       },
     });
 
     // didkit-wasm-node returns credential as a string - parse for JSON
     return {
       credential,
-      record
+      record,
     };
   } catch (e: any) {
     return {
@@ -126,8 +126,6 @@ export const verifyCredential = async (DIDKit: { [k: string]: any }, credential:
     return verify.errors.length === 0;
   } else {
     // past expiry :(
-    return {
-      errors: ['expired'],
-    };
+    return false;
   }
 };

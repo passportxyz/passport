@@ -23,7 +23,7 @@ export const generateMerkle = (record: MerkleRecord) => {
     for (prop in record) {
       if (record.hasOwnProperty(prop)) {
         // add leaf to merkle
-        merkleTools.addLeaf(record[prop] || "", true);
+        merkleTools.addLeaf(record[prop] || '', true);
       }
     }
   }
