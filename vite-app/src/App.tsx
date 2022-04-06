@@ -2,104 +2,41 @@
 import React, { useState, useEffect } from "react";
 
 // --- Assets/Artefacts
-// import logo from './logo.svg';
 import "./App.css";
 import dpoppLogofrom from "./assets/dpoppLogo.svg";
 
 // --- Wallet connection utilities
 import { initWeb3Onboard } from "./utils/onboard";
-import { Account, OnboardAPI } from "@web3-onboard/core/dist/types";
+import { OnboardAPI } from "@web3-onboard/core/dist/types";
 import { useConnectWallet, useWallets } from "@web3-onboard/react";
 import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
-// import { EIP1193Provider } from '@web3-onboard/common';
 
 // --- Identity Tools
 import { VerificationRecord, VerifiableCredential } from "@dpopp/types";
-import { verifyCredential, verifyMerkleProof, generateMerkle, Proof } from "@dpopp/identity/src";
-// - @ hacky-workaround to import @spruceid/didkit-wasm
+import {
+  fetchVerifiableCredential,
+  verifyCredential,
+  verifyMerkleProof,
+  generateMerkle,
+  // --- Types
+  Proof,
+} from "@dpopp/identity/src";
+// - @workaround to import @spruceid/didkit-wasm
 // issue: when imported directly vite separates the .wasm from the .js and bindings fail
 // fix: copying the library into a workspace avoids .vites caching mechanism
 import * as DIDKit from "@dpopp/identity/dist/didkit-browser";
 
-// Fetch a verifiable challenge credential
-const fetchChallengeCredential = async (address: string) => {
-  // fetch challenge as a credential from api
-  const response = await fetch("http://localhost:65535/api/v0.0.0/challenge", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json;charset=UTF-8",
-    },
-    body: JSON.stringify({
-      payload: {
-        address: address,
-        type: "Simple",
-      },
-    }),
-  });
-
-  const { credential } = (await response.json()) as { credential: VerifiableCredential };
-
-  return {
-    credential,
-  };
-};
-
-// Fetch a verifiableCredential
-const fetchVerifiableCredential = async (address: string | undefined, signer: JsonRpcSigner | undefined) => {
-  // check for valid context
-  if (address && signer) {
-    // first pull a challenge that can be signed by the user
-    const challenge = await fetchChallengeCredential(address);
-    // sign the challenge provided by the IAM
-    const signature = signer && (await signer.signMessage(challenge.credential.credentialSubject.challenge)).toString();
-    // fetch a credential from the API
-    const response = await fetch("http://localhost:65535/api/v0.0.0/verify", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json;charset=UTF-8",
-      },
-      body: JSON.stringify({
-        payload: {
-          address: address,
-          type: "Simple",
-          proofs: {
-            valid: "true",
-            username: "test",
-            signature: signature,
-          },
-        },
-        challenge: challenge.credential,
-      }),
-    });
-
-    const { credential, record } = (await response.json()) as {
-      credential: VerifiableCredential;
-      record: VerificationRecord;
-    };
-
-    return {
-      signature,
-      credential,
-      record,
-      challenge: challenge.credential,
-    };
-  } else {
-    // no address / signer
-    return {
-      credential: false,
-    };
-  }
-};
+// set the iamUrl to be used for new verifications (@TODO: this should be fed via the .env)
+const iamUrl = "http://localhost:65535/api/";
 
 function App(): JSX.Element {
   // Use onboard to control the current provider/wallets
-  const [{ wallet }, connect, disconnect] = useConnectWallet(); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const [{ wallet }, connect, disconnect] = useConnectWallet();
   // const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();
   const connectedWallets = useWallets();
   const [web3Onboard, setWeb3Onboard] = useState<OnboardAPI | undefined>();
   const [label, setLabel] = useState<string | undefined>();
   const [address, setAddress] = useState<string | undefined>();
-  const [accounts, setAccounts] = useState<Account[] | undefined>(); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [signer, setSigner] = useState<JsonRpcSigner | undefined>();
   const [signature, setSignature] = useState<string | undefined>();
   const [record, setRecord] = useState<false | VerificationRecord | undefined>();
@@ -107,8 +44,6 @@ function App(): JSX.Element {
   const [credential, setCredential] = useState<false | VerifiableCredential | undefined>();
   const [verifiedMerkle, setVerifiedMerkle] = useState<boolean | undefined>();
   const [verifiedCredential, setVerifiedCredential] = useState<boolean | undefined>();
-
-  // const [provider, setProvider] = useState<EIP1193Provider | undefined>();
 
   // Init onboard to enable hooks
   useEffect(() => {
@@ -121,23 +56,20 @@ function App(): JSX.Element {
     if (!connectedWallets.length) {
       setLabel(undefined);
       setAddress(undefined);
-      setAccounts(undefined);
       setRecord(undefined);
       setSigner(undefined);
+      // these are set as part of the verification flow demo (this will be replaced by @dpopp/storage)
       setSignature(undefined);
       setChallenge(undefined);
       setCredential(undefined);
       setVerifiedMerkle(undefined);
       setVerifiedCredential(undefined);
-      // setProvider(undefined);
     } else {
-      // record details
-      setLabel(connectedWallets[0]?.label);
-      setAddress(connectedWallets[0]?.accounts[0].address);
-      setAccounts(connectedWallets[0]?.accounts);
+      // record connected wallet details
+      setLabel(wallet?.label);
+      setAddress(wallet?.accounts[0].address);
       // get the signer from an ethers wrapped Web3Provider
       setSigner(new Web3Provider(connectedWallets[0]?.provider).getSigner());
-      // setProvider(connectedWallets[0]?.provider);
       // flaten array for storage
       const connectedWalletsLabelArray = connectedWallets.map(({ label }) => label);
       // store in localstorage
@@ -181,6 +113,59 @@ function App(): JSX.Element {
     }
   };
 
+  // fetch an example VC from the IAM server
+  const handleFetchCredential = (): void => {
+    fetchVerifiableCredential(
+      iamUrl,
+      {
+        address: address || "",
+        type: "Simple",
+        version: "0.0.0",
+        proofs: {
+          valid: "true",
+          username: "test",
+        },
+      },
+      signer
+    )
+      .then((res) => {
+        setSignature(res.signature);
+        setRecord(res.record as VerificationRecord);
+        setChallenge(res.challenge as VerifiableCredential);
+        setCredential(res.credential as VerifiableCredential);
+        // reset verification
+        setVerifiedMerkle(undefined);
+        setVerifiedCredential(undefined);
+      })
+      .catch((e) => {
+        throw e;
+      });
+  };
+
+  // Verify the example VC returned from the IAM server
+  const handleVerifyCredential = (): void => {
+    if (record && credential) {
+      // Recreate the merkle root
+      const merkle = generateMerkle(record);
+      // extract a single proof to test is a secret matches the proof in the root
+      const matchingProof = merkle.proofs.username as Proof<string | Buffer>;
+      const matchingSecret = record.username || "";
+      const matchingRoot = credential.credentialSubject.root || "";
+      // check if the proof verifies this content
+      const verifiedProof = verifyMerkleProof(matchingProof, matchingSecret, matchingRoot);
+      // merkle is verified
+      setVerifiedMerkle(verifiedProof);
+      // verify that the VC was generated by the trusted authority
+      verifyCredential(DIDKit, credential)
+        .then((verifiedVC) => {
+          setVerifiedCredential(verifiedVC);
+        })
+        .catch((e) => {
+          throw e;
+        });
+    }
+  };
+
   return (
     <div className="bg-violet-700 font-librefranklin text-gray-100 min-h-max font-miriam-libre min-h-default">
       <div className="container px-5 py-24 mx-auto">
@@ -198,7 +183,6 @@ function App(): JSX.Element {
               Gitcoin ID Passport is an identity aggregator of the top identity providers in the web3 space into one
               transportable identity that proves your personhood.
             </div>
-
             <div className="mb-10 mt-10 md:w-1/4">
               <button
                 data-testid="connectWalletButton"
@@ -208,37 +192,11 @@ function App(): JSX.Element {
                 <p className="text-base">{address ? `Disconnect from ${label || ""}` : "Get Started"}</p>
               </button>
               {address ? <div className="pt-3">Connected to: {JSON.stringify(address, null, 2)}</div> : null}
-              {/* {accounts &&
-                accounts.map((account: Account) => {
-                  return (
-                    <div key={label}>
-                      <div className="py-3">{label} Accounts Available:</div>
-                      <div>
-                        <pre>{JSON.stringify(account, null, 4)}</pre>
-                      </div>
-                    </div>
-                  );
-                })} */}
             </div>
             <a className="underline">Why use your wallet as your identity?</a>
             <button
               className="bg-gray-100 mb-10 min-w-full mt-10 px-20 py-4 rounded-lg text-violet-500"
-              onClick={() => {
-                // fetch an example VC from the IAM server
-                fetchVerifiableCredential(address, signer)
-                  .then((res) => {
-                    setSignature(res.signature);
-                    setRecord(res.record as VerificationRecord);
-                    setChallenge(res.challenge as VerifiableCredential);
-                    setCredential(res.credential as VerifiableCredential);
-                    // reset verification
-                    setVerifiedCredential(undefined);
-                    setVerifiedMerkle(undefined);
-                  })
-                  .catch((e) => {
-                    throw e;
-                  });
-              }}
+              onClick={handleFetchCredential}
             >
               Issue a Verifiable Credential
             </button>
@@ -251,33 +209,13 @@ function App(): JSX.Element {
             {credential ? (
               <button
                 className="bg-gray-100 mb-10 min-w-full mt-10 px-20 py-4 rounded-lg text-violet-500"
-                onClick={() => {
-                  if (record) {
-                    // Recreate the merkle root
-                    const merkle = generateMerkle(record);
-                    // extract a single proof to test is a secret matches the proof in the root
-                    const matchingProof = merkle.proofs.username as Proof<string | Buffer>;
-                    const matchingSecret = record.username || "";
-                    const matchingRoot = credential.credentialSubject.root;
-                    // check if the proof verifies this content
-                    const verifiedProof = verifyMerkleProof(matchingProof, matchingSecret, matchingRoot);
-                    // verify that the VC was generated by the trusted authority
-                    verifyCredential(DIDKit, credential)
-                      .then((verifiedVC) => {
-                        setVerifiedCredential(verifiedVC);
-                        setVerifiedMerkle(verifiedProof);
-                      })
-                      .catch((e) => {
-                        throw e;
-                      });
-                  }
-                }}
+                onClick={handleVerifyCredential}
               >
                 Verify Credential
               </button>
             ) : null}
             {verifiedMerkle ? (
-              <p>✅ MerkleProof verifiable contains the passed in username ({record && record.username})</p>
+              <p>✅ MerkleProof verifiably contains the passed in username ({record && record.username})</p>
             ) : null}
             {verifiedCredential ? (
               <p>✅ Credential has verifiably been issued by {credential && credential.issuer} </p>

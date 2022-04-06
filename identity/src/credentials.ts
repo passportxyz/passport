@@ -2,7 +2,11 @@
 import { generateMerkle } from "./merkle";
 
 // ---- Types
-import { ChallengeRecord, VerificationRecord, VerifiableCredential, DIDKitLib } from '@dpopp/types';
+import { ChallengeRecord, VerificationRecord, Payload, VerifiableCredential } from "@dpopp/types";
+import { JsonRpcSigner } from "@ethersproject/providers";
+
+// ---- Node/Browser http req library
+import axios from "axios";
 
 // Utility to add a number of seconds to a date
 const addSeconds = (date: Date, seconds: number) => {
@@ -127,5 +131,57 @@ export const verifyCredential = async (DIDKit: DIDKitLib, credential: Verifiable
   } else {
     // past expiry :(
     return false;
+  }
+};
+
+// Fetch a verifiable challenge credential
+export const fetchChallengeCredential = async (iamUrl: string, payload: Payload) => {
+  // fetch challenge as a credential from API that fits the version, address and type (this credential has a short ttl)
+  const { data } = await axios.post(`${iamUrl.replace(/\/+$/, "")}/v${payload.version}/challenge`, {
+    payload: {
+      address: payload.address,
+      type: payload.type,
+    },
+  });
+
+  return {
+    challenge: data.credential as VerifiableCredential,
+  };
+};
+
+// Fetch a verifiableCredential
+export const fetchVerifiableCredential = async (
+  iamUrl: string,
+  payload: Payload,
+  signer: JsonRpcSigner | undefined
+) => {
+  // check for valid context
+  if (payload.address && signer) {
+    // first pull a challenge that can be signed by the user
+    const { challenge } = await fetchChallengeCredential(iamUrl, payload);
+    // sign the challenge provided by the IAM
+    const signature = signer && (await signer.signMessage(challenge.credentialSubject.challenge)).toString();
+
+    // pass the signature as part of the proofs obj
+    payload.proofs = { ...payload.proofs, ...{ signature } };
+
+    // fetch a credential from the API that fits the version, payload and passes the signature message challenge
+    const { data } = await axios.post(`${iamUrl.replace(/\/+$/, "")}/v${payload.version}/verify`, {
+      payload,
+      challenge,
+    });
+
+    // return everything that was used to create the credential (along with the credential)
+    return {
+      signature,
+      challenge,
+      record: data.record as VerificationRecord,
+      credential: data.credential as VerifiableCredential,
+    };
+  } else {
+    // no address / signer
+    return {
+      credential: false,
+    };
   }
 };
