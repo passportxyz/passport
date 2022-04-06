@@ -10350,7 +10350,6 @@ strong-log-transformer@^2.1.0:
     minimist "^1.2.0"
     through "^2.3.4"
 
-<<<<<<< HEAD
 superagent@^7.1.0:
   version "7.1.2"
   resolved "https://registry.yarnpkg.com/superagent/-/superagent-7.1.2.tgz#71393141edd086ccf2544a29a4a609e46b7911f3"
@@ -10368,8 +10367,6 @@ superagent@^7.1.0:
     readable-stream "^3.6.0"
     semver "^7.3.5"
 
-=======
->>>>>>> fix(vite-app, identity): moves fetch*Credential functions to identity workspace
 superstruct@^0.10.12:
   version "0.10.13"
   resolved "https://registry.yarnpkg.com/superstruct/-/superstruct-0.10.13.tgz#705535a5598ff231bd976601a7b6b534a71a821b"

@@ -2,7 +2,7 @@
 import { generateMerkle } from "./merkle";
 
 // ---- Types
-import { ChallengeRecord, VerificationRecord, Payload, VerifiableCredential } from "@dpopp/types";
+import { DIDKitLib, ChallengeRecord, VerificationRecord, Payload, VerifiableCredential } from "@dpopp/types";
 import { JsonRpcSigner } from "@ethersproject/providers";
 
 // ---- Node/Browser http req library
