@@ -2,5 +2,4 @@
 /*.ts
 /test/**/*
 /dist/*
-/coverage/*
-/__mocks__/**/*.js
+**/__mocks__/**/*
