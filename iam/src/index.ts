@@ -13,9 +13,8 @@ import {
   VerificationRecord,
   ChallengeRecord,
   ChallengeRequestBody,
-  ChallengeResponseBody,
   VerifyRequestBody,
-  VerifyResponseBody,
+  CredentialResponseBody,
 } from "@dpopp/types";
 
 // ---- Generate & Verify methods
@@ -92,21 +91,13 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
       // generate a VC for the given payload
       return void issueChallengeCredential(DIDKit, key, record).then((credential) => {
         // check error state and run safety check to ensure we're returning a valid VC
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         if (credential.error) {
           // return error msg indicating a failure producing VC
           return errorRes(res, "Unable to produce a verifiable credential");
         }
 
-        // async verify the credential
-        return void verifyCredential(DIDKit, credential.credential).then((verifyCredential) => {
-          if (!verifyCredential) {
-            return errorRes(res, "Unable to produce a verifiable credential");
-          } else {
-            // return the verifiable credential
-            return res.json(credential as ChallengeResponseBody);
-          }
-        });
+        // return the verifiable credential
+        return res.json(credential as CredentialResponseBody);
       });
     } else {
       // return error message if an error present
@@ -155,25 +146,22 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
           } as VerificationRecord;
 
           // generate a VC for the given payload
-          return void issueMerkleCredential(DIDKit, key, record).then(({ credential, record }) => {
-            // as a safety check - ensure that the credential is valid
-            return void verifyCredential(DIDKit, credential).then((verifiedCredential) => {
-              // check error state and run safety check to ensure we're returning a valid VC
-              if (Object.hasOwnProperty.call(credential, "error") || !verifiedCredential) {
-                // return error msg indicating a failure producing VC
-                return errorRes(res, "Unable to produce a verifiable credential");
-              }
+          return issueMerkleCredential(DIDKit, key, record).then(({ credential, record }) => {
+            // check error state and run safety check to ensure we're returning a valid VC
+            if (Object.hasOwnProperty.call(credential, "error")) {
+              // return error msg indicating a failure producing VC
+              return errorRes(res, "Unable to produce a verifiable credential");
+            }
 
-              // return the verifiable credential
-              return res.json({
-                record,
-                credential,
-              } as VerifyResponseBody);
-            });
+            // return the verifiable credential
+            return res.json({
+              record,
+              credential,
+            } as CredentialResponseBody);
           });
         } else {
           // return error message if an error present
-          return void errorRes(
+          return errorRes(
             res,
             (verifiedChallenge.error && verifiedChallenge.error.join(", ")) || "Unable to verify proofs"
           );
