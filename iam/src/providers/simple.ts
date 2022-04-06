@@ -14,7 +14,7 @@ export class SimpleProvider extends Provider {
   };
 
   // construct this and its super
-  constructor(options: { [k: string]: any } = {}) {
+  constructor(options: { [prop: string]: { [prop: string]: string | undefined } | string } = {}) {
     // construct Provider
     super();
     // set options against this instance

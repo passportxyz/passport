@@ -2,14 +2,14 @@
   "name": "@dpopp/iam",
   "private": true,
   "version": "0.0.1",
-  "main": "dist/index.js",
+  "main": "dist/main.js",
   "license": "MIT",
   "scripts": {
     "clean": "rimraf dist node_modules",
     "prebuild": "yarn run lint",
     "build": "tsc",
     "prestart": "yarn run build",
-    "start": "node main",
+    "start": "node .",
     "test": "jest",
     "prettier": "prettier --write .",
     "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx ."

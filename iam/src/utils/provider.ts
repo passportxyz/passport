@@ -1,5 +1,5 @@
 // ----- Types
-import { Payload, Verification } from "@dpopp/types";
+import { Payload, Verification, VerificationRecord } from "@dpopp/types";
 
 // Base Provider which all Providers must extend
 export class Provider {
@@ -9,13 +9,13 @@ export class Provider {
   _options = {};
 
   // Add constructor so that typescript knows this is a constructable base
-  constructor(options: { [k: string]: any } = {}) {
+  constructor(options: { [prop: string]: { [prop: string]: string | undefined } | string } = {}) {
     // combine options with this._options
     this.setOptions(options);
   }
 
   // Set the options against the instance
-  setOptions(options: { [k: string]: any } = {}) {
+  setOptions(options: { [prop: string]: { [prop: string]: string | undefined } | string } = {}): void {
     this._options = { ...this._options, ...options };
   }
 
@@ -23,7 +23,7 @@ export class Provider {
   verify(payload: Payload): Verification {
     return {
       valid: true,
-      record: {},
+      record: payload as VerificationRecord,
     };
   }
 }
