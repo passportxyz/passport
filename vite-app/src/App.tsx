@@ -14,7 +14,7 @@ import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
 // import { EIP1193Provider } from '@web3-onboard/common';
 
 // --- Identity Tools
-import { MerkleRecord, VerifiableCredential } from "@dpopp/types";
+import { VerificationRecord, VerifiableCredential } from "@dpopp/types";
 import { verifyCredential, verifyMerkleProof, generateMerkle, Proof } from "@dpopp/identity/src";
 // - @ hacky-workaround to import @spruceid/didkit-wasm
 // issue: when imported directly vite separates the .wasm from the .js and bindings fail
@@ -74,7 +74,7 @@ const fetchVerifiableCredential = async (address: string | undefined, signer: Js
 
     const { credential, record } = (await response.json()) as {
       credential: VerifiableCredential;
-      record: MerkleRecord;
+      record: VerificationRecord;
     };
 
     return {
@@ -102,7 +102,7 @@ function App(): JSX.Element {
   const [accounts, setAccounts] = useState<Account[] | undefined>(); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [signer, setSigner] = useState<JsonRpcSigner | undefined>();
   const [signature, setSignature] = useState<string | undefined>();
-  const [record, setRecord] = useState<false | MerkleRecord | undefined>();
+  const [record, setRecord] = useState<false | VerificationRecord | undefined>();
   const [challenge, setChallenge] = useState<false | VerifiableCredential | undefined>();
   const [credential, setCredential] = useState<false | VerifiableCredential | undefined>();
   const [verifiedMerkle, setVerifiedMerkle] = useState<boolean | undefined>();
@@ -228,7 +228,7 @@ function App(): JSX.Element {
                 fetchVerifiableCredential(address, signer)
                   .then((res) => {
                     setSignature(res.signature);
-                    setRecord(res.record as MerkleRecord);
+                    setRecord(res.record as VerificationRecord);
                     setChallenge(res.challenge as VerifiableCredential);
                     setCredential(res.credential as VerifiableCredential);
                     // reset verification

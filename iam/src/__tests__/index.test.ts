@@ -1,45 +1,33 @@
+// ---- Testing libraries
 import request from "supertest";
-import { app } from "../index";
+
+// ---- Test subject
+import { app, config } from "../index";
+
+// ---- Types
+import { ChallengeResponseBody, VerifyResponseBody } from "@dpopp/types";
 
 describe("POST /challenge", function () {
   it("handles valid challenge requests", async () => {
+    // as each signature is unique, each request results in unique output
     const payload = {
       type: "Simple",
-      address: "0xcf0639A8102D94EE7424e71C017379B99Bc36893",
-    };
-    const expectedResponse = {
-      "@context": ["https://www.w3.org/2018/credentials/v1"],
-      type: ["VerifiableCredential"],
-      credentialSubject: {
-        id: "did:ethr:0xd23e91f4252d57aF484CE64BD02F3c693a9F83D9#Simple",
-        root: "SZYY9hw6+iBFH8YI0GYalosmpOfGDgVnBcMpjLcsnqQ=",
-        "@context": [
-          {
-            root: "https://schema.org/Text",
-          },
-        ],
-      },
-      issuer: "did:key:z6Mkmhp2sE9s4AxFrKUXQjcNxbDV7WTM8xdh1FDNmNDtogdw",
-      issuanceDate: "2022-04-05T19:27:40.358Z",
-      proof: {
-        type: "Ed25519Signature2018",
-        proofPurpose: "assertionMethod",
-        verificationMethod:
-          "did:key:z6Mkmhp2sE9s4AxFrKUXQjcNxbDV7WTM8xdh1FDNmNDtogdw#z6Mkmhp2sE9s4AxFrKUXQjcNxbDV7WTM8xdh1FDNmNDtogdw",
-        created: "2022-04-05T19:27:40.358Z",
-        jws: "eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..NvVCewNj8GzgUPdmelVqi5U4VJo6P6tWgu11gvW99s2wmsfZjBarkm7zNi2rPVIKJBceOo09YXGnQuknWa_SCQ",
-      },
-      expirationDate: "2022-05-05T19:27:40.358Z",
+      address: "0x0",
     };
 
+    // check that ID matches the payload (this has been mocked)
+    const expectedId = "did:ethr:0x0#challenge-Simple";
+
+    // create a req against the express app
     const response = await request(app)
       .post("/api/v0.0.0/challenge")
       .send({ payload })
       .set("Accept", "application/json")
       .expect(200)
       .expect("Content-Type", /json/);
-    // expect(response.status).toEqual(200);
-    expect(response.body).toEqual(expectedResponse);
+
+    // expect the mocked credential to be returned and contain the expectedId
+    expect((response.body as ChallengeResponseBody)?.credential?.credentialSubject?.id).toEqual(expectedId);
   });
 
   // TODO new unit test --> if credential.error then return 400
@@ -49,3 +37,46 @@ describe("POST /challenge", function () {
 });
 
 // TODO test POST /verify endpoint
+
+describe("POST /verify", function () {
+  it("handles valid challenge requests", async () => {
+    // challenge received from the challenge endpoint
+    const challenge = {
+      issuer: config.issuer,
+      credentialSubject: {
+        id: "did:ethr:0x0#challenge-Simple",
+        address: "0x0",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+    // payload containing a signature of the challenge in the challenge credential
+    const payload = {
+      type: "Simple",
+      address: "0x0",
+      proofs: {
+        valid: "true",
+        username: "test",
+        signature: "pass",
+      },
+    };
+
+    // check that ID matches the payload (this has been mocked)
+    const expectedId = "did:ethr:0x0#Simple";
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/verify")
+      .send({ challenge, payload })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    // check for an id match on the mocked credential
+    expect((response.body as VerifyResponseBody).credential.credentialSubject.id).toEqual(expectedId);
+  });
+
+  // TODO new unit test --> if credential.error then return 400
+  // TODO new unit test --> if !(await verifyCredential(DIDKit, credential)) then return 400
+  // TODO new unit test --> if utils.getAddress fails, then ???
+  // TODO new unit test --> if issueMerkleCredential fails, then ???
+});

@@ -1,3 +1,29 @@
+// Typing for required parts of DIDKit
+export type DIDKitLib = {
+  verifyCredential: (vc: string, proofOptions: string) => Promise<any>;
+  issueCredential: (credential: string, proofOptions: string, key: string) => Promise<any>;
+} & { [key: string]: any };
+
+// rough outline of a VerifiableCredential
+export type VerifiableCredential = {
+  "@context": string[];
+  type: string[];
+  credentialSubject: {
+    id: string;
+    "@context": { [key: string]: string }[];
+  } & { [key: string]: string };
+  issuer: string;
+  issuanceDate: string;
+  expirationDate: string;
+  proof: {
+    type: string;
+    proofPurpose: string;
+    verificationMethod: string;
+    created: string;
+    jws: string;
+  };
+};
+
 // values received from client and fed into the verify route
 export type Payload = {
   type: string;
@@ -15,17 +41,6 @@ export type ChallengeRecord = {
   version: string;
   challenge?: string;
 };
-
-// these values are placed into a merkle-tree according to the response of a Provider
-export type MerkleRecord = {
-  type: string;
-  address: string;
-  version: string;
-  username?: string;
-  email?: string;
-  proofMsg?: string;
-};
-
 // response Object return by verify procedure
 export type Challenge = {
   valid: boolean;
@@ -36,30 +51,38 @@ export type Challenge = {
   } & { [k: string]: string };
 };
 
+// these values are placed into a merkle-tree according to the response of a Provider
+export type VerificationRecord = {
+  type: string;
+  address: string;
+  version: string;
+  username?: string;
+  email?: string;
+  proofMsg?: string;
+} & { [k: string]: string };
+
 // response Object return by verify procedure
 export type Verification = {
   valid: boolean;
   error?: string[];
-  // This will overwrite the record presented in the Payload
+  // This will be combined with the VerificationRecord (built from the verified content in the Payload)
   record?: { [k: string]: string };
 };
 
-// rough outline of a VerifiableCredential
-export type VerifiableCredential = {
-  '@context': string[];
-  type: string[];
-  credentialSubject: {
-    id: string;
-    '@context': { [key: string]: string }[];
-  } & { [key: string]: string };
-  issuer: string;
-  issuanceDate: string;
-  expirationDate: string;
-  proof: {
-    type: string;
-    proofPurpose: string;
-    verificationMethod: string;
-    created: string;
-    jws: string;
-  };
+// Challenge req/res lifecycle
+export type ChallengeRequestBody = {
+  payload: Payload;
+};
+export type ChallengeResponseBody = {
+  credential: VerifiableCredential;
+};
+
+// Verify req/res lifecycle
+export type VerifyRequestBody = {
+  challenge: VerifiableCredential;
+  payload: Payload;
+};
+export type VerifyResponseBody = {
+  credential: VerifiableCredential;
+  record: VerificationRecord;
 };

@@ -3,10 +3,10 @@ import MerkleTools, { Proof } from 'merkle-tools';
 import crypto from 'crypto';
 
 // ----- Types
-import { MerkleRecord } from '@dpopp/types';
+import { VerificationRecord } from '@dpopp/types';
 
 // Generate a merkle from the record object held within the payload
-export const generateMerkle = (record: MerkleRecord) => {
+export const generateMerkle = (record: VerificationRecord) => {
   // props to access the merkle leafs
   let counter = 0;
   let prop: keyof typeof record;

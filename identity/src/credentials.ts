@@ -2,7 +2,7 @@
 import { generateMerkle } from './merkle';
 
 // ---- Types
-import { ChallengeRecord, MerkleRecord } from '@dpopp/types';
+import { ChallengeRecord, VerificationRecord, VerifiableCredential, DIDKitLib } from '@dpopp/types';
 
 // Utility to add a number of seconds to a date
 const addSeconds = (date: Date, seconds: number) => {
@@ -14,7 +14,7 @@ const addSeconds = (date: Date, seconds: number) => {
 
 // internal method to issue a verfiable credential
 const _issueCredential = async (
-  DIDKit: { [k: string]: any },
+  DIDKit: DIDKitLib,
   key: string,
   expiresInSeconds: number,
   fields: { [k: string]: any }
@@ -48,7 +48,7 @@ const _issueCredential = async (
 };
 
 // Issue a VC with challenge data
-export const issueChallengeCredential = async (DIDKit: { [k: string]: any }, key: string, record: ChallengeRecord) => {
+export const issueChallengeCredential = async (DIDKit: DIDKitLib, key: string, record: ChallengeRecord) => {
   // attempt to create a VC for the given payload
   try {
     // generate a verifiableCredential (60s ttl)
@@ -65,7 +65,7 @@ export const issueChallengeCredential = async (DIDKit: { [k: string]: any }, key
         challenge: record.challenge,
         address: record.address,
       },
-    });
+    }) as VerifiableCredential;
 
     // didkit-wasm-node returns credential as a string - parse for JSON
     return {
@@ -79,7 +79,7 @@ export const issueChallengeCredential = async (DIDKit: { [k: string]: any }, key
 };
 
 // Return a verifiable credential with embedded merkle data
-export const issueMerkleCredential = async (DIDKit: { [k: string]: any }, key: string, record: MerkleRecord) => {
+export const issueMerkleCredential = async (DIDKit: DIDKitLib, key: string, record: VerificationRecord) => {
   // attempt to create a VC for the given payload
   try {
     // generate a merkleTree for the provided evidence
@@ -97,7 +97,7 @@ export const issueMerkleCredential = async (DIDKit: { [k: string]: any }, key: s
         // *loosely defined atm - How do we enforce only valid content can enter the tree?
         root: root?.toString('base64'),
       },
-    });
+    }) as VerifiableCredential;
 
     // didkit-wasm-node returns credential as a string - parse for JSON
     return {
@@ -112,7 +112,7 @@ export const issueMerkleCredential = async (DIDKit: { [k: string]: any }, key: s
 };
 
 // Verify that the provided credential is valid
-export const verifyCredential = async (DIDKit: { [k: string]: any }, credential: { [k: string]: any }) => {
+export const verifyCredential = async (DIDKit: DIDKitLib, credential: VerifiableCredential) => {
   // extract expirationDate
   const { expirationDate } = credential;
   // check that the credential is still valid
