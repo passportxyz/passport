@@ -1,1 +1,1 @@
-export * from '@spruceid/didkit-wasm';
+export * from "@spruceid/didkit-wasm";
