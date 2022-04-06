@@ -1,6 +1,5 @@
 // ----- Tooling to build & verify merkleTrees
-import MerkleTools, { Proof } from 'merkle-tools';
-import crypto from 'crypto';
+import MerkleTools, { Proof } from "hash-js-merkle-tools";
 
 // ----- Types
 import { VerificationRecord } from '@dpopp/types';
@@ -13,7 +12,7 @@ export const generateMerkle = (record: VerificationRecord) => {
 
   // generate a new tree
   const merkleTools = new MerkleTools({
-    hashType: 'sha256',
+    hashType: "sha256",
   });
   // each proof relates to an entry in Payload.record
   const proofs: { [k: string]: any } = {};
@@ -23,7 +22,7 @@ export const generateMerkle = (record: VerificationRecord) => {
     for (prop in record) {
       if (record.hasOwnProperty(prop)) {
         // add leaf to merkle
-        merkleTools.addLeaf(record[prop] || '', true);
+        merkleTools.addLeaf(record[prop] || "", true);
       }
     }
   }
@@ -44,7 +43,7 @@ export const generateMerkle = (record: VerificationRecord) => {
   // return content required to carry out verification of the merkleTree content
   return {
     proofs,
-    root: merkleTools.getMerkleRoot(),
+    root: merkleTools.getMerkleRoot()?.toString("base64"),
   };
 };
 
@@ -52,11 +51,11 @@ export const generateMerkle = (record: VerificationRecord) => {
 export const verifyMerkleProof = (proof: Proof<string | Buffer>, value: string, root: string) => {
   // create a new merkleTree
   const merkleTools = new MerkleTools({
-    hashType: 'sha256',
+    hashType: "sha256",
   });
   // generate a hash from the given value
-  const hash = crypto.createHash('sha256').update(value).digest();
+  const hash = merkleTools.hash(value);
 
   // validate that the proof+hash is present in the root
-  return merkleTools.validateProof(proof, hash, Buffer.from(root, 'base64'));
+  return merkleTools.validateProof(proof, hash, Buffer.from(root, "base64"));
 };
