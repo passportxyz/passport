@@ -18,7 +18,7 @@
     "@dpopp/types": "0.0.1",
     "@spruceid/didkit-wasm": "^0.2.1",
     "@spruceid/didkit-wasm-node": "^0.2.1",
-    "merkle-tools": "^1.4.1",
+    "hash-js-merkle-tools": "^1.4.3",
     "typescript": "~4.6.3"
   },
   "devDependencies": {

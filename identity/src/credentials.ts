@@ -1,5 +1,5 @@
 // ---- Merkle methods
-import { generateMerkle } from './merkle';
+import { generateMerkle } from "./merkle";
 
 // ---- Types
 import { ChallengeRecord, VerificationRecord, VerifiableCredential, DIDKitLib } from '@dpopp/types';
@@ -20,20 +20,20 @@ const _issueCredential = async (
   fields: { [k: string]: any }
 ) => {
   // get DID from key
-  const issuer = DIDKit.keyToDID('key', key);
+  const issuer = DIDKit.keyToDID("key", key);
   // read method from key
-  const verificationMethod = await DIDKit.keyToVerificationMethod('key', key);
+  const verificationMethod = await DIDKit.keyToVerificationMethod("key", key);
   // stringify assertionMethod we feed to didkit-wasm-node
   const verifyWithMethod = JSON.stringify({
-    proofPurpose: 'assertionMethod',
+    proofPurpose: "assertionMethod",
     verificationMethod,
   });
 
   // generate a verifiableCredential
   const credential = await DIDKit.issueCredential(
     JSON.stringify({
-      '@context': ['https://www.w3.org/2018/credentials/v1'],
-      type: ['VerifiableCredential'],
+      "@context": ["https://www.w3.org/2018/credentials/v1"],
+      type: ["VerifiableCredential"],
       issuer,
       issuanceDate: new Date().toISOString(),
       expirationDate: addSeconds(new Date(), expiresInSeconds).toISOString(),
@@ -54,10 +54,10 @@ export const issueChallengeCredential = async (DIDKit: DIDKitLib, key: string, r
     // generate a verifiableCredential (60s ttl)
     const credential = await _issueCredential(DIDKit, key, 60, {
       credentialSubject: {
-        '@context': [
+        "@context": [
           {
-            challenge: 'https://schema.org/Text',
-            address: 'https://schema.org/Text',
+            challenge: "https://schema.org/Text",
+            address: "https://schema.org/Text",
           },
         ],
         id: `did:ethr:${record.address}#challenge-${record.type}`,
@@ -87,15 +87,14 @@ export const issueMerkleCredential = async (DIDKit: DIDKitLib, key: string, reco
     // generate a verifiableCredential
     const credential = await _issueCredential(DIDKit, key, 30 * 86400, {
       credentialSubject: {
-        '@context': [
+        "@context": [
           {
-            root: 'https://schema.org/Text',
+            root: "https://schema.org/Text",
           },
         ],
         id: `did:ethr:${record.address}#${record.type}`,
-        // custom fields to verify a merkleTree of content that the user might voluntarily share with 3rd parties
-        // *loosely defined atm - How do we enforce only valid content can enter the tree?
-        root: root?.toString('base64'),
+        // record the root of the records merkleTree (this will allow the user verifiably share the PPI held within the record)
+        root,
       },
     }) as VerifiableCredential;
 
@@ -103,6 +102,7 @@ export const issueMerkleCredential = async (DIDKit: DIDKitLib, key: string, reco
     return {
       credential,
       record,
+      proofs,
     };
   } catch (e: any) {
     return {
