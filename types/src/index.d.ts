@@ -69,20 +69,21 @@ export type Verification = {
   record?: { [k: string]: string };
 };
 
-// Challenge req/res lifecycle
+// IAM HTTP Request body types
 export type ChallengeRequestBody = {
   payload: Payload;
 };
-export type ChallengeResponseBody = {
-  credential: VerifiableCredential;
-};
-
-// Verify req/res lifecycle
 export type VerifyRequestBody = {
   challenge: VerifiableCredential;
   payload: Payload;
 };
-export type VerifyResponseBody = {
+
+// IAM HTTP Response body types
+export type ValidResponseBody = {
   credential: VerifiableCredential;
-  record: VerificationRecord;
+  record?: VerificationRecord;
 };
+export type ErrorResponseBody = {
+  error: string;
+};
+export type CredentialResponseBody = ValidResponseBody & ErrorResponseBody;

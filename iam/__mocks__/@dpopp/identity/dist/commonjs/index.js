@@ -4,6 +4,7 @@ const identity = {};
 // always returns dummy challenge
 identity.issueChallengeCredential = jest.fn(async (DIDKit, key, record) => ({
   credential: {
+    issuer: "empty",
     credentialSubject: {
       id: `did:ethr:${record.address}#challenge-${record.type}`,
       challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -16,7 +17,7 @@ identity.issueMerkleCredential = jest.fn(async (DIDKit, key, record) => ({
   record: {
     type: record.type,
     address: record.address,
-    version: record.version
+    version: record.version,
   },
   credential: {
     credentialSubject: {
