@@ -3,6 +3,9 @@
 // ---- Server
 import express, { Request } from "express";
 
+// ---- Production plugins
+import cors from "cors";
+
 // ---- Web3 packages
 import { utils } from "ethers";
 
@@ -37,6 +40,9 @@ export const app = express();
 
 // parse JSON post bodys
 app.use(express.json());
+
+// set cors to accept calls from anywhere
+app.use(cors());
 
 // // return a JSON error response with a 400 status
 const errorRes = async (res: Response, error: string): Promise<Response> =>
