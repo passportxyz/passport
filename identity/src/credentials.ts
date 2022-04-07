@@ -12,7 +12,6 @@ import {
   CredentialResponseBody,
   VerifiableCredentialRecord,
 } from "@dpopp/types";
-import { JsonRpcSigner } from "@ethersproject/providers";
 
 // ---- Node/Browser http req library
 import axios from "axios";
@@ -128,7 +127,7 @@ export const verifyCredential = async (DIDKit: DIDKitLib, credential: Verifiable
     ) as { checks: string[]; warnings: string[]; errors: string[] };
 
     // did we get any errors when we attempted to verify?
-    return verify?.errors?.length === 0;
+    return verify.errors.length === 0;
   } else {
     // past expiry :(
     return false;
@@ -157,36 +156,34 @@ export const fetchChallengeCredential = async (iamUrl: string, payload: RequestP
 export const fetchVerifiableCredential = async (
   iamUrl: string,
   payload: RequestPayload,
-  signer: JsonRpcSigner | undefined
+  signer: { signMessage: (message: string) => Promise<string> } | undefined
 ): Promise<VerifiableCredentialRecord> => {
-  // check for valid context
-  if (payload.address && signer) {
-    // first pull a challenge that can be signed by the user
-    const { challenge } = await fetchChallengeCredential(iamUrl, payload);
-    // sign the challenge provided by the IAM
-    const signature = signer && (await signer.signMessage(challenge.credentialSubject.challenge)).toString();
+  // first pull a challenge that can be signed by the user
+  const { challenge } = await fetchChallengeCredential(iamUrl, payload);
 
-    // pass the signature as part of the proofs obj
-    payload.proofs = { ...payload.proofs, ...{ signature } };
+  // sign the challenge provided by the IAM
+  const signature =
+    signer && challenge.credentialSubject.challenge
+      ? (await signer.signMessage(challenge.credentialSubject.challenge)).toString()
+      : "";
 
-    // fetch a credential from the API that fits the version, payload and passes the signature message challenge
-    const response: { data: CredentialResponseBody } = await axios.post(
-      `${iamUrl.replace(/\/+$/, "")}/v${payload.version}/verify`,
-      {
-        payload,
-        challenge,
-      }
-    );
+  // pass the signature as part of the proofs obj
+  payload.proofs = { ...payload.proofs, ...{ signature: signature } };
 
-    // return everything that was used to create the credential (along with the credential)
-    return {
-      signature,
+  // fetch a credential from the API that fits the version, payload and passes the signature message challenge
+  const response: { data: CredentialResponseBody } = await axios.post(
+    `${iamUrl.replace(/\/+$/, "")}/v${payload.version}/verify`,
+    {
+      payload,
       challenge,
-      record: response.data.record,
-      credential: response.data.credential,
-    } as VerifiableCredentialRecord;
-  } else {
-    // no address / signer
-    throw new Error("Must provide signer and address");
-  }
+    }
+  );
+
+  // return everything that was used to create the credential (along with the credential)
+  return {
+    signature,
+    challenge,
+    record: response.data.record,
+    credential: response.data.credential,
+  } as VerifiableCredentialRecord;
 };

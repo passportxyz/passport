@@ -29,8 +29,10 @@ export const generateMerkle = (
     }
   }
 
-  // make the tree
-  merkleTools.makeTree();
+  if (Object.keys(record).length > 0) {
+    // make the tree
+    merkleTools.makeTree();
+  }
 
   // get proof for each item of record
   for (prop in record) {
