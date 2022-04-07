@@ -1,7 +1,2 @@
-/*.js
-/*.ts
-/test/**/*.js
 /dist/*
 /coverage/*
-**/__mocks__/**/*.js
-**/__mocks__/**/*.ts

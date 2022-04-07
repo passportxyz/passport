@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "main": "dist/main.js",
+  "types": "dist/types.d.ts",
   "license": "MIT",
   "scripts": {
     "clean": "rimraf dist node_modules",
@@ -10,7 +11,7 @@
     "build": "tsc",
     "prestart": "yarn run build",
     "start": "node .",
-    "test": "jest",
+    "test": "jest --verbose",
     "prettier": "prettier --write .",
     "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx ."
   },

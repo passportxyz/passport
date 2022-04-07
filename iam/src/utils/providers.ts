@@ -1,10 +1,8 @@
-// ---- Base Provider instance that all Providers will inherit
-import { Provider } from "./provider";
-
 // ---- Types
-import { Payload, Challenge, Verification } from "@dpopp/types";
+import { Provider } from "../types";
+import { RequestPayload, ChallengePayload, VerifiedPayload } from "@dpopp/types";
 
-// ---- Return randomBytes as a challenge
+// ---- Return randomBytes as a challenge to test that the user has control of a provided address
 import crypto from "crypto";
 
 // Collate all Providers to abstract verify logic
@@ -16,8 +14,8 @@ export class Providers {
   constructor(_providers: Provider[]) {
     // reduce unique entries into _providers object
     this._providers = _providers.reduce((providers, provider) => {
-      if (!providers[provider._type]) {
-        providers[provider._type] = provider;
+      if (!providers[provider.type]) {
+        providers[provider.type] = provider;
       }
 
       return providers;
@@ -25,7 +23,7 @@ export class Providers {
   }
 
   // request a challenge sig
-  getChallenge(payload: Payload): Challenge {
+  getChallenge(payload: RequestPayload): ChallengePayload {
     // @TODO - expand this to allow providers to set custom challanges?
 
     // check that we've been provided an address for the challenge
@@ -34,9 +32,9 @@ export class Providers {
       return {
         valid: true,
         record: {
-          challenge: crypto.randomBytes(32).toString("hex"),
           address: payload.address,
           type: payload.type,
+          challenge: crypto.randomBytes(32).toString("hex"),
         },
       };
     } else {
@@ -49,7 +47,7 @@ export class Providers {
   }
 
   // Given the payload is valid return the response of the selected Providers verification proceedure
-  verify(payload: Payload): Verification {
+  verify(payload: RequestPayload): VerifiedPayload {
     // collect provider from options
     const provider = this._providers[payload.type];
 

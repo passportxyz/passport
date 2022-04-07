@@ -20,19 +20,19 @@
     "@spruceid/didkit-wasm": "^0.2.1",
     "@spruceid/didkit-wasm-node": "^0.2.1",
     "axios": "^0.26.1",
-    "hash-js-merkle-tools": "^1.4.3",
+    "hash-js-merkle-tools": "^1.4.4",
     "typescript": "~4.6.3"
   },
   "devDependencies": {
-    "copyfiles": "^2.4.1"
+    "copyfiles": "^2.4.1",
+    "jest": "^27.5.1"
   },
   "scripts": {
     "clean": "rimraf dist node_modules",
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "postbuild": "copyfiles -u 4 ../node_modules/@spruceid/didkit-wasm/* ./dist/didkit-browser",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\"",
-    "lint": "tslint -c tslint.json -p tsconfig.json --fix",
+    "test": "jest --verbose",
+    "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",
     "prettier": "prettier --write ."
   }
 }

@@ -3,4 +3,4 @@ export * from "./merkle";
 export * from "./credentials";
 
 // export typings from libs
-export type { Proof } from "merkle-tools";
+export type { Proof } from "hash-js-merkle-tools";

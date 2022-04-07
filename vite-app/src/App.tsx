@@ -12,15 +12,8 @@ import { useConnectWallet, useWallets } from "@web3-onboard/react";
 import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
 
 // --- Identity Tools
-import { VerificationRecord, VerifiableCredential } from "@dpopp/types";
-import {
-  fetchVerifiableCredential,
-  verifyCredential,
-  verifyMerkleProof,
-  generateMerkle,
-  // --- Types
-  Proof,
-} from "@dpopp/identity/src";
+import { ProofRecord, VerifiableCredential } from "@dpopp/types";
+import { fetchVerifiableCredential, verifyCredential, verifyMerkleProof, generateMerkle } from "@dpopp/identity/src";
 // - @workaround to import @spruceid/didkit-wasm
 // issue: when imported directly vite separates the .wasm from the .js and bindings fail
 // fix: copying the library into a workspace avoids .vites caching mechanism
@@ -39,7 +32,7 @@ function App(): JSX.Element {
   const [address, setAddress] = useState<string | undefined>();
   const [signer, setSigner] = useState<JsonRpcSigner | undefined>();
   const [signature, setSignature] = useState<string | undefined>();
-  const [record, setRecord] = useState<false | VerificationRecord | undefined>();
+  const [record, setRecord] = useState<false | ProofRecord | undefined>();
   const [challenge, setChallenge] = useState<false | VerifiableCredential | undefined>();
   const [credential, setCredential] = useState<false | VerifiableCredential | undefined>();
   const [verifiedMerkle, setVerifiedMerkle] = useState<boolean | undefined>();
@@ -130,9 +123,9 @@ function App(): JSX.Element {
     )
       .then((res): void => {
         setSignature(res.signature);
-        setRecord(res.record as VerificationRecord);
-        setChallenge(res.challenge as VerifiableCredential);
-        setCredential(res.credential as VerifiableCredential);
+        setRecord(res.record);
+        setChallenge(res.challenge);
+        setCredential(res.credential);
         // reset verification
         setVerifiedMerkle(undefined);
         setVerifiedCredential(undefined);
@@ -148,7 +141,7 @@ function App(): JSX.Element {
       // Recreate the merkle root
       const merkle = generateMerkle(record);
       // extract a single proof to test is a secret matches the proof in the root
-      const matchingProof = merkle.proofs.username as Proof<string | Buffer>;
+      const matchingProof = merkle.proofs.username;
       const matchingSecret = record.username || "";
       const matchingRoot = credential.credentialSubject.root || "";
       // check if the proof verifies this content

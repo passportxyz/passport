@@ -1,28 +1,23 @@
 // ----- Types
-import { Payload, Verification } from "@dpopp/types";
-
-// ---- Base Provider
-import { Provider } from "../utils/provider";
+import { Provider, ProviderOptions } from "../types";
+import { RequestPayload, VerifiedPayload } from "@dpopp/types";
 
 // Export a simple Provider as an example
-export class SimpleProvider extends Provider {
+export class SimpleProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
-  _type = "Simple";
+  type = "Simple";
   // Options can be set here and/or via the constructor
   _options = {
     valid: "true",
   };
 
-  // construct this and its super
-  constructor(options: { [prop: string]: { [prop: string]: string | undefined } | string } = {}) {
-    // construct Provider
-    super();
-    // set options against this instance
-    this.setOptions(options);
+  // construct the provider instance with supplied options
+  constructor(options: ProviderOptions = {}) {
+    this._options = { ...this._options, ...options };
   }
 
   // verify that the proof object contains valid === "true"
-  verify(payload: Payload): Verification {
+  verify(payload: RequestPayload): VerifiedPayload {
     return {
       valid: payload?.proofs?.valid === this._options.valid,
       record: {
