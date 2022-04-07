@@ -2,10 +2,15 @@
 import MerkleTools, { Proof } from "hash-js-merkle-tools";
 
 // ----- Types
-import { VerificationRecord } from '@dpopp/types';
+import { ProofRecord } from "@dpopp/types";
 
 // Generate a merkle from the record object held within the payload
-export const generateMerkle = (record: VerificationRecord) => {
+export const generateMerkle = (
+  record: ProofRecord
+): {
+  proofs: { [key: string]: Proof<string>[] | null };
+  root: string;
+} => {
   // props to access the merkle leafs
   let counter = 0;
   let prop: keyof typeof record;
@@ -15,15 +20,12 @@ export const generateMerkle = (record: VerificationRecord) => {
     hashType: "sha256",
   });
   // each proof relates to an entry in Payload.record
-  const proofs: { [k: string]: any } = {};
+  const proofs: { [key: string]: Proof<string>[] | null } = {};
 
-  // ensure record is provide
-  if (record) {
-    for (prop in record) {
-      if (record.hasOwnProperty(prop)) {
-        // add leaf to merkle
-        merkleTools.addLeaf(record[prop] || "", true);
-      }
+  for (prop in record) {
+    if (Object.hasOwnProperty.call(record, prop)) {
+      // add leaf to merkle
+      merkleTools.addLeaf(record[prop], true);
     }
   }
 
@@ -31,24 +33,22 @@ export const generateMerkle = (record: VerificationRecord) => {
   merkleTools.makeTree();
 
   // get proof for each item of record
-  if (record) {
-    for (prop in record) {
-      if (record.hasOwnProperty(prop)) {
-        // set proof and incr counter
-        proofs[prop] = merkleTools.getProof(counter++);
-      }
+  for (prop in record) {
+    if (Object.hasOwnProperty.call(record, prop)) {
+      // set proof and incr counter
+      proofs[prop] = merkleTools.getProof(counter++);
     }
   }
 
   // return content required to carry out verification of the merkleTree content
   return {
     proofs,
-    root: merkleTools.getMerkleRoot()?.toString("base64"),
+    root: merkleTools.getMerkleRoot()?.toString("base64") || "",
   };
 };
 
 // Verify that a given value fits into the merkle root
-export const verifyMerkleProof = (proof: Proof<string | Buffer>, value: string, root: string) => {
+export const verifyMerkleProof = (proof: Proof<string>[] | null, value: string, root: string): boolean => {
   // create a new merkleTree
   const merkleTools = new MerkleTools({
     hashType: "sha256",
@@ -57,5 +57,5 @@ export const verifyMerkleProof = (proof: Proof<string | Buffer>, value: string, 
   const hash = merkleTools.hash(value);
 
   // validate that the proof+hash is present in the root
-  return merkleTools.validateProof(proof, hash, Buffer.from(root, "base64"));
+  return proof && hash && root ? merkleTools.validateProof(proof, hash, Buffer.from(root, "base64")) : false;
 };

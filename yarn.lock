@@ -6591,10 +6591,10 @@ hash-base@^3.0.0:
     readable-stream "^3.6.0"
     safe-buffer "^5.2.0"
 
-hash-js-merkle-tools@^1.4.3:
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/hash-js-merkle-tools/-/hash-js-merkle-tools-1.4.3.tgz#15765f600a69d95863c6bfbc1a54c2e3c6a62e78"
-  integrity sha512-iE79bifmPQEGNVRp5Use1ohc8KWep9KervMUEl+TPAdL7P/RY53/7NvSSpc6broXuo21xdAKu8GR8rBWlL28jg==
+hash-js-merkle-tools@^1.4.4:
+  version "1.4.4"
+  resolved "https://registry.yarnpkg.com/hash-js-merkle-tools/-/hash-js-merkle-tools-1.4.4.tgz#d0a52c6b5900cc60e7660a7df0e3c3e221f7693b"
+  integrity sha512-kAYRCrV1wp6453DxLJd264bKXAy9pFqojoHN/Wu77HBI791rnndqvJMK4BgKbm2qkNybj1jgQq4lKbBDf4Cg8w==
   dependencies:
     hash.js "^1.1.7"
 

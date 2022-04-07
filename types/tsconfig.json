@@ -3,9 +3,9 @@
   "compilerOptions": {
     "composite": true,
     "declaration": true,
-    "noEmit": true,
     "rootDir": ".",
-    "types": ["node"]
+    "types": ["node"],
+    "outDir": "/tmp/tsc-output"
   },
   "include": ["src"]
 }

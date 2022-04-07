@@ -30,7 +30,7 @@ module.exports = {
     "no-console": "warn",
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": ["warn", { vars: "all", args: "after-used", ignoreRestSiblings: false }],
-    '@typescript-eslint/explicit-function-return-type': 'warn', // Consider using explicit annotations for object literals and function return types even when they can be inferred.
+    "@typescript-eslint/explicit-function-return-type": "warn", // Consider using explicit annotations for object literals and function return types even when they can be inferred.
     "no-empty": "warn",
     "@typescript-eslint/no-misused-promises": 1,
     "@typescript-eslint/no-floating-promises": 1,

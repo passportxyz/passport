@@ -1,11 +1,12 @@
 {
   "name": "@dpopp/types",
   "version": "0.0.1",
+  "license": "MIT",
   "types": "src/index.d.ts",
   "scripts": {
     "build": "tsc -b .",
     "clean": "rimraf dist *.tsbuildinfo",
-    "lint": "tslint -c tslint.json -p tsconfig.json --fix",
+    "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",
     "prettier": "prettier --write .",
     "precommit": "lint-staged"
   },

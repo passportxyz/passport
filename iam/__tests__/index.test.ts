@@ -2,7 +2,7 @@
 import request from "supertest";
 
 // ---- Test subject
-import { app, config } from "../index";
+import { app, config } from "../src/index";
 
 // ---- Types
 import { ErrorResponseBody, ValidResponseBody } from "@dpopp/types";
