@@ -12,7 +12,7 @@
     "rimraf": "^3.0.2"
   },
   "workspaces": [
-    "vite-app",
+    "app",
     "iam",
     "schemas",
     "identity",
@@ -28,11 +28,11 @@
     "build": "yarn build:identity && yarn build:iam && yarn build:app",
     "build:identity": "yarn workspace @dpopp/identity build",
     "build:iam": "yarn workspace @dpopp/iam build",
-    "build:app": "yarn workspace @dpopp/vite-app build",
+    "build:app": "yarn workspace @dpopp/app build",
     "start": "concurrently --kill-others \"yarn start:iam\" \"yarn start:app\"",
     "start:iam": "yarn workspace @dpopp/iam start",
-    "start:app": "yarn workspace @dpopp/vite-app dev",
-    "app": "yarn workspace @dpopp/vite-app",
+    "start:app": "yarn workspace @dpopp/app start",
+    "app": "yarn workspace @dpopp/app",
     "schemas": "yarn workspace @dpopp/schemas",
     "iam": "yarn workspace @dpopp/iam",
     "identity": "yarn workspace @dpopp/identity",

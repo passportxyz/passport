@@ -100,9 +100,13 @@ function App(): JSX.Element {
     } else {
       disconnect({
         label: label || "",
-      }).catch((e) => {
-        throw e;
-      });
+      })
+        .then(() => {
+          window.localStorage.setItem("connectedWallets", "[]");
+        })
+        .catch((e) => {
+          throw e;
+        });
     }
   };
 
