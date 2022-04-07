@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "clean": "rimraf node_modules",
-    "dev": "vite",
+    "start": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",
