@@ -4,10 +4,10 @@ import { generateMerkle, verifyMerkleProof } from "../src/merkle";
 
 // Sample record
 const record = {
-  "type": "Simple",
-  "address": "0x0",
-  "version": "0.0.0",
-  "username": "test"
+  type: "Simple",
+  address: "0x0",
+  version: "0.0.0",
+  username: "test",
 };
 
 // Generate the merkleTree
@@ -20,7 +20,7 @@ describe("MerkleTree", function () {
   it("cannot generate a merkleTree if we're not providing enough leafs", () => {
     // Generate the merkleTree
     const failMerkle = generateMerkle({
-      "type": "Simple",
+      type: "Simple",
     } as ProofRecord);
     // we need atleast two leafs to construct the tree
     expect(failMerkle.proofs.type.length).toEqual(0);
@@ -36,5 +36,11 @@ describe("MerkleTree", function () {
   it("cannot verify if merkle proof is null", () => {
     const verifyMerkle = verifyMerkleProof(null, record.address, merkle.root);
     expect(verifyMerkle).toEqual(false);
+  });
+  it("cannot generate a merkleTree if we're not providing any leafs", () => {
+    // Generate the merkleTree
+    const failMerkle = generateMerkle({} as ProofRecord);
+    // we need atleast two leafs to construct the tree
+    expect(JSON.stringify(failMerkle.proofs)).toEqual("{}");
   });
 });
