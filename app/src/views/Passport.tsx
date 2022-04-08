@@ -1,9 +1,6 @@
 // --- React Methods
 import React, { useState, useEffect, useContext } from "react";
 
-// --- Assets/Artefacts
-import dpoppLogofrom from "../assets/dpoppLogo.svg";
-
 // --- Identity Tools
 import { ProofRecord, VerifiableCredential } from "@dpopp/types";
 import { fetchVerifiableCredential, verifyCredential, verifyMerkleProof, generateMerkle } from "@dpopp/identity/src";
@@ -24,7 +21,8 @@ export function Passport(): JSX.Element {
   const [verifiedMerkle, setVerifiedMerkle] = useState<boolean | undefined>();
   const [verifiedCredential, setVerifiedCredential] = useState<boolean | undefined>();
 
-  const { handleConnection, address, walletLabel, connectedWallets, signer } = useContext(UserContext);
+  const { handleConnection, address, walletLabel, connectedWallets, signer, passport, handleCreatePassport } =
+    useContext(UserContext);
 
   // fetch an example VC from the IAM server
   const handleFetchCredential = (): void => {
@@ -110,17 +108,61 @@ export function Passport(): JSX.Element {
   return (
     <div className="mx-auto flex flex-wrap">
       <div className="w-1/2 w-full py-6 mb-6">
-        <img src={dpoppLogofrom} className="App-logo" alt="logo" />
-        <div className="mb-10 mt-10 md:w-1/4">
-          <button
-            data-testid="connectWalletButton"
-            className="bg-gray-100 text-violet-500 rounded-lg py-4 px-20 min-w-full"
-            onClick={handleConnection}
-          >
-            <p className="text-base">{address ? `Disconnect from ${walletLabel || ""}` : "Get Started"}</p>
-          </button>
-          {address ? <div className="pt-3">Connected to: {JSON.stringify(address, null, 2)}</div> : null}
+        <div className="font-miriam-libre text-gray-050 mt-10 font-normal font-bold leading-relaxed">
+          {/* Top Avatar and Address */}
+          <div className="flex items-center mx-auto sm:flex-row flex-col py-10">
+            <div className="h-12 w-12 sm:mr-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
+              <svg
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                className="sm:w-10 sm:h-10 w-2 h-2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div className="flex-grow sm:text-left text-center mt-6 sm:mt-0">
+              <h2 className="text-gray-100 text-lg title-font font-medium mb-2">{address}</h2>
+            </div>
+
+            <div className="mb-10 mt-10 md:w-1/4">
+              <button
+                data-testid="connectWalletButton"
+                className="bg-gray-100 text-violet-500 rounded-lg py-2 px-2 min-w-full"
+                onClick={handleConnection}
+              >
+                <p className="text-sm">{address ? `Disconnect from ${walletLabel || ""}` : "Get Started"}</p>
+              </button>
+              {/* {address ? <div className="pt-3">Connected to: {JSON.stringify(address, null, 2)}</div> : null} */}
+            </div>
+          </div>
+
+          <p className="text-6xl">
+            Gitcoin
+            <br />
+            ID Passport
+          </p>
         </div>
+
+        {address && (
+          <div className="p-20 mt-2 mb-2">
+            {!passport && (
+              <button
+                className="bg-gray-100 mb-10 min-w-full mt-10 px-20 py-4 rounded-lg text-violet-500"
+                onClick={handleCreatePassport}
+              >
+                Create Passport
+              </button>
+            )}
+            <p className="text-gray-100">{passport && `Your Passport: ${JSON.stringify(passport)}`}</p>
+            <p className="text-gray-100 text-3xl underline mt-10">{passport && "Stamps will be here"}</p>
+          </div>
+        )}
+
         <button
           className="bg-gray-100 mb-10 min-w-full mt-10 px-20 py-4 rounded-lg text-violet-500"
           onClick={handleFetchCredential}

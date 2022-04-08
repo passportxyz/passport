@@ -1,6 +1,3 @@
-// if user has no passport show create passport button
-
-// if user has passport display stamps
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -24,8 +21,11 @@ const mockWallet: WalletState = {
   chains: [],
 };
 const mockHandleConnection = jest.fn();
+const mockCreatePassport = jest.fn();
 const mockUserContext: UserContextState = {
   loggedIn: true,
+  passport: undefined,
+  handleCreatePassport: mockCreatePassport,
   handleConnection: mockHandleConnection,
   address: mockAddress,
   connectedWallets: [mockWallet],
@@ -67,5 +67,82 @@ describe("when user has a connected wallet", () => {
     await waitFor(() => {
       expect(mockHandleConnection).toBeCalledTimes(1);
     });
+  });
+});
+
+// if user has no passport show create passport button
+describe("when user has no passport", () => {
+  const mockUserContextWithNoPassport: UserContextState = {
+    ...mockUserContext,
+    passport: undefined,
+  };
+
+  it("should have a Create Passport button", () => {
+    render(
+      <UserContext.Provider value={mockUserContextWithNoPassport}>
+        <Passport />
+      </UserContext.Provider>
+    );
+
+    const createPassportButton = screen.getByRole("button", {
+      name: /Create Passport/,
+    });
+
+    expect(createPassportButton).toBeInTheDocument();
+  });
+
+  it("when Create passport button is clicked empty passport object should be generated", async () => {
+    render(
+      <UserContext.Provider value={mockUserContextWithNoPassport}>
+        <Passport />
+      </UserContext.Provider>
+    );
+
+    const createPassportButton = screen.getByRole("button", {
+      name: /Create Passport/,
+    });
+
+    userEvent.click(createPassportButton);
+
+    await waitFor(() => {
+      expect(mockCreatePassport).toBeCalledTimes(1);
+    });
+  });
+});
+
+describe("when the user has a passport", () => {
+  const mockUserContextWithPassport = {
+    ...mockUserContext,
+    passport: {
+      issuanceDate: new Date("2022-01-15"),
+      expiryDate: new Date("2022-01-15"),
+      stamps: [],
+    },
+  };
+
+  it("hides the Create Passport button when a passport already exists", () => {
+    render(
+      <UserContext.Provider value={mockUserContextWithPassport}>
+        <Passport />
+      </UserContext.Provider>
+    );
+
+    const createPassportButton = screen.queryByRole("button", {
+      name: /Create Passport/,
+    });
+
+    expect(createPassportButton).not.toBeInTheDocument();
+  });
+
+  it("shows phrase Stamps will be here", () => {
+    render(
+      <UserContext.Provider value={mockUserContextWithPassport}>
+        <Passport />
+      </UserContext.Provider>
+    );
+
+    const phraseOnPage = screen.getByText(/Stamps will be here/);
+
+    expect(phraseOnPage).toBeInTheDocument();
   });
 });

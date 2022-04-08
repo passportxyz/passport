@@ -10,8 +10,21 @@ import { initWeb3Onboard } from "./utils/onboard";
 import { OnboardAPI, WalletState } from "@web3-onboard/core/dist/types";
 import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
 
+interface Stamp {
+  recordUserName: string;
+  credentialIssuer: string;
+}
+
+interface Passport {
+  issuanceDate: Date;
+  expiryDate: Date;
+  stamps: Stamp[];
+}
+
 export interface UserContextState {
   loggedIn: boolean;
+  passport: Passport | undefined;
+  handleCreatePassport: () => void;
   handleConnection: () => void;
   address: string | undefined;
   connectedWallets: WalletState[];
@@ -20,6 +33,9 @@ export interface UserContextState {
 }
 const startingState: UserContextState = {
   loggedIn: false,
+  passport: undefined,
+  /* eslint-disable-next-line @typescript-eslint/no-empty-function */
+  handleCreatePassport: () => {},
   /* eslint-disable-next-line @typescript-eslint/no-empty-function */
   handleConnection: () => {},
   address: undefined,
@@ -32,6 +48,7 @@ export const UserContext = React.createContext(startingState);
 
 function App(): JSX.Element {
   const [loggedIn, setLoggedIn] = useState(false);
+  const [passport, setPassport] = useState<Passport | undefined>(undefined);
 
   // Use onboard to control the current provider/wallets
   const [{ wallet }, connect, disconnect] = useConnectWallet();
@@ -53,6 +70,7 @@ function App(): JSX.Element {
     if (!connectedWallets.length) {
       setWalletLabel(undefined);
       setAddress(undefined);
+      setSigner(undefined);
     } else {
       // record connected wallet details
       setWalletLabel(wallet?.label);
@@ -111,16 +129,31 @@ function App(): JSX.Element {
     }
   };
 
+  const handleCreatePassport = (): void => {
+    const issuanceDate: Date = new Date();
+    const expiryDate: Date = new Date();
+    const stamps: Stamp[] = [];
+
+    const newPassport = {
+      issuanceDate,
+      expiryDate,
+      stamps,
+    };
+    setPassport(newPassport);
+  };
+
   const stateMemo = useMemo(
     () => ({
       loggedIn,
+      passport,
+      handleCreatePassport,
       handleConnection,
       address,
       connectedWallets,
       signer,
       walletLabel,
     }),
-    [loggedIn, address]
+    [loggedIn, address, passport, signer, connectedWallets]
   );
 
   return (
