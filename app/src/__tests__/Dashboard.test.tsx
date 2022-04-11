@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Passport } from "../views";
+import { Dashboard } from "../views";
 import { UserContext, UserContextState } from "../App";
 import { Account, WalletState } from "@web3-onboard/core/dist/types";
 
@@ -39,7 +39,7 @@ describe("when user has a connected wallet", () => {
 
     render(
       <UserContext.Provider value={mockUserContext}>
-        <Passport />
+        <Dashboard />
       </UserContext.Provider>
     );
 
@@ -52,7 +52,7 @@ describe("when user has a connected wallet", () => {
 
     render(
       <UserContext.Provider value={mockUserContext}>
-        <Passport />
+        <Dashboard />
       </UserContext.Provider>
     );
 
@@ -80,7 +80,7 @@ describe("when user has no passport", () => {
   it("should have a Create Passport button", () => {
     render(
       <UserContext.Provider value={mockUserContextWithNoPassport}>
-        <Passport />
+        <Dashboard />
       </UserContext.Provider>
     );
 
@@ -94,7 +94,7 @@ describe("when user has no passport", () => {
   it("when Create passport button is clicked empty passport object should be generated", async () => {
     render(
       <UserContext.Provider value={mockUserContextWithNoPassport}>
-        <Passport />
+        <Dashboard />
       </UserContext.Provider>
     );
 
@@ -123,7 +123,7 @@ describe("when the user has a passport", () => {
   it("hides the Create Passport button when a passport already exists", () => {
     render(
       <UserContext.Provider value={mockUserContextWithPassport}>
-        <Passport />
+        <Dashboard />
       </UserContext.Provider>
     );
 
@@ -137,12 +137,26 @@ describe("when the user has a passport", () => {
   it("shows phrase Stamps will be here", () => {
     render(
       <UserContext.Provider value={mockUserContextWithPassport}>
-        <Passport />
+        <Dashboard />
       </UserContext.Provider>
     );
 
     const phraseOnPage = screen.getByText(/Stamps will be here/);
 
     expect(phraseOnPage).toBeInTheDocument();
+  });
+
+  it("user should see the View My Passport button when a passport already exists", () => {
+    render(
+      <UserContext.Provider value={mockUserContextWithPassport}>
+        <Dashboard />
+      </UserContext.Provider>
+    );
+
+    const viewPassportButton = screen.queryByRole("button", {
+      name: /View My Passport/,
+    });
+
+    expect(viewPassportButton).toBeInTheDocument();
   });
 });

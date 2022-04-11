@@ -13,7 +13,7 @@ import { UserContext } from "../App";
 // set the iamUrl to be used for new verifications (@TODO: this should be fed via the .env)
 const iamUrl = "http://localhost:65535/api/";
 
-export function Passport(): JSX.Element {
+export function Dashboard(): JSX.Element {
   const [signature, setSignature] = useState<string | undefined>();
   const [record, setRecord] = useState<false | ProofRecord | undefined>();
   const [challenge, setChallenge] = useState<false | VerifiableCredential | undefined>();
@@ -150,12 +150,19 @@ export function Passport(): JSX.Element {
 
         {address && (
           <div className="p-20 mt-2 mb-2">
-            {!passport && (
+            {!passport ? (
               <button
                 className="bg-gray-100 mb-10 min-w-full mt-10 px-20 py-4 rounded-lg text-violet-500"
                 onClick={handleCreatePassport}
               >
                 Create Passport
+              </button>
+            ) : (
+              <button
+                className="bg-gray-100 mb-10 min-w-full mt-10 px-20 py-4 rounded-lg text-violet-500"
+                onClick={handleCreatePassport}
+              >
+                View My Passport
               </button>
             )}
             <p className="text-gray-100">{passport && `Your Passport: ${JSON.stringify(passport)}`}</p>
