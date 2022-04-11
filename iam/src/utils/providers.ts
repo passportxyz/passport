@@ -1,6 +1,6 @@
 // ---- Types
-import { Provider } from "../types";
-import { RequestPayload, ChallengePayload, VerifiedPayload } from "@dpopp/types";
+import type { Provider } from "../types";
+import type { RequestPayload, ChallengePayload, VerifiedPayload } from "@dpopp/types";
 
 // ---- Return randomBytes as a challenge to test that the user has control of a provided address
 import crypto from "crypto";

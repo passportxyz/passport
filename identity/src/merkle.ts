@@ -9,43 +9,56 @@ export const generateMerkle = (
   record: ProofRecord
 ): {
   proofs: { [key: string]: Proof<string>[] | null };
-  root: string;
+  root: string | undefined;
 } => {
-  // props to access the merkle leafs
-  let counter = 0;
-  let prop: keyof typeof record;
-
   // generate a new tree
   const merkleTools = new MerkleTools({
     hashType: "sha256",
   });
   // each proof relates to an entry in Payload.record
-  const proofs: { [key: string]: Proof<string>[] | null } = {};
+  const proofs: { [key: string]: Proof<string>[] } = {};
 
+  // associate the key with its counter index in merkle
+  let counter = 0;
+  // props to access the merkle leafs
+  let prop: keyof typeof record;
+  // after reading back the proofs ensure they hold a value before returning the root+proofs response
+  let validProofs = true;
+
+  // add each record as a leaf on the merkleTree
   for (prop in record) {
     if (Object.hasOwnProperty.call(record, prop)) {
-      // add leaf to merkle
       merkleTools.addLeaf(record[prop], true);
     }
   }
 
-  if (Object.keys(record).length > 0) {
-    // make the tree
+  // make the tree - (if the tree isnt constructed then we get back a null root + proof)
+  if (Object.keys(record).length > 1) {
     merkleTools.makeTree();
   }
 
-  // get proof for each item of record
+  // once the tree has been created get the proof for each item of record
   for (prop in record) {
     if (Object.hasOwnProperty.call(record, prop)) {
       // set proof and incr counter
-      proofs[prop] = merkleTools.getProof(counter++);
+      proofs[prop] = merkleTools.getProof(counter++) || [];
+      // check that the proof exists and holds values
+      validProofs = proofs[prop].length === 0 ? false : validProofs;
     }
+  }
+
+  // extract the root
+  const root = merkleTools.getMerkleRoot();
+
+  // if there are not enough items to record in to the tree...
+  if (root === null || !validProofs) {
+    throw new Error("Add more leafs before attempting to construct a merkleTree");
   }
 
   // return content required to carry out verification of the merkleTree content
   return {
     proofs,
-    root: merkleTools.getMerkleRoot()?.toString("base64") || "",
+    root: root.toString("base64"),
   };
 };
 

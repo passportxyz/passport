@@ -24,7 +24,7 @@ const addSeconds = (date: Date, seconds: number): Date => {
   return result;
 };
 
-// internal method to issue a verfiable credential
+// Internal method to issue a verfiable credential
 const _issueCredential = async (
   DIDKit: DIDKitLib,
   key: string,
@@ -166,6 +166,11 @@ export const fetchVerifiableCredential = async (
     signer && challenge.credentialSubject.challenge
       ? (await signer.signMessage(challenge.credentialSubject.challenge)).toString()
       : "";
+
+  // must provide signature for message
+  if (!signature) {
+    throw new Error("Unable to sign message");
+  }
 
   // pass the signature as part of the proofs obj
   payload.proofs = { ...payload.proofs, ...{ signature: signature } };
