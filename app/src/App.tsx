@@ -3,23 +3,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useConnectWallet, useWallets } from "@web3-onboard/react";
 import "./App.css";
-import { Home, Layout, NoMatch, Passport } from "./views";
+import { Dashboard, Home, Layout, NoMatch } from "./views";
 
 // --- Wallet connection utilities
 import { initWeb3Onboard } from "./utils/onboard";
 import { OnboardAPI, WalletState } from "@web3-onboard/core/dist/types";
 import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
+import { Passport, Stamp } from "@dpopp/types";
 
-interface Stamp {
-  recordUserName: string;
-  credentialIssuer: string;
-}
-
-interface Passport {
-  issuanceDate: Date;
-  expiryDate: Date;
-  stamps: Stamp[];
-}
+// --- Data Storage Functions
+import {} from "./services/databaseStorage";
 
 export interface UserContextState {
   loggedIn: boolean;
@@ -164,7 +157,7 @@ function App(): JSX.Element {
             <Route index element={connectedWallets.length > 0 ? <Navigate replace to="/dashboard" /> : <Home />} />
             <Route
               path="dashboard"
-              element={connectedWallets.length > 0 ? <Passport /> : <Navigate replace to="/" />}
+              element={connectedWallets.length > 0 ? <Dashboard /> : <Navigate replace to="/" />}
             />
             <Route path="*" element={<NoMatch />} />
           </Route>
