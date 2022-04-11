@@ -1,22 +1,7 @@
 module.exports = {
-  post: async (url, data) => {
+  post: jest.fn(async (url, data) => {
     switch (url) {
-      case "/vbad/challenge":
-        return {
-          data: {
-            credential: {
-              credentialSubject: {},
-            },
-          },
-        };
-      case "/vbad/verify":
-        return {
-          data: {
-            credential: {},
-            record: {},
-          },
-        };
-      case "/v0.0.0/challenge":
+      case "/vTest-Case-1/challenge":
         return {
           data: {
             credential: {
@@ -26,7 +11,22 @@ module.exports = {
             },
           },
         };
-      case "/v0.0.0/verify":
+      case "/vTest-Case-1/verify":
+        return {
+          data: {
+            credential: {},
+            record: {},
+          },
+        };
+      case "/vTest-Case-2/challenge":
+        return {
+          data: {
+            credential: {
+              credentialSubject: {},
+            },
+          },
+        };
+      case "/vTest-Case-2/verify":
         return {
           data: {
             credential: {},
@@ -34,5 +34,5 @@ module.exports = {
           },
         };
     }
-  },
+  }),
 };

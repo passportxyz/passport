@@ -1,6 +1,6 @@
 // ----- Types
-import { Provider, ProviderOptions } from "../types";
-import { RequestPayload, VerifiedPayload } from "@dpopp/types";
+import type { Provider, ProviderOptions } from "../types";
+import type { RequestPayload, VerifiedPayload } from "@dpopp/types";
 
 // Export a simple Provider as an example
 export class SimpleProvider implements Provider {

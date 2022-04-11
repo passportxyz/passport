@@ -1,4 +1,4 @@
-// ---- Test subject
+// ---- Test subject - (NOTE: this is an integration test rather than a unit test)
 import { ProofRecord } from "@dpopp/types";
 import { generateMerkle, verifyMerkleProof } from "../src/merkle";
 
@@ -7,7 +7,6 @@ const record = {
   type: "Simple",
   address: "0x0",
   version: "0.0.0",
-  username: "test",
 };
 
 // Generate the merkleTree
@@ -15,15 +14,21 @@ const merkle = generateMerkle(record);
 
 describe("MerkleTree", function () {
   it("can generate a merkleTree", () => {
-    expect(merkle.root).toEqual("gv8oALCsnbsEMM9gSzJYN7d49UJ/CvPN3t9Xenj70gM=");
+    expect(merkle.root).toEqual("4tPCpmsNW5ndVJCYW9akgvXcFqVcRW7OrZH4oPBe2gE=");
+  });
+  it("cannot generate a merkleTree if we're not providing any leafs", () => {
+    // we need atleast one leaf to get a root and two to generate proofs
+    expect(() => generateMerkle({} as ProofRecord)).toThrow(
+      "Add more leafs before attempting to construct a merkleTree"
+    );
   });
   it("cannot generate a merkleTree if we're not providing enough leafs", () => {
-    // Generate the merkleTree
-    const failMerkle = generateMerkle({
-      type: "Simple",
-    } as ProofRecord);
-    // we need atleast two leafs to construct the tree
-    expect(failMerkle.proofs.type.length).toEqual(0);
+    // we need atleast one leaf to get a root and two to generate proofs
+    expect(() =>
+      generateMerkle({
+        type: "Simple",
+      } as ProofRecord)
+    ).toThrow("Add more leafs before attempting to construct a merkleTree");
   });
   it("can verify a merkle proof", () => {
     const verifyMerkle = verifyMerkleProof(merkle.proofs.address, record.address, merkle.root);
@@ -36,11 +41,5 @@ describe("MerkleTree", function () {
   it("cannot verify if merkle proof is null", () => {
     const verifyMerkle = verifyMerkleProof(null, record.address, merkle.root);
     expect(verifyMerkle).toEqual(false);
-  });
-  it("cannot generate a merkleTree if we're not providing any leafs", () => {
-    // Generate the merkleTree
-    const failMerkle = generateMerkle({} as ProofRecord);
-    // we need atleast two leafs to construct the tree
-    expect(JSON.stringify(failMerkle.proofs)).toEqual("{}");
   });
 });
