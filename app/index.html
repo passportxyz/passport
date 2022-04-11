@@ -4,13 +4,25 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/src/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google-signin-client_id" content="392570846785-ltva5m2jdvfoanublgkp30j816268h0k.apps.googleusercontent.com">
     <title>Vite App</title>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
   </head>
   <body>
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
     <div id="root"></div>
     <script>
       window.global = window;
       let global = globalThis;
+
+      function onSignIn(googleUser) {
+        var profile = googleUser.getBasicProfile();
+        console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+        console.log('Name: ' + profile.getName());
+        console.log('Image URL: ' + profile.getImageUrl());
+        console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+      }
+
     </script>
     <script type="module">
       import { Buffer } from "buffer";

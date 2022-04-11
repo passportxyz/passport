@@ -28,11 +28,13 @@ import { Providers } from "./utils/providers";
 
 // ---- Identity Providers
 import { SimpleProvider } from "./providers/simple";
+import { GoogleProvider } from "./providers/google";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
+  new GoogleProvider(),
 ]);
 
 // create the app and run on port
@@ -124,7 +126,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
   const payload = requestBody.payload;
 
   // Check the challenge and the payload is valid before issueing a credential from a registered provider
-  return void verifyCredential(DIDKit, challenge).then((verified) => {
+  return void verifyCredential(DIDKit, challenge).then(async (verified) => {
     if (verified && issuer === challenge.issuer) {
       // pull the address and checksum so that its stored in a predicatable format
       const address = utils.getAddress(
@@ -137,7 +139,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
       // type is required because we need it to select the correct Identity Provider
       if (isSigner && payload && payload.type) {
         // each provider will apply buisness logic to the payload inorder to set the `valid` bool on the returned VerifiedPayload
-        const verifiedPayload = providers.verify(payload);
+        const verifiedPayload = await providers.verify(payload);
         // check if the request is valid against the selected Identity Provider
         if (verifiedPayload && verifiedPayload?.valid === true) {
           // recreate the record to ensure the minimun number of leafs are present to produce a valid merkleTree

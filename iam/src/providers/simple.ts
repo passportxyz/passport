@@ -17,12 +17,12 @@ export class SimpleProvider implements Provider {
   }
 
   // verify that the proof object contains valid === "true"
-  verify(payload: RequestPayload): VerifiedPayload {
-    return {
+  verify(payload: RequestPayload): Promise<VerifiedPayload> {
+    return Promise.resolve({
       valid: payload?.proofs?.valid === this._options.valid,
       record: {
         username: payload?.proofs?.username || "",
       },
-    };
+    });
   }
 }
