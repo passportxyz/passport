@@ -92,16 +92,6 @@ export function Dashboard(): JSX.Element {
       setCredential(undefined);
       setVerifiedMerkle(undefined);
       setVerifiedCredential(undefined);
-    } else {
-      // record connected wallet details
-      // setLabel(wallet?.label);
-      // setAddress(wallet?.accounts[0].address);
-      // get the signer from an ethers wrapped Web3Provider
-      // setSigner(new Web3Provider(connectedWallets[0]?.provider).getSigner());
-      // flaten array for storage
-      // const connectedWalletsLabelArray = connectedWallets.map(({ label }) => label);
-      // store in localstorage
-      // window.localStorage.setItem("connectedWallets", JSON.stringify(connectedWalletsLabelArray));
     }
   }, [connectedWallets]);
 
@@ -150,19 +140,12 @@ export function Dashboard(): JSX.Element {
 
         {address && (
           <div className="p-20 mt-2 mb-2">
-            {!passport ? (
+            {!passport && (
               <button
                 className="bg-gray-100 mb-10 min-w-full mt-10 px-20 py-4 rounded-lg text-violet-500"
                 onClick={handleCreatePassport}
               >
                 Create Passport
-              </button>
-            ) : (
-              <button
-                className="bg-gray-100 mb-10 min-w-full mt-10 px-20 py-4 rounded-lg text-violet-500"
-                onClick={handleCreatePassport}
-              >
-                View My Passport
               </button>
             )}
             <p className="text-gray-100">{passport && `Your Passport: ${JSON.stringify(passport)}`}</p>
