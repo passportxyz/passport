@@ -1,4 +1,5 @@
-import { DataStorageBase, DID, Passport, Stamp } from "@dpopp/types";
+import { DID, Passport, Stamp } from "@dpopp/types";
+import { DataStorageBase } from "../types";
 
 export class LocalStorageDatabase implements DataStorageBase {
   passportKey: string;
@@ -30,6 +31,7 @@ export class LocalStorageDatabase implements DataStorageBase {
       : undefined;
   }
   addStamp(did: DID, stamp: Stamp): void {
-    console.log("add stamp here");
+    // eslint-disable-next-line no-console
+    console.log(`add stamp ${JSON.stringify(stamp)} to DID ${did}`);
   }
 }

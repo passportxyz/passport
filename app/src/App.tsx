@@ -9,10 +9,10 @@ import { Dashboard, Home, Layout, NoMatch } from "./views";
 import { initWeb3Onboard } from "./utils/onboard";
 import { OnboardAPI, WalletState } from "@web3-onboard/core/dist/types";
 import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
-import { Passport, Stamp } from "@dpopp/types";
+import { Passport } from "@dpopp/types";
 
 // --- Data Storage Functions
-import {} from "./services/databaseStorage";
+import { LocalStorageDatabase } from "./services/databaseStorage";
 
 export interface UserContextState {
   loggedIn: boolean;
@@ -42,6 +42,7 @@ export const UserContext = React.createContext(startingState);
 function App(): JSX.Element {
   const [loggedIn, setLoggedIn] = useState(false);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
+  const [localStorageDatabase, setLocalStorageDatabase] = useState<LocalStorageDatabase | undefined>(undefined);
 
   // Use onboard to control the current provider/wallets
   const [{ wallet }, connect, disconnect] = useConnectWallet();
@@ -74,6 +75,14 @@ function App(): JSX.Element {
       const connectedWalletsLabelArray = connectedWallets.map(({ label }) => label);
       // store in localstorage
       window.localStorage.setItem("connectedWallets", JSON.stringify(connectedWalletsLabelArray));
+
+      if (address) {
+        // Load localStorage Passport data
+        const localStorageInstance = new LocalStorageDatabase(address);
+        setLocalStorageDatabase(localStorageInstance);
+        const loadedPassport = localStorageInstance?.getPassport(localStorageInstance.passportKey);
+        setPassport(loadedPassport);
+      }
     }
   }, [connectedWallets, wallet]);
 
@@ -99,6 +108,7 @@ function App(): JSX.Element {
   }, [web3Onboard, connect]);
 
   // Toggle connect/disconnect
+  // clear context passport on disconnect
   const handleConnection = (): void => {
     if (!address) {
       connect({})
@@ -114,6 +124,7 @@ function App(): JSX.Element {
       })
         .then(() => {
           window.localStorage.setItem("connectedWallets", "[]");
+          setPassport(undefined);
           setLoggedIn(false);
         })
         .catch((e) => {
@@ -123,16 +134,11 @@ function App(): JSX.Element {
   };
 
   const handleCreatePassport = (): void => {
-    const issuanceDate: Date = new Date();
-    const expiryDate: Date = new Date();
-    const stamps: Stamp[] = [];
-
-    const newPassport = {
-      issuanceDate,
-      expiryDate,
-      stamps,
-    };
-    setPassport(newPassport);
+    if (localStorageDatabase) {
+      const passportDid = localStorageDatabase.createPassport();
+      const getPassport = localStorageDatabase.getPassport(passportDid);
+      setPassport(getPassport);
+    }
   };
 
   const stateMemo = useMemo(

@@ -3,23 +3,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Dashboard } from "../views";
 import { UserContext, UserContextState } from "../App";
-import { Account, WalletState } from "@web3-onboard/core/dist/types";
+import { mockAddress, mockWallet } from "../test-fixtures/onboardHookValues";
 
 jest.mock("../utils/onboard.ts");
 
-const mockAddress = "0xmyAddress";
-const mockAccount: Account = {
-  address: mockAddress,
-  ens: null,
-  balance: null,
-};
-const mockWallet: WalletState = {
-  label: "myWallet",
-  icon: "",
-  provider: { on: jest.fn(), removeListener: jest.fn(), request: jest.fn() },
-  accounts: [mockAccount],
-  chains: [],
-};
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
 const mockUserContext: UserContextState = {
@@ -70,7 +57,6 @@ describe("when user has a connected wallet", () => {
   });
 });
 
-// if user has no passport show create passport button
 describe("when user has no passport", () => {
   const mockUserContextWithNoPassport: UserContextState = {
     ...mockUserContext,
@@ -91,7 +77,7 @@ describe("when user has no passport", () => {
     expect(createPassportButton).toBeInTheDocument();
   });
 
-  it("when Create passport button is clicked empty passport object should be generated", async () => {
+  it("when Create passport button is clicked, create passport handler should be called", async () => {
     render(
       <UserContext.Provider value={mockUserContextWithNoPassport}>
         <Dashboard />
@@ -115,7 +101,7 @@ describe("when the user has a passport", () => {
     ...mockUserContext,
     passport: {
       issuanceDate: new Date("2022-01-15"),
-      expiryDate: new Date("2022-01-15"),
+      expiryDate: new Date("2022-01-16"),
       stamps: [],
     },
   };
@@ -146,17 +132,17 @@ describe("when the user has a passport", () => {
     expect(phraseOnPage).toBeInTheDocument();
   });
 
-  it("user should see the View My Passport button when a passport already exists", () => {
+  it("shows passport issuanceDate and expiryDate will be here", () => {
     render(
       <UserContext.Provider value={mockUserContextWithPassport}>
         <Dashboard />
       </UserContext.Provider>
     );
 
-    const viewPassportButton = screen.queryByRole("button", {
-      name: /View My Passport/,
-    });
+    const issuanceDateOnPage = screen.getByText(/2022-01-15/);
+    const expiryDateOnPage = screen.getByText(/2022-01-16/);
 
-    expect(viewPassportButton).toBeInTheDocument();
+    expect(issuanceDateOnPage).toBeInTheDocument();
+    expect(expiryDateOnPage).toBeInTheDocument();
   });
 });

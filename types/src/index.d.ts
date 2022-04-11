@@ -102,3 +102,17 @@ export type VerifiableCredentialRecord = {
   challenge: VerifiableCredential;
   credential: VerifiableCredential;
 };
+
+export type Stamp = {
+  recordUserName: string;
+  credentialIssuer: string;
+};
+
+export type Passport = {
+  issuanceDate: Date;
+  expiryDate: Date;
+  stamps: Stamp[];
+};
+
+// Passport DID
+export type DID = string;
