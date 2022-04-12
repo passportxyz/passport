@@ -33,6 +33,8 @@ export class GoogleProvider implements Provider {
 
     try {
       verifiedPayload = await verifyGoogle(payload.proofs.tokenId);
+    } catch (e) {
+      return { valid: false };
     } finally {
       valid = verifiedPayload && verifiedPayload.emailVerified ? true : false;
     }
@@ -40,7 +42,7 @@ export class GoogleProvider implements Provider {
     return {
       valid: valid,
       record: {
-        email: verifiedPayload.email || "",
+        email: verifiedPayload.email,
       },
     };
   }
