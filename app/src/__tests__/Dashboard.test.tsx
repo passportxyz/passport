@@ -100,6 +100,20 @@ describe("when user has no passport", () => {
       expect(mockCreatePassport).toBeCalledTimes(1);
     });
   });
+
+  it("should not display google verification button", () => {
+    render(
+      <UserContext.Provider value={mockUserContext}>
+        <Dashboard />
+      </UserContext.Provider>
+    );
+
+    const verifyGoogleButton = screen.queryByRole("button", {
+      name: /Verify with Google/,
+    });
+
+    expect(verifyGoogleButton).not.toBeInTheDocument();
+  });
 });
 
 describe("when the user has a passport", () => {
@@ -150,5 +164,35 @@ describe("when the user has a passport", () => {
 
     expect(issuanceDateOnPage).toBeInTheDocument();
     expect(expiryDateOnPage).toBeInTheDocument();
+  });
+
+  it("should display google verification button when user has not verified with google", () => {
+    mockHasStamp.mockImplementation(() => false);
+
+    render(
+      <UserContext.Provider value={mockUserContextWithPassport}>
+        <Dashboard />
+      </UserContext.Provider>
+    );
+
+    const verifyGoogleButton = screen.queryByRole("button", {
+      name: /Verify with Google/,
+    });
+
+    expect(verifyGoogleButton).toBeInTheDocument();
+  });
+
+  it("should display google verified message when user has verified with google", () => {
+    mockHasStamp.mockImplementation(() => true);
+
+    render(
+      <UserContext.Provider value={mockUserContextWithPassport}>
+        <Dashboard />
+      </UserContext.Provider>
+    );
+
+    const googleVerified = screen.queryByText(/Google: ✅ Verified/);
+
+    expect(googleVerified).toBeInTheDocument();
   });
 });
