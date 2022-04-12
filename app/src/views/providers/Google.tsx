@@ -57,8 +57,6 @@ export function Google(): JSX.Element {
           clientId={googleClientId}
           onFailure={(response): void => onGoogleSignIn(response as GoogleLoginResponse)}
           onSuccess={(response): void => onGoogleSignIn(response as GoogleLoginResponse)}
-          icon={false}
-          theme={"dark"}
           // To override all stylings...
           render={(renderProps): JSX.Element => (
             <button
@@ -69,9 +67,7 @@ export function Google(): JSX.Element {
               Verify with Google
             </button>
           )}
-        >
-          <span>Verify with Google</span>
-        </GoogleLogin>
+        ></GoogleLogin>
       ) : (
         <pre>Google: ✅ Verified</pre>
       )}
