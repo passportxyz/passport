@@ -123,13 +123,18 @@ export const verifyCredential = async (DIDKit: DIDKitLib, credential: Verifiable
   const { expirationDate, proof } = credential;
   // check that the credential is still valid
   if (new Date(expirationDate) > new Date()) {
-    // parse the result of attempting to verify
-    const verify = JSON.parse(
-      await DIDKit.verifyCredential(JSON.stringify(credential), `{"proofPurpose":"${proof.proofPurpose}"}`)
-    ) as { checks: string[]; warnings: string[]; errors: string[] };
+    try {
+      // parse the result of attempting to verify
+      const verify = JSON.parse(
+        await DIDKit.verifyCredential(JSON.stringify(credential), `{"proofPurpose":"${proof.proofPurpose}"}`)
+      ) as { checks: string[]; warnings: string[]; errors: string[] };
 
-    // did we get any errors when we attempted to verify?
-    return verify.errors.length === 0;
+      // did we get any errors when we attempted to verify?
+      return verify.errors.length === 0;
+    } catch (e) {
+      // if didkit throws, etc.
+      return false;
+    }
   } else {
     // past expiry :(
     return false;

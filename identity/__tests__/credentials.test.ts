@@ -192,6 +192,7 @@ describe("Verify Credentials", function () {
     expect(await verifyCredential(DIDKit, credentialToVerify)).toEqual(true);
     // expect to have called verifyCredential
     expect(DIDKit.verifyCredential).toHaveBeenCalled();
+    expect(DIDKit.verifyCredential).toHaveBeenCalledWith(JSON.stringify(credentialToVerify), expect.anything());
   });
 
   it("cannot verify a valid but expired credential", async () => {
@@ -211,19 +212,35 @@ describe("Verify Credentials", function () {
   });
 
   it("returns false when DIDKit.verifyCredential returns with errors", async () => {
-    const record = {
-      type: "Simple",
-      address: "0x0",
-      version: "Test-Case-1",
-    };
-
-    // we are creating this VC so that we know that we have a valid VC in this context to test against (never expired)
-    const { credential: credentialToVerify } = await issueMerkleCredential(DIDKit, key, record);
+    const futureExpirationDate = new Date();
+    futureExpirationDate.setFullYear(futureExpirationDate.getFullYear() + 1);
+    const credentialToVerify = {
+      expirationDate: futureExpirationDate.toISOString(),
+      proof: {
+        proofPurpose: "myProof",
+      },
+    } as VerifiableCredential;
 
     // DIDKit.verifyCredential can return with a non-empty errors array
     mockDIDKit.verifyCredential.mockResolvedValue(
       JSON.stringify({ checks: ["proof"], warnings: [], errors: ["signature error"] })
     );
+
+    expect(await verifyCredential(DIDKit, credentialToVerify)).toEqual(false);
+    expect(DIDKit.verifyCredential).toHaveBeenCalled();
+  });
+
+  it("returns false when DIDKit.verifyCredential rejects with an exception", async () => {
+    const futureExpirationDate = new Date();
+    futureExpirationDate.setFullYear(futureExpirationDate.getFullYear() + 1);
+    const credentialToVerify = {
+      expirationDate: futureExpirationDate.toISOString(),
+      proof: {
+        proofPurpose: "myProof",
+      },
+    } as VerifiableCredential;
+
+    mockDIDKit.verifyCredential.mockRejectedValue(new Error("something went wrong :("));
 
     expect(await verifyCredential(DIDKit, credentialToVerify)).toEqual(false);
     expect(DIDKit.verifyCredential).toHaveBeenCalled();
