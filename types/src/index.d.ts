@@ -104,8 +104,10 @@ export type VerifiableCredentialRecord = {
 };
 
 export type Stamp = {
-  recordUserName: string;
-  credentialIssuer: string;
+  // recordUserName: string;
+  // credentialIssuer: string;
+  provider: string;
+  credential: VerifiableCredential;
 };
 
 export type Passport = {

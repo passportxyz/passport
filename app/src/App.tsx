@@ -9,7 +9,7 @@ import { Dashboard, Home, Layout, NoMatch } from "./views";
 import { initWeb3Onboard } from "./utils/onboard";
 import { OnboardAPI, WalletState } from "@web3-onboard/core/dist/types";
 import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
-import { Passport } from "@dpopp/types";
+import { Passport, Stamp } from "@dpopp/types";
 
 // --- Data Storage Functions
 import { LocalStorageDatabase } from "./services/databaseStorage";
@@ -17,7 +17,10 @@ import { LocalStorageDatabase } from "./services/databaseStorage";
 export interface UserContextState {
   loggedIn: boolean;
   passport: Passport | undefined;
+  getStampIndex: (stamp: Stamp) => number | undefined;
+  hasStamp: (provider: string) => boolean;
   handleCreatePassport: () => void;
+  handleSaveStamp: (stamp: Stamp) => void;
   handleConnection: () => void;
   address: string | undefined;
   connectedWallets: WalletState[];
@@ -28,7 +31,13 @@ const startingState: UserContextState = {
   loggedIn: false,
   passport: undefined,
   /* eslint-disable-next-line @typescript-eslint/no-empty-function */
+  getStampIndex: () => undefined,
+  /* eslint-disable-next-line @typescript-eslint/no-empty-function */
+  hasStamp: () => false,
+  /* eslint-disable-next-line @typescript-eslint/no-empty-function */
   handleCreatePassport: () => {},
+  /* eslint-disable-next-line @typescript-eslint/no-empty-function */
+  handleSaveStamp: () => {},
   /* eslint-disable-next-line @typescript-eslint/no-empty-function */
   handleConnection: () => {},
   address: undefined,
@@ -140,13 +149,41 @@ function App(): JSX.Element {
     }
   };
 
+  const handleSaveStamp = (stamp: Stamp): void => {
+    if (passport) {
+      // check if there is already a stamp recorded for this provider
+      const stampIndex = getStampIndex(stamp);
+      // place the new stamp into the stamps array
+      if (stampIndex !== undefined && stampIndex !== -1) {
+        passport.stamps[stampIndex] = stamp;
+      } else {
+        passport.stamps.push(stamp);
+      }
+      // propagate the new passport state
+      setPassport({ ...passport });
+    }
+  };
+
+  const getStampIndex = (stamp: Stamp): number | undefined => {
+    // check if there is already a stamp recorded for this provider
+    return passport?.stamps.findIndex((_stamp) => _stamp.provider === stamp.provider);
+  };
+
+  const hasStamp = (provider: string): boolean => {
+    // check if a stamp exists for a given provider
+    return !!passport?.stamps && getStampIndex({ provider } as unknown as Stamp) !== -1;
+  };
+
   const stateMemo = useMemo(
     () => ({
       loggedIn,
+      address,
       passport,
       handleCreatePassport,
+      handleSaveStamp,
       handleConnection,
-      address,
+      getStampIndex,
+      hasStamp,
       connectedWallets,
       signer,
       walletLabel,

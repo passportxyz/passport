@@ -1,4 +1,4 @@
-import { Passport } from "@dpopp/types";
+import { Passport, VerifiableCredential } from "@dpopp/types";
 import { LocalStorageDatabase } from "../services/databaseStorage";
 
 const setItemSpy = jest.spyOn(window.localStorage.__proto__, "setItem");
@@ -17,7 +17,7 @@ it("should get a passport from localstorage", () => {
   const expectedPassport: Passport = {
     issuanceDate: new Date(),
     expiryDate: new Date(),
-    stamps: [{ recordUserName: "myUsername", credentialIssuer: "gitcoin" }],
+    stamps: [{ provider: "Test", credential: {} as unknown as VerifiableCredential }],
   };
   getItemSpy.mockReturnValue(JSON.stringify(expectedPassport));
 
