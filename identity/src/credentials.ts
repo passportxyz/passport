@@ -158,14 +158,18 @@ export const fetchVerifiableCredential = async (
   payload: RequestPayload,
   signer: { signMessage: (message: string) => Promise<string> } | undefined
 ): Promise<VerifiableCredentialRecord> => {
+  // must provide signature for message
+  if (!signer) {
+    throw new Error("Unable to sign message without a signer");
+  }
+
   // first pull a challenge that can be signed by the user
   const { challenge } = await fetchChallengeCredential(iamUrl, payload);
 
   // sign the challenge provided by the IAM
-  const signature =
-    signer && challenge.credentialSubject.challenge
-      ? (await signer.signMessage(challenge.credentialSubject.challenge)).toString()
-      : "";
+  const signature = challenge.credentialSubject.challenge
+    ? (await signer.signMessage(challenge.credentialSubject.challenge)).toString()
+    : "";
 
   // must provide signature for message
   if (!signature) {
