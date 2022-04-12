@@ -8,9 +8,15 @@ jest.mock("../utils/onboard.ts");
 
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
+const mockHasStamp = jest.fn();
+const getStampIndex = jest.fn();
+const handleSaveStamp = jest.fn();
 const mockUserContext: UserContextState = {
   loggedIn: false,
   passport: undefined,
+  hasStamp: mockHasStamp,
+  getStampIndex: getStampIndex,
+  handleSaveStamp: handleSaveStamp,
   handleCreatePassport: mockCreatePassport,
   handleConnection: mockHandleConnection,
   address: undefined,

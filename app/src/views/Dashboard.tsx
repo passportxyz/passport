@@ -10,8 +10,11 @@ import { fetchVerifiableCredential, verifyCredential, verifyMerkleProof, generat
 import * as DIDKit from "@dpopp/identity/dist/didkit-browser";
 import { UserContext } from "../App";
 
-// set the iamUrl to be used for new verifications (@TODO: this should be fed via the .env)
-const iamUrl = "http://localhost:65535/api/";
+// --- Identity Providers
+import { Google } from "./providers/Google";
+
+// --- ENV vars
+const iamUrl = process.env.DPOPP_IAM_URL;
 
 export function Dashboard(): JSX.Element {
   const [signature, setSignature] = useState<string | undefined>();
@@ -143,8 +146,11 @@ export function Dashboard(): JSX.Element {
                 Create Passport
               </button>
             )}
-            <p className="text-gray-100">{passport && `Your Passport: ${JSON.stringify(passport)}`}</p>
+            <pre className="text-gray-100">
+              {passport && `Your Passport: ${JSON.stringify(passport, undefined, 4)}`}
+            </pre>
             <p className="text-gray-100 text-3xl underline mt-10">{passport && "Stamps will be here"}</p>
+            {passport && <Google />}
           </div>
         )}
 

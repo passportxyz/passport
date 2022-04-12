@@ -9,6 +9,7 @@ identity.generateMerkle = jest.fn(() => ({
 // always verifies
 identity.verifyCredential = jest.fn(() => true);
 identity.verifyMerkleProof = jest.fn(() => true);
+identity.fetchVerifiableCredential = jest.fn(() => true);
 
 // return full mock
 module.exports = identity;

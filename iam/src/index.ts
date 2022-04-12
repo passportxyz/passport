@@ -139,41 +139,48 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
       // type is required because we need it to select the correct Identity Provider
       if (isSigner && payload && payload.type) {
         // each provider will apply buisness logic to the payload inorder to set the `valid` bool on the returned VerifiedPayload
-        const verifiedPayload = await providers.verify(payload);
-        // check if the request is valid against the selected Identity Provider
-        if (verifiedPayload && verifiedPayload?.valid === true) {
-          // recreate the record to ensure the minimun number of leafs are present to produce a valid merkleTree
-          const record: ProofRecord = {
-            // type and address will always be known and can be obtained from the resultant credential
-            type: payload.type,
-            address: payload.address,
-            // version is defined by entry point
-            version: "0.0.0",
-            // extend/overwrite with record returned from the provider
-            ...(verifiedPayload?.record || {}),
-          };
+        return providers
+          .verify(payload)
+          .then((verifiedPayload) => {
+            // check if the request is valid against the selected Identity Provider
+            if (verifiedPayload && verifiedPayload?.valid === true) {
+              // recreate the record to ensure the minimun number of leafs are present to produce a valid merkleTree
+              const record: ProofRecord = {
+                // type and address will always be known and can be obtained from the resultant credential
+                type: payload.type,
+                address: payload.address,
+                // version is defined by entry point
+                version: "0.0.0",
+                // extend/overwrite with record returned from the provider
+                ...(verifiedPayload?.record || {}),
+              };
 
-          // generate a VC for the given payload
-          return issueMerkleCredential(DIDKit, key, record)
-            .then(({ credential }) => {
-              return res.json({
-                record,
-                credential,
-              } as CredentialResponseBody);
-            })
-            .catch((error) => {
-              if (error) {
-                // return error msg indicating a failure producing VC
-                return errorRes(res, "Unable to produce a verifiable credential");
-              }
-            });
-        } else {
-          // return error message if an error is present
-          return errorRes(
-            res,
-            (verifiedPayload.error && verifiedPayload.error.join(", ")) || "Unable to verify proofs"
-          );
-        }
+              // generate a VC for the given payload
+              return issueMerkleCredential(DIDKit, key, record)
+                .then(({ credential }) => {
+                  return res.json({
+                    record,
+                    credential,
+                  } as CredentialResponseBody);
+                })
+                .catch((error) => {
+                  if (error) {
+                    // return error msg indicating a failure producing VC
+                    return errorRes(res, "Unable to produce a verifiable credential");
+                  }
+                });
+            } else {
+              // return error message if an error is present
+              return errorRes(
+                res,
+                (verifiedPayload.error && verifiedPayload.error.join(", ")) || "Unable to verify proofs"
+              );
+            }
+          })
+          .catch(() => {
+            // error response
+            return void errorRes(res, "Unable to verify with provider");
+          });
       }
     }
 
