@@ -87,6 +87,8 @@ export const issueChallengeCredential = async (
   } as IssuedCredential;
 };
 
+export const THIRTY_DAYS_TO_SECONDS = 30 * 86400;
+
 // Return a verifiable credential with embedded merkle data
 export const issueMerkleCredential = async (
   DIDKit: DIDKitLib,
@@ -96,7 +98,7 @@ export const issueMerkleCredential = async (
   // generate a merkleTree for the provided evidence
   const merkle = generateMerkle(record);
   // generate a verifiableCredential
-  const credential = await _issueCredential(DIDKit, key, 30 * 86400, {
+  const credential = await _issueCredential(DIDKit, key, THIRTY_DAYS_TO_SECONDS, {
     credentialSubject: {
       "@context": [
         {
