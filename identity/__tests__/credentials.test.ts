@@ -11,7 +11,6 @@ import {
 import { Axios } from "axios";
 import { DIDKitLib, VerifiableCredential } from "@dpopp/types";
 
-
 // ---- Set up test state (we reset these between runs to encapsulate the jest state)
 let axios: Axios;
 let DIDKit: DIDKitLib;
@@ -21,8 +20,16 @@ let fetchVerifiableCredential: typeof FetchVerifiableCredential;
 // this would need to be a valid key but we've mocked out didkit (and no verifications are made)
 const key = "SAMPLE_KEY";
 
+const MOCK_SIGNATURE = "Signed Message";
+const MOCK_SIGNER = { signMessage: jest.fn().mockImplementation(() => Promise.resolve(MOCK_SIGNATURE)) };
+
+// from axios mock
+const MOCK_CHALLENGE_VALUE = "this is a challenge";
+
 describe("Fetch Credentials", function () {
   beforeEach(() => {
+    MOCK_SIGNER.signMessage.mockClear();
+
     return import("axios").then((module) => {
       // reset axios
       axios = module as unknown as Axios;
@@ -40,41 +47,76 @@ describe("Fetch Credentials", function () {
 
   it("can fetch a challenge credential", async () => {
     // the returned values are fetched from the mocked axios.post(...)
-    await fetchChallengeCredential("", {
+    const payload = {
       address: "0x0",
       type: "Simple",
       version: "Test-Case-1",
-    });
+    };
+    const expectedUrl = `/v${payload.version}/challenge`;
+    const expectedRequestBody = {
+      payload: {
+        address: payload.address,
+        type: payload.type,
+      },
+    };
+
+    const { challenge: actualChallenge } = await fetchChallengeCredential("", payload);
 
     // check that called the axios.post fn
     expect(axios.post).toHaveBeenCalled();
+    expect(axios.post).toHaveBeenCalledWith(expectedUrl, expectedRequestBody);
+    expect(actualChallenge).toEqual({
+      credentialSubject: {
+        challenge: MOCK_CHALLENGE_VALUE,
+      },
+    });
   });
-  
+
   it("can fetch a verifiable credential", async () => {
-    // mock the message signer
-    const signMessage = jest.fn().mockImplementation(() => Promise.resolve("Signed Message"));
+    const payload = {
+      address: "0x0",
+      type: "Simple",
+      version: "Test-Case-1",
+    };
+    const expectedChallengeUrl = `/v${payload.version}/challenge`;
+    const expectedChallengeRequestBody = {
+      payload: {
+        address: payload.address,
+        type: payload.type,
+      },
+    };
+    const expectedVerifyUrl = `/v${payload.version}/verify`;
+    const expectedVerifyRequestBody = {
+      payload: {
+        ...payload,
+        proofs: {
+          signature: MOCK_SIGNATURE,
+        },
+      },
+      challenge: {
+        credentialSubject: {
+          challenge: MOCK_CHALLENGE_VALUE,
+        },
+      },
+    };
 
     // the returned values are fetched from the mocked axios.post(...)
-    await fetchVerifiableCredential(
-      "",
-      {
-        address: "0x0",
-        type: "Simple",
-        version: "Test-Case-1",
-      },
-      {
-        signMessage,
-      }
-    );
+    const { credential, record, signature, challenge } = await fetchVerifiableCredential("", payload, MOCK_SIGNER);
 
     // called to fetch the challenge and to verify
     expect(axios.post).toHaveBeenCalledTimes(2);
+    expect(axios.post).toHaveBeenNthCalledWith(1, expectedChallengeUrl, expectedChallengeRequestBody);
+    expect(axios.post).toHaveBeenNthCalledWith(2, expectedVerifyUrl, expectedVerifyRequestBody);
+
     // we expect to get back the mocked response
-    expect(signMessage).toHaveBeenCalled();
+    expect(MOCK_SIGNER.signMessage).toHaveBeenCalled();
+    expect(signature).toEqual(MOCK_SIGNATURE);
+    expect(JSON.stringify(challenge)).toEqual('{"credentialSubject":{"challenge":"this is a challenge"}}');
+    expect(JSON.stringify(credential)).toEqual("{}");
+    expect(JSON.stringify(record)).toEqual("{}");
   });
 
   it("will fail if not provided a signer to sign the message", async () => {
-    // without a signer we are unable to sign the message and the signature will be passed as an empty string
     await expect(
       fetchVerifiableCredential(
         "",
@@ -85,7 +127,9 @@ describe("Fetch Credentials", function () {
         },
         undefined
       )
-    ).rejects.toThrow("Unable to sign message");
+    ).rejects.toThrow("Unable to sign message without a signer");
+
+    expect(axios.post).not.toBeCalled();
   });
 
   it("will throw if signer rejects request for signature", async () => {
@@ -108,26 +152,28 @@ describe("Fetch Credentials", function () {
   });
 
   it("will not attempt to sign if not provided a challenge in the challenge credential", async () => {
-    // mock the message signer
-    const signMessage = jest.fn().mockImplementation(() => Promise.resolve("Signed Message"));
+    jest.spyOn(axios, "post").mockResolvedValue({
+      data: {
+        credential: {
+          credentialSubject: {},
+        },
+      },
+    });
 
-    // NOTE: The mocked axios "/vTest-Case-2/challenge" endpoint doesn't return a challenge
     await expect(
       fetchVerifiableCredential(
         "",
         {
           address: "0x0",
           type: "Simple",
-          version: "Test-Case-2",
+          version: "Test-Case-1",
         },
-        {
-          signMessage,
-        }
+        MOCK_SIGNER
       )
     ).rejects.toThrow("Unable to sign message");
 
     // NOTE: the signMessage function was never called
-    expect(signMessage).not.toBeCalled();
+    expect(MOCK_SIGNER.signMessage).not.toBeCalled();
   });
 });
 

@@ -18,21 +18,6 @@ module.exports = {
             record: {},
           },
         };
-      case "/vTest-Case-2/challenge":
-        return {
-          data: {
-            credential: {
-              credentialSubject: {},
-            },
-          },
-        };
-      case "/vTest-Case-2/verify":
-        return {
-          data: {
-            credential: {},
-            record: {},
-          },
-        };
     }
   }),
 };

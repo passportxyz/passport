@@ -6,9 +6,7 @@ module.exports = {
     Promise.resolve(
       JSON.stringify({
         ...JSON.parse(credential),
-        ...{
-          proof: {},
-        },
+        proof: {},
       })
     )
   ),
