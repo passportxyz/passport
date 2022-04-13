@@ -1,6 +1,11 @@
 // --- React Methods
 import React, { useState, useEffect, useContext } from "react";
 
+import { vcData } from "../types";
+
+// --Components
+import { CardList } from "../components/CardList";
+
 // --- Identity Tools
 import { ProofRecord, VerifiableCredential } from "@dpopp/types";
 import { fetchVerifiableCredential, verifyCredential, verifyMerkleProof, generateMerkle } from "@dpopp/identity/src";
@@ -9,9 +14,6 @@ import { fetchVerifiableCredential, verifyCredential, verifyMerkleProof, generat
 // fix: copying the library into a workspace avoids .vites caching mechanism
 import * as DIDKit from "@dpopp/identity/dist/didkit-browser";
 import { UserContext } from "../App";
-
-// --- Identity Providers
-import { Google } from "./providers/Google";
 
 // --- ENV vars
 const iamUrl = process.env.DPOPP_IAM_URL;
@@ -149,37 +151,19 @@ export function Dashboard(): JSX.Element {
             <pre className="text-gray-100">
               {passport && `Your Passport: ${JSON.stringify(passport, undefined, 4)}`}
             </pre>
-            <p className="text-gray-100 text-3xl underline mt-10">{passport && "Stamps will be here"}</p>
-            {passport && <Google />}
           </div>
         )}
 
-        <button
-          className="bg-gray-100 mb-10 min-w-full mt-10 px-20 py-4 rounded-lg text-violet-500"
-          onClick={handleFetchCredential}
-        >
-          Issue a Verifiable Credential
-        </button>
-        {challenge ? <p>✅ Challenged received ({challenge.credentialSubject.challenge}) </p> : null}
-        {challenge ? <p>✅ Challenged signed ({signature}) </p> : null}
-        {credential ? <p>✅ Credential issued: </p> : null}
-        {credential ? <pre>{JSON.stringify(credential, null, 4)}</pre> : null}
-        {record ? <p>✅ Provided with the following information: </p> : null}
-        {record ? <pre>{JSON.stringify(record, null, 4)}</pre> : null}
-        {credential ? (
-          <button
-            className="bg-gray-100 mb-10 min-w-full mt-10 px-20 py-4 rounded-lg text-violet-500"
-            onClick={handleVerifyCredential}
-          >
-            Verify Credential
-          </button>
-        ) : null}
-        {verifiedMerkle ? (
-          <p>✅ MerkleProof verifiably contains the passed in username ({record && record.username})</p>
-        ) : null}
-        {verifiedCredential ? (
-          <p>✅ Credential has verifiably been issued by {credential && credential.issuer} </p>
-        ) : null}
+        {/* VCs */}
+        <div className="flex items-center mx-auto sm:flex-row flex-col py-10">
+          <div className="flex-grow sm:text-left text-center mt-6 sm:mt-0 md:w-1/6 mr-10">
+            <h1 className="font-bold font-miriam-libre text-xl mb-6">Attestations</h1>
+          </div>
+
+          <div className="md:w-5/6">
+            <CardList />
+          </div>
+        </div>
       </div>
     </div>
   );
