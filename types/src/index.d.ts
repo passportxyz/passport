@@ -106,7 +106,7 @@ export type VerifiableCredentialRecord = {
 export type Stamp = {
   // recordUserName: string;
   // credentialIssuer: string;
-  provider: string;
+  provider: PROVIDER_ID;
   credential: VerifiableCredential;
 };
 
@@ -118,3 +118,5 @@ export type Passport = {
 
 // Passport DID
 export type DID = string;
+
+export type PROVIDER_ID = "Google" | "Simple";

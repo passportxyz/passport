@@ -1,23 +1,36 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Dashboard } from "../views";
-import { UserContext, UserContextState } from "../App";
-import { mockAddress, mockWallet } from "../test-fixtures/onboardHookValues";
+import { Dashboard } from "../../src/views";
+import { UserContext, UserContextState } from "../../src/App";
+import { mockAddress, mockWallet } from "../../__test-fixtures__/onboardHookValues";
+import { STAMP_PROVIDERS } from "../../src/config/providers";
 
-jest.mock("../utils/onboard.ts");
+jest.mock("../../src/utils/onboard.ts");
 
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
 const mockHasStamp = jest.fn();
 const getStampIndex = jest.fn();
 const handleSaveStamp = jest.fn();
+const handleAddStamp = jest.fn();
 const mockUserContext: UserContextState = {
   loggedIn: true,
   passport: undefined,
+  allProvidersState: {
+    Google: {
+      providerSpec: STAMP_PROVIDERS.Google,
+      stamp: undefined,
+    },
+    Simple: {
+      providerSpec: STAMP_PROVIDERS.Simple,
+      stamp: undefined,
+    },
+  },
   hasStamp: mockHasStamp,
   getStampIndex: getStampIndex,
   handleSaveStamp: handleSaveStamp,
+  handleAddStamp: handleAddStamp,
   handleCreatePassport: mockCreatePassport,
   handleConnection: mockHandleConnection,
   address: mockAddress,
@@ -100,20 +113,6 @@ describe("when user has no passport", () => {
       expect(mockCreatePassport).toBeCalledTimes(1);
     });
   });
-
-  it("should not display google verification button", () => {
-    render(
-      <UserContext.Provider value={mockUserContext}>
-        <Dashboard />
-      </UserContext.Provider>
-    );
-
-    const verifyGoogleButton = screen.queryByRole("button", {
-      name: /Verify with Google/,
-    });
-
-    expect(verifyGoogleButton).not.toBeInTheDocument();
-  });
 });
 
 describe("when the user has a passport", () => {
@@ -140,18 +139,6 @@ describe("when the user has a passport", () => {
     expect(createPassportButton).not.toBeInTheDocument();
   });
 
-  it("shows phrase Stamps will be here", () => {
-    render(
-      <UserContext.Provider value={mockUserContextWithPassport}>
-        <Dashboard />
-      </UserContext.Provider>
-    );
-
-    const phraseOnPage = screen.getByText(/Stamps will be here/);
-
-    expect(phraseOnPage).toBeInTheDocument();
-  });
-
   it("shows passport issuanceDate and expiryDate will be here", () => {
     render(
       <UserContext.Provider value={mockUserContextWithPassport}>
@@ -164,35 +151,5 @@ describe("when the user has a passport", () => {
 
     expect(issuanceDateOnPage).toBeInTheDocument();
     expect(expiryDateOnPage).toBeInTheDocument();
-  });
-
-  it("should display google verification button when user has not verified with google", () => {
-    mockHasStamp.mockImplementation(() => false);
-
-    render(
-      <UserContext.Provider value={mockUserContextWithPassport}>
-        <Dashboard />
-      </UserContext.Provider>
-    );
-
-    const verifyGoogleButton = screen.queryByRole("button", {
-      name: /Verify with Google/,
-    });
-
-    expect(verifyGoogleButton).toBeInTheDocument();
-  });
-
-  it("should display google verified message when user has verified with google", () => {
-    mockHasStamp.mockImplementation(() => true);
-
-    render(
-      <UserContext.Provider value={mockUserContextWithPassport}>
-        <Dashboard />
-      </UserContext.Provider>
-    );
-
-    const googleVerified = screen.queryByText(/Google: ✅ Verified/);
-
-    expect(googleVerified).toBeInTheDocument();
   });
 });

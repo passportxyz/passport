@@ -35,7 +35,16 @@ export class LocalStorageDatabase implements DataStorageBase {
   }
   addStamp(did: DID, stamp: Stamp): void {
     const passport = this.getPassport(did);
-    passport?.stamps.push(stamp);
-    window.localStorage.setItem(did, JSON.stringify(passport));
+    if (passport) {
+      passport.stamps.push(stamp);
+      window.localStorage.setItem(did, JSON.stringify(passport));
+    } else {
+      const newPassport = {
+        issuanceDate: new Date(),
+        expiryDate: new Date(),
+        stamps: [stamp],
+      };
+      window.localStorage.setItem(did, JSON.stringify(newPassport));
+    }
   }
 }

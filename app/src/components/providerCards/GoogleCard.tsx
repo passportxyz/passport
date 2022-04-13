@@ -1,5 +1,5 @@
 // --- React Methods
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 
 // --- Identity tools
 import { fetchVerifiableCredential } from "@dpopp/identity/src";
@@ -10,19 +10,20 @@ import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
 // pull context
 import { UserContext } from "../../App";
 
+import { Card } from "../Card";
+
+import { PROVIDER_ID } from "@dpopp/types";
+
 // import from .env
 const iamUrl = process.env.DPOPP_IAM_URL;
 const googleClientId = process.env.DPOPP_GOOGLE_CLIENT_ID;
 
-export function Google(): JSX.Element {
-  const { address, signer, hasStamp, handleSaveStamp } = useContext(UserContext);
-  // check the verified state by checking if passport.stamps has a Google stamp
-  const [isGoogleVerified, setIsGoogleVerified] = useState(hasStamp("Google"));
+const providerId: PROVIDER_ID = "Google";
+
+export function GoogleCard(): JSX.Element {
+  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
 
   const onGoogleSignIn = (response: GoogleLoginResponse): void => {
-    // pull the users profile information
-    const profile = response.getBasicProfile();
-
     // fetch the verifiable credential
     fetchVerifiableCredential(
       iamUrl,
@@ -37,10 +38,7 @@ export function Google(): JSX.Element {
       signer
     )
       .then((verified): void => {
-        // Once we have a credential we can mark this provider as complete
-        setIsGoogleVerified(!!profile.getEmail());
-        // add the stamp
-        handleSaveStamp({
+        handleAddStamp({
           provider: "Google",
           credential: verified.credential,
         });
@@ -51,26 +49,22 @@ export function Google(): JSX.Element {
   };
 
   return (
-    <div className="mt-6">
-      {!isGoogleVerified ? (
+    <Card
+      providerSpec={allProvidersState[providerId].providerSpec}
+      verifiableCredential={allProvidersState[providerId].stamp?.credential}
+      issueCredentialWidget={
         <GoogleLogin
           clientId={googleClientId}
           onFailure={(response): void => onGoogleSignIn(response as GoogleLoginResponse)}
           onSuccess={(response): void => onGoogleSignIn(response as GoogleLoginResponse)}
           // To override all stylings...
           render={(renderProps): JSX.Element => (
-            <button
-              className="bg-gray-100 mb-10 mt-10 px-20 py-4 rounded-lg text-violet-500"
-              onClick={renderProps.onClick}
-              disabled={renderProps.disabled}
-            >
-              Verify with Google
+            <button className="verify-btn" onClick={renderProps.onClick} disabled={renderProps.disabled}>
+              Verify
             </button>
           )}
-        ></GoogleLogin>
-      ) : (
-        <pre>Google: ✅ Verified</pre>
-      )}
-    </div>
+        />
+      }
+    />
   );
 }
