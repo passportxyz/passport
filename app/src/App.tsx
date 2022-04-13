@@ -46,7 +46,6 @@ function App(): JSX.Element {
 
   // Use onboard to control the current provider/wallets
   const [{ wallet }, connect, disconnect] = useConnectWallet();
-  // const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();
   const connectedWallets = useWallets();
   const [web3Onboard, setWeb3Onboard] = useState<OnboardAPI | undefined>();
   const [walletLabel, setWalletLabel] = useState<string | undefined>();

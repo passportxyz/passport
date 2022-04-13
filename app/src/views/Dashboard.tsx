@@ -79,13 +79,9 @@ export function Dashboard(): JSX.Element {
 
   // Update on wallet connect
   useEffect((): void => {
-    // window.localStorage.setItem("connectedWallets", "[]");
     // no connection
     if (!connectedWallets.length) {
-      // setLabel(undefined);
-      // setAddress(undefined);
       setRecord(undefined);
-      // setSigner(undefined);
       // these are set as part of the verification flow demo (this will be replaced by @dpopp/storage)
       setSignature(undefined);
       setChallenge(undefined);
@@ -127,7 +123,6 @@ export function Dashboard(): JSX.Element {
               >
                 <p className="text-sm">{address ? `Disconnect from ${walletLabel || ""}` : "Get Started"}</p>
               </button>
-              {/* {address ? <div className="pt-3">Connected to: {JSON.stringify(address, null, 2)}</div> : null} */}
             </div>
           </div>
 
