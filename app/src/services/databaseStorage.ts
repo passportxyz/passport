@@ -21,17 +21,21 @@ export class LocalStorageDatabase implements DataStorageBase {
   getPassport(did: DID): Passport | undefined {
     const stringifiedPassport = window.localStorage.getItem(did);
     if (stringifiedPassport === null) return undefined;
-    const passport = JSON.parse(stringifiedPassport) as { issuanceDate: string; expiryDate: string; stamps: Stamp[] };
-    return passport
-      ? {
-          issuanceDate: new Date(passport.issuanceDate),
-          expiryDate: new Date(passport.expiryDate),
-          stamps: passport.stamps,
-        }
-      : undefined;
+    const parsedPassport = JSON.parse(stringifiedPassport) as {
+      issuanceDate: string;
+      expiryDate: string;
+      stamps: Stamp[];
+    };
+    const passport = {
+      issuanceDate: new Date(parsedPassport.issuanceDate),
+      expiryDate: new Date(parsedPassport.expiryDate),
+      stamps: parsedPassport.stamps,
+    };
+    return passport ?? undefined;
   }
   addStamp(did: DID, stamp: Stamp): void {
-    // eslint-disable-next-line no-console
-    console.log(`add stamp ${JSON.stringify(stamp)} to DID ${did}`);
+    const passport = this.getPassport(did);
+    passport?.stamps.push(stamp);
+    window.localStorage.setItem(did, JSON.stringify(passport));
   }
 }
