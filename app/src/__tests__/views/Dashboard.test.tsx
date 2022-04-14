@@ -1,23 +1,25 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Dashboard } from "../views";
-import { UserContext, UserContextState } from "../App";
-import { mockAddress, mockWallet } from "../test-fixtures/onboardHookValues";
+import { Dashboard } from "../../views";
+import { UserContext, UserContextState } from "../../App";
+import { mockAddress, mockWallet } from "../../__test-fixtures__/onboardHookValues";
 
-jest.mock("../utils/onboard.ts");
+jest.mock("../../utils/onboard.ts");
 
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
 const mockHasStamp = jest.fn();
 const getStampIndex = jest.fn();
 const handleSaveStamp = jest.fn();
+const handleAddStamp = jest.fn();
 const mockUserContext: UserContextState = {
   loggedIn: true,
   passport: undefined,
   hasStamp: mockHasStamp,
   getStampIndex: getStampIndex,
   handleSaveStamp: handleSaveStamp,
+  handleAddStamp: handleAddStamp,
   handleCreatePassport: mockCreatePassport,
   handleConnection: mockHandleConnection,
   address: mockAddress,

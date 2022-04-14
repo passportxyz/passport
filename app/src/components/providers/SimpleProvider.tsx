@@ -9,7 +9,7 @@ import * as DIDKit from "@dpopp/identity/dist/didkit-browser";
 // pull context
 import { UserContext } from "../../App";
 
-import { Card } from "../../components/Card";
+import { Card } from "../Card";
 
 const iamUrl = process.env.DPOPP_IAM_URL;
 
@@ -113,6 +113,7 @@ export function SimpleProvider(): JSX.Element {
         ) : null}
       </div>
     ),
+    isVerified: false, // TODO
   };
 
   return <Card vcdata={simpleVCData} />;

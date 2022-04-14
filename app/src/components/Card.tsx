@@ -24,7 +24,7 @@ export const Card = ({ vcdata }: CardProps): JSX.Element => {
               />
             </svg>
           </div>
-          {vcdata.isVerified ? <button>is verified</button> : vcdata.verificationButton}
+          {vcdata.isVerified ? <p>✅ Verified</p> : vcdata.verificationButton}
         </div>
         <h1 className="title-font text-lg font-medium text-gray-900 mb-3">{vcdata.name}</h1>
         <p className="leading-relaxed">{vcdata.description}</p>

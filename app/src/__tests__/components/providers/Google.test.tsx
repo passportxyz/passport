@@ -1,23 +1,25 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { Google } from "../views/providers/Google";
+import { GoogleProvider } from "../../../components/providers";
 
-import { UserContext, UserContextState } from "../App";
-import { mockAddress, mockWallet } from "../test-fixtures/onboardHookValues";
+import { UserContext, UserContextState } from "../../../App";
+import { mockAddress, mockWallet } from "../../../__test-fixtures__/onboardHookValues";
 
-jest.mock("../utils/onboard.ts");
+jest.mock("../../../utils/onboard.ts");
 
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
 const mockHasStamp = jest.fn(() => false);
 const getStampIndex = jest.fn();
 const handleSaveStamp = jest.fn();
+const handleAddStamp = jest.fn();
 const mockUserContext: UserContextState = {
   loggedIn: true,
   passport: undefined,
   hasStamp: mockHasStamp,
   getStampIndex: getStampIndex,
   handleSaveStamp: handleSaveStamp,
+  handleAddStamp: handleAddStamp,
   handleCreatePassport: mockCreatePassport,
   handleConnection: mockHandleConnection,
   address: mockAddress,
@@ -26,11 +28,11 @@ const mockUserContext: UserContextState = {
   walletLabel: mockWallet.label,
 };
 
-describe("when user has not verfied with Google", () => {
+describe("when user has not verfied with GoogleProvider", () => {
   it("should display a google verification button", () => {
     render(
       <UserContext.Provider value={mockUserContext}>
-        <Google />
+        <GoogleProvider />
       </UserContext.Provider>
     );
 
@@ -42,11 +44,11 @@ describe("when user has not verfied with Google", () => {
   });
 });
 
-describe("when user has verfied with Google", () => {
+describe("when user has verified with GoogleProvider", () => {
   it("should display that google is verified", () => {
     render(
       <UserContext.Provider value={{ ...mockUserContext, hasStamp: (): boolean => true }}>
-        <Google />
+        <GoogleProvider />
       </UserContext.Provider>
     );
 

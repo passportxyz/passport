@@ -2,7 +2,7 @@
 import React from "react";
 
 // --- Identity Providers
-import { Google, SimpleProvider } from "../views/providers";
+import { GoogleProvider, SimpleProvider } from "./providers";
 
 export const CardList = (): JSX.Element => {
   return (
@@ -10,7 +10,7 @@ export const CardList = (): JSX.Element => {
       <div className="container px-5 py-24 mx-auto">
         <div className="flex flex-wrap -m-4">
           <SimpleProvider />
-          <Google />
+          <GoogleProvider />
         </div>
       </div>
     </section>

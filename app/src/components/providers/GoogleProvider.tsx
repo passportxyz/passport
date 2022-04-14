@@ -10,13 +10,13 @@ import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
 // pull context
 import { UserContext } from "../../App";
 
-import { Card } from "../../components/Card";
+import { Card } from "../Card";
 
 // import from .env
 const iamUrl = process.env.DPOPP_IAM_URL;
 const googleClientId = process.env.DPOPP_GOOGLE_CLIENT_ID;
 
-export function Google(): JSX.Element {
+export function GoogleProvider(): JSX.Element {
   const { address, signer, hasStamp, handleSaveStamp, handleAddStamp } = useContext(UserContext);
   // check the verified state by checking if passport.stamps has a Google stamp
   const [isGoogleVerified, setIsGoogleVerified] = useState(hasStamp("Google"));
