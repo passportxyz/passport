@@ -17,7 +17,7 @@ const iamUrl = process.env.DPOPP_IAM_URL;
 const googleClientId = process.env.DPOPP_GOOGLE_CLIENT_ID;
 
 export function Google(): JSX.Element {
-  const { address, signer, hasStamp, handleSaveStamp } = useContext(UserContext);
+  const { address, signer, hasStamp, handleSaveStamp, handleAddStamp } = useContext(UserContext);
   // check the verified state by checking if passport.stamps has a Google stamp
   const [isGoogleVerified, setIsGoogleVerified] = useState(hasStamp("Google"));
 
@@ -42,7 +42,7 @@ export function Google(): JSX.Element {
         // Once we have a credential we can mark this provider as complete
         setIsGoogleVerified(!!profile.getEmail());
         // add the stamp
-        handleSaveStamp({
+        handleAddStamp({
           provider: "Google",
           credential: verified.credential,
         });
@@ -61,12 +61,8 @@ export function Google(): JSX.Element {
         onSuccess={(response): void => onGoogleSignIn(response as GoogleLoginResponse)}
         // To override all stylings...
         render={(renderProps): JSX.Element => (
-          <button
-            className="bg-gray-100 mb-10 mt-10 px-20 py-4 rounded-lg text-violet-500"
-            onClick={renderProps.onClick}
-            disabled={renderProps.disabled}
-          >
-            Verify with Google
+          <button className="verify-btn" onClick={renderProps.onClick} disabled={renderProps.disabled}>
+            Issue Verification
           </button>
         )}
       ></GoogleLogin>
@@ -74,6 +70,7 @@ export function Google(): JSX.Element {
     name: "Google",
     description: "Google Provider",
     output: <div>{isGoogleVerified && <pre>Google: ✅ Verified</pre>}</div>,
+    isVerified: isGoogleVerified,
   };
 
   return <Card vcdata={googleVCData} />;

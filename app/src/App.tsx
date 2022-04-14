@@ -22,6 +22,7 @@ export interface UserContextState {
   handleCreatePassport: () => void;
   handleSaveStamp: (stamp: Stamp) => void;
   handleConnection: () => void;
+  handleAddStamp: (stamp: Stamp) => void;
   address: string | undefined;
   connectedWallets: WalletState[];
   signer: JsonRpcSigner | undefined;
@@ -40,6 +41,8 @@ const startingState: UserContextState = {
   handleSaveStamp: () => {},
   /* eslint-disable-next-line @typescript-eslint/no-empty-function */
   handleConnection: () => {},
+  /* eslint-disable-next-line @typescript-eslint/no-empty-function */
+  handleAddStamp: () => {},
   address: undefined,
   connectedWallets: [],
   signer: undefined,
@@ -149,6 +152,14 @@ function App(): JSX.Element {
     }
   };
 
+  const handleAddStamp = (stamp: Stamp): void => {
+    if (localStorageDatabase) {
+      localStorageDatabase.addStamp(localStorageDatabase.passportKey, stamp);
+      const getPassport = localStorageDatabase.getPassport(localStorageDatabase.passportKey);
+      setPassport(getPassport);
+    }
+  };
+
   const handleSaveStamp = (stamp: Stamp): void => {
     if (passport) {
       // check if there is already a stamp recorded for this provider
@@ -184,6 +195,7 @@ function App(): JSX.Element {
       handleConnection,
       getStampIndex,
       hasStamp,
+      handleAddStamp,
       connectedWallets,
       signer,
       walletLabel,

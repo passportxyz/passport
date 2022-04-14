@@ -14,7 +14,7 @@ import { Card } from "../../components/Card";
 const iamUrl = process.env.DPOPP_IAM_URL;
 
 export function SimpleProvider(): JSX.Element {
-  const { address, signer } = useContext(UserContext);
+  const { address, signer, handleAddStamp } = useContext(UserContext);
 
   const [signature, setSignature] = useState<string | undefined>();
   const [record, setRecord] = useState<false | ProofRecord | undefined>();
@@ -46,6 +46,10 @@ export function SimpleProvider(): JSX.Element {
         // reset verification
         setVerifiedMerkle(undefined);
         setVerifiedCredential(undefined);
+        handleAddStamp({
+          provider: "Simple",
+          credential: res.credential,
+        });
       })
       .catch((e): void => {
         throw e;
@@ -79,10 +83,7 @@ export function SimpleProvider(): JSX.Element {
   const simpleVCData = {
     icon: "",
     verificationButton: (
-      <button
-        className="bg-gray-100 mb-10 min-w-full mt-10 px-20 py-4 rounded-lg text-violet-500"
-        onClick={handleFetchCredential}
-      >
+      <button className="verify-btn" onClick={handleFetchCredential}>
         Issue a Verifiable Credential
       </button>
     ),

@@ -11,7 +11,7 @@ type CardProps = {
 
 export const Card = ({ vcdata }: CardProps): JSX.Element => {
   return (
-    <div className="flex relative">
+    <div className="flex relative m-2">
       <div className="px-2 py-4 relative z-10 w-full border-4 border-gray-200 bg-white rounded-lg">
         <div className="flex items-center mb-3 justify-space-between">
           <div className="w-8 h-8 inline-flex items-center justify-center text-white flex-shrink-0">
@@ -24,24 +24,24 @@ export const Card = ({ vcdata }: CardProps): JSX.Element => {
               />
             </svg>
           </div>
-          {vcdata.verificationButton}
+          {vcdata.isVerified ? <button>is verified</button> : vcdata.verificationButton}
         </div>
         <h1 className="title-font text-lg font-medium text-gray-900 mb-3">{vcdata.name}</h1>
         <p className="leading-relaxed">{vcdata.description}</p>
+        <Accordion defaultIndex={[0]} allowMultiple backgroundColor={"white"}>
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <Box flex="1" textAlign="left">
+                  Output
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel pb={4}>{vcdata.output}</AccordionPanel>
+          </AccordionItem>
+        </Accordion>
       </div>
-      <Accordion defaultIndex={[0]} allowMultiple backgroundColor={"white"}>
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box flex="1" textAlign="left">
-                Output
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>{vcdata.output}</AccordionPanel>
-        </AccordionItem>
-      </Accordion>
     </div>
   );
 };

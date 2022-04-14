@@ -6,6 +6,9 @@ import { vcData } from "../types";
 // --Components
 import { CardList } from "../components/CardList";
 
+// --Chakra UI Elements
+import { Box, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon } from "@chakra-ui/react";
+
 // --- Identity Tools
 import { ProofRecord, VerifiableCredential } from "@dpopp/types";
 import { fetchVerifiableCredential, verifyCredential, verifyMerkleProof, generateMerkle } from "@dpopp/identity/src";
@@ -98,7 +101,7 @@ export function Dashboard(): JSX.Element {
 
   return (
     <div className="mx-auto flex flex-wrap">
-      <div className="w-1/2 w-full py-6 mb-6">
+      <div className="w-full py-6 mb-6">
         <div className="font-miriam-libre text-gray-050 mt-10 font-normal font-bold leading-relaxed">
           {/* Top Avatar and Address */}
           <div className="flex items-center mx-auto sm:flex-row flex-col py-10">
@@ -149,20 +152,27 @@ export function Dashboard(): JSX.Element {
               </button>
             )}
             <pre className="text-gray-100">
-              {passport && `Your Passport: ${JSON.stringify(passport, undefined, 4)}`}
+              <Accordion defaultIndex={[0]} allowMultiple>
+                <AccordionItem>
+                  <h2>
+                    <AccordionButton borderColor={"white"}>
+                      <Box flex="1" textAlign="left">
+                        Your Passport
+                      </Box>
+                      <AccordionIcon />
+                    </AccordionButton>
+                  </h2>
+                  <AccordionPanel pb={4}>{JSON.stringify(passport, undefined, 4)}</AccordionPanel>
+                </AccordionItem>
+              </Accordion>
             </pre>
           </div>
         )}
 
         {/* VCs */}
-        <div className="flex items-center mx-auto sm:flex-row flex-col py-10">
-          <div className="flex-grow sm:text-left text-center mt-6 sm:mt-0 md:w-1/6 mr-10">
-            <h1 className="font-bold font-miriam-libre text-xl mb-6">Attestations</h1>
-          </div>
-
-          <div className="md:w-5/6">
-            <CardList />
-          </div>
+        <div className="flex items-center mx-auto flex-col py-10">
+          <h1 className="font-bold font-miriam-libre text-xl">Stamps</h1>
+          <CardList />
         </div>
       </div>
     </div>

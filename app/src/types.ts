@@ -15,4 +15,5 @@ export type vcData = {
   name: string;
   description: string;
   output: JSX.Element;
+  isVerified: boolean;
 };
