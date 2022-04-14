@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 
-import { Card } from "../../components/Card";
+import { Card } from "../../src/components/Card";
 
 it("should show verification button when user is not verified", () => {
   render(

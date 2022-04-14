@@ -1,11 +1,11 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Dashboard } from "../../views";
-import { UserContext, UserContextState } from "../../App";
+import { Dashboard } from "../../src/views";
+import { UserContext, UserContextState } from "../../src/App";
 import { mockAddress, mockWallet } from "../../__test-fixtures__/onboardHookValues";
 
-jest.mock("../../utils/onboard.ts");
+jest.mock("../../src/utils/onboard.ts");
 
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();

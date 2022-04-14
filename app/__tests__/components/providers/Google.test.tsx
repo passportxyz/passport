@@ -1,11 +1,11 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { GoogleProvider } from "../../../components/providers";
+import { GoogleProvider } from "../../../src/components/providers";
 
-import { UserContext, UserContextState } from "../../../App";
+import { UserContext, UserContextState } from "../../../src/App";
 import { mockAddress, mockWallet } from "../../../__test-fixtures__/onboardHookValues";
 
-jest.mock("../../../utils/onboard.ts");
+jest.mock("../../../src/utils/onboard.ts");
 
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();

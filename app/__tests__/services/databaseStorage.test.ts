@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/unbound-method */
 import { Passport, VerifiableCredential } from "@dpopp/types";
-import { LocalStorageDatabase } from "../../services/databaseStorage";
+import { LocalStorageDatabase } from "../../src/services/databaseStorage";
 import "jest-localstorage-mock";
 
 const localStorageDatabase = new LocalStorageDatabase("testaddress");
