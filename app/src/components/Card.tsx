@@ -1,15 +1,19 @@
 // --- React Methods
-import React, { useContext } from "react";
+import React from "react";
 
 import { Box, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon } from "@chakra-ui/react";
 
-import { vcData } from "../types";
+import { Stamp, VerifiableCredential } from "@dpopp/types";
+import { ProviderSpec } from "../config/providers";
 
 type CardProps = {
-  vcdata: vcData;
+  providerSpec: ProviderSpec;
+  verifiableCredential?: VerifiableCredential;
+  icon?: string; // todo figure out type
+  issueCredentialWidget: JSX.Element;
 };
 
-export const Card = ({ vcdata }: CardProps): JSX.Element => {
+export const Card = ({ providerSpec, verifiableCredential, issueCredentialWidget }: CardProps): JSX.Element => {
   return (
     <div className="flex relative m-2">
       <div className="px-2 py-4 relative z-10 w-full border-4 border-gray-200 bg-white rounded-lg">
@@ -24,11 +28,11 @@ export const Card = ({ vcdata }: CardProps): JSX.Element => {
               />
             </svg>
           </div>
-          {vcdata.isVerified ? <p>✅ Verified</p> : vcdata.verificationButton}
+          {verifiableCredential ? <p>✅ Verified</p> : issueCredentialWidget}
         </div>
-        <h1 className="title-font text-lg font-medium text-gray-900 mb-3">{vcdata.name}</h1>
-        <p className="leading-relaxed">{vcdata.description}</p>
-        <Accordion defaultIndex={[0]} allowMultiple backgroundColor={"white"}>
+        <h1 className="title-font text-lg font-medium text-gray-900 mb-3">{providerSpec.name}</h1>
+        <p className="leading-relaxed">{providerSpec.description}</p>
+        <Accordion allowMultiple backgroundColor={"white"}>
           <AccordionItem>
             <h2>
               <AccordionButton>
@@ -38,7 +42,9 @@ export const Card = ({ vcdata }: CardProps): JSX.Element => {
                 <AccordionIcon />
               </AccordionButton>
             </h2>
-            <AccordionPanel pb={4}>{vcdata.output}</AccordionPanel>
+            <AccordionPanel pb={4}>
+              <pre>{verifiableCredential ? JSON.stringify(verifiableCredential, null, 2) : "No stamp"}</pre>
+            </AccordionPanel>
           </AccordionItem>
         </Accordion>
       </div>

@@ -102,20 +102,6 @@ describe("when user has no passport", () => {
       expect(mockCreatePassport).toBeCalledTimes(1);
     });
   });
-
-  it("should not display google verification button", () => {
-    render(
-      <UserContext.Provider value={mockUserContext}>
-        <Dashboard />
-      </UserContext.Provider>
-    );
-
-    const verifyGoogleButton = screen.queryByRole("button", {
-      name: /Verify with Google/,
-    });
-
-    expect(verifyGoogleButton).not.toBeInTheDocument();
-  });
 });
 
 describe("when the user has a passport", () => {
@@ -140,18 +126,6 @@ describe("when the user has a passport", () => {
     });
 
     expect(createPassportButton).not.toBeInTheDocument();
-  });
-
-  it("shows phrase Stamps will be here", () => {
-    render(
-      <UserContext.Provider value={mockUserContextWithPassport}>
-        <Dashboard />
-      </UserContext.Provider>
-    );
-
-    const phraseOnPage = screen.getByText(/Stamps will be here/);
-
-    expect(phraseOnPage).toBeInTheDocument();
   });
 
   it("shows passport issuanceDate and expiryDate will be here", () => {

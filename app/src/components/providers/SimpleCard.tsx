@@ -2,7 +2,7 @@
 import React, { useState, useContext } from "react";
 
 // --- Identity tools
-import { ProofRecord, VerifiableCredential } from "@dpopp/types";
+import { ProofRecord, PROVIDER_ID, VerifiableCredential } from "@dpopp/types";
 import { fetchVerifiableCredential, verifyCredential, verifyMerkleProof, generateMerkle } from "@dpopp/identity/src";
 
 import * as DIDKit from "@dpopp/identity/dist/didkit-browser";
@@ -13,8 +13,10 @@ import { Card } from "../Card";
 
 const iamUrl = process.env.DPOPP_IAM_URL;
 
-export function SimpleProvider(): JSX.Element {
-  const { address, signer, handleAddStamp } = useContext(UserContext);
+const providerId: PROVIDER_ID = "Simple";
+
+export function SimpleCard(): JSX.Element {
+  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
 
   const [signature, setSignature] = useState<string | undefined>();
   const [record, setRecord] = useState<false | ProofRecord | undefined>();
@@ -80,41 +82,50 @@ export function SimpleProvider(): JSX.Element {
     }
   };
 
-  const simpleVCData = {
-    icon: "",
-    verificationButton: (
-      <button className="verify-btn" onClick={handleFetchCredential}>
-        Issue a Verifiable Credential
-      </button>
-    ),
-    name: "Simple",
-    description: "Simple Provider",
-    output: (
-      <div>
-        {challenge ? <p>✅ Challenged received ({challenge.credentialSubject.challenge}) </p> : null}
-        {challenge ? <p>✅ Challenged signed ({signature}) </p> : null}
-        {credential ? <p>✅ Credential issued: </p> : null}
-        {credential ? <pre>{JSON.stringify(credential, null, 4)}</pre> : null}
-        {record ? <p>✅ Provided with the following information: </p> : null}
-        {record ? <pre>{JSON.stringify(record, null, 4)}</pre> : null}
-        {credential ? (
-          <button
-            className="bg-gray-100 mb-10 min-w-full mt-10 px-20 py-4 rounded-lg text-violet-500"
-            onClick={handleVerifyCredential}
-          >
-            Verify Credential
-          </button>
-        ) : null}
-        {verifiedMerkle ? (
-          <p>✅ MerkleProof verifiably contains the passed in username ({record && record.username})</p>
-        ) : null}
-        {verifiedCredential ? (
-          <p>✅ Credential has verifiably been issued by {credential && credential.issuer} </p>
-        ) : null}
-      </div>
-    ),
-    isVerified: false, // TODO
-  };
+  const issueCredentialWidget = (
+    <button className="verify-btn" onClick={handleFetchCredential}>
+      Issue a Verifiable Credential
+    </button>
+  );
+  // const simpleVCData = {
+  //   icon: "",
+  //   verificationButton: (
 
-  return <Card vcdata={simpleVCData} />;
+  //   ),
+  //   name: "Simple",
+  //   description: "Simple Provider",
+  //   output: (
+  //     <div>
+  //       {challenge ? <p>✅ Challenged received ({challenge.credentialSubject.challenge}) </p> : null}
+  //       {challenge ? <p>✅ Challenged signed ({signature}) </p> : null}
+  //       {credential ? <p>✅ Credential issued: </p> : null}
+  //       {credential ? <pre>{JSON.stringify(credential, null, 4)}</pre> : null}
+  //       {record ? <p>✅ Provided with the following information: </p> : null}
+  //       {record ? <pre>{JSON.stringify(record, null, 4)}</pre> : null}
+  //       {credential ? (
+  //         <button
+  //           className="bg-gray-100 mb-10 min-w-full mt-10 px-20 py-4 rounded-lg text-violet-500"
+  //           onClick={handleVerifyCredential}
+  //         >
+  //           Verify Credential
+  //         </button>
+  //       ) : null}
+  //       {verifiedMerkle ? (
+  //         <p>✅ MerkleProof verifiably contains the passed in username ({record && record.username})</p>
+  //       ) : null}
+  //       {verifiedCredential ? (
+  //         <p>✅ Credential has verifiably been issued by {credential && credential.issuer} </p>
+  //       ) : null}
+  //     </div>
+  //   ),
+  //   isVerified: false, // TODO
+  // };
+
+  return (
+    <Card
+      providerSpec={allProvidersState[providerId].providerSpec}
+      verifiableCredential={allProvidersState[providerId].stamp?.credential}
+      issueCredentialWidget={issueCredentialWidget}
+    />
+  );
 }

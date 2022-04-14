@@ -9,14 +9,34 @@ import { Dashboard, Home, Layout, NoMatch } from "./views";
 import { initWeb3Onboard } from "./utils/onboard";
 import { OnboardAPI, WalletState } from "@web3-onboard/core/dist/types";
 import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
-import { Passport, Stamp } from "@dpopp/types";
+import { Passport, Stamp, PROVIDER_ID } from "@dpopp/types";
 
 // --- Data Storage Functions
 import { LocalStorageDatabase } from "./services/databaseStorage";
+import { ProviderSpec, STAMP_PROVIDERS } from "./config/providers";
+
+export type AllProvidersState = {
+  [provider in PROVIDER_ID]: {
+    providerSpec: ProviderSpec;
+    stamp?: Stamp;
+  };
+};
+
+const startingAllProvidersState: AllProvidersState = {
+  Google: {
+    providerSpec: STAMP_PROVIDERS.Google,
+    stamp: undefined,
+  },
+  Simple: {
+    providerSpec: STAMP_PROVIDERS.Simple,
+    stamp: undefined,
+  },
+};
 
 export interface UserContextState {
   loggedIn: boolean;
   passport: Passport | undefined;
+  allProvidersState: AllProvidersState;
   getStampIndex: (stamp: Stamp) => number | undefined;
   hasStamp: (provider: string) => boolean;
   handleCreatePassport: () => void;
@@ -31,6 +51,7 @@ export interface UserContextState {
 const startingState: UserContextState = {
   loggedIn: false,
   passport: undefined,
+  allProvidersState: startingAllProvidersState,
   /* eslint-disable-next-line @typescript-eslint/no-empty-function */
   getStampIndex: () => undefined,
   /* eslint-disable-next-line @typescript-eslint/no-empty-function */
@@ -55,6 +76,7 @@ function App(): JSX.Element {
   const [loggedIn, setLoggedIn] = useState(false);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
   const [localStorageDatabase, setLocalStorageDatabase] = useState<LocalStorageDatabase | undefined>(undefined);
+  const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
 
   // Use onboard to control the current provider/wallets
   const [{ wallet }, connect, disconnect] = useConnectWallet();
@@ -144,6 +166,20 @@ function App(): JSX.Element {
     }
   };
 
+  // hydrate allProvidersState
+  useEffect(() => {
+    passport?.stamps.forEach((stamp: Stamp) => {
+      const { provider, credential } = stamp;
+      const providerState = allProvidersState[provider];
+      const newProviderState = {
+        providerSpec: providerState.providerSpec,
+        stamp,
+      };
+      setAllProviderState((prevState) => ({ ...prevState, [provider]: newProviderState }));
+    });
+    // TODO remove providerstate on stamp removal
+  }, [passport]);
+
   const handleCreatePassport = (): void => {
     if (localStorageDatabase) {
       const passportDid = localStorageDatabase.createPassport();
@@ -190,6 +226,7 @@ function App(): JSX.Element {
       loggedIn,
       address,
       passport,
+      allProvidersState,
       handleCreatePassport,
       handleSaveStamp,
       handleConnection,
@@ -200,7 +237,7 @@ function App(): JSX.Element {
       signer,
       walletLabel,
     }),
-    [loggedIn, address, passport, signer, connectedWallets]
+    [loggedIn, address, passport, signer, connectedWallets, allProvidersState]
   );
 
   return (

@@ -1,2 +1,2 @@
-export { GoogleProvider } from "./GoogleProvider";
-export { SimpleProvider } from "./SimpleProvider";
+export { GoogleCard } from "./GoogleCard";
+export { SimpleCard } from "./SimpleCard";

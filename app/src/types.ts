@@ -1,4 +1,4 @@
-import { Passport, Stamp, DID } from "@dpopp/types";
+import { Passport, Stamp, DID, VerifiableCredential } from "@dpopp/types";
 import React from "react";
 
 // Class used as a base for each DataStorage Type
@@ -9,11 +9,9 @@ export abstract class DataStorageBase {
 }
 
 // VC Data Type
-export type vcData = {
-  icon: string;
-  verificationButton: JSX.Element;
-  name: string;
-  description: string;
-  output: JSX.Element;
-  isVerified: boolean;
-};
+// export type vcData = {
+//   icon: string;
+//   name: string;
+//   description: string;
+//   credential?: VerifiableCredential;
+// };
