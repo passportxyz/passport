@@ -1,0 +1,24 @@
+name: Deploy App to Dev
+
+# trigger: on push to `main` branch, AND only on changes to `app/*` files
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/*"
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      # push latest to fleek
+      # see https://docs.fleek.co/fleek-cli/github-actions/#sample-action-deploy-action
+      # note - env variables are configured in fleek
+      - name: Deploy test site
+          id: deploy
+          uses: fleekhq/action-deploy@v1
+          with:
+            apiKey: ${{ secrets.FLEEK_API_KEY }}
+      - name: Get the output url
+        run: echo "Deploy url is ${{ steps.deploy.outputs.deployUrl }}"

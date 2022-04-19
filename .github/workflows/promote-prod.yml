@@ -1,0 +1,48 @@
+name: Manual Deployment to Prod
+
+# this is the flow we're envisioning:
+#   new work is pushed/merged into `main` --> automatically deployed to `dev` environment (assuming tests/checks pass)
+#   devs manually promote work in `dev` --> `staging`, for PMs/product to review
+#   when work is accepted in `staging` and is ready for release, dev (or pm?) manually promotes `staging` --> `prod`
+
+# question: is there a way to ensure work is promoted to each environment, in order? (dev --> staging --> prod)
+#   we should also prevent ppl from promoting work into higher environments (staging, prod) if tests/checks are not passed
+
+on:
+  workflow_dispatch:
+    # thinking about using these inputs for deployer to
+    #    indicate whether the app, server, or both should be deployed.
+    # alternatively we could split this workflow into separate frontend/server workflows
+    #    and use the filepath filter option (see cd-app and cd-server workflows).
+    inputs:
+      deploy-app:
+        description: "Deploy front end"
+        required: false
+        type: boolean
+      deploy-server:
+        description: "Deploy IAM server"
+        required: false
+        type: boolean
+      # commit hash (for frontend deploy to fleek)
+      # and/or image tag? (for server deploy)
+      commit:
+        description: "Commit ref"
+        required: true
+        type: string
+
+jobs:
+  deploy-app:
+    if: github.event.inputs.deploy-app == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      # push commit hash to fleek api -- prod
+      # note - env variables are configured in fleek
+
+  deploy-server:
+    if: github.event.inputs.deploy-server == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      # deploy image to appropriate cluster -- prod
+      #  - env variables (iam/.env-example.env): GOOGLE_CLIENT_ID, IAM_JWK [secret]
