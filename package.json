@@ -39,13 +39,17 @@
     "types": "yarn workspace @dpopp/types",
     "prestart": "yarn build:identity",
     "pretest": "yarn build:identity",
-    "postinstall": "yarn build:identity"
+    "postinstall": "yarn build:identity",
+    "ceramic": "yarn workspace @dpopp/schemas ceramic",
+    "create-model": "yarn workspace @dpopp/schemas create-model",
+    "publish-model": "yarn workspace @dpopp/schemas publish-model"
   },
   "engines": {
     "yarn": ">=1.22.10",
     "node": ">=16.0.0"
   },
   "resolutions": {
-    "csstype": "3.0.10"
+    "csstype": "3.0.10",
+    "leveldown": "6.1.1"
   }
 }

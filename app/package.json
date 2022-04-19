@@ -84,6 +84,7 @@
     "vite-tsconfig-paths": "^3.4.1"
   },
   "resolutions": {
-    "csstype": "3.0.10"
+    "csstype": "3.0.10",
+    "leveldown": "6.1.1"
   }
 }
