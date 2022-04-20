@@ -4,7 +4,7 @@
 
 Prerequisites: [Node (v16 LTS)](https://nodejs.org/en/download/) plus [Yarn](https://classic.yarnpkg.com/en/docs/install/) and [Git](https://git-scm.com/downloads)
 
-> clone/fork DPOPP:
+> install DPOPP:
 
 ```bash
 git clone https://github.com/gitcoinco/dPopp.git
@@ -12,10 +12,10 @@ npm install --global lerna
 lerna bootstrap
 ```
 
-> start your 📱 frontend:
+> run DPOPP:
 
 ```bash
-cd app
+# remember to create .env files first
 yarn start
 ```
 
@@ -23,10 +23,24 @@ yarn start
 
 This will be the web app allowing users to interact with their dpopp
 
-## schema
+> start only the 📱 frontend:
 
-This will manage creation and publishing of the Ceramic schemas and data models.
+```bash
+cd app
+yarn start
+```
 
 ## iam
 
-This will be the server handling incoming requests to process verifications
+This is the server handling incoming requests to issue credentials and process verifications
+
+> start only the IAM server:
+
+```bash
+cd iam
+yarn start
+```
+
+## identity
+
+This is a helper package to compile Spruce DIDKit and export functions for use in `iam` and `app` packages.

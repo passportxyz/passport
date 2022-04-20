@@ -47,14 +47,7 @@ describe("POST /challenge", function () {
     // expect the mocked credential to be returned and contain the expectedId
     expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify payload");
   });
-
-  // TODO new unit test --> if credential.error then return 400
-  // TODO new unit test --> if !(await verifyCredential(DIDKit, credential)) then return 400
-  // TODO new unit test --> if utils.getAddress fails, then ???
-  // TODO new unit test --> if issueMerkleCredential fails, then ???
 });
-
-// TODO test POST /verify endpoint
 
 describe("POST /verify", function () {
   it("handles valid challenge requests", async () => {
@@ -188,9 +181,4 @@ describe("POST /verify", function () {
 
     expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify proofs");
   });
-
-  // TODO new unit test --> if credential.error then return 400
-  // TODO new unit test --> if !(await verifyCredential(DIDKit, credential)) then return 400
-  // TODO new unit test --> if utils.getAddress fails, then ???
-  // TODO new unit test --> if issueMerkleCredential fails, then ???
 });
