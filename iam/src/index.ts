@@ -1,4 +1,6 @@
 // Should this file be an app factory? If it was, we could move the provider config to main.ts and test in isolation
+import dotenv from "dotenv";
+dotenv.config();
 
 // ---- Server
 import express, { Request } from "express";
@@ -46,17 +48,11 @@ app.use(express.json());
 // set cors to accept calls from anywhere
 app.use(cors());
 
-// // return a JSON error response with a 400 status
+// return a JSON error response with a 400 status
 const errorRes = async (res: Response, error: string): Promise<Response> =>
   await new Promise((resolve) => resolve(res.status(400).json({ error })));
 
-// @TODO - remove example key - this should be supplied by the .env
-const key = JSON.stringify({
-  kty: "OKP",
-  crv: "Ed25519",
-  x: "a7wbszn1DfZ3I7-_zDkUXCgypcGxL_cpCSTYEPRYj_o",
-  d: "Z0hucmxRt1C22ygAXJ1arXwD9QlAA5tEPLb7qoXYDGY",
-});
+const key = process.env.IAM_JWK;
 
 // get DID from key
 const issuer = DIDKit.keyToDID("key", key);

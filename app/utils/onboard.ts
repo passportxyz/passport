@@ -5,14 +5,8 @@ import walletConnectModule from "@web3-onboard/walletconnect";
 import walletLinkModule from "@web3-onboard/walletlink";
 
 // RPC urls
-const MAINNET_RPC_URL = `https://mainnet.infura.io/v3/${
-  // process.env.NEXT_PUBLIC_DPOPP_INFURA_KEY
-  "460f40a260564ac4a4f4b3fffb032dad"
-}`;
-const RINKEBY_RPC_URL = `https://rinkeby.infura.io/v3/${
-  // process.env.NEXT_PUBLIC_DPOPP_INFURA_KEY
-  "460f40a260564ac4a4f4b3fffb032dad"
-}`;
+const MAINNET_RPC_URL = `https://mainnet.infura.io/v3/${process.env.NEXT_PUBLIC_DPOPP_INFURA_KEY}`;
+const RINKEBY_RPC_URL = `https://rinkeby.infura.io/v3/${process.env.NEXT_PUBLIC_DPOPP_INFURA_KEY}`;
 
 // Injected wallet
 const injected = injectedModule();
