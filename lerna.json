@@ -1,5 +1,5 @@
 {
-  "packages": ["old-app", "schemas", "iam", "identity", "types"],
+  "packages": ["old-app", "app", "schemas", "iam", "identity", "types"],
   "npmClient": "yarn",
   "version": "independent",
   "useWorkspaces": true,

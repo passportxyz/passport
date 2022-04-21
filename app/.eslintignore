@@ -1,0 +1,7 @@
+/*.js
+/*.ts
+/test/*
+/dist/*
+/coverage/*
+/node_modules/*
+/__mocks__/**/*.js
