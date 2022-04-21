@@ -1,0 +1,89 @@
+{
+  "name": "@dpopp/app",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "clean": "rimraf node_modules",
+    "start": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",
+    "test": "jest",
+    "prettier": "prettier --write ."
+  },
+  "setupFiles": [
+    {
+      "jest": {
+        "resetMocks": false,
+        "setupFiles": [
+          "jest-localstorage-mock"
+        ]
+      }
+    }
+  ],
+  "dependencies": {
+    "@chakra-ui/react": "^1.8.8",
+    "@dpopp/identity": "^0.0.1",
+    "@dpopp/types": "^0.0.1",
+    "@emotion/react": "^11",
+    "@emotion/styled": "^11",
+    "@ethersproject/providers": "^5.6.2",
+    "@walletconnect/web3-provider": "^1.7.7",
+    "@web3-onboard/core": "^2.1.0",
+    "@web3-onboard/injected-wallets": "^2.0.2",
+    "@web3-onboard/ledger": "^2.0.1",
+    "@web3-onboard/react": "^2.0.6",
+    "@web3-onboard/walletconnect": "^2.0.1",
+    "@web3-onboard/walletlink": "^2.0.0",
+    "buffer": "^6.0.3",
+    "eip-712": "^0.4.3",
+    "framer-motion": "^6",
+    "lodash": "^4.17.21",
+    "mock-local-storage": "^1.1.21",
+    "react": "^17.0.2",
+    "react-dom": "17.0.2",
+    "react-google-login": "^5.2.2",
+    "react-router-dom": "^6.3.0",
+    "vite-plugin-environment": "^1.1.1"
+  },
+  "devDependencies": {
+    "@babel/preset-typescript": "^7.16.7",
+    "@testing-library/jest-dom": "5.14.1",
+    "@testing-library/react": "12.0.0",
+    "@testing-library/user-event": "13.2.1",
+    "@types/jest": "^27.4.1",
+    "@types/node": "^17.0.23",
+    "@types/react": "^17.0.33",
+    "@types/react-dom": "^17.0.10",
+    "@typescript-eslint/eslint-plugin": "^5.17.0",
+    "@typescript-eslint/parser": "^5.17.0",
+    "@vitejs/plugin-react": "^1.0.7",
+    "autoprefixer": "^10.4.4",
+    "crypto-browserify": "^3.12.0",
+    "eslint": "^8.12.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-jest": "^26.1.3",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.29.4",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^27.5.1",
+    "jest-localstorage-mock": "^2.4.21",
+    "jest-mock-extended": "^2.0.5",
+    "postcss": "^8.4.12",
+    "prettier": "^2.6.1",
+    "stream-browserify": "^3.0.0",
+    "tailwindcss": "^3.0.23",
+    "ts-jest": "^27.1.4",
+    "ts-node": "^10.7.0",
+    "typescript": "~4.6.3",
+    "vite": "^2.9.0",
+    "vite-plugin-babel-macros": "^1.0.6",
+    "vite-plugin-externals": "^0.4.0",
+    "vite-plugin-top-level-await": "^0.0.4",
+    "vite-plugin-wasm": "^0.0.2",
+    "vite-tsconfig-paths": "^3.4.1"
+  },
+  "resolutions": {
+    "csstype": "3.0.10"
+  }
+}
