@@ -1,0 +1,76 @@
+// --- React Methods
+import React from "react";
+
+import {
+  Box,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
+} from "@chakra-ui/react";
+
+import { VerifiableCredential } from "@dpopp/types";
+import { ProviderSpec } from "../config/providers";
+
+export type CardProps = {
+  providerSpec: ProviderSpec;
+  verifiableCredential?: VerifiableCredential;
+  icon?: string; // todo figure out type
+  issueCredentialWidget: JSX.Element;
+};
+
+export const Card = ({
+  providerSpec,
+  verifiableCredential,
+  issueCredentialWidget,
+}: CardProps): JSX.Element => {
+  return (
+    <div className="relative m-2 flex">
+      <div className="relative z-10 w-full rounded-lg border-4 border-gray-200 bg-white px-2 py-4">
+        <div className="justify-space-between mb-3 flex items-center">
+          <div className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center text-white">
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 32 32"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M24.7999 24.8002H28.7999V28.8002H24.7999V24.8002ZM14 24.8002H18V28.8002H14V24.8002ZM3.19995 24.8002H7.19995V28.8002H3.19995V24.8002ZM24.7999 14.0002H28.7999V18.0002H24.7999V14.0002ZM14 14.0002H18V18.0002H14V14.0002ZM3.19995 14.0002H7.19995V18.0002H3.19995V14.0002ZM24.7999 3.2002H28.7999V7.2002H24.7999V3.2002ZM14 3.2002H18V7.2002H14V3.2002ZM3.19995 3.2002H7.19995V7.2002H3.19995V3.2002Z"
+                fill="#161616"
+              />
+            </svg>
+          </div>
+          {verifiableCredential ? <p>✅ Verified</p> : issueCredentialWidget}
+        </div>
+        <h1 className="title-font mb-3 text-lg font-medium text-gray-900">
+          {providerSpec.name}
+        </h1>
+        <p className="leading-relaxed">{providerSpec.description}</p>
+        <Accordion allowMultiple backgroundColor={"white"}>
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <Box flex="1" textAlign="left">
+                  Output
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel pb={4}>
+              <pre>
+                {verifiableCredential
+                  ? JSON.stringify(verifiableCredential, null, 2)
+                  : "No stamp"}
+              </pre>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+      </div>
+    </div>
+  );
+};
