@@ -10,26 +10,13 @@ import { useRouter } from "next/router";
 import { CardList } from "../components/CardList";
 
 // --Chakra UI Elements
-import {
-  Box,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-} from "@chakra-ui/react";
+import { Box, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon } from "@chakra-ui/react";
 
 import { UserContext } from "../context/userContext";
 
 const Dashboard: NextPage = () => {
-  const {
-    handleConnection,
-    address,
-    walletLabel,
-    passport,
-    handleCreatePassport,
-    connectedWallets,
-  } = useContext(UserContext);
+  const { handleConnection, address, walletLabel, passport, handleCreatePassport, connectedWallets } =
+    useContext(UserContext);
   const router = useRouter();
 
   // Route user to home when wallet is disconnected
@@ -60,9 +47,7 @@ const Dashboard: NextPage = () => {
               </svg>
             </div>
             <div className="mt-6 flex-grow text-center sm:mt-0 sm:text-left">
-              <h2 className="title-font mb-2 text-lg font-medium text-gray-100">
-                {address}
-              </h2>
+              <h2 className="title-font mb-2 text-lg font-medium text-gray-100">{address}</h2>
             </div>
 
             <div className="mb-10 mt-10 md:w-1/4">
@@ -71,11 +56,7 @@ const Dashboard: NextPage = () => {
                 className="min-w-full rounded-lg bg-gray-100 py-2 px-2 text-violet-500"
                 onClick={handleConnection}
               >
-                <p className="text-sm">
-                  {address
-                    ? `Disconnect from ${walletLabel || ""}`
-                    : "Get Started"}
-                </p>
+                <p className="text-sm">{address ? `Disconnect from ${walletLabel || ""}` : "Get Started"}</p>
               </button>
             </div>
           </div>
@@ -108,9 +89,7 @@ const Dashboard: NextPage = () => {
                       <AccordionIcon />
                     </AccordionButton>
                   </h2>
-                  <AccordionPanel pb={4}>
-                    {JSON.stringify(passport, undefined, 4)}
-                  </AccordionPanel>
+                  <AccordionPanel pb={4}>{JSON.stringify(passport, undefined, 4)}</AccordionPanel>
                 </AccordionItem>
               </Accordion>
             </pre>

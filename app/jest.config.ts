@@ -8,13 +8,10 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 const customJestConfig = {
   testEnvironment: "jest-environment-jsdom",
-  // transform: {
-  //   "^.+\\.tsx?$": "ts-jest",
-  // },
   moduleNameMapper: {
     "\\.(gif|ttf|eot|svg|png)$": "<rootDir>/__mocks__/fileMock.js",
     "\\.(css|less|sass|scss)$": "identity-obj-proxy",
-    // Handle module aliases (this will be automatically configured for you soon)
+    // Handle module aliases
     "^@/components/(.*)$": "<rootDir>/components/$1",
     "^@/pages/(.*)$": "<rootDir>/pages/$1",
   },

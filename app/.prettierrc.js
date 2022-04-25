@@ -1,4 +1,4 @@
 module.exports = {
-  // ...require("../.prettierrc.js"),
+  ...require("../.prettierrc.js"),
   singleQuote: false,
 };

@@ -67,17 +67,11 @@ const startingState: UserContextState = {
 // create our app context
 export const UserContext = createContext(startingState);
 
-// export function App({ children, ...props }: AppProps): JSX.Element {
-
 export const UserContextProvider = ({ children }: { children: any }) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
-  const [localStorageDatabase, setLocalStorageDatabase] = useState<
-    LocalStorageDatabase | undefined
-  >(undefined);
-  const [allProvidersState, setAllProviderState] = useState(
-    startingAllProvidersState
-  );
+  const [localStorageDatabase, setLocalStorageDatabase] = useState<LocalStorageDatabase | undefined>(undefined);
+  const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
 
   // Use onboard to control the current provider/wallets
   const [{ wallet }, connect, disconnect] = useConnectWallet();
@@ -128,22 +122,15 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       // get the signer from an ethers wrapped Web3Provider
       setSigner(new Web3Provider(connectedWallets[0]?.provider).getSigner());
       // flaten array for storage
-      const connectedWalletsLabelArray = connectedWallets.map(
-        ({ label }) => label
-      );
+      const connectedWalletsLabelArray = connectedWallets.map(({ label }) => label);
       // store in localstorage
-      window.localStorage.setItem(
-        "connectedWallets",
-        JSON.stringify(connectedWalletsLabelArray)
-      );
+      window.localStorage.setItem("connectedWallets", JSON.stringify(connectedWalletsLabelArray));
 
       if (address) {
         // Load localStorage Passport data
         const localStorageInstance = new LocalStorageDatabase(address);
         setLocalStorageDatabase(localStorageInstance);
-        const loadedPassport = localStorageInstance?.getPassport(
-          localStorageInstance.passportKey
-        );
+        const loadedPassport = localStorageInstance?.getPassport(localStorageInstance.passportKey);
         setPassport(loadedPassport);
       }
     }
@@ -203,9 +190,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   const handleAddStamp = (stamp: Stamp): void => {
     if (localStorageDatabase) {
       localStorageDatabase.addStamp(localStorageDatabase.passportKey, stamp);
-      const getPassport = localStorageDatabase.getPassport(
-        localStorageDatabase.passportKey
-      );
+      const getPassport = localStorageDatabase.getPassport(localStorageDatabase.passportKey);
       setPassport(getPassport);
     }
   };
@@ -227,17 +212,12 @@ export const UserContextProvider = ({ children }: { children: any }) => {
 
   const getStampIndex = (stamp: Stamp): number | undefined => {
     // check if there is already a stamp recorded for this provider
-    return passport?.stamps.findIndex(
-      (_stamp: Stamp) => _stamp.provider === stamp.provider
-    );
+    return passport?.stamps.findIndex((_stamp: Stamp) => _stamp.provider === stamp.provider);
   };
 
   const hasStamp = (provider: string): boolean => {
     // check if a stamp exists for a given provider
-    return (
-      !!passport?.stamps &&
-      getStampIndex({ provider } as unknown as Stamp) !== -1
-    );
+    return !!passport?.stamps && getStampIndex({ provider } as unknown as Stamp) !== -1;
   };
 
   const stateMemo = useMemo(
@@ -276,9 +256,5 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     walletLabel,
   };
 
-  return (
-    <UserContext.Provider value={providerProps}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={providerProps}>{children}</UserContext.Provider>;
 };

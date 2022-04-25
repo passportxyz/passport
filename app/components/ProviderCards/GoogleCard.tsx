@@ -21,8 +21,7 @@ const googleClientId = process.env.NEXT_PUBLIC_DPOPP_GOOGLE_CLIENT_ID || "";
 const providerId: PROVIDER_ID = "Google";
 
 export default function GoogleCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } =
-    useContext(UserContext);
+  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
 
   const onGoogleSignIn = (response: GoogleLoginResponse): void => {
     // fetch the verifiable credential
@@ -60,9 +59,7 @@ export default function GoogleCard(): JSX.Element {
             // onGoogleSignIn(response as GoogleLoginResponse)
             console.log("Google Login")
           }
-          onSuccess={(response): void =>
-            onGoogleSignIn(response as GoogleLoginResponse)
-          }
+          onSuccess={(response): void => onGoogleSignIn(response as GoogleLoginResponse)}
           // To override all stylings...
           render={(renderProps): JSX.Element => (
             <button className="verify-btn" onClick={renderProps.onClick}>

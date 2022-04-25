@@ -3,10 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { SimpleCard } from "../../../components/ProviderCards";
 
 import { UserContext, UserContextState } from "../../../context/userContext";
-import {
-  mockAddress,
-  mockWallet,
-} from "../../../__test-fixtures__/onboardHookValues";
+import { mockAddress, mockWallet } from "../../../__test-fixtures__/onboardHookValues";
 import { STAMP_PROVIDERS } from "../../../config/providers";
 import { simpleStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
 

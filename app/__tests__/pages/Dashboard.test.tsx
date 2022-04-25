@@ -3,10 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Dashboard from "../../pages/Dashboard";
 import { UserContext, UserContextState } from "../../context/userContext";
-import {
-  mockAddress,
-  mockWallet,
-} from "../../__test-fixtures__/onboardHookValues";
+import { mockAddress, mockWallet } from "../../__test-fixtures__/onboardHookValues";
 import { STAMP_PROVIDERS } from "../../config/providers";
 
 jest.mock("../../utils/onboard.ts");
