@@ -1,11 +1,12 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Home } from "../../src/views";
-import { UserContext, UserContextState } from "../../src/App";
-import { STAMP_PROVIDERS } from "../../src/config/providers";
+import Home from "../../pages/index";
+import { UserContext, UserContextState } from "../../context/userContext";
+import { STAMP_PROVIDERS } from "../../config/providers";
+import { act } from "react-dom/test-utils";
 
-jest.mock("../../src/utils/onboard.ts");
+jest.mock("../../utils/onboard.ts");
 
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
@@ -63,7 +64,7 @@ test("clicking connect wallet button calls handleConnection", async () => {
     name: "Get Started",
   });
 
-  userEvent.click(connectWalletButton);
+  await userEvent.click(connectWalletButton);
 
   await waitFor(() => {
     expect(mockHandleConnection).toBeCalledTimes(1);

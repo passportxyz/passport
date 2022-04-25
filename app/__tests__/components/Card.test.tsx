@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 
-import { Card, CardProps } from "../../src/components/Card";
+import { Card, CardProps } from "../../components/Card";
 
 import { VerifiableCredential } from "@dpopp/types";
 import { mock } from "jest-mock-extended";

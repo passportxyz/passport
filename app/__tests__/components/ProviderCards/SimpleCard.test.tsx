@@ -1,13 +1,13 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { SimpleCard } from "../../../src/components/providerCards";
+import { SimpleCard } from "../../../components/ProviderCards";
 
-import { UserContext, UserContextState } from "../../../src/App";
+import { UserContext, UserContextState } from "../../../context/userContext";
 import { mockAddress, mockWallet } from "../../../__test-fixtures__/onboardHookValues";
-import { STAMP_PROVIDERS } from "../../../src/config/providers";
+import { STAMP_PROVIDERS } from "../../../config/providers";
 import { simpleStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
 
-jest.mock("../../../src/utils/onboard.ts");
+jest.mock("../../../utils/onboard.ts");
 
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();

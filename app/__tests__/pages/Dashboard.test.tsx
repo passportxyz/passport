@@ -1,12 +1,12 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Dashboard } from "../../src/views";
-import { UserContext, UserContextState } from "../../src/App";
+import Dashboard from "../../pages/Dashboard";
+import { UserContext, UserContextState } from "../../context/userContext";
 import { mockAddress, mockWallet } from "../../__test-fixtures__/onboardHookValues";
-import { STAMP_PROVIDERS } from "../../src/config/providers";
+import { STAMP_PROVIDERS } from "../../config/providers";
 
-jest.mock("../../src/utils/onboard.ts");
+jest.mock("../../utils/onboard.ts");
 
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
@@ -68,7 +68,7 @@ describe("when user has a connected wallet", () => {
 
     expect(disconnectWalletButton).toBeInTheDocument();
 
-    userEvent.click(disconnectWalletButton);
+    await userEvent.click(disconnectWalletButton);
 
     await waitFor(() => {
       expect(mockHandleConnection).toBeCalledTimes(1);
@@ -107,7 +107,7 @@ describe("when user has no passport", () => {
       name: /Create Passport/,
     });
 
-    userEvent.click(createPassportButton);
+    await userEvent.click(createPassportButton);
 
     await waitFor(() => {
       expect(mockCreatePassport).toBeCalledTimes(1);

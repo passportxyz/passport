@@ -3,20 +3,19 @@ import React, { useContext } from "react";
 
 // --- Identity tools
 import { PROVIDER_ID } from "@dpopp/types";
-import { fetchVerifiableCredential } from "@dpopp/identity/src";
+import { fetchVerifiableCredential } from "@dpopp/identity/dist/commonjs";
 
 // pull context
-import { UserContext } from "../../App";
+import { UserContext } from "../../context/userContext";
 
 import { Card } from "../Card";
 
-const iamUrl = process.env.DPOPP_IAM_URL;
+const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 
 const providerId: PROVIDER_ID = "Simple";
 
-export function SimpleCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
-
+export default function SimpleCard(): JSX.Element {
+  const { address, signer, handleAddStamp, allProvidersState, connectedWallets } = useContext(UserContext);
   // fetch an example VC from the IAM server
   const handleFetchCredential = (): void => {
     fetchVerifiableCredential(
@@ -30,7 +29,7 @@ export function SimpleCard(): JSX.Element {
           username: "test",
         },
       },
-      signer
+      signer as { signMessage: (message: string) => Promise<string> }
     )
       .then((res): void => {
         handleAddStamp({

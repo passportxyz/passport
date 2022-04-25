@@ -2,13 +2,13 @@
 import React from "react";
 
 // --- Identity Providers
-import { GoogleCard, SimpleCard } from "./providerCards";
+import { GoogleCard, SimpleCard } from "./ProviderCards";
 
 export const CardList = (): JSX.Element => {
   return (
-    <section className="text-gray-600 body-font">
-      <div className="container px-5 py-24 mx-auto">
-        <div className="flex flex-wrap -m-4">
+    <section className="body-font text-gray-600">
+      <div className="container mx-auto px-5 py-24">
+        <div className="-m-4 flex flex-wrap">
           <SimpleCard />
           <GoogleCard />
         </div>

@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/unbound-method */
 import { Passport } from "@dpopp/types";
-import { LocalStorageDatabase } from "../../src/services/databaseStorage";
+import { LocalStorageDatabase } from "../../services/databaseStorage";
 import "jest-localstorage-mock";
 import { passportFixture, simpleStampFixture } from "../../__test-fixtures__/databaseStorageFixtures";
 
@@ -39,7 +37,6 @@ describe("when there is no passport for the given did", () => {
 
     localStorageDatabase.addStamp(did, simpleStampFixture);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const finalPassport = JSON.parse(localStorage.__STORE__[did] as string) as Passport;
     expect(finalPassport.stamps).toHaveLength(1);
     expect(finalPassport.stamps).toContainEqual(simpleStampFixture);
@@ -72,7 +69,6 @@ describe("when there is an existing passport for the given did", () => {
       stamps: [...passportFixture.stamps, simpleStampFixture],
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const finalPassport = JSON.parse(localStorage.__STORE__[did] as string) as Passport;
     expect(finalPassport.stamps).toHaveLength(passportFixture.stamps.length + 1);
     expect(finalPassport.stamps).toContainEqual(simpleStampFixture);

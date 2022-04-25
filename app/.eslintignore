@@ -2,6 +2,7 @@
 /*.ts
 /test/*
 /dist/*
+/.next/*
 /coverage/*
 /node_modules/*
 /__mocks__/**/*.js

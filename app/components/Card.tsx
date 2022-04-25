@@ -15,10 +15,10 @@ export type CardProps = {
 
 export const Card = ({ providerSpec, verifiableCredential, issueCredentialWidget }: CardProps): JSX.Element => {
   return (
-    <div className="flex relative m-2">
-      <div className="px-2 py-4 relative z-10 w-full border-4 border-gray-200 bg-white rounded-lg">
-        <div className="flex items-center mb-3 justify-space-between">
-          <div className="w-8 h-8 inline-flex items-center justify-center text-white flex-shrink-0">
+    <div className="relative m-2 flex">
+      <div className="relative z-10 w-full rounded-lg border-4 border-gray-200 bg-white px-2 py-4">
+        <div className="justify-space-between mb-3 flex items-center">
+          <div className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center text-white">
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 fillRule="evenodd"
@@ -30,7 +30,7 @@ export const Card = ({ providerSpec, verifiableCredential, issueCredentialWidget
           </div>
           {verifiableCredential ? <p>✅ Verified</p> : issueCredentialWidget}
         </div>
-        <h1 className="title-font text-lg font-medium text-gray-900 mb-3">{providerSpec.name}</h1>
+        <h1 className="title-font mb-3 text-lg font-medium text-gray-900">{providerSpec.name}</h1>
         <p className="leading-relaxed">{providerSpec.description}</p>
         <Accordion allowMultiple backgroundColor={"white"}>
           <AccordionItem>

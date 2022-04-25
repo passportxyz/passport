@@ -1,19 +1,19 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
-import React, { useEffect, useMemo, useState } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import React, { createContext, useMemo, useState, useEffect } from "react";
 import { useConnectWallet, useWallets } from "@web3-onboard/react";
-import "./App.css";
-import { Dashboard, Home, Layout, NoMatch } from "./views";
 
 // --- Wallet connection utilities
-import { initWeb3Onboard } from "./utils/onboard";
-import { OnboardAPI, WalletState } from "@web3-onboard/core/dist/types";
-import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
+import { initWeb3Onboard } from "../utils/onboard";
 import { Passport, Stamp, PROVIDER_ID } from "@dpopp/types";
 
 // --- Data Storage Functions
-import { LocalStorageDatabase } from "./services/databaseStorage";
-import { ProviderSpec, STAMP_PROVIDERS } from "./config/providers";
+import { OnboardAPI, WalletState } from "@web3-onboard/core/dist/types";
+import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
+
+// --- Data Storage Functions
+import { LocalStorageDatabase } from "../services/databaseStorage";
+import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 
 export type AllProvidersState = {
   [provider in PROVIDER_ID]: {
@@ -52,17 +52,11 @@ const startingState: UserContextState = {
   loggedIn: false,
   passport: undefined,
   allProvidersState: startingAllProvidersState,
-  /* eslint-disable-next-line @typescript-eslint/no-empty-function */
   getStampIndex: () => undefined,
-  /* eslint-disable-next-line @typescript-eslint/no-empty-function */
   hasStamp: () => false,
-  /* eslint-disable-next-line @typescript-eslint/no-empty-function */
   handleCreatePassport: () => {},
-  /* eslint-disable-next-line @typescript-eslint/no-empty-function */
   handleSaveStamp: () => {},
-  /* eslint-disable-next-line @typescript-eslint/no-empty-function */
   handleConnection: () => {},
-  /* eslint-disable-next-line @typescript-eslint/no-empty-function */
   handleAddStamp: () => {},
   address: undefined,
   connectedWallets: [],
@@ -70,9 +64,10 @@ const startingState: UserContextState = {
   walletLabel: undefined,
 };
 
-export const UserContext = React.createContext(startingState);
+// create our app context
+export const UserContext = createContext(startingState);
 
-function App(): JSX.Element {
+export const UserContextProvider = ({ children }: { children: any }) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
   const [localStorageDatabase, setLocalStorageDatabase] = useState<LocalStorageDatabase | undefined>(undefined);
@@ -89,6 +84,28 @@ function App(): JSX.Element {
   // Init onboard to enable hooks
   useEffect((): void => {
     setWeb3Onboard(initWeb3Onboard);
+  }, []);
+
+  const setWalletFromLocalStorage = async (): Promise<void> => {
+    const previouslyConnectedWallets = JSON.parse(
+      // retrieve localstorage state
+      window.localStorage.getItem("connectedWallets") || "[]"
+    ) as string[];
+    if (previouslyConnectedWallets?.length) {
+      connect({
+        autoSelect: {
+          label: previouslyConnectedWallets[0],
+          disableModals: true,
+        },
+      }).catch((e): void => {
+        throw e;
+      });
+    }
+  };
+
+  // Connect wallet on reload
+  useEffect((): void => {
+    setWalletFromLocalStorage();
   }, []);
 
   // Update on wallet connect
@@ -118,27 +135,6 @@ function App(): JSX.Element {
       }
     }
   }, [connectedWallets, wallet]);
-
-  // Connect wallet on reload
-  useEffect((): void => {
-    // retrieve localstorage state
-    const previouslyConnectedWallets = JSON.parse(window.localStorage.getItem("connectedWallets") || "[]") as string[];
-    if (previouslyConnectedWallets?.length) {
-      /* eslint-disable no-inner-declarations */
-      async function setWalletFromLocalStorage(): Promise<void> {
-        void (await connect({
-          autoSelect: {
-            label: previouslyConnectedWallets[0],
-            disableModals: true,
-          },
-        }));
-      }
-      // restore from localstorage
-      setWalletFromLocalStorage().catch((e): void => {
-        throw e;
-      });
-    }
-  }, [web3Onboard, connect]);
 
   // Toggle connect/disconnect
   // clear context passport on disconnect
@@ -175,7 +171,10 @@ function App(): JSX.Element {
         providerSpec: providerState.providerSpec,
         stamp,
       };
-      setAllProviderState((prevState) => ({ ...prevState, [provider]: newProviderState }));
+      setAllProviderState((prevState) => ({
+        ...prevState,
+        [provider]: newProviderState,
+      }));
     });
     // TODO remove providerstate on stamp removal
   }, [passport]);
@@ -213,7 +212,7 @@ function App(): JSX.Element {
 
   const getStampIndex = (stamp: Stamp): number | undefined => {
     // check if there is already a stamp recorded for this provider
-    return passport?.stamps.findIndex((_stamp) => _stamp.provider === stamp.provider);
+    return passport?.stamps.findIndex((_stamp: Stamp) => _stamp.provider === stamp.provider);
   };
 
   const hasStamp = (provider: string): boolean => {
@@ -240,22 +239,22 @@ function App(): JSX.Element {
     [loggedIn, address, passport, signer, connectedWallets, allProvidersState]
   );
 
-  return (
-    <div>
-      <UserContext.Provider value={stateMemo}>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={connectedWallets.length > 0 ? <Navigate replace to="/dashboard" /> : <Home />} />
-            <Route
-              path="dashboard"
-              element={connectedWallets.length > 0 ? <Dashboard /> : <Navigate replace to="/" />}
-            />
-            <Route path="*" element={<NoMatch />} />
-          </Route>
-        </Routes>
-      </UserContext.Provider>
-    </div>
-  );
-}
+  // use props as a way to pass configuration values
+  const providerProps = {
+    loggedIn,
+    address,
+    passport,
+    allProvidersState,
+    handleCreatePassport,
+    handleSaveStamp,
+    handleConnection,
+    getStampIndex,
+    hasStamp,
+    handleAddStamp,
+    connectedWallets,
+    signer,
+    walletLabel,
+  };
 
-export default App;
+  return <UserContext.Provider value={providerProps}>{children}</UserContext.Provider>;
+};
