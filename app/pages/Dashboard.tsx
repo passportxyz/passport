@@ -10,13 +10,28 @@ import { useRouter } from "next/router";
 import { CardList } from "../components/CardList";
 
 // --Chakra UI Elements
-import { Box, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon } from "@chakra-ui/react";
+import {
+  Box,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
+  Spinner,
+} from "@chakra-ui/react";
 
 import { UserContext } from "../context/userContext";
 
 const Dashboard: NextPage = () => {
-  const { handleConnection, address, walletLabel, passport, handleCreatePassport, connectedWallets } =
-    useContext(UserContext);
+  const {
+    handleConnection,
+    address,
+    walletLabel,
+    passport,
+    isLoadingPassport,
+    handleCreatePassport,
+    connectedWallets,
+  } = useContext(UserContext);
   const router = useRouter();
 
   // Route user to home when wallet is disconnected
@@ -25,6 +40,12 @@ const Dashboard: NextPage = () => {
       router.push("/");
     }
   }, [connectedWallets.length]);
+
+  useEffect(() => {
+    if (!passport && !isLoadingPassport) {
+      handleCreatePassport();
+    }
+  }, [passport, isLoadingPassport]);
 
   return (
     <div className="mx-auto flex flex-wrap">
@@ -68,16 +89,10 @@ const Dashboard: NextPage = () => {
           </p>
         </div>
 
-        {address && (
+        {!passport ? (
+          <Spinner data-testid="loading-spinner" />
+        ) : (
           <div className="mt-2 mb-2 p-20">
-            {!passport && (
-              <button
-                className="mb-10 mt-10 min-w-full rounded-lg bg-gray-100 px-20 py-4 text-violet-500"
-                onClick={handleCreatePassport}
-              >
-                Create Passport
-              </button>
-            )}
             <pre className="text-gray-100">
               <Accordion defaultIndex={[0]} allowMultiple>
                 <AccordionItem>

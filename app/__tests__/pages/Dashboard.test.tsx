@@ -17,6 +17,7 @@ const handleAddStamp = jest.fn();
 const mockUserContext: UserContextState = {
   loggedIn: true,
   passport: undefined,
+  isLoadingPassport: false,
   allProvidersState: {
     Google: {
       providerSpec: STAMP_PROVIDERS.Google,
@@ -38,6 +39,10 @@ const mockUserContext: UserContextState = {
   signer: undefined,
   walletLabel: mockWallet.label,
 };
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe("when user has a connected wallet", () => {
   it("should display wallet address", async () => {
@@ -82,32 +87,14 @@ describe("when user has no passport", () => {
     passport: undefined,
   };
 
-  it("should have a Create Passport button", () => {
+  it("should display a loading spinner, and call create passport", async () => {
     render(
       <UserContext.Provider value={mockUserContextWithNoPassport}>
         <Dashboard />
       </UserContext.Provider>
     );
 
-    const createPassportButton = screen.getByRole("button", {
-      name: /Create Passport/,
-    });
-
-    expect(createPassportButton).toBeInTheDocument();
-  });
-
-  it("when Create passport button is clicked, create passport handler should be called", async () => {
-    render(
-      <UserContext.Provider value={mockUserContextWithNoPassport}>
-        <Dashboard />
-      </UserContext.Provider>
-    );
-
-    const createPassportButton = screen.getByRole("button", {
-      name: /Create Passport/,
-    });
-
-    await userEvent.click(createPassportButton);
+    expect(screen.getByTestId("loading-spinner")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(mockCreatePassport).toBeCalledTimes(1);
@@ -125,18 +112,14 @@ describe("when the user has a passport", () => {
     },
   };
 
-  it("hides the Create Passport button when a passport already exists", () => {
+  it("it should not display a loading spinner", async () => {
     render(
       <UserContext.Provider value={mockUserContextWithPassport}>
         <Dashboard />
       </UserContext.Provider>
     );
 
-    const createPassportButton = screen.queryByRole("button", {
-      name: /Create Passport/,
-    });
-
-    expect(createPassportButton).not.toBeInTheDocument();
+    expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
   });
 
   it("shows passport issuanceDate and expiryDate will be here", () => {

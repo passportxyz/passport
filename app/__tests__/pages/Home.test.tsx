@@ -17,6 +17,7 @@ const handleAddStamp = jest.fn();
 const mockUserContext: UserContextState = {
   loggedIn: false,
   passport: undefined,
+  isLoadingPassport: false,
   allProvidersState: {
     Google: {
       providerSpec: STAMP_PROVIDERS.Google,

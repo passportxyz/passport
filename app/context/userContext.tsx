@@ -36,6 +36,7 @@ const startingAllProvidersState: AllProvidersState = {
 export interface UserContextState {
   loggedIn: boolean;
   passport: Passport | undefined;
+  isLoadingPassport: boolean;
   allProvidersState: AllProvidersState;
   getStampIndex: (stamp: Stamp) => number | undefined;
   hasStamp: (provider: string) => boolean;
@@ -51,6 +52,7 @@ export interface UserContextState {
 const startingState: UserContextState = {
   loggedIn: false,
   passport: undefined,
+  isLoadingPassport: true,
   allProvidersState: startingAllProvidersState,
   getStampIndex: () => undefined,
   hasStamp: () => false,
@@ -70,6 +72,7 @@ export const UserContext = createContext(startingState);
 export const UserContextProvider = ({ children }: { children: any }) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
+  const [isLoadingPassport, setIsLoadingPassport] = useState(true);
   const [localStorageDatabase, setLocalStorageDatabase] = useState<LocalStorageDatabase | undefined>(undefined);
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
 
@@ -130,8 +133,10 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         // Load localStorage Passport data
         const localStorageInstance = new LocalStorageDatabase(address);
         setLocalStorageDatabase(localStorageInstance);
+        setIsLoadingPassport(true);
         const loadedPassport = localStorageInstance?.getPassport(localStorageInstance.passportKey);
         setPassport(loadedPassport);
+        setIsLoadingPassport(false);
       }
     }
   }, [connectedWallets, wallet]);
@@ -224,6 +229,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     () => ({
       loggedIn,
       address,
+      isLoadingPassport,
       passport,
       allProvidersState,
       handleCreatePassport,
@@ -236,7 +242,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       signer,
       walletLabel,
     }),
-    [loggedIn, address, passport, signer, connectedWallets, allProvidersState]
+    [loggedIn, address, passport, isLoadingPassport, signer, connectedWallets, allProvidersState]
   );
 
   // use props as a way to pass configuration values
@@ -244,6 +250,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     loggedIn,
     address,
     passport,
+    isLoadingPassport,
     allProvidersState,
     handleCreatePassport,
     handleSaveStamp,
