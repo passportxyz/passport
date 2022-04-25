@@ -1,3 +1,6 @@
 {
-  "extends": ["plugin:testing-library/react", "next", "prettier"]
+  "extends": ["plugin:testing-library/react", "next", "prettier"],
+  "rules": {
+    "@next/next/no-img-element": "off"
+  }
 }

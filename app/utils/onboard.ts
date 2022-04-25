@@ -6,11 +6,11 @@ import walletLinkModule from "@web3-onboard/walletlink";
 
 // RPC urls
 const MAINNET_RPC_URL = `https://mainnet.infura.io/v3/${
-  // process.env.DPOPP_INFURA_KEY
+  // process.env.NEXT_PUBLIC_DPOPP_INFURA_KEY
   "460f40a260564ac4a4f4b3fffb032dad"
 }`;
 const RINKEBY_RPC_URL = `https://rinkeby.infura.io/v3/${
-  // process.env.DPOPP_INFURA_KEY
+  // process.env.NEXT_PUBLIC_DPOPP_INFURA_KEY
   "460f40a260564ac4a4f4b3fffb032dad"
 }`;
 
@@ -41,8 +41,8 @@ export const initWeb3Onboard = init({
   ],
   appMetadata: {
     name: "Gitcoin - dPopp",
-    icon: "/src/assets/dpoppLogo.svg",
-    logo: "/src/assets/dpoppLogo.svg",
+    icon: "/assets/dpoppLogo.svg",
+    logo: "/assets/dpoppLogo.svg",
     description: "Decentralise Proof of Personhood Passport",
     recommendedInjectedWallets: [
       { name: "Coinbase", url: "https://wallet.coinbase.com/" },

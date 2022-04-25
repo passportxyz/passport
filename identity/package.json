@@ -25,7 +25,8 @@
   },
   "devDependencies": {
     "copyfiles": "^2.4.1",
-    "jest": "^27.5.1"
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.4"
   },
   "scripts": {
     "clean": "rimraf dist node_modules",
