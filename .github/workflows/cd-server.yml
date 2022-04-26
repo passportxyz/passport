@@ -1,0 +1,19 @@
+name: Deploy IAM Server to Dev
+
+# trigger: on push to `main` branch, AND only on changes to `iam/*` files
+on:
+  push:
+    branches: [main]
+    paths:
+      - "iam/*"
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      # build new image
+      # push to ecr/dockerhub
+      # update dev cluster with new image [pulumi up]
+      #  - env variables (iam/.env-example.env): GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, IAM_JWK [secret]
+      # echo image tag?
