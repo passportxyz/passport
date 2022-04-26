@@ -1,0 +1,27 @@
+{
+  "name": "@dpopp/schemas",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "clean": "rimraf node_modules",
+    "ceramic": "ceramic daemon",
+    "create-model": "node --experimental-json-modules ./scripts/create-model.mjs",
+    "publish-model": "node --experimental-json-modules ./scripts/publish-model.mjs"
+  },
+  "dependencies": {
+    "@ceramicnetwork/http-client": "^2.0.0",
+    "dids": "^3.0.0",
+    "dotenv": "^16.0.0",
+    "key-did-provider-ed25519": "^2.0.0",
+    "key-did-resolver": "^2.0.0",
+    "uint8arrays": "^3.0.0"
+  },
+  "devDependencies": {
+    "@ceramicnetwork/cli": "^2.0.2",
+    "@glazed/devtools": "^0.1.6",
+    "@types/node": "^16.11.6"
+  },
+  "resolutions": {
+    "leveldown": "6.1.1"
+  }
+}
