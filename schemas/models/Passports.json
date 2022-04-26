@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Passport",
+  "description": "User Passport storing stamps",
+  "type": "object",
+  "properties": {
+    "issuanceDate": {
+      "type": "string",
+      "format": "date-time",
+      "title": "issuanceDate",
+      "maxLength": 30
+    },
+    "expiryDate": {
+      "type": "string",
+      "format": "date-time",
+      "title": "dateUpdated",
+      "maxLength": 30
+    },
+    "stamps": {
+      "type": "array",
+      "title": "stamps",
+      "items": {
+        "type": "object",
+        "title": "stampItem",
+        "properties": {
+          "provider": {
+            "type": "string"
+          },
+          "credential": {
+            "$ref": "#/definitions/VerifiableCredential"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "VerifiableCredential": {
+      "type": "string",
+      "pattern": "^ceramic://.+(\\?version=.+)?"
+    }
+  },
+  "additionalProperties": false
+}
