@@ -52,7 +52,7 @@ app.use(cors());
 const errorRes = async (res: Response, error: string): Promise<Response> =>
   await new Promise((resolve) => resolve(res.status(400).json({ error })));
 
-const key = process.env.IAM_JWK;
+const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
 
 // get DID from key
 const issuer = DIDKit.keyToDID("key", key);
