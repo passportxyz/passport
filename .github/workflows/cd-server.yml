@@ -83,3 +83,4 @@ jobs:
           DOCKER_GTC_WEB_IMAGE: ${{ needs.build-and-test.outputs.dockerTag }}
           ROUTE_53_ZONE: ${{ secrets.ROUTE53_ZONE_ID }}
           DOMAIN: ${{ secrets.DOMAIN }}
+          IAM_SERVER_SSM_ARN: ${{ secrets.IAM_SERVER_SSM_ARN }}

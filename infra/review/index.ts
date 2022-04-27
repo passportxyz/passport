@@ -4,14 +4,24 @@ import * as awsx from "@pulumi/awsx";
 
 // The following vars are not allowed to be undefined, hence the `${...}` magic
 
-// IAM package env variables
-let googleClientId = `${process.env["GOOGLE_CLIENT_ID"]}`;
-let googleClientSecret = `${process.env["GOOGLE_CLIENT_SECRET"]}`;
-let IAM_JWK = `${process.env["IAM_JWK"]}`;
-
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
 let domain = `${process.env["DOMAIN"]}`;
 let baseUrl = `http://${domain}/`;
+let IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
+
+// get secrets from secrets manager
+// const iamServerSecrets = aws.secretsmanager.getSecret({
+//   arn: IAM_SERVER_SSM_ARN,
+// });
+
+// IAM package env variables
+// let googleClientId = `${process.env["GOOGLE_CLIENT_ID"]}`;
+// let googleClientSecret = `${process.env["GOOGLE_CLIENT_SECRET"]}`;
+// let IAM_JWK = `${process.env["IAM_JWK"]}`;
+
+// let googleClientId = iamServerSecrets.GOOGLE_CLIENT_ID;
+// let googleClientSecret = iamServerSecrets.GOOGLE_CLIENT_SECRET;
+// let IAM_JWK = iamServerSecrets.IAM_JWK;
 
 export const dockerGtcDpoppImage = `${process.env["DOCKER_GTC_DPOPP_IMAGE"]}`;
 
@@ -184,10 +194,14 @@ const certificateValidationDomain = new aws.route53.Record(`${domain}-validation
   ttl: 600,
 });
 
-const certificateValidation = new aws.acm.CertificateValidation("certificateValidation", {
-  certificateArn: certificate.arn,
-  validationRecordFqdns: [certificateValidationDomain.fqdn],
-});
+const certificateValidation = new aws.acm.CertificateValidation(
+  "certificateValidation",
+  {
+    certificateArn: certificate.arn,
+    validationRecordFqdns: [certificateValidationDomain.fqdn],
+  },
+  { customTimeouts: { create: "30s", update: "30s" } }
+);
 
 // Create the listener for the application
 const listener = new awsx.lb.ApplicationListener("app", {
@@ -306,17 +320,17 @@ let environment = [
   // IAM server signing key
   {
     name: "IAM_JWK",
-    value: IAM_JWK,
+    value: "",
   },
   // Please checkout [Integration Docs](https://github.com/gitcoinco/web/blob/master/docs/THIRD_PARTY_SETUP.md)
   // To enable Google verification(in profile's trust tab)
   {
     name: "GOOGLE_CLIENT_ID",
-    value: googleClientId,
+    value: "",
   },
   {
     name: "GOOGLE_CLIENT_SECRET",
-    value: googleClientSecret,
+    value: "",
   },
 
   // For Facebook integration (in profile's trust tab)
@@ -366,6 +380,21 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
         portMappings: [],
         environment: environment,
         links: [],
+        secrets: [
+          {
+            name: "GOOGLE_CLIENT_ID",
+            valueFrom: IAM_SERVER_SSM_ARN,
+          },
+          {
+            name: "IAM_JWK",
+            valueFrom: IAM_SERVER_SSM_ARN,
+          },
+          {
+            name: "GOOGLE_CLIENT_SECRET",
+            valueFrom: IAM_SERVER_SSM_ARN,
+          },
+        ],
+        executionRoleArn: "arn:aws:iam::025742772000:role/dpopp-ecs-role",
       },
       ceramic: {
         image: "ceramicnetwork/go-ipfs-daemon:latest",
