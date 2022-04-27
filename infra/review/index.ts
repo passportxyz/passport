@@ -9,20 +9,6 @@ let domain = `${process.env["DOMAIN"]}`;
 let baseUrl = `http://${domain}/`;
 let IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
 
-// get secrets from secrets manager
-// const iamServerSecrets = aws.secretsmanager.getSecret({
-//   arn: IAM_SERVER_SSM_ARN,
-// });
-
-// IAM package env variables
-// let googleClientId = `${process.env["GOOGLE_CLIENT_ID"]}`;
-// let googleClientSecret = `${process.env["GOOGLE_CLIENT_SECRET"]}`;
-// let IAM_JWK = `${process.env["IAM_JWK"]}`;
-
-// let googleClientId = iamServerSecrets.GOOGLE_CLIENT_ID;
-// let googleClientSecret = iamServerSecrets.GOOGLE_CLIENT_SECRET;
-// let IAM_JWK = iamServerSecrets.IAM_JWK;
-
 export const dockerGtcDpoppImage = `${process.env["DOCKER_GTC_DPOPP_IMAGE"]}`;
 
 //////////////////////////////////////////////////////////////
@@ -317,22 +303,6 @@ let environment = [
     value: "rinkeby",
   },
 
-  // IAM server signing key
-  {
-    name: "IAM_JWK",
-    value: "",
-  },
-  // Please checkout [Integration Docs](https://github.com/gitcoinco/web/blob/master/docs/THIRD_PARTY_SETUP.md)
-  // To enable Google verification(in profile's trust tab)
-  {
-    name: "GOOGLE_CLIENT_ID",
-    value: "",
-  },
-  {
-    name: "GOOGLE_CLIENT_SECRET",
-    value: "",
-  },
-
   // For Facebook integration (in profile's trust tab)
   {
     name: "FACEBOOK_CLIENT_ID",
@@ -368,16 +338,51 @@ let environment = [
 // TODO connect EFS with Fargate containers
 // const ceramicStateStore = new aws.efs.FileSystem("ceramic-statestore");
 
-// TODO deploy with an actual docker image
+const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
+  assumeRolePolicy: JSON.stringify({
+    Version: "2012-10-17",
+    Statement: [
+      {
+        Action: "sts:AssumeRole",
+        Effect: "Allow",
+        Sid: "",
+        Principal: {
+          Service: "ecs-tasks.amazonaws.com",
+        },
+      },
+    ],
+  }),
+  inlinePolicies: [
+    {
+      name: "my_inline_policy",
+      policy: JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Action: ["secretsmanager:GetSecretValue"],
+            Effect: "Allow",
+            Resource: IAM_SERVER_SSM_ARN,
+          },
+        ],
+      }),
+    },
+  ],
+  managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"],
+  tags: {
+    dpopp: "",
+  },
+});
+
 const service = new awsx.ecs.FargateService("dpopp-iam", {
   cluster,
   desiredCount: 1,
   taskDefinitionArgs: {
+    executionRole: dpoppEcsRole,
     containers: {
       iam: {
         image: dockerGtcDpoppImage,
         memory: 512,
-        portMappings: [],
+        portMappings: [httpsListener],
         environment: environment,
         links: [],
         secrets: [
@@ -394,7 +399,6 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             valueFrom: IAM_SERVER_SSM_ARN,
           },
         ],
-        executionRoleArn: "arn:aws:iam::025742772000:role/dpopp-ecs-role",
       },
       ceramic: {
         image: "ceramicnetwork/go-ipfs-daemon:latest",
