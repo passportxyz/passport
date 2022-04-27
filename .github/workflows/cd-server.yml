@@ -44,7 +44,7 @@ jobs:
           access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           region: us-east-1
-          image: iam-server:${{steps.vars.outputs.sha_short}}
+          image: ${{secrets.ECR_URL}}:${{steps.vars.outputs.sha_short}}
     outputs:
       dockerTag: ${{ steps.vars.outputs.sha_short }}
 
