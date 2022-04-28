@@ -1,12 +1,11 @@
-name: Deploy IAM Server to Dev
+name: Deploy IAM Server to Review
 
 # trigger: on push to `main` branch, AND only on changes to `iam/*` files
 on:
   push:
-    #TODO set to main
-    branches: [github-actions]
-    # paths:
-    #   - "iam/*"
+    branches: [main]
+    paths:
+      - "iam/*"
 
 jobs:
   build-and-test:
@@ -34,8 +33,6 @@ jobs:
         id: vars
         shell: bash
         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-      # build new image
-      # - run: docker build -t ${{secrets.ECR_URL}}:${{steps.vars.outputs.sha_short}} -f iam/Dockerfile .
 
       # configure AWS credentials
       - name: Configure AWS credentials
@@ -60,19 +57,10 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f iam/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      # push to ecr/dockerhub
-      # - name: Push to ECR
-      #   id: ecr
-      #   uses: jwalton/gh-ecr-push@v1
-      #   with:
-      #     access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     region: us-east-1
-      #     image: ${{secrets.ECR_URL}}:${{steps.vars.outputs.sha_short}}
     outputs:
       dockerTag: ${{ steps.vars.outputs.sha_short }}
 
-  deploy-dev:
+  deploy-review:
     needs: build-and-test
     runs-on: ubuntu-latest
     steps:
@@ -82,8 +70,7 @@ jobs:
         with:
           cache: "yarn"
           cache-dependency-path: infra/review/package-lock.json
-      # Install pulumi dependencies
-      # Select the new pulumi stack
+      # Update the pulumi stack with new image
       - run: |
           npm install
           pulumi stack select -c gitcoin/dpopp/review
@@ -91,8 +78,6 @@ jobs:
         working-directory: infra/review
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-      # Run pulumi actions
-      # update dev cluster with new image [pulumi up]
       - uses: pulumi/actions@v3
         id: pulumi
         with:
@@ -104,7 +89,7 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_REVIEW }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_REVIEW }}
-          DOCKER_GTC_DPOPP_IMAGE: ${{ needs.build-and-test.outputs.dockerTag }}
+          DOCKER_GTC_DPOPP_IMAGE: ${{secrets.ECR_URL}}:${{ needs.build-and-test.outputs.dockerTag }}
           ROUTE_53_ZONE: ${{ secrets.ROUTE53_ZONE_ID_REVIEW }}
           DOMAIN: ${{ secrets.DOMAIN }}
           IAM_SERVER_SSM_ARN: ${{ secrets.IAM_SERVER_SSM_ARN_REVIEW }}
