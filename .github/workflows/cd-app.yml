@@ -7,6 +7,8 @@ on:
     branches: [github-actions-fleek-app]
     paths:
       - "app/*"
+  workflow_dispatch:
+    branches: [github-actions-fleek-app]
 
 jobs:
   deploy-app:
