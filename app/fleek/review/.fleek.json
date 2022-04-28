@@ -11,5 +11,6 @@
     "publicDir": "out",
     "command": "npm install && npm run build && npm run export",
     "rootDir": ""
+    
   }
 }
