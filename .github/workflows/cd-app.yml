@@ -17,9 +17,9 @@ jobs:
       # note - env variables are configured in fleek
       - name: Deploy app to fleek from review
         id: deploy
-        - uses: fleekhq/action-deploy@v1
-          with:
-            workDir: /app/fleek/review/
-            apiKey: ${{ secrets.FLEEK_API_KEY }}
+        uses: fleekhq/action-deploy@v1
+        with:
+          workDir: /app/fleek/review/
+          apiKey: ${{ secrets.FLEEK_API_KEY }}
       - name: Get the output url
         run: echo "Deploy url is ${{ steps.deploy.outputs.deployUrl }}"
