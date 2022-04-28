@@ -7,8 +7,9 @@
     "name": "yellow-art-3168"
   },
   "build": {
-    "baseDir": "/app/",
-    "publicDir": "/app/out",
+    "image": "fleek/next-js",
+    "baseDir": "/app",
+    "publicDir": "/out",
     "command": "yarn install && yarn build && yarn export",
     "rootDir": ""
   }
