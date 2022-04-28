@@ -1,0 +1,15 @@
+{
+  "site": {
+    "id": "08f0c03c-61f2-4b12-a412-99e78fc1e38a",
+    "team": "aa2daa7c-8c17-41fe-a5a1-043e8f253b0e",
+    "platform": "ipfs",
+    "source": "github",
+    "name": "yellow-art-3168"
+  },
+  "build": {
+    "baseDir": "/app/",
+    "publicDir": "out",
+    "command": "npm install && npm run build && npm run export",
+    "rootDir": ""
+  }
+}

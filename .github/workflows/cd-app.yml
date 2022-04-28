@@ -3,7 +3,8 @@ name: Deploy App to Dev
 # trigger: on push to `main` branch, AND only on changes to `app/*` files
 on:
   push:
-    branches: [main]
+    # TODO change back to branches: [main]
+    branches: [github-actions-fleek-app]
     paths:
       - "app/*"
 
@@ -16,6 +17,7 @@ jobs:
       # see https://docs.fleek.co/fleek-cli/github-actions/#sample-action-deploy-action
       # note - env variables are configured in fleek
       - name: Deploy test site
+          working_dir: /workspace/fleek/review/
           id: deploy
           uses: fleekhq/action-deploy@v1
           with:
