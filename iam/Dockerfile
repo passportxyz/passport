@@ -7,6 +7,6 @@ COPY . .
 RUN yarn global add lerna
 RUN lerna bootstrap --ignore app
 
-EXPOSE 65535
+EXPOSE 80 443
 
 CMD [ "yarn", "run", "start:iam" ]
