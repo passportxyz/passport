@@ -5,7 +5,7 @@ import * as awsx from "@pulumi/awsx";
 // The following vars are not allowed to be undefined, hence the `${...}` magic
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
-let domain = `${process.env["DOMAIN"]}`;
+let domain = `review.${process.env["DOMAIN"]}`;
 let baseUrl = `http://${domain}/`;
 let IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
 
@@ -201,18 +201,18 @@ const listener = new awsx.lb.ApplicationListener("app", {
 const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-service`, { vpc });
 
 // Listen to HTTP traffic on port 80 and redirect to 443
-const httpListener = alb.createListener("web-listener", {
-  port: 80,
-  protocol: "HTTP",
-  defaultAction: {
-    type: "redirect",
-    redirect: {
-      protocol: "HTTPS",
-      port: "443",
-      statusCode: "HTTP_301",
-    },
-  },
-});
+// const httpListener = alb.createListener("web-listener", {
+//   port: 80,
+//   protocol: "HTTP",
+//   defaultAction: {
+//     type: "redirect",
+//     redirect: {
+//       protocol: "HTTPS",
+//       port: "443",
+//       statusCode: "HTTP_301",
+//     },
+//   },
+// });
 
 // Target group with the port of the Docker image
 const target = alb.createTargetGroup("web-target", { vpc, port: 80 });
@@ -382,7 +382,14 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
       iam: {
         image: dockerGtcDpoppImage,
         memory: 512,
-        portMappings: [httpsListener],
+        portMappings: [
+          // httpsListener, // TODO - map this to 65535 too
+          {
+            hostPort: 80,
+            protocol: "tcp",
+            containerPort: 65535,
+          },
+        ],
         environment: environment,
         links: [],
         secrets: [
