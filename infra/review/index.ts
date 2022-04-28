@@ -387,7 +387,7 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
           {
             hostPort: 80,
             protocol: "tcp",
-            containerPort: 65535,
+            containerPort: 80,
           },
         ],
         environment: environment,

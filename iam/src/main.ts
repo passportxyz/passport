@@ -2,7 +2,8 @@
 import { app } from "./index";
 
 // default port to listen on
-const port = 65535;
+const port = 80;
+// TODO support 443 for https
 
 // start the Express server
 app.listen(port, () => {
