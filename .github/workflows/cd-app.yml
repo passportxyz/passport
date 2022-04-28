@@ -15,10 +15,10 @@ jobs:
       # push latest to fleek
       # see https://docs.fleek.co/fleek-cli/github-actions/#sample-action-deploy-action
       # note - env variables are configured in fleek
-      - name: Deploy test site
-          id: deploy
-          uses: fleekhq/action-deploy@v1
-          with:
-            apiKey: ${{ secrets.FLEEK_API_KEY }}
-      - name: Get the output url
-        run: echo "Deploy url is ${{ steps.deploy.outputs.deployUrl }}"
+      # - name: Deploy test site
+      #   id: deploy
+      #   uses: fleekhq/action-deploy@v1
+      #   with:
+      #     apiKey: ${{ secrets.FLEEK_API_KEY }}
+      # - name: Get the output url
+      #   run: echo "Deploy url is ${{ steps.deploy.outputs.deployUrl }}"

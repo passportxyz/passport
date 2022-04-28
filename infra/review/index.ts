@@ -303,16 +303,6 @@ let environment = [
     value: "rinkeby",
   },
 
-  // For Facebook integration (in profile's trust tab)
-  {
-    name: "FACEBOOK_CLIENT_ID",
-    value: "",
-  },
-  {
-    name: "FACEBOOK_CLIENT_SECRET",
-    value: "",
-  },
-
   ///////////////////////////////////////////////////////////////////////////////
   // Specific for review env test
   ///////////////////////////////////////////////////////////////////////////////
@@ -354,7 +344,7 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
   }),
   inlinePolicies: [
     {
-      name: "my_inline_policy",
+      name: "allow_iam_secrets_access",
       policy: JSON.stringify({
         Version: "2012-10-17",
         Statement: [
@@ -381,9 +371,9 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
     containers: {
       iam: {
         image: dockerGtcDpoppImage,
-        memory: 512,
+        memory: 1024,
         portMappings: [
-          // httpsListener, // TODO - map this to 65535 too
+          // httpsListener, // TODO - map this too
           {
             hostPort: 80,
             protocol: "tcp",
@@ -394,16 +384,16 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
         links: [],
         secrets: [
           {
-            name: "GOOGLE_CLIENT_ID",
-            valueFrom: IAM_SERVER_SSM_ARN,
+            name: "IAM_JWK",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:IAM_JWK::`,
           },
           {
-            name: "IAM_JWK",
-            valueFrom: IAM_SERVER_SSM_ARN,
+            name: "GOOGLE_CLIENT_ID",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:GOOGLE_CLIENT_ID::`,
           },
           {
             name: "GOOGLE_CLIENT_SECRET",
-            valueFrom: IAM_SERVER_SSM_ARN,
+            valueFrom: `${IAM_SERVER_SSM_ARN}:GOOGLE_CLIENT_SECRET::`,
           },
         ],
       },
