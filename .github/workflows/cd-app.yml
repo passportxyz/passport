@@ -13,7 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      # push latest to fleek
       # see https://docs.fleek.co/fleek-cli/github-actions/#sample-action-deploy-action
       # note - env variables are configured in fleek
       - name: Deploy app to fleek from review
