@@ -17,7 +17,7 @@ jobs:
       # see https://docs.fleek.co/fleek-cli/github-actions/#sample-action-deploy-action
       # note - env variables are configured in fleek
       - name: Deploy test site
-          working_dir: /workspace/fleek/review/
+          working-directory: /workspace/fleek/review/
           id: deploy
           uses: fleekhq/action-deploy@v1
           with:
