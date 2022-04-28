@@ -35,16 +35,40 @@ jobs:
         shell: bash
         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
       # build new image
-      - run: docker build -t ${{secrets.ECR_URL}}:${{steps.vars.outputs.sha_short}} -f iam/Dockerfile .
-      # push to ecr/dockerhub
-      - name: Push to ECR
-        id: ecr
-        uses: jwalton/gh-ecr-push@v1
+      # - run: docker build -t ${{secrets.ECR_URL}}:${{steps.vars.outputs.sha_short}} -f iam/Dockerfile .
+
+      # configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          region: us-east-1
-          image: ${{secrets.ECR_URL}}:${{steps.vars.outputs.sha_short}}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # login to docker for AWS
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      
+      # build, tag, and push to ECR
+      - name: Build, tag, and push image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: dpopp
+        IMAGE_TAG: ${{ steps.vars.outputs.sha_short }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f iam/Dockerfile .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      # push to ecr/dockerhub
+      # - name: Push to ECR
+      #   id: ecr
+      #   uses: jwalton/gh-ecr-push@v1
+      #   with:
+      #     access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     region: us-east-1
+      #     image: ${{secrets.ECR_URL}}:${{steps.vars.outputs.sha_short}}
     outputs:
       dockerTag: ${{ steps.vars.outputs.sha_short }}
 
