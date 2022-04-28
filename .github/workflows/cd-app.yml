@@ -16,8 +16,8 @@ jobs:
       # push latest to fleek
       # see https://docs.fleek.co/fleek-cli/github-actions/#sample-action-deploy-action
       # note - env variables are configured in fleek
-      - name: Deploy test site
-          working-directory: /workspace/fleek/review/
+      - name: Deploy app to fleek from review
+          working-directory: ./app/fleek/review/
           id: deploy
           uses: fleekhq/action-deploy@v1
           with:
