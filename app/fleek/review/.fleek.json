@@ -8,9 +8,8 @@
   },
   "build": {
     "image": "fleek/next-js",
-    "baseDir": "/app",
-    "publicDir": "/out",
-    "command": "yarn install && yarn build && yarn export",
-    "rootDir": ""
+    "baseDir": "app",
+    "publicDir": "out",
+    "command": "yarn install && yarn build && yarn export"
   }
 }
