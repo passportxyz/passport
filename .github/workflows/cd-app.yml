@@ -5,9 +5,10 @@ on:
   push:
     # TODO change back to branches: [main]
     branches: [github-actions-fleek-app]
-    paths:
-      - "app/*"
+    # paths:
+    #   - "app/*"
   workflow_dispatch:
+    branches: [github-actions-fleek-app]
 
 jobs:
   deploy-app:
