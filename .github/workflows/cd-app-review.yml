@@ -16,9 +16,6 @@ jobs:
           git fetch
           git checkout origin/staging-app
       - name: Merge changes from main
-        run: git merge --ff-only origin/main
-      - name: push to staging-app
         run: |
-          git fetch
-          git checkout origin/staging-app
+          git merge --ff-only origin/main
           git push origin/staging-app
