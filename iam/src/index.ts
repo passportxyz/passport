@@ -195,7 +195,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
       return void errorRes(res, "Unable to verify payload");
     })
     .catch((errorReason) => {
-      console.error("Error verifying credential: ", errorReason);
       return void errorRes(res, "Unable to verify payload");
     });
 });
