@@ -15,5 +15,5 @@ jobs:
         run: |
           git fetch
           git checkout origin/staging-app
-          git merge --ff-only main
+          git merge --ff-only origin/main
           git push
