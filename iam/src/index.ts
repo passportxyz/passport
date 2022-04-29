@@ -132,65 +132,70 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
   const payload = requestBody.payload;
 
   // Check the challenge and the payload is valid before issueing a credential from a registered provider
-  return void verifyCredential(DIDKit, challenge).then(async (verified) => {
-    if (verified && issuer === challenge.issuer) {
-      // pull the address and checksum so that its stored in a predicatable format
-      const address = utils.getAddress(
-        utils.verifyMessage(challenge.credentialSubject.challenge, payload.proofs.signature)
-      );
-      // ensure the only address we save is that of the signer
-      payload.address = address;
-      // the signer should be the address outlined in the challenge credential - rebuild the id to check for a full match
-      const isSigner = challenge.credentialSubject.id === `did:ethr:${address}#challenge-${payload.type}`;
-      // type is required because we need it to select the correct Identity Provider
-      if (isSigner && payload && payload.type) {
-        // each provider will apply buisness logic to the payload inorder to set the `valid` bool on the returned VerifiedPayload
-        return providers
-          .verify(payload)
-          .then((verifiedPayload) => {
-            // check if the request is valid against the selected Identity Provider
-            if (verifiedPayload && verifiedPayload?.valid === true) {
-              // recreate the record to ensure the minimun number of leafs are present to produce a valid merkleTree
-              const record: ProofRecord = {
-                // type and address will always be known and can be obtained from the resultant credential
-                type: payload.type,
-                address: payload.address,
-                // version is defined by entry point
-                version: "0.0.0",
-                // extend/overwrite with record returned from the provider
-                ...(verifiedPayload?.record || {}),
-              };
+  return void verifyCredential(DIDKit, challenge)
+    .then(async (verified) => {
+      if (verified && issuer === challenge.issuer) {
+        // pull the address and checksum so that its stored in a predicatable format
+        const address = utils.getAddress(
+          utils.verifyMessage(challenge.credentialSubject.challenge, payload.proofs.signature)
+        );
+        // ensure the only address we save is that of the signer
+        payload.address = address;
+        // the signer should be the address outlined in the challenge credential - rebuild the id to check for a full match
+        const isSigner = challenge.credentialSubject.id === `did:ethr:${address}#challenge-${payload.type}`;
+        // type is required because we need it to select the correct Identity Provider
+        if (isSigner && payload && payload.type) {
+          // each provider will apply buisness logic to the payload inorder to set the `valid` bool on the returned VerifiedPayload
+          return providers
+            .verify(payload)
+            .then((verifiedPayload) => {
+              // check if the request is valid against the selected Identity Provider
+              if (verifiedPayload && verifiedPayload?.valid === true) {
+                // recreate the record to ensure the minimun number of leafs are present to produce a valid merkleTree
+                const record: ProofRecord = {
+                  // type and address will always be known and can be obtained from the resultant credential
+                  type: payload.type,
+                  address: payload.address,
+                  // version is defined by entry point
+                  version: "0.0.0",
+                  // extend/overwrite with record returned from the provider
+                  ...(verifiedPayload?.record || {}),
+                };
 
-              // generate a VC for the given payload
-              return issueMerkleCredential(DIDKit, key, record)
-                .then(({ credential }) => {
-                  return res.json({
-                    record,
-                    credential,
-                  } as CredentialResponseBody);
-                })
-                .catch((error) => {
-                  if (error) {
-                    // return error msg indicating a failure producing VC
-                    return errorRes(res, "Unable to produce a verifiable credential");
-                  }
-                });
-            } else {
-              // return error message if an error is present
-              return errorRes(
-                res,
-                (verifiedPayload.error && verifiedPayload.error.join(", ")) || "Unable to verify proofs"
-              );
-            }
-          })
-          .catch(() => {
-            // error response
-            return void errorRes(res, "Unable to verify with provider");
-          });
+                // generate a VC for the given payload
+                return issueMerkleCredential(DIDKit, key, record)
+                  .then(({ credential }) => {
+                    return res.json({
+                      record,
+                      credential,
+                    } as CredentialResponseBody);
+                  })
+                  .catch((error) => {
+                    if (error) {
+                      // return error msg indicating a failure producing VC
+                      return errorRes(res, "Unable to produce a verifiable credential");
+                    }
+                  });
+              } else {
+                // return error message if an error is present
+                return errorRes(
+                  res,
+                  (verifiedPayload.error && verifiedPayload.error.join(", ")) || "Unable to verify proofs"
+                );
+              }
+            })
+            .catch(() => {
+              // error response
+              return void errorRes(res, "Unable to verify with provider");
+            });
+        }
       }
-    }
 
-    // error response
-    return void errorRes(res, "Unable to verify payload");
-  });
+      // error response
+      return void errorRes(res, "Unable to verify payload");
+    })
+    .catch((errorReason) => {
+      console.error("Error verifying credential: ", errorReason);
+      return void errorRes(res, "Unable to verify payload");
+    });
 });

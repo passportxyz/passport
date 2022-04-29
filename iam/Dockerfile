@@ -9,4 +9,4 @@ RUN lerna bootstrap --ignore app
 
 EXPOSE 80 443
 
-CMD [ "yarn", "run", "start:iam" ]
+CMD [ "yarn", "run", "prod:start:iam" ]
