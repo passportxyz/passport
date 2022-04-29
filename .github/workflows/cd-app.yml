@@ -6,7 +6,7 @@ on:
     # TODO change back to branches: [main]
     branches: [github-actions-fleek-app]
     # paths:
-    #   - "app/*"
+    #   - "app/**"
 
 jobs:
   deploy-app:
