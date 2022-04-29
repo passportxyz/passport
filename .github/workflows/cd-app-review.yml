@@ -7,7 +7,6 @@ on:
     branches: [github-actions-fleek-app]
     # paths:
     #   - "app/*"
-
 jobs:
   deploy-app:
     runs-on: ubuntu-latest
