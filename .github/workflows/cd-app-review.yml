@@ -15,4 +15,4 @@ jobs:
         run: |
           git checkout staging-app
           git merge --ff-only main
-          git push origin/staging-app
+          git push
