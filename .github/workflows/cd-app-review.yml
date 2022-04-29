@@ -21,4 +21,4 @@ jobs:
         run: |
           git fetch
           git checkout origin/staging-app
-          git push
+          git push origin/staging-app
