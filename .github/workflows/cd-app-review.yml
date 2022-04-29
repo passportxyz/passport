@@ -16,4 +16,5 @@ jobs:
           git fetch
           git checkout origin/staging-app
           git merge --ff-only origin/main
+          git commit -m "Updates origin/staging-app"
           git push -u origin staging-app
