@@ -36,6 +36,7 @@
     "start": "concurrently --kill-others \"yarn start:iam\" \"yarn start:app\"",
     "start:iam": "yarn workspace @dpopp/iam start",
     "start:app": "yarn workspace @dpopp/app start",
+    "prod:start:iam": "yarn workspace @dpopp/iam prod:start",
     "app": "yarn workspace @dpopp/app",
     "schemas": "yarn workspace @dpopp/schemas",
     "iam": "yarn workspace @dpopp/iam",

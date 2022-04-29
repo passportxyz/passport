@@ -207,7 +207,11 @@ const httpListener = alb.createListener("web-listener", {
 });
 
 // Target group with the port of the Docker image
-const target = alb.createTargetGroup("web-target", { vpc, port: 80 });
+const target = alb.createTargetGroup("web-target", {
+  vpc,
+  port: 80,
+  healthCheck: { path: "/health", unhealthyThreshold: 5 },
+});
 
 // Listen to traffic on port 443 & route it through the target group
 const httpsListener = target.createListener("web-listener", {

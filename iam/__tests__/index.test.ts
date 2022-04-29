@@ -7,6 +7,8 @@ import { app, config } from "../src/index";
 // ---- Types
 import { ErrorResponseBody, ValidResponseBody } from "@dpopp/types";
 
+import * as identityMock from "@dpopp/identity/dist/commonjs";
+
 describe("POST /challenge", function () {
   it("handles valid challenge requests", async () => {
     // as each signature is unique, each request results in unique output
@@ -180,5 +182,39 @@ describe("POST /verify", function () {
       .expect("Content-Type", /json/);
 
     expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify proofs");
+  });
+
+  it("handles exception if verify credential throws", async () => {
+    jest.spyOn(identityMock, "verifyCredential").mockRejectedValue("Verify Credential Error");
+
+    // challenge received from the challenge endpoint
+    const challenge = {
+      issuer: config.issuer,
+      credentialSubject: {
+        id: "did:ethr:0xNotAnEthereumAddress#challenge-Simple",
+        address: "0xNotAnEthereumAddress",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+    // payload containing a signature of the challenge in the challenge credential
+    const payload = {
+      type: "Simple",
+      address: "0x0",
+      proofs: {
+        valid: "false",
+        username: "test",
+        signature: "pass",
+      },
+    };
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/verify")
+      .send({ challenge, payload })
+      .set("Accept", "application/json")
+      .expect(400)
+      .expect("Content-Type", /json/);
+
+    expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify payload");
   });
 });

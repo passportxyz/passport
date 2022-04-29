@@ -11,6 +11,7 @@
     "build": "tsc",
     "prestart": "yarn run build",
     "start": "node .",
+    "prod:start": "tsc && node .",
     "test": "jest --verbose",
     "prettier": "prettier --write .",
     "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx ."
