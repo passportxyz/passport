@@ -11,11 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
-          fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
-        - name: Create local changes
-          run: |
-            git checkout staging-app
-            git merge --ff-only main
-            git push origin/staging-app
+      - name: Merge changes from main and push
+        run: |
+          git checkout staging-app
+          git merge --ff-only main
+          git push origin/staging-app
