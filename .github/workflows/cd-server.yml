@@ -3,9 +3,10 @@ name: Deploy IAM Server to Review
 # trigger: on push to `main` branch, AND only on changes to `iam/*` files
 on:
   push:
-    branches: [main]
-    paths:
-      - "iam/*"
+    # branches: [main] // TODO temporarily trigger on push to wip branch
+    branches: [github-actions]
+    # paths:
+    #   - "iam/*"
 
 jobs:
   build-and-test:

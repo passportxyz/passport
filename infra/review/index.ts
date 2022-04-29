@@ -189,30 +189,22 @@ const certificateValidation = new aws.acm.CertificateValidation(
   { customTimeouts: { create: "30s", update: "30s" } }
 );
 
-// Create the listener for the application
-const listener = new awsx.lb.ApplicationListener("app", {
-  port: 443,
-  protocol: "HTTPS",
-  vpc: cluster.vpc,
-  certificateArn: certificateValidation.certificateArn,
-});
-
 // Creates an ALB associated with our custom VPC.
 const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-service`, { vpc });
 
 // Listen to HTTP traffic on port 80 and redirect to 443
-// const httpListener = alb.createListener("web-listener", {
-//   port: 80,
-//   protocol: "HTTP",
-//   defaultAction: {
-//     type: "redirect",
-//     redirect: {
-//       protocol: "HTTPS",
-//       port: "443",
-//       statusCode: "HTTP_301",
-//     },
-//   },
-// });
+const httpListener = alb.createListener("web-listener", {
+  port: 80,
+  protocol: "HTTP",
+  defaultAction: {
+    type: "redirect",
+    redirect: {
+      protocol: "HTTPS",
+      port: "443",
+      statusCode: "HTTP_301",
+    },
+  },
+});
 
 // Target group with the port of the Docker image
 const target = alb.createTargetGroup("web-target", { vpc, port: 80 });
@@ -372,14 +364,7 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
       iam: {
         image: dockerGtcDpoppImage,
         memory: 1024,
-        portMappings: [
-          // httpsListener, // TODO - map this too
-          {
-            hostPort: 80,
-            protocol: "tcp",
-            containerPort: 80,
-          },
-        ],
+        portMappings: [httpsListener],
         environment: environment,
         links: [],
         secrets: [
