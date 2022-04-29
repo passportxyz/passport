@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: |
+      - name: Checkout staging-app
+        run: |
           git fetch
-          Checkout staging-app
-        run: git checkout origin/staging-app
+          git checkout origin/staging-app
       - name: Merge changes from main
         run: git merge --ff-only origin/main
       - name: push to staging-app
