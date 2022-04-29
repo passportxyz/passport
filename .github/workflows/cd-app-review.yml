@@ -18,4 +18,4 @@ jobs:
           git fetch
           git merge --ff-only origin/main
       - name: push to staging-app
-          git push
+        run: git push
