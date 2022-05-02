@@ -6,6 +6,7 @@
   "scripts": {
     "start": "next dev",
     "build": "next build",
+    "export": "next export",
     "prod-start": "next start",
     "clean": "rimraf node_modules",
     "lint": "next lint && prettier --check .",
