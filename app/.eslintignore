@@ -6,3 +6,4 @@
 /coverage/*
 /node_modules/*
 /__mocks__/**/*.js
+/out/*

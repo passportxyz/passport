@@ -1,0 +1,20 @@
+name: Deploy App to Review
+# trigger: on push to `main` branch, AND only on changes to `app/*` files
+on:
+  push:
+    # TODO change back to branches: [main]
+    branches: [github-actions-fleek-app]
+    paths:
+      - "app/**"
+jobs:
+  deploy-app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Checkout staging-app
+        run: |
+          git fetch
+          git checkout -b staging-app origin/staging-app
+          git merge --ff-only origin/main
+          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/dPopp.git/
+          git push origin staging-app
