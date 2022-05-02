@@ -13,6 +13,5 @@ jobs:
         run: |
           git fetch
           git checkout -b review-app origin/review-app
-          git merge --ff-only origin/main
           git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/dPopp.git/
           git push origin review-app
