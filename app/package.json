@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "start": "next dev",
+    "export": "next export",
     "build": "next build",
     "prod-start": "next start",
     "clean": "rimraf node_modules",
