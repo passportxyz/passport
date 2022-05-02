@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Checkout staging-app
+      - name: Checkout review-app
         run: |
           git fetch
-          git checkout -b staging-app origin/staging-app
+          git checkout -b review-app origin/review-app
           git merge --ff-only origin/main
           git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/dPopp.git/
-          git push origin staging-app
+          git push origin review-app
