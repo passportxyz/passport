@@ -4,8 +4,8 @@ on:
   push:
     # TODO change back to branches: [main]
     branches: [github-actions-fleek-app]
-    # paths:
-    #   - "app/**"
+    paths:
+      - "app/**"
 jobs:
   deploy-app:
     runs-on: ubuntu-latest
