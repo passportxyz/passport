@@ -10,6 +10,6 @@ jobs:
         run: |
           git fetch
           git checkout -b staging-app origin/staging-app
-          git merge --ff-only origin/main --allow-unrelated-histories
+          git reset --hard origin/main
           git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/dPopp.git
-          git push origin staging-app
+          git push origin staging-app -f
