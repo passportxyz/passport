@@ -1,0 +1,48 @@
+{
+  "name": "@dpopp/database-client",
+  "version": "0.0.1",
+  "license": "MIT",
+  "type": "module",
+  "main": "src/index.js",
+  "directories": {
+    "src": "src",
+    "dist": "dist"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist node_modules",
+    "ceramic": "ceramic daemon",
+    "test:integration": "yarn build && yarn node --experimental-vm-modules $(yarn bin jest) -c jest.integration.config.js"
+  },
+  "dependencies": {
+    "@ceramicnetwork/http-client": "^2.0.0",
+    "@dpopp/schemas": "0.0.1",
+    "@glazed/datamodel": "^0.3.0",
+    "@glazed/did-datastore": "^0.3.0",
+    "@glazed/tile-loader": "^0.2.0",
+    "dids": "^3.0.0",
+    "dotenv": "^16.0.0",
+    "key-did-provider-ed25519": "^2.0.0",
+    "key-did-resolver": "^2.0.0",
+    "uint8arrays": "^3.0.0"
+  },
+  "devDependencies": {
+    "@ceramicnetwork/common": "^2.0.0",
+    "@ceramicnetwork/stream-tile": "^2.0.0",
+    "@glazed/devtools": "^0.1.6",
+    "@glazed/did-datastore-model": "^0.2.0",
+    "@glazed/types": "^0.2.0",
+    "@types/node": "^16.11.6",
+    "jest": "^27.5.1"
+  },
+  "resolutions": {
+    "leveldown": "6.1.1"
+  }
+}
