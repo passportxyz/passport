@@ -1,0 +1,15 @@
+name: Promote App to Staging
+on:
+  workflow_dispatch
+jobs:
+  deploy-app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Checkout staging-app
+        run: |
+          git fetch
+          git checkout -b staging-app origin/staging-app
+          git merge --ff-only origin/main --allow-unrelated-histories
+          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/dPopp.git
+          git push origin staging-app
