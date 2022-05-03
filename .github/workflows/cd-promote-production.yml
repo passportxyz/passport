@@ -1,0 +1,15 @@
+name: Promote App to Production
+on:
+  workflow_dispatch
+jobs:
+  deploy-app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Checkout production-app
+        run: |
+          git fetch
+          git checkout -b production-app origin/production-app
+          git merge --ff-only origin/main --allow-unrelated-histories
+          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/dPopp.git
+          git push origin production-app
