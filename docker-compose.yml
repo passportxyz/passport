@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  # ceramic-daemon:
+  #   image: ceramicnetwork/go-ipfs-daemon:latest
+  #   ports:
+  #     - "5001:5001"
+  #     - "8011:8011"
+  ceramic-integration-test:
+    image: node:16
+    volumes:
+      - ./:/dpopp
+      - ./node_modules:/dpopp/node_modules
+    entrypoint:
+      ["sh", "/dpopp/database-client/integration-tests/run-ceramic-tests.sh"]
