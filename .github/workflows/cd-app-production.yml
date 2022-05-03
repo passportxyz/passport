@@ -1,4 +1,4 @@
-name: Promote App to Production
+name: Deploy App to Production
 on:
   workflow_dispatch
 jobs:
