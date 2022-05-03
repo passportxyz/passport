@@ -1,0 +1,21 @@
+{
+  "extends": "../tsconfig.settings.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "esModuleInterop": true,
+    "declaration": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es5",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "dist/esm",
+    "allowJs": true,
+    "baseUrl": "src",
+    "paths": {
+      "*": ["../node_modules/*", "node_modules/*"]
+    },
+    "skipLibCheck": true,
+    "resolveJsonModule": true
+  },
+  "include": ["src/*", "___test___", "integration-tests"]
+}
