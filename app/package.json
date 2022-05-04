@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "start": "next dev",
-    "export": "next export",
+    "export": "yarn build && next export",
     "build": "next build",
     "prod-start": "next start",
     "clean": "rimraf node_modules",
