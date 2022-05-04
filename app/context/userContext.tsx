@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
 import React, { createContext, useMemo, useState, useEffect } from "react";
 import { useConnectWallet, useWallets } from "@web3-onboard/react";
@@ -12,8 +11,13 @@ import { OnboardAPI, WalletState } from "@web3-onboard/core/dist/types";
 import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
 
 // --- Data Storage Functions
-import { LocalStorageDatabase } from "../services/databaseStorage";
+import { CeramicDatabase } from "@dpopp/database-client/dist/esm/src";
+// import { LocalStorageDatabase } from "../services/databaseStorage";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
+
+// -- Ceramic and Glazed
+import { EthereumAuthProvider } from "@self.id/web";
+import { useViewerConnection } from "@self.id/framework";
 
 export type AllProvidersState = {
   [provider in PROVIDER_ID]: {
@@ -73,8 +77,10 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
   const [isLoadingPassport, setIsLoadingPassport] = useState(true);
-  const [localStorageDatabase, setLocalStorageDatabase] = useState<LocalStorageDatabase | undefined>(undefined);
+  const [ceramicDatabase, setCeramicDatabase] = useState<CeramicDatabase | undefined>(undefined);
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
+
+  const [viewerConnection, ceramicConnect, ceramicDisconnect] = useViewerConnection();
 
   // Use onboard to control the current provider/wallets
   const [{ wallet }, connect, disconnect] = useConnectWallet();
@@ -118,6 +124,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       setWalletLabel(undefined);
       setAddress(undefined);
       setSigner(undefined);
+      setCeramicDatabase(undefined);
     } else {
       // record connected wallet details
       setWalletLabel(wallet?.label);
@@ -129,17 +136,38 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       // store in localstorage
       window.localStorage.setItem("connectedWallets", JSON.stringify(connectedWalletsLabelArray));
 
-      if (address) {
-        // Load localStorage Passport data
-        const localStorageInstance = new LocalStorageDatabase(address);
-        setLocalStorageDatabase(localStorageInstance);
-        setIsLoadingPassport(true);
-        const loadedPassport = localStorageInstance?.getPassport(localStorageInstance.passportKey);
-        setPassport(loadedPassport);
-        setIsLoadingPassport(false);
+      if (wallet) {
+        const ethereumProvider = wallet.provider;
+        ceramicConnect(new EthereumAuthProvider(ethereumProvider, wallet?.accounts[0].address));
       }
     }
   }, [connectedWallets, wallet]);
+
+  useEffect(() => {
+    switch (viewerConnection.status) {
+      case "idle": {
+        setCeramicDatabase(undefined);
+        break;
+      }
+      case "connected": {
+        const ceramicDatabaseInstance = new CeramicDatabase(viewerConnection.selfID.did);
+        setCeramicDatabase(ceramicDatabaseInstance);
+        fetchPassport(ceramicDatabaseInstance);
+        break;
+      }
+      case "failed": {
+        // user refused to connect to ceramic -- disconnect them
+        disconnect({
+          label: walletLabel || "",
+        });
+        console.log("failed to connect self id :(");
+        setCeramicDatabase(undefined);
+        break;
+      }
+      default:
+        break;
+    }
+  }, [viewerConnection.status]);
 
   // Toggle connect/disconnect
   // clear context passport on disconnect
@@ -157,6 +185,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         label: walletLabel || "",
       })
         .then(() => {
+          ceramicDisconnect();
           window.localStorage.setItem("connectedWallets", "[]");
           setPassport(undefined);
           setLoggedIn(false);
@@ -184,22 +213,34 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     // TODO remove providerstate on stamp removal
   }, [passport]);
 
+  const fetchPassport = (database: CeramicDatabase): void => {
+    console.log("attempting to fetch from ceramic...");
+    setIsLoadingPassport(true);
+    database
+      .getPassport()
+      .then((passport) => {
+        setPassport(passport);
+      })
+      .finally(() => setIsLoadingPassport(false));
+  };
+
   const handleCreatePassport = (): void => {
-    if (localStorageDatabase) {
-      const passportDid = localStorageDatabase.createPassport();
-      const getPassport = localStorageDatabase.getPassport(passportDid);
-      setPassport(getPassport);
+    if (ceramicDatabase) {
+      ceramicDatabase.createPassport().then(() => {
+        fetchPassport(ceramicDatabase);
+      });
     }
   };
 
   const handleAddStamp = (stamp: Stamp): void => {
-    if (localStorageDatabase) {
-      localStorageDatabase.addStamp(localStorageDatabase.passportKey, stamp);
-      const getPassport = localStorageDatabase.getPassport(localStorageDatabase.passportKey);
-      setPassport(getPassport);
+    if (ceramicDatabase) {
+      ceramicDatabase.addStamp(stamp).then(() => {
+        fetchPassport(ceramicDatabase);
+      });
     }
   };
 
+  // TODO: add a 'save'/'update' method to Database Client - currently this won't save
   const handleSaveStamp = (stamp: Stamp): void => {
     if (passport) {
       // check if there is already a stamp recorded for this provider

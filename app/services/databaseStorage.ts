@@ -1,8 +1,5 @@
 import { DID, Passport, Stamp } from "@dpopp/types";
 import { DataStorageBase } from "../types";
-import { CeramicDatabase } from "@dpopp/database-client/src";
-
-const placeholderCeramic = new CeramicDatabase();
 
 export class LocalStorageDatabase implements DataStorageBase {
   passportKey: string;
