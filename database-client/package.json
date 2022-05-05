@@ -39,6 +39,7 @@
     "@glazed/devtools": "^0.1.6",
     "@glazed/did-datastore-model": "^0.2.0",
     "@glazed/types": "^0.2.0",
+    "@types/jest": "^27.4.1",
     "@types/node": "^16.11.6",
     "jest": "^27.5.1"
   },

@@ -8,7 +8,13 @@ services:
   ceramic-integration-test:
     image: node:16
     volumes:
-      - ./:/dpopp
-      - ./node_modules:/dpopp/node_modules
+      - ./database-client:/dpopp/database-client
+      - ./schemas:/dpopp/schemas
+      - ./types:/dpopp/types
+      - ./lerna.json:/dpopp/lerna.json
+      - ./package.json:/dpopp/package.json
+      - ./tsconfig.json:/dpopp/tsconfig.json
+      - ./tsconfig.settings.json:/dpopp/tsconfig.settings.json
+      - ./yarn.lock:/dpopp/yarn.lock
     entrypoint:
       ["sh", "/dpopp/database-client/integration-tests/run-ceramic-tests.sh"]
