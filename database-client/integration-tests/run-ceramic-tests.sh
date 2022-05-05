@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 
 # === preliminary installs ===
-# TODO: Run installs on yarn
 yarn global add lerna
-cd dpopp # TODO - maybe not needed?
+cd dpopp
 lerna bootstrap # TODO - figure out how to speed this up if run in docker
 
 # === start up ceramic in background ===
 # TODO - how to kill this ceramic process at the end?
 echo "Starting up Ceramic..."
-(yarn workspace @dpopp/schemas ceramic &) | grep -q "Ceramic API running on"
+(yarn workspace @dpopp/schemas ceramic &) | grep --max-count=1 "Ceramic API running on"
 
 # TODO alternatively figure out how to save the PID and kill at the end
 # CERAMIC_PID = $(ceramic daemon)
@@ -21,4 +20,4 @@ yarn workspace @dpopp/schemas create-model
 yarn workspace @dpopp/schemas publish-model
 
 # === run ceramic integration tests ===
-yarn workspace @dpopp/database-client test:integration # && kill -9 $CERAMIC_PID
+yarn test:ceramic-integration

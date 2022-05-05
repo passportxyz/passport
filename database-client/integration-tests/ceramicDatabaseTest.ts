@@ -65,7 +65,6 @@ describe("when there is an existing passport with out stamps for the given did",
 
   let existingPassportStreamID;
   beforeEach(async () => {
-    // actualPassportStreamID = await ceramicDatabase.createPassport();
     const stream = await ceramicDatabase.store.set("Passport", existingPassport);
     existingPassportStreamID = stream.toUrl();
   });
@@ -168,22 +167,21 @@ describe("when there is an existing passport with stamps for the given did", () 
 
   let existingPassportStreamID;
   beforeEach(async () => {
-    const stream = await ceramicDatabase.store.set("Passport", existingPassport);
+    // create a tile for verifiable credential issued from iam server
+    const simpleStampTile = await ceramicDatabase.model.createTile("VerifiableCredential", credential);
+    // add simple stamp provider and streamId to passport stamps array
+    const existingPassportWithStamps = {
+      ...existingPassport,
+      stamps: [
+        {
+          provider: simpleStampFixture.provider,
+          credential: simpleStampTile.id.toUrl(),
+        },
+      ],
+    };
+
+    const stream = await ceramicDatabase.store.set("Passport", existingPassportWithStamps);
     existingPassportStreamID = stream.toUrl();
-
-    const loadedPassport = await ceramicDatabase.store.get("Passport");
-    if (loadedPassport) {
-      // create a tile for verifiable credential issued from iam server
-      const simpleStampTile = await ceramicDatabase.model.createTile("VerifiableCredential", credential);
-
-      // add simple stamp provider and streamId to passport stamps array
-      const newStamps = loadedPassport?.stamps.concat({
-        provider: simpleStampFixture.provider,
-        credential: simpleStampTile.id.toUrl(),
-      });
-      // merge new stamps array to update stamps on the passport
-      await ceramicDatabase.store.merge("Passport", { stamps: newStamps });
-    }
   });
 
   afterEach(async () => {
