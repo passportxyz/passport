@@ -1,6 +1,6 @@
 // --- React Methods
 import React, { createContext, useMemo, useState, useEffect } from "react";
-import { useConnectWallet, useWallets } from "@web3-onboard/react";
+import { useConnectWallet } from "@web3-onboard/react";
 
 // --- Wallet connection utilities
 import { initWeb3Onboard } from "../utils/onboard";
@@ -12,7 +12,6 @@ import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
 
 // --- Data Storage Functions
 import { CeramicDatabase } from "@dpopp/database-client/dist/esm/src";
-// import { LocalStorageDatabase } from "../services/databaseStorage";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 
 // -- Ceramic and Glazed
@@ -42,14 +41,11 @@ export interface UserContextState {
   passport: Passport | undefined;
   isLoadingPassport: boolean;
   allProvidersState: AllProvidersState;
-  getStampIndex: (stamp: Stamp) => number | undefined;
-  hasStamp: (provider: string) => boolean;
   handleCreatePassport: () => void;
-  handleSaveStamp: (stamp: Stamp) => void;
   handleConnection: () => void;
   handleAddStamp: (stamp: Stamp) => void;
   address: string | undefined;
-  connectedWallets: WalletState[];
+  wallet: WalletState | null;
   signer: JsonRpcSigner | undefined;
   walletLabel: string | undefined;
 }
@@ -58,14 +54,11 @@ const startingState: UserContextState = {
   passport: undefined,
   isLoadingPassport: true,
   allProvidersState: startingAllProvidersState,
-  getStampIndex: () => undefined,
-  hasStamp: () => false,
   handleCreatePassport: () => {},
-  handleSaveStamp: () => {},
   handleConnection: () => {},
   handleAddStamp: () => {},
   address: undefined,
-  connectedWallets: [],
+  wallet: null,
   signer: undefined,
   walletLabel: undefined,
 };
@@ -84,7 +77,6 @@ export const UserContextProvider = ({ children }: { children: any }) => {
 
   // Use onboard to control the current provider/wallets
   const [{ wallet }, connect, disconnect] = useConnectWallet();
-  const connectedWallets = useWallets();
   const [web3Onboard, setWeb3Onboard] = useState<OnboardAPI | undefined>();
   const [walletLabel, setWalletLabel] = useState<string | undefined>();
   const [address, setAddress] = useState<string>();
@@ -120,28 +112,24 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   // Update on wallet connect
   useEffect((): void => {
     // no connection
-    if (!connectedWallets.length) {
+    if (!wallet) {
       setWalletLabel(undefined);
       setAddress(undefined);
       setSigner(undefined);
       setCeramicDatabase(undefined);
     } else {
       // record connected wallet details
-      setWalletLabel(wallet?.label);
-      setAddress(wallet?.accounts[0].address);
+      setWalletLabel(wallet.label);
+      setAddress(wallet.accounts[0].address);
       // get the signer from an ethers wrapped Web3Provider
-      setSigner(new Web3Provider(connectedWallets[0]?.provider).getSigner());
-      // flaten array for storage
-      const connectedWalletsLabelArray = connectedWallets.map(({ label }) => label);
+      setSigner(new Web3Provider(wallet.provider).getSigner());
       // store in localstorage
-      window.localStorage.setItem("connectedWallets", JSON.stringify(connectedWalletsLabelArray));
+      window.localStorage.setItem("connectedWallets", JSON.stringify([wallet.label]));
 
-      if (wallet) {
-        const ethereumProvider = wallet.provider;
-        ceramicConnect(new EthereumAuthProvider(ethereumProvider, wallet?.accounts[0].address));
-      }
+      const ethereumProvider = wallet.provider;
+      ceramicConnect(new EthereumAuthProvider(ethereumProvider, wallet.accounts[0].address));
     }
-  }, [connectedWallets, wallet]);
+  }, [wallet]);
 
   useEffect(() => {
     switch (viewerConnection.status) {
@@ -240,32 +228,6 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     }
   };
 
-  // TODO: add a 'save'/'update' method to Database Client - currently this won't save
-  const handleSaveStamp = (stamp: Stamp): void => {
-    if (passport) {
-      // check if there is already a stamp recorded for this provider
-      const stampIndex = getStampIndex(stamp);
-      // place the new stamp into the stamps array
-      if (stampIndex !== undefined && stampIndex !== -1) {
-        passport.stamps[stampIndex] = stamp;
-      } else {
-        passport.stamps.push(stamp);
-      }
-      // propagate the new passport state
-      setPassport({ ...passport });
-    }
-  };
-
-  const getStampIndex = (stamp: Stamp): number | undefined => {
-    // check if there is already a stamp recorded for this provider
-    return passport?.stamps.findIndex((_stamp: Stamp) => _stamp.provider === stamp.provider);
-  };
-
-  const hasStamp = (provider: string): boolean => {
-    // check if a stamp exists for a given provider
-    return !!passport?.stamps && getStampIndex({ provider } as unknown as Stamp) !== -1;
-  };
-
   const stateMemo = useMemo(
     () => ({
       loggedIn,
@@ -274,16 +236,13 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       passport,
       allProvidersState,
       handleCreatePassport,
-      handleSaveStamp,
       handleConnection,
-      getStampIndex,
-      hasStamp,
       handleAddStamp,
-      connectedWallets,
+      wallet,
       signer,
       walletLabel,
     }),
-    [loggedIn, address, passport, isLoadingPassport, signer, connectedWallets, allProvidersState]
+    [loggedIn, address, passport, isLoadingPassport, signer, wallet, allProvidersState]
   );
 
   // use props as a way to pass configuration values
@@ -294,12 +253,9 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     isLoadingPassport,
     allProvidersState,
     handleCreatePassport,
-    handleSaveStamp,
     handleConnection,
-    getStampIndex,
-    hasStamp,
     handleAddStamp,
-    connectedWallets,
+    wallet,
     signer,
     walletLabel,
   };

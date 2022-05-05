@@ -15,7 +15,7 @@ const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 const providerId: PROVIDER_ID = "Simple";
 
 export default function SimpleCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState, connectedWallets } = useContext(UserContext);
+  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
   // fetch an example VC from the IAM server
   const handleFetchCredential = (): void => {
     fetchVerifiableCredential(
