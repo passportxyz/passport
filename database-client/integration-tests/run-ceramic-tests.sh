@@ -16,6 +16,7 @@ echo "Starting up Ceramic..."
 
 # TODO - not needed once we publish + persist our schemas to ceramic testnet
 # === create & publish model to ceramic ===
+export SEED="06be7d9853096fca06d6da9268a8a66ecaab2a7249ccd63c70fead97aafefa02" # TEST SEED, DO NOT USE IN PROD
 yarn workspace @dpopp/schemas create-model
 yarn workspace @dpopp/schemas publish-model
 

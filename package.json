@@ -30,7 +30,8 @@
     "test:iam": "yarn workspace @dpopp/iam test",
     "test:identity": "yarn workspace @dpopp/identity test",
     "prettier": "lerna run prettier",
-    "build": "yarn build:identity && yarn build:iam && yarn build:app",
+    "build": "yarn build:identity && yarn build:database-client && yarn build:iam && yarn build:app",
+    "build:database-client": "yarn workspace @dpopp/database-client build",
     "build:identity": "yarn workspace @dpopp/identity build",
     "build:iam": "yarn workspace @dpopp/iam build",
     "build:app": "yarn workspace @dpopp/app build",
@@ -43,9 +44,9 @@
     "iam": "yarn workspace @dpopp/iam",
     "identity": "yarn workspace @dpopp/identity",
     "types": "yarn workspace @dpopp/types",
-    "prestart": "yarn build:identity",
-    "pretest": "yarn build:identity",
-    "postinstall": "yarn build:identity",
+    "prestart": "yarn build:identity && yarn build:database-client",
+    "pretest": "yarn build:identity && yarn build:database-client",
+    "postinstall": "yarn build:identity && yarn build:database-client",
     "test:ceramic-integration": "yarn workspace @dpopp/database-client test:integration"
   },
   "engines": {
