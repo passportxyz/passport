@@ -6,138 +6,9 @@ import * as awsx from "@pulumi/awsx";
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
 let domain = `staging.${process.env["DOMAIN"]}`;
-let baseUrl = `http://${domain}/`;
 let IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
 
 export const dockerGtcDpoppImage = `${process.env["DOCKER_GTC_DPOPP_IMAGE"]}`;
-
-//////////////////////////////////////////////////////////////
-// Create permissions:
-//  - user for logging
-//////////////////////////////////////////////////////////////
-
-const usrLogger = new aws.iam.User("usrLogger", {
-  path: "/staging/",
-});
-
-const usrLoggerAccessKey = new aws.iam.AccessKey("usrLoggerAccessKey", { user: usrLogger.name });
-
-export const usrLoggerKey = usrLoggerAccessKey.id;
-export const usrLoggerSecret = usrLoggerAccessKey.secret;
-
-// See https://pypi.org/project/watchtower/ for the polciy required
-const test_attach = new aws.iam.PolicyAttachment("CloudWatchPolicyAttach", {
-  users: [usrLogger.name],
-  roles: [],
-  groups: [],
-  policyArn: "arn:aws:iam::aws:policy/AWSOpsWorksCloudWatchLogs",
-});
-
-//////////////////////////////////////////////////////////////
-// Create bucket for static hosting
-// Check policy recomendation here: https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html#iam-policy
-//////////////////////////////////////////////////////////////
-
-const staticAssetsBucket = new aws.s3.Bucket("static-assets", {
-  acl: "public-read",
-  website: {
-    indexDocument: "index.html",
-  },
-  forceDestroy: true,
-});
-
-const staticAssetsBucketPolicyDocument = aws.iam.getPolicyDocumentOutput({
-  statements: [
-    {
-      principals: [
-        {
-          type: "AWS",
-          identifiers: [pulumi.interpolate`${usrLogger.arn}`],
-        },
-      ],
-      actions: [
-        "s3:PutObject",
-        "s3:GetObjectAcl",
-        "s3:GetObject",
-        "s3:ListBucket",
-        "s3:DeleteObject",
-        "s3:PutObjectAcl",
-      ],
-      resources: [staticAssetsBucket.arn, pulumi.interpolate`${staticAssetsBucket.arn}/*`],
-    },
-  ],
-});
-
-const staticAssetsBucketPolicy = new aws.s3.BucketPolicy("staticAssetsBucketPolicy", {
-  bucket: staticAssetsBucket.id,
-  policy: staticAssetsBucketPolicyDocument.apply(
-    (staticAssetsBucketPolicyDocument) => staticAssetsBucketPolicyDocument.json
-  ),
-});
-
-const s3OriginId = "myS3Origin";
-const s3Distribution = new aws.cloudfront.Distribution("s3Distribution", {
-  origins: [
-    {
-      domainName: staticAssetsBucket.bucketRegionalDomainName,
-      originId: s3OriginId,
-    },
-  ],
-  enabled: true,
-  isIpv6Enabled: true,
-  defaultRootObject: "index.html",
-  defaultCacheBehavior: {
-    allowedMethods: ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"],
-    cachedMethods: ["GET", "HEAD"],
-    targetOriginId: s3OriginId,
-    forwardedValues: {
-      queryString: false,
-      cookies: {
-        forward: "none",
-      },
-    },
-    viewerProtocolPolicy: "allow-all",
-    minTtl: 0,
-    defaultTtl: 3600,
-    maxTtl: 86400,
-  },
-  orderedCacheBehaviors: [
-    {
-      pathPattern: "/static/*",
-      allowedMethods: ["GET", "HEAD", "OPTIONS"],
-      cachedMethods: ["GET", "HEAD", "OPTIONS"],
-      targetOriginId: s3OriginId,
-      forwardedValues: {
-        queryString: false,
-        headers: ["Origin"],
-        cookies: {
-          forward: "none",
-        },
-      },
-      minTtl: 0,
-      defaultTtl: 86400,
-      maxTtl: 31536000,
-      compress: true,
-      viewerProtocolPolicy: "redirect-to-https",
-    },
-  ],
-  priceClass: "PriceClass_200",
-  restrictions: {
-    geoRestriction: {
-      restrictionType: "none",
-    },
-  },
-  tags: {
-    Environment: "staging",
-  },
-  viewerCertificate: {
-    cloudfrontDefaultCertificate: true,
-  },
-});
-
-export const bucketName = staticAssetsBucket.id;
-export const bucketArn = staticAssetsBucket.arn;
-export const bucketWebURL = pulumi.interpolate`http://${staticAssetsBucket.websiteEndpoint}/`;
 
 //////////////////////////////////////////////////////////////
 // Set up VPC
@@ -233,94 +104,6 @@ const www = new aws.route53.Record("www", {
   ],
 });
 
-let environment = [
-  {
-    name: "ENV",
-    value: "test",
-  },
-  // read me to understand this file:
-  // https://github.com/gitcoinco/web/blob/master/docs/ENVIRONMENT_VARIABLES.md
-
-  ///////////////////////////////////////////////////////////////////////////////
-  // BASIC PARAMS
-  ///////////////////////////////////////////////////////////////////////////////
-  // {
-  //   name: "CACHE_URL",
-  //   value: "dbcache://my_cache_table",
-  // },
-  {
-    name: "DEBUG",
-    value: "on",
-  },
-  {
-    name: "BASE_URL",
-    value: baseUrl,
-  },
-  // {
-  //   name: "SENTRY_DSN",
-  //   value: sentryDSN,
-  // },
-
-  ///////////////////////////////////////////////////////////////////////////////
-  // DOCKER PROVISIONING PARAMS
-  ///////////////////////////////////////////////////////////////////////////////
-  // {
-  // name: "FORCE_PROVISION",
-  // value: "on"
-  // },
-  {
-    name: "DISABLE_PROVISION",
-    value: "on",
-  },
-  {
-    name: "DISABLE_INITIAL_CACHETABLE",
-    value: "on",
-  },
-  {
-    name: "DISABLE_INITIAL_COLLECTSTATIC",
-    value: "on",
-  },
-  {
-    name: "DISABLE_INITIAL_LOADDATA",
-    value: "off",
-  },
-  {
-    name: "DISABLE_INITIAL_MIGRATE",
-    value: "off",
-  },
-
-  ///////////////////////////////////////////////////////////////////////////////
-  // ADVANCED NOTIFICATION PARAMS
-  ///////////////////////////////////////////////////////////////////////////////
-  // Be VERY CAREFUL when changing this setting.  You don't want to accidentally
-  // spam a bunch of github notifications :)
-  {
-    name: "ENABLE_NOTIFICATIONS_ON_NETWORK",
-    value: "rinkeby",
-  },
-
-  ///////////////////////////////////////////////////////////////////////////////
-  // Specific for staging env test
-  ///////////////////////////////////////////////////////////////////////////////
-  {
-    name: "AWS_ACCESS_KEY_ID",
-    value: usrLoggerKey,
-  },
-  {
-    name: "AWS_SECRET_ACCESS_KEY",
-    value: usrLoggerSecret,
-  },
-  {
-    name: "AWS_DEFAULT_REGION",
-    value: "us-east-1", // TODO: configure this
-  },
-
-  {
-    name: "AWS_STORAGE_BUCKET_NAME",
-    value: bucketWebURL,
-  },
-];
-
 // TODO connect EFS with Fargate containers
 // const ceramicStateStore = new aws.efs.FileSystem("ceramic-statestore");
 
@@ -369,7 +152,6 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
         image: dockerGtcDpoppImage,
         memory: 1024,
         portMappings: [httpsListener],
-        environment: environment,
         links: [],
         secrets: [
           {
@@ -390,7 +172,6 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
         image: "ceramicnetwork/go-ipfs-daemon:latest",
         memory: 512,
         portMappings: [],
-        environment: environment,
         links: [],
       },
     },
