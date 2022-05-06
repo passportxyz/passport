@@ -31,12 +31,14 @@ import { Providers } from "./utils/providers";
 // ---- Identity Providers
 import { SimpleProvider } from "./providers/simple";
 import { GoogleProvider } from "./providers/google";
+import { EnsProvider } from "./providers/ens";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
   new GoogleProvider(),
+  new EnsProvider(),
 ]);
 
 // create the app and run on port
@@ -194,7 +196,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
       // error response
       return void errorRes(res, "Unable to verify payload");
     })
-    .catch((errorReason) => {
+    .catch(() => {
       return void errorRes(res, "Unable to verify payload");
     });
 });

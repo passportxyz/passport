@@ -34,6 +34,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: STAMP_PROVIDERS.Simple,
     stamp: undefined,
   },
+  Ens: {
+    providerSpec: STAMP_PROVIDERS.Ens,
+    stamp: undefined,
+  },
 };
 
 export interface UserContextState {
