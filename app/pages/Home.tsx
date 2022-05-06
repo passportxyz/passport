@@ -7,16 +7,16 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/userContext";
 
 export default function Home() {
-  const { handleConnection, address, walletLabel, connectedWallets } = useContext(UserContext);
+  const { handleConnection, address, walletLabel, wallet } = useContext(UserContext);
 
   const navigate = useNavigate();
 
   // Route user to dashboard when wallet is connected
   useEffect(() => {
-    if (connectedWallets.length > 0) {
+    if (wallet) {
       navigate("/dashboard");
     }
-  }, [connectedWallets.length]);
+  }, [wallet]);
 
   return (
     <div className="mx-auto flex flex-wrap">
