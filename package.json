@@ -35,7 +35,7 @@
     "build:identity": "yarn workspace @dpopp/identity build",
     "build:iam": "yarn workspace @dpopp/iam build",
     "build:app": "yarn workspace @dpopp/app build",
-    "start": "concurrently --kill-others \"yarn start:iam\" \"yarn start:app\" \"yarn start:ceramic\"",
+    "start": "concurrently --kill-others \"yarn start:iam\" \"yarn start:app\"",
     "start:iam": "yarn workspace @dpopp/iam start",
     "start:app": "yarn workspace @dpopp/app start",
     "start:ceramic": "yarn ceramic daemon",

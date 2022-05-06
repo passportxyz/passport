@@ -3,6 +3,8 @@ import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
 
+import testnetAliases from "./integration-test-model-aliases.json";
+
 import { CeramicDatabase } from "../src";
 
 let testDID: DID;
@@ -21,7 +23,7 @@ beforeAll(async () => {
   });
   await testDID.authenticate();
 
-  ceramicDatabase = new CeramicDatabase(testDID);
+  ceramicDatabase = new CeramicDatabase(testDID, process.env.CERAMIC_CLIENT_URL, testnetAliases);
 });
 
 afterAll(async () => {

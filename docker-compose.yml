@@ -1,10 +1,5 @@
 version: "3.9"
 services:
-  # ceramic-daemon:
-  #   image: ceramicnetwork/go-ipfs-daemon:latest
-  #   ports:
-  #     - "5001:5001"
-  #     - "8011:8011"
   ceramic-integration-test:
     image: node:16
     volumes:
