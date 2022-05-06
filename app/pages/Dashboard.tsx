@@ -21,9 +21,9 @@ import { UserContext } from "../context/userContext";
 
 export default function Dashboard() {
   const { handleConnection, address, walletLabel, passport, isLoadingPassport, handleCreatePassport, wallet } =
-  useContext(UserContext);
-  
-  const navigate = useNavigate()
+    useContext(UserContext);
+
+  const navigate = useNavigate();
 
   // Route user to home when wallet is disconnected
   useEffect(() => {
