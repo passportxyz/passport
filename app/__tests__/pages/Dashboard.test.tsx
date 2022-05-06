@@ -5,6 +5,7 @@ import Dashboard from "../../pages/Dashboard";
 import { UserContext, UserContextState } from "../../context/userContext";
 import { mockAddress, mockWallet } from "../../__test-fixtures__/onboardHookValues";
 import { STAMP_PROVIDERS } from "../../config/providers";
+import { HashRouter as Router } from "react-router-dom";
 
 jest.mock("../../utils/onboard.ts");
 
@@ -50,7 +51,9 @@ describe("when user has a connected wallet", () => {
 
     render(
       <UserContext.Provider value={mockUserContext}>
-        <Dashboard />
+        <Router>
+          <Dashboard />
+        </Router>
       </UserContext.Provider>
     );
 
@@ -63,7 +66,9 @@ describe("when user has a connected wallet", () => {
 
     render(
       <UserContext.Provider value={mockUserContext}>
-        <Dashboard />
+        <Router>
+          <Dashboard />
+        </Router>
       </UserContext.Provider>
     );
 
@@ -90,7 +95,9 @@ describe("when user has no passport", () => {
   it("should display a loading spinner, and call create passport", async () => {
     render(
       <UserContext.Provider value={mockUserContextWithNoPassport}>
-        <Dashboard />
+        <Router>
+          <Dashboard />
+        </Router>
       </UserContext.Provider>
     );
 
@@ -115,7 +122,9 @@ describe("when the user has a passport", () => {
   it("it should not display a loading spinner", async () => {
     render(
       <UserContext.Provider value={mockUserContextWithPassport}>
-        <Dashboard />
+        <Router>
+          <Dashboard />
+        </Router>
       </UserContext.Provider>
     );
 
@@ -125,7 +134,9 @@ describe("when the user has a passport", () => {
   it("shows passport issuanceDate and expiryDate will be here", () => {
     render(
       <UserContext.Provider value={mockUserContextWithPassport}>
-        <Dashboard />
+        <Router>
+          <Dashboard />
+        </Router>
       </UserContext.Provider>
     );
 

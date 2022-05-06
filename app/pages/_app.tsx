@@ -1,5 +1,5 @@
 // --- React Methods
-import React, { useEffect, useContext } from "react";
+import React from "react";
 
 import { AppProps } from "next/app";
 import "../styles/globals.css";
@@ -11,8 +11,8 @@ function MyApp({ Component, pageProps }: AppProps) {
     <UserContextProvider>
       <ChakraProvider>
         <div className="font-miriam-libre min-h-max min-h-default bg-violet-700 font-librefranklin text-gray-100">
-          <div className="container mx-auto px-5 py-2">
-            <Component {...pageProps} />
+          <div className="container mx-auto px-5 py-2" suppressHydrationWarning>
+            {typeof window === "undefined" ? null : <Component {...pageProps} />}
           </div>
         </div>
       </ChakraProvider>

@@ -1,10 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
 import React, { useContext, useEffect } from "react";
-
-// -- Next Methods
-import type { NextPage } from "next";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 
 // --Components
 import { CardList } from "../components/CardList";
@@ -22,22 +19,15 @@ import {
 
 import { UserContext } from "../context/userContext";
 
-const Dashboard: NextPage = () => {
-  const {
-    handleConnection,
-    address,
-    walletLabel,
-    passport,
-    isLoadingPassport,
-    handleCreatePassport,
-    connectedWallets,
-  } = useContext(UserContext);
-  const router = useRouter();
+export default function Dashboard() {
+  const navigate = useNavigate(),
+    { handleConnection, address, walletLabel, passport, isLoadingPassport, handleCreatePassport, connectedWallets } =
+      useContext(UserContext);
 
   // Route user to home when wallet is disconnected
   useEffect(() => {
     if (connectedWallets.length == 0) {
-      router.push("/");
+      navigate("/");
     }
   }, [connectedWallets.length]);
 
@@ -119,6 +109,4 @@ const Dashboard: NextPage = () => {
       </div>
     </div>
   );
-};
-
-export default Dashboard;
+}
