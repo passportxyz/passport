@@ -1,6 +1,12 @@
 name: Deploy App to Staging
 on:
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      # commit hash (for frontend deploy to fleek)
+      commit:
+        description: "Branch/Commit ref"
+        default: "origin/main"
+        type: string
 jobs:
   deploy-app:
     runs-on: ubuntu-latest
@@ -10,6 +16,6 @@ jobs:
         run: |
           git fetch
           git checkout -b staging-app origin/staging-app
-          git reset --hard origin/main
+          git reset --hard ${{ github.event.inputs.commit }}
           git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/dPopp.git
           git push origin staging-app -f
