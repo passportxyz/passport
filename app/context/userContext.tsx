@@ -138,7 +138,10 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         break;
       }
       case "connected": {
-        const ceramicDatabaseInstance = new CeramicDatabase(viewerConnection.selfID.did);
+        const ceramicDatabaseInstance = new CeramicDatabase(
+          viewerConnection.selfID.did,
+          process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL
+        );
         setCeramicDatabase(ceramicDatabaseInstance);
         fetchPassport(ceramicDatabaseInstance);
         break;
@@ -202,7 +205,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   }, [passport]);
 
   const fetchPassport = (database: CeramicDatabase): void => {
-    console.log("attempting to fetch from ceramic...");
+    console.log("attempting to fetch from ceramic...", database.ceramicClient._apiUrl);
     setIsLoadingPassport(true);
     database
       .getPassport()

@@ -41,9 +41,9 @@ export class CeramicDatabase implements DataStorageBase {
   model: DataModel<ModelTypes>;
   store: DIDDataStore<ModelTypes>;
 
-  constructor(did?: CeramicDID) {
+  constructor(did?: CeramicDID, ceramicHost?: string) {
     // Create the Ceramic instance and inject the DID
-    const ceramic = new CeramicClient(CERAMIC_CLIENT_URL);
+    const ceramic = new CeramicClient(ceramicHost ?? CERAMIC_CLIENT_URL);
     ceramic.setDID(did);
 
     // Create the loader, model and store
