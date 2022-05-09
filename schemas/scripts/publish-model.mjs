@@ -2,6 +2,9 @@ import { readFile, writeFile } from "node:fs/promises";
 import { CeramicClient } from "@ceramicnetwork/http-client";
 import { ModelManager } from "@glazed/devtools";
 
+import dotenv from "dotenv";
+dotenv.config();
+
 // Connect to the local Ceramic node
 const CERAMIC_CLIENT_URL =
   process.env.CERAMIC_CLIENT_URL || "http://localhost:7007";
