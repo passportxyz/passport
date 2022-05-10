@@ -12,7 +12,7 @@ jest.mock("ethers", () => {
   return {
     __esModule: true,
     ...originalModule,
-    provider: {
+    providers: {
       lookupAddress: (address: string) => {
         return address;
       },

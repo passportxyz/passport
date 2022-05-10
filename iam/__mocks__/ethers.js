@@ -7,7 +7,7 @@ module.exports = {
       return "0x0";
     },
   },
-  provider: {
+  providers: {
     lookupAddress: (address) => {
       return address;
     },
