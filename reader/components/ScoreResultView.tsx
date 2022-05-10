@@ -1,11 +1,34 @@
 // --- React Methods
 import React from 'react'
 
-import { VerifiableCredential } from '@dpopp/types'
+// import { VerifiableCredential } from '@dpopp/types'
 
 import type { ModelTypeAliases } from '@glazed/types'
 import { usePublicRecord } from '@self.id/react'
 import { useEffect } from 'react'
+
+// copied from @dpopp/types
+type VerifiableCredential = {
+  '@context': string[]
+  type: string[]
+  credentialSubject: {
+    id: string
+    '@context': { [key: string]: string }[]
+    root?: string
+    address?: string
+    challenge?: string
+  }
+  issuer: string
+  issuanceDate: string
+  expirationDate: string
+  proof: {
+    type: string
+    proofPurpose: string
+    verificationMethod: string
+    created: string
+    jws: string
+  }
+}
 
 type CeramicStamp = {
   provider: string
