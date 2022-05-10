@@ -1,29 +1,40 @@
 // --- React Methods
 import React from 'react'
 
-import { DID, Passport, Stamp, VerifiableCredential } from '@dpopp/types'
+import { VerifiableCredential } from '@dpopp/types'
 
+import type { ModelTypeAliases } from '@glazed/types'
 import { usePublicRecord } from '@self.id/react'
 import { useEffect } from 'react'
 
-export type ModelTypes = {
-  definitions: {
-    Passport: 'kjzl6cwe1jw14b5pv8zucigpz0sc2lh9z5l0ztdrvqw5y1xt2tvz8cjt34bkub9'
-    VerifiableCredential: 'kjzl6cwe1jw147bsnnxvupgywgr0tyi7tesgle7e4427hw2dn8sp9dnsltvey1n'
-  }
-  schemas: {
-    Passport: 'ceramic://k3y52l7qbv1frygm3lu9o9qra3nid11t6vuj0mas2m1mmlywh0fop5tgrxf060000'
-    VerifiableCredential: 'ceramic://k3y52l7qbv1frxunk7h39a05iup0s5sheycsgi8ozxme1s3tl37modhalv38d05q8'
-  }
-  tiles: {}
+type CeramicStamp = {
+  provider: string
+  credential: string
 }
+type CeramicPassport = {
+  issuanceDate: string
+  expiryDate: string
+  stamps: CeramicStamp[]
+}
+
+export type ModelTypes = ModelTypeAliases<
+  {
+    Passport: CeramicPassport
+    VerifiableCredential: VerifiableCredential
+  },
+  {
+    Passport: 'Passport'
+    VerifiableCredential: 'VerifiableCredential'
+  },
+  {}
+>
 
 export type ScoreResultViewProps = {
   did: string
 }
 
 export const ScoreResultView = ({ did }: ScoreResultViewProps): JSX.Element => {
-  const record = usePublicRecord<ModelTypes>('Passport', did)
+  const record = usePublicRecord<ModelTypes, 'Passport'>('Passport', did)
 
   useEffect(() => {
     console.log(record)
@@ -37,7 +48,7 @@ export const ScoreResultView = ({ did }: ScoreResultViewProps): JSX.Element => {
         </div>
       ) : (
         <p>
-          {((record.content as Passport)?.stamps || []).length > 0
+          {((record.content as CeramicPassport)?.stamps || []).length > 0
             ? 'GOOD'
             : 'BAD'}
         </p>
