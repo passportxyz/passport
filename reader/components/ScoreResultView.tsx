@@ -70,11 +70,16 @@ export const ScoreResultView = ({ did }: ScoreResultViewProps): JSX.Element => {
           <p>LOADING</p>
         </div>
       ) : (
-        <p>
-          {((record.content as CeramicPassport)?.stamps || []).length > 0
-            ? 'GOOD'
-            : 'BAD'}
-        </p>
+        <div className={"flex flex-col"}>
+          <div>
+            Your Score
+          </div>
+          <p>
+            {((record.content as CeramicPassport)?.stamps || []).length > 0
+              ? 'GOOD'
+              : 'BAD'}
+          </p>
+        </div>
       )}
     </div>
   )
