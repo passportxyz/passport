@@ -74,8 +74,8 @@ export const ScoreResultView = ({ did }: ScoreResultViewProps): JSX.Element => {
           <div className="mb-20 underline">Your Score</div>
           <p className="text-2xl">
             {((record.content as CeramicPassport)?.stamps || []).length > 0
-              ? 'GOOD 👍'
-              : 'BAD 👎'}
+                ? <span data-testid="passport-score--good">'GOOD 👍'</span>
+                : <span data-testid="passport-score--bad">'BAD 👎'</span>}
           </p>
         </div>
       )}

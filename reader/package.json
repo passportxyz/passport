@@ -4,7 +4,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "export": "next build && next export"
+    "export": "next build && next export",
+    "test": "jest"
   },
   "dependencies": {
     "@self.id/framework": "^0.3.0",
@@ -17,14 +18,16 @@
     "@testing-library/react": "^12.0.0",
     "@testing-library/user-event": "^14.1.1",
     "@types/node": "17.0.4",
-    "@types/react": "17.0.38",
+    "@types/react": "17.0.2",
     "@types/react-dom": "^17.0.2",
     "autoprefixer": "^10.4.0",
     "jest": "^27.5.1",
+    "jest-mock-extended": "^2.0.6",
     "postcss": "^8.4.5",
     "prettier": "^2.5.1",
     "prettier-plugin-tailwindcss": "^0.1.1",
     "tailwindcss": "^3.0.7",
+    "ts-node": "^10.7.0",
     "typescript": "4.5.4"
   }
 }
