@@ -13,6 +13,7 @@ import { VerifyModal } from "../VerifyModal";
 import { useDisclosure } from "@chakra-ui/react";
 
 import { PROVIDER_ID, Stamp } from "@dpopp/types";
+import { ProviderSpec } from "../../config/providers";
 
 const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 
@@ -91,7 +92,7 @@ export default function EnsCard(): JSX.Element {
 
   return (
     <Card
-      providerSpec={allProvidersState[providerId].providerSpec}
+      providerSpec={allProvidersState[providerId].providerSpec as ProviderSpec}
       verifiableCredential={allProvidersState[providerId].stamp?.credential}
       issueCredentialWidget={issueCredentialWidget}
     />

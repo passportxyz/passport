@@ -24,6 +24,14 @@ const mockUserContext: UserContextState = {
       providerSpec: STAMP_PROVIDERS.Simple,
       stamp: undefined,
     },
+    Ens: {
+      providerSpec: STAMP_PROVIDERS.Ens,
+      stamp: undefined,
+    },
+    Twitter: {
+      providerSpec: STAMP_PROVIDERS.Twitter,
+      stamp: undefined,
+    },
   },
   handleAddStamp: handleAddStamp,
   handleCreatePassport: mockCreatePassport,

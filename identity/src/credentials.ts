@@ -145,7 +145,7 @@ export const verifyCredential = async (DIDKit: DIDKitLib, credential: Verifiable
 export const fetchChallengeCredential = async (iamUrl: string, payload: RequestPayload): Promise<IssuedChallenge> => {
   // fetch challenge as a credential from API that fits the version, address and type (this credential has a short ttl)
   const response: { data: CredentialResponseBody } = await axios.post(
-    `${iamUrl.replace(/\/+$/, "")}/v${payload.version}/challenge`,
+    `${iamUrl.replace(/\/*?$/, "")}/v${payload.version}/challenge`,
     {
       payload: {
         address: payload.address,
@@ -188,7 +188,7 @@ export const fetchVerifiableCredential = async (
 
   // fetch a credential from the API that fits the version, payload and passes the signature message challenge
   const response: { data: CredentialResponseBody } = await axios.post(
-    `${iamUrl.replace(/\/+$/, "")}/v${payload.version}/verify`,
+    `${iamUrl.replace(/\/*?$/, "")}/v${payload.version}/verify`,
     {
       payload,
       challenge,
