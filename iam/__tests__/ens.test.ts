@@ -7,20 +7,7 @@ import { providers } from "ethers";
 
 jest.mock("ethers", () => {
   // Require the original module to not be mocked...
-  const originalModule = jest.requireActual("ethers");
-
-  return {
-    __esModule: true,
-    ...originalModule,
-    providers: {
-      lookupAddress: (address: string) => {
-        return address;
-      },
-      resolveName: (address: string) => {
-        return address;
-      },
-    },
-  };
+  return jest.requireActual("ethers");
 });
 
 const MOCK_ADDRESS = "0xcF300CE817E25b4F784bC1e24c9A99A525fEC50f";
