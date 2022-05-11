@@ -26,6 +26,10 @@ const mockUserContext: UserContextState = {
       providerSpec: STAMP_PROVIDERS.Ens,
       stamp: undefined,
     },
+    Poh: {
+      providerSpec: STAMP_PROVIDERS.Poh,
+      stamp: undefined,
+    },
   },
   handleAddStamp: handleAddStamp,
   handleCreatePassport: mockCreatePassport,
@@ -62,6 +66,10 @@ describe("when user has verified with EnsProvider", () => {
             Ens: {
               providerSpec: STAMP_PROVIDERS.Ens,
               stamp: ensStampFixture,
+            },
+            Poh: {
+              providerSpec: STAMP_PROVIDERS.Poh,
+              stamp: undefined,
             },
           },
         }}
