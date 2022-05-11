@@ -39,6 +39,11 @@ export const ensStampFixture: Stamp = {
   credential,
 };
 
+export const pohStampFixture: Stamp = {
+  provider: "Poh",
+  credential,
+};
+
 export const twitterStampFixture: Stamp = {
   provider: "Twitter",
   credential,

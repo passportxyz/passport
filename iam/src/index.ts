@@ -34,6 +34,7 @@ import { SimpleProvider } from "./providers/simple";
 import { GoogleProvider } from "./providers/google";
 import { TwitterProvider } from "./providers/twitter";
 import { EnsProvider } from "./providers/ens";
+import { PohProvider } from "./providers/poh";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
@@ -42,6 +43,7 @@ const providers = new Providers([
   new GoogleProvider(),
   new TwitterProvider(),
   new EnsProvider(),
+  new PohProvider(),
 ]);
 
 // create the app and run on port
