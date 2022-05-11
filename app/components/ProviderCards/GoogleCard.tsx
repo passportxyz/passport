@@ -13,6 +13,7 @@ import { UserContext } from "../../context/userContext";
 import { Card } from "../Card";
 
 import { PROVIDER_ID } from "@dpopp/types";
+import { ProviderSpec } from "../../config/providers";
 
 // import from .env
 const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
@@ -50,7 +51,7 @@ export default function GoogleCard(): JSX.Element {
 
   return (
     <Card
-      providerSpec={allProvidersState[providerId].providerSpec}
+      providerSpec={allProvidersState[providerId].providerSpec as ProviderSpec}
       verifiableCredential={allProvidersState[providerId].stamp?.credential}
       issueCredentialWidget={
         <GoogleLogin

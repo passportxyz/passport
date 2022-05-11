@@ -1,0 +1,120 @@
+// --- Methods
+import React, { useContext, useEffect } from "react";
+import { debounce } from "ts-debounce";
+import { BroadcastChannel } from "broadcast-channel";
+
+// --- Identity tools
+import { PROVIDER_ID } from "@dpopp/types";
+import { fetchVerifiableCredential } from "@dpopp/identity/dist/commonjs";
+
+// --- Components
+import { Card } from "../Card";
+
+// --- Context
+import { UserContext } from "../../context/userContext";
+import { ProviderSpec } from "../../config/providers";
+
+// Each provider is recognised by its ID
+const providerId: PROVIDER_ID = "Twitter";
+
+export default function TwitterCard(): JSX.Element {
+  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+
+  // Fetch Twitter OAuth2 url from the IAM procedure
+  async function handleFetchTwitterOAuth(): Promise<void> {
+    // Fetch data from external API
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_DPOPP_PROCEDURE_URL?.replace(/\/*?$/, "")}/twitter/generateAuthUrl`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          callback: process.env.NEXT_PUBLIC_DPOPP_TWITTER_CALLBACK,
+        }),
+      }
+    );
+    const data = await res.json();
+    // open new window for authUrl
+    openTwitterOAuthUrl(data.authUrl);
+  }
+
+  // Open Twitter authUrl in centered window
+  function openTwitterOAuthUrl(url: string): void {
+    const width = 600;
+    const height = 800;
+    const left = screen.width / 2 - width / 2;
+    const top = screen.height / 2 - height / 2;
+
+    // Pass data to the page via props
+    window.open(
+      url,
+      "_blank",
+      "toolbar=no, location=no, directories=no, status=no, menubar=no, resizable=no, copyhistory=no, width=" +
+        width +
+        ", height=" +
+        height +
+        ", top=" +
+        top +
+        ", left=" +
+        left
+    );
+  }
+
+  // Listener to watch for oauth redirect response on other windows (on the same host)
+  function listenForRedirect(e: { target: string; data: { code: string; state: string } }) {
+    // when receiving twitter oauth response from a spawned child run fetchVerifiableCredential
+    if (e.target === "twitter") {
+      // pull data from message
+      const queryCode = e.data.code;
+      const queryState = e.data.state;
+
+      // fetch and store credential
+      fetchVerifiableCredential(
+        process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "",
+        {
+          type: providerId,
+          version: "0.0.0",
+          address: address || "",
+          proofs: {
+            code: queryCode, // provided by twitter as query params in the redirect
+            sessionKey: queryState,
+          },
+        },
+        signer as { signMessage: (message: string) => Promise<string> }
+      ).then((verified: { credential: any }): void => {
+        handleAddStamp({
+          provider: providerId,
+          credential: verified.credential,
+        });
+      });
+    }
+  }
+
+  // attach and destroy a BroadcastChannel to handle the message
+  useEffect(() => {
+    // open the channel
+    const channel = new BroadcastChannel("twitter_oauth_channel");
+    // event handler will listen for messages from the child (debounced to avoid multiple submissions)
+    channel.onmessage = debounce(listenForRedirect, 300);
+
+    return () => {
+      channel.close();
+    };
+  });
+
+  const issueCredentialWidget = (
+    <button className="verify-btn" onClick={handleFetchTwitterOAuth}>
+      Verify
+    </button>
+  );
+
+  return (
+    <Card
+      providerSpec={allProvidersState[providerId].providerSpec as ProviderSpec}
+      verifiableCredential={allProvidersState[providerId].stamp?.credential}
+      issueCredentialWidget={issueCredentialWidget}
+    />
+  );
+}

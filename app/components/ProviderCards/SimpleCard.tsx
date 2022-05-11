@@ -9,6 +9,7 @@ import { fetchVerifiableCredential } from "@dpopp/identity/dist/commonjs";
 import { UserContext } from "../../context/userContext";
 
 import { Card } from "../Card";
+import { ProviderSpec } from "../../config/providers";
 
 const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 
@@ -50,7 +51,7 @@ export default function SimpleCard(): JSX.Element {
 
   return (
     <Card
-      providerSpec={allProvidersState[providerId].providerSpec}
+      providerSpec={allProvidersState[providerId].providerSpec as ProviderSpec}
       verifiableCredential={allProvidersState[providerId].stamp?.credential}
       issueCredentialWidget={issueCredentialWidget}
     />

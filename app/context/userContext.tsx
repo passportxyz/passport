@@ -38,6 +38,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: STAMP_PROVIDERS.Ens,
     stamp: undefined,
   },
+  Twitter: {
+    providerSpec: STAMP_PROVIDERS.Twitter,
+    stamp: undefined,
+  },
 };
 
 export interface UserContextState {

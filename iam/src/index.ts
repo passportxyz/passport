@@ -4,6 +4,7 @@ dotenv.config();
 
 // ---- Server
 import express, { Request } from "express";
+import { router as procedureRouter } from "./procedures";
 
 // ---- Production plugins
 import cors from "cors";
@@ -31,6 +32,7 @@ import { Providers } from "./utils/providers";
 // ---- Identity Providers
 import { SimpleProvider } from "./providers/simple";
 import { GoogleProvider } from "./providers/google";
+import { TwitterProvider } from "./providers/twitter";
 import { EnsProvider } from "./providers/ens";
 
 // Initiate providers - new Providers should be registered in this array...
@@ -38,6 +40,7 @@ const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
   new GoogleProvider(),
+  new TwitterProvider(),
   new EnsProvider(),
 ]);
 
@@ -200,3 +203,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
       return void errorRes(res, "Unable to verify payload");
     });
 });
+
+// procedure endpoints
+app.use("/procedure", procedureRouter);

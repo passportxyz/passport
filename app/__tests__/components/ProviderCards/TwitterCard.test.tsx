@@ -1,11 +1,11 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { SimpleCard } from "../../../components/ProviderCards";
+import { TwitterCard } from "../../../components/ProviderCards";
 
 import { UserContext, UserContextState } from "../../../context/userContext";
 import { mockAddress, mockWallet } from "../../../__test-fixtures__/onboardHookValues";
 import { STAMP_PROVIDERS } from "../../../config/providers";
-import { simpleStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
+import { twitterStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
 
 jest.mock("../../../utils/onboard.ts");
 
@@ -17,8 +17,8 @@ const mockUserContext: UserContextState = {
   passport: undefined,
   isLoadingPassport: false,
   allProvidersState: {
-    Simple: {
-      providerSpec: STAMP_PROVIDERS.Simple,
+    Twitter: {
+      providerSpec: STAMP_PROVIDERS.Twitter,
       stamp: undefined,
     },
   },
@@ -31,42 +31,42 @@ const mockUserContext: UserContextState = {
   walletLabel: mockWallet.label,
 };
 
-describe("when user has not verified with SimpleProvider", () => {
-  it("should display a verification button", () => {
+describe("when user has not verfied with TwitterProvider", () => {
+  it("should display a twitter verification button", () => {
     render(
       <UserContext.Provider value={mockUserContext}>
-        <SimpleCard />
+        <TwitterCard />
       </UserContext.Provider>
     );
 
-    const verifyButton = screen.queryByRole("button", {
+    const verifyTwitterButton = screen.queryByRole("button", {
       name: /Verify/,
     });
 
-    expect(verifyButton).toBeInTheDocument();
+    expect(verifyTwitterButton).toBeInTheDocument();
   });
 });
 
-describe("when user has verified with SimpleProvider", () => {
-  it("should display that user is verified", () => {
+describe("when user has verified with TwitterProvider", () => {
+  it("should display that twitter is verified", () => {
     render(
       <UserContext.Provider
         value={{
           ...mockUserContext,
           allProvidersState: {
-            Simple: {
-              providerSpec: STAMP_PROVIDERS.Simple,
-              stamp: simpleStampFixture,
+            Twitter: {
+              providerSpec: STAMP_PROVIDERS.Twitter,
+              stamp: twitterStampFixture,
             },
           },
         }}
       >
-        <SimpleCard />
+        <TwitterCard />
       </UserContext.Provider>
     );
 
-    const verified = screen.queryByText(/Verified/);
+    const twitterVerified = screen.queryByText(/Verified/);
 
-    expect(verified).toBeInTheDocument();
+    expect(twitterVerified).toBeInTheDocument();
   });
 });

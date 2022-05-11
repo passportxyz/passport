@@ -39,6 +39,11 @@ export const ensStampFixture: Stamp = {
   credential,
 };
 
+export const twitterStampFixture: Stamp = {
+  provider: "Twitter",
+  credential,
+};
+
 export const passportFixture: Passport = {
   issuanceDate: new Date("2022-01-01"),
   expiryDate: new Date("2022-01-02"),
