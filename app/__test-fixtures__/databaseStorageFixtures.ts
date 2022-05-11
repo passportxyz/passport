@@ -34,6 +34,11 @@ export const googleStampFixture: Stamp = {
   credential,
 };
 
+export const ensStampFixture: Stamp = {
+  provider: "Ens",
+  credential,
+};
+
 export const passportFixture: Passport = {
   issuanceDate: new Date("2022-01-01"),
   expiryDate: new Date("2022-01-02"),

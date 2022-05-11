@@ -19,4 +19,8 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     name: "Simple",
     description: "Simple Username",
   },
+  Ens: {
+    name: "Ens",
+    description: "Ens name",
+  },
 };
