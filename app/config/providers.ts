@@ -23,6 +23,10 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     name: "Ens",
     description: "Ens name",
   },
+  Poh: {
+    name: "POH",
+    description: "Proof of Humanity",
+  },
   Twitter: {
     name: "Twitter",
     description: "Twitter name",
