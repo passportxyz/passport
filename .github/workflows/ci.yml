@@ -22,7 +22,6 @@ jobs:
       - name: Run Tests
         run: yarn test
         env:
-          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
-          GOERLI_RPC_URL: ${{ secrets.GOERLI_RPC_URL }}
+          RPC_URL: ${{ secrets.GOERLI_RPC_URL }}
       - name: Run Linter
         run: yarn lint

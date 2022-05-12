@@ -7,7 +7,7 @@ import { utils, providers } from "ethers";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
 // set the network rpc url based on env
-const RPC_URL = process.env.NODE_ENV === "production" ? process.env.MAINNET_RPC_URL : process.env.GOERLI_RPC_URL;
+const RPC_URL = process.env.RPC_URL;
 
 // Export a Ens Provider to carry out Ens name check and return a record object
 export class EnsProvider implements Provider {

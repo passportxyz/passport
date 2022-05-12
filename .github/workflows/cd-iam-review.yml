@@ -22,8 +22,7 @@ jobs:
         run: lerna bootstrap
       - name: Run Tests
         env:
-          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
-          GOERLI_RPC_URL: ${{ secrets.GOERLI_RPC_URL }}
+          RPC_URL: ${{ secrets.GOERLI_RPC_URL }}
         run: |
           yarn test:iam
           yarn test:identity
