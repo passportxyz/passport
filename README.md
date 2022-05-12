@@ -4,7 +4,7 @@
 
 Prerequisites: [Node (v16 LTS)](https://nodejs.org/en/download/) plus [Yarn](https://classic.yarnpkg.com/en/docs/install/) and [Git](https://git-scm.com/downloads)
 
-> install DPOPP:
+> install dPopp (this will install all packages within the dPopp monorepo):
 
 ```bash
 git clone https://github.com/gitcoinco/dPopp.git
@@ -12,7 +12,7 @@ npm install --global lerna
 lerna bootstrap
 ```
 
-> run DPOPP:
+> run dPopp:
 
 ```bash
 # remember to create .env files first
@@ -21,7 +21,7 @@ yarn start
 
 ## app
 
-This will be the web app allowing users to interact with their dpopp
+This will be the web app allowing users to interact with their dPopp
 
 > start only the 📱 frontend:
 

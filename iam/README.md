@@ -1,13 +1,17 @@
 # IAM / Passport Authority
 
-From the root of dPoPP run:
+The IAM / Passport Authority is responsible for issuing verifiableCredentials based on verified Provider authentications.
 
 ```
-$ lerna bootstrap
-$ yarn start:iam
+# Ensure you copy and update the required variables for the environment
+$ cp ./.env-example.env ./.env
+
+# Install and start the IAM server
+$ yarn install
+$ yarn start
 ```
 
-Then send a POST request to `http://localhost:65535/api/v0.0.0/challenge` with the following JSON body:
+Then send a POST request to `http://localhost:80/api/v0.0.0/challenge` with the following JSON body:
 
 ```
 {
