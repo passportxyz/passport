@@ -166,13 +166,15 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "GOOGLE_CLIENT_SECRET",
             valueFrom: `${IAM_SERVER_SSM_ARN}:GOOGLE_CLIENT_SECRET::`,
           },
+          {
+            name: "MAINNET_RPC_URL",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:MAINNET_RPC_URL::`,
+          },
+          {
+            name: "GOERLI_RPC_URL",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:GOERLI_RPC_URL::`,
+          },
         ],
-      },
-      ceramic: {
-        image: "ceramicnetwork/go-ipfs-daemon:latest",
-        memory: 512,
-        portMappings: [],
-        links: [],
       },
     },
   },
