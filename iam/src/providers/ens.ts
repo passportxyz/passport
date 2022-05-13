@@ -3,7 +3,7 @@ import type { Provider, ProviderOptions } from "../types";
 import type { RequestPayload, VerifiedPayload } from "@dpopp/types";
 
 // ----- Ethers library
-import { utils, providers } from "ethers";
+import { utils } from "ethers";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
 // set the network rpc url based on env
@@ -28,7 +28,7 @@ export class EnsProvider implements Provider {
 
     try {
       // define a provider using the rpc url
-      const provider: StaticJsonRpcProvider = new providers.StaticJsonRpcProvider(RPC_URL);
+      const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(RPC_URL);
 
       // lookup ens name
       const reportedName: string = await provider.lookupAddress(address);

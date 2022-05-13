@@ -3,24 +3,28 @@ import { RequestPayload } from "@dpopp/types";
 import { EnsProvider } from "../src/providers/ens";
 
 // ----- Ethers library
-import { providers } from "ethers";
+import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
-jest.mock("ethers", () => {
-  // Require the original module to not be mocked...
-  return jest.requireActual("ethers");
-});
+jest.mock("@ethersproject/providers");
 
-const MOCK_ADDRESS = "0xcF300CE817E25b4F784bC1e24c9A99A525fEC50f";
-const MOCK_ENS = "dpopp.eth";
+const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
+const MOCK_ENS = "dpopptest.eth";
 
-const EthersLookupAddressMock = jest.spyOn(providers.StaticJsonRpcProvider.prototype, "lookupAddress");
-
-const EthersResolveAddressMock = jest.spyOn(providers.StaticJsonRpcProvider.prototype, "resolveName");
+const EthersLookupAddressMock = jest.spyOn(StaticJsonRpcProvider.prototype, "lookupAddress");
+const EthersResolveAddressMock = jest.spyOn(StaticJsonRpcProvider.prototype, "resolveName");
 
 describe("Attempt verification", function () {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    EthersLookupAddressMock.mockImplementation(async (address) => {
+      if (address === MOCK_ADDRESS) return MOCK_ENS;
+    });
+    EthersResolveAddressMock.mockImplementation(async (ens) => {
+      if (ens === MOCK_ENS) return MOCK_ADDRESS;
+    });
+  });
   it("handles valid verification attempt", async () => {
     const ens = new EnsProvider();
-
     const verifiedPayload = await ens.verify({
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
@@ -36,6 +40,7 @@ describe("Attempt verification", function () {
   });
 
   it("should return false for invalid address", async () => {
+    EthersLookupAddressMock.mockRejectedValueOnce("Invalid Address");
     const ens = new EnsProvider();
     const MOCK_FAKE_ADDRESS = "FAKE_ADDRESS";
 
