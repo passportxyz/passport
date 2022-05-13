@@ -19,6 +19,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "downlevelIteration": true, // TODO fixes problems with react-script 5 + @tendermint dependencies
+    "noImplicitAny": false // TODO fixes problems with react-script 5 + @tendermint dependencies
   },
-  "exclude": ["node_modules"]
 }
