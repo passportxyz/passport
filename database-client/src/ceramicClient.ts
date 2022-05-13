@@ -11,7 +11,7 @@ import type { DID as CeramicDID } from "dids";
 
 import { DataStorageBase } from "./types";
 
-const CERAMIC_CLIENT_URL = process.env.CERAMIC_CLIENT_URL || "http://localhost:7007";
+const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
 
 type CeramicStamp = {
   provider: string;
@@ -43,7 +43,7 @@ export class CeramicDatabase implements DataStorageBase {
 
   constructor(did?: CeramicDID, ceramicHost?: string) {
     // Create the Ceramic instance and inject the DID
-    const ceramic = new CeramicClient(ceramicHost ?? CERAMIC_CLIENT_URL);
+    const ceramic = new CeramicClient(ceramicHost ?? LOCAL_CERAMIC_CLIENT_URL);
     ceramic.setDID(did);
 
     // Create the loader, model and store
