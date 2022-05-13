@@ -17,18 +17,6 @@ const mockUserContext: UserContextState = {
   passport: undefined,
   isLoadingPassport: false,
   allProvidersState: {
-    Google: {
-      providerSpec: STAMP_PROVIDERS.Google,
-      stamp: undefined,
-    },
-    Simple: {
-      providerSpec: STAMP_PROVIDERS.Simple,
-      stamp: undefined,
-    },
-    Ens: {
-      providerSpec: STAMP_PROVIDERS.Ens,
-      stamp: undefined,
-    },
     Poh: {
       providerSpec: STAMP_PROVIDERS.Poh,
       stamp: undefined,
@@ -66,18 +54,6 @@ describe("when user has verified with PohProvider", () => {
         value={{
           ...mockUserContext,
           allProvidersState: {
-            Google: {
-              providerSpec: STAMP_PROVIDERS.Google,
-              stamp: undefined,
-            },
-            Simple: {
-              providerSpec: STAMP_PROVIDERS.Simple,
-              stamp: undefined,
-            },
-            Ens: {
-              providerSpec: STAMP_PROVIDERS.Ens,
-              stamp: undefined,
-            },
             Poh: {
               providerSpec: STAMP_PROVIDERS.Poh,
               stamp: pohStampFixture,
