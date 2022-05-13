@@ -197,42 +197,42 @@ const lb1 = new awsx.lb.ApplicationLoadBalancer(`gerald-dpopp-gitcoin-ecs`, { vp
 const httpListener1 = lb1.createListener("web-listener-ecs", {
   port: 80,
   protocol: "HTTP",
-  // defaultAction: {
-  //   type: "redirect",
-  //   redirect: {
-  //     protocol: "HTTPS",
-  //     port: "443",
-  //     statusCode: "HTTP_301",
-  //   },
-  // },
+  defaultAction: {
+    type: "redirect",
+    redirect: {
+      protocol: "HTTPS",
+      port: "443",
+      statusCode: "HTTP_301",
+    },
+  },
 });
 export const frontendUrlEcs = pulumi.interpolate`http://${httpListener1.endpoint.hostname}/`;
 
-// // Target group with the port of the Docker image
-// const target = lb1.createTargetGroup(
-//   "web-target", { vpc, port: 80 }
-// );
+// Target group with the port of the Docker image
+const target = lb1.createTargetGroup(
+  "web-target", { vpc, port: 80 }
+);
 
-// // Listen to traffic on port 443 & route it through the target group
-// const httpsListener = target.createListener("web-listener", {
-//   port: 443,
-//   certificateArn: certificateValidation.certificateArn
-// }); 
+// Listen to traffic on port 443 & route it through the target group
+const httpsListener = target.createListener("web-listener", {
+  port: 443,
+  certificateArn: certificateValidation.certificateArn
+}); 
 
 
 // Create a DNS record for the load balancer
-// const www = new aws.route53.Record("www", {
-//   zoneId: route53Zone,
-//   name: domain,
-//   type: "A",
-//   aliases: [
-//     {
-//       name: httpsListener.endpoint.hostname,
-//       zoneId: httpsListener.loadBalancer.loadBalancer.zoneId,
-//       evaluateTargetHealth: true,
-//     },
-//   ],
-// });
+const www = new aws.route53.Record("www", {
+  zoneId: route53Zone,
+  name: domain,
+  type: "A",
+  aliases: [
+    {
+      name: httpsListener.endpoint.hostname,
+      zoneId: httpsListener.loadBalancer.loadBalancer.zoneId,
+      evaluateTargetHealth: true,
+    },
+  ],
+});
 
 function makeCmd(input: pulumi.Input<string>): pulumi.Output<string[]> {
   let bucketName = pulumi.output(input);
@@ -289,7 +289,7 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
         memory: 1024,
         cpu: 500,
         portMappings: [
-          httpListener1
+          httpsListener
         ],
         links: [],
         command: ceramicCommand,
@@ -310,3 +310,5 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
 //   scalableDimension: "ecs:service:DesiredCount",
 //   serviceNamespace: "ecs",
 // });
+
+export const ceramicUrl = pulumi.interpolate`https://${domain}`
