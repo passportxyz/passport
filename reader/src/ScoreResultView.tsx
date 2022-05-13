@@ -1,13 +1,8 @@
-// --- React Methods
 import React from 'react'
-
-// import { VerifiableCredential } from '@dpopp/types'
-
 import type { ModelTypeAliases } from '@glazed/types'
-import { usePublicRecord } from '@self.id/react'
+import { usePublicRecord } from '@self.id/framework'
 import { useEffect } from 'react'
 
-// copied from @dpopp/types
 type VerifiableCredential = {
   '@context': string[]
   type: string[]
@@ -34,6 +29,7 @@ type CeramicStamp = {
   provider: string
   credential: string
 }
+
 type CeramicPassport = {
   issuanceDate: string
   expiryDate: string
@@ -65,7 +61,7 @@ export const ScoreResultView = ({ did }: ScoreResultViewProps): JSX.Element => {
 
   return (
     <div className="border-2 p-10 text-center">
-      {record.isLoading ? (
+      {record?.isLoading ? (
         <div>
           <p>LOADING</p>
         </div>
@@ -73,7 +69,7 @@ export const ScoreResultView = ({ did }: ScoreResultViewProps): JSX.Element => {
         <div className={'flex flex-col'}>
           <div className="mb-20 underline">Your Score</div>
           <p className="text-2xl">
-            {((record.content as CeramicPassport)?.stamps || []).length > 0
+            {((record?.content as CeramicPassport)?.stamps || []).length > 0
                 ? <span data-testid="passport-score--good">'GOOD 👍'</span>
                 : <span data-testid="passport-score--bad">'BAD 👎'</span>}
           </p>

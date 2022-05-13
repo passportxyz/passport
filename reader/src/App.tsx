@@ -1,10 +1,7 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-
 import React, { useState } from 'react'
-import { ScoreResultView } from '../components/ScoreResultView'
+import { ScoreResultView } from './ScoreResultView'
 
-const Home: NextPage = () => {
+const App = () => {
   const [did, setDid] = useState<string>('')
   const [didInput, setDidInput] = useState<string>('')
 
@@ -14,10 +11,6 @@ const Home: NextPage = () => {
 
   return (
     <div className="container mx-auto flex flex-wrap px-5 py-24 sm:flex-nowrap">
-      <Head>
-        <title>Passport Reader</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
       <div className="flex flex-col rounded-lg p-10 sm:mr-10 md:w-1/2 lg:w-1/2">
         <div className="font-miriam-libre text-gray-050 mt-10 font-bold leading-relaxed">
           <p className="text-6xl">
@@ -56,4 +49,4 @@ const Home: NextPage = () => {
   )
 }
 
-export default Home
+export default App
