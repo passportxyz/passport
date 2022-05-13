@@ -5,24 +5,34 @@ import { PohProvider } from "../src/providers/poh";
 // ----- Ethers library
 import { Contract } from "ethers";
 
+const mockIsRegistered = jest.fn();
+
 jest.mock("ethers", () => {
-  // Require the original module to not be mocked...
-  return jest.requireActual("ethers");
+  return {
+    Contract: jest.fn().mockImplementation(() => {
+      return {
+        isRegistered: mockIsRegistered,
+      };
+    }),
+  };
 });
 
 const MOCK_ADDRESS = "0x738488886dd94725864ae38252a90be1ab7609c7";
 
+// const IsRegisteredMock = jest.spyOn(Contract.prototype, "isRegistered");
+var IsRegisteredMock = jest.fn();
+
 describe("Attempt verification", function () {
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
+    // mockIsRegistered.mockImplementation(async (address) => {
+    //   if (address === MOCK_ADDRESS) return true;
+    // });
   });
 
   it("should return true for an address registered with proof of humanity", async () => {
-    const mockIsRegistered = jest.fn(() => new Promise((resolve) => resolve(true)));
-    (Contract.prototype as any).isRegistered = mockIsRegistered;
-
+    mockIsRegistered.mockResolvedValueOnce(true);
     const poh = new PohProvider();
-
     const verifiedPayload = await poh.verify({
       address: MOCK_ADDRESS,
     } as RequestPayload);
@@ -31,48 +41,39 @@ describe("Attempt verification", function () {
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
-        poh: "Verified",
+        poh: "Is registered",
       },
     });
   });
 
   it("should return false for an address not registered with proof of humanity", async () => {
-    const mockIsRegistered = jest.fn(() => new Promise((resolve) => resolve(false)));
-    (Contract.prototype as any).isRegistered = mockIsRegistered;
+    mockIsRegistered.mockResolvedValueOnce(false);
+    const UNREGISTERED_ADDRESS = "0xUNREGISTERED";
 
     const poh = new PohProvider();
-
     const verifiedPayload = await poh.verify({
-      address: MOCK_ADDRESS,
+      address: UNREGISTERED_ADDRESS,
     } as RequestPayload);
 
-    expect(mockIsRegistered).toBeCalledWith(MOCK_ADDRESS);
+    expect(mockIsRegistered).toBeCalledWith(UNREGISTERED_ADDRESS);
     expect(verifiedPayload).toEqual({
       valid: false,
-      record: {
-        poh: "NotVerified",
-      },
     });
   });
 
-  it("should return false for an incorrect address", async () => {
-    const mockIsRegistered = jest.fn(
-      () =>
-        new Promise((_) => {
-          throw "error";
-        })
-    );
-    (Contract.prototype as any).isRegistered = mockIsRegistered;
+  it("should return error response when isRegistered call errors", async () => {
+    mockIsRegistered.mockRejectedValueOnce("some error");
+    const UNREGISTERED_ADDRESS = "0xUNREGISTERED";
 
     const poh = new PohProvider();
-
     const verifiedPayload = await poh.verify({
-      address: MOCK_ADDRESS,
+      address: UNREGISTERED_ADDRESS,
     } as RequestPayload);
 
-    expect(mockIsRegistered).toBeCalledWith(MOCK_ADDRESS);
+    expect(mockIsRegistered).toBeCalledWith(UNREGISTERED_ADDRESS);
     expect(verifiedPayload).toEqual({
       valid: false,
+      error: [JSON.stringify("some error")],
     });
   });
 });
