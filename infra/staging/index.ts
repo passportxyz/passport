@@ -9,18 +9,17 @@ let domain = `ceramic.staging.${process.env["DOMAIN"]}`;
 // let IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
 
 // export const dockerGtcDpoppImage = `${process.env["DOCKER_GTC_DPOPP_IMAGE"]}`;
-export const dockerGtcDpoppImage = `nginx`;
 
 //////////////////////////////////////////////////////////////
 // Create permissions:
 //  - user for bucket access
 //////////////////////////////////////////////////////////////
 
-const usrS3 = new aws.iam.User(`gerald-dpopp-gitcoin-usr-s3`, {
+const usrS3 = new aws.iam.User(`gitcoin-dpopp-usr-s3`, {
   path: "/dpopp/",
 });
 
-const usrS3AccessKey = new aws.iam.AccessKey(`gerald-dpopp-gitcoin-usr-key`, { user: usrS3.name });
+const usrS3AccessKey = new aws.iam.AccessKey(`gitcoin-dpopp-usr-key`, { user: usrS3.name });
 
 export const usrS3Key = usrS3AccessKey.id;
 export const usrS3Secret = usrS3AccessKey.secret;
@@ -30,7 +29,7 @@ export const usrS3Secret = usrS3AccessKey.secret;
 //////////////////////////////////////////////////////////////
 
 // Generate an SSL certificate
-const certificate = new aws.acm.Certificate("cert", {
+const certificate = new aws.acm.Certificate("gitcoin-dpopp-ceramic-cert", {
   domainName: domain,
   tags: {
     Environment: "staging",
@@ -47,7 +46,7 @@ const certificateValidationDomain = new aws.route53.Record(`${domain}-validation
 });
 
 const certificateValidation = new aws.acm.CertificateValidation(
-  "certificateValidation",
+  "gitcoin-dpopp-ceramic-cert-validation",
   {
     certificateArn: certificate.arn,
     validationRecordFqdns: [certificateValidationDomain.fqdn],
@@ -57,7 +56,7 @@ const certificateValidation = new aws.acm.CertificateValidation(
 
 
 //////////////////////////////////////////////////////////////
-// Create bucket for ipf deamon
+// Create bucket for ipfs deamon
 // https://developers.ceramic.network/run/nodes/nodes/#example-aws-s3-policies
 //////////////////////////////////////////////////////////////
 
@@ -138,7 +137,7 @@ export const ceramicStateBucketArn = ceramicStateBucket.arn;
 // Set up VPC
 //////////////////////////////////////////////////////////////
 
-const vpc = new awsx.ec2.Vpc("gerald-dpopp-gitcoin", {
+const vpc = new awsx.ec2.Vpc("gitcoin-dpopp-ceramic", {
   subnets: [{ type: "public" }, { type: "private", mapPublicIpOnLaunch: true }],
 });
 
@@ -159,42 +158,14 @@ export const vpcPublicSubnet1 = vpcPublicSubnetIds.then((subnets) => {
 // Set up ALB and ECS cluster
 //////////////////////////////////////////////////////////////
 
-const cluster = new awsx.ecs.Cluster("gerald-dpopp-gitcoin", { vpc });
-// export const clusterInstance = cluster;
+const cluster = new awsx.ecs.Cluster("gitcoin-dpopp-ceramic", { vpc });
 export const clusterId = cluster.id;
 
 
-
-// TODO connect EFS with Fargate containers
-// const ceramicStateStore = new aws.efs.FileSystem("ceramic-statestore");
-
-const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
-  assumeRolePolicy: JSON.stringify({
-    Version: "2012-10-17",
-    Statement: [
-      {
-        Action: "sts:AssumeRole",
-        Effect: "Allow",
-        Sid: "",
-        Principal: {
-          Service: "ecs-tasks.amazonaws.com",
-        },
-      },
-    ],
-  }),
-  inlinePolicies: [
-  ],
-  managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"],
-  tags: {
-    dpopp: "",
-  },
-});
-
-
-const lb1 = new awsx.lb.ApplicationLoadBalancer(`gerald-dpopp-gitcoin-ecs`, { vpc });
+const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-dpopp-ceramic`, { vpc });
 
 // Listen to HTTP traffic on port 80 and redirect to 443
-const httpListener1 = lb1.createListener("web-listener-ecs", {
+const httpListener = alb.createListener("gitcoin-dpopp-ceramic-http", {
   port: 80,
   protocol: "HTTP",
   defaultAction: {
@@ -206,15 +177,15 @@ const httpListener1 = lb1.createListener("web-listener-ecs", {
     },
   },
 });
-export const frontendUrlEcs = pulumi.interpolate`http://${httpListener1.endpoint.hostname}/`;
+export const frontendUrlEcs = pulumi.interpolate`http://${httpListener.endpoint.hostname}/`;
 
 // Target group with the port of the Docker image
-const target = lb1.createTargetGroup(
-  "web-target", { vpc, port: 80 }
+const target = alb.createTargetGroup(
+  "gitcoin-dpopp-ceramic", { vpc, port: 80 }
 );
 
 // Listen to traffic on port 443 & route it through the target group
-const httpsListener = target.createListener("web-listener", {
+const httpsListener = target.createListener("gitcoin-dpopp-ceramic-https", {
   port: 443,
   certificateArn: certificateValidation.certificateArn
 }); 
@@ -260,7 +231,7 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   cluster,
   desiredCount: 1,
   taskDefinitionArgs: {
-    executionRole: dpoppEcsRole,
+    // executionRole: dpoppEcsRole,
     containers: {
       ipfs: {
         image: "ceramicnetwork/go-ipfs-daemon:latest",
