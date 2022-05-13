@@ -5,34 +5,29 @@ import * as awsx from "@pulumi/awsx";
 // The following vars are not allowed to be undefined, hence the `${...}` magic
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
-let domain = `staging.${process.env["DOMAIN"]}`;
-let IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
+let domain = `ceramic.staging.${process.env["DOMAIN"]}`;
+// let IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
 
-export const dockerGtcDpoppImage = `${process.env["DOCKER_GTC_DPOPP_IMAGE"]}`;
+// export const dockerGtcDpoppImage = `${process.env["DOCKER_GTC_DPOPP_IMAGE"]}`;
+export const dockerGtcDpoppImage = `nginx`;
 
 //////////////////////////////////////////////////////////////
-// Set up VPC
+// Create permissions:
+//  - user for bucket access
 //////////////////////////////////////////////////////////////
 
-const vpc = new awsx.ec2.Vpc("gitcoin", {
-  subnets: [{ type: "public" }, { type: "private", mapPublicIpOnLaunch: true }],
+const usrS3 = new aws.iam.User(`gerald-dpopp-gitcoin-usr-s3`, {
+  path: "/dpopp/",
 });
 
-export const vpcID = vpc.id;
-export const vpcPrivateSubnetIds = vpc.privateSubnetIds;
-export const vpcPublicSubnetIds = vpc.publicSubnetIds;
+const usrS3AccessKey = new aws.iam.AccessKey(`gerald-dpopp-gitcoin-usr-key`, { user: usrS3.name });
 
-export const vpcPublicSubnet1 = vpcPublicSubnetIds.then((subnets) => {
-  return subnets[0];
-});
+export const usrS3Key = usrS3AccessKey.id;
+export const usrS3Secret = usrS3AccessKey.secret;
 
 //////////////////////////////////////////////////////////////
-// Set up ALB and ECS cluster
+// Create HTTPS certificate
 //////////////////////////////////////////////////////////////
-
-const cluster = new awsx.ecs.Cluster("gitcoin", { vpc });
-// export const clusterInstance = cluster;
-export const clusterId = cluster.id;
 
 // Generate an SSL certificate
 const certificate = new aws.acm.Certificate("cert", {
@@ -60,49 +55,115 @@ const certificateValidation = new aws.acm.CertificateValidation(
   { customTimeouts: { create: "30s", update: "30s" } }
 );
 
-// Creates an ALB associated with our custom VPC.
-const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-service`, { vpc });
 
-// Listen to HTTP traffic on port 80 and redirect to 443
-const httpListener = alb.createListener("web-listener", {
-  port: 80,
-  protocol: "HTTP",
-  defaultAction: {
-    type: "redirect",
-    redirect: {
-      protocol: "HTTPS",
-      port: "443",
-      statusCode: "HTTP_301",
-    },
-  },
+//////////////////////////////////////////////////////////////
+// Create bucket for ipf deamon
+// https://developers.ceramic.network/run/nodes/nodes/#example-aws-s3-policies
+//////////////////////////////////////////////////////////////
+
+const ipfsBucket = new aws.s3.Bucket(`gitcoin-dpopp-ipfs`, {
+  acl: "private",
+  forceDestroy: true,
 });
 
-// Target group with the port of the Docker image
-const target = alb.createTargetGroup("web-target", {
-  vpc,
-  port: 80,
-  healthCheck: { path: "/health", unhealthyThreshold: 5 },
+const ipfsBucketPolicyDocument = aws.iam.getPolicyDocumentOutput({
+  statements: [{
+    principals: [{
+      type: "AWS",
+      identifiers: [pulumi.interpolate`${usrS3.arn}`],
+    }],
+    actions: [
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:PutObject",
+      "s3:DeleteObject"
+    ],
+    resources: [
+      ipfsBucket.arn,
+      pulumi.interpolate`${ipfsBucket.arn}/*`,
+    ],
+  }],
 });
 
-// Listen to traffic on port 443 & route it through the target group
-const httpsListener = target.createListener("web-listener", {
-  port: 443,
-  certificateArn: certificateValidation.certificateArn,
+const ipfsBucketPolicy = new aws.s3.BucketPolicy(`gitcoin-dpopp-ipfs-policy}`, {
+  bucket: ipfsBucket.id,
+  policy: ipfsBucketPolicyDocument.apply(ipfsBucketPolicyDocument => ipfsBucketPolicyDocument.json),
 });
 
-// Create a DNS record for the load balancer
-const www = new aws.route53.Record("www", {
-  zoneId: route53Zone,
-  name: domain,
-  type: "A",
-  aliases: [
-    {
-      name: httpsListener.endpoint.hostname,
-      zoneId: httpsListener.loadBalancer.loadBalancer.zoneId,
-      evaluateTargetHealth: true,
-    },
-  ],
+export const ipfsBucketName = ipfsBucket.id;
+export const ipfsBucketArn = ipfsBucket.arn;
+// export const ipfsBucketWebURL = pulumi.interpolate`http://${ipfsBucket.websiteEndpoint}/`;
+
+
+//////////////////////////////////////////////////////////////
+// Create bucket for ceramic state
+// https://developers.ceramic.network/run/nodes/nodes/#example-aws-s3-policies
+//////////////////////////////////////////////////////////////
+
+const ceramicStateBucket = new aws.s3.Bucket(`gitcoin-dpopp-ceramicState`, {
+  acl: "private",
+  forceDestroy: true,
 });
+
+const ceramicStateBucketPolicyDocument = aws.iam.getPolicyDocumentOutput({
+  statements: [{
+    principals: [{
+      type: "AWS",
+      identifiers: [pulumi.interpolate`${usrS3.arn}`],
+    }],
+    actions: [
+      "s3:ListBucket",
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject"
+    ],
+    resources: [
+      ceramicStateBucket.arn,
+      pulumi.interpolate`${ceramicStateBucket.arn}/*`,
+    ],
+  }],
+});
+
+const ceramicStateBucketPolicy = new aws.s3.BucketPolicy(`gitcoin-dpopp-ceramicState-policy}`, {
+  bucket: ceramicStateBucket.id,
+  policy: ceramicStateBucketPolicyDocument.apply(ceramicStateBucketPolicyDocument => ceramicStateBucketPolicyDocument.json),
+});
+
+export const ceramicStateBucketName = ceramicStateBucket.id;
+export const ceramicStateBucketArn = ceramicStateBucket.arn;
+// export const ipfsBucketWebURL = pulumi.interpolate`http://${ipfsBucket.websiteEndpoint}/`;
+
+
+//////////////////////////////////////////////////////////////
+// Set up VPC
+//////////////////////////////////////////////////////////////
+
+const vpc = new awsx.ec2.Vpc("gerald-dpopp-gitcoin", {
+  subnets: [{ type: "public" }, { type: "private", mapPublicIpOnLaunch: true }],
+});
+
+export const vpcID = vpc.id;
+export const vpcPrivateSubnetIds = vpc.privateSubnetIds;
+export const vpcPublicSubnetIds = vpc.publicSubnetIds;
+
+export const vpcPrivateSubnetId1 = vpcPrivateSubnetIds.then(values => values[0]);
+export const vpcPublicSubnetId1 = vpcPublicSubnetIds.then(values => values[0]);
+
+export const vpcPublicSubnet1 = vpcPublicSubnetIds.then((subnets) => {
+  return subnets[0];
+});
+
+
+
+//////////////////////////////////////////////////////////////
+// Set up ALB and ECS cluster
+//////////////////////////////////////////////////////////////
+
+const cluster = new awsx.ecs.Cluster("gerald-dpopp-gitcoin", { vpc });
+// export const clusterInstance = cluster;
+export const clusterId = cluster.id;
+
+
 
 // TODO connect EFS with Fargate containers
 // const ceramicStateStore = new aws.efs.FileSystem("ceramic-statestore");
@@ -122,19 +183,6 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
     ],
   }),
   inlinePolicies: [
-    {
-      name: "allow_iam_secrets_access",
-      policy: JSON.stringify({
-        Version: "2012-10-17",
-        Statement: [
-          {
-            Action: ["secretsmanager:GetSecretValue"],
-            Effect: "Allow",
-            Resource: IAM_SERVER_SSM_ARN,
-          },
-        ],
-      }),
-    },
   ],
   managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"],
   tags: {
@@ -142,44 +190,123 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
   },
 });
 
-const service = new awsx.ecs.FargateService("dpopp-iam", {
+
+const lb1 = new awsx.lb.ApplicationLoadBalancer(`gerald-dpopp-gitcoin-ecs`, { vpc });
+
+// Listen to HTTP traffic on port 80 and redirect to 443
+const httpListener1 = lb1.createListener("web-listener-ecs", {
+  port: 80,
+  protocol: "HTTP",
+  // defaultAction: {
+  //   type: "redirect",
+  //   redirect: {
+  //     protocol: "HTTPS",
+  //     port: "443",
+  //     statusCode: "HTTP_301",
+  //   },
+  // },
+});
+export const frontendUrlEcs = pulumi.interpolate`http://${httpListener1.endpoint.hostname}/`;
+
+// // Target group with the port of the Docker image
+// const target = lb1.createTargetGroup(
+//   "web-target", { vpc, port: 80 }
+// );
+
+// // Listen to traffic on port 443 & route it through the target group
+// const httpsListener = target.createListener("web-listener", {
+//   port: 443,
+//   certificateArn: certificateValidation.certificateArn
+// }); 
+
+
+// Create a DNS record for the load balancer
+// const www = new aws.route53.Record("www", {
+//   zoneId: route53Zone,
+//   name: domain,
+//   type: "A",
+//   aliases: [
+//     {
+//       name: httpsListener.endpoint.hostname,
+//       zoneId: httpsListener.loadBalancer.loadBalancer.zoneId,
+//       evaluateTargetHealth: true,
+//     },
+//   ],
+// });
+
+function makeCmd(input: pulumi.Input<string>): pulumi.Output<string[]> {
+  let bucketName = pulumi.output(input);
+  return bucketName.apply(bucketName => {
+    return [
+      "--port", "80",
+      "--hostname", "0.0.0.0",
+      // "--network", "${ceramic_network}",
+      "--ipfs-api", "http://localhost:5001",
+      // "--anchor-service-api", "${anchor_service_api_url}",
+      // "--debug", "${debug}",
+      "--log-to-files", "false",
+      // "--log-directory", "/usr/local/var/log/${directory_namespace}",
+      // "--cors-allowed-origins", "${cors_allowed_origins}",
+      // "--ethereum-rpc", "${eth_rpc_url}",
+      "--state-store-s3-bucket", bucketName,  // TODO: figure out how to user: ceramicStateBucket.id
+      // "--verbose", "${verbose}"
+    ]
+  });
+}
+
+let ceramicCommand = makeCmd(ceramicStateBucketName);
+
+const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   cluster,
   desiredCount: 1,
   taskDefinitionArgs: {
     executionRole: dpoppEcsRole,
     containers: {
-      iam: {
-        image: dockerGtcDpoppImage,
+      ipfs: {
+        image: "ceramicnetwork/go-ipfs-daemon:latest",
         memory: 1024,
-        portMappings: [httpsListener],
+        cpu: 500,
+        portMappings: [{
+          containerPort: 5001,
+          hostPort: 5001,
+        }, {
+          containerPort: 8011,
+          hostPort: 8011,
+        }],
         links: [],
-        secrets: [
-          {
-            name: "IAM_JWK",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:IAM_JWK::`,
-          },
-          {
-            name: "GOOGLE_CLIENT_ID",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:GOOGLE_CLIENT_ID::`,
-          },
-          {
-            name: "GOOGLE_CLIENT_SECRET",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:GOOGLE_CLIENT_SECRET::`,
-          },
-          {
-            name: "RPC_URL",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:MAINNET_RPC_URL::`,
-          },
+        environment: [
+          { name: "IPFS_ENABLE_S3", value: "true" },
+          { name: "IPFS_S3_REGION", value: "us-east-1" },
+          { name: "IPFS_S3_BUCKET_NAME", value: ipfsBucketName },
+          { name: "IPFS_S3_ROOT_DIRECTORY", value: "root" },
+          { name: "IPFS_S3_ACCESS_KEY_ID", value: usrS3Key },
+          { name: "IPFS_S3_SECRET_ACCESS_KEY", value: usrS3Secret },
+          { name: "IPFS_S3_KEY_TRANSFORM", value: "next-to-last/2" },
+        ],
+      },
+      ceramic: {
+        image: "ceramicnetwork/js-ceramic:latest",
+        memory: 1024,
+        cpu: 500,
+        portMappings: [
+          httpListener1
+        ],
+        links: [],
+        command: ceramicCommand,
+        environment: [
+          { name: "NODE_ENV", value: "production" },
+          { name: "AWS_ACCESS_KEY_ID", value: usrS3Key },
+          { name: "AWS_SECRET_ACCESS_KEY", value: usrS3Secret },
         ],
       },
     },
   },
 });
 
-const ecsTarget = new aws.appautoscaling.Target("autoscaling_target", {
-  maxCapacity: 10,
-  minCapacity: 1,
-  resourceId: pulumi.interpolate`service/${cluster.cluster.name}/${service.service.name}`,
-  scalableDimension: "ecs:service:DesiredCount",
-  serviceNamespace: "ecs",
-});
+// const ecsTarget = new aws.appautoscaling.Target("autoscaling_target", {
+//   maxCapacity: 10,
+//   minCapacity: 1,
+//   resourceId: pulumi.interpolate`service/${cluster.cluster.name}/${service.service.name}`,
+//   scalableDimension: "ecs:service:DesiredCount",
+//   serviceNamespace: "ecs",
+// });
