@@ -11,7 +11,7 @@ import * as awsx from "@pulumi/awsx";
 // The following vars are not allowed to be undefined, hence the `${...}` magic
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
-let domain = `ceramic.dpopp.${process.env["DOMAIN"]}`;
+let domain = `ceramic.${process.env["DOMAIN"]}`;
 
 //////////////////////////////////////////////////////////////
 // Create permissions:
@@ -125,7 +125,6 @@ const ceramicStateBucketPolicy = new aws.s3.BucketPolicy(`gitcoin-dpopp-ceramicS
 
 export const ceramicStateBucketName = ceramicStateBucket.id;
 export const ceramicStateBucketArn = ceramicStateBucket.arn;
-// export const ipfsBucketWebURL = pulumi.interpolate`http://${ipfsBucket.websiteEndpoint}/`;
 
 //////////////////////////////////////////////////////////////
 // Set up VPC
@@ -229,7 +228,6 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   cluster,
   desiredCount: 1,
   taskDefinitionArgs: {
-    // executionRole: dpoppEcsRole,
     containers: {
       ipfs: {
         image: "ceramicnetwork/go-ipfs-daemon:latest",

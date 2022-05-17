@@ -6,7 +6,7 @@ import * as awsx from "@pulumi/awsx";
 // The following vars are not allowed to be undefined, hence the `${...}` magic
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
-let domain = `ceramic.staging.dpopp.${process.env["DOMAIN"]}`;
+let domain = `ceramic.staging.${process.env["DOMAIN"]}`;
 
 //////////////////////////////////////////////////////////////
 // Create permissions:
@@ -120,7 +120,6 @@ const ceramicStateBucketPolicy = new aws.s3.BucketPolicy(`gitcoin-dpopp-ceramicS
 
 export const ceramicStateBucketName = ceramicStateBucket.id;
 export const ceramicStateBucketArn = ceramicStateBucket.arn;
-// export const ipfsBucketWebURL = pulumi.interpolate`http://${ipfsBucket.websiteEndpoint}/`;
 
 //////////////////////////////////////////////////////////////
 // Set up VPC
@@ -212,7 +211,7 @@ function makeCmd(input: pulumi.Input<string>): pulumi.Output<string[]> {
       ".*",
       // "--ethereum-rpc", "${eth_rpc_url}",
       "--state-store-s3-bucket",
-      bucketName, // TODO: figure out how to user: ceramicStateBucket.id
+      bucketName, // ceramicStateBucket.id
       // "--verbose", "${verbose}"
     ];
   });
@@ -220,12 +219,10 @@ function makeCmd(input: pulumi.Input<string>): pulumi.Output<string[]> {
 
 let ceramicCommand = makeCmd(ceramicStateBucketName);
 
-// https://developers.ceramic.network/run/nodes/nodes/#connect-to-the-mainnnet-a
 const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   cluster,
   desiredCount: 1,
   taskDefinitionArgs: {
-    // executionRole: dpoppEcsRole,
     containers: {
       ipfs: {
         image: "ceramicnetwork/go-ipfs-daemon:latest",
