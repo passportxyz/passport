@@ -168,7 +168,7 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
           },
           {
             name: "RPC_URL",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:GOERLI_RPC_URL::`,
+            valueFrom: `${IAM_SERVER_SSM_ARN}:MAINNET_RPC_URL::`,
           },
         ],
       },
