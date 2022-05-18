@@ -37,6 +37,10 @@ const mockUserContext: UserContextState = {
       providerSpec: STAMP_PROVIDERS.Twitter,
       stamp: undefined,
     },
+    POAP: {
+      providerSpec: STAMP_PROVIDERS.POAP,
+      stamp: undefined,
+    },
   },
   handleAddStamp: handleAddStamp,
   handleCreatePassport: mockCreatePassport,

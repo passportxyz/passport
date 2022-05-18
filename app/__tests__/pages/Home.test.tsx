@@ -28,8 +28,16 @@ const mockUserContext: UserContextState = {
       providerSpec: STAMP_PROVIDERS.Ens,
       stamp: undefined,
     },
+    Poh: {
+      providerSpec: STAMP_PROVIDERS.Poh,
+      stamp: undefined,
+    },
     Twitter: {
       providerSpec: STAMP_PROVIDERS.Twitter,
+      stamp: undefined,
+    },
+    POAP: {
+      providerSpec: STAMP_PROVIDERS.POAP,
       stamp: undefined,
     },
   },
