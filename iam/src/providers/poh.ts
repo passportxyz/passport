@@ -23,7 +23,7 @@ const POH_ABI = [
 ];
 
 // set the network rpc url based on env
-export const RPC_URL = process.env.MAINNET_RPC_URL;
+export const RPC_URL = process.env.RPC_URL;
 
 // Export a Poh Provider to carry out Proof of Humanity account is registered and active check and return a record object
 export class PohProvider implements Provider {
