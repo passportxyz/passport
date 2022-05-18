@@ -42,35 +42,37 @@ export class POAPProvider implements Provider {
   }
 
   // Verify that the address that is passed in owns at least one POAP older than 15 days
-  verify(payload: RequestPayload): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     const address = payload.address;
-    console.log("geri payload", payload);
-    // TODO geri: uri = 'https://api.thegraph.com/subgraphs/name/poap-xyz/poap%s' % ('-xdai' if network == 'xdai' else '')
-    // TODO geri: on which chain should I perform the verification? Always on ETH mainnet? Or use the chain which the user authorized?
-    const url = "https://api.thegraph.com/subgraphs/name/poap-xyz/poap-xdai";
-    const result = axios({
-      url: url,
-      method: "post",
-      data: {
-        query: `
-        {
-          account(id: "${address}") {
-            tokens(orderBy: created, orderDirection: asc) {
-              id
-              created
+    let isValid = false;
+    const graphChainSuffixes = [
+      "", // for mainnet
+      "-xdai", // for dai
+    ];
+
+    async function checkForPoaps(chain: string): Promise<boolean> {
+      // This function expects a chain specific suffix to add to the
+      // suffix to add to the subgraph URL
+      const url = `https://api.thegraph.com/subgraphs/name/poap-xyz/poap${chain}`;
+      const result = await axios({
+        url: url,
+        method: "post",
+        data: {
+          query: `
+          {
+            account(id: "${address}") {
+              tokens(orderBy: created, orderDirection: asc) {
+                id
+                created
+              }
             }
           }
-        }
-        `,
-      },
-    }).then((result) => {
+          `,
+        },
+      });
+
       const r = result as Result;
       const tokens = r.data?.data?.account?.tokens || [];
-
-      // tokens.forEach((token) => {
-      //   console.log("geri token:", token);
-      //   console.log("geri token:", token.id, token.created);
-      // });
 
       if (tokens.length > 0) {
         // If at least one token is present, check the oldest one
@@ -81,27 +83,16 @@ export class POAPProvider implements Provider {
 
       // Return false by default (if tokens array is empty or no matching verification)
       return false;
-    });
+    }
 
-    return new Promise((resolve) => {
-      result.then(
-        (isValid) => {
-          // Handle case when successfully processing
-          resolve({
-            valid: isValid,
-            record: {
-              // TODO geri: what information is relevant here?
-              poapVerification: "YES :)",
-            },
-          });
-        },
-        () => {
-          // Handle rejection / error
-          resolve({
-            valid: false,
-          });
-        }
-      );
+    // Verify if the user has poaps on all supported networks
+    for (let i = 0; !isValid && i < graphChainSuffixes.length; i++) {
+      isValid = await checkForPoaps(graphChainSuffixes[i]);
+    }
+
+    return Promise.resolve({
+      valid: isValid,
+      record: {},
     });
   }
 }

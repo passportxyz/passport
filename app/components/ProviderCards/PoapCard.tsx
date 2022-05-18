@@ -25,10 +25,7 @@ export default function PoapCard(): JSX.Element {
         address: address || "",
         type: providerId,
         version: "0.0.0",
-        proofs: {
-          valid: "true",
-          username: "test",
-        },
+        proofs: {},
       },
       signer as { signMessage: (message: string) => Promise<string> }
     )
