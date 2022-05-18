@@ -49,6 +49,11 @@ export const twitterStampFixture: Stamp = {
   credential,
 };
 
+export const facebookStampFixture: Stamp = {
+  provider: "Facebook",
+  credential,
+};
+
 export const passportFixture: Passport = {
   issuanceDate: new Date("2022-01-01"),
   expiryDate: new Date("2022-01-02"),
