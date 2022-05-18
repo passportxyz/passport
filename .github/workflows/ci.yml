@@ -21,7 +21,5 @@ jobs:
         run: lerna bootstrap
       - name: Run Tests
         run: yarn test
-        env:
-          RPC_URL: ${{ secrets.GOERLI_RPC_URL }}
       - name: Run Linter
         run: yarn lint
