@@ -2,7 +2,7 @@
 import React from "react";
 
 // --- Identity Providers
-import { GoogleCard, SimpleCard, EnsCard, PohCard, TwitterCard, PoapCard } from "./ProviderCards";
+import { GoogleCard, SimpleCard, EnsCard, PohCard, TwitterCard, PoapCard, FacebookCard } from "./ProviderCards";
 
 export const CardList = (): JSX.Element => {
   return (
@@ -15,6 +15,7 @@ export const CardList = (): JSX.Element => {
           <TwitterCard />
           <PohCard />
           <PoapCard />
+          <FacebookCard />
         </div>
       </div>
     </section>
