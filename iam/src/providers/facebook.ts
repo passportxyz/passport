@@ -3,17 +3,12 @@ import type { Provider, ProviderOptions } from "../types";
 import type { RequestPayload, VerifiedPayload } from "@dpopp/types";
 
 // --- Api Library
-import make from "axios";
+import axios from "axios";
+import { DateTime } from "luxon";
 
-type FacebookResponse = {
-  data?: Array<unknown>;
-  next?: { path?: string };
-  previous?: { path?: string };
-  paging?: { next: string; previous: string };
-  access_token?: string;
-};
+const APP_ID = process.env.FACEBOOK_APP_ID;
 
-type FacebookDebugResponse = {
+export type FacebookDebugResponse = {
   app_id?: string;
   type?: string;
   application?: string;
@@ -26,7 +21,7 @@ type FacebookDebugResponse = {
 
 // Facebook Graph API call response
 type Response = {
-  data?: FacebookDebugResponse;
+  data?: { data: FacebookDebugResponse };
   status?: number;
   statusText?: string;
   headers?: {
@@ -48,40 +43,32 @@ export class FacebookProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    let valid = false;
     try {
       const responseData = await verifyFacebook(payload.proofs.accessToken);
-      console.log("responseData ", responseData.data);
-      const formattedData = responseData?.data;
-      /// TODO: What should we verify?
-      if (formattedData.is_valid && formattedData.user_id) {
-        valid = true;
-      }
+      const formattedData = responseData?.data.data;
+
+      const notExpired = DateTime.now() < DateTime.fromSeconds(formattedData.expires_at);
+      const valid: boolean =
+        notExpired && formattedData.app_id === APP_ID && formattedData.is_valid && !!formattedData.user_id;
+
+      return {
+        valid,
+        record: valid
+          ? {
+              user_id: formattedData.user_id,
+            }
+          : undefined,
+      };
     } catch (e) {
       return { valid: false };
-    } finally {
-      valid;
     }
-
-    return {
-      valid: valid,
-      record: {
-        email: "Facebook",
-      },
-    };
   }
 }
 
 async function verifyFacebook(accessToken: string): Promise<Response> {
-  try {
-    const response: Response = await make({
-      headers: { "User-Agent": "Facebook Graph Client" },
-      method: "GET",
-      params: Object.assign({ access_token: accessToken, input_token: accessToken }),
-      url: "https://graph.facebook.com/debug_token/",
-    });
-    return response;
-  } catch (error) {
-    console.log("Get ERROR: ", error);
-  }
+  const response: Response = await axios.get("https://graph.facebook.com/debug_token/", {
+    headers: { "User-Agent": "Facebook Graph Client" },
+    params: { access_token: accessToken, input_token: accessToken },
+  });
+  return response;
 }

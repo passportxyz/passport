@@ -4890,6 +4890,11 @@
   resolved "https://registry.npmjs.org/@types/long/-/long-4.0.1.tgz"
   integrity sha512-5tXH6Bx/kNGd3MgffdmP4dy2Z+G4eaXw0SE81Tq3BNadtnMR5/ySMzX4SLEzHJzSmPNn4HIdpQsBvXMUykr58w==
 
+"@types/luxon@^2.3.2":
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-2.3.2.tgz#8a3f2cdd4858ce698b56cd8597d9243b8e9d3c65"
+  integrity sha512-WOehptuhKIXukSUUkRgGbj2c997Uv/iUgYgII8U7XLJqq9W2oF0kQ6frEznRQbdurioz+L/cdaIm4GutTQfgmA==
+
 "@types/mime@^1":
   version "1.3.2"
   resolved "https://registry.npmjs.org/@types/mime/-/mime-1.3.2.tgz"
@@ -12679,6 +12684,11 @@ ltgt@^2.1.2, ltgt@^2.2.1:
   resolved "https://registry.npmjs.org/ltgt/-/ltgt-2.2.1.tgz"
   integrity sha1-81ypHEk/e3PaDgdJUwTxezH4fuU=
 
+luxon@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-2.4.0.tgz#9435806545bb32d4234dab766ab8a3d54847a765"
+  integrity sha512-w+NAwWOUL5hO0SgwOHsMBAmZ15SoknmQXhSO0hIbJCAmPKSsGeK8MlmhYh2w6Iib38IxN2M+/ooXWLbeis7GuA==
+
 lz-string@^1.4.4:
   version "1.4.4"
   resolved "https://registry.npmjs.org/lz-string/-/lz-string-1.4.4.tgz"
@@ -14649,11 +14659,6 @@ react-dom@^17.0.2:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     scheduler "^0.20.2"
-
-react-facebook-login@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.npmjs.org/react-facebook-login/-/react-facebook-login-4.1.1.tgz"
-  integrity sha512-COnHEHlYGTKipz4963safFAK9PaNTcCiXfPXMS/yxo8El+/AJL5ye8kMJf23lKSSGGPgqFQuInskIHVqGqTvSw==
 
 react-fast-compare@3.2.0:
   version "3.2.0"

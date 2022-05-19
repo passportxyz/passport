@@ -6,10 +6,13 @@ import { HashRouter as Router, Routes, Route } from "react-router-dom";
 
 // -- Next Methods
 import type { NextPage } from "next";
+import Head from "next/head";
 
 // -- Pages
 import Home from "./Home";
 import Dashboard from "./Dashboard";
+
+const FacebookAppId = process.env.NEXT_PUBLIC_DPOPP_FACEBOOK_APP_ID || "";
 
 const App: NextPage = () => {
   // pull any search params
@@ -29,13 +32,41 @@ const App: NextPage = () => {
     return <div></div>;
   }
 
+  const facebookSdkScript = (
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `
+          window.fbAsyncInit = function() {
+            FB.init({
+              appId      : '${FacebookAppId}',
+              cookie     : true,
+              xfbml      : true,
+              version    : 'v13.0'
+            });
+            FB.AppEvents.logPageView();   
+          };
+        
+          (function(d, s, id){
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) {return;}
+            js = d.createElement(s); js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+          }(document, 'script', 'facebook-jssdk'));
+        `,
+      }}
+    />
+  );
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-      </Routes>
-    </Router>
+    <div>
+      <Head>{facebookSdkScript}</Head>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+      </Router>
+    </div>
   );
 };
 
