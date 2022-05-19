@@ -18,7 +18,6 @@ export default function PoapCard(): JSX.Element {
   const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
   // fetch an example VC from the IAM server
   const handleFetchCredential = (): void => {
-    // TODO geri: make the verification here? But what response should I generate?
     fetchVerifiableCredential(
       iamUrl,
       {

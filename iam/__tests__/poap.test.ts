@@ -85,12 +85,9 @@ describe("Attempt verification", function () {
       expectedSubgraphsToCheck.push(subgraphUrl);
       jest.clearAllMocks();
 
-      console.log("geri: subgraphUrl", subgraphUrl);
       mockedAxios.post.mockImplementation(async (url, data) => {
         const query: string = (data as RequestData).query;
-        console.log("geri: query.includes(MOCK_ADDRESS)", query.includes(MOCK_ADDRESS));
         if (url === subgraphUrl && query.includes(MOCK_ADDRESS)) {
-          console.log("geri return valid response")
           return validPoapResponse
         }
       });
@@ -121,12 +118,9 @@ describe("Attempt verification", function () {
       const subgraphUrl = poapSubgraphs[i];
       jest.clearAllMocks();
 
-      console.log("geri: subgraphUrl", subgraphUrl);
       mockedAxios.post.mockImplementation(async (url, data) => {
         const query: string = (data as RequestData).query;
-        console.log("geri: query.includes(MOCK_ADDRESS)", query.includes(MOCK_ADDRESS));
         if (url === subgraphUrl && query.includes(MOCK_ADDRESS)) {
-          console.log("geri return valid response")
           return invalidPoapResponse
         }
       });
@@ -156,12 +150,9 @@ describe("Attempt verification", function () {
       const subgraphUrl = poapSubgraphs[i];
       jest.clearAllMocks();
 
-      console.log("geri: subgraphUrl", subgraphUrl);
       mockedAxios.post.mockImplementation(async (url, data) => {
         const query: string = (data as RequestData).query;
-        console.log("geri: query.includes(MOCK_ADDRESS)", query.includes(MOCK_ADDRESS));
         if (url === subgraphUrl && query.includes(MOCK_ADDRESS)) {
-          console.log("geri return valid response")
           return emptyPoapResponse
         }
       });

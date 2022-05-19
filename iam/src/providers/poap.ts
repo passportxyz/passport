@@ -65,7 +65,6 @@ export class POAPProvider implements Provider {
     async function checkForPoaps(url: string): Promise<PoapCheckResult> {
       let hasPoaps = false;
       let poapList = null as string[];
-      console.log("geri checking url for poaps: ", url);
       const result = await axios.post(url, {
         query: `
           {
