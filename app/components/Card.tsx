@@ -1,7 +1,23 @@
 // --- React Methods
 import React from "react";
 
-import { Box, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon } from "@chakra-ui/react";
+import {
+  Box,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
+  Button,
+} from "@chakra-ui/react";
 
 import { VerifiableCredential } from "@dpopp/types";
 import { ProviderSpec } from "../config/providers";
@@ -14,11 +30,12 @@ export type CardProps = {
 };
 
 export const Card = ({ providerSpec, verifiableCredential, issueCredentialWidget }: CardProps): JSX.Element => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
   return (
-    <div className="relative m-2 flex">
-      <div className="relative z-10 w-full rounded-lg border-4 border-gray-200 bg-white px-2 py-4">
-        <div className="justify-space-between mb-3 flex items-center">
-          <div className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center text-white">
+    <div className="w-full p-4 md:w-1/2 xl:w-1/4">
+      <div className="border border-gray-200 p-0">
+        <div className="mx-auto flex flex-row p-2">
+          <div className="flex h-10 w-1/2 w-10 flex-grow">
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 fillRule="evenodd"
@@ -28,25 +45,60 @@ export const Card = ({ providerSpec, verifiableCredential, issueCredentialWidget
               />
             </svg>
           </div>
-          {verifiableCredential ? <p>✅ Verified</p> : issueCredentialWidget}
+
+          {verifiableCredential ? (
+            <>
+              {" "}
+              <button className="border-2 p-2 md:w-1/4" onClick={onOpen}>{`</>`}</button>
+              <Modal isOpen={isOpen} onClose={onClose}>
+                <ModalOverlay />
+                <ModalContent>
+                  <ModalHeader>
+                    <p className="font-miriam-libre">{providerSpec.name} JSON</p>
+                  </ModalHeader>
+                  <ModalCloseButton />
+                  <ModalBody>
+                    <Accordion allowMultiple backgroundColor={"white"}>
+                      <AccordionItem>
+                        <h2>
+                          <AccordionButton>
+                            <Box flex="1" textAlign="left" className="font-miriam-libre">
+                              You can find the {providerSpec.name} JSON data below
+                            </Box>
+                            <AccordionIcon />
+                          </AccordionButton>
+                        </h2>
+                        <AccordionPanel pb={4}>
+                          <pre>{verifiableCredential ? JSON.stringify(verifiableCredential, null, 2) : "No stamp"}</pre>
+                        </AccordionPanel>
+                      </AccordionItem>
+                    </Accordion>
+                  </ModalBody>
+
+                  <ModalFooter>
+                    <Button rounded={"md"} colorScheme="purple" mr={3} onClick={onClose}>
+                      <span className="font-miriam-libre">Done</span>
+                    </Button>
+                  </ModalFooter>
+                </ModalContent>
+              </Modal>
+            </>
+          ) : (
+            <></>
+          )}
         </div>
-        <h1 className="title-font mb-3 text-lg font-medium text-gray-900">{providerSpec.name}</h1>
-        <p className="leading-relaxed">{providerSpec.description}</p>
-        <Accordion allowMultiple backgroundColor={"white"}>
-          <AccordionItem>
-            <h2>
-              <AccordionButton>
-                <Box flex="1" textAlign="left">
-                  Output
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-            </h2>
-            <AccordionPanel pb={4}>
-              <pre>{verifiableCredential ? JSON.stringify(verifiableCredential, null, 2) : "No stamp"}</pre>
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
+        <div className="mt-2 p-2">
+          <h1 className="title-font mb-3 text-lg font-medium text-gray-900">{providerSpec.name}</h1>
+          <p className="pleading-relaxed">{providerSpec.description}</p>
+        </div>
+        {verifiableCredential ? (
+          <span className="flex w-full items-center justify-center border-t-2 p-2 text-gray-900">
+            <img src="./assets/verifiedShield.svg" />
+            <span className="ml-3 text-xl text-green-400">Verified</span>
+          </span>
+        ) : (
+          issueCredentialWidget
+        )}
       </div>
     </div>
   );

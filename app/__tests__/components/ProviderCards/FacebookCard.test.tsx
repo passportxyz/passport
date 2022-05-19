@@ -39,9 +39,7 @@ describe("when user has not verfied with FacebookProvider", () => {
       </UserContext.Provider>
     );
 
-    const verifyFacebookButton = screen.queryByRole("button", {
-      name: /Verify/,
-    });
+    const verifyFacebookButton = screen.queryByTestId("button-verify-facebook");
 
     expect(verifyFacebookButton).toBeInTheDocument();
   });

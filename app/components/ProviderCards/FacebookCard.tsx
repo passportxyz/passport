@@ -78,8 +78,8 @@ export default function FacebookCard(): JSX.Element {
       providerSpec={allProvidersState[providerId]!.providerSpec as ProviderSpec}
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={
-        <button className="verify-btn" onClick={onClick}>
-          Verify
+        <button data-testid="button-verify-facebook" className="verify-btn" onClick={onClick}>
+          Connect account
         </button>
       }
     />

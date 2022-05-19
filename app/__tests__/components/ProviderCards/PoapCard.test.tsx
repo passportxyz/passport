@@ -39,9 +39,7 @@ describe("when user has not verified with PoapProvider", () => {
       </UserContext.Provider>
     );
 
-    const verifyButton = screen.queryByRole("button", {
-      name: /Verify/,
-    });
+    const verifyButton = screen.queryByTestId("button-verify-poap");
 
     expect(verifyButton).toBeInTheDocument();
   });

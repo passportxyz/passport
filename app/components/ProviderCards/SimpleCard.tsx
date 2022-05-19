@@ -44,8 +44,8 @@ export default function SimpleCard(): JSX.Element {
   };
 
   const issueCredentialWidget = (
-    <button className="verify-btn" onClick={handleFetchCredential}>
-      Verify
+    <button data-testid="button-verify-simple" className="verify-btn" onClick={handleFetchCredential}>
+      Connect Simple
     </button>
   );
 

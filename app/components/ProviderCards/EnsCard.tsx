@@ -63,15 +63,15 @@ export default function EnsCard(): JSX.Element {
   const issueCredentialWidget = (
     <>
       <button
+        data-testid="button-verify-ens"
         className="verify-btn"
-        data-testid="button-verify"
         onClick={() => {
           SetCredentialResponse(undefined);
           handleFetchCredential();
           onOpen();
         }}
       >
-        Verify
+        Link to ENS
       </button>
       <VerifyModal
         isOpen={isOpen}

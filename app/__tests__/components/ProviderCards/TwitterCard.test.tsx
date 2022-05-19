@@ -39,11 +39,9 @@ describe("when user has not verfied with TwitterProvider", () => {
       </UserContext.Provider>
     );
 
-    const verifyTwitterButton = screen.queryByRole("button", {
-      name: /Verify/,
-    });
+    const twitterVerifyButton = screen.queryByTestId("button-verify-twitter");
 
-    expect(verifyTwitterButton).toBeInTheDocument();
+    expect(twitterVerifyButton).toBeInTheDocument();
   });
 });
 

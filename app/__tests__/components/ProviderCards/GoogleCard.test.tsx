@@ -39,9 +39,7 @@ describe("when user has not verfied with GoogleProvider", () => {
       </UserContext.Provider>
     );
 
-    const verifyGoogleButton = screen.queryByRole("button", {
-      name: /Verify/,
-    });
+    const verifyGoogleButton = screen.queryByTestId("button-verify-google");
 
     expect(verifyGoogleButton).toBeInTheDocument();
   });

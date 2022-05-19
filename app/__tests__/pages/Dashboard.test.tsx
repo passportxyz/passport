@@ -1,6 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import Dashboard from "../../pages/Dashboard";
 import { UserContext, UserContextState } from "../../context/userContext";
 import { mockAddress, mockWallet } from "../../__test-fixtures__/onboardHookValues";
@@ -59,47 +58,6 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe("when user has a connected wallet", () => {
-  it("should display wallet address", async () => {
-    expect.assertions(1);
-
-    render(
-      <UserContext.Provider value={mockUserContext}>
-        <Router>
-          <Dashboard />
-        </Router>
-      </UserContext.Provider>
-    );
-
-    const expectedAddress = await screen.findByText(/0xmyAddress/);
-    expect(expectedAddress).toBeInTheDocument();
-  });
-
-  it("should have a disconnect button", async () => {
-    expect.assertions(2);
-
-    render(
-      <UserContext.Provider value={mockUserContext}>
-        <Router>
-          <Dashboard />
-        </Router>
-      </UserContext.Provider>
-    );
-
-    const disconnectWalletButton = screen.getByRole("button", {
-      name: /Disconnect/,
-    });
-
-    expect(disconnectWalletButton).toBeInTheDocument();
-
-    await userEvent.click(disconnectWalletButton);
-
-    await waitFor(() => {
-      expect(mockHandleConnection).toBeCalledTimes(1);
-    });
-  });
-});
-
 describe("when user has no passport", () => {
   const mockUserContextWithNoPassport: UserContextState = {
     ...mockUserContext,
@@ -115,7 +73,7 @@ describe("when user has no passport", () => {
       </UserContext.Provider>
     );
 
-    expect(screen.getByTestId("loading-spinner")).toBeInTheDocument();
+    expect(screen.getByTestId("loading-spinner-passport")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(mockCreatePassport).toBeCalledTimes(1);
@@ -142,10 +100,10 @@ describe("when the user has a passport", () => {
       </UserContext.Provider>
     );
 
-    expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("loading-spinner-passport")).not.toBeInTheDocument();
   });
 
-  it("shows passport issuanceDate and expiryDate will be here", () => {
+  it("shows Passport JSON button", () => {
     render(
       <UserContext.Provider value={mockUserContextWithPassport}>
         <Router>
@@ -154,10 +112,37 @@ describe("when the user has a passport", () => {
       </UserContext.Provider>
     );
 
-    const issuanceDateOnPage = screen.getByText(/2022-01-15/);
-    const expiryDateOnPage = screen.getByText(/2022-01-16/);
+    expect(screen.getByTestId("button-passport-json")).toBeInTheDocument();
+  });
+});
 
-    expect(issuanceDateOnPage).toBeInTheDocument();
-    expect(expiryDateOnPage).toBeInTheDocument();
+describe("when the user clicks Passport JSON", () => {
+  const mockUserContextWithPassport = {
+    ...mockUserContext,
+    passport: {
+      issuanceDate: new Date("2022-01-15"),
+      expiryDate: new Date("2022-01-16"),
+      stamps: [],
+    },
+  };
+
+  it("it should display a modal", async () => {
+    render(
+      <UserContext.Provider value={mockUserContextWithPassport}>
+        <Router>
+          <Dashboard />
+        </Router>
+      </UserContext.Provider>
+    );
+
+    const buttonPassportJson = screen.queryByTestId("button-passport-json");
+
+    fireEvent.click(buttonPassportJson!);
+
+    const verifyModal = await screen.findByRole("dialog");
+    const buttonDone = screen.getByTestId("button-passport-json-done");
+
+    expect(verifyModal).toBeInTheDocument();
+    expect(buttonDone).toBeInTheDocument();
   });
 });
