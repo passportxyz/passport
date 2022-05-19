@@ -20,52 +20,59 @@ const validPoapResponse = {
   data: {
     data: {
       account: {
-        tokens: [{
-          id: "1",
-          created: daysAgo16
-        }, {
-          id: "2",
-          created: daysAgo14
-        }, {
-          id: "3",
-          created: daysAgo10
-        }, {
-          id: "4",
-          created: daysAgo5
-        }
-        ]
-      }
-    }
-  }
-}
+        tokens: [
+          {
+            id: "1",
+            created: daysAgo16,
+          },
+          {
+            id: "2",
+            created: daysAgo14,
+          },
+          {
+            id: "3",
+            created: daysAgo10,
+          },
+          {
+            id: "4",
+            created: daysAgo5,
+          },
+        ],
+      },
+    },
+  },
+};
 
 const invalidPoapResponse = {
   data: {
     data: {
       account: {
-        tokens: [{
-          id: "1",
-          created: daysAgo14
-        }, {
-          id: "2",
-          created: daysAgo10
-        }, {
-          id: "3",
-          created: daysAgo5
-        }
-        ]
-      }
-    }
-  }
-}
+        tokens: [
+          {
+            id: "1",
+            created: daysAgo14,
+          },
+          {
+            id: "2",
+            created: daysAgo10,
+          },
+          {
+            id: "3",
+            created: daysAgo5,
+          },
+        ],
+      },
+    },
+  },
+};
 
 const emptyPoapResponse = {
   data: {
     data: {
-      account: null as {}
-    }
-  }
-}
+      account: null as {},
+    },
+  },
+};
 
 // const AxiosPost = jest.spyOn(axios.prototype, "post");
 
@@ -74,8 +81,7 @@ interface RequestData {
 }
 
 describe("Attempt verification", function () {
-  beforeEach(() => {
-  });
+  beforeEach(() => {});
 
   it("handles valid verification attempt", async () => {
     // We'll mock responses on each of the configured networks, and check the expected calls
@@ -88,7 +94,7 @@ describe("Attempt verification", function () {
       mockedAxios.post.mockImplementation(async (url, data) => {
         const query: string = (data as RequestData).query;
         if (url === subgraphUrl && query.includes(MOCK_ADDRESS)) {
-          return validPoapResponse
+          return validPoapResponse;
         }
       });
 
@@ -99,16 +105,16 @@ describe("Attempt verification", function () {
 
       // Check that all the subgraph URLs have been queried, up to the one we mocked with relevant data
       expect(mockedAxios.post.mock.calls.length).toEqual(expectedSubgraphsToCheck.length);
-      for(let j=0; j<expectedSubgraphsToCheck.length;j++) {
+      for (let j = 0; j < expectedSubgraphsToCheck.length; j++) {
         expect(mockedAxios.post.mock.calls[i][0]).toEqual(expectedSubgraphsToCheck[i]);
       }
 
       expect(verifiedPayload).toEqual({
         valid: true,
         record: {
-          poaps: (validPoapResponse.data.data.account.tokens.map((token) => token.id) as string[]).join(",")
+          poaps: (validPoapResponse.data.data.account.tokens.map((token) => token.id) as string[]).join(","),
         },
-      })
+      });
     }
   });
 
@@ -121,7 +127,7 @@ describe("Attempt verification", function () {
       mockedAxios.post.mockImplementation(async (url, data) => {
         const query: string = (data as RequestData).query;
         if (url === subgraphUrl && query.includes(MOCK_ADDRESS)) {
-          return invalidPoapResponse
+          return invalidPoapResponse;
         }
       });
 
@@ -132,15 +138,14 @@ describe("Attempt verification", function () {
 
       // Check that all the subgraph URLs have been queried
       expect(mockedAxios.post.mock.calls.length).toEqual(poapSubgraphs.length);
-      for(let j=0; j<poapSubgraphs.length;j++) {
+      for (let j = 0; j < poapSubgraphs.length; j++) {
         expect(mockedAxios.post.mock.calls[i][0]).toEqual(poapSubgraphs[i]);
       }
 
       expect(verifiedPayload).toEqual({
         valid: false,
-        record: {
-        },
-      })
+        record: {},
+      });
     }
   });
 
@@ -153,7 +158,7 @@ describe("Attempt verification", function () {
       mockedAxios.post.mockImplementation(async (url, data) => {
         const query: string = (data as RequestData).query;
         if (url === subgraphUrl && query.includes(MOCK_ADDRESS)) {
-          return emptyPoapResponse
+          return emptyPoapResponse;
         }
       });
 
@@ -164,16 +169,14 @@ describe("Attempt verification", function () {
 
       // Check that all the subgraph URLs have been queried
       expect(mockedAxios.post.mock.calls.length).toEqual(poapSubgraphs.length);
-      for(let j=0; j<poapSubgraphs.length;j++) {
+      for (let j = 0; j < poapSubgraphs.length; j++) {
         expect(mockedAxios.post.mock.calls[i][0]).toEqual(poapSubgraphs[i]);
       }
 
       expect(verifiedPayload).toEqual({
         valid: false,
-        record: {
-        },
-      })
+        record: {},
+      });
     }
   });
-  
 });

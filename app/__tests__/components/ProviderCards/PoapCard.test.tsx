@@ -1,11 +1,11 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { SimpleCard } from "../../../components/ProviderCards";
+import { PoapCard } from "../../../components/ProviderCards";
 
 import { UserContext, UserContextState } from "../../../context/userContext";
 import { mockAddress, mockWallet } from "../../../__test-fixtures__/onboardHookValues";
 import { STAMP_PROVIDERS } from "../../../config/providers";
-import { simpleStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
+import { poapStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
 
 jest.mock("../../../utils/onboard.ts");
 
@@ -17,18 +17,6 @@ const mockUserContext: UserContextState = {
   passport: undefined,
   isLoadingPassport: false,
   allProvidersState: {
-    Google: {
-      providerSpec: STAMP_PROVIDERS.Google,
-      stamp: undefined,
-    },
-    Simple: {
-      providerSpec: STAMP_PROVIDERS.Simple,
-      stamp: undefined,
-    },
-    Ens: {
-      providerSpec: STAMP_PROVIDERS.Ens,
-      stamp: undefined,
-    },
     POAP: {
       providerSpec: STAMP_PROVIDERS.POAP,
       stamp: undefined,
@@ -47,7 +35,7 @@ describe("when user has not verified with PoapProvider", () => {
   it("should display a verification button", () => {
     render(
       <UserContext.Provider value={mockUserContext}>
-        <SimpleCard />
+        <PoapCard />
       </UserContext.Provider>
     );
 
@@ -59,33 +47,21 @@ describe("when user has not verified with PoapProvider", () => {
   });
 });
 
-describe("when user has verified with SimpleProvider", () => {
+describe("when user has verified with PoapProvider", () => {
   it("should display that user is verified", () => {
     render(
       <UserContext.Provider
         value={{
           ...mockUserContext,
           allProvidersState: {
-            Google: {
-              providerSpec: STAMP_PROVIDERS.Google,
-              stamp: undefined,
-            },
-            Simple: {
-              providerSpec: STAMP_PROVIDERS.Simple,
-              stamp: simpleStampFixture,
-            },
-            Ens: {
-              providerSpec: STAMP_PROVIDERS.Ens,
-              stamp: undefined,
-            },
             POAP: {
               providerSpec: STAMP_PROVIDERS.POAP,
-              stamp: undefined,
+              stamp: poapStampFixture,
             },
           },
         }}
       >
-        <SimpleCard />
+        <PoapCard />
       </UserContext.Provider>
     );
 

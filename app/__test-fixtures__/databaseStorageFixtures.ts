@@ -54,3 +54,8 @@ export const passportFixture: Passport = {
   expiryDate: new Date("2022-01-02"),
   stamps: [googleStampFixture],
 };
+
+export const poapStampFixture: Stamp = {
+  provider: "POAP",
+  credential,
+};
