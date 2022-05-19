@@ -40,8 +40,8 @@ export default function PoapCard(): JSX.Element {
   };
 
   const issueCredentialWidget = (
-    <button className="verify-btn" onClick={handleFetchCredential}>
-      Verify
+    <button data-testid="button-verify-poap" className="verify-btn" onClick={handleFetchCredential}>
+      Connect to POAP
     </button>
   );
 

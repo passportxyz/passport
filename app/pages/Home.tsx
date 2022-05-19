@@ -20,16 +20,16 @@ export default function Home() {
 
   return (
     <div className="mx-auto flex flex-wrap">
-      <div className="mb-6 w-1/2 w-full py-6">
+      <div className="mb-6 w-1/2 w-full py-6 text-purple-400">
         <img src="/assets/dpoppLogo.svg" className="invert" alt="logo" />
-        <div className="font-miriam-libre text-gray-050 mt-10 font-normal font-bold leading-relaxed">
+        <div className="font-miriam-libre mt-10 font-normal font-bold leading-relaxed">
           <p className="text-6xl">
             Gitcoin
             <br />
             ID Passport
           </p>
         </div>
-        <div className="font-libre-franklin mt-10 text-xl md:w-1/3">
+        <div className="font-mariam-libre mt-10 text-xl md:w-1/3">
           Gitcoin ID Passport is an identity aggregator of the top identity providers in the web3 space into one
           transportable identity that proves your personhood.
         </div>

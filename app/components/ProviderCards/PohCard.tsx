@@ -62,15 +62,15 @@ export default function PohCard(): JSX.Element {
   const issueCredentialWidget = (
     <>
       <button
+        data-testid="button-verify-poh"
         className="verify-btn"
-        data-testid="button-verify"
         onClick={() => {
           SetCredentialResponse(undefined);
           handleFetchCredential();
           onOpen();
         }}
       >
-        Verify
+        Connect PoH
       </button>
       <VerifyModal
         isOpen={isOpen}

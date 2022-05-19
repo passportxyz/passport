@@ -105,8 +105,8 @@ export default function TwitterCard(): JSX.Element {
   });
 
   const issueCredentialWidget = (
-    <button className="verify-btn" onClick={handleFetchTwitterOAuth}>
-      Verify
+    <button data-testid="button-verify-twitter" className="verify-btn" onClick={handleFetchTwitterOAuth}>
+      Connect account
     </button>
   );
 

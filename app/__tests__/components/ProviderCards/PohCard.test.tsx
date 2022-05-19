@@ -44,9 +44,7 @@ describe("when user has not verfied with PohProvider", () => {
       </UserContext.Provider>
     );
 
-    const verifyButton = screen.queryByRole("button", {
-      name: /Verify/,
-    });
+    const verifyButton = screen.queryByTestId("button-verify-poh");
 
     expect(verifyButton).toBeInTheDocument();
   });
@@ -93,9 +91,7 @@ describe("when the verify button is clicked", () => {
         </UserContext.Provider>
       );
 
-      const initialVerifyButton = screen.queryByRole("button", {
-        name: /Verify/,
-      });
+      const initialVerifyButton = screen.queryByTestId("button-verify-poh");
 
       fireEvent.click(initialVerifyButton!);
 
@@ -116,9 +112,7 @@ describe("when the verify button is clicked", () => {
         </UserContext.Provider>
       );
 
-      const initialVerifyButton = screen.queryByRole("button", {
-        name: /Verify/,
-      });
+      const initialVerifyButton = screen.queryByTestId("button-verify-poh");
 
       // Click verify button on ens card
       fireEvent.click(initialVerifyButton!);
@@ -147,9 +141,7 @@ describe("when the verify button is clicked", () => {
         </UserContext.Provider>
       );
 
-      const initialVerifyButton = screen.queryByRole("button", {
-        name: /Verify/,
-      });
+      const initialVerifyButton = screen.queryByTestId("button-verify-poh");
 
       fireEvent.click(initialVerifyButton!);
 
@@ -180,9 +172,7 @@ describe("when the verify button is clicked", () => {
         </UserContext.Provider>
       );
 
-      const initialVerifyButton = screen.queryByRole("button", {
-        name: /Verify/,
-      });
+      const initialVerifyButton = screen.queryByTestId("button-verify-poh");
 
       fireEvent.click(initialVerifyButton!);
 

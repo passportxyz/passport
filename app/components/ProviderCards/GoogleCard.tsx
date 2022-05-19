@@ -63,8 +63,8 @@ export default function GoogleCard(): JSX.Element {
           onSuccess={(response): void => onGoogleSignIn(response as GoogleLoginResponse)}
           // To override all stylings...
           render={(renderProps): JSX.Element => (
-            <button className="verify-btn" onClick={renderProps.onClick}>
-              Verify
+            <button data-testid="button-verify-google" className="verify-btn" onClick={renderProps.onClick}>
+              Connect account
             </button>
           )}
         />

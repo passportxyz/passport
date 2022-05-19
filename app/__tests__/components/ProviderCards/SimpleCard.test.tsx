@@ -39,9 +39,7 @@ describe("when user has not verified with SimpleProvider", () => {
       </UserContext.Provider>
     );
 
-    const verifyButton = screen.queryByRole("button", {
-      name: /Verify/,
-    });
+    const verifyButton = screen.queryByTestId("button-verify-simple");
 
     expect(verifyButton).toBeInTheDocument();
   });
