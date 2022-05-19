@@ -24,6 +24,7 @@
     "@types/node": "16",
     "@types/node-fetch": "latest",
     "@types/webpack-env": "^1.16.3",
+    "axios": "^0.27.2",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "ethers": "^5.0.32",

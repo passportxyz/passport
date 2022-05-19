@@ -46,6 +46,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: STAMP_PROVIDERS.Twitter,
     stamp: undefined,
   },
+  POAP: {
+    providerSpec: STAMP_PROVIDERS.POAP,
+    stamp: undefined,
+  },
 };
 
 export interface UserContextState {

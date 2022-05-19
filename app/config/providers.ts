@@ -31,4 +31,8 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     name: "Twitter",
     description: "Twitter name",
   },
+  POAP: {
+    name: "POAP",
+    description: "POAP Verification",
+  },
 };
