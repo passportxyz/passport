@@ -85,8 +85,8 @@ export default function PohCard(): JSX.Element {
 
   return (
     <Card
-      providerSpec={allProvidersState[providerId].providerSpec}
-      verifiableCredential={allProvidersState[providerId].stamp?.credential}
+      providerSpec={allProvidersState[providerId]!.providerSpec}
+      verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={issueCredentialWidget}
     />
   );
