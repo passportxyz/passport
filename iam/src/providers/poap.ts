@@ -1,7 +1,15 @@
 // ----- Types
 import type { Provider, ProviderOptions } from "../types";
 import type { RequestPayload, VerifiedPayload } from "@dpopp/types";
+
+// ----- Libs
 import axios from "axios";
+
+// List of POAP subgraphs to check
+export const poapSubgraphs = [
+  "https://api.thegraph.com/subgraphs/name/poap-xyz/poap",
+  "https://api.thegraph.com/subgraphs/name/poap-xyz/poap-xdai",
+];
 
 // Compute the minimum required token age as milliseconds
 const minTokenAge = 15 * 24 * 3600000;
@@ -28,6 +36,11 @@ interface Result {
   data: Data;
 }
 
+type PoapCheckResult = {
+  hasPoaps: boolean;
+  poapList: string[];
+};
+
 // Export a POAP Provider
 export class POAPProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
@@ -44,21 +57,17 @@ export class POAPProvider implements Provider {
   // Verify that the address that is passed in owns at least one POAP older than 15 days
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     const address = payload.address;
-    let isValid = false;
-    const graphChainSuffixes = [
-      "", // for mainnet
-      "-xdai", // for dai
-    ];
+    let poapCheckResult = {
+      hasPoaps: false,
+      poapList: null as string[],
+    };
 
-    async function checkForPoaps(chain: string): Promise<boolean> {
-      // This function expects a chain specific suffix to add to the
-      // suffix to add to the subgraph URL
-      const url = `https://api.thegraph.com/subgraphs/name/poap-xyz/poap${chain}`;
-      const result = await axios({
-        url: url,
-        method: "post",
-        data: {
-          query: `
+    async function checkForPoaps(url: string): Promise<PoapCheckResult> {
+      let hasPoaps = false;
+      let poapList = null as string[];
+      console.log("geri checking url for poaps: ", url);
+      const result = await axios.post(url, {
+        query: `
           {
             account(id: "${address}") {
               tokens(orderBy: created, orderDirection: asc) {
@@ -68,31 +77,38 @@ export class POAPProvider implements Provider {
             }
           }
           `,
-        },
       });
 
       const r = result as Result;
-      const tokens = r.data?.data?.account?.tokens || [];
+      const tokens = r?.data?.data?.account?.tokens || [];
 
       if (tokens.length > 0) {
         // If at least one token is present, check the oldest one
         const oldestToken = tokens[0];
         const age = Date.now() - oldestToken.created * 1000;
-        return age > minTokenAge;
+        hasPoaps = age > minTokenAge;
+        if (hasPoaps) {
+          poapList = tokens.map((token) => token.id);
+        }
       }
 
       // Return false by default (if tokens array is empty or no matching verification)
-      return false;
+      return {
+        hasPoaps,
+        poapList,
+      };
     }
 
     // Verify if the user has poaps on all supported networks
-    for (let i = 0; !isValid && i < graphChainSuffixes.length; i++) {
-      isValid = await checkForPoaps(graphChainSuffixes[i]);
+    for (let i = 0; !poapCheckResult.hasPoaps && i < poapSubgraphs.length; i++) {
+      poapCheckResult = await checkForPoaps(poapSubgraphs[i]);
     }
 
     return Promise.resolve({
-      valid: isValid,
-      record: {},
+      valid: poapCheckResult.hasPoaps,
+      record: {
+        poaps: poapCheckResult.poapList ? poapCheckResult.poapList.join(",") : undefined,
+      },
     });
   }
 }
