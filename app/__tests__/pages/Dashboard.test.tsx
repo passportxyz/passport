@@ -40,6 +40,10 @@ const mockUserContext: UserContextState = {
       providerSpec: STAMP_PROVIDERS.POAP,
       stamp: undefined,
     },
+    Facebook: {
+      providerSpec: STAMP_PROVIDERS.Facebook,
+      stamp: undefined,
+    },
   },
   handleAddStamp: handleAddStamp,
   handleCreatePassport: mockCreatePassport,

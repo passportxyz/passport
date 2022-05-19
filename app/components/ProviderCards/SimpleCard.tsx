@@ -51,8 +51,8 @@ export default function SimpleCard(): JSX.Element {
 
   return (
     <Card
-      providerSpec={allProvidersState[providerId].providerSpec as ProviderSpec}
-      verifiableCredential={allProvidersState[providerId].stamp?.credential}
+      providerSpec={allProvidersState[providerId]!.providerSpec as ProviderSpec}
+      verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={issueCredentialWidget}
     />
   );

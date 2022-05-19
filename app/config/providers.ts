@@ -35,4 +35,8 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     name: "POAP",
     description: "POAP Verification",
   },
+  Facebook: {
+    name: "Facebook",
+    description: "Facebook name",
+  },
 };

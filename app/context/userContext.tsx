@@ -19,7 +19,7 @@ import { EthereumAuthProvider } from "@self.id/web";
 import { useViewerConnection } from "@self.id/framework";
 
 export type AllProvidersState = {
-  [provider in PROVIDER_ID]: {
+  [provider in PROVIDER_ID]?: {
     providerSpec: ProviderSpec;
     stamp?: Stamp;
   };
@@ -48,6 +48,10 @@ const startingAllProvidersState: AllProvidersState = {
   },
   POAP: {
     providerSpec: STAMP_PROVIDERS.POAP,
+    stamp: undefined,
+  },
+  Facebook: {
+    providerSpec: STAMP_PROVIDERS.Facebook,
     stamp: undefined,
   },
 };
@@ -208,14 +212,16 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     passport?.stamps.forEach((stamp: Stamp) => {
       const { provider } = stamp;
       const providerState = allProvidersState[provider];
-      const newProviderState = {
-        providerSpec: providerState.providerSpec,
-        stamp,
-      };
-      setAllProviderState((prevState) => ({
-        ...prevState,
-        [provider]: newProviderState,
-      }));
+      if (providerState) {
+        const newProviderState = {
+          providerSpec: providerState.providerSpec,
+          stamp,
+        };
+        setAllProviderState((prevState) => ({
+          ...prevState,
+          [provider]: newProviderState,
+        }));
+      }
     });
     // TODO remove providerstate on stamp removal
   }, [passport]);
