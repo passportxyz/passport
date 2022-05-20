@@ -45,7 +45,7 @@ export default function PoapCard(): JSX.Element {
           credential: verified.credential,
         });
       })
-      .catch((e: any): void => { })
+      .catch((e: any): void => {})
       .finally((): void => {
         setCredentialResponseIsLoading(false);
       });
@@ -67,7 +67,8 @@ export default function PoapCard(): JSX.Element {
           SetCredentialResponse(undefined);
           handleFetchCredential();
           onOpen();
-        }}>
+        }}
+      >
         Connect to POAP
       </button>
       <VerifyModal

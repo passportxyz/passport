@@ -44,8 +44,7 @@ export const SUCCESFUL_POAP_RESULT: VerifiableCredentialRecord = {
     version: "0.0.0",
     poaps: "2734,2134,3256",
   },
-  signature:
-    "0x....",
+  signature: "0x....",
   challenge: credential,
   credential: credential,
 };
