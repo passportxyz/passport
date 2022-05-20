@@ -36,7 +36,7 @@ const mockUserContext: UserContextState = {
   walletLabel: mockWallet.label,
 };
 
-describe("when user has not verified with PoapProvider", () => {
+describe("when user has not veirfied with PoapProvider", () => {
   it("should display a verification button", () => {
     render(
       <UserContext.Provider value={mockUserContext}>
@@ -44,9 +44,9 @@ describe("when user has not verified with PoapProvider", () => {
       </UserContext.Provider>
     );
 
-    const verifyButton = screen.queryByTestId("button-verify-poap");
+    const initialVerifyButton = screen.queryByTestId("button-verify-poap");
 
-    expect(verifyButton).toBeInTheDocument();
+    expect(initialVerifyButton).toBeInTheDocument();
   });
 });
 
@@ -91,9 +91,7 @@ describe("when the verify button is clicked", () => {
         </UserContext.Provider>
       );
 
-      const initialVerifyButton = screen.queryByRole("button", {
-        name: /Verify/,
-      });
+      const initialVerifyButton = screen.queryByTestId("button-verify-poap");
 
       fireEvent.click(initialVerifyButton!);
 
@@ -114,11 +112,9 @@ describe("when the verify button is clicked", () => {
         </UserContext.Provider>
       );
 
-      const initialVerifyButton = screen.queryByRole("button", {
-        name: /Verify/,
-      });
+      const initialVerifyButton = screen.queryByTestId("button-verify-poap");
 
-      // Click verify button on poap card
+      // Click verify button on POAP card
       fireEvent.click(initialVerifyButton!);
 
       // Wait to see the verify button on the modal
@@ -145,9 +141,7 @@ describe("when the verify button is clicked", () => {
         </UserContext.Provider>
       );
 
-      const initialVerifyButton = screen.queryByRole("button", {
-        name: /Verify/,
-      });
+      const initialVerifyButton = screen.queryByTestId("button-verify-poap");
 
       fireEvent.click(initialVerifyButton!);
 
@@ -178,9 +172,7 @@ describe("when the verify button is clicked", () => {
         </UserContext.Provider>
       );
 
-      const initialVerifyButton = screen.queryByRole("button", {
-        name: /Verify/,
-      });
+      const initialVerifyButton = screen.queryByTestId("button-verify-poap");
 
       fireEvent.click(initialVerifyButton!);
 
