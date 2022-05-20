@@ -37,6 +37,19 @@ export const SUCCESFUL_ENS_RESULT: VerifiableCredentialRecord = {
   credential: credential,
 };
 
+export const SUCCESFUL_POAP_RESULT: VerifiableCredentialRecord = {
+  record: {
+    type: "POAP",
+    address: "0xcF323CE817E25b4F784bC1e14c9A99A525fDC50f",
+    version: "0.0.0",
+    poaps: "2734,2134,3256",
+  },
+  signature:
+    "0x....",
+  challenge: credential,
+  credential: credential,
+};
+
 export const SUCCESFUL_POH_RESULT: VerifiableCredentialRecord = {
   record: {
     type: "Poh",
