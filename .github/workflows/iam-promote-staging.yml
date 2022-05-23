@@ -1,6 +1,5 @@
 name: Deploy IAM Server to Staging
 
-# trigger: on push to `main` branch, AND only on changes to `iam/*` files
 on:
   workflow_dispatch:
     inputs:
