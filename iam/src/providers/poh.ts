@@ -48,7 +48,7 @@ export class PohProvider implements Provider {
       const readContract = new Contract(POH_CONTRACT_ADDRESS, POH_ABI, provider);
 
       // Checks to see if the address is registered with proof of humanity
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
       const valid: boolean = await readContract.isRegistered(address);
 
       return {
