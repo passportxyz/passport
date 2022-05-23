@@ -230,6 +230,9 @@ let ceramicCommand = makeCmd(ceramicStateBucketName);
 const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   cluster,
   desiredCount: 1,
+  networkConfiguration: {
+    subnets: vpc.privateSubnetIds,
+  },
   taskDefinitionArgs: {
     // executionRole: dpoppEcsRole,
     containers: {
