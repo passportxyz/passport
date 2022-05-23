@@ -1,3 +1,6 @@
+// BrightId Shared Types
+export { BrightIdProcedureResponse, BrightIdVerificationResponse, BrightIdSponsorshipResponse } from "./brightid";
+
 // Typing for required parts of DIDKit
 export type DIDKitLib = {
   verifyCredential: (vc: string, proofOptions: string) => Promise<string>;
@@ -119,4 +122,4 @@ export type Passport = {
 // Passport DID
 export type DID = string;
 
-export type PROVIDER_ID = "Google" | "Ens" | "Poh" | "Twitter" | "POAP" | "Facebook";
+export type PROVIDER_ID = "Google" | "Ens" | "Poh" | "Twitter" | "POAP" | "Facebook" | "Brightid";

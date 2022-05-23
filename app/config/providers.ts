@@ -1,7 +1,7 @@
 import { PROVIDER_ID } from "@dpopp/types";
 
 export type ProviderSpec = {
-  icon: string | undefined;
+  icon?: string | undefined;
   name: string;
   description: string;
 };
@@ -40,5 +40,10 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     icon: "./assets/facebookStampIcon.svg",
     name: "Facebook",
     description: "Facebook name",
+  },
+  Brightid: {
+    icon: "./assets/brightidStampIcon.svg",
+    name: "Bright ID",
+    description: "Bright ID name",
   },
 };

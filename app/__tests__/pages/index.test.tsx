@@ -9,6 +9,7 @@ const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
 const handleAddStamp = jest.fn();
 const mockUserContext: UserContextState = {
+  userDid: undefined,
   loggedIn: false,
   passport: undefined,
   isLoadingPassport: false,
@@ -35,6 +36,10 @@ const mockUserContext: UserContextState = {
     },
     Facebook: {
       providerSpec: STAMP_PROVIDERS.Facebook,
+      stamp: undefined,
+    },
+    Brightid: {
+      providerSpec: STAMP_PROVIDERS.Brightid,
       stamp: undefined,
     },
   },

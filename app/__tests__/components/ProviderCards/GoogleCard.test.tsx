@@ -13,6 +13,7 @@ const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
 const handleAddStamp = jest.fn();
 const mockUserContext: UserContextState = {
+  userDid: undefined,
   loggedIn: true,
   passport: undefined,
   isLoadingPassport: false,
