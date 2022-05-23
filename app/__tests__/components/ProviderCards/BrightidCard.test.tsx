@@ -1,12 +1,12 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor, waitForElementToBeRemoved } from "@testing-library/react";
-import { PohCard } from "../../../components/ProviderCards";
+import { BrightidCard } from "../../../components/ProviderCards";
 
 import { UserContext, UserContextState } from "../../../context/userContext";
 import { mockAddress, mockWallet } from "../../../__test-fixtures__/onboardHookValues";
 import { STAMP_PROVIDERS } from "../../../config/providers";
-import { pohStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
-import { SUCCESFUL_POH_RESULT } from "../../../__test-fixtures__/verifiableCredentialResults";
+import { brightidStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
+import { SUCCESFUL_BRIGHTID_RESULT } from "../../../__test-fixtures__/verifiableCredentialResults";
 import { fetchVerifiableCredential } from "@dpopp/identity";
 
 jest.mock("@dpopp/identity", () => ({
@@ -18,13 +18,13 @@ const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
 const handleAddStamp = jest.fn();
 const mockUserContext: UserContextState = {
-  userDid: undefined,
+  userDid: "mockUserDid",
   loggedIn: true,
   passport: undefined,
   isLoadingPassport: false,
   allProvidersState: {
-    Poh: {
-      providerSpec: STAMP_PROVIDERS.Poh,
+    Brightid: {
+      providerSpec: STAMP_PROVIDERS.Brightid,
       stamp: undefined,
     },
   },
@@ -37,62 +37,82 @@ const mockUserContext: UserContextState = {
   walletLabel: mockWallet.label,
 };
 
-describe("when user has not verfied with PohProvider", () => {
-  it("should display a verification button", () => {
+function setupFetchStub(valid: any) {
+  return function fetchStub(_url: any) {
+    return new Promise((resolve) => {
+      resolve({
+        json: () =>
+          Promise.resolve({
+            valid,
+          }),
+      });
+    });
+  };
+}
+
+describe("when user has not verfied with BrightId Provider", () => {
+  it("should display a verify button", () => {
     render(
       <UserContext.Provider value={mockUserContext}>
-        <PohCard />
+        <BrightidCard />
       </UserContext.Provider>
     );
 
-    const verifyButton = screen.queryByTestId("button-verify-poh");
+    const initialVerifyButton = screen.queryByTestId("button-verify-brightid");
 
-    expect(verifyButton).toBeInTheDocument();
+    expect(initialVerifyButton).toBeInTheDocument();
   });
 });
 
-describe("when user has verified with PohProvider", () => {
-  it("should display is verified", () => {
+describe("when user has verified with BrightId Provider", () => {
+  it("should display that a verified credential was returned", () => {
     render(
       <UserContext.Provider
         value={{
           ...mockUserContext,
           allProvidersState: {
-            Poh: {
-              providerSpec: STAMP_PROVIDERS.Poh,
-              stamp: pohStampFixture,
+            Brightid: {
+              providerSpec: STAMP_PROVIDERS.Brightid,
+              stamp: brightidStampFixture,
             },
           },
         }}
       >
-        <PohCard />
+        <BrightidCard />
       </UserContext.Provider>
     );
 
-    const verified = screen.queryByText(/Verified/);
+    const brightidVerified = screen.queryByText(/Verified/);
 
-    expect(verified).toBeInTheDocument();
+    expect(brightidVerified).toBeInTheDocument();
   });
 });
 
 describe("when the verify button is clicked", () => {
+  let originalFetch: any;
+  beforeEach(() => {
+    originalFetch = global.fetch;
+    global.fetch = jest.fn().mockImplementation(setupFetchStub(true));
+  });
+
   afterEach(() => {
+    global.fetch = originalFetch;
     jest.clearAllMocks();
   });
 
-  describe("and when a successful POH result is returned", () => {
+  describe("and when a successful BrightId result is returned", () => {
     beforeEach(() => {
-      (fetchVerifiableCredential as jest.Mock).mockResolvedValue(SUCCESFUL_POH_RESULT);
+      (fetchVerifiableCredential as jest.Mock).mockResolvedValue(SUCCESFUL_BRIGHTID_RESULT);
     });
 
     it("the modal displays the verify button", async () => {
       render(
         <UserContext.Provider value={mockUserContext}>
-          <PohCard />
+          <BrightidCard />
         </UserContext.Provider>
       );
 
-      const initialVerifyButton = screen.queryByTestId("button-verify-poh");
+      const initialVerifyButton = screen.queryByTestId("button-verify-brightid");
 
       fireEvent.click(initialVerifyButton!);
 
@@ -109,13 +129,13 @@ describe("when the verify button is clicked", () => {
     it("clicking verify adds the stamp", async () => {
       render(
         <UserContext.Provider value={mockUserContext}>
-          <PohCard />
+          <BrightidCard />
         </UserContext.Provider>
       );
 
-      const initialVerifyButton = screen.queryByTestId("button-verify-poh");
+      const initialVerifyButton = screen.queryByTestId("button-verify-brightid");
 
-      // Click verify button on poh card
+      // Click verify button on brightid card
       fireEvent.click(initialVerifyButton!);
 
       // Wait to see the verify button on the modal
@@ -135,14 +155,14 @@ describe("when the verify button is clicked", () => {
     });
 
     it("clicking cancel closes the modal and a stamp should not be added", async () => {
-      (fetchVerifiableCredential as jest.Mock).mockResolvedValue(SUCCESFUL_POH_RESULT);
+      (fetchVerifiableCredential as jest.Mock).mockResolvedValue(SUCCESFUL_BRIGHTID_RESULT);
       render(
         <UserContext.Provider value={mockUserContext}>
-          <PohCard />
+          <BrightidCard />
         </UserContext.Provider>
       );
 
-      const initialVerifyButton = screen.queryByTestId("button-verify-poh");
+      const initialVerifyButton = screen.queryByTestId("button-verify-brightid");
 
       fireEvent.click(initialVerifyButton!);
 
@@ -164,27 +184,31 @@ describe("when the verify button is clicked", () => {
     });
   });
 
-  describe("and when a failed POH result is returned", () => {
-    it("modal displays a failed message", async () => {
+  describe("and when a failed Bright Id result is returned", () => {
+    it("modal displays steps to get sponsored", async () => {
+      global.fetch = jest.fn().mockImplementation(setupFetchStub(false));
       (fetchVerifiableCredential as jest.Mock).mockRejectedValue("ERROR");
       render(
         <UserContext.Provider value={mockUserContext}>
-          <PohCard />
+          <BrightidCard />
         </UserContext.Provider>
       );
 
-      const initialVerifyButton = screen.queryByTestId("button-verify-poh");
+      const initialVerifyButton = screen.queryByTestId("button-verify-brightid");
 
       fireEvent.click(initialVerifyButton!);
 
       const verifyModal = await screen.findByRole("dialog");
-      const verifyModalText = screen.getByText("The Proof of Humanity Status for this address Is not Registered");
+      const triggerSponsorButton = screen.queryByTestId("button-sponsor-brightid");
+      const verifyModalText = screen.getByText(
+        "A verifiable credential was not generated for your address. Follow the steps below to qualify:"
+      );
 
       expect(verifyModal).toBeInTheDocument();
-
       await waitFor(() => {
         expect(verifyModalText).toBeInTheDocument();
       });
+      expect(triggerSponsorButton).toBeInTheDocument();
     });
   });
 });
