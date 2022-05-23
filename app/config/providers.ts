@@ -15,10 +15,6 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     name: "Google",
     description: "Google Authentication",
   },
-  Simple: {
-    name: "Simple",
-    description: "Simple Username",
-  },
   Ens: {
     name: "Ens",
     description: "Ens name",
