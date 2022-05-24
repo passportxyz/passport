@@ -1,31 +1,19 @@
 // --- React Methods
 import React from "react";
 
-import {
-  Box,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  useDisclosure,
-  Button,
-} from "@chakra-ui/react";
+// --Chakra UI Elements
+import { useDisclosure } from "@chakra-ui/react";
 
 import { VerifiableCredential } from "@dpopp/types";
 import { ProviderSpec } from "../config/providers";
 
+// --Components
+import { JsonOutputModal } from "../components/JsonOutputModal";
+
 export type CardProps = {
   providerSpec: ProviderSpec;
   verifiableCredential?: VerifiableCredential;
-  icon?: string; // todo figure out type
+  icon?: string;
   issueCredentialWidget: JSX.Element;
 };
 
@@ -34,7 +22,7 @@ export const Card = ({ providerSpec, verifiableCredential, issueCredentialWidget
   return (
     <div className="w-full p-4 md:w-1/2 xl:w-1/4">
       <div className="border border-gray-200 p-0">
-        <div className="mx-auto flex flex-row p-2">
+        <div className="flex flex-row p-6">
           <div className="flex h-10 w-1/2 w-10 flex-grow">
             {providerSpec.icon ? (
               <img src={providerSpec.icon} alt={providerSpec.name} className="h-10 w-10" />
@@ -52,40 +40,14 @@ export const Card = ({ providerSpec, verifiableCredential, issueCredentialWidget
 
           {verifiableCredential ? (
             <>
-              {" "}
-              <button className="border-2 p-2 md:w-1/4" onClick={onOpen}>{`</>`}</button>
-              <Modal isOpen={isOpen} onClose={onClose}>
-                <ModalOverlay />
-                <ModalContent>
-                  <ModalHeader>
-                    <p className="font-miriam-libre">{providerSpec.name} JSON</p>
-                  </ModalHeader>
-                  <ModalCloseButton />
-                  <ModalBody>
-                    <Accordion allowMultiple backgroundColor={"white"}>
-                      <AccordionItem>
-                        <h2>
-                          <AccordionButton>
-                            <Box flex="1" textAlign="left" className="font-miriam-libre">
-                              You can find the {providerSpec.name} JSON data below
-                            </Box>
-                            <AccordionIcon />
-                          </AccordionButton>
-                        </h2>
-                        <AccordionPanel pb={4}>
-                          <pre>{verifiableCredential ? JSON.stringify(verifiableCredential, null, 2) : "No stamp"}</pre>
-                        </AccordionPanel>
-                      </AccordionItem>
-                    </Accordion>
-                  </ModalBody>
-
-                  <ModalFooter>
-                    <Button rounded={"md"} colorScheme="purple" mr={3} onClick={onClose}>
-                      <span className="font-miriam-libre">Done</span>
-                    </Button>
-                  </ModalFooter>
-                </ModalContent>
-              </Modal>
+              <button className="rounded-lg border-2 md:w-1/4" onClick={onOpen}>{`</>`}</button>
+              <JsonOutputModal
+                isOpen={isOpen}
+                onClose={onClose}
+                title={`${providerSpec.name} JSON`}
+                subheading={`You can find the ${providerSpec.name} JSON data below`}
+                jsonOutput={verifiableCredential}
+              />
             </>
           ) : (
             <></>
@@ -96,7 +58,7 @@ export const Card = ({ providerSpec, verifiableCredential, issueCredentialWidget
           <p className="pleading-relaxed">{providerSpec.description}</p>
         </div>
         {verifiableCredential ? (
-          <span className="flex w-full items-center justify-center border-t-2 p-2 text-gray-900">
+          <span className="flex w-full items-center justify-center border-t-2 p-3 text-gray-900">
             <img src="./assets/verifiedShield.svg" alt="Verified Shield" />
             <span className="ml-3 text-xl text-green-400">Verified</span>
           </span>
