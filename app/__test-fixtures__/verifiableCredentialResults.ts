@@ -4,7 +4,7 @@ const credential: VerifiableCredential = {
   "@context": ["https://www.w3.org/2018/credentials/v1"],
   type: ["VerifiableCredential"],
   credentialSubject: {
-    id: "did:ethr:Simple",
+    id: "did:ethr:Test",
     "@context": [
       {
         root: "https://schema.org/Text",

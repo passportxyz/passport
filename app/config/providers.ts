@@ -16,11 +16,6 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     name: "Google",
     description: "Google Authentication",
   },
-  Simple: {
-    icon: undefined,
-    name: "Simple",
-    description: "Simple Username",
-  },
   Ens: {
     icon: "./assets/ensStampIcon.svg",
     name: "Ens",

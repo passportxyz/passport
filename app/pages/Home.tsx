@@ -6,18 +6,10 @@ import { useNavigate } from "react-router-dom";
 // --- Shared data context
 import { UserContext } from "../context/userContext";
 
-// ---- import stamp icons from config
-import { STAMP_PROVIDERS } from "../config/providers";
-
 export default function Home() {
   const { handleConnection, address, walletLabel, wallet } = useContext(UserContext);
 
   const navigate = useNavigate();
-
-  // Retrieve icons to be used for Home Page Display
-  const stampsArray: any = Object.values(STAMP_PROVIDERS)
-    .slice(0, 9)
-    .filter((element) => element.icon);
 
   // Route user to dashboard when wallet is connected
   useEffect(() => {

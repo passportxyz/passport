@@ -4,7 +4,7 @@ const credential: VerifiableCredential = {
   "@context": ["https://www.w3.org/2018/credentials/v1"],
   type: ["VerifiableCredential"],
   credentialSubject: {
-    id: "did:ethr:Simple",
+    id: "did:ethr:Test",
     "@context": [
       {
         root: "https://schema.org/Text",
@@ -22,11 +22,6 @@ const credential: VerifiableCredential = {
     jws: "randomValues",
   },
   expirationDate: "2022-05-15T21:04:01.708Z",
-};
-
-export const simpleStampFixture: Stamp = {
-  provider: "Simple",
-  credential,
 };
 
 export const googleStampFixture: Stamp = {

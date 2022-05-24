@@ -5,7 +5,7 @@ import * as awsx from "@pulumi/awsx";
 // The following vars are not allowed to be undefined, hence the `${...}` magic
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
-let domain = `review.${process.env["DOMAIN"]}`;
+let domain = `${process.env["DOMAIN"]}`;
 let IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
 
 export const dockerGtcDpoppImage = `${process.env["DOCKER_GTC_DPOPP_IMAGE"]}`;
@@ -38,7 +38,7 @@ export const clusterId = cluster.id;
 const certificate = new aws.acm.Certificate("cert", {
   domainName: domain,
   tags: {
-    Environment: "review",
+    Environment: "production",
   },
   validationMethod: "DNS",
 });
@@ -103,9 +103,6 @@ const www = new aws.route53.Record("www", {
     },
   ],
 });
-
-// TODO connect EFS with Fargate containers
-// const ceramicStateStore = new aws.efs.FileSystem("ceramic-statestore");
 
 const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
   assumeRolePolicy: JSON.stringify({

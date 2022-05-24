@@ -3,7 +3,7 @@ import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
 
-import { CeramicDatabase } from "../src/ceramicClient";
+import { CeramicDatabase } from "../src";
 
 let testDID: DID;
 let ceramicDatabase: CeramicDatabase;
@@ -86,7 +86,7 @@ describe("when there is an existing passport with out stamps for the given did",
       "@context": ["https://www.w3.org/2018/credentials/v1"],
       type: ["VerifiableCredential"],
       credentialSubject: {
-        id: "did:ethr:Simple",
+        id: "did:ethr:Test",
         "@context": [
           {
             root: "https://schema.org/Text",
@@ -135,7 +135,7 @@ describe("when there is an existing passport with stamps for the given did", () 
     "@context": ["https://www.w3.org/2018/credentials/v1"],
     type: ["VerifiableCredential"],
     credentialSubject: {
-      id: "did:ethr:Simple",
+      id: "did:ethr:Test",
       "@context": [
         {
           root: "https://schema.org/Text",
@@ -155,8 +155,8 @@ describe("when there is an existing passport with stamps for the given did", () 
     expirationDate: "2022-05-15T21:04:01.708Z",
   };
 
-  const simpleStampFixture: Stamp = {
-    provider: "Simple",
+  const ensStampFixture: Stamp = {
+    provider: "Ens",
     credential,
   };
 
@@ -168,14 +168,14 @@ describe("when there is an existing passport with stamps for the given did", () 
   let existingPassportStreamID;
   beforeEach(async () => {
     // create a tile for verifiable credential issued from iam server
-    const simpleStampTile = await ceramicDatabase.model.createTile("VerifiableCredential", credential);
-    // add simple stamp provider and streamId to passport stamps array
+    const ensStampTile = await ceramicDatabase.model.createTile("VerifiableCredential", credential);
+    // add ENS stamp provider and streamId to passport stamps array
     const existingPassportWithStamps = {
       ...existingPassport,
       stamps: [
         {
-          provider: simpleStampFixture.provider,
-          credential: simpleStampTile.id.toUrl(),
+          provider: ensStampFixture.provider,
+          credential: ensStampTile.id.toUrl(),
         },
       ],
     };
@@ -198,7 +198,7 @@ describe("when there is an existing passport with stamps for the given did", () 
     expect(formattedDate.getDay).toEqual(todaysDate.getDay);
     expect(formattedDate.getMonth).toEqual(todaysDate.getMonth);
     expect(formattedDate.getFullYear).toEqual(todaysDate.getFullYear);
-    expect(actualPassport.stamps[0]).toEqual(simpleStampFixture);
+    expect(actualPassport.stamps[0]).toEqual(ensStampFixture);
   });
 
   it("addStamp adds a stamp to passport", async () => {
