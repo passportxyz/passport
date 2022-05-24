@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps, @next/next/no-img-element */
 // --- React Methods
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // --- Shared data context
@@ -19,31 +19,47 @@ export default function Home() {
   }, [wallet]);
 
   return (
-    <div className="mx-auto flex flex-wrap">
-      <div className="mb-6 w-1/2 w-full py-6 text-purple-400">
-        <img src="/assets/dpoppLogo.svg" className="invert" alt="logo" />
-        <div className="font-miriam-libre mt-10 font-normal font-bold leading-relaxed">
-          <p className="text-6xl">
-            Gitcoin
-            <br />
-            ID Passport
-          </p>
+    <div className="font-miriam-libre min-h-max min-h-default bg-purple-darkpurple text-gray-100">
+      <div className="container mx-auto px-5 py-2">
+        <div className="mx-auto flex flex-wrap">
+          <div className="w-full py-6 text-white sm:w-1/2 md:w-1/2">
+            <img src="/assets/GitcoinLogoAndName.svg" alt="logo" className="mt-0 sm:mt-40 md:mt-40" />
+            <div className="font-miriam-libre mt-10 leading-relaxed">
+              <p className="text-5xl sm:text-7xl md:text-7xl">dPassport</p>
+            </div>
+            <div className="font-miriam-libre mt-2 text-lg sm:mt-10 sm:text-xl md:mt-10 md:text-xl">
+              A scored decentralized proof of personhood passport.
+            </div>
+            <div className="px-2 text-gray-600 sm:hidden sm:w-1/2 md:hidden">
+              <div className="-m-4 flex flex-wrap p-10">
+                <img src={"./assets/logoTiles.svg"} alt={"Stamp Logo Tiles"} />
+              </div>
+            </div>
+            <div className="font-mariam-libre  mt-0 text-sm sm:text-base md:mt-10 md:w-1/2 md:text-base">
+              dPassport lets you grow a decentralized identity record with various credentials about yourself. Based on
+              this network of sources about your personhood and who you are, social institutions like Gitcoin Grants can
+              give you rights like matching weight in Quadratic Funding.
+            </div>
+            <div className="mt-4 w-full sm:mt-10 sm:w-1/2 md:mt-10 md:w-1/2">
+              <button
+                data-testid="connectWalletButton"
+                className="rounded-sm rounded bg-purple-connectPurple py-2 px-10 text-white"
+                onClick={handleConnection}
+              >
+                <p className="text-base">{address ? `Disconnect from ${walletLabel || ""}` : "Connect Wallet"}</p>
+              </button>
+              {address ? <div className="pt-3">Connected to: {JSON.stringify(address, null, 2)}</div> : null}
+            </div>
+          </div>
+          {/* Stamp Provider Tile Display */}
+          <div className="container invisible mx-auto mt-2 px-5 py-2 text-gray-600 sm:visible sm:mt-20 sm:w-1/2 sm:py-24 md:visible md:mt-20 md:py-24">
+            <div className="-m-4 flex flex-wrap">
+              <div className="m-2 rounded px-6 py-8">
+                <img src={"./assets/logoTiles.svg"} alt={"Stamp Logo Tiles"} className="p-2" />
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="font-mariam-libre mt-10 text-xl md:w-1/3">
-          Gitcoin ID Passport is an identity aggregator of the top identity providers in the web3 space into one
-          transportable identity that proves your personhood.
-        </div>
-        <div className="mb-10 mt-10 md:w-1/4">
-          <button
-            data-testid="connectWalletButton"
-            className="min-w-full rounded-lg bg-gray-100 py-4 px-20 text-violet-500"
-            onClick={handleConnection}
-          >
-            <p className="text-base">{address ? `Disconnect from ${walletLabel || ""}` : "Get Started"}</p>
-          </button>
-          {address ? <div className="pt-3">Connected to: {JSON.stringify(address, null, 2)}</div> : null}
-        </div>
-        <a className="underline">Why use your wallet as your identity?</a>
       </div>
     </div>
   );

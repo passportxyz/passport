@@ -14,11 +14,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <Provider client={{ ceramic: "testnet-clay" }}>
       <UserContextProvider>
         <ChakraProvider>
-          <div className="font-miriam-libre min-h-max min-h-default bg-white text-gray-100">
-            <div className="container mx-auto px-5 py-2" suppressHydrationWarning>
-              {typeof window === "undefined" ? null : <Component {...pageProps} />}
-            </div>
-          </div>
+          <div suppressHydrationWarning>{typeof window === "undefined" ? null : <Component {...pageProps} />}</div>
         </ChakraProvider>
       </UserContextProvider>
     </Provider>

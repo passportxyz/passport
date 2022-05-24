@@ -59,9 +59,7 @@ test("renders connect wallet button", () => {
       </Router>
     </UserContext.Provider>
   );
-  const connectWalletButton = screen.getByRole("button", {
-    name: "Get Started",
-  });
+  const connectWalletButton = screen.getByTestId("connectWalletButton");
   expect(connectWalletButton).toBeInTheDocument();
 });
 
@@ -75,9 +73,7 @@ test("clicking connect wallet button calls handleConnection", async () => {
       </Router>
     </UserContext.Provider>
   );
-  const connectWalletButton = screen.getByRole("button", {
-    name: "Get Started",
-  });
+  const connectWalletButton = screen.getByTestId("connectWalletButton");
 
   await userEvent.click(connectWalletButton);
 

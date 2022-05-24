@@ -4,7 +4,8 @@ module.exports = {
     extend: {
       colors: {
         purple: {
-          darkpurple: "#0B0228",
+          darkpurple: "#0E0333",
+          connectPurple: "#6F3FF5",
         },
       },
     },

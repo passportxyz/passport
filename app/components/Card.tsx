@@ -36,14 +36,18 @@ export const Card = ({ providerSpec, verifiableCredential, issueCredentialWidget
       <div className="border border-gray-200 p-0">
         <div className="mx-auto flex flex-row p-2">
           <div className="flex h-10 w-1/2 w-10 flex-grow">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M24.7999 24.8002H28.7999V28.8002H24.7999V24.8002ZM14 24.8002H18V28.8002H14V24.8002ZM3.19995 24.8002H7.19995V28.8002H3.19995V24.8002ZM24.7999 14.0002H28.7999V18.0002H24.7999V14.0002ZM14 14.0002H18V18.0002H14V14.0002ZM3.19995 14.0002H7.19995V18.0002H3.19995V14.0002ZM24.7999 3.2002H28.7999V7.2002H24.7999V3.2002ZM14 3.2002H18V7.2002H14V3.2002ZM3.19995 3.2002H7.19995V7.2002H3.19995V3.2002Z"
-                fill="#161616"
-              />
-            </svg>
+            {providerSpec.icon ? (
+              <img src={providerSpec.icon} alt={providerSpec.name} className="h-10 w-10" />
+            ) : (
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M24.7999 24.8002H28.7999V28.8002H24.7999V24.8002ZM14 24.8002H18V28.8002H14V24.8002ZM3.19995 24.8002H7.19995V28.8002H3.19995V24.8002ZM24.7999 14.0002H28.7999V18.0002H24.7999V14.0002ZM14 14.0002H18V18.0002H14V14.0002ZM3.19995 14.0002H7.19995V18.0002H3.19995V14.0002ZM24.7999 3.2002H28.7999V7.2002H24.7999V3.2002ZM14 3.2002H18V7.2002H14V3.2002ZM3.19995 3.2002H7.19995V7.2002H3.19995V3.2002Z"
+                  fill="#161616"
+                />
+              </svg>
+            )}
           </div>
 
           {verifiableCredential ? (
@@ -93,7 +97,7 @@ export const Card = ({ providerSpec, verifiableCredential, issueCredentialWidget
         </div>
         {verifiableCredential ? (
           <span className="flex w-full items-center justify-center border-t-2 p-2 text-gray-900">
-            <img src="./assets/verifiedShield.svg" />
+            <img src="./assets/verifiedShield.svg" alt="Verified Shield" />
             <span className="ml-3 text-xl text-green-400">Verified</span>
           </span>
         ) : (
