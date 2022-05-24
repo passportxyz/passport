@@ -222,15 +222,13 @@ let ceramicCommand = makeCmd(ceramicStateBucketName);
 const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   cluster,
   desiredCount: 1,
-  networkConfiguration: {
-    subnets: vpc.privateSubnetIds,
-  },
+  subnets: vpc.privateSubnetIds,
   taskDefinitionArgs: {
     containers: {
       ipfs: {
         image: "ceramicnetwork/go-ipfs-daemon:latest",
-        memory: 1024,
-        cpu: 500,
+        memory: 4096,
+        cpu: 2048,
         portMappings: [
           {
             containerPort: 5001,
@@ -266,8 +264,8 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
           },
         ],
         image: "ceramicnetwork/js-ceramic:latest",
-        memory: 1024,
-        cpu: 500,
+        memory: 4096,
+        cpu: 2048,
         portMappings: [httpsListener],
         links: [],
         command: ceramicCommand,

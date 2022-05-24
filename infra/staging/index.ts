@@ -145,9 +145,7 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
 const service = new awsx.ecs.FargateService("dpopp-iam", {
   cluster,
   desiredCount: 1,
-  networkConfiguration: {
-    subnets: vpc.privateSubnetIds,
-  },
+  subnets: vpc.privateSubnetIds,
   taskDefinitionArgs: {
     executionRole: dpoppEcsRole,
     containers: {
