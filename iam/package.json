@@ -29,7 +29,8 @@
     "merkle-tools": "^1.4.1",
     "tslint": "^6.1.3",
     "twitter-api-sdk": "1.0.6",
-    "typescript": "~4.6.3"
+    "typescript": "~4.6.3",
+    "winston": "^3.7.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",

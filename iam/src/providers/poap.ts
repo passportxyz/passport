@@ -5,6 +5,11 @@ import type { RequestPayload, VerifiedPayload } from "@dpopp/types";
 // ----- Libs
 import axios from "axios";
 
+// -- Logging
+import { createFormattedConsoleLogger } from "../utils/logging";
+
+const logger = createFormattedConsoleLogger("iam:provider:poap");
+
 // List of POAP subgraphs to check
 export const poapSubgraphs = [
   "https://api.thegraph.com/subgraphs/name/poap-xyz/poap",
@@ -102,6 +107,8 @@ export class POAPProvider implements Provider {
     for (let i = 0; !poapCheckResult.hasPoaps && i < poapSubgraphs.length; i++) {
       poapCheckResult = await checkForPoaps(poapSubgraphs[i]);
     }
+
+    logger.info("Verified via POAPs. Result: %s", poapCheckResult.hasPoaps);
 
     return Promise.resolve({
       valid: poapCheckResult.hasPoaps,

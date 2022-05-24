@@ -6,6 +6,11 @@ import type { RequestPayload, VerifiedPayload } from "@dpopp/types";
 import { utils } from "ethers";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
+// -- Logging
+import { createFormattedConsoleLogger } from "../utils/logging";
+
+const logger = createFormattedConsoleLogger("iam:provider:ens");
+
 // set the network rpc url based on env
 const RPC_URL = process.env.RPC_URL;
 
@@ -42,6 +47,8 @@ export class EnsProvider implements Provider {
         valid = true;
       }
 
+      logger.info("Verified via ENS. Result: %s", valid);
+
       return {
         valid: valid,
         record: {
@@ -49,6 +56,7 @@ export class EnsProvider implements Provider {
         },
       };
     } catch (e) {
+      logger.error(e);
       return {
         valid: false,
       };

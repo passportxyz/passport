@@ -6,6 +6,11 @@ import type { RequestPayload, VerifiedPayload } from "@dpopp/types";
 import { Contract } from "ethers";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
+// -- Logging
+import { createFormattedConsoleLogger } from "../utils/logging";
+
+const logger = createFormattedConsoleLogger("iam:provider:poh");
+
 // Proof of humanity contract address
 const POH_CONTRACT_ADDRESS = "0xC5E9dDebb09Cd64DfaCab4011A0D5cEDaf7c9BDb";
 
@@ -51,6 +56,8 @@ export class PohProvider implements Provider {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
       const valid: boolean = await readContract.isRegistered(address);
 
+      logger.info("Verified via POH. Result: %s", valid);
+
       return {
         valid,
         record: valid
@@ -60,6 +67,7 @@ export class PohProvider implements Provider {
           : undefined,
       };
     } catch (e) {
+      logger.error(e);
       return {
         valid: false,
         error: [JSON.stringify(e)],

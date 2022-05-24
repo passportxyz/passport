@@ -5,6 +5,11 @@ import type { RequestPayload, VerifiedPayload } from "@dpopp/types";
 import { deleteClient, getClient, requestFindMyUser, TwitterFindMyUserResponse } from "../procedures/twitterOauth";
 import type { Provider, ProviderOptions } from "../types";
 
+// -- Logging
+import { createFormattedConsoleLogger } from "../utils/logging";
+
+const logger = createFormattedConsoleLogger("iam:provider:twitter");
+
 // Export a Twitter Provider to carry out OAuth and return a record object
 export class TwitterProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
@@ -25,10 +30,13 @@ export class TwitterProvider implements Provider {
     try {
       verifiedPayload = await verifyTwitter(payload.proofs.sessionKey, payload.proofs.code);
     } catch (e) {
+      logger.error(e);
       return { valid: false };
     } finally {
       valid = verifiedPayload && verifiedPayload.username ? true : false;
     }
+
+    logger.info("Verified via Twitter. Result: %s", valid);
 
     return {
       valid: valid,

@@ -5,6 +5,11 @@ import type { RequestPayload, VerifiedPayload } from "@dpopp/types";
 // ----- Googles OAuth2 library
 import { OAuth2Client } from "google-auth-library";
 
+// -- Logging
+import { createFormattedConsoleLogger } from "../utils/logging";
+
+const logger = createFormattedConsoleLogger("iam:provider:google");
+
 // Use env provided client_id to establish OAuth client
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -34,10 +39,13 @@ export class GoogleProvider implements Provider {
     try {
       verifiedPayload = await verifyGoogle(payload.proofs.tokenId);
     } catch (e) {
+      logger.error(e);
       return { valid: false };
     } finally {
       valid = verifiedPayload && verifiedPayload.emailVerified ? true : false;
     }
+
+    logger.info("Verified via Google. Result: %s", valid);
 
     return {
       valid: valid,

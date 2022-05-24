@@ -6,6 +6,11 @@ import type { RequestPayload, VerifiedPayload } from "@dpopp/types";
 import axios from "axios";
 import { DateTime } from "luxon";
 
+// -- Logging
+import { createFormattedConsoleLogger } from "../utils/logging";
+
+const logger = createFormattedConsoleLogger("iam:provider:facebook");
+
 const APP_ID = process.env.FACEBOOK_APP_ID;
 
 export type FacebookDebugResponse = {
@@ -51,6 +56,8 @@ export class FacebookProvider implements Provider {
       const valid: boolean =
         notExpired && formattedData.app_id === APP_ID && formattedData.is_valid && !!formattedData.user_id;
 
+      logger.info("Verified via Facebook. Result: %s", valid);
+
       return {
         valid,
         record: valid
@@ -60,6 +67,7 @@ export class FacebookProvider implements Provider {
           : undefined,
       };
     } catch (e) {
+      logger.error(e);
       return { valid: false };
     }
   }
