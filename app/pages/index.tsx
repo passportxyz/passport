@@ -11,6 +11,7 @@ import Head from "next/head";
 // -- Pages
 import Home from "./Home";
 import Dashboard from "./Dashboard";
+import Privacy from "./privacy";
 
 const FacebookAppId = process.env.NEXT_PUBLIC_DPOPP_FACEBOOK_APP_ID || "";
 
@@ -59,11 +60,15 @@ const App: NextPage = () => {
   );
   return (
     <div>
-      <Head>{facebookSdkScript}</Head>
+      <Head>
+        {facebookSdkScript}
+        <title>Gitcoin Passport</title>
+      </Head>
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/privacy" element={<Privacy />} />
         </Routes>
       </Router>
     </div>
