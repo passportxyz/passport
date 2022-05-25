@@ -176,9 +176,13 @@ const httpsListener = target.createListener("gitcoin-dpopp-ceramic-https", {
   certificateArn: certificateValidation.certificateArn,
 });
 
-const ceramicListener = target.createListener("gitcoin-dpopp-ceramic", {
+const ceramicTarget = alb.createTargetGroup("gitcoin-dpopp-ceramic-4001", {
+  vpc,
   port: 4001,
-  certificateArn: certificateValidation.certificateArn,
+});
+
+const ceramicListener = ceramicTarget.createListener("gitcoin-dpopp-ceramic", {
+  port: 4001,
 });
 
 // Create a DNS record for the load balancer
