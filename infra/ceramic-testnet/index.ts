@@ -176,6 +176,11 @@ const httpsListener = target.createListener("gitcoin-dpopp-ceramic-https", {
   certificateArn: certificateValidation.certificateArn,
 });
 
+const ceramicListener = target.createListener("gitcoin-dpopp-ceramic", {
+  port: 4001,
+  certificateArn: certificateValidation.certificateArn,
+});
+
 // Create a DNS record for the load balancer
 const www = new aws.route53.Record("www", {
   zoneId: route53Zone,
@@ -238,6 +243,7 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
             containerPort: 8011,
             hostPort: 8011,
           },
+          ceramicListener
         ],
         links: [],
         environment: [
