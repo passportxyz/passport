@@ -180,6 +180,7 @@ const ceramicTarget = alb.createTargetGroup("gitcoin-dpopp-swarm", {
   vpc,
   port: 4011,
   protocol: "HTTP",
+  healthCheck: { path: "/", unhealthyThreshold: 5, port: 8011, interval: 60, timeout: 30 },
 });
 
 const ceramicListener = ceramicTarget.createListener("gitcoin-dpopp-swarm", {
