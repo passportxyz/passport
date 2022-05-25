@@ -5,7 +5,6 @@ on:
 
 jobs:
   deploy-ceramic-testnet:
-    needs: build-and-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
