@@ -258,7 +258,10 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
             containerPort: 5001,
             hostPort: 5001,
           },
-          ipfsHealthcheckListener,
+          {
+            containerPort: 8011,
+            hostPort: 8011,
+          },
           ceramicListener,
         ],
         links: [],
