@@ -169,16 +169,35 @@ const httpListener = alb.createListener("gitcoin-dpopp-ceramic-http", {
 });
 export const frontendUrlEcs = pulumi.interpolate`http://${httpListener.endpoint.hostname}/`;
 
-// Target group with the port of the Docker image
+// Target group for the Ceramic container
 const target = alb.createTargetGroup("gitcoin-dpopp-ceramic", {
   vpc,
   port: 80,
+  healthCheck: { path: "/api/v0/node/healthcheck" },
 });
 
-// Listen to traffic on port 443 & route it through the target group
+// Listen to traffic on port 443 & route it through the Ceramic target group
 const httpsListener = target.createListener("gitcoin-dpopp-ceramic-https", {
   port: 443,
   certificateArn: certificateValidation.certificateArn,
+});
+
+// Target group for the IPFS container
+const ceramicTarget = alb.createTargetGroup("gitcoin-dpopp-swarm", {
+  vpc,
+  port: 4011,
+  protocol: "HTTP",
+  healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
+});
+
+const ceramicListener = ceramicTarget.createListener("gitcoin-dpopp-swarm", {
+  protocol: "HTTP",
+  port: 4011,
+});
+
+const ipfsHealthcheckListener = ceramicTarget.createListener("gitcoin-ipfs-healthcheck", {
+  protocol: "HTTP",
+  port: 8011,
 });
 
 // Create a DNS record for the load balancer
@@ -239,10 +258,8 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
             containerPort: 5001,
             hostPort: 5001,
           },
-          {
-            containerPort: 8011,
-            hostPort: 8011,
-          },
+          ipfsHealthcheckListener,
+          ceramicListener,
         ],
         links: [],
         environment: [
@@ -283,13 +300,5 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
     },
   },
 });
-
-// const ecsTarget = new aws.appautoscaling.Target("autoscaling_target", {
-//   maxCapacity: 10,
-//   minCapacity: 1,
-//   resourceId: pulumi.interpolate`service/${cluster.cluster.name}/${service.service.name}`,
-//   scalableDimension: "ecs:service:DesiredCount",
-//   serviceNamespace: "ecs",
-// });
 
 export const ceramicUrl = pulumi.interpolate`https://${domain}`;
