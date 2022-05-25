@@ -8,6 +8,7 @@ jest.mock("axios");
 
 describe("Attempt verification", function () {
   const accessToken = "12345";
+  const appAccessToken = `${process.env.FACEBOOK_APP_ID}|${process.env.FACEBOOK_APP_SECRET}`
   const tokenExpirationDate = DateTime.now().plus({ years: 1 }).toSeconds();
   let validAccessTokenData: FacebookDebugResponse = {
     app_id: process.env.FACEBOOK_APP_ID,
@@ -40,6 +41,10 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     expect(axios.get).toHaveBeenCalledTimes(1);
+    expect(axios.get).toBeCalledWith("https://graph.facebook.com/debug_token/", {
+      headers: { "User-Agent": "Facebook Graph Client" },
+      params: { access_token: appAccessToken, input_token: accessToken }
+    })
     expect(result).toEqual({
       valid: true,
       record: {

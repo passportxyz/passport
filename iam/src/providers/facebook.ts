@@ -7,6 +7,7 @@ import axios from "axios";
 import { DateTime } from "luxon";
 
 const APP_ID = process.env.FACEBOOK_APP_ID;
+const APP_SECRET = process.env.FACEBOOK_APP_SECRET;
 
 export type FacebookDebugResponse = {
   app_id?: string;
@@ -65,10 +66,12 @@ export class FacebookProvider implements Provider {
   }
 }
 
-async function verifyFacebook(accessToken: string): Promise<Response> {
-  const response: Response = await axios.get("https://graph.facebook.com/debug_token/", {
+async function verifyFacebook(userAccessToken: string): Promise<Response> {
+  // this is an alternative to generating an app auth token through a separate endpoint
+  // see https://developers.facebook.com/docs/facebook-login/guides/access-tokens#generating-an-app-access-token
+  const appAccessToken = `${APP_ID}|${APP_SECRET}`;
+  return axios.get("https://graph.facebook.com/debug_token/", {
     headers: { "User-Agent": "Facebook Graph Client" },
-    params: { access_token: accessToken, input_token: accessToken },
+    params: { access_token: appAccessToken, input_token: userAccessToken },
   });
-  return response;
 }
