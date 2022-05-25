@@ -179,6 +179,7 @@ const httpsListener = target.createListener("gitcoin-dpopp-ceramic-https", {
 const ceramicTarget = alb.createTargetGroup("gitcoin-dpopp-swarm", {
   vpc,
   port: 4011,
+  protocol: "HTTP",
 });
 
 const ceramicListener = ceramicTarget.createListener("gitcoin-dpopp-swarm", {
