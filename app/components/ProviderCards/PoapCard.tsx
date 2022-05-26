@@ -38,7 +38,6 @@ export default function PoapCard(): JSX.Element {
       signer as { signMessage: (message: string) => Promise<string> }
     )
       .then((verified: { record: any; credential: any }): void => {
-        console.log("geri: ", verified);
         SetPoapVerified(verified.record?.poaps);
         SetCredentialResponse({
           provider: "POAP",
