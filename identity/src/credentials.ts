@@ -1,6 +1,3 @@
-// ---- Merkle methods
-import { generateMerkle } from "./merkle";
-
 // ---- Types
 import {
   DIDKitLib,
@@ -13,6 +10,12 @@ import {
   VerifiableCredentialRecord,
 } from "@dpopp/types";
 
+// ---- crypto lib for hashing
+import { createHash } from "crypto";
+
+// ---- base64 encoding
+import * as base64 from "@ethersproject/base64";
+
 // ---- Node/Browser http req library
 import axios from "axios";
 
@@ -23,6 +26,9 @@ const addSeconds = (date: Date, seconds: number): Date => {
 
   return result;
 };
+
+// Keeping track of the hashing mechanism (algo + content)
+const VERSION = "v1.0.0";
 
 // Internal method to issue a verfiable credential
 const _issueCredential = async (
@@ -89,25 +95,43 @@ export const issueChallengeCredential = async (
 
 export const THIRTY_DAYS_TO_SECONDS = 30 * 86400;
 
-// Return a verifiable credential with embedded merkle data
-export const issueMerkleCredential = async (
+export const objToSortedArray = (obj: { [k: string]: string }): string[][] => {
+  const keys: string[] = Object.keys(obj).sort();
+  return keys.reduce((out: string[][], key: string) => {
+    out.push([key, obj[key]]);
+    return out;
+  }, [] as string[][]);
+};
+
+// Return a verifiable credential with embedded hash
+export const issueHashedCredential = async (
   DIDKit: DIDKitLib,
   key: string,
   record: ProofRecord
 ): Promise<IssuedCredential> => {
-  // generate a merkleTree for the provided evidence
-  const merkle = generateMerkle(record);
+  // Generate a hash like SHA256(IAM_PRIVATE_KEY+PII), where PII is the (deterministic) JSON representation
+  // of the PII object after transforming it to an array of the form [[key:string, value:string], ...]
+  // with the elemnts sorted by key
+  const hash = base64.encode(
+    createHash("sha256")
+      .update(key, "utf-8")
+      .update(JSON.stringify(objToSortedArray(record)))
+      .digest()
+  );
+
   // generate a verifiableCredential
   const credential = await _issueCredential(DIDKit, key, THIRTY_DAYS_TO_SECONDS, {
     credentialSubject: {
       "@context": [
         {
-          root: "https://schema.org/Text",
+          hash: "https://schema.org/Text",
+          provider: "https://schema.org/Text",
         },
       ],
-      id: `did:ethr:${record.address}#${record.type}`,
-      // record the root of the records merkleTree (this will allow the user verifiably share the PPI held within the record)
-      root: merkle.root,
+      // TODO: the :1: is presumably the chain id (in our case mainnet) ?
+      id: `did:pkh:eip155:1:${record.address}`,
+      provider: record.type,
+      hash: `${VERSION}:${hash}`,
     },
   });
 

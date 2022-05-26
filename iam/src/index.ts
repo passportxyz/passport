@@ -24,7 +24,7 @@ import {
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@dpopp/identity/dist/commonjs/didkit-node";
-import { issueChallengeCredential, issueMerkleCredential, verifyCredential } from "@dpopp/identity/dist/commonjs";
+import { issueChallengeCredential, issueHashedCredential, verifyCredential } from "@dpopp/identity/dist/commonjs";
 
 // ---- Identity Provider Management
 import { Providers } from "./utils/providers";
@@ -101,7 +101,7 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
     const challenge = providers.getChallenge(payload);
     // if the request is valid then proceed to generate a challenge credential
     if (challenge && challenge.valid === true) {
-      // recreate the record to ensure the minimun number of leafs are present to produce a valid merkleTree
+      // recreate the record to ensure the minimun number of properties are present
       const record: RequestPayload = {
         // add fields to identify the bearer of the challenge
         type: payload.type,
@@ -162,7 +162,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
             .then((verifiedPayload) => {
               // check if the request is valid against the selected Identity Provider
               if (verifiedPayload && verifiedPayload?.valid === true) {
-                // recreate the record to ensure the minimun number of leafs are present to produce a valid merkleTree
+                // recreate the record to ensure the minimun number of properties
                 const record: ProofRecord = {
                   // type and address will always be known and can be obtained from the resultant credential
                   type: payload.type,
@@ -174,7 +174,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
                 };
 
                 // generate a VC for the given payload
-                return issueMerkleCredential(DIDKit, key, record)
+                return issueHashedCredential(DIDKit, key, record)
                   .then(({ credential }) => {
                     return res.json({
                       record,

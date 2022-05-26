@@ -1,11 +1,18 @@
 // ---- Test subject
 import {
   issueChallengeCredential,
-  issueMerkleCredential,
+  issueHashedCredential,
   verifyCredential,
   fetchChallengeCredential,
   fetchVerifiableCredential,
+  objToSortedArray,
 } from "../src/credentials";
+
+// ---- base64 encoding
+import * as base64 from "@ethersproject/base64";
+
+// ---- crypto lib for hashing
+import { createHash } from "crypto";
 
 // ---- Mocked values and helpers
 import {
@@ -15,7 +22,6 @@ import {
   clearAxiosMocks,
 } from "../__mocks__/axios";
 import * as mockDIDKit from "../__mocks__/didkit";
-import * as mockMerkle from "../src/merkle";
 
 // ---- Types
 import axios from "axios";
@@ -120,15 +126,9 @@ describe("Fetch Credentials", function () {
 });
 
 describe("Generate Credentials", function () {
-  const MOCK_MERKLE_ROOT = "mockMerkleRoot";
-  const generateMerkleSpy = jest.spyOn(mockMerkle, "generateMerkle").mockReturnValue({
-    proofs: {},
-    root: MOCK_MERKLE_ROOT,
-  });
 
   beforeEach(() => {
     mockDIDKit.clearDidkitMocks();
-    generateMerkleSpy.mockClear();
   });
 
   it("can generate a challenge credential", async () => {
@@ -151,26 +151,41 @@ describe("Generate Credentials", function () {
     expect(typeof credential.proof).toEqual("object");
   });
 
-  it("can generate a merkle credential", async () => {
+  it("can convert an object to an sorted array for deterministic hashing", async () => {
     const record = {
       type: "Simple",
       address: "0x0",
       version: "Test-Case-1",
+      email: "my_own@email.com",
     };
 
-    // details of this credential are created by issueMerkleCredential - but the proof is added by DIDKit (which is mocked)
-    const { credential } = await issueMerkleCredential(DIDKit, key, record);
+    expect(objToSortedArray(record)).toEqual([
+      ["address", "0x0"],
+      ["email", "my_own@email.com"],
+      ["type", "Simple"],
+      ["version", "Test-Case-1"],
+    ]);
+  }),
+    it("can generate a credential containing hash", async () => {
+      const record = {
+        type: "Simple",
+        address: "0x0",
+        version: "Test-Case-1",
+      };
 
-    expect(generateMerkleSpy).toHaveBeenCalled();
-    expect(generateMerkleSpy).toHaveBeenCalledWith(record);
-    // expect to have called issueCredential
-    expect(DIDKit.issueCredential).toHaveBeenCalled();
-    // expect the structure/details added by issueMerkleCredential to be correct
-    expect(credential.credentialSubject.id).toEqual(`did:ethr:${record.address}#${record.type}`);
-    expect(typeof credential.credentialSubject.root === "string").toEqual(true);
-    expect(credential.credentialSubject.root).toEqual(MOCK_MERKLE_ROOT);
-    expect(typeof credential.proof).toEqual("object");
-  });
+      const expectedHash: string =
+        "v1.0.0:" + base64.encode(createHash("sha256").update(key).update(JSON.stringify(objToSortedArray(record))).digest());
+      // details of this credential are created by issueHashedCredential - but the proof is added by DIDKit (which is mocked)
+      const { credential } = await issueHashedCredential(DIDKit, key, record);
+      // expect to have called issueCredential
+      expect(DIDKit.issueCredential).toHaveBeenCalled();
+      // expect the structure/details added by issueHashedCredential to be correct
+      expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
+      expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
+      expect(typeof credential.credentialSubject.hash).toEqual("string");
+      expect(credential.credentialSubject.hash).toEqual(expectedHash);
+      expect(typeof credential.proof).toEqual("object");
+    });
 });
 
 describe("Verify Credentials", function () {
@@ -186,7 +201,7 @@ describe("Verify Credentials", function () {
     };
 
     // we are creating this VC so that we know that we have a valid VC in this context to test against (never expired)
-    const { credential: credentialToVerify } = await issueMerkleCredential(DIDKit, key, record);
+    const { credential: credentialToVerify } = await issueHashedCredential(DIDKit, key, record);
 
     // all verifications will pass as the DIDKit response is mocked
     expect(await verifyCredential(DIDKit, credentialToVerify)).toEqual(true);
