@@ -13,7 +13,8 @@ export type VerifiableCredential = {
   credentialSubject: {
     id: string;
     "@context": { [key: string]: string }[];
-    root?: string;
+    hash?: string;
+    provider?: string;
     address?: string;
     challenge?: string;
   };

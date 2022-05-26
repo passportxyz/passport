@@ -13,7 +13,7 @@ identity.issueChallengeCredential = jest.fn(async (DIDKit, key, record) => ({
 }));
 
 // always returns dummy VC
-identity.issueMerkleCredential = jest.fn(async (DIDKit, key, record) => ({
+identity.issueHashedCredential = jest.fn(async (DIDKit, key, record) => ({
   record: {
     type: record.type,
     address: record.address,
@@ -22,7 +22,8 @@ identity.issueMerkleCredential = jest.fn(async (DIDKit, key, record) => ({
   credential: {
     credentialSubject: {
       id: `did:ethr:${record.address}#${record.type}`,
-      root: "0x0-merkleRoot",
+      hash: "0x0-and-the-rest-of-hash",
+      provider: "PROVIDER",
     },
   },
   proofs: [],
