@@ -11,7 +11,7 @@ import { Provider } from "@self.id/framework";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <Provider client={{ ceramic: "testnet-clay" }}>
+    <Provider client={{ ceramic: "testnet-clay" }} session={true}>
       <UserContextProvider>
         <ChakraProvider>
           <div suppressHydrationWarning>{typeof window === "undefined" ? null : <Component {...pageProps} />}</div>
