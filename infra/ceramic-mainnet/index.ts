@@ -18,11 +18,11 @@ let domain = `ceramic.${process.env["DOMAIN"]}`;
 //  - user for bucket access
 //////////////////////////////////////////////////////////////
 
-const usrS3 = new aws.iam.User(`gitcoin-dpopp-usr-s3`, {
+const usrS3 = new aws.iam.User(`gitcoin-ceramic-usr-s3`, {
   path: "/dpopp/",
 });
 
-const usrS3AccessKey = new aws.iam.AccessKey(`gitcoin-dpopp-usr-key`, { user: usrS3.name });
+const usrS3AccessKey = new aws.iam.AccessKey(`gitcoin-ceramic-usr-key`, { user: usrS3.name });
 
 export const usrS3Key = usrS3AccessKey.id;
 export const usrS3Secret = usrS3AccessKey.secret;
@@ -32,10 +32,10 @@ export const usrS3Secret = usrS3AccessKey.secret;
 //////////////////////////////////////////////////////////////
 
 // Generate an SSL certificate
-const certificate = new aws.acm.Certificate("gitcoin-dpopp-ceramic-cert", {
+const certificate = new aws.acm.Certificate("gitcoin-ceramic-cert", {
   domainName: domain,
   tags: {
-    Environment: "staging",
+    Environment: "production",
   },
   validationMethod: "DNS",
 });
@@ -49,7 +49,7 @@ const certificateValidationDomain = new aws.route53.Record(`${domain}-validation
 });
 
 const certificateValidation = new aws.acm.CertificateValidation(
-  "gitcoin-dpopp-ceramic-cert-validation",
+  "gitcoin-ceramic-cert-validation",
   {
     certificateArn: certificate.arn,
     validationRecordFqdns: [certificateValidationDomain.fqdn],
@@ -62,7 +62,7 @@ const certificateValidation = new aws.acm.CertificateValidation(
 // https://developers.ceramic.network/run/nodes/nodes/#example-aws-s3-policies
 //////////////////////////////////////////////////////////////
 
-const ipfsBucket = new aws.s3.Bucket(`gitcoin-dpopp-ipfs`, {
+const ipfsBucket = new aws.s3.Bucket(`gitcoin-ceramic-ipfs`, {
   acl: "private",
   forceDestroy: true,
 });
@@ -82,7 +82,7 @@ const ipfsBucketPolicyDocument = aws.iam.getPolicyDocumentOutput({
   ],
 });
 
-const ipfsBucketPolicy = new aws.s3.BucketPolicy(`gitcoin-dpopp-ipfs-policy}`, {
+const ipfsBucketPolicy = new aws.s3.BucketPolicy(`gitcoin-ceramic-ipfs-policy`, {
   bucket: ipfsBucket.id,
   policy: ipfsBucketPolicyDocument.apply((ipfsBucketPolicyDocument) => ipfsBucketPolicyDocument.json),
 });
@@ -96,7 +96,7 @@ export const ipfsBucketArn = ipfsBucket.arn;
 // https://developers.ceramic.network/run/nodes/nodes/#example-aws-s3-policies
 //////////////////////////////////////////////////////////////
 
-const ceramicStateBucket = new aws.s3.Bucket(`gitcoin-dpopp-ceramicState`, {
+const ceramicStateBucket = new aws.s3.Bucket(`gitcoin-ceramicState`, {
   acl: "private",
   forceDestroy: true,
 });
@@ -116,7 +116,7 @@ const ceramicStateBucketPolicyDocument = aws.iam.getPolicyDocumentOutput({
   ],
 });
 
-const ceramicStateBucketPolicy = new aws.s3.BucketPolicy(`gitcoin-dpopp-ceramicState-policy}`, {
+const ceramicStateBucketPolicy = new aws.s3.BucketPolicy(`gitcoin-ceramicState-policy}`, {
   bucket: ceramicStateBucket.id,
   policy: ceramicStateBucketPolicyDocument.apply(
     (ceramicStateBucketPolicyDocument) => ceramicStateBucketPolicyDocument.json
@@ -130,7 +130,7 @@ export const ceramicStateBucketArn = ceramicStateBucket.arn;
 // Set up VPC
 //////////////////////////////////////////////////////////////
 
-const vpc = new awsx.ec2.Vpc("gitcoin-dpopp-ceramic", {
+const vpc = new awsx.ec2.Vpc("gitcoin-ceramic", {
   subnets: [{ type: "public" }, { type: "private", mapPublicIpOnLaunch: true }],
 });
 
@@ -149,13 +149,13 @@ export const vpcPublicSubnet1 = vpcPublicSubnetIds.then((subnets) => {
 // Set up ALB and ECS cluster
 //////////////////////////////////////////////////////////////
 
-const cluster = new awsx.ecs.Cluster("gitcoin-dpopp-ceramic", { vpc });
+const cluster = new awsx.ecs.Cluster("gitcoin-ceramic", { vpc });
 export const clusterId = cluster.id;
 
-const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-dpopp-ceramic`, { vpc });
+const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-ceramic`, { vpc });
 
 // Listen to HTTP traffic on port 80 and redirect to 443
-const httpListener = alb.createListener("gitcoin-dpopp-ceramic-http", {
+const httpListener = alb.createListener("gitcoin-ceramic-http", {
   port: 80,
   protocol: "HTTP",
   defaultAction: {
@@ -170,32 +170,32 @@ const httpListener = alb.createListener("gitcoin-dpopp-ceramic-http", {
 export const frontendUrlEcs = pulumi.interpolate`http://${httpListener.endpoint.hostname}/`;
 
 // Target group for the Ceramic container
-const target = alb.createTargetGroup("gitcoin-dpopp-ceramic", {
+const ceramicTarget = alb.createTargetGroup("gitcoin-ceramic", {
   vpc,
   port: 80,
   healthCheck: { path: "/api/v0/node/healthcheck" },
 });
 
 // Listen to traffic on port 443 & route it through the Ceramic target group
-const httpsListener = target.createListener("gitcoin-dpopp-ceramic-https", {
+const httpsListener = ceramicTarget.createListener("gitcoin-ceramic-https", {
   port: 443,
   certificateArn: certificateValidation.certificateArn,
 });
 
 // Target group for the IPFS container
-const ceramicTarget = alb.createTargetGroup("gitcoin-dpopp-swarm", {
+const ipfsTarget = alb.createTargetGroup("gitcoin-ipfs-swarm", {
   vpc,
   port: 4011,
   protocol: "HTTP",
   healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
 });
 
-const ceramicListener = ceramicTarget.createListener("gitcoin-dpopp-swarm", {
+const ipfsListener = ipfsTarget.createListener("gitcoin-ipfs-swarm", {
   protocol: "HTTP",
   port: 4011,
 });
 
-const ipfsHealthcheckListener = ceramicTarget.createListener("gitcoin-ipfs-healthcheck", {
+const ipfsHealthcheckListener = ipfsTarget.createListener("gitcoin-ipfs-healthcheck", {
   protocol: "HTTP",
   port: 8011,
 });
@@ -243,7 +243,7 @@ function makeCmd(input: pulumi.Input<string>): pulumi.Output<string[]> {
 
 let ceramicCommand = makeCmd(ceramicStateBucketName);
 
-const service = new awsx.ecs.FargateService("dpopp-ceramic", {
+const service = new awsx.ecs.FargateService("ceramic-mainnet", {
   cluster,
   desiredCount: 1,
   subnets: vpc.privateSubnetIds,
@@ -262,7 +262,7 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
             containerPort: 8011,
             hostPort: 8011,
           },
-          ceramicListener,
+          ipfsListener,
         ],
         links: [],
         environment: [
@@ -274,20 +274,20 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
           { name: "IPFS_S3_SECRET_ACCESS_KEY", value: usrS3Secret },
           { name: "IPFS_S3_KEY_TRANSFORM", value: "next-to-last/2" },
         ],
-        healthCheck: {
-          // NB: this is the same as the go-ipfs-daemon Dockerfile HEALTHCHECK
-          command: ["CMD", "ipfs dag stat /ipfs/QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn || exit 1"],
-          timeout: 3,
-          startPeriod: 5,
-        },
+        // healthCheck: {
+        //   // NB: this is the same as the go-ipfs-daemon Dockerfile HEALTHCHECK
+        //   command: ["CMD", "ipfs dag stat /ipfs/QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn || exit 1"],
+        //   timeout: 3,
+        //   startPeriod: 5,
+        // },
       },
       ceramic: {
-        dependsOn: [
-          {
-            containerName: "ipfs",
-            condition: "HEALTHY",
-          },
-        ],
+        // dependsOn: [
+        //   {
+        //     containerName: "ipfs",
+        //     condition: "HEALTHY",
+        //   },
+        // ],
         image: "ceramicnetwork/js-ceramic:latest",
         memory: 4096,
         cpu: 2048,
