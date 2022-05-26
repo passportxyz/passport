@@ -1,0 +1,23 @@
+config:
+  target: "https://orange-sky-5671.on.fleek.co/"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: Warm up
+    - duration: 120
+      arrivalRate: 5
+      rampTo: 50
+      name: Ramp up load
+    - duration: 600
+      arrivalRate: 50
+      name: Sustained load
+  ensure:
+    thresholds:
+      http.response_time.p99: 3500
+      http.response_time.p90: 3000
+
+scenarios:
+  - name: "Stop by and say hello"
+    flow:
+      - get:
+          url: "/"
