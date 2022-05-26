@@ -18,6 +18,9 @@ import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 import { EthereumAuthProvider } from "@self.id/web";
 import { useViewerConnection } from "@self.id/framework";
 
+// -- Trusted IAM servers DID
+const IAM_ISSUER_DID = process.env.NEXT_PUBLIC_DPOPP_IAM_ISSUER_DID || "";
+
 export type AllProvidersState = {
   [provider in PROVIDER_ID]?: {
     providerSpec: ProviderSpec;
@@ -222,13 +225,27 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     // TODO remove providerstate on stamp removal
   }, [passport]);
 
+  const cleanPassport = (passport: Passport | undefined): Passport | undefined => {
+    // clean stamp content if expired or from a different issuer
+    if (passport) {
+      passport.stamps = passport.stamps.filter((stamp: Stamp) => {
+        const has_expired = new Date(stamp.credential.expirationDate) < new Date();
+        const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
+
+        return !has_expired && has_correct_issuer;
+      });
+    }
+
+    return passport;
+  };
+
   const fetchPassport = (database: CeramicDatabase): void => {
     console.log("attempting to fetch from ceramic...", database.ceramicClient._apiUrl);
     setIsLoadingPassport(true);
     database
       .getPassport()
       .then((passport) => {
-        setPassport(passport);
+        setPassport(cleanPassport(passport));
       })
       .finally(() => setIsLoadingPassport(false));
   };

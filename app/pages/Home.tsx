@@ -25,7 +25,7 @@ export default function Home() {
           <div className="w-full py-6 text-white sm:w-1/2 md:w-1/2">
             <img src="/assets/GitcoinLogoAndName.svg" alt="logo" className="mt-0 sm:mt-40 md:mt-40" />
             <div className="font-miriam-libre mt-10 leading-relaxed">
-              <p className="text-5xl sm:text-7xl md:text-7xl">dPassport</p>
+              <p className="text-5xl sm:text-7xl md:text-7xl">Passport</p>
             </div>
             <div className="font-miriam-libre mt-2 text-lg sm:mt-10 sm:text-xl md:mt-10 md:text-xl">
               A scored decentralized proof of personhood passport.
@@ -36,9 +36,9 @@ export default function Home() {
               </div>
             </div>
             <div className="font-mariam-libre  mt-0 text-sm sm:text-base md:mt-10 md:w-1/2 md:text-base">
-              dPassport lets you grow a decentralized identity record with various credentials about yourself. Based on
-              this network of sources about your personhood and who you are, social institutions like Gitcoin Grants can
-              give you rights like matching weight in Quadratic Funding.
+              The passport lets you grow a decentralized identity record with various credentials about yourself. Based
+              on this network of sources about your personhood and who you are, social institutions like Gitcoin Grants
+              can give you rights like matching weight in Quadratic Funding.
             </div>
             <div className="mt-4 w-full sm:mt-10 sm:w-1/2 md:mt-10 md:w-1/2">
               <button

@@ -6,17 +6,15 @@ import { GoogleCard, EnsCard, PohCard, TwitterCard, PoapCard, FacebookCard } fro
 
 export const CardList = (): JSX.Element => {
   return (
-    <section className="body-font text-gray-600">
-      <div className="container mx-auto px-5 py-24">
-        <div className="-m-4 flex flex-wrap">
-          <GoogleCard />
-          <EnsCard />
-          <TwitterCard />
-          <PohCard />
-          <PoapCard />
-          <FacebookCard />
-        </div>
+    <div className="container mx-auto py-10">
+      <div className="-m-4 flex flex-wrap">
+        <GoogleCard />
+        <EnsCard />
+        <TwitterCard />
+        <PohCard />
+        <PoapCard />
+        <FacebookCard />
       </div>
-    </section>
+    </div>
   );
 };
