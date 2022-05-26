@@ -56,7 +56,7 @@ export class POAPProvider implements Provider {
 
   // Verify that the address that is passed in owns at least one POAP older than 15 days
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    const address = payload.address;
+    const address = payload.address.toLocaleLowerCase();
     let poapCheckResult = {
       hasPoaps: false,
       poapList: null as string[],

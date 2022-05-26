@@ -9,6 +9,8 @@ jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
+const MOCK_ADDRESS_LOWER = MOCK_ADDRESS.toLocaleLowerCase();
+
 const now = Math.floor(Date.now() / 1000);
 const secondsInADay = 3600 * 24;
 const daysAgo5 = now - 5 * secondsInADay;
@@ -93,7 +95,7 @@ describe("Attempt verification", function () {
 
       mockedAxios.post.mockImplementation(async (url, data) => {
         const query: string = (data as RequestData).query;
-        if (url === subgraphUrl && query.includes(MOCK_ADDRESS)) {
+        if (url === subgraphUrl && query.includes(MOCK_ADDRESS_LOWER)) {
           return validPoapResponse;
         }
       });
@@ -157,7 +159,7 @@ describe("Attempt verification", function () {
 
       mockedAxios.post.mockImplementation(async (url, data) => {
         const query: string = (data as RequestData).query;
-        if (url === subgraphUrl && query.includes(MOCK_ADDRESS)) {
+        if (url === subgraphUrl && query.includes(MOCK_ADDRESS_LOWER)) {
           return emptyPoapResponse;
         }
       });
