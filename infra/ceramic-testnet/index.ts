@@ -169,6 +169,10 @@ const target = alb.createTargetGroup("gitcoin-dpopp-ceramic", {
   vpc,
   port: 80,
   healthCheck: { path: "/api/v0/node/healthcheck" },
+  stickiness: {
+    type: "app_cookie",
+    cookieName: "gtc-passport",
+  },
 });
 
 // Listen to traffic on port 443 & route it through the Ceramic target group
