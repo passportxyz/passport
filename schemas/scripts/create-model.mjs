@@ -5,8 +5,8 @@ import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
 import { fromString } from "uint8arrays";
-import Passport from "../models/Passports.json" assert { type: "json" };
-import VerifiableCredentials from "../models/VerifiableCredentials.json" assert { type: "json" };
+import Passport from "../models/Passports.json";
+import VerifiableCredentials from "../models/VerifiableCredentials.json";
 
 import dotenv from "dotenv";
 dotenv.config();
