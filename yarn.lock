@@ -7866,21 +7866,7 @@ did-resolver@^3.1.5, did-resolver@^3.2.0:
   resolved "https://registry.npmjs.org/did-resolver/-/did-resolver-3.2.0.tgz"
   integrity sha512-8YiTRitfGt9hJYDIzjc254gXgJptO4zq6Q2BMZMNqkbCf9EFkV6BD4QIh5BUF4YjBglBgJY+duQRzO3UZAlZsw==
 
-dids@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.npmjs.org/dids/-/dids-3.0.0.tgz"
-  integrity sha512-y39gJtv4HsaePj3ZkNN6nkcGjiSzCZdVtd5+Z6yUcVnk6LuxZ1CpgC0X+d5ecCnpCYrcYKysWTVGJ3obwRCJ2A==
-  dependencies:
-    "@stablelib/random" "^1.0.1"
-    ceramic-cacao "^1.0.0"
-    dag-jose-utils "^2.0.0"
-    did-jwt "^6.0.0"
-    did-resolver "^3.1.5"
-    multiformats "^9.4.10"
-    rpc-utils "^0.6.1"
-    uint8arrays "^3.0.0"
-
-dids@^3.1.0:
+dids@^3.0.0, dids@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/dids/-/dids-3.1.0.tgz#8323a3d72949ea97e804f9dbe2acaff88c7fc485"
   integrity sha512-cqagqY2HKbixVOYjETUqPP4I/qtEjx/c3T5nsWhDyrW90oGyB8Sv9haKYaUH1fpov1ud+i3ZRrZJerBIImg2cg==
