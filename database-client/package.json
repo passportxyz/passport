@@ -27,7 +27,7 @@
     "@glazed/datamodel": "^0.3.0",
     "@glazed/did-datastore": "^0.3.1",
     "@glazed/tile-loader": "^0.2.0",
-    "dids": "^3.0.0",
+    "dids": "^3.1.0",
     "dotenv": "^16.0.0",
     "key-did-provider-ed25519": "^2.0.0",
     "key-did-resolver": "^2.0.0",
