@@ -223,7 +223,7 @@ function makeCmd(input: pulumi.Input<string>): pulumi.Output<string[]> {
       "--hostname",
       "0.0.0.0",
       "--network",
-      "mainnet",
+      "elp",
       "--ipfs-api",
       "http://localhost:5001",
       // "--anchor-service-api", "${anchor_service_api_url}",
