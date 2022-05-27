@@ -18,7 +18,7 @@ A hex-encoded 32-byte `SEED` environment variable must be present to create a ke
 
 Set the `CERAMIC_CLIENT_URL` environment variable to change the Ceramic node to run against - the scripts will default to `http://localhost:7007` if not provided.
 
-### `yarn create-model`
+### `yarn publish-model`
 
 Runs the `publish-model.mjs` script to publish the models to Ceramic.
 
