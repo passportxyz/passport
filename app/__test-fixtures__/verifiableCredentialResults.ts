@@ -7,10 +7,12 @@ const credential: VerifiableCredential = {
     id: "did:ethr:Test",
     "@context": [
       {
-        root: "https://schema.org/Text",
+        hash: "https://schema.org/Text",
+        provider: "https://schema.org/Text",
       },
     ],
-    root: "randomValuesRoot",
+    hash: "randomValuesHash",
+    provider: "randomValuesProvider",
   },
   issuer: "did:key:randomValuesIssuer",
   issuanceDate: "2022-04-15T21:04:01.708Z",
