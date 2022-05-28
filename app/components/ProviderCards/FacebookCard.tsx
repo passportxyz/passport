@@ -2,7 +2,7 @@
 import React, { useContext } from "react";
 
 // --- Identity tools
-import { fetchVerifiableCredential } from "@dpopp/identity/dist/commonjs";
+import { fetchVerifiableCredential } from "@dpopp/identity";
 
 // --- UserContext
 import { UserContext } from "../../context/userContext";

@@ -11,7 +11,7 @@ import { OnboardAPI, WalletState } from "@web3-onboard/core/dist/types";
 import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
 
 // --- Data Storage Functions
-import { CeramicDatabase } from "@dpopp/database-client/dist/esm/src";
+import { CeramicDatabase } from "@dpopp/database-client";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 
 // -- Ceramic and Glazed

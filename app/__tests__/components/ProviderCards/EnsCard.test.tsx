@@ -7,9 +7,9 @@ import { mockAddress, mockWallet } from "../../../__test-fixtures__/onboardHookV
 import { STAMP_PROVIDERS } from "../../../config/providers";
 import { ensStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
 import { SUCCESFUL_ENS_RESULT } from "../../../__test-fixtures__/verifiableCredentialResults";
-import { fetchVerifiableCredential } from "@dpopp/identity/dist/commonjs";
+import { fetchVerifiableCredential } from "@dpopp/identity";
 
-jest.mock("@dpopp/identity/dist/commonjs", () => ({
+jest.mock("@dpopp/identity", () => ({
   fetchVerifiableCredential: jest.fn(),
 }));
 jest.mock("../../../utils/onboard.ts");
