@@ -6,24 +6,24 @@ identity.issueChallengeCredential = jest.fn(async (DIDKit, key, record) => ({
   credential: {
     issuer: "empty",
     credentialSubject: {
-      id: `did:ethr:${record.address}#challenge-${record.type}`,
+      id: `did:pkh:eip155:1:${record.address}`,
+      provider: `challenge-${record.type}`,
       challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
     },
   },
 }));
 
 // always returns dummy VC
-identity.issueHashedCredential = jest.fn(async (DIDKit, key, record) => ({
+identity.issueHashedCredential = jest.fn(async (DIDKit, key, address, record) => ({
   record: {
     type: record.type,
-    address: record.address,
     version: record.version,
   },
   credential: {
     credentialSubject: {
-      id: `did:ethr:${record.address}#${record.type}`,
+      id: `did:pkh:eip155:1:${address}`,
       hash: "0x0-and-the-rest-of-hash",
-      provider: "PROVIDER",
+      provider: `${record.type}`,
     },
   },
   proofs: [],

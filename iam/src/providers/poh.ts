@@ -55,7 +55,8 @@ export class PohProvider implements Provider {
         valid,
         record: valid
           ? {
-              poh: "Is registered",
+              // store the address into the proof records
+              address,
             }
           : undefined,
       };

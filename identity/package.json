@@ -2,7 +2,7 @@
   "name": "@dpopp/identity",
   "version": "0.0.1",
   "license": "MIT",
-  "main": "src/index.js",
+  "main": "src/index.ts",
   "directories": {
     "src": "src",
     "dist": "dist"
@@ -18,19 +18,15 @@
     "@dpopp/types": "0.0.1",
     "@ethersproject/base64": "^5.6.1",
     "@ethersproject/providers": "^5.6.2",
-    "@spruceid/didkit-wasm": "^0.2.1",
-    "@spruceid/didkit-wasm-node": "^0.2.1",
     "axios": "^0.26.1",
     "typescript": "~4.6.3"
   },
   "devDependencies": {
-    "copyfiles": "^2.4.1",
     "jest": "^27.5.1",
     "ts-jest": "^27.1.4"
   },
   "scripts": {
     "clean": "rimraf dist node_modules",
-    "postbuild": "copyfiles -u 4 ../node_modules/@spruceid/didkit-wasm/* ./dist/didkit-browser",
     "build": "tsc",
     "test": "jest --verbose",
     "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",

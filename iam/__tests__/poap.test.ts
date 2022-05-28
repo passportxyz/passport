@@ -114,7 +114,7 @@ describe("Attempt verification", function () {
       expect(verifiedPayload).toEqual({
         valid: true,
         record: {
-          poaps: (validPoapResponse.data.data.account.tokens.map((token) => token.id) as string[]).join(","),
+          address: MOCK_ADDRESS_LOWER,
         },
       });
     }

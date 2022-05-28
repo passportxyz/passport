@@ -106,7 +106,7 @@ export class POAPProvider implements Provider {
     return Promise.resolve({
       valid: poapCheckResult.hasPoaps,
       record: {
-        poaps: poapCheckResult.poapList ? poapCheckResult.poapList.join(",") : undefined,
+        address: poapCheckResult.hasPoaps ? address : undefined,
       },
     });
   }
