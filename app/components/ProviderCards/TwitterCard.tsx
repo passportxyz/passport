@@ -5,7 +5,7 @@ import { BroadcastChannel } from "broadcast-channel";
 
 // --- Identity tools
 import { PROVIDER_ID } from "@dpopp/types";
-import { fetchVerifiableCredential } from "@dpopp/identity/dist/commonjs";
+import { fetchVerifiableCredential } from "@dpopp/identity";
 
 // --- Components
 import { Card } from "../Card";

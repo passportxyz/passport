@@ -2,7 +2,7 @@
 import React, { useContext } from "react";
 
 // --- Identity tools
-import { fetchVerifiableCredential } from "@dpopp/identity/dist/commonjs";
+import { fetchVerifiableCredential } from "@dpopp/identity";
 
 // --- Google OAuth toolkit
 import GoogleLogin, { GoogleLoginResponse } from "react-google-login";

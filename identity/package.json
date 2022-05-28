@@ -2,7 +2,7 @@
   "name": "@dpopp/identity",
   "version": "0.0.1",
   "license": "MIT",
-  "main": "src/index.ts",
+  "main": "dist/commonjs/index.js",
   "directories": {
     "src": "src",
     "dist": "dist"
