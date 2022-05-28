@@ -18,7 +18,7 @@ describe("POST /challenge", function () {
     };
 
     // check that ID matches the payload (this has been mocked)
-    const expectedId = "did:ethr:0x0#challenge-Simple";
+    const expectedId = "did:pkh:eip155:1:0x0";
 
     // create a req against the express app
     const response = await request(app)
@@ -57,7 +57,8 @@ describe("POST /verify", function () {
     const challenge = {
       issuer: config.issuer,
       credentialSubject: {
-        id: "did:ethr:0x0#challenge-Simple",
+        id: "did:pkh:eip155:1:0x0",
+        provider: "challenge-Simple",
         address: "0x0",
         challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
       },
@@ -73,8 +74,11 @@ describe("POST /verify", function () {
       },
     };
 
+    // resolve the verification
+    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+
     // check that ID matches the payload (this has been mocked)
-    const expectedId = "did:ethr:0x0#Simple";
+    const expectedId = "did:pkh:eip155:1:0x0";
 
     // create a req against the express app
     const response = await request(app)
@@ -93,7 +97,8 @@ describe("POST /verify", function () {
     const challenge = {
       issuer: "unknown",
       credentialSubject: {
-        id: "did:ethr:0x0#challenge-Simple",
+        id: "did:pkh:eip155:1:0x0",
+        provider: "challenge-Simple",
         address: "0x0",
         challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
       },
@@ -120,12 +125,12 @@ describe("POST /verify", function () {
     expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify payload");
   });
 
-  it("handles invalid challenge requests where challenge credential subject singature checks fail", async () => {
+  it("handles invalid challenge requests where challenge credential subject signature checks fail", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
       issuer: config.issuer,
       credentialSubject: {
-        id: "did:ethr:0xNotAnEthereumAddress#challenge-Simple",
+        id: "did:pkh:eip155:1:0xNotAnEthereumAddress#challenge-Simple",
         address: "0xNotAnEthereumAddress",
         challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
       },
@@ -157,7 +162,8 @@ describe("POST /verify", function () {
     const challenge = {
       issuer: config.issuer,
       credentialSubject: {
-        id: "did:ethr:0x0#challenge-Simple",
+        id: "did:pkh:eip155:1:0x0",
+        provider: "challenge-Simple",
         address: "0x0",
         challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
       },
@@ -191,7 +197,8 @@ describe("POST /verify", function () {
     const challenge = {
       issuer: config.issuer,
       credentialSubject: {
-        id: "did:ethr:0xNotAnEthereumAddress#challenge-Simple",
+        id: "did:pkh:eip155:1:0xNotAnEthereumAddress",
+        type: "challenge-Simple",
         address: "0xNotAnEthereumAddress",
         challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
       },

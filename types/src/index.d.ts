@@ -59,10 +59,9 @@ export type VerifiedPayload = {
   record?: { [k: string]: string };
 };
 
-// these values are placed into a merkle-tree according to the response of a Provider
+// these values are placed into a sha256 along with the IAM_PRIVATE_KEY to generate a deterministic but protected hash of the PII info
 export type ProofRecord = {
   type: string;
-  address: string;
   version: string;
   username?: string;
   email?: string;

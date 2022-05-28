@@ -1,4 +1,4 @@
-// ---- Types
+// --- Types
 import {
   DIDKitLib,
   ProofRecord,
@@ -10,14 +10,21 @@ import {
   VerifiableCredentialRecord,
 } from "@dpopp/types";
 
-// ---- crypto lib for hashing
-import { createHash } from "crypto";
+// --- Node/Browser http req library
+import axios from "axios";
 
-// ---- base64 encoding
+// --- Base64 encoding
 import * as base64 from "@ethersproject/base64";
 
-// ---- Node/Browser http req library
-import axios from "axios";
+// --- Crypto lib for hashing
+import { createHash } from "crypto";
+
+// Keeping track of the hashing mechanism (algo + content)
+export const VERSION = "v0.0.0";
+
+// Control expiry times of issued credentials
+export const CHALLENGE_EXPIRES_AFTER_SECONDS = 60; // 1min
+export const CREDENTIAL_EXPIRES_AFTER_SECONDS = 30 * 86400; // 30days
 
 // utility to add a number of seconds to a date
 const addSeconds = (date: Date, seconds: number): Date => {
@@ -27,10 +34,16 @@ const addSeconds = (date: Date, seconds: number): Date => {
   return result;
 };
 
-// Keeping track of the hashing mechanism (algo + content)
-const VERSION = "v1.0.0";
+// Create an ordered array of the given input (of the form [[key:string, value:string], ...])
+export const objToSortedArray = (obj: { [k: string]: string }): string[][] => {
+  const keys: string[] = Object.keys(obj).sort();
+  return keys.reduce((out: string[][], key: string) => {
+    out.push([key, obj[key]]);
+    return out;
+  }, [] as string[][]);
+};
 
-// Internal method to issue a verfiable credential
+// Internal method to issue a verifiable credential
 const _issueCredential = async (
   DIDKit: DIDKitLib,
   key: string,
@@ -72,15 +85,17 @@ export const issueChallengeCredential = async (
   record: RequestPayload
 ): Promise<IssuedCredential> => {
   // generate a verifiableCredential (60s ttl)
-  const credential = await _issueCredential(DIDKit, key, 60, {
+  const credential = await _issueCredential(DIDKit, key, CHALLENGE_EXPIRES_AFTER_SECONDS, {
     credentialSubject: {
       "@context": [
         {
+          provider: "https://schema.org/Text",
           challenge: "https://schema.org/Text",
           address: "https://schema.org/Text",
         },
       ],
-      id: `did:ethr:${record.address}#challenge-${record.type}`,
+      id: `did:pkh:eip155:1:${record.address}`,
+      provider: `challenge-${record.type}`,
       // extra fields to convey challenge data
       challenge: record.challenge,
       address: record.address,
@@ -93,25 +108,16 @@ export const issueChallengeCredential = async (
   } as IssuedCredential;
 };
 
-export const THIRTY_DAYS_TO_SECONDS = 30 * 86400;
-
-export const objToSortedArray = (obj: { [k: string]: string }): string[][] => {
-  const keys: string[] = Object.keys(obj).sort();
-  return keys.reduce((out: string[][], key: string) => {
-    out.push([key, obj[key]]);
-    return out;
-  }, [] as string[][]);
-};
-
 // Return a verifiable credential with embedded hash
 export const issueHashedCredential = async (
   DIDKit: DIDKitLib,
   key: string,
+  address: string,
   record: ProofRecord
 ): Promise<IssuedCredential> => {
   // Generate a hash like SHA256(IAM_PRIVATE_KEY+PII), where PII is the (deterministic) JSON representation
   // of the PII object after transforming it to an array of the form [[key:string, value:string], ...]
-  // with the elemnts sorted by key
+  // with the elements sorted by key
   const hash = base64.encode(
     createHash("sha256")
       .update(key, "utf-8")
@@ -120,7 +126,7 @@ export const issueHashedCredential = async (
   );
 
   // generate a verifiableCredential
-  const credential = await _issueCredential(DIDKit, key, THIRTY_DAYS_TO_SECONDS, {
+  const credential = await _issueCredential(DIDKit, key, CREDENTIAL_EXPIRES_AFTER_SECONDS, {
     credentialSubject: {
       "@context": [
         {
@@ -128,8 +134,8 @@ export const issueHashedCredential = async (
           provider: "https://schema.org/Text",
         },
       ],
-      // TODO: the :1: is presumably the chain id (in our case mainnet) ?
-      id: `did:pkh:eip155:1:${record.address}`,
+      // construct a pkh DID on mainnet (:1) for the given wallet address
+      id: `did:pkh:eip155:1:${address}`,
       provider: record.type,
       hash: `${VERSION}:${hash}`,
     },

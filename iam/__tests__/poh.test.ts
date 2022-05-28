@@ -32,7 +32,7 @@ describe("Attempt verification", function () {
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
-        poh: "Is registered",
+        address: MOCK_ADDRESS,
       },
     });
   });

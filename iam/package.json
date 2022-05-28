@@ -19,6 +19,7 @@
   "dependencies": {
     "@dpopp/identity": "^0.0.1",
     "@dpopp/types": "^0.0.1",
+    "@spruceid/didkit-wasm-node": "^0.2.1",
     "axios": "^0.27.2",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",

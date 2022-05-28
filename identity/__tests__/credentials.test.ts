@@ -145,7 +145,8 @@ describe("Generate Credentials", function () {
     // expect to have called issueCredential
     expect(DIDKit.issueCredential).toHaveBeenCalled();
     // expect the structure/details added by issueChallengeCredential to be correct
-    expect(credential.credentialSubject.id).toEqual(`did:ethr:${record.address}#challenge-${record.type}`);
+    expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
+    expect(credential.credentialSubject.provider).toEqual(`challenge-${record.type}`);
     expect(credential.credentialSubject.challenge).toEqual(record.challenge);
     expect(credential.credentialSubject.address).toEqual(record.address);
     expect(typeof credential.proof).toEqual("object");
@@ -169,14 +170,14 @@ describe("Generate Credentials", function () {
     it("can generate a credential containing hash", async () => {
       const record = {
         type: "Simple",
-        address: "0x0",
         version: "Test-Case-1",
+        address: "0x0",
       };
 
       const expectedHash: string =
-        "v1.0.0:" + base64.encode(createHash("sha256").update(key).update(JSON.stringify(objToSortedArray(record))).digest());
+        "v0.0.0:" + base64.encode(createHash("sha256").update(key).update(JSON.stringify(objToSortedArray(record))).digest());
       // details of this credential are created by issueHashedCredential - but the proof is added by DIDKit (which is mocked)
-      const { credential } = await issueHashedCredential(DIDKit, key, record);
+      const { credential } = await issueHashedCredential(DIDKit, key, "0x0", record);
       // expect to have called issueCredential
       expect(DIDKit.issueCredential).toHaveBeenCalled();
       // expect the structure/details added by issueHashedCredential to be correct
@@ -196,12 +197,12 @@ describe("Verify Credentials", function () {
   it("can verify a credential", async () => {
     const record = {
       type: "Simple",
-      address: "0x0",
       version: "Test-Case-1",
+      address: "0x0",
     };
 
     // we are creating this VC so that we know that we have a valid VC in this context to test against (never expired)
-    const { credential: credentialToVerify } = await issueHashedCredential(DIDKit, key, record);
+    const { credential: credentialToVerify } = await issueHashedCredential(DIDKit, key, "0x0", record);
 
     // all verifications will pass as the DIDKit response is mocked
     expect(await verifyCredential(DIDKit, credentialToVerify)).toEqual(true);
