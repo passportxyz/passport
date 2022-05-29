@@ -82,6 +82,10 @@ const target = alb.createTargetGroup("web-target", {
   vpc,
   port: 80,
   healthCheck: { path: "/health", unhealthyThreshold: 5 },
+  stickiness: {
+    type: "app_cookie",
+    cookieName: "gtc-passport",
+  },
 });
 
 // Listen to traffic on port 443 & route it through the target group
