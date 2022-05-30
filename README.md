@@ -8,7 +8,9 @@ Prerequisites: [Node (v16 LTS)](https://nodejs.org/en/download/) plus [Yarn](htt
 
 ```sh
 git clone https://github.com/gitcoinco/dPopp.git
+cd dPopp
 npm install --global lerna
+lerna init
 lerna bootstrap
 ```
 
