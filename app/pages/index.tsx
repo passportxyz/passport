@@ -19,15 +19,19 @@ const App: NextPage = () => {
   // pull any search params
   const queryString = new URLSearchParams(window?.location?.search);
   // Twitter oauth will attach code & state in oauth procedure
+  const queryError = queryString.get("error");
   const queryCode = queryString.get("code");
   const queryState = queryString.get("state");
 
   // if Twitter oauth then submit message to other windows and close self
-  if (queryCode && queryState && /^twitter-.*/.test(queryState)) {
+  if ((queryError || queryCode) && queryState && /^twitter-.*/.test(queryState)) {
     // shared message channel between windows (on the same domain)
     const channel = new BroadcastChannel("twitter_oauth_channel");
-
-    channel.postMessage({ target: "twitter", data: { code: queryCode, state: queryState } });
+    // only continue with the process if a code is returned
+    if (queryCode) {
+      channel.postMessage({ target: "twitter", data: { code: queryCode, state: queryState } });
+    }
+    // always close the redirected window
     window.close();
 
     return <div></div>;
