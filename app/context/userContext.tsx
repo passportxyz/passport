@@ -132,11 +132,15 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   useEffect((): void => {
     // no connection
     if (!wallet) {
+      // clear all state
+      resetPassport(passport);
       setWalletLabel(undefined);
       setAddress(undefined);
       setSigner(undefined);
       setCeramicDatabase(undefined);
     } else {
+      // clear any verified state
+      resetPassport(passport);
       // record connected wallet details
       setWalletLabel(wallet.label);
       setAddress(wallet.accounts[0].address);
@@ -195,10 +199,10 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         label: walletLabel || "",
       })
         .then(() => {
+          setLoggedIn(false);
+          resetPassport(passport);
           ceramicDisconnect();
           window.localStorage.setItem("connectedWallets", "[]");
-          setPassport(undefined);
-          setLoggedIn(false);
         })
         .catch((e) => {
           throw e;
@@ -225,6 +229,19 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     // TODO remove providerstate on stamp removal
   }, [passport]);
 
+  const resetPassport = (passport: Passport | undefined): void => {
+    // reset the passports stamp state on new fetch req
+    setPassport({
+      ...passport,
+      stamps:
+        passport?.stamps.map((stamp) => {
+          return {
+            provider: stamp.provider,
+          } as Stamp;
+        }) || [],
+    } as Passport);
+  };
+
   const cleanPassport = (passport: Passport | undefined): Passport | undefined => {
     // clean stamp content if expired or from a different issuer
     if (passport) {
@@ -242,6 +259,8 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   const fetchPassport = (database: CeramicDatabase): void => {
     console.log("attempting to fetch from ceramic...", database.ceramicClient._apiUrl);
     setIsLoadingPassport(true);
+
+    // fetch, clean and set the new Passport state
     database
       .getPassport()
       .then((passport) => {
