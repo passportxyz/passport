@@ -24,7 +24,7 @@ export default function EnsCard(): JSX.Element {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
-  const [ens, SetEns] = useState<Stamp | undefined>(undefined);
+  const [ens, SetEns] = useState<string | undefined>(undefined);
 
   const handleFetchCredential = (): void => {
     setCredentialResponseIsLoading(true);
