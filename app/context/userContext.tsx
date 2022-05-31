@@ -133,14 +133,15 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     // no connection
     if (!wallet) {
       // clear all state
-      resetPassport(passport);
+      setPassport(undefined);
       setWalletLabel(undefined);
       setAddress(undefined);
       setSigner(undefined);
       setCeramicDatabase(undefined);
     } else {
       // clear any verified state
-      resetPassport(passport);
+      setPassport(undefined);
+      setIsLoadingPassport(true);
       // record connected wallet details
       setWalletLabel(wallet.label);
       setAddress(wallet.accounts[0].address);
@@ -200,7 +201,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       })
         .then(() => {
           setLoggedIn(false);
-          resetPassport(passport);
+          setPassport(undefined);
           ceramicDisconnect();
           window.localStorage.setItem("connectedWallets", "[]");
         })
@@ -212,35 +213,37 @@ export const UserContextProvider = ({ children }: { children: any }) => {
 
   // hydrate allProvidersState
   useEffect(() => {
-    passport?.stamps.forEach((stamp: Stamp) => {
-      const { provider } = stamp;
-      const providerState = allProvidersState[provider];
-      if (providerState) {
+    if (passport) {
+      // set stamps into allProvidersState
+      passport.stamps.forEach((stamp: Stamp) => {
+        const { provider } = stamp;
+        const providerState = allProvidersState[provider];
+        if (providerState) {
+          const newProviderState = {
+            providerSpec: providerState.providerSpec,
+            stamp,
+          };
+          setAllProviderState((prevState) => ({
+            ...prevState,
+            [provider]: newProviderState,
+          }));
+        }
+      });
+    } else {
+      // clear stamps from allProvidersState
+      for (const [provider, providerState] of Object.entries(allProvidersState)) {
+        // clear the entry
         const newProviderState = {
-          providerSpec: providerState.providerSpec,
-          stamp,
+          providerSpec: providerState?.providerSpec,
+          stamp: undefined,
         };
         setAllProviderState((prevState) => ({
           ...prevState,
           [provider]: newProviderState,
         }));
       }
-    });
-    // TODO remove providerstate on stamp removal
+    }
   }, [passport]);
-
-  const resetPassport = (passport: Passport | undefined): void => {
-    // reset the passports stamp state on new fetch req
-    setPassport({
-      ...passport,
-      stamps:
-        passport?.stamps.map((stamp) => {
-          return {
-            provider: stamp.provider,
-          } as Stamp;
-        }) || [],
-    } as Passport);
-  };
 
   const cleanPassport = (passport: Passport | undefined): Passport | undefined => {
     // clean stamp content if expired or from a different issuer
