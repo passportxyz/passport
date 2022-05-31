@@ -1,13 +1,17 @@
 // --- React Methods
-import React from "react";
+import React, { useContext } from "react";
 
-// --Chakra UI Elements
-import { useDisclosure } from "@chakra-ui/react";
+// --- Chakra UI Elements
+import { Spinner, useDisclosure } from "@chakra-ui/react";
 
+// --- Types
 import { VerifiableCredential } from "@dpopp/types";
 import { ProviderSpec } from "../config/providers";
 
-// --Components
+// --- Context
+import { UserContext } from "../context/userContext";
+
+// --- Components
 import { JsonOutputModal } from "../components/JsonOutputModal";
 
 export type CardProps = {
@@ -18,6 +22,7 @@ export type CardProps = {
 };
 
 export const Card = ({ providerSpec, verifiableCredential, issueCredentialWidget }: CardProps): JSX.Element => {
+  const { isLoadingPassport } = useContext(UserContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <div className="w-full p-4 md:w-1/2 xl:w-1/4">
@@ -57,7 +62,20 @@ export const Card = ({ providerSpec, verifiableCredential, issueCredentialWidget
           <h1 className="title-font mb-3 text-lg font-medium text-gray-900">{providerSpec.name}</h1>
           <p className="pleading-relaxed">{providerSpec.description}</p>
         </div>
-        {verifiableCredential ? (
+        {isLoadingPassport ? (
+          <span className="flex w-full items-center justify-center border-t-2 p-3 text-gray-900">
+            <span>
+              <Spinner
+                title="loading..."
+                size="sm"
+                thickness="2px"
+                speed="0.65s"
+                emptyColor="gray.200"
+                color="purple.500"
+              />
+            </span>
+          </span>
+        ) : verifiableCredential ? (
           <span className="flex w-full items-center justify-center border-t-2 p-3 text-gray-900">
             <img src="./assets/verifiedShield.svg" alt="Verified Shield" />
             <span className="ml-3 text-xl text-green-400">Verified</span>

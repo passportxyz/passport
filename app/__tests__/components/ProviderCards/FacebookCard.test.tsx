@@ -31,7 +31,7 @@ const mockUserContext: UserContextState = {
   walletLabel: mockWallet.label,
 };
 
-describe("when user has not verfied with FacebookProvider", () => {
+describe("when user has not verified with FacebookProvider", () => {
   it("should display a facebook verification button", () => {
     render(
       <UserContext.Provider value={mockUserContext}>
