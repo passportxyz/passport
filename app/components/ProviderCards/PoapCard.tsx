@@ -22,7 +22,7 @@ export default function PoapCard(): JSX.Element {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
-  const [poapVerified, SetPoapVerified] = useState<Stamp | undefined>(undefined);
+  const [poapVerified, SetPoapVerified] = useState<boolean | undefined>(undefined);
 
   // fetch an example VC from the IAM server
   const handleFetchCredential = (): void => {
@@ -37,8 +37,8 @@ export default function PoapCard(): JSX.Element {
       },
       signer as { signMessage: (message: string) => Promise<string> }
     )
-      .then((verified: { record: any; credential: any }): void => {
-        SetPoapVerified(verified.record?.poaps);
+      .then((verified: { error?: string; record: any; credential: any }): void => {
+        SetPoapVerified(!verified.error);
         SetCredentialResponse({
           provider: "POAP",
           credential: verified.credential,
