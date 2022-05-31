@@ -23,7 +23,7 @@ export default function PohCard(): JSX.Element {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
-  const [pohVerified, SetPohVerified] = useState<Stamp | undefined>(undefined);
+  const [pohVerified, SetPohVerified] = useState<boolean | undefined>(undefined);
 
   const handleFetchCredential = (): void => {
     setCredentialResponseIsLoading(true);
@@ -39,8 +39,8 @@ export default function PohCard(): JSX.Element {
       },
       signer as { signMessage: (message: string) => Promise<string> }
     )
-      .then((verified: { record: any; credential: any }): void => {
-        SetPohVerified(verified.record?.poh);
+      .then((verified: { error?: string; record: any; credential: any }): void => {
+        SetPohVerified(!verified.error);
         SetCredentialResponse({
           provider: "Poh",
           credential: verified.credential,
