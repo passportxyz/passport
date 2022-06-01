@@ -95,6 +95,7 @@ export default function EnsCard(): JSX.Element {
       providerSpec={allProvidersState[providerId]!.providerSpec as ProviderSpec}
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={issueCredentialWidget}
+      isLoading={credentialResponseIsLoading}
     />
   );
 }

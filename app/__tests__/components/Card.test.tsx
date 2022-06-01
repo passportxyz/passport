@@ -51,6 +51,32 @@ describe("when the user is not verified", () => {
     };
   });
 
+  describe("when the user is verifying a stamp", () => {
+    it("should show a loading indicator", () => {
+      cardProps = {
+        ...cardProps,
+        isLoading: true,
+      };
+
+      render(<Card {...cardProps} />);
+
+      expect(screen.getByTestId("loading-indicator")).toBeInTheDocument();
+    });
+  });
+
+  describe("when the user is not verifying a stamp", () => {
+    it("should not show a loading indicator", () => {
+      cardProps = {
+        ...cardProps,
+        isLoading: false,
+      };
+
+      render(<Card {...cardProps} />);
+
+      expect(screen.queryByTestId("loading-indicator")).not.toBeInTheDocument();
+    });
+  });
+
   it("should show verification button", () => {
     render(
       <UserContext.Provider value={mockUserContext}>

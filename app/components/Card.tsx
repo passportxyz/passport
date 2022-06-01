@@ -19,14 +19,33 @@ export type CardProps = {
   verifiableCredential?: VerifiableCredential;
   icon?: string;
   issueCredentialWidget: JSX.Element;
+  isLoading?: boolean;
 };
 
-export const Card = ({ providerSpec, verifiableCredential, issueCredentialWidget }: CardProps): JSX.Element => {
+export const Card = ({
+  providerSpec,
+  verifiableCredential,
+  issueCredentialWidget,
+  isLoading = false,
+}: CardProps): JSX.Element => {
   const { isLoadingPassport } = useContext(UserContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <div className="w-full p-4 md:w-1/2 xl:w-1/4">
-      <div className="border border-gray-200 p-0">
+      <div className="relative border border-gray-200 p-0">
+        {isLoading && (
+          <div className="absolute inset-0 z-10 flex w-full flex-col items-center justify-center bg-white opacity-80">
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="purple.500"
+              size="md"
+              data-testid="loading-indicator"
+            />
+            Verifying stamp...
+          </div>
+        )}
         <div className="flex flex-row p-6">
           <div className="flex h-10 w-1/2 w-10 flex-grow">
             {providerSpec.icon ? (

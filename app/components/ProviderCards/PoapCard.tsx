@@ -92,6 +92,7 @@ export default function PoapCard(): JSX.Element {
       providerSpec={allProvidersState[providerId]!.providerSpec}
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={issueCredentialWidget}
+      isLoading={credentialResponseIsLoading}
     />
   );
 }
