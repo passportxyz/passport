@@ -1,5 +1,5 @@
 // --- React Methods
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 
 // --- Identity tools
 import { fetchVerifiableCredential } from "@dpopp/identity";
@@ -24,7 +24,10 @@ const providerId: PROVIDER_ID = "Google";
 export default function GoogleCard(): JSX.Element {
   const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
 
+  const [isLoading, setLoading] = useState(false);
+
   const onGoogleSignIn = (response: GoogleLoginResponse): void => {
+    setLoading(true);
     // fetch the verifiable credential
     fetchVerifiableCredential(
       iamUrl,
@@ -46,11 +49,15 @@ export default function GoogleCard(): JSX.Element {
       })
       .catch((e): void => {
         throw e;
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
   return (
     <Card
+      isLoading={isLoading}
       providerSpec={allProvidersState[providerId]!.providerSpec as ProviderSpec}
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={

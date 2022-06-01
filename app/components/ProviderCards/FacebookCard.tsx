@@ -1,5 +1,5 @@
 // --- React Methods
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 
 // --- Identity tools
 import { fetchVerifiableCredential } from "@dpopp/identity";
@@ -38,6 +38,7 @@ const providerId: PROVIDER_ID = "Facebook";
 
 export default function FacebookCard(): JSX.Element {
   const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const [isLoading, setLoading] = useState(false);
 
   const onClick = () => {
     //@ts-ignore assuming FB.init was already called; see facebookSdkScript in pages/index.tsx
@@ -49,6 +50,7 @@ export default function FacebookCard(): JSX.Element {
   };
 
   const onFacebookSignIn = (response: ReactFacebookLoginInfo): void => {
+    setLoading(true);
     // fetch the verifiable credential
     fetchVerifiableCredential(
       iamUrl,
@@ -70,6 +72,9 @@ export default function FacebookCard(): JSX.Element {
       })
       .catch((e): void => {
         throw e;
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -82,6 +87,7 @@ export default function FacebookCard(): JSX.Element {
           Connect account
         </button>
       }
+      isLoading={isLoading}
     />
   );
 }

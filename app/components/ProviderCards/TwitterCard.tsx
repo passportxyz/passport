@@ -1,5 +1,5 @@
 // --- Methods
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { debounce } from "ts-debounce";
 import { BroadcastChannel } from "broadcast-channel";
 
@@ -19,6 +19,7 @@ const providerId: PROVIDER_ID = "Twitter";
 
 export default function TwitterCard(): JSX.Element {
   const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const [isLoading, setLoading] = useState(false);
 
   // Fetch Twitter OAuth2 url from the IAM procedure
   async function handleFetchTwitterOAuth(): Promise<void> {
@@ -71,6 +72,7 @@ export default function TwitterCard(): JSX.Element {
       const queryState = e.data.state;
 
       // fetch and store credential
+      setLoading(true);
       fetchVerifiableCredential(
         process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "",
         {
@@ -83,12 +85,16 @@ export default function TwitterCard(): JSX.Element {
           },
         },
         signer as { signMessage: (message: string) => Promise<string> }
-      ).then((verified: { credential: any }): void => {
-        handleAddStamp({
-          provider: providerId,
-          credential: verified.credential,
+      )
+        .then((verified: { credential: any }): void => {
+          handleAddStamp({
+            provider: providerId,
+            credential: verified.credential,
+          });
+        })
+        .finally(() => {
+          setLoading(false);
         });
-      });
     }
   }
 
@@ -115,6 +121,7 @@ export default function TwitterCard(): JSX.Element {
       providerSpec={allProvidersState[providerId]!.providerSpec as ProviderSpec}
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={issueCredentialWidget}
+      isLoading={isLoading}
     />
   );
 }
