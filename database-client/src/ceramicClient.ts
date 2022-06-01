@@ -36,6 +36,7 @@ export type ModelTypes = {
 };
 
 export class CeramicDatabase implements DataStorageBase {
+  did: string;
   loader: TileLoader;
   ceramicClient: CeramicApi;
   model: DataModel<ModelTypes>;
@@ -51,6 +52,10 @@ export class CeramicDatabase implements DataStorageBase {
     const model = new DataModel({ ceramic, aliases: publishedModel });
     const store = new DIDDataStore({ loader, ceramic, model });
 
+    // Store the users did:pkh here to verify match on credential
+    this.did = (did.hasParent ? did.parent : did.id).toLowerCase();
+
+    // Store state into class
     this.loader = loader;
     this.ceramicClient = ceramic;
     this.model = model;
@@ -98,7 +103,9 @@ export class CeramicDatabase implements DataStorageBase {
   async addStamp(stamp: Stamp): Promise<void> {
     // get passport document from user did data store in ceramic
     const passport = await this.store.get("Passport");
-    if (passport) {
+    
+    // ensure the users did matches the credentials subject id otherwise skip the save
+    if (passport && this.did === stamp.credential.credentialSubject.id.toLowerCase()) {
       // create a tile for verifiable credential issued from iam server
       const newStampTile = await this.model.createTile("VerifiableCredential", stamp.credential);
 

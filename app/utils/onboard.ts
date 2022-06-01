@@ -26,12 +26,6 @@ export const initWeb3Onboard = init({
       label: "Ethereum Mainnet",
       rpcUrl: MAINNET_RPC_URL,
     },
-    {
-      id: "0x4",
-      token: "ETH",
-      label: "Ethereum Rinkeby Testnet",
-      rpcUrl: RINKEBY_RPC_URL,
-    },
   ],
   appMetadata: {
     name: "Gitcoin - dPopp",

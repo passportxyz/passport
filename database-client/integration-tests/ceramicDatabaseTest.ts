@@ -56,7 +56,7 @@ describe("when there is no passport for the given did", () => {
   });
 });
 
-describe("when there is an existing passport with out stamps for the given did", () => {
+describe("when there is an existing passport without stamps for the given did", () => {
   const existingPassport: Passport = {
     issuanceDate: new Date("2022-01-01"),
     expiryDate: new Date("2022-01-02"),
@@ -86,7 +86,7 @@ describe("when there is an existing passport with out stamps for the given did",
       "@context": ["https://www.w3.org/2018/credentials/v1"],
       type: ["VerifiableCredential"],
       credentialSubject: {
-        id: "did:ethr:Test",
+        id: "did:key:z6Mkf64CtFAtmSnt2a3HrFyo1i1BzR2ftndjrHby1bqv8N5r", // did:key value for TEST_SEED (must match ceramicClients DID)
         "@context": [
           {
             hash: "https://schema.org/Text",
@@ -137,7 +137,7 @@ describe("when there is an existing passport with stamps for the given did", () 
     "@context": ["https://www.w3.org/2018/credentials/v1"],
     type: ["VerifiableCredential"],
     credentialSubject: {
-      id: "did:ethr:Test",
+      id: "did:key:z6Mkf64CtFAtmSnt2a3HrFyo1i1BzR2ftndjrHby1bqv8N5r", // did:key value for TEST_SEED (must match ceramicClients DID)
       "@context": [
         {
           hash: "https://schema.org/Text",

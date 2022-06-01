@@ -245,14 +245,15 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     }
   }, [passport]);
 
-  const cleanPassport = (passport: Passport | undefined): Passport | undefined => {
+  const cleanPassport = (passport: Passport | undefined, database: CeramicDatabase): Passport | undefined => {
     // clean stamp content if expired or from a different issuer
     if (passport) {
       passport.stamps = passport.stamps.filter((stamp: Stamp) => {
         const has_expired = new Date(stamp.credential.expirationDate) < new Date();
         const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
+        const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
 
-        return !has_expired && has_correct_issuer;
+        return !has_expired && has_correct_issuer && has_correct_subject;
       });
     }
 
@@ -261,13 +262,12 @@ export const UserContextProvider = ({ children }: { children: any }) => {
 
   const fetchPassport = (database: CeramicDatabase): void => {
     console.log("attempting to fetch from ceramic...", database.ceramicClient._apiUrl);
-    setIsLoadingPassport(true);
 
     // fetch, clean and set the new Passport state
     database
       .getPassport()
       .then((passport) => {
-        setPassport(cleanPassport(passport));
+        setPassport(cleanPassport(passport, database));
       })
       .finally(() => setIsLoadingPassport(false));
   };

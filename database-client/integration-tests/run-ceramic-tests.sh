@@ -21,4 +21,4 @@ yarn workspace @dpopp/schemas create-model
 yarn workspace @dpopp/schemas publish-model
 
 # === run ceramic integration tests ===
-yarn test:ceramic-integration
+yarn test:integration
