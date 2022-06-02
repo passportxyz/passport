@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
+    <meta
+      charset="UTF-8"
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
     <title>404 Not Found</title>
     <style>
       @import url("https://fonts.googleapis.com/css?family=Libre+Franklin:400,600|Miriam+Libre:400");
@@ -9,8 +13,8 @@
       .not-found-header {
         display: flex;
         flex-direction: row;
-        padding-bottom: 1rem;
-        margin: 0 1rem 10rem 1rem;
+        padding: 1rem 0 1rem 0;
+        margin: 0 1rem 1rem 1rem;
         border-bottom: 1px solid #e2e0e7;
       }
 
@@ -44,8 +48,14 @@
         text-decoration: none;
       }
 
+      .spaceship {
+        width: 30vw;
+        height: auto;
+      }
+
       .not-found-copy {
         text-align: center;
+        width: 100%;
       }
 
       .not-found-go-home {
@@ -58,12 +68,62 @@
         font-family: "Libre Franklin", Arial, serif;
         font-weight: 400;
         color: #757087;
-        width: 120px;
-        height: 48px;
+        width: 10vw;
+        height: 5vh;
       }
 
       .not-found-go-home:hover {
         filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+      }
+
+      @media screen and (max-height: 600px) {
+        p {
+          font-size: 1rem;
+          line-height: 0.5rem;
+        }
+
+        h2 {
+          font-size: 2rem;
+          line-height: 0;
+        }
+
+        .spaceship {
+          width: 15vw;
+        }
+
+        .not-found-logo {
+          width: 3vw;
+          height: auto;
+        }
+
+        .not-found-header {
+          padding: 2vh 0 2vh 0;
+        }
+
+        .not-found-go-home {
+          width: 15vw;
+          height: 10vh;
+        }
+      }
+
+      @media screen and (max-width: 600px) {
+        .spaceship {
+          width: 60vw;
+        }
+
+        h2 {
+          font-size: 2rem;
+        }
+
+        p {
+          line-break: initial;
+          line-height: 1rem;
+          font-size: 0.75rem;
+        }
+
+        .not-found-go-home {
+          width: 25vw;
+        }
       }
     </style>
   </head>
@@ -72,7 +132,7 @@
       <a href="https://passport.gitcoin.co/">
         <img
           class="not-found-logo"
-          src="./assets/GitcoinLogo.svg"
+          src="assets/GitcoinLogo.svg"
           alt="A neat space station"
         />
       </a>
@@ -80,7 +140,7 @@
     <div class="not-found-content">
       <img
         class="spaceship"
-        src="./assets/coolSpacestation.svg"
+        src="assets/coolSpacestation.svg"
         alt="gitcoin logo"
       />
       <div class="not-found-copy">
