@@ -29,6 +29,7 @@ type VerifyModalProps = {
   stamp: Stamp | undefined;
   verifyData?: JSX.Element;
   isLoading: boolean;
+  title?: string | undefined;
 };
 
 export const VerifyModal = ({
@@ -38,7 +39,9 @@ export const VerifyModal = ({
   stamp,
   verifyData,
   isLoading,
+  title,
 }: VerifyModalProps): JSX.Element => {
+  const modalTitle = title || `Verify ${stamp?.provider} Stamp Data`;
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
@@ -49,27 +52,26 @@ export const VerifyModal = ({
           </div>
         ) : (
           <>
-            <ModalHeader className="text-center">Verify {stamp?.provider} Stamp Data</ModalHeader>
-
-            <ModalCloseButton />
-            <ModalBody>
-              {/* RSX Element passed in to show desired stamp output */}
-              {verifyData}
-              <br />
-              <br />
+            <ModalHeader px={8} pb={1} pt={6}>{ modalTitle }</ModalHeader>
+            <ModalCloseButton mr={2} />
+            <ModalBody p={0}>
+              <div className="px-8 pb-4 text-gray-500" >
+                {/* RSX Element passed in to show desired stamp output */}
+                {verifyData}
+              </div>
               {stamp && (
-                <Accordion defaultIndex={[0]} allowMultiple>
+                <Accordion defaultIndex={[]} allowMultiple>
                   <AccordionItem>
-                    <h2>
-                      <AccordionButton borderColor={"white"}>
-                        <Box flex="1" textAlign="left">
+                    <h2 className="border rounded my-6 mx-8">
+                      <AccordionButton>
+                        <Box flex="1" textAlign="left" textColor="gray.600">
                           Your Stamp Credential
                         </Box>
                         <AccordionIcon />
                       </AccordionButton>
                     </h2>
                     <AccordionPanel pb={4}>
-                      <div className="text-sm">{JSON.stringify(stamp, undefined, 4)}</div>
+                      <div className="text-sm overflow-auto text-gray-500"><pre>{JSON.stringify(stamp, undefined, 2)}</pre></div>
                     </AccordionPanel>
                   </AccordionItem>
                 </Accordion>
@@ -77,11 +79,11 @@ export const VerifyModal = ({
             </ModalBody>
 
             {stamp && (
-              <ModalFooter>
-                <Button data-testid="modal-cancel" colorScheme="red" mr={3} onClick={onClose}>
+              <ModalFooter py={3}>
+                <Button data-testid="modal-cancel" variant='outline' mr={5} onClick={onClose}>
                   Cancel
                 </Button>
-                <Button data-testid="modal-verify" colorScheme="purple" mr={3} onClick={handleUserVerify}>
+                <Button data-testid="modal-verify" colorScheme="purple" mr={2} onClick={handleUserVerify}>
                   Verify
                 </Button>
               </ModalFooter>

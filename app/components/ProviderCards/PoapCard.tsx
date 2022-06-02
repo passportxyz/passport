@@ -9,7 +9,7 @@ import { UserContext } from "../../context/userContext";
 
 import { Card } from "../Card";
 import { VerifyModal } from "../VerifyModal";
-import { useDisclosure } from "@chakra-ui/react";
+import { useDisclosure, Text } from "@chakra-ui/react";
 
 import { PROVIDER_ID, Stamp } from "@dpopp/types";
 
@@ -44,7 +44,7 @@ export default function PoapCard(): JSX.Element {
           credential: verified.credential,
         });
       })
-      .catch((e: any): void => {})
+      .catch((e: any): void => { })
       .finally((): void => {
         setCredentialResponseIsLoading(false);
       });
@@ -56,6 +56,16 @@ export default function PoapCard(): JSX.Element {
     }
     onClose();
   };
+
+  const successModalText = <>
+    <Text fontSize='md'>We checked for POAP badges and found at least one POAP badge that is 15 or more days old.</Text>
+  </>
+
+  const failModalText = <>
+    <Text fontSize='md'>We checked for POAP badges and did not find POAP badge(s) that are 15 or more days old.</Text>
+  </>
+
+  const title = poapVerified ? "POAP Stamp Verification" : "POAP Not Found";
 
   const issueCredentialWidget = (
     <>
@@ -78,11 +88,12 @@ export default function PoapCard(): JSX.Element {
         verifyData={
           <>
             {poapVerified
-              ? "Your POAP verification was successful!"
-              : "Your address does not have an POAP associated older than 15 days"}
+              ? successModalText
+              : failModalText}
           </>
         }
-        isLoading={credentialResponseIsLoading}
+        title={title}
+      isLoading={credentialResponseIsLoading}
       />
     </>
   );

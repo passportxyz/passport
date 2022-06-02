@@ -178,13 +178,14 @@ describe("when the verify button is clicked", () => {
       fireEvent.click(initialVerifyButton!);
 
       const verifyModal = await screen.findByRole("dialog");
-      const verifyModalText = screen.getByText("Your address does not have an POAP associated older than 15 days");
-
       expect(verifyModal).toBeInTheDocument();
+
+      const verifyModalText = screen.getByText("We checked for POAP badges and did not find POAP badge(s) that are 15 or more days old.")
 
       await waitFor(() => {
         expect(verifyModalText).toBeInTheDocument();
       });
+
     });
   });
 });
