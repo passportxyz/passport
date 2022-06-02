@@ -25,6 +25,7 @@ export default function EnsCard(): JSX.Element {
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [ens, SetEns] = useState<string | undefined>(undefined);
+  const [verificationInProgress, setVerificationInProgress] = useState(false);
 
   const handleFetchCredential = (): void => {
     setCredentialResponseIsLoading(true);
@@ -54,9 +55,14 @@ export default function EnsCard(): JSX.Element {
   };
 
   const handleUserVerify = (): void => {
-    if (credentialResponse) {
-      handleAddStamp(credentialResponse);
-    }
+    handleAddStamp(credentialResponse!).finally(() => {
+      setVerificationInProgress(false);
+    });
+    onClose();
+  };
+
+  const handleModalOnClose = (): void => {
+    setVerificationInProgress(false);
     onClose();
   };
 
@@ -66,6 +72,7 @@ export default function EnsCard(): JSX.Element {
         data-testid="button-verify-ens"
         className="verify-btn"
         onClick={() => {
+          setVerificationInProgress(true);
           SetCredentialResponse(undefined);
           handleFetchCredential();
           onOpen();
@@ -75,7 +82,7 @@ export default function EnsCard(): JSX.Element {
       </button>
       <VerifyModal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleModalOnClose}
         stamp={credentialResponse}
         handleUserVerify={handleUserVerify}
         verifyData={
@@ -95,7 +102,7 @@ export default function EnsCard(): JSX.Element {
       providerSpec={allProvidersState[providerId]!.providerSpec as ProviderSpec}
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={issueCredentialWidget}
-      isLoading={credentialResponseIsLoading}
+      isLoading={verificationInProgress}
     />
   );
 }

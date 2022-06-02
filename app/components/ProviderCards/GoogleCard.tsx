@@ -27,7 +27,6 @@ export default function GoogleCard(): JSX.Element {
   const [isLoading, setLoading] = useState(false);
 
   const onGoogleSignIn = (response: GoogleLoginResponse): void => {
-    setLoading(true);
     // fetch the verifiable credential
     fetchVerifiableCredential(
       iamUrl,
@@ -41,8 +40,8 @@ export default function GoogleCard(): JSX.Element {
       },
       signer as { signMessage: (message: string) => Promise<string> }
     )
-      .then((verified): void => {
-        handleAddStamp({
+      .then(async (verified): Promise<void> => {
+        await handleAddStamp({
           provider: "Google",
           credential: verified.credential,
         });
@@ -55,6 +54,10 @@ export default function GoogleCard(): JSX.Element {
       });
   };
 
+  const onGoogleSignInFailure = (): void => {
+    setLoading(false);
+  };
+
   return (
     <Card
       isLoading={isLoading}
@@ -63,14 +66,18 @@ export default function GoogleCard(): JSX.Element {
       issueCredentialWidget={
         <GoogleLogin
           clientId={googleClientId}
-          onFailure={(response): void =>
-            // onGoogleSignIn(response as GoogleLoginResponse)
-            console.log("Google Login")
-          }
+          onFailure={onGoogleSignInFailure}
           onSuccess={(response): void => onGoogleSignIn(response as GoogleLoginResponse)}
           // To override all stylings...
           render={(renderProps): JSX.Element => (
-            <button data-testid="button-verify-google" className="verify-btn" onClick={renderProps.onClick}>
+            <button
+              data-testid="button-verify-google"
+              className="verify-btn"
+              onClick={() => {
+                setLoading(true);
+                renderProps.onClick();
+              }}
+            >
               Connect account
             </button>
           )}

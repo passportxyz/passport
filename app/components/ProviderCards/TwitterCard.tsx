@@ -86,8 +86,8 @@ export default function TwitterCard(): JSX.Element {
         },
         signer as { signMessage: (message: string) => Promise<string> }
       )
-        .then((verified: { credential: any }): void => {
-          handleAddStamp({
+        .then(async (verified: { credential: any }): Promise<void> => {
+          await handleAddStamp({
             provider: providerId,
             credential: verified.credential,
           });

@@ -16,7 +16,7 @@ jest.mock("../../../utils/onboard.ts");
 
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
-const handleAddStamp = jest.fn();
+const handleAddStamp = jest.fn().mockResolvedValue(undefined);
 const mockUserContext: UserContextState = {
   userDid: "mockUserDid",
   loggedIn: true,
@@ -151,7 +151,9 @@ describe("when the verify button is clicked", () => {
       // Click the verify button on modal
       fireEvent.click(finalVerifyButton!);
 
-      expect(handleAddStamp).toBeCalled();
+      await waitFor(() => {
+        expect(handleAddStamp).toBeCalled();
+      });
     });
 
     it("clicking cancel closes the modal and a stamp should not be added", async () => {

@@ -24,6 +24,7 @@ export default function PohCard(): JSX.Element {
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [pohVerified, SetPohVerified] = useState<boolean | undefined>(undefined);
+  const [verificationInProgress, setVerificationInProgress] = useState(false);
 
   const handleFetchCredential = (): void => {
     setCredentialResponseIsLoading(true);
@@ -53,9 +54,14 @@ export default function PohCard(): JSX.Element {
   };
 
   const handleUserVerify = (): void => {
-    if (credentialResponse) {
-      handleAddStamp(credentialResponse);
-    }
+    handleAddStamp(credentialResponse!).finally(() => {
+      setVerificationInProgress(false);
+    });
+    onClose();
+  };
+
+  const handleModalOnClose = (): void => {
+    setVerificationInProgress(false);
     onClose();
   };
 
@@ -65,6 +71,7 @@ export default function PohCard(): JSX.Element {
         data-testid="button-verify-poh"
         className="verify-btn"
         onClick={() => {
+          setVerificationInProgress(true);
           SetCredentialResponse(undefined);
           handleFetchCredential();
           onOpen();
@@ -74,7 +81,7 @@ export default function PohCard(): JSX.Element {
       </button>
       <VerifyModal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleModalOnClose}
         stamp={credentialResponse}
         handleUserVerify={handleUserVerify}
         verifyData={<>{`The Proof of Humanity Status for this address ${pohVerified || "Is not Registered"}`}</>}
@@ -88,7 +95,7 @@ export default function PohCard(): JSX.Element {
       providerSpec={allProvidersState[providerId]!.providerSpec}
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={issueCredentialWidget}
-      isLoading={credentialResponseIsLoading}
+      isLoading={verificationInProgress}
     />
   );
 }

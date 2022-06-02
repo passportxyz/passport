@@ -41,16 +41,18 @@ export default function FacebookCard(): JSX.Element {
   const [isLoading, setLoading] = useState(false);
 
   const onClick = () => {
+    setLoading(true);
     //@ts-ignore assuming FB.init was already called; see facebookSdkScript in pages/index.tsx
     FB.login(function (response) {
       if (response.status === "connected") {
         onFacebookSignIn(response.authResponse);
+      } else {
+        setLoading(false);
       }
     });
   };
 
   const onFacebookSignIn = (response: ReactFacebookLoginInfo): void => {
-    setLoading(true);
     // fetch the verifiable credential
     fetchVerifiableCredential(
       iamUrl,
@@ -64,8 +66,8 @@ export default function FacebookCard(): JSX.Element {
       },
       signer as { signMessage: (message: string) => Promise<string> }
     )
-      .then((verified): void => {
-        handleAddStamp({
+      .then(async (verified): Promise<void> => {
+        await handleAddStamp({
           provider: "Facebook",
           credential: verified.credential,
         });
