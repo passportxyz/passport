@@ -13,7 +13,26 @@ import Home from "./Home";
 import Dashboard from "./Dashboard";
 import Privacy from "./privacy";
 
+// -- Datadog
+import { datadogRum } from "@datadog/browser-rum";
+
 const FacebookAppId = process.env.NEXT_PUBLIC_DPOPP_FACEBOOK_APP_ID || "";
+
+datadogRum.init({
+  applicationId: process.env.NEXT_PUBLIC_DATADOG_APPLICATION_ID || "",
+  clientToken: process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || "",
+  site: "datadoghq.eu",
+  service: "passport-frontend",
+  env: "review",
+  // Specify a version number to identify the deployed version of your application in Datadog
+  // version: '1.0.0',
+  sampleRate: 100,
+  premiumSampleRate: 100,
+  trackInteractions: true,
+  defaultPrivacyLevel: "mask-user-input",
+});
+
+// datadogRum.startSessionReplayRecording();
 
 const App: NextPage = () => {
   // pull any search params
