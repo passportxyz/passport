@@ -180,12 +180,13 @@ describe("when the verify button is clicked", () => {
       const verifyModal = await screen.findByRole("dialog");
       expect(verifyModal).toBeInTheDocument();
 
-      const verifyModalText = screen.getByText("We checked for POAP badges and did not find POAP badge(s) that are 15 or more days old.")
+      const verifyModalText = screen.getByText(
+        "We checked for POAP badges and did not find POAP badge(s) that are 15 or more days old."
+      );
 
       await waitFor(() => {
         expect(verifyModalText).toBeInTheDocument();
       });
-
     });
   });
 });

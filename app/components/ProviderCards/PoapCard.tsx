@@ -44,7 +44,7 @@ export default function PoapCard(): JSX.Element {
           credential: verified.credential,
         });
       })
-      .catch((e: any): void => { })
+      .catch((e: any): void => {})
       .finally((): void => {
         setCredentialResponseIsLoading(false);
       });
@@ -57,13 +57,19 @@ export default function PoapCard(): JSX.Element {
     onClose();
   };
 
-  const successModalText = <>
-    <Text fontSize='md'>We checked for POAP badges and found at least one POAP badge that is 15 or more days old.</Text>
-  </>
+  const successModalText = (
+    <>
+      <Text fontSize="md">
+        We checked for POAP badges and found at least one POAP badge that is 15 or more days old.
+      </Text>
+    </>
+  );
 
-  const failModalText = <>
-    <Text fontSize='md'>We checked for POAP badges and did not find POAP badge(s) that are 15 or more days old.</Text>
-  </>
+  const failModalText = (
+    <>
+      <Text fontSize="md">We checked for POAP badges and did not find POAP badge(s) that are 15 or more days old.</Text>
+    </>
+  );
 
   const title = poapVerified ? "POAP Stamp Verification" : "POAP Not Found";
 
@@ -85,15 +91,9 @@ export default function PoapCard(): JSX.Element {
         onClose={onClose}
         stamp={credentialResponse}
         handleUserVerify={handleUserVerify}
-        verifyData={
-          <>
-            {poapVerified
-              ? successModalText
-              : failModalText}
-          </>
-        }
+        verifyData={<>{poapVerified ? successModalText : failModalText}</>}
         title={title}
-      isLoading={credentialResponseIsLoading}
+        isLoading={credentialResponseIsLoading}
       />
     </>
   );
