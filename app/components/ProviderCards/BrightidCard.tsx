@@ -36,6 +36,7 @@ export default function BrightIdCard(): JSX.Element {
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [brightIdVerification, SetBrightIdVerification] = useState<BrightIdProviderRecord | undefined>(undefined);
   const toast = useToast();
+  const [verificationInProgress, setVerificationInProgress] = useState(false);
 
   const handleFetchCredential = (): void => {
     setCredentialResponseIsLoading(true);
@@ -114,9 +115,14 @@ export default function BrightIdCard(): JSX.Element {
   }
 
   const handleUserVerify = (): void => {
-    if (credentialResponse) {
-      handleAddStamp(credentialResponse);
-    }
+    handleAddStamp(credentialResponse!).finally(() => {
+      setVerificationInProgress(false);
+    });
+    onClose();
+  };
+
+  const handleModalOnClose = (): void => {
+    setVerificationInProgress(false);
     onClose();
   };
 
@@ -200,6 +206,7 @@ export default function BrightIdCard(): JSX.Element {
         data-testid="button-verify-brightid"
         className="verify-btn"
         onClick={async () => {
+          setVerificationInProgress(true);
           SetCredentialResponse(undefined);
           SetBrightIdVerification(undefined);
           const isVerified = await handleVerifyContextId();
@@ -213,7 +220,7 @@ export default function BrightIdCard(): JSX.Element {
       </button>
       <VerifyModal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleModalOnClose}
         stamp={credentialResponse}
         handleUserVerify={handleUserVerify}
         verifyData={
@@ -233,6 +240,7 @@ export default function BrightIdCard(): JSX.Element {
       providerSpec={allProvidersState[providerId]!.providerSpec as ProviderSpec}
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={issueCredentialWidget}
+      isLoading={verificationInProgress}
     />
   );
 }

@@ -22,7 +22,7 @@ import {
 
 import { Stamp } from "@dpopp/types";
 
-type VerifyModalProps = {
+export type VerifyModalProps = {
   isOpen: boolean;
   onClose: () => void;
   handleUserVerify: () => void;

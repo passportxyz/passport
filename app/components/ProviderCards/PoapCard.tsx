@@ -23,6 +23,7 @@ export default function PoapCard(): JSX.Element {
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
   const [poapVerified, SetPoapVerified] = useState<boolean | undefined>(undefined);
+  const [verificationInProgress, setVerificationInProgress] = useState(false);
 
   // fetch an example VC from the IAM server
   const handleFetchCredential = (): void => {
@@ -51,9 +52,14 @@ export default function PoapCard(): JSX.Element {
   };
 
   const handleUserVerify = (): void => {
-    if (credentialResponse) {
-      handleAddStamp(credentialResponse);
-    }
+    handleAddStamp(credentialResponse!).finally(() => {
+      setVerificationInProgress(false);
+    });
+    onClose();
+  };
+
+  const handleModalOnClose = (): void => {
+    setVerificationInProgress(false);
     onClose();
   };
 
@@ -63,6 +69,7 @@ export default function PoapCard(): JSX.Element {
         className="verify-btn"
         data-testid="button-verify-poap"
         onClick={() => {
+          setVerificationInProgress(true);
           SetCredentialResponse(undefined);
           handleFetchCredential();
           onOpen();
@@ -72,7 +79,7 @@ export default function PoapCard(): JSX.Element {
       </button>
       <VerifyModal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleModalOnClose}
         stamp={credentialResponse}
         handleUserVerify={handleUserVerify}
         verifyData={
@@ -92,7 +99,7 @@ export default function PoapCard(): JSX.Element {
       providerSpec={allProvidersState[providerId]!.providerSpec}
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={issueCredentialWidget}
-      isLoading={credentialResponseIsLoading}
+      isLoading={verificationInProgress}
     />
   );
 }

@@ -64,9 +64,9 @@ export interface UserContextState {
   passport: Passport | undefined;
   isLoadingPassport: boolean;
   allProvidersState: AllProvidersState;
-  handleCreatePassport: () => void;
+  handleCreatePassport: () => Promise<void>;
   handleConnection: () => void;
-  handleAddStamp: (stamp: Stamp) => void;
+  handleAddStamp: (stamp: Stamp) => Promise<void>;
   address: string | undefined;
   wallet: WalletState | null;
   signer: JsonRpcSigner | undefined;
@@ -78,9 +78,9 @@ const startingState: UserContextState = {
   passport: undefined,
   isLoadingPassport: true,
   allProvidersState: startingAllProvidersState,
-  handleCreatePassport: () => {},
+  handleCreatePassport: async () => {},
   handleConnection: () => {},
-  handleAddStamp: () => {},
+  handleAddStamp: async () => {},
   address: undefined,
   wallet: null,
   signer: undefined,
@@ -268,31 +268,24 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     return passport;
   };
 
-  const fetchPassport = (database: CeramicDatabase): void => {
-    console.log("attempting to fetch from ceramic...", database.ceramicClient._apiUrl);
-
+  const fetchPassport = async (database: CeramicDatabase): Promise<void> => {
     // fetch, clean and set the new Passport state
-    database
-      .getPassport()
-      .then((passport) => {
-        setPassport(cleanPassport(passport, database));
-      })
-      .finally(() => setIsLoadingPassport(false));
+    const passport = await database.getPassport();
+    setPassport(cleanPassport(passport, database));
+    setIsLoadingPassport(false);
   };
 
-  const handleCreatePassport = (): void => {
+  const handleCreatePassport = async (): Promise<void> => {
     if (ceramicDatabase) {
-      ceramicDatabase.createPassport().then(() => {
-        fetchPassport(ceramicDatabase);
-      });
+      await ceramicDatabase.createPassport();
+      await fetchPassport(ceramicDatabase);
     }
   };
 
-  const handleAddStamp = (stamp: Stamp): void => {
+  const handleAddStamp = async (stamp: Stamp): Promise<void> => {
     if (ceramicDatabase) {
-      ceramicDatabase.addStamp(stamp).then(() => {
-        fetchPassport(ceramicDatabase);
-      });
+      await ceramicDatabase.addStamp(stamp);
+      await fetchPassport(ceramicDatabase);
     }
   };
 
