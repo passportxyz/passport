@@ -13,7 +13,7 @@ import QRCode from "react-qr-code";
 // --- import components
 import { Card } from "../Card";
 import { VerifyModal } from "../VerifyModal";
-import { useDisclosure, Button, useToast } from "@chakra-ui/react";
+import { useDisclosure, useToast } from "@chakra-ui/react";
 
 // ---- Types
 import { PROVIDER_ID, Stamp, BrightIdProcedureResponse } from "@dpopp/types";
@@ -31,12 +31,14 @@ type BrightIdProviderRecord = {
 
 export default function BrightIdCard(): JSX.Element {
   const { address, signer, handleAddStamp, allProvidersState, userDid } = useContext(UserContext);
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [brightIdVerification, SetBrightIdVerification] = useState<BrightIdProviderRecord | undefined>(undefined);
-  const toast = useToast();
   const [verificationInProgress, setVerificationInProgress] = useState(false);
+
+  // --- Chakra functions
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
 
   const handleFetchCredential = (): void => {
     setCredentialResponseIsLoading(true);
@@ -79,11 +81,31 @@ export default function BrightIdCard(): JSX.Element {
     const data = await (await res).json();
     if (data?.response?.result?.status === "success") {
       toast({
-        title: "Success",
-        description: "Successfully triggered BrightID Sponsorship. Come back to Passport to Verify.",
-        status: "success",
         duration: 9000,
         isClosable: true,
+        render: (result) => (
+          <div className="rounded-md bg-blue-darkblue p-2 text-white">
+            <div className="flex p-4">
+              <button className="inline-flex flex-shrink-0 cursor-not-allowed">
+                <img
+                  alt="information circle"
+                  className="sticky top-0 mb-20 p-2"
+                  src="./assets/information-circle-icon.svg"
+                />
+              </button>
+              <div className="flex-grow pl-6">
+                <h2 className="title-font mb-2 text-lg font-bold">Sponsored through Gitcoin for Bright ID</h2>
+                <p className="text-base leading-relaxed">{`For verification status updates, check BrightID's App.`}</p>
+                <p className="text-base leading-relaxed">
+                  Once you are verified by BrightID - return here to complete this Stamp.
+                </p>
+              </div>
+              <button className="inline-flex flex-shrink-0 rounded-lg" onClick={result.onClose}>
+                <img alt="close button" className="rounded-lg p-2 hover:bg-gray-500" src="./assets/x-icon.svg" />
+              </button>
+            </div>
+          </div>
+        ),
       });
     } else {
       toast({
@@ -130,15 +152,27 @@ export default function BrightIdCard(): JSX.Element {
   const brightIdSponsorshipWidget = (
     <div>
       <h1 className="text-center text-xl font-bold">BrightID</h1>
+      <p>
+        BrightID is a social identity network that allows you to prove that you’re only using one account.{" "}
+        <a
+          className="text-purple-connectPurple underline"
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.brightid.org/"
+        >
+          Learn More
+        </a>
+        .
+      </p>
       {userDid ? (
         <div>
           <br />
-          <h1>A verifiable credential was not generated for your address. Follow the steps below to qualify:</h1>
+          <h1>To collect an Identity Stamp from BrightID, please complete the following steps.</h1>
           <br />
           <div>
-            <div>1) Download the BrightID App on your mobile device</div>
-            <div className="flex flex-wrap p-4">
-              <div className="mb-10 px-4 sm:w-1/2">
+            <div data-testid="brightid-modal-step1">1) Download the BrightID App on your mobile device</div>
+            <div className="-mt-4 flex flex-wrap">
+              <div className="w-1/2 px-4">
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
@@ -146,23 +180,19 @@ export default function BrightIdCard(): JSX.Element {
                 >
                   <img
                     alt="content"
-                    className="h-16 w-16 rounded-lg object-center p-2 hover:bg-gray-200"
-                    src="./assets/appAndroid.svg"
+                    className="mt-4 rounded-lg object-center p-2"
+                    src="./assets/google-play-logo.svg"
                   />
                 </a>
               </div>
-              <div className="mb-2 px-4 sm:w-1/2">
+              <div className="w-1/2 px-4">
                 <a target="_blank" rel="noopener noreferrer" href="https://apps.apple.com/us/app/brightid/id1428946820">
-                  <img
-                    alt="content"
-                    className="h-16 w-16 rounded-lg object-center p-2 hover:bg-gray-200"
-                    src="./assets/appApple.svg"
-                  />
+                  <img alt="content" className="rounded-lg object-center p-2" src="./assets/apple-appstore-logo.svg" />
                 </a>
               </div>
             </div>
-            <div>
-              2) Connect BrightID to Gitcoin by scanning this QR code from the BrightID app, or clicking{" "}
+            <div className="-mt-4">
+              2) Link BrightID to Gitcoin by scanning this QR code from the BrightID app, or clicking{" "}
               <a
                 className="text-purple-connectPurple underline"
                 href={`https://app.brightid.org/link-verification/http:%2f%2fnode.brightid.org/Gitcoin/${encodeURIComponent(
@@ -184,14 +214,21 @@ export default function BrightIdCard(): JSX.Element {
                 />
               </div>
             </div>
-
-            <button
-              data-testid="button-sponsor-brightid"
-              className="float-right mx-auto rounded-md bg-purple-connectPurple py-2 px-2 text-white"
-              onClick={async () => await handleSponsorship()}
-            >
-              <span className="font-miriam-libre">Connect BrightID</span>
-            </button>
+            <p className="mb-2">3) Click Connect BrightID to get sponsored by Gitcoin.</p>
+            <p className="mb-2">
+              {`Once you are linked, sponsored, and have attended a connection party to complete your verification* on
+              BrightID's App - return to this Stamp to finish the verification.`}
+            </p>
+            <p>* Please note that it may take some time for BrightID to complete this process</p>{" "}
+            <div className="w-full justify-center object-center p-4">
+              <button
+                data-testid="button-sponsor-brightid"
+                className="float-right mx-auto rounded-md bg-blue-darkblue py-2 px-2 text-white"
+                onClick={async () => await handleSponsorship()}
+              >
+                <span className="font-miriam-libre">Connect BrightID</span>
+              </button>
+            </div>
           </div>
         </div>
       ) : (

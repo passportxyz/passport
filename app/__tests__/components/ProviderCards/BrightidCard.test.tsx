@@ -202,9 +202,7 @@ describe("when the verify button is clicked", () => {
 
       const verifyModal = await screen.findByRole("dialog");
       const triggerSponsorButton = screen.queryByTestId("button-sponsor-brightid");
-      const verifyModalText = screen.getByText(
-        "A verifiable credential was not generated for your address. Follow the steps below to qualify:"
-      );
+      const verifyModalText = screen.queryByTestId("brightid-modal-step1");
 
       expect(verifyModal).toBeInTheDocument();
       await waitFor(() => {
