@@ -54,7 +54,7 @@ export const VerifyModal = ({
           </div>
         ) : (
           <>
-            <ModalHeader px={8} pb={1} pt={6}>
+            <ModalHeader px={8} pb={1} pt={6} textAlign="center">
               {modalTitle}
             </ModalHeader>
             <ModalCloseButton mr={2} />

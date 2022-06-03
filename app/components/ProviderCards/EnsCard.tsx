@@ -7,10 +7,11 @@ import { fetchVerifiableCredential } from "@dpopp/identity";
 // --- pull context
 import { UserContext } from "../../context/userContext";
 
-// --- import components
+// --- style components
 import { Card } from "../Card";
 import { VerifyModal } from "../VerifyModal";
-import { useDisclosure } from "@chakra-ui/react";
+import { DoneToastContent } from "../DoneToastContent";
+import { useDisclosure, useToast } from "@chakra-ui/react";
 
 import { PROVIDER_ID, Stamp } from "@dpopp/types";
 import { ProviderSpec } from "../../config/providers";
@@ -22,11 +23,14 @@ const providerId: PROVIDER_ID = "Ens";
 
 export default function EnsCard(): JSX.Element {
   const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [ens, SetEns] = useState<string | undefined>(undefined);
   const [verificationInProgress, setVerificationInProgress] = useState(false);
+
+  // --- Chakra functions
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
 
   const handleFetchCredential = (): void => {
     datadogLogs.logger.info("Saving Stamp", { provider: "ENS" });
@@ -63,6 +67,12 @@ export default function EnsCard(): JSX.Element {
         setVerificationInProgress(false);
       });
     onClose();
+    // Custom Success Toast
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
+    });
   };
 
   const handleModalOnClose = (): void => {
@@ -85,6 +95,7 @@ export default function EnsCard(): JSX.Element {
         Link to ENS
       </button>
       <VerifyModal
+        title="Verify ENS Stamp Data"
         isOpen={isOpen}
         onClose={handleModalOnClose}
         stamp={credentialResponse}

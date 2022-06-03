@@ -12,6 +12,7 @@ import QRCode from "react-qr-code";
 
 // --- import components
 import { Card } from "../Card";
+import { DoneToastContent } from "../DoneToastContent";
 import { VerifyModal } from "../VerifyModal";
 import { useDisclosure, useToast } from "@chakra-ui/react";
 
@@ -145,6 +146,12 @@ export default function BrightIdCard(): JSX.Element {
         setVerificationInProgress(false);
       });
     onClose();
+    // Custom Success Toast
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
+    });
   };
 
   const handleModalOnClose = (): void => {
@@ -155,9 +162,8 @@ export default function BrightIdCard(): JSX.Element {
   // Widget displays steps to verify BrightID with Gitcoin
   const brightIdSponsorshipWidget = (
     <div>
-      <h1 className="text-center text-xl font-bold">BrightID</h1>
-      <p>
-        BrightID is a social identity network that allows you to prove that you’re only using one account.{" "}
+      <p className="mt-2">
+        Bright ID is a social identity network that allows you to prove that you’re only using one account.{" "}
         <a
           className="text-purple-connectPurple underline"
           target="_blank"
@@ -171,10 +177,10 @@ export default function BrightIdCard(): JSX.Element {
       {userDid ? (
         <div>
           <br />
-          <h1>To collect an Identity Stamp from BrightID, please complete the following steps.</h1>
+          <h1>To collect an Identity Stamp from Bright ID, please complete the following steps.</h1>
           <br />
           <div>
-            <div data-testid="brightid-modal-step1">1) Download the BrightID App on your mobile device</div>
+            <div data-testid="brightid-modal-step1">1) Download the Bright ID App on your mobile device</div>
             <div className="-mt-4 flex flex-wrap">
               <div className="w-1/2 px-4">
                 <a
@@ -196,7 +202,7 @@ export default function BrightIdCard(): JSX.Element {
               </div>
             </div>
             <div className="-mt-4">
-              2) Link BrightID to Gitcoin by scanning this QR code from the BrightID app, or clicking{" "}
+              2) Link Bright ID to Gitcoin by scanning this QR code from the Bright ID app, or clicking{" "}
               <a
                 className="text-purple-connectPurple underline"
                 href={`https://app.brightid.org/link-verification/http:%2f%2fnode.brightid.org/Gitcoin/${encodeURIComponent(
@@ -218,25 +224,25 @@ export default function BrightIdCard(): JSX.Element {
                 />
               </div>
             </div>
-            <p className="mb-2">3) Click Connect BrightID to get sponsored by Gitcoin.</p>
+            <p className="mb-2">3) Click Connect Bright ID to get sponsored by Gitcoin.</p>
             <p className="mb-2">
               {`Once you are linked, sponsored, and have attended a connection party to complete your verification* on
               BrightID's App - return to this Stamp to finish the verification.`}
             </p>
-            <p>* Please note that it may take some time for BrightID to complete this process</p>{" "}
-            <div className="w-full justify-center object-center p-4">
+            <p>* Please note that it may take some time for Bright ID to complete this process</p>{" "}
+            <div className="mb-10 w-full justify-center object-center p-4">
               <button
                 data-testid="button-sponsor-brightid"
                 className="float-right mx-auto rounded-md bg-blue-darkblue py-2 px-2 text-white"
                 onClick={async () => await handleSponsorship()}
               >
-                <span className="font-miriam-libre">Connect BrightID</span>
+                <span className="font-miriam-libre">Connect Bright ID</span>
               </button>
             </div>
           </div>
         </div>
       ) : (
-        <div>Refresh Browser and Try Again</div>
+        <div className="p-2">Refresh Browser and Try Again</div>
       )}
     </div>
   );
@@ -260,6 +266,7 @@ export default function BrightIdCard(): JSX.Element {
         Connect Account
       </button>
       <VerifyModal
+        title="Verify Bright ID Stamp Data"
         isOpen={isOpen}
         onClose={handleModalOnClose}
         stamp={credentialResponse}
