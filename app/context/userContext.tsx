@@ -141,6 +141,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     if (!wallet) {
       // clear all state
       setPassport(undefined);
+      clearAllProvidersState();
       setWalletLabel(undefined);
       setAddress(undefined);
       setSigner(undefined);
@@ -148,6 +149,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     } else {
       // clear any verified state
       setPassport(undefined);
+      clearAllProvidersState();
       setIsLoadingPassport(true);
       // record connected wallet details
       setWalletLabel(wallet.label);
@@ -210,6 +212,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         .then(() => {
           setLoggedIn(false);
           setPassport(undefined);
+          clearAllProvidersState();
           ceramicDisconnect();
           window.localStorage.setItem("connectedWallets", "[]");
         })
@@ -220,7 +223,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   };
 
   // hydrate allProvidersState
-  useEffect(() => {
+  const hydrateAllProvidersState = (passport?: Passport) => {
     if (passport) {
       // set stamps into allProvidersState
       passport.stamps.forEach((stamp: Stamp) => {
@@ -238,20 +241,13 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         }
       });
     } else {
-      // clear stamps from allProvidersState
-      for (const [provider, providerState] of Object.entries(allProvidersState)) {
-        // clear the entry
-        const newProviderState = {
-          providerSpec: providerState?.providerSpec,
-          stamp: undefined,
-        };
-        setAllProviderState((prevState) => ({
-          ...prevState,
-          [provider]: newProviderState,
-        }));
-      }
+      clearAllProvidersState();
     }
-  }, [passport]);
+  };
+
+  const clearAllProvidersState = () => {
+    setAllProviderState(startingAllProvidersState);
+  };
 
   const cleanPassport = (passport: Passport | undefined, database: CeramicDatabase): Passport | undefined => {
     // clean stamp content if expired or from a different issuer
@@ -271,7 +267,9 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   const fetchPassport = async (database: CeramicDatabase): Promise<void> => {
     // fetch, clean and set the new Passport state
     const passport = await database.getPassport();
-    setPassport(cleanPassport(passport, database));
+    const cleanedPassport = cleanPassport(passport, database);
+    hydrateAllProvidersState(cleanedPassport);
+    setPassport(cleanedPassport);
     setIsLoadingPassport(false);
   };
 
