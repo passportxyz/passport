@@ -6,7 +6,6 @@ import walletLinkModule from "@web3-onboard/walletlink";
 
 // RPC urls
 const MAINNET_RPC_URL = `https://mainnet.infura.io/v3/${process.env.NEXT_PUBLIC_DPOPP_INFURA_KEY}`;
-const RINKEBY_RPC_URL = `https://rinkeby.infura.io/v3/${process.env.NEXT_PUBLIC_DPOPP_INFURA_KEY}`;
 
 // Injected wallet
 const injected = injectedModule();
@@ -28,10 +27,10 @@ export const initWeb3Onboard = init({
     },
   ],
   appMetadata: {
-    name: "Gitcoin - dPopp",
-    icon: "/assets/dpoppLogo.svg",
-    logo: "/assets/dpoppLogo.svg",
-    description: "Decentralise Proof of Personhood Passport",
+    name: "Passport",
+    icon: "/assets/GitcoinLogo.svg",
+    logo: "/assets/GitcoinLogo.svg",
+    description: "Decentralized Identity Verification",
     recommendedInjectedWallets: [
       { name: "Coinbase", url: "https://wallet.coinbase.com/" },
       { name: "MetaMask", url: "https://metamask.io" },
