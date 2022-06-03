@@ -29,7 +29,8 @@ type VerifyModalProps = {
   stamp: Stamp | undefined;
   verifyData?: JSX.Element;
   isLoading: boolean;
-  title?: string | undefined;
+  title?: string;
+  footer?: JSX.Element;
 };
 
 export const VerifyModal = ({
@@ -40,6 +41,7 @@ export const VerifyModal = ({
   verifyData,
   isLoading,
   title,
+  footer,
 }: VerifyModalProps): JSX.Element => {
   const modalTitle = title || `Verify ${stamp?.provider} Stamp Data`;
   return (
@@ -72,7 +74,7 @@ export const VerifyModal = ({
                         <AccordionIcon />
                       </AccordionButton>
                     </h2>
-                    <AccordionPanel pb={4}>
+                    <AccordionPanel px={8} pb={4}>
                       <div className="overflow-auto text-sm text-gray-500">
                         <pre>{JSON.stringify(stamp, undefined, 2)}</pre>
                       </div>
@@ -82,16 +84,17 @@ export const VerifyModal = ({
               )}
             </ModalBody>
 
-            {stamp && (
-              <ModalFooter py={3}>
-                <Button data-testid="modal-cancel" variant="outline" mr={5} onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button data-testid="modal-verify" colorScheme="purple" mr={2} onClick={handleUserVerify}>
-                  Verify
-                </Button>
-              </ModalFooter>
-            )}
+            {footer ||
+              (stamp && (
+                <ModalFooter py={3}>
+                  <Button data-testid="modal-cancel" variant="outline" mr={5} onClick={onClose}>
+                    Cancel
+                  </Button>
+                  <Button data-testid="modal-verify" colorScheme="purple" mr={2} onClick={handleUserVerify}>
+                    Verify
+                  </Button>
+                </ModalFooter>
+              ))}
           </>
         )}
       </ModalContent>

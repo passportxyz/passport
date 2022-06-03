@@ -183,9 +183,18 @@ describe("when the verify button is clicked", () => {
       const verifyModalText = screen.getByText(
         "We checked for POAP badges and did not find POAP badge(s) that are 15 or more days old."
       );
-
       await waitFor(() => {
         expect(verifyModalText).toBeInTheDocument();
+      });
+
+      const goToPoap = screen.getByText("Go to POAP");
+      await waitFor(() => {
+        expect(goToPoap).toBeInTheDocument();
+      });
+
+      const cancel = screen.getByText("Cancel");
+      await waitFor(() => {
+        expect(cancel).toBeInTheDocument();
       });
     });
   });

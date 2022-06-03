@@ -7,6 +7,9 @@ import { fetchVerifiableCredential } from "@dpopp/identity";
 // pull context
 import { UserContext } from "../../context/userContext";
 
+// --- Chakra Elements
+import { ModalFooter, Button } from "@chakra-ui/react";
+
 import { Card } from "../Card";
 import { VerifyModal } from "../VerifyModal";
 import { useDisclosure, Text } from "@chakra-ui/react";
@@ -73,6 +76,25 @@ export default function PoapCard(): JSX.Element {
 
   const title = poapVerified ? "POAP Stamp Verification" : "POAP Not Found";
 
+  // We only need a custom footor in the case of failure
+  const footer = poapVerified ? undefined : (
+    <ModalFooter py={3}>
+      <Button data-testid="modal-cancel" variant="outline" mr={5} onClick={onClose}>
+        Cancel
+      </Button>
+      <Button
+        data-testid="modal-verify"
+        colorScheme="purple"
+        mr={2}
+        onClick={() => {
+          window.open("https://poap.xyz", "_blank");
+        }}
+      >
+        Go to POAP
+      </Button>
+    </ModalFooter>
+  );
+
   const issueCredentialWidget = (
     <>
       <button
@@ -94,6 +116,7 @@ export default function PoapCard(): JSX.Element {
         verifyData={<>{poapVerified ? successModalText : failModalText}</>}
         title={title}
         isLoading={credentialResponseIsLoading}
+        footer={footer}
       />
     </>
   );
