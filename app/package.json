@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^1.8.8",
+    "@datadog/browser-logs": "^4.11.2",
     "@datadog/browser-rum": "^4.11.2",
     "@dpopp/database-client": "^0.0.1",
     "@dpopp/identity": "^0.0.1",

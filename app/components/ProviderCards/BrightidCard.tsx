@@ -18,6 +18,7 @@ import { useDisclosure, useToast } from "@chakra-ui/react";
 // ---- Types
 import { PROVIDER_ID, Stamp, BrightIdProcedureResponse } from "@dpopp/types";
 import { ProviderSpec } from "../../config/providers";
+import { datadogLogs } from "@datadog/browser-logs";
 
 const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 
@@ -137,9 +138,12 @@ export default function BrightIdCard(): JSX.Element {
   }
 
   const handleUserVerify = (): void => {
-    handleAddStamp(credentialResponse!).finally(() => {
-      setVerificationInProgress(false);
-    });
+    datadogLogs.logger.info("Saving Stamp", { provider: "BrightID" });
+    handleAddStamp(credentialResponse!)
+      .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: "BrightID" }))
+      .finally(() => {
+        setVerificationInProgress(false);
+      });
     onClose();
   };
 

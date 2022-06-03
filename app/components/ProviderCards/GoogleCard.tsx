@@ -7,6 +7,9 @@ import { fetchVerifiableCredential } from "@dpopp/identity";
 // --- Google OAuth toolkit
 import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
 
+// -- Datadog
+import { datadogLogs } from "@datadog/browser-logs";
+
 // pull context
 import { UserContext } from "../../context/userContext";
 
@@ -27,6 +30,7 @@ export default function GoogleCard(): JSX.Element {
   const [isLoading, setLoading] = useState(false);
 
   const onGoogleSignIn = (response: GoogleLoginResponse): void => {
+    datadogLogs.logger.info("Saving Stamp", { provider: "Google" });
     // fetch the verifiable credential
     fetchVerifiableCredential(
       iamUrl,
@@ -45,6 +49,7 @@ export default function GoogleCard(): JSX.Element {
           provider: "Google",
           credential: verified.credential,
         });
+        datadogLogs.logger.info("Successfully saved Stamp", { provider: "Google" });
       })
       .catch((e): void => {
         throw e;

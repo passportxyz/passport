@@ -15,6 +15,7 @@ import { VerifyModal } from "../VerifyModal";
 import { useDisclosure, Text } from "@chakra-ui/react";
 
 import { PROVIDER_ID, Stamp } from "@dpopp/types";
+import { datadogLogs } from "@datadog/browser-logs";
 
 const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 
@@ -30,6 +31,7 @@ export default function PoapCard(): JSX.Element {
 
   // fetch an example VC from the IAM server
   const handleFetchCredential = (): void => {
+    datadogLogs.logger.info("Saving Stamp", { provider: "POAP" });
     setCredentialResponseIsLoading(true);
     fetchVerifiableCredential(
       iamUrl,
@@ -55,9 +57,11 @@ export default function PoapCard(): JSX.Element {
   };
 
   const handleUserVerify = (): void => {
-    handleAddStamp(credentialResponse!).finally(() => {
-      setVerificationInProgress(false);
-    });
+    handleAddStamp(credentialResponse!)
+      .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: "POAP" }))
+      .finally(() => {
+        setVerificationInProgress(false);
+      });
     onClose();
   };
 

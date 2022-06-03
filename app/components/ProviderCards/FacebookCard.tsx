@@ -12,6 +12,7 @@ import { Card } from "../Card";
 
 import { PROVIDER_ID } from "@dpopp/types";
 import { ProviderSpec } from "../../config/providers";
+import { datadogLogs } from "@datadog/browser-logs";
 
 export interface ReactFacebookLoginInfo {
   id: string;
@@ -53,6 +54,7 @@ export default function FacebookCard(): JSX.Element {
   };
 
   const onFacebookSignIn = (response: ReactFacebookLoginInfo): void => {
+    datadogLogs.logger.info("Saving Stamp", { provider: "Facebook" });
     // fetch the verifiable credential
     fetchVerifiableCredential(
       iamUrl,
@@ -71,6 +73,7 @@ export default function FacebookCard(): JSX.Element {
           provider: "Facebook",
           credential: verified.credential,
         });
+        datadogLogs.logger.info("Successfully saved Stamp", { provider: "Facebook" });
       })
       .catch((e): void => {
         throw e;

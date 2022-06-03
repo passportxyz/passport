@@ -14,6 +14,7 @@ import Privacy from "./privacy";
 
 // -- Datadog
 import { datadogRum } from "@datadog/browser-rum";
+import { datadogLogs } from "@datadog/browser-logs";
 
 datadogRum.init({
   applicationId: process.env.NEXT_PUBLIC_DATADOG_APPLICATION_ID || "",
@@ -29,7 +30,13 @@ datadogRum.init({
   defaultPrivacyLevel: "mask-user-input",
 });
 
-// datadogRum.startSessionReplayRecording();
+datadogLogs.init({
+  clientToken: process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || "",
+  site: "datadoghq.eu",
+  forwardErrorsToLogs: true,
+  sampleRate: 100,
+  service: "passport-frontend",
+});
 
 const App: NextPage = () => {
   // pull any search params

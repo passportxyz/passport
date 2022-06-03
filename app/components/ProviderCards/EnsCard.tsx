@@ -14,6 +14,7 @@ import { useDisclosure } from "@chakra-ui/react";
 
 import { PROVIDER_ID, Stamp } from "@dpopp/types";
 import { ProviderSpec } from "../../config/providers";
+import { datadogLogs } from "@datadog/browser-logs";
 
 const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 
@@ -28,6 +29,7 @@ export default function EnsCard(): JSX.Element {
   const [verificationInProgress, setVerificationInProgress] = useState(false);
 
   const handleFetchCredential = (): void => {
+    datadogLogs.logger.info("Saving Stamp", { provider: "ENS" });
     setCredentialResponseIsLoading(true);
     fetchVerifiableCredential(
       iamUrl,
@@ -55,9 +57,11 @@ export default function EnsCard(): JSX.Element {
   };
 
   const handleUserVerify = (): void => {
-    handleAddStamp(credentialResponse!).finally(() => {
-      setVerificationInProgress(false);
-    });
+    handleAddStamp(credentialResponse!)
+      .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: "ENS" }))
+      .finally(() => {
+        setVerificationInProgress(false);
+      });
     onClose();
   };
 

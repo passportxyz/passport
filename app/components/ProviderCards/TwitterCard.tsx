@@ -13,6 +13,7 @@ import { Card } from "../Card";
 // --- Context
 import { UserContext } from "../../context/userContext";
 import { ProviderSpec } from "../../config/providers";
+import { datadogLogs } from "@datadog/browser-logs";
 
 // Each provider is recognised by its ID
 const providerId: PROVIDER_ID = "Twitter";
@@ -71,6 +72,7 @@ export default function TwitterCard(): JSX.Element {
       const queryCode = e.data.code;
       const queryState = e.data.state;
 
+      datadogLogs.logger.info("Saving Stamp", { provider: "Twitter" });
       // fetch and store credential
       setLoading(true);
       fetchVerifiableCredential(
@@ -91,6 +93,7 @@ export default function TwitterCard(): JSX.Element {
             provider: providerId,
             credential: verified.credential,
           });
+          datadogLogs.logger.info("Successfully saved Stamp", { provider: "Twitter" });
         })
         .finally(() => {
           setLoading(false);
