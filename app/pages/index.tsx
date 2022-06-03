@@ -6,7 +6,6 @@ import { HashRouter as Router, Routes, Route } from "react-router-dom";
 
 // -- Next Methods
 import type { NextPage } from "next";
-import Head from "next/head";
 
 // -- Pages
 import Home from "./Home";
@@ -15,8 +14,6 @@ import Privacy from "./privacy";
 
 // -- Datadog
 import { datadogRum } from "@datadog/browser-rum";
-
-const FacebookAppId = process.env.NEXT_PUBLIC_DPOPP_FACEBOOK_APP_ID || "";
 
 datadogRum.init({
   applicationId: process.env.NEXT_PUBLIC_DATADOG_APPLICATION_ID || "",
@@ -55,38 +52,8 @@ const App: NextPage = () => {
 
     return <div></div>;
   }
-
-  const facebookSdkScript = (
-    <script
-      dangerouslySetInnerHTML={{
-        __html: `
-          window.fbAsyncInit = function() {
-            FB.init({
-              appId      : '${FacebookAppId}',
-              cookie     : true,
-              xfbml      : true,
-              version    : 'v13.0'
-            });
-            FB.AppEvents.logPageView();   
-          };
-        
-          (function(d, s, id){
-            var js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) {return;}
-            js = d.createElement(s); js.id = id;
-            js.src = "https://connect.facebook.net/en_US/sdk.js";
-            fjs.parentNode.insertBefore(js, fjs);
-          }(document, 'script', 'facebook-jssdk'));
-        `,
-      }}
-    />
-  );
   return (
     <div>
-      <Head>
-        {facebookSdkScript}
-        <title>Gitcoin Passport</title>
-      </Head>
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
