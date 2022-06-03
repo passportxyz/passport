@@ -7,9 +7,12 @@ import { fetchVerifiableCredential } from "@dpopp/identity";
 // pull context
 import { UserContext } from "../../context/userContext";
 
+// --- Chakra Elements
+import { ModalFooter, Button } from "@chakra-ui/react";
+
 import { Card } from "../Card";
 import { VerifyModal } from "../VerifyModal";
-import { useDisclosure } from "@chakra-ui/react";
+import { useDisclosure, Text } from "@chakra-ui/react";
 
 import { PROVIDER_ID, Stamp } from "@dpopp/types";
 
@@ -63,6 +66,41 @@ export default function PoapCard(): JSX.Element {
     onClose();
   };
 
+  const successModalText = (
+    <>
+      <Text fontSize="md">
+        We checked for POAP badges and found at least one POAP badge that is 15 or more days old.
+      </Text>
+    </>
+  );
+
+  const failModalText = (
+    <>
+      <Text fontSize="md">We checked for POAP badges and did not find POAP badge(s) that are 15 or more days old.</Text>
+    </>
+  );
+
+  const title = poapVerified ? "POAP Stamp Verification" : "POAP Not Found";
+
+  // We only need a custom footor in the case of failure
+  const footer = poapVerified ? undefined : (
+    <ModalFooter py={3}>
+      <Button data-testid="modal-cancel" variant="outline" mr={5} onClick={onClose}>
+        Cancel
+      </Button>
+      <Button
+        data-testid="modal-verify"
+        colorScheme="purple"
+        mr={2}
+        onClick={() => {
+          window.open("https://poap.xyz", "_blank");
+        }}
+      >
+        Go to POAP
+      </Button>
+    </ModalFooter>
+  );
+
   const issueCredentialWidget = (
     <>
       <button
@@ -82,14 +120,10 @@ export default function PoapCard(): JSX.Element {
         onClose={handleModalOnClose}
         stamp={credentialResponse}
         handleUserVerify={handleUserVerify}
-        verifyData={
-          <>
-            {poapVerified
-              ? "Your POAP verification was successful!"
-              : "Your address does not have an POAP associated older than 15 days"}
-          </>
-        }
+        verifyData={<>{poapVerified ? successModalText : failModalText}</>}
+        title={title}
         isLoading={credentialResponseIsLoading}
+        footer={footer}
       />
     </>
   );
