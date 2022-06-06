@@ -24,7 +24,7 @@ export const VERSION = "v0.0.0";
 
 // Control expiry times of issued credentials
 export const CHALLENGE_EXPIRES_AFTER_SECONDS = 60; // 1min
-export const CREDENTIAL_EXPIRES_AFTER_SECONDS = 30 * 86400; // 30days
+export const CREDENTIAL_EXPIRES_AFTER_SECONDS = 90 * 86400; // 90days
 
 // utility to add a number of seconds to a date
 const addSeconds = (date: Date, seconds: number): Date => {
