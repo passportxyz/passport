@@ -11,7 +11,8 @@ import type { DID as CeramicDID } from "dids";
 
 import { DataStorageBase } from "./types";
 
-const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
+// const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
+const COMMUNITY_TESTNET_CERAMIC_CLIENT_URL = "https://ceramic-clay.3boxlabs.com"
 
 type CeramicStamp = {
   provider: string;
@@ -42,14 +43,14 @@ export class CeramicDatabase implements DataStorageBase {
   model: DataModel<ModelTypes>;
   store: DIDDataStore<ModelTypes>;
 
-  constructor(did?: CeramicDID, ceramicHost?: string) {
+  constructor(did?: CeramicDID, ceramicHost?: string, aliases?: any) {
     // Create the Ceramic instance and inject the DID
-    const ceramic = new CeramicClient(ceramicHost ?? LOCAL_CERAMIC_CLIENT_URL);
+    const ceramic = new CeramicClient(ceramicHost ?? COMMUNITY_TESTNET_CERAMIC_CLIENT_URL);
     ceramic.setDID(did);
 
     // Create the loader, model and store
     const loader = new TileLoader({ ceramic });
-    const model = new DataModel({ ceramic, aliases: publishedModel });
+    const model = new DataModel({ ceramic, aliases: aliases ?? publishedModel });
     const store = new DIDDataStore({ loader, ceramic, model });
 
     // Store the users did:pkh here to verify match on credential

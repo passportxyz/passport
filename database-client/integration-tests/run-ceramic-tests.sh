@@ -3,22 +3,20 @@
 # === preliminary installs ===
 yarn global add lerna
 cd dpopp
-lerna bootstrap # TODO - figure out how to speed this up if run in docker
+lerna bootstrap -- --ignore-scripts # skipping pre/postinstall scripts
+yarn build:database-client
+
+export CERAMIC_CLIENT_URL="https://ceramic-clay.3boxlabs.com"
 
 # === start up ceramic in background ===
-# TODO - how to kill this ceramic process at the end?
-echo "Starting up Ceramic..."
-(yarn workspace @dpopp/schemas ceramic &) | grep --max-count=1 "Ceramic API running on"
+until $(curl --output /dev/null --silent --head --fail $CERAMIC_CLIENT_URL/api/v0/node/healthcheck); do
+    printf '... waiting for Ceramic daemon ...'
+    sleep 5
+done
 
-# TODO alternatively figure out how to save the PID and kill at the end
-# CERAMIC_PID = $(ceramic daemon)
-# echo $CERAMIC_PID
-
-# TODO - not needed once we publish + persist our schemas to ceramic testnet
-# === create & publish model to ceramic ===
-export SEED="06be7d9853096fca06d6da9268a8a66ecaab2a7249ccd63c70fead97aafefa02" # TEST SEED, DO NOT USE IN PROD
-yarn workspace @dpopp/schemas create-model
-yarn workspace @dpopp/schemas publish-model
+# === fetch passport and VC definitions ===
+curl $CERAMIC_CLIENT_URL/api/v0/streams/kjzl6cwe1jw145znqlxwwar1crvgsm3wf56vcnxo6bu87fqsi6519eypjnzs7mu
+curl $CERAMIC_CLIENT_URL/api/v0/streams/kjzl6cwe1jw149zuvayqa89nhmlvwm0pkdkj0awlxhmtbbay6i972xuwy14jg4f
 
 # === run ceramic integration tests ===
-yarn test:integration
+yarn test:ceramic-integration
