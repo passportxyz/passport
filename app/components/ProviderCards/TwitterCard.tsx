@@ -7,8 +7,10 @@ import { BroadcastChannel } from "broadcast-channel";
 import { PROVIDER_ID } from "@dpopp/types";
 import { fetchVerifiableCredential } from "@dpopp/identity";
 
-// --- Components
+// --- Style Components
 import { Card } from "../Card";
+import { DoneToastContent } from "../DoneToastContent";
+import { useToast } from "@chakra-ui/react";
 
 // --- Context
 import { UserContext } from "../../context/userContext";
@@ -21,6 +23,9 @@ const providerId: PROVIDER_ID = "Twitter";
 export default function TwitterCard(): JSX.Element {
   const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
   const [isLoading, setLoading] = useState(false);
+
+  // --- Chakra functions
+  const toast = useToast();
 
   // Fetch Twitter OAuth2 url from the IAM procedure
   async function handleFetchTwitterOAuth(): Promise<void> {
@@ -94,6 +99,12 @@ export default function TwitterCard(): JSX.Element {
             credential: verified.credential,
           });
           datadogLogs.logger.info("Successfully saved Stamp", { provider: "Twitter" });
+          // Custom Success Toast
+          toast({
+            duration: 5000,
+            isClosable: true,
+            render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
+          });
         })
         .finally(() => {
           setLoading(false);

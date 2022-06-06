@@ -8,11 +8,11 @@ import { fetchVerifiableCredential } from "@dpopp/identity";
 import { UserContext } from "../../context/userContext";
 
 // --- Chakra Elements
-import { ModalFooter, Button } from "@chakra-ui/react";
+import { ModalFooter, Button, useDisclosure, Text, useToast } from "@chakra-ui/react";
 
 import { Card } from "../Card";
 import { VerifyModal } from "../VerifyModal";
-import { useDisclosure, Text } from "@chakra-ui/react";
+import { DoneToastContent } from "../DoneToastContent";
 
 import { PROVIDER_ID, Stamp } from "@dpopp/types";
 import { datadogLogs } from "@datadog/browser-logs";
@@ -23,11 +23,14 @@ const providerId: PROVIDER_ID = "POAP";
 
 export default function PoapCard(): JSX.Element {
   const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
   const [poapVerified, SetPoapVerified] = useState<boolean | undefined>(undefined);
   const [verificationInProgress, setVerificationInProgress] = useState(false);
+
+  // --- Chakra functions
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
 
   // fetch an example VC from the IAM server
   const handleFetchCredential = (): void => {
@@ -63,6 +66,12 @@ export default function PoapCard(): JSX.Element {
         setVerificationInProgress(false);
       });
     onClose();
+    // Custom Success Toast
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
+    });
   };
 
   const handleModalOnClose = (): void => {

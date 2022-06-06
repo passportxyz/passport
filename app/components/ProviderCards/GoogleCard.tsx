@@ -13,7 +13,10 @@ import { datadogLogs } from "@datadog/browser-logs";
 // pull context
 import { UserContext } from "../../context/userContext";
 
+// --- Style Components
 import { Card } from "../Card";
+import { DoneToastContent } from "../DoneToastContent";
+import { useToast } from "@chakra-ui/react";
 
 import { PROVIDER_ID } from "@dpopp/types";
 import { ProviderSpec } from "../../config/providers";
@@ -28,6 +31,9 @@ export default function GoogleCard(): JSX.Element {
   const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
 
   const [isLoading, setLoading] = useState(false);
+
+  // --- Chakra functions
+  const toast = useToast();
 
   const onGoogleSignIn = (response: GoogleLoginResponse): void => {
     datadogLogs.logger.info("Saving Stamp", { provider: "Google" });
@@ -50,6 +56,12 @@ export default function GoogleCard(): JSX.Element {
           credential: verified.credential,
         });
         datadogLogs.logger.info("Successfully saved Stamp", { provider: "Google" });
+        // Custom Success Toast
+        toast({
+          duration: 5000,
+          isClosable: true,
+          render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
+        });
       })
       .catch((e): void => {
         throw e;

@@ -9,6 +9,8 @@ import { UserContext } from "../../context/userContext";
 
 // --- Style Components
 import { Card } from "../Card";
+import { useToast } from "@chakra-ui/react";
+import { DoneToastContent } from "../DoneToastContent";
 
 import { PROVIDER_ID } from "@dpopp/types";
 import { ProviderSpec } from "../../config/providers";
@@ -40,6 +42,9 @@ const providerId: PROVIDER_ID = "Facebook";
 export default function FacebookCard(): JSX.Element {
   const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
   const [isLoading, setLoading] = useState(false);
+
+  // --- Chakra functions
+  const toast = useToast();
 
   const onClick = () => {
     setLoading(true);
@@ -74,6 +79,12 @@ export default function FacebookCard(): JSX.Element {
           credential: verified.credential,
         });
         datadogLogs.logger.info("Successfully saved Stamp", { provider: "Facebook" });
+        // Custom Success Toast
+        toast({
+          duration: 5000,
+          isClosable: true,
+          render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
+        });
       })
       .catch((e): void => {
         throw e;

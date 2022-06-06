@@ -14,18 +14,22 @@ const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 // --- import components
 import { Card } from "../Card";
 import { VerifyModal } from "../VerifyModal";
-import { useDisclosure } from "@chakra-ui/react";
 import { datadogLogs } from "@datadog/browser-logs";
+import { useDisclosure, useToast } from "@chakra-ui/react";
+import { DoneToastContent } from "../DoneToastContent";
 
 const providerId: PROVIDER_ID = "Poh";
 
 export default function PohCard(): JSX.Element {
   const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [pohVerified, SetPohVerified] = useState<boolean | undefined>(undefined);
   const [verificationInProgress, setVerificationInProgress] = useState(false);
+
+  // --- Chakra functions
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
 
   const handleFetchCredential = (): void => {
     datadogLogs.logger.info("Saving Stamp", { provider: "POH" });
@@ -62,6 +66,12 @@ export default function PohCard(): JSX.Element {
         setVerificationInProgress(false);
       });
     onClose();
+    // Custom Success Toast
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
+    });
   };
 
   const handleModalOnClose = (): void => {
@@ -84,6 +94,7 @@ export default function PohCard(): JSX.Element {
         Connect PoH
       </button>
       <VerifyModal
+        title="Verify POH Stamp Data"
         isOpen={isOpen}
         onClose={handleModalOnClose}
         stamp={credentialResponse}
