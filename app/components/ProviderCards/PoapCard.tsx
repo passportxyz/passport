@@ -1,6 +1,10 @@
 // --- React Methods
 import React, { useContext, useState } from "react";
 
+// --- Datadog
+import { datadogLogs } from "@datadog/browser-logs";
+import { datadogRum } from "@datadog/browser-rum";
+
 // --- Identity tools
 import { fetchVerifiableCredential } from "@dpopp/identity";
 
@@ -15,7 +19,6 @@ import { VerifyModal } from "../VerifyModal";
 import { DoneToastContent } from "../DoneToastContent";
 
 import { PROVIDER_ID, Stamp } from "@dpopp/types";
-import { datadogLogs } from "@datadog/browser-logs";
 
 const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 
@@ -34,7 +37,7 @@ export default function PoapCard(): JSX.Element {
 
   // fetch an example VC from the IAM server
   const handleFetchCredential = (): void => {
-    datadogLogs.logger.info("Saving Stamp", { provider: "POAP" });
+    datadogLogs.logger.info("Saving Stamp", { provider: providerId });
     setCredentialResponseIsLoading(true);
     fetchVerifiableCredential(
       iamUrl,
@@ -53,7 +56,9 @@ export default function PoapCard(): JSX.Element {
           credential: verified.credential,
         });
       })
-      .catch((e: any): void => {})
+      .catch((e: any): void => {
+        datadogRum.addError(e, { provider: providerId });
+      })
       .finally((): void => {
         setCredentialResponseIsLoading(false);
       });
@@ -61,7 +66,7 @@ export default function PoapCard(): JSX.Element {
 
   const handleUserVerify = (): void => {
     handleAddStamp(credentialResponse!)
-      .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: "POAP" }))
+      .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId }))
       .finally(() => {
         setVerificationInProgress(false);
       });

@@ -1,5 +1,10 @@
 // --- Methods
 import React, { useContext, useEffect, useState } from "react";
+
+// --- Datadog
+import { datadogLogs } from "@datadog/browser-logs";
+import { datadogRum } from "@datadog/browser-rum";
+
 import { debounce } from "ts-debounce";
 import { BroadcastChannel } from "broadcast-channel";
 
@@ -15,7 +20,6 @@ import { useToast } from "@chakra-ui/react";
 // --- Context
 import { UserContext } from "../../context/userContext";
 import { ProviderSpec } from "../../config/providers";
-import { datadogLogs } from "@datadog/browser-logs";
 
 // Each provider is recognised by its ID
 const providerId: PROVIDER_ID = "Twitter";
@@ -77,7 +81,7 @@ export default function TwitterCard(): JSX.Element {
       const queryCode = e.data.code;
       const queryState = e.data.state;
 
-      datadogLogs.logger.info("Saving Stamp", { provider: "Twitter" });
+      datadogLogs.logger.info("Saving Stamp", { provider: providerId });
       // fetch and store credential
       setLoading(true);
       fetchVerifiableCredential(
@@ -98,13 +102,17 @@ export default function TwitterCard(): JSX.Element {
             provider: providerId,
             credential: verified.credential,
           });
-          datadogLogs.logger.info("Successfully saved Stamp", { provider: "Twitter" });
+          datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId });
           // Custom Success Toast
           toast({
             duration: 5000,
             isClosable: true,
             render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
           });
+        })
+        .catch((e) => {
+          datadogRum.addError(e, { provider: providerId });
+          throw e;
         })
         .finally(() => {
           setLoading(false);
