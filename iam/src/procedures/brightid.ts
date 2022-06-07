@@ -4,24 +4,24 @@ import { BrightIdProcedureResponse, BrightIdVerificationResponse, BrightIdSponso
 // --- app name for Bright Id App
 const CONTEXT = "Gitcoin";
 
-export const verifyBrightidContextId = async (contextIdData: string): Promise<BrightIdProcedureResponse> => {
-  const contextId = encodeURIComponent(contextIdData);
-
+export const verifyBrightidContextId = async (contextId: string): Promise<BrightIdProcedureResponse> => {
   try {
     const verifyContextIdResult: BrightIdVerificationResponse = (await verifyContextId(
       CONTEXT,
       contextId
     )) as BrightIdVerificationResponse;
 
-    return { valid: "contextIds" in verifyContextIdResult, result: verifyContextIdResult };
+    // Unique is true if the user obtained "Meets" verification by attending a connection party
+    const isUnique = "unique" in verifyContextIdResult && verifyContextIdResult.unique === true;
+    const isValid = "contextIds" in verifyContextIdResult && verifyContextIdResult.contextIds.length > 0;
+
+    return { valid: isValid && isUnique, result: verifyContextIdResult };
   } catch (err: unknown) {
     return { valid: false, error: err as string };
   }
 };
 
-export const triggerBrightidSponsorship = async (contextIdData: string): Promise<BrightIdProcedureResponse> => {
-  const contextId = encodeURIComponent(contextIdData);
-
+export const triggerBrightidSponsorship = async (contextId: string): Promise<BrightIdProcedureResponse> => {
   try {
     const sponsorResult: BrightIdSponsorshipResponse = (await sponsor(
       process.env.BRIGHTID_PRIVATE_KEY,

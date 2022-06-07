@@ -17,7 +17,7 @@ import { VerifyModal } from "../VerifyModal";
 import { useDisclosure, useToast } from "@chakra-ui/react";
 
 // ---- Types
-import { PROVIDER_ID, Stamp, BrightIdProcedureResponse } from "@dpopp/types";
+import { PROVIDER_ID, Stamp } from "@dpopp/types";
 import { ProviderSpec } from "../../config/providers";
 import { datadogLogs } from "@datadog/browser-logs";
 
@@ -134,10 +134,11 @@ export default function BrightIdCard(): JSX.Element {
         }),
       }
     );
-    const result: BrightIdProcedureResponse = await res.json();
-    return result.valid;
+    const data = await (await res).json();
+    return data?.response?.valid;
   }
 
+  // triggers on modal verification click
   const handleUserVerify = (): void => {
     datadogLogs.logger.info("Saving Stamp", { provider: "BrightID" });
     handleAddStamp(credentialResponse!)
@@ -204,6 +205,8 @@ export default function BrightIdCard(): JSX.Element {
             <div className="-mt-4">
               2) Link Bright ID to Gitcoin by scanning this QR code from the Bright ID app, or clicking{" "}
               <a
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-purple-connectPurple underline"
                 href={`https://app.brightid.org/link-verification/http:%2f%2fnode.brightid.org/Gitcoin/${userDid}`}
               >
@@ -252,6 +255,7 @@ export default function BrightIdCard(): JSX.Element {
           setVerificationInProgress(true);
           SetCredentialResponse(undefined);
           SetBrightIdVerification(undefined);
+          // primary check to see if users did is verified
           const isVerified = await handleVerifyContextId();
           if (isVerified) {
             handleFetchCredential();
