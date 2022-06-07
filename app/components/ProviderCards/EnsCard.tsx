@@ -67,17 +67,19 @@ export default function EnsCard(): JSX.Element {
         setVerificationInProgress(false);
       });
     onClose();
-    // Custom Success Toast
-    toast({
-      duration: 5000,
-      isClosable: true,
-      render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
-    });
   };
 
   const handleModalOnClose = (): void => {
     setVerificationInProgress(false);
     onClose();
+    if (ens) {
+      // Custom Done Toast
+      toast({
+        duration: 5000,
+        isClosable: true,
+        render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
+      });
+    }
   };
 
   const issueCredentialWidget = (

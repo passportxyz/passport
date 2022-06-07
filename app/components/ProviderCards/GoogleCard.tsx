@@ -29,6 +29,7 @@ const providerId: PROVIDER_ID = "Google";
 
 export default function GoogleCard(): JSX.Element {
   const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const [isVerified, setIsVerified] = useState<boolean | undefined>(undefined);
 
   const [isLoading, setLoading] = useState(false);
 
@@ -51,23 +52,26 @@ export default function GoogleCard(): JSX.Element {
       signer as { signMessage: (message: string) => Promise<string> }
     )
       .then(async (verified): Promise<void> => {
+        setIsVerified(true);
         await handleAddStamp({
           provider: "Google",
           credential: verified.credential,
         });
         datadogLogs.logger.info("Successfully saved Stamp", { provider: "Google" });
-        // Custom Success Toast
-        toast({
-          duration: 5000,
-          isClosable: true,
-          render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
-        });
       })
       .catch((e): void => {
         throw e;
       })
       .finally(() => {
         setLoading(false);
+        if (isVerified) {
+          // Custom Done Toast
+          toast({
+            duration: 5000,
+            isClosable: true,
+            render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
+          });
+        }
       });
   };
 

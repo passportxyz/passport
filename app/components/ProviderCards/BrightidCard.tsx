@@ -119,6 +119,8 @@ export default function BrightIdCard(): JSX.Element {
       });
     }
     setCredentialResponseIsLoading(false);
+    setVerificationInProgress(false);
+    onClose();
   }
 
   async function handleVerifyContextId(): Promise<boolean> {
@@ -146,17 +148,19 @@ export default function BrightIdCard(): JSX.Element {
         setVerificationInProgress(false);
       });
     onClose();
-    // Custom Success Toast
-    toast({
-      duration: 5000,
-      isClosable: true,
-      render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
-    });
   };
 
   const handleModalOnClose = (): void => {
     setVerificationInProgress(false);
     onClose();
+    if (brightIdVerification) {
+      // Custom Done Toast
+      toast({
+        duration: 5000,
+        isClosable: true,
+        render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
+      });
+    }
   };
 
   // Widget displays steps to verify BrightID with Gitcoin
@@ -205,9 +209,7 @@ export default function BrightIdCard(): JSX.Element {
               2) Link Bright ID to Gitcoin by scanning this QR code from the Bright ID app, or clicking{" "}
               <a
                 className="text-purple-connectPurple underline"
-                href={`https://app.brightid.org/link-verification/http:%2f%2fnode.brightid.org/Gitcoin/${encodeURIComponent(
-                  userDid
-                )}`}
+                href={`https://app.brightid.org/link-verification/http:%2f%2fnode.brightid.org/Gitcoin/${userDid}`}
               >
                 here
               </a>{" "}
@@ -218,9 +220,7 @@ export default function BrightIdCard(): JSX.Element {
                 <QRCode
                   size={256}
                   style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                  value={`brightid://link-verification/http:%2f%2fnode.brightid.org/Gitcoin/${encodeURIComponent(
-                    userDid
-                  )}`}
+                  value={`brightid://link-verification/http:%2f%2fnode.brightid.org/Gitcoin/${userDid}`}
                 />
               </div>
             </div>

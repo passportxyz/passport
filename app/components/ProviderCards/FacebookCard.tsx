@@ -42,6 +42,7 @@ const providerId: PROVIDER_ID = "Facebook";
 export default function FacebookCard(): JSX.Element {
   const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
   const [isLoading, setLoading] = useState(false);
+  const [isVerified, setIsVerified] = useState<boolean | undefined>(undefined);
 
   // --- Chakra functions
   const toast = useToast();
@@ -74,23 +75,26 @@ export default function FacebookCard(): JSX.Element {
       signer as { signMessage: (message: string) => Promise<string> }
     )
       .then(async (verified): Promise<void> => {
+        setIsVerified(true);
         await handleAddStamp({
           provider: "Facebook",
           credential: verified.credential,
         });
         datadogLogs.logger.info("Successfully saved Stamp", { provider: "Facebook" });
-        // Custom Success Toast
-        toast({
-          duration: 5000,
-          isClosable: true,
-          render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
-        });
       })
       .catch((e): void => {
         throw e;
       })
       .finally(() => {
         setLoading(false);
+        if (isVerified) {
+          // Custom Done Toast
+          toast({
+            duration: 5000,
+            isClosable: true,
+            render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
+          });
+        }
       });
   };
 

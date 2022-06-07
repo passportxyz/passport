@@ -66,17 +66,19 @@ export default function PohCard(): JSX.Element {
         setVerificationInProgress(false);
       });
     onClose();
-    // Custom Success Toast
-    toast({
-      duration: 5000,
-      isClosable: true,
-      render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
-    });
   };
 
   const handleModalOnClose = (): void => {
     setVerificationInProgress(false);
     onClose();
+    if (pohVerified) {
+      // Custom Done Toast
+      toast({
+        duration: 5000,
+        isClosable: true,
+        render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
+      });
+    }
   };
 
   const issueCredentialWidget = (

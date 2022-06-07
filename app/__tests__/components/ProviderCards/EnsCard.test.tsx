@@ -134,12 +134,6 @@ describe("when the verify button is clicked", () => {
       await waitFor(() => {
         expect(handleAddStamp).toBeCalled();
       });
-
-      // Wait to see the done toast
-      await waitFor(() => {
-        const doneToast = screen.getByTestId("toast-done-ens");
-        expect(doneToast).toBeInTheDocument();
-      });
     });
 
     it("clicking cancel closes the modal and a stamp should not be added", async () => {

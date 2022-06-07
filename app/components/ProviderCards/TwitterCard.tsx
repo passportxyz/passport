@@ -23,6 +23,7 @@ const providerId: PROVIDER_ID = "Twitter";
 export default function TwitterCard(): JSX.Element {
   const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
   const [isLoading, setLoading] = useState(false);
+  const [isVerified, setIsVerified] = useState<boolean | undefined>(undefined);
 
   // --- Chakra functions
   const toast = useToast();
@@ -94,20 +95,23 @@ export default function TwitterCard(): JSX.Element {
         signer as { signMessage: (message: string) => Promise<string> }
       )
         .then(async (verified: { credential: any }): Promise<void> => {
+          setIsVerified(true);
           await handleAddStamp({
             provider: providerId,
             credential: verified.credential,
           });
           datadogLogs.logger.info("Successfully saved Stamp", { provider: "Twitter" });
-          // Custom Success Toast
-          toast({
-            duration: 5000,
-            isClosable: true,
-            render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
-          });
         })
         .finally(() => {
           setLoading(false);
+          if (isVerified) {
+            // Custom Done Toast
+            toast({
+              duration: 5000,
+              isClosable: true,
+              render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
+            });
+          }
         });
     }
   }
