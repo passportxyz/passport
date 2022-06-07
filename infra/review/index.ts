@@ -135,6 +135,19 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
         ],
       }),
     },
+    {
+      name: "allow_ecs_list_and_describe",
+      policy: JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Action: ["ecs:ListClusters", "ecs:ListContainerInstances", "ecs:DescribeContainerInstances"],
+            Effect: "Allow",
+          },
+        ],
+        Resource: ["*"],
+      }),
+    },
   ],
   managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"],
   tags: {
@@ -190,6 +203,27 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
           {
             name: "BRIGHTID_PRIVATE_KEY",
             valueFrom: `${IAM_SERVER_SSM_ARN}:BRIGHTID_PRIVATE_KEY::`,
+          },
+        ],
+      },
+      "datadog-agent": {
+        image: "public.ecr.aws/datadog/agent:latest",
+        memory: 256,
+        cpu: 10,
+        environment: [
+          {
+            name: "ECS_FARGATE",
+            value: "true",
+          },
+          {
+            name: "DD_SITE",
+            value: "datadoghq.eu",
+          },
+        ],
+        secrets: [
+          {
+            name: "DD_API_KEY",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:DD_API_KEY::`,
           },
         ],
       },
