@@ -43,7 +43,7 @@ function setupFetchStub(valid: any) {
       resolve({
         json: () =>
           Promise.resolve({
-            valid,
+            response: { valid },
           }),
       });
     });

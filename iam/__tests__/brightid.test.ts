@@ -12,7 +12,6 @@ jest.mock("brightid_sdk", () => ({
 
 describe("Attempt BrightId", () => {
   const did = "did:pkh:eip155:1:0x0";
-  const urlEncodedDid = encodeURIComponent(did);
   const nonUniqueResponse: BrightIdVerificationResponse = {
     unique: false,
     app: "Gitcoin",
@@ -70,7 +69,7 @@ describe("Attempt BrightId", () => {
       } as unknown as RequestPayload);
 
       expect(verifyContextId).toBeCalledTimes(1);
-      expect(verifyContextId).toBeCalledWith("Gitcoin", urlEncodedDid);
+      expect(verifyContextId).toBeCalledWith("Gitcoin", did);
       expect(result).toMatchObject({
         valid: true,
         record: {
@@ -134,7 +133,7 @@ describe("Attempt BrightId", () => {
       const result = await triggerBrightidSponsorship(did);
 
       expect(sponsor).toBeCalledTimes(1);
-      expect(sponsor).toBeCalledWith(process.env.BRIGHTID_PRIVATE_KEY, "Gitcoin", urlEncodedDid);
+      expect(sponsor).toBeCalledWith(process.env.BRIGHTID_PRIVATE_KEY, "Gitcoin", did);
       expect(result).toMatchObject({
         valid: true,
         result: validSponsorshipResponse,
@@ -146,7 +145,7 @@ describe("Attempt BrightId", () => {
       const result = await triggerBrightidSponsorship(did);
 
       expect(sponsor).toBeCalledTimes(1);
-      expect(sponsor).toBeCalledWith(process.env.BRIGHTID_PRIVATE_KEY, "Gitcoin", urlEncodedDid);
+      expect(sponsor).toBeCalledWith(process.env.BRIGHTID_PRIVATE_KEY, "Gitcoin", did);
       expect(result).toMatchObject({
         valid: false,
         result: invalidSponsorshipResponse,
@@ -158,7 +157,7 @@ describe("Attempt BrightId", () => {
       const result = await triggerBrightidSponsorship(did);
 
       expect(sponsor).toBeCalledTimes(1);
-      expect(sponsor).toBeCalledWith(process.env.BRIGHTID_PRIVATE_KEY, "Gitcoin", urlEncodedDid);
+      expect(sponsor).toBeCalledWith(process.env.BRIGHTID_PRIVATE_KEY, "Gitcoin", did);
       expect(result).toMatchObject({
         valid: false,
         error: "Thrown Error",
