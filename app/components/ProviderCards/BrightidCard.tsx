@@ -205,9 +205,7 @@ export default function BrightIdCard(): JSX.Element {
               2) Link Bright ID to Gitcoin by scanning this QR code from the Bright ID app, or clicking{" "}
               <a
                 className="text-purple-connectPurple underline"
-                href={`https://app.brightid.org/link-verification/http:%2f%2fnode.brightid.org/Gitcoin/${encodeURIComponent(
-                  userDid
-                )}`}
+                href={`https://app.brightid.org/link-verification/http:%2f%2fnode.brightid.org/Gitcoin/${userDid}`}
               >
                 here
               </a>{" "}
@@ -218,9 +216,7 @@ export default function BrightIdCard(): JSX.Element {
                 <QRCode
                   size={256}
                   style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                  value={`brightid://link-verification/http:%2f%2fnode.brightid.org/Gitcoin/${encodeURIComponent(
-                    userDid
-                  )}`}
+                  value={`brightid://link-verification/http:%2f%2fnode.brightid.org/Gitcoin/${userDid}`}
                 />
               </div>
             </div>
