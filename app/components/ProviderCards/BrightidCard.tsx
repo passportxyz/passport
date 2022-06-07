@@ -1,6 +1,10 @@
 // --- React Methods
 import React, { useContext, useState } from "react";
 
+// --- Datadog
+import { datadogLogs } from "@datadog/browser-logs";
+import { datadogRum } from "@datadog/browser-rum";
+
 // --- Identity tools
 import { fetchVerifiableCredential } from "@dpopp/identity";
 
@@ -19,7 +23,6 @@ import { useDisclosure, useToast } from "@chakra-ui/react";
 // ---- Types
 import { PROVIDER_ID, Stamp } from "@dpopp/types";
 import { ProviderSpec } from "../../config/providers";
-import { datadogLogs } from "@datadog/browser-logs";
 
 const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 
@@ -140,9 +143,13 @@ export default function BrightIdCard(): JSX.Element {
 
   // triggers on modal verification click
   const handleUserVerify = (): void => {
-    datadogLogs.logger.info("Saving Stamp", { provider: "BrightID" });
+    datadogLogs.logger.info("Saving Stamp", { provider: providerId });
     handleAddStamp(credentialResponse!)
-      .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: "BrightID" }))
+      .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId }))
+      .catch((e): void => {
+        datadogRum.addError(e, { provider: providerId });
+        throw e;
+      })
       .finally(() => {
         setVerificationInProgress(false);
       });
