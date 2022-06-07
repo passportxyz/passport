@@ -1,6 +1,10 @@
 // --- React Methods
 import React, { useContext, useState } from "react";
 
+// --- Datadog
+import { datadogLogs } from "@datadog/browser-logs";
+import { datadogRum } from "@datadog/browser-rum";
+
 // --- Identity tools
 import { fetchVerifiableCredential } from "@dpopp/identity";
 
@@ -14,7 +18,6 @@ const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 // --- import components
 import { Card } from "../Card";
 import { VerifyModal } from "../VerifyModal";
-import { datadogLogs } from "@datadog/browser-logs";
 import { useDisclosure, useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../DoneToastContent";
 
@@ -32,7 +35,7 @@ export default function PohCard(): JSX.Element {
   const toast = useToast();
 
   const handleFetchCredential = (): void => {
-    datadogLogs.logger.info("Saving Stamp", { provider: "POH" });
+    datadogLogs.logger.info("Saving Stamp", { provider: providerId });
     setCredentialResponseIsLoading(true);
     fetchVerifiableCredential(
       iamUrl,
@@ -53,7 +56,9 @@ export default function PohCard(): JSX.Element {
           credential: verified.credential,
         });
       })
-      .catch((e: any): void => {})
+      .catch((e: any): void => {
+        datadogRum.addError(e, { provider: providerId });
+      })
       .finally((): void => {
         setCredentialResponseIsLoading(false);
       });
@@ -61,7 +66,10 @@ export default function PohCard(): JSX.Element {
 
   const handleUserVerify = (): void => {
     handleAddStamp(credentialResponse!)
-      .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: "POH" }))
+      .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId }))
+      .catch((e) => {
+        datadogRum.addError(e, { provider: providerId });
+      })
       .finally(() => {
         setVerificationInProgress(false);
       });

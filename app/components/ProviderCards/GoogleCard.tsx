@@ -9,6 +9,7 @@ import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
 
 // -- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
+import { datadogRum } from "@datadog/browser-rum";
 
 // pull context
 import { UserContext } from "../../context/userContext";
@@ -64,6 +65,7 @@ export default function GoogleCard(): JSX.Element {
         });
       })
       .catch((e): void => {
+        datadogRum.addError(e, { provider: providerId });
         throw e;
       })
       .finally(() => {

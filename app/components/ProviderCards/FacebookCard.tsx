@@ -1,6 +1,10 @@
 // --- React Methods
 import React, { useContext, useState } from "react";
 
+// --- Datadog
+import { datadogLogs } from "@datadog/browser-logs";
+import { datadogRum } from "@datadog/browser-rum";
+
 // --- Identity tools
 import { fetchVerifiableCredential } from "@dpopp/identity";
 
@@ -14,7 +18,6 @@ import { DoneToastContent } from "../DoneToastContent";
 
 import { PROVIDER_ID } from "@dpopp/types";
 import { ProviderSpec } from "../../config/providers";
-import { datadogLogs } from "@datadog/browser-logs";
 
 export interface ReactFacebookLoginInfo {
   id: string;
@@ -59,7 +62,7 @@ export default function FacebookCard(): JSX.Element {
   };
 
   const onFacebookSignIn = (response: ReactFacebookLoginInfo): void => {
-    datadogLogs.logger.info("Saving Stamp", { provider: "Facebook" });
+    datadogLogs.logger.info("Saving Stamp", { provider: providerId });
     // fetch the verifiable credential
     fetchVerifiableCredential(
       iamUrl,
@@ -78,7 +81,7 @@ export default function FacebookCard(): JSX.Element {
           provider: "Facebook",
           credential: verified.credential,
         });
-        datadogLogs.logger.info("Successfully saved Stamp", { provider: "Facebook" });
+        datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId });
         // Custom Success Toast
         toast({
           duration: 5000,
@@ -87,6 +90,7 @@ export default function FacebookCard(): JSX.Element {
         });
       })
       .catch((e): void => {
+        datadogRum.addError(e, { provider: providerId });
         throw e;
       })
       .finally(() => {
