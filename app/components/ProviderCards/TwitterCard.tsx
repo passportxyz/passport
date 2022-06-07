@@ -110,10 +110,10 @@ export default function TwitterCard(): JSX.Element {
             render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
           });
         })
-          .catch((e) => {
-              datadogRum.addError(e, { provider: providerId });
-              throw e;
-          })
+        .catch((e) => {
+          datadogRum.addError(e, { provider: providerId });
+          throw e;
+        })
         .finally(() => {
           setLoading(false);
         });
