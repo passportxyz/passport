@@ -8,9 +8,11 @@ import { CardList } from "../components/CardList";
 import { JsonOutputModal } from "../components/JsonOutputModal";
 
 // --Chakra UI Elements
-import { Spinner, useDisclosure } from "@chakra-ui/react";
+import { Spinner, useDisclosure, Alert, AlertTitle } from "@chakra-ui/react";
 
 import { UserContext } from "../context/userContext";
+
+import { useViewerConnection } from "@self.id/framework";
 
 export default function Dashboard() {
   const { passport, isLoadingPassport, handleCreatePassport, wallet } = useContext(UserContext);
@@ -18,6 +20,8 @@ export default function Dashboard() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const navigate = useNavigate();
+
+  const [viewerConnection] = useViewerConnection();
 
   // Route user to home when wallet is disconnected
   useEffect(() => {
@@ -46,33 +50,40 @@ export default function Dashboard() {
           <p className="mb-4 text-2xl text-black">Decentralized Identity Verification</p>
           <p className="text-xl text-black">Select the verification stamps you’d like to connect to your Passport.</p>
         </div>
-        <div className="mx-auto w-1/4">
-          {!passport ? (
-            <Spinner
-              thickness="4px"
-              speed="0.65s"
-              emptyColor="gray.200"
-              color="purple.500"
-              size="xl"
-              data-testid="loading-spinner-passport"
-            />
-          ) : (
-            <div>
-              <button
-                data-testid="button-passport-json"
-                className="float-right rounded-md border-2 border-gray-300 py-2 px-6 text-black"
-                onClick={onOpen}
-              >{`</> Passport JSON`}</button>
-
-              <JsonOutputModal
-                isOpen={isOpen}
-                onClose={onClose}
-                title={"Passport JSON"}
-                subheading={"You can find the Passport JSON data below"}
-                jsonOutput={passport}
-              />
-            </div>
+        <div className="w-full md:w-1/4">
+          {viewerConnection.status === "connecting" && (
+            <Alert status="warning" data-testid="selfId-connection-alert">
+              <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="orange.500" size="md" />
+              <AlertTitle ml={4}> Waiting for wallet signature</AlertTitle>
+            </Alert>
           )}
+          {viewerConnection.status !== "connecting" &&
+            (!passport ? (
+              <Spinner
+                thickness="4px"
+                speed="0.65s"
+                emptyColor="gray.200"
+                color="purple.500"
+                size="xl"
+                data-testid="loading-spinner-passport"
+              />
+            ) : (
+              <div>
+                <button
+                  data-testid="button-passport-json"
+                  className="float-right rounded-md border-2 border-gray-300 py-2 px-6 text-black"
+                  onClick={onOpen}
+                >{`</> Passport JSON`}</button>
+
+                <JsonOutputModal
+                  isOpen={isOpen}
+                  onClose={onClose}
+                  title={"Passport JSON"}
+                  subheading={"You can find the Passport JSON data below"}
+                  jsonOutput={passport}
+                />
+              </div>
+            ))}
         </div>
       </div>
       <CardList />

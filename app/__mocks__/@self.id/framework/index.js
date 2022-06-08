@@ -7,6 +7,6 @@ const viewerConnection = {
   status: "idle",
 };
 
-framework.useViewerConnection = [viewerConnection, mockConnectFn, mockDisconnectFn];
+framework.useViewerConnection = () => [viewerConnection, mockConnectFn, mockDisconnectFn];
 
 module.exports = framework;
