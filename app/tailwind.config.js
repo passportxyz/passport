@@ -1,7 +1,13 @@
 module.exports = {
-  content: ["./pages/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}"],
+  content: ["./pages/**/*.{ts,tsx}", "./config/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./pages/_app.tsx"],
+  options: {
+    safelist: ["landingPageBackground"],
+  },
   theme: {
     extend: {
+      backgroundImage: {
+        landingPageBackground: "url('/assets/LandingPageBackground.svg')",
+      },
       colors: {
         purple: {
           darkpurple: "#0E0333",
