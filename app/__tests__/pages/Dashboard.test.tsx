@@ -5,8 +5,15 @@ import { UserContext, UserContextState } from "../../context/userContext";
 import { mockAddress, mockWallet } from "../../__test-fixtures__/onboardHookValues";
 import { STAMP_PROVIDERS } from "../../config/providers";
 import { HashRouter as Router } from "react-router-dom";
+import * as framework from "@self.id/framework";
 
 jest.mock("../../utils/onboard.ts");
+
+jest.mock("@self.id/framework", () => {
+  return {
+    useViewerConnection: jest.fn(),
+  };
+});
 
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
@@ -57,6 +64,13 @@ const mockUserContext: UserContextState = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  (framework.useViewerConnection as jest.Mock).mockImplementation(() => [
+    {
+      status: "connected",
+    },
+    jest.fn(),
+    jest.fn(),
+  ]);
 });
 
 describe("when user has no passport", () => {
@@ -145,5 +159,29 @@ describe("when the user clicks Passport JSON", () => {
 
     expect(verifyModal).toBeInTheDocument();
     expect(buttonDone).toBeInTheDocument();
+  });
+});
+
+describe("when viewer connection status is connecting", () => {
+  const mockUserContextWithPassport = {
+    ...mockUserContext,
+    passport: {
+      issuanceDate: new Date("2022-01-15"),
+      expiryDate: new Date("2022-01-16"),
+      stamps: [],
+    },
+  };
+  it("should show a 'waiting for signature' alert", () => {
+    (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connecting" }]);
+    render(
+      <UserContext.Provider value={mockUserContextWithPassport}>
+        <Router>
+          <Dashboard />
+        </Router>
+      </UserContext.Provider>
+    );
+
+    const waitingForSignature = screen.getByTestId("selfId-connection-alert");
+    expect(waitingForSignature).toBeInTheDocument();
   });
 });
