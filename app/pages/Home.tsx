@@ -62,7 +62,7 @@ export default function Home() {
       </div>
       <div className="container mx-auto flex flex-col flex-wrap items-center p-5 md:flex-row">
         <nav className="flex flex-wrap items-center justify-center text-base md:ml-auto md:mr-auto">
-          <img src={"./assets/GitcoindaoLogoDark.svg"} alt={"Gitcoin Logo Dark"} />
+          <img src="./assets/GitcoindaoLogoDark.svg" alt="Gitcoin Logo Dark" />
         </nav>
         <a
           href="https://github.com/gitcoinco/dPopp"
@@ -70,7 +70,7 @@ export default function Home() {
           rel="noopener noreferrer"
           className="mt-4 inline-flex items-center rounded py-1 px-3 text-base md:mt-0"
         >
-          <img src="./assets/GithubLogo.svg" alt="Gitcoin Logo Dark" />
+          <img src="./assets/githubLogo.svg" alt="Github Logo" />
         </a>
         {/* UNCOMMENT WHEN FAQ AVAILABLE*/}
         {/* <a className="border-grey-200 ml-2 mt-4 inline-flex items-center rounded-full rounded border-2 py-1 px-4 text-base md:mt-0">
