@@ -122,6 +122,8 @@ export default function BrightIdCard(): JSX.Element {
       });
     }
     setCredentialResponseIsLoading(false);
+    setVerificationInProgress(false);
+    onClose();
   }
 
   async function handleVerifyContextId(): Promise<boolean> {
