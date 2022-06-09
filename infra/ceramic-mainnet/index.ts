@@ -249,6 +249,35 @@ const service = new awsx.ecs.FargateService("ceramic-mainnet", {
   subnets: vpc.privateSubnetIds,
   taskDefinitionArgs: {
     containers: {
+      ceramic: {
+        // dependsOn: [
+        //   {
+        //     containerName: "ipfs",
+        //     condition: "HEALTHY",
+        //   },
+        // ],
+        image: "ceramicnetwork/js-ceramic:latest",
+        memory: 4096,
+        cpu: 2048,
+        portMappings: [httpsListener],
+        links: [],
+        command: ceramicCommand,
+        environment: [
+          { name: "NODE_ENV", value: "production" },
+          { name: "AWS_ACCESS_KEY_ID", value: usrS3Key },
+          { name: "AWS_SECRET_ACCESS_KEY", value: usrS3Secret },
+        ],
+      },
+    },
+  },
+});
+
+const serviceIPFS = new awsx.ecs.FargateService("ceramic-mainnet", {
+  cluster,
+  desiredCount: 1,
+  subnets: vpc.privateSubnetIds,
+  taskDefinitionArgs: {
+    containers: {
       ipfs: {
         image: "ceramicnetwork/go-ipfs-daemon:latest",
         memory: 4096,
@@ -280,25 +309,6 @@ const service = new awsx.ecs.FargateService("ceramic-mainnet", {
         //   timeout: 3,
         //   startPeriod: 5,
         // },
-      },
-      ceramic: {
-        // dependsOn: [
-        //   {
-        //     containerName: "ipfs",
-        //     condition: "HEALTHY",
-        //   },
-        // ],
-        image: "ceramicnetwork/js-ceramic:latest",
-        memory: 4096,
-        cpu: 2048,
-        portMappings: [httpsListener],
-        links: [],
-        command: ceramicCommand,
-        environment: [
-          { name: "NODE_ENV", value: "production" },
-          { name: "AWS_ACCESS_KEY_ID", value: usrS3Key },
-          { name: "AWS_SECRET_ACCESS_KEY", value: usrS3Secret },
-        ],
       },
     },
   },
