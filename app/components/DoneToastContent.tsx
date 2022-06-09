@@ -1,7 +1,7 @@
 // --- React Methods
 import React from "react";
 
-import { PROVIDER_ID } from "@dpopp/types";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 export type CustomToastProps = {
   providerId: PROVIDER_ID;

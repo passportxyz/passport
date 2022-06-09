@@ -1,6 +1,6 @@
 // ----- Types
 import type { Provider, ProviderOptions } from "../types";
-import type { RequestPayload, VerifiedPayload } from "@dpopp/types";
+import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // Export a simple Provider as an example
 export class SimpleProvider implements Provider {

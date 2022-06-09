@@ -1,4 +1,4 @@
-// mock everything that we're using in @dpopp/identity/src into an object and export it
+// mock everything that we're using in @gitcoin/passport-identity/src into an object and export it
 const identity = {};
 
 // always verifies

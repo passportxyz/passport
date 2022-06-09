@@ -1,5 +1,5 @@
 // ----- Types
-import type { RequestPayload, VerifiedPayload } from "@dpopp/types";
+import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
 import { deleteClient, getClient, requestFindMyUser, TwitterFindMyUserResponse } from "../procedures/twitterOauth";

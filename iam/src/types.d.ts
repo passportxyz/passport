@@ -1,4 +1,4 @@
-import { RequestPayload, VerifiedPayload } from "@dpopp/types";
+import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // All Identity Providers should implement Provider
 export interface Provider {

@@ -1,9 +1,9 @@
-import { DID, Passport, Stamp, VerifiableCredential } from "@dpopp/types";
+import { DID, Passport, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 
 // -- Ceramic and Glazed
 import type { CeramicApi } from "@ceramicnetwork/common";
 import { CeramicClient } from "@ceramicnetwork/http-client";
-import publishedModel from "@dpopp/schemas/scripts/publish-model.json";
+import publishedModel from "@gitcoin/passport-schemas/scripts/publish-model.json";
 import { DataModel } from "@glazed/datamodel";
 import { DIDDataStore } from "@glazed/did-datastore";
 import { TileLoader } from "@glazed/tile-loader";

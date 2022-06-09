@@ -5,7 +5,7 @@ import React, { useContext } from "react";
 import { Spinner, useDisclosure } from "@chakra-ui/react";
 
 // --- Types
-import { VerifiableCredential } from "@dpopp/types";
+import { VerifiableCredential } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../config/providers";
 
 // --- Context

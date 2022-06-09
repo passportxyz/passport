@@ -20,11 +20,15 @@ import {
   ChallengeRequestBody,
   VerifyRequestBody,
   CredentialResponseBody,
-} from "@dpopp/types";
+} from "@gitcoin/passport-types";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-import { issueChallengeCredential, issueHashedCredential, verifyCredential } from "@dpopp/identity/dist/commonjs";
+import {
+  issueChallengeCredential,
+  issueHashedCredential,
+  verifyCredential,
+} from "@gitcoin/passport-identity/dist/commonjs";
 
 // ---- Identity Provider Management
 import { Providers } from "./utils/providers";

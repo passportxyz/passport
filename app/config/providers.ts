@@ -1,4 +1,4 @@
-import { PROVIDER_ID } from "@dpopp/types";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 export type ProviderSpec = {
   icon?: string | undefined;

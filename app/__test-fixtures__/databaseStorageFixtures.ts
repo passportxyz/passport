@@ -1,4 +1,4 @@
-import { VerifiableCredential, Stamp, Passport } from "@dpopp/types";
+import { VerifiableCredential, Stamp, Passport } from "@gitcoin/passport-types";
 
 const credential: VerifiableCredential = {
   "@context": ["https://www.w3.org/2018/credentials/v1"],

@@ -1,4 +1,4 @@
-// mock everything that we're using in @dpopp/identity/dist/commonjs into an object and export it
+// mock everything that we're using in @gitcoin/passport-identity/dist/commonjs into an object and export it
 const identity = {};
 
 // always returns dummy challenge

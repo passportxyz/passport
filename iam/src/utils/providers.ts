@@ -1,6 +1,6 @@
 // ---- Types
 import type { Provider } from "../types";
-import type { RequestPayload, ChallengePayload, VerifiedPayload } from "@dpopp/types";
+import type { RequestPayload, ChallengePayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // Collate all Providers to abstract verify logic
 export class Providers {

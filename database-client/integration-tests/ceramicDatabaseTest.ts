@@ -1,4 +1,4 @@
-import { Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@dpopp/types";
+import { Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";

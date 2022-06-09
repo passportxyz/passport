@@ -1,6 +1,6 @@
 // ----- Types
 import type { Provider, ProviderOptions } from "../types";
-import type { RequestPayload, VerifiedPayload, BrightIdVerificationResponse } from "@dpopp/types";
+import type { RequestPayload, VerifiedPayload, BrightIdVerificationResponse } from "@gitcoin/passport-types";
 
 // --- verifyMethod in providers
 import { verifyBrightidContextId } from "../procedures/brightid";
