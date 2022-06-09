@@ -227,6 +227,7 @@ function makeCmd(input: pulumi.Input<string>): pulumi.Output<string[]> {
       "true",
       "--log-directory", "/usr/local/var/log/ceramic",
       "--cors-allowed-origins",
+      "--max-old-space-size=3072",
       ".*",
       // "--ethereum-rpc", "${eth_rpc_url}",
       "--state-store-s3-bucket",

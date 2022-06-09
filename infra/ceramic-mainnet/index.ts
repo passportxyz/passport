@@ -230,6 +230,7 @@ function makeCmd(input: pulumi.Input<string>): pulumi.Output<string[]> {
       // "--debug", "${debug}",
       "--log-to-files",
       "false",
+      "--max-old-space-size=3072",
       // "--log-directory", "/usr/local/var/log/${directory_namespace}",
       "--cors-allowed-origins",
       ".*",
