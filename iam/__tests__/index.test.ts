@@ -7,7 +7,7 @@ import { app, config } from "../src/index";
 // ---- Types
 import { ErrorResponseBody, ValidResponseBody } from "@gitcoin/passport-types";
 
-import * as identityMock from "@gitcoin/passport-identity/dist/commonjs";
+import * as identityMock from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 describe("POST /challenge", function () {
   it("handles valid challenge requests", async () => {

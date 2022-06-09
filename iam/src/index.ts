@@ -28,7 +28,7 @@ import {
   issueChallengeCredential,
   issueHashedCredential,
   verifyCredential,
-} from "@gitcoin/passport-identity/dist/commonjs";
+} from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // ---- Identity Provider Management
 import { Providers } from "./utils/providers";
