@@ -65,8 +65,9 @@ export default function GoogleCard(): JSX.Element {
         });
       })
       .catch((e): void => {
+        datadogLogs.logger.error("1) error providing verification", { error: e, provider: providerId });
+        console.error("2) error providing verification");
         datadogRum.addError(e, { provider: providerId });
-        throw e;
       })
       .finally(() => {
         setLoading(false);

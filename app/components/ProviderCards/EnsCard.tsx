@@ -36,7 +36,7 @@ export default function EnsCard(): JSX.Element {
   const toast = useToast();
 
   const handleFetchCredential = (): void => {
-    datadogLogs.logger.info("Saving Stamp", { provider: providerId });
+    datadogLogs.logger.info("starting provider verification", { provider: providerId });
     setCredentialResponseIsLoading(true);
     fetchVerifiableCredential(
       iamUrl,
@@ -58,6 +58,8 @@ export default function EnsCard(): JSX.Element {
         });
       })
       .catch((e: any): void => {
+        datadogLogs.logger.error("1) error providing verification", { error: e, provider: providerId });
+        console.error("2) error providing verification");
         datadogRum.addError(e, { provider: providerId });
       })
       .finally((): void => {
@@ -66,6 +68,7 @@ export default function EnsCard(): JSX.Element {
   };
 
   const handleUserVerify = (): void => {
+    datadogLogs.logger.info("Saving Stamp", { provider: providerId });
     handleAddStamp(credentialResponse!)
       .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId }))
       .catch((e: any): void => {

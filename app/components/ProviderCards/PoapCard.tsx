@@ -67,6 +67,9 @@ export default function PoapCard(): JSX.Element {
   const handleUserVerify = (): void => {
     handleAddStamp(credentialResponse!)
       .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId }))
+      .catch((e: any): void => {
+        datadogLogs.logger.error(`error saving stamp: ${e}`, { provider: providerId });
+      })
       .finally(() => {
         setVerificationInProgress(false);
       });
