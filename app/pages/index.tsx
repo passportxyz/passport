@@ -21,11 +21,11 @@ datadogRum.init({
   clientToken: process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || "",
   site: "datadoghq.eu",
   service: "passport-frontend",
-  env: "review",
+  env: process.env.NEXT_PUBLIC_DATADOG_ENV || "",
   // Specify a version number to identify the deployed version of your application in Datadog
   // version: '1.0.0',
   sampleRate: 100,
-  premiumSampleRate: 100,
+  premiumSampleRate: 0,
   trackInteractions: true,
   defaultPrivacyLevel: "mask-user-input",
 });
@@ -35,7 +35,8 @@ datadogLogs.init({
   site: "datadoghq.eu",
   forwardErrorsToLogs: true,
   sampleRate: 100,
-  service: "passport-frontend",
+  service: `passport-frontend`,
+  env: process.env.NEXT_PUBLIC_DATADOG_ENV || "",
 });
 
 const App: NextPage = () => {

@@ -91,7 +91,6 @@ export default function FacebookCard(): JSX.Element {
       })
       .catch((e): void => {
         datadogRum.addError(e, { provider: providerId });
-        throw e;
       })
       .finally(() => {
         setLoading(false);

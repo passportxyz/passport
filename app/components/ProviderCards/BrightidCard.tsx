@@ -46,6 +46,7 @@ export default function BrightIdCard(): JSX.Element {
   const toast = useToast();
 
   const handleFetchCredential = (): void => {
+    datadogLogs.logger.info("starting provider verification", { provider: providerId });
     setCredentialResponseIsLoading(true);
     fetchVerifiableCredential(
       iamUrl,
@@ -66,13 +67,16 @@ export default function BrightIdCard(): JSX.Element {
           credential: verified.credential,
         });
       })
-      .catch((e: any): void => {})
+      .catch((e: any): void => {
+        datadogRum.addError(`Error ${e}`, { provider: providerId });
+      })
       .finally((): void => {
         setCredentialResponseIsLoading(false);
       });
   };
 
   async function handleSponsorship(): Promise<void> {
+    datadogLogs.logger.info("Sponsoring user on BrightId", { provider: providerId });
     setCredentialResponseIsLoading(true);
     const res = fetch(`${process.env.NEXT_PUBLIC_DPOPP_PROCEDURE_URL?.replace(/\/*?$/, "")}/brightid/sponsor`, {
       method: "POST",
@@ -112,6 +116,7 @@ export default function BrightIdCard(): JSX.Element {
           </div>
         ),
       });
+      datadogLogs.logger.info("Successfully sponsored user on BrightId", { provider: providerId });
     } else {
       toast({
         title: "Failure",
@@ -120,6 +125,7 @@ export default function BrightIdCard(): JSX.Element {
         duration: 9000,
         isClosable: true,
       });
+      datadogRum.addError(data?.response?.error || "Failed to sponsor user on BrightId", { provider: providerId });
     }
     setCredentialResponseIsLoading(false);
     setVerificationInProgress(false);
