@@ -1,4 +1,4 @@
-import { Passport, Stamp, DID } from "@dpopp/types";
+import { Passport, Stamp, DID } from "@gitcoin/passport-types";
 
 // Class used as a base for each DataStorage Type
 export abstract class DataStorageBase {

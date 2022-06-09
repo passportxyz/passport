@@ -1,7 +1,7 @@
 // ---- Test subject
 import { TwitterProvider } from "../src/providers/twitter";
 
-import { RequestPayload } from "@dpopp/types";
+import { RequestPayload } from "@gitcoin/passport-types";
 import { auth } from "twitter-api-sdk";
 import { deleteClient, getClient, requestFindMyUser, TwitterFindMyUserResponse } from "../src/procedures/twitterOauth";
 

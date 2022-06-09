@@ -1,5 +1,5 @@
 {
-  "name": "@dpopp/types",
+  "name": "@gitcoin/passport-types",
   "version": "0.0.1",
   "license": "MIT",
   "types": "src/index.d.ts",

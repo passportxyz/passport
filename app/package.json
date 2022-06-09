@@ -1,5 +1,5 @@
 {
-  "name": "@dpopp/app",
+  "name": "@gitcoin/passport-app",
   "private": true,
   "version": "0.0.1",
   "scripts": {
@@ -16,9 +16,9 @@
     "@chakra-ui/react": "^1.8.8",
     "@datadog/browser-logs": "^4.11.2",
     "@datadog/browser-rum": "^4.11.2",
-    "@dpopp/database-client": "^0.0.1",
-    "@dpopp/identity": "^0.0.1",
-    "@dpopp/types": "^0.0.1",
+    "@gitcoin/passport-database-client": "^0.0.1",
+    "@gitcoin/passport-identity": "^0.0.1",
+    "@gitcoin/passport-types": "^0.0.1",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@ethersproject/providers": "^5.6.4",

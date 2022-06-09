@@ -1,5 +1,5 @@
 // ---- Test subject
-import { RequestPayload } from "@dpopp/types";
+import { RequestPayload } from "@gitcoin/passport-types";
 import { PohProvider } from "../src/providers/poh";
 
 const mockIsRegistered = jest.fn();

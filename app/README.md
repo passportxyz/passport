@@ -1,6 +1,6 @@
-# @dpopp/app
+# @gitcoin/passport-app
 
-This will be the web app allowing users to interact with their dpopp.
+This will be the web app allowing users to interact with their Gitcoin Passport.
 
 ```bash
 yarn start

@@ -1,5 +1,5 @@
 // ---- Test subject
-import { RequestPayload } from "@dpopp/types";
+import { RequestPayload } from "@gitcoin/passport-types";
 import { POAPProvider, poapSubgraphs } from "../src/providers/poap";
 
 // ----- Libs

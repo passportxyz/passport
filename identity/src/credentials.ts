@@ -8,7 +8,7 @@ import {
   IssuedChallenge,
   CredentialResponseBody,
   VerifiableCredentialRecord,
-} from "@dpopp/types";
+} from "@gitcoin/passport-types";
 
 // --- Node/Browser http req library
 import axios from "axios";

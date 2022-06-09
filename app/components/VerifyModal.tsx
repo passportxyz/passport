@@ -20,7 +20,7 @@ import {
   AccordionIcon,
 } from "@chakra-ui/react";
 
-import { Stamp } from "@dpopp/types";
+import { Stamp } from "@gitcoin/passport-types";
 
 export type VerifyModalProps = {
   isOpen: boolean;

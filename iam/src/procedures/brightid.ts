@@ -1,5 +1,9 @@
 import { verifyContextId, sponsor } from "brightid_sdk";
-import { BrightIdProcedureResponse, BrightIdVerificationResponse, BrightIdSponsorshipResponse } from "@dpopp/types";
+import {
+  BrightIdProcedureResponse,
+  BrightIdVerificationResponse,
+  BrightIdSponsorshipResponse,
+} from "@gitcoin/passport-types";
 
 // --- app name for Bright Id App
 const CONTEXT = "Gitcoin";

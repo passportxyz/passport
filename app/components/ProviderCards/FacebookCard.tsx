@@ -6,7 +6,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 
 // --- Identity tools
-import { fetchVerifiableCredential } from "@dpopp/identity";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 
 // --- UserContext
 import { UserContext } from "../../context/userContext";
@@ -16,7 +16,7 @@ import { Card } from "../Card";
 import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../DoneToastContent";
 
-import { PROVIDER_ID } from "@dpopp/types";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../../config/providers";
 
 export interface ReactFacebookLoginInfo {

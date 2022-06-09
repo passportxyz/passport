@@ -25,7 +25,7 @@ import * as mockDIDKit from "../__mocks__/didkit";
 
 // ---- Types
 import axios from "axios";
-import { DIDKitLib, RequestPayload, VerifiableCredential } from "@dpopp/types";
+import { DIDKitLib, RequestPayload, VerifiableCredential } from "@gitcoin/passport-types";
 
 // ---- Set up DIDKit mock
 const DIDKit: DIDKitLib = mockDIDKit as unknown as DIDKitLib;

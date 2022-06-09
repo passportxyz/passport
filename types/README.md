@@ -1,8 +1,8 @@
-# @dpopp/types
+# @gitcoin/passport-types
 
-Shared types for the dpopp repo.
+Shared types for the Gitcoin Passport repo.
 
 Instructions:
 
-- Ensure @dpopp/types is included as a package dependency
-- Import like so: `import { VerifiableCredential } from "@dpopp/types"`
+- Ensure @gitcoin/passport-types is included as a package dependency
+- Import like so: `import { VerifiableCredential } from "@gitcoin/passport-types"`

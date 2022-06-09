@@ -2,7 +2,7 @@
 import React, { useContext, useState } from "react";
 
 // --- Identity tools
-import { fetchVerifiableCredential } from "@dpopp/identity";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 
 // --- Google OAuth toolkit
 import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
@@ -19,7 +19,7 @@ import { Card } from "../Card";
 import { DoneToastContent } from "../DoneToastContent";
 import { useToast } from "@chakra-ui/react";
 
-import { PROVIDER_ID } from "@dpopp/types";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../../config/providers";
 
 // import from .env

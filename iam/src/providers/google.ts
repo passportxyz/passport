@@ -1,6 +1,6 @@
 // ----- Types
 import type { Provider, ProviderOptions } from "../types";
-import type { RequestPayload, VerifiedPayload } from "@dpopp/types";
+import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Googles OAuth2 library
 import { OAuth2Client } from "google-auth-library";

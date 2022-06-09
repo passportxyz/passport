@@ -1,6 +1,6 @@
 // ---- Types
 import type { Provider } from "../types";
-import type { RequestPayload, ChallengePayload, VerifiedPayload } from "@dpopp/types";
+import type { RequestPayload, ChallengePayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ---- Return randomBytes as a challenge to test that the user has control of a provided address
 import crypto from "crypto";

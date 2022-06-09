@@ -1,6 +1,6 @@
 // ---- Test subject
 import { FacebookDebugResponse, FacebookProvider } from "../src/providers/facebook";
-import { RequestPayload } from "@dpopp/types";
+import { RequestPayload } from "@gitcoin/passport-types";
 import axios from "axios";
 import { DateTime } from "luxon";
 

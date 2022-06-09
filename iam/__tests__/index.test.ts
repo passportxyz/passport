@@ -5,9 +5,9 @@ import request from "supertest";
 import { app, config } from "../src/index";
 
 // ---- Types
-import { ErrorResponseBody, ValidResponseBody } from "@dpopp/types";
+import { ErrorResponseBody, ValidResponseBody } from "@gitcoin/passport-types";
 
-import * as identityMock from "@dpopp/identity/dist/commonjs";
+import * as identityMock from "@gitcoin/passport-identity/dist/commonjs";
 
 describe("POST /challenge", function () {
   it("handles valid challenge requests", async () => {

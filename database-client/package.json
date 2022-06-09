@@ -1,5 +1,5 @@
 {
-  "name": "@dpopp/database-client",
+  "name": "@gitcoin/passport-database-client",
   "version": "0.0.1",
   "license": "MIT",
   "type": "module",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@ceramicnetwork/http-client": "^2.0.0",
-    "@dpopp/schemas": "0.0.1",
+    "@gitcoin/passport-schemas": "0.0.1",
     "@glazed/datamodel": "^0.3.0",
     "@glazed/did-datastore": "^0.3.1",
     "@glazed/tile-loader": "^0.2.0",

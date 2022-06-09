@@ -1,4 +1,4 @@
-# Dpopp Ceramic Schemas
+# Gitcoin Passport Ceramic Schemas
 
 ## Setup
 

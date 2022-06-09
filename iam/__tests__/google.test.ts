@@ -1,5 +1,5 @@
 // ---- Test subject
-import { RequestPayload } from "@dpopp/types";
+import { RequestPayload } from "@gitcoin/passport-types";
 import { GoogleProvider } from "../src/providers/google";
 
 jest.mock("google-auth-library");

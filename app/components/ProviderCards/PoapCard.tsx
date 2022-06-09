@@ -6,7 +6,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 
 // --- Identity tools
-import { fetchVerifiableCredential } from "@dpopp/identity";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 
 // pull context
 import { UserContext } from "../../context/userContext";
@@ -18,7 +18,7 @@ import { Card } from "../Card";
 import { VerifyModal } from "../VerifyModal";
 import { DoneToastContent } from "../DoneToastContent";
 
-import { PROVIDER_ID, Stamp } from "@dpopp/types";
+import { PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
 
 const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 

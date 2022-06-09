@@ -4,14 +4,14 @@ import { useConnectWallet } from "@web3-onboard/react";
 
 // --- Wallet connection utilities
 import { initWeb3Onboard } from "../utils/onboard";
-import { Passport, Stamp, PROVIDER_ID } from "@dpopp/types";
+import { Passport, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
 
 // --- Data Storage Functions
 import { OnboardAPI, WalletState } from "@web3-onboard/core/dist/types";
 import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
 
 // --- Data Storage Functions
-import { CeramicDatabase } from "@dpopp/database-client";
+import { CeramicDatabase } from "@gitcoin/passport-database-client";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 
 // -- Ceramic and Glazed

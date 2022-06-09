@@ -1,5 +1,5 @@
 {
-  "name": "@dpopp/identity",
+  "name": "@gitcoin/passport-identity",
   "version": "0.0.1",
   "license": "MIT",
   "main": "dist/commonjs/index.js",
@@ -15,7 +15,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@dpopp/types": "0.0.1",
+    "@gitcoin/passport-types": "0.0.1",
     "@ethersproject/base64": "^5.6.1",
     "@ethersproject/providers": "^5.6.2",
     "axios": "^0.26.1",
