@@ -18,6 +18,10 @@ import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 import { EthereumAuthProvider } from "@self.id/web";
 import { useViewerConnection } from "@self.id/framework";
 
+// --- Datadog
+import { datadogLogs } from "@datadog/browser-logs";
+import { datadogRum } from "@datadog/browser-rum";
+
 // -- Trusted IAM servers DID
 const IAM_ISSUER_DID = process.env.NEXT_PUBLIC_DPOPP_IAM_ISSUER_DID || "";
 
@@ -200,9 +204,11 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     if (!address) {
       connect({})
         .then(() => {
+          datadogLogs.logger.info("Connected to Ceramic");
           setLoggedIn(true);
         })
         .catch((e) => {
+          datadogRum.addError(e);
           throw e;
         });
     } else {
@@ -217,6 +223,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           window.localStorage.setItem("connectedWallets", "[]");
         })
         .catch((e) => {
+          datadogRum.addError(e);
           throw e;
         });
     }
