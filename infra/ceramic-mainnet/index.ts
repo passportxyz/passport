@@ -12,6 +12,7 @@ import * as awsx from "@pulumi/awsx";
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
 let domain = `ceramic.${process.env["DOMAIN"]}`;
+let loadBalancerDns = `${process.env["LOAD_BALANCER_DNS"]}`
 
 //////////////////////////////////////////////////////////////
 // Create permissions:
@@ -255,15 +256,14 @@ function makeCmd(input: pulumi.Input<string>): pulumi.Output<string[]> {
       "--network",
       "elp",
       "--ipfs-api",
-      "http://gitcoin-ceramic-c696c33-2109689178.us-east-1.elb.amazonaws.com:5001",
+      // TODO reference this from ALB instead
+      `${loadBalancerDns}`,
       // "--anchor-service-api", "${anchor_service_api_url}",
       // "--debug", "${debug}",
-      "--log-to-files",
-      "false",
+      "--log-to-files", // `true` when `--log-to-files` flag is provided
       // "--log-directory", "/usr/local/var/log/ceramic",
       "--cors-allowed-origins",
       ".*",
-      // "--max-old-space-size=3072",
       // "--ethereum-rpc", "${eth_rpc_url}",
       "--state-store-s3-bucket",
       bucketName, // ceramicStateBucket.id
@@ -283,8 +283,8 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
     containers: {
       ceramic: {
         image: "ceramicnetwork/js-ceramic:latest",
-        memory: 4096,
-        cpu: 2048,
+        memory: 8192,
+        cpu: 4096,
         portMappings: [httpsListener],
         links: [],
         command: ceramicCommand,
@@ -308,8 +308,8 @@ const serviceIPFS = new awsx.ecs.FargateService("dpopp-ipfs", {
     containers: {
       ipfs: {
         image: "ceramicnetwork/go-ipfs-daemon:latest",
-        memory: 4096,
-        cpu: 2048,
+        memory: 8192,
+        cpu: 4096,
         portMappings: [
           ceramicListener,
           ipfsListener,
@@ -325,6 +325,7 @@ const serviceIPFS = new awsx.ecs.FargateService("dpopp-ipfs", {
           { name: "IPFS_S3_ACCESS_KEY_ID", value: usrS3Key },
           { name: "IPFS_S3_SECRET_ACCESS_KEY", value: usrS3Secret },
           { name: "IPFS_S3_KEY_TRANSFORM", value: "next-to-last/2" },
+          { name: "GOLOG_LOG_LEVEL", value: "info" },
         ],
         // healthCheck: {
         //   // NB: this is the same as the go-ipfs-daemon Dockerfile HEALTHCHECK
