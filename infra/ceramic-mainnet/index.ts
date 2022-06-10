@@ -46,6 +46,8 @@ const certificateValidationDomain = new aws.route53.Record(`${domain}-validation
   type: certificate.domainValidationOptions[0].resourceRecordType,
   records: [certificate.domainValidationOptions[0].resourceRecordValue],
   ttl: 600,
+}, {
+  dependsOn: certificate
 });
 
 const certificateValidation = new aws.acm.CertificateValidation(
@@ -152,7 +154,7 @@ export const vpcPublicSubnet1 = vpcPublicSubnetIds.then((subnets) => {
 const cluster = new awsx.ecs.Cluster("gitcoin-ceramic", { vpc });
 export const clusterId = cluster.id;
 
-const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-ceramic`, { vpc });
+const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-ceramic`, { vpc }, {dependsOn: certificate});
 
 // Listen to HTTP traffic on port 80 and redirect to 443
 const httpListener = alb.createListener("gitcoin-ceramic-http", {
@@ -298,6 +300,7 @@ const service = new awsx.ecs.FargateService("ceramic-mainnet", {
           { name: "NODE_ENV", value: "production" },
           { name: "AWS_ACCESS_KEY_ID", value: usrS3Key },
           { name: "AWS_SECRET_ACCESS_KEY", value: usrS3Secret },
+          { name: "NODE_OPTIONS", value: "--max-old-space-size=3072" },
         ],
       },
     },
