@@ -169,35 +169,65 @@ const httpListener = alb.createListener("gitcoin-ceramic-http", {
 });
 export const frontendUrlEcs = pulumi.interpolate`http://${httpListener.endpoint.hostname}/`;
 
-// Target group for the Ceramic container
-const ceramicTarget = alb.createTargetGroup("gitcoin-ceramic", {
+const target = alb.createTargetGroup("gitcoin-dpopp-ceramic", {
   vpc,
   port: 80,
   healthCheck: { path: "/api/v0/node/healthcheck" },
 });
 
 // Listen to traffic on port 443 & route it through the Ceramic target group
-const httpsListener = ceramicTarget.createListener("gitcoin-ceramic-https", {
+const httpsListener = target.createListener("gitcoin-ceramic-https", {
   port: 443,
   certificateArn: certificateValidation.certificateArn,
 });
 
 // Target group for the IPFS container
-const ipfsTarget = alb.createTargetGroup("gitcoin-ipfs-swarm", {
+const ceramicTarget = alb.createTargetGroup("gitcoin-dpopp-swarm", {
   vpc,
-  port: 4011,
+  port: 4001,
   protocol: "HTTP",
   healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
 });
 
-const ipfsListener = ipfsTarget.createListener("gitcoin-ipfs-swarm", {
+const ceramicListener = ceramicTarget.createListener("gitcoin-dpopp-swarm", {
   protocol: "HTTP",
-  port: 4011,
+  port: 4001,
 });
 
-const ipfsHealthcheckListener = ipfsTarget.createListener("gitcoin-ipfs-healthcheck", {
+const ipfsTarget = alb.createTargetGroup("gitcoin-dpopp-ipfs", {
+  vpc,
+  port: 5001,
+  protocol: "HTTP",
+  healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
+});
+
+const ipfsListener = ipfsTarget.createListener("gitcoin-dpopp-ipfs", {
+  protocol: "HTTP",
+  port: 5001,
+});
+
+const ipfsHealthcheckTarget = alb.createTargetGroup("dpopp-ipfs-healthcheck", {
+  vpc,
+  port: 8011,
+  protocol: "HTTP",
+  healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
+});
+
+const ipfsHealthcheckListener = ipfsHealthcheckTarget.createListener("ipfs-healthcheck", {
   protocol: "HTTP",
   port: 8011,
+});
+
+const ipfsWS = alb.createTargetGroup("dpopp-ipfs-ws", {
+  vpc,
+  port: 8081,
+  protocol: "HTTP",
+  healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
+});
+
+const ifpsWSListener = ipfsWS.createListener("ipfs-ws", {
+  protocol: "HTTP",
+  port: 8081,
 });
 
 // Create a DNS record for the load balancer
@@ -225,18 +255,18 @@ function makeCmd(input: pulumi.Input<string>): pulumi.Output<string[]> {
       "--network",
       "elp",
       "--ipfs-api",
-      "http://localhost:5001",
+      "http://gitcoin-ceramic-c696c33-2109689178.us-east-1.elb.amazonaws.com:5001",
       // "--anchor-service-api", "${anchor_service_api_url}",
       // "--debug", "${debug}",
       "--log-to-files",
       "false",
-      "--max-old-space-size=3072",
-      // "--log-directory", "/usr/local/var/log/${directory_namespace}",
+      // "--log-directory", "/usr/local/var/log/ceramic",
       "--cors-allowed-origins",
+      "--max-old-space-size=3072",
       ".*",
       // "--ethereum-rpc", "${eth_rpc_url}",
       "--state-store-s3-bucket",
-      bucketName, // TODO: figure out how to user: ceramicStateBucket.id
+      bucketName, // ceramicStateBucket.id
       // "--verbose", "${verbose}"
     ];
   });
@@ -244,19 +274,14 @@ function makeCmd(input: pulumi.Input<string>): pulumi.Output<string[]> {
 
 let ceramicCommand = makeCmd(ceramicStateBucketName);
 
-const service = new awsx.ecs.FargateService("ceramic-mainnet", {
+const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   cluster,
   desiredCount: 1,
   subnets: vpc.privateSubnetIds,
+  enableExecuteCommand: true,
   taskDefinitionArgs: {
     containers: {
       ceramic: {
-        // dependsOn: [
-        //   {
-        //     containerName: "ipfs",
-        //     condition: "HEALTHY",
-        //   },
-        // ],
         image: "ceramicnetwork/js-ceramic:latest",
         memory: 4096,
         cpu: 2048,
@@ -273,10 +298,11 @@ const service = new awsx.ecs.FargateService("ceramic-mainnet", {
   },
 });
 
-const serviceIPFS = new awsx.ecs.FargateService("ceramic-mainnet", {
+const serviceIPFS = new awsx.ecs.FargateService("dpopp-ipfs", {
   cluster,
   desiredCount: 1,
   subnets: vpc.privateSubnetIds,
+  enableExecuteCommand: true,
   taskDefinitionArgs: {
     containers: {
       ipfs: {
@@ -284,15 +310,10 @@ const serviceIPFS = new awsx.ecs.FargateService("ceramic-mainnet", {
         memory: 4096,
         cpu: 2048,
         portMappings: [
-          {
-            containerPort: 5001,
-            hostPort: 5001,
-          },
-          {
-            containerPort: 8011,
-            hostPort: 8011,
-          },
+          ceramicListener,
           ipfsListener,
+          ipfsHealthcheckListener,
+          ifpsWSListener,
         ],
         links: [],
         environment: [
@@ -306,7 +327,7 @@ const serviceIPFS = new awsx.ecs.FargateService("ceramic-mainnet", {
         ],
         // healthCheck: {
         //   // NB: this is the same as the go-ipfs-daemon Dockerfile HEALTHCHECK
-        //   command: ["CMD", "ipfs dag stat /ipfs/QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn || exit 1"],
+        //   command: ["CMD-SHELL", "ipfs dag stat /ipfs/QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn || exit 1"],
         //   timeout: 3,
         //   startPeriod: 5,
         // },
