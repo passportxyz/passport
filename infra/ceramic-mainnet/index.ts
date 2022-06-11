@@ -12,6 +12,7 @@ import * as awsx from "@pulumi/awsx";
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
 let domain = `ceramic.${process.env["DOMAIN"]}`;
+let rpcUrl = `${process.env["RPC_URL"]}`;
 
 //////////////////////////////////////////////////////////////
 // Create permissions:
@@ -264,6 +265,8 @@ function makeCmd(inputbucketName: pulumi.Input<string>, inputIpfsUrl: pulumi.Inp
       ".*",
       "--state-store-s3-bucket",
       bucketName,
+      "--ethereum-rpc",
+      rpcUrl
     ];
   });
 }
