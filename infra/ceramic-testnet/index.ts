@@ -244,7 +244,7 @@ const www = new aws.route53.Record("www", {
   ],
 });
 
-function makeCmd(inputbucketName: pulumi.Input<string>, inputIpfsUrl:pulumi.Input<string>): pulumi.Output<string[]> {
+function makeCmd(inputbucketName: pulumi.Input<string>, inputIpfsUrl: pulumi.Input<string>): pulumi.Output<string[]> {
   let bucketName = pulumi.output(inputbucketName);
   let ipfsUrl = pulumi.output(inputIpfsUrl);
   return pulumi.all([bucketName, ipfsUrl]).apply((t: [string, string]) => {
@@ -260,7 +260,6 @@ function makeCmd(inputbucketName: pulumi.Input<string>, inputIpfsUrl:pulumi.Inpu
       "--ipfs-api",
       ipfsUrl,
       "--log-to-files",
-      "false",
       "--cors-allowed-origins",
       ".*",
       "--state-store-s3-bucket",
@@ -269,7 +268,10 @@ function makeCmd(inputbucketName: pulumi.Input<string>, inputIpfsUrl:pulumi.Inpu
   });
 }
 
-export const ceramicCommand = makeCmd(ceramicStateBucketName, pulumi.interpolate`http://${httpListener.endpoint.hostname}:5001`);
+export const ceramicCommand = makeCmd(
+  ceramicStateBucketName,
+  pulumi.interpolate`http://${httpListener.endpoint.hostname}:5001`
+);
 
 const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   cluster,
@@ -307,12 +309,7 @@ const serviceIPFS = new awsx.ecs.FargateService("dpopp-ipfs", {
         image: "ceramicnetwork/go-ipfs-daemon:latest",
         memory: 4096,
         cpu: 2048,
-        portMappings: [
-          ceramicListener,
-          ipfsListener,
-          ipfsHealthcheckListener,
-          ifpsWSListener,
-        ],
+        portMappings: [ceramicListener, ipfsListener, ipfsHealthcheckListener, ifpsWSListener],
         links: [],
         environment: [
           { name: "IPFS_ENABLE_S3", value: "true" },
