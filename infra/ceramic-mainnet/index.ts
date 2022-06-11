@@ -12,7 +12,6 @@ import * as awsx from "@pulumi/awsx";
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
 let domain = `ceramic.${process.env["DOMAIN"]}`;
-let loadBalancerDns = `${process.env["LOAD_BALANCER_DNS"]}`
 
 //////////////////////////////////////////////////////////////
 // Create permissions:
@@ -245,9 +244,12 @@ const www = new aws.route53.Record("www", {
   ],
 });
 
-function makeCmd(input: pulumi.Input<string>): pulumi.Output<string[]> {
-  let bucketName = pulumi.output(input);
-  return bucketName.apply((bucketName) => {
+function makeCmd(inputbucketName: pulumi.Input<string>, inputIpfsUrl: pulumi.Input<string>): pulumi.Output<string[]> {
+  let bucketName = pulumi.output(inputbucketName);
+  let ipfsUrl = pulumi.output(inputIpfsUrl);
+  return pulumi.all([bucketName, ipfsUrl]).apply((t: [string, string]) => {
+    const bucketName = t[0];
+    const ipfsUrl = t[1];
     return [
       "--port",
       "80",
@@ -256,23 +258,20 @@ function makeCmd(input: pulumi.Input<string>): pulumi.Output<string[]> {
       "--network",
       "elp",
       "--ipfs-api",
-      // TODO reference this from ALB instead
-      `${loadBalancerDns}`,
-      // "--anchor-service-api", "${anchor_service_api_url}",
-      // "--debug", "${debug}",
-      "--log-to-files", // `true` when `--log-to-files` flag is provided
-      // "--log-directory", "/usr/local/var/log/ceramic",
+      ipfsUrl,
+      "--log-to-files",
       "--cors-allowed-origins",
       ".*",
-      // "--ethereum-rpc", "${eth_rpc_url}",
       "--state-store-s3-bucket",
-      bucketName, // ceramicStateBucket.id
-      // "--verbose", "${verbose}"
+      bucketName,
     ];
   });
 }
 
-let ceramicCommand = makeCmd(ceramicStateBucketName);
+export const ceramicCommand = makeCmd(
+  ceramicStateBucketName,
+  pulumi.interpolate`http://${httpListener.endpoint.hostname}:5001`
+);
 
 const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   cluster,
