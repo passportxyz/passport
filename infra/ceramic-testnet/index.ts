@@ -116,7 +116,7 @@ const ceramicStateBucketPolicyDocument = aws.iam.getPolicyDocumentOutput({
   ],
 });
 
-const ceramicStateBucketPolicy = new aws.s3.BucketPolicy(`gitcoin-ceramicState-policy}`, {
+const ceramicStateBucketPolicy = new aws.s3.BucketPolicy(`gitcoin-ceramicState-policy`, {
   bucket: ceramicStateBucket.id,
   policy: ceramicStateBucketPolicyDocument.apply(
     (ceramicStateBucketPolicyDocument) => ceramicStateBucketPolicyDocument.json
@@ -256,7 +256,7 @@ function makeCmd(inputbucketName: pulumi.Input<string>, inputIpfsUrl: pulumi.Inp
       "--hostname",
       "0.0.0.0",
       "--network",
-      "elp",
+      "testnet-clay",
       "--ipfs-api",
       ipfsUrl,
       "--log-to-files",
@@ -307,8 +307,8 @@ const serviceIPFS = new awsx.ecs.FargateService("dpopp-ipfs", {
     containers: {
       ipfs: {
         image: "ceramicnetwork/go-ipfs-daemon:latest",
-        memory: 4096,
-        cpu: 2048,
+        memory: 8192,
+        cpu: 4096,
         portMappings: [ceramicListener, ipfsListener, ipfsHealthcheckListener, ifpsWSListener],
         links: [],
         environment: [
