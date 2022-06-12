@@ -12,6 +12,7 @@ import * as awsx from "@pulumi/awsx";
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
 let domain = `ceramic.staging.${process.env["DOMAIN"]}`;
+const serviceAccount = aws.elb.getServiceAccount({});
 
 //////////////////////////////////////////////////////////////
 // Create permissions:
@@ -127,6 +128,48 @@ export const ceramicStateBucketName = ceramicStateBucket.id;
 export const ceramicStateBucketArn = ceramicStateBucket.arn;
 
 //////////////////////////////////////////////////////////////
+// Create bucket for logs
+//////////////////////////////////////////////////////////////
+const accessLogsBucket = new aws.s3.Bucket(`gitcoin-ceramic-logs`, {
+  acl: "private",
+  forceDestroy: true,
+});
+
+
+// Set up bucket policy for access logs bucket of the ALB
+// - https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html
+// - https://www.pulumi.com/registry/packages/aws/api-docs/elb/getserviceaccount/
+const accessLogsBucketPolicyDocument = aws.iam.getPolicyDocumentOutput({
+  statements:  serviceAccount.then(serviceAccount => [
+    {
+      effect: "Allow",
+      principals: [{
+        type: "AWS",
+        identifiers: [pulumi.interpolate`${serviceAccount.arn}`]
+      }],
+      actions: ["s3:PutObject"],
+      resources: [pulumi.interpolate`arn:aws:s3:::${accessLogsBucket.id}/access_logs/AWSLogs/*`]
+    },
+    {
+      effect: "Allow",
+      principals: [{
+        type: "Service",
+        identifiers: ["logdelivery.elb.amazonaws.com"]
+      }],
+      actions: ["s3:GetBucketAcl"],
+      resources: [pulumi.interpolate`arn:aws:s3:::${accessLogsBucket.id}`]
+    }
+  ]),
+});
+
+const accessLogsBucketPolicy = new aws.s3.BucketPolicy(`gitcoin-accessLogs-policy`, {
+  bucket: accessLogsBucket.id,
+  policy: accessLogsBucketPolicyDocument.apply(
+    (accessLogsBucketPolicyDocument) => accessLogsBucketPolicyDocument.json
+  ),
+});
+
+//////////////////////////////////////////////////////////////
 // Set up VPC
 //////////////////////////////////////////////////////////////
 
@@ -152,7 +195,19 @@ export const vpcPublicSubnet1 = vpcPublicSubnetIds.then((subnets) => {
 const cluster = new awsx.ecs.Cluster("gitcoin-ceramic", { vpc });
 export const clusterId = cluster.id;
 
-const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-ceramic`, { vpc });
+const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-ceramic`, {
+  vpc,
+  accessLogs: {
+    bucket: accessLogsBucket.bucket,
+    prefix: "test-lb",
+    enabled: true,
+  },
+});
+
+
+//////////////////////////////////////////////////////////////
+// ALB listeners & target groups
+//////////////////////////////////////////////////////////////
 
 // Listen to HTTP traffic on port 80 and redirect to 443
 const httpListener = alb.createListener("gitcoin-ceramic-http", {
