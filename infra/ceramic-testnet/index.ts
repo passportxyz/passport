@@ -148,7 +148,7 @@ const accessLogsBucketPolicyDocument = aws.iam.getPolicyDocumentOutput({
         identifiers: [pulumi.interpolate`${serviceAccount.arn}`]
       }],
       actions: ["s3:PutObject"],
-      resources: [pulumi.interpolate`arn:aws:s3:::${accessLogsBucket.id}/access_logs/AWSLogs/*`]
+      resources: [pulumi.interpolate`arn:aws:s3:::${accessLogsBucket.id}/AWSLogs/*`]
     },
     {
       effect: "Allow",
@@ -199,7 +199,6 @@ const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-ceramic`, {
   vpc,
   accessLogs: {
     bucket: accessLogsBucket.bucket,
-    prefix: "test-lb",
     enabled: true,
   },
 });
