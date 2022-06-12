@@ -106,7 +106,7 @@ export default function PoapCard(): JSX.Element {
   // We only need a custom footor in the case of failure
   const footer = poapVerified ? undefined : (
     <ModalFooter py={3}>
-      <Button data-testid="modal-cancel" variant="outline" mr={5} onClick={onClose}>
+      <Button data-testid="modal-cancel" variant="outline" mr={5} onClick={handleModalOnClose}>
         Cancel
       </Button>
       <Button
