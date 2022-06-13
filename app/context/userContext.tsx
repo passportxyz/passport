@@ -256,7 +256,10 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     setAllProviderState(startingAllProvidersState);
   };
 
-  const cleanPassport = (passport: Passport | undefined, database: CeramicDatabase): Passport | undefined => {
+  const cleanPassport = (
+    passport: Passport | undefined | false,
+    database: CeramicDatabase
+  ): Passport | undefined | false => {
     // clean stamp content if expired or from a different issuer
     if (passport) {
       passport.stamps = passport.stamps.filter((stamp: Stamp) => {
@@ -273,10 +276,20 @@ export const UserContextProvider = ({ children }: { children: any }) => {
 
   const fetchPassport = async (database: CeramicDatabase): Promise<void> => {
     // fetch, clean and set the new Passport state
-    const passport = await database.getPassport();
-    const cleanedPassport = cleanPassport(passport, database);
-    hydrateAllProvidersState(cleanedPassport);
-    setPassport(cleanedPassport);
+    let passport = (await database.getPassport()) as Passport;
+    if (passport) {
+      passport = cleanPassport(passport, database) as Passport;
+      hydrateAllProvidersState(passport);
+    } else if (passport === false) {
+      handleCreatePassport();
+    } else {
+      // something is wrong with Ceramic...
+      console.warn("Ceramic connection failed");
+      // no ceramic...
+      setAddress(undefined);
+      handleConnection();
+    }
+    setPassport(passport);
     setIsLoadingPassport(false);
   };
 

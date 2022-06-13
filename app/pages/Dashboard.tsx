@@ -15,7 +15,7 @@ import { UserContext } from "../context/userContext";
 import { useViewerConnection } from "@self.id/framework";
 
 export default function Dashboard() {
-  const { passport, isLoadingPassport, handleCreatePassport, wallet } = useContext(UserContext);
+  const { passport, wallet } = useContext(UserContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -29,12 +29,6 @@ export default function Dashboard() {
       navigate("/");
     }
   }, [wallet]);
-
-  useEffect(() => {
-    if (!passport && !isLoadingPassport) {
-      handleCreatePassport();
-    }
-  }, [passport, isLoadingPassport]);
 
   return (
     <>

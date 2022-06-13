@@ -76,7 +76,7 @@ describe("when there is an existing passport without stamps for the given did", 
   });
 
   it("getPassport retrieves the passport from ceramic", async () => {
-    const actualPassport = await ceramicDatabase.getPassport();
+    const actualPassport = await ceramicDatabase.getPassport() as Passport;
 
     expect(actualPassport).toBeDefined();
     expect(actualPassport).toEqual(existingPassport);
@@ -195,7 +195,7 @@ describe("when there is an existing passport with stamps for the given did", () 
   });
 
   it("getPassport retrieves the passport and stamps from ceramic", async () => {
-    const actualPassport = await ceramicDatabase.getPassport();
+    const actualPassport = await ceramicDatabase.getPassport() as Passport;
 
     const formattedDate = new Date(actualPassport["issuanceDate"]);
     const todaysDate = new Date();

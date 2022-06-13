@@ -6,6 +6,6 @@ import { Passport, Stamp, DID } from "@dpopp/types";
 //  calling createPassport, getPassport, addStamp
 export abstract class DataStorageBase {
   abstract createPassport(): Promise<DID>;
-  abstract getPassport(): Promise<Passport | undefined>;
+  abstract getPassport(): Promise<Passport | undefined | false>;
   abstract addStamp(stamp: Stamp): Promise<void>;
 }
