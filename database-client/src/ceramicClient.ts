@@ -64,6 +64,7 @@ export class CeramicDatabase implements DataStorageBase {
   }
 
   async createPassport(): Promise<DID> {
+    console.info(`create new passport for did ${this.did}`);
     const date = new Date();
     const newPassport: CeramicPassport = {
       issuanceDate: date.toISOString(),
@@ -76,6 +77,7 @@ export class CeramicDatabase implements DataStorageBase {
   async getPassport(): Promise<Passport | undefined> {
     try {
       const passport = await this.store.get("Passport");
+      console.info(`loaded passport for did ${this.did} => ${JSON.stringify(passport)}`);
       if (!passport) return undefined;
       // `stamps` is stored as ceramic URLs - must load actual VC data from URL
       const stampsToLoad =
@@ -102,6 +104,7 @@ export class CeramicDatabase implements DataStorageBase {
     }
   }
   async addStamp(stamp: Stamp): Promise<void> {
+    console.info(`adding stamp to did ${this.did}`);
     // get passport document from user did data store in ceramic
     const passport = await this.store.get("Passport");
     
