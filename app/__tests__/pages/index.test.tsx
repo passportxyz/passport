@@ -11,7 +11,11 @@ const handleAddStamp = jest.fn();
 const mockUserContext: UserContextState = {
   userDid: undefined,
   loggedIn: false,
-  passport: undefined,
+  passport: {
+    issuanceDate: new Date(),
+    expiryDate: new Date(),
+    stamps: [],
+  },
   isLoadingPassport: false,
   allProvidersState: {
     Google: {
