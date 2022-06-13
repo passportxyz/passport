@@ -20,7 +20,11 @@ const handleAddStamp = jest.fn().mockResolvedValue(undefined);
 const mockUserContext: UserContextState = {
   userDid: "mockUserDid",
   loggedIn: true,
-  passport: undefined,
+  passport: {
+    issuanceDate: new Date(),
+    expiryDate: new Date(),
+    stamps: [],
+  },
   isLoadingPassport: false,
   allProvidersState: {
     Brightid: {

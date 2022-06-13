@@ -65,7 +65,7 @@ const startingAllProvidersState: AllProvidersState = {
 
 export interface UserContextState {
   loggedIn: boolean;
-  passport: Passport | undefined;
+  passport: Passport | undefined | false;
   isLoadingPassport: boolean;
   allProvidersState: AllProvidersState;
   handleCreatePassport: () => Promise<void>;
@@ -79,7 +79,11 @@ export interface UserContextState {
 }
 const startingState: UserContextState = {
   loggedIn: false,
-  passport: undefined,
+  passport: {
+    issuanceDate: new Date(),
+    expiryDate: new Date(),
+    stamps: [],
+  } as Passport,
   isLoadingPassport: true,
   allProvidersState: startingAllProvidersState,
   handleCreatePassport: async () => {},

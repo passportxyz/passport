@@ -21,7 +21,11 @@ const handleAddStamp = jest.fn();
 const mockUserContext: UserContextState = {
   userDid: undefined,
   loggedIn: true,
-  passport: undefined,
+  passport: {
+    issuanceDate: new Date(),
+    expiryDate: new Date(),
+    stamps: [],
+  },
   isLoadingPassport: false,
   allProvidersState: {
     Google: {
@@ -76,7 +80,7 @@ beforeEach(() => {
 describe("when user has no passport", () => {
   const mockUserContextWithNoPassport: UserContextState = {
     ...mockUserContext,
-    passport: undefined,
+    passport: false,
   };
 
   it("should display a loading spinner, and call create passport", async () => {
