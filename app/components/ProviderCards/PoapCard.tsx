@@ -6,7 +6,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 
 // --- Identity tools
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // pull context
 import { UserContext } from "../../context/userContext";

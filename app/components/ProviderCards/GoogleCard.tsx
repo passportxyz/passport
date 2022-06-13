@@ -2,7 +2,7 @@
 import React, { useContext, useState } from "react";
 
 // --- Identity tools
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Google OAuth toolkit
 import GoogleLogin, { GoogleLoginResponse } from "react-google-login";

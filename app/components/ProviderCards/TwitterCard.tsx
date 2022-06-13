@@ -10,7 +10,7 @@ import { BroadcastChannel } from "broadcast-channel";
 
 // --- Identity tools
 import { PROVIDER_ID } from "@gitcoin/passport-types";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Style Components
 import { Card } from "../Card";
