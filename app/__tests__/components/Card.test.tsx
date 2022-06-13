@@ -45,7 +45,7 @@ describe("when the user is not verified", () => {
     mockUserContext.passport = {
       expiryDate: new Date(),
       issuanceDate: new Date(),
-      stamps: []
+      stamps: [],
     };
     mockUserContext.isLoadingPassport = false;
     // set up Some provider without a VC
@@ -98,7 +98,7 @@ describe("when the user is verified", () => {
     mockUserContext.passport = {
       expiryDate: new Date(),
       issuanceDate: new Date(),
-      stamps: []
+      stamps: [],
     };
     mockUserContext.isLoadingPassport = false;
     // set up Some provider with a mocked VC (verified)
