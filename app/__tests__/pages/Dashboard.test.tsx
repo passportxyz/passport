@@ -94,9 +94,10 @@ describe("when user has no passport", () => {
 
     expect(screen.getByTestId("loading-spinner-passport")).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(mockCreatePassport).toBeCalledTimes(1);
-    });
+    // This call has been moved to userContext::fetchPassport
+    // await waitFor(() => {
+    //   expect(mockCreatePassport).toBeCalledTimes(1);
+    // });
   });
 });
 
