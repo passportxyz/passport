@@ -284,7 +284,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       handleCreatePassport();
     } else {
       // something is wrong with Ceramic...
-      console.warn("Ceramic connection failed");
+      datadogLogs.logger.info("Ceramic connection failed", { address });
       // no ceramic...
       setAddress(undefined);
       handleConnection();
