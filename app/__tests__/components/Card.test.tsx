@@ -42,6 +42,11 @@ describe("when the passport is loading", () => {
 
 describe("when the user is not verified", () => {
   beforeEach(() => {
+    mockUserContext.passport = {
+      expiryDate: new Date(),
+      issuanceDate: new Date(),
+      stamps: []
+    };
     mockUserContext.isLoadingPassport = false;
     // set up Some provider without a VC
     cardProps = {
@@ -90,6 +95,11 @@ describe("when the user is not verified", () => {
 
 describe("when the user is verified", () => {
   beforeEach(() => {
+    mockUserContext.passport = {
+      expiryDate: new Date(),
+      issuanceDate: new Date(),
+      stamps: []
+    };
     mockUserContext.isLoadingPassport = false;
     // set up Some provider with a mocked VC (verified)
     cardProps = {
