@@ -74,11 +74,11 @@ export class CeramicDatabase implements DataStorageBase {
     const stream = await this.store.set("Passport", { ...newPassport });
     return stream.toUrl();
   }
-  async getPassport(): Promise<Passport | undefined> {
+  async getPassport(): Promise<Passport | undefined | false> {
     try {
       const passport = await this.store.get("Passport");
       console.info(`loaded passport for did ${this.did} => ${JSON.stringify(passport)}`);
-      if (!passport) return undefined;
+      if (!passport) return false;
       // `stamps` is stored as ceramic URLs - must load actual VC data from URL
       const stampsToLoad =
         passport?.stamps.map(async (_stamp) => {

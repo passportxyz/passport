@@ -28,7 +28,7 @@ export const Card = ({
   issueCredentialWidget,
   isLoading = false,
 }: CardProps): JSX.Element => {
-  const { isLoadingPassport } = useContext(UserContext);
+  const { passport, isLoadingPassport } = useContext(UserContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <div className="w-full p-4 md:w-1/2 xl:w-1/4">
@@ -81,7 +81,8 @@ export const Card = ({
           <h1 className="title-font mb-3 text-lg font-medium text-gray-900">{providerSpec.name}</h1>
           <p className="pleading-relaxed">{providerSpec.description}</p>
         </div>
-        {isLoadingPassport ? (
+        {/* TODO: change this to passport===false and introduce an offline save state when passport===undefined */}
+        {!passport || isLoadingPassport ? (
           <span className="flex w-full items-center justify-center border-t-2 p-3 text-gray-900">
             <span>
               <Spinner
