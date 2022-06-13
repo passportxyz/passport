@@ -58,8 +58,7 @@ export default function EnsCard(): JSX.Element {
         });
       })
       .catch((e: any): void => {
-        datadogLogs.logger.error("1) error providing verification", { error: e, provider: providerId });
-        console.error("2) error providing verification");
+        datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
         datadogRum.addError(e, { provider: providerId });
       })
       .finally((): void => {
@@ -72,6 +71,7 @@ export default function EnsCard(): JSX.Element {
     handleAddStamp(credentialResponse!)
       .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId }))
       .catch((e: any): void => {
+        datadogLogs.logger.error("Error Saving Stamp", { error: e, provider: providerId });
         datadogRum.addError(e, { provider: providerId });
       })
       .finally(() => {

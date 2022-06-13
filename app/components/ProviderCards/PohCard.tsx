@@ -35,7 +35,7 @@ export default function PohCard(): JSX.Element {
   const toast = useToast();
 
   const handleFetchCredential = (): void => {
-    datadogLogs.logger.info("Saving Stamp", { provider: providerId });
+    datadogLogs.logger.info("Starting verification", { provider: providerId });
     setCredentialResponseIsLoading(true);
     fetchVerifiableCredential(
       iamUrl,
@@ -57,6 +57,7 @@ export default function PohCard(): JSX.Element {
         });
       })
       .catch((e: any): void => {
+        datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
         datadogRum.addError(e, { provider: providerId });
       })
       .finally((): void => {
@@ -68,6 +69,7 @@ export default function PohCard(): JSX.Element {
     handleAddStamp(credentialResponse!)
       .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId }))
       .catch((e) => {
+        datadogLogs.logger.error("Error Saving Stamp", { error: e, provider: providerId });
         datadogRum.addError(e, { provider: providerId });
       })
       .finally(() => {
