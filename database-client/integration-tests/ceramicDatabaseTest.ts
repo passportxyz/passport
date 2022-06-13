@@ -51,10 +51,10 @@ describe("when there is no passport for the given did", () => {
     expect(storedPassport["stamps"]).toEqual([]);
   });
 
-  it("getPassport returns undefined", async () => {
+  it("getPassport returns false", async () => {
     const actualPassport = await ceramicDatabase.getPassport();
 
-    expect(actualPassport).toEqual(undefined);
+    expect(actualPassport).toEqual(false);
   });
 });
 
