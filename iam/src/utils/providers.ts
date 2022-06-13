@@ -2,6 +2,9 @@
 import type { Provider } from "../types";
 import type { RequestPayload, ChallengePayload, VerifiedPayload } from "@dpopp/types";
 
+// ---- Return randomBytes as a challenge to test that the user has control of a provided address
+import crypto from "crypto";
+
 // Collate all Providers to abstract verify logic
 export class Providers {
   // collect providers against instance
@@ -31,7 +34,9 @@ export class Providers {
         record: {
           address: payload.address,
           type: payload.type,
-          challenge: `I commit that this stamp is my unique and only ${payload.type} verification for Passport.`,
+          challenge: `I commit that this stamp is my unique and only ${
+            payload.type
+          } verification for Passport.\n\nnonce: ${crypto.randomBytes(32).toString("hex")}`,
         },
       };
     } else {
