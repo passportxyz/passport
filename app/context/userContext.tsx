@@ -77,6 +77,7 @@ export interface UserContextState {
   walletLabel: string | undefined;
   userDid: string | undefined;
 }
+
 const startingState: UserContextState = {
   loggedIn: false,
   passport: {
@@ -187,7 +188,6 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         );
         setCeramicDatabase(ceramicDatabaseInstance);
         setUserDid(ceramicDatabaseInstance.did);
-        fetchPassport(ceramicDatabaseInstance);
         break;
       }
       case "failed": {
@@ -203,6 +203,12 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         break;
     }
   }, [viewerConnection.status]);
+
+  useEffect(() => {
+    if (ceramicDatabase) {
+      fetchPassport(ceramicDatabase);
+    }
+  }, [ceramicDatabase]);
 
   // Toggle connect/disconnect
   // clear context passport on disconnect
