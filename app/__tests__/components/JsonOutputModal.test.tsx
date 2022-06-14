@@ -27,7 +27,7 @@ afterEach(() => {
 });
 
 describe("displays the modal", () => {
-  it("should not display your modals content", () => {
+  it("should display your modals content", () => {
     render(<JsonOutputModal {...props} />);
 
     const subheading = screen.queryByText("Custom subheading");
