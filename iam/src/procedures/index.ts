@@ -2,7 +2,6 @@
 import { Request, Response, Router } from "express";
 
 import * as twitterOAuth from "./twitterOauth";
-import * as githubOAuth from "./githubOauth";
 import { triggerBrightidSponsorship, verifyBrightidContextId } from "./brightid";
 
 export const router = Router();
@@ -28,23 +27,6 @@ router.post("/twitter/generateAuthUrl", (req: Request, res: Response): void => {
     const data = {
       state,
       authUrl: twitterOAuth.generateAuthURL(client, state),
-    };
-
-    res.status(200).send(data);
-  } else {
-    res.status(400);
-  }
-});
-
-router.post("/github/generateAuthUrl", (req: Request, res: Response): void => {
-  const { callback } = req.body as GenerateGithubAuthUrlRequestBody;
-  if (callback) {
-    const state = githubOAuth.getSessionKey();
-    const clientId = process.env.GITHUB_CLIENT_ID;
-
-    const data = {
-      state,
-      authUrl: `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${callback}&state=${state}`,
     };
 
     res.status(200).send(data);

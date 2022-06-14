@@ -2,7 +2,6 @@
 import { GithubProvider } from "../src/providers/github";
 
 import { RequestPayload } from "@dpopp/types";
-import * as githubOauth from "../src/procedures/githubOauth";
 
 // ----- Libs
 import axios from "axios";
@@ -91,7 +90,7 @@ describe("Attempt verification", function () {
     expect(githubPayload).toMatchObject({ valid: false });
   });
 
-  it("should return invalid payload when there is no id in requestFindMyUser response", async () => {
+  it("should return invalid payload when there is no id in verifyGithub response", async () => {
     mockedAxios.get.mockImplementation(async (url, config) => {
       return {
         data: {
@@ -114,8 +113,12 @@ describe("Attempt verification", function () {
     expect(githubPayload).toMatchObject({ valid: false });
   });
 
-  it("should return invalid payload when requestFindMyUser throws", async () => {
-    const requestFindMyUser = jest.spyOn(githubOauth, "requestFindMyUser").mockRejectedValueOnce("unauthorized");
+  it("should return invalid payload when a bad status code is returned by github user api", async () => {
+    mockedAxios.get.mockImplementation(async (url, config) => {
+      return {
+        status: 500, // This will cause the method
+      };
+    });
 
     const github = new GithubProvider();
 
@@ -126,6 +129,5 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     expect(githubPayload).toMatchObject({ valid: false });
-    requestFindMyUser.mockRestore();
   });
 });

@@ -12,11 +12,11 @@ export const CardList = (): JSX.Element => {
         <FacebookCard />
         <GoogleCard />
         <TwitterCard />
+        <GithubCard />
         <BrightidCard />
         <PoapCard />
         <EnsCard />
         <PohCard />
-        <GithubCard />
       </div>
     </div>
   );

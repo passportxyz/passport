@@ -60,7 +60,7 @@ const App: NextPage = () => {
 
     return <div></div>;
   }
-  // if Twitter oauth then submit message to other windows and close self
+  // if Github oauth then submit message to other windows and close self
   else if ((queryError || queryCode) && queryState && /^github-.*/.test(queryState)) {
     // shared message channel between windows (on the same domain)
     const channel = new BroadcastChannel("github_oauth_channel");

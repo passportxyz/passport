@@ -18,33 +18,34 @@ import { datadogLogs } from "@datadog/browser-logs";
 // Each provider is recognised by its ID
 const providerId: PROVIDER_ID = "Github";
 
+function generateUID(length: number) {
+  return window
+    .btoa(
+      Array.from(window.crypto.getRandomValues(new Uint8Array(length * 2)))
+        .map((b) => String.fromCharCode(b))
+        .join("")
+    )
+    .replace(/[+/]/g, "")
+    .substring(0, length);
+}
+
 export default function GithubCard(): JSX.Element {
   const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
   const [isLoading, setLoading] = useState(false);
+  const [state, setState] = useState("");
 
   // Fetch Github OAuth2 url from the IAM procedure
   async function handleFetchGithubOAuth(): Promise<void> {
-    // Fetch data from external API
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_DPOPP_PROCEDURE_URL?.replace(/\/*?$/, "")}/github/generateAuthUrl`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          callback: process.env.NEXT_PUBLIC_DPOPP_GITHUB_CALLBACK,
-        }),
-      }
-    );
-    const data = await res.json();
-    // open new window for authUrl
-    const githubUrl = data.authUrl;
+    // Generate a new state string and store it in the compoenents state so that we can
+    // verify it later
+    const state = "github-" + generateUID(10);
+    setState(state);
 
+    const githubUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_DPOPP_GITHUB_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_DPOPP_GITHUB_CALLBACK}&state=${state}`;
     openGithubOAuthUrl(githubUrl);
   }
 
-  // Open Twitter authUrl in centered window
+  // Open Github authUrl in centered window
   function openGithubOAuthUrl(url: string): void {
     const width = 600;
     const height = 800;
@@ -72,7 +73,12 @@ export default function GithubCard(): JSX.Element {
     if (e.target === "github") {
       // pull data from message
       const queryCode = e.data.code;
-      const queryState = e.data.state;
+
+      if (state !== e.data.state) {
+        datadogLogs.logger.error("State mismatch, failed to create Github credential", { provider: "Github" });
+        setLoading(false);
+        return;
+      }
 
       datadogLogs.logger.info("Saving Stamp", { provider: "Github" });
       // fetch and store credential
@@ -85,7 +91,6 @@ export default function GithubCard(): JSX.Element {
           address: address || "",
           proofs: {
             code: queryCode, // provided by github as query params in the redirect
-            sessionKey: queryState,
           },
         },
         signer as { signMessage: (message: string) => Promise<string> }
