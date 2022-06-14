@@ -192,6 +192,14 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "BRIGHTID_PRIVATE_KEY",
             valueFrom: `${IAM_SERVER_SSM_ARN}:BRIGHTID_PRIVATE_KEY::`,
           },
+          {
+            name: "GITHUB_CLIENT_ID",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:GITHUB_CLIENT_ID::`,
+          },
+          {
+            name: "GITHUB_CLIENT_SECRET",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:GITHUB_CLIENT_SECRET::`,
+          },
         ],
       },
     },
