@@ -10,10 +10,6 @@ export type GenerateTwitterAuthUrlRequestBody = {
   callback: string;
 };
 
-export type GenerateGithubAuthUrlRequestBody = {
-  callback: string;
-};
-
 export type GenerateBrightidBody = {
   contextIdData: string;
 };
