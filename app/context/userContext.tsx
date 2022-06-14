@@ -181,7 +181,9 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       case "connected": {
         const ceramicDatabaseInstance = new CeramicDatabase(
           viewerConnection.selfID.did,
-          process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL
+          process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
+          undefined,
+          datadogLogs.logger
         );
         setCeramicDatabase(ceramicDatabaseInstance);
         setUserDid(ceramicDatabaseInstance.did);
