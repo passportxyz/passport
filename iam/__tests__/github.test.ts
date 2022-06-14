@@ -1,7 +1,7 @@
 // ---- Test subject
 import { GithubProvider } from "../src/providers/github";
 
-import { RequestPayload } from "@dpopp/types";
+import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";

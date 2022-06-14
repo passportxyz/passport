@@ -1,5 +1,5 @@
 // ----- Types
-import type { RequestPayload, VerifiedPayload } from "@dpopp/types";
+import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../types";
 import axios from "axios";
 

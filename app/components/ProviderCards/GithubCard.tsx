@@ -4,8 +4,8 @@ import { debounce } from "ts-debounce";
 import { BroadcastChannel } from "broadcast-channel";
 
 // --- Identity tools
-import { PROVIDER_ID } from "@dpopp/types";
-import { fetchVerifiableCredential } from "@dpopp/identity";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Components
 import { Card } from "../Card";
