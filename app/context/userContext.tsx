@@ -70,7 +70,7 @@ const startingAllProvidersState: AllProvidersState = {
 export interface UserContextState {
   loggedIn: boolean;
   passport: Passport | undefined | false;
-  isLoadingPassport: boolean;
+  isLoadingPassport: boolean | undefined;
   allProvidersState: AllProvidersState;
   handleCreatePassport: () => Promise<void>;
   handleConnection: () => void;
@@ -107,7 +107,7 @@ export const UserContext = createContext(startingState);
 export const UserContextProvider = ({ children }: { children: any }) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
-  const [isLoadingPassport, setIsLoadingPassport] = useState(true);
+  const [isLoadingPassport, setIsLoadingPassport] = useState<boolean | undefined>(true);
   const [ceramicDatabase, setCeramicDatabase] = useState<CeramicDatabase | undefined>(undefined);
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
 
@@ -291,22 +291,23 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   };
 
   const fetchPassport = async (database: CeramicDatabase): Promise<void> => {
+    setIsLoadingPassport(true);
     // fetch, clean and set the new Passport state
     let passport = (await database.getPassport()) as Passport;
     if (passport) {
       passport = cleanPassport(passport, database) as Passport;
       hydrateAllProvidersState(passport);
+      setPassport(passport);
+      setIsLoadingPassport(false);
     } else if (passport === false) {
       handleCreatePassport();
     } else {
       // something is wrong with Ceramic...
       datadogRum.addError("Ceramic connection failed", { address });
-      // no ceramic...
-      setAddress(undefined);
-      handleConnection();
+      setPassport(passport);
+      // TODO use more expressive loading states
+      setIsLoadingPassport(undefined);
     }
-    setPassport(passport);
-    setIsLoadingPassport(false);
   };
 
   const handleCreatePassport = async (): Promise<void> => {
