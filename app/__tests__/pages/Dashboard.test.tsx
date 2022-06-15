@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import Dashboard from "../../pages/Dashboard";
 import { UserContext, UserContextState } from "../../context/userContext";
 import { mockAddress, mockWallet } from "../../__test-fixtures__/onboardHookValues";
@@ -12,6 +12,12 @@ jest.mock("../../utils/onboard.ts");
 jest.mock("@self.id/framework", () => {
   return {
     useViewerConnection: jest.fn(),
+  };
+});
+
+jest.mock("@self.id/web", () => {
+  return {
+    EthereumAuthProvider: jest.fn(),
   };
 });
 
@@ -192,5 +198,63 @@ describe("when viewer connection status is connecting", () => {
 
     const waitingForSignature = screen.getByTestId("selfId-connection-alert");
     expect(waitingForSignature).toBeInTheDocument();
+  });
+});
+
+describe("when app fails to load ceramic stream", () => {
+  const mockUserContextUndefinedLoading = {
+    ...mockUserContext,
+    passport: undefined,
+    isLoadingPassport: undefined,
+  };
+
+  it("should display a modal for user to retry connection, or close", () => {
+    render(
+      <UserContext.Provider value={mockUserContextUndefinedLoading}>
+        <Router>
+          <Dashboard />
+        </Router>
+      </UserContext.Provider>
+    );
+
+    const retryModal = screen.getByTestId("retry-modal-content");
+    expect(retryModal).toBeInTheDocument();
+
+    const retryButton = screen.getByTestId("retry-modal-try-again");
+    expect(retryButton).toBeInTheDocument();
+
+    const closeButton = screen.getByTestId("retry-modal-close");
+    expect(closeButton).toBeInTheDocument();
+  });
+
+  it("when retry button is clicked, it should retry ceramic connection", () => {
+    const mockCeramicConnect = jest.fn();
+    (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }, mockCeramicConnect]);
+
+    render(
+      <UserContext.Provider value={mockUserContextUndefinedLoading}>
+        <Router>
+          <Dashboard />
+        </Router>
+      </UserContext.Provider>
+    );
+
+    fireEvent.click(screen.getByTestId("retry-modal-try-again"));
+
+    expect(mockCeramicConnect).toBeCalledTimes(1);
+  });
+
+  it("when done button is clicked, it should disconnect the user", () => {
+    render(
+      <UserContext.Provider value={mockUserContextUndefinedLoading}>
+        <Router>
+          <Dashboard />
+        </Router>
+      </UserContext.Provider>
+    );
+
+    fireEvent.click(screen.getByTestId("retry-modal-close"));
+
+    expect(mockHandleConnection).toBeCalledTimes(1);
   });
 });
