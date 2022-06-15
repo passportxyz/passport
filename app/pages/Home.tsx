@@ -60,15 +60,23 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className="container mx-auto flex flex-col flex-wrap items-center p-5 md:flex-row">
-        <nav className="flex flex-wrap items-center justify-center text-base md:ml-auto md:mr-auto">
-          <img src="./assets/GitcoindaoLogoDark.svg" alt="Gitcoin Logo Dark" />
-        </nav>
+      <div className="container mx-auto flex flex-col flex-wrap items-center py-5 px-2 md:flex-row">
+        <div className="flex flex-wrap p-2 text-base">
+          Powered By
+          <a href="https://ceramic.network/" target="_blank" rel="noopener noreferrer" className="ml-2 underline">
+            Ceramic Network.
+          </a>
+        </div>
+        <img
+          src="./assets/GitcoindaoLogoDark.svg"
+          alt="Gitcoin Logo Dark"
+          className="flex flex-wrap items-center justify-center p-2 text-base md:ml-auto md:mr-auto"
+        />
         <a
           href="https://github.com/gitcoinco/dPopp"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 inline-flex items-center rounded py-1 px-3 text-base md:mt-0"
+          className="mt-4 inline-flex rounded py-1 px-20 text-base md:mt-0"
         >
           <img src="./assets/githubLogo.svg" alt="Github Logo" />
         </a>
