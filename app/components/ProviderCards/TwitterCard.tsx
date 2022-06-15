@@ -111,7 +111,7 @@ export default function TwitterCard(): JSX.Element {
           });
         })
         .catch((e) => {
-          datadogRum.addError(e, { provider: providerId });
+          datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
           throw e;
         })
         .finally(() => {

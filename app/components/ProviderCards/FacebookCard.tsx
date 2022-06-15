@@ -90,6 +90,7 @@ export default function FacebookCard(): JSX.Element {
         });
       })
       .catch((e): void => {
+        datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
         datadogRum.addError(e, { provider: providerId });
       })
       .finally(() => {

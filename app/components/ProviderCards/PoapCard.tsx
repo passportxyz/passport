@@ -57,6 +57,7 @@ export default function PoapCard(): JSX.Element {
         });
       })
       .catch((e: any): void => {
+        datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
         datadogRum.addError(e, { provider: providerId });
       })
       .finally((): void => {

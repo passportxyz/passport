@@ -102,6 +102,10 @@ export default function GithubCard(): JSX.Element {
           });
           datadogLogs.logger.info("Successfully saved Stamp", { provider: "Github" });
         })
+        .catch((e) => {
+          datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
+          throw e;
+        })
         .finally(() => {
           setLoading(false);
         });

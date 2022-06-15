@@ -68,6 +68,7 @@ export default function BrightIdCard(): JSX.Element {
         });
       })
       .catch((e: any): void => {
+        datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
         datadogRum.addError(`Error ${e}`, { provider: providerId });
       })
       .finally((): void => {
@@ -125,6 +126,7 @@ export default function BrightIdCard(): JSX.Element {
         duration: 9000,
         isClosable: true,
       });
+      datadogLogs.logger.error("Error sponsoring user", { provider: providerId });
       datadogRum.addError(data?.response?.error || "Failed to sponsor user on BrightId", { provider: providerId });
     }
     setCredentialResponseIsLoading(false);
@@ -155,6 +157,7 @@ export default function BrightIdCard(): JSX.Element {
     handleAddStamp(credentialResponse!)
       .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId }))
       .catch((e): void => {
+        datadogLogs.logger.error("Error Saving Stamp", { error: e, provider: providerId });
         datadogRum.addError(e, { provider: providerId });
         throw e;
       })
