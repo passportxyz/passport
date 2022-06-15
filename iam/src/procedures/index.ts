@@ -1,7 +1,7 @@
 // ---- Server
 import { Request, Response, Router } from "express";
 
-import { generateAuthURL, getSessionKey, initClient } from "./twitterOauth";
+import * as twitterOAuth from "./twitterOauth";
 import { triggerBrightidSponsorship, verifyBrightidContextId } from "./brightid";
 
 export const router = Router();
@@ -17,12 +17,12 @@ export type GenerateBrightidBody = {
 router.post("/twitter/generateAuthUrl", (req: Request, res: Response): void => {
   const { callback } = req.body as GenerateTwitterAuthUrlRequestBody;
   if (callback) {
-    const state = getSessionKey();
-    const client = initClient(callback, state);
+    const state = twitterOAuth.getSessionKey();
+    const client = twitterOAuth.initClient(callback, state);
 
     const data = {
       state,
-      authUrl: generateAuthURL(client, state),
+      authUrl: twitterOAuth.generateAuthURL(client, state),
     };
 
     res.status(200).send(data);

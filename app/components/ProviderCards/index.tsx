@@ -5,3 +5,4 @@ export { default as TwitterCard } from "./TwitterCard";
 export { default as PoapCard } from "./PoapCard";
 export { default as FacebookCard } from "./FacebookCard";
 export { default as BrightidCard } from "./BrightidCard";
+export { default as GithubCard } from "./GithubCard";

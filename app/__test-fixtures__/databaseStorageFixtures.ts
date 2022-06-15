@@ -56,6 +56,11 @@ export const brightidStampFixture: Stamp = {
   credential,
 };
 
+export const githubStampFixture: Stamp = {
+  provider: "Github",
+  credential,
+};
+
 export const passportFixture: Passport = {
   issuanceDate: new Date("2022-01-01"),
   expiryDate: new Date("2022-01-02"),

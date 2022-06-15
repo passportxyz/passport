@@ -56,6 +56,10 @@ const mockUserContext: UserContextState = {
       providerSpec: STAMP_PROVIDERS.Brightid,
       stamp: undefined,
     },
+    Github: {
+      providerSpec: STAMP_PROVIDERS.Github,
+      stamp: undefined,
+    },
   },
   handleAddStamp: handleAddStamp,
   handleCreatePassport: mockCreatePassport,
