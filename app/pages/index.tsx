@@ -88,6 +88,18 @@ const App: NextPage = () => {
     if (queryCode) {
       channel.postMessage({ target: "discord", data: { code: queryCode, state: queryState } });
     }
+    window.close();
+
+    return <div></div>;
+  }
+  // if Coinbase oauth then submit message to other windows and close self
+  else if ((queryError || queryCode) && queryState && /^coinbase-.*/.test(queryState)) {
+    // shared message channel between windows (on the same domain)
+    const channel = new BroadcastChannel("coinbase_oauth_channel");
+    // only continue with the process if a code is returned
+    if (queryCode) {
+      channel.postMessage({ target: "coinbase", data: { code: queryCode, state: queryState } });
+    }
     // always close the redirected window
     window.close();
 

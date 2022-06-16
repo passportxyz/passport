@@ -46,6 +46,7 @@ import { BrightIdProvider } from "./providers/brightid";
 import { GithubProvider } from "./providers/github";
 import { LinkedinProvider } from "./providers/linkedin";
 import { DiscordProvider } from "./providers/discord";
+import { CoinbaseProvider } from "./providers/coinbase";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
@@ -61,6 +62,7 @@ const providers = new Providers([
   new GithubProvider(),
   new LinkedinProvider(),
   new DiscordProvider(),
+  new CoinbaseProvider(),
 ]);
 
 // create the app and run on port

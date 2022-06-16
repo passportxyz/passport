@@ -61,4 +61,9 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     name: "Discord",
     description: "Discord name",
   },
+  Coinbase: {
+    icon: "./assets/coinbaseLogo.svg",
+    name: "Coinbase",
+    description: "Coinbase account",
+  },
 };
