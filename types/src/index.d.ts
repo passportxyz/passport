@@ -122,4 +122,13 @@ export type Passport = {
 // Passport DID
 export type DID = string;
 
-export type PROVIDER_ID = "Google" | "Ens" | "Poh" | "Twitter" | "POAP" | "Facebook" | "Brightid" | "Github";
+export type PROVIDER_ID =
+  | "Google"
+  | "Ens"
+  | "Poh"
+  | "Twitter"
+  | "POAP"
+  | "Facebook"
+  | "Brightid"
+  | "Github"
+  | "Discord";

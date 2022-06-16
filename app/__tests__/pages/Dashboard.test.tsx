@@ -60,6 +60,10 @@ const mockUserContext: UserContextState = {
       providerSpec: STAMP_PROVIDERS.Github,
       stamp: undefined,
     },
+    Discord: {
+      providerSpec: STAMP_PROVIDERS.Discord,
+      stamp: undefined,
+    },
   },
   handleAddStamp: handleAddStamp,
   handleCreatePassport: mockCreatePassport,

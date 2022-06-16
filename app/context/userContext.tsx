@@ -65,6 +65,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: STAMP_PROVIDERS.Github,
     stamp: undefined,
   },
+  Discord: {
+    providerSpec: STAMP_PROVIDERS.Discord,
+    stamp: undefined,
+  },
 };
 
 export interface UserContextState {
