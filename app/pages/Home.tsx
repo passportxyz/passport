@@ -20,8 +20,10 @@ export default function Home() {
 
   return (
     <div className="font-miriam-libre min-h-max min-h-default bg-landingPageBackground bg-cover bg-no-repeat text-gray-100">
-      <div className="container mx-auto flex flex-col flex-wrap items-center p-5 md:flex-row">
-        <img src="/assets/GitcoinLogoAndName.svg" alt="logo" />
+      <div className="container mx-auto flex flex-row flex-wrap items-center p-5">
+        <img src="/assets/gitcoinLogoWhite.svg" alt="Gitcoin Logo" />
+        <img className="ml-6 mr-6" src="/assets/logoLine.svg" alt="Logo Line" />
+        <img src="/assets/passportLogoWhite.svg" alt="pPassport Logo" />
       </div>
       <div className="container mx-auto px-5 py-2">
         <div className="mx-auto flex flex-wrap">
@@ -80,10 +82,14 @@ export default function Home() {
         >
           <img src="./assets/githubLogo.svg" alt="Github Logo" />
         </a>
-        {/* UNCOMMENT WHEN FAQ AVAILABLE*/}
-        {/* <a className="border-grey-200 ml-2 mt-4 inline-flex items-center rounded-full rounded border-2 py-1 px-4 text-base md:mt-0">
+        <a
+          href="https://docs.passport.gitcoin.co/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="border-grey-200 ml-2 mt-4 inline-flex items-center rounded-full rounded border-2 py-1 px-4 text-base md:mt-0"
+        >
           FAQ
-        </a> */}
+        </a>
       </div>
     </div>
   );
