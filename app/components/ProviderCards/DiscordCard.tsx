@@ -79,7 +79,6 @@ export default function DiscordCard(): JSX.Element {
     if (e.target === "discord") {
       // pull data from message
       const queryCode = e.data.code;
-      console.log("queryCode", queryCode);
 
       datadogLogs.logger.info("Saving Stamp", { provider: providerId });
       // fetch and store credential
