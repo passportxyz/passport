@@ -145,9 +145,13 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   };
 
   // Force user on to Mainnet
-  const ensureMainnet = async (): Promise<void> => {
+  const ensureMainnet = async (): Promise<boolean | undefined> => {
     if (wallet && web3Onboard && (await wallet.provider.request({ method: "eth_chainId" })) !== "0x1") {
-      await web3Onboard.setChain({ chainId: "0x1" });
+      try {
+        return await web3Onboard.setChain({ chainId: "0x1" });
+      } catch (e) {
+        return false;
+      }
     }
   };
 
@@ -158,24 +162,33 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       // mark that we're attempting to login
       setLoggingIn(true);
       // ensure that passport is connected to mainnet
-      await ensureMainnet();
+      const chainId = await ensureMainnet();
       // clear any verified state
       setPassport(undefined);
       clearAllProvidersState();
-      setIsLoadingPassport(true);
       // record connected wallet details
       setWalletLabel(wallet.label);
       setAddress(wallet.accounts[0].address);
       // get the signer from an ethers wrapped Web3Provider
       setSigner(new Web3Provider(wallet.provider).getSigner());
-      // store in localstorage
-      window.localStorage.setItem("connectedWallets", JSON.stringify([wallet.label]));
-      try {
-        // connect to ceramic
-        await ceramicConnect(new EthereumAuthProvider(wallet.provider, wallet.accounts[0].address));
-      } finally {
-        // mark that this login attempt is complete
-        setLoggingIn(false);
+      // with loaded chainId
+      if (chainId) {
+        // store in localstorage
+        window.localStorage.setItem("connectedWallets", JSON.stringify([wallet.label]));
+        try {
+          // connect to ceramic
+          await ceramicConnect(new EthereumAuthProvider(wallet.provider, wallet.accounts[0].address));
+        } finally {
+          // mark that this login attempt is complete
+          setLoggingIn(false);
+        }
+      } else {
+        // logout
+        disconnect({
+          label: wallet.label || "",
+        }).then(() => {
+          setLoggingIn(false);
+        });
       }
     }
   };
