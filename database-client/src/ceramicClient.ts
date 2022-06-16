@@ -94,6 +94,11 @@ export class CeramicDatabase implements DataStorageBase {
       const passport = await this.store.get("Passport");
       this.logger.info(`loaded passport for did ${this.did} => ${JSON.stringify(passport)}`);
       if (!passport) return false;
+
+      // According to the logs, it does happen that passport is sometimes an empty object {}
+      // We treat this case as an non-existent passport
+      if (!passport.stamps) return false;
+
       // `stamps` is stored as ceramic URLs - must load actual VC data from URL
       const stampsToLoad =
         passport?.stamps.map(async (_stamp) => {
@@ -114,7 +119,7 @@ export class CeramicDatabase implements DataStorageBase {
 
       return parsePassport;
     } catch (e) {
-      this.logger.error("Error when loading passport: " + e.toString());
+      this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString());
       return undefined;
     }
   }
