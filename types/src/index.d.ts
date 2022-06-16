@@ -131,4 +131,5 @@ export type PROVIDER_ID =
   | "Facebook"
   | "Brightid"
   | "Github"
-  | "Linkedin";
+  | "Linkedin"
+  | "Discord";
