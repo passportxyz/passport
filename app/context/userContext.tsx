@@ -65,6 +65,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: STAMP_PROVIDERS.Github,
     stamp: undefined,
   },
+  Coinbase: {
+    providerSpec: STAMP_PROVIDERS.Coinbase,
+    stamp: undefined,
+  },
 };
 
 export interface UserContextState {

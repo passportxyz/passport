@@ -60,6 +60,10 @@ const mockUserContext: UserContextState = {
       providerSpec: STAMP_PROVIDERS.Github,
       stamp: undefined,
     },
+    Coinbase: {
+      providerSpec: STAMP_PROVIDERS.Coinbase,
+      stamp: undefined,
+    },
   },
   handleAddStamp: handleAddStamp,
   handleCreatePassport: mockCreatePassport,
