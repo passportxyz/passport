@@ -122,11 +122,17 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   const [userDid, setUserDid] = useState<string | undefined>();
   const [loggingIn, setLoggingIn] = useState<boolean | undefined>();
 
-  // Init onboard to enable hooks
-  useEffect((): void => {
-    setWeb3Onboard(initWeb3Onboard);
-  }, []);
+  // clear all state
+  const clearState = (): void => {
+    setPassport(undefined);
+    clearAllProvidersState();
+    setWalletLabel(undefined);
+    setAddress(undefined);
+    setSigner(undefined);
+    setCeramicDatabase(undefined);
+  };
 
+  // Restore wallet connection from localStorage
   const setWalletFromLocalStorage = async (): Promise<void> => {
     const previouslyConnectedWallets = JSON.parse(
       // retrieve localstorage state
@@ -146,35 +152,38 @@ export const UserContextProvider = ({ children }: { children: any }) => {
 
   // Force user on to Mainnet
   const ensureMainnet = async (): Promise<boolean | undefined> => {
-    if (wallet && web3Onboard && (await wallet.provider.request({ method: "eth_chainId" })) !== "0x1") {
-      try {
-        return await web3Onboard.setChain({ chainId: "0x1" });
-      } catch (e) {
-        return false;
+    if (wallet && web3Onboard) {
+      // check if wallet is on mainnet
+      if ((await wallet.provider.request({ method: "eth_chainId" })) !== "0x1") {
+        try {
+          // if its not, request that the user moves to mainnet
+          return await web3Onboard.setChain({ chainId: "0x1" });
+        } catch (e) {
+          // if they cancel, return false
+          return false;
+        }
+      } else {
+        // already on mainnet
+        return true;
       }
     }
+    // not connected
+    return false;
   };
 
-  // Attempt to login to Ceramic
+  // Attempt to login to Ceramic (on mainnet only)
   const passportLogin = async (): Promise<void> => {
     // check that passportLogin isnt mid-way through
     if (wallet && !loggingIn) {
+      // ensure that passport is connected to mainnet
+      const hasCorrectChainId = await ensureMainnet();
       // mark that we're attempting to login
       setLoggingIn(true);
-      // ensure that passport is connected to mainnet
-      const chainId = await ensureMainnet();
-      // clear any verified state
-      setPassport(undefined);
-      clearAllProvidersState();
-      // record connected wallet details
-      setWalletLabel(wallet.label);
-      setAddress(wallet.accounts[0].address);
-      // get the signer from an ethers wrapped Web3Provider
-      setSigner(new Web3Provider(wallet.provider).getSigner());
       // with loaded chainId
-      if (chainId) {
+      if (hasCorrectChainId) {
         // store in localstorage
         window.localStorage.setItem("connectedWallets", JSON.stringify([wallet.label]));
+        // attempt to connect to ceramic (if it passes or fails always set loggingIn=false)
         try {
           // connect to ceramic
           await ceramicConnect(new EthereumAuthProvider(wallet.provider, wallet.accounts[0].address));
@@ -183,15 +192,22 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           setLoggingIn(false);
         }
       } else {
-        // logout
-        disconnect({
+        // disconnect from the invalid chain
+        await disconnect({
           label: wallet.label || "",
-        }).then(() => {
-          setLoggingIn(false);
         });
+        // then clear local state
+        clearState();
+        // finished with this attempt
+        setLoggingIn(false);
       }
     }
   };
+
+  // Init onboard to enable hooks
+  useEffect((): void => {
+    setWeb3Onboard(initWeb3Onboard);
+  }, []);
 
   // Connect wallet on reload
   useEffect((): void => {
@@ -203,15 +219,29 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     // no connection
     if (!wallet) {
       // clear all state
+      clearState();
+    } else {
+      // clear any verified state
       setPassport(undefined);
       clearAllProvidersState();
-      setWalletLabel(undefined);
-      setAddress(undefined);
-      setSigner(undefined);
-      setCeramicDatabase(undefined);
-    } else {
+      // record connected wallet details
+      setWalletLabel(wallet.label);
+      setAddress(wallet.accounts[0].address);
+      // get the signer from an ethers wrapped Web3Provider
+      setSigner(new Web3Provider(wallet.provider).getSigner());
       // Login to Ceramic
       passportLogin();
+      // attach listener
+      wallet.provider.on("chainChanged", async (chainId: string): Promise<void> => {
+        if (chainId !== "0x1") {
+          // logout
+          await disconnect({
+            label: wallet.label || "",
+          }).then(() => {
+            clearState();
+          });
+        }
+      });
     }
   }, [wallet]);
 
