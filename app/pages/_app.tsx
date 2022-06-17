@@ -45,7 +45,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <title>Gitcoin Passport</title>
         {facebookSdkScript}
       </Head>
-      <Provider client={{ ceramic: "testnet-clay" }} session={true}>
+      <Provider client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }} session={true}>
         <UserContextProvider>
           <ChakraProvider>
             <div suppressHydrationWarning>{typeof window === "undefined" ? null : <Component {...pageProps} />}</div>
