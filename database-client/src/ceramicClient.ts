@@ -117,6 +117,14 @@ export class CeramicDatabase implements DataStorageBase {
         stamps: loadedStamps,
       };
 
+      // try pinning passport
+      try {
+        const passportDoc = await this.store.getRecordDocument(this.model.getDefinitionID("Passport"));
+        await this.ceramicClient.pin.add(passportDoc.id);
+      } catch (e) {
+        this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString());
+      }
+
       return parsePassport;
     } catch (e) {
       this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString());
@@ -137,7 +145,14 @@ export class CeramicDatabase implements DataStorageBase {
       const newStamps = passport?.stamps.concat({ provider: stamp.provider, credential: newStampTile.id.toUrl() });
 
       // merge new stamps array to update stamps on the passport
-      await this.store.merge("Passport", { stamps: newStamps });
+      const streamId = await this.store.merge("Passport", { stamps: newStamps });
+
+      // try pinning passport
+      try {
+        await this.ceramicClient.pin.add(streamId);
+      } catch (e) {
+        this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString());
+      }
     }
   }
 
