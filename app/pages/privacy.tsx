@@ -7,7 +7,7 @@ export default function Privacy() {
       <div className="container mx-auto px-5 py-2">
         <div className="mx-auto flex flex-wrap">
           <div className="w-full py-6 text-white">
-            <img src="/assets/GitcoinLogoAndName.svg" alt="logo" className="mt-0 sm:mt-40 md:mt-40" />
+            <img src="/assets/gitcoinLogoAndName.svg" alt="logo" className="mt-0 sm:mt-40 md:mt-40" />
             <div className="font-miriam-libre mt-10 leading-relaxed">
               <p className="text-5xl sm:text-7xl md:text-5xl">dPassport Data Deletion Instructions</p>
             </div>
