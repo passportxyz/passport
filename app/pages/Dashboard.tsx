@@ -21,13 +21,15 @@ import {
   Button,
 } from "@chakra-ui/react";
 
+import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 import { useViewerConnection } from "@self.id/framework";
 import { EthereumAuthProvider } from "@self.id/web";
 
 export default function Dashboard() {
-  const { passport, wallet, isLoadingPassport, handleConnection } = useContext(UserContext);
+  const { wallet, handleConnection } = useContext(UserContext);
+  const { passport, isLoadingPassport } = useContext(CeramicContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 

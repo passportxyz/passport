@@ -87,10 +87,10 @@ export const VerifyModal = ({
             {footer ||
               (stamp && (
                 <ModalFooter py={3}>
-                  <Button data-testid="modal-cancel" variant="outline" mr={5} onClick={onClose}>
+                  <Button data-testid="modal-cancel-btn" variant="outline" mr={5} onClick={onClose}>
                     Cancel
                   </Button>
-                  <Button data-testid="modal-verify" colorScheme="purple" mr={2} onClick={handleUserVerify}>
+                  <Button data-testid="modal-verify-btn" colorScheme="purple" mr={2} onClick={handleUserVerify}>
                     Verify
                   </Button>
                 </ModalFooter>
