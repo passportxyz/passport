@@ -12,6 +12,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 
 // pull context
+import { CeramicContext } from "../../context/ceramicContext";
 import { UserContext } from "../../context/userContext";
 
 // --- Style Components
@@ -29,7 +30,8 @@ const googleClientId = process.env.NEXT_PUBLIC_DPOPP_GOOGLE_CLIENT_ID || "";
 const providerId: PROVIDER_ID = "Google";
 
 export default function GoogleCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const { address, signer } = useContext(UserContext);
+  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
 
   const [isLoading, setLoading] = useState(false);
 

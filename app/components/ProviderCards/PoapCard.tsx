@@ -9,6 +9,7 @@ import { datadogRum } from "@datadog/browser-rum";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // pull context
+import { CeramicContext } from "../../context/ceramicContext";
 import { UserContext } from "../../context/userContext";
 
 // --- Chakra Elements
@@ -25,7 +26,8 @@ const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 const providerId: PROVIDER_ID = "POAP";
 
 export default function PoapCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const { address, signer } = useContext(UserContext);
+  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
   const [poapVerified, SetPoapVerified] = useState<boolean | undefined>(undefined);
@@ -107,11 +109,10 @@ export default function PoapCard(): JSX.Element {
   // We only need a custom footor in the case of failure
   const footer = poapVerified ? undefined : (
     <ModalFooter py={3}>
-      <Button data-testid="modal-cancel" variant="outline" mr={5} onClick={handleModalOnClose}>
+      <Button variant="outline" mr={5} onClick={handleModalOnClose}>
         Cancel
       </Button>
       <Button
-        data-testid="modal-verify"
         colorScheme="purple"
         mr={2}
         onClick={() => {

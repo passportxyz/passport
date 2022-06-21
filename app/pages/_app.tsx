@@ -5,9 +5,10 @@ import { AppProps } from "next/app";
 import "../styles/globals.css";
 import { ChakraProvider } from "@chakra-ui/react";
 import { UserContextProvider } from "../context/userContext";
+import { CeramicContextProvider } from "../context/ceramicContext";
 
 // --- Ceramic Tools
-import { Provider } from "@self.id/framework";
+import { Provider as SelfIdProvider } from "@self.id/framework";
 import Head from "next/head";
 
 const FacebookAppId = process.env.NEXT_PUBLIC_DPOPP_FACEBOOK_APP_ID || "";
@@ -45,13 +46,18 @@ function MyApp({ Component, pageProps }: AppProps) {
         <title>Gitcoin Passport</title>
         {facebookSdkScript}
       </Head>
-      <Provider client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }} session={true}>
+      <SelfIdProvider
+        client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}
+        session={true}
+      >
         <UserContextProvider>
-          <ChakraProvider>
-            <div suppressHydrationWarning>{typeof window === "undefined" ? null : <Component {...pageProps} />}</div>
-          </ChakraProvider>
+          <CeramicContextProvider>
+            <ChakraProvider>
+              <div suppressHydrationWarning>{typeof window === "undefined" ? null : <Component {...pageProps} />}</div>
+            </ChakraProvider>
+          </CeramicContextProvider>
         </UserContextProvider>
-      </Provider>
+      </SelfIdProvider>
     </>
   );
 }

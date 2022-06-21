@@ -8,6 +8,14 @@ import { STAMP_PROVIDERS } from "../../../config/providers";
 import { brightidStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
 import { SUCCESFUL_BRIGHTID_RESULT } from "../../../__test-fixtures__/verifiableCredentialResults";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { mock } from "jest-mock-extended";
+import { JsonRpcSigner } from "@ethersproject/providers";
+import {
+  makeTestCeramicContext,
+  makeTestUserContext,
+  renderWithContext,
+} from "../../../__test-fixtures__/contextTestHelpers";
+import { CeramicContextState } from "../../../context/ceramicContext";
 
 jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
   fetchVerifiableCredential: jest.fn(),
@@ -16,30 +24,19 @@ jest.mock("../../../utils/onboard.ts");
 
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
-const handleAddStamp = jest.fn().mockResolvedValue(undefined);
-const mockUserContext: UserContextState = {
-  userDid: "mockUserDid",
-  loggedIn: true,
-  passport: {
-    issuanceDate: new Date(),
-    expiryDate: new Date(),
-    stamps: [],
-  },
-  isLoadingPassport: false,
-  allProvidersState: {
-    Brightid: {
-      providerSpec: STAMP_PROVIDERS.Brightid,
-      stamp: undefined,
-    },
-  },
-  handleAddStamp: handleAddStamp,
-  handleCreatePassport: mockCreatePassport,
+const mockHandleAddStamp = jest.fn().mockResolvedValue(undefined);
+const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
+const mockUserContext: UserContextState = makeTestUserContext({
   handleConnection: mockHandleConnection,
   address: mockAddress,
-  wallet: mockWallet,
-  signer: undefined,
-  walletLabel: mockWallet.label,
-};
+  signer: mockSigner,
+});
+
+const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
+  userDid: "mockUserDid",
+  handleCreatePassport: mockCreatePassport,
+  handleAddStamp: mockHandleAddStamp,
+});
 
 function setupFetchStub(valid: any) {
   return function fetchStub(_url: any) {
@@ -56,11 +53,7 @@ function setupFetchStub(valid: any) {
 
 describe("when user has not verfied with BrightId Provider", () => {
   it("should display a verify button", () => {
-    render(
-      <UserContext.Provider value={mockUserContext}>
-        <BrightidCard />
-      </UserContext.Provider>
-    );
+    renderWithContext(mockUserContext, mockCeramicContext, <BrightidCard />);
 
     const initialVerifyButton = screen.queryByTestId("button-verify-brightid");
 
@@ -70,20 +63,18 @@ describe("when user has not verfied with BrightId Provider", () => {
 
 describe("when user has verified with BrightId Provider", () => {
   it("should display that a verified credential was returned", () => {
-    render(
-      <UserContext.Provider
-        value={{
-          ...mockUserContext,
-          allProvidersState: {
-            Brightid: {
-              providerSpec: STAMP_PROVIDERS.Brightid,
-              stamp: brightidStampFixture,
-            },
+    renderWithContext(
+      mockUserContext,
+      {
+        ...mockCeramicContext,
+        allProvidersState: {
+          Brightid: {
+            providerSpec: STAMP_PROVIDERS.Brightid,
+            stamp: brightidStampFixture,
           },
-        }}
-      >
-        <BrightidCard />
-      </UserContext.Provider>
+        },
+      },
+      <BrightidCard />
     );
 
     const brightidVerified = screen.queryByText(/Verified/);
@@ -110,18 +101,14 @@ describe("when the verify button is clicked", () => {
     });
 
     it("the modal displays the verify button", async () => {
-      render(
-        <UserContext.Provider value={mockUserContext}>
-          <BrightidCard />
-        </UserContext.Provider>
-      );
+      renderWithContext(mockUserContext, mockCeramicContext, <BrightidCard />);
 
       const initialVerifyButton = screen.queryByTestId("button-verify-brightid");
 
       fireEvent.click(initialVerifyButton!);
 
       const verifyModal = await screen.findByRole("dialog");
-      const verifyModalButton = screen.getByTestId("modal-verify");
+      const verifyModalButton = screen.getByTestId("modal-verify-btn");
 
       expect(verifyModal).toBeInTheDocument();
 
@@ -131,11 +118,7 @@ describe("when the verify button is clicked", () => {
     });
 
     it("clicking verify adds the stamp", async () => {
-      render(
-        <UserContext.Provider value={mockUserContext}>
-          <BrightidCard />
-        </UserContext.Provider>
-      );
+      renderWithContext(mockUserContext, mockCeramicContext, <BrightidCard />);
 
       const initialVerifyButton = screen.queryByTestId("button-verify-brightid");
 
@@ -144,7 +127,7 @@ describe("when the verify button is clicked", () => {
 
       // Wait to see the verify button on the modal
       await waitFor(() => {
-        const verifyModalButton = screen.getByTestId("modal-verify");
+        const verifyModalButton = screen.getByTestId("modal-verify-btn");
         expect(verifyModalButton).toBeInTheDocument();
       });
 
@@ -156,7 +139,7 @@ describe("when the verify button is clicked", () => {
       fireEvent.click(finalVerifyButton!);
 
       await waitFor(() => {
-        expect(handleAddStamp).toBeCalled();
+        expect(mockHandleAddStamp).toBeCalled();
       });
 
       // Wait to see the done toast
@@ -168,11 +151,7 @@ describe("when the verify button is clicked", () => {
 
     it("clicking cancel closes the modal and a stamp should not be added", async () => {
       (fetchVerifiableCredential as jest.Mock).mockResolvedValue(SUCCESFUL_BRIGHTID_RESULT);
-      render(
-        <UserContext.Provider value={mockUserContext}>
-          <BrightidCard />
-        </UserContext.Provider>
-      );
+      renderWithContext(mockUserContext, mockCeramicContext, <BrightidCard />);
 
       const initialVerifyButton = screen.queryByTestId("button-verify-brightid");
 
@@ -189,7 +168,7 @@ describe("when the verify button is clicked", () => {
 
       fireEvent.click(modalCancelButton!);
 
-      expect(handleAddStamp).not.toBeCalled();
+      expect(mockHandleAddStamp).not.toBeCalled();
 
       await waitForElementToBeRemoved(modalCancelButton);
       expect(modalCancelButton).not.toBeInTheDocument();
@@ -200,11 +179,7 @@ describe("when the verify button is clicked", () => {
     it("modal displays steps to get sponsored", async () => {
       global.fetch = jest.fn().mockImplementation(setupFetchStub(false));
       (fetchVerifiableCredential as jest.Mock).mockRejectedValue("ERROR");
-      render(
-        <UserContext.Provider value={mockUserContext}>
-          <BrightidCard />
-        </UserContext.Provider>
-      );
+      renderWithContext(mockUserContext, mockCeramicContext, <BrightidCard />);
 
       const initialVerifyButton = screen.queryByTestId("button-verify-brightid");
 

@@ -11,6 +11,7 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commo
 import { Card } from "../Card";
 
 // --- Context
+import { CeramicContext } from "../../context/ceramicContext";
 import { UserContext } from "../../context/userContext";
 import { ProviderSpec } from "../../config/providers";
 import { datadogLogs } from "@datadog/browser-logs";
@@ -30,7 +31,8 @@ function generateUID(length: number) {
 }
 
 export default function GithubCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const { address, signer } = useContext(UserContext);
+  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [state, setState] = useState("");
 
