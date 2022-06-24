@@ -1,5 +1,6 @@
 // Should this file be an app factory? If it was, we could move the provider config to main.ts and test in isolation
 import dotenv from "dotenv";
+
 dotenv.config();
 
 // ---- Server
@@ -68,8 +69,8 @@ app.use(express.json());
 app.use(cors());
 
 // return a JSON error response with a 400 status
-const errorRes = async (res: Response, error: string): Promise<Response> =>
-  await new Promise((resolve) => resolve(res.status(400).json({ error })));
+const errorRes = async (res: Response, error: string, errorCode: number): Promise<Response> =>
+  await new Promise((resolve) => resolve(res.status(errorCode).json({ error })));
 
 // health check endpoint
 app.get("/health", (req, res) => {
@@ -129,17 +130,22 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
         .catch((error) => {
           if (error) {
             // return error msg indicating a failure producing VC
-            return errorRes(res, "Unable to produce a verifiable credential");
+            return errorRes(res, "Unable to produce a verifiable credential", 400);
           }
         });
     } else {
       // return error message if an error present
-      return void errorRes(res, (challenge.error && challenge.error.join(", ")) || "Unable to verify proofs");
+      return void errorRes(res, (challenge.error && challenge.error.join(", ")) || "Unable to verify proofs", 403);
     }
   }
 
-  // error response
-  return void errorRes(res, "Unable to verify payload");
+  if (!payload.address) {
+    return void errorRes(res, "Missing address from challenge request body", 400);
+  }
+
+  if (!payload.type) {
+    return void errorRes(res, "Missing type from challenge request body", 400);
+  }
 });
 
 // expose verify entry point
@@ -192,29 +198,30 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
                   .catch((error) => {
                     if (error) {
                       // return error msg indicating a failure producing VC
-                      return errorRes(res, "Unable to produce a verifiable credential");
+                      return errorRes(res, "Unable to produce a verifiable credential", 400);
                     }
                   });
               } else {
                 // return error message if an error is present
                 return errorRes(
                   res,
-                  (verifiedPayload.error && verifiedPayload.error.join(", ")) || "Unable to verify proofs"
+                  (verifiedPayload.error && verifiedPayload.error.join(", ")) || "Unable to verify proofs",
+                  403
                 );
               }
             })
             .catch(() => {
               // error response
-              return void errorRes(res, "Unable to verify with provider");
+              return void errorRes(res, "Unable to verify with provider", 400);
             });
         }
       }
 
       // error response
-      return void errorRes(res, "Unable to verify payload");
+      return void errorRes(res, "Unable to verify payload", 401);
     })
     .catch(() => {
-      return void errorRes(res, "Unable to verify payload");
+      return void errorRes(res, "Unable to verify payload", 500);
     });
 });
 
