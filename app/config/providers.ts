@@ -51,4 +51,9 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     name: "Github",
     description: "Github name",
   },
+  Linkedin: {
+    icon: "./assets/linkedinStampIcon.svg",
+    name: "Linkedin",
+    description: "Linkedin name",
+  },
 };
