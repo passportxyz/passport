@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage: {
-        landingPageBackground: "url('/assets/LandingPageBackground.svg')",
+        landingPageBackground: "url('/assets/landingPageBackground.svg')",
       },
       colors: {
         purple: {

@@ -70,7 +70,7 @@ export default function Home() {
           </a>
         </div>
         <img
-          src="./assets/GitcoindaoLogoDark.svg"
+          src="./assets/gitcoindaoLogoDark.svg"
           alt="Gitcoin Logo Dark"
           className="flex flex-wrap items-center justify-center p-2 text-base md:ml-auto md:mr-auto"
         />
