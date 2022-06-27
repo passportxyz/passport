@@ -125,35 +125,38 @@ export default function Dashboard() {
               <span className="text-green-jade"> Waiting for wallet signature...</span>
             </div>
           )}
-          {!passport ? (
-            <Spinner
-              thickness="4px"
-              speed="0.65s"
-              emptyColor="gray.200"
-              color="purple.500"
-              size="xl"
-              data-testid="loading-spinner-passport"
-            />
-          ) : (
-            <div>
-              <button
-                data-testid="button-passport-json"
-                className="float-right rounded-md border-2 border-gray-300 py-2 px-6 text-black"
-                onClick={onOpen}
-              >{`</> Passport JSON`}</button>
+          {viewerConnection.status !== "connecting" &&
+            (passport ? (
+              <div>
+                <button
+                  data-testid="button-passport-json"
+                  className="float-right rounded-md border-2 border-gray-300 py-2 px-6 text-black"
+                  onClick={onOpen}
+                >{`</> Passport JSON`}</button>
 
-              <JsonOutputModal
-                isOpen={isOpen}
-                onClose={onClose}
-                title={"Passport JSON"}
-                subheading={"You can find the Passport JSON data below"}
-                jsonOutput={passport}
-              />
-            </div>
-          )}
+                <JsonOutputModal
+                  isOpen={isOpen}
+                  onClose={onClose}
+                  title={"Passport JSON"}
+                  subheading={"You can find the Passport JSON data below"}
+                  jsonOutput={passport}
+                />
+              </div>
+            ) : (
+              <div>
+                <div
+                  className="float-right flex flex-row items-center rounded-md border-2 border-gray-300 py-2 px-6 text-black"
+                  data-testid="loading-spinner-passport"
+                >
+                  <Spinner thickness="4px" speed="0.65s" emptyColor="lightGray" color="gray" size="md" />
+                  <h1 className="m-4">Connecting</h1>
+                </div>
+              </div>
+            ))}
         </div>
       </div>
-      <CardList />
+      {/* isLoadingPassport is undefined when there is a network error loading the passport */}
+      <CardList isLoading={isLoadingPassport || isLoadingPassport === undefined} />
     </>
   );
 }
