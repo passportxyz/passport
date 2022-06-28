@@ -33,8 +33,8 @@ describe("when stamp is not defined", () => {
   it("does not show the buttons", () => {
     render(<VerifyModal {...props} />);
 
-    expect(screen.queryByTestId("modal-verify")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("modal-cancel")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("modal-verify-btn")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("modal-cancel-btn")).not.toBeInTheDocument();
   });
 });
 
@@ -48,8 +48,8 @@ describe("when stamp is defined", () => {
   it("shows the buttons", () => {
     render(<VerifyModal {...props} />);
 
-    screen.getByTestId("modal-verify");
-    screen.getByTestId("modal-cancel");
+    screen.getByTestId("modal-verify-btn");
+    screen.getByTestId("modal-cancel-btn");
   });
 });
 
@@ -69,14 +69,14 @@ describe("buttons", () => {
   it("includes a verify button that calls handleUserVerify", () => {
     render(<VerifyModal {...props} />);
 
-    screen.getByTestId("modal-verify").click();
+    screen.getByTestId("modal-verify-btn").click();
     expect(props.handleUserVerify).toHaveBeenCalled();
   });
 
   it("includes a cancel button that calls onClose", () => {
     render(<VerifyModal {...props} />);
 
-    screen.getByTestId("modal-cancel").click();
+    screen.getByTestId("modal-cancel-btn").click();
     expect(props.onClose).toHaveBeenCalled();
   });
 });

@@ -10,7 +10,14 @@ import { STAMP_PROVIDERS } from "../../../config/providers";
 import { gooddollarStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
 import { SUCCESFULL_GOODDOLLAR_RESULT } from "../../../__test-fixtures__/verifiableCredentialResults";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
-import { buffer } from "node:stream/consumers";
+import { mock } from "jest-mock-extended";
+import { JsonRpcSigner } from "@ethersproject/providers";
+import {
+  makeTestCeramicContext,
+  makeTestUserContext,
+  renderWithContext,
+} from "../../../__test-fixtures__/contextTestHelpers";
+import { CeramicContextState } from "../../../context/ceramicContext";
 
 jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
   fetchVerifiableCredential: jest.fn(),
@@ -19,30 +26,19 @@ jest.mock("../../../utils/onboard.ts");
 
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
-const handleAddStamp = jest.fn().mockResolvedValue(undefined);
-const mockUserContext: UserContextState = {
-  userDid: undefined,
-  loggedIn: true,
-  passport: {
-    issuanceDate: new Date(),
-    expiryDate: new Date(),
-    stamps: [],
-  },
-  isLoadingPassport: false,
-  allProvidersState: {
-    GoodDollar: {
-      providerSpec: STAMP_PROVIDERS.GoodDollar,
-      stamp: undefined,
-    },
-  },
-  handleAddStamp: handleAddStamp,
-  handleCreatePassport: mockCreatePassport,
+const mockHandleAddStamp = jest.fn().mockResolvedValue(undefined);
+const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
+const mockUserContext: UserContextState = makeTestUserContext({
   handleConnection: mockHandleConnection,
   address: mockAddress,
-  wallet: mockWallet,
-  signer: undefined,
-  walletLabel: mockWallet.label,
-};
+  signer: mockSigner,
+});
+
+const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
+  userDid: "mockUserDid",
+  handleCreatePassport: mockCreatePassport,
+  handleAddStamp: mockHandleAddStamp,
+});
 
 export const sampleGooddollarSignedObject = {
   a: { value: "0x9E6Ea049A281F513a2BAbb106AF1E023FEEeCfA9", attestation: "" },
@@ -63,7 +59,9 @@ const history = createMemoryHistory();
 
 describe("when user has not verfied with GoodDollarProvider", () => {
   it("should display a verification button", () => {
-    render(
+    renderWithContext(
+      mockUserContext,
+      mockCeramicContext,
       <Router location={history.location} navigator={history}>
         <UserContext.Provider value={mockUserContext}>
           <GoodDollarCard />
@@ -79,21 +77,19 @@ describe("when user has not verfied with GoodDollarProvider", () => {
 
 describe("when user has verified with GoodDollarProvider", () => {
   it("should display is verified", () => {
-    render(
+    renderWithContext(
+      mockUserContext,
+      {
+        ...mockCeramicContext,
+        allProvidersState: {
+          GoodDollar: {
+            providerSpec: STAMP_PROVIDERS.GoodDollar,
+            stamp: gooddollarStampFixture,
+          },
+        },
+      },
       <Router location={history.location} navigator={history}>
-        <UserContext.Provider
-          value={{
-            ...mockUserContext,
-            allProvidersState: {
-              GoodDollar: {
-                providerSpec: STAMP_PROVIDERS.GoodDollar,
-                stamp: gooddollarStampFixture,
-              },
-            },
-          }}
-        >
-          <GoodDollarCard />
-        </UserContext.Provider>
+        <GoodDollarCard />
       </Router>
     );
 
@@ -109,11 +105,11 @@ describe("when the verify button is clicked", () => {
   });
 
   it("it should redirect to gooddollar login screen ", async () => {
-    render(
+    renderWithContext(
+      mockUserContext,
+      mockCeramicContext,
       <Router location={history.location} navigator={history}>
-        <UserContext.Provider value={mockUserContext}>
-          <GoodDollarCard />
-        </UserContext.Provider>
+        <GoodDollarCard />
       </Router>
     );
 
@@ -141,16 +137,16 @@ describe("when the verify button is clicked", () => {
 
       await act(
         async () =>
-          render(
+          renderWithContext(
+            mockUserContext,
+            mockCeramicContext,
             <MemoryRouter
               initialEntries={[
                 "/dashboard?login=" + Buffer.from(JSON.stringify(sampleGooddollarSignedObject)).toString("base64"),
               ]}
               initialIndex={0}
             >
-              <UserContext.Provider value={mockUserContext}>
-                <GoodDollarCard />
-              </UserContext.Provider>
+              <GoodDollarCard />
             </MemoryRouter>
           ) as any
       );
@@ -158,17 +154,17 @@ describe("when the verify button is clicked", () => {
       // Wait to see the verify button on the modal
       await waitFor(
         () => {
-          const verifyModalButton = screen.getByTestId("modal-verify");
+          const verifyModalButton = screen.getByTestId("modal-verify-btn");
           expect(verifyModalButton).toBeInTheDocument();
         },
-        { timeout: 2000 }
+        { timeout: 3000 }
       );
 
       // Click the verify button on modal
-      fireEvent.click(screen.getByTestId("modal-verify"));
+      fireEvent.click(screen.getByTestId("modal-verify-btn"));
 
       await waitFor(() => {
-        expect(handleAddStamp).toBeCalled();
+        expect(mockHandleAddStamp).toBeCalled();
       });
 
       await waitFor(() => {
@@ -187,16 +183,16 @@ describe("when the verify button is clicked", () => {
 
       await act(
         async () =>
-          render(
+          renderWithContext(
+            mockUserContext,
+            mockCeramicContext,
             <MemoryRouter
               initialEntries={[
                 "/dashboard?login=" + Buffer.from(JSON.stringify(sampleBadGooddollarSignedObject)).toString("base64"),
               ]}
               initialIndex={0}
             >
-              <UserContext.Provider value={mockUserContext}>
-                <GoodDollarCard />
-              </UserContext.Provider>
+              <GoodDollarCard />
             </MemoryRouter>
           ) as any
       );
@@ -224,11 +220,11 @@ describe("when the verify button is clicked", () => {
 
       await act(
         async () =>
-          render(
+          renderWithContext(
+            mockUserContext,
+            mockCeramicContext,
             <Router location={history.location} navigator={history}>
-              <UserContext.Provider value={mockUserContext}>
-                <GoodDollarCard />
-              </UserContext.Provider>
+              <GoodDollarCard />
             </Router>
           ) as any
       );

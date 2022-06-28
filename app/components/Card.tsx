@@ -9,7 +9,7 @@ import { VerifiableCredential } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../config/providers";
 
 // --- Context
-import { UserContext } from "../context/userContext";
+import { CeramicContext } from "../context/ceramicContext";
 
 // --- Components
 import { JsonOutputModal } from "../components/JsonOutputModal";
@@ -28,7 +28,7 @@ export const Card = ({
   issueCredentialWidget,
   isLoading = false,
 }: CardProps): JSX.Element => {
-  const { passport, isLoadingPassport } = useContext(UserContext);
+  const { passport, isLoadingPassport } = useContext(CeramicContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <div className="w-full p-4 md:w-1/2 xl:w-1/4">

@@ -9,6 +9,7 @@ import { datadogRum } from "@datadog/browser-rum";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // pull context
+import { CeramicContext } from "../../context/ceramicContext";
 import { UserContext } from "../../context/userContext";
 
 import { PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
@@ -24,7 +25,8 @@ import { DoneToastContent } from "../DoneToastContent";
 const providerId: PROVIDER_ID = "Poh";
 
 export default function PohCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const { address, signer } = useContext(UserContext);
+  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [pohVerified, SetPohVerified] = useState<boolean | undefined>(undefined);

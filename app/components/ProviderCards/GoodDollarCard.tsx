@@ -12,6 +12,7 @@ import { LoginButton, createLoginLink, parseLoginResponse } from "@gooddollar/go
 
 // pull context
 import { UserContext } from "../../context/userContext";
+import { CeramicContext } from "../../context/ceramicContext";
 
 import { PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
 
@@ -27,7 +28,8 @@ import { VerifyModal } from "../VerifyModal";
 const providerId: PROVIDER_ID = "GoodDollar";
 
 export default function GoodDollarCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const { address, signer } = useContext(UserContext);
+  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [verificationInProgress, setVerificationInProgress] = useState(false);

@@ -9,6 +9,7 @@ import { datadogRum } from "@datadog/browser-rum";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- pull context
+import { CeramicContext } from "../../context/ceramicContext";
 import { UserContext } from "../../context/userContext";
 
 // --- Verification step tools
@@ -35,7 +36,8 @@ type BrightIdProviderRecord = {
 };
 
 export default function BrightIdCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState, userDid } = useContext(UserContext);
+  const { address, signer } = useContext(UserContext);
+  const { handleAddStamp, allProvidersState, userDid } = useContext(CeramicContext);
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [brightIdVerification, SetBrightIdVerification] = useState<BrightIdProviderRecord | undefined>(undefined);

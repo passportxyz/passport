@@ -1,11 +1,18 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import Dashboard from "../../pages/Dashboard";
-import { UserContext, UserContextState } from "../../context/userContext";
-import { mockAddress, mockWallet } from "../../__test-fixtures__/onboardHookValues";
-import { STAMP_PROVIDERS } from "../../config/providers";
+import { UserContextState } from "../../context/userContext";
+import { mockAddress } from "../../__test-fixtures__/onboardHookValues";
 import { HashRouter as Router } from "react-router-dom";
 import * as framework from "@self.id/framework";
+import { mock } from "jest-mock-extended";
+import { JsonRpcSigner } from "@ethersproject/providers";
+import {
+  makeTestCeramicContext,
+  makeTestUserContext,
+  renderWithContext,
+} from "../../__test-fixtures__/contextTestHelpers";
+import { CeramicContextState } from "../../context/ceramicContext";
 
 jest.mock("../../utils/onboard.ts");
 
@@ -22,63 +29,14 @@ jest.mock("@self.id/web", () => {
 });
 
 const mockHandleConnection = jest.fn();
-const mockCreatePassport = jest.fn();
-const handleAddStamp = jest.fn();
-const mockUserContext: UserContextState = {
-  userDid: undefined,
-  loggedIn: true,
-  passport: {
-    issuanceDate: new Date(),
-    expiryDate: new Date(),
-    stamps: [],
-  },
-  isLoadingPassport: false,
-  allProvidersState: {
-    Google: {
-      providerSpec: STAMP_PROVIDERS.Google,
-      stamp: undefined,
-    },
-    Ens: {
-      providerSpec: STAMP_PROVIDERS.Ens,
-      stamp: undefined,
-    },
-    Poh: {
-      providerSpec: STAMP_PROVIDERS.Poh,
-      stamp: undefined,
-    },
-    Twitter: {
-      providerSpec: STAMP_PROVIDERS.Twitter,
-      stamp: undefined,
-    },
-    POAP: {
-      providerSpec: STAMP_PROVIDERS.POAP,
-      stamp: undefined,
-    },
-    Facebook: {
-      providerSpec: STAMP_PROVIDERS.Facebook,
-      stamp: undefined,
-    },
-    Brightid: {
-      providerSpec: STAMP_PROVIDERS.Brightid,
-      stamp: undefined,
-    },
-    Github: {
-      providerSpec: STAMP_PROVIDERS.Github,
-      stamp: undefined,
-    },
-    GoodDollar: {
-      providerSpec: STAMP_PROVIDERS.GoodDollar,
-      stamp: undefined,
-    },
-  },
-  handleAddStamp: handleAddStamp,
-  handleCreatePassport: mockCreatePassport,
+const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
+
+const mockUserContext: UserContextState = makeTestUserContext({
   handleConnection: mockHandleConnection,
   address: mockAddress,
-  wallet: mockWallet,
-  signer: undefined,
-  walletLabel: mockWallet.label,
-};
+  signer: mockSigner,
+});
+const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -92,58 +50,39 @@ beforeEach(() => {
 });
 
 describe("when user has no passport", () => {
-  const mockUserContextWithNoPassport: UserContextState = {
-    ...mockUserContext,
-    passport: false,
-  };
-
-  it("should display a loading spinner, and call create passport", async () => {
-    render(
-      <UserContext.Provider value={mockUserContextWithNoPassport}>
-        <Router>
-          <Dashboard />
-        </Router>
-      </UserContext.Provider>
+  it("should display a loading spinner", async () => {
+    renderWithContext(
+      mockUserContext,
+      { ...mockCeramicContext, passport: false },
+      <Router>
+        <Dashboard />
+      </Router>
     );
 
-    expect(screen.getByTestId("loading-spinner-passport")).toBeInTheDocument();
-
-    // This call has been moved to userContext::fetchPassport
-    // await waitFor(() => {
-    //   expect(mockCreatePassport).toBeCalledTimes(1);
-    // });
+    expect(screen.getByTestId("loading-spinner-passport"));
   });
 });
 
 describe("when the user has a passport", () => {
-  const mockUserContextWithPassport = {
-    ...mockUserContext,
-    passport: {
-      issuanceDate: new Date("2022-01-15"),
-      expiryDate: new Date("2022-01-16"),
-      stamps: [],
-    },
-  };
-
   it("it should not display a loading spinner", async () => {
-    render(
-      <UserContext.Provider value={mockUserContextWithPassport}>
-        <Router>
-          <Dashboard />
-        </Router>
-      </UserContext.Provider>
+    renderWithContext(
+      mockUserContext,
+      mockCeramicContext,
+      <Router>
+        <Dashboard />
+      </Router>
     );
 
     expect(screen.queryByTestId("loading-spinner-passport")).not.toBeInTheDocument();
   });
 
   it("shows Passport JSON button", () => {
-    render(
-      <UserContext.Provider value={mockUserContextWithPassport}>
-        <Router>
-          <Dashboard />
-        </Router>
-      </UserContext.Provider>
+    renderWithContext(
+      mockUserContext,
+      mockCeramicContext,
+      <Router>
+        <Dashboard />
+      </Router>
     );
 
     expect(screen.getByTestId("button-passport-json")).toBeInTheDocument();
@@ -151,22 +90,13 @@ describe("when the user has a passport", () => {
 });
 
 describe("when the user clicks Passport JSON", () => {
-  const mockUserContextWithPassport = {
-    ...mockUserContext,
-    passport: {
-      issuanceDate: new Date("2022-01-15"),
-      expiryDate: new Date("2022-01-16"),
-      stamps: [],
-    },
-  };
-
   it("it should display a modal", async () => {
-    render(
-      <UserContext.Provider value={mockUserContextWithPassport}>
-        <Router>
-          <Dashboard />
-        </Router>
-      </UserContext.Provider>
+    renderWithContext(
+      mockUserContext,
+      mockCeramicContext,
+      <Router>
+        <Dashboard />
+      </Router>
     );
 
     const buttonPassportJson = screen.queryByTestId("button-passport-json");
@@ -182,22 +112,14 @@ describe("when the user clicks Passport JSON", () => {
 });
 
 describe("when viewer connection status is connecting", () => {
-  const mockUserContextWithPassport = {
-    ...mockUserContext,
-    passport: {
-      issuanceDate: new Date("2022-01-15"),
-      expiryDate: new Date("2022-01-16"),
-      stamps: [],
-    },
-  };
   it("should show a 'waiting for signature' alert", () => {
     (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connecting" }]);
-    render(
-      <UserContext.Provider value={mockUserContextWithPassport}>
-        <Router>
-          <Dashboard />
-        </Router>
-      </UserContext.Provider>
+    renderWithContext(
+      mockUserContext,
+      mockCeramicContext,
+      <Router>
+        <Dashboard />
+      </Router>
     );
 
     const waitingForSignature = screen.getByTestId("selfId-connection-alert");
@@ -206,19 +128,17 @@ describe("when viewer connection status is connecting", () => {
 });
 
 describe("when app fails to load ceramic stream", () => {
-  const mockUserContextUndefinedLoading = {
-    ...mockUserContext,
-    passport: undefined,
-    isLoadingPassport: undefined,
-  };
-
   it("should display a modal for user to retry connection, or close", () => {
-    render(
-      <UserContext.Provider value={mockUserContextUndefinedLoading}>
-        <Router>
-          <Dashboard />
-        </Router>
-      </UserContext.Provider>
+    renderWithContext(
+      mockUserContext,
+      {
+        ...mockCeramicContext,
+        passport: undefined,
+        isLoadingPassport: undefined,
+      },
+      <Router>
+        <Dashboard />
+      </Router>
     );
 
     const retryModal = screen.getByTestId("retry-modal-content");
@@ -235,12 +155,16 @@ describe("when app fails to load ceramic stream", () => {
     const mockCeramicConnect = jest.fn();
     (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }, mockCeramicConnect]);
 
-    render(
-      <UserContext.Provider value={mockUserContextUndefinedLoading}>
-        <Router>
-          <Dashboard />
-        </Router>
-      </UserContext.Provider>
+    renderWithContext(
+      mockUserContext,
+      {
+        ...mockCeramicContext,
+        passport: undefined,
+        isLoadingPassport: undefined,
+      },
+      <Router>
+        <Dashboard />
+      </Router>
     );
 
     fireEvent.click(screen.getByTestId("retry-modal-try-again"));
@@ -249,12 +173,16 @@ describe("when app fails to load ceramic stream", () => {
   });
 
   it("when done button is clicked, it should disconnect the user", () => {
-    render(
-      <UserContext.Provider value={mockUserContextUndefinedLoading}>
-        <Router>
-          <Dashboard />
-        </Router>
-      </UserContext.Provider>
+    renderWithContext(
+      mockUserContext,
+      {
+        ...mockCeramicContext,
+        passport: undefined,
+        isLoadingPassport: undefined,
+      },
+      <Router>
+        <Dashboard />
+      </Router>
     );
 
     fireEvent.click(screen.getByTestId("retry-modal-close"));

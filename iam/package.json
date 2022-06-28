@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "main": "dist/src/main.js",
-  "types": "dist/types.d.ts",
+  "types": "src/types.d.ts",
   "license": "MIT",
   "scripts": {
     "clean": "rimraf dist node_modules",
