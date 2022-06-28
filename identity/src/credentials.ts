@@ -60,6 +60,7 @@ const _issueCredential = async (
     verificationMethod,
   });
 
+  // console.log("issueCredential . . . -- field", { fields });
   // generate a verifiableCredential
   const credential = await DIDKit.issueCredential(
     JSON.stringify({
@@ -74,6 +75,8 @@ const _issueCredential = async (
     key
   );
 
+  // console.log("generated credential issue -- credential -->", { credential });
+
   // parse the response of the DIDKit wasm
   return JSON.parse(credential) as VerifiableCredential;
 };
@@ -85,6 +88,7 @@ export const issueChallengeCredential = async (
   record: RequestPayload
 ): Promise<IssuedCredential> => {
   // generate a verifiableCredential (60s ttl)
+  // console.log("issueChallengeCredential -- record -->", { record });
   const credential = await _issueCredential(DIDKit, key, CHALLENGE_EXPIRES_AFTER_SECONDS, {
     credentialSubject: {
       "@context": [
@@ -98,9 +102,11 @@ export const issueChallengeCredential = async (
       provider: `challenge-${record.type}`,
       // extra fields to convey challenge data
       challenge: record.challenge,
-      address: record.address,
+      address: record.proofs?.whitelistedAddress || record.address,
     },
   });
+
+  // console.log("generated issueChallengeCredential (done)");
 
   // didkit-wasm-node returns credential as a string - parse for JSON
   return {
@@ -125,6 +131,8 @@ export const issueHashedCredential = async (
       .digest()
   );
 
+  // console.log("issueHashedCredential -->", { record });
+
   // generate a verifiableCredential
   const credential = await _issueCredential(DIDKit, key, CREDENTIAL_EXPIRES_AFTER_SECONDS, {
     credentialSubject: {
@@ -140,6 +148,8 @@ export const issueHashedCredential = async (
       hash: `${VERSION}:${hash}`,
     },
   });
+
+  // console.log("generated credential . . ", { credential });
 
   // didkit-wasm-node returns credential as a string - parse for JSON
   return {
@@ -180,6 +190,7 @@ export const fetchChallengeCredential = async (iamUrl: string, payload: RequestP
       payload: {
         address: payload.address,
         type: payload.type,
+        ...(payload.type === "GoodDollar" && { proofs: { whitelistedAddress: payload.proofs.whitelistedAddress } }),
       },
     }
   );

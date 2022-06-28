@@ -22,7 +22,7 @@
     "test:integration": "yarn build && yarn node --experimental-vm-modules $(yarn bin jest) -c jest.integration.config.js"
   },
   "dependencies": {
-    "@ceramicnetwork/http-client": "^2.2.1",
+    "@ceramicnetwork/http-client": "^2.0.0",
     "@gitcoin/passport-schemas": "0.0.1",
     "@glazed/datamodel": "^0.3.0",
     "@glazed/did-datastore": "^0.3.1",
@@ -34,8 +34,8 @@
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^2.2.1",
-    "@ceramicnetwork/stream-tile": "^2.2.2",
+    "@ceramicnetwork/common": "^2.0.0",
+    "@ceramicnetwork/stream-tile": "^2.0.0",
     "@glazed/devtools": "^0.1.6",
     "@glazed/did-datastore-model": "^0.2.0",
     "@glazed/types": "^0.2.0",

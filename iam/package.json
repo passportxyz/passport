@@ -2,7 +2,7 @@
   "name": "@gitcoin/passport-iam",
   "private": true,
   "version": "0.0.1",
-  "main": "dist/main.js",
+  "main": "dist/src/main.js",
   "types": "dist/types.d.ts",
   "license": "MIT",
   "scripts": {
@@ -19,6 +19,8 @@
   "dependencies": {
     "@gitcoin/passport-identity": "^0.0.1",
     "@gitcoin/passport-types": "^0.0.1",
+    "@gooddollar/goodlogin-sdk": "^1.1.12",
+    "@gooddollar/goodprotocol": "^1.0.20",
     "@spruceid/didkit-wasm-node": "^0.2.1",
     "axios": "^0.27.2",
     "brightid_sdk": "^1.0.1",

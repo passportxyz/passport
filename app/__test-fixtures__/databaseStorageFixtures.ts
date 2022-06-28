@@ -61,6 +61,11 @@ export const githubStampFixture: Stamp = {
   credential,
 };
 
+export const gooddollarStampFixture: Stamp = {
+  provider: "GoodDollar",
+  credential,
+};
+
 export const passportFixture: Passport = {
   issuanceDate: new Date("2022-01-01"),
   expiryDate: new Date("2022-01-02"),

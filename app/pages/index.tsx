@@ -42,6 +42,7 @@ datadogLogs.init({
 const App: NextPage = () => {
   // pull any search params
   const queryString = new URLSearchParams(window?.location?.search);
+
   // Twitter oauth will attach code & state in oauth procedure
   const queryError = queryString.get("error");
   const queryCode = queryString.get("code");
@@ -53,7 +54,10 @@ const App: NextPage = () => {
     const channel = new BroadcastChannel("twitter_oauth_channel");
     // only continue with the process if a code is returned
     if (queryCode) {
-      channel.postMessage({ target: "twitter", data: { code: queryCode, state: queryState } });
+      channel.postMessage({
+        target: "twitter",
+        data: { code: queryCode, state: queryState },
+      });
     }
     // always close the redirected window
     window.close();
@@ -66,7 +70,10 @@ const App: NextPage = () => {
     const channel = new BroadcastChannel("github_oauth_channel");
     // only continue with the process if a code is returned
     if (queryCode) {
-      channel.postMessage({ target: "github", data: { code: queryCode, state: queryState } });
+      channel.postMessage({
+        target: "github",
+        data: { code: queryCode, state: queryState },
+      });
     }
     // always close the redirected window
     window.close();

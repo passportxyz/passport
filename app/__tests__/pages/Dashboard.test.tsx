@@ -66,6 +66,10 @@ const mockUserContext: UserContextState = {
       providerSpec: STAMP_PROVIDERS.Github,
       stamp: undefined,
     },
+    GoodDollar: {
+      providerSpec: STAMP_PROVIDERS.GoodDollar,
+      stamp: undefined,
+    },
   },
   handleAddStamp: handleAddStamp,
   handleCreatePassport: mockCreatePassport,
