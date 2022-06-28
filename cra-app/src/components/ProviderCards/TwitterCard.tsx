@@ -1,21 +1,33 @@
-import React, {useContext, useEffect, useState} from "react";
-import {datadogLogs} from "@datadog/browser-logs";
-import {datadogRum} from "@datadog/browser-rum";
-import {debounce} from "ts-debounce";
-import {BroadcastChannel} from "broadcast-channel";
-import {fetchVerifiableCredential} from "@gitcoin/passport-identity";
-import {PROVIDER_ID} from "@gitcoin/passport-types";
-import {useToast} from "@chakra-ui/react";
-import {Card} from "../Card";
-import {DoneToastContent} from "../DoneToastContent";
-import {UserContext} from "../../context/userContext";
-import {ProviderSpec} from "../../config/providers";
+// --- Methods
+import React, { useContext, useEffect, useState } from "react";
+
+// --- Datadog
+import { datadogLogs } from "@datadog/browser-logs";
+import { datadogRum } from "@datadog/browser-rum";
+
+import { debounce } from "ts-debounce";
+import { BroadcastChannel } from "broadcast-channel";
+
+// --- Identity tools
+import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+
+// --- Style Components
+import { Card } from "../Card";
+import { DoneToastContent } from "../DoneToastContent";
+import { useToast } from "@chakra-ui/react";
+
+// --- Context
+import { CeramicContext } from "../../context/ceramicContext";
+import { UserContext } from "../../context/userContext";
+import { ProviderSpec } from "../../config/providers";
 
 // Each provider is recognised by its ID
 const providerId: PROVIDER_ID = "Twitter";
 
 export default function TwitterCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const { address, signer } = useContext(UserContext);
+  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
 
   // --- Chakra functions
@@ -101,7 +113,7 @@ export default function TwitterCard(): JSX.Element {
           });
         })
         .catch((e) => {
-          datadogRum.addError(e, { provider: providerId });
+          datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
           throw e;
         })
         .finally(() => {

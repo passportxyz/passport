@@ -1,12 +1,25 @@
+// --- React Methods
 import React, { useContext, useState } from "react";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
+
+// --- Identity tools
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+
+// --- Google OAuth toolkit
 import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
+
+// -- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
+
+// pull context
+import { CeramicContext } from "../../context/ceramicContext";
 import { UserContext } from "../../context/userContext";
+
+// --- Style Components
 import { Card } from "../Card";
 import { DoneToastContent } from "../DoneToastContent";
 import { useToast } from "@chakra-ui/react";
+
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../../config/providers";
 
@@ -17,7 +30,8 @@ const googleClientId = process.env.NEXT_PUBLIC_DPOPP_GOOGLE_CLIENT_ID || "";
 const providerId: PROVIDER_ID = "Google";
 
 export default function GoogleCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const { address, signer } = useContext(UserContext);
+  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
 
   const [isLoading, setLoading] = useState(false);
 
@@ -53,8 +67,7 @@ export default function GoogleCard(): JSX.Element {
         });
       })
       .catch((e): void => {
-        datadogLogs.logger.error("1) error providing verification", { error: e, provider: providerId });
-        console.error("2) error providing verification");
+        datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
         datadogRum.addError(e, { provider: providerId });
       })
       .finally(() => {

@@ -1,0 +1,19 @@
+@import url("https://fonts.googleapis.com/css?family=Libre+Franklin:400,600|Miriam+Libre:400");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .verify-btn {
+    @apply w-full border-t-2 p-3 hover:text-purple-400;
+  }
+}
+
+.font-libre-franklin {
+  font-family: "Libre Franklin";
+}
+
+.font-miriam-libre {
+  font-family: "Miriam Libre";
+}

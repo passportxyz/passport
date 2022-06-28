@@ -1,8 +1,17 @@
+// --- React Methods
 import React, { useContext } from "react";
+
+// --- Chakra UI Elements
 import { Spinner, useDisclosure } from "@chakra-ui/react";
+
+// --- Types
 import { VerifiableCredential } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../config/providers";
-import { UserContext } from "../context/userContext";
+
+// --- Context
+import { CeramicContext } from "../context/ceramicContext";
+
+// --- Components
 import { JsonOutputModal } from "../components/JsonOutputModal";
 
 export type CardProps = {
@@ -19,7 +28,7 @@ export const Card = ({
   issueCredentialWidget,
   isLoading = false,
 }: CardProps): JSX.Element => {
-  const { passport, isLoadingPassport } = useContext(UserContext);
+  const { passport, isLoadingPassport } = useContext(CeramicContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <div className="w-full p-4 md:w-1/2 xl:w-1/4">

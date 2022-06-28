@@ -8,20 +8,35 @@ import { CardList } from "../components/CardList";
 import { JsonOutputModal } from "../components/JsonOutputModal";
 
 // --Chakra UI Elements
-import { Spinner, useDisclosure, Alert, AlertTitle } from "@chakra-ui/react";
+import {
+  Spinner,
+  useDisclosure,
+  Alert,
+  AlertTitle,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalBody,
+  ModalFooter,
+  Button,
+} from "@chakra-ui/react";
 
+import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 import { useViewerConnection } from "@self.id/framework";
+import { EthereumAuthProvider } from "@self.id/web";
 
 export default function Dashboard() {
-  const { passport, wallet } = useContext(UserContext);
+  const { wallet, handleConnection } = useContext(UserContext);
+  const { passport, isLoadingPassport } = useContext(CeramicContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const navigate = useNavigate();
 
-  const [viewerConnection] = useViewerConnection();
+  const [viewerConnection, ceramicConnect] = useViewerConnection();
+  const { isOpen: retryModalIsOpen, onOpen: onRetryModalOpen, onClose: onRetryModalClose } = useDisclosure();
 
   // Route user to home when wallet is disconnected
   useEffect(() => {
@@ -30,12 +45,66 @@ export default function Dashboard() {
     }
   }, [wallet]);
 
+  // Allow user to retry Ceramic connection if failed
+  const retryConnection = () => {
+    if (isLoadingPassport == undefined && wallet) {
+      // connect to ceramic (deliberately connect with a lowercase DID to match reader)
+      ceramicConnect(new EthereumAuthProvider(wallet.provider, wallet.accounts[0].address.toLowerCase()));
+      onRetryModalClose();
+    }
+  };
+
+  const closeModalAndDisconnect = () => {
+    onRetryModalClose();
+    // toggle wallet connect/disconnect
+    handleConnection();
+  };
+
+  // isLoadingPassport undefined when there is an issue during fetchPassport attempt
+  useEffect(() => {
+    if (isLoadingPassport == undefined) {
+      onRetryModalOpen();
+    }
+  }, [isLoadingPassport]);
+
+  const retryModal = (
+    <Modal isOpen={retryModalIsOpen} onClose={onRetryModalClose}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalBody mt={4}>
+          <div className="flex flex-row">
+            <div className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-100 sm:mr-10">
+              <img alt="shield-exclamation-icon" src="./assets/shield-exclamation-icon.svg" />
+            </div>
+            <div className="flex flex-col" data-testid="retry-modal-content">
+              <p className="text-lg font-bold">Unable to Connect</p>
+              <p>
+                There was an issue connecting to the Ceramic network. You can try connecting again or try again later.
+              </p>
+            </div>
+          </div>
+        </ModalBody>
+        {
+          <ModalFooter py={3}>
+            <Button data-testid="retry-modal-try-again" variant="outline" mr={2} onClick={retryConnection}>
+              Try Again
+            </Button>
+            <Button data-testid="retry-modal-close" colorScheme="purple" onClick={closeModalAndDisconnect}>
+              Done
+            </Button>
+          </ModalFooter>
+        }
+      </ModalContent>
+    </Modal>
+  );
+
   return (
     <>
       <div className="flex w-full flex-col flex-wrap border-b-2 p-5 md:flex-row">
-        <div className="float-right mb-4 flex items-center font-medium text-gray-900 md:mb-0">
-          <img src="./assets/GitcoinLogo.svg" alt="Gitcoin Logo White" />
-          <span className="font-miriam-libre ml-3 text-xl">Passport</span>
+        <div className="float-right mb-4 flex flex-row items-center font-medium text-gray-900 md:mb-0">
+          <img src="/Users/luke/workspace/gitcoin/dPopp/cra-app/src/assets/gitcoinLogoDark.svg" alt="Gitcoin Logo" />
+          <img className="ml-6 mr-6" src="/Users/luke/workspace/gitcoin/dPopp/cra-app/src/assets/logoLine.svg" alt="Logo Line" />
+          <img src="/Users/luke/workspace/gitcoin/dPopp/cra-app/src/assets/passportLogoBlack.svg" alt="pPassport Logo" />
         </div>
       </div>
 
@@ -45,39 +114,45 @@ export default function Dashboard() {
           <p className="text-xl text-black">Select the verification stamps you’d like to connect to your Passport.</p>
         </div>
         <div className="w-full md:w-1/4">
+          {isLoadingPassport == undefined && retryModal}
           {viewerConnection.status === "connecting" && (
-            <Alert status="warning" data-testid="selfId-connection-alert">
-              <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="orange.500" size="md" />
-              <AlertTitle ml={4}> Waiting for wallet signature</AlertTitle>
-            </Alert>
+            <div
+              className="absolute right-1/2 rounded bg-blue-darkblue py-4 px-8"
+              data-testid="selfId-connection-alert"
+            >
+              <span className="absolute top-0 right-0 flex h-3 w-3 translate-x-1/2 -translate-y-1/2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-jade opacity-75"></span>
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-green-jade"></span>
+              </span>
+              <span className="text-green-jade"> Waiting for wallet signature...</span>
+            </div>
           )}
-          {viewerConnection.status !== "connecting" &&
-            (!passport ? (
-              <Spinner
-                thickness="4px"
-                speed="0.65s"
-                emptyColor="gray.200"
-                color="purple.500"
-                size="xl"
-                data-testid="loading-spinner-passport"
-              />
-            ) : (
-              <div>
-                <button
-                  data-testid="button-passport-json"
-                  className="float-right rounded-md border-2 border-gray-300 py-2 px-6 text-black"
-                  onClick={onOpen}
-                >{`</> Passport JSON`}</button>
+          {!passport ? (
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="purple.500"
+              size="xl"
+              data-testid="loading-spinner-passport"
+            />
+          ) : (
+            <div>
+              <button
+                data-testid="button-passport-json"
+                className="float-right rounded-md border-2 border-gray-300 py-2 px-6 text-black"
+                onClick={onOpen}
+              >{`</> Passport JSON`}</button>
 
-                <JsonOutputModal
-                  isOpen={isOpen}
-                  onClose={onClose}
-                  title={"Passport JSON"}
-                  subheading={"You can find the Passport JSON data below"}
-                  jsonOutput={passport}
-                />
-              </div>
-            ))}
+              <JsonOutputModal
+                isOpen={isOpen}
+                onClose={onClose}
+                title={"Passport JSON"}
+                subheading={"You can find the Passport JSON data below"}
+                jsonOutput={passport}
+              />
+            </div>
+          )}
         </div>
       </div>
       <CardList />

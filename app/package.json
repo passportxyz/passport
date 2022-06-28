@@ -30,7 +30,7 @@
     "@web3-onboard/walletconnect": "2.0.1",
     "@web3-onboard/walletlink": "2.0.1",
     "broadcast-channel": "^4.11.0",
-    "framer-motion": "^6.3.0",
+    "framer-motion": "4.1.17",
     "next": "latest",
     "node-fetch": "^3.2.4",
     "react": "^17.0.2",

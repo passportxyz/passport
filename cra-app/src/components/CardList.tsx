@@ -1,5 +1,9 @@
+// --- React Methods
 import React from "react";
+
+// --- Identity Providers
 import { GoogleCard, EnsCard, PohCard, TwitterCard, PoapCard, FacebookCard, BrightidCard } from "./ProviderCards";
+import GithubCard from "./ProviderCards/GithubCard";
 
 export const CardList = (): JSX.Element => {
   return (
@@ -8,6 +12,7 @@ export const CardList = (): JSX.Element => {
         <FacebookCard />
         <GoogleCard />
         <TwitterCard />
+        <GithubCard />
         <BrightidCard />
         <PoapCard />
         <EnsCard />

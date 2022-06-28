@@ -1,21 +1,33 @@
-import React, {useContext, useState} from "react";
-import {datadogLogs} from "@datadog/browser-logs";
-import {datadogRum} from "@datadog/browser-rum";
-import {UserContext} from "../../context/userContext";
-import {Card} from "../Card";
-import {VerifyModal} from "../VerifyModal";
-import {DoneToastContent} from "../DoneToastContent";
-import {useDisclosure, useToast} from "@chakra-ui/react";
-import {PROVIDER_ID, Stamp} from "@gitcoin/passport-types";
-import {ProviderSpec} from "../../config/providers";
-import {fetchVerifiableCredential} from "@gitcoin/passport-identity";
+// --- React Methods
+import React, { useContext, useState } from "react";
+
+// --- Datadog
+import { datadogLogs } from "@datadog/browser-logs";
+import { datadogRum } from "@datadog/browser-rum";
+
+// --- Identity tools
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+
+// --- pull context
+import { CeramicContext } from "../../context/ceramicContext";
+import { UserContext } from "../../context/userContext";
+
+// --- style components
+import { Card } from "../Card";
+import { VerifyModal } from "../VerifyModal";
+import { DoneToastContent } from "../DoneToastContent";
+import { useDisclosure, useToast } from "@chakra-ui/react";
+
+import { PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
+import { ProviderSpec } from "../../config/providers";
 
 const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 
 const providerId: PROVIDER_ID = "Ens";
 
 export default function EnsCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const { address, signer } = useContext(UserContext);
+  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [ens, SetEns] = useState<string | undefined>(undefined);
@@ -48,8 +60,7 @@ export default function EnsCard(): JSX.Element {
         });
       })
       .catch((e: any): void => {
-        datadogLogs.logger.error("1) error providing verification", { error: e, provider: providerId });
-        console.error("2) error providing verification");
+        datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
         datadogRum.addError(e, { provider: providerId });
       })
       .finally((): void => {
@@ -62,6 +73,7 @@ export default function EnsCard(): JSX.Element {
     handleAddStamp(credentialResponse!)
       .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId }))
       .catch((e: any): void => {
+        datadogLogs.logger.error("Error Saving Stamp", { error: e, provider: providerId });
         datadogRum.addError(e, { provider: providerId });
       })
       .finally(() => {

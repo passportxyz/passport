@@ -29,7 +29,7 @@
     "autoprefixer": "^10.4.0",
     "base64-js": "^1.5.1",
     "broadcast-channel": "^4.11.0",
-    "framer-motion": "^6.3.13",
+    "framer-motion": "4.1.17",
     "identity-obj-proxy": "^3.0.0",
     "node-fetch": "^3.2.4",
     "react": "^17.0.2",

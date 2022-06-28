@@ -1,8 +1,18 @@
+// --- React Methods
 import React, { useContext, useState } from "react";
+
+// --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
+
+// --- Identity tools
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+
+// --- UserContext
+import { CeramicContext } from "../../context/ceramicContext";
 import { UserContext } from "../../context/userContext";
+
+// --- Style Components
 import { Card } from "../Card";
 import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../DoneToastContent";
@@ -34,7 +44,8 @@ const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 const providerId: PROVIDER_ID = "Facebook";
 
 export default function FacebookCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const { address, signer } = useContext(UserContext);
+  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
 
   // --- Chakra functions
@@ -81,6 +92,7 @@ export default function FacebookCard(): JSX.Element {
         });
       })
       .catch((e): void => {
+        datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
         datadogRum.addError(e, { provider: providerId });
       })
       .finally(() => {

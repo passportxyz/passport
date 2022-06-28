@@ -1,52 +1,45 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor, waitForElementToBeRemoved } from "@testing-library/react";
-import { PoapCard } from "../ProviderCards";
-import { UserContext, UserContextState } from "../../context/userContext";
-import { mockAddress, mockWallet } from "../../__test-fixtures__/onboardHookValues";
-import { STAMP_PROVIDERS } from "../../config/providers";
-import { poapStampFixture } from "../../__test-fixtures__/databaseStorageFixtures";
-import { SUCCESFUL_POAP_RESULT } from "../../__test-fixtures__/verifiableCredentialResults";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
+import { fireEvent, screen, waitFor, waitForElementToBeRemoved } from "@testing-library/react";
+import { PoapCard } from "../../../components/ProviderCards";
 
-jest.mock("@gitcoin/passport-identity", () => ({
+import { UserContextState } from "../../../context/userContext";
+import { mockAddress } from "../../../__test-fixtures__/onboardHookValues";
+import { STAMP_PROVIDERS } from "../../../config/providers";
+import { poapStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
+import { SUCCESFUL_POAP_RESULT } from "../../../__test-fixtures__/verifiableCredentialResults";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import {
+  makeTestCeramicContext,
+  makeTestUserContext,
+  renderWithContext,
+} from "../../../__test-fixtures__/contextTestHelpers";
+import { CeramicContextState } from "../../../context/ceramicContext";
+import { mock } from "jest-mock-extended";
+import { JsonRpcSigner } from "@ethersproject/providers";
+
+jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
   fetchVerifiableCredential: jest.fn(),
 }));
-jest.mock("../../utils/onboard.ts");
+jest.mock("../../../utils/onboard.ts");
 
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
 const mockHandleAddStamp = jest.fn().mockResolvedValue(undefined);
-const mockUserContext: UserContextState = {
-  userDid: undefined,
-  loggedIn: true,
-  passport: {
-    issuanceDate: new Date(),
-    expiryDate: new Date(),
-    stamps: [],
-  },
-  isLoadingPassport: false,
-  allProvidersState: {
-    POAP: {
-      providerSpec: STAMP_PROVIDERS.POAP,
-      stamp: undefined,
-    },
-  },
-  handleAddStamp: mockHandleAddStamp,
-  handleCreatePassport: mockCreatePassport,
+const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
+
+const mockUserContext: UserContextState = makeTestUserContext({
   handleConnection: mockHandleConnection,
   address: mockAddress,
-  wallet: mockWallet,
-  signer: undefined,
-  walletLabel: mockWallet.label,
-};
+  signer: mockSigner,
+});
+const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
+  handleCreatePassport: mockCreatePassport,
+  handleAddStamp: mockHandleAddStamp,
+});
 
-describe("when user has not veirfied with PoapProvider", () => {
+describe("when user has not verified with PoapProvider", () => {
   it("should display a verification button", () => {
-    render(
-      <UserContext.Provider value={mockUserContext}>
-        <PoapCard />
-      </UserContext.Provider>
-    );
+    renderWithContext(mockUserContext, mockCeramicContext, <PoapCard />);
 
     const initialVerifyButton = screen.queryByTestId("button-verify-poap");
 
@@ -56,20 +49,18 @@ describe("when user has not veirfied with PoapProvider", () => {
 
 describe("when user has verified with PoapProvider", () => {
   it("should display that POAP is verified", () => {
-    render(
-      <UserContext.Provider
-        value={{
-          ...mockUserContext,
-          allProvidersState: {
-            POAP: {
-              providerSpec: STAMP_PROVIDERS.POAP,
-              stamp: poapStampFixture,
-            },
+    renderWithContext(
+      mockUserContext,
+      {
+        ...mockCeramicContext,
+        allProvidersState: {
+          POAP: {
+            providerSpec: STAMP_PROVIDERS.POAP,
+            stamp: poapStampFixture,
           },
-        }}
-      >
-        <PoapCard />
-      </UserContext.Provider>
+        },
+      },
+      <PoapCard />
     );
 
     const poapVerified = screen.queryByText(/Verified/);
@@ -79,9 +70,8 @@ describe("when user has verified with PoapProvider", () => {
 });
 
 describe("when the verify button is clicked", () => {
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
-    mockHandleAddStamp.mockResolvedValue('reeeeeee')
   });
 
   describe("and when a successful POAP result is returned", () => {
@@ -90,18 +80,14 @@ describe("when the verify button is clicked", () => {
     });
 
     it("the modal displays the verify button", async () => {
-      render(
-        <UserContext.Provider value={mockUserContext}>
-          <PoapCard />
-        </UserContext.Provider>
-      );
+      renderWithContext(mockUserContext, mockCeramicContext, <PoapCard />);
 
       const initialVerifyButton = screen.queryByTestId("button-verify-poap");
 
       fireEvent.click(initialVerifyButton!);
 
       const verifyModal = await screen.findByRole("dialog");
-      const verifyModalButton = screen.getByTestId("modal-verify");
+      const verifyModalButton = screen.getByTestId("modal-verify-btn");
 
       expect(verifyModal).toBeInTheDocument();
 
@@ -111,11 +97,8 @@ describe("when the verify button is clicked", () => {
     });
 
     it("clicking verify adds the stamp", async () => {
-      render(
-        <UserContext.Provider value={mockUserContext}>
-          <PoapCard />
-        </UserContext.Provider>
-      );
+      mockHandleAddStamp.mockResolvedValue('reeeee')
+      renderWithContext(mockUserContext, mockCeramicContext, <PoapCard />);
 
       const initialVerifyButton = screen.queryByTestId("button-verify-poap");
 
@@ -124,7 +107,7 @@ describe("when the verify button is clicked", () => {
 
       // Wait to see the verify button on the modal
       await waitFor(() => {
-        const verifyModalButton = screen.getByTestId("modal-verify");
+        const verifyModalButton = screen.getByTestId("modal-verify-btn");
         expect(verifyModalButton).toBeInTheDocument();
       });
 
@@ -148,11 +131,7 @@ describe("when the verify button is clicked", () => {
 
     it("clicking cancel closes the modal and a stamp should not be added", async () => {
       (fetchVerifiableCredential as jest.Mock).mockResolvedValue(SUCCESFUL_POAP_RESULT);
-      render(
-        <UserContext.Provider value={mockUserContext}>
-          <PoapCard />
-        </UserContext.Provider>
-      );
+      renderWithContext(mockUserContext, mockCeramicContext, <PoapCard />);
 
       const initialVerifyButton = screen.queryByTestId("button-verify-poap");
 
@@ -179,11 +158,7 @@ describe("when the verify button is clicked", () => {
   describe("and when a failed POAP result is returned", () => {
     it("modal displays a failed message", async () => {
       (fetchVerifiableCredential as jest.Mock).mockRejectedValue("ERROR");
-      render(
-        <UserContext.Provider value={mockUserContext}>
-          <PoapCard />
-        </UserContext.Provider>
-      );
+      renderWithContext(mockUserContext, mockCeramicContext, <PoapCard />);
 
       const initialVerifyButton = screen.queryByTestId("button-verify-poap");
 
@@ -192,22 +167,13 @@ describe("when the verify button is clicked", () => {
       const verifyModal = await screen.findByRole("dialog");
       expect(verifyModal).toBeInTheDocument();
 
-      const verifyModalText = screen.getByText(
-        "We checked for POAP badges and did not find POAP badge(s) that are 15 or more days old."
+      expect(
+        screen.getByText("We checked for POAP badges and did not find POAP badge(s) that are 15 or more days old.")
       );
-      await waitFor(() => {
-        expect(verifyModalText).toBeInTheDocument();
-      });
 
-      const goToPoap = screen.getByText("Go to POAP");
-      await waitFor(() => {
-        expect(goToPoap).toBeInTheDocument();
-      });
+      expect(screen.getByText("Go to POAP"));
 
-      const cancel = screen.getByText("Cancel");
-      await waitFor(() => {
-        expect(cancel).toBeInTheDocument();
-      });
+      expect(screen.getByText("Cancel"));
     });
   });
 });

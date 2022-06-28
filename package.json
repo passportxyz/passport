@@ -14,6 +14,7 @@
   "workspaces": [
     "app",
     "database-client",
+    "cra-app",
     "iam",
     "identity",
     "schemas",

@@ -1,21 +1,32 @@
+// --- React Methods
 import React, { useContext, useState } from "react";
+
+// --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
-import { PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
+
+// --- Identity tools
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+
+// pull context
+import { CeramicContext } from "../../context/ceramicContext";
 import { UserContext } from "../../context/userContext";
 
+import { PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
 
+const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
+
+// --- import components
 import { Card } from "../Card";
 import { VerifyModal } from "../VerifyModal";
 import { useDisclosure, useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../DoneToastContent";
 
-const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
 const providerId: PROVIDER_ID = "Poh";
 
 export default function PohCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const { address, signer } = useContext(UserContext);
+  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [pohVerified, SetPohVerified] = useState<boolean | undefined>(undefined);
@@ -26,7 +37,7 @@ export default function PohCard(): JSX.Element {
   const toast = useToast();
 
   const handleFetchCredential = (): void => {
-    datadogLogs.logger.info("Saving Stamp", { provider: providerId });
+    datadogLogs.logger.info("Starting verification", { provider: providerId });
     setCredentialResponseIsLoading(true);
     fetchVerifiableCredential(
       iamUrl,
@@ -48,6 +59,7 @@ export default function PohCard(): JSX.Element {
         });
       })
       .catch((e: any): void => {
+        datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
         datadogRum.addError(e, { provider: providerId });
       })
       .finally((): void => {
@@ -59,6 +71,7 @@ export default function PohCard(): JSX.Element {
     handleAddStamp(credentialResponse!)
       .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId }))
       .catch((e) => {
+        datadogLogs.logger.error("Error Saving Stamp", { error: e, provider: providerId });
         datadogRum.addError(e, { provider: providerId });
       })
       .finally(() => {

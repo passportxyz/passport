@@ -20,8 +20,10 @@ export default function Home() {
 
   return (
     <div className="font-miriam-libre min-h-max min-h-default bg-landingPageBackground bg-cover bg-no-repeat text-gray-100">
-      <div className="container mx-auto flex flex-col flex-wrap items-center p-5 md:flex-row">
-        <img src="/assets/GitcoinLogoAndName.svg" alt="logo" />
+      <div className="container mx-auto flex flex-row flex-wrap items-center p-5">
+        <img src="/Users/luke/workspace/gitcoin/dPopp/cra-app/src/assets/gitcoinLogoWhite.svg" alt="Gitcoin Logo" />
+        <img className="ml-6 mr-6" src="/Users/luke/workspace/gitcoin/dPopp/cra-app/src/assets/logoLine.svg" alt="Logo Line" />
+        <img src="/Users/luke/workspace/gitcoin/dPopp/cra-app/src/assets/passportLogoWhite.svg" alt="pPassport Logo" />
       </div>
       <div className="container mx-auto px-5 py-2">
         <div className="mx-auto flex flex-wrap">
@@ -60,22 +62,34 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className="container mx-auto flex flex-col flex-wrap items-center p-5 md:flex-row">
-        <nav className="flex flex-wrap items-center justify-center text-base md:ml-auto md:mr-auto">
-          <img src="./assets/GitcoindaoLogoDark.svg" alt="Gitcoin Logo Dark" />
-        </nav>
+      <div className="container mx-auto flex flex-col flex-wrap items-center py-5 px-2 md:flex-row">
+        <div className="flex flex-wrap p-2 text-base">
+          Powered By
+          <a href="https://ceramic.network/" target="_blank" rel="noopener noreferrer" className="ml-2 underline">
+            Ceramic Network.
+          </a>
+        </div>
+        <img
+          src="./assets/gitcoindaoLogoDark.svg"
+          alt="Gitcoin Logo Dark"
+          className="flex flex-wrap items-center justify-center p-2 text-base md:ml-auto md:mr-auto"
+        />
         <a
           href="https://github.com/gitcoinco/dPopp"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 inline-flex items-center rounded py-1 px-3 text-base md:mt-0"
+          className="mt-4 inline-flex rounded py-1 px-20 text-base md:mt-0"
         >
           <img src="./assets/githubLogo.svg" alt="Github Logo" />
         </a>
-        {/* UNCOMMENT WHEN FAQ AVAILABLE*/}
-        {/* <a className="border-grey-200 ml-2 mt-4 inline-flex items-center rounded-full rounded border-2 py-1 px-4 text-base md:mt-0">
+        <a
+          href="https://docs.passport.gitcoin.co/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="border-grey-200 ml-2 mt-4 inline-flex items-center rounded-full rounded border-2 py-1 px-4 text-base md:mt-0"
+        >
           FAQ
-        </a> */}
+        </a>
       </div>
     </div>
   );

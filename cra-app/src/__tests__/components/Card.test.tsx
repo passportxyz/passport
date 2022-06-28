@@ -1,22 +1,42 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+
 import { VerifiableCredential } from "@gitcoin/passport-types";
 import { mock } from "jest-mock-extended";
-import { Card, CardProps } from "./Card";
-import { UserContext, UserContextState } from "../context/userContext";
-import { ProviderSpec } from "../config/providers";
 
-jest.mock("../utils/onboard.ts");
+import { Card, CardProps } from "../../components/Card";
 
-// Mock isLoadingPassport in each describes beforeEach
-const mockUserContext: UserContextState = {} as UserContextState;
+import { UserContextState } from "../../context/userContext";
+import { ProviderSpec } from "../../config/providers";
+import { CeramicContextState } from "../../context/ceramicContext";
+import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 
+jest.mock("../../utils/onboard.ts");
+
+let mockUserContext: UserContextState = {} as UserContextState;
+let mockCeramicContext: CeramicContextState = makeTestCeramicContext({
+  passport: {
+    issuanceDate: new Date(),
+    expiryDate: new Date(),
+    stamps: [],
+  },
+});
 let cardProps: CardProps;
+
+beforeEach(() => {
+  mockCeramicContext = makeTestCeramicContext({
+    passport: {
+      issuanceDate: new Date(),
+      expiryDate: new Date(),
+      stamps: [],
+    },
+  });
+});
 
 describe("when the passport is loading", () => {
   beforeEach(() => {
     // set up in a loading state...
-    mockUserContext.isLoadingPassport = true;
+    mockCeramicContext.isLoadingPassport = true;
     // set up Some provider without a VC
     cardProps = {
       providerSpec: { name: "Some", description: "Some desc" } as ProviderSpec,
@@ -26,25 +46,15 @@ describe("when the passport is loading", () => {
   });
 
   it("should show loading spinner", () => {
-    render(
-      <UserContext.Provider value={mockUserContext}>
-        <Card {...cardProps} />
-      </UserContext.Provider>
-    );
+    renderWithContext(mockUserContext, mockCeramicContext, <Card {...cardProps} />);
 
-    expect(screen.getByTitle("loading...")).toBeInTheDocument();
+    expect(screen.getByTitle("loading..."));
     expect(screen.queryByTestId("some-widget")).not.toBeInTheDocument();
   });
 });
 
 describe("when the user is not verified", () => {
   beforeEach(() => {
-    mockUserContext.passport = {
-      expiryDate: new Date(),
-      issuanceDate: new Date(),
-      stamps: [],
-    };
-    mockUserContext.isLoadingPassport = false;
     // set up Some provider without a VC
     cardProps = {
       providerSpec: { name: "Some", description: "Some desc" } as ProviderSpec,
@@ -60,7 +70,7 @@ describe("when the user is not verified", () => {
         isLoading: true,
       };
 
-      render(<Card {...cardProps} />);
+      renderWithContext(mockUserContext, mockCeramicContext, <Card {...cardProps} />);
 
       expect(screen.getByTestId("loading-indicator")).toBeInTheDocument();
     });
@@ -73,18 +83,14 @@ describe("when the user is not verified", () => {
         isLoading: false,
       };
 
-      render(<Card {...cardProps} />);
+      renderWithContext(mockUserContext, mockCeramicContext, <Card {...cardProps} />);
 
       expect(screen.queryByTestId("loading-indicator")).not.toBeInTheDocument();
     });
   });
 
   it("should show verification button", () => {
-    render(
-      <UserContext.Provider value={mockUserContext}>
-        <Card {...cardProps} />
-      </UserContext.Provider>
-    );
+    renderWithContext(mockUserContext, mockCeramicContext, <Card {...cardProps} />);
 
     expect(screen.getByTestId("some-widget")).toBeInTheDocument();
   });
@@ -92,12 +98,6 @@ describe("when the user is not verified", () => {
 
 describe("when the user is verified", () => {
   beforeEach(() => {
-    mockUserContext.passport = {
-      expiryDate: new Date(),
-      issuanceDate: new Date(),
-      stamps: [],
-    };
-    mockUserContext.isLoadingPassport = false;
     // set up Some provider with a mocked VC (verified)
     cardProps = {
       providerSpec: { name: "Some", description: "Some desc" } as ProviderSpec,
@@ -107,11 +107,7 @@ describe("when the user is verified", () => {
   });
 
   it("should show verified status", () => {
-    render(
-      <UserContext.Provider value={mockUserContext}>
-        <Card {...cardProps} />
-      </UserContext.Provider>
-    );
+    renderWithContext(mockUserContext, mockCeramicContext, <Card {...cardProps} />);
 
     expect(screen.getByText(/[Vv]erified/)).toBeInTheDocument();
     expect(screen.queryByText("Verify Button")).not.toBeInTheDocument();
