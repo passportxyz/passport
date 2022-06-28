@@ -17,6 +17,9 @@ module.exports = {
         blue: {
           darkblue: "#0E0333",
         },
+        green: {
+          jade: "#02E2AC",
+        },
       },
     },
     fontFamily: {

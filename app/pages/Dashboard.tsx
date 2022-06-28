@@ -114,38 +114,43 @@ export default function Dashboard() {
         <div className="w-full md:w-1/4">
           {isLoadingPassport == undefined && retryModal}
           {viewerConnection.status === "connecting" && (
-            <Alert status="warning" data-testid="selfId-connection-alert">
-              <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="orange.500" size="md" />
-              <AlertTitle ml={4}> Waiting for wallet signature</AlertTitle>
-            </Alert>
+            <div
+              className="absolute right-1/2 rounded bg-blue-darkblue py-4 px-8"
+              data-testid="selfId-connection-alert"
+            >
+              <span className="absolute top-0 right-0 flex h-3 w-3 translate-x-1/2 -translate-y-1/2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-jade opacity-75"></span>
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-green-jade"></span>
+              </span>
+              <span className="text-green-jade"> Waiting for wallet signature...</span>
+            </div>
           )}
-          {viewerConnection.status !== "connecting" &&
-            (!passport ? (
-              <Spinner
-                thickness="4px"
-                speed="0.65s"
-                emptyColor="gray.200"
-                color="purple.500"
-                size="xl"
-                data-testid="loading-spinner-passport"
-              />
-            ) : (
-              <div>
-                <button
-                  data-testid="button-passport-json"
-                  className="float-right rounded-md border-2 border-gray-300 py-2 px-6 text-black"
-                  onClick={onOpen}
-                >{`</> Passport JSON`}</button>
+          {!passport ? (
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="purple.500"
+              size="xl"
+              data-testid="loading-spinner-passport"
+            />
+          ) : (
+            <div>
+              <button
+                data-testid="button-passport-json"
+                className="float-right rounded-md border-2 border-gray-300 py-2 px-6 text-black"
+                onClick={onOpen}
+              >{`</> Passport JSON`}</button>
 
-                <JsonOutputModal
-                  isOpen={isOpen}
-                  onClose={onClose}
-                  title={"Passport JSON"}
-                  subheading={"You can find the Passport JSON data below"}
-                  jsonOutput={passport}
-                />
-              </div>
-            ))}
+              <JsonOutputModal
+                isOpen={isOpen}
+                onClose={onClose}
+                title={"Passport JSON"}
+                subheading={"You can find the Passport JSON data below"}
+                jsonOutput={passport}
+              />
+            </div>
+          )}
         </div>
       </div>
       <CardList />
