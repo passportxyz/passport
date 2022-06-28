@@ -1,6 +1,5 @@
 // Should this file be an app factory? If it was, we could move the provider config to main.ts and test in isolation
 import dotenv from "dotenv";
-
 dotenv.config();
 
 // ---- Server
@@ -45,6 +44,7 @@ import { FacebookProvider } from "./providers/facebook";
 import { BrightIdProvider } from "./providers/brightid";
 import { GithubProvider } from "./providers/github";
 import { LinkedinProvider } from "./providers/linkedin";
+import { GoodDollarProvider } from "./providers/gooddollar";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
@@ -59,6 +59,7 @@ const providers = new Providers([
   new BrightIdProvider(),
   new GithubProvider(),
   new LinkedinProvider(),
+  new GoodDollarProvider(),
 ]);
 
 // create the app and run on port
@@ -109,8 +110,10 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
     // ensure address is check-summed
     payload.address = utils.getAddress(payload.address);
     // generate a challenge for the given payload
+    // console.log({ payload });
     const challenge = providers.getChallenge(payload);
     // if the request is valid then proceed to generate a challenge credential
+    // console.log({ challenge });
     if (challenge && challenge.valid === true) {
       // construct a request payload to issue a credential against
       const record: RequestPayload = {
@@ -119,17 +122,23 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
         address: payload.address,
         // version as defined by entry point
         version: "0.0.0",
+        ...(payload.type === "GoodDollar" && { proofs: { whitelistedAddress: payload.proofs.whitelistedAddress } }),
         // extend/overwrite with record returned from the provider
         ...(challenge?.record || {}),
       };
 
       // generate a VC for the given payload
+      // console.log("issue", { key, record });
       return void issueChallengeCredential(DIDKit, key, record)
         .then((credential) => {
+          // console.log({ credential });
+
           // return the verifiable credential
           return res.json(credential as CredentialResponseBody);
         })
         .catch((error) => {
+          // console.log({ error });
+
           if (error) {
             // return error msg indicating a failure producing VC
             return errorRes(res, "Unable to produce a verifiable credential", 400);

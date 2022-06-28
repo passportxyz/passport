@@ -20,6 +20,7 @@ export type VerifiableCredential = {
     provider?: string;
     address?: string;
     challenge?: string;
+    whitelistedAddress?: string;
   };
   issuer: string;
   issuanceDate: string;
@@ -131,4 +132,5 @@ export type PROVIDER_ID =
   | "Facebook"
   | "Brightid"
   | "Github"
-  | "Linkedin";
+  | "Linkedin"
+  | "GoodDollar";

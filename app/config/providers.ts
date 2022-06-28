@@ -56,4 +56,9 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     name: "Linkedin",
     description: "Linkedin name",
   },
+  GoodDollar: {
+    icon: "./assets/G$StampIcon.svg",
+    name: "GoodDollar Unique Identity",
+    description: "Anonymized facial liveness and uniqueness test",
+  },
 };

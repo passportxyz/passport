@@ -1,5 +1,7 @@
 node_modules
 .env
+.yarn
+.yarnrc.yml
 
 # Logs
 logs

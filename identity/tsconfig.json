@@ -16,5 +16,5 @@
       "*": ["../node_modules/*", "node_modules/*"]
     }
   },
-  "include": ["src/*", "src/didkit-node/*", "__tests__"]
+  "include": ["src/*", "src/didkit-node/*", "__tests__", "__mocks__"]
 }
