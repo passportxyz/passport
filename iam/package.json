@@ -1,7 +1,7 @@
 {
   "name": "@gitcoin/passport-iam",
   "private": true,
-  "version": "0.0.1",
+  "version": "1.0.0",
   "main": "dist/src/main.js",
   "types": "src/types.d.ts",
   "license": "MIT",
@@ -17,8 +17,8 @@
     "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx ."
   },
   "dependencies": {
-    "@gitcoin/passport-identity": "^0.0.1",
-    "@gitcoin/passport-types": "^0.0.1",
+    "@gitcoin/passport-identity": "^1.0.0",
+    "@gitcoin/passport-types": "^1.0.0",
     "@spruceid/didkit-wasm-node": "^0.2.1",
     "axios": "^0.27.2",
     "brightid_sdk": "^1.0.1",
