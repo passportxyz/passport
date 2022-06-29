@@ -1,20 +1,20 @@
 // ---- Test subject
 import { GoodDollarProvider } from "../src/providers/gooddollar";
 
+jest.setTimeout(10000);
 const MOCK_ADDRESS = "0x738488886dd94725864ae38252a90be1ab7609c2";
-const MOCK_ADDRESS2 = "0x9E6Ea049A281F513a2BAbb106AF1E023FEEeCfA9";
+const MOCK_ADDRESS2 = "0x66582D24FEaD72555adaC681Cc621caCbB208324";
 
 const mockIsWhitelisted = jest.fn();
 
 export const sampleGooddollarSignedObject = {
-  a: { value: "0x9E6Ea049A281F513a2BAbb106AF1E023FEEeCfA9", attestation: "" },
+  a: {
+    value: "0x66582D24FEaD72555adaC681Cc621caCbB208324",
+    attestation: "",
+  },
   v: { value: true, attestation: "" },
-  I: { value: "India", attestation: "" },
-  n: { value: "Harjaap Dhillon", attestation: "" },
-  e: { value: "harvydhillon16@gmail.com", attestation: "" },
-  m: { value: "+918146851290", attestation: "" },
-  nonce: { value: Date.now(), attestation: "" },
-  sig: "0xadbf6657ff309f9f25dddf72d2d04ec3b0af053b2db9121910f79ea82bce486e1db26ea639670fa1600ce862e209845e1d2a73ad7a4a4e858a80dfa33f79e0ef1c",
+  nonce: { value: 3312972836304, attestation: "" },
+  sig: "0x50ddf850f78cce38563ae7146b88e616508d9ed547646c8a82a28e5c66fa078f7a4663a811e9580a6d2284a730234210b777cfe3835a2ec7aa79d8c6fe1280a01b",
 };
 
 const MOCK_REQUEST_PAYLOAD = {
@@ -24,6 +24,15 @@ const MOCK_REQUEST_PAYLOAD = {
   proofs: {
     whitelistedAddress: MOCK_ADDRESS2,
     signedResponse: sampleGooddollarSignedObject,
+  },
+  challenge: "",
+};
+const MOCK_NONLOGIN_REQUEST_PAYLOAD = {
+  type: "GoodDollar",
+  address: MOCK_ADDRESS2,
+  version: "0.0.0",
+  proofs: {
+    whitelistedAddress: MOCK_ADDRESS2,
   },
   challenge: "",
 };
@@ -49,12 +58,24 @@ jest.mock("ethers", () => {
 });
 
 describe("Attempt verification", function () {
-  it("should return true for an address whitelisted with gooddollar", async () => {
+  it("should verify is address is whitelisted if verifying not through login with gooddollar", async () => {
     mockIsWhitelisted.mockResolvedValueOnce(true);
     const gd = new GoodDollarProvider();
-    const verifiedPayload = await gd.verify(MOCK_REQUEST_PAYLOAD as any);
-
+    const verifiedPayload = await gd.verify(MOCK_NONLOGIN_REQUEST_PAYLOAD as any);
     expect(mockIsWhitelisted).toBeCalledWith(MOCK_ADDRESS2);
+
+    expect(verifiedPayload).toEqual({
+      valid: true,
+      record: {
+        address: MOCK_ADDRESS2,
+        whitelistedAddress: MOCK_ADDRESS2,
+      },
+    });
+  });
+
+  it("should return true for an address whitelisted with gooddollar", async () => {
+    const gd = new GoodDollarProvider();
+    const verifiedPayload = await gd.verify(MOCK_REQUEST_PAYLOAD as any);
 
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -75,6 +96,7 @@ describe("Attempt verification", function () {
     expect(mockIsWhitelisted).toBeCalledWith(UNREGISTERED_ADDRESS);
     expect(verifiedPayload).toEqual({
       valid: false,
+      error: ["whitelist address mismatch or not whitelisted", "{}"],
     });
   });
 
@@ -88,7 +110,7 @@ describe("Attempt verification", function () {
     expect(mockIsWhitelisted).toBeCalledWith(UNREGISTERED_ADDRESS);
     expect(verifiedPayload).toEqual({
       valid: false,
-      error: [JSON.stringify("some error")],
+      error: [undefined, JSON.stringify("some error")],
     });
   });
 });

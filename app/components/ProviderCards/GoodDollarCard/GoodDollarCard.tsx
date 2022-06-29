@@ -26,6 +26,7 @@ import { GoodDollarVerifyModal } from "./GoodDollarVerifyModal";
 import { VerifyModal } from "../../VerifyModal";
 
 const providerId: PROVIDER_ID = "GoodDollar";
+const GOODDOLLAR_ENV = process.env.NEXT_PUBLIC_GOODDOLLAR_ENV || "fuse";
 
 export default function GoodDollarCard(): JSX.Element {
   const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
@@ -44,7 +45,7 @@ export default function GoodDollarCard(): JSX.Element {
   // console.log({ isWhitelisted, address, credentialResponseIsLoading, searchParams }, searchParams.get("login"));
   //TODO: verify all these details
   const gooddollarLinkDev = createLoginLink({
-    redirectLink: Envs[process.env.NEXT_PUBLIC_GOODDOLLAR_ENV || "fuse"].dappUrl + "/AppNavigation/LoginRedirect",
+    redirectLink: Envs[GOODDOLLAR_ENV].dappUrl + "/AppNavigation/LoginRedirect",
     v: "Gitcoin Passport",
     web: "https://passport.gitcoin.co",
     id: "",
@@ -160,8 +161,8 @@ export default function GoodDollarCard(): JSX.Element {
         return;
       }
 
-      const parsed = await parseLoginResponse(signedResponse);
-      onGoodDollarRedirect((parsed && parsed.walletAddress.value) || "", signedResponse);
+      const parsed = await parseLoginResponse(signedResponse, GOODDOLLAR_ENV);
+      onGoodDollarRedirect(((parsed && parsed.walletAddress.value) as string) || "", signedResponse);
     },
     [onGoodDollarRedirect, clearLogin, toast]
   );
