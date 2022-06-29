@@ -13,7 +13,7 @@ export type CardListProps = {
 export const CardList = ({ isLoading }: CardListProps): JSX.Element => {
   return (
     <div className="container mx-auto py-10">
-      <div className="-m-4 flex flex-wrap">
+      <div className="-m-4 flex flex-wrap px-4">
         {isLoading ? (
           <>
             {[...Array(9)].map((_, i) => (

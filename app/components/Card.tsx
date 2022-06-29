@@ -31,7 +31,7 @@ export const Card = ({
   const { passport, isLoadingPassport } = useContext(CeramicContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
-    <div className="w-full p-4 md:w-1/2 xl:w-1/4">
+    <div className="w-1/2 p-2 md:w-1/2 xl:w-1/4">
       <div className="relative border border-gray-200 p-0">
         {isLoading && (
           <div className="absolute inset-0 z-10 flex w-full flex-col items-center justify-center bg-white opacity-80">
@@ -79,7 +79,7 @@ export const Card = ({
         </div>
         <div className="mt-2 p-2">
           <h1 className="title-font mb-3 text-lg font-medium text-gray-900">{providerSpec.name}</h1>
-          <p className="pleading-relaxed">{providerSpec.description}</p>
+          <p className="pleading-relaxed hidden md:inline-block">{providerSpec.description}</p>
         </div>
         {/* TODO: change this to passport===false and introduce an offline save state when passport===undefined */}
         {!passport || isLoadingPassport ? (
