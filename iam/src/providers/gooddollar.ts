@@ -38,11 +38,19 @@ export class GoodDollarProvider implements Provider {
       const whitelistedAddress = proofs.whitelistedAddress;
       //if we have gooddollar login response, this will verify it was signed by owner and recently(nonce)
       if (proofs.signedResponse) {
-        const result = (await parseLoginResponse(proofs.signedResponse as unknown as LoginResult)) as {
-          walletAddrress: { value: string };
-        };
+        const result = await parseLoginResponse(proofs.signedResponse as unknown as LoginResult);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const signedAddress = result && result.walletAddress.value;
+
+        const isWhitelisted =
+          result &&
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          result.isAddressWhitelisted.isVerified &&
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          result.isAddressWhitelisted.value;
         // console.log({ result, proofs });
-        if (result.walletAddrress?.value !== whitelistedAddress) throw new Error("whitelist address mismatch");
+        if (!isWhitelisted || signedAddress != whitelistedAddress)
+          throw new Error("whitelist address mismatch or note whitelisted");
       } else {
         if (address !== whitelistedAddress) throw new Error("whitelist address mismatch");
       }
