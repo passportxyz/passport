@@ -241,16 +241,19 @@ export default function GoodDollarCard(): JSX.Element {
         verifyData={credentialResponse ? <></> : gooddollarWidget}
         isLoading={credentialResponseIsLoading}
       />
-      <Alert
+
+      <div
         hidden={!credentialResponseIsLoading}
-        status="warning"
-        data-testid="signature-waiting-alert"
-        position={"fixed"}
-        top={"30%"}
+        className="z-2000 fixed inset-x-0 top-20 mx-auto w-1/6 rounded bg-blue-darkblue py-4 px-8"
+        data-testid="selfId-connection-alert"
+        style={{ zIndex: 2000 }}
       >
-        <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="orange.500" size="md" />
-        <AlertTitle ml={4}> Waiting for wallet signature</AlertTitle>
-      </Alert>
+        <span className="absolute top-0 right-0 flex h-3 w-3 translate-x-1/2 -translate-y-1/2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-jade opacity-75"></span>
+          <span className="relative inline-flex h-3 w-3 rounded-full bg-green-jade"></span>
+        </span>
+        <span className="text-green-jade"> Waiting for wallet signature...</span>
+      </div>
     </div>
   );
 
