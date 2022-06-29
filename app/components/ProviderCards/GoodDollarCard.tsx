@@ -161,7 +161,7 @@ export default function GoodDollarCard(): JSX.Element {
       }
 
       const parsed = await parseLoginResponse(signedResponse);
-      onGoodDollarRedirect(parsed.walletAddrress.value, signedResponse);
+      onGoodDollarRedirect((parsed && parsed.walletAddress.value) || "", signedResponse);
     },
     [onGoodDollarRedirect, clearLogin, toast]
   );
