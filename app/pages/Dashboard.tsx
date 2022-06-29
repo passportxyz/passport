@@ -77,9 +77,10 @@ export default function Dashboard() {
               <img alt="shield-exclamation-icon" src="./assets/shield-exclamation-icon.svg" />
             </div>
             <div className="flex flex-col" data-testid="retry-modal-content">
-              <p className="text-lg font-bold">Unable to Connect</p>
+              <p className="text-lg font-bold">Ceramic Network Error</p>
               <p>
-                There was an issue connecting to the Ceramic network. You can try connecting again or try again later.
+                The Gitcoin Passport relies on the Ceramic Network which currently is having network issues. Please try
+                again later.
               </p>
             </div>
           </div>
