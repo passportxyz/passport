@@ -38,40 +38,42 @@ export class GoodDollarProvider implements Provider {
       const whitelistedAddress = proofs.whitelistedAddress;
       //if we have gooddollar login response, this will verify it was signed by owner and recently(nonce)
       if (proofs.signedResponse) {
-        const result = await parseLoginResponse(proofs.signedResponse as unknown as LoginResult);
+        const result = await parseLoginResponse(
+          proofs.signedResponse as unknown as LoginResult,
+          process.env.GOODDOLLAR_ENV || "fuse"
+        );
+        // console.log({ result, proofs });
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const signedAddress = result && result.walletAddress.value;
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const isWhitelisted =
           result &&
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           result.isAddressWhitelisted.isVerified &&
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           result.isAddressWhitelisted.value;
-        // console.log({ result, proofs });
         if (!isWhitelisted || signedAddress != whitelistedAddress)
-          throw new Error("whitelist address mismatch or note whitelisted");
+          throw new Error("whitelist address mismatch or not whitelisted");
       } else {
-        if (address !== whitelistedAddress) throw new Error("whitelist address mismatch");
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+        const valid = await contract.isWhitelisted(whitelistedAddress);
+        if (!valid || address !== whitelistedAddress) throw new Error("whitelist address mismatch or not whitelisted");
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-      const valid: boolean = await contract.isWhitelisted(whitelistedAddress);
-
       return {
-        valid,
-        record: valid
-          ? {
-              // store the address into the proof records
-              address,
-              whitelistedAddress,
-            }
-          : undefined,
+        valid: true,
+        record: {
+          // store the address into the proof records
+          address,
+          whitelistedAddress,
+        },
       };
     } catch (e) {
       return {
         valid: false,
-        error: [JSON.stringify(e)],
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        error: [e.message as string, JSON.stringify(e)],
       };
     }
   }

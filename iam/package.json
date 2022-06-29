@@ -19,7 +19,7 @@
   "dependencies": {
     "@gitcoin/passport-identity": "^0.0.1",
     "@gitcoin/passport-types": "^0.0.1",
-    "@gooddollar/goodlogin-sdk": "^1.1.12",
+    "@gooddollar/goodlogin-sdk": "^1.1.14",
     "@gooddollar/goodprotocol": "^1.0.20",
     "@spruceid/didkit-wasm-node": "^0.2.1",
     "axios": "^0.27.2",
