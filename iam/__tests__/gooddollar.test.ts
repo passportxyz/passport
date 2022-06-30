@@ -1,5 +1,6 @@
 // ---- Test subject
 import { GoodDollarProvider } from "../src/providers/gooddollar";
+import ethers from "ethers";
 
 jest.setTimeout(10000);
 const MOCK_ADDRESS = "0x738488886dd94725864ae38252a90be1ab7609c2";
@@ -47,16 +48,11 @@ const MOCK_INVALID_REQUEST_PAYLOAD = {
   challenge: "",
 };
 
-jest.mock("ethers", () => {
+ethers.Contract = jest.fn().mockImplementation(() => {
   return {
-    Contract: jest.fn().mockImplementation(() => {
-      return {
-        isWhitelisted: mockIsWhitelisted,
-      };
-    }),
+    isWhitelisted: mockIsWhitelisted,
   };
-});
-
+}) as any;
 describe("Attempt verification", function () {
   it("should verify is address is whitelisted if verifying not through login with gooddollar", async () => {
     mockIsWhitelisted.mockResolvedValueOnce(true);
