@@ -23,7 +23,7 @@
     "@gitcoin/passport-identity": "^0.0.1",
     "@gitcoin/passport-types": "^0.0.1",
     "@gooddollar/goodlogin-sdk": "^1.1.14",
-    "@gooddollar/web3sdk-v2": "^0.1.8",
+    "@gooddollar/web3sdk-v2": "^0.1.9",
     "@self.id/framework": "^0.3.2",
     "@web3-onboard/core": "2.3.0",
     "@web3-onboard/injected-wallets": "2.0.5",
