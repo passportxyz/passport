@@ -3301,10 +3301,10 @@
     truffle-plugin-verify "^0.5.11"
     truffle-source-verify "^0.0.6"
 
-"@gooddollar/web3sdk-v2@^0.1.8":
-  version "0.1.8"
-  resolved "https://registry.yarnpkg.com/@gooddollar/web3sdk-v2/-/web3sdk-v2-0.1.8.tgz#7da8694a0b3a382f66cfcf3303400fc534f665ab"
-  integrity sha512-Q8evTzwOpgl87KKyKtw8b0CYrUKjNDJWxPcS8M9QqqN3rrxBgZHr52416cdIVxY6ekBB16/NjCqpTOWisMHiUA==
+"@gooddollar/web3sdk-v2@^0.1.9":
+  version "0.1.9"
+  resolved "https://registry.yarnpkg.com/@gooddollar/web3sdk-v2/-/web3sdk-v2-0.1.9.tgz#8395369af58404c1a6bf2e92e988b9ec82a36d38"
+  integrity sha512-H+aWQESYtaOB6sWQFZWswHja5RVc15GHGBpX85XBrBmdITGefc3auC1/06wa3/3orVmyg98o+S+8wM9XmbRk0g==
   dependencies:
     "@gooddollar/goodprotocol" "^1.0.20"
     "@usedapp/core" "^1.0.9"
@@ -8912,12 +8912,7 @@ cssstyle@^2.3.0:
   dependencies:
     cssom "~0.3.6"
 
-csstype@3.0.9:
-  version "3.0.9"
-  resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.0.9.tgz#6410af31b26bd0520933d02cbc64fce9ce3fbf0b"
-  integrity sha512-rpw6JPxK6Rfg1zLOYCSwle2GFOOsnjmDYDaBwEcwoOg4qlsIVCN789VkBZDJAGi4T07gI4YSutR43t9Zz4Lzuw==
-
-csstype@^3.0.2:
+csstype@3.0.10, csstype@3.0.9, csstype@^3.0.2:
   version "3.0.10"
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.0.10.tgz#2ad3a7bed70f35b965707c092e5f30b327c290e5"
   integrity sha512-2u44ZG2OcNUO9HDp/Jl8C07x6pU/eTR3ncV91SiK3dhG9TWvRVsCoJw14Ckx5DgWkzGA3waZWO3d7pgqpUI/XA==

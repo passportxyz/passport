@@ -53,7 +53,7 @@ export default function GoodDollarCard(): JSX.Element {
     rdu: window.location.href,
   });
 
-  const clearLogin = useCallback(() => {
+  const clearRedirectParams = useCallback(() => {
     const loginParam = searchParams.get("login") || searchParams.get("verified");
     if (loginParam) {
       searchParams.delete("login");
@@ -137,18 +137,18 @@ export default function GoodDollarCard(): JSX.Element {
   //once user is back from login with gooddolalr or face verification we can use this helper to trigger the stamp verificaiton
   const onGoodDollarRedirect = useCallback(
     async (verifiedAddress: string, signedResponse?: any) => {
+      clearRedirectParams();
       setVerificationInProgress(true);
       SetCredentialResponse(undefined);
       onOpen();
       await handleFetchGoodCredential(verifiedAddress, signedResponse);
     },
-    [SetCredentialResponse, setVerificationInProgress, handleFetchGoodCredential, onOpen]
+    [SetCredentialResponse, setVerificationInProgress, handleFetchGoodCredential, onOpen, clearRedirectParams]
   );
 
   //handle LoginButton result form redirect back
   const goodDollarLoginCallback = useCallback(
     async (signedResponse: any) => {
-      clearLogin();
       // console.log({ data });
       if (signedResponse.error) {
         toast({
@@ -158,13 +158,14 @@ export default function GoodDollarCard(): JSX.Element {
           status: "error",
           title: "Request to login was denied!",
         });
+        clearRedirectParams();
         return;
       }
 
       const parsed = await parseLoginResponse(signedResponse, GOODDOLLAR_ENV);
       onGoodDollarRedirect(((parsed && parsed.walletAddress.value) as string) || "", signedResponse);
     },
-    [onGoodDollarRedirect, clearLogin, toast]
+    [onGoodDollarRedirect, clearRedirectParams, toast]
   );
 
   useEffect(() => {
@@ -184,38 +185,51 @@ export default function GoodDollarCard(): JSX.Element {
     }
   }, [searchParams, onOpen, isWhitelisted, address, onGoodDollarRedirect]);
 
-  const gooddollarWidget = (
-    <Box display="flex" alignItems="center" justifyContent="center" width="100%" py={6}>
-      <ButtonGroup>
-        <LoginButton
-          data-testid="button-verify-gooddollar"
-          // className="verify-btn"
-          onLoginCallback={goodDollarLoginCallback}
-          gooddollarlink={gooddollarLinkDev}
-          rdu={window.location.href}
-        >
-          <Button data-testid="modal-gd-connect" colorScheme="purple" mr={2}>
-            Connect Exisitng
-          </Button>
-        </LoginButton>
-        <Button
-          data-testid="button-fvverify-gooddollar"
-          colorScheme="purple"
-          mr={2}
-          onClick={() => setGetVerified(true)}
-        >
-          Get Verified
-        </Button>
-      </ButtonGroup>
-      <GoodDollarVerifyModal
-        isOpen={getVerified}
-        onClose={handleModalOnClose}
-        // stamp={{ provider: "GoodDollar", credential: { credentialSubject: { address } } }}
-        stamp={undefined}
-        isLoading={false}
-      />
-    </Box>
-  );
+  const GooddollarWidget = () => {
+    const Loading = (
+      <div className="p-6 text-center">
+        <div>Waiting for wallet signature</div>
+        <Spinner data-testid="loading-spinner" />
+      </div>
+    );
+    return (
+      <Box display="flex" alignItems="center" justifyContent="center" width="100%" py={6}>
+        {credentialResponseIsLoading && Loading}
+        {!credentialResponseIsLoading && (
+          <>
+            <ButtonGroup>
+              <LoginButton
+                data-testid="button-verify-gooddollar"
+                // className="verify-btn"
+                onLoginCallback={goodDollarLoginCallback}
+                gooddollarlink={gooddollarLinkDev}
+                rdu={window.location.href}
+              >
+                <Button data-testid="modal-gd-connect" colorScheme="purple" mr={2}>
+                  Connect Exisitng
+                </Button>
+              </LoginButton>
+              <Button
+                data-testid="button-fvverify-gooddollar"
+                colorScheme="purple"
+                mr={2}
+                onClick={() => setGetVerified(true)}
+              >
+                Get Verified
+              </Button>
+            </ButtonGroup>
+            <GoodDollarVerifyModal
+              isOpen={getVerified}
+              onClose={handleModalOnClose}
+              // stamp={{ provider: "GoodDollar", credential: { credentialSubject: { address } } }}
+              stamp={undefined}
+              isLoading={false}
+            />
+          </>
+        )}
+      </Box>
+    );
+  };
   const issueCredentialWidget = (
     <div>
       <button
@@ -238,22 +252,9 @@ export default function GoodDollarCard(): JSX.Element {
         onClose={handleModalOnClose}
         stamp={credentialResponse}
         handleUserVerify={handleUserVerify}
-        verifyData={credentialResponse ? <></> : gooddollarWidget}
-        isLoading={credentialResponseIsLoading}
+        verifyData={credentialResponse ? <></> : <GooddollarWidget />}
+        isLoading={false}
       />
-
-      <div
-        hidden={!credentialResponseIsLoading}
-        className="z-2000 fixed inset-x-0 top-20 mx-auto w-1/6 rounded bg-blue-darkblue py-4 px-8"
-        data-testid="selfId-connection-alert"
-        style={{ zIndex: 2000 }}
-      >
-        <span className="absolute top-0 right-0 flex h-3 w-3 translate-x-1/2 -translate-y-1/2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-jade opacity-75"></span>
-          <span className="relative inline-flex h-3 w-3 rounded-full bg-green-jade"></span>
-        </span>
-        <span className="text-green-jade"> Waiting for wallet signature...</span>
-      </div>
     </div>
   );
 
