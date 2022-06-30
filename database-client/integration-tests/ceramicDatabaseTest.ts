@@ -11,10 +11,7 @@ let testDID: DID;
 let ceramicDatabase: CeramicDatabase;
 
 beforeAll(async () => {
-  const TEST_SEED = new Uint8Array([
-    6, 190, 125, 152, 83, 9, 111, 202, 6, 214, 218, 146, 104, 168, 166, 110, 202, 171, 42, 114, 73, 204, 214, 60, 112,
-    254, 173, 151, 170, 254, 250, 2,
-  ]);
+  const TEST_SEED = Uint8Array.from({length: 32}, () => Math.floor(Math.random() * 256));
 
   // Create and authenticate the DID
   testDID = new DID({
@@ -88,7 +85,7 @@ describe("when there is an existing passport without stamps for the given did", 
       "@context": ["https://www.w3.org/2018/credentials/v1"],
       type: ["VerifiableCredential"],
       credentialSubject: {
-        id: "did:key:z6Mkf64CtFAtmSnt2a3HrFyo1i1BzR2ftndjrHby1bqv8N5r", // did:key value for TEST_SEED (must match ceramicClients DID)
+        id: `${ceramicDatabase.did}`,
         "@context": [
           {
             hash: "https://schema.org/Text",
@@ -135,44 +132,49 @@ describe("when there is an existing passport with stamps for the given did", () 
     stamps: [],
   };
 
-  const credential: VerifiableCredential = {
-    "@context": ["https://www.w3.org/2018/credentials/v1"],
-    type: ["VerifiableCredential"],
-    credentialSubject: {
-      id: "did:key:z6Mkf64CtFAtmSnt2a3HrFyo1i1BzR2ftndjrHby1bqv8N5r", // did:key value for TEST_SEED (must match ceramicClients DID)
-      "@context": [
-        {
-          hash: "https://schema.org/Text",
-          provider: "https://schema.org/Text",
-        },
-      ],
-      hash: "randomValuesHash",
-      provider: "randomValuesProvider",
-    },
-    issuer: "did:key:randomValuesIssuer",
-    issuanceDate: "2022-04-15T21:04:01.708Z",
-    proof: {
-      type: "Ed25519Signature2018",
-      proofPurpose: "assertionMethod",
-      verificationMethod: "did:key:randomValues",
-      created: "2022-04-15T21:04:01.708Z",
-      jws: "randomValues",
-    },
-    expirationDate: "2022-05-15T21:04:01.708Z",
-  };
-
-  const ensStampFixture: Stamp = {
-    provider: "Ens",
-    credential,
-  };
-
-  const googleStampFixture: Stamp = {
-    provider: "Google",
-    credential,
-  };
+  // these need to be initialized in beforeEach since `credential` needs `ceramicDatabase` to be defined
+  let credential: VerifiableCredential;
+  let ensStampFixture: Stamp;
+  let googleStampFixture: Stamp;
 
   let existingPassportStreamID;
   beforeEach(async () => {
+    credential = {
+      "@context": ["https://www.w3.org/2018/credentials/v1"],
+      type: ["VerifiableCredential"],
+      credentialSubject: {
+        id: `${ceramicDatabase.did}`,
+        "@context": [
+          {
+            hash: "https://schema.org/Text",
+            provider: "https://schema.org/Text",
+          },
+        ],
+        hash: "randomValuesHash",
+        provider: "randomValuesProvider",
+      },
+      issuer: "did:key:randomValuesIssuer",
+      issuanceDate: "2022-04-15T21:04:01.708Z",
+      proof: {
+        type: "Ed25519Signature2018",
+        proofPurpose: "assertionMethod",
+        verificationMethod: "did:key:randomValues",
+        created: "2022-04-15T21:04:01.708Z",
+        jws: "randomValues",
+      },
+      expirationDate: "2022-05-15T21:04:01.708Z",
+    };
+
+    ensStampFixture = {
+      provider: "Ens",
+      credential,
+    };
+
+    googleStampFixture = {
+      provider: "Google",
+      credential,
+    };
+
     // create a tile for verifiable credential issued from iam server
     const ensStampTile = await ceramicDatabase.model.createTile("VerifiableCredential", credential);
     // add ENS stamp provider and streamId to passport stamps array
