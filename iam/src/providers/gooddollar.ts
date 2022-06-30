@@ -3,7 +3,7 @@ import type { Provider, ProviderOptions } from "../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ------ Ethers Library
-import { Contract } from "ethers";
+import { Contract, utils } from "ethers";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
 // ------ GoodDollar identity ABI & Address
@@ -35,7 +35,7 @@ export class GoodDollarProvider implements Provider {
     try {
       const providerFuse: StaticJsonRpcProvider = new StaticJsonRpcProvider(fuse_rpc);
       const contract = new Contract(IDENTITY_ADDRESS_FUSE, Identity.abi, providerFuse);
-      const whitelistedAddress = proofs.whitelistedAddress;
+      const whitelistedAddress = utils.getAddress(proofs.whitelistedAddress);
       //if we have gooddollar login response, this will verify it was signed by owner and recently(nonce)
       if (proofs.signedResponse) {
         const result = await parseLoginResponse(
