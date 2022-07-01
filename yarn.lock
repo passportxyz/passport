@@ -5558,16 +5558,6 @@
   dependencies:
     "@walletconnect/window-getters" "^1.0.0"
 
-"@web3-onboard/common@^2.0.6":
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/@web3-onboard/common/-/common-2.1.2.tgz#76f636d58973e94f027198ba366f77b98d624ac2"
-  integrity sha512-sPshJq/ith/Z1CmfK8PXxadpbYtRmomCZJyhRFiR4lWxXf9deDLfvQgc7t4h/w7BLgdODpkwz6ixD0bA0gBkyA==
-  dependencies:
-    "@ethereumjs/common" "2.6.2"
-    ethers "5.5.4"
-    joi "^17.4.2"
-    rxjs "^7.5.2"
-
 "@web3-onboard/common@^2.1.0", "@web3-onboard/common@^2.1.1":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@web3-onboard/common/-/common-2.1.1.tgz#84cde2ad39581131a912aae064f0f41ef4f6843e"
@@ -5578,23 +5568,7 @@
     joi "^17.4.2"
     rxjs "^7.5.2"
 
-"@web3-onboard/core@2.2.5":
-  version "2.2.5"
-  resolved "https://registry.yarnpkg.com/@web3-onboard/core/-/core-2.2.5.tgz#724ed2d2a51fb61a2a455e6c0032343a85585324"
-  integrity sha512-HH163AN5lJVPUDkCLSCs35stxCnvc0F0ZmURQ9baiEXatzpx0gPQOS+ER6uMNnmNddzp2t/YsEiWlEhLJq2raw==
-  dependencies:
-    "@web3-onboard/common" "^2.0.6"
-    bowser "^2.11.0"
-    ethers "5.5.3"
-    eventemitter3 "^4.0.7"
-    joi "17.6.0"
-    lodash.merge "^4.6.2"
-    lodash.partition "^4.6.0"
-    rxjs "^7.5.2"
-    svelte "^3.46.4"
-    svelte-i18n "^3.3.13"
-
-"@web3-onboard/core@^2.2.11":
+"@web3-onboard/core@^2.2.11", "@web3-onboard/core@^2.2.5":
   version "2.2.12"
   resolved "https://registry.yarnpkg.com/@web3-onboard/core/-/core-2.2.12.tgz#24555ca31d58d383c8f00672781d202b0525280b"
   integrity sha512-ifTF3fCbnT/P8YOV6d4i+oHouqUB3+tlonf31mp4S2nJFr0HTDzTeP1j+2JpMEHbWNTye0HboiPrM47+8nD1gQ==
