@@ -262,7 +262,6 @@ export default function Dashboard() {
               ))}
           </div>
         </div>
-        <CardList />
       </GoodDollarWeb3Provider> */}
     </>
   );
