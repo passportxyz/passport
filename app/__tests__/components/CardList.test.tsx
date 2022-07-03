@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 
 import { UserContext, UserContextState } from "../../context/userContext";
 import { CardList, CardListProps } from "../../components/CardList";
@@ -69,9 +70,11 @@ describe("<CardList />", () => {
 
   it("renders provider cards when not loading", () => {
     render(
-      <UserContext.Provider value={mockUserContext}>
-        <CardList {...cardListProps} />
-      </UserContext.Provider>
+      <MemoryRouter>
+        <UserContext.Provider value={mockUserContext}>
+          <CardList {...cardListProps} />
+        </UserContext.Provider>
+      </MemoryRouter>
     );
 
     expect(screen.queryByTestId("loading-card")).not.toBeInTheDocument();

@@ -19,9 +19,9 @@
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@ethersproject/providers": "^5.6.4",
-    "@gitcoin/passport-database-client": "^0.0.1",
-    "@gitcoin/passport-identity": "^0.0.1",
-    "@gitcoin/passport-types": "^0.0.1",
+    "@gitcoin/passport-database-client": "^1.0.0",
+    "@gitcoin/passport-identity": "^1.0.0",
+    "@gitcoin/passport-types": "^1.0.0",
     "@gooddollar/goodlogin-sdk": "^1.1.14",
     "@gooddollar/web3sdk-v2": "^0.1.9",
     "@self.id/framework": "^0.3.2",
@@ -42,7 +42,7 @@
     "ts-debounce": "^4.0.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^2.0.0",
+    "@ceramicnetwork/common": "^2.2.1",
     "@glazed/did-datastore-model": "^0.2.0",
     "@glazed/types": "^0.2.0",
     "@next/eslint-plugin-next": "^12.1.5",
