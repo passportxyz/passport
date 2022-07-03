@@ -42,7 +42,7 @@
     "ts-debounce": "^4.0.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^2.0.0",
+    "@ceramicnetwork/common": "^2.2.1",
     "@glazed/did-datastore-model": "^0.2.0",
     "@glazed/types": "^0.2.0",
     "@next/eslint-plugin-next": "^12.1.5",
