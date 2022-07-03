@@ -1,5 +1,5 @@
 // --- React Methods
-import React, { useCallback, useContext, useState, useEffect } from "react";
+import React, { useCallback, useContext, useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom"; // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
 
@@ -44,14 +44,18 @@ export default function GoodDollarCard(): JSX.Element {
 
   // console.log({ isWhitelisted, address, credentialResponseIsLoading, searchParams }, searchParams.get("login"));
   //TODO: verify all these details
-  const gooddollarLinkDev = createLoginLink({
-    redirectLink: Envs[GOODDOLLAR_ENV].dappUrl + "/AppNavigation/LoginRedirect",
-    v: "Gitcoin Passport",
-    web: "https://passport.gitcoin.co",
-    id: "",
-    r: [],
-    rdu: window.location.href,
-  });
+  const gooddollarLinkDev = useMemo(
+    () =>
+      createLoginLink({
+        redirectLink: Envs[GOODDOLLAR_ENV].dappUrl + "/AppNavigation/LoginRedirect",
+        v: "Gitcoin Passport",
+        web: "https://passport.gitcoin.co",
+        id: "",
+        r: [],
+        rdu: window.location.href,
+      }),
+    []
+  );
 
   const clearRedirectParams = useCallback(() => {
     const loginParam = searchParams.get("login") || searchParams.get("verified");
@@ -115,7 +119,7 @@ export default function GoodDollarCard(): JSX.Element {
     [address, signer, toast, setCredentialResponseIsLoading, SetCredentialResponse, handleModalOnClose]
   );
 
-  const handleUserVerify = (): void => {
+  const handleUserVerify = useCallback((): void => {
     // console.log({ credentialResponse });
     handleAddStamp(credentialResponse!)
       .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId }))
@@ -132,7 +136,7 @@ export default function GoodDollarCard(): JSX.Element {
       isClosable: true,
       render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
     });
-  };
+  }, [credentialResponse, setVerificationInProgress, handleAddStamp, onClose, toast]);
 
   //once user is back from login with gooddolalr or face verification we can use this helper to trigger the stamp verificaiton
   const onGoodDollarRedirect = useCallback(
@@ -185,7 +189,7 @@ export default function GoodDollarCard(): JSX.Element {
     }
   }, [searchParams, onOpen, isWhitelisted, address, onGoodDollarRedirect]);
 
-  const GooddollarWidget = () => {
+  const GooddollarWidget = useMemo(() => {
     const Loading = (
       <div className="p-6 text-center">
         <div>Waiting for wallet signature</div>
@@ -229,33 +233,47 @@ export default function GoodDollarCard(): JSX.Element {
         )}
       </Box>
     );
-  };
-  const issueCredentialWidget = (
-    <div>
-      <button
-        data-testid="button-getverified-gooddollar"
-        className="verify-btn"
-        onClick={() => {
-          SetCredentialResponse(undefined);
-          if (isWhitelisted) {
-            setVerificationInProgress(true);
-            handleFetchGoodCredential(address || "");
-          }
-          onOpen();
-        }}
-      >
-        Login with GoodDolar Or Get Verified
-      </button>
-      <VerifyModal
-        title="GoodDollar Liveness and Uniqueness Verification"
-        isOpen={isOpen}
-        onClose={handleModalOnClose}
-        stamp={credentialResponse}
-        handleUserVerify={handleUserVerify}
-        verifyData={credentialResponse ? <></> : <GooddollarWidget />}
-        isLoading={false}
-      />
-    </div>
+  }, [credentialResponseIsLoading, getVerified, goodDollarLoginCallback, gooddollarLinkDev, handleModalOnClose]);
+
+  const issueCredentialWidget = useMemo(
+    () => (
+      <div>
+        <button
+          data-testid="button-getverified-gooddollar"
+          className="verify-btn"
+          onClick={() => {
+            SetCredentialResponse(undefined);
+            if (isWhitelisted) {
+              setVerificationInProgress(true);
+              handleFetchGoodCredential(address || "");
+            }
+            onOpen();
+          }}
+        >
+          Login with GoodDolar Or Get Verified
+        </button>
+        <VerifyModal
+          title="GoodDollar Liveness and Uniqueness Verification"
+          isOpen={isOpen}
+          onClose={handleModalOnClose}
+          stamp={credentialResponse}
+          handleUserVerify={handleUserVerify}
+          verifyData={credentialResponse ? <></> : GooddollarWidget}
+          isLoading={false}
+        />
+      </div>
+    ),
+    [
+      GooddollarWidget,
+      address,
+      credentialResponse,
+      handleFetchGoodCredential,
+      handleModalOnClose,
+      handleUserVerify,
+      isOpen,
+      isWhitelisted,
+      onOpen,
+    ]
   );
 
   return (
