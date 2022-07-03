@@ -182,7 +182,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   // Toggle connect/disconnect
   const handleConnection = (): void => {
     if (!address) {
-      connect({})
+      connect()
         .then(() => {
           datadogLogs.logger.info("Connected to Wallet");
           setLoggedIn(true);

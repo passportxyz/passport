@@ -1,7 +1,7 @@
 {
   "name": "@gitcoin/passport-iam",
   "private": true,
-  "version": "0.0.1",
+  "version": "1.0.0",
   "main": "dist/src/main.js",
   "types": "src/types.d.ts",
   "license": "MIT",

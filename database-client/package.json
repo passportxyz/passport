@@ -1,6 +1,6 @@
 {
   "name": "@gitcoin/passport-database-client",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "license": "MIT",
   "type": "module",
   "main": "dist/esm/src/index.js",
