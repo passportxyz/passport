@@ -1,4 +1,4 @@
-# dPopp aka Gitcoin Passport
+# Gitcoin Passport
 
 ## What is Passport?
 
@@ -32,17 +32,17 @@ When the review finishes, your pull request will be squashed and merged into the
 
 ## Bug Bounty
 
-If you think you've found a security vulnerability, we maintain an open bounty on Gitcoin to help reward community members who report these issues. Check it out here: https://github.com/gitcoinco/dpopp/issues/133
+If you think you've found a security vulnerability, we maintain an open bounty on Gitcoin to help reward community members who report these issues. Check it out here: https://github.com/gitcoinco/passport/issues/133
 
 ## Quick Start
 
 Prerequisites: [Node (v16 LTS)](https://nodejs.org/en/download/) plus [Yarn](https://classic.yarnpkg.com/en/docs/install/) and [Git](https://git-scm.com/downloads)
 
-1. Install dPopp (this will install all packages within the dPopp monorepo):
+1. Install Gitcoin Passport (this will install all packages within the passport monorepo):
 
 ```sh
-git clone https://github.com/gitcoinco/dPopp.git
-cd dPopp
+git clone https://github.com/gitcoinco/passport.git
+cd passport
 npm install --global lerna
 lerna init
 lerna bootstrap
@@ -73,7 +73,7 @@ yarn start
 
 ## app
 
-The web app allowing users to interact with their dPopp. [README](app/README.md)
+The web app allowing users to interact with their Gitcoin Passport. [README](app/README.md)
 
 ## database-client
 

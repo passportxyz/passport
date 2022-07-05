@@ -8,7 +8,7 @@ let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
 let domain = `${process.env["DOMAIN"]}`;
 let IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
 
-export const dockerGtcDpoppImage = `${process.env["DOCKER_GTC_DPOPP_IMAGE"]}`;
+export const dockerGtcPassportIamImage = `${process.env["DOCKER_GTC_PASSPORT_IAM_IMAGE"]}`;
 
 //////////////////////////////////////////////////////////////
 // Set up VPC
@@ -151,7 +151,7 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
     executionRole: dpoppEcsRole,
     containers: {
       iam: {
-        image: dockerGtcDpoppImage,
+        image: dockerGtcPassportIamImage,
         memory: 1024,
         portMappings: [httpsListener],
         links: [],

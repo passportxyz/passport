@@ -25,7 +25,7 @@ import { useDisclosure, useToast } from "@chakra-ui/react";
 import { PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../../config/providers";
 
-const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
+const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
 const providerId: PROVIDER_ID = "Brightid";
 
@@ -81,7 +81,7 @@ export default function BrightIdCard(): JSX.Element {
   async function handleSponsorship(): Promise<void> {
     datadogLogs.logger.info("Sponsoring user on BrightId", { provider: providerId });
     setCredentialResponseIsLoading(true);
-    const res = fetch(`${process.env.NEXT_PUBLIC_DPOPP_PROCEDURE_URL?.replace(/\/*?$/, "")}/brightid/sponsor`, {
+    const res = fetch(`${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(/\/*?$/, "")}/brightid/sponsor`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -138,7 +138,7 @@ export default function BrightIdCard(): JSX.Element {
 
   async function handleVerifyContextId(): Promise<boolean> {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_DPOPP_PROCEDURE_URL?.replace(/\/*?$/, "")}/brightid/verifyContextId`,
+      `${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(/\/*?$/, "")}/brightid/verifyContextId`,
       {
         method: "POST",
         headers: {

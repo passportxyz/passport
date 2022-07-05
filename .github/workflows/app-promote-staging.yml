@@ -17,5 +17,5 @@ jobs:
           git fetch
           git checkout -b staging-app origin/staging-app
           git reset --hard ${{ github.event.inputs.commit }}
-          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/dPopp.git
+          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/passport.git
           git push origin staging-app -f

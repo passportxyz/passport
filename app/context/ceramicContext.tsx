@@ -8,7 +8,7 @@ import { datadogRum } from "@datadog/browser-rum";
 import { UserContext } from "./userContext";
 
 // -- Trusted IAM servers DID
-const IAM_ISSUER_DID = process.env.NEXT_PUBLIC_DPOPP_IAM_ISSUER_DID || "";
+const IAM_ISSUER_DID = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
 
 export interface CeramicContextState {
   passport: Passport | undefined | false;

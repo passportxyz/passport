@@ -17,5 +17,5 @@ jobs:
           git fetch
           git checkout -b production-app origin/production-app
           git reset --hard ${{ github.event.inputs.commit }}
-          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/dPopp.git
+          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/passport.git
           git push origin production-app -f
