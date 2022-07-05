@@ -5,7 +5,7 @@ import walletConnectModule from "@web3-onboard/walletconnect";
 import walletLinkModule from "@web3-onboard/walletlink";
 
 // RPC urls
-const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_DPOPP_MAINNET_RPC_URL as string;
+const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL as string;
 
 // Injected wallet
 const injected = injectedModule();

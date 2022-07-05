@@ -24,8 +24,8 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../../config/providers";
 
 // import from .env
-const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
-const googleClientId = process.env.NEXT_PUBLIC_DPOPP_GOOGLE_CLIENT_ID || "";
+const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
+const googleClientId = process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CLIENT_ID || "";
 
 const providerId: PROVIDER_ID = "Google";
 

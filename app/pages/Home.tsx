@@ -75,7 +75,7 @@ export default function Home() {
           className="flex flex-wrap items-center justify-center p-2 text-base md:ml-auto md:mr-auto"
         />
         <a
-          href="https://github.com/gitcoinco/dPopp"
+          href="https://github.com/gitcoinco/passport"
           target="_blank"
           rel="noopener noreferrer"
           className="mt-4 inline-flex rounded py-1 px-20 text-base md:mt-0"

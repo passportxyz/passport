@@ -2,7 +2,7 @@
 
 # === preliminary installs ===
 yarn global add lerna
-cd dpopp
+cd passport
 lerna bootstrap -- --ignore-scripts # skipping pre/postinstall scripts
 yarn build:database-client
 

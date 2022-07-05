@@ -39,7 +39,7 @@ export interface ReactFacebookLoginInfo {
 }
 
 // import from .env
-const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
+const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
 const providerId: PROVIDER_ID = "Facebook";
 

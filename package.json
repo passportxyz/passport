@@ -1,5 +1,5 @@
 {
-  "name": "dpopp",
+  "name": "@gitcoin/passport",
   "private": true,
   "devDependencies": {
     "@commitlint/cli": "^16.2.3",

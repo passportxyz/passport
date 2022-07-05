@@ -11,7 +11,7 @@ import { CeramicContextProvider } from "../context/ceramicContext";
 import { Provider as SelfIdProvider } from "@self.id/framework";
 import Head from "next/head";
 
-const FacebookAppId = process.env.NEXT_PUBLIC_DPOPP_FACEBOOK_APP_ID || "";
+const FacebookAppId = process.env.NEXT_PUBLIC_PASSPORT_FACEBOOK_APP_ID || "";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const facebookSdkScript = (
