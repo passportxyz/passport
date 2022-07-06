@@ -35,7 +35,7 @@ describe("<CardList />", () => {
     expect(screen.queryByTestId("loading-card")).not.toBeInTheDocument();
   });
 
-  it("renders LoadingCards when loading the passport", () => {
+  it("renders LoadingCards when loading the passport", async () => {
     cardListProps.isLoading = true;
 
     renderWithContext(mockUserContext, mockCeramicContext, <CardList {...cardListProps} />);

@@ -8,6 +8,7 @@ on:
 
 jobs:
   build:
+    # runs-on: macos-latest
     runs-on: ubuntu-latest
 
     steps:
@@ -16,7 +17,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: "yarn"
+          # cache: "yarn"
       - name: Lerna Bootstrap
         run: lerna bootstrap
       - name: Run Tests
