@@ -59,6 +59,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: STAMP_PROVIDERS.Github,
     stamp: undefined,
   },
+  Linkedin: {
+    providerSpec: STAMP_PROVIDERS.Linkedin,
+    stamp: undefined,
+  },
 };
 
 const startingState: CeramicContextState = {

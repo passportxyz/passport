@@ -20,6 +20,7 @@ import { useToast } from "@chakra-ui/react";
 // --- Context
 import { UserContext } from "../../context/userContext";
 import { ProviderSpec } from "../../config/providers";
+import { CeramicContext } from "../../context/ceramicContext";
 
 // Each provider is recognised by its ID
 const providerId: PROVIDER_ID = "Linkedin";
@@ -36,7 +37,8 @@ function generateUID(length: number) {
 }
 
 export default function LinkedinCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const { address, signer } = useContext(UserContext);
+  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [state, setState] = useState("");
 
