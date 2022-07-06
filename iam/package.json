@@ -18,8 +18,8 @@
     "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx ."
   },
   "dependencies": {
-    "@gitcoin/passport-identity": "^0.0.1",
-    "@gitcoin/passport-types": "^0.0.1",
+    "@gitcoin/passport-identity": "^1.0.0",
+    "@gitcoin/passport-types": "^1.0.0",
     "@gooddollar/goodlogin-sdk": "^1.1.14",
     "@gooddollar/goodprotocol": "^1.0.20",
     "@spruceid/didkit-wasm-node": "^0.2.1",
