@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
 import { UserContext, UserContextState } from "../../context/userContext";
@@ -68,25 +68,30 @@ describe("<CardList />", () => {
     cardListProps = {};
   });
 
-  it("renders provider cards when not loading", () => {
-    render(
-      <MemoryRouter>
-        <UserContext.Provider value={mockUserContext}>
-          <CardList {...cardListProps} />
-        </UserContext.Provider>
-      </MemoryRouter>
+  it("renders provider cards when not loading", async () => {
+    await act(
+      async () =>
+        render(
+          <MemoryRouter>
+            <UserContext.Provider value={mockUserContext}>
+              <CardList {...cardListProps} />
+            </UserContext.Provider>
+          </MemoryRouter>
+        ) as any
     );
 
     expect(screen.queryByTestId("loading-card")).not.toBeInTheDocument();
   });
 
-  it("renders LoadingCards when loading the passport", () => {
+  it("renders LoadingCards when loading the passport", async () => {
     cardListProps.isLoading = true;
-
-    render(
-      <UserContext.Provider value={mockUserContext}>
-        <CardList {...cardListProps} />
-      </UserContext.Provider>
+    await act(
+      async () =>
+        render(
+          <UserContext.Provider value={mockUserContext}>
+            <CardList {...cardListProps} />
+          </UserContext.Provider>
+        ) as any
     );
 
     expect(screen.getAllByTestId("loading-card"));

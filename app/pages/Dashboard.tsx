@@ -38,12 +38,12 @@ export default function Dashboard() {
   const router = useRouter();
   const [searchParams] = useSearchParams();
   const provider = useMemo(() => {
-    if (signer) {
+    if (signer && signer._isSigner) {
       const provider = signer && new JsonRpcProvider("https://rpc.fuse.io");
       provider.getSigner = () => signer as JsonRpcSigner;
       return provider;
     }
-  }, [signer]);
+  }, [wallet]);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 

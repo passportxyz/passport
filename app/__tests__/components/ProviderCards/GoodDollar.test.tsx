@@ -1,7 +1,7 @@
 import React from "react";
 import { Router, MemoryRouter } from "react-router-dom";
 import { createMemoryHistory } from "history";
-import { render, screen, fireEvent, waitFor, waitForElementToBeRemoved, act } from "@testing-library/react";
+import { screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { GoodDollarCard } from "../../../components/ProviderCards";
 
 import { UserContext, UserContextState } from "../../../context/userContext";
@@ -58,15 +58,17 @@ export const sampleBadGooddollarSignedObject = {
 const history = createMemoryHistory();
 
 describe("when user has not verfied with GoodDollarProvider", () => {
-  it("should display a verification button", () => {
-    renderWithContext(
-      mockUserContext,
-      mockCeramicContext,
-      <Router location={history.location} navigator={history}>
-        <UserContext.Provider value={mockUserContext}>
-          <GoodDollarCard />
-        </UserContext.Provider>
-      </Router>
+  it("should display a verification button", async () => {
+    await act(async () =>
+      renderWithContext(
+        mockUserContext,
+        mockCeramicContext,
+        <Router location={history.location} navigator={history}>
+          <UserContext.Provider value={mockUserContext}>
+            <GoodDollarCard />
+          </UserContext.Provider>
+        </Router>
+      )
     );
 
     const verifyButton = screen.queryByTestId("button-getverified-gooddollar");
@@ -76,21 +78,23 @@ describe("when user has not verfied with GoodDollarProvider", () => {
 });
 
 describe("when user has verified with GoodDollarProvider", () => {
-  it("should display is verified", () => {
-    renderWithContext(
-      mockUserContext,
-      {
-        ...mockCeramicContext,
-        allProvidersState: {
-          GoodDollar: {
-            providerSpec: STAMP_PROVIDERS.GoodDollar,
-            stamp: gooddollarStampFixture,
+  it("should display is verified", async () => {
+    await act(async () =>
+      renderWithContext(
+        mockUserContext,
+        {
+          ...mockCeramicContext,
+          allProvidersState: {
+            GoodDollar: {
+              providerSpec: STAMP_PROVIDERS.GoodDollar,
+              stamp: gooddollarStampFixture,
+            },
           },
         },
-      },
-      <Router location={history.location} navigator={history}>
-        <GoodDollarCard />
-      </Router>
+        <Router location={history.location} navigator={history}>
+          <GoodDollarCard />
+        </Router>
+      )
     );
 
     const verified = screen.getByText("Verified");
@@ -105,12 +109,14 @@ describe("when the verify button is clicked", () => {
   });
 
   it("it should redirect to gooddollar login screen ", async () => {
-    renderWithContext(
-      mockUserContext,
-      mockCeramicContext,
-      <Router location={history.location} navigator={history}>
-        <GoodDollarCard />
-      </Router>
+    await act(async () =>
+      renderWithContext(
+        mockUserContext,
+        mockCeramicContext,
+        <Router location={history.location} navigator={history}>
+          <GoodDollarCard />
+        </Router>
+      )
     );
 
     const initialVerifyButton = screen.queryByTestId("button-getverified-gooddollar");
@@ -134,20 +140,15 @@ describe("when the verify button is clicked", () => {
         "http://localhost/dashboard?login=" +
           Buffer.from(JSON.stringify(sampleGooddollarSignedObject)).toString("base64")
       );
-
+      history.push("/dashboard?login=" + Buffer.from(JSON.stringify(sampleGooddollarSignedObject)).toString("base64"));
       await act(
         async () =>
           renderWithContext(
             mockUserContext,
             mockCeramicContext,
-            <MemoryRouter
-              initialEntries={[
-                "/dashboard?login=" + Buffer.from(JSON.stringify(sampleGooddollarSignedObject)).toString("base64"),
-              ]}
-              initialIndex={0}
-            >
+            <Router location={history.location} navigator={history}>
               <GoodDollarCard />
-            </MemoryRouter>
+            </Router>
           ) as any
       );
 
@@ -213,10 +214,7 @@ describe("when the verify button is clicked", () => {
         "http://localhost/dashboard?login=" +
           Buffer.from(JSON.stringify(sampleGooddollarSignedObject)).toString("base64")
       );
-      history.push(
-        "http://localhost/dashboard?login=" +
-          Buffer.from(JSON.stringify(sampleGooddollarSignedObject)).toString("base64")
-      );
+      history.push("/dashboard?login=" + Buffer.from(JSON.stringify(sampleGooddollarSignedObject)).toString("base64"));
 
       await act(
         async () =>
