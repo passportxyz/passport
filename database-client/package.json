@@ -34,8 +34,8 @@
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^2.0.0",
-    "@ceramicnetwork/stream-tile": "^2.0.0",
+    "@ceramicnetwork/common": "^2.2.1",
+    "@ceramicnetwork/stream-tile": "^2.2.2",
     "@glazed/devtools": "^0.1.6",
     "@glazed/did-datastore-model": "^0.2.0",
     "@glazed/types": "^0.2.0",
