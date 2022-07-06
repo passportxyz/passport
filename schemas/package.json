@@ -1,6 +1,6 @@
 {
   "name": "@gitcoin/passport-schemas",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "clean": "rimraf node_modules",

@@ -47,7 +47,38 @@ describe("POST /challenge", function () {
       .expect("Content-Type", /json/);
 
     // expect the mocked credential to be returned and contain the expectedId
-    expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify payload");
+    expect((response.body as ErrorResponseBody).error).toEqual("Missing address from challenge request body");
+  });
+
+  it("handles missing type from the challenge request body", async () => {
+    // as each signature is unique, each request results in unique output
+    const payload = {
+      address: "0x0",
+    };
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/challenge")
+      .send({ payload })
+      .set("Accept", "application/json")
+      .expect(400)
+      .expect("Content-Type", /json/);
+
+    // expect the mocked credential to be returned and contain the expectedId
+    expect((response.body as ErrorResponseBody).error).toEqual("Missing type from challenge request body");
+  });
+
+  it("handles malformed payload from the challenge request body", async () => {
+    // as each signature is unique, each request results in unique output
+    const payload = "bad :(";
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/challenge")
+      .send({ payload })
+      .set("Accept", "application/json")
+      .expect(400)
+      .expect("Content-Type", /json/);
   });
 });
 
@@ -119,7 +150,7 @@ describe("POST /verify", function () {
       .post("/api/v0.0.0/verify")
       .send({ challenge, payload })
       .set("Accept", "application/json")
-      .expect(400)
+      .expect(401)
       .expect("Content-Type", /json/);
 
     expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify payload");
@@ -151,7 +182,7 @@ describe("POST /verify", function () {
       .post("/api/v0.0.0/verify")
       .send({ challenge, payload })
       .set("Accept", "application/json")
-      .expect(400)
+      .expect(401)
       .expect("Content-Type", /json/);
 
     expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify payload");
@@ -184,7 +215,7 @@ describe("POST /verify", function () {
       .post("/api/v0.0.0/verify")
       .send({ challenge, payload })
       .set("Accept", "application/json")
-      .expect(400)
+      .expect(403)
       .expect("Content-Type", /json/);
 
     expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify proofs");
@@ -219,7 +250,7 @@ describe("POST /verify", function () {
       .post("/api/v0.0.0/verify")
       .send({ challenge, payload })
       .set("Accept", "application/json")
-      .expect(400)
+      .expect(500)
       .expect("Content-Type", /json/);
 
     expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify payload");
