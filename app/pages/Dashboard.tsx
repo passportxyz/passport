@@ -21,13 +21,15 @@ import {
   Button,
 } from "@chakra-ui/react";
 
+import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 import { useViewerConnection } from "@self.id/framework";
 import { EthereumAuthProvider } from "@self.id/web";
 
 export default function Dashboard() {
-  const { passport, wallet, isLoadingPassport, handleConnection } = useContext(UserContext);
+  const { wallet, handleConnection } = useContext(UserContext);
+  const { passport, isLoadingPassport } = useContext(CeramicContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -75,9 +77,10 @@ export default function Dashboard() {
               <img alt="shield-exclamation-icon" src="./assets/shield-exclamation-icon.svg" />
             </div>
             <div className="flex flex-col" data-testid="retry-modal-content">
-              <p className="text-lg font-bold">Unable to Connect</p>
+              <p className="text-lg font-bold">Ceramic Network Error</p>
               <p>
-                There was an issue connecting to the Ceramic network. You can try connecting again or try again later.
+                The Gitcoin Passport relies on the Ceramic Network which currently is having network issues. Please try
+                again later.
               </p>
             </div>
           </div>
@@ -114,22 +117,19 @@ export default function Dashboard() {
         <div className="w-full md:w-1/4">
           {isLoadingPassport == undefined && retryModal}
           {viewerConnection.status === "connecting" && (
-            <Alert status="warning" data-testid="selfId-connection-alert">
-              <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="orange.500" size="md" />
-              <AlertTitle ml={4}> Waiting for wallet signature</AlertTitle>
-            </Alert>
+            <div
+              className="absolute right-1/2 rounded bg-blue-darkblue py-4 px-8"
+              data-testid="selfId-connection-alert"
+            >
+              <span className="absolute top-0 right-0 flex h-3 w-3 translate-x-1/2 -translate-y-1/2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-jade opacity-75"></span>
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-green-jade"></span>
+              </span>
+              <span className="text-green-jade"> Waiting for wallet signature...</span>
+            </div>
           )}
           {viewerConnection.status !== "connecting" &&
-            (!passport ? (
-              <Spinner
-                thickness="4px"
-                speed="0.65s"
-                emptyColor="gray.200"
-                color="purple.500"
-                size="xl"
-                data-testid="loading-spinner-passport"
-              />
-            ) : (
+            (passport ? (
               <div>
                 <button
                   data-testid="button-passport-json"
@@ -145,10 +145,21 @@ export default function Dashboard() {
                   jsonOutput={passport}
                 />
               </div>
+            ) : (
+              <div>
+                <div
+                  className="float-right flex flex-row items-center rounded-md border-2 border-gray-300 py-2 px-6 text-black"
+                  data-testid="loading-spinner-passport"
+                >
+                  <Spinner thickness="4px" speed="0.65s" emptyColor="lightGray" color="gray" size="md" />
+                  <h1 className="m-4">Connecting</h1>
+                </div>
+              </div>
             ))}
         </div>
       </div>
-      <CardList />
+      {/* isLoadingPassport is undefined when there is a network error loading the passport */}
+      <CardList isLoading={isLoadingPassport || isLoadingPassport === undefined} />
     </>
   );
 }

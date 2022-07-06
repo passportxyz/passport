@@ -13,20 +13,35 @@ import {
   LinkedinCard,
 } from "./ProviderCards";
 import GithubCard from "./ProviderCards/GithubCard";
+import { LoadingCard } from "./LoadingCard";
 
-export const CardList = (): JSX.Element => {
+export type CardListProps = {
+  isLoading?: boolean;
+};
+
+export const CardList = ({ isLoading }: CardListProps): JSX.Element => {
   return (
     <div className="container mx-auto py-10">
       <div className="-m-4 flex flex-wrap">
-        <FacebookCard />
-        <GoogleCard />
-        <TwitterCard />
-        <GithubCard />
-        <BrightidCard />
-        <PoapCard />
-        <EnsCard />
-        <PohCard />
-        <LinkedinCard />
+        {isLoading ? (
+          <>
+            {[...Array(9)].map((_, i) => (
+              <LoadingCard key={i} />
+            ))}
+          </>
+        ) : (
+          <>
+            <FacebookCard />
+            <GoogleCard />
+            <TwitterCard />
+            <GithubCard />
+            <BrightidCard />
+            <PoapCard />
+            <EnsCard />
+            <PohCard />
+            <LinkedinCard />
+          </>
+        )}
       </div>
     </div>
   );

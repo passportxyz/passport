@@ -1,6 +1,6 @@
 {
   "name": "@gitcoin/passport-database-client",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "license": "MIT",
   "type": "module",
   "main": "dist/esm/src/index.js",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@ceramicnetwork/http-client": "^2.2.1",
-    "@gitcoin/passport-schemas": "0.0.1",
+    "@gitcoin/passport-schemas": "^1.0.0",
     "@glazed/datamodel": "^0.3.0",
     "@glazed/did-datastore": "^0.3.1",
     "@glazed/tile-loader": "^0.2.0",

@@ -18,6 +18,7 @@ import { DoneToastContent } from "../DoneToastContent";
 import { useToast } from "@chakra-ui/react";
 
 // --- Context
+import { CeramicContext } from "../../context/ceramicContext";
 import { UserContext } from "../../context/userContext";
 import { ProviderSpec } from "../../config/providers";
 
@@ -25,7 +26,8 @@ import { ProviderSpec } from "../../config/providers";
 const providerId: PROVIDER_ID = "Twitter";
 
 export default function TwitterCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const { address, signer } = useContext(UserContext);
+  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
 
   // --- Chakra functions
