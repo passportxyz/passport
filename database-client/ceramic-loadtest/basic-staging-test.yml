@@ -1,0 +1,14 @@
+config:
+  target: "https://ceramic.staging.dpopp.gitcoin.co"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: Warm up
+  engines:
+    ceramic: {}
+
+scenarios:
+  - name: "Create passport for DID"
+    engine: ceramic
+    flow:
+      - aCeramicOperation: 345

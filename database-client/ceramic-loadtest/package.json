@@ -1,0 +1,16 @@
+{
+  "name": "artillery-engine-ceramic",
+  "version": "1.0.0",
+  "description": "Load test Ceramic Network with Artillery.io",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/index.js"
+  },
+  "author": "GitCoin",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^3.2.4",
+    "debug": "^4.3.4",
+    "tape": "^5.5.3"
+  }
+}
