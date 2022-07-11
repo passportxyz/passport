@@ -24,7 +24,7 @@ export const Footer = ({ lightMode }: FooterProps): JSX.Element => {
           href="https://github.com/gitcoinco/passport"
           target="_blank"
           rel="noopener noreferrer"
-          className="ml-12 mt-4 mr-4 inline-flex rounded py-1 text-base md:mt-0"
+          className="ml-12 mt-4 mr-auto inline-flex rounded py-1 text-base md:mt-0 md:mr-4"
         >
           <img src={lightMode ? "./assets/githubLogoLight.svg" : "./assets/githubLogoDark.svg"} alt="Github Logo" />
         </a>
