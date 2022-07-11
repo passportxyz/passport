@@ -35,7 +35,7 @@ export default function Home() {
               <img src="/assets/gitcoinWordLogo.svg" alt="pPassport Logo" className="py-4" />
               <p className="text-5xl sm:text-7xl md:text-7xl">Passport</p>
             </div>
-            <div className="font-mariam-libre mt-0 text-lg text-gray-500 sm:text-xl md:mt-10 md:pr-20 md:text-xl">
+            <div className="font-libre-franklin mt-0 text-lg text-gray-400 sm:text-xl md:mt-10 md:pr-20 md:text-xl">
               Grow a decentralized identity record with various credentials about you. Through the network of sources
               about your personhood, applications like Gitcoin Grants 2.0 gives you rights like matching weight in
               Quadratic Funding.
@@ -53,8 +53,8 @@ export default function Home() {
           {/* Stamp Provider Tile Display */}
           <div className="mx-auto mb-10 bg-mobileLandingPageBackground text-gray-600 sm:mt-20 sm:w-1/2 sm:py-20 md:bg-none md:py-24">
             <div className="-m-4 flex flex-wrap">
-              <div className="m-2 rounded px-6">
-                <img src={"./assets/logoTiles.svg"} alt={"Stamp Logo Tiles"} className="p-2" />
+              <div className="m-2 rounded md:px-6">
+                <img src={"./assets/logoTiles.svg"} alt={"Stamp Logo Tiles"} className="md:p-2" />
               </div>
             </div>
           </div>

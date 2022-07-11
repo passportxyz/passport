@@ -100,7 +100,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="flex w-full flex-col flex-wrap border-b-2 p-5 md:flex-row">
+      <div className="invisible flex w-full flex-col flex-wrap border-b-2 p-5 md:visible md:flex-row">
         <div className="float-right mb-4 flex flex-row items-center font-medium text-gray-900 md:mb-0">
           <img src="/assets/gitcoinLogoDark.svg" alt="Gitcoin Logo" />
           <img className="ml-6 mr-6" src="/assets/logoLine.svg" alt="Logo Line" />
@@ -108,10 +108,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div>
-        {viewerConnection.status === "connecting" ? (
+      {viewerConnection.status === "connecting" && (
+        <div className="my-2 h-10">
           <div
-            className="absolute left-2 right-2 w-full rounded bg-blue-darkblue py-2 px-8 md:right-1/2 md:left-1/3 md:w-1/4 md:py-4"
+            className="absolute left-2 right-2 w-full rounded bg-blue-darkblue py-2 px-8 md:right-1/2 md:left-1/3 md:w-5/12 md:py-4 xl:w-1/4"
             data-testid="selfId-connection-alert"
           >
             <span className="absolute top-0 right-0 flex h-3 w-3 translate-x-1/2 -translate-y-1/2">
@@ -120,12 +120,28 @@ export default function Dashboard() {
             </span>
             <span className="text-green-jade"> Waiting for wallet signature...</span>
           </div>
-        ) : (
-          <div className="flex w-full flex-wrap p-5 md:hidden md:flex-row">
+        </div>
+      )}
+
+      <div className="flex w-full flex-wrap-reverse px-2 md:mt-4 md:flex-wrap md:px-10">
+        <div className="md:w-3/4">
+          <p className="mb-4 text-2xl text-black">My Stamps</p>
+          <p className="text-xl text-black">
+            Select the decentralized identity verification stamps you&apos;d like to connect to.
+          </p>
+        </div>
+
+        {viewerConnection.status !== "connecting" && (
+          <div className="my-2 flex grow flex-row justify-between md:hidden">
+            <div className="float-right mb-4 flex flex-row items-center font-medium text-gray-900 md:mb-0">
+              <img src="/assets/gitcoinLogoDark.svg" alt="Gitcoin Logo" />
+              <img className="ml-6 mr-6" src="/assets/logoLine.svg" alt="Logo Line" />
+              <img src="/assets/passportLogoBlack.svg" alt="pPassport Logo" />
+            </div>
             {passport && (
               <button
                 data-testid="button-passport-json-mobile"
-                className="float-right ml-auto rounded-md border-2 border-gray-300 py-2 px-6 text-black"
+                className="float-right ml-auto rounded-md border-2 border-gray-300 py-2 px-4 text-black"
                 onClick={onOpen}
               >
                 {`</>`}
@@ -133,13 +149,6 @@ export default function Dashboard() {
             )}
           </div>
         )}
-      </div>
-
-      <div className="flex w-full flex-wrap px-10 md:mt-4 lg:mt-20">
-        <p className="mb-4 w-3/4 text-2xl text-black">My Stamps</p>
-        <p className="w-full text-xl text-black md:w-3/4">
-          Select the decentralized identity verification stamps you&apos;d like to connect to.
-        </p>
         <div className="w-full md:w-1/4">
           {isLoadingPassport == undefined && retryModal}
           {viewerConnection.status !== "connecting" &&
