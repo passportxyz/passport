@@ -22,7 +22,7 @@ export default function Home() {
   }, [wallet]);
 
   return (
-    <div className="font-miriam-libre min-h-max min-h-default bg-landingPageBackground bg-cover bg-no-repeat text-gray-100">
+    <div className="font-miriam-libre min-h-max min-h-default bg-landingPageBackground bg-cover bg-no-repeat text-gray-100 md:bg-center">
       <div className="container mx-auto flex flex-row flex-wrap items-center p-5">
         <img src="/assets/gitcoinLogoWhite.svg" alt="Gitcoin Logo" />
         <img className="ml-6 mr-6" src="/assets/logoLine.svg" alt="Logo Line" />
