@@ -111,14 +111,14 @@ export default function Dashboard() {
       {viewerConnection.status === "connecting" && (
         <div className="my-2 h-10">
           <div
-            className="absolute left-2 right-2 w-full rounded bg-blue-darkblue py-2 px-8 md:right-1/2 md:left-1/3 md:w-5/12 md:py-4 xl:w-1/4"
+            className="absolute left-2 right-2 w-full rounded bg-blue-darkblue py-3 px-8 md:right-1/2 md:left-1/3 md:w-5/12 md:py-4 xl:w-1/4"
             data-testid="selfId-connection-alert"
           >
             <span className="absolute top-0 right-0 flex h-3 w-3 translate-x-1/2 -translate-y-1/2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-jade opacity-75"></span>
               <span className="relative inline-flex h-3 w-3 rounded-full bg-green-jade"></span>
             </span>
-            <span className="text-green-jade"> Waiting for wallet signature...</span>
+            <span className="font-bold text-green-jade"> Waiting for wallet signature...</span>
           </div>
         </div>
       )}
