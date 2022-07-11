@@ -55,7 +55,7 @@ const certificateValidation = new aws.acm.CertificateValidation(
     certificateArn: certificate.arn,
     validationRecordFqdns: [certificateValidationDomain.fqdn],
   },
-  { customTimeouts: { create: "30s", update: "30s" } }
+  { customTimeouts: { create: "30s", update: "30s" }, dependsOn: [certificate] }
 );
 
 //////////////////////////////////////////////////////////////
@@ -100,6 +100,8 @@ export const ipfsBucketArn = ipfsBucket.arn;
 const ceramicStateBucket = new aws.s3.Bucket(`gitcoin-ceramicState`, {
   acl: "private",
   forceDestroy: true,
+}, {
+  retainOnDelete: true
 });
 
 const ceramicStateBucketPolicyDocument = aws.iam.getPolicyDocumentOutput({
@@ -133,6 +135,8 @@ export const ceramicStateBucketArn = ceramicStateBucket.arn;
 const accessLogsBucket = new aws.s3.Bucket(`gitcoin-ceramic-logs`, {
   acl: "private",
   forceDestroy: true,
+}, {
+  retainOnDelete: true
 });
 
 
@@ -203,6 +207,15 @@ const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-ceramic`, {
   },
 });
 
+const internalalb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-ipfs`, {
+  vpc,
+  accessLogs: {
+    bucket: accessLogsBucket.bucket,
+    enabled: true,
+  },
+  external: false,
+});
+
 
 //////////////////////////////////////////////////////////////
 // ALB listeners & target groups
@@ -233,10 +246,10 @@ const target = alb.createTargetGroup("gitcoin-dpopp-ceramic", {
 const httpsListener = target.createListener("gitcoin-ceramic-https", {
   port: 443,
   certificateArn: certificateValidation.certificateArn,
-});
+}, { dependsOn: [certificate] });
 
 // Target group for the IPFS container
-const ceramicTarget = alb.createTargetGroup("gitcoin-dpopp-swarm", {
+const ceramicTarget = internalalb.createTargetGroup("gitcoin-dpopp-swarm", {
   vpc,
   port: 4001,
   protocol: "HTTP",
@@ -248,7 +261,7 @@ const ceramicListener = ceramicTarget.createListener("gitcoin-dpopp-swarm", {
   port: 4001,
 });
 
-const ipfsTarget = alb.createTargetGroup("gitcoin-dpopp-ipfs", {
+const ipfsTarget = internalalb.createTargetGroup("gitcoin-dpopp-ipfs", {
   vpc,
   port: 5001,
   protocol: "HTTP",
@@ -260,7 +273,7 @@ const ipfsListener = ipfsTarget.createListener("gitcoin-dpopp-ipfs", {
   port: 5001,
 });
 
-const ipfsHealthcheckTarget = alb.createTargetGroup("dpopp-ipfs-healthcheck", {
+const ipfsHealthcheckTarget = internalalb.createTargetGroup("dpopp-ipfs-healthcheck", {
   vpc,
   port: 8011,
   protocol: "HTTP",
@@ -272,7 +285,7 @@ const ipfsHealthcheckListener = ipfsHealthcheckTarget.createListener("ipfs-healt
   port: 8011,
 });
 
-const ipfsWS = alb.createTargetGroup("dpopp-ipfs-ws", {
+const ipfsWS = internalalb.createTargetGroup("dpopp-ipfs-ws", {
   vpc,
   port: 8081,
   protocol: "HTTP",
@@ -324,7 +337,7 @@ function makeCmd(inputbucketName: pulumi.Input<string>, inputIpfsUrl: pulumi.Inp
 
 export const ceramicCommand = makeCmd(
   ceramicStateBucketName,
-  pulumi.interpolate`http://${httpListener.endpoint.hostname}:5001`
+  pulumi.interpolate`http://${ceramicListener.endpoint.hostname}:5001`
 );
 
 const service = new awsx.ecs.FargateService("dpopp-ceramic", {
