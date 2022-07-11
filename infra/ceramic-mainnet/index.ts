@@ -316,7 +316,7 @@ function makeCmd(inputbucketName: pulumi.Input<string>, inputIpfsUrl: pulumi.Inp
       "--state-store-s3-bucket",
       bucketName,
       "--ethereum-rpc",
-      "https://eth-mainnet.alchemyapi.io/v2/MTWhVz7oXqOe7wf73I-_53Oh2OcXAMbX",
+      "<<REDACTED>>",
     ];
   });
 }
