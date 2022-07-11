@@ -237,7 +237,7 @@ const ceramicTarget = alb.createTargetGroup("gitcoin-dpopp-swarm", {
   vpc,
   port: 4001,
   protocol: "HTTP",
-  healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
+  healthCheck: { path: "/", unhealthyThreshold: 10, port: "8011", interval: 60, timeout: 30 },
 });
 
 const ceramicListener = ceramicTarget.createListener("gitcoin-dpopp-swarm", {
@@ -249,7 +249,7 @@ const ipfsTarget = alb.createTargetGroup("gitcoin-dpopp-ipfs", {
   vpc,
   port: 5001,
   protocol: "HTTP",
-  healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
+  healthCheck: { path: "/", unhealthyThreshold: 10, port: "8011", interval: 60, timeout: 30 },
 });
 
 const ipfsListener = ipfsTarget.createListener("gitcoin-dpopp-ipfs", {
@@ -261,7 +261,7 @@ const ipfsHealthcheckTarget = alb.createTargetGroup("dpopp-ipfs-healthcheck", {
   vpc,
   port: 8011,
   protocol: "HTTP",
-  healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
+  healthCheck: { path: "/", unhealthyThreshold: 10, port: "8011", interval: 60, timeout: 30 },
 });
 
 const ipfsHealthcheckListener = ipfsHealthcheckTarget.createListener("ipfs-healthcheck", {
@@ -273,7 +273,7 @@ const ipfsWS = alb.createTargetGroup("dpopp-ipfs-ws", {
   vpc,
   port: 8081,
   protocol: "HTTP",
-  healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
+  healthCheck: { path: "/", unhealthyThreshold: 10, port: "8011", interval: 60, timeout: 30 },
 });
 
 const ifpsWSListener = ipfsWS.createListener("ipfs-ws", {
@@ -316,7 +316,7 @@ function makeCmd(inputbucketName: pulumi.Input<string>, inputIpfsUrl: pulumi.Inp
       "--state-store-s3-bucket",
       bucketName,
       "--ethereum-rpc",
-      rpcUrl,
+      "<<REDACTED>>",
     ];
   });
 }
@@ -334,7 +334,7 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   taskDefinitionArgs: {
     containers: {
       ceramic: {
-        image: "ceramicnetwork/js-ceramic:latest",
+        image: "ceramicnetwork/js-ceramic:47135faa4c9c4eb6dd91219057d66e548617abb2",
         memory: 8192,
         cpu: 4096,
         portMappings: [httpsListener],
