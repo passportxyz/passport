@@ -15,6 +15,7 @@ import { UserContext } from "../../context/userContext";
 // --- style components
 import { Card } from "../Card";
 import { VerifyModal } from "../VerifyModal";
+import { ReturnModal } from "../ReturnModal";
 import { DoneToastContent } from "../DoneToastContent";
 import { useDisclosure, useToast } from "@chakra-ui/react";
 
@@ -35,6 +36,11 @@ export default function EnsCard(): JSX.Element {
 
   // --- Chakra functions
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: submitPassportModalIsOpen,
+    onOpen: submitPassportModalOpen,
+    onClose: submitPassportModalClose,
+  } = useDisclosure();
   const toast = useToast();
 
   const handleFetchCredential = (): void => {
@@ -71,7 +77,12 @@ export default function EnsCard(): JSX.Element {
   const handleUserVerify = (): void => {
     datadogLogs.logger.info("Saving Stamp", { provider: providerId });
     handleAddStamp(credentialResponse!)
-      .then(() => datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId }))
+      .then(() => {
+        datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId });
+        if (localStorage.getItem("showReturnToTrustModalMessage") !== "true") {
+          submitPassportModalOpen();
+        }
+      })
       .catch((e: any): void => {
         datadogLogs.logger.error("Error Saving Stamp", { error: e, provider: providerId });
         datadogRum.addError(e, { provider: providerId });
@@ -95,6 +106,7 @@ export default function EnsCard(): JSX.Element {
 
   const issueCredentialWidget = (
     <>
+      <ReturnModal isOpen={submitPassportModalIsOpen} onClose={submitPassportModalClose} />
       <button
         data-testid="button-verify-ens"
         className="verify-btn"

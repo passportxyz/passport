@@ -1,18 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps, @next/next/no-img-element */
 // --- React Methods
-import React, { useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useContext, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 // --- Shared data context
-import { UserContext } from "../context/userContext";
+import { UserContext, UserArrivalSourceState } from "../context/userContext";
 
 // --- Components
 import { Footer } from "../components/Footer";
 
 export default function Home() {
-  const { handleConnection, address, walletLabel, wallet } = useContext(UserContext);
+  const { handleConnection, address, walletLabel, wallet, setUserArrivalSource } = useContext(UserContext);
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // Route user to dashboard when wallet is connected
   useEffect(() => {
@@ -20,6 +21,13 @@ export default function Home() {
       navigate("/dashboard");
     }
   }, [wallet]);
+
+  // Set user arrival source
+  useEffect(() => {
+    if (searchParams.get("source") === "GitcoinTrust") {
+      setUserArrivalSource(UserArrivalSourceState.Known);
+    }
+  }, []);
 
   return (
     <div className="font-miriam-libre min-h-max min-h-default bg-landingPageBackground bg-cover bg-no-repeat text-gray-100 md:bg-center">
