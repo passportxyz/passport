@@ -22,6 +22,13 @@ export interface UserContextState {
   wallet: WalletState | null;
   signer: JsonRpcSigner | undefined;
   walletLabel: string | undefined;
+  userArrivalSource: UserArrivalSourceState;
+  setUserArrivalSource: (state: UserArrivalSourceState) => void;
+}
+
+export enum UserArrivalSourceState {
+  Unknown,
+  Known,
 }
 
 const startingState: UserContextState = {
@@ -31,6 +38,8 @@ const startingState: UserContextState = {
   wallet: null,
   signer: undefined,
   walletLabel: undefined,
+  userArrivalSource: UserArrivalSourceState.Unknown,
+  setUserArrivalSource: () => {},
 };
 
 // create our app context
@@ -47,6 +56,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   const [address, setAddress] = useState<string>();
   const [signer, setSigner] = useState<JsonRpcSigner | undefined>();
   const [loggingIn, setLoggingIn] = useState<boolean | undefined>();
+  const [userArrivalSource, setUserArrivalSource] = useState<UserArrivalSourceState>(UserArrivalSourceState.Unknown);
 
   // clear all state
   const clearState = (): void => {
@@ -215,8 +225,10 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       wallet,
       signer,
       walletLabel,
+      userArrivalSource,
+      setUserArrivalSource,
     }),
-    [loggedIn, address, signer, wallet]
+    [loggedIn, address, signer, wallet, userArrivalSource]
   );
 
   // use props as a way to pass configuration values
@@ -227,6 +239,8 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     wallet,
     signer,
     walletLabel,
+    userArrivalSource,
+    setUserArrivalSource,
   };
 
   return <UserContext.Provider value={providerProps}>{children}</UserContext.Provider>;
