@@ -29,12 +29,12 @@ export const Footer = ({ lightMode }: FooterProps): JSX.Element => {
           <img src={lightMode ? "./assets/githubLogoLight.svg" : "./assets/githubLogoDark.svg"} alt="Github Logo" />
         </a>
         <a
-          href="https://docs.passport.gitcoin.co/"
+          href="https://docs.passport.gitcoin.co/gitcoin-passport-sdk/getting-started"
           target="_blank"
           rel="noopener noreferrer"
-          className="ml-2 mt-4 inline-flex items-center rounded-full rounded border-2 border-gray-400 py-2 px-6 text-base md:mt-0"
+          className="ml-2 mt-4 inline-flex items-center border-gray-400 py-2 px-6 text-base md:mt-0"
         >
-          FAQ
+          <img src={lightMode ? "./assets/docsIconLight.svg" : "./assets/docsIconDark.svg"} alt="Docs Icon" />
         </a>
       </div>
       <div className="mx-auto h-px w-full flex-grow bg-gray-400 md:invisible"></div>
