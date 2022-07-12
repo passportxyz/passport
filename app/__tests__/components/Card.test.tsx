@@ -8,7 +8,7 @@ import { Card, CardProps } from "../../components/Card";
 
 import { UserContextState } from "../../context/userContext";
 import { ProviderSpec } from "../../config/providers";
-import { CeramicContextState } from "../../context/ceramicContext";
+import { CeramicContextState, IsLoadingPassportState } from "../../context/ceramicContext";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 
 jest.mock("../../utils/onboard.ts");
@@ -36,7 +36,7 @@ beforeEach(() => {
 describe("when the passport is loading", () => {
   beforeEach(() => {
     // set up in a loading state...
-    mockCeramicContext.isLoadingPassport = true;
+    mockCeramicContext.isLoadingPassport = IsLoadingPassportState.Loading;
     // set up Some provider without a VC
     cardProps = {
       providerSpec: { name: "Some", description: "Some desc" } as ProviderSpec,

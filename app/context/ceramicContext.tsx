@@ -12,11 +12,17 @@ const IAM_ISSUER_DID = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
 
 export interface CeramicContextState {
   passport: Passport | undefined | false;
-  isLoadingPassport: boolean | undefined;
+  isLoadingPassport: IsLoadingPassportState;
   allProvidersState: AllProvidersState;
   handleCreatePassport: () => Promise<void>;
   handleAddStamp: (stamp: Stamp) => Promise<void>;
   userDid: string | undefined;
+}
+
+export enum IsLoadingPassportState {
+  Idle,
+  Loading,
+  FailedToConnect,
 }
 
 export type AllProvidersState = {
@@ -63,7 +69,7 @@ const startingAllProvidersState: AllProvidersState = {
 
 const startingState: CeramicContextState = {
   passport: undefined,
-  isLoadingPassport: true,
+  isLoadingPassport: IsLoadingPassportState.Loading,
   allProvidersState: startingAllProvidersState,
   handleCreatePassport: async () => {},
   handleAddStamp: async () => {},
@@ -75,7 +81,7 @@ export const CeramicContext = createContext(startingState);
 export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
   const [ceramicDatabase, setCeramicDatabase] = useState<CeramicDatabase | undefined>(undefined);
-  const [isLoadingPassport, setIsLoadingPassport] = useState<boolean | undefined>(true);
+  const [isLoadingPassport, setIsLoadingPassport] = useState<IsLoadingPassportState>(IsLoadingPassportState.Loading);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
   const [userDid, setUserDid] = useState<string | undefined>();
   const [viewerConnection] = useViewerConnection();
@@ -125,22 +131,21 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   }, [ceramicDatabase]);
 
   const fetchPassport = async (database: CeramicDatabase): Promise<void> => {
-    setIsLoadingPassport(true);
+    setIsLoadingPassport(IsLoadingPassportState.Loading);
     // fetch, clean and set the new Passport state
     let passport = (await database.getPassport()) as Passport;
     if (passport) {
       passport = cleanPassport(passport, database) as Passport;
       hydrateAllProvidersState(passport);
       setPassport(passport);
-      setIsLoadingPassport(false);
+      setIsLoadingPassport(IsLoadingPassportState.Idle);
     } else if (passport === false) {
       handleCreatePassport();
     } else {
       // something is wrong with Ceramic...
       datadogRum.addError("Ceramic connection failed", { address });
       setPassport(passport);
-      // TODO use more expressive loading states
-      setIsLoadingPassport(undefined);
+      setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
     }
   };
 

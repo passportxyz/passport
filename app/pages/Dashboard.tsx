@@ -10,17 +10,17 @@ import { Footer } from "../components/Footer";
 
 // --Chakra UI Elements
 import {
+  Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalOverlay,
   Spinner,
   useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalBody,
-  ModalFooter,
-  Button,
 } from "@chakra-ui/react";
 
-import { CeramicContext } from "../context/ceramicContext";
+import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 import { useViewerConnection } from "@self.id/framework";
@@ -46,7 +46,7 @@ export default function Dashboard() {
 
   // Allow user to retry Ceramic connection if failed
   const retryConnection = () => {
-    if (isLoadingPassport == undefined && wallet) {
+    if (isLoadingPassport == IsLoadingPassportState.FailedToConnect && wallet) {
       // connect to ceramic (deliberately connect with a lowercase DID to match reader)
       ceramicConnect(new EthereumAuthProvider(wallet.provider, wallet.accounts[0].address.toLowerCase()));
       onRetryModalClose();
@@ -59,9 +59,8 @@ export default function Dashboard() {
     handleConnection();
   };
 
-  // isLoadingPassport undefined when there is an issue during fetchPassport attempt
   useEffect(() => {
-    if (isLoadingPassport == undefined) {
+    if (isLoadingPassport == IsLoadingPassportState.FailedToConnect) {
       onRetryModalOpen();
     }
   }, [isLoadingPassport]);
@@ -150,7 +149,7 @@ export default function Dashboard() {
           </div>
         )}
         <div className="w-full md:w-1/4">
-          {isLoadingPassport == undefined && retryModal}
+          {isLoadingPassport == IsLoadingPassportState.FailedToConnect && retryModal}
           {viewerConnection.status !== "connecting" &&
             (passport ? (
               <div>
@@ -183,8 +182,12 @@ export default function Dashboard() {
             ))}
         </div>
       </div>
-      {/* isLoadingPassport is undefined when there is a network error loading the passport */}
-      <CardList isLoading={isLoadingPassport || isLoadingPassport === undefined} />
+      <CardList
+        isLoading={
+          isLoadingPassport == IsLoadingPassportState.Loading ||
+          isLoadingPassport == IsLoadingPassportState.FailedToConnect
+        }
+      />
       {/* This footer contains dark colored text and dark images */}
       <Footer lightMode={false} />
     </>

@@ -12,7 +12,7 @@ import {
   makeTestUserContext,
   renderWithContext,
 } from "../../__test-fixtures__/contextTestHelpers";
-import { CeramicContextState } from "../../context/ceramicContext";
+import { CeramicContextState, IsLoadingPassportState } from "../../context/ceramicContext";
 
 jest.mock("../../utils/onboard.ts");
 
@@ -134,7 +134,7 @@ describe("when app fails to load ceramic stream", () => {
       {
         ...mockCeramicContext,
         passport: undefined,
-        isLoadingPassport: undefined,
+        isLoadingPassport: IsLoadingPassportState.FailedToConnect,
       },
       <Router>
         <Dashboard />
@@ -160,7 +160,7 @@ describe("when app fails to load ceramic stream", () => {
       {
         ...mockCeramicContext,
         passport: undefined,
-        isLoadingPassport: undefined,
+        isLoadingPassport: IsLoadingPassportState.FailedToConnect,
       },
       <Router>
         <Dashboard />
@@ -178,7 +178,7 @@ describe("when app fails to load ceramic stream", () => {
       {
         ...mockCeramicContext,
         passport: undefined,
-        isLoadingPassport: undefined,
+        isLoadingPassport: IsLoadingPassportState.FailedToConnect,
       },
       <Router>
         <Dashboard />
