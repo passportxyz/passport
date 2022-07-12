@@ -9,7 +9,7 @@ import { VerifiableCredential } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../config/providers";
 
 // --- Context
-import { CeramicContext } from "../context/ceramicContext";
+import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 
 // --- Components
 import { JsonOutputModal } from "../components/JsonOutputModal";
@@ -82,7 +82,7 @@ export const Card = ({
           <p className="pleading-relaxed hidden md:inline-block">{providerSpec.description}</p>
         </div>
         {/* TODO: change this to passport===false and introduce an offline save state when passport===undefined */}
-        {!passport || isLoadingPassport ? (
+        {!passport || isLoadingPassport !== IsLoadingPassportState.Idle ? (
           <span className="flex w-full items-center justify-center border-t-2 p-3 text-gray-900">
             <span>
               <Spinner
