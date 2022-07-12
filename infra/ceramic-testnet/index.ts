@@ -249,7 +249,7 @@ const httpsListener = target.createListener("gitcoin-ceramic-https", {
 }, { dependsOn: [certificate] });
 
 // Target group for the IPFS container
-const ceramicTarget = internalalb.createTargetGroup("gitcoin-dpopp-swarm", {
+const ceramicTarget = alb.createTargetGroup("gitcoin-dpopp-swarm", {
   vpc,
   port: 4001,
   protocol: "HTTP",
@@ -337,7 +337,7 @@ function makeCmd(inputbucketName: pulumi.Input<string>, inputIpfsUrl: pulumi.Inp
 
 export const ceramicCommand = makeCmd(
   ceramicStateBucketName,
-  pulumi.interpolate`http://${ceramicListener.endpoint.hostname}:5001`
+  pulumi.interpolate`http://${ipfsListener.endpoint.hostname}:5001`
 );
 
 const service = new awsx.ecs.FargateService("dpopp-ceramic", {
