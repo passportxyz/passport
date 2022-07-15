@@ -21,7 +21,7 @@ import { DoneToastContent } from "../DoneToastContent";
 
 import { PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
 
-const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
+const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
 const providerId: PROVIDER_ID = "POAP";
 

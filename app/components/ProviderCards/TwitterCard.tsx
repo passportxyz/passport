@@ -3,7 +3,6 @@ import React, { useContext, useEffect, useState } from "react";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
-import { datadogRum } from "@datadog/browser-rum";
 
 import { debounce } from "ts-debounce";
 import { BroadcastChannel } from "broadcast-channel";
@@ -37,14 +36,14 @@ export default function TwitterCard(): JSX.Element {
   async function handleFetchTwitterOAuth(): Promise<void> {
     // Fetch data from external API
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_DPOPP_PROCEDURE_URL?.replace(/\/*?$/, "")}/twitter/generateAuthUrl`,
+      `${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(/\/*?$/, "")}/twitter/generateAuthUrl`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          callback: process.env.NEXT_PUBLIC_DPOPP_TWITTER_CALLBACK,
+          callback: process.env.NEXT_PUBLIC_PASSPORT_TWITTER_CALLBACK,
         }),
       }
     );
@@ -87,7 +86,7 @@ export default function TwitterCard(): JSX.Element {
       // fetch and store credential
       setLoading(true);
       fetchVerifiableCredential(
-        process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "",
+        process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
         {
           type: providerId,
           version: "0.0.0",

@@ -44,7 +44,7 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
   Brightid: {
     icon: "./assets/brightidStampIcon.svg",
     name: "Bright ID",
-    description: "Bright ID name",
+    description: "Bright ID",
   },
   Github: {
     icon: "./assets/githubStampIcon.svg",

@@ -1,12 +1,13 @@
 module.exports = {
   content: ["./pages/**/*.{ts,tsx}", "./config/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./pages/_app.tsx"],
   options: {
-    safelist: ["landingPageBackground"],
+    safelist: ["landingPageBackground", "mobileLandingPageBackground"],
   },
   theme: {
     extend: {
       backgroundImage: {
         landingPageBackground: "url('/assets/landingPageBackground.svg')",
+        mobileLandingPageBackground: "url('/assets/mobileLandingPageBackground.svg')",
       },
       colors: {
         purple: {

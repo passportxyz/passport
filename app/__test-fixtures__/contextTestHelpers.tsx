@@ -1,5 +1,5 @@
 import { UserContext, UserContextState } from "../context/userContext";
-import { CeramicContext, CeramicContextState } from "../context/ceramicContext";
+import { CeramicContext, CeramicContextState, IsLoadingPassportState } from "../context/ceramicContext";
 import { STAMP_PROVIDERS } from "../config/providers";
 import { mockAddress, mockWallet } from "./onboardHookValues";
 import React from "react";
@@ -25,7 +25,7 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
       expiryDate: new Date(),
       stamps: [],
     },
-    isLoadingPassport: false,
+    isLoadingPassport: IsLoadingPassportState.Idle,
     allProvidersState: {
       Google: {
         providerSpec: STAMP_PROVIDERS.Google,

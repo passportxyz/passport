@@ -87,7 +87,7 @@ describe("when the verify button is clicked", () => {
       fireEvent.click(initialVerifyButton!);
 
       expect(fetchVerifiableCredential).toHaveBeenLastCalledWith(
-        process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "",
+        process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
         {
           type: "Ens",
           version: "0.0.0",

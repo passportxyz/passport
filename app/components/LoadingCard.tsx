@@ -2,7 +2,7 @@ import React from "react";
 
 export const LoadingCard = (): JSX.Element => {
   return (
-    <div className="w-full p-4 md:w-1/2 xl:w-1/4" data-testid="loading-card">
+    <div className="w-1/2 p-1 md:w-1/2 md:p-6 xl:w-1/4" data-testid="loading-card">
       <div className="relative animate-pulse border border-gray-200 p-0">
         <div className="flex flex-row p-6">
           <div className="flex h-10 w-1/2 w-10 flex-grow">

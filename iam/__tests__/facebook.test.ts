@@ -13,7 +13,7 @@ describe("Attempt verification", function () {
   let validAccessTokenData: FacebookDebugResponse = {
     app_id: process.env.FACEBOOK_APP_ID,
     type: "USER",
-    application: "dpopp",
+    application: "Gitcoin Passport",
     data_access_expires_at: tokenExpirationDate,
     expires_at: tokenExpirationDate,
     is_valid: true,
@@ -97,7 +97,7 @@ describe("Attempt verification", function () {
     });
   });
 
-  it("returns invalid response when app_id doesn't match dpopp app id", async () => {
+  it("returns invalid response when app_id doesn't match passport app id", async () => {
     (axios.get as jest.Mock).mockResolvedValueOnce({
       data: {
         data: {

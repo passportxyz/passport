@@ -21,7 +21,7 @@ import { useDisclosure, useToast } from "@chakra-ui/react";
 import { PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../../config/providers";
 
-const iamUrl = process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "";
+const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
 const providerId: PROVIDER_ID = "Ens";
 

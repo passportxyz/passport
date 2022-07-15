@@ -43,7 +43,7 @@ export default function GithubCard(): JSX.Element {
     const state = "github-" + generateUID(10);
     setState(state);
 
-    const githubUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_DPOPP_GITHUB_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_DPOPP_GITHUB_CALLBACK}&state=${state}`;
+    const githubUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK}&state=${state}`;
     openGithubOAuthUrl(githubUrl);
   }
 
@@ -86,7 +86,7 @@ export default function GithubCard(): JSX.Element {
       // fetch and store credential
       setLoading(true);
       fetchVerifiableCredential(
-        process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "",
+        process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
         {
           type: providerId,
           version: "0.0.0",
