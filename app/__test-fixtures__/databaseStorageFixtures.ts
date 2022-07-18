@@ -71,3 +71,8 @@ export const poapStampFixture: Stamp = {
   provider: "POAP",
   credential,
 };
+
+export const linkedinStampFixture: Stamp = {
+  provider: "Linkedin",
+  credential,
+};

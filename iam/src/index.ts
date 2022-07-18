@@ -44,6 +44,7 @@ import { POAPProvider } from "./providers/poap";
 import { FacebookProvider } from "./providers/facebook";
 import { BrightIdProvider } from "./providers/brightid";
 import { GithubProvider } from "./providers/github";
+import { LinkedinProvider } from "./providers/linkedin";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
@@ -57,6 +58,7 @@ const providers = new Providers([
   new FacebookProvider(),
   new BrightIdProvider(),
   new GithubProvider(),
+  new LinkedinProvider(),
 ]);
 
 // create the app and run on port

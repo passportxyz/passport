@@ -199,6 +199,18 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "GITHUB_CLIENT_SECRET",
             valueFrom: `${IAM_SERVER_SSM_ARN}:GITHUB_CLIENT_SECRET::`,
           },
+          {
+            name: "LINKEDIN_CLIENT_ID",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:LINKEDIN_CLIENT_ID::`,
+          },
+          {
+            name: "LINKEDIN_CLIENT_SECRET",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:LINKEDIN_CLIENT_SECRET::`,
+          },
+          {
+            name: "LINKEDIN_CALLBACK",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:LINKEDIN_CALLBACK::`,
+          },
         ],
       },
     },
