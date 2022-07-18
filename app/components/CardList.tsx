@@ -26,7 +26,7 @@ export const CardList = ({ isLoading }: CardListProps): JSX.Element => {
       <div className="flex flex-wrap md:-m-4 md:px-4">
         {isLoading ? (
           <>
-            {[...Array(9)].map((_, i) => (
+            {[...Array(10)].map((_, i) => (
               <LoadingCard key={i} />
             ))}
           </>
