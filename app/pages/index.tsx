@@ -80,6 +80,13 @@ const App: NextPage = () => {
     // only continue with the process if a code is returned
     if (queryCode) {
       channel.postMessage({ target: "linkedin", data: { code: queryCode, state: queryState } });
+    } // if Discord oauth then submit message to other windows and close self
+  } else if ((queryError || queryCode) && queryState && /^discord-.*/.test(queryState)) {
+    // shared message channel between windows (on the same domain)
+    const channel = new BroadcastChannel("discord_oauth_channel");
+    // only continue with the process if a code is returned
+    if (queryCode) {
+      channel.postMessage({ target: "discord", data: { code: queryCode, state: queryState } });
     }
     // always close the redirected window
     window.close();

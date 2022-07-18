@@ -7,3 +7,4 @@ export { default as FacebookCard } from "./FacebookCard";
 export { default as BrightidCard } from "./BrightidCard";
 export { default as GithubCard } from "./GithubCard";
 export { default as LinkedinCard } from "./LinkedinCard";
+export { default as DiscordCard } from "./DiscordCard";
