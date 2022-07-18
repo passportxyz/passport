@@ -14,6 +14,7 @@ import { Card } from "../Card";
 import { UserContext } from "../../context/userContext";
 import { ProviderSpec } from "../../config/providers";
 import { datadogLogs } from "@datadog/browser-logs";
+import { CeramicContext } from "../../context/ceramicContext";
 
 // Each provider is recognised by its ID
 const providerId: PROVIDER_ID = "Coinbase";
@@ -30,7 +31,8 @@ function generateUID(length: number) {
 }
 
 export default function CoinbaseCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const { address, signer } = useContext(UserContext);
+  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [state, setState] = useState("");
 
@@ -41,7 +43,7 @@ export default function CoinbaseCard(): JSX.Element {
     const state = "coinbase-" + generateUID(10);
     setState(state);
 
-    const coinbaseUrl = `https://www.coinbase.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_DPOPP_COINBASE_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_DPOPP_COINBASE_CALLBACK}&response_type=code&scope=wallet%3Auser%3Aread&state=${state}`;
+    const coinbaseUrl = `https://www.coinbase.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK}&response_type=code&scope=wallet%3Auser%3Aread&state=${state}`;
     openCoinbaseOAuthUrl(coinbaseUrl);
   }
 
@@ -84,7 +86,7 @@ export default function CoinbaseCard(): JSX.Element {
       // fetch and store credential
       setLoading(true);
       fetchVerifiableCredential(
-        process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "",
+        process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
         {
           type: providerId,
           version: "0.0.0",

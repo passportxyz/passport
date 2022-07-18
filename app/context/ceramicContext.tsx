@@ -73,6 +73,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: STAMP_PROVIDERS.Discord,
     stamp: undefined,
   },
+  Coinbase: {
+    providerSpec: STAMP_PROVIDERS.Coinbase,
+    stamp: undefined,
+  },
 };
 
 const startingState: CeramicContextState = {
