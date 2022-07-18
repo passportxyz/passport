@@ -73,6 +73,19 @@ const App: NextPage = () => {
 
     return <div></div>;
   }
+  // if linkedin oauth then submit message to other windows and close self
+  else if ((queryError || queryCode) && queryState && /^linkedin-.*/.test(queryState)) {
+    // shared message channel between windows (on the same domain)
+    const channel = new BroadcastChannel("linkedin_oauth_channel");
+    // only continue with the process if a code is returned
+    if (queryCode) {
+      channel.postMessage({ target: "linkedin", data: { code: queryCode, state: queryState } });
+    }
+    // always close the redirected window
+    window.close();
+
+    return <div></div>;
+  }
 
   return (
     <div>
