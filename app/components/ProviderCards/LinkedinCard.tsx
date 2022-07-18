@@ -52,7 +52,7 @@ export default function LinkedinCard(): JSX.Element {
     const state = "linkedin-" + generateUID(10);
     setState(state);
     // Fetch data from external API
-    const url = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${process.env.NEXT_PUBLIC_DPOPP_LINKEDIN_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_DPOPP_LINKEDIN_CALLBACK}&state=${state}&scope=r_emailaddress%20r_liteprofile`;
+    const url = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK}&state=${state}&scope=r_emailaddress%20r_liteprofile`;
     openLinkedAuthURl(url);
   }
 
@@ -96,7 +96,7 @@ export default function LinkedinCard(): JSX.Element {
       // fetch and store credential
       setLoading(true);
       fetchVerifiableCredential(
-        process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "",
+        process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
         {
           type: providerId,
           version: "0.0.0",
@@ -123,7 +123,7 @@ export default function LinkedinCard(): JSX.Element {
         })
         .catch((e) => {
           datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
-          throw e;
+          datadogRum.addError(e, { provider: providerId });
         })
         .finally(() => {
           setLoading(false);

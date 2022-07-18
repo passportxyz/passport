@@ -35,11 +35,11 @@ export const CardList = ({ isLoading }: CardListProps): JSX.Element => {
             <GoogleCard />
             <TwitterCard />
             <GithubCard />
+            <LinkedinCard />
             <BrightidCard />
             <PoapCard />
             <EnsCard />
             <PohCard />
-            <LinkedinCard />
           </>
         )}
       </div>
