@@ -37,13 +37,13 @@ export class CoinbaseProvider implements Provider {
     } catch (e) {
       return { valid: false };
     } finally {
-      valid = verifiedPayload && verifiedPayload.data.id ? true : false;
+      valid = verifiedPayload && verifiedPayload.data && verifiedPayload.data.id ? true : false;
     }
 
     return {
       valid: valid,
       record: {
-        id: verifiedPayload.data.id,
+        id: verifiedPayload && verifiedPayload.data ? verifiedPayload.data.id : undefined,
       },
     };
   }
