@@ -3,7 +3,6 @@ import React, { useContext, useEffect, useState } from "react";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
-import { datadogRum } from "@datadog/browser-rum";
 
 import { debounce } from "ts-debounce";
 import { BroadcastChannel } from "broadcast-channel";
@@ -20,6 +19,7 @@ import { useToast } from "@chakra-ui/react";
 // --- Context
 import { UserContext } from "../../context/userContext";
 import { ProviderSpec } from "../../config/providers";
+import { CeramicContext } from "../../context/ceramicContext";
 
 // Each provider is recognised by its ID
 const providerId: PROVIDER_ID = "Discord";
@@ -36,7 +36,8 @@ function generateUID(length: number) {
 }
 
 export default function DiscordCard(): JSX.Element {
-  const { address, signer, handleAddStamp, allProvidersState } = useContext(UserContext);
+  const { address, signer } = useContext(UserContext);
+  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
 
   // --- Chakra functions
@@ -46,8 +47,8 @@ export default function DiscordCard(): JSX.Element {
   async function handleFetchDiscordOAuth(): Promise<void> {
     // open new window for authUrl
     const authUrl = `https://discord.com/api/oauth2/authorize?response_type=code&scope=identify&client_id=${
-      process.env.NEXT_PUBLIC_DPOPP_DISCORD_CLIENT_ID
-    }&state=discord-${generateUID(10)}&redirect_uri=${process.env.NEXT_PUBLIC_DPOPP_DISCORD_CALLBACK}`;
+      process.env.NEXT_PUBLIC_PASSPORT_DISCORD_CLIENT_ID
+    }&state=discord-${generateUID(10)}&redirect_uri=${process.env.NEXT_PUBLIC_PASSPORT_DISCORD_CALLBACK}`;
     openDiscordOAuthUrl(authUrl);
   }
 
@@ -84,7 +85,7 @@ export default function DiscordCard(): JSX.Element {
       // fetch and store credential
       setLoading(true);
       fetchVerifiableCredential(
-        process.env.NEXT_PUBLIC_DPOPP_IAM_URL || "",
+        process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
         {
           type: providerId,
           version: "0.0.0",
