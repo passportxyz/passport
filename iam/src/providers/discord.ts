@@ -54,19 +54,25 @@ const requestAccessToken = async (code: string): Promise<string> => {
   const clientSecret = process.env.DISCORD_CLIENT_SECRET;
   const redirectUri = process.env.DISCORD_CALLBACK;
 
-  // Exchange the code for an access token
-  const tokenRequest = await axios.post(
-    "https://discord.com/api/oauth2/token",
-    `grant_type=authorization_code&code=${code}&client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${redirectUri}`
-  );
+  try {
+    // Exchange the code for an access token
+    const tokenRequest = await axios.post(
+      "https://discord.com/api/oauth2/token",
+      `grant_type=authorization_code&code=${code}&client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${redirectUri}`
+    );
 
-  if (tokenRequest.status != 200) {
-    throw `Post for request returned status code ${tokenRequest.status} instead of the expected 200`;
+    if (tokenRequest.status != 200) {
+      throw `Post for request returned status code ${tokenRequest.status} instead of the expected 200`;
+    }
+
+    const tokenResponse = tokenRequest.data as DiscordTokenResponse;
+
+    return tokenResponse.access_token;
+  } catch (e: unknown) {
+    const error = e as { response: { data: { error_description: string } } };
+    console.error("Error when verifying discord account for user:", error.response?.data);
+    throw e;
   }
-
-  const tokenResponse = tokenRequest.data as DiscordTokenResponse;
-
-  return tokenResponse.access_token;
 };
 
 const verifyDiscord = async (code: string): Promise<DiscordFindMyUserResponse> => {
