@@ -212,6 +212,18 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "LINKEDIN_CALLBACK",
             valueFrom: `${IAM_SERVER_SSM_ARN}:LINKEDIN_CALLBACK::`,
           },
+          {
+            name: "DISCORD_CLIENT_ID",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:DISCORD_CLIENT_ID::`,
+          },
+          {
+            name: "DISCORD_CLIENT_SECRET",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:DISCORD_CLIENT_SECRET::`,
+          },
+          {
+            name: "DISCORD_CALLBACK",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:DISCORD_CALLBACK::`,
+          },
         ],
       },
     },
