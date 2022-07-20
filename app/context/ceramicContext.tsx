@@ -74,6 +74,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: STAMP_PROVIDERS.Discord,
     stamp: undefined,
   },
+  IdStaking: {
+    providerSpec: STAMP_PROVIDERS.IdStaking,
+    stamp: undefined,
+  },
 };
 
 const startingState: CeramicContextState = {
@@ -122,6 +126,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         );
         setCeramicDatabase(ceramicDatabaseInstance);
         setUserDid(ceramicDatabaseInstance.did);
+        //////////////////
+        ceramicDatabaseInstance.deletePassport();
         break;
       }
       case "failed": {

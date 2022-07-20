@@ -12,6 +12,7 @@ import {
   BrightidCard,
   LinkedinCard,
   DiscordCard,
+  IdStakingCard,
 } from "./ProviderCards";
 import GithubCard from "./ProviderCards/GithubCard";
 import { LoadingCard } from "./LoadingCard";
@@ -42,6 +43,7 @@ export const CardList = ({ isLoading }: CardListProps): JSX.Element => {
             <EnsCard />
             <PohCard />
             <DiscordCard />
+            <IdStakingCard />
           </>
         )}
       </div>

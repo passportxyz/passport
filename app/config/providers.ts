@@ -61,4 +61,9 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     name: "Discord",
     description: "Discord name",
   },
+  IdStaking: {
+    icon: "./assets/idStakingStampIcon.svg",
+    name: "Id Staking",
+    description: "Verify Stake",
+  },
 };
