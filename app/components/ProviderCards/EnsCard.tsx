@@ -79,9 +79,6 @@ export default function EnsCard(): JSX.Element {
     handleAddStamp(credentialResponse!)
       .then(() => {
         datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId });
-        if (localStorage.getItem("showReturnToTrustModalMessage") !== "true") {
-          submitPassportModalOpen();
-        }
       })
       .catch((e: any): void => {
         datadogLogs.logger.error("Error Saving Stamp", { error: e, provider: providerId });
@@ -97,6 +94,9 @@ export default function EnsCard(): JSX.Element {
       isClosable: true,
       render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
     });
+    if (localStorage.getItem("showReturnToTrustModalMessage") !== "true") {
+      submitPassportModalOpen();
+    }
   };
 
   const handleModalOnClose = (): void => {
@@ -106,7 +106,6 @@ export default function EnsCard(): JSX.Element {
 
   const issueCredentialWidget = (
     <>
-      <ReturnModal isOpen={submitPassportModalIsOpen} onClose={submitPassportModalClose} />
       <button
         data-testid="button-verify-ens"
         className="verify-btn"
@@ -143,6 +142,9 @@ export default function EnsCard(): JSX.Element {
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={issueCredentialWidget}
       isLoading={verificationInProgress}
+      afterCredentialVerifiedWidget={
+        <ReturnModal isOpen={submitPassportModalIsOpen} onClose={submitPassportModalClose} />
+      }
     />
   );
 }

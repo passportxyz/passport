@@ -20,6 +20,7 @@ export type CardProps = {
   icon?: string;
   issueCredentialWidget: JSX.Element;
   isLoading?: boolean;
+  afterCredentialVerifiedWidget?: JSX.Element;
 };
 
 export const Card = ({
@@ -27,6 +28,7 @@ export const Card = ({
   verifiableCredential,
   issueCredentialWidget,
   isLoading = false,
+  afterCredentialVerifiedWidget = <></>,
 }: CardProps): JSX.Element => {
   const { passport, isLoadingPassport } = useContext(CeramicContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -81,6 +83,7 @@ export const Card = ({
           <h1 className="title-font mb-3 text-lg font-medium text-gray-900">{providerSpec.name}</h1>
           <p className="pleading-relaxed hidden md:inline-block">{providerSpec.description}</p>
         </div>
+        {afterCredentialVerifiedWidget}
         {/* TODO: change this to passport===false and introduce an offline save state when passport===undefined */}
         {!passport || isLoadingPassport !== IsLoadingPassportState.Idle ? (
           <span className="flex w-full items-center justify-center border-t-2 p-3 text-gray-900">
