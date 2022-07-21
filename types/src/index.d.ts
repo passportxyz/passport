@@ -116,6 +116,7 @@ export type Stamp = {
 export type Passport = {
   issuanceDate: Date;
   expiryDate: Date;
+  streamIDs: string[];
   stamps: Stamp[];
 };
 

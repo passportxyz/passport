@@ -16,6 +16,7 @@ export interface CeramicContextState {
   allProvidersState: AllProvidersState;
   handleCreatePassport: () => Promise<void>;
   handleAddStamp: (stamp: Stamp) => Promise<void>;
+  handleDeleteStamp: (streamId: string) => Promise<void>;
   userDid: string | undefined;
 }
 
@@ -29,6 +30,7 @@ export type AllProvidersState = {
   [provider in PROVIDER_ID]?: {
     providerSpec: ProviderSpec;
     stamp?: Stamp;
+    streamId?: string;
   };
 };
 
@@ -36,42 +38,52 @@ const startingAllProvidersState: AllProvidersState = {
   Google: {
     providerSpec: STAMP_PROVIDERS.Google,
     stamp: undefined,
+    streamId: undefined,
   },
   Ens: {
     providerSpec: STAMP_PROVIDERS.Ens,
     stamp: undefined,
+    streamId: undefined,
   },
   Poh: {
     providerSpec: STAMP_PROVIDERS.Poh,
     stamp: undefined,
+    streamId: undefined,
   },
   Twitter: {
     providerSpec: STAMP_PROVIDERS.Twitter,
     stamp: undefined,
+    streamId: undefined,
   },
   POAP: {
     providerSpec: STAMP_PROVIDERS.POAP,
     stamp: undefined,
+    streamId: undefined,
   },
   Facebook: {
     providerSpec: STAMP_PROVIDERS.Facebook,
     stamp: undefined,
+    streamId: undefined,
   },
   Brightid: {
     providerSpec: STAMP_PROVIDERS.Brightid,
     stamp: undefined,
+    streamId: undefined,
   },
   Github: {
     providerSpec: STAMP_PROVIDERS.Github,
     stamp: undefined,
+    streamId: undefined,
   },
   Linkedin: {
     providerSpec: STAMP_PROVIDERS.Linkedin,
     stamp: undefined,
+    streamId: undefined,
   },
   Discord: {
     providerSpec: STAMP_PROVIDERS.Discord,
     stamp: undefined,
+    streamId: undefined,
   },
 };
 
@@ -81,6 +93,7 @@ const startingState: CeramicContextState = {
   allProvidersState: startingAllProvidersState,
   handleCreatePassport: async () => {},
   handleAddStamp: async () => {},
+  handleDeleteStamp: async (streamId: string) => {},
   userDid: undefined,
 };
 
@@ -189,16 +202,25 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     }
   };
 
+  const handleDeleteStamp = async (streamId: string): Promise<void> => {
+    if (ceramicDatabase) {
+      await ceramicDatabase.deleteStamp(streamId);
+      await fetchPassport(ceramicDatabase);
+    }
+  };
+
   const hydrateAllProvidersState = (passport?: Passport) => {
     if (passport) {
       // set stamps into allProvidersState
-      passport.stamps.forEach((stamp: Stamp) => {
+      const streamIDs = passport.streamIDs;
+      passport.stamps.forEach((stamp: Stamp, index: number) => {
         const { provider } = stamp;
         const providerState = allProvidersState[provider];
         if (providerState) {
           const newProviderState = {
             providerSpec: providerState.providerSpec,
             stamp,
+            streamId: streamIDs[index],
           };
           setAllProviderState((prevState) => ({
             ...prevState,
@@ -222,6 +244,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       allProvidersState,
       handleCreatePassport,
       handleAddStamp,
+      handleDeleteStamp,
       userDid,
     }),
     [passport, isLoadingPassport]
@@ -233,6 +256,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     allProvidersState,
     handleCreatePassport,
     handleAddStamp,
+    handleDeleteStamp,
     userDid,
   };
 

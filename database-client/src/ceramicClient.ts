@@ -8,6 +8,7 @@ import { DataModel } from "@glazed/datamodel";
 import { DIDDataStore } from "@glazed/did-datastore";
 import { TileLoader } from "@glazed/tile-loader";
 import type { DID as CeramicDID } from "dids";
+import { StreamID } from "@ceramicnetwork/streamid";
 
 import { DataStorageBase } from "./types";
 
@@ -92,6 +93,10 @@ export class CeramicDatabase implements DataStorageBase {
   async getPassport(): Promise<Passport | undefined | false> {
     try {
       const passport = await this.store.get("Passport");
+      const streamIDs: string[] = passport.stamps.map((ceramicStamp: CeramicStamp) => {
+        return ceramicStamp.credential;
+      });
+
       this.logger.info(`loaded passport for did ${this.did} => ${JSON.stringify(passport)}`);
       if (!passport) return false;
 
@@ -115,6 +120,7 @@ export class CeramicDatabase implements DataStorageBase {
         issuanceDate: new Date(passport.issuanceDate),
         expiryDate: new Date(passport.expiryDate),
         stamps: loadedStamps,
+        streamIDs: streamIDs,
       };
 
       // try pinning passport
@@ -152,6 +158,46 @@ export class CeramicDatabase implements DataStorageBase {
         await this.ceramicClient.pin.add(streamId);
       } catch (e) {
         this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString());
+      }
+    }
+  }
+
+  async deleteStamp(streamId: string): Promise<void> {
+    this.logger.info(`deleting stamp ${streamId} from did ${this.did}`);
+    // get passport document from user did data store in ceramic
+    const passport = await this.store.get("Passport");
+
+    if (passport && passport.stamps) {
+      const itemIndex = passport.stamps.findIndex((stamp) => {
+        // TODO: should we double check that the stamp id matches the user id, in order to avoid saving to the wrong address?
+        return stamp.credential === streamId;
+      });
+
+      if (itemIndex != -1) {
+        // Remove the stamp from the stamp list
+        passport.stamps.splice(itemIndex, 1);
+
+        // merge new stamps array to update stamps on the passport
+        const passportStreamId = await this.store.merge("Passport", { stamps: passport.stamps });
+
+        // try to unpin the stamp
+        const stampStreamId: StreamID = StreamID.fromString(streamId);
+        try {
+          await this.ceramicClient.pin.rm(stampStreamId);
+        } catch (e) {
+          this.logger.error(
+            `Error when unpinning stamp with id ${stampStreamId.toString()} for did  ${this.did}:` + e.toString()
+          );
+        }
+
+        // try pinning passport
+        try {
+          await this.ceramicClient.pin.add(passportStreamId);
+        } catch (e) {
+          this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString());
+        }
+      } else {
+        this.logger.info(`unable to find stamp with stream id ${streamId} in passport`);
       }
     }
   }

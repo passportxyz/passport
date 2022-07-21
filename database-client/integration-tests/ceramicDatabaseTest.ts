@@ -11,7 +11,7 @@ let testDID: DID;
 let ceramicDatabase: CeramicDatabase;
 
 beforeAll(async () => {
-  const TEST_SEED = Uint8Array.from({length: 32}, () => Math.floor(Math.random() * 256));
+  const TEST_SEED = Uint8Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
 
   // Create and authenticate the DID
   testDID = new DID({
@@ -60,6 +60,7 @@ describe("when there is an existing passport without stamps for the given did", 
     issuanceDate: new Date("2022-01-01"),
     expiryDate: new Date("2022-01-02"),
     stamps: [],
+    streamIDs: [],
   };
 
   let existingPassportStreamID;
@@ -73,7 +74,7 @@ describe("when there is an existing passport without stamps for the given did", 
   });
 
   it("getPassport retrieves the passport from ceramic", async () => {
-    const actualPassport = await ceramicDatabase.getPassport() as Passport;
+    const actualPassport = (await ceramicDatabase.getPassport()) as Passport;
 
     expect(actualPassport).toBeDefined();
     expect(actualPassport).toEqual(existingPassport);
@@ -130,6 +131,7 @@ describe("when there is an existing passport with stamps for the given did", () 
     issuanceDate: new Date("2022-01-01"),
     expiryDate: new Date("2022-01-02"),
     stamps: [],
+    streamIDs: [],
   };
 
   // these need to be initialized in beforeEach since `credential` needs `ceramicDatabase` to be defined
@@ -197,7 +199,7 @@ describe("when there is an existing passport with stamps for the given did", () 
   });
 
   it("getPassport retrieves the passport and stamps from ceramic", async () => {
-    const actualPassport = await ceramicDatabase.getPassport() as Passport;
+    const actualPassport = (await ceramicDatabase.getPassport()) as Passport;
 
     const formattedDate = new Date(actualPassport["issuanceDate"]);
 

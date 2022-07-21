@@ -141,6 +141,7 @@ export default function TwitterCard(): JSX.Element {
 
   return (
     <Card
+      streamId={allProvidersState[providerId]!.streamId}
       providerSpec={allProvidersState[providerId]!.providerSpec as ProviderSpec}
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={issueCredentialWidget}
