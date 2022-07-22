@@ -40,6 +40,9 @@ export const Card = ({
     }
   };
 
+  console.log("geri verifiableCredential", !!verifiableCredential, verifiableCredential);
+  console.log("geri verifiableCredential", JSON.stringify(verifiableCredential));
+
   return (
     <div className="w-1/2 p-2 md:w-1/2 xl:w-1/4">
       <div className="relative border border-gray-200 p-0">
@@ -75,7 +78,7 @@ export const Card = ({
           {verifiableCredential ? (
             <>
               <Menu>
-                <MenuButton px="2" border="1px" rounded="lg" borderColor="gray.200">
+                <MenuButton px="2" border="1px" rounded="lg" borderColor="gray.200" data-testid="card-menu-button">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                       d="M10 6C8.89543 6 8 5.10457 8 4C8 2.89543 8.89543 2 10 2C11.1046 2 12 2.89543 12 4C12 5.10457 11.1046 6 10 6Z"
@@ -92,8 +95,12 @@ export const Card = ({
                   </svg>
                 </MenuButton>
                 <MenuList>
-                  <MenuItem onClick={onOpenJsonOutputModal}>View Stamp JSON</MenuItem>
-                  <MenuItem onClick={onDeleteStamp}>Remove stamp</MenuItem>
+                  <MenuItem onClick={onOpenJsonOutputModal} data-testid="view-json">
+                    View Stamp JSON
+                  </MenuItem>
+                  <MenuItem onClick={onDeleteStamp} data-testid="remove-stamp">
+                    Remove stamp
+                  </MenuItem>
                 </MenuList>
               </Menu>
               <JsonOutputModal
