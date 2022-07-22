@@ -5,6 +5,9 @@ on:
     types:
       - opened
 
+permissions:
+  issues: write
+
 jobs:
   add-to-project:
     name: Add issue to project
