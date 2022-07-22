@@ -5,9 +5,6 @@ on:
     types:
       - opened
 
-permissions:
-  issues: write
-
 jobs:
   add-to-project:
     name: Add issue to project
@@ -16,4 +13,4 @@ jobs:
       - uses: actions/add-to-project@v0.1.0
         with:
           project-url: https://github.com/orgs/gitcoinco/projects/6
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.ADD_ISSUE_TO_PROJECT_PAT }}
