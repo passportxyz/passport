@@ -93,7 +93,7 @@ export class CeramicDatabase implements DataStorageBase {
   async getPassport(): Promise<Passport | undefined | false> {
     try {
       const passport = await this.store.get("Passport");
-      const streamIDs: string[] = passport.stamps.map((ceramicStamp: CeramicStamp) => {
+      const streamIDs: string[] = passport?.stamps.map((ceramicStamp: CeramicStamp) => {
         return ceramicStamp.credential;
       });
 

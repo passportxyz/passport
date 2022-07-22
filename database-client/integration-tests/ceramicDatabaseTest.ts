@@ -65,7 +65,13 @@ describe("when there is an existing passport without stamps for the given did", 
 
   let existingPassportStreamID;
   beforeEach(async () => {
-    const stream = await ceramicDatabase.store.set("Passport", existingPassport);
+    // ceramicPassport follows the schema definition that ceramic expects
+    const ceramicPassport = {
+      issuanceDate: existingPassport.issuanceDate,
+      expiryDate: existingPassport.expiryDate,
+      stamps: existingPassport.stamps,
+    };
+    const stream = await ceramicDatabase.store.set("Passport", ceramicPassport);
     existingPassportStreamID = stream.toUrl();
   });
 
@@ -181,7 +187,8 @@ describe("when there is an existing passport with stamps for the given did", () 
     const ensStampTile = await ceramicDatabase.model.createTile("VerifiableCredential", credential);
     // add ENS stamp provider and streamId to passport stamps array
     const existingPassportWithStamps = {
-      ...existingPassport,
+      issuanceDate: new Date("2022-01-01"),
+      expiryDate: new Date("2022-01-02"),
       stamps: [
         {
           provider: ensStampFixture.provider,
