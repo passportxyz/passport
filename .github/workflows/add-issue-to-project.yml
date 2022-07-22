@@ -13,4 +13,4 @@ jobs:
       - uses: actions/add-to-project@v0.1.0
         with:
           project-url: https://github.com/orgs/gitcoinco/projects/6
-          github-token: ${{ secrets.ACTION_ACCESS_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
