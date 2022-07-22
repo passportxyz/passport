@@ -59,6 +59,7 @@ describe("when user has verified with LinkedinProvider", () => {
       providerSpec: STAMP_PROVIDERS.Linkedin,
       stamp: {
         provider: "Linkedin",
+        streamId: "STREAM-ID",
         credential: {
           type: ["VerifiableCredential"],
           proof: {
@@ -80,7 +81,6 @@ describe("when user has verified with LinkedinProvider", () => {
           },
         },
       },
-      streamId: "STREAM-ID",
     };
 
     renderWithContext(mockUserContext, mockCeramicContext, <LinkedinCard />);

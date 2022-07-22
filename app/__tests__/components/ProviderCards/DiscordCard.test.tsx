@@ -60,6 +60,7 @@ describe("when user has verified with DiscordProvider", () => {
       providerSpec: STAMP_PROVIDERS.Discord,
       stamp: {
         provider: "Discord",
+        streamId: "STREAM-ID",
         credential: {
           type: ["VerifiableCredential"],
           proof: {
@@ -81,7 +82,6 @@ describe("when user has verified with DiscordProvider", () => {
           },
         },
       },
-      streamId: "STREAM-ID",
     };
 
     renderWithContext(mockUserContext, mockCeramicContext, <DiscordCard />);

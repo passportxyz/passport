@@ -59,6 +59,7 @@ describe("when user has verified with GoogleProvider", () => {
       providerSpec: STAMP_PROVIDERS.Google,
       stamp: {
         provider: "Google",
+        streamId: "STREAM-ID",
         credential: {
           type: ["VerifiableCredential"],
           proof: {
@@ -80,7 +81,6 @@ describe("when user has verified with GoogleProvider", () => {
           },
         },
       },
-      streamId: "STREAM-ID",
     };
 
     renderWithContext(mockUserContext, mockCeramicContext, <GoogleCard />);

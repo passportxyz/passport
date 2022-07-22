@@ -79,6 +79,7 @@ describe("when user has verified with EnsProvider", () => {
       providerSpec: STAMP_PROVIDERS.Ens,
       stamp: {
         provider: "Ens",
+        streamId: "STREAM-ID",
         credential: {
           type: ["VerifiableCredential"],
           proof: {
@@ -100,7 +101,6 @@ describe("when user has verified with EnsProvider", () => {
           },
         },
       },
-      streamId: "STREAM-ID",
     };
 
     renderWithContext(mockUserContext, mockCeramicContext, <EnsCard />);

@@ -60,7 +60,6 @@ describe("when there is an existing passport without stamps for the given did", 
     issuanceDate: new Date("2022-01-01"),
     expiryDate: new Date("2022-01-02"),
     stamps: [],
-    streamIDs: [],
   };
 
   let existingPassportStreamID;
@@ -137,7 +136,6 @@ describe("when there is an existing passport with stamps for the given did", () 
     issuanceDate: new Date("2022-01-01"),
     expiryDate: new Date("2022-01-02"),
     stamps: [],
-    streamIDs: [],
   };
 
   // these need to be initialized in beforeEach since `credential` needs `ceramicDatabase` to be defined
@@ -173,9 +171,13 @@ describe("when there is an existing passport with stamps for the given did", () 
       expirationDate: "2022-05-15T21:04:01.708Z",
     };
 
+    // create a tile for verifiable credential issued from iam server
+    const ensStampTile = await ceramicDatabase.model.createTile("VerifiableCredential", credential);
+
     ensStampFixture = {
       provider: "Ens",
       credential,
+      streamId: ensStampTile.id.toUrl(),
     };
 
     googleStampFixture = {
@@ -183,8 +185,6 @@ describe("when there is an existing passport with stamps for the given did", () 
       credential,
     };
 
-    // create a tile for verifiable credential issued from iam server
-    const ensStampTile = await ceramicDatabase.model.createTile("VerifiableCredential", credential);
     // add ENS stamp provider and streamId to passport stamps array
     const existingPassportWithStamps = {
       issuanceDate: new Date("2022-01-01"),
@@ -238,7 +238,6 @@ describe("when there is an existing passport with stamps for the given did", () 
     issuanceDate: new Date("2022-01-01"),
     expiryDate: new Date("2022-01-02"),
     stamps: [],
-    streamIDs: [],
   };
 
   // these need to be initialized in beforeEach since `credential` needs `ceramicDatabase` to be defined

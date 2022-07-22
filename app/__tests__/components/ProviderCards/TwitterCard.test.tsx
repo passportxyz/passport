@@ -59,6 +59,7 @@ describe("when user has verified with TwitterProvider", () => {
       providerSpec: STAMP_PROVIDERS.Twitter,
       stamp: {
         provider: "Twitter",
+        streamId: "STREAM-ID",
         credential: {
           type: ["VerifiableCredential"],
           proof: {
@@ -80,7 +81,6 @@ describe("when user has verified with TwitterProvider", () => {
           },
         },
       },
-      streamId: "STREAM-ID",
     };
 
     renderWithContext(mockUserContext, mockCeramicContext, <TwitterCard />);

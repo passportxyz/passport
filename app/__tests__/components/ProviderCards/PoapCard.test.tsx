@@ -79,6 +79,7 @@ describe("when user has verified with PoapProvider", () => {
       providerSpec: STAMP_PROVIDERS.POAP,
       stamp: {
         provider: "POAP",
+        streamId: "STREAM-ID",
         credential: {
           type: ["VerifiableCredential"],
           proof: {
@@ -100,7 +101,6 @@ describe("when user has verified with PoapProvider", () => {
           },
         },
       },
-      streamId: "STREAM-ID",
     };
 
     renderWithContext(mockUserContext, mockCeramicContext, <PoapCard />);

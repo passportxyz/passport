@@ -2,7 +2,7 @@
 import React, { useContext } from "react";
 
 // --- Chakra UI Elements
-import { forwardRef, Menu, MenuButton, MenuItem, MenuList, Spinner, useDisclosure } from "@chakra-ui/react";
+import { Menu, MenuButton, MenuItem, MenuList, Spinner, useBoolean, useDisclosure } from "@chakra-ui/react";
 
 // --- Types
 import { VerifiableCredential } from "@gitcoin/passport-types";
@@ -32,16 +32,15 @@ export const Card = ({
 }: CardProps): JSX.Element => {
   const { passport, isLoadingPassport, handleDeleteStamp } = useContext(CeramicContext);
   const { isOpen, onOpen: onOpenJsonOutputModal, onClose } = useDisclosure();
+  const [isDeleting, setDeleting] = useBoolean();
 
   const onDeleteStamp = () => {
-    console.log("geri onDeleteStamp for streamId", streamId);
     if (streamId) {
+      setDeleting.on();
       handleDeleteStamp(streamId);
+      setTimeout(() => {}, 2000);
     }
   };
-
-  console.log("geri verifiableCredential", !!verifiableCredential, verifiableCredential);
-  console.log("geri verifiableCredential", JSON.stringify(verifiableCredential));
 
   return (
     <div className="w-1/2 p-2 md:w-1/2 xl:w-1/4">
@@ -57,6 +56,19 @@ export const Card = ({
               data-testid="loading-indicator"
             />
             Verifying stamp...
+          </div>
+        )}
+        {isDeleting && (
+          <div className="absolute inset-0 z-10 flex w-full flex-col items-center justify-center bg-white opacity-80">
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="purple.500"
+              size="md"
+              data-testid="loading-indicator"
+            />
+            Deleting stamp...
           </div>
         )}
         <div className="flex flex-row p-6">

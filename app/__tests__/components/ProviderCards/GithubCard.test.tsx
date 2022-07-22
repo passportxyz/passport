@@ -58,6 +58,7 @@ describe("when user has verified with GithubProvider", () => {
       providerSpec: STAMP_PROVIDERS.Github,
       stamp: {
         provider: "Github",
+        streamId: "STREAM-ID",
         credential: {
           type: ["VerifiableCredential"],
           proof: {
@@ -79,7 +80,6 @@ describe("when user has verified with GithubProvider", () => {
           },
         },
       },
-      streamId: "STREAM-ID",
     };
 
     renderWithContext(mockUserContext, mockCeramicContext, <GithubCard />);

@@ -30,7 +30,6 @@ export type AllProvidersState = {
   [provider in PROVIDER_ID]?: {
     providerSpec: ProviderSpec;
     stamp?: Stamp;
-    streamId?: string;
   };
 };
 
@@ -38,52 +37,42 @@ const startingAllProvidersState: AllProvidersState = {
   Google: {
     providerSpec: STAMP_PROVIDERS.Google,
     stamp: undefined,
-    streamId: undefined,
   },
   Ens: {
     providerSpec: STAMP_PROVIDERS.Ens,
     stamp: undefined,
-    streamId: undefined,
   },
   Poh: {
     providerSpec: STAMP_PROVIDERS.Poh,
     stamp: undefined,
-    streamId: undefined,
   },
   Twitter: {
     providerSpec: STAMP_PROVIDERS.Twitter,
     stamp: undefined,
-    streamId: undefined,
   },
   POAP: {
     providerSpec: STAMP_PROVIDERS.POAP,
     stamp: undefined,
-    streamId: undefined,
   },
   Facebook: {
     providerSpec: STAMP_PROVIDERS.Facebook,
     stamp: undefined,
-    streamId: undefined,
   },
   Brightid: {
     providerSpec: STAMP_PROVIDERS.Brightid,
     stamp: undefined,
-    streamId: undefined,
   },
   Github: {
     providerSpec: STAMP_PROVIDERS.Github,
     stamp: undefined,
-    streamId: undefined,
   },
   Linkedin: {
     providerSpec: STAMP_PROVIDERS.Linkedin,
     stamp: undefined,
-    streamId: undefined,
   },
   Discord: {
     providerSpec: STAMP_PROVIDERS.Discord,
     stamp: undefined,
-    streamId: undefined,
   },
 };
 
@@ -177,11 +166,15 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     // clean stamp content if expired or from a different issuer
     if (passport) {
       passport.stamps = passport.stamps.filter((stamp: Stamp) => {
-        const has_expired = new Date(stamp.credential.expirationDate) < new Date();
-        const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
-        const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
+        if (stamp) {
+          const has_expired = new Date(stamp.credential.expirationDate) < new Date();
+          const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
+          const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
 
-        return !has_expired && has_correct_issuer && has_correct_subject;
+          return !has_expired && has_correct_issuer && has_correct_subject;
+        } else {
+          return false;
+        }
       });
     }
 
@@ -205,14 +198,20 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const handleDeleteStamp = async (streamId: string): Promise<void> => {
     if (ceramicDatabase) {
       await ceramicDatabase.deleteStamp(streamId);
-      await fetchPassport(ceramicDatabase);
+      await new Promise((r) =>
+        // We need to delay the loading of stamps, in order for the deletion to be reflected in ceramic
+        setTimeout(async () => {
+          await fetchPassport(ceramicDatabase);
+          r(0);
+        }, 10000)
+      );
     }
   };
 
   const hydrateAllProvidersState = (passport?: Passport) => {
     if (passport) {
       // set stamps into allProvidersState
-      const streamIDs = passport.streamIDs;
+      let newAllProviderState = { ...startingAllProvidersState };
       passport.stamps.forEach((stamp: Stamp, index: number) => {
         const { provider } = stamp;
         const providerState = allProvidersState[provider];
@@ -220,14 +219,11 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           const newProviderState = {
             providerSpec: providerState.providerSpec,
             stamp,
-            streamId: streamIDs[index],
           };
-          setAllProviderState((prevState) => ({
-            ...prevState,
-            [provider]: newProviderState,
-          }));
+          newAllProviderState[provider] = newProviderState;
         }
       });
+      setAllProviderState(newAllProviderState);
     } else {
       clearAllProvidersState();
     }

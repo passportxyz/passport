@@ -24,59 +24,48 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
       issuanceDate: new Date(),
       expiryDate: new Date(),
       stamps: [],
-      streamIDs: [],
     },
     isLoadingPassport: IsLoadingPassportState.Idle,
     allProvidersState: {
       Google: {
         providerSpec: STAMP_PROVIDERS.Google,
         stamp: undefined,
-        streamId: undefined,
       },
       Ens: {
         providerSpec: STAMP_PROVIDERS.Ens,
         stamp: undefined,
-        streamId: undefined,
       },
       Poh: {
         providerSpec: STAMP_PROVIDERS.Poh,
         stamp: undefined,
-        streamId: undefined,
       },
       Twitter: {
         providerSpec: STAMP_PROVIDERS.Twitter,
         stamp: undefined,
-        streamId: undefined,
       },
       POAP: {
         providerSpec: STAMP_PROVIDERS.POAP,
         stamp: undefined,
-        streamId: undefined,
       },
       Facebook: {
         providerSpec: STAMP_PROVIDERS.Facebook,
         stamp: undefined,
-        streamId: undefined,
       },
       Brightid: {
         providerSpec: STAMP_PROVIDERS.Brightid,
         stamp: undefined,
-        streamId: undefined,
       },
       Github: {
         providerSpec: STAMP_PROVIDERS.Github,
         stamp: undefined,
-        streamId: undefined,
       },
       Linkedin: {
         providerSpec: STAMP_PROVIDERS.Linkedin,
         stamp: undefined,
-        streamId: undefined,
       },
       Discord: {
         providerSpec: STAMP_PROVIDERS.Discord,
         stamp: undefined,
-        streamId: undefined,
       },
     },
     handleAddStamp: jest.fn(),

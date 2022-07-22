@@ -79,6 +79,7 @@ describe("when user has verified with PohProvider", () => {
       providerSpec: STAMP_PROVIDERS.Poh,
       stamp: {
         provider: "Poh",
+        streamId: "STREAM-ID",
         credential: {
           type: ["VerifiableCredential"],
           proof: {
@@ -100,7 +101,6 @@ describe("when user has verified with PohProvider", () => {
           },
         },
       },
-      streamId: "STREAM-ID",
     };
 
     renderWithContext(mockUserContext, mockCeramicContext, <PohCard />);

@@ -153,7 +153,7 @@ export default function PoapCard(): JSX.Element {
 
   return (
     <Card
-      streamId={allProvidersState[providerId]!.streamId}
+      streamId={allProvidersState[providerId]!.stamp?.streamId}
       providerSpec={allProvidersState[providerId]!.providerSpec}
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={issueCredentialWidget}

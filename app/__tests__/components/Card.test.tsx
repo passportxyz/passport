@@ -19,7 +19,6 @@ let mockCeramicContext: CeramicContextState = makeTestCeramicContext({
     issuanceDate: new Date(),
     expiryDate: new Date(),
     stamps: [],
-    streamIDs: [],
   },
 });
 let cardProps: CardProps;
@@ -30,7 +29,6 @@ beforeEach(() => {
       issuanceDate: new Date(),
       expiryDate: new Date(),
       stamps: [],
-      streamIDs: [],
     },
   });
 });

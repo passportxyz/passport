@@ -93,6 +93,8 @@ describe("when user has verified with BrightId Provider", () => {
       providerSpec: STAMP_PROVIDERS.Brightid,
       stamp: {
         provider: "Brightid",
+        streamId: "STREAM-ID",
+
         credential: {
           type: ["VerifiableCredential"],
           proof: {
@@ -114,7 +116,6 @@ describe("when user has verified with BrightId Provider", () => {
           },
         },
       },
-      streamId: "STREAM-ID",
     };
 
     renderWithContext(mockUserContext, mockCeramicContext, <BrightidCard />);

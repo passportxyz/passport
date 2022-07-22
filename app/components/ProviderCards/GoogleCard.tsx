@@ -81,7 +81,7 @@ export default function GoogleCard(): JSX.Element {
 
   return (
     <Card
-      streamId={allProvidersState[providerId]!.streamId}
+      streamId={allProvidersState[providerId]!.stamp?.streamId}
       isLoading={isLoading}
       providerSpec={allProvidersState[providerId]!.providerSpec as ProviderSpec}
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}

@@ -11,6 +11,7 @@ import type { DID as CeramicDID } from "dids";
 import { StreamID } from "@ceramicnetwork/streamid";
 
 import { DataStorageBase } from "./types";
+import { createCipheriv } from "crypto";
 
 // const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
 const COMMUNITY_TESTNET_CERAMIC_CLIENT_URL = "https://ceramic-clay.3boxlabs.com";
@@ -106,21 +107,29 @@ export class CeramicDatabase implements DataStorageBase {
 
       // `stamps` is stored as ceramic URLs - must load actual VC data from URL
       const stampsToLoad =
-        passport?.stamps.map(async (_stamp) => {
-          const { provider, credential } = _stamp;
-          const loadedCred = await this.loader.load(credential);
-          return {
-            provider,
-            credential: loadedCred.content,
-          } as Stamp;
+        passport?.stamps.map(async (_stamp, idx) => {
+          try {
+            const { provider, credential } = _stamp;
+            const loadedCred = await this.loader.load(credential);
+            return {
+              provider,
+              credential: loadedCred.content,
+              streamId: streamIDs[idx],
+            } as Stamp;
+          } catch (e) {
+            this.logger.error(
+              `Error when loading stamp with streamId ${streamIDs[idx]} for did  ${this.did}:` + e.toString()
+            );
+            return null;
+          }
         }) ?? [];
+
       const loadedStamps = await Promise.all(stampsToLoad);
 
       const parsePassport: Passport = {
         issuanceDate: new Date(passport.issuanceDate),
         expiryDate: new Date(passport.expiryDate),
         stamps: loadedStamps,
-        streamIDs: streamIDs,
       };
 
       // try pinning passport

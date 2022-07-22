@@ -59,6 +59,7 @@ describe("when user has verified with FacebookProvider", () => {
       providerSpec: STAMP_PROVIDERS.Facebook,
       stamp: {
         provider: "Facebook",
+        streamId: "STREAM-ID",
         credential: {
           type: ["VerifiableCredential"],
           proof: {
@@ -80,7 +81,6 @@ describe("when user has verified with FacebookProvider", () => {
           },
         },
       },
-      streamId: "STREAM-ID",
     };
 
     renderWithContext(mockUserContext, mockCeramicContext, <FacebookCard />);
