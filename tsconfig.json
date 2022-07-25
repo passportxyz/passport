@@ -2,6 +2,7 @@
   "files": [],
   "references": [
     { "path": "packages/app" },
+    { "path": "packages/database-client" },
     { "path": "packages/iam" },
     { "path": "packages/identity" },
     { "path": "packages/types" }
