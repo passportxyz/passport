@@ -22,9 +22,9 @@ import { VerifyModal } from "../VerifyModal";
 import { useDisclosure, useToast, ModalFooter, Button } from "@chakra-ui/react";
 import { DoneToastContent } from "../DoneToastContent";
 
-const providerId: PROVIDER_ID = "IdStaking";
+const providerId: PROVIDER_ID = "IdCommunityStaking";
 
-export default function IdStakingCard(): JSX.Element {
+export default function IdCommunityStakingCard(): JSX.Element {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
@@ -43,7 +43,7 @@ export default function IdStakingCard(): JSX.Element {
     fetchVerifiableCredential(
       iamUrl,
       {
-        type: "IdStaking",
+        type: "IdCommunityStaking",
         version: "0.0.0",
         address: address || "",
         proofs: {
