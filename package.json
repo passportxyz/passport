@@ -12,12 +12,7 @@
     "rimraf": "^3.0.2"
   },
   "workspaces": [
-    "app",
-    "database-client",
-    "iam",
-    "identity",
-    "schemas",
-    "types"
+    "packages/*"
   ],
   "scripts": {
     "clean": "lerna run clean",

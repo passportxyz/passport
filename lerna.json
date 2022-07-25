@@ -1,11 +1,6 @@
 {
   "packages": [
-    "app",
-    "database-client",
-    "iam",
-    "identity",
-    "schemas",
-    "types"
+    "packages/*"
   ],
   "npmClient": "yarn",
   "version": "independent",
