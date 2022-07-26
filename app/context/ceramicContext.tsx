@@ -203,7 +203,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         setTimeout(async () => {
           await fetchPassport(ceramicDatabase);
           r(0);
-        }, 10000)
+        }, 2000)
       );
     }
   };

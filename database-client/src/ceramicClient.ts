@@ -178,7 +178,6 @@ export class CeramicDatabase implements DataStorageBase {
 
     if (passport && passport.stamps) {
       const itemIndex = passport.stamps.findIndex((stamp) => {
-        // TODO: should we double check that the stamp id matches the user id, in order to avoid saving to the wrong address?
         return stamp.credential === streamId;
       });
 
