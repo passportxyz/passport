@@ -102,6 +102,7 @@ export default function FacebookCard(): JSX.Element {
 
   return (
     <Card
+      streamId={allProvidersState[providerId]!.stamp?.streamId}
       providerSpec={allProvidersState[providerId]!.providerSpec as ProviderSpec}
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={

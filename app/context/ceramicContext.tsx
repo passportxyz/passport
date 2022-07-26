@@ -16,6 +16,7 @@ export interface CeramicContextState {
   allProvidersState: AllProvidersState;
   handleCreatePassport: () => Promise<void>;
   handleAddStamp: (stamp: Stamp) => Promise<void>;
+  handleDeleteStamp: (streamId: string) => Promise<void>;
   userDid: string | undefined;
 }
 
@@ -81,6 +82,7 @@ const startingState: CeramicContextState = {
   allProvidersState: startingAllProvidersState,
   handleCreatePassport: async () => {},
   handleAddStamp: async () => {},
+  handleDeleteStamp: async (streamId: string) => {},
   userDid: undefined,
 };
 
@@ -164,11 +166,15 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     // clean stamp content if expired or from a different issuer
     if (passport) {
       passport.stamps = passport.stamps.filter((stamp: Stamp) => {
-        const has_expired = new Date(stamp.credential.expirationDate) < new Date();
-        const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
-        const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
+        if (stamp) {
+          const has_expired = new Date(stamp.credential.expirationDate) < new Date();
+          const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
+          const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
 
-        return !has_expired && has_correct_issuer && has_correct_subject;
+          return !has_expired && has_correct_issuer && has_correct_subject;
+        } else {
+          return false;
+        }
       });
     }
 
@@ -189,10 +195,24 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     }
   };
 
+  const handleDeleteStamp = async (streamId: string): Promise<void> => {
+    if (ceramicDatabase) {
+      await ceramicDatabase.deleteStamp(streamId);
+      await new Promise((r) =>
+        // We need to delay the loading of stamps, in order for the deletion to be reflected in ceramic
+        setTimeout(async () => {
+          await fetchPassport(ceramicDatabase);
+          r(0);
+        }, 2000)
+      );
+    }
+  };
+
   const hydrateAllProvidersState = (passport?: Passport) => {
     if (passport) {
       // set stamps into allProvidersState
-      passport.stamps.forEach((stamp: Stamp) => {
+      let newAllProviderState = { ...startingAllProvidersState };
+      passport.stamps.forEach((stamp: Stamp, index: number) => {
         const { provider } = stamp;
         const providerState = allProvidersState[provider];
         if (providerState) {
@@ -200,12 +220,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
             providerSpec: providerState.providerSpec,
             stamp,
           };
-          setAllProviderState((prevState) => ({
-            ...prevState,
-            [provider]: newProviderState,
-          }));
+          newAllProviderState[provider] = newProviderState;
         }
       });
+      setAllProviderState(newAllProviderState);
     } else {
       clearAllProvidersState();
     }
@@ -222,6 +240,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       allProvidersState,
       handleCreatePassport,
       handleAddStamp,
+      handleDeleteStamp,
       userDid,
     }),
     [passport, isLoadingPassport]
@@ -233,6 +252,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     allProvidersState,
     handleCreatePassport,
     handleAddStamp,
+    handleDeleteStamp,
     userDid,
   };
 

@@ -109,6 +109,7 @@ export type VerifiableCredentialRecord = {
 export type Stamp = {
   // recordUserName: string;
   // credentialIssuer: string;
+  streamId?: string; // Must not be undefined for stamps loaded from ceramic
   provider: PROVIDER_ID;
   credential: VerifiableCredential;
 };

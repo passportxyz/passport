@@ -11,7 +11,7 @@ let testDID: DID;
 let ceramicDatabase: CeramicDatabase;
 
 beforeAll(async () => {
-  const TEST_SEED = Uint8Array.from({length: 32}, () => Math.floor(Math.random() * 256));
+  const TEST_SEED = Uint8Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
 
   // Create and authenticate the DID
   testDID = new DID({
@@ -64,7 +64,13 @@ describe("when there is an existing passport without stamps for the given did", 
 
   let existingPassportStreamID;
   beforeEach(async () => {
-    const stream = await ceramicDatabase.store.set("Passport", existingPassport);
+    // ceramicPassport follows the schema definition that ceramic expects
+    const ceramicPassport = {
+      issuanceDate: existingPassport.issuanceDate,
+      expiryDate: existingPassport.expiryDate,
+      stamps: existingPassport.stamps,
+    };
+    const stream = await ceramicDatabase.store.set("Passport", ceramicPassport);
     existingPassportStreamID = stream.toUrl();
   });
 
@@ -73,7 +79,7 @@ describe("when there is an existing passport without stamps for the given did", 
   });
 
   it("getPassport retrieves the passport from ceramic", async () => {
-    const actualPassport = await ceramicDatabase.getPassport() as Passport;
+    const actualPassport = (await ceramicDatabase.getPassport()) as Passport;
 
     expect(actualPassport).toBeDefined();
     expect(actualPassport).toEqual(existingPassport);
@@ -165,9 +171,13 @@ describe("when there is an existing passport with stamps for the given did", () 
       expirationDate: "2022-05-15T21:04:01.708Z",
     };
 
+    // create a tile for verifiable credential issued from iam server
+    const ensStampTile = await ceramicDatabase.model.createTile("VerifiableCredential", credential);
+
     ensStampFixture = {
       provider: "Ens",
       credential,
+      streamId: ensStampTile.id.toUrl(),
     };
 
     googleStampFixture = {
@@ -175,11 +185,10 @@ describe("when there is an existing passport with stamps for the given did", () 
       credential,
     };
 
-    // create a tile for verifiable credential issued from iam server
-    const ensStampTile = await ceramicDatabase.model.createTile("VerifiableCredential", credential);
     // add ENS stamp provider and streamId to passport stamps array
     const existingPassportWithStamps = {
-      ...existingPassport,
+      issuanceDate: new Date("2022-01-01"),
+      expiryDate: new Date("2022-01-02"),
       stamps: [
         {
           provider: ensStampFixture.provider,
@@ -197,7 +206,7 @@ describe("when there is an existing passport with stamps for the given did", () 
   });
 
   it("getPassport retrieves the passport and stamps from ceramic", async () => {
-    const actualPassport = await ceramicDatabase.getPassport() as Passport;
+    const actualPassport = (await ceramicDatabase.getPassport()) as Passport;
 
     const formattedDate = new Date(actualPassport["issuanceDate"]);
 
@@ -221,5 +230,134 @@ describe("when there is an existing passport with stamps for the given did", () 
     expect(passport.stamps.length).toEqual(2);
     expect(loadedCred.content as VerifiableCredential).toEqual(credential);
     expect(retrievedStamp.provider as PROVIDER_ID).toEqual(googleStampFixture.provider);
+  });
+});
+
+describe("when there is an existing passport with stamps for the given did", () => {
+  const existingPassport: Passport = {
+    issuanceDate: new Date("2022-01-01"),
+    expiryDate: new Date("2022-01-02"),
+    stamps: [],
+  };
+
+  // these need to be initialized in beforeEach since `credential` needs `ceramicDatabase` to be defined
+  let credential: VerifiableCredential;
+  let ensStampFixture: Stamp;
+  let googleStampFixture: Stamp;
+  let poapStampFixture: Stamp;
+
+  let existingPassportStreamID;
+  let existingEnsStampTileStreamID: string;
+  let existingGoogleStampTileStreamID: string;
+  let existingPoapStampTileStreamID: string;
+
+  beforeEach(async () => {
+    credential = {
+      "@context": ["https://www.w3.org/2018/credentials/v1"],
+      type: ["VerifiableCredential"],
+      credentialSubject: {
+        id: `${ceramicDatabase.did}`,
+        "@context": [
+          {
+            hash: "https://schema.org/Text",
+            provider: "https://schema.org/Text",
+          },
+        ],
+        hash: "randomValuesHash",
+        provider: "randomValuesProvider",
+      },
+      issuer: "did:key:randomValuesIssuer",
+      issuanceDate: "2022-04-15T21:04:01.708Z",
+      proof: {
+        type: "Ed25519Signature2018",
+        proofPurpose: "assertionMethod",
+        verificationMethod: "did:key:randomValues",
+        created: "2022-04-15T21:04:01.708Z",
+        jws: "randomValues",
+      },
+      expirationDate: "2022-05-15T21:04:01.708Z",
+    };
+
+    ensStampFixture = {
+      provider: "Ens",
+      credential,
+    };
+
+    googleStampFixture = {
+      provider: "Google",
+      credential,
+    };
+
+    poapStampFixture = {
+      provider: "POAP",
+      credential,
+    };
+
+    // create the tiles for verifiable credentials
+    const ensStampTile = await ceramicDatabase.model.createTile("VerifiableCredential", credential);
+    const googleStampTile = await ceramicDatabase.model.createTile("VerifiableCredential", credential);
+    const poapStampTile = await ceramicDatabase.model.createTile("VerifiableCredential", credential);
+    existingEnsStampTileStreamID = ensStampTile.id.toUrl();
+    existingGoogleStampTileStreamID = googleStampTile.id.toUrl();
+    existingPoapStampTileStreamID = poapStampTile.id.toUrl();
+
+    // add ENS stamp provider and streamId to passport stamps array
+    const existingPassportWithStamps = {
+      issuanceDate: new Date("2022-01-01"),
+      expiryDate: new Date("2022-01-02"),
+      stamps: [
+        {
+          provider: ensStampFixture.provider,
+          credential: ensStampTile.id.toUrl(),
+        },
+        {
+          provider: googleStampFixture.provider,
+          credential: googleStampTile.id.toUrl(),
+        },
+        {
+          provider: poapStampFixture.provider,
+          credential: poapStampTile.id.toUrl(),
+        },
+      ],
+    };
+
+    const stream = await ceramicDatabase.store.set("Passport", existingPassportWithStamps);
+    existingPassportStreamID = stream.toUrl();
+  });
+
+  afterEach(async () => {
+    await ceramicDatabase.store.remove("Passport");
+  });
+
+  it("deleteStamp deletes an existing stamp from passport", async () => {
+    ceramicDatabase.deleteStamp(existingGoogleStampTileStreamID);
+
+    // The deletion will not be reflected immediatly, we need to wait a bit ...
+    await new Promise((r) => setTimeout(r, 2000));
+    const passport = await ceramicDatabase.store.get("Passport");
+
+    console.log(
+      "ids",
+      passport.stamps.findIndex((stamp) => {
+        stamp.credential === existingEnsStampTileStreamID;
+      })
+    );
+
+    expect(passport.stamps.length).toEqual(2);
+    expect(
+      passport.stamps.findIndex((stamp) => {
+        return stamp.credential === existingEnsStampTileStreamID;
+      })
+    ).toEqual(0);
+    expect(
+      passport.stamps.findIndex((stamp) => {
+        return stamp.credential === existingPoapStampTileStreamID;
+      })
+    ).toEqual(1);
+    expect(
+      passport.stamps.findIndex((stamp) => {
+        return stamp.credential === existingGoogleStampTileStreamID;
+      })
+    ).toEqual(-1);
   });
 });
