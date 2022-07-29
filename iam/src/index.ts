@@ -45,6 +45,8 @@ import { FacebookProvider } from "./providers/facebook";
 import { BrightIdProvider } from "./providers/brightid";
 import { GithubProvider } from "./providers/github";
 
+import { GithubOrgProvider } from "./providers/githubOrg";
+
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
@@ -57,6 +59,7 @@ const providers = new Providers([
   new FacebookProvider(),
   new BrightIdProvider(),
   new GithubProvider(),
+  new GithubOrgProvider(),
 ]);
 
 // create the app and run on port
