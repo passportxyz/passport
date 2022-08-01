@@ -106,6 +106,7 @@ export default function EnsCard(): JSX.Element {
 
   const issueCredentialWidget = (
     <>
+      <ReturnModal isOpen={submitPassportModalIsOpen} onClose={submitPassportModalClose} />
       <button
         data-testid="button-verify-ens"
         className="verify-btn"
