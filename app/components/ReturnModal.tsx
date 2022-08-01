@@ -23,7 +23,7 @@ export const ReturnModal = ({ isOpen, onClose }: ReturnModalProps): JSX.Element 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent data-testid="return-modal">
         <ModalBody>
           <div className="flex flex-col items-center p-4 text-center">
             <div className="mb-5 inline-flex items-center justify-center text-indigo-500">
@@ -67,13 +67,15 @@ export const ReturnModal = ({ isOpen, onClose }: ReturnModalProps): JSX.Element 
               Become a partner
             </a>
           </Button>
-          <Button width="50%" data-testid="submit-passport-become-return" colorScheme="purple">
-            {userArrivalSource === UserArrivalSourceState.Known ? (
+          {userArrivalSource === UserArrivalSourceState.Known ? (
+            <Button width="50%" data-testid="return-modal-return-button" colorScheme="purple" onClick={onClose}>
               <a href="https://gitcoin.co/trust">Return</a>
-            ) : (
-              <span>Done</span>
-            )}
-          </Button>
+            </Button>
+          ) : (
+            <Button width="50%" data-testid="return-modal-done-button" colorScheme="purple" onClick={onClose}>
+              Done
+            </Button>
+          )}
         </ModalFooter>
       </ModalContent>
     </Modal>

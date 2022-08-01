@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Passport, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 import { CeramicDatabase } from "@gitcoin/passport-database-client";
+import { useDisclosure } from "@chakra-ui/react";
 import { useViewerConnection } from "@self.id/framework";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
@@ -17,6 +18,8 @@ export interface CeramicContextState {
   handleCreatePassport: () => Promise<void>;
   handleAddStamp: (stamp: Stamp) => Promise<void>;
   userDid: string | undefined;
+  submitPassportModalIsOpen: boolean;
+  submitPassportModalClose: () => void;
 }
 
 export enum IsLoadingPassportState {
@@ -82,6 +85,8 @@ const startingState: CeramicContextState = {
   handleCreatePassport: async () => {},
   handleAddStamp: async () => {},
   userDid: undefined,
+  submitPassportModalIsOpen: false,
+  submitPassportModalClose: async () => {},
 };
 
 export const CeramicContext = createContext(startingState);
@@ -93,6 +98,12 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
   const [userDid, setUserDid] = useState<string | undefined>();
   const [viewerConnection] = useViewerConnection();
+
+  const {
+    isOpen: submitPassportModalIsOpen,
+    onClose: submitPassportModalClose,
+    onOpen: submitPassportModalOpen,
+  } = useDisclosure();
 
   const { address } = useContext(UserContext);
 
@@ -120,6 +131,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         );
         setCeramicDatabase(ceramicDatabaseInstance);
         setUserDid(ceramicDatabaseInstance.did);
+        ceramicDatabaseInstance.deletePassport();
         break;
       }
       case "failed": {
@@ -186,6 +198,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     if (ceramicDatabase) {
       await ceramicDatabase.addStamp(stamp);
       await fetchPassport(ceramicDatabase);
+      if (localStorage.getItem("showReturnToTrustModalMessage") !== "true") {
+        submitPassportModalOpen();
+      }
     }
   };
 
@@ -223,8 +238,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       handleCreatePassport,
       handleAddStamp,
       userDid,
+      submitPassportModalIsOpen,
+      submitPassportModalClose,
     }),
-    [passport, isLoadingPassport]
+    [passport, isLoadingPassport, submitPassportModalIsOpen]
   );
 
   const providerProps = {
@@ -234,6 +251,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     handleCreatePassport,
     handleAddStamp,
     userDid,
+    submitPassportModalIsOpen,
+    submitPassportModalClose,
   };
 
   return <CeramicContext.Provider value={providerProps}>{children}</CeramicContext.Provider>;

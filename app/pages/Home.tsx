@@ -22,7 +22,7 @@ export default function Home() {
     }
   }, [wallet]);
 
-  // Set user arrival source
+  // Set user arrival source for post stamp add modal
   useEffect(() => {
     if (searchParams.get("source") === "GitcoinTrust") {
       setUserArrivalSource(UserArrivalSourceState.Known);

@@ -18,8 +18,7 @@ import { UserContext } from "../../context/userContext";
 // --- Style Components
 import { Card } from "../Card";
 import { DoneToastContent } from "../DoneToastContent";
-import { useToast, useDisclosure } from "@chakra-ui/react";
-import { ReturnModal } from "../ReturnModal";
+import { useToast } from "@chakra-ui/react";
 
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../../config/providers";
@@ -38,11 +37,6 @@ export default function GoogleCard(): JSX.Element {
 
   // --- Chakra functions
   const toast = useToast();
-  const {
-    isOpen: submitPassportModalIsOpen,
-    onOpen: submitPassportModalOpen,
-    onClose: submitPassportModalClose,
-  } = useDisclosure();
 
   const onGoogleSignIn = (response: GoogleLoginResponse): void => {
     datadogLogs.logger.info("Saving Stamp", { provider: "Google" });
@@ -65,10 +59,6 @@ export default function GoogleCard(): JSX.Element {
           credential: verified.credential,
         });
         datadogLogs.logger.info("Successfully saved Stamp", { provider: "Google" });
-        // if (localStorage.getItem("showReturnToTrustModalMessage") !== "true") {
-        console.log("over here");
-        submitPassportModalOpen();
-        // }
         // Custom Success Toast
         toast({
           duration: 5000,
@@ -96,7 +86,6 @@ export default function GoogleCard(): JSX.Element {
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={
         <>
-          <ReturnModal isOpen={submitPassportModalIsOpen} onClose={submitPassportModalClose} />
           <GoogleLogin
             clientId={googleClientId}
             onFailure={onGoogleSignInFailure}

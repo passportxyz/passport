@@ -1,4 +1,4 @@
-import { UserContext, UserContextState } from "../context/userContext";
+import { UserContext, UserContextState, UserArrivalSourceState } from "../context/userContext";
 import { CeramicContext, CeramicContextState, IsLoadingPassportState } from "../context/ceramicContext";
 import { STAMP_PROVIDERS } from "../config/providers";
 import { mockAddress, mockWallet } from "./onboardHookValues";
@@ -13,6 +13,8 @@ export const makeTestUserContext = (initialState?: Partial<UserContextState>): U
     wallet: mockWallet,
     signer: undefined,
     walletLabel: mockWallet.label,
+    userArrivalSource: UserArrivalSourceState.Unknown,
+    setUserArrivalSource: jest.fn(),
     ...initialState,
   };
 };
@@ -70,6 +72,8 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
     },
     handleAddStamp: jest.fn(),
     handleCreatePassport: jest.fn(),
+    submitPassportModalIsOpen: false,
+    submitPassportModalClose: jest.fn(),
     ...initialState,
   };
 };

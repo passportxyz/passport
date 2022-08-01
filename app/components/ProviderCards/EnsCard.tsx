@@ -15,7 +15,6 @@ import { UserContext } from "../../context/userContext";
 // --- style components
 import { Card } from "../Card";
 import { VerifyModal } from "../VerifyModal";
-import { ReturnModal } from "../ReturnModal";
 import { DoneToastContent } from "../DoneToastContent";
 import { useDisclosure, useToast } from "@chakra-ui/react";
 
@@ -36,11 +35,6 @@ export default function EnsCard(): JSX.Element {
 
   // --- Chakra functions
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const {
-    isOpen: submitPassportModalIsOpen,
-    onOpen: submitPassportModalOpen,
-    onClose: submitPassportModalClose,
-  } = useDisclosure();
   const toast = useToast();
 
   const handleFetchCredential = (): void => {
@@ -94,9 +88,6 @@ export default function EnsCard(): JSX.Element {
       isClosable: true,
       render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
     });
-    if (localStorage.getItem("showReturnToTrustModalMessage") !== "true") {
-      submitPassportModalOpen();
-    }
   };
 
   const handleModalOnClose = (): void => {
@@ -142,9 +133,6 @@ export default function EnsCard(): JSX.Element {
       verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
       issueCredentialWidget={issueCredentialWidget}
       isLoading={verificationInProgress}
-      afterCredentialVerifiedWidget={
-        <ReturnModal isOpen={submitPassportModalIsOpen} onClose={submitPassportModalClose} />
-      }
     />
   );
 }

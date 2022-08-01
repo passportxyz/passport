@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 // --Components
 import { CardList } from "../components/CardList";
 import { JsonOutputModal } from "../components/JsonOutputModal";
+import { ReturnModal } from "../components/ReturnModal";
 import { Footer } from "../components/Footer";
 
 // --Chakra UI Elements
@@ -28,7 +29,8 @@ import { EthereumAuthProvider } from "@self.id/web";
 
 export default function Dashboard() {
   const { wallet, handleConnection } = useContext(UserContext);
-  const { passport, isLoadingPassport } = useContext(CeramicContext);
+  const { passport, isLoadingPassport, submitPassportModalIsOpen, submitPassportModalClose } =
+    useContext(CeramicContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -182,6 +184,7 @@ export default function Dashboard() {
             ))}
         </div>
       </div>
+      <ReturnModal isOpen={submitPassportModalIsOpen} onClose={submitPassportModalClose} />
       <CardList
         isLoading={
           isLoadingPassport == IsLoadingPassportState.Loading ||
