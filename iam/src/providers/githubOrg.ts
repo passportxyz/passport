@@ -23,6 +23,11 @@ type GithubMyOrg = {
   matchingOrg: string;
 };
 
+type GHVerification = {
+  validOrg: GithubMyOrg;
+  handle: string;
+};
+
 // Export a Github Provider to carry out OAuth and return a record object
 export class GithubOrgProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
@@ -39,20 +44,22 @@ export class GithubOrgProvider implements Provider {
   // verify that the Github user is a memeber of the provided organization
   async verify(payload: GHUserRequestPayload): Promise<VerifiedPayload> {
     let valid = false,
-      validPayload: GithubMyOrg;
+      ghVerification: GHVerification;
 
     try {
-      validPayload = await verifyGithub(payload.proofs.code, payload.org);
+      ghVerification = await verifyGithub(payload.proofs.code, payload.org);
     } catch (e) {
       return { valid: false };
     } finally {
-      valid = validPayload && validPayload.matchingOrg === validPayload.providedOrg;
+      const validOrg = ghVerification?.validOrg;
+      valid = validOrg && validOrg.matchingOrg === validOrg.providedOrg;
     }
 
     return {
       valid: valid,
       record: {
-        org: validPayload.matchingOrg,
+        org: ghVerification.validOrg.matchingOrg,
+        handle: ghVerification.handle,
       },
     };
   }
@@ -87,7 +94,7 @@ const verifyOrg = (data: Organization[], providedOrg: string): GithubMyOrg => {
   };
 };
 
-const verifyGithub = async (code: string, providedOrg: string): Promise<GithubMyOrg> => {
+const verifyGithub = async (code: string, providedOrg: string): Promise<GHVerification> => {
   // retrieve user's auth bearer token to authenticate client
   const accessToken = await requestAccessToken(code);
 
@@ -99,9 +106,9 @@ const verifyGithub = async (code: string, providedOrg: string): Promise<GithubMy
     throw `Get user request returned status code ${userRequest.status} instead of the expected 200`;
   }
 
-  const userName = userRequest.data.login;
+  const handle = userRequest.data.login;
 
-  const userOrgRequest: GithubUserOrgResponse = await axios.get(`https://api.github.com/users/${userName}/orgs`, {
+  const userOrgRequest: GithubUserOrgResponse = await axios.get(`https://api.github.com/users/${handle}/orgs`, {
     headers: { Authorization: `token ${accessToken}` },
   });
 
@@ -110,5 +117,8 @@ const verifyGithub = async (code: string, providedOrg: string): Promise<GithubMy
   }
 
   const validOrg = verifyOrg(userOrgRequest.data, providedOrg);
-  return validOrg;
+  return {
+    validOrg,
+    handle,
+  };
 };

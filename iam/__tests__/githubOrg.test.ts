@@ -10,10 +10,12 @@ jest.mock("axios");
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+const handle = "my-login-handle"
+
 const validGithubUserResponse = {
   data: {
     id: "18723656",
-    login: "my-login-handle",
+    login: handle,
     type: "User",
   },
   status: 200,
@@ -102,7 +104,8 @@ describe("Attempt verification", function () {
     expect(githubPayload).toEqual({
       valid: true,
       record: {
-        org
+        org,
+        handle
       },
     });
   });
