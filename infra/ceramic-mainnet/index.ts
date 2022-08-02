@@ -56,7 +56,7 @@ const certificateValidation = new aws.acm.CertificateValidation(
     certificateArn: certificate.arn,
     validationRecordFqdns: [certificateValidationDomain.fqdn],
   },
-  { customTimeouts: { create: "30s", update: "30s" } }
+  { customTimeouts: { create: "30s", update: "30s" }, dependsOn: [certificate] }
 );
 
 //////////////////////////////////////////////////////////////
