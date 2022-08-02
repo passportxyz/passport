@@ -101,6 +101,8 @@ export const ipfsBucketArn = ipfsBucket.arn;
 const ceramicStateBucket = new aws.s3.Bucket(`gitcoin-ceramicState`, {
   acl: "private",
   forceDestroy: true,
+}, {
+  retainOnDelete: true
 });
 
 const ceramicStateBucketPolicyDocument = aws.iam.getPolicyDocumentOutput({
@@ -237,7 +239,7 @@ const ceramicTarget = alb.createTargetGroup("gitcoin-dpopp-swarm", {
   vpc,
   port: 4001,
   protocol: "HTTP",
-  healthCheck: { path: "/", unhealthyThreshold: 10, port: "8011", interval: 60, timeout: 30 },
+  healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
 });
 
 const ceramicListener = ceramicTarget.createListener("gitcoin-dpopp-swarm", {
@@ -249,7 +251,7 @@ const ipfsTarget = alb.createTargetGroup("gitcoin-dpopp-ipfs", {
   vpc,
   port: 5001,
   protocol: "HTTP",
-  healthCheck: { path: "/", unhealthyThreshold: 10, port: "8011", interval: 60, timeout: 30 },
+  healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
 });
 
 const ipfsListener = ipfsTarget.createListener("gitcoin-dpopp-ipfs", {
@@ -261,7 +263,7 @@ const ipfsHealthcheckTarget = alb.createTargetGroup("dpopp-ipfs-healthcheck", {
   vpc,
   port: 8011,
   protocol: "HTTP",
-  healthCheck: { path: "/", unhealthyThreshold: 10, port: "8011", interval: 60, timeout: 30 },
+  healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
 });
 
 const ipfsHealthcheckListener = ipfsHealthcheckTarget.createListener("ipfs-healthcheck", {
@@ -273,7 +275,7 @@ const ipfsWS = alb.createTargetGroup("dpopp-ipfs-ws", {
   vpc,
   port: 8081,
   protocol: "HTTP",
-  healthCheck: { path: "/", unhealthyThreshold: 10, port: "8011", interval: 60, timeout: 30 },
+  healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
 });
 
 const ifpsWSListener = ipfsWS.createListener("ipfs-ws", {
@@ -316,7 +318,7 @@ function makeCmd(inputbucketName: pulumi.Input<string>, inputIpfsUrl: pulumi.Inp
       "--state-store-s3-bucket",
       bucketName,
       "--ethereum-rpc",
-      "<<REDACTED>>",
+      rpcUrl,
     ];
   });
 }
