@@ -261,38 +261,38 @@ const ceramicListener = ceramicTarget.createListener("gitcoin-dpopp-swarm", {
   port: 4001,
 });
 
-const ipfsTarget = internalalb.createTargetGroup("gitcoin-dpopp-ipfs", {
+const ipfsTarget = internalalb.createTargetGroup("gitcoin-passport-ipfs", {
   vpc,
   port: 5001,
   protocol: "HTTP",
   healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
 });
 
-const ipfsListener = ipfsTarget.createListener("gitcoin-dpopp-ipfs", {
+const ipfsListener = ipfsTarget.createListener("gitcoin-passport-ipfs-listener", {
   protocol: "HTTP",
   port: 5001,
 });
 
-const ipfsHealthcheckTarget = internalalb.createTargetGroup("dpopp-ipfs-healthcheck", {
+const ipfsHealthcheckTarget = internalalb.createTargetGroup("passprt-ipfs-healthcheck", {
   vpc,
   port: 8011,
   protocol: "HTTP",
   healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
 });
 
-const ipfsHealthcheckListener = ipfsHealthcheckTarget.createListener("ipfs-healthcheck", {
+const ipfsHealthcheckListener = ipfsHealthcheckTarget.createListener("ipfs-healthcheck-listener", {
   protocol: "HTTP",
   port: 8011,
 });
 
-const ipfsWS = internalalb.createTargetGroup("dpopp-ipfs-ws", {
+const ipfsWS = internalalb.createTargetGroup("passport-ipfs-ws", {
   vpc,
   port: 8081,
   protocol: "HTTP",
   healthCheck: { path: "/", unhealthyThreshold: 5, port: "8011", interval: 60, timeout: 30 },
 });
 
-const ifpsWSListener = ipfsWS.createListener("ipfs-ws", {
+const ifpsWSListener = ipfsWS.createListener("ipfs-ws-listener", {
   protocol: "HTTP",
   port: 8081,
 });
