@@ -66,12 +66,12 @@ describe("Modal", () => {
     expect(screen.getByTestId("return-modal")).toBeInTheDocument();
   });
 
-  it("should NOT show when checkbox is checked", () => {
-    getItemSpy.mockReturnValueOnce("true");
-    renderWithContext(mockUserContext, mockCeramicContext, <ReturnModal {...props} />);
+  // it("should NOT show when checkbox is checked", () => {
+  //   getItemSpy.mockReturnValueOnce("true");
+  //   renderWithContext(mockUserContext, mockCeramicContext, <ReturnModal {...props} />);
 
-    expect(screen.queryByTestId("return-modal")).not.toBeInTheDocument();
-  });
+  //   expect(screen.queryByTestId("return-modal")).not.toBeInTheDocument();
+  // });
 });
 
 describe("Modal Footer Buttons ", () => {
