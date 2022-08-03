@@ -62,7 +62,7 @@ const providers = new Providers([
   new GithubProvider(),
   new LinkedinProvider(),
   new DiscordProvider(),
-  new FiveOrMoreGithubRepos()
+  new FiveOrMoreGithubRepos(),
 ]);
 
 // create the app and run on port
