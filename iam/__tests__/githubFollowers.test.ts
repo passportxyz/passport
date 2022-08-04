@@ -71,8 +71,7 @@ describe("Attempt verification", function () {
     expect(tenOrMoreGithubFollowersPayload).toEqual({
       valid: true,
       record: {
-        id: validGithubUserResponse.data.id,
-        followerCount: `${validGithubUserResponse.data.followers}`
+        id: validGithubUserResponse.data.id + "gte10GithubFollowers",
       },
     });
   });
@@ -104,8 +103,7 @@ describe("Attempt verification", function () {
     expect(fiftyOrMoreGithubFollowersPayload).toEqual({
       valid: true,
       record: {
-        id: validGithubUserResponse.data.id,
-        followerCount: `${validGithubUserResponse.data.followers}`
+        id: validGithubUserResponse.data.id + "gte50GithubFollowers",
       },
     });
   });

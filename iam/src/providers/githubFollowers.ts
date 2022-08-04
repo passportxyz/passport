@@ -49,8 +49,7 @@ export class TenOrMoreGithubFollowers implements Provider {
     return {
       valid: valid,
       record: {
-        id: verifiedPayload.id,
-        followerCount: `${verifiedPayload.followers}`,
+        id: verifiedPayload.id + "gte10GithubFollowers",
       },
     };
   }
@@ -86,8 +85,7 @@ export class FiftyOrMoreGithubFollowers implements Provider {
     return {
       valid: valid,
       record: {
-        id: verifiedPayload.id,
-        followerCount: `${verifiedPayload.followers}`,
+        id: verifiedPayload.id + "gte50GithubFollowers",
       },
     };
   }
