@@ -2,15 +2,15 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
-import { deleteClient, getClient, getFollowerCount } from "../procedures/twitterOauth";
+import { deleteClient, getClient, getFollowerCount, TwitterFollowerResponse } from "../procedures/twitterOauth";
 import type { Provider, ProviderOptions } from "../types";
 
 // Perform verification on twitter access token and retrieve follower count
-async function verifyTwitterFollowers(sessionKey: string, code: string): Promise<number> {
+async function verifyTwitterFollowers(sessionKey: string, code: string): Promise<TwitterFollowerResponse> {
   const client = getClient(sessionKey);
   const data = await getFollowerCount(client, code);
   deleteClient(sessionKey);
-  return data.followerCount;
+  return data;
 }
 
 // Export a Provider to verify Twitter Followers Greater than 100
@@ -28,19 +28,19 @@ export class TwitterFollowerGT100Provider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false;
-    let followerCount = 0;
-
+    let data: TwitterFollowerResponse = {};
     try {
-      followerCount = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
+      data = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
     } catch (e) {
       return { valid: false };
     } finally {
-      valid = followerCount > 100;
+      valid = data.followerCount > 100;
     }
 
     return {
       valid: valid,
       record: {
+        username: data.username,
         followerCount: valid ? "gt100" : "",
       },
     };
@@ -62,19 +62,20 @@ export class TwitterFollowerGT500Provider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false;
-    let followerCount = 0;
+    let data: TwitterFollowerResponse = {};
 
     try {
-      followerCount = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
+      data = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
     } catch (e) {
       return { valid: false };
     } finally {
-      valid = followerCount > 500;
+      valid = data.followerCount > 500;
     }
 
     return {
       valid: valid,
       record: {
+        username: data.username,
         followerCount: valid ? "gt500" : "",
       },
     };
@@ -96,19 +97,20 @@ export class TwitterFollowerGTE1000Provider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false;
-    let followerCount = 0;
+    let data: TwitterFollowerResponse = {};
 
     try {
-      followerCount = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
+      data = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
     } catch (e) {
       return { valid: false };
     } finally {
-      valid = followerCount >= 1000;
+      valid = data.followerCount >= 1000;
     }
 
     return {
       valid: valid,
       record: {
+        username: data.username,
         followerCount: valid ? "gte1000" : "",
       },
     };
@@ -130,19 +132,20 @@ export class TwitterFollowerGT5000Provider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false;
-    let followerCount = 0;
+    let data: TwitterFollowerResponse = {};
 
     try {
-      followerCount = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
+      data = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
     } catch (e) {
       return { valid: false };
     } finally {
-      valid = followerCount > 5000;
+      valid = data.followerCount > 5000;
     }
 
     return {
       valid: valid,
       record: {
+        username: data.username,
         followerCount: valid ? "gt5000" : "",
       },
     };

@@ -19,6 +19,7 @@ jest.mock("../src/procedures/twitterOauth", () => ({
 const MOCK_TWITTER_OAUTH_CLIENT = {} as auth.OAuth2User;
 
 const MOCK_TWITTER_USER: TwitterFollowerResponse = {
+  username: "DpoppDev",
   followerCount: 200,
 };
 
@@ -48,6 +49,7 @@ describe("Attempt verification", function () {
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
+        username: "DpoppDev",
         followerCount: "gt100",
       },
     });
