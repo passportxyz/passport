@@ -47,10 +47,7 @@ import { GithubProvider } from "./providers/github";
 import { LinkedinProvider } from "./providers/linkedin";
 import { DiscordProvider } from "./providers/discord";
 import { FiveOrMoreGithubRepos } from "./providers/fiveOrMoreGithubRepos";
-import { 
-  TenOrMoreGithubFollowers, 
-  FiftyOrMoreGithubFollowers 
-} from "./providers/githubFollowers";
+import { TenOrMoreGithubFollowers, FiftyOrMoreGithubFollowers } from "./providers/githubFollowers";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
@@ -68,7 +65,7 @@ const providers = new Providers([
   new DiscordProvider(),
   new FiveOrMoreGithubRepos(),
   new TenOrMoreGithubFollowers(),
-  new FiftyOrMoreGithubFollowers(), 
+  new FiftyOrMoreGithubFollowers(),
 ]);
 
 // create the app and run on port

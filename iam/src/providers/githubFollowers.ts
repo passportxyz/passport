@@ -40,7 +40,10 @@ export class TenOrMoreGithubFollowers implements Provider {
     } catch (e) {
       return { valid: false };
     } finally {
-      valid = verifiedPayload && (verifiedPayload.followers >= 10 && verifiedPayload.followers > 50) && verifiedPayload.id ? true : false;
+      valid =
+        verifiedPayload && verifiedPayload.followers >= 10 && verifiedPayload.followers > 50 && verifiedPayload.id
+          ? true
+          : false;
     }
 
     return {
@@ -124,6 +127,5 @@ const verifyGithubRepoCount = async (code: string): Promise<GithubFindMyUserResp
   if (userRequest.status != 200) {
     throw `Get user request returned status code ${userRequest.status} instead of the expected 200`;
   }
-  
   return userRequest.data as GithubFindMyUserResponse;
 };
