@@ -78,7 +78,7 @@ describe("Attempt verification", function () {
     mockedAxios.get.mockImplementation(async (url, config) => {
       return {
         data: {
-          id: undefined,
+          id: "39483721",
           login: "a-cool-user",
           public_repos: 3,
           type: "User",
