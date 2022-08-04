@@ -2,15 +2,15 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
-import { deleteClient, getClient, getTweetCount } from "../procedures/twitterOauth";
+import { deleteClient, getClient, getTweetCount, TwitterTweetResponse } from "../procedures/twitterOauth";
 import type { Provider, ProviderOptions } from "../types";
 
 // Perform verification on twitter access token and retrieve follower count
-async function verifyTwitterTweets(sessionKey: string, code: string): Promise<number> {
+async function verifyTwitterTweets(sessionKey: string, code: string): Promise<TwitterTweetResponse> {
   const client = getClient(sessionKey);
   const data = await getTweetCount(client, code);
   deleteClient(sessionKey);
-  return data.tweetCount;
+  return data;
 }
 
 // This twitter stamp verifies if the user has more than 10 tweets/posts
@@ -28,19 +28,20 @@ export class TwitterTweetGT10Provider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false;
-    let tweetCount = 0;
+    let data: TwitterTweetResponse = {};
 
     try {
-      tweetCount = await verifyTwitterTweets(payload.proofs.sessionKey, payload.proofs.code);
+      data = await verifyTwitterTweets(payload.proofs.sessionKey, payload.proofs.code);
     } catch (e) {
       return { valid: false };
     } finally {
-      valid = tweetCount > 10;
+      valid = data.tweetCount > 10;
     }
 
     return {
       valid: valid,
       record: {
+        username: data.username,
         tweetCount: valid ? "gt10" : "",
       },
     };

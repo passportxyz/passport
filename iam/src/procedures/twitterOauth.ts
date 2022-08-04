@@ -74,6 +74,7 @@ export const requestFindMyUser = async (client: auth.OAuth2User, code: string): 
 };
 
 export type TwitterTweetResponse = {
+  username?: string;
   tweetCount?: number;
 };
 
@@ -87,6 +88,7 @@ export const getTweetCount = async (client: auth.OAuth2User, code: string): Prom
     "user.fields": ["public_metrics"],
   });
   return {
+    username: myUser.data.username,
     tweetCount: myUser.data.public_metrics.tweet_count,
   };
 };
