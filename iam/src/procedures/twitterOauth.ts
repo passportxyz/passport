@@ -74,9 +74,6 @@ export const requestFindMyUser = async (client: auth.OAuth2User, code: string): 
 };
 
 export type TwitterFollowerResponse = {
-  id?: string;
-  name?: string;
-  username?: string;
   followerCount?: number;
 };
 
@@ -90,9 +87,6 @@ export const getFollowerCount = async (client: auth.OAuth2User, code: string): P
     "user.fields": ["public_metrics"],
   });
   return {
-    id: myUser.data.id,
-    name: myUser.data.name,
-    username: myUser.data.username,
     followerCount: myUser.data.public_metrics.followers_count,
   };
 };

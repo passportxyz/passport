@@ -19,9 +19,6 @@ jest.mock("../src/procedures/twitterOauth", () => ({
 const MOCK_TWITTER_OAUTH_CLIENT = {} as auth.OAuth2User;
 
 const MOCK_TWITTER_USER: TwitterFollowerResponse = {
-  id: "123",
-  name: "Userguy McTesterson",
-  username: "DpoppDev",
   followerCount: 200,
 };
 
@@ -51,7 +48,7 @@ describe("Attempt verification", function () {
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
-        followerCount: JSON.stringify(MOCK_TWITTER_USER.followerCount),
+        followerCount: "gt100",
       },
     });
   });
@@ -135,7 +132,7 @@ describe("Attempt verification", function () {
       expect(verifiedPayload).toMatchObject({ valid: false });
     });
 
-    it("Expected Greater than or equal to 1000 and Follower Count is 150", async () => {
+    it("Expected Greater than or equal to 1000 and Follower Count is 900", async () => {
       (getFollowerCount as jest.Mock).mockResolvedValue({ followerCount: 900 });
 
       const twitter = new TwitterFollowerGTE1000Provider();
@@ -150,7 +147,7 @@ describe("Attempt verification", function () {
       expect(verifiedPayload).toMatchObject({ valid: false });
     });
 
-    it("Expected Greater than 5000 and Follower Count is 150", async () => {
+    it("Expected Greater than 5000 and Follower Count is 2500", async () => {
       (getFollowerCount as jest.Mock).mockResolvedValue({ followerCount: 2500 });
 
       const twitter = new TwitterFollowerGT5000Provider();
@@ -163,6 +160,67 @@ describe("Attempt verification", function () {
       } as unknown as RequestPayload);
 
       expect(verifiedPayload).toMatchObject({ valid: false });
+    });
+  });
+  describe("Check valid cases for follower ranges", function () {
+    it("Expected Greater than 100 and Follower Count is 150", async () => {
+      (getFollowerCount as jest.Mock).mockResolvedValue({ followerCount: 150 });
+
+      const twitter = new TwitterFollowerGT100Provider();
+
+      const verifiedPayload = await twitter.verify({
+        proofs: {
+          sessionKey,
+          code,
+        },
+      } as unknown as RequestPayload);
+
+      expect(verifiedPayload).toMatchObject({ valid: true });
+    });
+
+    it("Expected Greater than 500 and Follower Count is 700", async () => {
+      (getFollowerCount as jest.Mock).mockResolvedValue({ followerCount: 700 });
+
+      const twitter = new TwitterFollowerGT500Provider();
+
+      const verifiedPayload = await twitter.verify({
+        proofs: {
+          sessionKey,
+          code,
+        },
+      } as unknown as RequestPayload);
+
+      expect(verifiedPayload).toMatchObject({ valid: true });
+    });
+
+    it("Expected Greater than or equal to 1000 and Follower Count is 1500", async () => {
+      (getFollowerCount as jest.Mock).mockResolvedValue({ followerCount: 1500 });
+
+      const twitter = new TwitterFollowerGTE1000Provider();
+
+      const verifiedPayload = await twitter.verify({
+        proofs: {
+          sessionKey,
+          code,
+        },
+      } as unknown as RequestPayload);
+
+      expect(verifiedPayload).toMatchObject({ valid: true });
+    });
+
+    it("Expected Greater than 5000 and Follower Count is 7500", async () => {
+      (getFollowerCount as jest.Mock).mockResolvedValue({ followerCount: 7500 });
+
+      const twitter = new TwitterFollowerGT5000Provider();
+
+      const verifiedPayload = await twitter.verify({
+        proofs: {
+          sessionKey,
+          code,
+        },
+      } as unknown as RequestPayload);
+
+      expect(verifiedPayload).toMatchObject({ valid: true });
     });
   });
 });
