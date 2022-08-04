@@ -7,6 +7,13 @@
     "schemas",
     "types"
   ],
+  "command": {
+    "bootstrap": {
+      "nohoist": [
+        "@tendermint"
+      ]
+    }
+  },
   "npmClient": "yarn",
   "version": "independent",
   "useWorkspaces": true,
