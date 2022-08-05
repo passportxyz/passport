@@ -47,6 +47,12 @@ import { GithubProvider } from "./providers/github";
 import { LinkedinProvider } from "./providers/linkedin";
 import { DiscordProvider } from "./providers/discord";
 import { TwitterTweetGT10Provider } from "./providers/twitterTweets";
+import {
+  TwitterFollowerGT100Provider,
+  TwitterFollowerGT500Provider,
+  TwitterFollowerGTE1000Provider,
+  TwitterFollowerGT5000Provider,
+} from "./providers/TwitterFollower";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
@@ -63,6 +69,10 @@ const providers = new Providers([
   new LinkedinProvider(),
   new DiscordProvider(),
   new TwitterTweetGT10Provider(),
+  new TwitterFollowerGT100Provider(),
+  new TwitterFollowerGT500Provider(),
+  new TwitterFollowerGTE1000Provider(),
+  new TwitterFollowerGT5000Provider(),
 ]);
 
 // create the app and run on port
