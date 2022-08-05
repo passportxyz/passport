@@ -9,8 +9,9 @@ import type {
 // ----- HTTP Client
 import axios from "axios";
 
-// Returning true if the repo owner and the Passport user are the same,
-// and the repo isn't a fork, and the fork count is greater than 1, otherwise, returning false
+// Returns object containing user's github repo data
+// if the repo owner and the Passport user are the same,
+// and the repo isn't a fork, and the fork count is greater than 1
 export const checkUserRepoForks = (
   userData: GithubFindMyUserResponse,
   userRepoData: GithubRepoRequestResponse["data"]
@@ -31,8 +32,9 @@ export const checkUserRepoForks = (
   return verifiedGithubRepoData;
 };
 
-// Returning true if the Passport user is not the same as the user
-// who starred the repo and the repo has more than 1 star, otherwise returning false
+// Returns object containing user's github repo data 
+// if the Passport user is not the same as the user
+// who starred the repo and the repo has 1 or more stars
 export const checkUserRepoStars = (
   userData: GithubFindMyUserResponse,
   userRepoData: GithubRepoRequestResponse["data"]
