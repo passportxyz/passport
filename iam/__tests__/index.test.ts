@@ -123,7 +123,7 @@ describe("POST /verify", function () {
     expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
   });
 
-  it.only("handles valid challenge request returning PII", async () => {
+  it("handles valid challenge request returning PII", async () => {
     const provider = "ClearTextSimple"
     // challenge received from the challenge endpoint
     const challenge = {
