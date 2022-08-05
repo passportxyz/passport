@@ -3,7 +3,8 @@ import type {
   GithubFindMyUserResponse,
   GithubUserRepoResponseData,
   GithubRepoRequestResponse,
-  VerifiedGithubRepoData,
+  VerifiedGithubForkedRepoData,
+  VerifiedGithubStarredRepoData,
 } from "../types/githubTypes";
 
 // ----- HTTP Client
@@ -15,8 +16,14 @@ import axios from "axios";
 export const checkUserRepoForks = (
   userData: GithubFindMyUserResponse,
   userRepoData: GithubRepoRequestResponse["data"]
-): VerifiedGithubRepoData => {
-  const verifiedGithubRepoData: VerifiedGithubRepoData = {};
+): VerifiedGithubForkedRepoData => {
+  const verifiedGithubRepoData: VerifiedGithubForkedRepoData = {};
+
+  // Check if the authenticated GH user has any repos
+  if (userRepoData.length < 1) {
+    verifiedGithubRepoData.owner_id = userData.id;
+    verifiedGithubRepoData.forks_count = 0;
+  }
 
   userRepoData.findIndex((repo: GithubUserRepoResponseData) => {
     // Check to see if the authenticated GH user is the same as the repo owner,
@@ -25,8 +32,10 @@ export const checkUserRepoForks = (
       verifiedGithubRepoData.owner_id = repo.owner.id;
       verifiedGithubRepoData.forks_count = repo.forks_count;
     }
+    // If the user has no repos with forks, set the user id to the repo owner's
+    // id, ad set the fork count to 0
     verifiedGithubRepoData.owner_id = repo.owner.id;
-    verifiedGithubRepoData.forks_count = repo.forks_count;
+    verifiedGithubRepoData.forks_count = 0;
   });
 
   return verifiedGithubRepoData;
@@ -38,8 +47,14 @@ export const checkUserRepoForks = (
 export const checkUserRepoStars = (
   userData: GithubFindMyUserResponse,
   userRepoData: GithubRepoRequestResponse["data"]
-): VerifiedGithubRepoData => {
-  const verifiedGithubRepoData: VerifiedGithubRepoData = {};
+): VerifiedGithubStarredRepoData => {
+  const verifiedGithubRepoData: VerifiedGithubStarredRepoData = {};
+  // Check if the authenticated GH user has any repos
+  if (userRepoData.length < 1) {
+    verifiedGithubRepoData.owner_id = userData.id;
+    verifiedGithubRepoData.stargazers_count = 0;
+  }
+
   userRepoData.findIndex((repo: GithubUserRepoResponseData) => {
     // First check if the GitHub user is the same as the owner of the repo
     if (userData.id === repo.owner.id && repo.stargazers_count > 1) {
@@ -65,8 +80,10 @@ export const checkUserRepoStars = (
         throw "Something went wrong when trying to fetch the stargazer data";
       }
     }
+    // If the user has no repos with stargazers, set the user id to the repo owner's
+    // id, ad set the stargazer count to 0
     verifiedGithubRepoData.owner_id = repo.owner.id;
-    verifiedGithubRepoData.stargazers_count = repo.stargazers_count;
+    verifiedGithubRepoData.stargazers_count = 0;
   });
 
   return verifiedGithubRepoData;
