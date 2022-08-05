@@ -48,7 +48,7 @@ export class GithubProvider implements Provider {
   }
 }
 
-const requestAccessToken = async (code: string): Promise<string> => {
+export const requestAccessToken = async (code: string): Promise<string> => {
   const clientId = process.env.GITHUB_CLIENT_ID;
   const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 
