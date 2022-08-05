@@ -13,8 +13,8 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const validGithubUserResponse = {
   data: {
-    userId: "18723656",
-    userLogin: "my-login-handle",
+    id: "18723656",
+    login: "a-cool-user",
     type: "User",
   },
   status: 200,
@@ -22,20 +22,17 @@ const validGithubUserResponse = {
 
 const validGithubUserRepoResponse = {
   data: {
-    name: 'the-cool-repo',
     owner: {
       id: "18723656",
+      type: "User",
     },
-    stargazers_url: `https://api.github.com/repos/${validGithubUserResponse.data.userLogin}/the-cool-repo/stargazers`,
+    fork: false,
+    forks_count: 5,
+    stargazers_url: `https://api.github.com/repos/${validGithubUserResponse.data.login}/the-cool-repo/stargazers`,
     stargazers_count: 4,
-    forks_count: 5
-  }
+  },
+  status: 200,
 }
-
-// const validGithubUserReposResponse = {
-//   hasOneFork: true,
-//   hasOneStar: true,
-// }
 
 const validCodeResponse = {
   data: {
@@ -51,19 +48,16 @@ beforeEach(() => {
   mockedAxios.post.mockImplementation(async (url, data, config) => {
     return validCodeResponse;
   });
-
+  
   mockedAxios.get.mockImplementation(async (url, config) => {
-    switch (url) {
-      case 'https://api.github.com/user':
-        return validGithubUserResponse;
-      case "https://api.github.com/user/" + validGithubUserResponse.data.userLogin + "/repos":
-        return validGithubUserRepoResponse;
-      default:
-        return 'Nothing found'
+    if (url.endsWith('/user')) {
+      return validGithubUserResponse;
+    }
+    if (url.endsWith('/repos')) {
+      return validGithubUserRepoResponse;
     }
   });
 });
-     
 
 describe("Attempt verification", function () {
   it("handles valid verification attempt", async () => {
@@ -75,8 +69,8 @@ describe("Attempt verification", function () {
         code,
       },
     } as unknown as RequestPayload);
-
-    // Check the request to get the token
+    
+    // Check the request to get the token for the user
     expect(mockedAxios.post).toBeCalledWith(
       `https://github.com/login/oauth/access_token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}`,
       {},
@@ -90,12 +84,77 @@ describe("Attempt verification", function () {
       headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
     });
 
-    expect(forkedGithubRepoProviderPayload).toEqual({
-      valid: true,
-      record: {
-        id: validGithubUserResponse.data.userId + "gte1Fork",
-      },
+    // Check the request to get the repo
+    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/user/${validGithubUserResponse.data.login}/repos`, {
+      headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
     });
+
+    // console.log('*****', forkedGithubRepoProviderPayload)
+
+    // expect(forkedGithubRepoProviderPayload).toEqual({
+    //   valid: true,
+    //   record: {
+    //     id: validGithubUserResponse.data.id + "gte1Fork",
+    //   },
+    // });
   });
-  
+
+  it("should return invalid payload when unable to retrieve auth token", async () => {
+    mockedAxios.post.mockImplementation(async (url, data, config) => {
+      return {
+        status: 500,
+      };
+    });
+
+    const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
+
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
+      proofs: {
+        code,
+      },
+    } as unknown as RequestPayload);
+
+    expect(forkedGithubRepoProviderPayload).toMatchObject({ valid: false });
+  });
+
+  it("should return invalid payload when there is no id in verifyGithub response", async () => {
+    mockedAxios.get.mockImplementation(async (url, config) => {
+      return {
+        data: {
+          id: undefined,
+          login: "a-cool-user",
+          type: "User",
+        },
+        status: 200,
+      };
+    });
+
+    const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
+
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
+      proofs: {
+        code,
+      },
+    } as unknown as RequestPayload);
+
+    expect(forkedGithubRepoProviderPayload).toMatchObject({ valid: false });
+  });
+
+  it("should return invalid payload when a bad status code is returned by github user or repo apis", async () => {
+    mockedAxios.get.mockImplementation(async (url, config) => {
+      return {
+        status: 500,
+      };
+    });
+
+    const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
+
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
+      proofs: {
+        code,
+      },
+    } as unknown as RequestPayload);
+
+    expect(forkedGithubRepoProviderPayload).toMatchObject({ valid: false });
+  });
 });

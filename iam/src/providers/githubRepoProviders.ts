@@ -1,7 +1,7 @@
 // ----- Types
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../types";
-import type { GithubFindMyUserResponse, GithubUserReposResponse, RepoResponse } from "./types/githubTypes";
+import type { GithubFindMyUserResponse, GithubRepoRequestResponse, VerifiedGithubRepoData } from "./types/githubTypes";
 
 // ----- HTTP Client
 import axios from "axios";
@@ -30,21 +30,27 @@ export class ForkedGithubRepoProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false,
       verifiedUserPayload: GithubFindMyUserResponse = {},
-      verifiedUserRepoPayload: GithubUserReposResponse = {};
+      verifiedUserRepoPayload: VerifiedGithubRepoData = {};
 
     try {
       verifiedUserPayload = await verifyGithub(payload.proofs.code);
-      verifiedUserRepoPayload = await verifyUserRepo(verifiedUserPayload, payload.proofs.code);
+      verifiedUserRepoPayload = await verifyUserGithubRepo(verifiedUserPayload, payload.proofs.code);
     } catch (e) {
       return { valid: false };
     } finally {
-      valid = verifiedUserPayload && verifiedUserPayload.id && verifiedUserRepoPayload.hasOneFork ? true : false;
+      valid =
+        verifiedUserRepoPayload &&
+        verifiedUserPayload &&
+        verifiedUserRepoPayload.owner_id &&
+        verifiedUserRepoPayload.forks_count >= 1
+          ? true
+          : false;
     }
 
     return {
       valid: valid,
       record: {
-        id: verifiedUserPayload.id + "gte1Fork",
+        id: `${verifiedUserPayload.id}gte1Fork`,
       },
     };
   }
@@ -67,21 +73,22 @@ export class StarredGithubRepoProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false,
       verifiedUserPayload: GithubFindMyUserResponse = {},
-      verifiedUserRepoPayload: GithubUserReposResponse = {};
+      verifiedUserRepoPayload: VerifiedGithubRepoData = {};
 
     try {
       verifiedUserPayload = await verifyGithub(payload.proofs.code);
-      verifiedUserRepoPayload = await verifyUserRepo(verifiedUserPayload, payload.proofs.code);
+      verifiedUserRepoPayload = await verifyUserGithubRepo(verifiedUserPayload, payload.proofs.code);
     } catch (e) {
       return { valid: false };
     } finally {
-      valid = verifiedUserPayload && verifiedUserPayload.id && verifiedUserRepoPayload.hasOneStar ? true : false;
+      valid =
+        verifiedUserPayload && verifiedUserPayload.id && verifiedUserRepoPayload.stargazers_count >= 1 ? true : false;
     }
 
     return {
       valid: valid,
       record: {
-        id: verifiedUserPayload.id + "gte1star",
+        id: `${verifiedUserPayload.id}gte1star`,
       },
     };
   }
@@ -125,32 +132,35 @@ const verifyGithub = async (code: string): Promise<GithubFindMyUserResponse> => 
   return userRequest.data as GithubFindMyUserResponse;
 };
 
-const verifyUserRepo = async (userData: GithubFindMyUserResponse, code: string): Promise<GithubUserReposResponse> => {
+const verifyUserGithubRepo = async (
+  userData: GithubFindMyUserResponse,
+  code: string
+): Promise<VerifiedGithubRepoData> => {
   // retrieve user's auth bearer token to authenticate client
   const accessToken = await requestAccessToken(code);
 
   // Once access token is received, fetch user repo data
-  const repoRequest: RepoResponse = await axios.get(`https://api.github.com/user/${userData.login}/repos`, {
-    headers: { Authorization: `token ${accessToken}` },
-  });
+  const repoRequest: GithubRepoRequestResponse = await axios.get(
+    `https://api.github.com/user/${userData.login}/repos`,
+    {
+      headers: { Authorization: `token ${accessToken}` },
+    }
+  );
 
   if (repoRequest.status != 200) {
     throw `Get repo request returned status code ${repoRequest.status} instead of the expected 200`;
   }
 
-  const userRequestData: RepoResponse["data"] = repoRequest.data;
+  const repoRequestData: GithubRepoRequestResponse["data"] = repoRequest.data;
 
-  // Is returned a boolean that assuages whether authenticated GH user has
-  // at least one fork of their repo
-  //**** Need to figure this out tomorrow
-  const userHasOneFork: boolean = checkUserRepoForks(userData, userRequestData);
+  // Returns an object with user's repo data or a boolean that assuages
+  // whether authenticated GH user has at least one fork of their repo
+  const userRepoForksCheck: VerifiedGithubRepoData = checkUserRepoForks(userData, repoRequestData);
 
-  // Is returned a boolean that assuages whether authenticated GH user has
-  // at least one stargazer of their repo that isn't themselves
-  const userHasOneStar: boolean = checkUserRepoStars(userData, userRequestData);
+  // Returns an object with user's repo data or a boolean that assuages
+  // whether authenticated GH user has at least one stargazer of their
+  // repo that isn't themselves
+  const userRepoStarsCheck: VerifiedGithubRepoData = checkUserRepoStars(userData, repoRequestData);
 
-  return {
-    hasOneFork: userHasOneFork,
-    hasOneStar: userHasOneStar,
-  } as GithubUserReposResponse;
+  return { userRepoForksCheck, userRepoStarsCheck } as VerifiedGithubRepoData;
 };

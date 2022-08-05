@@ -1,17 +1,12 @@
 export type GithubFindMyUserResponse = {
-  id?: string;
+  id?: number | string;
   login?: string;
   type?: string;
 };
 
-export type GithubUserReposResponse = {
-  hasOneFork?: boolean;
-  hasOneStar?: boolean;
-};
-
-export type GithubRepoResponse = {
+export type GithubUserRepoResponseData = {
   owner?: {
-    id?: string;
+    id?: number | string;
     type?: string;
   };
   fork?: boolean;
@@ -20,7 +15,14 @@ export type GithubRepoResponse = {
   stargazers_count?: number;
 };
 
-export type RepoResponse = {
+export type VerifiedGithubRepoData = {
+  owner_id?: number | string;
+  forks_count?: number;
+  stargazers_url?: string;
+  stargazers_count?: number;
+};
+
+export type GithubRepoRequestResponse = {
+  data?: Array<unknown>;
   status?: number;
-  data?: Array<GithubRepoResponse>;
 };
