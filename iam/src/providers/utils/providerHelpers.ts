@@ -32,7 +32,7 @@ export const checkUserRepoForks = (
   return verifiedGithubRepoData;
 };
 
-// Returns object containing user's github repo data 
+// Returns object containing user's github repo data
 // if the Passport user is not the same as the user
 // who starred the repo and the repo has 1 or more stars
 export const checkUserRepoStars = (
