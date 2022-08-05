@@ -17,7 +17,7 @@ const validGithubUserResponse = {
   data: {
     id: "39483721",
     login: "a-cool-user",
-    followers: 55 || 35,
+    followers: 35,
     type: "User",
   },
   status: 200,
@@ -76,7 +76,19 @@ describe("Attempt verification", function () {
     });
   });
 
-  it("handles valid verification attempt for a user with 55 followers", async () => {
+  it("handles validation for 55 followers", async () => {
+    mockedAxios.get.mockImplementation(async (url, config) => {
+      return {
+        data: {
+          id: "39483721",
+          login: "a-cool-user",
+          followers: 55,
+          type: "User",
+        },
+        status: 200,
+      };
+    });
+
     const clientId = process.env.GITHUB_CLIENT_ID;
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
     const fiftyOrMoreGithubFollowers = new FiftyOrMoreGithubFollowers();
