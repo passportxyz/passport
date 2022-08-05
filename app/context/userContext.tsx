@@ -64,7 +64,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     if (previouslyConnectedWallets?.length) {
       connect({
         autoSelect: {
-          label: previouslyConnectedWallets[0],
+          label: previouslyConnectedWallets[0] as string,
           disableModals: true,
         },
       }).catch((e): void => {
