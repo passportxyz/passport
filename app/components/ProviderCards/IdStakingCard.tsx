@@ -22,9 +22,7 @@ import { VerifyModal } from "../VerifyModal";
 import { useDisclosure, useToast, ModalFooter, Button } from "@chakra-ui/react";
 import { DoneToastContent } from "../DoneToastContent";
 
-const providerId: PROVIDER_ID = "IdStaking";
-
-export default function IdStakingCard(): JSX.Element {
+function useStakingCard(providerId: PROVIDER_ID = "SelfStakingBronze"): JSX.Element {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
@@ -43,7 +41,7 @@ export default function IdStakingCard(): JSX.Element {
     fetchVerifiableCredential(
       iamUrl,
       {
-        type: "IdStaking",
+        type: providerId,
         version: "0.0.0",
         address: address || "",
         proofs: {
@@ -56,7 +54,7 @@ export default function IdStakingCard(): JSX.Element {
         setStakingAmount(verified.record?.stakeAmount);
         SetStakingVerified(!verified.error);
         SetCredentialResponse({
-          provider: "IdStaking",
+          provider: providerId,
           credential: verified.credential,
         });
       })
@@ -103,8 +101,7 @@ export default function IdStakingCard(): JSX.Element {
         colorScheme="purple"
         mr={2}
         onClick={() => {
-          // window.open("https://neighborly-engine.surge.sh/", "_blank");
-          window.open("https://unaccountable-glue.surge.sh/", "_blank");
+          window.open("https://goerli-staking.surge.sh/", "_blank");
         }}
       >
         Go Stake
@@ -132,7 +129,7 @@ export default function IdStakingCard(): JSX.Element {
         onClose={handleModalOnClose}
         stamp={credentialResponse}
         handleUserVerify={handleUserVerify}
-        verifyData={<>{`The Amount you staked is ${stakingAmount || "0.0"} GTC`}</>}
+        verifyData={<>{`The Amount you staked is ${stakingAmount}`}</>}
         isLoading={credentialResponseIsLoading}
         footer={footer}
       />
@@ -148,3 +145,27 @@ export default function IdStakingCard(): JSX.Element {
     />
   );
 }
+
+export const SelfStakingBronzeCard = (): JSX.Element => {
+  return useStakingCard("SelfStakingBronze");
+};
+
+export const SelfStakingSilverCard = (): JSX.Element => {
+  return useStakingCard("SelfStakingSilver");
+};
+
+export const SelfStakingGold = (): JSX.Element => {
+  return useStakingCard("SelfStakingGold");
+};
+
+export const CommunityStakingBronzeCard = (): JSX.Element => {
+  return useStakingCard("CommunityStakingBronze");
+};
+
+export const CommunityStakingSilverCard = (): JSX.Element => {
+  return useStakingCard("CommunityStakingSilver");
+};
+
+export const CommunityStakingGold = (): JSX.Element => {
+  return useStakingCard("CommunityStakingGold");
+};

@@ -74,8 +74,28 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: STAMP_PROVIDERS.Discord,
     stamp: undefined,
   },
-  IdStaking: {
-    providerSpec: STAMP_PROVIDERS.IdStaking,
+  SelfStakingBronze: {
+    providerSpec: STAMP_PROVIDERS.SelfStakingBronze,
+    stamp: undefined,
+  },
+  SelfStakingSilver: {
+    providerSpec: STAMP_PROVIDERS.SelfStakingSilver,
+    stamp: undefined,
+  },
+  SelfStakingGold: {
+    providerSpec: STAMP_PROVIDERS.SelfStakingGold,
+    stamp: undefined,
+  },
+  CommunityStakingBronze: {
+    providerSpec: STAMP_PROVIDERS.CommunityStakingBronze,
+    stamp: undefined,
+  },
+  CommunityStakingSilver: {
+    providerSpec: STAMP_PROVIDERS.CommunityStakingBronze,
+    stamp: undefined,
+  },
+  CommunityStakingGold: {
+    providerSpec: STAMP_PROVIDERS.CommunityStakingBronze,
     stamp: undefined,
   },
 };

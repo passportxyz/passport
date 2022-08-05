@@ -60,7 +60,12 @@ import {
 import { FacebookFriendsProvider } from "./providers/facebookFriends";
 import { FacebookProfilePictureProvider } from "./providers/facebookProfilePicture";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
-import { IdStakingProvider } from "./providers/idstaking";
+import { SelfStakingBronzeProvider, SelfStakingSilverProvider, SelfStakingGoldProvider } from "./providers/selfstaking";
+import {
+  CommunityStakingBronzeProvider,
+  CommunityStakingSilverProvider,
+  CommunityStakingGoldProvider,
+} from "./providers/communitystaking";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
@@ -89,7 +94,13 @@ const providers = new Providers([
   new TwitterFollowerGT500Provider(),
   new TwitterFollowerGTE1000Provider(),
   new TwitterFollowerGT5000Provider(),
-  new IdStakingProvider(),
+  new SelfStakingBronzeProvider(),
+  new SelfStakingSilverProvider(),
+  new SelfStakingGoldProvider(),
+  new CommunityStakingBronzeProvider(),
+  new CommunityStakingBronzeProvider(),
+  new CommunityStakingSilverProvider(),
+  new CommunityStakingGoldProvider(),
 ]);
 
 // create the app and run on port

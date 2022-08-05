@@ -61,9 +61,34 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     name: "Discord",
     description: "Discord name",
   },
-  IdStaking: {
+  SelfStakingBronze: {
     icon: "./assets/idStakingStampIcon.svg",
-    name: "Id Staking",
+    name: "Self-Staking Bronze",
+    description: "Verify Stake",
+  },
+  SelfStakingSilver: {
+    icon: "./assets/idStakingStampIcon.svg",
+    name: "Self-Staking Silver",
+    description: "Verify Stake",
+  },
+  SelfStakingGold: {
+    icon: "./assets/idStakingStampIcon.svg",
+    name: "Self-Staking Gold",
+    description: "Verify Stake",
+  },
+  CommunityStakingBronze: {
+    icon: "./assets/idStakingStampIcon.svg",
+    name: "Community Staking Bronze",
+    description: "Verify Stake",
+  },
+  CommunityStakingSilver: {
+    icon: "./assets/idStakingStampIcon.svg",
+    name: "Community Staking Silver",
+    description: "Verify Stake",
+  },
+  CommunityStakingGold: {
+    icon: "./assets/idStakingStampIcon.svg",
+    name: "Community Staking Gold",
     description: "Verify Stake",
   },
 };

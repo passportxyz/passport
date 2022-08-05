@@ -134,4 +134,9 @@ export type PROVIDER_ID =
   | "Github"
   | "Linkedin"
   | "Discord"
-  | "IdStaking";
+  | "SelfStakingBronze"
+  | "SelfStakingSilver"
+  | "SelfStakingGold"
+  | "CommunityStakingBronze"
+  | "CommunityStakingSilver"
+  | "CommunityStakingGold";
