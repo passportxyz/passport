@@ -47,6 +47,8 @@ import { GithubProvider } from "./providers/github";
 import { LinkedinProvider } from "./providers/linkedin";
 import { DiscordProvider } from "./providers/discord";
 import { TwitterTweetGT10Provider } from "./providers/twitterTweets";
+import { ForkedGithubRepoProvider } from "./providers/githubForkedRepoProvider";
+import { StarredGithubRepoProvider } from "./providers/githubStarredRepoProvider";
 import {
   TwitterFollowerGT100Provider,
   TwitterFollowerGT500Provider,
@@ -73,6 +75,8 @@ const providers = new Providers([
   new TwitterFollowerGT500Provider(),
   new TwitterFollowerGTE1000Provider(),
   new TwitterFollowerGT5000Provider(),
+  new ForkedGithubRepoProvider(),
+  new StarredGithubRepoProvider(),
 ]);
 
 // create the app and run on port
