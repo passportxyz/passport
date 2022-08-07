@@ -40,11 +40,11 @@ export class StarredGithubRepoProvider implements Provider {
       return { valid: false };
     } finally {
       valid =
-        verifiedUserPayload && 
-        verifiedUserPayload.id && 
-        verifiedUserRepoPayload.owner.id && 
-        verifiedUserRepoPayload.stargazers_count >= 1 
-          ? true 
+        verifiedUserPayload &&
+        verifiedUserPayload.id &&
+        verifiedUserRepoPayload.owner.id &&
+        verifiedUserRepoPayload.stargazers_count >= 1
+          ? true
           : false;
     }
 
@@ -114,15 +114,15 @@ const verifyUserGithubRepo = async (
     throw `Get repo request returned status code ${repoRequest.status} instead of the expected 200`;
   }
 
-  // Returns an object with user's repo data or a boolean that assuages
-  // whether authenticated GH user has at least one stargazer of their
-  // repo that isn't themselves
-  const userRepoStarsCheck = repoRequest.data.find(
-    (repo: GithubUserRepoResponseData): GithubUserRepoResponseData => 
-  {
-    // First check if the GitHub user is the same as the owner of the repo
+  // Returns an object containing first instance of a user's repo if it has been starred
+  // by a user other than the repo owner, or the last checked repo with no stars
+  const userRepoStarsCheck = repoRequest.data.find((repo: GithubUserRepoResponseData): GithubUserRepoResponseData => {
+    // Check if the GitHub user is the same as the owner of the repo
+    // and if the stargazer count is gt 1
     if (userData.id === repo.owner.id && repo.stargazers_count > 1) {
       return repo;
+      // Check if the GitHub user is the same as the owner of the repo
+      // and if the stargazers count equals 1
     } else if (userData.id === repo.owner.id && repo.stargazers_count === 1) {
       // Check if the owner of the repo is the same as the only stargazer
       // if they're different, return true | if they're the same, return false
@@ -130,6 +130,7 @@ const verifyUserGithubRepo = async (
         // check if the stargazer's user id is equal to the authenticated user's id
         async (): Promise<GithubUserRepoResponseData> => {
           const stargazerData: [] = await axios.get(repo.stargazers_url);
+          // Return the first instance where the stargazer type is a "User"
           const stargazersItem: Record<string, unknown> = stargazerData.find(
             (stargazerObject: GithubUserRepoResponseData["owner"]) => {
               stargazerObject.type === userData.type;
@@ -143,8 +144,6 @@ const verifyUserGithubRepo = async (
         throw "Something went wrong when trying to fetch the stargazer data";
       }
     }
-    // If the user has no repos with stargazers, set the user id to the repo owner's
-    // id, ad set the stargazer count to 0
     return repo;
   });
 

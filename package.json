@@ -60,5 +60,8 @@
     "**/@types/react": "17.0.2",
     "leveldown": "6.1.1",
     "node-gyp": "^9.0.0"
+  },
+  "dependencies": {
+    "global": "^4.4.0"
   }
 }

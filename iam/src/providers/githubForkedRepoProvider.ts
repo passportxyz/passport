@@ -36,7 +36,6 @@ export class ForkedGithubRepoProvider implements Provider {
     try {
       verifiedUserPayload = await verifyGithub(payload.proofs.code);
       verifiedUserRepoPayload = await verifyUserGithubRepo(verifiedUserPayload, payload.proofs.code);
-
     } catch (e) {
       return { valid: false };
     } finally {
@@ -116,23 +115,17 @@ const verifyUserGithubRepo = async (
     throw `User repo GET request returned status code ${repoRequest.status} instead of the expected 200`;
   }
 
-  // const repoRequestData: GithubRepoRequestResponse = repoRequest;
-  
-  // Returns an object with user's repo data or a boolean that assuages
-  // whether authenticated GH user has at least one fork of their repo
-  const userRepoForksCheck = repoRequest.data.find(
-    (repo: GithubUserRepoResponseData): GithubUserRepoResponseData => 
-  {
+  // Returns an object containing first instance of a user's repo if it has been forked,
+  // or the last checked repo with no forks
+  const userRepoForksCheck = repoRequest.data.find((repo: GithubUserRepoResponseData): GithubUserRepoResponseData => {
     // Check to see if the authenticated GH user is the same as the repo owner,
     // if the repo is not a fork of another repo, and if the repo fork count is gte 1
     if (userData.id === repo.owner.id && !repo.fork && repo.forks_count >= 1) {
       return repo;
     } else {
-      // If the user has no repos with forks, set the user id to the repo owner's
-      // id, ad set the fork count to 0
       return repo;
     }
   });
 
-  return userRepoForksCheck as GithubUserRepoResponseData;
+  return userRepoForksCheck;
 };
