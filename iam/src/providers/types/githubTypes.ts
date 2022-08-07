@@ -16,16 +16,6 @@ export type GithubUserRepoResponseData = {
 };
 
 export type GithubRepoRequestResponse = {
-  data?: Array<unknown>;
+  data?: GithubUserRepoResponseData[];
   status?: number;
-};
-
-export type VerifiedGithubForkedRepoData = {
-  owner_id?: number | string;
-  forks_count?: number;
-};
-
-export type VerifiedGithubStarredRepoData = {
-  owner_id?: number | string;
-  stargazers_count?: number;
 };

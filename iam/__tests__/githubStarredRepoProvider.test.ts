@@ -1,5 +1,5 @@
 // ---- Test subject
-import { ForkedGithubRepoProvider } from "../src/providers/githubForkedRepoProvider";
+import { StarredGithubRepoProvider } from "../src/providers/githubStarredRepoProvider";
 
 // ----- Types
 import { RequestPayload } from "@gitcoin/passport-types";
@@ -27,17 +27,8 @@ const validGithubUserRepoResponse = {
         id: "18723656",
         type: "User",
       },
-      fork: false,
-      forks_count: 5,
+      stargazers_count: 4
     },
-    {
-      owner: {
-        id: "18723656",
-        type: "User",
-      },
-      fork: true,
-      forks_count: 2,
-    }
   ],
   status: 200,
 };
@@ -71,8 +62,8 @@ describe("Attempt verification", function () {
   it("handles valid verification attempt", async () => {
     const clientId = process.env.GITHUB_CLIENT_ID;
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-    const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
+    const starredGithubRepoProvider = new StarredGithubRepoProvider();
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
       proofs: {
         code,
       },
@@ -97,10 +88,10 @@ describe("Attempt verification", function () {
       headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
     });
 
-    expect(forkedGithubRepoProviderPayload).toEqual({
+    expect(starredGithubRepoProviderPayload).toEqual({
       valid: true,
       record: {
-        id: `${validGithubUserResponse.data.id}gte1Fork`,
+        id: `${validGithubUserResponse.data.id}gte1Star`,
       },
     });
   });
@@ -112,15 +103,15 @@ describe("Attempt verification", function () {
       };
     });
 
-    const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
+    const starredGithubRepoProvider = new StarredGithubRepoProvider();
 
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
       proofs: {
         code,
       },
     } as unknown as RequestPayload);
 
-    expect(forkedGithubRepoProviderPayload).toMatchObject({ valid: false });
+    expect(starredGithubRepoProviderPayload).toMatchObject({ valid: false });
   });
 
   it("should return invalid payload when there is no id in verifyGithub response", async () => {
@@ -135,18 +126,18 @@ describe("Attempt verification", function () {
       };
     });
 
-    const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
+    const starredGithubRepoProvider = new StarredGithubRepoProvider();
 
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
       proofs: {
         code,
       },
     } as unknown as RequestPayload);
 
-    expect(forkedGithubRepoProviderPayload).toMatchObject({ valid: false });
+    expect(starredGithubRepoProviderPayload).toMatchObject({ valid: false });
   });
 
-  it("should return invalid payload when the fork count for all repos is less than 1", async () => {
+  it("should return invalid payload when the stargazers count for all repos is less than 1", async () => {
     mockedAxios.get.mockImplementation(async (url, config) => {
       return {
         data: [
@@ -155,31 +146,22 @@ describe("Attempt verification", function () {
               id: "18723656",
               type: "User",
             },
-            fork: false,
-            forks_count: 0,
+            starred_count: 0
           },
-          {
-            owner: {
-              id: "18723656",
-              type: "User",
-            },
-            fork: true,
-            forks_count: 0,
-          }
         ],
         status: 200,
       };
     });
 
-    const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
+    const starredGithubRepoProvider = new StarredGithubRepoProvider();
 
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
       proofs: {
         code,
       },
     } as unknown as RequestPayload);
 
-    expect(forkedGithubRepoProviderPayload).toMatchObject({ valid: false });
+    expect(starredGithubRepoProviderPayload).toMatchObject({ valid: false });
   });
 
   it("should return invalid payload when a bad status code is returned by github user or repo apis", async () => {
@@ -189,14 +171,14 @@ describe("Attempt verification", function () {
       };
     });
 
-    const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
+    const starredGithubRepoProvider = new StarredGithubRepoProvider();
 
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
       proofs: {
         code,
       },
     } as unknown as RequestPayload);
 
-    expect(forkedGithubRepoProviderPayload).toMatchObject({ valid: false });
+    expect(starredGithubRepoProviderPayload).toMatchObject({ valid: false });
   });
 });
