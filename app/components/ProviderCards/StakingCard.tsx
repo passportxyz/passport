@@ -22,7 +22,11 @@ import { VerifyModal } from "../VerifyModal";
 import { useDisclosure, useToast, ModalFooter, Button } from "@chakra-ui/react";
 import { DoneToastContent } from "../DoneToastContent";
 
-function useStakingCard(providerId: PROVIDER_ID = "SelfStakingBronze"): JSX.Element {
+function useStakingCard(
+  providerId: PROVIDER_ID = "SelfStakingBronze",
+  verifyDataTrue: string,
+  verifyDataFalse: string
+): JSX.Element {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
   const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
@@ -124,12 +128,12 @@ function useStakingCard(providerId: PROVIDER_ID = "SelfStakingBronze"): JSX.Elem
         Verify Stake
       </button>
       <VerifyModal
-        title={stakingVerified ? "Verify Staked Amount" : "Valid Staked Amount Not Found"}
+        title={stakingVerified ? "Verify Data" : "Unable to Verify Data"}
         isOpen={isOpen}
         onClose={handleModalOnClose}
         stamp={credentialResponse}
         handleUserVerify={handleUserVerify}
-        verifyData={<>{`The Amount you staked is ${stakingAmount}`}</>}
+        verifyData={<div className="text-center">{stakingAmount ? verifyDataTrue : verifyDataFalse}</div>}
         isLoading={credentialResponseIsLoading}
         footer={footer}
       />
@@ -147,25 +151,49 @@ function useStakingCard(providerId: PROVIDER_ID = "SelfStakingBronze"): JSX.Elem
 }
 
 export const SelfStakingBronzeCard = (): JSX.Element => {
-  return useStakingCard("SelfStakingBronze");
+  return useStakingCard(
+    "SelfStakingBronze",
+    "The Amount Staked is Greater than 1 GTC",
+    "The Amount Staked is Less than 1 GTC"
+  );
 };
 
 export const SelfStakingSilverCard = (): JSX.Element => {
-  return useStakingCard("SelfStakingSilver");
+  return useStakingCard(
+    "SelfStakingSilver",
+    "The Amount Staked is Greater than 5 GTC",
+    "The Amount Staked is Less than 5 GTC"
+  );
 };
 
-export const SelfStakingGold = (): JSX.Element => {
-  return useStakingCard("SelfStakingGold");
+export const SelfStakingGoldCard = (): JSX.Element => {
+  return useStakingCard(
+    "SelfStakingGold",
+    "The Amount Staked is Greater than 50 GTC",
+    "The Amount Staked is Less than 50 GTC"
+  );
 };
 
 export const CommunityStakingBronzeCard = (): JSX.Element => {
-  return useStakingCard("CommunityStakingBronze");
+  return useStakingCard(
+    "CommunityStakingBronze",
+    "The Amount Staked is Greater than 10 GTC",
+    "The Amount Staked is Less than 10 GTC"
+  );
 };
 
 export const CommunityStakingSilverCard = (): JSX.Element => {
-  return useStakingCard("CommunityStakingSilver");
+  return useStakingCard(
+    "CommunityStakingSilver",
+    "The Amount Staked is Greater than 100 GTC",
+    "The Amount Staked is Less than 100 GTC"
+  );
 };
 
-export const CommunityStakingGold = (): JSX.Element => {
-  return useStakingCard("CommunityStakingGold");
+export const CommunityStakingGoldCard = (): JSX.Element => {
+  return useStakingCard(
+    "CommunityStakingGold",
+    "The Amount Staked is Greater than 500 GTC",
+    "The Amount Staked is Less than 500 GTC"
+  );
 };

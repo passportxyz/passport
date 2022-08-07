@@ -58,17 +58,15 @@ async function verifyStake(payload: RequestPayload): Promise<StakeResponse> {
       `,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  console.log("view results ", result.data.data, result.data.data.users[0]);
-
   const r = result as StakeResult;
-  const xstakes = r?.data?.data?.users[0].xstakeOnMe || [];
 
-  console.log("view xtake ", xstakes);
+  // Array of xstakes on the user
+  const xstakes = r?.data?.data?.users[0].xstakeOnMe || [];
 
   let response: StakeResponse = {};
 
   if (xstakes.length > 0) {
+    // Add all the amounts staked on user
     let totalAmountStaked = 0;
     xstakes.forEach((xstake) => {
       const stakeAmountFormatted: string = utils.formatUnits(xstake.amount.toString(), 18);
@@ -109,7 +107,8 @@ export class CommunityStakingBronzeProvider implements Provider {
         valid,
         record: {
           address: payload.address,
-          stakeAmount: valid ? "Greater Than 10 GTC" : "Less Than 10 GTC",
+          // csgt10 = Community Staking Greater than 10
+          stakeAmount: valid ? "csgt10" : "",
         },
       };
     } catch (e) {
@@ -147,7 +146,8 @@ export class CommunityStakingSilverProvider implements Provider {
         valid,
         record: {
           address: payload.address,
-          stakeAmount: valid ? "Greater Than 10 GTC" : "Less Than 10 GTC",
+          // csgt100 = Community Staking Greater than 100
+          stakeAmount: valid ? "csgt100" : "",
         },
       };
     } catch (e) {
@@ -178,14 +178,14 @@ export class CommunityStakingGoldProvider implements Provider {
     try {
       const stakeData = await verifyStake(payload);
       const stakeAmount = stakeData.totalAmountStaked;
-
       valid = stakeAmount > 500.0;
 
       return {
-        valid,
+        valid: valid,
         record: {
           address: payload.address,
-          stakeAmount: valid ? "Greater Than 10 GTC" : "Less Than 10 GTC",
+          // csgt500 = Community Staking Greater than 500
+          stakeAmount: valid ? "csgt500" : "",
         },
       };
     } catch (e) {

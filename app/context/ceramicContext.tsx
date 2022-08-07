@@ -91,11 +91,11 @@ const startingAllProvidersState: AllProvidersState = {
     stamp: undefined,
   },
   CommunityStakingSilver: {
-    providerSpec: STAMP_PROVIDERS.CommunityStakingBronze,
+    providerSpec: STAMP_PROVIDERS.CommunityStakingSilver,
     stamp: undefined,
   },
   CommunityStakingGold: {
-    providerSpec: STAMP_PROVIDERS.CommunityStakingBronze,
+    providerSpec: STAMP_PROVIDERS.CommunityStakingGold,
     stamp: undefined,
   },
 };

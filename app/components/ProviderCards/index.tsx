@@ -11,8 +11,8 @@ export { default as DiscordCard } from "./DiscordCard";
 export {
   SelfStakingBronzeCard,
   SelfStakingSilverCard,
-  SelfStakingGold,
+  SelfStakingGoldCard,
   CommunityStakingBronzeCard,
   CommunityStakingSilverCard,
-  CommunityStakingGold,
-} from "./IdStakingCard";
+  CommunityStakingGoldCard,
+} from "./StakingCard";

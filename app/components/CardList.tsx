@@ -14,10 +14,10 @@ import {
   DiscordCard,
   SelfStakingBronzeCard,
   SelfStakingSilverCard,
-  SelfStakingGold,
+  SelfStakingGoldCard,
   CommunityStakingBronzeCard,
   CommunityStakingSilverCard,
-  CommunityStakingGold,
+  CommunityStakingGoldCard,
 } from "./ProviderCards";
 import GithubCard from "./ProviderCards/GithubCard";
 import { LoadingCard } from "./LoadingCard";
@@ -50,10 +50,10 @@ export const CardList = ({ isLoading }: CardListProps): JSX.Element => {
             <DiscordCard />
             <SelfStakingBronzeCard />
             <SelfStakingSilverCard />
-            <SelfStakingGold />
+            <SelfStakingGoldCard />
             <CommunityStakingBronzeCard />
             <CommunityStakingSilverCard />
-            <CommunityStakingGold />
+            <CommunityStakingGoldCard />
           </>
         )}
       </div>

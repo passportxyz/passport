@@ -62,10 +62,9 @@ async function verifyStake(payload: RequestPayload): Promise<StakeResponse> {
       `,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  console.log("view results ", result.data.data);
-
   const r = result as StakeResult;
+
+  // Array of self stakes on the user
   const stakes = r?.data?.data?.stakes || [];
 
   let response: StakeResponse = {};
@@ -73,8 +72,6 @@ async function verifyStake(payload: RequestPayload): Promise<StakeResponse> {
   if (stakes) {
     const stakeValue: string = stakes[0].stake;
     const stakeAmountFormatted: string = utils.formatUnits(stakeValue.toString(), 18);
-    console.log("stake value ", stakeAmountFormatted);
-
     response = {
       stakeAmount: parseFloat(stakeAmountFormatted),
       address: address,
@@ -110,7 +107,8 @@ export class SelfStakingBronzeProvider implements Provider {
         valid,
         record: {
           address: payload.address,
-          stakeAmount: valid ? "Greater Than 1 GTC" : "Less Than 1 GTC",
+          // ssgt1 = Self Staking Greater than 1
+          stakeAmount: valid ? "csgt1" : "",
         },
       };
     } catch (e) {
@@ -126,7 +124,7 @@ export class SelfStakingBronzeProvider implements Provider {
 // User's self stake must be greater than 1 GTC
 export class SelfStakingSilverProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
-  type = "SelfStakingBronze";
+  type = "SelfStakingSilver";
   // Options can be set here and/or via the constructor
   _options = {};
 
@@ -148,7 +146,8 @@ export class SelfStakingSilverProvider implements Provider {
         valid,
         record: {
           address: payload.address,
-          stakeAmount: valid ? "Greater Than 5 GTC" : "Less Than 5 GTC",
+          // ssgt5 = Self Staking Greater than 5
+          stakeAmount: valid ? "csgt5" : "",
         },
       };
     } catch (e) {
@@ -164,7 +163,7 @@ export class SelfStakingSilverProvider implements Provider {
 // User's self stake must be greater than 1 GTC
 export class SelfStakingGoldProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
-  type = "SelfStakingBronze";
+  type = "SelfStakingGold";
   // Options can be set here and/or via the constructor
   _options = {};
 
@@ -186,7 +185,8 @@ export class SelfStakingGoldProvider implements Provider {
         valid,
         record: {
           address: payload.address,
-          stakeAmount: valid ? "Greater Than 50 GTC" : "Less Than 50 GTC",
+          // ssgt50 = Self Staking Greater than 50
+          stakeAmount: valid ? "csgt50" : "",
         },
       };
     } catch (e) {

@@ -67,6 +67,30 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: STAMP_PROVIDERS.Discord,
         stamp: undefined,
       },
+      SelfStakingBronze: {
+        providerSpec: STAMP_PROVIDERS.SelfStakingBronze,
+        stamp: undefined,
+      },
+      SelfStakingSilver: {
+        providerSpec: STAMP_PROVIDERS.SelfStakingSilver,
+        stamp: undefined,
+      },
+      SelfStakingGold: {
+        providerSpec: STAMP_PROVIDERS.SelfStakingGold,
+        stamp: undefined,
+      },
+      CommunityStakingBronze: {
+        providerSpec: STAMP_PROVIDERS.CommunityStakingBronze,
+        stamp: undefined,
+      },
+      CommunityStakingSilver: {
+        providerSpec: STAMP_PROVIDERS.CommunityStakingSilver,
+        stamp: undefined,
+      },
+      CommunityStakingGold: {
+        providerSpec: STAMP_PROVIDERS.CommunityStakingGold,
+        stamp: undefined,
+      },
     },
     handleAddStamp: jest.fn(),
     handleCreatePassport: jest.fn(),
