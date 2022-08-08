@@ -56,7 +56,7 @@ beforeEach(() => {
   mockedAxios.post.mockImplementation(async (url, data, config) => {
     return validCodeResponse;
   });
-
+  
   mockedAxios.get.mockImplementation(async (url, config) => {
     if (url.endsWith('/user')) {
       return validGithubUserResponse;
@@ -77,7 +77,6 @@ describe("Attempt verification", function () {
         code,
       },
     } as unknown as RequestPayload);
-
     // Check the request to get the token for the user
     expect(mockedAxios.post).toBeCalledWith(
       `https://github.com/login/oauth/access_token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}`,
@@ -221,4 +220,4 @@ describe("Attempt verification", function () {
 
     expect(forkedGithubRepoProviderPayload).toMatchObject({ valid: false });
   });
-}); 
+});

@@ -46,6 +46,8 @@ import { BrightIdProvider } from "./providers/brightid";
 import { GithubProvider } from "./providers/github";
 import { LinkedinProvider } from "./providers/linkedin";
 import { DiscordProvider } from "./providers/discord";
+import { ForkedGithubRepoProvider } from "./providers/githubForkedRepoProvider";
+import { StarredGithubRepoProvider } from "./providers/githubStarredRepoProvider";
 import { TwitterTweetGT10Provider } from "./providers/twitterTweets";
 import { ForkedGithubRepoProvider } from "./providers/githubForkedRepoProvider";
 import { StarredGithubRepoProvider } from "./providers/githubStarredRepoProvider";
@@ -70,6 +72,8 @@ const providers = new Providers([
   new GithubProvider(),
   new LinkedinProvider(),
   new DiscordProvider(),
+  new ForkedGithubRepoProvider(),
+  new StarredGithubRepoProvider(),
   new TwitterTweetGT10Provider(),
   new TwitterFollowerGT100Provider(),
   new TwitterFollowerGT500Provider(),

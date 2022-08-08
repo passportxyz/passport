@@ -164,6 +164,7 @@ describe("Attempt verification", function () {
     expect(starredGithubRepoProviderPayload).toMatchObject({ valid: false });
   });
 
+
   it("should return invalid payload when a repo has only one star, and it came from the repo owner", async () => {
     mockedAxios.get.mockImplementation(async (url, config) => {
       return {
@@ -179,7 +180,7 @@ describe("Attempt verification", function () {
           },
         ],
         status: 200
-      };
+      }
     });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
