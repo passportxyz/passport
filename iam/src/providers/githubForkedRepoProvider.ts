@@ -3,8 +3,8 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../types";
 import type {
   GithubFindMyUserResponse,
-  GithubRepoRequestResponse,
   GithubUserRepoResponseData,
+  GithubRepoRequestResponse,
 } from "./types/githubTypes";
 
 // ----- HTTP Client
@@ -112,7 +112,7 @@ const verifyUserGithubRepo = async (
   );
 
   if (repoRequest.status != 200) {
-    throw `User repo GET request returned status code ${repoRequest.status} instead of the expected 200`;
+    throw `Repo GET request returned status code ${repoRequest.status} instead of the expected 200`;
   }
 
   // Returns an object containing first instance of a user's repo if it has been forked,

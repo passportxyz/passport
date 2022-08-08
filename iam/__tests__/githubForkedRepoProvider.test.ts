@@ -182,11 +182,33 @@ describe("Attempt verification", function () {
     expect(forkedGithubRepoProviderPayload).toMatchObject({ valid: false });
   });
 
-  it("should return invalid payload when a bad status code is returned by github user or repo apis", async () => {
+  it("should return invalid payload when a bad status code is returned by github user request", async () => {
     mockedAxios.get.mockImplementation(async (url, config) => {
-      return {
-        status: 500,
-      };
+      if (url.endsWith('/user')) {
+        return {
+          status: 500,
+        };
+      }
+    });
+
+    const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
+
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
+      proofs: {
+        code,
+      },
+    } as unknown as RequestPayload);
+
+    expect(forkedGithubRepoProviderPayload).toMatchObject({ valid: false });
+  });
+
+  it("should return invalid payload when a bad status code is returned by github repo request", async () => {
+    mockedAxios.get.mockImplementation(async (url, config) => {
+      if (url.endsWith('/repos')) {
+        return {
+          status: 500,
+        };
+      }
     });
 
     const forkedGithubRepoProvider = new ForkedGithubRepoProvider();

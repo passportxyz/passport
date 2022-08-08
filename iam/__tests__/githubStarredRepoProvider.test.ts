@@ -164,10 +164,21 @@ describe("Attempt verification", function () {
     expect(starredGithubRepoProviderPayload).toMatchObject({ valid: false });
   });
 
-  it("should return invalid payload when a bad status code is returned by github user or repo apis", async () => {
+  it("should return invalid payload when a repo has only one star, and it came from the repo owner", async () => {
     mockedAxios.get.mockImplementation(async (url, config) => {
       return {
-        status: 500,
+        data: [
+          {
+            owner: {
+              id: "18723656",
+              login: "a-cool-user",
+              type: "User",
+            },
+            stargazers_count: 1,
+            stargazers_url: "https://api.github.com/repos/a-cool-user/coolest-repo/stargazers"
+          },
+        ],
+        status: 200
       };
     });
 
@@ -181,4 +192,44 @@ describe("Attempt verification", function () {
 
     expect(starredGithubRepoProviderPayload).toMatchObject({ valid: false });
   });
-}); 
+
+  it("should return invalid payload when a bad status code is returned by github user request", async () => {
+    mockedAxios.get.mockImplementation(async (url, config) => {
+      if (url.endsWith('/user')) {
+        return {
+          status: 500,
+        };
+      }
+    });
+
+    const starredGithubRepoProvider = new StarredGithubRepoProvider();
+
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
+      proofs: {
+        code,
+      },
+    } as unknown as RequestPayload);
+
+    expect(starredGithubRepoProviderPayload).toMatchObject({ valid: false });
+  });
+
+  it("should return invalid payload when a bad status code is returned by github repo request", async () => {
+    mockedAxios.get.mockImplementation(async (url, config) => {
+      if (url.endsWith('/pppp')) {
+        return {
+          status: 500,
+        };
+      }
+    });
+
+    const starredGithubRepoProvider = new StarredGithubRepoProvider();
+
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
+      proofs: {
+        code,
+      },
+    } as unknown as RequestPayload);
+
+    expect(starredGithubRepoProviderPayload).toMatchObject({ valid: false });
+  });
+});
