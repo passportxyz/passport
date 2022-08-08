@@ -167,7 +167,49 @@ describe("POST /verify", function () {
     // check for an id match on the mocked credential
     expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
   });
+  
+  it("handles valid challenge requests with multiple types", async () => {
+    // challenge received from the challenge endpoint
+    const challenge = {
+      issuer: config.issuer,
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0x0",
+        provider: "challenge-any",
+        address: "0x0",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+    // payload containing a signature of the challenge in the challenge credential
+    const payload = {
+      type: "any",
+      types: ["Simple", "Simple"],
+      address: "0x0",
+      proofs: {
+        valid: "true",
+        username: "test",
+        signature: "pass",
+      },
+    };
+  
+    // resolve the verification
+    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
 
+    // check that ID matches the payload (this has been mocked)
+    const expectedId = "did:pkh:eip155:1:0x0";
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/verify")
+      .send({ challenge, payload })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    // check for an id match on the mocked credential
+    expect((response.body[0] as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
+    expect((response.body[1] as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
+  });
+  
   it("handles invalid challenge requests where credential.issuer is unknown", async () => {
     // challenge received from the challenge endpoint
     const challenge = {

@@ -179,6 +179,7 @@ export const fetchChallengeCredential = async (iamUrl: string, payload: RequestP
     {
       payload: {
         address: payload.address,
+        // allow type to be `any` to support multi-vc-requests
         type: payload.type,
       },
     }
