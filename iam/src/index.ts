@@ -49,8 +49,6 @@ import { DiscordProvider } from "./providers/discord";
 import { ForkedGithubRepoProvider } from "./providers/githubForkedRepoProvider";
 import { StarredGithubRepoProvider } from "./providers/githubStarredRepoProvider";
 import { TwitterTweetGT10Provider } from "./providers/twitterTweets";
-import { ForkedGithubRepoProvider } from "./providers/githubForkedRepoProvider";
-import { StarredGithubRepoProvider } from "./providers/githubStarredRepoProvider";
 import {
   TwitterFollowerGT100Provider,
   TwitterFollowerGT500Provider,
