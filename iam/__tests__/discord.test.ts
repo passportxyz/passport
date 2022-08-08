@@ -66,6 +66,8 @@ describe("Attempt verification", function () {
   });
 
   it("should return invalid payload when unable to retrieve auth token", async () => {
+    const logSpy = jest.spyOn(console, 'error').mockImplementation();
+
     mockedAxios.post.mockImplementation(async (url, data, config) => {
       return {
         status: 500,
@@ -81,6 +83,7 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     expect(discordPayload).toMatchObject({ valid: false });
+    expect(logSpy).toHaveBeenCalledWith("Error when verifying discord account for user:", undefined);
   });
 
   it("should return invalid payload when there is no id in verifyDiscord response", async () => {
