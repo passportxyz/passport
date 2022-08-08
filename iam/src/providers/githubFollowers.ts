@@ -40,10 +40,7 @@ export class TenOrMoreGithubFollowers implements Provider {
     } catch (e) {
       return { valid: false };
     } finally {
-      valid =
-        verifiedPayload && verifiedPayload.followers >= 10 && verifiedPayload.followers < 50 && verifiedPayload.id
-          ? true
-          : false;
+      valid = verifiedPayload && verifiedPayload.followers >= 10 && verifiedPayload.id ? true : false;
     }
 
     return {
