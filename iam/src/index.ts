@@ -57,6 +57,7 @@ import {
   TwitterFollowerGTE1000Provider,
   TwitterFollowerGT5000Provider,
 } from "./providers/TwitterFollower";
+import { FacebookFriendsProvider } from "./providers/facebookFriends";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
 
 // Initiate providers - new Providers should be registered in this array...
@@ -70,6 +71,7 @@ const providers = new Providers([
   new PohProvider(),
   new POAPProvider(),
   new FacebookProvider(),
+  new FacebookFriendsProvider(),
   new BrightIdProvider(),
   new GithubProvider(),
   new ClearTextGithubOrgProvider(),

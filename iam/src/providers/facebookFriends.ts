@@ -4,25 +4,21 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // --- Api Library
 import axios from "axios";
+import { verifyFacebook } from "./facebook";
 import { DateTime } from "luxon";
 
 const APP_ID = process.env.FACEBOOK_APP_ID;
 const APP_SECRET = process.env.FACEBOOK_APP_SECRET;
 
-export type FacebookDebugResponse = {
-  app_id?: string;
-  type?: string;
-  application?: string;
-  data_access_expires_at?: number;
-  expires_at?: number;
-  is_valid?: boolean;
-  scopes?: string[];
-  user_id?: string;
+export type FacebookFriendsResponse = {
+  data?: { name: string; id: string };
+  paging?: { before: string; after: string };
+  summary?: { total_count?: number };
 };
 
 // Facebook Graph API call response
-export type Response = {
-  data?: { data: FacebookDebugResponse };
+type Response = {
+  data?: FacebookFriendsResponse;
   status?: number;
   statusText?: string;
   headers?: {
@@ -31,9 +27,9 @@ export type Response = {
 };
 
 // Query Facebook graph api to verify the access token recieved from the user login is valid
-export class FacebookProvider implements Provider {
+export class FacebookFriendsProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
-  type = "Facebook";
+  type = "FacebookFriends";
   // Options can be set here and/or via the constructor
   _options = {};
 
@@ -45,18 +41,29 @@ export class FacebookProvider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
-      const responseData = await verifyFacebook(payload.proofs.accessToken);
-      const formattedData = responseData?.data.data;
+      // Calling the verifyFacebook here, because we also want to get the user id associated with the
+      // user token that was provided (this we do not get from the friends request).
+      // And in addition we also validated the user token
+      const tokenResponseData = await verifyFacebook(payload.proofs.accessToken);
+      const formattedData = tokenResponseData?.data.data;
 
       const notExpired = DateTime.now() < DateTime.fromSeconds(formattedData.expires_at);
-      const valid: boolean =
+      const isTokenValid: boolean =
         notExpired && formattedData.app_id === APP_ID && formattedData.is_valid && !!formattedData.user_id;
+
+      // Get the FB friends
+      const friendsResponseData = await verifyFacebookFriends(payload.proofs.accessToken);
+      const friendsData = friendsResponseData?.data;
+
+      const friendsCountGte100 = friendsData.summary.total_count >= 100;
+      const valid = isTokenValid && friendsCountGte100;
 
       return {
         valid,
         record: valid
           ? {
               user_id: formattedData.user_id,
+              facebookFriendsGTE100: String(valid),
             }
           : undefined,
       };
@@ -66,12 +73,10 @@ export class FacebookProvider implements Provider {
   }
 }
 
-export async function verifyFacebook(userAccessToken: string): Promise<Response> {
-  // this is an alternative to generating an app auth token through a separate endpoint
-  // see https://developers.facebook.com/docs/facebook-login/guides/access-tokens#generating-an-app-access-token
-  const appAccessToken = `${APP_ID}|${APP_SECRET}`;
-  return axios.get("https://graph.facebook.com/debug_token/", {
+async function verifyFacebookFriends(userAccessToken: string): Promise<Response> {
+  // see https://developers.facebook.com/docs/graph-api/reference/user/friends/
+  return axios.get("https://graph.facebook.com/me/friends/", {
     headers: { "User-Agent": "Facebook Graph Client" },
-    params: { access_token: appAccessToken, input_token: userAccessToken },
+    params: { access_token: userAccessToken },
   });
 }
