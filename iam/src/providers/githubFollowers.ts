@@ -110,7 +110,7 @@ const requestAccessToken = async (code: string): Promise<string> => {
   return tokenResponse.access_token;
 };
 
-const verifyGithubRepoCount = async (code: string): Promise<GithubFindMyUserResponse> => {
+const verifyGithubFollowerCount = async (code: string): Promise<GithubFindMyUserResponse> => {
   // retrieve user's auth bearer token to authenticate client
   const accessToken = await requestAccessToken(code);
 
