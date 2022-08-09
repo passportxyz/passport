@@ -36,7 +36,7 @@ export class TenOrMoreGithubFollowers implements Provider {
       verifiedPayload: GithubFindMyUserResponse = {};
 
     try {
-      verifiedPayload = await verifyGithubRepoCount(payload.proofs.code);
+      verifiedPayload = await verifyGithubFollowerCount(payload.proofs.code);
     } catch (e) {
       return { valid: false };
     } finally {
@@ -72,7 +72,7 @@ export class FiftyOrMoreGithubFollowers implements Provider {
       verifiedPayload: GithubFindMyUserResponse = {};
 
     try {
-      verifiedPayload = await verifyGithubRepoCount(payload.proofs.code);
+      verifiedPayload = await verifyGithubFollowerCount(payload.proofs.code);
     } catch (e) {
       return { valid: false };
     } finally {
