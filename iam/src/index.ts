@@ -36,8 +36,10 @@ import { Providers } from "./utils/providers";
 
 // ---- Identity Providers
 import { SimpleProvider } from "./providers/simple";
+import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
 import { GoogleProvider } from "./providers/google";
 import { TwitterProvider } from "./providers/twitter";
+import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
 import { EnsProvider } from "./providers/ens";
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
@@ -53,11 +55,13 @@ import {
   TwitterFollowerGTE1000Provider,
   TwitterFollowerGT5000Provider,
 } from "./providers/TwitterFollower";
+import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
+  new ClearTextSimpleProvider(),
   new GoogleProvider(),
   new TwitterProvider(),
   new EnsProvider(),
@@ -66,8 +70,10 @@ const providers = new Providers([
   new FacebookProvider(),
   new BrightIdProvider(),
   new GithubProvider(),
+  new ClearTextGithubOrgProvider(),
   new LinkedinProvider(),
   new DiscordProvider(),
+  new ClearTextTwitterProvider(),
   new TwitterTweetGT10Provider(),
   new TwitterFollowerGT100Provider(),
   new TwitterFollowerGT500Provider(),
@@ -196,7 +202,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
                 // construct a set of Proofs to issue a credential against (this record will be used to generate a sha256 hash of any associated PII)
                 const record: ProofRecord = {
                   // type and address will always be known and can be obtained from the resultant credential
-                  type: payload.type,
+                  type: verifiedPayload.record.pii ? `${payload.type}#${verifiedPayload.record.pii}` : payload.type,
                   // version is defined by entry point
                   version: "0.0.0",
                   // extend/overwrite with record returned from the provider
