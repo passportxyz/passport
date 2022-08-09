@@ -6,6 +6,7 @@ import { getResolver } from "key-did-resolver";
 import testnetAliases from "./integration-test-model-aliases.json";
 
 import { CeramicDatabase } from "../src";
+import { createCipheriv } from "crypto";
 
 let testDID: DID;
 let ceramicDatabase: CeramicDatabase;
@@ -336,13 +337,6 @@ describe("when there is an existing passport with stamps for the given did", () 
     await new Promise((r) => setTimeout(r, 2000));
     const passport = await ceramicDatabase.store.get("Passport");
 
-    console.log(
-      "ids",
-      passport.stamps.findIndex((stamp) => {
-        stamp.credential === existingEnsStampTileStreamID;
-      })
-    );
-
     expect(passport.stamps.length).toEqual(2);
     expect(
       passport.stamps.findIndex((stamp) => {
@@ -359,5 +353,132 @@ describe("when there is an existing passport with stamps for the given did", () 
         return stamp.credential === existingGoogleStampTileStreamID;
       })
     ).toEqual(-1);
+  });
+});
+
+describe("when loading a stamp from a passport fails", () => {
+  const existingPassport: Passport = {
+    issuanceDate: new Date("2022-01-01"),
+    expiryDate: new Date("2022-01-02"),
+    stamps: [],
+  };
+
+  // these need to be initialized in beforeEach since `credential` needs `ceramicDatabase` to be defined
+  let ensCredential: VerifiableCredential;
+  let poapCredential: VerifiableCredential;
+  let googleCredential: VerifiableCredential;
+  let ensStampFixture: Stamp;
+  let googleStampFixture: Stamp;
+  let poapStampFixture: Stamp;
+
+  let existingPassportStreamID;
+  let existingEnsStampTileStreamID: string;
+  let existingPoapStampTileStreamID: string;
+
+  beforeEach(async () => {
+    const createVC = function (provider: string): VerifiableCredential {
+      return {
+        "@context": ["https://www.w3.org/2018/credentials/v1"],
+        type: ["VerifiableCredential"],
+        credentialSubject: {
+          id: `${ceramicDatabase.did}`,
+          "@context": [
+            {
+              hash: "https://schema.org/Text",
+              provider: "https://schema.org/Text",
+            },
+          ],
+          hash: "randomValuesHash",
+          provider: provider,
+        },
+        issuer: "did:key:randomValuesIssuer",
+        issuanceDate: "2022-04-15T21:04:01.708Z",
+        proof: {
+          type: "Ed25519Signature2018",
+          proofPurpose: "assertionMethod",
+          verificationMethod: "did:key:randomValues",
+          created: "2022-04-15T21:04:01.708Z",
+          jws: "randomValues",
+        },
+        expirationDate: "2022-05-15T21:04:01.708Z",
+      };
+    };
+
+    ensCredential = createVC("Ens");
+    poapCredential = createVC("POAP");
+    googleCredential = createVC("Google");
+
+    ensStampFixture = {
+      provider: "Ens",
+      credential: ensCredential,
+    };
+
+    googleStampFixture = {
+      provider: "Google",
+      credential: googleCredential,
+    };
+
+    poapStampFixture = {
+      provider: "POAP",
+      credential: poapCredential,
+    };
+
+    // create the tiles for verifiable credentials
+    const ensStampTile = await ceramicDatabase.model.createTile("VerifiableCredential", ensCredential);
+    const poapStampTile = await ceramicDatabase.model.createTile("VerifiableCredential", googleCredential);
+
+    existingEnsStampTileStreamID = ensStampTile.id.toUrl();
+    existingPoapStampTileStreamID = poapStampTile.id.toUrl();
+
+    // add ENS stamp provider and streamId to passport stamps array
+    const existingPassportWithStamps = {
+      issuanceDate: new Date("2022-01-01"),
+      expiryDate: new Date("2022-01-02"),
+      stamps: [
+        {
+          provider: ensStampFixture.provider,
+          credential: ensStampTile.id.toUrl(),
+        },
+        {
+          provider: googleStampFixture.provider,
+          credential: "ceramic://SOME_BAD_ID_FOR_CERAMIC",
+        },
+        {
+          provider: poapStampFixture.provider,
+          credential: poapStampTile.id.toUrl(),
+        },
+      ],
+    };
+
+    const stream = await ceramicDatabase.store.set("Passport", existingPassportWithStamps);
+    existingPassportStreamID = stream.toUrl();
+  });
+
+  afterEach(async () => {
+    await ceramicDatabase.store.remove("Passport");
+  });
+
+  it("ignores the failed stamp and returns null for the stamp that failed", async () => {
+    // The deletion will not be reflected immediatly, we need to wait a bit ...
+    await new Promise((r) => setTimeout(r, 2000));
+    const passport = (await ceramicDatabase.getPassport()) as Passport;
+
+    expect(passport.stamps.length).toEqual(3);
+    expect(
+      passport.stamps.findIndex((stamp) => {
+        return stamp && stamp.credential.credentialSubject.provider === "Ens";
+      })
+    ).toEqual(0);
+    // The Google stamps should not be readable, we expect null on that position
+    expect(
+      passport.stamps.findIndex((stamp) => {
+        return stamp === null;
+      })
+    ).toEqual(1);
+    expect(
+      passport.stamps.findIndex((stamp) => {
+        return stamp && stamp.credential.credentialSubject.provider === "Google";
+      })
+    ).toEqual(2);
   });
 });
