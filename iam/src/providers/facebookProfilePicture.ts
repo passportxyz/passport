@@ -24,7 +24,7 @@ type Response = {
   };
 };
 
-// Query Facebook graph api to verify the access token recieved from the user login is valid
+// Query Facebook graph api to verify the profile picture
 export class FacebookProfilePictureProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
   type = "FacebookProfilePicture";
