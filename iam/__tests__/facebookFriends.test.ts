@@ -35,6 +35,7 @@ describe("Attempt Facebook friends verification", function () {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://graph.facebook.com/debug_token/")
         return Promise.resolve({
+          status: 200,
           data: {
             data: {
               ...validAccessTokenData,
@@ -43,6 +44,7 @@ describe("Attempt Facebook friends verification", function () {
         });
       else if (url === "https://graph.facebook.com/me/friends/")
         return Promise.resolve({
+          status: 200,
           data: {
             ...validFriendList,
           },
@@ -67,7 +69,7 @@ describe("Attempt Facebook friends verification", function () {
     expect(result).toEqual({
       valid: true,
       record: {
-        user_id: "some-user-id",
+        userId: "some-user-id",
         facebookFriendsGTE100: "true",
       },
     });
@@ -77,6 +79,7 @@ describe("Attempt Facebook friends verification", function () {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://graph.facebook.com/debug_token/")
         return Promise.resolve({
+          status: 200,
           data: {
             data: {
               ...validAccessTokenData,
@@ -86,6 +89,7 @@ describe("Attempt Facebook friends verification", function () {
         });
       else if (url === "https://graph.facebook.com/me/friends/")
         return Promise.resolve({
+          status: 200,
           data: {
             ...validFriendList,
           },
@@ -108,6 +112,7 @@ describe("Attempt Facebook friends verification", function () {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://graph.facebook.com/debug_token/")
         return Promise.resolve({
+          status: 200,
           data: {
             data: {
               ...validAccessTokenData,
@@ -117,6 +122,7 @@ describe("Attempt Facebook friends verification", function () {
         });
       else if (url === "https://graph.facebook.com/me/friends/")
         return Promise.resolve({
+          status: 200,
           data: {
             ...validFriendList,
           },
@@ -139,6 +145,7 @@ describe("Attempt Facebook friends verification", function () {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://graph.facebook.com/debug_token/")
         return Promise.resolve({
+          status: 200,
           data: {
             data: {
               ...validAccessTokenData,
@@ -148,6 +155,7 @@ describe("Attempt Facebook friends verification", function () {
         });
       else if (url === "https://graph.facebook.com/me/friends/")
         return Promise.resolve({
+          status: 200,
           data: {
             ...validFriendList,
           },
@@ -171,6 +179,7 @@ describe("Attempt Facebook friends verification", function () {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://graph.facebook.com/debug_token/")
         return Promise.resolve({
+          status: 200,
           data: {
             data: {
               ...validAccessTokenData,
@@ -180,6 +189,7 @@ describe("Attempt Facebook friends verification", function () {
         });
       else if (url === "https://graph.facebook.com/me/friends/")
         return Promise.resolve({
+          status: 200,
           data: {
             ...validFriendList,
           },
@@ -204,6 +214,7 @@ describe("Attempt Facebook friends verification", function () {
         return Promise.resolve({ status: 400, data: { error: { message: "some error" } } });
       else if (url === "https://graph.facebook.com/me/friends/")
         return Promise.resolve({
+          status: 200,
           data: {
             ...validFriendList,
           },
@@ -225,6 +236,7 @@ describe("Attempt Facebook friends verification", function () {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://graph.facebook.com/debug_token/")
         return Promise.resolve({
+          status: 200,
           data: {
             data: {
               ...validAccessTokenData,
@@ -250,6 +262,7 @@ describe("Attempt Facebook friends verification", function () {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://graph.facebook.com/debug_token/")
         return Promise.resolve({
+          status: 200,
           data: {
             data: {
               ...validAccessTokenData,
@@ -258,6 +271,7 @@ describe("Attempt Facebook friends verification", function () {
         });
       else if (url === "https://graph.facebook.com/me/friends/")
         return Promise.resolve({
+          status: 200,
           data: {
             ...validFriendList,
             summary: { total_count: 99 },
@@ -281,6 +295,7 @@ describe("Attempt Facebook friends verification", function () {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://graph.facebook.com/debug_token/")
         return Promise.resolve({
+          status: 200,
           data: {
             data: {
               ...validAccessTokenData,
@@ -289,6 +304,7 @@ describe("Attempt Facebook friends verification", function () {
         });
       else if (url === "https://graph.facebook.com/me/friends/")
         return Promise.resolve({
+          status: 200,
           data: {
             ...validFriendList,
             summary: undefined,

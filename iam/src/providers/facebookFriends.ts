@@ -11,7 +11,7 @@ const APP_ID = process.env.FACEBOOK_APP_ID;
 const APP_SECRET = process.env.FACEBOOK_APP_SECRET;
 
 export type FacebookFriendsResponse = {
-  data?: { name: string; id: string };
+  data?: [];
   paging?: { before: string; after: string };
   summary?: { total_count?: number };
 };
@@ -45,6 +45,12 @@ export class FacebookFriendsProvider implements Provider {
       // user token that was provided (this we do not get from the friends request).
       // And in addition we also validated the user token
       const tokenResponseData = await verifyFacebook(payload.proofs.accessToken);
+
+      if (tokenResponseData.status != 200) {
+        // The exception handler will handle this
+        throw tokenResponseData.statusText;
+      }
+
       const formattedData = tokenResponseData?.data.data;
 
       const notExpired = DateTime.now() < DateTime.fromSeconds(formattedData.expires_at);
@@ -53,6 +59,12 @@ export class FacebookFriendsProvider implements Provider {
 
       // Get the FB friends
       const friendsResponseData = await verifyFacebookFriends(payload.proofs.accessToken);
+
+      if (friendsResponseData.status != 200) {
+        // The exception handler will handle this
+        throw friendsResponseData.statusText;
+      }
+
       const friendsData = friendsResponseData?.data;
 
       const friendsCountGte100 = friendsData.summary.total_count >= 100;
@@ -62,7 +74,7 @@ export class FacebookFriendsProvider implements Provider {
         valid,
         record: valid
           ? {
-              user_id: formattedData.user_id,
+              userId: formattedData.user_id,
               facebookFriendsGTE100: String(valid),
             }
           : undefined,
