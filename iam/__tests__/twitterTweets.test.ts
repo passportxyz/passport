@@ -3,17 +3,22 @@ import { TwitterTweetGT10Provider } from "../src/providers/twitterTweets";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 import { auth } from "twitter-api-sdk";
-import { deleteClient, getClient, getTweetCount, TwitterTweetResponse } from "../src/procedures/twitterOauth";
+import {
+  deleteClient,
+  getClient,
+  getTwitterPublicMetrics,
+  TwitterPublicMetricsResponse,
+} from "../src/procedures/twitterOauth";
 
 jest.mock("../src/procedures/twitterOauth", () => ({
   getClient: jest.fn(),
   deleteClient: jest.fn(),
-  getTweetCount: jest.fn(),
+  getTwitterPublicMetrics: jest.fn(),
 }));
 
 const MOCK_TWITTER_OAUTH_CLIENT = {} as auth.OAuth2User;
 
-const MOCK_TWITTER_USER: TwitterTweetResponse = {
+const MOCK_TWITTER_USER: TwitterPublicMetricsResponse = {
   username: "DpoppDev",
   tweetCount: 200,
 };
@@ -28,7 +33,7 @@ beforeEach(() => {
 
 describe("Attempt verification", function () {
   it("handles valid verification attempt", async () => {
-    (getTweetCount as jest.Mock).mockResolvedValue(MOCK_TWITTER_USER);
+    (getTwitterPublicMetrics as jest.Mock).mockResolvedValue(MOCK_TWITTER_USER);
 
     const twitter = new TwitterTweetGT10Provider();
     const verifiedPayload = await twitter.verify({
@@ -39,7 +44,7 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     expect(getClient).toBeCalledWith(sessionKey);
-    expect(getTweetCount).toBeCalledWith(MOCK_TWITTER_OAUTH_CLIENT, code);
+    expect(getTwitterPublicMetrics).toBeCalledWith(MOCK_TWITTER_OAUTH_CLIENT, code);
     expect(deleteClient).toBeCalledWith(sessionKey);
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -52,7 +57,7 @@ describe("Attempt verification", function () {
 
   it("should return invalid payload when unable to retrieve twitter oauth client", async () => {
     (getClient as jest.Mock).mockReturnValue(undefined);
-    (getTweetCount as jest.Mock).mockImplementationOnce(async (client) => {
+    (getTwitterPublicMetrics as jest.Mock).mockImplementationOnce(async (client) => {
       return client ? MOCK_TWITTER_USER : {};
     });
 
@@ -69,7 +74,7 @@ describe("Attempt verification", function () {
   });
 
   it("should return invalid payload when there is no username in requestFindMyUser response", async () => {
-    (getTweetCount as jest.Mock).mockResolvedValue({ username: undefined });
+    (getTwitterPublicMetrics as jest.Mock).mockResolvedValue({ username: undefined });
 
     const twitter = new TwitterTweetGT10Provider();
 
@@ -84,7 +89,7 @@ describe("Attempt verification", function () {
   });
 
   it("should return invalid payload when requestFindMyUser throws", async () => {
-    (getTweetCount as jest.Mock).mockRejectedValue("unauthorized");
+    (getTwitterPublicMetrics as jest.Mock).mockRejectedValue("unauthorized");
 
     const twitter = new TwitterTweetGT10Provider();
 
@@ -98,7 +103,7 @@ describe("Attempt verification", function () {
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
   it("should return invalid payload when tweet count is 5", async () => {
-    (getTweetCount as jest.Mock).mockResolvedValue({ tweetCount: 5 });
+    (getTwitterPublicMetrics as jest.Mock).mockResolvedValue({ tweetCount: 5 });
 
     const twitter = new TwitterTweetGT10Provider();
 
@@ -112,7 +117,7 @@ describe("Attempt verification", function () {
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
   it("should return valid payload when tweet count is 20", async () => {
-    (getTweetCount as jest.Mock).mockResolvedValue({ tweetCount: 20 });
+    (getTwitterPublicMetrics as jest.Mock).mockResolvedValue({ tweetCount: 20 });
 
     const twitter = new TwitterTweetGT10Provider();
 

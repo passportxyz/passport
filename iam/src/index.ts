@@ -52,7 +52,8 @@ import {
   TwitterFollowerGT500Provider,
   TwitterFollowerGTE1000Provider,
   TwitterFollowerGT5000Provider,
-} from "./providers/TwitterFollower";
+} from "./providers/twitterFollower";
+import { TwitterTweetLikesGTE100Provider, TwitterTweetRetweetsGTE25Provider } from "./providers/twitterTweetMetrics";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
@@ -73,6 +74,8 @@ const providers = new Providers([
   new TwitterFollowerGT500Provider(),
   new TwitterFollowerGTE1000Provider(),
   new TwitterFollowerGT5000Provider(),
+  new TwitterTweetLikesGTE100Provider(),
+  new TwitterTweetRetweetsGTE25Provider(),
 ]);
 
 // create the app and run on port

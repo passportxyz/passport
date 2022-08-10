@@ -2,13 +2,18 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
-import { deleteClient, getClient, getFollowerCount, TwitterFollowerResponse } from "../procedures/twitterOauth";
+import {
+  deleteClient,
+  getClient,
+  getTwitterPublicMetrics,
+  TwitterPublicMetricsResponse,
+} from "../procedures/twitterOauth";
 import type { Provider, ProviderOptions } from "../types";
 
 // Perform verification on twitter access token and retrieve follower count
-async function verifyTwitterFollowers(sessionKey: string, code: string): Promise<TwitterFollowerResponse> {
+async function verifyTwitterFollowers(sessionKey: string, code: string): Promise<TwitterPublicMetricsResponse> {
   const client = getClient(sessionKey);
-  const data = await getFollowerCount(client, code);
+  const data = await getTwitterPublicMetrics(client, code);
   deleteClient(sessionKey);
   return data;
 }
@@ -28,7 +33,7 @@ export class TwitterFollowerGT100Provider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false;
-    let data: TwitterFollowerResponse = {};
+    let data: TwitterPublicMetricsResponse = {};
     try {
       data = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
     } catch (e) {
@@ -62,7 +67,7 @@ export class TwitterFollowerGT500Provider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false;
-    let data: TwitterFollowerResponse = {};
+    let data: TwitterPublicMetricsResponse = {};
 
     try {
       data = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
@@ -97,7 +102,7 @@ export class TwitterFollowerGTE1000Provider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false;
-    let data: TwitterFollowerResponse = {};
+    let data: TwitterPublicMetricsResponse = {};
 
     try {
       data = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
@@ -132,7 +137,7 @@ export class TwitterFollowerGT5000Provider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false;
-    let data: TwitterFollowerResponse = {};
+    let data: TwitterPublicMetricsResponse = {};
 
     try {
       data = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);

@@ -73,12 +73,16 @@ export const requestFindMyUser = async (client: auth.OAuth2User, code: string): 
   return { ...myUser.data };
 };
 
-export type TwitterFollowerResponse = {
+export type TwitterPublicMetricsResponse = {
   username?: string;
   followerCount?: number;
+  tweetCount?: number;
 };
 
-export const getFollowerCount = async (client: auth.OAuth2User, code: string): Promise<TwitterFollowerResponse> => {
+export const getTwitterPublicMetrics = async (
+  client: auth.OAuth2User,
+  code: string
+): Promise<TwitterPublicMetricsResponse> => {
   // retrieve user's auth bearer token to authenticate client
   await client.requestAccessToken(code);
   const twitterClient = new Client(client);
@@ -90,25 +94,6 @@ export const getFollowerCount = async (client: auth.OAuth2User, code: string): P
   return {
     username: myUser.data.username,
     followerCount: myUser.data.public_metrics.followers_count,
-  };
-};
-
-export type TwitterTweetResponse = {
-  username?: string;
-  tweetCount?: number;
-};
-
-export const getTweetCount = async (client: auth.OAuth2User, code: string): Promise<TwitterTweetResponse> => {
-  // retrieve user's auth bearer token to authenticate client
-  await client.requestAccessToken(code);
-  const twitterClient = new Client(client);
-
-  // public metrics returns more data on user
-  const myUser = await twitterClient.users.findMyUser({
-    "user.fields": ["public_metrics"],
-  });
-  return {
-    username: myUser.data.username,
     tweetCount: myUser.data.public_metrics.tweet_count,
   };
 };
