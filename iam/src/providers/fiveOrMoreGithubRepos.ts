@@ -46,8 +46,7 @@ export class FiveOrMoreGithubRepos implements Provider {
     return {
       valid: valid,
       record: {
-        id: verifiedPayload.id,
-        repoCount: `${verifiedPayload.public_repos}`,
+        id: verifiedPayload.id + "gte5GithubRepos",
       },
     };
   }
