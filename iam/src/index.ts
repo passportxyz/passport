@@ -49,6 +49,7 @@ import { GithubProvider } from "./providers/github";
 import { LinkedinProvider } from "./providers/linkedin";
 import { DiscordProvider } from "./providers/discord";
 import { FiveOrMoreGithubRepos } from "./providers/fiveOrMoreGithubRepos";
+import { TenOrMoreGithubFollowers, FiftyOrMoreGithubFollowers } from "./providers/githubFollowers";
 import { TwitterTweetGT10Provider } from "./providers/twitterTweets";
 import {
   TwitterFollowerGT100Provider,
@@ -75,6 +76,8 @@ const providers = new Providers([
   new LinkedinProvider(),
   new DiscordProvider(),
   new FiveOrMoreGithubRepos(),
+  new TenOrMoreGithubFollowers(),
+  new FiftyOrMoreGithubFollowers(),
   new ClearTextTwitterProvider(),
   new TwitterTweetGT10Provider(),
   new TwitterFollowerGT100Provider(),
