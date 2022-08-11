@@ -22,7 +22,13 @@ import { VerifyModal } from "../VerifyModal";
 import { useDisclosure, useToast } from "@chakra-ui/react";
 
 // ---- Types
-import { PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
+import {
+  ProofRecord,
+  PROVIDER_ID,
+  Stamp,
+  VerifiableCredential,
+  VerifiableCredentialRecord,
+} from "@gitcoin/passport-types";
 import { ProviderSpec } from "../../config/providers";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
@@ -62,11 +68,11 @@ export default function BrightIdCard(): JSX.Element {
       },
       signer as { signMessage: (message: string) => Promise<string> }
     )
-      .then((verified: { record: any; credential: any }): void => {
-        SetBrightIdVerification(verified.record);
+      .then((verified: VerifiableCredentialRecord): void => {
+        SetBrightIdVerification(verified?.record as BrightIdProviderRecord);
         SetCredentialResponse({
           provider: "Brightid",
-          credential: verified.credential,
+          credential: verified.credential as VerifiableCredential,
         });
       })
       .catch((e: any): void => {

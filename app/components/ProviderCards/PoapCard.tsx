@@ -19,7 +19,7 @@ import { Card } from "../Card";
 import { VerifyModal } from "../VerifyModal";
 import { DoneToastContent } from "../DoneToastContent";
 
-import { PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
+import { PROVIDER_ID, Stamp, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
@@ -51,11 +51,11 @@ export default function PoapCard(): JSX.Element {
       },
       signer as { signMessage: (message: string) => Promise<string> }
     )
-      .then((verified: { error?: string; record: any; credential: any }): void => {
+      .then((verified: VerifiableCredentialRecord): void => {
         SetPoapVerified(!verified.error);
         SetCredentialResponse({
-          provider: "POAP",
-          credential: verified.credential,
+          provider: providerId,
+          credential: verified.credential as VerifiableCredential,
         });
       })
       .catch((e: any): void => {

@@ -20,7 +20,7 @@ import { Card } from "../Card";
 import { DoneToastContent } from "../DoneToastContent";
 import { useToast } from "@chakra-ui/react";
 
-import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { PROVIDER_ID, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../../config/providers";
 
 // import from .env
@@ -53,12 +53,12 @@ export default function GoogleCard(): JSX.Element {
       },
       signer as { signMessage: (message: string) => Promise<string> }
     )
-      .then(async (verified): Promise<void> => {
+      .then(async (verified: VerifiableCredentialRecord): Promise<void> => {
         await handleAddStamp({
-          provider: "Google",
-          credential: verified.credential,
+          provider: providerId,
+          credential: verified.credential as VerifiableCredential,
         });
-        datadogLogs.logger.info("Successfully saved Stamp", { provider: "Google" });
+        datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId });
         // Custom Success Toast
         toast({
           duration: 5000,

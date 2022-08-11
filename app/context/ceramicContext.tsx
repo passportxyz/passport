@@ -74,6 +74,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: STAMP_PROVIDERS.Discord,
     stamp: undefined,
   },
+  SecondSigner: {
+    providerSpec: STAMP_PROVIDERS.SecondSigner,
+    stamp: undefined,
+  },
 };
 
 const startingState: CeramicContextState = {

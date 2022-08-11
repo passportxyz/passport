@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Second signer</title>
+  <meta name="description" content="Second signer">
+</head>
+
+<body>
+  Waiting...
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.6.9/ethers.umd.min.js"
+  integrity="sha512-Veaz5IU2iRpa0BBrJlJeRgfJ7OAHWtVJZTXvgdH7s3ffsLUChllMCqC0Bb+eeRxGlrZ06iYIE/R3KsciCrgv3A=="
+  crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+  // exit if we see this cmd message
+  const exit = {
+    cmd: 'sign_message_error'
+  }
+  // close on uncaught error
+  window.onunhandledrejection = () => {
+    // send the signed message back to sender
+    window.opener.postMessage(exit, '*');
+  }
+  try {
+    // post to parent to signify ready (and to receive challenge string)
+    setTimeout(() => {
+      window.opener.postMessage('ready', '*');
+    });
+
+    // Only fires off the process if a signature is request on opening
+    window.addEventListener("message", async (event) => {
+      if (event.data.cmd === "sign_message") {        
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("wallet_requestPermissions", [{
+          eth_accounts: {},
+        }]);
+        await provider.send("eth_requestAccounts", []).then(async (accounts) => {
+          const account = accounts[0];
+          const signer = provider.getSigner();
+
+          // get a signature
+          const signature = (await signer.signMessage(event.data.msg)).toString();
+
+          // send the signed message back to sender
+          window.opener.postMessage({
+            cmd: 'sign_message',
+            msg: event.data.msg,
+            sig: signature,
+            addr: account
+          }, '*');
+
+          return {
+            account,
+            signer
+          }
+        });
+      }
+    });
+    // post to parent
+    setTimeout(() => {
+      window.opener.postMessage(exit, '*');
+    }, 60000);
+  } catch (e) {
+    // send the signed message back to sender
+    window.opener.postMessage(exit, '*');
+  }
+</script>
+
+</html>

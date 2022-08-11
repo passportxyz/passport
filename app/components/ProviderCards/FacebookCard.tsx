@@ -17,7 +17,7 @@ import { Card } from "../Card";
 import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../DoneToastContent";
 
-import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { PROVIDER_ID, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../../config/providers";
 
 export interface ReactFacebookLoginInfo {
@@ -78,10 +78,10 @@ export default function FacebookCard(): JSX.Element {
       },
       signer as { signMessage: (message: string) => Promise<string> }
     )
-      .then(async (verified): Promise<void> => {
+      .then(async (verified: VerifiableCredentialRecord): Promise<void> => {
         await handleAddStamp({
-          provider: "Facebook",
-          credential: verified.credential,
+          provider: providerId,
+          credential: verified.credential as VerifiableCredential,
         });
         datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId });
         // Custom Success Toast

@@ -218,7 +218,7 @@ export const fetchVerifiableCredential = async (
   payload.proofs = { ...payload.proofs, ...{ signature: signature } };
 
   // fetch a credential from the API that fits the version, payload and passes the signature message challenge
-  const response: { data: CredentialResponseBody } = await axios.post(
+  const response: { data: CredentialResponseBody | CredentialResponseBody[] } = await axios.post(
     `${iamUrl.replace(/\/*?$/, "")}/v${payload.version}/verify`,
     {
       payload,
@@ -230,7 +230,9 @@ export const fetchVerifiableCredential = async (
   return {
     signature,
     challenge,
-    record: response.data.record,
-    credential: response.data.credential,
+    error: Array.isArray(response.data) ? null : response.data.error,
+    record: Array.isArray(response.data) ? null : response.data.record,
+    credential: Array.isArray(response.data) ? null : response.data.credential,
+    credentials: Array.isArray(response.data) ? response.data : null,
   } as VerifiableCredentialRecord;
 };
