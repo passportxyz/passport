@@ -67,6 +67,10 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: STAMP_PROVIDERS.Discord,
         stamp: undefined,
       },
+      SecondSigner: {
+        providerSpec: STAMP_PROVIDERS.SecondSigner,
+        stamp: undefined,
+      },
     },
     handleAddStamp: jest.fn(),
     handleCreatePassport: jest.fn(),

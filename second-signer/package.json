@@ -1,0 +1,11 @@
+{
+  "name": "@gitcoin/passport-second-signer",
+  "version": "1.0.0",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "scripts": {
+    "start": "npx http-server ./public -a localhost -p 8000"
+  }
+}

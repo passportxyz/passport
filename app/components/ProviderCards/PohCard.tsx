@@ -12,7 +12,7 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commo
 import { CeramicContext } from "../../context/ceramicContext";
 import { UserContext } from "../../context/userContext";
 
-import { PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
+import { PROVIDER_ID, Stamp, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
@@ -51,11 +51,11 @@ export default function PohCard(): JSX.Element {
       },
       signer as { signMessage: (message: string) => Promise<string> }
     )
-      .then((verified: { error?: string; record: any; credential: any }): void => {
+      .then((verified: VerifiableCredentialRecord): void => {
         SetPohVerified(!verified.error);
         SetCredentialResponse({
           provider: "Poh",
-          credential: verified.credential,
+          credential: verified.credential as VerifiableCredential,
         });
       })
       .catch((e: any): void => {

@@ -4,7 +4,7 @@ import { debounce } from "ts-debounce";
 import { BroadcastChannel } from "broadcast-channel";
 
 // --- Identity tools
-import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { PROVIDER_ID, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Components
@@ -97,12 +97,12 @@ export default function GithubCard(): JSX.Element {
         },
         signer as { signMessage: (message: string) => Promise<string> }
       )
-        .then(async (verified: { credential: any }): Promise<void> => {
+        .then(async (verified: VerifiableCredentialRecord): Promise<void> => {
           await handleAddStamp({
             provider: providerId,
-            credential: verified.credential,
+            credential: verified.credential as VerifiableCredential,
           });
-          datadogLogs.logger.info("Successfully saved Stamp", { provider: "Github" });
+          datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId });
         })
         .catch((e) => {
           datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });

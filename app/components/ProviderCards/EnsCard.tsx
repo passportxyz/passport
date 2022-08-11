@@ -18,7 +18,7 @@ import { VerifyModal } from "../VerifyModal";
 import { DoneToastContent } from "../DoneToastContent";
 import { useDisclosure, useToast } from "@chakra-ui/react";
 
-import { PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
+import { PROVIDER_ID, Stamp, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../../config/providers";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
@@ -52,11 +52,11 @@ export default function EnsCard(): JSX.Element {
       },
       signer as { signMessage: (message: string) => Promise<string> }
     )
-      .then((verified: { record: any; credential: any }): void => {
+      .then(async (verified: VerifiableCredentialRecord): Promise<void> => {
         SetEns(verified.record?.ens);
         SetCredentialResponse({
-          provider: "Ens",
-          credential: verified.credential,
+          provider: providerId,
+          credential: verified.credential as VerifiableCredential,
         });
       })
       .catch((e: any): void => {

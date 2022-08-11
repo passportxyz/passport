@@ -3,7 +3,7 @@ import type { Provider, ProviderOptions } from "../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Ethers library
-import { Contract } from "ethers";
+import { Contract, utils } from "ethers";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
 // Proof of humanity contract address
@@ -39,7 +39,9 @@ export class PohProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    const { address } = payload;
+    let valid = false;
+    let { address } = payload;
+    const { proofs } = payload;
     try {
       // define a provider using the rpc url
       const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(RPC_URL);
@@ -47,9 +49,19 @@ export class PohProvider implements Provider {
       // load Proof of humanity contract
       const readContract = new Contract(POH_CONTRACT_ADDRESS, POH_ABI, provider);
 
-      // Checks to see if the address is registered with proof of humanity
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-      const valid: boolean = await readContract.isRegistered(address);
+      // check if we should using a second-sig wallet
+      try {
+        // if proof for second address is provided, use that instead...
+        if (proofs && proofs.scndAddress && proofs.scndMessage && proofs.scndSignature) {
+          // pull the address and checksum so that its stored in a predictable format
+          address = utils.getAddress(utils.verifyMessage(proofs.scndMessage, proofs.scndSignature));
+        }
+        // Checks to see if the address is registered with proof of humanity
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+        valid = await readContract.isRegistered(address);
+      } catch (e) {
+        valid = false;
+      }
 
       return {
         valid,

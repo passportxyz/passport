@@ -103,9 +103,11 @@ export type IssuedCredential = {
 // Issued Credential and support matterial returned when fetching the VerifiableCredential
 export type VerifiableCredentialRecord = {
   signature: string;
-  record: ProofRecord;
   challenge: VerifiableCredential;
-  credential: VerifiableCredential;
+  error?: string;
+  record?: ProofRecord;
+  credential?: VerifiableCredential;
+  credentials?: CredentialResponseBody[];
 };
 
 export type Stamp = {
@@ -126,6 +128,7 @@ export type Passport = {
 export type DID = string;
 
 export type PROVIDER_ID =
+  | "SecondSigner"
   | "Google"
   | "Ens"
   | "Poh"
