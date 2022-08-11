@@ -30,20 +30,21 @@ export class ForkedGithubRepoProvider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false,
+      accessToken: string,
       verifiedUserPayload: GithubFindMyUserResponse = {},
       verifiedUserRepoPayload: GithubUserRepoResponseData = {};
 
     try {
-      verifiedUserPayload = await verifyGithub(payload.proofs.code);
-      verifiedUserRepoPayload = await verifyUserGithubRepo(verifiedUserPayload, payload.proofs.code);
+      accessToken = await requestAccessToken(payload.proofs.code);
+      verifiedUserPayload = await verifyGithub(accessToken);
+      verifiedUserRepoPayload = await verifyUserGithubRepo(verifiedUserPayload, accessToken);
     } catch (e) {
       return { valid: false };
     } finally {
       valid =
         verifiedUserPayload &&
-        verifiedUserPayload.id &&
         verifiedUserRepoPayload &&
-        verifiedUserRepoPayload.owner.id &&
+        verifiedUserPayload.id &&
         verifiedUserRepoPayload.forks_count >= 1
           ? true
           : false;
@@ -70,49 +71,43 @@ const requestAccessToken = async (code: string): Promise<string> => {
       headers: { Accept: "application/json" },
     }
   );
-
   if (tokenRequest.status != 200) {
     throw `Post for request returned status code ${tokenRequest.status} instead of the expected 200`;
   }
-
   const tokenResponse = tokenRequest.data as GithubTokenResponse;
-
   return tokenResponse.access_token;
 };
 
-const verifyGithub = async (code: string): Promise<GithubFindMyUserResponse> => {
-  // retrieve user's auth bearer token to authenticate client
-  const accessToken = await requestAccessToken(code);
-
-  // Now that we have an access token fetch the user details
-  const userRequest = await axios.get("https://api.github.com/user", {
-    headers: { Authorization: `token ${accessToken}` },
-  });
-
-  if (userRequest.status != 200) {
-    throw `User GET request returned status code ${userRequest.status} instead of the expected 200`;
+const verifyGithub = async (ghAccessToken: string): Promise<GithubFindMyUserResponse> => {
+  let userRequest;
+  try {
+    // Now that we have an access token fetch the user details
+    userRequest = await axios.get("https://api.github.com/user", {
+      headers: { Authorization: `token ${ghAccessToken}` },
+    });
+    return userRequest.data as GithubFindMyUserResponse;
+  } catch (e) {
+    if (userRequest.status != 200) {
+      throw `User GET request returned status code ${userRequest.status} instead of the expected 200`;
+    }
   }
-
-  return userRequest.data as GithubFindMyUserResponse;
 };
 
 const verifyUserGithubRepo = async (
   userData: GithubFindMyUserResponse,
-  code: string
+  ghAccessToken: string
 ): Promise<GithubUserRepoResponseData> => {
-  // retrieve user's auth bearer token to authenticate client
-  const accessToken = await requestAccessToken(code);
+  let repoRequest: GithubRepoRequestResponse;
 
-  // Once access token is received, fetch user repo data
-  const repoRequest: GithubRepoRequestResponse = await axios.get(
-    `https://api.github.com/users/${userData.login}/repos`,
-    {
-      headers: { Authorization: `token ${accessToken}` },
+  try {
+    // fetch user repo data
+    repoRequest = await axios.get(`https://api.github.com/users/${userData.login}/repos`, {
+      headers: { Authorization: `token ${ghAccessToken}` },
+    });
+  } catch (e) {
+    if (repoRequest.status != 200) {
+      throw `Repo GET request returned status code ${repoRequest.status} instead of the expected 200`;
     }
-  );
-
-  if (repoRequest.status != 200) {
-    throw `Repo GET request returned status code ${repoRequest.status} instead of the expected 200`;
   }
 
   // Returns an object containing first instance of a user's repo if it has been forked,

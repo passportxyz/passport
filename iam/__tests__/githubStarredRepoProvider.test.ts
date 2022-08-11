@@ -33,6 +33,31 @@ const validGithubUserRepoResponse = {
   status: 200,
 };
 
+const validGithubUserRepoResponse1Star = {
+  data: [
+    {
+      owner: {
+        id: "18723656",
+        type: "User",
+      },
+      stargazers_count: 1,
+      stargazers_url: "https://api.github.com/repos/a-cool-user/a-cool-repo/stargazers",
+    },
+  ],
+  status: 200,
+};
+
+const validGithubUserRepoStargazersResponse = {
+  data: [
+    {
+      login: "another-cool-user",
+      id: 123456789,
+      type: "User",
+    },
+  ],
+  status: 200,
+};
+
 const validCodeResponse = {
   data: {
     access_token: "762165719dhiqudgasyuqwt6235",
@@ -52,7 +77,7 @@ beforeEach(() => {
     if (url.endsWith('/user')) {
       return validGithubUserResponse;
     }
-    if (url.endsWith('/repos')) {
+    if (url.endsWith('/repos?per_page=100')) {
       return validGithubUserRepoResponse;
     }
   });
@@ -84,9 +109,62 @@ describe("Attempt verification", function () {
     });
 
     // Check the request to get the repo
-    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos`, {
+    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`, {
       headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
     });
+
+    expect(starredGithubRepoProviderPayload).toEqual({
+      valid: true,
+      record: {
+        id: `${validGithubUserResponse.data.id}gte1Star`,
+      },
+    });
+  });
+
+  it("handles valid verification attempt for user with stars count == 1, that isn't the repo owner", async () => {
+    mockedAxios.get.mockImplementation(async (url) => {
+      if (url.endsWith("/user")) {
+        return validGithubUserResponse;
+      }
+      if (url.endsWith("/repos?per_page=100")) {
+        return validGithubUserRepoResponse1Star;
+      }
+      if (url.endsWith("/stargazers")) {
+        return validGithubUserRepoStargazersResponse;
+      }
+    });
+
+    const clientId = process.env.GITHUB_CLIENT_ID;
+    const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+    const starredGithubRepoProvider = new StarredGithubRepoProvider();
+
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
+      proofs: {
+        code,
+      },
+    } as unknown as RequestPayload);
+
+    // Check the request to get the token for the user
+    expect(mockedAxios.post).toBeCalledWith(
+      `https://github.com/login/oauth/access_token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}`,
+      {},
+      {
+        headers: { Accept: "application/json" },
+      }
+    );
+
+    // Check the request to get the user
+    expect(mockedAxios.get).toBeCalledWith("https://api.github.com/user", {
+      headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
+    });
+
+    // Check the request to get the repo
+    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`, {
+      headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
+    });
+
+    // Check the request to stargazers url
+    expect(mockedAxios.get).toBeCalledWith("https://api.github.com/repos/a-cool-user/a-cool-repo/stargazers");
 
     expect(starredGithubRepoProviderPayload).toEqual({
       valid: true,
@@ -216,7 +294,7 @@ describe("Attempt verification", function () {
 
   it("should return invalid payload when a bad status code is returned by github repo request", async () => {
     mockedAxios.get.mockImplementation(async (url, config) => {
-      if (url.endsWith('/pppp')) {
+      if (url.endsWith('/repos?per_page=100')) {
         return {
           status: 500,
         };
