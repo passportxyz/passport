@@ -54,7 +54,7 @@ export class PohProvider implements Provider {
         // pull the address and checksum so that its stored in a predictable format
         address = utils.getAddress(utils.verifyMessage(proofs.scndMessage, proofs.scndSignature));
       }
-      
+
       // Checks to see if the address is registered with proof of humanity
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
       valid = await readContract.isRegistered(address);
