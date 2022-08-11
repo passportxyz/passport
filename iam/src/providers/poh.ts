@@ -49,19 +49,15 @@ export class PohProvider implements Provider {
       // load Proof of humanity contract
       const readContract = new Contract(POH_CONTRACT_ADDRESS, POH_ABI, provider);
 
-      // check if we should using a second-sig wallet
-      try {
-        // if proof for second address is provided, use that instead...
-        if (proofs && proofs.scndAddress && proofs.scndMessage && proofs.scndSignature) {
-          // pull the address and checksum so that its stored in a predictable format
-          address = utils.getAddress(utils.verifyMessage(proofs.scndMessage, proofs.scndSignature));
-        }
-        // Checks to see if the address is registered with proof of humanity
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-        valid = await readContract.isRegistered(address);
-      } catch (e) {
-        valid = false;
+      // if proof for second address is provided, use that instead...
+      if (proofs && proofs.scndAddress && proofs.scndMessage && proofs.scndSignature) {
+        // pull the address and checksum so that its stored in a predictable format
+        address = utils.getAddress(utils.verifyMessage(proofs.scndMessage, proofs.scndSignature));
       }
+      
+      // Checks to see if the address is registered with proof of humanity
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+      valid = await readContract.isRegistered(address);
 
       return {
         valid,
