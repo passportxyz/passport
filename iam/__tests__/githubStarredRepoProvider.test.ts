@@ -20,6 +20,15 @@ const validGithubUserResponse = {
   status: 200,
 };
 
+const badUserRepoResponse = {
+  data: {
+    id: "18723656",
+    login: "a-col-user",
+    type: "User",
+  },
+  status: 200,
+}
+
 const validGithubUserRepoResponse = {
   data: [
     {
@@ -58,12 +67,42 @@ const validGithubUserRepoStargazersResponse = {
   status: 200,
 };
 
+const invalidUserRepoResponse = {
+  data:
+    {
+      messgage: "Error"
+    },
+  status: 500,
+};
+
+const invalidResponseSameUserStarred = {
+  data: [
+    {
+      owner: {
+        id: "18723656",
+        login: "a-cool-user",
+        type: "User",
+      },
+      stargazers_count: 1,
+      stargazers_url: "https://api.github.com/repos/a-cool-user/coolest-repo/stargazers"
+    },
+  ],
+  status: 200
+};
+
 const validCodeResponse = {
   data: {
     access_token: "762165719dhiqudgasyuqwt6235",
   },
   status: 200,
 };
+
+const invalidCodeResponse = {
+  data: {
+    message: "Error",
+  },
+  status: 500,
+}
 
 const code = "ABC123_ACCESSCODE";
 
@@ -175,9 +214,9 @@ describe("Attempt verification", function () {
   });
 
   it("should return invalid payload when unable to retrieve auth token", async () => {
-    mockedAxios.post.mockImplementation(async (url, data, config) => {
+    mockedAxios.post.mockImplementationOnce(async (url, data, config) => {
       return {
-        status: 500,
+        status: 200,
       };
     });
 
@@ -245,20 +284,7 @@ describe("Attempt verification", function () {
 
   it("should return invalid payload when a repo has only one star, and it came from the repo owner", async () => {
     mockedAxios.get.mockImplementation(async (url, config) => {
-      return {
-        data: [
-          {
-            owner: {
-              id: "18723656",
-              login: "a-cool-user",
-              type: "User",
-            },
-            stargazers_count: 1,
-            stargazers_url: "https://api.github.com/repos/a-cool-user/coolest-repo/stargazers"
-          },
-        ],
-        status: 200
-      }
+      return invalidResponseSameUserStarred;
     });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
@@ -275,9 +301,7 @@ describe("Attempt verification", function () {
   it("should return invalid payload when a bad status code is returned by github user request", async () => {
     mockedAxios.get.mockImplementation(async (url, config) => {
       if (url.endsWith('/user')) {
-        return {
-          status: 500,
-        };
+        return invalidUserRepoResponse;
       }
     });
 
@@ -294,13 +318,19 @@ describe("Attempt verification", function () {
 
   it("should return invalid payload when a bad status code is returned by github repo request", async () => {
     mockedAxios.get.mockImplementation(async (url, config) => {
+      if (url.endsWith('/user')) {
+        return badUserRepoResponse;
+      }
       if (url.endsWith('/repos?per_page=100')) {
         return {
           status: 500,
         };
+        // return invalidUserRepoResponse;
       }
     });
 
+    const clientId = process.env.GITHUB_CLIENT_ID;
+    const clientSecret = process.env.GITHUB_CLIENT_SECRET;
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
 
     const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
@@ -308,6 +338,24 @@ describe("Attempt verification", function () {
         code,
       },
     } as unknown as RequestPayload);
+
+    expect(mockedAxios.post).toBeCalledWith(
+      `https://github.com/login/oauth/access_token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}`,
+      {},
+      {
+        headers: { Accept: "application/json" },
+      }
+    );
+
+    // Check the request to get the user
+    expect(mockedAxios.get).toBeCalledWith("https://api.github.com/user", {
+      headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
+    });
+
+    // Check the request to get the repo
+    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${badUserRepoResponse.data.login}/repos?per_page=100`, {
+      headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
+    });
 
     expect(starredGithubRepoProviderPayload).toMatchObject({ valid: false });
   });
