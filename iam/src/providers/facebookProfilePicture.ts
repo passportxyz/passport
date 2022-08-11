@@ -4,6 +4,10 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // --- Api Library
 import axios from "axios";
+import { verifyFacebook } from "./facebook";
+import { DateTime } from "luxon";
+
+const APP_ID = process.env.FACEBOOK_APP_ID;
 
 export type FacebookProfileResponse = {
   id: string;
@@ -39,6 +43,22 @@ export class FacebookProfilePictureProvider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
+      // Calling the verifyFacebook here, because we also want to get the user id associated with the
+      // user token that was provided (this we do not get from the friends request).
+      // And in addition we also validated the user token
+      const tokenResponseData = await verifyFacebook(payload.proofs.accessToken);
+
+      if (tokenResponseData.status != 200) {
+        // The exception handler will handle this
+        throw tokenResponseData.statusText;
+      }
+
+      const formattedData = tokenResponseData?.data.data;
+
+      const notExpired = DateTime.now() < DateTime.fromSeconds(formattedData.expires_at);
+      const isTokenValid: boolean =
+        notExpired && formattedData.app_id === APP_ID && formattedData.is_valid && !!formattedData.user_id;
+
       // Get the FB profile
       const profileResponseData = await verifyFacebookFriends(payload.proofs.accessToken);
 
@@ -50,7 +70,9 @@ export class FacebookProfilePictureProvider implements Provider {
       const profileData = profileResponseData?.data;
 
       // User has profile picture if is_silhouette is false
-      const valid = !profileData.picture.data.is_silhouette;
+      const hasProfilePicture = !profileData.picture.data.is_silhouette;
+
+      const valid = isTokenValid && hasProfilePicture;
 
       return {
         valid,
