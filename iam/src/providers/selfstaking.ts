@@ -17,16 +17,11 @@ type StakeResponse = {
 };
 
 // Defining interfaces for the data structure returned by the subgraph
-interface User {
-  id: string;
-}
-
 interface Round {
   id: string;
 }
+
 interface Stake {
-  id: string;
-  user: User;
   round: Round;
   stake: string;
 }
@@ -35,50 +30,52 @@ interface StakeArray {
   stakes: Array<Stake>;
 }
 
-interface Data {
-  data: StakeArray;
+interface UsersArray {
+  address: string;
+  users: Array<StakeArray>;
 }
 
-interface StakeResult {
-  data: Data;
+interface StakeData {
+  data: UsersArray;
+}
+
+export interface DataResult {
+  data: StakeData;
 }
 
 async function verifyStake(payload: RequestPayload): Promise<StakeResponse> {
-  const address = payload.address.toLocaleLowerCase();
+  const address = payload.address.toLowerCase();
   const result = await axios.post(stakingSubgraph, {
     query: `
     {
-      stakes(where:{user: "${address}"}) {
-        id,
-        user {
-          id
-        },
-        round {
-          id
-        },
-        stake
+      users(where: {address: "${address}"}) {
+        address,
+        stakes(where: {round: "2", total_gt: 0}) {
+          stake
+          round {
+            id
+          }
+        }
       }
     }
       `,
   });
 
-  const r = result as StakeResult;
-
+  const r = result as DataResult;
+  const response: StakeResponse = {
+    address: address,
+    stakeAmount: 0,
+  };
   // Array of self stakes on the user
-  const stakes = r?.data?.data?.stakes || [];
-
-  let response: StakeResponse = {};
-
-  if (stakes) {
-    const stakeValue: string = stakes[0].stake;
-    const stakeAmountFormatted: string = utils.formatUnits(stakeValue.toString(), 18);
-    response = {
-      stakeAmount: parseFloat(stakeAmountFormatted),
-      address: address,
-    };
+  const stake = r?.data?.data?.users[0]?.stakes[0]?.stake;
+  if (!stake) {
+    return response;
   }
-
-  return response;
+  const stakeAmountFormatted: string = utils.formatUnits(stake.toString(), 18);
+  return {
+    stakeAmount: parseFloat(stakeAmountFormatted),
+    address: address,
+  };
 }
 
 // Export a Self Staking Bronze Stamp provider
@@ -105,11 +102,13 @@ export class SelfStakingBronzeProvider implements Provider {
 
       return {
         valid,
-        record: {
-          address: payload.address,
-          // ssgt1 = Self Staking Greater than 1
-          stakeAmount: valid ? "csgt1" : "",
-        },
+        record: valid
+          ? {
+              address: payload.address,
+              // ssgt1 = Self Staking Greater than 1
+              stakeAmount: "csgt1",
+            }
+          : {},
       };
     } catch (e) {
       return {
@@ -144,11 +143,13 @@ export class SelfStakingSilverProvider implements Provider {
 
       return {
         valid,
-        record: {
-          address: payload.address,
-          // ssgt5 = Self Staking Greater than 5
-          stakeAmount: valid ? "csgt5" : "",
-        },
+        record: valid
+          ? {
+              address: payload.address,
+              // ssgt5 = Self Staking Greater than 5
+              stakeAmount: "csgt5",
+            }
+          : {},
       };
     } catch (e) {
       return {
@@ -183,11 +184,13 @@ export class SelfStakingGoldProvider implements Provider {
 
       return {
         valid,
-        record: {
-          address: payload.address,
-          // ssgt50 = Self Staking Greater than 50
-          stakeAmount: valid ? "csgt50" : "",
-        },
+        record: valid
+          ? {
+              address: payload.address,
+              // ssgt50 = Self Staking Greater than 50
+              stakeAmount: "csgt50",
+            }
+          : {},
       };
     } catch (e) {
       return {

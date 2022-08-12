@@ -20,16 +20,18 @@ type StakeResponse = {
 interface Round {
   id: string;
 }
+
 interface XStake {
   round: Round;
-  amount: string;
+  total: string;
 }
 
 interface XStakeArray {
-  xstakeOnMe: Array<XStake>;
+  xstakeAggregates: Array<XStake>;
 }
 
 interface UsersArray {
+  address: string;
   users: Array<XStakeArray>;
 }
 
@@ -37,48 +39,44 @@ interface StakeData {
   data: UsersArray;
 }
 
-interface StakeResult {
+export interface DataResult {
   data: StakeData;
 }
 
 async function verifyStake(payload: RequestPayload): Promise<StakeResponse> {
-  const address = payload.address.toLocaleLowerCase();
+  const address = payload.address.toLowerCase();
   const result = await axios.post(stakingSubgraph, {
     query: `
     {
       users(where: {address: "${address}"}) {
-        xstakeOnMe {
+        address,
+        xstakeAggregates(where: {round: "2", total_gt: 0}) {
+          total
           round {
             id
           }
-          amount
         }
       }
     }
       `,
   });
 
-  const r = result as StakeResult;
+  const r = result as DataResult;
 
-  // Array of xstakes on the user
-  const xstakes = r?.data?.data?.users[0].xstakeOnMe || [];
-
-  let response: StakeResponse = {};
-
-  if (xstakes.length > 0) {
-    // Add all the amounts staked on user
-    let totalAmountStaked = 0;
-    xstakes.forEach((xstake) => {
-      const stakeAmountFormatted: string = utils.formatUnits(xstake.amount.toString(), 18);
-      totalAmountStaked += parseFloat(stakeAmountFormatted);
-    });
-    response = {
-      totalAmountStaked: totalAmountStaked,
-      address: address,
-    };
+  const response: StakeResponse = {
+    address: address,
+    totalAmountStaked: 0,
+  };
+  // Array of community stakes on the user
+  const xstake = r?.data?.data?.users[0]?.xstakeAggregates[0]?.total;
+  if (!xstake) {
+    return response;
   }
-
-  return response;
+  const stakeAmountFormatted: string = utils.formatUnits(xstake, 18);
+  return {
+    totalAmountStaked: parseFloat(stakeAmountFormatted),
+    address: address,
+  };
 }
 
 // Export a Self Staking Bronze Stamp provider
@@ -100,16 +98,17 @@ export class CommunityStakingBronzeProvider implements Provider {
     try {
       const stakeData = await verifyStake(payload);
       const stakeAmount = stakeData.totalAmountStaked;
-
       valid = stakeAmount > 10.0;
 
       return {
         valid,
-        record: {
-          address: payload.address,
-          // csgt10 = Community Staking Greater than 10
-          stakeAmount: valid ? "csgt10" : "",
-        },
+        record: valid
+          ? {
+              address: stakeData.address,
+              // csgt10 = Community Staking Greater than 10
+              stakeAmount: "csgt10",
+            }
+          : {},
       };
     } catch (e) {
       return {
@@ -144,11 +143,13 @@ export class CommunityStakingSilverProvider implements Provider {
 
       return {
         valid,
-        record: {
-          address: payload.address,
-          // csgt100 = Community Staking Greater than 100
-          stakeAmount: valid ? "csgt100" : "",
-        },
+        record: valid
+          ? {
+              address: stakeData.address,
+              // csgt100 = Community Staking Greater than 100
+              stakeAmount: "csgt100",
+            }
+          : {},
       };
     } catch (e) {
       return {
@@ -182,11 +183,13 @@ export class CommunityStakingGoldProvider implements Provider {
 
       return {
         valid: valid,
-        record: {
-          address: payload.address,
-          // csgt500 = Community Staking Greater than 500
-          stakeAmount: valid ? "csgt500" : "",
-        },
+        record: valid
+          ? {
+              address: stakeData.address,
+              // csgt500 = Community Staking Greater than 500
+              stakeAmount: "csgt500",
+            }
+          : {},
       };
     } catch (e) {
       return {
