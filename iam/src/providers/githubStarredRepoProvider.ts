@@ -148,6 +148,5 @@ const verifyUserGithubRepo = async (
       }
     }
   };
-
   return await checkUserRepoStars();
 };

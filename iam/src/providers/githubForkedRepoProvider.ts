@@ -65,14 +65,13 @@ const requestAccessToken = async (code: string): Promise<string> => {
         headers: { Accept: "application/json" },
       }
     );
-
-    const tokenResponse = tokenRequest.data as GithubTokenResponse;
-    return tokenResponse.access_token;
   } catch (e) {
     if (tokenRequest.status != 200) {
       throw `Post for request returned status code ${tokenRequest.status} instead of the expected 200`;
     }
   }
+  const tokenResponse = tokenRequest.data as GithubTokenResponse;
+  return tokenResponse.access_token;
 };
 
 const verifyGithub = async (ghAccessToken: string): Promise<GithubFindMyUserResponse> => {
@@ -82,12 +81,13 @@ const verifyGithub = async (ghAccessToken: string): Promise<GithubFindMyUserResp
     userRequest = await axios.get("https://api.github.com/user", {
       headers: { Authorization: `token ${ghAccessToken}` },
     });
-    return userRequest.data as GithubFindMyUserResponse;
   } catch (e) {
-    if (userRequest.status != 200) {
-      throw `User GET request returned status code ${userRequest.status} instead of the expected 200`;
-    }
+    console.log(e);
   }
+  if (userRequest.status != 200) {
+    throw `User GET request returned status code ${userRequest.status} instead of the expected 200`;
+  }
+  return userRequest.data as GithubFindMyUserResponse;
 };
 
 const verifyUserGithubRepo = async (userData: GithubFindMyUserResponse, ghAccessToken: string): Promise<boolean> => {
@@ -100,21 +100,21 @@ const verifyUserGithubRepo = async (userData: GithubFindMyUserResponse, ghAccess
     });
     // Returns true for first instance of a user's repo that has been forked,
     // false if no forks
-    const userRepoForksCheck = (): boolean => {
-      for (let i = 0; i < repoRequest.data.length; i++) {
-        const repo = repoRequest.data[i];
-        // Check to see if the authenticated GH user is the same as the repo owner,
-        // if the repo is not a fork of another repo, and if the repo fork count is gte 1
-        if (userData.id === repo.owner.id && !repo.fork && repo.forks_count >= 1) {
-          return true;
-        }
-      }
-    };
-
-    return userRepoForksCheck();
-  } catch (e) {
     if (repoRequest.status != 200) {
       throw `Repo GET request returned status code ${repoRequest.status} instead of the expected 200`;
     }
+  } catch (e) {
+    console.error(e);
   }
+  const userRepoForksCheck = (): boolean => {
+    for (let i = 0; i < repoRequest.data.length; i++) {
+      const repo = repoRequest.data[i];
+      // Check to see if the authenticated GH user is the same as the repo owner,
+      // if the repo is not a fork of another repo, and if the repo fork count is gte 1
+      if (userData.id === repo.owner.id && !repo.fork && repo.forks_count >= 1) {
+        return true;
+      }
+    }
+  };
+  return userRepoForksCheck();
 };
