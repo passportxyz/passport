@@ -89,7 +89,10 @@ const providers = new Providers([
   new TwitterFollowerGT500Provider(),
   new TwitterFollowerGTE1000Provider(),
   new TwitterFollowerGT5000Provider(),
-  new GitcoinContributionProvider(),
+  new GitcoinContributionProvider({ threshold: 1 }),
+  new GitcoinContributionProvider({ threshold: 10 }),
+  new GitcoinContributionProvider({ threshold: 25 }),
+  new GitcoinContributionProvider({ threshold: 100 }),
 ]);
 
 // create the app and run on port
@@ -142,6 +145,7 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
     // generate a challenge for the given payload
     const challenge = providers.getChallenge(payload);
     // if the request is valid then proceed to generate a challenge credential
+    console.log("geri challenge", challenge);
     if (challenge && challenge.valid === true) {
       // construct a request payload to issue a credential against
       const record: RequestPayload = {

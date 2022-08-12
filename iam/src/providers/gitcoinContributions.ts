@@ -13,17 +13,24 @@ export type GitcoinContributionStatistics = {
   is_gr14_contributor: boolean;
 };
 
+export type GitcoinContributionOptions = {
+  threshold: number;
+};
+
 // Export a Github Provider to carry out OAuth and return a record object
 export class GitcoinContributionProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
   type = "GitcoinContributionProvider";
 
   // Options can be set here and/or via the constructor
-  _options = {};
+  _options: GitcoinContributionOptions = {
+    threshold: 1,
+  };
 
   // construct the provider instance with supplied options
   constructor(options: ProviderOptions = {}) {
     this._options = { ...this._options, ...options };
+    this.type = `GitcoinContributionProviderGte${this._options.threshold}`;
   }
 
   // verify that the proof object contains valid === "true"
@@ -31,20 +38,29 @@ export class GitcoinContributionProvider implements Provider {
     let valid = false;
     let githubUser;
     try {
+      console.log("geri payload.proofs.code", payload.proofs.code);
       githubUser = await verifyGithub(payload.proofs.code);
+      console.log("geri githubUser", githubUser);
       const contributionStatistic = await verifyGitcoinContributions(githubUser.login);
-      valid = contributionStatistic.num_grants_contribute_to >= 1;
-    } catch (e) {}
+      console.log("geri contributionStatistic", contributionStatistic);
+      console.log("geri this._options.threshold", this._options.threshold);
+      valid = contributionStatistic.num_grants_contribute_to >= this._options.threshold;
+    } catch (e) {
+      console.log("geri error", e);
+    }
 
-    return {
+    const ret = {
       valid: valid,
       record: valid
         ? {
             id: githubUser.id,
-            numGrantsContributeToGte: "1",
+            numGrantsContributeToGte: `${this._options.threshold}`,
           }
         : undefined,
     };
+
+    console.log("geri ret", ret);
+    return ret;
   }
 }
 
