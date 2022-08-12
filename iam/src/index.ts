@@ -60,6 +60,7 @@ import {
 import { FacebookFriendsProvider } from "./providers/facebookFriends";
 import { FacebookProfilePictureProvider } from "./providers/facebookProfilePicture";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
+import { GitcoinContributionProvider } from "./providers/gitcoinContributions";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
@@ -88,6 +89,7 @@ const providers = new Providers([
   new TwitterFollowerGT500Provider(),
   new TwitterFollowerGTE1000Provider(),
   new TwitterFollowerGT5000Provider(),
+  new GitcoinContributionProvider(),
 ]);
 
 // create the app and run on port
