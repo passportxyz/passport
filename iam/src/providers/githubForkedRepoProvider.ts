@@ -2,6 +2,7 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../types";
 import type { GithubFindMyUserResponse, GithubRepoRequestResponse } from "./types/githubTypes";
+import { requestAccessToken } from "./github";
 
 // ----- HTTP Client
 import axios from "axios";
@@ -50,30 +51,6 @@ export class ForkedGithubRepoProvider implements Provider {
   }
 }
 
-const requestAccessToken = async (code: string): Promise<string> => {
-  const clientId = process.env.GITHUB_CLIENT_ID;
-  const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-
-  let tokenRequest;
-
-  try {
-    // Exchange the code for an access token
-    tokenRequest = await axios.post(
-      `https://github.com/login/oauth/access_token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}`,
-      {},
-      {
-        headers: { Accept: "application/json" },
-      }
-    );
-  } catch (e) {
-    if (tokenRequest.status != 200) {
-      throw `Post for request returned status code ${tokenRequest.status} instead of the expected 200`;
-    }
-  }
-  const tokenResponse = tokenRequest.data as GithubTokenResponse;
-  return tokenResponse.access_token;
-};
-
 const verifyGithub = async (ghAccessToken: string): Promise<GithubFindMyUserResponse> => {
   let userRequest;
   try {
@@ -82,10 +59,9 @@ const verifyGithub = async (ghAccessToken: string): Promise<GithubFindMyUserResp
       headers: { Authorization: `token ${ghAccessToken}` },
     });
   } catch (e) {
-    console.log(e);
-  }
-  if (userRequest.status != 200) {
-    throw `User GET request returned status code ${userRequest.status} instead of the expected 200`;
+    if (userRequest.status != 200) {
+      throw `User GET request returned status code ${userRequest.status} instead of the expected 200`;
+    }
   }
   return userRequest.data as GithubFindMyUserResponse;
 };
@@ -104,7 +80,10 @@ const verifyUserGithubRepo = async (userData: GithubFindMyUserResponse, ghAccess
       throw `Repo GET request returned status code ${repoRequest.status} instead of the expected 200`;
     }
   } catch (e) {
-    console.error(e);
+    if (repoRequest.status != 200) {
+      throw `Repo GET request returned status code ${repoRequest.status} instead of the expected 200`;
+    }
+    return false;
   }
   const userRepoForksCheck = (): boolean => {
     for (let i = 0; i < repoRequest.data.length; i++) {

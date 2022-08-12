@@ -6,6 +6,7 @@ import type {
   GithubRepoRequestResponse,
   GithubUserRepoResponseData,
 } from "./types/githubTypes";
+import { requestAccessToken } from "./github";
 
 // ----- HTTP Client
 import axios from "axios";
@@ -61,32 +62,6 @@ export class StarredGithubRepoProvider implements Provider {
   }
 }
 
-const requestAccessToken = async (code: string): Promise<string> => {
-  const clientId = process.env.GITHUB_CLIENT_ID;
-  const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-
-  let tokenRequest;
-
-  try {
-    // Exchange the code for an access token
-    tokenRequest = await axios.post(
-      `https://github.com/login/oauth/access_token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}`,
-      {},
-      {
-        headers: { Accept: "application/json" },
-      }
-    );
-
-    if (tokenRequest.status != 200) {
-      throw `Post for request returned status code ${tokenRequest.status} instead of the expected 200`;
-    }
-  } catch (e) {
-    console.error(e);
-  }
-  const tokenResponse = tokenRequest.data as GithubTokenResponse;
-  return tokenResponse.access_token;
-};
-
 const verifyGithub = async (ghAccessToken: string): Promise<GithubFindMyUserResponse> => {
   let userRequest;
   try {
@@ -99,16 +74,15 @@ const verifyGithub = async (ghAccessToken: string): Promise<GithubFindMyUserResp
       throw `Get user request returned status code ${userRequest.status} instead of the expected 200`;
     }
   } catch (e) {
-    console.error(e);
+    if (userRequest.status != 200) {
+      throw `Get user request returned status code ${userRequest.status} instead of the expected 200`;
+    }
   }
 
   return userRequest.data as GithubFindMyUserResponse;
 };
 
-const verifyUserGithubRepo = async (
-  userData: GithubFindMyUserResponse,
-  ghAccessToken: string
-): Promise<GithubUserRepoResponseData | boolean> => {
+const verifyUserGithubRepo = async (userData: GithubFindMyUserResponse, ghAccessToken: string): Promise<boolean> => {
   let repoRequest: GithubRepoRequestResponse;
 
   try {
@@ -116,23 +90,22 @@ const verifyUserGithubRepo = async (
     repoRequest = await axios.get(`https://api.github.com/users/${userData.login}/repos?per_page=100`, {
       headers: { Authorization: `token ${ghAccessToken}` },
     });
-
+  } catch (e) {
     if (repoRequest.status != 200) {
       throw `Get repo request returned status code ${repoRequest.status} instead of the expected 200`;
     }
-  } catch (e) {
-    console.error(e);
+    return false;
   }
 
   // Returns an object containing first instance of a user's repo if it has been starred
   // by a user other than the repo owner, or the last checked repo with no stars
-  const checkUserRepoStars = async (): Promise<GithubUserRepoResponseData | boolean> => {
+  const checkUserRepoStars = async (): Promise<boolean> => {
     for (let i = 0; i < repoRequest.data.length; i++) {
       const repo = repoRequest.data[i];
       // Check if the GitHub user is the same as the repo owner
       // and if the stargazer count is gt 1
       if (userData.id === repo.owner.id && repo.stargazers_count > 1) {
-        return repo;
+        return true;
         // Check if the GitHub user is the same as the repo owner and
         // if their stargazer count equals 1
       } else if (userData.id === repo.owner.id && repo.stargazers_count === 1) {
