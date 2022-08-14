@@ -7,14 +7,13 @@ import { verifyGithub } from "./github";
 const AMI_API_TOKEN = process.env.AMI_API_TOKEN;
 
 export type GitcoinContributionStatistics = {
-  num_grants_contribute_to: number;
-  num_rounds_contribute_to: number;
-  total_contribution_amount: number;
-  is_gr14_contributor: boolean;
+  [k: string]: number;
 };
 
 export type GitcoinContributionOptions = {
   threshold: number;
+  receivingAttribute: string;
+  recordAttribute: string;
 };
 
 // Export a Github Provider to carry out OAuth and return a record object
@@ -25,6 +24,8 @@ export class GitcoinContributionProvider implements Provider {
   // Options can be set here and/or via the constructor
   _options: GitcoinContributionOptions = {
     threshold: 1,
+    receivingAttribute: "",
+    recordAttribute: "",
   };
 
   // construct the provider instance with supplied options
@@ -38,15 +39,16 @@ export class GitcoinContributionProvider implements Provider {
     let valid = false;
     let githubUser;
     try {
-      console.log("geri payload.proofs.code", payload.proofs.code);
       githubUser = await verifyGithub(payload.proofs.code);
-      console.log("geri githubUser", githubUser);
-      const contributionStatistic = await verifyGitcoinContributions(githubUser.login);
-      console.log("geri contributionStatistic", contributionStatistic);
-      console.log("geri this._options.threshold", this._options.threshold);
-      valid = contributionStatistic.num_grants_contribute_to >= this._options.threshold;
+
+      // Only check the contribution condition if a valid github id has been received
+      valid = !!githubUser.id;
+      if (valid) {
+        const contributionStatistic = await verifyGitcoinContributions(githubUser.login);
+        valid = contributionStatistic[this._options.receivingAttribute] >= this._options.threshold;
+      }
     } catch (e) {
-      console.log("geri error", e);
+      return { valid: false };
     }
 
     const ret = {
@@ -54,12 +56,11 @@ export class GitcoinContributionProvider implements Provider {
       record: valid
         ? {
             id: githubUser.id,
-            numGrantsContributeToGte: `${this._options.threshold}`,
+            [this._options.recordAttribute]: `${this._options.threshold}`,
           }
         : undefined,
     };
 
-    console.log("geri ret", ret);
     return ret;
   }
 }
