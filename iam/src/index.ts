@@ -60,7 +60,7 @@ import {
 import { FacebookFriendsProvider } from "./providers/facebookFriends";
 import { FacebookProfilePictureProvider } from "./providers/facebookProfilePicture";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
-import { GitcoinContributionProvider } from "./providers/gitcoinContributions";
+import { GitcoinContributorStatisticsProvider } from "./providers/gitcoinContributorStatistics";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
@@ -89,10 +89,46 @@ const providers = new Providers([
   new TwitterFollowerGT500Provider(),
   new TwitterFollowerGTE1000Provider(),
   new TwitterFollowerGT5000Provider(),
-  new GitcoinContributionProvider({ threshold: 1 }),
-  new GitcoinContributionProvider({ threshold: 10 }),
-  new GitcoinContributionProvider({ threshold: 25 }),
-  new GitcoinContributionProvider({ threshold: 100 }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 1,
+    receivingAttribute: "num_grants_contribute_to",
+    recordAttribute: "numGrantsContributeToGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 10,
+    receivingAttribute: "num_grants_contribute_to",
+    recordAttribute: "numGrantsContributeToGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 25,
+    receivingAttribute: "num_grants_contribute_to",
+    recordAttribute: "numGrantsContributeToGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 100,
+    receivingAttribute: "num_grants_contribute_to",
+    recordAttribute: "numGrantsContributeToGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 10,
+    receivingAttribute: "total_contribution_amount",
+    recordAttribute: "totalContributionAmountGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 100,
+    receivingAttribute: "total_contribution_amount",
+    recordAttribute: "totalContributionAmountGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 1000,
+    receivingAttribute: "total_contribution_amount",
+    recordAttribute: "totalContributionAmountGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 1,
+    receivingAttribute: "num_rounds_contribute_to",
+    recordAttribute: "numRoundsContributedGte",
+  }),
 ]);
 
 // create the app and run on port
@@ -145,7 +181,6 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
     // generate a challenge for the given payload
     const challenge = providers.getChallenge(payload);
     // if the request is valid then proceed to generate a challenge credential
-    console.log("geri challenge", challenge);
     if (challenge && challenge.valid === true) {
       // construct a request payload to issue a credential against
       const record: RequestPayload = {

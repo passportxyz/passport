@@ -16,10 +16,10 @@ export type GitcoinContributionOptions = {
   recordAttribute: string;
 };
 
-// Export a Github Provider to carry out OAuth and return a record object
-export class GitcoinContributionProvider implements Provider {
-  // Give the provider a type so that we can select it with a payload
-  type = "GitcoinContributionProvider";
+// Export a Gitcoin Provider
+export class GitcoinContributorStatisticsProvider implements Provider {
+  // The type will be determined dynamically, from the options passed in to the constructor
+  type = "";
 
   // Options can be set here and/or via the constructor
   _options: GitcoinContributionOptions = {
@@ -31,7 +31,7 @@ export class GitcoinContributionProvider implements Provider {
   // construct the provider instance with supplied options
   constructor(options: ProviderOptions = {}) {
     this._options = { ...this._options, ...options };
-    this.type = `GitcoinContributionProviderGte${this._options.threshold}`;
+    this.type = `GitcoinContributorStatistics#${this._options.recordAttribute}#${this._options.threshold}`;
   }
 
   // verify that the proof object contains valid === "true"

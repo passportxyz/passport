@@ -4,8 +4,7 @@ import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
-import { camelize } from "tslint/lib/utils";
-import { GitcoinContributionProvider } from "../src/providers/gitcoinContributions";
+import { GitcoinContributorStatisticsProvider } from "../src/providers/gitcoinContributorStatistics";
 
 jest.mock("axios");
 
@@ -75,7 +74,7 @@ describe("Attempt verification", function () {
           });
       });
 
-      const github = new GitcoinContributionProvider({
+      const github = new GitcoinContributorStatisticsProvider({
         threshold,
         receivingAttribute,
         recordAttribute,
@@ -139,7 +138,7 @@ describe("Attempt verification", function () {
       });
     });
 
-    const github = new GitcoinContributionProvider({ threshold: 1 });
+    const github = new GitcoinContributorStatisticsProvider({ threshold: 1 });
 
     const githubPayload = await github.verify({
       proofs: {
@@ -164,7 +163,7 @@ describe("Attempt verification", function () {
       });
     });
 
-    const github = new GitcoinContributionProvider({ threshold: 1 });
+    const github = new GitcoinContributorStatisticsProvider({ threshold: 1 });
 
     const githubPayload = await github.verify({
       proofs: {
@@ -202,7 +201,7 @@ describe("Attempt verification", function () {
         });
     });
 
-    const github = new GitcoinContributionProvider({ threshold: 1 });
+    const github = new GitcoinContributorStatisticsProvider({ threshold: 1 });
 
     const githubPayload = await github.verify({
       proofs: {
@@ -249,7 +248,7 @@ describe("Attempt verification", function () {
         });
     });
 
-    const github = new GitcoinContributionProvider({ threshold: 1 });
+    const github = new GitcoinContributorStatisticsProvider({ threshold: 1 });
 
     const githubPayload = await github.verify({
       proofs: {
@@ -292,7 +291,7 @@ describe("Attempt verification", function () {
         });
     });
 
-    const github = new GitcoinContributionProvider({ threshold: 1 });
+    const github = new GitcoinContributorStatisticsProvider({ threshold: 1 });
 
     const githubPayload = await github.verify({
       proofs: {
