@@ -113,7 +113,7 @@ export class SelfStakingBronzeProvider implements Provider {
     } catch (e) {
       return {
         valid: false,
-        error: [JSON.stringify(e)],
+        error: ["Self Staking Bronze Provider verifyStake Error"],
       };
     }
   }
@@ -154,7 +154,7 @@ export class SelfStakingSilverProvider implements Provider {
     } catch (e) {
       return {
         valid: false,
-        error: [JSON.stringify(e)],
+        error: ["Self Staking Silver Provider verifyStake Error"],
       };
     }
   }
@@ -195,7 +195,7 @@ export class SelfStakingGoldProvider implements Provider {
     } catch (e) {
       return {
         valid: false,
-        error: [JSON.stringify(e)],
+        error: ["Self Staking Gold Provider verifyStake Error"],
       };
     }
   }

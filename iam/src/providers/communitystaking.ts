@@ -113,7 +113,7 @@ export class CommunityStakingBronzeProvider implements Provider {
     } catch (e) {
       return {
         valid: false,
-        error: [JSON.stringify(e)],
+        error: ["Community Staking Bronze Provider verifyStake Error"],
       };
     }
   }
@@ -154,7 +154,7 @@ export class CommunityStakingSilverProvider implements Provider {
     } catch (e) {
       return {
         valid: false,
-        error: [JSON.stringify(e)],
+        error: ["Community Staking Silver Provider verifyStake Error"],
       };
     }
   }
@@ -194,7 +194,7 @@ export class CommunityStakingGoldProvider implements Provider {
     } catch (e) {
       return {
         valid: false,
-        error: [JSON.stringify(e)],
+        error: ["Community Staking Gold Provider verifyStake Error"],
       };
     }
   }

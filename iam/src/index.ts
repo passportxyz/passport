@@ -60,12 +60,12 @@ import {
 import { FacebookFriendsProvider } from "./providers/facebookFriends";
 import { FacebookProfilePictureProvider } from "./providers/facebookProfilePicture";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
-import { SelfStakingBronzeProvider, SelfStakingSilverProvider, SelfStakingGoldProvider } from "./providers/selfstaking";
+import { SelfStakingBronzeProvider, SelfStakingSilverProvider, SelfStakingGoldProvider } from "./providers/selfStaking";
 import {
   CommunityStakingBronzeProvider,
   CommunityStakingSilverProvider,
   CommunityStakingGoldProvider,
-} from "./providers/communitystaking";
+} from "./providers/communityStaking";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([

@@ -6,7 +6,7 @@ import {
   CommunityStakingGoldProvider,
   stakingSubgraph,
   DataResult,
-} from "../src/providers/communitystaking";
+} from "../src/providers/communityStaking";
 
 // ----- Libs
 import axios from "axios";
@@ -150,7 +150,37 @@ describe("Attempt verification", function () {
     });
     expect(verifiedPayload).toEqual({
       valid: false,
-      error: ["{}"],
+      error: ["Community Staking Bronze Provider verifyStake Error"],
+    });
+  });
+  it("handles invalid verification attempt where an exception is thrown", async () => {
+    mockedAxios.post.mockImplementationOnce(async (url, data) => {
+      throw Error("Community Staking Bronze Provider verifyStake Error");
+    });
+    const communityStakingProvider = new CommunityStakingBronzeProvider();
+    const verifiedPayload = await communityStakingProvider.verify({
+      address: MOCK_ADDRESS_LOWER,
+    } as unknown as RequestPayload);
+
+    // Check the request to verify the subgraph query
+    expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
+      query: `
+    {
+      users(where: {address: "${MOCK_ADDRESS_LOWER}"}) {
+        address,
+        xstakeAggregates(where: {round: "2", total_gt: 0}) {
+          total
+          round {
+            id
+          }
+        }
+      }
+    }
+      `,
+    });
+    expect(verifiedPayload).toEqual({
+      valid: false,
+      error: ["Community Staking Bronze Provider verifyStake Error"],
     });
   });
 });

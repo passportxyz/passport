@@ -6,7 +6,7 @@ import {
   SelfStakingGoldProvider,
   stakingSubgraph,
   DataResult,
-} from "../src/providers/selfstaking";
+} from "../src/providers/selfStaking";
 
 // ----- Libs
 import axios from "axios";
@@ -150,7 +150,38 @@ describe("Attempt verification", function () {
     });
     expect(verifiedPayload).toEqual({
       valid: false,
-      error: ["{}"],
+      error: ["Self Staking Bronze Provider verifyStake Error"],
+    });
+  });
+
+  it("handles invalid verification attempt where an exception is thrown", async () => {
+    mockedAxios.post.mockImplementationOnce(async (url, data) => {
+      throw Error("Self Staking Bronze Provider verifyStake Error");
+    });
+    const selfStakingProvider = new SelfStakingBronzeProvider();
+    const verifiedPayload = await selfStakingProvider.verify({
+      address: MOCK_ADDRESS_LOWER,
+    } as unknown as RequestPayload);
+
+    // Check the request to verify the subgraph query
+    expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
+      query: `
+    {
+      users(where: {address: "${MOCK_ADDRESS_LOWER}"}) {
+        address,
+        stakes(where: {round: "2", total_gt: 0}) {
+          stake
+          round {
+            id
+          }
+        }
+      }
+    }
+      `,
+    });
+    expect(verifiedPayload).toEqual({
+      valid: false,
+      error: ["Self Staking Bronze Provider verifyStake Error"],
     });
   });
 });
