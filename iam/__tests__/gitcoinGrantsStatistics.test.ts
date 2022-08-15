@@ -4,7 +4,8 @@ import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
-import { GitcoinContributorStatisticsProvider } from "../src/providers/gitcoinContributorStatistics";
+import { GitcoinGrantStatisticsProvider } from "../src/providers/gitcoinGrantsStatistics";
+import type { ProviderOptions } from "../src/types";
 
 jest.mock("axios");
 
@@ -31,7 +32,18 @@ const validCodeResponse = {
   status: 200,
 };
 
+const testDataUrl = "https://gitcoin.co/grants/v1/api/vc/configurable_test_endpoint";
+const testProviderPrefix = "GitcoinGrantStatisticsProviderTester";
+
 const code = "ABC123_ACCESSCODE";
+
+class GitcoinGrantStatisticsProviderTester extends GitcoinGrantStatisticsProvider {
+  // construct the provider instance with supplied options
+  constructor(options: ProviderOptions = {}) {
+    super(testProviderPrefix, options);
+    this.dataUrl = testDataUrl;
+  }
+}
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -40,7 +52,23 @@ beforeEach(() => {
   });
 });
 
-describe("Attempt verification", function () {
+describe("GitcoinGrantStatisticsProvider class", function () {
+  it("should properly initialize the attributes", function () {
+    const threshold = 193;
+    const receivingAttribute = "aaa";
+    const recordAttribute = "bbb";
+    const gitcoin = new GitcoinGrantStatisticsProviderTester({
+      threshold,
+      receivingAttribute,
+      recordAttribute,
+    });
+
+    expect(gitcoin.type).toEqual(`${testProviderPrefix}#${recordAttribute}#${threshold}`);
+    expect(gitcoin.dataUrl).toEqual(testDataUrl);
+  });
+});
+
+describe("Attempt verification %s", function () {
   it.each([
     ["num_grants_contribute_to", "numGrantsContributedToGte", 123, 122, false],
     ["num_grants_contribute_to", "numGrantsContributedToGte", 123, 123, true],
@@ -59,7 +87,7 @@ describe("Attempt verification", function () {
     ) => {
       (axios.get as jest.Mock).mockImplementation((url) => {
         if (url === "https://api.github.com/user") return Promise.resolve(validGithubUserResponse);
-        else if (url.startsWith("https://gitcoin.co/grants/v1/api/vc/contributor_statistics"))
+        else if (url.startsWith(testDataUrl))
           return Promise.resolve({
             status: 200,
             data: {
@@ -74,12 +102,12 @@ describe("Attempt verification", function () {
           });
       });
 
-      const github = new GitcoinContributorStatisticsProvider({
+      const gitcoin = new GitcoinGrantStatisticsProviderTester({
         threshold,
         receivingAttribute,
         recordAttribute,
       });
-      const githubPayload = await github.verify({
+      const githubPayload = await gitcoin.verify({
         proofs: {
           code,
         },
@@ -102,12 +130,9 @@ describe("Attempt verification", function () {
       });
 
       // Check the request to get the contribution stats
-      expect(mockedAxios.get).toBeCalledWith(
-        `https://gitcoin.co/grants/v1/api/vc/contributor_statistics?handle=${userHandle}`,
-        {
-          headers: { Authorization: `token ${gitcoinAmiApiToken}` },
-        }
-      );
+      expect(mockedAxios.get).toBeCalledWith(`${testDataUrl}?handle=${userHandle}`, {
+        headers: { Authorization: `token ${gitcoinAmiApiToken}` },
+      });
 
       if (expectedValid)
         expect(githubPayload).toEqual({
@@ -138,7 +163,7 @@ describe("Attempt verification", function () {
       });
     });
 
-    const github = new GitcoinContributorStatisticsProvider({ threshold: 1 });
+    const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
 
     const githubPayload = await github.verify({
       proofs: {
@@ -163,7 +188,7 @@ describe("Attempt verification", function () {
       });
     });
 
-    const github = new GitcoinContributorStatisticsProvider({ threshold: 1 });
+    const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
 
     const githubPayload = await github.verify({
       proofs: {
@@ -201,7 +226,7 @@ describe("Attempt verification", function () {
         });
     });
 
-    const github = new GitcoinContributorStatisticsProvider({ threshold: 1 });
+    const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
 
     const githubPayload = await github.verify({
       proofs: {
@@ -248,7 +273,7 @@ describe("Attempt verification", function () {
         });
     });
 
-    const github = new GitcoinContributorStatisticsProvider({ threshold: 1 });
+    const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
 
     const githubPayload = await github.verify({
       proofs: {
@@ -291,7 +316,7 @@ describe("Attempt verification", function () {
         });
     });
 
-    const github = new GitcoinContributorStatisticsProvider({ threshold: 1 });
+    const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
 
     const githubPayload = await github.verify({
       proofs: {
