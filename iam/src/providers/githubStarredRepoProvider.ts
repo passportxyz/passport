@@ -74,11 +74,23 @@ const verifyGithub = async (ghAccessToken: string): Promise<GithubFindMyUserResp
       throw `Get user request returned status code ${userRequest.status} instead of the expected 200`;
     }
   } catch (e) {
-    if (userRequest.status != 200) {
-      throw `Get user request returned status code ${userRequest.status} instead of the expected 200`;
+    const error = e as {
+      response: {
+        data: {
+          error_description: string;
+        };
+      };
+      request: string;
+      message: string;
+    };
+    if (error.response) {
+      throw `User GET request returned status code ${userRequest.status} instead of the expected 200`;
+    } else if (error.request) {
+      throw `A request was made, but no response was received: ${error.request}`;
+    } else {
+      throw `Error: ${error.message}`;
     }
   }
-
   return userRequest.data as GithubFindMyUserResponse;
 };
 
@@ -86,15 +98,27 @@ const verifyUserGithubRepo = async (userData: GithubFindMyUserResponse, ghAccess
   let repoRequest: GithubRepoRequestResponse;
 
   try {
-    // Fetch user repo data
+    // Fetch user's repo data
     repoRequest = await axios.get(`https://api.github.com/users/${userData.login}/repos?per_page=100`, {
       headers: { Authorization: `token ${ghAccessToken}` },
     });
   } catch (e) {
-    if (repoRequest.status != 200) {
-      throw `Get repo request returned status code ${repoRequest.status} instead of the expected 200`;
+    const error = e as {
+      response: {
+        data: {
+          error_description: string;
+        };
+      };
+      request: string;
+      message: string;
+    };
+    if (error.response) {
+      throw `User GET request returned status code ${repoRequest.status} instead of the expected 200`;
+    } else if (error.request) {
+      throw `A request was made, but no response was received: ${error.request}`;
+    } else {
+      throw `Error: ${error.message}`;
     }
-    return false;
   }
 
   // Returns an object containing first instance of a user's repo if it has been starred

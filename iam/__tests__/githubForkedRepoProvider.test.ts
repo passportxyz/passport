@@ -89,7 +89,7 @@ describe("Attempt verification", function () {
       if (url.endsWith("/user")) {
         return Promise.resolve(validGithubUserResponse);
       }
-      if (url.endsWith("/repos")) {
+      if (url.endsWith("/repos?per_page=100")) {
         return Promise.resolve(validGithubUserRepoResponse);
       }
     });
@@ -118,7 +118,7 @@ describe("Attempt verification", function () {
     });
 
     // Check the request to get the repo
-    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos`, {
+    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`, {
       headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
     });
 
@@ -203,7 +203,7 @@ describe("Attempt verification", function () {
       if (url.endsWith("/user")) {
         return Promise.resolve(validGithubUserResponse);
       }
-      if (url.endsWith("/repos")) {
+      if (url.endsWith("/repos?per_page=100")) {
         return Promise.resolve(invalidGithubUserRepoResponse);
       }
     });
@@ -234,7 +234,7 @@ describe("Attempt verification", function () {
     });
 
     // Check the request to get the repo
-    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos`, {
+    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`, {
       headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
     });
 
@@ -266,7 +266,7 @@ describe("Attempt verification", function () {
       }
     );
 
-    expect(mockedAxios.get).toBeCalledTimes(2);
+    expect(mockedAxios.get).toBeCalledTimes(1);
 
     // Check the request to get the user
     expect(mockedAxios.get).toBeCalledWith("https://api.github.com/user", {
@@ -279,9 +279,9 @@ describe("Attempt verification", function () {
   it("should return invalid payload when a bad status code is returned by github repo request", async () => {
     mockedAxios.get.mockImplementation(async (url) => {
       if (url.endsWith("/user")) {
-        return Promise.reject(validGithubUserResponse);
+        return Promise.resolve(validGithubUserResponse);
       }
-      if (url.endsWith("/repos")) {
+      if (url.endsWith("/repos?per_page=100")) {
         return Promise.reject(invalidGithubResponse);
       }
     });
