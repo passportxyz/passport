@@ -65,6 +65,9 @@ import {
   CommunityStakingSilverProvider,
   CommunityStakingGoldProvider,
 } from "./providers/communityStaking";
+import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
+import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
+import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
@@ -98,9 +101,11 @@ const providers = new Providers([
   new SelfStakingSilverProvider(),
   new SelfStakingGoldProvider(),
   new CommunityStakingBronzeProvider(),
-  new CommunityStakingBronzeProvider(),
   new CommunityStakingSilverProvider(),
   new CommunityStakingGoldProvider(),
+  new ClearTextSimpleProvider(),
+  new ClearTextTwitterProvider(),
+  new ClearTextGithubOrgProvider(),
 ]);
 
 // create the app and run on port
@@ -224,7 +229,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
                 // construct a set of Proofs to issue a credential against (this record will be used to generate a sha256 hash of any associated PII)
                 const record: ProofRecord = {
                   // type and address will always be known and can be obtained from the resultant credential
-                  type: payload.type,
+                  type: verifiedPayload.record.pii ? `${payload.type}#${verifiedPayload.record.pii}` : payload.type,
                   // version is defined by entry point
                   version: "0.0.0",
                   // extend/overwrite with record returned from the provider
