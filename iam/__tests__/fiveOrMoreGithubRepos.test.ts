@@ -68,7 +68,7 @@ describe("Attempt verification", function () {
     expect(fiveOrMoreGithubReposPayload).toEqual({
       valid: true,
       record: {
-        id: validGithubUserResponse.data.id + "gte5GithubRepos"
+        id: validGithubUserResponse.data.id + "gte5GithubRepos",
       },
     });
   });

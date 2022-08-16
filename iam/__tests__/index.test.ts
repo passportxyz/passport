@@ -124,7 +124,7 @@ describe("POST /verify", function () {
   });
 
   it("handles valid challenge request returning PII", async () => {
-    const provider = "ClearTextSimple"
+    const provider = "ClearTextSimple";
     // challenge received from the challenge endpoint
     const challenge = {
       issuer: config.issuer,
@@ -159,15 +159,15 @@ describe("POST /verify", function () {
       .set("Accept", "application/json")
       .expect(200)
       .expect("Content-Type", /json/);
-    
-    const expectedProvider = `${provider}#Username`
+
+    const expectedProvider = `${provider}#Username`;
 
     // check that PII is returned with provider
     expect((response.body as ValidResponseBody).credential.credentialSubject.provider).toEqual(expectedProvider);
     // check for an id match on the mocked credential
     expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
   });
-  
+
   it("handles valid challenge requests with multiple types", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
@@ -190,7 +190,7 @@ describe("POST /verify", function () {
         signature: "pass",
       },
     };
-  
+
     // resolve the verification
     jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
 
@@ -209,7 +209,7 @@ describe("POST /verify", function () {
     expect((response.body[0] as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
     expect((response.body[1] as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
   });
-  
+
   it("handles invalid challenge requests where credential.issuer is unknown", async () => {
     // challenge received from the challenge endpoint
     const challenge = {

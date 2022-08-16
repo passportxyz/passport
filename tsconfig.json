@@ -5,7 +5,7 @@
     { "path": "iam" },
     { "path": "identity" },
     { "path": "types" },
-    { "path": "second-signer" }
+    { "path": "signer" }
   ],
   "exclude": ["node_modules"]
 }

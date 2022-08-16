@@ -10,7 +10,7 @@ jest.mock("axios");
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-const handle = "my-login-handle"
+const handle = "my-login-handle";
 
 const validGithubUserResponse = {
   data: {
@@ -25,7 +25,7 @@ const validGithubOrgResponse = {
   data: [
     {
       login: "gitcoinco",
-    }
+    },
   ],
   status: 200,
 };
@@ -34,7 +34,7 @@ const unexpectedGithubOrgResponse = {
   data: [
     {
       login: "uniswap",
-    }
+    },
   ],
   status: 200,
 };
@@ -48,7 +48,7 @@ const validCodeResponse = {
 
 const code = "ABC123_ACCESSCODE";
 
-const org = "gitcoinco"
+const org = "gitcoinco";
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -61,17 +61,17 @@ beforeEach(() => {
       case "https://api.github.com/user":
         return validGithubUserResponse;
       case "https://api.github.com/users/my-login-handle/orgs":
-        return validGithubOrgResponse
+        return validGithubOrgResponse;
       default:
         return {
-          status: 404
-        }
+          status: 404,
+        };
     }
   });
 });
 
 describe("Attempt verification", function () {
-  const pii = `${org}#${validGithubUserResponse.data.id}`
+  const pii = `${org}#${validGithubUserResponse.data.id}`;
   it("handles valid verification attempt", async () => {
     const clientId = process.env.GITHUB_CLIENT_ID;
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
@@ -80,7 +80,7 @@ describe("Attempt verification", function () {
       proofs: {
         code,
       },
-      org
+      org,
     } as unknown as RequestPayload);
 
     // Check the request to get the token
@@ -105,7 +105,7 @@ describe("Attempt verification", function () {
     expect(githubPayload).toEqual({
       valid: true,
       record: {
-        pii
+        pii,
       },
     });
   });
@@ -123,7 +123,7 @@ describe("Attempt verification", function () {
       proofs: {
         code,
       },
-      org
+      org,
     } as unknown as RequestPayload);
 
     expect(githubPayload).toMatchObject({ valid: false });
@@ -147,7 +147,7 @@ describe("Attempt verification", function () {
       proofs: {
         code,
       },
-      org
+      org,
     } as unknown as RequestPayload);
 
     expect(githubPayload).toMatchObject({ valid: false });
@@ -166,7 +166,7 @@ describe("Attempt verification", function () {
       proofs: {
         code,
       },
-      org
+      org,
     } as unknown as RequestPayload);
 
     expect(githubPayload).toMatchObject({ valid: false });
@@ -187,7 +187,7 @@ describe("Attempt verification", function () {
       proofs: {
         code,
       },
-      org
+      org,
     } as unknown as RequestPayload);
 
     expect(githubPayload).toMatchObject({ valid: false });
@@ -196,19 +196,19 @@ describe("Attempt verification", function () {
   it("should return invalid if provided org is not returned from github", async () => {
     mockedAxios.get.mockImplementation(async (url, config) => {
       if (url === "https://api.github.com/users/my-login-handle/orgs") {
-        return unexpectedGithubOrgResponse
+        return unexpectedGithubOrgResponse;
       }
     });
-  
+
     const github = new ClearTextGithubOrgProvider();
-  
+
     const githubPayload = await github.verify({
       proofs: {
         code,
       },
-      org
+      org,
     } as unknown as RequestPayload);
-  
+
     expect(githubPayload).toMatchObject({ valid: false });
   });
 });

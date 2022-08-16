@@ -179,8 +179,9 @@ export const fetchChallengeCredential = async (iamUrl: string, payload: RequestP
     {
       payload: {
         address: payload.address,
-        // allow type to be `any` to support multi-vc-requests
         type: payload.type,
+        // if an alt signer is being added pass it in to be included in the challenge string
+        signer: payload.signer,
       },
     }
   );

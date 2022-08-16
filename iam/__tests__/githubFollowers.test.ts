@@ -1,8 +1,5 @@
 // ---- Test subject
-import { 
-  TenOrMoreGithubFollowers, 
-  FiftyOrMoreGithubFollowers 
-} from "../src/providers/githubFollowers";
+import { TenOrMoreGithubFollowers, FiftyOrMoreGithubFollowers } from "../src/providers/githubFollowers";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 

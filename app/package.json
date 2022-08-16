@@ -7,7 +7,7 @@
     "export": "next build && next export",
     "build": "next build",
     "prod-start": "next start",
-    "clean": "rimraf node_modules",
+    "clean": "rimraf node_modules && rimraf .next",
     "lint": "next lint && prettier --check .",
     "lint:fix": "next lint && prettier --write .",
     "test": "jest"

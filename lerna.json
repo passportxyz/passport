@@ -6,7 +6,7 @@
     "identity",
     "schemas",
     "types",
-    "second-signer"
+    "signer"
   ],
   "command": {
     "bootstrap": {

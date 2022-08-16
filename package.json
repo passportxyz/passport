@@ -18,7 +18,7 @@
     "identity",
     "schemas",
     "types",
-    "second-signer"
+    "signer"
   ],
   "scripts": {
     "clean": "lerna run clean",
@@ -37,9 +37,9 @@
     "build:identity": "yarn workspace @gitcoin/passport-identity build",
     "build:iam": "yarn workspace @gitcoin/passport-iam build",
     "build:app": "yarn workspace @gitcoin/passport-app build",
-    "start": "concurrently --kill-others \"yarn start:iam\" \"yarn start:app\"",
+    "start": "concurrently --kill-others \"yarn start:iam\" \"yarn start:app\" \"yarn start:signer\"",
     "start:iam": "yarn workspace @gitcoin/passport-iam start",
-    "start:signer": "yarn workspace @gitcoin/passport-second-signer start",
+    "start:signer": "yarn workspace @gitcoin/passport-signer start",
     "start:app": "yarn workspace @gitcoin/passport-app start",
     "start:ceramic": "yarn ceramic daemon",
     "prod:start:iam": "yarn workspace @gitcoin/passport-iam prod:start",

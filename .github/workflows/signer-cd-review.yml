@@ -1,0 +1,18 @@
+name: Deploy Signer to Review
+on:
+  push:
+    branches: [main]
+    paths:
+      - "signer/**"
+jobs:
+  deploy-signer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Checkout review-signer
+        run: |
+          git fetch
+          git checkout -b review-signer origin/review-signer
+          git reset --hard origin/main
+          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/passport.git
+          git push origin review-signer -f
