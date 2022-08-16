@@ -46,10 +46,12 @@ import { POAPProvider } from "./providers/poap";
 import { FacebookProvider } from "./providers/facebook";
 import { BrightIdProvider } from "./providers/brightid";
 import { GithubProvider } from "./providers/github";
-import { LinkedinProvider } from "./providers/linkedin";
-import { DiscordProvider } from "./providers/discord";
 import { FiveOrMoreGithubRepos } from "./providers/fiveOrMoreGithubRepos";
 import { TenOrMoreGithubFollowers, FiftyOrMoreGithubFollowers } from "./providers/githubFollowers";
+import { ForkedGithubRepoProvider } from "./providers/githubForkedRepoProvider";
+import { StarredGithubRepoProvider } from "./providers/githubStarredRepoProvider";
+import { LinkedinProvider } from "./providers/linkedin";
+import { DiscordProvider } from "./providers/discord";
 import { TwitterTweetGT10Provider } from "./providers/twitterTweets";
 import {
   TwitterFollowerGT100Provider,
@@ -101,6 +103,8 @@ const providers = new Providers([
   new CommunityStakingBronzeProvider(),
   new CommunityStakingSilverProvider(),
   new CommunityStakingGoldProvider(),
+  new ForkedGithubRepoProvider(),
+  new StarredGithubRepoProvider(),
 ]);
 
 // create the app and run on port
