@@ -5,6 +5,9 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 // ----- Libs
 import axios from "axios";
 
+// ----- Credential verification
+import { getAddress } from "../utils/signer";
+
 // List of POAP subgraphs to check
 export const poapSubgraphs = [
   "https://api.thegraph.com/subgraphs/name/poap-xyz/poap",
@@ -54,9 +57,11 @@ export class POAPProvider implements Provider {
     this._options = { ...this._options, ...options };
   }
 
-  // Verify that the address that is passed in owns at least one POAP older than 15 days
+  // Verify that address defined in the payload owns at least one POAP older than 15 days
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    const address = payload.address.toLocaleLowerCase();
+    // if a signer is provider we will use that address to verify against
+    const address = (await getAddress(payload)).toLowerCase();
+
     let poapCheckResult = {
       hasPoaps: false,
       poapList: null as string[],

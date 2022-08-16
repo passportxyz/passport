@@ -71,6 +71,19 @@ import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
 import { GitcoinContributorStatisticsProvider } from "./providers/gitcoinGrantsContributorStatistics";
 import { GitcoinGranteeStatisticsProvider } from "./providers/gitcoinGrantsGranteeStatistics";
 
+// get DID from key
+const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
+const issuer = DIDKit.keyToDID("key", key);
+
+// export the current config
+export const config: {
+  key: string;
+  issuer: string;
+} = {
+  key,
+  issuer,
+};
+
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
@@ -279,19 +292,6 @@ app.get("/health", (req, res) => {
   res.status(200).send(data);
 });
 
-// get DID from key
-const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
-const issuer = DIDKit.keyToDID("key", key);
-
-// export the current config
-export const config: {
-  key: string;
-  issuer: string;
-} = {
-  key,
-  issuer,
-};
-
 // expose challenge entry point
 app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
   // get the payload from the JSON req body
@@ -362,6 +362,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
         );
         // ensure the only address we save is that of the signer
         payload.address = address;
+        payload.issuer = issuer;
         // the signer should be the address outlined in the challenge credential - rebuild the id to check for a full match
         const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
         const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;

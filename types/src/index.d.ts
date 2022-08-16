@@ -42,7 +42,13 @@ export type RequestPayload = {
   proofs?: {
     [k: string]: string;
   };
+  signer?: {
+    challenge: VerifiableCredential;
+    signature: string;
+    address: string;
+  };
   challenge?: string;
+  issuer?: string;
 };
 
 // response Object return by verify procedure
@@ -128,7 +134,7 @@ export type Passport = {
 export type DID = string;
 
 export type PROVIDER_ID =
-  | "SecondSigner"
+  | "Signer"
   | "Google"
   | "Ens"
   | "Poh"

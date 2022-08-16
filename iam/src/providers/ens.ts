@@ -6,6 +6,9 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { utils } from "ethers";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
+// ----- Credential verification
+import { getAddress } from "../utils/signer";
+
 // set the network rpc url based on env
 const RPC_URL = process.env.RPC_URL;
 
@@ -21,10 +24,10 @@ export class EnsProvider implements Provider {
     this._options = { ...this._options, ...options };
   }
 
-  // verify that the proof object contains valid === "true"
+  // Verify that the address defined in the payload has an ENS reverse lookup registered
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    let valid = false;
-    const { address } = payload;
+    // if a signer is provider we will use that address to verify against
+    const address = await getAddress(payload);
 
     try {
       // define a provider using the rpc url
@@ -32,15 +35,13 @@ export class EnsProvider implements Provider {
 
       // lookup ens name
       const reportedName: string = await provider.lookupAddress(address);
-
       if (!reportedName) return { valid: false, error: ["Ens name was not found for given address."] };
 
       // lookup the address resolved to an ens name
       const resolveAddress = await provider.resolveName(reportedName);
 
-      if (utils.getAddress(address) === utils.getAddress(resolveAddress)) {
-        valid = true;
-      }
+      // if the addresses match this is a valid ens lookup
+      const valid = utils.getAddress(address) === utils.getAddress(resolveAddress);
 
       return {
         valid: valid,

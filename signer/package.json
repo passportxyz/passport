@@ -1,5 +1,5 @@
 {
-  "name": "@gitcoin/passport-second-signer",
+  "name": "@gitcoin/passport-signer",
   "version": "1.0.0",
   "license": "MIT",
   "devDependencies": {

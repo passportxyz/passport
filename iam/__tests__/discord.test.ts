@@ -66,7 +66,7 @@ describe("Attempt verification", function () {
   });
 
   it("should return invalid payload when unable to retrieve auth token", async () => {
-    const logSpy = jest.spyOn(console, 'error').mockImplementation();
+    const logSpy = jest.spyOn(console, "error").mockImplementation();
 
     mockedAxios.post.mockImplementation(async (url, data, config) => {
       return {

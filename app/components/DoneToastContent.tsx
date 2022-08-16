@@ -9,7 +9,7 @@ export type CustomToastProps = {
 };
 
 // This content overrides Chakra UI Toast style in render function
-export const DoneToastContent = ({ providerId, result }: CustomToastProps): JSX.Element => {
+export const DoneToastContent = ({ providerId, result, message = false }: CustomToastProps): JSX.Element => {
   return (
     <div
       className="rounded-md bg-blue-darkblue text-white"
@@ -23,7 +23,7 @@ export const DoneToastContent = ({ providerId, result }: CustomToastProps): JSX.
         </div>
         <div className="flex-grow">
           <h2 className="title-font mb-2 text-lg font-bold">Done!</h2>
-          <p>Your {providerId} stamp has been verified.</p>
+          <p>{message || `Your ${providerId} stamp has been verified.`}</p>
         </div>
         <div>
           <button className="sticky top-0" onClick={result.onClose}>

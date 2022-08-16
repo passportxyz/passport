@@ -3,8 +3,11 @@ import type { Provider, ProviderOptions } from "../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Ethers library
-import { Contract, utils } from "ethers";
+import { Contract } from "ethers";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
+
+// ----- Credential verification
+import { getAddress } from "../utils/signer";
 
 // Proof of humanity contract address
 const POH_CONTRACT_ADDRESS = "0xC5E9dDebb09Cd64DfaCab4011A0D5cEDaf7c9BDb";
@@ -27,7 +30,7 @@ export const RPC_URL = process.env.RPC_URL;
 
 // Export a Poh Provider to carry out Proof of Humanity account is registered and active check and return a record object
 export class PohProvider implements Provider {
-  // Give the provider a type so that we can select it with a payload
+  // Give the provider a type so that we can select it from a payload
   type = "Poh";
   // Options can be set here and/or via the constructor
   _options = {};
@@ -37,11 +40,12 @@ export class PohProvider implements Provider {
     this._options = { ...this._options, ...options };
   }
 
-  // verify that the proof object contains valid === "true"
+  // Verify that the address defined in the payload exists in the POH register
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    let valid = false;
-    let { address } = payload;
-    const { proofs } = payload;
+    // if a signer is provider we will use that address to verify against
+    const address = await getAddress(payload);
+
+    // attempt to verify POH...
     try {
       // define a provider using the rpc url
       const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(RPC_URL);
@@ -49,15 +53,9 @@ export class PohProvider implements Provider {
       // load Proof of humanity contract
       const readContract = new Contract(POH_CONTRACT_ADDRESS, POH_ABI, provider);
 
-      // if proof for second address is provided, use that instead...
-      if (proofs && proofs.scndAddress && proofs.scndMessage && proofs.scndSignature) {
-        // pull the address and checksum so that its stored in a predictable format
-        address = utils.getAddress(utils.verifyMessage(proofs.scndMessage, proofs.scndSignature));
-      }
-
       // Checks to see if the address is registered with proof of humanity
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-      valid = await readContract.isRegistered(address);
+      const valid: boolean = await readContract.isRegistered(address);
 
       return {
         valid,

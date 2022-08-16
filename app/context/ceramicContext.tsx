@@ -74,8 +74,8 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: STAMP_PROVIDERS.Discord,
     stamp: undefined,
   },
-  SecondSigner: {
-    providerSpec: STAMP_PROVIDERS.SecondSigner,
+  Signer: {
+    providerSpec: STAMP_PROVIDERS.Signer,
     stamp: undefined,
   },
 };
