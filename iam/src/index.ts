@@ -36,18 +36,14 @@ import { Providers } from "./utils/providers";
 
 // ---- Identity Providers
 import { SimpleProvider } from "./providers/simple";
-import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
 import { GoogleProvider } from "./providers/google";
 import { TwitterProvider } from "./providers/twitter";
-import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
 import { EnsProvider } from "./providers/ens";
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
 import { FacebookProvider } from "./providers/facebook";
 import { BrightIdProvider } from "./providers/brightid";
 import { GithubProvider } from "./providers/github";
-import { FiveOrMoreGithubRepos } from "./providers/fiveOrMoreGithubRepos";
-import { TenOrMoreGithubFollowers, FiftyOrMoreGithubFollowers } from "./providers/githubFollowers";
 import { ForkedGithubRepoProvider } from "./providers/githubForkedRepoProvider";
 import { StarredGithubRepoProvider } from "./providers/githubStarredRepoProvider";
 import { LinkedinProvider } from "./providers/linkedin";
@@ -59,9 +55,6 @@ import {
   TwitterFollowerGTE1000Provider,
   TwitterFollowerGT5000Provider,
 } from "./providers/TwitterFollower";
-import { FacebookFriendsProvider } from "./providers/facebookFriends";
-import { FacebookProfilePictureProvider } from "./providers/facebookProfilePicture";
-import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
 import { SelfStakingBronzeProvider, SelfStakingSilverProvider, SelfStakingGoldProvider } from "./providers/selfStaking";
 import {
   CommunityStakingBronzeProvider,
@@ -73,24 +66,18 @@ import {
 const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
-  new ClearTextSimpleProvider(),
   new GoogleProvider(),
   new TwitterProvider(),
   new EnsProvider(),
   new PohProvider(),
   new POAPProvider(),
   new FacebookProvider(),
-  new FacebookFriendsProvider(),
-  new FacebookProfilePictureProvider(),
   new BrightIdProvider(),
   new GithubProvider(),
-  new ClearTextGithubOrgProvider(),
   new LinkedinProvider(),
   new DiscordProvider(),
-  new FiveOrMoreGithubRepos(),
-  new TenOrMoreGithubFollowers(),
-  new FiftyOrMoreGithubFollowers(),
-  new ClearTextTwitterProvider(),
+  new ForkedGithubRepoProvider(),
+  new StarredGithubRepoProvider(),
   new TwitterTweetGT10Provider(),
   new TwitterFollowerGT100Provider(),
   new TwitterFollowerGT500Provider(),
@@ -228,7 +215,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
                 // construct a set of Proofs to issue a credential against (this record will be used to generate a sha256 hash of any associated PII)
                 const record: ProofRecord = {
                   // type and address will always be known and can be obtained from the resultant credential
-                  type: verifiedPayload.record.pii ? `${payload.type}#${verifiedPayload.record.pii}` : payload.type,
+                  type: payload.type,
                   // version is defined by entry point
                   version: "0.0.0",
                   // extend/overwrite with record returned from the provider

@@ -318,4 +318,4 @@ describe("Attempt verification", function () {
 
     expect(forkedGithubRepoProviderPayload).toMatchObject({ valid: false });
   });
-}); 
+});

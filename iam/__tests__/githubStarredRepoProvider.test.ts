@@ -444,7 +444,7 @@ describe("Attempt verification", function () {
       },
     } as unknown as RequestPayload);
 
-    expect(mockedAxios.post).toBeCalledTimes(1);
+    expect(mockedAxios.post).toHaveBeenCalledTimes(1);
 
     // Check the request to get the token
     expect(mockedAxios.post).toBeCalledWith(
@@ -454,6 +454,18 @@ describe("Attempt verification", function () {
         headers: { Accept: "application/json" },
       }
     );
+
+    expect(mockedAxios.get).toHaveBeenCalledTimes(2);
+
+    // Check the request to get the user
+    expect(mockedAxios.get).toBeCalledWith("https://api.github.com/user", {
+      headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
+    });
+
+    // Check the request to get the repo
+    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`, {
+      headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
+    });
 
     expect(starredGithubRepoProviderPayload).toMatchObject({ valid: false });
   });
