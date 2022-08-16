@@ -42,8 +42,12 @@ import { EnsProvider } from "./providers/ens";
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
 import { FacebookProvider } from "./providers/facebook";
+import { FacebookFriendsProvider } from "./providers/facebookFriends";
+import { FacebookProfilePictureProvider } from "./providers/facebookProfilePicture";
 import { BrightIdProvider } from "./providers/brightid";
 import { GithubProvider } from "./providers/github";
+import { FiveOrMoreGithubRepos } from "./providers/fiveOrMoreGithubRepos";
+import { TenOrMoreGithubFollowers, FiftyOrMoreGithubFollowers } from "./providers/githubFollowers";
 import { ForkedGithubRepoProvider } from "./providers/githubForkedRepoProvider";
 import { StarredGithubRepoProvider } from "./providers/githubStarredRepoProvider";
 import { LinkedinProvider } from "./providers/linkedin";
@@ -72,8 +76,15 @@ const providers = new Providers([
   new PohProvider(),
   new POAPProvider(),
   new FacebookProvider(),
+  new FacebookFriendsProvider(),
+  new FacebookProfilePictureProvider(),
   new BrightIdProvider(),
   new GithubProvider(),
+  new FiveOrMoreGithubRepos(),
+  new TenOrMoreGithubFollowers(),
+  new FiftyOrMoreGithubFollowers(),
+  new ForkedGithubRepoProvider(),
+  new StarredGithubRepoProvider(),
   new LinkedinProvider(),
   new DiscordProvider(),
   new ForkedGithubRepoProvider(),
@@ -90,8 +101,6 @@ const providers = new Providers([
   new CommunityStakingBronzeProvider(),
   new CommunityStakingSilverProvider(),
   new CommunityStakingGoldProvider(),
-  new ForkedGithubRepoProvider(),
-  new StarredGithubRepoProvider(),
 ]);
 
 // create the app and run on port

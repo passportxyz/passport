@@ -66,7 +66,7 @@ export class FacebookProvider implements Provider {
   }
 }
 
-async function verifyFacebook(userAccessToken: string): Promise<Response> {
+export async function verifyFacebook(userAccessToken: string): Promise<Response> {
   // this is an alternative to generating an app auth token through a separate endpoint
   // see https://developers.facebook.com/docs/facebook-login/guides/access-tokens#generating-an-app-access-token
   const appAccessToken = `${APP_ID}|${APP_SECRET}`;
