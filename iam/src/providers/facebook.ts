@@ -21,7 +21,7 @@ export type FacebookDebugResponse = {
 };
 
 // Facebook Graph API call response
-export type Response = {
+type Response = {
   data?: { data: FacebookDebugResponse };
   status?: number;
   statusText?: string;

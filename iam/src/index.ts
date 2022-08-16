@@ -36,20 +36,22 @@ import { Providers } from "./utils/providers";
 
 // ---- Identity Providers
 import { SimpleProvider } from "./providers/simple";
-import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
 import { GoogleProvider } from "./providers/google";
 import { TwitterProvider } from "./providers/twitter";
-import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
 import { EnsProvider } from "./providers/ens";
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
 import { FacebookProvider } from "./providers/facebook";
+import { FacebookFriendsProvider } from "./providers/facebookFriends";
+import { FacebookProfilePictureProvider } from "./providers/facebookProfilePicture";
 import { BrightIdProvider } from "./providers/brightid";
 import { GithubProvider } from "./providers/github";
-import { LinkedinProvider } from "./providers/linkedin";
-import { DiscordProvider } from "./providers/discord";
 import { FiveOrMoreGithubRepos } from "./providers/fiveOrMoreGithubRepos";
 import { TenOrMoreGithubFollowers, FiftyOrMoreGithubFollowers } from "./providers/githubFollowers";
+import { ForkedGithubRepoProvider } from "./providers/githubForkedRepoProvider";
+import { StarredGithubRepoProvider } from "./providers/githubStarredRepoProvider";
+import { LinkedinProvider } from "./providers/linkedin";
+import { DiscordProvider } from "./providers/discord";
 import { TwitterTweetGT10Provider } from "./providers/twitterTweets";
 import {
   TwitterFollowerGT100Provider,
@@ -57,21 +59,20 @@ import {
   TwitterFollowerGTE1000Provider,
   TwitterFollowerGT5000Provider,
 } from "./providers/TwitterFollower";
-import { FacebookFriendsProvider } from "./providers/facebookFriends";
-import { FacebookProfilePictureProvider } from "./providers/facebookProfilePicture";
-import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
 import { SelfStakingBronzeProvider, SelfStakingSilverProvider, SelfStakingGoldProvider } from "./providers/selfStaking";
 import {
   CommunityStakingBronzeProvider,
   CommunityStakingSilverProvider,
   CommunityStakingGoldProvider,
 } from "./providers/communityStaking";
+import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
+import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
+import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
-  new ClearTextSimpleProvider(),
   new GoogleProvider(),
   new TwitterProvider(),
   new EnsProvider(),
@@ -82,13 +83,15 @@ const providers = new Providers([
   new FacebookProfilePictureProvider(),
   new BrightIdProvider(),
   new GithubProvider(),
-  new ClearTextGithubOrgProvider(),
-  new LinkedinProvider(),
-  new DiscordProvider(),
   new FiveOrMoreGithubRepos(),
   new TenOrMoreGithubFollowers(),
   new FiftyOrMoreGithubFollowers(),
-  new ClearTextTwitterProvider(),
+  new ForkedGithubRepoProvider(),
+  new StarredGithubRepoProvider(),
+  new LinkedinProvider(),
+  new DiscordProvider(),
+  new ForkedGithubRepoProvider(),
+  new StarredGithubRepoProvider(),
   new TwitterTweetGT10Provider(),
   new TwitterFollowerGT100Provider(),
   new TwitterFollowerGT500Provider(),
@@ -98,9 +101,11 @@ const providers = new Providers([
   new SelfStakingSilverProvider(),
   new SelfStakingGoldProvider(),
   new CommunityStakingBronzeProvider(),
-  new CommunityStakingBronzeProvider(),
   new CommunityStakingSilverProvider(),
   new CommunityStakingGoldProvider(),
+  new ClearTextSimpleProvider(),
+  new ClearTextTwitterProvider(),
+  new ClearTextGithubOrgProvider(),
 ]);
 
 // create the app and run on port
