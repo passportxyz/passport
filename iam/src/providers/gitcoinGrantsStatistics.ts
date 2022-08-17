@@ -47,7 +47,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
       // Only check the contribution condition if a valid github id has been received
       valid = !!githubUser.id;
       if (valid) {
-        const contributionStatistic = await getGitcoinStatistics(this.dataUrl, githubUser.login);
+        const gitcoinGrantsStatistic = await getGitcoinStatistics(this.dataUrl, githubUser.login);
         valid = contributionStatistic[this._options.receivingAttribute] >= this._options.threshold;
       }
     } catch (e) {
