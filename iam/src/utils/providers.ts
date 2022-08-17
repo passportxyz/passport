@@ -49,9 +49,9 @@ export class Providers {
   }
 
   // Given the payload is valid return the response of the selected Providers verification proceedure
-  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+  async verify(type: string, payload: RequestPayload): Promise<VerifiedPayload> {
     // collect provider from options
-    const provider = this._providers[payload.type];
+    const provider = this._providers[type];
 
     // if a provider is available - use it to verify the payload
     if (provider) {

@@ -70,6 +70,7 @@ const requestAccessToken = async (code: string): Promise<string> => {
     return tokenResponse.access_token;
   } catch (e: unknown) {
     const error = e as { response: { data: { error_description: string } } };
+    // eslint-disable-next-line no-console
     console.error("Error when verifying discord account for user:", error.response?.data);
     throw e;
   }

@@ -121,6 +121,61 @@ app.use(cors());
 const errorRes = async (res: Response, error: string, errorCode: number): Promise<Response> =>
   await new Promise((resolve) => resolve(res.status(errorCode).json({ error })));
 
+// return response for given payload
+const issueCredential = async (
+  address: string,
+  type: string,
+  payload: RequestPayload
+): Promise<CredentialResponseBody> => {
+  try {
+    const verifiedPayload = await providers.verify(type, payload);
+    // check if the request is valid against the selected Identity Provider
+    if (verifiedPayload && verifiedPayload?.valid === true) {
+      // construct a set of Proofs to issue a credential against (this record will be used to generate a sha256 hash of any associated PII)
+      const record: ProofRecord = {
+        // type and address will always be known and can be obtained from the resultant credential
+        type: verifiedPayload.record.pii ? `${payload.type}#${verifiedPayload.record.pii}` : payload.type,
+        // version is defined by entry point
+        version: "0.0.0",
+        // extend/overwrite with record returned from the provider
+        ...(verifiedPayload?.record || {}),
+      };
+
+      try {
+        // generate a VC for the given payload
+        const { credential } = await issueHashedCredential(DIDKit, key, address, record);
+
+        return {
+          record,
+          credential,
+        } as CredentialResponseBody;
+      } catch (error: unknown) {
+        if (error) {
+          // return error msg indicating a failure producing VC
+          throw {
+            error: "Unable to produce a verifiable credential",
+            code: 400,
+          };
+        }
+      }
+    } else {
+      // return error message if an error is present
+      throw {
+        error: (verifiedPayload.error && verifiedPayload.error.join(", ")) || "Unable to verify proofs",
+        code: 403,
+      };
+    }
+  } catch (error: unknown) {
+    // error response
+    throw error && (error as CredentialResponseBody).error
+      ? error
+      : {
+          error: "Unable to verify with provider",
+          code: 400,
+        };
+  }
+};
+
 // health check endpoint
 app.get("/health", (req, res) => {
   const data = {
@@ -131,9 +186,8 @@ app.get("/health", (req, res) => {
   res.status(200).send(data);
 });
 
-const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
-
 // get DID from key
+const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
 const issuer = DIDKit.keyToDID("key", key);
 
 // export the current config
@@ -179,7 +233,7 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
         .catch((error) => {
           if (error) {
             // return error msg indicating a failure producing VC
-            return errorRes(res, "Unable to produce a verifiable credential", 400);
+            return void errorRes(res, "Unable to produce a verifiable credential", 400);
           }
         });
     } else {
@@ -220,49 +274,30 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
         const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
         // type is required because we need it to select the correct Identity Provider
         if (isSigner && isType && payload && payload.type) {
-          // each provider will apply business logic to the payload in-order to set the `valid` bool on the returned VerifiedPayload
-          return providers
-            .verify(payload)
-            .then((verifiedPayload) => {
-              // check if the request is valid against the selected Identity Provider
-              if (verifiedPayload && verifiedPayload?.valid === true) {
-                // construct a set of Proofs to issue a credential against (this record will be used to generate a sha256 hash of any associated PII)
-                const record: ProofRecord = {
-                  // type and address will always be known and can be obtained from the resultant credential
-                  type: verifiedPayload.record.pii ? `${payload.type}#${verifiedPayload.record.pii}` : payload.type,
-                  // version is defined by entry point
-                  version: "0.0.0",
-                  // extend/overwrite with record returned from the provider
-                  ...(verifiedPayload?.record || {}),
-                };
-
-                // generate a VC for the given payload
-                return issueHashedCredential(DIDKit, key, address, record)
-                  .then(({ credential }) => {
-                    return res.json({
-                      record,
-                      credential,
-                    } as CredentialResponseBody);
-                  })
-                  .catch((error) => {
-                    if (error) {
-                      // return error msg indicating a failure producing VC
-                      return errorRes(res, "Unable to produce a verifiable credential", 400);
-                    }
-                  });
-              } else {
-                // return error message if an error is present
-                return errorRes(
-                  res,
-                  (verifiedPayload.error && verifiedPayload.error.join(", ")) || "Unable to verify proofs",
-                  403
-                );
-              }
-            })
-            .catch(() => {
-              // error response
-              return void errorRes(res, "Unable to verify with provider", 400);
-            });
+          // if multiple types are being requested - produce and return multiple vc's
+          if (payload.types && payload.types.length) {
+            // if payload.types then we want to iterate and return a VC for each type
+            const responses = await Promise.all(
+              payload.types.map(async (type: string) => {
+                try {
+                  return await issueCredential(address, type, payload);
+                } catch (error: unknown) {
+                  return (await error) as CredentialResponseBody;
+                }
+              })
+            );
+            // return multiple responses in an array
+            return res.json(responses);
+          } else {
+            // make and return a single response
+            return issueCredential(address, payload.type, payload)
+              .then((response) => {
+                return res.json(response);
+              })
+              .catch((error: CredentialResponseBody) => {
+                return void errorRes(res, error.error, error.code);
+              });
+          }
         }
       }
 

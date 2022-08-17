@@ -36,6 +36,7 @@ export type VerifiableCredential = {
 // values received from client and fed into the verify route
 export type RequestPayload = {
   type: string;
+  types?: string[];
   address: string;
   version: string;
   proofs?: {
@@ -87,6 +88,7 @@ export type ValidResponseBody = {
 };
 export type ErrorResponseBody = {
   error: string;
+  code?: number;
 };
 export type CredentialResponseBody = ValidResponseBody & ErrorResponseBody;
 
