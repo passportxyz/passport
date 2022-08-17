@@ -113,7 +113,7 @@ describe("Attempt verification", function () {
     });
   });
 
-  it("handles valid verification attempt when no requestedClient is provided", async () => {
+  it("handles valid access token request when no requestedClient is provided", async () => {
     const clientId = process.env.GITHUB_CLIENT_ID;
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 
