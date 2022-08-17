@@ -113,6 +113,29 @@ describe("Attempt verification", function () {
     });
   });
 
+  it("handles valid verification attempt when no requestedClient is provided", async () => {
+    const clientId = process.env.GITHUB_CLIENT_ID;
+    const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+
+    const github = new ClearTextGithubOrgProvider();
+    const githubPayload = await github.verify({
+      proofs: {
+        code,
+      },
+      org,
+      requestedClient: undefined
+    } as unknown as GHUserRequestPayload);
+
+    // Check the request to get the token
+    expect(mockedAxios.post).toBeCalledWith(
+      `https://github.com/login/oauth/access_token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}`,
+      {},
+      {
+        headers: { Accept: "application/json" },
+      }
+    );
+  })
+
   it("should return invalid payload when unable to retrieve auth token", async () => {
     mockedAxios.post.mockImplementation(async (url, data, config) => {
       return {
