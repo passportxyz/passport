@@ -48,7 +48,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
       valid = !!githubUser.id;
       if (valid) {
         const gitcoinGrantsStatistic = await getGitcoinStatistics(this.dataUrl, githubUser.login);
-        valid = contributionStatistic[this._options.receivingAttribute] >= this._options.threshold;
+        valid = gitcoinGrantsStatistic[this._options.receivingAttribute] >= this._options.threshold;
       }
     } catch (e) {
       return { valid: false };
