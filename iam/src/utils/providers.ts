@@ -1,6 +1,6 @@
 // ---- Types
 import type { Provider } from "../types";
-import type { RequestPayload, ChallengePayload, VerifiedPayload } from "@gitcoin/passport-types";
+import type { RequestPayload, ChallengePayload, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
 
 // ---- Return randomBytes as a challenge to test that the user has control of a provided address
 import crypto from "crypto";
@@ -58,14 +58,14 @@ export class Providers {
   }
 
   // Given the payload is valid return the response of the selected Providers verification proceedure
-  async verify(type: string, payload: RequestPayload): Promise<VerifiedPayload> {
+  async verify(type: string, payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     // collect provider from options
     const provider = this._providers[type];
 
     // if a provider is available - use it to verify the payload
     if (provider) {
       // return the verification response
-      return await provider.verify(payload);
+      return await provider.verify(payload, context);
     }
 
     // unable to verify without provider

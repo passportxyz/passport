@@ -21,6 +21,7 @@ import {
   ChallengeRequestBody,
   VerifyRequestBody,
   CredentialResponseBody,
+  ProviderContext,
 } from "@gitcoin/passport-types";
 
 // ---- Generate & Verify methods
@@ -231,10 +232,11 @@ const errorRes = async (res: Response, error: string, errorCode: number): Promis
 const issueCredential = async (
   address: string,
   type: string,
-  payload: RequestPayload
+  payload: RequestPayload,
+  context: ProviderContext
 ): Promise<CredentialResponseBody> => {
   try {
-    const verifiedPayload = await providers.verify(type, payload);
+    const verifiedPayload = await providers.verify(type, payload, context);
     // check if the request is valid against the selected Identity Provider
     if (verifiedPayload && verifiedPayload?.valid === true) {
       // construct a set of Proofs to issue a credential against (this record will be used to generate a sha256 hash of any associated PII)
@@ -351,6 +353,9 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
   const challenge = requestBody.challenge;
   // get the payload from the JSON req body
   const payload = requestBody.payload;
+  // define a context to be shared between providers in the verify request
+  // this is intended as a temporary storage for providers to share data
+  const context: ProviderContext = {};
 
   // Check the challenge and the payload is valid before issuing a credential from a registered provider
   return void verifyCredential(DIDKit, challenge)
@@ -371,20 +376,22 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
           // if multiple types are being requested - produce and return multiple vc's
           if (payload.types && payload.types.length) {
             // if payload.types then we want to iterate and return a VC for each type
-            const responses = await Promise.all(
-              payload.types.map(async (type: string) => {
-                try {
-                  return await issueCredential(address, type, payload);
-                } catch (error: unknown) {
-                  return (await error) as CredentialResponseBody;
-                }
-              })
-            );
+            const responses: CredentialResponseBody[] = [];
+            for (let i = 0; i < payload.types.length; i++) {
+              try {
+                const type = payload.types[i];
+                const response = await issueCredential(address, type, payload, context);
+                responses.push(response);
+              } catch (error: unknown) {
+                responses.push((await error) as CredentialResponseBody);
+              }
+            }
+
             // return multiple responses in an array
             return res.json(responses);
           } else {
             // make and return a single response
-            return issueCredential(address, payload.type, payload)
+            return issueCredential(address, payload.type, payload, context)
               .then((response) => {
                 return res.json(response);
               })
