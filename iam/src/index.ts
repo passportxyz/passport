@@ -68,6 +68,8 @@ import {
 import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
 import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
+import { GitcoinContributorStatisticsProvider } from "./providers/gitcoinGrantsContributorStatistics";
+import { GitcoinGranteeStatisticsProvider } from "./providers/gitcoinGrantsGranteeStatistics";
 
 // Initiate providers - new Providers should be registered in this array...
 const providers = new Providers([
@@ -106,6 +108,97 @@ const providers = new Providers([
   new ClearTextSimpleProvider(),
   new ClearTextTwitterProvider(),
   new ClearTextGithubOrgProvider(),
+  /////////////////////////////////////////////////////////////
+  // Start adding the specific gitcoin contributor providers
+  /////////////////////////////////////////////////////////////
+  new GitcoinContributorStatisticsProvider({
+    threshold: 1,
+    receivingAttribute: "num_grants_contribute_to",
+    recordAttribute: "numGrantsContributeToGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 10,
+    receivingAttribute: "num_grants_contribute_to",
+    recordAttribute: "numGrantsContributeToGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 25,
+    receivingAttribute: "num_grants_contribute_to",
+    recordAttribute: "numGrantsContributeToGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 100,
+    receivingAttribute: "num_grants_contribute_to",
+    recordAttribute: "numGrantsContributeToGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 10,
+    receivingAttribute: "total_contribution_amount",
+    recordAttribute: "totalContributionAmountGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 100,
+    receivingAttribute: "total_contribution_amount",
+    recordAttribute: "totalContributionAmountGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 1000,
+    receivingAttribute: "total_contribution_amount",
+    recordAttribute: "totalContributionAmountGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 1,
+    receivingAttribute: "num_rounds_contribute_to",
+    recordAttribute: "numRoundsContributedToGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 1,
+    receivingAttribute: "num_gr14_contributions",
+    recordAttribute: "numGr14ContributionsGte",
+  }),
+  /////////////////////////////////////////////////////////////
+  // Start adding the specific gitcoin grantee providers
+  /////////////////////////////////////////////////////////////
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 1,
+    receivingAttribute: "num_owned_grants",
+    recordAttribute: "numOwnedGrants",
+  }),
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 10,
+    receivingAttribute: "num_grant_contributors",
+    recordAttribute: "numGrantContributors",
+  }),
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 25,
+    receivingAttribute: "num_grant_contributors",
+    recordAttribute: "numGrantContributors",
+  }),
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 100,
+    receivingAttribute: "num_grant_contributors",
+    recordAttribute: "numGrantContributors",
+  }),
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 100,
+    receivingAttribute: "total_contribution_amount",
+    recordAttribute: "totalContributionAmount",
+  }),
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 1000,
+    receivingAttribute: "total_contribution_amount",
+    recordAttribute: "totalContributionAmount",
+  }),
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 10000,
+    receivingAttribute: "total_contribution_amount",
+    recordAttribute: "totalContributionAmount",
+  }),
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 1,
+    receivingAttribute: "num_grants_in_eco_and_cause_rounds",
+    recordAttribute: "numGrantsInEcoAndCauseRound",
+  }),
 ]);
 
 // create the app and run on port

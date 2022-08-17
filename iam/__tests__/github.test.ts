@@ -50,6 +50,9 @@ describe("Attempt verification", function () {
       },
     } as unknown as RequestPayload);
 
+    expect(axios.post).toHaveBeenCalledTimes(1);
+    expect(axios.get).toHaveBeenCalledTimes(1);
+
     // Check the request to get the token
     expect(mockedAxios.post).toBeCalledWith(
       `https://github.com/login/oauth/access_token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}`,
@@ -87,6 +90,9 @@ describe("Attempt verification", function () {
       },
     } as unknown as RequestPayload);
 
+    expect(axios.post).toHaveBeenCalledTimes(1);
+    expect(axios.get).toHaveBeenCalledTimes(0);
+
     expect(githubPayload).toMatchObject({ valid: false });
   });
 
@@ -110,6 +116,9 @@ describe("Attempt verification", function () {
       },
     } as unknown as RequestPayload);
 
+    expect(axios.post).toHaveBeenCalledTimes(1);
+    expect(axios.get).toHaveBeenCalledTimes(1);
+
     expect(githubPayload).toMatchObject({ valid: false });
   });
 
@@ -127,6 +136,9 @@ describe("Attempt verification", function () {
         code,
       },
     } as unknown as RequestPayload);
+
+    expect(axios.post).toHaveBeenCalledTimes(1);
+    expect(axios.get).toHaveBeenCalledTimes(1);
 
     expect(githubPayload).toMatchObject({ valid: false });
   });
