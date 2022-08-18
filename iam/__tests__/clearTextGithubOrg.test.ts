@@ -1,5 +1,5 @@
 // ---- Test subject
-import { ClearTextGithubOrgProvider } from "../src/providers/clearTextGithubOrg";
+import { ClearTextGithubOrgProvider, ClientType, GHUserRequestPayload } from "../src/providers/clearTextGithubOrg";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 
@@ -9,6 +9,8 @@ import axios from "axios";
 jest.mock("axios");
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+const requestedClient = ClientType.GrantHub;
 
 const handle = "my-login-handle";
 
@@ -73,15 +75,16 @@ beforeEach(() => {
 describe("Attempt verification", function () {
   const pii = `${org}#${validGithubUserResponse.data.id}`;
   it("handles valid verification attempt", async () => {
-    const clientId = process.env.GITHUB_CLIENT_ID;
-    const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+    const clientId = process.env.GRANT_HUB_GITHUB_CLIENT_ID;
+    const clientSecret = process.env.GRANT_HUB_GITHUB_CLIENT_SECRET;
     const github = new ClearTextGithubOrgProvider();
     const githubPayload = await github.verify({
       proofs: {
         code,
       },
       org,
-    } as unknown as RequestPayload);
+      requestedClient,
+    } as unknown as GHUserRequestPayload);
 
     // Check the request to get the token
     expect(mockedAxios.post).toBeCalledWith(
@@ -110,6 +113,29 @@ describe("Attempt verification", function () {
     });
   });
 
+  it("handles valid access token request when no requestedClient is provided", async () => {
+    const clientId = process.env.GITHUB_CLIENT_ID;
+    const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+
+    const github = new ClearTextGithubOrgProvider();
+    const githubPayload = await github.verify({
+      proofs: {
+        code,
+      },
+      org,
+      requestedClient: undefined
+    } as unknown as GHUserRequestPayload);
+
+    // Check the request to get the token
+    expect(mockedAxios.post).toBeCalledWith(
+      `https://github.com/login/oauth/access_token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}`,
+      {},
+      {
+        headers: { Accept: "application/json" },
+      }
+    );
+  })
+
   it("should return invalid payload when unable to retrieve auth token", async () => {
     mockedAxios.post.mockImplementation(async (url, data, config) => {
       return {
@@ -124,7 +150,8 @@ describe("Attempt verification", function () {
         code,
       },
       org,
-    } as unknown as RequestPayload);
+      requestedClient,
+    } as unknown as GHUserRequestPayload);
 
     expect(githubPayload).toMatchObject({ valid: false });
   });
@@ -148,7 +175,8 @@ describe("Attempt verification", function () {
         code,
       },
       org,
-    } as unknown as RequestPayload);
+      requestedClient,
+    } as unknown as GHUserRequestPayload);
 
     expect(githubPayload).toMatchObject({ valid: false });
   });
@@ -167,7 +195,8 @@ describe("Attempt verification", function () {
         code,
       },
       org,
-    } as unknown as RequestPayload);
+      requestedClient,
+    } as unknown as GHUserRequestPayload);
 
     expect(githubPayload).toMatchObject({ valid: false });
   });
@@ -188,7 +217,8 @@ describe("Attempt verification", function () {
         code,
       },
       org,
-    } as unknown as RequestPayload);
+      requestedClient,
+    } as unknown as GHUserRequestPayload);
 
     expect(githubPayload).toMatchObject({ valid: false });
   });
@@ -207,7 +237,8 @@ describe("Attempt verification", function () {
         code,
       },
       org,
-    } as unknown as RequestPayload);
+      requestedClient,
+    } as unknown as GHUserRequestPayload);
 
     expect(githubPayload).toMatchObject({ valid: false });
   });

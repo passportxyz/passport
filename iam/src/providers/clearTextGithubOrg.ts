@@ -1,7 +1,6 @@
 // ----- Types
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../types";
-import { requestAccessToken } from "./github";
 import axios from "axios";
 
 export type GithubTokenResponse = {
@@ -14,7 +13,12 @@ export type GithubFindMyUserResponse = {
   type?: string;
 };
 
-type GHUserRequestPayload = RequestPayload & {
+export enum ClientType {
+  GrantHub,
+}
+
+export type GHUserRequestPayload = RequestPayload & {
+  requestedClient: ClientType;
   org?: string;
 };
 
@@ -48,7 +52,7 @@ export class ClearTextGithubOrgProvider implements Provider {
       pii;
 
     try {
-      ghVerification = await verifyGithub(payload.proofs.code, payload.org);
+      ghVerification = await verifyGithub(payload.proofs.code, payload.org, payload.requestedClient);
     } catch (e) {
       return { valid: false };
     } finally {
@@ -96,9 +100,39 @@ const verifyOrg = (data: Organization[], providedOrg: string): GithubMyOrg => {
   };
 };
 
-const verifyGithub = async (code: string, providedOrg: string): Promise<GHVerification> => {
+const requestAccessToken = async (code: string, requestedClient: ClientType): Promise<string> => {
+  const clientId =
+    requestedClient === ClientType.GrantHub ? process.env.GRANT_HUB_GITHUB_CLIENT_ID : process.env.GITHUB_CLIENT_ID;
+  const clientSecret =
+    requestedClient === ClientType.GrantHub
+      ? process.env.GRANT_HUB_GITHUB_CLIENT_SECRET
+      : process.env.GITHUB_CLIENT_SECRET;
+
+  // Exchange the code for an access token
+  const tokenRequest = await axios.post(
+    `https://github.com/login/oauth/access_token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}`,
+    {},
+    {
+      headers: { Accept: "application/json" },
+    }
+  );
+
+  if (tokenRequest.status != 200) {
+    throw `Post for request returned status code ${tokenRequest.status} instead of the expected 200`;
+  }
+
+  const tokenResponse = tokenRequest.data as GithubTokenResponse;
+
+  return tokenResponse.access_token;
+};
+
+const verifyGithub = async (
+  code: string,
+  providedOrg: string,
+  requestedClient: ClientType
+): Promise<GHVerification> => {
   // retrieve user's auth bearer token to authenticate client
-  const accessToken = await requestAccessToken(code);
+  const accessToken = await requestAccessToken(code, requestedClient);
 
   // Now that we have an access token fetch the user details
   const userRequest: GithubUserResponse = await axios.get("https://api.github.com/user", {
