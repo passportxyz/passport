@@ -70,6 +70,8 @@ import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
 import { GitcoinContributorStatisticsProvider } from "./providers/gitcoinGrantsContributorStatistics";
 import { GitcoinGranteeStatisticsProvider } from "./providers/gitcoinGrantsGranteeStatistics";
+import { SnapshotProposalsProvider } from "./providers/snapshotProposalsProvider";
+import { SnapshotVotesProvider } from "./providers/snapshotVotesProvider";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -121,6 +123,8 @@ const providers = new Providers([
   new ClearTextSimpleProvider(),
   new ClearTextTwitterProvider(),
   new ClearTextGithubOrgProvider(),
+  new SnapshotProposalsProvider(),
+  new SnapshotVotesProvider(),
   /////////////////////////////////////////////////////////////
   // Start adding the specific gitcoin contributor providers
   /////////////////////////////////////////////////////////////
