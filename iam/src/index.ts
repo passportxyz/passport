@@ -76,6 +76,7 @@ import { SnapshotVotesProvider } from "./providers/snapshotVotesProvider";
 import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
 import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./providers/ethTransactions";
 import { NFTProvider } from "./providers/nft";
+import { GitPOAPProvider } from "./providers/gitpoap";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
