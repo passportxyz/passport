@@ -144,22 +144,22 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     }
   }, [ceramicDatabase]);
 
-  const fetchPassport = async (database: CeramicDatabase): Promise<void> => {
-    setIsLoadingPassport(IsLoadingPassportState.Loading);
+  const fetchPassport = async (database: CeramicDatabase, skipLoadingState?: boolean): Promise<void> => {
+    if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
     // fetch, clean and set the new Passport state
     let passport = (await database.getPassport()) as Passport;
     if (passport) {
       passport = cleanPassport(passport, database) as Passport;
       hydrateAllProvidersState(passport);
       setPassport(passport);
-      setIsLoadingPassport(IsLoadingPassportState.Idle);
+      if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Idle);
     } else if (passport === false) {
       handleCreatePassport();
     } else {
       // something is wrong with Ceramic...
       datadogRum.addError("Ceramic connection failed", { address });
       setPassport(passport);
-      setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
+      if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
     }
   };
 
@@ -195,7 +195,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const handleAddStamp = async (stamp: Stamp): Promise<void> => {
     if (ceramicDatabase) {
       await ceramicDatabase.addStamp(stamp);
-      await fetchPassport(ceramicDatabase);
+      await fetchPassport(ceramicDatabase, true);
     }
   };
 
@@ -205,7 +205,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       await new Promise((r) =>
         // We need to delay the loading of stamps, in order for the deletion to be reflected in ceramic
         setTimeout(async () => {
-          await fetchPassport(ceramicDatabase);
+          await fetchPassport(ceramicDatabase, true);
           r(0);
         }, 2000)
       );
