@@ -37,8 +37,7 @@ export const Card = ({
   const onDeleteStamp = () => {
     if (streamId) {
       setDeleting.on();
-      handleDeleteStamp(streamId);
-      setTimeout(() => {}, 2000);
+      handleDeleteStamp(streamId).finally(() => setDeleting.off());
     }
   };
 
