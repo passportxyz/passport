@@ -6,6 +6,7 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 export type CustomToastProps = {
   providerId: PROVIDER_ID;
   result: any;
+  message?: boolean | string;
 };
 
 // This content overrides Chakra UI Toast style in render function

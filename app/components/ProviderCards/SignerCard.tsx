@@ -136,11 +136,11 @@ export default function SignerCard(): JSX.Element {
       },
       signer as { signMessage: (message: string) => Promise<string> }
     )
-      .then(async (verified: VerifiableCredentialRecord): void => {
+      .then(async (verified: VerifiableCredentialRecord): Promise<void> => {
         // tot the number of added stamps
         let added = 0;
         // because we provided a types array in the params we expect to receive a credentials array in the response...
-        for (const cred in verified.credentials) {
+        for (const cred of verified.credentials || []) {
           if (!cred.error) {
             // add each of the requested/received stamps to the passport...
             if (cred.record?.type === "Poh") {
@@ -162,7 +162,6 @@ export default function SignerCard(): JSX.Element {
                 credential: cred.credential,
               });
             }
-          } else {
           }
         }
         // Custom Success Toast
