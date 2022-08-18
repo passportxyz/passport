@@ -66,4 +66,9 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     name: "Ethereum Account",
     description: "Additional Ethereum account",
   },
+  GitPOAP: {
+    icon: "./assets/gitPOAPStampIcon.svg",
+    name: "GitPOAP",
+    description: "GitPOAP Verification",
+  },
 };
