@@ -133,6 +133,7 @@ export const providers = new Providers([
   new EthGasProvider(),
   new FirstEthTxnProvider(),
   new EthGTEOneTxnProvider(),
+  new GitPOAPProvider(),
   /////////////////////////////////////////////////////////////
   // Start adding the specific gitcoin contributor providers
   /////////////////////////////////////////////////////////////
