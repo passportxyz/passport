@@ -7,7 +7,7 @@ import axios from "axios";
 import { DateTime } from "luxon";
 
 // Use GitPOAP Public API to get a list of tokens for that address
-const GITPOAP_API_URL = "https://public-api.gitpoap.io/";
+const GITPOAP_API_URL = "https://public-api.gitpoap.io";
 
 // GitPOAP Public API return type
 export type GitPOAP = {
@@ -39,7 +39,7 @@ export class GitPOAPProvider implements Provider {
     let gitpoaps: GitPOAP[] = [];
 
     try {
-      const { data } = await axios.get<GitPOAP[]>(`${GITPOAP_API_URL}/vi/address/${address}/gitpoaps`, {
+      const { data } = await axios.get<GitPOAP[]>(`${GITPOAP_API_URL}/v1/address/${address}/gitpoaps`, {
         headers: { "Content-Type": "application/json" },
       });
       gitpoaps = data;
