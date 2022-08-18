@@ -16,6 +16,7 @@ export interface CeramicContextState {
   allProvidersState: AllProvidersState;
   handleCreatePassport: () => Promise<void>;
   handleAddStamp: (stamp: Stamp) => Promise<void>;
+  handleAddStamps: (stamps: Stamp[]) => Promise<void>;
   handleDeleteStamp: (streamId: string) => Promise<void>;
   userDid: string | undefined;
 }
@@ -86,6 +87,7 @@ const startingState: CeramicContextState = {
   allProvidersState: startingAllProvidersState,
   handleCreatePassport: async () => {},
   handleAddStamp: async () => {},
+  handleAddStamps: async () => {},
   handleDeleteStamp: async (streamId: string) => {},
   userDid: undefined,
 };
@@ -199,6 +201,13 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     }
   };
 
+  const handleAddStamps = async (stamps: Stamp[]): Promise<void> => {
+    if (ceramicDatabase) {
+      await ceramicDatabase.addStamps(stamps);
+      await fetchPassport(ceramicDatabase, true);
+    }
+  };
+
   const handleDeleteStamp = async (streamId: string): Promise<void> => {
     if (ceramicDatabase) {
       await ceramicDatabase.deleteStamp(streamId);
@@ -244,6 +253,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       allProvidersState,
       handleCreatePassport,
       handleAddStamp,
+      handleAddStamps,
       handleDeleteStamp,
       userDid,
     }),
@@ -256,6 +266,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     allProvidersState,
     handleCreatePassport,
     handleAddStamp,
+    handleAddStamps,
     handleDeleteStamp,
     userDid,
   };

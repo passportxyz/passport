@@ -73,6 +73,7 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
       },
     },
     handleAddStamp: jest.fn(),
+    handleAddStamps: jest.fn(),
     handleCreatePassport: jest.fn(),
     handleDeleteStamp: jest.fn(),
     ...initialState,

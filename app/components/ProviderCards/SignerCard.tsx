@@ -16,7 +16,13 @@ import { CeramicContext } from "../../context/ceramicContext";
 import { UserContext } from "../../context/userContext";
 
 // --- Types
-import { PROVIDER_ID, Stamp, VerifiableCredentialRecord } from "@gitcoin/passport-types";
+import {
+  PROVIDER_ID,
+  Stamp,
+  VerifiableCredentialRecord,
+  VerifiableCredential,
+  CredentialResponseBody,
+} from "@gitcoin/passport-types";
 
 // --- Constants
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
@@ -32,7 +38,7 @@ import { useToast } from "@chakra-ui/react";
 export default function SignerCard(): JSX.Element {
   // pull context in to element
   const { address, signer } = useContext(UserContext);
-  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
+  const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [verificationInProgress, setVerificationInProgress] = useState(false);
   const toast = useToast();
 
@@ -114,9 +120,6 @@ export default function SignerCard(): JSX.Element {
       window.addEventListener("message", listener);
     });
 
-    // show the signatures...
-    console.log(extraSignature);
-
     // fetch the new credentials and save to the passport
     await fetchVerifiableCredential(
       iamUrl,
@@ -137,33 +140,21 @@ export default function SignerCard(): JSX.Element {
       signer as { signMessage: (message: string) => Promise<string> }
     )
       .then(async (verified: VerifiableCredentialRecord): Promise<void> => {
-        // tot the number of added stamps
-        let added = 0;
         // because we provided a types array in the params we expect to receive a credentials array in the response...
-        for (const cred of verified.credentials || []) {
-          if (!cred.error) {
-            // add each of the requested/received stamps to the passport...
-            if (cred.record?.type === "Poh") {
-              added++;
-              await handleAddStamp({
-                provider: "Poh",
-                credential: cred.credential,
-              });
-            } else if (cred.record?.type === "POAP") {
-              added++;
-              await handleAddStamp({
-                provider: "POAP",
-                credential: cred.credential,
-              });
-            } else if (cred.record?.type === "Ens") {
-              added++;
-              await handleAddStamp({
-                provider: "Ens",
-                credential: cred.credential,
-              });
-            }
-          }
-        }
+        const vcs =
+          verified.credentials
+            ?.map((cred: CredentialResponseBody): Stamp | undefined => {
+              if (!cred.error) {
+                // add each of the requested/received stamps to the passport...
+                return {
+                  provider: cred.record?.type as PROVIDER_ID,
+                  credential: cred.credential as VerifiableCredential,
+                };
+              }
+            })
+            .filter((v: Stamp | undefined) => v) || [];
+        // Add all the stamps to the passport at once
+        await handleAddStamps(vcs as Stamp[]);
         // Custom Success Toast
         toast({
           duration: 5000,
@@ -171,8 +162,8 @@ export default function SignerCard(): JSX.Element {
           render: (result: any) => (
             <DoneToastContent
               providerId={providerId}
-              message={`${added > 0 ? `Successfully added` : `Discovered`} ${added} stamp${
-                added !== 1 ? `s` : ``
+              message={`${vcs.length > 0 ? `Successfully added` : `Discovered`} ${vcs.length} stamp${
+                vcs.length !== 1 ? `s` : ``
               } using wallet: ${extraSignature?.addr}.`}
               result={result}
             />
