@@ -240,7 +240,7 @@ const issueCredential = async (
       // construct a set of Proofs to issue a credential against (this record will be used to generate a sha256 hash of any associated PII)
       const record: ProofRecord = {
         // type and address will always be known and can be obtained from the resultant credential
-        type: verifiedPayload.record.pii ? `${payload.type}#${verifiedPayload.record.pii}` : payload.type,
+        type: verifiedPayload.record.pii ? `${type}#${verifiedPayload.record.pii}` : type,
         // version is defined by entry point
         version: "0.0.0",
         // extend/overwrite with record returned from the provider
