@@ -296,6 +296,7 @@ describe("POST /verify", function () {
 
     expect(gitcoinGte100).toBeCalledWith(
       {
+        issuer: config.issuer,
         type: "GitcoinContributorStatistics#numGrantsContributeToGte#10",
         types: [
           "GitcoinContributorStatistics#numGrantsContributeToGte#10",
