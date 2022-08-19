@@ -86,7 +86,7 @@ export const config: {
 };
 
 // Initiate providers - new Providers should be registered in this array...
-const providers = new Providers([
+export const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
   new GoogleProvider(),
