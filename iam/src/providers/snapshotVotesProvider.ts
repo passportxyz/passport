@@ -44,7 +44,7 @@ export class SnapshotVotesProvider implements Provider {
     this._options = { ...this._options, ...options };
   }
 
-  // Verify that the address that is passed in owns at least one POAP older than 15 days
+  // Verify that the address that is passed in has voted on 2 or more DAO proposals
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     const address = payload.address.toLocaleLowerCase();
     let valid = false,
@@ -82,7 +82,6 @@ const checkForSnapshotVotes = async (url: string, address: string): Promise<Snap
       query: `
         query Votes {
           votes (
-            first: 10, 
             where: {
               voter: "${address}"
             }

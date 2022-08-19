@@ -174,4 +174,21 @@ describe("Attempt verification", function () {
     expect(axios.post).toHaveBeenCalledTimes(1);
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
+
+  it("should return invalid payload when an exception is thrown when a request is made", async () => {
+    mockedAxios.post.mockImplementation(async (url, data) => {
+      const query: string = (data as RequestData).query;
+      if (url === snapshotGraphQLDatabase && query.includes(BAD_MOCK_ADDRESS_LOWER)) {
+        throw "an error";
+      }
+    });
+
+    const snapshotProposalsProvider = new SnapshotProposalsProvider();
+    const verifiedPayload = await snapshotProposalsProvider.verify({
+      address: MOCK_ADDRESS,
+    } as RequestPayload);
+
+    expect(axios.post).toHaveBeenCalledTimes(1);
+    expect(verifiedPayload).toMatchObject({ valid: false });
+  });
 });

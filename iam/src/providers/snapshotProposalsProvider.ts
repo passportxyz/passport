@@ -82,7 +82,6 @@ const checkForSnapshotProposals = async (url: string, address: string): Promise<
       query: `
         query Proposals {
           proposals (
-            first: 100, 
             where: {
               author: "${address}"
             }
