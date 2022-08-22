@@ -107,11 +107,14 @@ describe("Attempt verification %s", function () {
         receivingAttribute,
         recordAttribute,
       });
-      const gitcoinPayload = await gitcoin.verify({
-        proofs: {
-          code,
-        },
-      } as unknown as RequestPayload);
+      const gitcoinPayload = await gitcoin.verify(
+        {
+          proofs: {
+            code,
+          },
+        } as unknown as RequestPayload,
+        {}
+      );
 
       expect(axios.post).toHaveBeenCalledTimes(1);
       // Check the request to get the token
@@ -165,11 +168,14 @@ describe("Attempt verification %s", function () {
 
     const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
 
-    const gitcoinPayload = await github.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const gitcoinPayload = await github.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(axios.post).toHaveBeenCalledTimes(1);
     expect(axios.get).toHaveBeenCalledTimes(0);
@@ -190,11 +196,14 @@ describe("Attempt verification %s", function () {
 
     const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
 
-    const gitcoinPayload = await github.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const gitcoinPayload = await github.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(axios.post).toHaveBeenCalledTimes(1);
     expect(axios.get).toHaveBeenCalledTimes(0);
@@ -228,11 +237,14 @@ describe("Attempt verification %s", function () {
 
     const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
 
-    const gitcoinPayload = await github.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const gitcoinPayload = await github.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(axios.post).toHaveBeenCalledTimes(1);
     // Check the request to get the token
@@ -275,11 +287,14 @@ describe("Attempt verification %s", function () {
 
     const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
 
-    const gitcoinPayload = await github.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const gitcoinPayload = await github.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(axios.post).toHaveBeenCalledTimes(1);
     // Check the request to get the token
@@ -318,11 +333,14 @@ describe("Attempt verification %s", function () {
 
     const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
 
-    const gitcoinPayload = await github.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const gitcoinPayload = await github.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(axios.post).toHaveBeenCalledTimes(1);
     // Check the request to get the token

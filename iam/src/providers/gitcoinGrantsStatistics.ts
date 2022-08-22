@@ -1,8 +1,8 @@
 // ----- Types
-import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
+import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../types";
 import axios from "axios";
-import { verifyGithub } from "./github";
+import { GithubFindMyUserResponse, verifyGithub } from "./github";
 
 const AMI_API_TOKEN = process.env.AMI_API_TOKEN;
 
@@ -38,11 +38,14 @@ export class GitcoinGrantStatisticsProvider implements Provider {
   }
 
   // verify that the proof object contains valid === "true"
-  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     let valid = false;
-    let githubUser;
+    let githubUser: GithubFindMyUserResponse = context.githubUser as GithubFindMyUserResponse;
     try {
-      githubUser = await verifyGithub(payload.proofs.code);
+      if (!githubUser) {
+        githubUser = await verifyGithub(payload.proofs.code);
+        context["githubUser"] = githubUser;
+      }
 
       // Only check the contribution condition if a valid github id has been received
       valid = !!githubUser.id;
