@@ -73,6 +73,7 @@ import { GitcoinContributorStatisticsProvider } from "./providers/gitcoinGrantsC
 import { GitcoinGranteeStatisticsProvider } from "./providers/gitcoinGrantsGranteeStatistics";
 import { SnapshotProposalsProvider } from "./providers/snapshotProposalsProvider";
 import { SnapshotVotesProvider } from "./providers/snapshotVotesProvider";
+import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -216,6 +217,36 @@ export const providers = new Providers([
     threshold: 1,
     receivingAttribute: "num_grants_in_eco_and_cause_rounds",
     recordAttribute: "numGrantsInEcoAndCauseRound",
+  }),
+  /////////////////////////////////////////////////////////////
+  // Start adding ETH/GTC Possession Providers
+  /////////////////////////////////////////////////////////////
+  new EthErc20PossessionProvider({
+    threshold: 100,
+    recordAttribute: "gtcPossessionsGte",
+    contractAddress: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f",
+    error: "GTC Possessions >= 100 Provider verify Error",
+  }),
+  new EthErc20PossessionProvider({
+    threshold: 10,
+    recordAttribute: "gtcPossessionsGte",
+    contractAddress: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f",
+    error: "GTC Possessions >= 10 Provider verify Error",
+  }),
+  new EthErc20PossessionProvider({
+    threshold: 32,
+    recordAttribute: "ethPossessionsGte",
+    error: "ETH Possessions >= 32 Provider verify Error",
+  }),
+  new EthErc20PossessionProvider({
+    threshold: 10,
+    recordAttribute: "ethPossessionsGte",
+    error: "ETH Possessions >= 10 Provider verify Error",
+  }),
+  new EthErc20PossessionProvider({
+    threshold: 1,
+    recordAttribute: "ethPossessionsGte",
+    error: "ETH Possessions >= 1 Provider verify Error",
   }),
 ]);
 
