@@ -334,7 +334,7 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   taskDefinitionArgs: {
     containers: {
       ceramic: {
-        image: "ceramicnetwork/js-ceramic:latest",
+        image: "ceramicnetwork/js-ceramic@sha256:dbac573700f3370524a216e7dbc9862c4f96c85b1d03a9bdec801fdccddb017e",
         memory: 8192,
         cpu: 4096,
         portMappings: [httpsListener],
@@ -359,7 +359,7 @@ const serviceIPFS = new awsx.ecs.FargateService("dpopp-ipfs", {
   taskDefinitionArgs: {
     containers: {
       ipfs: {
-        image: "ceramicnetwork/go-ipfs-daemon:latest",
+        image: "ceramicnetwork/go-ipfs-daemon@sha256:b77db182710abe065d9f974966488f6dd8ced93b0db50118f8a2d9c483a3a4da",
         memory: 8192,
         cpu: 4096,
         portMappings: [ceramicListener, ipfsListener, ipfsHealthcheckListener, ifpsWSListener],
