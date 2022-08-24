@@ -32,11 +32,9 @@ export class NFTProvider implements Provider {
 
   // Verify that address defined in the payload owns at least one POAP older than 15 days
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    console.log("geri - verify", payload);
     // if a signer is provider we will use that address to verify against
     const address = (await getAddress(payload)).toLowerCase();
 
-    console.log("geri - address");
     let valid = false;
     let nftsResponse: NFTsResponse = {
       ownedNfts: [],
@@ -44,7 +42,6 @@ export class NFTProvider implements Provider {
     };
 
     try {
-      console.log("geri - making request");
       const requestResponse = await axios.get(alchemyGetNFTsUrl, {
         params: {
           withMetadata: "false",
@@ -55,18 +52,17 @@ export class NFTProvider implements Provider {
       if (requestResponse.status == 200) {
         nftsResponse = requestResponse.data as NFTsResponse;
 
-        console.log("geri - nftsResponse", nftsResponse);
         valid = nftsResponse.totalCount > 0;
       }
     } catch (error) {
       // Nothing to do here, valid will remain false
     }
 
-    console.log("geri - valid", valid);
     return Promise.resolve({
       valid: valid,
       record: valid
         ? {
+            address: address,
             numTotalNFTs: nftsResponse.totalCount.toString(),
           }
         : undefined,

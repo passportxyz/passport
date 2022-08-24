@@ -17,7 +17,7 @@ beforeEach(() => {
 });
 
 describe("Attempt verification", function () {
-  it.only.each([
+  it.each([
     [200, 0, false],
     [200, 1, true],
     [200, 200, true],
@@ -55,6 +55,7 @@ describe("Attempt verification", function () {
         expect(nftPayload).toEqual({
           valid: true,
           record: {
+            address: MOCK_ADDRESS_LOWER,
             numTotalNFTs: totalCount.toString(),
           },
         });
@@ -72,7 +73,9 @@ describe("Attempt verification", function () {
     });
 
     const nftProvider = new NFTProvider();
-    const nftPayload = await nftProvider.verify({} as unknown as RequestPayload);
+    const nftPayload = await nftProvider.verify({
+      address: MOCK_ADDRESS,
+    } as unknown as RequestPayload);
 
     expect(axios.get).toHaveBeenCalledTimes(1);
     expect(nftPayload).toMatchObject({ valid: false });
