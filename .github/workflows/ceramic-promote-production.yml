@@ -1,4 +1,4 @@
-name: Deploy Ceramic Node to Production
+name: Deploy Ceramic Mainnet Node
 
 on:
   workflow_dispatch:
