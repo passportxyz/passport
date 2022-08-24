@@ -43,7 +43,6 @@ export const CardList = ({ isLoading }: CardListProps): JSX.Element => {
             <EnsCard />
             <PohCard />
             <DiscordCard />
-            <SignerCard />
           </>
         )}
       </div>
