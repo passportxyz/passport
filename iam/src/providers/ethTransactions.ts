@@ -7,7 +7,7 @@ import axios from "axios";
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 
-// Defining interfaces for the data structure returned by the request
+// Define interfaces for the data structure returned by the request
 interface EtherscanRequestResponse {
   status?: number;
   data?: {
@@ -99,8 +99,8 @@ export class FirstEthTxnProvider implements Provider {
     this._options = { ...this._options, ...options };
   }
 
-  // Verify that the address that is passed in has created a proposal that
-  // has received votes, which means the proposal score is greater than zero
+  // Verify that the address that is passed in has gte 30 days since their
+  // first ETH transaction on the mainnet
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     const address = payload.address.toLocaleLowerCase();
     const offsetCount = 1;
@@ -180,10 +180,11 @@ export const requestEthData = async (
   address: string,
   offsetCount: number
 ): Promise<EtherscanRequestResponse["data"]> => {
-  const etherscanURL = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=${offsetCount}&sort=asc&apikey=${ETHERSCAN_API_KEY}`;
+  const etherscanURL = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&page=1&offset=${offsetCount}&sort=asc&apikey=${ETHERSCAN_API_KEY}`;
   let etherscanRequestResponse: EtherscanRequestResponse;
 
   try {
+    // GET request using Etherscan API to retrieve user's ethereum mainnet transactions
     etherscanRequestResponse = await axios.get(etherscanURL);
   } catch (e: unknown) {
     const error = e as Error;
@@ -194,11 +195,14 @@ export const requestEthData = async (
 };
 
 const checkGasFees = (ethData: EtherscanRequestResponse["data"]): EthGasCheck => {
+  // set variables for gas fees calculations
   const gweiToEth = 0.000000001;
   const results = ethData.result;
   let hasGTEHalfEthSpentGas = false,
     totalGas = 0;
 
+  // Iterate through result array and add up the gas used per transaction
+  // until 0.5 ETH worth of gas is reached
   for (let i = 0; i < results.length; i++) {
     const gasUsed = parseInt(results[i].gasUsed);
     if (totalGas + gasUsed > 500000000) break;
@@ -215,6 +219,7 @@ const checkGasFees = (ethData: EtherscanRequestResponse["data"]): EthGasCheck =>
 };
 
 const checkFirstTxn = (ethData: EtherscanRequestResponse["data"]): EthFirstTxnCheck => {
+  // set variables for timestamp to days calculations
   let hasGTE30DaysSinceFirstTxn = false;
   let firstResult;
   if (ethData.result.length > 0) {
