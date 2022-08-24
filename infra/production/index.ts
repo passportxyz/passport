@@ -232,6 +232,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "DISCORD_CALLBACK",
             valueFrom: `${IAM_SERVER_SSM_ARN}:DISCORD_CALLBACK::`,
           },
+          {
+            name: "ETHERSCAN_API_KEY",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:ETHERSCAN_API_KEY::`,
+          },
         ],
       },
     },

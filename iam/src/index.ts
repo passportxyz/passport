@@ -74,6 +74,7 @@ import { GitcoinGranteeStatisticsProvider } from "./providers/gitcoinGrantsGrant
 import { SnapshotProposalsProvider } from "./providers/snapshotProposalsProvider";
 import { SnapshotVotesProvider } from "./providers/snapshotVotesProvider";
 import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
+import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./providers/ethTransactions";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -127,6 +128,9 @@ export const providers = new Providers([
   new ClearTextGithubOrgProvider(),
   new SnapshotProposalsProvider(),
   new SnapshotVotesProvider(),
+  new EthGasProvider(),
+  new FirstEthTxnProvider(),
+  new EthGTEOneTxnProvider(),
   /////////////////////////////////////////////////////////////
   // Start adding the specific gitcoin contributor providers
   /////////////////////////////////////////////////////////////
