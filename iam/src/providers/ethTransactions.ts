@@ -58,7 +58,7 @@ export class EthGasProvider implements Provider {
   // Verify that the address that is passed in has accumulated >= 0.5 ETH on gas fees
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     const address = payload.address.toLocaleLowerCase();
-    const offsetCount = 1000;
+    const offsetCount = 500;
     let valid = false,
       ethData: EtherscanRequestResponse["data"],
       verifiedPayload = {
@@ -103,7 +103,7 @@ export class FirstEthTxnProvider implements Provider {
   // first ETH transaction on the mainnet
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     const address = payload.address.toLocaleLowerCase();
-    const offsetCount = 1;
+    const offsetCount = 100;
     let valid = false,
       ethData: EtherscanRequestResponse["data"],
       verifiedPayload = {
@@ -112,7 +112,7 @@ export class FirstEthTxnProvider implements Provider {
 
     try {
       ethData = await requestEthData(address, offsetCount);
-      verifiedPayload = checkFirstTxn(ethData);
+      verifiedPayload = checkFirstTxn(ethData, address);
 
       valid = address && verifiedPayload.hasGTE30DaysSinceFirstTxn ? true : false;
     } catch (e) {
@@ -148,7 +148,7 @@ export class EthGTEOneTxnProvider implements Provider {
   // ETH transaction on the mainnet
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     const address = payload.address.toLocaleLowerCase();
-    const offsetCount = 10;
+    const offsetCount = 100;
     let valid = false,
       ethData: EtherscanRequestResponse["data"],
       verifiedPayload = {
@@ -157,7 +157,7 @@ export class EthGTEOneTxnProvider implements Provider {
 
     try {
       ethData = await requestEthData(address, offsetCount);
-      verifiedPayload = checkForTxns(ethData);
+      verifiedPayload = checkForTxns(ethData, address);
 
       valid = address && verifiedPayload.hasGTEOneEthTxn ? true : false;
     } catch (e) {
@@ -218,23 +218,23 @@ const checkGasFees = (ethData: EtherscanRequestResponse["data"]): EthGasCheck =>
   };
 };
 
-const checkFirstTxn = (ethData: EtherscanRequestResponse["data"]): EthFirstTxnCheck => {
+const checkFirstTxn = (ethData: EtherscanRequestResponse["data"], address: string): EthFirstTxnCheck => {
   // set variables for timestamp to days calculations
   let hasGTE30DaysSinceFirstTxn = false;
-  let firstResult;
+  const results = ethData.result;
+
+  // Return the first successful transaction that was made >= 30 days ago by the wallet holder
   if (ethData.result.length > 0) {
-    firstResult = ethData.result[0];
-  }
+    const successfulFirstTxn = results.findIndex((result) => {
+      const txnInMilliseconds = parseInt(result.timeStamp) * 1000;
+      const todayInMilliseconds = new Date().getTime();
+      const timeDifference = todayInMilliseconds - txnInMilliseconds;
+      const daysDifference = timeDifference / (1000 * 3600 * 24);
 
-  // Sort direction should be asc so the 1st txn can be checked -- if the first txn is
-  // >= 30 days ago, return true
-  const txnInMilliseconds = parseInt(firstResult.timeStamp) * 1000;
-  const todayInMilliseconds = new Date().getTime();
-  const timeDifference = todayInMilliseconds - txnInMilliseconds;
-  const daysDifference = timeDifference / (1000 * 3600 * 24);
+      return daysDifference >= 30 && result.isError === "0" && result.from.toLowerCase() === address;
+    });
 
-  if (daysDifference >= 30) {
-    hasGTE30DaysSinceFirstTxn = true;
+    successfulFirstTxn === -1 ? (hasGTE30DaysSinceFirstTxn = false) : (hasGTE30DaysSinceFirstTxn = true);
   }
 
   return {
@@ -242,12 +242,13 @@ const checkFirstTxn = (ethData: EtherscanRequestResponse["data"]): EthFirstTxnCh
   };
 };
 
-const checkForTxns = (ethData: EtherscanRequestResponse["data"]): EthGTEOneTxnCheck => {
+const checkForTxns = (ethData: EtherscanRequestResponse["data"], address: string): EthGTEOneTxnCheck => {
   const results = ethData.result;
   let hasGTEOneEthTxn = false;
-  // Iterate through the result array until the first instance where a successful txn was made
+  // Iterate through the results array until the first instance where a
+  // successful txn was made by the wallet holder
   if (results.length > 0) {
-    const txnsCheck = results.findIndex((result) => result.isError === "0");
+    const txnsCheck = results.findIndex((result) => result.isError === "0" && result.from.toLowerCase() === address);
     hasGTEOneEthTxn = txnsCheck === -1 ? false : true;
   }
 

@@ -23,9 +23,8 @@ const toUnixTime = () => {
   return Math.floor(new Date().getTime() / 1000);
 };
 
-const ETH_GAS_OFFSET_COUNT = 1000;
-const FIRST_ETH_TXN_OFFSET_COUNT = 1;
-const ETH_GTE_ONE_TXN_OFFSET_COUNT = 10;
+const ETH_GAS_OFFSET_COUNT = 500;
+const FIRST_ETH_GTE_TXN_OFFSET_COUNT = 100;
 
 const validEtherscanResponse = {
   data: {
@@ -278,7 +277,7 @@ describe("Attempt verification for gte 30 days since first ETH transaction stamp
     } as unknown as RequestPayload);
 
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
+    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
@@ -301,7 +300,7 @@ describe("Attempt verification for gte 30 days since first ETH transaction stamp
     } as unknown as RequestPayload);
 
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
+    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
 
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
@@ -319,7 +318,7 @@ describe("Attempt verification for gte 30 days since first ETH transaction stamp
     } as unknown as RequestPayload);
 
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
+    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
 
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
@@ -337,7 +336,7 @@ describe("Attempt verification for gte 30 days since first ETH transaction stamp
     } as unknown as RequestPayload);
 
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=&page=1&offset=${FIRST_ETH_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
+    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
 
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
@@ -355,7 +354,7 @@ describe("Attempt verification for gte 30 days since first ETH transaction stamp
     } as unknown as RequestPayload);
 
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${BAD_MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
+    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${BAD_MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
 
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
@@ -379,7 +378,7 @@ describe("Attempt verification for at least one ETH transaction on the mainnet s
     } as unknown as RequestPayload);
 
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GTE_ONE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
+    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
 
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -403,7 +402,7 @@ describe("Attempt verification for at least one ETH transaction on the mainnet s
     } as unknown as RequestPayload);
 
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GTE_ONE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
+    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
 
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
@@ -421,7 +420,7 @@ describe("Attempt verification for at least one ETH transaction on the mainnet s
     } as unknown as RequestPayload);
 
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GTE_ONE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
+    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
 
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
@@ -439,7 +438,7 @@ describe("Attempt verification for at least one ETH transaction on the mainnet s
     } as unknown as RequestPayload);
 
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=&page=1&offset=${ETH_GTE_ONE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
+    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
 
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
@@ -457,7 +456,7 @@ describe("Attempt verification for at least one ETH transaction on the mainnet s
     } as unknown as RequestPayload);
 
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${BAD_MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GTE_ONE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
+    expect(mockedAxios.get).toBeCalledWith(`https://api.etherscan.io/api?module=account&action=txlist&address=${BAD_MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
 
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
