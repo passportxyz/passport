@@ -150,4 +150,5 @@ export type PROVIDER_ID =
   | "Brightid"
   | "Github"
   | "Linkedin"
-  | "Discord";
+  | "Discord"
+  | "GitPOAP";

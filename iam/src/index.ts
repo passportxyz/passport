@@ -75,6 +75,9 @@ import { SnapshotProposalsProvider } from "./providers/snapshotProposalsProvider
 import { SnapshotVotesProvider } from "./providers/snapshotVotesProvider";
 import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
 import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./providers/ethTransactions";
+import { NFTProvider } from "./providers/nft";
+import { GitPOAPProvider } from "./providers/gitpoap";
+import { LensProfileProvider } from "./providers/lens";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -131,6 +134,7 @@ export const providers = new Providers([
   new EthGasProvider(),
   new FirstEthTxnProvider(),
   new EthGTEOneTxnProvider(),
+  new GitPOAPProvider(),
   /////////////////////////////////////////////////////////////
   // Start adding the specific gitcoin contributor providers
   /////////////////////////////////////////////////////////////
@@ -252,6 +256,11 @@ export const providers = new Providers([
     recordAttribute: "ethPossessionsGte",
     error: "ETH Possessions >= 1 Provider verify Error",
   }),
+  /////////////////////////////////////////////////////////////
+  // END
+  ////////////////////////////////////////////////////////////
+  new NFTProvider(),
+  new LensProfileProvider(),
 ]);
 
 // create the app and run on port

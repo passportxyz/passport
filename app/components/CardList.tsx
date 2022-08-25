@@ -10,11 +10,12 @@ import {
   PoapCard,
   FacebookCard,
   BrightidCard,
+  GithubCard,
   LinkedinCard,
   DiscordCard,
   SignerCard,
+  GitPOAPCard,
 } from "./ProviderCards";
-import GithubCard from "./ProviderCards/GithubCard";
 import { LoadingCard } from "./LoadingCard";
 
 export type CardListProps = {
@@ -43,7 +44,6 @@ export const CardList = ({ isLoading }: CardListProps): JSX.Element => {
             <EnsCard />
             <PohCard />
             <DiscordCard />
-            <SignerCard />
           </>
         )}
       </div>

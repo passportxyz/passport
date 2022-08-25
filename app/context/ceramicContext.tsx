@@ -79,6 +79,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: STAMP_PROVIDERS.Signer,
     stamp: undefined,
   },
+  GitPOAP: {
+    providerSpec: STAMP_PROVIDERS.GitPOAP,
+    stamp: undefined,
+  },
 };
 
 const startingState: CeramicContextState = {
