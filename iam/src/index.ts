@@ -75,6 +75,7 @@ import { SnapshotProposalsProvider } from "./providers/snapshotProposalsProvider
 import { SnapshotVotesProvider } from "./providers/snapshotVotesProvider";
 import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
 import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./providers/ethTransactions";
+import { NFTProvider } from "./providers/nft";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -252,6 +253,10 @@ export const providers = new Providers([
     recordAttribute: "ethPossessionsGte",
     error: "ETH Possessions >= 1 Provider verify Error",
   }),
+  /////////////////////////////////////////////////////////////
+  // END
+  ////////////////////////////////////////////////////////////
+  new NFTProvider(),
 ]);
 
 // create the app and run on port
