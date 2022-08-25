@@ -172,6 +172,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             valueFrom: `${IAM_SERVER_SSM_ARN}:MAINNET_RPC_URL::`,
           },
           {
+            name: "ALCHEMY_API_KEY",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:ALCHEMY_API_KEY::`,
+          },
+          {
             name: "TWITTER_CLIENT_ID",
             valueFrom: `${IAM_SERVER_SSM_ARN}:TWITTER_CLIENT_ID::`,
           },
