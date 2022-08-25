@@ -135,38 +135,39 @@ const accessLogsBucket = new aws.s3.Bucket(`gitcoin-ceramic-logs`, {
   forceDestroy: true,
 });
 
-
 // Set up bucket policy for access logs bucket of the ALB
 // - https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html
 // - https://www.pulumi.com/registry/packages/aws/api-docs/elb/getserviceaccount/
 const accessLogsBucketPolicyDocument = aws.iam.getPolicyDocumentOutput({
-  statements:  serviceAccount.then(serviceAccount => [
+  statements: serviceAccount.then((serviceAccount) => [
     {
       effect: "Allow",
-      principals: [{
-        type: "AWS",
-        identifiers: [pulumi.interpolate`${serviceAccount.arn}`]
-      }],
+      principals: [
+        {
+          type: "AWS",
+          identifiers: [pulumi.interpolate`${serviceAccount.arn}`],
+        },
+      ],
       actions: ["s3:PutObject"],
-      resources: [pulumi.interpolate`arn:aws:s3:::${accessLogsBucket.id}/AWSLogs/*`]
+      resources: [pulumi.interpolate`arn:aws:s3:::${accessLogsBucket.id}/AWSLogs/*`],
     },
     {
       effect: "Allow",
-      principals: [{
-        type: "Service",
-        identifiers: ["logdelivery.elb.amazonaws.com"]
-      }],
+      principals: [
+        {
+          type: "Service",
+          identifiers: ["logdelivery.elb.amazonaws.com"],
+        },
+      ],
       actions: ["s3:GetBucketAcl"],
-      resources: [pulumi.interpolate`arn:aws:s3:::${accessLogsBucket.id}`]
-    }
+      resources: [pulumi.interpolate`arn:aws:s3:::${accessLogsBucket.id}`],
+    },
   ]),
 });
 
 const accessLogsBucketPolicy = new aws.s3.BucketPolicy(`gitcoin-accessLogs-policy`, {
   bucket: accessLogsBucket.id,
-  policy: accessLogsBucketPolicyDocument.apply(
-    (accessLogsBucketPolicyDocument) => accessLogsBucketPolicyDocument.json
-  ),
+  policy: accessLogsBucketPolicyDocument.apply((accessLogsBucketPolicyDocument) => accessLogsBucketPolicyDocument.json),
 });
 
 //////////////////////////////////////////////////////////////
@@ -202,7 +203,6 @@ const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-ceramic`, {
     enabled: true,
   },
 });
-
 
 //////////////////////////////////////////////////////////////
 // ALB listeners & target groups
@@ -335,7 +335,7 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   taskDefinitionArgs: {
     containers: {
       ceramic: {
-        image: "ceramicnetwork/js-ceramic@sha256:dbac573700f3370524a216e7dbc9862c4f96c85b1d03a9bdec801fdccddb017e",
+        image: "ceramicnetwork/js-ceramic:2.6.0",
         memory: 8192,
         cpu: 4096,
         portMappings: [httpsListener],
