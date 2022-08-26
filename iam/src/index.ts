@@ -78,6 +78,7 @@ import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./pro
 import { NFTProvider } from "./providers/nft";
 import { GitPOAPProvider } from "./providers/gitpoap";
 import { LensProfileProvider } from "./providers/lens";
+import { ZkSynkProvider } from "./providers/zkSync";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -261,6 +262,7 @@ export const providers = new Providers([
   ////////////////////////////////////////////////////////////
   new NFTProvider(),
   new LensProfileProvider(),
+  new ZkSynkProvider(),
 ]);
 
 // create the app and run on port
