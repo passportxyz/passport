@@ -194,7 +194,7 @@ describe("should return invalid payload", function () {
   it("when stake amount is below 1 GTC for Bronze", async () => {
     jest.clearAllMocks();
     mockedAxios.post.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "0");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "100000000000000000");
     });
 
     const selfstaking = new SelfStakingBronzeProvider();
@@ -205,13 +205,13 @@ describe("should return invalid payload", function () {
 
     expect(selfstakingPayload).toMatchObject({ valid: false });
   });
-  it("when stake amount is below 5 GTC for Silver", async () => {
+  it("when stake amount is below 10 GTC for Silver", async () => {
     jest.clearAllMocks();
     mockedAxios.post.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "1000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "3000000000000000000");
     });
 
-    const selfstaking = new SelfStakingBronzeProvider();
+    const selfstaking = new SelfStakingSilverProvider();
 
     const selfstakingPayload = await selfstaking.verify({
       address: MOCK_ADDRESS_LOWER,
@@ -219,13 +219,13 @@ describe("should return invalid payload", function () {
 
     expect(selfstakingPayload).toMatchObject({ valid: false });
   });
-  it("when stake amount is below 50 GTC for Gold", async () => {
+  it("when stake amount is below 100 GTC for Gold", async () => {
     jest.clearAllMocks();
     mockedAxios.post.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "10000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "8000000000000000000");
     });
 
-    const selfstaking = new SelfStakingBronzeProvider();
+    const selfstaking = new SelfStakingGoldProvider();
 
     const selfstakingPayload = await selfstaking.verify({
       address: MOCK_ADDRESS_LOWER,
@@ -250,9 +250,9 @@ describe("should return valid payload", function () {
 
     expect(selfstakingPayload).toMatchObject({ valid: true });
   });
-  it("when stake amount above 5 GTC for Silver", async () => {
+  it("when stake amount above 10 GTC for Silver", async () => {
     mockedAxios.post.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "6000000000000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "60000000000000000000");
     });
 
     const selfstaking = new SelfStakingSilverProvider();
@@ -263,9 +263,9 @@ describe("should return valid payload", function () {
 
     expect(selfstakingPayload).toMatchObject({ valid: true });
   });
-  it("when stake amount above 50 GTC for Gold", async () => {
+  it("when stake amount above 100 GTC for Gold", async () => {
     mockedAxios.post.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "520000000000000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "500000000000000000000");
     });
 
     const selfstaking = new SelfStakingGoldProvider();

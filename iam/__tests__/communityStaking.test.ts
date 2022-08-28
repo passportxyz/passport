@@ -89,7 +89,7 @@ describe("Attempt verification", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        stakeAmount: "csgt10",
+        stakeAmount: "csgt1",
       },
     });
   });
@@ -190,7 +190,7 @@ describe("should return invalid payload", function () {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it("when stake amount is below 10 GTC for Bronze", async () => {
+  it("when stake amount is below 1 GTC for Bronze", async () => {
     jest.clearAllMocks();
     mockedAxios.post.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "500000000");
@@ -204,13 +204,13 @@ describe("should return invalid payload", function () {
 
     expect(communitystakingPayload).toMatchObject({ valid: false });
   });
-  it("when stake amount is below 100 GTC for Silver", async () => {
+  it("when stake amount is below 10 GTC for Silver", async () => {
     jest.clearAllMocks();
     mockedAxios.post.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "9000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "5000000000000000000");
     });
 
-    const communitystaking = new CommunityStakingBronzeProvider();
+    const communitystaking = new CommunityStakingSilverProvider();
 
     const communitystakingPayload = await communitystaking.verify({
       address: MOCK_ADDRESS_LOWER,
@@ -218,13 +218,13 @@ describe("should return invalid payload", function () {
 
     expect(communitystakingPayload).toMatchObject({ valid: false });
   });
-  it("when stake amount is below 500 GTC for Gold", async () => {
+  it("when stake amount is below 100 GTC for Gold", async () => {
     jest.clearAllMocks();
     mockedAxios.post.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "40000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "40000000000000000000");
     });
 
-    const communitystaking = new CommunityStakingBronzeProvider();
+    const communitystaking = new CommunityStakingGoldProvider();
 
     const communitystakingPayload = await communitystaking.verify({
       address: MOCK_ADDRESS_LOWER,
@@ -236,9 +236,9 @@ describe("should return invalid payload", function () {
 
 // All the positive cases for thresholds are tested
 describe("should return valid payload", function () {
-  it("when stake amount above 10 GTC for Bronze", async () => {
+  it("when stake amount above 1 GTC for Bronze", async () => {
     mockedAxios.post.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "12000000000000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "2000000000000000000");
     });
 
     const communitystaking = new CommunityStakingBronzeProvider();
@@ -249,9 +249,9 @@ describe("should return valid payload", function () {
 
     expect(communitystakingPayload).toMatchObject({ valid: true });
   });
-  it("when stake amount above 100 GTC for Silver", async () => {
+  it("when stake amount above 10 GTC for Silver", async () => {
     mockedAxios.post.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "120000000000000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "15000000000000000000");
     });
 
     const communitystaking = new CommunityStakingSilverProvider();
@@ -262,9 +262,9 @@ describe("should return valid payload", function () {
 
     expect(communitystakingPayload).toMatchObject({ valid: true });
   });
-  it("when stake amount above 500 GTC for Gold", async () => {
+  it("when stake amount above 100 GTC for Gold", async () => {
     mockedAxios.post.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "5200000000000000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "500000000000000000000");
     });
 
     const communitystaking = new CommunityStakingGoldProvider();
