@@ -11,9 +11,6 @@ import { getAddress } from "../utils/signer";
 // https://docs.zksync.io/api/v0.2/
 export const zkSyncApiEnpoint = "https://api.zksync.io/api/v0.2/";
 
-// Compute the minimum required token age as milliseconds
-const minTokenAge = 15 * 24 * 3600000;
-
 // Pagination structure
 type Pagination = {
   from: string;
@@ -31,7 +28,7 @@ type ZKSyncTransaction = {
 
 type ZkSyncResponse = {
   status: string;
-  error: any;
+  error: unknown;
   result: { list: ZKSyncTransaction[] };
   pagination: Pagination;
 };
@@ -67,7 +64,7 @@ export class ZkSynkProvider implements Provider {
       });
 
       if (requestResponse.status == 200) {
-        const zkSyncResponse = requestResponse.data;
+        const zkSyncResponse = requestResponse.data as ZkSyncResponse;
 
         if (zkSyncResponse.status === "success") {
           // We consider the verification valid if this account has at least one finalized
@@ -86,7 +83,7 @@ export class ZkSynkProvider implements Provider {
             error = ["Unable to find a finalized transaction from the given address"];
           }
         } else {
-          error = [`ZKSync API Error '${zkSyncResponse.status}'. Details: '${zkSyncResponse.error}'.`];
+          error = [`ZKSync API Error '${zkSyncResponse.status}'. Details: '${zkSyncResponse.error.toString()}'.`];
         }
       } else {
         error = [`HTTP Error '${requestResponse.status}'. Details: '${requestResponse.statusText}'.`];
