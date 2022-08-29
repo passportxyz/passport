@@ -1,7 +1,10 @@
 // --- React Methods
-import React from "react";
+import React, { useEffect } from "react";
 
+// --- Next Methods
 import { AppProps } from "next/app";
+import Head from "next/head";
+
 import "../styles/globals.css";
 import { ChakraProvider } from "@chakra-ui/react";
 import { UserContextProvider } from "../context/userContext";
@@ -9,13 +12,21 @@ import { CeramicContextProvider } from "../context/ceramicContext";
 
 // --- Ceramic Tools
 import { Provider as SelfIdProvider } from "@self.id/framework";
-import Head from "next/head";
+
+// --- GTM Module
+import TagManager from "react-gtm-module";
 
 const FacebookAppId = process.env.NEXT_PUBLIC_PASSPORT_FACEBOOK_APP_ID || "";
+const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
 
 function MyApp({ Component, pageProps }: AppProps) {
+  useEffect(() => {
+    TagManager.initialize({ gtmId: `${GTM_ID}` });
+  }, []);
+
   const facebookSdkScript = (
     <script
+      id="facebook-app-script"
       dangerouslySetInnerHTML={{
         __html: `
           window.fbAsyncInit = function() {
@@ -39,6 +50,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       }}
     />
   );
+
   return (
     <>
       <Head>
