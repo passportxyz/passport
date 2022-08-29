@@ -26,7 +26,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, []);
 
   const facebookSdkScript = (
-    <Script
+    <script
       id="facebook-app-script"
       dangerouslySetInnerHTML={{
         __html: `
