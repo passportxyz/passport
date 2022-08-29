@@ -38,5 +38,5 @@ jobs:
           ROUTE_53_ZONE: ${{ secrets.ROUTE53_ZONE_ID_PRODUCTION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_PRODUCTION }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_PRODUCTION }}
-          DOMAIN: ${{ secrets.DOMAIN }}
+          DOMAIN: passport-iam.gitcoin.co
           RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
