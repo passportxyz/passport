@@ -10,6 +10,7 @@ import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
 // -- Ceramic and Glazed
 import { EthereumAuthProvider } from "@self.id/web";
 import { useViewerConnection } from "@self.id/framework";
+import { DIDSession } from "@glazed/did-session";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
@@ -108,8 +109,28 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         window.localStorage.setItem("connectedWallets", JSON.stringify([wallet.label]));
         // attempt to connect to ceramic (if it passes or fails always set loggingIn=false)
         try {
-          // connect to ceramic (deliberately connect with a lowercase DID to match reader)
-          await ceramicConnect(new EthereumAuthProvider(wallet.provider, wallet.accounts[0].address.toLowerCase()));
+          const address = wallet.accounts[0].address;
+          const ethAuthProvider = new EthereumAuthProvider(wallet.provider, wallet.accounts[0].address.toLowerCase());
+
+          // Sessions will be serialized and stored in localhost
+          // The sessions are bound to an ETH address, this is why we use the address in the session key
+          const sessionKey = `didsession-${address}`;
+          const sessionStr = localStorage.getItem(sessionKey);
+
+          let selfId = await ceramicConnect(ethAuthProvider, sessionStr);
+
+          if (
+            !selfId?.client?.session ||
+            selfId?.client?.session?.isExpired ||
+            selfId?.client?.session?.expireInSecs < 3600
+          ) {
+            // If the session loaded is not valid, or if it is expired or close to expire, we create
+            // a new connection to ceramic
+            selfId = await ceramicConnect(ethAuthProvider);
+          }
+
+          // Store the session in localstorage
+          localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
         } finally {
           // mark that this login attempt is complete
           setLoggingIn(false);
