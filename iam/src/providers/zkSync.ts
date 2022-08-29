@@ -36,7 +36,7 @@ type ZkSyncResponse = {
 // Export a ZkSynkProvider Provider
 export class ZkSynkProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
-  type = "ZkSynkProvider";
+  type = "ZkSynk";
 
   // Options can be set here and/or via the constructor
   _options = {};
