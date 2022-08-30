@@ -80,7 +80,7 @@ async function verifyStake(payload: RequestPayload): Promise<StakeResponse> {
 }
 
 // Export a Community Staking Bronze Stamp provider
-// User's community stake must be greater than 10 GTC
+// User's community stake must be greater than 1 GTC
 export class CommunityStakingBronzeProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
   type = "CommunityStakingBronze";
@@ -98,15 +98,15 @@ export class CommunityStakingBronzeProvider implements Provider {
     try {
       const stakeData = await verifyStake(payload);
       const stakeAmount = stakeData.totalAmountStaked;
-      valid = stakeAmount > 10.0;
+      valid = stakeAmount > 1.0;
 
       return {
         valid,
         record: valid
           ? {
               address: stakeData.address,
-              // csgt10 = Community Staking Greater than 10
-              stakeAmount: "csgt10",
+              // csgt1 = Community Staking Greater than 1
+              stakeAmount: "csgt1",
             }
           : {},
       };
@@ -120,7 +120,7 @@ export class CommunityStakingBronzeProvider implements Provider {
 }
 
 // Export a Community Staking Silver Stamp provider
-// User's community stake must be greater than 100 GTC
+// User's community stake must be greater than 10 GTC
 export class CommunityStakingSilverProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
   type = "CommunityStakingSilver";
@@ -139,15 +139,15 @@ export class CommunityStakingSilverProvider implements Provider {
       const stakeData = await verifyStake(payload);
       const stakeAmount = stakeData.totalAmountStaked;
 
-      valid = stakeAmount > 100.0;
+      valid = stakeAmount > 10.0;
 
       return {
         valid,
         record: valid
           ? {
               address: stakeData.address,
-              // csgt100 = Community Staking Greater than 100
-              stakeAmount: "csgt100",
+              // csgt10 = Community Staking Greater than 10
+              stakeAmount: "csgt10",
             }
           : {},
       };
@@ -161,7 +161,7 @@ export class CommunityStakingSilverProvider implements Provider {
 }
 
 // Export a Community Staking Bronze Stamp provider
-// User's community stake must be greater than 500 GTC
+// User's community stake must be greater than 100 GTC
 export class CommunityStakingGoldProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
   type = "CommunityStakingGold";
@@ -179,15 +179,15 @@ export class CommunityStakingGoldProvider implements Provider {
     try {
       const stakeData = await verifyStake(payload);
       const stakeAmount = stakeData.totalAmountStaked;
-      valid = stakeAmount > 500.0;
+      valid = stakeAmount > 100.0;
 
       return {
         valid: valid,
         record: valid
           ? {
               address: stakeData.address,
-              // csgt500 = Community Staking Greater than 500
-              stakeAmount: "csgt500",
+              // csgt100 = Community Staking Greater than 100
+              stakeAmount: "csgt100",
             }
           : {},
       };
