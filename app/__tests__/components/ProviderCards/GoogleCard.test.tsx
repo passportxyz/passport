@@ -1,6 +1,6 @@
 import React from "react";
 import { screen, fireEvent } from "@testing-library/react";
-import { GoogleCard } from "../../../components/ProviderCards";
+import { GoogleCard } from "../../../components/PlatformCards";
 
 import { UserContextState } from "../../../context/userContext";
 import { STAMP_PROVIDERS } from "../../../config/providers";

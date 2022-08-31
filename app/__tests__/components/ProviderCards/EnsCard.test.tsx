@@ -1,6 +1,6 @@
 import React from "react";
 import { fireEvent, screen, waitFor, waitForElementToBeRemoved } from "@testing-library/react";
-import { EnsCard } from "../../../components/ProviderCards";
+import { EnsCard } from "../../../components/PlatformCards";
 
 import { UserContextState } from "../../../context/userContext";
 import { CeramicContextState } from "../../../context/ceramicContext";

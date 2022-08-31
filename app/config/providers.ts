@@ -1,74 +1,108 @@
-import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-types";
 
 export type ProviderSpec = {
-  icon?: string | undefined;
-  name: string;
-  description: string;
+  title: string;
+  name: PROVIDER_ID;
 };
 
+export type PlatformGroupSpec = {
+  providers: ProviderSpec[];
+  platformGroup: string;
+};
+
+// Platform -> Provider[]
 export type Providers = {
-  [provider in PROVIDER_ID]: ProviderSpec;
+  [platform in PLATFORM_ID]: PlatformGroupSpec[];
 };
 
 export const STAMP_PROVIDERS: Readonly<Providers> = {
-  Google: {
-    icon: "./assets/googleStampIcon.svg",
-    name: "Google",
-    description: "Google Authentication",
-  },
-  Ens: {
-    icon: "./assets/ensStampIcon.svg",
-    name: "Ens",
-    description: "Ens name",
-  },
-  Poh: {
-    icon: "./assets/pohStampIcon.svg",
-    name: "POH",
-    description: "Proof of Humanity",
-  },
-  Twitter: {
-    icon: "./assets/twitterStampIcon.svg",
-    name: "Twitter",
-    description: "Twitter name",
-  },
-  POAP: {
-    icon: "./assets/poapStampIcon.svg",
-    name: "POAP",
-    description: "POAP Verification",
-  },
-  Facebook: {
-    icon: "./assets/facebookStampIcon.svg",
-    name: "Facebook",
-    description: "Facebook name",
-  },
-  Brightid: {
-    icon: "./assets/brightidStampIcon.svg",
-    name: "Bright ID",
-    description: "Bright ID",
-  },
-  Github: {
-    icon: "./assets/githubStampIcon.svg",
-    name: "Github",
-    description: "Github name",
-  },
-  Linkedin: {
-    icon: "./assets/linkedinStampIcon.svg",
-    name: "Linkedin",
-    description: "Linkedin name",
-  },
-  Discord: {
-    icon: "./assets/discordStampIcon.svg",
-    name: "Discord",
-    description: "Discord name",
-  },
-  Signer: {
-    icon: "./assets/ethStampIcon.svg",
-    name: "Ethereum Account",
-    description: "Additional Ethereum account",
-  },
-  GitPOAP: {
-    icon: "./assets/gitPOAPStampIcon.svg",
-    name: "GitPOAP",
-    description: "GitPOAP Verification",
-  },
+  Google: [{ platformGroup: "Account Name", providers: [{ title: "Google", name: "Google" }] }],
+  Ens: [
+    {
+      platformGroup: "Account Name",
+      providers: [{ title: "Encrypted", name: "Ens" }],
+    },
+  ],
+  Poh: [
+    {
+      platformGroup: "Account Name",
+      providers: [{ title: "Encrypted", name: "Poh" }],
+    },
+  ],
+  Twitter: [
+    {
+      platformGroup: "Account Name",
+      providers: [{ title: "Encrypted", name: "Twitter" }],
+    },
+    {
+      platformGroup: "Tweet/Posts",
+      providers: [{ title: "More than 10", name: "TwitterTweetGT10" }],
+    },
+    {
+      platformGroup: "Followers",
+      providers: [
+        { title: "More than 100", name: "TwitterFollowerGT100" },
+        {
+          title: "More than 500",
+          name: "TwitterFollowerGT500",
+        },
+        {
+          title: "More than 1000",
+          name: "TwitterFollowerGTE1000",
+        },
+        {
+          title: "More than 5000",
+          name: "TwitterFollowerGT5000",
+        },
+      ],
+    },
+  ],
+  POAP: [
+    {
+      platformGroup: "Account Name",
+      providers: [{ title: "Encrypted", name: "POAP" }],
+    },
+  ],
+  Facebook: [
+    {
+      platformGroup: "Account Name",
+      providers: [{ title: "Encrypted", name: "Facebook" }],
+    },
+  ],
+  Brightid: [
+    {
+      platformGroup: "Account Name",
+      providers: [{ title: "Encrypted", name: "Brightid" }],
+    },
+  ],
+  Github: [
+    {
+      platformGroup: "Account Name",
+      providers: [{ title: "Encrypted", name: "Twitter" }],
+    },
+  ],
+  Linkedin: [
+    {
+      platformGroup: "Account Name",
+      providers: [{ title: "Encrypted", name: "Linkedin" }],
+    },
+  ],
+  Discord: [
+    {
+      platformGroup: "Account Name",
+      providers: [{ title: "Encrypted", name: "Discord" }],
+    },
+  ],
+  Signer: [
+    {
+      platformGroup: "Account Name",
+      providers: [{ title: "Encrypted", name: "Signer" }],
+    },
+  ],
+  GitPOAP: [
+    {
+      platformGroup: "Account Name",
+      providers: [{ title: "Encrypted", name: "GitPOAP" }],
+    },
+  ],
 };

@@ -1,6 +1,6 @@
 import React from "react";
 import { screen, fireEvent } from "@testing-library/react";
-import { FacebookCard } from "../../../components/ProviderCards";
+import { FacebookCard } from "../../../components/PlatformCards";
 
 import { UserContextState } from "../../../context/userContext";
 import { STAMP_PROVIDERS } from "../../../config/providers";

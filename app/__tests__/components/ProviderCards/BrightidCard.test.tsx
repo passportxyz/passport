@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor, waitForElementToBeRemoved } from "@testing-library/react";
-import { BrightidCard } from "../../../components/ProviderCards";
+import { BrightidCard } from "../../../components/PlatformCards";
 
 import { UserContext, UserContextState } from "../../../context/userContext";
 import { mockAddress, mockWallet } from "../../../__test-fixtures__/onboardHookValues";

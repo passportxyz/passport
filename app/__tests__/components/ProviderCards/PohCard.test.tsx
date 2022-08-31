@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor, waitForElementToBeRemoved } from "@testing-library/react";
-import { PohCard } from "../../../components/ProviderCards";
+import { PohCard } from "../../../components/PlatformCards";
 
 import { UserContext, UserContextState } from "../../../context/userContext";
 import { mockAddress, mockWallet } from "../../../__test-fixtures__/onboardHookValues";

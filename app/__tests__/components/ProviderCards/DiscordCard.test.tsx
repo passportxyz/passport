@@ -1,6 +1,6 @@
 import React from "react";
 import { fireEvent, screen } from "@testing-library/react";
-import { DiscordCard } from "../../../components/ProviderCards";
+import { DiscordCard } from "../../../components/PlatformCards";
 
 import { UserContextState } from "../../../context/userContext";
 import {

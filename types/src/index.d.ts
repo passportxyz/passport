@@ -139,12 +139,31 @@ export type Passport = {
 // Passport DID
 export type DID = string;
 
+export type PLATFORM_ID =
+  | "Google"
+  | "Ens"
+  | "Poh"
+  | "Twitter"
+  | "POAP"
+  | "Facebook"
+  | "Brightid"
+  | "Github"
+  | "Linkedin"
+  | "Discord"
+  | "GitPOAP"
+  | "Signer";
+
 export type PROVIDER_ID =
   | "Signer"
   | "Google"
   | "Ens"
   | "Poh"
   | "Twitter"
+  | "TwitterTweetGT10"
+  | "TwitterFollowerGT100"
+  | "TwitterFollowerGT500"
+  | "TwitterFollowerGTE1000"
+  | "TwitterFollowerGT5000"
   | "POAP"
   | "Facebook"
   | "Brightid"

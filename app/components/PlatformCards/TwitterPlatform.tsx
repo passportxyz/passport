@@ -8,11 +8,18 @@ import { debounce } from "ts-debounce";
 import { BroadcastChannel } from "broadcast-channel";
 
 // --- Identity tools
-import { PROVIDER_ID, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
+import {
+  Stamp,
+  PLATFORM_ID,
+  PROVIDER_ID,
+  VerifiableCredential,
+  CredentialResponseBody,
+  VerifiableCredentialRecord,
+} from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Style Components
-import { Card } from "../Card";
+import { SideBarContent } from "../SideBarContent";
 import { DoneToastContent } from "../DoneToastContent";
 import { useToast } from "@chakra-ui/react";
 
@@ -21,12 +28,16 @@ import { CeramicContext } from "../../context/ceramicContext";
 import { UserContext } from "../../context/userContext";
 import { ProviderSpec } from "../../config/providers";
 
-// Each provider is recognised by its ID
-const providerId: PROVIDER_ID = "Twitter";
+//
+import { getPlatformSpec, PLATFORMS, PlatformSpec } from "../../config/platforms";
+import { PlatformGroupSpec, STAMP_PROVIDERS } from "../../config/providers";
 
-export default function TwitterCard(): JSX.Element {
+// Each provider is recognised by its ID
+const platformId: PLATFORM_ID = "Twitter";
+
+export default function TwitterPlatform(): JSX.Element {
   const { address, signer } = useContext(UserContext);
-  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
+  const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
 
   // --- Chakra functions
@@ -82,13 +93,14 @@ export default function TwitterCard(): JSX.Element {
       const queryCode = e.data.code;
       const queryState = e.data.state;
 
-      datadogLogs.logger.info("Saving Stamp", { provider: providerId });
+      datadogLogs.logger.info("Saving Stamp", { platform: platformId });
       // fetch and store credential
       setLoading(true);
       fetchVerifiableCredential(
         process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
         {
-          type: providerId,
+          type: platformId,
+          types: providers as PROVIDER_ID[],
           version: "0.0.0",
           address: address || "",
           proofs: {
@@ -99,20 +111,31 @@ export default function TwitterCard(): JSX.Element {
         signer as { signMessage: (message: string) => Promise<string> }
       )
         .then(async (verified: VerifiableCredentialRecord): Promise<void> => {
-          await handleAddStamp({
-            provider: providerId,
-            credential: verified.credential as VerifiableCredential,
-          });
-          datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId });
+          // because we provided a types array in the params we expect to receive a credentials array in the response...
+          const vcs =
+            verified.credentials
+              ?.map((cred: CredentialResponseBody): Stamp | undefined => {
+                if (!cred.error) {
+                  // add each of the requested/received stamps to the passport...
+                  return {
+                    provider: cred.record?.type as PROVIDER_ID,
+                    credential: cred.credential as VerifiableCredential,
+                  };
+                }
+              })
+              .filter((v: Stamp | undefined) => v) || [];
+          // Add all the stamps to the passport at once
+          await handleAddStamps(vcs as Stamp[]);
+          datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
           // Custom Success Toast
           toast({
             duration: 5000,
             isClosable: true,
-            render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
+            render: (result: any) => <DoneToastContent providerId={platformId} result={result} />,
           });
         })
         .catch((e) => {
-          datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
+          datadogLogs.logger.error("Verification Error", { error: e, platform: platformId });
           throw e;
         })
         .finally(() => {
@@ -133,19 +156,15 @@ export default function TwitterCard(): JSX.Element {
     };
   });
 
-  const issueCredentialWidget = (
-    <button data-testid="button-verify-twitter" className="verify-btn" onClick={handleFetchTwitterOAuth}>
-      Connect account
-    </button>
-  );
-
   return (
-    <Card
-      streamId={allProvidersState[providerId]!.stamp?.streamId}
-      providerSpec={allProvidersState[providerId]!.providerSpec as ProviderSpec}
-      verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
-      issueCredentialWidget={issueCredentialWidget}
-      isLoading={isLoading}
+    <SideBarContent
+      currentPlatform={getPlatformSpec("Twitter")}
+      currentProviders={STAMP_PROVIDERS["Twitter"]}
+      verifyButton={
+        <button onClick={handleFetchTwitterOAuth} data-testid="button-verify-twitter" className="sidebar-verify-btn">
+          Verify
+        </button>
+      }
     />
   );
 }

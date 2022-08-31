@@ -1,6 +1,6 @@
 import React from "react";
 import { fireEvent, screen, waitFor, waitForElementToBeRemoved } from "@testing-library/react";
-import { GitPOAPCard } from "../../../components/ProviderCards";
+import { GitPOAPCard } from "../../../components/PlatformCards";
 
 import { UserContextState } from "../../../context/userContext";
 import { mockAddress } from "../../../__test-fixtures__/onboardHookValues";

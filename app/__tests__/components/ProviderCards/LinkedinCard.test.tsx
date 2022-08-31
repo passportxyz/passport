@@ -1,6 +1,6 @@
 import React from "react";
 import { screen, fireEvent } from "@testing-library/react";
-import { LinkedinCard } from "../../../components/ProviderCards";
+import { LinkedinCard } from "../../../components/PlatformCards";
 
 import { UserContextState } from "../../../context/userContext";
 import { STAMP_PROVIDERS } from "../../../config/providers";
