@@ -15,6 +15,7 @@ import {
   DiscordCard,
   SignerCard,
   GitPOAPCard,
+  WorldIDCard,
 } from "./ProviderCards";
 import { LoadingCard } from "./LoadingCard";
 
@@ -44,6 +45,7 @@ export const CardList = ({ isLoading }: CardListProps): JSX.Element => {
             <EnsCard />
             <PohCard />
             <DiscordCard />
+            <WorldIDCard />
           </>
         )}
       </div>

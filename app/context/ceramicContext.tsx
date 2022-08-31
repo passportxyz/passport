@@ -83,6 +83,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: STAMP_PROVIDERS.GitPOAP,
     stamp: undefined,
   },
+  WorldID: {
+    providerSpec: STAMP_PROVIDERS.WorldID,
+    stamp: undefined,
+  },
 };
 
 const startingState: CeramicContextState = {

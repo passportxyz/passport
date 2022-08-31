@@ -71,4 +71,9 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     name: "GitPOAP",
     description: "GitPOAP Verification",
   },
+  WorldID: {
+    icon: "./assets/worldIDStampIcon.svg",
+    name: "Worldcoin",
+    description: "Proof-of-Personhood with World ID",
+  },
 };

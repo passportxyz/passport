@@ -151,4 +151,5 @@ export type PROVIDER_ID =
   | "Github"
   | "Linkedin"
   | "Discord"
-  | "GitPOAP";
+  | "GitPOAP"
+  | "WorldID";
