@@ -116,7 +116,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           // The sessions are bound to an ETH address, this is why we use the address in the session key
           const sessionKey = `didsession-${address}`;
           const sessionStr = localStorage.getItem(sessionKey);
-      
+
           // @ts-ignore
           let selfId = await ceramicConnect(ethAuthProvider, sessionStr);
 
