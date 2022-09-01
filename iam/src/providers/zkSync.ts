@@ -33,10 +33,10 @@ type ZkSyncResponse = {
   pagination: Pagination;
 };
 
-// Export a ZkSynkProvider Provider
-export class ZkSynkProvider implements Provider {
+// Export a ZkSyncProvider Provider
+export class ZkSyncProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
-  type = "ZkSynk";
+  type = "ZkSync";
 
   // Options can be set here and/or via the constructor
   _options = {};
