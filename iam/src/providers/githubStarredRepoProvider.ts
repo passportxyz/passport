@@ -134,7 +134,7 @@ const verifyUserGithubRepo = async (userData: GithubFindMyUserResponse, ghAccess
         // if their stargazer count equals 1
       } else if (userData.id === repo.owner.id && repo.stargazers_count === 1) {
         // GET the solo stargazer's data
-        const stargazer: StargazerData = (await axios.get(repo.stargazers_url)).data;
+        const stargazer: StargazerData = (await axios.get(repo.stargazers_url)).data as StargazerData;
 
         for (let i = 0; i < stargazer.length; i++) {
           if (stargazer[i].id != repo.owner.id) {
