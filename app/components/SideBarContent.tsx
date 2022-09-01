@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 // --- Chakra UI Elements
 import {
@@ -16,6 +16,8 @@ import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
+import { CeramicContext } from "../context/ceramicContext";
+
 export type SideBarContentProps = {
   currentPlatform: PlatformSpec | undefined;
   currentProviders: PlatformGroupSpec[] | undefined;
@@ -31,6 +33,26 @@ export const SideBarContent = ({
   setSelectedProviders,
   verifyButton,
 }: SideBarContentProps): JSX.Element => {
+  const { allProvidersState } = useContext(CeramicContext);
+  const [allProviderIds, setAllProviderIds] = useState<PROVIDER_ID[]>([]);
+  const [allSelected, setAllSelected] = useState(false);
+
+  // alter select-all state when items change
+  useEffect(() => {
+    // find all providerIds
+    const providerIds =
+      currentProviders?.reduce((all, stamp, i) => {
+        return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+      }, [] as PROVIDER_ID[]) || [];
+
+    // should we select or deselect?
+    const doSelect = (selectedProviders?.length || 0) < providerIds.length;
+
+    // is everything selected?
+    setAllSelected(!doSelect);
+    setAllProviderIds(providerIds);
+  }, [currentProviders, selectedProviders]);
+
   return (
     <DrawerContent>
       <DrawerCloseButton />
@@ -53,14 +75,24 @@ export const SideBarContent = ({
           </DrawerHeader>
           <DrawerBody>
             <div>
-              <button className="text-purple-connectPurple">Select all</button>
+              <div className="flex">
+                <button
+                  className="ml-auto text-purple-connectPurple"
+                  onClick={(e) => {
+                    // set the selected items by concating or filtering by providerId
+                    setSelectedProviders && setSelectedProviders(!allSelected ? allProviderIds : []);
+                  }}
+                >
+                  {allSelected ? `- Remove all` : `+ Add all`}
+                </button>
+              </div>
               <hr className="border-1" />
               {/* each of the available providers in this platform */}
               {currentProviders?.map((stamp, i) => {
                 return (
                   <div key={i} className="border-b-2 py-4">
                     <p className="font-bold">{stamp.platformGroup}</p>
-                    <div className="flex flex-row">
+                    <div className="flex flex-row justify-between">
                       <ul className="list-disc">
                         {stamp.providers?.map((provider, i) => {
                           return (
@@ -71,17 +103,32 @@ export const SideBarContent = ({
                         })}
                       </ul>
                       <div className="align-right flex">
-                        <Switch colorScheme="purple" size="lg" onChange={(e) => {
-                          // grab all provider_ids for this platform
-                          const providerIds = (stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+                        <Switch
+                          colorScheme="purple"
+                          size="lg"
+                          isChecked={(() => {
+                            // check if any of the mentioned providers are present in allProvidersState
+                            return stamp.providers?.reduce(
+                              (isPresent, provider) =>
+                                isPresent ||
+                                selectedProviders?.indexOf(provider.name) !== -1 ||
+                                typeof allProvidersState[provider.name]?.stamp?.credential !== "undefined",
+                              false
+                            );
+                          })()}
+                          onChange={(e) => {
+                            // grab all provider_ids for this platform
+                            const providerIds = stamp.providers?.map((provider) => provider.name as PROVIDER_ID);
 
-                          // set the selected items by concating or filtering by providerId
-                          setSelectedProviders && setSelectedProviders(
-                            e.target.checked
-                              ? (selectedProviders || []).concat(providerIds)
-                              : (selectedProviders || []).filter((id) => !providerIds.includes(id))
-                          )
-                        }} />
+                            // set the selected items by concating or filtering by providerId
+                            setSelectedProviders &&
+                              setSelectedProviders(
+                                e.target.checked
+                                  ? (selectedProviders || []).concat(providerIds)
+                                  : (selectedProviders || []).filter((id) => !providerIds.includes(id))
+                              );
+                          }}
+                        />
                       </div>
                     </div>
                   </div>

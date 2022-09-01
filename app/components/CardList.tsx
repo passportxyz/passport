@@ -42,7 +42,15 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       case "Twitter":
         return <TwitterPlatform />;
       default:
-        return <SideBarContent currentPlatform={undefined} currentProviders={undefined} verifyButton={undefined} />;
+        return (
+          <SideBarContent
+            selectedProviders={undefined}
+            setSelectedProviders={undefined}
+            currentPlatform={undefined}
+            currentProviders={undefined}
+            verifyButton={undefined}
+          />
+        );
     }
   };
 
@@ -82,7 +90,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
                 </div>
                 <button
                   className="verify-btn"
-                  ref={btnRef}
+                  ref={btnRef.current}
                   onClick={(e) => {
                     console.log(platform);
                     setCurrentPlatform(platform);
@@ -98,7 +106,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       </div>
       {/* sidebar */}
       {currentProviders && (
-        <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef}>
+        <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef.current}>
           <DrawerOverlay />
           {renderCurrentPlatformSelection()}
         </Drawer>
