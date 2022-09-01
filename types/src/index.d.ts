@@ -33,7 +33,7 @@ export type VerifiableCredential = {
   };
 };
 
-// A ProviderContext is used as a tenporary storage so that providers can can share data
+// A ProviderContext is used as a temporary storage so that providers can can share data
 // between them, in case multiple VCs are requests in one http request
 export type ProviderContext = {
   [key: string]: any;
@@ -139,12 +139,31 @@ export type Passport = {
 // Passport DID
 export type DID = string;
 
+export type PLATFORM_ID =
+  | "Google"
+  | "Ens"
+  | "Poh"
+  | "Twitter"
+  | "POAP"
+  | "Facebook"
+  | "Brightid"
+  | "Github"
+  | "Linkedin"
+  | "Discord"
+  | "GitPOAP"
+  | "Signer";
+
 export type PROVIDER_ID =
   | "Signer"
   | "Google"
   | "Ens"
   | "Poh"
   | "Twitter"
+  | "TwitterTweetGT10"
+  | "TwitterFollowerGT100"
+  | "TwitterFollowerGT500"
+  | "TwitterFollowerGTE1000"
+  | "TwitterFollowerGT5000"
   | "POAP"
   | "Facebook"
   | "Brightid"
