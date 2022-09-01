@@ -161,7 +161,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   // Connect wallet on reload
   useEffect((): void => {
     setWalletFromLocalStorage();
-  }, [setWalletFromLocalStorage]);
+  }, []);
 
   // Update on wallet connect
   useEffect((): void => {
