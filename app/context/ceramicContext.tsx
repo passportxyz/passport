@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Passport, PLATFORM_ID, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
-import { PlatformGroupSpec, ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
+import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 import { CeramicDatabase } from "@gitcoin/passport-database-client";
 import { useViewerConnection } from "@self.id/framework";
 import { datadogLogs } from "@datadog/browser-logs";
@@ -287,7 +287,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       handleDeleteStamp,
       userDid,
     }),
-    [passport, isLoadingPassport]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [passport, isLoadingPassport, allProvidersState, userDid]
   );
 
   const providerProps = {

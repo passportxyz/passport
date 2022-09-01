@@ -2614,6 +2614,15 @@
     "@glazed/datamodel" "^0.3.1"
     "@glazed/tile-loader" "^0.2.1"
 
+"@glazed/did-session@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@glazed/did-session/-/did-session-0.1.1.tgz#53d8cf23b0c7c7b4ec124caf97bd8f1e6bdc64ce"
+  integrity sha512-OyKt89Ek7aciehqtFR6GiGtheqpfwLaZq3R+mFJY9rc++qAmRPt+omKXnXd5I6O6a6XCwUfvEFrGqqzM13cO9g==
+  dependencies:
+    "@ceramicnetwork/blockchain-utils-linking" "^2.0.6"
+    "@ceramicnetwork/stream-tile" "^2.2.2"
+    ceramic-cacao "^1.1.1"
+
 "@glazed/tile-loader@^0.2.0", "@glazed/tile-loader@^0.2.1":
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/@glazed/tile-loader/-/tile-loader-0.2.1.tgz#8f1a27b72953068718771171bd84a6657b612833"

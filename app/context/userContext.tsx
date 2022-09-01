@@ -116,12 +116,16 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           // The sessions are bound to an ETH address, this is why we use the address in the session key
           const sessionKey = `didsession-${address}`;
           const sessionStr = localStorage.getItem(sessionKey);
-
+      
+          // @ts-ignore
           let selfId = await ceramicConnect(ethAuthProvider, sessionStr);
 
           if (
+            // @ts-ignore
             !selfId?.client?.session ||
+            // @ts-ignore
             selfId?.client?.session?.isExpired ||
+            // @ts-ignore
             selfId?.client?.session?.expireInSecs < 3600
           ) {
             // If the session loaded is not valid, or if it is expired or close to expire, we create
@@ -130,6 +134,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           }
 
           // Store the session in localstorage
+          // @ts-ignore
           localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
         } finally {
           // mark that this login attempt is complete
@@ -156,7 +161,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   // Connect wallet on reload
   useEffect((): void => {
     setWalletFromLocalStorage();
-  }, []);
+  }, [setWalletFromLocalStorage]);
 
   // Update on wallet connect
   useEffect((): void => {
@@ -237,6 +242,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       signer,
       walletLabel,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [loggedIn, address, signer, wallet]
   );
 
