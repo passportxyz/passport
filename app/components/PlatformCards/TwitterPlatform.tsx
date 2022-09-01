@@ -40,8 +40,16 @@ export default function TwitterPlatform(): JSX.Element {
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
 
+  // find all providerIds
+  const providerIds =
+    STAMP_PROVIDERS["Twitter"]?.reduce((all, stamp, i) => {
+      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+    }, [] as PROVIDER_ID[]) || [];
+
   // SelectedProviders will be passed in to the sidebar to be filled there...
-  const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([]);
+  const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>(providerIds.filter((providerId) => (
+    typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
+  )));
 
   // --- Chakra functions
   const toast = useToast();

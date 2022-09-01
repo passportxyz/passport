@@ -69,7 +69,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
             <div className="w-1/2 p-2 md:w-1/2 xl:w-1/4" key={`${platform.name}${i}`}>
               <div className="relative border border-gray-200 p-0">
                 <div className="flex flex-row p-6">
-                  <div className="flex h-10 w-1/2 w-10 flex-grow">
+                  <div className="flex h-10 w-10 flex-grow">
                     {platform.icon ? (
                       <img src={platform.icon} alt={platform.name} className="h-10 w-10" />
                     ) : (

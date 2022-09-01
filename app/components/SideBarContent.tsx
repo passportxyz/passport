@@ -110,9 +110,7 @@ export const SideBarContent = ({
                             // check if any of the mentioned providers are present in allProvidersState
                             return stamp.providers?.reduce(
                               (isPresent, provider) =>
-                                isPresent ||
-                                selectedProviders?.indexOf(provider.name) !== -1 ||
-                                typeof allProvidersState[provider.name]?.stamp?.credential !== "undefined",
+                                isPresent || selectedProviders?.indexOf(provider.name) !== -1,
                               false
                             );
                           })()}
