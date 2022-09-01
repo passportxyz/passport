@@ -46,9 +46,9 @@ export default function TwitterPlatform(): JSX.Element {
     }, [] as PROVIDER_ID[]) || [];
 
   // SelectedProviders will be passed in to the sidebar to be filled there...
-  const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>(providerIds.filter((providerId) => (
-    typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
-  )));
+  const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>(
+    providerIds.filter((providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined")
+  );
 
   // --- Chakra functions
   const toast = useToast();

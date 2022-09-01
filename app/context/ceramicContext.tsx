@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { Passport, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
-import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
+import { Passport, PLATFORM_ID, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
+import { PlatformGroupSpec, ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 import { CeramicDatabase } from "@gitcoin/passport-database-client";
 import { useViewerConnection } from "@self.id/framework";
 import { datadogLogs } from "@datadog/browser-logs";
@@ -34,53 +34,79 @@ export type AllProvidersState = {
   };
 };
 
+const getProviderSpec = (platform: PLATFORM_ID, provider: string): ProviderSpec => {
+  return STAMP_PROVIDERS[platform]
+    ?.find((i) => i.providers.find((p) => p.name == provider))
+    ?.providers.find((p) => p.name == provider) as ProviderSpec;
+};
+
 const startingAllProvidersState: AllProvidersState = {
   Google: {
-    providerSpec: STAMP_PROVIDERS.Google,
+    providerSpec: STAMP_PROVIDERS.Google as unknown as ProviderSpec,
     stamp: undefined,
   },
   Ens: {
-    providerSpec: STAMP_PROVIDERS.Ens,
+    providerSpec: getProviderSpec("Ens", "Ens"),
     stamp: undefined,
   },
   Poh: {
-    providerSpec: STAMP_PROVIDERS.Poh,
+    providerSpec: getProviderSpec("Poh", "Poh"),
     stamp: undefined,
   },
   Twitter: {
-    providerSpec: STAMP_PROVIDERS.Twitter,
+    providerSpec: getProviderSpec("Twitter", "Twitter"),
+    stamp: undefined,
+  },
+  TwitterFollowerGT100: {
+    providerSpec: getProviderSpec("Twitter", "TwitterFollowerGT100"),
+    stamp: undefined,
+  },
+  TwitterFollowerGT500: {
+    providerSpec: getProviderSpec("Twitter", "TwitterFollowerGT500"),
+    stamp: undefined,
+  },
+  TwitterFollowerGTE1000: {
+    providerSpec: getProviderSpec("Twitter", "TwitterFollowerGTE1000"),
+    stamp: undefined,
+  },
+  TwitterFollowerGT5000: {
+    providerSpec: getProviderSpec("Twitter", "TwitterFollowerGT5000"),
+    stamp: undefined,
+  },
+  TwitterTweetGT10: {
+    providerSpec: getProviderSpec("Twitter", "TwitterTweetGT10"),
     stamp: undefined,
   },
   POAP: {
-    providerSpec: STAMP_PROVIDERS.POAP,
+    providerSpec: getProviderSpec("POAP", "POAP"),
     stamp: undefined,
   },
   Facebook: {
-    providerSpec: STAMP_PROVIDERS.Facebook,
+    providerSpec: getProviderSpec("Facebook", "Facebook"),
     stamp: undefined,
   },
   Brightid: {
-    providerSpec: STAMP_PROVIDERS.Brightid,
+    providerSpec: getProviderSpec("Brightid", "Brightid"),
     stamp: undefined,
   },
   Github: {
-    providerSpec: STAMP_PROVIDERS.Github,
+    providerSpec: getProviderSpec("Github", "Github"),
     stamp: undefined,
   },
   Linkedin: {
-    providerSpec: STAMP_PROVIDERS.Linkedin,
+    providerSpec: getProviderSpec("Linkedin", "Linkedin"),
     stamp: undefined,
   },
   Discord: {
-    providerSpec: STAMP_PROVIDERS.Discord,
+    providerSpec: getProviderSpec("Discord", "Discord"),
     stamp: undefined,
   },
   Signer: {
-    providerSpec: STAMP_PROVIDERS.Signer,
+    providerSpec: getProviderSpec("Signer", "Signer"),
     stamp: undefined,
   },
   GitPOAP: {
-    providerSpec: STAMP_PROVIDERS.GitPOAP,
+    providerSpec: getProviderSpec("GitPOAP", "GitPOAP"),
     stamp: undefined,
   },
 };

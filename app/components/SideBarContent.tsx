@@ -1,13 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 // --- Chakra UI Elements
-import {
-  DrawerBody,
-  DrawerHeader,
-  DrawerContent,
-  DrawerCloseButton,
-  Switch,
-} from "@chakra-ui/react";
+import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Switch } from "@chakra-ui/react";
 
 import { PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
@@ -103,8 +97,7 @@ export const SideBarContent = ({
                           isChecked={(() => {
                             // check that atleast one of the descendents is in selectedProviders
                             return stamp.providers?.reduce(
-                              (isPresent, provider) =>
-                                isPresent || selectedProviders?.indexOf(provider.name) !== -1,
+                              (isPresent, provider) => isPresent || selectedProviders?.indexOf(provider.name) !== -1,
                               false
                             );
                           })()}
