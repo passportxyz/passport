@@ -105,7 +105,10 @@ export const SideBarContent = ({
                         <Switch
                           colorScheme="green"
                           size="lg"
-                          isChecked={false}
+                          isChecked={stamp.providers?.reduce(
+                            (isPresent, provider) => isPresent || selectedProviders?.indexOf(provider.name) !== -1,
+                            false
+                          )}
                           onChange={(e) => {
                             // grab all provider_ids for this group of stamps
                             const providerIds = stamp.providers?.map((provider) => provider.name as PROVIDER_ID);
