@@ -28,9 +28,9 @@ import { CeramicContext } from "../../context/ceramicContext";
 import { UserContext } from "../../context/userContext";
 import { ProviderSpec } from "../../config/providers";
 
-//
-import { getPlatformSpec, PLATFORMS, PlatformSpec } from "../../config/platforms";
-import { PlatformGroupSpec, STAMP_PROVIDERS } from "../../config/providers";
+// --- Platform definitions
+import { getPlatformSpec } from "../../config/platforms";
+import { STAMP_PROVIDERS } from "../../config/providers";
 
 // Each provider is recognised by its ID
 const platformId: PLATFORM_ID = "Twitter";
@@ -39,6 +39,9 @@ export default function TwitterPlatform(): JSX.Element {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
+
+  // SelectedProviders will be passed in to the sidebar to be filled there...
+  const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([]);
 
   // --- Chakra functions
   const toast = useToast();
@@ -96,11 +99,13 @@ export default function TwitterPlatform(): JSX.Element {
       datadogLogs.logger.info("Saving Stamp", { platform: platformId });
       // fetch and store credential
       setLoading(true);
+
+      // fetch VCs for only the selectedProviders
       fetchVerifiableCredential(
         process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
         {
           type: platformId,
-          types: providers as PROVIDER_ID[],
+          types: selectedProviders,
           version: "0.0.0",
           address: address || "",
           proofs: {
@@ -160,6 +165,8 @@ export default function TwitterPlatform(): JSX.Element {
     <SideBarContent
       currentPlatform={getPlatformSpec("Twitter")}
       currentProviders={STAMP_PROVIDERS["Twitter"]}
+      selectedProviders={selectedProviders}
+      setSelectedProviders={setSelectedProviders}
       verifyButton={
         <button onClick={handleFetchTwitterOAuth} data-testid="button-verify-twitter" className="sidebar-verify-btn">
           Verify

@@ -14,23 +14,28 @@ import {
 
 import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 export type SideBarContentProps = {
   currentPlatform: PlatformSpec | undefined;
   currentProviders: PlatformGroupSpec[] | undefined;
+  selectedProviders: PROVIDER_ID[] | undefined;
+  setSelectedProviders: React.Dispatch<React.SetStateAction<PROVIDER_ID[]>> | undefined;
   verifyButton: JSX.Element | undefined;
 };
 
 export const SideBarContent = ({
   currentPlatform,
   currentProviders,
+  selectedProviders,
+  setSelectedProviders,
   verifyButton,
 }: SideBarContentProps): JSX.Element => {
   return (
     <DrawerContent>
       <DrawerCloseButton />
       {currentPlatform && currentProviders ? (
-        <div>
+        <div className="overflow-auto">
           <DrawerHeader>
             <div className="mt-10 flex flex-col sm:flex-row">
               <div className="w-full text-center sm:py-8 sm:pr-8">
@@ -50,6 +55,7 @@ export const SideBarContent = ({
             <div>
               <button className="text-purple-connectPurple">Select all</button>
               <hr className="border-1" />
+              {/* each of the available providers in this platform */}
               {currentProviders?.map((stamp, i) => {
                 return (
                   <div key={i} className="border-b-2 py-4">
@@ -65,8 +71,17 @@ export const SideBarContent = ({
                         })}
                       </ul>
                       <div className="align-right flex">
-                        {/* TODO -- upon selection of switch all the providers under this platform group should have all their providers selected  */}
-                        <Switch colorScheme="purple" size="lg" />
+                        <Switch colorScheme="purple" size="lg" onChange={(e) => {
+                          // grab all provider_ids for this platform
+                          const providerIds = (stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+
+                          // set the selected items by concating or filtering by providerId
+                          setSelectedProviders && setSelectedProviders(
+                            e.target.checked
+                              ? (selectedProviders || []).concat(providerIds)
+                              : (selectedProviders || []).filter((id) => !providerIds.includes(id))
+                          )
+                        }} />
                       </div>
                     </div>
                   </div>
