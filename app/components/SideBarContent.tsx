@@ -1,22 +1,17 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // --- Chakra UI Elements
 import {
-  Drawer,
   DrawerBody,
   DrawerHeader,
-  DrawerOverlay,
   DrawerContent,
   DrawerCloseButton,
-  useDisclosure,
   Switch,
 } from "@chakra-ui/react";
 
-import { PLATFORMS, PlatformSpec } from "../config/platforms";
+import { PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
-
-import { CeramicContext } from "../context/ceramicContext";
 
 export type SideBarContentProps = {
   currentPlatform: PlatformSpec | undefined;
@@ -33,7 +28,6 @@ export const SideBarContent = ({
   setSelectedProviders,
   verifyButton,
 }: SideBarContentProps): JSX.Element => {
-  const { allProvidersState } = useContext(CeramicContext);
   const [allProviderIds, setAllProviderIds] = useState<PROVIDER_ID[]>([]);
   const [allSelected, setAllSelected] = useState(false);
 
@@ -107,7 +101,7 @@ export const SideBarContent = ({
                           colorScheme="purple"
                           size="lg"
                           isChecked={(() => {
-                            // check if any of the mentioned providers are present in allProvidersState
+                            // check that atleast one of the descendents is in selectedProviders
                             return stamp.providers?.reduce(
                               (isPresent, provider) =>
                                 isPresent || selectedProviders?.indexOf(provider.name) !== -1,
@@ -115,7 +109,7 @@ export const SideBarContent = ({
                             );
                           })()}
                           onChange={(e) => {
-                            // grab all provider_ids for this platform
+                            // grab all provider_ids for this group of stamps
                             const providerIds = stamp.providers?.map((provider) => provider.name as PROVIDER_ID);
 
                             // set the selected items by concating or filtering by providerId

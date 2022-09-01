@@ -26,7 +26,6 @@ import { useToast } from "@chakra-ui/react";
 // --- Context
 import { CeramicContext } from "../../context/ceramicContext";
 import { UserContext } from "../../context/userContext";
-import { ProviderSpec } from "../../config/providers";
 
 // --- Platform definitions
 import { getPlatformSpec } from "../../config/platforms";
@@ -42,7 +41,7 @@ export default function TwitterPlatform(): JSX.Element {
 
   // find all providerIds
   const providerIds =
-    STAMP_PROVIDERS["Twitter"]?.reduce((all, stamp, i) => {
+    STAMP_PROVIDERS["Twitter"]?.reduce((all, stamp) => {
       return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
     }, [] as PROVIDER_ID[]) || [];
 
