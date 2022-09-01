@@ -3,6 +3,8 @@ import { PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-types";
 export type ProviderSpec = {
   title: string;
   name: PROVIDER_ID;
+  icon?: string;
+  description?: string;
 };
 
 export type PlatformGroupSpec = {
