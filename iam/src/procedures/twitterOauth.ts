@@ -41,7 +41,7 @@ export const initClient = (callback: string, sessionKey: string): auth.OAuth2Use
 };
 
 // record timeouts so that we can delay the deletion of the auth key til after all Providers have used it
-let timeoutDel: { [key: string]: NodeJS.Timeout };
+const timeoutDel: { [key: string]: NodeJS.Timeout } = {};
 
 export const deleteClient = (state: string): void => {
   timeoutDel[state] = setTimeout(() => {
