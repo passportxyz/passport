@@ -149,10 +149,12 @@ export default function TwitterPlatform(): JSX.Element {
           // Add all the stamps to the passport at once
           await handleAddStamps(vcs as Stamp[]);
           datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
-          // update the verified providers
-          setVerifiedProviders(
-            providerIds.filter((providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined")
+          const verifiedProviders = providerIds.filter(
+            (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
           );
+          // update the verified and selected providers
+          setVerifiedProviders([...verifiedProviders]);
+          setSelectedProviders([...verifiedProviders]);
           // reset can submit state
           setCanSubmit(false);
           // Custom Success Toast
