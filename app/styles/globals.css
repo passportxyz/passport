@@ -11,6 +11,9 @@
   .sidebar-verify-btn {
     @apply mt-10 w-full rounded-md bg-purple-connectPurple py-2 text-white hover:bg-purple-200 hover:text-black;
   }
+  .sidebar-verify-btn:disabled {
+    @apply bg-purple-200 text-black;
+  }
 }
 
 .font-libre-franklin {

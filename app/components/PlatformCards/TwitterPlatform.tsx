@@ -38,6 +38,7 @@ export default function TwitterPlatform(): JSX.Element {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
+  const [canSubmit, setCanSubmit] = useState(false);
 
   // find all providerIds
   const providerIds =
@@ -46,9 +47,18 @@ export default function TwitterPlatform(): JSX.Element {
     }, [] as PROVIDER_ID[]) || [];
 
   // SelectedProviders will be passed in to the sidebar to be filled there...
-  const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>(
+  const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
     providerIds.filter((providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined")
   );
+  // SelectedProviders will be passed in to the sidebar to be filled there...
+  const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
+
+  // any time we change selection state...
+  useEffect(() => {
+    if (selectedProviders.length !== verifiedProviders.length) {
+      setCanSubmit(true);
+    }
+  }, [selectedProviders, verifiedProviders]);
 
   // --- Chakra functions
   const toast = useToast();
@@ -139,6 +149,12 @@ export default function TwitterPlatform(): JSX.Element {
           // Add all the stamps to the passport at once
           await handleAddStamps(vcs as Stamp[]);
           datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
+          // update the verified providers
+          setVerifiedProviders(
+            providerIds.filter((providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined")
+          );
+          // reset can submit state
+          setCanSubmit(false);
           // Custom Success Toast
           toast({
             duration: 5000,
@@ -172,10 +188,16 @@ export default function TwitterPlatform(): JSX.Element {
     <SideBarContent
       currentPlatform={getPlatformSpec("Twitter")}
       currentProviders={STAMP_PROVIDERS["Twitter"]}
+      verifiedProviders={verifiedProviders}
       selectedProviders={selectedProviders}
       setSelectedProviders={setSelectedProviders}
       verifyButton={
-        <button onClick={handleFetchTwitterOAuth} data-testid="button-verify-twitter" className="sidebar-verify-btn">
+        <button
+          disabled={!canSubmit}
+          onClick={handleFetchTwitterOAuth}
+          data-testid="button-verify-twitter"
+          className="sidebar-verify-btn"
+        >
           Verify
         </button>
       }

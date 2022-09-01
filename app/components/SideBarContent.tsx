@@ -4,12 +4,13 @@ import React, { useEffect, useState } from "react";
 import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Switch } from "@chakra-ui/react";
 
 import { PlatformSpec } from "../config/platforms";
-import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
+import { PlatformGroupSpec } from "../config/providers";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 export type SideBarContentProps = {
   currentPlatform: PlatformSpec | undefined;
   currentProviders: PlatformGroupSpec[] | undefined;
+  verifiedProviders: PROVIDER_ID[] | undefined;
   selectedProviders: PROVIDER_ID[] | undefined;
   setSelectedProviders: React.Dispatch<React.SetStateAction<PROVIDER_ID[]>> | undefined;
   verifyButton: JSX.Element | undefined;
@@ -18,6 +19,7 @@ export type SideBarContentProps = {
 export const SideBarContent = ({
   currentPlatform,
   currentProviders,
+  verifiedProviders,
   selectedProviders,
   setSelectedProviders,
   verifyButton,
@@ -43,12 +45,12 @@ export const SideBarContent = ({
 
   return (
     <DrawerContent>
-      <DrawerCloseButton />
+      <DrawerCloseButton className="z-10" />
       {currentPlatform && currentProviders ? (
         <div className="overflow-auto">
           <DrawerHeader>
             <div className="mt-10 flex flex-col sm:flex-row">
-              <div className="w-full text-center sm:py-8 sm:pr-8">
+              <div className="w-full text-center sm:py-8">
                 <div className="inline-flex h-20 w-20 items-center justify-center rounded-full text-gray-400">
                   <img alt="Platform Image" className="h-full w-full" src={currentPlatform?.icon} />
                 </div>
@@ -61,38 +63,47 @@ export const SideBarContent = ({
               </div>
             </div>
           </DrawerHeader>
-          <DrawerBody>
+          <DrawerBody
+            style={{ paddingInlineStart: "0", paddingInlineEnd: "0", WebkitPaddingStart: "0", WebkitPaddingEnd: "0" }}
+          >
             <div>
-              <div className="flex">
-                <button
-                  className="ml-auto text-purple-connectPurple"
+              <div className="flex pl-4 pr-6">
+                <span
+                  className={`ml-auto py-2 text-sm ${
+                    !allSelected ? `cursor-pointer text-purple-connectPurple` : `cursor-default `
+                  } `}
                   onClick={(e) => {
                     // set the selected items by concating or filtering by providerId
-                    setSelectedProviders && setSelectedProviders(!allSelected ? allProviderIds : []);
+                    if (!allSelected) setSelectedProviders && setSelectedProviders(!allSelected ? allProviderIds : []);
                   }}
                 >
-                  {allSelected ? `- Remove all` : `+ Add all`}
-                </button>
+                  {allSelected ? `Selected!` : `Select all`}
+                </span>
               </div>
               <hr className="border-1" />
               {/* each of the available providers in this platform */}
               {currentProviders?.map((stamp, i) => {
                 return (
-                  <div key={i} className="border-b-2 py-4">
-                    <p className="font-bold">{stamp.platformGroup}</p>
+                  <div key={i} className="border-b py-4 px-6">
+                    <p className="ml-4 text-sm font-bold">{stamp.platformGroup}</p>
                     <div className="flex flex-row justify-between">
-                      <ul className="list-disc">
+                      <ul className="marker:leading-1 list-disc marker:text-3xl ">
                         {stamp.providers?.map((provider, i) => {
                           return (
-                            <li className="ml-4 mb-2 text-gray-400" key={`${provider.title}${i}`}>
-                              {provider.title}
+                            <li
+                              className={`ml-4 ${
+                                verifiedProviders?.indexOf(provider.name) !== -1 ? `text-green-500` : `text-gray-400`
+                              }`}
+                              key={`${provider.title}${i}`}
+                            >
+                              <div className="relative top-[-0.3em] text-sm text-gray-400">{provider.title}</div>
                             </li>
                           );
                         })}
                       </ul>
                       <div className="align-right flex">
                         <Switch
-                          colorScheme="purple"
+                          colorScheme="green"
                           size="lg"
                           isChecked={(() => {
                             // check that atleast one of the descendents is in selectedProviders
@@ -119,7 +130,7 @@ export const SideBarContent = ({
                   </div>
                 );
               })}
-              {verifyButton}
+              <div className="pl-4 pr-4 pb-4">{verifyButton}</div>
             </div>
           </DrawerBody>
         </div>

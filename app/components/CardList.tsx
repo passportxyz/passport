@@ -44,6 +44,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       default:
         return (
           <SideBarContent
+            verifiedProviders={undefined}
             selectedProviders={undefined}
             setSelectedProviders={undefined}
             currentPlatform={undefined}
@@ -106,7 +107,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       </div>
       {/* sidebar */}
       {currentProviders && (
-        <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef.current}>
+        <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose} finalFocusRef={btnRef.current}>
           <DrawerOverlay />
           {renderCurrentPlatformSelection()}
         </Drawer>
