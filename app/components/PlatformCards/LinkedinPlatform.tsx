@@ -32,7 +32,7 @@ import { getPlatformSpec } from "../../config/platforms";
 import { STAMP_PROVIDERS } from "../../config/providers";
 import { SideBarContent } from "../SideBarContent";
 
-// Each provider is recognised by its ID
+// Each platform is recognised by its ID
 const platformId: PLATFORM_ID = "Linkedin";
 
 function generateUID(length: number) {
