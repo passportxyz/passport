@@ -1,20 +1,20 @@
 // --- React Methods
 import React from "react";
 
-import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { PLATFORM_ID } from "@gitcoin/passport-types";
 
 export type CustomToastProps = {
-  providerId: PROVIDER_ID;
+  platformId: PLATFORM_ID;
   result: any;
   message?: boolean | string;
 };
 
 // This content overrides Chakra UI Toast style in render function
-export const DoneToastContent = ({ providerId, result, message = false }: CustomToastProps): JSX.Element => {
+export const DoneToastContent = ({ platformId, result, message = false }: CustomToastProps): JSX.Element => {
   return (
     <div
       className="rounded-md bg-blue-darkblue text-white"
-      data-testid={`toast-done-${providerId && providerId.toLowerCase()}`}
+      data-testid={`toast-done-${platformId && platformId.toLowerCase()}`}
     >
       <div className="flex p-4">
         <div className="mr-2">
@@ -24,7 +24,7 @@ export const DoneToastContent = ({ providerId, result, message = false }: Custom
         </div>
         <div className="flex-grow">
           <h2 className="title-font mb-2 text-lg font-bold">Done!</h2>
-          <p>{message || `Your ${providerId} stamp has been verified.`}</p>
+          <p>{message || `Your ${platformId} stamp has been verified.`}</p>
         </div>
         <div>
           <button className="sticky top-0" onClick={result.onClose}>

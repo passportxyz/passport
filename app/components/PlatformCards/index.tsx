@@ -1,4 +1,4 @@
-export { default as GoogleCard } from "./GoogleCard";
+export { default as GooglePlatform } from "./GooglePlatform";
 export { default as EnsCard } from "./EnsCard";
 export { default as PohCard } from "./PohCard";
 export { default as TwitterPlatform } from "./TwitterPlatform";
