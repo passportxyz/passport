@@ -85,6 +85,14 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: getProviderSpec("Facebook", "Facebook"),
     stamp: undefined,
   },
+  FacebookFriends: {
+    providerSpec: getProviderSpec("Facebook", "FacebookFriends"),
+    stamp: undefined,
+  },
+  FacebookProfilePicture: {
+    providerSpec: getProviderSpec("Facebook", "FacebookProfilePicture"),
+    stamp: undefined,
+  },
   Brightid: {
     providerSpec: getProviderSpec("Brightid", "Brightid"),
     stamp: undefined,

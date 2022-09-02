@@ -13,7 +13,7 @@ import {
   PohCard,
   TwitterPlatform,
   PoapCard,
-  FacebookCard,
+  FacebookPlatform,
   BrightidCard,
   GithubPlatform,
   LinkedinCard,
@@ -43,6 +43,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <TwitterPlatform />;
       case "Github":
         return <GithubPlatform />;
+      case "Facebook":
+        return <FacebookPlatform />;
       default:
         return (
           <SideBarContent
