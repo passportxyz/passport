@@ -17,6 +17,7 @@ import {
   BrightidCard,
   GithubPlatform,
   LinkedinPlatform,
+  GitcoinPlatform,
   DiscordCard,
   SignerCard,
   GitPOAPCard,
@@ -44,6 +45,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <TwitterPlatform />;
       case "Github":
         return <GithubPlatform />;
+      case "Gitcoin":
+        return <GitcoinPlatform />;
       case "Facebook":
         return <FacebookPlatform />;
       case "Snapshot":

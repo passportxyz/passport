@@ -76,6 +76,13 @@ export const PLATFORMS: PlatformSpec[] = [
     connectMessage: "Connect Account",
   },
   {
+    icon: "./assets/gitcoinStampIcon.svg",
+    platform: "Gitcoin",
+    name: "Gitcoin",
+    description: "Connect your existing Gitcoin account to verify.",
+    connectMessage: "Connect Account",
+  },
+  {
     icon: "./assets/linkedinStampIcon.svg",
     platform: "Linkedin",
     name: "Linkedin",

@@ -149,6 +149,82 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: getProviderSpec("Snapshot", "SnapshotVotesProvider"),
     stamp: undefined,
   },
+  "GitcoinContributorStatistics#numGrantsContributeToGte#1": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGrantsContributeToGte#1"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#numGrantsContributeToGte#10": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGrantsContributeToGte#10"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#numGrantsContributeToGte#25": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGrantsContributeToGte#25"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#numGrantsContributeToGte#100": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGrantsContributeToGte#100"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#totalContributionAmountGte#1": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#totalContributionAmountGte#1"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#totalContributionAmountGte#10": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#totalContributionAmountGte#10"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#totalContributionAmountGte#100": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#totalContributionAmountGte#100"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#totalContributionAmountGte#1000": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#totalContributionAmountGte#1000"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#numRoundsContributedToGte#1": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numRoundsContributedToGte#1"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#numGr14ContributionsGte#1": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGr14ContributionsGte#1"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#numOwnedGrants#1": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numOwnedGrants#1"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#numGrantContributors#10": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#10"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#numGrantContributors#25": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#25"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#numGrantContributors#100": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#100"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#totalContributionAmount#10": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#10"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#totalContributionAmount#25": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#25"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#totalContributionAmount#100": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#100"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#totalContributionAmount#1000": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#1000"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#numGrantsInEcoAndCauseRound#1": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantsInEcoAndCauseRound#1"),
+    stamp: undefined,
+  },
 };
 
 const startingState: CeramicContextState = {
