@@ -168,6 +168,11 @@ export type PROVIDER_ID =
   | "Facebook"
   | "Brightid"
   | "Github"
+  | "TenOrMoreGithubFollowers"
+  | "FiftyOrMoreGithubFollowers"
+  | "ForkedGithubRepoProvider"
+  | "StarredGithubRepoProvider"
+  | "FiveOrMoreGithubRepos"
   | "Linkedin"
   | "Discord"
   | "GitPOAP";

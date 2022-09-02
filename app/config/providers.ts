@@ -80,7 +80,37 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
   Github: [
     {
       platformGroup: "Account Name",
-      providers: [{ title: "Encrypted", name: "Twitter" }],
+      providers: [{ title: "Encrypted", name: "Github" }],
+    },
+    {
+      platformGroup: "Repositories",
+      providers: [
+        {
+          title: "Five or more GitHub repos",
+          name: "FiveOrMoreGithubRepos" 
+        },
+        {
+          title: "At least 1 GitHub repo forked by another user",
+          name: "ForkedGithubRepoProvider" 
+        },
+        {
+          title: "At least 1 GitHub repo starred by another user",
+          name: "StarredGithubRepoProvider" 
+        },
+      ],
+    },
+    {
+      platformGroup: "Followers",
+      providers: [
+        {
+          title: "Ten or more GitHub followers",
+          name: "TenOrMoreGithubFollowers",
+        },
+        {
+          title: "Fifty or more GitHub followers",
+          name: "FiftyOrMoreGithubFollowers",
+        },
+      ],
     },
   ],
   Linkedin: [
