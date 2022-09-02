@@ -42,7 +42,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       case "Twitter":
         return <TwitterPlatform />;
       case "Github":
-        return <GithubPlatform />
+        return <GithubPlatform />;
       default:
         return (
           <SideBarContent

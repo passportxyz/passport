@@ -87,15 +87,15 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [
         {
           title: "Five or more GitHub repos",
-          name: "FiveOrMoreGithubRepos" 
+          name: "FiveOrMoreGithubRepos",
         },
         {
           title: "At least 1 GitHub repo forked by another user",
-          name: "ForkedGithubRepoProvider" 
+          name: "ForkedGithubRepoProvider",
         },
         {
           title: "At least 1 GitHub repo starred by another user",
-          name: "StarredGithubRepoProvider" 
+          name: "StarredGithubRepoProvider",
         },
       ],
     },
