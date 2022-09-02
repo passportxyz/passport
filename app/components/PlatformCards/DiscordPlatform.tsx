@@ -8,21 +8,31 @@ import { debounce } from "ts-debounce";
 import { BroadcastChannel } from "broadcast-channel";
 
 // --- Identity tools
-import { PROVIDER_ID, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
+import {
+  Stamp,
+  PLATFORM_ID,
+  PROVIDER_ID,
+  VerifiableCredential,
+  CredentialResponseBody,
+  VerifiableCredentialRecord,
+} from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Style Components
-import { Card } from "../Card";
+import { SideBarContent } from "../SideBarContent";
 import { DoneToastContent } from "../DoneToastContent";
 import { useToast } from "@chakra-ui/react";
 
 // --- Context
-import { UserContext } from "../../context/userContext";
-import { ProviderSpec } from "../../config/providers";
 import { CeramicContext } from "../../context/ceramicContext";
+import { UserContext } from "../../context/userContext";
+
+// --- Platform definitions
+import { getPlatformSpec } from "../../config/platforms";
+import { STAMP_PROVIDERS } from "../../config/providers";
 
 // Each provider is recognised by its ID
-const providerId: PROVIDER_ID = "Discord";
+const platformId: PLATFORM_ID = "Discord";
 
 function generateUID(length: number) {
   return window
@@ -37,8 +47,29 @@ function generateUID(length: number) {
 
 export default function DiscordCard(): JSX.Element {
   const { address, signer } = useContext(UserContext);
-  const { handleAddStamp, allProvidersState } = useContext(CeramicContext);
+  const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
+  const [canSubmit, setCanSubmit] = useState(false);
+
+  // find all providerIds
+  const providerIds =
+    STAMP_PROVIDERS["Discord"]?.reduce((all, stamp) => {
+      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+    }, [] as PROVIDER_ID[]) || [];
+
+  // SelectedProviders will be passed in to the sidebar to be filled there...
+  const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
+    providerIds.filter((providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined")
+  );
+  // SelectedProviders will be passed in to the sidebar to be filled there...
+  const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
+
+  // any time we change selection state...
+  useEffect(() => {
+    if (selectedProviders.length !== verifiedProviders.length) {
+      setCanSubmit(true);
+    }
+  }, [selectedProviders, verifiedProviders]);
 
   // --- Chakra functions
   const toast = useToast();
@@ -81,13 +112,14 @@ export default function DiscordCard(): JSX.Element {
       // pull data from message
       const queryCode = e.data.code;
 
-      datadogLogs.logger.info("Saving Stamp", { provider: providerId });
+      datadogLogs.logger.info("Saving Stamp", { platform: platformId });
       // fetch and store credential
       setLoading(true);
       fetchVerifiableCredential(
         process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
         {
-          type: providerId,
+          type: platformId,
+          types: selectedProviders,
           version: "0.0.0",
           address: address || "",
           proofs: {
@@ -97,20 +129,39 @@ export default function DiscordCard(): JSX.Element {
         signer as { signMessage: (message: string) => Promise<string> }
       )
         .then(async (verified: VerifiableCredentialRecord): Promise<void> => {
-          await handleAddStamp({
-            provider: providerId,
-            credential: verified.credential as VerifiableCredential,
-          });
-          datadogLogs.logger.info("Successfully saved Stamp", { provider: providerId });
+          // because we provided a types array in the params we expect to receive a credentials array in the response...
+          const vcs =
+            verified.credentials
+              ?.map((cred: CredentialResponseBody): Stamp | undefined => {
+                if (!cred.error) {
+                  // add each of the requested/received stamps to the passport...
+                  return {
+                    provider: cred.record?.type as PROVIDER_ID,
+                    credential: cred.credential as VerifiableCredential,
+                  };
+                }
+              })
+              .filter((v: Stamp | undefined) => v) || [];
+          // Add all the stamps to the passport at once
+          await handleAddStamps(vcs as Stamp[]);
+          datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
+          const verifiedProviders = providerIds.filter(
+            (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
+          );
+          // update the verified and selected providers
+          setVerifiedProviders([...verifiedProviders]);
+          setSelectedProviders([...verifiedProviders]);
+          // reset can submit state
+          setCanSubmit(false);
           // Custom Success Toast
           toast({
             duration: 5000,
             isClosable: true,
-            render: (result: any) => <DoneToastContent providerId={providerId} result={result} />,
+            render: (result: any) => <DoneToastContent providerId={platformId} result={result} />,
           });
         })
         .catch((e) => {
-          datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
+          datadogLogs.logger.error("Verification Error", { error: e, platform: platformId });
           throw e;
         })
         .finally(() => {
@@ -131,19 +182,23 @@ export default function DiscordCard(): JSX.Element {
     };
   });
 
-  const issueCredentialWidget = (
-    <button data-testid="button-verify-discord" className="verify-btn" onClick={handleFetchDiscordOAuth}>
-      Connect account
-    </button>
-  );
-
   return (
-    <Card
-      streamId={allProvidersState[providerId]!.stamp?.streamId}
-      providerSpec={allProvidersState[providerId]!.providerSpec as ProviderSpec}
-      verifiableCredential={allProvidersState[providerId]!.stamp?.credential}
-      issueCredentialWidget={issueCredentialWidget}
-      isLoading={isLoading}
+    <SideBarContent
+      currentPlatform={getPlatformSpec("Discord")}
+      currentProviders={STAMP_PROVIDERS["Discord"]}
+      verifiedProviders={verifiedProviders}
+      selectedProviders={selectedProviders}
+      setSelectedProviders={setSelectedProviders}
+      verifyButton={
+        <button
+          disabled={!canSubmit}
+          onClick={handleFetchDiscordOAuth}
+          data-testid="button-verify-discord"
+          className="sidebar-verify-btn"
+        >
+          Verify
+        </button>
+      }
     />
   );
 }
