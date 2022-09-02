@@ -69,7 +69,6 @@ export default function GithubPlatform(): JSX.Element {
   useEffect(() => {
     if (selectedProviders.length !== verifiedProviders.length) {
       setCanSubmit(true);
-      console.log(selectedProviders);
     }
   }, [selectedProviders, verifiedProviders]);
 
