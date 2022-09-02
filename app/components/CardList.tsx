@@ -57,6 +57,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <LinkedinPlatform />;
       case "GitPOAP":
         return <GitPOAPPlatform />;
+      case "Discord":
+        return <DiscordPlatform />;
       default:
         return (
           <SideBarContent
