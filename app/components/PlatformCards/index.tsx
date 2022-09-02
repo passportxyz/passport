@@ -6,7 +6,7 @@ export { default as PoapCard } from "./PoapCard";
 export { default as FacebookPlatform } from "./FacebookPlatform";
 export { default as BrightidCard } from "./BrightidCard";
 export { default as GithubPlatform } from "./GithubPlatform";
-export { default as LinkedinCard } from "./LinkedinCard";
+export { default as LinkedinPlatform } from "./LinkedinPlatform";
 export { default as DiscordCard } from "./DiscordCard";
 export { default as SignerCard } from "./SignerCard";
 export { default as GitPOAPCard } from "./GitPOAPCard";
