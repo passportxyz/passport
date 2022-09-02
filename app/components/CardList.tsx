@@ -8,7 +8,7 @@ import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
 
 // --- Identity Providers
 import {
-  GoogleCard,
+  GooglePlatform,
   EnsCard,
   PohCard,
   TwitterPlatform,
@@ -45,6 +45,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <GithubPlatform />;
       case "Facebook":
         return <FacebookPlatform />;
+      case "Google":
+        return <GooglePlatform />;
       default:
         return (
           <SideBarContent
