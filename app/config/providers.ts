@@ -123,7 +123,7 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
   ],
   Gitcoin: [
     {
-      platformGroup: "Contributor to...",
+      platformGroup: "Contributed to...",
       providers: [
         { title: "more than 1 Grant", name: "GitcoinContributorStatistics#numGrantsContributeToGte#1" },
         { title: "more than 10 Grants", name: "GitcoinContributorStatistics#numGrantsContributeToGte#10" },
