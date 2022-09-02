@@ -103,4 +103,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "GitPOAP Verification",
     connectMessage: "Connect Account",
   },
+  {
+    icon: "./assets/gitPOAPStampIcon.svg",
+    platform: "Snapshot",
+    name: "Snapshot",
+    description: "Snapshot Verification",
+    connectMessage: "Connect Account",
+  },
 ];

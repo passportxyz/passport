@@ -137,6 +137,18 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: getProviderSpec("GitPOAP", "GitPOAP"),
     stamp: undefined,
   },
+  Snapshot: {
+    providerSpec: getProviderSpec("Snapshot", "Snapshot"),
+    stamp: undefined,
+  },
+  SnapshotProposalsProvider: {
+    providerSpec: getProviderSpec("Snapshot", "SnapshotProposalsProvider"),
+    stamp: undefined,
+  },
+  SnapshotVotesProvider: {
+    providerSpec: getProviderSpec("Snapshot", "SnapshotVotesProvider"),
+    stamp: undefined,
+  },
 };
 
 const startingState: CeramicContextState = {

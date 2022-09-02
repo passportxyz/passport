@@ -151,7 +151,8 @@ export type PLATFORM_ID =
   | "Linkedin"
   | "Discord"
   | "GitPOAP"
-  | "Signer";
+  | "Signer"
+  | "Snapshot";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -177,4 +178,7 @@ export type PROVIDER_ID =
   | "FiveOrMoreGithubRepos"
   | "Linkedin"
   | "Discord"
-  | "GitPOAP";
+  | "GitPOAP"
+  | "Snapshot"
+  | "SnapshotProposalsProvider"
+  | "SnapshotVotesProvider";

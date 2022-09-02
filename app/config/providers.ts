@@ -145,4 +145,14 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Encrypted", name: "GitPOAP" }],
     },
   ],
+  Snapshot: [
+    {
+      platformGroup: "Snapshot Proposals",
+      providers: [{ title: "Voted on at least 1 Snapshot proposal voted on", name: "SnapshotProposalsProvider" }],
+    },
+    {
+      platformGroup: "Snapshot Votes",
+      providers: [{ title: "At least 1 Snapshot proposal voted on by another user", name: "SnapshotVotesProvider" }],
+    },
+  ],
 };

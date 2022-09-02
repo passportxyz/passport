@@ -10,3 +10,4 @@ export { default as LinkedinCard } from "./LinkedinCard";
 export { default as DiscordCard } from "./DiscordCard";
 export { default as SignerCard } from "./SignerCard";
 export { default as GitPOAPCard } from "./GitPOAPCard";
+export { default as SnapshotPlatform } from "./SnapshotPlatform";

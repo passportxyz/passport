@@ -20,6 +20,7 @@ import {
   DiscordCard,
   SignerCard,
   GitPOAPCard,
+  SnapshotPlatform,
 } from "./PlatformCards";
 import { SideBarContent } from "./SideBarContent";
 
@@ -45,6 +46,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <GithubPlatform />;
       case "Facebook":
         return <FacebookPlatform />;
+      case "Snapshot":
+        return <SnapshotPlatform />;
       default:
         return (
           <SideBarContent
