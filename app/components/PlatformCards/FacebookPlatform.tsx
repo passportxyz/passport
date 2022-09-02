@@ -46,7 +46,6 @@ export interface ReactFacebookLoginInfo {
       }
     | undefined;
 }
-
 // import from .env
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
@@ -60,7 +59,7 @@ export default function FacebookCard(): JSX.Element {
 
   // find all providerIds
   const providerIds =
-    STAMP_PROVIDERS["Twitter"]?.reduce((all, stamp) => {
+    STAMP_PROVIDERS["Facebook"]?.reduce((all, stamp) => {
       return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
     }, [] as PROVIDER_ID[]) || [];
 
