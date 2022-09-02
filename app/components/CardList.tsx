@@ -18,7 +18,7 @@ import {
   GithubPlatform,
   LinkedinPlatform,
   GitcoinPlatform,
-  DiscordCard,
+  DiscordPlatform,
   SignerCard,
   GitPOAPPlatform,
   SnapshotPlatform,

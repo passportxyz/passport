@@ -8,7 +8,7 @@ export { default as BrightidCard } from "./BrightidCard";
 export { default as GithubPlatform } from "./GithubPlatform";
 export { default as LinkedinPlatform } from "./LinkedinPlatform";
 export { default as GitcoinPlatform } from "./GitcoinPlatform";
-export { default as DiscordCard } from "./DiscordCard";
+export { default as DiscordPlatform } from "./DiscordPlatform";
 export { default as SignerCard } from "./SignerCard";
 export { default as GitPOAPPlatform } from "./GitPOAPPlatform";
 export { default as SnapshotPlatform } from "./SnapshotPlatform";
