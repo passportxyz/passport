@@ -15,7 +15,7 @@ import {
   PoapCard,
   FacebookCard,
   BrightidCard,
-  GithubCard,
+  GithubPlatform,
   LinkedinCard,
   DiscordCard,
   SignerCard,
@@ -41,6 +41,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
     switch (currentPlatform?.name) {
       case "Twitter":
         return <TwitterPlatform />;
+      case "Github":
+        return <GithubPlatform />
       default:
         return (
           <SideBarContent
@@ -93,7 +95,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
                   className="verify-btn"
                   ref={btnRef.current}
                   onClick={(e) => {
-                    console.log(platform);
+                    // console.log(platform);
                     setCurrentPlatform(platform);
                     onOpen();
                   }}

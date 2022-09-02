@@ -93,6 +93,26 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: getProviderSpec("Github", "Github"),
     stamp: undefined,
   },
+  TenOrMoreGithubFollowers: {
+    providerSpec: getProviderSpec("Github", "TenOrMoreGithubFollowers"),
+    stamp: undefined,
+  },
+  FiftyOrMoreGithubFollowers: {
+    providerSpec: getProviderSpec("Github", "FiftyOrMoreGithubFollowers"),
+    stamp: undefined,
+  },
+  ForkedGithubRepoProvider: {
+    providerSpec: getProviderSpec("Github", "ForkedGithubRepoProvider"),
+    stamp: undefined,
+  },
+  StarredGithubRepoProvider: {
+    providerSpec: getProviderSpec("Github", "StarredGithubRepoProvider"),
+    stamp: undefined,
+  },
+  FiveOrMoreGithubRepos: {
+    providerSpec: getProviderSpec("Github", "FiveOrMoreGithubRepos"),
+    stamp: undefined,
+  },
   Linkedin: {
     providerSpec: getProviderSpec("Linkedin", "Linkedin"),
     stamp: undefined,

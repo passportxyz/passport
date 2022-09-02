@@ -1,14 +1,14 @@
 import React from "react";
 import { screen, fireEvent } from "@testing-library/react";
-import { GithubCard } from "../../../components/PlatformCards";
+import { GithubPlatform } from "../../../components/PlatformCards";
 
 import { UserContextState } from "../../../context/userContext";
-import { STAMP_PROVIDERS } from "../../../config/providers";
 import { githubStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
 import {
   makeTestCeramicContext,
   makeTestUserContext,
   renderWithContext,
+  getProviderSpec,
 } from "../../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../../context/ceramicContext";
 
@@ -17,9 +17,9 @@ jest.mock("../../../utils/onboard.ts");
 const mockUserContext: UserContextState = makeTestUserContext();
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
-describe("when user has not verified with GithubProvider", () => {
+describe("when user has not verified with GithubPlatform", () => {
   it("should display a github verification button", () => {
-    // renderWithContext(mockUserContext, mockCeramicContext, <GithubCard />);
+    // renderWithContext(mockUserContext, mockCeramicContext, <GithubPlatform />);
     // const githubVerifyButton = screen.queryByTestId("button-verify-github");
     // expect(githubVerifyButton).toBeInTheDocument();
   });
@@ -33,12 +33,32 @@ describe("when user has not verified with GithubProvider", () => {
 //         ...mockCeramicContext,
 //         allProvidersState: {
 //           Github: {
-//             providerSpec: STAMP_PROVIDERS.Github,
-//             stamp: githubStampFixture,
+//             providerSpec: getProviderSpec("Github", "Github"),
+//             stamp: undefined,
+//           },
+//           TenOrMoreGithubFollowers: {
+//             providerSpec: getProviderSpec("Github", "TenOrMoreGithubFollowers"),
+//             stamp: undefined,
+//           },
+//           FiftyOrMoreGithubFollowers: {
+//             providerSpec: getProviderSpec("Github", "FiftyOrMoreGithubFollowers"),
+//             stamp: undefined,
+//           },
+//           ForkedGithubRepoProvider: {
+//             providerSpec: getProviderSpec("Github", "ForkedGithubRepoProvider"),
+//             stamp: undefined,
+//           },
+//           StarredGithubRepoProvider: {
+//             providerSpec: getProviderSpec("Github", "StarredGithubRepoProvider"),
+//             stamp: undefined,
+//           },
+//           FiveOrMoreGithubRepos: {
+//             providerSpec: getProviderSpec("Github", "FiveOrMoreGithubRepos"),
+//             stamp: undefined,
 //           },
 //         },
 //       },
-//       <GithubCard />
+//       <GithubPlatform />
 //     );
 
 //     const githubVerified = screen.queryByText(/Verified/);
@@ -53,7 +73,7 @@ describe("when user has not verified with GithubProvider", () => {
 //     });
 
 //     mockCeramicContext.allProvidersState.Github = {
-//       providerSpec: STAMP_PROVIDERS.Github,
+//       providerSpec: getProviderSpec("Github", "Github"),
 //       stamp: {
 //         provider: "Github",
 //         streamId: "STREAM-ID",
@@ -80,7 +100,7 @@ describe("when user has not verified with GithubProvider", () => {
 //       },
 //     };
 
-//     renderWithContext(mockUserContext, mockCeramicContext, <GithubCard />);
+//     renderWithContext(mockUserContext, mockCeramicContext, <GithubPlatform />);
 
 //     // Open menu (click the menu button)
 //     const menuButton = screen.queryByTestId("card-menu-button");

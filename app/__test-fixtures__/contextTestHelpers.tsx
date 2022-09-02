@@ -18,7 +18,7 @@ export const makeTestUserContext = (initialState?: Partial<UserContextState>): U
   };
 };
 
-const getProviderSpec = (platform: PLATFORM_ID, provider: string): ProviderSpec => {
+export const getProviderSpec = (platform: PLATFORM_ID, provider: string): ProviderSpec => {
   return STAMP_PROVIDERS[platform]
     ?.find((i) => i.providers.find((p) => p.name == provider))
     ?.providers.find((p) => p.name == provider) as ProviderSpec;
@@ -84,6 +84,26 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
       },
       Github: {
         providerSpec: getProviderSpec("Github", "Github"),
+        stamp: undefined,
+      },
+      TenOrMoreGithubFollowers: {
+        providerSpec: getProviderSpec("Github", "TenOrMoreGithubFollowers"),
+        stamp: undefined,
+      },
+      FiftyOrMoreGithubFollowers: {
+        providerSpec: getProviderSpec("Github", "FiftyOrMoreGithubFollowers"),
+        stamp: undefined,
+      },
+      ForkedGithubRepoProvider: {
+        providerSpec: getProviderSpec("Github", "ForkedGithubRepoProvider"),
+        stamp: undefined,
+      },
+      StarredGithubRepoProvider: {
+        providerSpec: getProviderSpec("Github", "StarredGithubRepoProvider"),
+        stamp: undefined,
+      },
+      FiveOrMoreGithubRepos: {
+        providerSpec: getProviderSpec("Github", "FiveOrMoreGithubRepos"),
         stamp: undefined,
       },
       Linkedin: {
