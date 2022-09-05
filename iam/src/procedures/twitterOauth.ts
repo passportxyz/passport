@@ -14,6 +14,7 @@ const TIMEOUT_IN_MS = 60000; // 60000ms = 60s
 
 // Map <SessionKey, auth.OAuth2User>
 export const clients: Record<string, auth.OAuth2User> = {};
+export const authedClients: Record<string, Client> = {};
 
 export const getSessionKey = (): string => {
   return `twitter-${crypto.randomBytes(32).toString("hex")}`;
@@ -55,6 +56,31 @@ export const getClient = (state: string): auth.OAuth2User | undefined => {
   return clients[state];
 };
 
+const timeoutAuthDel: { [key: string]: NodeJS.Timeout } = {};
+
+const deleteAuthClient = (code: string): void => {
+  timeoutAuthDel[code] = setTimeout(() => {
+    delete authedClients[code];
+    delete timeoutAuthDel[code];
+  }, 10000);
+};
+
+const getAuthClient = async (client: auth.OAuth2User, code: string): Promise<Client> => {
+  let authedClient: Client;
+  // retrieve user's auth bearer token to authenticate client
+  if (authedClients[code]) {
+    clearTimeout(timeoutAuthDel[code]);
+    authedClient = authedClients[code];
+  } else {
+    await client.requestAccessToken(code);
+    authedClient = authedClients[code] = new Client(client);
+  }
+
+  deleteAuthClient(code);
+
+  return authedClient;
+};
+
 // This method has side-effects which alter unaccessible state on the
 //   OAuth2User instance. The correct state values need to be present when we request the access token
 export const generateAuthURL = (client: auth.OAuth2User, state: string): string => {
@@ -71,11 +97,8 @@ export type TwitterFindMyUserResponse = {
 };
 
 export const requestFindMyUser = async (client: auth.OAuth2User, code: string): Promise<TwitterFindMyUserResponse> => {
-  // retrieve user's auth bearer token to authenticate client
-  await client.requestAccessToken(code);
-
   // return information about the (authenticated) requesting user
-  const twitterClient = new Client(client);
+  const twitterClient = await getAuthClient(client, code);
   const myUser = await twitterClient.users.findMyUser();
   return { ...myUser.data };
 };
@@ -87,8 +110,7 @@ export type TwitterFollowerResponse = {
 
 export const getFollowerCount = async (client: auth.OAuth2User, code: string): Promise<TwitterFollowerResponse> => {
   // retrieve user's auth bearer token to authenticate client
-  await client.requestAccessToken(code);
-  const twitterClient = new Client(client);
+  const twitterClient = await getAuthClient(client, code);
 
   // public metrics returns more data on user
   const myUser = await twitterClient.users.findMyUser({
@@ -107,8 +129,7 @@ export type TwitterTweetResponse = {
 
 export const getTweetCount = async (client: auth.OAuth2User, code: string): Promise<TwitterTweetResponse> => {
   // retrieve user's auth bearer token to authenticate client
-  await client.requestAccessToken(code);
-  const twitterClient = new Client(client);
+  const twitterClient = await getAuthClient(client, code);
 
   // public metrics returns more data on user
   const myUser = await twitterClient.users.findMyUser({
