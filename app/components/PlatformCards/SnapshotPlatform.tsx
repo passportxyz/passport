@@ -18,7 +18,7 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commo
 // --- Style Components
 import { SideBarContent } from "../SideBarContent";
 import { DoneToastContent } from "../DoneToastContent";
-import { useToast } from "@chakra-ui/react";
+import { ModalFooter, Button, useDisclosure, Text, useToast } from "@chakra-ui/react";
 
 // --- Context
 import { CeramicContext } from "../../context/ceramicContext";
@@ -37,6 +37,7 @@ export default function SnapshotPlatform(): JSX.Element {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
+  const [snapshotVerified, setSnapshotVerified] = useState<boolean | undefined>(undefined);
   const [canSubmit, setCanSubmit] = useState(false);
 
   // find all providerIds
@@ -57,10 +58,20 @@ export default function SnapshotPlatform(): JSX.Element {
     if (selectedProviders.length !== verifiedProviders.length) {
       setCanSubmit(true);
     }
+    if (selectedProviders.length === 0) {
+      setCanSubmit(false);
+    }
   }, [selectedProviders, verifiedProviders]);
 
   // --- Chakra functions
   const toast = useToast();
+
+  // // if the selected providers length equals 0, disable the Verify button
+  // useEffect(() => {
+  //   if (selectedProviders.length === 0) {
+  //     setCanSubmit(false);
+  //   }
+  // }, [selectedProviders]);
 
   // fetch VCs from IAM server
   const handleFetchCredential = (): void => {

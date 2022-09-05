@@ -104,10 +104,10 @@ export const PLATFORMS: PlatformSpec[] = [
     connectMessage: "Connect Account",
   },
   {
-    icon: "./assets/gitPOAPStampIcon.svg",
+    icon: "./assets/snapshotStampIcon.svg",
     platform: "Snapshot",
     name: "Snapshot",
-    description: "Snapshot Verification",
-    connectMessage: "Connect Account",
+    description: "Connect your existing account to verify with Snapshot.",
+    connectMessage: "Verify Account",
   },
 ];
