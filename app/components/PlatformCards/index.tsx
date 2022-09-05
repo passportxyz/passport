@@ -4,7 +4,7 @@ export { default as PohCard } from "./PohCard";
 export { default as TwitterPlatform } from "./TwitterPlatform";
 export { default as PoapPlatform } from "./PoapPlatform";
 export { default as FacebookPlatform } from "./FacebookPlatform";
-export { default as BrightidCard } from "./BrightidCard";
+export { default as BrightidPlatform } from "./BrightidPlatform";
 export { default as GithubPlatform } from "./GithubPlatform";
 export { default as LinkedinPlatform } from "./LinkedinPlatform";
 export { default as GitcoinPlatform } from "./GitcoinPlatform";

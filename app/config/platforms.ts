@@ -11,7 +11,7 @@ export type PlatformSpec = {
 export const getPlatformSpec = (platformName: string): PlatformSpec | undefined => {
   let platformspec: PlatformSpec | undefined = undefined;
   PLATFORMS.forEach((platform) => {
-    if (platform.name === platformName) {
+    if (platform.platform === platformName) {
       platformspec = platform;
     }
   });
