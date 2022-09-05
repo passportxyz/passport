@@ -14,7 +14,7 @@ import {
   TwitterPlatform,
   PoapPlatform,
   FacebookPlatform,
-  BrightidCard,
+  BrightidPlatform,
   GithubPlatform,
   LinkedinPlatform,
   GitcoinPlatform,
@@ -41,7 +41,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
 
   // Add the platforms to this switch so the sidebar content can populate dynamically
   const renderCurrentPlatformSelection = () => {
-    switch (currentPlatform?.name) {
+    switch (currentPlatform?.platform) {
       case "Twitter":
         return <TwitterPlatform />;
       case "Github":
@@ -66,6 +66,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <PoapPlatform />;
       case "Ens":
         return <EnsPlatform />;
+      case "Brightid":
+        return <BrightidPlatform />;
       default:
         return (
           <SideBarContent
