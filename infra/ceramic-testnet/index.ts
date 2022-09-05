@@ -318,6 +318,7 @@ function makeCmd(inputbucketName: pulumi.Input<string>, inputIpfsUrl: pulumi.Inp
       ".*",
       "--state-store-s3-bucket",
       bucketName,
+      "--verbose",
     ];
   });
 }

@@ -317,6 +317,7 @@ function makeCmd(inputbucketName: pulumi.Input<string>, inputIpfsUrl: pulumi.Inp
       bucketName,
       "--ethereum-rpc",
       rpcUrl,
+      "--verbose",
     ];
   });
 }
