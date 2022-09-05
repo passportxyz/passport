@@ -31,7 +31,7 @@ import { UserContext } from "../../context/userContext";
 import { getPlatformSpec } from "../../config/platforms";
 import { STAMP_PROVIDERS } from "../../config/providers";
 
-// Each provider is recognised by its ID
+// Each platform is recognised by its ID
 const platformId: PLATFORM_ID = "Gitcoin";
 
 function generateUID(length: number) {

@@ -137,7 +137,7 @@ export default function FacebookCard(): JSX.Element {
         toast({
           duration: 5000,
           isClosable: true,
-          render: (result: any) => <DoneToastContent providerId={platformId} result={result} />,
+          render: (result: any) => <DoneToastContent platformId={platformId} result={result} />,
         });
       })
       .catch((e): void => {
