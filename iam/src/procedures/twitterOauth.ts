@@ -11,6 +11,7 @@ import { auth, Client } from "twitter-api-sdk";
 */
 
 const TIMEOUT_IN_MS = 60000; // 60000ms = 60s
+const TIMEOUT_AUTHED_IN_MS = 10000; // 10000ms = 10s
 
 // Map <SessionKey, auth.OAuth2User>
 export const clients: Record<string, auth.OAuth2User> = {};
@@ -43,42 +44,45 @@ export const initClient = (callback: string, sessionKey: string): auth.OAuth2Use
 
 // record timeouts so that we can delay the deletion of the auth key til after all Providers have used it
 const timeoutDel: { [key: string]: NodeJS.Timeout } = {};
+const timeoutAuthDel: { [key: string]: NodeJS.Timeout } = {};
 
 export const deleteClient = (state: string): void => {
   timeoutDel[state] = setTimeout(() => {
     delete clients[state];
     delete timeoutDel[state];
-  }, 10000);
+  }, TIMEOUT_AUTHED_IN_MS);
 };
-
-export const getClient = (state: string): auth.OAuth2User | undefined => {
-  clearTimeout(timeoutDel[state]);
-  return clients[state];
-};
-
-const timeoutAuthDel: { [key: string]: NodeJS.Timeout } = {};
 
 const deleteAuthClient = (code: string): void => {
   timeoutAuthDel[code] = setTimeout(() => {
     delete authedClients[code];
     delete timeoutAuthDel[code];
-  }, 10000);
+  }, TIMEOUT_AUTHED_IN_MS);
 };
 
+// retrieve the raw client that is shared between Proceedures
+export const getClient = (state: string): auth.OAuth2User | undefined => {
+  clearTimeout(timeoutDel[state]);
+  return clients[state];
+};
+
+// retrieve the instatiated Client shared between Providers
 const getAuthClient = async (client: auth.OAuth2User, code: string): Promise<Client> => {
-  let authedClient: Client;
-  // retrieve user's auth bearer token to authenticate client
-  if (authedClients[code]) {
-    clearTimeout(timeoutAuthDel[code]);
-    authedClient = authedClients[code];
-  } else {
+  // clear any previous attempt (it's okay if timeoutAuthDel[code] is undefined)
+  clearTimeout(timeoutAuthDel[code]);
+  // if the client has not already been created...
+  if (!authedClients[code]) {
+    // retrieve user's auth bearer token to authenticate client
     await client.requestAccessToken(code);
-    authedClient = authedClients[code] = new Client(client);
+    // associate and store the authedClients[code]
+    authedClients[code] = new Client(client);
   }
 
+  // delete the authed client in 10s (long enough for all Providers to use the same client in a single request)
   deleteAuthClient(code);
 
-  return authedClient;
+  // return the Client instance
+  return authedClients[code];
 };
 
 // This method has side-effects which alter unaccessible state on the
