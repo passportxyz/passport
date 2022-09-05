@@ -2,7 +2,7 @@ export { default as GooglePlatform } from "./GooglePlatform";
 export { default as EnsCard } from "./EnsCard";
 export { default as PohCard } from "./PohCard";
 export { default as TwitterPlatform } from "./TwitterPlatform";
-export { default as PoapCard } from "./PoapCard";
+export { default as PoapPlatform } from "./PoapPlatform";
 export { default as FacebookPlatform } from "./FacebookPlatform";
 export { default as BrightidCard } from "./BrightidCard";
 export { default as GithubPlatform } from "./GithubPlatform";
