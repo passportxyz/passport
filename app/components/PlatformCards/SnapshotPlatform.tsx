@@ -66,13 +66,6 @@ export default function SnapshotPlatform(): JSX.Element {
   // --- Chakra functions
   const toast = useToast();
 
-  // // if the selected providers length equals 0, disable the Verify button
-  // useEffect(() => {
-  //   if (selectedProviders.length === 0) {
-  //     setCanSubmit(false);
-  //   }
-  // }, [selectedProviders]);
-
   // fetch VCs from IAM server
   const handleFetchCredential = (): void => {
     datadogLogs.logger.info("Saving Stamp", { platform: platformId });
@@ -117,7 +110,7 @@ export default function SnapshotPlatform(): JSX.Element {
         toast({
           duration: 5000,
           isClosable: true,
-          render: (result: any) => <DoneToastContent providerId={platformId} result={result} />,
+          render: (result: any) => <DoneToastContent platformId={platformId} result={result} />,
         });
       })
       .catch((e) => {
