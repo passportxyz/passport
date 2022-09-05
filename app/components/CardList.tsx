@@ -9,7 +9,7 @@ import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
 // --- Identity Providers
 import {
   GooglePlatform,
-  EnsCard,
+  EnsPlatform,
   PohCard,
   TwitterPlatform,
   PoapPlatform,
@@ -61,6 +61,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <DiscordPlatform />;
       case "POAP":
         return <PoapPlatform />;
+      case "Ens":
+        return <EnsPlatform />;
       default:
         return (
           <SideBarContent
