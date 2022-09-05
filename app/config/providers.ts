@@ -62,7 +62,7 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
   POAP: [
     {
       platformGroup: "Account Name",
-      providers: [{ title: "Encrypted", name: "POAP" }],
+      providers: [{ title: "Connect an account to a PoAP owned for over 15 days.", name: "POAP" }],
     },
   ],
   Facebook: [

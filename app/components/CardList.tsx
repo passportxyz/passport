@@ -12,7 +12,7 @@ import {
   EnsCard,
   PohCard,
   TwitterPlatform,
-  PoapCard,
+  PoapPlatform,
   FacebookPlatform,
   BrightidCard,
   GithubPlatform,
@@ -59,6 +59,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <GitPOAPPlatform />;
       case "Discord":
         return <DiscordPlatform />;
+      case "POAP":
+        return <PoapPlatform />;
       default:
         return (
           <SideBarContent
