@@ -1,5 +1,5 @@
 // --- Methods
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
@@ -31,7 +31,7 @@ import { UserContext } from "../../context/userContext";
 import { getPlatformSpec } from "../../config/platforms";
 import { STAMP_PROVIDERS } from "../../config/providers";
 
-// Each provider is recognised by its ID
+// Each platform is recognised by its ID
 const platformId: PLATFORM_ID = "Twitter";
 
 export default function TwitterPlatform(): JSX.Element {
@@ -41,10 +41,13 @@ export default function TwitterPlatform(): JSX.Element {
   const [canSubmit, setCanSubmit] = useState(false);
 
   // find all providerIds
-  const providerIds =
-    STAMP_PROVIDERS["Twitter"]?.reduce((all, stamp) => {
-      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-    }, [] as PROVIDER_ID[]) || [];
+  const providerIds = useMemo(
+    () =>
+      STAMP_PROVIDERS["Twitter"]?.reduce((all, stamp) => {
+        return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+      }, [] as PROVIDER_ID[]) || [],
+    []
+  );
 
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
@@ -148,20 +151,22 @@ export default function TwitterPlatform(): JSX.Element {
               .filter((v: Stamp | undefined) => v) || [];
           // Add all the stamps to the passport at once
           await handleAddStamps(vcs as Stamp[]);
+          // report success to datadog
           datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
-          const verifiedProviders = providerIds.filter(
-            (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
+          // grab all providers who are verified from the verify response
+          const actualVerifiedProviders = providerIds.filter((providerId) =>
+            vcs.find((vc: Stamp) => vc.credentialSubject.provider === providerId)
           );
-          // update the verified and selected providers
-          setVerifiedProviders([...verifiedProviders]);
-          setSelectedProviders([...verifiedProviders]);
+          // both verified and selected should look the same after save
+          setVerifiedProviders([...actualVerifiedProviders]);
+          setSelectedProviders([...actualVerifiedProviders]);
           // reset can submit state
           setCanSubmit(false);
           // Custom Success Toast
           toast({
             duration: 5000,
             isClosable: true,
-            render: (result: any) => <DoneToastContent providerId={platformId} result={result} />,
+            render: (result: any) => <DoneToastContent platformId={platformId} result={result} />,
           });
         })
         .catch((e) => {

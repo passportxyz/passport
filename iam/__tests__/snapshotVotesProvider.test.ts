@@ -22,7 +22,7 @@ const validSnapshotResponse = {
         {
           voter: "0xc2E2B715d9e302947Ec7e312fd2384b5a1296099",
           proposal: {
-            id: "0xc6655f1fb08259263693f9111a8cdaba6b726390e9dbb65eaa6ce41905ba297c"
+            id: "0xc6655f1fb08259263693f9111a8cdaba6b726390e9dbb65eaa6ce41905ba297c",
           },
           space: {
             id: "gitcoindao.eth",
@@ -31,7 +31,7 @@ const validSnapshotResponse = {
         {
           voter: "0xc2E2B715d9e302947Ec7e312fd2384b5a1296099",
           proposal: {
-            id: "0xc6309348f43ba77bb488d2d5f154db3264f86a890b500fa8286fe089c6ddc9a0"
+            id: "0xc6309348f43ba77bb488d2d5f154db3264f86a890b500fa8286fe089c6ddc9a0",
           },
           space: {
             id: "gitcoindao.eth",
@@ -40,7 +40,7 @@ const validSnapshotResponse = {
         {
           voter: "0xc2E2B715d9e302947Ec7e312fd2384b5a1296099",
           proposal: {
-            id: "0x625e70dcff35be042778684d66cb3e24efd35bdc4222d263047afd2699188fb6"
+            id: "0x625e70dcff35be042778684d66cb3e24efd35bdc4222d263047afd2699188fb6",
           },
           space: {
             id: "opcollective.eth",
@@ -49,7 +49,7 @@ const validSnapshotResponse = {
         {
           voter: "0xc2E2B715d9e302947Ec7e312fd2384b5a1296099",
           proposal: {
-            id: "0x3fcd17d2393cfdcd3583a97fea85dfc9bc874b2e8ac2427c059e4e2566197e7f"
+            id: "0x3fcd17d2393cfdcd3583a97fea85dfc9bc874b2e8ac2427c059e4e2566197e7f",
           },
           space: {
             id: "rehashweb3.eth",
@@ -67,11 +67,11 @@ const invalidSnapshotResponseLessThan2DAOProposalVotes = {
         {
           voter: "0xc2E2B715d9e302947Ec7e312fd2384b5a1296099",
           proposal: {
-            id: "0xc6655f1fb08259263693f9111a8cdaba6b726390e9dbb65eaa6ce41905ba297c"
+            id: "0xc6655f1fb08259263693f9111a8cdaba6b726390e9dbb65eaa6ce41905ba297c",
           },
           space: {
             id: "gitcoindao.eth",
-          }
+          },
         },
       ],
     },
@@ -114,7 +114,7 @@ describe("Attempt verification", function () {
       record: {
         address: `${MOCK_ADDRESS_LOWER}`,
         hasVotedOnGTE2SnapshotProposals: "true",
-      }
+      },
     });
   });
 
@@ -151,7 +151,6 @@ describe("Attempt verification", function () {
     expect(axios.post).toHaveBeenCalledTimes(1);
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
-
 
   it("should return invalid payload when there is no address to send with the graphQL query", async () => {
     mockedAxios.post.mockImplementation(async (url, data) => {
