@@ -56,20 +56,6 @@ export default function TwitterPlatform(): JSX.Element {
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
 
-  // if VCs are added to allProvidersState as a result of handleAddStamps()
-  useEffect(() => {
-    // get the current list of verified providers
-    const actualVerifiedProviders = providerIds.filter(
-      (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
-    );
-    // check if verifiedProviders needs to be updated to match actualVerifiedProviders
-    if (JSON.stringify(verifiedProviders) !== JSON.stringify(actualVerifiedProviders)) {
-      // update the verified and selected providers
-      setVerifiedProviders([...actualVerifiedProviders]);
-      setSelectedProviders([...actualVerifiedProviders]);
-    }
-  }, [allProvidersState, providerIds, verifiedProviders]);
-
   // any time we change selection state...
   useEffect(() => {
     if (selectedProviders.length !== verifiedProviders.length) {
@@ -167,6 +153,13 @@ export default function TwitterPlatform(): JSX.Element {
           await handleAddStamps(vcs as Stamp[]);
           // report success to datadog
           datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
+          // grab all providers who are verified from the verify response
+          const actualVerifiedProviders = providerIds.filter((providerId) =>
+            vcs.find((vc: Stamp) => vc.credentialSubject.provider === providerId)
+          );
+          // both verified and selected should look the same after save
+          setVerifiedProviders([...actualVerifiedProviders]);
+          setSelectedProviders([...actualVerifiedProviders]);
           // reset can submit state
           setCanSubmit(false);
           // Custom Success Toast
