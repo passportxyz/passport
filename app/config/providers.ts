@@ -153,7 +153,7 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     {
       platformGroup: "Snapshot Votes",
       providers: [
-        { title: "Create a DAO proposal that was voted on by at least 1 person", name: "SnapshotVotesProvider" },
+        { title: "Created a DAO proposal that was voted on by at least 1 person", name: "SnapshotVotesProvider" },
       ],
     },
   ],
