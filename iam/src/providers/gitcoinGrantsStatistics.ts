@@ -43,7 +43,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
     let githubUser: GithubFindMyUserResponse = context.githubUser as GithubFindMyUserResponse;
     try {
       if (!githubUser) {
-        githubUser = await verifyGithub(payload.proofs.code);
+        githubUser = await verifyGithub(payload.proofs.code, context);
         context["githubUser"] = githubUser;
       }
 
