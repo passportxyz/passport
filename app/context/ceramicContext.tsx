@@ -247,6 +247,29 @@ const startingAllProvidersState: AllProvidersState = {
   },
   "gtcPossessionsGte#100": {
     providerSpec: getProviderSpec("GTC", "gtcPossessionsGte#100"),
+  },
+  SelfStakingBronze: {
+    providerSpec: getProviderSpec("GtcStaking", "SelfStakingBronze"),
+    stamp: undefined,
+  },
+  SelfStakingSilver: {
+    providerSpec: getProviderSpec("GtcStaking", "SelfStakingSilver"),
+    stamp: undefined,
+  },
+  SelfStakingGold: {
+    providerSpec: getProviderSpec("GtcStaking", "SelfStakingGold"),
+    stamp: undefined,
+  },
+  CommunityStakingBronze: {
+    providerSpec: getProviderSpec("GtcStaking", "CommunityStakingBronze"),
+    stamp: undefined,
+  },
+  CommunityStakingSilver: {
+    providerSpec: getProviderSpec("GtcStaking", "CommunityStakingSilver"),
+    stamp: undefined,
+  },
+  CommunityStakingGold: {
+    providerSpec: getProviderSpec("GtcStaking", "CommunityStakingGold"),
     stamp: undefined,
   },
 };

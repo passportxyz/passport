@@ -242,4 +242,22 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       ],
     },
   ],
+  GtcStaking: [
+    {
+      platformGroup: "Self GTC Staking",
+      providers: [
+        { title: "Self GTC Staking Bronze", name: "SelfStakingBronze" },
+        { title: "Self GTC Staking Silver", name: "SelfStakingSilver" },
+        { title: "Self GTC Staking Gold", name: "SelfStakingGold" },
+      ],
+    },
+    {
+      platformGroup: "Community GTC Staking",
+      providers: [
+        { title: "Community GTC Staking Bronze", name: "CommunityStakingBronze" },
+        { title: "Community GTC Staking Silver", name: "CommunityStakingSilver" },
+        { title: "Community GTC Staking Gold", name: "CommunityStakingGold" },
+      ],
+    },
+  ],
 };
