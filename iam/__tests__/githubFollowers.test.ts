@@ -45,11 +45,14 @@ describe("Attempt verification", function () {
     const clientId = process.env.GITHUB_CLIENT_ID;
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
     const tenOrMoreGithubFollowers = new TenOrMoreGithubFollowers();
-    const tenOrMoreGithubFollowersPayload = await tenOrMoreGithubFollowers.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const tenOrMoreGithubFollowersPayload = await tenOrMoreGithubFollowers.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     // Check the request to get the token
     expect(mockedAxios.post).toBeCalledWith(
@@ -89,11 +92,14 @@ describe("Attempt verification", function () {
     const clientId = process.env.GITHUB_CLIENT_ID;
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
     const fiftyOrMoreGithubFollowers = new FiftyOrMoreGithubFollowers();
-    const fiftyOrMoreGithubFollowersPayload = await fiftyOrMoreGithubFollowers.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const fiftyOrMoreGithubFollowersPayload = await fiftyOrMoreGithubFollowers.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     // Check the request to get the token
     expect(mockedAxios.post).toBeCalledWith(
@@ -132,11 +138,14 @@ describe("Attempt verification", function () {
 
     const tenOrMoreGithubFollowers = new TenOrMoreGithubFollowers();
 
-    const tenOrMoreGithubFollowersPayload = await tenOrMoreGithubFollowers.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const tenOrMoreGithubFollowersPayload = await tenOrMoreGithubFollowers.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(tenOrMoreGithubFollowersPayload).toMatchObject({ valid: false });
   });
@@ -156,11 +165,14 @@ describe("Attempt verification", function () {
 
     const fiftyOrMoreGithubFollowers = new FiftyOrMoreGithubFollowers();
 
-    const fiftyOrMoreGithubFollowersPayload = await fiftyOrMoreGithubFollowers.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const fiftyOrMoreGithubFollowersPayload = await fiftyOrMoreGithubFollowers.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(fiftyOrMoreGithubFollowersPayload).toMatchObject({ valid: false });
   });
@@ -174,11 +186,14 @@ describe("Attempt verification", function () {
 
     const tenOrMoreGithubFollowers = new TenOrMoreGithubFollowers();
 
-    const tenOrMoreGithubFollowersPayload = await tenOrMoreGithubFollowers.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const tenOrMoreGithubFollowersPayload = await tenOrMoreGithubFollowers.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(tenOrMoreGithubFollowersPayload).toMatchObject({ valid: false });
   });
@@ -198,11 +213,14 @@ describe("Attempt verification", function () {
 
     const tenOrMoreGithubFollowers = new TenOrMoreGithubFollowers();
 
-    const tenOrMoreGithubFollowersPayload = await tenOrMoreGithubFollowers.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const tenOrMoreGithubFollowersPayload = await tenOrMoreGithubFollowers.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(tenOrMoreGithubFollowersPayload).toMatchObject({ valid: false });
   });
@@ -216,11 +234,14 @@ describe("Attempt verification", function () {
 
     const tenOrMoreGithubFollowers = new TenOrMoreGithubFollowers();
 
-    const tenOrMoreGithubFollowersPayload = await tenOrMoreGithubFollowers.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const tenOrMoreGithubFollowersPayload = await tenOrMoreGithubFollowers.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(tenOrMoreGithubFollowersPayload).toMatchObject({ valid: false });
   });

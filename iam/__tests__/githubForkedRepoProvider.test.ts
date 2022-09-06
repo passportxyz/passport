@@ -95,11 +95,14 @@ describe("Attempt verification", function () {
     });
 
     const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
     // Check the request to get the token for the user
@@ -141,11 +144,14 @@ describe("Attempt verification", function () {
     });
 
     const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -174,11 +180,14 @@ describe("Attempt verification", function () {
     });
 
     const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -212,11 +221,14 @@ describe("Attempt verification", function () {
     });
 
     const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -255,11 +267,14 @@ describe("Attempt verification", function () {
     });
 
     const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -293,11 +308,14 @@ describe("Attempt verification", function () {
     });
 
     const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 

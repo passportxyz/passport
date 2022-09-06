@@ -45,11 +45,14 @@ describe("Attempt verification", function () {
     const clientId = process.env.GITHUB_CLIENT_ID;
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
     const fiveOrMoreGithubRepos = new FiveOrMoreGithubRepos();
-    const fiveOrMoreGithubReposPayload = await fiveOrMoreGithubRepos.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const fiveOrMoreGithubReposPayload = await fiveOrMoreGithubRepos.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     // Check the request to get the token
     expect(mockedAxios.post).toBeCalledWith(
@@ -88,11 +91,14 @@ describe("Attempt verification", function () {
 
     const fiveOrMoreGithubRepos = new FiveOrMoreGithubRepos();
 
-    const fiveOrMoreGithubReposPayload = await fiveOrMoreGithubRepos.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const fiveOrMoreGithubReposPayload = await fiveOrMoreGithubRepos.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(fiveOrMoreGithubReposPayload).toMatchObject({ valid: false });
   });
@@ -106,11 +112,14 @@ describe("Attempt verification", function () {
 
     const fiveOrMoreGithubRepos = new FiveOrMoreGithubRepos();
 
-    const fiveOrMoreGithubReposPayload = await fiveOrMoreGithubRepos.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const fiveOrMoreGithubReposPayload = await fiveOrMoreGithubRepos.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(fiveOrMoreGithubReposPayload).toMatchObject({ valid: false });
   });
@@ -130,11 +139,14 @@ describe("Attempt verification", function () {
 
     const fiveOrMoreGithubRepos = new FiveOrMoreGithubRepos();
 
-    const fiveOrMoreGithubReposPayload = await fiveOrMoreGithubRepos.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const fiveOrMoreGithubReposPayload = await fiveOrMoreGithubRepos.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(fiveOrMoreGithubReposPayload).toMatchObject({ valid: false });
   });
@@ -148,11 +160,14 @@ describe("Attempt verification", function () {
 
     const fiveOrMoreGithubRepos = new FiveOrMoreGithubRepos();
 
-    const fiveOrMoreGithubReposPayload = await fiveOrMoreGithubRepos.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const fiveOrMoreGithubReposPayload = await fiveOrMoreGithubRepos.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(fiveOrMoreGithubReposPayload).toMatchObject({ valid: false });
   });
