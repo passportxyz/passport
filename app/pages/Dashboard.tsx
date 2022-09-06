@@ -122,8 +122,8 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="flex w-full flex-wrap-reverse px-2 md:mt-4 md:flex-wrap md:px-10">
-        <div className="md:w-3/4">
+      <div className="flex flex-wrap-reverse container mx-auto px-2 md:mt-4 md:flex-wrap">
+        <div className="md:w-3/5">
           <p className="mb-4 text-2xl text-black">My Stamps</p>
           <p className="text-xl text-black">
             Select the decentralized identity verification stamps you&apos;d like to connect to.
@@ -148,7 +148,7 @@ export default function Dashboard() {
             )}
           </div>
         )}
-        <div className="w-full md:w-1/4">
+        <div className="w-full md:w-2/5">
           {isLoadingPassport == IsLoadingPassportState.FailedToConnect && retryModal}
           {viewerConnection.status !== "connecting" &&
             (passport ? (

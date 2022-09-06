@@ -1,8 +1,6 @@
 // --- React Methods
 import React, { useContext, useEffect, useRef, useState } from "react";
 
-import { LoadingCard } from "./LoadingCard";
-
 import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
 
