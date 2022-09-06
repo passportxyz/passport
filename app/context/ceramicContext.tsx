@@ -149,10 +149,6 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: getProviderSpec("Snapshot", "SnapshotVotesProvider"),
     stamp: undefined,
   },
-  ETH: {
-    providerSpec: getProviderSpec("ETH", "ETH"),
-    stamp: undefined,
-  },
   "ethPossessionsGte#1": {
     providerSpec: getProviderSpec("ETH", "ethPossessionsGte#1"),
     stamp: undefined,
