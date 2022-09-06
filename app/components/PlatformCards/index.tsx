@@ -9,5 +9,5 @@ export { default as GithubPlatform } from "./GithubPlatform";
 export { default as LinkedinPlatform } from "./LinkedinPlatform";
 export { default as DiscordCard } from "./DiscordCard";
 export { default as SignerCard } from "./SignerCard";
-export { default as GitPOAPCard } from "./GitPOAPCard";
+export { default as GitPOAPPlatform } from "./GitPOAPPlatform";
 export { default as SnapshotPlatform } from "./SnapshotPlatform";

@@ -31,9 +31,9 @@ import { STAMP_PROVIDERS } from "../../config/providers";
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
 // Each provider is recognised by its ID
-const platformId: PLATFORM_ID = "Snapshot";
+const platformId: PLATFORM_ID = "GitPOAP";
 
-export default function SnapshotPlatform(): JSX.Element {
+export default function GitPOAPPlatform(): JSX.Element {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
@@ -41,7 +41,7 @@ export default function SnapshotPlatform(): JSX.Element {
 
   // find all providerIds
   const providerIds =
-    STAMP_PROVIDERS["Snapshot"]?.reduce((all, stamp) => {
+    STAMP_PROVIDERS[platformId]?.reduce((all, stamp) => {
       return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
     }, [] as PROVIDER_ID[]) || [];
 
@@ -123,8 +123,8 @@ export default function SnapshotPlatform(): JSX.Element {
 
   return (
     <SideBarContent
-      currentPlatform={getPlatformSpec("Snapshot")}
-      currentProviders={STAMP_PROVIDERS["Snapshot"]}
+      currentPlatform={getPlatformSpec(platformId)}
+      currentProviders={STAMP_PROVIDERS[platformId]}
       verifiedProviders={verifiedProviders}
       selectedProviders={selectedProviders}
       setSelectedProviders={setSelectedProviders}
@@ -132,7 +132,7 @@ export default function SnapshotPlatform(): JSX.Element {
         <button
           disabled={!canSubmit}
           onClick={handleFetchCredential}
-          data-testid="button-verify-snapshot"
+          data-testid="button-verify-gitpoap"
           className="sidebar-verify-btn"
         >
           Verify
