@@ -17,9 +17,10 @@ import {
   BrightidCard,
   GithubPlatform,
   LinkedinPlatform,
+  GitcoinPlatform,
   DiscordCard,
   SignerCard,
-  GitPOAPCard,
+  GitPOAPPlatform,
   SnapshotPlatform,
   EthPlatform,
 } from "./PlatformCards";
@@ -45,6 +46,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <TwitterPlatform />;
       case "Github":
         return <GithubPlatform />;
+      case "Gitcoin":
+        return <GitcoinPlatform />;
       case "Facebook":
         return <FacebookPlatform />;
       case "Snapshot":
@@ -55,6 +58,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <LinkedinPlatform />;
       case "ETH":
         return <EthPlatform />;
+      case "GitPOAP":
+        return <GitPOAPPlatform />;
       default:
         return (
           <SideBarContent

@@ -32,7 +32,7 @@ import { getPlatformSpec } from "../../config/platforms";
 import { STAMP_PROVIDERS } from "../../config/providers";
 
 // Each platform is recognised by its ID
-const platformId: PLATFORM_ID = "Github";
+const platformId: PLATFORM_ID = "Gitcoin";
 
 function generateUID(length: number) {
   return window
@@ -119,7 +119,9 @@ export default function GithubPlatform(): JSX.Element {
       const queryCode = e.data.code;
 
       if (state !== e.data.state) {
-        datadogLogs.logger.error("State mismatch, failed to create Github credential", { platform: platformId });
+        datadogLogs.logger.error("State mismatch, failed to create Github credential (for Gitcoin stamp)", {
+          platform: platformId,
+        });
         setLoading(false);
         return;
       }
@@ -198,16 +200,10 @@ export default function GithubPlatform(): JSX.Element {
     };
   });
 
-  // const issueCredentialWidget = (
-  //   <button data-testid="button-verify-github" className="verify-btn" onClick={handleFetchGithubOAuth}>
-  //     Connect account
-  //   </button>
-  // );
-
   return (
     <SideBarContent
-      currentPlatform={getPlatformSpec("Github")}
-      currentProviders={STAMP_PROVIDERS["Github"]}
+      currentPlatform={getPlatformSpec(platformId)}
+      currentProviders={STAMP_PROVIDERS[platformId]}
       verifiedProviders={verifiedProviders}
       selectedProviders={selectedProviders}
       setSelectedProviders={setSelectedProviders}
@@ -215,7 +211,7 @@ export default function GithubPlatform(): JSX.Element {
         <button
           disabled={!canSubmit}
           onClick={handleFetchGithubOAuth}
-          data-testid="button-verify-github"
+          data-testid="button-verify-gitcoin"
           className="sidebar-verify-btn"
         >
           Verify

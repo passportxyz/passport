@@ -1,5 +1,5 @@
 // --- React Methods
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useMemo } from "react";
 
 // --- Identity tools
 import {
@@ -45,10 +45,13 @@ export default function GooglePlatform(): JSX.Element {
   const [canSubmit, setCanSubmit] = useState(false);
 
   // find all providerIds
-  const providerIds =
-    STAMP_PROVIDERS["Google"]?.reduce((all, stamp) => {
-      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-    }, [] as PROVIDER_ID[]) || [];
+  const providerIds = useMemo(
+    () =>
+      STAMP_PROVIDERS[platformId]?.reduce((all, stamp) => {
+        return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+      }, [] as PROVIDER_ID[]) || [],
+    []
+  );
 
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
@@ -101,6 +104,16 @@ export default function GooglePlatform(): JSX.Element {
         // Add all the stamps to the passport at once
         await handleAddStamps(vcs as Stamp[]);
         datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
+        // grab all providers who are verified from the verify response
+        const actualVerifiedProviders = providerIds.filter(
+          (providerId) =>
+            !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
+        );
+        // both verified and selected should look the same after save
+        setVerifiedProviders([...actualVerifiedProviders]);
+        setSelectedProviders([...actualVerifiedProviders]);
+        // reset can submit state
+        setCanSubmit(false);
         // Custom Success Toast
         toast({
           duration: 5000,

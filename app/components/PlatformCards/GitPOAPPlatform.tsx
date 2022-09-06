@@ -1,5 +1,5 @@
 // --- Methods
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
@@ -31,22 +31,19 @@ import { STAMP_PROVIDERS } from "../../config/providers";
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
 // Each provider is recognised by its ID
-const platformId: PLATFORM_ID = "Snapshot";
+const platformId: PLATFORM_ID = "GitPOAP";
 
-export default function SnapshotPlatform(): JSX.Element {
+export default function GitPOAPPlatform(): JSX.Element {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
 
   // find all providerIds
-  const providerIds = useMemo(
-    () =>
-      STAMP_PROVIDERS[platformId]?.reduce((all, stamp) => {
-        return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-      }, [] as PROVIDER_ID[]) || [],
-    []
-  );
+  const providerIds =
+    STAMP_PROVIDERS[platformId]?.reduce((all, stamp) => {
+      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+    }, [] as PROVIDER_ID[]) || [];
 
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
@@ -100,14 +97,12 @@ export default function SnapshotPlatform(): JSX.Element {
         // Add all the stamps to the passport at once
         await handleAddStamps(vcs as Stamp[]);
         datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
-        // grab all providers who are verified from the verify response
-        const actualVerifiedProviders = providerIds.filter(
-          (providerId) =>
-            !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
+        const verifiedProviders = providerIds.filter(
+          (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
         );
-        // both verified and selected should look the same after save
-        setVerifiedProviders([...actualVerifiedProviders]);
-        setSelectedProviders([...actualVerifiedProviders]);
+        // update the verified and selected providers
+        setVerifiedProviders([...verifiedProviders]);
+        setSelectedProviders([...verifiedProviders]);
         // reset can submit state
         setCanSubmit(false);
         // Custom Success Toast
@@ -128,8 +123,8 @@ export default function SnapshotPlatform(): JSX.Element {
 
   return (
     <SideBarContent
-      currentPlatform={getPlatformSpec("Snapshot")}
-      currentProviders={STAMP_PROVIDERS["Snapshot"]}
+      currentPlatform={getPlatformSpec(platformId)}
+      currentProviders={STAMP_PROVIDERS[platformId]}
       verifiedProviders={verifiedProviders}
       selectedProviders={selectedProviders}
       setSelectedProviders={setSelectedProviders}
@@ -137,7 +132,7 @@ export default function SnapshotPlatform(): JSX.Element {
         <button
           disabled={!canSubmit}
           onClick={handleFetchCredential}
-          data-testid="button-verify-snapshot"
+          data-testid="button-verify-gitpoap"
           className="sidebar-verify-btn"
         >
           Verify

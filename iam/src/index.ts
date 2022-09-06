@@ -59,7 +59,7 @@ import {
   TwitterFollowerGT500Provider,
   TwitterFollowerGTE1000Provider,
   TwitterFollowerGT5000Provider,
-} from "./providers/TwitterFollower";
+} from "./providers/twitterFollower";
 import { SelfStakingBronzeProvider, SelfStakingSilverProvider, SelfStakingGoldProvider } from "./providers/selfStaking";
 import {
   CommunityStakingBronzeProvider,
