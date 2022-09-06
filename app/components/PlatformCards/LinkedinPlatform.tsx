@@ -1,5 +1,5 @@
 // --- Methods
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
@@ -54,10 +54,13 @@ export default function LinkedinCard(): JSX.Element {
   const [canSubmit, setCanSubmit] = useState(false);
 
   // find all providerIds
-  const providerIds =
-    STAMP_PROVIDERS["Linkedin"]?.reduce((all, stamp) => {
-      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-    }, [] as PROVIDER_ID[]) || [];
+  const providerIds = useMemo(
+    () =>
+      STAMP_PROVIDERS[platformId]?.reduce((all, stamp) => {
+        return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+      }, [] as PROVIDER_ID[]) || [],
+    []
+  );
 
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
@@ -156,12 +159,14 @@ export default function LinkedinCard(): JSX.Element {
           // Add all the stamps to the passport at once
           await handleAddStamps(vcs as Stamp[]);
           datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
-          const verifiedProviders = providerIds.filter(
-            (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
+          // grab all providers who are verified from the verify response
+          const actualVerifiedProviders = providerIds.filter(
+            (providerId) =>
+              !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
           );
-          // update the verified and selected providers
-          setVerifiedProviders([...verifiedProviders]);
-          setSelectedProviders([...verifiedProviders]);
+          // both verified and selected should look the same after save
+          setVerifiedProviders([...actualVerifiedProviders]);
+          setSelectedProviders([...actualVerifiedProviders]);
           // reset can submit state
           setCanSubmit(false);
           // Custom Success Toast
