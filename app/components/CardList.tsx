@@ -240,7 +240,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
                       className="verify-btn"
                       ref={btnRef.current}
                       onClick={(e) => {
-                        // console.log(platform);
                         setCurrentPlatform(platform);
                         onOpen();
                       }}
