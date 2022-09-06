@@ -346,6 +346,7 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
           { name: "AWS_ACCESS_KEY_ID", value: usrS3Key },
           { name: "AWS_SECRET_ACCESS_KEY", value: usrS3Secret },
           { name: "NODE_OPTIONS", value: "--max-old-space-size=7168" },
+          { name: "CERAMIC_STREAM_CACHE_LIMIT", value: "20000" },
         ],
       },
     },
