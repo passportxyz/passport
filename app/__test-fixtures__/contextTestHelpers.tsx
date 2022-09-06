@@ -75,6 +75,10 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: STAMP_PROVIDERS.GitPOAP,
         stamp: undefined,
       },
+      WorldID: {
+        providerSpec: STAMP_PROVIDERS.WorldID,
+        stamp: undefined,
+      },
     },
     handleAddStamp: jest.fn(),
     handleAddStamps: jest.fn(),

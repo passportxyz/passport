@@ -86,3 +86,8 @@ export const gitpoapStampFixture: Stamp = {
   provider: "GitPOAP",
   credential,
 };
+
+export const worldIDStampFixture: Stamp = {
+  provider: "WorldID",
+  credential,
+};

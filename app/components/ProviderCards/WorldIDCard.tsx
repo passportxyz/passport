@@ -60,6 +60,7 @@ export default function WorldIDCard(): JSX.Element {
           provider: providerId,
           credential: verified.credential as VerifiableCredential,
         });
+        handleUserVerify();
       })
       .catch((e: any): void => {
         datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
@@ -72,6 +73,7 @@ export default function WorldIDCard(): JSX.Element {
 
   const handleUserVerify = (): void => {
     datadogLogs.logger.info("Saving Stamp", { provider: providerId });
+    console.log(credentialResponse);
     handleAddStamp(credentialResponse!)
       .then(() => datadogLogs.logger.info("Successfully Saved Stamp", { provider: providerId }))
       .catch((e): void => {
@@ -138,7 +140,7 @@ export default function WorldIDCard(): JSX.Element {
   const issueCredentialWidget = (
     <>
       <button
-        data-testid="button-verify-brightid"
+        data-testid="button-verify-world-id"
         className="verify-btn"
         onClick={async () => {
           setVerificationInProgress(true);
@@ -152,7 +154,7 @@ export default function WorldIDCard(): JSX.Element {
         isOpen={isOpen}
         onClose={handleModalOnClose}
         handleUserVerify={() => {}} // Method is unused; the modal is no longer shown if the credential is issued
-        stamp={undefined}
+        stamp={credentialResponse}
         verifyData={
           <>
             {worldIDVerification

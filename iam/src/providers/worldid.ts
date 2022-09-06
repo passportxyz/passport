@@ -8,8 +8,8 @@ import axios from "axios";
 
 // API endpoint to verify World ID ZKP
 const VERIFY_ENDPOINT = "https://developer.worldcoin.org/api/v1/verify";
-// Static action ID to verify ZKP (should never change! for local testing, new IDs can be created in developer.worldcoin.org)
-const ACTION_ID = "wid_staging_f03ce20272cf13e445a963c91a5695ea";
+// Static action ID to verify ZKP (should never change in prod! for local testing, new IDs can be created in developer.worldcoin.org)
+export const WORLD_ID_ACTION_ID = "wid_staging_f03ce20272cf13e445a963c91a5695ea";
 
 interface VerifyResponse {
   success: boolean;
@@ -35,24 +35,35 @@ export class WorldIDProvider implements Provider {
 
     // Attempt to verify ZKP with World ID API
     try {
-      const response = await axios.post<VerifyResponse>(VERIFY_ENDPOINT, {
-        nullifier_hash: payload.proofs.nullifier_hash,
-        merkle_root: payload.proofs.merkle_root,
-        proof: payload.proofs.proof,
-        action_id: ACTION_ID,
-        signal: address,
-      });
+      const response = await axios.post<VerifyResponse>(
+        VERIFY_ENDPOINT,
+        {
+          nullifier_hash: payload.proofs.nullifier_hash,
+          merkle_root: payload.proofs.merkle_root,
+          proof: payload.proofs.proof,
+          action_id: WORLD_ID_ACTION_ID,
+          signal: address,
+        },
+        {
+          headers: { Accept: "application/json" },
+        }
+      );
 
-      const valid = response.data.success;
+      const valid = response.status === 200 && response.data.success;
+
+      if (valid) {
+        return {
+          valid: true,
+          record: {
+            // Store the nullifier hash into the proof records
+            nullifier_hash: payload.proofs.nullifier_hash,
+          },
+        };
+      }
 
       return {
-        valid,
-        record: valid
-          ? {
-              // Store the nullifier hash into the proof records
-              nullifier_hash: payload.proofs.nullifier_hash,
-            }
-          : undefined,
+        valid: false,
+        error: [(response.data as Record<string, any>).detail || JSON.stringify(response.status)],
       };
     } catch (e) {
       return {
