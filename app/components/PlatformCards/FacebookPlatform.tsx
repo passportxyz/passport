@@ -78,6 +78,9 @@ export default function FacebookCard(): JSX.Element {
     if (selectedProviders.length !== verifiedProviders.length) {
       setCanSubmit(true);
     }
+    if (selectedProviders.length === 0) {
+      setCanSubmit(false);
+    }
   }, [selectedProviders, verifiedProviders]);
 
   // --- Chakra functions
