@@ -103,4 +103,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "GitPOAP Verification",
     connectMessage: "Connect Account",
   },
+  {
+    icon: "./assets/ethereumStampIcon.svg",
+    platform: "ETH",
+    name: "ETH",
+    description: "ETH possession and transaction verification",
+    connectMessage: "Verify Account",
+  },
 ];

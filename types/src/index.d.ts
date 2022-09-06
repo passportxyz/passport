@@ -151,7 +151,8 @@ export type PLATFORM_ID =
   | "Linkedin"
   | "Discord"
   | "GitPOAP"
-  | "Signer";
+  | "Signer"
+  | "ETH";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -177,4 +178,11 @@ export type PROVIDER_ID =
   | "FiveOrMoreGithubRepos"
   | "Linkedin"
   | "Discord"
-  | "GitPOAP";
+  | "GitPOAP"
+  | "ETH"
+  | "ethPossessionsGte#1"
+  | "ethPossessionsGte#10"
+  | "ethPossessionsGte#32"
+  | "FirstEthTxnProvider"
+  | "EthGTEOneTxnProvider"
+  | "EthGasProvider";

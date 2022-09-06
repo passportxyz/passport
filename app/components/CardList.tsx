@@ -20,6 +20,7 @@ import {
   DiscordCard,
   SignerCard,
   GitPOAPCard,
+  EthPlatform,
 } from "./PlatformCards";
 import { SideBarContent } from "./SideBarContent";
 
@@ -49,6 +50,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <GooglePlatform />;
       case "Linkedin":
         return <LinkedinPlatform />;
+      case "ETH":
+        return <EthPlatform />;
       default:
         return (
           <SideBarContent
