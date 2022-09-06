@@ -44,11 +44,14 @@ describe("Attempt verification", function () {
     const clientId = process.env.GITHUB_CLIENT_ID;
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
     const github = new GithubProvider();
-    const githubPayload = await github.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const githubPayload = await github.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(axios.post).toHaveBeenCalledTimes(1);
     expect(axios.get).toHaveBeenCalledTimes(1);
@@ -84,11 +87,14 @@ describe("Attempt verification", function () {
 
     const github = new GithubProvider();
 
-    const githubPayload = await github.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const githubPayload = await github.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(axios.post).toHaveBeenCalledTimes(1);
     expect(axios.get).toHaveBeenCalledTimes(0);
@@ -110,11 +116,14 @@ describe("Attempt verification", function () {
 
     const github = new GithubProvider();
 
-    const githubPayload = await github.verify({
-      proofs: {
-        code,
+    const githubPayload = await github.verify(
+      {
+        proofs: {
+          code,
       },
-    } as unknown as RequestPayload);
+    } as unknown as RequestPayload,
+    {}
+    );
 
     expect(axios.post).toHaveBeenCalledTimes(1);
     expect(axios.get).toHaveBeenCalledTimes(1);
@@ -131,11 +140,14 @@ describe("Attempt verification", function () {
 
     const github = new GithubProvider();
 
-    const githubPayload = await github.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const githubPayload = await github.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(axios.post).toHaveBeenCalledTimes(1);
     expect(axios.get).toHaveBeenCalledTimes(1);

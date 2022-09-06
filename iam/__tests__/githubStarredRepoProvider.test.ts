@@ -136,11 +136,14 @@ describe("Attempt verification", function () {
     });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -193,11 +196,14 @@ describe("Attempt verification", function () {
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
 
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -244,11 +250,14 @@ describe("Attempt verification", function () {
     });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -279,11 +288,14 @@ describe("Attempt verification", function () {
     });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -320,11 +332,14 @@ describe("Attempt verification", function () {
     });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);
 
@@ -369,11 +384,14 @@ describe("Attempt verification", function () {
     });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -412,11 +430,14 @@ describe("Attempt verification", function () {
     });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);
 
@@ -449,11 +470,14 @@ describe("Attempt verification", function () {
     });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);
 
