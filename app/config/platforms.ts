@@ -78,7 +78,7 @@ export const PLATFORMS: PlatformSpec[] = [
   {
     icon: "./assets/gitcoinStampIcon.svg",
     platform: "Gitcoin",
-    name: "Gitcoin",
+    name: "Gitcoin Grants",
     description: "Connect your existing Gitcoin account to verify.",
     connectMessage: "Connect Account",
   },
@@ -96,13 +96,13 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Connect your existing Linkedin account to verify.",
     connectMessage: "Connect Account",
   },
-  {
-    icon: "./assets/ethStampIcon.svg",
-    platform: "Signer",
-    name: "Ethereum Account",
-    description: "Additional Ethereum account",
-    connectMessage: "Connect Account",
-  },
+  // {
+  //   icon: "./assets/ethStampIcon.svg",
+  //   platform: "Signer",
+  //   name: "Ethereum Account",
+  //   description: "Additional Ethereum account",
+  //   connectMessage: "Connect Account",
+  // },
   {
     icon: "./assets/gitPOAPStampIcon.svg",
     platform: "GitPOAP",
