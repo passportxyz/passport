@@ -51,8 +51,8 @@ export const PLATFORMS: PlatformSpec[] = [
     icon: "./assets/poapStampIcon.svg",
     platform: "POAP",
     name: "POAP",
-    description: "Connect an account to a PoAP owned for over 15 days.",
-    connectMessage: "Connect to PoAP",
+    description: "Connect an account to a POAP owned for over 15 days.",
+    connectMessage: "Connect to POAP",
   },
   {
     icon: "./assets/facebookStampIcon.svg",
