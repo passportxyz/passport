@@ -42,7 +42,7 @@ export default function GitPOAPPlatform(): JSX.Element {
   // find all providerIds
   const providerIds = useMemo(
     () =>
-      STAMP_PROVIDERS["Twitter"]?.reduce((all, stamp) => {
+      STAMP_PROVIDERS[platformId]?.reduce((all, stamp) => {
         return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
       }, [] as PROVIDER_ID[]) || [],
     []
