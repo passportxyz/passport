@@ -10,7 +10,7 @@ import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
 import {
   GooglePlatform,
   EnsPlatform,
-  PohCard,
+  PohPlatform,
   TwitterPlatform,
   PoapPlatform,
   FacebookPlatform,
@@ -19,7 +19,7 @@ import {
   LinkedinPlatform,
   GitcoinPlatform,
   DiscordPlatform,
-  SignerCard,
+  // SignerCard,
   GitPOAPPlatform,
   SnapshotPlatform,
   EthPlatform,
@@ -68,6 +68,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <EnsPlatform />;
       case "Brightid":
         return <BrightidPlatform />;
+      case "Poh":
+        return <PohPlatform />;
       default:
         return (
           <SideBarContent

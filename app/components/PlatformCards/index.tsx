@@ -1,6 +1,6 @@
 export { default as GooglePlatform } from "./GooglePlatform";
 export { default as EnsPlatform } from "./EnsPlatform";
-export { default as PohCard } from "./PohCard";
+export { default as PohPlatform } from "./PohPlatform";
 export { default as TwitterPlatform } from "./TwitterPlatform";
 export { default as PoapPlatform } from "./PoapPlatform";
 export { default as FacebookPlatform } from "./FacebookPlatform";
