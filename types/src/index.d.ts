@@ -154,7 +154,8 @@ export type PLATFORM_ID =
   | "GitPOAP"
   | "Signer"
   | "Snapshot"
-  | "ETH";
+  | "ETH"
+  | "GTC";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -208,4 +209,6 @@ export type PROVIDER_ID =
   | "ethPossessionsGte#32"
   | "FirstEthTxnProvider"
   | "EthGTEOneTxnProvider"
-  | "EthGasProvider";
+  | "EthGasProvider"
+  | "gtcPossessionsGte#10"
+  | "gtcPossessionsGte#100";

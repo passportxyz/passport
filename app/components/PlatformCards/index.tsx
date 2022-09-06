@@ -13,3 +13,4 @@ export { default as SignerCard } from "./SignerCard";
 export { default as EthPlatform } from "./EthPlatform";
 export { default as GitPOAPPlatform } from "./GitPOAPPlatform";
 export { default as SnapshotPlatform } from "./SnapshotPlatform";
+export { default as GtcPlatform } from "./GtcPlatform";

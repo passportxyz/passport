@@ -23,6 +23,7 @@ import {
   GitPOAPPlatform,
   SnapshotPlatform,
   EthPlatform,
+  GtcPlatform,
 } from "./PlatformCards";
 import { SideBarContent } from "./SideBarContent";
 
@@ -70,6 +71,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <BrightidPlatform />;
       case "Poh":
         return <PohPlatform />;
+      case "GTC":
+        return <GtcPlatform />;
       default:
         return (
           <SideBarContent
