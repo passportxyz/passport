@@ -22,7 +22,7 @@ import { UserContext } from "../../context/userContext";
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
 // --- import components
-import { useDisclosure, useToast } from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../DoneToastContent";
 
 // --- Platform definitions
