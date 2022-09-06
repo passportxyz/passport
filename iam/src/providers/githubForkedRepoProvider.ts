@@ -1,5 +1,5 @@
 // ----- Types
-import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
+import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../types";
 import type { GithubFindMyUserResponse, GithubRepoRequestResponse } from "./types/githubTypes";
 import { requestAccessToken } from "./github";
@@ -25,14 +25,14 @@ export class ForkedGithubRepoProvider implements Provider {
   }
 
   // verify that the proof object contains valid === "true"
-  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     let valid = false,
       accessToken: string,
       verifiedUserPayload: GithubFindMyUserResponse = {},
       verifiedUserRepoPayload: boolean;
 
     try {
-      accessToken = await requestAccessToken(payload.proofs.code);
+      accessToken = await requestAccessToken(payload.proofs.code, context);
       verifiedUserPayload = await verifyGithub(accessToken);
       verifiedUserRepoPayload = await verifyUserGithubRepo(verifiedUserPayload, accessToken);
       valid = verifiedUserPayload && verifiedUserRepoPayload ? true : false;
