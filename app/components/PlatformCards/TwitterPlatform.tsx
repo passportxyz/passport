@@ -202,6 +202,7 @@ export default function TwitterPlatform(): JSX.Element {
       verifiedProviders={verifiedProviders}
       selectedProviders={selectedProviders}
       setSelectedProviders={setSelectedProviders}
+      isLoading={isLoading}
       verifyButton={
         <button
           disabled={!canSubmit}

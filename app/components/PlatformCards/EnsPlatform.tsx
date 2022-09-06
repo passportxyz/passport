@@ -71,6 +71,7 @@ export default function EnsPlatform(): JSX.Element {
   // fetch VCs from IAM server
   const handleFetchCredential = (): void => {
     datadogLogs.logger.info("Saving Stamp", { platform: platformId });
+    setLoading(true);
     fetchVerifiableCredential(
       iamUrl,
       {
@@ -133,6 +134,7 @@ export default function EnsPlatform(): JSX.Element {
       verifiedProviders={verifiedProviders}
       selectedProviders={selectedProviders}
       setSelectedProviders={setSelectedProviders}
+      isLoading={isLoading}
       verifyButton={
         <button
           disabled={!canSubmit}

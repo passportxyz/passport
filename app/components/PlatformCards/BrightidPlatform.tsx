@@ -55,6 +55,7 @@ export default function BrightidPlatform(): JSX.Element {
   const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
   const [brightIdVerification, SetBrightIdVerification] = useState<BrightIdProviderRecord | undefined>(undefined);
   const [verificationInProgress, setVerificationInProgress] = useState(false);
+  const [isLoading, setLoading] = useState(false);
   const [vcs, setVcs] = useState<(Stamp | undefined)[]>([]);
   const [canSubmit, setCanSubmit] = useState(false);
 
@@ -85,6 +86,7 @@ export default function BrightidPlatform(): JSX.Element {
   const handleFetchCredential = (): void => {
     datadogLogs.logger.info("starting provider verification", { platform: platformId });
     setCredentialResponseIsLoading(true);
+    setLoading(true);
     fetchVerifiableCredential(
       iamUrl,
       {
@@ -125,6 +127,7 @@ export default function BrightidPlatform(): JSX.Element {
       })
       .finally((): void => {
         setCredentialResponseIsLoading(false);
+        setLoading(false);
       });
   };
 
@@ -359,6 +362,7 @@ export default function BrightidPlatform(): JSX.Element {
       verifiedProviders={verifiedProviders}
       selectedProviders={selectedProviders}
       setSelectedProviders={setSelectedProviders}
+      isLoading={isLoading}
       verifyButton={
         <>
           <button

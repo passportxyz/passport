@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 // --- Chakra UI Elements
-import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Switch } from "@chakra-ui/react";
+import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Switch, Spinner } from "@chakra-ui/react";
 
 import { PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec } from "../config/providers";
@@ -13,6 +13,7 @@ export type SideBarContentProps = {
   verifiedProviders: PROVIDER_ID[] | undefined;
   selectedProviders: PROVIDER_ID[] | undefined;
   setSelectedProviders: React.Dispatch<React.SetStateAction<PROVIDER_ID[]>> | undefined;
+  isLoading: boolean | undefined;
   verifyButton: JSX.Element | undefined;
 };
 
@@ -22,6 +23,7 @@ export const SideBarContent = ({
   verifiedProviders,
   selectedProviders,
   setSelectedProviders,
+  isLoading,
   verifyButton,
 }: SideBarContentProps): JSX.Element => {
   const [allProviderIds, setAllProviderIds] = useState<PROVIDER_ID[]>([]);
@@ -45,7 +47,7 @@ export const SideBarContent = ({
 
   return (
     <DrawerContent>
-      <DrawerCloseButton className="z-10" />
+      <DrawerCloseButton disabled={isLoading} className={`z-10`} />
       {currentPlatform && currentProviders ? (
         <div className="overflow-auto">
           <DrawerHeader>
@@ -129,7 +131,20 @@ export const SideBarContent = ({
                   </div>
                 );
               })}
-              <div className="pl-4 pr-4 pb-4">{verifyButton}</div>
+              <div className="pl-4 pr-4 pb-4">
+                {isLoading ? (
+                  <button
+                    disabled
+                    data-testid="button-loading-twitter"
+                    className="sidebar-verify-btn mx-auto flex justify-center"
+                  >
+                    <Spinner size="sm" className="my-auto mr-2" />
+                    Verifying
+                  </button>
+                ) : (
+                  verifyButton
+                )}
+              </div>
             </div>
           </DrawerBody>
         </div>

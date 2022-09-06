@@ -144,6 +144,7 @@ export default function GooglePlatform(): JSX.Element {
       verifiedProviders={verifiedProviders}
       selectedProviders={selectedProviders}
       setSelectedProviders={setSelectedProviders}
+      isLoading={isLoading}
       verifyButton={
         <GoogleLogin
           clientId={googleClientId}

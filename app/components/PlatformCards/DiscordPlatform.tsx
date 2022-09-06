@@ -197,6 +197,7 @@ export default function DiscordCard(): JSX.Element {
       verifiedProviders={verifiedProviders}
       selectedProviders={selectedProviders}
       setSelectedProviders={setSelectedProviders}
+      isLoading={isLoading}
       verifyButton={
         <button
           disabled={!canSubmit}

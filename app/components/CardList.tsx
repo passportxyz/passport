@@ -128,6 +128,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
             setSelectedProviders={undefined}
             currentPlatform={undefined}
             currentProviders={undefined}
+            isLoading={undefined}
             verifyButton={undefined}
           />
         );

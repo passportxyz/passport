@@ -67,6 +67,7 @@ export default function PoapPlatform(): JSX.Element {
 
   // fetch VCs from IAM server
   const handleFetchCredential = (): void => {
+    setLoading(true);
     datadogLogs.logger.info("Saving Stamp", { platform: platformId });
     fetchVerifiableCredential(
       iamUrl,
@@ -129,6 +130,7 @@ export default function PoapPlatform(): JSX.Element {
       verifiedProviders={verifiedProviders}
       selectedProviders={selectedProviders}
       setSelectedProviders={setSelectedProviders}
+      isLoading={isLoading}
       verifyButton={
         <button
           disabled={!canSubmit}
