@@ -98,7 +98,8 @@ export default function SnapshotPlatform(): JSX.Element {
         await handleAddStamps(vcs as Stamp[]);
         datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
         const verifiedProviders = providerIds.filter(
-          (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
+          (providerId) =>
+            !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
         );
         // update the verified and selected providers
         setVerifiedProviders([...verifiedProviders]);

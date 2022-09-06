@@ -183,7 +183,6 @@ export type PROVIDER_ID =
   | "Snapshot"
   | "SnapshotProposalsProvider"
   | "SnapshotVotesProvider"
-  | "ETH"
   | "ethPossessionsGte#1"
   | "ethPossessionsGte#10"
   | "ethPossessionsGte#32"
