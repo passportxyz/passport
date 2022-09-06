@@ -155,7 +155,8 @@ export type PLATFORM_ID =
   | "Signer"
   | "Snapshot"
   | "ETH"
-  | "GTC";
+  | "GTC"
+  | "GtcStaking";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -211,4 +212,10 @@ export type PROVIDER_ID =
   | "EthGTEOneTxnProvider"
   | "EthGasProvider"
   | "gtcPossessionsGte#10"
-  | "gtcPossessionsGte#100";
+  | "gtcPossessionsGte#100"
+  | "SelfStakingBronze"
+  | "SelfStakingSilver"
+  | "SelfStakingGold"
+  | "CommunityStakingBronze"
+  | "CommunityStakingSilver"
+  | "CommunityStakingGold";

@@ -47,6 +47,22 @@ const invalidselfStakingResponse = {
   },
 };
 
+const getSubgraphQuery = (address: string): string => {
+  return `
+    {
+      users(where: {address: "${address}"}) {
+        address,
+        stakes(where: {round: "1"}) {
+          stake
+          round {
+            id
+          }
+        }
+      }
+    }
+      `;
+};
+
 interface RequestData {
   query: string;
 }
@@ -70,19 +86,7 @@ describe("Attempt verification", function () {
 
     // Check the request to verify the subgraph query
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
-      query: `
-    {
-      users(where: {address: "${MOCK_ADDRESS_LOWER}"}) {
-        address,
-        stakes(where: {round: "2", total_gt: 0}) {
-          stake
-          round {
-            id
-          }
-        }
-      }
-    }
-      `,
+      query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
     });
 
     expect(verifiedPayload).toEqual({
@@ -101,19 +105,7 @@ describe("Attempt verification", function () {
 
     // Check the request to verify the subgraph query
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
-      query: `
-    {
-      users(where: {address: "not_address"}) {
-        address,
-        stakes(where: {round: "2", total_gt: 0}) {
-          stake
-          round {
-            id
-          }
-        }
-      }
-    }
-      `,
+      query: getSubgraphQuery("not_address"),
     });
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -134,19 +126,7 @@ describe("Attempt verification", function () {
 
     // Check the request to verify the subgraph query
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
-      query: `
-    {
-      users(where: {address: "${MOCK_ADDRESS_LOWER}"}) {
-        address,
-        stakes(where: {round: "2", total_gt: 0}) {
-          stake
-          round {
-            id
-          }
-        }
-      }
-    }
-      `,
+      query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
     });
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -165,19 +145,7 @@ describe("Attempt verification", function () {
 
     // Check the request to verify the subgraph query
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
-      query: `
-    {
-      users(where: {address: "${MOCK_ADDRESS_LOWER}"}) {
-        address,
-        stakes(where: {round: "2", total_gt: 0}) {
-          stake
-          round {
-            id
-          }
-        }
-      }
-    }
-      `,
+      query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
     });
     expect(verifiedPayload).toEqual({
       valid: false,

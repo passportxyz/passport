@@ -25,6 +25,7 @@ import {
   SnapshotPlatform,
   EthPlatform,
   GtcPlatform,
+  GtcStakingPlatform,
 } from "./PlatformCards";
 import { SideBarContent } from "./SideBarContent";
 
@@ -120,6 +121,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <PohPlatform />;
       case "GTC":
         return <GtcPlatform />;
+      case "GtcStaking":
+        return <GtcStakingPlatform />;
       default:
         return (
           <SideBarContent

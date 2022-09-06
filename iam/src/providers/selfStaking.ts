@@ -50,7 +50,7 @@ async function verifyStake(payload: RequestPayload): Promise<StakeResponse> {
     {
       users(where: {address: "${address}"}) {
         address,
-        stakes(where: {round: "2", total_gt: 0}) {
+        stakes(where: {round: "1"}) {
           stake
           round {
             id

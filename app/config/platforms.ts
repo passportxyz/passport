@@ -131,4 +131,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "GTC possession verification",
     connectMessage: "Verify Account",
   },
+  {
+    icon: "./assets/gtcStakingLogoIcon.svg",
+    platform: "GtcStaking",
+    name: "GTC Staking",
+    description: "Connect to passport to verify your staking amount.",
+    connectMessage: "Verify amount",
+  },
 ];

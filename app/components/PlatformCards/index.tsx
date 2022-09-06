@@ -14,3 +14,4 @@ export { default as EthPlatform } from "./EthPlatform";
 export { default as GitPOAPPlatform } from "./GitPOAPPlatform";
 export { default as SnapshotPlatform } from "./SnapshotPlatform";
 export { default as GtcPlatform } from "./GtcPlatform";
+export { default as GtcStakingPlatform } from "./GtcStakingPlatform";
