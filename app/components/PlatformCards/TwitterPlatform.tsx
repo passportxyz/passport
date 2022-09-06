@@ -155,7 +155,7 @@ export default function TwitterPlatform(): JSX.Element {
           datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
           // grab all providers who are verified from the verify response
           const actualVerifiedProviders = providerIds.filter((providerId) =>
-            vcs.find((vc: Stamp) => vc.credentialSubject.provider === providerId)
+            !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
           );
           // both verified and selected should look the same after save
           setVerifiedProviders([...actualVerifiedProviders]);
