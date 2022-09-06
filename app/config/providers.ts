@@ -204,13 +204,13 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
   ],
   Snapshot: [
     {
-      platformGroup: "Snapshot Proposals",
-      providers: [{ title: "Voted on 2 or more DAO proposals", name: "SnapshotProposalsProvider" }],
+      platformGroup: "Snapshot Voter",
+      providers: [{ title: "Voted on 2 or more DAO proposals", name: "SnapshotVotesProvider" }],
     },
     {
-      platformGroup: "Snapshot Votes",
+      platformGroup: "Snapshot Proposal Creator",
       providers: [
-        { title: "Created a DAO proposal that was voted on by at least 1 person", name: "SnapshotVotesProvider" },
+        { title: "Created a DAO proposal that was voted on by at least 1 person", name: "SnapshotProposalsProvider" },
       ],
     },
   ],
