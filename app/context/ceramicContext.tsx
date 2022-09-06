@@ -149,6 +149,34 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: getProviderSpec("Snapshot", "SnapshotVotesProvider"),
     stamp: undefined,
   },
+  ETH: {
+    providerSpec: getProviderSpec("ETH", "ETH"),
+    stamp: undefined,
+  },
+  "ethPossessionsGte#1": {
+    providerSpec: getProviderSpec("ETH", "ethPossessionsGte#1"),
+    stamp: undefined,
+  },
+  "ethPossessionsGte#10": {
+    providerSpec: getProviderSpec("ETH", "ethPossessionsGte#10"),
+    stamp: undefined,
+  },
+  "ethPossessionsGte#32": {
+    providerSpec: getProviderSpec("ETH", "ethPossessionsGte#32"),
+    stamp: undefined,
+  },
+  FirstEthTxnProvider: {
+    providerSpec: getProviderSpec("ETH", "FirstEthTxnProvider"),
+    stamp: undefined,
+  },
+  EthGTEOneTxnProvider: {
+    providerSpec: getProviderSpec("ETH", "EthGTEOneTxnProvider"),
+    stamp: undefined,
+  },
+  EthGasProvider: {
+    providerSpec: getProviderSpec("ETH", "EthGasProvider"),
+    stamp: undefined,
+  },
   "GitcoinContributorStatistics#numGrantsContributeToGte#1": {
     providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGrantsContributeToGte#1"),
     stamp: undefined,

@@ -153,7 +153,8 @@ export type PLATFORM_ID =
   | "Discord"
   | "GitPOAP"
   | "Signer"
-  | "Snapshot";
+  | "Snapshot"
+  | "ETH";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -201,4 +202,10 @@ export type PROVIDER_ID =
   | "GitPOAP"
   | "Snapshot"
   | "SnapshotProposalsProvider"
-  | "SnapshotVotesProvider";
+  | "SnapshotVotesProvider"
+  | "ethPossessionsGte#1"
+  | "ethPossessionsGte#10"
+  | "ethPossessionsGte#32"
+  | "FirstEthTxnProvider"
+  | "EthGTEOneTxnProvider"
+  | "EthGasProvider";
