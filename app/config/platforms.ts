@@ -110,4 +110,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Connect your existing account to verify with Snapshot.",
     connectMessage: "Verify Account",
   },
+  {
+    icon: "./assets/ethereumStampIcon.svg",
+    platform: "ETH",
+    name: "ETH",
+    description: "ETH possession and transaction verification",
+    connectMessage: "Verify Account",
+  },
 ];

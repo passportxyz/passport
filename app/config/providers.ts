@@ -157,4 +157,25 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       ],
     },
   ],
+  ETH: [
+    {
+      platformGroup: "Possessions",
+      providers: [
+        { title: "At least 1 ETH", name: "ethPossessionsGte#1" },
+        { title: "At least 10 ETH", name: "ethPossessionsGte#10" },
+        { title: "At least 32 ETH", name: "ethPossessionsGte#32" },
+      ],
+    },
+    {
+      platformGroup: "Transactions",
+      providers: [
+        { title: "First ETH transaction occurred more than 30 days ago", name: "FirstEthTxnProvider" },
+        { title: "At least 1 ETH transaction", name: "EthGTEOneTxnProvider" },
+      ],
+    },
+    {
+      platformGroup: "Gas fees spent",
+      providers: [{ title: "At least 0.5 ETH in gas fees spent", name: "EthGasProvider" }],
+    },
+  ],
 };
