@@ -124,4 +124,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "ETH possession and transaction verification",
     connectMessage: "Verify Account",
   },
+  {
+    icon: "./assets/gtcPossessionStampIcon.svg",
+    platform: "GTC",
+    name: "GTC",
+    description: "GTC possession verification",
+    connectMessage: "Verify Account",
+  },
 ];

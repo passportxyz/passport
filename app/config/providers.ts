@@ -235,4 +235,13 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "At least 0.5 ETH in gas fees spent", name: "EthGasProvider" }],
     },
   ],
+  GTC: [
+    {
+      platformGroup: "GTC possessions",
+      providers: [
+        { title: "At least 10 GTC", name: "gtcPossessionsGte#10" },
+        { title: "At least 100 GTC", name: "gtcPossessionsGte#100" },
+      ],
+    },
+  ],
 };

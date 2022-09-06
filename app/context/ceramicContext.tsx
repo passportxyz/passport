@@ -249,6 +249,14 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantsInEcoAndCauseRound#1"),
     stamp: undefined,
   },
+  "gtcPossessionsGte#10": {
+    providerSpec: getProviderSpec("GTC", "gtcPossessionsGte#10"),
+    stamp: undefined,
+  },
+  "gtcPossessionsGte#100": {
+    providerSpec: getProviderSpec("GTC", "gtcPossessionsGte#100"),
+    stamp: undefined,
+  },
 };
 
 const startingState: CeramicContextState = {
