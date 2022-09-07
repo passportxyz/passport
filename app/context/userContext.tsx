@@ -35,13 +35,12 @@ const startingState: UserContextState = {
 };
 
 export const pillLocalStorage = (platform?: string): void => {
-  const previouslyUpdatedPlatforms = JSON.parse(window.localStorage.getItem("updatedPlatforms") || "{}");
+  const platforms = window.localStorage.getItem("updatedPlatforms");
+  const previouslyUpdatedPlatforms = JSON.parse(platforms || "{}");
   if (platform && !previouslyUpdatedPlatforms[platform]) {
-    const updatedPlatforms = {
-      ...previouslyUpdatedPlatforms,
-      platform: true,
-    };
-    window.localStorage.setItem("updatedPlatforms", updatedPlatforms);
+    const updatedPlatforms = previouslyUpdatedPlatforms;
+    updatedPlatforms[platform] = true;
+    window.localStorage.setItem("updatedPlatforms", JSON.stringify(updatedPlatforms));
   }
 };
 
