@@ -4,7 +4,6 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
-import { DateTime } from "luxon";
 
 // Use GitPOAP Public API to get a list of tokens for that address
 const GITPOAP_API_URL = "https://public-api.gitpoap.io";

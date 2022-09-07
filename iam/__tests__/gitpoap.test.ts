@@ -4,12 +4,10 @@ import { GitPOAP, GitPOAPProvider } from "../src/providers/gitpoap";
 
 // ----- Libs
 import axios from "axios";
-import { DateTime } from "luxon";
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
-const today = DateTime.now().toFormat("YYYY-mm-dd");
 
 const validResponse: { data: GitPOAP[] } = {
   data: [
@@ -55,9 +53,9 @@ describe("Attempt verification", () => {
   it("handles valid verification attempt", async () => {
     mockedAxios.get.mockImplementation(async (url) => {
       if (url.includes(MOCK_ADDRESS)) {
-        return validResponse;
+        return Promise.resolve(validResponse);
       }
-      return validResponse;
+      return Promise.resolve(validResponse);
     });
 
     // We'll mock responses on each of the configured networks, and check the expected calls
@@ -77,9 +75,9 @@ describe("Attempt verification", () => {
   it("should return invalid if the user doesn't have any GitPOAPs", async () => {
     mockedAxios.get.mockImplementation(async (url) => {
       if (url.includes(MOCK_ADDRESS)) {
-        return emptyResponse;
+        return Promise.resolve(emptyResponse);
       }
-      return emptyResponse;
+      return Promise.resolve(emptyResponse);
     });
 
     const gitpoap = new GitPOAPProvider();
