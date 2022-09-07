@@ -2,10 +2,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 
 import { PLATFORMS, PlatformSpec } from "../config/platforms";
-import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
-
-// --- Context
-import { CeramicContext } from "../context/ceramicContext";
+import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // --- Components
 import { JsonOutputModal } from "./JsonOutputModal";
@@ -36,6 +33,8 @@ import { SideBarContent } from "./SideBarContent";
 // --- Chakra UI Elements
 import { Drawer, DrawerOverlay, Menu, MenuButton, MenuItem, MenuList, Spinner, useDisclosure } from "@chakra-ui/react";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { CeramicContext } from "../context/ceramicContext";
+import { pillLocalStorage } from "../context/userContext";
 
 export type CardListProps = {
   isLoading?: boolean;
@@ -54,6 +53,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const btnRef = useRef();
   const [currentPlatform, setCurrentPlatform] = useState<PlatformSpec | undefined>();
   const [currentProviders, setCurrentProviders] = useState<PlatformGroupSpec[]>([]);
+  const [updatedPlatforms, setUpdatedPlatforms] = useState<UpdatedPlatforms | undefined>();
   // get the selected Providers
   const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
     PLATFORMS.reduce((plaforms, platform) => {
@@ -171,6 +171,9 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
                         />
                       </svg>
                     )}
+                  </div>
+                  <div className="inline-flex h-6 items-center rounded-xl bg-yellow px-2 text-xs font-medium shadow-sm">
+                    Update
                   </div>
                 </div>
                 <div className="flex justify-center py-0 px-6 pb-6 md:block md:justify-start">

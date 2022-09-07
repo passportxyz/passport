@@ -34,6 +34,17 @@ const startingState: UserContextState = {
   walletLabel: undefined,
 };
 
+export const pillLocalStorage = (platform?: string): void => {
+  const previouslyUpdatedPlatforms = JSON.parse(window.localStorage.getItem("updatedPlatforms") || "{}");
+  if (platform && !previouslyUpdatedPlatforms[platform]) {
+    const updatedPlatforms = {
+      ...previouslyUpdatedPlatforms,
+      platform: true,
+    };
+    window.localStorage.setItem("updatedPlatforms", updatedPlatforms);
+  }
+};
+
 // create our app context
 export const UserContext = createContext(startingState);
 
