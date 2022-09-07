@@ -100,7 +100,7 @@ export const PLATFORMS: PlatformSpec[] = [
     icon: "./assets/discordStampIcon.svg",
     platform: "Discord",
     name: "Discord",
-    description: "Connect your existing Linkedin account to verify.",
+    description: "Connect your existing Discord account to verify.",
     connectMessage: "Connect Account",
   },
   {
