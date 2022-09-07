@@ -134,7 +134,6 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     {
       platformGroup: "Contributed ($)...",
       providers: [
-        { title: "more than $1", name: "GitcoinContributorStatistics#totalContributionAmountGte#1" },
         { title: "more than $10", name: "GitcoinContributorStatistics#totalContributionAmountGte#10" },
         { title: "more than $100", name: "GitcoinContributorStatistics#totalContributionAmountGte#100" },
         { title: "more than $1000", name: "GitcoinContributorStatistics#totalContributionAmountGte#1000" },
@@ -162,10 +161,9 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     {
       platformGroup: "Grants have received...",
       providers: [
-        { title: "more than $10", name: "GitcoinGranteeStatistics#totalContributionAmount#10" },
-        { title: "more than $25", name: "GitcoinGranteeStatistics#totalContributionAmount#25" },
         { title: "more than $100", name: "GitcoinGranteeStatistics#totalContributionAmount#100" },
         { title: "more than $1000", name: "GitcoinGranteeStatistics#totalContributionAmount#1000" },
+        { title: "more than $10000", name: "GitcoinGranteeStatistics#totalContributionAmount#10000" },
       ],
     },
     {
