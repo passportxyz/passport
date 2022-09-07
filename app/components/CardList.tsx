@@ -159,7 +159,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       <div className="flex flex-wrap md:-m-4 md:px-4">
         {PLATFORMS.map((platform, i) => {
           return isLoading ? (
-            <LoadingCard />
+            <LoadingCard key={i} />
           ) : (
             <div className="w-1/2 p-2 md:w-1/2 xl:w-1/4" key={`${platform.name}${i}`}>
               <div className="relative flex h-full flex-col border border-gray-200 p-0">
