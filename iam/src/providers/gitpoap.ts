@@ -45,16 +45,7 @@ export class GitPOAPProvider implements Provider {
       gitpoaps = data;
 
       /* Check if address has any GitPOAPs */
-      if (gitpoaps.length > 0) {
-        const hasValidGitPOAP = gitpoaps.some((gitpoap) => {
-          const mintDate = DateTime.fromISO(gitpoap.mintedAt);
-          return DateTime.now().diff(mintDate).as("days") > 15;
-        });
-        /* Check if address has any valid GitPOAPs > 15 days in age */
-        if (hasValidGitPOAP) {
-          valid = true;
-        }
-      }
+      valid = gitpoaps.length > 0;
     } catch (err) {
       return {
         valid: false,
