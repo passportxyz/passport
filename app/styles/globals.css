@@ -6,7 +6,7 @@
 
 @layer components {
   .verify-btn {
-    @apply w-full border-t-2 p-3 hover:text-purple-400;
+    @apply w-full border-t p-3 hover:text-purple-400;
   }
   .sidebar-verify-btn {
     @apply mt-10 w-full rounded-md bg-purple-connectPurple py-2 text-white hover:bg-purple-200 hover:text-black;

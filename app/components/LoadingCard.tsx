@@ -16,7 +16,7 @@ export const LoadingCard = (): JSX.Element => {
             <div className="col-span-2 h-3 rounded-md bg-gray-300"></div>
           </div>
         </div>
-        <div className="mt-auto flex h-12 w-full flex-row items-center justify-center border-t-2 text-gray-900">
+        <div className="mt-auto flex h-12 w-full flex-row items-center justify-center border-t text-gray-900">
           <div className="mr-2 h-3 w-1/5 rounded-md bg-gray-300"></div>
           <div className="ml-2 h-3 w-1/5 rounded-md bg-gray-300"></div>
         </div>
