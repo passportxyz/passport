@@ -13,7 +13,7 @@ export type PlatformGroupSpec = {
 };
 
 export type UpdatedPlatforms = {
-  [k in PROVIDER_ID]: boolean;
+  [key: string]: boolean;
 };
 
 // Platform -> Provider[]

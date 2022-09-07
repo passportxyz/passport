@@ -71,6 +71,11 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
     }, {} as SelectedProviders)
   );
 
+  const getUpdatedPlatforms = () => {
+    const previouslyUpdatedPlatforms = localStorage.getItem("updatedPlatforms");
+    setUpdatedPlatforms(JSON.parse(previouslyUpdatedPlatforms || "{}"));
+  };
+
   // update when verifications change...
   useEffect(() => {
     // update all verfied states
@@ -89,6 +94,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return plaforms;
       }, {} as SelectedProviders)
     );
+    getUpdatedPlatforms();
   }, [allProvidersState]);
 
   // Add the platforms to this switch so the sidebar content can populate dynamically
@@ -172,9 +178,11 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
                       </svg>
                     )}
                   </div>
-                  <div className="inline-flex h-6 items-center rounded-xl bg-yellow px-2 text-xs font-medium shadow-sm">
-                    Update
-                  </div>
+                  {updatedPlatforms && updatedPlatforms[platform.name] !== true && (
+                    <div className="inline-flex h-6 items-center rounded-xl bg-yellow px-2 text-xs font-medium shadow-sm">
+                      Update
+                    </div>
+                  )}
                 </div>
                 <div className="flex justify-center py-0 px-6 pb-6 md:block md:justify-start">
                   <h1 className="title-font mb-0 text-lg font-medium text-gray-900 md:mb-3">{platform.name}</h1>
@@ -252,6 +260,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
                       onClick={(e) => {
                         setCurrentPlatform(platform);
                         onOpen();
+                        pillLocalStorage(platform.name);
+                        getUpdatedPlatforms();
                       }}
                     >
                       {platform.connectMessage}
