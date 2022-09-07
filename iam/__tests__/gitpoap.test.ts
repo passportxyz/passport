@@ -43,21 +43,6 @@ const validResponse: { data: GitPOAP[] } = {
   ],
 };
 
-const invalidResponse: { data: GitPOAP[] } = {
-  data: [
-    {
-      gitPoapId: 3261,
-      name: "GitPOAP: 2022 Test Contributor",
-      year: 2022,
-      description: "A description",
-      repositories: ["gitpoap/gitpoap-hackathon-devconnect-2022"],
-      earnedAt: "2022-05-18",
-      /* set date to today (invalid) */
-      mintedAt: today,
-    },
-  ],
-};
-
 const emptyResponse: { data: GitPOAP[] } = {
   data: [],
 };
@@ -85,27 +70,6 @@ describe("Attempt verification", () => {
       valid: true,
       record: {
         gitpoaps: validResponse.data.map((gitpoap) => gitpoap.gitPoapId).join(","),
-      },
-    });
-  });
-
-  it("should return invalid if the user doesn't have any GitPOAPs within the expected time range", async () => {
-    mockedAxios.get.mockImplementation(async (url) => {
-      if (url.includes(MOCK_ADDRESS)) {
-        return invalidResponse;
-      }
-      return invalidResponse;
-    });
-
-    const gitpoap = new GitPOAPProvider();
-    const verifiedPayload = await gitpoap.verify({
-      address: MOCK_ADDRESS,
-    } as RequestPayload);
-
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      record: {
-        gitpoaps: undefined,
       },
     });
   });
