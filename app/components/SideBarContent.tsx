@@ -15,6 +15,7 @@ export type SideBarContentProps = {
   setSelectedProviders: React.Dispatch<React.SetStateAction<PROVIDER_ID[]>> | undefined;
   isLoading: boolean | undefined;
   verifyButton: JSX.Element | undefined;
+  infoElement?: JSX.Element | undefined;
 };
 
 export const SideBarContent = ({
@@ -25,6 +26,7 @@ export const SideBarContent = ({
   setSelectedProviders,
   isLoading,
   verifyButton,
+  infoElement,
 }: SideBarContentProps): JSX.Element => {
   const [allProviderIds, setAllProviderIds] = useState<PROVIDER_ID[]>([]);
   const [allSelected, setAllSelected] = useState(false);
@@ -131,6 +133,8 @@ export const SideBarContent = ({
                   </div>
                 );
               })}
+              {/* This is an optional element that can be used to provide more information */}
+              {infoElement}
               <div className="pl-4 pr-4 pb-4">
                 {isLoading ? (
                   <button

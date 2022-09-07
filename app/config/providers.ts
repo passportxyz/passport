@@ -250,17 +250,17 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     {
       platformGroup: "Self GTC Staking",
       providers: [
-        { title: "Self GTC Staking Bronze", name: "SelfStakingBronze" },
-        { title: "Self GTC Staking Silver", name: "SelfStakingSilver" },
-        { title: "Self GTC Staking Gold", name: "SelfStakingGold" },
+        { title: "1 GTC (Bronze)", name: "SelfStakingBronze" },
+        { title: "10 GTC (Silver)", name: "SelfStakingSilver" },
+        { title: "100 GTC (Gold)", name: "SelfStakingGold" },
       ],
     },
     {
       platformGroup: "Community GTC Staking",
       providers: [
-        { title: "Community GTC Staking Bronze", name: "CommunityStakingBronze" },
-        { title: "Community GTC Staking Silver", name: "CommunityStakingSilver" },
-        { title: "Community GTC Staking Gold", name: "CommunityStakingGold" },
+        { title: "1 GTC (Bronze)", name: "CommunityStakingBronze" },
+        { title: "10 GTC (Silver)", name: "CommunityStakingSilver" },
+        { title: "100 GTC (Gold)", name: "CommunityStakingGold" },
       ],
     },
   ],

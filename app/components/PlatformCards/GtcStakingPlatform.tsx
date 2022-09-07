@@ -145,6 +145,34 @@ export default function GtcStakingPlatform(): JSX.Element {
           Verify
         </button>
       }
+      infoElement={
+        <div className="p-4">
+          <div className="mt-10 rounded-lg border border-purple-infoElementBorder bg-purple-infoElementBG px-4 py-6">
+            <div className="flex flex-row items-center">
+              <h2 className="text-md mb-0 text-left font-bold text-gray-900">
+                Stake your GTC on the new Identity Staking site.
+              </h2>
+            </div>
+
+            <div className="mt-4 flex-grow">
+              <p className="text-left text-base leading-relaxed">
+                Defend against sybil by staking on your own identity or sombody else’s. By staking, the profile of
+                stamps in the Passport becomes more unique.
+              </p>
+              <div className="border-divider mt-3 border-t">
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://staking.passport.gitcoin.co"
+                  className="mx-auto mt-3 flex justify-center text-indigo-500"
+                >
+                  Go to Identity Staking
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
     />
   );
 }
