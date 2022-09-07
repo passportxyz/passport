@@ -15,6 +15,7 @@ module.exports = {
           connectPurple: "#6F3FF5",
           gitcoinpurple: "#6f3ff5",
         },
+        yellow: "#FFF8DB",
         blue: {
           darkblue: "#0E0333",
         },

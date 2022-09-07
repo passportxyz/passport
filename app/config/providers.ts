@@ -12,6 +12,10 @@ export type PlatformGroupSpec = {
   platformGroup: string;
 };
 
+export type UpdatedPlatforms = {
+  [k in PROVIDER_ID]: boolean;
+};
+
 // Platform -> Provider[]
 export type Providers = {
   [platform in PLATFORM_ID]: PlatformGroupSpec[];
