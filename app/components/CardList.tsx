@@ -4,8 +4,12 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
 
+// --- Context
+import { CeramicContext } from "../context/ceramicContext";
+
 // --- Components
 import { JsonOutputModal } from "./JsonOutputModal";
+import { LoadingCard } from "./LoadingCard";
 
 // --- Identity Providers
 import {
@@ -29,9 +33,8 @@ import {
 import { SideBarContent } from "./SideBarContent";
 
 // --- Chakra UI Elements
-import { Drawer, DrawerOverlay, Menu, MenuButton, MenuItem, MenuList, useDisclosure } from "@chakra-ui/react";
+import { Drawer, DrawerOverlay, Menu, MenuButton, MenuItem, MenuList, Spinner, useDisclosure } from "@chakra-ui/react";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
-import { CeramicContext } from "../context/ceramicContext";
 
 export type CardListProps = {
   isLoading?: boolean;
@@ -146,7 +149,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
     <div className="container mx-auto py-10">
       <div className="flex flex-wrap md:-m-4 md:px-4">
         {PLATFORMS.map((platform, i) => {
-          return (
+          return (isLoading ? <LoadingCard /> :
             <div className="w-1/2 p-2 md:w-1/2 xl:w-1/4" key={`${platform.name}${i}`}>
               <div className="relative flex h-full flex-col border border-gray-200 p-0 lg:min-h-[252px]">
                 <div className="flex flex-row p-6">
