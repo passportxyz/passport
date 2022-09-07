@@ -148,7 +148,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         {PLATFORMS.map((platform, i) => {
           return (
             <div className="w-1/2 p-2 md:w-1/2 xl:w-1/4" key={`${platform.name}${i}`}>
-              <div className="relative flex flex-col border border-gray-200 p-0 lg:min-h-[260px]">
+              <div className="relative flex h-full flex-col border border-gray-200 p-0 lg:min-h-[252px]">
                 <div className="flex flex-row p-6">
                   <div className="flex h-10 w-10 flex-grow justify-center md:justify-start">
                     {platform.icon ? (
@@ -165,7 +165,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
                     )}
                   </div>
                 </div>
-                <div className="mt-2 flex justify-center px-6 pb-6 md:block md:justify-start">
+                <div className="flex justify-center py-0 px-6 pb-6 md:block md:justify-start">
                   <h1 className="title-font mb-3 text-lg font-medium text-gray-900">{platform.name}</h1>
                   <p className="pleading-relaxed hidden md:inline-block">{platform.description}</p>
                 </div>
