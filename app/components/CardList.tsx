@@ -149,7 +149,9 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
     <div className="container mx-auto py-10">
       <div className="flex flex-wrap md:-m-4 md:px-4">
         {PLATFORMS.map((platform, i) => {
-          return (isLoading ? <LoadingCard /> :
+          return isLoading ? (
+            <LoadingCard />
+          ) : (
             <div className="w-1/2 p-2 md:w-1/2 xl:w-1/4" key={`${platform.name}${i}`}>
               <div className="relative flex h-full flex-col border border-gray-200 p-0 lg:min-h-[252px]">
                 <div className="flex flex-row p-6">
@@ -169,7 +171,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
                   </div>
                 </div>
                 <div className="flex justify-center py-0 px-6 pb-6 md:block md:justify-start">
-                  <h1 className="title-font mb-3 text-lg font-medium text-gray-900">{platform.name}</h1>
+                  <h1 className="title-font mb-0 text-lg font-medium text-gray-900 md:mb-3">{platform.name}</h1>
                   <p className="pleading-relaxed hidden md:inline-block">{platform.description}</p>
                 </div>
                 <div className="mt-auto">
