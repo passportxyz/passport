@@ -27,6 +27,7 @@ import {
   EthPlatform,
   GtcPlatform,
   GtcStakingPlatform,
+  NftPlatform,
 } from "./PlatformCards";
 import { SideBarContent } from "./SideBarContent";
 
@@ -132,6 +133,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <GtcPlatform />;
       case "GtcStaking":
         return <GtcStakingPlatform />;
+      case "NFT":
+        return <NftPlatform />;
       default:
         return (
           <SideBarContent

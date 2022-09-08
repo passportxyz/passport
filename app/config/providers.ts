@@ -264,4 +264,10 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       ],
     },
   ],
+  NFT: [
+    {
+      platformGroup: "NFT Holder",
+      providers: [{ title: "Holds at least 1 NFT", name: "NFT" }],
+    },
+  ],
 };
