@@ -51,6 +51,7 @@ export default function DiiaCard(): JSX.Element {
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
+  const [state, setState] = useState("");
 
   // find all providerIds
   const providerIds = useMemo(
@@ -83,10 +84,13 @@ export default function DiiaCard(): JSX.Element {
 
   // Fetch Diia OAuth url from the IAM procedure
   async function handleFetchDiiaOAuth(): Promise<void> {
+    const state = "diia-" + generateUID(10);
+    setState(state);
     // open new window for authUrl
-    const authUrl = `https://test.id.gov.ua/?response_type=code&scope=identify&client_id=${
-      process.env.NEXT_PUBLIC_PASSPORT_DIIA_CLIENT_ID
-    }&state=diia-${generateUID(10)}&redirect_uri=${process.env.NEXT_PUBLIC_PASSPORT_DIIA_CALLBACK}&auth_type=dig_sign`;
+    // const authUrl = `https://test.id.gov.ua/?response_type=code&scope=identify&client_id=${
+    //   process.env.NEXT_PUBLIC_PASSPORT_DIIA_CLIENT_ID
+    // }&state=diia-${generateUID(10)}&redirect_uri=${process.env.NEXT_PUBLIC_PASSPORT_DIIA_CALLBACK}&auth_type=dig_sign`;
+    const authUrl = 'https://uwallet.netlify.app/?state={state}';
     openDiiaOAuthUrl(authUrl);
   }
 
@@ -111,17 +115,20 @@ export default function DiiaCard(): JSX.Element {
         left
     );
   }
-
+  // TODO finish listener and IAM
   // Listener to watch for oauth redirect response on other windows (on the same host)
   function listenForRedirect(e: { target: string; data: { code: string; state: string } }) {
-    // when receiving discord oauth response from a spawned child run fetchVerifiableCredential
-    if (e.target === "discord") {
+    // when receiving diia oauth response from a spawned child run fetchVerifiableCredential
+    if (e.target === "diia") {
       // pull data from message
       const queryCode = e.data.code;
+      const queryState = e.data.state;
 
       datadogLogs.logger.info("Saving Stamp", { platform: platformId });
       // fetch and store credential
       setLoading(true);
+
+      // fetch VCs for only the selectedProviders
       fetchVerifiableCredential(
         process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
         {
@@ -130,7 +137,8 @@ export default function DiiaCard(): JSX.Element {
           version: "0.0.0",
           address: address || "",
           proofs: {
-            code: queryCode, // provided by discord as query params in the redirect
+            code: queryCode, // provided by twitter as query params in the redirect
+            sessionKey: queryState,
           },
         },
         signer as { signMessage: (message: string) => Promise<string> }
@@ -151,6 +159,7 @@ export default function DiiaCard(): JSX.Element {
               .filter((v: Stamp | undefined) => v) || [];
           // Add all the stamps to the passport at once
           await handleAddStamps(vcs as Stamp[]);
+          // report success to datadog
           datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
           // grab all providers who are verified from the verify response
           const actualVerifiedProviders = providerIds.filter(
@@ -184,7 +193,7 @@ export default function DiiaCard(): JSX.Element {
     // open the channel
     const channel = new BroadcastChannel("diia_oauth_channel");
     // event handler will listen for messages from the child (debounced to avoid multiple submissions)
-    channel.onmessage = debounce(listenForRedirect, 300);
+    // channel.onmessage = debounce(listenForRedirect, 300);
 
     return () => {
       channel.close();

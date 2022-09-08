@@ -21,6 +21,7 @@ import {
   LinkedinPlatform,
   GitcoinPlatform,
   DiscordPlatform,
+  DiiaPlatfrom,
   // SignerCard,
   GitPOAPPlatform,
   SnapshotPlatform,
@@ -132,6 +133,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <GtcPlatform />;
       case "GtcStaking":
         return <GtcStakingPlatform />;
+      case "Diia":
+        return <DiiaPlatfrom />;
       default:
         return (
           <SideBarContent

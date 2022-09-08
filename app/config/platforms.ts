@@ -139,10 +139,10 @@ export const PLATFORMS: PlatformSpec[] = [
     connectMessage: "Connect Account",
   },
   {
-    icon: "./assets/DiiaStampIcon.svg",
+    icon: "./assets/diiaStampIcon.svg",
     platform: "Diia",
     name: "Diia.gov.ua",
-    description: "Ukranian citinzenship verification via Diia",
+    description: "Ukranian citizenship verification via Diia",
     connectMessage: "Connect Account",
   },
 ];
