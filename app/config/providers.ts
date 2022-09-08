@@ -264,4 +264,10 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       ],
     },
   ],
+  ZkSync: [
+    {
+      platformGroup: "Account name",
+      providers: [{ title: "Encrypted", name: "ZkSync" }],
+    },
+  ],
 };

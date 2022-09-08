@@ -156,7 +156,8 @@ export type PLATFORM_ID =
   | "Snapshot"
   | "ETH"
   | "GTC"
-  | "GtcStaking";
+  | "GtcStaking"
+  | "ZkSync";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -216,4 +217,5 @@ export type PROVIDER_ID =
   | "SelfStakingGold"
   | "CommunityStakingBronze"
   | "CommunityStakingSilver"
-  | "CommunityStakingGold";
+  | "CommunityStakingGold"
+  | "ZkSync";

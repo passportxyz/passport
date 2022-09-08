@@ -138,4 +138,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "GitPOAP Verification",
     connectMessage: "Connect Account",
   },
+  {
+    icon: "./assets/zksyncStampIcon.svg",
+    platform: "ZkSync",
+    name: "ZkSync",
+    description: "ZkSync Verification",
+    connectMessage: "Verify Account",
+  },
 ];
