@@ -272,6 +272,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: getProviderSpec("GtcStaking", "CommunityStakingGold"),
     stamp: undefined,
   },
+  Diia: {
+    providerSpec: getProviderSpec("Diia", "Diia"),
+    stamp: undefined,
+  },
 };
 
 const startingState: CeramicContextState = {

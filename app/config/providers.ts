@@ -204,6 +204,12 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Encrypted", name: "GitPOAP" }],
     },
   ],
+  Diia: [
+    {
+      platformGroup: "Account Name",
+      providers: [{ title: "Encrypted", name: "Diia" }],
+    },
+  ],
   Snapshot: [
     {
       platformGroup: "Snapshot Voter",
