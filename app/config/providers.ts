@@ -270,4 +270,10 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Encrypted", name: "ZkSync" }],
     },
   ],
+  Lens: [
+    {
+      platformGroup: "Account Name",
+      providers: [{ title: "Encrypted", name: "Lens" }],
+    },
+  ],
 };

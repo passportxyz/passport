@@ -16,3 +16,4 @@ export { default as SnapshotPlatform } from "./SnapshotPlatform";
 export { default as GtcPlatform } from "./GtcPlatform";
 export { default as GtcStakingPlatform } from "./GtcStakingPlatform";
 export { default as ZkSyncPlatform } from "./ZkSyncPlatform";
+export { default as LensPlatform } from "./LensPlatform";

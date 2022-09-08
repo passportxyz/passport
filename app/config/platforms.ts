@@ -145,4 +145,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "ZkSync Verification",
     connectMessage: "Verify Account",
   },
+  {
+    icon: "./assets/lensStampIcon.svg",
+    platform: "Lens",
+    name: "Lens",
+    description: "Lens Profile Verification",
+    connectMessage: "Verify Account",
+  },
 ];
