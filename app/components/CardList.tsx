@@ -28,6 +28,7 @@ import {
   GtcPlatform,
   GtcStakingPlatform,
   ZkSyncPlatform,
+  LensPlatform,
 } from "./PlatformCards";
 import { SideBarContent } from "./SideBarContent";
 
@@ -135,6 +136,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <GtcStakingPlatform />;
       case "ZkSync":
         return <ZkSyncPlatform />;
+      case "Lens":
+        return <LensPlatform />;
       default:
         return (
           <SideBarContent

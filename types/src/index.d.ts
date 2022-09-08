@@ -157,7 +157,8 @@ export type PLATFORM_ID =
   | "ETH"
   | "GTC"
   | "GtcStaking"
-  | "ZkSync";
+  | "ZkSync"
+  | "Lens";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -218,4 +219,5 @@ export type PROVIDER_ID =
   | "CommunityStakingBronze"
   | "CommunityStakingSilver"
   | "CommunityStakingGold"
-  | "ZkSync";
+  | "ZkSync"
+  | "Lens";

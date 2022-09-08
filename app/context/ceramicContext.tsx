@@ -276,6 +276,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: getProviderSpec("ZkSync", "ZkSync"),
     stamp: undefined,
   },
+  Lens: {
+    providerSpec: getProviderSpec("Lens", "Lens"),
+    stamp: undefined,
+  },
 };
 
 const startingState: CeramicContextState = {
