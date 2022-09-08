@@ -1,11 +1,10 @@
 // ---- Test subject
-import { alchemyGetNFTsUrl, NFTProvider } from "../src/providers/nft";
+import { gnosisSafeApiEndpoint, GnosisSafeProvider } from "../src/providers/gnosisSafe";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
-import { gnosisSafeApiEndpoint, GnosisSafeProvider } from "../src/providers/gnosisSafe";
 
 jest.mock("axios");
 

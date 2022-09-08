@@ -78,13 +78,8 @@ import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./pro
 import { NFTProvider } from "./providers/nft";
 import { GitPOAPProvider } from "./providers/gitpoap";
 import { LensProfileProvider } from "./providers/lens";
-<<<<<<< HEAD
 import { ZkSyncProvider } from "./providers/zkSync";
 import { GnosisSafeProvider } from "./providers/gnosisSafe";
-=======
-import { ZkSynkProvider } from "./providers/zkSync";
-import { GnosisSafeProvider } from "./providers/gnosisSafe";
->>>>>>> feat(iam): adding gnosis safe stamp
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
