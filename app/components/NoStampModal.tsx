@@ -1,17 +1,35 @@
 // --- React Methods
-import React from "react";
+import React, { useContext } from "react";
 
 // --- Chakra Elements
 import { Modal, ModalOverlay, ModalContent } from "@chakra-ui/react";
 
 import { Stamp } from "@gitcoin/passport-types";
+import { UserContext } from "../context/userContext";
+import { useConnectWallet } from "@web3-onboard/react";
 
 export type NoStampModalProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
+export const initiateAccountChange = async (): Promise<void> => {
+  await window.ethereum.request({
+    method: "wallet_requestPermissions",
+    params: [
+      {
+        eth_accounts: {},
+      },
+    ],
+  });
+};
+
 export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
+  // const { wallet, handleConnection } = useContext(UserContext);
+  // // const initiateAccountChange = async (): Promise<void> => {
+  // //   onClose();
+  // //   const wallets = await handleConnection();
+  // // };
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
@@ -28,7 +46,11 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
             <a href="" target="_blank" className="m-1 w-1/2 items-center rounded-md border py-2  text-center">
               Go to ENS
             </a>
-            <button className="m-1 w-1/2 rounded-md bg-purple-connectPurple py-2 text-white hover:bg-purple-200 hover:text-black">
+            <button
+              data-testid="check-other-wallet"
+              className="m-1 w-1/2 rounded-md bg-purple-connectPurple py-2 text-white hover:bg-purple-200 hover:text-black"
+              onClick={initiateAccountChange}
+            >
               Try another wallet
             </button>
           </div>
