@@ -152,4 +152,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Lens Profile Verification",
     connectMessage: "Verify Account",
   },
+  {
+    icon: "./assets/gnosisSafeStampIcon.svg",
+    platform: "GnosisSafe",
+    name: "Gnosis Safe",
+    description: "Gnosis Safe Signer/Owner Verification",
+    connectMessage: "Verify Account",
+  },
 ];

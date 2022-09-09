@@ -280,6 +280,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: getProviderSpec("Lens", "Lens"),
     stamp: undefined,
   },
+  GnosisSafe: {
+    providerSpec: getProviderSpec("GnosisSafe", "GnosisSafe"),
+    stamp: undefined,
+  },
 };
 
 const startingState: CeramicContextState = {
