@@ -59,7 +59,8 @@ describe("when user has no passport", () => {
       </Router>
     );
 
-    expect(screen.getByTestId("loading-spinner-passport"));
+    // screen loads mobile view - check for md loading-spinner
+    expect(screen.getByTestId("loading-spinner-passport-md"));
   });
 });
 
@@ -73,7 +74,7 @@ describe("when the user has a passport", () => {
       </Router>
     );
 
-    expect(screen.queryByTestId("loading-spinner-passport")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("loading-spinner-passport-md")).not.toBeInTheDocument();
   });
 
   it("shows Passport JSON button", () => {

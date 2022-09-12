@@ -189,7 +189,7 @@ export default function Dashboard() {
               <div className="hidden md:block">
                 <div
                   className="float-right flex flex-row items-center rounded-md border-2 border-gray-300 py-2 px-4 text-black md:px-6"
-                  data-testid="loading-spinner-passport"
+                  data-testid="loading-spinner-passport-md"
                 >
                   <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
                   <h1 className="mx-2">Connecting</h1>
