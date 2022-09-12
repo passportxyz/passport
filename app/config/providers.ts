@@ -268,6 +268,8 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     {
       platformGroup: "NFT Holder",
       providers: [{ title: "Holds at least 1 NFT", name: "NFT" }],
+    },
+  ],
   ZkSync: [
     {
       platformGroup: "Account name",
