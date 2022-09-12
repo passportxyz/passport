@@ -108,9 +108,9 @@ export default function Dashboard() {
       </div>
 
       {viewerConnection.status === "connecting" && (
-        <div className="my-2 h-10">
+        <div className="top-unset absolute z-10 my-2 h-10 w-full md:top-10">
           <div
-            className="absolute left-2 right-2 w-full rounded bg-blue-darkblue py-3 px-8 md:right-1/2 md:left-1/3 md:w-5/12 md:py-4 xl:w-1/4"
+            className="absolute left-2 right-2 rounded bg-blue-darkblue py-3 px-8 md:right-1/2 md:left-1/3 md:w-5/12 md:py-4 xl:w-1/4"
             data-testid="selfId-connection-alert"
           >
             <span className="absolute top-0 right-0 flex h-3 w-3 translate-x-1/2 -translate-y-1/2">
@@ -137,7 +137,7 @@ export default function Dashboard() {
               <img className="ml-6 mr-6" src="/assets/logoLine.svg" alt="Logo Line" />
               <img src="/assets/passportLogoBlack.svg" alt="pPassport Logo" />
             </div>
-            {passport && (
+            {passport ? (
               <button
                 data-testid="button-passport-json-mobile"
                 className="float-right ml-auto rounded-md border-2 border-gray-300 py-2 px-4 text-black"
@@ -145,6 +145,22 @@ export default function Dashboard() {
               >
                 {`</>`}
               </button>
+            ) : (
+              <div>
+                <div
+                  className="float-right flex flex-row items-center rounded-md border-2 border-gray-300 py-2 px-4 text-black md:px-6"
+                  data-testid="loading-spinner-passport"
+                >
+                  <Spinner
+                    className="my-[2px]"
+                    thickness="2px"
+                    speed="0.65s"
+                    emptyColor="darkGray"
+                    color="gray"
+                    size="md"
+                  />
+                </div>
+              </div>
             )}
           </div>
         )}
@@ -152,10 +168,10 @@ export default function Dashboard() {
           {isLoadingPassport == IsLoadingPassportState.FailedToConnect && retryModal}
           {viewerConnection.status !== "connecting" &&
             (passport ? (
-              <div>
+              <div className="hidden md:block">
                 <button
                   data-testid="button-passport-json"
-                  className="float-right hidden rounded-md border-2 border-gray-300 py-2 px-6 text-black md:inline-block"
+                  className="float-right rounded-md border-2 border-gray-300 py-2 px-4 text-black"
                   onClick={onOpen}
                 >
                   {`</>`} Passport JSON
@@ -170,13 +186,13 @@ export default function Dashboard() {
                 />
               </div>
             ) : (
-              <div>
+              <div className="hidden md:block">
                 <div
-                  className="float-right flex flex-row items-center rounded-md border-2 border-gray-300 py-2 px-6 text-black"
+                  className="float-right flex flex-row items-center rounded-md border-2 border-gray-300 py-2 px-4 text-black md:px-6"
                   data-testid="loading-spinner-passport"
                 >
-                  <Spinner thickness="4px" speed="0.65s" emptyColor="lightGray" color="gray" size="md" />
-                  <h1 className="m-4">Connecting</h1>
+                  <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
+                  <h1 className="mx-2">Connecting</h1>
                 </div>
               </div>
             ))}
