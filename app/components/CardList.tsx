@@ -38,6 +38,7 @@ import { Drawer, DrawerOverlay, Menu, MenuButton, MenuItem, MenuList, Spinner, u
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { CeramicContext } from "../context/ceramicContext";
 import { pillLocalStorage } from "../context/userContext";
+import GnosisSafePlatform from "./PlatformCards/GnosisSafeProvider";
 
 export type CardListProps = {
   isLoading?: boolean;
@@ -141,6 +142,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <ZkSyncPlatform />;
       case "Lens":
         return <LensPlatform />;
+      case "GnosisSafe":
+        return <GnosisSafePlatform />;
       default:
         return (
           <SideBarContent

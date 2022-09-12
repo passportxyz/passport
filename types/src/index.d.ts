@@ -159,7 +159,8 @@ export type PLATFORM_ID =
   | "GtcStaking"
   | "NFT"
   | "ZkSync"
-  | "Lens";
+  | "Lens"
+  | "GnosisSafe";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -222,4 +223,5 @@ export type PROVIDER_ID =
   | "CommunityStakingGold"
   | "NFT"
   | "ZkSync"
-  | "Lens";
+  | "Lens"
+  | "GnosisSafe";

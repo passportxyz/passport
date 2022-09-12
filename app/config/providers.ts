@@ -282,4 +282,10 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Encrypted", name: "Lens" }],
     },
   ],
+  GnosisSafe: [
+    {
+      platformGroup: "Account Name",
+      providers: [{ title: "Encrypted", name: "GnosisSafe" }],
+    },
+  ],
 };
