@@ -170,6 +170,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
           ) : (
             <PlatformCard
               i={i}
+              key={i}
               platform={platform}
               btnRef={btnRef}
               onOpen={onOpen}
