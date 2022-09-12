@@ -1,14 +1,31 @@
-name: CI
+name: CI with local ceramic
 
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#     branches: [main]
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
+  workflow_dispatch:
+    inputs:
+      # commit hash (for frontend deploy to fleek)
+      commit:
+        description: "Branch/Commit ref"
+        default: "origin/ci_ceramic_service"
+        type: string
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    # Run a local ceramic nod to test against
+    services:
+      ceramic:
+        image: ceramicnetwork/js-ceramic:2.6.0-rc.1
+        ports:
+          - 7007:7007
+
+    env:
+     CERAMIC_CLIENT_URL: http://127.0.0.1:7007
 
     steps:
       - uses: actions/checkout@v3
