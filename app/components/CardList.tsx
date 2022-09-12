@@ -27,6 +27,7 @@ import {
   EthPlatform,
   GtcPlatform,
   GtcStakingPlatform,
+  NftPlatform,
   ZkSyncPlatform,
   LensPlatform,
 } from "./PlatformCards";
@@ -134,6 +135,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <GtcPlatform />;
       case "GtcStaking":
         return <GtcStakingPlatform />;
+      case "NFT":
+        return <NftPlatform />;
       case "ZkSync":
         return <ZkSyncPlatform />;
       case "Lens":

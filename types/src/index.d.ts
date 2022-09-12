@@ -157,6 +157,7 @@ export type PLATFORM_ID =
   | "ETH"
   | "GTC"
   | "GtcStaking"
+  | "NFT"
   | "ZkSync"
   | "Lens";
 
@@ -219,5 +220,6 @@ export type PROVIDER_ID =
   | "CommunityStakingBronze"
   | "CommunityStakingSilver"
   | "CommunityStakingGold"
+  | "NFT"
   | "ZkSync"
   | "Lens";

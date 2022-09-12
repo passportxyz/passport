@@ -139,6 +139,13 @@ export const PLATFORMS: PlatformSpec[] = [
     connectMessage: "Connect Account",
   },
   {
+    icon: "./assets/nftStampIcon.svg",
+    platform: "NFT",
+    name: "NFT Holder",
+    description: "Connect a wallet and validate the stamp by retrieving an NFT.",
+    connectMessage: "Connect NFT",
+  },
+  {
     icon: "./assets/zksyncStampIcon.svg",
     platform: "ZkSync",
     name: "ZkSync",

@@ -272,6 +272,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: getProviderSpec("GtcStaking", "CommunityStakingGold"),
     stamp: undefined,
   },
+  NFT: {
+    providerSpec: getProviderSpec("NFT", "NFT"),
+    stamp: undefined,
+  },
   ZkSync: {
     providerSpec: getProviderSpec("ZkSync", "ZkSync"),
     stamp: undefined,
