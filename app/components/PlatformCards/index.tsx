@@ -18,4 +18,4 @@ export { default as GtcStakingPlatform } from "./GtcStakingPlatform";
 export { default as NftPlatform } from "./NftPlatform";
 export { default as ZkSyncPlatform } from "./ZkSyncPlatform";
 export { default as LensPlatform } from "./LensPlatform";
-export { default as GnosisSafePlatform } from "./GitcoinPlatform";
+export { default as GnosisSafePlatform } from "./GnosisSafePlatform";
