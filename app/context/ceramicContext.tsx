@@ -274,6 +274,12 @@ const startingAllProvidersState: AllProvidersState = {
   },
   NFT: {
     providerSpec: getProviderSpec("NFT", "NFT"),
+  ZkSync: {
+    providerSpec: getProviderSpec("ZkSync", "ZkSync"),
+    stamp: undefined,
+  },
+  Lens: {
+    providerSpec: getProviderSpec("Lens", "Lens"),
     stamp: undefined,
   },
 };

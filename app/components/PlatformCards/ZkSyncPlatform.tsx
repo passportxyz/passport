@@ -1,5 +1,5 @@
 // --- Methods
-import React, { useContext, useEffect, useState, useMemo } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
@@ -31,16 +31,13 @@ import { STAMP_PROVIDERS } from "../../config/providers";
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
 // Each provider is recognised by its ID
-const platformId: PLATFORM_ID = "GtcStaking";
+const platformId: PLATFORM_ID = "ZkSync";
 
-export default function GtcStakingPlatform(): JSX.Element {
+export default function ZkSyncPlatform(): JSX.Element {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
-
-  // --- Chakra functions
-  const toast = useToast();
 
   // find all providerIds
   const providerIds = useMemo(
@@ -68,10 +65,13 @@ export default function GtcStakingPlatform(): JSX.Element {
     }
   }, [selectedProviders, verifiedProviders]);
 
+  // --- Chakra functions
+  const toast = useToast();
+
   // fetch VCs from IAM server
   const handleFetchCredential = (): void => {
-    datadogLogs.logger.info("Saving Stamp", { platform: platformId });
     setLoading(true);
+    datadogLogs.logger.info("Saving Stamp", { platform: platformId });
     fetchVerifiableCredential(
       iamUrl,
       {
@@ -139,39 +139,11 @@ export default function GtcStakingPlatform(): JSX.Element {
         <button
           disabled={!canSubmit}
           onClick={handleFetchCredential}
-          data-testid="button-verify-gtcstaking"
+          data-testid="button-verify-zksync"
           className="sidebar-verify-btn"
         >
           Verify
         </button>
-      }
-      infoElement={
-        <div className="p-4">
-          <div className="mt-10 rounded-lg border border-purple-infoElementBorder bg-purple-infoElementBG px-4 py-6">
-            <div className="flex flex-row items-center">
-              <h2 className="text-md mb-0 text-left font-bold text-gray-900">
-                Stake your GTC on the new Identity Staking site.
-              </h2>
-            </div>
-
-            <div className="mt-4 flex-grow">
-              <p className="text-left text-base leading-relaxed">
-                Defend against sybil by staking on your own identity or sombody else’s. By staking, the profile of
-                stamps in the Passport becomes more unique.
-              </p>
-              <div className="border-divider mt-3 border-t">
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href="https://staking.passport.gitcoin.co"
-                  className="mx-auto mt-3 flex justify-center text-indigo-500"
-                >
-                  Go to Identity Staking
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
       }
     />
   );

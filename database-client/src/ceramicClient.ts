@@ -95,16 +95,16 @@ export class CeramicDatabase implements DataStorageBase {
   async getPassport(): Promise<Passport | undefined | false> {
     try {
       const passport = await this.store.get("Passport");
-      const streamIDs: string[] = passport?.stamps.map((ceramicStamp: CeramicStamp) => {
-        return ceramicStamp.credential;
-      });
-
       this.logger.info(`loaded passport for did ${this.did} => ${JSON.stringify(passport)}`);
       if (!passport) return false;
 
       // According to the logs, it does happen that passport is sometimes an empty object {}
       // We treat this case as an non-existent passport
       if (!passport.stamps) return false;
+
+      const streamIDs: string[] = passport?.stamps.map((ceramicStamp: CeramicStamp) => {
+        return ceramicStamp.credential;
+      });
 
       // `stamps` is stored as ceramic URLs - must load actual VC data from URL
       const stampsToLoad =
@@ -180,17 +180,19 @@ export class CeramicDatabase implements DataStorageBase {
 
     // add stamp provider and streamId to passport stamps array
     const newStamps = passport?.stamps.concat(
+      // write all stamps to ceramic as tiles and collate CeramicStamp definitions
       (
-        // write all stamps to ceramic as tiles and collate CeramicStamp definitions
-        await Promise.all(stamps.map(async (stamp): Promise<CeramicStamp | undefined> => {
-          // ensure the users did matches the credentials subject id otherwise skip the save
-          if (passport && this.did === stamp.credential.credentialSubject.id.toLowerCase()) {
-            // create a tile for verifiable credential issued from iam server
-            const newStampTile = await this.model.createTile("VerifiableCredential", stamp.credential);
+        await Promise.all(
+          stamps.map(async (stamp): Promise<CeramicStamp | undefined> => {
+            // ensure the users did matches the credentials subject id otherwise skip the save
+            if (passport && this.did === stamp.credential.credentialSubject.id.toLowerCase()) {
+              // create a tile for verifiable credential issued from iam server
+              const newStampTile = await this.model.createTile("VerifiableCredential", stamp.credential);
 
-            return { provider: stamp.provider, credential: newStampTile.id.toUrl() };
-          }
-        }))
+              return { provider: stamp.provider, credential: newStampTile.id.toUrl() };
+            }
+          })
+        )
       ).filter((v: CeramicStamp | undefined) => v)
     );
 
