@@ -22,12 +22,20 @@ import QRCode from "react-qr-code";
 // --- import components
 import { SideBarContent } from "../SideBarContent";
 import { DoneToastContent } from "../DoneToastContent";
-import { VerifyModal } from "../VerifyModal";
-import { useDisclosure, useToast } from "@chakra-ui/react";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  useDisclosure,
+  useToast,
+  Spinner,
+} from "@chakra-ui/react";
 
 // ---- Types
 import {
-  ProofRecord,
   PROVIDER_ID,
   Stamp,
   VerifiableCredential,
@@ -35,7 +43,6 @@ import {
   PLATFORM_ID,
   CredentialResponseBody,
 } from "@gitcoin/passport-types";
-import { ProviderSpec } from "../../config/providers";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
@@ -51,12 +58,8 @@ type BrightIdProviderRecord = {
 export default function BrightidPlatform(): JSX.Element {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, allProvidersState, userDid } = useContext(CeramicContext);
-  const [credentialResponse, SetCredentialResponse] = useState<Stamp | undefined>(undefined);
-  const [credentialResponseIsLoading, setCredentialResponseIsLoading] = useState(false);
-  const [brightIdVerification, SetBrightIdVerification] = useState<BrightIdProviderRecord | undefined>(undefined);
   const [verificationInProgress, setVerificationInProgress] = useState(false);
   const [isLoading, setLoading] = useState(false);
-  const [vcs, setVcs] = useState<(Stamp | undefined)[]>([]);
   const [canSubmit, setCanSubmit] = useState(false);
 
   // find all providerIds
@@ -85,7 +88,6 @@ export default function BrightidPlatform(): JSX.Element {
 
   const handleFetchCredential = (): void => {
     datadogLogs.logger.info("starting provider verification", { platform: platformId });
-    setCredentialResponseIsLoading(true);
     setLoading(true);
     fetchVerifiableCredential(
       iamUrl,
@@ -100,12 +102,7 @@ export default function BrightidPlatform(): JSX.Element {
       },
       signer as { signMessage: (message: string) => Promise<string> }
     )
-      .then((verified: VerifiableCredentialRecord): void => {
-        SetBrightIdVerification(verified?.record as BrightIdProviderRecord);
-        SetCredentialResponse({
-          provider: "Brightid",
-          credential: verified.credential as VerifiableCredential,
-        });
+      .then(async (verified: VerifiableCredentialRecord): void => {
         // because we provided a types array in the params we expect to receive a credentials array in the response...
         const vcs =
           verified.credentials
@@ -119,21 +116,37 @@ export default function BrightidPlatform(): JSX.Element {
               }
             })
             .filter((v: Stamp | undefined) => v) || [];
-        setVcs(vcs);
+        // Add all the stamps to the passport at once
+        await handleAddStamps(vcs as Stamp[]);
+        datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
+        // grab all providers who are verified from the verify response
+        const actualVerifiedProviders = providerIds.filter(
+          (providerId) =>
+            !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
+        );
+        // both verified and selected should look the same after save
+        setVerifiedProviders([...actualVerifiedProviders]);
+        setSelectedProviders([...actualVerifiedProviders]);
+        // reset can submit state
+        setCanSubmit(false);
+        // Custom Success Toast
+        toast({
+          duration: 5000,
+          isClosable: true,
+          render: (result: any) => <DoneToastContent platformId={platformId} result={result} />,
+        });
       })
       .catch((e: any): void => {
         datadogLogs.logger.error("Verification Error", { error: e, platformId: platformId });
         datadogRum.addError(`Error ${e}`, { platformId: platformId });
       })
       .finally((): void => {
-        setCredentialResponseIsLoading(false);
         setLoading(false);
       });
   };
 
   async function handleSponsorship(): Promise<void> {
     datadogLogs.logger.info("Sponsoring user on BrightId", { platformId: platformId });
-    setCredentialResponseIsLoading(true);
     const res = fetch(`${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(/\/*?$/, "")}/brightid/sponsor`, {
       method: "POST",
       headers: {
@@ -184,8 +197,6 @@ export default function BrightidPlatform(): JSX.Element {
       datadogLogs.logger.error("Error sponsoring user", { platformId: platformId });
       datadogRum.addError(data?.response?.error || "Failed to sponsor user on BrightId", { platformId: platformId });
     }
-    setCredentialResponseIsLoading(false);
-    setVerificationInProgress(false);
     onClose();
   }
 
@@ -205,32 +216,6 @@ export default function BrightidPlatform(): JSX.Element {
     const data = await (await res).json();
     return data?.response?.valid;
   }
-
-  // triggers on modal verification click
-  const handleUserVerify = (): void => {
-    datadogLogs.logger.info("Saving Stamp", { platformId: platformId });
-    handleAddStamps(vcs as Stamp[])
-      .then(() => datadogLogs.logger.info("Successfully saved Stamp", { platformId: platformId }))
-      .catch((e): void => {
-        datadogLogs.logger.error("Error Saving Stamp", { error: e, platformId: platformId });
-        throw e;
-      })
-      .finally(() => {
-        setVerificationInProgress(false);
-      });
-    onClose();
-    // Custom Success Toast
-    toast({
-      duration: 5000,
-      isClosable: true,
-      render: (result: any) => <DoneToastContent platformId={platformId} result={result} />,
-    });
-  };
-
-  const handleModalOnClose = (): void => {
-    setVerificationInProgress(false);
-    onClose();
-  };
 
   // Widget displays steps to verify BrightID with Gitcoin
   const brightIdSponsorshipWidget = (
@@ -318,43 +303,6 @@ export default function BrightidPlatform(): JSX.Element {
     </div>
   );
 
-  const issueCredentialWidget = (
-    <>
-      <button
-        data-testid="button-verify-brightid"
-        className="verify-btn"
-        onClick={async () => {
-          setVerificationInProgress(true);
-          SetCredentialResponse(undefined);
-          SetBrightIdVerification(undefined);
-          // primary check to see if users did is verified
-          const isVerified = await handleVerifyContextId();
-          if (isVerified) {
-            handleFetchCredential();
-          }
-          onOpen();
-        }}
-      >
-        Connect Account
-      </button>
-      <VerifyModal
-        title="Verify Bright ID Stamp Data"
-        isOpen={isOpen}
-        onClose={handleModalOnClose}
-        stamp={credentialResponse}
-        handleUserVerify={handleUserVerify}
-        verifyData={
-          <>
-            {brightIdVerification
-              ? `Your BrightId has been verified on ${brightIdVerification.context}`
-              : brightIdSponsorshipWidget}
-          </>
-        }
-        isLoading={credentialResponseIsLoading}
-      />
-    </>
-  );
-
   return (
     <SideBarContent
       currentPlatform={getPlatformSpec(platformId)}
@@ -369,14 +317,15 @@ export default function BrightidPlatform(): JSX.Element {
             disabled={!canSubmit}
             onClick={async () => {
               setVerificationInProgress(true);
-              SetCredentialResponse(undefined);
-              SetBrightIdVerification(undefined);
               // primary check to see if users did is verified
               const isVerified = await handleVerifyContextId();
               if (isVerified) {
                 handleFetchCredential();
+              } else {
+                // uncheck the switch after this connection modal shows
+                setSelectedProviders([]);
+                onOpen();
               }
-              onOpen();
             }}
             data-testid="button-verify-brightid"
             className="sidebar-verify-btn"
@@ -384,21 +333,29 @@ export default function BrightidPlatform(): JSX.Element {
             Verify
           </button>
 
-          <VerifyModal
-            title="Verify Bright ID Stamp Data"
-            isOpen={isOpen}
-            onClose={handleModalOnClose}
-            stamp={credentialResponse}
-            handleUserVerify={handleUserVerify}
-            verifyData={
-              <>
-                {brightIdVerification
-                  ? `Your BrightId has been verified on ${brightIdVerification.context}`
-                  : brightIdSponsorshipWidget}
-              </>
-            }
-            isLoading={credentialResponseIsLoading}
-          />
+          <Modal isOpen={isOpen} onClose={onClose}>
+            <ModalOverlay />
+            <ModalContent>
+              {isLoading ? (
+                <div className="p-20 text-center">
+                  <Spinner data-testid="loading-spinner" />
+                </div>
+              ) : (
+                <>
+                  <ModalHeader px={8} pb={1} pt={6} textAlign="center">
+                    {"Verify Bright ID Stamp Data"}
+                  </ModalHeader>
+                  <ModalCloseButton mr={2} />
+                  <ModalBody p={0}>
+                    <div className="px-8 pb-4 text-gray-500">
+                      {/* RSX Element passed in to show desired stamp output */}
+                      {brightIdSponsorshipWidget}
+                    </div>
+                  </ModalBody>
+                </>
+              )}
+            </ModalContent>
+          </Modal>
         </>
       }
     />
