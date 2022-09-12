@@ -102,7 +102,7 @@ export default function BrightidPlatform(): JSX.Element {
       },
       signer as { signMessage: (message: string) => Promise<string> }
     )
-      .then(async (verified: VerifiableCredentialRecord): void => {
+      .then(async (verified: VerifiableCredentialRecord): Promise<void> => {
         // because we provided a types array in the params we expect to receive a credentials array in the response...
         const vcs =
           verified.credentials
