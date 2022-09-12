@@ -40,7 +40,7 @@ export class GnosisSafeProvider implements Provider {
     // Check if address is owner of at least 1 safe
     try {
       const ownerSafes = await getSafes(address);
-      valid = !!ownerSafes.safes && ownerSafes.safes.length > 1;
+      valid = !!ownerSafes.safes && ownerSafes.safes.length >= 1;
     } catch (exc) {
       error.push((exc as unknown).toString());
     }
