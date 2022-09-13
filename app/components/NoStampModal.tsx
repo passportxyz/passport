@@ -1,37 +1,26 @@
 // --- React Methods
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 
 // --- Chakra Elements
-import { Modal, ModalOverlay, ModalContent } from "@chakra-ui/react";
+import { Modal, ModalOverlay, ModalContent, Spinner } from "@chakra-ui/react";
 
-import { Stamp } from "@gitcoin/passport-types";
+// --- Shared context
 import { UserContext } from "../context/userContext";
-import { useConnectWallet } from "@web3-onboard/react";
+
+import { fetchAdditionalSigner } from "../signer/utils";
 
 export type NoStampModalProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
-export const initiateAccountChange = async (): Promise<void> => {
-  await window.ethereum.request({
-    method: "wallet_requestPermissions",
-    params: [
-      {
-        eth_accounts: {},
-      },
-    ],
-  });
-};
-
 export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
-  // const { wallet, handleConnection } = useContext(UserContext);
-  // // const initiateAccountChange = async (): Promise<void> => {
-  // //   onClose();
-  // //   const wallets = await handleConnection();
-  // // };
+  // pull context in to element
+  const { address } = useContext(UserContext);
+  const [verificationInProgress, setVerificationInProgress] = useState(false);
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} blockScrollOnMount={false}>
       <ModalOverlay />
       <ModalContent>
         <div className="m-3 flex flex-col items-center">
@@ -43,14 +32,43 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
             The stamp you are trying to verify could not be associated with your current Ethereum wallet address.
           </p>
           <div className="flex w-full">
-            <a href="" target="_blank" className="m-1 w-1/2 items-center rounded-md border py-2  text-center">
+            <a
+              href="https://ens.domains/"
+              target="_blank"
+              className="m-1 w-1/2 items-center rounded-md border py-2  text-center"
+              rel="noreferrer"
+              onClick={() => {
+                onClose();
+              }}
+            >
               Go to ENS
             </a>
             <button
               data-testid="check-other-wallet"
-              className="m-1 w-1/2 rounded-md bg-purple-connectPurple py-2 text-white hover:bg-purple-200 hover:text-black"
-              onClick={initiateAccountChange}
+              className="m-1 mx-auto flex w-1/2 justify-center rounded-md bg-purple-connectPurple py-2 text-white hover:bg-purple-200 hover:text-black"
+              onClick={async () => {
+                // mark as verifying
+                setVerificationInProgress(true);
+                try {
+                  // fetch the credentials
+                  const additionalSigner = await fetchAdditionalSigner(address!);
+                } finally {
+                  // mark as done
+                  setVerificationInProgress(false);
+                }
+              }}
             >
+              {verificationInProgress && (
+                <Spinner
+                  thickness="4px"
+                  speed="0.65s"
+                  emptyColor="gray.200"
+                  color="purple.500"
+                  size="sm"
+                  data-testid="loading-indicator"
+                  className="my-auto mr-2"
+                />
+              )}
               Try another wallet
             </button>
           </div>
