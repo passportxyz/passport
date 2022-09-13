@@ -16,6 +16,7 @@
     "database-client",
     "iam",
     "identity",
+    "identity-providers",
     "schemas",
     "types",
     "signer"
