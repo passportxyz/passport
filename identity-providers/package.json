@@ -1,0 +1,35 @@
+{
+  "name": "@gitcoin/passport-identity-providers",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "dist/commonjs/index.js",
+  "directories": {
+    "src": "src",
+    "dist": "dist"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@ethersproject/base64": "^5.6.1",
+    "@ethersproject/providers": "^5.6.2",
+    "@gitcoin/passport-types": "^1.0.0",
+    "axios": "^0.26.1",
+    "typescript": "~4.6.3"
+  },
+  "devDependencies": {
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.4"
+  },
+  "scripts": {
+    "clean": "rimraf dist node_modules",
+    "build": "tsc",
+    "test": "jest --verbose",
+    "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",
+    "prettier": "prettier --write ."
+  }
+}
