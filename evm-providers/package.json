@@ -1,5 +1,5 @@
 {
-  "name": "@gitcoin/passport-identity-providers",
+  "name": "@gitcoin/passport-evm-providers",
   "version": "1.0.0",
   "license": "MIT",
   "main": "dist/commonjs/index.js",
