@@ -24,7 +24,7 @@ import { ProviderSpec } from "../../config/providers";
 import { VerificationResponse, WorldIDWidget } from "@worldcoin/id";
 
 const providerId: PROVIDER_ID = "WorldID";
-const actionId = "wid_staging_f03ce20272cf13e445a963c91a5695ea";
+const actionId = "wid_5047fd9af3d4a665da9a44251270d6b2"; // Remember to change actionId in `iam/src/providers/worldid.ts`
 
 export default function WorldIDCard(): JSX.Element {
   const { handleAddStamp, allProvidersState } = useContext(CeramicContext);

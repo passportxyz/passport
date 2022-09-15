@@ -9,7 +9,7 @@ import axios from "axios";
 // API endpoint to verify World ID ZKP
 const VERIFY_ENDPOINT = "https://developer.worldcoin.org/api/v1/verify";
 // Static action ID to verify ZKP (should never change in prod! for local testing, new IDs can be created in developer.worldcoin.org)
-export const WORLD_ID_ACTION_ID = "wid_staging_f03ce20272cf13e445a963c91a5695ea";
+export const WORLD_ID_ACTION_ID = "wid_5047fd9af3d4a665da9a44251270d6b2";
 
 interface VerifyResponse {
   success: boolean;
