@@ -1,33 +1,47 @@
-import { VerifiedPayload, IdentityProviders, VerifiedProvider, ProviderPayload } from "../utils/identityProviders";
-import { ProviderContext } from "@gitcoin/passport-types";
+// ----- Types
+import type { Provider, ProviderOptions } from "../types";
+import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Ethers library
 import { utils } from "ethers";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
+// ----- Credential verification
+import { getAddress } from "../utils/signer";
+
 // set the network rpc url based on env
 const RPC_URL = process.env.RPC_URL;
 
-export class ENSIdentityProvider implements VerifiedProvider {
-  type = "ENS";
+// Export a Ens Provider to carry out Ens name check and return a record object
+export class EnsProvider implements Provider {
+  // Give the provider a type so that we can select it with a payload
+  type = "Ens";
+  // Options can be set here and/or via the constructor
+  _options = {};
 
-  async verify(payload: ProviderPayload, context: ProviderContext): Promise<VerifiedPayload> {
+  // construct the provider instance with supplied options
+  constructor(options: ProviderOptions = {}) {
+    this._options = { ...this._options, ...options };
+  }
+
+  // Verify that the address defined in the payload has an ENS reverse lookup registered
+  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
-    const { address } = payload;
+    const address = await getAddress(payload);
 
     try {
       // define a provider using the rpc url
       const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(RPC_URL);
 
       // lookup ens name
-      const reportedName: string | null = await provider.lookupAddress(address);
+      const reportedName: string = await provider.lookupAddress(address);
       if (!reportedName) return { valid: false, error: ["Ens name was not found for given address."] };
 
       // lookup the address resolved to an ens name
       const resolveAddress = await provider.resolveName(reportedName);
 
       // if the addresses match this is a valid ens lookup
-      const valid = utils.getAddress(payload.address) === utils.getAddress(resolveAddress);
+      const valid = utils.getAddress(address) === utils.getAddress(resolveAddress);
 
       return {
         valid: valid,
