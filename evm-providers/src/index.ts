@@ -1,4 +1,4 @@
-import { IdentityProviders } from "./utils/identityProviders";
-import { ENSIdentityProvider } from "./providers/ens";
+import { EVMProviders } from "./utils/evmProviders";
+import { EnsProvider } from "./providers/ens";
 
-// export const providers = new IdentityProviders([ENSIdentityProvider]);
+export const evmProviders = new EVMProviders([new EnsProvider()]);
