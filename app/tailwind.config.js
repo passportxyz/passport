@@ -1,13 +1,7 @@
 module.exports = {
   content: ["./pages/**/*.{ts,tsx}", "./config/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./pages/_app.tsx"],
-  options: {
-    safelist: ["passportLanding", "mobilePassportLanding"],
-  },
   theme: {
     extend: {
-      backgroundImage: {
-        landingPageBackground: "url('/assets/passportLanding.svg')",
-      },
       colors: {
         purple: {
           darkpurple: "#0E0333",
