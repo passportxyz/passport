@@ -34,6 +34,7 @@ const startingState: UserContextState = {
   walletLabel: undefined,
 };
 
+// set update platform card pill
 export const pillLocalStorage = (platform?: string): void => {
   const platforms = window.localStorage.getItem("updatedPlatforms");
   const previouslyUpdatedPlatforms = JSON.parse(platforms || "{}");

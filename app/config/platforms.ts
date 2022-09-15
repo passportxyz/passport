@@ -6,6 +6,7 @@ export type PlatformSpec = {
   name: string;
   description: string;
   connectMessage: string;
+  enablePlatformCardUpdate: boolean;
 };
 
 export const getPlatformSpec = (platformName: string): PlatformSpec | undefined => {
@@ -25,6 +26,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "Gitcoin Grants",
     description: "Connect with Github to verify with your Gitcoin account.",
     connectMessage: "Connect Account",
+    enablePlatformCardUpdate: false,
   },
   {
     icon: "./assets/gtcPossessionStampIcon.svg",
@@ -32,6 +34,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "GTC",
     description: "GTC possession verification",
     connectMessage: "Verify Account",
+    enablePlatformCardUpdate: false,
   },
   {
     icon: "./assets/gtcStakingLogoIcon.svg",
@@ -39,6 +42,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "GTC Staking",
     description: "Connect to passport to verify your staking amount.",
     connectMessage: "Verify amount",
+    enablePlatformCardUpdate: false,
   },
   {
     icon: "./assets/twitterStampIcon.svg",
@@ -46,6 +50,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "Twitter",
     description: "Connect your existing Twitter account to verify.",
     connectMessage: "Connect Account",
+    enablePlatformCardUpdate: true,
   },
   {
     icon: "./assets/googleStampIcon.svg",
@@ -53,6 +58,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "Google",
     description: "Connect your existing Google Account to verify",
     connectMessage: "Connect Account",
+    enablePlatformCardUpdate: false,
   },
   {
     icon: "./assets/githubStampIcon.svg",
@@ -60,6 +66,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "Github",
     description: "Connect your existing Github account to verify.",
     connectMessage: "Connect Account",
+    enablePlatformCardUpdate: true,
   },
   {
     icon: "./assets/facebookStampIcon.svg",
@@ -67,6 +74,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "Facebook",
     description: "Connect your existing account to verify with Facebook.",
     connectMessage: "Connect Account",
+    enablePlatformCardUpdate: true,
   },
   {
     icon: "./assets/ensStampIcon.svg",
@@ -74,6 +82,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "ENS",
     description: "Purchase an .eth name to verify/ connect your existing account.",
     connectMessage: "Connect Account",
+    enablePlatformCardUpdate: false,
   },
   {
     icon: "./assets/poapStampIcon.svg",
@@ -81,6 +90,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "POAP",
     description: "Connect an account to a POAP owned for over 15 days.",
     connectMessage: "Connect to POAP",
+    enablePlatformCardUpdate: false,
   },
   {
     icon: "./assets/brightidStampIcon.svg",
@@ -88,6 +98,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "BrightID",
     description: "Connect your BrightID",
     connectMessage: "Connect Account",
+    enablePlatformCardUpdate: false,
   },
   {
     icon: "./assets/pohStampIcon.svg",
@@ -95,6 +106,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "Proof of Humanity",
     description: "Connect your wallet to start the process of verifying with Proof of Humanity.",
     connectMessage: "Connect Account",
+    enablePlatformCardUpdate: false,
   },
   {
     icon: "./assets/discordStampIcon.svg",
@@ -102,6 +114,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "Discord",
     description: "Connect your existing Discord account to verify.",
     connectMessage: "Connect Account",
+    enablePlatformCardUpdate: false,
   },
   {
     icon: "./assets/linkedinStampIcon.svg",
@@ -109,6 +122,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "Linkedin",
     description: "Connect your existing Linkedin account to verify.",
     connectMessage: "Connect Account",
+    enablePlatformCardUpdate: false,
   },
   {
     icon: "./assets/ethereumStampIcon.svg",
@@ -116,6 +130,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "ETH",
     description: "ETH possession and transaction verification",
     connectMessage: "Verify Account",
+    enablePlatformCardUpdate: false,
   },
   // {
   //   icon: "./assets/ethStampIcon.svg",
@@ -123,6 +138,7 @@ export const PLATFORMS: PlatformSpec[] = [
   //   name: "Ethereum Account",
   //   description: "Additional Ethereum account",
   //   connectMessage: "Connect Account",
+  //   enablePlatformCardUpdate: false,
   // },
   {
     icon: "./assets/snapshotStampIcon.svg",
@@ -130,6 +146,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "Snapshot",
     description: "Connect your existing account to verify with Snapshot.",
     connectMessage: "Verify Account",
+    enablePlatformCardUpdate: false,
   },
   {
     icon: "./assets/gitPOAPStampIcon.svg",
@@ -137,6 +154,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "GitPOAP",
     description: "GitPOAP Verification",
     connectMessage: "Connect Account",
+    enablePlatformCardUpdate: false,
   },
   {
     icon: "./assets/nftStampIcon.svg",
@@ -144,6 +162,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "NFT Holder",
     description: "Connect a wallet and validate the stamp by retrieving an NFT.",
     connectMessage: "Connect NFT",
+    enablePlatformCardUpdate: false,
   },
   {
     icon: "./assets/zksyncStampIcon.svg",
@@ -151,6 +170,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "ZkSync",
     description: "ZkSync Verification",
     connectMessage: "Verify Account",
+    enablePlatformCardUpdate: false,
   },
   {
     icon: "./assets/lensStampIcon.svg",
@@ -158,6 +178,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "Lens",
     description: "Lens Profile Verification",
     connectMessage: "Verify Account",
+    enablePlatformCardUpdate: false,
   },
   {
     icon: "./assets/gnosisSafeStampIcon.svg",
@@ -165,5 +186,6 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "Gnosis Safe",
     description: "Gnosis Safe Signer/Owner Verification",
     connectMessage: "Verify Account",
+    enablePlatformCardUpdate: false,
   },
 ];
