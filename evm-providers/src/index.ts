@@ -1,4 +1,2 @@
-import { EVMProviders } from "./utils/evmProviders";
-import { EnsProvider } from "./providers/ens";
-
-export const evmProviders = new EVMProviders([new EnsProvider()]);
+export { EVMProviders } from "./utils/evmProviders";
+export { EnsProvider } from "./providers/ens";
