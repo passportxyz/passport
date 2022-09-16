@@ -23,6 +23,9 @@ import {
   CredentialResponseBody,
   ProviderContext,
 } from "@gitcoin/passport-types";
+import { EnsProvider } from "@gitcoin/passport-evm-providers/dist/commonjs/src/index";
+
+import { getChallenge } from "./utils/challenge";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
@@ -39,7 +42,6 @@ import { Providers } from "./utils/providers";
 import { SimpleProvider } from "./providers/simple";
 import { GoogleProvider } from "./providers/google";
 import { TwitterProvider } from "./providers/twitter";
-import { EnsProvider } from "./providers/ens";
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
 import { FacebookProvider } from "./providers/facebook";
@@ -357,7 +359,7 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
     // ensure address is check-summed
     payload.address = utils.getAddress(payload.address);
     // generate a challenge for the given payload
-    const challenge = providers.getChallenge(payload);
+    const challenge = getChallenge(payload);
     // if the request is valid then proceed to generate a challenge credential
     if (challenge && challenge.valid === true) {
       // construct a request payload to issue a credential against
