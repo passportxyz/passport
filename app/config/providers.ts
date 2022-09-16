@@ -288,4 +288,10 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Encrypted", name: "GnosisSafe" }],
     },
   ],
+  WorldID: [
+    {
+      platformGroup: "Verified World ID",
+      providers: [{ title: "Encrypted", name: "WorldID" }],
+    },
+  ],
 };

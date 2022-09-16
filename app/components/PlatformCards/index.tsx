@@ -19,3 +19,4 @@ export { default as NftPlatform } from "./NftPlatform";
 export { default as ZkSyncPlatform } from "./ZkSyncPlatform";
 export { default as LensPlatform } from "./LensPlatform";
 export { default as GnosisSafePlatform } from "./GnosisSafePlatform";
+export { default as WorldIDPlatform } from "./WorldIDPlatform";

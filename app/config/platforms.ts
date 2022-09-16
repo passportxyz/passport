@@ -166,4 +166,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Gnosis Safe Signer/Owner Verification",
     connectMessage: "Verify Account",
   },
+  {
+    icon: "./assets/worldIDStampIcon.svg",
+    platform: "WorldID",
+    name: "Worldcoin",
+    description: "Connect your Worldcoin app to anonymously prove you are a unique person.",
+    connectMessage: "Verify Account",
+  },
 ];

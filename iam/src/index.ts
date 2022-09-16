@@ -80,6 +80,7 @@ import { GitPOAPProvider } from "./providers/gitpoap";
 import { LensProfileProvider } from "./providers/lens";
 import { ZkSyncProvider } from "./providers/zkSync";
 import { GnosisSafeProvider } from "./providers/gnosisSafe";
+import { WorldIDProvider } from "./providers/worldid";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -265,6 +266,7 @@ export const providers = new Providers([
   new LensProfileProvider(),
   new ZkSyncProvider(),
   new GnosisSafeProvider(),
+  new WorldIDProvider(),
 ]);
 
 // create the app and run on port
