@@ -59,7 +59,7 @@ import {
   TwitterFollowerGT500Provider,
   TwitterFollowerGTE1000Provider,
   TwitterFollowerGT5000Provider,
-} from "./providers/TwitterFollower";
+} from "./providers/twitterFollower";
 import { SelfStakingBronzeProvider, SelfStakingSilverProvider, SelfStakingGoldProvider } from "./providers/selfStaking";
 import {
   CommunityStakingBronzeProvider,
@@ -78,8 +78,8 @@ import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./pro
 import { NFTProvider } from "./providers/nft";
 import { GitPOAPProvider } from "./providers/gitpoap";
 import { LensProfileProvider } from "./providers/lens";
-import { ZkSynkProvider } from "./providers/zkSync";
-import { WorldIDProvider } from "./providers/worldid";
+import { ZkSyncProvider } from "./providers/zkSync";
+import { GnosisSafeProvider } from "./providers/gnosisSafe";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -263,8 +263,8 @@ export const providers = new Providers([
   ////////////////////////////////////////////////////////////
   new NFTProvider(),
   new LensProfileProvider(),
-  new ZkSynkProvider(),
-  new WorldIDProvider(),
+  new ZkSyncProvider(),
+  new GnosisSafeProvider(),
 ]);
 
 // create the app and run on port

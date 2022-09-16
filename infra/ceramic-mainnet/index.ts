@@ -317,6 +317,7 @@ function makeCmd(inputbucketName: pulumi.Input<string>, inputIpfsUrl: pulumi.Inp
       bucketName,
       "--ethereum-rpc",
       rpcUrl,
+      "--verbose",
     ];
   });
 }
@@ -334,7 +335,7 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   taskDefinitionArgs: {
     containers: {
       ceramic: {
-        image: "ceramicnetwork/js-ceramic:2.6.0",
+        image: "ceramicnetwork/js-ceramic:2.6.1-rc.2",
         memory: 8192,
         cpu: 4096,
         portMappings: [httpsListener],
@@ -345,6 +346,7 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
           { name: "AWS_ACCESS_KEY_ID", value: usrS3Key },
           { name: "AWS_SECRET_ACCESS_KEY", value: usrS3Secret },
           { name: "NODE_OPTIONS", value: "--max-old-space-size=7168" },
+          { name: "CERAMIC_STREAM_CACHE_LIMIT", value: "20000" },
         ],
       },
     },

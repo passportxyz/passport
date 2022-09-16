@@ -28,7 +28,7 @@ const generateSubgraphResponse = (address: string, total: string): DataResult =>
               {
                 total: total,
                 round: {
-                  id: "2",
+                  id: "1",
                 },
               },
             ],
@@ -45,6 +45,22 @@ const invalidCommunityStakingResponse = {
       users: [{}],
     },
   },
+};
+
+const getSubgraphQuery = (address: string): string => {
+  return `
+    {
+      users(where: {address: "${address}"}) {
+        address,
+        xstakeAggregates(where: {round: "1", total_gt: 0}) {
+          total
+          round {
+            id
+          }
+        }
+      }
+    }
+      `;
 };
 
 interface RequestData {
@@ -70,26 +86,14 @@ describe("Attempt verification", function () {
 
     // Check the request to verify the subgraph query
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
-      query: `
-    {
-      users(where: {address: "${MOCK_ADDRESS_LOWER}"}) {
-        address,
-        xstakeAggregates(where: {round: "2", total_gt: 0}) {
-          total
-          round {
-            id
-          }
-        }
-      }
-    }
-      `,
+      query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
     });
 
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        stakeAmount: "csgt1",
+        stakeAmount: "csgte1",
       },
     });
   });
@@ -101,19 +105,7 @@ describe("Attempt verification", function () {
 
     // Check the request to verify the subgraph query
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
-      query: `
-    {
-      users(where: {address: "not_address"}) {
-        address,
-        xstakeAggregates(where: {round: "2", total_gt: 0}) {
-          total
-          round {
-            id
-          }
-        }
-      }
-    }
-      `,
+      query: getSubgraphQuery("not_address"),
     });
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -134,19 +126,7 @@ describe("Attempt verification", function () {
 
     // Check the request to verify the subgraph query
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
-      query: `
-    {
-      users(where: {address: "${MOCK_ADDRESS_LOWER}"}) {
-        address,
-        xstakeAggregates(where: {round: "2", total_gt: 0}) {
-          total
-          round {
-            id
-          }
-        }
-      }
-    }
-      `,
+      query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
     });
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -164,19 +144,7 @@ describe("Attempt verification", function () {
 
     // Check the request to verify the subgraph query
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
-      query: `
-    {
-      users(where: {address: "${MOCK_ADDRESS_LOWER}"}) {
-        address,
-        xstakeAggregates(where: {round: "2", total_gt: 0}) {
-          total
-          round {
-            id
-          }
-        }
-      }
-    }
-      `,
+      query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
     });
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -247,7 +215,10 @@ describe("should return valid payload", function () {
       address: MOCK_ADDRESS_LOWER,
     } as unknown as RequestPayload);
 
-    expect(communitystakingPayload).toMatchObject({ valid: true });
+    expect(communitystakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte1" },
+    });
   });
   it("when stake amount above 10 GTC for Silver", async () => {
     mockedAxios.post.mockImplementation(async () => {
@@ -260,7 +231,10 @@ describe("should return valid payload", function () {
       address: MOCK_ADDRESS_LOWER,
     } as unknown as RequestPayload);
 
-    expect(communitystakingPayload).toMatchObject({ valid: true });
+    expect(communitystakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte10" },
+    });
   });
   it("when stake amount above 100 GTC for Gold", async () => {
     mockedAxios.post.mockImplementation(async () => {
@@ -273,6 +247,61 @@ describe("should return valid payload", function () {
       address: MOCK_ADDRESS_LOWER,
     } as unknown as RequestPayload);
 
-    expect(communitystakingPayload).toMatchObject({ valid: true });
+    expect(communitystakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte100" },
+    });
+  });
+  // All values equal to tier amount
+  it("when stake amount is equal to 1 GTC for Bronze", async () => {
+    jest.clearAllMocks();
+    mockedAxios.post.mockImplementation(async () => {
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "1000000000000000000");
+    });
+
+    const communitystaking = new CommunityStakingBronzeProvider();
+
+    const communitystakingPayload = await communitystaking.verify({
+      address: MOCK_ADDRESS_LOWER,
+    } as unknown as RequestPayload);
+
+    expect(communitystakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte1" },
+    });
+  });
+  it("when stake amount is equal to 10 GTC for Silver", async () => {
+    jest.clearAllMocks();
+    mockedAxios.post.mockImplementation(async () => {
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "10000000000000000000");
+    });
+
+    const communitystaking = new CommunityStakingSilverProvider();
+
+    const communitystakingPayload = await communitystaking.verify({
+      address: MOCK_ADDRESS_LOWER,
+    } as unknown as RequestPayload);
+
+    expect(communitystakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte10" },
+    });
+  });
+  it("when stake amount is equal to 100 GTC for Gold", async () => {
+    jest.clearAllMocks();
+    mockedAxios.post.mockImplementation(async () => {
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "100000000000000000000");
+    });
+
+    const communitystaking = new CommunityStakingGoldProvider();
+
+    const communitystakingPayload = await communitystaking.verify({
+      address: MOCK_ADDRESS_LOWER,
+    } as unknown as RequestPayload);
+
+    expect(communitystakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte100" },
+    });
   });
 });

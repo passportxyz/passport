@@ -37,7 +37,7 @@ const validGithubUserRepoResponse = {
       },
       fork: true,
       forks_count: 2,
-    }
+    },
   ],
   status: 200,
 };
@@ -58,7 +58,7 @@ const invalidGithubUserRepoResponse = {
 
 const invalidGithubResponse = {
   data: {
-    message: "Error"
+    message: "Error",
   },
   status: 500,
 };
@@ -84,7 +84,7 @@ describe("Attempt verification", function () {
     mockedAxios.post.mockImplementation(async () => {
       return Promise.resolve(validCodeResponse);
     });
-    
+
     mockedAxios.get.mockImplementation(async (url) => {
       if (url.endsWith("/user")) {
         return Promise.resolve(validGithubUserResponse);
@@ -95,11 +95,14 @@ describe("Attempt verification", function () {
     });
 
     const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
     // Check the request to get the token for the user
@@ -118,9 +121,12 @@ describe("Attempt verification", function () {
     });
 
     // Check the request to get the repo
-    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`, {
-      headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
-    });
+    expect(mockedAxios.get).toBeCalledWith(
+      `https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`,
+      {
+        headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
+      }
+    );
 
     expect(forkedGithubRepoProviderPayload).toEqual({
       valid: true,
@@ -138,11 +144,14 @@ describe("Attempt verification", function () {
     });
 
     const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -171,11 +180,14 @@ describe("Attempt verification", function () {
     });
 
     const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -209,12 +221,15 @@ describe("Attempt verification", function () {
     });
 
     const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
-    
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
+
     expect(mockedAxios.post).toBeCalledTimes(1);
 
     // Check the request to get the token for the user
@@ -234,9 +249,12 @@ describe("Attempt verification", function () {
     });
 
     // Check the request to get the repo
-    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`, {
-      headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
-    });
+    expect(mockedAxios.get).toBeCalledWith(
+      `https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`,
+      {
+        headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
+      }
+    );
 
     expect(forkedGithubRepoProviderPayload).toMatchObject({ valid: false });
   });
@@ -249,11 +267,14 @@ describe("Attempt verification", function () {
     });
 
     const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -287,11 +308,14 @@ describe("Attempt verification", function () {
     });
 
     const forkedGithubRepoProvider = new ForkedGithubRepoProvider();
-    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const forkedGithubRepoProviderPayload = await forkedGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -312,9 +336,12 @@ describe("Attempt verification", function () {
     });
 
     // Check the request to get the repo
-    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`, {
-      headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
-    });
+    expect(mockedAxios.get).toBeCalledWith(
+      `https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`,
+      {
+        headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
+      }
+    );
 
     expect(forkedGithubRepoProviderPayload).toMatchObject({ valid: false });
   });

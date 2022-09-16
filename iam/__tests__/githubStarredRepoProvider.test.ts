@@ -27,7 +27,7 @@ const validGithubUserRepoResponse = {
         id: 18723656,
         type: "User",
       },
-      stargazers_count: 4
+      stargazers_count: 4,
     },
   ],
   status: 200,
@@ -59,10 +59,9 @@ const validGithubUserRepoStargazersResponse = {
 };
 
 const invalidRequestResponse = {
-  data:
-    {
-      message: "Error"
-    },
+  data: {
+    message: "Error",
+  },
   status: 500,
 };
 
@@ -73,7 +72,7 @@ const zeroStargazersResponse = {
         id: 18723656,
         type: "User",
       },
-      starred_count: 0
+      starred_count: 0,
     },
   ],
   status: 200,
@@ -88,10 +87,10 @@ const sameUserStarredRepoResponse = {
         type: "User",
       },
       stargazers_count: 1,
-      stargazers_url: "https://api.github.com/repos/a-cool-user/coolest-repo/stargazers"
+      stargazers_url: "https://api.github.com/repos/a-cool-user/coolest-repo/stargazers",
     },
   ],
-  status: 200
+  status: 200,
 };
 
 const invalidGithubUserRepoStargazersResponse = {
@@ -120,28 +119,31 @@ const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 beforeEach(() => {
   jest.clearAllMocks();
 });
- 
+
 describe("Attempt verification", function () {
   it("handles valid verification attempt", async () => {
     mockedAxios.post.mockImplementation(async () => {
       return validCodeResponse;
     });
-  
+
     mockedAxios.get.mockImplementation(async (url) => {
-      if (url.endsWith('/user')) {
+      if (url.endsWith("/user")) {
         return validGithubUserResponse;
       }
-      if (url.endsWith('/repos?per_page=100')) {
+      if (url.endsWith("/repos?per_page=100")) {
         return validGithubUserRepoResponse;
       }
     });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -162,9 +164,12 @@ describe("Attempt verification", function () {
     });
 
     // Check the request to get the repo
-    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`, {
-      headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
-    });
+    expect(mockedAxios.get).toBeCalledWith(
+      `https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`,
+      {
+        headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
+      }
+    );
 
     expect(starredGithubRepoProviderPayload).toEqual({
       valid: true,
@@ -191,11 +196,14 @@ describe("Attempt verification", function () {
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
 
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -216,9 +224,12 @@ describe("Attempt verification", function () {
     });
 
     // Check the request to get the repo
-    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`, {
-      headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
-    });
+    expect(mockedAxios.get).toBeCalledWith(
+      `https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`,
+      {
+        headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
+      }
+    );
 
     // Check the request to stargazers url
     expect(mockedAxios.get).toBeCalledWith("https://api.github.com/repos/a-cool-user/a-cool-repo/stargazers");
@@ -239,11 +250,14 @@ describe("Attempt verification", function () {
     });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -274,11 +288,14 @@ describe("Attempt verification", function () {
     });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -312,14 +329,17 @@ describe("Attempt verification", function () {
       if (url.endsWith("/stargazers")) {
         return invalidGithubUserRepoStargazersResponse;
       }
-    })
+    });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);
 
@@ -340,9 +360,12 @@ describe("Attempt verification", function () {
     });
 
     // Check the request to get the repo
-    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`, {
-      headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
-    });
+    expect(mockedAxios.get).toBeCalledWith(
+      `https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`,
+      {
+        headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
+      }
+    );
 
     // Check the request to get the stargazer data
     expect(mockedAxios.get).toBeCalledWith("https://api.github.com/repos/a-cool-user/coolest-repo/stargazers");
@@ -361,11 +384,14 @@ describe("Attempt verification", function () {
     });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
 
@@ -386,9 +412,12 @@ describe("Attempt verification", function () {
     });
 
     // Check the request to get the repo
-    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`, {
-      headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
-    });
+    expect(mockedAxios.get).toBeCalledWith(
+      `https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`,
+      {
+        headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
+      }
+    );
 
     expect(starredGithubRepoProviderPayload).toMatchObject({ valid: false });
   });
@@ -401,11 +430,14 @@ describe("Attempt verification", function () {
     });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);
 
@@ -417,7 +449,7 @@ describe("Attempt verification", function () {
         headers: { Accept: "application/json" },
       }
     );
-      
+
     expect(mockedAxios.get).toHaveBeenCalledTimes(1);
 
     // Check the request to get the user
@@ -438,11 +470,14 @@ describe("Attempt verification", function () {
     });
 
     const starredGithubRepoProvider = new StarredGithubRepoProvider();
-    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const starredGithubRepoProviderPayload = await starredGithubRepoProvider.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
 
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);
 
@@ -463,9 +498,12 @@ describe("Attempt verification", function () {
     });
 
     // Check the request to get the repo
-    expect(mockedAxios.get).toBeCalledWith(`https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`, {
-      headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
-    });
+    expect(mockedAxios.get).toBeCalledWith(
+      `https://api.github.com/users/${validGithubUserResponse.data.login}/repos?per_page=100`,
+      {
+        headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
+      }
+    );
 
     expect(starredGithubRepoProviderPayload).toMatchObject({ valid: false });
   });

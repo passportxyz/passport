@@ -34,6 +34,16 @@ const startingState: UserContextState = {
   walletLabel: undefined,
 };
 
+export const pillLocalStorage = (platform?: string): void => {
+  const platforms = window.localStorage.getItem("updatedPlatforms");
+  const previouslyUpdatedPlatforms = JSON.parse(platforms || "{}");
+  if (platform && !previouslyUpdatedPlatforms[platform]) {
+    const updatedPlatforms = previouslyUpdatedPlatforms;
+    updatedPlatforms[platform] = true;
+    window.localStorage.setItem("updatedPlatforms", JSON.stringify(updatedPlatforms));
+  }
+};
+
 // create our app context
 export const UserContext = createContext(startingState);
 
@@ -117,11 +127,15 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           const sessionKey = `didsession-${address}`;
           const sessionStr = localStorage.getItem(sessionKey);
 
+          // @ts-ignore
           let selfId = await ceramicConnect(ethAuthProvider, sessionStr);
 
           if (
+            // @ts-ignore
             !selfId?.client?.session ||
+            // @ts-ignore
             selfId?.client?.session?.isExpired ||
+            // @ts-ignore
             selfId?.client?.session?.expireInSecs < 3600
           ) {
             // If the session loaded is not valid, or if it is expired or close to expire, we create
@@ -130,6 +144,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           }
 
           // Store the session in localstorage
+          // @ts-ignore
           localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
         } finally {
           // mark that this login attempt is complete
@@ -237,6 +252,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       signer,
       walletLabel,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [loggedIn, address, signer, wallet]
   );
 

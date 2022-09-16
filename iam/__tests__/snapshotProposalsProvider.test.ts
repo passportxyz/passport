@@ -88,7 +88,7 @@ describe("Attempt verification", function () {
       record: {
         address: `${MOCK_ADDRESS_LOWER}`,
         hasGT1SnapshotProposalsVotedOn: "true",
-      }
+      },
     });
   });
 
@@ -125,7 +125,6 @@ describe("Attempt verification", function () {
     expect(axios.post).toHaveBeenCalledTimes(1);
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
-
 
   it("should return invalid payload when there is no address to send with the graphQL query", async () => {
     mockedAxios.post.mockImplementation(async (url, data) => {

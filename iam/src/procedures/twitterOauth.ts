@@ -11,9 +11,11 @@ import { auth, Client } from "twitter-api-sdk";
 */
 
 const TIMEOUT_IN_MS = 60000; // 60000ms = 60s
+const TIMEOUT_AUTHED_IN_MS = 10000; // 10000ms = 10s
 
 // Map <SessionKey, auth.OAuth2User>
 export const clients: Record<string, auth.OAuth2User> = {};
+export const authedClients: Record<string, Client> = {};
 
 export const getSessionKey = (): string => {
   return `twitter-${crypto.randomBytes(32).toString("hex")}`;
@@ -40,12 +42,47 @@ export const initClient = (callback: string, sessionKey: string): auth.OAuth2Use
   return clients[sessionKey];
 };
 
+// record timeouts so that we can delay the deletion of the auth key til after all Providers have used it
+const timeoutDel: { [key: string]: NodeJS.Timeout } = {};
+const timeoutAuthDel: { [key: string]: NodeJS.Timeout } = {};
+
 export const deleteClient = (state: string): void => {
-  delete clients[state];
+  timeoutDel[state] = setTimeout(() => {
+    delete clients[state];
+    delete timeoutDel[state];
+  }, TIMEOUT_AUTHED_IN_MS);
 };
 
+const deleteAuthClient = (code: string): void => {
+  timeoutAuthDel[code] = setTimeout(() => {
+    delete authedClients[code];
+    delete timeoutAuthDel[code];
+  }, TIMEOUT_AUTHED_IN_MS);
+};
+
+// retrieve the raw client that is shared between Proceedures
 export const getClient = (state: string): auth.OAuth2User | undefined => {
+  clearTimeout(timeoutDel[state]);
   return clients[state];
+};
+
+// retrieve the instatiated Client shared between Providers
+const getAuthClient = async (client: auth.OAuth2User, code: string): Promise<Client> => {
+  // clear any previous attempt (it's okay if timeoutAuthDel[code] is undefined)
+  clearTimeout(timeoutAuthDel[code]);
+  // if the client has not already been created...
+  if (!authedClients[code]) {
+    // retrieve user's auth bearer token to authenticate client
+    await client.requestAccessToken(code);
+    // associate and store the authedClients[code]
+    authedClients[code] = new Client(client);
+  }
+
+  // delete the authed client in 10s (long enough for all Providers to use the same client in a single request)
+  deleteAuthClient(code);
+
+  // return the Client instance
+  return authedClients[code];
 };
 
 // This method has side-effects which alter unaccessible state on the
@@ -64,11 +101,8 @@ export type TwitterFindMyUserResponse = {
 };
 
 export const requestFindMyUser = async (client: auth.OAuth2User, code: string): Promise<TwitterFindMyUserResponse> => {
-  // retrieve user's auth bearer token to authenticate client
-  await client.requestAccessToken(code);
-
   // return information about the (authenticated) requesting user
-  const twitterClient = new Client(client);
+  const twitterClient = await getAuthClient(client, code);
   const myUser = await twitterClient.users.findMyUser();
   return { ...myUser.data };
 };
@@ -80,8 +114,7 @@ export type TwitterFollowerResponse = {
 
 export const getFollowerCount = async (client: auth.OAuth2User, code: string): Promise<TwitterFollowerResponse> => {
   // retrieve user's auth bearer token to authenticate client
-  await client.requestAccessToken(code);
-  const twitterClient = new Client(client);
+  const twitterClient = await getAuthClient(client, code);
 
   // public metrics returns more data on user
   const myUser = await twitterClient.users.findMyUser({
@@ -100,8 +133,7 @@ export type TwitterTweetResponse = {
 
 export const getTweetCount = async (client: auth.OAuth2User, code: string): Promise<TwitterTweetResponse> => {
   // retrieve user's auth bearer token to authenticate client
-  await client.requestAccessToken(code);
-  const twitterClient = new Client(client);
+  const twitterClient = await getAuthClient(client, code);
 
   // public metrics returns more data on user
   const myUser = await twitterClient.users.findMyUser({

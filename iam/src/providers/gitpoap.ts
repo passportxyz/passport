@@ -4,7 +4,6 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
-import { DateTime } from "luxon";
 
 // Use GitPOAP Public API to get a list of tokens for that address
 const GITPOAP_API_URL = "https://public-api.gitpoap.io";
@@ -45,16 +44,7 @@ export class GitPOAPProvider implements Provider {
       gitpoaps = data;
 
       /* Check if address has any GitPOAPs */
-      if (gitpoaps.length > 0) {
-        const hasValidGitPOAP = gitpoaps.some((gitpoap) => {
-          const mintDate = DateTime.fromISO(gitpoap.mintedAt);
-          return DateTime.now().diff(mintDate).as("days") > 15;
-        });
-        /* Check if address has any valid GitPOAPs > 15 days in age */
-        if (hasValidGitPOAP) {
-          valid = true;
-        }
-      }
+      valid = gitpoaps.length > 0;
     } catch (err) {
       return {
         valid: false,

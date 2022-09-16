@@ -22,7 +22,7 @@ export default function Home() {
   }, [wallet]);
 
   return (
-    <div className="font-miriam-libre min-h-max min-h-default bg-landingPageBackground bg-cover bg-no-repeat text-gray-100 md:bg-center">
+    <div className="font-miriam-libre min-h-max min-h-default bg-purple-darkpurple bg-no-repeat text-gray-100 md:bg-center">
       <div className="container mx-auto flex flex-row flex-wrap items-center p-5">
         <img src="/assets/gitcoinLogoWhite.svg" alt="Gitcoin Logo" />
         <img className="ml-6 mr-6" src="/assets/logoLine.svg" alt="Logo Line" />
@@ -51,10 +51,14 @@ export default function Home() {
             </div>
           </div>
           {/* Stamp Provider Tile Display */}
-          <div className="mx-auto mb-10 bg-mobileLandingPageBackground text-gray-600 sm:mt-20 sm:w-1/2 sm:py-20 md:bg-none md:py-24">
+          <div className="mx-auto mb-10 text-gray-600 sm:mt-20 sm:w-1/2 sm:py-20 md:bg-none md:py-20">
             <div className="-m-4 flex flex-wrap">
               <div className="m-2 rounded md:px-6">
-                <img src={"./assets/logoTiles.svg"} alt={"Stamp Logo Tiles"} className="md:p-2" />
+                <img
+                  src={"./assets/passportLanding.svg"}
+                  alt={"Stamp Logo Tiles"}
+                  className="m-auto mt-4 w-4/5 md:-mt-4 md:-mb-72 md:w-full md:p-2 lg:-mt-24 lg:-mb-72 xl:-mt-44"
+                />
               </div>
             </div>
           </div>

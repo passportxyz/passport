@@ -47,6 +47,22 @@ const invalidselfStakingResponse = {
   },
 };
 
+const getSubgraphQuery = (address: string): string => {
+  return `
+    {
+      users(where: {address: "${address}"}) {
+        address,
+        stakes(where: {round: "1"}) {
+          stake
+          round {
+            id
+          }
+        }
+      }
+    }
+      `;
+};
+
 interface RequestData {
   query: string;
 }
@@ -70,26 +86,14 @@ describe("Attempt verification", function () {
 
     // Check the request to verify the subgraph query
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
-      query: `
-    {
-      users(where: {address: "${MOCK_ADDRESS_LOWER}"}) {
-        address,
-        stakes(where: {round: "2", total_gt: 0}) {
-          stake
-          round {
-            id
-          }
-        }
-      }
-    }
-      `,
+      query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
     });
 
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        stakeAmount: "csgt1",
+        stakeAmount: "ssgte1",
       },
     });
   });
@@ -101,19 +105,7 @@ describe("Attempt verification", function () {
 
     // Check the request to verify the subgraph query
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
-      query: `
-    {
-      users(where: {address: "not_address"}) {
-        address,
-        stakes(where: {round: "2", total_gt: 0}) {
-          stake
-          round {
-            id
-          }
-        }
-      }
-    }
-      `,
+      query: getSubgraphQuery("not_address"),
     });
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -134,19 +126,7 @@ describe("Attempt verification", function () {
 
     // Check the request to verify the subgraph query
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
-      query: `
-    {
-      users(where: {address: "${MOCK_ADDRESS_LOWER}"}) {
-        address,
-        stakes(where: {round: "2", total_gt: 0}) {
-          stake
-          round {
-            id
-          }
-        }
-      }
-    }
-      `,
+      query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
     });
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -165,19 +145,7 @@ describe("Attempt verification", function () {
 
     // Check the request to verify the subgraph query
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
-      query: `
-    {
-      users(where: {address: "${MOCK_ADDRESS_LOWER}"}) {
-        address,
-        stakes(where: {round: "2", total_gt: 0}) {
-          stake
-          round {
-            id
-          }
-        }
-      }
-    }
-      `,
+      query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
     });
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -248,7 +216,10 @@ describe("should return valid payload", function () {
       address: MOCK_ADDRESS_LOWER,
     } as unknown as RequestPayload);
 
-    expect(selfstakingPayload).toMatchObject({ valid: true });
+    expect(selfstakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte1" },
+    });
   });
   it("when stake amount above 10 GTC for Silver", async () => {
     mockedAxios.post.mockImplementation(async () => {
@@ -261,7 +232,10 @@ describe("should return valid payload", function () {
       address: MOCK_ADDRESS_LOWER,
     } as unknown as RequestPayload);
 
-    expect(selfstakingPayload).toMatchObject({ valid: true });
+    expect(selfstakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte10" },
+    });
   });
   it("when stake amount above 100 GTC for Gold", async () => {
     mockedAxios.post.mockImplementation(async () => {
@@ -274,6 +248,58 @@ describe("should return valid payload", function () {
       address: MOCK_ADDRESS_LOWER,
     } as unknown as RequestPayload);
 
-    expect(selfstakingPayload).toMatchObject({ valid: true });
+    expect(selfstakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte100" },
+    });
+  });
+  // All amounts equal to tier amount
+  it("when stake amount equal to 1 GTC for Bronze", async () => {
+    mockedAxios.post.mockImplementation(async () => {
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "1000000000000000000");
+    });
+
+    const selfstaking = new SelfStakingBronzeProvider();
+
+    const selfstakingPayload = await selfstaking.verify({
+      address: MOCK_ADDRESS_LOWER,
+    } as unknown as RequestPayload);
+
+    expect(selfstakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte1" },
+    });
+  });
+  it("when stake amount equal to 10 GTC for Silver", async () => {
+    mockedAxios.post.mockImplementation(async () => {
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "10000000000000000000");
+    });
+
+    const selfstaking = new SelfStakingSilverProvider();
+
+    const selfstakingPayload = await selfstaking.verify({
+      address: MOCK_ADDRESS_LOWER,
+    } as unknown as RequestPayload);
+
+    expect(selfstakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte10" },
+    });
+  });
+  it("when stake amount equal to 100 GTC for Gold", async () => {
+    mockedAxios.post.mockImplementation(async () => {
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "100000000000000000000");
+    });
+
+    const selfstaking = new SelfStakingGoldProvider();
+
+    const selfstakingPayload = await selfstaking.verify({
+      address: MOCK_ADDRESS_LOWER,
+    } as unknown as RequestPayload);
+
+    expect(selfstakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte100" },
+    });
   });
 });

@@ -1,5 +1,5 @@
 // ----- Types
-import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
+import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../types";
 import type {
   GithubFindMyUserResponse,
@@ -35,14 +35,14 @@ export class StarredGithubRepoProvider implements Provider {
   }
 
   // verify that the proof object contains valid === "true"
-  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     let valid = false,
       accessToken: string,
       verifiedUserPayload: GithubFindMyUserResponse = {},
       verifiedUserRepoPayload: boolean | GithubUserRepoResponseData = {};
 
     try {
-      accessToken = await requestAccessToken(payload.proofs.code);
+      accessToken = await requestAccessToken(payload.proofs.code, context);
       verifiedUserPayload = await verifyGithub(accessToken);
       verifiedUserRepoPayload = await verifyUserGithubRepo(verifiedUserPayload, accessToken);
 
@@ -134,7 +134,7 @@ const verifyUserGithubRepo = async (userData: GithubFindMyUserResponse, ghAccess
         // if their stargazer count equals 1
       } else if (userData.id === repo.owner.id && repo.stargazers_count === 1) {
         // GET the solo stargazer's data
-        const stargazer: StargazerData = (await axios.get(repo.stargazers_url)).data;
+        const stargazer: StargazerData = (await axios.get(repo.stargazers_url)).data as StargazerData;
 
         for (let i = 0; i < stargazer.length; i++) {
           if (stargazer[i].id != repo.owner.id) {

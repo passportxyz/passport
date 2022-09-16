@@ -123,7 +123,7 @@ describe("Attempt verification", function () {
         code,
       },
       org,
-      requestedClient: undefined
+      requestedClient: undefined,
     } as unknown as GHUserRequestPayload);
 
     // Check the request to get the token
@@ -134,7 +134,7 @@ describe("Attempt verification", function () {
         headers: { Accept: "application/json" },
       }
     );
-  })
+  });
 
   it("should return invalid payload when unable to retrieve auth token", async () => {
     mockedAxios.post.mockImplementation(async (url, data, config) => {

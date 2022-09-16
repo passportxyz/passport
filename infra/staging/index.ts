@@ -247,6 +247,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "POLYGON_RPC_URL",
             valueFrom: `${IAM_SERVER_SSM_ARN}:POLYGON_RPC_URL::`,
           },
+          {
+            name: "AMI_API_TOKEN",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:AMI_API_TOKEN::`,
+          },
         ],
       },
     },

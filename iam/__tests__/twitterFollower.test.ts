@@ -4,7 +4,7 @@ import {
   TwitterFollowerGT500Provider,
   TwitterFollowerGTE1000Provider,
   TwitterFollowerGT5000Provider,
-} from "../src/providers/TwitterFollower";
+} from "../src/providers/twitterFollower";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 import { auth } from "twitter-api-sdk";
@@ -58,7 +58,7 @@ describe("Attempt verification", function () {
   it("should return invalid payload when unable to retrieve twitter oauth client", async () => {
     (getClient as jest.Mock).mockReturnValue(undefined);
     (getFollowerCount as jest.Mock).mockImplementationOnce(async (client) => {
-      return client ? MOCK_TWITTER_USER : {};
+      return Promise.resolve(client ? MOCK_TWITTER_USER : {});
     });
 
     const twitter = new TwitterFollowerGT100Provider();

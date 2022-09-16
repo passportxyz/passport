@@ -10,6 +10,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # Run a local ceramic nod to test against
+    services:
+      ceramic:
+        image: ceramicnetwork/js-ceramic:2.6.0-rc.1
+        ports:
+          - 7007:7007
+
+    env:
+     CERAMIC_CLIENT_URL: http://127.0.0.1:7007
+
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js 16

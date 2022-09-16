@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { Passport, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
+import { Passport, PLATFORM_ID, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 import { CeramicDatabase } from "@gitcoin/passport-database-client";
 import { useViewerConnection } from "@self.id/framework";
@@ -34,53 +34,258 @@ export type AllProvidersState = {
   };
 };
 
+const getProviderSpec = (platform: PLATFORM_ID, provider: string): ProviderSpec => {
+  return STAMP_PROVIDERS[platform]
+    ?.find((i) => i.providers.find((p) => p.name == provider))
+    ?.providers.find((p) => p.name == provider) as ProviderSpec;
+};
+
 const startingAllProvidersState: AllProvidersState = {
   Google: {
-    providerSpec: STAMP_PROVIDERS.Google,
+    providerSpec: STAMP_PROVIDERS.Google as unknown as ProviderSpec,
     stamp: undefined,
   },
   Ens: {
-    providerSpec: STAMP_PROVIDERS.Ens,
+    providerSpec: getProviderSpec("Ens", "Ens"),
     stamp: undefined,
   },
   Poh: {
-    providerSpec: STAMP_PROVIDERS.Poh,
+    providerSpec: getProviderSpec("Poh", "Poh"),
     stamp: undefined,
   },
   Twitter: {
-    providerSpec: STAMP_PROVIDERS.Twitter,
+    providerSpec: getProviderSpec("Twitter", "Twitter"),
+    stamp: undefined,
+  },
+  TwitterFollowerGT100: {
+    providerSpec: getProviderSpec("Twitter", "TwitterFollowerGT100"),
+    stamp: undefined,
+  },
+  TwitterFollowerGT500: {
+    providerSpec: getProviderSpec("Twitter", "TwitterFollowerGT500"),
+    stamp: undefined,
+  },
+  TwitterFollowerGTE1000: {
+    providerSpec: getProviderSpec("Twitter", "TwitterFollowerGTE1000"),
+    stamp: undefined,
+  },
+  TwitterFollowerGT5000: {
+    providerSpec: getProviderSpec("Twitter", "TwitterFollowerGT5000"),
+    stamp: undefined,
+  },
+  TwitterTweetGT10: {
+    providerSpec: getProviderSpec("Twitter", "TwitterTweetGT10"),
     stamp: undefined,
   },
   POAP: {
-    providerSpec: STAMP_PROVIDERS.POAP,
+    providerSpec: getProviderSpec("POAP", "POAP"),
     stamp: undefined,
   },
   Facebook: {
-    providerSpec: STAMP_PROVIDERS.Facebook,
+    providerSpec: getProviderSpec("Facebook", "Facebook"),
+    stamp: undefined,
+  },
+  FacebookFriends: {
+    providerSpec: getProviderSpec("Facebook", "FacebookFriends"),
+    stamp: undefined,
+  },
+  FacebookProfilePicture: {
+    providerSpec: getProviderSpec("Facebook", "FacebookProfilePicture"),
     stamp: undefined,
   },
   Brightid: {
-    providerSpec: STAMP_PROVIDERS.Brightid,
+    providerSpec: getProviderSpec("Brightid", "Brightid"),
     stamp: undefined,
   },
   Github: {
-    providerSpec: STAMP_PROVIDERS.Github,
+    providerSpec: getProviderSpec("Github", "Github"),
+    stamp: undefined,
+  },
+  TenOrMoreGithubFollowers: {
+    providerSpec: getProviderSpec("Github", "TenOrMoreGithubFollowers"),
+    stamp: undefined,
+  },
+  FiftyOrMoreGithubFollowers: {
+    providerSpec: getProviderSpec("Github", "FiftyOrMoreGithubFollowers"),
+    stamp: undefined,
+  },
+  ForkedGithubRepoProvider: {
+    providerSpec: getProviderSpec("Github", "ForkedGithubRepoProvider"),
+    stamp: undefined,
+  },
+  StarredGithubRepoProvider: {
+    providerSpec: getProviderSpec("Github", "StarredGithubRepoProvider"),
+    stamp: undefined,
+  },
+  FiveOrMoreGithubRepos: {
+    providerSpec: getProviderSpec("Github", "FiveOrMoreGithubRepos"),
     stamp: undefined,
   },
   Linkedin: {
-    providerSpec: STAMP_PROVIDERS.Linkedin,
+    providerSpec: getProviderSpec("Linkedin", "Linkedin"),
     stamp: undefined,
   },
   Discord: {
-    providerSpec: STAMP_PROVIDERS.Discord,
+    providerSpec: getProviderSpec("Discord", "Discord"),
     stamp: undefined,
   },
   Signer: {
-    providerSpec: STAMP_PROVIDERS.Signer,
+    providerSpec: getProviderSpec("Signer", "Signer"),
     stamp: undefined,
   },
   GitPOAP: {
-    providerSpec: STAMP_PROVIDERS.GitPOAP,
+    providerSpec: getProviderSpec("GitPOAP", "GitPOAP"),
+    stamp: undefined,
+  },
+  Snapshot: {
+    providerSpec: getProviderSpec("Snapshot", "Snapshot"),
+    stamp: undefined,
+  },
+  SnapshotProposalsProvider: {
+    providerSpec: getProviderSpec("Snapshot", "SnapshotProposalsProvider"),
+    stamp: undefined,
+  },
+  SnapshotVotesProvider: {
+    providerSpec: getProviderSpec("Snapshot", "SnapshotVotesProvider"),
+    stamp: undefined,
+  },
+  "ethPossessionsGte#1": {
+    providerSpec: getProviderSpec("ETH", "ethPossessionsGte#1"),
+    stamp: undefined,
+  },
+  "ethPossessionsGte#10": {
+    providerSpec: getProviderSpec("ETH", "ethPossessionsGte#10"),
+    stamp: undefined,
+  },
+  "ethPossessionsGte#32": {
+    providerSpec: getProviderSpec("ETH", "ethPossessionsGte#32"),
+    stamp: undefined,
+  },
+  FirstEthTxnProvider: {
+    providerSpec: getProviderSpec("ETH", "FirstEthTxnProvider"),
+    stamp: undefined,
+  },
+  EthGTEOneTxnProvider: {
+    providerSpec: getProviderSpec("ETH", "EthGTEOneTxnProvider"),
+    stamp: undefined,
+  },
+  EthGasProvider: {
+    providerSpec: getProviderSpec("ETH", "EthGasProvider"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#numGrantsContributeToGte#1": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGrantsContributeToGte#1"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#numGrantsContributeToGte#10": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGrantsContributeToGte#10"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#numGrantsContributeToGte#25": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGrantsContributeToGte#25"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#numGrantsContributeToGte#100": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGrantsContributeToGte#100"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#totalContributionAmountGte#10": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#totalContributionAmountGte#10"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#totalContributionAmountGte#100": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#totalContributionAmountGte#100"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#totalContributionAmountGte#1000": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#totalContributionAmountGte#1000"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#numRoundsContributedToGte#1": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numRoundsContributedToGte#1"),
+    stamp: undefined,
+  },
+  "GitcoinContributorStatistics#numGr14ContributionsGte#1": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGr14ContributionsGte#1"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#numOwnedGrants#1": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numOwnedGrants#1"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#numGrantContributors#10": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#10"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#numGrantContributors#25": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#25"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#numGrantContributors#100": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#100"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#totalContributionAmount#100": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#totalContributionAmount#100"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#totalContributionAmount#1000": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#totalContributionAmount#1000"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#totalContributionAmount#10000": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#totalContributionAmount#10000"),
+    stamp: undefined,
+  },
+  "GitcoinGranteeStatistics#numGrantsInEcoAndCauseRound#1": {
+    providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantsInEcoAndCauseRound#1"),
+    stamp: undefined,
+  },
+  "gtcPossessionsGte#10": {
+    providerSpec: getProviderSpec("GTC", "gtcPossessionsGte#10"),
+    stamp: undefined,
+  },
+  "gtcPossessionsGte#100": {
+    providerSpec: getProviderSpec("GTC", "gtcPossessionsGte#100"),
+  },
+  SelfStakingBronze: {
+    providerSpec: getProviderSpec("GtcStaking", "SelfStakingBronze"),
+    stamp: undefined,
+  },
+  SelfStakingSilver: {
+    providerSpec: getProviderSpec("GtcStaking", "SelfStakingSilver"),
+    stamp: undefined,
+  },
+  SelfStakingGold: {
+    providerSpec: getProviderSpec("GtcStaking", "SelfStakingGold"),
+    stamp: undefined,
+  },
+  CommunityStakingBronze: {
+    providerSpec: getProviderSpec("GtcStaking", "CommunityStakingBronze"),
+    stamp: undefined,
+  },
+  CommunityStakingSilver: {
+    providerSpec: getProviderSpec("GtcStaking", "CommunityStakingSilver"),
+    stamp: undefined,
+  },
+  CommunityStakingGold: {
+    providerSpec: getProviderSpec("GtcStaking", "CommunityStakingGold"),
+    stamp: undefined,
+  },
+  NFT: {
+    providerSpec: getProviderSpec("NFT", "NFT"),
+    stamp: undefined,
+  },
+  ZkSync: {
+    providerSpec: getProviderSpec("ZkSync", "ZkSync"),
+    stamp: undefined,
+  },
+  Lens: {
+    providerSpec: getProviderSpec("Lens", "Lens"),
+    stamp: undefined,
+  },
+  GnosisSafe: {
+    providerSpec: getProviderSpec("GnosisSafe", "GnosisSafe"),
     stamp: undefined,
   },
   WorldID: {
@@ -265,7 +470,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       handleDeleteStamp,
       userDid,
     }),
-    [passport, isLoadingPassport]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [passport, isLoadingPassport, allProvidersState, userDid]
   );
 
   const providerProps = {

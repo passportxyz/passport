@@ -5,7 +5,7 @@ import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
-import { zkSyncApiEnpoint, ZkSynkProvider } from "../src/providers/zkSync";
+import { zkSyncApiEnpoint, ZkSyncProvider } from "../src/providers/zkSync";
 
 jest.mock("axios");
 
@@ -123,7 +123,7 @@ describe("Verification succeeds", function () {
       });
     });
 
-    const zkSyncProvider = new ZkSynkProvider();
+    const zkSyncProvider = new ZkSyncProvider();
     const zkSyncPayload = await zkSyncProvider.verify({
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
@@ -159,7 +159,7 @@ describe("Verification fails", function () {
       });
     });
 
-    const zkSyncProvider = new ZkSynkProvider();
+    const zkSyncProvider = new ZkSyncProvider();
     const zkSyncPayload = await zkSyncProvider.verify({
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
@@ -191,7 +191,7 @@ describe("Verification fails", function () {
       });
     });
 
-    const zkSyncProvider = new ZkSynkProvider();
+    const zkSyncProvider = new ZkSyncProvider();
     const zkSyncPayload = await zkSyncProvider.verify({
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
@@ -224,7 +224,7 @@ describe("Verification fails", function () {
       });
     });
 
-    const zkSyncProvider = new ZkSynkProvider();
+    const zkSyncProvider = new ZkSyncProvider();
     const zkSyncPayload = await zkSyncProvider.verify({
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
@@ -257,7 +257,7 @@ describe("Verification fails", function () {
       });
     });
 
-    const zkSyncProvider = new ZkSynkProvider();
+    const zkSyncProvider = new ZkSyncProvider();
     const zkSyncPayload = await zkSyncProvider.verify({
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
@@ -283,7 +283,7 @@ describe("Verification fails", function () {
       throw "something bad happened";
     });
 
-    const zkSyncProvider = new ZkSynkProvider();
+    const zkSyncProvider = new ZkSyncProvider();
     const zkSyncPayload = await zkSyncProvider.verify({
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
