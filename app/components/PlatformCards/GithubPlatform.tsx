@@ -47,7 +47,7 @@ function generateUID(length: number) {
 
 export default function GithubPlatform(): JSX.Element {
   const { address, signer } = useContext(UserContext);
-  const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
+  const { handleAddStamps, allProvidersState, handleUpdateStamps } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [state, setState] = useState("");
   const [canSubmit, setCanSubmit] = useState(false);
@@ -72,9 +72,6 @@ export default function GithubPlatform(): JSX.Element {
   useEffect(() => {
     if (selectedProviders.length !== verifiedProviders.length) {
       setCanSubmit(true);
-    }
-    if (selectedProviders.length === 0) {
-      setCanSubmit(false);
     }
   }, [selectedProviders, verifiedProviders]);
 
@@ -159,6 +156,8 @@ export default function GithubPlatform(): JSX.Element {
                 }
               })
               .filter((v: Stamp | undefined) => v) || [];
+          // Update/remove stamps
+          await handleUpdateStamps(providerIds as PROVIDER_ID[]);
           // Add all the stamps to the passport at once
           await handleAddStamps(vcs as Stamp[]);
           datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
@@ -201,12 +200,6 @@ export default function GithubPlatform(): JSX.Element {
     };
   });
 
-  // const issueCredentialWidget = (
-  //   <button data-testid="button-verify-github" className="verify-btn" onClick={handleFetchGithubOAuth}>
-  //     Connect account
-  //   </button>
-  // );
-
   return (
     <SideBarContent
       currentPlatform={getPlatformSpec("Github")}
@@ -222,7 +215,7 @@ export default function GithubPlatform(): JSX.Element {
           data-testid="button-verify-github"
           className="sidebar-verify-btn"
         >
-          Verify
+          {verifiedProviders.length > 0 ? <p>Save</p> : <p>Verify</p>}
         </button>
       }
     />

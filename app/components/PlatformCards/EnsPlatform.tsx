@@ -35,7 +35,7 @@ const platformId: PLATFORM_ID = "Ens";
 
 export default function EnsPlatform(): JSX.Element {
   const { address, signer } = useContext(UserContext);
-  const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
+  const { handleAddStamps, handleUpdateStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
 
@@ -62,9 +62,6 @@ export default function EnsPlatform(): JSX.Element {
   useEffect(() => {
     if (selectedProviders.length !== verifiedProviders.length) {
       setCanSubmit(true);
-    }
-    if (selectedProviders.length === 0) {
-      setCanSubmit(false);
     }
   }, [selectedProviders, verifiedProviders]);
 
@@ -98,6 +95,9 @@ export default function EnsPlatform(): JSX.Element {
               }
             })
             .filter((v: Stamp | undefined) => v) || [];
+
+        // Update the selected stamps for removal
+        await handleUpdateStamps(selectedProviders as PROVIDER_ID[]);
         // Add all the stamps to the passport at once
         await handleAddStamps(vcs as Stamp[]);
         datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
@@ -142,7 +142,7 @@ export default function EnsPlatform(): JSX.Element {
           data-testid="button-verify-ens"
           className="sidebar-verify-btn"
         >
-          Verify
+          {verifiedProviders.length > 0 ? <p>Save</p> : <p>Verify</p>}
         </button>
       }
     />

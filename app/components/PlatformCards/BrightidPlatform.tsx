@@ -57,7 +57,7 @@ type BrightIdProviderRecord = {
 
 export default function BrightidPlatform(): JSX.Element {
   const { address, signer } = useContext(UserContext);
-  const { handleAddStamps, allProvidersState, userDid } = useContext(CeramicContext);
+  const { handleAddStamps, allProvidersState, userDid, handleUpdateStamps } = useContext(CeramicContext);
   const [verificationInProgress, setVerificationInProgress] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
@@ -116,6 +116,9 @@ export default function BrightidPlatform(): JSX.Element {
               }
             })
             .filter((v: Stamp | undefined) => v) || [];
+        // Update/remove stamps
+        await handleUpdateStamps(providerIds as PROVIDER_ID[]);
+
         // Add all the stamps to the passport at once
         await handleAddStamps(vcs as Stamp[]);
         datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
@@ -330,7 +333,7 @@ export default function BrightidPlatform(): JSX.Element {
             data-testid="button-verify-brightid"
             className="sidebar-verify-btn"
           >
-            Verify
+            {verifiedProviders.length > 0 ? <p>Save</p> : <p>Verify</p>}
           </button>
 
           <Modal isOpen={isOpen} onClose={onClose}>

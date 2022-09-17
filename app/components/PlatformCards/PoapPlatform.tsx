@@ -35,7 +35,7 @@ const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
 export default function PoapPlatform(): JSX.Element {
   const { address, signer } = useContext(UserContext);
-  const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
+  const { handleAddStamps, allProvidersState, handleUpdateStamps } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
 
@@ -56,9 +56,6 @@ export default function PoapPlatform(): JSX.Element {
   useEffect(() => {
     if (selectedProviders.length !== verifiedProviders.length) {
       setCanSubmit(true);
-    }
-    if (selectedProviders.length === 0) {
-      setCanSubmit(false);
     }
   }, [selectedProviders, verifiedProviders]);
 
@@ -95,6 +92,8 @@ export default function PoapPlatform(): JSX.Element {
               }
             })
             .filter((v: Stamp | undefined) => v) || [];
+        // Update/remove stamps
+        await handleUpdateStamps(providerIds as PROVIDER_ID[]);
         // Add all the stamps to the passport at once
         await handleAddStamps(vcs as Stamp[]);
         datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
@@ -138,7 +137,7 @@ export default function PoapPlatform(): JSX.Element {
           data-testid="button-verify-poap"
           className="sidebar-verify-btn"
         >
-          Verify
+          {verifiedProviders.length > 0 ? <p>Save</p> : <p>Verify</p>}
         </button>
       }
     />

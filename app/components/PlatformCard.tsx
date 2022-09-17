@@ -1,5 +1,5 @@
 // --- React Methods
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 
 // --- Chakra UI Elements
 import { useDisclosure, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
@@ -7,7 +7,7 @@ import { useDisclosure, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/
 // --- Types
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "../config/platforms";
-import { UpdatedPlatforms } from "../config/providers";
+import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
@@ -40,7 +40,7 @@ export const PlatformCard = ({
   getUpdatedPlatforms,
 }: PlatformCardProps): JSX.Element => {
   // import all providers
-  const { allProvidersState } = useContext(CeramicContext);
+  const { allProvidersState, handleUpdateStamps } = useContext(CeramicContext);
 
   // useDisclosure to control JSON modal
   const {
@@ -122,7 +122,7 @@ export const PlatformCard = ({
                 </MenuButton>
                 <MenuList>
                   <MenuItem onClick={onOpenJsonOutputModal} data-testid="view-json">
-                    View Stamp JSON
+                    View stamp JSON
                   </MenuItem>
                   <MenuItem
                     onClick={() => {
@@ -134,6 +134,18 @@ export const PlatformCard = ({
                     data-testid="manage-stamp"
                   >
                     Manage stamp
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      handleUpdateStamps(
+                        STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
+                          return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+                        }, [] as PROVIDER_ID[]) || []
+                      );
+                    }}
+                    data-testid="remove-stamp"
+                  >
+                    Remove stamp
                   </MenuItem>
                 </MenuList>
               </Menu>

@@ -1,4 +1,4 @@
-import { DID, Passport, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
+import { DID, Passport, PROVIDER_ID, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 
 // -- Ceramic and Glazed
 import type { CeramicApi } from "@ceramicnetwork/common";
@@ -204,6 +204,28 @@ export class CeramicDatabase implements DataStorageBase {
       await this.ceramicClient.pin.add(streamId);
     } catch (e) {
       this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString());
+    }
+  }
+
+  // Update stamps by providerIds
+  async updateStamps(providerIds: PROVIDER_ID[]): Promise<void> {
+    this.logger.info(`updating stamp(s) on ${this.did}`);
+
+    const passport = await this.store.get("Passport");
+
+    // filter Passport stamp list by the platform's providerIds
+    if (passport && passport.stamps) {
+      const updatedStamps = passport.stamps.filter(stamp => !providerIds.includes(stamp.provider as PROVIDER_ID));
+
+      // overwrite stamps array with updated stamps on the passport
+      const streamId = await this.store.set("Passport", { stamps: updatedStamps });
+
+      // try pinning passport
+      try {
+        await this.ceramicClient.pin.add(streamId);
+      } catch (e) {
+        this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString());
+      }
     }
   }
 

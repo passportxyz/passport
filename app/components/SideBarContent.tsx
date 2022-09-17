@@ -143,7 +143,7 @@ export const SideBarContent = ({
                     className="sidebar-verify-btn mx-auto flex justify-center"
                   >
                     <Spinner size="sm" className="my-auto mr-2" />
-                    Verifying
+                    {verifiedProviders!.length > 0 ? <p>Saving</p> : <p>Verifying</p>}
                   </button>
                 ) : (
                   verifyButton
