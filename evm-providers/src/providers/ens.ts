@@ -1,16 +1,38 @@
+import { JsonRpcProvider, JsonRpcSigner, StaticJsonRpcProvider } from "@ethersproject/providers";
 // ----- Types
 import type { Provider, ProviderOptions } from "../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Ethers library
 import { utils } from "ethers";
-import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
 // ----- Credential verification
 import { getAddress } from "../utils/signer";
 
 // set the network rpc url based on env
 const RPC_URL = process.env.RPC_URL;
+
+export const getRPCProvider = async (
+  payload: RequestPayload
+): Promise<{ provider: JsonRpcSigner | JsonRpcProvider; address: string }> => {
+  // return signer if provided
+  if (payload.jsonRpcSigner) {
+    const provider = payload.jsonRpcSigner;
+    const address = await provider.getAddress();
+    return {
+      provider,
+      address,
+    };
+  }
+
+  // define a provider using the rpc url
+  const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(RPC_URL);
+  const address = await getAddress(payload);
+  return {
+    provider,
+    address,
+  };
+};
 
 // Export a Ens Provider to carry out Ens name check and return a record object
 export class EnsProvider implements Provider {
@@ -26,15 +48,11 @@ export class EnsProvider implements Provider {
 
   // Verify that the address defined in the payload has an ENS reverse lookup registered
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    // if a signer is provider we will use that address to verify against
-    const address = await getAddress(payload);
-
     try {
-      // define a provider using the rpc url
-      const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(RPC_URL);
-
+      const { provider, address } = await getRPCProvider(payload);
+      const staticProvider: StaticJsonRpcProvider = new StaticJsonRpcProvider(RPC_URL);
       // lookup ens name
-      const reportedName: string = await provider.lookupAddress(address);
+      const reportedName: string = await staticProvider.lookupAddress(address);
       if (!reportedName) return { valid: false, error: ["Ens name was not found for given address."] };
 
       // lookup the address resolved to an ens name

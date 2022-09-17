@@ -1,3 +1,4 @@
+import { JsonRpcSigner } from "@ethersproject/providers";
 // BrightId Shared Types
 export { BrightIdProcedureResponse, BrightIdVerificationResponse, BrightIdSponsorshipResponse } from "./brightid";
 
@@ -53,6 +54,7 @@ export type RequestPayload = {
     signature: string;
     address: string;
   };
+  jsonRpcSigner?: JsonRpcSigner;
   challenge?: string;
   issuer?: string;
 };
