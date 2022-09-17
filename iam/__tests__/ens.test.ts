@@ -3,7 +3,9 @@ import { RequestPayload } from "@gitcoin/passport-types";
 import { EnsProvider } from "../src/providers/ens";
 
 // ----- Ethers library
-import { StaticJsonRpcProvider } from "@ethersproject/providers";
+import { StaticJsonRpcProvider, JsonRpcSigner } from "@ethersproject/providers";
+
+import { mock } from "jest-mock-extended";
 
 jest.mock("@ethersproject/providers");
 
@@ -11,7 +13,10 @@ const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
 const MOCK_ENS = "dpopptest.eth";
 
 const EthersLookupAddressMock = jest.spyOn(StaticJsonRpcProvider.prototype, "lookupAddress");
-const EthersResolveAddressMock = jest.spyOn(StaticJsonRpcProvider.prototype, "resolveName");
+const EthersProviderResolveAddressMock = jest.spyOn(StaticJsonRpcProvider.prototype, "resolveName");
+const EthersSignerResolveAddressMock = jest.spyOn(JsonRpcSigner.prototype, "resolveName")
+
+const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
 
 describe("Attempt verification", function () {
   beforeEach(() => {
@@ -19,10 +24,23 @@ describe("Attempt verification", function () {
     EthersLookupAddressMock.mockImplementation(async (address) => {
       if (address === MOCK_ADDRESS) return MOCK_ENS;
     });
-    EthersResolveAddressMock.mockImplementation(async (ens) => {
+    EthersProviderResolveAddressMock.mockImplementation(async (ens) => {
+      if (ens === MOCK_ENS) return MOCK_ADDRESS;
+    });
+    EthersSignerResolveAddressMock.mockImplementation(async (ens) => {
       if (ens === MOCK_ENS) return MOCK_ADDRESS;
     });
   });
+
+  it("should make evm request with signer if provided", async () => {
+    const ens = new EnsProvider();
+    const verifiedPayload = await ens.verify({
+      signer: mockSigner,
+    } as unknown as RequestPayload);
+
+    expect(EthersSignerResolveAddressMock).toBeCalledWith(MOCK_ENS);
+  })
+
   it("handles valid verification attempt", async () => {
     const ens = new EnsProvider();
     const verifiedPayload = await ens.verify({
@@ -30,7 +48,7 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     expect(EthersLookupAddressMock).toBeCalledWith(MOCK_ADDRESS);
-    expect(EthersResolveAddressMock).toBeCalledWith(MOCK_ENS);
+    expect(EthersProviderResolveAddressMock).toBeCalledWith(MOCK_ENS);
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
