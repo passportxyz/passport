@@ -6,6 +6,7 @@ import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Switch, Spi
 import { PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec } from "../config/providers";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { NoStampModal } from "./NoStampModal";
 
 export type SideBarContentProps = {
   currentPlatform: PlatformSpec | undefined;
@@ -16,6 +17,7 @@ export type SideBarContentProps = {
   isLoading: boolean | undefined;
   verifyButton: JSX.Element | undefined;
   infoElement?: JSX.Element | undefined;
+  verificationAttempted?: boolean;
 };
 
 export const SideBarContent = ({
@@ -27,9 +29,11 @@ export const SideBarContent = ({
   isLoading,
   verifyButton,
   infoElement,
+  verificationAttempted,
 }: SideBarContentProps): JSX.Element => {
   const [allProviderIds, setAllProviderIds] = useState<PROVIDER_ID[]>([]);
   const [allSelected, setAllSelected] = useState(false);
+  const [showNoStampModal, setShowNoStampModal] = useState(false);
 
   // alter select-all state when items change
   useEffect(() => {
@@ -45,7 +49,13 @@ export const SideBarContent = ({
     // is everything selected?
     setAllSelected(!doSelect);
     setAllProviderIds(providerIds);
-  }, [currentProviders, selectedProviders]);
+  }, [currentProviders, selectedProviders, verificationAttempted]);
+
+  useEffect(() => {
+    if (verificationAttempted && (selectedProviders?.length || 0) < allProviderIds.length) {
+      setShowNoStampModal(true);
+    }
+  }, [verificationAttempted, allProviderIds, selectedProviders]);
 
   return (
     <DrawerContent>
@@ -161,6 +171,7 @@ export const SideBarContent = ({
           </DrawerHeader>
         </div>
       )}
+      <NoStampModal isOpen={showNoStampModal} onClose={() => setShowNoStampModal(false)} />
     </DrawerContent>
   );
 };
