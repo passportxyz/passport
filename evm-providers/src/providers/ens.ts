@@ -1,4 +1,4 @@
-import { JsonRpcProvider, JsonRpcSigner, StaticJsonRpcProvider } from "@ethersproject/providers";
+import { StaticJsonRpcProvider } from "@ethersproject/providers";
 // ----- Types
 import type { Provider, ProviderOptions } from "../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
@@ -7,32 +7,10 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { utils } from "ethers";
 
 // ----- Credential verification
-import { getAddress } from "../utils/signer";
+import { getRPCProvider } from "../utils/signer";
 
 // set the network rpc url based on env
 const RPC_URL = process.env.RPC_URL;
-
-export const getRPCProvider = async (
-  payload: RequestPayload
-): Promise<{ provider: JsonRpcSigner | JsonRpcProvider; address: string }> => {
-  // return signer if provided
-  if (payload.jsonRpcSigner) {
-    const provider = payload.jsonRpcSigner;
-    const address = await provider.getAddress();
-    return {
-      provider,
-      address,
-    };
-  }
-
-  // define a provider using the rpc url
-  const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(RPC_URL);
-  const address = await getAddress(payload);
-  return {
-    provider,
-    address,
-  };
-};
 
 // Export a Ens Provider to carry out Ens name check and return a record object
 export class EnsProvider implements Provider {
