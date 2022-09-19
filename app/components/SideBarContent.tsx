@@ -52,10 +52,10 @@ export const SideBarContent = ({
   }, [currentProviders, selectedProviders, verificationAttempted]);
 
   useEffect(() => {
-    if (verificationAttempted && (selectedProviders?.length || 0) < allProviderIds.length) {
+    if (verificationAttempted && currentPlatform?.isEVM && (selectedProviders?.length || 0) < allProviderIds.length) {
       setShowNoStampModal(true);
     }
-  }, [verificationAttempted, allProviderIds, selectedProviders]);
+  }, [verificationAttempted, allProviderIds, selectedProviders, currentPlatform]);
 
   return (
     <DrawerContent>
