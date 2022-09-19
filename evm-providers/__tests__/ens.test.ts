@@ -3,12 +3,16 @@ import { RequestPayload } from "@gitcoin/passport-types";
 import { EnsProvider } from "../src/providers/ens";
 
 // ----- Ethers library
-import { StaticJsonRpcProvider } from "@ethersproject/providers";
+import { StaticJsonRpcProvider, JsonRpcSigner } from "@ethersproject/providers";
+
+import { mock } from "jest-mock-extended";
 
 jest.mock("@ethersproject/providers");
 
 const MOCK_ADDRESS = "0x6Cc41e662668C733c029d3c70E9CF248359ce544";
 const MOCK_ENS = "dpopptest.eth";
+
+const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
 
 const EthersLookupAddressMock = jest.spyOn(StaticJsonRpcProvider.prototype, "lookupAddress");
 const EthersResolveAddressMock = jest.spyOn(StaticJsonRpcProvider.prototype, "resolveName");
@@ -22,7 +26,18 @@ describe("Attempt verification", function () {
     EthersResolveAddressMock.mockImplementation(async (ens) => {
       if (ens === MOCK_ENS) return MOCK_ADDRESS;
     });
+    mockSigner.getAddress = jest.fn(async () => MOCK_ADDRESS);
   });
+
+  it("should make evm request with signer if provided", async () => {
+    const ens = new EnsProvider();
+    await ens.verify({
+      jsonRpcSigner: mockSigner,
+    } as unknown as RequestPayload);
+
+    expect(mockSigner.getAddress).toHaveBeenCalled();
+  });
+
   it("handles valid verification attempt", async () => {
     const ens = new EnsProvider();
     const verifiedPayload = await ens.verify({
