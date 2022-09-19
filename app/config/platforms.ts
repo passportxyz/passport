@@ -6,6 +6,7 @@ export type PlatformSpec = {
   name: string;
   description: string;
   connectMessage: string;
+  isEVM?: boolean;
 };
 
 export const getPlatformSpec = (platformName: string): PlatformSpec | undefined => {
@@ -32,6 +33,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "GTC",
     description: "GTC possession verification",
     connectMessage: "Verify Account",
+    isEVM: true,
   },
   {
     icon: "./assets/gtcStakingLogoIcon.svg",
@@ -39,6 +41,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "GTC Staking",
     description: "Connect to passport to verify your staking amount.",
     connectMessage: "Verify amount",
+    isEVM: true,
   },
   {
     icon: "./assets/twitterStampIcon.svg",
@@ -74,6 +77,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "ENS",
     description: "Purchase an .eth name to verify/ connect your existing account.",
     connectMessage: "Connect Account",
+    isEVM: true,
   },
   {
     icon: "./assets/poapStampIcon.svg",
@@ -81,6 +85,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "POAP",
     description: "Connect an account to a POAP owned for over 15 days.",
     connectMessage: "Connect to POAP",
+    isEVM: true,
   },
   {
     icon: "./assets/brightidStampIcon.svg",
@@ -88,6 +93,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "BrightID",
     description: "Connect your BrightID",
     connectMessage: "Connect Account",
+    isEVM: true,
   },
   {
     icon: "./assets/pohStampIcon.svg",
@@ -95,6 +101,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "Proof of Humanity",
     description: "Connect your wallet to start the process of verifying with Proof of Humanity.",
     connectMessage: "Connect Account",
+    isEVM: true,
   },
   {
     icon: "./assets/discordStampIcon.svg",
@@ -116,6 +123,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "ETH",
     description: "ETH possession and transaction verification",
     connectMessage: "Verify Account",
+    isEVM: true,
   },
   // {
   //   icon: "./assets/ethStampIcon.svg",
@@ -130,6 +138,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "Snapshot",
     description: "Connect your existing account to verify with Snapshot.",
     connectMessage: "Verify Account",
+    isEVM: true,
   },
   {
     icon: "./assets/gitPOAPStampIcon.svg",
@@ -151,6 +160,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "ZkSync",
     description: "ZkSync Verification",
     connectMessage: "Verify Account",
+    isEVM: true,
   },
   {
     icon: "./assets/lensStampIcon.svg",
@@ -158,6 +168,7 @@ export const PLATFORMS: PlatformSpec[] = [
     name: "Lens",
     description: "Lens Profile Verification",
     connectMessage: "Verify Account",
+    isEVM: true,
   },
   {
     icon: "./assets/gnosisSafeStampIcon.svg",
