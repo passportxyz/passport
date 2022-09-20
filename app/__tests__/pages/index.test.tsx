@@ -5,11 +5,19 @@ jest.mock("../../utils/onboard.ts");
 jest.mock("@datadog/browser-rum");
 jest.mock("@datadog/browser-logs");
 
-const broadcastChannel = jest.spyOn(require("broadcast-channel"), "BroadcastChannel");
+const mockPostMessage = jest.fn();
+jest.mock("broadcast-channel", () => {
+  return {
+    BroadcastChannel: jest.fn().mockImplementation(() => {
+      return {
+        postMessage: mockPostMessage,
+      };
+    }),
+  };
+});
 
 describe("when index is provided queryParams matching twitters OAuth response", () => {
   it("should postMessage to opener and close window", async () => {
-    const mockPostMessage = jest.fn();
     const mockCloseWindow = jest.fn();
 
     // Mock query params
@@ -19,11 +27,6 @@ describe("when index is provided queryParams matching twitters OAuth response", 
         search: "?code=ABC&state=twitter-123",
       },
     });
-
-    // Mock BroadcastChannel
-    broadcastChannel.mockImplementation(() => ({
-      postMessage: mockPostMessage,
-    }));
 
     // Mock window.close
     Object.defineProperty(window, "close", {
