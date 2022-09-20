@@ -154,6 +154,19 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
     }
   };
 
+  // Choose the function to return when the verify button is clicked for a stamp
+  // Generally this should just be the disclosure onOpen
+  const getOnOpenForPlatform = (platform) => {
+    switch (platform) {
+      case "AddNewStamp":
+        return () => {
+          window.open("https://docs.passport.gitcoin.co/gitcoin-passport-sdk/integrating-a-new-stamp", "_blank");
+        };
+      default:
+        return onOpen;
+    }
+  };
+
   useEffect(() => {
     // set providers for the current platform
     if (currentPlatform) {
@@ -173,7 +186,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
               key={i}
               platform={platform}
               btnRef={btnRef}
-              onOpen={onOpen}
+              onOpen={getOnOpenForPlatform(platform.platform)}
               selectedProviders={selectedProviders}
               updatedPlatforms={updatedPlatforms}
               getUpdatedPlatforms={getUpdatedPlatforms}

@@ -166,4 +166,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Gnosis Safe Signer/Owner Verification",
     connectMessage: "Verify Account",
   },
+  {
+    icon: "./assets/passportLogoStampIcon.svg",
+    platform: "AddNewStamp",
+    name: "Add a New Stamp!",
+    description: "Add your protocol's stamp to Gitcoin Passport",
+    connectMessage: "Get More Info",
+  },
 ];
