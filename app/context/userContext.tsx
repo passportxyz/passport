@@ -4,17 +4,17 @@ import React, { createContext, useEffect, useMemo, useState } from "react";
 // --- Wallet connection utilities
 import { useConnectWallet } from "@web3-onboard/react";
 import { initWeb3Onboard } from "../utils/onboard";
-import { OnboardAPI, WalletState } from "@web3-onboard/core/dist/types";
+import { WalletState } from "@web3-onboard/core/dist/types";
 import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
 
 // -- Ceramic and Glazed
 import { EthereumAuthProvider } from "@self.id/web";
 import { useViewerConnection } from "@self.id/framework";
-import { DIDSession } from "@glazed/did-session";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
+import { OnboardAPI } from "@web3-onboard/core";
 
 export interface UserContextState {
   loggedIn: boolean;
