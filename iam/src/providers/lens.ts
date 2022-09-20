@@ -3,7 +3,7 @@ import type { Provider, ProviderOptions } from "../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Ethers library
-import { Contract } from "ethers";
+import { Contract, BigNumber } from "ethers";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
 // Lens Hub Proxy Contract Address
@@ -49,9 +49,16 @@ const LENS_HUB_PROXY_ABI = [
     stateMutability: "view",
     type: "function",
   },
+  {
+    inputs: [{ internalType: "address", name: "owner", type: "address" }],
+    name: "balanceOf",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
 ];
 
-async function getUserHandle(userAddress: string): Promise<string> {
+async function getDefaultProfile(userAddress: string): Promise<string> {
   const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(process.env.POLYGON_RPC_URL);
 
   const contract = new Contract(LENS_HUB_PROXY_CONTRACT_ADDRESS, LENS_HUB_PROXY_ABI, provider);
@@ -63,6 +70,15 @@ async function getUserHandle(userAddress: string): Promise<string> {
   const userHandle: unknown = await contract.getHandle(profileId);
 
   return userHandle?.toString();
+}
+
+// If the user owns a lens handle this will return a number greater than 0
+async function getNumberOfHandles(userAddress: string): Promise<number> {
+  const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(process.env.POLYGON_RPC_URL);
+  const contract = new Contract(LENS_HUB_PROXY_CONTRACT_ADDRESS, LENS_HUB_PROXY_ABI, provider);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  const numberOfHandles: BigNumber = await contract.balanceOf(userAddress);
+  return numberOfHandles?._isBigNumber ? parseInt(numberOfHandles?._hex, 16) : 0;
 }
 
 // Export a Lens Profile Provider
@@ -78,34 +94,27 @@ export class LensProfileProvider implements Provider {
     this._options = { ...this._options, ...options };
   }
 
-  // Verify that address defined in the payload has a default lens handle
+  // Verify that address defined in the payload has a lens handle
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
-
     let valid = false;
-    let userHandle: string;
+    let numberOfHandles: number;
     try {
-      userHandle = await getUserHandle(address);
+      numberOfHandles = await getNumberOfHandles(address);
     } catch (e) {
       return {
         valid: false,
         error: ["Lens provider get user handle error"],
       };
     }
-
-    // Check for a valid lens handle
-    if (userHandle?.length > 4) {
-      const userHandleSplit = userHandle.split(".");
-      valid = userHandleSplit[userHandleSplit.length - 1] === "lens";
-    }
-
+    valid = numberOfHandles >= 1;
     return Promise.resolve({
       valid: valid,
       record: valid
         ? {
             address: address,
-            userHandle: userHandle,
+            numberOfHandles: numberOfHandles.toString(),
           }
         : {},
     });

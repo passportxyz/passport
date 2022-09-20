@@ -278,8 +278,8 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
   ],
   Lens: [
     {
-      platformGroup: "Account Name",
-      providers: [{ title: "Encrypted", name: "Lens" }],
+      platformGroup: "Lens Handle",
+      providers: [{ title: "At least 1 Lens Handle", name: "Lens" }],
     },
   ],
   GnosisSafe: [
