@@ -3,8 +3,7 @@ import React, { useEffect, useState } from "react";
 // --- Chakra UI Elements
 import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Switch, Spinner } from "@chakra-ui/react";
 
-import { PlatformSpec } from "../config/platforms";
-import { PlatformGroupSpec } from "../config/providers";
+import { PlatformSpec, PlatformGroupSpec } from "@gitcoin/passport-platforms/types";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { NoStampModal } from "./NoStampModal";
 

@@ -19,7 +19,8 @@
     "evm-providers",
     "schemas",
     "types",
-    "signer"
+    "signer",
+    "platforms"
   ],
   "scripts": {
     "clean": "lerna run clean",
