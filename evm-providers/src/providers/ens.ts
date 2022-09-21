@@ -27,17 +27,17 @@ export class EnsProvider implements Provider {
   // Verify that the address defined in the payload has an ENS reverse lookup registered
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
-      const { provider, address } = await getRPCProvider(payload);
+      const provider = getRPCProvider(payload);
       const staticProvider: StaticJsonRpcProvider = new StaticJsonRpcProvider(RPC_URL);
       // lookup ens name
-      const reportedName: string = await staticProvider.lookupAddress(address);
+      const reportedName: string = await staticProvider.lookupAddress(payload.address);
       if (!reportedName) return { valid: false, error: ["Ens name was not found for given address."] };
 
       // lookup the address resolved to an ens name
       const resolveAddress = await provider.resolveName(reportedName);
 
       // if the addresses match this is a valid ens lookup
-      const valid = utils.getAddress(address) === utils.getAddress(resolveAddress);
+      const valid = utils.getAddress(payload.address) === utils.getAddress(resolveAddress);
 
       return {
         valid: valid,

@@ -15,10 +15,7 @@ describe("signer", () => {
   it("getRPCProvider should return signer", async () => {
     const payload = { jsonRpcSigner: mockSigner } as RequestPayload;
     const provider = await getRPCProvider(payload);
-    expect(provider).toEqual({
-      provider: mockSigner,
-      address: MOCK_ADDRESS,
-    });
+    expect(provider).toEqual(mockSigner);
   });
 
   it("getRPCProvider should return provider", async () => {
@@ -27,9 +24,6 @@ describe("signer", () => {
       issuer: "did:key:z6MknoH3b2xBpjFRx2fYVqwLAcRCSXwEX3Y4XgwdGPDubwxt",
     } as RequestPayload;
     const provider = await getRPCProvider(payload);
-    expect(provider).toEqual({
-      provider: new StaticJsonRpcProvider(),
-      address: MOCK_ADDRESS,
-    });
+    expect(provider).toEqual(new StaticJsonRpcProvider());
   });
 });

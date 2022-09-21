@@ -29,15 +29,6 @@ describe("Attempt verification", function () {
     mockSigner.getAddress = jest.fn(async () => MOCK_ADDRESS);
   });
 
-  it("should make evm request with signer if provided", async () => {
-    const ens = new EnsProvider();
-    await ens.verify({
-      jsonRpcSigner: mockSigner,
-    } as unknown as RequestPayload);
-
-    expect(mockSigner.getAddress).toHaveBeenCalled();
-  });
-
   it("handles valid verification attempt", async () => {
     const ens = new EnsProvider();
     const verifiedPayload = await ens.verify({

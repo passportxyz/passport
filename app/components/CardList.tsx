@@ -20,7 +20,6 @@ import {
   LinkedinPlatform,
   GitcoinPlatform,
   DiscordPlatform,
-  // SignerCard,
   GitPOAPPlatform,
   SnapshotPlatform,
   EthPlatform,
