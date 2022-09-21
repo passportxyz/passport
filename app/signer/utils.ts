@@ -12,7 +12,7 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const providerId: PROVIDER_ID = "Signer";
 const signerUrl = process.env.NEXT_PUBLIC_PASSPORT_SIGNER_URL || "http://localhost:8000/";
-type AdditionalSignature = { addr: string; sig: string; msg: string };
+export type AdditionalSignature = { addr: string; sig: string; msg: string };
 
 // open Signer url in an iframe
 function openSigner(url: string): HTMLIFrameElement {

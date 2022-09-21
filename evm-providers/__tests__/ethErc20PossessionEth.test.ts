@@ -10,6 +10,19 @@ import { formatUnits } from "@ethersproject/units";
 
 import { mock } from "jest-mock-extended";
 
+import { getRPCProvider } from "../src/utils/signer";
+
+const mockGetBalanceSigner = jest.fn();
+jest.mock("../src/utils/signer", () => {
+  return {
+    getRPCProvider: jest.fn().mockImplementation(() => {
+      return {
+        getBalance: mockGetBalance,
+      };
+    }),
+  };
+});
+
 jest.mock("@ethersproject/units", () => ({
   formatUnits: jest.fn(),
 }));
@@ -18,11 +31,6 @@ const mockGetBalance = jest.fn();
 jest.mock("@ethersproject/providers", () => {
   return {
     StaticJsonRpcProvider: jest.fn().mockImplementation(() => {
-      return {
-        getBalance: mockGetBalance,
-      };
-    }),
-    JsonRpcSigner: jest.fn().mockImplementation(() => {
       return {
         getBalance: mockGetBalance,
       };
@@ -41,19 +49,38 @@ describe("Attempt verification", function () {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetBalance.mockResolvedValue(MOCK_BALANCE);
+    mockGetBalanceSigner.mockResolvedValue(MOCK_BALANCE);
     (formatUnits as jest.Mock).mockImplementation((num: string, power: number) => {
       return parseFloat(num) / Math.pow(10, power);
+    });
+    jest.mock("../src/utils/signer", () => {
+      return {
+        getRPCProvider: jest.fn().mockImplementation(() => {
+          return {
+            getBalance: mockGetBalance,
+          };
+        }),
+      };
     });
   });
 
   it("should return valid response with signer", async () => {
+    jest.mock("../src/utils/signer", () => {
+      return {
+        getRPCProvider: jest.fn().mockImplementation(() => {
+          return {
+            getBalance: mockGetBalance,
+          };
+        }),
+      };
+    });
     const ethPossessions = new EthErc20PossessionProvider({
       threshold: 1,
       recordAttribute: "ethPossessionsGte",
     });
 
     const verifiedPayload = await ethPossessions.verify({
-      jsonRPCSigner: mockSigner,
+      jsonRpcSigner: mockSigner,
       address: MOCK_ADDRESS_LOWER,
     } as unknown as RequestPayload);
 

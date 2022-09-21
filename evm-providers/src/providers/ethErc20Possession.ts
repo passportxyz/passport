@@ -58,6 +58,7 @@ export async function getTokenBalance(
 export async function getEthBalance(address: string, payload: RequestPayload): Promise<number> {
   // define a provider using the rpc url
   const provider = getRPCProvider(payload);
+  console.log({ provider });
   const ethBalance = await provider?.getBalance(address);
   // convert a currency unit from wei to ether
   const balanceFormatted: string = formatUnits(ethBalance, 18);

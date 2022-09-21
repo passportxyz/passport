@@ -24,6 +24,7 @@
         window.parent.postMessage(exit, "*");
       }
       try {
+        console.log('tryinggg')
         // after 60 seconds send exit cmd back to parent
         setTimeout(() => {
           window.parent.postMessage(exit, "*");
@@ -34,6 +35,7 @@
         });
         // Only fires off the process if a signature is requested on opening and a challenge string is provided
         window.addEventListener("message", async (event) => {
+          console.log({ event }, "message in signer html")
           if (event.data.cmd === "sign_message" && event.data.msg) {        
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             // request wallet selector

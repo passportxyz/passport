@@ -6,6 +6,7 @@ import { useConnectWallet } from "@web3-onboard/react";
 import { initWeb3Onboard } from "../utils/onboard";
 import { WalletState } from "@web3-onboard/core/dist/types";
 import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
+import { OnboardAPI } from "@web3-onboard/core";
 
 // -- Ceramic and Glazed
 import { EthereumAuthProvider } from "@self.id/web";
