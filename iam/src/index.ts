@@ -23,7 +23,7 @@ import {
   CredentialResponseBody,
   ProviderContext,
 } from "@gitcoin/passport-types";
-import { EnsProvider } from "@gitcoin/passport-evm-providers/dist/commonjs/src/index";
+import { EnsProvider, EthErc20PossessionProvider } from "@gitcoin/passport-evm-providers/dist/commonjs/src/index";
 
 import { getChallenge } from "./utils/challenge";
 
@@ -75,7 +75,6 @@ import { GitcoinContributorStatisticsProvider } from "./providers/gitcoinGrantsC
 import { GitcoinGranteeStatisticsProvider } from "./providers/gitcoinGrantsGranteeStatistics";
 import { SnapshotProposalsProvider } from "./providers/snapshotProposalsProvider";
 import { SnapshotVotesProvider } from "./providers/snapshotVotesProvider";
-import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
 import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./providers/ethTransactions";
 import { NFTProvider } from "./providers/nft";
 import { GitPOAPProvider } from "./providers/gitpoap";
