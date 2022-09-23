@@ -58,7 +58,6 @@ export async function getTokenBalance(
 export async function getEthBalance(address: string, payload: RequestPayload): Promise<number> {
   // define a provider using the rpc url
   const provider = getRPCProvider(payload);
-  console.log({ provider });
   const ethBalance = await provider?.getBalance(address);
   // convert a currency unit from wei to ether
   const balanceFormatted: string = formatUnits(ethBalance, 18);
@@ -76,7 +75,7 @@ export type ethErc20PossessionProviderOptions = {
 // Export an Eth ERC20 Possessions Provider. This is intended to be a generic implementation that should be extended
 export class EthErc20PossessionProvider implements Provider {
   // The type will be determined dynamically, from the options passed in to the constructor
-  type = "";
+  type = "EthErc20PossessionProvider";
 
   // Options can be set here and/or via the constructor
   _options: ethErc20PossessionProviderOptions = {
