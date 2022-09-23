@@ -59,6 +59,7 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
                     try {
                       // fetch the credentials
                       const additionalSigner = await fetchAdditionalSigner(address!);
+                      // alternate solution to return signer is eval('(' + decodeURI(e.data) + ')();'); but possibly insecure
                       setAdditionalSigner(additionalSigner);
                     } finally {
                       // mark as done
