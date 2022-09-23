@@ -75,7 +75,7 @@ export type ethErc20PossessionProviderOptions = {
 // Export an Eth ERC20 Possessions Provider. This is intended to be a generic implementation that should be extended
 export class EthErc20PossessionProvider implements Provider {
   // The type will be determined dynamically, from the options passed in to the constructor
-  type = "EthErc20PossessionProvider";
+  type = "";
 
   // Options can be set here and/or via the constructor
   _options: ethErc20PossessionProviderOptions = {
@@ -97,11 +97,17 @@ export class EthErc20PossessionProvider implements Provider {
     const { address } = payload;
     let valid = false;
     let amount = 0;
+    const currentAddress = payload?.signer?.address ?? address;
     try {
       if (this._options.contractAddress.length > 0) {
-        amount = await getTokenBalance(address, this._options.contractAddress, this._options.decimalNumber, payload);
+        amount = await getTokenBalance(
+          currentAddress,
+          this._options.contractAddress,
+          this._options.decimalNumber,
+          payload
+        );
       } else {
-        amount = await getEthBalance(address, payload);
+        amount = await getEthBalance(currentAddress, payload);
       }
     } catch (e) {
       return {
