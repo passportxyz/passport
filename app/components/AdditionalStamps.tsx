@@ -1,18 +1,25 @@
 // --- React Methods
 import React, { useEffect, useState } from "react";
-import { AdditionalSignature, EVMStamps, fetchPossibleEVMStamps } from "../signer/utils";
+import { AdditionalSignature, EVMStamp, fetchPossibleEVMStamps } from "../signer/utils";
 import { VerifiedPayload } from "@gitcoin/passport-types";
 import { getPlatformSpec } from "../config/platforms";
 import { Button } from "@chakra-ui/react";
+import { AddAdditionalStamp } from "./AddAdditionalStamp";
 
 export type AdditionalStampProps = {
   payload: VerifiedPayload;
   type: string;
 };
 
-export const AdditionalStamps = ({ additionalSigner }: { additionalSigner: AdditionalSignature }) => {
-  const [additionalStamps, setAdditionalStamps] = useState<EVMStamps[] | undefined>();
-  const [requestedStamps, setRequestedStamps] = useState<string[]>([]);
+export const AdditionalStamps = ({
+  additionalSigner,
+  onClose,
+}: {
+  additionalSigner: AdditionalSignature;
+  onClose: () => void;
+}) => {
+  const [additionalStamps, setAdditionalStamps] = useState<EVMStamp[] | undefined>();
+  const [requestedStamp, setRequestedStamp] = useState<EVMStamp | undefined>();
 
   const checkAdditionalStamps = async (address: string) => {
     const additionalStamps = await fetchPossibleEVMStamps(address);
@@ -23,8 +30,24 @@ export const AdditionalStamps = ({ additionalSigner }: { additionalSigner: Addit
       checkAdditionalStamps(additionalSigner.addr);
     }
   }, [additionalSigner]);
+
+  if (requestedStamp) {
+    return (
+      <AddAdditionalStamp
+        stampAdded={() => setRequestedStamp(undefined)}
+        additionalSigner={additionalSigner}
+        stamp={requestedStamp}
+      />
+    );
+  }
+
   return (
     <>
+      <div className="flex w-full justify-end">
+        <button onClick={onClose} className="float-left p-2">
+          <img className="w-4" src="./assets/cross.svg" alt="Back arrow" />
+        </button>
+      </div>
       <div className="mt-2 w-fit rounded-full bg-gray-100">
         <img className="m-2" alt="shield-exclamation-icon" src="./assets/check-icon.svg" />
       </div>
@@ -45,7 +68,7 @@ export const AdditionalStamps = ({ additionalSigner }: { additionalSigner: Addit
                       {/* <p>{stamp.payload.record}</p> */}
                     </div>
                   </div>
-                  <Button onClick={() => setRequestedStamps([...requestedStamps, stamp.providerType])}>
+                  <Button onClick={() => setRequestedStamp(stamp)}>
                     <img src="./assets/plus.svg" alt="Plus Image" className="pr-2" />
                     Add
                   </Button>
@@ -56,6 +79,9 @@ export const AdditionalStamps = ({ additionalSigner }: { additionalSigner: Addit
           }
         })}
       </div>
+      <button onClick={onClose} data-testid="button-verify-ens" className="sidebar-verify-btn">
+        Done
+      </button>
     </>
   );
 };
