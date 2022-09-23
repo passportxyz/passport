@@ -28,7 +28,7 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
       <ModalContent>
         <div className="m-3 flex flex-col items-center">
           {additionalSigner ? (
-            <AdditionalStamps additionalSigner={additionalSigner} />
+            <AdditionalStamps additionalSigner={additionalSigner} onClose={onClose} />
           ) : (
             <>
               <div className="mt-2 w-fit rounded-full bg-pink-500/25">
