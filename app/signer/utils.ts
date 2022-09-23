@@ -1,13 +1,14 @@
+import { Provider } from "./../../iam/src/types.d";
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 
 // --- Identity tools
-import {
-  fetchChallengeCredential,
-  fetchVerifiableCredential,
-} from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
-import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { fetchChallengeCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { PLATFORM_ID, PROVIDER_ID, VerifiedPayload } from "@gitcoin/passport-types";
+
+// evm providers
+import { EthErc20PossessionProvider, EnsProvider } from "@gitcoin/passport-evm-providers/dist/commonjs/src";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const providerId: PROVIDER_ID = "Signer";
@@ -76,7 +77,6 @@ export const fetchAdditionalSigner = async (address: string): Promise<Additional
           signerUrl
         );
       } else if (event.data?.cmd == "signed_message") {
-        console.log({ event }, "signed_message");
         // cleanup
         clearListener();
         // resolve outer with the signed message result
@@ -136,4 +136,84 @@ export const fetchAdditionalSigner = async (address: string): Promise<Additional
   //     return undefined;
   //   });
   // return undefined;
+};
+
+type EVMPlatforms = {
+  platform: PLATFORM_ID;
+  providers: Provider[];
+};
+
+const platforms: EVMPlatforms[] = [
+  {
+    platform: "GTC",
+    providers: [
+      new EthErc20PossessionProvider({
+        threshold: 100,
+        recordAttribute: "gtcPossessionsGte",
+        contractAddress: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f",
+        error: "GTC Possessions >= 100 Provider verify Error",
+      }),
+      new EthErc20PossessionProvider({
+        threshold: 10,
+        recordAttribute: "gtcPossessionsGte",
+        contractAddress: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f",
+        error: "GTC Possessions >= 10 Provider verify Error",
+      }),
+    ],
+  },
+  {
+    platform: "ETH",
+    providers: [
+      new EthErc20PossessionProvider({
+        threshold: 32,
+        recordAttribute: "ethPossessionsGte",
+        error: "ETH Possessions >= 32 Provider verify Error",
+      }),
+      new EthErc20PossessionProvider({
+        threshold: 10,
+        recordAttribute: "ethPossessionsGte",
+        error: "ETH Possessions >= 10 Provider verify Error",
+      }),
+      new EthErc20PossessionProvider({
+        threshold: 1,
+        recordAttribute: "ethPossessionsGte",
+        error: "ETH Possessions >= 1 Provider verify Error",
+      }),
+    ],
+  },
+  {
+    platform: "Ens",
+    providers: [new EnsProvider()],
+  },
+];
+
+export type EVMStamps = {
+  providerType: string;
+  platformType: PLATFORM_ID;
+  payload: VerifiedPayload;
+};
+
+export const fetchPossibleEVMStamps = async (address: string): Promise<EVMStamps[]> => {
+  const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
+
+  const providerRequests = platforms
+    .map((platform) => {
+      return platform.providers.map(async (provider) => {
+        const payload = await provider.verify({
+          type: "",
+          address,
+          version: "0.0.0",
+          rpcUrl,
+        });
+        return {
+          payload,
+          providerType: provider.type,
+          platformType: platform.platform,
+        };
+      });
+    })
+    .flat();
+
+  const verifiedProviders = await Promise.all(providerRequests);
+  return verifiedProviders;
 };
