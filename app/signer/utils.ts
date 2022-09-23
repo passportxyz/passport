@@ -94,48 +94,6 @@ export const fetchAdditionalSigner = async (address: string): Promise<Additional
     window.addEventListener("message", listener);
   });
   return extraSignature;
-  // console.log({ extraSignature });
-  // We should have an extraSignature, time to fetch what stamps they COULD include
-  // await fetchVerifiableCredential(
-  //   iamUrl,
-  //   {
-  //     type: "Signer",
-  //     types: ["Poh", "POAP", "Ens"],
-  //     version: "0.0.0",
-  //     address: address || "",
-  //     proofs: {
-  //       valid: address ? "true" : "false",
-  //     },
-  //     signer: {
-  //       challenge: challenge,
-  //       signature: extraSignature?.sig,
-  //       address: extraSignature?.addr,
-  //     },
-  //   },
-  //   signer as { signMessage: (message: string) => Promise<string> }
-  // )
-  //   .then(async (verified: VerifiableCredentialRecord): Promise<(Stamp | undefined)[]> => {
-  //     // because we provided a types array in the params we expect to receive a credentials array in the response...
-  //     const vcs =
-  //       verified.credentials
-  //         ?.map((cred: CredentialResponseBody): Stamp | undefined => {
-  //           if (!cred.error) {
-  //             // add each of the requested/received stamps to the passport...
-  //             return {
-  //               provider: cred.record?.type as PROVIDER_ID,
-  //               credential: cred.credential as VerifiableCredential,
-  //             };
-  //           }
-  //         })
-  //         .filter((v: Stamp | undefined) => v) || [];
-  //     return vcs;
-  //   })
-  //   .catch((e: any): void => {
-  //     datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
-  //     datadogRum.addError(e, { provider: providerId });
-  //     return undefined;
-  //   });
-  // return undefined;
 };
 
 type EVMPlatforms = {
@@ -187,13 +145,13 @@ const platforms: EVMPlatforms[] = [
   },
 ];
 
-export type EVMStamps = {
+export type EVMStamp = {
   providerType: string;
   platformType: PLATFORM_ID;
   payload: VerifiedPayload;
 };
 
-export const fetchPossibleEVMStamps = async (address: string): Promise<EVMStamps[]> => {
+export const fetchPossibleEVMStamps = async (address: string): Promise<EVMStamp[]> => {
   const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
 
   const providerRequests = platforms
