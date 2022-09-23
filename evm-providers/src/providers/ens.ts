@@ -28,7 +28,7 @@ export class EnsProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
       const provider = getRPCProvider(payload);
-      const staticProvider: StaticJsonRpcProvider = new StaticJsonRpcProvider(RPC_URL);
+      const staticProvider: StaticJsonRpcProvider = new StaticJsonRpcProvider(payload.rpcUrl);
       // lookup ens name
       const reportedName: string = await staticProvider.lookupAddress(payload.address);
       if (!reportedName) return { valid: false, error: ["Ens name was not found for given address."] };
