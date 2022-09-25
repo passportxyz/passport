@@ -162,7 +162,7 @@ export default function GithubPlatform(): JSX.Element {
                 }
               })
               .filter((v: Stamp | undefined) => v) || [];
-          // Update/remove stamps
+          // Remove stamps
           await handleDeleteStamps(providerIds as PROVIDER_ID[]);
           // Add all the stamps to the passport at once
           await handleAddStamps(vcs as Stamp[]);
@@ -188,7 +188,7 @@ export default function GithubPlatform(): JSX.Element {
 
           // Custom Success Toast
           if (updatedMinusInitial.size > 0 && initialMinusUpdated.size === 0) {
-            addedDataPointsToast(updatedMinusInitial);
+            addedDataPointsToast(updatedMinusInitial, initialVerifiedProviders);
           } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
             removedDataPointsToast(initialMinusUpdated);
           } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size > 0) {
@@ -209,16 +209,17 @@ export default function GithubPlatform(): JSX.Element {
     }
   }
 
-  const addedDataPointsToast = (updatedVPs: Set<PROVIDER_ID>) => {
+  // --- Done Toast Helpers
+  const addedDataPointsToast = (updatedMinusInitals: Set<PROVIDER_ID>, initalVPs: Set<PROVIDER_ID>) => {
     toast({
       duration: 5000,
       isClosable: true,
       render: (result: any) => (
         <DoneToastContent
           title="Success!"
-          body={`You've verified ${updatedVPs.size + initialVerifiedProviders.size} ${platformId} data points out of ${
+          body={`You've verified ${updatedMinusInitals.size + initalVPs.size} out of ${
             providerIds.length
-          }.`}
+          } ${platformId} data points.`}
           icon="../../assets/check-icon.svg"
           platformId={platformId}
           result={result}
@@ -234,7 +235,9 @@ export default function GithubPlatform(): JSX.Element {
       render: (result: any) => (
         <DoneToastContent
           title="Success!"
-          body={`You've removed ${initialVPs.size} ${platformId} data points. You can re-verify them later.`}
+          body={`You've removed ${initialVPs.size} ${platformId} data ${
+            initialVPs.size > 1 || initialVPs.size === 0 ? "points" : "point"
+          }. You can re-verify ${initialVPs.size > 1 || initialVPs.size === 0 ? "them" : "it"} later.`}
           icon="../../assets/check-icon.svg"
           platformId={platformId}
           result={result}
@@ -250,7 +253,9 @@ export default function GithubPlatform(): JSX.Element {
       render: (result: any) => (
         <DoneToastContent
           title="Success!"
-          body={`You've verified ${updatedVPs.size} and removed ${initialVPs.size} ${platformId} data points out of ${providerIds.length}.`}
+          body={`You've removed ${initialVPs.size} ${platformId} data ${
+            initialVPs.size > 1 || initialVPs.size === 0 ? "points" : "point"
+          }. You can re-verify ${initialVPs.size > 1 || initialVPs.size === 0 ? "them" : "it"} later.`}
           icon="../../assets/check-icon.svg"
           platformId={platformId}
           result={result}
@@ -283,7 +288,7 @@ export default function GithubPlatform(): JSX.Element {
         <DoneToastContent
           title="Verificaton Failed"
           body="Please make sure you fulfill the requirements for this stamp."
-          icon=""
+          icon="whiteBgShieldExclamation.svg"
           platformId={platformId}
           result={result}
         />

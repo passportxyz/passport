@@ -30,7 +30,7 @@ export const DoneToastContent = ({
     >
       <div className="flex p-4">
         <div className="mr-2">
-          <button className="mt-2 cursor-not-allowed rounded-full bg-gray-100">
+          <button className="mt-1 cursor-not-allowed rounded-full bg-gray-100">
             <img alt="information circle" className="sticky top-0" src={icon} />
           </button>
         </div>

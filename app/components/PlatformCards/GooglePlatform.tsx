@@ -31,6 +31,9 @@ import { useToast } from "@chakra-ui/react";
 import { getPlatformSpec } from "../../config/platforms";
 import { STAMP_PROVIDERS } from "../../config/providers";
 
+// --- Helpers
+import { difference } from "../../utils/helpers";
+
 // import from .env
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const googleClientId = process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CLIENT_ID || "";
@@ -40,7 +43,7 @@ const platformId: PLATFORM_ID = "Google";
 
 export default function GooglePlatform(): JSX.Element {
   const { address, signer } = useContext(UserContext);
-  const { handleAddStamps, allProvidersState, handleUpdateStamps } = useContext(CeramicContext);
+  const { handleAddStamps, allProvidersState, handleDeleteStamps } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
 
@@ -59,6 +62,9 @@ export default function GooglePlatform(): JSX.Element {
   );
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
+
+  // Create Set to check initial verified providers
+  const initialVerifiedProviders = new Set(verifiedProviders);
 
   // any time we change selection state...
   useEffect(() => {
@@ -102,7 +108,7 @@ export default function GooglePlatform(): JSX.Element {
             })
             .filter((v: Stamp | undefined) => v) || [];
         // Update/remove stamps
-        await handleUpdateStamps(providerIds as PROVIDER_ID[]);
+        await handleDeleteStamps(providerIds as PROVIDER_ID[]);
         // Add all the stamps to the passport at once
         await handleAddStamps(vcs as Stamp[]);
         datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
@@ -114,14 +120,23 @@ export default function GooglePlatform(): JSX.Element {
         // both verified and selected should look the same after save
         setVerifiedProviders([...actualVerifiedProviders]);
         setSelectedProviders([...actualVerifiedProviders]);
+        // Create Set to check changed providers after verification
+        const updatedVerifiedProviders = new Set(actualVerifiedProviders);
+
+        // Initial providers set minus updated providers set to determine which data points were removed
+        const initialMinusUpdated = difference(initialVerifiedProviders, updatedVerifiedProviders);
+        // Updated providers set minus initial providers set to determine which data points were added
+        const updatedMinusInitial = difference(updatedVerifiedProviders, initialVerifiedProviders);
         // reset can submit state
         setCanSubmit(false);
         // Custom Success Toast
-        toast({
-          duration: 5000,
-          isClosable: true,
-          render: (result: any) => <DoneToastContent platformId={platformId} result={result} />,
-        });
+        if (updatedMinusInitial.size === providerIds.length) {
+          completeVerificationToast();
+        } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
+          removedDataPointsToast(initialMinusUpdated);
+        } else {
+          failedVerificationToast();
+        }
       })
       .catch((e): void => {
         datadogLogs.logger.error("Verification Error", { error: e, platformId: platformId });
@@ -130,6 +145,55 @@ export default function GooglePlatform(): JSX.Element {
       .finally(() => {
         setLoading(false);
       });
+  };
+
+  // --- Done Toast Helpers
+  const removedDataPointsToast = (initialVPs: Set<PROVIDER_ID>) => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => (
+        <DoneToastContent
+          title="Success!"
+          body={`You've removed ${initialVPs.size} ${platformId} data points. You can re-verify them later.`}
+          icon="../../assets/check-icon.svg"
+          platformId={platformId}
+          result={result}
+        />
+      ),
+    });
+  };
+
+  const completeVerificationToast = () => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => (
+        <DoneToastContent
+          title="Done!"
+          body={`${platformId} stamp completely verified.`}
+          icon="../../assets/check-icon.svg"
+          platformId={platformId}
+          result={result}
+        />
+      ),
+    });
+  };
+
+  const failedVerificationToast = () => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => (
+        <DoneToastContent
+          title="Verificaton Failed"
+          body="Please make sure you fulfill the requirements for this stamp."
+          icon="../../assets/whiteBgShieldExclamation.svg"
+          platformId={platformId}
+          result={result}
+        />
+      ),
+    });
   };
 
   const onGoogleSignInFailure = (): void => {
