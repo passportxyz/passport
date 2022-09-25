@@ -89,7 +89,7 @@ export const PlatformCard = ({
           <p className="pleading-relaxed hidden md:inline-block">{platform.description}</p>
         </div>
         <div className="mt-auto">
-          {selectedProviders[platform.platform].length === 0 ? (
+          {selectedProviders[platform.platform].length > 0 ? (
             <>
               <Menu>
                 <MenuButton className="verify-btn flex" data-testid="card-menu-button">
