@@ -208,13 +208,22 @@ export class CeramicDatabase implements DataStorageBase {
   }
 
   // Update stamps by providerIds
-  async updateStamps(providerIds: PROVIDER_ID[]): Promise<void> {
+  async deleteStamps(providerIds: PROVIDER_ID[]): Promise<void> {
     this.logger.info(`updating stamp(s) on ${this.did}`);
 
     const passport = await this.store.get("Passport");
 
     // filter Passport stamp list by the platform's providerIds
     if (passport && passport.stamps) {
+      await Promise.all(passport.stamps.map(async (stamp) => {
+        const regex = /ceramic:\/*/i;
+        const cred = stamp.credential.replace(regex, '');
+
+        if (providerIds.includes(stamp.provider as PROVIDER_ID)) {
+          await this.deleteStamp(cred);
+        }
+      }));
+
       const updatedStamps = passport.stamps.filter(stamp => !providerIds.includes(stamp.provider as PROVIDER_ID));
 
       // overwrite stamps array with updated stamps on the passport

@@ -15,6 +15,7 @@ import { pillLocalStorage } from "../context/userContext";
 
 // --- Components
 import { JsonOutputModal } from "./JsonOutputModal";
+import { RemoveStampModal } from "./RemoveStampModal";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -40,13 +41,20 @@ export const PlatformCard = ({
   getUpdatedPlatforms,
 }: PlatformCardProps): JSX.Element => {
   // import all providers
-  const { allProvidersState, handleUpdateStamps } = useContext(CeramicContext);
+  const { allProvidersState, handleDeleteStamps } = useContext(CeramicContext);
 
   // useDisclosure to control JSON modal
   const {
     isOpen: isOpenJsonOutputModal,
     onOpen: onOpenJsonOutputModal,
     onClose: onCloseJsonOutputModal,
+  } = useDisclosure();
+
+  // useDisclosure to control stamp removal modal
+  const {
+    isOpen: isOpenRemoveStampModal,
+    onOpen: onOpenRemoveStampModal,
+    onClose: onCloseRemoveStampModal,
   } = useDisclosure();
 
   // returns a single Platform card
@@ -135,16 +143,7 @@ export const PlatformCard = ({
                   >
                     Manage stamp
                   </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      handleUpdateStamps(
-                        STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
-                          return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-                        }, [] as PROVIDER_ID[]) || []
-                      );
-                    }}
-                    data-testid="remove-stamp"
-                  >
+                  <MenuItem onClick={onOpenRemoveStampModal} data-testid="remove-stamp">
                     Remove stamp
                   </MenuItem>
                 </MenuList>
@@ -157,6 +156,19 @@ export const PlatformCard = ({
                 jsonOutput={selectedProviders[platform.platform].map(
                   (providerId) => allProvidersState[providerId]?.stamp?.credential
                 )}
+              />
+              <RemoveStampModal
+                isOpen={isOpenRemoveStampModal}
+                onClose={onCloseRemoveStampModal}
+                title={`Remove ${platform.name} Stamp`}
+                body={`You can find the ${platform.name} JSON data below`}
+                stampsToBeDeleted={
+                  STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
+                    return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+                  }, [] as PROVIDER_ID[]) || []
+                }
+                handleDeleteStamps={handleDeleteStamps}
+                platformId={platform.name as PLATFORM_ID}
               />
             </>
           ) : (
