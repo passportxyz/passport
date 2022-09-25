@@ -89,7 +89,7 @@ export const PlatformCard = ({
           <p className="pleading-relaxed hidden md:inline-block">{platform.description}</p>
         </div>
         <div className="mt-auto">
-          {selectedProviders[platform.platform].length > 0 ? (
+          {selectedProviders[platform.platform].length === 0 ? (
             <>
               <Menu>
                 <MenuButton className="verify-btn flex" data-testid="card-menu-button">
@@ -161,7 +161,9 @@ export const PlatformCard = ({
                 isOpen={isOpenRemoveStampModal}
                 onClose={onCloseRemoveStampModal}
                 title={`Remove ${platform.name} Stamp`}
-                body={`You can find the ${platform.name} JSON data below`}
+                body={
+                  "This stamp will be removed from your Passport. You can still re-verify your stamp in the future."
+                }
                 stampsToBeDeleted={
                   STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
                     return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));

@@ -11,8 +11,12 @@ import {
   ModalBody,
   Stack,
   Button,
+  useToast,
 } from "@chakra-ui/react";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+
+// --- Style Components
+import { DoneToastContent } from "./DoneToastContent";
 
 export type RemoveStampModalProps = {
   isOpen: boolean;
@@ -35,29 +39,63 @@ export const RemoveStampModal = ({
   handleDeleteStamps,
   platformId,
 }: RemoveStampModalProps): JSX.Element => {
+  const toast = useToast();
+
   const handleStampRemoval = () => {
     handleDeleteStamps(stampsToBeDeleted);
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => (
+        <DoneToastContent
+          title="Success!"
+          body="Stamp data has been removed."
+          icon="../assets/check-icon.svg"
+          result={result}
+        />
+      ),
+    });
+    onClose();
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay />
-      <ModalContent rounded={"none"} padding={4} maxW="80%" maxH="80%">
-        <ModalHeader borderBottomWidth={2} borderBottomColor={"gray.200"}>
-          <p className="font-miriam-libre">{title}</p>
+      <ModalOverlay width="100%" height="100%" />
+      <ModalContent
+        rounded={"none"}
+        padding={5}
+        maxW={{
+          sm: "100%",
+          md: "55%",
+          xl: "45%",
+        }}
+        maxH="80%"
+      >
+        <ModalHeader>
+          <img src="../assets/shieldAlert.svg" className="m-auto mb-4 w-10" />
+          <p className="font-miriam-libre text-center">{title}</p>
         </ModalHeader>
         <ModalCloseButton />
-        <ModalBody className="font-miriam-libre overflow-auto">{body}</ModalBody>
+        <ModalBody color="#757087" className="font-miriam-libre mb-10 overflow-auto text-center">
+          {body}
+        </ModalBody>
 
-        <Stack borderTopWidth={2} borderTopColor={"gray.200"}>
-          <Button data-testid="button-stamp-removal-cancel" width="50%" rounded={"base"} mr={3} onClick={onClose}>
+        <Stack direction={["column", "row"]} align="center">
+          <Button
+            data-testid="button-stamp-removal-cancel"
+            width="50%"
+            rounded={"base"}
+            onClick={onClose}
+            backgroundColor="#fff"
+            borderWidth={1}
+            borderColor="#e6e4e9"
+          >
             <span className="font-miriam-libre">{"Cancel"}</span>
           </Button>
           <Button
             data-testid="button-stamp-removal"
             width="50%"
             rounded={"base"}
-            mr={3}
             colorScheme="purple"
             onClick={handleStampRemoval}
           >
