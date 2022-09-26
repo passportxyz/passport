@@ -1,5 +1,5 @@
 // --- React Methods
-import React from "react";
+import React, { useState } from "react";
 
 // --- Chakra Elements
 import {
@@ -39,10 +39,12 @@ export const RemoveStampModal = ({
   handleDeleteStamps,
   platformId,
 }: RemoveStampModalProps): JSX.Element => {
+  const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
 
-  const handleStampRemoval = () => {
-    handleDeleteStamps(stampsToBeDeleted);
+  const handleStampRemoval = async () => {
+    setIsLoading(true);
+    await handleDeleteStamps(stampsToBeDeleted);
     toast({
       duration: 5000,
       isClosable: true,
@@ -55,6 +57,7 @@ export const RemoveStampModal = ({
         />
       ),
     });
+    setIsLoading(false);
     onClose();
   };
 
@@ -98,6 +101,9 @@ export const RemoveStampModal = ({
             rounded={"base"}
             colorScheme="purple"
             onClick={handleStampRemoval}
+            isLoading={isLoading}
+            loadingText="Removing Stamp"
+            className="font-miriam-libre"
           >
             <span className="font-miriam-libre">{closeButtonText || "Remove Stamp"}</span>
           </Button>
