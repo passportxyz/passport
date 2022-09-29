@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 // --- Chakra UI Elements
 import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Switch, Spinner } from "@chakra-ui/react";
 
-import { PlatformSpec, PlatformGroupSpec } from "@gitcoin/passport-platforms/types";
+import { PlatformSpec, PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { NoStampModal } from "./NoStampModal";
 
@@ -105,7 +105,9 @@ export const SideBarContent = ({
                           return (
                             <li
                               className={`ml-4 ${
-                                verifiedProviders?.indexOf(provider.name) !== -1 ? `text-green-500` : `text-gray-400`
+                                verifiedProviders?.indexOf(provider.name as PROVIDER_ID) !== -1
+                                  ? `text-green-500`
+                                  : `text-gray-400`
                               }`}
                               key={`${provider.title}${i}`}
                             >
@@ -120,7 +122,8 @@ export const SideBarContent = ({
                           size="lg"
                           isChecked={
                             stamp.providers?.reduce(
-                              (isPresent, provider) => isPresent || selectedProviders?.indexOf(provider.name) !== -1,
+                              (isPresent, provider) =>
+                                isPresent || selectedProviders?.indexOf(provider.name as PROVIDER_ID) !== -1,
                               false as boolean // typing the response - always bool
                             ) || false
                           }

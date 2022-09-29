@@ -10,8 +10,6 @@ import { BroadcastChannel } from "broadcast-channel";
 // --- Identity tools
 import {
   Stamp,
-  PLATFORM_ID,
-  PROVIDER_ID,
   VerifiableCredential,
   CredentialResponseBody,
   VerifiableCredentialRecord,
@@ -19,21 +17,24 @@ import {
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Style Components
-import { SideBarContent } from "@gitcoin/passport-app/components/SideBarContent";
-import { DoneToastContent } from "@gitcoin/passport-app/components/DoneToastContent";
+import { SideBarContent } from "./SideBarContent";
+import { DoneToastContent } from "./DoneToastContent";
 import { useToast } from "@chakra-ui/react";
 
 // --- Context
-import { CeramicContext } from "@gitcoin/passport-app/context/ceramicContext";
-import { UserContext } from "@gitcoin/passport-app/context/userContext";
+import { CeramicContext } from "../context/ceramicContext";
+import { UserContext } from "../context/userContext";
 
-// --- Platform definitions
-import { Platform, Providers } from "./Types";
+// --- Types
+import { PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
+import { getPlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/src/platforms-config";
 
-// Each platform is recognised by its ID
-const platformId: PLATFORM_ID = "Twitter";
+type PlatformProps = {
+  platformId: string;
+  platformgroupspec: PlatformGroupSpec[];
+};
 
-export default function TwitterPlatform(): JSX.Element {
+export const GenericOauthPlatform = ({ platformId, platformgroupspec }: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
@@ -42,7 +43,7 @@ export default function TwitterPlatform(): JSX.Element {
   // find all providerIds
   const providerIds = useMemo(
     () =>
-      Providers[platformId]?.reduce((all, stamp) => {
+      platformgroupspec?.reduce((all, stamp) => {
         return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
       }, [] as PROVIDER_ID[]) || [],
     []
@@ -50,7 +51,9 @@ export default function TwitterPlatform(): JSX.Element {
 
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
-    providerIds.filter((providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined")
+    providerIds.filter((providerId) => {
+      typeof allProvidersState[providerId!]?.stamp?.credential !== "undefined";
+    })
   );
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
@@ -68,8 +71,8 @@ export default function TwitterPlatform(): JSX.Element {
   // --- Chakra functions
   const toast = useToast();
 
-  // Fetch Twitter OAuth2 url from the IAM procedure
-  async function handleFetchTwitterOAuth(): Promise<void> {
+  // Fetch OAuth2 url from the IAM procedure
+  async function handleFetchOAuth(): Promise<void> {
     // Fetch data from external API
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(/\/*?$/, "")}/twitter/generateAuthUrl`,
@@ -88,7 +91,7 @@ export default function TwitterPlatform(): JSX.Element {
     openTwitterOAuthUrl(data.authUrl);
   }
 
-  // Open Twitter authUrl in centered window
+  // Open authUrl in centered window
   function openTwitterOAuthUrl(url: string): void {
     const width = 600;
     const height = 800;
@@ -112,7 +115,7 @@ export default function TwitterPlatform(): JSX.Element {
 
   // Listener to watch for oauth redirect response on other windows (on the same host)
   function listenForRedirect(e: { target: string; data: { code: string; state: string } }) {
-    // when receiving twitter oauth response from a spawned child run fetchVerifiableCredential
+    // when receiving oauth response from a spawned child run fetchVerifiableCredential
     if (e.target === "twitter") {
       // pull data from message
       const queryCode = e.data.code;
@@ -131,7 +134,7 @@ export default function TwitterPlatform(): JSX.Element {
           version: "0.0.0",
           address: address || "",
           proofs: {
-            code: queryCode, // provided by twitter as query params in the redirect
+            code: queryCode, // provided by the provider as query params in the redirect
             sessionKey: queryState,
           },
         },
@@ -157,7 +160,7 @@ export default function TwitterPlatform(): JSX.Element {
           datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
           // grab all providers who are verified from the verify response
           const actualVerifiedProviders = providerIds.filter(
-            (providerId) =>
+            (providerId: string | undefined) =>
               !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
           );
           // both verified and selected should look the same after save
@@ -196,8 +199,8 @@ export default function TwitterPlatform(): JSX.Element {
 
   return (
     <SideBarContent
-      currentPlatform={Platform}
-      currentProviders={Providers}
+      currentPlatform={getPlatformSpec(platformId)}
+      currentProviders={platformgroupspec}
       verifiedProviders={verifiedProviders}
       selectedProviders={selectedProviders}
       setSelectedProviders={setSelectedProviders}
@@ -205,8 +208,8 @@ export default function TwitterPlatform(): JSX.Element {
       verifyButton={
         <button
           disabled={!canSubmit}
-          onClick={handleFetchTwitterOAuth}
-          data-testid="button-verify-twitter"
+          onClick={handleFetchOAuth}
+          data-testid={`button-verify-${platformId}`}
           className="sidebar-verify-btn"
         >
           Verify
@@ -214,4 +217,4 @@ export default function TwitterPlatform(): JSX.Element {
       }
     />
   );
-}
+};

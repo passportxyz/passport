@@ -4,12 +4,15 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
+// Providers
+
+import { TwitterProviderConfig } from "@gitcoin/passport-platforms";
+
 // --- Components
 import { LoadingCard } from "./LoadingCard";
-const thePlatform = "Twitter";
-const TwitterPlatform = import(`@gitcoin/platforms/${thePlatform}/App-Bindings.ts`);
-// --- Identity Providers
+import { GenericOauthPlatform } from "./GenericOauthPlatform";
 
+// --- Identity Providers
 import { SideBarContent } from "./SideBarContent";
 
 // --- Chakra UI Elements
@@ -79,7 +82,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const renderCurrentPlatformSelection = () => {
     switch (currentPlatform?.platform) {
       case "Twitter":
-        return TwitterPlatform;
+        return <GenericOauthPlatform platformId={"Twitter"} platformgroupspec={TwitterProviderConfig} />;
       // case "Github":
       //   return <GithubPlatform />;
       // case "Gitcoin":

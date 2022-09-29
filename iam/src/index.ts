@@ -23,7 +23,7 @@ import {
   CredentialResponseBody,
   ProviderContext,
 } from "@gitcoin/passport-types";
-import { EnsProvider } from "@gitcoin/passport-evm-providers/dist/commonjs/src/index";
+// import { EnsProvider } from "@gitcoin/passport-evm-providers/dist/commonjs/src/index";
 
 import { getChallenge } from "./utils/challenge";
 
@@ -41,7 +41,16 @@ import { Providers } from "./utils/providers";
 // ---- Identity Providers
 import { SimpleProvider } from "./providers/simple";
 import { GoogleProvider } from "./providers/google";
-import { TwitterProvider } from "./providers/twitter";
+// import { TwitterProvider } from "./providers/twitter";
+import {
+  TwitterAuthProvider,
+  TwitterFollowerGT100Provider,
+  TwitterFollowerGT500Provider,
+  TwitterFollowerGTE1000Provider,
+  TwitterFollowerGT5000Provider,
+  TwitterTweetGT10Provider,
+} from "@gitcoin/passport-platforms";
+
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
 import { FacebookProvider } from "./providers/facebook";
@@ -55,13 +64,7 @@ import { ForkedGithubRepoProvider } from "./providers/githubForkedRepoProvider";
 import { StarredGithubRepoProvider } from "./providers/githubStarredRepoProvider";
 import { LinkedinProvider } from "./providers/linkedin";
 import { DiscordProvider } from "./providers/discord";
-import { TwitterTweetGT10Provider } from "./providers/twitterTweets";
-import {
-  TwitterFollowerGT100Provider,
-  TwitterFollowerGT500Provider,
-  TwitterFollowerGTE1000Provider,
-  TwitterFollowerGT5000Provider,
-} from "./providers/twitterFollower";
+
 import { SelfStakingBronzeProvider, SelfStakingSilverProvider, SelfStakingGoldProvider } from "./providers/selfStaking";
 import {
   CommunityStakingBronzeProvider,
@@ -101,8 +104,8 @@ export const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
   new GoogleProvider(),
-  new TwitterProvider(),
-  new EnsProvider(),
+  new TwitterAuthProvider(),
+  // new EnsProvider(),
   new PohProvider(),
   new POAPProvider(),
   new FacebookProvider(),

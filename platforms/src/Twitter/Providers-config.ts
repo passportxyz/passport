@@ -1,6 +1,6 @@
 import { PlatformSpec, PlatformGroupSpec } from "../types";
 
-export const Platform: PlatformSpec = {
+export const TwitterPlatformDetails: PlatformSpec = {
   icon: "./assets/twitterStampIcon.svg",
   platform: "Twitter",
   name: "Twitter",
@@ -8,7 +8,7 @@ export const Platform: PlatformSpec = {
   connectMessage: "Connect Account",
 };
 
-export const Providers: PlatformGroupSpec[] = [
+export const TwitterProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name",
     providers: [{ title: "Encrypted", name: "Twitter" }],

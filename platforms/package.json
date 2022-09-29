@@ -2,14 +2,14 @@
     "name": "@gitcoin/passport-platforms",
     "version": "1.0.0",
     "license": "MIT",
-    "main": "dist/src/index.js",
+    "main": "dist/commonjs/index.js",
     "directories": {
-      "src": "src",
-      "dist": "dist"
+      "dist": "dist",
+      "src":"src"
     },
     "files": [
-      "src",
-      "dist"
+      "dist",
+      "src"
     ],
     "publishConfig": {
       "access": "public"
