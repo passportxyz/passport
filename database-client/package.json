@@ -19,7 +19,8 @@
     "build": "tsc",
     "clean": "rimraf dist node_modules",
     "ceramic": "ceramic daemon",
-    "test:integration": "yarn build && yarn node --experimental-vm-modules $(yarn bin jest) -c jest.integration.config.js"
+    "test:integration": "yarn build && yarn node --experimental-vm-modules $(yarn bin jest) -c jest.integration.config.js",
+    "test": "yarn node --experimental-vm-modules $(yarn bin jest) -c jest.config.cjs"
   },
   "dependencies": {
     "@ceramicnetwork/http-client": "^2.2.1",
@@ -41,7 +42,9 @@
     "@glazed/types": "^0.2.0",
     "@types/jest": "^27.4.1",
     "@types/node": "^16.11.6",
-    "jest": "^27.5.1"
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.4",
+    "ts-node": "^10.8.0"
   },
   "resolutions": {
     "leveldown": "6.1.1"
