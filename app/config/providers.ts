@@ -288,4 +288,10 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Encrypted", name: "GnosisSafe" }],
     },
   ],
+  FractalId: [
+    {
+      platformGroup: "Fractal User ID",
+      providers: [{ title: "Unique", name: "FractalId" }],
+    },
+  ],
 };

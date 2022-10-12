@@ -30,6 +30,7 @@ import {
   ZkSyncPlatform,
   LensPlatform,
   GnosisSafePlatform,
+  FractalIdPlatform,
 } from "./PlatformCards";
 import { SideBarContent } from "./SideBarContent";
 
@@ -139,6 +140,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <LensPlatform />;
       case "GnosisSafe":
         return <GnosisSafePlatform />;
+      case "FractalId":
+        return <FractalIdPlatform />;
       default:
         return (
           <SideBarContent

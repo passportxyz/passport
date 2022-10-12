@@ -288,6 +288,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: getProviderSpec("GnosisSafe", "GnosisSafe"),
     stamp: undefined,
   },
+  FractalId: {
+    providerSpec: getProviderSpec("FractalId", "FractalId"),
+    stamp: undefined,
+  },
 };
 
 const startingState: CeramicContextState = {

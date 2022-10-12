@@ -166,4 +166,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Gnosis Safe Signer/Owner Verification",
     connectMessage: "Verify Account",
   },
+  {
+    icon: "./assets/fractalIdStampIcon.svg",
+    platform: "FractalId",
+    name: "Fractal ID",
+    description: "Fractal ID Uniqueness proof",
+    connectMessage: "Verify Account",
+  },
 ];
