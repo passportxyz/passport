@@ -6,6 +6,9 @@ import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 export type CustomToastProps = {
   platformId?: PLATFORM_ID;
   providerId?: PROVIDER_ID;
+  title: string;
+  body: string;
+  icon: string;
   result: any;
   message?: boolean | string;
 };
@@ -14,6 +17,9 @@ export type CustomToastProps = {
 export const DoneToastContent = ({
   platformId,
   providerId,
+  title,
+  body,
+  icon,
   result,
   message = false,
 }: CustomToastProps): JSX.Element => {
@@ -24,13 +30,13 @@ export const DoneToastContent = ({
     >
       <div className="flex p-4">
         <div className="mr-2">
-          <button className="cursor-not-allowed rounded-full bg-gray-100">
-            <img alt="information circle" className="sticky top-0" src="./assets/check-icon.svg" />
+          <button className="mt-1 cursor-not-allowed rounded-full bg-gray-100">
+            <img alt="information circle" className="sticky top-0" src={icon} />
           </button>
         </div>
         <div className="flex-grow">
-          <h2 className="title-font mb-2 text-lg font-bold">Done!</h2>
-          <p>{message || `Your ${platformId || providerId} stamp has been verified.`}</p>
+          <h2 className="title-font mb-2 text-lg font-bold">{title}</h2>
+          <p>{message || body}</p>
         </div>
         <div>
           <button className="sticky top-0" onClick={result.onClose}>

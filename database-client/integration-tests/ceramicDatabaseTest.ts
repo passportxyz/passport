@@ -251,6 +251,7 @@ describe("when there is an existing passport with stamps for the given did", () 
   let existingEnsStampTileStreamID: string;
   let existingGoogleStampTileStreamID: string;
   let existingPoapStampTileStreamID: string;
+  let providerIds: PROVIDER_ID[];
 
   beforeEach(async () => {
     credential = {
@@ -301,6 +302,7 @@ describe("when there is an existing passport with stamps for the given did", () 
     existingEnsStampTileStreamID = ensStampTile.id.toUrl();
     existingGoogleStampTileStreamID = googleStampTile.id.toUrl();
     existingPoapStampTileStreamID = poapStampTile.id.toUrl();
+    providerIds = ["Ens", "Google", "POAP"];
 
     // add ENS stamp provider and streamId to passport stamps array
     const existingPassportWithStamps = {
@@ -328,6 +330,31 @@ describe("when there is an existing passport with stamps for the given did", () 
 
   afterEach(async () => {
     await ceramicDatabase.store.remove("Passport");
+  });
+
+  it("deleteStamps deletes selected stamps from passport", async () => {
+    ceramicDatabase.deleteStamps(providerIds);
+
+    // The deletion will not be reflected immediatly, we need to wait a bit ...
+    await new Promise((r) => setTimeout(r, 2000));
+    const passport = await ceramicDatabase.store.get("Passport");
+
+    expect(passport.stamps.length).toEqual(0);
+    expect(
+      passport.stamps.findIndex((stamp) => {
+        return stamp.credential === existingEnsStampTileStreamID;
+      })
+    ).toEqual(-1);
+    expect(
+      passport.stamps.findIndex((stamp) => {
+        return stamp.credential === existingPoapStampTileStreamID;
+      })
+    ).toEqual(-1);
+    expect(
+      passport.stamps.findIndex((stamp) => {
+        return stamp.credential === existingGoogleStampTileStreamID;
+      })
+    ).toEqual(-1);
   });
 
   it("deleteStamp deletes an existing stamp from passport", async () => {

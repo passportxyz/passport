@@ -1,5 +1,5 @@
 // --- React Methods
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 
 // --- Chakra UI Elements
 import { useDisclosure, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
@@ -7,7 +7,7 @@ import { useDisclosure, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/
 // --- Types
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "../config/platforms";
-import { UpdatedPlatforms } from "../config/providers";
+import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
@@ -15,6 +15,7 @@ import { pillLocalStorage } from "../context/userContext";
 
 // --- Components
 import { JsonOutputModal } from "./JsonOutputModal";
+import { RemoveStampModal } from "./RemoveStampModal";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -40,13 +41,20 @@ export const PlatformCard = ({
   getUpdatedPlatforms,
 }: PlatformCardProps): JSX.Element => {
   // import all providers
-  const { allProvidersState } = useContext(CeramicContext);
+  const { allProvidersState, handleDeleteStamps } = useContext(CeramicContext);
 
   // useDisclosure to control JSON modal
   const {
     isOpen: isOpenJsonOutputModal,
     onOpen: onOpenJsonOutputModal,
     onClose: onCloseJsonOutputModal,
+  } = useDisclosure();
+
+  // useDisclosure to control stamp removal modal
+  const {
+    isOpen: isOpenRemoveStampModal,
+    onOpen: onOpenRemoveStampModal,
+    onClose: onCloseRemoveStampModal,
   } = useDisclosure();
 
   // returns a single Platform card
@@ -122,7 +130,7 @@ export const PlatformCard = ({
                 </MenuButton>
                 <MenuList>
                   <MenuItem onClick={onOpenJsonOutputModal} data-testid="view-json">
-                    View Stamp JSON
+                    View stamp JSON
                   </MenuItem>
                   <MenuItem
                     onClick={() => {
@@ -135,6 +143,9 @@ export const PlatformCard = ({
                   >
                     Manage stamp
                   </MenuItem>
+                  <MenuItem onClick={onOpenRemoveStampModal} data-testid="remove-stamp">
+                    Remove stamp
+                  </MenuItem>
                 </MenuList>
               </Menu>
               <JsonOutputModal
@@ -145,6 +156,21 @@ export const PlatformCard = ({
                 jsonOutput={selectedProviders[platform.platform].map(
                   (providerId) => allProvidersState[providerId]?.stamp?.credential
                 )}
+              />
+              <RemoveStampModal
+                isOpen={isOpenRemoveStampModal}
+                onClose={onCloseRemoveStampModal}
+                title={`Remove ${platform.name} Stamp`}
+                body={
+                  "This stamp will be removed from your Passport. You can still re-verify your stamp in the future."
+                }
+                stampsToBeDeleted={
+                  STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
+                    return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+                  }, [] as PROVIDER_ID[]) || []
+                }
+                handleDeleteStamps={handleDeleteStamps}
+                platformId={platform.name as PLATFORM_ID}
               />
             </>
           ) : (

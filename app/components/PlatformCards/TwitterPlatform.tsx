@@ -31,12 +31,15 @@ import { UserContext } from "../../context/userContext";
 import { getPlatformSpec } from "../../config/platforms";
 import { STAMP_PROVIDERS } from "../../config/providers";
 
+// --- Helpers
+import { difference } from "../../utils/helpers";
+
 // Each platform is recognised by its ID
 const platformId: PLATFORM_ID = "Twitter";
 
 export default function TwitterPlatform(): JSX.Element {
   const { address, signer } = useContext(UserContext);
-  const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
+  const { handleAddStamps, allProvidersState, handleDeleteStamps } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
 
@@ -56,13 +59,13 @@ export default function TwitterPlatform(): JSX.Element {
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
 
+  // Create Set to check initial verified providers
+  const initialVerifiedProviders = new Set(verifiedProviders);
+
   // any time we change selection state...
   useEffect(() => {
     if (selectedProviders.length !== verifiedProviders.length) {
       setCanSubmit(true);
-    }
-    if (selectedProviders.length === 0) {
-      setCanSubmit(false);
     }
   }, [selectedProviders, verifiedProviders]);
 
@@ -152,6 +155,8 @@ export default function TwitterPlatform(): JSX.Element {
                 }
               })
               .filter((v: Stamp | undefined) => v) || [];
+          // Update/remove stamps
+          await handleDeleteStamps(providerIds as PROVIDER_ID[]);
           // Add all the stamps to the passport at once
           await handleAddStamps(vcs as Stamp[]);
           // report success to datadog
@@ -164,14 +169,29 @@ export default function TwitterPlatform(): JSX.Element {
           // both verified and selected should look the same after save
           setVerifiedProviders([...actualVerifiedProviders]);
           setSelectedProviders([...actualVerifiedProviders]);
+
+          // Create Set to check changed providers after verification
+          const updatedVerifiedProviders = new Set(actualVerifiedProviders);
+
+          // Initial providers set minus updated providers set to determine which data points were removed
+          const initialMinusUpdated = difference(initialVerifiedProviders, updatedVerifiedProviders);
+          // Updated providers set minus initial providers set to determine which data points were added
+          const updatedMinusInitial = difference(updatedVerifiedProviders, initialVerifiedProviders);
           // reset can submit state
           setCanSubmit(false);
+
           // Custom Success Toast
-          toast({
-            duration: 5000,
-            isClosable: true,
-            render: (result: any) => <DoneToastContent platformId={platformId} result={result} />,
-          });
+          if (updatedMinusInitial.size > 0 && initialMinusUpdated.size === 0) {
+            addedDataPointsToast(updatedMinusInitial, initialVerifiedProviders);
+          } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
+            removedDataPointsToast(initialMinusUpdated);
+          } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size > 0) {
+            addedRemovedDataPointsToast(initialMinusUpdated, updatedMinusInitial);
+          } else if (updatedMinusInitial.size === providerIds.length) {
+            completeVerificationToast();
+          } else {
+            failedVerificationToast();
+          }
         })
         .catch((e) => {
           datadogLogs.logger.error("Verification Error", { error: e, platform: platformId });
@@ -182,6 +202,91 @@ export default function TwitterPlatform(): JSX.Element {
         });
     }
   }
+
+  // --- Done Toast Helpers
+  const addedDataPointsToast = (updatedMinusInitals: Set<PROVIDER_ID>, initalVPs: Set<PROVIDER_ID>) => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => (
+        <DoneToastContent
+          title="Success!"
+          body={`You've verified ${updatedMinusInitals.size + initalVPs.size} out of ${
+            providerIds.length
+          } ${platformId} data points.`}
+          icon="../../assets/check-icon.svg"
+          platformId={platformId}
+          result={result}
+        />
+      ),
+    });
+  };
+
+  const removedDataPointsToast = (initialVPs: Set<PROVIDER_ID>) => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => (
+        <DoneToastContent
+          title="Success!"
+          body={`You've removed ${initialVPs.size} ${platformId} data ${
+            initialVPs.size > 1 ? "points" : "point"
+          }. You can re-verify ${initialVPs.size > 1 ? "them" : "it"} later.`}
+          icon="../../assets/check-icon.svg"
+          platformId={platformId}
+          result={result}
+        />
+      ),
+    });
+  };
+
+  const addedRemovedDataPointsToast = (initialVPs: Set<PROVIDER_ID>, updatedVPs: Set<PROVIDER_ID>) => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => (
+        <DoneToastContent
+          title="Success!"
+          body={`You've verified ${updatedVPs.size} and removed ${initialVPs.size} ${platformId} data points out of ${providerIds.length}.`}
+          icon="../../assets/check-icon.svg"
+          platformId={platformId}
+          result={result}
+        />
+      ),
+    });
+  };
+
+  const completeVerificationToast = () => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => (
+        <DoneToastContent
+          title="Done!"
+          body={`${platformId} stamp completely verified.`}
+          icon="../../assets/check-icon.svg"
+          platformId={platformId}
+          result={result}
+        />
+      ),
+    });
+  };
+
+  const failedVerificationToast = () => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => (
+        <DoneToastContent
+          title="Verificaton Failed"
+          body="Please make sure you fulfill the requirements for this stamp."
+          icon="whiteBgShieldExclamation.svg"
+          platformId={platformId}
+          result={result}
+        />
+      ),
+    });
+  };
 
   // attach and destroy a BroadcastChannel to handle the message
   useEffect(() => {
@@ -210,7 +315,7 @@ export default function TwitterPlatform(): JSX.Element {
           data-testid="button-verify-twitter"
           className="sidebar-verify-btn"
         >
-          Verify
+          {verifiedProviders.length > 0 ? <p>Save</p> : <p>Verify</p>}
         </button>
       }
     />
