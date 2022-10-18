@@ -156,19 +156,19 @@ export default function SignerCard(): JSX.Element {
         // Add all the stamps to the passport at once
         await handleAddStamps(vcs as Stamp[]);
         // Custom Success Toast
-        toast({
-          duration: 5000,
-          isClosable: true,
-          render: (result: any) => (
-            <DoneToastContent
-              providerId={providerId}
-              message={`${vcs.length > 0 ? `Successfully added` : `Discovered`} ${vcs.length} stamp${
-                vcs.length !== 1 ? `s` : ``
-              } using wallet: ${extraSignature?.addr}.`}
-              result={result}
-            />
-          ),
-        });
+        // toast({
+        //   duration: 5000,
+        //   isClosable: true,
+        //   render: (result: any) => (
+        //     <DoneToastContent
+        //       providerId={providerId}
+        //       message={`${vcs.length > 0 ? `Successfully added` : `Discovered`} ${vcs.length} stamp${
+        //         vcs.length !== 1 ? `s` : ``
+        //       } using wallet: ${extraSignature?.addr}.`}
+        //       result={result}
+        //     />
+        //   ),
+        // });
       })
       .catch((e: any): void => {
         datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
