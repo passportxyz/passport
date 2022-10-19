@@ -184,9 +184,9 @@ export default function GithubPlatform(): JSX.Element {
           // Updated providers set minus initial providers set to determine which data points were added
           const updatedMinusInitial = difference(updatedVerifiedProviders, initialVerifiedProviders);
 
-          console.log("imu", initialMinusUpdated)
-        console.log("umi", updatedMinusInitial)
-        console.log("sps", selectedProviders.length)
+          console.log("imu", initialMinusUpdated);
+          console.log("umi", updatedMinusInitial);
+          console.log("sps", selectedProviders.length);
 
           // reset can submit state
           setCanSubmit(false);
@@ -242,9 +242,7 @@ export default function GithubPlatform(): JSX.Element {
       render: (result: any) => (
         <DoneToastContent
           title="Success!"
-          body={`${initialVPs.size} ${platformId} data ${
-            initialVPs.size > 1 ? "points" : "point"
-          } removed.`}
+          body={`${initialVPs.size} ${platformId} data ${initialVPs.size > 1 ? "points" : "point"} removed.`}
           icon="../../assets/check-icon.svg"
           platformId={platformId}
           result={result}
@@ -276,9 +274,9 @@ export default function GithubPlatform(): JSX.Element {
       render: (result: any) => (
         <DoneToastContent
           title="Success!"
-          body={`${initialVPs.size} ${platformId} data ${
-            initialVPs.size > 1 ? "points" : "point"
-          } removed and ${updatedVPs.size} verified.`}
+          body={`${initialVPs.size} ${platformId} data ${initialVPs.size > 1 ? "points" : "point"} removed and ${
+            updatedVPs.size
+          } verified.`}
           icon="../../assets/check-icon.svg"
           platformId={platformId}
           result={result}

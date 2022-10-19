@@ -231,9 +231,7 @@ export default function TwitterPlatform(): JSX.Element {
       render: (result: any) => (
         <DoneToastContent
           title="Success!"
-          body={`${initialVPs.size} ${platformId} data ${
-            initialVPs.size > 1 ? "points" : "point"
-          } removed.`}
+          body={`${initialVPs.size} ${platformId} data ${initialVPs.size > 1 ? "points" : "point"} removed.`}
           icon="../../assets/check-icon.svg"
           platformId={platformId}
           result={result}
@@ -265,9 +263,9 @@ export default function TwitterPlatform(): JSX.Element {
       render: (result: any) => (
         <DoneToastContent
           title="Success!"
-          body={`${initialVPs.size} ${platformId} data ${
-            initialVPs.size > 1 ? "points" : "point"
-          } removed and ${updatedVPs.size} verified.`}
+          body={`${initialVPs.size} ${platformId} data ${initialVPs.size > 1 ? "points" : "point"} removed and ${
+            updatedVPs.size
+          } verified.`}
           icon="../../assets/check-icon.svg"
           platformId={platformId}
           result={result}
