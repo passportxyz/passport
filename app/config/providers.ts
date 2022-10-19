@@ -98,15 +98,15 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       platformGroup: "Repositories",
       providers: [
         {
-          title: "Five or more GitHub repos",
+          title: "Five or more Github repos",
           name: "FiveOrMoreGithubRepos",
         },
         {
-          title: "At least 1 GitHub repo forked by another user",
+          title: "At least 1 Github repo forked by another user",
           name: "ForkedGithubRepoProvider",
         },
         {
-          title: "At least 1 GitHub repo starred by another user",
+          title: "At least 1 Github repo starred by another user",
           name: "StarredGithubRepoProvider",
         },
       ],
@@ -115,11 +115,11 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       platformGroup: "Followers",
       providers: [
         {
-          title: "Ten or more GitHub followers",
+          title: "Ten or more Github followers",
           name: "TenOrMoreGithubFollowers",
         },
         {
-          title: "Fifty or more GitHub followers",
+          title: "Fifty or more Github followers",
           name: "FiftyOrMoreGithubFollowers",
         },
       ],
