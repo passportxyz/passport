@@ -1,5 +1,0 @@
-/dist/*
-/coverage/*
-/node_modules/*
-/src/didkit-node/*
-/src/didkit-browser/*

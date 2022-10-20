@@ -23,7 +23,6 @@ import {
   CredentialResponseBody,
   ProviderContext,
 } from "@gitcoin/passport-types";
-// import { EnsProvider } from "@gitcoin/passport-evm-providers/dist/commonjs/src/index";
 
 import { getChallenge } from "./utils/challenge";
 
