@@ -9,10 +9,6 @@ export type GenerateTwitterAuthUrlRequestBody = {
   callback: string;
 };
 
-export type GenerateBrightidBody = {
-  contextIdData: string;
-};
-
 router.post("/twitter/generateAuthUrl", (req: Request, res: Response): void => {
   const { callback } = req.body as GenerateTwitterAuthUrlRequestBody;
   if (callback) {
