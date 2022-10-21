@@ -337,7 +337,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         );
         setCeramicDatabase(ceramicDatabaseInstance);
         setUserDid(ceramicDatabaseInstance.did);
-        ceramicDatabaseInstance.deletePassport();
         break;
       }
       case "failed": {
