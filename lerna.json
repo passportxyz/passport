@@ -7,7 +7,6 @@
     "schemas",
     "types",
     "signer",
-    "evm-providers",
     "platforms"
   ],
   "command": {
