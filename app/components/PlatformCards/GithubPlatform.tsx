@@ -184,10 +184,6 @@ export default function GithubPlatform(): JSX.Element {
           // Updated providers set minus initial providers set to determine which data points were added
           const updatedMinusInitial = difference(updatedVerifiedProviders, initialVerifiedProviders);
 
-          console.log("imu", initialMinusUpdated);
-          console.log("umi", updatedMinusInitial);
-          console.log("sps", selectedProviders.length);
-
           // reset can submit state
           setCanSubmit(false);
 
