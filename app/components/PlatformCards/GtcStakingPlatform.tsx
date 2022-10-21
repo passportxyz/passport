@@ -127,6 +127,8 @@ export default function GtcStakingPlatform(): JSX.Element {
         // Custom Success Toast
         if (updatedMinusInitial.size > 0 && initialMinusUpdated.size === 0) {
           addedDataPointsToast(updatedMinusInitial, initialVerifiedProviders);
+        } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0 && selectedProviders.length === 0) {
+          removedAllDataPointsToast();
         } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
           removedDataPointsToast(initialMinusUpdated);
         } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size > 0) {
@@ -154,9 +156,9 @@ export default function GtcStakingPlatform(): JSX.Element {
       render: (result: any) => (
         <DoneToastContent
           title="Success!"
-          body={`You've verified ${updatedMinusInitals.size + initalVPs.size} out of ${
+          body={`${updatedMinusInitals.size + initalVPs.size} ${platformId} data points verified out of ${
             providerIds.length
-          } ${platformId} data points.`}
+          }.`}
           icon="../../assets/check-icon.svg"
           platformId={platformId}
           result={result}
@@ -172,9 +174,23 @@ export default function GtcStakingPlatform(): JSX.Element {
       render: (result: any) => (
         <DoneToastContent
           title="Success!"
-          body={`You've removed ${initialVPs.size} ${platformId} data ${
-            initialVPs.size > 1 ? "points" : "point"
-          }. You can re-verify ${initialVPs.size > 1 ? "them" : "it"} later.`}
+          body={`${initialVPs.size} ${platformId} data ${initialVPs.size > 1 ? "points" : "point"} removed.`}
+          icon="../../assets/check-icon.svg"
+          platformId={platformId}
+          result={result}
+        />
+      ),
+    });
+  };
+
+  const removedAllDataPointsToast = () => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => (
+        <DoneToastContent
+          title="Success!"
+          body={`All ${platformId} data points removed.`}
           icon="../../assets/check-icon.svg"
           platformId={platformId}
           result={result}
@@ -190,7 +206,9 @@ export default function GtcStakingPlatform(): JSX.Element {
       render: (result: any) => (
         <DoneToastContent
           title="Success!"
-          body={`You've verified ${updatedVPs.size} and removed ${initialVPs.size} ${platformId} data points out of ${providerIds.length}.`}
+          body={`${initialVPs.size} ${platformId} data ${initialVPs.size > 1 ? "points" : "point"} removed and ${
+            updatedVPs.size
+          } verified.`}
           icon="../../assets/check-icon.svg"
           platformId={platformId}
           result={result}
@@ -206,7 +224,7 @@ export default function GtcStakingPlatform(): JSX.Element {
       render: (result: any) => (
         <DoneToastContent
           title="Done!"
-          body={`${platformId} stamp completely verified.`}
+          body={`All ${platformId} data points verified.`}
           icon="../../assets/check-icon.svg"
           platformId={platformId}
           result={result}
@@ -221,9 +239,9 @@ export default function GtcStakingPlatform(): JSX.Element {
       isClosable: true,
       render: (result: any) => (
         <DoneToastContent
-          title="Verificaton Failed"
+          title="Verification Failed"
           body="Please make sure you fulfill the requirements for this stamp."
-          icon="whiteBgShieldExclamation.svg"
+          icon="../../assets/verification-failed.svg"
           platformId={platformId}
           result={result}
         />

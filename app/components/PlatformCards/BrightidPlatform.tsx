@@ -149,7 +149,7 @@ export default function BrightidPlatform(): JSX.Element {
         if (updatedMinusInitial.size === providerIds.length) {
           completeVerificationToast();
         } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
-          removedDataPointsToast(initialMinusUpdated);
+          removedDataPointsToast();
         } else {
           failedVerificationToast();
         }
@@ -164,14 +164,14 @@ export default function BrightidPlatform(): JSX.Element {
   };
 
   // --- Done Toast Helpers
-  const removedDataPointsToast = (initialVPs: Set<PROVIDER_ID>) => {
+  const removedDataPointsToast = () => {
     return toast({
       duration: 5000,
       isClosable: true,
       render: (result: any) => (
         <DoneToastContent
           title="Success!"
-          body={`You've removed ${initialVPs.size} ${platformId} data points. You can re-verify them later.`}
+          body={`All ${platformId} data points removed.`}
           icon="../../assets/check-icon.svg"
           platformId={platformId}
           result={result}
@@ -186,8 +186,8 @@ export default function BrightidPlatform(): JSX.Element {
       isClosable: true,
       render: (result: any) => (
         <DoneToastContent
-          title="Done!"
-          body={`${platformId} stamp completely verified.`}
+          title="Success!"
+          body={`All ${platformId} data points verified.`}
           icon="../../assets/check-icon.svg"
           platformId={platformId}
           result={result}
@@ -202,9 +202,9 @@ export default function BrightidPlatform(): JSX.Element {
       isClosable: true,
       render: (result: any) => (
         <DoneToastContent
-          title="Verificaton Failed"
+          title="Verification Failed"
           body="Please make sure you fulfill the requirements for this stamp."
-          icon="../../assets/whiteBgShieldExclamation.svg"
+          icon="../../assets/verification-failed.svg"
           platformId={platformId}
           result={result}
         />

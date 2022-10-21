@@ -124,10 +124,16 @@ export default function SnapshotPlatform(): JSX.Element {
         // reset can submit state
         setCanSubmit(false);
         // Custom Success Toast
-        if (updatedMinusInitial.size === providerIds.length) {
-          completeVerificationToast();
+        if (updatedMinusInitial.size > 0 && initialMinusUpdated.size === 0) {
+          addedDataPointsToast(updatedMinusInitial, initialVerifiedProviders);
+        } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0 && selectedProviders.length === 0) {
+          removedAllDataPointsToast();
         } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
           removedDataPointsToast(initialMinusUpdated);
+        } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size > 0) {
+          addedRemovedDataPointsToast(initialMinusUpdated, updatedMinusInitial);
+        } else if (updatedMinusInitial.size === providerIds.length) {
+          completeVerificationToast();
         } else {
           failedVerificationToast();
         }
@@ -142,6 +148,24 @@ export default function SnapshotPlatform(): JSX.Element {
   };
 
   // --- Done Toast Helpers
+  const addedDataPointsToast = (updatedMinusInitals: Set<PROVIDER_ID>, initalVPs: Set<PROVIDER_ID>) => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => (
+        <DoneToastContent
+          title="Success!"
+          body={`${updatedMinusInitals.size + initalVPs.size} ${platformId} data points verified out of ${
+            providerIds.length
+          }.`}
+          icon="../../assets/check-icon.svg"
+          platformId={platformId}
+          result={result}
+        />
+      ),
+    });
+  };
+
   const removedDataPointsToast = (initialVPs: Set<PROVIDER_ID>) => {
     toast({
       duration: 5000,
@@ -149,7 +173,41 @@ export default function SnapshotPlatform(): JSX.Element {
       render: (result: any) => (
         <DoneToastContent
           title="Success!"
-          body={`You've removed ${initialVPs.size} ${platformId} data points. You can re-verify them later.`}
+          body={`${initialVPs.size} ${platformId} data ${initialVPs.size > 1 ? "points" : "point"} removed.`}
+          icon="../../assets/check-icon.svg"
+          platformId={platformId}
+          result={result}
+        />
+      ),
+    });
+  };
+
+  const removedAllDataPointsToast = () => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => (
+        <DoneToastContent
+          title="Success!"
+          body={`All ${platformId} data points removed.`}
+          icon="../../assets/check-icon.svg"
+          platformId={platformId}
+          result={result}
+        />
+      ),
+    });
+  };
+
+  const addedRemovedDataPointsToast = (initialVPs: Set<PROVIDER_ID>, updatedVPs: Set<PROVIDER_ID>) => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => (
+        <DoneToastContent
+          title="Success!"
+          body={`${initialVPs.size} ${platformId} data ${initialVPs.size > 1 ? "points" : "point"} removed and ${
+            updatedVPs.size
+          } verified.`}
           icon="../../assets/check-icon.svg"
           platformId={platformId}
           result={result}
@@ -165,7 +223,7 @@ export default function SnapshotPlatform(): JSX.Element {
       render: (result: any) => (
         <DoneToastContent
           title="Done!"
-          body={`${platformId} stamp completely verified.`}
+          body={`All ${platformId} data points verified.`}
           icon="../../assets/check-icon.svg"
           platformId={platformId}
           result={result}
@@ -180,9 +238,9 @@ export default function SnapshotPlatform(): JSX.Element {
       isClosable: true,
       render: (result: any) => (
         <DoneToastContent
-          title="Verificaton Failed"
+          title="Verification Failed"
           body="Please make sure you fulfill the requirements for this stamp."
-          icon="../../assets/whiteBgShieldExclamation.svg"
+          icon="../../assets/verification-failed.svg"
           platformId={platformId}
           result={result}
         />
