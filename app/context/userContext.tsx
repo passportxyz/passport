@@ -15,7 +15,6 @@ import { useViewerConnection } from "@self.id/framework";
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
-import { OnboardAPI } from "@web3-onboard/core";
 
 export interface UserContextState {
   loggedIn: boolean;
