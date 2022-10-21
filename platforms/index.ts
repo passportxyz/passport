@@ -7,5 +7,5 @@ export {
   TwitterFollowerGTE1000Provider,
   TwitterFollowerGT5000Provider,
   TwitterTweetGT10Provider,
-} from "./src/Twitter/Providers";
+} from "./src/Twitter/providers";
 export { TwitterPlatformDetails, TwitterProviderConfig } from "./src/Twitter/Providers-config";
