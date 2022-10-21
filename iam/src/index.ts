@@ -24,6 +24,8 @@ import {
   ProviderContext,
 } from "@gitcoin/passport-types";
 
+import { getChallenge } from "./utils/challenge";
+
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 import {
@@ -38,8 +40,16 @@ import { Providers } from "./utils/providers";
 // ---- Identity Providers
 import { SimpleProvider } from "./providers/simple";
 import { GoogleProvider } from "./providers/google";
-import { TwitterProvider } from "./providers/twitter";
-import { EnsProvider } from "./providers/ens";
+// import { TwitterProvider } from "./providers/twitter";
+import {
+  TwitterAuthProvider,
+  TwitterFollowerGT100Provider,
+  TwitterFollowerGT500Provider,
+  TwitterFollowerGTE1000Provider,
+  TwitterFollowerGT5000Provider,
+  TwitterTweetGT10Provider,
+} from "@gitcoin/passport-platforms";
+
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
 import { FacebookProvider } from "./providers/facebook";
@@ -53,13 +63,7 @@ import { ForkedGithubRepoProvider } from "./providers/githubForkedRepoProvider";
 import { StarredGithubRepoProvider } from "./providers/githubStarredRepoProvider";
 import { LinkedinProvider } from "./providers/linkedin";
 import { DiscordProvider } from "./providers/discord";
-import { TwitterTweetGT10Provider } from "./providers/twitterTweets";
-import {
-  TwitterFollowerGT100Provider,
-  TwitterFollowerGT500Provider,
-  TwitterFollowerGTE1000Provider,
-  TwitterFollowerGT5000Provider,
-} from "./providers/twitterFollower";
+
 import { SelfStakingBronzeProvider, SelfStakingSilverProvider, SelfStakingGoldProvider } from "./providers/selfStaking";
 import {
   CommunityStakingBronzeProvider,
@@ -99,8 +103,8 @@ export const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
   new GoogleProvider(),
-  new TwitterProvider(),
-  new EnsProvider(),
+  new TwitterAuthProvider(),
+  // new EnsProvider(),
   new PohProvider(),
   new POAPProvider(),
   new FacebookProvider(),
@@ -357,7 +361,7 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
     // ensure address is check-summed
     payload.address = utils.getAddress(payload.address);
     // generate a challenge for the given payload
-    const challenge = providers.getChallenge(payload);
+    const challenge = getChallenge(payload);
     // if the request is valid then proceed to generate a challenge credential
     if (challenge && challenge.valid === true) {
       // construct a request payload to issue a credential against

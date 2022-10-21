@@ -100,7 +100,7 @@ export default function Dashboard() {
   return (
     <>
       <div className="invisible flex w-full flex-col flex-wrap border-b-2 p-5 md:visible md:flex-row">
-        <div className="float-right mb-4 flex h-12 flex-row items-center font-medium text-gray-900 md:mb-0">
+        <div className="float-right mb-4 flex flex-row items-center font-medium text-gray-900 md:mb-0">
           <img src="/assets/gitcoinLogoDark.svg" alt="Gitcoin Logo" />
           <img className="ml-6 mr-6" src="/assets/logoLine.svg" alt="Logo Line" />
           <img src="/assets/passportLogoBlack.svg" alt="pPassport Logo" />

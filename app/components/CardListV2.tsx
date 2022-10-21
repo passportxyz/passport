@@ -4,32 +4,15 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
+// Providers
+
+import { TwitterProviderConfig } from "@gitcoin/passport-platforms";
+
 // --- Components
 import { LoadingCard } from "./LoadingCard";
+import { GenericOauthPlatform } from "./GenericOauthPlatform";
 
 // --- Identity Providers
-import {
-  GooglePlatform,
-  EnsPlatform,
-  PohPlatform,
-  TwitterPlatform,
-  PoapPlatform,
-  FacebookPlatform,
-  BrightidPlatform,
-  GithubPlatform,
-  LinkedinPlatform,
-  GitcoinPlatform,
-  DiscordPlatform,
-  GitPOAPPlatform,
-  SnapshotPlatform,
-  EthPlatform,
-  GtcPlatform,
-  GtcStakingPlatform,
-  NftPlatform,
-  ZkSyncPlatform,
-  LensPlatform,
-  GnosisSafePlatform,
-} from "./PlatformCards";
 import { SideBarContent } from "./SideBarContent";
 
 // --- Chakra UI Elements
@@ -99,45 +82,45 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const renderCurrentPlatformSelection = () => {
     switch (currentPlatform?.platform) {
       case "Twitter":
-        return <TwitterPlatform />;
-      case "Github":
-        return <GithubPlatform />;
-      case "Gitcoin":
-        return <GitcoinPlatform />;
-      case "Facebook":
-        return <FacebookPlatform />;
-      case "Snapshot":
-        return <SnapshotPlatform />;
-      case "Google":
-        return <GooglePlatform />;
-      case "Linkedin":
-        return <LinkedinPlatform />;
-      case "ETH":
-        return <EthPlatform />;
-      case "GitPOAP":
-        return <GitPOAPPlatform />;
-      case "Discord":
-        return <DiscordPlatform />;
-      case "POAP":
-        return <PoapPlatform />;
-      case "Ens":
-        return <EnsPlatform />;
-      case "Brightid":
-        return <BrightidPlatform />;
-      case "Poh":
-        return <PohPlatform />;
-      case "GTC":
-        return <GtcPlatform />;
-      case "GtcStaking":
-        return <GtcStakingPlatform />;
-      case "NFT":
-        return <NftPlatform />;
-      case "ZkSync":
-        return <ZkSyncPlatform />;
-      case "Lens":
-        return <LensPlatform />;
-      case "GnosisSafe":
-        return <GnosisSafePlatform />;
+        return <GenericOauthPlatform platformId={"Twitter"} platformgroupspec={TwitterProviderConfig} />;
+      // case "Github":
+      //   return <GithubPlatform />;
+      // case "Gitcoin":
+      //   return <GitcoinPlatform />;
+      // case "Facebook":
+      //   return <FacebookPlatform />;
+      // case "Snapshot":
+      //   return <SnapshotPlatform />;
+      // case "Google":
+      //   return <GooglePlatform />;
+      // case "Linkedin":
+      //   return <LinkedinPlatform />;
+      // case "ETH":
+      //   return <EthPlatform />;
+      // case "GitPOAP":
+      //   return <GitPOAPPlatform />;
+      // case "Discord":
+      //   return <DiscordPlatform />;
+      // case "POAP":
+      //   return <PoapPlatform />;
+      // case "Ens":
+      //   return <EnsPlatform />;
+      // case "Brightid":
+      //   return <BrightidPlatform />;
+      // case "Poh":
+      //   return <PohPlatform />;
+      // case "GTC":
+      //   return <GtcPlatform />;
+      // case "GtcStaking":
+      //   return <GtcStakingPlatform />;
+      // case "NFT":
+      //   return <NftPlatform />;
+      // case "ZkSync":
+      //   return <ZkSyncPlatform />;
+      // case "Lens":
+      //   return <LensPlatform />;
+      // case "GnosisSafe":
+      //   return <GnosisSafePlatform />;
       default:
         return (
           <SideBarContent

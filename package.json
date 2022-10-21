@@ -18,7 +18,8 @@
     "identity",
     "schemas",
     "types",
-    "signer"
+    "signer",
+    "platforms"
   ],
   "scripts": {
     "clean": "lerna run clean",
@@ -32,11 +33,12 @@
     "test:app": "yarn workspace @gitcoin/passport-app test",
     "test:identity": "yarn workspace @gitcoin/passport-identity test",
     "prettier": "lerna run prettier",
-    "build": "yarn build:identity && yarn build:database-client && yarn build:iam && yarn build:app",
+    "build": "yarn build:identity && yarn build:database-client && yarn build:iam && yarn build:app && yarn build:platforms",
     "build:database-client": "yarn workspace @gitcoin/passport-database-client build",
     "build:identity": "yarn workspace @gitcoin/passport-identity build",
     "build:iam": "yarn workspace @gitcoin/passport-iam build",
     "build:app": "yarn workspace @gitcoin/passport-app build",
+    "build:platforms": "yarn workspace @gitcoin/passport-platforms build",
     "start": "concurrently --kill-others \"yarn start:iam\" \"yarn start:app\" \"yarn start:signer\"",
     "start:iam": "yarn workspace @gitcoin/passport-iam start",
     "start:signer": "yarn workspace @gitcoin/passport-signer start",
@@ -48,9 +50,9 @@
     "iam": "yarn workspace @gitcoin/passport-iam",
     "identity": "yarn workspace @gitcoin/passport-identity",
     "types": "yarn workspace @gitcoin/passport-types",
-    "prestart": "yarn build:identity && yarn build:database-client",
+    "prestart": "yarn build:identity && yarn build:database-client && yarn build:iam && yarn build:platforms",
     "pretest": "yarn build:identity && yarn build:database-client",
-    "postinstall": "yarn build:identity && yarn build:database-client",
+    "postinstall": "yarn build:identity && yarn build:database-client && yarn build:iam && yarn build:platforms",
     "test:ceramic-integration": "yarn workspace @gitcoin/passport-database-client test:integration"
   },
   "engines": {

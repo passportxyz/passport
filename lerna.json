@@ -6,13 +6,12 @@
     "identity",
     "schemas",
     "types",
-    "signer"
+    "signer",
+    "platforms"
   ],
   "command": {
     "bootstrap": {
-      "nohoist": [
-        "@tendermint"
-      ]
+      "nohoist": ["@tendermint"]
     }
   },
   "npmClient": "yarn",

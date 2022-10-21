@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 // --- Chakra UI Elements
 import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Switch, Spinner } from "@chakra-ui/react";
 
-import { PlatformSpec } from "../config/platforms";
-import { PlatformGroupSpec } from "../config/providers";
+import { PlatformSpec, PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { NoStampModal } from "./NoStampModal";
 
 export type SideBarContentProps = {
   currentPlatform: PlatformSpec | undefined;
@@ -16,6 +16,7 @@ export type SideBarContentProps = {
   isLoading: boolean | undefined;
   verifyButton: JSX.Element | undefined;
   infoElement?: JSX.Element | undefined;
+  verificationAttempted?: boolean;
 };
 
 export const SideBarContent = ({
@@ -27,9 +28,11 @@ export const SideBarContent = ({
   isLoading,
   verifyButton,
   infoElement,
+  verificationAttempted,
 }: SideBarContentProps): JSX.Element => {
   const [allProviderIds, setAllProviderIds] = useState<PROVIDER_ID[]>([]);
   const [allSelected, setAllSelected] = useState(false);
+  const [showNoStampModal, setShowNoStampModal] = useState(false);
 
   // alter select-all state when items change
   useEffect(() => {
@@ -45,7 +48,13 @@ export const SideBarContent = ({
     // is everything selected?
     setAllSelected(!doSelect);
     setAllProviderIds(providerIds);
-  }, [currentProviders, selectedProviders]);
+  }, [currentProviders, selectedProviders, verificationAttempted]);
+
+  useEffect(() => {
+    if (verificationAttempted && currentPlatform?.isEVM && (selectedProviders?.length || 0) < allProviderIds.length) {
+      setShowNoStampModal(true);
+    }
+  }, [verificationAttempted, allProviderIds, selectedProviders, currentPlatform]);
 
   return (
     <DrawerContent>
@@ -96,7 +105,9 @@ export const SideBarContent = ({
                           return (
                             <li
                               className={`ml-4 ${
-                                verifiedProviders?.indexOf(provider.name) !== -1 ? `text-green-500` : `text-gray-400`
+                                verifiedProviders?.indexOf(provider.name as PROVIDER_ID) !== -1
+                                  ? `text-green-500`
+                                  : `text-gray-400`
                               }`}
                               key={`${provider.title}${i}`}
                             >
@@ -111,7 +122,8 @@ export const SideBarContent = ({
                           size="lg"
                           isChecked={
                             stamp.providers?.reduce(
-                              (isPresent, provider) => isPresent || selectedProviders?.indexOf(provider.name) !== -1,
+                              (isPresent, provider) =>
+                                isPresent || selectedProviders?.indexOf(provider.name as PROVIDER_ID) !== -1,
                               false as boolean // typing the response - always bool
                             ) || false
                           }
@@ -161,6 +173,7 @@ export const SideBarContent = ({
           </DrawerHeader>
         </div>
       )}
+      <NoStampModal isOpen={showNoStampModal} onClose={() => setShowNoStampModal(false)} />
     </DrawerContent>
   );
 };

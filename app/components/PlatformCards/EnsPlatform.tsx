@@ -41,6 +41,7 @@ export default function EnsPlatform(): JSX.Element {
   const { handleAddStamps, handleDeleteStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
+  const [verificationAttempted, setVerificationAttempted] = useState(false);
 
   // --- Chakra functions
   const toast = useToast();
@@ -75,6 +76,7 @@ export default function EnsPlatform(): JSX.Element {
   const handleFetchCredential = (): void => {
     datadogLogs.logger.info("Saving Stamp", { platform: platformId });
     setLoading(true);
+    setVerificationAttempted(true);
     fetchVerifiableCredential(
       iamUrl,
       {
@@ -200,6 +202,7 @@ export default function EnsPlatform(): JSX.Element {
       selectedProviders={selectedProviders}
       setSelectedProviders={setSelectedProviders}
       isLoading={isLoading}
+      verificationAttempted={verificationAttempted}
       verifyButton={
         <button
           disabled={!canSubmit}

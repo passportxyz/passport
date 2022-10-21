@@ -11,7 +11,7 @@ const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
 const MOCK_ENS = "dpopptest.eth";
 
 const EthersLookupAddressMock = jest.spyOn(StaticJsonRpcProvider.prototype, "lookupAddress");
-const EthersResolveAddressMock = jest.spyOn(StaticJsonRpcProvider.prototype, "resolveName");
+const EthersProviderResolveAddressMock = jest.spyOn(StaticJsonRpcProvider.prototype, "resolveName");
 
 describe("Attempt verification", function () {
   beforeEach(() => {
@@ -19,10 +19,11 @@ describe("Attempt verification", function () {
     EthersLookupAddressMock.mockImplementation(async (address) => {
       if (address === MOCK_ADDRESS) return MOCK_ENS;
     });
-    EthersResolveAddressMock.mockImplementation(async (ens) => {
+    EthersProviderResolveAddressMock.mockImplementation(async (ens) => {
       if (ens === MOCK_ENS) return MOCK_ADDRESS;
     });
   });
+
   it("handles valid verification attempt", async () => {
     const ens = new EnsProvider();
     const verifiedPayload = await ens.verify({
@@ -30,7 +31,7 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     expect(EthersLookupAddressMock).toBeCalledWith(MOCK_ADDRESS);
-    expect(EthersResolveAddressMock).toBeCalledWith(MOCK_ENS);
+    expect(EthersProviderResolveAddressMock).toBeCalledWith(MOCK_ENS);
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {

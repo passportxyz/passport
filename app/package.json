@@ -23,6 +23,7 @@
     "@gitcoin/passport-database-client": "^1.0.0",
     "@gitcoin/passport-identity": "^1.0.0",
     "@gitcoin/passport-types": "^1.0.0",
+    "@gitcoin/passport-platforms": "^1.0.0",
     "@self.id/framework": "0.3.3",
     "@web3-onboard/core": "^2.3.2",
     "@web3-onboard/injected-wallets": "^2.0.12",
