@@ -46,6 +46,7 @@ export const GenericOauthPlatform = ({ platformId, platformgroupspec }: Platform
       platformgroupspec?.reduce((all, stamp) => {
         return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
       }, [] as PROVIDER_ID[]) || [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
