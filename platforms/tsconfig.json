@@ -17,5 +17,5 @@
     },
     "jsx": "react"
   },
-  "include": ["./*", "__tests__", "src/platforms-config.ts", "src/Twitter", "Twitter/types.ts"]
+  "include": ["./*", "__tests__", "src/platforms-config.ts", "src/Twitter", "Twitter/types.ts", "src/index.ts"]
 }
