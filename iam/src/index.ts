@@ -40,7 +40,7 @@ import { Providers } from "./utils/providers";
 
 // ---- Identity Providers
 import { SimpleProvider } from "./providers/simple";
-import { GoogleProvider } from "./providers/google";
+// import { GoogleProvider } from "./providers/google";
 
 import {
   TwitterAuthProvider,
@@ -71,8 +71,8 @@ import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
 import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
 import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./providers/ethTransactions";
 
-import { NFTProvider } from "./providers/nft";
-import { GitPOAPProvider } from "./providers/gitpoap";
+// import { NFTProvider } from "./providers/nft";
+// import { GitPOAPProvider } from "./providers/gitpoap";
 
 // import { LensProfileProvider } from "./providers/lens";
 
@@ -95,7 +95,7 @@ export const config: {
 export const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
-  new GoogleProvider(),
+  new Google.GoogleProvider(),
   new TwitterAuthProvider(),
   new EnsProvider(),
   new Poh.PohProvider(),
