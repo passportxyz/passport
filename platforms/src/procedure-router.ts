@@ -1,8 +1,8 @@
 // ---- Server
 import { Request, Response, Router } from "express";
 
-import * as twitterOAuth from "./twitterOauth";
-import { triggerBrightidSponsorship, verifyBrightidContextId } from "./brightid";
+import * as twitterOAuth from "../src/Twitter/procedures/twitterOauth";
+import { triggerBrightidSponsorship, verifyBrightidContextId } from "../src/Brightid/procedures/brightidProcedures";
 
 export const router = Router();
 
