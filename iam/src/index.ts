@@ -1,3 +1,4 @@
+// import { EnsProvider } from './providers/ens';
 // Should this file be an app factory? If it was, we could move the provider config to main.ts and test in isolation
 import dotenv from "dotenv";
 
@@ -84,6 +85,7 @@ import { GitPOAPProvider } from "./providers/gitpoap";
 import { LensProfileProvider } from "./providers/lens";
 import { ZkSyncProvider } from "./providers/zkSync";
 import { GnosisSafeProvider } from "./providers/gnosisSafe";
+import { EnsProvider } from "./providers/ens";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -104,7 +106,7 @@ export const providers = new Providers([
   new SimpleProvider(),
   new GoogleProvider(),
   new TwitterAuthProvider(),
-  // new EnsProvider(),
+  new EnsProvider(),
   new PohProvider(),
   new POAPProvider(),
   new FacebookProvider(),
