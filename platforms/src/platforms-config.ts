@@ -223,7 +223,6 @@ export type PROVIDER_ID =
   | "Linkedin"
   | "Discord"
   | "GitPOAP"
-  | "Snapshot"
   | "SnapshotProposalsProvider"
   | "SnapshotVotesProvider"
   | "ethPossessionsGte#1"
