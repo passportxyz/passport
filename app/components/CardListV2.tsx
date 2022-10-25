@@ -5,8 +5,7 @@ import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // Providers
-
-import { TwitterProviderConfig } from "@gitcoin/passport-platforms";
+import { TwitterProviderConfig, GitPOAPProviderConfig } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -83,6 +82,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
     switch (currentPlatform?.platform) {
       case "Twitter":
         return <GenericOauthPlatform platformId={"Twitter"} platformgroupspec={TwitterProviderConfig} />;
+      case "GitPOAP":
+        return <GenericOauthPlatform platformId={"GitPOAP"} platformgroupspec={GitPOAPProviderConfig} />;
       // case "Github":
       //   return <GithubPlatform />;
       // case "Gitcoin":
@@ -97,8 +98,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <LinkedinPlatform />;
       // case "ETH":
       //   return <EthPlatform />;
-      // case "GitPOAP":
-      //   return <GitPOAPPlatform />;
       // case "Discord":
       //   return <DiscordPlatform />;
       // case "POAP":
