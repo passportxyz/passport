@@ -5,8 +5,8 @@ import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // Providers
+import { Twitter, Ens, Lens, Github, Gitcoin, Facebook, Poh, GitPOAP } from "@gitcoin/passport-platforms";
 
-import { Twitter, Ens, Lens, Github, Gitcoin, Facebook, Poh } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -128,7 +128,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
             platformgroupspec={Gitcoin.GitcoinProviderConfig}
           />
         );
-
+      case "GitPOAP":
+        return <GenericEVMPlatform platform={new GitPOAP.GitPOAPPlatform()} platFormGroupSpec={GitPOAP.GitPOAPProviderConfig} />;
       // case "Facebook":
       //   return <FacebookPlatform />;
       // case "Snapshot":
@@ -139,8 +140,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <LinkedinPlatform />;
       // case "ETH":
       //   return <EthPlatform />;
-      // case "GitPOAP":
-      //   return <GitPOAPPlatform />;
       // case "Discord":
       //   return <DiscordPlatform />;
       // case "POAP":
