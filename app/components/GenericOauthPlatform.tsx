@@ -199,7 +199,6 @@ export const GenericOauthPlatform = ({ platformId, platformgroupspec, getOAuthUr
   // attach and destroy a BroadcastChannel to handle the message
   useEffect(() => {
     // open the channel
-    console.log("geri broadcast channel ", `${platformPath}_oauth_channel`)
     const channel = new BroadcastChannel(`${platformPath}_oauth_channel`);
     // event handler will listen for messages from the child (debounced to avoid multiple submissions)
     channel.onmessage = debounce(listenForRedirect, 300);

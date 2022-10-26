@@ -1,6 +1,9 @@
 // ----- Types
 import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../../types";
+import { requestAccessToken } from "./github";
+
+// ----- HTTP Client
 import axios from "axios";
 
 export type GithubTokenResponse = {
@@ -10,13 +13,15 @@ export type GithubTokenResponse = {
 export type GithubFindMyUserResponse = {
   id?: string;
   login?: string;
+  public_repos?: number;
   type?: string;
 };
 
-// Export a Github Provider to carry out OAuth and return a record object
-export class GithubProvider implements Provider {
+// Export a Github Provider to carry out OAuth, check if the user has 5 >= repos,
+// and return a record object
+export class FiveOrMoreGithubRepos implements Provider {
   // Give the provider a type so that we can select it with a payload
-  type = "Github";
+  type = "FiveOrMoreGithubRepos";
 
   // Options can be set here and/or via the constructor
   _options = {};
@@ -32,51 +37,45 @@ export class GithubProvider implements Provider {
       verifiedPayload: GithubFindMyUserResponse = {};
 
     try {
-      verifiedPayload = await verifyGithub(payload.proofs.code, context);
+      verifiedPayload = await verifyGithubRepoCount(payload.proofs.code, context);
     } catch (e) {
       return { valid: false };
     } finally {
-      valid = verifiedPayload && verifiedPayload.id ? true : false;
+      valid = verifiedPayload && verifiedPayload.public_repos >= 5 && verifiedPayload.id ? true : false;
     }
 
     return {
       valid: valid,
       record: {
-        id: verifiedPayload.id,
+        id: verifiedPayload.id + "gte5GithubRepos",
       },
     };
   }
 }
 
-export const requestAccessToken = async (code: string, context: ProviderContext): Promise<string> => {
-  const clientId = process.env.GITHUB_CLIENT_ID;
-  const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-  const accessToken = context.githubAccessToken as string;
+// const requestAccessToken = async (code: string): Promise<string> => {
+//   const clientId = process.env.GITHUB_CLIENT_ID;
+//   const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 
-  if (accessToken) {
-    return accessToken;
-  }
+//   // Exchange the code for an access token
+//   const tokenRequest = await axios.post(
+//     `https://github.com/login/oauth/access_token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}`,
+//     {},
+//     {
+//       headers: { Accept: "application/json" },
+//     }
+//   );
 
-  // Exchange the code for an access token
-  const tokenRequest = await axios.post(
-    `https://github.com/login/oauth/access_token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}`,
-    {},
-    {
-      headers: { Accept: "application/json" },
-    }
-  );
+//   if (tokenRequest.status != 200) {
+//     throw `Post for request returned status code ${tokenRequest.status} instead of the expected 200`;
+//   }
 
-  if (tokenRequest.status != 200) {
-    throw `Post for request returned status code ${tokenRequest.status} instead of the expected 200`;
-  }
+//   const tokenResponse = tokenRequest.data as GithubTokenResponse;
 
-  const tokenResponse = tokenRequest.data as GithubTokenResponse;
+//   return tokenResponse.access_token;
+// };
 
-  context["githubAccessToken"] = tokenResponse.access_token;
-  return tokenResponse.access_token;
-};
-
-export const verifyGithub = async (code: string, context: ProviderContext): Promise<GithubFindMyUserResponse> => {
+const verifyGithubRepoCount = async (code: string, context: ProviderContext): Promise<GithubFindMyUserResponse> => {
   // retrieve user's auth bearer token to authenticate client
   const accessToken = await requestAccessToken(code, context);
 

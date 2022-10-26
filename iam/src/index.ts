@@ -53,17 +53,21 @@ import {
 
 import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
 
+import {
+  GithubProvider,
+  ForkedGithubRepoProvider,
+  StarredGithubRepoProvider,
+  TenOrMoreGithubFollowers,
+  FiftyOrMoreGithubFollowers,
+} from "@gitcoin/passport-platforms";
+
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
 import { FacebookProvider } from "./providers/facebook";
 import { FacebookFriendsProvider } from "./providers/facebookFriends";
 import { FacebookProfilePictureProvider } from "./providers/facebookProfilePicture";
 import { BrightIdProvider } from "./providers/brightid";
-import { GithubProvider } from "./providers/github";
 import { FiveOrMoreGithubRepos } from "./providers/fiveOrMoreGithubRepos";
-import { TenOrMoreGithubFollowers, FiftyOrMoreGithubFollowers } from "./providers/githubFollowers";
-import { ForkedGithubRepoProvider } from "./providers/githubForkedRepoProvider";
-import { StarredGithubRepoProvider } from "./providers/githubStarredRepoProvider";
 import { LinkedinProvider } from "./providers/linkedin";
 import { DiscordProvider } from "./providers/discord";
 
