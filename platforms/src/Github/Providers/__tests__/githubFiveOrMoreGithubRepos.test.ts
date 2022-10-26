@@ -1,5 +1,5 @@
 // ---- Test subject
-import { GithubProvider } from "../github";
+import { FiveOrMoreGithubRepos } from "../githubFiveOrMoreRepos";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 
@@ -12,8 +12,9 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const validGithubUserResponse = {
   data: {
-    id: "18723656",
-    login: "my-login-handle",
+    id: "39483721",
+    login: "a-cool-user",
+    public_repos: 7,
     type: "User",
   },
   status: 200,
@@ -43,18 +44,15 @@ describe("Attempt verification", function () {
   it("handles valid verification attempt", async () => {
     const clientId = process.env.GITHUB_CLIENT_ID;
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-    const github = new GithubProvider();
-    const githubPayload = await github.verify(
+    const fiveOrMoreGithubRepos = new FiveOrMoreGithubRepos();
+    const fiveOrMoreGithubReposPayload = await fiveOrMoreGithubRepos.verify(
       {
         proofs: {
           code,
         },
       } as unknown as RequestPayload,
-      {}
+      {},
     );
-
-    expect(axios.post).toHaveBeenCalledTimes(1);
-    expect(axios.get).toHaveBeenCalledTimes(1);
 
     // Check the request to get the token
     expect(mockedAxios.post).toBeCalledWith(
@@ -70,12 +68,39 @@ describe("Attempt verification", function () {
       headers: { Authorization: "token 762165719dhiqudgasyuqwt6235" },
     });
 
-    expect(githubPayload).toEqual({
+    expect(fiveOrMoreGithubReposPayload).toEqual({
       valid: true,
       record: {
-        id: validGithubUserResponse.data.id,
+        id: validGithubUserResponse.data.id + "gte5GithubRepos",
       },
     });
+  });
+
+  it("should return invalid payload when the user's repo count is less than 5", async () => {
+    mockedAxios.get.mockImplementation(async (url, config) => {
+      return {
+        data: {
+          id: "39483721",
+          login: "a-cool-user",
+          public_repos: 3,
+          type: "User",
+        },
+        status: 200,
+      };
+    });
+
+    const fiveOrMoreGithubRepos = new FiveOrMoreGithubRepos();
+
+    const fiveOrMoreGithubReposPayload = await fiveOrMoreGithubRepos.verify(
+      {
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {},
+    );
+
+    expect(fiveOrMoreGithubReposPayload).toMatchObject({ valid: false });
   });
 
   it("should return invalid payload when unable to retrieve auth token", async () => {
@@ -85,21 +110,18 @@ describe("Attempt verification", function () {
       };
     });
 
-    const github = new GithubProvider();
+    const fiveOrMoreGithubRepos = new FiveOrMoreGithubRepos();
 
-    const githubPayload = await github.verify(
+    const fiveOrMoreGithubReposPayload = await fiveOrMoreGithubRepos.verify(
       {
         proofs: {
           code,
         },
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
-    expect(axios.post).toHaveBeenCalledTimes(1);
-    expect(axios.get).toHaveBeenCalledTimes(0);
-
-    expect(githubPayload).toMatchObject({ valid: false });
+    expect(fiveOrMoreGithubReposPayload).toMatchObject({ valid: false });
   });
 
   it("should return invalid payload when there is no id in verifyGithub response", async () => {
@@ -108,27 +130,25 @@ describe("Attempt verification", function () {
         data: {
           id: undefined,
           login: "my-login-handle",
+          public_repos: 7,
           type: "User",
         },
         status: 200,
       };
     });
 
-    const github = new GithubProvider();
+    const fiveOrMoreGithubRepos = new FiveOrMoreGithubRepos();
 
-    const githubPayload = await github.verify(
+    const fiveOrMoreGithubReposPayload = await fiveOrMoreGithubRepos.verify(
       {
         proofs: {
           code,
-      },
-    } as unknown as RequestPayload,
-    {}
+        },
+      } as unknown as RequestPayload,
+      {},
     );
 
-    expect(axios.post).toHaveBeenCalledTimes(1);
-    expect(axios.get).toHaveBeenCalledTimes(1);
-
-    expect(githubPayload).toMatchObject({ valid: false });
+    expect(fiveOrMoreGithubReposPayload).toMatchObject({ valid: false });
   });
 
   it("should return invalid payload when a bad status code is returned by github user api", async () => {
@@ -138,9 +158,9 @@ describe("Attempt verification", function () {
       };
     });
 
-    const github = new GithubProvider();
+    const fiveOrMoreGithubRepos = new FiveOrMoreGithubRepos();
 
-    const githubPayload = await github.verify(
+    const fiveOrMoreGithubReposPayload = await fiveOrMoreGithubRepos.verify(
       {
         proofs: {
           code,
@@ -149,9 +169,6 @@ describe("Attempt verification", function () {
       {},
     );
 
-    expect(axios.post).toHaveBeenCalledTimes(1);
-    expect(axios.get).toHaveBeenCalledTimes(1);
-
-    expect(githubPayload).toMatchObject({ valid: false });
+    expect(fiveOrMoreGithubReposPayload).toMatchObject({ valid: false });
   });
 });
