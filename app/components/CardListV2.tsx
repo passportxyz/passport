@@ -79,6 +79,30 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
     getUpdatedPlatforms();
   }, [allProvidersState]);
 
+  // TODO: gerald, move this
+  async function getTwitterOAuthUrl(state:string): Promise<string> {
+    // Fetch data from external API
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(/\/*?$/, "")}/twitter/generateAuthUrl`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          callback: process.env.NEXT_PUBLIC_PASSPORT_TWITTER_CALLBACK,
+        }),
+      }
+    );
+    const data = await res.json();
+    return data.authUrl;
+  }
+
+  async function getGithubOAuthUrl(state:string): Promise<string> {
+    const githubUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK}&state=${state}`;
+    return githubUrl;
+  }
+
   // Add the platforms to this switch so the sidebar content can populate dynamically
   const renderCurrentPlatformSelection = () => {
     switch (currentPlatform?.platform) {
@@ -86,8 +110,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <GenericOauthPlatform platformId={"Twitter"} platformgroupspec={Twitter.TwitterProviderConfig} />;
       case "Ens":
         return <GenericEVMPlatform platformId={"Ens"} platFormGroupSpec={Ens.EnsProviderConfig} />;
-      // case "Github":
-      //   return <GithubPlatform />;
+      case "Github":
+        return <GenericOauthPlatform platformId={"Github"} platformgroupspec={GithubProviderConfig} getOAuthUrl={getGithubOAuthUrl} platformPath={"github"}/>;
       // case "Gitcoin":
       //   return <GitcoinPlatform />;
       // case "Facebook":

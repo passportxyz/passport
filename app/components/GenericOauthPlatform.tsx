@@ -32,9 +32,22 @@ import { getPlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/c
 type PlatformProps = {
   platformId: string;
   platformgroupspec: PlatformGroupSpec[];
+  getOAuthUrl: (state:string) => Promise<string>;
+  platformPath: string;
 };
 
-export const GenericOauthPlatform = ({ platformId, platformgroupspec }: PlatformProps): JSX.Element => {
+function generateUID(length: number) {
+  return window
+    .btoa(
+      Array.from(window.crypto.getRandomValues(new Uint8Array(length * 2)))
+        .map((b) => String.fromCharCode(b))
+        .join("")
+    )
+    .replace(/[+/]/g, "")
+    .substring(0, length);
+}
+
+export const GenericOauthPlatform = ({ platformId, platformgroupspec, getOAuthUrl, platformPath }: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
@@ -72,28 +85,12 @@ export const GenericOauthPlatform = ({ platformId, platformgroupspec }: Platform
   // --- Chakra functions
   const toast = useToast();
 
-  // Fetch OAuth2 url from the IAM procedure
-  async function handleFetchOAuth(): Promise<void> {
-    // Fetch data from external API
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(/\/*?$/, "")}/twitter/generateAuthUrl`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          callback: process.env.NEXT_PUBLIC_PASSPORT_TWITTER_CALLBACK,
-        }),
-      }
-    );
-    const data = await res.json();
-    // open new window for authUrl
-    openTwitterOAuthUrl(data.authUrl);
-  }
+  // TODO geri: manage & validate state
+  const state = `${platformPath}-` + generateUID(10);
+
 
   // Open authUrl in centered window
-  function openTwitterOAuthUrl(url: string): void {
+  function openOAuthUrl(url: string): void {
     const width = 600;
     const height = 800;
     const left = screen.width / 2 - width / 2;
@@ -114,10 +111,15 @@ export const GenericOauthPlatform = ({ platformId, platformgroupspec }: Platform
     );
   }
 
+  const handleVerifyStamps = async () => {
+    const authUrl:string = await getOAuthUrl(state);
+    openOAuthUrl(authUrl);
+  }
+  
   // Listener to watch for oauth redirect response on other windows (on the same host)
   function listenForRedirect(e: { target: string; data: { code: string; state: string } }) {
     // when receiving oauth response from a spawned child run fetchVerifiableCredential
-    if (e.target === "twitter") {
+    if (e.target === platformPath) {
       // pull data from message
       const queryCode = e.data.code;
       const queryState = e.data.state;
@@ -197,14 +199,15 @@ export const GenericOauthPlatform = ({ platformId, platformgroupspec }: Platform
   // attach and destroy a BroadcastChannel to handle the message
   useEffect(() => {
     // open the channel
-    const channel = new BroadcastChannel("twitter_oauth_channel");
+    console.log("geri broadcast channel ", `${platformPath}_oauth_channel`)
+    const channel = new BroadcastChannel(`${platformPath}_oauth_channel`);
     // event handler will listen for messages from the child (debounced to avoid multiple submissions)
     channel.onmessage = debounce(listenForRedirect, 300);
 
     return () => {
       channel.close();
     };
-  });
+  }, [platformPath]);
 
   return (
     <SideBarContent
@@ -217,7 +220,7 @@ export const GenericOauthPlatform = ({ platformId, platformgroupspec }: Platform
       verifyButton={
         <button
           disabled={!canSubmit}
-          onClick={handleFetchOAuth}
+          onClick={handleVerifyStamps}
           data-testid={`button-verify-${platformId}`}
           className="sidebar-verify-btn"
         >
