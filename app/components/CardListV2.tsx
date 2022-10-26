@@ -5,8 +5,7 @@ import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // Providers
-
-import { Twitter, Ens, Lens, Github, Gitcoin, Facebook, Poh } from "@gitcoin/passport-platforms";
+import { Twitter, Ens, Lens, Github, Gitcoin, Facebook, Poh, GnosisSafe } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -161,8 +160,10 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <ZkSyncPlatform />;
       case "Lens":
         return <GenericEVMPlatform platform={new Lens.LensPlatform()} platFormGroupSpec={Lens.LensProviderConfig} />;
-      // case "GnosisSafe":
-      //   return <GnosisSafePlatform />;
+      // case "Lens":
+      //   return <LensPlatform />;
+      case "GnosisSafe":
+        return <GenericOauthPlatform platform={new GnosisSafe.GnosisSafePlatform()} platformgroupspec={GnosisSafe.GnosisSafeProviderConfig} />;
       default:
         return (
           <SideBarContent
