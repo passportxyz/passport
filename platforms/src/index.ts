@@ -12,5 +12,6 @@ export { TwitterPlatformDetails, TwitterProviderConfig } from "./Twitter/Provide
 
 // Snapshot Platform
 export { SnapshotPlatform } from "./Snapshot/App-Bindings";
-export { SnapshotProposalsProvider, SnapshotVotesProvider } from "./Snapshot/Providers";
+export { SnapshotProposalsProvider } from "./Snapshot/Providers/snapshotProposalsProvider";
+export { SnapshotVotesProvider } from "./Snapshot/Providers/snapshotVotesProvider";
 export { SnapshotPlatformDetails, SnapshotProviderConfig } from "./Snapshot/Providers-config";
