@@ -5,7 +5,7 @@ dotenv.config();
 
 // ---- Server
 import express, { Request } from "express";
-import { router as procedureRouter } from "./procedures";
+import { router as procedureRouter } from "@gitcoin/passport-platforms/dist/commonjs/src/procedure-router";
 
 // ---- Production plugins
 import cors from "cors";
