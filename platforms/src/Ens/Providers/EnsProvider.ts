@@ -25,12 +25,11 @@ export class EnsProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
       const provider = getRPCProvider(payload);
-      console.log({ payload });
+
       const staticProvider: StaticJsonRpcProvider = new StaticJsonRpcProvider(payload.rpcUrl);
       // lookup ens name
-      console.log("payload", payload);
+
       const reportedName = await staticProvider.lookupAddress(payload.address);
-      console.log({ reportedName });
       if (!reportedName) return { valid: false, error: ["Ens name was not found for given address."] };
 
       // lookup the address resolved to an ens name
@@ -46,7 +45,6 @@ export class EnsProvider implements Provider {
         },
       };
     } catch (e) {
-      console.log({ e });
       return {
         valid: false,
       };
