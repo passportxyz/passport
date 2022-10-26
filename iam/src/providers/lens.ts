@@ -76,7 +76,7 @@ async function getDefaultProfile(userAddress: string): Promise<string> {
 async function getNumberOfHandles(userAddress: string): Promise<number> {
   const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(process.env.POLYGON_RPC_URL);
   const contract = new Contract(LENS_HUB_PROXY_CONTRACT_ADDRESS, LENS_HUB_PROXY_ABI, provider);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
   const numberOfHandles: BigNumber = await contract.balanceOf(userAddress);
   return numberOfHandles?._isBigNumber ? parseInt(numberOfHandles?._hex, 16) : 0;
 }
