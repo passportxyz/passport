@@ -2,12 +2,7 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
-import {
-  deleteClient,
-  getClient,
-  getFollowerCount,
-  TwitterFollowerResponse,
-} from "@gitcoin/passport-iam/dist/src/procedures/twitterOauth";
+import { deleteClient, getClient, getFollowerCount, TwitterFollowerResponse } from "../procedures/twitterOauth";
 import type { Provider, ProviderOptions } from "../../types";
 
 // Perform verification on twitter access token and retrieve follower count
