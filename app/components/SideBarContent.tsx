@@ -173,7 +173,6 @@ export const SideBarContent = ({
           </DrawerHeader>
         </div>
       )}
-      <NoStampModal isOpen={showNoStampModal} onClose={() => setShowNoStampModal(false)} />
     </DrawerContent>
   );
 };
