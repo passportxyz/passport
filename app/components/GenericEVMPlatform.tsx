@@ -78,77 +78,76 @@ export const GenericEVMPlatform = ({ platformId, platFormGroupSpec }: PlatformPr
   }, [selectedProviders, verifiedProviders]);
 
   // fetch VCs from IAM server
-  const handleFetchCredential = (): void => {
+  const handleFetchCredential = async (): Promise<void> => {
     datadogLogs.logger.info("Saving Stamp", { platform: platformId });
     setLoading(true);
     setVerificationAttempted(true);
-    fetchVerifiableCredential(
-      iamUrl,
-      {
-        type: platformId,
-        types: selectedProviders,
-        version: "0.0.0",
-        address: address || "",
-        proofs: {},
-        rpcUrl,
-      },
-      signer as { signMessage: (message: string) => Promise<string> }
-    )
-      .then(async (verified: VerifiableCredentialRecord): Promise<void> => {
-        // because we provided a types array in the params we expect to receive a
-        // credentials array in the response...
-        const vcs =
-          verified.credentials
-            ?.map((cred: CredentialResponseBody): Stamp | undefined => {
-              if (!cred.error) {
-                // add each of the requested/received stamps to the passport...
-                return {
-                  provider: cred.record?.type as PROVIDER_ID,
-                  credential: cred.credential as VerifiableCredential,
-                };
-              }
-            })
-            .filter((v: Stamp | undefined) => v) || [];
+    try {
+      const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
+        iamUrl,
+        {
+          type: platformId,
+          types: selectedProviders,
+          version: "0.0.0",
+          address: address || "",
+          proofs: {},
+          rpcUrl,
+        },
+        signer as { signMessage: (message: string) => Promise<string> }
+      );
+      // because we provided a types array in the params we expect to receive a
+      // credentials array in the response...
+      const vcs =
+        verified.credentials
+          ?.map((cred: CredentialResponseBody): Stamp | undefined => {
+            if (!cred.error) {
+              // add each of the requested/received stamps to the passport...
+              return {
+                provider: cred.record?.type as PROVIDER_ID,
+                credential: cred.credential as VerifiableCredential,
+              };
+            }
+          })
+          .filter((v: Stamp | undefined) => v) || [];
 
-        // Update the selected stamps for removal
-        await handleDeleteStamps(selectedProviders as PROVIDER_ID[]);
-        // Add all the stamps to the passport at once
-        await handleAddStamps(vcs as Stamp[]);
-        datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
-        // grab all providers who are verified from the verify response
-        const actualVerifiedProviders = providerIds.filter(
-          (providerId) =>
-            !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
-        );
-        // both verified and selected should look the same after save
-        setVerifiedProviders([...actualVerifiedProviders]);
-        setSelectedProviders([...actualVerifiedProviders]);
+      // Update the selected stamps for removal
+      await handleDeleteStamps(selectedProviders as PROVIDER_ID[]);
+      // Add all the stamps to the passport at once
+      await handleAddStamps(vcs as Stamp[]);
+      datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
+      // grab all providers who are verified from the verify response
+      const actualVerifiedProviders = providerIds.filter(
+        (providerId) =>
+          !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
+      );
+      // both verified and selected should look the same after save
+      setVerifiedProviders([...actualVerifiedProviders]);
+      setSelectedProviders([...actualVerifiedProviders]);
 
-        // Create Set to check changed providers after verification
-        const updatedVerifiedProviders = new Set(actualVerifiedProviders);
+      // Create Set to check changed providers after verification
+      const updatedVerifiedProviders = new Set(actualVerifiedProviders);
 
-        // Initial providers set minus updated providers set to determine which data points were removed
-        const initialMinusUpdated = difference(initialVerifiedProviders, updatedVerifiedProviders);
-        // Updated providers set minus initial providers set to determine which data points were added
-        const updatedMinusInitial = difference(updatedVerifiedProviders, initialVerifiedProviders);
-        // reset can submit state
-        setCanSubmit(false);
-        // Custom Success Toast
-        if (updatedMinusInitial.size === providerIds.length) {
-          completeVerificationToast();
-        } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
-          removedDataPointsToast();
-        } else {
-          failedVerificationToast();
-        }
-      })
-      .catch((e) => {
-        datadogLogs.logger.error("Verification Error", { error: e, platform: platformId });
-        throw e;
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      // Initial providers set minus updated providers set to determine which data points were removed
+      const initialMinusUpdated = difference(initialVerifiedProviders, updatedVerifiedProviders);
+      // Updated providers set minus initial providers set to determine which data points were added
+      const updatedMinusInitial = difference(updatedVerifiedProviders, initialVerifiedProviders);
+      // reset can submit state
+      setCanSubmit(false);
+      // Custom Success Toast
+      if (updatedMinusInitial.size === providerIds.length) {
+        completeVerificationToast();
+      } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
+        removedDataPointsToast();
+      } else {
+        failedVerificationToast();
+      }
+      setLoading(false);
+    } catch (e) {
+      datadogLogs.logger.error("Verification Error", { error: e, platform: platformId });
+      throw e;
+    } finally {
+      setLoading(false);
+    }
   };
 
   // --- Done Toast Helpers
