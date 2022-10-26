@@ -55,8 +55,10 @@ import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/P
 import { Gitcoin, Lens, Github, Facebook, Poh, Snapshot } from "@gitcoin/passport-platforms";
 
 // import { PohProvider } from "./providers/poh";
+
 import { POAPProvider } from "./providers/poap";
 import { BrightIdProvider } from "./providers/brightid";
+
 import { LinkedinProvider } from "./providers/linkedin";
 import { DiscordProvider } from "./providers/discord";
 
