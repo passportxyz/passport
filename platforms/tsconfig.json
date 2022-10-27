@@ -18,4 +18,3 @@
     "jsx": "react"
   },
   "include": ["src/**/*", "__tests__/**/*"]
-}
