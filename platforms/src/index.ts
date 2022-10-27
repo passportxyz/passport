@@ -9,3 +9,8 @@ export {
 } from "./Twitter/Providers/TwitterFollowerProvider";
 export { TwitterTweetGT10Provider } from "./Twitter/Providers/TwitterTweetsProvider";
 export { TwitterPlatformDetails, TwitterProviderConfig } from "./Twitter/Providers-config";
+
+// GitPOAP Platform
+export { GitPOAPPlatform } from "./GitPOAP/App-Bindings";
+export { GitPOAPProvider } from "./GitPOAP/Providers/gitpoap";
+export { GitPOAPPlatformDetails, GitPOAPProviderConfig } from "./GitPOAP/Providers-config";
