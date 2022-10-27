@@ -1,14 +1,14 @@
 import { PlatformSpec, PlatformGroupSpec } from "../types";
 
-export const GithubPlatformDetails: PlatformSpec = {
-  icon: "./assets/githubStampIcon.svg",
-  platform: "Github",
-  name: "Github",
-  description: "Connect your existing Github account to verify.",
+export const gitcoinPlatformDetails: PlatformSpec = {
+  icon: "./assets/gitcoinStampIcon.svg",
+  platform: "Gitcoin",
+  name: "Gitcoin",
+  description: "Connect with Github to verify with your Gitcoin account.",
   connectMessage: "Connect Account",
 };
 
-export const GithubProviderConfig: PlatformGroupSpec[] = [
+export const GitcoinProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Contributed to...",
     providers: [

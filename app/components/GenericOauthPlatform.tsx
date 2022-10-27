@@ -206,7 +206,7 @@ export const GenericOauthPlatform = ({  platformgroupspec, platform }: PlatformP
     return () => {
       channel.close();
     };
-  }, [platform.path]);
+  }, [platform.path, selectedProviders]);
 
   return (
     <SideBarContent
