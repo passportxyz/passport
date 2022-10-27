@@ -1,4 +1,2 @@
-import { EnsProvider } from "./Providers/EnsProvider";
-import { EnsPlatformDetails, EnsProviderConfig } from "./Providers-config";
-
-export { EnsProvider, EnsPlatformDetails, EnsProviderConfig };
+export { EnsPlatformDetails, EnsProviderConfig } from "./Providers-config";
+export { EnsProvider } from "./Providers/EnsProvider";

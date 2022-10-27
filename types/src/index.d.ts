@@ -102,7 +102,7 @@ export type ValidResponseBody = {
   record?: ProofRecord;
 };
 export type ErrorResponseBody = {
-  error: string;
+  error?: string;
   code?: number;
 };
 export type CredentialResponseBody = ValidResponseBody & ErrorResponseBody;

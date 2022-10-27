@@ -51,6 +51,8 @@ import {
   TwitterTweetGT10Provider,
 } from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
 
+import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
+
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
 import { FacebookProvider } from "./providers/facebook";
@@ -85,7 +87,6 @@ import { GitPOAPProvider } from "./providers/gitpoap";
 import { LensProfileProvider } from "./providers/lens";
 import { ZkSyncProvider } from "./providers/zkSync";
 import { GnosisSafeProvider } from "./providers/gnosisSafe";
-import { EnsProvider } from "./providers/ens";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
