@@ -17,5 +17,5 @@
     },
     "jsx": "react"
   },
-  "include": ["./*", "__tests__", "src/platforms-config.ts", "src/procedure-router.ts", "src/Twitter", "Twitter/types.ts", "src/index.ts", "src/Brightid/procedures/brightidProcedures.ts"]
+  "include": ["./*", "__tests__", "src/platforms-config.ts", "src/procedure-router.ts", "src/Twitter", "Twitter/types.ts", "src/index.ts", "src/Brightid/procedures/brightidProcedures.ts", "src/NFT/__tests__/"]
 }
