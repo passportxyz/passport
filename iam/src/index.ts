@@ -40,15 +40,15 @@ import { Providers } from "./utils/providers";
 // ---- Identity Providers
 import { SimpleProvider } from "./providers/simple";
 import { GoogleProvider } from "./providers/google";
-// import { TwitterProvider } from "./providers/twitter";
+
 import {
   TwitterAuthProvider,
   TwitterFollowerGT100Provider,
+  TwitterFollowerGT5000Provider,
   TwitterFollowerGT500Provider,
   TwitterFollowerGTE1000Provider,
-  TwitterFollowerGT5000Provider,
   TwitterTweetGT10Provider,
-} from "@gitcoin/passport-platforms";
+} from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
 
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
