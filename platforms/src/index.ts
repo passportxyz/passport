@@ -9,3 +9,8 @@ export {
 } from "./Twitter/Providers/TwitterFollowerProvider";
 export { TwitterTweetGT10Provider } from "./Twitter/Providers/TwitterTweetsProvider";
 export { TwitterPlatformDetails, TwitterProviderConfig } from "./Twitter/Providers-config";
+
+// NFT Platform// NFT Platform
+export { NFTPlatform } from "./NFT/App-Bindings";
+export { NFTProvider } from "./NFT/Providers/nft";
+export { NFTPlatformDetails, NFTProviderConfig } from "./NFT/Providers-config";
