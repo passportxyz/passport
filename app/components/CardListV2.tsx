@@ -7,6 +7,7 @@ import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/
 // Providers
 
 import { Twitter, Ens } from "@gitcoin/passport-platforms";
+import {Github, GithubProviderConfig} from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -79,29 +80,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
     getUpdatedPlatforms();
   }, [allProvidersState]);
 
-  // TODO: gerald, move this
-  async function getTwitterOAuthUrl(state:string): Promise<string> {
-    // Fetch data from external API
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(/\/*?$/, "")}/twitter/generateAuthUrl`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          callback: process.env.NEXT_PUBLIC_PASSPORT_TWITTER_CALLBACK,
-        }),
-      }
-    );
-    const data = await res.json();
-    return data.authUrl;
-  }
-
-  async function getGithubOAuthUrl(state:string): Promise<string> {
-    const githubUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK}&state=${state}`;
-    return githubUrl;
-  }
 
   // Add the platforms to this switch so the sidebar content can populate dynamically
   const renderCurrentPlatformSelection = () => {
@@ -111,9 +89,12 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       case "Ens":
         return <GenericEVMPlatform platformId={"Ens"} platFormGroupSpec={Ens.EnsProviderConfig} />;
       case "Github":
-        return <GenericOauthPlatform platformId={"Github"} platformgroupspec={GithubProviderConfig} getOAuthUrl={getGithubOAuthUrl} platformPath={"github"}/>;
+        return <GenericOauthPlatform platform={new Github.GithubPlatform({
+          clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+          redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+        })} platformgroupspec={GithubProviderConfig} />;
       // case "Gitcoin":
-      //   return <GitcoinPlatform />;
+      //   return <GenericOauthPlatform platformId={Gitcoin.platformId} platformgroupspec={Gitcoin.config} getOAuthUrl={Github.getOAuthUrl} platformPath={"github"}/>;
       // case "Facebook":
       //   return <FacebookPlatform />;
       // case "Snapshot":
