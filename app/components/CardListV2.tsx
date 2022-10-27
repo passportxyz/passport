@@ -77,7 +77,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
     );
     getUpdatedPlatforms();
   }, [allProvidersState]);
-
   // Add the platforms to this switch so the sidebar content can populate dynamically
   const renderCurrentPlatformSelection = () => {
     switch (currentPlatform?.platform) {
@@ -127,7 +126,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
             platformgroupspec={Gitcoin.GitcoinProviderConfig}
           />
         );
-
       // case "Facebook":
       //   return <FacebookPlatform />;
       case "Snapshot":
