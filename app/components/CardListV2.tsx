@@ -5,7 +5,7 @@ import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // Providers
-import { Twitter, Ens, Lens, Github, Gitcoin, Facebook, Poh, GitPOAP } from "@gitcoin/passport-platforms";
+import { Twitter, Ens, Lens, Github, Gitcoin, Facebook, Poh, GitPOAP, Linkedin } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -140,8 +140,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <SnapshotPlatform />;
       // case "Google":
       //   return <GooglePlatform />;
-      // case "Linkedin":
-      //   return <LinkedinPlatform />;
+      case "Linkedin":
+        return <GenericOauthPlatform platformId={"Linkedin"} platformgroupspec={LinkedinProviderConfig} />;
       // case "ETH":
       //   return <EthPlatform />;
       // case "Discord":
