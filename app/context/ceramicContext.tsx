@@ -43,6 +43,7 @@ const {
   GuildXYZ,
   Hypercerts,
   Holonym,
+  Idena,
 } = stampPlatforms;
 
 import { PlatformProps } from "../components/GenericPlatform";
@@ -215,6 +216,11 @@ if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP === "on") {
     platFormGroupSpec: Holonym.ProviderConfig,
   });
 }
+
+platforms.set("Idena", {
+  platform: new Idena.IdenaPlatform(),
+  platFormGroupSpec: Idena.ProviderConfig,
+});
 
 export enum IsLoadingPassportState {
   Idle,
