@@ -103,7 +103,7 @@ describe("Attempt verification", function () {
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
   it("should return invalid payload when tweet count is 5", async () => {
-    (getTweetCount as jest.Mock).mockResolvedValue({ tweetCount: 5 });
+    (getTweetCount as jest.Mock).mockResolvedValue({ username: "DpoppDev", tweetCount: 5 });
 
     const twitter = new TwitterTweetGT10Provider();
 
@@ -117,7 +117,7 @@ describe("Attempt verification", function () {
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
   it("should return valid payload when tweet count is 20", async () => {
-    (getTweetCount as jest.Mock).mockResolvedValue({ tweetCount: 20 });
+    (getTweetCount as jest.Mock).mockResolvedValue({ username: "DpoppDev", tweetCount: 20 });
 
     const twitter = new TwitterTweetGT10Provider();
 

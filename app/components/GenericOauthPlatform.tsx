@@ -173,7 +173,15 @@ export const GenericOauthPlatform = ({ platformId, platformgroupspec }: Platform
           toast({
             duration: 5000,
             isClosable: true,
-            render: (result: any) => <DoneToastContent platformId={platformId} result={result} />,
+            render: (result: any) => (
+              <DoneToastContent
+                platformId={platformId}
+                result={result}
+                title={"TODO Title"}
+                body={"TODO Body"}
+                icon={"TODO Icon"}
+              />
+            ),
           });
         })
         .catch((e) => {
