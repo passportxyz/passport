@@ -29,7 +29,7 @@ export class TwitterFollowerGT100Provider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false;
     let data: TwitterFollowerResponse = {};
-    let record: { [k: string]: string } = {};
+    let record: { [k: string]: string } | undefined = undefined;
     try {
       if (payload && payload.proofs) {
         data = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
@@ -68,7 +68,7 @@ export class TwitterFollowerGT500Provider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false;
     let data: TwitterFollowerResponse = {};
-    let record: { [k: string]: string } = {};
+    let record: { [k: string]: string } | undefined = undefined;
 
     try {
       if (payload && payload.proofs) {
@@ -108,7 +108,7 @@ export class TwitterFollowerGTE1000Provider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false;
     let data: TwitterFollowerResponse = {};
-    let record: { [k: string]: string } = {};
+    let record: { [k: string]: string } | undefined = undefined;
 
     try {
       if (payload && payload.proofs) {
@@ -148,7 +148,7 @@ export class TwitterFollowerGT5000Provider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false;
     let data: TwitterFollowerResponse = {};
-    let record: { [k: string]: string } = {};
+    let record: { [k: string]: string } | undefined = undefined;
 
     try {
       if (payload && payload.proofs) {
@@ -163,7 +163,7 @@ export class TwitterFollowerGT5000Provider implements Provider {
       }
     } catch (e) {
       return { valid: false };
-    } 
+    }
 
     return {
       valid: valid,

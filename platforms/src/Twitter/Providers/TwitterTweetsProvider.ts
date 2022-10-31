@@ -29,7 +29,7 @@ export class TwitterTweetGT10Provider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false;
     let data: TwitterTweetResponse = {};
-    let record: { [k: string]: string } = {};
+    let record: { [k: string]: string } | undefined = undefined;
 
     try {
       if (payload && payload.proofs) {

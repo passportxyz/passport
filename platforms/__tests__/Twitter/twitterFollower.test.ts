@@ -110,7 +110,7 @@ describe("Attempt verification", function () {
 
   describe("Check invalid cases for follower ranges", function () {
     it("Expected Greater than 100 and Follower Count is 50", async () => {
-      (getFollowerCount as jest.Mock).mockResolvedValue({ followerCount: 50 });
+      (getFollowerCount as jest.Mock).mockResolvedValue({ username: "DpoppDev", followerCount: 50 });
 
       const twitter = new TwitterFollowerGT100Provider();
 
@@ -125,7 +125,7 @@ describe("Attempt verification", function () {
     });
 
     it("Expected Greater than 500 and Follower Count is 150", async () => {
-      (getFollowerCount as jest.Mock).mockResolvedValue({ followerCount: 150 });
+      (getFollowerCount as jest.Mock).mockResolvedValue({ username: "DpoppDev", followerCount: 150 });
 
       const twitter = new TwitterFollowerGT500Provider();
 
@@ -140,7 +140,7 @@ describe("Attempt verification", function () {
     });
 
     it("Expected Greater than or equal to 1000 and Follower Count is 900", async () => {
-      (getFollowerCount as jest.Mock).mockResolvedValue({ followerCount: 900 });
+      (getFollowerCount as jest.Mock).mockResolvedValue({ username: "DpoppDev", followerCount: 900 });
 
       const twitter = new TwitterFollowerGTE1000Provider();
 
@@ -155,7 +155,7 @@ describe("Attempt verification", function () {
     });
 
     it("Expected Greater than 5000 and Follower Count is 2500", async () => {
-      (getFollowerCount as jest.Mock).mockResolvedValue({ followerCount: 2500 });
+      (getFollowerCount as jest.Mock).mockResolvedValue({ username: "DpoppDev", followerCount: 2500 });
 
       const twitter = new TwitterFollowerGT5000Provider();
 
@@ -171,7 +171,7 @@ describe("Attempt verification", function () {
   });
   describe("Check valid cases for follower ranges", function () {
     it("Expected Greater than 100 and Follower Count is 150", async () => {
-      (getFollowerCount as jest.Mock).mockResolvedValue({ followerCount: 150 });
+      (getFollowerCount as jest.Mock).mockResolvedValue({ username: "DpoppDev", followerCount: 150 });
 
       const twitter = new TwitterFollowerGT100Provider();
 
@@ -186,7 +186,7 @@ describe("Attempt verification", function () {
     });
 
     it("Expected Greater than 500 and Follower Count is 700", async () => {
-      (getFollowerCount as jest.Mock).mockResolvedValue({ followerCount: 700 });
+      (getFollowerCount as jest.Mock).mockResolvedValue({ username: "DpoppDev", followerCount: 700 });
 
       const twitter = new TwitterFollowerGT500Provider();
 
@@ -201,7 +201,7 @@ describe("Attempt verification", function () {
     });
 
     it("Expected Greater than or equal to 1000 and Follower Count is 1500", async () => {
-      (getFollowerCount as jest.Mock).mockResolvedValue({ followerCount: 1500 });
+      (getFollowerCount as jest.Mock).mockResolvedValue({ username: "DpoppDev", followerCount: 1500 });
 
       const twitter = new TwitterFollowerGTE1000Provider();
 
@@ -216,7 +216,7 @@ describe("Attempt verification", function () {
     });
 
     it("Expected Greater than 5000 and Follower Count is 7500", async () => {
-      (getFollowerCount as jest.Mock).mockResolvedValue({ followerCount: 7500 });
+      (getFollowerCount as jest.Mock).mockResolvedValue({ username: "DpoppDev", followerCount: 7500 });
 
       const twitter = new TwitterFollowerGT5000Provider();
 
