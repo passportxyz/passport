@@ -35,5 +35,11 @@ jobs:
         run: yarn test:ceramic-integration
       - name: Run Linter
         run: yarn lint
+      - name: Workarround for build error
+        run: rm -rf node_modules/@tendermint
       - name: Run Build (ensure that build succeeds)
         run: yarn build
+      - name: Run Build iam (ensure that build succeeds)
+        run: yarn build:iam
+      - name: Run Build app (ensure that build succeeds)
+        run: yarn build:app
