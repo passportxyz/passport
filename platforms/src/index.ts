@@ -25,6 +25,7 @@ import * as GtcStaking from "./GtcStaking";
 import * as Google from "./Google";
 import * as ClearText from "./ClearText";
 import * as Brightid from "./Brightid";
+import * as Idena from "./Idena";
 
 export {
   Brightid,
@@ -48,6 +49,7 @@ export {
   Facebook,
   Ens,
   Twitter,
+  Idena,
 };
 
 // Initiate providers - new Providers should be registered in this array...
@@ -219,6 +221,14 @@ export const providers = new Providers([
   new Lens.LensProfileProvider(),
   new ZkSync.ZkSyncProvider(),
   new GnosisSafe.GnosisSafeProvider(),
+  new Idena.IdenaStateNewbieProvider(),
+  new Idena.IdenaStateVerifiedProvider(),
+  new Idena.IdenaStateHumanProvider(),
+  new Idena.IdenaStake1kProvider(),
+  new Idena.IdenaStake10kProvider(),
+  new Idena.IdenaStake100kProvider(),
+  new Idena.IdenaAge5Provider(),
+  new Idena.IdenaAge10Provider(),
 ]);
 
 export { Platform, AppContext, ProviderPayload, PlatformSpec } from "./types";

@@ -34,6 +34,7 @@ import {
   GtcStaking,
   Google,
   Brightid,
+  Idena,
 } from "@gitcoin/passport-platforms";
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -167,6 +168,11 @@ platforms.set("Google", {
 platforms.set("Brightid", {
   platform: new Brightid.BrightidPlatform(),
   platFormGroupSpec: Brightid.BrightidProviderConfig,
+});
+
+platforms.set("Idena", {
+  platform: new Idena.IdenaPlatform(),
+  platFormGroupSpec: Idena.IdenaProviderConfig,
 });
 
 export enum IsLoadingPassportState {
@@ -435,6 +441,38 @@ const startingAllProvidersState: AllProvidersState = {
   },
   GnosisSafe: {
     providerSpec: getProviderSpec("GnosisSafe", "GnosisSafe"),
+    stamp: undefined,
+  },
+  "IdenaState#Newbie": {
+    providerSpec: getProviderSpec("Idena", "IdenaState#Newbie"),
+    stamp: undefined,
+  },
+  "IdenaState#Verified": {
+    providerSpec: getProviderSpec("Idena", "IdenaState#Verified"),
+    stamp: undefined,
+  },
+  "IdenaState#Human": {
+    providerSpec: getProviderSpec("Idena", "IdenaState#Human"),
+    stamp: undefined,
+  },
+  "IdenaStake#1k": {
+    providerSpec: getProviderSpec("Idena", "IdenaStake#1k"),
+    stamp: undefined,
+  },
+  "IdenaStake#10k": {
+    providerSpec: getProviderSpec("Idena", "IdenaStake#10k"),
+    stamp: undefined,
+  },
+  "IdenaStake#100k": {
+    providerSpec: getProviderSpec("Idena", "IdenaStake#100k"),
+    stamp: undefined,
+  },
+  "IdenaAge#5": {
+    providerSpec: getProviderSpec("Idena", "IdenaAge#5"),
+    stamp: undefined,
+  },
+  "IdenaAge#10": {
+    providerSpec: getProviderSpec("Idena", "IdenaAge#10"),
     stamp: undefined,
   },
 };

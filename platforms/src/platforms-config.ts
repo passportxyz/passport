@@ -168,4 +168,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Gnosis Safe Signer/Owner Verification",
     connectMessage: "Verify Account",
   },
+  {
+    icon: "./assets/idenaStampIcon.svg",
+    platform: "Idena",
+    name: "Idena",
+    description: "Idena Verification",
+    connectMessage: "Verify Identity",
+  },
 ];

@@ -103,7 +103,8 @@ export type PLATFORM_ID =
   | "NFT"
   | "ZkSync"
   | "Lens"
-  | "GnosisSafe";
+  | "GnosisSafe"
+  | "Idena";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -167,4 +168,12 @@ export type PROVIDER_ID =
   | "NFT"
   | "ZkSync"
   | "Lens"
-  | "GnosisSafe";
+  | "GnosisSafe"
+  | "IdenaState#Newbie"
+  | "IdenaState#Verified"
+  | "IdenaState#Human"
+  | "IdenaStake#1k"
+  | "IdenaStake#10k"
+  | "IdenaStake#100k"
+  | "IdenaAge#5"
+  | "IdenaAge#10";

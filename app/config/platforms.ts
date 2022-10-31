@@ -178,4 +178,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Connect your wallet to verify Gnosis Safe Signer/Owner Verification",
     connectMessage: "Connect Wallet",
   },
+  {
+    icon: "./assets/idenaStampIcon.svg",
+    platform: "Idena",
+    name: "Idena",
+    description: "Idena Verification",
+    connectMessage: "Verify Identity",
+  },
 ];
