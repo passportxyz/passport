@@ -17,5 +17,5 @@
     },
     "jsx": "react"
   },
-  "include": ["src/**/*", "__tests__/**/*", "index.ts"]
+  "include": ["src/**/*", "__tests__/**/*"]
 }
