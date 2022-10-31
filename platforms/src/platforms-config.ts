@@ -183,4 +183,11 @@ export const PLATFORMS: PlatformSpec[] = [
     connectMessage: "Verify Guilds",
     isEVM: true,
   },
+  {
+    icon: "./assets/idenaStampIcon.svg",
+    platform: "Idena",
+    name: "Idena",
+    description: "Idena Verification",
+    connectMessage: "Verify Identity",
+  },
 ];
