@@ -27,19 +27,23 @@ export const getSessionKey = (): string => {
  * @returns instance of auth.OAuth2User
  */
 export const initClient = (callback: string, sessionKey: string): auth.OAuth2User => {
-  clients[sessionKey] = new auth.OAuth2User({
-    client_id: process.env.TWITTER_CLIENT_ID,
-    client_secret: process.env.TWITTER_CLIENT_SECRET,
-    callback: callback,
-    scopes: ["tweet.read", "users.read"],
-  });
+  if (process.env.TWITTER_CLIENT_ID && process.env.TWITTER_CLIENT_SECRET) {
+    clients[sessionKey] = new auth.OAuth2User({
+      client_id: process.env.TWITTER_CLIENT_ID,
+      client_secret: process.env.TWITTER_CLIENT_SECRET,
+      callback: callback,
+      scopes: ["tweet.read", "users.read"],
+    });
 
-  // stope the clients from causing a memory leak
-  setTimeout(() => {
-    deleteClient(sessionKey);
-  }, TIMEOUT_IN_MS);
+    // stope the clients from causing a memory leak
+    setTimeout(() => {
+      deleteClient(sessionKey);
+    }, TIMEOUT_IN_MS);
 
-  return clients[sessionKey];
+    return clients[sessionKey];
+  } else {
+    throw "Missing TWITTER_CLIENT_ID or TWITTER_CLIENT_SECRET";
+  }
 };
 
 // record timeouts so that we can delay the deletion of the auth key til after all Providers have used it
@@ -61,9 +65,13 @@ const deleteAuthClient = (code: string): void => {
 };
 
 // retrieve the raw client that is shared between Proceedures
-export const getClient = (state: string): auth.OAuth2User | undefined => {
+export const getClient = (state: string): auth.OAuth2User => {
   clearTimeout(timeoutDel[state]);
-  return clients[state];
+  const ret: auth.OAuth2User = clients[state];
+  if (ret !== undefined) {
+    return ret;
+  }
+  throw "Unable to get twitter client";
 };
 
 // retrieve the instatiated Client shared between Providers
@@ -121,8 +129,8 @@ export const getFollowerCount = async (client: auth.OAuth2User, code: string): P
     "user.fields": ["public_metrics"],
   });
   return {
-    username: myUser.data.username,
-    followerCount: myUser.data.public_metrics.followers_count,
+    username: myUser.data?.username,
+    followerCount: myUser.data?.public_metrics?.followers_count,
   };
 };
 
@@ -140,7 +148,7 @@ export const getTweetCount = async (client: auth.OAuth2User, code: string): Prom
     "user.fields": ["public_metrics"],
   });
   return {
-    username: myUser.data.username,
-    tweetCount: myUser.data.public_metrics.tweet_count,
+    username: myUser.data?.username,
+    tweetCount: myUser.data?.public_metrics?.tweet_count,
   };
 };
