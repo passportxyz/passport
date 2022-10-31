@@ -29,21 +29,27 @@ export class TwitterTweetGT10Provider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     let valid = false;
     let data: TwitterTweetResponse = {};
+    let record: { [k: string]: string } = {};
 
     try {
-      data = await verifyTwitterTweets(payload.proofs.sessionKey, payload.proofs.code);
+      if (payload && payload.proofs) {
+        data = await verifyTwitterTweets(payload.proofs.sessionKey, payload.proofs.code);
+        if (data && data.username && data.tweetCount) {
+          valid = data.tweetCount > 10;
+
+          record = {
+            username: data.username,
+            tweetCount: valid ? "gt10" : "",
+          };
+        }
+      }
     } catch (e) {
       return { valid: false };
-    } finally {
-      valid = data.tweetCount > 10;
     }
 
     return {
       valid: valid,
-      record: {
-        username: data.username,
-        tweetCount: valid ? "gt10" : "",
-      },
+      record,
     };
   }
 }
