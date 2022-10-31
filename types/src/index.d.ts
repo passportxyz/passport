@@ -57,6 +57,7 @@ export type RequestPayload = {
   jsonRpcSigner?: JsonRpcSigner;
   challenge?: string;
   issuer?: string;
+  rpcUrl?: string;
 };
 
 // response Object return by verify procedure
@@ -101,7 +102,7 @@ export type ValidResponseBody = {
   record?: ProofRecord;
 };
 export type ErrorResponseBody = {
-  error: string;
+  error?: string;
   code?: number;
 };
 export type CredentialResponseBody = ValidResponseBody & ErrorResponseBody;

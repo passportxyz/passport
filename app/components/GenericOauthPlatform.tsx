@@ -175,11 +175,11 @@ export const GenericOauthPlatform = ({ platformId, platformgroupspec }: Platform
             isClosable: true,
             render: (result: any) => (
               <DoneToastContent
+                title="Success!"
+                body={`All ${platformId} data points verified.`}
+                icon="../../assets/check-icon.svg"
                 platformId={platformId}
                 result={result}
-                title={"TODO Title"}
-                body={"TODO Body"}
-                icon={"TODO Icon"}
               />
             ),
           });
