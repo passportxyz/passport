@@ -31,8 +31,8 @@ jobs:
         run: lerna bootstrap
       - name: Run Tests
         run: yarn test
-      - name: Run Ceramic Integration Tests
-        run: yarn test:ceramic-integration
+      # - name: Run Ceramic Integration Tests
+      #   run: yarn test:ceramic-integration
       - name: Run Linter
         run: yarn lint
       - name: Workarround for build error
