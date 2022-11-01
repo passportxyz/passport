@@ -7,7 +7,6 @@ import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/
 // Providers
 import { Twitter, Ens, Lens, Github, Gitcoin, Facebook, Poh, GitPOAP } from "@gitcoin/passport-platforms";
 
-
 // --- Components
 import { LoadingCard } from "./LoadingCard";
 import { GenericOauthPlatform } from "./GenericOauthPlatform";
