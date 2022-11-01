@@ -32,7 +32,7 @@ import { getPlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/c
 type PlatformProps = {
   platformId: string;
   platformgroupspec: PlatformGroupSpec[];
-  accessTokenRequest?(): Promise<{ [k: string]: string } | boolean>;
+  accessTokenRequest?(callback: (proof: any) => void): void;
 };
 
 export interface ReactFacebookLoginInfo {
@@ -95,21 +95,6 @@ export const GenericOauthPlatform = ({
   // --- Chakra functions
   const toast = useToast();
 
-  const facebookCredentialIssuance = async () => {
-    setLoading(true);
-    //@ts-ignore assuming FB.init was already called; see facebookSdkScript in pages/index.tsx
-    FB.login(function (response) {
-      if (response.status === "connected") {
-        const proofs = {
-          accessToken: response.accessToken,
-        };
-        fetchCredential(proofs);
-      } else {
-        setLoading(false);
-      }
-    });
-  };
-
   async function fetchCredential(proofs: { [k: string]: string }): Promise<void> {
     setLoading(true);
     // fetch VCs for only the selectedProviders
@@ -161,10 +146,13 @@ export const GenericOauthPlatform = ({
 
   async function initiateFetchCredential() {
     if (accessTokenRequest) {
-      const token = await accessTokenRequest();
-      if (token) {
-        fetchCredential(token);
-      }
+      const token = await accessTokenRequest((proof: any) => {
+        if (!proof.authenticated) {
+          setLoading(false);
+        } else {
+          fetchCredential(proof);
+        }
+      });
     } else {
       handleFetchOAuth();
     }
