@@ -6,11 +6,12 @@ import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/
 
 // Providers
 
-import { TwitterProviderConfig, SnapshotProviderConfig } from "@gitcoin/passport-platforms";
+import { Twitter, Ens, Snapshot } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
 import { GenericOauthPlatform } from "./GenericOauthPlatform";
+import { GenericEVMPlatform } from "./GenericEVMPlatform";
 
 // --- Identity Providers
 import { SideBarContent } from "./SideBarContent";
@@ -82,7 +83,9 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const renderCurrentPlatformSelection = () => {
     switch (currentPlatform?.platform) {
       case "Twitter":
-        return <GenericOauthPlatform platformId={"Twitter"} platformgroupspec={TwitterProviderConfig} />;
+        return <GenericOauthPlatform platformId={"Twitter"} platformgroupspec={Twitter.TwitterProviderConfig} />;
+      case "Ens":
+        return <GenericEVMPlatform platformId={"Ens"} platFormGroupSpec={Ens.EnsProviderConfig} />;
       // case "Github":
       //   return <GithubPlatform />;
       // case "Gitcoin":
@@ -90,7 +93,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       // case "Facebook":
       //   return <FacebookPlatform />;
       case "Snapshot":
-        return <GenericOauthPlatform platformId={"Snapshot"} platformgroupspec={SnapshotProviderConfig} />;
+        return <GenericEVMPlatform platformId={"Snapshot"} platFormGroupSpec={Snapshot.SnapshotProviderConfig} />;
       // case "Google":
       //   return <GooglePlatform />;
       // case "Linkedin":

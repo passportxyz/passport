@@ -1,3 +1,4 @@
+// import { EnsProvider } from './providers/ens';
 // Should this file be an app factory? If it was, we could move the provider config to main.ts and test in isolation
 import dotenv from "dotenv";
 
@@ -40,15 +41,22 @@ import { Providers } from "./utils/providers";
 // ---- Identity Providers
 import { SimpleProvider } from "./providers/simple";
 import { GoogleProvider } from "./providers/google";
-// import { TwitterProvider } from "./providers/twitter";
+
 import {
   TwitterAuthProvider,
   TwitterFollowerGT100Provider,
+  TwitterFollowerGT5000Provider,
   TwitterFollowerGT500Provider,
   TwitterFollowerGTE1000Provider,
-  TwitterFollowerGT5000Provider,
   TwitterTweetGT10Provider,
-} from "@gitcoin/passport-platforms";
+} from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
+
+import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
+
+import {
+  SnapshotProposalsProvider,
+  SnapshotVotesProvider,
+} from "@gitcoin/passport-platforms/dist/commonjs/src/Snapshot";
 
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
@@ -75,8 +83,6 @@ import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
 import { GitcoinContributorStatisticsProvider } from "./providers/gitcoinGrantsContributorStatistics";
 import { GitcoinGranteeStatisticsProvider } from "./providers/gitcoinGrantsGranteeStatistics";
-import { SnapshotProposalsProvider } from "./providers/snapshotProposalsProvider";
-import { SnapshotVotesProvider } from "./providers/snapshotVotesProvider";
 import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
 import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./providers/ethTransactions";
 import { NFTProvider } from "./providers/nft";
@@ -104,7 +110,7 @@ export const providers = new Providers([
   new SimpleProvider(),
   new GoogleProvider(),
   new TwitterAuthProvider(),
-  // new EnsProvider(),
+  new EnsProvider(),
   new PohProvider(),
   new POAPProvider(),
   new FacebookProvider(),
