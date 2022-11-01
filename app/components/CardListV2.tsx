@@ -6,7 +6,7 @@ import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/
 
 // Providers
 
-import { Twitter, Ens } from "@gitcoin/passport-platforms";
+import { Twitter, Ens, Lens } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -120,8 +120,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <NftPlatform />;
       // case "ZkSync":
       //   return <ZkSyncPlatform />;
-      // case "Lens":
-      //   return <LensPlatform />;
+      case "Lens":
+        return <GenericEVMPlatform platformId={"Lens"} platFormGroupSpec={Lens.LensProviderConfig} />;
       // case "GnosisSafe":
       //   return <GnosisSafePlatform />;
       default:
