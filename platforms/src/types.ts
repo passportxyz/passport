@@ -31,3 +31,10 @@ export interface Provider {
 
 // Use unknown
 export type ProviderOptions = Record<string, unknown>;
+
+export interface Platform {
+  platformId: string;
+  path?: string;
+  getOAuthUrl?(state: string): Promise<string>;
+  getAccessToken?(): Promise<{ [k: string]: string } | boolean>;
+}
