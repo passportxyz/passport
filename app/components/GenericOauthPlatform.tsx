@@ -32,6 +32,7 @@ import { getPlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/c
 type PlatformProps = {
   platformId: string;
   platformgroupspec: PlatformGroupSpec[];
+  accessTokenRequest?(): Promise<{ [k: string]: string } | boolean>;
 };
 
 export interface ReactFacebookLoginInfo {
@@ -52,7 +53,11 @@ export interface ReactFacebookLoginInfo {
     | undefined;
 }
 
-export const GenericOauthPlatform = ({ platformId, platformgroupspec }: PlatformProps): JSX.Element => {
+export const GenericOauthPlatform = ({
+  platformId,
+  platformgroupspec,
+  accessTokenRequest,
+}: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
@@ -95,16 +100,73 @@ export const GenericOauthPlatform = ({ platformId, platformgroupspec }: Platform
     //@ts-ignore assuming FB.init was already called; see facebookSdkScript in pages/index.tsx
     FB.login(function (response) {
       if (response.status === "connected") {
-        fetchCredential(response.authResponse);
+        const proofs = {
+          accessToken: response.accessToken,
+        };
+        fetchCredential(proofs);
       } else {
         setLoading(false);
       }
     });
   };
 
+  async function fetchCredential(proofs: { [k: string]: string }): Promise<void> {
+    setLoading(true);
+    // fetch VCs for only the selectedProviders
+    const vcs = await fetchVerifiableCredential(
+      process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
+      {
+        type: platformId,
+        types: selectedProviders,
+        version: "0.0.0",
+        address: address || "",
+        proofs,
+      },
+      signer as { signMessage: (message: string) => Promise<string> }
+    );
+    setVerifiedCredentialState(vcs);
+  }
+
+  async function setVerifiedCredentialState(verified: VerifiableCredentialRecord) {
+    // because we provided a types array in the params we expect to receive a credentials array in the response...
+    const vcs =
+      verified.credentials
+        ?.map((cred: CredentialResponseBody): Stamp | undefined => {
+          if (!cred.error) {
+            // add each of the requested/received stamps to the passport...
+            return {
+              provider: cred.record?.type as PROVIDER_ID,
+              credential: cred.credential as VerifiableCredential,
+            };
+          }
+        })
+        .filter((v: Stamp | undefined) => v) || [];
+    // Add all the stamps to the passport at once
+    await handleAddStamps(vcs as Stamp[]);
+    // report success to datadog
+    datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
+    // grab all providers who are verified from the verify response
+    const actualVerifiedProviders = providerIds.filter(
+      (providerId: string | undefined) =>
+        !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
+    );
+    // both verified and selected should look the same after save
+    setVerifiedProviders([...actualVerifiedProviders]);
+    setSelectedProviders([...actualVerifiedProviders]);
+    // reset can submit state
+    setCanSubmit(false);
+
+    // TODO: show toast
+  }
+
   async function initiateFetchCredential() {
-    if (platformId === "Facebook") {
-      facebookCredentialIssuance();
+    if (accessTokenRequest) {
+      const token = await accessTokenRequest();
+      if (token) {
+        fetchCredential(token);
+      }
+    } else {
+      handleFetchOAuth();
     }
   }
   // Fetch OAuth2 url from the IAM procedure
@@ -146,24 +208,6 @@ export const GenericOauthPlatform = ({ platformId, platformgroupspec }: Platform
         top +
         ", left=" +
         left
-    );
-  }
-
-  async function fetchCredential(response: ReactFacebookLoginInfo): Promise<void> {
-    setLoading(true);
-    // fetch VCs for only the selectedProviders
-    await fetchVerifiableCredential(
-      process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
-      {
-        type: platformId,
-        types: selectedProviders,
-        version: "0.0.0",
-        address: address || "",
-        proofs: {
-          accessToken: response.accessToken,
-        },
-      },
-      signer as { signMessage: (message: string) => Promise<string> }
     );
   }
 
@@ -270,7 +314,7 @@ export const GenericOauthPlatform = ({ platformId, platformgroupspec }: Platform
       verifyButton={
         <button
           disabled={!canSubmit}
-          onClick={handleFetchOAuth}
+          onClick={initiateFetchCredential}
           data-testid={`button-verify-${platformId}`}
           className="sidebar-verify-btn"
         >

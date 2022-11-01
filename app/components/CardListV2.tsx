@@ -91,7 +91,14 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       // case "Gitcoin":
       //   return <GitcoinPlatform />;
       case "Facebook":
-        return <GenericOauthPlatform platformId={"Facebook"} platformgroupspec={Facebook.FacebookProviderConfig} />;
+        const facebook = new Facebook.FacebookPlatform();
+        return (
+          <GenericOauthPlatform
+            platformId={facebook.platformId}
+            platformgroupspec={Facebook.FacebookProviderConfig}
+            accessTokenRequest={facebook.getAccessToken}
+          />
+        );
       // case "Snapshot":
       //   return <SnapshotPlatform />;
       // case "Google":
