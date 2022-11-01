@@ -34,6 +34,24 @@ type PlatformProps = {
   platformgroupspec: PlatformGroupSpec[];
 };
 
+export interface ReactFacebookLoginInfo {
+  id: string;
+  userID: string;
+  accessToken: string;
+  name?: string | undefined;
+  email?: string | undefined;
+  picture?:
+    | {
+        data: {
+          height?: number | undefined;
+          is_silhouette?: boolean | undefined;
+          url?: string | undefined;
+          width?: number | undefined;
+        };
+      }
+    | undefined;
+}
+
 export const GenericOauthPlatform = ({ platformId, platformgroupspec }: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
@@ -72,6 +90,23 @@ export const GenericOauthPlatform = ({ platformId, platformgroupspec }: Platform
   // --- Chakra functions
   const toast = useToast();
 
+  const facebookCredentialIssuance = async () => {
+    setLoading(true);
+    //@ts-ignore assuming FB.init was already called; see facebookSdkScript in pages/index.tsx
+    FB.login(function (response) {
+      if (response.status === "connected") {
+        fetchCredential(response.authResponse);
+      } else {
+        setLoading(false);
+      }
+    });
+  };
+
+  async function initiateFetchCredential() {
+    if (platformId === "Facebook") {
+      facebookCredentialIssuance();
+    }
+  }
   // Fetch OAuth2 url from the IAM procedure
   async function handleFetchOAuth(): Promise<void> {
     // Fetch data from external API
@@ -111,6 +146,24 @@ export const GenericOauthPlatform = ({ platformId, platformgroupspec }: Platform
         top +
         ", left=" +
         left
+    );
+  }
+
+  async function fetchCredential(response: ReactFacebookLoginInfo): Promise<void> {
+    setLoading(true);
+    // fetch VCs for only the selectedProviders
+    await fetchVerifiableCredential(
+      process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
+      {
+        type: platformId,
+        types: selectedProviders,
+        version: "0.0.0",
+        address: address || "",
+        proofs: {
+          accessToken: response.accessToken,
+        },
+      },
+      signer as { signMessage: (message: string) => Promise<string> }
     );
   }
 

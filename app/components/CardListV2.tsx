@@ -6,7 +6,7 @@ import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/
 
 // Providers
 
-import { Twitter, Ens } from "@gitcoin/passport-platforms";
+import { Twitter, Facebook, Ens } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -90,8 +90,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <GithubPlatform />;
       // case "Gitcoin":
       //   return <GitcoinPlatform />;
-      // case "Facebook":
-      //   return <FacebookPlatform />;
+      case "Facebook":
+        return <GenericOauthPlatform platformId={"Facebook"} platformgroupspec={Facebook.FacebookProviderConfig} />;
       // case "Snapshot":
       //   return <SnapshotPlatform />;
       // case "Google":
