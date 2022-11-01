@@ -5,11 +5,12 @@ import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // Providers
-import { TwitterProviderConfig, GitPOAPProviderConfig } from "@gitcoin/passport-platforms";
+import { Twitter, Ens, GitPOAP } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
 import { GenericOauthPlatform } from "./GenericOauthPlatform";
+import { GenericEVMPlatform } from "./GenericEVMPlatform";
 
 // --- Identity Providers
 import { SideBarContent } from "./SideBarContent";
@@ -83,7 +84,9 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       case "Twitter":
         return <GenericOauthPlatform platformId={"Twitter"} platformgroupspec={TwitterProviderConfig} />;
       case "GitPOAP":
-        return <GenericOauthPlatform platformId={"GitPOAP"} platformgroupspec={GitPOAPProviderConfig} />;
+        return <GenericEVMPlatform platformId={"GitPOAP"} platFormGroupSpec={GitPOAP.GitPOAPProviderConfig} />;
+      case "Ens":
+        return <GenericEVMPlatform platformId={"Ens"} platFormGroupSpec={Ens.EnsProviderConfig} />;
       // case "Github":
       //   return <GithubPlatform />;
       // case "Gitcoin":
