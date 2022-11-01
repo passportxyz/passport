@@ -47,9 +47,9 @@ async function verifyTwitter(sessionKey: string, code: string): Promise<TwitterF
   let myUser;
   if (client) {
     myUser = await requestFindMyUser(client, code);
+    deleteClient(sessionKey);
+    return myUser;
   }
 
-  deleteClient(sessionKey);
-
-  return myUser;
+  throw "Unable to determin twitter user";
 }
