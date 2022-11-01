@@ -9,11 +9,6 @@
     "signer",
     "platforms"
   ],
-  "command": {
-    "bootstrap": {
-      "nohoist": ["@tendermint"]
-    }
-  },
   "npmClient": "yarn",
   "version": "independent",
   "useWorkspaces": true,

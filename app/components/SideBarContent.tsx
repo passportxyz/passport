@@ -82,6 +82,7 @@ export const SideBarContent = ({
             <div>
               <div className="flex pl-4 pr-6">
                 <span
+                  data-testid="select-all"
                   className={`ml-auto py-2 text-sm ${
                     !allSelected ? `cursor-pointer text-purple-connectPurple` : `cursor-default `
                   } `}
@@ -173,7 +174,6 @@ export const SideBarContent = ({
           </DrawerHeader>
         </div>
       )}
-      <NoStampModal isOpen={showNoStampModal} onClose={() => setShowNoStampModal(false)} />
     </DrawerContent>
   );
 };

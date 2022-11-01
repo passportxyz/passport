@@ -1,3 +1,4 @@
+// import { EnsProvider } from './providers/ens';
 // Should this file be an app factory? If it was, we could move the provider config to main.ts and test in isolation
 import dotenv from "dotenv";
 
@@ -40,15 +41,19 @@ import { Providers } from "./utils/providers";
 // ---- Identity Providers
 import { SimpleProvider } from "./providers/simple";
 import { GoogleProvider } from "./providers/google";
-// import { TwitterProvider } from "./providers/twitter";
+
 import {
   TwitterAuthProvider,
   TwitterFollowerGT100Provider,
+  TwitterFollowerGT5000Provider,
   TwitterFollowerGT500Provider,
   TwitterFollowerGTE1000Provider,
-  TwitterFollowerGT5000Provider,
   TwitterTweetGT10Provider,
-} from "@gitcoin/passport-platforms";
+} from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
+
+import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
+
+import { GitPOAPProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/GitPOAP";
 
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
@@ -80,7 +85,6 @@ import { SnapshotVotesProvider } from "./providers/snapshotVotesProvider";
 import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
 import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./providers/ethTransactions";
 import { NFTProvider } from "./providers/nft";
-import { GitPOAPProvider } from "./providers/gitpoap";
 import { LensProfileProvider } from "./providers/lens";
 import { ZkSyncProvider } from "./providers/zkSync";
 import { GnosisSafeProvider } from "./providers/gnosisSafe";
@@ -104,7 +108,7 @@ export const providers = new Providers([
   new SimpleProvider(),
   new GoogleProvider(),
   new TwitterAuthProvider(),
-  // new EnsProvider(),
+  new EnsProvider(),
   new PohProvider(),
   new POAPProvider(),
   new FacebookProvider(),
