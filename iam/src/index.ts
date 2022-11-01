@@ -53,6 +53,11 @@ import {
 
 import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
 
+import {
+  SnapshotProposalsProvider,
+  SnapshotVotesProvider,
+} from "@gitcoin/passport-platforms/dist/commonjs/src/Snapshot";
+
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
 import { FacebookProvider } from "./providers/facebook";
@@ -78,8 +83,6 @@ import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
 import { GitcoinContributorStatisticsProvider } from "./providers/gitcoinGrantsContributorStatistics";
 import { GitcoinGranteeStatisticsProvider } from "./providers/gitcoinGrantsGranteeStatistics";
-import { SnapshotProposalsProvider } from "./providers/snapshotProposalsProvider";
-import { SnapshotVotesProvider } from "./providers/snapshotVotesProvider";
 import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
 import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./providers/ethTransactions";
 import { NFTProvider } from "./providers/nft";
