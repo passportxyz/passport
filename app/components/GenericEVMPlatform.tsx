@@ -126,7 +126,6 @@ export const GenericEVMPlatform = ({ platformId, platFormGroupSpec }: PlatformPr
 
       // Create Set to check changed providers after verification
       const updatedVerifiedProviders = new Set(actualVerifiedProviders);
-
       // Initial providers set minus updated providers set to determine which data points were removed
       const initialMinusUpdated = difference(initialVerifiedProviders, updatedVerifiedProviders);
       // Updated providers set minus initial providers set to determine which data points were added
