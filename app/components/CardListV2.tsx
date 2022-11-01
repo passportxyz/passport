@@ -5,12 +5,12 @@ import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // Providers
-
-import { TwitterProviderConfig, NFTProviderConfig } from "@gitcoin/passport-platforms";
+import { Twitter, Ens, NFT } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
 import { GenericOauthPlatform } from "./GenericOauthPlatform";
+import { GenericEVMPlatform } from "./GenericEVMPlatform";
 
 // --- Identity Providers
 import { SideBarContent } from "./SideBarContent";
@@ -82,7 +82,11 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const renderCurrentPlatformSelection = () => {
     switch (currentPlatform?.platform) {
       case "Twitter":
-        return <GenericOauthPlatform platformId={"Twitter"} platformgroupspec={TwitterProviderConfig} />;
+        return <GenericOauthPlatform platformId={"Twitter"} platformgroupspec={Twitter.TwitterProviderConfig} />;
+      case "Ens":
+        return <GenericEVMPlatform platformId={"Ens"} platFormGroupSpec={Ens.EnsProviderConfig} />;
+      case "NFT":
+        return <GenericEVMPlatform platformId={"NFT"} platFormGroupSpec={NFT.NFTProviderConfig} />;
       // case "Github":
       //   return <GithubPlatform />;
       // case "Gitcoin":
@@ -113,8 +117,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <GtcPlatform />;
       // case "GtcStaking":
       //   return <GtcStakingPlatform />;
-      case "NFT":
-        return <GenericOauthPlatform platformId={"NFT"} platformgroupspec={NFTProviderConfig} />;
       // case "ZkSync":
       //   return <ZkSyncPlatform />;
       // case "Lens":
