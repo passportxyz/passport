@@ -52,7 +52,7 @@ import {
 } from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
 
 import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
-import { Gitcoin, Lens, Github, Facebook, Poh } from "@gitcoin/passport-platforms";
+import { Gitcoin, Lens, Github, Facebook, Poh, Snapshot } from "@gitcoin/passport-platforms";
 
 // import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
@@ -69,10 +69,6 @@ import {
 import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
 import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
-// import { GitcoinContributorStatisticsProvider } from "./providers/gitcoinGrantsContributorStatistics";
-// import { GitcoinGranteeStatisticsProvider } from "./providers/gitcoinGrantsGranteeStatistics";
-import { SnapshotProposalsProvider } from "./providers/snapshotProposalsProvider";
-import { SnapshotVotesProvider } from "./providers/snapshotVotesProvider";
 import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
 import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./providers/ethTransactions";
 import { NFTProvider } from "./providers/nft";
@@ -129,8 +125,8 @@ export const providers = new Providers([
   new ClearTextSimpleProvider(),
   new ClearTextTwitterProvider(),
   new ClearTextGithubOrgProvider(),
-  new SnapshotProposalsProvider(),
-  new SnapshotVotesProvider(),
+  new Snapshot.SnapshotProposalsProvider(),
+  new Snapshot.SnapshotVotesProvider(),
   new EthGasProvider(),
   new FirstEthTxnProvider(),
   new EthGTEOneTxnProvider(),

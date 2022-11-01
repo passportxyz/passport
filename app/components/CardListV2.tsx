@@ -131,7 +131,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       // case "Facebook":
       //   return <FacebookPlatform />;
       case "Snapshot":
-        return <GenericOauthPlatform platformId={"Snapshot"} platformgroupspec={SnapshotProviderConfig} />;
+        return <GenericEVMPlatform platform={"Snapshot"} platFormGroupSpec={Snapshot.SnapshotProviderConfig} />;
       // case "Google":
       //   return <GooglePlatform />;
       // case "Linkedin":
