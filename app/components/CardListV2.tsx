@@ -82,7 +82,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const renderCurrentPlatformSelection = () => {
     switch (currentPlatform?.platform) {
       case "Twitter":
-        return <GenericOauthPlatform platformId={"Twitter"} platformgroupspec={TwitterProviderConfig} />;
+        return <GenericOauthPlatform platformId={"Twitter"} platformgroupspec={Twitter.TwitterProviderConfig} />;
       case "GitPOAP":
         return <GenericEVMPlatform platformId={"GitPOAP"} platFormGroupSpec={GitPOAP.GitPOAPProviderConfig} />;
       case "Ens":
