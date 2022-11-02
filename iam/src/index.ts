@@ -58,7 +58,6 @@ import { Gitcoin, Lens, Github, Facebook, Poh, Snapshot } from "@gitcoin/passpor
 
 import { POAPProvider } from "./providers/poap";
 import { BrightIdProvider } from "./providers/brightid";
-
 import { LinkedinProvider } from "./providers/linkedin";
 import { DiscordProvider } from "./providers/discord";
 
