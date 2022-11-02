@@ -47,7 +47,7 @@ function generateUID(length: number) {
     .substring(0, length);
 }
 
-export const GenericOauthPlatform = ({  platformgroupspec, platform }: PlatformProps): JSX.Element => {
+export const GenericOauthPlatform = ({ platformgroupspec, platform }: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
@@ -87,7 +87,6 @@ export const GenericOauthPlatform = ({  platformgroupspec, platform }: PlatformP
 
   const state = `${platform.path}-` + generateUID(10);
 
-
   // Open authUrl in centered window
   function openOAuthUrl(url: string): void {
     const width = 600;
@@ -111,10 +110,10 @@ export const GenericOauthPlatform = ({  platformgroupspec, platform }: PlatformP
   }
 
   const handleVerifyStamps = async () => {
-    const authUrl:string = await platform.getOAuthUrl(state);
+    const authUrl: string = await platform.getOAuthUrl(state);
     openOAuthUrl(authUrl);
-  }
-  
+  };
+
   // Listener to watch for oauth redirect response on other windows (on the same host)
   function listenForRedirect(e: { target: string; data: { code: string; state: string } }) {
     // when receiving oauth response from a spawned child run fetchVerifiableCredential

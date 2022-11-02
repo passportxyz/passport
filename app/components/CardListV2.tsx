@@ -6,9 +6,7 @@ import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/
 
 // Providers
 
-import { Twitter, Ens } from "@gitcoin/passport-platforms";
-import { Github } from "@gitcoin/passport-platforms";
-import { Gitcoin } from "@gitcoin/passport-platforms";
+import { Twitter, Ens, Lens, Github, Gitcoin } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -85,9 +83,14 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const renderCurrentPlatformSelection = () => {
     switch (currentPlatform?.platform) {
       case "Twitter":
-        return <GenericOauthPlatform platform={new Twitter.TwitterPlatform()} platformgroupspec={Twitter.TwitterProviderConfig} />;
+        return (
+          <GenericOauthPlatform
+            platform={new Twitter.TwitterPlatform()}
+            platformgroupspec={Twitter.TwitterProviderConfig}
+          />
+        );
       case "Ens":
-        return <GenericEVMPlatform platformId={"Ens"} platFormGroupSpec={Ens.EnsProviderConfig} />;
+        return <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />;
       case "Github":
         return (
           <GenericOauthPlatform
@@ -143,8 +146,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <NftPlatform />;
       // case "ZkSync":
       //   return <ZkSyncPlatform />;
-      // case "Lens":
-      //   return <LensPlatform />;
+      case "Lens":
+        return <GenericEVMPlatform platform={new Lens.LensPlatform()} platFormGroupSpec={Lens.LensProviderConfig} />;
       // case "GnosisSafe":
       //   return <GnosisSafePlatform />;
       default:

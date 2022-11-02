@@ -54,6 +54,7 @@ import {
 import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
 import { Github } from "@gitcoin/passport-platforms";
 import { Gitcoin } from "@gitcoin/passport-platforms";
+import { Lens } from "@gitcoin/passport-platforms";
 
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
@@ -81,7 +82,7 @@ import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
 import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./providers/ethTransactions";
 import { NFTProvider } from "./providers/nft";
 import { GitPOAPProvider } from "./providers/gitpoap";
-import { LensProfileProvider } from "./providers/lens";
+// import { LensProfileProvider } from "./providers/lens";
 import { ZkSyncProvider } from "./providers/zkSync";
 import { GnosisSafeProvider } from "./providers/gnosisSafe";
 
@@ -264,7 +265,7 @@ export const providers = new Providers([
   // END
   ////////////////////////////////////////////////////////////
   new NFTProvider(),
-  new LensProfileProvider(),
+  new Lens.LensProfileProvider(),
   new ZkSyncProvider(),
   new GnosisSafeProvider(),
 ]);
