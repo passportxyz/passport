@@ -7,6 +7,8 @@ import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/
 // Providers
 
 import { Twitter, Ens } from "@gitcoin/passport-platforms";
+import { Github } from "@gitcoin/passport-platforms";
+import { Gitcoin } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -83,13 +85,34 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const renderCurrentPlatformSelection = () => {
     switch (currentPlatform?.platform) {
       case "Twitter":
-        return <GenericOauthPlatform platformId={"Twitter"} platformgroupspec={Twitter.TwitterProviderConfig} />;
+        return <GenericOauthPlatform platform={new Twitter.TwitterPlatform()} platformgroupspec={Twitter.TwitterProviderConfig} />;
       case "Ens":
         return <GenericEVMPlatform platformId={"Ens"} platFormGroupSpec={Ens.EnsProviderConfig} />;
-      // case "Github":
-      //   return <GithubPlatform />;
-      // case "Gitcoin":
-      //   return <GitcoinPlatform />;
+      case "Github":
+        return (
+          <GenericOauthPlatform
+            platform={
+              new Github.GithubPlatform({
+                clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+                redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+              })
+            }
+            platformgroupspec={Github.GithubProviderConfig}
+          />
+        );
+      case "Gitcoin":
+        return (
+          <GenericOauthPlatform
+            platform={
+              new Gitcoin.GitcoinPlatform({
+                clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+                redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+              })
+            }
+            platformgroupspec={Gitcoin.GitcoinProviderConfig}
+          />
+        );
+
       // case "Facebook":
       //   return <FacebookPlatform />;
       // case "Snapshot":

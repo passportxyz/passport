@@ -1,5 +1,6 @@
+/* eslint-disable */
 // ---- Test subject
-import { GithubProvider } from "../src/providers/github";
+import { GithubProvider } from "../github";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 
@@ -30,11 +31,11 @@ const code = "ABC123_ACCESSCODE";
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockedAxios.post.mockImplementation(async () => {
+  mockedAxios.post.mockImplementation(async (url, data, config) => {
     return validCodeResponse;
   });
 
-  mockedAxios.get.mockImplementation(async () => {
+  mockedAxios.get.mockImplementation(async (url, config) => {
     return validGithubUserResponse;
   });
 });

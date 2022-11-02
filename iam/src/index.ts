@@ -52,6 +52,8 @@ import {
 } from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
 
 import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
+import { Github } from "@gitcoin/passport-platforms";
+import { Gitcoin } from "@gitcoin/passport-platforms";
 
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
@@ -59,11 +61,6 @@ import { FacebookProvider } from "./providers/facebook";
 import { FacebookFriendsProvider } from "./providers/facebookFriends";
 import { FacebookProfilePictureProvider } from "./providers/facebookProfilePicture";
 import { BrightIdProvider } from "./providers/brightid";
-import { GithubProvider } from "./providers/github";
-import { FiveOrMoreGithubRepos } from "./providers/fiveOrMoreGithubRepos";
-import { TenOrMoreGithubFollowers, FiftyOrMoreGithubFollowers } from "./providers/githubFollowers";
-import { ForkedGithubRepoProvider } from "./providers/githubForkedRepoProvider";
-import { StarredGithubRepoProvider } from "./providers/githubStarredRepoProvider";
 import { LinkedinProvider } from "./providers/linkedin";
 import { DiscordProvider } from "./providers/discord";
 
@@ -76,8 +73,8 @@ import {
 import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
 import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
-import { GitcoinContributorStatisticsProvider } from "./providers/gitcoinGrantsContributorStatistics";
-import { GitcoinGranteeStatisticsProvider } from "./providers/gitcoinGrantsGranteeStatistics";
+// import { GitcoinContributorStatisticsProvider } from "./providers/gitcoinGrantsContributorStatistics";
+// import { GitcoinGranteeStatisticsProvider } from "./providers/gitcoinGrantsGranteeStatistics";
 import { SnapshotProposalsProvider } from "./providers/snapshotProposalsProvider";
 import { SnapshotVotesProvider } from "./providers/snapshotVotesProvider";
 import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
@@ -114,16 +111,14 @@ export const providers = new Providers([
   new FacebookFriendsProvider(),
   new FacebookProfilePictureProvider(),
   new BrightIdProvider(),
-  new GithubProvider(),
-  new FiveOrMoreGithubRepos(),
-  new TenOrMoreGithubFollowers(),
-  new FiftyOrMoreGithubFollowers(),
-  new ForkedGithubRepoProvider(),
-  new StarredGithubRepoProvider(),
+  new Github.GithubProvider(),
+  new Github.FiveOrMoreGithubRepos(),
+  new Github.TenOrMoreGithubFollowers(),
+  new Github.FiftyOrMoreGithubFollowers(),
+  new Github.ForkedGithubRepoProvider(),
+  new Github.StarredGithubRepoProvider(),
   new LinkedinProvider(),
   new DiscordProvider(),
-  new ForkedGithubRepoProvider(),
-  new StarredGithubRepoProvider(),
   new TwitterTweetGT10Provider(),
   new TwitterFollowerGT100Provider(),
   new TwitterFollowerGT500Provider(),
@@ -147,47 +142,47 @@ export const providers = new Providers([
   /////////////////////////////////////////////////////////////
   // Start adding the specific gitcoin contributor providers
   /////////////////////////////////////////////////////////////
-  new GitcoinContributorStatisticsProvider({
+  new Gitcoin.GitcoinContributorStatisticsProvider({
     threshold: 1,
     receivingAttribute: "num_grants_contribute_to",
     recordAttribute: "numGrantsContributeToGte",
   }),
-  new GitcoinContributorStatisticsProvider({
+  new Gitcoin.GitcoinContributorStatisticsProvider({
     threshold: 10,
     receivingAttribute: "num_grants_contribute_to",
     recordAttribute: "numGrantsContributeToGte",
   }),
-  new GitcoinContributorStatisticsProvider({
+  new Gitcoin.GitcoinContributorStatisticsProvider({
     threshold: 25,
     receivingAttribute: "num_grants_contribute_to",
     recordAttribute: "numGrantsContributeToGte",
   }),
-  new GitcoinContributorStatisticsProvider({
+  new Gitcoin.GitcoinContributorStatisticsProvider({
     threshold: 100,
     receivingAttribute: "num_grants_contribute_to",
     recordAttribute: "numGrantsContributeToGte",
   }),
-  new GitcoinContributorStatisticsProvider({
+  new Gitcoin.GitcoinContributorStatisticsProvider({
     threshold: 10,
     receivingAttribute: "total_contribution_amount",
     recordAttribute: "totalContributionAmountGte",
   }),
-  new GitcoinContributorStatisticsProvider({
+  new Gitcoin.GitcoinContributorStatisticsProvider({
     threshold: 100,
     receivingAttribute: "total_contribution_amount",
     recordAttribute: "totalContributionAmountGte",
   }),
-  new GitcoinContributorStatisticsProvider({
+  new Gitcoin.GitcoinContributorStatisticsProvider({
     threshold: 1000,
     receivingAttribute: "total_contribution_amount",
     recordAttribute: "totalContributionAmountGte",
   }),
-  new GitcoinContributorStatisticsProvider({
+  new Gitcoin.GitcoinContributorStatisticsProvider({
     threshold: 1,
     receivingAttribute: "num_rounds_contribute_to",
     recordAttribute: "numRoundsContributedToGte",
   }),
-  new GitcoinContributorStatisticsProvider({
+  new Gitcoin.GitcoinContributorStatisticsProvider({
     threshold: 1,
     receivingAttribute: "num_gr14_contributions",
     recordAttribute: "numGr14ContributionsGte",
@@ -195,42 +190,42 @@ export const providers = new Providers([
   /////////////////////////////////////////////////////////////
   // Start adding the specific gitcoin grantee providers
   /////////////////////////////////////////////////////////////
-  new GitcoinGranteeStatisticsProvider({
+  new Gitcoin.GitcoinGranteeStatisticsProvider({
     threshold: 1,
     receivingAttribute: "num_owned_grants",
     recordAttribute: "numOwnedGrants",
   }),
-  new GitcoinGranteeStatisticsProvider({
+  new Gitcoin.GitcoinGranteeStatisticsProvider({
     threshold: 10,
     receivingAttribute: "num_grant_contributors",
     recordAttribute: "numGrantContributors",
   }),
-  new GitcoinGranteeStatisticsProvider({
+  new Gitcoin.GitcoinGranteeStatisticsProvider({
     threshold: 25,
     receivingAttribute: "num_grant_contributors",
     recordAttribute: "numGrantContributors",
   }),
-  new GitcoinGranteeStatisticsProvider({
+  new Gitcoin.GitcoinGranteeStatisticsProvider({
     threshold: 100,
     receivingAttribute: "num_grant_contributors",
     recordAttribute: "numGrantContributors",
   }),
-  new GitcoinGranteeStatisticsProvider({
+  new Gitcoin.GitcoinGranteeStatisticsProvider({
     threshold: 100,
     receivingAttribute: "total_contribution_amount",
     recordAttribute: "totalContributionAmount",
   }),
-  new GitcoinGranteeStatisticsProvider({
+  new Gitcoin.GitcoinGranteeStatisticsProvider({
     threshold: 1000,
     receivingAttribute: "total_contribution_amount",
     recordAttribute: "totalContributionAmount",
   }),
-  new GitcoinGranteeStatisticsProvider({
+  new Gitcoin.GitcoinGranteeStatisticsProvider({
     threshold: 10000,
     receivingAttribute: "total_contribution_amount",
     recordAttribute: "totalContributionAmount",
   }),
-  new GitcoinGranteeStatisticsProvider({
+  new Gitcoin.GitcoinGranteeStatisticsProvider({
     threshold: 1,
     receivingAttribute: "num_grants_in_eco_and_cause_rounds",
     recordAttribute: "numGrantsInEcoAndCauseRound",

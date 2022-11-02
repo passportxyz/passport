@@ -1,5 +1,6 @@
+/* eslint-disable */
 // ---- Test subject
-import { StarredGithubRepoProvider } from "../src/providers/githubStarredRepoProvider";
+import { StarredGithubRepoProvider } from "../githubStarredRepoProvider";
 
 // ----- Types
 import { RequestPayload } from "@gitcoin/passport-types";
@@ -142,7 +143,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
@@ -202,7 +203,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
@@ -256,7 +257,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
@@ -294,7 +295,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
@@ -338,7 +339,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);
@@ -390,7 +391,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
@@ -436,7 +437,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);
@@ -476,7 +477,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);
