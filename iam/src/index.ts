@@ -52,15 +52,13 @@ import {
 } from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
 
 import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
-import { Github } from "@gitcoin/passport-platforms";
-import { Gitcoin } from "@gitcoin/passport-platforms";
-import { Lens } from "@gitcoin/passport-platforms";
+import { Gitcoin, Lens, Github, Facebook } from "@gitcoin/passport-platforms";
 
 import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
-import { FacebookProvider } from "./providers/facebook";
-import { FacebookFriendsProvider } from "./providers/facebookFriends";
-import { FacebookProfilePictureProvider } from "./providers/facebookProfilePicture";
+// import { FacebookProvider } from "./providers/facebook";
+// import { FacebookFriendsProvider } from "./providers/facebookFriends";
+// import { FacebookProfilePictureProvider } from "./providers/facebookProfilePicture";
 import { BrightIdProvider } from "./providers/brightid";
 import { LinkedinProvider } from "./providers/linkedin";
 import { DiscordProvider } from "./providers/discord";
@@ -108,9 +106,9 @@ export const providers = new Providers([
   new EnsProvider(),
   new PohProvider(),
   new POAPProvider(),
-  new FacebookProvider(),
-  new FacebookFriendsProvider(),
-  new FacebookProfilePictureProvider(),
+  new Facebook.FacebookProvider(),
+  new Facebook.FacebookFriendsProvider(),
+  new Facebook.FacebookProfilePictureProvider(),
   new BrightIdProvider(),
   new Github.GithubProvider(),
   new Github.FiveOrMoreGithubRepos(),
