@@ -1,6 +1,6 @@
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
-import { LensProfileProvider } from "../providers/lens";
+import { LensProfileProvider } from "../Providers/lens";
 
 const mockBalanceOf = jest.fn();
 jest.mock("ethers", () => {
