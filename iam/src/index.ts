@@ -52,6 +52,7 @@ import {
 } from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
 
 import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
+
 import { Gitcoin, Lens, Github, Facebook, Poh, Snapshot } from "@gitcoin/passport-platforms";
 
 // import { PohProvider } from "./providers/poh";
