@@ -90,7 +90,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
           />
         );
       case "Ens":
-        return <GenericEVMPlatform platformId={"Ens"} platFormGroupSpec={Ens.EnsProviderConfig} />;
+        return <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />;
       case "Github":
         return (
           <GenericOauthPlatform
