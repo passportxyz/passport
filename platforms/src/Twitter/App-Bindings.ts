@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Platform, PlatformOptions } from "../types";
 
 export class TwitterPlatform implements Platform {
@@ -12,7 +13,7 @@ export class TwitterPlatform implements Platform {
     this.redirectUri = options.redirectUri as string;
     this.state = options.state as string;
   }
-  async getOAuthUrl (state: string): Promise<string> {
+  async getOAuthUrl(state: string): Promise<string> {
     // TODO: implement this
     // Fetch data from external API
     // const res = await fetch(
@@ -30,5 +31,5 @@ export class TwitterPlatform implements Platform {
     // const data = await res.json();
     // return data.authUrl;
     return "/TODO/";
-  };
-};
+  }
+}

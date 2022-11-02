@@ -142,7 +142,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {},
+      {}
     );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
@@ -202,7 +202,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {},
+      {}
     );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
@@ -256,7 +256,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {},
+      {}
     );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
@@ -294,7 +294,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {},
+      {}
     );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
@@ -338,7 +338,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {},
+      {}
     );
 
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);
@@ -390,7 +390,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {},
+      {}
     );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
@@ -436,7 +436,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {},
+      {}
     );
 
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);
@@ -476,7 +476,7 @@ describe("Attempt verification", function () {
           code,
         },
       } as unknown as RequestPayload,
-      {},
+      {}
     );
 
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);

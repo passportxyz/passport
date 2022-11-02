@@ -30,11 +30,11 @@ const code = "ABC123_ACCESSCODE";
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockedAxios.post.mockImplementation(async (url, data, config) => {
+  mockedAxios.post.mockImplementation(async () => {
     return validCodeResponse;
   });
 
-  mockedAxios.get.mockImplementation(async (url, config) => {
+  mockedAxios.get.mockImplementation(async () => {
     return validGithubUserResponse;
   });
 });

@@ -39,32 +39,23 @@ export class GitcoinGrantStatisticsProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
-    console.log("verify 1");
     let valid = false;
     let githubUser: GithubFindMyUserResponse = context.githubUser as GithubFindMyUserResponse;
-    console.log("verify 2");
     try {
-      console.log("verify 3");
       if (!githubUser) {
-        console.log("verify 3.1");
         githubUser = await verifyGithub(payload.proofs.code, context);
-        console.log("verify 3.2");
         context["githubUser"] = githubUser;
       }
-
-      console.log("verify 4");
 
       // Only check the contribution condition if a valid github id has been received
       valid = !!githubUser.id;
       if (valid) {
-        console.log("verify 5");
         const gitcoinGrantsStatistic = await getGitcoinStatistics(this.dataUrl, githubUser.login);
         valid = gitcoinGrantsStatistic[this._options.receivingAttribute] >= this._options.threshold;
       }
     } catch (e) {
       return { valid: false };
     }
-    console.log("verify 6");
 
     const ret = {
       valid: valid,
@@ -75,7 +66,6 @@ export class GitcoinGrantStatisticsProvider implements Provider {
           }
         : undefined,
     };
-    console.log("verify 7");
 
     return ret;
   }

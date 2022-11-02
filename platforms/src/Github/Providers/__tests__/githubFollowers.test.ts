@@ -1,3 +1,4 @@
+/* eslint-disable */
 // ---- Test subject
 import { TenOrMoreGithubFollowers, FiftyOrMoreGithubFollowers } from "../githubFollowers";
 
@@ -31,11 +32,11 @@ const code = "ABC123_ACCESSCODE";
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockedAxios.post.mockImplementation(async (url, data, config) => {
+  mockedAxios.post.mockImplementation(async () => {
     return validCodeResponse;
   });
 
-  mockedAxios.get.mockImplementation(async (url, config) => {
+  mockedAxios.get.mockImplementation(async () => {
     return validGithubUserResponse;
   });
 });
@@ -77,7 +78,7 @@ describe("Attempt verification", function () {
   });
 
   it("handles validation for 55 followers", async () => {
-    mockedAxios.get.mockImplementation(async (url, config) => {
+    mockedAxios.get.mockImplementation(async () => {
       return {
         data: {
           id: "39483721",
@@ -124,7 +125,7 @@ describe("Attempt verification", function () {
   });
 
   it("should return invalid payload when the verifyGithub response for follower count is less than 10", async () => {
-    mockedAxios.get.mockImplementation(async (url, config) => {
+    mockedAxios.get.mockImplementation(async () => {
       return {
         data: {
           id: "39483721",
@@ -151,7 +152,7 @@ describe("Attempt verification", function () {
   });
 
   it("should return invalid payload when the verifyGithub response for follower count is less than 50", async () => {
-    mockedAxios.get.mockImplementation(async (url, config) => {
+    mockedAxios.get.mockImplementation(async () => {
       return {
         data: {
           id: "39483721",
@@ -178,7 +179,7 @@ describe("Attempt verification", function () {
   });
 
   it("should return invalid payload when unable to retrieve auth token", async () => {
-    mockedAxios.post.mockImplementation(async (url, data, config) => {
+    mockedAxios.post.mockImplementation(async () => {
       return {
         status: 500,
       };
@@ -199,7 +200,7 @@ describe("Attempt verification", function () {
   });
 
   it("should return invalid payload when there is no id in verifyGithub response", async () => {
-    mockedAxios.get.mockImplementation(async (url, config) => {
+    mockedAxios.get.mockImplementation(async () => {
       return {
         data: {
           id: undefined,
@@ -226,7 +227,7 @@ describe("Attempt verification", function () {
   });
 
   it("should return invalid payload when a bad status code is returned by github user api", async () => {
-    mockedAxios.get.mockImplementation(async (url, config) => {
+    mockedAxios.get.mockImplementation(async () => {
       return {
         status: 500,
       };

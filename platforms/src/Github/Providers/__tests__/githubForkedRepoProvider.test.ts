@@ -1,3 +1,4 @@
+/* eslint-disable */
 // ---- Test subject
 import { ForkedGithubRepoProvider } from "../githubForkedRepoProvider";
 

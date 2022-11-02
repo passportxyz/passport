@@ -1,3 +1,4 @@
+/* eslint-disable */
 // ---- Test subject
 import { FiveOrMoreGithubRepos } from "../githubFiveOrMoreRepos";
 

@@ -1,3 +1,4 @@
+/* eslint-disable */
 // ---- Test subject
 
 import { RequestPayload } from "@gitcoin/passport-types";
@@ -47,7 +48,7 @@ class GitcoinGrantStatisticsProviderTester extends GitcoinGrantStatisticsProvide
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockedAxios.post.mockImplementation(async (url, data, config) => {
+  mockedAxios.post.mockImplementation(async () => {
     return validCodeResponse;
   });
 });

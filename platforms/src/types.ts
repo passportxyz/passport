@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 export type PlatformSpec = {

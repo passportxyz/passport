@@ -85,7 +85,6 @@ export const GenericOauthPlatform = ({  platformgroupspec, platform }: PlatformP
   // --- Chakra functions
   const toast = useToast();
 
-  // TODO geri: manage & validate state
   const state = `${platform.path}-` + generateUID(10);
 
 
@@ -178,9 +177,9 @@ export const GenericOauthPlatform = ({  platformgroupspec, platform }: PlatformP
             render: (result: any) => (
               <DoneToastContent
                 title="Success!"
-                body={`All ${platformId} data points verified.`}
+                body={`All ${platform.platformId} data points verified.`}
                 icon="../../assets/check-icon.svg"
-                platformId={platformId}
+                platformId={platform.platformId}
                 result={result}
               />
             ),
