@@ -11,6 +11,13 @@ import { utils } from "ethers";
 // ----- Verify signed message with ethers
 import { JsonRpcProvider, JsonRpcSigner, StaticJsonRpcProvider } from "@ethersproject/providers";
 
+// ----- Credential verification
+import * as DIDKit from "@spruceid/didkit-wasm-node";
+import { verifyCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+
+// ----- Verify signed message with ethers
+import { utils } from "ethers";
+
 // set the network rpc url based on env
 const RPC_URL = process.env.RPC_URL;
 
