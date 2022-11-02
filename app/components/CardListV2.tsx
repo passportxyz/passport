@@ -147,7 +147,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       // case "ZkSync":
       //   return <ZkSyncPlatform />;
       case "Lens":
-        return <GenericEVMPlatform platformId={"Lens"} platFormGroupSpec={Lens.LensProviderConfig} />;
+        return <GenericEVMPlatform platform={new Lens.LensPlatform()} platFormGroupSpec={Lens.LensProviderConfig} />;
       // case "GnosisSafe":
       //   return <GnosisSafePlatform />;
       default:
