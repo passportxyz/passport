@@ -27,35 +27,30 @@ import { UserContext } from "../context/userContext";
 
 // --- Types
 import { PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
+import { Platform } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
 import { getPlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/src/platforms-config";
 
 type PlatformProps = {
-  platformId: string;
+  // platformId: string;
   platformgroupspec: PlatformGroupSpec[];
-  accessTokenRequest?(callback: (proof: any) => void): void;
+  platform: Platform;
+  accessTokenRequest?(callback: (proof: { [k: string]: string | boolean }) => void): void;
 };
 
-export interface ReactFacebookLoginInfo {
-  id: string;
-  userID: string;
-  accessToken: string;
-  name?: string | undefined;
-  email?: string | undefined;
-  picture?:
-    | {
-        data: {
-          height?: number | undefined;
-          is_silhouette?: boolean | undefined;
-          url?: string | undefined;
-          width?: number | undefined;
-        };
-      }
-    | undefined;
+function generateUID(length: number) {
+  return window
+    .btoa(
+      Array.from(window.crypto.getRandomValues(new Uint8Array(length * 2)))
+        .map((b) => String.fromCharCode(b))
+        .join("")
+    )
+    .replace(/[+/]/g, "")
+    .substring(0, length);
 }
 
 export const GenericOauthPlatform = ({
-  platformId,
   platformgroupspec,
+  platform,
   accessTokenRequest,
 }: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
@@ -101,7 +96,7 @@ export const GenericOauthPlatform = ({
     const vcs = await fetchVerifiableCredential(
       process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
       {
-        type: platformId,
+        type: platform.platformId,
         types: selectedProviders,
         version: "0.0.0",
         address: address || "",
@@ -129,7 +124,7 @@ export const GenericOauthPlatform = ({
     // Add all the stamps to the passport at once
     await handleAddStamps(vcs as Stamp[]);
     // report success to datadog
-    datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
+    datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
     // grab all providers who are verified from the verify response
     const actualVerifiedProviders = providerIds.filter(
       (providerId: string | undefined) =>
@@ -174,11 +169,11 @@ export const GenericOauthPlatform = ({
     );
     const data = await res.json();
     // open new window for authUrl
-    openTwitterOAuthUrl(data.authUrl);
   }
+  const state = `${platform.path}-` + generateUID(10);
 
   // Open authUrl in centered window
-  function openTwitterOAuthUrl(url: string): void {
+  function openOAuthUrl(url: string): void {
     const width = 600;
     const height = 800;
     const left = screen.width / 2 - width / 2;
@@ -199,15 +194,22 @@ export const GenericOauthPlatform = ({
     );
   }
 
+  const handleVerifyStamps = async () => {
+    if (platform.getOAuthUrl) {
+      const authUrl: string = await platform.getOAuthUrl(state);
+      openOAuthUrl(authUrl);
+    }
+  };
+
   // Listener to watch for oauth redirect response on other windows (on the same host)
   function listenForRedirect(e: { target: string; data: { code: string; state: string } }) {
     // when receiving oauth response from a spawned child run fetchVerifiableCredential
-    if (e.target === "twitter") {
+    if (e.target === platform.path) {
       // pull data from message
       const queryCode = e.data.code;
       const queryState = e.data.state;
 
-      datadogLogs.logger.info("Saving Stamp", { platform: platformId });
+      datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
       // fetch and store credential
       setLoading(true);
 
@@ -215,7 +217,7 @@ export const GenericOauthPlatform = ({
       fetchVerifiableCredential(
         process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
         {
-          type: platformId,
+          type: platform.platformId,
           types: selectedProviders,
           version: "0.0.0",
           address: address || "",
@@ -243,7 +245,7 @@ export const GenericOauthPlatform = ({
           // Add all the stamps to the passport at once
           await handleAddStamps(vcs as Stamp[]);
           // report success to datadog
-          datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
+          datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
           // grab all providers who are verified from the verify response
           const actualVerifiedProviders = providerIds.filter(
             (providerId: string | undefined) =>
@@ -261,16 +263,16 @@ export const GenericOauthPlatform = ({
             render: (result: any) => (
               <DoneToastContent
                 title="Success!"
-                body={`All ${platformId} data points verified.`}
+                body={`All ${platform.platformId} data points verified.`}
                 icon="../../assets/check-icon.svg"
-                platformId={platformId}
+                platformId={platform.platformId}
                 result={result}
               />
             ),
           });
         })
         .catch((e) => {
-          datadogLogs.logger.error("Verification Error", { error: e, platform: platformId });
+          datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
           throw e;
         })
         .finally(() => {
@@ -282,18 +284,18 @@ export const GenericOauthPlatform = ({
   // attach and destroy a BroadcastChannel to handle the message
   useEffect(() => {
     // open the channel
-    const channel = new BroadcastChannel("twitter_oauth_channel");
+    const channel = new BroadcastChannel(`${platform.path}_oauth_channel`);
     // event handler will listen for messages from the child (debounced to avoid multiple submissions)
     channel.onmessage = debounce(listenForRedirect, 300);
 
     return () => {
       channel.close();
     };
-  });
+  }, [platform.path, selectedProviders]);
 
   return (
     <SideBarContent
-      currentPlatform={getPlatformSpec(platformId)}
+      currentPlatform={getPlatformSpec(platform.platformId)}
       currentProviders={platformgroupspec}
       verifiedProviders={verifiedProviders}
       selectedProviders={selectedProviders}
@@ -303,7 +305,7 @@ export const GenericOauthPlatform = ({
         <button
           disabled={!canSubmit}
           onClick={initiateFetchCredential}
-          data-testid={`button-verify-${platformId}`}
+          data-testid={`button-verify-${platform.platformId}`}
           className="sidebar-verify-btn"
         >
           Verify

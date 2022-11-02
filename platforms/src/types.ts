@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 export type PlatformSpec = {
@@ -40,3 +41,5 @@ export interface Platform {
   getOAuthUrl?(state: string): Promise<string>;
   getAccessToken?(callback: (proof: Proof) => void): void;
 }
+
+export type PlatformOptions = Record<string, unknown>;

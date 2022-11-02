@@ -75,7 +75,7 @@ export const RemoveStampModal = ({
         maxH="80%"
       >
         <ModalHeader>
-          <img src="../assets/shield-alert.svg" className="m-auto mb-4 w-10" />
+          <img alt="shield alert" src="../assets/shield-alert.svg" className="m-auto mb-4 w-10" />
           <p className="font-miriam-libre text-center">{title}</p>
         </ModalHeader>
         <ModalCloseButton />

@@ -4,9 +4,6 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
 
-import { debounce } from "ts-debounce";
-import { BroadcastChannel } from "broadcast-channel";
-
 // --- Identity tools
 import {
   Stamp,
@@ -26,21 +23,21 @@ import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 // --- Types
-import { PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
+import { PlatformGroupSpec, Platform } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
 import { getPlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/src/platforms-config";
 
 // --- Helpers
 import { difference } from "../utils/helpers";
 
 type PlatformProps = {
-  platformId: string;
   platFormGroupSpec: PlatformGroupSpec[];
+  platform: Platform;
 };
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
 
-export const GenericEVMPlatform = ({ platformId, platFormGroupSpec }: PlatformProps): JSX.Element => {
+export const GenericEVMPlatform = ({ platFormGroupSpec, platform }: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, handleDeleteStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
@@ -79,14 +76,14 @@ export const GenericEVMPlatform = ({ platformId, platFormGroupSpec }: PlatformPr
 
   // fetch VCs from IAM server
   const handleFetchCredential = async (): Promise<void> => {
-    datadogLogs.logger.info("Saving Stamp", { platform: platformId });
+    datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
     setLoading(true);
     setVerificationAttempted(true);
     try {
       const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
         iamUrl,
         {
-          type: platformId,
+          type: platform.platformId,
           types: selectedProviders,
           version: "0.0.0",
           address: address || "",
@@ -114,7 +111,7 @@ export const GenericEVMPlatform = ({ platformId, platFormGroupSpec }: PlatformPr
       await handleDeleteStamps(selectedProviders as PROVIDER_ID[]);
       // Add all the stamps to the passport at once
       await handleAddStamps(vcs as Stamp[]);
-      datadogLogs.logger.info("Successfully saved Stamp", { platform: platformId });
+      datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
       // grab all providers who are verified from the verify response
       const actualVerifiedProviders = providerIds.filter(
         (providerId) =>
@@ -126,7 +123,6 @@ export const GenericEVMPlatform = ({ platformId, platFormGroupSpec }: PlatformPr
 
       // Create Set to check changed providers after verification
       const updatedVerifiedProviders = new Set(actualVerifiedProviders);
-
       // Initial providers set minus updated providers set to determine which data points were removed
       const initialMinusUpdated = difference(initialVerifiedProviders, updatedVerifiedProviders);
       // Updated providers set minus initial providers set to determine which data points were added
@@ -143,7 +139,7 @@ export const GenericEVMPlatform = ({ platformId, platFormGroupSpec }: PlatformPr
       }
       setLoading(false);
     } catch (e) {
-      datadogLogs.logger.error("Verification Error", { error: e, platform: platformId });
+      datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
       throw e;
     } finally {
       setLoading(false);
@@ -158,9 +154,9 @@ export const GenericEVMPlatform = ({ platformId, platFormGroupSpec }: PlatformPr
       render: (result: any) => (
         <DoneToastContent
           title="Success!"
-          body={`All ${platformId} data points removed.`}
+          body={`All ${platform.platformId} data points removed.`}
           icon="../../assets/check-icon.svg"
-          platformId={platformId}
+          platformId={platform.platformId}
           result={result}
         />
       ),
@@ -174,9 +170,9 @@ export const GenericEVMPlatform = ({ platformId, platFormGroupSpec }: PlatformPr
       render: (result: any) => (
         <DoneToastContent
           title="Success!"
-          body={`All ${platformId} data points verified.`}
+          body={`All ${platform.platformId} data points verified.`}
           icon="../../assets/check-icon.svg"
-          platformId={platformId}
+          platformId={platform.platformId}
           result={result}
         />
       ),
@@ -192,7 +188,7 @@ export const GenericEVMPlatform = ({ platformId, platFormGroupSpec }: PlatformPr
           title="Verification Failed"
           body="Please make sure you fulfill the requirements for this stamp."
           icon="../../assets/verification-failed.svg"
-          platformId={platformId}
+          platformId={platform.platformId}
           result={result}
         />
       ),
@@ -201,7 +197,7 @@ export const GenericEVMPlatform = ({ platformId, platFormGroupSpec }: PlatformPr
 
   return (
     <SideBarContent
-      currentPlatform={getPlatformSpec(platformId)}
+      currentPlatform={getPlatformSpec(platform.platformId)}
       currentProviders={platFormGroupSpec}
       verifiedProviders={verifiedProviders}
       selectedProviders={selectedProviders}
@@ -211,7 +207,7 @@ export const GenericEVMPlatform = ({ platformId, platFormGroupSpec }: PlatformPr
         <button
           disabled={!canSubmit}
           onClick={handleFetchCredential}
-          data-testid={`button-verify-${platformId}`}
+          data-testid={`button-verify-${platform.platformId}`}
           className="sidebar-verify-btn"
         >
           Verify

@@ -6,7 +6,7 @@ import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/
 
 // Providers
 
-import { Twitter, Facebook, Ens } from "@gitcoin/passport-platforms";
+import { Twitter, Ens, Lens, Github, Gitcoin, Facebook } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -83,9 +83,14 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const renderCurrentPlatformSelection = () => {
     switch (currentPlatform?.platform) {
       case "Twitter":
-        return <GenericOauthPlatform platformId={"Twitter"} platformgroupspec={Twitter.TwitterProviderConfig} />;
+        return (
+          <GenericOauthPlatform
+            platform={new Twitter.TwitterPlatform()}
+            platformgroupspec={Twitter.TwitterProviderConfig}
+          />
+        );
       case "Ens":
-        return <GenericEVMPlatform platformId={"Ens"} platFormGroupSpec={Ens.EnsProviderConfig} />;
+        return <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />;
       // case "Github":
       //   return <GithubPlatform />;
       // case "Gitcoin":
@@ -94,11 +99,38 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         const facebook = new Facebook.FacebookPlatform();
         return (
           <GenericOauthPlatform
-            platformId={facebook.platformId}
             platformgroupspec={Facebook.FacebookProviderConfig}
             accessTokenRequest={facebook.getAccessToken}
+            platform={facebook}
           />
         );
+      case "Github":
+        return (
+          <GenericOauthPlatform
+            platform={
+              new Github.GithubPlatform({
+                clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+                redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+              })
+            }
+            platformgroupspec={Github.GithubProviderConfig}
+          />
+        );
+      case "Gitcoin":
+        return (
+          <GenericOauthPlatform
+            platform={
+              new Gitcoin.GitcoinPlatform({
+                clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+                redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+              })
+            }
+            platformgroupspec={Gitcoin.GitcoinProviderConfig}
+          />
+        );
+
+      // case "Facebook":
+      //   return <FacebookPlatform />;
       // case "Snapshot":
       //   return <SnapshotPlatform />;
       // case "Google":
@@ -127,8 +159,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <NftPlatform />;
       // case "ZkSync":
       //   return <ZkSyncPlatform />;
-      // case "Lens":
-      //   return <LensPlatform />;
+      case "Lens":
+        return <GenericEVMPlatform platform={new Lens.LensPlatform()} platFormGroupSpec={Lens.LensProviderConfig} />;
       // case "GnosisSafe":
       //   return <GnosisSafePlatform />;
       default:
