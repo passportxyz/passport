@@ -149,26 +149,8 @@ export const GenericOauthPlatform = ({
         }
       });
     } else {
-      handleFetchOAuth();
+      handleVerifyStamps();
     }
-  }
-  // Fetch OAuth2 url from the IAM procedure
-  async function handleFetchOAuth(): Promise<void> {
-    // Fetch data from external API
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(/\/*?$/, "")}/twitter/generateAuthUrl`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          callback: process.env.NEXT_PUBLIC_PASSPORT_TWITTER_CALLBACK,
-        }),
-      }
-    );
-    const data = await res.json();
-    // open new window for authUrl
   }
   const state = `${platform.path}-` + generateUID(10);
 
