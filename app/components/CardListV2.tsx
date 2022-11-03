@@ -6,7 +6,7 @@ import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/
 
 // Providers
 
-import { Twitter, Ens, Lens, Github, Gitcoin } from "@gitcoin/passport-platforms";
+import { Twitter, Ens, Lens, Github, Gitcoin, Poh } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -136,8 +136,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <EnsPlatform />;
       // case "Brightid":
       //   return <BrightidPlatform />;
-      // case "Poh":
-      //   return <PohPlatform />;
+      case "Poh":
+        return <GenericEVMPlatform platform={new Poh.PohPlatform()} platFormGroupSpec={Poh.PohProviderConfig} />;
       // case "GTC":
       //   return <GtcPlatform />;
       // case "GtcStaking":
