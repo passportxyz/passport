@@ -1,18 +1,11 @@
 // ----- Types
 import type { RequestPayload } from "@gitcoin/passport-types";
 
-// ----- Credential verification
-import * as DIDKit from "@spruceid/didkit-wasm";
-import { verifyCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
-
-// ----- Verify signed message with ethers
-import { utils } from "ethers";
-
 // ----- Verify signed message with ethers
 import { JsonRpcProvider, JsonRpcSigner, StaticJsonRpcProvider } from "@ethersproject/providers";
 
 // ----- Credential verification
-import * as DIDKit from "@spruceid/didkit-wasm-node";
+import * as DIDKit from "@spruceid/didkit-wasm";
 import { verifyCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // ----- Verify signed message with ethers
