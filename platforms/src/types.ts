@@ -33,13 +33,18 @@ export interface Provider {
 // Use unknown
 export type ProviderOptions = Record<string, unknown>;
 
-export type Proof = { [k: string]: string | boolean };
+export type Proofs = { [k: string]: string };
+
+export type CallbackParameters = {
+  proofs?: Proofs;
+  authenticated: boolean;
+};
 
 export interface Platform {
   platformId: string;
   path?: string;
   getOAuthUrl?(state: string): Promise<string>;
-  getAccessToken?(callback: (proof: Proof) => void): void;
+  getAccessToken?(callback: (params: CallbackParameters) => void): void;
 }
 
 export type PlatformOptions = Record<string, unknown>;
