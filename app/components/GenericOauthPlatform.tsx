@@ -66,7 +66,7 @@ export const GenericOauthPlatform = ({ platformgroupspec, platform }: PlatformPr
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
     providerIds.filter((providerId) => {
-      typeof allProvidersState[providerId!]?.stamp?.credential !== "undefined";
+      return typeof allProvidersState[providerId]?.stamp?.credential !== "undefined";
     })
   );
   // SelectedProviders will be passed in to the sidebar to be filled there...
@@ -206,6 +206,7 @@ export const GenericOauthPlatform = ({ platformgroupspec, platform }: PlatformPr
     };
   }, [platform.path, selectedProviders]);
 
+  console.log("geri verifiedProviders", verifiedProviders);
   return (
     <SideBarContent
       currentPlatform={getPlatformSpec(platform.platformId)}
