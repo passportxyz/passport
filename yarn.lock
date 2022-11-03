@@ -4762,6 +4762,11 @@
   resolved "https://registry.yarnpkg.com/@spruceid/didkit-wasm-node/-/didkit-wasm-node-0.2.1.tgz#85f7023979b4ef84bd6de16c79c67b6e9a08e1db"
   integrity sha512-c8e3u5FIRS/2Gf6UHnRPnfRozgKgby4avZzlvIiaJRDVLl1LaX1SE13vEvKV2rAq6NMfZrV4YG908M4uVlT90Q==
 
+"@spruceid/didkit-wasm@^0.3.0-alpha0":
+  version "0.3.0-rc.0"
+  resolved "https://registry.yarnpkg.com/@spruceid/didkit-wasm/-/didkit-wasm-0.3.0-rc.0.tgz#2f1e8433506b86457fcfce9595af2c71b6c23cc7"
+  integrity sha512-LYb+ROUnpLaBUUfCP3ocF9jCFb03E1xTo0hkhVxVvgMuQKsfP4Pg5UzRynXnxGDLTBSeCMsIw3+J7JioLjzW6A==
+
 "@stablelib/aead@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@stablelib/aead/-/aead-1.0.1.tgz#c4b1106df9c23d1b867eb9b276d8f42d5fc4c0c3"
