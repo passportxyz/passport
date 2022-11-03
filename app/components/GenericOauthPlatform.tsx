@@ -206,7 +206,6 @@ export const GenericOauthPlatform = ({ platformgroupspec, platform }: PlatformPr
     };
   }, [platform.path, selectedProviders]);
 
-  console.log("geri verifiedProviders", verifiedProviders);
   return (
     <SideBarContent
       currentPlatform={getPlatformSpec(platform.platformId)}
