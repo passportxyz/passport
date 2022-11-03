@@ -1,36 +1,36 @@
 {
-    "name": "@gitcoin/passport-platforms",
-    "version": "1.0.0",
-    "license": "MIT",
-    "main": "dist/commonjs/src/index.js",
-    "directories": {
-      "src":"src",
-      "dist": "dist"
-    },
-    "files": [
-      "src",
-      "dist"
-    ],
-    "publishConfig": {
-      "access": "public"
-    },
-    "dependencies": {
-      "@ethersproject/base64": "^5.6.1",
-      "@ethersproject/providers": "^5.6.2",
-      "@gitcoin/passport-types": "^1.0.0",
-      "@spruceid/didkit-wasm": "^0.3.0-alpha0",
-      "axios": "^0.26.1",
-      "typescript": "~4.6.3"
-    },
-    "devDependencies": {
-      "jest": "^27.5.1",
-      "ts-jest": "^27.1.4"
-    },
-    "scripts": {
-      "clean": "rimraf dist node_modules",
-      "build": "tsc",
-      "test": "jest --verbose",
-      "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",
-      "prettier": "prettier --write ."
-    }
+  "name": "@gitcoin/passport-platforms",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "dist/commonjs/src/index.js",
+  "directories": {
+    "src": "src",
+    "dist": "dist"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@ethersproject/base64": "^5.6.1",
+    "@ethersproject/providers": "^5.6.2",
+    "@gitcoin/passport-types": "^1.0.0",
+    "@spruceid/didkit-wasm": "^0.3.0-alpha0",
+    "axios": "^1.1.3",
+    "typescript": "~4.6.3"
+  },
+  "devDependencies": {
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.4"
+  },
+  "scripts": {
+    "clean": "rimraf dist node_modules",
+    "build": "tsc",
+    "test": "jest --verbose",
+    "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",
+    "prettier": "prettier --write ."
   }
+}
