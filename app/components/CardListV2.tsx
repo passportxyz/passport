@@ -19,6 +19,7 @@ import {
   Snapshot,
   POAP,
   ETH,
+  ZkSync
 } from "@gitcoin/passport-platforms";
 
 // --- Components
@@ -172,8 +173,15 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <GtcPlatform />;
       // case "GtcStaking":
       //   return <GtcStakingPlatform />;
-      // case "ZkSync":
-      //   return <ZkSyncPlatform />;
+      // case "NFT":
+      //   return <NftPlatform />;
+      case "ZkSync":
+        return (
+          <GenericOauthPlatform
+            platform={new ZkSync.ZkSyncPlatform()}
+            platformgroupspec={ZkSync.ZkSyncProviderConfig}
+          />
+        );
       case "Lens":
         return <GenericEVMPlatform platform={new Lens.LensPlatform()} platFormGroupSpec={Lens.LensProviderConfig} />;
       case "GnosisSafe":

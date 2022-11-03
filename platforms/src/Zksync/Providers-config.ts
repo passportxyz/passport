@@ -9,7 +9,7 @@ export const ZkSyncPlatformDetails: PlatformSpec = {
   isEVM: true,
 };
 
-export const ZKSyncProviderConfig: PlatformGroupSpec[] = [
+export const ZkSyncProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account name",
     providers: [{ title: "Encrypted", name: "ZkSync" }],

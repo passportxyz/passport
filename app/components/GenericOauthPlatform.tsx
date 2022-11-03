@@ -26,14 +26,9 @@ import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 // --- Types
-<<<<<<< HEAD
 import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { getPlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/platforms-config";
-=======
-import { PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
-import { Platform, AccessTokenResult, Proofs } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
-import { getPlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/src/platforms-config";
->>>>>>> feat(platforms, app): refactor logic around initiating issueing a credential after login
+import { AccessTokenResult, Proofs } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
 
 type PlatformProps = {
   // platformId: string;
