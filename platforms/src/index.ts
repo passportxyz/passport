@@ -9,3 +9,4 @@ export * as Snapshot from "./Snapshot";
 export * as GnosisSafe from "./GnosisSafe";
 export * as NFT from "./NFT";
 export * as GitPOAP from "./GitPOAP";
+export * as Google from "./Google";
