@@ -55,8 +55,9 @@ import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/P
 import { Github } from "@gitcoin/passport-platforms";
 import { Gitcoin } from "@gitcoin/passport-platforms";
 import { Lens } from "@gitcoin/passport-platforms";
+import { Poh } from "@gitcoin/passport-platforms";
 
-import { PohProvider } from "./providers/poh";
+// import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
 import { FacebookProvider } from "./providers/facebook";
 import { FacebookFriendsProvider } from "./providers/facebookFriends";
@@ -106,7 +107,7 @@ export const providers = new Providers([
   new GoogleProvider(),
   new TwitterAuthProvider(),
   new EnsProvider(),
-  new PohProvider(),
+  new Poh.PohProvider(),
   new POAPProvider(),
   new FacebookProvider(),
   new FacebookFriendsProvider(),
