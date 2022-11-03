@@ -34,6 +34,7 @@ type PlatformProps = {
   // platformId: string;
   platformgroupspec: PlatformGroupSpec[];
   platform: Platform;
+  accessTokenRequest?(callback: (proof: { [k: string]: string | boolean }) => void): void;
 };
 
 function generateUID(length: number) {
@@ -47,7 +48,11 @@ function generateUID(length: number) {
     .substring(0, length);
 }
 
-export const GenericOauthPlatform = ({ platformgroupspec, platform }: PlatformProps): JSX.Element => {
+export const GenericOauthPlatform = ({
+  platformgroupspec,
+  platform,
+  accessTokenRequest,
+}: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
@@ -85,6 +90,87 @@ export const GenericOauthPlatform = ({ platformgroupspec, platform }: PlatformPr
   // --- Chakra functions
   const toast = useToast();
 
+  async function fetchCredential(proofs: { [k: string]: string }): Promise<void> {
+    setLoading(true);
+    // fetch VCs for only the selectedProviders
+    const vcs = await fetchVerifiableCredential(
+      process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
+      {
+        type: platform.platformId,
+        types: selectedProviders,
+        version: "0.0.0",
+        address: address || "",
+        proofs,
+      },
+      signer as { signMessage: (message: string) => Promise<string> }
+    );
+    setVerifiedCredentialState(vcs);
+  }
+
+  async function setVerifiedCredentialState(verified: VerifiableCredentialRecord) {
+    // because we provided a types array in the params we expect to receive a credentials array in the response...
+    const vcs =
+      verified.credentials
+        ?.map((cred: CredentialResponseBody): Stamp | undefined => {
+          if (!cred.error) {
+            // add each of the requested/received stamps to the passport...
+            return {
+              provider: cred.record?.type as PROVIDER_ID,
+              credential: cred.credential as VerifiableCredential,
+            };
+          }
+        })
+        .filter((v: Stamp | undefined) => v) || [];
+    // Add all the stamps to the passport at once
+    await handleAddStamps(vcs as Stamp[]);
+    // report success to datadog
+    datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
+    // grab all providers who are verified from the verify response
+    const actualVerifiedProviders = providerIds.filter(
+      (providerId: string | undefined) =>
+        !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
+    );
+    // both verified and selected should look the same after save
+    setVerifiedProviders([...actualVerifiedProviders]);
+    setSelectedProviders([...actualVerifiedProviders]);
+    // reset can submit state
+    setCanSubmit(false);
+
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => (
+        <DoneToastContent
+          title="Success!"
+          body={`All ${platform.platformId} data points verified.`}
+          icon="../../assets/check-icon.svg"
+          platformId={platform.platformId}
+          result={result}
+        />
+      ),
+    });
+    setLoading(false);
+  }
+
+  async function initiateFetchCredential() {
+    if (accessTokenRequest) {
+      try {
+        accessTokenRequest((proof: any) => {
+          if (!proof.authenticated) {
+            setLoading(false);
+          } else {
+            fetchCredential(proof);
+          }
+        });
+      } catch (e) {
+        datadogLogs.logger.error("Error saving Stamp", { platform: platform.platformId });
+        console.error(e);
+        setLoading(false);
+      }
+    } else {
+      handleVerifyOauthWindowStamps();
+    }
+  }
   const state = `${platform.path}-` + generateUID(10);
 
   // Open authUrl in centered window
@@ -109,9 +195,11 @@ export const GenericOauthPlatform = ({ platformgroupspec, platform }: PlatformPr
     );
   }
 
-  const handleVerifyStamps = async () => {
-    const authUrl: string = await platform.getOAuthUrl(state);
-    openOAuthUrl(authUrl);
+  const handleVerifyOauthWindowStamps = async () => {
+    if (platform.getOAuthUrl) {
+      const authUrl: string = await platform.getOAuthUrl(state);
+      openOAuthUrl(authUrl);
+    }
   };
 
   // Listener to watch for oauth redirect response on other windows (on the same host)
@@ -126,71 +214,13 @@ export const GenericOauthPlatform = ({ platformgroupspec, platform }: PlatformPr
       // fetch and store credential
       setLoading(true);
 
-      // fetch VCs for only the selectedProviders
-      fetchVerifiableCredential(
-        process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
-        {
-          type: platform.platformId,
-          types: selectedProviders,
-          version: "0.0.0",
-          address: address || "",
-          proofs: {
-            code: queryCode, // provided by the provider as query params in the redirect
-            sessionKey: queryState,
-          },
-        },
-        signer as { signMessage: (message: string) => Promise<string> }
-      )
-        .then(async (verified: VerifiableCredentialRecord): Promise<void> => {
-          // because we provided a types array in the params we expect to receive a credentials array in the response...
-          const vcs =
-            verified.credentials
-              ?.map((cred: CredentialResponseBody): Stamp | undefined => {
-                if (!cred.error) {
-                  // add each of the requested/received stamps to the passport...
-                  return {
-                    provider: cred.record?.type as PROVIDER_ID,
-                    credential: cred.credential as VerifiableCredential,
-                  };
-                }
-              })
-              .filter((v: Stamp | undefined) => v) || [];
-          // Add all the stamps to the passport at once
-          await handleAddStamps(vcs as Stamp[]);
-          // report success to datadog
-          datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
-          // grab all providers who are verified from the verify response
-          const actualVerifiedProviders = providerIds.filter(
-            (providerId: string | undefined) =>
-              !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
-          );
-          // both verified and selected should look the same after save
-          setVerifiedProviders([...actualVerifiedProviders]);
-          setSelectedProviders([...actualVerifiedProviders]);
-          // reset can submit state
-          setCanSubmit(false);
-          // Custom Success Toast
-          toast({
-            duration: 5000,
-            isClosable: true,
-            render: (result: any) => (
-              <DoneToastContent
-                title="Success!"
-                body={`All ${platform.platformId} data points verified.`}
-                icon="../../assets/check-icon.svg"
-                platformId={platform.platformId}
-                result={result}
-              />
-            ),
-          });
-        })
-        .catch((e) => {
-          datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
-          throw e;
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+      try {
+        fetchCredential({ code: queryCode, state: queryState });
+      } catch (e) {
+        datadogLogs.logger.error("Error saving Stamp", { platform: platform.platformId });
+        console.error(e);
+        setLoading(false);
+      }
     }
   }
 
@@ -217,7 +247,7 @@ export const GenericOauthPlatform = ({ platformgroupspec, platform }: PlatformPr
       verifyButton={
         <button
           disabled={!canSubmit}
-          onClick={handleVerifyStamps}
+          onClick={initiateFetchCredential}
           data-testid={`button-verify-${platform.platformId}`}
           className="sidebar-verify-btn"
         >

@@ -6,7 +6,7 @@ import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/
 
 // Providers
 
-import { Twitter, Ens, Lens, Github, Gitcoin, Poh } from "@gitcoin/passport-platforms";
+import { Twitter, Ens, Lens, Github, Gitcoin, Facebook, Poh } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -91,6 +91,19 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         );
       case "Ens":
         return <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />;
+      // case "Github":
+      //   return <GithubPlatform />;
+      // case "Gitcoin":
+      //   return <GitcoinPlatform />;
+      case "Facebook":
+        const facebook = new Facebook.FacebookPlatform();
+        return (
+          <GenericOauthPlatform
+            platformgroupspec={Facebook.FacebookProviderConfig}
+            accessTokenRequest={facebook.getAccessToken}
+            platform={facebook}
+          />
+        );
       case "Github":
         return (
           <GenericOauthPlatform

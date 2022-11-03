@@ -33,10 +33,13 @@ export interface Provider {
 // Use unknown
 export type ProviderOptions = Record<string, unknown>;
 
+export type Proof = { [k: string]: string | boolean };
+
 export interface Platform {
   platformId: string;
-  path: string;
-  getOAuthUrl(state: string): Promise<string>;
+  path?: string;
+  getOAuthUrl?(state: string): Promise<string>;
+  getAccessToken?(callback: (proof: Proof) => void): void;
 }
 
 export type PlatformOptions = Record<string, unknown>;
