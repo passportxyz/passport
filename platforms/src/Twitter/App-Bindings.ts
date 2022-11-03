@@ -1,6 +1,12 @@
 /* eslint-disable */
 import { Platform, PlatformOptions } from "../types";
+import axios from "axios";
 
+type TwitterProcResponse = {
+  data: {
+    authUrl: string;
+  };
+};
 export class TwitterPlatform implements Platform {
   platformId = "Twitter";
   path = "twitter";
@@ -14,22 +20,13 @@ export class TwitterPlatform implements Platform {
     this.state = options.state as string;
   }
   async getOAuthUrl(state: string): Promise<string> {
-    // TODO: implement this
     // Fetch data from external API
-    // const res = await fetch(
-    //   `${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(/\/*?$/, "")}/twitter/generateAuthUrl`,
-    //   {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({
-    //       callback: process.env.NEXT_PUBLIC_PASSPORT_TWITTER_CALLBACK,
-    //     }),
-    //   }
-    // );
-    // const data = await res.json();
-    // return data.authUrl;
-    return "/TODO/";
+    const res = (await axios.post(
+      `${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(/\/*?$/, "")}/twitter/generateAuthUrl`,
+      {
+        callback: process.env.NEXT_PUBLIC_PASSPORT_TWITTER_CALLBACK,
+      }
+    )) as TwitterProcResponse;
+    return res.data.authUrl;
   }
 }

@@ -71,7 +71,7 @@ export const GenericOauthPlatform = ({
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
     providerIds.filter((providerId) => {
-      typeof allProvidersState[providerId!]?.stamp?.credential !== "undefined";
+      return typeof allProvidersState[providerId]?.stamp?.credential !== "undefined";
     })
   );
   // SelectedProviders will be passed in to the sidebar to be filled there...

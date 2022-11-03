@@ -54,7 +54,7 @@ export const GenericEVMPlatform = ({ platFormGroupSpec, platform }: PlatformProp
       platFormGroupSpec?.reduce((all, stamp) => {
         return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
       }, [] as PROVIDER_ID[]) || [],
-    []
+    [platFormGroupSpec]
   );
 
   // SelectedProviders will be passed in to the sidebar to be filled there...
