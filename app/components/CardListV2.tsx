@@ -88,6 +88,13 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
             platformgroupspec={Twitter.TwitterProviderConfig}
           />
         );
+      case "GitPOAP":
+        return (
+          <GenericEVMPlatform
+            platform={new GitPOAP.GitPOAPPlatform()}
+            platFormGroupSpec={GitPOAP.GitPOAPProviderConfig}
+          />
+        );
       case "Ens":
         return <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />;
       // case "Github":
@@ -127,8 +134,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
             platformgroupspec={Gitcoin.GitcoinProviderConfig}
           />
         );
-      case "GitPOAP":
-        return <GenericEVMPlatform platform={new GitPOAP.GitPOAPPlatform()} platFormGroupSpec={GitPOAP.GitPOAPProviderConfig} />;
       // case "Facebook":
       //   return <FacebookPlatform />;
       // case "Snapshot":

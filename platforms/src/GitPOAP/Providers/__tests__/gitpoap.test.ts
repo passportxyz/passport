@@ -1,6 +1,7 @@
+/* eslint-disable */
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
-import { GitPOAP, GitPOAPProvider } from "../Providers/gitpoap";
+import { GitPOAP, GitPOAPProvider } from "../gitpoap";
 
 // ----- Libs
 import axios from "axios";
