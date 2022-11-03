@@ -27,14 +27,14 @@ import { UserContext } from "../context/userContext";
 
 // --- Types
 import { PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
-import { Platform } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
+import { Platform, CallbackParameters, Proofs } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
 import { getPlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/src/platforms-config";
 
 type PlatformProps = {
   // platformId: string;
   platformgroupspec: PlatformGroupSpec[];
   platform: Platform;
-  accessTokenRequest?(callback: (proof: { [k: string]: string | boolean }) => void): void;
+  accessTokenRequest?(callback: (params: CallbackParameters) => void): void;
 };
 
 function generateUID(length: number) {
@@ -90,7 +90,7 @@ export const GenericOauthPlatform = ({
   // --- Chakra functions
   const toast = useToast();
 
-  async function fetchCredential(proofs: { [k: string]: string }): Promise<void> {
+  async function fetchCredential(proofs: Proofs): Promise<void> {
     setLoading(true);
     // fetch VCs for only the selectedProviders
     const vcs = await fetchVerifiableCredential(
@@ -155,11 +155,11 @@ export const GenericOauthPlatform = ({
   async function initiateFetchCredential() {
     if (accessTokenRequest) {
       try {
-        accessTokenRequest((proof: any) => {
-          if (!proof.authenticated) {
-            setLoading(false);
+        accessTokenRequest((loginAttempt: CallbackParameters) => {
+          if (loginAttempt.authenticated && loginAttempt.proofs) {
+            fetchCredential(loginAttempt.proofs);
           } else {
-            fetchCredential(proof);
+            setLoading(false);
           }
         });
       } catch (e) {
