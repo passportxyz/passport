@@ -52,9 +52,8 @@ import {
 } from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
 
 import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
-import { Gitcoin, Lens, Github, Facebook, Poh } from "@gitcoin/passport-platforms";
+import { Gitcoin, Lens, Github, Facebook, Poh, GitPOAP } from "@gitcoin/passport-platforms";
 
-// import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
 import { BrightIdProvider } from "./providers/brightid";
 import { LinkedinProvider } from "./providers/linkedin";
@@ -76,8 +75,9 @@ import { SnapshotVotesProvider } from "./providers/snapshotVotesProvider";
 import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
 import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./providers/ethTransactions";
 import { NFTProvider } from "./providers/nft";
-import { GitPOAPProvider } from "./providers/gitpoap";
+// import { GitPOAPProvider } from "./providers/gitpoap";
 // import { LensProfileProvider } from "./providers/lens";
+
 import { ZkSyncProvider } from "./providers/zkSync";
 import { GnosisSafeProvider } from "./providers/gnosisSafe";
 
@@ -134,7 +134,7 @@ export const providers = new Providers([
   new EthGasProvider(),
   new FirstEthTxnProvider(),
   new EthGTEOneTxnProvider(),
-  new GitPOAPProvider(),
+  new GitPOAP.GitPOAPProvider(),
   /////////////////////////////////////////////////////////////
   // Start adding the specific gitcoin contributor providers
   /////////////////////////////////////////////////////////////
