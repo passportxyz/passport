@@ -1,16 +1,11 @@
 // ---- Test subject
-import TwitterProvider from "../../src/Twitter/Providers/TwitterAuthProvider";
+import TwitterProvider from "../Providers/TwitterAuthProvider";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 import { auth } from "twitter-api-sdk";
-import {
-  deleteClient,
-  getClient,
-  requestFindMyUser,
-  TwitterFindMyUserResponse,
-} from "../../src/Twitter/procedures/twitterOauth";
+import { deleteClient, getClient, requestFindMyUser, TwitterFindMyUserResponse } from "../procedures/twitterOauth";
 
-jest.mock("../../src/Twitter/procedures/twitterOauth", () => ({
+jest.mock("../procedures/twitterOauth", () => ({
   getClient: jest.fn(),
   deleteClient: jest.fn(),
   requestFindMyUser: jest.fn(),

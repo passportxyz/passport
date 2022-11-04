@@ -5,7 +5,20 @@ import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // Providers
-import { Twitter, Ens, Lens, Github, Gitcoin, Facebook, Poh, GitPOAP, NFT, GnosisSafe, Snapshot } from "@gitcoin/passport-platforms";
+import {
+  Twitter,
+  Ens,
+  Lens,
+  Github,
+  Gitcoin,
+  Facebook,
+  Poh,
+  GitPOAP,
+  NFT,
+  GnosisSafe,
+  Snapshot,
+  POAP,
+} from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -152,8 +165,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <EthPlatform />;
       // case "Discord":
       //   return <DiscordPlatform />;
-      // case "POAP":
-      //   return <PoapPlatform />;
+      case "POAP":
+        return <GenericEVMPlatform platform={new POAP.POAPPlatform()} platFormGroupSpec={POAP.POAPProviderConfig} />;
       // case "Ens":
       //   return <EnsPlatform />;
       // case "Brightid":
