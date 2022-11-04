@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { Platform, PlatformOptions } from "../types";
+import { AuthType, Platform, PlatformOptions } from "../types";
 import axios from "axios";
 
 type TwitterProcResponse = {
@@ -13,6 +13,7 @@ export class TwitterPlatform implements Platform {
   clientId: string = null;
   redirectUri: string = null;
   state: string = null;
+  authType = AuthType.Window;
 
   constructor(options: PlatformOptions = {}) {
     this.clientId = options.clientId as string;

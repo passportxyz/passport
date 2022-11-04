@@ -45,9 +45,16 @@ export type AccessTokenResult = {
   authenticated: boolean;
 };
 
+export enum AuthType {
+  Token,
+  Window,
+  Null,
+}
+
 export interface Platform {
   platformId: string;
   path?: string;
+  authType?: AuthType;
   getOAuthUrl?(state: string): Promise<string>;
   getProviderProof?(): Promise<AccessTokenResult>;
 }
