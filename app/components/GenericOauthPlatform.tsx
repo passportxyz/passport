@@ -34,7 +34,6 @@ type PlatformProps = {
   // platformId: string;
   platformgroupspec: PlatformGroupSpec[];
   platform: Platform;
-  getProviderProof?(): Promise<AccessTokenResult>;
 };
 
 function generateUID(length: number) {
@@ -48,7 +47,7 @@ function generateUID(length: number) {
     .substring(0, length);
 }
 
-export const GenericOauthPlatform = ({ platformgroupspec, platform, getProviderProof }: PlatformProps): JSX.Element => {
+export const GenericOauthPlatform = ({ platformgroupspec, platform }: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
@@ -149,9 +148,9 @@ export const GenericOauthPlatform = ({ platformgroupspec, platform, getProviderP
   }
 
   async function initiateFetchCredential() {
-    if (getProviderProof) {
+    if (platform.getProviderProof) {
       try {
-        const result = await getProviderProof();
+        const result = await platform.getProviderProof();
         if (result.authenticated) {
           fetchCredential(result.proofs!);
         } else {

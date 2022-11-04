@@ -115,13 +115,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <GenericEVMPlatform platform={new NFT.NFTPlatform()} platFormGroupSpec={NFT.NFTProviderConfig} />;
       case "Facebook":
         const facebook = new Facebook.FacebookPlatform();
-        return (
-          <GenericOauthPlatform
-            platformgroupspec={Facebook.FacebookProviderConfig}
-            getProviderProof={facebook.getProviderProof}
-            platform={facebook}
-          />
-        );
+        return <GenericOauthPlatform platformgroupspec={Facebook.FacebookProviderConfig} platform={facebook} />;
       case "Github":
         return (
           <GenericOauthPlatform
