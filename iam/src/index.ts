@@ -52,9 +52,19 @@ import {
 } from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
 
 import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
-import { Gitcoin, Lens, Github, Facebook, Poh, ZkSync } from "@gitcoin/passport-platforms";
+import {
+  Gitcoin,
+  Lens,
+  Github,
+  Facebook,
+  Poh,
+  GitPOAP,
+  NFT,
+  GnosisSafe,
+  Snapshot,
+  ZkSync,
+} from "@gitcoin/passport-platforms";
 
-// import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
 import { BrightIdProvider } from "./providers/brightid";
 import { LinkedinProvider } from "./providers/linkedin";
@@ -69,14 +79,12 @@ import {
 import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
 import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
-// import { GitcoinContributorStatisticsProvider } from "./providers/gitcoinGrantsContributorStatistics";
-// import { GitcoinGranteeStatisticsProvider } from "./providers/gitcoinGrantsGranteeStatistics";
-import { SnapshotProposalsProvider } from "./providers/snapshotProposalsProvider";
-import { SnapshotVotesProvider } from "./providers/snapshotVotesProvider";
 import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
 import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./providers/ethTransactions";
+
 import { NFTProvider } from "./providers/nft";
 import { GitPOAPProvider } from "./providers/gitpoap";
+
 // import { LensProfileProvider } from "./providers/lens";
 import { GnosisSafeProvider } from "./providers/gnosisSafe";
 
@@ -128,12 +136,12 @@ export const providers = new Providers([
   new ClearTextSimpleProvider(),
   new ClearTextTwitterProvider(),
   new ClearTextGithubOrgProvider(),
-  new SnapshotProposalsProvider(),
-  new SnapshotVotesProvider(),
+  new Snapshot.SnapshotProposalsProvider(),
+  new Snapshot.SnapshotVotesProvider(),
   new EthGasProvider(),
   new FirstEthTxnProvider(),
   new EthGTEOneTxnProvider(),
-  new GitPOAPProvider(),
+  new GitPOAP.GitPOAPProvider(),
   /////////////////////////////////////////////////////////////
   // Start adding the specific gitcoin contributor providers
   /////////////////////////////////////////////////////////////
@@ -258,10 +266,10 @@ export const providers = new Providers([
   /////////////////////////////////////////////////////////////
   // END
   ////////////////////////////////////////////////////////////
-  new NFTProvider(),
+  new NFT.NFTProvider(),
   new Lens.LensProfileProvider(),
   new ZkSync.ZkSyncProvider(),
-  new GnosisSafeProvider(),
+  new GnosisSafe.GnosisSafeProvider(),
 ]);
 
 // create the app and run on port
