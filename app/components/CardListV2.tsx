@@ -5,7 +5,7 @@ import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // Providers
-import { Twitter, Ens, Lens, Github, Gitcoin, Facebook, Poh, GitPOAP, NFT, GnosisSafe } from "@gitcoin/passport-platforms";
+import { Twitter, Ens, Lens, Github, Gitcoin, Facebook, Poh, GitPOAP, NFT, GnosisSafe, Snapshot } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -77,7 +77,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
     );
     getUpdatedPlatforms();
   }, [allProvidersState]);
-
   // Add the platforms to this switch so the sidebar content can populate dynamically
   const renderCurrentPlatformSelection = () => {
     switch (currentPlatform?.platform) {
@@ -138,8 +137,13 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         );
       // case "Facebook":
       //   return <FacebookPlatform />;
-      // case "Snapshot":
-      //   return <SnapshotPlatform />;
+      case "Snapshot":
+        return (
+          <GenericEVMPlatform
+            platform={new Snapshot.SnapshotPlatform()}
+            platFormGroupSpec={Snapshot.SnapshotProviderConfig}
+          />
+        );
       // case "Google":
       //   return <GooglePlatform />;
       // case "Linkedin":
