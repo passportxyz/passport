@@ -100,7 +100,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return (
           <GenericOauthPlatform
             platformgroupspec={Facebook.FacebookProviderConfig}
-            accessTokenRequest={facebook.getAccessToken}
+            getProviderProof={facebook.getProviderProof}
             platform={facebook}
           />
         );
