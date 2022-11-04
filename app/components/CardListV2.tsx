@@ -141,7 +141,17 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       // case "Google":
       //   return <GooglePlatform />;
       case "Linkedin":
-        return <GenericOauthPlatform platformId={"Linkedin"} platformgroupspec={LinkedinProviderConfig} />;
+        return (
+          <GenericOauthPlatform
+            platform={
+              new Linkedin.LinkedinPlatform({
+                clientId: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CLIENT_ID,
+                redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
+              })
+            }
+            platformgroupspec={Linkedin.LinkedinProviderConfig}
+          />
+        );
       // case "ETH":
       //   return <EthPlatform />;
       // case "Discord":

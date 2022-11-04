@@ -8,7 +8,7 @@ export const LinkedinPlatformDetails: PlatformSpec = {
   connectMessage: "Connect Account",
 };
 
-export const TwitterProviderConfig: PlatformGroupSpec[] = [
+export const LinkedinProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name",
     providers: [{ title: "Encrypted", name: "Linkedin" }],
