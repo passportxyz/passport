@@ -7,4 +7,3 @@
 /src/didkit-browser/*
 /__mocks__/**/*
 /__tests__/**/*
-/src/GnosisSafe/__tests__/**/*
