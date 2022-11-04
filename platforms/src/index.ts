@@ -6,3 +6,7 @@ export * as Gitcoin from "./Gitcoin";
 export * as Lens from "./Lens";
 export * as Poh from "./Poh";
 export * as ZkSync from "./ZkSync";
+export * as Snapshot from "./Snapshot";
+export * as GnosisSafe from "./GnosisSafe";
+export * as NFT from "./NFT";
+export * as GitPOAP from "./GitPOAP";

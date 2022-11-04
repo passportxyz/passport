@@ -5,8 +5,20 @@ import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // Providers
-
-import { Twitter, Ens, Lens, Github, Gitcoin, Facebook, Poh, ZkSync } from "@gitcoin/passport-platforms";
+import {
+  Twitter,
+  Ens,
+  Lens,
+  Github,
+  Gitcoin,
+  Facebook,
+  Poh,
+  GitPOAP,
+  NFT,
+  GnosisSafe,
+  Snapshot,
+  ZkSync,
+} from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -78,7 +90,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
     );
     getUpdatedPlatforms();
   }, [allProvidersState]);
-
   // Add the platforms to this switch so the sidebar content can populate dynamically
   const renderCurrentPlatformSelection = () => {
     switch (currentPlatform?.platform) {
@@ -89,8 +100,17 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
             platformgroupspec={Twitter.TwitterProviderConfig}
           />
         );
+      case "GitPOAP":
+        return (
+          <GenericEVMPlatform
+            platform={new GitPOAP.GitPOAPPlatform()}
+            platFormGroupSpec={GitPOAP.GitPOAPProviderConfig}
+          />
+        );
       case "Ens":
         return <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />;
+      case "NFT":
+        return <GenericEVMPlatform platform={new NFT.NFTPlatform()} platFormGroupSpec={NFT.NFTProviderConfig} />;
       // case "Github":
       //   return <GithubPlatform />;
       // case "Gitcoin":
@@ -122,19 +142,21 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
             platformgroupspec={Gitcoin.GitcoinProviderConfig}
           />
         );
-
       // case "Facebook":
       //   return <FacebookPlatform />;
-      // case "Snapshot":
-      //   return <SnapshotPlatform />;
+      case "Snapshot":
+        return (
+          <GenericEVMPlatform
+            platform={new Snapshot.SnapshotPlatform()}
+            platFormGroupSpec={Snapshot.SnapshotProviderConfig}
+          />
+        );
       // case "Google":
       //   return <GooglePlatform />;
       // case "Linkedin":
       //   return <LinkedinPlatform />;
       // case "ETH":
       //   return <EthPlatform />;
-      // case "GitPOAP":
-      //   return <GitPOAPPlatform />;
       // case "Discord":
       //   return <DiscordPlatform />;
       // case "POAP":
@@ -160,8 +182,15 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         );
       case "Lens":
         return <GenericEVMPlatform platform={new Lens.LensPlatform()} platFormGroupSpec={Lens.LensProviderConfig} />;
-      // case "GnosisSafe":
-      //   return <GnosisSafePlatform />;
+      // case "Lens":
+      //   return <LensPlatform />;
+      case "GnosisSafe":
+        return (
+          <GenericOauthPlatform
+            platform={new GnosisSafe.GnosisSafePlatform()}
+            platformgroupspec={GnosisSafe.GnosisSafeProviderConfig}
+          />
+        );
       default:
         return (
           <SideBarContent
