@@ -5,7 +5,7 @@ import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // Providers
-import { Twitter, Ens, Lens, Github, Gitcoin, Facebook, Poh, GnosisSafe } from "@gitcoin/passport-platforms";
+import { Twitter, Ens, Lens, Github, Gitcoin, Facebook, Poh, GitPOAP, NFT, GnosisSafe } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -88,8 +88,17 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
             platformgroupspec={Twitter.TwitterProviderConfig}
           />
         );
+      case "GitPOAP":
+        return (
+          <GenericEVMPlatform
+            platform={new GitPOAP.GitPOAPPlatform()}
+            platFormGroupSpec={GitPOAP.GitPOAPProviderConfig}
+          />
+        );
       case "Ens":
         return <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />;
+      case "NFT":
+        return <GenericEVMPlatform platform={new NFT.NFTPlatform()} platFormGroupSpec={NFT.NFTProviderConfig} />;
       // case "Github":
       //   return <GithubPlatform />;
       // case "Gitcoin":
@@ -127,7 +136,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
             platformgroupspec={Gitcoin.GitcoinProviderConfig}
           />
         );
-
       // case "Facebook":
       //   return <FacebookPlatform />;
       // case "Snapshot":
@@ -138,8 +146,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <LinkedinPlatform />;
       // case "ETH":
       //   return <EthPlatform />;
-      // case "GitPOAP":
-      //   return <GitPOAPPlatform />;
       // case "Discord":
       //   return <DiscordPlatform />;
       // case "POAP":
@@ -154,8 +160,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <GtcPlatform />;
       // case "GtcStaking":
       //   return <GtcStakingPlatform />;
-      // case "NFT":
-      //   return <NftPlatform />;
       // case "ZkSync":
       //   return <ZkSyncPlatform />;
       case "Lens":
