@@ -52,7 +52,7 @@ import {
 } from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
 
 import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
-import { Gitcoin, Lens, Github, Facebook, Poh } from "@gitcoin/passport-platforms";
+import { Gitcoin, Lens, Github, Facebook, Poh, ZkSync } from "@gitcoin/passport-platforms";
 
 // import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
@@ -78,7 +78,6 @@ import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./pro
 import { NFTProvider } from "./providers/nft";
 import { GitPOAPProvider } from "./providers/gitpoap";
 // import { LensProfileProvider } from "./providers/lens";
-import { ZkSyncProvider } from "./providers/zkSync";
 import { GnosisSafeProvider } from "./providers/gnosisSafe";
 
 // get DID from key
@@ -261,7 +260,7 @@ export const providers = new Providers([
   ////////////////////////////////////////////////////////////
   new NFTProvider(),
   new Lens.LensProfileProvider(),
-  new ZkSyncProvider(),
+  new ZkSync.ZkSyncProvider(),
   new GnosisSafeProvider(),
 ]);
 
