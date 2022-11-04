@@ -52,7 +52,7 @@ import {
 } from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
 
 import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
-import { Gitcoin, Lens, Github, Facebook, Poh } from "@gitcoin/passport-platforms";
+import { Gitcoin, Lens, Github, Facebook, Poh, NFT } from "@gitcoin/passport-platforms";
 
 // import { PohProvider } from "./providers/poh";
 import { POAPProvider } from "./providers/poap";
@@ -75,7 +75,7 @@ import { SnapshotProposalsProvider } from "./providers/snapshotProposalsProvider
 import { SnapshotVotesProvider } from "./providers/snapshotVotesProvider";
 import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
 import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./providers/ethTransactions";
-import { NFTProvider } from "./providers/nft";
+// import { NFTProvider } from "./providers/nft";
 import { GitPOAPProvider } from "./providers/gitpoap";
 // import { LensProfileProvider } from "./providers/lens";
 import { ZkSyncProvider } from "./providers/zkSync";
@@ -259,7 +259,7 @@ export const providers = new Providers([
   /////////////////////////////////////////////////////////////
   // END
   ////////////////////////////////////////////////////////////
-  new NFTProvider(),
+  new NFT.NFTProvider(),
   new Lens.LensProfileProvider(),
   new ZkSyncProvider(),
   new GnosisSafeProvider(),

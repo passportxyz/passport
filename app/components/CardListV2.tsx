@@ -5,7 +5,7 @@ import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // Providers
-import { Twitter, Ens, Lens, Github, Gitcoin, NFT, Poh } from "@gitcoin/passport-platforms";
+import { Twitter, Ens, Lens, Github, Gitcoin, NFT, Poh, Facebook } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -127,7 +127,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
             platformgroupspec={Gitcoin.GitcoinProviderConfig}
           />
         );
-
+      case "NFT":
+        return <GenericEVMPlatform platform={new NFT.NFTPlatform()} platFormGroupSpec={NFT.NFTProviderConfig} />;
       // case "Facebook":
       //   return <FacebookPlatform />;
       // case "Snapshot":

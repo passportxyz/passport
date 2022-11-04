@@ -1,5 +1,6 @@
+/* eslint-disable */
 // ---- Test subject
-import { alchemyGetNFTsUrl, NFTProvider } from "../Providers/nft";
+import { alchemyGetNFTsUrl, NFTProvider } from "../nft";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 
