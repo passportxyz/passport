@@ -6,3 +6,4 @@ export * as Gitcoin from "./Gitcoin";
 export * as Lens from "./Lens";
 export * as Poh from "./Poh";
 export * as NFT from "./NFT";
+export * as GitPOAP from "./GitPOAP";
