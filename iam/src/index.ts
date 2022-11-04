@@ -52,7 +52,7 @@ import {
 } from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
 
 import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
-import { Gitcoin, Lens, Github, Facebook, Poh, GitPOAP, NFT } from "@gitcoin/passport-platforms";
+import { Gitcoin, Lens, Github, Facebook, Poh, GitPOAP, NFT, GnosisSafe } from "@gitcoin/passport-platforms";
 
 import { POAPProvider } from "./providers/poap";
 import { BrightIdProvider } from "./providers/brightid";
@@ -81,7 +81,6 @@ import { GitPOAPProvider } from "./providers/gitpoap";
 // import { LensProfileProvider } from "./providers/lens";
 
 import { ZkSyncProvider } from "./providers/zkSync";
-import { GnosisSafeProvider } from "./providers/gnosisSafe";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -264,7 +263,7 @@ export const providers = new Providers([
   new NFT.NFTProvider(),
   new Lens.LensProfileProvider(),
   new ZkSyncProvider(),
-  new GnosisSafeProvider(),
+  new GnosisSafe.GnosisSafeProvider(),
 ]);
 
 // create the app and run on port
