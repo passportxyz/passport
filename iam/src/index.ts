@@ -56,6 +56,7 @@ import {
   Snapshot,
   POAP,
   ETH,
+  ZkSync
 } from "@gitcoin/passport-platforms";
 
 import { BrightIdProvider } from "./providers/brightid";
@@ -71,7 +72,6 @@ import {
 import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
 import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
-import { ZkSyncProvider } from "./providers/zkSync";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -253,7 +253,7 @@ export const providers = new Providers([
   ////////////////////////////////////////////////////////////
   new NFT.NFTProvider(),
   new Lens.LensProfileProvider(),
-  new ZkSyncProvider(),
+  new ZkSync.ZkSyncProvider(),
   new GnosisSafe.GnosisSafeProvider(),
 ]);
 
