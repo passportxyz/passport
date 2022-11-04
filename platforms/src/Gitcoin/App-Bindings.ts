@@ -1,4 +1,4 @@
-import { AuthType, Platform, PlatformOptions } from "../types";
+import { Platform, PlatformOptions } from "../types";
 
 /* eslint-disable */
 
@@ -7,7 +7,6 @@ export class GitcoinPlatform implements Platform {
   path = "github";
   clientId: string = null;
   redirectUri: string = null;
-  authType = AuthType.Window;
 
   constructor(options: PlatformOptions = {}) {
     this.clientId = options.clientId as string;
