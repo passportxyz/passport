@@ -40,7 +40,6 @@ import { Providers } from "./utils/providers";
 
 // ---- Identity Providers
 import { SimpleProvider } from "./providers/simple";
-// import { GoogleProvider } from "./providers/google";
 
 import {
   TwitterAuthProvider,
@@ -52,7 +51,18 @@ import {
 } from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
 
 import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
-import { Gitcoin, Lens, Github, Facebook, Poh, GitPOAP, NFT, GnosisSafe, Snapshot } from "@gitcoin/passport-platforms";
+import {
+  Gitcoin,
+  Lens,
+  Github,
+  Facebook,
+  Poh,
+  GitPOAP,
+  NFT,
+  GnosisSafe,
+  Snapshot,
+  Google,
+} from "@gitcoin/passport-platforms";
 
 import { POAPProvider } from "./providers/poap";
 import { BrightIdProvider } from "./providers/brightid";

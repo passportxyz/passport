@@ -17,6 +17,7 @@ import {
   NFT,
   GnosisSafe,
   Snapshot,
+  Google,
 } from "@gitcoin/passport-platforms";
 
 // --- Components
