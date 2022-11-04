@@ -31,7 +31,7 @@ import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/
 import { getPlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/platforms-config";
 =======
 import { PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
-import { Platform, CallbackParameters, Proofs } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
+import { Platform, AccessTokenResult, Proofs } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
 import { getPlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/src/platforms-config";
 >>>>>>> feat(platforms, app): refactor logic around initiating issueing a credential after login
 
@@ -39,7 +39,7 @@ type PlatformProps = {
   // platformId: string;
   platformgroupspec: PlatformGroupSpec[];
   platform: Platform;
-  accessTokenRequest?(callback: (params: CallbackParameters) => void): void;
+  getProviderProof?(): Promise<AccessTokenResult>;
 };
 
 function generateUID(length: number) {
@@ -53,11 +53,7 @@ function generateUID(length: number) {
     .substring(0, length);
 }
 
-export const GenericOauthPlatform = ({
-  platformgroupspec,
-  platform,
-  accessTokenRequest,
-}: PlatformProps): JSX.Element => {
+export const GenericOauthPlatform = ({ platformgroupspec, platform, getProviderProof }: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
@@ -158,15 +154,14 @@ export const GenericOauthPlatform = ({
   }
 
   async function initiateFetchCredential() {
-    if (accessTokenRequest) {
+    if (getProviderProof) {
       try {
-        accessTokenRequest((loginAttempt: CallbackParameters) => {
-          if (loginAttempt.authenticated && loginAttempt.proofs) {
-            fetchCredential(loginAttempt.proofs);
-          } else {
-            setLoading(false);
-          }
-        });
+        const result = await getProviderProof();
+        if (result.authenticated) {
+          fetchCredential(result.proofs!);
+        } else {
+          setLoading(false);
+        }
       } catch (e) {
         datadogLogs.logger.error("Error saving Stamp", { platform: platform.platformId });
         console.error(e);
@@ -176,6 +171,7 @@ export const GenericOauthPlatform = ({
       handleVerifyOauthWindowStamps();
     }
   }
+
   const state = `${platform.path}-` + generateUID(10);
 
   // Open authUrl in centered window

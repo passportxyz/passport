@@ -40,11 +40,16 @@ export type CallbackParameters = {
   authenticated: boolean;
 };
 
+export type AccessTokenResult = {
+  proofs?: Proofs;
+  authenticated: boolean;
+};
+
 export interface Platform {
   platformId: string;
   path?: string;
   getOAuthUrl?(state: string): Promise<string>;
-  getAccessToken?(callback: (params: CallbackParameters) => void): void;
+  getProviderProof?(): Promise<AccessTokenResult>;
 }
 
 export type PlatformOptions = Record<string, unknown>;
