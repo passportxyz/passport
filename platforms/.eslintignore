@@ -7,4 +7,3 @@
 /src/didkit-browser/*
 /__mocks__/**/*
 /__tests__/**/*
-/src/Snapshot/__tests__/**/*
