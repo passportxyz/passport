@@ -1,5 +1,6 @@
+/* eslint-disable */
 // ---- Test subject
-import { gnosisSafeApiEndpoint, GnosisSafeProvider } from "../Providers/gnosisSafe";
+import { gnosisSafeApiEndpoint, GnosisSafeProvider } from "../gnosisSafe";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 

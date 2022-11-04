@@ -163,7 +163,12 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       // case "Lens":
       //   return <LensPlatform />;
       case "GnosisSafe":
-        return <GenericOauthPlatform platform={new GnosisSafe.GnosisSafePlatform()} platformgroupspec={GnosisSafe.GnosisSafeProviderConfig} />;
+        return (
+          <GenericOauthPlatform
+            platform={new GnosisSafe.GnosisSafePlatform()}
+            platformgroupspec={GnosisSafe.GnosisSafeProviderConfig}
+          />
+        );
       default:
         return (
           <SideBarContent
