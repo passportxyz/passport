@@ -90,6 +90,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         );
       case "Ens":
         return <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />;
+      case "NFT":
+        return <GenericEVMPlatform platform={new NFT.NFTPlatform()} platFormGroupSpec={NFT.NFTProviderConfig} />;
       // case "Github":
       //   return <GithubPlatform />;
       // case "Gitcoin":
@@ -127,8 +129,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
             platformgroupspec={Gitcoin.GitcoinProviderConfig}
           />
         );
-      case "NFT":
-        return <GenericEVMPlatform platform={new NFT.NFTPlatform()} platFormGroupSpec={NFT.NFTProviderConfig} />;
       // case "Facebook":
       //   return <FacebookPlatform />;
       // case "Snapshot":
@@ -155,8 +155,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <GtcPlatform />;
       // case "GtcStaking":
       //   return <GtcStakingPlatform />;
-      case "NFT":
-        return <GenericOauthPlatform platformId={"NFT"} platformgroupspec={NFTProviderConfig} />;
       // case "ZkSync":
       //   return <ZkSyncPlatform />;
       case "Lens":
