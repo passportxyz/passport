@@ -120,6 +120,7 @@ export const SideBarContent = ({
                         <Switch
                           colorScheme="green"
                           size="lg"
+                          data-testid={`switch-${i}`}
                           isChecked={
                             stamp.providers?.reduce(
                               (isPresent, provider) =>

@@ -16,12 +16,8 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 jest.mock("../../utils/onboard.ts");
 
-const verifiedProviders: PROVIDER_ID[] = [
-  "Github",
-  "FiveOrMoreGithubRepos",
-  "ForkedGithubRepoProvider",
-  "TenOrMoreGithubFollowers",
-];
+const verifiedProviders: PROVIDER_ID[] = ["Github", "FiveOrMoreGithubRepos", "ForkedGithubRepoProvider"];
+const selectedProviders: PROVIDER_ID[] = ["Github", "FiveOrMoreGithubRepos", "ForkedGithubRepoProvider"];
 
 const props: SideBarContentProps = {
   currentPlatform: {
@@ -50,7 +46,7 @@ const props: SideBarContentProps = {
     },
   ],
   verifiedProviders,
-  selectedProviders: ["Github", "FiveOrMoreGithubRepos", "ForkedGithubRepoProvider", "TenOrMoreGithubFollowers"],
+  selectedProviders,
   setSelectedProviders: undefined,
   isLoading: false,
   verifyButton: undefined,
@@ -105,6 +101,26 @@ describe("SideBarContent", () => {
 
     nonVerifiedProviders?.forEach((provider) => {
       expect(screen.getByTestId(`indicator-${provider}`)).toHaveClass("text-gray-400");
+    });
+  });
+
+  it("should set switches as checked", () => {
+    const drawer = () => (
+      <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
+        <DrawerOverlay />
+        <SideBarContent {...props} />
+      </Drawer>
+    );
+    renderWithContext(mockUserContext, mockCeramicContext, drawer());
+
+    props.currentProviders?.forEach((stamp) => {
+      stamp.providers.forEach((provider, i) => {
+        if (verifiedProviders.includes(provider.name as PROVIDER_ID)) {
+          expect(screen.getByTestId(`switch-${i}`)).toHaveAttribute("data-checked");
+        } else {
+          expect(screen.getByTestId(`switch-${i}`).attributes).not.toContain("data-checked");
+        }
+      });
     });
   });
 });
