@@ -30,7 +30,7 @@ import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/
 import { getPlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/platforms-config";
 import { AccessTokenResult, Proofs } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
 
-type PlatformProps = {
+export type PlatformProps = {
   // platformId: string;
   platformgroupspec: PlatformGroupSpec[];
   platform: Platform;
@@ -148,54 +148,10 @@ export const GenericOauthPlatform = ({ platformgroupspec, platform }: PlatformPr
   }
 
   async function initiateFetchCredential() {
-    if (platform.getProviderProof) {
-      try {
-        const result = await platform.getProviderProof();
-        if (result.authenticated) {
-          fetchCredential(result.proofs!);
-        } else {
-          setLoading(false);
-        }
-      } catch (e) {
-        datadogLogs.logger.error("Error saving Stamp", { platform: platform.platformId });
-        console.error(e);
-        setLoading(false);
-      }
-    } else {
-      handleVerifyOauthWindowStamps();
-    }
+    platform.dummy(state, window, screen);
   }
 
   const state = `${platform.path}-` + generateUID(10);
-
-  // Open authUrl in centered window
-  function openOAuthUrl(url: string): void {
-    const width = 600;
-    const height = 800;
-    const left = screen.width / 2 - width / 2;
-    const top = screen.height / 2 - height / 2;
-
-    // Pass data to the page via props
-    window.open(
-      url,
-      "_blank",
-      "toolbar=no, location=no, directories=no, status=no, menubar=no, resizable=no, copyhistory=no, width=" +
-        width +
-        ", height=" +
-        height +
-        ", top=" +
-        top +
-        ", left=" +
-        left
-    );
-  }
-
-  const handleVerifyOauthWindowStamps = async () => {
-    if (platform.getOAuthUrl) {
-      const authUrl: string = await platform.getOAuthUrl(state);
-      openOAuthUrl(authUrl);
-    }
-  };
 
   // Listener to watch for oauth redirect response on other windows (on the same host)
   function listenForRedirect(e: { target: string; data: { code: string; state: string } }) {

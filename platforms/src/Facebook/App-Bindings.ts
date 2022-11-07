@@ -4,6 +4,11 @@ export class FacebookPlatform implements Platform {
   path: string;
   platformId = "Facebook";
 
+  async dummy(state: any, window: any, screen: any): Promise<string> {
+    return "hello";
+  }
+
+  
   async getProviderProof(): Promise<AccessTokenResult> {
     // TODO: Shouldn't need all of these ignores, should be just this //@ts-ignore assuming FB.init was already called; see facebookSdkScript in pages/index.tsx once tsconfigs are normalized
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

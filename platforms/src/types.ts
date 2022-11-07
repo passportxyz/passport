@@ -49,7 +49,9 @@ export interface Platform {
   platformId: string;
   path?: string;
   getOAuthUrl?(state: string): Promise<string>;
-  getProviderProof?(): Promise<AccessTokenResult>;
+  getProviderProof?(): Promise<AccessTokenResult>; 
+  dummy(state: any, window: any, screen: any): Promise<string>;
+
 }
 
 export type PlatformOptions = Record<string, unknown>;

@@ -13,3 +13,5 @@ export * as GitPOAP from "./GitPOAP";
 export * as POAP from "./POAP";
 export * as ETH from "./ETH";
 export * as ZkSync from "./ZkSync";
+
+export { Platform } from "./types";

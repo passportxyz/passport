@@ -24,7 +24,7 @@ import {
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
-import { GenericOauthPlatform } from "./GenericOauthPlatform";
+import { GenericOauthPlatform, PlatformProps } from "./GenericOauthPlatform";
 import { GenericEVMPlatform } from "./GenericEVMPlatform";
 
 // --- Identity Providers
@@ -41,6 +41,72 @@ export type CardListProps = {
 };
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
+
+// const providers = new Map<PLATFORM_ID, PlatformProps>();
+
+// providers.set("Twitter", {
+//   platform: new Twitter.TwitterPlatform(),
+//   platformgroupspec: Twitter.TwitterProviderConfig,
+// });
+
+// providers.set("GitPOAP", {
+//   platform: new GitPOAP.GitPOAPPlatform(),
+//   platformgroupspec: GitPOAP.GitPOAPProviderConfig,
+// });
+
+// providers.set("Ens", {
+//   platform: new Ens.EnsPlatform(),
+//   platformgroupspec: Ens.EnsProviderConfig,
+// });
+
+// providers.set("NFT", {
+//   platform: new NFT.NFTPlatform(),
+//   platformgroupspec: NFT.NFTProviderConfig,
+// });
+
+// providers.set("Facebook", {
+//   platformgroupspec: Facebook.FacebookProviderConfig,
+//   platform: new Facebook.FacebookPlatform(),
+// });
+
+// providers.set("Github", {
+//   platform: new Github.GithubPlatform({
+//     clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+//     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+//   }),
+//   platformgroupspec: Github.GithubProviderConfig,
+// });
+
+// providers.set("Gitcoin", {
+//   platform: new Gitcoin.GitcoinPlatform({
+//     clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+//     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+//   }),
+//   platformgroupspec: Gitcoin.GitcoinProviderConfig,
+// });
+
+// providers.set("Snapshot", {
+//   platform: new Snapshot.SnapshotPlatform(),
+//   platformgroupspec: Snapshot.SnapshotProviderConfig,
+// });
+
+// providers.set("Poh", {
+//   platform: new Poh.PohPlatform(),
+//   platformgroupspec: Poh.PohProviderConfig,
+// });
+
+// providers.set("ZkSync", {
+//   platform: new ZkSync.ZkSyncPlatform(),
+//   platformgroupspec: ZkSync.ZkSyncProviderConfig,
+// });
+// providers.set("Lens", {
+//   platform: new Lens.LensPlatform(),
+//   platformgroupspec: Lens.LensProviderConfig,
+// });
+// providers.set("GnosisSafe", {
+//   platform: new GnosisSafe.GnosisSafePlatform(),
+//   platformgroupspec: GnosisSafe.GnosisSafeProviderConfig,
+// });
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const { allProvidersState } = useContext(CeramicContext);
@@ -94,6 +160,14 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   }, [allProvidersState]);
   // Add the platforms to this switch so the sidebar content can populate dynamically
   const renderCurrentPlatformSelection = () => {
+    // if (currentPlatform) {
+    //   const platform = providers.get(currentPlatform.platform);
+    //   if(platform) {
+    //     return  <GenericOauthPlatform {...platform} />
+    //   }
+    // }
+    // <GenericOauthPlatform platform={new Twitter.TwitterPlatform()} platformgroupspec={Twitter.TwitterProviderConfig} />;
+
     switch (currentPlatform?.platform) {
       case "Twitter":
         return (

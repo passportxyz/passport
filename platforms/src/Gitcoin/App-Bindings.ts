@@ -7,6 +7,12 @@ export class GitcoinPlatform implements Platform {
   clientId: string = null;
   redirectUri: string = null;
 
+  async dummy(state: any, window: any, screen: any): Promise<string> {
+
+    return "hello";
+  }
+
+  
   constructor(options: PlatformOptions = {}) {
     this.clientId = options.clientId as string;
     this.redirectUri = options.redirectUri as string;

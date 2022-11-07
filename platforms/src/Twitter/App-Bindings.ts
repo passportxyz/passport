@@ -19,6 +19,13 @@ export class TwitterPlatform implements Platform {
     this.redirectUri = options.redirectUri as string;
     this.state = options.state as string;
   }
+
+  async dummy(state: any, window: any, screen: any): Promise<string> {
+
+    return "hello";
+  }
+
+  
   async getOAuthUrl(state: string): Promise<string> {
     // Fetch data from external API
     const res = (await axios.post(

@@ -1,18 +1,15 @@
 /* eslint-disable */
-import { Platform, PlatformOptions } from "../types";
+import { Platform } from "../../types";
 
-export class NFTPlatform implements Platform {
+export class GooglePlatform implements Platform {
   async dummy(state: any, window: any, screen: any): Promise<string> {
 
     return "hello";
   }
-
   
   getOAuthUrl(state: string): Promise<string> {
     throw new Error("Method not implemented.");
   }
-  platformId = "NFT";
-  path = "NFT";
-  clientId: string = null;
-  redirectUri: string = null;
-};
+  platformId = "Google";
+  path = "Google";
+}
