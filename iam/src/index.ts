@@ -52,7 +52,18 @@ import {
 } from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
 
 import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
-import { Gitcoin, Lens, Github, Facebook, Poh, GitPOAP, NFT, GnosisSafe, Snapshot } from "@gitcoin/passport-platforms";
+import {
+  Gitcoin,
+  Lens,
+  Github,
+  Facebook,
+  Poh,
+  GitPOAP,
+  NFT,
+  GnosisSafe,
+  Snapshot,
+  ETH,
+} from "@gitcoin/passport-platforms";
 
 import { POAPProvider } from "./providers/poap";
 import { BrightIdProvider } from "./providers/brightid";
@@ -68,13 +79,6 @@ import {
 import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
 import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
-import { EthErc20PossessionProvider } from "./providers/ethErc20Possession";
-import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "./providers/ethTransactions";
-
-import { NFTProvider } from "./providers/nft";
-import { GitPOAPProvider } from "./providers/gitpoap";
-
-// import { LensProfileProvider } from "./providers/lens";
 
 import { ZkSyncProvider } from "./providers/zkSync";
 
@@ -128,9 +132,9 @@ export const providers = new Providers([
   new ClearTextGithubOrgProvider(),
   new Snapshot.SnapshotProposalsProvider(),
   new Snapshot.SnapshotVotesProvider(),
-  new EthGasProvider(),
-  new FirstEthTxnProvider(),
-  new EthGTEOneTxnProvider(),
+  new ETH.EthGasProvider(),
+  new ETH.FirstEthTxnProvider(),
+  new ETH.EthGTEOneTxnProvider(),
   new GitPOAP.GitPOAPProvider(),
   /////////////////////////////////////////////////////////////
   // Start adding the specific gitcoin contributor providers
@@ -226,29 +230,29 @@ export const providers = new Providers([
   /////////////////////////////////////////////////////////////
   // Start adding ETH/GTC Possession Providers
   /////////////////////////////////////////////////////////////
-  new EthErc20PossessionProvider({
+  new ETH.EthErc20PossessionProvider({
     threshold: 100,
     recordAttribute: "gtcPossessionsGte",
     contractAddress: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f",
     error: "GTC Possessions >= 100 Provider verify Error",
   }),
-  new EthErc20PossessionProvider({
+  new ETH.EthErc20PossessionProvider({
     threshold: 10,
     recordAttribute: "gtcPossessionsGte",
     contractAddress: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f",
     error: "GTC Possessions >= 10 Provider verify Error",
   }),
-  new EthErc20PossessionProvider({
+  new ETH.EthErc20PossessionProvider({
     threshold: 32,
     recordAttribute: "ethPossessionsGte",
     error: "ETH Possessions >= 32 Provider verify Error",
   }),
-  new EthErc20PossessionProvider({
+  new ETH.EthErc20PossessionProvider({
     threshold: 10,
     recordAttribute: "ethPossessionsGte",
     error: "ETH Possessions >= 10 Provider verify Error",
   }),
-  new EthErc20PossessionProvider({
+  new ETH.EthErc20PossessionProvider({
     threshold: 1,
     recordAttribute: "ethPossessionsGte",
     error: "ETH Possessions >= 1 Provider verify Error",
