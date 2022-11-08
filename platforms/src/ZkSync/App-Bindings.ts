@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable */
 import { AccessTokenResult, Platform, ProviderPayload, AppContext } from "../types";
 export class ZkSyncPlatform implements Platform {
   path: string;

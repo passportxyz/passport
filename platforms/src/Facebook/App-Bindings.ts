@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable */
 import { Platform, AccessTokenResult, AppContext, ProviderPayload } from "../types";
 export class FacebookPlatform implements Platform {
   path: string;
