@@ -109,6 +109,7 @@ export const SideBarContent = ({
                                   : `text-gray-400`
                               }`}
                               key={`${provider.title}${i}`}
+                              data-testid={`indicator-${provider.name}`}
                             >
                               <div className="relative top-[-0.3em] text-sm text-gray-400">{provider.title}</div>
                             </li>
@@ -119,6 +120,7 @@ export const SideBarContent = ({
                         <Switch
                           colorScheme="green"
                           size="lg"
+                          data-testid={`switch-${i}`}
                           isChecked={
                             stamp.providers?.reduce(
                               (isPresent, provider) =>
