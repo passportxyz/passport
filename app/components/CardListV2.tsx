@@ -17,6 +17,7 @@ import {
   NFT,
   GnosisSafe,
   Snapshot,
+  POAP,
   ETH,
 } from "@gitcoin/passport-platforms";
 
@@ -30,7 +31,7 @@ import { SideBarContent } from "./SideBarContent";
 
 // --- Chakra UI Elements
 import { Drawer, DrawerOverlay, useDisclosure } from "@chakra-ui/react";
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { CeramicContext } from "../context/ceramicContext";
 import { PlatformCard } from "./PlatformCard";
 
@@ -111,10 +112,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />;
       case "NFT":
         return <GenericEVMPlatform platform={new NFT.NFTPlatform()} platFormGroupSpec={NFT.NFTProviderConfig} />;
-      // case "Github":
-      //   return <GithubPlatform />;
-      // case "Gitcoin":
-      //   return <GitcoinPlatform />;
       case "Facebook":
         const facebook = new Facebook.FacebookPlatform();
         return (
@@ -148,8 +145,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
             platformgroupspec={Gitcoin.GitcoinProviderConfig}
           />
         );
-      // case "Facebook":
-      //   return <FacebookPlatform />;
       case "Snapshot":
         return (
           <GenericEVMPlatform
@@ -165,8 +160,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return <GenericEVMPlatform platform={new ETH.ETHPlatform()} platFormGroupSpec={ETH.ETHProviderConfig} />;
       // case "Discord":
       //   return <DiscordPlatform />;
-      // case "POAP":
-      //   return <PoapPlatform />;
+      case "POAP":
+        return <GenericEVMPlatform platform={new POAP.POAPPlatform()} platFormGroupSpec={POAP.POAPProviderConfig} />;
       // case "Ens":
       //   return <EnsPlatform />;
       // case "Brightid":
@@ -181,8 +176,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <ZkSyncPlatform />;
       case "Lens":
         return <GenericEVMPlatform platform={new Lens.LensPlatform()} platFormGroupSpec={Lens.LensProviderConfig} />;
-      // case "Lens":
-      //   return <LensPlatform />;
       case "GnosisSafe":
         return (
           <GenericOauthPlatform

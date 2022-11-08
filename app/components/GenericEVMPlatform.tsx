@@ -23,8 +23,8 @@ import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 // --- Types
-import { PlatformGroupSpec, Platform } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
-import { getPlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/src/platforms-config";
+import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { getPlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/platforms-config";
 
 // --- Helpers
 import { difference } from "../utils/helpers";
@@ -43,6 +43,8 @@ export const GenericEVMPlatform = ({ platFormGroupSpec, platform }: PlatformProp
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [verificationAttempted, setVerificationAttempted] = useState(false);
+
+  console.log("seee it ", platFormGroupSpec, platform);
 
   // --- Chakra functions
   const toast = useToast();
@@ -156,7 +158,7 @@ export const GenericEVMPlatform = ({ platFormGroupSpec, platform }: PlatformProp
           title="Success!"
           body={`All ${platform.platformId} data points removed.`}
           icon="../../assets/check-icon.svg"
-          platformId={platform.platformId}
+          platformId={platform.platformId as PLATFORM_ID}
           result={result}
         />
       ),
@@ -172,7 +174,7 @@ export const GenericEVMPlatform = ({ platFormGroupSpec, platform }: PlatformProp
           title="Success!"
           body={`All ${platform.platformId} data points verified.`}
           icon="../../assets/check-icon.svg"
-          platformId={platform.platformId}
+          platformId={platform.platformId as PLATFORM_ID}
           result={result}
         />
       ),
@@ -188,7 +190,7 @@ export const GenericEVMPlatform = ({ platFormGroupSpec, platform }: PlatformProp
           title="Verification Failed"
           body="Please make sure you fulfill the requirements for this stamp."
           icon="../../assets/verification-failed.svg"
-          platformId={platform.platformId}
+          platformId={platform.platformId as PLATFORM_ID}
           result={result}
         />
       ),

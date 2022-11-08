@@ -1,15 +1,4 @@
-export type PLATFORM_ID = string;
-
-// export type PROVIDER_ID = string;
-
-export type PlatformSpec = {
-  icon?: string | undefined;
-  platform: PLATFORM_ID;
-  name: string;
-  description: string;
-  connectMessage: string;
-  isEVM?: boolean;
-};
+import { PlatformSpec } from "./types";
 
 export const getPlatformSpec = (platformName: string): PlatformSpec | undefined => {
   let platformspec: PlatformSpec | undefined = undefined;
@@ -180,66 +169,3 @@ export const PLATFORMS: PlatformSpec[] = [
     connectMessage: "Verify Account",
   },
 ];
-
-export type PROVIDER_ID =
-  | "Signer"
-  | "Google"
-  | "Ens"
-  | "Poh"
-  | "Twitter"
-  | "TwitterTweetGT10"
-  | "TwitterFollowerGT100"
-  | "TwitterFollowerGT500"
-  | "TwitterFollowerGTE1000"
-  | "TwitterFollowerGT5000"
-  | "POAP"
-  | "Facebook"
-  | "FacebookFriends"
-  | "FacebookProfilePicture"
-  | "Brightid"
-  | "Github"
-  | "TenOrMoreGithubFollowers"
-  | "FiftyOrMoreGithubFollowers"
-  | "ForkedGithubRepoProvider"
-  | "StarredGithubRepoProvider"
-  | "FiveOrMoreGithubRepos"
-  | "GitcoinContributorStatistics#numGrantsContributeToGte#1"
-  | "GitcoinContributorStatistics#numGrantsContributeToGte#10"
-  | "GitcoinContributorStatistics#numGrantsContributeToGte#25"
-  | "GitcoinContributorStatistics#numGrantsContributeToGte#100"
-  | "GitcoinContributorStatistics#totalContributionAmountGte#10"
-  | "GitcoinContributorStatistics#totalContributionAmountGte#100"
-  | "GitcoinContributorStatistics#totalContributionAmountGte#1000"
-  | "GitcoinContributorStatistics#numRoundsContributedToGte#1"
-  | "GitcoinContributorStatistics#numGr14ContributionsGte#1"
-  | "GitcoinGranteeStatistics#numOwnedGrants#1"
-  | "GitcoinGranteeStatistics#numGrantContributors#10"
-  | "GitcoinGranteeStatistics#numGrantContributors#25"
-  | "GitcoinGranteeStatistics#numGrantContributors#100"
-  | "GitcoinGranteeStatistics#totalContributionAmount#100"
-  | "GitcoinGranteeStatistics#totalContributionAmount#1000"
-  | "GitcoinGranteeStatistics#totalContributionAmount#10000"
-  | "GitcoinGranteeStatistics#numGrantsInEcoAndCauseRound#1"
-  | "Linkedin"
-  | "Discord"
-  | "GitPOAP"
-  | "SnapshotProposalsProvider"
-  | "SnapshotVotesProvider"
-  | "ethPossessionsGte#1"
-  | "ethPossessionsGte#10"
-  | "ethPossessionsGte#32"
-  | "FirstEthTxnProvider"
-  | "EthGTEOneTxnProvider"
-  | "EthGasProvider"
-  | "gtcPossessionsGte#10"
-  | "gtcPossessionsGte#100"
-  | "SelfStakingBronze"
-  | "SelfStakingSilver"
-  | "SelfStakingGold"
-  | "CommunityStakingBronze"
-  | "CommunityStakingSilver"
-  | "CommunityStakingGold"
-  | "NFT"
-  | "ZkSync"
-  | "Lens"
-  | "GnosisSafe";

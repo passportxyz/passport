@@ -6,7 +6,7 @@ dotenv.config();
 
 // ---- Server
 import express, { Request } from "express";
-import { router as procedureRouter } from "@gitcoin/passport-platforms/dist/commonjs/src/procedure-router";
+import { router as procedureRouter } from "@gitcoin/passport-platforms/dist/commonjs/procedure-router";
 
 // ---- Production plugins
 import cors from "cors";
@@ -43,16 +43,8 @@ import { SimpleProvider } from "./providers/simple";
 import { GoogleProvider } from "./providers/google";
 
 import {
-  TwitterAuthProvider,
-  TwitterFollowerGT100Provider,
-  TwitterFollowerGT5000Provider,
-  TwitterFollowerGT500Provider,
-  TwitterFollowerGTE1000Provider,
-  TwitterTweetGT10Provider,
-} from "@gitcoin/passport-platforms/dist/commonjs/src/Twitter";
-
-import { EnsProvider } from "@gitcoin/passport-platforms/dist/commonjs/src/Ens/Providers";
-import {
+  Twitter,
+  Ens,
   Gitcoin,
   Lens,
   Github,
@@ -62,10 +54,10 @@ import {
   NFT,
   GnosisSafe,
   Snapshot,
+  POAP,
   ETH,
 } from "@gitcoin/passport-platforms";
 
-import { POAPProvider } from "./providers/poap";
 import { BrightIdProvider } from "./providers/brightid";
 import { LinkedinProvider } from "./providers/linkedin";
 import { DiscordProvider } from "./providers/discord";
@@ -79,7 +71,6 @@ import {
 import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
 import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
-
 import { ZkSyncProvider } from "./providers/zkSync";
 
 // get DID from key
@@ -100,10 +91,10 @@ export const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
   new GoogleProvider(),
-  new TwitterAuthProvider(),
-  new EnsProvider(),
+  new Twitter.TwitterAuthProvider(),
+  new Ens.EnsProvider(),
   new Poh.PohProvider(),
-  new POAPProvider(),
+  new POAP.POAPProvider(),
   new Facebook.FacebookProvider(),
   new Facebook.FacebookFriendsProvider(),
   new Facebook.FacebookProfilePictureProvider(),
@@ -116,11 +107,11 @@ export const providers = new Providers([
   new Github.StarredGithubRepoProvider(),
   new LinkedinProvider(),
   new DiscordProvider(),
-  new TwitterTweetGT10Provider(),
-  new TwitterFollowerGT100Provider(),
-  new TwitterFollowerGT500Provider(),
-  new TwitterFollowerGTE1000Provider(),
-  new TwitterFollowerGT5000Provider(),
+  new Twitter.TwitterTweetGT10Provider(),
+  new Twitter.TwitterFollowerGT100Provider(),
+  new Twitter.TwitterFollowerGT500Provider(),
+  new Twitter.TwitterFollowerGTE1000Provider(),
+  new Twitter.TwitterFollowerGT5000Provider(),
   new SelfStakingBronzeProvider(),
   new SelfStakingSilverProvider(),
   new SelfStakingGoldProvider(),
