@@ -1,6 +1,6 @@
 import React from "react";
 import { fireEvent, render, screen, waitFor, waitForElementToBeRemoved } from "@testing-library/react";
-import { GenericEVMPlatform } from "../../components/GenericEVMPlatform";
+import { GenericPlatform } from "../../components/GenericPlatform";
 
 import { Ens } from "@gitcoin/passport-platforms";
 
@@ -51,7 +51,7 @@ describe("when user has not verified with EnsProvider", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />
-        <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />
+        <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />
       </Drawer>
     );
 
@@ -63,7 +63,7 @@ describe("when user has not verified with EnsProvider", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />
-        <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />
+        <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />
       </Drawer>
     );
     renderWithContext(mockUserContext, mockCeramicContext, drawer());
@@ -81,7 +81,7 @@ describe("when user has not verified with EnsProvider", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />
-        <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />
+        <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />
       </Drawer>
     );
     renderWithContext(mockUserContext, mockCeramicContext, drawer());
@@ -108,7 +108,7 @@ describe("when user does not successfully verify an EnsProvider", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />
-        <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />
+        <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />
       </Drawer>
     );
     renderWithContext(mockUserContext, mockCeramicContext, drawer());
