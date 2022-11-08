@@ -26,9 +26,8 @@ import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 // --- Types
-import { PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
-import { Platform } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
-import { getPlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/src/platforms-config";
+import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { getPlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/platforms-config";
 
 type PlatformProps = {
   // platformId: string;
@@ -144,7 +143,7 @@ export const GenericOauthPlatform = ({
           title="Success!"
           body={`All ${platform.platformId} data points verified.`}
           icon="../../assets/check-icon.svg"
-          platformId={platform.platformId}
+          platformId={platform.platformId as PLATFORM_ID}
           result={result}
         />
       ),
@@ -234,6 +233,7 @@ export const GenericOauthPlatform = ({
     return () => {
       channel.close();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [platform.path, selectedProviders]);
 
   return (

@@ -3,9 +3,7 @@ import React, { useEffect, useState } from "react";
 // --- Chakra UI Elements
 import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Switch, Spinner } from "@chakra-ui/react";
 
-import { PlatformSpec, PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
-import { PROVIDER_ID } from "@gitcoin/passport-types";
-import { NoStampModal } from "./NoStampModal";
+import { PlatformSpec, PlatformGroupSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 
 export type SideBarContentProps = {
   currentPlatform: PlatformSpec | undefined;

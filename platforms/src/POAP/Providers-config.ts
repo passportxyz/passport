@@ -12,6 +12,6 @@ export const POAPPlatformDetails: PlatformSpec = {
 export const POAPProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name",
-    providers: [{ title: "Connect an account to a PoAP owned for over 15 days.", name: "POAP" }],
+    providers: [{ title: "Connect an account to a POAP owned for over 15 days.", name: "POAP" }],
   },
 ];
