@@ -56,7 +56,7 @@ import {
   Snapshot,
   POAP,
   ETH,
-  ZkSync
+  ZkSync,
 } from "@gitcoin/passport-platforms";
 
 import { BrightIdProvider } from "./providers/brightid";
