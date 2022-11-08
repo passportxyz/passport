@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Platform, AccessTokenResult } from "../types";
+import { Platform, AccessTokenResult, AppContext, ProviderPayload } from "../types";
 export class FacebookPlatform implements Platform {
   path: string;
   platformId = "Facebook";
 
-  async dummy(state: any, window: any, screen: any): Promise<string> {
-    return "hello";
+  async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
+    return {};
   }
 
   

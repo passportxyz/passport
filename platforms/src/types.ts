@@ -45,12 +45,22 @@ export type AccessTokenResult = {
   authenticated: boolean;
 };
 
+export type ProviderPayload = Record<string, unknown>;
+
+export type AppContext = {
+  state: any;
+  window: any;
+  screen: any;
+  waitForRedirect(timeout?: number): Promise<ProviderPayload>;
+}
+
+
 export interface Platform {
   platformId: string;
   path?: string;
   getOAuthUrl?(state: string): Promise<string>;
   getProviderProof?(): Promise<AccessTokenResult>; 
-  dummy(state: any, window: any, screen: any): Promise<string>;
+  getProviderPayload(appContext: AppContext): Promise<ProviderPayload>;
 
 }
 

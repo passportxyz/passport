@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { Platform, PlatformOptions } from "../types";
+import { AppContext, Platform, PlatformOptions, ProviderPayload } from "../types";
 import axios from "axios";
 
 type TwitterProcResponse = {
@@ -20,9 +20,8 @@ export class TwitterPlatform implements Platform {
     this.state = options.state as string;
   }
 
-  async dummy(state: any, window: any, screen: any): Promise<string> {
-
-    return "hello";
+  async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
+    return {};
   }
 
   

@@ -1,13 +1,12 @@
 /* eslint-disable */
-import { Platform, PlatformOptions } from "../types";
+import { AppContext, Platform, PlatformOptions, ProviderPayload } from "../types";
 
 export class GnosisSafePlatform implements Platform {
   getOAuthUrl(state: string): Promise<string> {
     throw new Error("Method not implemented.");
   }
-  async dummy(state: any, window: any, screen: any): Promise<string> {
-
-    return "hello";
+  async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
+    return {};
   }
 
   

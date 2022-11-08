@@ -1,7 +1,5 @@
 /* eslint-disable */
-import { Platform, PlatformOptions } from "../types";
-
-
+import { AppContext, Platform, PlatformOptions, ProviderPayload } from "../types";
 
 export class GithubPlatform implements Platform {
   platformId = "Github";
@@ -14,19 +12,18 @@ export class GithubPlatform implements Platform {
     this.redirectUri = options.redirectUri as string;
   }
 
-
-  async dummy(state: any, window: any, screen: any): Promise<string> {
+  async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     // TODO: open the BroadCastChannel
     // TODO: register the event handler - onmessage
 
-    const authUrl: string = await this.getOAuthUrl(state);
+    const authUrl: string = await this.getOAuthUrl(appContext.state);
     const width = 600;
     const height = 800;
-    const left = screen.width / 2 - width / 2;
-    const top = screen.height / 2 - height / 2;
+    const left = appContext.screen.width / 2 - width / 2;
+    const top = appContext.screen.height / 2 - height / 2;
 
     // Pass data to the page via props
-    window.open(
+    appContext.window.open(
       authUrl,
       "_blank",
       "toolbar=no, location=no, directories=no, status=no, menubar=no, resizable=no, copyhistory=no, width=" +
@@ -38,7 +35,8 @@ export class GithubPlatform implements Platform {
         ", left=" +
         left
     );
-    return "hello";
+
+    return appContext.waitForRedirect();
   }
 
   async getOAuthUrl(state: string): Promise<string> {

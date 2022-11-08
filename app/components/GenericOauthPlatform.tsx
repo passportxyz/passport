@@ -26,9 +26,15 @@ import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 // --- Types
-import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
-import { getPlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/platforms-config";
-import { AccessTokenResult, Proofs } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
+import { PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
+import {
+  Platform,
+  AccessTokenResult,
+  Proofs,
+  AppContext,
+  ProviderPayload,
+} from "@gitcoin/passport-platforms/dist/commonjs/src/types";
+import { getPlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/src/platforms-config";
 
 export type PlatformProps = {
   // platformId: string;
@@ -86,7 +92,6 @@ export const GenericOauthPlatform = ({ platformgroupspec, platform }: PlatformPr
   const toast = useToast();
 
   async function fetchCredential(proofs: Proofs): Promise<void> {
-    setLoading(true);
     // fetch VCs for only the selectedProviders
     const vcs = await fetchVerifiableCredential(
       process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "",
@@ -99,7 +104,7 @@ export const GenericOauthPlatform = ({ platformgroupspec, platform }: PlatformPr
       },
       signer as { signMessage: (message: string) => Promise<string> }
     );
-    setVerifiedCredentialState(vcs);
+    await setVerifiedCredentialState(vcs);
   }
 
   async function setVerifiedCredentialState(verified: VerifiableCredentialRecord) {
@@ -144,49 +149,51 @@ export const GenericOauthPlatform = ({ platformgroupspec, platform }: PlatformPr
         />
       ),
     });
-    setLoading(false);
-  }
-
-  async function initiateFetchCredential() {
-    platform.dummy(state, window, screen);
   }
 
   const state = `${platform.path}-` + generateUID(10);
 
-  // Listener to watch for oauth redirect response on other windows (on the same host)
-  function listenForRedirect(e: { target: string; data: { code: string; state: string } }) {
-    // when receiving oauth response from a spawned child run fetchVerifiableCredential
-    if (e.target === platform.path) {
-      // pull data from message
-      const queryCode = e.data.code;
-      const queryState = e.data.state;
+  const waitForRedirect = (timeout?: number): Promise<ProviderPayload> => {
+    const channel = new BroadcastChannel(`${platform.path}_oauth_channel`);
+    const waitForRedirect = new Promise<ProviderPayload>((resolve, reject) => {
+      // Listener to watch for oauth redirect response on other windows (on the same host)
+      function listenForRedirect(e: { target: string; data: { code: string; state: string } }) {
+        // when receiving oauth response from a spawned child run fetchVerifiableCredential
+        if (e.target === platform.path) {
+          // pull data from message
+          const queryCode = e.data.code;
+          const queryState = e.data.state;
+          datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
+          try {
+            resolve({ code: queryCode, state: queryState });
+          } catch (e) {
+            datadogLogs.logger.error("Error saving Stamp", { platform: platform.platformId });
+            console.error(e);
+            reject(e);
+          }
+        }
+      }
+      // event handler will listen for messages from the child (debounced to avoid multiple submissions)
+      channel.onmessage = debounce(listenForRedirect, 300);
+    }).finally(() => {
+      channel.close();
+    });
+    return waitForRedirect;
+  };
 
-      datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
+  async function initiateFetchCredential() {
+    try {
       // fetch and store credential
       setLoading(true);
-
-      try {
-        fetchCredential({ code: queryCode, state: queryState });
-      } catch (e) {
-        datadogLogs.logger.error("Error saving Stamp", { platform: platform.platformId });
-        console.error(e);
-        setLoading(false);
-      }
+      const providerPayload = await platform.getProviderPayload({ state, window, screen, waitForRedirect });
+      // TODO: use only one of Proofs or ProfiderPayload and drop the other
+      await fetchCredential(providerPayload as unknown as Proofs);
+    } catch (e) {
+      datadogLogs.logger.error("Error saving Stamp", { platform: platform.platformId });
+      console.error(e);
     }
+    setLoading(false);
   }
-
-  // attach and destroy a BroadcastChannel to handle the message
-  useEffect(() => {
-    // open the channel
-    const channel = new BroadcastChannel(`${platform.path}_oauth_channel`);
-    // event handler will listen for messages from the child (debounced to avoid multiple submissions)
-    channel.onmessage = debounce(listenForRedirect, 300);
-
-    return () => {
-      channel.close();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [platform.path, selectedProviders]);
 
   return (
     <SideBarContent

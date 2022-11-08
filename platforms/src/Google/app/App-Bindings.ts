@@ -1,10 +1,9 @@
 /* eslint-disable */
-import { Platform } from "../../types";
+import { AppContext, Platform, ProviderPayload } from "../../types";
 
 export class GooglePlatform implements Platform {
-  async dummy(state: any, window: any, screen: any): Promise<string> {
-
-    return "hello";
+  async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
+    return {};
   }
   
   getOAuthUrl(state: string): Promise<string> {

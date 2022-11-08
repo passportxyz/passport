@@ -1,4 +1,4 @@
-import { Platform, PlatformOptions } from "../types";
+import { AppContext, Platform, PlatformOptions, ProviderPayload } from "../types";
 
 /* eslint-disable */
 export class GitcoinPlatform implements Platform {
@@ -7,9 +7,8 @@ export class GitcoinPlatform implements Platform {
   clientId: string = null;
   redirectUri: string = null;
 
-  async dummy(state: any, window: any, screen: any): Promise<string> {
-
-    return "hello";
+  async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
+    return {};
   }
 
   
