@@ -11,3 +11,4 @@ export * as GnosisSafe from "./GnosisSafe";
 export * as NFT from "./NFT";
 export * as GitPOAP from "./GitPOAP";
 export * as POAP from "./POAP";
+export * as ETH from "./ETH";

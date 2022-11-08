@@ -18,6 +18,7 @@ import {
   GnosisSafe,
   Snapshot,
   POAP,
+  ETH,
 } from "@gitcoin/passport-platforms";
 
 // --- Components
@@ -161,8 +162,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       //   return <GooglePlatform />;
       // case "Linkedin":
       //   return <LinkedinPlatform />;
-      // case "ETH":
-      //   return <EthPlatform />;
+      case "ETH":
+        return <GenericEVMPlatform platform={new ETH.ETHPlatform()} platFormGroupSpec={ETH.ETHProviderConfig} />;
       // case "Discord":
       //   return <DiscordPlatform />;
       case "POAP":
