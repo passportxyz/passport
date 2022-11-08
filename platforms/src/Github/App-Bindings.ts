@@ -13,9 +13,6 @@ export class GithubPlatform implements Platform {
   }
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-    // TODO: open the BroadCastChannel
-    // TODO: register the event handler - onmessage
-
     const authUrl: string = await this.getOAuthUrl(appContext.state);
     const width = 600;
     const height = 800;

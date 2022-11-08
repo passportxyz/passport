@@ -24,8 +24,7 @@ import {
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
-import { GenericOauthPlatform, PlatformProps } from "./GenericOauthPlatform";
-import { GenericEVMPlatform } from "./GenericEVMPlatform";
+import { GenericPlatform, PlatformProps } from "./GenericPlatform";
 
 // --- Identity Providers
 import { SideBarContent } from "./SideBarContent";
@@ -165,7 +164,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       const platformProps = providers.get(currentPlatform.platform);
       if (platformProps) {
         return (
-          <GenericOauthPlatform platform={platformProps.platform} platformgroupspec={platformProps.platformgroupspec} />
+          <GenericPlatform platform={platformProps.platform} platFormGroupSpec={platformProps.platformgroupspec} />
         );
       }
     }
@@ -180,110 +179,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         verifyButton={undefined}
       />
     );
-
-    // switch (currentPlatform?.platform) {
-    //   case "Twitter":
-    //     return (
-    //       <GenericOauthPlatform
-    //         platform={new Twitter.TwitterPlatform()}
-    //         platformgroupspec={Twitter.TwitterProviderConfig}
-    //       />
-    //     );
-    //   case "GitPOAP":
-    //     return (
-    //       <GenericEVMPlatform
-    //         platform={new GitPOAP.GitPOAPPlatform()}
-    //         platFormGroupSpec={GitPOAP.GitPOAPProviderConfig}
-    //       />
-    //     );
-    //   case "Ens":
-    //     return <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />;
-    //   case "NFT":
-    //     return <GenericEVMPlatform platform={new NFT.NFTPlatform()} platFormGroupSpec={NFT.NFTProviderConfig} />;
-    //   case "Facebook":
-    //     const facebook = new Facebook.FacebookPlatform();
-    //     return <GenericOauthPlatform platformgroupspec={Facebook.FacebookProviderConfig} platform={facebook} />;
-    //   case "Github":
-    //     return (
-    //       <GenericOauthPlatform
-    //         platform={
-    //           new Github.GithubPlatform({
-    //             clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
-    //             redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
-    //           })
-    //         }
-    //         platformgroupspec={Github.GithubProviderConfig}
-    //       />
-    //     );
-    //   case "Gitcoin":
-    //     const platformProps = providers.get("Github");
-    //     if (platformProps) {
-    //       return (
-    //         <GenericOauthPlatform platform={platformProps.platform} platformgroupspec={Gitcoin.GitcoinProviderConfig} />
-    //       );
-    //     }
-    //   // case "Facebook":
-    //   //   return <FacebookPlatform />;
-    //   case "Snapshot":
-    //     return (
-    //       <GenericEVMPlatform
-    //         platform={new Snapshot.SnapshotPlatform()}
-    //         platFormGroupSpec={Snapshot.SnapshotProviderConfig}
-    //       />
-    //     );
-    //   // case "Google":
-    //   //   return <GooglePlatform />;
-    //   // case "Linkedin":
-    //   //   return <LinkedinPlatform />;
-    //   // case "ETH":
-    //   //   return <EthPlatform />;
-    //   // case "Discord":
-    //   //   return <DiscordPlatform />;
-    //   // case "POAP":
-    //   //   return <PoapPlatform />;
-    //   // case "Ens":
-    //   //   return <EnsPlatform />;
-    //   // case "Brightid":
-    //   //   return <BrightidPlatform />;
-    //   case "Poh":
-    //     return <GenericEVMPlatform platform={new Poh.PohPlatform()} platFormGroupSpec={Poh.PohProviderConfig} />;
-    //   // case "GTC":
-    //   //   return <GtcPlatform />;
-    //   // case "GtcStaking":
-    //   //   return <GtcStakingPlatform />;
-    //   // case "NFT":
-    //   //   return <NftPlatform />;
-    //   case "ZkSync":
-    //     return (
-    //       <GenericOauthPlatform
-    //         platform={new ZkSync.ZkSyncPlatform()}
-    //         platformgroupspec={ZkSync.ZkSyncProviderConfig}
-    //       />
-    //     );
-    //   case "Lens":
-    //     return <GenericEVMPlatform platform={new Lens.LensPlatform()} platFormGroupSpec={Lens.LensProviderConfig} />;
-    //   // case "Lens":
-    //   //   return <LensPlatform />;
-    //   case "GnosisSafe":
-    //     return (
-    //       <GenericOauthPlatform
-    //         platform={new GnosisSafe.GnosisSafePlatform()}
-    //         platformgroupspec={GnosisSafe.GnosisSafeProviderConfig}
-    //       />
-    //     );
-    //   default:
-    //     return (
-    //       <SideBarContent
-    //         verifiedProviders={undefined}
-    //         selectedProviders={undefined}
-    //         setSelectedProviders={undefined}
-    //         currentPlatform={undefined}
-    //         currentProviders={undefined}
-    //         isLoading={undefined}
-    //         verifyButton={undefined}
-    //       />
-    //     );
-    // }
   };
 
   useEffect(() => {
