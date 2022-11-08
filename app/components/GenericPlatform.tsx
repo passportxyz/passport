@@ -11,6 +11,7 @@ import {
   CredentialResponseBody,
   VerifiableCredentialRecord,
 } from "@gitcoin/passport-types";
+import { ProviderPayload } from "@gitcoin/passport-platforms/dist/commonjs/src/types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Style Components
@@ -29,7 +30,10 @@ import { getPlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/platf
 // --- Helpers
 import { difference } from "../utils/helpers";
 
-type PlatformProps = {
+import { debounce } from "ts-debounce";
+import { BroadcastChannel } from "broadcast-channel";
+
+export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
   platform: Platform;
 };
@@ -37,7 +41,18 @@ type PlatformProps = {
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
 
-export const GenericEVMPlatform = ({ platFormGroupSpec, platform }: PlatformProps): JSX.Element => {
+function generateUID(length: number) {
+  return window
+    .btoa(
+      Array.from(window.crypto.getRandomValues(new Uint8Array(length * 2)))
+        .map((b) => String.fromCharCode(b))
+        .join("")
+    )
+    .replace(/[+/]/g, "")
+    .substring(0, length);
+}
+
+export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, handleDeleteStamps, allProvidersState } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
@@ -74,12 +89,43 @@ export const GenericEVMPlatform = ({ platFormGroupSpec, platform }: PlatformProp
     }
   }, [selectedProviders, verifiedProviders]);
 
+  const waitForRedirect = (timeout?: number): Promise<ProviderPayload> => {
+    const channel = new BroadcastChannel(`${platform.path}_oauth_channel`);
+    const waitForRedirect = new Promise<ProviderPayload>((resolve, reject) => {
+      // Listener to watch for oauth redirect response on other windows (on the same host)
+      function listenForRedirect(e: { target: string; data: { code: string; state: string } }) {
+        // when receiving oauth response from a spawned child run fetchVerifiableCredential
+        if (e.target === platform.path) {
+          // pull data from message
+          const queryCode = e.data.code;
+          const queryState = e.data.state;
+          datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
+          try {
+            resolve({ code: queryCode, state: queryState });
+          } catch (e) {
+            datadogLogs.logger.error("Error saving Stamp", { platform: platform.platformId });
+            console.error(e);
+            reject(e);
+          }
+        }
+      }
+      // event handler will listen for messages from the child (debounced to avoid multiple submissions)
+      channel.onmessage = debounce(listenForRedirect, 300);
+    }).finally(() => {
+      channel.close();
+    });
+    return waitForRedirect;
+  };
+
   // fetch VCs from IAM server
   const handleFetchCredential = async (): Promise<void> => {
     datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
     setLoading(true);
     setVerificationAttempted(true);
     try {
+      const state = `${platform.path}-` + generateUID(10);
+      const providerPayload = (await platform.getProviderPayload({ state, window, screen, waitForRedirect })) as {};
+
       const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
         iamUrl,
         {
@@ -87,7 +133,7 @@ export const GenericEVMPlatform = ({ platFormGroupSpec, platform }: PlatformProp
           types: selectedProviders,
           version: "0.0.0",
           address: address || "",
-          proofs: {},
+          proofs: providerPayload,
           rpcUrl,
         },
         signer as { signMessage: (message: string) => Promise<string> }

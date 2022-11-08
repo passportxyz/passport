@@ -1,15 +1,15 @@
 // ----- Types
 import type { RequestPayload } from "@gitcoin/passport-types";
 
+// ----- Verify signed message with ethers
+import { JsonRpcProvider, JsonRpcSigner, StaticJsonRpcProvider } from "@ethersproject/providers";
+
 // ----- Credential verification
 import * as DIDKit from "@spruceid/didkit-wasm";
 import { verifyCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // ----- Verify signed message with ethers
 import { utils } from "ethers";
-
-// ----- Verify signed message with ethers
-import { JsonRpcProvider, JsonRpcSigner, StaticJsonRpcProvider } from "@ethersproject/providers";
 
 // set the network rpc url based on env
 const RPC_URL = process.env.RPC_URL;

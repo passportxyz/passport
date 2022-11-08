@@ -33,13 +33,34 @@ export interface Provider {
 // Use unknown
 export type ProviderOptions = Record<string, unknown>;
 
-export type Proof = { [k: string]: string | boolean };
+export type Proofs = { [k: string]: string };
+
+export type CallbackParameters = {
+  proofs?: Proofs;
+  authenticated: boolean;
+};
+
+export type AccessTokenResult = {
+  proofs?: Proofs;
+  authenticated: boolean;
+};
+
+export type ProviderPayload = Record<string, unknown>;
+
+export type AppContext = {
+  state: any;
+  window: any;
+  screen: any;
+  waitForRedirect(timeout?: number): Promise<ProviderPayload>;
+};
 
 export interface Platform {
   platformId: string;
   path?: string;
+  // TODO: shall we drop the getOAuthUrl and getProviderProof, given that we have getProviderPayload
   getOAuthUrl?(state: string): Promise<string>;
-  getAccessToken?(callback: (proof: Proof) => void): void;
+  getProviderProof?(): Promise<AccessTokenResult>;
+  getProviderPayload(appContext: AppContext): Promise<ProviderPayload>;
 }
 
 export type PlatformOptions = Record<string, unknown>;

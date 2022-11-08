@@ -47,53 +47,20 @@ const App: NextPage = () => {
   const queryCode = queryString.get("code");
   const queryState = queryString.get("state");
 
+  // We expect for a queryState like" 'twitter-asdfgh', 'google-asdfghjk'
+  const providerPath = queryState?.split("-");
+  const provider = providerPath ? providerPath[0] : undefined;
+
   // if Twitter oauth then submit message to other windows and close self
-  if ((queryError || queryCode) && queryState && /^twitter-.*/.test(queryState)) {
+  if ((queryError || queryCode) && queryState && provider) {
     // shared message channel between windows (on the same domain)
-    const channel = new BroadcastChannel("twitter_oauth_channel");
-    // only continue with the process if a code is returned
-    if (queryCode) {
-      channel.postMessage({ target: "twitter", data: { code: queryCode, state: queryState } });
-    }
-    // always close the redirected window
-    window.close();
+    const channel = new BroadcastChannel(`${provider}_oauth_channel`);
 
-    return <div></div>;
-  }
-  // if Github oauth then submit message to other windows and close self
-  else if ((queryError || queryCode) && queryState && /^github-.*/.test(queryState)) {
-    // shared message channel between windows (on the same domain)
-    const channel = new BroadcastChannel("github_oauth_channel");
     // only continue with the process if a code is returned
     if (queryCode) {
-      channel.postMessage({ target: "github", data: { code: queryCode, state: queryState } });
+      channel.postMessage({ target: provider, data: { code: queryCode, state: queryState } });
     }
-    // always close the redirected window
-    window.close();
 
-    return <div></div>;
-  }
-  // if linkedin oauth then submit message to other windows and close self
-  else if ((queryError || queryCode) && queryState && /^linkedin-.*/.test(queryState)) {
-    // shared message channel between windows (on the same domain)
-    const channel = new BroadcastChannel("linkedin_oauth_channel");
-    // only continue with the process if a code is returned
-    if (queryCode) {
-      channel.postMessage({ target: "linkedin", data: { code: queryCode, state: queryState } });
-    }
-    // always close the redirected window
-    window.close();
-
-    return <div></div>;
-  }
-  // if Discord oauth then submit message to other windows and close self
-  else if ((queryError || queryCode) && queryState && /^discord-.*/.test(queryState)) {
-    // shared message channel between windows (on the same domain)
-    const channel = new BroadcastChannel("discord_oauth_channel");
-    // only continue with the process if a code is returned
-    if (queryCode) {
-      channel.postMessage({ target: "discord", data: { code: queryCode, state: queryState } });
-    }
     // always close the redirected window
     window.close();
 
