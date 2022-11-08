@@ -17,9 +17,12 @@ export const verifyBrightidContextId = async (contextId: string): Promise<Bright
 
     // Unique is true if the user obtained "Meets" verification by attending a connection party
     const isUnique = "unique" in verifyContextIdResult && verifyContextIdResult.unique === true;
-    const isValid = "contextIds" in verifyContextIdResult && verifyContextIdResult.contextIds.length > 0;
+    const isValid =
+      "contextIds" in verifyContextIdResult &&
+      verifyContextIdResult.contextIds &&
+      verifyContextIdResult.contextIds.length > 0;
 
-    return { valid: isValid && isUnique, result: verifyContextIdResult };
+    return { valid: (isValid && isUnique) || false, result: verifyContextIdResult };
   } catch (err: unknown) {
     return { valid: false, error: err as string };
   }
@@ -28,7 +31,7 @@ export const verifyBrightidContextId = async (contextId: string): Promise<Bright
 export const triggerBrightidSponsorship = async (contextId: string): Promise<BrightIdProcedureResponse> => {
   try {
     const sponsorResult: BrightIdSponsorshipResponse = (await sponsor(
-      process.env.BRIGHTID_PRIVATE_KEY,
+      process.env.BRIGHTID_PRIVATE_KEY || "",
       CONTEXT,
       contextId
     )) as BrightIdSponsorshipResponse;
