@@ -52,16 +52,15 @@ export type AppContext = {
   window: any;
   screen: any;
   waitForRedirect(timeout?: number): Promise<ProviderPayload>;
-}
-
+};
 
 export interface Platform {
   platformId: string;
   path?: string;
+  // TODO: shall we drop the getOAuthUrl and getProviderProof, given that we have getProviderPayload
   getOAuthUrl?(state: string): Promise<string>;
-  getProviderProof?(): Promise<AccessTokenResult>; 
+  getProviderProof?(): Promise<AccessTokenResult>;
   getProviderPayload(appContext: AppContext): Promise<ProviderPayload>;
-
 }
 
 export type PlatformOptions = Record<string, unknown>;

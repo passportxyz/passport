@@ -19,7 +19,7 @@ import {
   Snapshot,
   POAP,
   ETH,
-  ZkSync
+  ZkSync,
 } from "@gitcoin/passport-platforms";
 
 // --- Components
@@ -42,71 +42,72 @@ export type CardListProps = {
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
-// const providers = new Map<PLATFORM_ID, PlatformProps>();
+export const providers = new Map<PLATFORM_ID, PlatformProps>();
+providers.set("Twitter", {
+  platform: new Twitter.TwitterPlatform(),
+  platformgroupspec: Twitter.TwitterProviderConfig,
+});
 
-// providers.set("Twitter", {
-//   platform: new Twitter.TwitterPlatform(),
-//   platformgroupspec: Twitter.TwitterProviderConfig,
-// });
+providers.set("GitPOAP", {
+  platform: new GitPOAP.GitPOAPPlatform(),
+  platformgroupspec: GitPOAP.GitPOAPProviderConfig,
+});
 
-// providers.set("GitPOAP", {
-//   platform: new GitPOAP.GitPOAPPlatform(),
-//   platformgroupspec: GitPOAP.GitPOAPProviderConfig,
-// });
+providers.set("Ens", {
+  platform: new Ens.EnsPlatform(),
+  platformgroupspec: Ens.EnsProviderConfig,
+});
 
-// providers.set("Ens", {
-//   platform: new Ens.EnsPlatform(),
-//   platformgroupspec: Ens.EnsProviderConfig,
-// });
+providers.set("NFT", {
+  platform: new NFT.NFTPlatform(),
+  platformgroupspec: NFT.NFTProviderConfig,
+});
 
-// providers.set("NFT", {
-//   platform: new NFT.NFTPlatform(),
-//   platformgroupspec: NFT.NFTProviderConfig,
-// });
+providers.set("Facebook", {
+  platformgroupspec: Facebook.FacebookProviderConfig,
+  platform: new Facebook.FacebookPlatform(),
+});
 
-// providers.set("Facebook", {
-//   platformgroupspec: Facebook.FacebookProviderConfig,
-//   platform: new Facebook.FacebookPlatform(),
-// });
+providers.set("Github", {
+  platform: new Github.GithubPlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+  }),
+  platformgroupspec: Github.GithubProviderConfig,
+});
 
-// providers.set("Github", {
-//   platform: new Github.GithubPlatform({
-//     clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
-//     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
-//   }),
-//   platformgroupspec: Github.GithubProviderConfig,
-// });
+providers.set("Gitcoin", {
+  platform: new Gitcoin.GitcoinPlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+  }),
+  platformgroupspec: Gitcoin.GitcoinProviderConfig,
+});
 
-// providers.set("Gitcoin", {
-//   platform: new Gitcoin.GitcoinPlatform({
-//     clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
-//     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
-//   }),
-//   platformgroupspec: Gitcoin.GitcoinProviderConfig,
-// });
+providers.set("Snapshot", {
+  platform: new Snapshot.SnapshotPlatform(),
+  platformgroupspec: Snapshot.SnapshotProviderConfig,
+});
 
-// providers.set("Snapshot", {
-//   platform: new Snapshot.SnapshotPlatform(),
-//   platformgroupspec: Snapshot.SnapshotProviderConfig,
-// });
+providers.set("Poh", {
+  platform: new Poh.PohPlatform(),
+  platformgroupspec: Poh.PohProviderConfig,
+});
 
-// providers.set("Poh", {
-//   platform: new Poh.PohPlatform(),
-//   platformgroupspec: Poh.PohProviderConfig,
-// });
+providers.set("ZkSync", {
+  platform: new ZkSync.ZkSyncPlatform(),
+  platformgroupspec: ZkSync.ZkSyncProviderConfig,
+});
 
-// providers.set("ZkSync", {
-//   platform: new ZkSync.ZkSyncPlatform(),
-//   platformgroupspec: ZkSync.ZkSyncProviderConfig,
-// });
-// providers.set("Lens", {
-//   platform: new Lens.LensPlatform(),
-//   platformgroupspec: Lens.LensProviderConfig,
-// });
-// providers.set("GnosisSafe", {
-//   platform: new GnosisSafe.GnosisSafePlatform(),
-//   platformgroupspec: GnosisSafe.GnosisSafeProviderConfig,
-// });
+providers.set("Lens", {
+  platform: new Lens.LensPlatform(),
+  platformgroupspec: Lens.LensProviderConfig,
+});
+
+providers.set("GnosisSafe", {
+  platform: new GnosisSafe.GnosisSafePlatform(),
+  platformgroupspec: GnosisSafe.GnosisSafeProviderConfig,
+});
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const { allProvidersState } = useContext(CeramicContext);
@@ -160,118 +161,129 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   }, [allProvidersState]);
   // Add the platforms to this switch so the sidebar content can populate dynamically
   const renderCurrentPlatformSelection = () => {
-    // if (currentPlatform) {
-    //   const platform = providers.get(currentPlatform.platform);
-    //   if(platform) {
-    //     return  <GenericOauthPlatform {...platform} />
-    //   }
-    // }
-    // <GenericOauthPlatform platform={new Twitter.TwitterPlatform()} platformgroupspec={Twitter.TwitterProviderConfig} />;
-
-    switch (currentPlatform?.platform) {
-      case "Twitter":
+    if (currentPlatform) {
+      const platformProps = providers.get(currentPlatform.platform);
+      if (platformProps) {
         return (
-          <GenericOauthPlatform
-            platform={new Twitter.TwitterPlatform()}
-            platformgroupspec={Twitter.TwitterProviderConfig}
-          />
+          <GenericOauthPlatform platform={platformProps.platform} platformgroupspec={platformProps.platformgroupspec} />
         );
-      case "GitPOAP":
-        return (
-          <GenericEVMPlatform
-            platform={new GitPOAP.GitPOAPPlatform()}
-            platFormGroupSpec={GitPOAP.GitPOAPProviderConfig}
-          />
-        );
-      case "Ens":
-        return <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />;
-      case "NFT":
-        return <GenericEVMPlatform platform={new NFT.NFTPlatform()} platFormGroupSpec={NFT.NFTProviderConfig} />;
-      case "Facebook":
-        const facebook = new Facebook.FacebookPlatform();
-        return <GenericOauthPlatform platformgroupspec={Facebook.FacebookProviderConfig} platform={facebook} />;
-      case "Github":
-        return (
-          <GenericOauthPlatform
-            platform={
-              new Github.GithubPlatform({
-                clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
-                redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
-              })
-            }
-            platformgroupspec={Github.GithubProviderConfig}
-          />
-        );
-      case "Gitcoin":
-        return (
-          <GenericOauthPlatform
-            platform={
-              new Gitcoin.GitcoinPlatform({
-                clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
-                redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
-              })
-            }
-            platformgroupspec={Gitcoin.GitcoinProviderConfig}
-          />
-        );
-      case "Snapshot":
-        return (
-          <GenericEVMPlatform
-            platform={new Snapshot.SnapshotPlatform()}
-            platFormGroupSpec={Snapshot.SnapshotProviderConfig}
-          />
-        );
-      // case "Google":
-      //   return <GooglePlatform />;
-      // case "Linkedin":
-      //   return <LinkedinPlatform />;
-      case "ETH":
-        return <GenericEVMPlatform platform={new ETH.ETHPlatform()} platFormGroupSpec={ETH.ETHProviderConfig} />;
-      // case "Discord":
-      //   return <DiscordPlatform />;
-      case "POAP":
-        return <GenericEVMPlatform platform={new POAP.POAPPlatform()} platFormGroupSpec={POAP.POAPProviderConfig} />;
-      // case "Ens":
-      //   return <EnsPlatform />;
-      // case "Brightid":
-      //   return <BrightidPlatform />;
-      case "Poh":
-        return <GenericEVMPlatform platform={new Poh.PohPlatform()} platFormGroupSpec={Poh.PohProviderConfig} />;
-      // case "GTC":
-      //   return <GtcPlatform />;
-      // case "GtcStaking":
-      //   return <GtcStakingPlatform />;
-      // case "NFT":
-      //   return <NftPlatform />;
-      case "ZkSync":
-        return (
-          <GenericOauthPlatform
-            platform={new ZkSync.ZkSyncPlatform()}
-            platformgroupspec={ZkSync.ZkSyncProviderConfig}
-          />
-        );
-      case "Lens":
-        return <GenericEVMPlatform platform={new Lens.LensPlatform()} platFormGroupSpec={Lens.LensProviderConfig} />;
-      case "GnosisSafe":
-        return (
-          <GenericOauthPlatform
-            platform={new GnosisSafe.GnosisSafePlatform()}
-            platformgroupspec={GnosisSafe.GnosisSafeProviderConfig}
-          />
-        );
-      default:
-        return (
-          <SideBarContent
-            verifiedProviders={undefined}
-            selectedProviders={undefined}
-            setSelectedProviders={undefined}
-            currentPlatform={undefined}
-            currentProviders={undefined}
-            isLoading={undefined}
-            verifyButton={undefined}
-          />
-        );
+      }
     }
+    return (
+      <SideBarContent
+        verifiedProviders={undefined}
+        selectedProviders={undefined}
+        setSelectedProviders={undefined}
+        currentPlatform={undefined}
+        currentProviders={undefined}
+        isLoading={undefined}
+        verifyButton={undefined}
+      />
+    );
+
+    // switch (currentPlatform?.platform) {
+    //   case "Twitter":
+    //     return (
+    //       <GenericOauthPlatform
+    //         platform={new Twitter.TwitterPlatform()}
+    //         platformgroupspec={Twitter.TwitterProviderConfig}
+    //       />
+    //     );
+    //   case "GitPOAP":
+    //     return (
+    //       <GenericEVMPlatform
+    //         platform={new GitPOAP.GitPOAPPlatform()}
+    //         platFormGroupSpec={GitPOAP.GitPOAPProviderConfig}
+    //       />
+    //     );
+    //   case "Ens":
+    //     return <GenericEVMPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />;
+    //   case "NFT":
+    //     return <GenericEVMPlatform platform={new NFT.NFTPlatform()} platFormGroupSpec={NFT.NFTProviderConfig} />;
+    //   case "Facebook":
+    //     const facebook = new Facebook.FacebookPlatform();
+    //     return <GenericOauthPlatform platformgroupspec={Facebook.FacebookProviderConfig} platform={facebook} />;
+    //   case "Github":
+    //     return (
+    //       <GenericOauthPlatform
+    //         platform={
+    //           new Github.GithubPlatform({
+    //             clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+    //             redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+    //           })
+    //         }
+    //         platformgroupspec={Github.GithubProviderConfig}
+    //       />
+    //     );
+    //   case "Gitcoin":
+    //     const platformProps = providers.get("Github");
+    //     if (platformProps) {
+    //       return (
+    //         <GenericOauthPlatform platform={platformProps.platform} platformgroupspec={Gitcoin.GitcoinProviderConfig} />
+    //       );
+    //     }
+    //   // case "Facebook":
+    //   //   return <FacebookPlatform />;
+    //   case "Snapshot":
+    //     return (
+    //       <GenericEVMPlatform
+    //         platform={new Snapshot.SnapshotPlatform()}
+    //         platFormGroupSpec={Snapshot.SnapshotProviderConfig}
+    //       />
+    //     );
+    //   // case "Google":
+    //   //   return <GooglePlatform />;
+    //   // case "Linkedin":
+    //   //   return <LinkedinPlatform />;
+    //   // case "ETH":
+    //   //   return <EthPlatform />;
+    //   // case "Discord":
+    //   //   return <DiscordPlatform />;
+    //   // case "POAP":
+    //   //   return <PoapPlatform />;
+    //   // case "Ens":
+    //   //   return <EnsPlatform />;
+    //   // case "Brightid":
+    //   //   return <BrightidPlatform />;
+    //   case "Poh":
+    //     return <GenericEVMPlatform platform={new Poh.PohPlatform()} platFormGroupSpec={Poh.PohProviderConfig} />;
+    //   // case "GTC":
+    //   //   return <GtcPlatform />;
+    //   // case "GtcStaking":
+    //   //   return <GtcStakingPlatform />;
+    //   // case "NFT":
+    //   //   return <NftPlatform />;
+    //   case "ZkSync":
+    //     return (
+    //       <GenericOauthPlatform
+    //         platform={new ZkSync.ZkSyncPlatform()}
+    //         platformgroupspec={ZkSync.ZkSyncProviderConfig}
+    //       />
+    //     );
+    //   case "Lens":
+    //     return <GenericEVMPlatform platform={new Lens.LensPlatform()} platFormGroupSpec={Lens.LensProviderConfig} />;
+    //   // case "Lens":
+    //   //   return <LensPlatform />;
+    //   case "GnosisSafe":
+    //     return (
+    //       <GenericOauthPlatform
+    //         platform={new GnosisSafe.GnosisSafePlatform()}
+    //         platformgroupspec={GnosisSafe.GnosisSafeProviderConfig}
+    //       />
+    //     );
+    //   default:
+    //     return (
+    //       <SideBarContent
+    //         verifiedProviders={undefined}
+    //         selectedProviders={undefined}
+    //         setSelectedProviders={undefined}
+    //         currentPlatform={undefined}
+    //         currentProviders={undefined}
+    //         isLoading={undefined}
+    //         verifyButton={undefined}
+    //       />
+    //     );
+    // }
   };
 
   useEffect(() => {
