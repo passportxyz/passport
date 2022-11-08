@@ -127,8 +127,8 @@ providers.set("Discord", {
 
 providers.set("Linkedin", {
   platform: new Linkedin.LinkedinPlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
   }),
   platformgroupspec: Linkedin.LinkedinProviderConfig,
 });
