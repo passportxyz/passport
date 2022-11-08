@@ -1,3 +1,6 @@
+// TODO - remove eslint disable below once type rules are unified
+/* eslint-disable @typescript-eslint/unbound-method */
+/* eslint-disable @typescript-eslint/require-await */
 // ---- Test subject
 import { DiscordProvider } from "../Providers/discord";
 
