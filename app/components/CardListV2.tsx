@@ -21,6 +21,7 @@ import {
   ETH,
   ZkSync,
   Discord,
+  Linkedin,
 } from "@gitcoin/passport-platforms";
 
 // --- Components
@@ -122,6 +123,14 @@ providers.set("POAP", {
 providers.set("Discord", {
   platform: new Discord.DiscordPlatform(),
   platFormGroupSpec: Discord.DiscordProviderConfig,
+});
+
+providers.set("Linkedin", {
+  platform: new Linkedin.LinkedinPlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+  }),
+  platformgroupspec: Linkedin.LinkedinProviderConfig,
 });
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {

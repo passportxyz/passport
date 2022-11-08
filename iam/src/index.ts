@@ -57,10 +57,10 @@ import {
   POAP,
   ETH,
   ZkSync,
+  Linkedin,
 } from "@gitcoin/passport-platforms";
 
 import { BrightIdProvider } from "./providers/brightid";
-import { LinkedinProvider } from "./providers/linkedin";
 import { DiscordProvider } from "./providers/discord";
 
 import { SelfStakingBronzeProvider, SelfStakingSilverProvider, SelfStakingGoldProvider } from "./providers/selfStaking";
@@ -105,7 +105,7 @@ export const providers = new Providers([
   new Github.FiftyOrMoreGithubFollowers(),
   new Github.ForkedGithubRepoProvider(),
   new Github.StarredGithubRepoProvider(),
-  new LinkedinProvider(),
+  new Linkedin.LinkedinProvider(),
   new DiscordProvider(),
   new Twitter.TwitterTweetGT10Provider(),
   new Twitter.TwitterFollowerGT100Provider(),
