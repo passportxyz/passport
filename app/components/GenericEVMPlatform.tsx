@@ -44,8 +44,6 @@ export const GenericEVMPlatform = ({ platFormGroupSpec, platform }: PlatformProp
   const [canSubmit, setCanSubmit] = useState(false);
   const [verificationAttempted, setVerificationAttempted] = useState(false);
 
-  console.log("seee it ", platFormGroupSpec, platform);
-
   // --- Chakra functions
   const toast = useToast();
 
