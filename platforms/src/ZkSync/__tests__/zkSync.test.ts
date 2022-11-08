@@ -112,7 +112,7 @@ beforeEach(() => {
 
 describe("Verification succeeds", function () {
   it("when valid response is received from the zksync API endpoint", async () => {
-    (axios.get as jest.Mock).mockImplementation((url) => {
+    (axios.get as jest.Mock).mockImplementation(() => {
       return Promise.resolve({
         status: 200,
         data: {
@@ -148,7 +148,7 @@ describe("Verification succeeds", function () {
 
 describe("Verification fails", function () {
   it("when the response list does not contain any transaction initiated by the address we verify (address is not in from field)", async () => {
-    (axios.get as jest.Mock).mockImplementation((url) => {
+    (axios.get as jest.Mock).mockImplementation(() => {
       return Promise.resolve({
         status: 200,
         data: {
@@ -180,7 +180,7 @@ describe("Verification fails", function () {
   });
 
   it("when the response list does not contain any finalized tranzactions", async () => {
-    (axios.get as jest.Mock).mockImplementation((url) => {
+    (axios.get as jest.Mock).mockImplementation(() => {
       return Promise.resolve({
         status: 200,
         data: {
@@ -212,7 +212,7 @@ describe("Verification fails", function () {
   });
 
   it("when the API response is not with status='success'", async () => {
-    (axios.get as jest.Mock).mockImplementation((url) => {
+    (axios.get as jest.Mock).mockImplementation(() => {
       return Promise.resolve({
         status: 200,
         data: {
@@ -245,7 +245,7 @@ describe("Verification fails", function () {
   });
 
   it("when the HTTP status code is not 200", async () => {
-    (axios.get as jest.Mock).mockImplementation((url) => {
+    (axios.get as jest.Mock).mockImplementation(() => {
       return Promise.resolve({
         status: 400,
         statusText: "Bad Request",
@@ -278,7 +278,7 @@ describe("Verification fails", function () {
   });
 
   it("when the HTTP request throws", async () => {
-    (axios.get as jest.Mock).mockImplementation((url) => {
+    (axios.get as jest.Mock).mockImplementation(() => {
       throw "something bad happened";
     });
 

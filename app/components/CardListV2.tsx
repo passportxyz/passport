@@ -108,6 +108,16 @@ providers.set("GnosisSafe", {
   platformgroupspec: GnosisSafe.GnosisSafeProviderConfig,
 });
 
+providers.set("ETH", {
+  platform: new ETH.ETHPlatform(),
+  platformgroupspec: ETH.ETHProviderConfig,
+});
+
+providers.set("POAP", {
+  platform: new POAP.POAPPlatform(),
+  platformgroupspec: POAP.POAPProviderConfig,
+});
+
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const { allProvidersState } = useContext(CeramicContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
