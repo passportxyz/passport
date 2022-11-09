@@ -24,13 +24,7 @@ import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 // --- Types
-import {
-  PlatformGroupSpec,
-  Platform,
-  PROVIDER_ID,
-  PLATFORM_ID,
-  ProviderPayload,
-} from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { getPlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/platforms-config";
 
 // --- Helpers
