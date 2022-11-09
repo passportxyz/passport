@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "license": "MIT",
   "main": "dist/commonjs/index.js",
+  "iam": "dist/commonjs/index.js",
+  "app": "dist/commonjs/index.js",
+  "types": "dist/commonjs/index.js",
   "directories": {
     "src": "src",
     "dist": "dist"
