@@ -20,6 +20,7 @@ import {
   POAP,
   ETH,
   ZkSync,
+  Discord,
 } from "@gitcoin/passport-platforms";
 
 // --- Components
@@ -116,6 +117,11 @@ providers.set("ETH", {
 providers.set("POAP", {
   platform: new POAP.POAPPlatform(),
   platFormGroupSpec: POAP.POAPProviderConfig,
+});
+
+providers.set("Discord", {
+  platform: new Discord.DiscordPlatform(),
+  platFormGroupSpec: Discord.DiscordProviderConfig,
 });
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
