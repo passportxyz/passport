@@ -154,7 +154,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
           .filter((v: Stamp | undefined) => v) || [];
 
       // Update the selected stamps for removal
-      await handleDeleteStamps(selectedProviders as PROVIDER_ID[]);
+      await handleDeleteStamps(providerIds as PROVIDER_ID[]);
       // Add all the stamps to the passport at once
       await handleAddStamps(vcs as Stamp[]);
       datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
@@ -175,13 +175,55 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
       const updatedMinusInitial = difference(updatedVerifiedProviders, initialVerifiedProviders);
       // reset can submit state
       setCanSubmit(false);
-      // Custom Success Toast
-      if (updatedMinusInitial.size === providerIds.length) {
-        completeVerificationToast();
+
+      if (updatedMinusInitial.size > 0 && initialMinusUpdated.size === 0) {
+        doneToast(
+          "Success!",
+          `${updatedMinusInitial.size + initialMinusUpdated.size} ${platform.platformId} data points verified out of ${
+            providerIds.length
+          }.`,
+          "../../assets/check-icon.svg",
+          platform.platformId as PLATFORM_ID
+        );
+      } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0 && selectedProviders.length === 0) {
+        doneToast(
+          "Success!",
+          `All ${platform.platformId} data points removed.`,
+          "../../assets/check-icon.svg",
+          platform.platformId as PLATFORM_ID
+        );
       } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
-        removedDataPointsToast();
+        doneToast(
+          "Success!",
+          `${initialMinusUpdated.size} ${platform.platformId} data ${
+            initialMinusUpdated.size > 1 ? "points" : "point"
+          } removed.`,
+          "../../assets/check-icon.svg",
+          platform.platformId as PLATFORM_ID
+        );
+      } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size > 0) {
+        doneToast(
+          "Success!",
+          `${initialMinusUpdated.size} ${platform.platformId} data ${
+            initialMinusUpdated.size > 1 ? "points" : "point"
+          } removed and ${updatedMinusInitial.size} verified.`,
+          "../../assets/check-icon.svg",
+          platform.platformId as PLATFORM_ID
+        );
+      } else if (updatedMinusInitial.size === providerIds.length) {
+        doneToast(
+          "Done!",
+          `All ${platform.platformId} data points verified.`,
+          "../../assets/check-icon.svg",
+          platform.platformId as PLATFORM_ID
+        );
       } else {
-        failedVerificationToast();
+        doneToast(
+          "Verification Failed",
+          "Please make sure you fulfill the requirements for this stamp.",
+          "../../assets/verification-failed.svg",
+          platform.platformId as PLATFORM_ID
+        );
       }
       setLoading(false);
     } catch (e) {
@@ -192,51 +234,13 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
     }
   };
 
-  // --- Done Toast Helpers
-  const removedDataPointsToast = () => {
+  // --- Done Toast Helper
+  const doneToast = (title: string, body: string, icon: string, platformId: PLATFORM_ID) => {
     toast({
       duration: 5000,
       isClosable: true,
       render: (result: any) => (
-        <DoneToastContent
-          title="Success!"
-          body={`All ${platform.platformId} data points removed.`}
-          icon="../../assets/check-icon.svg"
-          platformId={platform.platformId as PLATFORM_ID}
-          result={result}
-        />
-      ),
-    });
-  };
-
-  const completeVerificationToast = () => {
-    toast({
-      duration: 5000,
-      isClosable: true,
-      render: (result: any) => (
-        <DoneToastContent
-          title="Success!"
-          body={`All ${platform.platformId} data points verified.`}
-          icon="../../assets/check-icon.svg"
-          platformId={platform.platformId as PLATFORM_ID}
-          result={result}
-        />
-      ),
-    });
-  };
-
-  const failedVerificationToast = () => {
-    toast({
-      duration: 5000,
-      isClosable: true,
-      render: (result: any) => (
-        <DoneToastContent
-          title="Verification Failed"
-          body="Please make sure you fulfill the requirements for this stamp."
-          icon="../../assets/verification-failed.svg"
-          platformId={platform.platformId as PLATFORM_ID}
-          result={result}
-        />
+        <DoneToastContent title={title} body={body} icon={icon} platformId={platformId} result={result} />
       ),
     });
   };
