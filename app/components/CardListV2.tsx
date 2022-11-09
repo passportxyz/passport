@@ -22,6 +22,7 @@ import {
   ZkSync,
   Discord,
   Linkedin,
+  GTC,
 } from "@gitcoin/passport-platforms";
 
 // --- Components
