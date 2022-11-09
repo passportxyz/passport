@@ -17,7 +17,18 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commo
 // --- Style Components
 import { SideBarContent } from "./SideBarContent";
 import { DoneToastContent } from "./DoneToastContent";
-import { useToast } from "@chakra-ui/react";
+import { PlatformInfoModal } from "./PlatformInfoModal";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  useDisclosure,
+  useToast,
+  Spinner,
+} from "@chakra-ui/react";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
@@ -56,12 +67,13 @@ function generateUID(length: number) {
 
 export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
-  const { handleAddStamps, handleDeleteStamps, allProvidersState } = useContext(CeramicContext);
+  const { handleAddStamps, handleDeleteStamps, allProvidersState, userDid } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [verificationAttempted, setVerificationAttempted] = useState(false);
 
   // --- Chakra functions
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
   // find all providerIds
@@ -273,14 +285,25 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
       setSelectedProviders={setSelectedProviders}
       isLoading={isLoading}
       verifyButton={
-        <button
-          disabled={!canSubmit}
-          onClick={handleFetchCredential}
-          data-testid={`button-verify-${platform.platformId}`}
-          className="sidebar-verify-btn"
-        >
-          {verifiedProviders.length > 0 ? "Save" : "Verify"}
-        </button>
+        <>
+          <button
+            disabled={!canSubmit}
+            onClick={handleFetchCredential}
+            data-testid={`button-verify-${platform.platformId}`}
+            className="sidebar-verify-btn"
+          >
+            {verifiedProviders.length > 0 ? "Save" : "Verify"}
+          </button>
+          {platFormGroupSpec.showInfoModal && (
+            <PlatformInfoModal
+              isOpen={isOpen}
+              onClose={onClose}
+              isLoading={isLoading}
+              platformId={platform.platformId}
+              userDid={userDid || ""}
+            />
+          )}
+        </>
       }
     />
   );
