@@ -134,6 +134,11 @@ providers.set("Linkedin", {
   platFormGroupSpec: Linkedin.LinkedinProviderConfig,
 });
 
+providers.set("GTC", {
+  platform: new GTC.GTCPlatform(),
+  platFormGroupSpec: GTC.GTCProviderConfig,
+});
+
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const { allProvidersState } = useContext(CeramicContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
