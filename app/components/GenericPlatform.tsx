@@ -11,6 +11,7 @@ import {
   CredentialResponseBody,
   VerifiableCredentialRecord,
 } from "@gitcoin/passport-types";
+import { ProviderPayload } from "@gitcoin/passport-platforms";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Style Components
