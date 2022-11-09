@@ -11,7 +11,6 @@ import type { DID as CeramicDID } from "dids";
 import { StreamID } from "@ceramicnetwork/streamid";
 
 import { DataStorageBase } from "./types";
-import { createCipheriv } from "crypto";
 
 // const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
 const COMMUNITY_TESTNET_CERAMIC_CLIENT_URL = "https://ceramic-clay.3boxlabs.com";
@@ -121,11 +120,18 @@ export class CeramicDatabase implements DataStorageBase {
             this.logger.error(
               `Error when loading stamp with streamId ${streamIDs[idx]} for did  ${this.did}:` + e.toString()
             );
-            return null;
+            throw e;
           }
         }) ?? [];
 
-      const loadedStamps = await Promise.all(stampsToLoad);
+      // Wait for all stamp loading to be settled
+      const stampLoadingStatus = await Promise.allSettled(stampsToLoad);
+
+      // Filter out only the successfully loaded stamps
+      const isFulfilled = <T>(input: PromiseSettledResult<T>): input is PromiseFulfilledResult<T> =>
+        input.status === "fulfilled";
+      const filteredStamps = stampLoadingStatus.filter(isFulfilled);
+      const loadedStamps = filteredStamps.map((settledStamp) => settledStamp.value);
 
       const parsePassport: Passport = {
         issuanceDate: new Date(passport.issuanceDate),
