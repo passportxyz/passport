@@ -44,26 +44,26 @@ type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 export const providers = new Map<PLATFORM_ID, PlatformProps>();
 providers.set("Twitter", {
   platform: new Twitter.TwitterPlatform(),
-  platformgroupspec: Twitter.TwitterProviderConfig,
+  platFormGroupSpec: Twitter.TwitterProviderConfig,
 });
 
 providers.set("GitPOAP", {
   platform: new GitPOAP.GitPOAPPlatform(),
-  platformgroupspec: GitPOAP.GitPOAPProviderConfig,
+  platFormGroupSpec: GitPOAP.GitPOAPProviderConfig,
 });
 
 providers.set("Ens", {
   platform: new Ens.EnsPlatform(),
-  platformgroupspec: Ens.EnsProviderConfig,
+  platFormGroupSpec: Ens.EnsProviderConfig,
 });
 
 providers.set("NFT", {
   platform: new NFT.NFTPlatform(),
-  platformgroupspec: NFT.NFTProviderConfig,
+  platFormGroupSpec: NFT.NFTProviderConfig,
 });
 
 providers.set("Facebook", {
-  platformgroupspec: Facebook.FacebookProviderConfig,
+  platFormGroupSpec: Facebook.FacebookProviderConfig,
   platform: new Facebook.FacebookPlatform(),
 });
 
@@ -72,7 +72,7 @@ providers.set("Github", {
     clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
   }),
-  platformgroupspec: Github.GithubProviderConfig,
+  platFormGroupSpec: Github.GithubProviderConfig,
 });
 
 providers.set("Gitcoin", {
@@ -80,42 +80,42 @@ providers.set("Gitcoin", {
     clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
   }),
-  platformgroupspec: Gitcoin.GitcoinProviderConfig,
+  platFormGroupSpec: Gitcoin.GitcoinProviderConfig,
 });
 
 providers.set("Snapshot", {
   platform: new Snapshot.SnapshotPlatform(),
-  platformgroupspec: Snapshot.SnapshotProviderConfig,
+  platFormGroupSpec: Snapshot.SnapshotProviderConfig,
 });
 
 providers.set("Poh", {
   platform: new Poh.PohPlatform(),
-  platformgroupspec: Poh.PohProviderConfig,
+  platFormGroupSpec: Poh.PohProviderConfig,
 });
 
 providers.set("ZkSync", {
   platform: new ZkSync.ZkSyncPlatform(),
-  platformgroupspec: ZkSync.ZkSyncProviderConfig,
+  platFormGroupSpec: ZkSync.ZkSyncProviderConfig,
 });
 
 providers.set("Lens", {
   platform: new Lens.LensPlatform(),
-  platformgroupspec: Lens.LensProviderConfig,
+  platFormGroupSpec: Lens.LensProviderConfig,
 });
 
 providers.set("GnosisSafe", {
   platform: new GnosisSafe.GnosisSafePlatform(),
-  platformgroupspec: GnosisSafe.GnosisSafeProviderConfig,
+  platFormGroupSpec: GnosisSafe.GnosisSafeProviderConfig,
 });
 
 providers.set("ETH", {
   platform: new ETH.ETHPlatform(),
-  platformgroupspec: ETH.ETHProviderConfig,
+  platFormGroupSpec: ETH.ETHProviderConfig,
 });
 
 providers.set("POAP", {
   platform: new POAP.POAPPlatform(),
-  platformgroupspec: POAP.POAPProviderConfig,
+  platFormGroupSpec: POAP.POAPProviderConfig,
 });
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
@@ -174,7 +174,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
       const platformProps = providers.get(currentPlatform.platform);
       if (platformProps) {
         return (
-          <GenericPlatform platform={platformProps.platform} platFormGroupSpec={platformProps.platformgroupspec} />
+          <GenericPlatform platform={platformProps.platform} platFormGroupSpec={platformProps.platFormGroupSpec} />
         );
       }
     }
