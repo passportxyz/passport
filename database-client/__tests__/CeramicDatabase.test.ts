@@ -130,4 +130,82 @@ describe("Verify Ceramic Database", () => {
     expect(passport?.issuanceDate).toEqual(issuanceDate);
     expect(passport?.expiryDate).toEqual(expiryDate);
   });
+
+  it("ignores stamps that cannot be loaded succefully from ceramic", async () => {
+    const issuanceDate = new Date("2022-06-01");
+    const expiryDate = new Date("2022-09-01");
+    const maxGoodStamps = 2;
+    let numGoodStamps = 0;
+    let spyStoreGet = jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (name) => {
+      return {
+        id: "passport-id",
+        issuanceDate,
+        expiryDate,
+        stamps: [
+          {
+            provider: "Provider-1",
+            credential: "ceramic://credential-1",
+          },
+          {
+            provider: "Provider-2",
+            credential: "ceramic://credential-2",
+          },
+          {
+            provider: "Provider-3",
+            credential: "ceramic://credential-3",
+          },
+        ],
+      };
+    });
+    let spyStoreGetRecordDocument = jest
+      .spyOn(ceramicDatabase.store, "getRecordDocument")
+      .mockImplementation(async (name) => {
+        return {
+          id: "passport-id",
+        } as unknown as TileDoc;
+      });
+    let spyLoaderLoad = jest.spyOn(ceramicDatabase.loader, "load").mockImplementation(async (streamId) => {
+      return new Promise((resolve, reject) => {
+        if (numGoodStamps < maxGoodStamps) {
+          numGoodStamps += 1;
+          resolve({
+            content: "Stamp Content for " + streamId,
+          } as any as TileDocument);
+        }
+        reject("Error loading stamp!");
+      });
+    });
+    let spyPinAdd = jest.spyOn(ceramicDatabase.ceramicClient.pin, "add").mockImplementation(async (streamId) => {
+      // Nothing to do here
+      return;
+    });
+
+    const passport = (await ceramicDatabase.getPassport()) as Passport;
+
+    // We do not expect to have any passport, hence `false` should be returned
+    expect(spyStoreGet).toBeCalledTimes(1);
+    expect(spyStoreGet).toBeCalledWith("Passport");
+    expect(spyLoaderLoad).toBeCalledTimes(3);
+    expect(spyStoreGetRecordDocument).toBeCalledTimes(1);
+
+    // Ensure the document is pinned
+    expect(spyPinAdd).toBeCalledTimes(1);
+    expect(spyPinAdd).toBeCalledWith("passport-id");
+
+    // We only expect 2 stamps to have been loaded
+    expect(passport?.stamps).toEqual([
+      {
+        credential: "Stamp Content for ceramic://credential-1",
+        provider: "Provider-1",
+        streamId: "ceramic://credential-1",
+      },
+      {
+        credential: "Stamp Content for ceramic://credential-2",
+        provider: "Provider-2",
+        streamId: "ceramic://credential-2",
+      },
+    ]);
+    expect(passport?.issuanceDate).toEqual(issuanceDate);
+    expect(passport?.expiryDate).toEqual(expiryDate);
+  });
 });
