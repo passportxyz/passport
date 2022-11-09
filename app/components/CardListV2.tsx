@@ -130,7 +130,7 @@ providers.set("Linkedin", {
     clientId: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CLIENT_ID,
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
   }),
-  platformgroupspec: Linkedin.LinkedinProviderConfig,
+  platFormGroupSpec: Linkedin.LinkedinProviderConfig,
 });
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
