@@ -2,7 +2,7 @@
 import { Platform, AccessTokenResult, AppContext, ProviderPayload, PlatformOptions } from "../types";
 
 export class DiscordPlatform implements Platform {
-  path: string;
+  path = "discord";
   platformId = "Discord";
 
   clientId: string = null;
@@ -38,7 +38,7 @@ export class DiscordPlatform implements Platform {
   }
 
   async getOAuthUrl(state: string): Promise<string> {
-    const authUrl = `https://discord.com/api/oauth2/authorize?response_type=code&scope=identify&client_id=${process.env.NEXT_PUBLIC_PASSPORT_DISCORD_CLIENT_ID}&state=discord-${state}&redirect_uri=${process.env.NEXT_PUBLIC_PASSPORT_DISCORD_CALLBACK}`;
+    const authUrl = `https://discord.com/api/oauth2/authorize?response_type=code&scope=identify&client_id=${process.env.NEXT_PUBLIC_PASSPORT_DISCORD_CLIENT_ID}&state=${state}&redirect_uri=${process.env.NEXT_PUBLIC_PASSPORT_DISCORD_CALLBACK}`;
     return authUrl;
   }
 }
