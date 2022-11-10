@@ -1,17 +1,13 @@
-/* eslint-disable */
-import { AppContext, Platform, ProviderPayload } from "../types";
-
-export class ETHPlatform implements Platform {
+import { AppContext, ProviderPayload } from "../types";
+import { Platform } from "../utils/platform";
+export class ETHPlatform extends Platform {
   platformId = "ETH";
   path = "ETH";
   clientId: string = null;
   redirectUri: string = null;
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-    return {};
-  }
-
-  getOAuthUrl(state: string): Promise<string> {
-    throw new Error("Method not implemented.");
+    const result = await Promise.resolve({});
+    return result;
   }
 }
