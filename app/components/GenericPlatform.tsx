@@ -39,7 +39,7 @@ export type PlatformProps = {
 };
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
-const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
+const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
 function generateUID(length: number) {
   return window
