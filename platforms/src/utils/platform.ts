@@ -30,7 +30,6 @@ export class Platform {
     );
 
     return appContext.waitForRedirect().then((data) => {
-      console.log("authUrl", authUrl, { data });
       return {
         code: data.code,
         sessionKey: data.state,
