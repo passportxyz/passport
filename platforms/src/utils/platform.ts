@@ -1,6 +1,6 @@
 import { AppContext, ProviderPayload } from "../types";
 
-type PlatformOptions = {
+export type PlatformOptions = {
   platformId: string;
   path: string;
   clientId?: string;
@@ -14,14 +14,6 @@ export class Platform {
   clientId?: string;
   redirectUri?: string;
   state?: string;
-
-  constructor(options: PlatformOptions) {
-    this.platformId = options.platformId;
-    this.path = options.path;
-    this.clientId = options.clientId;
-    this.redirectUri = options.redirectUri;
-    this.state = options.state;
-  }
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     const authUrl: string = await this.getOAuthUrl(appContext.state);
@@ -38,6 +30,7 @@ export class Platform {
     );
 
     return appContext.waitForRedirect().then((data) => {
+      console.log("authUrl", authUrl, { data });
       return {
         code: data.code,
         sessionKey: data.state,
@@ -46,7 +39,7 @@ export class Platform {
     });
   }
 
-  getOAuthUrl(state: string): Promise<string> {
+  getOAuthUrl(state?: string): Promise<string> {
     throw new Error("Method not implemented.");
   }
 }
