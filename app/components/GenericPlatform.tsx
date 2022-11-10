@@ -63,7 +63,6 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
   const toast = useToast();
 
   // find all providerIds
-  // find all providerIds
   const providerIds = useMemo(
     () =>
       platFormGroupSpec?.reduce((all, stamp) => {
@@ -176,55 +175,8 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
       // reset can submit state
       setCanSubmit(false);
 
-      if (updatedMinusInitial.size > 0 && initialMinusUpdated.size === 0) {
-        doneToast(
-          "Success!",
-          `${updatedMinusInitial.size + initialMinusUpdated.size} ${platform.platformId} data points verified out of ${
-            providerIds.length
-          }.`,
-          "../../assets/check-icon.svg",
-          platform.platformId as PLATFORM_ID
-        );
-      } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0 && selectedProviders.length === 0) {
-        doneToast(
-          "Success!",
-          `All ${platform.platformId} data points removed.`,
-          "../../assets/check-icon.svg",
-          platform.platformId as PLATFORM_ID
-        );
-      } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
-        doneToast(
-          "Success!",
-          `${initialMinusUpdated.size} ${platform.platformId} data ${
-            initialMinusUpdated.size > 1 ? "points" : "point"
-          } removed.`,
-          "../../assets/check-icon.svg",
-          platform.platformId as PLATFORM_ID
-        );
-      } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size > 0) {
-        doneToast(
-          "Success!",
-          `${initialMinusUpdated.size} ${platform.platformId} data ${
-            initialMinusUpdated.size > 1 ? "points" : "point"
-          } removed and ${updatedMinusInitial.size} verified.`,
-          "../../assets/check-icon.svg",
-          platform.platformId as PLATFORM_ID
-        );
-      } else if (updatedMinusInitial.size === providerIds.length) {
-        doneToast(
-          "Done!",
-          `All ${platform.platformId} data points verified.`,
-          "../../assets/check-icon.svg",
-          platform.platformId as PLATFORM_ID
-        );
-      } else {
-        doneToast(
-          "Verification Failed",
-          "Please make sure you fulfill the requirements for this stamp.",
-          "../../assets/verification-failed.svg",
-          platform.platformId as PLATFORM_ID
-        );
-      }
+      getDoneToastMessages(initialMinusUpdated, updatedMinusInitial);
+
       setLoading(false);
     } catch (e) {
       datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
@@ -243,6 +195,59 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
         <DoneToastContent title={title} body={body} icon={icon} platformId={platformId} result={result} />
       ),
     });
+  };
+
+  // Done toast messages getter
+  const getDoneToastMessages = (initialMinusUpdated: Set<PROVIDER_ID>, updatedMinusInitial: Set<PROVIDER_ID>) => {
+    if (updatedMinusInitial.size === providerIds.length) {
+      doneToast(
+        "Done!",
+        `All ${platform.platformId} data points verified.`,
+        "../../assets/check-icon.svg",
+        platform.platformId as PLATFORM_ID
+      );
+    } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size === 0) {
+      doneToast(
+        "Success!",
+        `${updatedMinusInitial.size + initialMinusUpdated.size} ${platform.platformId} data points verified out of ${
+          providerIds.length
+        }.`,
+        "../../assets/check-icon.svg",
+        platform.platformId as PLATFORM_ID
+      );
+    } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0 && selectedProviders.length === 0) {
+      doneToast(
+        "Success!",
+        `All ${platform.platformId} data points removed.`,
+        "../../assets/check-icon.svg",
+        platform.platformId as PLATFORM_ID
+      );
+    } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
+      doneToast(
+        "Success!",
+        `${initialMinusUpdated.size} ${platform.platformId} data ${
+          initialMinusUpdated.size > 1 ? "points" : "point"
+        } removed.`,
+        "../../assets/check-icon.svg",
+        platform.platformId as PLATFORM_ID
+      );
+    } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size > 0) {
+      doneToast(
+        "Success!",
+        `${initialMinusUpdated.size} ${platform.platformId} data ${
+          initialMinusUpdated.size > 1 ? "points" : "point"
+        } removed and ${updatedMinusInitial.size} verified.`,
+        "../../assets/check-icon.svg",
+        platform.platformId as PLATFORM_ID
+      );
+    } else {
+      doneToast(
+        "Verification Failed",
+        "Please make sure you fulfill the requirements for this stamp.",
+        "../../assets/verification-failed.svg",
+        platform.platformId as PLATFORM_ID
+      );
+    }
   };
 
   return (
