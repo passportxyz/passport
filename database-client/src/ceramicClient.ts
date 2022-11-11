@@ -9,7 +9,7 @@ import { DIDDataStore } from "@glazed/did-datastore";
 import { TileLoader } from "@glazed/tile-loader";
 import type { DID as CeramicDID } from "dids";
 import { StreamID } from "@ceramicnetwork/streamid";
-
+import axios from "axios";
 import { DataStorageBase } from "./types";
 
 // const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
@@ -52,6 +52,7 @@ export class CeramicDatabase implements DataStorageBase {
   model: DataModel<ModelTypes>;
   store: DIDDataStore<ModelTypes>;
   logger: Logger;
+  apiHost: string;
 
   constructor(did?: CeramicDID, ceramicHost?: string, aliases?: any, logger?: Logger) {
     if (logger) {
@@ -61,7 +62,8 @@ export class CeramicDatabase implements DataStorageBase {
     }
 
     // Create the Ceramic instance and inject the DID
-    const ceramic = new CeramicClient(ceramicHost ?? COMMUNITY_TESTNET_CERAMIC_CLIENT_URL);
+    this.apiHost = ceramicHost ?? COMMUNITY_TESTNET_CERAMIC_CLIENT_URL;
+    const ceramic = new CeramicClient(this.apiHost);
     ceramic.setDID(did);
 
     // Create the loader, model and store
@@ -106,23 +108,27 @@ export class CeramicDatabase implements DataStorageBase {
       });
 
       // `stamps` is stored as ceramic URLs - must load actual VC data from URL
-      const stampsToLoad =
-        passport?.stamps.map(async (_stamp, idx) => {
-          try {
-            const { provider, credential } = _stamp;
-            const loadedCred = await this.loader.load(credential);
-            return {
-              provider,
-              credential: loadedCred.content,
-              streamId: streamIDs[idx],
-            } as Stamp;
-          } catch (e) {
-            this.logger.error(
-              `Error when loading stamp with streamId ${streamIDs[idx]} for did  ${this.did}:` + e.toString()
-            );
-            throw e;
-          }
-        }) ?? [];
+      const stampsToLoad = passport?.stamps.map(async (_stamp, idx) => {
+        const streamUrl = `${this.apiHost}/api/v0/streams/${streamIDs[idx].substring(10)}`;
+        console.log("streamUrl", streamUrl);
+
+        try {
+          const { provider, credential } = _stamp;
+          const loadedCred = (await axios.get(streamUrl)) as { data: { state: { content: VerifiableCredential } } };
+          console.log("Credential: ", loadedCred.data.state.content);
+          return {
+            provider,
+            credential: loadedCred.data.state.content,
+            streamId: streamIDs[idx],
+          } as Stamp;
+        } catch (e) {
+          this.logger.error(
+            `Error when loading stamp with streamId ${streamIDs[idx]} for did  ${this.did}:` + e.toString()
+          );
+          console.log(e);
+          return null;
+        }
+      });
 
       // Wait for all stamp loading to be settled
       const stampLoadingStatus = await Promise.allSettled(stampsToLoad);
