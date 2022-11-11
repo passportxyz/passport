@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { AppContext, ProviderPayload } from "../types";
 import { Platform } from "../utils/platform";
 
@@ -7,6 +6,7 @@ export class GnosisSafePlatform extends Platform {
   path = "GnosisSafe";
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-    return {};
+    const result = await Promise.resolve({});
+    return result;
   }
 }

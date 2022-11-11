@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { PlatformOptions } from "../types";
 import { Platform } from "../utils/platform";
 export class GithubPlatform extends Platform {
@@ -14,7 +13,9 @@ export class GithubPlatform extends Platform {
   }
 
   async getOAuthUrl(state: string): Promise<string> {
-    const githubUrl = `https://github.com/login/oauth/authorize?client_id=${this.clientId}&redirect_uri=${this.redirectUri}&state=${state}`;
+    const githubUrl = await Promise.resolve(
+      `https://github.com/login/oauth/authorize?client_id=${this.clientId}&redirect_uri=${this.redirectUri}&state=${state}`
+    );
     return githubUrl;
   }
 }
