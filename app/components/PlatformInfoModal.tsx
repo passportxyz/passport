@@ -34,10 +34,7 @@ export type VerifyModalProps = {
 export const PlatformInfoModal = ({
   isOpen,
   onClose,
-  verifyData,
   isLoading,
-  title,
-  footer,
   platformId,
   userDid,
 }: VerifyModalProps): JSX.Element => {
@@ -194,7 +191,7 @@ export const PlatformInfoModal = ({
         ) : (
           <>
             <ModalHeader px={8} pb={1} pt={6} textAlign="center">
-              {"Verify Bright ID Stamp Data"}
+              {`Verify ${platformId} Stamp Data`}
             </ModalHeader>
             <ModalCloseButton mr={2} />
             <ModalBody p={0}>
