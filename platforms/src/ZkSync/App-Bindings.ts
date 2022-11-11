@@ -1,4 +1,4 @@
-import { AccessTokenResult, AppContext, ProviderPayload } from "../types";
+import { AppContext, ProviderPayload } from "../types";
 import { Platform } from "../utils/platform";
 export class ZkSyncPlatform extends Platform {
   path: string;
