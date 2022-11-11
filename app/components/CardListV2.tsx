@@ -23,6 +23,7 @@ import {
   Discord,
   Linkedin,
   GTC,
+  GtcStaking,
 } from "@gitcoin/passport-platforms";
 
 // --- Components
@@ -137,6 +138,11 @@ providers.set("Linkedin", {
 providers.set("GTC", {
   platform: new GTC.GTCPlatform(),
   platFormGroupSpec: GTC.GTCProviderConfig,
+});
+
+providers.set("GtcStaking", {
+  platform: new GtcStaking.GTCStakingPlatform(),
+  platFormGroupSpec: GtcStaking.GTCStakingProviderConfig,
 });
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
