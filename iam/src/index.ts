@@ -40,7 +40,9 @@ import { Providers } from "./utils/providers";
 
 // ---- Identity Providers
 import { SimpleProvider } from "./providers/simple";
-import { GoogleProvider } from "./providers/google";
+// import { GoogleProvider } from "./providers/google";
+
+import { Google } from "@gitcoin/passport-platforms/dist/commonjs/_iam";
 
 import {
   Twitter,
@@ -91,7 +93,7 @@ export const config: {
 export const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
-  new GoogleProvider(),
+  new Google.GoogleProvider(),
   new Twitter.TwitterAuthProvider(),
   new Ens.EnsProvider(),
   new Poh.PohProvider(),

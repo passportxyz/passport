@@ -4,6 +4,8 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
+import { Google } from "@gitcoin/passport-platforms/";
+
 // Providers
 import {
   Twitter,
@@ -137,6 +139,11 @@ providers.set("Linkedin", {
 providers.set("GTC", {
   platform: new GTC.GTCPlatform(),
   platFormGroupSpec: GTC.GTCProviderConfig,
+});
+
+providers.set("Google", {
+  platform: new Google.GooglePlatform(),
+  platFormGroupSpec: Google.GoogleProviderConfig,
 });
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
