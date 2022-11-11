@@ -59,17 +59,12 @@ import {
   ZkSync,
   Linkedin,
   GTC,
+  GtcStaking,
+  Discord,
 } from "@gitcoin/passport-platforms";
 
 import { BrightIdProvider } from "./providers/brightid";
-import { DiscordProvider } from "./providers/discord";
 
-import { SelfStakingBronzeProvider, SelfStakingSilverProvider, SelfStakingGoldProvider } from "./providers/selfStaking";
-import {
-  CommunityStakingBronzeProvider,
-  CommunityStakingSilverProvider,
-  CommunityStakingGoldProvider,
-} from "./providers/communityStaking";
 import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
 import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
 import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
@@ -107,18 +102,18 @@ export const providers = new Providers([
   new Github.ForkedGithubRepoProvider(),
   new Github.StarredGithubRepoProvider(),
   new Linkedin.LinkedinProvider(),
-  new DiscordProvider(),
+  new Discord.DiscordProvider(),
   new Twitter.TwitterTweetGT10Provider(),
   new Twitter.TwitterFollowerGT100Provider(),
   new Twitter.TwitterFollowerGT500Provider(),
   new Twitter.TwitterFollowerGTE1000Provider(),
   new Twitter.TwitterFollowerGT5000Provider(),
-  new SelfStakingBronzeProvider(),
-  new SelfStakingSilverProvider(),
-  new SelfStakingGoldProvider(),
-  new CommunityStakingBronzeProvider(),
-  new CommunityStakingSilverProvider(),
-  new CommunityStakingGoldProvider(),
+  new GtcStaking.SelfStakingBronzeProvider(),
+  new GtcStaking.SelfStakingSilverProvider(),
+  new GtcStaking.SelfStakingGoldProvider(),
+  new GtcStaking.CommunityStakingBronzeProvider(),
+  new GtcStaking.CommunityStakingSilverProvider(),
+  new GtcStaking.CommunityStakingGoldProvider(),
   new ClearTextSimpleProvider(),
   new ClearTextTwitterProvider(),
   new ClearTextGithubOrgProvider(),
