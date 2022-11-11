@@ -61,6 +61,7 @@ import {
   GTC,
   GtcStaking,
   Discord,
+  ClearText,
 } from "@gitcoin/passport-platforms";
 
 import { BrightIdProvider } from "./providers/brightid";
@@ -99,7 +100,8 @@ export const providers = new Providers([
   new Github.FiftyOrMoreGithubFollowers(),
   new Github.ForkedGithubRepoProvider(),
   new Github.StarredGithubRepoProvider(),
-  new Github.ClearTextGithubOrgProvider(),
+  new ClearText.ClearTextGithubOrgProvider(),
+  new ClearText.ClearTextTwitterProvider(),
   new Linkedin.LinkedinProvider(),
   new Discord.DiscordProvider(),
   new Twitter.TwitterTweetGT10Provider(),
