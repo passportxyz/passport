@@ -217,9 +217,9 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
     } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size === 0) {
       return {
         title: "Success!",
-        body: `${updatedMinusInitial.size + initialMinusUpdated.size} ${
-          platform.platformId
-        } data points verified out of ${providerIds.length}.`,
+        body: `${updatedMinusInitial.size + initialMinusUpdated.size} ${platform.platformId} data ${
+          updatedMinusInitial.size + initialMinusUpdated.size > 1 ? "points" : "point"
+        } verified out of ${providerIds.length}.`,
         icon: checkIcon,
         platformId: platform.platformId as PLATFORM_ID,
       };
