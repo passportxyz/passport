@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { AppContext, PlatformOptions, ProviderPayload } from "../types";
+import { PlatformOptions } from "../types";
 import { Platform } from "../utils/platform";
 export class GithubPlatform extends Platform {
   platformId = "Github";
