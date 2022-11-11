@@ -1,4 +1,3 @@
-export { ClearTextTwitterProvider } from "./Providers/clearTextTwitter";
 // Twitter Platform
 export { TwitterPlatform } from "./App-Bindings";
 export { default as TwitterAuthProvider } from "./Providers/TwitterAuthProvider";
