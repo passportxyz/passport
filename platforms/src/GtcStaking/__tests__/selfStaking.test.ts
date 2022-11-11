@@ -1,3 +1,6 @@
+// TODOD - remove once tsconfig are unified across packages
+/* eslint-disable @typescript-eslint/require-await */
+/* eslint-disable @typescript-eslint/unbound-method */
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
 import {
