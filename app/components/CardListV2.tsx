@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
-import { Google } from "@gitcoin/passport-platforms/";
+import { Google } from "@gitcoin/passport-platforms/dist/commonjs/_app";
 
 // Providers
 import {
