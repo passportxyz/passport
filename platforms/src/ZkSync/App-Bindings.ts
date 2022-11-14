@@ -1,15 +1,11 @@
-/* eslint-disable */
-import { AccessTokenResult, Platform, ProviderPayload, AppContext } from "../types";
-export class ZkSyncPlatform implements Platform {
+import { AppContext, ProviderPayload } from "../types";
+import { Platform } from "../utils/platform";
+export class ZkSyncPlatform extends Platform {
   path: string;
   platformId = "ZkSync";
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-    return {};
-  }
-
-  async getProviderProof(): Promise<AccessTokenResult> {
-    const result = await Promise.resolve({ authenticated: true, proofs: {} });
+    const result = await Promise.resolve({});
     return result;
   }
 }

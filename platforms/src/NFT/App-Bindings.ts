@@ -1,17 +1,12 @@
-/* eslint-disable */
-import { AppContext, Platform, PlatformOptions, ProviderPayload } from "../types";
+import { AppContext, ProviderPayload } from "../types";
+import { Platform } from "../utils/platform";
 
-export class NFTPlatform implements Platform {
+export class NFTPlatform extends Platform {
   platformId = "NFT";
   path = "NFT";
-  clientId: string = null;
-  redirectUri: string = null;
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-    return {};
-  }
-
-  getOAuthUrl(state: string): Promise<string> {
-    throw new Error("Method not implemented.");
+    const result = await Promise.resolve({});
+    return result;
   }
 }

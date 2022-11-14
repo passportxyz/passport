@@ -48,9 +48,14 @@ export type AccessTokenResult = {
 export type ProviderPayload = Record<string, unknown>;
 
 export type AppContext = {
-  state: any;
-  window: any;
-  screen: any;
+  state: string;
+  window: {
+    open: (url: string, target: string, features: string) => void;
+  };
+  screen: {
+    width: number;
+    height: number;
+  };
   waitForRedirect(timeout?: number): Promise<ProviderPayload>;
 };
 
