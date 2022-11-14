@@ -130,7 +130,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
       const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
         iamUrl,
         {
-          type: platform.platformId,
+          type: " ",
           types: selectedProviders,
           version: "0.0.0",
           address: address || "",
@@ -152,14 +152,22 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
               };
             }
           })
-          .filter((v: Stamp | undefined) => v) || [];
+          .filter((v: Stamp | undefined) => {
+            console.log("v -->", v);
+            console.log("provider ids -->", providerIds);
+
+            // remove any stamps that are about to be deleted
+            return v && providerIds.findIndex((providerId: PROVIDER_ID) => v?.provider === providerId);
+          }) || [];
+      console.log("vcs -->", vcs);
 
       // Update the selected stamps for removal
       await handleDeleteStamps(providerIds as PROVIDER_ID[]);
-      console.log("vcs**", vcs);
 
       // Add all the stamps to the passport at once
-      await handleAddStamps(vcs as Stamp[]);
+      if (vcs.length > 0) {
+        await handleAddStamps(vcs as Stamp[]);
+      }
       datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
       // grab all providers who are verified from the verify response
       const actualVerifiedProviders = providerIds.filter(
@@ -273,7 +281,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
           data-testid={`button-verify-${platform.platformId}`}
           className="sidebar-verify-btn"
         >
-          Verify
+          {verifiedProviders.length > 0 ? "Save" : "Verify"}
         </button>
       }
     />
