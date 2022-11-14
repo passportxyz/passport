@@ -124,7 +124,11 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
     setVerificationAttempted(true);
     try {
       const state = `${platform.path}-` + generateUID(10);
-      const providerPayload = (await platform.getProviderPayload({ state, window, screen, waitForRedirect })) as {};
+      const providerPayload = (await platform
+        .getProviderPayload({ state, window, screen, waitForRedirect })
+        .then((result) => {
+          console.log("result from getProviderPayload ", result);
+        })) as {};
 
       const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
         iamUrl,

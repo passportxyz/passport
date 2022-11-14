@@ -51,12 +51,30 @@ function MyApp({ Component, pageProps }: AppProps) {
     />
   );
 
+  const googleApiScript = (
+    // eslint-disable-next-line @next/next/no-sync-scripts
+    <script
+      src="https://accounts.google.com/gsi/client"
+      async
+      defer
+      id="google-api-script"
+      dangerouslySetInnerHTML={{
+        __html: `
+        initClient()
+        `,
+      }}
+    />
+  );
+
   return (
     <>
       <Head>
         <link rel="shortcut icon" href="/favicon.ico" />
+        <script src="https://apis.google.com/js/api.js"></script>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
         <title>Gitcoin Passport</title>
         {facebookSdkScript}
+        {/* {googleApiScript} */}
       </Head>
       <SelfIdProvider
         client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}
