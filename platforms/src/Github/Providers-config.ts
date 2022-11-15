@@ -6,6 +6,7 @@ export const GithubPlatformDetails: PlatformSpec = {
   name: "Github",
   description: "Connect your existing Github account to verify.",
   connectMessage: "Connect Account",
+  enablePlatformCardUpdate: true,
 };
 
 export const GithubProviderConfig: PlatformGroupSpec[] = [

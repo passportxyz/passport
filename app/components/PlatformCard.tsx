@@ -6,7 +6,7 @@ import { useDisclosure, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/
 
 // --- Types
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
-import { PlatformSpec } from "../config/platforms";
+import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // --- Context
@@ -77,6 +77,7 @@ export const PlatformCard = ({
             )}
           </div>
           {updatedPlatforms &&
+            platform?.enablePlatformCardUpdate &&
             updatedPlatforms[platform.name] !== true &&
             selectedProviders[platform.platform].length > 0 && (
               <div className="inline-flex h-6 items-center rounded-xl bg-yellow px-2 text-xs font-medium shadow-sm">
@@ -136,7 +137,9 @@ export const PlatformCard = ({
                     onClick={() => {
                       setCurrentPlatform(platform);
                       onOpen();
-                      pillLocalStorage(platform.name);
+                      if (platform.enablePlatformCardUpdate) {
+                        pillLocalStorage(platform.name);
+                      }
                       getUpdatedPlatforms();
                     }}
                     data-testid="manage-stamp"
@@ -178,7 +181,9 @@ export const PlatformCard = ({
               className="verify-btn"
               ref={btnRef.current}
               onClick={(e) => {
-                pillLocalStorage(platform.platform);
+                if (platform.enablePlatformCardUpdate) {
+                  pillLocalStorage(platform.platform);
+                }
                 setCurrentPlatform(platform);
                 onOpen();
               }}

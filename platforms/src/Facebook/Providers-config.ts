@@ -6,6 +6,7 @@ export const FacebookPlatformDetails: PlatformSpec = {
   name: "Facebook",
   description: "Connect your existing account to verify with Facebook.",
   connectMessage: "Connect Account",
+  enablePlatformCardUpdate: true,
 };
 
 export const FacebookProviderConfig: PlatformGroupSpec[] = [

@@ -18,4 +18,4 @@ export * as Linkedin from "./Linkedin";
 export * as GTC from "./GTC";
 export * as GtcStaking from "./GtcStaking";
 
-export { Platform, AppContext, ProviderPayload } from "./types";
+export { Platform, AppContext, ProviderPayload, PlatformSpec } from "./types";
