@@ -133,7 +133,7 @@ describe("Attempt BrightId", () => {
       const result = await triggerBrightidSponsorship(did);
 
       expect(sponsor).toBeCalledTimes(1);
-      expect(sponsor).toBeCalledWith(process.env.BRIGHTID_PRIVATE_KEY, "Gitcoin", did);
+      expect(sponsor).toBeCalledWith(process.env.BRIGHTID_PRIVATE_KEY || "", "Gitcoin", did);
       expect(result).toMatchObject({
         valid: true,
         result: validSponsorshipResponse,
@@ -145,7 +145,7 @@ describe("Attempt BrightId", () => {
       const result = await triggerBrightidSponsorship(did);
 
       expect(sponsor).toBeCalledTimes(1);
-      expect(sponsor).toBeCalledWith(process.env.BRIGHTID_PRIVATE_KEY, "Gitcoin", did);
+      expect(sponsor).toBeCalledWith(process.env.BRIGHTID_PRIVATE_KEY || "", "Gitcoin", did);
       expect(result).toMatchObject({
         valid: false,
         result: invalidSponsorshipResponse,
@@ -157,7 +157,7 @@ describe("Attempt BrightId", () => {
       const result = await triggerBrightidSponsorship(did);
 
       expect(sponsor).toBeCalledTimes(1);
-      expect(sponsor).toBeCalledWith(process.env.BRIGHTID_PRIVATE_KEY, "Gitcoin", did);
+      expect(sponsor).toBeCalledWith(process.env.BRIGHTID_PRIVATE_KEY || "", "Gitcoin", did);
       expect(result).toMatchObject({
         valid: false,
         error: "Thrown Error",
