@@ -1,4 +1,3 @@
-/* eslint-disable */
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
 import {
@@ -11,6 +10,7 @@ import {
 
 // ----- Libs
 import axios from "axios";
+import { resolve } from "path";
 
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -18,26 +18,28 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
 const MOCK_ADDRESS_LOWER = MOCK_ADDRESS.toLowerCase();
 
-const generateSubgraphResponse = (address: string, total: string): DataResult => {
-  return {
-    data: {
+const generateSubgraphResponse = (address: string, total: string): Promise<DataResult> => {
+  return new Promise((resolve) => {
+    resolve({
       data: {
-        address: address,
-        users: [
-          {
-            xstakeAggregates: [
-              {
-                total: total,
-                round: {
-                  id: "1",
+        data: {
+          address: address,
+          users: [
+            {
+              xstakeAggregates: [
+                {
+                  total: total,
+                  round: {
+                    id: "1",
+                  },
                 },
-              },
-            ],
-          },
-        ],
+              ],
+            },
+          ],
+        },
       },
-    },
-  };
+    });
+  });
 };
 
 const invalidCommunityStakingResponse = {
@@ -71,7 +73,7 @@ interface RequestData {
 describe("Attempt verification", function () {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedAxios.post.mockImplementation(async (url, data) => {
+    mockedAxios.post.mockImplementation((url, data) => {
       const query: string = (data as RequestData).query;
       if (url === stakingSubgraph && query.includes(MOCK_ADDRESS_LOWER)) {
         return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "220000000000000000000");
@@ -86,6 +88,7 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     // Check the request to verify the subgraph query
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
       query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
     });
@@ -105,6 +108,7 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     // Check the request to verify the subgraph query
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
       query: getSubgraphQuery("not_address"),
     });
@@ -114,10 +118,12 @@ describe("Attempt verification", function () {
     });
   });
   it("handles invalid subgraph response", async () => {
-    mockedAxios.post.mockImplementationOnce(async (url, data) => {
+    mockedAxios.post.mockImplementationOnce((url, data) => {
       const query: string = (data as RequestData).query;
       if (url === stakingSubgraph && query.includes(MOCK_ADDRESS_LOWER)) {
-        return invalidCommunityStakingResponse;
+        return new Promise((resolve) => {
+          resolve(invalidCommunityStakingResponse);
+        });
       }
     });
     const communityStakingProvider = new CommunityStakingBronzeProvider();
@@ -126,6 +132,7 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     // Check the request to verify the subgraph query
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
       query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
     });
@@ -135,7 +142,7 @@ describe("Attempt verification", function () {
     });
   });
   it("handles invalid verification attempt where an exception is thrown", async () => {
-    mockedAxios.post.mockImplementationOnce(async (url, data) => {
+    mockedAxios.post.mockImplementationOnce((url, data) => {
       throw Error("Community Staking Bronze Provider verifyStake Error");
     });
     const communityStakingProvider = new CommunityStakingBronzeProvider();
@@ -144,6 +151,7 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     // Check the request to verify the subgraph query
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
       query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
     });
