@@ -137,7 +137,13 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
     setVerificationAttempted(true);
     try {
       const state = `${platform.path}-` + generateUID(10);
-      const providerPayload = (await platform.getProviderPayload({ state, window, screen, waitForRedirect })) as {};
+      const providerPayload = (await platform.getProviderPayload({
+        state,
+        window,
+        screen,
+        userDid,
+        waitForRedirect,
+      })) as {};
 
       // This array will contain all providers that new validated VCs
       let vcs: Stamp[] = [];

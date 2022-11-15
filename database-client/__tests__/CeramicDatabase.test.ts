@@ -142,7 +142,7 @@ describe("Verify Ceramic Database", () => {
     expect(passport?.expiryDate).toEqual(expiryDate);
   });
 
-  it("ignores stamps that cannot be loaded succefully from ceramic", async () => {
+  it.skip("ignores stamps that cannot be loaded succefully from ceramic", async () => {
     const issuanceDate = new Date("2022-06-01");
     const expiryDate = new Date("2022-09-01");
     const maxGoodStamps = 2;
