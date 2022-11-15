@@ -127,6 +127,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
       const state = `${platform.path}-` + generateUID(10);
       const providerPayload = (await platform.getProviderPayload({ state, window, screen, waitForRedirect })) as {};
 
+      // This array will contain all providers that new validated VCs
       let vcs: Stamp[] = [];
 
       if (selectedProviders.length > 0) {
@@ -158,12 +159,15 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
           }
         }
       }
-      // Update the selected stamps with providerIds to be deleted
+
+      console.table(providerIds);
+      // Delete all stamps ...
       await handleDeleteStamps(providerIds as PROVIDER_ID[]);
 
-      // Add all the stamps to the passport at once
+      console.table(vcs);
+      // .. and now add all newly validate stamps 
       if (vcs.length > 0) {
-        await handleAddStamps(vcs as Stamp[]);
+        await handleAddStamps(vcs);
       }
       datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
       // grab all providers who are verified from the verify response
