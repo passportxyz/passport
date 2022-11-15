@@ -127,41 +127,38 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
       const state = `${platform.path}-` + generateUID(10);
       const providerPayload = (await platform.getProviderPayload({ state, window, screen, waitForRedirect })) as {};
 
-      const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
-        iamUrl,
-        {
-          type: " ",
-          types: selectedProviders,
-          version: "0.0.0",
-          address: address || "",
-          proofs: providerPayload,
-          rpcUrl,
-        },
-        signer as { signMessage: (message: string) => Promise<string> }
-      );
-      // because we provided a types array in the params we expect to receive a
-      // credentials array in the response...
-      const vcs =
-        verified.credentials
-          ?.map((cred: CredentialResponseBody): Stamp | undefined => {
-            if (!cred.error) {
+      let vcs: Stamp[] = [];
+
+      if (selectedProviders.length > 0) {
+        const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
+          iamUrl,
+          {
+            type: "",
+            types: selectedProviders,
+            version: "0.0.0",
+            address: address || "",
+            proofs: providerPayload,
+            rpcUrl,
+          },
+          signer as { signMessage: (message: string) => Promise<string> }
+        );
+
+        // because we provided a types array in the params we expect to receive a
+        // credentials array in the response...
+        if (verified.credentials) {
+          for (let i = 0; i < verified.credentials.length; i++) {
+            let cred = verified.credentials[i];
+            if (!cred.error && providerIds.find((providerId: PROVIDER_ID) => cred?.record?.type === providerId)) {
               // add each of the requested/received stamps to the passport...
-              return {
+              vcs.push({
                 provider: cred.record?.type as PROVIDER_ID,
                 credential: cred.credential as VerifiableCredential,
-              };
+              });
             }
-          })
-          .filter((v: Stamp | undefined) => {
-            console.log("v -->", v);
-            console.log("provider ids -->", providerIds);
-
-            // remove any stamps that are about to be deleted
-            return v && providerIds.findIndex((providerId: PROVIDER_ID) => v?.provider === providerId);
-          }) || [];
-      console.log("vcs -->", vcs);
-
-      // Update the selected stamps for removal
+          }
+        }
+      }
+      // Update the selected stamps with providerIds to be deleted
       await handleDeleteStamps(providerIds as PROVIDER_ID[]);
 
       // Add all the stamps to the passport at once

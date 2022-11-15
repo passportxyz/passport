@@ -28,5 +28,4 @@ export const GTCStakingProviderConfig: PlatformGroupSpec[] = [
   },
 ];
 
-
 // TODO: allow adding additional content to the side panel: Stake your GTC on the new Identity Staking site.

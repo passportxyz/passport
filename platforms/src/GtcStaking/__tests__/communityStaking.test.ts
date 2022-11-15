@@ -1,3 +1,4 @@
+/* eslint-disable */
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
 import {
