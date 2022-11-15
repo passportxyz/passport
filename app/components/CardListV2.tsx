@@ -157,17 +157,17 @@ providers.set("Google", {
 
 providers.set("POAP", {
   platform: new POAP.POAPPlatform(),
-  platformgroupspec: POAP.POAPProviderConfig,
+  platFormGroupSpec: POAP.POAPProviderConfig,
 });
 
 providers.set("ETH", {
   platform: new ETH.ETHPlatform(),
-  platformgroupspec: ETH.ETHProviderConfig,
+  platFormGroupSpec: ETH.ETHProviderConfig,
 });
 
 providers.set("Brightid", {
   platform: new Brightid.BrightidPlatform(),
-  platformgroupspec: Brightid.BrightidProviderConfig,
+  platFormGroupSpec: Brightid.BrightidProviderConfig,
 });
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {

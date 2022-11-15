@@ -294,7 +294,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
           >
             {verifiedProviders.length > 0 ? "Save" : "Verify"}
           </button>
-          {platFormGroupSpec.showInfoModal && (
+          {platform.showInfoModal && (
             <PlatformInfoModal
               isOpen={isOpen}
               onClose={onClose}
