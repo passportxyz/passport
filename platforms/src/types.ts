@@ -71,20 +71,6 @@ export interface Platform {
   getProviderPayload(appContext: AppContext): Promise<ProviderPayload>;
 }
 
-// Info Modal Interfaces
-export interface toastType {
-  title: string;
-  description: string;
-  status: string;
-}
-
-export interface linkType {
-  linkTitle?: string;
-  link: string;
-  img?: string;
-  className?: string;
-}
-
 export type PlatformOptions = Record<string, unknown>;
 
 export type PLATFORM_ID =
