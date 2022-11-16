@@ -24,6 +24,7 @@ import {
   Linkedin,
   GTC,
   GtcStaking,
+  Google,
 } from "@gitcoin/passport-platforms";
 
 // --- Components
@@ -82,7 +83,7 @@ providers.set("Github", {
 providers.set("Gitcoin", {
   platform: new Gitcoin.GitcoinPlatform({
     clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CALLBACK,
   }),
   platFormGroupSpec: Gitcoin.GitcoinProviderConfig,
 });
@@ -143,6 +144,14 @@ providers.set("GTC", {
 providers.set("GtcStaking", {
   platform: new GtcStaking.GTCStakingPlatform(),
   platFormGroupSpec: GtcStaking.GTCStakingProviderConfig,
+});
+
+providers.set("Google", {
+  platform: new Google.GooglePlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
+  }),
+  platFormGroupSpec: Google.GoogleProviderConfig,
 });
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {

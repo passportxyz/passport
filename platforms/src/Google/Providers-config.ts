@@ -1,4 +1,4 @@
-import { PlatformSpec, PlatformGroupSpec } from "../../types";
+import { PlatformSpec, PlatformGroupSpec } from "../types";
 
 export const GooglePlatformDetails: PlatformSpec = {
   icon: "./assets/googleStampIcon.svg",

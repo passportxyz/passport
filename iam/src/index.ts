@@ -61,6 +61,7 @@ import {
   GTC,
   GtcStaking,
   Discord,
+  Google,
 } from "@gitcoin/passport-platforms";
 
 import { BrightIdProvider } from "./providers/brightid";
@@ -86,7 +87,7 @@ export const config: {
 export const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
-  new GoogleProvider(),
+  new Google.GoogleProvider(),
   new Twitter.TwitterAuthProvider(),
   new Ens.EnsProvider(),
   new Poh.PohProvider(),
