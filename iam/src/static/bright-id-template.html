@@ -8759,7 +8759,8 @@
         <div class="mb-10 w-full justify-center object-center p-4">
           <button
             data-testid="button-sponsor-brightid"
-            class="bg-blue-darkblue float-right mx-auto rounded-md py-2 px-2 text-white"
+            onclick="initiateCallBack()"
+            class="float-right mx-auto rounded-md bg-purple-900 py-2 px-2 text-white"
           >
             <span class="font-miriam-libre">Connect Bright ID</span>
           </button>
@@ -8767,4 +8768,13 @@
       </div>
     </div>
   </div>
+  <script>
+    function initiateCallBack() {
+      const queryString = new URLSearchParams(window?.location?.search);
+      const callback = queryString.get("callback");
+      window.location.replace(
+        callback + "?error=false&code=brightId&state=brightid-"
+      );
+    }
+  </script>
 </div>

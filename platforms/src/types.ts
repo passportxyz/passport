@@ -58,6 +58,7 @@ export type AppContext = {
     height: number;
   };
   userDid?: string;
+  callbackUrl?: string;
   waitForRedirect(timeout?: number): Promise<ProviderPayload>;
 };
 

@@ -142,6 +142,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
         window,
         screen,
         userDid,
+        callbackUrl: window.location.origin,
         waitForRedirect,
       })) as {};
 
