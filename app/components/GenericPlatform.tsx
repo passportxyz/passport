@@ -17,18 +17,7 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commo
 // --- Style Components
 import { SideBarContent } from "./SideBarContent";
 import { DoneToastContent } from "./DoneToastContent";
-import { PlatformInfoModal } from "./PlatformInfoModal";
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  useDisclosure,
-  useToast,
-  Spinner,
-} from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
@@ -74,7 +63,6 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
   const [verificationAttempted, setVerificationAttempted] = useState(false);
 
   // --- Chakra functions
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
   // find all providerIds
@@ -172,7 +160,6 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
       datadogLogs.logger.error("Error sponsoring user", { platformId: platform.platformId });
       datadogRum.addError("Failed to sponsor user on BrightId", { platformId: platform.platformId });
     }
-    onClose();
   };
 
   // fetch VCs from IAM server
@@ -353,15 +340,6 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
           >
             {verifiedProviders.length > 0 ? "Save" : "Verify"}
           </button>
-          {platform.showInfoModal && (
-            <PlatformInfoModal
-              isOpen={isOpen}
-              onClose={onClose}
-              isLoading={isLoading}
-              platformId={platform.platformId}
-              userDid={userDid || ""}
-            />
-          )}
         </>
       }
     />
