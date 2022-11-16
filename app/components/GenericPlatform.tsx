@@ -43,6 +43,7 @@ import { difference } from "../utils/helpers";
 
 import { debounce } from "ts-debounce";
 import { BroadcastChannel } from "broadcast-channel";
+import { datadogRum } from "@datadog/browser-rum";
 
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
@@ -130,6 +131,50 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
     return waitForRedirect;
   };
 
+  const handleSponsorship = async (result: string): Promise<void> => {
+    if (result === "success") {
+      toast({
+        duration: 9000,
+        isClosable: true,
+        render: (result) => (
+          <div className="rounded-md bg-blue-darkblue p-2 text-white">
+            <div className="flex p-4">
+              <button className="inline-flex flex-shrink-0 cursor-not-allowed">
+                <img
+                  alt="information circle"
+                  className="sticky top-0 mb-20 p-2"
+                  src="./assets/information-circle-icon.svg"
+                />
+              </button>
+              <div className="flex-grow pl-6">
+                <h2 className="title-font mb-2 text-lg font-bold">Sponsored through Gitcoin for Bright ID</h2>
+                <p className="text-base leading-relaxed">{`For verification status updates, check BrightID's App.`}</p>
+                <p className="text-base leading-relaxed">
+                  Once you are verified by BrightID - return here to complete this Stamp.
+                </p>
+              </div>
+              <button className="inline-flex flex-shrink-0 rounded-lg" onClick={result.onClose}>
+                <img alt="close button" className="rounded-lg p-2 hover:bg-gray-500" src="./assets/x-icon.svg" />
+              </button>
+            </div>
+          </div>
+        ),
+      });
+      datadogLogs.logger.info("Successfully sponsored user on BrightId", { platformId: platform.platformId });
+    } else {
+      toast({
+        title: "Failure",
+        description: "Failed to trigger BrightID Sponsorship",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+      datadogLogs.logger.error("Error sponsoring user", { platformId: platform.platformId });
+      datadogRum.addError("Failed to sponsor user on BrightId", { platformId: platform.platformId });
+    }
+    onClose();
+  };
+
   // fetch VCs from IAM server
   const handleFetchCredential = async (): Promise<void> => {
     datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
@@ -144,7 +189,14 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
         userDid,
         callbackUrl: window.location.origin,
         waitForRedirect,
-      })) as {};
+      })) as {
+        [k: string]: string;
+      };
+
+      if (providerPayload.sessionKey === "brightid") {
+        handleSponsorship(providerPayload.code);
+        return;
+      }
 
       // This array will contain all providers that new validated VCs
       let vcs: Stamp[] = [];

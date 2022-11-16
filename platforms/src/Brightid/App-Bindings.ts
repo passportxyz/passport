@@ -48,11 +48,18 @@ export class BrightidPlatform implements Platform {
       `toolbar=no, location=no, directories=no, status=no, menubar=no, resizable=no, copyhistory=no, width=${width}, height=${height}, top=${top}, left=${left}`
     );
 
-    return appContext.waitForRedirect().then((data) => {
+    return appContext.waitForRedirect().then(async (response) => {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(/\/*?$/, "")}/brightid/sponsor`,
+        {
+          contextIdData: appContext.userDid,
+        }
+      );
+      const { data } = res as { data: { response: { valid: boolean } } };
+
       return {
-        code: data.code,
-        sessionKey: data.state,
-        signature: data.signature,
+        code: data?.response?.valid ? "success" : "error",
+        sessionKey: response.state,
       };
     });
   }
