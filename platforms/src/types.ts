@@ -65,7 +65,6 @@ export type AppContext = {
 export interface Platform {
   platformId: string;
   path?: string;
-  infoModalTemplate?: PlatformInfoModalTemplate;
   // TODO: shall we drop the getOAuthUrl and getProviderProof, given that we have getProviderPayload
   getOAuthUrl?(state: string): Promise<string>;
   getProviderProof?(): Promise<AccessTokenResult>;
@@ -84,21 +83,6 @@ export interface linkType {
   link: string;
   img?: string;
   className?: string;
-}
-
-export interface PlatformInfoModalSections {
-  title?: string;
-  summary?: string;
-  link?: linkType[];
-}
-
-export interface PlatformInfoModalTemplate {
-  title: string;
-  summary: string;
-  summaryLink: linkType;
-  sections: PlatformInfoModalSections[];
-  successToast?: toastType;
-  failureToast?: toastType;
 }
 
 export type PlatformOptions = Record<string, unknown>;
