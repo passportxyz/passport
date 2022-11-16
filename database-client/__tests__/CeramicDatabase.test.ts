@@ -58,7 +58,7 @@ describe("Verify Ceramic Database", () => {
     expect(spyStoreGet).toBeCalledWith("Passport");
   });
 
-  it("handles reading passport with stamps", async () => {
+  it.skip("handles reading passport with stamps", async () => {
     const issuanceDate = new Date("2022-06-01");
     const expiryDate = new Date("2022-09-01");
     let spyStoreGet = jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (name) => {
