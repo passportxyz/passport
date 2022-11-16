@@ -134,7 +134,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
         const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
           iamUrl,
           {
-            type: "",
+            type: platform.platformId,
             types: selectedProviders,
             version: "0.0.0",
             address: address || "",
@@ -159,13 +159,10 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
           }
         }
       }
-
-      console.table(providerIds);
       // Delete all stamps ...
       await handleDeleteStamps(providerIds as PROVIDER_ID[]);
 
-      console.table(vcs);
-      // .. and now add all newly validate stamps 
+      // .. and now add all newly validate stamps
       if (vcs.length > 0) {
         await handleAddStamps(vcs);
       }
