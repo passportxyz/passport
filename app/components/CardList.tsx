@@ -4,37 +4,38 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
+// Providers
+import {
+  Twitter,
+  Ens,
+  Lens,
+  Github,
+  Gitcoin,
+  Facebook,
+  Poh,
+  GitPOAP,
+  NFT,
+  GnosisSafe,
+  Snapshot,
+  POAP,
+  ETH,
+  ZkSync,
+  Discord,
+  Linkedin,
+  GTC,
+  GtcStaking,
+} from "@gitcoin/passport-platforms";
+
 // --- Components
 import { LoadingCard } from "./LoadingCard";
+import { GenericPlatform, PlatformProps } from "./GenericPlatform";
 
 // --- Identity Providers
-import {
-  GooglePlatform,
-  EnsPlatform,
-  PohPlatform,
-  TwitterPlatform,
-  PoapPlatform,
-  FacebookPlatform,
-  BrightidPlatform,
-  GithubPlatform,
-  LinkedinPlatform,
-  GitcoinPlatform,
-  DiscordPlatform,
-  GitPOAPPlatform,
-  SnapshotPlatform,
-  EthPlatform,
-  GtcPlatform,
-  GtcStakingPlatform,
-  NftPlatform,
-  ZkSyncPlatform,
-  LensPlatform,
-  GnosisSafePlatform,
-} from "./PlatformCards";
 import { SideBarContent } from "./SideBarContent";
 
 // --- Chakra UI Elements
 import { Drawer, DrawerOverlay, useDisclosure } from "@chakra-ui/react";
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { CeramicContext } from "../context/ceramicContext";
 import { PlatformCard } from "./PlatformCard";
 
@@ -43,6 +44,106 @@ export type CardListProps = {
 };
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
+
+export const providers = new Map<PLATFORM_ID, PlatformProps>();
+providers.set("Twitter", {
+  platform: new Twitter.TwitterPlatform(),
+  platFormGroupSpec: Twitter.TwitterProviderConfig,
+});
+
+providers.set("GitPOAP", {
+  platform: new GitPOAP.GitPOAPPlatform(),
+  platFormGroupSpec: GitPOAP.GitPOAPProviderConfig,
+});
+
+providers.set("Ens", {
+  platform: new Ens.EnsPlatform(),
+  platFormGroupSpec: Ens.EnsProviderConfig,
+});
+
+providers.set("NFT", {
+  platform: new NFT.NFTPlatform(),
+  platFormGroupSpec: NFT.NFTProviderConfig,
+});
+
+providers.set("Facebook", {
+  platFormGroupSpec: Facebook.FacebookProviderConfig,
+  platform: new Facebook.FacebookPlatform(),
+});
+
+providers.set("Github", {
+  platform: new Github.GithubPlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+  }),
+  platFormGroupSpec: Github.GithubProviderConfig,
+});
+
+providers.set("Gitcoin", {
+  platform: new Gitcoin.GitcoinPlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+  }),
+  platFormGroupSpec: Gitcoin.GitcoinProviderConfig,
+});
+
+providers.set("Snapshot", {
+  platform: new Snapshot.SnapshotPlatform(),
+  platFormGroupSpec: Snapshot.SnapshotProviderConfig,
+});
+
+providers.set("Poh", {
+  platform: new Poh.PohPlatform(),
+  platFormGroupSpec: Poh.PohProviderConfig,
+});
+
+providers.set("ZkSync", {
+  platform: new ZkSync.ZkSyncPlatform(),
+  platFormGroupSpec: ZkSync.ZkSyncProviderConfig,
+});
+
+providers.set("Lens", {
+  platform: new Lens.LensPlatform(),
+  platFormGroupSpec: Lens.LensProviderConfig,
+});
+
+providers.set("GnosisSafe", {
+  platform: new GnosisSafe.GnosisSafePlatform(),
+  platFormGroupSpec: GnosisSafe.GnosisSafeProviderConfig,
+});
+
+providers.set("ETH", {
+  platform: new ETH.ETHPlatform(),
+  platFormGroupSpec: ETH.ETHProviderConfig,
+});
+
+providers.set("POAP", {
+  platform: new POAP.POAPPlatform(),
+  platFormGroupSpec: POAP.POAPProviderConfig,
+});
+
+providers.set("Discord", {
+  platform: new Discord.DiscordPlatform(),
+  platFormGroupSpec: Discord.DiscordProviderConfig,
+});
+
+providers.set("Linkedin", {
+  platform: new Linkedin.LinkedinPlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
+  }),
+  platFormGroupSpec: Linkedin.LinkedinProviderConfig,
+});
+
+providers.set("GTC", {
+  platform: new GTC.GTCPlatform(),
+  platFormGroupSpec: GTC.GTCProviderConfig,
+});
+
+providers.set("GtcStaking", {
+  platform: new GtcStaking.GTCStakingPlatform(),
+  platFormGroupSpec: GtcStaking.GTCStakingProviderConfig,
+});
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const { allProvidersState } = useContext(CeramicContext);
@@ -94,63 +195,27 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
     );
     getUpdatedPlatforms();
   }, [allProvidersState]);
-
   // Add the platforms to this switch so the sidebar content can populate dynamically
   const renderCurrentPlatformSelection = () => {
-    switch (currentPlatform?.platform) {
-      case "Twitter":
-        return <TwitterPlatform />;
-      case "Github":
-        return <GithubPlatform />;
-      case "Gitcoin":
-        return <GitcoinPlatform />;
-      case "Facebook":
-        return <FacebookPlatform />;
-      case "Snapshot":
-        return <SnapshotPlatform />;
-      case "Google":
-        return <GooglePlatform />;
-      case "Linkedin":
-        return <LinkedinPlatform />;
-      case "ETH":
-        return <EthPlatform />;
-      case "GitPOAP":
-        return <GitPOAPPlatform />;
-      case "Discord":
-        return <DiscordPlatform />;
-      case "POAP":
-        return <PoapPlatform />;
-      case "Ens":
-        return <EnsPlatform />;
-      case "Brightid":
-        return <BrightidPlatform />;
-      case "Poh":
-        return <PohPlatform />;
-      case "GTC":
-        return <GtcPlatform />;
-      case "GtcStaking":
-        return <GtcStakingPlatform />;
-      case "NFT":
-        return <NftPlatform />;
-      case "ZkSync":
-        return <ZkSyncPlatform />;
-      case "Lens":
-        return <LensPlatform />;
-      case "GnosisSafe":
-        return <GnosisSafePlatform />;
-      default:
+    if (currentPlatform) {
+      const platformProps = providers.get(currentPlatform.platform);
+      if (platformProps) {
         return (
-          <SideBarContent
-            verifiedProviders={undefined}
-            selectedProviders={undefined}
-            setSelectedProviders={undefined}
-            currentPlatform={undefined}
-            currentProviders={undefined}
-            isLoading={undefined}
-            verifyButton={undefined}
-          />
+          <GenericPlatform platform={platformProps.platform} platFormGroupSpec={platformProps.platFormGroupSpec} />
         );
+      }
     }
+    return (
+      <SideBarContent
+        verifiedProviders={undefined}
+        selectedProviders={undefined}
+        setSelectedProviders={undefined}
+        currentPlatform={undefined}
+        currentProviders={undefined}
+        isLoading={undefined}
+        verifyButton={undefined}
+      />
+    );
   };
 
   useEffect(() => {
