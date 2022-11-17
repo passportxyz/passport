@@ -9,6 +9,8 @@ import testnetAliases from "./integration-test-model-aliases.json";
 import { TileDocument } from "@ceramicnetwork/stream-tile";
 import { TileDoc } from "@glazed/did-datastore/dist/proxy";
 
+import axios from "axios";
+
 let testDID: DID;
 let ceramicDatabase: CeramicDatabase;
 
@@ -87,12 +89,21 @@ describe("Verify Ceramic Database", () => {
           id: "passport-id",
         } as unknown as TileDoc;
       });
-    let spyLoaderLoad = jest.spyOn(ceramicDatabase.loader, "load").mockImplementation(async (streamId) => {
-      // return new TileDocument(new SnapshotState(), );
-      return {
-        content: "Stamp Content for " + streamId,
-      } as any as TileDocument;
+    const spyLoadStreamReq = jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
+      return new Promise((resolve) => {
+        const urlSegments = url.split("/");
+        const streamId = urlSegments[urlSegments.length - 1];
+        resolve({
+          data: {
+            state: {
+              content: "Stamp Content for ceramic://" + streamId,
+            },
+          },
+          status: 200,
+        });
+      });
     });
+
     let spyPinAdd = jest.spyOn(ceramicDatabase.ceramicClient.pin, "add").mockImplementation(async (streamId) => {
       // Nothing to do here
       return;
@@ -103,7 +114,7 @@ describe("Verify Ceramic Database", () => {
     // We do not expect to have any passport, hence `false` should be returned
     expect(spyStoreGet).toBeCalledTimes(1);
     expect(spyStoreGet).toBeCalledWith("Passport");
-    expect(spyLoaderLoad).toBeCalledTimes(3);
+    expect(spyLoadStreamReq).toBeCalledTimes(3);
     expect(spyStoreGetRecordDocument).toBeCalledTimes(1);
 
     // Ensure the document is pinned
@@ -164,17 +175,25 @@ describe("Verify Ceramic Database", () => {
           id: "passport-id",
         } as unknown as TileDoc;
       });
-    let spyLoaderLoad = jest.spyOn(ceramicDatabase.loader, "load").mockImplementation(async (streamId) => {
+    const spyLoadStreamReq = jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
       return new Promise((resolve, reject) => {
+        const urlSegments = url.split("/");
+        const streamId = urlSegments[urlSegments.length - 1];
         if (numGoodStamps < maxGoodStamps) {
           numGoodStamps += 1;
           resolve({
-            content: "Stamp Content for " + streamId,
-          } as any as TileDocument);
+            data: {
+              state: {
+                content: "Stamp Content for ceramic://" + streamId,
+              },
+            },
+            status: 200,
+          });
         }
         reject("Error loading stamp!");
       });
     });
+
     let spyPinAdd = jest.spyOn(ceramicDatabase.ceramicClient.pin, "add").mockImplementation(async (streamId) => {
       // Nothing to do here
       return;
@@ -185,7 +204,7 @@ describe("Verify Ceramic Database", () => {
     // We do not expect to have any passport, hence `false` should be returned
     expect(spyStoreGet).toBeCalledTimes(1);
     expect(spyStoreGet).toBeCalledWith("Passport");
-    expect(spyLoaderLoad).toBeCalledTimes(3);
+    expect(spyLoadStreamReq).toBeCalledTimes(3);
     expect(spyStoreGetRecordDocument).toBeCalledTimes(1);
 
     // Ensure the document is pinned

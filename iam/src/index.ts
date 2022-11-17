@@ -40,7 +40,6 @@ import { Providers } from "./utils/providers";
 
 // ---- Identity Providers
 import { SimpleProvider } from "./providers/simple";
-import { GoogleProvider } from "./providers/google";
 
 import {
   Twitter,

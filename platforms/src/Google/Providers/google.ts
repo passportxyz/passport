@@ -8,7 +8,7 @@ import type { Provider, ProviderOptions } from "../../types";
 import axios from "axios";
 
 // Checking a valid tokenId for a result from Google will result in the following type
-type GoogleResponse = {
+export type GoogleResponse = {
   email?: string;
   emailVerified?: boolean;
 };
@@ -76,26 +76,17 @@ export const requestAccessToken = async (code: string): Promise<string> => {
 };
 
 // Perform verification on shared google access token
-async function verifyGoogle(code: string): Promise<GoogleResponse> {
+export const verifyGoogle = async (code: string): Promise<GoogleResponse> => {
   // retrieve user's auth bearer token to authenticate client
-  console.log("geri get token ...");
   const accessToken = await requestAccessToken(code);
-
-  console.log("geri accessToken", accessToken);
 
   // Now that we have an access token fetch the user details
   const userRequest = await axios.get("https://www.googleapis.com/oauth2/v2/userinfo", {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
-  if (userRequest.status != 200) {
-    throw `Get user request returned status code ${userRequest.status} instead of the expected 200`;
-  }
-
-  console.log("userRequest.data", userRequest.data);
-
   return {
     email: userRequest.data.email,
     emailVerified: userRequest.data.verified_email,
   };
-}
+};
