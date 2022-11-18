@@ -149,7 +149,7 @@ providers.set("GtcStaking", {
 providers.set("Google", {
   platform: new Google.GooglePlatform({
     clientId: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CALLBACK,
   }),
   platFormGroupSpec: Google.GoogleProviderConfig,
 });
