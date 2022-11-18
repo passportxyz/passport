@@ -124,8 +124,7 @@ export class CeramicDatabase implements DataStorageBase {
           this.logger.error(
             `Error when loading stamp with streamId ${streamIDs[idx]} for did  ${this.did}:` + e.toString()
           );
-          console.log(e);
-          return null;
+          throw e;
         }
       });
 
