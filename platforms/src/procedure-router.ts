@@ -2,7 +2,8 @@
 import { Request, Response, Router } from "express";
 
 import * as twitterOAuth from "./Twitter/procedures/twitterOauth";
-import { triggerBrightidSponsorship, verifyBrightidContextId } from "./Brightid/procedures/brightidProcedures";
+import { triggerBrightidSponsorship, verifyBrightidContextId } from "./Brightid/procedures/brightid";
+import path from "path";
 
 export const router = Router();
 
@@ -51,4 +52,8 @@ router.post("/brightid/verifyContextId", (req: Request, res: Response): void => 
   } else {
     res.status(400);
   }
+});
+
+router.get("/brightid/information", (req: Request, res: Response): void => {
+  res.sendFile(path.resolve(process.cwd(), "src/static/bright-id-template.html"));
 });

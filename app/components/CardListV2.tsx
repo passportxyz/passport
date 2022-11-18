@@ -25,6 +25,7 @@ import {
   GTC,
   GtcStaking,
   Google,
+  Brightid,
 } from "@gitcoin/passport-platforms";
 
 // --- Components
@@ -152,6 +153,21 @@ providers.set("Google", {
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CALLBACK,
   }),
   platFormGroupSpec: Google.GoogleProviderConfig,
+});
+
+providers.set("POAP", {
+  platform: new POAP.POAPPlatform(),
+  platFormGroupSpec: POAP.POAPProviderConfig,
+});
+
+providers.set("ETH", {
+  platform: new ETH.ETHPlatform(),
+  platFormGroupSpec: ETH.ETHProviderConfig,
+});
+
+providers.set("Brightid", {
+  platform: new Brightid.BrightidPlatform(),
+  platFormGroupSpec: Brightid.BrightidProviderConfig,
 });
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {

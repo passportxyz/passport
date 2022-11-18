@@ -17,6 +17,11 @@ export type GoogleTokenResponse = {
   access_token: string;
 };
 
+export type GoogleUserInfo = {
+  email?: string;
+  verified_email?: boolean;
+};
+
 // Export a Google Provider to carry out OAuth and return a record object
 export class GoogleProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
@@ -85,8 +90,10 @@ export const verifyGoogle = async (code: string): Promise<GoogleResponse> => {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
+  const userInfo: GoogleUserInfo = userRequest.data as GoogleUserInfo;
+
   return {
-    email: userRequest.data.email,
-    emailVerified: userRequest.data.verified_email,
+    email: userInfo?.email,
+    emailVerified: userInfo?.verified_email,
   };
 };

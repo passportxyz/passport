@@ -76,7 +76,7 @@ describe("Attempt verification", function () {
     const verifyGoogleMock = jest
       .spyOn(google, "verifyGoogle")
       .mockImplementation((code: string): Promise<google.GoogleResponse> => {
-        throw Error("ERROR!!!");
+        throw new Error("ERROR!!!");
       });
 
     const verifiedPayload = await googleProvider.verify({
@@ -106,7 +106,7 @@ describe("verifyGoogle", function () {
         });
       });
 
-    const userInfoMock = jest.spyOn(axios, "get").mockImplementation((code: string): Promise<{}> => {
+    const userInfoMock = jest.spyOn(axios, "get").mockImplementation((code: string): Promise<unknown> => {
       return new Promise((resolve) => {
         resolve({
           data: {
@@ -138,33 +138,30 @@ describe("verifyGoogle", function () {
         });
       });
 
-    const userInfoMock = jest.spyOn(axios, "get").mockImplementation((code: string): Promise<{}> => {
-      throw Error("USER INFO ERROR");
+    const userInfoMock = jest.spyOn(axios, "get").mockImplementation((code: string): Promise<google.GoogleUserInfo> => {
+      throw new Error("USER INFO ERROR");
     });
 
-    try {
-      const verifiedGoogleResponse = await google.verifyGoogle(MOCK_TOKEN_ID);
-    } catch (e) {
-      expect(e).toEqual(Error("USER INFO ERROR"));
+    async function verifyGoogle() {
+      await google.verifyGoogle(MOCK_TOKEN_ID);
     }
+    await expect(verifyGoogle).rejects.toThrow(new Error("USER INFO ERROR"));
     expect(requestAccessTokenMock).toBeCalledWith(MOCK_TOKEN_ID);
+    expect(userInfoMock).toBeCalledTimes(1);
     expect(userInfoMock).toBeCalledWith("https://www.googleapis.com/oauth2/v2/userinfo", {
       headers: { Authorization: `Bearer ${MOCK_ACCESS_TOKEN}` },
     });
   });
 
   it("should throw when requestAccessToken throws", async () => {
-    const requestAccessTokenMock = jest
-      .spyOn(google, "requestAccessToken")
-      .mockImplementation((code: string): Promise<string> => {
-        throw Error("ERROR");
-      });
+    jest.spyOn(google, "requestAccessToken").mockImplementation((code: string): Promise<string> => {
+      throw new Error("ERROR");
+    });
 
-    try {
-      const verifiedGoogleResponse = await google.verifyGoogle(MOCK_TOKEN_ID);
-      fail("Should have thrown ...");
-    } catch (e) {
-      expect(e).toEqual(Error("ERROR"));
+    async function verifyGoogle() {
+      await google.verifyGoogle(MOCK_TOKEN_ID);
     }
+
+    await expect(verifyGoogle).rejects.toThrow(new Error("ERROR"));
   });
 });
