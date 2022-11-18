@@ -58,7 +58,7 @@ describe("Verify Ceramic Database", () => {
     expect(spyStoreGet).toBeCalledWith("Passport");
   });
 
-  it.skip("handles reading passport with stamps", async () => {
+  it("handles reading passport with stamps", async () => {
     const issuanceDate = new Date("2022-06-01");
     const expiryDate = new Date("2022-09-01");
     let spyStoreGet = jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (name) => {
@@ -142,7 +142,7 @@ describe("Verify Ceramic Database", () => {
     expect(passport?.expiryDate).toEqual(expiryDate);
   });
 
-  it.skip("ignores stamps that cannot be loaded succefully from ceramic", async () => {
+  it("ignores stamps that cannot be loaded succefully from ceramic", async () => {
     const issuanceDate = new Date("2022-06-01");
     const expiryDate = new Date("2022-09-01");
     const maxGoodStamps = 2;

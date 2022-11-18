@@ -1,5 +1,5 @@
 // --- Test subject
-import { BrightIdProvider } from "../providers/brightid";
+import { BrightIdProvider } from "../Providers/brightid";
 import { triggerBrightidSponsorship } from "../procedures/brightid";
 import { BrightIdVerificationResponse, BrightIdSponsorshipResponse } from "@gitcoin/passport-types";
 import { RequestPayload } from "@gitcoin/passport-types";
