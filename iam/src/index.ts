@@ -61,13 +61,12 @@ import {
   GtcStaking,
   Discord,
   Google,
+  ClearText,
 } from "@gitcoin/passport-platforms";
 
 import { BrightIdProvider } from "./providers/brightid";
 
 import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
-import { ClearTextTwitterProvider } from "./providers/clearTextTwitter";
-import { ClearTextGithubOrgProvider } from "./providers/clearTextGithubOrg";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -101,6 +100,8 @@ export const providers = new Providers([
   new Github.FiftyOrMoreGithubFollowers(),
   new Github.ForkedGithubRepoProvider(),
   new Github.StarredGithubRepoProvider(),
+  new ClearText.ClearTextGithubOrgProvider(),
+  new ClearText.ClearTextTwitterProvider(),
   new Linkedin.LinkedinProvider(),
   new Discord.DiscordProvider(),
   new Twitter.TwitterTweetGT10Provider(),
@@ -115,8 +116,6 @@ export const providers = new Providers([
   new GtcStaking.CommunityStakingSilverProvider(),
   new GtcStaking.CommunityStakingGoldProvider(),
   new ClearTextSimpleProvider(),
-  new ClearTextTwitterProvider(),
-  new ClearTextGithubOrgProvider(),
   new Snapshot.SnapshotProposalsProvider(),
   new Snapshot.SnapshotVotesProvider(),
   new ETH.EthGasProvider(),

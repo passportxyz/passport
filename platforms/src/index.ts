@@ -18,5 +18,6 @@ export * as Linkedin from "./Linkedin";
 export * as GTC from "./GTC";
 export * as GtcStaking from "./GtcStaking";
 export * as Google from "./Google";
+export * as ClearText from "./ClearText";
 
 export { Platform, AppContext, ProviderPayload, PlatformSpec } from "./types";
