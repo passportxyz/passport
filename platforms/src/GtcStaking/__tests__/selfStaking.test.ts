@@ -14,32 +14,33 @@ import {
 // ----- Libs
 import axios from "axios";
 
-jest.mock("axios");
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mockedAxiosPost = jest.spyOn(axios, "post");
 
 const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
 const MOCK_ADDRESS_LOWER = MOCK_ADDRESS.toLowerCase();
 
-const generateSubgraphResponse = (address: string, stake: string): DataResult => {
-  return {
-    data: {
+const generateSubgraphResponse = (address: string, stake: string): Promise<DataResult> => {
+  return new Promise((resolve) => {
+    resolve({
       data: {
-        address: address,
-        users: [
-          {
-            stakes: [
-              {
-                stake: stake,
-                round: {
-                  id: "2",
+        data: {
+          address: address,
+          users: [
+            {
+              stakes: [
+                {
+                  stake: stake,
+                  round: {
+                    id: "2",
+                  },
                 },
-              },
-            ],
-          },
-        ],
+              ],
+            },
+          ],
+        },
       },
-    },
-  };
+    });
+  });
 };
 
 const invalidselfStakingResponse = {
@@ -73,7 +74,7 @@ interface RequestData {
 describe("Attempt verification", function () {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedAxios.post.mockImplementation(async (url, data) => {
+    mockedAxiosPost.mockImplementation(async (url, data) => {
       const query: string = (data as RequestData).query;
       if (url === stakingSubgraph && query.includes(MOCK_ADDRESS_LOWER)) {
         return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "220000000000000000000");
@@ -88,7 +89,7 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     // Check the request to verify the subgraph query
-    expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
+    expect(mockedAxiosPost).toBeCalledWith(stakingSubgraph, {
       query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
     });
 
@@ -107,7 +108,7 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     // Check the request to verify the subgraph query
-    expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
+    expect(mockedAxiosPost).toBeCalledWith(stakingSubgraph, {
       query: getSubgraphQuery("not_address"),
     });
     expect(verifiedPayload).toEqual({
@@ -116,10 +117,12 @@ describe("Attempt verification", function () {
     });
   });
   it("handles invalid subgraph response", async () => {
-    mockedAxios.post.mockImplementationOnce(async (url, data) => {
+    mockedAxiosPost.mockImplementationOnce((url, data) => {
       const query: string = (data as RequestData).query;
       if (url === stakingSubgraph && query.includes(MOCK_ADDRESS_LOWER)) {
-        return invalidselfStakingResponse;
+        return new Promise((resolve) => {
+          resolve(invalidselfStakingResponse);
+        });
       }
     });
     const selfStakingProvider = new SelfStakingBronzeProvider();
@@ -128,7 +131,7 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     // Check the request to verify the subgraph query
-    expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
+    expect(mockedAxiosPost).toBeCalledWith(stakingSubgraph, {
       query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
     });
     expect(verifiedPayload).toEqual({
@@ -138,7 +141,7 @@ describe("Attempt verification", function () {
   });
 
   it("handles invalid verification attempt where an exception is thrown", async () => {
-    mockedAxios.post.mockImplementationOnce(async (url, data) => {
+    mockedAxiosPost.mockImplementationOnce(() => {
       throw Error("Self Staking Bronze Provider verifyStake Error");
     });
     const selfStakingProvider = new SelfStakingBronzeProvider();
@@ -147,7 +150,7 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     // Check the request to verify the subgraph query
-    expect(mockedAxios.post).toBeCalledWith(stakingSubgraph, {
+    expect(mockedAxiosPost).toBeCalledWith(stakingSubgraph, {
       query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
     });
     expect(verifiedPayload).toEqual({
@@ -164,7 +167,7 @@ describe("should return invalid payload", function () {
   });
   it("when stake amount is below 1 GTC for Bronze", async () => {
     jest.clearAllMocks();
-    mockedAxios.post.mockImplementation(async () => {
+    mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "100000000000000000");
     });
 
@@ -178,7 +181,7 @@ describe("should return invalid payload", function () {
   });
   it("when stake amount is below 10 GTC for Silver", async () => {
     jest.clearAllMocks();
-    mockedAxios.post.mockImplementation(async () => {
+    mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "3000000000000000000");
     });
 
@@ -192,7 +195,7 @@ describe("should return invalid payload", function () {
   });
   it("when stake amount is below 100 GTC for Gold", async () => {
     jest.clearAllMocks();
-    mockedAxios.post.mockImplementation(async () => {
+    mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "8000000000000000000");
     });
 
@@ -209,7 +212,7 @@ describe("should return invalid payload", function () {
 // All the positive cases for thresholds are tested
 describe("should return valid payload", function () {
   it("when stake amount above 1 GTC for Bronze", async () => {
-    mockedAxios.post.mockImplementation(async () => {
+    mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "5000000000000000000");
     });
 
@@ -225,7 +228,7 @@ describe("should return valid payload", function () {
     });
   });
   it("when stake amount above 10 GTC for Silver", async () => {
-    mockedAxios.post.mockImplementation(async () => {
+    mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "60000000000000000000");
     });
 
@@ -241,7 +244,7 @@ describe("should return valid payload", function () {
     });
   });
   it("when stake amount above 100 GTC for Gold", async () => {
-    mockedAxios.post.mockImplementation(async () => {
+    mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "500000000000000000000");
     });
 
@@ -258,7 +261,7 @@ describe("should return valid payload", function () {
   });
   // All amounts equal to tier amount
   it("when stake amount equal to 1 GTC for Bronze", async () => {
-    mockedAxios.post.mockImplementation(async () => {
+    mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "1000000000000000000");
     });
 
@@ -274,7 +277,7 @@ describe("should return valid payload", function () {
     });
   });
   it("when stake amount equal to 10 GTC for Silver", async () => {
-    mockedAxios.post.mockImplementation(async () => {
+    mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "10000000000000000000");
     });
 
@@ -290,7 +293,7 @@ describe("should return valid payload", function () {
     });
   });
   it("when stake amount equal to 100 GTC for Gold", async () => {
-    mockedAxios.post.mockImplementation(async () => {
+    mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "100000000000000000000");
     });
 
