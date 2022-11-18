@@ -485,27 +485,20 @@ describe("when loading a stamp from a passport fails", () => {
     await ceramicDatabase.store.remove("Passport");
   });
 
-  it("ignores the failed stamp and returns null for the stamp that failed", async () => {
-    // The deletion will not be reflected immediatly, we need to wait a bit ...
-    await new Promise((r) => setTimeout(r, 2000));
+  it("ignores the failed stamp and only returns the successfully loaded stamps", async () => {
     const passport = (await ceramicDatabase.getPassport()) as Passport;
 
-    expect(passport.stamps.length).toEqual(3);
+    // Weony expect 2 results: Ens and Google stamps
+    expect(passport.stamps.length).toEqual(2);
     expect(
       passport.stamps.findIndex((stamp) => {
         return stamp && stamp.credential.credentialSubject.provider === "Ens";
       })
     ).toEqual(0);
-    // The Google stamps should not be readable, we expect null on that position
-    expect(
-      passport.stamps.findIndex((stamp) => {
-        return stamp === null;
-      })
-    ).toEqual(1);
     expect(
       passport.stamps.findIndex((stamp) => {
         return stamp && stamp.credential.credentialSubject.provider === "Google";
       })
-    ).toEqual(2);
+    ).toEqual(1);
   });
 });
