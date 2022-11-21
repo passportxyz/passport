@@ -19,8 +19,8 @@ describe("Attempt verification", function () {
 
     const verifyGoogleMock = jest
       .spyOn(google, "verifyGoogle")
-      .mockImplementation((code: string): Promise<google.GoogleResponse> => {
-        return new Promise<google.GoogleResponse>((resolve) => {
+      .mockImplementation((code: string): Promise<google.UserInfo> => {
+        return new Promise<google.UserInfo>((resolve) => {
           resolve({
             email: MOCK_EMAIL,
             emailVerified: MOCK_EMAIL_VERIFIED,
@@ -47,8 +47,8 @@ describe("Attempt verification", function () {
     const googleProvider = new google.GoogleProvider();
     const verifyGoogleMock = jest
       .spyOn(google, "verifyGoogle")
-      .mockImplementation((code: string): Promise<google.GoogleResponse> => {
-        return new Promise<google.GoogleResponse>((resolve) => {
+      .mockImplementation((code: string): Promise<google.UserInfo> => {
+        return new Promise<google.UserInfo>((resolve) => {
           resolve({
             email: MOCK_EMAIL,
             emailVerified: false,
@@ -75,8 +75,8 @@ describe("Attempt verification", function () {
     const googleProvider = new google.GoogleProvider();
     const verifyGoogleMock = jest
       .spyOn(google, "verifyGoogle")
-      .mockImplementation((code: string): Promise<google.GoogleResponse> => {
-        throw new Error("ERROR!!!");
+      .mockImplementation((code: string): Promise<google.UserInfo> => {
+        throw new Error("verifyGoogle error message");
       });
 
     const verifiedPayload = await googleProvider.verify({
@@ -88,6 +88,7 @@ describe("Attempt verification", function () {
     expect(verifyGoogleMock).toBeCalledWith(MOCK_TOKEN_ID);
     expect(verifiedPayload).toEqual({
       valid: false,
+      error: ["verifyGoogle error message"],
     });
   });
 });
@@ -139,13 +140,13 @@ describe("verifyGoogle", function () {
       });
 
     const userInfoMock = jest.spyOn(axios, "get").mockImplementation((code: string): Promise<google.GoogleUserInfo> => {
-      throw new Error("USER INFO ERROR");
+      throw { response: { data: { error: { message: "error message for user data request" } } } };
     });
 
     async function verifyGoogle() {
       await google.verifyGoogle(MOCK_TOKEN_ID);
     }
-    await expect(verifyGoogle).rejects.toThrow(new Error("USER INFO ERROR"));
+    await expect(verifyGoogle).rejects.toThrow(new Error("Error getting user info: error message for user data request"));
     expect(requestAccessTokenMock).toBeCalledWith(MOCK_TOKEN_ID);
     expect(userInfoMock).toBeCalledTimes(1);
     expect(userInfoMock).toBeCalledWith("https://www.googleapis.com/oauth2/v2/userinfo", {
