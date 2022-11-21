@@ -62,9 +62,8 @@ import {
   Discord,
   Google,
   ClearText,
+  Brightid,
 } from "@gitcoin/passport-platforms";
-
-import { BrightIdProvider } from "./providers/brightid";
 
 import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
 
@@ -93,7 +92,7 @@ export const providers = new Providers([
   new Facebook.FacebookProvider(),
   new Facebook.FacebookFriendsProvider(),
   new Facebook.FacebookProfilePictureProvider(),
-  new BrightIdProvider(),
+  new Brightid.BrightIdProvider(),
   new Github.GithubProvider(),
   new Github.FiveOrMoreGithubRepos(),
   new Github.TenOrMoreGithubFollowers(),
