@@ -29,6 +29,10 @@ export type GoogleUserInfo = {
   verified_email?: boolean;
 };
 
+export type GoogleErr = {
+  response?: { status: string; statusText: string; data: { error: { message: string }; error_description: string } };
+};
+
 // Export a Google Provider to carry out OAuth and return a record object
 export class GoogleProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
@@ -44,9 +48,7 @@ export class GoogleProvider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     const verifiedPayload = await verifyGoogle(payload.proofs.code);
-    let valid = !verifiedPayload.errors && verifiedPayload.emailVerified;
-    console.log("geri verifiedPayload", verifiedPayload);
-    console.log("geri valid", valid);
+    const valid = !verifiedPayload.errors && verifiedPayload.emailVerified;
     return {
       valid: valid,
       error: verifiedPayload.errors,
@@ -64,7 +66,6 @@ export const requestAccessToken = async (code: string): Promise<string> => {
 
   try {
     const url = `https://oauth2.googleapis.com/token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}&grant_type=authorization_code&redirectUri=${redirectUri}`;
-    console.log("url", url);
 
     // Exchange the code for an access token
     const tokenRequest = await axios.post(
@@ -76,10 +77,10 @@ export const requestAccessToken = async (code: string): Promise<string> => {
     );
 
     const tokenResponse = tokenRequest.data as GoogleTokenResponse;
-    console.log("tokenResponse", tokenResponse);
     return tokenResponse.access_token;
   } catch (error) {
-    throw new Error("Error getting authentication token: " + error?.response?.data?.error_description);
+    const errorMsg = (error as GoogleErr) || {};
+    throw new Error("Error getting authentication token: " + errorMsg?.response?.data?.error_description);
   }
 };
 
@@ -94,21 +95,19 @@ export const verifyGoogle = async (code: string): Promise<UserInfo> => {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
-    console.log("userRequest", userRequest);
-
     const userInfo: GoogleUserInfo = userRequest.data as GoogleUserInfo;
 
-    console.log("userInfo", userInfo);
     return {
       email: userInfo?.email,
       emailVerified: userInfo?.verified_email,
     };
   } catch (error) {
+    const errorMsg = (error as GoogleErr) || {};
     return {
       errors: [
         "Error getting user info",
-        `Status ${error.response.status}: ${error.response.statusText}`,
-        "Details: " + error?.response?.data?.error?.message,
+        `Status ${errorMsg.response?.status}: ${errorMsg.response?.statusText}`,
+        "Details: " + errorMsg?.response?.data?.error?.message,
       ],
     };
   }

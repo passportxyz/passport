@@ -1,3 +1,4 @@
+import { UserInfo } from "./../google";
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
 import * as google from "../google";
@@ -72,12 +73,12 @@ describe("Attempt verification", function () {
   });
 
   it("should return invalid payload when verifyGoogle throws exception", async () => {
-    const googleProvider = new google.GoogleProvider();
     const verifyGoogleMock = jest
       .spyOn(google, "verifyGoogle")
       .mockImplementation((code: string): Promise<google.UserInfo> => {
-        throw new Error("verifyGoogle error message");
+        return Promise.resolve({ errors: ["Error getting user info"] });
       });
+    const googleProvider = new google.GoogleProvider();
 
     const verifiedPayload = await googleProvider.verify({
       proofs: {
@@ -88,7 +89,10 @@ describe("Attempt verification", function () {
     expect(verifyGoogleMock).toBeCalledWith(MOCK_TOKEN_ID);
     expect(verifiedPayload).toEqual({
       valid: false,
-      error: ["verifyGoogle error message"],
+      error: ["Error getting user info"],
+      record: {
+        email: undefined,
+      },
     });
   });
 });
@@ -143,10 +147,9 @@ describe("verifyGoogle", function () {
       throw { response: { data: { error: { message: "error message for user data request" } } } };
     });
 
-    async function verifyGoogle() {
-      await google.verifyGoogle(MOCK_TOKEN_ID);
-    }
-    await expect(verifyGoogle).rejects.toThrow(new Error("Error getting user info: error message for user data request"));
+    const verificationResponse: UserInfo = await google.verifyGoogle(MOCK_TOKEN_ID);
+
+    expect(verificationResponse.errors[0]).toBe("Error getting user info");
     expect(requestAccessTokenMock).toBeCalledWith(MOCK_TOKEN_ID);
     expect(userInfoMock).toBeCalledTimes(1);
     expect(userInfoMock).toBeCalledWith("https://www.googleapis.com/oauth2/v2/userinfo", {
