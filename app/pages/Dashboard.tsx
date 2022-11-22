@@ -4,7 +4,7 @@ import React, { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 // --Components
-import { CardList } from "../components/CardListV2";
+import { CardList } from "../components/CardList";
 import { JsonOutputModal } from "../components/JsonOutputModal";
 import { Footer } from "../components/Footer";
 
