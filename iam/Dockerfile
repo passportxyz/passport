@@ -1,6 +1,5 @@
 FROM node:16
-
-WORKDIR /usr/src/iam
+WORKDIR /usr/src
 
 COPY . .
 
@@ -8,5 +7,4 @@ RUN yarn global add lerna
 RUN lerna bootstrap --ignore app
 
 EXPOSE 80 443
-
-CMD [ "yarn", "run", "prod:start:iam" ]
+CMD [ "node", "dist/src/main.js" ]
