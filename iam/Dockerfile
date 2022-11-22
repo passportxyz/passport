@@ -7,4 +7,4 @@ RUN yarn global add lerna
 RUN lerna bootstrap --ignore app
 
 EXPOSE 80 443
-CMD [ "node", "dist/src/main.js" ]
+CMD [ "node", "iam/dist/src/main.js" ]
