@@ -55,5 +55,7 @@ router.post("/brightid/verifyContextId", (req: Request, res: Response): void => 
 });
 
 router.get("/brightid/information", (req: Request, res: Response): void => {
-  res.sendFile(path.resolve(process.cwd(), "src/static/bright-id-template.html"));
+  const staticPath =
+    process.env.CURRENT_ENV === "development" ? "src/static/bright-id-template.html" : "static/bright-id-template.html";
+  res.sendFile(path.resolve(process.cwd(), staticPath));
 });
