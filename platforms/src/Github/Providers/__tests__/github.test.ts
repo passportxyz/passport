@@ -134,9 +134,7 @@ describe("Attempt verification", function () {
 
   it("should return invalid payload when a bad status code is returned by github user api", async () => {
     mockedAxios.get.mockImplementation(async (url, config) => {
-      return {
-        status: 500,
-      };
+      throw new Error("Some Error");
     });
 
     const github = new GithubProvider();

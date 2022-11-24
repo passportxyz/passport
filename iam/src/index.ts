@@ -304,8 +304,10 @@ const issueCredential = async (
       }
     } else {
       // return error message if an error is present
+      // limit the error message string to 1000 chars
       throw {
-        error: (verifiedPayload.error && verifiedPayload.error.join(", ")) || "Unable to verify proofs",
+        error:
+          (verifiedPayload.error && verifiedPayload.error.join(", ").substring(0, 1000)) || "Unable to verify proofs",
         code: 403,
       };
     }
@@ -369,7 +371,12 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
         });
     } else {
       // return error message if an error present
-      return void errorRes(res, (challenge.error && challenge.error.join(", ")) || "Unable to verify proofs", 403);
+      // limit the error message string to 1000 chars
+      return void errorRes(
+        res,
+        (challenge.error && challenge.error.join(", ").substring(0, 1000)) || "Unable to verify proofs",
+        403
+      );
     }
   }
 

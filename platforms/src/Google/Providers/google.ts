@@ -5,6 +5,7 @@
 // ----- Types
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../../types";
+import { getErrorString } from "../../utils/errors";
 import axios from "axios";
 
 // Checking a valid tokenId for a result from Google will result in the following type
@@ -45,8 +46,7 @@ export class GoogleProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     const verifiedPayload = await verifyGoogle(payload.proofs.code);
     let valid = !verifiedPayload.errors && verifiedPayload.emailVerified;
-    console.log("geri verifiedPayload", verifiedPayload);
-    console.log("geri valid", valid);
+    console.log("google - verify - verifiedPayload", verifiedPayload);
     return {
       valid: valid,
       error: verifiedPayload.errors,
@@ -64,7 +64,6 @@ export const requestAccessToken = async (code: string): Promise<string> => {
 
   try {
     const url = `https://oauth2.googleapis.com/token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}&grant_type=authorization_code&redirectUri=${redirectUri}`;
-    console.log("url", url);
 
     // Exchange the code for an access token
     const tokenRequest = await axios.post(
@@ -76,39 +75,54 @@ export const requestAccessToken = async (code: string): Promise<string> => {
     );
 
     const tokenResponse = tokenRequest.data as GoogleTokenResponse;
-    console.log("tokenResponse", tokenResponse);
+    console.log(
+      "google - tokenRequest.statusText, tokenRequest.status, tokenRequest.data",
+      tokenRequest.statusText,
+      tokenRequest.status,
+      tokenRequest.data
+    );
     return tokenResponse.access_token;
   } catch (error) {
-    throw new Error("Error getting authentication token: " + error?.response?.data?.error_description);
+    const errorString = getErrorString(error);
+    console.log(errorString);
+    throw new Error(errorString);
   }
 };
 
 // Perform verification on shared google access token
 export const verifyGoogle = async (code: string): Promise<UserInfo> => {
-  // retrieve user's auth bearer token to authenticate client
-  const accessToken = await requestAccessToken(code);
-
   try {
+    // retrieve user's auth bearer token to authenticate client
+    const accessToken = await requestAccessToken(code);
+
     // Now that we have an access token fetch the user details
     const userRequest = await axios.get("https://www.googleapis.com/oauth2/v2/userinfo", {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
-    console.log("userRequest", userRequest);
-
+    console.log(
+      "google - userRequest.statusText, userRequest.status, userRequest.data",
+      userRequest.statusText,
+      userRequest.status,
+      userRequest.data
+    );
     const userInfo: GoogleUserInfo = userRequest.data as GoogleUserInfo;
+    console.log("google - userInfo", userInfo);
 
-    console.log("userInfo", userInfo);
     return {
       email: userInfo?.email,
       emailVerified: userInfo?.verified_email,
     };
   } catch (error) {
+    const errorString = getErrorString(error);
+    console.log(errorString);
+
     return {
       errors: [
         "Error getting user info",
-        `Status ${error.response.status}: ${error.response.statusText}`,
-        "Details: " + error?.response?.data?.error?.message,
+        `${error?.message}`,
+        `Status ${error.response?.status}: ${error.response?.statusText}`,
+        `Details: ${JSON.stringify(error?.response?.data)}`,
       ],
     };
   }

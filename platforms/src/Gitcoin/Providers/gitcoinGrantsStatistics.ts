@@ -1,13 +1,15 @@
 // ----- Types
 import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../../types";
+import { getErrorString } from "../../utils/errors";
 import axios from "axios";
 import { GithubFindMyUserResponse, verifyGithub } from "../../Github/Providers/github";
 
 const AMI_API_TOKEN = process.env.AMI_API_TOKEN;
 
 export type GitcoinGrantStatistics = {
-  [k: string]: number;
+  errors?: string[] | undefined;
+  record?: { [k: string]: number };
 };
 
 export type GitcoinGrantProviderOptions = {
@@ -39,19 +41,37 @@ export class GitcoinGrantStatisticsProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
-    let valid = false;
+    let valid: boolean = false;
     let githubUser: GithubFindMyUserResponse = context.githubUser as GithubFindMyUserResponse;
     try {
       if (!githubUser) {
         githubUser = await verifyGithub(payload.proofs.code, context);
         context["githubUser"] = githubUser;
       }
+      console.log("gitcoin - githubUser", githubUser);
 
       // Only check the contribution condition if a valid github id has been received
-      valid = !!githubUser.id;
+      valid = !githubUser.errors && !!githubUser.id;
       if (valid) {
         const gitcoinGrantsStatistic = await getGitcoinStatistics(this.dataUrl, githubUser.login);
-        valid = gitcoinGrantsStatistic[this._options.receivingAttribute] >= this._options.threshold;
+        console.log("gitcoin - getGitcoinStatistics", gitcoinGrantsStatistic);
+
+        valid =
+          !gitcoinGrantsStatistic.errors &&
+          (gitcoinGrantsStatistic.record
+            ? gitcoinGrantsStatistic.record[this._options.receivingAttribute] >= this._options.threshold
+            : false);
+
+        return {
+          valid: valid,
+          error: gitcoinGrantsStatistic.errors,
+          record: valid
+            ? {
+                id: `${githubUser.id}`,
+                [this._options.recordAttribute]: `${this._options.threshold}`,
+              }
+            : undefined,
+        };
       }
     } catch (e) {
       return { valid: false };
@@ -59,6 +79,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
 
     const ret = {
       valid: valid,
+      error: githubUser ? githubUser.errors : undefined,
       record: valid
         ? {
             id: `${githubUser.id}`,
@@ -72,13 +93,22 @@ export class GitcoinGrantStatisticsProvider implements Provider {
 }
 
 const getGitcoinStatistics = async (dataUrl: string, handle: string): Promise<GitcoinGrantStatistics> => {
-  const grantStatisticsRequest = await axios.get(`${dataUrl}?handle=${handle}`, {
-    headers: { Authorization: `token ${AMI_API_TOKEN}` },
-  });
+  try {
+    const grantStatisticsRequest = await axios.get(`${dataUrl}?handle=${handle}`, {
+      headers: { Authorization: `token ${AMI_API_TOKEN}` },
+    });
 
-  if (grantStatisticsRequest.status != 200) {
-    throw `Get user request returned status code ${grantStatisticsRequest.status} instead of the expected 200`;
+    console.log("gitcoin - API response", handle, dataUrl, grantStatisticsRequest.data);
+    return { record: grantStatisticsRequest.data } as GitcoinGrantStatistics;
+  } catch (error) {
+    console.log("gitcoinGrantsStatistics", dataUrl, handle, getErrorString(error));
+    return {
+      errors: [
+        "Error getting user info",
+        `${error?.message}`,
+        `Status ${error.response?.status}: ${error.response?.statusText}`,
+        `Details: ${JSON.stringify(error?.response?.data)}`,
+      ],
+    };
   }
-
-  return grantStatisticsRequest.data as GitcoinGrantStatistics;
 };

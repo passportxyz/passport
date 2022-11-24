@@ -268,10 +268,7 @@ describe("Attempt verification %s", function () {
   it("should return invalid payload when a bad status code is returned by github user api", async () => {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://api.github.com/user")
-        return Promise.resolve({
-          ...validGithubUserResponse,
-          status: 500,
-        });
+        throw new Error("API EXCEPTION");
       else if (url.startsWith("https://gitcoin.co/grants/v1/api/vc/contributor_statistics"))
         return Promise.resolve({
           status: 200,
