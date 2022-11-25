@@ -23,6 +23,7 @@ jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
   fetchVerifiableCredential: jest.fn(),
 }));
 jest.mock("../../utils/onboard.ts");
+const handleFetchCredential = jest.fn();
 
 const mockHandleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
@@ -33,8 +34,6 @@ const mockUserContext: UserContextState = makeTestUserContext({
   address: mockAddress,
   signer: mockSigner,
 });
-
-const handleFetchCredential = jest.fn();
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
   handleCreatePassport: mockCreatePassport,
@@ -99,6 +98,51 @@ describe.skip("when user has not verified with EnsProvider", () => {
     });
   });
 });
+
+// describe("when user attempts to re-verify their passport data point(s)", () => {
+//   beforeEach(() => {
+//     (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
+//       credentials: [SUCCESFUL_ENS_RESULTS],
+//     });
+//   });
+
+//   it("should show 'Success!' done toast message if user still qualifies for data point", async () => {
+//     const drawer = () => (
+//       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
+//         <DrawerOverlay />
+//         <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />
+//       </Drawer>
+//     );
+
+//     renderWithContext(mockUserContext, mockCeramicContext, drawer());
+
+//     screen.queryByTestId("select-all");
+//     screen.getByText("Verify").focus();
+//     fireEvent.keyDown(document.activeElement || document.body);
+//     // Add mock handleFetchCredential function (???)
+
+//     // Wait to see the done toast
+//     await waitFor(() => {
+//       expect(screen.getByText("Success!"));
+//     });
+
+// const secondSwitch = screen.queryByTestId("switch-0");
+// await fireEvent.click(secondSwitch as HTMLElement);
+// await fireEvent.click(secondSwitch as HTMLElement);
+
+// const saveButton = screen.queryByTestId("button-verify-Ens");
+
+// await fireEvent.click(saveButton as HTMLElement);
+// // Wait to see the done toast
+// await waitFor(() => {
+//   expect(screen.getByTestId("toast-done-ens")).toBeInTheDocument();
+// }, {timeout: 3000});
+// });
+
+// it("should show 'Verification Failure' done toast message if user no longer qualifies for data point", async () => {
+
+// });
+// });
 
 // describe("when user does not successfully verify an EnsProvider", () => {
 //   beforeEach(() => {

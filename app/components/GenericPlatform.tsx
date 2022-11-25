@@ -236,15 +236,19 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
 
       // Create Set to check changed providers after verification
       const updatedVerifiedProviders = new Set(actualVerifiedProviders);
-      // Initial providers set minus updated providers set to determine which data points were removed
+      // Initial providers Set minus updated providers Set to determine which data points were removed
       const initialMinusUpdated = difference(initialVerifiedProviders, updatedVerifiedProviders);
-      // Updated providers set minus initial providers set to determine which data points were added
+      // Updated providers Set minus initial providers Set to determine which data points were added
       const updatedMinusInitial = difference(updatedVerifiedProviders, initialVerifiedProviders);
       // reset can submit state
       setCanSubmit(false);
 
       // Get the done toast messages
-      const { title, body, icon, platformId } = getDoneToastMessages(initialMinusUpdated, updatedMinusInitial);
+      const { title, body, icon, platformId } = getDoneToastMessages(
+        updatedVerifiedProviders,
+        initialMinusUpdated,
+        updatedMinusInitial
+      );
 
       // Display done toast
       doneToast(title, body, icon, platformId);
@@ -270,11 +274,24 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
   };
 
   // Done toast message getter
-  const getDoneToastMessages = (initialMinusUpdated: Set<PROVIDER_ID>, updatedMinusInitial: Set<PROVIDER_ID>) => {
+  const getDoneToastMessages = (
+    updatedVerifiedProviders: Set<PROVIDER_ID>,
+    initialMinusUpdated: Set<PROVIDER_ID>,
+    updatedMinusInitial: Set<PROVIDER_ID>
+  ) => {
     if (updatedMinusInitial.size === providerIds.length) {
       return {
         title: "Done!",
         body: `All ${platform.platformId} data points verified.`,
+        icon: checkIcon,
+        platformId: platform.platformId as PLATFORM_ID,
+      };
+    } else if (updatedVerifiedProviders.size > 0 && updatedMinusInitial.size === 0 && initialMinusUpdated.size === 0) {
+      return {
+        title: "Success!",
+        body: `Successfully re-verified ${platform.platformId} data ${
+          updatedVerifiedProviders.size > 1 ? "points" : "point"
+        }.`,
         icon: checkIcon,
         platformId: platform.platformId as PLATFORM_ID,
       };
