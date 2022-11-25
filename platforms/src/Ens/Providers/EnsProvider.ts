@@ -41,7 +41,7 @@ export class EnsProvider implements Provider {
       return {
         valid: valid,
         record: {
-          ens: valid ? reportedName : "",
+          ens: valid ? reportedName : undefined,
         },
       };
     } catch (e) {

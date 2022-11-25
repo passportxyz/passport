@@ -44,7 +44,7 @@ export class LinkedinProvider implements Provider {
     return {
       valid: valid,
       record: {
-        id: verifiedPayload.id || "",
+        id: verifiedPayload.id,
       },
     };
   }
