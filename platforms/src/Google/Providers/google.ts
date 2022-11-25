@@ -30,10 +30,6 @@ export type GoogleUserInfo = {
   verified_email?: boolean;
 };
 
-export type GoogleErr = {
-  response?: { status: string; statusText: string; data: { error: { message: string }; error_description: string } };
-};
-
 // Export a Google Provider to carry out OAuth and return a record object
 export class GoogleProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
