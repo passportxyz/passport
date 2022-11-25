@@ -27,6 +27,7 @@ import * as ClearText from "./ClearText";
 import * as Brightid from "./Brightid";
 import * as Coinbase from "./Coinbase";
 import * as GuildXYZ from "./GuildXYZ";
+import * as Idena from "./Idena";
 
 export {
   Brightid,
@@ -52,8 +53,10 @@ export {
   Twitter,
   Coinbase,
   GuildXYZ,
+  Idena,
 };
 
+// TODO idena
 // Initiate providers - new Providers should be registered in this array...
 export const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`

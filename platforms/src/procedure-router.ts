@@ -4,7 +4,7 @@ import { Request, Response, Router } from "express";
 import * as twitterOAuth from "./Twitter/procedures/twitterOauth";
 import { triggerBrightidSponsorship, verifyBrightidContextId } from "./Brightid/procedures/brightid";
 import path from "path";
-import * as idenaSignIn from "../src/Idena/procedures/idenaSignIn";
+import * as idenaSignIn from "./Idena/procedures/idenaSignIn";
 
 export const router = Router();
 
