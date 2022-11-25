@@ -2,6 +2,7 @@
 import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../../types";
 import { getErrorString, ProviderError } from "../../utils/errors";
+import { getAddress } from "../../utils/signer";
 import axios from "axios";
 import { GithubFindMyUserResponse, verifyGithub } from "../../Github/Providers/github";
 
@@ -41,6 +42,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
+    const address = (await getAddress(payload)).toLowerCase();
     let valid = false;
     let githubUser: GithubFindMyUserResponse = context.githubUser as GithubFindMyUserResponse;
     try {
@@ -48,13 +50,13 @@ export class GitcoinGrantStatisticsProvider implements Provider {
         githubUser = await verifyGithub(payload.proofs.code, context);
         context["githubUser"] = githubUser;
       }
-      console.log("gitcoin - githubUser", githubUser);
+      console.log("gitcoin - githubUser", address, githubUser);
 
       // Only check the contribution condition if a valid github id has been received
       valid = !githubUser.errors && !!githubUser.id;
       if (valid) {
         const gitcoinGrantsStatistic = await getGitcoinStatistics(this.dataUrl, githubUser.login);
-        console.log("gitcoin - getGitcoinStatistics", gitcoinGrantsStatistic);
+        console.log("gitcoin - getGitcoinStatistics", address, gitcoinGrantsStatistic);
 
         valid =
           !gitcoinGrantsStatistic.errors &&

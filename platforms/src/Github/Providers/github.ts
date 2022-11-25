@@ -1,8 +1,9 @@
 // ----- Types
 import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../../types";
-import axios from "axios";
 import { getErrorString, ProviderError } from "../../utils/errors";
+import { getAddress } from "../../utils/signer";
+import axios from "axios";
 
 export type GithubTokenResponse = {
   access_token: string;
@@ -30,11 +31,12 @@ export class GithubProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
+    const address = (await getAddress(payload)).toLowerCase();
     const verifiedPayload = await verifyGithub(payload.proofs.code, context);
 
-    console.log("github - verifiedPayload", verifiedPayload);
+    console.log("github - verifiedPayload", address, verifiedPayload);
     const valid = !!(!verifiedPayload.errors && verifiedPayload.id);
-    console.log("github - valid", valid);
+    console.log("github - valid", address, valid);
 
     return {
       valid: valid,
