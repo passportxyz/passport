@@ -66,16 +66,6 @@ const App: NextPage = () => {
 
     return <div></div>;
   }
-  // if Idena SignIn then submit message to other windows and close self
-  else if (queryState && /^idena-.*/.test(queryState)) {
-    // shared message channel between windows (on the same domain)
-    const channel = new BroadcastChannel("idena_sign_in_channel");
-    channel.postMessage({ target: "idena", data: { state: queryState } });
-    // always close the redirected window
-    window.close();
-
-    return <div></div>;
-  }
 
   return (
     <div>

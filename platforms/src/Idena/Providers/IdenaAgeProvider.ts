@@ -24,7 +24,8 @@ abstract class IdenaAgeProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    const { valid, address, expiresInSeconds } = await checkAge(payload.proofs.token, this.minAge);
+    const token = payload.proofs.sessionKey;
+    const { valid, address, expiresInSeconds } = await checkAge(token, this.minAge);
     if (!valid) {
       return { valid: false };
     }
