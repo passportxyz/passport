@@ -2,12 +2,14 @@
 import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../../types";
 import axios from "axios";
+import { getErrorString, ProviderError } from "../../utils/errors";
 
 export type GithubTokenResponse = {
   access_token: string;
 };
 
 export type GithubFindMyUserResponse = {
+  errors?: string[] | undefined;
   id?: string;
   login?: string;
   type?: string;
@@ -28,22 +30,20 @@ export class GithubProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
-    let valid = false,
-      verifiedPayload: GithubFindMyUserResponse = {};
+    const verifiedPayload = await verifyGithub(payload.proofs.code, context);
 
-    try {
-      verifiedPayload = await verifyGithub(payload.proofs.code, context);
-    } catch (e) {
-      return { valid: false };
-    } finally {
-      valid = verifiedPayload && verifiedPayload.id ? true : false;
-    }
+    console.log("github - verifiedPayload", verifiedPayload);
+    const valid = !!(!verifiedPayload.errors && verifiedPayload.id);
+    console.log("github - valid", valid);
 
     return {
       valid: valid,
-      record: {
-        id: verifiedPayload.id,
-      },
+      error: verifiedPayload.errors,
+      record: valid
+        ? {
+            id: verifiedPayload.id,
+          }
+        : undefined,
     };
   }
 }
@@ -66,10 +66,6 @@ export const requestAccessToken = async (code: string, context: ProviderContext)
     }
   );
 
-  if (tokenRequest.status != 200) {
-    throw `Post for request returned status code ${tokenRequest.status} instead of the expected 200`;
-  }
-
   const tokenResponse = tokenRequest.data as GithubTokenResponse;
 
   context["githubAccessToken"] = tokenResponse.access_token;
@@ -77,17 +73,27 @@ export const requestAccessToken = async (code: string, context: ProviderContext)
 };
 
 export const verifyGithub = async (code: string, context: ProviderContext): Promise<GithubFindMyUserResponse> => {
-  // retrieve user's auth bearer token to authenticate client
-  const accessToken = await requestAccessToken(code, context);
+  try {
+    // retrieve user's auth bearer token to authenticate client
+    const accessToken = await requestAccessToken(code, context);
 
-  // Now that we have an access token fetch the user details
-  const userRequest = await axios.get("https://api.github.com/user", {
-    headers: { Authorization: `token ${accessToken}` },
-  });
+    // Now that we have an access token fetch the user details
+    const userRequest = await axios.get("https://api.github.com/user", {
+      headers: { Authorization: `token ${accessToken}` },
+    });
+    console.log("verifyGithub result:", userRequest.data);
 
-  if (userRequest.status != 200) {
-    throw `Get user request returned status code ${userRequest.status} instead of the expected 200`;
+    return userRequest.data as GithubFindMyUserResponse;
+  } catch (_error) {
+    const error = _error as ProviderError;
+    console.log("verifyGithub ERROR:", getErrorString(error));
+    return {
+      errors: [
+        "Error getting getting github info",
+        `${error?.message}`,
+        `Status ${error.response?.status}: ${error.response?.statusText}`,
+        `Details: ${JSON.stringify(error?.response?.data)}`,
+      ],
+    };
   }
-
-  return userRequest.data as GithubFindMyUserResponse;
 };
