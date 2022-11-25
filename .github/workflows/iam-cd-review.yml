@@ -4,9 +4,6 @@ name: Deploy IAM Server to Review
 on:
   push:
     branches: [main]
-    paths:
-      - "iam/**"
-      - "infra/review/**"
 
 jobs:
   build-and-test:

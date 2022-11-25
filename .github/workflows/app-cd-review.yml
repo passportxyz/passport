@@ -2,8 +2,7 @@ name: Deploy App to Review
 on:
   push:
     branches: [main]
-    paths:
-      - "app/**"
+
 jobs:
   deploy-app:
     runs-on: ubuntu-latest
