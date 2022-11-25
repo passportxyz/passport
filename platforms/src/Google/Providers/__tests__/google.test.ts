@@ -29,6 +29,7 @@ describe("Attempt verification", function () {
       });
 
     const verifiedPayload = await googleProvider.verify({
+      address: "0x0",
       proofs: {
         code: MOCK_TOKEN_ID,
       },
@@ -57,6 +58,7 @@ describe("Attempt verification", function () {
       });
 
     const verifiedPayload = await googleProvider.verify({
+      address: "0x0",
       proofs: {
         code: MOCK_TOKEN_ID,
       },

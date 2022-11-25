@@ -47,6 +47,7 @@ describe("Attempt verification", function () {
     const github = new GithubProvider();
     const githubPayload = await github.verify(
       {
+        address: "0x0",
         proofs: {
           code,
         },
@@ -90,6 +91,7 @@ describe("Attempt verification", function () {
 
     const githubPayload = await github.verify(
       {
+        address: "0x0",
         proofs: {
           code,
         },
@@ -119,11 +121,12 @@ describe("Attempt verification", function () {
 
     const githubPayload = await github.verify(
       {
+        address: "0x0",
         proofs: {
           code,
-      },
-    } as unknown as RequestPayload,
-    {}
+        },
+      } as unknown as RequestPayload,
+      {}
     );
 
     expect(axios.post).toHaveBeenCalledTimes(1);
@@ -141,11 +144,12 @@ describe("Attempt verification", function () {
 
     const githubPayload = await github.verify(
       {
+        address: "0x0",
         proofs: {
           code,
         },
       } as unknown as RequestPayload,
-      {},
+      {}
     );
 
     expect(axios.post).toHaveBeenCalledTimes(1);
