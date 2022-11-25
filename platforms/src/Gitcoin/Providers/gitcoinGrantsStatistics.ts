@@ -50,13 +50,13 @@ export class GitcoinGrantStatisticsProvider implements Provider {
         githubUser = await verifyGithub(payload.proofs.code, context);
         context["githubUser"] = githubUser;
       }
-      console.log("gitcoin - githubUser", address, githubUser);
+      console.log("gitcoin - githubUser", address, JSON.stringify(githubUser));
 
       // Only check the contribution condition if a valid github id has been received
       valid = !githubUser.errors && !!githubUser.id;
       if (valid) {
         const gitcoinGrantsStatistic = await getGitcoinStatistics(this.dataUrl, githubUser.login);
-        console.log("gitcoin - getGitcoinStatistics", address, gitcoinGrantsStatistic);
+        console.log("gitcoin - getGitcoinStatistics", address, JSON.stringify(gitcoinGrantsStatistic));
 
         valid =
           !gitcoinGrantsStatistic.errors &&
@@ -100,7 +100,7 @@ const getGitcoinStatistics = async (dataUrl: string, handle: string): Promise<Gi
       headers: { Authorization: `token ${AMI_API_TOKEN}` },
     });
 
-    console.log("gitcoin - API response", handle, dataUrl, grantStatisticsRequest.data);
+    console.log("gitcoin - API response", handle, dataUrl, JSON.stringify(grantStatisticsRequest.data));
     return { record: grantStatisticsRequest.data } as GitcoinGrantStatistics;
   } catch (_error) {
     const error = _error as ProviderError;
