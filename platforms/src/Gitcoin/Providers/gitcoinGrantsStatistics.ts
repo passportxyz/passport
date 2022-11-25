@@ -1,7 +1,7 @@
 // ----- Types
 import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../../types";
-import { getErrorString } from "../../utils/errors";
+import { getErrorString, ProviderError } from "../../utils/errors";
 import axios from "axios";
 import { GithubFindMyUserResponse, verifyGithub } from "../../Github/Providers/github";
 
@@ -41,7 +41,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
-    let valid: boolean = false;
+    let valid = false;
     let githubUser: GithubFindMyUserResponse = context.githubUser as GithubFindMyUserResponse;
     try {
       if (!githubUser) {
@@ -67,7 +67,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
           error: gitcoinGrantsStatistic.errors,
           record: valid
             ? {
-                id: `${githubUser.id}`,
+                id: githubUser.id,
                 [this._options.recordAttribute]: `${this._options.threshold}`,
               }
             : undefined,
@@ -100,7 +100,8 @@ const getGitcoinStatistics = async (dataUrl: string, handle: string): Promise<Gi
 
     console.log("gitcoin - API response", handle, dataUrl, grantStatisticsRequest.data);
     return { record: grantStatisticsRequest.data } as GitcoinGrantStatistics;
-  } catch (error) {
+  } catch (_error) {
+    const error = _error as ProviderError;
     console.log("gitcoinGrantsStatistics", dataUrl, handle, getErrorString(error));
     return {
       errors: [

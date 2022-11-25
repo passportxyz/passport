@@ -129,7 +129,7 @@ describe("verifyGoogle", function () {
         "Error getting user info",
         "undefined",
         "Status undefined: undefined",
-        'Details: {"error":{"message":"error message for user data request"}}',
+        "Details: " + JSON.stringify({ error: { message: "error message for user data request" } }),
       ],
     });
     expect(requestAccessTokenMock).toBeCalledWith(MOCK_TOKEN_ID);

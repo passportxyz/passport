@@ -2,7 +2,7 @@
 import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../../types";
 import axios from "axios";
-import { getErrorString } from "../../utils/errors";
+import { getErrorString, ProviderError } from "../../utils/errors";
 
 export type GithubTokenResponse = {
   access_token: string;
@@ -84,7 +84,8 @@ export const verifyGithub = async (code: string, context: ProviderContext): Prom
     console.log("verifyGithub result:", userRequest.data);
 
     return userRequest.data as GithubFindMyUserResponse;
-  } catch (error) {
+  } catch (_error) {
+    const error = _error as ProviderError;
     console.log("verifyGithub ERROR:", getErrorString(error));
     return {
       errors: [
