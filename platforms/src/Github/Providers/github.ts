@@ -34,7 +34,7 @@ export class GithubProvider implements Provider {
     const address = (await getAddress(payload)).toLowerCase();
     const verifiedPayload = await verifyGithub(payload.proofs.code, context);
 
-    console.log("github - verifiedPayload", address, verifiedPayload);
+    console.log("github - verifiedPayload", address, JSON.stringify(verifiedPayload));
     const valid = !!(!verifiedPayload.errors && verifiedPayload.id);
     console.log("github - valid", address, valid);
 
@@ -83,7 +83,7 @@ export const verifyGithub = async (code: string, context: ProviderContext): Prom
     const userRequest = await axios.get("https://api.github.com/user", {
       headers: { Authorization: `token ${accessToken}` },
     });
-    console.log("verifyGithub result:", userRequest.data);
+    console.log("verifyGithub result:", JSON.stringify(userRequest.data));
 
     return userRequest.data as GithubFindMyUserResponse;
   } catch (_error) {

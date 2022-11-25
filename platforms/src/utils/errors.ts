@@ -9,7 +9,7 @@ export type ProviderError = {
 };
 
 export function getErrorString(error: ProviderError): string {
-  return `${error.name} - ${error.message}\n\t\
-  response: Status ${error.response?.status} - ${error.response?.statusText}\n\t\
-  response data: ${JSON.stringify(error?.response?.data)}`;
+  return `${error.name} - ${error.message}|\
+response: Status ${error.response?.status} - ${error.response?.statusText}|\
+response data: ${JSON.stringify(error?.response?.data)}`;
 }

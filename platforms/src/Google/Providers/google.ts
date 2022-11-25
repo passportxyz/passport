@@ -48,7 +48,7 @@ export class GoogleProvider implements Provider {
     const address = (await getAddress(payload)).toLowerCase();
     const verifiedPayload = await verifyGoogle(payload.proofs.code);
     const valid = !verifiedPayload.errors && verifiedPayload.emailVerified;
-    console.log("google - verify - verifiedPayload", address, verifiedPayload);
+    console.log("google - verify - verifiedPayload", address, JSON.stringify(verifiedPayload));
     return {
       valid: valid,
       error: verifiedPayload.errors,
@@ -81,7 +81,7 @@ export const requestAccessToken = async (code: string): Promise<string> => {
       "google - tokenRequest.statusText, tokenRequest.status, tokenRequest.data",
       tokenRequest.statusText,
       tokenRequest.status,
-      tokenRequest.data
+      JSON.stringify(tokenRequest.data)
     );
     return tokenResponse.access_token;
   } catch (_error) {
@@ -107,10 +107,10 @@ export const verifyGoogle = async (code: string): Promise<UserInfo> => {
       "google - userRequest.statusText, userRequest.status, userRequest.data",
       userRequest.statusText,
       userRequest.status,
-      userRequest.data
+      JSON.stringify(userRequest.data)
     );
     const userInfo: GoogleUserInfo = userRequest.data as GoogleUserInfo;
-    console.log("google - userInfo", userInfo);
+    console.log("google - userInfo", JSON.stringify(userInfo));
 
     return {
       email: userInfo?.email,
