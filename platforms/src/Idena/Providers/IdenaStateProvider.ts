@@ -24,7 +24,8 @@ abstract class IdenaStateProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    const { valid, address, expiresInSeconds } = await checkState(payload.proofs.token, this.state);
+    const token = payload.proofs.sessionKey;
+    const { valid, address, expiresInSeconds } = await checkState(token, this.state);
     if (!valid) {
       return { valid: false };
     }
