@@ -110,6 +110,7 @@ describe("Attempt verification %s", function () {
       });
       const gitcoinPayload = await gitcoin.verify(
         {
+          address: "0x0",
           proofs: {
             code,
           },
@@ -171,6 +172,7 @@ describe("Attempt verification %s", function () {
 
     const gitcoinPayload = await github.verify(
       {
+        address: "0x0",
         proofs: {
           code,
         },
@@ -199,6 +201,7 @@ describe("Attempt verification %s", function () {
 
     const gitcoinPayload = await github.verify(
       {
+        address: "0x0",
         proofs: {
           code,
         },
@@ -240,6 +243,7 @@ describe("Attempt verification %s", function () {
 
     const gitcoinPayload = await github.verify(
       {
+        address: "0x0",
         proofs: {
           code,
         },
@@ -267,8 +271,7 @@ describe("Attempt verification %s", function () {
 
   it("should return invalid payload when a bad status code is returned by github user api", async () => {
     (axios.get as jest.Mock).mockImplementation((url) => {
-      if (url === "https://api.github.com/user")
-        throw new Error("API EXCEPTION");
+      if (url === "https://api.github.com/user") throw new Error("API EXCEPTION");
       else if (url.startsWith("https://gitcoin.co/grants/v1/api/vc/contributor_statistics"))
         return Promise.resolve({
           status: 200,
@@ -287,6 +290,7 @@ describe("Attempt verification %s", function () {
 
     const gitcoinPayload = await github.verify(
       {
+        address: "0x0",
         proofs: {
           code,
         },
@@ -333,6 +337,7 @@ describe("Attempt verification %s", function () {
 
     const gitcoinPayload = await github.verify(
       {
+        address: "0x0",
         proofs: {
           code,
         },

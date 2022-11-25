@@ -6,6 +6,7 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../../types";
 import { getErrorString, ProviderError } from "../../utils/errors";
+import { getAddress } from "../../utils/signer";
 import axios from "axios";
 
 // Checking a valid tokenId for a result from Google will result in the following type
@@ -44,9 +45,10 @@ export class GoogleProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+    const address = (await getAddress(payload)).toLowerCase();
     const verifiedPayload = await verifyGoogle(payload.proofs.code);
     const valid = !verifiedPayload.errors && verifiedPayload.emailVerified;
-    console.log("google - verify - verifiedPayload", verifiedPayload);
+    console.log("google - verify - verifiedPayload", address, verifiedPayload);
     return {
       valid: valid,
       error: verifiedPayload.errors,
