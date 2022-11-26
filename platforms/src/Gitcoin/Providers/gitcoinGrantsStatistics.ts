@@ -96,7 +96,9 @@ export class GitcoinGrantStatisticsProvider implements Provider {
 
 const getGitcoinStatistics = async (dataUrl: string, handle: string): Promise<GitcoinGrantStatistics> => {
   try {
-    const grantStatisticsRequest = await axios.get(`${dataUrl}?handle=${handle}`, {
+    // The gitcoin API excpects lowercase handle
+    const lowerHandle = handle.toLowerCase();
+    const grantStatisticsRequest = await axios.get(`${dataUrl}?handle=${lowerHandle}`, {
       headers: { Authorization: `token ${AMI_API_TOKEN}` },
     });
 

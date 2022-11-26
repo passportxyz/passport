@@ -362,4 +362,63 @@ describe("Attempt verification %s", function () {
     });
     expect(gitcoinPayload).toMatchObject({ valid: false });
   });
+
+  it("should use the lowercase github handle when making querying the gitcoin API", async () => {
+    (axios.get as jest.Mock).mockImplementation((url) => {
+      if (url === "https://api.github.com/user") {
+        return Promise.resolve({
+          data: {
+            id: "18723656",
+            login: "User-Handle-With-Upper",
+            type: "User",
+          },
+          status: 200,
+        });
+      } else if (url.startsWith("https://gitcoin.co/grants/v1/api/vc/contributor_statistics"))
+        return Promise.resolve({
+          status: 200,
+          data: {
+            ...{
+              num_grants_contribute_to: 0,
+              num_rounds_contribute_to: 0,
+              total_contribution_amount: 0,
+              num_gr14_contributions: false,
+            },
+          },
+        });
+    });
+
+    const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
+
+    const gitcoinPayload = await github.verify(
+      {
+        address: "0x0",
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
+
+    expect(axios.post).toHaveBeenCalledTimes(1);
+    // Check the request to get the token
+    expect(mockedAxios.post).toBeCalledWith(
+      `https://github.com/login/oauth/access_token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}`,
+      {},
+      {
+        headers: { Accept: "application/json" },
+      }
+    );
+
+    expect(axios.get).toHaveBeenCalledTimes(2);
+
+    // Check the request to get the user
+    expect(mockedAxios.get).toBeCalledWith("https://api.github.com/user", {
+      headers: { Authorization: `token ${githubAccessCode}` },
+    });
+    expect(mockedAxios.get).nthCalledWith(2, `${testDataUrl}?handle=user-handle-with-upper`, {
+      headers: { Authorization: `token ${gitcoinAmiApiToken}` },
+    });
+    expect(gitcoinPayload).toMatchObject({ valid: false });
+  });
 });
