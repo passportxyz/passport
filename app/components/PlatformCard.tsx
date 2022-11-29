@@ -16,6 +16,7 @@ import { pillLocalStorage } from "../context/userContext";
 // --- Components
 import { JsonOutputModal } from "./JsonOutputModal";
 import { RemoveStampModal } from "./RemoveStampModal";
+import { getStampProviderFilters } from "../config/filters";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -56,6 +57,10 @@ export const PlatformCard = ({
     onOpen: onOpenRemoveStampModal,
     onClose: onCloseRemoveStampModal,
   } = useDisclosure();
+
+  const stampFilters = getStampProviderFilters(window?.location?.search);
+  const hidePlatform = stampFilters && !Object.keys(stampFilters).includes(platform.platform);
+  if (hidePlatform) return <></>
 
   // returns a single Platform card
   return (

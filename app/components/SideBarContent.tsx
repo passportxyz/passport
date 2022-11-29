@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Switch, Spinner } from "@chakra-ui/react";
 
 import { PlatformSpec, PlatformGroupSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { getStampProviderFilters } from "../config/filters";
 
 export type SideBarContentProps = {
   currentPlatform: PlatformSpec | undefined;
@@ -54,6 +55,8 @@ export const SideBarContent = ({
     }
   }, [verificationAttempted, allProviderIds, selectedProviders, currentPlatform]);
 
+  const stampFilters = getStampProviderFilters(window?.location?.search);
+
   return (
     <DrawerContent>
       <DrawerCloseButton disabled={isLoading} className={`z-10`} />
@@ -95,6 +98,9 @@ export const SideBarContent = ({
               <hr className="border-1" />
               {/* each of the available providers in this platform */}
               {currentProviders?.map((stamp, i) => {
+                const hideStamp =
+                  stampFilters && !stampFilters[currentPlatform?.platform]?.includes(stamp.platformGroup);
+                if (hideStamp) return null;
                 return (
                   <div key={i} className="border-b py-4 px-6">
                     <p className="ml-4 text-sm font-bold">{stamp.platformGroup}</p>
