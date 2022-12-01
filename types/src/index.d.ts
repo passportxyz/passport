@@ -224,7 +224,8 @@ export type PLATFORM_ID =
   | "Hypercerts"
   | "PHI"
   | "Holonym"
-  | "Idena";
+  | "Idena"
+  | "HumanodeOAuth2Service";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -310,4 +311,5 @@ export type PROVIDER_ID =
   | "IdenaStake#10k"
   | "IdenaStake#100k"
   | "IdenaAge#5"
-  | "IdenaAge#10";
+  | "IdenaAge#10"
+  | "BiometricsLivenessCheck";

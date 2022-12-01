@@ -311,6 +311,22 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "FF_NEW_GITHUB_STAMPS",
             valueFrom: `${IAM_SERVER_SSM_ARN}:FF_NEW_GITHUB_STAMPS::`,
           },
+          {
+            name: "HUMANODE_OAUTH2_SERVICE_CLIENT_ID",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:HUMANODE_OAUTH2_SERVICE_CLIENT_ID::`,
+          },
+          {
+            name: "HUMANODE_OAUTH2_SERVICE_CLIENT_SECRET",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:HUMANODE_OAUTH2_SERVICE_CLIENT_SECRET::`,
+          },
+          {
+            name: "HUMANODE_OAUTH2_SERVICE_ACCESS_TOKEN_URL",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:HUMANODE_OAUTH2_SERVICE_ACCESS_TOKEN_URL::`,
+          },
+          {
+            name: "HUMANODE_OAUTH2_SERVICE_CALLBACK",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:HUMANODE_OAUTH2_SERVICE_CALLBACK::`,
+          },
         ],
       },
     },
