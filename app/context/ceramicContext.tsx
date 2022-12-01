@@ -289,6 +289,10 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: getProviderSpec("GnosisSafe", "GnosisSafe"),
     stamp: undefined,
   },
+  BiometricsLivenessCheck: {
+    providerSpec: getProviderSpec("HumanodeOAuth2Service", "BiometricsLivenessCheck"),
+    stamp: undefined,
+  },
 };
 
 const startingState: CeramicContextState = {

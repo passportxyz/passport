@@ -288,4 +288,10 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Encrypted", name: "GnosisSafe" }],
     },
   ],
+  HumanodeOAuth2Service: [
+    {
+      platformGroup: "OAuth2 service",
+      providers: [{ title: "Liveness check", name: "BiometricsLivenessCheck" }],
+    },
+  ],
 };

@@ -94,7 +94,8 @@ export type PLATFORM_ID =
   | "NFT"
   | "ZkSync"
   | "Lens"
-  | "GnosisSafe";
+  | "GnosisSafe"
+  | "HumanodeOAuth2Service";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -158,4 +159,5 @@ export type PROVIDER_ID =
   | "NFT"
   | "ZkSync"
   | "Lens"
-  | "GnosisSafe";
+  | "GnosisSafe"
+  | "BiometricsLivenessCheck";

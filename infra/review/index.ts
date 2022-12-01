@@ -252,6 +252,22 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "AMI_API_TOKEN",
             valueFrom: `${IAM_SERVER_SSM_ARN}:AMI_API_TOKEN::`,
           },
+          {
+            name: "HUMANODE_OAUTH2_SERVICE_CLIENT_ID",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:HUMANODE_OAUTH2_SERVICE_CLIENT_ID::`,
+          },
+          {
+            name: "HUMANODE_OAUTH2_SERVICE_CLIENT_SECRET",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:HUMANODE_OAUTH2_SERVICE_CLIENT_SECRET::`,
+          },
+          {
+            name: "HUMANODE_OAUTH2_SERVICE_ACCESS_TOKEN_URL",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:HUMANODE_OAUTH2_SERVICE_ACCESS_TOKEN_URL::`,
+          },
+          {
+            name: "HUMANODE_OAUTH2_SERVICE_CALLBACK",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:HUMANODE_OAUTH2_SERVICE_CALLBACK::`,
+          },
         ],
       },
     },

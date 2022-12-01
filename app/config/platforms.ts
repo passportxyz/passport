@@ -177,4 +177,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Gnosis Safe Signer/Owner Verification",
     connectMessage: "Verify Account",
   },
+  {
+    icon: "./assets/humanodeStampIcon.svg",
+    platform: "HumanodeOAuth2Service",
+    name: "Humanode OAuth2 Service",
+    description: "Private biometric verification",
+    connectMessage: "Verify Account",
+  },
 ];

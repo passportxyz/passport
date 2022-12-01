@@ -26,6 +26,7 @@ import {
   GtcStaking,
   Google,
   Brightid,
+  HumanodeOAuth2Service,
 } from "@gitcoin/passport-platforms";
 
 // --- Components
@@ -158,6 +159,11 @@ providers.set("Google", {
 providers.set("Brightid", {
   platform: new Brightid.BrightidPlatform(),
   platFormGroupSpec: Brightid.BrightidProviderConfig,
+});
+
+providers.set("HumanodeOAuth2Service", {
+  platform: new HumanodeOAuth2Service.HumanodeOAuth2ServicePlatform(),
+  platFormGroupSpec: HumanodeOAuth2Service.HumanodeOAuth2ServiceProviderConfig,
 });
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
