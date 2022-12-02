@@ -14,6 +14,7 @@ export class Platform {
   clientId?: string;
   redirectUri?: string;
   state?: string;
+  bannerContent?: string;
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     const authUrl: string = await this.getOAuthUrl(appContext.state);
