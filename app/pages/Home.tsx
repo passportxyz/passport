@@ -37,7 +37,7 @@ export default function Home() {
             </div>
             <div className="font-libre-franklin mt-0 text-lg text-gray-400 sm:text-xl md:mt-10 md:pr-20 md:text-xl">
               Grow a decentralized identity record with various credentials about you. Through the network of sources
-              about your personhood, applications like Gitcoin Grants 2.0 gives you rights like matching weight in
+              about your personhood, applications like Gitcoin Grants Protocol gives you rights like matching weight in
               Quadratic Funding.
             </div>
             <div className="mt-4 hidden w-full sm:mt-10 sm:w-1/2 md:mt-10 md:block md:w-1/2">
