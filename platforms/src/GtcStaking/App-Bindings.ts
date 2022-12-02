@@ -7,6 +7,8 @@ export class GTCStakingPlatform implements Platform {
   clientId: string = null;
   redirectUri: string = null;
 
+  bannerContent = "The GTC Staking stamp is only claimable during Gitcoin Grants rounds.";
+
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     return {};
   }
