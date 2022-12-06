@@ -11,10 +11,8 @@ export const STAMP_FILTERS: any = {
   }
 };
 
-export const getStampProviderFilters = (search: string): any => {
+export const getStampProviderFilters = (filter: string | string[] | undefined): any => {
   let stampFilters: any = false;
-  const queryString = new URLSearchParams(search);
-  const filter = queryString.get("filter");
   if (filter && typeof filter === "string" && filter.length && Object.keys(STAMP_FILTERS).includes(filter)) {
     stampFilters = STAMP_FILTERS[filter];
   }
