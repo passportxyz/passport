@@ -1,5 +1,6 @@
 // --- React Methods
 import { useContext, useEffect } from "react";
+import { useRouter } from 'next/router';
 
 // --- Chakra UI Elements
 import { useDisclosure, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
@@ -44,6 +45,10 @@ export const PlatformCard = ({
   // import all providers
   const { allProvidersState, handleDeleteStamps } = useContext(CeramicContext);
 
+  // stamp filter
+  const router = useRouter();
+  const { filter } = router.query;
+
   // useDisclosure to control JSON modal
   const {
     isOpen: isOpenJsonOutputModal,
@@ -58,9 +63,10 @@ export const PlatformCard = ({
     onClose: onCloseRemoveStampModal,
   } = useDisclosure();
 
-  const stampFilters = getStampProviderFilters(window?.location?.search);
+  // hide platforms based on filter
+  const stampFilters = getStampProviderFilters(filter);
   const hidePlatform = stampFilters && !Object.keys(stampFilters).includes(platform.platform);
-  if (hidePlatform) return <></>
+  if (hidePlatform) return <></>;
 
   // returns a single Platform card
   return (

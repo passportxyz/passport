@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useRouter } from 'next/router';
 
 // --- Chakra UI Elements
 import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Switch, Spinner } from "@chakra-ui/react";
@@ -33,6 +34,10 @@ export const SideBarContent = ({
   const [allSelected, setAllSelected] = useState(false);
   const [showNoStampModal, setShowNoStampModal] = useState(false);
 
+  // stamp filter
+  const router = useRouter();
+  const { filter } = router.query;
+
   // alter select-all state when items change
   useEffect(() => {
     // find all providerIds
@@ -55,7 +60,7 @@ export const SideBarContent = ({
     }
   }, [verificationAttempted, allProviderIds, selectedProviders, currentPlatform]);
 
-  const stampFilters = getStampProviderFilters(window?.location?.search);
+  const stampFilters = getStampProviderFilters(filter);
 
   return (
     <DrawerContent>
@@ -98,6 +103,7 @@ export const SideBarContent = ({
               <hr className="border-1" />
               {/* each of the available providers in this platform */}
               {currentProviders?.map((stamp, i) => {
+                // hide stamps based on filter
                 const hideStamp =
                   stampFilters && !stampFilters[currentPlatform?.platform]?.includes(stamp.platformGroup);
                 if (hideStamp) return null;
