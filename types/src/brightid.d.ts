@@ -16,10 +16,11 @@ export type SponsorshipSuccessResponse = {
 };
 
 export type VerificationSuccessResponse = {
+  verification: string;
   unique?: boolean;
   app?: string;
-  context?: string;
-  contextIds?: string[];
+  verificationHash?: string;
+  appUserId?: string;
 };
 
 export type BrightIdVerificationResponse = FailResponse | VerificationSuccessResponse;

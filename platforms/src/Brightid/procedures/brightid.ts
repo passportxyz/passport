@@ -1,4 +1,4 @@
-import { verifyContextId, sponsor } from "brightid_sdk";
+import { userVerificationStatus, sponsor } from "brightid_sdk_v6";
 import {
   BrightIdProcedureResponse,
   BrightIdVerificationResponse,
@@ -10,17 +10,14 @@ const CONTEXT = "Gitcoin";
 
 export const verifyBrightidContextId = async (contextId: string): Promise<BrightIdProcedureResponse> => {
   try {
-    const verifyContextIdResult: BrightIdVerificationResponse = (await verifyContextId(
+    const verifyContextIdResult: BrightIdVerificationResponse = (await userVerificationStatus(
       CONTEXT,
       contextId
     )) as BrightIdVerificationResponse;
-
     // Unique is true if the user obtained "Meets" verification by attending a connection party
     const isUnique = "unique" in verifyContextIdResult && verifyContextIdResult.unique === true;
-    const isValid =
-      "contextIds" in verifyContextIdResult &&
-      verifyContextIdResult.contextIds &&
-      verifyContextIdResult.contextIds.length > 0;
+    // TODO: Possibly verify verification further
+    const isValid = "verification" in verifyContextIdResult && verifyContextIdResult.verification;
 
     return { valid: (isValid && isUnique) || false, result: verifyContextIdResult };
   } catch (err: unknown) {

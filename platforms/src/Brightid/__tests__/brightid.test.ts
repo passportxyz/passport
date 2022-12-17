@@ -3,10 +3,10 @@ import { BrightIdProvider } from "../Providers/brightid";
 import { triggerBrightidSponsorship } from "../procedures/brightid";
 import { BrightIdVerificationResponse, BrightIdSponsorshipResponse } from "@gitcoin/passport-types";
 import { RequestPayload } from "@gitcoin/passport-types";
-import { verifyContextId, sponsor } from "brightid_sdk";
+import { userVerificationStatus, sponsor } from "brightid_sdk_v6";
 
-jest.mock("brightid_sdk", () => ({
-  verifyContextId: jest.fn(),
+jest.mock("brightid_sdk_v6", () => ({
+  userVerificationStatus: jest.fn(),
   sponsor: jest.fn(),
 }));
 
@@ -60,7 +60,7 @@ describe("Attempt BrightId", () => {
 
   describe("Handles Verification", () => {
     it("valid BrightId did as contextId verification attempt, returns valid true, verifies if user has Meet status and verified contextId", async () => {
-      (verifyContextId as jest.Mock).mockResolvedValue(validVerificationResponse);
+      (userVerificationStatus as jest.Mock).mockResolvedValue(validVerificationResponse);
 
       const result = await new BrightIdProvider().verify({
         proofs: {
@@ -68,8 +68,8 @@ describe("Attempt BrightId", () => {
         },
       } as unknown as RequestPayload);
 
-      expect(verifyContextId).toBeCalledTimes(1);
-      expect(verifyContextId).toBeCalledWith("Gitcoin", did);
+      expect(userVerificationStatus).toBeCalledTimes(1);
+      expect(userVerificationStatus).toBeCalledWith("Gitcoin", did);
       expect(result).toMatchObject({
         valid: true,
         record: {
@@ -80,7 +80,7 @@ describe("Attempt BrightId", () => {
     });
 
     it("invalid BrightId did as contextId verification attempt, returns valid false and record undefined", async () => {
-      (verifyContextId as jest.Mock).mockResolvedValue(invalidVerificationResponse);
+      (userVerificationStatus as jest.Mock).mockResolvedValue(invalidVerificationResponse);
 
       const result = await new BrightIdProvider().verify({
         proofs: {
@@ -88,7 +88,7 @@ describe("Attempt BrightId", () => {
         },
       } as unknown as RequestPayload);
 
-      expect(verifyContextId).toBeCalledTimes(1);
+      expect(userVerificationStatus).toBeCalledTimes(1);
       expect(result).toMatchObject({
         valid: false,
         record: undefined,
@@ -96,7 +96,7 @@ describe("Attempt BrightId", () => {
     });
 
     it("thrown error from BrightId did as contextId verification attempt, returns valid false", async () => {
-      (verifyContextId as jest.Mock).mockRejectedValue("Thrown Error");
+      (userVerificationStatus as jest.Mock).mockRejectedValue("Thrown Error");
 
       const result = await new BrightIdProvider().verify({
         proofs: {
@@ -104,14 +104,14 @@ describe("Attempt BrightId", () => {
         },
       } as unknown as RequestPayload);
 
-      expect(verifyContextId).toBeCalledTimes(1);
+      expect(userVerificationStatus).toBeCalledTimes(1);
       expect(result).toMatchObject({
         valid: false,
       });
     });
 
     it("user is sponsored but did not attend a connection party, returns valid false and record undefined", async () => {
-      (verifyContextId as jest.Mock).mockResolvedValue(nonUniqueResponse);
+      (userVerificationStatus as jest.Mock).mockResolvedValue(nonUniqueResponse);
 
       const result = await new BrightIdProvider().verify({
         proofs: {
@@ -119,7 +119,7 @@ describe("Attempt BrightId", () => {
         },
       } as unknown as RequestPayload);
 
-      expect(verifyContextId).toBeCalledTimes(1);
+      expect(userVerificationStatus).toBeCalledTimes(1);
       expect(result).toMatchObject({
         valid: false,
         record: undefined,

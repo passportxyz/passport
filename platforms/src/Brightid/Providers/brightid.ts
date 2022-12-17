@@ -26,19 +26,15 @@ export class BrightIdProvider implements Provider {
 
       // Unique is true if the user obtained "Meets" verification by attending a connection party
       const isUnique = "unique" in formattedData && formattedData.unique === true;
-      const firstContextId =
-        "contextIds" in formattedData &&
-        formattedData.contextIds &&
-        formattedData.contextIds.length > 0 &&
-        formattedData.contextIds[0];
-      const valid: boolean = (firstContextId && isUnique) || false;
+      const verified = "verification" in formattedData && formattedData.verification;
+      const valid: boolean = (verified && isUnique) || false;
 
       return {
         valid,
         record: valid
           ? {
-              context: "context" in formattedData && formattedData.context,
-              contextId: firstContextId,
+              context: "verification" in formattedData && formattedData.verification,
+              contextId: "appUserId" in formattedData.appUserId,
               meets: JSON.stringify(isUnique),
             }
           : undefined,
