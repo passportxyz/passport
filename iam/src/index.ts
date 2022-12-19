@@ -63,6 +63,7 @@ import {
   Google,
   ClearText,
   Brightid,
+  Holonym,
 } from "@gitcoin/passport-platforms";
 
 import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
@@ -249,6 +250,7 @@ export const providers = new Providers([
   new Lens.LensProfileProvider(),
   new ZkSync.ZkSyncProvider(),
   new GnosisSafe.GnosisSafeProvider(),
+  new Holonym.HolonymGovIdProvider(),
 ]);
 
 // create the app and run on port

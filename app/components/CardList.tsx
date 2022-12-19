@@ -26,6 +26,7 @@ import {
   GtcStaking,
   Google,
   Brightid,
+  Holonym,
 } from "@gitcoin/passport-platforms";
 
 // --- Components
@@ -158,6 +159,11 @@ providers.set("Google", {
 providers.set("Brightid", {
   platform: new Brightid.BrightidPlatform(),
   platFormGroupSpec: Brightid.BrightidProviderConfig,
+});
+
+providers.set("Holonym", {
+  platform: new Holonym.HolonymPlatform(),
+  platFormGroupSpec: Holonym.HolonymProviderConfig,
 });
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {

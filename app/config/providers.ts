@@ -288,4 +288,10 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Encrypted", name: "GnosisSafe" }],
     },
   ],
+  Holonym: [
+    {
+      platformGroup: "Government ID",
+      providers: [{ title: "Proven uniqueness using Holonym with government ID", name: "HolonymGovIdProvider" }],
+    },
+  ],
 };

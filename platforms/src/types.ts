@@ -95,7 +95,8 @@ export type PLATFORM_ID =
   | "NFT"
   | "ZkSync"
   | "Lens"
-  | "GnosisSafe";
+  | "GnosisSafe"
+  | "Holonym";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -159,4 +160,6 @@ export type PROVIDER_ID =
   | "NFT"
   | "ZkSync"
   | "Lens"
-  | "GnosisSafe";
+  | "GnosisSafe"
+  | "Holonym"
+  | "HolonymGovIdProvider";

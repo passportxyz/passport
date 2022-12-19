@@ -20,5 +20,6 @@ export * as GtcStaking from "./GtcStaking";
 export * as Google from "./Google";
 export * as ClearText from "./ClearText";
 export * as Brightid from "./Brightid";
+export * as Holonym from "./Holonym";
 
 export { Platform, AppContext, ProviderPayload, PlatformSpec } from "./types";

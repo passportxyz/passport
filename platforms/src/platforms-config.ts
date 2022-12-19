@@ -168,4 +168,12 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Gnosis Safe Signer/Owner Verification",
     connectMessage: "Verify Account",
   },
+  {
+    icon: "./assets/holonymStampIcon.svg",
+    platform: "Holonym",
+    name: "Holonym",
+    description: "Mint a Holo to verify your account",
+    connectMessage: "Connect Account",
+    isEVM: true,
+  },
 ];
