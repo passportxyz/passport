@@ -6,8 +6,9 @@ export class EnsPlatform extends Platform {
   path = "Ens";
   clientId: string = null;
   redirectUri: string = null;
-  
-  bannerContent = "The ENS stamp only recognizes ENS domains if they are set to your account as primary ENS (or reverse record).";
+
+  bannerContent =
+    "The ENS stamp only recognizes ENS domains if they are set to your account as primary ENS (or reverse record).";
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     const result = await Promise.resolve({});
