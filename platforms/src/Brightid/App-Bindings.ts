@@ -35,7 +35,7 @@ export class BrightidPlatform implements Platform {
     const authUrl = `${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(
       /\/*?$/,
       ""
-    )}/brightid/information?callback=${appContext?.callbackUrl}`;
+    )}/brightid/information?callback=${appContext?.callbackUrl}&userDid=${appContext?.userDid}`;
     const width = 600;
     const height = 800;
     const left = appContext.screen.width / 2 - width / 2;
