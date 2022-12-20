@@ -15,6 +15,7 @@ export class Platform {
   redirectUri?: string;
   state?: string;
   bannerContent?: string;
+  isEVM?: boolean;
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     const authUrl: string = await this.getOAuthUrl(appContext.state);

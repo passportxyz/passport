@@ -6,6 +6,7 @@ export class EnsPlatform extends Platform {
   path = "Ens";
   clientId: string = null;
   redirectUri: string = null;
+  isEVM = true;
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     const result = await Promise.resolve({});
