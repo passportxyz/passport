@@ -43,6 +43,11 @@ export const SUCCESFUL_ENS_RESULTS: CredentialResponseBody = {
   credential,
 };
 
+export const UN_SUCCESSFUL_ENS_RESULT: CredentialResponseBody = {
+  record: { type: "Ens", version: "0.0.0", ens: "jimmyjim.eth" },
+  credential,
+};
+
 export const SUCCESFUL_POAP_RESULT: VerifiableCredentialRecord = {
   record: {
     type: "POAP",

@@ -29,32 +29,32 @@ import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/
 import { getPlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/platforms-config";
 
 // --- Helpers
-import { difference } from "../utils/helpers";
+import { difference, generateUID } from "../utils/helpers";
 
 import { debounce } from "ts-debounce";
 import { BroadcastChannel } from "broadcast-channel";
 import { datadogRum } from "@datadog/browser-rum";
+import { NoStampModal } from "./NoStampModal";
 
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
   platform: Platform;
 };
 
+enum VerificationStatuses {
+  AllVerified,
+  ReVerified,
+  PartiallyVerified,
+  AllRemoved,
+  PartiallyRemoved,
+  PartiallyRemovedAndVerified,
+  Failed,
+}
+
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
 const checkIcon = "../../assets/check-icon.svg";
-
-function generateUID(length: number) {
-  return window
-    .btoa(
-      Array.from(window.crypto.getRandomValues(new Uint8Array(length * 2)))
-        .map((b) => String.fromCharCode(b))
-        .join("")
-    )
-    .replace(/[+/]/g, "")
-    .substring(0, length);
-}
 
 export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
@@ -62,6 +62,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [verificationAttempted, setVerificationAttempted] = useState(false);
+  const [showNoStampModal, setShowNoStampModal] = useState(false);
 
   // --- Chakra functions
   const toast = useToast();
@@ -244,8 +245,19 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
       // reset can submit state
       setCanSubmit(false);
 
+      const verificationStatus = getVerificationStatus(
+        updatedVerifiedProviders,
+        initialMinusUpdated,
+        updatedMinusInitial
+      );
+
+      if (verificationStatus === VerificationStatuses.Failed && verificationAttempted) {
+        setShowNoStampModal(true);
+      }
+
       // Get the done toast messages
       const { title, body, icon, platformId } = getDoneToastMessages(
+        verificationStatus,
         updatedVerifiedProviders,
         initialMinusUpdated,
         updatedMinusInitial
@@ -274,93 +286,121 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
     });
   };
 
-  // Done toast message getter
-  const getDoneToastMessages = (
+  const getVerificationStatus = (
     updatedVerifiedProviders: Set<PROVIDER_ID>,
     initialMinusUpdated: Set<PROVIDER_ID>,
     updatedMinusInitial: Set<PROVIDER_ID>
   ) => {
     if (updatedMinusInitial.size === providerIds.length) {
-      return {
-        title: "Done!",
-        body: `All ${platform.platformId} data points verified.`,
-        icon: checkIcon,
-        platformId: platform.platformId as PLATFORM_ID,
-      };
+      return VerificationStatuses.AllVerified;
     } else if (updatedVerifiedProviders.size > 0 && updatedMinusInitial.size === 0 && initialMinusUpdated.size === 0) {
-      return {
-        title: "Success!",
-        body: `Successfully re-verified ${platform.platformId} data ${
-          updatedVerifiedProviders.size > 1 ? "points" : "point"
-        }.`,
-        icon: checkIcon,
-        platformId: platform.platformId as PLATFORM_ID,
-      };
+      return VerificationStatuses.ReVerified;
     } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size === 0) {
-      return {
-        title: "Success!",
-        body: `${updatedMinusInitial.size + initialMinusUpdated.size} ${platform.platformId} data ${
-          updatedMinusInitial.size + initialMinusUpdated.size > 1 ? "points" : "point"
-        } verified out of ${providerIds.length}.`,
-        icon: checkIcon,
-        platformId: platform.platformId as PLATFORM_ID,
-      };
+      return VerificationStatuses.PartiallyVerified;
     } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0 && selectedProviders.length === 0) {
-      return {
-        title: "Success!",
-        body: `All ${platform.platformId} data points removed.`,
-        icon: checkIcon,
-        platformId: platform.platformId as PLATFORM_ID,
-      };
+      return VerificationStatuses.AllRemoved;
     } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
-      return {
-        title: "Success!",
-        body: `${initialMinusUpdated.size} ${platform.platformId} data ${
-          initialMinusUpdated.size > 1 ? "points" : "point"
-        } removed.`,
-        icon: checkIcon,
-        platformId: platform.platformId as PLATFORM_ID,
-      };
+      return VerificationStatuses.PartiallyRemoved;
     } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size > 0) {
-      return {
-        title: "Success!",
-        body: `${initialMinusUpdated.size} ${platform.platformId} data ${
-          initialMinusUpdated.size > 1 ? "points" : "point"
-        } removed and ${updatedMinusInitial.size} verified.`,
-        icon: checkIcon,
-        platformId: platform.platformId as PLATFORM_ID,
-      };
+      return VerificationStatuses.PartiallyRemovedAndVerified;
     } else {
-      return {
-        title: "Verification Failed",
-        body: "Please make sure you fulfill the requirements for this stamp.",
-        icon: "../../assets/verification-failed.svg",
-        platformId: platform.platformId as PLATFORM_ID,
-      };
+      return VerificationStatuses.Failed;
+    }
+  };
+
+  // Done toast message getter
+  const getDoneToastMessages = (
+    verificationStatus: VerificationStatuses,
+    initialMinusUpdated: Set<PROVIDER_ID>,
+    updatedMinusInitial: Set<PROVIDER_ID>,
+    updatedVerifiedProviders: Set<PROVIDER_ID>
+  ) => {
+    // Switch statement to determine which toast message to display based on VerificationStatuses enum
+    switch (verificationStatus) {
+      case VerificationStatuses.AllVerified:
+        return {
+          title: "Done!",
+          body: `All ${platform.platformId} data points verified.`,
+          icon: checkIcon,
+          platformId: platform.platformId as PLATFORM_ID,
+        };
+      case VerificationStatuses.ReVerified:
+        return {
+          title: "Success!",
+          body: `Successfully re-verified ${platform.platformId} data ${
+            updatedVerifiedProviders.size > 1 ? "points" : "point"
+          }.`,
+          icon: checkIcon,
+          platformId: platform.platformId as PLATFORM_ID,
+        };
+      case VerificationStatuses.PartiallyVerified:
+        return {
+          title: "Success!",
+          body: `Successfully verified ${platform.platformId} data ${
+            updatedMinusInitial.size > 1 ? "points" : "point"
+          }.`,
+          icon: checkIcon,
+          platformId: platform.platformId as PLATFORM_ID,
+        };
+      case VerificationStatuses.AllRemoved:
+        return {
+          title: "Success!",
+          body: `All ${platform.platformId} data points removed.`,
+          icon: checkIcon,
+          platformId: platform.platformId as PLATFORM_ID,
+        };
+      case VerificationStatuses.PartiallyRemoved:
+        return {
+          title: "Success!",
+          body: `Successfully removed ${platform.platformId} data ${
+            initialMinusUpdated.size > 1 ? "points" : "point"
+          }.`,
+          icon: checkIcon,
+          platformId: platform.platformId as PLATFORM_ID,
+        };
+      case VerificationStatuses.PartiallyRemovedAndVerified:
+        return {
+          title: "Success!",
+          body: `${initialMinusUpdated.size} ${platform.platformId} data ${
+            initialMinusUpdated.size > 1 ? "points" : "point"
+          } removed and ${updatedMinusInitial.size} verified.`,
+          icon: checkIcon,
+          platformId: platform.platformId as PLATFORM_ID,
+        };
+      case VerificationStatuses.Failed:
+        return {
+          title: "Verification Failed",
+          body: "Please make sure you fulfill the requirements for this stamp.",
+          icon: "../../assets/verification-failed.svg",
+          platformId: platform.platformId as PLATFORM_ID,
+        };
     }
   };
 
   return (
-    <SideBarContent
-      currentPlatform={getPlatformSpec(platform.platformId)}
-      currentProviders={platFormGroupSpec}
-      verifiedProviders={verifiedProviders}
-      selectedProviders={selectedProviders}
-      setSelectedProviders={setSelectedProviders}
-      isLoading={isLoading}
-      infoElement={platform.bannerContent ? <GenericBanner content={platform.bannerContent} /> : undefined}
-      verifyButton={
-        <>
-          <button
-            disabled={!canSubmit}
-            onClick={handleFetchCredential}
-            data-testid={`button-verify-${platform.platformId}`}
-            className="sidebar-verify-btn"
-          >
-            {verifiedProviders.length > 0 ? "Save" : "Verify"}
-          </button>
-        </>
-      }
-    />
+    <>
+      <SideBarContent
+        currentPlatform={getPlatformSpec(platform.platformId)}
+        currentProviders={platFormGroupSpec}
+        verifiedProviders={verifiedProviders}
+        selectedProviders={selectedProviders}
+        setSelectedProviders={setSelectedProviders}
+        isLoading={isLoading}
+        infoElement={platform.bannerContent ? <GenericBanner content={platform.bannerContent} /> : undefined}
+        verifyButton={
+          <>
+            <button
+              disabled={!canSubmit}
+              onClick={handleFetchCredential}
+              data-testid={`button-verify-${platform.platformId}`}
+              className="sidebar-verify-btn"
+            >
+              {verifiedProviders.length > 0 ? "Save" : "Verify"}
+            </button>
+          </>
+        }
+      />
+      <NoStampModal isOpen={showNoStampModal} onClose={() => console.log("Closing")} />
+    </>
   );
 };

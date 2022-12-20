@@ -14,7 +14,6 @@ export type SideBarContentProps = {
   isLoading: boolean | undefined;
   verifyButton: JSX.Element | undefined;
   infoElement?: JSX.Element | undefined;
-  verificationAttempted?: boolean;
 };
 
 export const SideBarContent = ({
@@ -26,11 +25,9 @@ export const SideBarContent = ({
   isLoading,
   verifyButton,
   infoElement,
-  verificationAttempted,
 }: SideBarContentProps): JSX.Element => {
   const [allProviderIds, setAllProviderIds] = useState<PROVIDER_ID[]>([]);
   const [allSelected, setAllSelected] = useState(false);
-  const [showNoStampModal, setShowNoStampModal] = useState(false);
 
   // alter select-all state when items change
   useEffect(() => {
@@ -46,13 +43,7 @@ export const SideBarContent = ({
     // is everything selected?
     setAllSelected(!doSelect);
     setAllProviderIds(providerIds);
-  }, [currentProviders, selectedProviders, verificationAttempted]);
-
-  useEffect(() => {
-    if (verificationAttempted && currentPlatform?.isEVM && (selectedProviders?.length || 0) < allProviderIds.length) {
-      setShowNoStampModal(true);
-    }
-  }, [verificationAttempted, allProviderIds, selectedProviders, currentPlatform]);
+  }, [currentProviders, selectedProviders]);
 
   return (
     <DrawerContent>
