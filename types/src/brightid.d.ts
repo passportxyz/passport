@@ -1,18 +1,14 @@
 export type FailResponse = {
-  status?: number;
-  statusText?: string;
-  data?: {
-    error: boolean;
-    errorNum: number;
-    errorMessage: string;
-    contextIds?: string[];
-    code: number;
-  };
+  error: boolean;
+  errorMessage: string;
 };
 
 export type SponsorshipSuccessResponse = {
-  status: string;
-  statusReason: string;
+  hash: string;
+};
+
+export type SponsorData = {
+  hash: string;
 };
 
 export type VerificationSuccessResponse = {
@@ -25,10 +21,21 @@ export type VerificationSuccessResponse = {
 
 export type BrightIdVerificationResponse = FailResponse | VerificationSuccessResponse;
 
-export type BrightIdSponsorshipResponse = FailResponse | SponsorshipSuccessResponse;
+export type BrightIdSponsorshipResponse = FailResponse | SponsorData;
+
+export type SignedVerification = {
+  unique: boolean;
+  app: string;
+  appUserId: string;
+  verification: string;
+  verificationHash?: string;
+  timestamp?: number;
+  sig?: string;
+  publicKey?: string;
+};
 
 export type BrightIdProcedureResponse = {
   valid: boolean;
-  result?: BrightIdSponsorshipResponse | BrightIdVerificationResponse;
+  result?: BrightIdSponsorshipResponse | SignedVerification;
   error?: string;
 };
