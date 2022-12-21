@@ -5,31 +5,11 @@ import { CeramicContext } from "../context/ceramicContext";
 import { AdditionalSignature } from "../signer/utils";
 import { PlatformClass } from "@gitcoin/passport-platforms";
 import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
-import { Provider } from "@gitcoin/passport-platforms/dist/commonjs/types";
-import { checkAllEVMProviders } from "@gitcoin/passport-platforms";
-
-// export type RequestPayload = {
-//   type: string;
-//   types?: string[];
-//   address: string;
-//   version: string;
-//   proofs?: {
-//     [k: string]: string;
-//   };
-//   signer?: {
-//     challenge: VerifiableCredential;
-//     signature: string;
-//     address: string;
-//   };
-//   jsonRpcSigner?: JsonRpcSigner;
-//   challenge?: string;
-//   issuer?: string;
-//   rpcUrl?: string;
-// };
+import { fetchPossibleEVMStamps } from "../signer/utils";
 
 export const AdditionalStamps = ({ additionalSigner }: { additionalSigner: AdditionalSignature }) => {
   const { allPlatforms } = useContext(CeramicContext);
-  const [evmPlatforms, setEvmPlatforms] = useState<PlatformClass[]>([]);
+  const [evmProviders, setEvmProviders] = useState<string[]>([]);
 
   useEffect(() => {
     // const platforms: PlatformClass[] = [];
@@ -41,21 +21,20 @@ export const AdditionalStamps = ({ additionalSigner }: { additionalSigner: Addit
         platformGroupSpec.push(...platformProp.platFormGroupSpec);
       }
     });
-    console.log({ platformGroupSpec });
 
-    // Get all provider types
-
-    console.log("platformGroupSpec", platformGroupSpec);
-    // setEvmPlatforms(platforms);
-    console.log("evmPlatforms", evmPlatforms);
+    // Flatten platformGroupSpec to a list of all provider names
+    const providerNames = platformGroupSpec.reduce((acc, cur) => {
+      return [...acc, ...cur.providers.map((provider) => provider.name)];
+    }, [] as string[]);
+    setEvmProviders(providerNames);
   }, [allPlatforms]);
 
   useEffect(() => {
     const checkAdditionalSigners = async () => {
-      // const additionalProviders = await checkAllEVMProviders({
-      //   signer: additionalSigner,
-      // });
+      const possibleStamps = await fetchPossibleEVMStamps(additionalSigner.addr, evmProviders);
+      console.log({ possibleStamps });
     };
+    checkAdditionalSigners();
   });
 
   const evmStamps = [];

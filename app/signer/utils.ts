@@ -8,6 +8,7 @@ import {
   fetchVerifiableCredential,
 } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { providers } from "@gitcoin/passport-platforms";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const providerId: PROVIDER_ID = "Signer";
@@ -94,46 +95,19 @@ export const fetchAdditionalSigner = async (address: string): Promise<Additional
     window.addEventListener("message", listener);
   });
   return extraSignature;
-  // console.log({ extraSignature });
-  // We should have an extraSignature, time to fetch what stamps they COULD include
-  // await fetchVerifiableCredential(
-  //   iamUrl,
-  //   {
-  //     type: "Signer",
-  //     types: ["Poh", "POAP", "Ens"],
-  //     version: "0.0.0",
-  //     address: address || "",
-  //     proofs: {
-  //       valid: address ? "true" : "false",
-  //     },
-  //     signer: {
-  //       challenge: challenge,
-  //       signature: extraSignature?.sig,
-  //       address: extraSignature?.addr,
-  //     },
-  //   },
-  //   signer as { signMessage: (message: string) => Promise<string> }
-  // )
-  //   .then(async (verified: VerifiableCredentialRecord): Promise<(Stamp | undefined)[]> => {
-  //     // because we provided a types array in the params we expect to receive a credentials array in the response...
-  //     const vcs =
-  //       verified.credentials
-  //         ?.map((cred: CredentialResponseBody): Stamp | undefined => {
-  //           if (!cred.error) {
-  //             // add each of the requested/received stamps to the passport...
-  //             return {
-  //               provider: cred.record?.type as PROVIDER_ID,
-  //               credential: cred.credential as VerifiableCredential,
-  //             };
-  //           }
-  //         })
-  //         .filter((v: Stamp | undefined) => v) || [];
-  //     return vcs;
-  //   })
-  //   .catch((e: any): void => {
-  //     datadogLogs.logger.error("Verification Error", { error: e, provider: providerId });
-  //     datadogRum.addError(e, { provider: providerId });
-  //     return undefined;
-  //   });
-  // return undefined;
+};
+
+export const fetchPossibleEVMStamps = async (address: string, providerTypes: string[]) => {
+  const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
+
+  const providerRequests = providerTypes.map(async (provider) => {
+    const payload = await providers.verify(provider, { type: provider, address, version: "0.0.0", rpcUrl }, {});
+    return {
+      payload,
+      providerType: provider,
+    };
+  });
+
+  const verifiedProviders = await Promise.all(providerRequests);
+  return verifiedProviders;
 };
