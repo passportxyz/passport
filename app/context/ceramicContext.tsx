@@ -6,6 +6,29 @@ import { useViewerConnection } from "@self.id/framework";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { UserContext } from "./userContext";
+import {
+  Twitter,
+  Ens,
+  Lens,
+  Github,
+  Gitcoin,
+  Facebook,
+  Poh,
+  GitPOAP,
+  NFT,
+  GnosisSafe,
+  Snapshot,
+  POAP,
+  ETH,
+  ZkSync,
+  Discord,
+  Linkedin,
+  GTC,
+  GtcStaking,
+  Google,
+  Brightid,
+} from "@gitcoin/passport-platforms";
+import { PlatformProps } from "../components/GenericPlatform";
 
 // -- Trusted IAM servers DID
 const IAM_ISSUER_DID = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
@@ -14,6 +37,7 @@ export interface CeramicContextState {
   passport: Passport | undefined | false;
   isLoadingPassport: IsLoadingPassportState;
   allProvidersState: AllProvidersState;
+  allPlatforms: Map<PLATFORM_ID, PlatformProps>;
   handleCreatePassport: () => Promise<void>;
   handleAddStamp: (stamp: Stamp) => Promise<void>;
   handleAddStamps: (stamps: Stamp[]) => Promise<void>;
@@ -21,6 +45,119 @@ export interface CeramicContextState {
   handleDeleteStamps: (providerIds: PROVIDER_ID[]) => Promise<void>;
   userDid: string | undefined;
 }
+
+export const platforms = new Map<PLATFORM_ID, PlatformProps>();
+platforms.set("Twitter", {
+  platform: new Twitter.TwitterPlatform(),
+  platFormGroupSpec: Twitter.TwitterProviderConfig,
+});
+
+platforms.set("GitPOAP", {
+  platform: new GitPOAP.GitPOAPPlatform(),
+  platFormGroupSpec: GitPOAP.GitPOAPProviderConfig,
+});
+
+platforms.set("Ens", {
+  platform: new Ens.EnsPlatform(),
+  platFormGroupSpec: Ens.EnsProviderConfig,
+});
+
+platforms.set("NFT", {
+  platform: new NFT.NFTPlatform(),
+  platFormGroupSpec: NFT.NFTProviderConfig,
+});
+
+platforms.set("Facebook", {
+  platFormGroupSpec: Facebook.FacebookProviderConfig,
+  platform: new Facebook.FacebookPlatform(),
+});
+
+platforms.set("Github", {
+  platform: new Github.GithubPlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+  }),
+  platFormGroupSpec: Github.GithubProviderConfig,
+});
+
+platforms.set("Gitcoin", {
+  platform: new Gitcoin.GitcoinPlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+  }),
+  platFormGroupSpec: Gitcoin.GitcoinProviderConfig,
+});
+
+platforms.set("Snapshot", {
+  platform: new Snapshot.SnapshotPlatform(),
+  platFormGroupSpec: Snapshot.SnapshotProviderConfig,
+});
+
+platforms.set("Poh", {
+  platform: new Poh.PohPlatform(),
+  platFormGroupSpec: Poh.PohProviderConfig,
+});
+
+platforms.set("ZkSync", {
+  platform: new ZkSync.ZkSyncPlatform(),
+  platFormGroupSpec: ZkSync.ZkSyncProviderConfig,
+});
+
+platforms.set("Lens", {
+  platform: new Lens.LensPlatform(),
+  platFormGroupSpec: Lens.LensProviderConfig,
+});
+
+platforms.set("GnosisSafe", {
+  platform: new GnosisSafe.GnosisSafePlatform(),
+  platFormGroupSpec: GnosisSafe.GnosisSafeProviderConfig,
+});
+
+platforms.set("ETH", {
+  platform: new ETH.ETHPlatform(),
+  platFormGroupSpec: ETH.ETHProviderConfig,
+});
+
+platforms.set("POAP", {
+  platform: new POAP.POAPPlatform(),
+  platFormGroupSpec: POAP.POAPProviderConfig,
+});
+
+platforms.set("Discord", {
+  platform: new Discord.DiscordPlatform(),
+  platFormGroupSpec: Discord.DiscordProviderConfig,
+});
+
+platforms.set("Linkedin", {
+  platform: new Linkedin.LinkedinPlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
+  }),
+  platFormGroupSpec: Linkedin.LinkedinProviderConfig,
+});
+
+platforms.set("GTC", {
+  platform: new GTC.GTCPlatform(),
+  platFormGroupSpec: GTC.GTCProviderConfig,
+});
+
+platforms.set("GtcStaking", {
+  platform: new GtcStaking.GTCStakingPlatform(),
+  platFormGroupSpec: GtcStaking.GTCStakingProviderConfig,
+});
+
+platforms.set("Google", {
+  platform: new Google.GooglePlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CALLBACK,
+  }),
+  platFormGroupSpec: Google.GoogleProviderConfig,
+});
+
+platforms.set("Brightid", {
+  platform: new Brightid.BrightidPlatform(),
+  platFormGroupSpec: Brightid.BrightidProviderConfig,
+});
 
 export enum IsLoadingPassportState {
   Idle,
@@ -295,6 +432,7 @@ const startingState: CeramicContextState = {
   passport: undefined,
   isLoadingPassport: IsLoadingPassportState.Loading,
   allProvidersState: startingAllProvidersState,
+  allPlatforms: platforms,
   handleCreatePassport: async () => {},
   handleAddStamp: async () => {},
   handleAddStamps: async () => {},
@@ -484,6 +622,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     passport,
     isLoadingPassport,
     allProvidersState,
+    allPlatforms: platforms,
     handleCreatePassport,
     handleAddStamp,
     handleAddStamps,
