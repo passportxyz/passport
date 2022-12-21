@@ -135,10 +135,6 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           // When sessionStr is null, this will create a new selfId. We want to avoid this, becasue we want to make sure
           // that chainId 1 is in the did
           let selfId = !!sessionStr ? await ceramicConnect(ethAuthProvider, sessionStr) : null;
-          console.log(
-            "geri - process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE",
-            process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE
-          );
 
           if (
             // @ts-ignore
@@ -162,7 +158,6 @@ export const UserContextProvider = ({ children }: { children: any }) => {
                   address: address,
                 })
               );
-              console.log("geri - authMethod", authMethod);
               const session = await DIDSession.authorize(authMethod, {
                 expiresInSecs: 24 * 3600,
                 resources: ["ceramic://*"],
@@ -171,11 +166,9 @@ export const UserContextProvider = ({ children }: { children: any }) => {
 
               selfId = await ceramicConnect(ethAuthProvider, newSessionStr);
             } else {
-              console.log("geri - NEW default selfId");
               // If the session loaded is not valid, or if it is expired or close to expire, we create
               // a new connection to ceramic
               selfId = await ceramicConnect(ethAuthProvider);
-              console.log("geri - selfId", selfId);
             }
           }
 
