@@ -1,7 +1,8 @@
 import axios from "axios";
-import { AppContext, Platform, ProviderPayload } from "../types";
+import { AppContext, ProviderPayload } from "../types";
+import { Platform } from "../utils/platform";
 
-export class BrightidPlatform implements Platform {
+export class BrightidPlatform extends Platform {
   platformId = "Brightid";
   path = "brightid";
   clientId: string = null;
