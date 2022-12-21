@@ -26,6 +26,7 @@ import { UserContext } from "../context/userContext";
 
 // --- Types
 import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PlatformClass } from "@gitcoin/passport-platforms";
 import { getPlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/platforms-config";
 
 // --- Helpers
@@ -38,7 +39,7 @@ import { NoStampModal } from "./NoStampModal";
 
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
-  platform: Platform;
+  platform: PlatformClass;
 };
 
 enum VerificationStatuses {
@@ -61,7 +62,6 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
   const { handleAddStamps, handleDeleteStamps, allProvidersState, userDid } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
-  const [verificationAttempted, setVerificationAttempted] = useState(false);
   const [showNoStampModal, setShowNoStampModal] = useState(false);
 
   // --- Chakra functions
@@ -75,6 +75,8 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
       }, [] as PROVIDER_ID[]) || [],
     [platFormGroupSpec]
   );
+
+  console.log({ providerIds });
 
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
@@ -168,7 +170,6 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
   const handleFetchCredential = async (): Promise<void> => {
     datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
     setLoading(true);
-    setVerificationAttempted(true);
     try {
       const state = `${platform.path}-` + generateUID(10);
       const providerPayload = (await platform.getProviderPayload({
@@ -251,7 +252,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
         updatedMinusInitial
       );
 
-      if (verificationStatus === VerificationStatuses.Failed && verificationAttempted) {
+      if (verificationStatus === VerificationStatuses.Failed && platform.isEVM) {
         setShowNoStampModal(true);
       }
 

@@ -22,3 +22,5 @@ export * as ClearText from "./ClearText";
 export * as Brightid from "./Brightid";
 
 export { Platform, AppContext, ProviderPayload, PlatformSpec } from "./types";
+export { Platform as PlatformClass } from "./utils/platform";
+export { checkAllEVMProviders } from "./utils/checkForAdditionalEVMStamps";
