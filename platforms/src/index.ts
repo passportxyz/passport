@@ -223,4 +223,3 @@ export const providers = new Providers([
 
 export { Platform, AppContext, ProviderPayload, PlatformSpec } from "./types";
 export { Platform as PlatformClass } from "./utils/platform";
-export { checkAllEVMProviders } from "./utils/checkForAdditionalEVMStamps";
