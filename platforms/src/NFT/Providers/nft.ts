@@ -41,8 +41,10 @@ export class NFTProvider implements Provider {
       totalCount: 0,
     };
 
+    const providerUrl = alchemyGetNFTsUrl || payload.rpcUrl;
+
     try {
-      const requestResponse = await axios.get(alchemyGetNFTsUrl, {
+      const requestResponse = await axios.get(providerUrl, {
         params: {
           withMetadata: "false",
           owner: address,
