@@ -2,7 +2,8 @@
 import request from "supertest";
 
 // ---- Test subject
-import { app, config, providers } from "../src/index";
+import { app, config } from "../src/index";
+import { providers } from "@gitcoin/passport-platforms";
 
 // ---- Types
 import {
