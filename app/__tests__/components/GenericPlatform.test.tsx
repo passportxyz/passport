@@ -122,7 +122,6 @@ describe("Mulitple EVM plaftorms", () => {
     const firstSwitch = screen.queryByTestId("select-all");
     await fireEvent.click(firstSwitch as HTMLElement);
     const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
-    console.log({ initialVerifyButton });
 
     await fireEvent.click(initialVerifyButton as HTMLElement);
     await waitFor(async () => {
