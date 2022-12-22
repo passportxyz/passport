@@ -129,7 +129,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           // Sessions will be serialized and stored in localhost
           // The sessions are bound to an ETH address, this is why we use the address in the session key
           const sessionKey = `didsession-${address}`;
-          const sessionStr = localStorage.getItem(sessionKey + "BAD");
+          const sessionStr = localStorage.getItem(sessionKey);
 
           // @ts-ignore
           // When sessionStr is null, this will create a new selfId. We want to avoid this, becasue we want to make sure
