@@ -3,10 +3,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 
 // --- Identity tools
-import {
-  fetchChallengeCredential,
-  fetchVerifiableCredential,
-} from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { fetchChallengeCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { providers } from "@gitcoin/passport-platforms";
 
@@ -39,8 +36,6 @@ export const fetchAdditionalSigner = async (address: string): Promise<Additional
     version: "0.0.0",
     address: address || "",
   });
-
-  console.log({ challenge });
 
   // open an iframe (must be on a different domain/port so that we're not triggering a wallet change on the parent window)
   // * note: this domain will appear in the metamask window
