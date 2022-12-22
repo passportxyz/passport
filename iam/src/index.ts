@@ -35,15 +35,8 @@ import {
   verifyCredential,
 } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
-// ---- Identity Provider Management
-import { Providers } from "./utils/providers";
-
-// ---- Identity Providers
-import { SimpleProvider } from "./providers/simple";
-
+// All provider exports from platforms
 import { providers } from "@gitcoin/passport-platforms";
-
-import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
