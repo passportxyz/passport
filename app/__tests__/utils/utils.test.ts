@@ -1,61 +1,39 @@
 import { fetchPossibleEVMStamps } from "../../signer/utils";
 import { providers } from "@gitcoin/passport-platforms";
 import { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
+import { VALID_ENS_VERIFICATION, VALID_LENS_VERIFICATION } from "../../__test-fixtures__/verifiableCredentialResults";
+import { Ens, Lens } from "@gitcoin/passport-platforms";
 
-const validLensVerification = {
-  providerType: "Lens",
-  payload: {
-    valid: true,
-    record: {
-      address: "0x123",
-      numberOfHandles: "1",
-    },
-  },
-};
+const mockedAllPlatforms = new Map();
+mockedAllPlatforms.set("Ens", {
+  platform: new Ens.EnsPlatform(),
+  platFormGroupSpec: Ens.EnsProviderConfig,
+});
 
-const validEnsVerification = {
-  providerType: "Ens",
-  payload: {
-    valid: true,
-    record: {
-      ens: "MEME",
-    },
-  },
-};
+mockedAllPlatforms.set("Lens", {
+  platform: new Lens.LensPlatform(),
+  platFormGroupSpec: Lens.LensProviderConfig,
+});
 
 describe("fetchPossibleEVMStamps", () => {
-  it("should return an array of verification responses", async () => {
+  it("should return valid platforms", async () => {
     jest
       .spyOn(providers._providers["Ens"], "verify")
       .mockImplementation(async (payload: RequestPayload): Promise<VerifiedPayload> => {
-        return validEnsVerification.payload;
+        return VALID_ENS_VERIFICATION.payload;
       });
 
+    VALID_LENS_VERIFICATION.payload.valid = false;
     jest
       .spyOn(providers._providers["Lens"], "verify")
       .mockImplementation(async (payload: RequestPayload): Promise<VerifiedPayload> => {
-        return validLensVerification.payload;
+        return VALID_LENS_VERIFICATION.payload;
       });
-    const result = await fetchPossibleEVMStamps("0x123", ["Ens", "Lens"]);
+    const result = await fetchPossibleEVMStamps("0x123", mockedAllPlatforms);
+    console.log({ result });
 
-    expect(result).toEqual([validEnsVerification, validLensVerification]);
-  });
+    expect(result.length).toBe(1);
 
-  it("should return an array of verification responses if one of the providers is invalid", async () => {
-    jest
-      .spyOn(providers._providers["Ens"], "verify")
-      .mockImplementation(async (payload: RequestPayload): Promise<VerifiedPayload> => {
-        return validEnsVerification.payload;
-      });
-
-    validLensVerification.payload.valid = false;
-    jest
-      .spyOn(providers._providers["Lens"], "verify")
-      .mockImplementation(async (payload: RequestPayload): Promise<VerifiedPayload> => {
-        return validLensVerification.payload;
-      });
-    const result = await fetchPossibleEVMStamps("0x123", ["Ens", "Lens"]);
-
-    expect(result).toEqual([validEnsVerification, validLensVerification]);
+    expect(result[0].platformProps.platform.path).toBe("Ens");
   });
 });

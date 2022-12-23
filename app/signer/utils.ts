@@ -1,11 +1,13 @@
+import { providers } from "@gitcoin/passport-platforms";
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 
 // --- Identity tools
 import { fetchChallengeCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
-import { PROVIDER_ID } from "@gitcoin/passport-types";
-import { providers } from "@gitcoin/passport-platforms";
+import { PLATFORM_ID, PROVIDER_ID, VerifiedPayload } from "@gitcoin/passport-types";
+import { PlatformProps } from "../components/GenericPlatform";
+import { PlatformGroupSpec } from "../config/providers";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const providerId: PROVIDER_ID = "Signer";
@@ -92,17 +94,74 @@ export const fetchAdditionalSigner = async (address: string): Promise<Additional
   return extraSignature;
 };
 
-export const fetchPossibleEVMStamps = async (address: string, providerTypes: string[]) => {
+export type PossibleEVMProvider = {
+  validatedPlatformGroups: {
+    payload: VerifiedPayload;
+    providerType: PROVIDER_ID;
+  }[][];
+  platformProps: PlatformProps;
+};
+
+export const fetchPossibleEVMStamps = async (
+  address: string,
+  allPlatforms: Map<PLATFORM_ID, PlatformProps>
+): Promise<PossibleEVMProvider[]> => {
   const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
-  const providerRequests = providerTypes.map(async (provider) => {
-    const payload = await providers.verify(provider, { type: provider, address, version: "0.0.0", rpcUrl }, {});
-    return {
-      payload,
-      providerType: provider,
-    };
+  // Extract EVM platforms
+  const evmPlatforms: PlatformProps[] = [];
+  const evmPlatformGroupSpecs: PlatformGroupSpec[] = [];
+  allPlatforms.forEach((value, key, map) => {
+    const platformProp = map.get(key);
+    if (platformProp?.platform.isEVM) {
+      evmPlatformGroupSpecs.push(...platformProp.platFormGroupSpec);
+      evmPlatforms.push(platformProp);
+    }
   });
 
-  const verifiedProviders = await Promise.all(providerRequests);
-  return verifiedProviders;
+  // Build requests for each verify function within every EVM Provider
+  const providerRequests = evmPlatforms.map((platform) => {
+    const validatedProviderGroup = platform.platFormGroupSpec.map((groupSpec) => {
+      return groupSpec.providers.map(async (provider) => {
+        const payload = await providers.verify(
+          provider.name,
+          { type: provider.name, address, version: "0.0.0", rpcUrl },
+          {}
+        );
+        return {
+          payload,
+          providerType: provider.name,
+        };
+      });
+    });
+    return { validatedProviderGroup, platform };
+  });
+
+  // Resolve nested promises
+  const validatedPlatforms = await Promise.all(
+    providerRequests.map(async (requestedPlatform) => {
+      const validatedPlatformGroups = await Promise.all(
+        requestedPlatform.validatedProviderGroup.map(async (group) => {
+          const validatedProviders = await Promise.all(group);
+          return validatedProviders;
+        })
+      );
+      return { validatedPlatformGroups, platformProps: requestedPlatform.platform };
+    })
+  );
+
+  // Look for valid stamps and return the provider group if valid
+  const validPlatforms = validatedPlatforms.filter((validatedPlatform) => {
+    // If any of the providers in the group are valid, then the group is valid
+    const validGroup = validatedPlatform.validatedPlatformGroups.filter((group) => {
+      return (
+        group.filter((provider) => {
+          return provider.payload.valid;
+        }).length > 0
+      );
+    });
+    return validGroup.length > 0;
+  });
+
+  return validPlatforms;
 };
