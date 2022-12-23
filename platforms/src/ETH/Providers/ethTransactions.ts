@@ -5,7 +5,7 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 // ----- Libs
 import axios from "axios";
 
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || process.env.NEXT_ETHERSCAN_API_KEY;
 
 // Define interfaces for the data structure returned by the request
 interface EtherscanRequestResponse {
@@ -222,6 +222,8 @@ const checkFirstTxn = (ethData: EtherscanRequestResponse["data"], address: strin
   // set variables for timestamp to days calculations
   let hasGTE30DaysSinceFirstTxn = false;
   const results = ethData.result;
+
+  console.log({ ethData }, "should have txns");
 
   // Return the first successful transaction that was made >= 30 days ago by the wallet holder
   if (ethData.result.length > 0) {

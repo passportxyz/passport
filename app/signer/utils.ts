@@ -29,6 +29,59 @@ function openSigner(url: string): HTMLIFrameElement {
   return iframe;
 }
 
+export const signMessageForAdditionalSigner = async (message: string): Promise<string> => {
+  const iframe = openSigner(signerUrl) as HTMLIFrameElement;
+  // pass message to iframe and await signature
+  const extraSignature: AdditionalSignature = await new Promise((resolve, reject) => {
+    const killSwitch = setTimeout(() => {
+      // reject the outer promise
+      reject("Failed to get a ready response from the signer page in time...");
+    }, 5000);
+
+    const clearListener = () => {
+      // if the message was received and signed, the signer will response with a "sign_message" cmd
+      document.body.removeChild(iframe);
+      // remove this listener - its job is done
+      window.removeEventListener("message", listener);
+    };
+
+    // attach this listener to the message challenge (it includes its own teardown procedure)
+    const listener = (event: MessageEvent) => {
+      if (event.data == "ready") {
+        // clear the kill switch - page has loaded
+        clearTimeout(killSwitch);
+        // send the challenge string we want a signed message for...
+        iframe.contentWindow?.postMessage(
+          {
+            cmd: "sign_message",
+            msg: message,
+            host: `${window.location.protocol}//${window.location.host}`,
+          },
+          // this should be the hosted instances domain
+          signerUrl
+        );
+      } else if (event.data?.cmd == "signed_message") {
+        // cleanup
+        clearListener();
+        // resolve outer with the signed message result
+        resolve({
+          ...event.data,
+        });
+      } else if (event.data?.cmd == "sign_message_error") {
+        // cleanup
+        clearListener();
+        // reject the outer promise
+        reject("Failed to get signature");
+      }
+    };
+    // attach the listener so that we can receive responses from the iframe
+    window.addEventListener("message", listener);
+  });
+
+  console.log({ extraSignature });
+  return extraSignature.sig;
+};
+
 export const fetchAdditionalSigner = async (address: string): Promise<AdditionalSignature> => {
   datadogLogs.logger.info("Starting verification", { provider: providerId });
 
