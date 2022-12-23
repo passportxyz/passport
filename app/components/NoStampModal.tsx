@@ -27,8 +27,11 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
       <ModalOverlay />
       <ModalContent>
         <div className="m-3 flex flex-col items-center">
+          <button onClick={() => onClose()} className="absolute right-3">
+            <img width="20px" src="./assets/x-mark-icon.svg" alt="Check Icon" />
+          </button>
           {additionalSigner ? (
-            <AdditionalStampModal additionalSigner={additionalSigner} />
+            <AdditionalStampModal additionalSigner={additionalSigner} onClose={() => onClose()} />
           ) : (
             <>
               <div className="mt-2 w-fit rounded-full bg-pink-500/25">

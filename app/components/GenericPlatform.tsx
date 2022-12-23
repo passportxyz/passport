@@ -399,7 +399,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
           </>
         }
       />
-      <NoStampModal isOpen={showNoStampModal} onClose={() => console.log("Closing")} />
+      <NoStampModal isOpen={showNoStampModal} onClose={() => setShowNoStampModal(false)} />
     </>
   );
 };

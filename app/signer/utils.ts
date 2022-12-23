@@ -78,7 +78,6 @@ export const signMessageForAdditionalSigner = async (message: string): Promise<s
     window.addEventListener("message", listener);
   });
 
-  console.log({ extraSignature });
   return extraSignature.sig;
 };
 
