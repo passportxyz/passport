@@ -15,14 +15,12 @@ import { signMessageForAdditionalSigner } from "../signer/utils";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
-import { generateUID } from "../utils/helpers";
-import { JsonRpcSigner } from "@ethersproject/providers";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
 export const AdditionalStampModal = ({ additionalSigner }: { additionalSigner: AdditionalSignature }) => {
-  const { allPlatforms } = useContext(CeramicContext);
+  const { allPlatforms, handleAddStamps, handleDeleteStamps, allProvidersState, userDid } = useContext(CeramicContext);
   const [verifiedPlatforms, setVerifiedPlatforms] = useState<PossibleEVMProvider[]>([]);
   const [activePlatform, setActivePlatform] = useState<PossibleEVMProvider | null>(null);
   const [loading, setLoading] = useState(false);
@@ -49,7 +47,9 @@ export const AdditionalStampModal = ({ additionalSigner }: { additionalSigner: A
               proofs: {},
               rpcUrl,
             },
+            // Should this be signed by the original signer so that it is included in the original signers Passport?
             { signMessage: signMessageForAdditionalSigner } as { signMessage: (message: string) => Promise<string> }
+            // signer as { signMessage: (message: string) => Promise<string> }
           );
           console.log({ verified });
 
@@ -69,51 +69,24 @@ export const AdditionalStampModal = ({ additionalSigner }: { additionalSigner: A
           }
         }
 
+        // Delete all stamps ...
+        await handleDeleteStamps(providerIds as PROVIDER_ID[]);
+
         // .. and now add all newly validate stamps
-        // if (vcs.length > 0) {
-        //   await handleAddStamps(vcs);
-        // }
-        // datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
-        // // grab all providers who are verified from the verify response
-        // const actualVerifiedProviders = providerIds.filter(
-        //   (providerId) =>
-        //     !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
-        // );
+        if (vcs.length > 0) {
+          await handleAddStamps(vcs);
+        }
+        datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
+        // grab all providers who are verified from the verify response
+        const actualVerifiedProviders = providerIds.filter(
+          (providerId) =>
+            !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
+        );
         // // both verified and selected should look the same after save
-        // setVerifiedProviders([...actualVerifiedProviders]);
-        // setSelectedProviders([...actualVerifiedProviders]);
+        setVerifiedProviders([...actualVerifiedProviders]);
+        setSelectedProviders([...actualVerifiedProviders]);
 
-        // // Create Set to check changed providers after verification
-        // const updatedVerifiedProviders = new Set(actualVerifiedProviders);
-        // // Initial providers Set minus updated providers Set to determine which data points were removed
-        // const initialMinusUpdated = difference(initialVerifiedProviders, updatedVerifiedProviders);
-        // // Updated providers Set minus initial providers Set to determine which data points were added
-        // const updatedMinusInitial = difference(updatedVerifiedProviders, initialVerifiedProviders);
-        // // reset can submit state
-        // setCanSubmit(false);
-
-        // const verificationStatus = getVerificationStatus(
-        //   updatedVerifiedProviders,
-        //   initialMinusUpdated,
-        //   updatedMinusInitial
-        // );
-
-        // if (verificationStatus === VerificationStatuses.Failed && platform.isEVM) {
-        //   setShowNoStampModal(true);
-        // }
-
-        // // Get the done toast messages
-        // const { title, body, icon, platformId } = getDoneToastMessages(
-        //   verificationStatus,
-        //   updatedVerifiedProviders,
-        //   initialMinusUpdated,
-        //   updatedMinusInitial
-        // );
-
-        // // Display done toast
-        // doneToast(title, body, icon, platformId);
-
-        // setLoading(false);
+        setLoading(false);
       } catch (e) {
         datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
         throw e;
