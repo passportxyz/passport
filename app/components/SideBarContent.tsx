@@ -6,6 +6,7 @@ import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Switch, Spi
 import { PlatformSpec, PlatformGroupSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 
 import { StampSelector } from "./StampSelector";
+import { PlatformDetails } from "./PlatformDetails";
 
 export type SideBarContentProps = {
   currentPlatform: PlatformSpec | undefined;
@@ -53,19 +54,7 @@ export const SideBarContent = ({
       {currentPlatform && currentProviders ? (
         <div className="overflow-auto">
           <DrawerHeader>
-            <div className="mt-10 flex flex-col sm:flex-row">
-              <div className="w-full text-center sm:py-8">
-                <div className="inline-flex h-20 w-20 items-center justify-center rounded-full text-gray-400">
-                  <img alt="Platform Image" className="h-full w-full" src={currentPlatform?.icon} />
-                </div>
-                <div className="flex flex-col items-center justify-center text-center">
-                  <h2 className="font-miriam-libre title-font mt-4 text-2xl font-medium text-gray-900">
-                    {currentPlatform?.name}
-                  </h2>
-                  <p className="font-miriam-libre text-base text-gray-500">{currentPlatform?.description}</p>
-                </div>
-              </div>
-            </div>
+            <PlatformDetails currentPlatform={currentPlatform!} />
           </DrawerHeader>
           <DrawerBody
             style={{ paddingInlineStart: "0", paddingInlineEnd: "0", WebkitPaddingStart: "0", WebkitPaddingEnd: "0" }}

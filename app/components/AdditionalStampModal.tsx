@@ -8,6 +8,7 @@ import { getPlatformSpec, PlatformSpec } from "../config/platforms";
 import { Button } from "@chakra-ui/react";
 import { StampSelector } from "./StampSelector";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { PlatformDetails } from "./PlatformDetails";
 
 export const AdditionalStampModal = ({ additionalSigner }: { additionalSigner: AdditionalSignature }) => {
   const { allPlatforms } = useContext(CeramicContext);
@@ -20,6 +21,11 @@ export const AdditionalStampModal = ({ additionalSigner }: { additionalSigner: A
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
 
+  const providerIds =
+    activePlatform?.platformProps.platFormGroupSpec?.reduce((all, stamp, i) => {
+      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+    }, [] as PROVIDER_ID[]) || [];
+
   useEffect(() => {
     const fetchPlatforms = async () => {
       const verifiedPlatforms = await fetchPossibleEVMStamps(additionalSigner.addr, allPlatforms);
@@ -28,16 +34,35 @@ export const AdditionalStampModal = ({ additionalSigner }: { additionalSigner: A
     fetchPlatforms();
   }, [allPlatforms, additionalSigner]);
 
-  console.log({ activePlatform });
   if (activePlatform) {
+    const allAdded = providerIds.length === selectedProviders.length;
+    const platform = getPlatformSpec(activePlatform.platformProps.platform.path);
     return (
       <>
-        <StampSelector
-          currentProviders={activePlatform.platformProps.platFormGroupSpec}
-          verifiedProviders={verifiedProviders}
-          selectedProviders={selectedProviders}
-          setSelectedProviders={(providerIds) => setSelectedProviders && setSelectedProviders(providerIds)}
-        />
+        <PlatformDetails currentPlatform={platform!} />
+        <div className="mb-2 w-full">
+          <div className="flex w-full justify-between">
+            <p className="mb-1 text-left text-sm font-semibold text-gray-600">Accounts</p>
+            <a
+              className={`cursor-pointer text-sm ${allAdded ? "text-gray-600" : "text-purple-connectPurple"}`}
+              onClick={() => {
+                setSelectedProviders(providerIds);
+              }}
+            >
+              {allAdded ? "Added!" : "Add All"}
+            </a>
+          </div>
+          <hr className="border-1" />
+        </div>
+
+        <div className="flex flex-col">
+          <StampSelector
+            currentProviders={activePlatform.platformProps.platFormGroupSpec}
+            verifiedProviders={verifiedProviders}
+            selectedProviders={selectedProviders}
+            setSelectedProviders={(providerIds) => setSelectedProviders && setSelectedProviders(providerIds)}
+          />
+        </div>
       </>
     );
   }
