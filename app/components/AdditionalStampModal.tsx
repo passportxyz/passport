@@ -6,11 +6,19 @@ import { PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/typ
 import { fetchPossibleEVMStamps, PossibleEVMProvider } from "../signer/utils";
 import { getPlatformSpec, PlatformSpec } from "../config/platforms";
 import { Button } from "@chakra-ui/react";
+import { StampSelector } from "./StampSelector";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 export const AdditionalStampModal = ({ additionalSigner }: { additionalSigner: AdditionalSignature }) => {
   const { allPlatforms } = useContext(CeramicContext);
   const [verifiedPlatforms, setVerifiedPlatforms] = useState<PossibleEVMProvider[]>([]);
-  const [activePlatform, setActivePlatform] = useState<PlatformSpec | null>(null);
+  const [activePlatform, setActivePlatform] = useState<PossibleEVMProvider | null>(null);
+
+  // SelectedProviders will be passed in to the sidebar to be filled there...
+  const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>([]);
+
+  // SelectedProviders will be passed in to the sidebar to be filled there...
+  const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
 
   useEffect(() => {
     const fetchPlatforms = async () => {
@@ -19,6 +27,20 @@ export const AdditionalStampModal = ({ additionalSigner }: { additionalSigner: A
     };
     fetchPlatforms();
   }, [allPlatforms, additionalSigner]);
+
+  console.log({ activePlatform });
+  if (activePlatform) {
+    return (
+      <>
+        <StampSelector
+          currentProviders={activePlatform.platformProps.platFormGroupSpec}
+          verifiedProviders={verifiedProviders}
+          selectedProviders={selectedProviders}
+          setSelectedProviders={(providerIds) => setSelectedProviders && setSelectedProviders(providerIds)}
+        />
+      </>
+    );
+  }
 
   return (
     <>
@@ -45,7 +67,7 @@ export const AdditionalStampModal = ({ additionalSigner }: { additionalSigner: A
                       <img width="25px" alt="Platform Image" src={platform?.icon} className="m-3" />
                       <p className="pt-2 text-sm font-semibold">{platform.name}</p>
                     </div>
-                    <Button mt={2} onClick={() => setActivePlatform(platform)}>
+                    <Button mt={2} onClick={() => setActivePlatform(verifiedPlatform)}>
                       <img width="20px" alt="Plus Icon" src="./assets/plus-icon.svg" />
                       Add
                     </Button>
