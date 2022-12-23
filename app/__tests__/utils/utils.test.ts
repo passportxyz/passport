@@ -30,7 +30,6 @@ describe("fetchPossibleEVMStamps", () => {
         return VALID_LENS_VERIFICATION.payload;
       });
     const result = await fetchPossibleEVMStamps("0x123", mockedAllPlatforms);
-    console.log({ result });
 
     expect(result.length).toBe(1);
 

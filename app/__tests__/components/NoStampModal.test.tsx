@@ -8,6 +8,10 @@ jest.mock("../../signer/utils", () => ({
   fetchPossibleEVMStamps: jest.fn(),
 }));
 
+jest.mock("../../components/AdditionalStampModal", () => ({
+  AdditionalStampModal: () => <div>Additional Stamp Modal</div>,
+}));
+
 jest.mock("../../utils/onboard.ts");
 
 let props: NoStampModalProps;
@@ -49,7 +53,7 @@ describe("NoStampModal", () => {
       render(<NoStampModal {...props} />);
       fireEvent.click(screen.getByTestId("check-other-wallet")!);
       await waitFor(() => {
-        expect(screen.getByText("Stamp Verification")).toBeInTheDocument();
+        expect(screen.getByText("Additional Stamp Modal")).toBeInTheDocument();
       });
     });
   });
