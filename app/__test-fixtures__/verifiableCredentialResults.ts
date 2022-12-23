@@ -96,3 +96,24 @@ export const SUCCESSFUL_GITPOAP_RESULT: VerifiableCredentialRecord = {
   challenge: credential,
   credential: credential,
 };
+
+export const VALID_LENS_VERIFICATION = {
+  providerType: "Lens",
+  payload: {
+    valid: true,
+    record: {
+      address: "0x123",
+      numberOfHandles: "1",
+    },
+  },
+};
+
+export const VALID_ENS_VERIFICATION = {
+  providerType: "Ens",
+  payload: {
+    valid: true,
+    record: {
+      ens: "MEME",
+    },
+  },
+};

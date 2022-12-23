@@ -9,7 +9,7 @@ import { UserContext } from "../context/userContext";
 
 import { AdditionalSignature, fetchAdditionalSigner } from "../signer/utils";
 
-import { AdditionalStamps } from "./AdditionalStamps";
+import { AdditionalStampModal } from "./AdditionalStampModal";
 
 export type NoStampModalProps = {
   isOpen: boolean;
@@ -28,7 +28,7 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
       <ModalContent>
         <div className="m-3 flex flex-col items-center">
           {additionalSigner ? (
-            <AdditionalStamps additionalSigner={additionalSigner} />
+            <AdditionalStampModal additionalSigner={additionalSigner} />
           ) : (
             <>
               <div className="mt-2 w-fit rounded-full bg-pink-500/25">
