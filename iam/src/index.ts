@@ -63,6 +63,7 @@ import {
   Google,
   ClearText,
   Brightid,
+  MeritProtocol,
 } from "@gitcoin/passport-platforms";
 
 import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
@@ -249,6 +250,21 @@ export const providers = new Providers([
   new Lens.LensProfileProvider(),
   new ZkSync.ZkSyncProvider(),
   new GnosisSafe.GnosisSafeProvider(),
+  new MeritProtocol.MeritProtocolIncomeProvider({
+    threshold: 10000,
+    recordAttribute: "MeritProtocolIncomeGte",
+    error: "Income >= $10000 USD verification error",
+  }),
+  new MeritProtocol.MeritProtocolIncomeProvider({
+    threshold: 50000,
+    recordAttribute: "MeritProtocolIncomeGte",
+    error: "Income >= $50000 USD verification error",
+  }),
+  new MeritProtocol.MeritProtocolIncomeProvider({
+    threshold: 100000,
+    recordAttribute: "MeritProtocolIncomeGte",
+    error: "Income >= $100000 USD verification error",
+  }),
 ]);
 
 // create the app and run on port

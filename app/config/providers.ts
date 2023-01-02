@@ -288,4 +288,14 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Encrypted", name: "GnosisSafe" }],
     },
   ],
+  MeritProtocol: [
+    {
+      platformGroup: "Income",
+      providers: [
+        { title: "At least $10,000 USD", name: "MeritProtocolIncomeGte#10000" },
+        { title: "At least $50,000 USD", name: "MeritProtocolIncomeGte#50000" },
+        { title: "At least $100,000 USD", name: "MeritProtocolIncomeGte#100000" },
+      ],
+    },
+  ],
 };

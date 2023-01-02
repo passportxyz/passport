@@ -2,6 +2,7 @@
   "extends": "../tsconfig.settings.json",
   "compilerOptions": {
     "module": "commonjs",
+    "lib": ["DOM"], // help avoid tendermint compile errors
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "target": "es6",

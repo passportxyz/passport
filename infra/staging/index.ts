@@ -255,6 +255,14 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "AMI_API_TOKEN",
             valueFrom: `${IAM_SERVER_SSM_ARN}:AMI_API_TOKEN::`,
           },
+          {
+            name: "MERIT_TOKEN",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:MERIT_TOKEN::`,
+          },
+          {
+            name: "MERIT_HOST_URL",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:MERIT_HOST_URL::`,
+          },
         ],
       },
     },
