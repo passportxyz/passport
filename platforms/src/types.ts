@@ -95,7 +95,8 @@ export type PLATFORM_ID =
   | "NFT"
   | "ZkSync"
   | "Lens"
-  | "GnosisSafe";
+  | "GnosisSafe"
+  | "MeritProtocol";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -159,4 +160,7 @@ export type PROVIDER_ID =
   | "NFT"
   | "ZkSync"
   | "Lens"
-  | "GnosisSafe";
+  | "GnosisSafe"
+  | "MeritProtocolIncomeGte#10000"
+  | "MeritProtocolIncomeGte#50000"
+  | "MeritProtocolIncomeGte#100000";

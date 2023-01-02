@@ -26,6 +26,7 @@ import {
   GtcStaking,
   Google,
   Brightid,
+  MeritProtocol
 } from "@gitcoin/passport-platforms";
 
 // --- Components
@@ -158,6 +159,14 @@ providers.set("Google", {
 providers.set("Brightid", {
   platform: new Brightid.BrightidPlatform(),
   platFormGroupSpec: Brightid.BrightidProviderConfig,
+});
+
+providers.set("MeritProtocol", {
+  platform: new MeritProtocol.MeritProtocolPlatform({
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_MERIT_CALLBACK,
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_MERIT_CLIENT_ID,
+  }),
+  platFormGroupSpec: MeritProtocol.MeritProtocolProviderConfig,
 });
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {

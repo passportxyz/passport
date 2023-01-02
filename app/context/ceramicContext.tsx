@@ -289,6 +289,18 @@ const startingAllProvidersState: AllProvidersState = {
     providerSpec: getProviderSpec("GnosisSafe", "GnosisSafe"),
     stamp: undefined,
   },
+  "MeritProtocolIncomeGte#10000": {
+    providerSpec: getProviderSpec("MeritProtocol", "MeritProtocolIncomeGte#10000"),
+    stamp: undefined,
+  },
+  "MeritProtocolIncomeGte#50000": {
+    providerSpec: getProviderSpec("MeritProtocol", "MeritProtocolIncomeGte#50000"),
+    stamp: undefined,
+  },
+  "MeritProtocolIncomeGte#100000": {
+    providerSpec: getProviderSpec("MeritProtocol", "MeritProtocolIncomeGte#100000"),
+    stamp: undefined,
+  },
 };
 
 const startingState: CeramicContextState = {

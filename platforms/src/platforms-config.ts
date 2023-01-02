@@ -168,4 +168,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Gnosis Safe Signer/Owner Verification",
     connectMessage: "Verify Account",
   },
+  {
+    icon: "./assets/meritProtocolStampIcon.svg",
+    platform: "MeritProtocol",
+    name: "MeritProtocol",
+    description: "Merit Protocol Income Verification",
+    connectMessage: "Verify Income",
+  },
 ];

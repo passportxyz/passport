@@ -19,7 +19,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 datadogRum.init({
   applicationId: process.env.NEXT_PUBLIC_DATADOG_APPLICATION_ID || "",
   clientToken: process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || "",
-  site: "datadoghq.eu",
+  site: process.env.NEXT_PUBLIC_DATADOG_SITE ||"datadoghq.eu",
   service: "passport-frontend",
   env: process.env.NEXT_PUBLIC_DATADOG_ENV || "",
   // Specify a version number to identify the deployed version of your application in Datadog
@@ -32,7 +32,7 @@ datadogRum.init({
 
 datadogLogs.init({
   clientToken: process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || "",
-  site: "datadoghq.eu",
+  site: process.env.NEXT_PUBLIC_DATADOG_SITE ||"datadoghq.eu",
   forwardErrorsToLogs: true,
   sampleRate: 100,
   service: `passport-frontend`,

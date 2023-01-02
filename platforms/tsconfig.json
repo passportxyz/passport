@@ -12,6 +12,7 @@
     "outDir": "dist/commonjs",
     "allowJs": true,
     "baseUrl": "src",
+    "lib": ["DOM"],  // help avoid tendermint compile errors
     "paths": {
       "*": ["../node_modules/*", "node_modules/*"]
     },

@@ -116,11 +116,8 @@ export class MeritProtocolIncomeProvider implements Provider {
 }
 
 const verifyIncome = async (code: string): Promise<MeritProtocolIncomeResponse> => {
-  const accessToken = "";
-
-  // Now that we have an access token fetch the user details
   const incomeRequest = await axios.post(
-    "https://dev.getmerit.xyz/fe/api/income",
+    process.env.MERIT_HOST_URL + "/api/income",
     { accountId: code },
     { headers: { "x-access-token": process.env.MERIT_TOKEN } }
   );
