@@ -22,16 +22,38 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
   const [verificationInProgress, setVerificationInProgress] = useState(false);
   const [additionalSigner, setAdditionalSigner] = useState<AdditionalSignature | undefined>();
 
+  const resetStateAndClose = () => {
+    setAdditionalSigner(undefined);
+    setVerificationInProgress(false);
+    onClose();
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} blockScrollOnMount={false}>
+    <Modal
+      isOpen={isOpen}
+      onClose={() => {
+        resetStateAndClose();
+      }}
+      blockScrollOnMount={false}
+    >
       <ModalOverlay />
       <ModalContent>
         <div className="m-3 flex flex-col items-center">
-          <button onClick={() => onClose()} className="absolute right-3">
+          <button
+            onClick={() => {
+              resetStateAndClose();
+            }}
+            className="absolute right-3"
+          >
             <img width="20px" src="./assets/x-mark-icon.svg" alt="Check Icon" />
           </button>
           {additionalSigner ? (
-            <AdditionalStampModal additionalSigner={additionalSigner} onClose={() => onClose()} />
+            <AdditionalStampModal
+              additionalSigner={additionalSigner}
+              onClose={() => {
+                resetStateAndClose();
+              }}
+            />
           ) : (
             <>
               <div className="mt-2 w-fit rounded-full bg-pink-500/25">
@@ -42,7 +64,7 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
                 The stamp you are trying to verify could not be associated with your current Ethereum wallet address.
               </p>
               <div className="flex w-full">
-                <a
+                {/* <a
                   href="https://ens.domains/"
                   target="_blank"
                   className="m-1 w-1/2 items-center rounded-md border py-2  text-center"
@@ -52,10 +74,10 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
                   }}
                 >
                   Go to ENS
-                </a>
+                </a> */}
                 <button
                   data-testid="check-other-wallet"
-                  className="m-1 mx-auto flex w-1/2 justify-center rounded-md bg-purple-connectPurple py-2 text-white hover:bg-purple-200 hover:text-black"
+                  className="m-1 mx-auto flex w-full justify-center rounded-md bg-purple-connectPurple py-2 text-white hover:bg-purple-200 hover:text-black"
                   onClick={async () => {
                     // mark as verifying
                     setVerificationInProgress(true);

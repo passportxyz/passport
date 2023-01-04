@@ -37,6 +37,12 @@ export const AdditionalStampModal = ({
   const [loading, setLoading] = useState(false);
   const [verifiedPlatforms, setVerifiedPlatforms] = useState<string[]>([]);
 
+  const resetState = () => {
+    setPossiblyVerifiedPlatforms([]);
+    setActivePlatform(null);
+    setVerifiedPlatforms([]);
+  };
+
   // fetch VCs from IAM server
   const handleFetchCredential = async (): Promise<void> => {
     if (activePlatform) {
@@ -234,7 +240,13 @@ export const AdditionalStampModal = ({
           })}
         </div>
       </div>
-      <button className="sidebar-verify-btn mx-auto flex justify-center" onClick={() => onClose()}>
+      <button
+        className="sidebar-verify-btn mx-auto flex justify-center"
+        onClick={() => {
+          resetState();
+          onClose();
+        }}
+      >
         Done
       </button>
     </>
