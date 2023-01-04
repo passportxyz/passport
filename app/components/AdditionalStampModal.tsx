@@ -2,19 +2,18 @@
 import React, { useContext, useEffect, useState } from "react";
 import { CeramicContext } from "../context/ceramicContext";
 import { AdditionalSignature } from "../signer/utils";
-import { PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { fetchPossibleEVMStamps, PossibleEVMProvider } from "../signer/utils";
-import { getPlatformSpec, PlatformSpec } from "../config/platforms";
+import { getPlatformSpec } from "../config/platforms";
 import { Button, Spinner } from "@chakra-ui/react";
 import { StampSelector } from "./StampSelector";
 import { PROVIDER_ID, Stamp, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
 import { PlatformDetails } from "./PlatformDetails";
 
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
-import { signMessageForAdditionalSigner } from "../signer/utils";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
+import { UserContext } from "../context/userContext";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
@@ -26,7 +25,8 @@ export const AdditionalStampModal = ({
   additionalSigner: AdditionalSignature;
   onClose: () => void;
 }) => {
-  const { allPlatforms, handleAddStamps, handleDeleteStamps, allProvidersState, userDid } = useContext(CeramicContext);
+  const { allPlatforms, handleAddStamps, handleDeleteStamps } = useContext(CeramicContext);
+  const { signer, address } = useContext(UserContext);
   const [possiblyVerifiedPlatforms, setPossiblyVerifiedPlatforms] = useState<PossibleEVMProvider[]>([]);
   const [activePlatform, setActivePlatform] = useState<PossibleEVMProvider | null>(null);
   const [loading, setLoading] = useState(false);
@@ -42,7 +42,6 @@ export const AdditionalStampModal = ({
         // This array will contain all providers that new validated VCs
         let vcs: Stamp[] = [];
 
-        console.log(additionalSigner.addr, "additionalSigner.addr");
         if (selectedProviders.length > 0) {
           const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
             iamUrl,
@@ -50,13 +49,17 @@ export const AdditionalStampModal = ({
               type: platform.platformId,
               types: selectedProviders,
               version: "0.0.0",
-              address: additionalSigner.addr || "",
+              address: address || "",
               proofs: {},
               rpcUrl,
+              signer: {
+                challenge: additionalSigner.challenge,
+                signature: additionalSigner.sig,
+                address: additionalSigner.addr,
+              },
             },
             // Should this be signed by the original signer so that it is included in the original signers Passport?
-            // signer as { signMessage: (message: string) => Promise<string> }
-            { signMessage: signMessageForAdditionalSigner } as { signMessage: (message: string) => Promise<string> }
+            signer as { signMessage: (message: string) => Promise<string> }
           );
           // because we provided a types array in the params we expect to receive a
           // credentials array in the response...
@@ -189,8 +192,8 @@ export const AdditionalStampModal = ({
             const platform = getPlatformSpec(verifiedPlatform.platformProps.platform.path);
             if (platform) {
               return (
-                <>
-                  <div key={platform.name} className="flex w-full justify-between">
+                <div key={platform.name}>
+                  <div className="flex w-full justify-between">
                     <div className="flex">
                       <img width="25px" alt="Platform Image" src={platform?.icon} className="m-3" />
                       <p className="pt-2 text-sm font-semibold">{platform.name}</p>
@@ -211,7 +214,7 @@ export const AdditionalStampModal = ({
                     )}
                   </div>
                   <hr className="border-1" />
-                </>
+                </div>
               );
             }
           })}

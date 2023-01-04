@@ -5,14 +5,14 @@ import { datadogRum } from "@datadog/browser-rum";
 
 // --- Identity tools
 import { fetchChallengeCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
-import { PLATFORM_ID, PROVIDER_ID, VerifiedPayload } from "@gitcoin/passport-types";
+import { PLATFORM_ID, PROVIDER_ID, VerifiableCredential, VerifiedPayload } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
 import { PlatformGroupSpec } from "../config/providers";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const providerId: PROVIDER_ID = "Signer";
 const signerUrl = process.env.NEXT_PUBLIC_PASSPORT_SIGNER_URL || "http://localhost:8000/";
-export type AdditionalSignature = { addr: string; sig: string; msg: string };
+export type AdditionalSignature = { addr: string; sig: string; msg: string; challenge: VerifiableCredential };
 
 // open Signer url in an iframe
 function openSigner(url: string): HTMLIFrameElement {
@@ -126,12 +126,12 @@ export const fetchAdditionalSigner = async (address: string): Promise<Additional
           signerUrl
         );
       } else if (event.data?.cmd == "signed_message") {
-        console.log({ event }, "signed_message");
         // cleanup
         clearListener();
         // resolve outer with the signed message result
         resolve({
           ...event.data,
+          challenge,
         });
       } else if (event.data?.cmd == "sign_message_error") {
         // cleanup

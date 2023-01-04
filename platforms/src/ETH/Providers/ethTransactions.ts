@@ -223,8 +223,6 @@ const checkFirstTxn = (ethData: EtherscanRequestResponse["data"], address: strin
   let hasGTE30DaysSinceFirstTxn = false;
   const results = ethData.result;
 
-  console.log({ ethData }, "should have txns");
-
   // Return the first successful transaction that was made >= 30 days ago by the wallet holder
   if (ethData.result.length > 0) {
     const successfulFirstTxn = results.findIndex((result) => {

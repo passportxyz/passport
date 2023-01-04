@@ -72,6 +72,12 @@ const issueCredential = async (
   context: ProviderContext
 ): Promise<CredentialResponseBody> => {
   try {
+    // if the payload includes an additional signer, use that to issue credential.
+    if (payload.signer) {
+      // We can assume that the signer is a valid address because the challenge was verified within the /verify endpoint
+      payload.address = payload.signer.address;
+    }
+    // verify the payload against the selected Identity Provider
     const verifiedPayload = await providers.verify(type, payload, context);
     // check if the request is valid against the selected Identity Provider
     if (verifiedPayload && verifiedPayload?.valid === true) {
@@ -214,6 +220,18 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
         // the signer should be the address outlined in the challenge credential - rebuild the id to check for a full match
         const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
         const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
+
+        // if an additional signer is passed verify that the challenger credential is valid
+        if (payload.signer) {
+          const additionalSignerCredential = await verifyCredential(DIDKit, payload.signer.challenge);
+
+          // if the additional signer credential is valid and issued by the iAM server then we can proceed
+          if (!additionalSignerCredential && issuer === payload.signer.challenge.issuer) {
+            // error response
+            return void errorRes(res, "Unable to verify payload", 401);
+          }
+        }
+
         // type is required because we need it to select the correct Identity Provider
         if (isSigner && isType && payload && payload.type) {
           // if multiple types are being requested - produce and return multiple vc's
