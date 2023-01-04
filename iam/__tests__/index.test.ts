@@ -444,4 +444,88 @@ describe("POST /verify", function () {
 
     expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify payload");
   });
+
+  it("handles invalid challenge request passed by the additional signer", async () => {
+    // challenge received from the challenge endpoint
+    const challenge = {
+      issuer: config.issuer,
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0x0",
+        provider: "challenge-any",
+        address: "0x0",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+    // payload containing a signature of the challenge in the challenge credential
+    const payload = {
+      type: "any",
+      types: ["Simple", "Simple"],
+      address: "0x0",
+      proofs: {
+        valid: "true",
+        username: "test",
+        signature: "pass",
+      },
+      signer: {
+        address: "0x0",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+
+    // resolve the verification
+    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true).mockResolvedValue(false);
+
+    // check that ID matches the payload (this has been mocked)
+    const expectedId = "did:pkh:eip155:1:0x0";
+
+    // create a req against the express app
+    await request(app)
+      .post("/api/v0.0.0/verify")
+      .send({ challenge, payload })
+      .set("Accept", "application/json")
+      .expect(401)
+      .expect("Content-Type", /json/);
+  });
+
+  it("handles valid challenge request passed by the additional signer", async () => {
+    // challenge received from the challenge endpoint
+    const challenge = {
+      issuer: config.issuer,
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0x0",
+        provider: "challenge-any",
+        address: "0x0",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+    // payload containing a signature of the challenge in the challenge credential
+    const payload = {
+      type: "any",
+      types: ["Simple", "Simple"],
+      address: "0x0",
+      proofs: {
+        valid: "true",
+        username: "test",
+        signature: "pass",
+      },
+      signer: {
+        address: "0x1",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+
+    // resolve the verification
+    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+
+    // check that ID matches the payload (this has been mocked)
+    const expectedId = "did:pkh:eip155:1:0x0";
+
+    // create a req against the express app
+    await request(app)
+      .post("/api/v0.0.0/verify")
+      .send({ challenge, payload })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+  });
 });
