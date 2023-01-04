@@ -453,7 +453,9 @@ describe("POST /verify", function () {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-any",
         address: "0x0",
-        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+        challenge: {
+          issuer: "did:key:z6Mkecq4nKTCniqNed5cdDSURj1JX4SEdNhvhitZ48HcJMnN",
+        },
       },
     };
     // payload containing a signature of the challenge in the challenge credential
@@ -468,15 +470,14 @@ describe("POST /verify", function () {
       },
       signer: {
         address: "0x0",
-        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+        challenge: {
+          issuer: "did:key:z6Mkecq4nKTCniqNed5cdDSURj1JX4SEdNhvhitZ48HcJMnN",
+        },
       },
     };
 
     // resolve the verification
     jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true).mockResolvedValue(false);
-
-    // check that ID matches the payload (this has been mocked)
-    const expectedId = "did:pkh:eip155:1:0x0";
 
     // create a req against the express app
     await request(app)
@@ -495,9 +496,12 @@ describe("POST /verify", function () {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-any",
         address: "0x0",
-        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+        challenge: {
+          issuer: "did:key:z6Mkecq4nKTCniqNed5cdDSURj1JX4SEdNhvhitZ48HcJMnN",
+        },
       },
     };
+
     // payload containing a signature of the challenge in the challenge credential
     const payload = {
       type: "any",
@@ -510,7 +514,9 @@ describe("POST /verify", function () {
       },
       signer: {
         address: "0x1",
-        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+        challenge: {
+          issuer: "did:key:z6Mkecq4nKTCniqNed5cdDSURj1JX4SEdNhvhitZ48HcJMnN",
+        },
       },
     };
 

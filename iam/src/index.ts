@@ -221,12 +221,12 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
         const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
         const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
 
-        // if an additional signer is passed verify that the challenger credential is valid
+        // if an additional signer is passed verify that the challenge credential is valid
         if (payload.signer) {
           const additionalSignerCredential = await verifyCredential(DIDKit, payload.signer.challenge);
 
           // if the additional signer credential is valid and issued by the iAM server then we can proceed
-          if (!additionalSignerCredential && issuer === payload.signer.challenge.issuer) {
+          if (!additionalSignerCredential || issuer !== payload.signer.challenge.issuer) {
             // error response
             return void errorRes(res, "Unable to verify payload", 401);
           }
