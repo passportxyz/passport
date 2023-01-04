@@ -1,13 +1,20 @@
+/* eslint-disable testing-library/no-wait-for-multiple-assertions */
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { AdditionalStampModal } from "../../components/AdditionalStampModal";
 import { fetchPossibleEVMStamps } from "../../signer/utils";
 import { VALID_ENS_VERIFICATION, VALID_LENS_VERIFICATION } from "../../__test-fixtures__/verifiableCredentialResults";
+import { VerifiableCredential } from "@gitcoin/passport-types";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 jest.mock("../../utils/onboard.ts");
 
 jest.mock("../../signer/utils", () => ({
   fetchPossibleEVMStamps: jest.fn(),
+}));
+
+jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
+  fetchVerifiableCredential: jest.fn(),
 }));
 
 const mockPossibleEVMStamps = [
@@ -170,14 +177,75 @@ const mockPossibleEVMStamps = [
   },
 ];
 
-describe("AdditionalStampModal", () => {
+describe.only("AdditionalStampModal", () => {
   beforeEach(() => {
     (fetchPossibleEVMStamps as jest.Mock).mockResolvedValue(mockPossibleEVMStamps);
+    (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
+      credentials: [],
+    });
   });
 
-  it("renders a list of possible platforms", () => {
-    render(<AdditionalStampModal additionalSigner={{ addr: "0xasdf", sig: "", msg: "" }} />);
-    expect(screen.getByText("Stamp Verification")).toBeInTheDocument();
-    expect(screen.getByText("0xasdf")).toBeInTheDocument();
+  it("renders a list of possible platforms", async () => {
+    render(
+      <AdditionalStampModal
+        onClose={() => {}}
+        additionalSigner={{ addr: "0xasdf", sig: "", msg: "", challenge: {} as VerifiableCredential }}
+      />
+    );
+    await waitFor(async () => {
+      expect(screen.getByText("Stamp Verification")).toBeInTheDocument();
+      expect(screen.getByText("0xasdf")).toBeInTheDocument();
+      mockPossibleEVMStamps.forEach((stamp) => {
+        const platoformGroupName = stamp.platformProps.platform.path;
+        expect(screen.getByText(platoformGroupName)).toBeInTheDocument();
+      });
+    });
+  });
+
+  it("should show stamp selection inputs when requested", async () => {
+    render(
+      <AdditionalStampModal
+        onClose={() => {}}
+        additionalSigner={{ addr: "0xasdf", sig: "", msg: "", challenge: {} as VerifiableCredential }}
+      />
+    );
+
+    await waitFor(async () => {
+      const ethPlatformGroup = screen.getByTestId("ETH-add-btn");
+      await fireEvent.click(ethPlatformGroup);
+    });
+
+    await waitFor(async () => {
+      expect(screen.getByText("ETH")).toBeInTheDocument();
+      expect(screen.getByText("Possessions")).toBeInTheDocument();
+      expect(screen.getByText("Transactions")).toBeInTheDocument();
+      expect(screen.getByText("Gas fees spent")).toBeInTheDocument();
+    });
+  });
+
+  it("should attempt to fetch a verifiable credential when the verify button is clicked", async () => {
+    render(
+      <AdditionalStampModal
+        onClose={() => {}}
+        additionalSigner={{ addr: "0xasdf", sig: "", msg: "", challenge: {} as VerifiableCredential }}
+      />
+    );
+
+    await waitFor(async () => {
+      const ethPlatformGroup = screen.getByTestId("ETH-add-btn");
+      await fireEvent.click(ethPlatformGroup);
+    });
+
+    await waitFor(async () => {
+      const addAll = screen.getByTestId("add-all-btn");
+      await fireEvent.click(addAll);
+    });
+
+    await waitFor(async () => {
+      const addAll = screen.getByTestId("verify-btn");
+      await fireEvent.click(addAll);
+    });
+
+    expect(fetchVerifiableCredential).toHaveBeenCalled();
   });
 });

@@ -1,20 +1,25 @@
 // --- React Methods
 import React, { useContext, useEffect, useState } from "react";
+
+// Context
 import { CeramicContext } from "../context/ceramicContext";
-import { AdditionalSignature } from "../signer/utils";
-import { fetchPossibleEVMStamps, PossibleEVMProvider } from "../signer/utils";
+import { UserContext } from "../context/userContext";
+
+// utils
+import { fetchPossibleEVMStamps, PossibleEVMProvider, AdditionalSignature } from "../signer/utils";
 import { getPlatformSpec } from "../config/platforms";
+
+// Components
 import { Button, Spinner } from "@chakra-ui/react";
 import { StampSelector } from "./StampSelector";
-import { PROVIDER_ID, Stamp, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
 import { PlatformDetails } from "./PlatformDetails";
 
+// Passport imports
+import { PROVIDER_ID, Stamp, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
-import { UserContext } from "../context/userContext";
-
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
@@ -144,6 +149,7 @@ export const AdditionalStampModal = ({
             <p className="mb-1 text-left text-sm font-semibold text-gray-600">Accounts</p>
             <a
               className={`cursor-pointer text-sm ${allAdded ? "text-gray-600" : "text-purple-connectPurple"}`}
+              data-testid="add-all-btn"
               onClick={() => {
                 setSelectedProviders(providerIds);
               }}
@@ -162,7 +168,11 @@ export const AdditionalStampModal = ({
             setSelectedProviders={(providerIds) => setSelectedProviders && setSelectedProviders(providerIds)}
           />
         </div>
-        <button className="sidebar-verify-btn mx-auto flex justify-center" onClick={handleFetchCredential}>
+        <button
+          data-testid="verify-btn"
+          className="sidebar-verify-btn mx-auto flex justify-center"
+          onClick={handleFetchCredential}
+        >
           {loading ? (
             <>
               <Spinner size="sm" className="my-auto mr-2" />
@@ -207,7 +217,11 @@ export const AdditionalStampModal = ({
                         Verified
                       </button>
                     ) : (
-                      <Button mt={2} onClick={() => setActivePlatform(verifiedPlatform)}>
+                      <Button
+                        data-testid={`${verifiedPlatform.platformProps.platform.path}-add-btn`}
+                        mt={2}
+                        onClick={() => setActivePlatform(verifiedPlatform)}
+                      >
                         <img width="20px" alt="Plus Icon" src="./assets/plus-icon.svg" />
                         Add
                       </Button>
