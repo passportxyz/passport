@@ -247,6 +247,9 @@ export const AdditionalStampModal = ({
               }
             })
           )}
+          {!platformsLoading && possiblyVerifiedPlatforms.length === 0 && (
+            <p className="mt-4 font-semibold text-gray-600">Additional stamps were not Found</p>
+          )}
         </div>
       </div>
       <button
