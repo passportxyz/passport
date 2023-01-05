@@ -32,6 +32,7 @@ export const AdditionalStampModal = ({
 }) => {
   const { allPlatforms, handleAddStamps, handleDeleteStamps } = useContext(CeramicContext);
   const { signer, address } = useContext(UserContext);
+  const [platformsLoading, setPlatformsLoading] = useState(false);
   const [possiblyVerifiedPlatforms, setPossiblyVerifiedPlatforms] = useState<PossibleEVMProvider[]>([]);
   const [activePlatform, setActivePlatform] = useState<PossibleEVMProvider | null>(null);
   const [loading, setLoading] = useState(false);
@@ -133,8 +134,10 @@ export const AdditionalStampModal = ({
 
   useEffect(() => {
     const fetchPlatforms = async () => {
+      setPlatformsLoading(true);
       const verifiedPlatforms = await fetchPossibleEVMStamps(additionalSigner.addr, allPlatforms);
       setPossiblyVerifiedPlatforms(verifiedPlatforms);
+      setPlatformsLoading(false);
     };
     fetchPlatforms();
   }, [allPlatforms, additionalSigner]);
@@ -204,40 +207,46 @@ export const AdditionalStampModal = ({
         <div className="flex w-full flex-col">
           <p className="w-full text-left text-sm font-semibold text-gray-600">Accounts</p>
           <hr className="border-1" />
-          {possiblyVerifiedPlatforms.map((verifiedPlatform: PossibleEVMProvider) => {
-            const platform = getPlatformSpec(verifiedPlatform.platformProps.platform.path);
-            if (platform) {
-              return (
-                <div key={platform.name}>
-                  <div className="flex w-full justify-between">
-                    <div className="flex">
-                      <img width="25px" alt="Platform Image" src={platform?.icon} className="m-3" />
-                      <p className="pt-2 text-sm font-semibold">{platform.name}</p>
+          {platformsLoading ? (
+            <div className="mt-6 flex w-full justify-center">
+              <Spinner size="lg" />
+            </div>
+          ) : (
+            possiblyVerifiedPlatforms.map((verifiedPlatform: PossibleEVMProvider) => {
+              const platform = getPlatformSpec(verifiedPlatform.platformProps.platform.path);
+              if (platform) {
+                return (
+                  <div key={platform.name}>
+                    <div className="flex w-full justify-between">
+                      <div className="flex">
+                        <img width="25px" alt="Platform Image" src={platform?.icon} className="m-3" />
+                        <p className="pt-2 text-sm font-semibold">{platform.name}</p>
+                      </div>
+                      {verifiedPlatforms.includes(platform.name) ? (
+                        <button
+                          onClick={() => setActivePlatform(verifiedPlatform)}
+                          className="mt-2 flex h-8 w-24 items-center justify-center rounded-md bg-green-200 py-6 text-sm font-semibold "
+                        >
+                          <img width="20px" alt="Check Icon" src="./assets/check-icon.svg" />
+                          Verified
+                        </button>
+                      ) : (
+                        <Button
+                          data-testid={`${verifiedPlatform.platformProps.platform.path}-add-btn`}
+                          mt={2}
+                          onClick={() => setActivePlatform(verifiedPlatform)}
+                        >
+                          <img width="20px" alt="Plus Icon" src="./assets/plus-icon.svg" />
+                          Add
+                        </Button>
+                      )}
                     </div>
-                    {verifiedPlatforms.includes(platform.name) ? (
-                      <button
-                        onClick={() => setActivePlatform(verifiedPlatform)}
-                        className="mt-2 flex h-8 w-24 items-center justify-center rounded-md bg-green-200 py-6 text-sm font-semibold "
-                      >
-                        <img width="20px" alt="Check Icon" src="./assets/check-icon.svg" />
-                        Verified
-                      </button>
-                    ) : (
-                      <Button
-                        data-testid={`${verifiedPlatform.platformProps.platform.path}-add-btn`}
-                        mt={2}
-                        onClick={() => setActivePlatform(verifiedPlatform)}
-                      >
-                        <img width="20px" alt="Plus Icon" src="./assets/plus-icon.svg" />
-                        Add
-                      </Button>
-                    )}
+                    <hr className="border-1" />
                   </div>
-                  <hr className="border-1" />
-                </div>
-              );
-            }
-          })}
+                );
+              }
+            })
+          )}
         </div>
       </div>
       <button
