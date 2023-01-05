@@ -16,8 +16,6 @@ import {
 
 import * as identityMock from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
-import { utils } from "ethers";
-
 jest.mock("ethers", () => {
   return {
     utils: {

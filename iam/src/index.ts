@@ -221,7 +221,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
         const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
         const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
 
-        // if an additional signer is passed verify that the challenge credential is valid
+        // if an additional signer is passed verify that message was signed by passed signer address
         if (payload.signer) {
           const additionalChallenge = payload.signer.challenge;
 
@@ -231,7 +231,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
             .getAddress(utils.verifyMessage(additionalChallenge.credentialSubject.challenge, payload.signer.signature))
             .toLocaleLowerCase();
 
-          // if verifiedaddress does not equal the additional signer address throw an error because additional signer is invalid
+          // if verifiedAddress does not equal the additional signer address throw an error because signature is invalid
           if (!additionalSignerCredential || verifiedAddress !== payload.signer.address) {
             return void errorRes(res, "Unable to verify payload", 401);
           }
