@@ -16,6 +16,21 @@ import {
 
 import * as identityMock from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
+import { utils } from "ethers";
+
+jest.mock("ethers", () => {
+  return {
+    utils: {
+      getAddress: jest.fn().mockImplementation(() => {
+        return "0x0";
+      }),
+      verifyMessage: jest.fn().mockImplementation(() => {
+        return "string";
+      }),
+    },
+  };
+});
+
 describe("POST /challenge", function () {
   it("handles valid challenge requests", async () => {
     // as each signature is unique, each request results in unique output
@@ -514,13 +529,11 @@ describe("POST /verify", function () {
       },
       signer: {
         address: "0x0",
-        signature:
-          "0x1ae236412dbdf191de0cde816a0e6efac99a301c8c7739ad8a2d5e97fb3372d6288d1e02acf368e7cc9b1e8d20a3c4a2c33f27d08db435e0d1db0afc51f4106e1c",
+        signature: "0x1",
         challenge: {
           issuer: "did:key:z6Mkecq4nKTCniqNed5cdDSURj1JX4SEdNhvhitZ48HcJMnN",
           credentialSubject: {
-            challenge:
-              "I commit that this wallet is under my control and that I wish to link it with my Passport.\n\nnonce: cd789ec42ede1efa185465b7967acd0ceed27121c32acd325bd6982d4b1738c9",
+            challenge: "I commit that this wallet is under my control",
           },
         },
       },
@@ -537,5 +550,51 @@ describe("POST /verify", function () {
       .expect(200)
       .expect("Content-Type", /json/);
   });
-  it("should not issue credential for additional signer when invalid address is provided", async () => {});
+  it("should not issue credential for additional signer when invalid address is provided", async () => {
+    // challenge received from the challenge endpoint
+    const challenge = {
+      issuer: config.issuer,
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0x0",
+        provider: "challenge-any",
+        address: "0x0",
+        challenge: {
+          issuer: "did:key:z6Mkecq4nKTCniqNed5cdDSURj1JX4SEdNhvhitZ48HcJMnN",
+        },
+      },
+    };
+
+    // payload containing a signature of the challenge in the challenge credential
+    const payload = {
+      type: "any",
+      types: ["Simple", "Simple"],
+      address: "0x1",
+      proofs: {
+        valid: "true",
+        username: "test",
+        signature: "pass",
+      },
+      signer: {
+        address: "0xbadAddress",
+        signature: "0x1",
+        challenge: {
+          issuer: "did:key:z6Mkecq4nKTCniqNed5cdDSURj1JX4SEdNhvhitZ48HcJMnN",
+          credentialSubject: {
+            challenge: "I commit that this wallet is under my control",
+          },
+        },
+      },
+    };
+
+    // resolve the verification
+    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+
+    // create a req against the express app
+    await request(app)
+      .post("/api/v0.0.0/verify")
+      .send({ challenge, payload })
+      .set("Accept", "application/json")
+      .expect(401)
+      .expect("Content-Type", /json/);
+  });
 });
