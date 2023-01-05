@@ -250,7 +250,11 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
         updatedMinusInitial
       );
 
-      if (verificationStatus === VerificationStatuses.Failed && platform.isEVM) {
+      if (
+        verificationStatus === VerificationStatuses.Failed &&
+        platform.isEVM &&
+        process.env.NEXT_PUBLIC_FF_MULTI_EVM_SIGNER === "on"
+      ) {
         setShowNoStampModal(true);
       }
 
