@@ -506,25 +506,28 @@ describe("POST /verify", function () {
     const payload = {
       type: "any",
       types: ["Simple", "Simple"],
-      address: "0x0",
+      address: "0x1",
       proofs: {
         valid: "true",
         username: "test",
         signature: "pass",
       },
       signer: {
-        address: "0x1",
+        address: "0x0",
+        signature:
+          "0x1ae236412dbdf191de0cde816a0e6efac99a301c8c7739ad8a2d5e97fb3372d6288d1e02acf368e7cc9b1e8d20a3c4a2c33f27d08db435e0d1db0afc51f4106e1c",
         challenge: {
           issuer: "did:key:z6Mkecq4nKTCniqNed5cdDSURj1JX4SEdNhvhitZ48HcJMnN",
+          credentialSubject: {
+            challenge:
+              "I commit that this wallet is under my control and that I wish to link it with my Passport.\n\nnonce: cd789ec42ede1efa185465b7967acd0ceed27121c32acd325bd6982d4b1738c9",
+          },
         },
       },
     };
 
     // resolve the verification
     jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
-
-    // check that ID matches the payload (this has been mocked)
-    const expectedId = "did:pkh:eip155:1:0x0";
 
     // create a req against the express app
     await request(app)
@@ -534,4 +537,5 @@ describe("POST /verify", function () {
       .expect(200)
       .expect("Content-Type", /json/);
   });
+  it("should not issue credential for additional signer when invalid address is provided", async () => {});
 });

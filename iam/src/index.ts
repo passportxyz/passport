@@ -223,11 +223,16 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 
         // if an additional signer is passed verify that the challenge credential is valid
         if (payload.signer) {
-          const additionalSignerCredential = await verifyCredential(DIDKit, payload.signer.challenge);
+          const additionalChallenge = payload.signer.challenge;
 
-          // if the additional signer credential is valid and issued by the iAM server then we can proceed
-          if (!additionalSignerCredential || issuer !== payload.signer.challenge.issuer) {
-            // error response
+          const additionalSignerCredential = await verifyCredential(DIDKit, additionalChallenge);
+
+          const verifiedAddress = utils
+            .getAddress(utils.verifyMessage(additionalChallenge.credentialSubject.challenge, payload.signer.signature))
+            .toLocaleLowerCase();
+
+          // if verifiedaddress does not equal the additional signer address throw an error because additional signer is invalid
+          if (!additionalSignerCredential || verifiedAddress !== payload.signer.address) {
             return void errorRes(res, "Unable to verify payload", 401);
           }
         }

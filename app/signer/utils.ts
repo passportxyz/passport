@@ -84,7 +84,7 @@ export const signMessageForAdditionalSigner = async (message: string): Promise<s
 export const fetchAdditionalSigner = async (address: string): Promise<AdditionalSignature> => {
   datadogLogs.logger.info("Starting verification", { provider: providerId });
 
-  // get a callenge string - this should get an appropriate message back from the iam server to sign with the second account
+  // get a challenge string - this should get an appropriate message back from the iam server to sign with the second account
   const { challenge } = await fetchChallengeCredential(iamUrl, {
     type: "SignerChallenge",
     version: "0.0.0",
