@@ -25,6 +25,8 @@ import { UserContext } from "../context/userContext";
 
 import { useViewerConnection } from "@self.id/framework";
 import { EthereumAuthProvider } from "@self.id/web";
+import { Banner } from "../components/Banner";
+import { getExpiredStamps } from "../utils/helpers";
 
 export default function Dashboard() {
   const { wallet, handleConnection } = useContext(UserContext);
@@ -120,6 +122,20 @@ export default function Dashboard() {
             <span className="font-bold text-green-jade"> Waiting for wallet signature...</span>
           </div>
         </div>
+      )}
+
+      {getExpiredStamps(passport).length > 0 && (
+        <Banner>
+          <div className="w-full">
+            <div className="flex w-full justify-center">
+              <img src="./assets/clock-icon.svg" alt="clock-icon" className="mr-2 w-6 fill-blue-500" />
+              <p>Some of your stamps have expired. You can remove them from your Passport.</p>
+              <button className="ml-2 flex underline">
+                Remove Expired Stamps <img className="w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
+              </button>
+            </div>
+          </div>
+        </Banner>
       )}
 
       <div className="container mx-auto flex flex-wrap-reverse px-2 md:mt-4 md:flex-wrap">
