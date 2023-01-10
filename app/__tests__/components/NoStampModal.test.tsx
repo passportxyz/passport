@@ -5,6 +5,11 @@ import { fetchAdditionalSigner } from "../../signer/utils";
 
 jest.mock("../../signer/utils", () => ({
   fetchAdditionalSigner: jest.fn(),
+  fetchPossibleEVMStamps: jest.fn(),
+}));
+
+jest.mock("../../components/AdditionalStampModal", () => ({
+  AdditionalStampModal: () => <div>Additional Stamp Modal</div>,
 }));
 
 jest.mock("../../utils/onboard.ts");
@@ -38,17 +43,12 @@ describe("NoStampModal", () => {
         expect(fetchAdditionalSigner).toHaveBeenCalled();
       });
     });
-    it("links to ENS website", () => {
-      render(<NoStampModal {...props} />);
-      fireEvent.click(screen.getByText("Go to ENS"));
-      expect(props.onClose).toHaveBeenCalled();
-    });
     it("should show stamps for additional wallet", async () => {
       (fetchAdditionalSigner as jest.Mock).mockResolvedValue({ addr: "string", sig: "string", msg: "string" });
       render(<NoStampModal {...props} />);
       fireEvent.click(screen.getByTestId("check-other-wallet")!);
       await waitFor(() => {
-        expect(screen.getByText("Stamp Verification")).toBeInTheDocument();
+        expect(screen.getByText("Additional Stamp Modal")).toBeInTheDocument();
       });
     });
   });

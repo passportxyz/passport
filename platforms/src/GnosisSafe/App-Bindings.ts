@@ -4,6 +4,7 @@ import { Platform } from "../utils/platform";
 export class GnosisSafePlatform extends Platform {
   platformId = "GnosisSafe";
   path = "GnosisSafe";
+  isEVM = true;
 
   bannerContent =
     "Currently, we only recognize Gnosis Safes on the Ethereum main network. So you can't get that stamp through your Gnosis Safes on other networks.";

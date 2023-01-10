@@ -58,23 +58,12 @@ const LENS_HUB_PROXY_ABI = [
   },
 ];
 
-// async function getDefaultProfile(userAddress: string): Promise<string> {
-//   const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(process.env.POLYGON_RPC_URL);
-
-//   const contract = new Contract(LENS_HUB_PROXY_CONTRACT_ADDRESS, LENS_HUB_PROXY_ABI, provider);
-
-//   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-//   const profileId: unknown = await contract.defaultProfile(userAddress);
-
-//   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-//   const userHandle: unknown = await contract.getHandle(profileId);
-
-//   return userHandle?.toString();
-// }
-
 // If the user owns a lens handle this will return a number greater than 0
 async function getNumberOfHandles(userAddress: string): Promise<number> {
-  const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(process.env.POLYGON_RPC_URL);
+  const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(
+    process.env.POLYGON_RPC_URL || "https://polygon-rpc.com"
+  );
+
   const contract = new Contract(LENS_HUB_PROXY_CONTRACT_ADDRESS, LENS_HUB_PROXY_ABI, provider);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
   const numberOfHandles: BigNumber = await contract.balanceOf(userAddress);

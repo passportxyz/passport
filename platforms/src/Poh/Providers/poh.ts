@@ -4,10 +4,9 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Ethers library
 import { Contract } from "ethers";
-import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
-// ----- Credential verification
-import { getAddress } from "../../utils/signer";
+// ----- Credential verification, RPC Getter
+import { getAddress, getRPCProvider } from "../../utils/signer";
 
 // Proof of humanity contract address
 const POH_CONTRACT_ADDRESS = "0xC5E9dDebb09Cd64DfaCab4011A0D5cEDaf7c9BDb";
@@ -48,10 +47,10 @@ export class PohProvider implements Provider {
     // attempt to verify POH...
     try {
       // define a provider using the rpc url
-      const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(RPC_URL);
+      const staticProvider = getRPCProvider(payload);
 
       // load Proof of humanity contract
-      const readContract = new Contract(POH_CONTRACT_ADDRESS, POH_ABI, provider);
+      const readContract = new Contract(POH_CONTRACT_ADDRESS, POH_ABI, staticProvider);
 
       // Checks to see if the address is registered with proof of humanity
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
