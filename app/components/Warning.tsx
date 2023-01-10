@@ -1,4 +1,4 @@
-export function GenericBanner({ content }: { content: string }) {
+export function Warning({ content }: { content: string }) {
   return (
     <div className="p-4">
       <div className="mt-10 rounded-lg border border-purple-infoElementBorder bg-purple-infoElementBG px-4 py-6">

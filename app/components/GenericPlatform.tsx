@@ -18,7 +18,7 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commo
 import { SideBarContent } from "./SideBarContent";
 import { DoneToastContent } from "./DoneToastContent";
 import { useToast } from "@chakra-ui/react";
-import { GenericBanner } from "./GenericBanner";
+import { Warning } from "./Warning";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
@@ -348,7 +348,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
       selectedProviders={selectedProviders}
       setSelectedProviders={setSelectedProviders}
       isLoading={isLoading}
-      infoElement={platform.bannerContent ? <GenericBanner content={platform.bannerContent} /> : undefined}
+      infoElement={platform.bannerContent ? <Warning content={platform.bannerContent} /> : undefined}
       verifyButton={
         <>
           <button
