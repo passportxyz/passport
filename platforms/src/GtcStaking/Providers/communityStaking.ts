@@ -9,7 +9,7 @@ import { utils } from "ethers";
 import axios from "axios";
 
 // List of subgraphs to check
-export const stakingSubgraph = "https://api.thegraph.com/subgraphs/name/moonshotcollective/id-staking";
+export const stakingSubgraph = "https://api.studio.thegraph.com/query/40773/gtc-staking/v0.0.1";
 
 type StakeResponse = {
   totalAmountStaked?: number;
