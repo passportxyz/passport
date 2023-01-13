@@ -164,6 +164,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
               });
               const newSessionStr = session.serialize();
 
+              // @ts-ignore
               selfId = await ceramicConnect(ethAuthProvider, newSessionStr);
             } else {
               // If the session loaded is not valid, or if it is expired or close to expire, we create
