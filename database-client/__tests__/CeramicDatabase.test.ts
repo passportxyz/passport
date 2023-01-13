@@ -1,3 +1,4 @@
+import { PassportWithErrors } from './../../types/src/index.d';
 import { Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
@@ -109,7 +110,7 @@ describe("Verify Ceramic Database", () => {
       return;
     });
 
-    const passport = (await ceramicDatabase.getPassport()) as Passport;
+    const passport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
 
     // We do not expect to have any passport, hence `false` should be returned
     expect(spyStoreGet).toBeCalledTimes(1);
@@ -121,7 +122,7 @@ describe("Verify Ceramic Database", () => {
     expect(spyPinAdd).toBeCalledTimes(1);
     expect(spyPinAdd).toBeCalledWith("passport-id");
 
-    expect(passport?.stamps).toEqual([
+    expect(passport.passport?.stamps).toEqual([
       {
         credential: "Stamp Content for ceramic://credential-1",
         provider: "Provider-1",
@@ -138,8 +139,8 @@ describe("Verify Ceramic Database", () => {
         streamId: "ceramic://credential-3",
       },
     ]);
-    expect(passport?.issuanceDate).toEqual(issuanceDate);
-    expect(passport?.expiryDate).toEqual(expiryDate);
+    expect(passport.passport?.issuanceDate).toEqual(issuanceDate);
+    expect(passport.passport?.expiryDate).toEqual(expiryDate);
   });
 
   it("ignores stamps that cannot be loaded succefully from ceramic", async () => {
@@ -199,7 +200,7 @@ describe("Verify Ceramic Database", () => {
       return;
     });
 
-    const passport = (await ceramicDatabase.getPassport()) as Passport;
+    const passport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
 
     // We do not expect to have any passport, hence `false` should be returned
     expect(spyStoreGet).toBeCalledTimes(1);
@@ -212,7 +213,7 @@ describe("Verify Ceramic Database", () => {
     expect(spyPinAdd).toBeCalledWith("passport-id");
 
     // We only expect 2 stamps to have been loaded
-    expect(passport?.stamps).toEqual([
+    expect(passport.passport?.stamps).toEqual([
       {
         credential: "Stamp Content for ceramic://credential-1",
         provider: "Provider-1",
@@ -224,7 +225,7 @@ describe("Verify Ceramic Database", () => {
         streamId: "ceramic://credential-2",
       },
     ]);
-    expect(passport?.issuanceDate).toEqual(issuanceDate);
-    expect(passport?.expiryDate).toEqual(expiryDate);
+    expect(passport.passport?.issuanceDate).toEqual(issuanceDate);
+    expect(passport.passport?.expiryDate).toEqual(expiryDate);
   });
 });

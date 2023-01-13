@@ -1,3 +1,4 @@
+import { PassportWithErrors } from './../../types/src/index.d';
 import { Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
@@ -80,11 +81,11 @@ describe("when there is an existing passport without stamps for the given did", 
   });
 
   it("getPassport retrieves the passport from ceramic", async () => {
-    const actualPassport = (await ceramicDatabase.getPassport()) as Passport;
+    const {passport} = (await ceramicDatabase.getPassport()) as PassportWithErrors;
 
-    expect(actualPassport).toBeDefined();
-    expect(actualPassport).toEqual(existingPassport);
-    expect(actualPassport.stamps).toEqual([]);
+    expect(passport).toBeDefined();
+    expect(passport).toEqual(existingPassport);
+    expect(passport.stamps).toEqual([]);
   });
 
   it("addStamp adds a stamp to passport", async () => {
@@ -207,7 +208,7 @@ describe("when there is an existing passport with stamps for the given did", () 
   });
 
   it("getPassport retrieves the passport and stamps from ceramic", async () => {
-    const actualPassport = (await ceramicDatabase.getPassport()) as Passport;
+    const actualPassport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
 
     const formattedDate = new Date(actualPassport["issuanceDate"]);
 
@@ -215,7 +216,7 @@ describe("when there is an existing passport with stamps for the given did", () 
     expect(formattedDate.getDay()).toEqual(existingPassport.issuanceDate.getDay());
     expect(formattedDate.getMonth()).toEqual(existingPassport.issuanceDate.getMonth());
     expect(formattedDate.getFullYear()).toEqual(existingPassport.issuanceDate.getFullYear());
-    expect(actualPassport.stamps[0]).toEqual(ensStampFixture);
+    expect(actualPassport.passport.stamps[0]).toEqual(ensStampFixture);
   });
 
   it("addStamp adds a stamp to passport", async () => {
@@ -486,19 +487,23 @@ describe("when loading a stamp from a passport fails", () => {
   });
 
   it("ignores the failed stamp and only returns the successfully loaded stamps", async () => {
-    const passport = (await ceramicDatabase.getPassport()) as Passport;
+    const passport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
 
-    // Weony expect 2 results: Ens and Google stamps
-    expect(passport.stamps.length).toEqual(2);
+    // We only expect 2 results: Ens and Google stamps
+    expect(passport.passport.stamps.length).toEqual(2);
     expect(
-      passport.stamps.findIndex((stamp) => {
+      passport.passport.stamps.findIndex((stamp) => {
         return stamp && stamp.credential.credentialSubject.provider === "Ens";
       })
     ).toEqual(0);
     expect(
-      passport.stamps.findIndex((stamp) => {
+      passport.passport.stamps.findIndex((stamp) => {
         return stamp && stamp.credential.credentialSubject.provider === "Google";
       })
     ).toEqual(1);
+
+    // We expect 1 error: the POAP stamp
+    expect(passport.errors.stamps.length).toEqual(1);
+    expect(passport.errors.stamps[0]).toEqual("ceramic://SOME_BAD_ID_FOR_CERAMIC");
   });
 });

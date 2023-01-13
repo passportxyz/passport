@@ -1,4 +1,4 @@
-import { DID, Passport, PROVIDER_ID, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
+import { DID, PassportWithErrors, PROVIDER_ID, Stamp, VerifiableCredential, PassportError, Passport } from "@gitcoin/passport-types";
 
 // -- Ceramic and Glazed
 import type { CeramicApi } from "@ceramicnetwork/common";
@@ -93,7 +93,11 @@ export class CeramicDatabase implements DataStorageBase {
     return stream.toUrl();
   }
 
-  async getPassport(): Promise<Passport | undefined | false> {
+  async getPassport(): Promise<PassportWithErrors | undefined | false> {
+    const errors: PassportError = {
+      error: false,
+      stamps: [],
+    }
     try {
       const passport = await this.store.get("Passport");
       this.logger.info(`loaded passport for did ${this.did} => ${JSON.stringify(passport)}`);
@@ -124,6 +128,8 @@ export class CeramicDatabase implements DataStorageBase {
           this.logger.error(
             `Error when loading stamp with streamId ${streamIDs[idx]} for did  ${this.did}:` + e.toString()
           );
+          errors.error = true;
+          errors.stamps.push(streamIDs[idx])
           throw e;
         }
       });
@@ -151,7 +157,10 @@ export class CeramicDatabase implements DataStorageBase {
         this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString());
       }
 
-      return parsePassport;
+      return {
+        passport: parsePassport,
+        errors,
+      };
     } catch (e) {
       this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString());
       return undefined;

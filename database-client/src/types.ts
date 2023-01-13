@@ -1,4 +1,4 @@
-import { Passport, Stamp, DID } from "@gitcoin/passport-types";
+import { Stamp, DID, PassportWithErrors } from "@gitcoin/passport-types";
 
 // Class used as a base for each DataStorage Type
 // Implementations should enforce 1 Passport <-> 1 user
@@ -6,6 +6,6 @@ import { Passport, Stamp, DID } from "@gitcoin/passport-types";
 //  calling createPassport, getPassport, addStamp
 export abstract class DataStorageBase {
   abstract createPassport(): Promise<DID>;
-  abstract getPassport(): Promise<Passport | undefined | false>;
+  abstract getPassport(): Promise<PassportWithErrors | undefined | false>;
   abstract addStamp(stamp: Stamp): Promise<void>;
 }
