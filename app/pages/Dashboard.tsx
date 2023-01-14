@@ -30,7 +30,7 @@ import { getExpiredStamps } from "../utils/helpers";
 
 export default function Dashboard() {
   const { wallet, handleConnection } = useContext(UserContext);
-  const { passport, isLoadingPassport } = useContext(CeramicContext);
+  const { passport, isLoadingPassport, ceramicErrors, handleRefreshPassport } = useContext(CeramicContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -134,6 +134,15 @@ export default function Dashboard() {
                 Remove Expired Stamps <img className="w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
               </button>
             </div>
+          </div>
+        </Banner>
+      )}
+      {ceramicErrors && (
+        <Banner>
+          <div className="w-full">
+            <button className="ml-2 flex underline" onClick={() => handleRefreshPassport()}>
+              Reset Passport <img className="w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
+            </button>
           </div>
         </Banner>
       )}

@@ -1,3 +1,4 @@
+import { CeramicClient } from '@ceramicnetwork/http-client';
 import { PassportWithErrors } from './../../types/src/index.d';
 import { Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
 import { DID } from "dids";
@@ -11,6 +12,7 @@ import { TileDocument } from "@ceramicnetwork/stream-tile";
 import { TileDoc } from "@glazed/did-datastore/dist/proxy";
 
 import axios from "axios";
+import { Stream } from '@ceramicnetwork/common';
 
 let testDID: DID;
 let ceramicDatabase: CeramicDatabase;
@@ -201,7 +203,7 @@ describe("Verify Ceramic Database", () => {
     });
 
     const passport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
-
+ 
     // We do not expect to have any passport, hence `false` should be returned
     expect(spyStoreGet).toBeCalledTimes(1);
     expect(spyStoreGet).toBeCalledWith("Passport");
@@ -227,5 +229,21 @@ describe("Verify Ceramic Database", () => {
     ]);
     expect(passport.passport?.issuanceDate).toEqual(issuanceDate);
     expect(passport.passport?.expiryDate).toEqual(expiryDate);
+  });
+  it("should continue polling the ceramic node until stream is synced", async () => {
+    const spyLoadStream = jest.spyOn(ceramicDatabase.ceramicClient, "loadStream").mockImplementationOnce(async () => {
+      // There doesn't seem to be typing for an error response, assuming it is just a string
+      throw new Error('CACAO expired: Commit...') as unknown as Stream;
+    }).mockImplementationOnce(async () => {
+      // There doesn't seem to be typing for an error response, assuming it is just a string
+      throw new Error('CACAO expired: Commit...') as unknown as Stream;
+    }).mockImplementationOnce(async () => {
+      return {} as unknown as Stream;
+    }).mockImplementationOnce(async () => {
+      // There doesn't seem to be typing for an error response, assuming it is just a string
+      throw new Error('CACAO expired: Commit...') as unknown as Stream;
+    });
+    await ceramicDatabase.refreshStream("kjzl6cwe1jw14bmt6j16chuodycx4cc3zvorpzlv7zosb06lr45wu7p09tcnu08");
+    expect(spyLoadStream).toBeCalledTimes(3);
   });
 });

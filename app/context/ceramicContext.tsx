@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { Passport, PLATFORM_ID, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
+import { Passport, PassportWithErrors, PassportError, PLATFORM_ID, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 import { CeramicDatabase } from "@gitcoin/passport-database-client";
 import { useViewerConnection } from "@self.id/framework";
@@ -19,7 +19,9 @@ export interface CeramicContextState {
   handleAddStamps: (stamps: Stamp[]) => Promise<void>;
   handleDeleteStamp: (streamId: string) => Promise<void>;
   handleDeleteStamps: (providerIds: PROVIDER_ID[]) => Promise<void>;
+  handleRefreshPassport: () => Promise<void>;
   userDid: string | undefined;
+  ceramicErrors: PassportError | undefined;
 }
 
 export enum IsLoadingPassportState {
@@ -300,7 +302,9 @@ const startingState: CeramicContextState = {
   handleAddStamps: async () => {},
   handleDeleteStamp: async (streamId: string) => {},
   handleDeleteStamps: async () => {},
+  handleRefreshPassport: async () => {},
   userDid: undefined,
+  ceramicErrors: undefined,
 };
 
 export const CeramicContext = createContext(startingState);
@@ -311,6 +315,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [isLoadingPassport, setIsLoadingPassport] = useState<IsLoadingPassportState>(IsLoadingPassportState.Loading);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
   const [userDid, setUserDid] = useState<string | undefined>();
+  const [ceramicErrors, setCeramicErrors] = useState<PassportError | undefined>();
   const [viewerConnection] = useViewerConnection();
 
   const { address } = useContext(UserContext);
@@ -321,6 +326,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       setCeramicDatabase(undefined);
       setPassport(undefined);
       setUserDid(undefined);
+      setCeramicErrors(undefined);
     };
   }, [address]);
 
@@ -360,7 +366,12 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const fetchPassport = async (database: CeramicDatabase, skipLoadingState?: boolean): Promise<void> => {
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
     // fetch, clean and set the new Passport state
-    let passport = (await database.getPassport()) as Passport;
+    const passportResponse = (await database.getPassport()) as PassportWithErrors;
+    let { passport } = passportResponse;
+    if (passportResponse?.errors?.error) {
+      setCeramicErrors(passportResponse.errors);
+    }
+
     if (passport) {
       passport = cleanPassport(passport, database) as Passport;
       hydrateAllProvidersState(passport);
@@ -396,6 +407,16 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     }
 
     return passport;
+  };
+
+  const handleRefreshPassport = async (): Promise<void> => {
+    if (ceramicDatabase) {
+      ceramicErrors &&
+        ceramicErrors?.stamps?.forEach(async (streamId) => {
+          const stream = await ceramicDatabase.refreshStream(streamId);
+          console.log({ stream });
+        });
+    }
   };
 
   const handleCreatePassport = async (): Promise<void> => {
@@ -489,7 +510,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     handleAddStamps,
     handleDeleteStamps,
     handleDeleteStamp,
+    handleRefreshPassport,
     userDid,
+    ceramicErrors,
   };
 
   return <CeramicContext.Provider value={providerProps}>{children}</CeramicContext.Provider>;
