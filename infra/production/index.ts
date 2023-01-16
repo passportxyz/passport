@@ -252,6 +252,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "AMI_API_TOKEN",
             valueFrom: `${IAM_SERVER_SSM_ARN}:AMI_API_TOKEN::`,
           },
+          {
+            name: "GTC_STAKING_GRAPH_API_KEY",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:GTC_STAKING_GRAPH_API_KEY::`,
+          },
         ],
       },
     },
