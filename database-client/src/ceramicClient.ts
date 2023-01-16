@@ -98,16 +98,18 @@ export class CeramicDatabase implements DataStorageBase {
   async refreshStream(streamId: string): Promise<Stream> {
     let attempts = 1;
     let success = false;
+    // Attempt to load stream 5 times, with 1 second delay between each attempt
     while (attempts < 5 || !success) {
-      attempts++;
+      const options = attempts === 1 ? { sync: SyncOptions.SYNC_ALWAYS, syncTimeoutSeconds: 5 } : {  };
       try {
-        const stream = await this.ceramicClient.loadStream<TileDocument>(streamId, { sync: SyncOptions.SYNC_ALWAYS, syncTimeoutSeconds: 1 });
+        const stream = await this.ceramicClient.loadStream<TileDocument>(streamId, options);
         success = true;
-        return stream
+        return stream;
       } catch (e) {
         this.logger.error(`Error when calling loadStream on ${streamId}, attempt ${attempts}`, e);
+        attempts++;
+        await new Promise((resolve) => setTimeout(resolve, 5000));
       }
-      setTimeout(() => {}, 1000);
     }
   }
 
