@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import Dashboard from "../../pages/Dashboard";
 import { UserContextState } from "../../context/userContext";
 import { mockAddress } from "../../__test-fixtures__/onboardHookValues";
@@ -13,8 +13,13 @@ import {
   renderWithContext,
 } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState, IsLoadingPassportState } from "../../context/ceramicContext";
+// import {RefreshStampModal} from "../../components/RefreshStampModal";
 
 jest.mock("../../utils/onboard.ts");
+
+jest.mock("../../components/RefreshStampModal", () => ({
+  RefreshStampModal: () => <div>Refresh Modal</div>,
+}));
 
 jest.mock("@self.id/framework", () => {
   return {
@@ -211,7 +216,7 @@ describe("when app fails to load ceramic stream", () => {
       )
     ).toBeInTheDocument();
   });
-  it.skip("reset passport button should open refresh modal when clicked", () => {
+  it("reset passport button should open refresh modal when clicked", async () => {
     renderWithContext(
       mockUserContext,
       {
@@ -220,14 +225,15 @@ describe("when app fails to load ceramic stream", () => {
           error: true,
           stamps: ["streamid"],
         },
-        handleRefreshPassport: jest.fn().mockResolvedValue([true]),
       },
       <Router>
         <Dashboard />
       </Router>
     );
 
-    fireEvent.click(screen.getByText("Reset Passport"));
-    expect(screen.getByText("Reset Passport Modal")).toBeInTheDocument();
+    await fireEvent.click(screen.getByText("Reset Passport"));
+    await waitFor(() => {
+      expect(screen.getByText("Refresh Modal")).toBeInTheDocument();
+    });
   });
 });

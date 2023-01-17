@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // --Components
@@ -40,7 +40,7 @@ export default function Dashboard() {
   const [viewerConnection, ceramicConnect] = useViewerConnection();
   const { isOpen: retryModalIsOpen, onOpen: onRetryModalOpen, onClose: onRetryModalClose } = useDisclosure();
 
-  const [refreshModal, setRefreshModal] = React.useState(false);
+  const [refreshModal, setRefreshModal] = useState(false);
 
   // Route user to home when wallet is disconnected
   useEffect(() => {
