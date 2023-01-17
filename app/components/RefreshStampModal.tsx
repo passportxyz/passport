@@ -62,7 +62,7 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
       <ModalOverlay />
       <ModalContent>
         <div className="m-4">
-          <p className="font-semibold m-2">Resetting</p>
+          <p className="m-2 font-semibold">Resetting</p>
           <p className="m-2">
             Please wait while we repair some parts of your Passport on the Ceramic side. This may take up to 5
             minutes...
