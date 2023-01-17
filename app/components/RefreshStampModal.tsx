@@ -47,7 +47,6 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
     const refreshPassportState = async () => {
       updateSteps(1);
       const refreshedState = await (await handleRefreshPassport()).filter((state: boolean) => !state);
-      console.log({ refreshedState });
       if (refreshedState.length > 0) {
         updateSteps(2, true);
       } else {
@@ -55,7 +54,7 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
       }
     };
     refreshPassportState();
-  }, [handleRefreshPassport]);
+  }, []);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} blockScrollOnMount={false}>
