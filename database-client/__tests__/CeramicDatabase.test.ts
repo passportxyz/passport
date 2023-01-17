@@ -231,6 +231,9 @@ describe("Verify Ceramic Database", () => {
     expect(passport.passport?.expiryDate).toEqual(expiryDate);
   });
   it("should continue polling the ceramic node until stream is synced", async () => {
+    // Mock setTimout
+    jest.useFakeTimers();
+
     const spyLoadStream = jest.spyOn(ceramicDatabase.ceramicClient, "loadStream").mockImplementationOnce(async () => {
       // There doesn't seem to be typing for an error response, assuming it is just a string
       throw new Error('CACAO expired: Commit...') as unknown as Stream;
@@ -243,7 +246,9 @@ describe("Verify Ceramic Database", () => {
       // There doesn't seem to be typing for an error response, assuming it is just a string
       throw new Error('CACAO expired: Commit...') as unknown as Stream;
     });
-    await ceramicDatabase.refreshStream("kjzl6cwe1jw14bmt6j16chuodycx4cc3zvorpzlv7zosb06lr45wu7p09tcnu08");
-    expect(spyLoadStream).toBeCalledTimes(3);
+    ceramicDatabase.refreshStream("kjzl6cwe1jw14bmt6j16chuodycx4cc3zvorpzlv7zosb06lr45wu7p09tcnu08").then(() => {
+      expect(spyLoadStream).toBeCalledTimes(3);
+    });
+    jest.runAllTimers()
   });
 });

@@ -95,22 +95,23 @@ export class CeramicDatabase implements DataStorageBase {
     return stream.toUrl();
   }
 
-  async refreshStream(streamId: string): Promise<Stream> {
+  async refreshStream(streamId: string): Promise<boolean> {
     let attempts = 1;
     let success = false;
-    // Attempt to load stream 5 times, with 1 second delay between each attempt
-    while (attempts < 5 || !success) {
+    // Attempt to load stream 36 times, with 5 second delay between each attempt - 5 min total
+    while (attempts < 36 && !success) {
       const options = attempts === 1 ? { sync: SyncOptions.SYNC_ALWAYS, syncTimeoutSeconds: 5 } : {  };
       try {
         const stream = await this.ceramicClient.loadStream<TileDocument>(streamId, options);
         success = true;
-        return stream;
+        return success;
       } catch (e) {
         this.logger.error(`Error when calling loadStream on ${streamId}, attempt ${attempts}`, e);
         attempts++;
         await new Promise((resolve) => setTimeout(resolve, 5000));
       }
     }
+    return false;
   }
 
   async getPassport(): Promise<PassportWithErrors | undefined | false> {
@@ -135,13 +136,12 @@ export class CeramicDatabase implements DataStorageBase {
       const stampsToLoad = passport?.stamps.map(async (_stamp, idx) => {
         const streamUrl = `${this.apiHost}/api/v0/streams/${streamIDs[idx].substring(10)}`;
         this.logger.log(`get stamp from streamUrl: ${streamUrl}`);
-        console.log({streamIDs})
         try {
           const { provider, credential } = _stamp;
-          const loadedCred = (await axios.get(streamUrl)) as { data: { state: { content: VerifiableCredential } } };
+          const loadedCred = (await this.ceramicClient.loadStream<TileDocument>(streamIDs[idx])) as unknown as { content: VerifiableCredential };
           return {
             provider,
-            credential: loadedCred.data.state.content,
+            credential: loadedCred.content,
             streamId: streamIDs[idx],
           } as Stamp;
         } catch (e) {
@@ -163,7 +163,7 @@ export class CeramicDatabase implements DataStorageBase {
       const filteredStamps = stampLoadingStatus.filter(isFulfilled);
       const loadedStamps = filteredStamps.map((settledStamp) => settledStamp.value);
 
-      const parsePassport: Passport = {
+      const parsedPassport: Passport = {
         issuanceDate: new Date(passport.issuanceDate),
         expiryDate: new Date(passport.expiryDate),
         stamps: loadedStamps,
@@ -172,14 +172,13 @@ export class CeramicDatabase implements DataStorageBase {
       // try pinning passport
       try {
         const passportDoc = await this.store.getRecordDocument(this.model.getDefinitionID("Passport"));
-        console.log({passportDoc}, passportDoc.id)
         await this.ceramicClient.pin.add(passportDoc.id);
       } catch (e) {
         this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString());
       }
 
       return {
-        passport: parsePassport,
+        passport: parsedPassport,
         errors,
       };
     } catch (e) {
