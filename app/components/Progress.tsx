@@ -76,7 +76,7 @@ function StepComponent({ step, isLastStep, error }: StepComponentProps) {
   }
 
   return (
-    <li className={"relative"} data-testid={`step-${step.name}`}>
+    <li className="relative m-2" data-testid={`step-${step.name}`}>
       {!isLastStep && (
         <div className={`absolute top-4 left-4 -ml-px mt-0.5 h-full w-0.5 bg-indigo-600`} aria-hidden="true" />
       )}
