@@ -19,7 +19,7 @@ export interface CeramicContextState {
   handleAddStamps: (stamps: Stamp[]) => Promise<void>;
   handleDeleteStamp: (streamId: string) => Promise<void>;
   handleDeleteStamps: (providerIds: PROVIDER_ID[]) => Promise<void>;
-  handleRefreshPassport: () => Promise<void>;
+  handleRefreshPassport: () => Promise<boolean[]>;
   userDid: string | undefined;
   ceramicErrors: PassportError | undefined;
 }
@@ -302,7 +302,7 @@ const startingState: CeramicContextState = {
   handleAddStamps: async () => {},
   handleDeleteStamp: async (streamId: string) => {},
   handleDeleteStamps: async () => {},
-  handleRefreshPassport: async () => {},
+  handleRefreshPassport: async () => [],
   userDid: undefined,
   ceramicErrors: undefined,
 };
@@ -409,14 +409,22 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     return passport;
   };
 
-  const handleRefreshPassport = async (): Promise<void> => {
-    if (ceramicDatabase) {
-      ceramicErrors &&
-        ceramicErrors?.stamps?.forEach(async (streamId) => {
-          const stream = await ceramicDatabase.refreshStream(streamId);
-          console.log({ stream });
-        });
+  const handleRefreshPassport = async (): Promise<boolean[]> => {
+    if (ceramicDatabase && ceramicErrors) {
+      try {
+        // attempt to refresh each instance of an error
+        const stampErrors = ceramicErrors.stamps
+          ? ceramicErrors.stamps.map(async (streamId) => await ceramicDatabase.refreshStream(streamId))
+          : [];
+        // const passportError =  ceramicErrors.passport ? await ceramicDatabase.refreshStream(ceramicErrors.passport) : undefined;
+
+        const resolvedErrors = await Promise.all([...stampErrors]);
+        return resolvedErrors;
+      } catch (error) {
+        return [];
+      }
     }
+    return [];
   };
 
   const handleCreatePassport = async (): Promise<void> => {

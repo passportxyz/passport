@@ -190,4 +190,43 @@ describe("when app fails to load ceramic stream", () => {
 
     expect(mockHandleConnection).toBeCalledTimes(1);
   });
+  it("if ceramic errors are present it should show reset banner", () => {
+    renderWithContext(
+      mockUserContext,
+      {
+        ...mockCeramicContext,
+        ceramicErrors: {
+          error: true,
+          stamps: ["streamid"],
+        },
+      },
+      <Router>
+        <Dashboard />
+      </Router>
+    );
+
+    expect(
+      screen.getByText(
+        "We’re making some repairs. Your Passport will be locked before continuing. This may take up to 5 minutes."
+      )
+    ).toBeInTheDocument();
+  });
+  it("reset passport button should open refresh modal when clicked", () => {
+    renderWithContext(
+      mockUserContext,
+      {
+        ...mockCeramicContext,
+        ceramicErrors: {
+          error: true,
+          stamps: ["streamid"],
+        },
+      },
+      <Router>
+        <Dashboard />
+      </Router>
+    );
+
+    fireEvent.click(screen.getByText("Reset Passport"));
+    expect(screen.getByText("Reset Passport Modal")).toBeInTheDocument();
+  });
 });

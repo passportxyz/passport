@@ -199,11 +199,13 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         stamp: undefined,
       },
     },
+    ceramicErrors: { error: false },
     handleAddStamp: jest.fn(),
     handleAddStamps: jest.fn(),
     handleCreatePassport: jest.fn(),
     handleDeleteStamp: jest.fn(),
     handleDeleteStamps: jest.fn(),
+    handleRefreshPassport: jest.fn(),
     ...initialState,
   };
 };

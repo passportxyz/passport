@@ -39,8 +39,6 @@ export const fetchAdditionalSigner = async (address: string): Promise<Additional
     address: address || "",
   });
 
-  console.log({ challenge });
-
   // open an iframe (must be on a different domain/port so that we're not triggering a wallet change on the parent window)
   // * note: this domain will appear in the metamask window
   // - replace signerUrl with "/signer.html" to see how bad the ux would be if we were to handle this on the same domain
