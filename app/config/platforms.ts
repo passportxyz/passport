@@ -78,7 +78,7 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Connect your Facebook account to verify stamp details.",
     connectMessage: "Connect Account",
   },
-    {
+  {
     icon: "./assets/linkedinStampIcon.svg",
     platform: "Linkedin",
     name: "Linkedin",
@@ -105,7 +105,8 @@ export const PLATFORMS: PlatformSpec[] = [
     icon: "./assets/brightidStampIcon.svg",
     platform: "Brightid",
     name: "BrightID",
-    description: "Verify your BrightID connection details. If you do not have BrightID, you can join a connection party.",
+    description:
+      "Verify your BrightID connection details. If you do not have BrightID, you can join a connection party.",
     connectMessage: "Verify Account",
     isEVM: true,
   },
