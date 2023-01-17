@@ -8,8 +8,10 @@ export class EnsPlatform extends Platform {
   redirectUri: string = null;
   isEVM = true;
 
-  bannerContent =
-    "The ENS stamp only recognizes ENS domains if they are set to your account as primary ENS (or reverse record).";
+  banner = {
+    heading:
+      "The ENS stamp only recognizes ENS domains if they are set to your account as primary ENS (or reverse record).",
+  };
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     const result = await Promise.resolve({});

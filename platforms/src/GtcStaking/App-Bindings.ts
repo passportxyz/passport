@@ -7,7 +7,14 @@ export class GTCStakingPlatform implements Platform {
   clientId: string = null;
   redirectUri: string = null;
 
-  bannerContent = "The GTC Staking stamp is only claimable during Gitcoin Grants rounds.";
+  banner = {
+    heading: "Stake your GTC on the new Identity Staking site.",
+    content: "Defend against sybil by staking on your own identity or somebody else's. By staking, the profile of stamps in the Passport becomes more unique.",
+    cta: {
+      label: "Go to Identity Staking",
+      url: "https://www.staking.passport.gitcoin.co/"
+    }
+  }
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     return {};

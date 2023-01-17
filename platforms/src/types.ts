@@ -65,7 +65,14 @@ export type AppContext = {
 export interface Platform {
   platformId: string;
   path?: string;
-  bannerContent?: string;
+  banner?: {
+    heading?: string;
+    content?: string;
+    cta?: {
+      label: string;
+      url: string;
+    }
+  };
   isEVM?: boolean;
   // TODO: shall we drop the getOAuthUrl and getProviderProof, given that we have getProviderPayload
   getOAuthUrl?(state: string): Promise<string>;
