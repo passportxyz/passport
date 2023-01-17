@@ -36,9 +36,11 @@ export default function Home() {
               <p className="text-5xl sm:text-7xl md:text-7xl">Passport</p>
             </div>
             <div className="font-libre-franklin mt-0 text-lg text-gray-400 sm:text-xl md:mt-10 md:pr-20 md:text-xl">
-              Grow a decentralized identity record with various credentials about you. Through the network of sources
-              about your personhood, applications like Gitcoin Grants Protocol gives you rights like matching weight in
-              Quadratic Funding.
+              Take control of your online identity by creating a decentralized record of your credentials. By collecting
+              &ldquo;stamps&rdquo; of validation for your identity and online reputation, you can gain access to the
+              most trustworthy web3 experiences and maximize your ability to benefit from platforms like Gitcoin Grants.
+              The more you verify your identity, the more opportunities you will have to vote and participate across the
+              web3.
             </div>
             <div className="mt-4 hidden w-full sm:mt-10 sm:w-1/2 md:mt-10 md:block md:w-1/2">
               <button
