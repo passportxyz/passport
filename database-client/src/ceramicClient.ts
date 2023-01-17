@@ -138,10 +138,10 @@ export class CeramicDatabase implements DataStorageBase {
         this.logger.log(`get stamp from streamUrl: ${streamUrl}`);
         try {
           const { provider, credential } = _stamp;
-          const loadedCred = (await this.ceramicClient.loadStream<TileDocument>(streamIDs[idx])) as unknown as { content: VerifiableCredential };
+          const loadedCred = (await axios.get(streamUrl)) as { data: { state: { content: VerifiableCredential } } };
           return {
             provider,
-            credential: loadedCred.content,
+            credential: loadedCred.data.state.content,
             streamId: streamIDs[idx],
           } as Stamp;
         } catch (e) {
