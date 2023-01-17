@@ -416,6 +416,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         const stampErrors = ceramicErrors.stamps
           ? ceramicErrors.stamps.map(async (streamId) => await ceramicDatabase.refreshStream(streamId))
           : [];
+
         // const passportError =  ceramicErrors.passport ? await ceramicDatabase.refreshStream(ceramicErrors.passport) : undefined;
 
         const resolvedErrors = await Promise.all([...stampErrors]);

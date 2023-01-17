@@ -205,7 +205,7 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
     handleCreatePassport: jest.fn(),
     handleDeleteStamp: jest.fn(),
     handleDeleteStamps: jest.fn(),
-    handleRefreshPassport: jest.fn(),
+    handleRefreshPassport: () => Promise.resolve([]),
     ...initialState,
   };
 };

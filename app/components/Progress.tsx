@@ -25,7 +25,7 @@ type StepComponentProps = {
 export const completedIcon = (src: string) => (
   <span className="step-icon step-icon-completed flex h-9 items-center">
     <span className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-teal-600">
-      <img alt="information circle" className="sticky top-0 h-6" src={src} style={{ fill: "red" }} />
+      <img alt="completed icon" className="sticky top-0 h-6" src={src} />
     </span>
   </span>
 );
@@ -52,7 +52,7 @@ const waitingIcon = (
 const errorIcon = (
   <span className="step-icon step-icon-error flex h-9 items-center">
     <span className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-red-600">
-      <img alt="information circle" className="sticky top-0 h-6" src="./assets/x-icon.svg" />
+      <img alt="error icon" className="sticky top-0 h-6" src="./assets/x-icon.svg" />
     </span>
   </span>
 );
@@ -92,7 +92,7 @@ function StepComponent({ step, isLastStep, error }: StepComponentProps) {
   );
 }
 
-export default function Progress({ steps, error }: ProgressProps) {
+export function Progress({ steps, error }: ProgressProps) {
   return (
     <>
       {/* <div>

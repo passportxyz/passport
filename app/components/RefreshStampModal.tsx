@@ -1,7 +1,7 @@
 import { Modal, ModalContent, ModalOverlay } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { CeramicContext } from "../context/ceramicContext";
-import Progress, { completedIcon, Status, Step } from "./Progress";
+import { Progress, completedIcon, Status, Step } from "./Progress";
 import { useToast } from "@chakra-ui/react";
 
 export type RefreshStampModalProps = {
@@ -30,12 +30,11 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
     // if error mark ActiveStep as ERROR, and previous steps as SUCCESS
     const steps = [...currentSteps];
     if (error) {
-      steps[activeStepIndex].status = Status.ERROR;
       steps.slice(0, activeStepIndex).forEach((step) => (step.status = Status.SUCCESS));
+      steps[activeStepIndex - 1].status = Status.ERROR;
       setCurrentSteps(steps);
       return;
     }
-
     // if there is no error mark previous steps as SUCCESS, mark step after activeStepIndex as IS_STARTED
     steps.slice(0, activeStepIndex).forEach((step) => (step.status = Status.SUCCESS));
     if (steps[activeStepIndex]) {
