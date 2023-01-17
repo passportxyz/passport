@@ -45,14 +45,18 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
 
   useEffect(() => {
     const refreshPassportState = async () => {
-      updateSteps(1);
-      const refreshedState = await (await handleRefreshPassport()).filter((state: boolean) => !state);
-      if (refreshedState.length > 0) {
+      try {
+        updateSteps(1);
+        const refreshedState = await (await handleRefreshPassport()).filter((state: boolean) => !state);
+        if (refreshedState.length > 0) {
+          updateSteps(2, true);
+        } else {
+          updateSteps(2);
+        }
+        window.location.reload();
+      } catch (error) {
         updateSteps(2, true);
-      } else {
-        updateSteps(2);
       }
-      window.location.reload();
     };
     refreshPassportState();
   }, []);
