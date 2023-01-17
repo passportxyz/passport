@@ -419,6 +419,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         // const passportError =  ceramicErrors.passport ? await ceramicDatabase.refreshStream(ceramicErrors.passport) : undefined;
 
         const resolvedErrors = await Promise.all([...stampErrors]);
+
+        // fetchpassport to reset passport state
+        await fetchPassport(ceramicDatabase);
         return resolvedErrors;
       } catch (error) {
         return [];
