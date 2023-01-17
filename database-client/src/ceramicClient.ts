@@ -116,8 +116,8 @@ export class CeramicDatabase implements DataStorageBase {
 
   async getPassport(): Promise<PassportWithErrors | undefined | false> {
     const errors: PassportError = {
-      error: true,
-      stamps: ["kjzl6cwe1jw14bmt6j16chuodycx4cc3zvorpzlv7zosb06lr45wu7p09tcnu08"],
+      error: false,
+      stamps: [],
     }
     try {
       const passport = await this.store.get("Passport");
