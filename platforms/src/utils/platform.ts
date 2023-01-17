@@ -8,13 +8,22 @@ export type PlatformOptions = {
   state?: string;
 };
 
+export type PlatformBanner = {
+  heading?: string;
+  content?: string;
+  cta?: {
+    label: string;
+    url: string;
+  };
+};
+
 export class Platform {
   platformId: string;
   path: string;
   clientId?: string;
   redirectUri?: string;
   state?: string;
-  bannerContent?: string;
+  banner?: PlatformBanner;
   isEVM?: boolean;
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {

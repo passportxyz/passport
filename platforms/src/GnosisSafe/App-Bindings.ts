@@ -6,8 +6,10 @@ export class GnosisSafePlatform extends Platform {
   path = "GnosisSafe";
   isEVM = true;
 
-  bannerContent =
-    "Currently, we only recognize Gnosis Safes on the Ethereum main network. So you can't get that stamp through your Gnosis Safes on other networks.";
+  banner = {
+    heading:
+      "Currently, we only recognize Gnosis Safes on the Ethereum main network. So you can't get that stamp through your Gnosis Safes on other networks.",
+  };
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     const result = await Promise.resolve({});

@@ -389,7 +389,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
         selectedProviders={selectedProviders}
         setSelectedProviders={setSelectedProviders}
         isLoading={isLoading}
-        infoElement={platform.bannerContent ? <GenericBanner content={platform.bannerContent} /> : undefined}
+        infoElement={platform.banner ? <GenericBanner banner={platform.banner} /> : undefined}
         verifyButton={
           <>
             <button
