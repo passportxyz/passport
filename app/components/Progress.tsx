@@ -1,8 +1,8 @@
 export enum Status {
-  IS_SUCCESS,
+  SUCCESS,
   IN_PROGRESS,
   NOT_STARTED,
-  IS_ERROR,
+  ERROR,
 }
 
 export type Step = {
@@ -61,7 +61,7 @@ function StepComponent({ step, isLastStep, error }: StepComponentProps) {
   let icon = waitingIcon;
 
   switch (step.status) {
-    case Status.IS_SUCCESS:
+    case Status.SUCCESS:
       icon = completedIcon;
       break;
     case Status.NOT_STARTED:
@@ -70,7 +70,7 @@ function StepComponent({ step, isLastStep, error }: StepComponentProps) {
     case Status.IN_PROGRESS:
       icon = currentIcon;
       break;
-    case Status.IS_ERROR:
+    case Status.ERROR:
       icon = errorIcon;
       break;
   }

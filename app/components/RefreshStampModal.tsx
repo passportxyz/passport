@@ -15,7 +15,7 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
     {
       name: "Connecting",
       description: "Connecting to Ceramic...",
-      status: Status.IS_SUCCESS,
+      status: Status.SUCCESS,
     },
     {
       name: "Resetting",
@@ -25,17 +25,17 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
   ]);
 
   const updateSteps = (activeStepIndex: number, error?: boolean) => {
-    // if error mark ActiveStep as IS_ERROR, and previous steps as IS_SUCCESS
+    // if error mark ActiveStep as ERROR, and previous steps as SUCCESS
     const steps = [...currentSteps];
     if (error) {
-      steps[activeStepIndex].status = Status.IS_ERROR;
-      steps.slice(0, activeStepIndex).forEach((step) => (step.status = Status.IS_SUCCESS));
+      steps[activeStepIndex].status = Status.ERROR;
+      steps.slice(0, activeStepIndex).forEach((step) => (step.status = Status.SUCCESS));
       setCurrentSteps(steps);
       return;
     }
 
-    // if there is no error mark previous steps as IS_SUCCESS, mark step after activeStepIndex as IS_STARTED
-    steps.slice(0, activeStepIndex).forEach((step) => (step.status = Status.IS_SUCCESS));
+    // if there is no error mark previous steps as SUCCESS, mark step after activeStepIndex as IS_STARTED
+    steps.slice(0, activeStepIndex).forEach((step) => (step.status = Status.SUCCESS));
     if (steps[activeStepIndex]) {
       steps[activeStepIndex].status = Status.IN_PROGRESS;
     }
