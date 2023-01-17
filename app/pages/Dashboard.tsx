@@ -126,7 +126,7 @@ export default function Dashboard() {
         <div className="md:w-3/5">
           <p className="mb-4 text-2xl text-black">My Stamps</p>
           <p className="text-xl text-black">
-            Select the decentralized identity verification stamps you&apos;d like to connect to.
+            Gitcoin Passport is an identity aggregator that helps you build a digital identifier showcasing your unique humanity. Select the verification stamps you&apos;d like to connect to start building your passport. The more verifications you have&#44; the stronger your passport will be.
           </p>
         </div>
 
