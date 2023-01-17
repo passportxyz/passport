@@ -6,7 +6,7 @@ export class GitcoinPlatform extends Platform {
   path = "github";
   clientId: string = null;
   redirectUri: string = null;
-  bannerContent = "The Gitcoin Grant stamp only recognizes contributions during Gitcoin Grants rounds.";
+  bannerContent = "The Gitcoin Grant stamp only recognizes contributions made during Gitcoin Grants rounds 1-15.";
 
   constructor(options: PlatformOptions = {}) {
     super();
