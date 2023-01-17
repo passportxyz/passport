@@ -22,10 +22,10 @@ type StepComponentProps = {
   error?: boolean;
 };
 
-const completedIcon = (
+export const completedIcon = (src: string) => (
   <span className="step-icon step-icon-completed flex h-9 items-center">
     <span className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-teal-600">
-      <img alt="information circle" className="sticky top-0 h-6" src="./assets/white-check-icon.svg" />
+      <img alt="information circle" className="sticky top-0 h-6" src={src} style={{ fill: "red" }} />
     </span>
   </span>
 );
@@ -62,7 +62,7 @@ function StepComponent({ step, isLastStep, error }: StepComponentProps) {
 
   switch (step.status) {
     case Status.SUCCESS:
-      icon = completedIcon;
+      icon = completedIcon("./assets/white-check-icon.svg");
       break;
     case Status.NOT_STARTED:
       icon = waitingIcon;

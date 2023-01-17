@@ -1,7 +1,8 @@
 import { Modal, ModalContent, ModalOverlay } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { CeramicContext } from "../context/ceramicContext";
-import Progress, { Status, Step } from "./Progress";
+import Progress, { completedIcon, Status, Step } from "./Progress";
+import { useToast } from "@chakra-ui/react";
 
 export type RefreshStampModalProps = {
   isOpen: boolean;
@@ -10,6 +11,7 @@ export type RefreshStampModalProps = {
 
 export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) => {
   const { handleRefreshPassport } = useContext(CeramicContext);
+  const toast = useToast();
 
   const [currentSteps, setCurrentSteps] = useState<Step[]>([
     {
@@ -43,6 +45,22 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
     setCurrentSteps(steps);
   };
 
+  const successToast = () => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      render: (result: any) => (
+        <div className="flex justify-between rounded-md bg-blue-darkblue p-4 text-white">
+          {completedIcon("./assets/purple-check-icon.svg")}
+          <p className="py-1 px-3">Your Passport has been reset.</p>
+          <button className="sticky top-0" onClick={result.onClose}>
+            <img alt="close button" className="rounded-lg hover:bg-gray-500" src="./assets/x-icon.svg" />
+          </button>
+        </div>
+      ),
+    });
+  };
+
   useEffect(() => {
     const refreshPassportState = async () => {
       try {
@@ -52,8 +70,14 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
           updateSteps(2, true);
         } else {
           updateSteps(2);
+          // Wait 2 seconds and reload page
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
+          onClose();
+
+          // Show success toast
+          successToast();
         }
-        window.location.reload();
       } catch (error) {
         updateSteps(2, true);
       }
@@ -62,18 +86,20 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
   }, []);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} blockScrollOnMount={false}>
-      <ModalOverlay />
-      <ModalContent>
-        <div className="m-4">
-          <p className="m-2 font-semibold">Resetting</p>
-          <p className="m-2">
-            Please wait while we repair some parts of your Passport on the Ceramic side. This may take up to 5
-            minutes...
-          </p>
-          <Progress steps={currentSteps} />
-        </div>
-      </ModalContent>
-    </Modal>
+    <>
+      <Modal isOpen={isOpen} onClose={onClose} blockScrollOnMount={false}>
+        <ModalOverlay />
+        <ModalContent>
+          <div className="m-4">
+            <p className="m-2 font-semibold">Resetting</p>
+            <p className="m-2">
+              Please wait while we repair some parts of your Passport on the Ceramic side. This may take up to 5
+              minutes...
+            </p>
+            <Progress steps={currentSteps} />
+          </div>
+        </ModalContent>
+      </Modal>
+    </>
   );
 };
