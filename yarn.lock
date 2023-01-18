@@ -4254,7 +4254,7 @@
   resolved "https://registry.yarnpkg.com/@next/swc-win32-x64-msvc/-/swc-win32-x64-msvc-12.3.1.tgz#27d71a95247a9eaee03d47adee7e3bd594514136"
   integrity sha512-W1ijvzzg+kPEX6LAc+50EYYSEo0FVu7dmTE+t+DM4iOLqgGHoW9uYSz9wCVdkXOEEMP9xhXfGpcSxsfDucyPkA==
 
-"@noble/ed25519@^1.5.1":
+"@noble/ed25519@^1.5.1", "@noble/ed25519@^1.6.1":
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/@noble/ed25519/-/ed25519-1.7.1.tgz#6899660f6fbb97798a6fbd227227c4589a454724"
   integrity sha512-Rk4SkJFaXZiznFyC/t77Q0NKS4FL7TLJJsVG2V2oiEq3kJVeTdxysEe/yRWSpnWMe808XRDJ+VFh5pt/FN5plw==
@@ -6865,11 +6865,12 @@ braces@^3.0.2, braces@~3.0.2:
   dependencies:
     fill-range "^7.0.1"
 
-brightid_sdk@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/brightid_sdk/-/brightid_sdk-1.0.1.tgz#e848865456f2db8ba49c2156483814e44a10ef9f"
-  integrity sha512-3tdprkXj/odL5BpQEHnWSLdwAxmMvs8AkRk7rF6UGnAoQTZjR4FEPNkxBAuPF2BbDoqKw2ebQ7P2LPhPGsahdA==
+brightid_sdk_v6@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/brightid_sdk_v6/-/brightid_sdk_v6-2.0.1.tgz#a145905aa981e97d66906c5f826fd86227f9b929"
+  integrity sha512-bq/Z+ofrc2M/uLN7ajlt3e9ozx+p9RyaGkc/ziq5a7xhvyD7+Fne7VWEwNb2rE2EkAdhWO1xQ6/wHIiMVv6CWg==
   dependencies:
+    "@noble/ed25519" "^1.6.1"
     axios "^0.21.0"
     base64-js "^1.5.1"
     fast-json-stable-stringify "^2.1.0"

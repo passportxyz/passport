@@ -23,9 +23,10 @@ describe("BrightidPlatform", () => {
       }
     });
     const platform = new BrightidPlatform();
-    const result = await platform.handleVerifyContextId("did:brightid:0x123");
+    const result = await platform.getBrightidInfoForUserDid("did:brightid:0x123");
     expect(result).toBe(true);
   });
+
   it("should be able to get a provider payload", async () => {
     mockedAxios.post.mockImplementation(async (url) => {
       switch (url) {

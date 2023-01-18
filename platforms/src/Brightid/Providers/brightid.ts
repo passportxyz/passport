@@ -1,9 +1,9 @@
 // ----- Types
 import type { Provider, ProviderOptions } from "../../types";
-import type { RequestPayload, VerifiedPayload, BrightIdVerificationResponse } from "@gitcoin/passport-types";
+import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // --- verifyMethod in providers
-import { verifyBrightidContextId } from "../procedures/brightid";
+import { getBrightidInfoForUserDid } from "../procedures/brightid";
 
 // Request a verifiable credential from brightid
 export class BrightIdProvider implements Provider {
@@ -21,24 +21,20 @@ export class BrightIdProvider implements Provider {
     try {
       const did = payload.proofs?.did;
 
-      const responseData = await verifyBrightidContextId(did || "");
-      const formattedData: BrightIdVerificationResponse = responseData?.result as BrightIdVerificationResponse;
+      const responseData = await getBrightidInfoForUserDid(did || "");
+      const formattedData = responseData?.result;
 
       // Unique is true if the user obtained "Meets" verification by attending a connection party
       const isUnique = "unique" in formattedData && formattedData.unique === true;
-      const firstContextId =
-        "contextIds" in formattedData &&
-        formattedData.contextIds &&
-        formattedData.contextIds.length > 0 &&
-        formattedData.contextIds[0];
-      const valid: boolean = (firstContextId && isUnique) || false;
+      const verified = "verification" in formattedData && formattedData.verification;
+      const valid: boolean = (verified && isUnique) || false;
 
       return {
         valid,
         record: valid
           ? {
-              context: "context" in formattedData && formattedData.context,
-              contextId: firstContextId,
+              context: "verification" in formattedData && formattedData.verification,
+              contextId: "Gitcoin",
               meets: JSON.stringify(isUnique),
             }
           : undefined,
