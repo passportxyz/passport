@@ -22,7 +22,8 @@ import { AccountId } from "caip";
 
 export interface UserContextState {
   loggedIn: boolean;
-  handleConnection: () => void;
+  toggleConnection: () => void;
+  handleDisconnection: () => void;
   address: string | undefined;
   wallet: WalletState | null;
   signer: JsonRpcSigner | undefined;
@@ -31,7 +32,8 @@ export interface UserContextState {
 
 const startingState: UserContextState = {
   loggedIn: false,
-  handleConnection: () => {},
+  toggleConnection: () => {},
+  handleDisconnection: () => {},
   address: undefined,
   wallet: null,
   signer: undefined,
@@ -246,38 +248,46 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   }, [viewerConnection.status]);
 
   // Toggle connect/disconnect
-  const handleConnection = (): void => {
+  const toggleConnection = (): void => {
     if (!address) {
-      connect()
-        .then(() => {
-          datadogLogs.logger.info("Connected to Wallet");
-          setLoggedIn(true);
-        })
-        .catch((e) => {
-          datadogRum.addError(e);
-          throw e;
-        });
+      handleConnection();
     } else {
-      disconnect({
-        label: walletLabel || "",
-      })
-        .then(() => {
-          setLoggedIn(false);
-          ceramicDisconnect();
-          window.localStorage.setItem("connectedWallets", "[]");
-        })
-        .catch((e) => {
-          datadogRum.addError(e);
-          throw e;
-        });
+      handleDisconnection();
     }
+  };
+
+  const handleConnection = (): void => {
+    connect()
+      .then(() => {
+        datadogLogs.logger.info("Connected to Wallet");
+        setLoggedIn(true);
+      })
+      .catch((e) => {
+        datadogRum.addError(e);
+        throw e;
+      });
+  };
+
+  const handleDisconnection = (): void => {
+    disconnect({
+      label: walletLabel || "",
+    })
+      .then(() => {
+        setLoggedIn(false);
+        ceramicDisconnect();
+        window.localStorage.setItem("connectedWallets", "[]");
+      })
+      .catch((e) => {
+        datadogRum.addError(e);
+        throw e;
+      });
   };
 
   const stateMemo = useMemo(
     () => ({
       loggedIn,
       address,
-      handleConnection,
+      toggleConnection,
       wallet,
       signer,
       walletLabel,
@@ -290,7 +300,8 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   const providerProps = {
     loggedIn,
     address,
-    handleConnection,
+    toggleConnection,
+    handleDisconnection,
     wallet,
     signer,
     walletLabel,

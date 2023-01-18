@@ -10,7 +10,7 @@ import { UserContext } from "../context/userContext";
 import { Footer } from "../components/Footer";
 
 export default function Home() {
-  const { handleConnection, address, walletLabel, wallet } = useContext(UserContext);
+  const { toggleConnection, address, walletLabel, wallet } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -46,7 +46,7 @@ export default function Home() {
               <button
                 data-testid="connectWalletButton"
                 className="rounded-sm rounded bg-purple-connectPurple px-10 py-2 text-white"
-                onClick={handleConnection}
+                onClick={toggleConnection}
               >
                 <p className="text-base">{address ? `Disconnect from ${walletLabel || ""}` : "Connect Wallet"}</p>
               </button>
@@ -68,7 +68,7 @@ export default function Home() {
           <button
             data-testid="connectWalletButtonMobile"
             className="w-full rounded-sm rounded bg-purple-connectPurple py-2 px-10 text-white md:invisible"
-            onClick={handleConnection}
+            onClick={toggleConnection}
           >
             <p className="text-base">{address ? `Disconnect from ${walletLabel || ""}` : "Connect Wallet"}</p>
           </button>

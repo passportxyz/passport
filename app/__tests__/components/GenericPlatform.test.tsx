@@ -32,12 +32,12 @@ jest.mock("../../utils/helpers.tsx", () => ({
   }),
 }));
 
-const mockHandleConnection = jest.fn();
+const mockToggleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
 const mockHandleAddStamp = jest.fn().mockResolvedValue(undefined);
 const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
 const mockUserContext: UserContextState = makeTestUserContext({
-  handleConnection: mockHandleConnection,
+  toggleConnection: mockToggleConnection,
   address: mockAddress,
   signer: mockSigner,
 });
