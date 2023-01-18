@@ -1,4 +1,11 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { IdenaAge5Provider, IdenaAge10Provider } from "./Providers/IdenaAgeProvider";
+import { IdenaStake1kProvider, IdenaStake10kProvider, IdenaStake100kProvider } from "./Providers/IdenaStakeProvider";
+import {
+  IdenaStateNewbieProvider,
+  IdenaStateVerifiedProvider,
+  IdenaStateHumanProvider,
+} from "./Providers/IdenaStateProvider";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/idenaStampIcon.svg",
@@ -35,4 +42,13 @@ export const ProviderConfig: PlatformGroupSpec[] = [
   },
 ];
 
-export const providers: Provider[] = [];
+export const providers: Provider[] = [
+  new IdenaStateNewbieProvider(),
+  new IdenaStateVerifiedProvider(),
+  new IdenaStateHumanProvider(),
+  new IdenaStake1kProvider(),
+  new IdenaStake10kProvider(),
+  new IdenaStake100kProvider(),
+  new IdenaAge5Provider(),
+  new IdenaAge10Provider(),
+];
