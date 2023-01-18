@@ -183,8 +183,8 @@ export class CeramicDatabase implements DataStorageBase {
       };
     } catch (e) {
       this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString());
-      errors.error = true;
-      errors.passport = true;
+      // errors.error = true;
+      // errors.passport = true;
       return {
         passport: undefined,
         errors,
