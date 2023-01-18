@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import Dashboard from "../../pages/Dashboard";
 import { UserContextState } from "../../context/userContext";
 import { mockAddress } from "../../__test-fixtures__/onboardHookValues";
@@ -28,11 +28,13 @@ jest.mock("@self.id/web", () => {
   };
 });
 
-const mockHandleConnection = jest.fn();
+const mockToggleConnection = jest.fn();
+const mockHandleDisconnection = jest.fn();
 const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
 
 const mockUserContext: UserContextState = makeTestUserContext({
-  handleConnection: mockHandleConnection,
+  toggleConnection: mockToggleConnection,
+  handleDisconnection: mockHandleDisconnection,
   address: mockAddress,
   signer: mockSigner,
 });
@@ -188,6 +190,29 @@ describe("when app fails to load ceramic stream", () => {
 
     fireEvent.click(screen.getByTestId("retry-modal-close"));
 
-    expect(mockHandleConnection).toBeCalledTimes(1);
+    expect(mockToggleConnection).toBeCalledTimes(1);
+  });
+});
+
+describe("when a user clicks on the Passport logo", () => {
+  it("should disconnect the user's wallet and navigate to homepage", async () => {
+    const mockCeramicConnect = jest.fn();
+    (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }, mockCeramicConnect]);
+
+    renderWithContext(
+      mockUserContext,
+      mockCeramicContext,
+      <Router>
+        <Dashboard />
+      </Router>
+    );
+
+    const passportLogoLink = screen.getByTestId("passport-logo-link");
+
+    fireEvent.click(passportLogoLink);
+
+    expect(mockHandleDisconnection).toBeCalledTimes(1);
+
+    await waitFor(() => expect(window.location.pathname).toBe("/"));
   });
 });
