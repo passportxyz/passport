@@ -127,19 +127,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {getExpiredStamps(passport).length > 0 && (
-        <Banner>
-          <div className="w-full">
-            <div className="flex w-full justify-center">
-              <img src="./assets/clock-icon.svg" alt="clock-icon" className="mr-2 w-6 fill-blue-500" />
-              <p>Some of your stamps have expired. You can remove them from your Passport.</p>
-              <button className="ml-2 flex underline">
-                Remove Expired Stamps <img className="w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
-              </button>
-            </div>
-          </div>
-        </Banner>
-      )}
       {ceramicErrors && (
         <Banner>
           <div className="flex w-full justify-center">
