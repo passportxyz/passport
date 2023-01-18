@@ -40,6 +40,7 @@ const {
   Coinbase,
   GuildXYZ,
   Hypercerts,
+  Idena,
 } = stampPlatforms;
 
 import { PlatformProps } from "../components/GenericPlatform";
@@ -198,6 +199,11 @@ if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
     platFormGroupSpec: GuildXYZ.ProviderConfig,
   });
 }
+
+platforms.set("Idena", {
+  platform: new Idena.IdenaPlatform(),
+  platFormGroupSpec: Idena.ProviderConfig,
+});
 
 export enum IsLoadingPassportState {
   Idle,
