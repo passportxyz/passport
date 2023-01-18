@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
 import React, { useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // --Components
 import { CardList } from "../components/CardList";
@@ -27,7 +27,7 @@ import { useViewerConnection } from "@self.id/framework";
 import { EthereumAuthProvider } from "@self.id/web";
 
 export default function Dashboard() {
-  const { wallet, handleConnection } = useContext(UserContext);
+  const { wallet, toggleConnection, handleDisconnection } = useContext(UserContext);
   const { passport, isLoadingPassport } = useContext(CeramicContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -56,7 +56,7 @@ export default function Dashboard() {
   const closeModalAndDisconnect = () => {
     onRetryModalClose();
     // toggle wallet connect/disconnect
-    handleConnection();
+    toggleConnection();
   };
 
   useEffect(() => {
@@ -103,7 +103,9 @@ export default function Dashboard() {
         <div className="float-right mb-4 flex h-12 flex-row items-center font-medium text-gray-900 md:mb-0">
           <img src="/assets/gitcoinLogoDark.svg" alt="Gitcoin Logo" />
           <img className="ml-6 mr-6" src="/assets/logoLine.svg" alt="Logo Line" />
-          <img src="/assets/passportLogoBlack.svg" alt="pPassport Logo" />
+          <Link data-testid="passport-logo-link" to="/" onClick={handleDisconnection}>
+            <img src="/assets/passportLogoBlack.svg" alt="pPassport Logo" />
+          </Link>
         </div>
       </div>
 

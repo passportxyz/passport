@@ -10,7 +10,8 @@ import { PlatformProps } from "../components/GenericPlatform";
 export const makeTestUserContext = (initialState?: Partial<UserContextState>): UserContextState => {
   return {
     loggedIn: true,
-    handleConnection: jest.fn(),
+    toggleConnection: jest.fn(),
+    handleDisconnection: jest.fn(),
     address: mockAddress,
     wallet: mockWallet,
     signer: undefined,
