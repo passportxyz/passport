@@ -56,7 +56,6 @@ export {
   Idena,
 };
 
-// TODO idena
 // Initiate providers - new Providers should be registered in this array...
 export const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
@@ -229,6 +228,14 @@ export const providers = new Providers([
   new GuildXYZ.GuildAdminProvider(),
   new GuildXYZ.GuildMemberProvider(),
   new GuildXYZ.GuildPassportMemberProvider(),
+  new Idena.IdenaStateNewbieProvider(),
+  new Idena.IdenaStateVerifiedProvider(),
+  new Idena.IdenaStateHumanProvider(),
+  new Idena.IdenaStake1kProvider(),
+  new Idena.IdenaStake10kProvider(),
+  new Idena.IdenaStake100kProvider(),
+  new Idena.IdenaAge5Provider(),
+  new Idena.IdenaAge10Provider(),
 ]);
 
 export { Platform, AppContext, ProviderPayload, PlatformSpec } from "./types";

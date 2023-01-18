@@ -37,6 +37,7 @@ import {
   Brightid,
   Coinbase,
   GuildXYZ,
+  Idena,
 } from "@gitcoin/passport-platforms";
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -185,6 +186,11 @@ if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
     platFormGroupSpec: GuildXYZ.GuildXYZProviderConfig,
   });
 }
+
+platforms.set("Idena", {
+  platform: new Idena.IdenaPlatform(),
+  platFormGroupSpec: Idena.IdenaProviderConfig,
+});
 
 export enum IsLoadingPassportState {
   Idle,
