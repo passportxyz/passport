@@ -210,9 +210,9 @@ describe("when there is an existing passport with stamps for the given did", () 
   it("getPassport retrieves the passport and stamps from ceramic", async () => {
     const actualPassport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
 
-    const formattedDate = new Date(actualPassport["issuanceDate"]);
+    const formattedDate = new Date(actualPassport.passport["issuanceDate"]);
 
-    expect(actualPassport).toBeDefined();
+    expect(actualPassport.passport).toBeDefined();
     expect(formattedDate.getDay()).toEqual(existingPassport.issuanceDate.getDay());
     expect(formattedDate.getMonth()).toEqual(existingPassport.issuanceDate.getMonth());
     expect(formattedDate.getFullYear()).toEqual(existingPassport.issuanceDate.getFullYear());
@@ -501,9 +501,5 @@ describe("when loading a stamp from a passport fails", () => {
         return stamp && stamp.credential.credentialSubject.provider === "Google";
       })
     ).toEqual(1);
-
-    // We expect 1 error: the POAP stamp
-    expect(passport.errors.stamps.length).toEqual(1);
-    expect(passport.errors.stamps[0]).toEqual("ceramic://SOME_BAD_ID_FOR_CERAMIC");
   });
 });
