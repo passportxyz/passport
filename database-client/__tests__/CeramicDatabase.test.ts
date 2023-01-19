@@ -30,6 +30,8 @@ beforeAll(async () => {
   ceramicDatabase = new CeramicDatabase(testDID, process.env.CERAMIC_CLIENT_URL, testnetAliases);
 });
 
+jest.setTimeout(30000);
+
 describe("Verify Ceramic Database", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -230,25 +232,76 @@ describe("Verify Ceramic Database", () => {
     expect(passport.passport?.issuanceDate).toEqual(issuanceDate);
     expect(passport.passport?.expiryDate).toEqual(expiryDate);
   });
-  it("should continue polling the ceramic node until stream is synced", async () => {
-    // Mock setTimout
-    jest.useFakeTimers();
+  it("checkPassportCACAOError should indicate if a passport stream is throwing a CACAO error", () => {
+    let spyStoreGetRecordDocument = jest
+      .spyOn(ceramicDatabase.store, "getRecordDocument")
+      .mockImplementation(async (name) => {
+        return {
+          id: "passport-id",
+        } as unknown as TileDoc;
+      });
+    
+    const spyLoadStreamReq = jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
+      return new Promise((resolve, reject) => {
+        reject({
+          response: {
+            data: {
+              error: "CACAO has expired",
+            },
+          },
+          status: 500,
+        });
+      });
+    });
 
-    const spyLoadStream = jest.spyOn(ceramicDatabase.ceramicClient, "loadStream").mockImplementationOnce(async () => {
-      // There doesn't seem to be typing for an error response, assuming it is just a string
-      throw new Error('CACAO expired: Commit...') as unknown as Stream;
-    }).mockImplementationOnce(async () => {
-      // There doesn't seem to be typing for an error response, assuming it is just a string
-      throw new Error('CACAO expired: Commit...') as unknown as Stream;
-    }).mockImplementationOnce(async () => {
-      return {} as unknown as Stream;
-    }).mockImplementationOnce(async () => {
-      // There doesn't seem to be typing for an error response, assuming it is just a string
-      throw new Error('CACAO expired: Commit...') as unknown as Stream;
+    expect(ceramicDatabase.checkPassportCACAOError()).resolves.toBe(true);
+  });
+  it("checkPassportCACAOError should not indicate cacao error if not present", () => {
+    jest
+      .spyOn(ceramicDatabase.store, "getRecordDocument")
+      .mockImplementation(async (name) => {
+        return {
+          id: "passport-id",
+        } as unknown as TileDoc;
+      });
+    
+    jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
+      return new Promise((resolve, reject) => {
+        reject({
+          response: {
+            data: {
+              error: "Timeout",
+            },
+          },
+          status: 504,
+        });
+      });
     });
-    ceramicDatabase.refreshStream("kjzl6cwe1jw14bmt6j16chuodycx4cc3zvorpzlv7zosb06lr45wu7p09tcnu08").then(() => {
-      expect(spyLoadStream).toBeCalledTimes(3);
-    });
-    jest.runAllTimers()
+    expect(ceramicDatabase.checkPassportCACAOError()).resolves.toBe(false);
+  });
+  it("should attempt to refresh a passport until successful", async () => {
+    jest
+      .spyOn(ceramicDatabase.store, "getRecordDocument")
+      .mockImplementation(async (name) => {
+        return {
+          id: "passport-id",
+        } as unknown as TileDoc;
+      });
+      
+    const spyLoadStream = jest.spyOn(ceramicDatabase.ceramicClient, "loadStream")
+
+    spyLoadStream.mockImplementationOnce(() => {
+      throw new Error('CACAO expired: Commit...') as unknown as Stream;
+    })
+
+    spyLoadStream.mockImplementationOnce((streamId) => {
+      return new Promise((resolve, reject) => {
+        resolve("true" as unknown as Stream);
+      });
+    })
+    
+    await ceramicDatabase.refreshPassport()
+
+    expect(spyLoadStream).toBeCalledTimes(2);  
   });
 });

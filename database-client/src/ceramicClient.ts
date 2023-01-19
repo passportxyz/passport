@@ -95,18 +95,41 @@ export class CeramicDatabase implements DataStorageBase {
     return stream.toUrl();
   }
 
-  async refreshStream(streamId: string): Promise<boolean> {
+  async checkPassportCACAOError(): Promise<boolean> {
+    try {
+      const passportDoc = await this.store.getRecordDocument(this.model.getDefinitionID("Passport"));
+      const streamUrl = `${this.apiHost}/api/v0/streams/${passportDoc.id}`;
+      const rest = await axios.get(streamUrl);
+      return false;
+    } catch (e) {
+      this.logger.error(`Error when calling getRecordDocument on Passport`, e);
+      if (e?.response?.data?.error?.includes("CACAO has expired")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async refreshPassport(): Promise<boolean> {
     let attempts = 1;
     let success = false;
+
+    let passportDoc
+    try {
+      passportDoc = await this.store.getRecordDocument(this.model.getDefinitionID("Passport"));
+    } catch (e) {
+      // unable to get passport doc
+      return false;
+    }
     // Attempt to load stream 36 times, with 5 second delay between each attempt - 5 min total
     while (attempts < 36 && !success) {
       const options = attempts === 1 ? { sync: SyncOptions.SYNC_ALWAYS, syncTimeoutSeconds: 5 } : {  };
       try {
-        const stream = await this.ceramicClient.loadStream<TileDocument>(streamId, options);
+        await this.ceramicClient.loadStream<TileDocument>(passportDoc.id, options);
         success = true;
         return success;
       } catch (e) {
-        this.logger.error(`Error when calling loadStream on ${streamId}, attempt ${attempts}`, e);
+        this.logger.error(`Error when calling loadStream on passport, attempt ${attempts}`, e);
         attempts++;
         await new Promise((resolve) => setTimeout(resolve, 5000));
       }
@@ -148,10 +171,6 @@ export class CeramicDatabase implements DataStorageBase {
           this.logger.error(
             `Error when loading stamp with streamId ${streamIDs[idx]} for did  ${this.did}:` + e.toString()
           );
-          if (e.response.data.error.includes("CACAO has expired")) {
-            errors.error = true;
-            errors.stamps.push(streamIDs[idx]) 
-          }
           throw e;
         }
       });
@@ -170,7 +189,6 @@ export class CeramicDatabase implements DataStorageBase {
         expiryDate: new Date(passport.expiryDate),
         stamps: loadedStamps,
       };
-
       // try pinning passport
       try {
         const passportDoc = await this.store.getRecordDocument(this.model.getDefinitionID("Passport"));
@@ -181,16 +199,16 @@ export class CeramicDatabase implements DataStorageBase {
 
       return {
         passport: parsedPassport,
-        errors,
       };
     } catch (e) {
       this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString());
-      // errors.error = true;
-      // errors.passport = true;
+      // Indicate there was an error loading passport
+      errors.error = true;
+      errors.passport = true
       return {
         passport: undefined,
         errors,
-      };
+      }
     }
   }
 
