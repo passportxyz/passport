@@ -161,7 +161,6 @@ export const UserContextProvider = ({ children }: { children: any }) => {
                 })
               );
               const session = await DIDSession.authorize(authMethod, {
-                expiresInSecs: 24 * 3600,
                 resources: ["ceramic://*"],
               });
               const newSessionStr = session.serialize();
