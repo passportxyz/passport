@@ -31,7 +31,7 @@ import { RefreshStampModal } from "../components/RefreshStampModal";
 
 export default function Dashboard() {
   const { wallet, handleConnection } = useContext(UserContext);
-  const { passport, isLoadingPassport, ceramicErrors, handleRefreshPassport } = useContext(CeramicContext);
+  const { passport, isLoadingPassport, ceramicErrors } = useContext(CeramicContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 

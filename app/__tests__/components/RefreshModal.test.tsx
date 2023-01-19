@@ -26,7 +26,7 @@ const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 describe("RefreshStampModal", () => {
   it("should attempt to refresh a passport once rendered", async () => {
-    const refreshRequest = jest.spyOn(mockCeramicContext, "handleRefreshPassport").mockResolvedValue([]);
+    const refreshRequest = jest.spyOn(mockCeramicContext, "handleCheckRefreshPassport").mockResolvedValue([]);
     renderWithContext(
       mockUserContext,
       {
@@ -43,7 +43,7 @@ describe("RefreshStampModal", () => {
   });
 
   it("should indicate to progress component that streams have been refreshed", async () => {
-    jest.spyOn(mockCeramicContext, "handleRefreshPassport").mockResolvedValue([]);
+    jest.spyOn(mockCeramicContext, "handleCheckRefreshPassport").mockResolvedValue([]);
     renderWithContext(
       mockUserContext,
       {
@@ -60,7 +60,7 @@ describe("RefreshStampModal", () => {
   });
 
   it("should indicate to progress component that there was an error refreshing stamps", async () => {
-    jest.spyOn(mockCeramicContext, "handleRefreshPassport").mockResolvedValue([false]);
+    jest.spyOn(mockCeramicContext, "handleCheckRefreshPassport").mockResolvedValue([false]);
     renderWithContext(
       mockUserContext,
       {

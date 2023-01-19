@@ -10,7 +10,7 @@ export type RefreshStampModalProps = {
 };
 
 export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) => {
-  const { handleRefreshPassport } = useContext(CeramicContext);
+  const { handleCheckRefreshPassport } = useContext(CeramicContext);
   const toast = useToast();
 
   const [currentSteps, setCurrentSteps] = useState<Step[]>([
@@ -64,12 +64,13 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
     const refreshPassportState = async () => {
       try {
         updateSteps(1);
-        const refreshedState = await (await handleRefreshPassport()).filter((state: boolean) => !state);
+        const refreshedState = await (await handleCheckRefreshPassport()).filter((state: boolean) => !state);
         if (refreshedState.length > 0) {
+          // handleCheckRefreshPassport returned an error after polling ceramic
           updateSteps(2, true);
         } else {
           updateSteps(2);
-          // Wait 2 seconds and reload page
+          // Wait 2 seconds to show success toast
           await new Promise((resolve) => setTimeout(resolve, 2000));
 
           onClose();
