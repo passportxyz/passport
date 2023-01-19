@@ -423,6 +423,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
         // fetchpassport to reset passport state
         await fetchPassport(ceramicDatabase);
+        // if fetchPassport and refreshStream don't throw errors, passport should be reset
+        setCeramicErrors(undefined);
         return resolvedErrors;
       } catch (error) {
         return [];

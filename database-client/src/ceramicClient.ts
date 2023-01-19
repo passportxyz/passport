@@ -148,8 +148,10 @@ export class CeramicDatabase implements DataStorageBase {
           this.logger.error(
             `Error when loading stamp with streamId ${streamIDs[idx]} for did  ${this.did}:` + e.toString()
           );
-          errors.error = true;
-          errors.stamps.push(streamIDs[idx])
+          if (e.response.data.error.includes("CACAO has expired")) {
+            errors.error = true;
+            errors.stamps.push(streamIDs[idx]) 
+          }
           throw e;
         }
       });
