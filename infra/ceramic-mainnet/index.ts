@@ -203,6 +203,7 @@ const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-ceramic`, {
     bucket: accessLogsBucket.bucket,
     enabled: true,
   },
+  idleTimeout: 120
 });
 
 // Listen to HTTP traffic on port 80 and redirect to 443
