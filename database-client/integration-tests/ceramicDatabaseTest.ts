@@ -3,7 +3,7 @@ import { Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/pas
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
-
+import { jest } from "@jest/globals";
 import testnetAliases from "./integration-test-model-aliases.json";
 
 import { CeramicDatabase } from "../src";
@@ -11,6 +11,8 @@ import { createCipheriv } from "crypto";
 
 let testDID: DID;
 let ceramicDatabase: CeramicDatabase;
+
+jest.setTimeout(30000);
 
 beforeAll(async () => {
   const TEST_SEED = Uint8Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
