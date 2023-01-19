@@ -223,7 +223,7 @@ export const frontendUrlEcs = pulumi.interpolate`http://${httpListener.endpoint.
 const target = alb.createTargetGroup("gitcoin-dpopp-ceramic", {
   vpc,
   port: 80,
-  healthCheck: { path: "/api/v0/node/healthcheck", unhealthyThreshold: 3, port: "8011", interval: 60, timeout: 30, healthyThreshold: 2 },
+  healthCheck: { path: "/api/v0/node/healthcheck", unhealthyThreshold: 3, port: "80", interval: 60, timeout: 30, healthyThreshold: 2 },
 });
 
 // Listen to traffic on port 443 & route it through the Ceramic target group
