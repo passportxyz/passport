@@ -64,9 +64,9 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
   const refreshPassportState = async () => {
     try {
       updateSteps(1);
-      const refreshedState = await (await handleCheckRefreshPassport()).filter((state: boolean) => !state);
+      const refreshSuccess = await handleCheckRefreshPassport();
       // If errors were found while refreshing they won't be filtered out
-      if (refreshedState.length > 0) {
+      if (!refreshSuccess) {
         // handleCheckRefreshPassport returned an error after polling ceramic
         updateSteps(2, true);
         // show error status in progress bar for 2 seconds

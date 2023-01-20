@@ -129,7 +129,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {ceramicErrors && (
+      {ceramicErrors && ceramicErrors.error && (
         <Banner>
           <div className="flex w-full justify-center">
             We’re making some repairs. Your Passport will be locked before continuing. This may take up to 5 minutes.
