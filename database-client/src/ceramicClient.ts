@@ -110,7 +110,7 @@ export class CeramicDatabase implements DataStorageBase {
       const rest = await axios.get(streamUrl);
       return false;
     } catch (e) {
-      this.logger.error(`Error when calling getRecordDocument on Passport`, e);
+      this.logger.error(`checkPassportCACAOError - Error when calling getRecordDocument on Passport`, {error:e});
       if (e?.response?.data?.error?.includes("CACAO has expired")) {
         return true;
       }
@@ -124,8 +124,10 @@ export class CeramicDatabase implements DataStorageBase {
 
     let passportDoc;
     try {
+      this.logger.info("refreshPassport - getRecordDocument");
       passportDoc = await this.store.getRecordDocument(this.model.getDefinitionID("Passport"));
     } catch (e) {
+      this.logger.info("refreshPassport - failed to get record document", {error:e});
       // unable to get passport doc
       return false;
     }
@@ -133,11 +135,13 @@ export class CeramicDatabase implements DataStorageBase {
     while (attempts < 36 && !success) {
       const options = attempts === 1 ? { sync: SyncOptions.SYNC_ALWAYS, syncTimeoutSeconds: 5 } : {};
       try {
+        this.logger.info(`refreshPassport - loading stream with SyncOptions.SYNC_ALWAYS, attempt:${attempts}, stream=${passportDoc.id}`,  {options:options});
         await this.ceramicClient.loadStream<TileDocument>(passportDoc.id, options);
         success = true;
+        this.logger.info(`refreshPassport - loading stream with SyncOptions.SYNC_ALWAYS, attempt:${attempts}, stream=${passportDoc.id} => SUCCESS`);
         return success;
       } catch (e) {
-        this.logger.error(`Error when calling loadStream on passport, attempt ${attempts}`, e);
+        this.logger.error(`refreshPassport - error when calling loadStream on passport, attempt ${attempts}`, {error: e});
         attempts++;
         await new Promise((resolve) => setTimeout(resolve, 5000));
       }
@@ -182,7 +186,7 @@ export class CeramicDatabase implements DataStorageBase {
             errors.error = true;
           }
           this.logger.error(
-            `Error when loading stamp with streamId ${streamIDs[idx]} for did  ${this.did}:` + e.toString()
+            `Error when loading stamp with streamId ${streamIDs[idx]} for did  ${this.did}:` + e.toString(), {error: e}
           );
           throw e;
         }
@@ -207,7 +211,7 @@ export class CeramicDatabase implements DataStorageBase {
         const passportDoc = await this.store.getRecordDocument(this.model.getDefinitionID("Passport"));
         await this.ceramicClient.pin.add(passportDoc.id);
       } catch (e) {
-        this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString());
+        this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString(),  {error: e});
       }
 
       return {
@@ -215,7 +219,7 @@ export class CeramicDatabase implements DataStorageBase {
         errors,
       };
     } catch (e) {
-      this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString());
+      this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString(),  {error: e});
       // Indicate there was an error loading passport
       errors.error = true;
       errors.passport = true;
