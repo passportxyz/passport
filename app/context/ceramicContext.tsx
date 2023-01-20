@@ -530,10 +530,15 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         handleCreatePassport();
       }
     } else {
-      // something is wrong with Ceramic...
-      datadogRum.addError("Ceramic connection failed", { address });
-      setPassport(passport);
-      if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
+      const passportCacaoError = await database.checkPassportCACAOError();
+      if (passportCacaoError) {
+        passportHasError = true;
+      } else {
+        // something is wrong with Ceramic...
+        datadogRum.addError("Ceramic connection failed", { address });
+        setPassport(passport);
+        if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
+      }
     }
     const error = passportHasError || failedStamps.length > 0;
 
