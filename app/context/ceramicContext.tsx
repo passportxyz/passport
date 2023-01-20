@@ -440,7 +440,7 @@ const startingState: CeramicContextState = {
   handleAddStamps: async () => {},
   handleDeleteStamp: async (streamId: string) => {},
   handleDeleteStamps: async () => {},
-  handleCheckRefreshPassport: async () => [],
+  handleCheckRefreshPassport: async () => false,
   userDid: undefined,
   ceramicErrors: undefined,
 };
