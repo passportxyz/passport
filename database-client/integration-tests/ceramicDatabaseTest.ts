@@ -12,7 +12,7 @@ import { createCipheriv } from "crypto";
 let testDID: DID;
 let ceramicDatabase: CeramicDatabase;
 
-jest.setTimeout(90000);
+jest.setTimeout(180000);
 
 beforeAll(async () => {
   const TEST_SEED = Uint8Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
