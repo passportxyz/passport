@@ -132,9 +132,10 @@ export default function Dashboard() {
       {ceramicErrors && ceramicErrors.error && (
         <Banner>
           <div className="flex w-full justify-center">
-          We have detected some broken stamps in your passport. Your passport is currently locked because of this. We need to fix these errors before you continue using Passport. This might take up to 5 minutes.
+            We have detected some broken stamps in your passport. Your passport is currently locked because of this. We
+            need to fix these errors before you continue using Passport. This might take up to 5 minutes.
             <button className="ml-2 flex underline" onClick={() => setRefreshModal(true)}>
-              Reset Passport &nbsp;<img className="w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
+              Reset Passport <img className="ml-1 w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
             </button>
           </div>
         </Banner>
