@@ -11,6 +11,7 @@ export type RefreshStampModalProps = {
 
 export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) => {
   const { handleCheckRefreshPassport } = useContext(CeramicContext);
+  const [resetError, setResetError] = useState<boolean>(false);
   const toast = useToast();
 
   const [currentSteps, setCurrentSteps] = useState<Step[]>([
@@ -60,28 +61,33 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
     });
   };
 
-  useEffect(() => {
-    const refreshPassportState = async () => {
-      try {
-        updateSteps(1);
-        const refreshedState = await (await handleCheckRefreshPassport()).filter((state: boolean) => !state);
-        if (refreshedState.length > 0) {
-          // handleCheckRefreshPassport returned an error after polling ceramic
-          updateSteps(2, true);
-        } else {
-          updateSteps(2);
-          // Wait 2 seconds to show success toast
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-
-          onClose();
-
-          // Show success toast
-          successToast();
-        }
-      } catch (error) {
+  const refreshPassportState = async () => {
+    try {
+      updateSteps(1);
+      const refreshedState = await (await handleCheckRefreshPassport()).filter((state: boolean) => !state);
+      // If errors were found while refreshing they won't be filtered out
+      if (refreshedState.length > 0) {
+        // handleCheckRefreshPassport returned an error after polling ceramic
         updateSteps(2, true);
+        // show error status in progress bar for 2 seconds
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        setResetError(true);
+      } else {
+        updateSteps(2);
+        // Wait 2 seconds to show success toast
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        onClose();
+
+        // Show success toast
+        successToast();
       }
-    };
+    } catch (error) {
+      updateSteps(2, true);
+    }
+  };
+
+  useEffect(() => {
     refreshPassportState();
   }, []);
 
@@ -90,13 +96,52 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
       <Modal isOpen={isOpen} onClose={onClose} blockScrollOnMount={false}>
         <ModalOverlay />
         <ModalContent>
-          <div className="m-4">
-            <p className="m-2 font-semibold">Resetting</p>
-            <p className="m-2">
-              Please wait while we repair some parts of your Passport. This may take up to 5 minutes...
-            </p>
-            <Progress steps={currentSteps} />
-          </div>
+          {resetError ? (
+            <div className="m-4">
+              <div className="flex w-full justify-center">
+                <div className="mt-2 w-fit rounded-full bg-pink-500/25">
+                  <img
+                    className="m-2"
+                    alt="shield-exclamation-icon"
+                    src="./assets/shield-exclamation-icon-warning.svg"
+                  />
+                </div>
+              </div>
+              <p className="m-1 text-center text-sm font-bold">Reset Failed</p>
+              <p className="m-1 mb-4 text-center">
+                We could not reset your Passport at the moment. Please try again or contact our support team.
+              </p>
+
+              <div className="flex w-full">
+                <a
+                  href="https://support.gitcoin.co/gitcoin-knowledge-base/misc/contact-us"
+                  target="_blank"
+                  className="m-1 w-1/2 items-center rounded-md border py-2  text-center"
+                  rel="noreferrer"
+                >
+                  Contact Support
+                </a>
+                <button
+                  data-testid="check-other-wallet"
+                  className="m-1 mx-auto flex w-1/2 justify-center rounded-md bg-purple-connectPurple py-2 text-white hover:bg-purple-200 hover:text-black"
+                  onClick={() => {
+                    setResetError(false);
+                    refreshPassportState();
+                  }}
+                >
+                  Try Again
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="m-4">
+              <p className="m-2 font-semibold">Resetting</p>
+              <p className="m-2">
+                Please wait while we repair some parts of your Passport. This may take up to 5 minutes...
+              </p>
+              <Progress steps={currentSteps} />
+            </div>
+          )}
         </ModalContent>
       </Modal>
     </>
