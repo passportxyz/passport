@@ -574,7 +574,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
         if (ceramicErrors.stamps && ceramicErrors.stamps.length) {
           try {
-            ceramicDatabase.deleteStampIDs(ceramicErrors.stamps);
+            await ceramicDatabase.deleteStampIDs(ceramicErrors.stamps);
             failedStamps = [];
           } catch {}
         }
@@ -583,8 +583,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         await fetchPassport(ceramicDatabase);
 
         success = !passportHasError && !failedStamps.length;
-
-        setCeramicErrors({ passport: passportHasError, stamps: failedStamps, error: !success });
       } catch {
         success = false;
       }

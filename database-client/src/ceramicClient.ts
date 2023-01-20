@@ -336,7 +336,7 @@ export class CeramicDatabase implements DataStorageBase {
     const passport = await this.store.get("Passport");
 
     if (passport && passport.stamps) {
-      const [stampsToKeep, stampsToDelete] = partition(passport.stamps, (stamp) =>
+      const [stampsToDelete, stampsToKeep] = partition(passport.stamps, (stamp) =>
         streamIds.includes(stamp.credential)
       );
 
