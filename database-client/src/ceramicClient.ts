@@ -165,25 +165,17 @@ export class CeramicDatabase implements DataStorageBase {
       });
 
       // `stamps` is stored as ceramic URLs - must load actual VC data from URL
-      let first = true;
       const stampsToLoad = passport?.stamps.map(async (_stamp, idx) => {
         const streamUrl = `${this.apiHost}/api/v0/streams/${streamIDs[idx].substring(10)}`;
         this.logger.log(`get stamp from streamUrl: ${streamUrl}`);
         try {
           const { provider, credential } = _stamp;
           const loadedCred = (await axios.get(streamUrl)) as { data: { state: { content: VerifiableCredential } } };
-          if (first) {
-            console.log("!!!!!!! stream", streamIDs[idx]);
-            errors.stamps.push(streamIDs[idx]);
-            errors.error = true;
-            first = false;
-          } else {
-            return {
-              provider,
-              credential: loadedCred.data.state.content,
-              streamId: streamIDs[idx],
-            } as Stamp;
-          }
+          return {
+            provider,
+            credential: loadedCred.data.state.content,
+            streamId: streamIDs[idx],
+          } as Stamp;
         } catch (e) {
           if (e?.response?.data?.error?.includes("CACAO has expired")) {
             errors.stamps.push(streamIDs[idx]);
