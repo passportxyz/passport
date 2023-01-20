@@ -1,3 +1,5 @@
+import { CeramicClient } from '@ceramicnetwork/http-client';
+import { PassportWithErrors } from './../../types/src/index.d';
 import { Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
@@ -10,6 +12,7 @@ import { TileDocument } from "@ceramicnetwork/stream-tile";
 import { TileDoc } from "@glazed/did-datastore/dist/proxy";
 
 import axios from "axios";
+import { Stream } from '@ceramicnetwork/common';
 
 let testDID: DID;
 let ceramicDatabase: CeramicDatabase;
@@ -26,6 +29,8 @@ beforeAll(async () => {
 
   ceramicDatabase = new CeramicDatabase(testDID, process.env.CERAMIC_CLIENT_URL, testnetAliases);
 });
+
+jest.setTimeout(30000);
 
 describe("Verify Ceramic Database", () => {
   beforeEach(() => {
@@ -109,7 +114,7 @@ describe("Verify Ceramic Database", () => {
       return;
     });
 
-    const passport = (await ceramicDatabase.getPassport()) as Passport;
+    const passport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
 
     // We do not expect to have any passport, hence `false` should be returned
     expect(spyStoreGet).toBeCalledTimes(1);
@@ -121,7 +126,7 @@ describe("Verify Ceramic Database", () => {
     expect(spyPinAdd).toBeCalledTimes(1);
     expect(spyPinAdd).toBeCalledWith("passport-id");
 
-    expect(passport?.stamps).toEqual([
+    expect(passport.passport?.stamps).toEqual([
       {
         credential: "Stamp Content for ceramic://credential-1",
         provider: "Provider-1",
@@ -138,8 +143,8 @@ describe("Verify Ceramic Database", () => {
         streamId: "ceramic://credential-3",
       },
     ]);
-    expect(passport?.issuanceDate).toEqual(issuanceDate);
-    expect(passport?.expiryDate).toEqual(expiryDate);
+    expect(passport.passport?.issuanceDate).toEqual(issuanceDate);
+    expect(passport.passport?.expiryDate).toEqual(expiryDate);
   });
 
   it("ignores stamps that cannot be loaded succefully from ceramic", async () => {
@@ -199,8 +204,8 @@ describe("Verify Ceramic Database", () => {
       return;
     });
 
-    const passport = (await ceramicDatabase.getPassport()) as Passport;
-
+    const passport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
+ 
     // We do not expect to have any passport, hence `false` should be returned
     expect(spyStoreGet).toBeCalledTimes(1);
     expect(spyStoreGet).toBeCalledWith("Passport");
@@ -212,7 +217,7 @@ describe("Verify Ceramic Database", () => {
     expect(spyPinAdd).toBeCalledWith("passport-id");
 
     // We only expect 2 stamps to have been loaded
-    expect(passport?.stamps).toEqual([
+    expect(passport.passport?.stamps).toEqual([
       {
         credential: "Stamp Content for ceramic://credential-1",
         provider: "Provider-1",
@@ -224,7 +229,79 @@ describe("Verify Ceramic Database", () => {
         streamId: "ceramic://credential-2",
       },
     ]);
-    expect(passport?.issuanceDate).toEqual(issuanceDate);
-    expect(passport?.expiryDate).toEqual(expiryDate);
+    expect(passport.passport?.issuanceDate).toEqual(issuanceDate);
+    expect(passport.passport?.expiryDate).toEqual(expiryDate);
+  });
+  it("checkPassportCACAOError should indicate if a passport stream is throwing a CACAO error", () => {
+    let spyStoreGetRecordDocument = jest
+      .spyOn(ceramicDatabase.store, "getRecordDocument")
+      .mockImplementation(async (name) => {
+        return {
+          id: "passport-id",
+        } as unknown as TileDoc;
+      });
+    
+    const spyLoadStreamReq = jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
+      return new Promise((resolve, reject) => {
+        reject({
+          response: {
+            data: {
+              error: "CACAO has expired",
+            },
+          },
+          status: 500,
+        });
+      });
+    });
+
+    expect(ceramicDatabase.checkPassportCACAOError()).resolves.toBe(true);
+  });
+  it("checkPassportCACAOError should not indicate cacao error if not present", () => {
+    jest
+      .spyOn(ceramicDatabase.store, "getRecordDocument")
+      .mockImplementation(async (name) => {
+        return {
+          id: "passport-id",
+        } as unknown as TileDoc;
+      });
+    
+    jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
+      return new Promise((resolve, reject) => {
+        reject({
+          response: {
+            data: {
+              error: "Timeout",
+            },
+          },
+          status: 504,
+        });
+      });
+    });
+    expect(ceramicDatabase.checkPassportCACAOError()).resolves.toBe(false);
+  });
+  it("should attempt to refresh a passport until successful", async () => {
+    jest
+      .spyOn(ceramicDatabase.store, "getRecordDocument")
+      .mockImplementation(async (name) => {
+        return {
+          id: "passport-id",
+        } as unknown as TileDoc;
+      });
+      
+    const spyLoadStream = jest.spyOn(ceramicDatabase.ceramicClient, "loadStream")
+
+    spyLoadStream.mockImplementationOnce(() => {
+      throw new Error('CACAO expired: Commit...') as unknown as Stream;
+    })
+
+    spyLoadStream.mockImplementationOnce((streamId) => {
+      return new Promise((resolve, reject) => {
+        resolve("true" as unknown as Stream);
+      });
+    })
+    
+    await ceramicDatabase.refreshPassport()
+
+    expect(spyLoadStream).toBeCalledTimes(2);  
   });
 });

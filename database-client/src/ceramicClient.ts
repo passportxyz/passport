@@ -1,7 +1,9 @@
-import { DID, Passport, PROVIDER_ID, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
+import { TileDocument } from '@ceramicnetwork/stream-tile';
+import { DID, PassportWithErrors, PROVIDER_ID, Stamp, VerifiableCredential, PassportError, Passport } from "@gitcoin/passport-types";
 
 // -- Ceramic and Glazed
-import type { CeramicApi } from "@ceramicnetwork/common";
+import type { CeramicApi, Stream } from "@ceramicnetwork/common";
+import {SyncOptions} from "@ceramicnetwork/common";
 import { CeramicClient } from "@ceramicnetwork/http-client";
 import publishedModel from "@gitcoin/passport-schemas/scripts/publish-model.json";
 import { DataModel } from "@glazed/datamodel";
@@ -93,7 +95,53 @@ export class CeramicDatabase implements DataStorageBase {
     return stream.toUrl();
   }
 
-  async getPassport(): Promise<Passport | undefined | false> {
+  async checkPassportCACAOError(): Promise<boolean> {
+    try {
+      const passportDoc = await this.store.getRecordDocument(this.model.getDefinitionID("Passport"));
+      const streamUrl = `${this.apiHost}/api/v0/streams/${passportDoc.id}`;
+      const rest = await axios.get(streamUrl);
+      return false;
+    } catch (e) {
+      this.logger.error(`Error when calling getRecordDocument on Passport`, e);
+      if (e?.response?.data?.error?.includes("CACAO has expired")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async refreshPassport(): Promise<boolean> {
+    let attempts = 1;
+    let success = false;
+
+    let passportDoc
+    try {
+      passportDoc = await this.store.getRecordDocument(this.model.getDefinitionID("Passport"));
+    } catch (e) {
+      // unable to get passport doc
+      return false;
+    }
+    // Attempt to load stream 36 times, with 5 second delay between each attempt - 5 min total
+    while (attempts < 36 && !success) {
+      const options = attempts === 1 ? { sync: SyncOptions.SYNC_ALWAYS, syncTimeoutSeconds: 5 } : {  };
+      try {
+        await this.ceramicClient.loadStream<TileDocument>(passportDoc.id, options);
+        success = true;
+        return success;
+      } catch (e) {
+        this.logger.error(`Error when calling loadStream on passport, attempt ${attempts}`, e);
+        attempts++;
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+    }
+    return false;
+  }
+
+  async getPassport(): Promise<PassportWithErrors | undefined | false> {
+    const errors: PassportError = {
+      error: false,
+      stamps: [],
+    }
     try {
       const passport = await this.store.get("Passport");
       this.logger.info(`loaded passport for did ${this.did} => ${JSON.stringify(passport)}`);
@@ -111,7 +159,6 @@ export class CeramicDatabase implements DataStorageBase {
       const stampsToLoad = passport?.stamps.map(async (_stamp, idx) => {
         const streamUrl = `${this.apiHost}/api/v0/streams/${streamIDs[idx].substring(10)}`;
         this.logger.log(`get stamp from streamUrl: ${streamUrl}`);
-
         try {
           const { provider, credential } = _stamp;
           const loadedCred = (await axios.get(streamUrl)) as { data: { state: { content: VerifiableCredential } } };
@@ -137,12 +184,11 @@ export class CeramicDatabase implements DataStorageBase {
       const filteredStamps = stampLoadingStatus.filter(isFulfilled);
       const loadedStamps = filteredStamps.map((settledStamp) => settledStamp.value);
 
-      const parsePassport: Passport = {
+      const parsedPassport: Passport = {
         issuanceDate: new Date(passport.issuanceDate),
         expiryDate: new Date(passport.expiryDate),
         stamps: loadedStamps,
       };
-
       // try pinning passport
       try {
         const passportDoc = await this.store.getRecordDocument(this.model.getDefinitionID("Passport"));
@@ -151,10 +197,18 @@ export class CeramicDatabase implements DataStorageBase {
         this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString());
       }
 
-      return parsePassport;
+      return {
+        passport: parsedPassport,
+      };
     } catch (e) {
       this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString());
-      return undefined;
+      // Indicate there was an error loading passport
+      errors.error = true;
+      errors.passport = true
+      return {
+        passport: undefined,
+        errors,
+      }
     }
   }
 

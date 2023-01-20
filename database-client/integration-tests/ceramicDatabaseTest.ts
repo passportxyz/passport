@@ -1,8 +1,9 @@
+import { PassportWithErrors } from './../../types/src/index.d';
 import { Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
-
+import { jest } from "@jest/globals";
 import testnetAliases from "./integration-test-model-aliases.json";
 
 import { CeramicDatabase } from "../src";
@@ -10,6 +11,8 @@ import { createCipheriv } from "crypto";
 
 let testDID: DID;
 let ceramicDatabase: CeramicDatabase;
+
+jest.setTimeout(180000);
 
 beforeAll(async () => {
   const TEST_SEED = Uint8Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
@@ -80,11 +83,11 @@ describe("when there is an existing passport without stamps for the given did", 
   });
 
   it("getPassport retrieves the passport from ceramic", async () => {
-    const actualPassport = (await ceramicDatabase.getPassport()) as Passport;
+    const {passport} = (await ceramicDatabase.getPassport()) as PassportWithErrors;
 
-    expect(actualPassport).toBeDefined();
-    expect(actualPassport).toEqual(existingPassport);
-    expect(actualPassport.stamps).toEqual([]);
+    expect(passport).toBeDefined();
+    expect(passport).toEqual(existingPassport);
+    expect(passport.stamps).toEqual([]);
   });
 
   it("addStamp adds a stamp to passport", async () => {
@@ -207,15 +210,15 @@ describe("when there is an existing passport with stamps for the given did", () 
   });
 
   it("getPassport retrieves the passport and stamps from ceramic", async () => {
-    const actualPassport = (await ceramicDatabase.getPassport()) as Passport;
+    const actualPassport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
 
-    const formattedDate = new Date(actualPassport["issuanceDate"]);
+    const formattedDate = new Date(actualPassport.passport["issuanceDate"]);
 
-    expect(actualPassport).toBeDefined();
+    expect(actualPassport.passport).toBeDefined();
     expect(formattedDate.getDay()).toEqual(existingPassport.issuanceDate.getDay());
     expect(formattedDate.getMonth()).toEqual(existingPassport.issuanceDate.getMonth());
     expect(formattedDate.getFullYear()).toEqual(existingPassport.issuanceDate.getFullYear());
-    expect(actualPassport.stamps[0]).toEqual(ensStampFixture);
+    expect(actualPassport.passport.stamps[0]).toEqual(ensStampFixture);
   });
 
   it("addStamp adds a stamp to passport", async () => {
@@ -486,17 +489,17 @@ describe("when loading a stamp from a passport fails", () => {
   });
 
   it("ignores the failed stamp and only returns the successfully loaded stamps", async () => {
-    const passport = (await ceramicDatabase.getPassport()) as Passport;
+    const passport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
 
-    // Weony expect 2 results: Ens and Google stamps
-    expect(passport.stamps.length).toEqual(2);
+    // We only expect 2 results: Ens and Google stamps
+    expect(passport.passport.stamps.length).toEqual(2);
     expect(
-      passport.stamps.findIndex((stamp) => {
+      passport.passport.stamps.findIndex((stamp) => {
         return stamp && stamp.credential.credentialSubject.provider === "Ens";
       })
     ).toEqual(0);
     expect(
-      passport.stamps.findIndex((stamp) => {
+      passport.passport.stamps.findIndex((stamp) => {
         return stamp && stamp.credential.credentialSubject.provider === "Google";
       })
     ).toEqual(1);

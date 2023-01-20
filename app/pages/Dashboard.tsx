@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 // --Components
@@ -25,10 +25,13 @@ import { UserContext } from "../context/userContext";
 
 import { useViewerConnection } from "@self.id/framework";
 import { EthereumAuthProvider } from "@self.id/web";
+import { Banner } from "../components/Banner";
+import { getExpiredStamps } from "../utils/helpers";
+import { RefreshStampModal } from "../components/RefreshStampModal";
 
 export default function Dashboard() {
+  const { passport, isLoadingPassport, ceramicErrors } = useContext(CeramicContext);
   const { wallet, toggleConnection, handleDisconnection } = useContext(UserContext);
-  const { passport, isLoadingPassport } = useContext(CeramicContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -36,6 +39,8 @@ export default function Dashboard() {
 
   const [viewerConnection, ceramicConnect] = useViewerConnection();
   const { isOpen: retryModalIsOpen, onOpen: onRetryModalOpen, onClose: onRetryModalClose } = useDisclosure();
+
+  const [refreshModal, setRefreshModal] = useState(false);
 
   // Route user to home when wallet is disconnected
   useEffect(() => {
@@ -124,6 +129,17 @@ export default function Dashboard() {
         </div>
       )}
 
+      {ceramicErrors && (
+        <Banner>
+          <div className="flex w-full justify-center">
+            We’re making some repairs. Your Passport will be locked before continuing. This may take up to 5 minutes.
+            <button className="ml-2 flex underline" onClick={() => setRefreshModal(true)}>
+              Reset Passport <img className="w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
+            </button>
+          </div>
+        </Banner>
+      )}
+
       <div className="container mx-auto flex flex-wrap-reverse px-2 md:mt-4 md:flex-wrap">
         <div className="md:w-3/5">
           <p className="mb-4 text-2xl text-black">My Stamps</p>
@@ -210,6 +226,7 @@ export default function Dashboard() {
       />
       {/* This footer contains dark colored text and dark images */}
       <Footer lightMode={false} />
+      {refreshModal && <RefreshStampModal isOpen={refreshModal} onClose={() => setRefreshModal(false)} />}
     </>
   );
 }

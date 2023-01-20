@@ -139,6 +139,17 @@ export type Passport = {
   stamps: Stamp[];
 };
 
+export type PassportError = {
+  error: boolean;
+  passport?: boolean;
+  stamps?: string[];
+};
+
+export type PassportWithErrors = {
+  passport: Passport;
+  errors?: PassportError;
+};
+
 // Passport DID
 export type DID = string;
 

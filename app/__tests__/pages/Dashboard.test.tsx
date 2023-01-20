@@ -13,8 +13,13 @@ import {
   renderWithContext,
 } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState, IsLoadingPassportState } from "../../context/ceramicContext";
+// import {RefreshStampModal} from "../../components/RefreshStampModal";
 
 jest.mock("../../utils/onboard.ts");
+
+jest.mock("../../components/RefreshStampModal", () => ({
+  RefreshStampModal: () => <div>Refresh Modal</div>,
+}));
 
 jest.mock("@self.id/framework", () => {
   return {
@@ -214,5 +219,46 @@ describe("when a user clicks on the Passport logo", () => {
     expect(mockHandleDisconnection).toBeCalledTimes(1);
 
     await waitFor(() => expect(window.location.pathname).toBe("/"));
+  });
+  it("if ceramic errors are present it should show reset banner", () => {
+    renderWithContext(
+      mockUserContext,
+      {
+        ...mockCeramicContext,
+        ceramicErrors: {
+          error: true,
+          stamps: ["streamid"],
+        },
+      },
+      <Router>
+        <Dashboard />
+      </Router>
+    );
+
+    expect(
+      screen.getByText(
+        "We’re making some repairs. Your Passport will be locked before continuing. This may take up to 5 minutes."
+      )
+    ).toBeInTheDocument();
+  });
+  it("reset passport button should open refresh modal when clicked", async () => {
+    renderWithContext(
+      mockUserContext,
+      {
+        ...mockCeramicContext,
+        ceramicErrors: {
+          error: true,
+          stamps: ["streamid"],
+        },
+      },
+      <Router>
+        <Dashboard />
+      </Router>
+    );
+
+    await fireEvent.click(screen.getByText("Reset Passport"));
+    await waitFor(() => {
+      expect(screen.getByText("Refresh Modal")).toBeInTheDocument();
+    });
   });
 });
