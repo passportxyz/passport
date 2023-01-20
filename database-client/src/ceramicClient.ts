@@ -133,7 +133,7 @@ export class CeramicDatabase implements DataStorageBase {
     }
     // Attempt to load stream 36 times, with 5 second delay between each attempt - 5 min total
     while (attempts < 36 && !success) {
-      const options = attempts === 1 ? { sync: SyncOptions.SYNC_ALWAYS, syncTimeoutSeconds: 5 } : {};
+      const options = attempts === 1 ? { sync: SyncOptions.SYNC_ALWAYS } : {};
       try {
         this.logger.info(`refreshPassport - loading stream with SyncOptions.SYNC_ALWAYS, attempt:${attempts}, stream=${passportDoc.id}`,  {options:options});
         await this.ceramicClient.loadStream<TileDocument>(passportDoc.id, options);
