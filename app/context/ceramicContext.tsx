@@ -512,6 +512,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     if (passportResponse?.errors?.passport) {
       const passportCacaoError = await database.checkPassportCACAOError();
       if (passportCacaoError) {
+        datadogRum.addError("Passport CACAO error -- error thrown on initial fetch within getPassport", { address });
         passportHasError = true;
       }
     }
@@ -525,6 +526,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     } else if (passport === false) {
       const passportCacaoError = await database.checkPassportCACAOError();
       if (passportCacaoError) {
+        datadogRum.addError(
+          "Passport CACAO error -- undefined or null return while fetching getPassport from ceramic",
+          { address }
+        );
         passportHasError = true;
       } else {
         handleCreatePassport();
@@ -532,6 +537,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     } else {
       const passportCacaoError = await database.checkPassportCACAOError();
       if (passportCacaoError) {
+        datadogRum.addError("Passport CACAO error -- checking before throwing IsLoadingPassportState.FailedToConnect", {
+          address,
+        });
         passportHasError = true;
       } else {
         // something is wrong with Ceramic...
