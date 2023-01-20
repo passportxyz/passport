@@ -1,9 +1,17 @@
-import { TileDocument } from '@ceramicnetwork/stream-tile';
-import { DID, PassportWithErrors, PROVIDER_ID, Stamp, VerifiableCredential, PassportError, Passport } from "@gitcoin/passport-types";
+import { TileDocument } from "@ceramicnetwork/stream-tile";
+import {
+  DID,
+  PassportWithErrors,
+  PROVIDER_ID,
+  Stamp,
+  VerifiableCredential,
+  PassportError,
+  Passport,
+} from "@gitcoin/passport-types";
 
 // -- Ceramic and Glazed
 import type { CeramicApi, Stream } from "@ceramicnetwork/common";
-import {SyncOptions} from "@ceramicnetwork/common";
+import { SyncOptions } from "@ceramicnetwork/common";
 import { CeramicClient } from "@ceramicnetwork/http-client";
 import publishedModel from "@gitcoin/passport-schemas/scripts/publish-model.json";
 import { DataModel } from "@glazed/datamodel";
@@ -102,7 +110,7 @@ export class CeramicDatabase implements DataStorageBase {
       const rest = await axios.get(streamUrl);
       return false;
     } catch (e) {
-      this.logger.error(`Error when calling getRecordDocument on Passport`, e);
+      this.logger.error(`checkPassportCACAOError - Error when calling getRecordDocument on Passport`, {error:e});
       if (e?.response?.data?.error?.includes("CACAO has expired")) {
         return true;
       }
@@ -114,22 +122,26 @@ export class CeramicDatabase implements DataStorageBase {
     let attempts = 1;
     let success = false;
 
-    let passportDoc
+    let passportDoc;
     try {
+      this.logger.info("refreshPassport - getRecordDocument");
       passportDoc = await this.store.getRecordDocument(this.model.getDefinitionID("Passport"));
     } catch (e) {
+      this.logger.info("refreshPassport - failed to get record document", {error:e});
       // unable to get passport doc
       return false;
     }
     // Attempt to load stream 36 times, with 5 second delay between each attempt - 5 min total
     while (attempts < 36 && !success) {
-      const options = attempts === 1 ? { sync: SyncOptions.SYNC_ALWAYS, syncTimeoutSeconds: 5 } : {  };
+      const options = attempts === 1 ? { sync: SyncOptions.SYNC_ALWAYS } : {};
       try {
+        this.logger.info(`refreshPassport - loading stream with SyncOptions.SYNC_ALWAYS, attempt:${attempts}, stream=${passportDoc.id}`,  {options:options});
         await this.ceramicClient.loadStream<TileDocument>(passportDoc.id, options);
         success = true;
+        this.logger.info(`refreshPassport - loading stream with SyncOptions.SYNC_ALWAYS, attempt:${attempts}, stream=${passportDoc.id} => SUCCESS`);
         return success;
       } catch (e) {
-        this.logger.error(`Error when calling loadStream on passport, attempt ${attempts}`, e);
+        this.logger.error(`refreshPassport - error when calling loadStream on passport, attempt ${attempts}`, {error: e});
         attempts++;
         await new Promise((resolve) => setTimeout(resolve, 5000));
       }
@@ -140,8 +152,9 @@ export class CeramicDatabase implements DataStorageBase {
   async getPassport(): Promise<PassportWithErrors | undefined | false> {
     const errors: PassportError = {
       error: false,
+      passport: false,
       stamps: [],
-    }
+    };
     try {
       const passport = await this.store.get("Passport");
       this.logger.info(`loaded passport for did ${this.did} => ${JSON.stringify(passport)}`);
@@ -168,8 +181,12 @@ export class CeramicDatabase implements DataStorageBase {
             streamId: streamIDs[idx],
           } as Stamp;
         } catch (e) {
+          if (e?.response?.data?.error?.includes("CACAO has expired")) {
+            errors.stamps.push(streamIDs[idx]);
+            errors.error = true;
+          }
           this.logger.error(
-            `Error when loading stamp with streamId ${streamIDs[idx]} for did  ${this.did}:` + e.toString()
+            `Error when loading stamp with streamId ${streamIDs[idx]} for did  ${this.did}:` + e.toString(), {error: e}
           );
           throw e;
         }
@@ -194,21 +211,22 @@ export class CeramicDatabase implements DataStorageBase {
         const passportDoc = await this.store.getRecordDocument(this.model.getDefinitionID("Passport"));
         await this.ceramicClient.pin.add(passportDoc.id);
       } catch (e) {
-        this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString());
+        this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString(),  {error: e});
       }
 
       return {
         passport: parsedPassport,
+        errors,
       };
     } catch (e) {
-      this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString());
+      this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString(),  {error: e});
       // Indicate there was an error loading passport
       errors.error = true;
-      errors.passport = true
+      errors.passport = true;
       return {
         passport: undefined,
         errors,
-      }
+      };
     }
   }
 
@@ -305,41 +323,47 @@ export class CeramicDatabase implements DataStorageBase {
   }
 
   async deleteStamp(streamId: string): Promise<void> {
-    this.logger.info(`deleting stamp ${streamId} from did ${this.did}`);
+    return this.deleteStampIDs([streamId]);
+  }
+
+  async deleteStampIDs(streamIds: string[]): Promise<void> {
+    this.logger.info(`deleting stamp(s) ${streamIds.join(", ")} from did ${this.did}`);
     // get passport document from user did data store in ceramic
     const passport = await this.store.get("Passport");
 
     if (passport && passport.stamps) {
-      const itemIndex = passport.stamps.findIndex((stamp) => {
-        return stamp.credential === streamId;
-      });
+      const [stampsToDelete, stampsToKeep] = partition(passport.stamps, (stamp) =>
+        streamIds.includes(stamp.credential)
+      );
 
-      if (itemIndex != -1) {
-        // Remove the stamp from the stamp list
-        passport.stamps.splice(itemIndex, 1);
+      // merge new stamps array to update stamps on the passport
+      const passportStreamId = await this.store.merge("Passport", { stamps: stampsToKeep });
 
-        // merge new stamps array to update stamps on the passport
-        const passportStreamId = await this.store.merge("Passport", { stamps: passport.stamps });
+      await Promise.all(
+        stampsToDelete.map(async (stamp) => {
+          // try to unpin the stamp
+          const stampStreamId: StreamID = StreamID.fromString(stamp.credential);
+          try {
+            return await this.ceramicClient.pin.rm(stampStreamId);
+          } catch (e) {
+            this.logger.error(
+              `Error when unpinning stamp with id ${stampStreamId.toString()} for did  ${this.did}:` + e.toString()
+            );
+          }
+        })
+      );
 
-        // try to unpin the stamp
-        const stampStreamId: StreamID = StreamID.fromString(streamId);
-        try {
-          await this.ceramicClient.pin.rm(stampStreamId);
-        } catch (e) {
-          this.logger.error(
-            `Error when unpinning stamp with id ${stampStreamId.toString()} for did  ${this.did}:` + e.toString()
-          );
-        }
-
-        // try pinning passport
-        try {
-          await this.ceramicClient.pin.add(passportStreamId);
-        } catch (e) {
-          this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString());
-        }
-      } else {
-        this.logger.info(`unable to find stamp with stream id ${streamId} in passport`);
+      try {
+        await this.ceramicClient.pin.add(passportStreamId);
+      } catch (e) {
+        this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString());
       }
+
+      const missingStamps = streamIds.filter(
+        (streamId) => !stampsToDelete.find((stamp) => stamp.credential === streamId)
+      );
+      if (missingStamps.length)
+        this.logger.info(`unable to find stamp with stream id(s) ${missingStamps.join(", ")} in passport`);
     }
   }
 
@@ -348,4 +372,13 @@ export class CeramicDatabase implements DataStorageBase {
     // Created for development purposes
     await this.store.remove("Passport");
   }
+}
+
+function partition<T>(arr: T[], test: (elem: T) => boolean): [T[], T[]] {
+  const pass: T[] = [];
+  const fail: T[] = [];
+
+  arr.map((elem) => (test(elem) ? pass.push(elem) : fail.push(elem)));
+
+  return [pass, fail];
 }

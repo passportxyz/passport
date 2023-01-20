@@ -4,13 +4,16 @@ import { CeramicContext } from "../context/ceramicContext";
 import { Progress, completedIcon, Status, Step } from "./Progress";
 import { useToast } from "@chakra-ui/react";
 
+// --- Datadog
+import { datadogLogs } from "@datadog/browser-logs";
+
 export type RefreshStampModalProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
 export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) => {
-  const { handleCheckRefreshPassport } = useContext(CeramicContext);
+  const { handleCheckRefreshPassport, userDid } = useContext(CeramicContext);
   const [resetError, setResetError] = useState<boolean>(false);
   const toast = useToast();
 
@@ -64,15 +67,26 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
   const refreshPassportState = async () => {
     try {
       updateSteps(1);
-      const refreshedState = await (await handleCheckRefreshPassport()).filter((state: boolean) => !state);
+      datadogLogs.logger.info(`RefreshStampModal - calling handleCheckRefreshPassport for did=${userDid}`, {
+        did: userDid,
+      });
+      const refreshSuccess = await handleCheckRefreshPassport();
       // If errors were found while refreshing they won't be filtered out
-      if (refreshedState.length > 0) {
+      if (!refreshSuccess) {
+        datadogLogs.logger.error(
+          `RefreshStampModal - calling handleCheckRefreshPassport was not successfull for did=${userDid}`,
+          { did: userDid }
+        );
         // handleCheckRefreshPassport returned an error after polling ceramic
         updateSteps(2, true);
         // show error status in progress bar for 2 seconds
         await new Promise((resolve) => setTimeout(resolve, 2000));
         setResetError(true);
       } else {
+        datadogLogs.logger.info(
+          `RefreshStampModal - calling handleCheckRefreshPassport was successfull for did=${userDid}`,
+          { did: userDid }
+        );
         updateSteps(2);
         // Wait 2 seconds to show success toast
         await new Promise((resolve) => setTimeout(resolve, 2000));

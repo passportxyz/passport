@@ -237,7 +237,7 @@ describe("when a user clicks on the Passport logo", () => {
 
     expect(
       screen.getByText(
-        "We’re making some repairs. Your Passport will be locked before continuing. This may take up to 5 minutes."
+        "We have detected some broken stamps in your passport. Your passport is currently locked because of this. We need to fix these errors before you continue using Passport. This might take up to 5 minutes."
       )
     ).toBeInTheDocument();
   });
