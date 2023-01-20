@@ -5,6 +5,9 @@ import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Switch, Spi
 
 import { PlatformSpec, PlatformGroupSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 
+import { StampSelector } from "./StampSelector";
+import { PlatformDetails } from "./PlatformDetails";
+
 export type SideBarContentProps = {
   currentPlatform: PlatformSpec | undefined;
   currentProviders: PlatformGroupSpec[] | undefined;
@@ -14,7 +17,6 @@ export type SideBarContentProps = {
   isLoading: boolean | undefined;
   verifyButton: JSX.Element | undefined;
   infoElement?: JSX.Element | undefined;
-  verificationAttempted?: boolean;
 };
 
 export const SideBarContent = ({
@@ -26,11 +28,9 @@ export const SideBarContent = ({
   isLoading,
   verifyButton,
   infoElement,
-  verificationAttempted,
 }: SideBarContentProps): JSX.Element => {
   const [allProviderIds, setAllProviderIds] = useState<PROVIDER_ID[]>([]);
   const [allSelected, setAllSelected] = useState(false);
-  const [showNoStampModal, setShowNoStampModal] = useState(false);
 
   // alter select-all state when items change
   useEffect(() => {
@@ -46,13 +46,7 @@ export const SideBarContent = ({
     // is everything selected?
     setAllSelected(!doSelect);
     setAllProviderIds(providerIds);
-  }, [currentProviders, selectedProviders, verificationAttempted]);
-
-  useEffect(() => {
-    if (verificationAttempted && currentPlatform?.isEVM && (selectedProviders?.length || 0) < allProviderIds.length) {
-      setShowNoStampModal(true);
-    }
-  }, [verificationAttempted, allProviderIds, selectedProviders, currentPlatform]);
+  }, [currentProviders, selectedProviders]);
 
   return (
     <DrawerContent>
@@ -60,19 +54,7 @@ export const SideBarContent = ({
       {currentPlatform && currentProviders ? (
         <div className="overflow-auto">
           <DrawerHeader>
-            <div className="mt-10 flex flex-col sm:flex-row">
-              <div className="w-full text-center sm:py-8">
-                <div className="inline-flex h-20 w-20 items-center justify-center rounded-full text-gray-400">
-                  <img alt="Platform Image" className="h-full w-full" src={currentPlatform?.icon} />
-                </div>
-                <div className="flex flex-col items-center justify-center text-center">
-                  <h2 className="font-miriam-libre title-font mt-4 text-2xl font-medium text-gray-900">
-                    {currentPlatform?.name}
-                  </h2>
-                  <p className="font-miriam-libre text-base text-gray-500">{currentPlatform?.description}</p>
-                </div>
-              </div>
-            </div>
+            <PlatformDetails currentPlatform={currentPlatform!} />
           </DrawerHeader>
           <DrawerBody
             style={{ paddingInlineStart: "0", paddingInlineEnd: "0", WebkitPaddingStart: "0", WebkitPaddingEnd: "0" }}
@@ -93,59 +75,12 @@ export const SideBarContent = ({
                 </span>
               </div>
               <hr className="border-1" />
-              {/* each of the available providers in this platform */}
-              {currentProviders?.map((stamp, i) => {
-                return (
-                  <div key={i} className="border-b py-4 px-6">
-                    <p className="ml-4 text-sm font-bold">{stamp.platformGroup}</p>
-                    <div className="flex flex-row justify-between">
-                      <ul className="marker:leading-1 list-disc marker:text-3xl ">
-                        {stamp.providers?.map((provider, i) => {
-                          return (
-                            <li
-                              className={`ml-4 ${
-                                verifiedProviders?.indexOf(provider.name as PROVIDER_ID) !== -1
-                                  ? `text-green-500`
-                                  : `text-gray-400`
-                              }`}
-                              key={`${provider.title}${i}`}
-                              data-testid={`indicator-${provider.name}`}
-                            >
-                              <div className="relative top-[-0.3em] text-sm text-gray-400">{provider.title}</div>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                      <div className="align-right flex">
-                        <Switch
-                          colorScheme="green"
-                          size="lg"
-                          data-testid={`switch-${i}`}
-                          isChecked={
-                            stamp.providers?.reduce(
-                              (isPresent, provider) =>
-                                isPresent || selectedProviders?.indexOf(provider.name as PROVIDER_ID) !== -1,
-                              false as boolean // typing the response - always bool
-                            ) || false
-                          }
-                          onChange={(e) => {
-                            // grab all provider_ids for this group of stamps
-                            const providerIds = stamp.providers?.map((provider) => provider.name as PROVIDER_ID);
-
-                            // set the selected items by concating or filtering by providerId
-                            setSelectedProviders &&
-                              setSelectedProviders(
-                                e.target.checked
-                                  ? (selectedProviders || []).concat(providerIds)
-                                  : (selectedProviders || []).filter((id) => !providerIds.includes(id))
-                              );
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              <StampSelector
+                currentProviders={currentProviders}
+                verifiedProviders={verifiedProviders}
+                selectedProviders={selectedProviders}
+                setSelectedProviders={(providerIds) => setSelectedProviders && setSelectedProviders(providerIds)}
+              />
               {/* This is an optional element that can be used to provide more information */}
               {infoElement}
               <div className="pl-4 pr-4 pb-4">

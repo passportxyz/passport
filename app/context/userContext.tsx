@@ -16,9 +16,14 @@ import { useViewerConnection } from "@self.id/framework";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 
+import { DIDSession } from "did-session";
+import { EthereumWebAuth } from "@didtools/pkh-ethereum";
+import { AccountId } from "caip";
+
 export interface UserContextState {
   loggedIn: boolean;
-  handleConnection: () => void;
+  toggleConnection: () => void;
+  handleDisconnection: () => void;
   address: string | undefined;
   wallet: WalletState | null;
   signer: JsonRpcSigner | undefined;
@@ -27,7 +32,8 @@ export interface UserContextState {
 
 const startingState: UserContextState = {
   loggedIn: false,
-  handleConnection: () => {},
+  toggleConnection: () => {},
+  handleDisconnection: () => {},
   address: undefined,
   wallet: null,
   signer: undefined,
@@ -110,7 +116,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     // check that passportLogin isnt mid-way through
     if (wallet && !loggingIn) {
       // ensure that passport is connected to mainnet
-      const hasCorrectChainId = await ensureMainnet();
+      const hasCorrectChainId = process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on" ? true : await ensureMainnet();
       // mark that we're attempting to login
       setLoggingIn(true);
       // with loaded chainId
@@ -128,9 +134,13 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           const sessionStr = localStorage.getItem(sessionKey);
 
           // @ts-ignore
-          let selfId = await ceramicConnect(ethAuthProvider, sessionStr);
+          // When sessionStr is null, this will create a new selfId. We want to avoid this, becasue we want to make sure
+          // that chainId 1 is in the did
+          let selfId = !!sessionStr ? await ceramicConnect(ethAuthProvider, sessionStr) : null;
 
           if (
+            // @ts-ignore
+            !selfId ||
             // @ts-ignore
             !selfId?.client?.session ||
             // @ts-ignore
@@ -138,9 +148,31 @@ export const UserContextProvider = ({ children }: { children: any }) => {
             // @ts-ignore
             selfId?.client?.session?.expireInSecs < 3600
           ) {
-            // If the session loaded is not valid, or if it is expired or close to expire, we create
-            // a new connection to ceramic
-            selfId = await ceramicConnect(ethAuthProvider);
+            if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
+              // If the session loaded is not valid, or if it is expired or close to expire, we create
+              // a new session
+              // Also we enforce the "1" chainId, as we always want to use mainnet dids, in order to avoid confusion
+              // as to where a passport / stamp has been stored
+              const authMethod = await EthereumWebAuth.getAuthMethod(
+                wallet.provider,
+                new AccountId({
+                  chainId: "eip155:1",
+                  address: address,
+                })
+              );
+              const session = await DIDSession.authorize(authMethod, {
+                expiresInSecs: 24 * 3600,
+                resources: ["ceramic://*"],
+              });
+              const newSessionStr = session.serialize();
+
+              // @ts-ignore
+              selfId = await ceramicConnect(ethAuthProvider, newSessionStr);
+            } else {
+              // If the session loaded is not valid, or if it is expired or close to expire, we create
+              // a new connection to ceramic
+              selfId = await ceramicConnect(ethAuthProvider);
+            }
           }
 
           // Store the session in localstorage
@@ -216,38 +248,46 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   }, [viewerConnection.status]);
 
   // Toggle connect/disconnect
-  const handleConnection = (): void => {
+  const toggleConnection = (): void => {
     if (!address) {
-      connect()
-        .then(() => {
-          datadogLogs.logger.info("Connected to Wallet");
-          setLoggedIn(true);
-        })
-        .catch((e) => {
-          datadogRum.addError(e);
-          throw e;
-        });
+      handleConnection();
     } else {
-      disconnect({
-        label: walletLabel || "",
-      })
-        .then(() => {
-          setLoggedIn(false);
-          ceramicDisconnect();
-          window.localStorage.setItem("connectedWallets", "[]");
-        })
-        .catch((e) => {
-          datadogRum.addError(e);
-          throw e;
-        });
+      handleDisconnection();
     }
+  };
+
+  const handleConnection = (): void => {
+    connect()
+      .then(() => {
+        datadogLogs.logger.info("Connected to Wallet");
+        setLoggedIn(true);
+      })
+      .catch((e) => {
+        datadogRum.addError(e);
+        throw e;
+      });
+  };
+
+  const handleDisconnection = (): void => {
+    disconnect({
+      label: walletLabel || "",
+    })
+      .then(() => {
+        setLoggedIn(false);
+        ceramicDisconnect();
+        window.localStorage.setItem("connectedWallets", "[]");
+      })
+      .catch((e) => {
+        datadogRum.addError(e);
+        throw e;
+      });
   };
 
   const stateMemo = useMemo(
     () => ({
       loggedIn,
       address,
-      handleConnection,
+      toggleConnection,
       wallet,
       signer,
       walletLabel,
@@ -260,7 +300,8 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   const providerProps = {
     loggedIn,
     address,
-    handleConnection,
+    toggleConnection,
+    handleDisconnection,
     wallet,
     signer,
     walletLabel,

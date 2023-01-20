@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // --Components
 import { CardList } from "../components/CardList";
@@ -30,8 +30,8 @@ import { getExpiredStamps } from "../utils/helpers";
 import { RefreshStampModal } from "../components/RefreshStampModal";
 
 export default function Dashboard() {
-  const { wallet, handleConnection } = useContext(UserContext);
   const { passport, isLoadingPassport, ceramicErrors } = useContext(CeramicContext);
+  const { wallet, toggleConnection, handleDisconnection } = useContext(UserContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -61,7 +61,7 @@ export default function Dashboard() {
   const closeModalAndDisconnect = () => {
     onRetryModalClose();
     // toggle wallet connect/disconnect
-    handleConnection();
+    toggleConnection();
   };
 
   useEffect(() => {
@@ -108,7 +108,9 @@ export default function Dashboard() {
         <div className="float-right mb-4 flex h-12 flex-row items-center font-medium text-gray-900 md:mb-0">
           <img src="/assets/gitcoinLogoDark.svg" alt="Gitcoin Logo" />
           <img className="ml-6 mr-6" src="/assets/logoLine.svg" alt="Logo Line" />
-          <img src="/assets/passportLogoBlack.svg" alt="pPassport Logo" />
+          <Link data-testid="passport-logo-link" to="/" onClick={handleDisconnection}>
+            <img src="/assets/passportLogoBlack.svg" alt="pPassport Logo" />
+          </Link>
         </div>
       </div>
 
@@ -142,7 +144,9 @@ export default function Dashboard() {
         <div className="md:w-3/5">
           <p className="mb-4 text-2xl text-black">My Stamps</p>
           <p className="text-xl text-black">
-            Select the decentralized identity verification stamps you&apos;d like to connect to.
+            Gitcoin Passport is an identity aggregator that helps you build a digital identifier showcasing your unique
+            humanity. Select the verification stamps you&apos;d like to connect to start building your passport. The
+            more verifications you have&#44; the stronger your passport will be.
           </p>
         </div>
 

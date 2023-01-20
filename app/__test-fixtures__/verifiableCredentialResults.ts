@@ -43,6 +43,11 @@ export const SUCCESFUL_ENS_RESULTS: CredentialResponseBody = {
   credential,
 };
 
+export const UN_SUCCESSFUL_ENS_RESULT: CredentialResponseBody = {
+  record: { type: "Ens", version: "0.0.0", ens: "jimmyjim.eth" },
+  credential,
+};
+
 export const SUCCESFUL_POAP_RESULT: VerifiableCredentialRecord = {
   record: {
     type: "POAP",
@@ -90,4 +95,25 @@ export const SUCCESSFUL_GITPOAP_RESULT: VerifiableCredentialRecord = {
   signature: "0xbdbac10fdb0921e73df7575e47cbda484be550c......8af1ad6eeee1ee94c9a0794a3812ae861f8898a973233abea1c",
   challenge: credential,
   credential: credential,
+};
+
+export const VALID_LENS_VERIFICATION = {
+  providerType: "Lens",
+  payload: {
+    valid: true,
+    record: {
+      address: "0x123",
+      numberOfHandles: "1",
+    },
+  },
+};
+
+export const VALID_ENS_VERIFICATION = {
+  providerType: "Ens",
+  payload: {
+    valid: true,
+    record: {
+      ens: "MEME",
+    },
+  },
 };

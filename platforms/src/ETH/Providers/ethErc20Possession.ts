@@ -5,7 +5,8 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 // ----- Ethers library
 import { Contract } from "ethers";
 import { formatUnits } from "@ethersproject/units";
-import { StaticJsonRpcProvider } from "@ethersproject/providers";
+// ----- RPC Getter
+import { getRPCProvider } from "../../utils/signer";
 
 /*
 Eth ERC20 Possession Provider can be used to check a greater than balance for ethereum or any other evm token (ERC20).
@@ -43,22 +44,23 @@ export const RPC_URL = process.env.RPC_URL;
 export async function getTokenBalance(
   address: string,
   tokenContractAddress: string,
-  decimalNumber: number
+  decimalNumber: number,
+  payload: RequestPayload
 ): Promise<number> {
   // define a provider using the rpc url
-  const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(RPC_URL);
+  const staticProvider = getRPCProvider(payload);
   // load Token contract
-  const readContract = new Contract(tokenContractAddress, ERC20_ABI, provider);
+  const readContract = new Contract(tokenContractAddress, ERC20_ABI, staticProvider);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const tokenBalance: string = await readContract?.balanceOf(address);
   const balanceFormatted: string = formatUnits(tokenBalance, decimalNumber);
   return parseFloat(balanceFormatted);
 }
 
-export async function getEthBalance(address: string): Promise<number> {
+export async function getEthBalance(address: string, payload: RequestPayload): Promise<number> {
   // define a provider using the rpc url
-  const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(RPC_URL);
-  const ethBalance = await provider?.getBalance(address);
+  const staticProvider = getRPCProvider(payload);
+  const ethBalance = await staticProvider?.getBalance(address);
   // convert a currency unit from wei to ether
   const balanceFormatted: string = formatUnits(ethBalance, 18);
   return parseFloat(balanceFormatted);
@@ -100,9 +102,9 @@ export class EthErc20PossessionProvider implements Provider {
 
     try {
       if (this._options.contractAddress.length > 0) {
-        amount = await getTokenBalance(address, this._options.contractAddress, this._options.decimalNumber);
+        amount = await getTokenBalance(address, this._options.contractAddress, this._options.decimalNumber, payload);
       } else {
-        amount = await getEthBalance(address);
+        amount = await getEthBalance(address, payload);
       }
     } catch (e) {
       return {

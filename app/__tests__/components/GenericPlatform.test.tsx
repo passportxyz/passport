@@ -8,7 +8,7 @@ import { UserContextState } from "../../context/userContext";
 import { CeramicContextState } from "../../context/ceramicContext";
 import { mockAddress } from "../../__test-fixtures__/onboardHookValues";
 import { ensStampFixture } from "../../__test-fixtures__/databaseStorageFixtures";
-import { SUCCESFUL_ENS_RESULT, SUCCESFUL_ENS_RESULTS } from "../../__test-fixtures__/verifiableCredentialResults";
+import { UN_SUCCESSFUL_ENS_RESULT, SUCCESFUL_ENS_RESULTS } from "../../__test-fixtures__/verifiableCredentialResults";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 import {
   makeTestCeramicContext,
@@ -25,12 +25,19 @@ jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
 jest.mock("../../utils/onboard.ts");
 const handleFetchCredential = jest.fn();
 
-const mockHandleConnection = jest.fn();
+jest.mock("../../utils/helpers.tsx", () => ({
+  generateUID: jest.fn(),
+  difference: (setA: any, setB: any) => ({
+    size: 1,
+  }),
+}));
+
+const mockToggleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
 const mockHandleAddStamp = jest.fn().mockResolvedValue(undefined);
 const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
 const mockUserContext: UserContextState = makeTestUserContext({
-  handleConnection: mockHandleConnection,
+  toggleConnection: mockToggleConnection,
   address: mockAddress,
   signer: mockSigner,
 });
@@ -42,7 +49,7 @@ const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
 
 // TODO
 
-describe.skip("when user has not verified with EnsProvider", () => {
+describe("when user has not verified with EnsProvider", () => {
   beforeEach(() => {
     (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
       credentials: [SUCCESFUL_ENS_RESULTS],
@@ -94,7 +101,32 @@ describe.skip("when user has not verified with EnsProvider", () => {
     await fireEvent.click(initialVerifyButton as HTMLElement);
     // Wait to see the done toast
     await waitFor(() => {
-      expect(screen.getByText("Success!")).toBeInTheDocument();
+      expect(screen.getByText("All Ens data points verified.")).toBeInTheDocument();
+    });
+  });
+});
+
+describe("Mulitple EVM plaftorms", () => {
+  it("Should show no stamp modal if the platform isEVM and no stamps were found", async () => {
+    (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
+      credentials: [UN_SUCCESSFUL_ENS_RESULT],
+    });
+    const drawer = () => (
+      <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
+        <DrawerOverlay />
+        <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />
+      </Drawer>
+    );
+    renderWithContext(mockUserContext, mockCeramicContext, drawer());
+
+    const firstSwitch = screen.queryByTestId("select-all");
+    await fireEvent.click(firstSwitch as HTMLElement);
+    const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
+
+    await fireEvent.click(initialVerifyButton as HTMLElement);
+    await waitFor(async () => {
+      const verifyModal = await screen.findByRole("dialog");
+      expect(verifyModal).toBeInTheDocument();
     });
   });
 });

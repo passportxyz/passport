@@ -5,11 +5,13 @@ import { mockAddress, mockWallet } from "./onboardHookValues";
 import React from "react";
 import { render } from "@testing-library/react";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
+import { PlatformProps } from "../components/GenericPlatform";
 
 export const makeTestUserContext = (initialState?: Partial<UserContextState>): UserContextState => {
   return {
     loggedIn: true,
-    handleConnection: jest.fn(),
+    toggleConnection: jest.fn(),
+    handleDisconnection: jest.fn(),
     address: mockAddress,
     wallet: mockWallet,
     signer: undefined,
@@ -33,6 +35,7 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
       stamps: [],
     },
     isLoadingPassport: IsLoadingPassportState.Idle,
+    allPlatforms: new Map<PLATFORM_ID, PlatformProps>(),
     allProvidersState: {
       Google: {
         providerSpec: STAMP_PROVIDERS.Google as unknown as ProviderSpec,
