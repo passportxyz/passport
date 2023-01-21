@@ -1,5 +1,5 @@
-import { CeramicClient } from '@ceramicnetwork/http-client';
-import { PassportWithErrors } from './../../types/src/index.d';
+import { CeramicClient } from "@ceramicnetwork/http-client";
+import { PassportWithErrors } from "./../../types/src/index.d";
 import { Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
@@ -12,7 +12,7 @@ import { TileDocument } from "@ceramicnetwork/stream-tile";
 import { TileDoc } from "@glazed/did-datastore/dist/proxy";
 
 import axios from "axios";
-import { Stream } from '@ceramicnetwork/common';
+import { Stream } from "@ceramicnetwork/common";
 
 let testDID: DID;
 let ceramicDatabase: CeramicDatabase;
@@ -205,7 +205,7 @@ describe("Verify Ceramic Database", () => {
     });
 
     const passport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
- 
+
     // We do not expect to have any passport, hence `false` should be returned
     expect(spyStoreGet).toBeCalledTimes(1);
     expect(spyStoreGet).toBeCalledWith("Passport");
@@ -232,15 +232,10 @@ describe("Verify Ceramic Database", () => {
     expect(passport.passport?.issuanceDate).toEqual(issuanceDate);
     expect(passport.passport?.expiryDate).toEqual(expiryDate);
   });
-  it("checkPassportCACAOError should indicate if a passport stream is throwing a CACAO error", () => {
-    let spyStoreGetRecordDocument = jest
-      .spyOn(ceramicDatabase.store, "getRecordDocument")
-      .mockImplementation(async (name) => {
-        return {
-          id: "passport-id",
-        } as unknown as TileDoc;
-      });
-    
+  it("checkPassportCACAOError should indicate if a passport stream is throwing a CACAO error", async () => {
+    jest
+      .spyOn(ceramicDatabase.store, "getRecordID")
+      .mockImplementation(async (name) => "passport-id" as unknown as string);
     const spyLoadStreamReq = jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
       return new Promise((resolve, reject) => {
         reject({
@@ -257,14 +252,12 @@ describe("Verify Ceramic Database", () => {
     expect(ceramicDatabase.checkPassportCACAOError()).resolves.toBe(true);
   });
   it("checkPassportCACAOError should not indicate cacao error if not present", () => {
-    jest
-      .spyOn(ceramicDatabase.store, "getRecordDocument")
-      .mockImplementation(async (name) => {
-        return {
-          id: "passport-id",
-        } as unknown as TileDoc;
-      });
-    
+    jest.spyOn(ceramicDatabase.store, "getRecordDocument").mockImplementation(async (name) => {
+      return {
+        id: "passport-id",
+      } as unknown as TileDoc;
+    });
+
     jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
       return new Promise((resolve, reject) => {
         reject({
@@ -281,27 +274,23 @@ describe("Verify Ceramic Database", () => {
   });
   it("should attempt to refresh a passport until successful", async () => {
     jest
-      .spyOn(ceramicDatabase.store, "getRecordDocument")
-      .mockImplementation(async (name) => {
-        return {
-          id: "passport-id",
-        } as unknown as TileDoc;
-      });
-      
-    const spyLoadStream = jest.spyOn(ceramicDatabase.ceramicClient, "loadStream")
+      .spyOn(ceramicDatabase.store, "getRecordID")
+      .mockImplementation(async (name) => "passport-id" as unknown as string);
+
+    const spyLoadStream = jest.spyOn(ceramicDatabase.ceramicClient, "loadStream");
 
     spyLoadStream.mockImplementationOnce(() => {
-      throw new Error('CACAO expired: Commit...') as unknown as Stream;
-    })
+      throw new Error("CACAO expired: Commit...") as unknown as Stream;
+    });
 
     spyLoadStream.mockImplementationOnce((streamId) => {
       return new Promise((resolve, reject) => {
         resolve("true" as unknown as Stream);
       });
-    })
-    
-    await ceramicDatabase.refreshPassport()
+    });
 
-    expect(spyLoadStream).toBeCalledTimes(2);  
+    await ceramicDatabase.refreshPassport();
+
+    expect(spyLoadStream).toBeCalledTimes(2);
   });
 });
