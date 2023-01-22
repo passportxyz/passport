@@ -507,23 +507,31 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
     // fetch, clean and set the new Passport state
-    const passportResponse = (await database.getPassport()) as PassportWithErrors;
-    let { passport } = passportResponse;
-    if (passportResponse?.errors?.passport) {
+    const passportResponse = (await database.getPassport()) as PassportWithErrors | undefined | false;
+
+    // Ceramic error being thrown relies on the false response from getPassport. This is a temporary fix
+    let passport;
+    if (passportResponse === undefined || passportResponse === false) {
+      passport = passportResponse;
+    } else {
+      passport = passportResponse.passport;
+    }
+
+    if (passportResponse && passportResponse?.errors?.passport) {
       const passportCacaoError = await database.checkPassportCACAOError();
       if (passportCacaoError) {
         datadogRum.addError("Passport CACAO error -- error thrown on initial fetch within getPassport", { address });
         passportHasError = true;
       }
     }
-    if (passportResponse?.errors?.stamps) failedStamps = passportResponse.errors.stamps;
+    if (passportResponse && passportResponse?.errors?.stamps) failedStamps = passportResponse.errors.stamps;
 
     if (passport) {
       passport = cleanPassport(passport, database) as Passport;
       hydrateAllProvidersState(passport);
       setPassport(passport);
       if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Idle);
-    } else if (passport === false) {
+    } else if (passportResponse === false) {
       const passportCacaoError = await database.checkPassportCACAOError();
       if (passportCacaoError) {
         datadogRum.addError(
@@ -544,7 +552,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       } else {
         // something is wrong with Ceramic...
         datadogRum.addError("Ceramic connection failed", { address });
-        setPassport(passport);
+        setPassport(undefined);
         if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
       }
     }
