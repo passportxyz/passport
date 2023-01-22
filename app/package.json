@@ -3,10 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "start": "next dev",
+    "dev": "next dev",
     "export": "next build && next export",
     "build": "next build",
-    "prod-start": "next start",
+    "start": "next start",
     "clean": "rimraf node_modules && rimraf .next",
     "lint": "next lint && prettier --check .",
     "lint:fix": "next lint && prettier --write .",
