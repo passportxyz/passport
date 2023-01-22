@@ -40,7 +40,7 @@ export const PLATFORMS: PlatformSpec[] = [
     icon: "./assets/gitcoinStampIcon.svg",
     platform: "Gitcoin",
     name: "Gitcoin Grants",
-    description: "Connect Github account to review your donation activity on Gitcoin (Up to GR15).",
+    description: "Connect your wallet to review your donation activity on Gitcoin (Up to GR15).",
     connectMessage: "Connect Account",
   },
   {
