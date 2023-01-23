@@ -147,32 +147,142 @@ describe("Verify Ceramic Database", () => {
     expect(passport.passport?.expiryDate).toEqual(expiryDate);
   });
 
-  it("ignores stamps that cannot be loaded succefully from ceramic", async () => {
-    const issuanceDate = new Date("2022-06-01");
-    const expiryDate = new Date("2022-09-01");
-    const maxGoodStamps = 2;
-    let numGoodStamps = 0;
-    let spyStoreGet = jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (name) => {
-      return {
-        id: "passport-id",
-        issuanceDate,
-        expiryDate,
-        stamps: [
-          {
-            provider: "Provider-1",
-            credential: "ceramic://credential-1",
-          },
-          {
-            provider: "Provider-2",
-            credential: "ceramic://credential-2",
-          },
-          {
-            provider: "Provider-3",
-            credential: "ceramic://credential-3",
-          },
-        ],
-      };
+  describe("when stamps cannot successfully be loaded from ceramic", () => {
+    let spyAxiosGet, spyStoreGet, spyStoreGetRecordDocument, spyPinAdd, issuanceDate, expiryDate;
+    const parseStreamIdFromUrl = (url: string) => url.split("/").slice(-1);
+
+    beforeEach(() => {
+      issuanceDate = new Date("2022-06-01");
+      expiryDate = new Date("2022-09-01");
+
+      spyStoreGet = jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (name) => {
+        return {
+          id: "passport-id",
+          issuanceDate,
+          expiryDate,
+          stamps: [
+            {
+              provider: "Provider-1",
+              credential: "ceramic://credential-1",
+            },
+            {
+              provider: "Provider-2",
+              credential: "ceramic://credential-2",
+            },
+            {
+              provider: "Provider-3",
+              credential: "ceramic://credential-3",
+            },
+          ],
+        };
+      });
+      spyStoreGetRecordDocument = jest
+        .spyOn(ceramicDatabase.store, "getRecordDocument")
+        .mockImplementation(async (name) => {
+          return {
+            id: "passport-id",
+          } as unknown as TileDoc;
+        });
+
+      spyAxiosGet = jest.spyOn(axios, "get");
+
+      spyPinAdd = jest.spyOn(ceramicDatabase.ceramicClient.pin, "add").mockImplementation(async (streamId) => {
+        // Nothing to do here
+        return;
+      });
     });
+
+    it("ignores unsuccessful stamps", async () => {
+      const maxGoodStamps = 2;
+      let numGoodStamps = 0;
+
+      spyAxiosGet.mockImplementation(async (url: string): Promise<{}> => {
+        const streamId = parseStreamIdFromUrl(url);
+        if (numGoodStamps < maxGoodStamps) {
+          numGoodStamps += 1;
+          return {
+            data: {
+              state: {
+                content: "Stamp Content for ceramic://" + streamId,
+              },
+            },
+            status: 200,
+          };
+        }
+        throw "Error loading stamp!";
+      });
+
+      const passport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
+
+      // We do not expect to have any passport, hence `false` should be returned
+      expect(spyStoreGet).toBeCalledTimes(1);
+      expect(spyStoreGet).toBeCalledWith("Passport");
+      expect(spyAxiosGet).toBeCalledTimes(3);
+      expect(spyStoreGetRecordDocument).toBeCalledTimes(1);
+
+      // Ensure the document is pinned
+      expect(spyPinAdd).toBeCalledTimes(1);
+      expect(spyPinAdd).toBeCalledWith("passport-id");
+
+      // We only expect 2 stamps to have been loaded
+      expect(passport.passport?.stamps).toEqual([
+        {
+          credential: "Stamp Content for ceramic://credential-1",
+          provider: "Provider-1",
+          streamId: "ceramic://credential-1",
+        },
+        {
+          credential: "Stamp Content for ceramic://credential-2",
+          provider: "Provider-2",
+          streamId: "ceramic://credential-2",
+        },
+      ]);
+      expect(passport.passport?.issuanceDate).toEqual(issuanceDate);
+      expect(passport.passport?.expiryDate).toEqual(expiryDate);
+    });
+
+    it("records the stream index when a stamp has a CACAO error", async () => {
+      spyAxiosGet
+        .mockImplementationOnce(async (): Promise<{}> => {
+          throw { response: { data: { error: "CACAO has expired" } } };
+        })
+        .mockImplementation(async (url: string): Promise<{}> => {
+          return {
+            data: {
+              state: {
+                content: "Stamp Content for ceramic://" + parseStreamIdFromUrl(url),
+              },
+            },
+            status: 200,
+          };
+        });
+
+      const passport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
+
+      expect(spyAxiosGet).toBeCalledTimes(3);
+
+      expect(passport.passport?.stamps).toEqual([
+        {
+          credential: "Stamp Content for ceramic://credential-2",
+          provider: "Provider-2",
+          streamId: "ceramic://credential-2",
+        },
+        {
+          credential: "Stamp Content for ceramic://credential-3",
+          provider: "Provider-3",
+          streamId: "ceramic://credential-3",
+        },
+      ]);
+
+      expect(passport.errors?.error).toBe(true);
+      expect(passport.errors?.stamps).toEqual(["ceramic://credential-1"]);
+    });
+  });
+  it("checkPassportCACAOError should indicate if a passport stream is throwing a CACAO error", async () => {
+    jest
+      .spyOn(ceramicDatabase.store, "getRecordID")
+      .mockImplementation(async (name) => "passport-id" as unknown as string);
+
     let spyStoreGetRecordDocument = jest
       .spyOn(ceramicDatabase.store, "getRecordDocument")
       .mockImplementation(async (name) => {
@@ -180,62 +290,7 @@ describe("Verify Ceramic Database", () => {
           id: "passport-id",
         } as unknown as TileDoc;
       });
-    const spyLoadStreamReq = jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
-      return new Promise((resolve, reject) => {
-        const urlSegments = url.split("/");
-        const streamId = urlSegments[urlSegments.length - 1];
-        if (numGoodStamps < maxGoodStamps) {
-          numGoodStamps += 1;
-          resolve({
-            data: {
-              state: {
-                content: "Stamp Content for ceramic://" + streamId,
-              },
-            },
-            status: 200,
-          });
-        }
-        reject("Error loading stamp!");
-      });
-    });
 
-    let spyPinAdd = jest.spyOn(ceramicDatabase.ceramicClient.pin, "add").mockImplementation(async (streamId) => {
-      // Nothing to do here
-      return;
-    });
-
-    const passport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
-
-    // We do not expect to have any passport, hence `false` should be returned
-    expect(spyStoreGet).toBeCalledTimes(1);
-    expect(spyStoreGet).toBeCalledWith("Passport");
-    expect(spyLoadStreamReq).toBeCalledTimes(3);
-    expect(spyStoreGetRecordDocument).toBeCalledTimes(1);
-
-    // Ensure the document is pinned
-    expect(spyPinAdd).toBeCalledTimes(1);
-    expect(spyPinAdd).toBeCalledWith("passport-id");
-
-    // We only expect 2 stamps to have been loaded
-    expect(passport.passport?.stamps).toEqual([
-      {
-        credential: "Stamp Content for ceramic://credential-1",
-        provider: "Provider-1",
-        streamId: "ceramic://credential-1",
-      },
-      {
-        credential: "Stamp Content for ceramic://credential-2",
-        provider: "Provider-2",
-        streamId: "ceramic://credential-2",
-      },
-    ]);
-    expect(passport.passport?.issuanceDate).toEqual(issuanceDate);
-    expect(passport.passport?.expiryDate).toEqual(expiryDate);
-  });
-  it("checkPassportCACAOError should indicate if a passport stream is throwing a CACAO error", async () => {
-    jest
-      .spyOn(ceramicDatabase.store, "getRecordID")
-      .mockImplementation(async (name) => "passport-id" as unknown as string);
     const spyLoadStreamReq = jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
       return new Promise((resolve, reject) => {
         reject({
@@ -251,6 +306,7 @@ describe("Verify Ceramic Database", () => {
 
     expect(ceramicDatabase.checkPassportCACAOError()).resolves.toBe(true);
   });
+
   it("checkPassportCACAOError should not indicate cacao error if not present", () => {
     jest.spyOn(ceramicDatabase.store, "getRecordDocument").mockImplementation(async (name) => {
       return {
@@ -276,6 +332,12 @@ describe("Verify Ceramic Database", () => {
     jest
       .spyOn(ceramicDatabase.store, "getRecordID")
       .mockImplementation(async (name) => "passport-id" as unknown as string);
+
+    jest.spyOn(ceramicDatabase.store, "getRecordDocument").mockImplementation(async (name) => {
+      return {
+        id: "passport-id",
+      } as unknown as TileDoc;
+    });
 
     const spyLoadStream = jest.spyOn(ceramicDatabase.ceramicClient, "loadStream");
 

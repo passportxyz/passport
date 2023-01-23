@@ -1,4 +1,4 @@
-import { PassportWithErrors } from './../../types/src/index.d';
+import { PassportWithErrors } from "./../../types/src/index.d";
 import { Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
@@ -83,7 +83,7 @@ describe("when there is an existing passport without stamps for the given did", 
   });
 
   it("getPassport retrieves the passport from ceramic", async () => {
-    const {passport} = (await ceramicDatabase.getPassport()) as PassportWithErrors;
+    const { passport } = (await ceramicDatabase.getPassport()) as PassportWithErrors;
 
     expect(passport).toBeDefined();
     expect(passport).toEqual(existingPassport);
@@ -336,9 +336,9 @@ describe("when there is an existing passport with stamps for the given did", () 
   });
 
   it("deleteStamps deletes selected stamps from passport", async () => {
-    ceramicDatabase.deleteStamps(providerIds);
+    await ceramicDatabase.deleteStamps(providerIds);
 
-    // The deletion will not be reflected immediatly, we need to wait a bit ...
+    // The deletion will not be reflected immediately, we need to wait a bit ...
     await new Promise((r) => setTimeout(r, 2000));
     const passport = await ceramicDatabase.store.get("Passport");
 
@@ -361,9 +361,9 @@ describe("when there is an existing passport with stamps for the given did", () 
   });
 
   it("deleteStamp deletes an existing stamp from passport", async () => {
-    ceramicDatabase.deleteStamp(existingGoogleStampTileStreamID);
+    await ceramicDatabase.deleteStamp(existingGoogleStampTileStreamID);
 
-    // The deletion will not be reflected immediatly, we need to wait a bit ...
+    // The deletion will not be reflected immediately, we need to wait a bit ...
     await new Promise((r) => setTimeout(r, 2000));
     const passport = await ceramicDatabase.store.get("Passport");
 
