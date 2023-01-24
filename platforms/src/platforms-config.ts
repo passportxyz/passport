@@ -172,7 +172,8 @@ export const PLATFORMS: PlatformSpec[] = [
     icon: "./assets/holonymStampIcon.svg",
     platform: "Holonym",
     name: "Holonym",
-    description: "Mint a Holo to verify your account",
+    description:
+      "To verify your Holo, mint your Holo at app.holonym.id and then prove uniqueness at app.holonym.id/prove/uniqueness",
     connectMessage: "Connect Account",
     isEVM: true,
   },
