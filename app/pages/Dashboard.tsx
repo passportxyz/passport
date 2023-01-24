@@ -82,8 +82,9 @@ export default function Dashboard() {
             <div className="flex flex-col" data-testid="retry-modal-content">
               <p className="text-lg font-bold">Ceramic Network Error</p>
               <p>
-                Gitcoin Passport relies on the Ceramic Network to load your stamp details. We cannot reach the Ceramic Network right now. 
-                There are a number of reasons this could be happening, but there is no action you need to take. Please try again.
+                Gitcoin Passport relies on the Ceramic Network to load your stamp details. We cannot reach the Ceramic
+                Network right now. There are a number of reasons this could be happening, but there is no action you
+                need to take. Please try again.
               </p>
             </div>
           </div>
