@@ -115,7 +115,7 @@ export type IssuedCredential = {
   credential: VerifiableCredential;
 };
 
-// Issued Credential and support matterial returned when fetching the VerifiableCredential
+// Issued Credential and support material returned when fetching the VerifiableCredential
 export type VerifiableCredentialRecord = {
   signature: string;
   challenge: VerifiableCredential;
@@ -139,12 +139,7 @@ export type Passport = {
   stamps: Stamp[];
 };
 
-export enum PassportLoadStatus {
-  Success,
-  DoesNotExist,
-  PassportError,
-  PassportStampError,
-}
+export type PassportLoadStatus = "Success" | "DoesNotExist" | "PassportError" | "PassportStampError";
 
 export type PassportLoadErrorDetails = {
   stampStreamIds: string[];

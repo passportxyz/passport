@@ -517,12 +517,13 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     const { status, errorDetails, passport } = await database.getPassport();
 
     switch (status) {
-      case (PassportLoadStatus.PassportError, PassportLoadStatus.DoesNotExist):
+      case "PassportError":
+      case "DoesNotExist":
         const passportCacaoError = await database.checkPassportCACAOError();
         if (passportCacaoError) {
           datadogRum.addError("Passport CACAO error -- error thrown on initial fetch", { address });
         } else {
-          if (status === PassportLoadStatus.DoesNotExist) handleCreatePassport();
+          if (status === "DoesNotExist") handleCreatePassport();
           else {
             // something is wrong with Ceramic...
             datadogRum.addError("Ceramic connection failed", { address });
@@ -531,10 +532,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           }
         }
         break;
-      case PassportLoadStatus.PassportStampError:
+      case "PassportStampError":
         // Handled in the refresh
         break;
-      case PassportLoadStatus.Success:
+      case "Success":
       default:
         const cleanedPassport = cleanPassport(passport, database) as Passport;
         hydrateAllProvidersState(cleanedPassport);
@@ -569,7 +570,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const handleCheckRefreshPassport = async (): Promise<boolean> => {
     let success = true;
     if (ceramicDatabase && passportLoadResponse) {
-      let passportHasError = passportLoadResponse.status === PassportLoadStatus.PassportError;
+      let passportHasError = passportLoadResponse.status === "PassportError";
       let failedStamps = passportLoadResponse.errorDetails?.stampStreamIds || [];
       try {
         if (passportHasError) {
@@ -661,10 +662,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   };
 
   const passportHasErrors = (): boolean => {
-    if (passportLoadResponse)
-      return [PassportLoadStatus.PassportError || PassportLoadStatus.PassportStampError].includes(
-        passportLoadResponse.status
-      );
+    if (passportLoadResponse) return ["PassportError" || "PassportStampError"].includes(passportLoadResponse.status);
     else return false;
   };
 

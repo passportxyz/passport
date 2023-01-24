@@ -2,8 +2,7 @@
   "name": "@gitcoin/passport-types",
   "version": "1.0.0",
   "license": "MIT",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "src/index.d.ts",
   "scripts": {
     "build": "tsc -b .",
     "clean": "rimraf dist *.tsbuildinfo",

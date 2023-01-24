@@ -225,10 +225,7 @@ describe("when a user clicks on the Passport logo", () => {
       mockUserContext,
       {
         ...mockCeramicContext,
-        ceramicErrors: {
-          error: true,
-          stamps: ["streamid"],
-        },
+        passportHasErrors: () => true,
       },
       <Router>
         <Dashboard />
@@ -246,17 +243,14 @@ describe("when a user clicks on the Passport logo", () => {
       mockUserContext,
       {
         ...mockCeramicContext,
-        ceramicErrors: {
-          error: true,
-          stamps: ["streamid"],
-        },
+        passportHasErrors: () => true,
       },
       <Router>
         <Dashboard />
       </Router>
     );
 
-    await fireEvent.click(screen.getByText("Reset Passport"));
+    fireEvent.click(screen.getByText("Reset Passport"));
     await waitFor(() => {
       expect(screen.getByText("Refresh Modal")).toBeInTheDocument();
     });

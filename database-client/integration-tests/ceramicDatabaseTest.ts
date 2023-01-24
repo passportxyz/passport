@@ -1,5 +1,4 @@
-// import { PassportWithErrors } from "./../../types/src/index.d";
-import { Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
+import { PassportLoadStatus, Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
@@ -53,9 +52,10 @@ describe("when there is no passport for the given did", () => {
   });
 
   it("getPassport returns false", async () => {
-    const actualPassport = await ceramicDatabase.getPassport();
+    const { passport, status, errorDetails } = await ceramicDatabase.getPassport();
 
-    expect(actualPassport).toEqual(false);
+    const expectedStatus: PassportLoadStatus = "DoesNotExist";
+    expect(status).toEqual(expectedStatus);
   });
 });
 
@@ -210,15 +210,15 @@ describe("when there is an existing passport with stamps for the given did", () 
   });
 
   it("getPassport retrieves the passport and stamps from ceramic", async () => {
-    const actualPassport = await ceramicDatabase.getPassport();
+    const { passport } = await ceramicDatabase.getPassport();
 
-    const formattedDate = new Date(actualPassport.passport["issuanceDate"]);
+    const formattedDate = new Date(passport["issuanceDate"]);
 
-    expect(actualPassport.passport).toBeDefined();
+    expect(passport).toBeDefined();
     expect(formattedDate.getDay()).toEqual(existingPassport.issuanceDate.getDay());
     expect(formattedDate.getMonth()).toEqual(existingPassport.issuanceDate.getMonth());
     expect(formattedDate.getFullYear()).toEqual(existingPassport.issuanceDate.getFullYear());
-    expect(actualPassport.passport.stamps[0]).toEqual(ensStampFixture);
+    expect(passport.stamps[0]).toEqual(ensStampFixture);
   });
 
   it("addStamp adds a stamp to passport", async () => {
@@ -489,17 +489,17 @@ describe("when loading a stamp from a passport fails", () => {
   });
 
   it("ignores the failed stamp and only returns the successfully loaded stamps", async () => {
-    const passport = await ceramicDatabase.getPassport();
+    const { passport } = await ceramicDatabase.getPassport();
 
     // We only expect 2 results: Ens and Google stamps
-    expect(passport.passport.stamps.length).toEqual(2);
+    expect(passport.stamps.length).toEqual(2);
     expect(
-      passport.passport.stamps.findIndex((stamp) => {
+      passport.stamps.findIndex((stamp) => {
         return stamp && stamp.credential.credentialSubject.provider === "Ens";
       })
     ).toEqual(0);
     expect(
-      passport.passport.stamps.findIndex((stamp) => {
+      passport.stamps.findIndex((stamp) => {
         return stamp && stamp.credential.credentialSubject.provider === "Google";
       })
     ).toEqual(1);

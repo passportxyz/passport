@@ -1,5 +1,4 @@
 import { PassportLoadStatus } from "@gitcoin/passport-types";
-import { Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
@@ -44,7 +43,8 @@ describe("Verify Ceramic Database", () => {
     const { passport, status } = await ceramicDatabase.getPassport();
 
     // We do not expect to have any passport, hence `false` should be returned
-    expect(status).toEqual(PassportLoadStatus.DoesNotExist);
+    const expectedStatus: PassportLoadStatus = "DoesNotExist";
+    expect(status).toEqual(expectedStatus);
     expect(passport).toEqual(undefined);
     expect(spyStoreGet).toBeCalledTimes(1);
     expect(spyStoreGet).toBeCalledWith("Passport");
@@ -58,7 +58,8 @@ describe("Verify Ceramic Database", () => {
     const { passport, status } = await ceramicDatabase.getPassport();
 
     // We do not expect to have any passport, hence `false` should be returned
-    expect(status).toEqual(PassportLoadStatus.DoesNotExist);
+    const expectedStatus: PassportLoadStatus = "DoesNotExist";
+    expect(status).toEqual(expectedStatus);
     expect(passport).toEqual(undefined);
     expect(spyStoreGet).toBeCalledTimes(1);
     expect(spyStoreGet).toBeCalledWith("Passport");
@@ -275,7 +276,8 @@ describe("Verify Ceramic Database", () => {
         },
       ]);
 
-      expect(passport.status).toBe(PassportLoadStatus.PassportStampError);
+      const expectedStatus: PassportLoadStatus = "PassportStampError";
+      expect(passport.status).toBe(expectedStatus);
       expect(passport.errorDetails?.stampStreamIds).toEqual(["ceramic://credential-1"]);
     });
   });

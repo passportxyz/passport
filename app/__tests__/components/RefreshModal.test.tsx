@@ -31,9 +31,8 @@ describe("RefreshStampModal", () => {
       mockUserContext,
       {
         ...mockCeramicContext,
-        ceramicErrors: {
-          error: true,
-          stamps: ["streamid"],
+        passportLoadResponse: {
+          status: "PassportError",
         },
       },
       <RefreshStampModal isOpen={true} onClose={jest.fn()} />
@@ -48,9 +47,8 @@ describe("RefreshStampModal", () => {
       mockUserContext,
       {
         ...mockCeramicContext,
-        ceramicErrors: {
-          error: true,
-          stamps: ["streamid"],
+        passportLoadResponse: {
+          status: "PassportError",
         },
       },
       <RefreshStampModal isOpen={true} onClose={jest.fn()} />
@@ -65,9 +63,8 @@ describe("RefreshStampModal", () => {
       mockUserContext,
       {
         ...mockCeramicContext,
-        ceramicErrors: {
-          error: true,
-          stamps: ["streamid"],
+        passportLoadResponse: {
+          status: "PassportError",
         },
       },
       <RefreshStampModal isOpen={true} onClose={jest.fn()} />

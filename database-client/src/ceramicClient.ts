@@ -171,7 +171,7 @@ export class CeramicDatabase implements DataStorageBase {
 
   async getPassport(): Promise<PassportLoadResponse> {
     let passport: Passport;
-    let status = PassportLoadStatus.Success;
+    let status: PassportLoadStatus = "Success";
     let errorDetails: PassportLoadErrorDetails;
 
     try {
@@ -180,13 +180,13 @@ export class CeramicDatabase implements DataStorageBase {
 
       // According to the logs, it does happen that passport is sometimes an empty object {}
       // We treat this case as an non-existent passport
-      if (!ceramicPassport?.stamps) status = PassportLoadStatus.DoesNotExist;
+      if (!ceramicPassport?.stamps) status = "DoesNotExist";
       else {
         const { successfulStamps, cacaoErrorStampIds } = await this.loadStamps(ceramicPassport);
 
         if (cacaoErrorStampIds.length) {
           errorDetails = { stampStreamIds: cacaoErrorStampIds };
-          status = PassportLoadStatus.PassportStampError;
+          status = "PassportStampError";
         }
 
         passport = {
@@ -198,7 +198,7 @@ export class CeramicDatabase implements DataStorageBase {
         await this.pinCurrentPassport();
       }
     } catch (e) {
-      status = PassportLoadStatus.PassportError;
+      status = "PassportError";
       this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString(), { error: e });
     } finally {
       return {
@@ -398,10 +398,9 @@ export class CeramicDatabase implements DataStorageBase {
 }
 
 async function getFulfilledPromises<T>(promises: Promise<T>[]): Promise<T[]> {
-  // Wait for all stamp loading to be settled
   const promiseStatuses = await Promise.allSettled(promises);
 
-  // Filter out only the successfully loaded stamps
+  // Filter out only the successful promises
   const isFulfilled = <T>(input: PromiseSettledResult<T>): input is PromiseFulfilledResult<T> =>
     input.status === "fulfilled";
 
