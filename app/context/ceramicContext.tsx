@@ -536,7 +536,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         // Handled in the refresh
         break;
       case "Success":
-      default:
         const cleanedPassport = cleanPassport(passport, database) as Passport;
         hydrateAllProvidersState(cleanedPassport);
         setPassport(cleanedPassport);

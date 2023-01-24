@@ -116,7 +116,7 @@ describe("Verify Ceramic Database", () => {
       return;
     });
 
-    const passport = await ceramicDatabase.getPassport();
+    const { passport, status } = await ceramicDatabase.getPassport();
 
     // We do not expect to have any passport, hence `false` should be returned
     expect(spyStoreGet).toBeCalledTimes(1);
@@ -128,7 +128,10 @@ describe("Verify Ceramic Database", () => {
     expect(spyPinAdd).toBeCalledTimes(1);
     expect(spyPinAdd).toBeCalledWith("passport-id");
 
-    expect(passport.passport?.stamps).toEqual([
+    const expectedStatus: PassportLoadStatus = "Success";
+    expect(status).toBe(expectedStatus);
+
+    expect(passport?.stamps).toEqual([
       {
         credential: "Stamp Content for ceramic://credential-1",
         provider: "Provider-1",
@@ -145,8 +148,8 @@ describe("Verify Ceramic Database", () => {
         streamId: "ceramic://credential-3",
       },
     ]);
-    expect(passport.passport?.issuanceDate).toEqual(issuanceDate);
-    expect(passport.passport?.expiryDate).toEqual(expiryDate);
+    expect(passport?.issuanceDate).toEqual(issuanceDate);
+    expect(passport?.expiryDate).toEqual(expiryDate);
   });
 
   describe("when stamps cannot successfully be loaded from ceramic", () => {
@@ -214,7 +217,7 @@ describe("Verify Ceramic Database", () => {
         throw "Error loading stamp!";
       });
 
-      const passport = await ceramicDatabase.getPassport();
+      const { passport } = await ceramicDatabase.getPassport();
 
       // We do not expect to have any passport, hence `false` should be returned
       expect(spyStoreGet).toBeCalledTimes(1);
@@ -227,7 +230,7 @@ describe("Verify Ceramic Database", () => {
       expect(spyPinAdd).toBeCalledWith("passport-id");
 
       // We only expect 2 stamps to have been loaded
-      expect(passport.passport?.stamps).toEqual([
+      expect(passport?.stamps).toEqual([
         {
           credential: "Stamp Content for ceramic://credential-1",
           provider: "Provider-1",
@@ -239,8 +242,8 @@ describe("Verify Ceramic Database", () => {
           streamId: "ceramic://credential-2",
         },
       ]);
-      expect(passport.passport?.issuanceDate).toEqual(issuanceDate);
-      expect(passport.passport?.expiryDate).toEqual(expiryDate);
+      expect(passport?.issuanceDate).toEqual(issuanceDate);
+      expect(passport?.expiryDate).toEqual(expiryDate);
     });
 
     it("records the stream index when a stamp has a CACAO error", async () => {
@@ -259,11 +262,11 @@ describe("Verify Ceramic Database", () => {
           };
         });
 
-      const passport = await ceramicDatabase.getPassport();
+      const { passport, status, errorDetails } = await ceramicDatabase.getPassport();
 
       expect(spyAxiosGet).toBeCalledTimes(3);
 
-      expect(passport.passport?.stamps).toEqual([
+      expect(passport?.stamps).toEqual([
         {
           credential: "Stamp Content for ceramic://credential-2",
           provider: "Provider-2",
@@ -277,9 +280,19 @@ describe("Verify Ceramic Database", () => {
       ]);
 
       const expectedStatus: PassportLoadStatus = "PassportStampError";
-      expect(passport.status).toBe(expectedStatus);
-      expect(passport.errorDetails?.stampStreamIds).toEqual(["ceramic://credential-1"]);
+      expect(status).toBe(expectedStatus);
+      expect(errorDetails?.stampStreamIds).toEqual(["ceramic://credential-1"]);
     });
+  });
+
+  it("should have PassportError status when loading the passport object fails", async () => {
+    jest.spyOn(ceramicDatabase.store, "get").mockImplementation(() => {
+      throw "Error";
+    });
+
+    const { status } = await ceramicDatabase.getPassport();
+    const expectedStatus: PassportLoadStatus = "PassportError";
+    expect(status).toBe(expectedStatus);
   });
 
   it("checkPassportCACAOError should indicate if a passport stream is throwing a CACAO error", async () => {
@@ -332,6 +345,7 @@ describe("Verify Ceramic Database", () => {
     });
     expect(ceramicDatabase.checkPassportCACAOError()).resolves.toBe(false);
   });
+
   it("should attempt to refresh a passport until successful", async () => {
     jest
       .spyOn(ceramicDatabase.store, "getRecordID")
