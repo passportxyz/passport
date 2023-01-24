@@ -139,15 +139,21 @@ export type Passport = {
   stamps: Stamp[];
 };
 
-export type PassportError = {
-  error: boolean;
-  passport?: boolean;
-  stamps?: string[];
+export enum PassportLoadStatus {
+  Success,
+  DoesNotExist,
+  PassportError,
+  PassportStampError,
+}
+
+export type PassportLoadErrorDetails = {
+  stampStreamIds: string[];
 };
 
-export type PassportWithErrors = {
-  passport: Passport;
-  errors?: PassportError;
+export type PassportLoadResponse = {
+  passport?: Passport;
+  status: PassportLoadStatus;
+  errorDetails?: PassportLoadErrorDetails;
 };
 
 // Passport DID

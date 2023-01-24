@@ -1,5 +1,4 @@
-import { CeramicClient } from "@ceramicnetwork/http-client";
-import { PassportWithErrors } from "./../../types/src/index.d";
+import { PassportLoadStatus } from "@gitcoin/passport-types";
 import { Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
@@ -42,10 +41,11 @@ describe("Verify Ceramic Database", () => {
       return null;
     });
 
-    const passport = await ceramicDatabase.getPassport();
+    const { passport, status } = await ceramicDatabase.getPassport();
 
     // We do not expect to have any passport, hence `false` should be returned
-    expect(passport).toEqual(false);
+    expect(status).toEqual(PassportLoadStatus.DoesNotExist);
+    expect(passport).toEqual(undefined);
     expect(spyStoreGet).toBeCalledTimes(1);
     expect(spyStoreGet).toBeCalledWith("Passport");
   });
@@ -55,10 +55,11 @@ describe("Verify Ceramic Database", () => {
       return {};
     });
 
-    const passport = await ceramicDatabase.getPassport();
+    const { passport, status } = await ceramicDatabase.getPassport();
 
     // We do not expect to have any passport, hence `false` should be returned
-    expect(passport).toEqual(false);
+    expect(status).toEqual(PassportLoadStatus.DoesNotExist);
+    expect(passport).toEqual(undefined);
     expect(spyStoreGet).toBeCalledTimes(1);
     expect(spyStoreGet).toBeCalledWith("Passport");
   });
@@ -114,7 +115,7 @@ describe("Verify Ceramic Database", () => {
       return;
     });
 
-    const passport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
+    const passport = await ceramicDatabase.getPassport();
 
     // We do not expect to have any passport, hence `false` should be returned
     expect(spyStoreGet).toBeCalledTimes(1);
@@ -212,7 +213,7 @@ describe("Verify Ceramic Database", () => {
         throw "Error loading stamp!";
       });
 
-      const passport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
+      const passport = await ceramicDatabase.getPassport();
 
       // We do not expect to have any passport, hence `false` should be returned
       expect(spyStoreGet).toBeCalledTimes(1);
@@ -257,7 +258,7 @@ describe("Verify Ceramic Database", () => {
           };
         });
 
-      const passport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
+      const passport = await ceramicDatabase.getPassport();
 
       expect(spyAxiosGet).toBeCalledTimes(3);
 
@@ -274,10 +275,11 @@ describe("Verify Ceramic Database", () => {
         },
       ]);
 
-      expect(passport.errors?.error).toBe(true);
-      expect(passport.errors?.stamps).toEqual(["ceramic://credential-1"]);
+      expect(passport.status).toBe(PassportLoadStatus.PassportStampError);
+      expect(passport.errorDetails?.stampStreamIds).toEqual(["ceramic://credential-1"]);
     });
   });
+
   it("checkPassportCACAOError should indicate if a passport stream is throwing a CACAO error", async () => {
     jest
       .spyOn(ceramicDatabase.store, "getRecordID")

@@ -41,7 +41,7 @@ export const PlatformCard = ({
   getUpdatedPlatforms,
 }: PlatformCardProps): JSX.Element => {
   // import all providers
-  const { allProvidersState, ceramicErrors, handleDeleteStamps } = useContext(CeramicContext);
+  const { allProvidersState, passportHasErrors, handleDeleteStamps } = useContext(CeramicContext);
 
   // useDisclosure to control JSON modal
   const {
@@ -56,6 +56,8 @@ export const PlatformCard = ({
     onOpen: onOpenRemoveStampModal,
     onClose: onCloseRemoveStampModal,
   } = useDisclosure();
+
+  const disabled = passportHasErrors();
 
   // returns a single Platform card
   return (
@@ -93,7 +95,7 @@ export const PlatformCard = ({
           {selectedProviders[platform.platform].length > 0 ? (
             <>
               <Menu>
-                <MenuButton disabled={ceramicErrors?.error} className="verify-btn flex" data-testid="card-menu-button">
+                <MenuButton disabled={disabled} className="verify-btn flex" data-testid="card-menu-button">
                   <div className="m-auto flex justify-center">
                     <svg
                       className="m-1 mr-2"
@@ -179,7 +181,7 @@ export const PlatformCard = ({
           ) : (
             <button
               className="verify-btn"
-              disabled={ceramicErrors?.error}
+              disabled={disabled}
               ref={btnRef.current}
               onClick={(e) => {
                 if (platform.enablePlatformCardUpdate) {

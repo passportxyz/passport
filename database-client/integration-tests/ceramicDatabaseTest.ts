@@ -1,4 +1,4 @@
-import { PassportWithErrors } from "./../../types/src/index.d";
+// import { PassportWithErrors } from "./../../types/src/index.d";
 import { Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
@@ -83,7 +83,7 @@ describe("when there is an existing passport without stamps for the given did", 
   });
 
   it("getPassport retrieves the passport from ceramic", async () => {
-    const { passport } = (await ceramicDatabase.getPassport()) as PassportWithErrors;
+    const { passport } = await ceramicDatabase.getPassport();
 
     expect(passport).toBeDefined();
     expect(passport).toEqual(existingPassport);
@@ -210,7 +210,7 @@ describe("when there is an existing passport with stamps for the given did", () 
   });
 
   it("getPassport retrieves the passport and stamps from ceramic", async () => {
-    const actualPassport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
+    const actualPassport = await ceramicDatabase.getPassport();
 
     const formattedDate = new Date(actualPassport.passport["issuanceDate"]);
 
@@ -489,7 +489,7 @@ describe("when loading a stamp from a passport fails", () => {
   });
 
   it("ignores the failed stamp and only returns the successfully loaded stamps", async () => {
-    const passport = (await ceramicDatabase.getPassport()) as PassportWithErrors;
+    const passport = await ceramicDatabase.getPassport();
 
     // We only expect 2 results: Ens and Google stamps
     expect(passport.passport.stamps.length).toEqual(2);
