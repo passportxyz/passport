@@ -8,13 +8,13 @@ export class GTCStakingPlatform implements Platform {
   redirectUri: string = null;
 
   banner = {
-    heading: "Stake your GTC on the new Identity Staking site.",
-    content: "Defend against sybil by staking on your own identity or somebody else's. By staking, the profile of stamps in the Passport becomes more unique.",
+    heading:
+      "During a live Gitcoin Grants Round, you can connect your wallet to verify your staked GTC amount. If you haven't staked yet, you can follow this link to do so.",
     cta: {
       label: "Go to Identity Staking",
-      url: "https://www.staking.passport.gitcoin.co/"
-    }
-  }
+      url: "https://www.staking.passport.gitcoin.co/",
+    },
+  };
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     return {};
