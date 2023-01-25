@@ -46,6 +46,7 @@ export interface CeramicContextState {
   handleCheckRefreshPassport: () => Promise<boolean>;
   userDid: string | undefined;
   ceramicErrors: PassportError | undefined;
+  expiredProviders: PROVIDER_ID[];
 }
 
 export const platforms = new Map<PLATFORM_ID, PlatformProps>();
@@ -443,6 +444,7 @@ const startingState: CeramicContextState = {
   handleCheckRefreshPassport: async () => false,
   userDid: undefined,
   ceramicErrors: undefined,
+  expiredProviders: [],
 };
 
 export const CeramicContext = createContext(startingState);
@@ -454,6 +456,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
   const [userDid, setUserDid] = useState<string | undefined>();
   const [ceramicErrors, setCeramicErrors] = useState<PassportError | undefined>();
+  const [expiredProviders, setExpiredProviders] = useState<PROVIDER_ID[]>([]);
   const [viewerConnection] = useViewerConnection();
 
   const { address } = useContext(UserContext);
@@ -567,9 +570,13 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   ): Passport | undefined | false => {
     // clean stamp content if expired or from a different issuer
     if (passport) {
-      passport.stamps = passport.stamps.filter((stamp: Stamp) => {
+      passport.stamps = passport.stamps.filter((stamp: Stamp, i: number) => {
         if (stamp) {
           const has_expired = new Date(stamp.credential.expirationDate) < new Date();
+          if (has_expired) {
+            setExpiredProviders([...expiredProviders, stamp.credential.credentialSubject.provider as PROVIDER_ID]);
+          }
+
           const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
           const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
 
@@ -706,6 +713,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     handleCheckRefreshPassport,
     userDid,
     ceramicErrors,
+    expiredProviders,
   };
 
   return <CeramicContext.Provider value={providerProps}>{children}</CeramicContext.Provider>;
