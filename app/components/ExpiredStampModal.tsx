@@ -69,9 +69,9 @@ export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) =
             const spec = getPlatformSpec(platform as PLATFORM_ID);
             return (
               <div key={spec?.name} className="w-full">
-                <div className="flex w-full justify-start">
+                <div className="flex w-full items-center justify-start">
                   <img width="25px" alt="Platform Image" src={spec?.icon} className="m-3" />
-                  <p className="pt-4 text-sm font-semibold">{spec?.name}</p>
+                  <p className="text-sm font-semibold">{spec?.name}</p>
                 </div>
                 <hr className="border-1 w-full" />
               </div>
