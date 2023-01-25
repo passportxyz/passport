@@ -28,9 +28,10 @@ import { EthereumAuthProvider } from "@self.id/web";
 import { Banner } from "../components/Banner";
 import { getExpiredStamps } from "../utils/helpers";
 import { RefreshStampModal } from "../components/RefreshStampModal";
+import { ExpiredStampModal } from "../components/ExpiredStampModal";
 
 export default function Dashboard() {
-  const { passport, isLoadingPassport, ceramicErrors } = useContext(CeramicContext);
+  const { passport, isLoadingPassport, ceramicErrors, expiredProviders } = useContext(CeramicContext);
   const { wallet, toggleConnection, handleDisconnection } = useContext(UserContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -41,6 +42,7 @@ export default function Dashboard() {
   const { isOpen: retryModalIsOpen, onOpen: onRetryModalOpen, onClose: onRetryModalClose } = useDisclosure();
 
   const [refreshModal, setRefreshModal] = useState(false);
+  const [expiredStampModal, setExpiredStampModal] = useState(false);
 
   // Route user to home when wallet is disconnected
   useEffect(() => {
@@ -141,6 +143,19 @@ export default function Dashboard() {
         </Banner>
       )}
 
+      {expiredProviders.length > 0 && (
+        <Banner>
+          <div className="flex w-full justify-center">
+            <img className="mr-2 h-6" alt="Clock Icon" src="./assets/clock-icon.svg" />
+            Some of your stamps have expired. You can remove them from your Passport.
+            <button className="ml-2 flex underline" onClick={() => setExpiredStampModal(true)}>
+              Remove Expired Stamps{" "}
+              <img className="ml-1 w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
+            </button>
+          </div>
+        </Banner>
+      )}
+
       <div className="container mx-auto flex flex-wrap-reverse px-2 md:mt-4 md:flex-wrap">
         <div className="md:w-3/5">
           <p className="mb-4 text-2xl text-black">My Stamps</p>
@@ -228,6 +243,9 @@ export default function Dashboard() {
       {/* This footer contains dark colored text and dark images */}
       <Footer lightMode={false} />
       {refreshModal && <RefreshStampModal isOpen={refreshModal} onClose={() => setRefreshModal(false)} />}
+      {expiredStampModal && (
+        <ExpiredStampModal isOpen={expiredStampModal} onClose={() => setExpiredStampModal(false)} />
+      )}
     </>
   );
 }
