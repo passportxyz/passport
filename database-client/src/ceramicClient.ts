@@ -201,11 +201,9 @@ export class CeramicDatabase implements DataStorageBase {
       status = "ExceptionRaised";
       this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString(), { error: e });
     } finally {
-      try {
-        const possiblePassportCacaoErrorStatuses: PassportLoadStatus[] = ["DoesNotExist", "ExceptionRaised"];
-        if (possiblePassportCacaoErrorStatuses.includes(status) && (await this.checkPassportCACAOError()))
-          status = "PassportCacaoError";
-      } catch {}
+      const possiblePassportCacaoErrorStatuses: PassportLoadStatus[] = ["DoesNotExist", "ExceptionRaised"];
+      if (possiblePassportCacaoErrorStatuses.includes(status) && (await this.checkPassportCACAOError()))
+        status = "PassportCacaoError";
 
       return {
         passport,
