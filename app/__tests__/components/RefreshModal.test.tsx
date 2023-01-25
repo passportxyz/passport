@@ -31,10 +31,7 @@ describe("RefreshStampModal", () => {
       mockUserContext,
       {
         ...mockCeramicContext,
-        ceramicErrors: {
-          error: true,
-          stamps: ["streamid"],
-        },
+        passportHasCacaoError: () => true,
       },
       <RefreshStampModal isOpen={true} onClose={jest.fn()} />
     );
@@ -48,10 +45,7 @@ describe("RefreshStampModal", () => {
       mockUserContext,
       {
         ...mockCeramicContext,
-        ceramicErrors: {
-          error: true,
-          stamps: ["streamid"],
-        },
+        passportHasCacaoError: () => true,
       },
       <RefreshStampModal isOpen={true} onClose={jest.fn()} />
     );
@@ -65,10 +59,7 @@ describe("RefreshStampModal", () => {
       mockUserContext,
       {
         ...mockCeramicContext,
-        ceramicErrors: {
-          error: true,
-          stamps: ["streamid"],
-        },
+        passportHasCacaoError: () => true,
       },
       <RefreshStampModal isOpen={true} onClose={jest.fn()} />
     );
