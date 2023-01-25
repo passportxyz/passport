@@ -2,23 +2,23 @@ import { useContext, useEffect, useState } from "react";
 import { Button, Modal, ModalContent, ModalOverlay, useToast } from "@chakra-ui/react";
 import { CeramicContext } from "../context/ceramicContext";
 import { getPlatformSpec } from "../config/platforms";
-import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { completedIcon } from "./Progress";
+import { PLATFORMS, PlatformSpec } from "../config/platforms";
+import { STAMP_PROVIDERS } from "../config/providers";
 
 export type ExpiredStampModalProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
+export const getProviderIdsFromPlatformId = (platformId: PLATFORM_ID): PROVIDER_ID[] => {
+  return STAMP_PROVIDERS[platformId as PLATFORM_ID].flatMap((x) => x.providers.map((y) => y.name));
+};
+
 export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) => {
   const { expiredProviders, handleDeleteStamps } = useContext(CeramicContext);
   const toast = useToast();
-
-  const expiredPlatformGroups = expiredProviders
-    .filter((item, index) => {
-      return expiredProviders.findIndex((i) => JSON.stringify(i) === JSON.stringify(item)) === index;
-    })
-    .map((provider: PROVIDER_ID) => getPlatformSpec(provider));
 
   const successToast = () => {
     toast({
@@ -36,8 +36,16 @@ export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) =
     });
   };
 
+  const expiredPlatforms = Object.keys(STAMP_PROVIDERS).filter((provider) => {
+    const possibleProviders = getProviderIdsFromPlatformId(provider as PLATFORM_ID);
+    return possibleProviders.filter((provider) => expiredProviders.includes(provider)).length > 0;
+  });
+
   const deleteAndNotify = async () => {
-    await handleDeleteStamps(expiredProviders);
+    const stampsToDelete = expiredPlatforms.flatMap((platform) =>
+      getProviderIdsFromPlatformId(platform as PLATFORM_ID)
+    );
+    await handleDeleteStamps(stampsToDelete);
 
     onClose();
     successToast();
@@ -57,12 +65,18 @@ export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) =
           </p>
           <p className="w-full text-left text-sm font-semibold text-gray-600">Accounts</p>
           <hr className="border-1 w-full" />
-          {expiredPlatformGroups.map((platform) => (
-            <div key={platform?.name} className="flex w-full justify-start">
-              <img width="25px" alt="Platform Image" src={platform?.icon} className="m-3" />
-              <p className="pt-4 text-sm font-semibold">{platform?.name}</p>
-            </div>
-          ))}
+          {expiredPlatforms.map((platform) => {
+            const spec = getPlatformSpec(platform as PLATFORM_ID);
+            return (
+              <div key={spec?.name} className="w-full">
+                <div className="flex w-full justify-start">
+                  <img width="25px" alt="Platform Image" src={spec?.icon} className="m-3" />
+                  <p className="pt-4 text-sm font-semibold">{spec?.name}</p>
+                </div>
+                <hr className="border-1 w-full" />
+              </div>
+            );
+          })}
           <div className="flex w-full">
             <button
               onClick={() => onClose()}
@@ -70,7 +84,11 @@ export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) =
             >
               Cancel
             </button>
-            <button onClick={() => deleteAndNotify()} className="sidebar-verify-btn w-1/2">
+            <button
+              data-testid="delete-duplicate"
+              onClick={() => deleteAndNotify()}
+              className="sidebar-verify-btn w-1/2"
+            >
               Remove
             </button>
           </div>
