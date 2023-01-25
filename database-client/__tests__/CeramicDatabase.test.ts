@@ -279,19 +279,37 @@ describe("Verify Ceramic Database", () => {
         },
       ]);
 
-      const expectedStatus: PassportLoadStatus = "PassportStampError";
+      const expectedStatus: PassportLoadStatus = "StampCacaoError";
       expect(status).toBe(expectedStatus);
       expect(errorDetails?.stampStreamIds).toEqual(["ceramic://credential-1"]);
     });
   });
 
-  it("should have PassportError status when loading the passport object fails", async () => {
-    jest.spyOn(ceramicDatabase.store, "get").mockImplementation(() => {
+  it("should have ExceptionRaised status when loading the passport object fails", async () => {
+    jest.spyOn(ceramicDatabase.store, "get").mockImplementationOnce(() => {
+      throw "Error";
+    });
+
+    jest.spyOn(ceramicDatabase.store, "getRecordID").mockImplementationOnce(() => {
       throw "Error";
     });
 
     const { status } = await ceramicDatabase.getPassport();
-    const expectedStatus: PassportLoadStatus = "PassportError";
+    const expectedStatus: PassportLoadStatus = "ExceptionRaised";
+    expect(status).toBe(expectedStatus);
+  });
+
+  it("should have PassportError status when loading the passport object fails and there is a Cacao issue", async () => {
+    jest.spyOn(ceramicDatabase.store, "get").mockImplementationOnce(() => {
+      throw "Error";
+    });
+
+    jest.spyOn(ceramicDatabase.store, "getRecordID").mockImplementationOnce(() => {
+      throw { response: { data: { error: "CACAO has expired" } } };
+    });
+
+    const { status } = await ceramicDatabase.getPassport();
+    const expectedStatus: PassportLoadStatus = "PassportCacaoError";
     expect(status).toBe(expectedStatus);
   });
 
@@ -347,10 +365,6 @@ describe("Verify Ceramic Database", () => {
   });
 
   it("should attempt to refresh a passport until successful", async () => {
-    jest
-      .spyOn(ceramicDatabase.store, "getRecordID")
-      .mockImplementation(async (name) => "passport-id" as unknown as string);
-
     jest.spyOn(ceramicDatabase.store, "getRecordDocument").mockImplementation(async (name) => {
       return {
         id: "passport-id",

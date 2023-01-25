@@ -209,7 +209,7 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
     handleDeleteStamp: jest.fn(),
     handleDeleteStamps: jest.fn(),
     handleCheckRefreshPassport: () => Promise.resolve(true),
-    passportHasErrors: () => false,
+    passportHasCacaoError: () => false,
     ...initialState,
   };
 };

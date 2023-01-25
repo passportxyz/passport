@@ -30,7 +30,7 @@ import { getExpiredStamps } from "../utils/helpers";
 import { RefreshStampModal } from "../components/RefreshStampModal";
 
 export default function Dashboard() {
-  const { passport, isLoadingPassport, passportHasErrors } = useContext(CeramicContext);
+  const { passport, isLoadingPassport, passportHasCacaoError } = useContext(CeramicContext);
   const { wallet, toggleConnection, handleDisconnection } = useContext(UserContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -129,7 +129,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {passportHasErrors() && (
+      {passportHasCacaoError() && (
         <Banner>
           <div className="flex w-full justify-center">
             We have detected some broken stamps in your passport. Your passport is currently locked because of this. We

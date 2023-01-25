@@ -41,7 +41,7 @@ export const PlatformCard = ({
   getUpdatedPlatforms,
 }: PlatformCardProps): JSX.Element => {
   // import all providers
-  const { allProvidersState, passportHasErrors, handleDeleteStamps } = useContext(CeramicContext);
+  const { allProvidersState, passportHasCacaoError, handleDeleteStamps } = useContext(CeramicContext);
 
   // useDisclosure to control JSON modal
   const {
@@ -57,7 +57,7 @@ export const PlatformCard = ({
     onClose: onCloseRemoveStampModal,
   } = useDisclosure();
 
-  const disabled = passportHasErrors();
+  const disabled = passportHasCacaoError();
 
   // returns a single Platform card
   return (

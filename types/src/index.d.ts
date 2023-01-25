@@ -139,7 +139,12 @@ export type Passport = {
   stamps: Stamp[];
 };
 
-export type PassportLoadStatus = "Success" | "DoesNotExist" | "PassportError" | "PassportStampError";
+export type PassportLoadStatus =
+  | "Success"
+  | "DoesNotExist"
+  | "ExceptionRaised"
+  | "StampCacaoError"
+  | "PassportCacaoError";
 
 export type PassportLoadErrorDetails = {
   stampStreamIds: string[];

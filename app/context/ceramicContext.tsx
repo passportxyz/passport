@@ -52,7 +52,7 @@ export interface CeramicContextState {
   handleDeleteStamps: (providerIds: PROVIDER_ID[]) => Promise<void>;
   handleCheckRefreshPassport: () => Promise<boolean>;
   userDid: string | undefined;
-  passportHasErrors: () => boolean;
+  passportHasCacaoError: () => boolean;
   passportLoadResponse?: PassportLoadResponse;
 }
 
@@ -449,7 +449,7 @@ const startingState: CeramicContextState = {
   handleDeleteStamp: async (streamId: string) => {},
   handleDeleteStamps: async () => {},
   handleCheckRefreshPassport: async () => false,
-  passportHasErrors: () => false,
+  passportHasCacaoError: () => false,
   userDid: undefined,
   passportLoadResponse: undefined,
 };
@@ -517,28 +517,25 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     const { status, errorDetails, passport } = await database.getPassport();
 
     switch (status) {
-      case "PassportError":
-      case "DoesNotExist":
-        const passportCacaoError = await database.checkPassportCACAOError();
-        if (passportCacaoError) {
-          datadogRum.addError("Passport CACAO error -- error thrown on initial fetch", { address });
-        } else {
-          if (status === "DoesNotExist") handleCreatePassport();
-          else {
-            // something is wrong with Ceramic...
-            datadogRum.addError("Ceramic connection failed", { address });
-            setPassport(undefined);
-            if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
-          }
-        }
-        break;
-      case "PassportStampError":
-        // Handled in the refresh
-        break;
       case "Success":
+      case "StampCacaoError":
         const cleanedPassport = cleanPassport(passport, database) as Passport;
         hydrateAllProvidersState(cleanedPassport);
         setPassport(cleanedPassport);
+        if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Idle);
+        break;
+      case "PassportCacaoError":
+        datadogRum.addError("Passport CACAO error -- error thrown on initial fetch", { address });
+        break;
+      case "DoesNotExist":
+        handleCreatePassport();
+        break;
+      case "ExceptionRaised":
+        // something is wrong with Ceramic...
+        datadogRum.addError("Ceramic connection failed", { address });
+        setPassport(undefined);
+        if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
+        break;
     }
 
     setPassportLoadResponse({ passport, status, errorDetails });
@@ -569,7 +566,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const handleCheckRefreshPassport = async (): Promise<boolean> => {
     let success = true;
     if (ceramicDatabase && passportLoadResponse) {
-      let passportHasError = passportLoadResponse.status === "PassportError";
+      let passportHasError = passportLoadResponse.status === "PassportCacaoError";
       let failedStamps = passportLoadResponse.errorDetails?.stampStreamIds || [];
       try {
         if (passportHasError) {
@@ -639,7 +636,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     if (passport) {
       // set stamps into allProvidersState
       let newAllProviderState = { ...startingAllProvidersState };
-      passport.stamps.forEach((stamp: Stamp, index: number) => {
+      passport.stamps.forEach((stamp: Stamp) => {
         const { provider } = stamp;
         const providerState = allProvidersState[provider];
         if (providerState) {
@@ -660,8 +657,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     setAllProviderState(startingAllProvidersState);
   };
 
-  const passportHasErrors = (): boolean => {
-    if (passportLoadResponse) return ["PassportError" || "PassportStampError"].includes(passportLoadResponse.status);
+  const passportHasCacaoError = (): boolean => {
+    const errorStatuses: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
+    if (passportLoadResponse) return errorStatuses.includes(passportLoadResponse.status);
     else return false;
   };
 
@@ -694,7 +692,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     handleCheckRefreshPassport,
     userDid,
     passportLoadResponse,
-    passportHasErrors,
+    passportHasCacaoError,
   };
 
   return <CeramicContext.Provider value={providerProps}>{children}</CeramicContext.Provider>;

@@ -31,9 +31,7 @@ describe("RefreshStampModal", () => {
       mockUserContext,
       {
         ...mockCeramicContext,
-        passportLoadResponse: {
-          status: "PassportError",
-        },
+        passportHasCacaoError: () => true,
       },
       <RefreshStampModal isOpen={true} onClose={jest.fn()} />
     );
@@ -47,9 +45,7 @@ describe("RefreshStampModal", () => {
       mockUserContext,
       {
         ...mockCeramicContext,
-        passportLoadResponse: {
-          status: "PassportError",
-        },
+        passportHasCacaoError: () => true,
       },
       <RefreshStampModal isOpen={true} onClose={jest.fn()} />
     );
@@ -63,9 +59,7 @@ describe("RefreshStampModal", () => {
       mockUserContext,
       {
         ...mockCeramicContext,
-        passportLoadResponse: {
-          status: "PassportError",
-        },
+        passportHasCacaoError: () => true,
       },
       <RefreshStampModal isOpen={true} onClose={jest.fn()} />
     );

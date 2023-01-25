@@ -186,7 +186,7 @@ export class CeramicDatabase implements DataStorageBase {
 
         if (cacaoErrorStampIds.length) {
           errorDetails = { stampStreamIds: cacaoErrorStampIds };
-          status = "PassportStampError";
+          status = "StampCacaoError";
         }
 
         passport = {
@@ -198,9 +198,15 @@ export class CeramicDatabase implements DataStorageBase {
         await this.pinCurrentPassport();
       }
     } catch (e) {
-      status = "PassportError";
+      status = "ExceptionRaised";
       this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString(), { error: e });
     } finally {
+      try {
+        const possiblePassportCacaoErrorStatuses: PassportLoadStatus[] = ["DoesNotExist", "ExceptionRaised"];
+        if (possiblePassportCacaoErrorStatuses.includes(status) && (await this.checkPassportCACAOError()))
+          status = "PassportCacaoError";
+      } catch {}
+
       return {
         passport,
         status,
@@ -222,7 +228,7 @@ export class CeramicDatabase implements DataStorageBase {
     const cacaoErrorStampIds = [];
 
     // `stamps` is stored as ceramic URLs - must load actual VC data from URL
-    const stampsToLoad = passport.stamps.map(async (stamp, idx) => {
+    const stampsToLoad = passport.stamps.map(async (stamp) => {
       const streamId = stamp.credential;
       const streamUrl = `${this.apiHost}/api/v0/streams/${streamId.substring(10)}`;
       this.logger.log(`get stamp from streamUrl: ${streamUrl}`);
