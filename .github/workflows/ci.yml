@@ -13,7 +13,7 @@ jobs:
     # Run a local ceramic nod to test against
     services:
       ceramic:
-        image: ceramicnetwork/js-ceramic:2.6.0-rc.1
+        image: ceramicnetwork/js-ceramic:2.20.0
         ports:
           - 7007:7007
 
