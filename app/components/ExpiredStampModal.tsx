@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Button, Modal, ModalContent, ModalOverlay, useToast } from "@chakra-ui/react";
+import { Button, Modal, ModalContent, ModalOverlay, Spinner, useToast } from "@chakra-ui/react";
 import { CeramicContext } from "../context/ceramicContext";
 import { getPlatformSpec } from "../config/platforms";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
@@ -18,6 +18,7 @@ export const getProviderIdsFromPlatformId = (platformId: PLATFORM_ID): PROVIDER_
 
 export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) => {
   const { expiredProviders, handleDeleteStamps } = useContext(CeramicContext);
+  const [isRemovingStamps, setIsRemovingStamps] = useState(false);
   const toast = useToast();
 
   const successToast = () => {
@@ -42,11 +43,13 @@ export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) =
   });
 
   const deleteAndNotify = async () => {
+    setIsRemovingStamps(true);
     const stampsToDelete = expiredPlatforms.flatMap((platform) =>
       getProviderIdsFromPlatformId(platform as PLATFORM_ID)
     );
-    await handleDeleteStamps(stampsToDelete);
 
+    await handleDeleteStamps(stampsToDelete);
+    setIsRemovingStamps(false);
     onClose();
     successToast();
   };
@@ -89,7 +92,7 @@ export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) =
               onClick={() => deleteAndNotify()}
               className="sidebar-verify-btn w-1/2"
             >
-              Remove
+              {isRemovingStamps && <Spinner size="sm" className="my-auto mr-2" />} Remove
             </button>
           </div>
         </div>
