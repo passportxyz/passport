@@ -202,7 +202,7 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         stamp: undefined,
       },
     },
-    ceramicErrors: { error: false },
+    passportLoadResponse: undefined,
     handleAddStamp: jest.fn(),
     handleAddStamps: jest.fn(),
     handleCreatePassport: jest.fn(),
@@ -210,6 +210,7 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
     handleDeleteStamps: jest.fn(),
     handleCheckRefreshPassport: () => Promise.resolve(true),
     expiredProviders: [],
+    passportHasCacaoError: () => false,
     ...initialState,
   };
 };

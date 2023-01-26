@@ -336,7 +336,7 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   taskDefinitionArgs: {
     containers: {
       ceramic: {
-        image: "ceramicnetwork/js-ceramic:2.18.0",
+        image: "ceramicnetwork/js-ceramic:2.20.0",
         memory: 8192,
         cpu: 4096,
         portMappings: [httpsListener],

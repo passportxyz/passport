@@ -1,11 +1,12 @@
 import { TileDocument } from "@ceramicnetwork/stream-tile";
 import {
   DID,
-  PassportWithErrors,
   PROVIDER_ID,
   Stamp,
   VerifiableCredential,
-  PassportError,
+  PassportLoadStatus,
+  PassportLoadResponse,
+  PassportLoadErrorDetails,
   Passport,
 } from "@gitcoin/passport-types";
 
@@ -53,6 +54,11 @@ export type Logger = {
   warn: (msg: string, context?: object) => void;
   debug: (msg: string, context?: object) => void;
   info: (msg: string, context?: object) => void;
+};
+
+type StampLoadResponse = {
+  successfulStamps: Stamp[];
+  cacaoErrorStampIds: string[];
 };
 
 export class CeramicDatabase implements DataStorageBase {
@@ -163,86 +169,92 @@ export class CeramicDatabase implements DataStorageBase {
     return false;
   }
 
-  async getPassport(): Promise<PassportWithErrors | undefined | false> {
-    const errors: PassportError = {
-      error: false,
-      passport: false,
-      stamps: [],
-    };
+  async getPassport(): Promise<PassportLoadResponse> {
+    let passport: Passport;
+    let status: PassportLoadStatus = "Success";
+    let errorDetails: PassportLoadErrorDetails;
+
     try {
-      const passport = await this.store.get("Passport");
-      this.logger.info(`loaded passport for did ${this.did} => ${JSON.stringify(passport)}`);
-      if (!passport) return false;
+      const ceramicPassport = await this.store.get("Passport");
+      this.logger.info(`loaded passport for did ${this.did} => ${JSON.stringify(ceramicPassport)}`);
 
       // According to the logs, it does happen that passport is sometimes an empty object {}
       // We treat this case as an non-existent passport
-      if (!passport.stamps) return false;
+      if (!ceramicPassport?.stamps) status = "DoesNotExist";
+      else {
+        const { successfulStamps, cacaoErrorStampIds } = await this.loadStamps(ceramicPassport);
 
-      const streamIDs: string[] = passport?.stamps.map((ceramicStamp: CeramicStamp) => {
-        return ceramicStamp.credential;
-      });
-
-      // `stamps` is stored as ceramic URLs - must load actual VC data from URL
-      const stampsToLoad = passport?.stamps.map(async (_stamp, idx) => {
-        const streamUrl = `${this.apiHost}/api/v0/streams/${streamIDs[idx].substring(10)}`;
-        this.logger.log(`get stamp from streamUrl: ${streamUrl}`);
-        try {
-          const { provider, credential } = _stamp;
-          const loadedCred = (await axios.get(streamUrl)) as { data: { state: { content: VerifiableCredential } } };
-          return {
-            provider,
-            credential: loadedCred.data.state.content,
-            streamId: streamIDs[idx],
-          } as Stamp;
-        } catch (e) {
-          if (e?.response?.data?.error?.includes("CACAO has expired")) {
-            errors.stamps.push(streamIDs[idx]);
-            errors.error = true;
-          }
-          this.logger.error(
-            `Error when loading stamp with streamId ${streamIDs[idx]} for did  ${this.did}:` + e.toString(),
-            { error: e }
-          );
-          throw e;
+        if (cacaoErrorStampIds.length) {
+          errorDetails = { stampStreamIds: cacaoErrorStampIds };
+          status = "StampCacaoError";
         }
-      });
 
-      // Wait for all stamp loading to be settled
-      const stampLoadingStatus = await Promise.allSettled(stampsToLoad);
+        passport = {
+          issuanceDate: new Date(ceramicPassport.issuanceDate),
+          expiryDate: new Date(ceramicPassport.expiryDate),
+          stamps: successfulStamps,
+        };
 
-      // Filter out only the successfully loaded stamps
-      const isFulfilled = <T>(input: PromiseSettledResult<T>): input is PromiseFulfilledResult<T> =>
-        input.status === "fulfilled";
-      const filteredStamps = stampLoadingStatus.filter(isFulfilled);
-      const loadedStamps = filteredStamps.map((settledStamp) => settledStamp.value);
-
-      const parsedPassport: Passport = {
-        issuanceDate: new Date(passport.issuanceDate),
-        expiryDate: new Date(passport.expiryDate),
-        stamps: loadedStamps,
-      };
-      // try pinning passport
-      try {
-        const passportDoc = await this.store.getRecordDocument(this.model.getDefinitionID("Passport"));
-        await this.ceramicClient.pin.add(passportDoc.id);
-      } catch (e) {
-        this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString(), { error: e });
+        await this.pinCurrentPassport();
       }
+    } catch (e) {
+      status = "ExceptionRaised";
+      this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString(), { error: e });
+    } finally {
+      const possiblePassportCacaoErrorStatuses: PassportLoadStatus[] = ["DoesNotExist", "ExceptionRaised"];
+      if (possiblePassportCacaoErrorStatuses.includes(status) && (await this.checkPassportCACAOError()))
+        status = "PassportCacaoError";
 
       return {
-        passport: parsedPassport,
-        errors,
-      };
-    } catch (e) {
-      this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString(), { error: e });
-      // Indicate there was an error loading passport
-      errors.error = true;
-      errors.passport = true;
-      return {
-        passport: undefined,
-        errors,
+        passport,
+        status,
+        errorDetails,
       };
     }
+  }
+
+  async pinCurrentPassport(): Promise<void> {
+    try {
+      const passportDoc = await this.store.getRecordDocument(this.model.getDefinitionID("Passport"));
+      await this.ceramicClient.pin.add(passportDoc.id);
+    } catch (e) {
+      this.logger.error(`Error when pinning passport for did  ${this.did}:` + e.toString(), { error: e });
+    }
+  }
+
+  async loadStamps(passport: CeramicPassport): Promise<StampLoadResponse> {
+    const cacaoErrorStampIds = [];
+
+    // `stamps` is stored as ceramic URLs - must load actual VC data from URL
+    const stampsToLoad = passport.stamps.map(async (stamp) => {
+      const streamId = stamp.credential;
+      const streamUrl = `${this.apiHost}/api/v0/streams/${streamId.substring(10)}`;
+      this.logger.log(`get stamp from streamUrl: ${streamUrl}`);
+      try {
+        const { provider } = stamp;
+        const loadedCred = (await axios.get(streamUrl)) as { data: { state: { content: VerifiableCredential } } };
+        return {
+          provider,
+          credential: loadedCred.data.state.content,
+          streamId,
+        } as Stamp;
+      } catch (e) {
+        if (e?.response?.data?.error?.includes("CACAO has expired")) {
+          cacaoErrorStampIds.push(streamId);
+        }
+        this.logger.error(`Error when loading stamp with streamId ${streamId} for did  ${this.did}:` + e.toString(), {
+          error: e,
+        });
+        throw e;
+      }
+    });
+
+    const successfulStamps = await getFulfilledPromises(stampsToLoad);
+
+    return {
+      successfulStamps,
+      cacaoErrorStampIds,
+    };
   }
 
   async addStamp(stamp: Stamp): Promise<void> {
@@ -387,6 +399,18 @@ export class CeramicDatabase implements DataStorageBase {
     // Created for development purposes
     await this.store.remove("Passport");
   }
+}
+
+async function getFulfilledPromises<T>(promises: Promise<T>[]): Promise<T[]> {
+  const promiseStatuses = await Promise.allSettled(promises);
+
+  // Filter out only the successful promises
+  const isFulfilled = <T>(input: PromiseSettledResult<T>): input is PromiseFulfilledResult<T> =>
+    input.status === "fulfilled";
+
+  const fulfilledPromises = promiseStatuses.filter(isFulfilled);
+
+  return fulfilledPromises.map((fulfilledPromise) => fulfilledPromise.value);
 }
 
 function partition<T>(arr: T[], test: (elem: T) => boolean): [T[], T[]] {

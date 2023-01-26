@@ -26,12 +26,11 @@ import { UserContext } from "../context/userContext";
 import { useViewerConnection } from "@self.id/framework";
 import { EthereumAuthProvider } from "@self.id/web";
 import { Banner } from "../components/Banner";
-import { getExpiredStamps } from "../utils/helpers";
 import { RefreshStampModal } from "../components/RefreshStampModal";
 import { ExpiredStampModal } from "../components/ExpiredStampModal";
 
 export default function Dashboard() {
-  const { passport, isLoadingPassport, ceramicErrors, expiredProviders } = useContext(CeramicContext);
+  const { passport, isLoadingPassport, passportHasCacaoError, expiredProviders } = useContext(CeramicContext);
   const { wallet, toggleConnection, handleDisconnection } = useContext(UserContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -84,8 +83,9 @@ export default function Dashboard() {
             <div className="flex flex-col" data-testid="retry-modal-content">
               <p className="text-lg font-bold">Ceramic Network Error</p>
               <p>
-                The Gitcoin Passport relies on the Ceramic Network which currently is having network issues. Please try
-                again later.
+                Gitcoin Passport relies on the Ceramic Network to load your stamp details. We cannot reach the Ceramic
+                Network right now. There are a number of reasons this could be happening, but there is no action you
+                need to take. Please try again.
               </p>
             </div>
           </div>
@@ -131,7 +131,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {ceramicErrors && ceramicErrors.error && (
+      {passportHasCacaoError() && (
         <Banner>
           <div className="flex w-full justify-center">
             We have detected some broken stamps in your passport. Your passport is currently locked because of this. We

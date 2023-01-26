@@ -33,7 +33,7 @@ describe("NoStampModal", () => {
   describe("linking another account", () => {
     it("opens", () => {
       render(<NoStampModal {...props} />);
-      expect(screen.getByText("No Stamp Found")).toBeInTheDocument();
+      expect(screen.getByText("You do not meet the eligibility criteria")).toBeInTheDocument();
     });
     it("initiates account change when requested", async () => {
       (fetchAdditionalSigner as jest.Mock).mockResolvedValue({ cool: true });

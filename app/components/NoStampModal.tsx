@@ -59,7 +59,7 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
               <div className="mt-2 w-fit rounded-full bg-pink-500/25">
                 <img className="m-2" alt="shield-exclamation-icon" src="./assets/shield-exclamation-icon-warning.svg" />
               </div>
-              <p className="m-1 text-sm font-bold">No Stamp Found</p>
+              <p className="m-1 text-sm font-bold">You do not meet the eligibility criteria</p>
               <p className="m-1 mb-4 text-center">
                 The stamp you are trying to verify could not be associated with your current Ethereum wallet address.
               </p>
@@ -102,7 +102,7 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
                       className="my-auto mr-2"
                     />
                   )}
-                  Try another wallet
+                  Try another stamp
                 </button>
               </div>
             </>
