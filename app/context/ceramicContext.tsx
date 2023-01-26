@@ -548,13 +548,14 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     passport: Passport | undefined | false,
     database: CeramicDatabase
   ): Passport | undefined | false => {
+    const tempExpiredProviders: PROVIDER_ID[] = [];
     // clean stamp content if expired or from a different issuer
     if (passport) {
-      passport.stamps = passport.stamps.filter((stamp: Stamp, i: number) => {
+      passport.stamps = passport.stamps.filter((stamp: Stamp) => {
         if (stamp) {
           const has_expired = new Date(stamp.credential.expirationDate) < new Date();
           if (has_expired) {
-            setExpiredProviders([...expiredProviders, stamp.credential.credentialSubject.provider as PROVIDER_ID]);
+            tempExpiredProviders.push(stamp.credential.credentialSubject.provider as PROVIDER_ID);
           }
 
           const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
@@ -565,6 +566,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           return false;
         }
       });
+      setExpiredProviders(tempExpiredProviders);
     }
 
     return passport;

@@ -30,7 +30,7 @@ const TestingComponent = () => {
   return (
     <div>
       {expiredProviders.map((provider) => (
-        <div key={provider}>{provider}</div>
+        <p key={provider}>{provider}</p>
       ))}
     </div>
   );
@@ -42,7 +42,7 @@ jest.mock("@gitcoin/passport-database-client", () => {
       return {
         getPassport: jest.fn().mockReturnValue({
           passport: {
-            stamps: [SUCCESFUL_POAP_RESULT, SUCCESFUL_ENS_RESULT],
+            stamps: [SUCCESFUL_ENS_RESULT],
           },
           status: "Success",
         }),
@@ -62,7 +62,7 @@ describe("<CeramicContextProvider>", () => {
       </UserContext.Provider>
     );
     await waitFor(() => {
-      expect(screen.getByText(SUCCESFUL_POAP_RESULT?.credential?.credentialSubject.provider || "")).toBeInTheDocument();
+      expect(screen.getAllByText(SUCCESFUL_POAP_RESULT?.credential?.credentialSubject.provider || "")).toHaveLength(1);
     });
   });
 });
