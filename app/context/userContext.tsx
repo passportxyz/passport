@@ -131,7 +131,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           // Sessions will be serialized and stored in localhost
           // The sessions are bound to an ETH address, this is why we use the address in the session key
           const sessionKey = `didsession-${address}`;
-          const sessionStr = localStorage.getItem(sessionKey);
+          const sessionStr = window.localStorage.getItem(sessionKey);
 
           // @ts-ignore
           // When sessionStr is null, this will create a new selfId. We want to avoid this, becasue we want to make sure
@@ -171,7 +171,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
 
             // Store the session in localstorage
             // @ts-ignore
-            localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
+            window.localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
           } else if (
             // @ts-ignore
             selfId?.client?.session?.isExpired ||
@@ -184,7 +184,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
             });
             // then clear local state
             clearState();
-            localStorage.removeItem(sessionKey);
+            window.localStorage.removeItem(sessionKey);
           }
         } finally {
           // mark that this login attempt is complete
