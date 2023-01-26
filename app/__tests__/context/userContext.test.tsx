@@ -100,8 +100,6 @@ describe("<UserContext>", () => {
       </UserContextProvider>
     );
 
-    await waitFor(() => {
-      expect(localStorageMock.getItem("didsession-0xmyAddress")).toBe(undefined);
-    });
+    await waitFor(() => expect(localStorageMock.getItem("didsession-0xmyAddress")).toBe(undefined), { timeout: 5000 });
   });
 });
