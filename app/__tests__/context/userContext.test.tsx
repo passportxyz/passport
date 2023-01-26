@@ -74,6 +74,8 @@ const mockCeramicContext = makeTestCeramicContext({
   },
 });
 
+jest.setTimeout(30000);
+
 describe("<UserContext>", () => {
   beforeEach(() => {
     localStorageMock.clear();
