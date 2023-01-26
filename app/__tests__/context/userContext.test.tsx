@@ -74,8 +74,6 @@ const mockCeramicContext = makeTestCeramicContext({
   },
 });
 
-jest.setTimeout(30000);
-
 describe("<UserContext>", () => {
   beforeEach(() => {
     localStorageMock.clear();
@@ -102,6 +100,6 @@ describe("<UserContext>", () => {
       </UserContextProvider>
     );
 
-    await waitFor(() => expect(localStorageMock.getItem("didsession-0xmyAddress")).toBe(undefined));
+    await waitFor(() => expect(localStorageMock.getItem("didsession-0xmyAddress")).toBe(undefined), { timeout: 30000 });
   });
 });
