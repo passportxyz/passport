@@ -6,7 +6,6 @@ import { jest } from "@jest/globals";
 import testnetAliases from "./integration-test-model-aliases.json";
 
 import { CeramicDatabase } from "../src";
-import { createCipheriv } from "crypto";
 
 let testDID: DID;
 let ceramicDatabase: CeramicDatabase;
