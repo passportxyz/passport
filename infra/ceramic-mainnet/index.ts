@@ -342,6 +342,13 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
         portMappings: [httpsListener],
         links: [],
         command: ceramicCommand,
+        "ulimits": [
+          {
+              "name": "nofile",
+              "hardLimit": 1000000,
+              "softLimit": 1000000
+          }
+        ],
         environment: [
           { name: "NODE_ENV", value: "production" },
           { name: "AWS_ACCESS_KEY_ID", value: usrS3Key },
@@ -363,10 +370,17 @@ const serviceIPFS = new awsx.ecs.FargateService("dpopp-ipfs", {
     containers: {
       ipfs: {
         image: "ceramicnetwork/go-ipfs-daemon:962a0f2d5e29204f79bb436e5cb82f94dfe37dea",  // This is go-ipfs v0.15.0
-        memory: 8192,
+        memory: 12288,
         cpu: 4096,
         portMappings: [ceramicListener, ipfsListener, ipfsHealthcheckListener, ifpsWSListener],
         links: [],
+        "ulimits": [
+          {
+              "name": "nofile",
+              "hardLimit": 1000000,
+              "softLimit": 1000000
+          }
+        ],
         environment: [
           { name: "IPFS_ENABLE_S3", value: "true" },
           { name: "IPFS_S3_REGION", value: "us-east-1" },
