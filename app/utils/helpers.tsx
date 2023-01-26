@@ -13,8 +13,6 @@ export function difference(setA: Set<PROVIDER_ID>, setB: Set<PROVIDER_ID>) {
   return _difference;
 }
 
-export function getStampProviderFromPlatformId(platformId: PROVIDER_ID): Providers;
-
 export function generateUID(length: number) {
   return window
     .btoa(
