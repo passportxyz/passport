@@ -52,6 +52,7 @@ export interface CeramicContextState {
   handleDeleteStamps: (providerIds: PROVIDER_ID[]) => Promise<void>;
   handleCheckRefreshPassport: () => Promise<boolean>;
   userDid: string | undefined;
+  expiredProviders: PROVIDER_ID[];
   passportHasCacaoError: () => boolean;
   passportLoadResponse?: PassportLoadResponse;
 }
@@ -451,6 +452,7 @@ const startingState: CeramicContextState = {
   handleCheckRefreshPassport: async () => false,
   passportHasCacaoError: () => false,
   userDid: undefined,
+  expiredProviders: [],
   passportLoadResponse: undefined,
 };
 
@@ -462,6 +464,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [isLoadingPassport, setIsLoadingPassport] = useState<IsLoadingPassportState>(IsLoadingPassportState.Loading);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
   const [userDid, setUserDid] = useState<string | undefined>();
+  const [expiredProviders, setExpiredProviders] = useState<PROVIDER_ID[]>([]);
   const [passportLoadResponse, setPassportLoadResponse] = useState<PassportLoadResponse | undefined>();
   const [viewerConnection] = useViewerConnection();
 
@@ -545,11 +548,16 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     passport: Passport | undefined | false,
     database: CeramicDatabase
   ): Passport | undefined | false => {
+    const tempExpiredProviders: PROVIDER_ID[] = [];
     // clean stamp content if expired or from a different issuer
     if (passport) {
       passport.stamps = passport.stamps.filter((stamp: Stamp) => {
         if (stamp) {
           const has_expired = new Date(stamp.credential.expirationDate) < new Date();
+          if (has_expired) {
+            tempExpiredProviders.push(stamp.credential.credentialSubject.provider as PROVIDER_ID);
+          }
+
           const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
           const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
 
@@ -558,6 +566,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           return false;
         }
       });
+      setExpiredProviders(tempExpiredProviders);
     }
 
     return passport;
@@ -691,6 +700,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     handleDeleteStamp,
     handleCheckRefreshPassport,
     userDid,
+    expiredProviders,
     passportLoadResponse,
     passportHasCacaoError,
   };

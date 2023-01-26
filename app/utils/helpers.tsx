@@ -2,6 +2,7 @@
 
 // --- Types
 import { Passport, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
+import { Providers, STAMP_PROVIDERS } from "../config/providers";
 
 // --- Stamp Data Point Helpers
 export function difference(setA: Set<PROVIDER_ID>, setB: Set<PROVIDER_ID>) {
@@ -11,21 +12,6 @@ export function difference(setA: Set<PROVIDER_ID>, setB: Set<PROVIDER_ID>) {
   });
   return _difference;
 }
-
-export const getExpiredStamps = (passport: Passport | undefined | false): Stamp[] => {
-  if (passport) {
-    return passport.stamps.filter((stamp: Stamp) => {
-      if (stamp) {
-        const has_expired = new Date(stamp.credential.expirationDate) < new Date();
-        return has_expired;
-      } else {
-        return false;
-      }
-    });
-  }
-
-  return [];
-};
 
 export function generateUID(length: number) {
   return window
