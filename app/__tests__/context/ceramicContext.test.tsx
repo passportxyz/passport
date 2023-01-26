@@ -44,6 +44,7 @@ jest.mock("@gitcoin/passport-database-client", () => {
           passport: {
             stamps: [SUCCESFUL_POAP_RESULT, SUCCESFUL_ENS_RESULT],
           },
+          status: "Success",
         }),
         checkPassportCACAOError: jest.fn().mockReturnValue(false),
       };
