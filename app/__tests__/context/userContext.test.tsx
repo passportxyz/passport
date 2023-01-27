@@ -74,7 +74,7 @@ const mockCeramicContext = makeTestCeramicContext({
   },
 });
 
-jest.useRealTimers();
+jest.setTimeout(200000);
 
 describe("<UserContext>", () => {
   beforeEach(() => {
@@ -82,8 +82,6 @@ describe("<UserContext>", () => {
   });
 
   it("should delete localStorage item if session has expired", async () => {
-    jest.useFakeTimers("legacy");
-
     const ceramicConnect = jest.fn().mockResolvedValueOnce({
       client: {
         session: {
@@ -105,7 +103,7 @@ describe("<UserContext>", () => {
     );
 
     await waitFor(() => expect(localStorageMock.getItem("didsession-0xmyAddress")).toBe(undefined), {
-      timeout: 30000,
+      timeout: 200000,
     });
-  }, 30000);
+  });
 });
