@@ -37,6 +37,7 @@ import {
 
 // All provider exports from platforms
 import { providers } from "@gitcoin/passport-platforms";
+import { cacheCredential } from "./utils/scorer-service";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -94,6 +95,9 @@ const issueCredential = async (
       try {
         // generate a VC for the given payload
         const { credential } = await issueHashedCredential(DIDKit, key, address, record);
+
+        // make call to scorer service to save credential
+        void cacheCredential(credential);
 
         return {
           record,

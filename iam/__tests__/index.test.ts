@@ -16,6 +16,10 @@ import {
 
 import * as identityMock from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
+jest.mock("../src/utils/scorer-service", () => ({
+  cacheCredential: jest.fn()
+}))
+
 jest.mock("ethers", () => {
   return {
     utils: {
