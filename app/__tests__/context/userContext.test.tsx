@@ -82,7 +82,7 @@ describe("<UserContext>", () => {
   });
 
   it("should delete localStorage item if session has expired", async () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers("legacy");
 
     const ceramicConnect = jest.fn().mockResolvedValueOnce({
       client: {
