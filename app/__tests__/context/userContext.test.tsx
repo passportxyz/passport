@@ -59,7 +59,9 @@ const localStorageMock = (function () {
   };
 })();
 
-Object.defineProperty(window, "localStorage", { value: localStorageMock });
+Storage.prototype.setItem = localStorageMock.setItem;
+Storage.prototype.getItem = localStorageMock.getItem;
+Storage.prototype.removeItem = localStorageMock.removeItem;
 
 const TestingComponent = () => {
   const { wallet } = useContext(UserContext);
