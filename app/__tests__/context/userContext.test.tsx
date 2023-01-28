@@ -1,6 +1,6 @@
-import { render, waitFor } from "@testing-library/react";
+import { render, waitFor, screen, act } from "@testing-library/react";
 import * as framework from "@self.id/framework";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { mockWallet } from "../../__test-fixtures__/onboardHookValues";
 import { makeTestCeramicContext } from "../../__test-fixtures__/contextTestHelpers";
 
@@ -63,7 +63,13 @@ Object.defineProperty(window, "localStorage", { value: localStorageMock });
 
 const TestingComponent = () => {
   const { wallet } = useContext(UserContext);
-  return <div>{wallet?.label}</div>;
+  const [session, setSession] = useState("");
+
+  useEffect(() => {
+    setSession(localStorage.getItem("didsession-0xmyAddress") ?? "");
+  });
+
+  return <div data-testid="session-id">{session}</div>;
 };
 
 const mockCeramicContext = makeTestCeramicContext({
@@ -73,8 +79,6 @@ const mockCeramicContext = makeTestCeramicContext({
     stamps: [],
   },
 });
-
-jest.setTimeout(200000);
 
 describe("<UserContext>", () => {
   it("should delete localStorage item if session has expired", async () => {
@@ -90,16 +94,18 @@ describe("<UserContext>", () => {
 
     localStorageMock.setItem("didsession-0xmyAddress", "eyJzZXNzaW9uS2V5U2VlZCI6IlF5cTN4aW9ubGxD...");
 
-    render(
-      <UserContextProvider>
-        <CeramicContext.Provider value={mockCeramicContext}>
-          <TestingComponent />
-        </CeramicContext.Provider>
-      </UserContextProvider>
-    );
-
-    await waitFor(() => expect(localStorageMock.getItem("didsession-0xmyAddress")).toBe(undefined), {
-      timeout: 200000,
+    act(() => {
+      render(
+        <UserContextProvider>
+          <CeramicContext.Provider value={mockCeramicContext}>
+            <TestingComponent />
+          </CeramicContext.Provider>
+        </UserContextProvider>
+      );
     });
+
+    expect(screen.getByTestId("session-id")).toHaveTextContent("eyJzZXNzaW9uS2V5U2VlZCI6IlF5cTN4aW9ubGxD...");
+
+    await waitFor(() => expect(screen.getByTestId("session-id")).toHaveTextContent(""));
   });
 });
