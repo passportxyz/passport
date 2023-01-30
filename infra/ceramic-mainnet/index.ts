@@ -336,7 +336,7 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   taskDefinitionArgs: {
     containers: {
       ceramic: {
-        image: "ceramicnetwork/js-ceramic:2.20.0",
+        image: "ceramicnetwork/js-ceramic:095cfd1a75b15c151ee17445be106f6b9a37cdf7",
         memory: 8192,
         cpu: 4096,
         portMappings: [httpsListener],
@@ -355,6 +355,7 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
           { name: "AWS_SECRET_ACCESS_KEY", value: usrS3Secret },
           { name: "NODE_OPTIONS", value: "--max-old-space-size=7168" },
           { name: "CERAMIC_STREAM_CACHE_LIMIT", value: "20000" },
+          { name: "CERAMIC_DISABLE_PUBSUB_UPDATES", value: "true" },
         ],
       },
     },
