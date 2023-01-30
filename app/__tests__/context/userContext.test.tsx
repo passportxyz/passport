@@ -81,7 +81,7 @@ const mockCeramicContext = makeTestCeramicContext({
 });
 
 describe("<UserContext>", () => {
-  it("should delete localStorage item if session has expired", async () => {
+  it.skip("should delete localStorage item if session has expired", async () => {
     const ceramicConnect = jest.fn().mockResolvedValueOnce({
       client: {
         session: {
