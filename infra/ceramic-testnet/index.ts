@@ -239,11 +239,11 @@ const privateMountTarget_1 = new aws.efs.MountTarget(`dpopp-ipfs-data-privateMou
   subnetId: vpcPrivateSubnetId1Str,
   securityGroups: [sg.id],
 });
-// const publicMountTarget_2 = new aws.efs.MountTarget(`dpopp-ipfs-data-privateMountTarget-2`, {
-//   fileSystemId: efs.id,
-//   subnetId: vpcPrivateSubnetId2Str,
-//   // securityGroups: [sg.id]
-// });
+const publicMountTarget_2 = new aws.efs.MountTarget(`dpopp-ipfs-data-privateMountTarget-2`, {
+  fileSystemId: efs.id,
+  subnetId: vpcPrivateSubnetId2Str,
+  securityGroups: [sg.id]
+});
 
 //////////////////////////////////////////////////////////////
 // ALB listeners & target groups
@@ -435,7 +435,7 @@ const serviceIPFS = new awsx.ecs.FargateService("dpopp-ipfs", {
       {
         name: `dpopp-ipfs-data-volume`,
         efsVolumeConfiguration: {
-          fileSystemId: privateMountTarget_1.fileSystemId,
+          fileSystemId: efs.id,
           transitEncryption: "ENABLED",
         },
       },
