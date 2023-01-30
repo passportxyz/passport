@@ -113,7 +113,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
 
   // Attempt to login to Ceramic (on mainnet only)
   const passportLogin = async (): Promise<void> => {
-    // check that passportLogin isnt mid-way through
+    // check that passportLogin isn't mid-way through
     if (wallet && !loggingIn) {
       // ensure that passport is connected to mainnet
       const hasCorrectChainId = process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on" ? true : await ensureMainnet();
@@ -131,7 +131,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           // Sessions will be serialized and stored in localhost
           // The sessions are bound to an ETH address, this is why we use the address in the session key
           const sessionKey = `didsession-${address}`;
-          const sessionStr = localStorage.getItem(sessionKey);
+          const sessionStr = window.localStorage.getItem(sessionKey);
 
           // @ts-ignore
           // When sessionStr is null, this will create a new selfId. We want to avoid this, becasue we want to make sure
@@ -142,11 +142,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
             // @ts-ignore
             !selfId ||
             // @ts-ignore
-            !selfId?.client?.session ||
-            // @ts-ignore
-            selfId?.client?.session?.isExpired ||
-            // @ts-ignore
-            selfId?.client?.session?.expireInSecs < 3600
+            !selfId?.client?.session
           ) {
             if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
               // If the session loaded is not valid, or if it is expired or close to expire, we create
@@ -172,11 +168,24 @@ export const UserContextProvider = ({ children }: { children: any }) => {
               // a new connection to ceramic
               selfId = await ceramicConnect(ethAuthProvider);
             }
-          }
 
-          // Store the session in localstorage
-          // @ts-ignore
-          localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
+            // Store the session in localstorage
+            // @ts-ignore
+            window.localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
+          } else if (
+            // @ts-ignore
+            selfId?.client?.session?.isExpired ||
+            // @ts-ignore
+            selfId?.client?.session?.expireInSecs < 3600
+          ) {
+            // disconnect from the invalid chain
+            await disconnect({
+              label: wallet.label || "",
+            });
+            // then clear local state
+            clearState();
+            window.localStorage.removeItem(sessionKey);
+          }
         } finally {
           // mark that this login attempt is complete
           setLoggingIn(false);
