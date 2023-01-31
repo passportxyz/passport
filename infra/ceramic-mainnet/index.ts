@@ -184,10 +184,51 @@ export const vpcPrivateSubnetIds = vpc.privateSubnetIds;
 export const vpcPublicSubnetIds = vpc.publicSubnetIds;
 
 export const vpcPrivateSubnetId1 = vpcPrivateSubnetIds.then((values) => values[0]);
+export const vpcPrivateSubnetId2 = vpcPrivateSubnetIds.then((values) => values[1]);
 export const vpcPublicSubnetId1 = vpcPublicSubnetIds.then((values) => values[0]);
 
 export const vpcPublicSubnet1 = vpcPublicSubnetIds.then((subnets) => {
   return subnets[0];
+});
+
+export const vpcPrivateSubnetId1Str = pulumi.interpolate`${vpcPrivateSubnetId1}`;
+export const vpcPrivateSubnetId2Str = pulumi.interpolate`${vpcPrivateSubnetId2}`;
+
+//////////////////////////////////////////////////////////////
+// EFS for `/data/ipfs` folder in ipfs task
+//////////////////////////////////////////////////////////////
+
+// Allocate a security group and then a series of rules:
+const sg = new awsx.ec2.SecurityGroup(`dpopp-ipfs-data-efs-sg`, { vpc });
+const NFS_PORT = 2049;
+// inbound nfs traffic on port 2049 from a specific IP address
+sg.createIngressRule("nfs-access", {
+  location: new awsx.ec2.AnyIPv4Location(),
+  ports: new awsx.ec2.TcpPorts(NFS_PORT),
+  description: "allow NFS access for EFS from anywhere",
+});
+// outbound TCP traffic on any port to anywhere
+sg.createEgressRule("outbound-access", {
+  location: new awsx.ec2.AnyIPv4Location(),
+  ports: new awsx.ec2.AllTcpPorts(),
+  description: "allow outbound access to anywhere",
+});
+
+const efs = new aws.efs.FileSystem(`dpopp-ipfs-data-efs`, {
+  tags: {
+    Name: `dpopp-ipfs-data`,
+  },
+});
+// Create a mount target for both public subnets
+const privateMountTarget_1 = new aws.efs.MountTarget(`dpopp-ipfs-data-privateMountTarget-1`, {
+  fileSystemId: efs.id,
+  subnetId: vpcPrivateSubnetId1Str,
+  securityGroups: [sg.id],
+});
+const publicMountTarget_2 = new aws.efs.MountTarget(`dpopp-ipfs-data-privateMountTarget-2`, {
+  fileSystemId: efs.id,
+  subnetId: vpcPrivateSubnetId2Str,
+  securityGroups: [sg.id]
 });
 
 //////////////////////////////////////////////////////////////
@@ -392,14 +433,23 @@ const serviceIPFS = new awsx.ecs.FargateService("dpopp-ipfs", {
           { name: "IPFS_S3_KEY_TRANSFORM", value: "next-to-last/2" },
           { name: "GOLOG_LOG_LEVEL", value: "info" },
         ],
-        // healthCheck: {
-        //   // NB: this is the same as the go-ipfs-daemon Dockerfile HEALTHCHECK
-        //   command: ["CMD-SHELL", "ipfs dag stat /ipfs/QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn || exit 1"],
-        //   timeout: 3,
-        //   startPeriod: 5,
-        // },
+        mountPoints: [
+          {
+            sourceVolume: "dpopp-ipfs-data-volume",
+            containerPath: "/data/ipfs",
+          },
+        ],
       },
     },
+    volumes: [
+      {
+        name: `dpopp-ipfs-data-volume`,
+        efsVolumeConfiguration: {
+          fileSystemId: efs.id,
+          transitEncryption: "ENABLED",
+        },
+      },
+    ],
   },
 });
 
