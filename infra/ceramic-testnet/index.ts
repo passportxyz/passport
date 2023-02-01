@@ -403,7 +403,7 @@ const serviceIPFS = new awsx.ecs.FargateService("dpopp-ipfs", {
   taskDefinitionArgs: {
     containers: {
       ipfs: {
-        image: "ceramicnetwork/go-ipfs-daemon:962a0f2d5e29204f79bb436e5cb82f94dfe37dea", // This is go-ipfs v0.15.0
+        image: "ceramicnetwork/go-ipfs-daemon:817ed4f0b5aff32fef03095a64ed912d941e37e1",  // This is go-ipfs/Kubo v0.18.1.
         memory: 8192,
         cpu: 4096,
         portMappings: [ceramicListener, ipfsListener, ipfsHealthcheckListener, ifpsWSListener],
