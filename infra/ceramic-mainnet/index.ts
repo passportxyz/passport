@@ -219,6 +219,27 @@ const efs = new aws.efs.FileSystem(`dpopp-ipfs-data-efs`, {
     Name: `dpopp-ipfs-data`,
   },
 });
+
+// EFS created for Kubo v0.18.1 update and fs migration
+const efsGoIpfs18 = new aws.efs.FileSystem(`dpopp-ipfs-data-efs`, {
+  tags: {
+    Name: `dpopp-ipfs-data-18.1`,
+  },
+});
+
+
+// Create a mount target for both public subnets for kubo v0.18.1 EFS
+const privateMountTarget_1_kubo18 = new aws.efs.MountTarget(`dpopp-ipfs-data-privateMountTarget-1`, {
+  fileSystemId: efsGoIpfs18.id,
+  subnetId: vpcPrivateSubnetId1Str,
+  securityGroups: [sg.id],
+});
+const publicMountTarget_2_kubo18 = new aws.efs.MountTarget(`dpopp-ipfs-data-privateMountTarget-2`, {
+  fileSystemId: efsGoIpfs18.id,
+  subnetId: vpcPrivateSubnetId2Str,
+  securityGroups: [sg.id]
+});
+
 // Create a mount target for both public subnets
 const privateMountTarget_1 = new aws.efs.MountTarget(`dpopp-ipfs-data-privateMountTarget-1`, {
   fileSystemId: efs.id,
