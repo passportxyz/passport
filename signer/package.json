@@ -6,6 +6,6 @@
     "http-server": "^14.1.1"
   },
   "scripts": {
-    "start": "npx http-server ./public -a localhost -p 8000"
+    "start": "npx http-server ./public -a localhost -p 8001"
   }
 }

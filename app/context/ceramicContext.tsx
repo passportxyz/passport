@@ -183,6 +183,13 @@ export type AllProvidersState = {
   };
 };
 
+export class NoStampsInCacheError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NoStampsInCacheError";
+  }
+}
+
 const getProviderSpec = (platform: PLATFORM_ID, provider: string): ProviderSpec => {
   return STAMP_PROVIDERS[platform]
     ?.find((i) => i.providers.find((p) => p.name == provider))
@@ -525,9 +532,17 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   useEffect(() => {
     if (activeDatabase) {
-      fetchPassport(activeDatabase);
+      try {
+        fetchPassport(activeDatabase);
+      } catch (e) {
+        if (e instanceof NoStampsInCacheError) {
+          setActiveDatabase(ceramicCacheDatabase);
+        } else {
+          throw e;
+        }
+      }
     }
-  }, [ceramicDatabase]);
+  }, [ceramicDatabase, activeDatabase]);
 
   const fetchPassport = async (
     database: CeramicDatabase | CeramicCacheDatabase,
@@ -558,6 +573,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         setPassport(undefined);
         if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
         break;
+      case "NoStampsInCache":
+        datadogRum.addError("No stamps found in cache", { address });
+        throw new NoStampsInCacheError("No stamps found in cache");
     }
 
     setPassportLoadResponse({ passport, status, errorDetails });
