@@ -531,18 +531,21 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   }, [viewerConnection.status, address]);
 
   useEffect(() => {
-    if (activeDatabase) {
-      try {
-        fetchPassport(activeDatabase);
-      } catch (e) {
-        if (e instanceof NoStampsInCacheError) {
-          setActiveDatabase(ceramicCacheDatabase);
-        } else {
-          throw e;
+    (async () => {
+      if (activeDatabase) {
+        try {
+          await fetchPassport(ceramicCacheDatabase);
+        } catch (e) {
+          if (e instanceof NoStampsInCacheError) {
+            await fetchPassport(ceramicCacheDatabase);
+            setActiveDatabase(ceramicDatabase);
+          } else {
+            throw e;
+          }
         }
       }
-    }
-  }, [ceramicDatabase, activeDatabase]);
+    })();
+  }, []);
 
   const fetchPassport = async (
     database: CeramicDatabase | CeramicCacheDatabase,
