@@ -144,7 +144,8 @@ export type PassportLoadStatus =
   | "DoesNotExist"
   | "ExceptionRaised"
   | "StampCacaoError"
-  | "PassportCacaoError";
+  | "PassportCacaoError"
+  | "NoStampsInCache";
 
 export type PassportLoadErrorDetails = {
   stampStreamIds: string[];

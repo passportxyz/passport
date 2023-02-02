@@ -35,15 +35,17 @@ export class CeramicCacheDatabase implements DataStorageBase {
     let errorDetails: PassportLoadErrorDetails;
 
     try {
-      const response = await axios.get(
-        `${this.ceramicCacheUrl}/ceramic-cache/stamp?address=${this.address}`,
-      )
+      const response = await axios.get(`${this.ceramicCacheUrl}/ceramic-cache/stamp?address=${this.address}`);
       const { data } = response;
       if (data && data.success === 200) {
         passport = {
           issuanceDate: null,
           expiryDate: null,
           stamps: data.stamps,
+        };
+
+        if (data.stamps.length === 0) {
+          status = "NoStampsInCache";
         }
       }
     } catch (e) {
@@ -61,14 +63,11 @@ export class CeramicCacheDatabase implements DataStorageBase {
     this.logger.info(`adding stamp to ceramicCache address: ${this.address}`);
     try {
       // Todo will need to validate ownership / pass signature
-      await axios.post(
-        `${this.ceramicCacheUrl}/ceramic-cache/stamp`,
-        {
-          address: this.address,
-          provider: stamp.provider,
-          stamp: stamp.credential,
-        },
-      )
+      await axios.post(`${this.ceramicCacheUrl}/ceramic-cache/stamp`, {
+        address: this.address,
+        provider: stamp.provider,
+        stamp: stamp.credential,
+      });
     } catch (e) {
       this.logger.error(`Error saving stamp to ceramicCache address:  ${this.address}:` + e.toString());
     }
@@ -80,7 +79,7 @@ export class CeramicCacheDatabase implements DataStorageBase {
         data: {
           address: this.address,
           provider: provider,
-        }
+        },
       });
     } catch (e) {
       this.logger.error(`Error deleting stamp from ceramicCache for ${provider} on ${this.address}: ` + e.toString());
