@@ -183,13 +183,6 @@ export type AllProvidersState = {
   };
 };
 
-export class NoStampsInCacheError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "NoStampsInCacheError";
-  }
-}
-
 const getProviderSpec = (platform: PLATFORM_ID, provider: string): ProviderSpec => {
   return STAMP_PROVIDERS[platform]
     ?.find((i) => i.providers.find((p) => p.name == provider))
@@ -463,26 +456,28 @@ const startingState: CeramicContextState = {
   passportLoadResponse: undefined,
 };
 
+const CERAMIC_TIMEOUT_MS = process.env.CERAMIC_TIMEOUT_MS || "10000";
+
 export const CeramicContext = createContext(startingState);
 
 export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
-  const [ceramicDatabase, setCeramicDatabase] = useState<CeramicDatabase | undefined>(undefined);
-  const [ceramicCacheDatabase, setCeramicCacheDatabase] = useState<CeramicCacheDatabase | undefined>(undefined);
+  const [ceramicClient, setCeramicClient] = useState<CeramicDatabase | undefined>(undefined);
   const [isLoadingPassport, setIsLoadingPassport] = useState<IsLoadingPassportState>(IsLoadingPassportState.Loading);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
   const [userDid, setUserDid] = useState<string | undefined>();
   const [expiredProviders, setExpiredProviders] = useState<PROVIDER_ID[]>([]);
   const [passportLoadResponse, setPassportLoadResponse] = useState<PassportLoadResponse | undefined>();
   const [viewerConnection] = useViewerConnection();
-  const [activeDatabase, setActiveDatabase] = useState<CeramicDatabase | CeramicCacheDatabase | undefined>(undefined);
+  const [database, setDatabase] = useState<CeramicCacheDatabase | undefined>(undefined);
 
   const { address } = useContext(UserContext);
 
   useEffect(() => {
     return () => {
       clearAllProvidersState();
-      setCeramicDatabase(undefined);
+      setCeramicClient(undefined);
+      setDatabase(undefined);
       setPassport(undefined);
       setUserDid(undefined);
       setPassportLoadResponse(undefined);
@@ -492,22 +487,22 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   useEffect((): void => {
     switch (viewerConnection.status) {
       case "idle": {
-        setCeramicDatabase(undefined);
-        setCeramicCacheDatabase(undefined);
+        setCeramicClient(undefined);
+        setDatabase(undefined);
         break;
       }
       case "connected": {
         // Ceramic Network Connection
-        const ceramicDatabaseInstance = new CeramicDatabase(
+        const ceramicClientInstance = new CeramicDatabase(
           viewerConnection.selfID.did,
           process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
           undefined,
           datadogLogs.logger
         );
-        setCeramicDatabase(ceramicDatabaseInstance);
-        setUserDid(ceramicDatabaseInstance.did);
+        setCeramicClient(ceramicClientInstance);
+        setUserDid(ceramicClientInstance.did);
         // Ceramic cache db
-        const ceramicCacheDatabaseInstance = new CeramicCacheDatabase(
+        const databaseInstance = new CeramicCacheDatabase(
           process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT || "",
           process.env.NEXT_PUBLIC_CERAMIC_CACHE_API_KEY || "",
           address || "",
@@ -515,14 +510,13 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           viewerConnection.selfID.did
         );
 
-        setCeramicCacheDatabase(ceramicCacheDatabaseInstance);
-        setActiveDatabase(ceramicCacheDatabaseInstance);
+        setDatabase(databaseInstance);
         break;
       }
       case "failed": {
         console.log("failed to connect self id :(");
-        setCeramicDatabase(undefined);
-        setCeramicCacheDatabase(undefined);
+        setCeramicClient(undefined);
+        setDatabase(undefined);
         break;
       }
       default:
@@ -531,21 +525,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   }, [viewerConnection.status, address]);
 
   useEffect(() => {
-    (async () => {
-      if (activeDatabase) {
-        try {
-          await fetchPassport(ceramicCacheDatabase);
-        } catch (e) {
-          if (e instanceof NoStampsInCacheError) {
-            await fetchPassport(ceramicCacheDatabase);
-            setActiveDatabase(ceramicDatabase);
-          } else {
-            throw e;
-          }
-        }
-      }
-    })();
-  }, []);
+    if (database) fetchPassport(database);
+  }, [database]);
 
   const fetchPassport = async (
     database: CeramicDatabase | CeramicCacheDatabase,
@@ -556,6 +537,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     // fetch, clean and set the new Passport state
     const { status, errorDetails, passport } = await database.getPassport();
 
+    debugger;
     switch (status) {
       case "Success":
       case "StampCacaoError":
@@ -576,9 +558,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         setPassport(undefined);
         if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
         break;
-      case "NoStampsInCache":
-        datadogRum.addError("No stamps found in cache", { address });
-        throw new NoStampsInCacheError("No stamps found in cache");
     }
 
     setPassportLoadResponse({ passport, status, errorDetails });
@@ -614,23 +593,23 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const handleCheckRefreshPassport = async (): Promise<boolean> => {
     let success = true;
-    if (ceramicDatabase && passportLoadResponse) {
+    if (ceramicClient && passportLoadResponse) {
       let passportHasError = passportLoadResponse.status === "PassportCacaoError";
       let failedStamps = passportLoadResponse.errorDetails?.stampStreamIds || [];
       try {
         if (passportHasError) {
-          passportHasError = !(await ceramicDatabase.refreshPassport());
+          passportHasError = !(await ceramicClient.refreshPassport());
         }
 
         if (failedStamps && failedStamps.length) {
           try {
-            await ceramicDatabase.deleteStampIDs(failedStamps);
+            await ceramicClient.deleteStampIDs(failedStamps);
             failedStamps = [];
           } catch {}
         }
 
         // fetchPassport to reset passport state
-        await fetchPassport(ceramicDatabase);
+        await fetchPassport(ceramicClient);
 
         success = !passportHasError && !failedStamps.length;
       } catch {
@@ -641,59 +620,66 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   };
 
   const handleCreatePassport = async (): Promise<void> => {
-    if (activeDatabase) {
-      await activeDatabase.createPassport();
-      await fetchPassport(activeDatabase);
+    if (database && ceramicClient) {
+      let initialStamps: Stamp[] = [];
+      const { status, passport } = await Promise.race<PassportLoadResponse>([
+        returnEmptyPassportAfterTimeout(parseInt(CERAMIC_TIMEOUT_MS)),
+        ceramicClient.getPassport(),
+      ]);
+      if (status === "Success" && passport?.stamps.length) {
+        initialStamps = passport.stamps;
+      }
+      await database.createPassport(initialStamps);
+      await fetchPassport(database);
     }
   };
 
+  const returnEmptyPassportAfterTimeout = async (timeout: number): Promise<PassportLoadResponse> =>
+    new Promise<PassportLoadResponse>((resolve) =>
+      setTimeout(() => resolve({ status: "Success", passport: { stamps: [] } }), timeout)
+    );
+
   const handleAddStamp = async (stamp: Stamp): Promise<void> => {
-    if (activeDatabase) {
-      await activeDatabase.addStamp(stamp);
-      await fetchPassport(activeDatabase, true);
+    if (database) {
+      await database.addStamp(stamp);
+      await fetchPassport(database, true);
     }
   };
 
   const handleAddStamps = async (stamps: Stamp[]): Promise<void> => {
-    if (activeDatabase) {
-      if (activeDatabase instanceof CeramicDatabase) {
-        await activeDatabase.addStamps(stamps);
-      } else if (activeDatabase instanceof CeramicCacheDatabase) {
-        // TODO - add bulk post to cache db?
-        const addStampRequests = Promise.all(stamps.map((stamp) => activeDatabase.addStamp(stamp)));
-        const results = await addStampRequests;
-      }
-      await fetchPassport(activeDatabase, true);
+    if (database) {
+      await database.addStamps(stamps);
+      await fetchPassport(database, true);
     }
   };
 
   const handleDeleteStamps = async (providerIds: PROVIDER_ID[]): Promise<void> => {
-    if (activeDatabase) {
-      if (activeDatabase instanceof CeramicDatabase) {
-        await activeDatabase.deleteStamps(providerIds);
-      } else if (activeDatabase instanceof CeramicCacheDatabase) {
+    if (database) {
+      if (database instanceof CeramicDatabase) {
+        await database.deleteStamps(providerIds);
+      } else if (database instanceof CeramicCacheDatabase) {
         // TODO - add bulk post to cache db?
-        const addStampRequests = Promise.all(providerIds.map((providerId) => activeDatabase.deleteStamp(providerId)));
+        const addStampRequests = Promise.all(providerIds.map((providerId) => database.deleteStamp(providerId)));
         const results = await addStampRequests;
       }
-      await fetchPassport(activeDatabase, true);
+      await fetchPassport(database, true);
     }
   };
 
   const handleDeleteStamp = async (streamId: string, providerId: PROVIDER_ID): Promise<void> => {
-    if (activeDatabase) {
-      if (activeDatabase instanceof CeramicDatabase) {
-        await activeDatabase.deleteStamp(streamId);
+    if (database) {
+      if (database instanceof CeramicDatabase) {
+        await database.deleteStamp(streamId);
         await new Promise((r) =>
           // We need to delay the loading of stamps, in order for the deletion to be reflected in ceramic
           setTimeout(async () => {
-            await fetchPassport(activeDatabase, true);
+            await fetchPassport(database, true);
             r(0);
           }, 2000)
         );
       } else {
-        await activeDatabase.deleteStamp(providerId);
-        await fetchPassport(activeDatabase, true);
+        await database.deleteStamp(providerId);
+        await fetchPassport(database, true);
       }
     }
   };

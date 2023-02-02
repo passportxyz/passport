@@ -17,24 +17,25 @@ export class CeramicCacheDatabase implements DataStorageBase {
   address: string;
   did: string;
   logger: Logger;
+  allowEmpty: boolean;
 
-  constructor(
-    ceramicDatabase: DataStorageBase,
-    ceramicCacheUrl: string,
-    ceramicCacheApiKey: string,
-    address: string,
-    logger?: Logger,
-    did?: CeramicDID
-  ) {
+  constructor(ceramicCacheUrl: string, ceramicCacheApiKey: string, address: string, logger?: Logger, did?: CeramicDID) {
     this.ceramicCacheUrl = ceramicCacheUrl;
     this.ceramicCacheApiKey = ceramicCacheApiKey;
     this.address = address;
     this.logger = logger;
     this.did = (did.hasParent ? did.parent : did.id).toLowerCase();
+    this.allowEmpty = false;
   }
 
-  async createPassport(): Promise<string> {
-    throw new Error("Method not implemented.");
+  async createPassport(initialStamps?: Stamp[]): Promise<string> {
+    if (initialStamps?.length) {
+      this.addStamps(initialStamps);
+    } else {
+      this.allowEmpty = true;
+    }
+
+    return "created";
   }
 
   async getPassport(): Promise<PassportLoadResponse> {
@@ -45,14 +46,14 @@ export class CeramicCacheDatabase implements DataStorageBase {
     try {
       const response = await axios.get(`${this.ceramicCacheUrl}/ceramic-cache/stamp?address=${this.address}`);
       const { data } = response;
-      if (data && data.success && data.stamps.length !== 0) {
+      if (data && data.success && (this.allowEmpty || data.stamps.length !== 0)) {
         passport = {
           issuanceDate: null,
           expiryDate: null,
           stamps: data.stamps,
         };
       } else {
-        status = "NoStampsInCache";
+        status = "DoesNotExist";
       }
     } catch (e) {
       status = "ExceptionRaised";
@@ -65,6 +66,11 @@ export class CeramicCacheDatabase implements DataStorageBase {
       };
     }
   }
+
+  addStamps = async (stamps: Stamp[]): Promise<void> => {
+    await Promise.all(stamps.map((stamp) => this.addStamp(stamp)));
+  };
+
   async addStamp(stamp: Stamp): Promise<void> {
     this.logger.info(`adding stamp to ceramicCache address: ${this.address}`);
     try {
