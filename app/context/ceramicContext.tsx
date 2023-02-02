@@ -601,43 +601,68 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   };
 
   const handleCreatePassport = async (): Promise<void> => {
-    if (ceramicDatabase) {
-      await ceramicDatabase.createPassport();
-      await fetchPassport(ceramicDatabase);
+    try {
+      if (ceramicDatabase) {
+        await ceramicDatabase.createPassport();
+        await fetchPassport(ceramicDatabase);
+      }
+    } catch (e) {
+      datadogLogs.logger.error("Error creating passport", { error: e });
+      throw e;
     }
   };
 
   const handleAddStamp = async (stamp: Stamp): Promise<void> => {
-    if (ceramicDatabase) {
-      await ceramicDatabase.addStamp(stamp);
-      await fetchPassport(ceramicDatabase, true);
+    try {
+      if (ceramicDatabase) {
+        await ceramicDatabase.addStamp(stamp);
+        await fetchPassport(ceramicDatabase, true);
+      }
+    } catch (e) {
+      datadogLogs.logger.error("Error add single stamp", { stamp, error: e });
+      throw e;
     }
   };
 
   const handleAddStamps = async (stamps: Stamp[]): Promise<void> => {
-    if (ceramicDatabase) {
-      await ceramicDatabase.addStamps(stamps);
-      await fetchPassport(ceramicDatabase, true);
+    try {
+      if (ceramicDatabase) {
+        await ceramicDatabase.addStamps(stamps);
+        await fetchPassport(ceramicDatabase, true);
+      }
+    } catch (e) {
+      datadogLogs.logger.error("Error adding multiple stamps", { stamps, error: e });
+      throw e;
     }
   };
 
   const handleDeleteStamps = async (providerIds: PROVIDER_ID[]): Promise<void> => {
-    if (ceramicDatabase) {
-      await ceramicDatabase.deleteStamps(providerIds);
-      await fetchPassport(ceramicDatabase, true);
+    try {
+      if (ceramicDatabase) {
+        await ceramicDatabase.deleteStamps(providerIds);
+        await fetchPassport(ceramicDatabase, true);
+      }
+    } catch (e) {
+      datadogLogs.logger.error("Error deleting multiple stamps", { providerIds, error: e });
+      throw e;
     }
   };
 
   const handleDeleteStamp = async (streamId: string): Promise<void> => {
-    if (ceramicDatabase) {
-      await ceramicDatabase.deleteStamp(streamId);
-      await new Promise((r) =>
-        // We need to delay the loading of stamps, in order for the deletion to be reflected in ceramic
-        setTimeout(async () => {
-          await fetchPassport(ceramicDatabase, true);
-          r(0);
-        }, 2000)
-      );
+    try {
+      if (ceramicDatabase) {
+        await ceramicDatabase.deleteStamp(streamId);
+        await new Promise((r) =>
+          // We need to delay the loading of stamps, in order for the deletion to be reflected in ceramic
+          setTimeout(async () => {
+            await fetchPassport(ceramicDatabase, true);
+            r(0);
+          }, 2000)
+        );
+      }
+    } catch (e) {
+      datadogLogs.logger.error("Error deleting single stamp", { streamId, error: e });
+      throw e;
     }
   };
 
