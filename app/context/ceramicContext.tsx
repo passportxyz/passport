@@ -504,7 +504,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT || "",
           process.env.NEXT_PUBLIC_CERAMIC_CACHE_API_KEY || "",
           address || "",
-          datadogLogs.logger
+          datadogLogs.logger,
+          viewerConnection.selfID.did
         );
 
         setCeramicCacheDatabase(ceramicCacheDatabaseInstance);
