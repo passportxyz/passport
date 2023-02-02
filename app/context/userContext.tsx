@@ -19,6 +19,10 @@ import { datadogRum } from "@datadog/browser-rum";
 import { DIDSession } from "did-session";
 import { EthereumWebAuth } from "@didtools/pkh-ethereum";
 import { AccountId } from "caip";
+import { DID, DagJWS } from "dids";
+import { Cacao } from "@didtools/cacao";
+import * as KeyResolver from "key-did-resolver";
+import { CID } from "multiformats/cid";
 
 export interface UserContextState {
   loggedIn: boolean;
@@ -131,7 +135,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           // Sessions will be serialized and stored in localhost
           // The sessions are bound to an ETH address, this is why we use the address in the session key
           const sessionKey = `didsession-${address}`;
-          const sessionStr = window.localStorage.getItem(sessionKey);
+          // const sessionStr = window.localStorage.getItem(sessionKey);
 
           // @ts-ignore
           // When sessionStr is null, this will create a new selfId. We want to avoid this, becasue we want to make sure
@@ -156,10 +160,138 @@ export const UserContextProvider = ({ children }: { children: any }) => {
                   address: address,
                 })
               );
+
               const session = await DIDSession.authorize(authMethod, {
                 resources: ["ceramic://*"],
               });
+              console.log("geri session.cacao:", session.cacao);
               const newSessionStr = session.serialize();
+              console.log("geri newSessionStr:", newSessionStr);
+              console.log("geri did:", session.did);
+
+              const payloadToSign = { data: "TODO" };
+
+              // const did1 = new DID({ parent: did.parent, resolver: KeyResolver.getResolver() });
+              const did = session.did;
+
+              // sign the payload as dag-jose
+              const { jws, linkedBlock, cacaoBlock } = await did.createDagJWS(payloadToSign);
+
+              // Get the JWS & serialize it (this is what we would send to the BE)
+              const { link, payload, signatures } = jws;
+              console.log("---- JSON.stringify(signatures)", JSON.stringify(signatures));
+              console.log("---- JSON.stringify(payload)", JSON.stringify(payload));
+              console.log("---- JSON.stringify(jws.link?.bytes)", JSON.stringify(Array.from(link ? link.bytes : [])));
+              console.log("---- JSON.stringify(cacao)", JSON.stringify(Array.from(cacaoBlock ? cacaoBlock : [])));
+
+              // Load some a JSON serialized JWS (this we would do on the BE)
+              const os_signature = JSON.parse(JSON.stringify(signatures));
+              const os_payload = JSON.parse(JSON.stringify(payload));
+              const os_cid = new Uint8Array(JSON.parse(JSON.stringify(Array.from(link ? link.bytes : []))));
+              const os_cacao = new Uint8Array(JSON.parse(JSON.stringify(Array.from(cacaoBlock ? cacaoBlock : []))));
+
+              const s_signature = [
+                {
+                  protected:
+                    "eyJhbGciOiJFZERTQSIsImNhcCI6ImlwZnM6Ly9iYWZ5cmVpZXpnY3M1c3FxaHI0ZXA1ajVjNjdpaWVzNGtwMnZwanAzdzY2d2U3NW1sZXhiZ25vdnVpbSIsImtpZCI6ImRpZDprZXk6ejZNa201dzVDU2pUc1hIWlJZUUhKdkpEemtjaWM5cG9EeFRSZ2M0S3lEWlJ3WFhiI3o2TWttNXc1Q1NqVHNYSFpSWVFISnZKRHprY2ljOXBvRHhUUmdjNEt5RFpSd1hYYiJ9",
+                  signature: "oKrQe4G_5_vLyeEx7QBxJgF3XqzUBMHMinh8HbnJGQ_eYrz73_gpsKsvnazzttK1vBDKGUT-wUX8VUqnjmGZCQ",
+                },
+              ];
+              const s_payload = "AXESINDmZIeFXbbpBQWH1bXt7F2Ysg03pRcvzsvSc7vMNurc";
+              const s_cid = new Uint8Array([
+                1, 113, 18, 32, 208, 230, 100, 135, 133, 93, 182, 233, 5, 5, 135, 213, 181, 237, 236, 93, 152, 178, 13,
+                55, 165, 23, 47, 206, 203, 210, 115, 187, 204, 54, 234, 220,
+              ]);
+              const s_cacao = await Cacao.fromBlockBytes(
+                new Uint8Array([
+                  163, 97, 104, 161, 97, 116, 103, 101, 105, 112, 52, 51, 54, 49, 97, 112, 169, 99, 97, 117, 100, 120,
+                  56, 100, 105, 100, 58, 107, 101, 121, 58, 122, 54, 77, 107, 109, 53, 119, 53, 67, 83, 106, 84, 115,
+                  88, 72, 90, 82, 89, 81, 72, 74, 118, 74, 68, 122, 107, 99, 105, 99, 57, 112, 111, 68, 120, 84, 82,
+                  103, 99, 52, 75, 121, 68, 90, 82, 119, 88, 88, 98, 99, 101, 120, 112, 120, 24, 50, 48, 50, 51, 45, 48,
+                  50, 45, 48, 56, 84, 50, 48, 58, 48, 55, 58, 52, 49, 46, 55, 49, 55, 90, 99, 105, 97, 116, 120, 24, 50,
+                  48, 50, 51, 45, 48, 50, 45, 48, 49, 84, 50, 48, 58, 48, 55, 58, 52, 49, 46, 55, 49, 55, 90, 99, 105,
+                  115, 115, 120, 59, 100, 105, 100, 58, 112, 107, 104, 58, 101, 105, 112, 49, 53, 53, 58, 49, 58, 48,
+                  120, 56, 53, 102, 102, 48, 49, 99, 102, 102, 49, 53, 55, 49, 57, 57, 53, 50, 55, 53, 50, 56, 55, 56,
+                  56, 101, 99, 52, 101, 97, 54, 51, 51, 54, 54, 49, 53, 99, 57, 56, 57, 101, 110, 111, 110, 99, 101,
+                  106, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 102, 100, 111, 109, 97, 105, 110, 105, 108, 111, 99, 97,
+                  108, 104, 111, 115, 116, 103, 118, 101, 114, 115, 105, 111, 110, 97, 49, 105, 114, 101, 115, 111, 117,
+                  114, 99, 101, 115, 129, 107, 99, 101, 114, 97, 109, 105, 99, 58, 47, 47, 42, 105, 115, 116, 97, 116,
+                  101, 109, 101, 110, 116, 108, 72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100, 33, 97, 115, 162,
+                  97, 115, 120, 132, 48, 120, 52, 99, 55, 53, 50, 51, 51, 54, 56, 54, 57, 49, 99, 101, 102, 102, 49, 99,
+                  51, 98, 56, 52, 101, 54, 56, 55, 100, 50, 54, 53, 56, 53, 101, 55, 57, 99, 50, 98, 56, 55, 102, 54,
+                  100, 57, 97, 56, 56, 99, 99, 98, 54, 50, 51, 97, 56, 54, 48, 48, 54, 52, 53, 48, 55, 54, 53, 55, 97,
+                  102, 55, 102, 101, 56, 100, 49, 54, 51, 54, 56, 55, 101, 52, 49, 50, 57, 54, 97, 99, 98, 48, 49, 100,
+                  98, 102, 55, 97, 56, 51, 57, 53, 101, 100, 53, 57, 53, 57, 50, 51, 57, 52, 101, 53, 99, 102, 99, 56,
+                  48, 98, 97, 54, 53, 52, 102, 53, 52, 54, 50, 97, 48, 49, 98, 97, 116, 102, 101, 105, 112, 49, 57, 49,
+                ])
+              );
+
+              const jws_restored = {
+                signatures: s_signature,
+                payload: s_payload,
+                cid: CID.decode(s_cid),
+              } as DagJWS;
+
+              if (cacaoBlock) {
+                const cacao = await Cacao.fromBlockBytes(cacaoBlock);
+                const issuer = cacao.p.iss;
+                console.log("----- cacao:", cacao);
+                console.log("----- cacao.p.iss:", cacao.p.iss);
+
+                try {
+                  const verifyResult = await did.verifyJWS(jws, {
+                    issuer,
+                    capability: cacao,
+                  });
+                  console.log("verifyResult:", verifyResult); // I am not sure how to verify that the issuer matches the expected one here
+                } catch (error) {
+                  console.error("Error 1", error);
+                }
+
+                try {
+                  const verifyResult = await did.verifyJWS(jws_restored, {
+                    issuer,
+                    capability: s_cacao,
+                    disableTimecheck: true,
+                  });
+                  console.log("verifyResult - restored stuff:", verifyResult); // I am not sure how to verify that the issuer matches the expected one here
+                } catch (error) {
+                  console.error("Error 2", error);
+                }
+
+                // const did1 = new DID({ parent: did.parent, resolver: KeyResolver.getResolver() });
+                const did1 = new DID({ resolver: KeyResolver.getResolver() });
+                try {
+                  const verifyResult = await did1.verifyJWS(jws_restored, {
+                    issuer: "did:pkh:eip155:1:0x85ff01cff157199527528788ec4ea6336615c989",
+                    capability: s_cacao,
+                    disableTimecheck: true,
+                  });
+                  console.log("verifyResult - issuer", issuer);
+                  console.log("verifyResult - restored stuff with did1:", verifyResult); // I am not sure how to verify that the issuer matches the expected one here
+                } catch (error) {
+                  console.error("Error 2", error);
+                }
+
+                try {
+                  const verifyResultBad = await did.verifyJWS(jws, {
+                    issuer: "did:pkh:eip155:1:0x4a13f4394cf05a52128bda527664429d5376c67f",
+                    capability: cacao,
+                  });
+                  console.log("verifyResultBad:", verifyResultBad); // I am not sure how to verify that the issuer matches the expected one here
+                } catch (error) {
+                  console.error("Error 3", error);
+                }
+
+                const payloadForVerifier = {
+                  signatures: JSON.stringify(signatures),
+                  payload: JSON.stringify(payload),
+                  cid: JSON.stringify(Array.from(link ? link.bytes : [])),
+                  cacao: JSON.stringify(Array.from(cacaoBlock ? cacaoBlock : [])),
+                  issuer: cacao.p.iss,
+                }
+  
+              }
 
               // @ts-ignore
               selfId = await ceramicConnect(ethAuthProvider, newSessionStr);
