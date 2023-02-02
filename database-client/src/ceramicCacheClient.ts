@@ -16,7 +16,7 @@ export class CeramicCacheDatabase implements DataStorageBase {
   address: string;
   logger: Logger;
 
-  constructor(ceramicCacheUrl: string, address: string, ceramicCacheApiKey: string, logger?: Logger) {
+  constructor(ceramicCacheUrl: string, ceramicCacheApiKey: string, address: string, logger?: Logger) {
     this.ceramicCacheUrl = ceramicCacheUrl;
     this.ceramicCacheApiKey = ceramicCacheApiKey;
     this.address = address;
@@ -33,10 +33,10 @@ export class CeramicCacheDatabase implements DataStorageBase {
 
     try {
       const response = await axios.get(
-        `${this.ceramicCacheUrl}/ceramic-cache/stamp?${this.address}`,
+        `${this.ceramicCacheUrl}/ceramic-cache/stamp?address=${this.address}`,
         {
           headers: {
-            'X-API-Key': this.ceramicCacheApiKey,
+            "X-API-Key": this.ceramicCacheApiKey,
           },
         }
       )
@@ -72,7 +72,8 @@ export class CeramicCacheDatabase implements DataStorageBase {
         },
         {
           headers: {
-            'X-API-Key': this.ceramicCacheApiKey,
+            "X-API-Key": this.ceramicCacheApiKey,
+            accept: "application/json",
             'Content-Type': 'application/json',
           },
         } 

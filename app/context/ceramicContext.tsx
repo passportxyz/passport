@@ -48,7 +48,7 @@ export interface CeramicContextState {
   handleCreatePassport: () => Promise<void>;
   handleAddStamp: (stamp: Stamp) => Promise<void>;
   handleAddStamps: (stamps: Stamp[]) => Promise<void>;
-  handleDeleteStamp: (streamId: string) => Promise<void>;
+  handleDeleteStamp: (streamId: string, providerId: PROVIDER_ID) => Promise<void>;
   handleDeleteStamps: (providerIds: PROVIDER_ID[]) => Promise<void>;
   handleCheckRefreshPassport: () => Promise<boolean>;
   userDid: string | undefined;
@@ -468,6 +468,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [expiredProviders, setExpiredProviders] = useState<PROVIDER_ID[]>([]);
   const [passportLoadResponse, setPassportLoadResponse] = useState<PassportLoadResponse | undefined>();
   const [viewerConnection] = useViewerConnection();
+  const [activeDatabase, setActiveDatabase] = useState<CeramicDatabase | CeramicCacheDatabase | undefined>(undefined);
 
   const { address } = useContext(UserContext);
 
@@ -498,15 +499,16 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         );
         setCeramicDatabase(ceramicDatabaseInstance);
         setUserDid(ceramicDatabaseInstance.did);
-
         // Ceramic cache db
         const ceramicCacheDatabaseInstance = new CeramicCacheDatabase(
-          process.env.NEXT_CERAMIC_CACHE_ENDPOINT || "",
+          process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT || "",
+          process.env.NEXT_PUBLIC_CERAMIC_CACHE_API_KEY || "",
           address || "",
           datadogLogs.logger
         );
 
         setCeramicCacheDatabase(ceramicCacheDatabaseInstance);
+        setActiveDatabase(ceramicCacheDatabaseInstance);
         break;
       }
       case "failed": {
@@ -521,12 +523,15 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   }, [viewerConnection.status, address]);
 
   useEffect(() => {
-    if (ceramicDatabase) {
-      fetchPassport(ceramicDatabase);
+    if (activeDatabase) {
+      fetchPassport(activeDatabase);
     }
   }, [ceramicDatabase]);
 
-  const fetchPassport = async (database: CeramicDatabase, skipLoadingState?: boolean): Promise<void> => {
+  const fetchPassport = async (
+    database: CeramicDatabase | CeramicCacheDatabase,
+    skipLoadingState?: boolean
+  ): Promise<void> => {
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
 
     // fetch, clean and set the new Passport state
@@ -559,7 +564,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const cleanPassport = (
     passport: Passport | undefined | false,
-    database: CeramicDatabase
+    database: CeramicDatabase | CeramicCacheDatabase
   ): Passport | undefined | false => {
     const tempExpiredProviders: PROVIDER_ID[] = [];
     // clean stamp content if expired or from a different issuer
@@ -614,43 +619,60 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   };
 
   const handleCreatePassport = async (): Promise<void> => {
-    if (ceramicDatabase) {
-      await ceramicDatabase.createPassport();
-      await fetchPassport(ceramicDatabase);
+    if (activeDatabase) {
+      await activeDatabase.createPassport();
+      await fetchPassport(activeDatabase);
     }
   };
 
   const handleAddStamp = async (stamp: Stamp): Promise<void> => {
-    if (ceramicDatabase) {
-      await ceramicDatabase.addStamp(stamp);
-      await fetchPassport(ceramicDatabase, true);
+    if (activeDatabase) {
+      await activeDatabase.addStamp(stamp);
+      await fetchPassport(activeDatabase, true);
     }
   };
 
   const handleAddStamps = async (stamps: Stamp[]): Promise<void> => {
-    if (ceramicDatabase) {
-      await ceramicDatabase.addStamps(stamps);
-      await fetchPassport(ceramicDatabase, true);
+    if (activeDatabase) {
+      if (activeDatabase instanceof CeramicDatabase) {
+        await activeDatabase.addStamps(stamps);
+      } else if (activeDatabase instanceof CeramicCacheDatabase) {
+        // TODO - add bulk post to cache db?
+        const addStampRequests = Promise.all(stamps.map((stamp) => activeDatabase.addStamp(stamp)));
+        const results = await addStampRequests;
+      }
+      await fetchPassport(activeDatabase, true);
     }
   };
 
   const handleDeleteStamps = async (providerIds: PROVIDER_ID[]): Promise<void> => {
-    if (ceramicDatabase) {
-      await ceramicDatabase.deleteStamps(providerIds);
-      await fetchPassport(ceramicDatabase, true);
+    if (activeDatabase) {
+      if (activeDatabase instanceof CeramicDatabase) {
+        await activeDatabase.deleteStamps(providerIds);
+      } else if (activeDatabase instanceof CeramicCacheDatabase) {
+        // TODO - add bulk post to cache db?
+        const addStampRequests = Promise.all(providerIds.map((providerId) => activeDatabase.deleteStamp(providerId)));
+        const results = await addStampRequests;
+      }
+      await fetchPassport(activeDatabase, true);
     }
   };
 
-  const handleDeleteStamp = async (streamId: string): Promise<void> => {
-    if (ceramicDatabase) {
-      await ceramicDatabase.deleteStamp(streamId);
-      await new Promise((r) =>
-        // We need to delay the loading of stamps, in order for the deletion to be reflected in ceramic
-        setTimeout(async () => {
-          await fetchPassport(ceramicDatabase, true);
-          r(0);
-        }, 2000)
-      );
+  const handleDeleteStamp = async (streamId: string, providerId: PROVIDER_ID): Promise<void> => {
+    if (activeDatabase) {
+      if (activeDatabase instanceof CeramicDatabase) {
+        await activeDatabase.deleteStamp(streamId);
+        await new Promise((r) =>
+          // We need to delay the loading of stamps, in order for the deletion to be reflected in ceramic
+          setTimeout(async () => {
+            await fetchPassport(activeDatabase, true);
+            r(0);
+          }, 2000)
+        );
+      } else {
+        await activeDatabase.deleteStamp(providerId);
+        await fetchPassport(activeDatabase, true);
+      }
     }
   };
 
