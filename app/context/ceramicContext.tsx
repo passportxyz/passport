@@ -8,7 +8,7 @@ import {
   Stamp,
 } from "@gitcoin/passport-types";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
-import { CeramicDatabase } from "@gitcoin/passport-database-client";
+import { CeramicDatabase, CeramicCacheDatabase } from "@gitcoin/passport-database-client";
 import { useViewerConnection } from "@self.id/framework";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
@@ -461,6 +461,7 @@ export const CeramicContext = createContext(startingState);
 export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
   const [ceramicDatabase, setCeramicDatabase] = useState<CeramicDatabase | undefined>(undefined);
+  const [ceramicCacheDatabase, setCeramicCacheDatabase] = useState<CeramicCacheDatabase | undefined>(undefined);
   const [isLoadingPassport, setIsLoadingPassport] = useState<IsLoadingPassportState>(IsLoadingPassportState.Loading);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
   const [userDid, setUserDid] = useState<string | undefined>();
@@ -484,9 +485,11 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     switch (viewerConnection.status) {
       case "idle": {
         setCeramicDatabase(undefined);
+        setCeramicCacheDatabase(undefined);
         break;
       }
       case "connected": {
+        // Ceramic Network Connection
         const ceramicDatabaseInstance = new CeramicDatabase(
           viewerConnection.selfID.did,
           process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
@@ -495,17 +498,27 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         );
         setCeramicDatabase(ceramicDatabaseInstance);
         setUserDid(ceramicDatabaseInstance.did);
+
+        // Ceramic cache db
+        const ceramicCacheDatabaseInstance = new CeramicCacheDatabase(
+          process.env.NEXT_CERAMIC_CACHE_ENDPOINT || "",
+          address || "",
+          datadogLogs.logger
+        );
+
+        setCeramicCacheDatabase(ceramicCacheDatabaseInstance);
         break;
       }
       case "failed": {
         console.log("failed to connect self id :(");
         setCeramicDatabase(undefined);
+        setCeramicCacheDatabase(undefined);
         break;
       }
       default:
         break;
     }
-  }, [viewerConnection.status]);
+  }, [viewerConnection.status, address]);
 
   useEffect(() => {
     if (ceramicDatabase) {
