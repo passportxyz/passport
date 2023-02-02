@@ -18,7 +18,14 @@ export class CeramicCacheDatabase implements DataStorageBase {
   did: string;
   logger: Logger;
 
-  constructor(ceramicCacheUrl: string, ceramicCacheApiKey: string, address: string, logger?: Logger, did?: CeramicDID) {
+  constructor(
+    ceramicDatabase: DataStorageBase,
+    ceramicCacheUrl: string,
+    ceramicCacheApiKey: string,
+    address: string,
+    logger?: Logger,
+    did?: CeramicDID
+  ) {
     this.ceramicCacheUrl = ceramicCacheUrl;
     this.ceramicCacheApiKey = ceramicCacheApiKey;
     this.address = address;
@@ -29,6 +36,7 @@ export class CeramicCacheDatabase implements DataStorageBase {
   async createPassport(): Promise<string> {
     throw new Error("Method not implemented.");
   }
+
   async getPassport(): Promise<PassportLoadResponse> {
     let passport: Passport;
     let status: PassportLoadStatus = "Success";
@@ -37,16 +45,14 @@ export class CeramicCacheDatabase implements DataStorageBase {
     try {
       const response = await axios.get(`${this.ceramicCacheUrl}/ceramic-cache/stamp?address=${this.address}`);
       const { data } = response;
-      if (data && data.success === 200) {
+      if (data && data.success && data.stamps.length !== 0) {
         passport = {
           issuanceDate: null,
           expiryDate: null,
           stamps: data.stamps,
         };
-
-        if (data.stamps.length === 0) {
-          status = "NoStampsInCache";
-        }
+      } else {
+        status = "NoStampsInCache";
       }
     } catch (e) {
       status = "ExceptionRaised";
