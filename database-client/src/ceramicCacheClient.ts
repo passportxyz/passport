@@ -30,7 +30,7 @@ export class CeramicCacheDatabase implements DataStorageBase {
 
   async createPassport(initialStamps?: Stamp[]): Promise<string> {
     if (initialStamps?.length) {
-      this.addStamps(initialStamps);
+      await this.addStamps(initialStamps);
     } else {
       this.allowEmpty = true;
     }
@@ -50,7 +50,7 @@ export class CeramicCacheDatabase implements DataStorageBase {
         passport = {
           issuanceDate: null,
           expiryDate: null,
-          stamps: data.stamps,
+          stamps: data.stamps.map((stamp: any) => ({ ...stamp, credential: stamp.stamp })),
         };
       } else {
         status = "DoesNotExist";
@@ -84,6 +84,7 @@ export class CeramicCacheDatabase implements DataStorageBase {
       this.logger.error(`Error saving stamp to ceramicCache address:  ${this.address}:` + e.toString());
     }
   }
+
   async deleteStamp(provider: PROVIDER_ID): Promise<void> {
     this.logger.info(`deleting stamp from ceramicCache for ${provider} on ${this.address}`);
     try {
