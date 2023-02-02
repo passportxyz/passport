@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Logger } from "./ceramicClient";
 import { DataStorageBase } from "./types";
+import type { DID as CeramicDID } from "dids";
 import {
   PROVIDER_ID,
   Stamp,
@@ -14,13 +15,15 @@ export class CeramicCacheDatabase implements DataStorageBase {
   ceramicCacheUrl: string;
   ceramicCacheApiKey: string;
   address: string;
+  did: string;
   logger: Logger;
 
-  constructor(ceramicCacheUrl: string, ceramicCacheApiKey: string, address: string, logger?: Logger) {
+  constructor(ceramicCacheUrl: string, ceramicCacheApiKey: string, address: string, logger?: Logger, did?: CeramicDID) {
     this.ceramicCacheUrl = ceramicCacheUrl;
     this.ceramicCacheApiKey = ceramicCacheApiKey;
     this.address = address;
     this.logger = logger;
+    this.did = (did.hasParent ? did.parent : did.id).toLowerCase();
   }
 
   async createPassport(): Promise<string> {
@@ -34,11 +37,6 @@ export class CeramicCacheDatabase implements DataStorageBase {
     try {
       const response = await axios.get(
         `${this.ceramicCacheUrl}/ceramic-cache/stamp?address=${this.address}`,
-        {
-          headers: {
-            "X-API-Key": this.ceramicCacheApiKey,
-          },
-        }
       )
       const { data } = response;
       if (data && data.success === 200) {
@@ -70,13 +68,6 @@ export class CeramicCacheDatabase implements DataStorageBase {
           provider: stamp.provider,
           stamp: stamp.credential,
         },
-        {
-          headers: {
-            "X-API-Key": this.ceramicCacheApiKey,
-            accept: "application/json",
-            'Content-Type': 'application/json',
-          },
-        } 
       )
     } catch (e) {
       this.logger.error(`Error saving stamp to ceramicCache address:  ${this.address}:` + e.toString());
@@ -86,9 +77,6 @@ export class CeramicCacheDatabase implements DataStorageBase {
     this.logger.info(`deleting stamp from ceramicCache for ${provider} on ${this.address}`);
     try {
       await axios.delete(`${this.ceramicCacheUrl}/ceramic-cache/stamp`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
         data: {
           address: this.address,
           provider: provider,
