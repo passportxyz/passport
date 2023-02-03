@@ -50,6 +50,16 @@ function MyApp({ Component, pageProps }: AppProps) {
       }}
     />
   );
+  const GoogleTagManagerScript = (
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9RXPBVDZ4S"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-9RXPBVDZ4S');
+    </script>
+  );
 
   return (
     <>
@@ -57,6 +67,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <link rel="shortcut icon" href="/favicon.ico" />
         <title>Gitcoin Passport</title>
         {facebookSdkScript}
+        {GoogleTagManagerScript}
       </Head>
       <SelfIdProvider
         client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}
