@@ -627,14 +627,20 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       setIsLoadingPassport(IsLoadingPassportState.LoadingFromCeramic);
 
       let initialStamps: Stamp[] = [];
-      const { status, passport } = await Promise.race<PassportLoadResponse>([
-        returnEmptyPassportAfterTimeout(parseInt(CERAMIC_TIMEOUT_MS)),
-        returnEmptyPassportOnCancel(),
-        ceramicClient.getPassport(),
-      ]);
-      if (status === "Success" && passport?.stamps.length) {
-        initialStamps = passport.stamps;
+
+      try {
+        const { status, passport } = await Promise.race<PassportLoadResponse>([
+          returnEmptyPassportAfterTimeout(parseInt(CERAMIC_TIMEOUT_MS)),
+          returnEmptyPassportOnCancel(),
+          ceramicClient.getPassport(),
+        ]);
+        if (status === "Success" && passport?.stamps.length) {
+          initialStamps = passport.stamps;
+        }
+      } catch (e) {
+        console.error(e);
       }
+
       await database.createPassport(initialStamps);
       await fetchPassport(database);
     }
@@ -664,47 +670,67 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     );
 
   const handleAddStamp = async (stamp: Stamp): Promise<void> => {
-    if (database) {
-      await database.addStamp(stamp);
-      await fetchPassport(database, true);
+    try {
+      if (database) {
+        await database.addStamp(stamp);
+        await fetchPassport(database, true);
+      }
+    } catch (e) {
+      datadogLogs.logger.error("Error add single stamp", { stamp, error: e });
+      throw e;
     }
   };
 
   const handleAddStamps = async (stamps: Stamp[]): Promise<void> => {
-    if (database) {
-      await database.addStamps(stamps);
-      await fetchPassport(database, true);
+    try {
+      if (database) {
+        await database.addStamps(stamps);
+        await fetchPassport(database, true);
+      }
+    } catch (e) {
+      datadogLogs.logger.error("Error adding multiple stamps", { stamps, error: e });
+      throw e;
     }
   };
 
   const handleDeleteStamps = async (providerIds: PROVIDER_ID[]): Promise<void> => {
-    if (database) {
-      if (database instanceof CeramicDatabase) {
-        await database.deleteStamps(providerIds);
-      } else if (database instanceof PassportDatabase) {
-        // TODO - add bulk post to cache db?
-        const addStampRequests = Promise.all(providerIds.map((providerId) => database.deleteStamp(providerId)));
-        const results = await addStampRequests;
+    try {
+      if (database) {
+        if (database instanceof CeramicDatabase) {
+          await database.deleteStamps(providerIds);
+        } else if (database instanceof PassportDatabase) {
+          // TODO - add bulk post to cache db?
+          const addStampRequests = Promise.all(providerIds.map((providerId) => database.deleteStamp(providerId)));
+          const results = await addStampRequests;
+        }
+        await fetchPassport(database, true);
       }
-      await fetchPassport(database, true);
+    } catch (e) {
+      datadogLogs.logger.error("Error deleting multiple stamps", { providerIds, error: e });
+      throw e;
     }
   };
 
   const handleDeleteStamp = async (streamId: string, providerId: PROVIDER_ID): Promise<void> => {
-    if (database) {
-      if (database instanceof CeramicDatabase) {
-        await database.deleteStamp(streamId);
-        await new Promise((r) =>
-          // We need to delay the loading of stamps, in order for the deletion to be reflected in ceramic
-          setTimeout(async () => {
-            await fetchPassport(database, true);
-            r(0);
-          }, 2000)
-        );
-      } else {
-        await database.deleteStamp(providerId);
-        await fetchPassport(database, true);
+    try {
+      if (database) {
+        if (database instanceof CeramicDatabase) {
+          await database.deleteStamp(streamId);
+          await new Promise((r) =>
+            // We need to delay the loading of stamps, in order for the deletion to be reflected in ceramic
+            setTimeout(async () => {
+              await fetchPassport(database, true);
+              r(0);
+            }, 2000)
+          );
+        } else {
+          await database.deleteStamp(providerId);
+          await fetchPassport(database, true);
+        }
       }
+    } catch (e) {
+      datadogLogs.logger.error("Error deleting single stamp", { streamId, providerId, error: e });
+      throw e;
     }
   };
 
