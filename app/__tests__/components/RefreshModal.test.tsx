@@ -17,8 +17,13 @@ jest.mock("../../utils/onboard.ts");
 const mockHandleConnection = jest.fn();
 const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
 
+jest.mock("@didtools/cacao", () => ({
+  Cacao: {
+    fromBlockBytes: jest.fn(),
+  },
+}));
+
 const mockUserContext: UserContextState = makeTestUserContext({
-  handleConnection: mockHandleConnection,
   address: mockAddress,
   signer: mockSigner,
 });

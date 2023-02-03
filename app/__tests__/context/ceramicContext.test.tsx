@@ -25,6 +25,12 @@ jest.mock("@self.id/framework", () => {
   };
 });
 
+jest.mock("@didtools/cacao", () => ({
+  Cacao: {
+    fromBlockBytes: jest.fn(),
+  },
+}));
+
 const TestingComponent = () => {
   const { expiredProviders } = useContext(CeramicContext);
   return (

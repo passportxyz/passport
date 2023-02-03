@@ -33,6 +33,12 @@ jest.mock("@self.id/web", () => {
   };
 });
 
+jest.mock("@didtools/cacao", () => ({
+  Cacao: {
+    fromBlockBytes: jest.fn(),
+  },
+}));
+
 const mockToggleConnection = jest.fn();
 const mockHandleDisconnection = jest.fn();
 const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;

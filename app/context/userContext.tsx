@@ -19,12 +19,9 @@ import { datadogRum } from "@datadog/browser-rum";
 import { DIDSession } from "did-session";
 import { EthereumWebAuth } from "@didtools/pkh-ethereum";
 import { AccountId } from "caip";
-import { DID, DagJWS } from "dids";
+import { DID } from "dids";
 import { Cacao } from "@didtools/cacao";
-import * as KeyResolver from "key-did-resolver";
-import { CID } from "multiformats/cid";
 import axios from "axios";
-import { execPath } from "process";
 
 export interface UserContextState {
   loggedIn: boolean;

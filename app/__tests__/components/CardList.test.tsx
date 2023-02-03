@@ -12,6 +12,12 @@ import { CeramicContextState } from "../../context/ceramicContext";
 
 jest.mock("../../utils/onboard.ts");
 
+jest.mock("@didtools/cacao", () => ({
+  Cacao: {
+    fromBlockBytes: jest.fn(),
+  },
+}));
+
 const mockUserContext: UserContextState = makeTestUserContext();
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 

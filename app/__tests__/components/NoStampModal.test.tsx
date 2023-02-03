@@ -14,6 +14,12 @@ jest.mock("../../components/AdditionalStampModal", () => ({
 
 jest.mock("../../utils/onboard.ts");
 
+jest.mock("@didtools/cacao", () => ({
+  Cacao: {
+    fromBlockBytes: jest.fn(),
+  },
+}));
+
 let props: NoStampModalProps;
 
 beforeEach(() => {
