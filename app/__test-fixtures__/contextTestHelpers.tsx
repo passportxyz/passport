@@ -23,6 +23,7 @@ export const makeTestUserContext = (initialState?: Partial<UserContextState>): U
     signer: undefined,
     walletLabel: mockWallet.label,
     dbAccessToken: "token",
+    dbAccessTokenStatus: "idle",
     ...initialState,
   };
 };
