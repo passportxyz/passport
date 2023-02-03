@@ -51,14 +51,14 @@ function MyApp({ Component, pageProps }: AppProps) {
     />
   );
   const GoogleTagManagerScript = (
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9RXPBVDZ4S"></script>
-    <script>
+    <script 
+      async src="https://www.googletagmanager.com/gtag/js?id=G-9RXPBVDZ4S"
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
       gtag('config', 'G-9RXPBVDZ4S');
-    </script>
+    />
   );
 
   return (
