@@ -51,6 +51,7 @@ export interface CeramicContextState {
   handleDeleteStamp: (streamId: string, providerId: PROVIDER_ID) => Promise<void>;
   handleDeleteStamps: (providerIds: PROVIDER_ID[]) => Promise<void>;
   handleCheckRefreshPassport: () => Promise<boolean>;
+  cancelCeramicConnection: () => void;
   userDid: string | undefined;
   expiredProviders: PROVIDER_ID[];
   passportHasCacaoError: () => boolean;
@@ -173,6 +174,7 @@ platforms.set("Brightid", {
 export enum IsLoadingPassportState {
   Idle,
   Loading,
+  LoadingFromCeramic,
   FailedToConnect,
 }
 
@@ -451,12 +453,14 @@ const startingState: CeramicContextState = {
   handleDeleteStamps: async () => {},
   handleCheckRefreshPassport: async () => false,
   passportHasCacaoError: () => false,
+  cancelCeramicConnection: () => {},
   userDid: undefined,
   expiredProviders: [],
   passportLoadResponse: undefined,
 };
 
 const CERAMIC_TIMEOUT_MS = process.env.CERAMIC_TIMEOUT_MS || "10000";
+let shouldHaltCeramicConnection = false;
 
 export const CeramicContext = createContext(startingState);
 
@@ -620,9 +624,12 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const handleCreatePassport = async (): Promise<void> => {
     if (database && ceramicClient) {
+      setIsLoadingPassport(IsLoadingPassportState.LoadingFromCeramic);
+
       let initialStamps: Stamp[] = [];
       const { status, passport } = await Promise.race<PassportLoadResponse>([
         returnEmptyPassportAfterTimeout(parseInt(CERAMIC_TIMEOUT_MS)),
+        returnEmptyPassportOnCancel(),
         ceramicClient.getPassport(),
       ]);
       if (status === "Success" && passport?.stamps.length) {
@@ -632,6 +639,24 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       await fetchPassport(database);
     }
   };
+
+  const cancelCeramicConnection = () => {
+    shouldHaltCeramicConnection = true;
+  };
+
+  const returnEmptyPassportOnCancel = async (): Promise<PassportLoadResponse> =>
+    new Promise<PassportLoadResponse>((resolve) => {
+      const interval = setInterval(() => {
+        if (shouldHaltCeramicConnection) {
+          clearInterval(interval);
+          resolve({ status: "Success", passport: { stamps: [] } });
+        }
+      }, 1000);
+
+      setTimeout(() => {
+        clearInterval(interval);
+      }, parseInt(CERAMIC_TIMEOUT_MS));
+    });
 
   const returnEmptyPassportAfterTimeout = async (timeout: number): Promise<PassportLoadResponse> =>
     new Promise<PassportLoadResponse>((resolve) =>
@@ -741,6 +766,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     handleDeleteStamps,
     handleDeleteStamp,
     handleCheckRefreshPassport,
+    cancelCeramicConnection,
     userDid,
     expiredProviders,
     passportLoadResponse,
