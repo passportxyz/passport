@@ -20,9 +20,8 @@ export class CeramicCacheDatabase implements DataStorageBase {
   allowEmpty: boolean;
   token: string;
 
-  constructor(ceramicCacheUrl: string, ceramicCacheApiKey: string, address: string, token: string, logger?: Logger, did?: CeramicDID) {
+  constructor(ceramicCacheUrl: string, address: string, token: string, logger?: Logger, did?: CeramicDID) {
     this.ceramicCacheUrl = ceramicCacheUrl;
-    this.ceramicCacheApiKey = ceramicCacheApiKey;
     this.address = address;
     this.logger = logger;
     this.did = (did.hasParent ? did.parent : did.id).toLowerCase();

@@ -509,7 +509,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           // Ceramic cache db
           const databaseInstance = new PassportDatabase(
             process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT || "",
-            process.env.NEXT_PUBLIC_CERAMIC_CACHE_API_KEY || "",
             address || "",
             dbAccessToken || "",
             datadogLogs.logger,
