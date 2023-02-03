@@ -103,7 +103,7 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
 
   useEffect(() => {
     refreshPassportState();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>

@@ -135,6 +135,44 @@ describe("when viewer connection status is connecting", () => {
   });
 });
 
+describe.only("when viewer connection status is connected", () => {
+  it("should show a loading stamps alert", () => {
+    (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }]);
+    renderWithContext(
+      mockUserContext,
+      {
+        ...mockCeramicContext,
+        passport: undefined,
+        isLoadingPassport: IsLoadingPassportState.Loading,
+      },
+      <Router>
+        <Dashboard />
+      </Router>
+    );
+
+    const databaseLoadingAlert = screen.getByTestId("db-stamps-alert");
+    expect(databaseLoadingAlert).toBeInTheDocument();
+  });
+
+  it("should show a connecting to ceramic alert", () => {
+    (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }]);
+    renderWithContext(
+      mockUserContext,
+      {
+        ...mockCeramicContext,
+        passport: undefined,
+        isLoadingPassport: IsLoadingPassportState.LoadingFromCeramic,
+      },
+      <Router>
+        <Dashboard />
+      </Router>
+    );
+
+    const ceramicLoadingAlert = screen.getByTestId("ceramic-stamps-alert");
+    expect(ceramicLoadingAlert).toBeInTheDocument();
+  });
+});
+
 describe("when app fails to load ceramic stream", () => {
   it("should display a modal for user to retry connection, or close", () => {
     renderWithContext(

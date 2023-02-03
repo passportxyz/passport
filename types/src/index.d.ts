@@ -134,8 +134,8 @@ export type Stamp = {
 };
 
 export type Passport = {
-  issuanceDate: Date;
-  expiryDate: Date;
+  issuanceDate?: Date;
+  expiryDate?: Date;
   stamps: Stamp[];
 };
 

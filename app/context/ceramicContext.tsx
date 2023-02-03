@@ -8,7 +8,7 @@ import {
   Stamp,
 } from "@gitcoin/passport-types";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
-import { CeramicDatabase } from "@gitcoin/passport-database-client";
+import { CeramicDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
 import { useViewerConnection } from "@self.id/framework";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
@@ -48,9 +48,10 @@ export interface CeramicContextState {
   handleCreatePassport: () => Promise<void>;
   handleAddStamp: (stamp: Stamp) => Promise<void>;
   handleAddStamps: (stamps: Stamp[]) => Promise<void>;
-  handleDeleteStamp: (streamId: string) => Promise<void>;
+  handleDeleteStamp: (streamId: string, providerId: PROVIDER_ID) => Promise<void>;
   handleDeleteStamps: (providerIds: PROVIDER_ID[]) => Promise<void>;
   handleCheckRefreshPassport: () => Promise<boolean>;
+  cancelCeramicConnection: () => void;
   userDid: string | undefined;
   expiredProviders: PROVIDER_ID[];
   passportHasCacaoError: () => boolean;
@@ -173,6 +174,7 @@ platforms.set("Brightid", {
 export enum IsLoadingPassportState {
   Idle,
   Loading,
+  LoadingFromCeramic,
   FailedToConnect,
 }
 
@@ -451,29 +453,35 @@ const startingState: CeramicContextState = {
   handleDeleteStamps: async () => {},
   handleCheckRefreshPassport: async () => false,
   passportHasCacaoError: () => false,
+  cancelCeramicConnection: () => {},
   userDid: undefined,
   expiredProviders: [],
   passportLoadResponse: undefined,
 };
 
+const CERAMIC_TIMEOUT_MS = process.env.CERAMIC_TIMEOUT_MS || "10000";
+let shouldHaltCeramicConnection = false;
+
 export const CeramicContext = createContext(startingState);
 
 export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
-  const [ceramicDatabase, setCeramicDatabase] = useState<CeramicDatabase | undefined>(undefined);
+  const [ceramicClient, setCeramicClient] = useState<CeramicDatabase | undefined>(undefined);
   const [isLoadingPassport, setIsLoadingPassport] = useState<IsLoadingPassportState>(IsLoadingPassportState.Loading);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
   const [userDid, setUserDid] = useState<string | undefined>();
   const [expiredProviders, setExpiredProviders] = useState<PROVIDER_ID[]>([]);
   const [passportLoadResponse, setPassportLoadResponse] = useState<PassportLoadResponse | undefined>();
   const [viewerConnection] = useViewerConnection();
+  const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
 
   const { address } = useContext(UserContext);
 
   useEffect(() => {
     return () => {
       clearAllProvidersState();
-      setCeramicDatabase(undefined);
+      setCeramicClient(undefined);
+      setDatabase(undefined);
       setPassport(undefined);
       setUserDid(undefined);
       setPassportLoadResponse(undefined);
@@ -483,37 +491,51 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   useEffect((): void => {
     switch (viewerConnection.status) {
       case "idle": {
-        setCeramicDatabase(undefined);
+        setCeramicClient(undefined);
+        setDatabase(undefined);
         break;
       }
       case "connected": {
-        const ceramicDatabaseInstance = new CeramicDatabase(
+        // Ceramic Network Connection
+        const ceramicClientInstance = new CeramicDatabase(
           viewerConnection.selfID.did,
           process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
           undefined,
           datadogLogs.logger
         );
-        setCeramicDatabase(ceramicDatabaseInstance);
-        setUserDid(ceramicDatabaseInstance.did);
+        setCeramicClient(ceramicClientInstance);
+        setUserDid(ceramicClientInstance.did);
+        // Ceramic cache db
+        const databaseInstance = new PassportDatabase(
+          process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT || "",
+          process.env.NEXT_PUBLIC_CERAMIC_CACHE_API_KEY || "",
+          address || "",
+          datadogLogs.logger,
+          viewerConnection.selfID.did
+        );
+
+        setDatabase(databaseInstance);
         break;
       }
       case "failed": {
         console.log("failed to connect self id :(");
-        setCeramicDatabase(undefined);
+        setCeramicClient(undefined);
+        setDatabase(undefined);
         break;
       }
       default:
         break;
     }
-  }, [viewerConnection.status]);
+  }, [viewerConnection.status, address]);
 
   useEffect(() => {
-    if (ceramicDatabase) {
-      fetchPassport(ceramicDatabase);
-    }
-  }, [ceramicDatabase]);
+    if (database) fetchPassport(database);
+  }, [database]);
 
-  const fetchPassport = async (database: CeramicDatabase, skipLoadingState?: boolean): Promise<void> => {
+  const fetchPassport = async (
+    database: CeramicDatabase | PassportDatabase,
+    skipLoadingState?: boolean
+  ): Promise<void> => {
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
 
     // fetch, clean and set the new Passport state
@@ -546,7 +568,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const cleanPassport = (
     passport: Passport | undefined | false,
-    database: CeramicDatabase
+    database: CeramicDatabase | PassportDatabase
   ): Passport | undefined | false => {
     const tempExpiredProviders: PROVIDER_ID[] = [];
     // clean stamp content if expired or from a different issuer
@@ -574,23 +596,23 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const handleCheckRefreshPassport = async (): Promise<boolean> => {
     let success = true;
-    if (ceramicDatabase && passportLoadResponse) {
+    if (ceramicClient && passportLoadResponse) {
       let passportHasError = passportLoadResponse.status === "PassportCacaoError";
       let failedStamps = passportLoadResponse.errorDetails?.stampStreamIds || [];
       try {
         if (passportHasError) {
-          passportHasError = !(await ceramicDatabase.refreshPassport());
+          passportHasError = !(await ceramicClient.refreshPassport());
         }
 
         if (failedStamps && failedStamps.length) {
           try {
-            await ceramicDatabase.deleteStampIDs(failedStamps);
+            await ceramicClient.deleteStampIDs(failedStamps);
             failedStamps = [];
           } catch {}
         }
 
         // fetchPassport to reset passport state
-        await fetchPassport(ceramicDatabase);
+        await fetchPassport(ceramicClient);
 
         success = !passportHasError && !failedStamps.length;
       } catch {
@@ -601,22 +623,57 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   };
 
   const handleCreatePassport = async (): Promise<void> => {
-    try {
-      if (ceramicDatabase) {
-        await ceramicDatabase.createPassport();
-        await fetchPassport(ceramicDatabase);
+    if (database && ceramicClient) {
+      setIsLoadingPassport(IsLoadingPassportState.LoadingFromCeramic);
+
+      let initialStamps: Stamp[] = [];
+
+      try {
+        const { status, passport } = await Promise.race<PassportLoadResponse>([
+          returnEmptyPassportAfterTimeout(parseInt(CERAMIC_TIMEOUT_MS)),
+          returnEmptyPassportOnCancel(),
+          ceramicClient.getPassport(),
+        ]);
+        if (status === "Success" && passport?.stamps.length) {
+          initialStamps = passport.stamps;
+        }
+      } catch (e) {
+        console.error(e);
       }
-    } catch (e) {
-      datadogLogs.logger.error("Error creating passport", { error: e });
-      throw e;
+
+      await database.createPassport(initialStamps);
+      await fetchPassport(database);
     }
   };
 
+  const cancelCeramicConnection = () => {
+    shouldHaltCeramicConnection = true;
+  };
+
+  const returnEmptyPassportOnCancel = async (): Promise<PassportLoadResponse> =>
+    new Promise<PassportLoadResponse>((resolve) => {
+      const interval = setInterval(() => {
+        if (shouldHaltCeramicConnection) {
+          clearInterval(interval);
+          resolve({ status: "Success", passport: { stamps: [] } });
+        }
+      }, 1000);
+
+      setTimeout(() => {
+        clearInterval(interval);
+      }, parseInt(CERAMIC_TIMEOUT_MS));
+    });
+
+  const returnEmptyPassportAfterTimeout = async (timeout: number): Promise<PassportLoadResponse> =>
+    new Promise<PassportLoadResponse>((resolve) =>
+      setTimeout(() => resolve({ status: "Success", passport: { stamps: [] } }), timeout)
+    );
+
   const handleAddStamp = async (stamp: Stamp): Promise<void> => {
     try {
-      if (ceramicDatabase) {
-        await ceramicDatabase.addStamp(stamp);
-        await fetchPassport(ceramicDatabase, true);
+      if (database) {
+        await database.addStamp(stamp);
+        await fetchPassport(database, true);
       }
     } catch (e) {
       datadogLogs.logger.error("Error add single stamp", { stamp, error: e });
@@ -626,9 +683,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const handleAddStamps = async (stamps: Stamp[]): Promise<void> => {
     try {
-      if (ceramicDatabase) {
-        await ceramicDatabase.addStamps(stamps);
-        await fetchPassport(ceramicDatabase, true);
+      if (database) {
+        await database.addStamps(stamps);
+        await fetchPassport(database, true);
       }
     } catch (e) {
       datadogLogs.logger.error("Error adding multiple stamps", { stamps, error: e });
@@ -638,9 +695,15 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const handleDeleteStamps = async (providerIds: PROVIDER_ID[]): Promise<void> => {
     try {
-      if (ceramicDatabase) {
-        await ceramicDatabase.deleteStamps(providerIds);
-        await fetchPassport(ceramicDatabase, true);
+      if (database) {
+        if (database instanceof CeramicDatabase) {
+          await database.deleteStamps(providerIds);
+        } else if (database instanceof PassportDatabase) {
+          // TODO - add bulk post to cache db?
+          const addStampRequests = Promise.all(providerIds.map((providerId) => database.deleteStamp(providerId)));
+          const results = await addStampRequests;
+        }
+        await fetchPassport(database, true);
       }
     } catch (e) {
       datadogLogs.logger.error("Error deleting multiple stamps", { providerIds, error: e });
@@ -648,20 +711,25 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     }
   };
 
-  const handleDeleteStamp = async (streamId: string): Promise<void> => {
+  const handleDeleteStamp = async (streamId: string, providerId: PROVIDER_ID): Promise<void> => {
     try {
-      if (ceramicDatabase) {
-        await ceramicDatabase.deleteStamp(streamId);
-        await new Promise((r) =>
-          // We need to delay the loading of stamps, in order for the deletion to be reflected in ceramic
-          setTimeout(async () => {
-            await fetchPassport(ceramicDatabase, true);
-            r(0);
-          }, 2000)
-        );
+      if (database) {
+        if (database instanceof CeramicDatabase) {
+          await database.deleteStamp(streamId);
+          await new Promise((r) =>
+            // We need to delay the loading of stamps, in order for the deletion to be reflected in ceramic
+            setTimeout(async () => {
+              await fetchPassport(database, true);
+              r(0);
+            }, 2000)
+          );
+        } else {
+          await database.deleteStamp(providerId);
+          await fetchPassport(database, true);
+        }
       }
     } catch (e) {
-      datadogLogs.logger.error("Error deleting single stamp", { streamId, error: e });
+      datadogLogs.logger.error("Error deleting single stamp", { streamId, providerId, error: e });
       throw e;
     }
   };
@@ -724,6 +792,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     handleDeleteStamps,
     handleDeleteStamp,
     handleCheckRefreshPassport,
+    cancelCeramicConnection,
     userDid,
     expiredProviders,
     passportLoadResponse,
