@@ -10,6 +10,12 @@ import { UserContextState } from "../../context/userContext";
 
 jest.mock("../../utils/onboard.ts");
 
+jest.mock("@didtools/cacao", () => ({
+  Cacao: {
+    fromBlockBytes: jest.fn(),
+  },
+}));
+
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 describe("ExpiredStampModal", () => {

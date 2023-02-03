@@ -19,6 +19,12 @@ import { JsonRpcSigner } from "@ethersproject/providers";
 import { mock } from "jest-mock-extended";
 import { Drawer, DrawerOverlay } from "@chakra-ui/react";
 
+jest.mock("@didtools/cacao", () => ({
+  Cacao: {
+    fromBlockBytes: jest.fn(),
+  },
+}));
+
 jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
   fetchVerifiableCredential: jest.fn(),
 }));

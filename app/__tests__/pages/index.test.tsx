@@ -4,6 +4,11 @@ import Index from "../../pages/index";
 jest.mock("../../utils/onboard.ts");
 jest.mock("@datadog/browser-rum");
 jest.mock("@datadog/browser-logs");
+jest.mock("@didtools/cacao", () => ({
+  Cacao: {
+    fromBlockBytes: jest.fn(),
+  },
+}));
 
 const mockPostMessage = jest.fn();
 jest.mock("broadcast-channel", () => {

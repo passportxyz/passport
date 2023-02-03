@@ -475,7 +475,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [viewerConnection] = useViewerConnection();
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
 
-  const { address } = useContext(UserContext);
+  const { address, dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
 
   useEffect(() => {
     return () => {
@@ -495,26 +495,34 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         setDatabase(undefined);
         break;
       }
+      case "connecting": {
+        setIsLoadingPassport(IsLoadingPassportState.Loading);
+        break;
+      }
       case "connected": {
-        // Ceramic Network Connection
-        const ceramicClientInstance = new CeramicDatabase(
-          viewerConnection.selfID.did,
-          process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
-          undefined,
-          datadogLogs.logger
-        );
-        setCeramicClient(ceramicClientInstance);
-        setUserDid(ceramicClientInstance.did);
-        // Ceramic cache db
-        const databaseInstance = new PassportDatabase(
-          process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT || "",
-          process.env.NEXT_PUBLIC_CERAMIC_CACHE_API_KEY || "",
-          address || "",
-          datadogLogs.logger,
-          viewerConnection.selfID.did
-        );
+        if (dbAccessTokenStatus === "failed") {
+          setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
+        } else if (dbAccessToken) {
+          // Ceramic Network Connection
+          const ceramicClientInstance = new CeramicDatabase(
+            viewerConnection.selfID.did,
+            process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
+            undefined,
+            datadogLogs.logger
+          );
+          setCeramicClient(ceramicClientInstance);
+          setUserDid(ceramicClientInstance.did);
+          // Ceramic cache db
+          const databaseInstance = new PassportDatabase(
+            process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT || "",
+            address || "",
+            dbAccessToken || "",
+            datadogLogs.logger,
+            viewerConnection.selfID.did
+          );
 
-        setDatabase(databaseInstance);
+          setDatabase(databaseInstance);
+        }
         break;
       }
       case "failed": {
@@ -526,7 +534,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       default:
         break;
     }
-  }, [viewerConnection.status, address]);
+  }, [viewerConnection.status, address, dbAccessToken, dbAccessTokenStatus]);
 
   useEffect(() => {
     if (database) fetchPassport(database);

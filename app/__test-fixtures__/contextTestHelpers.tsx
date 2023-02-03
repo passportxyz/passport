@@ -7,6 +7,12 @@ import { render } from "@testing-library/react";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
 
+jest.mock("@didtools/cacao", () => ({
+  Cacao: {
+    fromBlockBytes: jest.fn(),
+  },
+}));
+
 export const makeTestUserContext = (initialState?: Partial<UserContextState>): UserContextState => {
   return {
     loggedIn: true,
@@ -16,6 +22,8 @@ export const makeTestUserContext = (initialState?: Partial<UserContextState>): U
     wallet: mockWallet,
     signer: undefined,
     walletLabel: mockWallet.label,
+    dbAccessToken: "token",
+    dbAccessTokenStatus: "idle",
     ...initialState,
   };
 };

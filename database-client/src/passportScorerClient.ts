@@ -13,25 +13,26 @@ import {
 
 export class PassportDatabase implements DataStorageBase {
   passportScorerUrl: string;
-  passportScorerApiKey: string;
   address: string;
+  token: string;
   did: string;
   logger: Logger;
   allowEmpty: boolean;
+  
 
   constructor(
     passportScorerUrl: string,
-    passportScorerApiKey: string,
     address: string,
+    token: string,
     logger?: Logger,
-    did?: CeramicDID
+    did?: CeramicDID,
   ) {
     this.passportScorerUrl = passportScorerUrl;
-    this.passportScorerApiKey = passportScorerApiKey;
     this.address = address;
     this.logger = logger;
     this.did = (did.hasParent ? did.parent : did.id).toLowerCase();
     this.allowEmpty = false;
+    this.token = token;
   }
 
   async createPassport(initialStamps?: Stamp[]): Promise<string> {
@@ -85,7 +86,10 @@ export class PassportDatabase implements DataStorageBase {
         address: this.address,
         provider: stamp.provider,
         stamp: stamp.credential,
-      });
+      }, {
+          headers:
+            { Authorization: `Bearer ${this.token}`},
+        });
     } catch (e) {
       this.logger.error(`Error saving stamp to passportScorer address:  ${this.address}:` + e.toString());
     }
@@ -99,6 +103,7 @@ export class PassportDatabase implements DataStorageBase {
           address: this.address,
           provider: provider,
         },
+        headers: { Authorization: `Bearer ${this.token}` },
       });
     } catch (e) {
       this.logger.error(`Error deleting stamp from passportScorer for ${provider} on ${this.address}: ` + e.toString());
