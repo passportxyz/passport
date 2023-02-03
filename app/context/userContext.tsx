@@ -34,6 +34,7 @@ export interface UserContextState {
   wallet: WalletState | null;
   signer: JsonRpcSigner | undefined;
   walletLabel: string | undefined;
+  dbAccessToken: string | undefined;
 }
 
 const startingState: UserContextState = {
@@ -44,6 +45,7 @@ const startingState: UserContextState = {
   wallet: null,
   signer: undefined,
   walletLabel: undefined,
+  dbAccessToken: undefined,
 };
 
 export const pillLocalStorage = (platform?: string): void => {
@@ -127,7 +129,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     // Get the JWS & serialize it (this is what we would send to the BE)
     const { link, payload, signatures } = jws;
 
-    if (cacaoBlock) {
+    if (cacaoBlock !== undefined) {
       const cacao = await Cacao.fromBlockBytes(cacaoBlock);
       const issuer = cacao.p.iss;
 
@@ -148,13 +150,11 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         return accessToken;
       } catch (error) {
         const msg = `Failed to authenticate user with did: ${did.parent}`;
-        console.error(msg);
         datadogRum.addError(msg);
         throw msg;
       }
     } else {
       const msg = `Failed to create DagJWS for did: ${did.parent}`;
-      console.error(msg);
       datadogRum.addError(msg);
       throw msg;
     }
@@ -243,8 +243,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
             window.localStorage.removeItem(dbCacheTokenKey);
           }
 
-
-          // Here we try to get an access token for the Passport database 
+          // Here we try to get an access token for the Passport database
           // We should get a new access token:
           // 1. if the user has nonde
           // 2. in case a new session has been created (access tokens should expire similar to sessions)
@@ -257,14 +256,13 @@ export const UserContextProvider = ({ children }: { children: any }) => {
               // @ts-ignore
               window.localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
               window.localStorage.setItem(dbCacheTokenKey, dbAccessToken);
+              setDbAccessToken(dbAccessToken || undefined);
             } catch (error) {
+              // Should we logout the user here? They will be unable to write to passport
               const msg = `Error getting access token for did: ${did}`;
-              console.error(msg);
               datadogRum.addError(msg);
             }
           }
-
-          setDbAccessToken(dbAccessToken || undefined);
         } finally {
           // mark that this login attempt is complete
           setLoggingIn(false);
@@ -392,7 +390,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     wallet,
     signer,
     walletLabel,
-    dbAccessToken
+    dbAccessToken,
   };
 
   return <UserContext.Provider value={providerProps}>{children}</UserContext.Provider>;

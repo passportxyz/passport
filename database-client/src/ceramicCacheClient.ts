@@ -18,14 +18,16 @@ export class CeramicCacheDatabase implements DataStorageBase {
   did: string;
   logger: Logger;
   allowEmpty: boolean;
+  token: string;
 
-  constructor(ceramicCacheUrl: string, ceramicCacheApiKey: string, address: string, logger?: Logger, did?: CeramicDID) {
+  constructor(ceramicCacheUrl: string, ceramicCacheApiKey: string, address: string, token: string, logger?: Logger, did?: CeramicDID) {
     this.ceramicCacheUrl = ceramicCacheUrl;
     this.ceramicCacheApiKey = ceramicCacheApiKey;
     this.address = address;
     this.logger = logger;
     this.did = (did.hasParent ? did.parent : did.id).toLowerCase();
     this.allowEmpty = false;
+    this.token = token;
   }
 
   async createPassport(initialStamps?: Stamp[]): Promise<string> {
@@ -75,11 +77,16 @@ export class CeramicCacheDatabase implements DataStorageBase {
     this.logger.info(`adding stamp to ceramicCache address: ${this.address}`);
     try {
       // Todo will need to validate ownership / pass signature
-      await axios.post(`${this.ceramicCacheUrl}ceramic-cache/stamp`, {
-        address: this.address,
-        provider: stamp.provider,
-        stamp: stamp.credential,
-      });
+      await axios.post(`${this.ceramicCacheUrl}ceramic-cache/stamp`,
+        {
+          address: this.address,
+          provider: stamp.provider,
+          stamp: stamp.credential,
+        },
+        {
+          headers:
+            { Authorization: `Bearer ${this.token}`},
+        });
     } catch (e) {
       this.logger.error(`Error saving stamp to ceramicCache address:  ${this.address}:` + e.toString());
     }
@@ -93,6 +100,7 @@ export class CeramicCacheDatabase implements DataStorageBase {
           address: this.address,
           provider: provider,
         },
+        headers: { Authorization: `Bearer ${this.token}` },
       });
     } catch (e) {
       this.logger.error(`Error deleting stamp from ceramicCache for ${provider} on ${this.address}: ` + e.toString());
