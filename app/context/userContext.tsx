@@ -245,6 +245,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           // 1. if the user has nonde
           // 2. in case a new session has been created (access tokens should expire similar to sessions)
           // TODO: verifying the validity of the access token would also make sense => check the expiration data in the token
+          // @ts-ignore
           const did = selfId?.client?.session?.did;
           if (!dbAccessToken || hasNewSelfId) {
             try {
