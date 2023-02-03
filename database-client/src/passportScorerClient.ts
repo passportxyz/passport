@@ -11,17 +11,23 @@ import {
   Passport,
 } from "@gitcoin/passport-types";
 
-export class CeramicCacheDatabase implements DataStorageBase {
-  ceramicCacheUrl: string;
-  ceramicCacheApiKey: string;
+export class PassportDatabase implements DataStorageBase {
+  passportScorerUrl: string;
+  passportScorerApiKey: string;
   address: string;
   did: string;
   logger: Logger;
   allowEmpty: boolean;
 
-  constructor(ceramicCacheUrl: string, ceramicCacheApiKey: string, address: string, logger?: Logger, did?: CeramicDID) {
-    this.ceramicCacheUrl = ceramicCacheUrl;
-    this.ceramicCacheApiKey = ceramicCacheApiKey;
+  constructor(
+    passportScorerUrl: string,
+    passportScorerApiKey: string,
+    address: string,
+    logger?: Logger,
+    did?: CeramicDID
+  ) {
+    this.passportScorerUrl = passportScorerUrl;
+    this.passportScorerApiKey = passportScorerApiKey;
     this.address = address;
     this.logger = logger;
     this.did = (did.hasParent ? did.parent : did.id).toLowerCase();
@@ -44,7 +50,7 @@ export class CeramicCacheDatabase implements DataStorageBase {
     let errorDetails: PassportLoadErrorDetails;
 
     try {
-      const response = await axios.get(`${this.ceramicCacheUrl}ceramic-cache/stamp?address=${this.address}`);
+      const response = await axios.get(`${this.passportScorerUrl}ceramic-cache/stamp?address=${this.address}`);
       const { data } = response;
       if (data && data.success && (this.allowEmpty || data.stamps.length !== 0)) {
         passport = {
@@ -72,30 +78,30 @@ export class CeramicCacheDatabase implements DataStorageBase {
   };
 
   async addStamp(stamp: Stamp): Promise<void> {
-    this.logger.info(`adding stamp to ceramicCache address: ${this.address}`);
+    this.logger.info(`adding stamp to passportScorer address: ${this.address}`);
     try {
       // Todo will need to validate ownership / pass signature
-      await axios.post(`${this.ceramicCacheUrl}ceramic-cache/stamp`, {
+      await axios.post(`${this.passportScorerUrl}ceramic-cache/stamp`, {
         address: this.address,
         provider: stamp.provider,
         stamp: stamp.credential,
       });
     } catch (e) {
-      this.logger.error(`Error saving stamp to ceramicCache address:  ${this.address}:` + e.toString());
+      this.logger.error(`Error saving stamp to passportScorer address:  ${this.address}:` + e.toString());
     }
   }
 
   async deleteStamp(provider: PROVIDER_ID): Promise<void> {
-    this.logger.info(`deleting stamp from ceramicCache for ${provider} on ${this.address}`);
+    this.logger.info(`deleting stamp from passportScorer for ${provider} on ${this.address}`);
     try {
-      await axios.delete(`${this.ceramicCacheUrl}ceramic-cache/stamp`, {
+      await axios.delete(`${this.passportScorerUrl}ceramic-cache/stamp`, {
         data: {
           address: this.address,
           provider: provider,
         },
       });
     } catch (e) {
-      this.logger.error(`Error deleting stamp from ceramicCache for ${provider} on ${this.address}: ` + e.toString());
+      this.logger.error(`Error deleting stamp from passportScorer for ${provider} on ${this.address}: ` + e.toString());
     }
   }
 }

@@ -1,2 +1,2 @@
 export * from "./ceramicClient";
-export * from "./ceramicCacheClient";
+export * from "./passportScorerClient";

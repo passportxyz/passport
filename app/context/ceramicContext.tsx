@@ -8,7 +8,7 @@ import {
   Stamp,
 } from "@gitcoin/passport-types";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
-import { CeramicDatabase, CeramicCacheDatabase } from "@gitcoin/passport-database-client";
+import { CeramicDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
 import { useViewerConnection } from "@self.id/framework";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
@@ -469,7 +469,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [expiredProviders, setExpiredProviders] = useState<PROVIDER_ID[]>([]);
   const [passportLoadResponse, setPassportLoadResponse] = useState<PassportLoadResponse | undefined>();
   const [viewerConnection] = useViewerConnection();
-  const [database, setDatabase] = useState<CeramicCacheDatabase | undefined>(undefined);
+  const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
 
   const { address } = useContext(UserContext);
 
@@ -502,7 +502,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         setCeramicClient(ceramicClientInstance);
         setUserDid(ceramicClientInstance.did);
         // Ceramic cache db
-        const databaseInstance = new CeramicCacheDatabase(
+        const databaseInstance = new PassportDatabase(
           process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT || "",
           process.env.NEXT_PUBLIC_CERAMIC_CACHE_API_KEY || "",
           address || "",
@@ -529,7 +529,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   }, [database]);
 
   const fetchPassport = async (
-    database: CeramicDatabase | CeramicCacheDatabase,
+    database: CeramicDatabase | PassportDatabase,
     skipLoadingState?: boolean
   ): Promise<void> => {
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
@@ -564,7 +564,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const cleanPassport = (
     passport: Passport | undefined | false,
-    database: CeramicDatabase | CeramicCacheDatabase
+    database: CeramicDatabase | PassportDatabase
   ): Passport | undefined | false => {
     const tempExpiredProviders: PROVIDER_ID[] = [];
     // clean stamp content if expired or from a different issuer
@@ -656,7 +656,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     if (database) {
       if (database instanceof CeramicDatabase) {
         await database.deleteStamps(providerIds);
-      } else if (database instanceof CeramicCacheDatabase) {
+      } else if (database instanceof PassportDatabase) {
         // TODO - add bulk post to cache db?
         const addStampRequests = Promise.all(providerIds.map((providerId) => database.deleteStamp(providerId)));
         const results = await addStampRequests;
