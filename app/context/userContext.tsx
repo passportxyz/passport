@@ -70,6 +70,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   const [address, setAddress] = useState<string>();
   const [signer, setSigner] = useState<JsonRpcSigner | undefined>();
   const [loggingIn, setLoggingIn] = useState<boolean | undefined>();
+  const [dbAccessToken, setDbAccessToken] = useState<string | undefined>();
 
   // clear all state
   const clearState = (): void => {
@@ -117,6 +118,48 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     return false;
   };
 
+  const getPassportDatabaseAccessToken = async (did: DID): Promise<string> => {
+    const payloadToSign = { data: "TODO" };
+
+    // sign the payload as dag-jose
+    const { jws, cacaoBlock } = await did.createDagJWS(payloadToSign);
+
+    // Get the JWS & serialize it (this is what we would send to the BE)
+    const { link, payload, signatures } = jws;
+
+    if (cacaoBlock) {
+      const cacao = await Cacao.fromBlockBytes(cacaoBlock);
+      const issuer = cacao.p.iss;
+
+      const payloadForVerifier = {
+        signatures: signatures,
+        payload: payload,
+        cid: Array.from(link ? link.bytes : []),
+        cacao: Array.from(cacaoBlock ? cacaoBlock : []),
+        issuer,
+      };
+
+      try {
+        const authResponse = await axios.post(
+          `${process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT}ceramic-cache/authenticate`,
+          payloadForVerifier
+        );
+        const accessToken = authResponse.data?.access as string;
+        return accessToken;
+      } catch (error) {
+        const msg = `Failed to authenticate user with did: ${did.parent}`;
+        console.error(msg);
+        datadogRum.addError(msg);
+        throw msg;
+      }
+    } else {
+      const msg = `Failed to create DagJWS for did: ${did.parent}`;
+      console.error(msg);
+      datadogRum.addError(msg);
+      throw msg;
+    }
+  };
+
   // Attempt to login to Ceramic (on mainnet only)
   const passportLogin = async (): Promise<void> => {
     // check that passportLogin isn't mid-way through
@@ -138,8 +181,10 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           // The sessions are bound to an ETH address, this is why we use the address in the session key
           const sessionKey = `didsession-${address}`;
           const dbCacheTokenKey = `dbcache-token-${address}`;
+          let dbAccessToken = window.localStorage.getItem(dbCacheTokenKey);
           // const sessionStr = window.localStorage.getItem(sessionKey);
           const sessionStr = null;
+          let hasNewSelfId = false;
 
           // @ts-ignore
           // When sessionStr is null, this will create a new selfId. We want to avoid this, becasue we want to make sure
@@ -152,6 +197,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
             // @ts-ignore
             !selfId?.client?.session
           ) {
+            hasNewSelfId = true;
             if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
               // If the session loaded is not valid, or if it is expired or close to expire, we create
               // a new session
@@ -170,53 +216,12 @@ export const UserContextProvider = ({ children }: { children: any }) => {
               });
               const newSessionStr = session.serialize();
 
-
-
               // @ts-ignore
               selfId = await ceramicConnect(ethAuthProvider, newSessionStr);
             } else {
               // If the session loaded is not valid, or if it is expired or close to expire, we create
               // a new connection to ceramic
               selfId = await ceramicConnect(ethAuthProvider);
-            }
-
-
-            const did = selfId?.client?.session?.did;
-
-            const payloadToSign = { data: "TODO" };
-
-            // sign the payload as dag-jose
-            const { jws, cacaoBlock } = await did.createDagJWS(payloadToSign);
-
-            // Get the JWS & serialize it (this is what we would send to the BE)
-            const { link, payload, signatures } = jws;
-
-            if (cacaoBlock) {
-              const cacao = await Cacao.fromBlockBytes(cacaoBlock);
-              const issuer = cacao.p.iss;
-
-              const payloadForVerifier = {
-                signatures: signatures,
-                payload: payload,
-                cid: Array.from(link ? link.bytes : []),
-                cacao: Array.from(cacaoBlock ? cacaoBlock : []),
-                issuer,
-              };
-
-              try {
-                const authResponse = await axios.post(
-                  "http://127.0.0.1:8000/ceramic-cache/authenticate",
-                  payloadForVerifier
-                );
-                console.log("Auth response: ", authResponse.data);
-
-                // Store the access token in localstorage
-                // @ts-ignore
-                window.localStorage.setItem(dbCacheTokenKey, authResponse.data?.access);
-              } catch (error) {
-                console.error("Failed to authenticate user!", error);
-                datadogRum.addError(error);
-              }
             }
 
             // Store the session in localstorage
@@ -237,6 +242,29 @@ export const UserContextProvider = ({ children }: { children: any }) => {
             window.localStorage.removeItem(sessionKey);
             window.localStorage.removeItem(dbCacheTokenKey);
           }
+
+
+          // Here we try to get an access token for the Passport database 
+          // We should get a new access token:
+          // 1. if the user has nonde
+          // 2. in case a new session has been created (access tokens should expire similar to sessions)
+          // TODO: verifying the validity of the access token would also make sense => check the expiration data in the token
+          const did = selfId?.client?.session?.did;
+          if (!dbAccessToken || hasNewSelfId) {
+            try {
+              dbAccessToken = await getPassportDatabaseAccessToken(did);
+              // Store the session in localstorage
+              // @ts-ignore
+              window.localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
+              window.localStorage.setItem(dbCacheTokenKey, dbAccessToken);
+            } catch (error) {
+              const msg = `Error getting access token for did: ${did}`;
+              console.error(msg);
+              datadogRum.addError(msg);
+            }
+          }
+
+          setDbAccessToken(dbAccessToken || undefined);
         } finally {
           // mark that this login attempt is complete
           setLoggingIn(false);
@@ -364,6 +392,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     wallet,
     signer,
     walletLabel,
+    dbAccessToken
   };
 
   return <UserContext.Provider value={providerProps}>{children}</UserContext.Provider>;
