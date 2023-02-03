@@ -537,7 +537,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     // fetch, clean and set the new Passport state
     const { status, errorDetails, passport } = await database.getPassport();
 
-    debugger;
     switch (status) {
       case "Success":
       case "StampCacaoError":
