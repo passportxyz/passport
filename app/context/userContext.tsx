@@ -23,6 +23,8 @@ import { DID } from "dids";
 import { Cacao } from "@didtools/cacao";
 import axios from "axios";
 
+export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
+
 export interface UserContextState {
   loggedIn: boolean;
   toggleConnection: () => void;
@@ -32,6 +34,7 @@ export interface UserContextState {
   signer: JsonRpcSigner | undefined;
   walletLabel: string | undefined;
   dbAccessToken: string | undefined;
+  dbAccessTokenStatus: DbAuthTokenStatus;
 }
 
 const startingState: UserContextState = {
@@ -43,6 +46,7 @@ const startingState: UserContextState = {
   signer: undefined,
   walletLabel: undefined,
   dbAccessToken: undefined,
+  dbAccessTokenStatus: "idle",
 };
 
 export const pillLocalStorage = (platform?: string): void => {
@@ -70,6 +74,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   const [signer, setSigner] = useState<JsonRpcSigner | undefined>();
   const [loggingIn, setLoggingIn] = useState<boolean | undefined>();
   const [dbAccessToken, setDbAccessToken] = useState<string | undefined>();
+  const [dbAccessTokenStatus, setDbAccessTokenStatus] = useState<DbAuthTokenStatus>("idle");
 
   // clear all state
   const clearState = (): void => {
@@ -118,6 +123,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   };
 
   const getPassportDatabaseAccessToken = async (did: DID): Promise<string> => {
+    // TODO: set a meaningfull payload ...
     const payloadToSign = { data: "TODO" };
 
     // sign the payload as dag-jose
@@ -178,9 +184,8 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           // The sessions are bound to an ETH address, this is why we use the address in the session key
           const sessionKey = `didsession-${address}`;
           const dbCacheTokenKey = `dbcache-token-${address}`;
-          let dbAccessToken = window.localStorage.getItem(dbCacheTokenKey);
-          // const sessionStr = window.localStorage.getItem(sessionKey);
-          const sessionStr = null;
+          const sessionStr = window.localStorage.getItem(sessionKey);
+
           let hasNewSelfId = false;
 
           // @ts-ignore
@@ -239,28 +244,6 @@ export const UserContextProvider = ({ children }: { children: any }) => {
             window.localStorage.removeItem(sessionKey);
             window.localStorage.removeItem(dbCacheTokenKey);
           }
-
-          // Here we try to get an access token for the Passport database
-          // We should get a new access token:
-          // 1. if the user has nonde
-          // 2. in case a new session has been created (access tokens should expire similar to sessions)
-          // TODO: verifying the validity of the access token would also make sense => check the expiration data in the token
-          // @ts-ignore
-          const did = selfId?.client?.session?.did;
-          if (!dbAccessToken || hasNewSelfId) {
-            try {
-              dbAccessToken = await getPassportDatabaseAccessToken(did);
-              // Store the session in localstorage
-              // @ts-ignore
-              window.localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
-              window.localStorage.setItem(dbCacheTokenKey, dbAccessToken);
-              setDbAccessToken(dbAccessToken || undefined);
-            } catch (error) {
-              // Should we logout the user here? They will be unable to write to passport
-              const msg = `Error getting access token for did: ${did}`;
-              datadogRum.addError(msg);
-            }
-          }
         } finally {
           // mark that this login attempt is complete
           setLoggingIn(false);
@@ -287,6 +270,48 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   useEffect((): void => {
     setWalletFromLocalStorage();
   }, []);
+
+  useEffect((): void => {
+    console.log({ loggedIn, address, status: viewerConnection.status });
+    const loadDbAccessToken = async () => {
+      if (viewerConnection.status === "connected") {
+        const dbCacheTokenKey = `dbcache-token-${address}`;
+        // TODO: if we load the token from the localstorage we should validate it
+        // let dbAccessToken = window.localStorage.getItem(dbCacheTokenKey);
+        let dbAccessToken = null;
+
+        // Here we try to get an access token for the Passport database
+        // We should get a new access token:
+        // 1. if the user has nonde
+        // 2. in case a new session has been created (access tokens should expire similar to sessions)
+        // TODO: verifying the validity of the access token would also make sense => check the expiration data in the token
+        const did = viewerConnection.selfID.did; // selfId?.client?.session?.did;
+        if (!dbAccessToken) {
+          setDbAccessTokenStatus("connecting");
+
+          try {
+            dbAccessToken = await getPassportDatabaseAccessToken(did);
+            // Store the session in localstorage
+            // @ts-ignore
+            window.localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
+            window.localStorage.setItem(dbCacheTokenKey, dbAccessToken);
+            setDbAccessToken(dbAccessToken || undefined);
+            setDbAccessTokenStatus(dbAccessToken ? "connected" : "failed");
+          } catch (error) {
+            setDbAccessTokenStatus("failed");
+
+            // Should we logout the user here? They will be unable to write to passport
+            const msg = `Error getting access token for did: ${did}`;
+            datadogRum.addError(msg);
+          }
+        } else {
+          setDbAccessToken(dbAccessToken || undefined);
+          setDbAccessTokenStatus(dbAccessToken ? "connected" : "failed");
+        }
+      }
+    };
+    loadDbAccessToken();
+  }, [loggedIn, viewerConnection.status, address]);
 
   // Update on wallet connect
   useEffect((): void => {
@@ -389,6 +414,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     signer,
     walletLabel,
     dbAccessToken,
+    dbAccessTokenStatus,
   };
 
   return <UserContext.Provider value={providerProps}>{children}</UserContext.Provider>;

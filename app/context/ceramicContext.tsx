@@ -475,7 +475,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [viewerConnection] = useViewerConnection();
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
 
-  const { address, dbAccessToken } = useContext(UserContext);
+  const { address, dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
 
   useEffect(() => {
     return () => {
@@ -495,8 +495,14 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         setDatabase(undefined);
         break;
       }
+      case "connecting": {
+        setIsLoadingPassport(IsLoadingPassportState.Loading);
+        break;
+      }
       case "connected": {
-        if (dbAccessToken) {
+        if (dbAccessTokenStatus === "failed") {
+          setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
+        } else if (dbAccessToken) {
           // Ceramic Network Connection
           const ceramicClientInstance = new CeramicDatabase(
             viewerConnection.selfID.did,
@@ -528,7 +534,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       default:
         break;
     }
-  }, [viewerConnection.status, address, dbAccessToken]);
+  }, [viewerConnection.status, address, dbAccessToken, dbAccessTokenStatus]);
 
   useEffect(() => {
     if (database) fetchPassport(database);
