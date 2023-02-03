@@ -272,7 +272,6 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   }, []);
 
   useEffect((): void => {
-    console.log({ loggedIn, address, status: viewerConnection.status });
     const loadDbAccessToken = async () => {
       if (viewerConnection.status === "connected") {
         const dbCacheTokenKey = `dbcache-token-${address}`;
@@ -293,7 +292,6 @@ export const UserContextProvider = ({ children }: { children: any }) => {
             dbAccessToken = await getPassportDatabaseAccessToken(did);
             // Store the session in localstorage
             // @ts-ignore
-            window.localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
             window.localStorage.setItem(dbCacheTokenKey, dbAccessToken);
             setDbAccessToken(dbAccessToken || undefined);
             setDbAccessTokenStatus(dbAccessToken ? "connected" : "failed");
