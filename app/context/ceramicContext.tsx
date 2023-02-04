@@ -502,7 +502,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       case "connected": {
         if (dbAccessTokenStatus === "failed") {
           setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
-        } else if (dbAccessToken) {
+        } else if (dbAccessToken && address) {
           // Ceramic Network Connection
           const ceramicClientInstance = new CeramicDatabase(
             viewerConnection.selfID.did,
@@ -515,8 +515,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           // Ceramic cache db
           const databaseInstance = new PassportDatabase(
             process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT || "",
-            address || "",
-            dbAccessToken || "",
+            address,
+            dbAccessToken,
             datadogLogs.logger,
             viewerConnection.selfID.did
           );
