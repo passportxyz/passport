@@ -117,29 +117,24 @@ export default function Dashboard() {
       </div>
 
       {viewerConnection.status === "connecting" && (
-        <ProcessingPopup>
-          <span data-testid="selfId-connection-alert"> Waiting for wallet signature...</span>
-        </ProcessingPopup>
+        <ProcessingPopup data-testid="selfId-connection-alert">Waiting for wallet signature...</ProcessingPopup>
       )}
 
       {isLoadingPassport === IsLoadingPassportState.Loading && (
-        <ProcessingPopup>
-          <span data-testid="db-stamps-alert">One moment while we load your Stamps</span>
-        </ProcessingPopup>
+        <ProcessingPopup data-testid="db-stamps-alert">One moment while we load your Stamps...</ProcessingPopup>
       )}
 
       {isLoadingPassport === IsLoadingPassportState.LoadingFromCeramic && (
         <ProcessingPopup>
-          <span data-testid="ceramic-stamps-alert">
-            {" "}
-            Connecting to Ceramic...&nbsp;&nbsp;&nbsp;&nbsp;
+          <>
+            Connecting to Ceramic...
             <span
-              className="text-white no-underline hover:cursor-pointer hover:underline"
+              className="pl-4 text-white no-underline hover:cursor-pointer hover:underline sm:pl-8 md:pl-12"
               onClick={cancelCeramicConnection}
             >
               Cancel
             </span>
-          </span>
+          </>
         </ProcessingPopup>
       )}
 
