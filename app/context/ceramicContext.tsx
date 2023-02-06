@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, useRef } from "react";
 import {
   Passport,
   PassportLoadResponse,
@@ -460,12 +460,12 @@ const startingState: CeramicContextState = {
 };
 
 const CERAMIC_TIMEOUT_MS = process.env.CERAMIC_TIMEOUT_MS || "10000";
-let shouldHaltCeramicConnection = false;
 
 export const CeramicContext = createContext(startingState);
 
 export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
+  const resolveCancel = useRef<() => void>();
   const [ceramicClient, setCeramicClient] = useState<CeramicDatabase | undefined>(undefined);
   const [isLoadingPassport, setIsLoadingPassport] = useState<IsLoadingPassportState>(IsLoadingPassportState.Loading);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
@@ -655,21 +655,14 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   };
 
   const cancelCeramicConnection = () => {
-    shouldHaltCeramicConnection = true;
+    if (resolveCancel?.current) resolveCancel.current();
   };
 
   const returnEmptyPassportOnCancel = async (): Promise<PassportLoadResponse> =>
     new Promise<PassportLoadResponse>((resolve) => {
-      const interval = setInterval(() => {
-        if (shouldHaltCeramicConnection) {
-          clearInterval(interval);
-          resolve({ status: "Success", passport: { stamps: [] } });
-        }
-      }, 1000);
-
-      setTimeout(() => {
-        clearInterval(interval);
-      }, parseInt(CERAMIC_TIMEOUT_MS));
+      resolveCancel.current = () => {
+        resolve({ status: "Success", passport: { stamps: [] } });
+      };
     });
 
   const returnEmptyPassportAfterTimeout = async (timeout: number): Promise<PassportLoadResponse> =>
