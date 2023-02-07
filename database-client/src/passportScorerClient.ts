@@ -52,6 +52,8 @@ export class PassportDatabase implements DataStorageBase {
 
     try {
       const response = await axios.get(`${this.passportScorerUrl}ceramic-cache/stamp?address=${this.address}`);
+      this.logger.info(`loaded passport for did ${this.did} => ${this.address}`);
+
       const { data } = response;
       if (data && data.success && (this.allowEmpty || data.stamps.length !== 0)) {
         passport = {
