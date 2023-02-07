@@ -125,7 +125,7 @@ export default function Dashboard() {
       )}
 
       {isLoadingPassport === IsLoadingPassportState.LoadingFromCeramic && (
-        <ProcessingPopup>
+        <ProcessingPopup data-testid="ceramic-stamps-alert">
           <>
             Connecting to Ceramic...
             <span
