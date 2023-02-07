@@ -176,7 +176,7 @@ export class CeramicDatabase implements DataStorageBase {
 
     try {
       const ceramicPassport = await this.store.get("Passport");
-      this.logger.info(`loaded passport for did ${this.did} => ${JSON.stringify(ceramicPassport)}`);
+      this.logger.info(`[Ceramic] Loaded passport for did ${this.did} => ${JSON.stringify(ceramicPassport)}`);
 
       // According to the logs, it does happen that passport is sometimes an empty object {}
       // We treat this case as an non-existent passport
@@ -199,7 +199,7 @@ export class CeramicDatabase implements DataStorageBase {
       }
     } catch (e) {
       status = "ExceptionRaised";
-      this.logger.error(`Error when loading passport for did  ${this.did}:` + e.toString(), { error: e });
+      this.logger.error(`[Ceramic] Error when loading passport for did  ${this.did}:` + e.toString(), { error: e });
     } finally {
       const possiblePassportCacaoErrorStatuses: PassportLoadStatus[] = ["DoesNotExist", "ExceptionRaised"];
       if (possiblePassportCacaoErrorStatuses.includes(status) && (await this.checkPassportCACAOError()))
