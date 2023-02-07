@@ -52,7 +52,7 @@ export class PassportDatabase implements DataStorageBase {
 
     try {
       const response = await axios.get(`${this.passportScorerUrl}ceramic-cache/stamp?address=${this.address}`);
-      this.logger.info(`loaded passport for did ${this.did} => ${this.address}`);
+      this.logger.info(`[Scorer] Loaded passport for did ${this.did} => ${this.address}`);
 
       const { data } = response;
       if (data && data.success && (this.allowEmpty || data.stamps.length !== 0)) {
@@ -66,7 +66,7 @@ export class PassportDatabase implements DataStorageBase {
       }
     } catch (e) {
       status = "ExceptionRaised";
-      this.logger.error(`Error when loading passport for did  ${this.address}:` + e.toString(), { error: e });
+      this.logger.error(`[Scorer] Error when loading passport for did  ${this.address}:` + e.toString(), { error: e });
     } finally {
       return {
         passport,
