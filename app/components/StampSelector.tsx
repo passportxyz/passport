@@ -24,7 +24,7 @@ export function StampSelector({
   // stamp filter
   const router = useRouter();
   const { filter } = router.query;
-  const stampFilters = filter && typeof filter === "string" ? getStampProviderFilters(filter) : false;
+  const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;
 
   return (
     <>
