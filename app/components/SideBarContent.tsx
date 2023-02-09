@@ -76,6 +76,7 @@ export const SideBarContent = ({
               </div>
               <hr className="border-1" />
               <StampSelector
+                currentPlatform={currentPlatform}
                 currentProviders={currentProviders}
                 verifiedProviders={verifiedProviders}
                 selectedProviders={selectedProviders}
