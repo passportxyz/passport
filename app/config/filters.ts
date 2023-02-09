@@ -1,20 +1,38 @@
-export const STAMP_FILTERS: any = {
+export const STAMP_FILTERS: {
+  [key: string]: {
+    name: string;
+    stamps: {
+      [key: string]: string[]
+    }
+  };
+} = {
   'bankless-academy': {
-    Google: ["Account Name"],
-    Ens: ["Account Name"],
-    Poh: ["Account Name"],
-    Twitter: ["Account Name"],
-    Facebook: ["Account Name"],
-    Brightid: ["Account Name"],
-    Linkedin: ["Account Name"],
-    Discord: ["Account Name"],
+    name: 'Bankless Academy',
+    stamps: {
+      Google: ["Account Name"],
+      Ens: ["Account Name"],
+      Poh: ["Account Name"],
+      Twitter: ["Account Name"],
+      Facebook: ["Account Name"],
+      Brightid: ["Account Name"],
+      Linkedin: ["Account Name"],
+      Discord: ["Account Name"],
+    }
   }
 };
 
-export const getStampProviderFilters = (filter: string | string[] | undefined): any => {
+export const getStampProviderFilters = (filter: string): any => {
   let stampFilters: any = false;
-  if (filter && typeof filter === "string" && filter.length && Object.keys(STAMP_FILTERS).includes(filter)) {
-    stampFilters = STAMP_FILTERS[filter];
+  if (Object.keys(STAMP_FILTERS).includes(filter)) {
+    stampFilters = STAMP_FILTERS[filter].stamps;
   }
-  return stampFilters
+  return stampFilters;
+};
+
+export const getFilterName = (filter: string): any => {
+  let filterName: any = false;
+  if (Object.keys(STAMP_FILTERS).includes(filter)) {
+    filterName = STAMP_FILTERS[filter].name;
+  }
+  return filterName;
 };
