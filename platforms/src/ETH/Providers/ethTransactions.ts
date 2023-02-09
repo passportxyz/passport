@@ -5,7 +5,7 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 // ----- Libs
 import axios from "axios";
 
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || process.env.NEXT_ETHERSCAN_API_KEY;
 
 // Define interfaces for the data structure returned by the request
 interface EtherscanRequestResponse {

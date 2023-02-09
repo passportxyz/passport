@@ -4,33 +4,9 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
-// Providers
-import {
-  Twitter,
-  Ens,
-  Lens,
-  Github,
-  Gitcoin,
-  Facebook,
-  Poh,
-  GitPOAP,
-  NFT,
-  GnosisSafe,
-  Snapshot,
-  POAP,
-  ETH,
-  ZkSync,
-  Discord,
-  Linkedin,
-  GTC,
-  GtcStaking,
-  Google,
-  Brightid,
-} from "@gitcoin/passport-platforms";
-
 // --- Components
 import { LoadingCard } from "./LoadingCard";
-import { GenericPlatform, PlatformProps } from "./GenericPlatform";
+import { GenericPlatform } from "./GenericPlatform";
 
 // --- Identity Providers
 import { SideBarContent } from "./SideBarContent";
@@ -47,121 +23,8 @@ export type CardListProps = {
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
-export const providers = new Map<PLATFORM_ID, PlatformProps>();
-providers.set("Twitter", {
-  platform: new Twitter.TwitterPlatform(),
-  platFormGroupSpec: Twitter.TwitterProviderConfig,
-});
-
-providers.set("GitPOAP", {
-  platform: new GitPOAP.GitPOAPPlatform(),
-  platFormGroupSpec: GitPOAP.GitPOAPProviderConfig,
-});
-
-providers.set("Ens", {
-  platform: new Ens.EnsPlatform(),
-  platFormGroupSpec: Ens.EnsProviderConfig,
-});
-
-providers.set("NFT", {
-  platform: new NFT.NFTPlatform(),
-  platFormGroupSpec: NFT.NFTProviderConfig,
-});
-
-providers.set("Facebook", {
-  platFormGroupSpec: Facebook.FacebookProviderConfig,
-  platform: new Facebook.FacebookPlatform(),
-});
-
-providers.set("Github", {
-  platform: new Github.GithubPlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
-  }),
-  platFormGroupSpec: Github.GithubProviderConfig,
-});
-
-providers.set("Gitcoin", {
-  platform: new Gitcoin.GitcoinPlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
-  }),
-  platFormGroupSpec: Gitcoin.GitcoinProviderConfig,
-});
-
-providers.set("Snapshot", {
-  platform: new Snapshot.SnapshotPlatform(),
-  platFormGroupSpec: Snapshot.SnapshotProviderConfig,
-});
-
-providers.set("Poh", {
-  platform: new Poh.PohPlatform(),
-  platFormGroupSpec: Poh.PohProviderConfig,
-});
-
-providers.set("ZkSync", {
-  platform: new ZkSync.ZkSyncPlatform(),
-  platFormGroupSpec: ZkSync.ZkSyncProviderConfig,
-});
-
-providers.set("Lens", {
-  platform: new Lens.LensPlatform(),
-  platFormGroupSpec: Lens.LensProviderConfig,
-});
-
-providers.set("GnosisSafe", {
-  platform: new GnosisSafe.GnosisSafePlatform(),
-  platFormGroupSpec: GnosisSafe.GnosisSafeProviderConfig,
-});
-
-providers.set("ETH", {
-  platform: new ETH.ETHPlatform(),
-  platFormGroupSpec: ETH.ETHProviderConfig,
-});
-
-providers.set("POAP", {
-  platform: new POAP.POAPPlatform(),
-  platFormGroupSpec: POAP.POAPProviderConfig,
-});
-
-providers.set("Discord", {
-  platform: new Discord.DiscordPlatform(),
-  platFormGroupSpec: Discord.DiscordProviderConfig,
-});
-
-providers.set("Linkedin", {
-  platform: new Linkedin.LinkedinPlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
-  }),
-  platFormGroupSpec: Linkedin.LinkedinProviderConfig,
-});
-
-providers.set("GTC", {
-  platform: new GTC.GTCPlatform(),
-  platFormGroupSpec: GTC.GTCProviderConfig,
-});
-
-providers.set("GtcStaking", {
-  platform: new GtcStaking.GTCStakingPlatform(),
-  platFormGroupSpec: GtcStaking.GTCStakingProviderConfig,
-});
-
-providers.set("Google", {
-  platform: new Google.GooglePlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CALLBACK,
-  }),
-  platFormGroupSpec: Google.GoogleProviderConfig,
-});
-
-providers.set("Brightid", {
-  platform: new Brightid.BrightidPlatform(),
-  platFormGroupSpec: Brightid.BrightidProviderConfig,
-});
-
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
-  const { allProvidersState } = useContext(CeramicContext);
+  const { allProvidersState, allPlatforms } = useContext(CeramicContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef();
   const [currentPlatform, setCurrentPlatform] = useState<PlatformSpec | undefined>();
@@ -213,7 +76,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   // Add the platforms to this switch so the sidebar content can populate dynamically
   const renderCurrentPlatformSelection = () => {
     if (currentPlatform) {
-      const platformProps = providers.get(currentPlatform.platform);
+      const platformProps = allPlatforms.get(currentPlatform.platform);
       if (platformProps) {
         return (
           <GenericPlatform platform={platformProps.platform} platFormGroupSpec={platformProps.platFormGroupSpec} />

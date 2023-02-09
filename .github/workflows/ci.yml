@@ -13,7 +13,7 @@ jobs:
     # Run a local ceramic nod to test against
     services:
       ceramic:
-        image: ceramicnetwork/js-ceramic:2.6.0-rc.1
+        image: ceramicnetwork/js-ceramic:2.20.0
         ports:
           - 7007:7007
 
@@ -22,10 +22,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 16
+      - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
           cache: "yarn"
       - name: Lerna Bootstrap
         run: lerna bootstrap

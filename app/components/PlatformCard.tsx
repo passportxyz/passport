@@ -43,7 +43,7 @@ export const PlatformCard = ({
   getUpdatedPlatforms,
 }: PlatformCardProps): JSX.Element => {
   // import all providers
-  const { allProvidersState, handleDeleteStamps } = useContext(CeramicContext);
+  const { allProvidersState, passportHasCacaoError, handleDeleteStamps } = useContext(CeramicContext);
 
   // stamp filter
   const router = useRouter();
@@ -63,8 +63,10 @@ export const PlatformCard = ({
     onClose: onCloseRemoveStampModal,
   } = useDisclosure();
 
+  const disabled = passportHasCacaoError();
+  
   // hide platforms based on filter
-  const stampFilters = getStampProviderFilters(filter);
+  const stampFilters = filter && typeof filter === "string" ? getStampProviderFilters(filter) : false;
   const hidePlatform = stampFilters && !Object.keys(stampFilters).includes(platform.platform);
   if (hidePlatform) return <></>;
 
@@ -104,7 +106,7 @@ export const PlatformCard = ({
           {selectedProviders[platform.platform].length > 0 ? (
             <>
               <Menu>
-                <MenuButton className="verify-btn flex" data-testid="card-menu-button">
+                <MenuButton disabled={disabled} className="verify-btn flex" data-testid="card-menu-button">
                   <div className="m-auto flex justify-center">
                     <svg
                       className="m-1 mr-2"
@@ -190,6 +192,7 @@ export const PlatformCard = ({
           ) : (
             <button
               className="verify-btn"
+              disabled={disabled}
               ref={btnRef.current}
               onClick={(e) => {
                 if (platform.enablePlatformCardUpdate) {

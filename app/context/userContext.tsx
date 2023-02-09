@@ -16,22 +16,37 @@ import { useViewerConnection } from "@self.id/framework";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 
+import { DIDSession } from "did-session";
+import { EthereumWebAuth } from "@didtools/pkh-ethereum";
+import { AccountId } from "caip";
+import { DID } from "dids";
+import { Cacao } from "@didtools/cacao";
+import axios from "axios";
+
+export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
+
 export interface UserContextState {
   loggedIn: boolean;
-  handleConnection: () => void;
+  toggleConnection: () => void;
+  handleDisconnection: () => void;
   address: string | undefined;
   wallet: WalletState | null;
   signer: JsonRpcSigner | undefined;
   walletLabel: string | undefined;
+  dbAccessToken: string | undefined;
+  dbAccessTokenStatus: DbAuthTokenStatus;
 }
 
 const startingState: UserContextState = {
   loggedIn: false,
-  handleConnection: () => {},
+  toggleConnection: () => {},
+  handleDisconnection: () => {},
   address: undefined,
   wallet: null,
   signer: undefined,
   walletLabel: undefined,
+  dbAccessToken: undefined,
+  dbAccessTokenStatus: "idle",
 };
 
 export const pillLocalStorage = (platform?: string): void => {
@@ -58,6 +73,8 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   const [address, setAddress] = useState<string>();
   const [signer, setSigner] = useState<JsonRpcSigner | undefined>();
   const [loggingIn, setLoggingIn] = useState<boolean | undefined>();
+  const [dbAccessToken, setDbAccessToken] = useState<string | undefined>();
+  const [dbAccessTokenStatus, setDbAccessTokenStatus] = useState<DbAuthTokenStatus>("idle");
 
   // clear all state
   const clearState = (): void => {
@@ -105,12 +122,53 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     return false;
   };
 
+  const getPassportDatabaseAccessToken = async (did: DID): Promise<string> => {
+    // TODO: set a meaningfull payload ...
+    const payloadToSign = { data: "TODO" };
+
+    // sign the payload as dag-jose
+    const { jws, cacaoBlock } = await did.createDagJWS(payloadToSign);
+
+    // Get the JWS & serialize it (this is what we would send to the BE)
+    const { link, payload, signatures } = jws;
+
+    if (cacaoBlock !== undefined) {
+      const cacao = await Cacao.fromBlockBytes(cacaoBlock);
+      const issuer = cacao.p.iss;
+
+      const payloadForVerifier = {
+        signatures: signatures,
+        payload: payload,
+        cid: Array.from(link ? link.bytes : []),
+        cacao: Array.from(cacaoBlock ? cacaoBlock : []),
+        issuer,
+      };
+
+      try {
+        const authResponse = await axios.post(
+          `${process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT}ceramic-cache/authenticate`,
+          payloadForVerifier
+        );
+        const accessToken = authResponse.data?.access as string;
+        return accessToken;
+      } catch (error) {
+        const msg = `Failed to authenticate user with did: ${did.parent}`;
+        datadogRum.addError(msg);
+        throw msg;
+      }
+    } else {
+      const msg = `Failed to create DagJWS for did: ${did.parent}`;
+      datadogRum.addError(msg);
+      throw msg;
+    }
+  };
+
   // Attempt to login to Ceramic (on mainnet only)
   const passportLogin = async (): Promise<void> => {
-    // check that passportLogin isnt mid-way through
+    // check that passportLogin isn't mid-way through
     if (wallet && !loggingIn) {
       // ensure that passport is connected to mainnet
-      const hasCorrectChainId = await ensureMainnet();
+      const hasCorrectChainId = process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on" ? true : await ensureMainnet();
       // mark that we're attempting to login
       setLoggingIn(true);
       // with loaded chainId
@@ -125,27 +183,67 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           // Sessions will be serialized and stored in localhost
           // The sessions are bound to an ETH address, this is why we use the address in the session key
           const sessionKey = `didsession-${address}`;
-          const sessionStr = localStorage.getItem(sessionKey);
+          const dbCacheTokenKey = `dbcache-token-${address}`;
+          const sessionStr = window.localStorage.getItem(sessionKey);
+
+          let hasNewSelfId = false;
 
           // @ts-ignore
-          let selfId = await ceramicConnect(ethAuthProvider, sessionStr);
+          // When sessionStr is null, this will create a new selfId. We want to avoid this, becasue we want to make sure
+          // that chainId 1 is in the did
+          let selfId = !!sessionStr ? await ceramicConnect(ethAuthProvider, sessionStr) : null;
 
           if (
             // @ts-ignore
-            !selfId?.client?.session ||
+            !selfId ||
+            // @ts-ignore
+            !selfId?.client?.session
+          ) {
+            hasNewSelfId = true;
+            if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
+              // If the session loaded is not valid, or if it is expired or close to expire, we create
+              // a new session
+              // Also we enforce the "1" chainId, as we always want to use mainnet dids, in order to avoid confusion
+              // as to where a passport / stamp has been stored
+              const authMethod = await EthereumWebAuth.getAuthMethod(
+                wallet.provider,
+                new AccountId({
+                  chainId: "eip155:1",
+                  address: address,
+                })
+              );
+
+              const session = await DIDSession.authorize(authMethod, {
+                resources: ["ceramic://*"],
+              });
+              const newSessionStr = session.serialize();
+
+              // @ts-ignore
+              selfId = await ceramicConnect(ethAuthProvider, newSessionStr);
+            } else {
+              // If the session loaded is not valid, or if it is expired or close to expire, we create
+              // a new connection to ceramic
+              selfId = await ceramicConnect(ethAuthProvider);
+            }
+
+            // Store the session in localstorage
+            // @ts-ignore
+            window.localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
+          } else if (
             // @ts-ignore
             selfId?.client?.session?.isExpired ||
             // @ts-ignore
             selfId?.client?.session?.expireInSecs < 3600
           ) {
-            // If the session loaded is not valid, or if it is expired or close to expire, we create
-            // a new connection to ceramic
-            selfId = await ceramicConnect(ethAuthProvider);
+            // disconnect from the invalid chain
+            await disconnect({
+              label: wallet.label || "",
+            });
+            // then clear local state
+            clearState();
+            window.localStorage.removeItem(sessionKey);
+            window.localStorage.removeItem(dbCacheTokenKey);
           }
-
-          // Store the session in localstorage
-          // @ts-ignore
-          localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
         } finally {
           // mark that this login attempt is complete
           setLoggingIn(false);
@@ -172,6 +270,46 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   useEffect((): void => {
     setWalletFromLocalStorage();
   }, []);
+
+  useEffect((): void => {
+    const loadDbAccessToken = async () => {
+      if (viewerConnection.status === "connected") {
+        const dbCacheTokenKey = `dbcache-token-${address}`;
+        // TODO: if we load the token from the localstorage we should validate it
+        // let dbAccessToken = window.localStorage.getItem(dbCacheTokenKey);
+        let dbAccessToken = null;
+
+        // Here we try to get an access token for the Passport database
+        // We should get a new access token:
+        // 1. if the user has nonde
+        // 2. in case a new session has been created (access tokens should expire similar to sessions)
+        // TODO: verifying the validity of the access token would also make sense => check the expiration data in the token
+        const did = viewerConnection.selfID.did; // selfId?.client?.session?.did;
+        if (!dbAccessToken) {
+          setDbAccessTokenStatus("connecting");
+
+          try {
+            dbAccessToken = await getPassportDatabaseAccessToken(did);
+            // Store the session in localstorage
+            // @ts-ignore
+            window.localStorage.setItem(dbCacheTokenKey, dbAccessToken);
+            setDbAccessToken(dbAccessToken || undefined);
+            setDbAccessTokenStatus(dbAccessToken ? "connected" : "failed");
+          } catch (error) {
+            setDbAccessTokenStatus("failed");
+
+            // Should we logout the user here? They will be unable to write to passport
+            const msg = `Error getting access token for did: ${did}`;
+            datadogRum.addError(msg);
+          }
+        } else {
+          setDbAccessToken(dbAccessToken || undefined);
+          setDbAccessTokenStatus(dbAccessToken ? "connected" : "failed");
+        }
+      }
+    };
+    loadDbAccessToken();
+  }, [loggedIn, viewerConnection.status, address]);
 
   // Update on wallet connect
   useEffect((): void => {
@@ -216,38 +354,46 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   }, [viewerConnection.status]);
 
   // Toggle connect/disconnect
-  const handleConnection = (): void => {
+  const toggleConnection = (): void => {
     if (!address) {
-      connect()
-        .then(() => {
-          datadogLogs.logger.info("Connected to Wallet");
-          setLoggedIn(true);
-        })
-        .catch((e) => {
-          datadogRum.addError(e);
-          throw e;
-        });
+      handleConnection();
     } else {
-      disconnect({
-        label: walletLabel || "",
-      })
-        .then(() => {
-          setLoggedIn(false);
-          ceramicDisconnect();
-          window.localStorage.setItem("connectedWallets", "[]");
-        })
-        .catch((e) => {
-          datadogRum.addError(e);
-          throw e;
-        });
+      handleDisconnection();
     }
+  };
+
+  const handleConnection = (): void => {
+    connect()
+      .then(() => {
+        datadogLogs.logger.info("Connected to Wallet");
+        setLoggedIn(true);
+      })
+      .catch((e) => {
+        datadogRum.addError(e);
+        throw e;
+      });
+  };
+
+  const handleDisconnection = (): void => {
+    disconnect({
+      label: walletLabel || "",
+    })
+      .then(() => {
+        setLoggedIn(false);
+        ceramicDisconnect();
+        window.localStorage.setItem("connectedWallets", "[]");
+      })
+      .catch((e) => {
+        datadogRum.addError(e);
+        throw e;
+      });
   };
 
   const stateMemo = useMemo(
     () => ({
       loggedIn,
       address,
-      handleConnection,
+      toggleConnection,
       wallet,
       signer,
       walletLabel,
@@ -260,10 +406,13 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   const providerProps = {
     loggedIn,
     address,
-    handleConnection,
+    toggleConnection,
+    handleDisconnection,
     wallet,
     signer,
     walletLabel,
+    dbAccessToken,
+    dbAccessTokenStatus,
   };
 
   return <UserContext.Provider value={providerProps}>{children}</UserContext.Provider>;

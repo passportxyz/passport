@@ -5,15 +5,25 @@ import { mockAddress, mockWallet } from "./onboardHookValues";
 import React from "react";
 import { render } from "@testing-library/react";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
+import { PlatformProps } from "../components/GenericPlatform";
+
+jest.mock("@didtools/cacao", () => ({
+  Cacao: {
+    fromBlockBytes: jest.fn(),
+  },
+}));
 
 export const makeTestUserContext = (initialState?: Partial<UserContextState>): UserContextState => {
   return {
     loggedIn: true,
-    handleConnection: jest.fn(),
+    toggleConnection: jest.fn(),
+    handleDisconnection: jest.fn(),
     address: mockAddress,
     wallet: mockWallet,
     signer: undefined,
     walletLabel: mockWallet.label,
+    dbAccessToken: "token",
+    dbAccessTokenStatus: "idle",
     ...initialState,
   };
 };
@@ -33,6 +43,7 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
       stamps: [],
     },
     isLoadingPassport: IsLoadingPassportState.Idle,
+    allPlatforms: new Map<PLATFORM_ID, PlatformProps>(),
     allProvidersState: {
       Google: {
         providerSpec: STAMP_PROVIDERS.Google as unknown as ProviderSpec,
@@ -199,11 +210,16 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         stamp: undefined,
       },
     },
+    passportLoadResponse: undefined,
     handleAddStamp: jest.fn(),
     handleAddStamps: jest.fn(),
     handleCreatePassport: jest.fn(),
     handleDeleteStamp: jest.fn(),
     handleDeleteStamps: jest.fn(),
+    handleCheckRefreshPassport: () => Promise.resolve(true),
+    expiredProviders: [],
+    passportHasCacaoError: () => false,
+    cancelCeramicConnection: jest.fn(),
     ...initialState,
   };
 };

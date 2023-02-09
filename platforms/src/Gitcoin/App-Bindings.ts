@@ -7,6 +7,10 @@ export class GitcoinPlatform extends Platform {
   clientId: string = null;
   redirectUri: string = null;
 
+  banner = {
+    heading: "The Gitcoin Grant stamp only recognizes contributions made during Gitcoin Grants rounds 1-15.",
+  };
+
   constructor(options: PlatformOptions = {}) {
     super();
     this.clientId = options.clientId as string;

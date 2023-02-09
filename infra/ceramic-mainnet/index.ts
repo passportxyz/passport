@@ -184,10 +184,51 @@ export const vpcPrivateSubnetIds = vpc.privateSubnetIds;
 export const vpcPublicSubnetIds = vpc.publicSubnetIds;
 
 export const vpcPrivateSubnetId1 = vpcPrivateSubnetIds.then((values) => values[0]);
+export const vpcPrivateSubnetId2 = vpcPrivateSubnetIds.then((values) => values[1]);
 export const vpcPublicSubnetId1 = vpcPublicSubnetIds.then((values) => values[0]);
 
 export const vpcPublicSubnet1 = vpcPublicSubnetIds.then((subnets) => {
   return subnets[0];
+});
+
+export const vpcPrivateSubnetId1Str = pulumi.interpolate`${vpcPrivateSubnetId1}`;
+export const vpcPrivateSubnetId2Str = pulumi.interpolate`${vpcPrivateSubnetId2}`;
+
+//////////////////////////////////////////////////////////////
+// EFS for `/data/ipfs` folder in ipfs task
+//////////////////////////////////////////////////////////////
+
+// Allocate a security group and then a series of rules:
+const sg = new awsx.ec2.SecurityGroup(`dpopp-ipfs-data-efs-sg`, { vpc });
+const NFS_PORT = 2049;
+// inbound nfs traffic on port 2049 from a specific IP address
+sg.createIngressRule("nfs-access", {
+  location: new awsx.ec2.AnyIPv4Location(),
+  ports: new awsx.ec2.TcpPorts(NFS_PORT),
+  description: "allow NFS access for EFS from anywhere",
+});
+// outbound TCP traffic on any port to anywhere
+sg.createEgressRule("outbound-access", {
+  location: new awsx.ec2.AnyIPv4Location(),
+  ports: new awsx.ec2.AllTcpPorts(),
+  description: "allow outbound access to anywhere",
+});
+
+const efs = new aws.efs.FileSystem(`dpopp-ipfs-data-efs`, {
+  tags: {
+    Name: `dpopp-ipfs-data`,
+  },
+});
+// Create a mount target for both public subnets
+const privateMountTarget_1 = new aws.efs.MountTarget(`dpopp-ipfs-data-privateMountTarget-1`, {
+  fileSystemId: efs.id,
+  subnetId: vpcPrivateSubnetId1Str,
+  securityGroups: [sg.id],
+});
+const publicMountTarget_2 = new aws.efs.MountTarget(`dpopp-ipfs-data-privateMountTarget-2`, {
+  fileSystemId: efs.id,
+  subnetId: vpcPrivateSubnetId2Str,
+  securityGroups: [sg.id]
 });
 
 //////////////////////////////////////////////////////////////
@@ -203,6 +244,7 @@ const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-ceramic`, {
     bucket: accessLogsBucket.bucket,
     enabled: true,
   },
+  idleTimeout: 120
 });
 
 // Listen to HTTP traffic on port 80 and redirect to 443
@@ -223,7 +265,7 @@ export const frontendUrlEcs = pulumi.interpolate`http://${httpListener.endpoint.
 const target = alb.createTargetGroup("gitcoin-dpopp-ceramic", {
   vpc,
   port: 80,
-  healthCheck: { path: "/api/v0/node/healthcheck" },
+  healthCheck: { path: "/api/v0/node/healthcheck", unhealthyThreshold: 3, port: "80", interval: 60, timeout: 30, healthyThreshold: 2 },
 });
 
 // Listen to traffic on port 443 & route it through the Ceramic target group
@@ -335,18 +377,26 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   taskDefinitionArgs: {
     containers: {
       ceramic: {
-        image: "ceramicnetwork/js-ceramic:2.6.1-rc.2",
+        image: "ceramicnetwork/js-ceramic:095cfd1a75b15c151ee17445be106f6b9a37cdf7",
         memory: 8192,
         cpu: 4096,
         portMappings: [httpsListener],
         links: [],
         command: ceramicCommand,
+        "ulimits": [
+          {
+              "name": "nofile",
+              "hardLimit": 1000000,
+              "softLimit": 1000000
+          }
+        ],
         environment: [
           { name: "NODE_ENV", value: "production" },
           { name: "AWS_ACCESS_KEY_ID", value: usrS3Key },
           { name: "AWS_SECRET_ACCESS_KEY", value: usrS3Secret },
           { name: "NODE_OPTIONS", value: "--max-old-space-size=7168" },
           { name: "CERAMIC_STREAM_CACHE_LIMIT", value: "20000" },
+          { name: "CERAMIC_DISABLE_PUBSUB_UPDATES", value: "true" },
         ],
       },
     },
@@ -361,11 +411,18 @@ const serviceIPFS = new awsx.ecs.FargateService("dpopp-ipfs", {
   taskDefinitionArgs: {
     containers: {
       ipfs: {
-        image: "ceramicnetwork/go-ipfs-daemon@sha256:b77db182710abe065d9f974966488f6dd8ced93b0db50118f8a2d9c483a3a4da",
-        memory: 8192,
+        image: "ceramicnetwork/go-ipfs-daemon:962a0f2d5e29204f79bb436e5cb82f94dfe37dea",  // This is go-ipfs v0.15.0
+        memory: 12288,
         cpu: 4096,
         portMappings: [ceramicListener, ipfsListener, ipfsHealthcheckListener, ifpsWSListener],
         links: [],
+        "ulimits": [
+          {
+              "name": "nofile",
+              "hardLimit": 1000000,
+              "softLimit": 1000000
+          }
+        ],
         environment: [
           { name: "IPFS_ENABLE_S3", value: "true" },
           { name: "IPFS_S3_REGION", value: "us-east-1" },
@@ -376,14 +433,23 @@ const serviceIPFS = new awsx.ecs.FargateService("dpopp-ipfs", {
           { name: "IPFS_S3_KEY_TRANSFORM", value: "next-to-last/2" },
           { name: "GOLOG_LOG_LEVEL", value: "info" },
         ],
-        // healthCheck: {
-        //   // NB: this is the same as the go-ipfs-daemon Dockerfile HEALTHCHECK
-        //   command: ["CMD-SHELL", "ipfs dag stat /ipfs/QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn || exit 1"],
-        //   timeout: 3,
-        //   startPeriod: 5,
-        // },
+        mountPoints: [
+          {
+            sourceVolume: "dpopp-ipfs-data-volume",
+            containerPath: "/data/ipfs",
+          },
+        ],
       },
     },
+    volumes: [
+      {
+        name: `dpopp-ipfs-data-volume`,
+        efsVolumeConfiguration: {
+          fileSystemId: efs.id,
+          transitEncryption: "ENABLED",
+        },
+      },
+    ],
   },
 });
 

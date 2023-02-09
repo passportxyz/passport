@@ -1,15 +1,16 @@
-import { Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
+import { PassportLoadStatus, Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
-
+import { jest } from "@jest/globals";
 import testnetAliases from "./integration-test-model-aliases.json";
 
 import { CeramicDatabase } from "../src";
-import { createCipheriv } from "crypto";
 
 let testDID: DID;
 let ceramicDatabase: CeramicDatabase;
+
+jest.setTimeout(180000);
 
 beforeAll(async () => {
   const TEST_SEED = Uint8Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
@@ -50,9 +51,10 @@ describe("when there is no passport for the given did", () => {
   });
 
   it("getPassport returns false", async () => {
-    const actualPassport = await ceramicDatabase.getPassport();
+    const { passport, status, errorDetails } = await ceramicDatabase.getPassport();
 
-    expect(actualPassport).toEqual(false);
+    const expectedStatus: PassportLoadStatus = "DoesNotExist";
+    expect(status).toEqual(expectedStatus);
   });
 });
 
@@ -80,11 +82,11 @@ describe("when there is an existing passport without stamps for the given did", 
   });
 
   it("getPassport retrieves the passport from ceramic", async () => {
-    const actualPassport = (await ceramicDatabase.getPassport()) as Passport;
+    const { passport } = await ceramicDatabase.getPassport();
 
-    expect(actualPassport).toBeDefined();
-    expect(actualPassport).toEqual(existingPassport);
-    expect(actualPassport.stamps).toEqual([]);
+    expect(passport).toBeDefined();
+    expect(passport).toEqual(existingPassport);
+    expect(passport.stamps).toEqual([]);
   });
 
   it("addStamp adds a stamp to passport", async () => {
@@ -207,15 +209,15 @@ describe("when there is an existing passport with stamps for the given did", () 
   });
 
   it("getPassport retrieves the passport and stamps from ceramic", async () => {
-    const actualPassport = (await ceramicDatabase.getPassport()) as Passport;
+    const { passport } = await ceramicDatabase.getPassport();
 
-    const formattedDate = new Date(actualPassport["issuanceDate"]);
+    const formattedDate = new Date(passport["issuanceDate"]);
 
-    expect(actualPassport).toBeDefined();
+    expect(passport).toBeDefined();
     expect(formattedDate.getDay()).toEqual(existingPassport.issuanceDate.getDay());
     expect(formattedDate.getMonth()).toEqual(existingPassport.issuanceDate.getMonth());
     expect(formattedDate.getFullYear()).toEqual(existingPassport.issuanceDate.getFullYear());
-    expect(actualPassport.stamps[0]).toEqual(ensStampFixture);
+    expect(passport.stamps[0]).toEqual(ensStampFixture);
   });
 
   it("addStamp adds a stamp to passport", async () => {
@@ -333,9 +335,9 @@ describe("when there is an existing passport with stamps for the given did", () 
   });
 
   it("deleteStamps deletes selected stamps from passport", async () => {
-    ceramicDatabase.deleteStamps(providerIds);
+    await ceramicDatabase.deleteStamps(providerIds);
 
-    // The deletion will not be reflected immediatly, we need to wait a bit ...
+    // The deletion will not be reflected immediately, we need to wait a bit ...
     await new Promise((r) => setTimeout(r, 2000));
     const passport = await ceramicDatabase.store.get("Passport");
 
@@ -358,9 +360,9 @@ describe("when there is an existing passport with stamps for the given did", () 
   });
 
   it("deleteStamp deletes an existing stamp from passport", async () => {
-    ceramicDatabase.deleteStamp(existingGoogleStampTileStreamID);
+    await ceramicDatabase.deleteStamp(existingGoogleStampTileStreamID);
 
-    // The deletion will not be reflected immediatly, we need to wait a bit ...
+    // The deletion will not be reflected immediately, we need to wait a bit ...
     await new Promise((r) => setTimeout(r, 2000));
     const passport = await ceramicDatabase.store.get("Passport");
 
@@ -486,9 +488,9 @@ describe("when loading a stamp from a passport fails", () => {
   });
 
   it("ignores the failed stamp and only returns the successfully loaded stamps", async () => {
-    const passport = (await ceramicDatabase.getPassport()) as Passport;
+    const { passport } = await ceramicDatabase.getPassport();
 
-    // Weony expect 2 results: Ens and Google stamps
+    // We only expect 2 results: Ens and Google stamps
     expect(passport.stamps.length).toEqual(2);
     expect(
       passport.stamps.findIndex((stamp) => {

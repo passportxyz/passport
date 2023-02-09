@@ -183,11 +183,15 @@ export const vpcPrivateSubnetIds = vpc.privateSubnetIds;
 export const vpcPublicSubnetIds = vpc.publicSubnetIds;
 
 export const vpcPrivateSubnetId1 = vpcPrivateSubnetIds.then((values) => values[0]);
+export const vpcPrivateSubnetId2 = vpcPrivateSubnetIds.then((values) => values[1]);
 export const vpcPublicSubnetId1 = vpcPublicSubnetIds.then((values) => values[0]);
 
 export const vpcPublicSubnet1 = vpcPublicSubnetIds.then((subnets) => {
   return subnets[0];
 });
+
+export const vpcPrivateSubnetId1Str = pulumi.interpolate`${vpcPrivateSubnetId1}`;
+export const vpcPrivateSubnetId2Str = pulumi.interpolate`${vpcPrivateSubnetId2}`;
 
 //////////////////////////////////////////////////////////////
 // Set up ALB and ECS cluster
@@ -202,6 +206,43 @@ const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-ceramic`, {
     bucket: accessLogsBucket.bucket,
     enabled: true,
   },
+});
+
+//////////////////////////////////////////////////////////////
+// EFS for `/data/ipfs` folder in ipfs task
+//////////////////////////////////////////////////////////////
+
+// Allocate a security group and then a series of rules:
+const sg = new awsx.ec2.SecurityGroup(`dpopp-ipfs-data-efs-sg`, { vpc });
+const NFS_PORT = 2049;
+// inbound nfs traffic on port 2049 from a specific IP address
+sg.createIngressRule("nfs-access", {
+  location: new awsx.ec2.AnyIPv4Location(),
+  ports: new awsx.ec2.TcpPorts(NFS_PORT),
+  description: "allow NFS access for EFS from anywhere",
+});
+// outbound TCP traffic on any port to anywhere
+sg.createEgressRule("outbound-access", {
+  location: new awsx.ec2.AnyIPv4Location(),
+  ports: new awsx.ec2.AllTcpPorts(),
+  description: "allow outbound access to anywhere",
+});
+
+const efs = new aws.efs.FileSystem(`dpopp-ipfs-data-efs`, {
+  tags: {
+    Name: `dpopp-ipfs-data`,
+  },
+});
+// Create a mount target for both public subnets
+const privateMountTarget_1 = new aws.efs.MountTarget(`dpopp-ipfs-data-privateMountTarget-1`, {
+  fileSystemId: efs.id,
+  subnetId: vpcPrivateSubnetId1Str,
+  securityGroups: [sg.id],
+});
+const publicMountTarget_2 = new aws.efs.MountTarget(`dpopp-ipfs-data-privateMountTarget-2`, {
+  fileSystemId: efs.id,
+  subnetId: vpcPrivateSubnetId2Str,
+  securityGroups: [sg.id]
 });
 
 //////////////////////////////////////////////////////////////
@@ -336,7 +377,7 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
   taskDefinitionArgs: {
     containers: {
       ceramic: {
-        image: "ceramicnetwork/js-ceramic:2.6.1-rc.2",
+        image: "ceramicnetwork/js-ceramic:2.20.0",
         memory: 8192,
         cpu: 4096,
         portMappings: [httpsListener],
@@ -362,7 +403,7 @@ const serviceIPFS = new awsx.ecs.FargateService("dpopp-ipfs", {
   taskDefinitionArgs: {
     containers: {
       ipfs: {
-        image: "ceramicnetwork/go-ipfs-daemon@sha256:b77db182710abe065d9f974966488f6dd8ced93b0db50118f8a2d9c483a3a4da",
+        image: "ceramicnetwork/go-ipfs-daemon:962a0f2d5e29204f79bb436e5cb82f94dfe37dea", // This is go-ipfs v0.15.0
         memory: 8192,
         cpu: 4096,
         portMappings: [ceramicListener, ipfsListener, ipfsHealthcheckListener, ifpsWSListener],
@@ -382,8 +423,23 @@ const serviceIPFS = new awsx.ecs.FargateService("dpopp-ipfs", {
         //   timeout: 3,
         //   startPeriod: 5,
         // },
+        mountPoints: [
+          {
+            sourceVolume: "dpopp-ipfs-data-volume",
+            containerPath: "/data/ipfs",
+          },
+        ],
       },
     },
+    volumes: [
+      {
+        name: `dpopp-ipfs-data-volume`,
+        efsVolumeConfiguration: {
+          fileSystemId: efs.id,
+          transitEncryption: "ENABLED",
+        },
+      },
+    ],
   },
 });
 

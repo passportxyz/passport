@@ -13,11 +13,17 @@ import { CeramicContextState } from "../../context/ceramicContext";
 
 jest.mock("../../utils/onboard.ts");
 
-const mockHandleConnection = jest.fn();
+jest.mock("@didtools/cacao", () => ({
+  Cacao: {
+    fromBlockBytes: jest.fn(),
+  },
+}));
+
+const mockToggleConnection = jest.fn();
 
 const mockUserContext: UserContextState = makeTestUserContext({
   loggedIn: false,
-  handleConnection: mockHandleConnection,
+  toggleConnection: mockToggleConnection,
   address: undefined,
   wallet: null,
   signer: undefined,
@@ -37,7 +43,7 @@ test("renders connect wallet button", () => {
   expect(screen.getByTestId("connectWalletButton"));
 });
 
-test("clicking connect wallet button calls handleConnection", async () => {
+test("clicking connect wallet button calls toggleConnection", async () => {
   expect.assertions(1);
 
   renderWithContext(
@@ -52,6 +58,6 @@ test("clicking connect wallet button calls handleConnection", async () => {
   await userEvent.click(connectWalletButton);
 
   await waitFor(() => {
-    expect(mockHandleConnection).toBeCalledTimes(1);
+    expect(mockToggleConnection).toBeCalledTimes(1);
   });
 });

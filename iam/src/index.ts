@@ -35,37 +35,8 @@ import {
   verifyCredential,
 } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
-// ---- Identity Provider Management
-import { Providers } from "./utils/providers";
-
-// ---- Identity Providers
-import { SimpleProvider } from "./providers/simple";
-
-import {
-  Twitter,
-  Ens,
-  Gitcoin,
-  Lens,
-  Github,
-  Facebook,
-  Poh,
-  GitPOAP,
-  NFT,
-  GnosisSafe,
-  Snapshot,
-  POAP,
-  ETH,
-  ZkSync,
-  Linkedin,
-  GTC,
-  GtcStaking,
-  Discord,
-  Google,
-  ClearText,
-  Brightid,
-} from "@gitcoin/passport-platforms";
-
-import { ClearTextSimpleProvider } from "./providers/clearTextSimple";
+// All provider exports from platforms
+import { providers } from "@gitcoin/passport-platforms";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -79,177 +50,6 @@ export const config: {
   key,
   issuer,
 };
-
-// Initiate providers - new Providers should be registered in this array...
-export const providers = new Providers([
-  // Example provider which verifies the payload when `payload.proofs.valid === "true"`
-  new SimpleProvider(),
-  new Google.GoogleProvider(),
-  new Twitter.TwitterAuthProvider(),
-  new Ens.EnsProvider(),
-  new Poh.PohProvider(),
-  new POAP.POAPProvider(),
-  new Facebook.FacebookProvider(),
-  new Facebook.FacebookFriendsProvider(),
-  new Facebook.FacebookProfilePictureProvider(),
-  new Brightid.BrightIdProvider(),
-  new Github.GithubProvider(),
-  new Github.FiveOrMoreGithubRepos(),
-  new Github.TenOrMoreGithubFollowers(),
-  new Github.FiftyOrMoreGithubFollowers(),
-  new Github.ForkedGithubRepoProvider(),
-  new Github.StarredGithubRepoProvider(),
-  new ClearText.ClearTextGithubOrgProvider(),
-  new ClearText.ClearTextTwitterProvider(),
-  new Linkedin.LinkedinProvider(),
-  new Discord.DiscordProvider(),
-  new Twitter.TwitterTweetGT10Provider(),
-  new Twitter.TwitterFollowerGT100Provider(),
-  new Twitter.TwitterFollowerGT500Provider(),
-  new Twitter.TwitterFollowerGTE1000Provider(),
-  new Twitter.TwitterFollowerGT5000Provider(),
-  new GtcStaking.SelfStakingBronzeProvider(),
-  new GtcStaking.SelfStakingSilverProvider(),
-  new GtcStaking.SelfStakingGoldProvider(),
-  new GtcStaking.CommunityStakingBronzeProvider(),
-  new GtcStaking.CommunityStakingSilverProvider(),
-  new GtcStaking.CommunityStakingGoldProvider(),
-  new ClearTextSimpleProvider(),
-  new Snapshot.SnapshotProposalsProvider(),
-  new Snapshot.SnapshotVotesProvider(),
-  new ETH.EthGasProvider(),
-  new ETH.FirstEthTxnProvider(),
-  new ETH.EthGTEOneTxnProvider(),
-  new GitPOAP.GitPOAPProvider(),
-  /////////////////////////////////////////////////////////////
-  // Start adding the specific gitcoin contributor providers
-  /////////////////////////////////////////////////////////////
-  new Gitcoin.GitcoinContributorStatisticsProvider({
-    threshold: 1,
-    receivingAttribute: "num_grants_contribute_to",
-    recordAttribute: "numGrantsContributeToGte",
-  }),
-  new Gitcoin.GitcoinContributorStatisticsProvider({
-    threshold: 10,
-    receivingAttribute: "num_grants_contribute_to",
-    recordAttribute: "numGrantsContributeToGte",
-  }),
-  new Gitcoin.GitcoinContributorStatisticsProvider({
-    threshold: 25,
-    receivingAttribute: "num_grants_contribute_to",
-    recordAttribute: "numGrantsContributeToGte",
-  }),
-  new Gitcoin.GitcoinContributorStatisticsProvider({
-    threshold: 100,
-    receivingAttribute: "num_grants_contribute_to",
-    recordAttribute: "numGrantsContributeToGte",
-  }),
-  new Gitcoin.GitcoinContributorStatisticsProvider({
-    threshold: 10,
-    receivingAttribute: "total_contribution_amount",
-    recordAttribute: "totalContributionAmountGte",
-  }),
-  new Gitcoin.GitcoinContributorStatisticsProvider({
-    threshold: 100,
-    receivingAttribute: "total_contribution_amount",
-    recordAttribute: "totalContributionAmountGte",
-  }),
-  new Gitcoin.GitcoinContributorStatisticsProvider({
-    threshold: 1000,
-    receivingAttribute: "total_contribution_amount",
-    recordAttribute: "totalContributionAmountGte",
-  }),
-  new Gitcoin.GitcoinContributorStatisticsProvider({
-    threshold: 1,
-    receivingAttribute: "num_rounds_contribute_to",
-    recordAttribute: "numRoundsContributedToGte",
-  }),
-  new Gitcoin.GitcoinContributorStatisticsProvider({
-    threshold: 1,
-    receivingAttribute: "num_gr14_contributions",
-    recordAttribute: "numGr14ContributionsGte",
-  }),
-  /////////////////////////////////////////////////////////////
-  // Start adding the specific gitcoin grantee providers
-  /////////////////////////////////////////////////////////////
-  new Gitcoin.GitcoinGranteeStatisticsProvider({
-    threshold: 1,
-    receivingAttribute: "num_owned_grants",
-    recordAttribute: "numOwnedGrants",
-  }),
-  new Gitcoin.GitcoinGranteeStatisticsProvider({
-    threshold: 10,
-    receivingAttribute: "num_grant_contributors",
-    recordAttribute: "numGrantContributors",
-  }),
-  new Gitcoin.GitcoinGranteeStatisticsProvider({
-    threshold: 25,
-    receivingAttribute: "num_grant_contributors",
-    recordAttribute: "numGrantContributors",
-  }),
-  new Gitcoin.GitcoinGranteeStatisticsProvider({
-    threshold: 100,
-    receivingAttribute: "num_grant_contributors",
-    recordAttribute: "numGrantContributors",
-  }),
-  new Gitcoin.GitcoinGranteeStatisticsProvider({
-    threshold: 100,
-    receivingAttribute: "total_contribution_amount",
-    recordAttribute: "totalContributionAmount",
-  }),
-  new Gitcoin.GitcoinGranteeStatisticsProvider({
-    threshold: 1000,
-    receivingAttribute: "total_contribution_amount",
-    recordAttribute: "totalContributionAmount",
-  }),
-  new Gitcoin.GitcoinGranteeStatisticsProvider({
-    threshold: 10000,
-    receivingAttribute: "total_contribution_amount",
-    recordAttribute: "totalContributionAmount",
-  }),
-  new Gitcoin.GitcoinGranteeStatisticsProvider({
-    threshold: 1,
-    receivingAttribute: "num_grants_in_eco_and_cause_rounds",
-    recordAttribute: "numGrantsInEcoAndCauseRound",
-  }),
-  /////////////////////////////////////////////////////////////
-  // Start adding ETH/GTC Possession Providers
-  /////////////////////////////////////////////////////////////
-  new GTC.EthErc20PossessionProvider({
-    threshold: 100,
-    recordAttribute: "gtcPossessionsGte",
-    contractAddress: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f",
-    error: "GTC Possessions >= 100 Provider verify Error",
-  }),
-  new GTC.EthErc20PossessionProvider({
-    threshold: 10,
-    recordAttribute: "gtcPossessionsGte",
-    contractAddress: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f",
-    error: "GTC Possessions >= 10 Provider verify Error",
-  }),
-  new ETH.EthErc20PossessionProvider({
-    threshold: 32,
-    recordAttribute: "ethPossessionsGte",
-    error: "ETH Possessions >= 32 Provider verify Error",
-  }),
-  new ETH.EthErc20PossessionProvider({
-    threshold: 10,
-    recordAttribute: "ethPossessionsGte",
-    error: "ETH Possessions >= 10 Provider verify Error",
-  }),
-  new ETH.EthErc20PossessionProvider({
-    threshold: 1,
-    recordAttribute: "ethPossessionsGte",
-    error: "ETH Possessions >= 1 Provider verify Error",
-  }),
-  /////////////////////////////////////////////////////////////
-  // END
-  ////////////////////////////////////////////////////////////
-  new NFT.NFTProvider(),
-  new Lens.LensProfileProvider(),
-  new ZkSync.ZkSyncProvider(),
-  new GnosisSafe.GnosisSafeProvider(),
-]);
 
 // create the app and run on port
 export const app = express();
@@ -272,6 +72,12 @@ const issueCredential = async (
   context: ProviderContext
 ): Promise<CredentialResponseBody> => {
   try {
+    // if the payload includes an additional signer, use that to issue credential.
+    if (payload.signer) {
+      // We can assume that the signer is a valid address because the challenge was verified within the /verify endpoint
+      payload.address = payload.signer.address;
+    }
+    // verify the payload against the selected Identity Provider
     const verifiedPayload = await providers.verify(type, payload, context);
     // check if the request is valid against the selected Identity Provider
     if (verifiedPayload && verifiedPayload?.valid === true) {
@@ -414,6 +220,23 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
         // the signer should be the address outlined in the challenge credential - rebuild the id to check for a full match
         const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
         const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
+
+        // if an additional signer is passed verify that message was signed by passed signer address
+        if (payload.signer) {
+          const additionalChallenge = payload.signer.challenge;
+
+          const additionalSignerCredential = await verifyCredential(DIDKit, additionalChallenge);
+
+          const verifiedAddress = utils
+            .getAddress(utils.verifyMessage(additionalChallenge.credentialSubject.challenge, payload.signer.signature))
+            .toLocaleLowerCase();
+
+          // if verifiedAddress does not equal the additional signer address throw an error because signature is invalid
+          if (!additionalSignerCredential || verifiedAddress !== payload.signer.address) {
+            return void errorRes(res, "Unable to verify payload", 401);
+          }
+        }
+
         // type is required because we need it to select the correct Identity Provider
         if (isSigner && isType && payload && payload.type) {
           // if multiple types are being requested - produce and return multiple vc's

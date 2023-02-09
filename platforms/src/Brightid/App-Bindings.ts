@@ -1,7 +1,8 @@
 import axios from "axios";
-import { AppContext, Platform, ProviderPayload } from "../types";
+import { AppContext, ProviderPayload } from "../types";
+import { Platform } from "../utils/platform";
 
-export class BrightidPlatform implements Platform {
+export class BrightidPlatform extends Platform {
   platformId = "Brightid";
   path = "brightid";
   clientId: string = null;
@@ -35,7 +36,7 @@ export class BrightidPlatform implements Platform {
     const authUrl = `${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(
       /\/*?$/,
       ""
-    )}/brightid/information?callback=${appContext?.callbackUrl}`;
+    )}/brightid/information?callback=${appContext?.callbackUrl}&userDid=${appContext?.userDid}`;
     const width = 600;
     const height = 800;
     const left = appContext.screen.width / 2 - width / 2;

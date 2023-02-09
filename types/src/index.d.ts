@@ -115,7 +115,7 @@ export type IssuedCredential = {
   credential: VerifiableCredential;
 };
 
-// Issued Credential and support matterial returned when fetching the VerifiableCredential
+// Issued Credential and support material returned when fetching the VerifiableCredential
 export type VerifiableCredentialRecord = {
   signature: string;
   challenge: VerifiableCredential;
@@ -134,9 +134,26 @@ export type Stamp = {
 };
 
 export type Passport = {
-  issuanceDate: Date;
-  expiryDate: Date;
+  issuanceDate?: Date;
+  expiryDate?: Date;
   stamps: Stamp[];
+};
+
+export type PassportLoadStatus =
+  | "Success"
+  | "DoesNotExist"
+  | "ExceptionRaised"
+  | "StampCacaoError"
+  | "PassportCacaoError";
+
+export type PassportLoadErrorDetails = {
+  stampStreamIds: string[];
+};
+
+export type PassportLoadResponse = {
+  passport?: Passport;
+  status: PassportLoadStatus;
+  errorDetails?: PassportLoadErrorDetails;
 };
 
 // Passport DID
