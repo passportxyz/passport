@@ -675,6 +675,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       if (database) {
         await database.addStamp(stamp);
         await fetchPassport(database, true);
+        if (ceramicClient && passport) {
+          ceramicClient.setStamps(passport.stamps);
+        }
       }
     } catch (e) {
       datadogLogs.logger.error("Error add single stamp", { stamp, error: e });
@@ -687,6 +690,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       if (database) {
         await database.addStamps(stamps);
         await fetchPassport(database, true);
+        if (ceramicClient && passport) {
+          ceramicClient.setStamps(passport.stamps);
+        }
       }
     } catch (e) {
       datadogLogs.logger.error("Error adding multiple stamps", { stamps, error: e });
@@ -697,14 +703,14 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const handleDeleteStamps = async (providerIds: PROVIDER_ID[]): Promise<void> => {
     try {
       if (database) {
-        if (database instanceof CeramicDatabase) {
-          await database.deleteStamps(providerIds);
-        } else if (database instanceof PassportDatabase) {
-          // TODO - add bulk post to cache db?
-          const addStampRequests = Promise.all(providerIds.map((providerId) => database.deleteStamp(providerId)));
-          const results = await addStampRequests;
-        }
+        // TODO - add bulk post to cache db?
+        const deleteStampRequests = Promise.all(providerIds.map((providerId) => database.deleteStamp(providerId)));
+        const results = await deleteStampRequests;
+
         await fetchPassport(database, true);
+        if (ceramicClient && passport) {
+          ceramicClient.setStamps(passport.stamps);
+        }
       }
     } catch (e) {
       datadogLogs.logger.error("Error deleting multiple stamps", { providerIds, error: e });
@@ -715,18 +721,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const handleDeleteStamp = async (streamId: string, providerId: PROVIDER_ID): Promise<void> => {
     try {
       if (database) {
-        if (database instanceof CeramicDatabase) {
-          await database.deleteStamp(streamId);
-          await new Promise((r) =>
-            // We need to delay the loading of stamps, in order for the deletion to be reflected in ceramic
-            setTimeout(async () => {
-              await fetchPassport(database, true);
-              r(0);
-            }, 2000)
-          );
-        } else {
-          await database.deleteStamp(providerId);
-          await fetchPassport(database, true);
+        await database.deleteStamp(providerId);
+        await fetchPassport(database, true);
+        if (ceramicClient && passport) {
+          ceramicClient.setStamps(passport.stamps);
         }
       }
     } catch (e) {
