@@ -1,14 +1,20 @@
 import { render, waitFor, screen } from "@testing-library/react";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { CeramicContext, CeramicContextProvider } from "../../context/ceramicContext";
-import { CeramicDatabase } from "@gitcoin/passport-database-client";
-import { SUCCESFUL_POAP_RESULT, SUCCESFUL_ENS_RESULT } from "../../__test-fixtures__/verifiableCredentialResults";
+import { CeramicDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
+import {
+  googleStampFixture,
+  discordStampFixture,
+  brightidStampFixture,
+  facebookStampFixture,
+} from "../../__test-fixtures__/databaseStorageFixtures";
 import {
   makeTestCeramicContext,
   makeTestUserContext,
   renderWithContext,
 } from "../../__test-fixtures__/contextTestHelpers";
 import { UserContext, UserContextState } from "../../context/userContext";
+import { act } from "react-dom/test-utils";
 
 const mockUserContext: UserContextState = makeTestUserContext();
 
@@ -31,6 +37,8 @@ jest.mock("@didtools/cacao", () => ({
   },
 }));
 
+// jest.unmock("@gitcoin/passport-database-client");
+
 const TestingComponent = () => {
   const { expiredProviders } = useContext(CeramicContext);
   return (
@@ -41,22 +49,6 @@ const TestingComponent = () => {
     </div>
   );
 };
-
-jest.mock("@gitcoin/passport-database-client", () => {
-  return {
-    CeramicDatabase: jest.fn().mockImplementation(() => {
-      return {
-        getPassport: jest.fn().mockReturnValue({
-          passport: {
-            stamps: [SUCCESFUL_ENS_RESULT],
-          },
-          status: "Success",
-        }),
-        checkPassportCACAOError: jest.fn().mockReturnValue(false),
-      };
-    }),
-  };
-});
 
 // TODO: remove skip
 describe.skip("<CeramicContextProvider>", () => {
@@ -72,5 +64,92 @@ describe.skip("<CeramicContextProvider>", () => {
     await waitFor(() => {
       expect(screen.getAllByText(SUCCESFUL_POAP_RESULT?.credential?.credentialSubject.provider || "")).toHaveLength(1);
     });
+  });
+});
+
+export const dbGetPassportMock = jest.fn().mockImplementation(() => {
+  return {
+    passport: {
+      stamps: [],
+    },
+    errorDetails: {},
+    status: "Success",
+  };
+});
+export const dbAddStampMock = jest.fn();
+export const dbAddStampsMock = jest.fn();
+export const dbDeleteStampMock = jest.fn();
+export const dbDeleteStampsMock = jest.fn();
+export const dbCreatePassportMock = jest.fn();
+
+describe("CeramicContextProvider syncs stamp state with ceramic", () => {
+  beforeEach(() => {});
+
+  // const passportDatabase = new PassportDatabase("", "", "");
+  const ceramicDatabase = new CeramicDatabase(undefined);
+  it("when adding new stamps", async () => {
+    (PassportDatabase as jest.Mock).mockImplementation(() => {
+      console.log("geri - my mock");
+      return {
+        createPassport: dbCreatePassportMock,
+        getPassport: jest.fn().mockImplementation(async () => {
+          console.log("geri PassportDatabase.getPassport");
+          return {
+            passport: {
+              stamps: [googleStampFixture, discordStampFixture, brightidStampFixture, facebookStampFixture],
+            },
+            errorDetails: {},
+            status: "Success",
+          };
+        }),
+        addStamp: dbAddStampMock,
+        addStamps: dbAddStampsMock,
+        deleteStamp: dbDeleteStampMock,
+        deleteStamps: dbDeleteStampsMock,
+      };
+    });
+    (CeramicDatabase as jest.Mock).mockImplementation(() => {
+      console.log("geri - my mock CeramicDatabase");
+      return {
+        createPassport: dbCreatePassportMock,
+        getPassport: jest.fn().mockImplementation(async () => {
+          console.log("geri CeramicDatabase.getPassport");
+          return {
+            passport: {
+              stamps: [googleStampFixture, discordStampFixture, brightidStampFixture, facebookStampFixture],
+            },
+            errorDetails: {},
+            status: "Success",
+          };
+        }),
+        addStamp: dbAddStampMock,
+        addStamps: dbAddStampsMock,
+        deleteStamp: dbDeleteStampMock,
+        deleteStamps: dbDeleteStampsMock,
+      };
+    });
+    const TestingComponentDeleteStamps = () => {
+      const { passport, handleDeleteStamps } = useContext(CeramicContext);
+
+      // When passport was loaded, delete stamps
+      // useEffect(() => {
+      //   console.log("GERI - mock", passport);
+      //   (async () => {
+      //     if (passport) {
+      //       // handleDeleteStamps();
+      //     }
+      //   })();
+      // }, [passport]);
+
+      return <div></div>;
+    };
+
+    render(
+      <UserContext.Provider value={mockUserContext}>
+        <CeramicContextProvider>
+          <TestingComponentDeleteStamps />
+        </CeramicContextProvider>
+      </UserContext.Provider>
+    );
   });
 });
