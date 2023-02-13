@@ -773,8 +773,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const handleDeleteStamps = async (providerIds: PROVIDER_ID[]): Promise<void> => {
     try {
       if (database) {
-        const deleteStampRequests = Promise.all(providerIds.map((providerId) => database.deleteStamp(providerId)));
-        const results = await deleteStampRequests;
+        await database.deleteStamps(providerIds);
 
         const newPassport = await fetchPassport(database, true);
         if (ceramicClient && newPassport) {
