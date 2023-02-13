@@ -537,13 +537,19 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   }, [viewerConnection.status, address, dbAccessToken, dbAccessTokenStatus]);
 
   useEffect(() => {
-    if (database) fetchPassport(database);
-  }, [database]);
+    if (database && ceramicClient) {
+      initialFetchPassport(database);
+    }
+  }, [database, ceramicClient]);
 
-  const fetchPassport = async (
+  // The initialFetchPassport is only use when loading the passport for the first time
+  // as we will try to import the stamps from ceramic in case the user has none in
+  // the DB yet
+  const initialFetchPassport = async (
     database: CeramicDatabase | PassportDatabase,
     skipLoadingState?: boolean
   ): Promise<void> => {
+    let isCreatingPassport = false;
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
 
     // fetch, clean and set the new Passport state
@@ -551,27 +557,72 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
     switch (status) {
       case "Success":
-      case "StampCacaoError":
         const cleanedPassport = cleanPassport(passport, database) as Passport;
         hydrateAllProvidersState(cleanedPassport);
         setPassport(cleanedPassport);
         if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Idle);
         break;
+      case "StampCacaoError":
       case "PassportCacaoError":
-        datadogRum.addError("Passport CACAO error -- error thrown on initial fetch", { address });
+        // These cannot occur when loading from DB
         break;
       case "DoesNotExist":
-        handleCreatePassport();
+        isCreatingPassport = true;
+        await handleCreatePassport();
         break;
       case "ExceptionRaised":
         // something is wrong with Ceramic...
-        datadogRum.addError("Ceramic connection failed", { address });
+        datadogRum.addError("Exception when reading passport", { address });
         setPassport(undefined);
         if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
         break;
     }
 
     setPassportLoadResponse({ passport, status, errorDetails });
+
+    // Start also fetching the passport from ceramic.
+    // If we are creating passport, this will already call loadCeramicPassport,
+    // so no need to call it again
+    if (!isCreatingPassport) {
+      loadCeramicPassport();
+    }
+  };
+
+  const fetchPassport = async (
+    database: CeramicDatabase | PassportDatabase,
+    skipLoadingState?: boolean
+  ): Promise<Passport | undefined> => {
+    let isCreatingPassport = false;
+    if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
+
+    // fetch, clean and set the new Passport state
+    const { status, errorDetails, passport } = await database.getPassport();
+    let passportToReturn: Passport | undefined = undefined;
+
+    switch (status) {
+      case "Success":
+        const cleanedPassport = cleanPassport(passport, database) as Passport;
+        hydrateAllProvidersState(cleanedPassport);
+        setPassport(cleanedPassport);
+        passportToReturn = cleanedPassport;
+        if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Idle);
+        break;
+      case "StampCacaoError":
+      case "PassportCacaoError":
+        // These cannot occur when loading from DB
+        break;
+      case "DoesNotExist":
+        break;
+      case "ExceptionRaised":
+        // something is wrong with Ceramic...
+        datadogRum.addError("Exception when reading passport", { address });
+        setPassport(undefined);
+        if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
+        break;
+    }
+
+    setPassportLoadResponse({ passport, status, errorDetails });
+    return passportToReturn;
   };
 
   const cleanPassport = (
@@ -630,6 +681,42 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     return success;
   };
 
+  // Start also fetching the passport from ceramic.
+  // We only do this to asses the "health" of the Passport & Stamps
+  // In case of erros we will force a reset of the Pasport.
+  // In case of borked stamps, we will not reset those, we'll simply ignore the borked stamps
+  // and the user ca claim other stamps
+  const loadCeramicPassport = async (): Promise<PassportLoadResponse> => {
+    if (ceramicClient) {
+      const ret = await ceramicClient.getPassport();
+      switch (ret.status) {
+        case "Success":
+          // Ok, nothing to do for now
+          break;
+        case "StampCacaoError":
+          // Ok, nothing to do for now. We will ignore borked stamps
+          break;
+        case "PassportCacaoError":
+          // We need to reset the passport to the last stable state
+          datadogRum.addError(
+            "Passport CACAO error -- error thrown on initial fetch. Going to refresh passport with SyncOptions.SYNC_ALWAYS option",
+            { address }
+          );
+          await ceramicClient.refreshPassport();
+          break;
+        case "DoesNotExist":
+          // Ok, nothing to do for now
+          break;
+        case "ExceptionRaised":
+          // Ok, nothing to do for now
+          break;
+      }
+      return ret;
+    }
+    // We just return an error here
+    return { status: "ExceptionRaised", passport: undefined };
+  };
+
   const handleCreatePassport = async (): Promise<void> => {
     if (database && ceramicClient) {
       setIsLoadingPassport(IsLoadingPassportState.LoadingFromCeramic);
@@ -640,7 +727,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         const { status, passport } = await Promise.race<PassportLoadResponse>([
           returnEmptyPassportAfterTimeout(parseInt(CERAMIC_TIMEOUT_MS)),
           returnEmptyPassportOnCancel(),
-          ceramicClient.getPassport(),
+          loadCeramicPassport(),
         ]);
         if (status === "Success" && passport?.stamps.length) {
           initialStamps = passport.stamps;
@@ -674,7 +761,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     try {
       if (database) {
         await database.addStamp(stamp);
-        await fetchPassport(database, true);
+        const newPassport = await fetchPassport(database, true);
+        if (ceramicClient && newPassport) {
+          ceramicClient.setStamps(newPassport.stamps);
+        }
       }
     } catch (e) {
       datadogLogs.logger.error("Error add single stamp", { stamp, error: e });
@@ -686,7 +776,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     try {
       if (database) {
         await database.addStamps(stamps);
-        await fetchPassport(database, true);
+        const newPassport = await fetchPassport(database, true);
+        if (ceramicClient && newPassport) {
+          ceramicClient.setStamps(newPassport.stamps);
+        }
       }
     } catch (e) {
       datadogLogs.logger.error("Error adding multiple stamps", { stamps, error: e });
@@ -697,14 +790,13 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const handleDeleteStamps = async (providerIds: PROVIDER_ID[]): Promise<void> => {
     try {
       if (database) {
-        if (database instanceof CeramicDatabase) {
-          await database.deleteStamps(providerIds);
-        } else if (database instanceof PassportDatabase) {
-          // TODO - add bulk post to cache db?
-          const addStampRequests = Promise.all(providerIds.map((providerId) => database.deleteStamp(providerId)));
-          const results = await addStampRequests;
+        const deleteStampRequests = Promise.all(providerIds.map((providerId) => database.deleteStamp(providerId)));
+        const results = await deleteStampRequests;
+
+        const newPassport = await fetchPassport(database, true);
+        if (ceramicClient && newPassport) {
+          ceramicClient.setStamps(newPassport.stamps);
         }
-        await fetchPassport(database, true);
       }
     } catch (e) {
       datadogLogs.logger.error("Error deleting multiple stamps", { providerIds, error: e });
@@ -715,18 +807,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const handleDeleteStamp = async (streamId: string, providerId: PROVIDER_ID): Promise<void> => {
     try {
       if (database) {
-        if (database instanceof CeramicDatabase) {
-          await database.deleteStamp(streamId);
-          await new Promise((r) =>
-            // We need to delay the loading of stamps, in order for the deletion to be reflected in ceramic
-            setTimeout(async () => {
-              await fetchPassport(database, true);
-              r(0);
-            }, 2000)
-          );
-        } else {
-          await database.deleteStamp(providerId);
-          await fetchPassport(database, true);
+        await database.deleteStamp(providerId);
+        const newPassport = await fetchPassport(database, true);
+        if (ceramicClient && newPassport) {
+          ceramicClient.setStamps(newPassport.stamps);
         }
       }
     } catch (e) {
