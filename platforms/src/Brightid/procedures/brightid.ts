@@ -4,7 +4,7 @@ import { BrightIdProcedureResponse, BrightIdSponsorshipResponse, SignedVerificat
 import crypto from "crypto";
 
 // --- app name for Bright Id App
-const APP_NAME = "Gitcoin";
+const APP_NAME = "GitcoinPassport";
 
 export const appUserIdForDid = (userDid: string): string => {
   // Hash the address so that the BrightID can't be traced back to the eth address

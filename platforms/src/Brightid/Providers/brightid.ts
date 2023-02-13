@@ -34,7 +34,7 @@ export class BrightIdProvider implements Provider {
         record: valid
           ? {
               context: "verification" in formattedData && formattedData.verification,
-              contextId: "Gitcoin",
+              contextId: "GitcoinPassport",
               meets: JSON.stringify(isUnique),
             }
           : undefined,

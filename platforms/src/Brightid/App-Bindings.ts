@@ -31,6 +31,13 @@ export class BrightidPlatform extends Platform {
       const result = await this.getBrightidInfoForUserDid(userDid);
       const { valid, appUserId } = result;
 
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(/\/*?$/, "")}/brightid/sponsor`,
+        {
+          contextIdData: userDid,
+        }
+      );
+      console.log("SPONSOR", res);
       if (valid) {
         return {
           did: userDid,
