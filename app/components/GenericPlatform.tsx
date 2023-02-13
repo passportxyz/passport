@@ -59,7 +59,7 @@ const checkIcon = "../../assets/check-icon.svg";
 
 export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
-  const { handleAddStamps, handleDeleteStamps, allProvidersState, userDid } = useContext(CeramicContext);
+  const { handleAddStamps, allProvidersState, userDid } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [showNoStampModal, setShowNoStampModal] = useState(false);
@@ -218,8 +218,6 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
           }
         }
       }
-      // Delete all stamps ...
-      await handleDeleteStamps(providerIds as PROVIDER_ID[]);
 
       // .. and now add all newly validate stamps
       if (vcs.length > 0) {
