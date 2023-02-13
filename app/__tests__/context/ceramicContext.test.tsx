@@ -1,5 +1,5 @@
-import { render, waitFor, screen } from "@testing-library/react";
-import { useContext, useEffect } from "react";
+import { render, waitFor, screen, waitForElementToBeRemoved } from "@testing-library/react";
+import { useContext, useState, useEffect } from "react";
 import { CeramicContext, CeramicContextProvider } from "../../context/ceramicContext";
 import { CeramicDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
 import {
@@ -82,6 +82,13 @@ export const dbDeleteStampMock = jest.fn();
 export const dbDeleteStampsMock = jest.fn();
 export const dbCreatePassportMock = jest.fn();
 
+const stamps = [googleStampFixture, discordStampFixture, brightidStampFixture, facebookStampFixture].map((stamp) => {
+  stamp.credential.expirationDate = "2099-05-15T21:04:01.708Z";
+  stamp.credential.credentialSubject.id = "test-user-did";
+  stamp.credential.issuer = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
+  return stamp;
+});
+
 describe("CeramicContextProvider syncs stamp state with ceramic", () => {
   beforeEach(() => {});
 
@@ -96,7 +103,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
           console.log("geri PassportDatabase.getPassport");
           return {
             passport: {
-              stamps: [googleStampFixture, discordStampFixture, brightidStampFixture, facebookStampFixture],
+              stamps,
             },
             errorDetails: {},
             status: "Success",
@@ -106,6 +113,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
         addStamps: dbAddStampsMock,
         deleteStamp: dbDeleteStampMock,
         deleteStamps: dbDeleteStampsMock,
+        did: "test-user-did",
       };
     });
     (CeramicDatabase as jest.Mock).mockImplementation(() => {
@@ -116,7 +124,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
           console.log("geri CeramicDatabase.getPassport");
           return {
             passport: {
-              stamps: [googleStampFixture, discordStampFixture, brightidStampFixture, facebookStampFixture],
+              stamps,
             },
             errorDetails: {},
             status: "Success",
@@ -126,22 +134,27 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
         addStamps: dbAddStampsMock,
         deleteStamp: dbDeleteStampMock,
         deleteStamps: dbDeleteStampsMock,
+        did: "test-user-did",
       };
     });
     const TestingComponentDeleteStamps = () => {
       const { passport, handleDeleteStamps } = useContext(CeramicContext);
 
       // When passport was loaded, delete stamps
-      // useEffect(() => {
-      //   console.log("GERI - mock", passport);
-      //   (async () => {
-      //     if (passport) {
-      //       // handleDeleteStamps();
-      //     }
-      //   })();
-      // }, [passport]);
+      useEffect(() => {
+        console.log("GERI - mock", passport);
+        (async () => {
+          if (passport) {
+            // await handleDeleteStamps([googleStampFixture.provider]);
+          }
+        })();
+      }, [passport]);
 
-      return <div></div>;
+      return (
+        <>
+          <div># Stamps = {passport && passport.stamps.length}</div>
+        </>
+      );
     };
 
     render(
@@ -151,5 +164,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
         </CeramicContextProvider>
       </UserContext.Provider>
     );
+
+    await waitFor(() => expect(screen.getAllByText("# Stamps = 4")).toHaveLength(1));
   });
 });
