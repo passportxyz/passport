@@ -108,19 +108,4 @@ export class PassportDatabase implements DataStorageBase {
       this.logger.error(`Error deleting stamp from passportScorer for ${providers.join(", ")} on ${this.address}: ` + e.toString());
     }
   }
-
-  async deleteStamp(provider: PROVIDER_ID): Promise<void> {
-    this.logger.info(`deleting stamp from passportScorer for ${provider} on ${this.address}`);
-    try {
-      await axios.delete(`${this.passportScorerUrl}ceramic-cache/stamps/bulk`, {
-        data: {
-          address: this.address,
-          provider: provider,
-        },
-        headers: { Authorization: `Bearer ${this.token}` },
-      });
-    } catch (e) {
-      this.logger.error(`Error deleting stamp from passportScorer for ${provider} on ${this.address}: ` + e.toString());
-    }
-  }
 }
