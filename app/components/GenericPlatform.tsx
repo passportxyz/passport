@@ -270,7 +270,12 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
       setLoading(false);
     } catch (e) {
       datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
-      throw e;
+      doneToast(
+        "Verification Failed",
+        "There was an error verifying your stamp. Please try again.",
+        "../../assets/verification-failed.svg",
+        platform.platformId as PLATFORM_ID
+      );
     } finally {
       setLoading(false);
     }
