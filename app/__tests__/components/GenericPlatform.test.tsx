@@ -50,7 +50,6 @@ const mockUserContext: UserContextState = makeTestUserContext({
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
   handleCreatePassport: mockCreatePassport,
-  handleAddStamp: mockHandleAddStamp,
 });
 
 // TODO
@@ -134,6 +133,29 @@ describe("Mulitple EVM plaftorms", () => {
       const verifyModal = await screen.findByRole("dialog");
       expect(verifyModal).toBeInTheDocument();
     });
+  });
+});
+
+it("should indicate that there was an error issuing the credential", async () => {
+  const drawer = () => (
+    <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
+      <DrawerOverlay />
+      <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.EnsProviderConfig} />
+    </Drawer>
+  );
+  renderWithContext(
+    mockUserContext,
+    { ...mockCeramicContext, handleAddStamps: jest.fn().mockRejectedValue(500) },
+    drawer()
+  );
+
+  const firstSwitch = screen.queryByTestId("select-all");
+  await fireEvent.click(firstSwitch as HTMLElement);
+  const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
+
+  await fireEvent.click(initialVerifyButton as HTMLElement);
+  await waitFor(() => {
+    expect(screen.getByText("There was an error verifying your stamp. Please try again.")).toBeInTheDocument();
   });
 });
 

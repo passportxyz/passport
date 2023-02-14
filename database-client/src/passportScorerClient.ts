@@ -77,38 +77,35 @@ export class PassportDatabase implements DataStorageBase {
   }
 
   addStamps = async (stamps: Stamp[]): Promise<void> => {
-    await Promise.all(stamps.map((stamp) => this.addStamp(stamp)));
-  };
-
-  async addStamp(stamp: Stamp): Promise<void> {
     this.logger.info(`adding stamp to passportScorer address: ${this.address}`);
     try {
-      // Todo will need to validate ownership / pass signature
-      await axios.post(`${this.passportScorerUrl}ceramic-cache/stamp`, {
-        address: this.address,
+      const stampsToSave = stamps.map((stamp) => ({
         provider: stamp.provider,
         stamp: stamp.credential,
-      }, {
+      }));
+
+      await axios.post(`${this.passportScorerUrl}ceramic-cache/stamps/bulk`, stampsToSave, {
           headers:
             { Authorization: `Bearer ${this.token}`},
         });
     } catch (e) {
       this.logger.error(`Error saving stamp to passportScorer address:  ${this.address}:` + e.toString());
     }
-  }
+  };
 
-  async deleteStamp(provider: PROVIDER_ID): Promise<void> {
-    this.logger.info(`deleting stamp from passportScorer for ${provider} on ${this.address}`);
+  addStamp = async (stamp: Stamp): Promise<void> => {
+    console.log("Not implemented");
+  };
+
+  async deleteStamps(providers: PROVIDER_ID[]): Promise<void> {
+    this.logger.info(`deleting stamp from passportScorer for ${providers.join(", ")} on ${this.address}`);
     try {
-      await axios.delete(`${this.passportScorerUrl}ceramic-cache/stamp`, {
-        data: {
-          address: this.address,
-          provider: provider,
-        },
+      await axios.delete(`${this.passportScorerUrl}ceramic-cache/stamps/bulk`, {
+        data: providers.map((provider) => ({ provider })),
         headers: { Authorization: `Bearer ${this.token}` },
       });
     } catch (e) {
-      this.logger.error(`Error deleting stamp from passportScorer for ${provider} on ${this.address}: ` + e.toString());
+      this.logger.error(`Error deleting stamp from passportScorer for ${providers.join(", ")} on ${this.address}: ` + e.toString());
     }
   }
 }
