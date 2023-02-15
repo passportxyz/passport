@@ -1,6 +1,6 @@
 // --- React Methods
 import { useContext, useEffect } from "react";
-import { useRouter } from 'next/router';
+import { useRouter } from "next/router";
 
 // --- Chakra UI Elements
 import { useDisclosure, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
@@ -64,7 +64,7 @@ export const PlatformCard = ({
   } = useDisclosure();
 
   const disabled = passportHasCacaoError();
-  
+
   // hide platforms based on filter
   const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;
   const hidePlatform = stampFilters && !Object.keys(stampFilters).includes(platform.platform);

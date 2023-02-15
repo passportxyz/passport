@@ -39,6 +39,12 @@ jest.mock("@didtools/cacao", () => ({
   },
 }));
 
+jest.mock("next/router", () => ({
+  useRouter: () => ({
+    query: { filter: "" },
+  }),
+}));
+
 const mockToggleConnection = jest.fn();
 const mockHandleDisconnection = jest.fn();
 const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;

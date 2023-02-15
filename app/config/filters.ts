@@ -2,12 +2,12 @@ export const STAMP_FILTERS: {
   [key: string]: {
     name: string;
     stamps: {
-      [key: string]: string[]
-    }
+      [key: string]: string[];
+    };
   };
 } = {
-  'bankless-academy': {
-    name: 'Bankless Academy',
+  "bankless-academy": {
+    name: "Bankless Academy",
     stamps: {
       Google: ["Account Name"],
       Ens: ["Account Name"],
@@ -17,8 +17,8 @@ export const STAMP_FILTERS: {
       Brightid: ["Account Name"],
       Linkedin: ["Account Name"],
       Discord: ["Account Name"],
-    }
-  }
+    },
+  },
 };
 
 export const getStampProviderFilters = (filter: string): any => {

@@ -18,6 +18,12 @@ jest.mock("@didtools/cacao", () => ({
   },
 }));
 
+jest.mock("next/router", () => ({
+  useRouter: () => ({
+    query: { filter: "" },
+  }),
+}));
+
 const mockUserContext: UserContextState = makeTestUserContext();
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
