@@ -22,6 +22,7 @@
     "@gitcoin/passport-types": "^1.0.0",
     "@spruceid/didkit-wasm-node": "^0.2.1",
     "axios": "^0.27.2",
+    "brightid_sdk": "^1.0.1",
     "brightid_sdk_v6": "^2.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",

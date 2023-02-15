@@ -27,6 +27,7 @@ export const getBrightidInfoForUserDid = async (userDid: string): Promise<any> =
 
   try {
     const verifyContextIdResult = await userVerificationStatus(APP_NAME, appUserId);
+    debugger;
     // Unique is true if the user obtained "Meets" verification by attending a connection party
     const isUnique = "unique" in verifyContextIdResult && verifyContextIdResult.unique === true;
     // Response reference https://dev.brightid.org/docs/node-api/3e6b0acc7fe6b-gets-a-signed-verification
@@ -38,7 +39,8 @@ export const getBrightidInfoForUserDid = async (userDid: string): Promise<any> =
   }
 };
 
-export const triggerBrightidSponsorship = async (appUserId: string): Promise<BrightIdProcedureResponse> => {
+export const triggerBrightidSponsorship = async (userDid: string): Promise<BrightIdProcedureResponse> => {
+  const appUserId = appUserIdForDid(userDid);
   try {
     const sponsorResult: BrightIdSponsorshipResponse = (await sponsor(
       process.env.BRIGHTID_PRIVATE_KEY || "",

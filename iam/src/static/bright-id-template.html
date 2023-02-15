@@ -324,7 +324,7 @@
             target="_blank"
             rel="noopener noreferrer"
             class="text-purple-700 underline"
-            href="https://app.brightid.org/link-verification/http:%2f%2fnode.brightid.org/GitcoinPassport/"
+            href="brightid://link-verification/GitcoinPassport/"
             >here</a
           >
           from your mobile device.<br /><br />
@@ -380,7 +380,7 @@
     // Generate QR Code
     const qrNode = document.getElementById("brightid-qrcode");
     new QRCode(qrNode, {
-      text: `brightid://link-verification/http:%2f%2fnode.brightid.org/GitcoinPassport/${appUserId}`,
+      text: `brightid://link-verification/GitcoinPassport/${appUserId}`,
       width: 256,
       height: 256,
       colorDark: "#000000",
@@ -390,6 +390,6 @@
 
     // Generate BrightId Link and append to anchor tag
     const brightIdLink = document.getElementById("bright-id-link");
-    brightIdLink.href = `https://app.brightid.org/link-verification/http:%2f%2fnode.brightid.org/GitcoinPassport/${appUserId}`;
+    brightIdLink.href = `https://app.brightid.org/link-verification/GitcoinPassport/${appUserId}`;
   </script>
 </div>
