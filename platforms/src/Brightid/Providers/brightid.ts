@@ -18,29 +18,22 @@ export class BrightIdProvider implements Provider {
   }
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+    let valid = false;
+    let record;
     try {
       const did = payload.proofs?.did;
 
-      const responseData = await getBrightidInfoForUserDid(did || "");
-      const formattedData = responseData?.result;
-
-      // Unique is true if the user obtained "Meets" verification by attending a connection party
-      const isUnique = "unique" in formattedData && formattedData.unique === true;
-      const verified = "verification" in formattedData && formattedData.verification;
-      const valid: boolean = (verified && isUnique) || false;
-
-      return {
-        valid,
-        record: valid
-          ? {
-              context: "verification" in formattedData && formattedData.verification,
-              contextId: "GitcoinPassport",
-              meets: JSON.stringify(isUnique),
-            }
-          : undefined,
-      };
+      if (did) {
+        ({ valid } = await getBrightidInfoForUserDid(did));
+        if (valid) {
+          record = {
+            contextId: "GitcoinPassport",
+          };
+        }
+      }
     } catch (e) {
-      return { valid: false };
+    } finally {
+      return { valid, record };
     }
   }
 }

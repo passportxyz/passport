@@ -11,8 +11,12 @@ export type GenerateTwitterAuthUrlRequestBody = {
   callback: string;
 };
 
-export type GenerateBrightidBody = {
-  contextIdData: string;
+export type BrightidUserInfoBody = {
+  userDid: string;
+};
+
+export type SponsorBrightidBody = {
+  appUserId: string;
 };
 
 router.post("/twitter/generateAuthUrl", (req: Request, res: Response): void => {
@@ -33,9 +37,9 @@ router.post("/twitter/generateAuthUrl", (req: Request, res: Response): void => {
 });
 
 router.post("/brightid/sponsor", (req: Request, res: Response): void => {
-  const { contextIdData } = req.body as GenerateBrightidBody;
-  if (contextIdData) {
-    return void triggerBrightidSponsorship(contextIdData).then((response) => {
+  const { appUserId } = req.body as SponsorBrightidBody;
+  if (appUserId) {
+    return void triggerBrightidSponsorship(appUserId).then((response) => {
       return res.status(200).send({ response });
     });
   } else {
@@ -44,9 +48,9 @@ router.post("/brightid/sponsor", (req: Request, res: Response): void => {
 });
 
 router.post("/brightid/getUserInfo", (req: Request, res: Response): void => {
-  const { contextIdData } = req.body as GenerateBrightidBody;
-  if (contextIdData) {
-    return void getBrightidInfoForUserDid(contextIdData)
+  const { userDid } = req.body as BrightidUserInfoBody;
+  if (userDid) {
+    return void getBrightidInfoForUserDid(userDid)
       .then((response) => {
         return res.status(200).send({ response });
       })

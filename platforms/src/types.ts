@@ -51,7 +51,13 @@ export type ProviderPayload = Record<string, unknown>;
 export type AppContext = {
   state: string;
   window: {
-    open: (url: string, target: string, features: string) => void;
+    open: (
+      url: string,
+      target: string,
+      features: string
+    ) => {
+      closed: boolean;
+    };
   };
   screen: {
     width: number;
@@ -71,7 +77,7 @@ export interface Platform {
     cta?: {
       label: string;
       url: string;
-    }
+    };
   };
   isEVM?: boolean;
   // TODO: shall we drop the getOAuthUrl and getProviderProof, given that we have getProviderPayload

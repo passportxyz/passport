@@ -170,6 +170,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
     setLoading(true);
     try {
       const state = `${platform.path}-` + generateUID(10);
+
       const providerPayload = (await platform.getProviderPayload({
         state,
         window,
@@ -180,11 +181,6 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
       })) as {
         [k: string]: string;
       };
-
-      if (providerPayload.sessionKey === "brightid") {
-        handleSponsorship(providerPayload.code);
-        return;
-      }
 
       // This array will contain all providers that new validated VCs
       let vcs: Stamp[] = [];

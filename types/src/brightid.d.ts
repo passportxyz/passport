@@ -36,6 +36,7 @@ export type SignedVerification = {
 
 export type BrightIdProcedureResponse = {
   valid: boolean;
+  appUserId: string;
   result?: BrightIdSponsorshipResponse | SignedVerification;
   error?: string;
 };

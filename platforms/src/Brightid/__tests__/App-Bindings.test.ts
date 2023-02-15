@@ -52,10 +52,6 @@ describe("BrightidPlatform", () => {
       },
       userDid: "string",
       callbackUrl: "string",
-      waitForRedirect: async () =>
-        Promise.resolve({
-          state: "brightId",
-        }),
     });
 
     expect(result).toEqual({ code: "success", sessionKey: "brightId" });
