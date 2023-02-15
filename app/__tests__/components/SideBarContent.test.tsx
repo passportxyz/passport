@@ -16,6 +16,12 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 jest.mock("../../utils/onboard.ts");
 
+jest.mock("next/router", () => ({
+  useRouter: () => ({
+    query: { filter: "" },
+  }),
+}));
+
 const verifiedProviders: PROVIDER_ID[] = ["Github", "FiveOrMoreGithubRepos", "ForkedGithubRepoProvider"];
 const selectedProviders: PROVIDER_ID[] = ["Github", "FiveOrMoreGithubRepos", "ForkedGithubRepoProvider"];
 

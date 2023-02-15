@@ -23,6 +23,12 @@ jest.mock("@didtools/cacao", () => ({
   },
 }));
 
+jest.mock("next/router", () => ({
+  useRouter: () => ({
+    query: { filter: "" },
+  }),
+}));
+
 const mockPossibleEVMStamps = [
   {
     validatedPlatformGroups: [

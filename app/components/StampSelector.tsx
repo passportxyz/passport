@@ -31,7 +31,8 @@ export function StampSelector({
       {/* each of the available providers in this platform */}
       {currentProviders?.map((stamp, i) => {
         // hide stamps based on filter
-        const hideStamp = stampFilters && currentPlatform && !stampFilters[currentPlatform?.platform]?.includes(stamp.platformGroup);
+        const hideStamp =
+          stampFilters && currentPlatform && !stampFilters[currentPlatform?.platform]?.includes(stamp.platformGroup);
         if (hideStamp) return null;
 
         return (
