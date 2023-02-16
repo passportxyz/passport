@@ -152,7 +152,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         cid: Array.from(link ? link.bytes : []),
         cacao: Array.from(cacaoBlock ? cacaoBlock : []),
         issuer,
-        nonce:nonce,
+        nonce: nonce,
       };
 
       try {
