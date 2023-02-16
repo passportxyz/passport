@@ -3,7 +3,7 @@ import type { Provider, ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // --- verifyMethod in providers
-import { getBrightidInfoForUserDid } from "../procedures/brightid";
+import { getBrightidInfoForAddress } from "../procedures/brightid";
 
 // Request a verifiable credential from brightid
 export class BrightIdProvider implements Provider {
@@ -21,10 +21,10 @@ export class BrightIdProvider implements Provider {
     let valid = false;
     let record;
     try {
-      const did = payload.proofs?.did;
+      const address = payload.address;
 
-      if (did) {
-        ({ valid } = await getBrightidInfoForUserDid(did));
+      if (address) {
+        ({ valid } = await getBrightidInfoForAddress(address));
         if (valid) {
           record = {
             contextId: "GitcoinPassport",

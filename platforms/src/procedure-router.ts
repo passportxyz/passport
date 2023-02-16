@@ -2,7 +2,7 @@
 import { Request, Response, Router } from "express";
 
 import * as twitterOAuth from "./Twitter/procedures/twitterOauth";
-import { triggerBrightidSponsorship, getBrightidInfoForUserDid } from "./Brightid/procedures/brightid";
+import { triggerBrightidSponsorship, getBrightidInfoForAddress } from "./Brightid/procedures/brightid";
 import path from "path";
 
 export const router = Router();
@@ -12,7 +12,7 @@ export type GenerateTwitterAuthUrlRequestBody = {
 };
 
 export type BrightidUserInfoBody = {
-  userDid: string;
+  address: string;
 };
 
 export type SponsorBrightidBody = {
@@ -48,9 +48,9 @@ router.post("/brightid/sponsor", (req: Request, res: Response): void => {
 });
 
 router.post("/brightid/getUserInfo", (req: Request, res: Response): void => {
-  const { userDid } = req.body as BrightidUserInfoBody;
-  if (userDid) {
-    return void getBrightidInfoForUserDid(userDid)
+  const { address } = req.body as BrightidUserInfoBody;
+  if (address) {
+    return void getBrightidInfoForAddress(address)
       .then((response) => {
         return res.status(200).send({ response });
       })

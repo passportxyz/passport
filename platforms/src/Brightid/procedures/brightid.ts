@@ -10,17 +10,17 @@ const APP_NAME = "GitcoinPassport";
 // TODO change this to match APP_NAME once v5 sponsorships are used up
 const SPONSORSHIP_APP_NAME = "Gitcoin";
 
-export const appUserIdForDid = (userDid: string): string => {
+export const appUserIdForAddress = (address: string): string => {
   // Hash the address so that the BrightID can't be traced back to the eth address
   return crypto
     .createHmac("sha256", process.env.BRIGHTID_PRIVATE_KEY)
-    .update(userDid)
+    .update(address.toLowerCase())
     .digest()
     .toString("base64url", 0, 32);
 };
 
-export const getBrightidInfoForUserDid = async (userDid: string): Promise<BrightIdProcedureResponse> => {
-  const appUserId = appUserIdForDid(userDid);
+export const getBrightidInfoForAddress = async (address: string): Promise<BrightIdProcedureResponse> => {
+  const appUserId = appUserIdForAddress(address);
 
   try {
     // This wild type conversion is necessary because the brightid_sdk_v6 package is wrong

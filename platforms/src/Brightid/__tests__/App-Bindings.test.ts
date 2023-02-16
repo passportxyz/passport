@@ -23,7 +23,7 @@ describe("BrightidPlatform", () => {
       }
     });
     const platform = new BrightidPlatform();
-    const result = await platform.getBrightidInfoForUserDid("did:brightid:0x123");
+    const result = await platform.getBrightidInfoForAddress("did:brightid:0x123");
     expect(result).toBe(true);
   });
 
@@ -52,6 +52,10 @@ describe("BrightidPlatform", () => {
       },
       userDid: "string",
       callbackUrl: "string",
+      waitForRedirect: async () =>
+        Promise.resolve({
+          state: "brightId",
+        }),
     });
 
     expect(result).toEqual({ code: "success", sessionKey: "brightId" });

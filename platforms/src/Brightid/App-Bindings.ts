@@ -14,9 +14,9 @@ export class BrightidPlatform extends Platform {
   redirectUri: string = null;
   isEVM = true;
 
-  async getBrightidInfoForUserDid(userDid: string): Promise<any> {
+  async getBrightidInfoForAddress(address: string): Promise<any> {
     try {
-      const res = await axios.post(GET_USER_INFO_URL, { userDid });
+      const res = await axios.post(GET_USER_INFO_URL, { address });
       const { data } = res;
       // TODO remove
       console.log("bidinfo", res);
@@ -52,9 +52,9 @@ export class BrightidPlatform extends Platform {
     return this.createPromiseToWaitForWindowClose(popup);
   }
 
-  // This lets us return a promise that resolves when the popup closes
+  // This returns a promise that resolves when the window closes
   async createPromiseToWaitForWindowClose(wndw: { closed: boolean }): Promise<void> {
-    let windowCloseResolve: () => void;
+    let windowCloseResolve: () => void = () => {};
     const interval = setInterval(() => wndw.closed && windowCloseResolve(), 100);
     return new Promise<void>((resolve) => {
       windowCloseResolve = () => {
@@ -66,10 +66,11 @@ export class BrightidPlatform extends Platform {
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     const { userDid } = appContext;
+    const address = userDid.split(":").at(-1);
     let valid;
 
-    if (userDid) {
-      const info = await this.getBrightidInfoForUserDid(userDid);
+    if (address) {
+      const info = await this.getBrightidInfoForAddress(address);
       const { appUserId } = info;
       valid = info.valid;
 
@@ -79,9 +80,6 @@ export class BrightidPlatform extends Platform {
       }
     }
 
-    return {
-      valid,
-      did: userDid,
-    };
+    return {};
   }
 }

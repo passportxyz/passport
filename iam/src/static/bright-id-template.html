@@ -1,22 +1,35 @@
 <script src="https://cdn.tailwindcss.com"></script>
-<div class="px-8 pb-4 text-gray-500">
+<div class="px-8 py-4 text-gray-500">
   <div>
-    <h1 class="mb-2 text-center text-lg font-semibold">
-      Verify Bright ID Stamp Data
+    <h1 class="mb-4 text-center text-lg font-semibold">
+      Verify BrightID Stamp Data
     </h1>
     <div>
-      <h1 class="mb-2">
-        To collect an Identity Stamp from Bright ID (<a
+      <p class="text-center">
+        To collect an Identity Stamp from BrightID (<a
           class="text-blue-600 underline"
           target="_blank"
           rel="noopener noreferrer"
           href="https://www.brightid.org/"
           >homepage</a
-        >), please complete the following steps:
-      </h1>
-      <div class="text-center">
+        >), several steps must be completed
+      </p>
+      <p class="py-6 text-center">
+        When this window is closed, the Passport app will request your signature
+        before checking your verification status. Confirm the signature to check
+        your status, or you may go ahead and cancel if you already know you are
+        not yet verified.
+      </p>
+      <div class="collapsible my-4 flex items-center justify-center">
+        <button
+          class="collapsible-button w-1/2 rounded-md bg-purple-900 py-2 px-2 font-bold text-white"
+        >
+          Show BrightID Instructions
+        </button>
+      </div>
+      <div class="collapsible-content max-h-0 overflow-hidden text-center">
         <div data-testid="brightid-modal-step1">
-          <b>1)</b> Download the Bright ID App on your mobile device
+          <b>1)</b> Download the BrightID App on your mobile device
         </div>
         <div class="-mt-2 flex flex-wrap items-center justify-center">
           <a
@@ -312,23 +325,12 @@
             href="https://meet.brightid.org/#/"
             >connection party</a
           >
-          to verify your account. After this, you may return and continue with
-          the next step.
+          to verify your account.
         </p>
-        <div class="mt-5 mb-8 text-center">
-          <p>
-            <b>If you have not done so, exit and get verified on Bright ID</b>
-          </p>
-          <p class="text-sm">
-            The Passport app will request your signature before checking your
-            verification. Confirm the signature to check your status, or you may
-            go ahead and cancel if you already know you are not verified.
-          </p>
-        </div>
-        <div>
+        <div class="mb-4">
           <b>3)</b> Once verified, use your <b>mobile device</b> to link your
-          Bright ID account to your Gitcoin Passport by scanning this QR code
-          from the Bright ID app or clicking
+          BrightID account to your Gitcoin Passport by scanning this QR code
+          from the BrightID app or clicking
           <a
             id="bright-id-link"
             target="_blank"
@@ -336,33 +338,32 @@
             class="text-blue-600 underline"
             href="brightid://link-verification/GitcoinPassport/"
             >here</a
-          >.<br /><br />
+          > (from your mobile device).<br /><br />
           <div
-            class="flex justify-center"
+            class="flex justify-center pb-6"
             style="height: auto; ax-width: 300px; width: 100%"
           >
             <div id="brightid-qrcode"></div>
           </div>
         </div>
-        <div class="mt-5 mb-1 text-center">
-          <p class="text-sm">
-            If you have never been sponsored, we automatically trigger a
-            sponsorship. This should take effect within seconds but may
-            occasionally take considerably longer. If you have completed the
-            above steps and still cannot acquire this stamp, please try again
-            later.
-          </p>
-        </div>
-        <div class="mb-8 w-full justify-center object-center p-4">
+        <div class="collapsible flex items-center justify-center">
           <button
             data-testid="button-sponsor-brightid"
             onclick="window.close()"
-            class="float-right mx-auto rounded-md bg-purple-900 py-2 px-2 text-white"
+            class="float-right mx-auto rounded-md bg-purple-900 py-2 px-2 font-bold text-white"
           >
-            <span class="font-miriam-libre">Check Verification</span>
+            <span class="font-miriam-libre px-6">Close Window</span>
           </button>
         </div>
       </div>
+    </div>
+    <div class="mt-10 mb-6 text-center">
+      <p class="text-sm">
+        Note: Our interaction with the BrightID network should take effect
+        within seconds but may occasionally take longer. If you have completed
+        the above steps and still cannot acquire this stamp, please try again
+        later.
+      </p>
     </div>
   </div>
   <script
@@ -390,5 +391,21 @@
     // Generate BrightId Link and append to anchor tag
     const brightIdLink = document.getElementById("bright-id-link");
     brightIdLink.href = `https://app.brightid.org/link-verification/GitcoinPassport/${appUserId}`;
+  </script>
+
+  <script>
+    var button = document.getElementsByClassName("collapsible-button")[0];
+
+    button.addEventListener("click", function () {
+      this.classList.toggle("active");
+      var content = document.getElementsByClassName("collapsible-content")[0];
+      if (content.style.maxHeight) {
+        button.innerHTML = "Show BrightID Instructions";
+        content.style.maxHeight = null;
+      } else {
+        button.innerHTML = "Hide BrightID Instructions";
+        content.style.maxHeight = content.scrollHeight + "px";
+      }
+    });
   </script>
 </div>
