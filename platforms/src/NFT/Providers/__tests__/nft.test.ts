@@ -57,7 +57,7 @@ describe("Attempt verification", function () {
           valid: true,
           record: {
             address: MOCK_ADDRESS_LOWER,
-            numTotalNFTs: totalCount.toString(),
+            "NFT#numNFTsGte": "1",
           },
         });
       } else {
