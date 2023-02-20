@@ -123,8 +123,18 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   };
 
   const getPassportDatabaseAccessToken = async (did: DID): Promise<string> => {
-    // TODO: set a meaningfull payload ...
-    const payloadToSign = { data: "TODO" };
+    let nonce = null;
+    try {
+      // Get nonce from server
+      const nonceResponse = await axios.get(`${process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT}account/nonce`);
+      nonce = nonceResponse.data.nonce;
+    } catch (error) {
+      const msg = `Failed to get nonce from server for user with did: ${did.parent}`;
+      datadogRum.addError(msg);
+      throw msg;
+    }
+
+    const payloadToSign = { nonce };
 
     // sign the payload as dag-jose
     const { jws, cacaoBlock } = await did.createDagJWS(payloadToSign);
@@ -142,6 +152,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         cid: Array.from(link ? link.bytes : []),
         cacao: Array.from(cacaoBlock ? cacaoBlock : []),
         issuer,
+        nonce: nonce,
       };
 
       try {
