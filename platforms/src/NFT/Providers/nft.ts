@@ -65,7 +65,7 @@ export class NFTProvider implements Provider {
       record: valid
         ? {
             address: address,
-            numTotalNFTs: nftsResponse.totalCount.toString(),
+            "NFT#numNFTsGte": "1",
           }
         : undefined,
     });
