@@ -38,6 +38,12 @@ jest.mock("../../utils/helpers.tsx", () => ({
   }),
 }));
 
+jest.mock("next/router", () => ({
+  useRouter: () => ({
+    query: { filter: "" },
+  }),
+}));
+
 const mockToggleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
 const mockHandleAddStamp = jest.fn().mockResolvedValue(undefined);

@@ -1,9 +1,13 @@
+import { useRouter } from "next/router";
 import { Switch } from "@chakra-ui/react";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { PlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { useState } from "react";
 import { PlatformGroupSpec } from "../config/providers";
+import { getStampProviderFilters } from "../config/filters";
 
 type StampSelectorProps = {
+  currentPlatform?: PlatformSpec | undefined;
   currentProviders: PlatformGroupSpec[] | undefined;
   verifiedProviders: PROVIDER_ID[] | undefined;
   selectedProviders: PROVIDER_ID[] | undefined;
@@ -11,15 +15,26 @@ type StampSelectorProps = {
 };
 
 export function StampSelector({
+  currentPlatform,
   currentProviders,
   verifiedProviders,
   selectedProviders,
   setSelectedProviders,
 }: StampSelectorProps) {
+  // stamp filter
+  const router = useRouter();
+  const { filter } = router.query;
+  const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;
+
   return (
     <>
       {/* each of the available providers in this platform */}
       {currentProviders?.map((stamp, i) => {
+        // hide stamps based on filter
+        const hideStamp =
+          stampFilters && currentPlatform && !stampFilters[currentPlatform?.platform]?.includes(stamp.platformGroup);
+        if (hideStamp) return null;
+
         return (
           <div key={i} className="border-b py-4 px-6">
             <p className="ml-4 text-sm font-bold">{stamp.platformGroup}</p>

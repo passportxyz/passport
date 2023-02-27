@@ -1,5 +1,6 @@
 // --- React Methods
 import { useContext, useEffect } from "react";
+import { useRouter } from "next/router";
 
 // --- Chakra UI Elements
 import { useDisclosure, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
@@ -16,6 +17,7 @@ import { pillLocalStorage } from "../context/userContext";
 // --- Components
 import { JsonOutputModal } from "./JsonOutputModal";
 import { RemoveStampModal } from "./RemoveStampModal";
+import { getStampProviderFilters } from "../config/filters";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -43,6 +45,10 @@ export const PlatformCard = ({
   // import all providers
   const { allProvidersState, passportHasCacaoError, handleDeleteStamps } = useContext(CeramicContext);
 
+  // stamp filter
+  const router = useRouter();
+  const { filter } = router.query;
+
   // useDisclosure to control JSON modal
   const {
     isOpen: isOpenJsonOutputModal,
@@ -58,6 +64,11 @@ export const PlatformCard = ({
   } = useDisclosure();
 
   const disabled = passportHasCacaoError();
+
+  // hide platforms based on filter
+  const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;
+  const hidePlatform = stampFilters && !Object.keys(stampFilters).includes(platform.platform);
+  if (hidePlatform) return <></>;
 
   // returns a single Platform card
   return (
