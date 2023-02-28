@@ -397,7 +397,6 @@ const service = new awsx.ecs.FargateService("dpopp-ceramic", {
           { name: "NODE_OPTIONS", value: "--max-old-space-size=7168" },
           { name: "CERAMIC_STREAM_CACHE_LIMIT", value: "20000" },
           { name: "CERAMIC_DISABLE_PUBSUB_UPDATES", value: "false" },
-          { name: "CERAMIC_NODE_PRIVATE_SEED_URL", value: "did:key:z6MkjxbhUeTCS3c7GqYp6jnVx8XYPihJjjDwqVWvWrWNs1Qh"},
         ],
       },
     },
