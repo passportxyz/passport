@@ -21,8 +21,8 @@ export default function Privacy() {
               <br />
               <br />
               For full privacy policy, see{" "}
-              <a href={"https://gitcoin.co/legal/privacy"}>
-                <u>https://gitcoin.co/legal/privacy</u>
+              <a href={"https://bounties.gitcoin.co/legal/privacy"}>
+                <u>https://bounties.gitcoin.co/legal/privacy</u>
               </a>
               .
             </div>

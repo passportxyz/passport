@@ -33,7 +33,7 @@ const validCodeResponse = {
   status: 200,
 };
 
-const testDataUrl = "https://gitcoin.co/grants/v1/api/vc/configurable_test_endpoint";
+const testDataUrl = "https://bounties.gitcoin.co/grants/v1/api/vc/configurable_test_endpoint";
 const testProviderPrefix = "GitcoinGrantStatisticsProviderTester";
 
 const code = "ABC123_ACCESSCODE";
