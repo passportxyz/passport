@@ -33,7 +33,7 @@ const validCodeResponse = {
   status: 200,
 };
 
-const testDataUrl = "https://gitcoin.co/grants/v1/api/vc/configurable_test_endpoint";
+const testDataUrl = "https://bounties.gitcoin.co/grants/v1/api/vc/configurable_test_endpoint";
 const testProviderPrefix = "GitcoinGrantStatisticsProviderTester";
 
 const code = "ABC123_ACCESSCODE";
@@ -225,7 +225,7 @@ describe("Attempt verification %s", function () {
             type: "User",
           },
         });
-      else if (url.startsWith("https://gitcoin.co/grants/v1/api/vc/contributor_statistics"))
+      else if (url.startsWith("https://bounties.gitcoin.co/grants/v1/api/vc/contributor_statistics"))
         return Promise.resolve({
           status: 200,
           data: {
@@ -272,7 +272,7 @@ describe("Attempt verification %s", function () {
   it("should return invalid payload when a bad status code is returned by github user api", async () => {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://api.github.com/user") throw new Error("API EXCEPTION");
-      else if (url.startsWith("https://gitcoin.co/grants/v1/api/vc/contributor_statistics"))
+      else if (url.startsWith("https://bounties.gitcoin.co/grants/v1/api/vc/contributor_statistics"))
         return Promise.resolve({
           status: 200,
           data: {
@@ -319,7 +319,7 @@ describe("Attempt verification %s", function () {
   it("should return invalid payload when a bad response received when calling the github user api (exception thrown)", async () => {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://api.github.com/user") throw "Some kind of error";
-      else if (url.startsWith("https://gitcoin.co/grants/v1/api/vc/contributor_statistics"))
+      else if (url.startsWith("https://bounties.gitcoin.co/grants/v1/api/vc/contributor_statistics"))
         return Promise.resolve({
           status: 200,
           data: {
@@ -374,7 +374,7 @@ describe("Attempt verification %s", function () {
           },
           status: 200,
         });
-      } else if (url.startsWith("https://gitcoin.co/grants/v1/api/vc/contributor_statistics"))
+      } else if (url.startsWith("https://bounties.gitcoin.co/grants/v1/api/vc/contributor_statistics"))
         return Promise.resolve({
           status: 200,
           data: {

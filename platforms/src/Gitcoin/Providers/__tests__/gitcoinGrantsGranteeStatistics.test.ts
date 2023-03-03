@@ -13,7 +13,7 @@ describe("GitcoinGranteeStatisticsProvider class", function () {
     });
 
     expect(gitcoin.type).toEqual(`GitcoinGranteeStatistics#${recordAttribute}#${threshold}`);
-    expect(gitcoin.dataUrl).toEqual("https://gitcoin.co/grants/v1/api/vc/grantee_statistics");
+    expect(gitcoin.dataUrl).toEqual("https://bounties.gitcoin.co/grants/v1/api/vc/grantee_statistics");
     expect(gitcoin._options).toEqual({ threshold, receivingAttribute, recordAttribute });
   });
 });
