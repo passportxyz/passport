@@ -9,6 +9,7 @@ import "../styles/globals.css";
 import { ChakraProvider } from "@chakra-ui/react";
 import { UserContextProvider } from "../context/userContext";
 import { CeramicContextProvider } from "../context/ceramicContext";
+import { StampStorageProvider } from "../context/stampStorageContext";
 
 // --- Ceramic Tools
 import { Provider as SelfIdProvider } from "@self.id/framework";
@@ -62,13 +63,17 @@ function MyApp({ Component, pageProps }: AppProps) {
         client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}
         session={true}
       >
-        <UserContextProvider>
-          <CeramicContextProvider>
-            <ChakraProvider>
-              <div suppressHydrationWarning>{typeof window === "undefined" ? null : <Component {...pageProps} />}</div>
-            </ChakraProvider>
-          </CeramicContextProvider>
-        </UserContextProvider>
+        <StampStorageProvider>
+          <UserContextProvider>
+            <CeramicContextProvider>
+              <ChakraProvider>
+                <div suppressHydrationWarning>
+                  {typeof window === "undefined" ? null : <Component {...pageProps} />}
+                </div>
+              </ChakraProvider>
+            </CeramicContextProvider>
+          </UserContextProvider>
+        </StampStorageProvider>
       </SelfIdProvider>
     </>
   );

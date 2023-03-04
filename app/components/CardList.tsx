@@ -15,6 +15,7 @@ import { SideBarContent } from "./SideBarContent";
 import { Drawer, DrawerOverlay, useDisclosure } from "@chakra-ui/react";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { CeramicContext } from "../context/ceramicContext";
+import { useStampStorage } from "../context/stampStorageContext";
 import { PlatformCard } from "./PlatformCard";
 
 export type CardListProps = {
@@ -25,6 +26,7 @@ type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const { allProvidersState, allPlatforms } = useContext(CeramicContext);
+  const { stamps } = useStampStorage();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef();
   const [currentPlatform, setCurrentPlatform] = useState<PlatformSpec | undefined>();
@@ -33,18 +35,19 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
 
   // get the selected Providers
   const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
-    PLATFORMS.reduce((plaforms, platform) => {
+    PLATFORMS.reduce((platforms, platform) => {
       // get all providerIds for this platform
       const providerIds =
         STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
           return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
         }, [] as PROVIDER_ID[]) || [];
-      // default to empty array for each platform
-      plaforms[platform.platform] = providerIds.filter(
-        (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
-      );
-      // return all platforms
-      return plaforms;
+      return {
+        ...platforms,
+        // default to empty array for each platform
+        [platform.platform]: providerIds.filter(
+          (providerId) => stamps.find((stamp) => stamp.provider === providerId) !== undefined
+        ),
+      };
     }, {} as SelectedProviders)
   );
 

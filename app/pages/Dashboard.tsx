@@ -32,7 +32,11 @@ import { ExpiredStampModal } from "../components/ExpiredStampModal";
 import ProcessingPopup from "../components/ProcessingPopup";
 import { getFilterName } from "../config/filters";
 
+import { useStampStorage } from "../context/stampStorageContext";
+
 export default function Dashboard() {
+  const { initialize, stamps, status } = useStampStorage();
+
   const { passport, isLoadingPassport, passportHasCacaoError, cancelCeramicConnection, expiredProviders } =
     useContext(CeramicContext);
   const { wallet, toggleConnection, handleDisconnection } = useContext(UserContext);
@@ -51,6 +55,12 @@ export default function Dashboard() {
   const router = useRouter();
   const { filter } = router.query;
   const filterName = filter?.length && typeof filter === "string" ? getFilterName(filter) : false;
+
+  useEffect(() => {
+    if (passport && status === "UNINITIALIZED") {
+      initialize(async () => passport.stamps || []);
+    }
+  }, [passport]);
 
   // Route user to home when wallet is disconnected
   useEffect(() => {
@@ -196,7 +206,7 @@ export default function Dashboard() {
               <img className="ml-6 mr-6" src="/assets/logoLine.svg" alt="Logo Line" />
               <img src="/assets/passportLogoBlack.svg" alt="pPassport Logo" />
             </div>
-            {passport ? (
+            {status === "STEADY" ? (
               <button
                 data-testid="button-passport-json-mobile"
                 className="float-right ml-auto rounded-md border-2 border-gray-300 py-2 px-4 text-black"
@@ -226,7 +236,7 @@ export default function Dashboard() {
         <div className="w-full md:w-2/5">
           {isLoadingPassport == IsLoadingPassportState.FailedToConnect && retryModal}
           {viewerConnection.status !== "connecting" &&
-            (passport ? (
+            (status === "STEADY" ? (
               <div className="hidden md:block">
                 <button
                   data-testid="button-passport-json"
