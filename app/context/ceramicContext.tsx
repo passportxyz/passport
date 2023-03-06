@@ -35,6 +35,7 @@ import {
   Google,
   Brightid,
   Coinbase,
+  ImpactSelf,
 } from "@gitcoin/passport-platforms";
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -117,6 +118,11 @@ platforms.set("ZkSync", {
 platforms.set("Lens", {
   platform: new Lens.LensPlatform(),
   platFormGroupSpec: Lens.LensProviderConfig,
+});
+
+platforms.set("ImpactSelf", {
+  platform: new ImpactSelf.ImpactSelfPlatform(),
+  platFormGroupSpec: ImpactSelf.ImpactSelfProviderConfig,
 });
 
 platforms.set("GnosisSafe", {
@@ -447,6 +453,34 @@ const startingAllProvidersState: AllProvidersState = {
   },
   Coinbase: {
     providerSpec: getProviderSpec("Coinbase", "Coinbase"),
+    stamp: undefined,
+  },
+  "ImpactSelf#Claimed": {
+    providerSpec: getProviderSpec("ImpactSelf", "ImpactSelf#Claimed"),
+    stamp: undefined,
+  },
+  "ImpactSelf#Score#5": {
+    providerSpec: getProviderSpec("ImpactSelf", "ImpactSelf#Score#5"),
+    stamp: undefined,
+  },
+  "ImpactSelf#Score#20": {
+    providerSpec: getProviderSpec("ImpactSelf", "ImpactSelf#Score#20"),
+    stamp: undefined,
+  },
+  "ImpactSelf#Score#70": {
+    providerSpec: getProviderSpec("ImpactSelf", "ImpactSelf#Score#70"),
+    stamp: undefined,
+  },
+  "ImpactSelf#ActiveSources#1": {
+    providerSpec: getProviderSpec("ImpactSelf", "ImpactSelf#ActiveSources#1"),
+    stamp: undefined,
+  },
+  "ImpactSelf#ActiveSources#3": {
+    providerSpec: getProviderSpec("ImpactSelf", "ImpactSelf#ActiveSources#3"),
+    stamp: undefined,
+  },
+  "ImpactSelf#ActiveSources#5": {
+    providerSpec: getProviderSpec("ImpactSelf", "ImpactSelf#ActiveSources#5"),
     stamp: undefined,
   },
 };

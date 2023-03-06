@@ -294,4 +294,26 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Encrypted", name: "Coinbase" }],
     },
   ],
+  ImpactSelf: [
+    {
+      platformGroup: "Ownership",
+      providers: [{ title: "A claimed Impact Self", name: "ImpactSelf#Claimed" }],
+    },
+    {
+      platformGroup: "Score",
+      providers: [
+        { title: "More than 5", name: "ImpactSelf#Score#5" },
+        { title: "More than 20", name: "ImpactSelf#Score#20" },
+        { title: "More than 70", name: "ImpactSelf#Score#70" },
+      ],
+    },
+    {
+      platformGroup: "Connected Sources",
+      providers: [
+        { title: "More than 1", name: "ImpactSelf#ActiveSources#1" },
+        { title: "More than 3", name: "ImpactSelf#ActiveSources#3" },
+        { title: "More than 5", name: "ImpactSelf#ActiveSources#5" },
+      ],
+    },
+  ],
 };

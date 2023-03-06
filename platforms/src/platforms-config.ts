@@ -175,4 +175,12 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Connect your existing Coinbase account to verify.",
     connectMessage: "Connect Account",
   },
+  {
+    icon: "./assets/dottylandStampIcon.svg",
+    platform: "ImpactSelf",
+    name: "Impact Self",
+    description: "Connect your wallet to verify ownership of an Impact Self. Claim at https://dottyland.xyz",
+    connectMessage: "Verify Account",
+    isEVM: true,
+  },
 ];

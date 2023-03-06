@@ -26,6 +26,7 @@ import * as Google from "./Google";
 import * as ClearText from "./ClearText";
 import * as Brightid from "./Brightid";
 import * as Coinbase from "./Coinbase";
+import * as ImpactSelf from "./ImpactSelf";
 
 export {
   Brightid,
@@ -50,6 +51,7 @@ export {
   Ens,
   Twitter,
   Coinbase,
+  ImpactSelf,
 };
 
 // Initiate providers - new Providers should be registered in this array...
@@ -213,6 +215,40 @@ export const providers = new Providers([
     threshold: 1,
     recordAttribute: "ethPossessionsGte",
     error: "ETH Possessions >= 1 Provider verify Error",
+  }),
+  /////////////////////////////////////////////////////////////
+  // Start adding Impact Self Providers
+  ////////////////////////////////////////////////////////////
+  new ImpactSelf.ImpactSelfOwnershipProvider(),
+  new ImpactSelf.ImpactSelfScoreProvider({
+    typeName: "ImpactSelf#Score#5",
+    threshold: 5,
+    error: "Impact Self Score > 5 provider error",
+  }),
+  new ImpactSelf.ImpactSelfScoreProvider({
+    typeName: "ImpactSelf#Score#20",
+    threshold: 20,
+    error: "Impact Self Score > 20 provider error",
+  }),
+  new ImpactSelf.ImpactSelfScoreProvider({
+    typeName: "ImpactSelf#Score#70",
+    threshold: 70,
+    error: "Impact Self Score > 70 provider error",
+  }),
+  new ImpactSelf.ImpactSelfActiveSourcesProvider({
+    typeName: "ImpactSelf#ActiveSources#1",
+    threshold: 1,
+    error: "Impact Self Score > 1 provider error",
+  }),
+  new ImpactSelf.ImpactSelfActiveSourcesProvider({
+    typeName: "ImpactSelf#ActiveSources#3",
+    threshold: 3,
+    error: "Impact Self Score > 3 provider error",
+  }),
+  new ImpactSelf.ImpactSelfActiveSourcesProvider({
+    typeName: "ImpactSelf#ActiveSources#5",
+    threshold: 5,
+    error: "Impact Self Score > 5 provider error",
   }),
   /////////////////////////////////////////////////////////////
   // END

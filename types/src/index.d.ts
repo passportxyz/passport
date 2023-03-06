@@ -181,7 +181,8 @@ export type PLATFORM_ID =
   | "ZkSync"
   | "Lens"
   | "GnosisSafe"
-  | "Coinbase";
+  | "Coinbase"
+  | "ImpactSelf";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -246,4 +247,11 @@ export type PROVIDER_ID =
   | "ZkSync"
   | "Lens"
   | "GnosisSafe"
-  | "Coinbase";
+  | "Coinbase"
+  | "ImpactSelf#Claimed"
+  | "ImpactSelf#Score#5"
+  | "ImpactSelf#Score#20"
+  | "ImpactSelf#Score#70"
+  | "ImpactSelf#ActiveSources#1"
+  | "ImpactSelf#ActiveSources#3"
+  | "ImpactSelf#ActiveSources#5";

@@ -186,4 +186,12 @@ export const PLATFORMS: PlatformSpec[] = [
     connectMessage: "Connect Account",
     isEVM: false,
   },
+  {
+    icon: "./assets/dottylandStampIcon.svg",
+    platform: "ImpactSelf",
+    name: "Impact Self",
+    description: "Connect your wallet to verify ownership of an Impact Self. Claim at https://dottyland.xyz",
+    connectMessage: "Connect Wallet",
+    isEVM: true,
+  },
 ];
