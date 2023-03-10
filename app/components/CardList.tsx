@@ -1,5 +1,5 @@
 // --- React Methods
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState, useMemo } from "react";
 
 import { PLATFORMS, PlatformSpec } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
@@ -25,7 +25,7 @@ export type CardListProps = {
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
 export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
-  const { allProvidersState, allPlatforms } = useContext(CeramicContext);
+  const { allPlatforms } = useContext(CeramicContext);
   const { stamps } = useStampStorage();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef();
@@ -34,21 +34,23 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   const [updatedPlatforms, setUpdatedPlatforms] = useState<UpdatedPlatforms | undefined>();
 
   // get the selected Providers
-  const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
-    PLATFORMS.reduce((platforms, platform) => {
-      // get all providerIds for this platform
-      const providerIds =
-        STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
-          return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-        }, [] as PROVIDER_ID[]) || [];
-      return {
-        ...platforms,
-        // default to empty array for each platform
-        [platform.platform]: providerIds.filter(
-          (providerId) => stamps.find((stamp) => stamp.provider === providerId) !== undefined
-        ),
-      };
-    }, {} as SelectedProviders)
+  const selectedProviders = useMemo(
+    () =>
+      PLATFORMS.reduce((platforms, platform) => {
+        // get all providerIds for this platform
+        const providerIds =
+          STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
+            return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+          }, [] as PROVIDER_ID[]) || [];
+        return {
+          ...platforms,
+          // default to empty array for each platform
+          [platform.platform]: providerIds.filter((providerId) =>
+            stamps.find((stamp) => stamp.provider === providerId)
+          ),
+        };
+      }, {} as SelectedProviders),
+    [stamps]
   );
 
   const getUpdatedPlatforms = () => {
@@ -56,26 +58,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
     setUpdatedPlatforms(JSON.parse(previouslyUpdatedPlatforms || "{}"));
   };
 
-  // update when verifications change...
-  useEffect(() => {
-    // update all verfied states
-    setSelectedProviders(
-      PLATFORMS.reduce((plaforms, platform) => {
-        // get all providerIds for this platform
-        const providerIds =
-          STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
-            return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-          }, [] as PROVIDER_ID[]) || [];
-        // default to empty array for each platform
-        plaforms[platform.platform] = providerIds.filter(
-          (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
-        );
-        // return all platforms
-        return plaforms;
-      }, {} as SelectedProviders)
-    );
-    getUpdatedPlatforms();
-  }, [allProvidersState]);
   // Add the platforms to this switch so the sidebar content can populate dynamically
   const renderCurrentPlatformSelection = () => {
     if (currentPlatform) {

@@ -1,69 +1,36 @@
 import React, { useReducer } from "react";
-import { Stamp } from "@gitcoin/passport-types";
-
-export type OnAdd = (stamp: Stamp) => Promise<void>;
-export type OnDelete = (stamp: Stamp) => Promise<void>;
-
-export type Destination = {
-  onAdd: OnAdd;
-  onDelete: OnDelete;
-};
+import { Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
 
 export type StampStorageAction =
   | {
       type: "add";
-      stamp: Stamp;
-    }
-  | {
-      type: "delete";
-      stamp: Stamp;
-    }
-  | {
-      type: "initialize";
       stamps: Stamp[];
     }
   | {
-      type: "registerDestination";
-      destination: Destination;
+      type: "delete";
+      providers: PROVIDER_ID[];
+    }
+  | {
+      type: "clear";
     };
 
-type StampStorageState = {
-  stamps: Stamp[];
-  destinations: Destination[];
-};
-
-const stampStorageReducer = (state: StampStorageState, action: StampStorageAction) => {
+const stampStorageReducer = (stamps: Stamp[], action: StampStorageAction) => {
   switch (action.type) {
     case "add":
-      return {
-        ...state,
-        stamps: [...state.stamps, action.stamp],
-      };
+      return [...stamps, ...action.stamps];
     case "delete":
-      return {
-        ...state,
-        stamps: state.stamps.filter((stamp: Stamp) => stamp.provider !== action.stamp.provider),
-      };
-    case "initialize":
-      return {
-        ...state,
-        stamps: action.stamps,
-      };
-    case "registerDestination":
-      return {
-        ...state,
-        destinations: [...state.destinations, action.destination],
-      };
+      return stamps.filter((stamp: Stamp) =>
+        action.providers.find((provider: PROVIDER_ID) => provider === stamp.provider)
+      );
+    case "clear":
+      return [];
     default:
-      return state;
+      return stamps;
   }
 };
 
 export const useStampStorageReducer = () => {
-  const [state, dispatch] = useReducer(stampStorageReducer, {
-    stamps: [],
-    destinations: [],
-  });
+  const [state, dispatch] = useReducer(stampStorageReducer, []);
 
   // Returning as array to match useReducer, const tells TypeScript
   // that we'll be sure to destructure in the right order

@@ -35,10 +35,17 @@ import { getFilterName } from "../config/filters";
 import { useStampStorage } from "../context/stampStorageContext";
 
 export default function Dashboard() {
-  const { initialize, stamps, status } = useStampStorage();
+  const { initialize, status, registerDestination } = useStampStorage();
 
-  const { passport, isLoadingPassport, passportHasCacaoError, cancelCeramicConnection, expiredProviders } =
-    useContext(CeramicContext);
+  const {
+    passport,
+    isLoadingPassport,
+    passportHasCacaoError,
+    cancelCeramicConnection,
+    expiredProviders,
+    handleAddStamps,
+    handleDeleteStamps,
+  } = useContext(CeramicContext);
   const { wallet, toggleConnection, handleDisconnection } = useContext(UserContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -59,6 +66,10 @@ export default function Dashboard() {
   useEffect(() => {
     if (passport && status === "UNINITIALIZED") {
       initialize(async () => passport.stamps || []);
+      registerDestination({
+        onAdd: handleAddStamps,
+        onDelete: handleDeleteStamps,
+      });
     }
   }, [passport]);
 
@@ -100,7 +111,7 @@ export default function Dashboard() {
               <img alt="shield-exclamation-icon" src="./assets/shield-exclamation-icon.svg" />
             </div>
             <div className="flex flex-col" data-testid="retry-modal-content">
-              <p className="text-lg font-bold">Datasource Connection Error</p>
+              <p className="text-lg font-bold">Data Source Connection Error</p>
               <p>
                 We cannot connect to the datastore where your Stamp data is stored. Please try again in a few minutes.
               </p>
@@ -267,6 +278,7 @@ export default function Dashboard() {
             ))}
         </div>
       </div>
+      <p>STATUS: {status}</p>
       <CardList
         isLoading={
           isLoadingPassport == IsLoadingPassportState.Loading ||

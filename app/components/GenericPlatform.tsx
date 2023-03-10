@@ -22,6 +22,7 @@ import { GenericBanner } from "./GenericBanner";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
+import { useStampStorage } from "../context/stampStorageContext";
 import { UserContext } from "../context/userContext";
 
 // --- Types
@@ -59,7 +60,8 @@ const checkIcon = "../../assets/check-icon.svg";
 
 export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
-  const { handleAddStamps, handleDeleteStamps, allProvidersState, userDid } = useContext(CeramicContext);
+  const { allProvidersState, userDid } = useContext(CeramicContext);
+  const { addStamps, deleteStamps } = useStampStorage();
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [showNoStampModal, setShowNoStampModal] = useState(false);
@@ -219,12 +221,12 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
         }
       }
 
-      // Delete all stamps ...
-      await handleDeleteStamps(providerIds as PROVIDER_ID[]);
+      // Delete all stamps for platform ...
+      deleteStamps(providerIds as PROVIDER_ID[]);
 
       // .. and now add all newly validate stamps
       if (vcs.length > 0) {
-        await handleAddStamps(vcs);
+        addStamps(vcs);
       }
       datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
       // grab all providers who are verified from the verify response
