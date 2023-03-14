@@ -22,15 +22,16 @@ import type { DID as CeramicDID } from "dids";
 import { StreamID } from "@ceramicnetwork/streamid";
 import axios from "axios";
 import { DataStorageBase } from "./types";
+import { getTilesToCreate } from "./utils";
 
 // const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
 const COMMUNITY_TESTNET_CERAMIC_CLIENT_URL = "https://ceramic-clay.3boxlabs.com";
 
-type CeramicStamp = {
+export type CeramicStamp = {
   provider: string;
   credential: string;
 };
-type CeramicPassport = {
+export type CeramicPassport = {
   issuanceDate: string;
   expiryDate: string;
   stamps: CeramicStamp[];
@@ -323,22 +324,17 @@ export class CeramicDatabase implements DataStorageBase {
     // get passport document from user did data store in ceramic
     const passport = await this.store.get("Passport");
 
-    // TODO: gerald - we might avoid writing all the stamps again:
-    // We can avoid writing a stamp again if it has the same hash and issuance date as the previouse
-    // one loaded above with this statement: const passport = await this.store.get("Passport");
+    const stampsToWrite = getTilesToCreate(stamps, this.did, passport);
 
     // add stamp provider and streamId to passport stamps array
     const newStamps = // write all stamps to ceramic as tiles and collate CeramicStamp definitions
       (
         await Promise.all(
-          stamps.map(async (stamp): Promise<CeramicStamp | undefined> => {
-            // ensure the users did matches the credentials subject id otherwise skip the save
-            if (passport && this.did === stamp.credential.credentialSubject.id.toLowerCase()) {
-              // create a tile for verifiable credential issued from iam server
-              const newStampTile = await this.model.createTile("VerifiableCredential", stamp.credential);
+          stampsToWrite.map(async (stamp): Promise<CeramicStamp | undefined> => {
+            // create a tile for verifiable credential issued from iam server
+            const newStampTile = await this.model.createTile("VerifiableCredential", stamp.credential);
 
-              return { provider: stamp.provider, credential: newStampTile.id.toUrl() };
-            }
+            return { provider: stamp.provider, credential: newStampTile.id.toUrl() };
           })
         )
       ).filter((v: CeramicStamp | undefined) => v);
