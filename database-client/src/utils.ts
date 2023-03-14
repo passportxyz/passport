@@ -6,13 +6,16 @@ export function getTilesToCreate(stamps: Stamp[], did: string, passport?: Cerami
 
   const existingStampIdentifiers = passport.stamps.map((s) => {
     const credential: VerifiableCredential = JSON.parse(s.credential);
-    return { hash: credential.credentialSubject.hash, id: credential.credentialSubject.id }
+    return { hash: credential.credentialSubject.hash, issuanceDate: credential.issuanceDate }
   });
 
   const stampsToSave = stamps.filter((s) => {
-    const identifier = { hash: s.credential.credentialSubject.hash, id: s.credential.credentialSubject.id };
+    const identifier = { hash: s.credential.credentialSubject.hash, issuanceDate: s.credential.issuanceDate };
     // Check that stamp is not already saved and that the DID matches the passport DID
-    return !existingStampIdentifiers.includes(identifier) && did === s.credential.credentialSubject.id.toLocaleLowerCase();
+    return !existingStampIdentifiers.some(existingIdentifier => (
+      existingIdentifier.hash === identifier.hash &&
+      existingIdentifier.issuanceDate === identifier.issuanceDate
+    ));
   });
 
   return stampsToSave
