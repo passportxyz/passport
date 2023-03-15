@@ -1,10 +1,11 @@
 import { Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 import { getTilesToCreate } from "../src/utils";
 
-export const createStamp = (hash: string, issuanceDate: string) => ({
+export const createStamp = (hash: string, issuanceDate: string, did?: string) => ({
   credential: {
     '@context': ['https://www.w3.org/2018/credentials/v1'],
     type: ['VerifiableCredential'],
+    issuer: did || "did:example:123456789abcdefghi",
     credentialSubject: { hash } as any,
     issuanceDate,
   },

@@ -3,7 +3,7 @@ import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
 import { jest } from "@jest/globals";
-import { CeramicDatabase, CeramicPassport } from "../src";
+import { CeramicDatabase } from "../src";
 
 import testnetAliases from "./integration-test-model-aliases.json";
 import { TileDoc } from "@glazed/did-datastore/dist/proxy";
@@ -388,86 +388,100 @@ describe("Verify Ceramic Database", () => {
 
     expect(spyLoadStream).toBeCalledTimes(2);
   });
-  it("should attempt to set a stamp when called", async () => {
-    const successfulStamps = [
-      {
-        provider: "Provider-1",
-        streamId: "ceramic://credential-1",
-        credential: createStamp('hash1', '2022-01-01').credential,
-      } as unknown as Stamp,
-      {
-        provider: "Provider-1",
-        streamId: "ceramic://credential-2",
-        credential: createStamp('hash2', '2022-01-02').credential,
-      } as unknown as Stamp,
-    ]
-    const newStamps = [
-      {
-        provider: "Provider-1",
-        streamId: "ceramic://credential-1",
-        credential: createStamp('hash3', '2022-01-03').credential,
-      } as unknown as Stamp,
-      {
-        provider: "Provider-2",
-        streamId: "ceramic://credential-2",
-        credential: createStamp('hash4', '2022-01-04').credential,
-      } as unknown as Stamp,
-    ]
-    let spyStoreGet = jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (_name) => {
-      return {
-        id: "passport-id",
+  let spyStoreMerge, spyPinAdd, mockstreamUrl, mockstreamUrl1, passportStreamId, spyLoggerInfo, successfulStamps, newStamps;
+  describe("setStamp", () => {
+    beforeEach(() => {
+      successfulStamps = [
+        {
+          provider: "Provider-1",
+          streamId: "ceramic://credential-1",
+          credential: createStamp('hash1', '2022-01-01', testDID.id).credential,
+        } as unknown as Stamp,
+        {
+          provider: "Provider-1",
+          streamId: "ceramic://credential-2",
+          credential: createStamp('hash2', '2022-01-02', testDID.id).credential,
+        } as unknown as Stamp,
+      ]
+      newStamps = [
+        {
+          provider: "Provider-1",
+          streamId: "ceramic://credential-1",
+          credential: createStamp('hash3', '2022-01-03', testDID.id).credential,
+        } as unknown as Stamp,
+        {
+          provider: "Provider-2",
+          streamId: "ceramic://credential-2",
+          credential: createStamp('hash4', '2022-01-04', testDID.id).credential,
+        } as unknown as Stamp,
+      ]
+
+
+      jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (_name) => {
+        return {
+          id: "passport-id",
+          stamps: [
+            {
+              provider: "Provider-1",
+              credential: "ceramic://credential-1",
+            },
+            {
+              provider: "Provider-2",
+              credential: "ceramic://credential-2",
+            },
+          ],
+        };
+      });
+      jest.spyOn(ceramicDatabase, "loadStamps").mockImplementation(async () => {
+        return {
+          successfulStamps,
+          cacaoErrorStampIds: [],
+        }
+      });
+
+      mockstreamUrl = "ceramic://passport-id"
+      mockstreamUrl1 = "ceramic://passport-id-1"
+
+      jest.spyOn(ceramicDatabase.model, "createTile").mockImplementationOnce(async () => {
+        return {
+          id: {
+            toUrl: jest.fn().mockReturnValue(mockstreamUrl),
+          },
+        } as unknown as TileDoc;
+      }).mockImplementationOnce(async () => {
+        return {
+          id: {
+            toUrl: jest.fn().mockReturnValue(mockstreamUrl1),
+          },
+        } as unknown as TileDoc;
+      });
+
+      passportStreamId = "passport-stream-d" as unknown as StreamID;
+      spyStoreMerge = jest.spyOn(ceramicDatabase.store, "merge").mockReturnValue(Promise.resolve(passportStreamId));
+
+
+      spyPinAdd = jest.spyOn(ceramicDatabase.ceramicClient.pin, "add").mockImplementation(async (_streamId) => {
+        // Nothing to do here
+        return;
+      });
+
+      spyLoggerInfo = jest.spyOn(ceramicDatabase.logger, "info")
+    });
+
+    it("should attempt to set a stamp when called", async () => {
+      await ceramicDatabase.setStamps(newStamps);
+      expect(spyStoreMerge).toBeCalledTimes(1);
+      expect(spyStoreMerge).toBeCalledWith("Passport", {
         stamps: [
-          {
-            provider: "Provider-1",
-            credential: "ceramic://credential-1",
-          },
-          {
-            provider: "Provider-2",
-            credential: "ceramic://credential-2",
-          },
-        ],
-      };
+          { provider: 'Provider-1', credential: mockstreamUrl },
+          { provider: 'Provider-2', credential: mockstreamUrl1 }
+        ]
+      });
+      expect(spyPinAdd).toBeCalledWith(passportStreamId);
     });
-    let spyStoreLoadStamps = jest.spyOn(ceramicDatabase, "loadStamps").mockImplementation(async () => {
-      return {
-        successfulStamps,
-        cacaoErrorStampIds: [],
-      }
+    it("should not attempt to save stamps that already exist", async () => {
+      await ceramicDatabase.setStamps(successfulStamps);
+      expect(spyLoggerInfo).toHaveBeenNthCalledWith(2, `No stamps were written to ceramic because they already exist ${testDID.id.toLowerCase()}:`);
     });
-
-    let mockstreamUrl = "ceramic://passport-id"
-    let mockstreamUrl1 = "ceramic://passport-id-1"
-
-    let spyModelCreateTile = jest.spyOn(ceramicDatabase.model, "createTile").mockImplementationOnce(async () => {
-      return {
-        id: {
-          toUrl: jest.fn().mockReturnValue(mockstreamUrl),
-        },
-      } as unknown as TileDoc;
-    }).mockImplementationOnce(async () => {
-      return {
-        id: {
-          toUrl: jest.fn().mockReturnValue(mockstreamUrl1),
-        },
-      } as unknown as TileDoc;
-    });
-
-    const passportStreamId = "passport-stream-d" as unknown as StreamID;
-    let spyStoreMerge = jest.spyOn(ceramicDatabase.store, "merge").mockReturnValue(Promise.resolve(passportStreamId));
-
-
-    let spyPinAdd = jest.spyOn(ceramicDatabase.ceramicClient.pin, "add").mockImplementation(async (_streamId) => {
-      // Nothing to do here
-      return;
-    });
-
-    await ceramicDatabase.setStamps(newStamps);
-    expect(spyStoreMerge).toBeCalledTimes(1);
-    expect(spyStoreMerge).toBeCalledWith("Passport", {
-      stamps: [
-      { provider: 'Provider-1', credential: mockstreamUrl },
-      { provider: 'Provider-2', credential: mockstreamUrl1 }
-    ]});
-    expect(spyPinAdd).toBeCalledWith(passportStreamId);
   });
 });
