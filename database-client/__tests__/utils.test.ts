@@ -1,17 +1,18 @@
 import { Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 import { getTilesToCreate } from "../src/utils";
 
+export const createStamp = (hash: string, issuanceDate: string) => ({
+  credential: {
+    '@context': ['https://www.w3.org/2018/credentials/v1'],
+    type: ['VerifiableCredential'],
+    credentialSubject: { hash } as any,
+    issuanceDate,
+  },
+});
+
 describe('getTilesToCreate', () => {
   const did = 'did:example:123456789abcdefghi';
 
-  const createStamp = (hash: string, issuanceDate: string) => ({
-    credential: {
-      '@context': ['https://www.w3.org/2018/credentials/v1'],
-      type: ['VerifiableCredential'],
-      credentialSubject: { hash } as any,
-      issuanceDate,
-    },
-  });
 
   it('should return empty array if all stamps are already in existingStamps', () => {
     const stamps = [createStamp('hash1', '2022-01-01'), createStamp('hash2', '2022-01-02')] as Stamp[];
