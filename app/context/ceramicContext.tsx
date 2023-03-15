@@ -538,6 +538,18 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     }
   }, [database, ceramicClient]);
 
+  const successFullPassportLoad = (
+    database: CeramicDatabase | PassportDatabase,
+    passport?: Passport,
+    skipLoadingState?: boolean
+  ): Passport => {
+    const cleanedPassport = cleanPassport(passport, database) as Passport;
+    hydrateAllProvidersState(cleanedPassport);
+    setPassport(cleanedPassport);
+    if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Idle);
+    return cleanedPassport;
+  };
+
   // The initialFetchPassport is only use when loading the passport for the first time
   // as we will try to import the stamps from ceramic in case the user has none in
   // the DB yet
@@ -553,10 +565,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
     switch (status) {
       case "Success":
-        const cleanedPassport = cleanPassport(passport, database) as Passport;
-        hydrateAllProvidersState(cleanedPassport);
-        setPassport(cleanedPassport);
-        if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Idle);
+        successFullPassportLoad(database, passport, skipLoadingState);
         break;
       case "StampCacaoError":
       case "PassportCacaoError":
@@ -597,11 +606,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
     switch (status) {
       case "Success":
-        const cleanedPassport = cleanPassport(passport, database) as Passport;
-        hydrateAllProvidersState(cleanedPassport);
-        setPassport(cleanedPassport);
-        passportToReturn = cleanedPassport;
-        if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Idle);
+        passportToReturn = successFullPassportLoad(database, passport, skipLoadingState);
         break;
       case "StampCacaoError":
       case "PassportCacaoError":
