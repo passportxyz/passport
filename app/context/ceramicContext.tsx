@@ -534,7 +534,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   useEffect(() => {
     if (database && ceramicClient) {
-      initialFetchPassport(database, false, true);
+      fetchPassport(database, false, true);
     }
   }, [database, ceramicClient]);
 
@@ -568,44 +568,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     }
   };
 
-  // The initialFetchPassport is only use when loading the passport for the first time
-  // as we will try to import the stamps from ceramic in case the user has none in
-  // the DB yet
-  const initialFetchPassport = async (
+  const fetchPassport = async (
     database: CeramicDatabase | PassportDatabase,
     skipLoadingState?: boolean,
     isInitialLoad?: boolean
-  ): Promise<void> => {
-    if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
-
-    // fetch, clean and set the new Passport state
-    const { status, errorDetails, passport } = await database.getPassport();
-
-    switch (status) {
-      case "Success":
-        passportLoadSuccess(database, passport, skipLoadingState);
-        break;
-      case "StampCacaoError":
-      case "PassportCacaoError":
-        // These cannot occur when loading from DB
-        break;
-      case "DoesNotExist":
-        if (isInitialLoad) {
-          await passportLoadDoesNotExist();
-        }
-        break;
-      case "ExceptionRaised":
-        // something is wrong with Ceramic...
-        passportLoadException(skipLoadingState);
-        break;
-    }
-
-    setPassportLoadResponse({ passport, status, errorDetails });
-  };
-
-  const fetchPassport = async (
-    database: CeramicDatabase | PassportDatabase,
-    skipLoadingState?: boolean
   ): Promise<Passport | undefined> => {
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
 
@@ -622,6 +588,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         // These cannot occur when loading from DB
         break;
       case "DoesNotExist":
+        if (isInitialLoad) {
+          await passportLoadDoesNotExist();
+        }
         break;
       case "ExceptionRaised":
         // something is wrong with Ceramic...
