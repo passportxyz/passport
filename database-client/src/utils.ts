@@ -1,11 +1,8 @@
 import { Stamp, VerifiableCredential } from "@gitcoin/passport-types";
-import { CeramicPassport } from "./ceramicClient";
 
-export function getTilesToCreate(stamps: Stamp[], did: string, passport?: CeramicPassport) {
-  if (!passport) return undefined
-
-  const existingStampIdentifiers = passport.stamps.map((s) => {
-    const credential: VerifiableCredential = JSON.parse(s.credential);
+export function getTilesToCreate(stamps: Stamp[], did: string, existingStamps?: Stamp[]) {
+  const existingStampIdentifiers = existingStamps.map((s) => {
+    const credential: VerifiableCredential = s.credential;
     return { hash: credential.credentialSubject.hash, issuanceDate: credential.issuanceDate }
   });
 

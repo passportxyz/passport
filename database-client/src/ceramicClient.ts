@@ -324,7 +324,9 @@ export class CeramicDatabase implements DataStorageBase {
     // get passport document from user did data store in ceramic
     const passport = await this.store.get("Passport");
 
-    const stampsToWrite = getTilesToCreate(stamps, this.did, passport);
+    const { successfulStamps } = await this.loadStamps(passport);
+
+    const stampsToWrite = getTilesToCreate(stamps, this.did, successfulStamps);
 
     // add stamp provider and streamId to passport stamps array
     const newStamps = // write all stamps to ceramic as tiles and collate CeramicStamp definitions

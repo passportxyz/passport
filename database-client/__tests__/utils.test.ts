@@ -1,73 +1,46 @@
+import { Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 import { getTilesToCreate } from "../src/utils";
-import { CeramicPassport } from "../src/ceramicClient";
-import { Stamp } from "@gitcoin/passport-types";
 
 describe('getTilesToCreate', () => {
-  it('should return undefined when passport is not provided', () => {
+  const did = 'did:example:123456789abcdefghi';
+
+  const createStamp = (hash: string, issuanceDate: string) => ({
+    credential: {
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
+      type: ['VerifiableCredential'],
+      credentialSubject: { hash } as any,
+      issuanceDate,
+    },
+  });
+
+  it('should return empty array if all stamps are already in existingStamps', () => {
+    const stamps = [createStamp('hash1', '2022-01-01'), createStamp('hash2', '2022-01-02')] as Stamp[];
+    const existingStamps = stamps;
+
+    expect(getTilesToCreate(stamps, did, existingStamps)).toEqual([]);
+  });
+
+  it('should return all stamps if none of them are in existingStamps', () => {
+    const stamps = [createStamp('hash1', '2022-01-01'), createStamp('hash2', '2022-01-02')] as Stamp[];
+    const existingStamps: Stamp[] = [];
+
+    expect(getTilesToCreate(stamps, did, existingStamps)).toEqual(stamps);
+  });
+
+  it('should return only new stamps not in existingStamps', () => {
+    const stamp1 = createStamp('hash1', '2022-01-01');
+    const stamp2 = createStamp('hash2', '2022-01-02');
+    const stamp3 = createStamp('hash3', '2022-01-03');
+    const stamps = [stamp1, stamp2, stamp3] as Stamp[];
+    const existingStamps = [stamp1, stamp2] as Stamp[];
+
+    expect(getTilesToCreate(stamps, did, existingStamps)).toEqual([stamp3]);
+  });
+
+  it('should return empty array if no stamps are provided', () => {
     const stamps: Stamp[] = [];
-    const did = 'did:test:123';
-    const result = getTilesToCreate(stamps, did);
-    expect(result).toBeUndefined();
-  });
+    const existingStamps: Stamp[] = [];
 
-  it('should return stamps that are not already in the passport', () => {
-    const stamp1 = {
-      credential: {
-        '@context': ['https://www.w3.org/2018/credentials/v1'],
-        type: ['VerifiableCredential'],
-        credentialSubject: { hash: 'hash1' },
-        issuanceDate: '2022-01-01T00:00:00Z',
-      },
-    } as Stamp;
-
-    const stamp2 = {
-      credential: {
-        '@context': ['https://www.w3.org/2018/credentials/v1'],
-        type: ['VerifiableCredential'],
-        credentialSubject: { hash: 'hash2' },
-        issuanceDate: '2022-01-01T00:00:00Z',
-      },
-    } as Stamp;
-
-    const passport = {
-      stamps: [
-        {
-          credential: JSON.stringify(stamp1.credential),
-        },
-      ],
-    } as CeramicPassport;
-
-    const stamps: Stamp[] = [stamp1, stamp2];
-    const did = 'did:test:123';
-
-    const result = getTilesToCreate(stamps, did, passport);
-
-    expect(result).toEqual([stamp2]);
-  });
-
-  it('should not return stamps that are already in the passport', () => {
-    const stamp1 = {
-      credential: {
-        '@context': ['https://www.w3.org/2018/credentials/v1'],
-        type: ['VerifiableCredential'],
-        credentialSubject: { hash: 'hash1' },
-        issuanceDate: '2022-01-01T00:00:00Z',
-      },
-    } as Stamp;
-
-    const passport = {
-      stamps: [
-        {
-          credential: JSON.stringify(stamp1.credential),
-        },
-      ],
-    } as CeramicPassport;
-
-    const stamps: Stamp[] = [stamp1];
-    const did = 'did:test:123';
-
-    const result = getTilesToCreate(stamps, did, passport);
-
-    expect(result).toEqual([]);
+    expect(getTilesToCreate(stamps, did, existingStamps)).toEqual([]);
   });
 });
