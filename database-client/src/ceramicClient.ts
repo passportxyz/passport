@@ -328,6 +328,12 @@ export class CeramicDatabase implements DataStorageBase {
 
     const stampsToWrite = getTilesToCreate(stamps, this.did, successfulStamps);
 
+    // If there are no stamps to write, exit
+    if (stampsToWrite.length === 0) {
+      this.logger.info(`No stamps were written to ceramic because they already exist ${this.did}:`);
+      return;
+    }
+
     // add stamp provider and streamId to passport stamps array
     const newStamps = // write all stamps to ceramic as tiles and collate CeramicStamp definitions
       (

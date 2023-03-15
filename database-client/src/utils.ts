@@ -12,7 +12,7 @@ export function getTilesToCreate(stamps: Stamp[], did: string, existingStamps?: 
     return !existingStampIdentifiers.some(existingIdentifier => (
       existingIdentifier.hash === identifier.hash &&
       existingIdentifier.issuanceDate === identifier.issuanceDate
-    ));
+    )) && s.credential.issuer.toLocaleLowerCase() === did;
   });
 
   return stampsToSave
