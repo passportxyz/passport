@@ -2,6 +2,7 @@
 // --- React Methods
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 
 // --Components
 import { CardList } from "../components/CardList";
@@ -29,6 +30,7 @@ import { Banner } from "../components/Banner";
 import { RefreshStampModal } from "../components/RefreshStampModal";
 import { ExpiredStampModal } from "../components/ExpiredStampModal";
 import ProcessingPopup from "../components/ProcessingPopup";
+import { getFilterName } from "../config/filters";
 
 export default function Dashboard() {
   const { passport, isLoadingPassport, passportHasCacaoError, cancelCeramicConnection, expiredProviders } =
@@ -44,6 +46,11 @@ export default function Dashboard() {
 
   const [refreshModal, setRefreshModal] = useState(false);
   const [expiredStampModal, setExpiredStampModal] = useState(false);
+
+  // stamp filter
+  const router = useRouter();
+  const { filter } = router.query;
+  const filterName = filter?.length && typeof filter === "string" ? getFilterName(filter) : false;
 
   // Route user to home when wallet is disconnected
   useEffect(() => {
@@ -165,7 +172,16 @@ export default function Dashboard() {
 
       <div className="container mx-auto flex flex-wrap-reverse px-2 md:mt-4 md:flex-wrap">
         <div className="md:w-3/5">
-          <p className="mb-4 text-2xl text-black">My Stamps</p>
+          <p className="mb-4 text-2xl text-black">
+            My {filterName && `${filterName} `}Stamps
+            {filterName && (
+              <a href="/#/dashboard">
+                <span data-testid="select-all" className={`pl-2 text-sm text-purple-connectPurple`}>
+                  see all my stamps
+                </span>
+              </a>
+            )}
+          </p>
           <p className="text-xl text-black">
             Gitcoin Passport is an identity aggregator that helps you build a digital identifier showcasing your unique
             humanity. Select the verification stamps you&apos;d like to connect to start building your passport. The

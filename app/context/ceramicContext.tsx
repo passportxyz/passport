@@ -46,9 +46,7 @@ export interface CeramicContextState {
   allProvidersState: AllProvidersState;
   allPlatforms: Map<PLATFORM_ID, PlatformProps>;
   handleCreatePassport: () => Promise<void>;
-  handleAddStamp: (stamp: Stamp) => Promise<void>;
   handleAddStamps: (stamps: Stamp[]) => Promise<void>;
-  handleDeleteStamp: (streamId: string, providerId: PROVIDER_ID) => Promise<void>;
   handleDeleteStamps: (providerIds: PROVIDER_ID[]) => Promise<void>;
   handleCheckRefreshPassport: () => Promise<boolean>;
   cancelCeramicConnection: () => void;
@@ -447,9 +445,7 @@ const startingState: CeramicContextState = {
   allProvidersState: startingAllProvidersState,
   allPlatforms: platforms,
   handleCreatePassport: async () => {},
-  handleAddStamp: async () => {},
   handleAddStamps: async () => {},
-  handleDeleteStamp: async (streamId: string) => {},
   handleDeleteStamps: async () => {},
   handleCheckRefreshPassport: async () => false,
   passportHasCacaoError: () => false,
@@ -757,21 +753,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       setTimeout(() => resolve({ status: "Success", passport: { stamps: [] } }), timeout)
     );
 
-  const handleAddStamp = async (stamp: Stamp): Promise<void> => {
-    try {
-      if (database) {
-        await database.addStamp(stamp);
-        const newPassport = await fetchPassport(database, true);
-        if (ceramicClient && newPassport) {
-          ceramicClient.setStamps(newPassport.stamps);
-        }
-      }
-    } catch (e) {
-      datadogLogs.logger.error("Error add single stamp", { stamp, error: e });
-      throw e;
-    }
-  };
-
   const handleAddStamps = async (stamps: Stamp[]): Promise<void> => {
     try {
       if (database) {
@@ -790,8 +771,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const handleDeleteStamps = async (providerIds: PROVIDER_ID[]): Promise<void> => {
     try {
       if (database) {
-        const deleteStampRequests = Promise.all(providerIds.map((providerId) => database.deleteStamp(providerId)));
-        const results = await deleteStampRequests;
+        await database.deleteStamps(providerIds);
 
         const newPassport = await fetchPassport(database, true);
         if (ceramicClient && newPassport) {
@@ -800,21 +780,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       }
     } catch (e) {
       datadogLogs.logger.error("Error deleting multiple stamps", { providerIds, error: e });
-      throw e;
-    }
-  };
-
-  const handleDeleteStamp = async (streamId: string, providerId: PROVIDER_ID): Promise<void> => {
-    try {
-      if (database) {
-        await database.deleteStamp(providerId);
-        const newPassport = await fetchPassport(database, true);
-        if (ceramicClient && newPassport) {
-          ceramicClient.setStamps(newPassport.stamps);
-        }
-      }
-    } catch (e) {
-      datadogLogs.logger.error("Error deleting single stamp", { streamId, providerId, error: e });
       throw e;
     }
   };
@@ -856,10 +821,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       isLoadingPassport,
       allProvidersState,
       handleCreatePassport,
-      handleAddStamp,
       handleAddStamps,
       handleDeleteStamps,
-      handleDeleteStamp,
       userDid,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -872,10 +835,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     allProvidersState,
     allPlatforms: platforms,
     handleCreatePassport,
-    handleAddStamp,
     handleAddStamps,
     handleDeleteStamps,
-    handleDeleteStamp,
     handleCheckRefreshPassport,
     cancelCeramicConnection,
     userDid,
