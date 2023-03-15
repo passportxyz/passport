@@ -534,11 +534,11 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   useEffect(() => {
     if (database && ceramicClient) {
-      initialFetchPassport(database);
+      initialFetchPassport(database, false, true);
     }
   }, [database, ceramicClient]);
 
-  const successFullPassportLoad = (
+  const passportLoadSuccess = (
     database: CeramicDatabase | PassportDatabase,
     passport?: Passport,
     skipLoadingState?: boolean
@@ -550,14 +550,32 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     return cleanedPassport;
   };
 
+  const passportLoadException = (skipLoadingState?: boolean) => {
+    datadogRum.addError("Exception when reading passport", { address });
+    setPassport(undefined);
+    if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
+  };
+
+  const passportLoadDoesNotExist = async () => {
+    try {
+      await handleCreatePassport();
+      // Start also fetching the passport from ceramic.
+      // If we are creating passport, this will already call loadCeramicPassport,
+      // so no need to call it again
+      loadCeramicPassport();
+    } catch (e) {
+      return false;
+    }
+  };
+
   // The initialFetchPassport is only use when loading the passport for the first time
   // as we will try to import the stamps from ceramic in case the user has none in
   // the DB yet
   const initialFetchPassport = async (
     database: CeramicDatabase | PassportDatabase,
-    skipLoadingState?: boolean
+    skipLoadingState?: boolean,
+    isInitialLoad?: boolean
   ): Promise<void> => {
-    let isCreatingPassport = false;
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
 
     // fetch, clean and set the new Passport state
@@ -565,39 +583,30 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
     switch (status) {
       case "Success":
-        successFullPassportLoad(database, passport, skipLoadingState);
+        passportLoadSuccess(database, passport, skipLoadingState);
         break;
       case "StampCacaoError":
       case "PassportCacaoError":
         // These cannot occur when loading from DB
         break;
       case "DoesNotExist":
-        isCreatingPassport = true;
-        await handleCreatePassport();
+        if (isInitialLoad) {
+          await passportLoadDoesNotExist();
+        }
         break;
       case "ExceptionRaised":
         // something is wrong with Ceramic...
-        datadogRum.addError("Exception when reading passport", { address });
-        setPassport(undefined);
-        if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
+        passportLoadException(skipLoadingState);
         break;
     }
 
     setPassportLoadResponse({ passport, status, errorDetails });
-
-    // Start also fetching the passport from ceramic.
-    // If we are creating passport, this will already call loadCeramicPassport,
-    // so no need to call it again
-    if (!isCreatingPassport) {
-      loadCeramicPassport();
-    }
   };
 
   const fetchPassport = async (
     database: CeramicDatabase | PassportDatabase,
     skipLoadingState?: boolean
   ): Promise<Passport | undefined> => {
-    let isCreatingPassport = false;
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
 
     // fetch, clean and set the new Passport state
@@ -606,7 +615,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
     switch (status) {
       case "Success":
-        passportToReturn = successFullPassportLoad(database, passport, skipLoadingState);
+        passportToReturn = passportLoadSuccess(database, passport, skipLoadingState);
         break;
       case "StampCacaoError":
       case "PassportCacaoError":
@@ -616,9 +625,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         break;
       case "ExceptionRaised":
         // something is wrong with Ceramic...
-        datadogRum.addError("Exception when reading passport", { address });
-        setPassport(undefined);
-        if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
+        passportLoadException(skipLoadingState);
         break;
     }
 
