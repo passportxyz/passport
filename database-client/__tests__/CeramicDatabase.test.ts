@@ -1,4 +1,4 @@
-import { PassportLoadStatus } from "@gitcoin/passport-types";
+import { PassportLoadStatus, Stamp } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
@@ -6,11 +6,12 @@ import { jest } from "@jest/globals";
 import { CeramicDatabase } from "../src";
 
 import testnetAliases from "./integration-test-model-aliases.json";
-import { TileDocument } from "@ceramicnetwork/stream-tile";
 import { TileDoc } from "@glazed/did-datastore/dist/proxy";
 
 import axios from "axios";
 import { Stream } from "@ceramicnetwork/common";
+import { StreamID } from "@ceramicnetwork/streamid";
+import { createStamp } from "./utils.test";
 
 let testDID: DID;
 let ceramicDatabase: CeramicDatabase;
@@ -36,7 +37,7 @@ describe("Verify Ceramic Database", () => {
   });
 
   it("handles failure to read null passport", async () => {
-    let spyStoreGet = jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (name) => {
+    let spyStoreGet = jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (_name) => {
       return null;
     });
 
@@ -51,7 +52,7 @@ describe("Verify Ceramic Database", () => {
   });
 
   it("handles failure to read an empty passport (no stamps attribute)", async () => {
-    let spyStoreGet = jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (name) => {
+    let spyStoreGet = jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (_name) => {
       return {};
     });
 
@@ -68,7 +69,7 @@ describe("Verify Ceramic Database", () => {
   it("handles reading passport with stamps", async () => {
     const issuanceDate = new Date("2022-06-01");
     const expiryDate = new Date("2022-09-01");
-    let spyStoreGet = jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (name) => {
+    let spyStoreGet = jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (_name) => {
       return {
         id: "passport-id",
         issuanceDate,
@@ -91,7 +92,7 @@ describe("Verify Ceramic Database", () => {
     });
     let spyStoreGetRecordDocument = jest
       .spyOn(ceramicDatabase.store, "getRecordDocument")
-      .mockImplementation(async (name) => {
+      .mockImplementation(async (_name) => {
         return {
           id: "passport-id",
         } as unknown as TileDoc;
@@ -111,7 +112,7 @@ describe("Verify Ceramic Database", () => {
       });
     });
 
-    let spyPinAdd = jest.spyOn(ceramicDatabase.ceramicClient.pin, "add").mockImplementation(async (streamId) => {
+    let spyPinAdd = jest.spyOn(ceramicDatabase.ceramicClient.pin, "add").mockImplementation(async (_streamId) => {
       // Nothing to do here
       return;
     });
@@ -160,7 +161,7 @@ describe("Verify Ceramic Database", () => {
       issuanceDate = new Date("2022-06-01");
       expiryDate = new Date("2022-09-01");
 
-      spyStoreGet = jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (name) => {
+      spyStoreGet = jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (_name) => {
         return {
           id: "passport-id",
           issuanceDate,
@@ -183,7 +184,7 @@ describe("Verify Ceramic Database", () => {
       });
       spyStoreGetRecordDocument = jest
         .spyOn(ceramicDatabase.store, "getRecordDocument")
-        .mockImplementation(async (name) => {
+        .mockImplementation(async (_name) => {
           return {
             id: "passport-id",
           } as unknown as TileDoc;
@@ -191,7 +192,7 @@ describe("Verify Ceramic Database", () => {
 
       spyAxiosGet = jest.spyOn(axios, "get");
 
-      spyPinAdd = jest.spyOn(ceramicDatabase.ceramicClient.pin, "add").mockImplementation(async (streamId) => {
+      spyPinAdd = jest.spyOn(ceramicDatabase.ceramicClient.pin, "add").mockImplementation(async (_streamId) => {
         // Nothing to do here
         return;
       });
@@ -316,18 +317,18 @@ describe("Verify Ceramic Database", () => {
   it("checkPassportCACAOError should indicate if a passport stream is throwing a CACAO error", async () => {
     jest
       .spyOn(ceramicDatabase.store, "getRecordID")
-      .mockImplementation(async (name) => "passport-id" as unknown as string);
+      .mockImplementation(async (_name) => "passport-id" as unknown as string);
 
     let spyStoreGetRecordDocument = jest
       .spyOn(ceramicDatabase.store, "getRecordDocument")
-      .mockImplementation(async (name) => {
+      .mockImplementation(async (_name) => {
         return {
           id: "passport-id",
         } as unknown as TileDoc;
       });
 
-    const spyLoadStreamReq = jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
-      return new Promise((resolve, reject) => {
+    const spyLoadStreamReq = jest.spyOn(axios, "get").mockImplementation((_url: string): Promise<{}> => {
+      return new Promise((_resolve, reject) => {
         reject({
           response: {
             data: {
@@ -343,14 +344,14 @@ describe("Verify Ceramic Database", () => {
   });
 
   it("checkPassportCACAOError should not indicate cacao error if not present", () => {
-    jest.spyOn(ceramicDatabase.store, "getRecordDocument").mockImplementation(async (name) => {
+    jest.spyOn(ceramicDatabase.store, "getRecordDocument").mockImplementation(async (_name) => {
       return {
         id: "passport-id",
       } as unknown as TileDoc;
     });
 
-    jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
-      return new Promise((resolve, reject) => {
+    jest.spyOn(axios, "get").mockImplementation((_url: string): Promise<{}> => {
+      return new Promise((_resolve, reject) => {
         reject({
           response: {
             data: {
@@ -365,7 +366,7 @@ describe("Verify Ceramic Database", () => {
   });
 
   it("should attempt to refresh a passport until successful", async () => {
-    jest.spyOn(ceramicDatabase.store, "getRecordDocument").mockImplementation(async (name) => {
+    jest.spyOn(ceramicDatabase.store, "getRecordDocument").mockImplementation(async (_name) => {
       return {
         id: "passport-id",
       } as unknown as TileDoc;
@@ -377,8 +378,8 @@ describe("Verify Ceramic Database", () => {
       throw new Error("CACAO expired: Commit...") as unknown as Stream;
     });
 
-    spyLoadStream.mockImplementationOnce((streamId) => {
-      return new Promise((resolve, reject) => {
+    spyLoadStream.mockImplementationOnce((_streamId) => {
+      return new Promise((resolve, _reject) => {
         resolve("true" as unknown as Stream);
       });
     });
@@ -386,5 +387,101 @@ describe("Verify Ceramic Database", () => {
     await ceramicDatabase.refreshPassport();
 
     expect(spyLoadStream).toBeCalledTimes(2);
+  });
+  let spyStoreMerge, spyPinAdd, mockstreamUrl, mockstreamUrl1, passportStreamId, spyLoggerInfo, successfulStamps, newStamps;
+  describe("setStamp", () => {
+    beforeEach(() => {
+      successfulStamps = [
+        {
+          provider: "Provider-1",
+          streamId: "ceramic://credential-1",
+          credential: createStamp('hash1', '2022-01-01', testDID.id).credential,
+        } as unknown as Stamp,
+        {
+          provider: "Provider-1",
+          streamId: "ceramic://credential-2",
+          credential: createStamp('hash2', '2022-01-02', testDID.id).credential,
+        } as unknown as Stamp,
+      ]
+      newStamps = [
+        {
+          provider: "Provider-1",
+          streamId: "ceramic://credential-1",
+          credential: createStamp('hash3', '2022-01-03', testDID.id).credential,
+        } as unknown as Stamp,
+        {
+          provider: "Provider-2",
+          streamId: "ceramic://credential-2",
+          credential: createStamp('hash4', '2022-01-04', testDID.id).credential,
+        } as unknown as Stamp,
+      ]
+
+
+      jest.spyOn(ceramicDatabase.store, "get").mockImplementation(async (_name) => {
+        return {
+          id: "passport-id",
+          stamps: [
+            {
+              provider: "Provider-1",
+              credential: "ceramic://credential-1",
+            },
+            {
+              provider: "Provider-2",
+              credential: "ceramic://credential-2",
+            },
+          ],
+        };
+      });
+      jest.spyOn(ceramicDatabase, "loadStamps").mockImplementation(async () => {
+        return {
+          successfulStamps,
+          cacaoErrorStampIds: [],
+        }
+      });
+
+      mockstreamUrl = "ceramic://passport-id"
+      mockstreamUrl1 = "ceramic://passport-id-1"
+
+      jest.spyOn(ceramicDatabase.model, "createTile").mockImplementationOnce(async () => {
+        return {
+          id: {
+            toUrl: jest.fn().mockReturnValue(mockstreamUrl),
+          },
+        } as unknown as TileDoc;
+      }).mockImplementationOnce(async () => {
+        return {
+          id: {
+            toUrl: jest.fn().mockReturnValue(mockstreamUrl1),
+          },
+        } as unknown as TileDoc;
+      });
+
+      passportStreamId = "passport-stream-d" as unknown as StreamID;
+      spyStoreMerge = jest.spyOn(ceramicDatabase.store, "merge").mockReturnValue(Promise.resolve(passportStreamId));
+
+
+      spyPinAdd = jest.spyOn(ceramicDatabase.ceramicClient.pin, "add").mockImplementation(async (_streamId) => {
+        // Nothing to do here
+        return;
+      });
+
+      spyLoggerInfo = jest.spyOn(ceramicDatabase.logger, "info")
+    });
+
+    it("should attempt to set a stamp when called", async () => {
+      await ceramicDatabase.setStamps(newStamps);
+      expect(spyStoreMerge).toBeCalledTimes(1);
+      expect(spyStoreMerge).toBeCalledWith("Passport", {
+        stamps: [
+          { provider: 'Provider-1', credential: mockstreamUrl },
+          { provider: 'Provider-2', credential: mockstreamUrl1 }
+        ]
+      });
+      expect(spyPinAdd).toBeCalledWith(passportStreamId);
+    });
+    it("should not attempt to save stamps that already exist", async () => {
+      await ceramicDatabase.setStamps(successfulStamps);
+      expect(spyLoggerInfo).toHaveBeenNthCalledWith(2, `No stamps were written to ceramic because they already exist ${testDID.id.toLowerCase()}:`);
+    });
   });
 });
