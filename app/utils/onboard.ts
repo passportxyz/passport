@@ -11,11 +11,7 @@ const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL as stri
 const injected = injectedModule();
 // web3Oboard modules
 const walletLink = walletLinkModule();
-const walletConnect = walletConnectModule({
-  qrcodeModalOptions: {
-    mobileLinks: ["rainbow", "metamask", "argent", "trust", "imtoken", "pillar"],
-  },
-});
+const walletConnect = walletConnectModule();
 // Include ledger capabilities
 const ledger = ledgerModule();
 
