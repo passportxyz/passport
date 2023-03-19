@@ -432,6 +432,7 @@ const serviceIPFS = new awsx.ecs.FargateService("dpopp-ipfs", {
           { name: "IPFS_S3_SECRET_ACCESS_KEY", value: usrS3Secret },
           { name: "IPFS_S3_KEY_TRANSFORM", value: "next-to-last/2" },
           { name: "GOLOG_LOG_LEVEL", value: "info" },
+          { name: "GODEBUG", value: "gctrace=1" },
         ],
         mountPoints: [
           {
