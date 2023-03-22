@@ -15,7 +15,7 @@ export const Footer = ({ lightMode }: FooterProps): JSX.Element => {
             Ceramic Network.
           </a>
         </div>
-        <a href="https://go.gitcoin.co/passport/" target="_blank">
+        <a href="https://go.gitcoin.co/passport/" target="_blank" rel="noopener noreferrer">
           <img
             src="./assets/gitcoindaoLogoLight.svg"
             alt="Gitcoin Logo"
