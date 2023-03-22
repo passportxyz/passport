@@ -12,13 +12,16 @@ export class FacebookPlatform extends Platform {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore assuming FB.init was already called; see facebookSdkScript in app/pages/_app.tsx
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-      FB.login(function (response: { authResponse: { accessToken: string }; status: string }) {
-        if (response.status === "connected") {
-          resolve({ accessToken: response.authResponse.accessToken });
-        } else {
-          resolve({ authenticated: false });
-        }
-      });
+      FB.login(
+        function (response: { authResponse: { accessToken: string }; status: string }) {
+          if (response.status === "connected") {
+            resolve({ accessToken: response.authResponse.accessToken });
+          } else {
+            resolve({ authenticated: false });
+          }
+        },
+        { scope: "public_profile,user_friends" }
+      );
     });
 
     return result;

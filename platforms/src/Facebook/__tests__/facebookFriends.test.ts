@@ -20,7 +20,7 @@ describe("Attempt Facebook friends verification", function () {
     data_access_expires_at: tokenExpirationDate,
     expires_at: tokenExpirationDate,
     is_valid: true,
-    scopes: ["public_profile"],
+    scopes: ["public_profile", "user_friends"],
     user_id: "some-user-id",
   };
   const validFriendList: FacebookFriendsResponse = {
