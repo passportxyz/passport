@@ -59,7 +59,7 @@ export class PassportDatabase implements DataStorageBase {
         passport = {
           issuanceDate: null,
           expiryDate: null,
-          stamps: data.stamps.map((stamp: any) => ({ ...stamp, credential: stamp.stamp })),
+          stamps: data.stamps.map((stamp: any) => ({ provider: stamp.stamp?.credentialSubject?.provider, credential: stamp.stamp })),
         };
       } else {
         status = "DoesNotExist";
