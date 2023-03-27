@@ -4,6 +4,8 @@ name: Deploy IAM Server to Review
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+  
 
 jobs:
   build-and-test:
