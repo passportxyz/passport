@@ -34,36 +34,42 @@ const validEtherscanResponse = {
         {
           from: `${MOCK_ADDRESS_LOWER}`,
           gasUsed: "100000000",
+          gasPrice: "500000000",
           isError: "0",
           timeStamp: "1495266702",
         },
         {
           from: `${MOCK_ADDRESS_LOWER}`,
           gasUsed: "100000000",
+          gasPrice: "500000000",
           isError: "0",
           timeStamp: "1526802702",
         },
         {
           from: `${MOCK_ADDRESS_LOWER}`,
           gasUsed: "100000000",
+          gasPrice: "500000000",
           isError: "0",
           timeStamp: "1555266702",
         },
         {
           from: `${MOCK_ADDRESS_LOWER}`,
           gasUsed: "100000000",
+          gasPrice: "500000000",
           isError: "0",
           timeStamp: "1595266702",
         },
         {
           from: `${MOCK_ADDRESS_LOWER}`,
           gasUsed: "100000000",
+          gasPrice: "500000000",
           isError: "0",
           timeStamp: "1658303502",
         },
         {
           from: `${MOCK_ADDRESS_LOWER}`,
           gasUsed: "100000000",
+          gasPrice: "500000000",
           isError: "0",
           timeStamp: "1655711502",
         },
@@ -176,9 +182,12 @@ describe("Attempt verification for ETH gas provider stamp", function () {
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
 
-    expect(axios.get).toHaveBeenCalledTimes(1);
+    expect(axios.get).toHaveBeenCalledTimes(2);
     expect(mockedAxios.get).toBeCalledWith(
       `https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
+    );
+    expect(mockedAxios.get).toBeCalledWith(
+      `https://api.etherscan.io/api?module=account&action=txlistinternal&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -201,9 +210,12 @@ describe("Attempt verification for ETH gas provider stamp", function () {
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
 
-    expect(axios.get).toHaveBeenCalledTimes(1);
+    expect(axios.get).toHaveBeenCalledTimes(2);
     expect(mockedAxios.get).toBeCalledWith(
       `https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
+    );
+    expect(mockedAxios.get).toBeCalledWith(
+      `https://api.etherscan.io/api?module=account&action=txlistinternal&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
 
     expect(verifiedPayload).toMatchObject({ valid: false });
@@ -221,9 +233,12 @@ describe("Attempt verification for ETH gas provider stamp", function () {
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
 
-    expect(axios.get).toHaveBeenCalledTimes(1);
+    expect(axios.get).toHaveBeenCalledTimes(2);
     expect(mockedAxios.get).toBeCalledWith(
       `https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
+    );
+    expect(mockedAxios.get).toBeCalledWith(
+      `https://api.etherscan.io/api?module=account&action=txlistinternal&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
 
     expect(verifiedPayload).toMatchObject({ valid: false });
@@ -241,9 +256,12 @@ describe("Attempt verification for ETH gas provider stamp", function () {
       address: "",
     } as unknown as RequestPayload);
 
-    expect(axios.get).toHaveBeenCalledTimes(1);
+    expect(axios.get).toHaveBeenCalledTimes(2);
     expect(mockedAxios.get).toBeCalledWith(
       `https://api.etherscan.io/api?module=account&action=txlist&address=&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
+    );
+    expect(mockedAxios.get).toBeCalledWith(
+      `https://api.etherscan.io/api?module=account&action=txlistinternal&address=&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
 
     expect(verifiedPayload).toMatchObject({ valid: false });
@@ -261,9 +279,12 @@ describe("Attempt verification for ETH gas provider stamp", function () {
       address: BAD_MOCK_ADDRESS_LOWER,
     } as unknown as RequestPayload);
 
-    expect(axios.get).toHaveBeenCalledTimes(1);
+    expect(axios.get).toHaveBeenCalledTimes(2);
     expect(mockedAxios.get).toBeCalledWith(
       `https://api.etherscan.io/api?module=account&action=txlist&address=${BAD_MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
+    );
+    expect(mockedAxios.get).toBeCalledWith(
+      `https://api.etherscan.io/api?module=account&action=txlistinternal&address=${BAD_MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
 
     expect(verifiedPayload).toMatchObject({ valid: false });
