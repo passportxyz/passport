@@ -94,5 +94,5 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_STAGING }}
           DOCKER_GTC_PASSPORT_IAM_IMAGE: ${{secrets.ECR_URL_STAGING}}:${{ needs.build-and-test.outputs.dockerTag }}
           ROUTE_53_ZONE: ${{ secrets.ROUTE53_ZONE_ID_STAGING }}
-          DOMAIN: ${{ secrets.DOMAIN }}
+          DOMAIN: ${{ secrets.DOMAIN_STAGING }}
           IAM_SERVER_SSM_ARN: ${{ secrets.IAM_SERVER_SSM_ARN_STAGING }}
