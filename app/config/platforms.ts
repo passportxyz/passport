@@ -178,4 +178,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Connect your wallet to verify Gnosis Safe Signer/Owner Verification",
     connectMessage: "Connect Wallet",
   },
+  {
+    icon: "./assets/rociFiStampIcon.svg",
+    platform: "RociFi",
+    name: "Roci Finance",
+    description: "Connect a wallet and validate the stamp by checking NFCS ownership.",
+    connectMessage: "Verify NFCS",
+  },
 ];
