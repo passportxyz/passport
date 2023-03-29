@@ -15,11 +15,13 @@ export const Footer = ({ lightMode }: FooterProps): JSX.Element => {
             Ceramic Network.
           </a>
         </div>
-        <img
-          src="./assets/gitcoindaoLogoLight.svg"
-          alt="Gitcoin Logo"
-          className="flex hidden flex-wrap items-center justify-center p-2 text-base md:ml-auto md:mr-auto md:inline-block"
-        />
+        <a href="https://go.gitcoin.co/passport/" target="_blank" rel="noopener noreferrer">
+          <img
+            src="./assets/gitcoindaoLogoLight.svg"
+            alt="Gitcoin Logo"
+            className="flex hidden flex-wrap items-center justify-center p-2 text-base md:ml-auto md:mr-auto md:inline-block"
+          />
+        </a>
         <a
           href="https://github.com/gitcoinco/passport"
           target="_blank"

@@ -7,18 +7,18 @@ import axios from "axios";
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || process.env.NEXT_ETHERSCAN_API_KEY;
 
+interface EtherscanRequestResponseData {
+  from?: string;
+  gasUsed?: string;
+  gasPrice?: string;
+  isError?: string;
+  timeStamp?: string;
+}
 // Define interfaces for the data structure returned by the request
 interface EtherscanRequestResponse {
   status?: number;
   data?: {
-    result?: [
-      {
-        from?: string;
-        gasUsed?: string;
-        isError?: string;
-        timeStamp?: string;
-      }
-    ];
+    result?: EtherscanRequestResponseData[];
   };
 }
 
@@ -60,14 +60,19 @@ export class EthGasProvider implements Provider {
     const address = payload.address.toLocaleLowerCase();
     const offsetCount = 500;
     let valid = false,
-      ethData: EtherscanRequestResponse["data"],
+      ethTransactions: EtherscanRequestResponse["data"],
+      ethInternalTransactions: EtherscanRequestResponse["data"],
       verifiedPayload = {
         hasGTEHalfEthSpentGas: false,
       };
 
     try {
-      ethData = await requestEthData(address, offsetCount);
-      verifiedPayload = checkGasFees(ethData);
+      ethTransactions = await requestEthData(address, offsetCount);
+      ethInternalTransactions = await requestEthInternalData(address, offsetCount);
+
+      const combinedEthTransactions = ethTransactions.result.concat(ethInternalTransactions.result);
+
+      verifiedPayload = checkGasFees(combinedEthTransactions);
 
       valid = address && verifiedPayload.hasGTEHalfEthSpentGas ? true : false;
     } catch (e) {
@@ -194,22 +199,43 @@ export const requestEthData = async (
   return etherscanRequestResponse.data;
 };
 
-const checkGasFees = (ethData: EtherscanRequestResponse["data"]): EthGasCheck => {
+export const requestEthInternalData = async (
+  address: string,
+  offsetCount: number
+): Promise<EtherscanRequestResponse["data"]> => {
+  const etherscanURL = `https://api.etherscan.io/api?module=account&action=txlistinternal&address=${address}&page=1&offset=${offsetCount}&sort=asc&apikey=${ETHERSCAN_API_KEY}`;
+  let etherscanRequestResponse: EtherscanRequestResponse;
+
+  try {
+    // GET request using Etherscan API to retrieve user's ethereum mainnet transactions
+    etherscanRequestResponse = await axios.get(etherscanURL);
+  } catch (e: unknown) {
+    const error = e as Error;
+    throw `The GET request resulted in a status code ${etherscanRequestResponse.status} error. Message: ${error.response.data.message}`;
+  }
+
+  return etherscanRequestResponse.data;
+};
+
+const checkGasFees = (results: EtherscanRequestResponseData[]): EthGasCheck => {
   // set variables for gas fees calculations
-  const gweiToEth = 0.000000001;
-  const results = ethData.result;
-  let hasGTEHalfEthSpentGas = false,
-    totalGas = 0;
+  const weiLimit = BigInt(500000000000000000); // This is 0.5 ETH in wei
+  let hasGTEHalfEthSpentGas = false;
+  let totalWeiSpent = BigInt(0);
 
   // Iterate through result array and add up the gas used per transaction
   // until 0.5 ETH worth of gas is reached
   for (let i = 0; i < results.length; i++) {
-    const gasUsed = parseInt(results[i].gasUsed);
-    if (totalGas + gasUsed > 500000000) break;
-    totalGas += gasUsed;
+    const gasUsed = BigInt(results[i].gasUsed);
+    const gasPrice = BigInt(results[i].gasPrice);
+    const weiSpent = gasUsed * gasPrice;
+    totalWeiSpent += weiSpent;
+    if (totalWeiSpent > totalWeiSpent) {
+      break;
+    }
   }
 
-  if (totalGas * gweiToEth >= 0.5) {
+  if (totalWeiSpent >= weiLimit) {
     hasGTEHalfEthSpentGas = true;
   }
 
