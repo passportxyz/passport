@@ -288,4 +288,10 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Encrypted", name: "GnosisSafe" }],
     },
   ],
+  Coinbase: [
+    {
+      platformGroup: "Account Name",
+      providers: [{ title: "Encrypted", name: "Coinbase" }],
+    },
+  ],
 };

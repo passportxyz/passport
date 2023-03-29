@@ -34,6 +34,7 @@ import {
   GtcStaking,
   Google,
   Brightid,
+  Coinbase,
 } from "@gitcoin/passport-platforms";
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -167,6 +168,13 @@ platforms.set("Google", {
 platforms.set("Brightid", {
   platform: new Brightid.BrightidPlatform(),
   platFormGroupSpec: Brightid.BrightidProviderConfig,
+});
+platforms.set("Coinbase", {
+  platform: new Coinbase.CoinbasePlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK,
+  }),
+  platFormGroupSpec: Coinbase.CoinbaseProviderConfig,
 });
 
 export enum IsLoadingPassportState {
@@ -435,6 +443,10 @@ const startingAllProvidersState: AllProvidersState = {
   },
   GnosisSafe: {
     providerSpec: getProviderSpec("GnosisSafe", "GnosisSafe"),
+    stamp: undefined,
+  },
+  Coinbase: {
+    providerSpec: getProviderSpec("Coinbase", "Coinbase"),
     stamp: undefined,
   },
 };
