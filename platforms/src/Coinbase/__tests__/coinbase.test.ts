@@ -28,6 +28,9 @@ const validCodeResponse = {
 };
 
 const code = "ABC123_ACCESSCODE";
+const clientId = process.env.COINBASE_CLIENT_ID;
+const clientSecret = process.env.COINBASE_CLIENT_SECRET;
+const callback = process.env.COINBASE_CALLBACK;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -42,9 +45,6 @@ beforeEach(() => {
 
 describe("Attempt verification", function () {
   it("handles valid verification attempt", async () => {
-    const clientId = process.env.COINBASE_CLIENT_ID;
-    const clientSecret = process.env.COINBASE_CLIENT_SECRET;
-    const callback = process.env.COINBASE_CALLBACK;
     const coinbase = new CoinbaseProvider();
     const coinbasePayload = await coinbase.verify({
       proofs: {
@@ -52,6 +52,7 @@ describe("Attempt verification", function () {
       },
     } as unknown as RequestPayload);
 
+    expect(mockedAxios.post).toBeCalledTimes(1);
     // Check the request to get the token
     expect(mockedAxios.post).toBeCalledWith(
       `https://api.coinbase.com/oauth/token?grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
@@ -61,6 +62,7 @@ describe("Attempt verification", function () {
       }
     );
 
+    expect(mockedAxios.get).toBeCalledTimes(1);
     // Check the request to get the user
     expect(mockedAxios.get).toBeCalledWith("https://api.coinbase.com/v2/user", {
       headers: { Authorization: "Bearer cnbstkn294745627362562" },
@@ -82,12 +84,19 @@ describe("Attempt verification", function () {
     });
 
     const coinbase = new CoinbaseProvider();
-
     const coinbasePayload = await coinbase.verify({
       proofs: {
         code,
       },
     } as unknown as RequestPayload);
+    expect(mockedAxios.post).toBeCalledTimes(1);
+    expect(mockedAxios.post).toBeCalledWith(
+      `https://api.coinbase.com/oauth/token?grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
+      {},
+      {
+        headers: { Accept: "application/json" },
+      }
+    );
 
     expect(coinbasePayload).toMatchObject({ valid: false });
   });
@@ -105,13 +114,26 @@ describe("Attempt verification", function () {
     });
 
     const coinbase = new CoinbaseProvider();
-
     const coinbasePayload = await coinbase.verify({
       proofs: {
         code,
       },
     } as unknown as RequestPayload);
 
+    expect(mockedAxios.post).toBeCalledTimes(1);
+    // Check the request to get the token
+    expect(mockedAxios.post).toBeCalledWith(
+      `https://api.coinbase.com/oauth/token?grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
+      {},
+      {
+        headers: { Accept: "application/json" },
+      }
+    );
+    expect(mockedAxios.get).toBeCalledTimes(1);
+    // Check the request to get the user
+    expect(mockedAxios.get).toBeCalledWith("https://api.coinbase.com/v2/user", {
+      headers: { Authorization: "Bearer cnbstkn294745627362562" },
+    });
     expect(coinbasePayload).toMatchObject({ valid: false });
   });
 
@@ -123,12 +145,27 @@ describe("Attempt verification", function () {
     });
 
     const coinbase = new CoinbaseProvider();
-
     const coinbasePayload = await coinbase.verify({
       proofs: {
         code,
       },
     } as unknown as RequestPayload);
+
+    expect(mockedAxios.post).toBeCalledTimes(1);
+
+    // Check the request to get the token
+    expect(mockedAxios.post).toBeCalledWith(
+      `https://api.coinbase.com/oauth/token?grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
+      {},
+      {
+        headers: { Accept: "application/json" },
+      }
+    );
+    expect(mockedAxios.get).toBeCalledTimes(1);
+    // Check the request to get the user
+    expect(mockedAxios.get).toBeCalledWith("https://api.coinbase.com/v2/user", {
+      headers: { Authorization: "Bearer cnbstkn294745627362562" },
+    });
 
     expect(coinbasePayload).toMatchObject({ valid: false });
   });
