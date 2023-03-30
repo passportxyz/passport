@@ -1,7 +1,6 @@
 // ----- Types
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../../types";
-
 import axios from "axios";
 
 export type CoinbaseTokenResponse = {
@@ -43,9 +42,11 @@ export class CoinbaseProvider implements Provider {
 
     return {
       valid: valid,
-      record: {
-        id: verifiedPayload && verifiedPayload.data ? verifiedPayload.data.id : undefined,
-      },
+      record: valid
+        ? {
+            id: verifiedPayload.data.id,
+          }
+        : undefined,
     };
   }
 }
@@ -74,17 +75,36 @@ const requestAccessToken = async (code: string): Promise<string> => {
 };
 
 const verifyCoinbase = async (code: string): Promise<CoinbaseFindMyUserResponse> => {
-  // retrieve user's auth bearer token to authenticate client
-  const accessToken = await requestAccessToken(code);
+  let userRequest;
+  try {
+    // retrieve user's auth bearer token to authenticate client
+    const accessToken = await requestAccessToken(code);
 
-  // Now that we have an access token fetch the user details
-  const userRequest = await axios.get("https://api.coinbase.com/v2/user", {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+    // Now that we have an access token fetch the user details
+    userRequest = await axios.get("https://api.coinbase.com/v2/user", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
-  if (userRequest.status != 200) {
-    throw `Get user request returned status code ${userRequest.status} instead of the expected 200`;
+    if (userRequest.status != 200) {
+      throw `Get user request returned status code ${userRequest.status} instead of the expected 200`;
+    }
+  } catch (e) {
+    const error = e as {
+      response: {
+        data: {
+          error_description: string;
+        };
+      };
+      request: string;
+      message: string;
+    };
+    if (error.response) {
+      throw `User GET request returned status code ${userRequest.status} instead of the expected 200`;
+    } else if (error.request) {
+      throw `A request was made, but no response was received: ${error.request}`;
+    } else {
+      throw `Error: ${error.message}`;
+    }
   }
-
   return userRequest.data as CoinbaseFindMyUserResponse;
 };
