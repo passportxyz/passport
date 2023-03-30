@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import NodeCache from "node-cache";
 import axios, { AxiosInstance } from "axios";
 
 // Idena SignIn session
@@ -17,10 +18,46 @@ type Session = {
 // Idena API url
 const API_URL = process.env.NEXT_PUBLIC_IDENA_API_URL;
 
-const TIMEOUT_IN_MS = 300000; // 300000ms = 5min
+class PlatformSessionCache<SessionType> {
+  private cache: NodeCache;
+  longTTL: number = 60;
+  shortTTL: number = 10;
+
+  constructor() {
+    this.cache = new NodeCache({
+      stdTTL: this.longTTL,
+      checkperiod: 30,
+      maxKeys: 10000,
+    });
+  }
+
+  initiateSession(clientId: string, initialValue: SessionType): void {
+    this.cache.set(clientId, initialValue, this.longTTL);
+  }
+
+  getSession(clientId: string): SessionType {
+    if (!this.cache.has(clientId)) {
+      throw new Error(`Session with id ${clientId} not found`);
+    }
+    return this.cache.get(clientId);
+  }
+
+  updatePreAuthSession(clientId: string, sessionUpdates: Partial<SessionType>): void {
+    this._updateSession(clientId, sessionUpdates, this.longTTL);
+  }
+
+  updatePostAuthSession(clientId: string, sessionUpdates: Partial<SessionType>): void {
+    this._updateSession(clientId, sessionUpdates, this.shortTTL);
+  }
+
+  _updateSession(clientId: string, sessionUpdates: Partial<SessionType>, ttl: number): void {
+    const currentSession = this.getSession(clientId);
+    this.cache.set(clientId, { ...currentSession, ...sessionUpdates }, ttl);
+  }
+}
 
 // Map <Token, Session>
-const sessions: Record<string, Session> = {};
+const sessions = new PlatformSessionCache<Session>();
 
 const generateToken = (): string => {
   return `idena-${crypto.randomBytes(32).toString("hex")}`;
@@ -32,33 +69,16 @@ const generateNonce = (): string => {
 
 export const initSession = (): string => {
   const token = generateToken();
-  sessions[token] = {
-    token: token,
-  };
-  setTimeout(() => {
-    deleteSession(token);
-  }, TIMEOUT_IN_MS);
+
+  sessions.initiateSession(token, {
+    token,
+  });
+
   return token;
 };
 
-const deleteSession = (token: string): void => {
-  delete sessions[token];
-};
-
-const getSession = (token: string): Session | undefined => {
-  return sessions[token];
-};
-
-const findSession = (token: string): Session => {
-  const session = getSession(token);
-  if (!session) {
-    throw "session not found or expired";
-  }
-  return session;
-};
-
 export const startIdenaSession = (token: string, address: string): string | undefined => {
-  const session = getSession(token);
+  const session = sessions.getSession(token);
   if (!session || session.nonce) {
     return;
   }
@@ -68,7 +88,7 @@ export const startIdenaSession = (token: string, address: string): string | unde
 };
 
 export const authenticate = async (token: string, signature: string): Promise<boolean> => {
-  const session = getSession(token);
+  const session = sessions.getSession(token);
   if (!session || !session.address || session.signature) {
     return;
   }
@@ -116,7 +136,7 @@ const requestSignatureAddress = async (nonce: string, signature: string): Promis
 };
 
 const requestValidationTime = async (token: string): Promise<string> => {
-  const session = findSession(token);
+  const session = sessions.getSession(token);
   if (!session.cachedExpirationDate) {
     const data: EpochResponse = await apiClient().get("/api/epoch/last");
     session.cachedExpirationDate = data.result.validationTime;
@@ -154,7 +174,7 @@ const apiClient = (): AxiosInstance => {
   });
 };
 
-const request = async <T>(token: string, method: string): Promise<T> => {
+const request = async <SessionType>(token: string, method: string): Promise<SessionType> => {
   const session = findSession(token);
   if (!session.signature) {
     throw "authentication not passed";
@@ -166,5 +186,5 @@ const request = async <T>(token: string, method: string): Promise<T> => {
   if (response.status != 200) {
     throw `get ${method} returned status code ${response.status} instead of the expected 200`;
   }
-  return { ...response.data, address: session.address } as T;
+  return { ...response.data, address: session.address } as SessionType;
 };

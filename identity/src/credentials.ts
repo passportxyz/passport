@@ -127,7 +127,8 @@ export const issueHashedCredential = async (
   );
 
   // generate a verifiableCredential
-  const credential = await _issueCredential(DIDKit, key, expiresInSeconds, {
+  const credentialExpiresInSeconds = Math.min(expiresInSeconds, CREDENTIAL_EXPIRES_AFTER_SECONDS);
+  const credential = await _issueCredential(DIDKit, key, credentialExpiresInSeconds, {
     credentialSubject: {
       "@context": [
         {

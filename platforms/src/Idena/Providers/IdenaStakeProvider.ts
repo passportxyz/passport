@@ -67,7 +67,7 @@ const checkStake = async (
 ): Promise<{ valid: boolean; address?: string; expiresInSeconds?: number }> => {
   try {
     const result = await requestIdentityStake(token);
-    const expiresInSeconds = Math.max((new Date(result.expirationDate).getTime() - new Date().getTime()) / 1000);
+    const expiresInSeconds = (new Date(result.expirationDate).getTime() - new Date().getTime()) / 1000;
     return { valid: result.stake > min, address: result.address, expiresInSeconds };
   } catch (e) {
     return { valid: false };

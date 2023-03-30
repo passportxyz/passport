@@ -21,9 +21,8 @@ export class IdenaPlatform extends Platform {
     const token = res.data.token;
 
     const callbackUrl = encodeURIComponent(`${idenaCallback}?state=${token}&code=${token}`);
-    const endpoint = procedureUrl;
-    const nonceEndpoint = `${endpoint}/idena/start-session`;
-    const authenticationEndpoint = `${endpoint}/idena/authenticate`;
+    const nonceEndpoint = `${procedureUrl}/idena/start-session`;
+    const authenticationEndpoint = `${procedureUrl}/idena/authenticate`;
     return `${idenaWebApp}/dna/signin?token=${token}&callback_url=${callbackUrl}&callback_target=_self&nonce_endpoint=${nonceEndpoint}&authentication_endpoint=${authenticationEndpoint}`;
   }
 }
