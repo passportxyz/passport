@@ -25,6 +25,7 @@ import * as GtcStaking from "./GtcStaking";
 import * as Google from "./Google";
 import * as ClearText from "./ClearText";
 import * as Brightid from "./Brightid";
+import * as Coinbase from "./Coinbase";
 
 export {
   Brightid,
@@ -48,6 +49,7 @@ export {
   Facebook,
   Ens,
   Twitter,
+  Coinbase,
 };
 
 // Initiate providers - new Providers should be registered in this array...
@@ -219,6 +221,7 @@ export const providers = new Providers([
   new Lens.LensProfileProvider(),
   new ZkSync.ZkSyncProvider(),
   new GnosisSafe.GnosisSafeProvider(),
+  new Coinbase.CoinbaseProvider(),
 ]);
 
 export { Platform, AppContext, ProviderPayload, PlatformSpec } from "./types";

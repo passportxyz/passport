@@ -168,4 +168,11 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Gnosis Safe Signer/Owner Verification",
     connectMessage: "Verify Account",
   },
+  {
+    icon: "./assets/coinbaseStampIcon.svg",
+    platform: "Coinbase",
+    name: "Coinbase",
+    description: "Connect your existing Coinbase account to verify.",
+    connectMessage: "Connect Account",
+  },
 ];

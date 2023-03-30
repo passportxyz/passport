@@ -209,6 +209,10 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantsInEcoAndCauseRound#1"),
         stamp: undefined,
       },
+      Coinbase: {
+        providerSpec: getProviderSpec("Coinbase", "Coinbase"),
+        stamp: undefined,
+      },
     },
     passportLoadResponse: undefined,
     handleAddStamps: jest.fn(),

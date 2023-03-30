@@ -180,7 +180,8 @@ export type PLATFORM_ID =
   | "NFT"
   | "ZkSync"
   | "Lens"
-  | "GnosisSafe";
+  | "GnosisSafe"
+  | "Coinbase";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -244,4 +245,5 @@ export type PROVIDER_ID =
   | "NFT"
   | "ZkSync"
   | "Lens"
-  | "GnosisSafe";
+  | "GnosisSafe"
+  | "Coinbase";

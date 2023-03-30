@@ -259,6 +259,18 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "GTC_STAKING_GRAPH_API_KEY",
             valueFrom: `${IAM_SERVER_SSM_ARN}:GTC_STAKING_GRAPH_API_KEY::`,
           },
+          {
+            name: "COINBASE_CLIENT_ID",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:COINBASE_CLIENT_ID::`,
+          },
+          {
+            name: "COINBASE_CLIENT_SECRET",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:COINBASE_CLIENT_SECRET::`,
+          },
+          {
+            name: "COINBASE_CALLBACK",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:COINBASE_CALLBACK::`,
+          },
         ],
       },
     },
