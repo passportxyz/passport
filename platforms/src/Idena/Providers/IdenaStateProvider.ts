@@ -68,7 +68,7 @@ const checkState = async (
 ): Promise<{ valid: boolean; address?: string; expiresInSeconds?: number }> => {
   try {
     const result = await requestIdentityState(token, context);
-    const expiresInSeconds = Math.max((new Date(result.expirationDate).getTime() - new Date().getTime()) / 1000);
+    const expiresInSeconds = Math.max((new Date(result.expirationDate).getTime() - new Date().getTime()) / 1000, 0);
     return { valid: result.state === expectedState, address: result.address, expiresInSeconds };
   } catch (e) {
     return { valid: false };

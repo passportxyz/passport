@@ -61,7 +61,7 @@ const checkAge = async (
 ): Promise<{ valid: boolean; address?: string; expiresInSeconds?: number }> => {
   try {
     const result = await requestIdentityAge(token, context);
-    const expiresInSeconds = Math.max((new Date(result.expirationDate).getTime() - new Date().getTime()) / 1000);
+    const expiresInSeconds = Math.max((new Date(result.expirationDate).getTime() - new Date().getTime()) / 1000, 0);
     return { valid: result.age > min, address: result.address, expiresInSeconds };
   } catch {
     return { valid: false };

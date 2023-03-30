@@ -40,7 +40,7 @@ export const loadIdenaSession = (token: string, address: string): string | undef
 export const authenticate = async (token: string, signature: string): Promise<boolean> => {
   const session = loadIdenaCache(token);
   if (!session.address || session.signature) {
-    return;
+    return false;
   }
   let address;
   try {
