@@ -71,7 +71,7 @@ export interface Platform {
     cta?: {
       label: string;
       url: string;
-    }
+    };
   };
   isEVM?: boolean;
   // TODO: shall we drop the getOAuthUrl and getProviderProof, given that we have getProviderPayload
@@ -104,6 +104,7 @@ export type PLATFORM_ID =
   | "ZkSync"
   | "Lens"
   | "GnosisSafe"
+  | "Coinbase"
   | "RociFi";
 
 export type PROVIDER_ID =
@@ -169,4 +170,5 @@ export type PROVIDER_ID =
   | "ZkSync"
   | "Lens"
   | "GnosisSafe"
+  | "Coinbase"
   | "RociFi";

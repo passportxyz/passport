@@ -179,6 +179,14 @@ export const PLATFORMS: PlatformSpec[] = [
     connectMessage: "Connect Wallet",
   },
   {
+    icon: "./assets/coinbaseStampIcon.svg",
+    platform: "Coinbase",
+    name: "Coinbase",
+    description: "Connect your Coinbase account to verify stamp details.",
+    connectMessage: "Connect Account",
+    isEVM: false,
+  },
+  {
     icon: "./assets/rociFiStampIcon.svg",
     platform: "RociFi",
     name: "Roci Finance",
