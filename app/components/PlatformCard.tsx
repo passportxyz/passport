@@ -70,6 +70,9 @@ export const PlatformCard = ({
   const hidePlatform = stampFilters && !Object.keys(stampFilters).includes(platform.platform);
   if (hidePlatform) return <></>;
 
+  // Hides Coinbase stamp if feature flag is off
+  if (process.env.NEXT_PUBLIC_FF_COINBASE_STAMP === "off" && platform.platform === "Coinbase") return <></>;
+
   // returns a single Platform card
   return (
     <div className="w-1/2 p-2 md:w-1/2 xl:w-1/4" key={`${platform.name}${i}`}>
