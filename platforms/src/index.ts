@@ -10,6 +10,7 @@ import * as Facebook from "./Facebook";
 import * as Github from "./Github";
 import * as Gitcoin from "./Gitcoin";
 import * as Lens from "./Lens";
+import * as WIW from "./WIW";
 import * as Poh from "./Poh";
 import * as Snapshot from "./Snapshot";
 import * as GnosisSafe from "./GnosisSafe";
@@ -43,6 +44,7 @@ export {
   Snapshot,
   Poh,
   Lens,
+  WIW,
   Gitcoin,
   Github,
   Facebook,
@@ -217,6 +219,7 @@ export const providers = new Providers([
   ////////////////////////////////////////////////////////////
   new NFT.NFTProvider(),
   new Lens.LensProfileProvider(),
+  new WIW.WIWBadgeProvider(),
   new ZkSync.ZkSyncProvider(),
   new GnosisSafe.GnosisSafeProvider(),
 ]);

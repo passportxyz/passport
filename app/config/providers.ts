@@ -282,6 +282,12 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "At least 1 Lens Handle", name: "Lens" }],
     },
   ],
+  WIW: [
+    {
+      platformGroup: "WIW Badges",
+      providers: [{ title: "At least 15 WIW Badges", name: "WIWBadgeProvider" }],
+    },
+  ],
   GnosisSafe: [
     {
       platformGroup: "Account Name",

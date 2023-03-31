@@ -180,6 +180,7 @@ export type PLATFORM_ID =
   | "NFT"
   | "ZkSync"
   | "Lens"
+  | "WIW"
   | "GnosisSafe";
 
 export type PROVIDER_ID =
@@ -244,4 +245,5 @@ export type PROVIDER_ID =
   | "NFT"
   | "ZkSync"
   | "Lens"
+  | "WIWBadgeProvider"
   | "GnosisSafe";

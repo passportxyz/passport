@@ -17,6 +17,7 @@ import {
   Twitter,
   Ens,
   Lens,
+  WIW,
   Github,
   Gitcoin,
   Facebook,
@@ -116,6 +117,11 @@ platforms.set("ZkSync", {
 platforms.set("Lens", {
   platform: new Lens.LensPlatform(),
   platFormGroupSpec: Lens.LensProviderConfig,
+});
+
+platforms.set("WIW", {
+  platform: new WIW.WIWPlatform(),
+  platFormGroupSpec: WIW.WIWProviderConfig,
 });
 
 platforms.set("GnosisSafe", {
@@ -431,6 +437,10 @@ const startingAllProvidersState: AllProvidersState = {
   },
   Lens: {
     providerSpec: getProviderSpec("Lens", "Lens"),
+    stamp: undefined,
+  },
+  WIWBadgeProvider: {
+    providerSpec: getProviderSpec("WIW", "WIWBadgeProvider"),
     stamp: undefined,
   },
   GnosisSafe: {

@@ -172,6 +172,14 @@ export const PLATFORMS: PlatformSpec[] = [
     isEVM: true,
   },
   {
+    icon: "./assets/wiwStampIcon.svg",
+    platform: "WIW",
+    name: "WIW",
+    description: "Connect your wallet to verify WIW Badge qualifications.",
+    connectMessage: "Connect Walllet",
+    isEVM: true,
+  },
+  {
     icon: "./assets/gnosisSafeStampIcon.svg",
     platform: "GnosisSafe",
     name: "Gnosis Safe",
