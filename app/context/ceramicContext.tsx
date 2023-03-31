@@ -59,7 +59,10 @@ export interface CeramicContextState {
 
 export const platforms = new Map<PLATFORM_ID, PlatformProps>();
 platforms.set("Twitter", {
-  platform: new Twitter.TwitterPlatform(),
+  platform: new Twitter.TwitterPlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+  }),
   platFormGroupSpec: Twitter.TwitterProviderConfig,
 });
 

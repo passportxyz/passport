@@ -51,5 +51,5 @@ async function verifyTwitter(sessionKey: string, code: string): Promise<TwitterF
     return myUser;
   }
 
-  throw "Unable to determin twitter user";
+  throw "Unable to determine twitter user";
 }
