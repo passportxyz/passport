@@ -189,7 +189,7 @@ export const PLATFORMS: PlatformSpec[] = [
   {
     icon: "./assets/rociFiStampIcon.svg",
     platform: "RociFi",
-    name: "Roci Finance",
+    name: "RociFi",
     description: "Connect a wallet and validate the stamp by checking NFCS ownership.",
     connectMessage: "Verify NFCS",
   },

@@ -2,26 +2,24 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import type { Provider, ProviderOptions } from "../../types";
-import { Contract } from "ethers";
+import { Contract, BigNumber } from "ethers";
 
 // ----- Credential verification
 import { getAddress } from "../../utils/signer";
 
-
 //NFCS contract address
-const POLYGON_NFCS_ADDRESS = "0x839a06a50A087fe3b842DF1877Ef83A443E37FbE"
+const POLYGON_NFCS_ADDRESS = "0x839a06a50A087fe3b842DF1877Ef83A443E37FbE";
 
 //NFCS interface
-const NFCS_ABI = [{
-  "inputs": [
-    { "internalType": "address", "name": "tokenOwner", "type": "address" }
-  ],
-  "name": "getToken",
-  "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-  "stateMutability": "view",
-  "type": "function"
-}]
-
+const NFCS_ABI = [
+  {
+    inputs: [{ internalType: "address", name: "tokenOwner", type: "address" }],
+    name: "getToken",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+];
 
 //Checks user owns NFCS token
 async function isOwnsNfcs(userAddress: string): Promise<boolean> {
@@ -30,14 +28,15 @@ async function isOwnsNfcs(userAddress: string): Promise<boolean> {
   );
 
   const nfcs = new Contract(POLYGON_NFCS_ADDRESS, NFCS_ABI, provider);
-  
+
   let hasNfcs = false;
 
-  try{
+  try {
     //Will throw in case user haven't NFCS token
-    await nfcs.getToken(userAddress); 
+    const getToken = nfcs.getToken as (address: string) => Promise<BigNumber>;
+    await getToken(userAddress);
     hasNfcs = true;
-  }catch{}
+  } catch {}
 
   return hasNfcs;
 }

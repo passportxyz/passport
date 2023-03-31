@@ -35,6 +35,7 @@ import {
   Google,
   Brightid,
   Coinbase,
+  RociFi,
 } from "@gitcoin/passport-platforms";
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -169,12 +170,18 @@ platforms.set("Brightid", {
   platform: new Brightid.BrightidPlatform(),
   platFormGroupSpec: Brightid.BrightidProviderConfig,
 });
+
 platforms.set("Coinbase", {
   platform: new Coinbase.CoinbasePlatform({
     clientId: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CLIENT_ID,
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK,
   }),
   platFormGroupSpec: Coinbase.CoinbaseProviderConfig,
+});
+
+platforms.set("RociFi", {
+  platform: new RociFi.RociFiPlatform(),
+  platFormGroupSpec: RociFi.RociFiProviderConfig,
 });
 
 export enum IsLoadingPassportState {
@@ -447,6 +454,10 @@ const startingAllProvidersState: AllProvidersState = {
   },
   Coinbase: {
     providerSpec: getProviderSpec("Coinbase", "Coinbase"),
+    stamp: undefined,
+  },
+  RociFi: {
+    providerSpec: getProviderSpec("RociFi", "RociFi"),
     stamp: undefined,
   },
 };

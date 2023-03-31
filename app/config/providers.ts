@@ -288,16 +288,16 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Encrypted", name: "GnosisSafe" }],
     },
   ],
-  
   Coinbase: [
     {
       platformGroup: "Account Name",
       providers: [{ title: "Encrypted", name: "Coinbase" }],
-    }],
-   
-    RociFi: [
-      {
-        platformGroup: "NFCS Owner",
-        providers: [{ title: "Holds NFCS", name: "RociFi" }],
-}]
+    },
+  ],
+  RociFi: [
+    {
+      platformGroup: "NFCS Owner",
+      providers: [{ title: "Holds NFCS", name: "RociFi" }],
+    },
+  ],
 };

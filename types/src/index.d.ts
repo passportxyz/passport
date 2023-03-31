@@ -182,7 +182,7 @@ export type PLATFORM_ID =
   | "Lens"
   | "GnosisSafe"
   | "Coinbase"
-  | "RociFi"
+  | "RociFi";
 
 export type PROVIDER_ID =
   | "Signer"
