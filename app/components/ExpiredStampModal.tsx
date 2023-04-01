@@ -92,7 +92,8 @@ export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) =
               onClick={() => deleteAndNotify()}
               className="sidebar-verify-btn w-1/2"
             >
-              {isRemovingStamps && <Spinner size="sm" className="my-auto mr-2" />} Remove
+              {isRemovingStamps && <Spinner data-testid="removing-stamps-spinner" size="sm" className="my-auto mr-2" />}{" "}
+              Remove
             </button>
           </div>
         </div>
