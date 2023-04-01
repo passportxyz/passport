@@ -35,6 +35,7 @@ import {
   Google,
   Brightid,
   Coinbase,
+  Coinpassport,
 } from "@gitcoin/passport-platforms";
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -208,6 +209,22 @@ const startingAllProvidersState: AllProvidersState = {
   },
   Poh: {
     providerSpec: getProviderSpec("Poh", "Poh"),
+    stamp: undefined,
+  },
+  Coinpassport: {
+    providerSpec: getProviderSpec("Coinpassport", "Coinpassport"),
+    stamp: undefined,
+  },
+  CoinpassportOver18: {
+    providerSpec: getProviderSpec("Coinpassport", "CoinpassportOver18"),
+    stamp: undefined,
+  },
+  CoinpassportOver21: {
+    providerSpec: getProviderSpec("Coinpassport", "CoinpassportOver21"),
+    stamp: undefined,
+  },
+  CoinpassportCountry: {
+    providerSpec: getProviderSpec("Coinpassport", "CoinpassportCountry"),
     stamp: undefined,
   },
   Twitter: {

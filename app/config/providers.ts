@@ -35,6 +35,23 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Encrypted", name: "Poh" }],
     },
   ],
+  Coinpassport: [
+    {
+      platformGroup: "Expiration Date",
+      providers: [{ title: "Expiration Timestamp", name: "Coinpassport" }],
+    },
+    {
+      platformGroup: "Age",
+      providers: [
+        { title: "Over 18", name: "CoinpassportOver18" },
+        { title: "Over 21", name: "CoinpassportOver21" },
+      ],
+    },
+    {
+      platformGroup: "Country of Citizenship",
+      providers: [{ title: "Country Code", name: "CoinpassportCountry" }],
+    },
+  ],
   Twitter: [
     {
       platformGroup: "Account Name",

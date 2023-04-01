@@ -26,6 +26,7 @@ import * as Google from "./Google";
 import * as ClearText from "./ClearText";
 import * as Brightid from "./Brightid";
 import * as Coinbase from "./Coinbase";
+import * as Coinpassport from "./Coinpassport";
 
 export {
   Brightid,
@@ -50,6 +51,7 @@ export {
   Ens,
   Twitter,
   Coinbase,
+  Coinpassport,
 };
 
 // Initiate providers - new Providers should be registered in this array...
@@ -93,6 +95,10 @@ export const providers = new Providers([
   new ETH.FirstEthTxnProvider(),
   new ETH.EthGTEOneTxnProvider(),
   new GitPOAP.GitPOAPProvider(),
+  new Coinpassport.CoinpassportProvider(),
+  new Coinpassport.CoinpassportOver18Provider(),
+  new Coinpassport.CoinpassportOver21Provider(),
+  new Coinpassport.CoinpassportCountryProvider(),
   /////////////////////////////////////////////////////////////
   // Start adding the specific gitcoin contributor providers
   /////////////////////////////////////////////////////////////

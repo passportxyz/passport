@@ -119,6 +119,14 @@ export const PLATFORMS: PlatformSpec[] = [
     isEVM: true,
   },
   {
+    icon: "./assets/coinpassportStampIcon.svg",
+    platform: "Coinpassport",
+    name: "Coinpassport",
+    description: "Connect your account to verify passport verification status.",
+    connectMessage: "Verify Account",
+    isEVM: true,
+  },
+  {
     icon: "./assets/ethereumStampIcon.svg",
     platform: "ETH",
     name: "ETH",
