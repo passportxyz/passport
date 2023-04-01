@@ -132,6 +132,7 @@ describe("<UserContext>", () => {
 
     expect(screen.getByTestId("session-id")).toHaveTextContent("eyJzZXNzaW9uS2V5U2VlZCI6IlF5cTN4aW9ubGxD...");
 
+    await waitFor(() => expect(screen.getByText("Logging In: false")).toBeInTheDocument());
     await waitFor(() => expect(screen.getByTestId("session-id").textContent).toBe(""));
   });
 
@@ -147,14 +148,12 @@ describe("<UserContext>", () => {
       ]);
     });
 
-    afterEach(async () => {
-      await waitFor(() => expect(screen.getByText("Logging In: false")).toBeInTheDocument());
-    });
-
     it("should use chain id 1 in the DID regardless of the wallet chain", async () => {
       renderTestComponent();
 
       await waitFor(() => expect(screen.getByText("Logging In: true")).toBeInTheDocument());
+
+      await waitFor(() => expect(screen.getByText("Logging In: false")).toBeInTheDocument());
 
       expect(EthereumWebAuth.getAuthMethod as jest.Mock).toHaveBeenCalledWith(
         mockWallet.provider,
@@ -168,6 +167,8 @@ describe("<UserContext>", () => {
       renderTestComponent();
 
       await waitFor(() => expect(screen.getByText("Logging In: true")).toBeInTheDocument());
+
+      await waitFor(() => expect(screen.getByText("Logging In: false")).toBeInTheDocument());
 
       expect(EthereumWebAuth.getAuthMethod as jest.Mock).toHaveBeenCalledWith(
         mockWallet.provider,
