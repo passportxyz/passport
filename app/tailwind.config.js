@@ -4,6 +4,7 @@ module.exports = {
     extend: {
       colors: {
         purple: {
+          softpurple: "#757087",
           darkpurple: "#0E0333",
           connectPurple: "#6F3FF5",
           gitcoinpurple: "#6f3ff5",

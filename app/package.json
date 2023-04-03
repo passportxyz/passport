@@ -3,9 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "start": "next dev -p 3000",
+    "start": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next dev -p 3000",
     "export": "next build && next export",
-    "build": "next build",
+    "build": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next build",
     "prod-start": "next start",
     "clean": "rimraf node_modules && rimraf .next",
     "lint": "next lint && prettier --check .",
