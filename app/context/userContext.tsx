@@ -25,7 +25,7 @@ import axios from "axios";
 
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
-const MULTICHAIN_ENABLED = true; // process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on";
+const MULTICHAIN_ENABLED = process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE !== "off";
 
 export interface UserContextState {
   loggedIn: boolean;
