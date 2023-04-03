@@ -16,6 +16,7 @@ jest.mock("@didtools/cacao", () => ({
 export const makeTestUserContext = (initialState?: Partial<UserContextState>): UserContextState => {
   return {
     loggedIn: true,
+    loggingIn: false,
     toggleConnection: jest.fn(),
     handleDisconnection: jest.fn(),
     address: mockAddress,
