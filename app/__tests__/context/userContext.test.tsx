@@ -1,4 +1,4 @@
-import { render, waitFor, screen, act } from "@testing-library/react";
+import { render, waitFor, screen } from "@testing-library/react";
 import * as framework from "@self.id/framework";
 import { EthereumWebAuth } from "@didtools/pkh-ethereum";
 import { AccountId } from "caip";
@@ -45,39 +45,12 @@ jest.mock("@self.id/framework", () => {
   };
 });
 
-const localStorageMock = (function () {
-  let store: any = {};
-
-  return {
-    getItem(key: any) {
-      return store[key];
-    },
-
-    setItem(key: any, value: any) {
-      store[key] = value;
-    },
-
-    clear() {
-      store = {};
-    },
-
-    removeItem(key: any) {
-      delete store[key];
-    },
-
-    getAll() {
-      return store;
-    },
-  };
-})();
-
-Object.defineProperty(window, "localStorage", { value: localStorageMock });
-
 const TestingComponent = () => {
   const { loggingIn } = useContext(UserContext);
   const [session, setSession] = useState("");
 
   useEffect(() => {
+    // using https://www.npmjs.com/package/jest-localstorage-mock to mock localStorage
     setSession(localStorage.getItem("didsession-0xmyAddress") ?? "");
   });
 
@@ -108,7 +81,7 @@ describe("<UserContext>", () => {
     );
 
   beforeEach(() => {
-    localStorageMock.setItem("connectedWallets", "[]");
+    localStorage.setItem("connectedWallets", "[]");
   });
 
   it("should delete localStorage item if session has expired", async () => {
@@ -126,7 +99,7 @@ describe("<UserContext>", () => {
       jest.fn(),
     ]);
 
-    localStorageMock.setItem("didsession-0xmyAddress", "eyJzZXNzaW9uS2V5U2VlZCI6IlF5cTN4aW9ubGxD...");
+    localStorage.setItem("didsession-0xmyAddress", "eyJzZXNzaW9uS2V5U2VlZCI6IlF5cTN4aW9ubGxD...");
 
     renderTestComponent();
 
@@ -162,7 +135,7 @@ describe("<UserContext>", () => {
     });
 
     it("should create a DID with id 1 when switching to a different chain", async () => {
-      localStorageMock.setItem("didsession-0xmyAddress", "eyJzZXNzaW9uS2V5U2VlZCI6IlF5cTN4aW9ubGxD...");
+      localStorage.setItem("didsession-0xmyAddress", "eyJzZXNzaW9uS2V5U2VlZCI6IlF5cTN4aW9ubGxD...");
 
       renderTestComponent();
 
