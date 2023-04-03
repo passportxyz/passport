@@ -25,6 +25,8 @@ import axios from "axios";
 
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
+const MULTICHAIN_ENABLED = true; // process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on";
+
 export interface UserContextState {
   loggedIn: boolean;
   toggleConnection: () => void;
@@ -181,7 +183,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     // check that passportLogin isn't mid-way through
     if (wallet && !loggingIn) {
       // ensure that passport is connected to mainnet
-      const hasCorrectChainId = process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on" ? true : await ensureMainnet();
+      const hasCorrectChainId = MULTICHAIN_ENABLED ? true : await ensureMainnet();
       // mark that we're attempting to login
       setLoggingIn(true);
       // with loaded chainId
@@ -210,7 +212,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
             // @ts-ignore
             !selfId?.client?.session
           ) {
-            if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
+            if (MULTICHAIN_ENABLED) {
               // If the session loaded is not valid, or if it is expired or close to expire, we create
               // a new session
               // Also we enforce the "1" chainId, as we always want to use mainnet dids, in order to avoid confusion
