@@ -25,6 +25,8 @@ export const makeTestUserContext = (initialState?: Partial<UserContextState>): U
     walletLabel: mockWallet.label,
     dbAccessToken: "token",
     dbAccessTokenStatus: "idle",
+    userWarning: undefined,
+    setUserWarning: jest.fn(),
     ...initialState,
   };
 };
