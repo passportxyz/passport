@@ -155,11 +155,11 @@ export default function Dashboard() {
     </Modal >
   );
 
-const modals = (
-  <>
-    {viewerConnection.status === "connecting" && (
-      <ProcessingPopup data-testid="selfId-connection-alert">Waiting for wallet signature...</ProcessingPopup>
-    )}
+  const modals = (
+    <>
+      {viewerConnection.status === "connecting" && (
+        <ProcessingPopup data-testid="selfId-connection-alert">Waiting for wallet signature...</ProcessingPopup>
+      )}
 
     {isLoadingPassport === IsLoadingPassportState.Loading && (
       <ProcessingPopup data-testid="db-stamps-alert">One moment while we load your Stamps...</ProcessingPopup>
@@ -193,36 +193,17 @@ const modals = (
       {expiredStampModal && (
         <ExpiredStampModal isOpen={expiredStampModal} onClose={() => setExpiredStampModal(false)} />
       )}
+    </>
+  );
 
+  return (
+    <>
+      {modals}
       <HeaderContentFooterGrid>
         <Header />
-        <PageWidthGrid>
-          {passportHasCacaoError() && (
-            <Banner>
-              <div className="flex w-full justify-center">
-                We have detected some broken stamps in your passport. Your passport is currently locked because of this.
-                We need to fix these errors before you continue using Passport. This might take up to 5 minutes.
-                <button className="ml-2 flex underline" onClick={() => setRefreshModal(true)}>
-                  Reset Passport <img className="ml-1 w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
-                </button>
-              </div>
-            </Banner>
-          )}
-
-          {expiredProviders.length > 0 && (
-            <Banner>
-              <div className="flex w-full justify-center">
-                <img className="mr-2 h-6" alt="Clock Icon" src="./assets/clock-icon.svg" />
-                Some of your stamps have expired. You can remove them from your Passport.
-                <button className="ml-2 flex underline" onClick={() => setExpiredStampModal(true)}>
-                  Remove Expired Stamps{" "}
-                  <img className="ml-1 w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
-                </button>
-              </div>
-            </Banner>
-          )}
-          <div className="col-span-3 flex flex-wrap-reverse px-2 md:mt-4 md:flex-wrap">
-            <p className="mb-4 text-2xl text-black">
+        <PageWidthGrid className="mt-8">
+          <div className="col-span-2 self-center lg:col-span-4">
+            <p className="text-2xl text-black">
               My {filterName && `${filterName} `}Stamps
               {filterName && (
                 <a href="/#/dashboard">
