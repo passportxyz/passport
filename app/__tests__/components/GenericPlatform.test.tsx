@@ -18,6 +18,7 @@ import {
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { mock } from "jest-mock-extended";
 import { Drawer, DrawerOverlay } from "@chakra-ui/react";
+import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -61,7 +62,8 @@ const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
 // TODO
 
 describe("when user has not verified with EnsProvider", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    await closeAllToasts();
     (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
       credentials: [SUCCESFUL_ENS_RESULTS],
     });
