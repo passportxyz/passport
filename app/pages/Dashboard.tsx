@@ -196,67 +196,76 @@ export default function Dashboard() {
     </>
   );
 
-  return (
-    <>
-      {modals}
-      <HeaderContentFooterGrid>
-        <Header />
-        <PageWidthGrid className="mt-8">
-          <div className="col-span-2 self-center lg:col-span-4">
-            <p className="text-2xl text-black">
-              My {filterName && `${filterName} `}Stamps
-              {filterName && (
-                <a href="/#/dashboard">
-                  <span data-testid="select-all" className={`pl-2 text-sm text-purple-connectPurple`}>
-                    see all my stamps
-                  </span>
-                </a>
-              )}
-            </p>
-            {/* TODO Add to info popover */}
-            {/*
+  const subheader = useMemo(
+    () => (
+      <PageWidthGrid nested={true} className="my-4">
+        <div className="col-span-3 self-center lg:col-span-4">
+          <p className="text-2xl text-black">
+            My {filterName && `${filterName} `}Stamps
+            {filterName && (
+              <a href="/#/dashboard">
+                <span data-testid="select-all" className={`pl-2 text-sm text-purple-connectPurple`}>
+                  see all my stamps
+                </span>
+              </a>
+            )}
+          </p>
+          {/* TODO Add to info popover */}
+          {/*
               <p className="text-xl text-black">
                 Gitcoin Passport is an identity aggregator that helps you build a digital identifier showcasing your
                 unique humanity. Select the verification stamps you&apos;d like to connect to start building your
                 passport. The more verifications you have&#44; the stronger your passport will be.
               </p>
               */}
-          </div>
+        </div>
 
-          <div className="col-span-1 col-end-[-1] justify-self-end">
-            {passport ? (
-              <button
-                data-testid="button-passport-json-mobile"
-                className="rounded-md border-2 border-gray-300 py-2 px-4 text-black"
-                onClick={onOpen}
-              >
-                {`</>`}
-              </button>
-            ) : (
-              <div
-                data-testid="loading-spinner-passport"
-                className="flex flex-row items-center rounded-md border-2 border-gray-300 py-2 px-4 text-black"
-              >
-                <Spinner
-                  className="my-[2px]"
-                  thickness="2px"
-                  speed="0.65s"
-                  emptyColor="darkGray"
-                  color="gray"
-                  size="md"
-                />
-              </div>
-            )}
-          </div>
-          <CardList
-          isLoading={
-            isLoadingPassport == IsLoadingPassportState.Loading ||
-            isLoadingPassport == IsLoadingPassportState.LoadingFromCeramic ||
-            isLoadingPassport == IsLoadingPassportState.FailedToConnect
-          }
-        />
+        <div className="col-span-1 col-end-[-1] justify-self-end">
+          {passport ? (
+            <button
+              data-testid="button-passport-json-mobile"
+              className="rounded-md border-2 border-gray-300 py-2 px-4 text-black"
+              onClick={onOpen}
+            >
+              {`</>`}
+            </button>
+          ) : (
+            <div
+              data-testid="loading-spinner-passport"
+              className="flex flex-row items-center rounded-md border-2 border-gray-300 py-2 px-4 text-black"
+            >
+              <Spinner
+                className="my-[2px]"
+                thickness="2px"
+                speed="0.65s"
+                emptyColor="darkGray"
+                color="gray"
+                size="md"
+              />
+            </div>
+          )}
+        </div>
       </PageWidthGrid>
-      {/* This footer contains dark colored text and dark images */}
+    ),
+    [filterName, onOpen, passport]
+  );
+
+  return (
+    <>
+      {modals}
+      <HeaderContentFooterGrid>
+        <Header subheader={subheader} />
+        <PageWidthGrid className="mt-8">
+          <CardList
+            cardClassName="col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-3"
+            isLoading={
+              isLoadingPassport == IsLoadingPassportState.Loading ||
+              isLoadingPassport == IsLoadingPassportState.LoadingFromCeramic ||
+              isLoadingPassport == IsLoadingPassportState.FailedToConnect
+            }
+          />
+        </PageWidthGrid>
+        {/* This footer contains dark colored text and dark images */}
         <Footer lightMode={false} />
       </HeaderContentFooterGrid>
     </>
