@@ -29,7 +29,6 @@ import { UserContext } from "../context/userContext";
 
 import { useViewerConnection } from "@self.id/framework";
 import { EthereumAuthProvider } from "@self.id/web";
-import { Banner } from "../components/Banner";
 import { RefreshStampModal } from "../components/RefreshStampModal";
 import { ExpiredStampModal } from "../components/ExpiredStampModal";
 import ProcessingPopup from "../components/ProcessingPopup";
@@ -38,7 +37,7 @@ import { getFilterName } from "../config/filters";
 export default function Dashboard() {
   const { passport, isLoadingPassport, passportHasCacaoError, cancelCeramicConnection, expiredProviders } =
     useContext(CeramicContext);
-  const { wallet, toggleConnection, handleDisconnection } = useContext(UserContext);
+  const { wallet, toggleConnection, userWarning, setUserWarning } = useContext(UserContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -83,6 +82,47 @@ export default function Dashboard() {
     }
   }, [isLoadingPassport]);
 
+  useEffect(() => {
+    if (passportHasCacaoError()) {
+      setUserWarning({
+        name: "cacaoError",
+        content: (
+          <div className="flex max-w-screen-lg flex-col items-center text-center">
+            We have detected some broken stamps in your passport. Your passport is currently locked because of this. We
+            need to fix these errors before you continue using Passport. This might take up to 5 minutes.
+            <button className="ml-2 flex underline" onClick={() => setRefreshModal(true)}>
+              Reset Passport <img className="ml-1 w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
+            </button>
+          </div>
+        ),
+        dismissible: false,
+      });
+    } else if (userWarning?.name === "cacaoError") {
+      setUserWarning();
+    }
+  });
+
+  useEffect(() => {
+    if (expiredProviders.length > 0) {
+      setUserWarning({
+        name: "expiredStamp",
+        icon: <img className="mr-2 h-6" alt="Clock Icon" src="./assets/clock-icon.svg" />,
+        content: (
+          <div className="flex justify-center">
+            Some of your stamps have expired. You can remove them from your Passport.
+            <button className="ml-2 flex underline" onClick={() => setExpiredStampModal(true)}>
+              Remove Expired Stamps{" "}
+              <img className="ml-1 w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
+            </button>
+          </div>
+        ),
+        dismissible: false,
+      });
+    } else if (userWarning?.name === "expiredStamp") {
+      setUserWarning();
+    }
+  });
+
   const retryModal = (
     <Modal isOpen={retryModalIsOpen} onClose={onRetryModalClose}>
       <ModalOverlay />
@@ -114,7 +154,7 @@ export default function Dashboard() {
     </Modal>
   );
 
-  return (
+  const modals = (
     <>
       {viewerConnection.status === "connecting" && (
         <ProcessingPopup data-testid="selfId-connection-alert">Waiting for wallet signature...</ProcessingPopup>
@@ -152,36 +192,17 @@ export default function Dashboard() {
       {expiredStampModal && (
         <ExpiredStampModal isOpen={expiredStampModal} onClose={() => setExpiredStampModal(false)} />
       )}
+    </>
+  );
 
+  return (
+    <>
+      {modals}
       <HeaderContentFooterGrid>
         <Header />
-        <PageWidthGrid>
-          {passportHasCacaoError() && (
-            <Banner>
-              <div className="flex w-full justify-center">
-                We have detected some broken stamps in your passport. Your passport is currently locked because of this.
-                We need to fix these errors before you continue using Passport. This might take up to 5 minutes.
-                <button className="ml-2 flex underline" onClick={() => setRefreshModal(true)}>
-                  Reset Passport <img className="ml-1 w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
-                </button>
-              </div>
-            </Banner>
-          )}
-
-          {expiredProviders.length > 0 && (
-            <Banner>
-              <div className="flex w-full justify-center">
-                <img className="mr-2 h-6" alt="Clock Icon" src="./assets/clock-icon.svg" />
-                Some of your stamps have expired. You can remove them from your Passport.
-                <button className="ml-2 flex underline" onClick={() => setExpiredStampModal(true)}>
-                  Remove Expired Stamps{" "}
-                  <img className="ml-1 w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
-                </button>
-              </div>
-            </Banner>
-          )}
-          <div className="col-span-3 flex flex-wrap-reverse px-2 md:mt-4 md:flex-wrap">
-            <p className="mb-4 text-2xl text-black">
+        <PageWidthGrid className="mt-8">
+          <div className="col-span-2 self-center lg:col-span-4">
+            <p className="text-2xl text-black">
               My {filterName && `${filterName} `}Stamps
               {filterName && (
                 <a href="/#/dashboard">

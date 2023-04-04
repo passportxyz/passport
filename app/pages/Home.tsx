@@ -7,9 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/userContext";
 
 // --- Components
-import { Footer } from "../components/Footer";
-import Header from "../components/Header";
-import PageWidthGrid from "../components/PageWidthGrid";
+import MinimalHeader from "../components/MinimalHeader";
+import PageWidthGrid, { PAGE_PADDING } from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 
 const EmptyFooterSpacer = () => <div className="h-20" />;
@@ -29,7 +28,7 @@ export default function Home() {
   return (
     <div className="font-miriam-libre bg-purple-darkpurple text-gray-100">
       <HeaderContentFooterGrid>
-        <Header />
+        <MinimalHeader className={PAGE_PADDING} />
         <PageWidthGrid className="items-center">
           <div className="col-span-4 flex flex-col items-center text-center text-white md:col-start-2 lg:col-start-3 xl:col-span-6 xl:col-start-4">
             <img src="/assets/gitcoinWordLogo.svg" alt="pPassport Logo" className="py-4" />

@@ -27,6 +27,15 @@ export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
 const MULTICHAIN_ENABLED = process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE !== "off";
 
+type UserWarningName = "expiredStamp" | "cacaoError";
+
+export interface UserWarning {
+  content: React.ReactNode;
+  icon?: React.ReactNode;
+  name?: UserWarningName;
+  dismissible?: boolean;
+}
+
 export interface UserContextState {
   loggedIn: boolean;
   toggleConnection: () => void;
@@ -38,6 +47,8 @@ export interface UserContextState {
   dbAccessToken: string | undefined;
   dbAccessTokenStatus: DbAuthTokenStatus;
   loggingIn: boolean;
+  userWarning?: UserWarning;
+  setUserWarning: (warning?: UserWarning) => void;
 }
 
 const startingState: UserContextState = {
@@ -51,6 +62,8 @@ const startingState: UserContextState = {
   dbAccessToken: undefined,
   dbAccessTokenStatus: "idle",
   loggingIn: false,
+  userWarning: undefined,
+  setUserWarning: () => {},
 };
 
 export const pillLocalStorage = (platform?: string): void => {
@@ -69,6 +82,7 @@ export const UserContext = createContext(startingState);
 export const UserContextProvider = ({ children }: { children: any }) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [viewerConnection, ceramicConnect, ceramicDisconnect] = useViewerConnection();
+  const [userWarning, setUserWarning] = useState<UserWarning | undefined>();
 
   // Use onboard to control the current provider/wallets
   const [{ wallet }, connect, disconnect] = useConnectWallet();
@@ -414,6 +428,8 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     dbAccessToken,
     dbAccessTokenStatus,
     loggingIn,
+    userWarning,
+    setUserWarning,
   };
 
   return <UserContext.Provider value={providerProps}>{children}</UserContext.Provider>;
