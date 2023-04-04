@@ -1,6 +1,11 @@
 module.exports = {
   content: ["./pages/**/*.{ts,tsx}", "./config/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./pages/_app.tsx"],
   theme: {
+    screens: {
+      md: "480px",
+      lg: "1020px",
+      xl: "1280px",
+    },
     extend: {
       colors: {
         purple: {
@@ -19,6 +24,19 @@ module.exports = {
           jade: "#02E2AC",
         },
       },
+    },
+    fontSize: {
+      // Set line-height to 150%
+      // for all font sizes
+      xs: ["12px", "1.5em"],
+      sm: ["14px", "1.5em"],
+      base: ["16px", "1.5em"],
+      lg: ["18px", "1.5em"],
+      xl: ["20px", "1.5em"],
+      "2xl": ["24px", "1.5em"],
+      "3xl": ["30px", "1.5em"],
+      "4xl": ["36px", "1.5em"],
+      "5xl": ["48px", "1.5em"],
     },
     fontFamily: {
       miriamlibre: ["miriam libre"],

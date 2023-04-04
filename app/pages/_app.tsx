@@ -9,6 +9,7 @@ import "../styles/globals.css";
 import { ChakraProvider } from "@chakra-ui/react";
 import { UserContextProvider } from "../context/userContext";
 import { CeramicContextProvider } from "../context/ceramicContext";
+import ManageAccountCenter from "../components/ManageAccountCenter";
 
 // --- Ceramic Tools
 import { Provider as SelfIdProvider } from "@self.id/framework";
@@ -64,9 +65,11 @@ function MyApp({ Component, pageProps }: AppProps) {
       >
         <UserContextProvider>
           <CeramicContextProvider>
+          <ManageAccountCenter>
             <ChakraProvider>
               <div suppressHydrationWarning>{typeof window === "undefined" ? null : <Component {...pageProps} />}</div>
             </ChakraProvider>
+          </ManageAccountCenter>
           </CeramicContextProvider>
         </UserContextProvider>
       </SelfIdProvider>

@@ -75,7 +75,7 @@ export const PlatformCard = ({
 
   // returns a single Platform card
   return (
-    <div className="w-1/2 p-2 md:w-1/2 xl:w-1/4" key={`${platform.name}${i}`}>
+    <div className="col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-3" key={`${platform.name}${i}`}>
       <div className="relative flex h-full flex-col border border-gray-200 p-0">
         <div className="flex flex-row p-6">
           <div className="flex h-10 w-10 flex-grow justify-center md:justify-start">
