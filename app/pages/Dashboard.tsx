@@ -12,7 +12,6 @@ import { Footer } from "../components/Footer";
 import Header from "../components/Header";
 import PageWidthGrid from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
-import Tooltip from "../components/Tooltip";
 
 // --Chakra UI Elements
 import {
@@ -131,62 +130,62 @@ export default function Dashboard() {
       <ModalContent>
         <ModalBody mt={4}>
           <div className="flex flex-row">
-            <div className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-100 md:mr-10">
-              <img alt="shield-exclamation-icon" src="./assets/shield-exclamation-icon.svg" />
-            </div>
-            <div className="flex flex-col" data-testid="retry-modal-content">
-              <p className="text-lg font-bold">Datasource Connection Error</p>
-              <p>
-                We cannot connect to the datastore where your Stamp data is stored. Please try again in a few minutes.
-              </p>
-            </div>
-          </div>
-        </ModalBody>
-        {
-          <ModalFooter py={3}>
+            <div className="sm:mr-10 inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-100">
+      <img alt="shield-exclamation-icon" src="./assets/shield-exclamation-icon.svg" />
+    </div>
+    <div className="flex flex-col" data-testid="retry-modal-content">
+      <p className="text-lg font-bold">Datasource Connection Error</p>
+      <p>
+        We cannot connect to the datastore where your Stamp data is stored. Please try again in a few minutes.
+      </p>
+    </div>
+  </div>
+        </ModalBody >
+    {
+          < ModalFooter py = { 3} >
             <Button data-testid="retry-modal-try-again" variant="outline" mr={2} onClick={retryConnection}>
               Try Again
             </Button>
             <Button data-testid="retry-modal-close" colorScheme="purple" onClick={closeModalAndDisconnect}>
               Done
             </Button>
-          </ModalFooter>
+          </ModalFooter >
         }
-      </ModalContent>
-    </Modal>
+      </ModalContent >
+    </Modal >
   );
 
-  const modals = (
-    <>
-      {viewerConnection.status === "connecting" && (
-        <ProcessingPopup data-testid="selfId-connection-alert">Waiting for wallet signature...</ProcessingPopup>
-      )}
+const modals = (
+  <>
+    {viewerConnection.status === "connecting" && (
+      <ProcessingPopup data-testid="selfId-connection-alert">Waiting for wallet signature...</ProcessingPopup>
+    )}
 
-      {isLoadingPassport === IsLoadingPassportState.Loading && (
-        <ProcessingPopup data-testid="db-stamps-alert">One moment while we load your Stamps...</ProcessingPopup>
-      )}
+    {isLoadingPassport === IsLoadingPassportState.Loading && (
+      <ProcessingPopup data-testid="db-stamps-alert">One moment while we load your Stamps...</ProcessingPopup>
+    )}
 
-      {isLoadingPassport === IsLoadingPassportState.LoadingFromCeramic && (
-        <ProcessingPopup data-testid="ceramic-stamps-alert">
-          <>
-            Connecting to Ceramic...
-            <span
-              className="pl-4 text-white no-underline hover:cursor-pointer hover:underline md:pl-12"
-              onClick={cancelCeramicConnection}
-            >
-              Cancel
-            </span>
-          </>
-        </ProcessingPopup>
-      )}
+    {isLoadingPassport === IsLoadingPassportState.LoadingFromCeramic && (
+      <ProcessingPopup data-testid="ceramic-stamps-alert">
+        <>
+          Connecting to Ceramic...
+          <span
+              className="sm:pl-8 pl-4 text-white no-underline hover:cursor-pointer hover:underline md:pl-12"
+            onClick={cancelCeramicConnection}
+          >
+            Cancel
+          </span>
+        </>
+      </ProcessingPopup>
+    )}
 
-      <JsonOutputModal
-        isOpen={isOpen}
-        onClose={onClose}
-        title={"Passport JSON"}
-        subheading={"You can find the Passport JSON data below"}
-        jsonOutput={passport}
-      />
+    <JsonOutputModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={"Passport JSON"}
+      subheading={"You can find the Passport JSON data below"}
+      jsonOutput={passport}
+    />
 
       {isLoadingPassport == IsLoadingPassportState.FailedToConnect && retryModal}
 
@@ -194,78 +193,91 @@ export default function Dashboard() {
       {expiredStampModal && (
         <ExpiredStampModal isOpen={expiredStampModal} onClose={() => setExpiredStampModal(false)} />
       )}
-    </>
-  );
 
-  const subheader = useMemo(
-    () => (
-      <PageWidthGrid nested={true} className="my-4">
-        <div className="col-span-3 flex items-center justify-items-center self-center lg:col-span-4">
-          <div className="flex text-2xl">
-            My {filterName && `${filterName} `}Stamps
-            {filterName && (
-              <a href="/#/dashboard">
-                <span data-testid="select-all" className={`pl-2 text-sm text-purple-connectPurple`}>
-                  see all my stamps
-                </span>
-              </a>
-            )}
-            <Tooltip>
-              Gitcoin Passport is an identity aggregator that helps you build a digital identifier showcasing your
-              unique humanity. Select the verification stamps you&apos;d like to connect to start building your
-              passport. The more verifications you have&#44; the stronger your passport will be.
-            </Tooltip>
-          </div>
-        </div>
-
-        <div className="col-span-1 col-end-[-1] justify-self-end">
-          {passport ? (
-            <button
-              data-testid="button-passport-json-mobile"
-              className="rounded-md border-2 border-gray-300 py-2 px-4"
-              onClick={onOpen}
-            >
-              {`</>`}
-            </button>
-          ) : (
-            <div
-              data-testid="loading-spinner-passport"
-              className="flex flex-row items-center rounded-md border-2 border-gray-300 py-2 px-4"
-            >
-              <Spinner
-                className="my-[2px]"
-                thickness="2px"
-                speed="0.65s"
-                emptyColor="darkGray"
-                color="gray"
-                size="md"
-              />
-            </div>
-          )}
-        </div>
-      </PageWidthGrid>
-    ),
-    [filterName, onOpen, passport]
-  );
-
-  return (
-    <PageRoot className="text-color-1">
-      {modals}
       <HeaderContentFooterGrid>
-        <Header subheader={subheader} />
-        <PageWidthGrid className="mt-8">
+        <Header />
+        <PageWidthGrid>
+          {passportHasCacaoError() && (
+            <Banner>
+              <div className="flex w-full justify-center">
+                We have detected some broken stamps in your passport. Your passport is currently locked because of this.
+                We need to fix these errors before you continue using Passport. This might take up to 5 minutes.
+                <button className="ml-2 flex underline" onClick={() => setRefreshModal(true)}>
+                  Reset Passport <img className="ml-1 w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
+                </button>
+              </div>
+            </Banner>
+          )}
+
+          {expiredProviders.length > 0 && (
+            <Banner>
+              <div className="flex w-full justify-center">
+                <img className="mr-2 h-6" alt="Clock Icon" src="./assets/clock-icon.svg" />
+                Some of your stamps have expired. You can remove them from your Passport.
+                <button className="ml-2 flex underline" onClick={() => setExpiredStampModal(true)}>
+                  Remove Expired Stamps{" "}
+                  <img className="ml-1 w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
+                </button>
+              </div>
+            </Banner>
+          )}
+          <div className="col-span-3 flex flex-wrap-reverse px-2 md:mt-4 md:flex-wrap">
+            <p className="mb-4 text-2xl text-black">
+              My {filterName && `${filterName} `}Stamps
+              {filterName && (
+                <a href="/#/dashboard">
+                  <span data-testid="select-all" className={`pl-2 text-sm text-purple-connectPurple`}>
+                    see all my stamps
+                  </span>
+                </a>
+              )}
+            </p>
+            {/* TODO Add to info popover */}
+            {/*
+              <p className="text-xl text-black">
+                Gitcoin Passport is an identity aggregator that helps you build a digital identifier showcasing your
+                unique humanity. Select the verification stamps you&apos;d like to connect to start building your
+                passport. The more verifications you have&#44; the stronger your passport will be.
+              </p>
+              */}
+          </div>
+
+          <div className="col-span-1 col-end-[-1] justify-self-end">
+            {passport ? (
+              <button
+                data-testid="button-passport-json-mobile"
+                className="rounded-md border-2 border-gray-300 py-2 px-4 text-black"
+                onClick={onOpen}
+              >
+                {`</>`}
+              </button>
+            ) : (
+              <div
+                data-testid="loading-spinner-passport"
+                className="flex flex-row items-center rounded-md border-2 border-gray-300 py-2 px-4 text-black"
+              >
+                <Spinner
+                  className="my-[2px]"
+                  thickness="2px"
+                  speed="0.65s"
+                  emptyColor="darkGray"
+                  color="gray"
+                  size="md"
+                />
+              </div>
+            )}
+          </div>
           <CardList
-            cardClassName="col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-3"
-            isLoading={
-              isLoadingPassport == IsLoadingPassportState.Loading ||
-              isLoadingPassport == IsLoadingPassportState.LoadingFromCeramic ||
-              isLoadingPassport == IsLoadingPassportState.FailedToConnect
-            }
-          />
-        </PageWidthGrid>
-        {/* This footer contains dark colored text and dark images */}
-        <Footer lightMode={true} />
+          isLoading={
+            isLoadingPassport == IsLoadingPassportState.Loading ||
+            isLoadingPassport == IsLoadingPassportState.LoadingFromCeramic ||
+            isLoadingPassport == IsLoadingPassportState.FailedToConnect
+          }
+        />
+      </PageWidthGrid>
+      {/* This footer contains dark colored text and dark images */}
+        <Footer lightMode={false} />
       </HeaderContentFooterGrid>
-    </PageRoot>
+    </>
   );
 }
