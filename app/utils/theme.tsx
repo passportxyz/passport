@@ -1,3 +1,4 @@
+import React from "react";
 import { useLayoutEffect } from "react";
 
 export const palette = {
