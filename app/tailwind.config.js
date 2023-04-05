@@ -5,6 +5,7 @@ module.exports = {
       md: "480px",
       lg: "1020px",
       xl: "1280px",
+      tall: { raw: "(min-height: 550px)" },
     },
     extend: {
       colors: {
@@ -24,10 +25,8 @@ module.exports = {
           jade: "#02E2AC",
         },
         background: "var(--color-background)",
-        "background-2": "var(--color-background-2)",
         accent: "var(--color-accent)",
         "accent-2": "var(--color-accent-2)",
-        "accent-3": "var(--color-accent-3)",
         muted: "var(--color-muted)",
 
         // Text Colors
@@ -38,7 +37,6 @@ module.exports = {
         "color-1": "var(--color-text-1)",
         "color-2": "var(--color-text-2)",
         "color-3": "var(--color-text-3)",
-        "color-4": "var(--color-text-4)",
       },
     },
     fontSize: {

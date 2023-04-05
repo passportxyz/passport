@@ -10,8 +10,14 @@ import { UserContext } from "../context/userContext";
 import MinimalHeader from "../components/MinimalHeader";
 import PageWidthGrid, { PAGE_PADDING } from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
+import SIWEButton from "../components/SIWEButton";
 
-const EmptyFooterSpacer = () => <div className="h-20" />;
+const Footer = () => (
+  <>
+    <div className="h-20 lg:hidden" />
+    <div className="landingPageFooter hidden h-[360px] lg:block" />
+  </>
+);
 
 export default function Home() {
   const { toggleConnection, wallet } = useContext(UserContext);
@@ -26,32 +32,26 @@ export default function Home() {
   }, [wallet]);
 
   return (
-    <div className="font-miriam-libre bg-purple-darkpurple text-gray-100">
+    <div className="bg-background text-color-2 tall:max-h-screen tall:overflow-hidden">
       <HeaderContentFooterGrid>
-        <MinimalHeader className={PAGE_PADDING} />
-        <PageWidthGrid className="items-center">
-          <div className="col-span-4 flex flex-col items-center text-center text-white md:col-start-2 lg:col-start-3 xl:col-span-6 xl:col-start-4">
-            <img src="/assets/gitcoinWordLogo.svg" alt="pPassport Logo" className="py-4" />
-            <p className="sm:text-7xl md:text-7xl font-miriamlibre text-5xl">Passport</p>
-            <div className="font-libre-franklin text-lg text-gray-400 md:text-xl">
-              Take control of your online identity by creating a decentralized record of your credentials. By collecting
-              &ldquo;stamps&rdquo; of validation for your identity and online reputation, you can gain access to the
-              most trustworthy web3 experiences and maximize your ability to benefit from platforms like Gitcoin Grants.
-              The more you verify your identity, the more opportunities you will have to vote and participate across the
-              web3.
+        <div className={PAGE_PADDING}>
+          <MinimalHeader className={`border-b border-accent-2`} />
+        </div>
+        <PageWidthGrid className="mt-8 items-center">
+          <div className="col-span-4 flex flex-col items-center text-center md:col-start-2 lg:col-start-3 xl:col-span-6 xl:col-start-4">
+            <img src="/assets/gitcoinLogoType.svg" alt="Gitcoin Logo" />
+            <img src="/assets/passportLandingPageLogo.svg" alt="Passport Logo" className="pt-6" />
+            <div className="py-4 font-heading text-2xl text-color-3">Take control of your identity.</div>
+            <div className="text-base">
+              By collecting &ldquo;stamps&rdquo; of validation for your identity and online reputation, you can gain
+              access to the most trustworthy web3 experiences and maximize your ability to benefit from platforms like
+              Gitcoin Grants. The more you verify your identity, the more opportunities you will have to vote and
+              participate across the web3.
             </div>
-            <div className="mt-4 w-1/2 md:mt-10">
-              <button
-                data-testid="connectWalletButton"
-                className="rounded-sm rounded bg-purple-connectPurple px-10 py-2 text-white"
-                onClick={toggleConnection}
-              >
-                <p className="text-base">{address ? `Disconnect from ${walletLabel || ""}` : "Connect Wallet"}</p>
-              </button>
-            </div>
+            <SIWEButton testId="connectWalletButton" login={toggleConnection} className="mt-4 md:mt-10" />
           </div>
         </PageWidthGrid>
-        <EmptyFooterSpacer />
+        <Footer />
       </HeaderContentFooterGrid>
     </div>
   );

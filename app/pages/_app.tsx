@@ -155,11 +155,13 @@ function App({ Component, pageProps }: AppProps) {
       >
         <UserContextProvider>
           <CeramicContextProvider>
-          <ManageAccountCenter>
-            <ChakraProvider>
-              <div suppressHydrationWarning>{typeof window === "undefined" ? null : <Component {...pageProps} />}</div>
-            </ChakraProvider>
-          </ManageAccountCenter>
+            <ManageAccountCenter>
+              <ChakraProvider>
+                <div className="darkMode font-body" suppressHydrationWarning>
+                  {typeof window === "undefined" ? null : <Component {...pageProps} />}
+                </div>
+              </ChakraProvider>
+            </ManageAccountCenter>
           </CeramicContextProvider>
         </UserContextProvider>
       </SelfIdProvider>
