@@ -1,3 +1,5 @@
+import { useLayoutEffect } from "react";
+
 export const palette = {
   wave: {
     800: "#083A40",
@@ -49,4 +51,10 @@ export const setTheme = ({ colors, fonts }: Theme) => {
 
   r.style.setProperty("--font-body", fonts.body);
   r.style.setProperty("--font-heading", fonts.heading);
+};
+
+export const ThemeWrapper = ({ children, defaultTheme }: { children: React.ReactNode; defaultTheme: Theme }) => {
+  useLayoutEffect(() => setTheme(defaultTheme), [defaultTheme]);
+
+  return <>{children}</>;
 };
