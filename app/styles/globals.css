@@ -50,32 +50,6 @@
   --account-center-position-right: 4.1rem;
   --account-center-border-radius: 16px;
   --onboard-action-required-btn-text-color: #fff;
-
-  --palette-white: #fff;
-  --palette-sand-400: #ece7d5;
-  --palette-moon-600: #0b110f;
-  --palette-lichen-600: #8af214;
-  --palette-passionflower-500: #6935ff;
-  --palette-passionflower-100: #d9d6ff;
-  --palette-wave-800: #083a40;
-  --font-family-body: "Libre Franklin";
-  --font-family-heading: "Miriam Libre";
-}
-
-.darkMode {
-  --color-background: var(--palette-moon-600);
-  --color-accent: var(--palette-passionflower-500);
-  --color-accent-2: var(--palette-wave-800);
-  --color-accent-3: var(--palette-lichen-600);
-  --color-muted: var(--palette-passionflower-100);
-
-  --color-text-1: var(--palette-white);
-  --color-text-2: var(--palette-sand-400);
-  --color-text-3: var(--palette-passionflower-100);
-}
-
-.lightMode {
-  --color-background: #00f;
 }
 
 @media (max-width: 1020px /* md */) {

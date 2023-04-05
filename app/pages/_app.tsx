@@ -1,5 +1,5 @@
 // --- React Methods
-import React, { useEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 
 // --- Next Methods
 import { AppProps } from "next/app";
@@ -17,13 +17,34 @@ import { Provider as SelfIdProvider } from "@self.id/framework";
 // --- GTM Module
 import TagManager from "react-gtm-module";
 
+import { setTheme, palette, Theme } from "../utils/theme";
+
 const FacebookAppId = process.env.NEXT_PUBLIC_PASSPORT_FACEBOOK_APP_ID || "";
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
+
+const DARK_MODE_THEME: Theme = {
+  colors: {
+    background: palette.moon[600],
+    accent: palette.passionflower[500],
+    "accent-2": palette.wave[800],
+    "accent-3": palette.lichen[600],
+    muted: palette.passionflower[100],
+    "text-1": palette.white,
+    "text-2": palette.sand[400],
+    "text-3": palette.passionflower[100],
+  },
+  fonts: {
+    body: "Libre Franklin",
+    heading: "Miriam Libre",
+  },
+};
 
 function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
     TagManager.initialize({ gtmId: `${GTM_ID}` });
   }, []);
+
+  useLayoutEffect(() => setTheme(DARK_MODE_THEME), []);
 
   const facebookSdkScript = (
     <script
@@ -67,7 +88,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           <CeramicContextProvider>
             <ManageAccountCenter>
               <ChakraProvider>
-                <div className="darkMode font-body" suppressHydrationWarning>
+                <div className="font-body" suppressHydrationWarning>
                   {typeof window === "undefined" ? null : <Component {...pageProps} />}
                 </div>
               </ChakraProvider>
