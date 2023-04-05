@@ -1,8 +1,6 @@
 // --- React methods
 import React, { useMemo } from "react";
 
-import { PAGE_PADDING } from "./PageWidthGrid";
-
 type MinimalHeaderProps = {
   className?: string;
 };

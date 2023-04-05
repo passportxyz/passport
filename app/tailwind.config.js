@@ -5,6 +5,7 @@ module.exports = {
       md: "480px",
       lg: "1020px",
       xl: "1280px",
+      tall: { raw: "(min-height: 550px)" },
     },
     extend: {
       colors: {
@@ -23,6 +24,19 @@ module.exports = {
         green: {
           jade: "#02E2AC",
         },
+        background: "var(--color-background)",
+        accent: "var(--color-accent)",
+        "accent-2": "var(--color-accent-2)",
+        muted: "var(--color-muted)",
+
+        // Text Colors
+        // using this naming convention
+        // so that e.g. text-color-1 can be used
+        //
+        // Don't use these for non-text colors
+        "color-1": "var(--color-text-1)",
+        "color-2": "var(--color-text-2)",
+        "color-3": "var(--color-text-3)",
       },
     },
     fontSize: {
@@ -39,9 +53,8 @@ module.exports = {
       "5xl": ["48px", "1.5em"],
     },
     fontFamily: {
-      miriamlibre: ["miriam libre"],
-      librefranklin: ["Libre Franklin"],
-      body: ['"Libre Franklin"'],
+      body: "var(--font-family-body)",
+      heading: "var(--font-family-heading)",
     },
     minHeight: {
       default: "100vh",
