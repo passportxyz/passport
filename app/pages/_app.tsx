@@ -157,8 +157,12 @@ function App({ Component, pageProps }: AppProps) {
           <CeramicContextProvider>
             <ManageAccountCenter>
               <ChakraProvider>
-                <div className="darkMode" suppressHydrationWarning>
-                  {typeof window === "undefined" ? null : <Component {...pageProps} />}
+                <div className="font-body" suppressHydrationWarning>
+                  {typeof window === "undefined" ? null : (
+                    <ThemeWrapper defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                      <Component {...pageProps} />
+                    </ThemeWrapper>
+                  )}
                 </div>
               </ChakraProvider>
             </ManageAccountCenter>
