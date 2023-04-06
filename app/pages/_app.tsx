@@ -17,6 +17,8 @@ import { Provider as SelfIdProvider } from "@self.id/framework";
 // --- GTM Module
 import TagManager from "react-gtm-module";
 
+import { themes, ThemeWrapper } from "../utils/theme";
+
 const FacebookAppId = process.env.NEXT_PUBLIC_PASSPORT_FACEBOOK_APP_ID || "";
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
 
@@ -67,8 +69,12 @@ function MyApp({ Component, pageProps }: AppProps) {
           <CeramicContextProvider>
             <ManageAccountCenter>
               <ChakraProvider>
-                <div className="darkMode" suppressHydrationWarning>
-                  {typeof window === "undefined" ? null : <Component {...pageProps} />}
+                <div className="font-body" suppressHydrationWarning>
+                  {typeof window === "undefined" ? null : (
+                    <ThemeWrapper defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                      <Component {...pageProps} />
+                    </ThemeWrapper>
+                  )}
                 </div>
               </ChakraProvider>
             </ManageAccountCenter>
