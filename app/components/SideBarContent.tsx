@@ -104,8 +104,8 @@ export const SideBarContent = ({
       ) : (
         <div>
           <DrawerHeader>
-            <div className="mt-10 flex flex-col sm:flex-row">
-              <div className="w-full text-center sm:py-8 sm:pr-8">The requested Platform or Provider was not found</div>
+            <div className="sm:flex-row mt-10 flex flex-col">
+              <div className="sm:py-8 sm:pr-8 w-full text-center">The requested Platform or Provider was not found</div>
             </div>
           </DrawerHeader>
         </div>

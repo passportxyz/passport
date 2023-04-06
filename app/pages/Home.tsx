@@ -31,6 +31,13 @@ export default function Home() {
     }
   }, [wallet]);
 
+  // // Route user to Welcome page when wallet is connected
+  // useEffect(() => {
+  //   if (wallet) {
+  //     navigate("/welcome");
+  //   }
+  // }, [wallet]);
+
   return (
     <div className="bg-background text-color-2 tall:max-h-screen tall:overflow-hidden">
       <HeaderContentFooterGrid>

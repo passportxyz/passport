@@ -17,6 +17,10 @@
   .sidebar-verify-btn:disabled {
     @apply bg-purple-200 text-black;
   }
+
+  .secondary-btn {
+    @apply border border-accent-2 text-white;
+  }
 }
 
 .font-libre-franklin {
