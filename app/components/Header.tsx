@@ -13,9 +13,9 @@ const Header = ({ subheader }: HeaderProps): JSX.Element => {
   const { userWarning, setUserWarning } = useContext(UserContext);
 
   return (
-    <div className={"border-b border-gray-300 bg-white"}>
-      <div className={`w-full bg-white ${PAGE_PADDING}`}>
-        <MinimalHeader className={`${subheader ? "border-b border-b-gray-200" : ""}`} />
+    <div className={"border-b border-accent-2"}>
+      <div className={`w-full bg-background ${PAGE_PADDING}`}>
+        <MinimalHeader className={`${subheader ? "border-b border-b-accent-2" : ""}`} />
       </div>
       <div className={`w-full bg-red-100 ${PAGE_PADDING}`}>
         {userWarning && <Warning userWarning={userWarning} onDismiss={() => setUserWarning()} />}
