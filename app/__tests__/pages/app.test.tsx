@@ -1,5 +1,6 @@
 import { render } from "@testing-library/react";
-import Index from "../../pages/index";
+import App from "../../pages/_app";
+import { AppProps } from "next/app";
 
 jest.mock("../../utils/onboard.ts");
 jest.mock("@datadog/browser-rum");
@@ -39,7 +40,9 @@ describe("when index is provided queryParams matching twitters OAuth response", 
       value: mockCloseWindow,
     });
 
-    render(<Index />);
+    const appProps = {} as AppProps;
+
+    render(<App {...appProps} />);
 
     // expect message to be posted and window.close() to have been called
     expect(mockPostMessage).toBeCalledTimes(1);
