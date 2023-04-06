@@ -5,7 +5,6 @@ module.exports = {
       md: "480px",
       lg: "1020px",
       xl: "1280px",
-      tall: { raw: "(min-height: 550px)" },
     },
     extend: {
       colors: {
