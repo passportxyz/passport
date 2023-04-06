@@ -1,5 +1,5 @@
 // --- React Methods
-import React, { useEffect, useLayoutEffect } from "react";
+import React, { useEffect } from "react";
 
 // --- Next Methods
 import { AppProps } from "next/app";
