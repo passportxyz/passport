@@ -38,12 +38,6 @@
   animation-timing-function: ease;
 }
 
-.landingPageFooter {
-  background-image: url(/assets/backgroundRock.png);
-  background-position: top;
-  background-repeat: no-repeat;
-}
-
 :root {
   --onboard-shadow-3: none;
   --account-center-position-top: -14px;

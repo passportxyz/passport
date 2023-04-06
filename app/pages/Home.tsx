@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/userContext";
 
 // --- Components
+import PageRoot from "../components/PageRoot";
 import MinimalHeader from "../components/MinimalHeader";
 import PageWidthGrid, { PAGE_PADDING } from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
@@ -15,7 +16,7 @@ import SIWEButton from "../components/SIWEButton";
 const Footer = () => (
   <>
     <div className="h-20 lg:hidden" />
-    <div className="landingPageFooter hidden h-[360px] lg:block" />
+    <div className="hidden h-[360px] bg-[url(/assets/backgroundRock.png)] bg-contain bg-top bg-no-repeat lg:block" />
   </>
 );
 
@@ -32,9 +33,9 @@ export default function Home() {
   }, [wallet]);
 
   return (
-    <div className="bg-background text-color-2 tall:max-h-screen tall:overflow-hidden">
+    <PageRoot className="text-color-2">
       <HeaderContentFooterGrid>
-        <div className={PAGE_PADDING}>
+        <div className={`${PAGE_PADDING} bg-background`}>
           <MinimalHeader className={`border-b border-accent-2`} />
         </div>
         <PageWidthGrid className="mt-8 items-center">
@@ -48,11 +49,11 @@ export default function Home() {
               Gitcoin Grants. The more you verify your identity, the more opportunities you will have to vote and
               participate across the web3.
             </div>
-            <SIWEButton testId="connectWalletButton" login={toggleConnection} className="mt-4 md:mt-10" />
+            <SIWEButton testId="connectWalletButton" login={toggleConnection} className="mt-10" />
           </div>
         </PageWidthGrid>
         <Footer />
       </HeaderContentFooterGrid>
-    </div>
+    </PageRoot>
   );
 }

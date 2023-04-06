@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useRouter } from "next/router";
 
 // --Components
+import PageRoot from "../components/PageRoot";
 import { CardList } from "../components/CardList";
 import { JsonOutputModal } from "../components/JsonOutputModal";
 import { Footer } from "../components/Footer";
@@ -199,7 +200,7 @@ export default function Dashboard() {
     () => (
       <PageWidthGrid nested={true} className="my-4">
         <div className="col-span-3 self-center lg:col-span-4">
-          <p className="text-2xl text-black">
+          <p className="text-2xl">
             My {filterName && `${filterName} `}Stamps
             {filterName && (
               <a href="/#/dashboard">
@@ -223,7 +224,7 @@ export default function Dashboard() {
           {passport ? (
             <button
               data-testid="button-passport-json-mobile"
-              className="rounded-md border-2 border-gray-300 py-2 px-4 text-black"
+              className="rounded-md border-2 border-gray-300 py-2 px-4"
               onClick={onOpen}
             >
               {`</>`}
@@ -231,7 +232,7 @@ export default function Dashboard() {
           ) : (
             <div
               data-testid="loading-spinner-passport"
-              className="flex flex-row items-center rounded-md border-2 border-gray-300 py-2 px-4 text-black"
+              className="flex flex-row items-center rounded-md border-2 border-gray-300 py-2 px-4"
             >
               <Spinner
                 className="my-[2px]"
@@ -250,7 +251,7 @@ export default function Dashboard() {
   );
 
   return (
-    <>
+    <PageRoot className="text-color-1">
       {modals}
       <HeaderContentFooterGrid>
         <Header subheader={subheader} />
@@ -267,6 +268,6 @@ export default function Dashboard() {
         {/* This footer contains dark colored text and dark images */}
         <Footer lightMode={false} />
       </HeaderContentFooterGrid>
-    </>
+    </PageRoot>
   );
 }

@@ -67,7 +67,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           <CeramicContextProvider>
             <ManageAccountCenter>
               <ChakraProvider>
-                <div className="darkMode font-body" suppressHydrationWarning>
+                <div className="darkMode" suppressHydrationWarning>
                   {typeof window === "undefined" ? null : <Component {...pageProps} />}
                 </div>
               </ChakraProvider>
