@@ -56,12 +56,20 @@ cp ./iam/.env-example.env ./iam/.env
 cp ./schemas/.env-example.env ./schemas/.env
 ```
 
-3. Start iam, app, and ceramic services concurrently:
-
+3. Start iam, app, and ceramic services concurrently:  
+`# remember to create .env files first`
 ```sh
-# remember to create .env files first
+yarn 
+# you only need to run 'yarn' the 1st time you run this app
 yarn start
 ```
+
+4. Start passport-scorer:  
+Follow [these instructions](https://github.com/gitcoinco/passport-scorer/blob/main/SETUP.md) to get passport-scorer working.
+
+5. Interact w/ the passport app at: `localhost:3000`
+
+
 
 ## Background Knowledge
 
