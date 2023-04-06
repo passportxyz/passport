@@ -17,27 +17,10 @@ import { Provider as SelfIdProvider } from "@self.id/framework";
 // --- GTM Module
 import TagManager from "react-gtm-module";
 
-import { ThemeWrapper, palette, Theme } from "../utils/theme";
+import { themes, ThemeWrapper } from "../utils/theme";
 
 const FacebookAppId = process.env.NEXT_PUBLIC_PASSPORT_FACEBOOK_APP_ID || "";
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
-
-const DARK_MODE_THEME: Theme = {
-  colors: {
-    background: palette.moon[600],
-    accent: palette.passionflower[500],
-    "accent-2": palette.wave[800],
-    "accent-3": palette.lichen[600],
-    muted: palette.passionflower[100],
-    "text-1": palette.white,
-    "text-2": palette.sand[400],
-    "text-3": palette.passionflower[100],
-  },
-  fonts: {
-    body: "Libre Franklin",
-    heading: "Miriam Libre",
-  },
-};
 
 function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
@@ -88,7 +71,7 @@ function MyApp({ Component, pageProps }: AppProps) {
               <ChakraProvider>
                 <div className="font-body" suppressHydrationWarning>
                   {typeof window === "undefined" ? null : (
-                    <ThemeWrapper defaultTheme={DARK_MODE_THEME}>
+                    <ThemeWrapper defaultTheme={themes.LUNARPUNK_DARK_MODE}>
                       <Component {...pageProps} />
                     </ThemeWrapper>
                   )}
