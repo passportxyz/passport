@@ -24,6 +24,7 @@ module.exports = {
           jade: "#02E2AC",
         },
         background: "var(--color-background)",
+        "background-2": "var(--color-background-2)",
         accent: "var(--color-accent)",
         "accent-2": "var(--color-accent-2)",
         "accent-3": "var(--color-accent-3)",

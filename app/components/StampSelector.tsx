@@ -36,29 +36,27 @@ export function StampSelector({
         if (hideStamp) return null;
 
         return (
-          <div key={i} className="border-b py-4 px-6">
-            <p className="ml-4 text-sm font-bold">{stamp.platformGroup}</p>
+          <div key={i} className={`border-b border-accent-2 py-4 px-6 ${i ? "" : "border-t"}`}>
+            <p className="ml-4 text-sm font-bold text-color-3">{stamp.platformGroup}</p>
             <div className="flex flex-row justify-between">
               <ul className="marker:leading-1 list-disc marker:text-3xl ">
                 {stamp.providers?.map((provider, i) => {
                   return (
                     <li
                       className={`ml-4 ${
-                        verifiedProviders?.indexOf(provider.name as PROVIDER_ID) !== -1
-                          ? `text-green-500`
-                          : `text-gray-400`
+                        verifiedProviders?.indexOf(provider.name as PROVIDER_ID) !== -1 ? "text-accent" : "text-muted"
                       }`}
                       key={`${provider.title}${i}`}
                       data-testid={`indicator-${provider.name}`}
                     >
-                      <div className="relative top-[-0.3em] text-sm text-gray-400">{provider.title}</div>
+                      <div className="relative top-[-0.3em] text-sm">{provider.title}</div>
                     </li>
                   );
                 })}
               </ul>
               <div className="align-right flex">
                 <Switch
-                  colorScheme="green"
+                  colorScheme="accent"
                   size="lg"
                   data-testid={`switch-${i}`}
                   isChecked={

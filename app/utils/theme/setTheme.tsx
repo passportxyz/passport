@@ -4,6 +4,7 @@ const setTheme = ({ colors, fonts }: Theme) => {
   const r = document.documentElement;
 
   r.style.setProperty("--color-background", colors.background);
+  r.style.setProperty("--color-background-2", colors.background2);
   r.style.setProperty("--color-accent", colors.accent);
   r.style.setProperty("--color-accent-2", colors.accent2);
   r.style.setProperty("--color-accent-3", colors.accent3);

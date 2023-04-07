@@ -6,16 +6,16 @@
 
 @layer components {
   .verify-btn {
-    @apply w-full border-t p-3 hover:text-purple-400;
+    @apply w-full border-t border-accent-2 p-3 hover:text-accent-3;
   }
   .verify-btn:disabled {
     @apply text-gray-400;
   }
   .sidebar-verify-btn {
-    @apply mt-10 w-full rounded-md bg-purple-connectPurple py-2 text-white hover:bg-purple-200 hover:text-black;
+    @apply mt-10 w-full rounded-md bg-accent py-2 text-white hover:bg-muted hover:text-background;
   }
   .sidebar-verify-btn:disabled {
-    @apply bg-purple-200 text-black;
+    @apply bg-muted text-background;
   }
 }
 

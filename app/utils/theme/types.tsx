@@ -1,6 +1,7 @@
 export type Theme = {
   colors: {
     background: string;
+    background2: string;
     accent: string;
     accent2: string;
     accent3: string;
