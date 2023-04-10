@@ -6,6 +6,13 @@ import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 
 type ColorKey = keyof Theme["colors"];
 
+// Translates
+// { background: "#fff", ... }
+// to
+// { background: {
+//   100: "#fff", 200: "#fff", 300: "#fff", 400: "#fff", 500: "#fff",
+//   600: "#fff", 700: "#fff", 800: "#fff", 900: "#fff"
+//  }, ... }
 const transposeColorsToChakraScheme = (colors: Theme["colors"]) =>
   (Object.keys(colors) as ColorKey[]).reduce(
     (acc, key: ColorKey) => ({

@@ -12,7 +12,7 @@ import { Footer } from "../components/Footer";
 import Header from "../components/Header";
 import PageWidthGrid from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
-import TooltipPopover from "../components/TooltipPopover";
+import Tooltip from "../components/Tooltip";
 
 // --Chakra UI Elements
 import {
@@ -201,7 +201,7 @@ export default function Dashboard() {
     () => (
       <PageWidthGrid nested={true} className="my-4">
         <div className="col-span-3 flex items-center justify-items-center self-center lg:col-span-4">
-          <p className="text-2xl">
+          <div className="flex text-2xl">
             My {filterName && `${filterName} `}Stamps
             {filterName && (
               <a href="/#/dashboard">
@@ -210,12 +210,12 @@ export default function Dashboard() {
                 </span>
               </a>
             )}
-          </p>
-          <TooltipPopover>
-            Gitcoin Passport is an identity aggregator that helps you build a digital identifier showcasing your unique
-            humanity. Select the verification stamps you&apos;d like to connect to start building your passport. The
-            more verifications you have&#44; the stronger your passport will be.
-          </TooltipPopover>
+            <Tooltip>
+              Gitcoin Passport is an identity aggregator that helps you build a digital identifier showcasing your
+              unique humanity. Select the verification stamps you&apos;d like to connect to start building your
+              passport. The more verifications you have&#44; the stronger your passport will be.
+            </Tooltip>
+          </div>
         </div>
 
         <div className="col-span-1 col-end-[-1] justify-self-end">

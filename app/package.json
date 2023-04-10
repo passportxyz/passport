@@ -26,6 +26,7 @@
     "@gitcoin/passport-types": "^1.0.0",
     "@headlessui/react": "^1.7.13",
     "@heroicons/react": "^2.0.17",
+    "@popperjs/core": "^2.11.7",
     "@self.id/framework": "0.3.3",
     "@web3-onboard/core": "^2.3.2",
     "@web3-onboard/injected-wallets": "^2.0.12",
@@ -42,6 +43,7 @@
     "react-dom": "^17.0.2",
     "react-google-login": "^5.2.2",
     "react-gtm-module": "^2.0.11",
+    "react-popper": "^2.3.0",
     "react-router-dom": "^6.3.0",
     "ts-debounce": "^4.0.0"
   },
