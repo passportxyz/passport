@@ -2,7 +2,6 @@ import { useRouter } from "next/router";
 import { Switch } from "@chakra-ui/react";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/types";
-import { useState } from "react";
 import { PlatformGroupSpec } from "../config/providers";
 import { getStampProviderFilters } from "../config/filters";
 
@@ -44,7 +43,7 @@ export function StampSelector({
                   return (
                     <li
                       className={`ml-4 ${
-                        verifiedProviders?.indexOf(provider.name as PROVIDER_ID) !== -1 ? "text-accent" : "text-muted"
+                        verifiedProviders?.indexOf(provider.name as PROVIDER_ID) !== -1 ? "text-accent-3" : "text-muted"
                       }`}
                       key={`${provider.title}${i}`}
                       data-testid={`indicator-${provider.name}`}
@@ -56,7 +55,7 @@ export function StampSelector({
               </ul>
               <div className="align-right flex">
                 <Switch
-                  colorScheme="accent"
+                  colorScheme="accent3"
                   size="lg"
                   data-testid={`switch-${i}`}
                   isChecked={

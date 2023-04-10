@@ -24,6 +24,7 @@
     "@gitcoin/passport-identity": "^1.0.0",
     "@gitcoin/passport-platforms": "^1.0.0",
     "@gitcoin/passport-types": "^1.0.0",
+    "@headlessui/react": "^1.7.13",
     "@heroicons/react": "^2.0.17",
     "@self.id/framework": "0.3.3",
     "@web3-onboard/core": "^2.3.2",
