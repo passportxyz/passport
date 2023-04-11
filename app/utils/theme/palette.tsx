@@ -6,7 +6,11 @@ export const palette = {
     400: "#ECE7D5",
   },
   moon: {
+    100: "#ffffff",
+    200: "#CACBCB",
+    300: "#979998",
     600: "#0B110F",
+    800: "#000",
   },
   passionflower: {
     500: "#6935ff",
@@ -18,7 +22,6 @@ export const palette = {
     600: "#8af214",
   },
   white: "#fff",
-  black: "#000",
 };
 
 export default palette;

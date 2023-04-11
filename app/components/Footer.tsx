@@ -17,20 +17,20 @@ export const Footer = ({ lightMode }: FooterProps): JSX.Element => {
           rel="noopener noreferrer"
           className="ml-1 hover:underline lg:ml-2"
         >
-          Ceramic
+          Ceramic.
         </a>
       </div>
-      <a href="/" target="_blank" rel="noopener noreferrer" className="col-span-2 md:col-span-3">
+      <a href="/" target="_blank" rel="noopener noreferrer" className="col-span-2 hover:underline md:col-span-3">
         Learn More
       </a>
-      <a href="/" target="_blank" rel="noopener noreferrer" className="col-span-4">
+      <a href="/" target="_blank" rel="noopener noreferrer" className="col-span-4 hover:underline">
         Gitcoin Passport Scorer
       </a>
       <a
         href={`https://github.com/gitcoinco/passport/commit/${process.env.NEXT_PUBLIC_GIT_COMMIT_HASH}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="col-span-2 justify-self-end md:col-span-3"
+        className="col-span-2 justify-self-end hover:underline md:col-span-3"
       >
         Git commit
       </a>

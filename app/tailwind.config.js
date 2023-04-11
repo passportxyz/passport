@@ -38,6 +38,7 @@ module.exports = {
         "color-1": "var(--color-text-1)",
         "color-2": "var(--color-text-2)",
         "color-3": "var(--color-text-3)",
+        "color-4": "var(--color-text-4)",
       },
     },
     fontSize: {

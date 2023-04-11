@@ -49,11 +49,17 @@ export const SideBarContent = ({
   }, [currentProviders, selectedProviders]);
 
   return (
-    <DrawerContent style={{ backgroundColor: "var(--color-background)" }}>
+    <DrawerContent
+      style={{
+        backgroundColor: "var(--color-background-2)",
+        border: "1px solid var(--color-accent-2)",
+        borderRadius: "6px",
+      }}
+    >
       <DrawerCloseButton disabled={isLoading} className={`z-10`} />
       {currentPlatform && currentProviders ? (
         <div className="overflow-auto">
-          <DrawerHeader>
+          <DrawerHeader style={{ fontWeight: "inherit" }}>
             <PlatformDetails currentPlatform={currentPlatform!} />
           </DrawerHeader>
           <DrawerBody
@@ -69,7 +75,7 @@ export const SideBarContent = ({
                 <span
                   data-testid="select-all"
                   className={`ml-auto py-2 text-sm ${
-                    !allSelected ? `cursor-pointer text-accent-3` : `cursor-default text-color-1`
+                    !allSelected ? `cursor-pointer text-accent` : `cursor-default text-muted`
                   } `}
                   onClick={(e) => {
                     // set the selected items by concating or filtering by providerId

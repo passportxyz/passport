@@ -107,7 +107,7 @@ export const PlatformCard = ({
           <h1 className="mb-0 text-lg md:mb-3">{platform.name}</h1>
           <p className="pleading-relaxed hidden text-color-3 md:inline-block">{platform.description}</p>
         </div>
-        <div className="mt-auto">
+        <div className="mt-auto text-color-3">
           {selectedProviders[platform.platform].length > 0 ? (
             <>
               <Menu>
@@ -132,7 +132,7 @@ export const PlatformCard = ({
                     </svg>
                   </div>
                 </MenuButton>
-                <MenuList>
+                <MenuList style={{ marginLeft: "16px" }}>
                   <MenuItem onClick={onOpenJsonOutputModal} data-testid="view-json">
                     View stamp JSON
                   </MenuItem>
