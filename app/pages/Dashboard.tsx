@@ -131,7 +131,7 @@ export default function Dashboard() {
       <ModalContent>
         <ModalBody mt={4}>
           <div className="flex flex-row">
-            <div className="sm:mr-10 inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-100">
+            <div className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-100 md:mr-10">
               <img alt="shield-exclamation-icon" src="./assets/shield-exclamation-icon.svg" />
             </div>
             <div className="flex flex-col" data-testid="retry-modal-content">
@@ -171,7 +171,7 @@ export default function Dashboard() {
           <>
             Connecting to Ceramic...
             <span
-              className="sm:pl-8 pl-4 text-white no-underline hover:cursor-pointer hover:underline md:pl-12"
+              className="pl-4 text-white no-underline hover:cursor-pointer hover:underline md:pl-12"
               onClick={cancelCeramicConnection}
             >
               Cancel
