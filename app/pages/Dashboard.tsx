@@ -264,7 +264,7 @@ export default function Dashboard() {
           />
         </PageWidthGrid>
         {/* This footer contains dark colored text and dark images */}
-        <Footer lightMode={false} />
+        <Footer lightMode={true} />
       </HeaderContentFooterGrid>
     </PageRoot>
   );
