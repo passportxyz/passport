@@ -8,15 +8,17 @@ const PageWidthGrid = ({
   children,
   className,
   nested,
+  unconstrainedWidth,
 }: {
   children: React.ReactNode;
   className?: string;
   nested?: boolean;
+  unconstrainedWidth?: boolean;
 }) => (
   <div
     className={`col-span-full grid w-full grid-cols-4 gap-4 justify-self-center md:grid-cols-6 md:gap-6 lg:grid-cols-8 xl:grid-cols-12 ${className} ${
-      nested ? "" : PAGE_PADDING + " " + CONTENT_MAX_WIDTH_INCLUDING_PADDING
-    }`}
+      nested ? "" : PAGE_PADDING
+    } ${unconstrainedWidth || nested ? "" : CONTENT_MAX_WIDTH_INCLUDING_PADDING}`}
   >
     {children}
   </div>

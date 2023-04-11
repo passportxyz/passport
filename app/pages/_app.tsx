@@ -6,7 +6,6 @@ import { AppProps } from "next/app";
 import Head from "next/head";
 
 import "../styles/globals.css";
-import { ChakraProvider } from "@chakra-ui/react";
 import { UserContextProvider } from "../context/userContext";
 import { CeramicContextProvider } from "../context/ceramicContext";
 import ManageAccountCenter from "../components/ManageAccountCenter";
@@ -68,15 +67,13 @@ function MyApp({ Component, pageProps }: AppProps) {
         <UserContextProvider>
           <CeramicContextProvider>
             <ManageAccountCenter>
-              <ChakraProvider>
-                <div className="font-body" suppressHydrationWarning>
-                  {typeof window === "undefined" ? null : (
-                    <ThemeWrapper defaultTheme={themes.LUNARPUNK_DARK_MODE}>
-                      <Component {...pageProps} />
-                    </ThemeWrapper>
-                  )}
-                </div>
-              </ChakraProvider>
+              <div className="font-body" suppressHydrationWarning>
+                {typeof window === "undefined" ? null : (
+                  <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                    <Component {...pageProps} />
+                  </ThemeWrapper>
+                )}
+              </div>
             </ManageAccountCenter>
           </CeramicContextProvider>
         </UserContextProvider>

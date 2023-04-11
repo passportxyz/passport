@@ -12,6 +12,7 @@ import { Footer } from "../components/Footer";
 import Header from "../components/Header";
 import PageWidthGrid from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
+import Tooltip from "../components/Tooltip";
 
 // --Chakra UI Elements
 import {
@@ -130,7 +131,7 @@ export default function Dashboard() {
       <ModalContent>
         <ModalBody mt={4}>
           <div className="flex flex-row">
-            <div className="sm:mr-10 inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-100">
+            <div className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-100 md:mr-10">
               <img alt="shield-exclamation-icon" src="./assets/shield-exclamation-icon.svg" />
             </div>
             <div className="flex flex-col" data-testid="retry-modal-content">
@@ -170,7 +171,7 @@ export default function Dashboard() {
           <>
             Connecting to Ceramic...
             <span
-              className="sm:pl-8 pl-4 text-white no-underline hover:cursor-pointer hover:underline md:pl-12"
+              className="pl-4 text-white no-underline hover:cursor-pointer hover:underline md:pl-12"
               onClick={cancelCeramicConnection}
             >
               Cancel
@@ -199,8 +200,8 @@ export default function Dashboard() {
   const subheader = useMemo(
     () => (
       <PageWidthGrid nested={true} className="my-4">
-        <div className="col-span-3 self-center lg:col-span-4">
-          <p className="text-2xl">
+        <div className="col-span-3 flex items-center justify-items-center self-center lg:col-span-4">
+          <div className="flex text-2xl">
             My {filterName && `${filterName} `}Stamps
             {filterName && (
               <a href="/#/dashboard">
@@ -209,15 +210,12 @@ export default function Dashboard() {
                 </span>
               </a>
             )}
-          </p>
-          {/* TODO Add to info popover */}
-          {/*
-              <p className="text-xl text-black">
-                Gitcoin Passport is an identity aggregator that helps you build a digital identifier showcasing your
-                unique humanity. Select the verification stamps you&apos;d like to connect to start building your
-                passport. The more verifications you have&#44; the stronger your passport will be.
-              </p>
-              */}
+            <Tooltip>
+              Gitcoin Passport is an identity aggregator that helps you build a digital identifier showcasing your
+              unique humanity. Select the verification stamps you&apos;d like to connect to start building your
+              passport. The more verifications you have&#44; the stronger your passport will be.
+            </Tooltip>
+          </div>
         </div>
 
         <div className="col-span-1 col-end-[-1] justify-self-end">
@@ -266,7 +264,7 @@ export default function Dashboard() {
           />
         </PageWidthGrid>
         {/* This footer contains dark colored text and dark images */}
-        <Footer lightMode={false} />
+        <Footer lightMode={true} />
       </HeaderContentFooterGrid>
     </PageRoot>
   );
