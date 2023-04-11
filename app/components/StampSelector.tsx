@@ -40,17 +40,19 @@ export function StampSelector({
             <div className="flex flex-row justify-between">
               <ul className="marker:leading-1 list-disc marker:text-3xl ">
                 {stamp.providers?.map((provider, i) => {
+                  let bulletColor = "text-color-4";
+                  let textColor = "text-color-4";
+                  if (verifiedProviders?.indexOf(provider.name as PROVIDER_ID) !== -1) {
+                    bulletColor = "text-accent";
+                    textColor = "text-color-1";
+                  }
                   return (
                     <li
-                      className={`ml-4 ${
-                        verifiedProviders?.indexOf(provider.name as PROVIDER_ID) !== -1
-                          ? "text-color-1"
-                          : "text-color-4"
-                      }`}
+                      className={`ml-4 ${bulletColor}`}
                       key={`${provider.title}${i}`}
                       data-testid={`indicator-${provider.name}`}
                     >
-                      <div className="text-md relative top-[-0.3em]">{provider.title}</div>
+                      <div className={`text-md relative top-[-0.3em] ${textColor}`}>{provider.title}</div>
                     </li>
                   );
                 })}
