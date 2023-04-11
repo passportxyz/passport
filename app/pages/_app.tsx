@@ -36,7 +36,7 @@ function App({ Component, pageProps }: AppProps) {
       };
       //@ts-ignore eslint-disable-next-line no-use-before-define
       (function () {
-        var w = window;
+        var w: any = window;
         var ic = w.Intercom;
         if (typeof ic === "function") {
           ic("reattach_activator");
