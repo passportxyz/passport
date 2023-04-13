@@ -28,7 +28,7 @@ export default function Home() {
   // Route user to dashboard when wallet is connected
   useEffect(() => {
     if (wallet) {
-      navigate("/dashboard");
+      navigate("/welcome");
     }
   }, [wallet]);
 

@@ -13,9 +13,12 @@ type RefreshStampsProgressStepsProps = {
 export default function RefreshStampsProgressSteps({ steps }: RefreshStampsProgressStepsProps) {
   return (
     <nav aria-label="Progress">
-      <ol role="list" className="overflow-hidden">
+      <ol role="list" className="overflow-hidden text-black">
         {steps.map((step, stepIdx) => (
-          <li key={step.name} className={classNames(stepIdx !== steps.length - 1 ? "pb-0" : "", "relative")}>
+          <li
+            key={step.name}
+            className={classNames(stepIdx !== steps.length - 1 ? "pb-0 text-black" : "text-black", "relative")}
+          >
             {step.status === Status.SUCCESS ? (
               <>
                 {stepIdx !== steps.length - 1 ? (
@@ -34,7 +37,10 @@ export default function RefreshStampsProgressSteps({ steps }: RefreshStampsProgr
             ) : step.status === Status.IN_PROGRESS ? (
               <>
                 {stepIdx !== steps.length - 1 ? (
-                  <div className="absolute left-4 top-8 -ml-px mt-0.5 h-full w-0.5 bg-accent-2" aria-hidden="true" />
+                  <div
+                    className="absolute left-4 top-8 -ml-px mt-0.5 h-full w-0.5 bg-accent-2 text-black"
+                    aria-hidden="true"
+                  />
                 ) : null}
                 ;
                 <span className="flex h-0 items-center" aria-hidden="true">
@@ -49,11 +55,14 @@ export default function RefreshStampsProgressSteps({ steps }: RefreshStampsProgr
             ) : (
               <>
                 {stepIdx !== steps.length - 1 ? (
-                  <div className="absolute left-4 top-8 -ml-px mt-0.5 h-full w-0.5 bg-accent-2" aria-hidden="true" />
+                  <div
+                    className="absolute left-4 top-8 -ml-px mt-0.5 h-full w-0.5 bg-accent-2 text-black"
+                    aria-hidden="true"
+                  />
                 ) : null}
                 ;
-                <span className="flex h-0 items-center" aria-hidden="true">
-                  <span className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 border-accent-2 bg-black group-hover:border-gray-400">
+                <span className="flex h-0 items-center text-black" aria-hidden="true">
+                  <span className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 border-accent-2 bg-black text-black group-hover:border-gray-400">
                     <span className="h-2.5 w-2.5 rounded-full bg-transparent group-hover:bg-gray-300" />
                   </span>
                 </span>

@@ -15,40 +15,37 @@ export type RefreshMyStampsModalProps = {
   onClose: () => void;
   steps: Step[];
   fetchedPossibleEVMStamps: PossibleEVMProvider[] | undefined;
+  resetStampsAndProgressState: () => void;
 };
-
-// This modal looks for any web3 stamps the user has not yet claimed
 
 export const RefreshMyStampsModal = ({
   isOpen,
   onClose,
   steps,
   fetchedPossibleEVMStamps,
+  resetStampsAndProgressState,
 }: RefreshMyStampsModalProps) => {
-  const [isLoading, setLoading] = useState(false);
-  const [canSubmit, setCanSubmit] = useState(false);
-  const [platformsLoading, setPlatformsLoading] = useState(false);
-
-  // TODO:
-  // Render--if checking for evm stamps is in progress, show progress bar
-  // if stamps are there/no stamps found, show RefreshStampsModalContent
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={true} isCentered>
-        <ModalOverlay />
+        <ModalOverlay bg="blackAlpha.900" />
         <ModalContent
-          rounded={"none"}
+          rounded="none"
           padding={5}
           w="410px"
           minH="550px"
           maxH="auto"
           backgroundColor="black"
           borderWidth="1px"
-          borderColor="#234E52"
+          borderColor="var(--color-accent-2)"
         >
           {fetchedPossibleEVMStamps ? (
             <>
-              <RefreshMyStampsModalContent onClose={onClose} fetchedPossibleEVMStamps={fetchedPossibleEVMStamps} />
+              <RefreshMyStampsModalContent
+                onClose={onClose}
+                fetchedPossibleEVMStamps={fetchedPossibleEVMStamps}
+                resetStampsAndProgressState={resetStampsAndProgressState}
+              />
             </>
           ) : (
             <>

@@ -1,14 +1,12 @@
-import { Dispatch, SetStateAction, useEffect } from "react";
-
 // --- Utils
 import { PossibleEVMProvider } from "../signer/utils";
 
 // --- Types
 import { getPlatformSpec } from "../config/platforms";
-import { PlatformGroupSpec, PlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
+import { PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
 import { evmPlatformProvider } from "./RefreshMyStampsModalContent";
 
-// --- Components
+// --- App components
 import { RefreshMyStampsModalContentCard } from "./RefreshMyStampsModalContentCard";
 
 type RefreshMyStampsModalCardListProps = {

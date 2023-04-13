@@ -1,7 +1,6 @@
+// --- React & ReactDOM hooks
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { useToast } from "@chakra-ui/react";
 
 // --- Types
 import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
@@ -10,6 +9,7 @@ import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/
 import { Stamp, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
+// --- Contexts
 import { UserContext } from "../context/userContext";
 import { CeramicContext } from "../context/ceramicContext";
 
@@ -19,13 +19,19 @@ import { datadogLogs } from "@datadog/browser-logs";
 // --- Utils
 import { PossibleEVMProvider } from "../signer/utils";
 
+// --- UI components
+// TODO: re-add toasts after design updates
+import { useToast, IconButton } from "@chakra-ui/react";
+import { XMarkIcon } from "@heroicons/react/20/solid";
+
+// --- App components
 import { RefreshMyStampsModalContentCardList } from "../components/RefreshMyStampsModalContentCardList";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
 export type RefreshMyStampsModalContentProps = {
-  // isOpen: boolean;
+  resetStampsAndProgressState: () => void;
   onClose: () => void;
   fetchedPossibleEVMStamps: PossibleEVMProvider[] | undefined;
 };
@@ -39,6 +45,7 @@ export type evmPlatformProvider = {
 export const RefreshMyStampsModalContent = ({
   onClose,
   fetchedPossibleEVMStamps,
+  resetStampsAndProgressState,
 }: RefreshMyStampsModalContentProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, handleDeleteStamps } = useContext(CeramicContext);
@@ -79,11 +86,14 @@ export const RefreshMyStampsModalContent = ({
         })
       );
       setLoading(false);
+      resetStampsAndProgressState();
       navigate("/dashboard");
     } catch (e) {
       // TODO: update datadog logger
       // datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
       console.log(e);
+      navigate("/");
+      resetStampsAndProgressState();
     }
   };
 
@@ -142,6 +152,7 @@ export const RefreshMyStampsModalContent = ({
       setVerifiedProviders([...actualVerifiedProviders]);
       setSelectedProviders([...actualVerifiedProviders]);
 
+      // TODO: re-add toasts after design updates
       // // Get the done toast messages
       // const { title, body, icon, platformId } = getDoneToastMessages(
       //   verificationStatus,
@@ -170,35 +181,63 @@ export const RefreshMyStampsModalContent = ({
 
   return (
     <>
-      <div className="mb-6 text-2xl text-white">Stamps Found</div>
-      <div>
-        {" "}
-        {/* TODO: update comments */}
-        {/* container for platforms so user can scroll if they have a lot */}
-        <RefreshMyStampsModalContentCardList
-          verifiedProviders={verifiedProviders}
-          selectedProviders={selectedProviders}
-          fetchedPossibleEVMStamps={fetchedPossibleEVMStamps}
-          selectedEVMPlatformProviders={selectedEVMPlatformProviders}
-          setSelectedProviders={setSelectedProviders}
-          setSelectedEVMPlatformProviders={setSelectedEVMPlatformProviders}
-        />
-      </div>
-      <div className="text-center text-pink-300 underline">
-        <a href="#">How is my data stored?</a>
-      </div>
-      <div className="mt-16 flex content-center items-center justify-between">
-        <button className="secondary-btn mr-2 w-full rounded-sm py-2 px-6" onClick={onClose}>
-          Cancel
-        </button>
-        <button
-          className={`ml-2 w-full rounded-sm bg-accent py-2 px-6 text-white disabled:cursor-not-allowed disabled:bg-muted disabled:text-black`}
-          onClick={handleRefreshSelectedStamps}
-          disabled={!canSubmit}
-        >
-          Confirm Stamps
-        </button>
-      </div>
+      {fetchedPossibleEVMStamps ? (
+        <div className="relative flex h-full flex-col">
+          <div className="mb-6 text-2xl text-white">Stamps Found</div>
+          <div>
+            {" "}
+            {/* TODO: update comments */}
+            {/* container for platforms so user can scroll if they have a lot */}
+            <RefreshMyStampsModalContentCardList
+              verifiedProviders={verifiedProviders}
+              selectedProviders={selectedProviders}
+              fetchedPossibleEVMStamps={fetchedPossibleEVMStamps}
+              selectedEVMPlatformProviders={selectedEVMPlatformProviders}
+              setSelectedProviders={setSelectedProviders}
+              setSelectedEVMPlatformProviders={setSelectedEVMPlatformProviders}
+            />
+          </div>
+          <div className="mt-8 text-center text-pink-300 underline">
+            <a href="#">How is my data stored?</a>
+          </div>
+          <div className="mt-16 mb-auto flex items-center justify-center">
+            <button className="secondary-btn mr-2 w-full rounded-sm py-2 px-6" onClick={onClose}>
+              Cancel
+            </button>
+            <button
+              className={`ml-2 w-full rounded-sm bg-accent py-2 px-6 text-white disabled:cursor-not-allowed disabled:bg-muted disabled:text-black`}
+              onClick={() => {
+                handleRefreshSelectedStamps();
+              }}
+              disabled={!canSubmit}
+            >
+              Confirm Stamps
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex h-full flex-col content-end">
+          <button
+            className="mt-4 mb-6 flex h-10 w-10 items-center justify-center self-center rounded-full border border-accent-2"
+            onClick={onClose}
+          >
+            <XMarkIcon className="h-7 w-7 text-white" aria-hidden="true" />
+          </button>
+          <div className="text-center">
+            <div className="m-auto mb-6 w-3/4 text-3xl text-white">No Eligible Web3 Stamps Found</div>
+            <div className="mt-24 text-xl text-muted">Visit the Dashboard to explore more Stamp options.</div>
+          </div>
+          <button
+            className="sidebar-verify-btn hover:backround-2 mt-36 w-full rounded-sm text-white"
+            onClick={() => {
+              navigate("/dashboard");
+              resetStampsAndProgressState();
+            }}
+          >
+            Explore Stamps
+          </button>
+        </div>
+      )}
     </>
   );
 };

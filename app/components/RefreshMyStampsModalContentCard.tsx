@@ -1,12 +1,16 @@
-import { useEffect, useState } from "react";
+// --- React hooks
+import { useState } from "react";
+
+// --- Types
 import { evmPlatformProvider } from "./RefreshMyStampsModalContent";
 
+// --- UI components
 import { Switch, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon } from "@chakra-ui/react";
 
 // --- Utils
-import { PossibleEVMProvider } from "../signer/utils";
 import { PlatformGroupSpec, PlatformSpec, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/src/types";
 
+// --- App components
 import { RefreshMyStampsSelector } from "../components/RefreshMyStampsSelector";
 
 type RefreshMyStampsModalCardProps = {
@@ -35,21 +39,13 @@ export const RefreshMyStampsModalContentCard = ({
   return (
     <div>
       <Accordion allowToggle>
-        <AccordionItem
-          className="py-2 first:border-t-accent-2 last:border-b-accent-2"
-          // _first={{ borderTop: "1px solid #083A40" }}
-          borderBottom="0px"
-          // borderBottom="1px solid #083A40"
-          // _last={{ borderBottom: "0px solid #083A40" }}
-        >
+        <AccordionItem className="py-2 first:border-t-accent-2 first:border-b-accent-2">
           <AccordionButton className="grid grid-cols-4 items-center justify-between text-white">
             <div className="grid grid-cols-2 items-center justify-start">
               <img src={currentPlatform?.icon} alt={currentPlatform?.name} className="mr-5 h-11 w-11" />
               <p className=" text-left">{currentPlatform?.name}</p>
             </div>
             <div className="grid grid-cols-2 items-center">
-              {/* if switch is checked, then the providers are checkable */}
-              {/* if switch is unchecked, then the provider checkboxes are disabled AND uncheck the provider checkboxes if they're checked */}
               <Switch
                 data-testid={`switch-${currentPlatform?.name}`}
                 value={`${currentPlatform?.name}`}
