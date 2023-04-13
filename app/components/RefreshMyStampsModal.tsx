@@ -1,50 +1,37 @@
 import { Modal, ModalContent, ModalOverlay } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
-import { CeramicContext } from "../context/ceramicContext";
-import { Progress, completedIcon, Status, Step } from "./Progress";
-import { useToast } from "@chakra-ui/react";
 
+import { PlatformClass, providers } from "@gitcoin/passport-platforms";
+import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { PlatformProps } from "../components/GenericPlatform";
-import { PlatformGroupSpec } from "../config/providers";
 
-// --- Datadog
-import { datadogLogs } from "@datadog/browser-logs";
+import { Status, Step } from "../components/Progress";
+import RefreshStampsProgressSteps from "./RefreshStampsProgressSteps";
+import { PossibleEVMProvider } from "../signer/utils";
+import { RefreshMyStampsModalContent } from "./RefreshMyStampsModalContent";
 
 export type RefreshMyStampsModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  steps: Step[];
+  fetchedPossibleEVMStamps: PossibleEVMProvider[] | undefined;
 };
 
 // This modal looks for any web3 stamps the user has not yet claimed
 
-export const RefreshMyStampsModal = ({ isOpen, onClose }: RefreshMyStampsModalProps) => {
-  const [currentSteps, setCurrentSteps] = useState<Step[]>([
-    {
-      name: "Scanning",
-      status: Status.SUCCESS,
-    },
-    {
-      name: "Double Checking",
-      status: Status.NOT_STARTED,
-    },
-    {
-      name: "Validating",
-      status: Status.NOT_STARTED,
-    },
-    {
-      name: "Brewing Coffee",
-      status: Status.NOT_STARTED,
-    },
-    {
-      name: "Almost there",
-      status: Status.NOT_STARTED,
-    },
-    {
-      name: "Ready for review",
-      status: Status.NOT_STARTED,
-    },
-  ]);
+export const RefreshMyStampsModal = ({
+  isOpen,
+  onClose,
+  steps,
+  fetchedPossibleEVMStamps,
+}: RefreshMyStampsModalProps) => {
+  const [isLoading, setLoading] = useState(false);
+  const [canSubmit, setCanSubmit] = useState(false);
+  const [platformsLoading, setPlatformsLoading] = useState(false);
 
+  // TODO:
+  // Render--if checking for evm stamps is in progress, show progress bar
+  // if stamps are there/no stamps found, show RefreshStampsModalContent
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={true} isCentered>
@@ -53,15 +40,24 @@ export const RefreshMyStampsModal = ({ isOpen, onClose }: RefreshMyStampsModalPr
           rounded={"none"}
           padding={5}
           w="410px"
-          h="550px"
+          minH="550px"
+          maxH="auto"
           backgroundColor="black"
           borderWidth="1px"
           borderColor="#234E52"
         >
-          <div className="text-3xl text-white">Searching for Stamps</div>
-          <div className="mt-2 text-white">Give us a moment while we check your account for existing Stamps.</div>
-          <div className="mt-2 text-white">***Stamp refresh progess bar***</div>
-          <div className="mt-6 text-center text-white">Please do not close the window.</div>
+          {fetchedPossibleEVMStamps ? (
+            <>
+              <RefreshMyStampsModalContent onClose={onClose} fetchedPossibleEVMStamps={fetchedPossibleEVMStamps} />
+            </>
+          ) : (
+            <>
+              <div className="text-3xl text-white">Searching for Stamps</div>
+              <div className="mt-2 text-white">Give us a moment while we check your account for existing Stamps.</div>
+              <RefreshStampsProgressSteps steps={steps} />
+              <div className="text-center text-white">Please do not close the window.</div>
+            </>
+          )}
         </ModalContent>
       </Modal>
     </>

@@ -1,9 +1,21 @@
+import { useContext } from "react";
+
+import { PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PlatformProps } from "../components/GenericPlatform";
+
+import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
+import { UserContext } from "../context/userContext";
+
 interface WelcomeBackProps {
   setSkipForNow: (skipForNow: boolean) => void;
   onOpen: () => void;
+  handleFetchPossibleEVMStamps: (addr: string, allPlats: Map<PLATFORM_ID, PlatformProps>) => void;
 }
 
-export const WelcomeBack = ({ setSkipForNow, onOpen }: WelcomeBackProps) => {
+export const WelcomeBack = ({ setSkipForNow, onOpen, handleFetchPossibleEVMStamps }: WelcomeBackProps) => {
+  const { allPlatforms } = useContext(CeramicContext);
+  const { address } = useContext(UserContext);
+
   return (
     <>
       <div className="top-[113px] mt-10 text-3xl">Welcome Back!</div>
@@ -13,10 +25,16 @@ export const WelcomeBack = ({ setSkipForNow, onOpen }: WelcomeBackProps) => {
         You can now verify most web3 stamps and return to your destination faster with one-click verification!
       </p>
       <div className="mt-16 flex w-[295px] content-center items-center justify-between lg:w-[410px]">
-        <button className="secondary-btn rounded-sm py-2 px-6" onClick={() => setSkipForNow(true)}>
+        <button className="secondary-btn mr-2 w-full rounded-sm py-2 px-6" onClick={() => setSkipForNow(true)}>
           Skip For Now
         </button>
-        <button className="rounded-sm bg-accent py-2 px-6" onClick={onOpen}>
+        <button
+          className="ml-2 w-full rounded-sm bg-accent py-2 px-6"
+          onClick={() => {
+            onOpen();
+            handleFetchPossibleEVMStamps(address!, allPlatforms);
+          }}
+        >
           Refresh My Stamps
         </button>
       </div>
