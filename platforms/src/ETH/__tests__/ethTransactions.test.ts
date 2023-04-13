@@ -406,7 +406,7 @@ describe("Attempt verification for at least one ETH transaction on the mainnet s
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
 
-    expect(axios.get).toHaveBeenCalledTimes(1);
+    expect(axios.get).toHaveBeenCalledTimes(2);
     expect(mockedAxios.get).toBeCalledWith(
       `https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
@@ -421,11 +421,7 @@ describe("Attempt verification for at least one ETH transaction on the mainnet s
   });
 
   it("should return invalid payload when the user has no successful ethereum transactions", async () => {
-    mockedAxios.get.mockImplementation(async (url) => {
-      if (url.includes("https://api.etherscan.io/api") && url.includes(MOCK_ADDRESS_LOWER)) {
-        return Promise.resolve(invalidEtherscanResponseNoSuccessfulTxns.data);
-      }
-    });
+    mockNRequests(1, invalidEtherscanResponseNoSuccessfulTxns);
 
     const ethGTEOneTxnProvider = new EthGTEOneTxnProvider();
     const verifiedPayload = await ethGTEOneTxnProvider.verify({
@@ -441,11 +437,7 @@ describe("Attempt verification for at least one ETH transaction on the mainnet s
   });
 
   it("should return invalid payload when the user has no ethereum transactions (empty result array)", async () => {
-    mockedAxios.get.mockImplementation(async (url) => {
-      if (url.includes("https://api.etherscan.io/api") && url.includes(MOCK_ADDRESS_LOWER)) {
-        return Promise.resolve(invalidEtherscanResponseNoResults.data);
-      }
-    });
+    mockNRequests(1, noMoreTxResponse);
 
     const ethGTEOneTxnProvider = new EthGTEOneTxnProvider();
     const verifiedPayload = await ethGTEOneTxnProvider.verify({
