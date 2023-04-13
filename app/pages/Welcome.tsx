@@ -40,15 +40,6 @@ export default function Welcome() {
   const [skipForNow, setSkipForNow] = useState(false);
   const navigate = useNavigate();
 
-  // // Route user to dashboard when wallet is connected
-  // useEffect(() => {
-  //   if (skipForNow && address) {
-  //     navigate("/dashboard");
-  //   } else {
-  //     navigate("/")
-  //   }
-  // }, [skipForNow]);
-
   console.log(passport);
 
   const [fetchedPossibleEVMStamps, setFetchedPossibleEVMStamps] = useState<PossibleEVMProvider[]>();

@@ -1,4 +1,5 @@
 import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { PlatformProps } from "../components/GenericPlatform";
@@ -15,6 +16,7 @@ interface WelcomeBackProps {
 export const WelcomeBack = ({ setSkipForNow, onOpen, handleFetchPossibleEVMStamps }: WelcomeBackProps) => {
   const { allPlatforms } = useContext(CeramicContext);
   const { address } = useContext(UserContext);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -25,7 +27,7 @@ export const WelcomeBack = ({ setSkipForNow, onOpen, handleFetchPossibleEVMStamp
         You can now verify most web3 stamps and return to your destination faster with one-click verification!
       </p>
       <div className="mt-16 flex w-[295px] content-center items-center justify-between lg:w-[410px]">
-        <button className="secondary-btn mr-2 w-full rounded-sm py-2 px-6" onClick={() => setSkipForNow(true)}>
+        <button className="secondary-btn mr-2 w-full rounded-sm py-2 px-6" onClick={() => navigate("/dashboard")}>
           Skip For Now
         </button>
         <button

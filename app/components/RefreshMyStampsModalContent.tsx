@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { useToast } from "@chakra-ui/react";
 
@@ -56,11 +57,7 @@ export const RefreshMyStampsModalContent = ({
   const [platformsLoading, setPlatformsLoading] = useState(false);
   const [activePlatform, setActivePlatform] = useState<PossibleEVMProvider | null>(null);
   const [selectedEVMPlatformProviders, setSelectedEVMPlatformProviders] = useState<evmPlatformProvider[]>([]);
-  // const [switchState, setSwitchState] = useState<>({
-  //   checked: false,
-  //   platformId: "" as PLATFORM_ID,
-  //   platformGroup: [] as PlatformGroupSpec[],
-  // });
+  const navigate = useNavigate();
 
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>([]);
@@ -68,30 +65,29 @@ export const RefreshMyStampsModalContent = ({
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
 
-  // const providerIds =
-  //   activePlatform?.platformProps.platFormGroupSpec?.reduce((all, stamp, i) => {
-  //     return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-  //   }, [] as PROVIDER_ID[]) || [];
-
   const handleRefreshSelectedStamps = async () => {
-    selectedEVMPlatformProviders?.map((platformProviders) => {
-      const platformId = platformProviders.platformId;
-      const providerIds =
-        platformProviders.platformGroup.reduce((all, stamp, i) => {
-          return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-        }, [] as PROVIDER_ID[]) || [];
-      console.log("platformId", platformId);
-      console.log("providerIds", providerIds);
-      handleFetchCredential(platformId, providerIds);
-    });
+    try {
+      setLoading(true);
+      await selectedEVMPlatformProviders?.map(async (platformProviders) => {
+        const platformId = platformProviders.platformId;
+        const providerIds =
+          platformProviders.platformGroup.reduce((all, stamp, i) => {
+            return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+          }, [] as PROVIDER_ID[]) || [];
+        await handleFetchCredential(platformId, providerIds);
+      });
+      setLoading(false);
+      if (!isLoading) {
+        navigate("/dashboard");
+      }
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const handleFetchCredential = async (platformID: PLATFORM_ID, providerIDs: PROVIDER_ID[]): Promise<void> => {
     // FIXME: there should be no activePlatform since handleFetchCredential will be looped and called together for all platforms
-    // if (activePlatform) {
-    //   const { platform } = activePlatform?.platformProps;
-    //   datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
-    setLoading(true);
+
     try {
       // This array will contain all providers that new validated VCs
       let vcs: Stamp[] = [];
@@ -156,7 +152,7 @@ export const RefreshMyStampsModalContent = ({
       // // Display done toast
       // doneToast(title, body, icon, platformId);
 
-      setLoading(false);
+      // setLoading(false);
     } catch (e) {
       // datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
       console.log("error", e);
@@ -166,10 +162,7 @@ export const RefreshMyStampsModalContent = ({
       //   "../../assets/verification-failed.svg",
       //   platform.platformId as PLATFORM_ID
       // );
-    } finally {
-      setLoading(false);
     }
-    // }
   };
 
   /* TODO: 
@@ -200,7 +193,10 @@ export const RefreshMyStampsModalContent = ({
         <button className="secondary-btn mr-2 w-full rounded-sm py-2 px-6" onClick={onClose}>
           Cancel
         </button>
-        <button className="ml-2 w-full rounded-sm bg-accent py-2 px-6 text-white" onClick={handleRefreshSelectedStamps}>
+        <button
+          className="ml-2 w-full rounded-sm bg-accent py-2 px-6 text-white"
+          onClick={() => handleRefreshSelectedStamps}
+        >
           Confirm Stamps
         </button>
       </div>
