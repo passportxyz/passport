@@ -49,22 +49,33 @@ export const SideBarContent = ({
   }, [currentProviders, selectedProviders]);
 
   return (
-    <DrawerContent>
+    <DrawerContent
+      style={{
+        backgroundColor: "var(--color-background-2)",
+        border: "1px solid var(--color-accent-2)",
+        borderRadius: "6px",
+      }}
+    >
       <DrawerCloseButton disabled={isLoading} className={`z-10`} />
       {currentPlatform && currentProviders ? (
         <div className="overflow-auto">
-          <DrawerHeader>
+          <DrawerHeader style={{ fontWeight: "inherit" }}>
             <PlatformDetails currentPlatform={currentPlatform!} />
           </DrawerHeader>
           <DrawerBody
-            style={{ paddingInlineStart: "0", paddingInlineEnd: "0", WebkitPaddingStart: "0", WebkitPaddingEnd: "0" }}
+            style={{
+              paddingInlineStart: "0",
+              paddingInlineEnd: "0",
+              WebkitPaddingStart: "0",
+              WebkitPaddingEnd: "0",
+            }}
           >
             <div>
               <div className="flex pl-4 pr-6">
                 <span
                   data-testid="select-all"
                   className={`ml-auto py-2 text-sm ${
-                    !allSelected ? `cursor-pointer text-purple-connectPurple` : `cursor-default `
+                    !allSelected ? `cursor-pointer text-accent` : `cursor-default text-muted`
                   } `}
                   onClick={(e) => {
                     // set the selected items by concating or filtering by providerId
@@ -74,7 +85,6 @@ export const SideBarContent = ({
                   {allSelected ? `Selected!` : `Select all`}
                 </span>
               </div>
-              <hr className="border-1" />
               <StampSelector
                 currentPlatform={currentPlatform}
                 currentProviders={currentProviders}
@@ -104,8 +114,8 @@ export const SideBarContent = ({
       ) : (
         <div>
           <DrawerHeader>
-            <div className="mt-10 flex flex-col sm:flex-row">
-              <div className="w-full text-center sm:py-8 sm:pr-8">The requested Platform or Provider was not found</div>
+            <div className="mt-10 flex flex-col md:flex-row">
+              <div className="w-full text-center md:py-8 md:pr-8">The requested Platform or Provider was not found</div>
             </div>
           </DrawerHeader>
         </div>

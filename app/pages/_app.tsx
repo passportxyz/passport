@@ -8,15 +8,17 @@ import { AppProps } from "next/app";
 import Head from "next/head";
 
 import "../styles/globals.css";
-import { ChakraProvider } from "@chakra-ui/react";
 import { UserContextProvider } from "../context/userContext";
 import { CeramicContextProvider } from "../context/ceramicContext";
+import ManageAccountCenter from "../components/ManageAccountCenter";
 
 // --- Ceramic Tools
 import { Provider as SelfIdProvider } from "@self.id/framework";
 
 // --- GTM Module
 import TagManager from "react-gtm-module";
+
+import { themes, ThemeWrapper } from "../utils/theme";
 
 const FacebookAppId = process.env.NEXT_PUBLIC_PASSPORT_FACEBOOK_APP_ID || "";
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
@@ -153,9 +155,15 @@ function App({ Component, pageProps }: AppProps) {
       >
         <UserContextProvider>
           <CeramicContextProvider>
-            <ChakraProvider>
-              <div suppressHydrationWarning>{typeof window === "undefined" ? null : <Component {...pageProps} />}</div>
-            </ChakraProvider>
+            <ManageAccountCenter>
+              <div className="font-body" suppressHydrationWarning>
+                {typeof window === "undefined" ? null : (
+                  <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                    <Component {...pageProps} />
+                  </ThemeWrapper>
+                )}
+              </div>
+            </ManageAccountCenter>
           </CeramicContextProvider>
         </UserContextProvider>
       </SelfIdProvider>
