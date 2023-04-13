@@ -5,17 +5,9 @@ import { useToast } from "@chakra-ui/react";
 
 // --- Types
 import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
-import { PlatformProps } from "../components/GenericPlatform";
-import { PlatformClass } from "@gitcoin/passport-platforms";
-import { getPlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/platforms-config";
 
 // --- Identity tools
-import {
-  Stamp,
-  VerifiableCredential,
-  CredentialResponseBody,
-  VerifiableCredentialRecord,
-} from "@gitcoin/passport-types";
+import { Stamp, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 import { UserContext } from "../context/userContext";
@@ -28,7 +20,6 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { PossibleEVMProvider } from "../signer/utils";
 
 import { RefreshMyStampsModalContentCardList } from "../components/RefreshMyStampsModalContentCardList";
-import { platform } from "os";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
@@ -50,44 +41,53 @@ export const RefreshMyStampsModalContent = ({
   fetchedPossibleEVMStamps,
 }: RefreshMyStampsModalContentProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
-  const { handleAddStamps, handleDeleteStamps, allProvidersState, userDid, allPlatforms } = useContext(CeramicContext);
+  const { handleAddStamps, handleDeleteStamps } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
-  const [possiblyVerifiedPlatforms, setPossiblyVerifiedPlatforms] = useState<PossibleEVMProvider[]>([]);
-  const [platformsLoading, setPlatformsLoading] = useState(false);
-  const [activePlatform, setActivePlatform] = useState<PossibleEVMProvider | null>(null);
   const [selectedEVMPlatformProviders, setSelectedEVMPlatformProviders] = useState<evmPlatformProvider[]>([]);
   const navigate = useNavigate();
 
+  // TODO: update comments
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>([]);
 
+  // TODO: update comments
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
 
+  useEffect(() => {
+    if (selectedProviders.length !== 0) {
+      setCanSubmit(true);
+    } else {
+      setCanSubmit(false);
+    }
+  });
+
   const handleRefreshSelectedStamps = async () => {
     try {
+      // TODO: add datadog logger
+      // datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
       setLoading(true);
-      await selectedEVMPlatformProviders?.map(async (platformProviders) => {
-        const platformId = platformProviders.platformId;
-        const providerIds =
-          platformProviders.platformGroup.reduce((all, stamp, i) => {
-            return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-          }, [] as PROVIDER_ID[]) || [];
-        await handleFetchCredential(platformId, providerIds);
-      });
+      const result = await Promise.all(
+        selectedEVMPlatformProviders?.map(async (platformProviders) => {
+          const platformId = platformProviders.platformId;
+          const providerIds =
+            platformProviders.platformGroup.reduce((all, stamp, i) => {
+              return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+            }, [] as PROVIDER_ID[]) || [];
+          await handleFetchCredential(platformId, providerIds);
+        })
+      );
       setLoading(false);
-      if (!isLoading) {
-        navigate("/dashboard");
-      }
+      navigate("/dashboard");
     } catch (e) {
+      // TODO: update datadog logger
+      // datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
       console.log(e);
     }
   };
 
   const handleFetchCredential = async (platformID: PLATFORM_ID, providerIDs: PROVIDER_ID[]): Promise<void> => {
-    // FIXME: there should be no activePlatform since handleFetchCredential will be looped and called together for all platforms
-
     try {
       // This array will contain all providers that new validated VCs
       let vcs: Stamp[] = [];
@@ -130,6 +130,7 @@ export const RefreshMyStampsModalContent = ({
         await handleAddStamps(vcs);
       }
 
+      // TODO: update datadog logger
       // datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
 
       // grab all providers who are verified from the verify response
@@ -153,9 +154,11 @@ export const RefreshMyStampsModalContent = ({
       // doneToast(title, body, icon, platformId);
 
       // setLoading(false);
-    } catch (e) {
+    } catch (e: unknown) {
+      // TODO: update datadog logger
       // datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
-      console.log("error", e);
+      console.log(e);
+      throw new Error();
       // doneToast(
       //   "Verification Failed",
       //   "There was an error verifying your stamp. Please try again.",
@@ -165,17 +168,12 @@ export const RefreshMyStampsModalContent = ({
     }
   };
 
-  /* TODO: 
-  -- when the "Confirm Stamps" button is clicked, 
-  -- onClick ---> start a forEach loop and for each of the found platforms, call handleFetchCredential
-  ----***check the selectedProviders output to see how we can do this
-  -- if the provider is validated those platform cards should say "Verified"
-  */
   return (
     <>
       <div className="mb-6 text-2xl text-white">Stamps Found</div>
       <div>
         {" "}
+        {/* TODO: update comments */}
         {/* container for platforms so user can scroll if they have a lot */}
         <RefreshMyStampsModalContentCardList
           verifiedProviders={verifiedProviders}
@@ -194,8 +192,9 @@ export const RefreshMyStampsModalContent = ({
           Cancel
         </button>
         <button
-          className="ml-2 w-full rounded-sm bg-accent py-2 px-6 text-white"
-          onClick={() => handleRefreshSelectedStamps}
+          className={`ml-2 w-full rounded-sm bg-accent py-2 px-6 text-white disabled:cursor-not-allowed disabled:bg-muted disabled:text-black`}
+          onClick={handleRefreshSelectedStamps}
+          disabled={!canSubmit}
         >
           Confirm Stamps
         </button>

@@ -14,6 +14,7 @@ import MinimalHeader from "../components/MinimalHeader";
 import PageWidthGrid, { PAGE_PADDING } from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import { WelcomeBack } from "../components/WelcomeBack";
+import PageRoot from "../components/PageRoot";
 
 // --Chakra UI Elements
 import {
@@ -109,23 +110,25 @@ export default function Welcome() {
       }
     });
     // Build requests for each verify function within every EVM Provider
-    const providerRequests = evmPlatforms.map((platform) => {
-      const validatedProviderGroup = platform.platFormGroupSpec.map((groupSpec) => {
-        return groupSpec.providers.map(async (provider) => {
-          const payload = await providers.verify(
-            provider.name,
-            { type: provider.name, address, version: "0.0.0", rpcUrl },
-            {}
-          );
-          return {
-            payload,
-            providerType: provider.name,
-          };
+    const providerRequests = await Promise.all(
+      evmPlatforms.map((platform) => {
+        const validatedProviderGroup = platform.platFormGroupSpec.map((groupSpec) => {
+          return groupSpec.providers.map(async (provider) => {
+            const payload = await providers.verify(
+              provider.name,
+              { type: provider.name, address, version: "0.0.0", rpcUrl },
+              {}
+            );
+            return {
+              payload,
+              providerType: provider.name,
+            };
+          });
         });
-      });
-      updateSteps(2);
-      return { validatedProviderGroup, platform };
-    });
+        updateSteps(2);
+        return { validatedProviderGroup, platform };
+      })
+    );
 
     // Resolve nested promises
     const validatedPlatforms = await Promise.all(
@@ -186,9 +189,9 @@ export default function Welcome() {
   };
 
   return (
-    <div className="tall:max-h-screen tall:overflow-hidden bg-background text-color-2">
+    <PageRoot className="text-color-2">
       <HeaderContentFooterGrid>
-        <div className={PAGE_PADDING}>
+        <div className={`${PAGE_PADDING} bg-background`}>
           <MinimalHeader className={`border-b border-accent-2`} />
         </div>
         <PageWidthGrid>
@@ -209,6 +212,6 @@ export default function Welcome() {
         onClose={onClose}
         fetchedPossibleEVMStamps={fetchedPossibleEVMStamps}
       />
-    </div>
+    </PageRoot>
   );
 }
