@@ -32,13 +32,6 @@ export default function Home() {
     }
   }, [wallet]);
 
-  // // Route user to Welcome page when wallet is connected
-  // useEffect(() => {
-  //   if (wallet) {
-  //     navigate("/welcome");
-  //   }
-  // }, [wallet]);
-
   return (
     <PageRoot className="text-color-2">
       <HeaderContentFooterGrid>

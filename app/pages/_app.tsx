@@ -156,15 +156,13 @@ function App({ Component, pageProps }: AppProps) {
         <UserContextProvider>
           <CeramicContextProvider>
             <ManageAccountCenter>
-              <ChakraProvider>
-                <div className="font-body" suppressHydrationWarning>
-                  {typeof window === "undefined" ? null : (
-                    <ThemeWrapper defaultTheme={themes.LUNARPUNK_DARK_MODE}>
-                      <Component {...pageProps} />
-                    </ThemeWrapper>
-                  )}
-                </div>
-              </ChakraProvider>
+              <div className="font-body" suppressHydrationWarning>
+                {typeof window === "undefined" ? null : (
+                  <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                    <Component {...pageProps} />
+                  </ThemeWrapper>
+                )}
+              </div>
             </ManageAccountCenter>
           </CeramicContextProvider>
         </UserContextProvider>

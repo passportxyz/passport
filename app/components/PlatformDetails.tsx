@@ -2,8 +2,8 @@ import { PlatformSpec } from "@gitcoin/passport-platforms";
 
 export function PlatformDetails({ currentPlatform }: { currentPlatform: PlatformSpec }) {
   return (
-    <div className="sm:py-8 w-full text-center">
-      <div className="inline-flex h-20 w-20 items-center justify-center rounded-full text-gray-400">
+    <div className="w-full text-center text-color-1 md:pt-4">
+      <div className="inline-flex h-20 w-20 items-center justify-center rounded-full">
         <img alt="Platform Image" className="h-full w-full" src={currentPlatform?.icon} />
       </div>
       <div className="flex flex-col items-center justify-center text-center">
