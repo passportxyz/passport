@@ -27,6 +27,17 @@ const toUnixTime = () => {
 const ETH_GAS_OFFSET_COUNT = 500;
 const FIRST_ETH_GTE_TXN_OFFSET_COUNT = 100;
 
+const noMoreTxResponse = {
+  data: {
+    data: {
+      result: [] as [],
+      status: "0",
+      message: "No transactions found",
+    },
+    status: 200,
+  },
+};
+
 const validEtherscanResponse = {
   data: {
     data: {
@@ -165,24 +176,31 @@ const invalidRequest = {
   },
 };
 
+const mockNRequests = (pageCount: number, mockSuccessResponse: any, address: string = MOCK_ADDRESS_LOWER) =>
+  mockedAxios.get.mockImplementation(async (url) => {
+    if (url.includes("https://api.etherscan.io/api") && url.includes(address)) {
+      for (let i = 1; i <= pageCount; i++) {
+        if (url.includes(`&page=${i}`)) {
+          return i < pageCount ? Promise.resolve(mockSuccessResponse.data) : Promise.resolve(noMoreTxResponse.data);
+        }
+      }
+    }
+  });
+
 describe("Attempt verification for ETH gas provider stamp", function () {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("handles valid verification attempt", async () => {
-    mockedAxios.get.mockImplementation(async (url) => {
-      if (url.includes("https://api.etherscan.io/api") && url.includes(MOCK_ADDRESS_LOWER)) {
-        return Promise.resolve(validEtherscanResponse.data);
-      }
-    });
+    mockNRequests(2, validEtherscanResponse);
 
     const ethGasProvider = new EthGasProvider();
     const verifiedPayload = await ethGasProvider.verify({
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
 
-    expect(axios.get).toHaveBeenCalledTimes(2);
+    expect(axios.get).toHaveBeenCalledTimes(4);
     expect(mockedAxios.get).toBeCalledWith(
       `https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
@@ -199,11 +217,7 @@ describe("Attempt verification for ETH gas provider stamp", function () {
   });
 
   it("should return invalid payload if the user has accumulated less than 0.5 ETH in gas fees", async () => {
-    mockedAxios.get.mockImplementation(async (url) => {
-      if (url.includes("https://api.etherscan.io/api") && url.includes(MOCK_ADDRESS_LOWER)) {
-        return Promise.resolve(invalidEtherscanResponseLTHalfEthGasSpent.data);
-      }
-    });
+    mockNRequests(1, invalidEtherscanResponseLTHalfEthGasSpent);
 
     const ethGasProvider = new EthGasProvider();
     const verifiedPayload = await ethGasProvider.verify({
@@ -222,11 +236,7 @@ describe("Attempt verification for ETH gas provider stamp", function () {
   });
 
   it("should return invalid payload when the user has no ethereum transactions (empty result array)", async () => {
-    mockedAxios.get.mockImplementation(async (url) => {
-      if (url.includes("https://api.etherscan.io/api") && url.includes(MOCK_ADDRESS_LOWER)) {
-        return Promise.resolve(invalidEtherscanResponseNoResults.data);
-      }
-    });
+    mockNRequests(1, noMoreTxResponse);
 
     const ethGasProvider = new EthGasProvider();
     const verifiedPayload = await ethGasProvider.verify({
@@ -245,18 +255,14 @@ describe("Attempt verification for ETH gas provider stamp", function () {
   });
 
   it("should return invalid payload if there is no address provided to the ETH gas provider verification method", async () => {
-    mockedAxios.get.mockImplementation(async (url) => {
-      if (url.includes("https://api.etherscan.io/api")) {
-        return Promise.resolve(invalidRequest.data);
-      }
-    });
+    mockNRequests(2, validEtherscanResponse, "");
 
     const ethGasProvider = new EthGasProvider();
     const verifiedPayload = await ethGasProvider.verify({
       address: "",
     } as unknown as RequestPayload);
 
-    expect(axios.get).toHaveBeenCalledTimes(2);
+    expect(axios.get).toHaveBeenCalledTimes(4);
     expect(mockedAxios.get).toBeCalledWith(
       `https://api.etherscan.io/api?module=account&action=txlist&address=&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
@@ -268,7 +274,7 @@ describe("Attempt verification for ETH gas provider stamp", function () {
   });
 
   it("should return invalid payload when an exception is through when a request is made", async () => {
-    mockedAxios.post.mockImplementation(async (url) => {
+    mockedAxios.get.mockImplementation(async (url: any) => {
       if (url.includes("https://api.etherscan.io/api") && url.includes(BAD_MOCK_ADDRESS_LOWER)) {
         throw "an error";
       }
@@ -279,12 +285,9 @@ describe("Attempt verification for ETH gas provider stamp", function () {
       address: BAD_MOCK_ADDRESS_LOWER,
     } as unknown as RequestPayload);
 
-    expect(axios.get).toHaveBeenCalledTimes(2);
+    expect(axios.get).toHaveBeenCalledTimes(1);
     expect(mockedAxios.get).toBeCalledWith(
       `https://api.etherscan.io/api?module=account&action=txlist&address=${BAD_MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
-    );
-    expect(mockedAxios.get).toBeCalledWith(
-      `https://api.etherscan.io/api?module=account&action=txlistinternal&address=${BAD_MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
 
     expect(verifiedPayload).toMatchObject({ valid: false });
@@ -297,18 +300,14 @@ describe("Attempt verification for gte 30 days since first ETH transaction stamp
   });
 
   it("handles valid verification attempt", async () => {
-    mockedAxios.get.mockImplementation(async (url) => {
-      if (url.includes("https://api.etherscan.io/api") && url.includes(MOCK_ADDRESS_LOWER)) {
-        return Promise.resolve(validEtherscanResponse.data);
-      }
-    });
+    mockNRequests(2, validEtherscanResponse);
 
     const firstEthTxnProvider = new FirstEthTxnProvider();
     const verifiedPayload = await firstEthTxnProvider.verify({
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
 
-    expect(axios.get).toHaveBeenCalledTimes(1);
+    expect(axios.get).toHaveBeenCalledTimes(2);
     expect(mockedAxios.get).toBeCalledWith(
       `https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
@@ -322,11 +321,7 @@ describe("Attempt verification for gte 30 days since first ETH transaction stamp
   });
 
   it("should return invalid payload when it's been less than 30 days since the user's first ETH transaction", async () => {
-    mockedAxios.get.mockImplementation(async (url) => {
-      if (url.includes("https://api.etherscan.io/api") && url.includes(MOCK_ADDRESS_LOWER)) {
-        return Promise.resolve(invalidEtherscanResponse.data);
-      }
-    });
+    mockNRequests(1, invalidEtherscanResponseLTHalfEthGasSpent);
 
     const firstEthTxnProvider = new FirstEthTxnProvider();
     const verifiedPayload = await firstEthTxnProvider.verify({
@@ -342,11 +337,7 @@ describe("Attempt verification for gte 30 days since first ETH transaction stamp
   });
 
   it("should return invalid payload when the user has no ethereum transactions (empty result array)", async () => {
-    mockedAxios.get.mockImplementation(async (url) => {
-      if (url.includes("https://api.etherscan.io/api") && url.includes(MOCK_ADDRESS_LOWER)) {
-        return Promise.resolve(invalidEtherscanResponseNoResults.data);
-      }
-    });
+    mockNRequests(1, noMoreTxResponse);
 
     const firstEthTxnProvider = new FirstEthTxnProvider();
     const verifiedPayload = await firstEthTxnProvider.verify({
@@ -382,7 +373,7 @@ describe("Attempt verification for gte 30 days since first ETH transaction stamp
   });
 
   it("should return invalid payload when an exception is through when a request is made", async () => {
-    mockedAxios.post.mockImplementation(async (url) => {
+    mockedAxios.get.mockImplementation(async (url) => {
       if (url.includes("https://api.etherscan.io/api") && url.includes(BAD_MOCK_ADDRESS_LOWER)) {
         throw "an error";
       }
@@ -408,11 +399,7 @@ describe("Attempt verification for at least one ETH transaction on the mainnet s
   });
 
   it("handles valid verification attempt", async () => {
-    mockedAxios.get.mockImplementation(async (url) => {
-      if (url.includes("https://api.etherscan.io/api") && url.includes(MOCK_ADDRESS_LOWER)) {
-        return Promise.resolve(validEtherscanResponse.data);
-      }
-    });
+    mockNRequests(2, validEtherscanResponse, MOCK_ADDRESS_LOWER);
 
     const ethGTEOneTxnProvider = new EthGTEOneTxnProvider();
     const verifiedPayload = await ethGTEOneTxnProvider.verify({
