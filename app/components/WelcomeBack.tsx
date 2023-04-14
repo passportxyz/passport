@@ -7,7 +7,7 @@ import { PlatformProps } from "../components/GenericPlatform";
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
-interface WelcomeBackProps {
+export interface WelcomeBackProps {
   onOpen: () => void;
   handleFetchPossibleEVMStamps: (addr: string, allPlats: Map<PLATFORM_ID, PlatformProps>) => void;
   resetStampsAndProgressState: () => void;

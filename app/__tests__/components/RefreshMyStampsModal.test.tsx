@@ -8,6 +8,7 @@ const defaultProps: RefreshMyStampsModalProps = {
   onClose: jest.fn(),
   steps: [],
   fetchedPossibleEVMStamps: undefined,
+  resetStampsAndProgressState: jest.fn(),
 };
 
 jest.mock("../../utils/onboard");
