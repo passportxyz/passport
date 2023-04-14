@@ -21,7 +21,7 @@ import { PossibleEVMProvider } from "../signer/utils";
 
 // --- UI components
 // TODO: re-add toasts after design updates
-import { useToast, IconButton } from "@chakra-ui/react";
+import { useToast, IconButton, Spinner } from "@chakra-ui/react";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 
 // --- App components
@@ -92,7 +92,7 @@ export const RefreshMyStampsModalContent = ({
       // TODO: update datadog logger
       // datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
       console.log(e);
-      navigate("/");
+      navigate("/dashboard");
       resetStampsAndProgressState();
     }
   };
@@ -201,11 +201,11 @@ export const RefreshMyStampsModalContent = ({
             <a href="#">How is my data stored?</a>
           </div>
           <div className="mt-16 mb-auto flex items-center justify-center">
-            <button className="secondary-btn mr-2 w-full rounded-sm py-2 px-6" onClick={onClose}>
+            <button className="secondary-btn mr-2 w-full rounded-sm py-2 px-6" onClick={() => navigate("/dashboard")}>
               Cancel
             </button>
             <button
-              className={`ml-2 w-full rounded-sm bg-accent py-2 px-6 text-white disabled:cursor-not-allowed disabled:bg-muted disabled:text-black`}
+              className="ml-2 flex w-full items-center justify-center rounded-sm bg-accent py-2 px-6 text-white disabled:cursor-not-allowed disabled:bg-muted disabled:text-black"
               onClick={() => {
                 handleRefreshSelectedStamps();
               }}
@@ -228,13 +228,14 @@ export const RefreshMyStampsModalContent = ({
             <div className="mt-24 text-xl text-muted">Visit the Dashboard to explore more Stamp options.</div>
           </div>
           <button
-            className="sidebar-verify-btn hover:backround-2 mt-36 w-full rounded-sm text-white"
+            className="sidebar-verify-btn hover:backround-2 mt-36 flex w-full items-center justify-center rounded-sm text-white"
             onClick={() => {
               navigate("/dashboard");
               resetStampsAndProgressState();
             }}
           >
             Explore Stamps
+            {isLoading ? <Spinner size="sm" className="my-auto ml-2" /> : <></>}
           </button>
         </div>
       )}

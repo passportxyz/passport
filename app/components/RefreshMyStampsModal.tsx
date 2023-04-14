@@ -1,11 +1,6 @@
 import { Modal, ModalContent, ModalOverlay } from "@chakra-ui/react";
-import { useContext, useEffect, useState } from "react";
 
-import { PlatformClass, providers } from "@gitcoin/passport-platforms";
-import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
-import { PlatformProps } from "../components/GenericPlatform";
-
-import { Status, Step } from "../components/Progress";
+import { Step } from "../components/Progress";
 import RefreshStampsProgressSteps from "./RefreshStampsProgressSteps";
 import { PossibleEVMProvider } from "../signer/utils";
 import { RefreshMyStampsModalContent } from "./RefreshMyStampsModalContent";
@@ -27,7 +22,13 @@ export const RefreshMyStampsModal = ({
 }: RefreshMyStampsModalProps) => {
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={true} isCentered>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        closeOnOverlayClick={true}
+        isCentered
+        datatest-id="refresh-my-stamps-modal"
+      >
         <ModalOverlay bg="blackAlpha.900" />
         <ModalContent
           rounded="none"

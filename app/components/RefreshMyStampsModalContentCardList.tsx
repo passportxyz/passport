@@ -9,7 +9,7 @@ import { evmPlatformProvider } from "./RefreshMyStampsModalContent";
 // --- App components
 import { RefreshMyStampsModalContentCard } from "./RefreshMyStampsModalContentCard";
 
-type RefreshMyStampsModalCardListProps = {
+export type RefreshMyStampsModalCardListProps = {
   fetchedPossibleEVMStamps: PossibleEVMProvider[] | undefined;
   verifiedProviders: PROVIDER_ID[];
   selectedProviders: PROVIDER_ID[];

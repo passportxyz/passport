@@ -1,11 +1,17 @@
-import { useContext } from "react";
+// --- React & ReactDOM hooks
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// --- Types
 import { PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { PlatformProps } from "../components/GenericPlatform";
 
-import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
+// --- Contexts
+import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
+
+// --- UI Components
+import { Spinner } from "@chakra-ui/react";
 
 export interface WelcomeBackProps {
   onOpen: () => void;
@@ -21,6 +27,7 @@ export const WelcomeBack = ({
   const { allPlatforms } = useContext(CeramicContext);
   const { address } = useContext(UserContext);
   const navigate = useNavigate();
+  const [isLoading, setLoading] = useState(false);
 
   return (
     <>
@@ -32,15 +39,20 @@ export const WelcomeBack = ({
       </p>
       <div className="absolute bottom-10 mb-auto flex w-[295px] items-center justify-between md:relative md:mt-16 lg:w-[410px]">
         <button
-          className="secondary-btn mr-2 w-full rounded-sm py-2 px-6"
+          data-testid="skip-for-now-button"
+          className="secondary-btn mr-2 flex w-full items-center justify-center rounded-sm py-2 px-6"
           onClick={() => {
+            setLoading(true);
             navigate("/dashboard");
             resetStampsAndProgressState();
+            setLoading(false);
           }}
         >
           Skip For Now
+          {isLoading ? <Spinner size="sm" className="my-auto ml-2" /> : <></>}
         </button>
         <button
+          data-testid="refresh-my-stamps-button"
           className="ml-2 w-full rounded-sm bg-accent py-2 px-6"
           onClick={() => {
             onOpen();
