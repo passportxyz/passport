@@ -12,6 +12,7 @@ import {
 } from "../../__test-fixtures__/contextTestHelpers";
 import { RefreshMyStampsModal } from "../../components/RefreshMyStampsModal";
 import { CeramicContextState } from "../../context/ceramicContext";
+import { Stamp } from "@gitcoin/passport-types";
 
 jest.mock("../../utils/onboard.ts");
 
@@ -30,8 +31,17 @@ jest.mock("@self.id/framework", () => {
 const mockUserContext: UserContextState = makeTestUserContext();
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
+const ceramicWithPassport = {
+  ...mockCeramicContext,
+  passport: { stamps: [{} as Stamp] },
+} as unknown as CeramicContextState;
+
 jest.mock("../../components/RefreshMyStampsModal.tsx", () => ({
   RefreshMyStampsModal: () => <div data-testid="refresh-my-stamps-modal" />,
+}));
+
+jest.mock("../../components/InitialWelcome.tsx", () => ({
+  InitialWelcome: () => <div data-testid="initial-welcome" />,
 }));
 
 beforeEach(() => {
@@ -49,7 +59,7 @@ describe("Welcome", () => {
   it("renders the page", () => {
     renderWithContext(
       mockUserContext,
-      mockCeramicContext,
+      ceramicWithPassport,
       <Router>
         <Welcome />
       </Router>
@@ -69,7 +79,7 @@ describe("when the user is navigated to the Welcome page", () => {
   it("should render the Skip for Now button", () => {
     renderWithContext(
       mockUserContext,
-      mockCeramicContext,
+      ceramicWithPassport,
       <Router>
         <Welcome />
       </Router>
@@ -81,7 +91,7 @@ describe("when the user is navigated to the Welcome page", () => {
   it("should render the Refresh My Stamps button", () => {
     renderWithContext(
       mockUserContext,
-      mockCeramicContext,
+      ceramicWithPassport,
       <Router>
         <Welcome />
       </Router>
@@ -121,7 +131,7 @@ describe("when the user clicks the Refresh My Stamps button it launches the Refr
   it("should render the refresh stamps modal", () => {
     renderWithContext(
       mockUserContext,
-      mockCeramicContext,
+      ceramicWithPassport,
       <Router>
         <Welcome />
       </Router>
@@ -135,5 +145,19 @@ describe("when the user clicks the Refresh My Stamps button it launches the Refr
 
     expect(refreshMyStampsModal).toBeInTheDocument();
     expect(screen.getByTestId("refresh-my-stamps-modal")).toBeInTheDocument();
+  });
+});
+
+describe("when a new use visits the Welcome page", () => {
+  it("should render the Skip for Now button", () => {
+    renderWithContext(
+      mockUserContext,
+      { ...mockCeramicContext, passport: undefined },
+      <Router>
+        <Welcome />
+      </Router>
+    );
+
+    expect(screen.getByTestId("initial-welcome")).toBeInTheDocument();
   });
 });

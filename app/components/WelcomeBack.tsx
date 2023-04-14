@@ -33,7 +33,7 @@ export const WelcomeBack = ({
   return (
     <WelcomeWrapper
       content={{
-        header: "Welcome Back",
+        header: "Welcome Back!",
         subHeader: "One-Click Verification",
         body: "You can now verify most web3 stamps and return to your destination faster with one-click verification!",
         imgSrc: "",
