@@ -24,6 +24,7 @@ import { useDisclosure } from "@chakra-ui/react";
 // --- Contexts
 import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
+import { InitialWelcome } from "../components/InitialWelcome";
 
 export default function Welcome() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -204,13 +205,20 @@ export default function Welcome() {
         </div>
         <PageWidthGrid>
           <div className="col-span-4 flex flex-col items-center text-center md:col-start-2 lg:col-start-3 xl:col-span-6 xl:col-start-4">
-            {/* if connected wallet address has a passport, show the Welcome Back component */}
-            <WelcomeBack
-              handleFetchPossibleEVMStamps={handleFetchPossibleEVMStamps}
-              onOpen={onOpen}
-              resetStampsAndProgressState={resetStampsAndProgressState}
-            />
-            {/* otherwise, show the First Time Welcome component */}
+            {passport && passport.stamps.length > 0 ? (
+              <WelcomeBack
+                handleFetchPossibleEVMStamps={handleFetchPossibleEVMStamps}
+                onOpen={onOpen}
+                resetStampsAndProgressState={resetStampsAndProgressState}
+              />
+            ) : (
+              <InitialWelcome
+                onBoardFinished={() => {
+                  resetStampsAndProgressState();
+                  onOpen();
+                }}
+              />
+            )}
           </div>
         </PageWidthGrid>
       </HeaderContentFooterGrid>
