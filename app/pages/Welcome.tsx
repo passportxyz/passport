@@ -24,6 +24,8 @@ import { useDisclosure } from "@chakra-ui/react";
 // --- Contexts
 import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { platform } from "os";
 
 export default function Welcome() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -102,7 +104,6 @@ export default function Welcome() {
       const evmPlatforms: PlatformProps[] = [];
       const evmPlatformGroupSpecs: PlatformGroupSpec[] = [];
 
-      updateSteps(1);
       allPlatforms.forEach((value, key, map) => {
         const platformProp = map.get(key);
         if (platformProp?.platform.isEVM) {
@@ -126,7 +127,7 @@ export default function Welcome() {
               };
             });
           });
-          updateSteps(2);
+          updateSteps(1);
           return { validatedProviderGroup, platform };
         })
       );
@@ -140,7 +141,7 @@ export default function Welcome() {
               return validatedProviders;
             })
           );
-          updateSteps(3);
+          updateSteps(2);
           return { validatedPlatformGroups, platformProps: requestedPlatform.platform };
         })
       );
@@ -155,31 +156,43 @@ export default function Welcome() {
             }).length > 0
           );
         });
-        updateSteps(4);
+        updateSteps(3);
         return validGroup.length > 0;
       });
 
-      // TODO: complete this to filter stamps if they're already in user's passport
-      // const validPlatformsNotInPassport = () => {
-      //   if (passport) {
-      //     passport.stamps.map((stamp) => {
-      //       validPlatforms.map((validPlatform) => {
-      //         validPlatform.validatedPlatformGroups.map((validatedPlatformGroup) => {
-      //           console.log("validatedPlatformGroup", validatedPlatformGroup);
-      //         });
-      //         // validPlatforms
-      //         // -- validatedPlatformGroups is a nested object with arrays, 1 or more
-      //         // ----
-      //         // if the platform contains any of the providers, then filter that validPlatorm out
+      // filter stamps if they're already in user's passport
+      const isolatedPlatforms = await Promise.all(
+        validPlatforms.map((validPlatform) => {
+          let validatedPlatformGroups = validPlatform.validatedPlatformGroups;
+          let platformProps = validPlatform.platformProps;
+          return validPlatform.validatedPlatformGroups.flatMap((group) => {
+            if (passport) {
+              let groupProviders = group[0].providerType,
+                stampProviders: PROVIDER_ID[];
+              stampProviders = passport.stamps.map((stamp) => stamp.provider);
+              if (!stampProviders.includes(groupProviders)) {
+                return {
+                  validatedPlatformGroups,
+                  platformProps,
+                };
+              } else {
+                return [];
+              }
+            }
+          });
+        })
+      );
 
-      //         // return stamp !== validPlatform
-      //       });
-      //     });
-      //   }
-      // };
-      // validPlatformsNotInPassport();
+      updateSteps(4);
+      const platformsNotAlreadyInPassport = isolatedPlatforms.flat();
+
+      const dedupedPlatformsNotAlreadyInPassport = platformsNotAlreadyInPassport.filter(
+        (value, index, self) =>
+          index === self.findIndex((t) => t?.platformProps.platform === value?.platformProps.platform)
+      );
+
       updateSteps(5);
-      return validPlatforms;
+      return dedupedPlatformsNotAlreadyInPassport as PossibleEVMProvider[];
     } catch (error) {
       console.log(error);
       throw new Error("Error: ");
