@@ -150,49 +150,24 @@ export default function Welcome() {
       const validPlatforms = validatedPlatforms.filter((validatedPlatform) => {
         // If any of the providers in the group are valid, then the group is valid
         const validGroup = validatedPlatform.validatedPlatformGroups.filter((group) => {
+          updateSteps(3);
           return (
             group.filter((provider) => {
-              return provider.payload.valid;
+              if (passport) {
+                const stampProviders = passport.stamps.map((stamp) => stamp.provider);
+                if (!stampProviders.includes(provider.providerType)) {
+                  return provider.payload.valid;
+                }
+              }
             }).length > 0
           );
         });
-        updateSteps(3);
+        updateSteps(4);
         return validGroup.length > 0;
       });
 
-      // filter stamps if they're already in user's passport
-      const isolatedPlatforms = await Promise.all(
-        validPlatforms.map((validPlatform) => {
-          let validatedPlatformGroups = validPlatform.validatedPlatformGroups;
-          let platformProps = validPlatform.platformProps;
-          return validPlatform.validatedPlatformGroups.flatMap((group) => {
-            if (passport) {
-              let groupProviders = group[0].providerType,
-                stampProviders: PROVIDER_ID[];
-              stampProviders = passport.stamps.map((stamp) => stamp.provider);
-              if (!stampProviders.includes(groupProviders)) {
-                return {
-                  validatedPlatformGroups,
-                  platformProps,
-                };
-              } else {
-                return [];
-              }
-            }
-          });
-        })
-      );
-
-      updateSteps(4);
-      const platformsNotAlreadyInPassport = isolatedPlatforms.flat();
-
-      const dedupedPlatformsNotAlreadyInPassport = platformsNotAlreadyInPassport.filter(
-        (value, index, self) =>
-          index === self.findIndex((t) => t?.platformProps.platform === value?.platformProps.platform)
-      );
-
       updateSteps(5);
-      return dedupedPlatformsNotAlreadyInPassport as PossibleEVMProvider[];
+      return validPlatforms;
     } catch (error) {
       console.log(error);
       throw new Error("Error: ");

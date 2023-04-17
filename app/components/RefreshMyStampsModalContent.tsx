@@ -33,7 +33,7 @@ const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 export type RefreshMyStampsModalContentProps = {
   resetStampsAndProgressState: () => void;
   onClose: () => void;
-  fetchedPossibleEVMStamps: PossibleEVMProvider[] | undefined;
+  fetchedPossibleEVMStamps: PossibleEVMProvider[];
 };
 
 export type evmPlatformProvider = {
@@ -181,7 +181,7 @@ export const RefreshMyStampsModalContent = ({
 
   return (
     <>
-      {fetchedPossibleEVMStamps ? (
+      {fetchedPossibleEVMStamps.length > 0 ? (
         <div className="relative flex h-full flex-col">
           <div className="mb-6 text-2xl text-white">Stamps Found</div>
           <div>
