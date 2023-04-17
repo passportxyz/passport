@@ -37,7 +37,7 @@ export const PLATFORMS: PlatformSpec[] = [
     isEVM: true,
   },
   {
-    icon: "./assets/gitcoinStampIcon.svg",
+    icon: "./assets/gtcGrantsLightIcon.svg",
     platform: "Gitcoin",
     name: "Gitcoin Grants",
     description: "Connect your wallet to review your donation activity on Gitcoin (Up to GR15).",
@@ -65,7 +65,7 @@ export const PLATFORMS: PlatformSpec[] = [
     connectMessage: "Connect Account",
   },
   {
-    icon: "./assets/githubStampIcon.svg",
+    icon: "./assets/githubWhiteStampIcon.svg",
     platform: "Github",
     name: "Github",
     description: "Connect your Github account to verify stamp details.",
@@ -164,7 +164,7 @@ export const PLATFORMS: PlatformSpec[] = [
     isEVM: true,
   },
   {
-    icon: "./assets/lensStampIcon.svg",
+    icon: "./assets/lensWhiteStampIcon.svg",
     platform: "Lens",
     name: "Lens",
     description: "Connect your wallet to verify ownership of a Lens Profile.",
