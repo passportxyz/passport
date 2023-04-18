@@ -11,7 +11,7 @@ export const ZkSyncPlatformDetails: PlatformSpec = {
 
 export const ZkSyncProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Account name",
-    providers: [{ title: "Encrypted", name: "ZkSync" }],
+    platformGroup: "zkSync 1.0",
+    providers: [{ title: "Transacted on zkSync 1.0", name: "ZkSync" }],
   },
 ];
