@@ -8,6 +8,7 @@ import type { NextPage } from "next";
 
 // -- Pages
 import Home from "./Home";
+import Welcome from "./Welcome";
 import Dashboard from "./Dashboard";
 import Privacy from "./privacy";
 
@@ -44,6 +45,7 @@ const App: NextPage = () => {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/welcome" element={<Welcome />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/privacy" element={<Privacy />} />
         </Routes>

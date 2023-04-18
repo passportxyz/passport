@@ -6,6 +6,7 @@ export const GitPOAPPlatformDetails: PlatformSpec = {
   name: "GitPOAP",
   description: "GitPOAP Verification",
   connectMessage: "Connect Account",
+  isEVM: true,
 };
 
 export const GitPOAPProviderConfig: PlatformGroupSpec[] = [
