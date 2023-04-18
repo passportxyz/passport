@@ -64,6 +64,7 @@ export class EthGasProvider implements Provider {
     let valid = false,
       ethTransactions: EtherscanRequestResponse["data"],
       ethInternalTransactions: EtherscanRequestResponse["data"],
+      ethTokenTransactions: EtherscanRequestResponse["data"],
       verifiedPayload = {
         hasGTEHalfEthSpentGas: false,
       };
@@ -71,9 +72,11 @@ export class EthGasProvider implements Provider {
     try {
       ethTransactions = await fetchEthereumData("txlist", address, offsetCount);
       ethInternalTransactions = await fetchEthereumData("txlistinternal", address, offsetCount);
-      ethInternalTransactions = await fetchEthereumData("tokentx", address, offsetCount);
+      ethTokenTransactions = await fetchEthereumData("tokentx", address, offsetCount);
 
-      const combinedEthTransactions = ethTransactions.result.concat(ethInternalTransactions.result);
+      const combinedEthTransactions = ethTransactions.result
+        .concat(ethInternalTransactions.result)
+        .concat(ethTokenTransactions.result);
 
       verifiedPayload = checkGasFees(combinedEthTransactions);
 
