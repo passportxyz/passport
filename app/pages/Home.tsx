@@ -28,7 +28,11 @@ export default function Home() {
   // Route user to dashboard when wallet is connected
   useEffect(() => {
     if (wallet) {
-      navigate("/welcome");
+      if (process.env.NEXT_PUBLIC_FF_ONE_CLICK_VERIFICATION === "on") {
+        navigate("/welcome");
+      } else {
+        navigate("/dashboard");
+      }
     }
   }, [wallet]);
 
