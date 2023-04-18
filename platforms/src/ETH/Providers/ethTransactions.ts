@@ -196,7 +196,7 @@ const fetchEthereumData = async (
   let allResults: EtherscanRequestResponse["data"]["result"] = [];
   let pageNo = 1;
 
-  while (pageNo < 10) {
+  while (pageNo < 3) {
     try {
       // GET request using Etherscan API to retrieve user's ethereum mainnet transactions
       etherscanRequestResponse = await axios.get(etherscanURL(pageNo));
