@@ -103,7 +103,6 @@ export default function Welcome() {
       const evmPlatforms: PlatformProps[] = [];
       const evmPlatformGroupSpecs: PlatformGroupSpec[] = [];
 
-      updateSteps(1);
       allPlatforms.forEach((value, key, map) => {
         const platformProp = map.get(key);
         if (platformProp?.platform.isEVM) {
@@ -127,7 +126,7 @@ export default function Welcome() {
               };
             });
           });
-          updateSteps(2);
+          updateSteps(1);
           return { validatedProviderGroup, platform };
         })
       );
@@ -141,7 +140,7 @@ export default function Welcome() {
               return validatedProviders;
             })
           );
-          updateSteps(3);
+          updateSteps(2);
           return { validatedPlatformGroups, platformProps: requestedPlatform.platform };
         })
       );
@@ -150,9 +149,15 @@ export default function Welcome() {
       const validPlatforms = validatedPlatforms.filter((validatedPlatform) => {
         // If any of the providers in the group are valid, then the group is valid
         const validGroup = validatedPlatform.validatedPlatformGroups.filter((group) => {
+          updateSteps(3);
           return (
             group.filter((provider) => {
-              return provider.payload.valid;
+              if (passport) {
+                const stampProviders = passport.stamps.map((stamp) => stamp.provider);
+                if (!stampProviders.includes(provider.providerType)) {
+                  return provider.payload.valid;
+                }
+              }
             }).length > 0
           );
         });
@@ -160,25 +165,6 @@ export default function Welcome() {
         return validGroup.length > 0;
       });
 
-      // TODO: complete this to filter stamps if they're already in user's passport
-      // const validPlatformsNotInPassport = () => {
-      //   if (passport) {
-      //     passport.stamps.map((stamp) => {
-      //       validPlatforms.map((validPlatform) => {
-      //         validPlatform.validatedPlatformGroups.map((validatedPlatformGroup) => {
-      //           console.log("validatedPlatformGroup", validatedPlatformGroup);
-      //         });
-      //         // validPlatforms
-      //         // -- validatedPlatformGroups is a nested object with arrays, 1 or more
-      //         // ----
-      //         // if the platform contains any of the providers, then filter that validPlatorm out
-
-      //         // return stamp !== validPlatform
-      //       });
-      //     });
-      //   }
-      // };
-      // validPlatformsNotInPassport();
       updateSteps(5);
       return validPlatforms;
     } catch (error) {

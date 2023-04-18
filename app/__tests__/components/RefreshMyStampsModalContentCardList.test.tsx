@@ -87,7 +87,7 @@ describe("RefreshMyStampsModalContentCardList", () => {
     const RefreshMyStampsModalContentPropsList: RefreshMyStampsModalContentProps = {
       resetStampsAndProgressState: jest.fn(),
       onClose: jest.fn(),
-      fetchedPossibleEVMStamps: undefined,
+      fetchedPossibleEVMStamps: [],
     };
 
     const refreshModal = () => {
