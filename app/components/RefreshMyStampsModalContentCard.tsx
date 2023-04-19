@@ -32,8 +32,9 @@ export const RefreshMyStampsModalContentCard = ({
   setSelectedProviders,
   setSelectedEVMPlatformProviders,
 }: RefreshMyStampsModalCardProps): JSX.Element => {
-  const [switchState, setSwitchState] = useState<{ checked: boolean }>({
+  const [switchState, setSwitchState] = useState<{ checked: boolean; providers: PROVIDER_ID[] }>({
     checked: false,
+    providers: [],
   });
 
   return (
@@ -52,7 +53,12 @@ export const RefreshMyStampsModalContentCard = ({
                 colorScheme="purple"
                 onChange={(e) => {
                   const value = e.target.value as PLATFORM_ID;
-                  e.target.checked ? setSwitchState({ checked: true }) : setSwitchState({ checked: false });
+                  const providers = platformGroup
+                    ?.map((group) => group.providers?.map((provider) => provider.name))
+                    .flat();
+                  e.target.checked
+                    ? setSwitchState({ checked: true, providers: providers })
+                    : setSwitchState({ checked: false, providers: [] });
                   setSelectedEVMPlatformProviders(
                     e.target.checked
                       ? (selectedEVMPlatformProviders || []).concat({
