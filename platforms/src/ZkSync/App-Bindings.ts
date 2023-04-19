@@ -1,8 +1,8 @@
 import { AppContext, ProviderPayload } from "../types";
 import { Platform } from "../utils/platform";
 export class ZkSyncPlatform extends Platform {
-  path: string;
   platformId = "ZkSync";
+  path = "ZkSync";
   isEVM = true;
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
