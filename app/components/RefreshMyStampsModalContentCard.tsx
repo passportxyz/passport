@@ -40,7 +40,10 @@ export const RefreshMyStampsModalContentCard = ({
     <div>
       <Accordion allowToggle>
         <AccordionItem className="py-2 first:border-t-accent-2 first:border-b-accent-2">
-          <AccordionButton className="items-center justify-between text-white">
+          <AccordionButton
+            className="items-center justify-between text-white focus:shadow-none"
+            _focus={{ outline: "none" }}
+          >
             <div className="flex items-center justify-start">
               <img src={currentPlatform?.icon} alt={currentPlatform?.name} className="mr-5 h-11 w-11" />
               <p className="text-left">{currentPlatform?.name}</p>
