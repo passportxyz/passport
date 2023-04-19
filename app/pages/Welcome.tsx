@@ -28,8 +28,8 @@ import { InitialWelcome } from "../components/InitialWelcome";
 
 export default function Welcome() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { passport } = useContext(CeramicContext);
-  const { wallet } = useContext(UserContext);
+  const { passport, allPlatforms } = useContext(CeramicContext);
+  const { wallet, address } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -199,9 +199,11 @@ export default function Welcome() {
               />
             ) : (
               <InitialWelcome
-                onBoardFinished={() => {
-                  resetStampsAndProgressState();
-                  onOpen();
+                onBoardFinished={async () => {
+                  if (address) {
+                    await handleFetchPossibleEVMStamps(address, allPlatforms);
+                    onOpen();
+                  }
                 }}
               />
             )}
