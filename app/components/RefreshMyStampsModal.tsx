@@ -26,7 +26,7 @@ export const RefreshMyStampsModal = ({
         isOpen={isOpen}
         onClose={onClose}
         closeOnOverlayClick={true}
-        isCentered
+        scrollBehavior="outside"
         datatest-id="refresh-my-stamps-modal"
       >
         <ModalOverlay bg="blackAlpha.900" />
