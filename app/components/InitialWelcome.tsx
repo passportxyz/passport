@@ -18,7 +18,7 @@ const welcomeSteps = [
   {
     header: "Get Started",
     subHeader: "One-Click Verification",
-    body: "You can now verify most web3 stamps with one-click verification! Verifying Web2 apps will come after this step, and we encourage you to collect as many stamps as possible.",
+    body: "You can now verify most web3 stamps with one-click verification! For Web2 stamps, please verify them through your Passport dashboard, and we encourage you to collect as many stamps as possible.",
     imgSrc: "",
   },
 ];
