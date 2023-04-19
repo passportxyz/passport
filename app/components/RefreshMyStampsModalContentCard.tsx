@@ -37,48 +37,50 @@ export const RefreshMyStampsModalContentCard = ({
   });
 
   return (
-    <Accordion allowToggle>
-      <AccordionItem className="py-2 first:border-t-accent-2 first:border-b-accent-2">
-        <AccordionButton className="grid grid-cols-4 items-center justify-between text-white">
-          <div className="flex items-center justify-start">
-            <img src={currentPlatform?.icon} alt={currentPlatform?.name} className="mr-5 h-11 w-11" />
-            <p className=" text-left">{currentPlatform?.name}</p>
-          </div>
-          <div className="grid grid-cols-2 items-center">
-            <Switch
-              data-testid={`switch-${currentPlatform?.name}`}
-              value={`${currentPlatform?.name}`}
-              colorScheme="purple"
-              onChange={(e) => {
-                const value = e.target.value as PLATFORM_ID;
-                e.target.checked ? setSwitchState({ checked: true }) : setSwitchState({ checked: false });
-                setSelectedEVMPlatformProviders(
-                  e.target.checked
-                    ? (selectedEVMPlatformProviders || []).concat({
-                        checked: true,
-                        platformId: value,
-                        platformGroup: platformGroup,
-                      })
-                    : (selectedEVMPlatformProviders || []).filter(
-                        (selectedEVMPlatformProvider) => selectedEVMPlatformProvider["platformId"] !== value
-                      )
-                );
-              }}
+    <div>
+      <Accordion allowToggle>
+        <AccordionItem className="py-2 first:border-t-accent-2 first:border-b-accent-2">
+          <AccordionButton className="grid grid-cols-4 items-center justify-between text-white">
+            <div className="flex items-center justify-start">
+              <img src={currentPlatform?.icon} alt={currentPlatform?.name} className="mr-5 h-11 w-11" />
+              <p className=" text-left">{currentPlatform?.name}</p>
+            </div>
+            <div className="grid grid-cols-2 items-center">
+              <Switch
+                data-testid={`switch-${currentPlatform?.name}`}
+                value={`${currentPlatform?.name}`}
+                colorScheme="purple"
+                onChange={(e) => {
+                  const value = e.target.value as PLATFORM_ID;
+                  e.target.checked ? setSwitchState({ checked: true }) : setSwitchState({ checked: false });
+                  setSelectedEVMPlatformProviders(
+                    e.target.checked
+                      ? (selectedEVMPlatformProviders || []).concat({
+                          checked: true,
+                          platformId: value,
+                          platformGroup: platformGroup,
+                        })
+                      : (selectedEVMPlatformProviders || []).filter(
+                          (selectedEVMPlatformProvider) => selectedEVMPlatformProvider["platformId"] !== value
+                        )
+                  );
+                }}
+              />
+              <AccordionIcon marginLeft="8px" fontSize="28px" />
+            </div>
+          </AccordionButton>
+          <AccordionPanel borderTop="1px solid #083A40" marginTop="8px" paddingLeft="0" paddingRight="0">
+            <RefreshMyStampsSelector
+              currentPlatform={currentPlatform}
+              currentProviders={platformGroup}
+              verifiedProviders={verifiedProviders}
+              selectedProviders={selectedProviders}
+              setSelectedProviders={(providerIds) => setSelectedProviders && setSelectedProviders(providerIds)}
+              switchState={switchState}
             />
-            <AccordionIcon marginLeft="8px" fontSize="28px" />
-          </div>
-        </AccordionButton>
-        <AccordionPanel borderTop="1px solid #083A40" marginTop="8px" paddingLeft="0" paddingRight="0">
-          <RefreshMyStampsSelector
-            currentPlatform={currentPlatform}
-            currentProviders={platformGroup}
-            verifiedProviders={verifiedProviders}
-            selectedProviders={selectedProviders}
-            setSelectedProviders={(providerIds) => setSelectedProviders && setSelectedProviders(providerIds)}
-            switchState={switchState}
-          />
-        </AccordionPanel>
-      </AccordionItem>
-    </Accordion>
+          </AccordionPanel>
+        </AccordionItem>
+      </Accordion>
+    </div>
   );
 };
