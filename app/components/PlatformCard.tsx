@@ -65,7 +65,7 @@ export const PlatformCard = ({
     onClose: onCloseRemoveStampModal,
   } = useDisclosure();
 
-  const disabled = passportHasCacaoError();
+  const disabled = passportHasCacaoError;
 
   // hide platforms based on filter
   const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;

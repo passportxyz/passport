@@ -85,7 +85,7 @@ export default function Dashboard() {
   }, [isLoadingPassport]);
 
   useEffect(() => {
-    if (passportHasCacaoError()) {
+    if (passportHasCacaoError) {
       setUserWarning({
         name: "cacaoError",
         content: (
@@ -102,7 +102,7 @@ export default function Dashboard() {
     } else if (userWarning?.name === "cacaoError") {
       setUserWarning();
     }
-  });
+  }, [passportHasCacaoError]);
 
   useEffect(() => {
     if (expiredProviders.length > 0) {
@@ -123,7 +123,7 @@ export default function Dashboard() {
     } else if (userWarning?.name === "expiredStamp") {
       setUserWarning();
     }
-  });
+  }, [expiredProviders]);
 
   const retryModal = (
     <Modal isOpen={retryModalIsOpen} onClose={onRetryModalClose}>
