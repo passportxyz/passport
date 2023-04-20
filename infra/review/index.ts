@@ -5,7 +5,7 @@ import * as awsx from "@pulumi/awsx";
 // The following vars are not allowed to be undefined, hence the `${...}` magic
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
-export const domain = `iam.${process.env["DOMAIN"]}`;  // like: iam.review.passport.gitcoin.co
+export const domain = `iam.${process.env["DOMAIN"]}`; // like: iam.review.passport.gitcoin.co
 let IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
 
 export const dockerGtcPassportIamImage = `${process.env["DOCKER_GTC_PASSPORT_IAM_IMAGE"]}`;
@@ -255,6 +255,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
           {
             name: "GTC_STAKING_GRAPH_API_KEY",
             valueFrom: `${IAM_SERVER_SSM_ARN}:GTC_STAKING_GRAPH_API_KEY::`,
+          },
+          {
+            name: "GTC_STAKING_ROUND",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:GTC_STAKING_ROUND::`,
           },
           {
             name: "COINBASE_CLIENT_ID",
