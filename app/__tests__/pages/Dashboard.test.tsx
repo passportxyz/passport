@@ -275,7 +275,7 @@ describe("when a user clicks on the Passport logo", () => {
       mockUserContext,
       {
         ...mockCeramicContext,
-        passportHasCacaoError: () => true,
+        passportHasCacaoError: true,
       },
       <Router>
         <Dashboard />
@@ -293,7 +293,7 @@ describe("when a user clicks on the Passport logo", () => {
       mockUserContext,
       {
         ...mockCeramicContext,
-        passportHasCacaoError: () => true,
+        passportHasCacaoError: true,
       },
       <Router>
         <Dashboard />

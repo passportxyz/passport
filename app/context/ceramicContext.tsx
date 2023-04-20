@@ -40,6 +40,7 @@ import { PlatformProps } from "../components/GenericPlatform";
 
 // -- Trusted IAM servers DID
 const IAM_ISSUER_DID = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
+const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
 
 export interface CeramicContextState {
   passport: Passport | undefined | false;
@@ -53,7 +54,7 @@ export interface CeramicContextState {
   cancelCeramicConnection: () => void;
   userDid: string | undefined;
   expiredProviders: PROVIDER_ID[];
-  passportHasCacaoError: () => boolean;
+  passportHasCacaoError: boolean;
   passportLoadResponse?: PassportLoadResponse;
 }
 
@@ -460,7 +461,7 @@ const startingState: CeramicContextState = {
   handleAddStamps: async () => {},
   handleDeleteStamps: async () => {},
   handleCheckRefreshPassport: async () => false,
-  passportHasCacaoError: () => false,
+  passportHasCacaoError: false,
   cancelCeramicConnection: () => {},
   userDid: undefined,
   expiredProviders: [],
@@ -480,6 +481,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [userDid, setUserDid] = useState<string | undefined>();
   const [expiredProviders, setExpiredProviders] = useState<PROVIDER_ID[]>([]);
   const [passportLoadResponse, setPassportLoadResponse] = useState<PassportLoadResponse | undefined>();
+  const [passportHasCacaoError, setPassportHasCacaoError] = useState<boolean>(false);
   const [viewerConnection] = useViewerConnection();
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
 
@@ -611,6 +613,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     }
 
     setPassportLoadResponse({ passport, status, errorDetails });
+    setPassportHasCacaoError(CACAO_ERROR_STATUSES.includes(status));
+
     return passportToReturn;
   };
 
@@ -800,12 +804,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const clearAllProvidersState = () => {
     setAllProviderState(startingAllProvidersState);
-  };
-
-  const passportHasCacaoError = (): boolean => {
-    const errorStatuses: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
-    if (passportLoadResponse) return errorStatuses.includes(passportLoadResponse.status);
-    else return false;
   };
 
   const stateMemo = useMemo(
