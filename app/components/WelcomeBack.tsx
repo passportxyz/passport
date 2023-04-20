@@ -36,7 +36,7 @@ export const WelcomeBack = ({
         header: "Welcome Back!",
         subHeader: "One-Click Verification",
         body: "You can now verify most web3 stamps and return to your destination faster with one-click verification!",
-        imgSrc: "",
+        imgSrc: "./assets/welcome-back.svg",
       }}
     >
       <>

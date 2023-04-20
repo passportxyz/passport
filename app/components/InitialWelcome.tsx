@@ -7,19 +7,19 @@ const welcomeSteps = [
     header: "Welcome to Gitcoin Passport!",
     subHeader: "Privacy-First Verification",
     body: "The non-doxxing identity aggregator that combines multiple sybil prevention mechanisms to prove your unique humanity and build your reputation.",
-    imgSrc: "",
+    imgSrc: "./assets/welcome.svg",
   },
   {
     header: "Introducing Passport Scoring",
     subHeader: "Get Your Unique Humanity Score",
     body: "Think of your score as a trampoline that launches you to your destination. As your score increases, communities more easily trust that you are a unique human.",
-    imgSrc: "",
+    imgSrc: "./assets/welcome-passport-scoring.svg",
   },
   {
     header: "Get Started",
     subHeader: "One-Click Verification",
     body: "You can now verify most web3 stamps with one-click verification! For Web2 stamps, please verify them through your Passport dashboard, and we encourage you to collect as many stamps as possible.",
-    imgSrc: "",
+    imgSrc: "./assets/welcome-get-started.svg",
   },
 ];
 
