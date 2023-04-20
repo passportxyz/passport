@@ -205,13 +205,13 @@ export const RefreshMyStampsModalContent = ({
               Cancel
             </button>
             <button
-              className="ml-2 flex w-full items-center justify-center rounded-sm bg-accent py-2 px-6 text-white disabled:cursor-not-allowed disabled:bg-muted disabled:text-black"
+              className="ml-2 flex w-full items-center justify-center rounded-sm bg-accent py-2 px-2 text-white disabled:cursor-not-allowed disabled:bg-muted disabled:text-black"
               onClick={() => {
                 handleRefreshSelectedStamps();
               }}
               disabled={!canSubmit}
             >
-              Confirm Stamps
+              <span className="flex">Confirm Stamps {isLoading && <Spinner size="sm" className="my-auto ml-2" />}</span>
             </button>
           </div>
         </div>
@@ -235,7 +235,6 @@ export const RefreshMyStampsModalContent = ({
             }}
           >
             Explore Stamps
-            {isLoading ? <Spinner size="sm" className="my-auto ml-2" /> : <></>}
           </button>
         </div>
       )}
