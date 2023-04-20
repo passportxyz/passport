@@ -83,7 +83,7 @@ describe("SideBarContent", () => {
     renderWithContext(mockUserContext, mockCeramicContext, drawer());
 
     verifiedProviders.forEach((provider) => {
-      expect(screen.getByTestId(`indicator-${provider}`)).toHaveClass("text-green-500");
+      expect(screen.getByTestId(`indicator-${provider}`)).toHaveClass("text-accent");
     });
   });
 
@@ -106,7 +106,7 @@ describe("SideBarContent", () => {
     );
 
     nonVerifiedProviders?.forEach((provider) => {
-      expect(screen.getByTestId(`indicator-${provider}`)).toHaveClass("text-gray-400");
+      expect(screen.getByTestId(`indicator-${provider}`)).toHaveClass("text-color-4");
     });
   });
 

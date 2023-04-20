@@ -30,6 +30,7 @@ type PlatformCardProps = {
   onOpen: () => void;
   setCurrentPlatform: React.Dispatch<React.SetStateAction<PlatformSpec | undefined>>;
   getUpdatedPlatforms: () => void;
+  className?: string;
 };
 
 export const PlatformCard = ({
@@ -41,6 +42,7 @@ export const PlatformCard = ({
   onOpen,
   setCurrentPlatform,
   getUpdatedPlatforms,
+  className,
 }: PlatformCardProps): JSX.Element => {
   // import all providers
   const { allProvidersState, passportHasCacaoError, handleDeleteStamps } = useContext(CeramicContext);
@@ -70,10 +72,13 @@ export const PlatformCard = ({
   const hidePlatform = stampFilters && !Object.keys(stampFilters).includes(platform.platform);
   if (hidePlatform) return <></>;
 
+  // Hides Coinbase stamp if feature flag is off
+  if (process.env.NEXT_PUBLIC_FF_COINBASE_STAMP === "off" && platform.platform === "Coinbase") return <></>;
+
   // returns a single Platform card
   return (
-    <div className="w-1/2 p-2 md:w-1/2 xl:w-1/4" key={`${platform.name}${i}`}>
-      <div className="relative flex h-full flex-col border border-gray-200 p-0">
+    <div className={className} key={`${platform.name}${i}`}>
+      <div className="relative flex h-full flex-col border border-accent-2 bg-background-2 p-0">
         <div className="flex flex-row p-6">
           <div className="flex h-10 w-10 flex-grow justify-center md:justify-start">
             {platform.icon ? (
@@ -84,7 +89,7 @@ export const PlatformCard = ({
                   fillRule="evenodd"
                   clipRule="evenodd"
                   d="M24.7999 24.8002H28.7999V28.8002H24.7999V24.8002ZM14 24.8002H18V28.8002H14V24.8002ZM3.19995 24.8002H7.19995V28.8002H3.19995V24.8002ZM24.7999 14.0002H28.7999V18.0002H24.7999V14.0002ZM14 14.0002H18V18.0002H14V14.0002ZM3.19995 14.0002H7.19995V18.0002H3.19995V14.0002ZM24.7999 3.2002H28.7999V7.2002H24.7999V3.2002ZM14 3.2002H18V7.2002H14V3.2002ZM3.19995 3.2002H7.19995V7.2002H3.19995V3.2002Z"
-                  fill="#161616"
+                  fill="var(--color-muted)"
                 />
               </svg>
             )}
@@ -93,46 +98,31 @@ export const PlatformCard = ({
             platform?.enablePlatformCardUpdate &&
             updatedPlatforms[platform.name] !== true &&
             selectedProviders[platform.platform].length > 0 && (
-              <div className="inline-flex h-6 items-center rounded-xl bg-yellow px-2 text-xs font-medium shadow-sm">
+              <div className="inline-flex h-6 items-center rounded-xl border border-accent-3 px-2 text-xs text-accent-3">
                 Update
               </div>
             )}
         </div>
         <div className="flex justify-center py-0 px-6 pb-6 md:block md:justify-start">
-          <h1 className="title-font mb-0 text-lg font-medium text-gray-900 md:mb-3">{platform.name}</h1>
-          <p className="pleading-relaxed hidden md:inline-block">{platform.description}</p>
+          <h1 className="mb-0 text-lg md:mb-3">{platform.name}</h1>
+          <p className="pleading-relaxed hidden text-color-3 md:inline-block">{platform.description}</p>
         </div>
-        <div className="mt-auto">
+        <div className="mt-auto text-color-3">
           {selectedProviders[platform.platform].length > 0 ? (
             <>
               <Menu>
                 <MenuButton disabled={disabled} className="verify-btn flex" data-testid="card-menu-button">
-                  <div className="m-auto flex justify-center">
-                    <svg
-                      className="m-1 mr-2"
-                      width="15"
-                      height="16"
-                      viewBox="0 0 15 16"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
+                  <div className="m-auto flex items-center justify-center">
+                    <svg width="15" height="16" viewBox="0 0 15 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path
                         fillRule="evenodd"
                         clipRule="evenodd"
                         d="M0.449301 3.499C3.15674 3.46227 5.62356 2.42929 7.4998 0.75C9.37605 2.42929 11.8429 3.46227 14.5503 3.499C14.6486 4.0847 14.6998 4.68638 14.6998 5.30002C14.6998 10.0024 11.6945 14.0028 7.4998 15.4854C3.30511 14.0028 0.299805 10.0024 0.299805 5.30002C0.299805 4.68638 0.350982 4.0847 0.449301 3.499ZM10.8362 6.83638C11.1877 6.48491 11.1877 5.91506 10.8362 5.56359C10.4847 5.21212 9.91488 5.21212 9.56341 5.56359L6.5998 8.5272L5.4362 7.36359C5.08473 7.01212 4.51488 7.01212 4.16341 7.36359C3.81194 7.71506 3.81194 8.28491 4.16341 8.63638L5.96341 10.4364C6.31488 10.7879 6.88473 10.7879 7.2362 10.4364L10.8362 6.83638Z"
-                        fill="#059669"
+                        fill="var(--color-accent-3)"
                       />
                     </svg>
-                    Verified
-                    <svg
-                      className="relative m-1 mt-2 pl-1"
-                      style={{ top: "1px" }}
-                      width="11"
-                      height="7"
-                      viewBox="0 0 11 7"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
+                    <span className="mx-2 translate-y-[1px]">Verified</span>
+                    <svg width="11" height="7" viewBox="0 0 11 7" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path
                         fillRule="evenodd"
                         clipRule="evenodd"
@@ -142,7 +132,7 @@ export const PlatformCard = ({
                     </svg>
                   </div>
                 </MenuButton>
-                <MenuList>
+                <MenuList style={{ marginLeft: "16px" }}>
                   <MenuItem onClick={onOpenJsonOutputModal} data-testid="view-json">
                     View stamp JSON
                   </MenuItem>

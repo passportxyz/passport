@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { ExpiredStampModal, getProviderIdsFromPlatformId } from "../../components/ExpiredStampModal";
 import {
   makeTestCeramicContext,
@@ -61,7 +61,7 @@ describe("ExpiredStampModal", () => {
       "FiftyOrMoreGithubFollowers",
     ]);
   });
-  it("should delete all stamps within each expired platform", () => {
+  it("should delete all stamps within each expired platform", async () => {
     const handleDeleteStamps = jest.fn();
     renderWithContext(
       {} as UserContextState,
@@ -70,6 +70,9 @@ describe("ExpiredStampModal", () => {
     );
 
     screen.getByTestId("delete-duplicate").click();
+
+    const spinner = screen.getByTestId("removing-stamps-spinner");
+    expect(spinner).toBeInTheDocument();
     expect(handleDeleteStamps).toHaveBeenCalledWith([
       "Ens",
       "Facebook",
@@ -83,5 +86,7 @@ describe("ExpiredStampModal", () => {
       "FiftyOrMoreGithubFollowers",
       "Linkedin",
     ]);
+
+    await waitFor(() => expect(spinner).not.toBeInTheDocument());
   });
 });

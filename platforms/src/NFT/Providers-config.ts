@@ -6,6 +6,7 @@ export const NFTPlatformDetails: PlatformSpec = {
   name: "NFT Holder",
   description: "Connect a wallet and validate the stamp by retrieving an NFT.",
   connectMessage: "Connect NFT",
+  isEVM: true,
 };
 
 export const NFTProviderConfig: PlatformGroupSpec[] = [

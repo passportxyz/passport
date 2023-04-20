@@ -6,6 +6,7 @@ export const GnosisSafePlatformDetails: PlatformSpec = {
   name: "Gnosis Safe",
   description: "Gnosis Safe Signer/Owner Verification",
   connectMessage: "Verify Account",
+  isEVM: true,
 };
 
 export const GnosisSafeProviderConfig: PlatformGroupSpec[] = [

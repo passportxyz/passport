@@ -12,7 +12,7 @@ export const getPlatformSpec = (platformName: string): PlatformSpec | undefined 
 
 export const PLATFORMS: PlatformSpec[] = [
   {
-    icon: "./assets/gitcoinStampIcon.svg",
+    icon: "./assets/gtcGrantsLightIcon.svg",
     platform: "Gitcoin",
     name: "Gitcoin Grants",
     description: "Connect with Github to verify with your Gitcoin account.",
@@ -49,7 +49,7 @@ export const PLATFORMS: PlatformSpec[] = [
     connectMessage: "Connect Account",
   },
   {
-    icon: "./assets/githubStampIcon.svg",
+    icon: "./assets/githubWhiteStampIcon.svg",
     platform: "Github",
     name: "Github",
     description: "Connect your existing Github account to verify.",
@@ -154,7 +154,7 @@ export const PLATFORMS: PlatformSpec[] = [
     isEVM: true,
   },
   {
-    icon: "./assets/lensStampIcon.svg",
+    icon: "./assets/lensWhiteStampIcon.svg",
     platform: "Lens",
     name: "Lens",
     description: "Lens Profile Verification",

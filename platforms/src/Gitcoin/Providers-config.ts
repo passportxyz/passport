@@ -6,6 +6,7 @@ export const gitcoinPlatformDetails: PlatformSpec = {
   name: "Gitcoin",
   description: "Connect with Github to verify with your Gitcoin account.",
   connectMessage: "Connect Account",
+  isEVM: true,
 };
 
 export const GitcoinProviderConfig: PlatformGroupSpec[] = [

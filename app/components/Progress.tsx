@@ -7,7 +7,7 @@ export enum Status {
 
 export type Step = {
   name: string;
-  description: string;
+  description?: string;
   status: Status;
 };
 

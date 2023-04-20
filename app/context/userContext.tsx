@@ -25,6 +25,17 @@ import axios from "axios";
 
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
+const MULTICHAIN_ENABLED = process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE !== "off";
+
+type UserWarningName = "expiredStamp" | "cacaoError";
+
+export interface UserWarning {
+  content: React.ReactNode;
+  icon?: React.ReactNode;
+  name?: UserWarningName;
+  dismissible?: boolean;
+}
+
 export interface UserContextState {
   loggedIn: boolean;
   toggleConnection: () => void;
@@ -35,6 +46,9 @@ export interface UserContextState {
   walletLabel: string | undefined;
   dbAccessToken: string | undefined;
   dbAccessTokenStatus: DbAuthTokenStatus;
+  loggingIn: boolean;
+  userWarning?: UserWarning;
+  setUserWarning: (warning?: UserWarning) => void;
 }
 
 const startingState: UserContextState = {
@@ -47,6 +61,9 @@ const startingState: UserContextState = {
   walletLabel: undefined,
   dbAccessToken: undefined,
   dbAccessTokenStatus: "idle",
+  loggingIn: false,
+  userWarning: undefined,
+  setUserWarning: () => {},
 };
 
 export const pillLocalStorage = (platform?: string): void => {
@@ -65,6 +82,7 @@ export const UserContext = createContext(startingState);
 export const UserContextProvider = ({ children }: { children: any }) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [viewerConnection, ceramicConnect, ceramicDisconnect] = useViewerConnection();
+  const [userWarning, setUserWarning] = useState<UserWarning | undefined>();
 
   // Use onboard to control the current provider/wallets
   const [{ wallet }, connect, disconnect] = useConnectWallet();
@@ -72,7 +90,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   const [walletLabel, setWalletLabel] = useState<string | undefined>();
   const [address, setAddress] = useState<string>();
   const [signer, setSigner] = useState<JsonRpcSigner | undefined>();
-  const [loggingIn, setLoggingIn] = useState<boolean | undefined>();
+  const [loggingIn, setLoggingIn] = useState<boolean>(false);
   const [dbAccessToken, setDbAccessToken] = useState<string | undefined>();
   const [dbAccessTokenStatus, setDbAccessTokenStatus] = useState<DbAuthTokenStatus>("idle");
 
@@ -179,7 +197,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     // check that passportLogin isn't mid-way through
     if (wallet && !loggingIn) {
       // ensure that passport is connected to mainnet
-      const hasCorrectChainId = process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on" ? true : await ensureMainnet();
+      const hasCorrectChainId = MULTICHAIN_ENABLED ? true : await ensureMainnet();
       // mark that we're attempting to login
       setLoggingIn(true);
       // with loaded chainId
@@ -197,8 +215,6 @@ export const UserContextProvider = ({ children }: { children: any }) => {
           const dbCacheTokenKey = `dbcache-token-${address}`;
           const sessionStr = window.localStorage.getItem(sessionKey);
 
-          let hasNewSelfId = false;
-
           // @ts-ignore
           // When sessionStr is null, this will create a new selfId. We want to avoid this, becasue we want to make sure
           // that chainId 1 is in the did
@@ -210,8 +226,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
             // @ts-ignore
             !selfId?.client?.session
           ) {
-            hasNewSelfId = true;
-            if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
+            if (MULTICHAIN_ENABLED) {
               // If the session loaded is not valid, or if it is expired or close to expire, we create
               // a new session
               // Also we enforce the "1" chainId, as we always want to use mainnet dids, in order to avoid confusion
@@ -252,6 +267,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
             });
             // then clear local state
             clearState();
+
             window.localStorage.removeItem(sessionKey);
             window.localStorage.removeItem(dbCacheTokenKey);
           }
@@ -400,19 +416,6 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       });
   };
 
-  const stateMemo = useMemo(
-    () => ({
-      loggedIn,
-      address,
-      toggleConnection,
-      wallet,
-      signer,
-      walletLabel,
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [loggedIn, address, signer, wallet]
-  );
-
   // use props as a way to pass configuration values
   const providerProps = {
     loggedIn,
@@ -424,6 +427,9 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     walletLabel,
     dbAccessToken,
     dbAccessTokenStatus,
+    loggingIn,
+    userWarning,
+    setUserWarning,
   };
 
   return <UserContext.Provider value={providerProps}>{children}</UserContext.Provider>;

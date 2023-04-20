@@ -16,14 +16,16 @@ import { Drawer, DrawerOverlay, useDisclosure } from "@chakra-ui/react";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { CeramicContext } from "../context/ceramicContext";
 import { PlatformCard } from "./PlatformCard";
+import PageWidthGrid from "../components/PageWidthGrid";
 
 export type CardListProps = {
   isLoading?: boolean;
+  cardClassName?: string;
 };
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
-export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
+export const CardList = ({ isLoading = false, cardClassName }: CardListProps): JSX.Element => {
   const { allProvidersState, allPlatforms } = useContext(CeramicContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef();
@@ -104,11 +106,11 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
   }, [currentPlatform]);
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex flex-wrap md:-m-4 md:px-4">
+    <>
+      <PageWidthGrid nested={true}>
         {PLATFORMS.map((platform, i) => {
           return isLoading ? (
-            <LoadingCard key={i} />
+            <LoadingCard key={i} className={cardClassName} />
           ) : (
             <PlatformCard
               i={i}
@@ -120,10 +122,11 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
               updatedPlatforms={updatedPlatforms}
               getUpdatedPlatforms={getUpdatedPlatforms}
               setCurrentPlatform={setCurrentPlatform}
+              className={cardClassName}
             />
           );
         })}
-      </div>
+      </PageWidthGrid>
       {/* sidebar */}
       {currentProviders && (
         <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose} finalFocusRef={btnRef.current}>
@@ -131,6 +134,6 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
           {renderCurrentPlatformSelection()}
         </Drawer>
       )}
-    </div>
+    </>
   );
 };

@@ -16,6 +16,8 @@ const customJestConfig = {
     "^@/pages/(.*)$": "<rootDir>/pages/$1",
   },
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+  setupFiles: ["jest-localstorage-mock"],
+  resetMocks: false,
 };
 
 export default createJestConfig(customJestConfig);
