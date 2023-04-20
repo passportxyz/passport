@@ -75,16 +75,17 @@ export const RefreshMyStampsModalContent = ({
       // TODO: add datadog logger
       // datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
       setLoading(true);
+      const providerIds: PROVIDER_ID[] = [];
       const result = await Promise.all(
         selectedEVMPlatformProviders?.map(async (platformProviders) => {
-          const platformId = platformProviders.platformId;
-          const providerIds =
+          const providerIdsTemp =
             platformProviders.platformGroup.reduce((all, stamp, i) => {
               return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
             }, [] as PROVIDER_ID[]) || [];
-          await handleFetchCredential(platformId, providerIds);
+          providerIds.push(...providerIdsTemp);
         })
       );
+      await handleFetchCredential(providerIds);
       setLoading(false);
       resetStampsAndProgressState();
       navigate("/dashboard");
@@ -97,7 +98,7 @@ export const RefreshMyStampsModalContent = ({
     }
   };
 
-  const handleFetchCredential = async (platformID: PLATFORM_ID, providerIDs: PROVIDER_ID[]): Promise<void> => {
+  const handleFetchCredential = async (providerIDs: PROVIDER_ID[]): Promise<void> => {
     try {
       // This array will contain all providers that new validated VCs
       let vcs: Stamp[] = [];
@@ -106,7 +107,7 @@ export const RefreshMyStampsModalContent = ({
         const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
           iamUrl,
           {
-            type: platformID,
+            type: "EVMBulkVerify",
             types: selectedProviders,
             version: "0.0.0",
             address: address || "",
@@ -209,7 +210,7 @@ export const RefreshMyStampsModalContent = ({
               onClick={() => {
                 handleRefreshSelectedStamps();
               }}
-              disabled={!canSubmit}
+              disabled={!canSubmit || isLoading}
             >
               <span className="flex">Confirm Stamps {isLoading && <Spinner size="sm" className="my-auto ml-2" />}</span>
             </button>
