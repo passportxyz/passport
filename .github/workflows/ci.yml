@@ -18,7 +18,7 @@ jobs:
           - 7007:7007
 
     env:
-     CERAMIC_CLIENT_URL: http://127.0.0.1:7007
+      CERAMIC_CLIENT_URL: http://127.0.0.1:7007
 
     steps:
       - uses: actions/checkout@v3
@@ -31,10 +31,10 @@ jobs:
         run: lerna bootstrap
       - name: Run Tests
         run: yarn test
-      - name: Run Ceramic Integration Tests
-        run: yarn test:ceramic-integration
       - name: Run Linter
         run: yarn lint
+      - name: Run Ceramic Integration Tests
+        run: yarn test:ceramic-integration
       - name: Workarround for build error
         run: rm -rf node_modules/@tendermint
       - name: Run Build (ensure that build succeeds)
