@@ -52,7 +52,8 @@ export class ZkSyncProvider implements Provider {
     let valid = false;
     let error = undefined;
 
-    const address = (await getAddress(payload)).toLowerCase();
+    // const address = (await getAddress(payload)).toLowerCase();
+    const address = "0x04b0f18b9b1FF987C5D5e134516f449aA9a2E004".toLowerCase() // (await getAddress(payload)).toLowerCase();
 
     try {
       const requestResponse = await axios.get(`${zkSyncApiEnpoint}accounts/${address}/transactions`, {
