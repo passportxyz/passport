@@ -44,13 +44,14 @@ export interface DataResult {
 }
 
 async function verifyStake(payload: RequestPayload): Promise<StakeResponse> {
+  const round = process.env.GTC_STAKING_ROUND || "1";
   const address = payload.address.toLowerCase();
   const result = await axios.post(stakingSubgraph, {
     query: `
     {
       users(where: {address: "${address}"}) {
         address,
-        stakes(where: {round: "1"}) {
+        stakes(where: {round: "${round}"}) {
           stake
           round {
             id
