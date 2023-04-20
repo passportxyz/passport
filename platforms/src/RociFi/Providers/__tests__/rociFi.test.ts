@@ -4,7 +4,7 @@ import { RociFiProvider } from "../rociFi";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 
-const NFCS_OWNER = "0x644b862E6F8D8333E9d6c65FcD2f0Fa0674E899C";
+const NFCS_OWNER = "0x644b862E6F8D8333E9d6c65FcD2f0Fa0674E899C".toLowerCase();
 const NFCS_NOT_OWNER = "0x0000000000000000000000000000000000000001";
 
 describe("Attempt verification", function () {
