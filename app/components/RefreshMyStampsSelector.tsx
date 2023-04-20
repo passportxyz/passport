@@ -28,8 +28,8 @@ export function RefreshMyStampsSelector({
   setSwitchState,
 }: RefreshMyStampsSelectorProps) {
   const [checkboxesState, setCheckboxesState] = useState<{ checked: boolean; provider: PROVIDER_ID }[]>();
-  const slicedProviders = switchState.providers.slice(0, switchState.providers.length);
   const [checkboxProviders, setCheckboxProviders] = useState<PROVIDER_ID[]>();
+  const slicedProviders = switchState.providers.slice(0, switchState.providers.length);
 
   useEffect(() => {
     if (switchState.checked) {
@@ -38,8 +38,18 @@ export function RefreshMyStampsSelector({
       setCheckboxProviders(slicedProviders);
     } else if (!switchState.checked) {
       setCheckboxesState(checkboxesState?.map((checkState) => ({ checked: false, provider: checkState.provider })));
+      setSelectedProviders((selectedProviders || []).filter((provider) => checkboxProviders?.indexOf(provider) === -1));
+      setCheckboxProviders([]);
     }
   }, [switchState]);
+
+  useEffect(() => {
+    if (checkboxProviders) {
+      if (checkboxProviders?.length === 0 && switchState.checked) {
+        setSwitchState({ checked: false, providers: [] });
+      }
+    }
+  }, [checkboxProviders]);
 
   // if no items are checked, set switchState to false -- toggle off
   const handleCheckboxChecking = useCallback(
@@ -49,11 +59,6 @@ export function RefreshMyStampsSelector({
           checkbox.checked = event.target.checked;
         }
       });
-      if (checkboxProviders) {
-        if (checkboxProviders?.length <= 1 && switchState.checked) {
-          setSwitchState({ checked: false, providers: [] });
-        }
-      }
     },
     [checkboxesState, checkboxProviders, switchState]
   );
@@ -98,9 +103,9 @@ export function RefreshMyStampsSelector({
                               );
                             setCheckboxProviders &&
                               setCheckboxProviders(
-                                e.target.checked && checkboxProviders
-                                  ? [...checkboxProviders]
-                                  : (checkboxProviders || []).filter((providerId) => providerId !== value)
+                                !e.target.checked && checkboxProviders
+                                  ? (checkboxProviders || []).filter((providerId) => providerId !== value)
+                                  : [...checkboxProviders]
                               );
                           }}
                         />
