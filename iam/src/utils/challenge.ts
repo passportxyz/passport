@@ -10,6 +10,8 @@ export const getChallenge = (payload: RequestPayload): ChallengePayload => {
         return `I commit that this wallet is under my control and that I wish to link it with my Passport.\n\nnonce: ${nonce}`;
       case "Signer":
         return `I commit that I wish to register all ETH stamps associated with an Ethereum account that I control to my Passport.\n\naccount: ${payload.signer.address}\nnonce: ${nonce}`;
+      case "EVMBulkVerify":
+        return `I commit that I wish to verify all the selected EVM stamps associated with my Passport.\n\nnonce: ${nonce}`;
       default:
         return `I commit that this stamp is my unique and only ${provider} verification for Passport.\n\nnonce: ${nonce}`;
     }
