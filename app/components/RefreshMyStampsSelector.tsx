@@ -28,7 +28,7 @@ export function RefreshMyStampsSelector({
   setSwitchState,
 }: RefreshMyStampsSelectorProps) {
   const [checkboxesState, setCheckboxesState] = useState<{ checked: boolean; provider: PROVIDER_ID }[]>();
-  const [checkboxProviders, setCheckboxProviders] = useState<PROVIDER_ID[]>();
+  const [checkboxProviders, setCheckboxProviders] = useState<PROVIDER_ID[]>([]);
   const slicedProviders = switchState.providers.slice(0, switchState.providers.length);
 
   useEffect(() => {
