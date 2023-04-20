@@ -1,5 +1,5 @@
 // --- React hooks
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // --- Types
 import { evmPlatformProvider } from "./RefreshMyStampsModalContent";
@@ -51,6 +51,7 @@ export const RefreshMyStampsModalContentCard = ({
                 data-testid={`switch-${currentPlatform?.name}`}
                 value={`${currentPlatform?.name}`}
                 colorScheme="purple"
+                isChecked={switchState.checked}
                 onChange={(e) => {
                   const value = e.target.value as PLATFORM_ID;
                   const providers = platformGroup
@@ -83,6 +84,7 @@ export const RefreshMyStampsModalContentCard = ({
               selectedProviders={selectedProviders}
               setSelectedProviders={(providerIds) => setSelectedProviders && setSelectedProviders(providerIds)}
               switchState={switchState}
+              setSwitchState={setSwitchState}
             />
           </AccordionPanel>
         </AccordionItem>
