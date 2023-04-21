@@ -41,7 +41,7 @@ export default function Dashboard() {
   const { passport, isLoadingPassport, passportHasCacaoError, cancelCeramicConnection, expiredProviders } =
     useContext(CeramicContext);
   const { wallet, toggleConnection, userWarning, setUserWarning } = useContext(UserContext);
-  const { score, rawScore, refreshScore, scoreDescription } = useContext(ScorerContext);
+  const { score, rawScore, refreshScore, scoreDescription, passportSubmissionState } = useContext(ScorerContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -224,7 +224,17 @@ export default function Dashboard() {
 
         <div className="col-span-1 col-end-[-2] justify-self-end">
           <div className="flex text-2xl">
-            <span className={`${score === "1" ? "text-accent-3" : "text-color-2"} text-accent-3`}>{rawScore}</span>
+            {passportSubmissionState === "APP_REQUEST_PENDING" ? (
+              <Spinner
+                className="my-[2px]"
+                thickness="2px"
+                speed="0.65s"
+                emptyColor="darkGray"
+                color="gray"
+                size="md"
+              />
+            ) : null}
+            <span className={`${score == 1 ? "text-accent-3" : "text-color-4"}`}>{rawScore}</span>
             <Tooltip>
               Your Unique Humanity Score is based out of 100 and measures how unique you are. The current passing score
               threshold is 15.
@@ -260,7 +270,7 @@ export default function Dashboard() {
         </div>
       </PageWidthGrid>
     ),
-    [filterName, onOpen, passport]
+    [filterName, onOpen, passport, score, rawScore, scoreDescription, passportSubmissionState]
   );
 
   return (

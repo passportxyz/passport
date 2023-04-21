@@ -2,7 +2,7 @@
 import React, { createContext, useEffect, useMemo, useState } from "react";
 
 // --- Axios
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 const scorerId = process.env.NEXT_PUBLIC_ALLO_SCORER_ID;
 const scorerApiKey = process.env.NEXT_PUBLIC_ALLO_SCORER_API_KEY || "";
@@ -18,9 +18,9 @@ export type PassportSubmissionStateType =
 export type ScoreStateType = "APP_INITIAL" | "PROCESSING" | "ERROR" | "DONE";
 
 export interface ScorerContextState {
-  score: string;
-  rawScore: string;
-  threshold: string;
+  score: number;
+  rawScore: number;
+  threshold: number;
   scoreDescription: string;
   passportSubmissionState: PassportSubmissionStateType;
   scoreState: ScoreStateType;
@@ -30,9 +30,9 @@ export interface ScorerContextState {
 }
 
 const startingState: ScorerContextState = {
-  score: "",
-  rawScore: "",
-  threshold: "",
+  score: 0,
+  rawScore: 0,
+  threshold: 0,
   scoreDescription: "",
   passportSubmissionState: "APP_INITIAL",
   scoreState: "APP_INITIAL",
@@ -44,9 +44,9 @@ const startingState: ScorerContextState = {
 export const ScorerContext = createContext(startingState);
 
 export const ScorerContextProvider = ({ children }: { children: any }) => {
-  const [score, setScore] = useState("");
-  const [rawScore, setRawScore] = useState("");
-  const [threshold, setThreshold] = useState("");
+  const [score, setScore] = useState(0);
+  const [rawScore, setRawScore] = useState(0);
+  const [threshold, setThreshold] = useState(0);
   const [scoreDescription, setScoreDescription] = useState("");
   const [passportSubmissionState, setPassportSubmissionState] = useState<PassportSubmissionStateType>("APP_INITIAL");
   const [scoreState, setScoreState] = useState<ScoreStateType>("APP_INITIAL");
@@ -59,15 +59,17 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
           "X-API-Key": scorerApiKey,
         },
       });
-      console.log("Response for score", response.data);
       setScoreState(response.data.status);
       if (response.data.status === "DONE") {
         setScore(response.data.score);
-        setRawScore(response.data.evidence.rawScore);
-        setThreshold(response.data.evidence.threshold);
 
         const numRawScore = Number.parseFloat(response.data.evidence.rawScore);
         const numThreshold = Number.parseFloat(response.data.evidence.threshold);
+        const numScore = Number.parseFloat(response.data.score);
+
+        setRawScore(numRawScore);
+        setThreshold(numThreshold);
+        setScore(numScore);
 
         if (numRawScore > numThreshold) {
           setScoreDescription("Passing Score");
@@ -82,8 +84,9 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     }
   };
 
-  const refreshScore = async (address: string | undefined) => {
+  const refreshScore = async (address: string | undefined, submitePassportOnFailure: boolean = true) => {
     if (address) {
+      setPassportSubmissionState("APP_REQUEST_PENDING");
       try {
         let scoreStatus = "PROCESSING";
 
@@ -91,8 +94,12 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
           scoreStatus = await loadScore(address);
           await new Promise((resolve) => setTimeout(resolve, 3000));
         }
-      } catch (error) {
-        console.error(error);
+        setPassportSubmissionState("APP_REQUEST_SUCCESS");
+      } catch (error: AxiosError | any) {
+        setPassportSubmissionState("APP_REQUEST_ERROR");
+        if (submitePassportOnFailure && error.response.data.detail === "Unable to get score for provided scorer.") {
+          submitPassport(address);
+        }
       }
     }
   };
@@ -112,8 +119,8 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
             },
           }
         );
-        console.log("Response for passport submission - scorer: ", response.data);
-        refreshScore(address);
+        // Refresh score, but set the submitePassportOnFailure to false -> we want to avoid a loop
+        refreshScore(address, false);
       } catch (error) {
         console.error(error);
       }
