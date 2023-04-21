@@ -81,7 +81,7 @@ export const CardList = ({ isLoading = false, cardClassName }: CardListProps): J
       const platformProps = allPlatforms.get(currentPlatform.platform);
       if (platformProps) {
         return (
-          <GenericPlatform platform={platformProps.platform} platFormGroupSpec={platformProps.platFormGroupSpec} />
+          <GenericPlatform platform={platformProps.platform} platFormGroupSpec={platformProps.platFormGroupSpec} onClose={onClose} />
         );
       }
     }

@@ -40,6 +40,7 @@ import { NoStampModal } from "./NoStampModal";
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
   platform: PlatformClass;
+  onClose: ()=>void;
 };
 
 enum VerificationStatuses {
@@ -57,12 +58,13 @@ const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
 const checkIcon = "../../assets/check-icon.svg";
 
-export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps): JSX.Element => {
+export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: PlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, handleDeleteStamps, allProvidersState, userDid } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [showNoStampModal, setShowNoStampModal] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   // --- Chakra functions
   const toast = useToast();
@@ -88,9 +90,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
 
   // any time we change selection state...
   useEffect(() => {
-    if (selectedProviders.length !== verifiedProviders.length) {
-      setCanSubmit(true);
-    }
+      setCanSubmit(selectedProviders.length !== verifiedProviders.length);
   }, [selectedProviders, verifiedProviders]);
 
   const waitForRedirect = (timeout?: number): Promise<ProviderPayload> => {
@@ -281,13 +281,14 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
       );
     } finally {
       setLoading(false);
+      setSubmitted(true);
     }
   };
 
   // --- Done Toast Helper
   const doneToast = (title: string, body: string, icon: string, platformId: PLATFORM_ID) => {
     toast({
-      duration: 5000,
+      duration: 9000,
       isClosable: true,
       render: (result: any) => (
         <DoneToastContent title={title} body={body} icon={icon} platformId={platformId} result={result} />
@@ -399,12 +400,12 @@ export const GenericPlatform = ({ platFormGroupSpec, platform }: PlatformProps):
         verifyButton={
           <>
             <button
-              disabled={!canSubmit}
-              onClick={handleFetchCredential}
+              disabled={!submitted && !canSubmit}
+              onClick={canSubmit ? handleFetchCredential : onClose}
               data-testid={`button-verify-${platform.platformId}`}
               className="sidebar-verify-btn"
             >
-              {verifiedProviders.length > 0 ? "Save" : "Verify"}
+              {submitted && !canSubmit ? "Close" : (verifiedProviders.length > 0 ? "Save" : "Verify")}
             </button>
           </>
         }
