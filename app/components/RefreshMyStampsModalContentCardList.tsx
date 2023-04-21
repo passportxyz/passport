@@ -11,14 +11,12 @@ import { RefreshMyStampsModalContentCard } from "./RefreshMyStampsModalContentCa
 
 export type RefreshMyStampsModalCardListProps = {
   fetchedPossibleEVMStamps: PossibleEVMProvider[] | undefined;
-  verifiedProviders: PROVIDER_ID[];
   selectedProviders: PROVIDER_ID[];
   setSelectedProviders: (providerIds: PROVIDER_ID[]) => void;
 };
 
 export const RefreshMyStampsModalContentCardList = ({
   fetchedPossibleEVMStamps,
-  verifiedProviders,
   selectedProviders,
   setSelectedProviders,
 }: RefreshMyStampsModalCardListProps) => {
@@ -31,7 +29,6 @@ export const RefreshMyStampsModalContentCardList = ({
         key={currentPlatform ? currentPlatform.name : `undefined-${index}`}
         platformGroup={platformGroup}
         currentPlatform={currentPlatform}
-        verifiedProviders={verifiedProviders}
         selectedProviders={selectedProviders}
         setSelectedProviders={setSelectedProviders}
       />

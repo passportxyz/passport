@@ -15,7 +15,6 @@ import { RefreshMyStampsSelector } from "../components/RefreshMyStampsSelector";
 
 type RefreshMyStampsModalCardProps = {
   platformGroup: PlatformGroupSpec[];
-  verifiedProviders: PROVIDER_ID[];
   selectedProviders: PROVIDER_ID[];
   currentPlatform: PlatformSpec | undefined;
   setSelectedProviders: (providerIds: PROVIDER_ID[]) => void;
@@ -24,24 +23,18 @@ type RefreshMyStampsModalCardProps = {
 export const RefreshMyStampsModalContentCard = ({
   platformGroup,
   currentPlatform,
-  verifiedProviders,
   selectedProviders,
   setSelectedProviders,
 }: RefreshMyStampsModalCardProps): JSX.Element => {
-  const [checked, setChecked] = useState(true);
-
   const platformProviders = useMemo(
     () => platformGroup.map((group) => group.providers?.map((provider) => provider.name)).flat(),
     [platformGroup]
   );
 
-  useEffect(() => {
-    if (checked) {
-      setSelectedProviders((selectedProviders || []).concat(platformProviders));
-    } else {
-      setSelectedProviders((selectedProviders || []).filter((provider) => platformProviders?.indexOf(provider) === -1));
-    }
-  }, [checked]);
+  const checked = useMemo(
+    () => (selectedProviders || []).some((provider) => platformProviders?.indexOf(provider) !== -1),
+    [selectedProviders, platformProviders]
+  );
 
   return (
     <div>
@@ -61,7 +54,15 @@ export const RefreshMyStampsModalContentCard = ({
                 value={`${currentPlatform?.name}`}
                 colorScheme="purple"
                 isChecked={checked}
-                onChange={(e) => setChecked(e.target.checked)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedProviders((selectedProviders || []).concat(platformProviders));
+                  } else {
+                    setSelectedProviders(
+                      (selectedProviders || []).filter((provider) => platformProviders?.indexOf(provider) === -1)
+                    );
+                  }
+                }}
               />
               <AccordionIcon marginLeft="8px" fontSize="28px" />
             </div>
