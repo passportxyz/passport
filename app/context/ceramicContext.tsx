@@ -13,6 +13,7 @@ import { useViewerConnection } from "@self.id/framework";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { UserContext } from "./userContext";
+import { ScorerContext } from "./scorerContext";
 import {
   Twitter,
   Ens,
@@ -486,6 +487,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
 
   const { address, dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
+  const { submitPassport } = useContext(ScorerContext);
 
   useEffect(() => {
     return () => {
@@ -758,6 +760,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         if (ceramicClient && newPassport) {
           ceramicClient.setStamps(newPassport.stamps);
         }
+        submitPassport(address);
       }
     } catch (e) {
       datadogLogs.logger.error("Error adding multiple stamps", { stamps, error: e });
@@ -774,6 +777,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         if (ceramicClient && newPassport) {
           ceramicClient.setStamps(newPassport.stamps);
         }
+        submitPassport(address);
       }
     } catch (e) {
       datadogLogs.logger.error("Error deleting multiple stamps", { providerIds, error: e });

@@ -28,6 +28,7 @@ import {
 
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
+import { ScorerContext } from "../context/scorerContext";
 
 import { useViewerConnection } from "@self.id/framework";
 import { EthereumAuthProvider } from "@self.id/web";
@@ -40,6 +41,7 @@ export default function Dashboard() {
   const { passport, isLoadingPassport, passportHasCacaoError, cancelCeramicConnection, expiredProviders } =
     useContext(CeramicContext);
   const { wallet, toggleConnection, userWarning, setUserWarning } = useContext(UserContext);
+  const { score, rawScore, refreshScore, scoreDescription, passportSubmissionState } = useContext(ScorerContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -60,6 +62,8 @@ export default function Dashboard() {
   useEffect(() => {
     if (!wallet) {
       navigate("/");
+    } else {
+      refreshScore(wallet.accounts[0].address.toLowerCase());
     }
   }, [wallet]);
 
@@ -200,7 +204,7 @@ export default function Dashboard() {
   const subheader = useMemo(
     () => (
       <PageWidthGrid nested={true} className="my-4">
-        <div className="col-span-3 flex items-center justify-items-center self-center lg:col-span-4">
+        <div className="col-span-2 flex items-center justify-items-center self-center lg:col-span-4">
           <div className="flex text-2xl">
             My {filterName && `${filterName} `}Stamps
             {filterName && (
@@ -215,6 +219,23 @@ export default function Dashboard() {
               unique humanity. Select the verification stamps you&apos;d like to connect to start building your
               passport. The more verifications you have&#44; the stronger your passport will be.
             </Tooltip>
+          </div>
+        </div>
+
+        <div className="col-span-1 col-end-[-2] flex min-w-fit items-center justify-self-end">
+          <div className={`pr-2 ${passportSubmissionState === "APP_REQUEST_PENDING" ? "visible" : "invisible"}`}>
+            <Spinner className="my-[2px]" thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="flex text-2xl">
+              {/* TODO add color to theme */}
+              <span className={`${score == 1 ? "text-accent-3" : "text-[#FFE28A]"}`}>{rawScore.toFixed(2)}</span>
+              <Tooltip>
+                Your Unique Humanity Score is based out of 100 and measures how unique you are. The current passing
+                score threshold is 15.
+              </Tooltip>
+            </div>
+            <div className="flex whitespace-nowrap text-sm">{scoreDescription}</div>
           </div>
         </div>
 
@@ -245,7 +266,7 @@ export default function Dashboard() {
         </div>
       </PageWidthGrid>
     ),
-    [filterName, onOpen, passport]
+    [filterName, onOpen, passport, score, rawScore, scoreDescription, passportSubmissionState]
   );
 
   return (
