@@ -155,8 +155,8 @@ function App({ Component, pageProps }: AppProps) {
         session={true}
       >
         <UserContextProvider>
-          <CeramicContextProvider>
-            <ScorerContextProvider>
+          <ScorerContextProvider>
+            <CeramicContextProvider>
               <ManageAccountCenter>
                 <div className="font-body" suppressHydrationWarning>
                   {typeof window === "undefined" ? null : (
@@ -166,8 +166,8 @@ function App({ Component, pageProps }: AppProps) {
                   )}
                 </div>
               </ManageAccountCenter>
-            </ScorerContextProvider>
-          </CeramicContextProvider>
+            </CeramicContextProvider>
+          </ScorerContextProvider>
         </UserContextProvider>
       </SelfIdProvider>
     </>

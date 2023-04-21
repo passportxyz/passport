@@ -41,7 +41,7 @@ export default function Dashboard() {
   const { passport, isLoadingPassport, passportHasCacaoError, cancelCeramicConnection, expiredProviders } =
     useContext(CeramicContext);
   const { wallet, toggleConnection, userWarning, setUserWarning } = useContext(UserContext);
-  const { score, rawScore, refreshScore, submitPassport } = useContext(ScorerContext);
+  const { score, rawScore, refreshScore, scoreDescription } = useContext(ScorerContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -63,16 +63,9 @@ export default function Dashboard() {
     if (!wallet) {
       navigate("/");
     } else {
-      // submitPassport(wallet.accounts[0].address.toLowerCase());
-      // refreshScore(wallet.accounts[0].address.toLowerCase());
+      refreshScore(wallet.accounts[0].address.toLowerCase());
     }
   }, [wallet]);
-
-  const handleSubmitPassport = () => {
-    if (wallet) {
-      submitPassport(wallet.accounts[0].address.toLowerCase());
-    }
-  };
 
   // Allow user to retry Ceramic connection if failed
   const retryConnection = () => {
@@ -211,7 +204,7 @@ export default function Dashboard() {
   const subheader = useMemo(
     () => (
       <PageWidthGrid nested={true} className="my-4">
-        <div className="col-span-3 flex items-center justify-items-center self-center lg:col-span-4">
+        <div className="col-span-2 flex items-center justify-items-center self-center lg:col-span-4">
           <div className="flex text-2xl">
             My {filterName && `${filterName} `}Stamps
             {filterName && (
@@ -227,7 +220,17 @@ export default function Dashboard() {
               passport. The more verifications you have&#44; the stronger your passport will be.
             </Tooltip>
           </div>
-          <button onClick={handleSubmitPassport}>Test Submit Passport</button>
+        </div>
+
+        <div className="col-span-1 col-end-[-2] justify-self-end">
+          <div className="flex text-2xl">
+            <span className={`${score === "1" ? "text-accent-3" : "text-color-2"} text-accent-3`}>{rawScore}</span>
+            <Tooltip>
+              Your Unique Humanity Score is based out of 100 and measures how unique you are. The current passing score
+              threshold is 15.
+            </Tooltip>
+          </div>
+          <div className="flex text-sm">{scoreDescription}</div>
         </div>
 
         <div className="col-span-1 col-end-[-1] justify-self-end">

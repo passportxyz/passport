@@ -18,71 +18,105 @@ export type PassportSubmissionStateType =
 export type ScoreStateType = "APP_INITIAL" | "PROCESSING" | "ERROR" | "DONE";
 
 export interface ScorerContextState {
-  score: number;
-  rawScore: number;
+  score: string;
+  rawScore: string;
+  threshold: string;
+  scoreDescription: string;
   passportSubmissionState: PassportSubmissionStateType;
   scoreState: ScoreStateType;
 
-  refreshScore: (address: string) => void;
-  submitPassport: (address: string) => void;
+  refreshScore: (address: string | undefined) => Promise<void>;
+  submitPassport: (address: string | undefined) => Promise<void>;
 }
 
 const startingState: ScorerContextState = {
-  score: 0,
-  rawScore: 0,
+  score: "",
+  rawScore: "",
+  threshold: "",
+  scoreDescription: "",
   passportSubmissionState: "APP_INITIAL",
   scoreState: "APP_INITIAL",
-  refreshScore: (address: string) => {},
-  submitPassport: (address: string) => {},
+  refreshScore: async (address: string | undefined): Promise<void> => {},
+  submitPassport: async (address: string | undefined): Promise<void> => {},
 };
 
 // create our app context
 export const ScorerContext = createContext(startingState);
 
 export const ScorerContextProvider = ({ children }: { children: any }) => {
-  const [score, setScore] = useState(0);
-  const [rawScore, setRawScore] = useState(0);
+  const [score, setScore] = useState("");
+  const [rawScore, setRawScore] = useState("");
+  const [threshold, setThreshold] = useState("");
+  const [scoreDescription, setScoreDescription] = useState("");
   const [passportSubmissionState, setPassportSubmissionState] = useState<PassportSubmissionStateType>("APP_INITIAL");
   const [scoreState, setScoreState] = useState<ScoreStateType>("APP_INITIAL");
 
-  const refreshScore = async (address: string) => {
+  const loadScore = async (address: string | undefined): Promise<string> => {
     try {
+      setScoreState("APP_INITIAL");
       const response = await axios.get(`${scorerApiGetScore}/${scorerId}/${address}`, {
         headers: {
           "X-API-Key": scorerApiKey,
         },
       });
       console.log("Response for score", response.data);
+      setScoreState(response.data.status);
+      if (response.data.status === "DONE") {
+        setScore(response.data.score);
+        setRawScore(response.data.evidence.rawScore);
+        setThreshold(response.data.evidence.threshold);
+
+        const numRawScore = Number.parseFloat(response.data.evidence.rawScore);
+        const numThreshold = Number.parseFloat(response.data.evidence.threshold);
+
+        if (numRawScore > numThreshold) {
+          setScoreDescription("Passing Score");
+        } else {
+          setScoreDescription("Low Score");
+        }
+      }
+
+      return response.data.status;
     } catch (error) {
-      console.error(error);
+      throw error;
     }
   };
 
-  const submitPassport = async (address: string) => {
-    try {
-      const signingMessageResponse = await axios.get(`${signingMessage}`, {
-        headers: {
-          "X-API-Key": scorerApiKey,
-        },
-      });
+  const refreshScore = async (address: string | undefined) => {
+    if (address) {
+      try {
+        let scoreStatus = "PROCESSING";
 
-      const signingMessageResponseData = await signingMessageResponse.data;
-      const { nonce, message } = signingMessageResponseData;
+        while (scoreStatus === "PROCESSING") {
+          scoreStatus = await loadScore(address);
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
 
-      const response = await axios.post(scorerApiSubmitPassport, {
-        headers: {
-          "X-API-Key": scorerApiKey,
-        },
-        body: {
-          address,
-          scorer_id: scorerId,
-          signature: message,
-          nonce,
-        },
-      });
-      console.log("Response for passport submission - scorer: ", response.data);
-    } catch (error) {
-      console.error(error);
+  const submitPassport = async (address: string | undefined) => {
+    if (address) {
+      try {
+        const response = await axios.post(
+          scorerApiSubmitPassport,
+          {
+            address,
+            scorer_id: scorerId,
+          },
+          {
+            headers: {
+              "X-API-Key": scorerApiKey,
+            },
+          }
+        );
+        console.log("Response for passport submission - scorer: ", response.data);
+        refreshScore(address);
+      } catch (error) {
+        console.error(error);
+      }
     }
   };
 
@@ -90,6 +124,8 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const providerProps = {
     score,
     rawScore,
+    threshold,
+    scoreDescription,
     passportSubmissionState,
     scoreState,
     refreshScore,
