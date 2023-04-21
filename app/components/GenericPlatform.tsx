@@ -40,7 +40,7 @@ import { NoStampModal } from "./NoStampModal";
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
   platform: PlatformClass;
-  onClose: ()=>void;
+  onClose: () => void;
 };
 
 enum VerificationStatuses {
@@ -90,7 +90,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Platfo
 
   // any time we change selection state...
   useEffect(() => {
-      setCanSubmit(selectedProviders.length !== verifiedProviders.length);
+    setCanSubmit(selectedProviders.length !== verifiedProviders.length);
   }, [selectedProviders, verifiedProviders]);
 
   const waitForRedirect = (timeout?: number): Promise<ProviderPayload> => {
@@ -405,7 +405,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Platfo
               data-testid={`button-verify-${platform.platformId}`}
               className="sidebar-verify-btn"
             >
-              {submitted && !canSubmit ? "Close" : (verifiedProviders.length > 0 ? "Save" : "Verify")}
+              {submitted && !canSubmit ? "Close" : verifiedProviders.length > 0 ? "Save" : "Verify"}
             </button>
           </>
         }
