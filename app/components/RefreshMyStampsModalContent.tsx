@@ -194,7 +194,6 @@ export const RefreshMyStampsModalContent = ({
             {/* TODO: update comments */}
             {/* container for platforms so user can scroll if they have a lot */}
             <RefreshMyStampsModalContentCardList
-              verifiedProviders={verifiedProviders}
               selectedProviders={selectedProviders}
               fetchedPossibleEVMStamps={fetchedPossibleEVMStamps}
               setSelectedProviders={setSelectedProviders}
