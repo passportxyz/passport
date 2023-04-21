@@ -40,7 +40,6 @@ import { NoStampModal } from "./NoStampModal";
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
   platform: PlatformClass;
-  onClose: () => void;
 };
 
 enum VerificationStatuses {
@@ -58,7 +57,9 @@ const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
 const checkIcon = "../../assets/check-icon.svg";
 
-export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: PlatformProps): JSX.Element => {
+type GenericPlatformProps = PlatformProps & { onClose: () => void };
+
+export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: GenericPlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, handleDeleteStamps, allProvidersState, userDid } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
