@@ -759,8 +759,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         const newPassport = await fetchPassport(database, true);
         if (ceramicClient && newPassport) {
           ceramicClient.setStamps(newPassport.stamps);
-          submitPassport(address);
         }
+        submitPassport(address);
       }
     } catch (e) {
       datadogLogs.logger.error("Error adding multiple stamps", { stamps, error: e });
@@ -776,9 +776,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         const newPassport = await fetchPassport(database, true);
         if (ceramicClient && newPassport) {
           ceramicClient.setStamps(newPassport.stamps);
-
-          submitPassport(address);
         }
+        submitPassport(address);
       }
     } catch (e) {
       datadogLogs.logger.error("Error deleting multiple stamps", { providerIds, error: e });

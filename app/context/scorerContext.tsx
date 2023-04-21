@@ -1,12 +1,11 @@
 // --- React Methods
-import React, { createContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useState } from "react";
 
 // --- Axios
 import axios, { AxiosError } from "axios";
 
 const scorerId = process.env.NEXT_PUBLIC_ALLO_SCORER_ID;
 const scorerApiKey = process.env.NEXT_PUBLIC_ALLO_SCORER_API_KEY || "";
-const signingMessage = process.env.NEXT_PUBLIC_SCORER_ENDPOINT + "/signing-message";
 const scorerApiSubmitPassport = process.env.NEXT_PUBLIC_SCORER_ENDPOINT + "/submit-passport";
 const scorerApiGetScore = process.env.NEXT_PUBLIC_SCORER_ENDPOINT + "/score";
 
@@ -84,20 +83,20 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     }
   };
 
-  const refreshScore = async (address: string | undefined, submitePassportOnFailure: boolean = true) => {
+  const refreshScore = async (address: string | undefined, submitPassportOnFailure: boolean = true) => {
     if (address) {
       setPassportSubmissionState("APP_REQUEST_PENDING");
       try {
-        let scoreStatus = "PROCESSING";
+        let scoreStatus = await loadScore(address);
 
         while (scoreStatus === "PROCESSING") {
-          scoreStatus = await loadScore(address);
           await new Promise((resolve) => setTimeout(resolve, 3000));
+          scoreStatus = await loadScore(address);
         }
         setPassportSubmissionState("APP_REQUEST_SUCCESS");
       } catch (error: AxiosError | any) {
         setPassportSubmissionState("APP_REQUEST_ERROR");
-        if (submitePassportOnFailure && error.response.data.detail === "Unable to get score for provided scorer.") {
+        if (submitPassportOnFailure && error.response.data.detail === "Unable to get score for provided scorer.") {
           submitPassport(address);
         }
       }
@@ -107,7 +106,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const submitPassport = async (address: string | undefined) => {
     if (address) {
       try {
-        const response = await axios.post(
+        await axios.post(
           scorerApiSubmitPassport,
           {
             address,
@@ -119,7 +118,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
             },
           }
         );
-        // Refresh score, but set the submitePassportOnFailure to false -> we want to avoid a loop
+        // Refresh score, but set the submitPassportOnFailure to false -> we want to avoid a loop
         refreshScore(address, false);
       } catch (error) {
         console.error(error);
