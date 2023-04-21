@@ -6,6 +6,7 @@ import axios from "axios";
 
 const scorerId = process.env.NEXT_PUBLIC_ALLO_SCORER_ID;
 const scorerApiKey = process.env.NEXT_PUBLIC_ALLO_SCORER_API_KEY || "";
+const signingMessage = process.env.NEXT_PUBLIC_SCORER_ENDPOINT + "/signing-message";
 const scorerApiSubmitPassport = process.env.NEXT_PUBLIC_SCORER_ENDPOINT + "/submit-passport";
 const scorerApiGetScore = process.env.NEXT_PUBLIC_SCORER_ENDPOINT + "/score";
 
@@ -57,7 +58,33 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     }
   };
 
-  const submitPassport = async (address: string) => {};
+  const submitPassport = async (address: string) => {
+    try {
+      const signingMessageResponse = await axios.get(`${signingMessage}`, {
+        headers: {
+          "X-API-Key": scorerApiKey,
+        },
+      });
+
+      const signingMessageResponseData = await signingMessageResponse.data;
+      const { nonce, message } = signingMessageResponseData;
+
+      const response = await axios.post(scorerApiSubmitPassport, {
+        headers: {
+          "X-API-Key": scorerApiKey,
+        },
+        body: {
+          address,
+          scorer_id: scorerId,
+          signature: message,
+          nonce,
+        },
+      });
+      console.log("Response for passport submission - scorer: ", response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   // use props as a way to pass configuration values
   const providerProps = {

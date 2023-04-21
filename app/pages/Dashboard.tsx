@@ -41,7 +41,7 @@ export default function Dashboard() {
   const { passport, isLoadingPassport, passportHasCacaoError, cancelCeramicConnection, expiredProviders } =
     useContext(CeramicContext);
   const { wallet, toggleConnection, userWarning, setUserWarning } = useContext(UserContext);
-  const { score, rawScore, refreshScore } = useContext(ScorerContext);
+  const { score, rawScore, refreshScore, submitPassport } = useContext(ScorerContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -63,9 +63,16 @@ export default function Dashboard() {
     if (!wallet) {
       navigate("/");
     } else {
-      refreshScore(wallet.accounts[0].address.toLowerCase());
+      // submitPassport(wallet.accounts[0].address.toLowerCase());
+      // refreshScore(wallet.accounts[0].address.toLowerCase());
     }
   }, [wallet]);
+
+  const handleSubmitPassport = () => {
+    if (wallet) {
+      submitPassport(wallet.accounts[0].address.toLowerCase());
+    }
+  };
 
   // Allow user to retry Ceramic connection if failed
   const retryConnection = () => {
@@ -220,6 +227,7 @@ export default function Dashboard() {
               passport. The more verifications you have&#44; the stronger your passport will be.
             </Tooltip>
           </div>
+          <button onClick={handleSubmitPassport}>Test Submit Passport</button>
         </div>
 
         <div className="col-span-1 col-end-[-1] justify-self-end">
