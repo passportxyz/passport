@@ -56,7 +56,7 @@ export const SideBarContent = ({
         borderRadius: "6px",
       }}
     >
-      <DrawerCloseButton disabled={isLoading} className={`z-10`} />
+      <DrawerCloseButton disabled={isLoading} className={`z-10 bg-muted`} _hover={{backgroundColor:"var(--color-accent)"}} />
       {currentPlatform && currentProviders ? (
         <div className="overflow-auto">
           <DrawerHeader style={{ fontWeight: "inherit" }}>
