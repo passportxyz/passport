@@ -22,13 +22,13 @@ export const RefreshMyStampsModalContentCardList = ({
   selectedProviders,
   setSelectedProviders,
 }: RefreshMyStampsModalCardListProps) => {
-  const cardList = fetchedPossibleEVMStamps?.map((possiblePlatform: PossibleEVMProvider) => {
+  const cardList = fetchedPossibleEVMStamps?.map((possiblePlatform: PossibleEVMProvider, index: number) => {
     const currentPlatform = getPlatformSpec(possiblePlatform.platformProps.platform.path);
     const platformGroup = possiblePlatform.platformProps.platFormGroupSpec;
 
     return (
       <RefreshMyStampsModalContentCard
-        key={currentPlatform?.name}
+        key={currentPlatform ? currentPlatform.name : `undefined-${index}`}
         platformGroup={platformGroup}
         currentPlatform={currentPlatform}
         verifiedProviders={verifiedProviders}
