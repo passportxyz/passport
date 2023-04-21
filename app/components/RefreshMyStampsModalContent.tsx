@@ -169,6 +169,18 @@ export const RefreshMyStampsModalContent = ({
     }
   };
 
+  useEffect(() => {
+    const providerNames: string[] = fetchedPossibleEVMStamps
+      .map((entry: any) =>
+        entry.platformProps.platFormGroupSpec
+          .map((spec: any) => spec.providers.map((provider: any) => provider.name))
+          .flat()
+      )
+      .flat();
+
+    setSelectedProviders(providerNames as PROVIDER_ID[]);
+  }, [fetchedPossibleEVMStamps]);
+
   return (
     <>
       {fetchedPossibleEVMStamps.length > 0 ? (
