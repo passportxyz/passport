@@ -11,58 +11,17 @@ import { PlatformGroupSpec } from "../config/providers";
 type RefreshMyStampsSelectorProps = {
   currentPlatform?: PlatformSpec | undefined;
   currentProviders: PlatformGroupSpec[] | undefined;
-  verifiedProviders: PROVIDER_ID[] | undefined;
   selectedProviders: PROVIDER_ID[] | undefined;
   setSelectedProviders: (providerIds: PROVIDER_ID[]) => void;
-  switchState: { checked: boolean; providers: PROVIDER_ID[] };
-  setSwitchState: (switchState: { checked: boolean; providers: PROVIDER_ID[] }) => void;
+  platformChecked: boolean;
 };
 
 export function RefreshMyStampsSelector({
-  currentPlatform,
   currentProviders,
-  verifiedProviders,
   selectedProviders,
   setSelectedProviders,
-  switchState,
-  setSwitchState,
+  platformChecked,
 }: RefreshMyStampsSelectorProps) {
-  const [checkboxesState, setCheckboxesState] = useState<{ checked: boolean; provider: PROVIDER_ID }[]>();
-  const [checkboxProviders, setCheckboxProviders] = useState<PROVIDER_ID[]>([]);
-  const slicedProviders = switchState.providers.slice(0, switchState.providers.length);
-
-  useEffect(() => {
-    if (switchState.checked) {
-      setCheckboxesState(switchState.providers?.map((provider) => ({ checked: true, provider: provider })));
-      setSelectedProviders((selectedProviders || []).concat(switchState.providers?.map((provider) => provider)));
-      setCheckboxProviders(slicedProviders);
-    } else if (!switchState.checked) {
-      setCheckboxesState(checkboxesState?.map((checkState) => ({ checked: false, provider: checkState.provider })));
-      setSelectedProviders((selectedProviders || []).filter((provider) => checkboxProviders?.indexOf(provider) === -1));
-      setCheckboxProviders([]);
-    }
-  }, [switchState]);
-
-  useEffect(() => {
-    if (checkboxProviders) {
-      if (checkboxProviders?.length === 0 && switchState.checked) {
-        setSwitchState({ checked: false, providers: [] });
-      }
-    }
-  }, [checkboxProviders]);
-
-  // if no items are checked, set switchState to false -- toggle off
-  const handleCheckboxChecking = useCallback(
-    (event) => {
-      checkboxesState?.map((checkbox) => {
-        if (checkbox.provider === event.target.value) {
-          checkbox.checked = event.target.checked;
-        }
-      });
-    },
-    [checkboxesState, checkboxProviders, switchState]
-  );
-
   return (
     <>
       {/* each of the available providers in all fetched platforms */}
@@ -84,29 +43,16 @@ export function RefreshMyStampsSelector({
                           key={`${provider.title}${i}`}
                           colorScheme="purple"
                           data-testid={`checkbox-${provider.name}`}
-                          value={provider.name}
-                          disabled={!switchState.checked}
-                          isChecked={
-                            checkboxesState?.filter((checkbox) => checkbox.provider === provider.name)[0].checked
-                          }
+                          disabled={!platformChecked}
+                          isChecked={selectedProviders?.includes(provider.name)}
                           size="lg"
                           onChange={(e) => {
-                            const providerIds = stamp.providers?.map((provider) => provider.name as PROVIDER_ID);
-                            handleCheckboxChecking(e);
                             // set the selected items by concating or filtering by providerId
-                            const value = e.target.value as PROVIDER_ID;
-                            setSelectedProviders &&
-                              setSelectedProviders(
-                                e.target.checked
-                                  ? (selectedProviders || []).concat(provider.name)
-                                  : (selectedProviders || []).filter((providerId) => providerId !== value)
-                              );
-                            setCheckboxProviders &&
-                              setCheckboxProviders(
-                                !e.target.checked && checkboxProviders
-                                  ? (checkboxProviders || []).filter((providerId) => providerId !== value)
-                                  : [...checkboxProviders]
-                              );
+                            setSelectedProviders(
+                              e.target.checked
+                                ? (selectedProviders || []).concat(provider.name)
+                                : (selectedProviders || []).filter((providerId) => providerId !== provider.name)
+                            );
                           }}
                         />
                       </div>

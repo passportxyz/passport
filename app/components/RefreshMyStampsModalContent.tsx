@@ -51,7 +51,6 @@ export const RefreshMyStampsModalContent = ({
   const { handleAddStamps, handleDeleteStamps } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
-  const [selectedEVMPlatformProviders, setSelectedEVMPlatformProviders] = useState<evmPlatformProvider[]>([]);
   const navigate = useNavigate();
 
   // TODO: update comments
@@ -75,17 +74,7 @@ export const RefreshMyStampsModalContent = ({
       // TODO: add datadog logger
       // datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
       setLoading(true);
-      const providerIds: PROVIDER_ID[] = [];
-      const result = await Promise.all(
-        selectedEVMPlatformProviders?.map(async (platformProviders) => {
-          const providerIdsTemp =
-            platformProviders.platformGroup.reduce((all, stamp, i) => {
-              return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-            }, [] as PROVIDER_ID[]) || [];
-          providerIds.push(...providerIdsTemp);
-        })
-      );
-      await handleFetchCredential(providerIds);
+      await handleFetchCredential(selectedProviders);
       setLoading(false);
       resetStampsAndProgressState();
       navigate("/dashboard");
@@ -180,6 +169,21 @@ export const RefreshMyStampsModalContent = ({
     }
   };
 
+  useEffect(() => {
+    const providerNames: string[] = fetchedPossibleEVMStamps
+      .map((entry: any) => {
+        if (entry.platformProps.platFormGroupSpec) {
+          return entry.platformProps.platFormGroupSpec
+            .map((spec: any) => spec.providers.map((provider: any) => provider.name))
+            .flat();
+        }
+        return [];
+      })
+      .flat();
+
+    setSelectedProviders(providerNames as PROVIDER_ID[]);
+  }, [fetchedPossibleEVMStamps]);
+
   return (
     <>
       {fetchedPossibleEVMStamps.length > 0 ? (
@@ -193,9 +197,7 @@ export const RefreshMyStampsModalContent = ({
               verifiedProviders={verifiedProviders}
               selectedProviders={selectedProviders}
               fetchedPossibleEVMStamps={fetchedPossibleEVMStamps}
-              selectedEVMPlatformProviders={selectedEVMPlatformProviders}
               setSelectedProviders={setSelectedProviders}
-              setSelectedEVMPlatformProviders={setSelectedEVMPlatformProviders}
             />
           </div>
           <div className="mt-8 text-center text-pink-300 underline">
