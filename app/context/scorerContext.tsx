@@ -1,26 +1,13 @@
 // --- React Methods
 import React, { createContext, useEffect, useMemo, useState } from "react";
 
-// --- Wallet connection utilities
-import { useConnectWallet } from "@web3-onboard/react";
-import { initWeb3Onboard } from "../utils/onboard";
-import { JsonRpcSigner, Web3Provider } from "@ethersproject/providers";
-import { OnboardAPI } from "@web3-onboard/core";
-
-// -- Ceramic and Glazed
-import { EthereumAuthProvider } from "@self.id/web";
-import { useViewerConnection } from "@self.id/framework";
-
-// --- Datadog
-import { datadogLogs } from "@datadog/browser-logs";
-import { datadogRum } from "@datadog/browser-rum";
-
-import { DIDSession } from "did-session";
-import { EthereumWebAuth } from "@didtools/pkh-ethereum";
-import { AccountId } from "caip";
-import { DID } from "dids";
-import { Cacao } from "@didtools/cacao";
+// --- Axios
 import axios from "axios";
+
+const scorerId = process.env.NEXT_PUBLIC_ALLO_SCORER_ID;
+const scorerApiKey = process.env.NEXT_PUBLIC_ALLO_SCORER_API_KEY || "";
+const scorerApiSubmitPassport = process.env.NEXT_PUBLIC_SCORER_ENDPOINT + "/submit-passport";
+const scorerApiGetScore = process.env.NEXT_PUBLIC_SCORER_ENDPOINT + "/score";
 
 export type PassportSubmissionStateType =
   | "APP_INITIAL"
@@ -34,6 +21,9 @@ export interface ScorerContextState {
   rawScore: number;
   passportSubmissionState: PassportSubmissionStateType;
   scoreState: ScoreStateType;
+
+  refreshScore: (address: string) => void;
+  submitPassport: (address: string) => void;
 }
 
 const startingState: ScorerContextState = {
@@ -41,16 +31,33 @@ const startingState: ScorerContextState = {
   rawScore: 0,
   passportSubmissionState: "APP_INITIAL",
   scoreState: "APP_INITIAL",
+  refreshScore: (address: string) => {},
+  submitPassport: (address: string) => {},
 };
 
 // create our app context
 export const ScorerContext = createContext(startingState);
 
-export const ScorerContexttProvider = ({ children }: { children: any }) => {
+export const ScorerContextProvider = ({ children }: { children: any }) => {
   const [score, setScore] = useState(0);
   const [rawScore, setRawScore] = useState(0);
   const [passportSubmissionState, setPassportSubmissionState] = useState<PassportSubmissionStateType>("APP_INITIAL");
   const [scoreState, setScoreState] = useState<ScoreStateType>("APP_INITIAL");
+
+  const refreshScore = async (address: string) => {
+    try {
+      const response = await axios.get(`${scorerApiGetScore}/${scorerId}/${address}`, {
+        headers: {
+          "X-API-Key": scorerApiKey,
+        },
+      });
+      console.log("Response for score", response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const submitPassport = async (address: string) => {};
 
   // use props as a way to pass configuration values
   const providerProps = {
@@ -58,6 +65,8 @@ export const ScorerContexttProvider = ({ children }: { children: any }) => {
     rawScore,
     passportSubmissionState,
     scoreState,
+    refreshScore,
+    submitPassport,
   };
 
   return <ScorerContext.Provider value={providerProps}>{children}</ScorerContext.Provider>;

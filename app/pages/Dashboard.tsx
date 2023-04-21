@@ -28,6 +28,7 @@ import {
 
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
+import { ScorerContext } from "../context/scorerContext";
 
 import { useViewerConnection } from "@self.id/framework";
 import { EthereumAuthProvider } from "@self.id/web";
@@ -40,6 +41,7 @@ export default function Dashboard() {
   const { passport, isLoadingPassport, passportHasCacaoError, cancelCeramicConnection, expiredProviders } =
     useContext(CeramicContext);
   const { wallet, toggleConnection, userWarning, setUserWarning } = useContext(UserContext);
+  const { score, rawScore, refreshScore } = useContext(ScorerContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -60,6 +62,8 @@ export default function Dashboard() {
   useEffect(() => {
     if (!wallet) {
       navigate("/");
+    } else {
+      refreshScore(wallet.accounts[0].address.toLowerCase());
     }
   }, [wallet]);
 

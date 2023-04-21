@@ -10,6 +10,7 @@ import Head from "next/head";
 import "../styles/globals.css";
 import { UserContextProvider } from "../context/userContext";
 import { CeramicContextProvider } from "../context/ceramicContext";
+import { ScorerContextProvider } from "../context/scorerContext";
 import ManageAccountCenter from "../components/ManageAccountCenter";
 
 // --- Ceramic Tools
@@ -155,15 +156,17 @@ function App({ Component, pageProps }: AppProps) {
       >
         <UserContextProvider>
           <CeramicContextProvider>
-            <ManageAccountCenter>
-              <div className="font-body" suppressHydrationWarning>
-                {typeof window === "undefined" ? null : (
-                  <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
-                    <Component {...pageProps} />
-                  </ThemeWrapper>
-                )}
-              </div>
-            </ManageAccountCenter>
+            <ScorerContextProvider>
+              <ManageAccountCenter>
+                <div className="font-body" suppressHydrationWarning>
+                  {typeof window === "undefined" ? null : (
+                    <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                      <Component {...pageProps} />
+                    </ThemeWrapper>
+                  )}
+                </div>
+              </ManageAccountCenter>
+            </ScorerContextProvider>
           </CeramicContextProvider>
         </UserContextProvider>
       </SelfIdProvider>
