@@ -222,7 +222,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="col-span-1 col-end-[-2] justify-self-end">
+        <div className="col-span-1 col-end-[-2] flex flex-col items-center justify-self-end">
           <div className="flex text-2xl">
             {passportSubmissionState === "APP_REQUEST_PENDING" ? (
               <Spinner
@@ -234,13 +234,14 @@ export default function Dashboard() {
                 size="md"
               />
             ) : null}
-            <span className={`${score == 1 ? "text-accent-3" : "text-color-4"}`}>{rawScore}</span>
+            {/* TODO add color to theme */}
+            <span className={`${score == 1 ? "text-accent-3" : "text-[#FFE28A]"}`}>{rawScore.toFixed(2)}</span>
             <Tooltip>
               Your Unique Humanity Score is based out of 100 and measures how unique you are. The current passing score
               threshold is 15.
             </Tooltip>
           </div>
-          <div className="flex text-sm">{scoreDescription}</div>
+          <div className="flex whitespace-nowrap text-sm">{scoreDescription}</div>
         </div>
 
         <div className="col-span-1 col-end-[-1] justify-self-end">
