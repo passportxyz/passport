@@ -51,16 +51,18 @@ export const RefreshMyStampsModalContent = ({
   const { handleAddStamps, handleDeleteStamps } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
-  const [selectedEVMPlatformProviders, setSelectedEVMPlatformProviders] = useState<evmPlatformProvider[]>([]);
   const navigate = useNavigate();
 
   // TODO: update comments
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>([]);
 
+  // TODO: update comments
+  // SelectedProviders will be passed in to the sidebar to be filled there...
+  const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
 
   useEffect(() => {
-    if (selectedEVMPlatformProviders.length !== 0) {
+    if (selectedProviders.length !== 0) {
       setCanSubmit(true);
     } else {
       setCanSubmit(false);
@@ -72,17 +74,7 @@ export const RefreshMyStampsModalContent = ({
       // TODO: add datadog logger
       // datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
       setLoading(true);
-      const providerIds: PROVIDER_ID[] = [];
-      const result = await Promise.all(
-        selectedEVMPlatformProviders?.map(async (platformProviders) => {
-          const providerIdsTemp =
-            platformProviders.platformGroup.reduce((all, stamp, i) => {
-              return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-            }, [] as PROVIDER_ID[]) || [];
-          providerIds.push(...providerIdsTemp);
-        })
-      );
-      await handleFetchCredential(providerIds);
+      await handleFetchCredential(selectedProviders);
       setLoading(false);
       resetStampsAndProgressState();
       navigate("/dashboard");
@@ -100,12 +92,12 @@ export const RefreshMyStampsModalContent = ({
       // This array will contain all providers that new validated VCs
       let vcs: Stamp[] = [];
 
-      if (selectedEVMPlatformProviders.length > 0) {
+      if (selectedProviders.length > 0) {
         const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
           iamUrl,
           {
             type: "EVMBulkVerify",
-            types: selectedEVMPlatformProviders.map((platform) => platform.platformId),
+            types: selectedProviders,
             version: "0.0.0",
             address: address || "",
             proofs: {},
@@ -148,6 +140,7 @@ export const RefreshMyStampsModalContent = ({
       );
       // both verified and selected should look the same after save
       setVerifiedProviders([...actualVerifiedProviders]);
+      setSelectedProviders([...actualVerifiedProviders]);
 
       // TODO: re-add toasts after design updates
       // // Get the done toast messages
@@ -187,9 +180,9 @@ export const RefreshMyStampsModalContent = ({
             {/* container for platforms so user can scroll if they have a lot */}
             <RefreshMyStampsModalContentCardList
               verifiedProviders={verifiedProviders}
+              selectedProviders={selectedProviders}
               fetchedPossibleEVMStamps={fetchedPossibleEVMStamps}
-              selectedEVMPlatformProviders={selectedEVMPlatformProviders}
-              setSelectedEVMPlatformProviders={setSelectedEVMPlatformProviders}
+              setSelectedProviders={setSelectedProviders}
             />
           </div>
           <div className="mt-8 text-center text-pink-300 underline">

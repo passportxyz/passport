@@ -1,5 +1,5 @@
 // --- React hooks
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 // --- Types
 import { evmPlatformProvider } from "./RefreshMyStampsModalContent";
@@ -16,22 +16,32 @@ import { RefreshMyStampsSelector } from "../components/RefreshMyStampsSelector";
 type RefreshMyStampsModalCardProps = {
   platformGroup: PlatformGroupSpec[];
   verifiedProviders: PROVIDER_ID[];
+  selectedProviders: PROVIDER_ID[];
   currentPlatform: PlatformSpec | undefined;
-  selectedEVMPlatformProviders: evmPlatformProvider[];
-  setSelectedEVMPlatformProviders: (evmPlatformProviders: evmPlatformProvider[]) => void;
+  setSelectedProviders: (providerIds: PROVIDER_ID[]) => void;
 };
 
 export const RefreshMyStampsModalContentCard = ({
   platformGroup,
   currentPlatform,
   verifiedProviders,
-  selectedEVMPlatformProviders,
-  setSelectedEVMPlatformProviders,
+  selectedProviders,
+  setSelectedProviders,
 }: RefreshMyStampsModalCardProps): JSX.Element => {
-  const [switchState, setSwitchState] = useState<{ checked: boolean; providers: PROVIDER_ID[] }>({
-    checked: true,
-    providers: []
-  });
+  const [checked, setChecked] = useState(true);
+
+  const platformProviders = useMemo(
+    () => platformGroup.map((group) => group.providers?.map((provider) => provider.name)).flat(),
+    [platformGroup]
+  );
+
+  useEffect(() => {
+    if (checked) {
+      setSelectedProviders((selectedProviders || []).concat(platformProviders));
+    } else {
+      setSelectedProviders((selectedProviders || []).filter((provider) => platformProviders?.indexOf(provider) === -1));
+    }
+  }, [checked]);
 
   return (
     <div>
@@ -50,27 +60,8 @@ export const RefreshMyStampsModalContentCard = ({
                 data-testid={`switch-${currentPlatform?.name}`}
                 value={`${currentPlatform?.name}`}
                 colorScheme="purple"
-                isChecked={switchState.checked}
-                onChange={(e) => {
-                  const value = e.target.value as PLATFORM_ID;
-                  const providers = platformGroup
-                    ?.map((group) => group.providers?.map((provider) => provider.name))
-                    .flat();
-                  e.target.checked
-                    ? setSwitchState({ checked: true, providers: providers })
-                    : setSwitchState({ checked: false, providers: [] });
-                  setSelectedEVMPlatformProviders(
-                    e.target.checked
-                      ? (selectedEVMPlatformProviders || []).concat({
-                          checked: true,
-                          platformId: value,
-                          platformGroup: platformGroup,
-                        })
-                      : (selectedEVMPlatformProviders || []).filter(
-                          (selectedEVMPlatformProvider) => selectedEVMPlatformProvider["platformId"] !== value
-                        )
-                  );
-                }}
+                isChecked={checked}
+                onChange={(e) => setChecked(e.target.checked)}
               />
               <AccordionIcon marginLeft="8px" fontSize="28px" />
             </div>
@@ -79,10 +70,9 @@ export const RefreshMyStampsModalContentCard = ({
             <RefreshMyStampsSelector
               currentPlatform={currentPlatform}
               currentProviders={platformGroup}
-              verifiedProviders={verifiedProviders}
-              switchState={switchState}
-              selectedEVMPlatformProviders={selectedEVMPlatformProviders}
-              setSelectedEVMPlatformProviders={setSelectedEVMPlatformProviders}
+              selectedProviders={selectedProviders}
+              setSelectedProviders={setSelectedProviders}
+              platformChecked={checked}
             />
           </AccordionPanel>
         </AccordionItem>
