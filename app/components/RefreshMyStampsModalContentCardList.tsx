@@ -12,18 +12,14 @@ import { RefreshMyStampsModalContentCard } from "./RefreshMyStampsModalContentCa
 export type RefreshMyStampsModalCardListProps = {
   fetchedPossibleEVMStamps: PossibleEVMProvider[] | undefined;
   verifiedProviders: PROVIDER_ID[];
-  selectedProviders: PROVIDER_ID[];
   selectedEVMPlatformProviders: evmPlatformProvider[];
-  setSelectedProviders: (providerIds: PROVIDER_ID[]) => void;
   setSelectedEVMPlatformProviders: (evmPlatformProviders: evmPlatformProvider[]) => void;
 };
 
 export const RefreshMyStampsModalContentCardList = ({
   fetchedPossibleEVMStamps,
   verifiedProviders,
-  selectedProviders,
   selectedEVMPlatformProviders,
-  setSelectedProviders,
   setSelectedEVMPlatformProviders,
 }: RefreshMyStampsModalCardListProps) => {
   const cardList = fetchedPossibleEVMStamps?.map((possiblePlatform: PossibleEVMProvider) => {
@@ -36,9 +32,7 @@ export const RefreshMyStampsModalContentCardList = ({
         platformGroup={platformGroup}
         currentPlatform={currentPlatform}
         verifiedProviders={verifiedProviders}
-        selectedProviders={selectedProviders}
         selectedEVMPlatformProviders={selectedEVMPlatformProviders}
-        setSelectedProviders={setSelectedProviders}
         setSelectedEVMPlatformProviders={setSelectedEVMPlatformProviders}
       />
     );

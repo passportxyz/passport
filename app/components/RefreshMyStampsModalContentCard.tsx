@@ -16,10 +16,8 @@ import { RefreshMyStampsSelector } from "../components/RefreshMyStampsSelector";
 type RefreshMyStampsModalCardProps = {
   platformGroup: PlatformGroupSpec[];
   verifiedProviders: PROVIDER_ID[];
-  selectedProviders: PROVIDER_ID[];
   currentPlatform: PlatformSpec | undefined;
   selectedEVMPlatformProviders: evmPlatformProvider[];
-  setSelectedProviders: (providerIds: PROVIDER_ID[]) => void;
   setSelectedEVMPlatformProviders: (evmPlatformProviders: evmPlatformProvider[]) => void;
 };
 
@@ -27,14 +25,12 @@ export const RefreshMyStampsModalContentCard = ({
   platformGroup,
   currentPlatform,
   verifiedProviders,
-  selectedProviders,
   selectedEVMPlatformProviders,
-  setSelectedProviders,
   setSelectedEVMPlatformProviders,
 }: RefreshMyStampsModalCardProps): JSX.Element => {
   const [switchState, setSwitchState] = useState<{ checked: boolean; providers: PROVIDER_ID[] }>({
-    checked: false,
-    providers: [],
+    checked: true,
+    providers: []
   });
 
   return (
@@ -84,10 +80,9 @@ export const RefreshMyStampsModalContentCard = ({
               currentPlatform={currentPlatform}
               currentProviders={platformGroup}
               verifiedProviders={verifiedProviders}
-              selectedProviders={selectedProviders}
-              setSelectedProviders={(providerIds) => setSelectedProviders && setSelectedProviders(providerIds)}
               switchState={switchState}
-              setSwitchState={setSwitchState}
+              selectedEVMPlatformProviders={selectedEVMPlatformProviders}
+              setSelectedEVMPlatformProviders={setSelectedEVMPlatformProviders}
             />
           </AccordionPanel>
         </AccordionItem>

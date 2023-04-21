@@ -58,12 +58,9 @@ export const RefreshMyStampsModalContent = ({
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>([]);
 
-  // TODO: update comments
-  // SelectedProviders will be passed in to the sidebar to be filled there...
-  const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
 
   useEffect(() => {
-    if (selectedProviders.length !== 0) {
+    if (selectedEVMPlatformProviders.length !== 0) {
       setCanSubmit(true);
     } else {
       setCanSubmit(false);
@@ -103,12 +100,12 @@ export const RefreshMyStampsModalContent = ({
       // This array will contain all providers that new validated VCs
       let vcs: Stamp[] = [];
 
-      if (selectedProviders.length > 0) {
+      if (selectedEVMPlatformProviders.length > 0) {
         const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
           iamUrl,
           {
             type: "EVMBulkVerify",
-            types: selectedProviders,
+            types: selectedEVMPlatformProviders.map((platform) => platform.platformId),
             version: "0.0.0",
             address: address || "",
             proofs: {},
@@ -151,7 +148,6 @@ export const RefreshMyStampsModalContent = ({
       );
       // both verified and selected should look the same after save
       setVerifiedProviders([...actualVerifiedProviders]);
-      setSelectedProviders([...actualVerifiedProviders]);
 
       // TODO: re-add toasts after design updates
       // // Get the done toast messages
@@ -191,10 +187,8 @@ export const RefreshMyStampsModalContent = ({
             {/* container for platforms so user can scroll if they have a lot */}
             <RefreshMyStampsModalContentCardList
               verifiedProviders={verifiedProviders}
-              selectedProviders={selectedProviders}
               fetchedPossibleEVMStamps={fetchedPossibleEVMStamps}
               selectedEVMPlatformProviders={selectedEVMPlatformProviders}
-              setSelectedProviders={setSelectedProviders}
               setSelectedEVMPlatformProviders={setSelectedEVMPlatformProviders}
             />
           </div>

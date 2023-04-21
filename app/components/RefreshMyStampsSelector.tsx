@@ -7,25 +7,20 @@ import { Checkbox } from "@chakra-ui/react";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { PlatformGroupSpec } from "../config/providers";
+import { evmPlatformProvider } from "./RefreshMyStampsModalContent";
 
 type RefreshMyStampsSelectorProps = {
   currentPlatform?: PlatformSpec | undefined;
   currentProviders: PlatformGroupSpec[] | undefined;
   verifiedProviders: PROVIDER_ID[] | undefined;
-  selectedProviders: PROVIDER_ID[] | undefined;
-  setSelectedProviders: (providerIds: PROVIDER_ID[]) => void;
-  switchState: { checked: boolean; providers: PROVIDER_ID[] };
-  setSwitchState: (switchState: { checked: boolean; providers: PROVIDER_ID[] }) => void;
+  selectedEVMPlatformProviders: evmPlatformProvider[];
+  setSelectedEVMPlatformProviders: (evmPlatformProviders: evmPlatformProvider[]) => void;
 };
 
 export function RefreshMyStampsSelector({
-  currentPlatform,
   currentProviders,
-  verifiedProviders,
-  selectedProviders,
-  setSelectedProviders,
-  switchState,
-  setSwitchState,
+  selectedEVMPlatformProviders,
+  setSelectedEVMPlatformProviders
 }: RefreshMyStampsSelectorProps) {
   const [checkboxesState, setCheckboxesState] = useState<{ checked: boolean; provider: PROVIDER_ID }[]>();
   const [checkboxProviders, setCheckboxProviders] = useState<PROVIDER_ID[]>([]);
@@ -34,22 +29,12 @@ export function RefreshMyStampsSelector({
   useEffect(() => {
     if (switchState.checked) {
       setCheckboxesState(switchState.providers?.map((provider) => ({ checked: true, provider: provider })));
-      setSelectedProviders((selectedProviders || []).concat(switchState.providers?.map((provider) => provider)));
       setCheckboxProviders(slicedProviders);
     } else if (!switchState.checked) {
       setCheckboxesState(checkboxesState?.map((checkState) => ({ checked: false, provider: checkState.provider })));
-      setSelectedProviders((selectedProviders || []).filter((provider) => checkboxProviders?.indexOf(provider) === -1));
       setCheckboxProviders([]);
     }
   }, [switchState]);
-
-  useEffect(() => {
-    if (checkboxProviders) {
-      if (checkboxProviders?.length === 0 && switchState.checked) {
-        setSwitchState({ checked: false, providers: [] });
-      }
-    }
-  }, [checkboxProviders]);
 
   // if no items are checked, set switchState to false -- toggle off
   const handleCheckboxChecking = useCallback(
@@ -95,12 +80,17 @@ export function RefreshMyStampsSelector({
                             handleCheckboxChecking(e);
                             // set the selected items by concating or filtering by providerId
                             const value = e.target.value as PROVIDER_ID;
-                            setSelectedProviders &&
-                              setSelectedProviders(
-                                e.target.checked
-                                  ? (selectedProviders || []).concat(provider.name)
-                                  : (selectedProviders || []).filter((providerId) => providerId !== value)
-                              );
+                            setSelectedEVMPlatformProviders(
+                              e.target.checked
+                                ? (selectedEVMPlatformProviders || []).concat({
+                                    checked: true,
+                                    platformId: value,
+                                    platformGroup: platformGroup,
+                                  })
+                                : (selectedEVMPlatformProviders || []).filter(
+                                    (selectedEVMPlatformProvider) => selectedEVMPlatformProvider["platformId"] !== value
+                                  )
+                            );
                             setCheckboxProviders &&
                               setCheckboxProviders(
                                 !e.target.checked && checkboxProviders
