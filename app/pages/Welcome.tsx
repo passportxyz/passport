@@ -25,6 +25,7 @@ import { useDisclosure } from "@chakra-ui/react";
 import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 import { InitialWelcome } from "../components/InitialWelcome";
+import LoadingScreen from "../components/LoadingScreen";
 
 export default function Welcome() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -191,21 +192,25 @@ export default function Welcome() {
         </div>
         <PageWidthGrid>
           <div className="col-span-4 flex flex-col items-center text-center md:col-start-2 lg:col-start-3 xl:col-span-6 xl:col-start-4">
-            {passport && passport.stamps.length > 0 ? (
-              <WelcomeBack
-                handleFetchPossibleEVMStamps={handleFetchPossibleEVMStamps}
-                onOpen={onOpen}
-                resetStampsAndProgressState={resetStampsAndProgressState}
-              />
+            {passport ? (
+              passport.stamps.length > 0 ? (
+                <WelcomeBack
+                  handleFetchPossibleEVMStamps={handleFetchPossibleEVMStamps}
+                  onOpen={onOpen}
+                  resetStampsAndProgressState={resetStampsAndProgressState}
+                />
+              ) : (
+                <InitialWelcome
+                  onBoardFinished={async () => {
+                    if (address) {
+                      await handleFetchPossibleEVMStamps(address, allPlatforms);
+                      onOpen();
+                    }
+                  }}
+                />
+              )
             ) : (
-              <InitialWelcome
-                onBoardFinished={async () => {
-                  if (address) {
-                    await handleFetchPossibleEVMStamps(address, allPlatforms);
-                    onOpen();
-                  }
-                }}
-              />
+              <LoadingScreen />
             )}
           </div>
         </PageWidthGrid>
