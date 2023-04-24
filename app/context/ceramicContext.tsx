@@ -487,7 +487,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
 
   const { address, dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
-  const { submitPassport } = useContext(ScorerContext);
+  const { refreshScore } = useContext(ScorerContext);
 
   useEffect(() => {
     return () => {
@@ -760,7 +760,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         if (ceramicClient && newPassport) {
           ceramicClient.setStamps(newPassport.stamps);
         }
-        submitPassport(address);
+        if (dbAccessToken) {
+          refreshScore(address, dbAccessToken);
+        }
       }
     } catch (e) {
       datadogLogs.logger.error("Error adding multiple stamps", { stamps, error: e });
@@ -777,7 +779,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         if (ceramicClient && newPassport) {
           ceramicClient.setStamps(newPassport.stamps);
         }
-        submitPassport(address);
+        if (dbAccessToken) {
+          refreshScore(address, dbAccessToken);
+        }
       }
     } catch (e) {
       datadogLogs.logger.error("Error deleting multiple stamps", { providerIds, error: e });

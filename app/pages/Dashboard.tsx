@@ -37,6 +37,8 @@ import { ExpiredStampModal } from "../components/ExpiredStampModal";
 import ProcessingPopup from "../components/ProcessingPopup";
 import { getFilterName } from "../config/filters";
 
+const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
+
 export default function Dashboard() {
   const { passport, isLoadingPassport, passportHasCacaoError, cancelCeramicConnection, expiredProviders } =
     useContext(CeramicContext);
@@ -52,6 +54,7 @@ export default function Dashboard() {
 
   const [refreshModal, setRefreshModal] = useState(false);
   const [expiredStampModal, setExpiredStampModal] = useState(false);
+  const { address, dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
 
   // stamp filter
   const router = useRouter();
@@ -63,9 +66,11 @@ export default function Dashboard() {
     if (!wallet) {
       navigate("/");
     } else {
-      refreshScore(wallet.accounts[0].address.toLowerCase());
+      if (dbAccessTokenStatus === "connected" && dbAccessToken) {
+        refreshScore(wallet.accounts[0].address.toLowerCase(), dbAccessToken);
+      }
     }
-  }, [wallet]);
+  }, [wallet, dbAccessToken, dbAccessTokenStatus]);
 
   // Allow user to retry Ceramic connection if failed
   const retryConnection = () => {
@@ -222,22 +227,31 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="col-span-1 col-end-[-2] flex min-w-fit items-center justify-self-end">
-          <div className={`pr-2 ${passportSubmissionState === "APP_REQUEST_PENDING" ? "visible" : "invisible"}`}>
-            <Spinner className="my-[2px]" thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="flex text-2xl">
-              {/* TODO add color to theme */}
-              <span className={`${score == 1 ? "text-accent-3" : "text-[#FFE28A]"}`}>{rawScore.toFixed(2)}</span>
-              <Tooltip>
-                Your Unique Humanity Score is based out of 100 and measures how unique you are. The current passing
-                score threshold is 15.
-              </Tooltip>
+        {isLiveAlloScoreEnabled ? (
+          <div className="col-span-1 col-end-[-2] flex min-w-fit items-center justify-self-end">
+            <div className={`pr-2 ${passportSubmissionState === "APP_REQUEST_PENDING" ? "visible" : "invisible"}`}>
+              <Spinner
+                className="my-[2px]"
+                thickness="2px"
+                speed="0.65s"
+                emptyColor="darkGray"
+                color="gray"
+                size="md"
+              />
             </div>
-            <div className="flex whitespace-nowrap text-sm">{scoreDescription}</div>
+            <div className="flex flex-col items-center">
+              <div className="flex text-2xl">
+                {/* TODO add color to theme */}
+                <span className={`${score == 1 ? "text-accent-3" : "text-[#FFE28A]"}`}>{rawScore.toFixed(2)}</span>
+                <Tooltip>
+                  Your Unique Humanity Score is based out of 100 and measures how unique you are. The current passing
+                  score threshold is 15.
+                </Tooltip>
+              </div>
+              <div className="flex whitespace-nowrap text-sm">{scoreDescription}</div>
+            </div>
           </div>
-        </div>
+        ) : null}
 
         <div className="col-span-1 col-end-[-1] justify-self-end">
           {passport ? (
