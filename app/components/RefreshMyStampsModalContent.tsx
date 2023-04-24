@@ -239,7 +239,7 @@ export const RefreshMyStampsModalContent = ({
           </button>
           <div className="text-center">
             <div className="m-auto mb-6 w-3/4 text-3xl">No Eligible Web3 Stamps Found</div>
-            <div className="mt-24 text-xl text-muted">Visit the Dashboard to explore more Stamp options.</div>
+            <div className="mt-24 text-xl text-muted">There are no unverified stamps currently eligible. Please return to the dashboard and select additional stamps to receive by connecting to external accounts (examples include Gmail, Discord, etc) or perform the actions required to qualify for a stamp and resubmit for that stamp through the dashboard. Click the button to return to the dashboard and explore all stamps.</div>
           </div>
           <button
             className="sidebar-verify-btn hover:backround-2 mt-36 flex w-full items-center justify-center rounded-sm text-white"
