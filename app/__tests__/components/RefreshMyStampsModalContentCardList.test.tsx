@@ -83,7 +83,7 @@ describe("RefreshMyStampsModalContentCardList", () => {
     await waitFor(() => expect(screen.getByTestId("refresh-my-stamps-modal-content-card")).toBeInTheDocument());
   });
 
-  it("renders the component after fetched stamps have been found", async () => {
+  it("renders the component when no stamps were found", async () => {
     const RefreshMyStampsModalContentPropsList: RefreshMyStampsModalContentProps = {
       resetStampsAndProgressState: jest.fn(),
       onClose: jest.fn(),
