@@ -9,6 +9,8 @@ const scorerApiKey = process.env.NEXT_PUBLIC_ALLO_SCORER_API_KEY || "";
 const scorerApiSubmitPassport = process.env.NEXT_PUBLIC_SCORER_ENDPOINT + "/submit-passport";
 const scorerApiGetScore = process.env.NEXT_PUBLIC_SCORER_ENDPOINT + "/score";
 
+const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
+
 export type PassportSubmissionStateType =
   | "APP_INITIAL"
   | "APP_REQUEST_PENDING"
@@ -84,6 +86,9 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   };
 
   const refreshScore = async (address: string | undefined, submitPassportOnFailure: boolean = true) => {
+    if (!isLiveAlloScoreEnabled) {
+      return;
+    }
     if (address) {
       setPassportSubmissionState("APP_REQUEST_PENDING");
       try {
@@ -96,14 +101,18 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
         setPassportSubmissionState("APP_REQUEST_SUCCESS");
       } catch (error: AxiosError | any) {
         setPassportSubmissionState("APP_REQUEST_ERROR");
-        if (submitPassportOnFailure && error.response.data.detail === "Unable to get score for provided scorer.") {
-          submitPassport(address);
-        }
+        // Commenting this, as we don't want to submit passport on failure any more - this will be handled in the BE
+        // if (submitPassportOnFailure && error.response?.data?.detail === "Unable to get score for provided scorer.") {
+        //   submitPassport(address);
+        // }
       }
     }
   };
 
   const submitPassport = async (address: string | undefined) => {
+    if (!isLiveAlloScoreEnabled) {
+      return;
+    }
     if (address) {
       try {
         await axios.post(
