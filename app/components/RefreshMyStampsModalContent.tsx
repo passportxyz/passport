@@ -51,6 +51,7 @@ export const RefreshMyStampsModalContent = ({
   const { handleAddStamps, handleDeleteStamps } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
+  const [showDataInfo, setShowDataInfo] = useState(false);
   const navigate = useNavigate();
 
   // TODO: update comments
@@ -187,8 +188,8 @@ export const RefreshMyStampsModalContent = ({
   return (
     <>
       {fetchedPossibleEVMStamps.length > 0 ? (
-        <div className="relative flex h-full flex-col">
-          <div className="mb-6 text-2xl text-white">Stamps Found</div>
+        <div className="relative flex h-full flex-col text-white">
+          <div className="mb-6 text-2xl">Stamps Found</div>
           <div>
             {" "}
             {/* TODO: update comments */}
@@ -199,15 +200,26 @@ export const RefreshMyStampsModalContent = ({
               setSelectedProviders={setSelectedProviders}
             />
           </div>
-          <div className="mt-8 text-center text-pink-300 underline">
-            <a href="#">How is my data stored?</a>
+          <div className="mt-8 cursor-pointer text-center text-pink-300 underline">
+            <a onClick={() => setShowDataInfo(!showDataInfo)}>How is my data stored?</a>
           </div>
+          {showDataInfo && (
+            <div className="pt-3 text-justify">
+              <p>
+                The only information in your passport is the Decentralized Identifier (DID) associated with your
+                Ethereum address and the Verifiable Credentials (VCs) issued for each service you connect to your
+                passport. No identifiable details are stored in your passport as we encrypt the account details when
+                creating your VCs. You can inspect the data yourself in the Gitcoin Passport by clicking the &lt;/&gt;
+                Passport JSON button in the upper right of the Passport dashboard.
+              </p>
+            </div>
+          )}
           <div className="mt-16 mb-auto flex items-center justify-center">
             <button className="secondary-btn mr-2 w-full rounded-sm py-2 px-6" onClick={() => navigate("/dashboard")}>
               Cancel
             </button>
             <button
-              className="ml-2 flex w-full items-center justify-center rounded-sm bg-accent py-2 px-2 text-white disabled:cursor-not-allowed disabled:bg-muted disabled:text-black"
+              className="ml-2 flex w-full items-center justify-center rounded-sm bg-accent py-2 px-2 disabled:cursor-not-allowed disabled:bg-muted disabled:text-black"
               onClick={() => {
                 handleRefreshSelectedStamps();
               }}
@@ -218,15 +230,15 @@ export const RefreshMyStampsModalContent = ({
           </div>
         </div>
       ) : (
-        <div className="flex h-full flex-col content-end">
+        <div className="flex h-full flex-col content-end text-white">
           <button
             className="mt-4 mb-6 flex h-10 w-10 items-center justify-center self-center rounded-full border border-accent-2"
             onClick={onClose}
           >
-            <XMarkIcon className="h-7 w-7 text-white" aria-hidden="true" />
+            <XMarkIcon className="h-7 w-7" aria-hidden="true" />
           </button>
           <div className="text-center">
-            <div className="m-auto mb-6 w-3/4 text-3xl text-white">No Eligible Web3 Stamps Found</div>
+            <div className="m-auto mb-6 w-3/4 text-3xl">No Eligible Web3 Stamps Found</div>
             <div className="mt-24 text-xl text-muted">Visit the Dashboard to explore more Stamp options.</div>
           </div>
           <button
