@@ -54,6 +54,7 @@ export default function Dashboard() {
 
   const [refreshModal, setRefreshModal] = useState(false);
   const [expiredStampModal, setExpiredStampModal] = useState(false);
+  const { address, dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
 
   // stamp filter
   const router = useRouter();
@@ -65,9 +66,11 @@ export default function Dashboard() {
     if (!wallet) {
       navigate("/");
     } else {
-      refreshScore(wallet.accounts[0].address.toLowerCase());
+      if (dbAccessTokenStatus === "connected") {
+        refreshScore(wallet.accounts[0].address.toLowerCase(), dbAccessToken);
+      }
     }
-  }, [wallet]);
+  }, [wallet, dbAccessToken, dbAccessTokenStatus]);
 
   // Allow user to retry Ceramic connection if failed
   const retryConnection = () => {
