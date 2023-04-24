@@ -26,7 +26,7 @@ export interface ScorerContextState {
   passportSubmissionState: PassportSubmissionStateType;
   scoreState: ScoreStateType;
 
-  refreshScore: (address: string | undefined) => Promise<void>;
+  refreshScore: (address: string | undefined, dbAccessToken: string) => Promise<void>;
   // submitPassport: (address: string | undefined) => Promise<void>;
 }
 
@@ -37,7 +37,7 @@ const startingState: ScorerContextState = {
   scoreDescription: "",
   passportSubmissionState: "APP_INITIAL",
   scoreState: "APP_INITIAL",
-  refreshScore: async (address: string | undefined): Promise<void> => {},
+  refreshScore: async (address: string | undefined, dbAccessToken: string): Promise<void> => {},
   // submitPassport: async (address: string | undefined): Promise<void> => {},
 };
 

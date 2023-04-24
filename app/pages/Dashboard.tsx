@@ -66,7 +66,7 @@ export default function Dashboard() {
     if (!wallet) {
       navigate("/");
     } else {
-      if (dbAccessTokenStatus === "connected") {
+      if (dbAccessTokenStatus === "connected" && dbAccessToken) {
         refreshScore(wallet.accounts[0].address.toLowerCase(), dbAccessToken);
       }
     }
