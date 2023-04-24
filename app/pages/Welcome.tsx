@@ -22,14 +22,14 @@ import { PossibleEVMProvider } from "../signer/utils";
 import { useDisclosure } from "@chakra-ui/react";
 
 // --- Contexts
-import { CeramicContext } from "../context/ceramicContext";
+import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 import { InitialWelcome } from "../components/InitialWelcome";
 import LoadingScreen from "../components/LoadingScreen";
 
 export default function Welcome() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { passport, allPlatforms } = useContext(CeramicContext);
+  const { passport, allPlatforms, isLoadingPassport } = useContext(CeramicContext);
   const { wallet, address } = useContext(UserContext);
 
   const navigate = useNavigate();
@@ -192,8 +192,9 @@ export default function Welcome() {
         </div>
         <PageWidthGrid>
           <div className="col-span-4 flex flex-col items-center text-center md:col-start-2 lg:col-start-3 xl:col-span-6 xl:col-start-4">
-            {passport ? (
-              passport.stamps.length > 0 ? (
+            {isLoadingPassport === IsLoadingPassportState.Idle ||
+            isLoadingPassport === IsLoadingPassportState.FailedToConnect ? (
+              passport && passport.stamps.length > 0 ? (
                 <WelcomeBack
                   handleFetchPossibleEVMStamps={handleFetchPossibleEVMStamps}
                   onOpen={onOpen}
