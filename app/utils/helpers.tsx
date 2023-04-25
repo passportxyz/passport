@@ -1,7 +1,7 @@
 // import React from "react";
 
 // --- Types
-import { Passport, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
+import { CredentialResponseBody, Passport, PROVIDER_ID, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 import { Providers, STAMP_PROVIDERS } from "../config/providers";
 
 // --- Stamp Data Point Helpers
@@ -22,4 +22,17 @@ export function generateUID(length: number) {
     )
     .replace(/[+/]/g, "")
     .substring(0, length);
+}
+
+export function reduceStampResponse(providerIDs: PROVIDER_ID[], verifiedCredentials?: CredentialResponseBody[]) {
+  if (!verifiedCredentials) return [];
+  return verifiedCredentials
+    .filter(
+      (credential) =>
+        !credential.error && providerIDs.find((providerId: PROVIDER_ID) => credential?.record?.type === providerId)
+    )
+    .map((credential) => ({
+      provider: credential.record?.type as PROVIDER_ID,
+      credential: credential.credential as VerifiableCredential,
+    }));
 }
