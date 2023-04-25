@@ -1,14 +1,11 @@
 // --- React hooks
-import { useState, useEffect, useMemo } from "react";
-
-// --- Types
-import { evmPlatformProvider } from "./RefreshMyStampsModalContent";
+import { useMemo } from "react";
 
 // --- UI components
 import { Switch, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon } from "@chakra-ui/react";
 
 // --- Utils
-import { PlatformGroupSpec, PlatformSpec, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/src/types";
+import { PlatformGroupSpec, PlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
 
 // --- App components
 import { RefreshMyStampsSelector } from "../components/RefreshMyStampsSelector";

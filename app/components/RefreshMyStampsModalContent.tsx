@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
 // --- Types
-import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PlatformGroupSpec, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 
 // --- Identity tools
 import { Stamp, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
@@ -21,7 +21,7 @@ import { PossibleEVMProvider } from "../signer/utils";
 
 // --- UI components
 // TODO: re-add toasts after design updates
-import { useToast, IconButton, Spinner } from "@chakra-ui/react";
+import { Spinner } from "@chakra-ui/react";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 
 // --- App components
