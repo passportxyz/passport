@@ -43,11 +43,13 @@ export type ValidPlatform = {
   groups: ValidPlatformGroup[];
 };
 
-// These are type-guarded filters which tell typescrept that
+// These are type-guarded filters which tell typescript that
 // objects which pass this filter are of the defined type
-const filterNullProviders = (provider: ValidProvider | undefined): provider is ValidProvider => !!provider;
-const filterNullGroups = (group: ValidPlatformGroup | undefined): group is ValidPlatformGroup => !!group;
-const filterNullPlatforms = (platform: ValidPlatform | undefined): platform is ValidPlatform => !!platform;
+const filterUndefined = <T,>(item: T | undefined): item is T => !!item;
+
+const MIN_DELAY = 250;
+const MAX_DELAY = 1000;
+const getStepDelay = () => Math.floor(Math.random() * (MAX_DELAY - MIN_DELAY + 1) + MIN_DELAY);
 
 export default function Welcome() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -120,8 +122,16 @@ export default function Welcome() {
     allPlatforms: Map<PLATFORM_ID, PlatformProps>
   ): Promise<ValidPlatform[]> => {
     try {
-      if (!passport) return [];
-      const existingProviders = passport.stamps.map((stamp) => stamp.provider);
+      let step = 0;
+      const incrementStep = () => {
+        if (step < 5) {
+          updateSteps(++step);
+          setTimeout(incrementStep, getStepDelay());
+        }
+      };
+      incrementStep();
+
+      const existingProviders = passport && passport.stamps.map((stamp) => stamp.provider);
 
       const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
@@ -134,7 +144,7 @@ export default function Welcome() {
           await Promise.all(
             groupSpec.providers.map(async (provider) => {
               const { name, title } = provider;
-              if (existingProviders.includes(name)) return;
+              if (existingProviders && existingProviders.includes(name)) return;
 
               const payload = await providers.verify(name, { type: name, address, version: "0.0.0", rpcUrl }, {});
 
@@ -146,7 +156,7 @@ export default function Welcome() {
               };
             })
           )
-        ).filter(filterNullProviders);
+        ).filter(filterUndefined);
 
       const getValidPlatformGroups = async (platform: PlatformProps): Promise<ValidPlatformGroup[]> =>
         (
@@ -160,12 +170,11 @@ export default function Welcome() {
               };
             })
           )
-        ).filter(filterNullGroups);
+        ).filter(filterUndefined);
 
       const validPlatforms: ValidPlatform[] = (
         await Promise.all(
           evmPlatforms.map(async (platform) => {
-            updateSteps(1);
             const validPlatformGroups = await getValidPlatformGroups(platform);
             if (validPlatformGroups.length === 0) return;
             return {
@@ -175,14 +184,12 @@ export default function Welcome() {
             };
           })
         )
-      ).filter(filterNullPlatforms);
+      ).filter(filterUndefined);
 
-      updateSteps(2);
+      step = 5;
+      updateSteps(6);
+      await new Promise((resolve) => setTimeout(resolve, getStepDelay()));
 
-      updateSteps(3);
-      updateSteps(4);
-
-      updateSteps(5);
       return validPlatforms;
     } catch (error) {
       console.log(error);
@@ -194,7 +201,6 @@ export default function Welcome() {
     try {
       const platforms = await fetchValidPlatforms(addr, allPlats);
       setValidPlatforms(platforms);
-      updateSteps(6);
     } catch (error) {
       throw new Error();
     }
@@ -220,7 +226,7 @@ export default function Welcome() {
                 <InitialWelcome
                   onBoardFinished={async () => {
                     if (address) {
-                      await handleFetchPossibleEVMStamps(address, allPlatforms);
+                      handleFetchPossibleEVMStamps(address, allPlatforms);
                       onOpen();
                     }
                   }}
