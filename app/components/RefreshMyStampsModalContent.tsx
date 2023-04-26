@@ -26,6 +26,7 @@ import { XMarkIcon } from "@heroicons/react/20/solid";
 
 // --- App components
 import { RefreshMyStampsModalContentCardList } from "../components/RefreshMyStampsModalContentCardList";
+import { reduceStampResponse } from "../utils/helpers";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
@@ -72,27 +73,21 @@ export const RefreshMyStampsModalContent = ({
 
   const handleRefreshSelectedStamps = async () => {
     try {
-      // TODO: add datadog logger
-      // datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
       setLoading(true);
       await handleFetchCredential(selectedProviders);
-      setLoading(false);
-      resetStampsAndProgressState();
-      navigate("/dashboard");
+      datadogLogs.logger.info("Successfully saved Stamp, onboard one step verification", {
+        providers: selectedProviders,
+      });
     } catch (e) {
-      // TODO: update datadog logger
-      // datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
-      console.log(e);
-      navigate("/dashboard");
-      resetStampsAndProgressState();
+      datadogLogs.logger.error("Verification Error, onboard one step verification", { error: e });
     }
+    setLoading(false);
+    navigate("/dashboard");
+    resetStampsAndProgressState();
   };
 
   const handleFetchCredential = async (providerIDs: PROVIDER_ID[]): Promise<void> => {
     try {
-      // This array will contain all providers that new validated VCs
-      let vcs: Stamp[] = [];
-
       if (selectedProviders.length > 0) {
         const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
           iamUrl,
@@ -107,41 +102,25 @@ export const RefreshMyStampsModalContent = ({
           signer as { signMessage: (message: string) => Promise<string> }
         );
 
-        // because we provided a types array in the params we expect to receive a
-        // credentials array in the response...
-        if (verified.credentials) {
-          for (let i = 0; i < verified.credentials.length; i++) {
-            let cred = verified.credentials[i];
-            if (!cred.error && providerIDs.find((providerId: PROVIDER_ID) => cred?.record?.type === providerId)) {
-              // add each of the requested/received stamps to the passport...
-              vcs.push({
-                provider: cred.record?.type as PROVIDER_ID,
-                credential: cred.credential as VerifiableCredential,
-              });
-            }
-          }
+        const vcs = reduceStampResponse(selectedProviders, verified.credentials);
+
+        // Delete all stamps ...
+        await handleDeleteStamps(providerIDs as PROVIDER_ID[]);
+
+        // .. and now add all newly validate stamps
+        if (vcs.length > 0) {
+          await handleAddStamps(vcs);
         }
+
+        // grab all providers who are verified from the verify response
+        const actualVerifiedProviders = providerIDs.filter(
+          (providerId) =>
+            !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
+        );
+        // both verified and selected should look the same after save
+        setVerifiedProviders([...actualVerifiedProviders]);
+        setSelectedProviders([...actualVerifiedProviders]);
       }
-
-      // Delete all stamps ...
-      await handleDeleteStamps(providerIDs as PROVIDER_ID[]);
-
-      // .. and now add all newly validate stamps
-      if (vcs.length > 0) {
-        await handleAddStamps(vcs);
-      }
-
-      // TODO: update datadog logger
-      // datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
-
-      // grab all providers who are verified from the verify response
-      const actualVerifiedProviders = providerIDs.filter(
-        (providerId) =>
-          !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
-      );
-      // both verified and selected should look the same after save
-      setVerifiedProviders([...actualVerifiedProviders]);
-      setSelectedProviders([...actualVerifiedProviders]);
 
       // TODO: re-add toasts after design updates
       // // Get the done toast messages
