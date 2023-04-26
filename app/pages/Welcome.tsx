@@ -3,6 +3,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+import axios from "axios";
 // --- Types
 import { Status, Step } from "../components/Progress";
 import { providers } from "@gitcoin/passport-platforms";
@@ -139,6 +140,18 @@ export default function Welcome() {
       const allPlatformsData = Array.from(allPlatforms.values());
       const evmPlatforms: PlatformProps[] = allPlatformsData.filter(({ platform }) => platform.isEVM);
 
+      const payload = {
+        type: "bulk",
+        types: ["EthGasProvider", "EthGTEOneTxnProvider", "FirstEthTxnProvider"],
+        address,
+        version: "0.0.0",
+        rpcUrl,
+      };
+      const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
+      const response = await axios.post(`${iamUrl.replace(/\/*?$/, "")}/v${payload.version}/check`, {
+        payload,
+      });
+      debugger;
       const getValidGroupProviders = async (groupSpec: PlatformGroupSpec): Promise<ValidProvider[]> =>
         (
           await Promise.all(
@@ -202,6 +215,7 @@ export default function Welcome() {
       const platforms = await fetchValidPlatforms(addr, allPlats);
       setValidPlatforms(platforms);
     } catch (error) {
+      console.log(error);
       throw new Error();
     }
   };

@@ -195,6 +195,31 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
   }
 });
 
+type CheckRequestBody = {
+  payload: RequestPayload;
+};
+
+type CheckResponseBody = {
+  valid: boolean;
+  type: string;
+  error?: string[];
+};
+
+app.post("/api/v0.0.0/check", (req: Request, res: Response): void => {
+  const { payload } = req.body as CheckRequestBody;
+  const context: ProviderContext = {};
+  const responses: CheckResponseBody[] = [];
+  Promise.all(
+    (payload.types?.length ? payload.types : [payload.type]).map(async (type) => {
+      // verify the payload against the selected Identity Provider
+      const { valid, error } = await providers.verify(type, payload, context);
+      responses.push({ valid, type, error });
+    })
+  )
+    .then(() => res.json(responses))
+    .catch(() => errorRes(res, "Unable to check payload", 500));
+});
+
 // expose verify entry point
 app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
   const requestBody: VerifyRequestBody = req.body as VerifyRequestBody;
