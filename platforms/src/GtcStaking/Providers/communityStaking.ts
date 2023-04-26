@@ -46,7 +46,7 @@ export interface DataResult {
 }
 
 async function verifyStake(payload: RequestPayload): Promise<StakeResponse> {
-  const round = process.env.NEXT_PUBLIC_GTC_STAKING_GRAPH_API_KEY || process.env.GTC_STAKING_ROUND;
+  const round = process.env.NEXT_PUBLIC_GTC_STAKING_GRAPH_API_KEY || process.env.GTC_STAKING_ROUND || "1";
   const address = payload.address.toLowerCase();
   const result = await axios.post(stakingSubgraph, {
     query: `
