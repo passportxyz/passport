@@ -1,6 +1,6 @@
 /* eslint-disable */
 // ---- Test subject
-import { alchemyGetNFTsUrl, NFTProvider } from "../nft";
+import { getNFTEndpoint, NFTProvider } from "../nft";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 
@@ -45,7 +45,7 @@ describe("Attempt verification", function () {
 
       // Check the request to get the NFTs
       expect(axios.get).toHaveBeenCalledTimes(1);
-      expect(mockedAxios.get).toBeCalledWith(alchemyGetNFTsUrl, {
+      expect(mockedAxios.get).toBeCalledWith(getNFTEndpoint(), {
         params: {
           withMetadata: "false",
           owner: MOCK_ADDRESS_LOWER,
@@ -80,5 +80,11 @@ describe("Attempt verification", function () {
 
     expect(axios.get).toHaveBeenCalledTimes(1);
     expect(nftPayload).toMatchObject({ valid: false });
+  });
+
+  it("should return the nft endpoint given an alchemy url", () => {
+    expect(getNFTEndpoint("https://eth-mainnet.alchemyapi.io/v2/123")).toBe(
+      "https://eth-mainnet.g.alchemy.com/nft/v2/123/getNFTs"
+    );
   });
 });
