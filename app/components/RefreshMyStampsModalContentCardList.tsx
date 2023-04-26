@@ -4,7 +4,6 @@ import { PossibleEVMProvider } from "../signer/utils";
 // --- Types
 import { getPlatformSpec } from "../config/platforms";
 import { PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
-import { evmPlatformProvider } from "./RefreshMyStampsModalContent";
 
 // --- App components
 import { RefreshMyStampsModalContentCard } from "./RefreshMyStampsModalContentCard";

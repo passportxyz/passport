@@ -20,11 +20,8 @@ import { PossibleEVMProvider } from "../../signer/utils";
 
 const defaultProps: RefreshMyStampsModalCardListProps = {
   fetchedPossibleEVMStamps: undefined,
-  verifiedProviders: [],
   selectedProviders: [],
-  selectedEVMPlatformProviders: [],
   setSelectedProviders: jest.fn(),
-  setSelectedEVMPlatformProviders: jest.fn(),
 };
 
 const fetchedPossibleEVMStamps = [
@@ -80,7 +77,7 @@ describe("RefreshMyStampsModalContentCardList", () => {
     };
 
     renderWithContext(mockUserContext, mockCeramicContext, refreshModal());
-    await waitFor(() => expect(screen.getByTestId("refresh-my-stamps-modal-content-card")).toBeInTheDocument());
+    await screen.findByTestId("refresh-my-stamps-modal-content-card");
   });
 
   it("renders the component when no stamps were found", async () => {
@@ -99,6 +96,6 @@ describe("RefreshMyStampsModalContentCardList", () => {
     };
 
     renderWithContext(mockUserContext, mockCeramicContext, refreshModal());
-    await waitFor(() => expect(screen.getByText("No Eligible Web3 Stamps Found")).toBeInTheDocument());
+    await screen.findByText("No Eligible Web3 Stamps Found");
   });
 });

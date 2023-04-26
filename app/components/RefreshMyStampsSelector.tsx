@@ -1,5 +1,3 @@
-// --- React hooks
-import { useState, useEffect, ChangeEvent, useCallback } from "react";
 // --- UI Components
 import { Checkbox } from "@chakra-ui/react";
 
