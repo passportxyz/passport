@@ -16,7 +16,6 @@ import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import PageRoot from "../components/PageRoot";
 import { WelcomeBack } from "../components/WelcomeBack";
 import { RefreshMyStampsModal } from "../components/RefreshMyStampsModal";
-import { PossibleEVMProvider } from "../signer/utils";
 
 // --Chakra UI Elements
 import { useDisclosure } from "@chakra-ui/react";
@@ -26,6 +25,29 @@ import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContex
 import { UserContext } from "../context/userContext";
 import { InitialWelcome } from "../components/InitialWelcome";
 import LoadingScreen from "../components/LoadingScreen";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
+
+type ValidProvider = {
+  name: PROVIDER_ID;
+  title: string;
+};
+
+export type ValidPlatformGroup = {
+  name: string;
+  providers: ValidProvider[];
+};
+
+export type ValidPlatform = {
+  name: string;
+  path: string;
+  groups: ValidPlatformGroup[];
+};
+
+// These are type-guarded filters which tell typescrept that
+// objects which pass this filter are of the defined type
+const filterNullProviders = (provider: ValidProvider | undefined): provider is ValidProvider => !!provider;
+const filterNullGroups = (group: ValidPlatformGroup | undefined): group is ValidPlatformGroup => !!group;
+const filterNullPlatforms = (platform: ValidPlatform | undefined): platform is ValidPlatform => !!platform;
 
 export default function Welcome() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -67,11 +89,11 @@ export default function Welcome() {
       status: Status.NOT_STARTED,
     },
   ];
-  const [fetchedPossibleEVMStamps, setFetchedPossibleEVMStamps] = useState<PossibleEVMProvider[]>();
+  const [validPlatforms, setValidPlatforms] = useState<ValidPlatform[]>();
   const [currentSteps, setCurrentSteps] = useState<Step[]>(initialSteps);
 
   const resetStampsAndProgressState = () => {
-    setFetchedPossibleEVMStamps([]);
+    setValidPlatforms([]);
     setCurrentSteps(initialSteps);
   };
 
@@ -93,78 +115,72 @@ export default function Welcome() {
     setCurrentSteps(steps);
   };
 
-  const fetchPossibleEVMStamps = async (
+  const fetchValidPlatforms = async (
     address: string,
     allPlatforms: Map<PLATFORM_ID, PlatformProps>
-  ): Promise<PossibleEVMProvider[]> => {
+  ): Promise<ValidPlatform[]> => {
     try {
+      if (!passport) return [];
+      const existingProviders = passport.stamps.map((stamp) => stamp.provider);
+
       const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
       // Extract EVM platforms
-      const evmPlatforms: PlatformProps[] = [];
-      const evmPlatformGroupSpecs: PlatformGroupSpec[] = [];
+      const allPlatformsData = Array.from(allPlatforms.values());
+      const evmPlatforms: PlatformProps[] = allPlatformsData.filter(({ platform }) => platform.isEVM);
 
-      allPlatforms.forEach((value, key, map) => {
-        const platformProp = map.get(key);
-        if (platformProp?.platform.isEVM) {
-          evmPlatformGroupSpecs.push(...platformProp.platFormGroupSpec);
-          evmPlatforms.push(platformProp);
-        }
-      });
-      // Build requests for each verify function within every EVM Provider
-      const providerRequests = await Promise.all(
-        evmPlatforms.map((platform) => {
-          const validatedProviderGroup = platform.platFormGroupSpec.map((groupSpec) => {
-            return groupSpec.providers.map(async (provider) => {
-              const payload = await providers.verify(
-                provider.name,
-                { type: provider.name, address, version: "0.0.0", rpcUrl },
-                {}
-              );
+      const getValidGroupProviders = async (groupSpec: PlatformGroupSpec): Promise<ValidProvider[]> =>
+        (
+          await Promise.all(
+            groupSpec.providers.map(async (provider) => {
+              const { name, title } = provider;
+              if (existingProviders.includes(name)) return;
+
+              const payload = await providers.verify(name, { type: name, address, version: "0.0.0", rpcUrl }, {});
+
+              if (!payload.valid) return;
+
               return {
-                payload,
-                providerType: provider.name,
+                name,
+                title,
               };
-            });
-          });
-          updateSteps(1);
-          return { validatedProviderGroup, platform };
-        })
-      );
-
-      // Resolve nested promises
-      const validatedPlatforms = await Promise.all(
-        providerRequests.map(async (requestedPlatform) => {
-          const validatedPlatformGroups = await Promise.all(
-            requestedPlatform.validatedProviderGroup.map(async (group) => {
-              const validatedProviders = await Promise.all(group);
-              return validatedProviders;
             })
-          );
-          updateSteps(2);
-          return { validatedPlatformGroups, platformProps: requestedPlatform.platform };
-        })
-      );
+          )
+        ).filter(filterNullProviders);
 
-      // Look for valid stamps and return the provider group if valid
-      const validPlatforms = validatedPlatforms.filter((validatedPlatform) => {
-        // If any of the providers in the group are valid, then the group is valid
-        const validGroup = validatedPlatform.validatedPlatformGroups.filter((group) => {
-          updateSteps(3);
-          return (
-            group.filter((provider) => {
-              if (passport) {
-                const stampProviders = passport.stamps.map((stamp) => stamp.provider);
-                if (!stampProviders.includes(provider.providerType)) {
-                  return provider.payload.valid;
-                }
-              }
-            }).length > 0
-          );
-        });
-        updateSteps(4);
-        return validGroup.length > 0;
-      });
+      const getValidPlatformGroups = async (platform: PlatformProps): Promise<ValidPlatformGroup[]> =>
+        (
+          await Promise.all(
+            platform.platFormGroupSpec.map(async (groupSpec) => {
+              const groupProviders = await getValidGroupProviders(groupSpec);
+              if (groupProviders.length === 0) return;
+              return {
+                name: groupSpec.platformGroup,
+                providers: groupProviders,
+              };
+            })
+          )
+        ).filter(filterNullGroups);
+
+      const validPlatforms: ValidPlatform[] = (
+        await Promise.all(
+          evmPlatforms.map(async (platform) => {
+            updateSteps(1);
+            const validPlatformGroups = await getValidPlatformGroups(platform);
+            if (validPlatformGroups.length === 0) return;
+            return {
+              groups: validPlatformGroups,
+              name: platform.platform.platformId,
+              path: platform.platform.path,
+            };
+          })
+        )
+      ).filter(filterNullPlatforms);
+
+      updateSteps(2);
+
+      updateSteps(3);
+      updateSteps(4);
 
       updateSteps(5);
       return validPlatforms;
@@ -176,8 +192,8 @@ export default function Welcome() {
 
   const handleFetchPossibleEVMStamps = async (addr: string, allPlats: Map<PLATFORM_ID, PlatformProps>) => {
     try {
-      const possibleEVMStamps = await fetchPossibleEVMStamps(addr, allPlats);
-      setFetchedPossibleEVMStamps(possibleEVMStamps);
+      const platforms = await fetchValidPlatforms(addr, allPlats);
+      setValidPlatforms(platforms);
       updateSteps(6);
     } catch (error) {
       throw new Error();
@@ -220,7 +236,7 @@ export default function Welcome() {
         steps={currentSteps}
         isOpen={isOpen}
         onClose={onClose}
-        fetchedPossibleEVMStamps={fetchedPossibleEVMStamps}
+        validPlatforms={validPlatforms}
         resetStampsAndProgressState={resetStampsAndProgressState}
       />
     </PageRoot>

@@ -1,5 +1,4 @@
-// --- Utils
-import { PossibleEVMProvider } from "../signer/utils";
+import { ValidPlatform } from "../pages/Welcome";
 
 // --- Types
 import { getPlatformSpec } from "../config/platforms";
@@ -9,24 +8,24 @@ import { PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
 import { RefreshMyStampsModalContentCard } from "./RefreshMyStampsModalContentCard";
 
 export type RefreshMyStampsModalCardListProps = {
-  fetchedPossibleEVMStamps: PossibleEVMProvider[] | undefined;
+  validPlatforms: ValidPlatform[];
   selectedProviders: PROVIDER_ID[];
   setSelectedProviders: (providerIds: PROVIDER_ID[]) => void;
 };
 
 export const RefreshMyStampsModalContentCardList = ({
-  fetchedPossibleEVMStamps,
+  validPlatforms,
   selectedProviders,
   setSelectedProviders,
 }: RefreshMyStampsModalCardListProps) => {
-  const cardList = fetchedPossibleEVMStamps?.map((possiblePlatform: PossibleEVMProvider, index: number) => {
-    const currentPlatform = getPlatformSpec(possiblePlatform.platformProps.platform.path);
-    const platformGroup = possiblePlatform.platformProps.platFormGroupSpec;
+  const cardList = validPlatforms.map((validPlatform: ValidPlatform, index: number) => {
+    const currentPlatform = getPlatformSpec(validPlatform.path);
+    const platformGroups = validPlatform.groups;
 
     return (
       <RefreshMyStampsModalContentCard
         key={currentPlatform ? currentPlatform.name : `undefined-${index}`}
-        platformGroup={platformGroup}
+        platformGroups={platformGroups}
         currentPlatform={currentPlatform}
         selectedProviders={selectedProviders}
         setSelectedProviders={setSelectedProviders}

@@ -9,23 +9,24 @@ import { PlatformGroupSpec, PlatformSpec, PROVIDER_ID } from "@gitcoin/passport-
 
 // --- App components
 import { RefreshMyStampsSelector } from "../components/RefreshMyStampsSelector";
+import { ValidPlatformGroup } from "../pages/Welcome";
 
 type RefreshMyStampsModalCardProps = {
-  platformGroup: PlatformGroupSpec[];
+  platformGroups: ValidPlatformGroup[];
   selectedProviders: PROVIDER_ID[];
   currentPlatform: PlatformSpec | undefined;
   setSelectedProviders: (providerIds: PROVIDER_ID[]) => void;
 };
 
 export const RefreshMyStampsModalContentCard = ({
-  platformGroup,
+  platformGroups,
   currentPlatform,
   selectedProviders,
   setSelectedProviders,
 }: RefreshMyStampsModalCardProps): JSX.Element => {
   const platformProviders = useMemo(
-    () => platformGroup.map((group) => group.providers?.map((provider) => provider.name)).flat(),
-    [platformGroup]
+    () => platformGroups.map(({ providers }) => providers?.map(({ name }) => name)).flat(2),
+    [platformGroups]
   );
 
   const checked = useMemo(
@@ -66,8 +67,7 @@ export const RefreshMyStampsModalContentCard = ({
           </AccordionButton>
           <AccordionPanel borderTop="1px solid #083A40" marginTop="8px" paddingLeft="0" paddingRight="0">
             <RefreshMyStampsSelector
-              currentPlatform={currentPlatform}
-              currentProviders={platformGroup}
+              validPlatformGroups={platformGroups}
               selectedProviders={selectedProviders}
               setSelectedProviders={setSelectedProviders}
               platformChecked={checked}

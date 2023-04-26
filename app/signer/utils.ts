@@ -146,11 +146,13 @@ export const fetchAdditionalSigner = async (address: string): Promise<Additional
   return extraSignature;
 };
 
+export type ValidatedPlatformGroup = {
+  payload: VerifiedPayload;
+  providerType: PROVIDER_ID;
+};
+
 export type PossibleEVMProvider = {
-  validatedPlatformGroups: {
-    payload: VerifiedPayload;
-    providerType: PROVIDER_ID;
-  }[][];
+  validatedPlatformGroups: ValidatedPlatformGroup[][];
   platformProps: PlatformProps;
 };
 
