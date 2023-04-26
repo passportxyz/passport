@@ -8,8 +8,10 @@ import { utils } from "ethers";
 // ----- Libs
 import axios from "axios";
 
+const gtcStakingapiKey = process.env.NEXT_PUBLIC_GTC_STAKING_GRAPH_API_KEY || process.env.GTC_STAKING_GRAPH_API_KEY;
+
 // List of subgraphs to check
-export const stakingSubgraph = `https://gateway.thegraph.com/api/${process.env.GTC_STAKING_GRAPH_API_KEY}/subgraphs/id/6neBRm8wdXfbH9WQuFeizJRpsom4qovuqKhswPBRTC5Q`;
+export const stakingSubgraph = `https://gateway.thegraph.com/api/${gtcStakingapiKey}/subgraphs/id/6neBRm8wdXfbH9WQuFeizJRpsom4qovuqKhswPBRTC5Q`;
 
 type StakeResponse = {
   totalAmountStaked?: number;
@@ -44,7 +46,7 @@ export interface DataResult {
 }
 
 async function verifyStake(payload: RequestPayload): Promise<StakeResponse> {
-  const round = process.env.GTC_STAKING_ROUND || "1";
+  const round = process.env.NEXT_PUBLIC_GTC_STAKING_GRAPH_API_KEY || process.env.GTC_STAKING_ROUND;
   const address = payload.address.toLowerCase();
   const result = await axios.post(stakingSubgraph, {
     query: `

@@ -3,6 +3,7 @@ import { AppContext, Platform, PlatformOptions, ProviderPayload } from "../types
 
 export class GTCStakingPlatform implements Platform {
   platformId = "GtcStaking";
+  isEVM = true;
   path = "";
   clientId: string = null;
   redirectUri: string = null;
