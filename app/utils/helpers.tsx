@@ -36,3 +36,18 @@ export function reduceStampResponse(providerIDs: PROVIDER_ID[], verifiedCredenti
       credential: credential.credential as VerifiableCredential,
     }));
 }
+
+export function checkShowOnboard(): boolean {
+  const onboardTs = localStorage.getItem("onboardTS");
+  if (!onboardTs) return true;
+  // Get the current Unix timestamp in seconds.
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+
+  // Calculate the timestamp for 3 months ago.
+  // Note that this is an approximation because months have varying numbers of days.
+  const threeMonthsInSeconds = 3 * 30 * 24 * 60 * 60;
+  const threeMonthsAgoTimestamp = currentTimestamp - threeMonthsInSeconds;
+
+  // Check if the given timestamp is within the last 3 months.
+  return parseInt(onboardTs) <= threeMonthsAgoTimestamp;
+}
