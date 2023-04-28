@@ -6,7 +6,7 @@ import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 // utils
-import { fetchPossibleEVMStamps, PossibleEVMProvider, AdditionalSignature } from "../signer/utils";
+import { fetchPossibleEVMStamps, ValidatedPlatform, AdditionalSignature } from "../signer/utils";
 import { getPlatformSpec } from "../config/platforms";
 
 // Components
@@ -21,7 +21,6 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commo
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
-const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
 export const AdditionalStampModal = ({
   additionalSigner,
@@ -33,8 +32,8 @@ export const AdditionalStampModal = ({
   const { allPlatforms, handleAddStamps, handleDeleteStamps } = useContext(CeramicContext);
   const { signer, address } = useContext(UserContext);
   const [platformsLoading, setPlatformsLoading] = useState(false);
-  const [possiblyVerifiedPlatforms, setPossiblyVerifiedPlatforms] = useState<PossibleEVMProvider[]>([]);
-  const [activePlatform, setActivePlatform] = useState<PossibleEVMProvider | null>(null);
+  const [possiblyVerifiedPlatforms, setPossiblyVerifiedPlatforms] = useState<ValidatedPlatform[]>([]);
+  const [activePlatform, setActivePlatform] = useState<ValidatedPlatform | null>(null);
   const [loading, setLoading] = useState(false);
   const [verifiedPlatforms, setVerifiedPlatforms] = useState<string[]>([]);
 
@@ -63,7 +62,6 @@ export const AdditionalStampModal = ({
               version: "0.0.0",
               address: address || "",
               proofs: {},
-              rpcUrl,
               signer: {
                 challenge: additionalSigner.challenge,
                 signature: additionalSigner.sig,
@@ -135,7 +133,7 @@ export const AdditionalStampModal = ({
   useEffect(() => {
     const fetchPlatforms = async () => {
       setPlatformsLoading(true);
-      const verifiedPlatforms = await fetchPossibleEVMStamps(additionalSigner.addr, allPlatforms);
+      const verifiedPlatforms = await fetchPossibleEVMStamps(additionalSigner.addr, allPlatforms, undefined);
       setPossiblyVerifiedPlatforms(verifiedPlatforms);
       setPlatformsLoading(false);
     };
@@ -212,7 +210,7 @@ export const AdditionalStampModal = ({
               <Spinner size="lg" />
             </div>
           ) : (
-            possiblyVerifiedPlatforms.map((verifiedPlatform: PossibleEVMProvider) => {
+            possiblyVerifiedPlatforms.map((verifiedPlatform: ValidatedPlatform) => {
               const platform = getPlatformSpec(verifiedPlatform.platformProps.platform.path);
               if (platform) {
                 return (

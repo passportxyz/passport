@@ -53,7 +53,6 @@ enum VerificationStatuses {
 }
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
-const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
 const checkIcon = "../../assets/check-icon.svg";
 
@@ -199,7 +198,6 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
             version: "0.0.0",
             address: address || "",
             proofs: providerPayload,
-            rpcUrl,
           },
           signer as { signMessage: (message: string) => Promise<string> }
         );

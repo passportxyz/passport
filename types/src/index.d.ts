@@ -57,7 +57,6 @@ export type RequestPayload = {
   jsonRpcSigner?: JsonRpcSigner;
   challenge?: string;
   issuer?: string;
-  rpcUrl?: string;
 };
 
 // response Object return by verify procedure
@@ -76,6 +75,17 @@ export type VerifiedPayload = {
   error?: string[];
   // This will be combined with the ProofRecord (built from the verified content in the Payload)
   record?: { [k: string]: string };
+};
+
+export type CheckRequestBody = {
+  payload: RequestPayload;
+};
+
+export type CheckResponseBody = {
+  valid: boolean;
+  type: string;
+  error?: string;
+  code?: number;
 };
 
 // these values are placed into a sha256 along with the IAM_PRIVATE_KEY to generate a deterministic but protected hash of the PII info

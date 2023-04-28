@@ -2,14 +2,14 @@ import { Modal, ModalContent, ModalOverlay } from "@chakra-ui/react";
 
 import { Step } from "../components/Progress";
 import RefreshStampsProgressSteps from "./RefreshStampsProgressSteps";
-import { PossibleEVMProvider } from "../signer/utils";
 import { RefreshMyStampsModalContent } from "./RefreshMyStampsModalContent";
+import { ValidatedPlatform } from "../signer/utils";
 
 export type RefreshMyStampsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   steps: Step[];
-  fetchedPossibleEVMStamps: PossibleEVMProvider[] | undefined;
+  validPlatforms: ValidatedPlatform[] | undefined;
   resetStampsAndProgressState: () => void;
 };
 
@@ -17,7 +17,7 @@ export const RefreshMyStampsModal = ({
   isOpen,
   onClose,
   steps,
-  fetchedPossibleEVMStamps,
+  validPlatforms,
   resetStampsAndProgressState,
 }: RefreshMyStampsModalProps) => {
   return (
@@ -40,11 +40,11 @@ export const RefreshMyStampsModal = ({
           borderWidth="1px"
           borderColor="var(--color-accent-2)"
         >
-          {fetchedPossibleEVMStamps ? (
+          {validPlatforms ? (
             <>
               <RefreshMyStampsModalContent
                 onClose={onClose}
-                fetchedPossibleEVMStamps={fetchedPossibleEVMStamps}
+                validPlatforms={validPlatforms}
                 resetStampsAndProgressState={resetStampsAndProgressState}
               />
             </>

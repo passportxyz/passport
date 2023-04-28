@@ -81,10 +81,4 @@ describe("Attempt verification", function () {
     expect(axios.get).toHaveBeenCalledTimes(1);
     expect(nftPayload).toMatchObject({ valid: false });
   });
-
-  it("should return the nft endpoint given an alchemy url", () => {
-    expect(getNFTEndpoint("https://eth-mainnet.alchemyapi.io/v2/123")).toBe(
-      "https://eth-mainnet.g.alchemy.com/nft/v2/123/getNFTs"
-    );
-  });
 });

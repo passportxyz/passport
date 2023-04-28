@@ -16,9 +16,6 @@ import { CeramicContext } from "../context/ceramicContext";
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
 
-// --- Utils
-import { PossibleEVMProvider } from "../signer/utils";
-
 // --- UI components
 // TODO: re-add toasts after design updates
 import { Spinner, Checkbox } from "@chakra-ui/react";
@@ -27,14 +24,14 @@ import { XMarkIcon } from "@heroicons/react/20/solid";
 // --- App components
 import { RefreshMyStampsModalContentCardList } from "../components/RefreshMyStampsModalContentCardList";
 import { reduceStampResponse } from "../utils/helpers";
+import { ValidatedPlatform } from "../signer/utils";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
-const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
 export type RefreshMyStampsModalContentProps = {
   resetStampsAndProgressState: () => void;
   onClose: () => void;
-  fetchedPossibleEVMStamps: PossibleEVMProvider[];
+  validPlatforms: ValidatedPlatform[];
 };
 
 export type evmPlatformProvider = {
@@ -45,7 +42,7 @@ export type evmPlatformProvider = {
 
 export const RefreshMyStampsModalContent = ({
   onClose,
-  fetchedPossibleEVMStamps,
+  validPlatforms,
   resetStampsAndProgressState,
 }: RefreshMyStampsModalContentProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
@@ -98,7 +95,6 @@ export const RefreshMyStampsModalContent = ({
             version: "0.0.0",
             address: address || "",
             proofs: {},
-            rpcUrl,
           },
           signer as { signMessage: (message: string) => Promise<string> }
         );
@@ -151,23 +147,16 @@ export const RefreshMyStampsModalContent = ({
   };
 
   useEffect(() => {
-    const providerNames: string[] = fetchedPossibleEVMStamps
-      .map((entry: any) => {
-        if (entry.platformProps.platFormGroupSpec) {
-          return entry.platformProps.platFormGroupSpec
-            .map((spec: any) => spec.providers.map((provider: any) => provider.name))
-            .flat();
-        }
-        return [];
-      })
-      .flat();
+    const providerNames: string[] = validPlatforms
+      .map(({ groups }) => groups.map(({ providers }) => providers.map(({ name }) => name)))
+      .flat(3);
 
     setSelectedProviders(providerNames as PROVIDER_ID[]);
-  }, [fetchedPossibleEVMStamps]);
+  }, [validPlatforms]);
 
   return (
     <>
-      {fetchedPossibleEVMStamps.length > 0 ? (
+      {validPlatforms.length > 0 ? (
         <div className="relative flex h-full flex-col text-white">
           <div className="mb-6 text-2xl">Stamps Found</div>
           <div>
@@ -176,7 +165,7 @@ export const RefreshMyStampsModalContent = ({
             {/* container for platforms so user can scroll if they have a lot */}
             <RefreshMyStampsModalContentCardList
               selectedProviders={selectedProviders}
-              fetchedPossibleEVMStamps={fetchedPossibleEVMStamps}
+              validPlatforms={validPlatforms}
               setSelectedProviders={setSelectedProviders}
             />
           </div>
