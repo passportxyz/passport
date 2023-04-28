@@ -72,7 +72,7 @@ export default function Welcome() {
       status: Status.NOT_STARTED,
     },
   ];
-  const [validPlatforms, setValidPlatforms] = useState<ValidPlatform[]>();
+  const [validPlatforms, setValidPlatforms] = useState<ValidatedPlatform[]>();
   const [currentSteps, setCurrentSteps] = useState<Step[]>(initialSteps);
 
   const resetStampsAndProgressState = () => {

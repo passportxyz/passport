@@ -27,7 +27,6 @@ import { reduceStampResponse } from "../utils/helpers";
 import { ValidatedPlatform } from "../signer/utils";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
-const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
 export type RefreshMyStampsModalContentProps = {
   resetStampsAndProgressState: () => void;
@@ -95,7 +94,6 @@ export const RefreshMyStampsModalContent = ({
             version: "0.0.0",
             address: address || "",
             proofs: {},
-            rpcUrl,
           },
           signer as { signMessage: (message: string) => Promise<string> }
         );

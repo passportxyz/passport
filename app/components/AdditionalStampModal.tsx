@@ -21,7 +21,6 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commo
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
-const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
 export const AdditionalStampModal = ({
   additionalSigner,
@@ -63,7 +62,6 @@ export const AdditionalStampModal = ({
               version: "0.0.0",
               address: address || "",
               proofs: {},
-              rpcUrl,
               signer: {
                 challenge: additionalSigner.challenge,
                 signature: additionalSigner.sig,
@@ -135,7 +133,7 @@ export const AdditionalStampModal = ({
   useEffect(() => {
     const fetchPlatforms = async () => {
       setPlatformsLoading(true);
-      const verifiedPlatforms = await fetchPossibleEVMStamps(additionalSigner.addr, allPlatforms);
+      const verifiedPlatforms = await fetchPossibleEVMStamps(additionalSigner.addr, allPlatforms, undefined);
       setPossiblyVerifiedPlatforms(verifiedPlatforms);
       setPlatformsLoading(false);
     };

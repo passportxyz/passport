@@ -17,10 +17,8 @@ type NFTsResponse = {
   totalCount: number;
 };
 
-export function getNFTEndpoint(rpcUrl?: string): string {
-  const nftAPIKey = rpcUrl ? rpcUrl.split("/").pop() : apiKey;
-
-  return `https://eth-mainnet.g.alchemy.com/nft/v2/${nftAPIKey}/getNFTs`;
+export function getNFTEndpoint(): string {
+  return `https://eth-mainnet.g.alchemy.com/nft/v2/${apiKey}/getNFTs`;
 }
 
 // Export a NFT Provider
@@ -47,7 +45,7 @@ export class NFTProvider implements Provider {
       totalCount: 0,
     };
 
-    const providerUrl = getNFTEndpoint(payload.rpcUrl);
+    const providerUrl = getNFTEndpoint();
 
     try {
       const requestResponse = await axios.get(providerUrl, {

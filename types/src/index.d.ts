@@ -57,7 +57,6 @@ export type RequestPayload = {
   jsonRpcSigner?: JsonRpcSigner;
   challenge?: string;
   issuer?: string;
-  rpcUrl?: string;
 };
 
 // response Object return by verify procedure

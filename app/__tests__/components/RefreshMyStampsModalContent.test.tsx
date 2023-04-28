@@ -27,7 +27,6 @@ const navigateMock = jest.fn();
 (useNavigate as jest.Mock).mockReturnValue(navigateMock);
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
-const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
 const mockOnClose = jest.fn();
 const mockResetStampsAndProgressState = jest.fn();
@@ -111,7 +110,6 @@ describe("RefreshMyStampsModalContent", () => {
           version: "0.0.0",
           address: "0xmyAddress",
           proofs: {},
-          rpcUrl,
         },
         undefined
       )
