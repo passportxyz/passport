@@ -55,7 +55,7 @@ export const WelcomeBack = ({
         </button>
         <button
           data-testid="refresh-my-stamps-button"
-          className="ml-2 w-full rounded-sm bg-accent py-2 px-6"
+          className="ml-2 w-full rounded-sm bg-accent py-2 px-2"
           onClick={() => {
             onOpen();
             handleFetchPossibleEVMStamps(address!, allPlatforms);

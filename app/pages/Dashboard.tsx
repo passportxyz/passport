@@ -168,7 +168,9 @@ export default function Dashboard() {
   const modals = (
     <>
       {viewerConnection.status === "connecting" && (
-        <ProcessingPopup data-testid="selfId-connection-alert">Waiting for wallet signature...</ProcessingPopup>
+        <ProcessingPopup data-testid="selfId-connection-alert">
+          Please user your wallet to sign the message prompt and complete the sign-in process.
+        </ProcessingPopup>
       )}
 
       {isLoadingPassport === IsLoadingPassportState.Loading && (

@@ -1,4 +1,4 @@
-import { Modal, ModalContent, ModalOverlay } from "@chakra-ui/react";
+import { Modal, ModalCloseButton, ModalContent, ModalOverlay } from "@chakra-ui/react";
 
 import { Step } from "../components/Progress";
 import RefreshStampsProgressSteps from "./RefreshStampsProgressSteps";
@@ -40,6 +40,7 @@ export const RefreshMyStampsModal = ({
           borderWidth="1px"
           borderColor="var(--color-accent-2)"
         >
+          <ModalCloseButton color="var(--color-text-1)" />
           {fetchedPossibleEVMStamps ? (
             <>
               <RefreshMyStampsModalContent

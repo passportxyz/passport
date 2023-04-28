@@ -19,7 +19,7 @@ export const WelcomeWrapper = ({ content, children }: WelcomeWrapperProps) => {
       </div>
       <p className="mt-10 text-2xl text-muted">{content.subHeader}</p>
       <p className="mt-2 mb-10 w-[343px] text-gray-300 lg:w-[410px]">{content.body}</p>
-      <div className="absolute bottom-10 mb-auto flex w-[295px] items-center justify-between md:relative md:mt-16 lg:w-[410px]">
+      <div className="absolute bottom-10 mb-auto flex w-full items-center justify-between px-4 md:relative md:mt-16 md:px-0 lg:w-[410px]">
         {children}
       </div>
     </>
