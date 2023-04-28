@@ -20,11 +20,11 @@ import { datadogLogs } from "@datadog/browser-logs";
 // TODO: re-add toasts after design updates
 import { Spinner } from "@chakra-ui/react";
 import { XMarkIcon } from "@heroicons/react/20/solid";
-import { ValidPlatform } from "../pages/Welcome";
 
 // --- App components
 import { RefreshMyStampsModalContentCardList } from "../components/RefreshMyStampsModalContentCardList";
 import { reduceStampResponse } from "../utils/helpers";
+import { ValidatedPlatform } from "../signer/utils";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
@@ -32,7 +32,7 @@ const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 export type RefreshMyStampsModalContentProps = {
   resetStampsAndProgressState: () => void;
   onClose: () => void;
-  validPlatforms: ValidPlatform[];
+  validPlatforms: ValidatedPlatform[];
 };
 
 export type evmPlatformProvider = {

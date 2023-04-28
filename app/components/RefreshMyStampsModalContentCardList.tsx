@@ -1,14 +1,13 @@
-import { ValidPlatform } from "../pages/Welcome";
-
 // --- Types
 import { getPlatformSpec } from "../config/platforms";
 import { PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
 
 // --- App components
 import { RefreshMyStampsModalContentCard } from "./RefreshMyStampsModalContentCard";
+import { ValidatedPlatform } from "../signer/utils";
 
 export type RefreshMyStampsModalCardListProps = {
-  validPlatforms: ValidPlatform[];
+  validPlatforms: ValidatedPlatform[];
   selectedProviders: PROVIDER_ID[];
   setSelectedProviders: (providerIds: PROVIDER_ID[]) => void;
 };
@@ -18,8 +17,8 @@ export const RefreshMyStampsModalContentCardList = ({
   selectedProviders,
   setSelectedProviders,
 }: RefreshMyStampsModalCardListProps) => {
-  const cardList = validPlatforms.map((validPlatform: ValidPlatform, index: number) => {
-    const currentPlatform = getPlatformSpec(validPlatform.path);
+  const cardList = validPlatforms.map((validPlatform: ValidatedPlatform, index: number) => {
+    const currentPlatform = getPlatformSpec(validPlatform.platformProps.platform.path);
     const platformGroups = validPlatform.groups;
 
     return (

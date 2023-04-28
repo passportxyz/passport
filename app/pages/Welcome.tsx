@@ -3,11 +3,9 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import axios from "axios";
 // --- Types
 import { Status, Step } from "../components/Progress";
-import { providers } from "@gitcoin/passport-platforms";
-import { PlatformGroupSpec, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { PlatformProps } from "../components/GenericPlatform";
 
 // --Components
@@ -26,30 +24,12 @@ import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContex
 import { UserContext } from "../context/userContext";
 import { InitialWelcome } from "../components/InitialWelcome";
 import LoadingScreen from "../components/LoadingScreen";
-import { PROVIDER_ID } from "@gitcoin/passport-types";
 
-type ValidProvider = {
-  name: PROVIDER_ID;
-  title: string;
-};
+// --- Utils
+import { fetchPossibleEVMStamps, ValidatedPlatform } from "../signer/utils";
 
-export type ValidPlatformGroup = {
-  name: string;
-  providers: ValidProvider[];
-};
-
-export type ValidPlatform = {
-  name: string;
-  path: string;
-  groups: ValidPlatformGroup[];
-};
-
-// These are type-guarded filters which tell typescript that
-// objects which pass this filter are of the defined type
-const filterUndefined = <T,>(item: T | undefined): item is T => !!item;
-
-const MIN_DELAY = 250;
-const MAX_DELAY = 1000;
+const MIN_DELAY = 50;
+const MAX_DELAY = 800;
 const getStepDelay = () => Math.floor(Math.random() * (MAX_DELAY - MIN_DELAY + 1) + MIN_DELAY);
 
 export default function Welcome() {
@@ -121,87 +101,22 @@ export default function Welcome() {
   const fetchValidPlatforms = async (
     address: string,
     allPlatforms: Map<PLATFORM_ID, PlatformProps>
-  ): Promise<ValidPlatform[]> => {
+  ): Promise<ValidatedPlatform[]> => {
     try {
       let step = 0;
       const incrementStep = () => {
-        if (step < 5) {
+        if (step < 4) {
           updateSteps(++step);
           setTimeout(incrementStep, getStepDelay());
         }
       };
       incrementStep();
 
-      const existingProviders = passport && passport.stamps.map((stamp) => stamp.provider);
-
-      const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
-
-      // Extract EVM platforms
-      const allPlatformsData = Array.from(allPlatforms.values());
-      const evmPlatforms: PlatformProps[] = allPlatformsData.filter(({ platform }) => platform.isEVM);
-
-      const payload = {
-        type: "bulk",
-        types: ["EthGasProvider", "EthGTEOneTxnProvider", "FirstEthTxnProvider"],
-        address,
-        version: "0.0.0",
-        rpcUrl,
-      };
-      const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
-      const response = await axios.post(`${iamUrl.replace(/\/*?$/, "")}/v${payload.version}/check`, {
-        payload,
-      });
-      debugger;
-      const getValidGroupProviders = async (groupSpec: PlatformGroupSpec): Promise<ValidProvider[]> =>
-        (
-          await Promise.all(
-            groupSpec.providers.map(async (provider) => {
-              const { name, title } = provider;
-              if (existingProviders && existingProviders.includes(name)) return;
-
-              const payload = await providers.verify(name, { type: name, address, version: "0.0.0", rpcUrl }, {});
-
-              if (!payload.valid) return;
-
-              return {
-                name,
-                title,
-              };
-            })
-          )
-        ).filter(filterUndefined);
-
-      const getValidPlatformGroups = async (platform: PlatformProps): Promise<ValidPlatformGroup[]> =>
-        (
-          await Promise.all(
-            platform.platFormGroupSpec.map(async (groupSpec) => {
-              const groupProviders = await getValidGroupProviders(groupSpec);
-              if (groupProviders.length === 0) return;
-              return {
-                name: groupSpec.platformGroup,
-                providers: groupProviders,
-              };
-            })
-          )
-        ).filter(filterUndefined);
-
-      const validPlatforms: ValidPlatform[] = (
-        await Promise.all(
-          evmPlatforms.map(async (platform) => {
-            const validPlatformGroups = await getValidPlatformGroups(platform);
-            if (validPlatformGroups.length === 0) return;
-            return {
-              groups: validPlatformGroups,
-              name: platform.platform.platformId,
-              path: platform.platform.path,
-            };
-          })
-        )
-      ).filter(filterUndefined);
+      const validPlatforms = await fetchPossibleEVMStamps(address, allPlatforms, passport);
 
       step = 5;
       updateSteps(6);
-      await new Promise((resolve) => setTimeout(resolve, getStepDelay()));
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
       return validPlatforms;
     } catch (error) {

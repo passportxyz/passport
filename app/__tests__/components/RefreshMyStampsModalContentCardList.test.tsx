@@ -16,15 +16,15 @@ import {
   renderWithContext,
 } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
-import { PossibleEVMProvider } from "../../signer/utils";
+import { ValidatedPlatform } from "../../signer/utils";
 
 const defaultProps: RefreshMyStampsModalCardListProps = {
-  fetchedPossibleEVMStamps: undefined,
+  validPlatforms: [],
   selectedProviders: [],
   setSelectedProviders: jest.fn(),
 };
 
-const fetchedPossibleEVMStamps = [
+const validPlatforms = [
   {
     platformProps: {
       platform: {
@@ -32,13 +32,14 @@ const fetchedPossibleEVMStamps = [
         platform_id: "1",
       },
     },
+    groups: [],
   },
-] as unknown as PossibleEVMProvider[];
+] as unknown as ValidatedPlatform[];
 
 const RefreshMyStampsModalContentPropsList: RefreshMyStampsModalContentProps = {
   resetStampsAndProgressState: jest.fn(),
   onClose: jest.fn(),
-  fetchedPossibleEVMStamps: fetchedPossibleEVMStamps,
+  validPlatforms,
 };
 
 jest.mock("../../utils/onboard.ts");
@@ -84,7 +85,7 @@ describe("RefreshMyStampsModalContentCardList", () => {
     const RefreshMyStampsModalContentPropsList: RefreshMyStampsModalContentProps = {
       resetStampsAndProgressState: jest.fn(),
       onClose: jest.fn(),
-      fetchedPossibleEVMStamps: [],
+      validPlatforms: [],
     };
 
     const refreshModal = () => {

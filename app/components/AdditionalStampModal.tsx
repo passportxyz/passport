@@ -6,7 +6,7 @@ import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 // utils
-import { fetchPossibleEVMStamps, PossibleEVMProvider, AdditionalSignature } from "../signer/utils";
+import { fetchPossibleEVMStamps, ValidatedPlatform, AdditionalSignature } from "../signer/utils";
 import { getPlatformSpec } from "../config/platforms";
 
 // Components
@@ -33,8 +33,8 @@ export const AdditionalStampModal = ({
   const { allPlatforms, handleAddStamps, handleDeleteStamps } = useContext(CeramicContext);
   const { signer, address } = useContext(UserContext);
   const [platformsLoading, setPlatformsLoading] = useState(false);
-  const [possiblyVerifiedPlatforms, setPossiblyVerifiedPlatforms] = useState<PossibleEVMProvider[]>([]);
-  const [activePlatform, setActivePlatform] = useState<PossibleEVMProvider | null>(null);
+  const [possiblyVerifiedPlatforms, setPossiblyVerifiedPlatforms] = useState<ValidatedPlatform[]>([]);
+  const [activePlatform, setActivePlatform] = useState<ValidatedPlatform | null>(null);
   const [loading, setLoading] = useState(false);
   const [verifiedPlatforms, setVerifiedPlatforms] = useState<string[]>([]);
 
@@ -212,7 +212,7 @@ export const AdditionalStampModal = ({
               <Spinner size="lg" />
             </div>
           ) : (
-            possiblyVerifiedPlatforms.map((verifiedPlatform: PossibleEVMProvider) => {
+            possiblyVerifiedPlatforms.map((verifiedPlatform: ValidatedPlatform) => {
               const platform = getPlatformSpec(verifiedPlatform.platformProps.platform.path);
               if (platform) {
                 return (

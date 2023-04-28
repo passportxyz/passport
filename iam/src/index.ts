@@ -23,6 +23,8 @@ import {
   VerifyRequestBody,
   CredentialResponseBody,
   ProviderContext,
+  CheckRequestBody,
+  CheckResponseBody,
 } from "@gitcoin/passport-types";
 
 import { getChallenge } from "./utils/challenge";
@@ -195,25 +197,43 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
   }
 });
 
-type CheckRequestBody = {
-  payload: RequestPayload;
-};
-
-type CheckResponseBody = {
-  valid: boolean;
-  type: string;
-  error?: string[];
-};
-
 app.post("/api/v0.0.0/check", (req: Request, res: Response): void => {
   const { payload } = req.body as CheckRequestBody;
+
+  if (!payload || !(payload.type || payload.types)) {
+    return void errorRes(res, "Incorrect payload", 400);
+  }
+
+  // See note below about context
   const context: ProviderContext = {};
   const responses: CheckResponseBody[] = [];
+  const types = (payload.types?.length ? payload.types : [payload.type]).filter((type) => type);
+
+  // This currently works for stamps which do not require the context
+  // Most oauth stamps will likely not work correctly unless only checking a single type
+  // TODO: In the platforms file, sort providers by platform. Here, process the
+  // platforms in parallel, but the providers in series. This will allow us to pass
+  // the context from one provider to the next. Do the same in the verify endpoint.
   Promise.all(
-    (payload.types?.length ? payload.types : [payload.type]).map(async (type) => {
-      // verify the payload against the selected Identity Provider
-      const { valid, error } = await providers.verify(type, payload, context);
-      responses.push({ valid, type, error });
+    types.map(async (type) => {
+      let valid = false;
+      let code, error;
+
+      try {
+        // verify the payload against the selected Identity Provider
+        const verifyResult = await providers.verify(type, payload, context);
+        valid = verifyResult.valid;
+        if (!valid) {
+          code = 403;
+          error =
+            (verifyResult.error && verifyResult.error.join(", ").substring(0, 1000)) || "Unable to verify provider";
+        }
+      } catch {
+        error = "Unable to verify provider";
+        code = 400;
+      } finally {
+        responses.push({ valid, type, code, error });
+      }
     })
   )
     .then(() => res.json(responses))

@@ -1,13 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import { RefreshMyStampsModal, RefreshMyStampsModalProps } from "../../components/RefreshMyStampsModal";
-import { PossibleEVMProvider } from "../../signer/utils";
+import { ValidatedPlatform } from "../../signer/utils";
 
 const defaultProps: RefreshMyStampsModalProps = {
   isOpen: true,
   onClose: jest.fn(),
   steps: [],
-  fetchedPossibleEVMStamps: undefined,
+  validPlatforms: undefined,
   resetStampsAndProgressState: jest.fn(),
 };
 
@@ -45,8 +45,8 @@ describe("RefreshMyStampsModal", () => {
   });
 
   it("renders the component with RefreshMyStampsModalContent when fetchedPossibleEVMStamps is not undefined", () => {
-    const fetchedPossibleEVMStamps = [{ provider: "ethereum", platform_id: "1" }] as unknown as PossibleEVMProvider[];
-    render(<RefreshMyStampsModal {...defaultProps} fetchedPossibleEVMStamps={fetchedPossibleEVMStamps} />);
+    const validPlatforms = [{ provider: "ethereum", platform_id: "1" }] as unknown as ValidatedPlatform[];
+    render(<RefreshMyStampsModal {...defaultProps} validPlatforms={validPlatforms} />);
 
     expect(screen.getByTestId("refresh-my-stamps-modal-content")).toBeInTheDocument();
   });

@@ -3,10 +3,10 @@ import { Checkbox } from "@chakra-ui/react";
 
 // --- Types
 import { PROVIDER_ID } from "@gitcoin/passport-types";
-import { ValidPlatformGroup } from "../pages/Welcome";
+import { ValidatedProviderGroup } from "../signer/utils";
 
 type RefreshMyStampsSelectorProps = {
-  validPlatformGroups: ValidPlatformGroup[];
+  validPlatformGroups: ValidatedProviderGroup[];
   selectedProviders: PROVIDER_ID[] | undefined;
   setSelectedProviders: (providerIds: PROVIDER_ID[]) => void;
   platformChecked: boolean;

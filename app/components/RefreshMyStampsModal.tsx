@@ -2,14 +2,14 @@ import { Modal, ModalContent, ModalOverlay } from "@chakra-ui/react";
 
 import { Step } from "../components/Progress";
 import RefreshStampsProgressSteps from "./RefreshStampsProgressSteps";
-import { ValidPlatform } from "../pages/Welcome";
 import { RefreshMyStampsModalContent } from "./RefreshMyStampsModalContent";
+import { ValidatedPlatform } from "../signer/utils";
 
 export type RefreshMyStampsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   steps: Step[];
-  validPlatforms: ValidPlatform[] | undefined;
+  validPlatforms: ValidatedPlatform[] | undefined;
   resetStampsAndProgressState: () => void;
 };
 

@@ -1,18 +1,20 @@
 // --- React hooks
 import { useMemo } from "react";
 
+// --- Types
+import { ValidatedProviderGroup } from "../signer/utils";
+
 // --- UI components
 import { Switch, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon } from "@chakra-ui/react";
 
 // --- Utils
-import { PlatformGroupSpec, PlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
+import { PlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
 
 // --- App components
 import { RefreshMyStampsSelector } from "../components/RefreshMyStampsSelector";
-import { ValidPlatformGroup } from "../pages/Welcome";
 
 type RefreshMyStampsModalCardProps = {
-  platformGroups: ValidPlatformGroup[];
+  platformGroups: ValidatedProviderGroup[];
   selectedProviders: PROVIDER_ID[];
   currentPlatform: PlatformSpec | undefined;
   setSelectedProviders: (providerIds: PROVIDER_ID[]) => void;

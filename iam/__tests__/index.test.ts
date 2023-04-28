@@ -596,3 +596,93 @@ describe("POST /verify", function () {
       .expect("Content-Type", /json/);
   });
 });
+
+describe("POST /check", function () {
+  it("handles valid check requests", async () => {
+    const payload = {
+      type: "Simple",
+      address: "0x0",
+      proofs: {
+        valid: "true",
+      },
+    };
+
+    const response = await request(app)
+      .post("/api/v0.0.0/check")
+      .send({ payload })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    expect(response.body[0].valid).toBe(true);
+    expect(response.body[0].type).toEqual("Simple");
+  });
+
+  it("handles valid check requests with multiple types", async () => {
+    const payload = {
+      types: ["Simple", "AnotherType"],
+      address: "0x0",
+      proofs: {
+        valid: "true",
+      },
+    };
+
+    const response = await request(app)
+      .post("/api/v0.0.0/check")
+      .send({ payload })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    expect(response.body.length).toBe(2);
+
+    const simple = response.body.find((item: any) => item.type === "Simple");
+    const anotherType = response.body.find((item: any) => item.type === "AnotherType");
+
+    expect(simple.valid).toBe(true);
+    expect(anotherType.valid).toBe(false);
+    expect(anotherType.error).toBeDefined();
+    expect(anotherType.code).toBeDefined();
+  });
+
+  it("handles missing payload in the check request body", async () => {
+    const response = await request(app)
+      .post("/api/v0.0.0/check")
+      .send({})
+      .set("Accept", "application/json")
+      .expect(400)
+      .expect("Content-Type", /json/);
+
+    expect(response.body.error).toEqual("Incorrect payload");
+  });
+
+  it("handles malformed payload in the check request body", async () => {
+    const payload = "bad :(";
+
+    const response = await request(app)
+      .post("/api/v0.0.0/check")
+      .send({ payload })
+      .set("Accept", "application/json")
+      .expect(400)
+      .expect("Content-Type", /json/);
+
+    expect(response.body.error).toEqual("Incorrect payload");
+  });
+
+  it("handles empty types array in the check request body", async () => {
+    const payload = {
+      types: [] as unknown as string[],
+      address: "0x0",
+    };
+
+    const response = await request(app)
+      .post("/api/v0.0.0/check")
+      .send({ payload })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    console.log(response.body);
+    expect(response.body.length).toEqual(0);
+  });
+});

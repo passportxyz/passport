@@ -78,6 +78,17 @@ export type VerifiedPayload = {
   record?: { [k: string]: string };
 };
 
+export type CheckRequestBody = {
+  payload: RequestPayload;
+};
+
+export type CheckResponseBody = {
+  valid: boolean;
+  type: string;
+  error?: string;
+  code?: number;
+};
+
 // these values are placed into a sha256 along with the IAM_PRIVATE_KEY to generate a deterministic but protected hash of the PII info
 export type ProofRecord = {
   type: string;
