@@ -21,7 +21,7 @@ import { PossibleEVMProvider } from "../signer/utils";
 
 // --- UI components
 // TODO: re-add toasts after design updates
-import { Spinner } from "@chakra-ui/react";
+import { Spinner, Checkbox } from "@chakra-ui/react";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 
 // --- App components
@@ -53,6 +53,7 @@ export const RefreshMyStampsModalContent = ({
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [showDataInfo, setShowDataInfo] = useState(false);
+  const [disableOnboard, setDisplayOnboard] = useState(false);
   const navigate = useNavigate();
 
   // TODO: update comments
@@ -226,7 +227,7 @@ export const RefreshMyStampsModalContent = ({
             </div>
           </div>
           <button
-            className="sidebar-verify-btn hover:backround-2 mt-36 flex w-full items-center justify-center rounded-sm text-white"
+            className="sidebar-verify-btn hover:backround-2 mt-36 mb-8 flex w-full items-center justify-center rounded-sm text-white"
             onClick={() => {
               navigate("/dashboard");
               resetStampsAndProgressState();
@@ -236,6 +237,27 @@ export const RefreshMyStampsModalContent = ({
           </button>
         </div>
       )}
+      <div className="absolute bottom-4 flex text-color-1">
+        <Checkbox
+          type="checkbox"
+          colorScheme="purple"
+          data-testid="checkbox-onboard-hide"
+          isChecked={disableOnboard}
+          size="md"
+          onChange={(e) => {
+            if (e.target.checked) {
+              const now = Math.floor(Date.now() / 1000);
+              localStorage.setItem("onboardTS", now.toString());
+              setDisplayOnboard(true);
+            } else {
+              localStorage.removeItem("onboardTS");
+              setDisplayOnboard(false);
+            }
+          }}
+        >
+          Skip welcome onboarding until stamps expire
+        </Checkbox>
+      </div>
     </>
   );
 };
