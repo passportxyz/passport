@@ -102,7 +102,7 @@ describe("Welcome navigation", () => {
   });
 
   it("calls navigate with /welcome when feature flag is on and checkShowOnboard is true", () => {
-    process.env.NEXT_PUBLIC_FF_ONE_CLICK_VERIFICATION = "off";
+    process.env.NEXT_PUBLIC_FF_ONE_CLICK_VERIFICATION = "on";
     renderWithContext(
       { ...mockUserContext, wallet: {} as WalletState },
       { ...mockCeramicContext, passport: undefined },
@@ -110,6 +110,6 @@ describe("Welcome navigation", () => {
         <Home />
       </Router>
     );
-    expect(navigate).toHaveBeenCalledWith("/dashboard");
+    expect(navigate).toHaveBeenCalledWith("/welcome");
   });
 });
