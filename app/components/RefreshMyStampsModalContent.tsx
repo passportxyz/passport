@@ -155,78 +155,82 @@ export const RefreshMyStampsModalContent = ({
   }, [validPlatforms]);
 
   return (
-    <>
-      {validPlatforms.length > 0 ? (
-        <div className="relative flex h-full flex-col text-white">
-          <div className="mb-6 text-2xl">Stamps Found</div>
-          <div>
-            {" "}
-            {/* TODO: update comments */}
-            {/* container for platforms so user can scroll if they have a lot */}
-            <RefreshMyStampsModalContentCardList
-              selectedProviders={selectedProviders}
-              validPlatforms={validPlatforms}
-              setSelectedProviders={setSelectedProviders}
-            />
-          </div>
-          <div className="mt-8 cursor-pointer text-center text-pink-300 underline">
-            <a onClick={() => setShowDataInfo(!showDataInfo)}>How is my data stored?</a>
-          </div>
-          {showDataInfo && (
-            <div className="pt-3 text-justify">
-              <p>
-                The only information in your passport is the Decentralized Identifier (DID) associated with your
-                Ethereum address and the Verifiable Credentials (VCs) issued for each service you connect to your
-                passport. No identifiable details are stored in your passport as we encrypt the account details when
-                creating your VCs. You can inspect the data yourself in the Gitcoin Passport by clicking the &lt;/&gt;
-                Passport JSON button in the upper right of the Passport dashboard.
-              </p>
+    <div className="flex grow flex-col">
+      <div className="grow">
+        {validPlatforms.length > 0 ? (
+          <div className="flex flex-col text-white">
+            <div className="mb-6 text-2xl">Stamps Found</div>
+            <div>
+              {" "}
+              {/* TODO: update comments */}
+              {/* container for platforms so user can scroll if they have a lot */}
+              <RefreshMyStampsModalContentCardList
+                selectedProviders={selectedProviders}
+                validPlatforms={validPlatforms}
+                setSelectedProviders={setSelectedProviders}
+              />
             </div>
-          )}
-          <div className="mt-16 mb-auto flex items-center justify-center">
-            <button className="secondary-btn mr-2 w-full rounded-sm py-2 px-6" onClick={() => navigate("/dashboard")}>
-              Cancel
-            </button>
+            <div className="mt-8 cursor-pointer text-center text-pink-300 underline">
+              <a onClick={() => setShowDataInfo(!showDataInfo)}>How is my data stored?</a>
+            </div>
+            {showDataInfo && (
+              <div className="pt-3 text-justify">
+                <p>
+                  The only information in your passport is the Decentralized Identifier (DID) associated with your
+                  Ethereum address and the Verifiable Credentials (VCs) issued for each service you connect to your
+                  passport. No identifiable details are stored in your passport as we encrypt the account details when
+                  creating your VCs. You can inspect the data yourself in the Gitcoin Passport by clicking the &lt;/&gt;
+                  Passport JSON button in the upper right of the Passport dashboard.
+                </p>
+              </div>
+            )}
+            <div className="mt-16 mb-auto flex items-center justify-center">
+              <button className="secondary-btn mr-2 w-full rounded-sm py-2 px-6" onClick={() => navigate("/dashboard")}>
+                Cancel
+              </button>
+              <button
+                className="ml-2 flex w-full items-center justify-center rounded-sm bg-accent py-2 px-2 disabled:cursor-not-allowed disabled:bg-muted disabled:text-black"
+                onClick={() => {
+                  handleRefreshSelectedStamps();
+                }}
+                disabled={!canSubmit || isLoading}
+              >
+                <span className="flex">
+                  Confirm Stamps {isLoading && <Spinner size="sm" className="my-auto ml-2" />}
+                </span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col content-end text-white">
             <button
-              className="ml-2 flex w-full items-center justify-center rounded-sm bg-accent py-2 px-2 disabled:cursor-not-allowed disabled:bg-muted disabled:text-black"
-              onClick={() => {
-                handleRefreshSelectedStamps();
-              }}
-              disabled={!canSubmit || isLoading}
+              className="mt-4 mb-6 flex h-10 w-10 items-center justify-center self-center rounded-full border border-accent-2"
+              onClick={onClose}
             >
-              <span className="flex">Confirm Stamps {isLoading && <Spinner size="sm" className="my-auto ml-2" />}</span>
+              <XMarkIcon className="h-7 w-7" aria-hidden="true" />
+            </button>
+            <div className="text-center">
+              <div className="m-auto mb-6 w-3/4 text-3xl">No Eligible Web3 Stamps Found</div>
+              <div className="mt-24 text-xl text-muted">
+                There are no unverified stamps currently eligible. Please return to the dashboard and select additional
+                stamps to receive by connecting to external accounts (examples include Gmail, Discord, etc) or perform
+                the actions required to qualify for a stamp and resubmit for that stamp through the dashboard. Click the
+                button to return to the dashboard and explore all stamps.
+              </div>
+            </div>
+            <button
+              className="sidebar-verify-btn hover:backround-2 mt-36 mb-8 flex w-full items-center justify-center rounded-sm text-white"
+              onClick={() => {
+                navigate("/dashboard");
+                resetStampsAndProgressState();
+              }}
+            >
+              Explore Stamps
             </button>
           </div>
-        </div>
-      ) : (
-        <div className="flex h-full flex-col content-end text-white">
-          <button
-            className="mt-4 mb-6 flex h-10 w-10 items-center justify-center self-center rounded-full border border-accent-2"
-            onClick={onClose}
-          >
-            <XMarkIcon className="h-7 w-7" aria-hidden="true" />
-          </button>
-          <div className="text-center">
-            <div className="m-auto mb-6 w-3/4 text-3xl">No Eligible Web3 Stamps Found</div>
-            <div className="mt-24 text-xl text-muted">
-              There are no unverified stamps currently eligible. Please return to the dashboard and select additional
-              stamps to receive by connecting to external accounts (examples include Gmail, Discord, etc) or perform the
-              actions required to qualify for a stamp and resubmit for that stamp through the dashboard. Click the
-              button to return to the dashboard and explore all stamps.
-            </div>
-          </div>
-          <button
-            className="sidebar-verify-btn hover:backround-2 mt-36 mb-8 flex w-full items-center justify-center rounded-sm text-white"
-            onClick={() => {
-              navigate("/dashboard");
-              resetStampsAndProgressState();
-            }}
-          >
-            Explore Stamps
-          </button>
-        </div>
-      )}
-      <div className="absolute bottom-4 flex text-color-1">
+        )}
+      </div>
+      <div className="mt-6 mb-2 text-color-1">
         <Checkbox
           type="checkbox"
           colorScheme="purple"
@@ -247,6 +251,6 @@ export const RefreshMyStampsModalContent = ({
           Skip welcome onboarding until stamps expire
         </Checkbox>
       </div>
-    </>
+    </div>
   );
 };
