@@ -48,6 +48,12 @@ export function checkShowOnboard(): boolean {
   const threeMonthsInSeconds = 3 * 30 * 24 * 60 * 60;
   const threeMonthsAgoTimestamp = currentTimestamp - threeMonthsInSeconds;
 
+  const onBoardOlderThanThreeMonths = parseInt(onboardTs) <= threeMonthsAgoTimestamp;
+
+  if (onBoardOlderThanThreeMonths) {
+    localStorage.removeItem("onboardTS");
+  }
+
   // Check if the given timestamp is within the last 3 months.
-  return parseInt(onboardTs) <= threeMonthsAgoTimestamp;
+  return onBoardOlderThanThreeMonths;
 }
