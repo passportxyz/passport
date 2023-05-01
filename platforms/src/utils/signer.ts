@@ -34,5 +34,5 @@ export const getAddress = async ({ address, signer, issuer }: RequestPayload): P
   }
 
   // proof was missing/invalid return controller address from the payload
-  return address;
+  return utils.getAddress(address);
 };
