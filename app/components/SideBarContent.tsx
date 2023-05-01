@@ -79,7 +79,7 @@ export const SideBarContent = ({
                 <span
                   data-testid="select-all"
                   className={`ml-auto py-2 text-sm ${
-                    !allSelected ? `cursor-pointer text-accent` : `cursor-default text-muted`
+                    !allSelected ? `cursor-pointer text-accent-3` : `cursor-default text-muted`
                   } `}
                   onClick={(e) => {
                     // set the selected items by concating or filtering by providerId
