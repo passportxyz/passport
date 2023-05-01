@@ -36,7 +36,7 @@ describe("Verification succeeds", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes`);
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`);
 
     expect(gnosisSafePayload).toEqual({
       valid: true,
@@ -65,7 +65,7 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes`);
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`);
 
     expect(gnosisSafePayload).toEqual({
       valid: false,
@@ -88,7 +88,7 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes`);
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`);
 
     expect(gnosisSafePayload).toEqual({
       valid: false,
@@ -115,7 +115,7 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes`);
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`);
 
     expect(gnosisSafePayload).toEqual({
       valid: false,
@@ -135,7 +135,7 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes`);
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`);
 
     expect(gnosisSafePayload).toEqual({
       valid: false,
