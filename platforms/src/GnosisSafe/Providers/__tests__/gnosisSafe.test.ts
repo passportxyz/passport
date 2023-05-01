@@ -10,7 +10,7 @@ import axios from "axios";
 jest.mock("axios");
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
-const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
+const MOCK_ADDRESS = "0xEf1c6E67703c7BD7107eed8303Fbe6EC2554BF6B";
 
 const validResponseList = ["safe-1", "safe-2", "safe-3"];
 
