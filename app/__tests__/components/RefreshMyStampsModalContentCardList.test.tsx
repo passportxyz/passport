@@ -97,6 +97,6 @@ describe("RefreshMyStampsModalContentCardList", () => {
     };
 
     renderWithContext(mockUserContext, mockCeramicContext, refreshModal());
-    await screen.findByText("No Eligible Web3 Stamps Found");
+    await screen.findByText("No New Web3 Stamps Detected");
   });
 });
