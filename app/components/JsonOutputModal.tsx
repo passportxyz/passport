@@ -75,12 +75,12 @@ export const JsonOutputModal = ({
             mr={3}
             onClick={onDownload}
             variant="outline"
-            colorScheme="purple"
+            borderColor="var(--color-accent2)"
             _hover={{ bg: "var(--color-accent1)" }}
           >
-            <ArrowDownTrayIcon fill="var(--color-accent)" />
+            <ArrowDownTrayIcon fill="var(--color-text-1)" />
             &nbsp;
-            <span className="font-miriam-libre">{"Download"}</span>
+            <span className="font-miriam-libre text-color-1">{"Download"}</span>
           </Button>
           <Button
             data-testid="button-passport-json-done"
