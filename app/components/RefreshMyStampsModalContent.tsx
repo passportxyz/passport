@@ -210,12 +210,11 @@ export const RefreshMyStampsModalContent = ({
               <XMarkIcon className="h-7 w-7" aria-hidden="true" />
             </button>
             <div className="text-center">
-              <div className="m-auto mb-6 w-3/4 text-3xl">No Eligible Web3 Stamps Found</div>
+              <div className="m-auto mb-6 w-3/4 text-3xl">No New Web3 Stamps Detected</div>
               <div className="mt-24 text-xl text-muted">
-                There are no unverified stamps currently eligible. Please return to the dashboard and select additional
-                stamps to receive by connecting to external accounts (examples include Gmail, Discord, etc) or perform
-                the actions required to qualify for a stamp and resubmit for that stamp through the dashboard. Click the
-                button to return to the dashboard and explore all stamps.
+                We did not find any new Web3 stamps to add to your passport. Completing the actions for a web3 stamp and 
+                resubmitting will ensure that stamp is added (for example: Obtain an ENS name, NFT, etc.). Please return to the dashboard 
+                and select additional stamps to verify your unique humanity by connecting to external accounts (for example: Gmail, Discord, etc). 
               </div>
             </div>
             <button
