@@ -24,6 +24,7 @@ export const RefreshMyStampsModalContentCard = ({
   setSelectedProviders,
 }: RefreshMyStampsModalCardProps): JSX.Element => {
   const [disableExpand, setDisableExpand] = useState(false);
+  const [accordionExpanded, setAccordionExpanded] = useState(false);
 
   const accordionButton = useRef<HTMLButtonElement>(null);
   const platformProviders = useMemo(
@@ -42,7 +43,11 @@ export const RefreshMyStampsModalContentCard = ({
         <AccordionItem className="py-2 first:border-t-accent-2 first:border-b-accent-2" isDisabled={disableExpand}>
           <div className="grid grid-cols-10 items-center justify-between text-white focus:shadow-none">
             <div className="col-span-8 items-center justify-start">
-              <AccordionButton _focus={{ outline: "none" }} ref={accordionButton}>
+              <AccordionButton
+                _focus={{ outline: "none" }}
+                ref={accordionButton}
+                onClick={() => setAccordionExpanded(!accordionExpanded)}
+              >
                 <img src={currentPlatform?.icon} alt={currentPlatform?.name} className="mr-5 h-11 w-11" />
                 <p className="text-left">{currentPlatform?.name}</p>
               </AccordionButton>
@@ -54,9 +59,10 @@ export const RefreshMyStampsModalContentCard = ({
                 colorScheme="purple"
                 isChecked={checked}
                 onChange={(e) => {
-                  if (!disableExpand) {
+                  if (!e.target.checked && accordionExpanded) {
                     // collapse before disabling accordion
                     accordionButton.current?.click();
+                    setAccordionExpanded(false);
                   }
                   setDisableExpand(!disableExpand);
                   if (e.target.checked) {
