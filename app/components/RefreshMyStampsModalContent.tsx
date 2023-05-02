@@ -18,10 +18,8 @@ import { datadogLogs } from "@datadog/browser-logs";
 
 // --- UI components
 // TODO: re-add toasts after design updates
-import { Spinner } from "@chakra-ui/react";
 import { NoSymbolIcon } from "@heroicons/react/20/solid";
 import { Spinner, Checkbox } from "@chakra-ui/react";
-import { XMarkIcon } from "@heroicons/react/20/solid";
 
 // --- App components
 import { RefreshMyStampsModalContentCardList } from "../components/RefreshMyStampsModalContentCardList";
@@ -209,7 +207,7 @@ export const RefreshMyStampsModalContent = ({
               className="mt-4 mb-6 flex h-10 w-10 items-center justify-center self-center rounded-full border border-accent-2"
               onClick={onClose}
             >
-              <XMarkIcon className="h-7 w-7" aria-hidden="true" />
+              <NoSymbolIcon className="h-7 w-7" aria-hidden="true" fill="var(--color-accent-3)" />
             </button>
             <div className="text-center">
               <div className="m-auto mb-6 w-3/4 text-3xl">No New Web3 Stamps Detected</div>
