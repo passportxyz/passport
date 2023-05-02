@@ -55,8 +55,9 @@ module.exports = {
       "5xl": ["48px", "1.5em"],
     },
     fontFamily: {
-      body: "var(--font-family-body)",
-      heading: "var(--font-family-heading)",
+      body: ["var(--font-body)"],
+      heading: ["var(--font-heading)"],
+      cta: ["var(--font-cta)"],
     },
     minHeight: {
       default: "100vh",
