@@ -55,7 +55,7 @@ export const JsonOutputModal = ({
         padding={4}
         maxW="80%"
         maxH="80%"
-        background="var(--color-background)"
+        background="var(--color-background-2)"
         textColor="var(--color-text)"
       >
         <ModalHeader borderBottomWidth={2} borderBottomColor="var(--color-accent2)">
@@ -63,7 +63,7 @@ export const JsonOutputModal = ({
           <p className="font-miriam-libre text-base font-normal text-color-1">{subheading}</p>
         </ModalHeader>
         <ModalCloseButton color="var(--color-text-1)" />
-        <ModalBody className="font-miriam-libre overflow-auto  text-color-4">
+        <ModalBody className="font-miriam-libre overflow-auto text-color-4">
           <pre data-testid="passport-json">{JSON.stringify(jsonOutput, null, "\t")}</pre>
         </ModalBody>
 

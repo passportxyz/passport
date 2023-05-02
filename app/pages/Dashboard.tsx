@@ -259,7 +259,7 @@ export default function Dashboard() {
           {passport ? (
             <button
               data-testid="button-passport-json-mobile"
-              className="rounded-md border-2 border-gray-300 py-2 px-4"
+              className="h-10 w-10 rounded-md border border-accent-2 border-gray-300"
               onClick={onOpen}
             >
               {`</>`}
