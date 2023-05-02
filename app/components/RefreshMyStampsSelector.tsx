@@ -33,7 +33,7 @@ export function RefreshMyStampsSelector({
                       <li key={`${provider.title}${i}`} data-testid={`indicator-${provider.name}`}>
                         <div className="relative mr-10 text-sm text-white">{provider.title}</div>
                       </li>
-                      <div className="align-right flex">
+                      <div className="align-right flex rounded bg-white">
                         <Checkbox
                           type="checkbox"
                           key={`${provider.title}${i}`}
