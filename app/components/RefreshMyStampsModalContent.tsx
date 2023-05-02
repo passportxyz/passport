@@ -16,25 +16,24 @@ import { CeramicContext } from "../context/ceramicContext";
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
 
-// --- Utils
-import { PossibleEVMProvider } from "../signer/utils";
-
 // --- UI components
 // TODO: re-add toasts after design updates
 import { Spinner } from "@chakra-ui/react";
 import { NoSymbolIcon } from "@heroicons/react/20/solid";
+import { Spinner, Checkbox } from "@chakra-ui/react";
+import { XMarkIcon } from "@heroicons/react/20/solid";
 
 // --- App components
 import { RefreshMyStampsModalContentCardList } from "../components/RefreshMyStampsModalContentCardList";
 import { reduceStampResponse } from "../utils/helpers";
+import { ValidatedPlatform } from "../signer/utils";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
-const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
 export type RefreshMyStampsModalContentProps = {
   resetStampsAndProgressState: () => void;
   onClose: () => void;
-  fetchedPossibleEVMStamps: PossibleEVMProvider[];
+  validPlatforms: ValidatedPlatform[];
 };
 
 export type evmPlatformProvider = {
@@ -45,7 +44,7 @@ export type evmPlatformProvider = {
 
 export const RefreshMyStampsModalContent = ({
   onClose,
-  fetchedPossibleEVMStamps,
+  validPlatforms,
   resetStampsAndProgressState,
 }: RefreshMyStampsModalContentProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
@@ -53,6 +52,7 @@ export const RefreshMyStampsModalContent = ({
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [showDataInfo, setShowDataInfo] = useState(false);
+  const [disableOnboard, setDisplayOnboard] = useState(false);
   const navigate = useNavigate();
 
   // TODO: update comments
@@ -97,7 +97,6 @@ export const RefreshMyStampsModalContent = ({
             version: "0.0.0",
             address: address || "",
             proofs: {},
-            rpcUrl,
           },
           signer as { signMessage: (message: string) => Promise<string> }
         );
@@ -150,92 +149,110 @@ export const RefreshMyStampsModalContent = ({
   };
 
   useEffect(() => {
-    const providerNames: string[] = fetchedPossibleEVMStamps
-      .map((entry: any) => {
-        if (entry.platformProps.platFormGroupSpec) {
-          return entry.platformProps.platFormGroupSpec
-            .map((spec: any) => spec.providers.map((provider: any) => provider.name))
-            .flat();
-        }
-        return [];
-      })
-      .flat();
+    const providerNames: string[] = validPlatforms
+      .map(({ groups }) => groups.map(({ providers }) => providers.map(({ name }) => name)))
+      .flat(3);
 
     setSelectedProviders(providerNames as PROVIDER_ID[]);
-  }, [fetchedPossibleEVMStamps]);
+  }, [validPlatforms]);
 
   return (
-    <>
-      {fetchedPossibleEVMStamps.length > 0 ? (
-        <div className="relative flex h-full flex-col text-white">
-          <div className="mb-6 text-2xl">Stamps Found</div>
-          <div>
-            {" "}
-            {/* TODO: update comments */}
-            {/* container for platforms so user can scroll if they have a lot */}
-            <RefreshMyStampsModalContentCardList
-              selectedProviders={selectedProviders}
-              fetchedPossibleEVMStamps={fetchedPossibleEVMStamps}
-              setSelectedProviders={setSelectedProviders}
-            />
-          </div>
-          <div className="mt-8 cursor-pointer text-center text-pink-300 underline">
-            <a onClick={() => setShowDataInfo(!showDataInfo)}>How is my data stored?</a>
-          </div>
-          {showDataInfo && (
-            <div className="pt-3 text-justify">
-              <p>
-                The only information in your passport is the Decentralized Identifier (DID) associated with your
-                Ethereum address and the Verifiable Credentials (VCs) issued for each service you connect to your
-                passport. No identifiable details are stored in your passport as we encrypt the account details when
-                creating your VCs. You can inspect the data yourself in the Gitcoin Passport by clicking the &lt;/&gt;
-                Passport JSON button in the upper right of the Passport dashboard.
-              </p>
+    <div className="flex grow flex-col">
+      <div className="grow">
+        {validPlatforms.length > 0 ? (
+          <div className="flex flex-col text-white">
+            <div className="mb-6 text-2xl">Stamps Found</div>
+            <div>
+              {" "}
+              {/* TODO: update comments */}
+              {/* container for platforms so user can scroll if they have a lot */}
+              <RefreshMyStampsModalContentCardList
+                selectedProviders={selectedProviders}
+                validPlatforms={validPlatforms}
+                setSelectedProviders={setSelectedProviders}
+              />
             </div>
-          )}
-          <div className="mt-16 mb-auto flex items-center justify-center">
-            <button className="secondary-btn mr-2 w-full rounded-sm py-2 px-6" onClick={() => navigate("/dashboard")}>
-              Cancel
-            </button>
+            <div className="mt-8 cursor-pointer text-center text-pink-300 underline">
+              <a onClick={() => setShowDataInfo(!showDataInfo)}>How is my data stored?</a>
+            </div>
+            {showDataInfo && (
+              <div className="pt-3 text-justify">
+                <p>
+                  The only information in your passport is the Decentralized Identifier (DID) associated with your
+                  Ethereum address and the Verifiable Credentials (VCs) issued for each service you connect to your
+                  passport. No identifiable details are stored in your passport as we encrypt the account details when
+                  creating your VCs. You can inspect the data yourself in the Gitcoin Passport by clicking the &lt;/&gt;
+                  Passport JSON button in the upper right of the Passport dashboard.
+                </p>
+              </div>
+            )}
+            <div className="mt-16 mb-auto flex items-center justify-center">
+              <button className="secondary-btn mr-2 w-full rounded-sm py-2 px-6" onClick={() => navigate("/dashboard")}>
+                Cancel
+              </button>
+              <button
+                className="ml-2 flex w-full items-center justify-center rounded-sm bg-accent py-2 px-2 disabled:cursor-not-allowed disabled:bg-muted disabled:text-black"
+                onClick={() => {
+                  handleRefreshSelectedStamps();
+                }}
+                disabled={!canSubmit || isLoading}
+              >
+                <span className="flex">
+                  Confirm Stamps {isLoading && <Spinner size="sm" className="my-auto ml-2" />}
+                </span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col content-end text-white">
             <button
-              className="ml-2 flex w-full items-center justify-center rounded-sm bg-accent py-2 px-2 disabled:cursor-not-allowed disabled:bg-muted disabled:text-black"
-              onClick={() => {
-                handleRefreshSelectedStamps();
-              }}
-              disabled={!canSubmit || isLoading}
+              className="mt-4 mb-6 flex h-10 w-10 items-center justify-center self-center rounded-full border border-accent-2"
+              onClick={onClose}
             >
-              <span className="flex">Confirm Stamps {isLoading && <Spinner size="sm" className="my-auto ml-2" />}</span>
+              <XMarkIcon className="h-7 w-7" aria-hidden="true" />
+            </button>
+            <div className="text-center">
+              <div className="m-auto mb-6 w-3/4 text-3xl">No New Web3 Stamps Detected</div>
+              <div className="mt-24 text-xl text-muted">
+                We did not find any new Web3 stamps to add to your passport. Completing the actions for a web3 stamp and
+                resubmitting will ensure that stamp is added (for example: Obtain an ENS name, NFT, etc.). Please return
+                to the dashboard and select additional stamps to verify your unique humanity by connecting to external
+                accounts (for example: Gmail, Discord, etc).
+              </div>
+            </div>
+            <button
+              className="sidebar-verify-btn hover:backround-2 mt-36 mb-8 flex w-full items-center justify-center rounded-sm text-white"
+              onClick={() => {
+                navigate("/dashboard");
+                resetStampsAndProgressState();
+              }}
+            >
+              Explore Stamps
             </button>
           </div>
-        </div>
-      ) : (
-        <div className="flex h-full flex-col content-end text-white">
-          <button
-            className="mt-4 mb-6 flex h-10 w-10 items-center justify-center self-center rounded-full border border-accent-2"
-            onClick={onClose}
-          >
-            <NoSymbolIcon className="h-7 w-7" aria-hidden="true" fill="var(--color-accent-3)" />
-          </button>
-          <div className="text-center">
-            <div className="m-auto mb-6 w-3/4 text-3xl">No Eligible Web3 Stamps Found</div>
-            <div className="mt-24 text-xl text-muted">
-              There are no unverified stamps currently eligible. Please return to the dashboard and select additional
-              stamps to receive by connecting to external accounts (examples include Gmail, Discord, etc) or perform the
-              actions required to qualify for a stamp and resubmit for that stamp through the dashboard. Click the
-              button to return to the dashboard and explore all stamps.
-            </div>
-          </div>
-          <button
-            className="sidebar-verify-btn hover:backround-2 mt-36 flex w-full items-center justify-center rounded-sm text-white"
-            onClick={() => {
-              navigate("/dashboard");
-              resetStampsAndProgressState();
-            }}
-          >
-            Explore Stamps
-          </button>
-        </div>
-      )}
-    </>
+        )}
+      </div>
+      <div className="mt-6 mb-2 text-color-1">
+        <Checkbox
+          type="checkbox"
+          colorScheme="purple"
+          data-testid="checkbox-onboard-hide"
+          isChecked={disableOnboard}
+          size="md"
+          onChange={(e) => {
+            if (e.target.checked) {
+              const now = Math.floor(Date.now() / 1000);
+              localStorage.setItem("onboardTS", now.toString());
+              setDisplayOnboard(true);
+            } else {
+              localStorage.removeItem("onboardTS");
+              setDisplayOnboard(false);
+            }
+          }}
+        >
+          Skip welcome onboarding until stamps expire
+        </Checkbox>
+      </div>
+    </div>
   );
 };

@@ -8,7 +8,7 @@ import {
 } from "../../__test-fixtures__/contextTestHelpers";
 
 import { useNavigate } from "react-router-dom";
-import { PossibleEVMProvider } from "../../signer/utils";
+import { ValidatedPlatform } from "../../signer/utils";
 
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 import { reduceStampResponse } from "../../utils/helpers";
@@ -27,7 +27,6 @@ const navigateMock = jest.fn();
 (useNavigate as jest.Mock).mockReturnValue(navigateMock);
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
-const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
 
 const mockOnClose = jest.fn();
 const mockResetStampsAndProgressState = jest.fn();
@@ -46,31 +45,28 @@ jest.mock("../../components/RefreshMyStampsModalContentCardList.tsx", () => ({
   RefreshMyStampsModalContentCardList: () => <div>RefreshMyStampsModalContentCardList</div>,
 }));
 
-const fetchedPossibleEVMStamps: PossibleEVMProvider[] = [
+const validPlatforms: ValidatedPlatform[] = [
   {
-    validatedPlatformGroups: [
-      [
-        {
-          payload: {
-            valid: true,
-            record: {
-              address: "0xc79abb54e4824cdb65c71f2eeb2d7f2db5da1fb8",
-              hasGTE30DaysSinceFirstTxnOnTheMainnet: "true",
-            },
+    groups: [
+      {
+        name: "Eth",
+        providers: [
+          {
+            name: "FirstEthTxnProvider",
+            title: "First Eth Txn",
           },
-          providerType: "FirstEthTxnProvider",
-        },
-      ],
+        ],
+      },
     ],
     platformProps: {
       platform: {} as any,
       platFormGroupSpec: [
         {
-          platformGroup: "Possessions",
+          platformGroup: "Eth",
           providers: [
             {
-              title: "At least 1 ETH",
-              name: "ethPossessionsGte#1",
+              name: "FirstEthTxnProvider",
+              title: "First Eth Txn",
             },
           ],
         },
@@ -80,25 +76,26 @@ const fetchedPossibleEVMStamps: PossibleEVMProvider[] = [
 ];
 
 describe("RefreshMyStampsModalContent", () => {
-  it("renders the Stamps Found title when fetchedPossibleEVMStamps are provided", () => {
+  it("renders the Stamps Found title when validPlatforms are provided", () => {
     renderWithContext(
       mockUserContext,
       mockCeramicContext,
       <RefreshMyStampsModalContent
         onClose={mockOnClose}
-        fetchedPossibleEVMStamps={[]}
+        validPlatforms={validPlatforms}
         resetStampsAndProgressState={mockResetStampsAndProgressState}
       />
     );
-    expect(screen.getByText(/No Eligible Web3 Stamps Found/i)).toBeInTheDocument();
+    expect(screen.getByText(/Stamps Found/i)).toBeInTheDocument();
   });
+
   it("calls handleRefreshSelectedStamps when the 'Confirm Stamps' button is clicked", async () => {
     renderWithContext(
       mockUserContext,
       mockCeramicContext,
       <RefreshMyStampsModalContent
         onClose={mockOnClose}
-        fetchedPossibleEVMStamps={fetchedPossibleEVMStamps}
+        validPlatforms={validPlatforms}
         resetStampsAndProgressState={mockResetStampsAndProgressState}
       />
     );
@@ -109,11 +106,10 @@ describe("RefreshMyStampsModalContent", () => {
         iamUrl,
         {
           type: "EVMBulkVerify",
-          types: ["ethPossessionsGte#1"],
+          types: ["FirstEthTxnProvider"],
           version: "0.0.0",
           address: "0xmyAddress",
           proofs: {},
-          rpcUrl,
         },
         undefined
       )
@@ -126,7 +122,7 @@ describe("RefreshMyStampsModalContent", () => {
       mockCeramicContext,
       <RefreshMyStampsModalContent
         onClose={mockOnClose}
-        fetchedPossibleEVMStamps={fetchedPossibleEVMStamps}
+        validPlatforms={validPlatforms}
         resetStampsAndProgressState={mockResetStampsAndProgressState}
       />
     );

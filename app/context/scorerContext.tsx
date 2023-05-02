@@ -4,9 +4,6 @@ import React, { createContext, useState } from "react";
 // --- Axios
 import axios, { AxiosError } from "axios";
 
-const scorerId = process.env.NEXT_PUBLIC_ALLO_SCORER_ID;
-const scorerApiKey = process.env.NEXT_PUBLIC_ALLO_SCORER_API_KEY || "";
-const scorerApiSubmitPassport = process.env.NEXT_PUBLIC_SCORER_ENDPOINT + "/submit-passport";
 const scorerApiGetScore = process.env.NEXT_PUBLIC_SCORER_ENDPOINT + "/score";
 
 const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
@@ -119,32 +116,6 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       }
     }
   };
-
-  // const submitPassport = async (address: string | undefined) => {
-  //   if (!isLiveAlloScoreEnabled) {
-  //     return;
-  //   }
-  //   if (address) {
-  //     try {
-  //       await axios.post(
-  //         scorerApiSubmitPassport,
-  //         {
-  //           address,
-  //           scorer_id: scorerId,
-  //         },
-  //         {
-  //           headers: {
-  //             "X-API-Key": scorerApiKey,
-  //           },
-  //         }
-  //       );
-  //       // Refresh score, but set the submitPassportOnFailure to false -> we want to avoid a loop
-  //       refreshScore(address, false);
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   }
-  // };
 
   // use props as a way to pass configuration values
   const providerProps = {

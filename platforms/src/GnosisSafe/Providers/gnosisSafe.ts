@@ -4,12 +4,13 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
+import { utils } from "ethers";
 
 // ----- Credential verification
 import { getAddress } from "../../utils/signer";
 
 // https://safe-transaction.gnosis.io/
-export const gnosisSafeApiEndpoint = "https://safe-transaction.gnosis.io/api/v1/";
+export const gnosisSafeApiEndpoint = "https://safe-transaction-mainnet.safe.global/api/v1/";
 
 type OwnerSafesResponse = {
   safes: string[];
@@ -35,7 +36,7 @@ export class GnosisSafeProvider implements Provider {
     const error = [];
 
     // Get the address. Note: this is expected to be a checksumed address (this is what the gnosis safe API expects)
-    const address = await getAddress(payload);
+    const address = utils.getAddress(await getAddress(payload));
 
     // Check if address is owner of at least 1 safe
     try {
@@ -62,7 +63,7 @@ export class GnosisSafeProvider implements Provider {
 }
 
 const getSafes = async (address: string): Promise<OwnerSafesResponse> => {
-  const requestResponse = await axios.get(`${gnosisSafeApiEndpoint}owners/${address}/safes`);
+  const requestResponse = await axios.get(`${gnosisSafeApiEndpoint}owners/${address}/safes/`);
 
   if (requestResponse.status != 200) {
     throw [`HTTP Error '${requestResponse.status}'. Details: '${requestResponse.statusText}'.`];

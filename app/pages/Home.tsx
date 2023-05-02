@@ -12,6 +12,7 @@ import MinimalHeader from "../components/MinimalHeader";
 import PageWidthGrid, { PAGE_PADDING } from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import SIWEButton from "../components/SIWEButton";
+import { checkShowOnboard } from "../utils/helpers";
 
 const Footer = () => (
   <>
@@ -28,7 +29,7 @@ export default function Home() {
   // Route user to dashboard when wallet is connected
   useEffect(() => {
     if (wallet) {
-      if (process.env.NEXT_PUBLIC_FF_ONE_CLICK_VERIFICATION === "on") {
+      if (process.env.NEXT_PUBLIC_FF_ONE_CLICK_VERIFICATION === "on" && checkShowOnboard()) {
         navigate("/welcome");
       } else {
         navigate("/dashboard");

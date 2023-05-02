@@ -10,7 +10,7 @@ import axios from "axios";
 jest.mock("axios");
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
-const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
+const MOCK_ADDRESS = "0xEf1c6E67703c7BD7107eed8303Fbe6EC2554BF6B";
 
 const validResponseList = ["safe-1", "safe-2", "safe-3"];
 
@@ -36,7 +36,7 @@ describe("Verification succeeds", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes`);
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`);
 
     expect(gnosisSafePayload).toEqual({
       valid: true,
@@ -65,7 +65,7 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes`);
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`);
 
     expect(gnosisSafePayload).toEqual({
       valid: false,
@@ -88,7 +88,7 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes`);
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`);
 
     expect(gnosisSafePayload).toEqual({
       valid: false,
@@ -115,7 +115,7 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes`);
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`);
 
     expect(gnosisSafePayload).toEqual({
       valid: false,
@@ -135,7 +135,7 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes`);
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`);
 
     expect(gnosisSafePayload).toEqual({
       valid: false,

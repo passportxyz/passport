@@ -1,24 +1,23 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { RefreshMyStampsModalContentCard } from "../../components/RefreshMyStampsModalContentCard";
-import { PlatformGroupSpec, PlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
+import { PlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
+import { ValidatedProviderGroup } from "../../signer/utils";
 
 beforeAll(() => {
   window.scrollTo = jest.fn();
 });
 
 const mockSetSelectedProviders = jest.fn();
-const platformGroup: PlatformGroupSpec[] = [
+const platformGroups: ValidatedProviderGroup[] = [
   {
+    name: "Platform Group",
     providers: [
       {
-        title: "Provider Title",
-        name: "Ens" as PROVIDER_ID,
-        icon: "provider-icon.png",
-        description: "Provider description",
+        name: "FirstEthTxnProvider",
+        title: "First Eth Txn",
       },
     ],
-    platformGroup: "Platform Group",
   },
 ];
 
@@ -32,13 +31,13 @@ const currentPlatform: PlatformSpec = {
   enablePlatformCardUpdate: false,
 };
 
-const selectedProviders: PROVIDER_ID[] = ["Ens"];
+const selectedProviders: PROVIDER_ID[] = ["FirstEthTxnProvider"];
 
 describe("RefreshMyStampsModalContentCard", () => {
   it("renders the component and handles switch change", () => {
     render(
       <RefreshMyStampsModalContentCard
-        platformGroup={platformGroup}
+        platformGroups={platformGroups}
         currentPlatform={currentPlatform}
         selectedProviders={selectedProviders}
         setSelectedProviders={mockSetSelectedProviders}
@@ -55,7 +54,7 @@ describe("RefreshMyStampsModalContentCard", () => {
   it("should mark switch as checked if selectedProviders are passed as props", () => {
     render(
       <RefreshMyStampsModalContentCard
-        platformGroup={platformGroup}
+        platformGroups={platformGroups}
         currentPlatform={currentPlatform}
         selectedProviders={selectedProviders}
         setSelectedProviders={mockSetSelectedProviders}

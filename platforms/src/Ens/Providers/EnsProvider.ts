@@ -26,10 +26,7 @@ export class EnsProvider implements Provider {
     try {
       const provider = getRPCProvider(payload);
 
-      const staticProvider: StaticJsonRpcProvider = new StaticJsonRpcProvider(payload.rpcUrl);
-      // lookup ens name
-
-      const reportedName = await staticProvider.lookupAddress(payload.address);
+      const reportedName = await provider.lookupAddress(payload.address);
       if (!reportedName) return { valid: false, error: ["Ens name was not found for given address."] };
 
       // lookup the address resolved to an ens name

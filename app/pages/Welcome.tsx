@@ -5,8 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 // --- Types
 import { Status, Step } from "../components/Progress";
-import { providers } from "@gitcoin/passport-platforms";
-import { PlatformGroupSpec, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { PlatformProps } from "../components/GenericPlatform";
 
 // --Components
@@ -16,7 +15,6 @@ import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import PageRoot from "../components/PageRoot";
 import { WelcomeBack } from "../components/WelcomeBack";
 import { RefreshMyStampsModal } from "../components/RefreshMyStampsModal";
-import { PossibleEVMProvider } from "../signer/utils";
 
 // --Chakra UI Elements
 import { useDisclosure } from "@chakra-ui/react";
@@ -26,6 +24,13 @@ import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContex
 import { UserContext } from "../context/userContext";
 import { InitialWelcome } from "../components/InitialWelcome";
 import LoadingScreen from "../components/LoadingScreen";
+
+// --- Utils
+import { fetchPossibleEVMStamps, ValidatedPlatform } from "../signer/utils";
+
+const MIN_DELAY = 50;
+const MAX_DELAY = 800;
+const getStepDelay = () => Math.floor(Math.random() * (MAX_DELAY - MIN_DELAY + 1) + MIN_DELAY);
 
 export default function Welcome() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -67,11 +72,11 @@ export default function Welcome() {
       status: Status.NOT_STARTED,
     },
   ];
-  const [fetchedPossibleEVMStamps, setFetchedPossibleEVMStamps] = useState<PossibleEVMProvider[]>();
+  const [validPlatforms, setValidPlatforms] = useState<ValidatedPlatform[]>();
   const [currentSteps, setCurrentSteps] = useState<Step[]>(initialSteps);
 
   const resetStampsAndProgressState = () => {
-    setFetchedPossibleEVMStamps([]);
+    setValidPlatforms([]);
     setCurrentSteps(initialSteps);
   };
 
@@ -93,80 +98,26 @@ export default function Welcome() {
     setCurrentSteps(steps);
   };
 
-  const fetchPossibleEVMStamps = async (
+  const fetchValidPlatforms = async (
     address: string,
     allPlatforms: Map<PLATFORM_ID, PlatformProps>
-  ): Promise<PossibleEVMProvider[]> => {
+  ): Promise<ValidatedPlatform[]> => {
     try {
-      const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL;
-
-      // Extract EVM platforms
-      const evmPlatforms: PlatformProps[] = [];
-      const evmPlatformGroupSpecs: PlatformGroupSpec[] = [];
-
-      allPlatforms.forEach((value, key, map) => {
-        const platformProp = map.get(key);
-        if (platformProp?.platform.isEVM) {
-          evmPlatformGroupSpecs.push(...platformProp.platFormGroupSpec);
-          evmPlatforms.push(platformProp);
+      let step = 0;
+      const incrementStep = () => {
+        if (step < 4) {
+          updateSteps(++step);
+          setTimeout(incrementStep, getStepDelay());
         }
-      });
-      // Build requests for each verify function within every EVM Provider
-      const providerRequests = await Promise.all(
-        evmPlatforms.map((platform) => {
-          const validatedProviderGroup = platform.platFormGroupSpec.map((groupSpec) => {
-            return groupSpec.providers.map(async (provider) => {
-              const payload = await providers.verify(
-                provider.name,
-                { type: provider.name, address, version: "0.0.0", rpcUrl },
-                {}
-              );
-              return {
-                payload,
-                providerType: provider.name,
-              };
-            });
-          });
-          updateSteps(1);
-          return { validatedProviderGroup, platform };
-        })
-      );
+      };
+      incrementStep();
 
-      // Resolve nested promises
-      const validatedPlatforms = await Promise.all(
-        providerRequests.map(async (requestedPlatform) => {
-          const validatedPlatformGroups = await Promise.all(
-            requestedPlatform.validatedProviderGroup.map(async (group) => {
-              const validatedProviders = await Promise.all(group);
-              return validatedProviders;
-            })
-          );
-          updateSteps(2);
-          return { validatedPlatformGroups, platformProps: requestedPlatform.platform };
-        })
-      );
+      const validPlatforms = await fetchPossibleEVMStamps(address, allPlatforms, passport);
 
-      // Look for valid stamps and return the provider group if valid
-      const validPlatforms = validatedPlatforms.filter((validatedPlatform) => {
-        // If any of the providers in the group are valid, then the group is valid
-        const validGroup = validatedPlatform.validatedPlatformGroups.filter((group) => {
-          updateSteps(3);
-          return (
-            group.filter((provider) => {
-              if (passport) {
-                const stampProviders = passport.stamps.map((stamp) => stamp.provider);
-                if (!stampProviders.includes(provider.providerType)) {
-                  return provider.payload.valid;
-                }
-              }
-            }).length > 0
-          );
-        });
-        updateSteps(4);
-        return validGroup.length > 0;
-      });
+      step = 5;
+      updateSteps(6);
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
-      updateSteps(5);
       return validPlatforms;
     } catch (error) {
       console.log(error);
@@ -176,10 +127,10 @@ export default function Welcome() {
 
   const handleFetchPossibleEVMStamps = async (addr: string, allPlats: Map<PLATFORM_ID, PlatformProps>) => {
     try {
-      const possibleEVMStamps = await fetchPossibleEVMStamps(addr, allPlats);
-      setFetchedPossibleEVMStamps(possibleEVMStamps);
-      updateSteps(6);
+      const platforms = await fetchValidPlatforms(addr, allPlats);
+      setValidPlatforms(platforms);
     } catch (error) {
+      console.log(error);
       throw new Error();
     }
   };
@@ -204,7 +155,7 @@ export default function Welcome() {
                 <InitialWelcome
                   onBoardFinished={async () => {
                     if (address) {
-                      await handleFetchPossibleEVMStamps(address, allPlatforms);
+                      handleFetchPossibleEVMStamps(address, allPlatforms);
                       onOpen();
                     }
                   }}
@@ -220,7 +171,7 @@ export default function Welcome() {
         steps={currentSteps}
         isOpen={isOpen}
         onClose={onClose}
-        fetchedPossibleEVMStamps={fetchedPossibleEVMStamps}
+        validPlatforms={validPlatforms}
         resetStampsAndProgressState={resetStampsAndProgressState}
       />
     </PageRoot>
