@@ -758,7 +758,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         await database.addStamps(stamps);
         const newPassport = await fetchPassport(database, true);
         if (ceramicClient && newPassport) {
-          ceramicClient.setStamps(newPassport.stamps);
+          ceramicClient.setStamps(newPassport.stamps).catch((e) => console.log("error setting ceramic stamps", e));
         }
         if (dbAccessToken) {
           refreshScore(address, dbAccessToken);
@@ -777,7 +777,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
         const newPassport = await fetchPassport(database, true);
         if (ceramicClient && newPassport) {
-          ceramicClient.setStamps(newPassport.stamps);
+          ceramicClient.setStamps(newPassport.stamps).catch((e) => console.log("error setting ceramic stamps", e));
         }
         if (dbAccessToken) {
           refreshScore(address, dbAccessToken);

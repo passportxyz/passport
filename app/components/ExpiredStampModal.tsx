@@ -66,6 +66,14 @@ export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) =
           <p className="m-1 mb-4 text-center">
             These expired stamps will be removed from your Passport. You can still re-verify your stamp in the future.
           </p>
+          <a
+            className="mb-1 text-center text-sm text-blue-600 underline"
+            href="https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/what-are-stamps"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Why have my stamps expired?
+          </a>
           <p className="w-full text-left text-sm font-semibold text-gray-600">Accounts</p>
           <hr className="border-1 w-full" />
           {expiredPlatforms.map((platform) => {
