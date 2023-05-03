@@ -83,7 +83,7 @@ const ATTESTER_TYPES = {
 // create the app and run on port
 export const app = express();
 
-// parse JSON post bodys
+// parse JSON post bodies
 app.use(express.json());
 
 // set cors to accept calls from anywhere
@@ -268,7 +268,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 
         // type is required because we need it to select the correct Identity Provider
         if (isSigner && isType && payload && payload.type) {
-          // if multiple types are being requested - produce and return multiple vc's
+          // if multiple types are being requested - produce and return multiple vcs
           if (payload.types && payload.types.length) {
             // if payload.types then we want to iterate and return a VC for each type
             const responses: CredentialResponseBody[] = [];
@@ -328,10 +328,7 @@ type EasPayload = {
     r: string;
     s: string;
   };
-  invalidCredentialInfo: {
-    credential: VerifiableCredential;
-    errors: string[];
-  }[];
+  invalidCredentials: VerifiableCredential[];
 };
 
 // Expose entry point for getting eas payload for moving stamps on-chain
@@ -347,33 +344,19 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 
   Promise.all(
     credentials.map(async (credential) => {
-      // TODO check that issuer matches
-      const errors = [];
-      try {
-        const verification = await DIDKit.verifyCredential(
-          JSON.stringify(credential),
-          '{"proofPurpose":"assertionMethod"}'
-        );
-        errors.push(...JSON.parse(verification).errors);
-      } catch (error: unknown) {
-        errors.push("Unable to verify credential: " + error);
-      } finally {
-        return { credential, errors, valid: errors.length === 0 };
-      }
+      return {
+        credential,
+        verified: issuer === credential.issuer && (await verifyCredential(DIDKit, credential)),
+      };
     })
   )
     .then((credentialVerifications) => {
-      const invalidCredentialInfo = credentialVerifications
-        .filter(({ valid }) => !valid)
-        .map(({ credential, errors }) => {
-          return {
-            credential,
-            errors,
-          };
-        });
+      const invalidCredentials = credentialVerifications
+        .filter(({ verified }) => !verified)
+        .map(({ credential }) => credential);
 
       const stamps: EasStamp[] = credentialVerifications
-        .filter(({ valid }) => valid)
+        .filter(({ verified }) => verified)
         .map(({ credential }) => {
           return {
             provider: credential.credentialSubject.provider,
@@ -401,7 +384,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           const payload: EasPayload = {
             passport: easPassport,
             signature: { v, r, s },
-            invalidCredentialInfo,
+            invalidCredentials,
           };
 
           return void res.json(payload);
