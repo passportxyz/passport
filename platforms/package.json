@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "jest": "^27.5.1",
+    "jest-mock-extended": "^3.0.4",
     "ts-jest": "^27.1.4"
   },
   "scripts": {

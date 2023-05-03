@@ -29,6 +29,20 @@ jest.mock("ethers", () => {
   };
 });
 
+jest.mock("@ethereum-attestation-service/eas-sdk", () => {
+  return {
+    SchemaEncoder: jest.fn().mockImplementation(() => {
+      return {
+        encodeData: jest.fn().mockImplementation(() => {
+          return "0xEncodedData";
+        }),
+      };
+    }),
+    ZERO_BYTES32: "0x0000000000000000000000000000000000000000000000000000000000000000",
+    NO_EXPIRATION: -1,
+  };
+});
+
 describe("POST /challenge", function () {
   it("handles valid challenge requests", async () => {
     // as each signature is unique, each request results in unique output
