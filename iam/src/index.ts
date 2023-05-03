@@ -13,6 +13,7 @@ import cors from "cors";
 
 // ---- Web3 packages
 import { utils } from "ethers";
+import { ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 
 // ---- Types
 import { Response } from "express";
@@ -38,6 +39,7 @@ import {
 
 // All provider exports from platforms
 import { providers } from "@gitcoin/passport-platforms";
+import { ethers } from "ethers";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -50,6 +52,32 @@ export const config: {
 } = {
   key,
   issuer,
+};
+
+const attestation_signer_wallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
+
+const ATTESTER_DOMAIN = {
+  name: "Attester",
+  version: "1",
+  chainId: process.env.GITCOIN_ATTESTER_CHAIN_ID,
+  verifyingContract: process.env.GITCOIN_ATTESTER_CONTRACT_ADDRESS,
+};
+
+const ATTESTER_TYPES = {
+  Stamp: [
+    { name: "provider", type: "string" },
+    { name: "stampHash", type: "string" },
+    { name: "expirationDate", type: "string" },
+    { name: "encodedData", type: "bytes" },
+  ],
+  Passport: [
+    { name: "stamps", type: "Stamp[]" },
+    { name: "recipient", type: "address" },
+    { name: "expirationTime", type: "uint64" },
+    { name: "revocable", type: "bool" },
+    { name: "refUID", type: "bytes32" },
+    { name: "value", type: "uint256" },
+  ],
 };
 
 // create the app and run on port
@@ -277,27 +305,116 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
     });
 });
 
-export type EasSchema = {
+export type EasStamp = {
   provider: string;
   stampHash: string;
   expirationDate: string;
+  encodedData: string;
+};
+
+type EasPassport = {
+  stamps: EasStamp[];
+  recipient: string;
+  expirationTime: number;
+  revocable: boolean;
+  refUID: string;
+  value: number;
+};
+
+type EasPayload = {
+  passport: EasPassport;
+  signature: {
+    v: number;
+    r: string;
+    s: string;
+  };
+  invalidCredentialInfo: {
+    credential: VerifiableCredential;
+    errors: string[];
+  }[];
 };
 
 // Expose entry point for getting eas payload for moving stamps on-chain
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
   const credentials: VerifiableCredential[] = req.body as VerifiableCredential[];
+  if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
 
-  const easPayloads = credentials.map((credential) => {
-    // const additionalSignerCredential = await verifyCredential(DIDKit, additionalChallenge);
-    return {
-      provider: credential.credentialSubject.provider,
-      stampHash: credential.credentialSubject.hash,
-      expirationDate: credential.expirationDate,
-    };
-  });
+  const recipient = credentials[0].credentialSubject.id.split(":")[4];
 
-  res.json(easPayloads);
+  if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
+    return void errorRes(res, "Invalid recipient", 400);
+
+  Promise.all(
+    credentials.map(async (credential) => {
+      // TODO check that issuer matches
+      const errors = [];
+      try {
+        const verification = await DIDKit.verifyCredential(
+          JSON.stringify(credential),
+          '{"proofPurpose":"assertionMethod"}'
+        );
+        errors.push(...JSON.parse(verification).errors);
+      } catch (error: unknown) {
+        errors.push("Unable to verify credential: " + error);
+      } finally {
+        return { credential, errors, valid: errors.length === 0 };
+      }
+    })
+  )
+    .then((credentialVerifications) => {
+      const invalidCredentialInfo = credentialVerifications
+        .filter(({ valid }) => !valid)
+        .map(({ credential, errors }) => {
+          return {
+            credential,
+            errors,
+          };
+        });
+
+      const stamps: EasStamp[] = credentialVerifications
+        .filter(({ valid }) => valid)
+        .map(({ credential }) => {
+          return {
+            provider: credential.credentialSubject.provider,
+            stampHash: credential.credentialSubject.hash,
+            expirationDate: credential.expirationDate,
+            // TODO is this the right data and format?
+            encodedData: JSON.stringify(credential),
+          };
+        });
+
+      const easPassport: EasPassport = {
+        stamps,
+        recipient,
+        expirationTime: NO_EXPIRATION,
+        revocable: true,
+        refUID: ZERO_BYTES32,
+        value: 0,
+      };
+
+      attestation_signer_wallet
+        ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, easPassport)
+        .then((signature) => {
+          const { v, r, s } = ethers.utils.splitSignature(signature);
+
+          const payload: EasPayload = {
+            passport: easPassport,
+            signature: { v, r, s },
+            invalidCredentialInfo,
+          };
+
+          return void res.json(payload);
+        })
+        .catch((error) => {
+          // TODO dont return real error
+          return void errorRes(res, error, 500);
+        });
+    })
+    .catch((error) => {
+      // TODO dont return real error
+      return void errorRes(res, error, 500);
+    });
 });
 
 // procedure endpoints
