@@ -25,6 +25,7 @@ import {
   ProviderContext,
   CheckRequestBody,
   CheckResponseBody,
+  VerifiableCredential,
 } from "@gitcoin/passport-types";
 
 import { getChallenge } from "./utils/challenge";
@@ -319,6 +320,29 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
     .catch(() => {
       return void errorRes(res, "Unable to verify payload", 500);
     });
+});
+
+export type EasSchema = {
+  provider: string;
+  stampHash: string;
+  expirationDate: string;
+};
+
+// Expose entry point for getting eas payload for moving stamps on-chain
+// This function will receive an array of stamps, validate them and return an array of eas payloads
+app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
+  const credentials: VerifiableCredential[] = req.body as VerifiableCredential[];
+
+  const easPayloads = credentials.map((credential) => {
+    // const additionalSignerCredential = await verifyCredential(DIDKit, additionalChallenge);
+    return {
+      provider: credential.credentialSubject.provider,
+      stampHash: credential.credentialSubject.hash,
+      expirationDate: credential.expirationDate,
+    };
+  });
+
+  res.json(easPayloads);
 });
 
 // procedure endpoints
