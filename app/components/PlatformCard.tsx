@@ -103,9 +103,9 @@ export const PlatformCard = ({
               </div>
             )}
         </div>
-        <div className="flex justify-center py-0 px-6 pb-6 md:block md:justify-start">
+        <div className="flex justify-center px-2 py-0 pb-6 md:block md:justify-start md:px-6">
           <h1 className="mb-0 text-lg md:mb-3">{platform.name}</h1>
-          <p className="pleading-relaxed hidden text-color-3 md:inline-block">{platform.description}</p>
+          <p className="pleading-relaxed hidden text-color-4 md:inline-block">{platform.description}</p>
         </div>
         <div className="mt-auto text-color-3">
           {selectedProviders[platform.platform].length > 0 ? (

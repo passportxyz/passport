@@ -80,8 +80,8 @@ export const RemoveStampModal = ({
         padding={5}
         maxW={{
           sm: "100%",
-          md: "55%",
-          xl: "45%",
+          // md: "55%",
+          md: "600px",
         }}
         maxH="80%"
       >

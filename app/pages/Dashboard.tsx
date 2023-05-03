@@ -168,7 +168,9 @@ export default function Dashboard() {
   const modals = (
     <>
       {viewerConnection.status === "connecting" && (
-        <ProcessingPopup data-testid="selfId-connection-alert">Waiting for wallet signature...</ProcessingPopup>
+        <ProcessingPopup data-testid="selfId-connection-alert">
+          Please user your wallet to sign the message prompt and complete the sign-in process.
+        </ProcessingPopup>
       )}
 
       {isLoadingPassport === IsLoadingPassportState.Loading && (
@@ -257,7 +259,7 @@ export default function Dashboard() {
           {passport ? (
             <button
               data-testid="button-passport-json-mobile"
-              className="rounded-md border-2 border-gray-300 py-2 px-4"
+              className="h-10 w-10 rounded-md border border-accent-2 border-gray-300"
               onClick={onOpen}
             >
               {`</>`}
