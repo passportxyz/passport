@@ -8,6 +8,8 @@ dotenv.config();
 import express, { Request } from "express";
 import { router as procedureRouter } from "@gitcoin/passport-platforms/dist/commonjs/procedure-router";
 
+import { SchemaEncoder, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
+
 // ---- Production plugins
 import cors from "cors";
 
@@ -53,7 +55,8 @@ export const config: {
   issuer,
 };
 
-const attestation_signer_wallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
+const attestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
+const attestationSchemaEncoder = new SchemaEncoder("string provider, string hash");
 
 const ATTESTER_DOMAIN = {
   name: "Attester",
@@ -357,25 +360,31 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
       const stamps: EasStamp[] = credentialVerifications
         .filter(({ verified }) => verified)
         .map(({ credential }) => {
+          const encodedData = attestationSchemaEncoder.encodeData([
+            { name: "provider", value: credential.credentialSubject.provider, type: "string" },
+            { name: "hash", value: credential.credentialSubject.hash, type: "string" },
+          ]);
           return {
             provider: credential.credentialSubject.provider,
             stampHash: credential.credentialSubject.hash,
             expirationDate: credential.expirationDate,
             // TODO is this the right data and format?
-            encodedData: JSON.stringify(credential),
+            encodedData,
           };
         });
+
+      if (!stamps.length) return void errorRes(res, "No verifiable stamps provided", 400);
 
       const easPassport: EasPassport = {
         stamps,
         recipient,
-        expirationTime: -1,
+        expirationTime: NO_EXPIRATION,
         revocable: true,
-        refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
+        refUID: ZERO_BYTES32,
         value: 0,
       };
 
-      attestation_signer_wallet
+      attestationSignerWallet
         ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, easPassport)
         .then((signature) => {
           const { v, r, s } = utils.splitSignature(signature);
@@ -390,11 +399,13 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
         })
         .catch((error) => {
           // TODO dont return real error
+          console.log("here0", error);
           return void errorRes(res, String(error), 500);
         });
     })
     .catch((error) => {
       // TODO dont return real error
+      console.log("here1", error);
       return void errorRes(res, String(error), 500);
     });
 });

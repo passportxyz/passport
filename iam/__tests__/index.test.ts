@@ -41,6 +41,20 @@ jest.mock("ethers", () => {
   };
 });
 
+jest.mock("@ethereum-attestation-service/eas-sdk", () => {
+  return {
+    SchemaEncoder: jest.fn().mockImplementation(() => {
+      return {
+        encodeData: jest.fn().mockImplementation(() => {
+          return "0xEncodedData";
+        }),
+      };
+    }),
+    ZERO_BYTES32: "0x0000000000000000000000000000000000000000000000000000000000000000",
+    NO_EXPIRATION: -1,
+  };
+});
+
 describe("POST /challenge", function () {
   it("handles valid challenge requests", async () => {
     // as each signature is unique, each request results in unique output
@@ -651,7 +665,7 @@ describe("POST /eas", () => {
             provider: "test",
             stampHash: "test",
             expirationDate: "9999-12-31T23:59:59Z",
-            encodedData: JSON.stringify(credentials[0]),
+            encodedData: "0xEncodedData",
           },
         ],
         recipient: "0x5678000000000000000000000000000000000000",
@@ -668,13 +682,37 @@ describe("POST /eas", () => {
       .post("/api/v0.0.0/eas")
       .send(credentials)
       .set("Accept", "application/json")
-      .then((res) => {
-        console.log(res.body);
-        return res;
-      });
+      .expect(200)
+      .expect("Content-Type", /json/);
 
     expect(response.body).toMatchObject(expectedPayload);
     expect(response.body.signature.r).toBe("r");
+  });
+
+  it("handles request with only invalid credentials", async () => {
+    const failedCredential = {
+      "@context": "https://www.w3.org/2018/credentials/v1",
+      type: ["VerifiableCredential", "Stamp"],
+      issuer: "BAD_ISSUER",
+      issuanceDate: new Date().toISOString(),
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
+        provider: "failure",
+        hash: "test",
+      },
+      expirationDate: "9999-12-31T23:59:59Z",
+    };
+
+    const credentials = [failedCredential];
+
+    const response = await request(app)
+      .post("/api/v0.0.0/eas")
+      .send(credentials)
+      .set("Accept", "application/json")
+      .expect(400)
+      .expect("Content-Type", /json/);
+
+    expect(response.body.error).toEqual("No verifiable stamps provided");
   });
 
   it("handles missing stamps in the request body", async () => {
