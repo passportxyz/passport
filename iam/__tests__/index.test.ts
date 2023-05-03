@@ -686,3 +686,133 @@ describe("POST /check", function () {
     expect(response.body.length).toEqual(0);
   });
 });
+
+describe("POST /eas", () => {
+  beforeEach(() => {
+    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+  });
+
+  it("handles valid requests including some invalid credentials", async () => {
+    const failedCredential = {
+      "@context": "https://www.w3.org/2018/credentials/v1",
+      type: ["VerifiableCredential", "Stamp"],
+      issuer: "BAD_ISSUER",
+      issuanceDate: new Date().toISOString(),
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
+        provider: "failure",
+        hash: "test",
+      },
+      expirationDate: "9999-12-31T23:59:59Z",
+    };
+
+    const credentials = [
+      {
+        "@context": "https://www.w3.org/2018/credentials/v1",
+        type: ["VerifiableCredential", "Stamp"],
+        issuer: config.issuer,
+        issuanceDate: new Date().toISOString(),
+        credentialSubject: {
+          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
+          provider: "test",
+          hash: "test",
+        },
+        expirationDate: "9999-12-31T23:59:59Z",
+      },
+      failedCredential,
+    ];
+
+    const expectedPayload = {
+      passport: {
+        stamps: [
+          {
+            provider: "test",
+            stampHash: "test",
+            expirationDate: "9999-12-31T23:59:59Z",
+            encodedData: "0xEncodedData",
+          },
+        ],
+        recipient: "0x5678000000000000000000000000000000000000",
+        expirationTime: -1,
+        revocable: true,
+        refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
+        value: 0,
+      },
+      signature: expect.any(Object),
+      invalidCredentials: [failedCredential],
+    };
+
+    const response = await request(app)
+      .post("/api/v0.0.0/eas")
+      .send(credentials)
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    expect(response.body).toMatchObject(expectedPayload);
+    expect(response.body.signature.r).toBe("r");
+  });
+
+  it("handles request with only invalid credentials", async () => {
+    const failedCredential = {
+      "@context": "https://www.w3.org/2018/credentials/v1",
+      type: ["VerifiableCredential", "Stamp"],
+      issuer: "BAD_ISSUER",
+      issuanceDate: new Date().toISOString(),
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
+        provider: "failure",
+        hash: "test",
+      },
+      expirationDate: "9999-12-31T23:59:59Z",
+    };
+
+    const credentials = [failedCredential];
+
+    const response = await request(app)
+      .post("/api/v0.0.0/eas")
+      .send(credentials)
+      .set("Accept", "application/json")
+      .expect(400)
+      .expect("Content-Type", /json/);
+
+    expect(response.body.error).toEqual("No verifiable stamps provided");
+  });
+
+  it("handles missing stamps in the request body", async () => {
+    const response = await request(app)
+      .post("/api/v0.0.0/eas")
+      .send([])
+      .set("Accept", "application/json")
+      .expect(400)
+      .expect("Content-Type", /json/);
+
+    expect(response.body.error).toEqual("No stamps provided");
+  });
+
+  it("handles invalid recipient in the request body", async () => {
+    const credentials = [
+      {
+        "@context": "https://www.w3.org/2018/credentials/v1",
+        type: ["VerifiableCredential", "Stamp"],
+        issuer: config.issuer,
+        issuanceDate: new Date().toISOString(),
+        credentialSubject: {
+          id: "did:pkh:eip155:1:0x5678",
+          provider: "test",
+          hash: "test",
+        },
+        expirationDate: "9999-12-31T23:59:59Z",
+      },
+    ];
+
+    const response = await request(app)
+      .post("/api/v0.0.0/eas")
+      .send(credentials)
+      .set("Accept", "application/json")
+      .expect(400)
+      .expect("Content-Type", /json/);
+
+    expect(response.body.error).toEqual("Invalid recipient");
+  });
+});

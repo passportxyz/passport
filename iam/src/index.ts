@@ -12,8 +12,7 @@ import { router as procedureRouter } from "@gitcoin/passport-platforms/dist/comm
 import cors from "cors";
 
 // ---- Web3 packages
-import { utils } from "ethers";
-import { ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
+// import { ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 
 // ---- Types
 import { Response } from "express";
@@ -41,7 +40,7 @@ import {
 
 // All provider exports from platforms
 import { providers } from "@gitcoin/passport-platforms";
-import { ethers } from "ethers";
+import { utils, ethers } from "ethers";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -415,16 +414,16 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
       const easPassport: EasPassport = {
         stamps,
         recipient,
-        expirationTime: NO_EXPIRATION,
+        expirationTime: -1,
         revocable: true,
-        refUID: ZERO_BYTES32,
+        refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
         value: 0,
       };
 
       attestation_signer_wallet
         ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, easPassport)
         .then((signature) => {
-          const { v, r, s } = ethers.utils.splitSignature(signature);
+          const { v, r, s } = utils.splitSignature(signature);
 
           const payload: EasPayload = {
             passport: easPassport,
@@ -436,12 +435,12 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
         })
         .catch((error) => {
           // TODO dont return real error
-          return void errorRes(res, error, 500);
+          return void errorRes(res, String(error), 500);
         });
     })
     .catch((error) => {
       // TODO dont return real error
-      return void errorRes(res, error, 500);
+      return void errorRes(res, String(error), 500);
     });
 });
 
