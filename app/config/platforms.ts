@@ -186,4 +186,12 @@ export const PLATFORMS: PlatformSpec[] = [
     connectMessage: "Connect Account",
     isEVM: false,
   },
+  {
+    icon: "./assets/guildXYZStampIcon.svg",
+    platform: "GuildXYZ",
+    name: "Guild Membership and Roles",
+    description: "Connect your Guild XYZ account to verify your memberships.",
+    connectMessage: "Verify Guilds",
+    isEVM: true,
+  },
 ];
