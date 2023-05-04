@@ -46,20 +46,28 @@ export async function getAllGuilds(): Promise<Guild[]> {
 }
 
 export async function checkMemberShipCount(memberships: GuildMembership[]): Promise<boolean> {
-  const allGuilds = await getAllGuilds();
   // Member of more than 5 guilds and > 15 roles across those guilds (guilds over 250 members)
-  const filteredMemberships = memberships.filter(
-    (membership) => getGuildMemberCount(membership.guildId, allGuilds) > 250
-  );
+  const allGuilds = await getAllGuilds();
 
-  if (filteredMemberships.length <= 5) {
+  const myGuildStats = memberships.map((membership) => ({
+    guildId: membership.guildId,
+    roleIdsLength: membership.roleids.length,
+  }));
+
+  const membershipIds = myGuildStats.map((membership) => membership.guildId);
+
+  // Filter out guilds that don't have sufficient membership
+  const myGuildMemberships = allGuilds.filter((guild) => membershipIds.includes(guild.id) && guild.memberCount > 250);
+
+  if (myGuildMemberships.length <= 5) {
     return false;
   }
 
-  const totalRoles = filteredMemberships.reduce(
-    (accumulator, membership) => accumulator + membership.roleids.length,
-    0
-  );
+  // Calculate totalRoles by summing roleIdsLength from myGuilds for each guild in myGuildMemberships
+  const totalRoles = myGuildMemberships.reduce((accumulator, membership) => {
+    const myGuild = myGuildStats.find((g) => g.guildId === membership.id);
+    return myGuild ? accumulator + myGuild.roleIdsLength : accumulator;
+  }, 0);
 
   return totalRoles > 15;
 }
@@ -91,11 +99,7 @@ export class GuildMemberProvider implements Provider {
 }
 
 export const checkGuildOwner = (memberships: GuildMembership[]): boolean => {
-  console.log({ memberships });
-  return memberships.some((membership) => {
-    console.log(membership, "membership.isOwner");
-    return membership.isOwner || membership.isAdmin;
-  });
+  return memberships.some((membership) => membership.isOwner || membership.isAdmin);
 };
 
 export class GuildAdminProvider implements Provider {

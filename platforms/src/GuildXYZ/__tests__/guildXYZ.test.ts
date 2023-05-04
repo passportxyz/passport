@@ -19,7 +19,7 @@ const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
 const mockGuildMemberships = [
   {
     guildId: 1,
-    roleids: [1, 2],
+    roleids: [3, 4, 5, 6, 7, 8, 9, 10],
     isAdmin: false,
     isOwner: false,
   },
@@ -31,7 +31,7 @@ const mockGuildMemberships = [
   },
   {
     guildId: 3,
-    roleids: [6],
+    roleids: [3, 4, 5],
     isAdmin: false,
     isOwner: true,
   },
@@ -44,7 +44,7 @@ const mockAllGuilds = [
     roles: ["Role 1", "Role 2"],
     imageUrl: "https://example.com/guildA.png",
     urlName: "guild-a",
-    memberCount: 100,
+    memberCount: 300,
   },
   {
     id: 2,
@@ -60,7 +60,7 @@ const mockAllGuilds = [
     roles: ["Role 6"],
     imageUrl: "https://example.com/guildC.png",
     urlName: "guild-c",
-    memberCount: 50,
+    memberCount: 350,
   },
 ];
 
@@ -98,7 +98,7 @@ describe("Guild Providers", () => {
 
       mockedAxios.get.mockResolvedValueOnce({
         data: [
-          mockGuildMemberships,
+          ...mockGuildMemberships,
           {
             guildId: 4,
             roleids: [6],
@@ -111,18 +111,24 @@ describe("Guild Providers", () => {
             isAdmin: false,
             isOwner: true,
           },
+          {
+            guildId: 6,
+            roleids: [6],
+            isAdmin: false,
+            isOwner: true,
+          },
         ],
       });
       mockedAxios.get.mockResolvedValueOnce({
         data: [
-          mockAllGuilds,
+          ...mockAllGuilds,
           {
             id: 4,
             name: "Guild D",
             roles: ["Role 6"],
             imageUrl: "https://example.com/guildC.png",
             urlName: "guild-c",
-            memberCount: 200,
+            memberCount: 300,
           },
           {
             id: 5,
@@ -130,9 +136,35 @@ describe("Guild Providers", () => {
             roles: ["Role 6"],
             imageUrl: "https://example.com/guildC.png",
             urlName: "guild-c",
-            memberCount: 200,
+            memberCount: 300,
+          },
+          {
+            id: 6,
+            name: "Guild F",
+            roles: ["Role 6"],
+            imageUrl: "https://example.com/guildC.png",
+            urlName: "guild-c",
+            memberCount: 300,
           },
         ],
+      });
+
+      const result = await provider.verify({ address: MOCK_ADDRESS } as RequestPayload);
+      expect(result).toEqual({
+        valid: true,
+        record: {
+          address: MOCK_ADDRESS,
+        },
+      });
+    });
+    it("should return invalid if has insufficient guilds", async () => {
+      const provider = new GuildMemberProvider();
+
+      mockedAxios.get.mockResolvedValueOnce({
+        data: mockGuildMemberships,
+      });
+      mockedAxios.get.mockResolvedValueOnce({
+        data: mockAllGuilds,
       });
 
       const result = await provider.verify({ address: MOCK_ADDRESS } as RequestPayload);
@@ -159,7 +191,7 @@ describe("Guild Providers", () => {
       });
     });
 
-    it("doesn't verify admin is not admin", async () => {
+    it("should return invalid for non admin", async () => {
       const provider = new GuildAdminProvider();
 
       mockedAxios.get.mockResolvedValueOnce({

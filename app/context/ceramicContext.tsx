@@ -469,7 +469,7 @@ const startingAllProvidersState: AllProvidersState = {
     stamp: undefined,
   },
 };
-console.log({ platforms });
+
 const startingState: CeramicContextState = {
   passport: undefined,
   isLoadingPassport: IsLoadingPassportState.Loading,
