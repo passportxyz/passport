@@ -31,7 +31,7 @@ const SyncToChainButton = () => {
         if (data.error) console.log("error syncing credentials to chain: ", data.error, "credentials: ", credentials);
         if (data.invalidCredentials.length > 0)
           console.log("not syncing invalid credentials: ", data.invalidCredentials);
-        // TODO info toast
+        // TODO info toast for invalid credentials
 
         if (data.passport) {
           const ethersProvider = new ethers.BrowserProvider(wallet.provider, "any");
@@ -50,9 +50,9 @@ const SyncToChainButton = () => {
             s
           );
           toast({
-            title: "Success",
+            title: "Submitted",
             description: "Passport submitted to chain",
-            status: "success",
+            status: "info",
             duration: 5000,
             isClosable: true,
           });
@@ -82,11 +82,11 @@ const SyncToChainButton = () => {
 
   return (
     <button
-      className="h-11 w-16 rounded-md border-2 border-gray-300 py-2 px-4"
+      className="h-10 w-10 rounded-md border border-muted"
       onClick={() => onSyncToChain(wallet, passport)}
       disabled={syncingToChain}
     >
-      <div className={`${syncingToChain ? "block" : "hidden"}`}>
+      <div className={`${syncingToChain ? "block" : "hidden"} relative top-1`}>
         <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
       </div>
       <div className={`${syncingToChain ? "hidden" : "block"}`}>{`⛓`}</div>
