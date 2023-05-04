@@ -399,13 +399,11 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
         })
         .catch((error) => {
           // TODO dont return real error
-          console.log("here0", error);
           return void errorRes(res, String(error), 500);
         });
     })
     .catch((error) => {
       // TODO dont return real error
-      console.log("here1", error);
       return void errorRes(res, String(error), 500);
     });
 });

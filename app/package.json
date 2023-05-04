@@ -36,6 +36,7 @@
     "@web3-onboard/walletlink": "^2.0.4",
     "broadcast-channel": "^4.11.0",
     "did-session": "^1.0.0",
+    "ethers": "^6.3.0",
     "framer-motion": "^6.3.0",
     "next": "latest",
     "node-fetch": "^3.2.4",
