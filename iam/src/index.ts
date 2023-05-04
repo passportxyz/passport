@@ -8,13 +8,12 @@ dotenv.config();
 import express, { Request } from "express";
 import { router as procedureRouter } from "@gitcoin/passport-platforms/dist/commonjs/procedure-router";
 
-import { SchemaEncoder, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
-
 // ---- Production plugins
 import cors from "cors";
 
 // ---- Web3 packages
-// import { ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
+import { utils, ethers } from "ethers";
+import { SchemaEncoder, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 
 // ---- Types
 import { Response } from "express";
@@ -40,7 +39,6 @@ import {
 
 // All provider exports from platforms
 import { providers } from "@gitcoin/passport-platforms";
-import { utils, ethers } from "ethers";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
