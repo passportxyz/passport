@@ -25,6 +25,18 @@ jest.mock("ethers", () => {
       verifyMessage: jest.fn().mockImplementation(() => {
         return "string";
       }),
+      splitSignature: jest.fn().mockImplementation(() => {
+        return { v: 0, r: "r", s: "s" };
+      }),
+    },
+    ethers: {
+      Wallet: jest.fn().mockImplementation(() => {
+        return {
+          _signTypedData: jest.fn().mockImplementation(() => {
+            return new Promise((r) => r("0xSignedData"));
+          }),
+        };
+      }),
     },
   };
 });
