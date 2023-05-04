@@ -8,6 +8,10 @@ export class GuildXYZPlatform implements Platform {
   clientId: string = null;
   redirectUri: string = null;
 
+  banner = {
+    heading: "*Qualifying guilds have more than 250 members",
+  };
+
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     return {};
   }

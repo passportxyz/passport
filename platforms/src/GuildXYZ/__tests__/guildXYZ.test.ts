@@ -4,7 +4,6 @@ import axios from "axios";
 import {
   getGuildMemberships,
   getAllGuilds,
-  checkMemberShipCount,
   GuildMemberProvider,
   GuildAdminProvider,
   GuildPassportMemberProvider,
@@ -19,7 +18,7 @@ const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
 const mockGuildMemberships = [
   {
     guildId: 1,
-    roleids: [3, 4, 5, 6, 7, 8, 9, 10],
+    roleids: [3, 4, 5, 6],
     isAdmin: false,
     isOwner: false,
   },
@@ -85,13 +84,6 @@ describe("Guild Providers", () => {
     expect(mockedAxios.get).toHaveBeenCalledWith("https://api.guild.xyz/v1/guild");
   });
 
-  it("checks membership count correctly", async () => {
-    mockedAxios.get.mockResolvedValue({ data: mockAllGuilds });
-
-    const membershipCount = await checkMemberShipCount(mockGuildMemberships);
-    expect(membershipCount).toBe(false);
-  });
-
   describe("GuildMemberProvider", () => {
     it("verifies GuildMember correctly", async () => {
       const provider = new GuildMemberProvider();
@@ -101,13 +93,13 @@ describe("Guild Providers", () => {
           ...mockGuildMemberships,
           {
             guildId: 4,
-            roleids: [6],
+            roleids: [6, 7, 8],
             isAdmin: false,
             isOwner: true,
           },
           {
             guildId: 5,
-            roleids: [6],
+            roleids: [6, 7],
             isAdmin: false,
             isOwner: true,
           },

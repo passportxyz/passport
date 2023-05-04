@@ -23,6 +23,23 @@ type Guild = {
   memberCount: number;
 };
 
+type GuildStats = {
+  guildCount: number;
+  totalRoles: number;
+  totalAdminOwner: number;
+};
+
+class Cache {
+  private cache: Map<string, Promise<GuildStats>> = new Map();
+
+  async get(key: string, fetchFunction: () => Promise<GuildStats>): Promise<GuildStats> {
+    if (!this.cache.has(key)) {
+      this.cache.set(key, fetchFunction());
+    }
+    return this.cache.get(key);
+  }
+}
+
 const guildBaseEndpoint = "https://api.guild.xyz/v1/";
 
 export async function getGuildMemberships(address: string): Promise<GuildMembership[]> {
@@ -32,55 +49,67 @@ export async function getGuildMemberships(address: string): Promise<GuildMembers
   return memberShipResponse.data;
 }
 
-export function getGuildMemberCount(guildId: number, allGuilds: Guild[]): number {
-  const guild = allGuilds.find((guild) => guild.id === guildId);
-  return guild?.memberCount || 0;
-}
-
 export async function getAllGuilds(): Promise<Guild[]> {
   // https://api.guild.xyz/v1/guild
   const guildResponse: {
     data: Guild[];
   } = await axios.get(`${guildBaseEndpoint}guild`);
+
   return guildResponse.data;
 }
 
-export async function checkMemberShipCount(memberships: GuildMembership[]): Promise<boolean> {
+export async function checkGuildStats(memberships: GuildMembership[]): Promise<GuildStats> {
   // Member of more than 5 guilds and > 15 roles across those guilds (guilds over 250 members)
   const allGuilds = await getAllGuilds();
 
-  const myGuildStats = new Map<number, number>(); // key: guildId, value: roleIdsLength
+  const myGuildRoles = new Map<number, number>(); // key: guildId, value: roleIdsLength
+  const adminOwnerGuilds = new Map<number, number>();
   memberships.forEach((membership) => {
-    myGuildStats.set(membership.guildId, membership.roleids.length);
+    myGuildRoles.set(membership.guildId, membership.roleids.length);
+    adminOwnerGuilds.set(membership.guildId, membership.isAdmin || membership.isOwner ? 1 : 0);
   });
 
-  // Filter out guilds that don't have sufficient membership and count roles at the same time
+  // Aggregate guild and role count
   let guildCount = 0;
   let totalRoles = 0;
+  let totalAdminOwner = 0;
+
   for (const guild of allGuilds) {
-    if (myGuildStats.has(guild.id) && guild.memberCount > 250) {
+    if (myGuildRoles.has(guild.id) && guild.memberCount > 250) {
       guildCount++;
-      totalRoles += myGuildStats.get(guild.id);
+      totalRoles += myGuildRoles.get(guild.id);
+      totalAdminOwner += adminOwnerGuilds.get(guild.id);
     }
   }
 
   // Check conditions
-  return guildCount > 5 && totalRoles > 15;
+  return {
+    guildCount,
+    totalRoles,
+    totalAdminOwner,
+  };
 }
 
-export class GuildMemberProvider implements Provider {
+const membershipCountCache = new Cache();
+class GuildProvider {
+  protected async checkMemberShipStats(address: string): Promise<GuildStats> {
+    const memberships = await getGuildMemberships(address);
+    return await checkGuildStats(memberships);
+    // return membershipCountCache.get(address, () => checkGuildStats(memberships));
+  }
+}
+
+export class GuildMemberProvider extends GuildProvider implements Provider {
   type = "GuildMember";
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
       const address = await getAddress(payload);
 
-      const memberships = await getGuildMemberships(address);
-
-      const membershipCount = checkMemberShipCount(memberships);
+      const membershipStats = await this.checkMemberShipStats(address);
 
       return {
-        valid: await membershipCount,
+        valid: membershipStats.guildCount > 5 && membershipStats.totalRoles > 15,
         record: {
           address,
         },
@@ -98,16 +127,17 @@ export const checkGuildOwner = (memberships: GuildMembership[]): boolean => {
   return memberships.some((membership) => membership.isOwner || membership.isAdmin);
 };
 
-export class GuildAdminProvider implements Provider {
+export class GuildAdminProvider extends GuildProvider implements Provider {
   type = "GuildAdmin";
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
       const address = await getAddress(payload);
 
-      const memberships = await getGuildMemberships(address);
+      const membershipStats = await this.checkMemberShipStats(address);
+
       return {
-        valid: checkGuildOwner(memberships),
+        valid: membershipStats.totalAdminOwner > 0,
         record: {
           address,
         },
