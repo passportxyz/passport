@@ -213,7 +213,7 @@ export default function Dashboard() {
   const subheader = useMemo(
     () => (
       <PageWidthGrid nested={true} className="my-4">
-        <div className="col-span-2 flex items-center justify-items-center self-center lg:col-span-4">
+        <div className="col-span-3 flex items-center justify-items-center self-center lg:col-span-4">
           <div className="flex text-2xl">
             My {filterName && `${filterName} `}Stamps
             {filterName && (
@@ -230,7 +230,7 @@ export default function Dashboard() {
             </Tooltip>
           </div>
         </div>
-        <div className="col-span-2 col-end-[-1] flex justify-self-end">
+        <div className="col-start-[-3] col-end-[-1] flex justify-self-end">
           {isLiveAlloScoreEnabled && (
             <div className={"flex min-w-fit items-center"}>
               <div className={`pr-2 ${passportSubmissionState === "APP_REQUEST_PENDING" ? "visible" : "invisible"}`}>
