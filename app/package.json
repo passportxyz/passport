@@ -88,5 +88,9 @@
     "csstype": "3.0.10",
     "**/@types/react": "17.0.2",
     "leveldown": "6.1.1"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.7",
+    "utf-8-validate": "^6.0.3"
   }
 }

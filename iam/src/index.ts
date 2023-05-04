@@ -368,7 +368,6 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
             provider: credential.credentialSubject.provider,
             stampHash: credential.credentialSubject.hash,
             expirationDate: credential.expirationDate,
-            // TODO is this the right data and format?
             encodedData,
           };
         });
