@@ -228,7 +228,7 @@ export default function Dashboard() {
         </div>
 
         {isLiveAlloScoreEnabled ? (
-          <div className="col-span-1 col-end-[-2] flex min-w-fit items-center justify-self-end">
+          <div className="col-span-1 col-end-[-3] flex min-w-fit items-center justify-self-end">
             <div className={`pr-2 ${passportSubmissionState === "APP_REQUEST_PENDING" ? "visible" : "invisible"}`}>
               <Spinner
                 className="my-[2px]"
@@ -252,6 +252,16 @@ export default function Dashboard() {
             </div>
           </div>
         ) : null}
+
+        <div className="col-span-1 col-end-[-2] justify-self-end">
+          <button
+            data-testid="button-passport-json-mobile"
+            className="rounded-md border-2 border-gray-300 py-2 px-4"
+            onClick={onOpen}
+          >
+            {`⛓`}
+          </button>
+        </div>
 
         <div className="col-span-1 col-end-[-1] justify-self-end">
           {passport ? (
