@@ -36,6 +36,7 @@
     "@web3-onboard/walletlink": "^2.0.4",
     "broadcast-channel": "^4.11.0",
     "did-session": "^1.0.0",
+    "ethers": "^6.3.0",
     "framer-motion": "^6.3.0",
     "next": "latest",
     "node-fetch": "^3.2.4",
@@ -87,5 +88,9 @@
     "csstype": "3.0.10",
     "**/@types/react": "17.0.2",
     "leveldown": "6.1.1"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.7",
+    "utf-8-validate": "^6.0.3"
   }
 }
