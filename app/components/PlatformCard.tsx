@@ -72,10 +72,7 @@ export const PlatformCard = ({
   const hidePlatform = stampFilters && !Object.keys(stampFilters).includes(platform.platform);
   if (hidePlatform) return <></>;
 
-  // Hides Coinbase stamp if feature flag is off
-  if (process.env.NEXT_PUBLIC_FF_COINBASE_STAMP === "off" && platform.platform === "Coinbase") return <></>;
-
-  // Hide Guild Stamp
+  // Feature Flag Guild Stamp
   if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP !== "on" && platform.platform === "GuildXYZ") return <></>;
 
   // returns a single Platform card
