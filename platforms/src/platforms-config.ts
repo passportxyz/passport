@@ -175,4 +175,12 @@ export const PLATFORMS: PlatformSpec[] = [
     description: "Connect your existing Coinbase account to verify.",
     connectMessage: "Connect Account",
   },
+  {
+    icon: "./assets/guildXYZStampIcon.svg",
+    platform: "GuildXYZ",
+    name: "Guild Membership and Roles",
+    description: "Connect your Guild XYZ account to verify your memberships.",
+    connectMessage: "Verify Guilds",
+    isEVM: true,
+  },
 ];

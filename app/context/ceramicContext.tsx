@@ -36,6 +36,7 @@ import {
   Google,
   Brightid,
   Coinbase,
+  GuildXYZ,
 } from "@gitcoin/passport-platforms";
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -177,6 +178,10 @@ platforms.set("Coinbase", {
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK,
   }),
   platFormGroupSpec: Coinbase.CoinbaseProviderConfig,
+});
+platforms.set("GuildXYZ", {
+  platform: new GuildXYZ.GuildXYZPlatform(),
+  platFormGroupSpec: GuildXYZ.GuildXYZProviderConfig,
 });
 
 export enum IsLoadingPassportState {
@@ -449,6 +454,18 @@ const startingAllProvidersState: AllProvidersState = {
   },
   Coinbase: {
     providerSpec: getProviderSpec("Coinbase", "Coinbase"),
+    stamp: undefined,
+  },
+  GuildMember: {
+    providerSpec: getProviderSpec("GuildXYZ", "GuildMember"),
+    stamp: undefined,
+  },
+  GuildAdmin: {
+    providerSpec: getProviderSpec("GuildXYZ", "GuildAdmin"),
+    stamp: undefined,
+  },
+  GuildPassportMember: {
+    providerSpec: getProviderSpec("GuildXYZ", "GuildPassportMember"),
     stamp: undefined,
   },
 };

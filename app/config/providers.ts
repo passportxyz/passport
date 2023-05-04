@@ -294,4 +294,20 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Encrypted", name: "Coinbase" }],
     },
   ],
+  GuildXYZ: [
+    {
+      platformGroup: "Account Name",
+      providers: [
+        {
+          title: "Member of more than 5 guilds and > 15 roles across those guilds (guilds over 250 members)",
+          name: "GuildMember",
+        },
+        {
+          title: "Owner (Guild Master) or Administrator (Guild Admin) of one or more guilds (over 500 members)",
+          name: "GuildAdmin",
+        },
+        { title: "Member with 1 or more roles in Passport Guild", name: "GuildPassportMember" },
+      ],
+    },
+  ],
 };
