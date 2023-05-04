@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useRouter } from "next/router";
 
 // --Components
@@ -35,9 +35,11 @@ import { EthereumAuthProvider } from "@self.id/web";
 import { RefreshStampModal } from "../components/RefreshStampModal";
 import { ExpiredStampModal } from "../components/ExpiredStampModal";
 import ProcessingPopup from "../components/ProcessingPopup";
+import SyncToChainButton from "../components/SyncToChainButton";
 import { getFilterName } from "../config/filters";
 
 const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
+const isOnChainSyncEnabled = process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on";
 
 export default function Dashboard() {
   const { passport, isLoadingPassport, passportHasCacaoError, cancelCeramicConnection, expiredProviders } =
@@ -54,7 +56,7 @@ export default function Dashboard() {
 
   const [refreshModal, setRefreshModal] = useState(false);
   const [expiredStampModal, setExpiredStampModal] = useState(false);
-  const { address, dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
+  const { dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
 
   // stamp filter
   const router = useRouter();
@@ -228,9 +230,12 @@ export default function Dashboard() {
             </Tooltip>
           </div>
         </div>
-
-        {isLiveAlloScoreEnabled ? (
-          <div className="col-span-1 col-end-[-3] flex min-w-fit items-center justify-self-end">
+        {isLiveAlloScoreEnabled && (
+          <div
+            className={`col-span-1 col-end-[-${
+              isOnChainSyncEnabled ? "3" : "2"
+            }] flex min-w-fit items-center justify-self-end`}
+          >
             <div className={`pr-2 ${passportSubmissionState === "APP_REQUEST_PENDING" ? "visible" : "invisible"}`}>
               <Spinner
                 className="my-[2px]"
@@ -253,17 +258,13 @@ export default function Dashboard() {
               <div className="flex whitespace-nowrap text-sm">{scoreDescription}</div>
             </div>
           </div>
-        ) : null}
+        )}
 
-        <div className="col-span-1 col-end-[-2] justify-self-end">
-          <button
-            data-testid="button-passport-json-mobile"
-            className="rounded-md border-2 border-gray-300 py-2 px-4"
-            onClick={onOpen}
-          >
-            {`⛓`}
-          </button>
-        </div>
+        {isOnChainSyncEnabled && (
+          <div className="col-span-1 col-end-[-2] justify-self-end">
+            <SyncToChainButton />
+          </div>
+        )}
 
         <div className="col-span-1 col-end-[-1] justify-self-end">
           {passport ? (
