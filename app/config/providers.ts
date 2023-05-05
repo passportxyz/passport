@@ -35,6 +35,15 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Encrypted", name: "Poh" }],
     },
   ],
+  PHI: [
+    {
+      platformGroup: "PHI Activity",
+      providers: [
+        { title: "Silver Rank", name: "PHIActivitySilver" },
+        { title: "Gold Rank", name: "PHIActivityGold" },
+      ],
+    },
+  ],
   Twitter: [
     {
       platformGroup: "Account Name",

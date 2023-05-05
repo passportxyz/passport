@@ -22,6 +22,7 @@ import {
   Gitcoin,
   Facebook,
   Poh,
+  PHI,
   GitPOAP,
   NFT,
   GnosisSafe,
@@ -104,6 +105,11 @@ platforms.set("Gitcoin", {
 platforms.set("Snapshot", {
   platform: new Snapshot.SnapshotPlatform(),
   platFormGroupSpec: Snapshot.SnapshotProviderConfig,
+});
+
+platforms.set("PHI", {
+  platform: new PHI.PohPlatform(),
+  platFormGroupSpec: PHI.PHIProviderConfig,
 });
 
 platforms.set("Poh", {
@@ -210,6 +216,14 @@ const startingAllProvidersState: AllProvidersState = {
   },
   Poh: {
     providerSpec: getProviderSpec("Poh", "Poh"),
+    stamp: undefined,
+  },
+  PHIActivitySilver: {
+    providerSpec: getProviderSpec("PHI", "PHIActivitySilver"),
+    stamp: undefined,
+  },
+  PHIActivityGold: {
+    providerSpec: getProviderSpec("PHI", "PHIActivityGold"),
     stamp: undefined,
   },
   Twitter: {

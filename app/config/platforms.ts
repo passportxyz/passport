@@ -119,6 +119,14 @@ export const PLATFORMS: PlatformSpec[] = [
     isEVM: true,
   },
   {
+    icon: "./assets/phiLogoIcon.svg",
+    platform: "PHI",
+    name: "PHI",
+    description: "Connect your wallet to verify your phi activity.",
+    connectMessage: "Verify Account",
+    isEVM: true,
+  },
+  {
     icon: "./assets/ethereumStampIcon.svg",
     platform: "ETH",
     name: "ETH",
