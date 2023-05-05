@@ -11,18 +11,26 @@ export const GuildXYZPlatformDetails: PlatformSpec = {
 
 export const GuildXYZProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Guild Membership and Roles",
+    platformGroup: "Guild Member",
     providers: [
       {
         title: "Member of more than 5 guilds and more than 15 roles*",
         name: "GuildMember",
       },
+    ],
+  },
+  {
+    platformGroup: "Guild Admin",
+    providers: [
       {
         title: "Owner or Administrator of one or more guilds*",
         name: "GuildAdmin",
       },
-      { title: "Member with 1 or more roles in Gitcoin Passport Guild", name: "GuildPassportMember" },
     ],
+  },
+  {
+    platformGroup: "Guild Passport Member",
+    providers: [{ title: "Member with 1 or more roles in Gitcoin Passport Guild", name: "GuildPassportMember" }],
   },
 ];
 
