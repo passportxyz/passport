@@ -24,6 +24,7 @@ const {
   Gitcoin,
   Facebook,
   Poh,
+  PHI,
   GitPOAP,
   NFT,
   GnosisSafe,
@@ -110,6 +111,11 @@ platforms.set("Gitcoin", {
 platforms.set("Snapshot", {
   platform: new Snapshot.SnapshotPlatform(),
   platFormGroupSpec: Snapshot.ProviderConfig,
+});
+
+platforms.set("PHI", {
+  platform: new PHI.PohPlatform(),
+  platFormGroupSpec: PHI.PHIProviderConfig,
 });
 
 platforms.set("Poh", {

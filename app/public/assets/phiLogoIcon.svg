@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1280px" height="1280px" viewBox="0 0 1280 1280" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>phi logo bold 8080ff-white@1x</title>
+    <g id="phi-logo-bold-8080ff-white" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="logo" transform="translate(184.000000, 40.000000)" fill-rule="nonzero">
+            <polygon id="logo-path" fill="#8080FF" points="744 -4.07220992e-15 912 84 912 252 792 312 912 372 912 684 336 972 336 1116 168 1200 4.62642486e-16 1116 0 660 288 516 288 372 456 288 600 360 696 312 576 252 576 84"></polygon>
+            <polygon id="logo-path" fill="#FFFFFF" points="432 636 192 756 192 1140 288 1092 288 828 336 804 335.813529 924.093232 432 876"></polygon>
+            <polygon id="logo-path" fill="#FFFFFF" points="576 420 480 468 480 852 576 804 576 684 624 660 624 780 720 732 720 492 576 564"></polygon>
+            <polygon id="logo-path" fill="#FFFFFF" points="864 420 768 468 768 708 864 660"></polygon>
+            <polygon id="logo-path" fill="#FFFFFF" points="864 132 768 180 768 276 864 228"></polygon>
+        </g>
+    </g>
+</svg>
