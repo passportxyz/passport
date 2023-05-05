@@ -29,17 +29,6 @@ type GuildStats = {
   totalAdminOwner: number;
 };
 
-class Cache {
-  private cache: Map<string, Promise<GuildStats>> = new Map();
-
-  async get(key: string, fetchFunction: () => Promise<GuildStats>): Promise<GuildStats> {
-    if (!this.cache.has(key)) {
-      this.cache.set(key, fetchFunction());
-    }
-    return this.cache.get(key);
-  }
-}
-
 const guildBaseEndpoint = "https://api.guild.xyz/v1/";
 
 export async function getGuildMemberships(address: string): Promise<GuildMembership[]> {
@@ -90,12 +79,10 @@ export async function checkGuildStats(memberships: GuildMembership[]): Promise<G
   };
 }
 
-const membershipCountCache = new Cache();
 class GuildProvider {
   protected async checkMemberShipStats(address: string): Promise<GuildStats> {
     const memberships = await getGuildMemberships(address);
     return await checkGuildStats(memberships);
-    // return membershipCountCache.get(address, () => checkGuildStats(memberships));
   }
 }
 
