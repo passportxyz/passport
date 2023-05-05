@@ -296,18 +296,31 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
   ],
   GuildXYZ: [
     {
-      platformGroup: "Account Name",
+      platformGroup: "Guild Member",
       providers: [
         {
-          title: "Member of more than 5 guilds and > 15 roles across those guilds (guilds over 250 members)",
+          title: "Member of more than 5 guilds and more than 15 roles*",
           name: "GuildMember",
         },
         {
-          title: "Owner (Guild Master) or Administrator (Guild Admin) of one or more guilds (over 500 members)",
+          title: "Owner or Administrator of one or more guilds*",
           name: "GuildAdmin",
         },
-        { title: "Member with 1 or more roles in Passport Guild", name: "GuildPassportMember" },
+        { title: "Member with 1 or more roles in Gitcoin Passport Guild", name: "GuildPassportMember" },
       ],
+    },
+    {
+      platformGroup: "Guild Admin",
+      providers: [
+        {
+          title: "Owner or Administrator of one or more guilds*",
+          name: "GuildAdmin",
+        },
+      ],
+    },
+    {
+      platformGroup: "Guild Passport Member",
+      providers: [{ title: "Member with 1 or more roles in Gitcoin Passport Guild", name: "GuildPassportMember" }],
     },
   ],
 };
