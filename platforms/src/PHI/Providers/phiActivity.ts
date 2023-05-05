@@ -18,7 +18,7 @@ interface Record {
 }
 
 interface LogClaimObject {
-  logClaimObject: Record[];
+  logClaimObjects: Record[];
 }
 
 interface Data {
@@ -72,9 +72,8 @@ export class PHIActivitySilverProvider implements Provider {
           }
           `,
       });
-
       const r = result as Result;
-      const records = r?.data?.data?.logClaimObject || [];
+      const records = r?.data?.data?.logClaimObjects || [];
 
       if (records.length > 0) {
         hasClaimed = true;
@@ -138,7 +137,7 @@ export class PHIActivityGoldProvider implements Provider {
       });
 
       const r = result as Result;
-      const records = r?.data?.data?.logClaimObject || [];
+      const records = r?.data?.data?.logClaimObjects || [];
 
       if (records.length > 0) {
         hasClaimed = true;
