@@ -8,6 +8,7 @@ import {
   GuildAdminProvider,
   GuildPassportMemberProvider,
   PASSPORT_GUILD_ID,
+  checkGuildStats,
 } from "../Providers/guildXYZ";
 
 jest.mock("axios");
@@ -60,6 +61,14 @@ const mockAllGuilds = [
     imageUrl: "https://example.com/guildC.png",
     urlName: "guild-c",
     memberCount: 350,
+  },
+  {
+    id: 4,
+    name: "Guild D",
+    roles: ["Role 6"],
+    imageUrl: "https://example.com/guildC.png",
+    urlName: "guild-c",
+    memberCount: 100,
   },
 ];
 
@@ -252,5 +261,103 @@ describe("Guild Providers", () => {
         error: ["Error verifying Guild Passport Membership"],
       });
     });
+  });
+});
+
+describe("checkGuildStats()", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("computes guild stats correctly", async () => {
+    const memberships = [
+      {
+        guildId: 1,
+        roleids: [3, 4, 5, 6],
+        isAdmin: false,
+        isOwner: false,
+      },
+      {
+        guildId: 2,
+        roleids: [3, 4, 5],
+        isAdmin: true,
+        isOwner: false,
+      },
+      {
+        guildId: 3,
+        roleids: [3, 4, 5],
+        isAdmin: false,
+        isOwner: true,
+      },
+    ];
+
+    mockedAxios.get.mockResolvedValue({ data: mockAllGuilds });
+
+    const stats = await checkGuildStats(memberships);
+
+    const expectedResult = {
+      guildCount: 3,
+      totalRoles: 10,
+      totalAdminOwner: 2,
+    };
+
+    expect(stats).toEqual(expectedResult);
+    expect(mockedAxios.get).toHaveBeenCalledWith("https://api.guild.xyz/v1/guild");
+  });
+
+  it("computes guild stats with no qualifying guilds", async () => {
+    const memberships = [
+      {
+        guildId: 4,
+        roleids: [3, 4, 5, 6],
+        isAdmin: false,
+        isOwner: false,
+      },
+    ];
+
+    mockedAxios.get.mockResolvedValue({ data: mockAllGuilds });
+
+    const stats = await checkGuildStats(memberships);
+
+    const expectedResult = {
+      guildCount: 0,
+      totalRoles: 0,
+      totalAdminOwner: 0,
+    };
+
+    expect(stats).toEqual(expectedResult);
+    expect(mockedAxios.get).toHaveBeenCalledWith("https://api.guild.xyz/v1/guild");
+  });
+
+  it("handles errors correctly", async () => {
+    const memberships = [
+      {
+        guildId: 1,
+        roleids: [3, 4, 5, 6],
+        isAdmin: false,
+        isOwner: false,
+      },
+      {
+        guildId: 2,
+        roleids: [3, 4, 5],
+        isAdmin: true,
+        isOwner: false,
+      },
+      {
+        guildId: 3,
+        roleids: [3, 4, 5],
+        isAdmin: false,
+        isOwner: true,
+      },
+    ];
+
+    mockedAxios.get.mockRejectedValueOnce(new Error("Request failed"));
+
+    try {
+      await checkGuildStats(memberships);
+    } catch (error) {
+      expect(error.message).toBe("Request failed");
+    }
+    expect(mockedAxios.get).toHaveBeenCalledWith("https://api.guild.xyz/v1/guild");
   });
 });
