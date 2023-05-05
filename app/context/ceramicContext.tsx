@@ -108,7 +108,7 @@ platforms.set("Snapshot", {
 });
 
 platforms.set("PHI", {
-  platform: new PHI.PohPlatform(),
+  platform: new PHI.PHIPlatform(),
   platFormGroupSpec: PHI.PHIProviderConfig,
 });
 

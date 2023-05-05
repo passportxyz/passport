@@ -12,6 +12,8 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const MOCK_ADDRESS = "0x685c99E8780e5a7f158617cC2E9acc0e45a66120";
 const MOCK_ADDRESS_LOWER = MOCK_ADDRESS.toLocaleLowerCase();
+const MOCK_ADDRESS2 = "0xe35E5f8B912C25cDb6B00B347cb856467e4112A3";
+const MOCK_ADDRESS2_LOWER = MOCK_ADDRESS2.toLocaleLowerCase();
 
 const validPhiQuestSilverResponse = {
   data: {
@@ -162,7 +164,7 @@ describe("Attempt Silver verification", function () {
     }
   });
 
-  it("should return false if user does not have any PHI", async () => {
+  it("should return false if user does not have any PHI Siliver Object", async () => {
     // We'll mock responses on each of the configured networks, and check the expected calls
     for (let i = 0; i < phiSubgraphs.length; i++) {
       const subgraphUrl = phiSubgraphs[i];
@@ -170,7 +172,7 @@ describe("Attempt Silver verification", function () {
 
       mockedAxios.post.mockImplementation(async (url, data) => {
         const query: string = (data as RequestData).query;
-        if (url === subgraphUrl && query.includes(MOCK_ADDRESS_LOWER)) {
+        if (url === subgraphUrl && query.includes(MOCK_ADDRESS2_LOWER)) {
           return emptyPhiQuestResponse;
         }
       });
@@ -261,7 +263,7 @@ describe("Attempt Gold verification", function () {
     }
   });
 
-  it("should return false if user does not have any PHI", async () => {
+  it("should return false if user does not have any PHI Gold Object", async () => {
     // We'll mock responses on each of the configured networks, and check the expected calls
     for (let i = 0; i < phiSubgraphs.length; i++) {
       const subgraphUrl = phiSubgraphs[i];
@@ -269,7 +271,7 @@ describe("Attempt Gold verification", function () {
 
       mockedAxios.post.mockImplementation(async (url, data) => {
         const query: string = (data as RequestData).query;
-        if (url === subgraphUrl && query.includes(MOCK_ADDRESS_LOWER)) {
+        if (url === subgraphUrl && query.includes(MOCK_ADDRESS2_LOWER)) {
           return emptyPhiQuestResponse;
         }
       });
