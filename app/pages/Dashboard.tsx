@@ -231,7 +231,7 @@ export default function Dashboard() {
             </Tooltip>
           </div>
         </div>
-        <div className={`col-start-[-${isOnChainSyncEnabled ? 3 : 2}] col-end-[-1] flex justify-self-end`}>
+        <div className={`col-span-1 col-end-[-1] flex justify-self-end`}>
           {isLiveAlloScoreEnabled && (
             <div className={"flex min-w-fit items-center"}>
               <div className={`pr-2 ${passportSubmissionState === "APP_REQUEST_PENDING" ? "visible" : "invisible"}`}>
@@ -258,11 +258,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {isOnChainSyncEnabled && wallet?.chains[0].id === sepoliaChainId && (
-            <div className="mx-4">
-              <SyncToChainButton />
-            </div>
-          )}
+          {isOnChainSyncEnabled && wallet?.chains[0].id === sepoliaChainId && <SyncToChainButton />}
           {passport ? (
             <button
               data-testid="button-passport-json-mobile"
