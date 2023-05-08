@@ -68,7 +68,7 @@ export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) =
           </p>
           <a
             className="mb-1 text-center text-sm text-blue-600 underline"
-            href="https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/what-are-stamps"
+            href="https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/common-questions/why-have-my-stamps-expired"
             target="_blank"
             rel="noopener noreferrer"
           >
