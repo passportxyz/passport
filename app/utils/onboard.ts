@@ -24,6 +24,15 @@ const chains = [
   },
 ];
 
+if (process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on") {
+  chains.push({
+    id: "0xaa36a7",
+    token: "ETH",
+    label: "Sepolia",
+    rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SEPOLIA_RPC_URL as string,
+  });
+}
+
 if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
   chains.push({
     id: "0x89",

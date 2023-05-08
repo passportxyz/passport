@@ -56,11 +56,7 @@ export const SideBarContent = ({
         borderRadius: "6px",
       }}
     >
-      <DrawerCloseButton
-        disabled={isLoading}
-        className={`z-10 bg-muted`}
-        _hover={{ backgroundColor: "var(--color-accent)" }}
-      />
+      <DrawerCloseButton disabled={isLoading} className={`z-10 text-color-1`} />
       {currentPlatform && currentProviders ? (
         <div className="overflow-auto">
           <DrawerHeader style={{ fontWeight: "inherit" }}>
@@ -79,7 +75,7 @@ export const SideBarContent = ({
                 <span
                   data-testid="select-all"
                   className={`ml-auto py-2 text-sm ${
-                    !allSelected ? `cursor-pointer text-accent` : `cursor-default text-muted`
+                    !allSelected ? `cursor-pointer text-accent-3` : `cursor-default text-muted`
                   } `}
                   onClick={(e) => {
                     // set the selected items by concating or filtering by providerId

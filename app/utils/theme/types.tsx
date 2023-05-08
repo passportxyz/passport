@@ -14,5 +14,6 @@ export type Theme = {
   fonts: {
     body: string;
     heading: string;
+    cta: string;
   };
 };

@@ -17,9 +17,10 @@
     "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx ."
   },
   "dependencies": {
+    "@ethereum-attestation-service/eas-sdk": "^0.28.2",
     "@gitcoin/passport-identity": "^1.0.0",
-    "@gitcoin/passport-types": "^1.0.0",
     "@gitcoin/passport-platforms": "^1.0.0",
+    "@gitcoin/passport-types": "^1.0.0",
     "@spruceid/didkit-wasm-node": "^0.2.1",
     "axios": "^0.27.2",
     "brightid_sdk": "^1.0.1",

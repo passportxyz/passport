@@ -272,6 +272,18 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "COINBASE_CALLBACK",
             valueFrom: `${IAM_SERVER_SSM_ARN}:COINBASE_CALLBACK::`,
           },
+          {
+            name: "ATTESTATION_SIGNER_PRIVATE_KEY",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:ATTESTATION_SIGNER_PRIVATE_KEY::`,
+          },
+          {
+            name: "GITCOIN_ATTESTER_CONTRACT_ADDRESS",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:GITCOIN_ATTESTER_CONTRACT_ADDRESS::`,
+          },
+          {
+            name: "GITCOIN_ATTESTER_CHAIN_ID",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:GITCOIN_ATTESTER_CHAIN_ID::`,
+          },
         ],
       },
     },

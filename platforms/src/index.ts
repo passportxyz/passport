@@ -26,6 +26,7 @@ import * as Google from "./Google";
 import * as ClearText from "./ClearText";
 import * as Brightid from "./Brightid";
 import * as Coinbase from "./Coinbase";
+import * as GuildXYZ from "./GuildXYZ";
 
 export {
   Brightid,
@@ -50,6 +51,7 @@ export {
   Ens,
   Twitter,
   Coinbase,
+  GuildXYZ,
 };
 
 // Initiate providers - new Providers should be registered in this array...
@@ -222,6 +224,9 @@ export const providers = new Providers([
   new ZkSync.ZkSyncProvider(),
   new GnosisSafe.GnosisSafeProvider(),
   new Coinbase.CoinbaseProvider(),
+  new GuildXYZ.GuildAdminProvider(),
+  new GuildXYZ.GuildMemberProvider(),
+  new GuildXYZ.GuildPassportMemberProvider(),
 ]);
 
 export { Platform, AppContext, ProviderPayload, PlatformSpec } from "./types";

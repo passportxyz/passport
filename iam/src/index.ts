@@ -12,7 +12,8 @@ import { router as procedureRouter } from "@gitcoin/passport-platforms/dist/comm
 import cors from "cors";
 
 // ---- Web3 packages
-import { utils } from "ethers";
+import { utils, ethers } from "ethers";
+import { SchemaEncoder, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 
 // ---- Types
 import { Response } from "express";
@@ -25,6 +26,7 @@ import {
   ProviderContext,
   CheckRequestBody,
   CheckResponseBody,
+  VerifiableCredential,
 } from "@gitcoin/passport-types";
 
 import { getChallenge } from "./utils/challenge";
@@ -53,10 +55,37 @@ export const config: {
   issuer,
 };
 
+const attestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
+const attestationSchemaEncoder = new SchemaEncoder("string provider, string hash");
+
+const ATTESTER_DOMAIN = {
+  name: "Attester",
+  version: "1",
+  chainId: process.env.GITCOIN_ATTESTER_CHAIN_ID,
+  verifyingContract: process.env.GITCOIN_ATTESTER_CONTRACT_ADDRESS,
+};
+
+const ATTESTER_TYPES = {
+  Stamp: [
+    { name: "provider", type: "string" },
+    { name: "stampHash", type: "string" },
+    { name: "expirationDate", type: "string" },
+    { name: "encodedData", type: "bytes" },
+  ],
+  Passport: [
+    { name: "stamps", type: "Stamp[]" },
+    { name: "recipient", type: "address" },
+    { name: "expirationTime", type: "uint64" },
+    { name: "revocable", type: "bool" },
+    { name: "refUID", type: "bytes32" },
+    { name: "value", type: "uint256" },
+  ],
+};
+
 // create the app and run on port
 export const app = express();
 
-// parse JSON post bodys
+// parse JSON post bodies
 app.use(express.json());
 
 // set cors to accept calls from anywhere
@@ -284,7 +313,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 
         // type is required because we need it to select the correct Identity Provider
         if (isSigner && isType && payload && payload.type) {
-          // if multiple types are being requested - produce and return multiple vc's
+          // if multiple types are being requested - produce and return multiple vcs
           if (payload.types && payload.types.length) {
             // if payload.types then we want to iterate and return a VC for each type
             const responses: CredentialResponseBody[] = [];
@@ -318,6 +347,106 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
     })
     .catch(() => {
       return void errorRes(res, "Unable to verify payload", 500);
+    });
+});
+
+export type EasStamp = {
+  provider: string;
+  stampHash: string;
+  expirationDate: string;
+  encodedData: string;
+};
+
+type EasPassport = {
+  stamps: EasStamp[];
+  recipient: string;
+  expirationTime: number;
+  revocable: boolean;
+  refUID: string;
+  value: number;
+};
+
+type EasPayload = {
+  passport: EasPassport;
+  signature: {
+    v: number;
+    r: string;
+    s: string;
+  };
+  invalidCredentials: VerifiableCredential[];
+};
+
+// Expose entry point for getting eas payload for moving stamps on-chain
+// This function will receive an array of stamps, validate them and return an array of eas payloads
+app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
+  const credentials: VerifiableCredential[] = req.body as VerifiableCredential[];
+  if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
+
+  const recipient = credentials[0].credentialSubject.id.split(":")[4];
+
+  if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
+    return void errorRes(res, "Invalid recipient", 400);
+
+  Promise.all(
+    credentials.map(async (credential) => {
+      return {
+        credential,
+        verified: issuer === credential.issuer && (await verifyCredential(DIDKit, credential)),
+      };
+    })
+  )
+    .then((credentialVerifications) => {
+      const invalidCredentials = credentialVerifications
+        .filter(({ verified }) => !verified)
+        .map(({ credential }) => credential);
+
+      const stamps: EasStamp[] = credentialVerifications
+        .filter(({ verified }) => verified)
+        .map(({ credential }) => {
+          const encodedData = attestationSchemaEncoder.encodeData([
+            { name: "provider", value: credential.credentialSubject.provider, type: "string" },
+            { name: "hash", value: credential.credentialSubject.hash, type: "string" },
+          ]);
+          return {
+            provider: credential.credentialSubject.provider,
+            stampHash: credential.credentialSubject.hash,
+            expirationDate: credential.expirationDate,
+            encodedData,
+          };
+        });
+
+      if (!stamps.length) return void errorRes(res, "No verifiable stamps provided", 400);
+
+      const easPassport: EasPassport = {
+        stamps,
+        recipient,
+        expirationTime: NO_EXPIRATION,
+        revocable: true,
+        refUID: ZERO_BYTES32,
+        value: 0,
+      };
+
+      attestationSignerWallet
+        ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, easPassport)
+        .then((signature) => {
+          const { v, r, s } = utils.splitSignature(signature);
+
+          const payload: EasPayload = {
+            passport: easPassport,
+            signature: { v, r, s },
+            invalidCredentials,
+          };
+
+          return void res.json(payload);
+        })
+        .catch((error) => {
+          // TODO dont return real error
+          return void errorRes(res, String(error), 500);
+        });
+    })
+    .catch((error) => {
+      // TODO dont return real error
+      return void errorRes(res, String(error), 500);
     });
 });
 

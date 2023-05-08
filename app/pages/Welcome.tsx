@@ -142,7 +142,7 @@ export default function Welcome() {
           <MinimalHeader className={`border-b border-accent-2`} />
         </div>
         <PageWidthGrid>
-          <div className="col-span-4 flex flex-col items-center text-center md:col-start-2 lg:col-start-3 xl:col-span-6 xl:col-start-4">
+          <div className="col-span-4 mb-36 flex flex-col items-center text-center md:col-start-2 md:mb-0 lg:col-start-3 xl:col-span-6 xl:col-start-4">
             {isLoadingPassport === IsLoadingPassportState.Idle ||
             isLoadingPassport === IsLoadingPassportState.FailedToConnect ? (
               passport && passport.stamps.length > 0 ? (

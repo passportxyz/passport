@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useRouter } from "next/router";
 
 // --Components
@@ -35,9 +35,11 @@ import { EthereumAuthProvider } from "@self.id/web";
 import { RefreshStampModal } from "../components/RefreshStampModal";
 import { ExpiredStampModal } from "../components/ExpiredStampModal";
 import ProcessingPopup from "../components/ProcessingPopup";
+import SyncToChainButton from "../components/SyncToChainButton";
 import { getFilterName } from "../config/filters";
 
 const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
+const isOnChainSyncEnabled = process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on";
 
 export default function Dashboard() {
   const { passport, isLoadingPassport, passportHasCacaoError, cancelCeramicConnection, expiredProviders } =
@@ -54,7 +56,7 @@ export default function Dashboard() {
 
   const [refreshModal, setRefreshModal] = useState(false);
   const [expiredStampModal, setExpiredStampModal] = useState(false);
-  const { address, dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
+  const { dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
 
   // stamp filter
   const router = useRouter();
@@ -168,7 +170,9 @@ export default function Dashboard() {
   const modals = (
     <>
       {viewerConnection.status === "connecting" && (
-        <ProcessingPopup data-testid="selfId-connection-alert">Waiting for wallet signature...</ProcessingPopup>
+        <ProcessingPopup data-testid="selfId-connection-alert">
+          Please user your wallet to sign the message prompt and complete the sign-in process.
+        </ProcessingPopup>
       )}
 
       {isLoadingPassport === IsLoadingPassportState.Loading && (
@@ -209,7 +213,7 @@ export default function Dashboard() {
   const subheader = useMemo(
     () => (
       <PageWidthGrid nested={true} className="my-4">
-        <div className="col-span-2 flex items-center justify-items-center self-center lg:col-span-4">
+        <div className="col-span-3 flex items-center justify-items-center self-center lg:col-span-4">
           <div className="flex text-2xl">
             My {filterName && `${filterName} `}Stamps
             {filterName && (
@@ -226,38 +230,42 @@ export default function Dashboard() {
             </Tooltip>
           </div>
         </div>
-
-        {isLiveAlloScoreEnabled ? (
-          <div className="col-span-1 col-end-[-2] flex min-w-fit items-center justify-self-end">
-            <div className={`pr-2 ${passportSubmissionState === "APP_REQUEST_PENDING" ? "visible" : "invisible"}`}>
-              <Spinner
-                className="my-[2px]"
-                thickness="2px"
-                speed="0.65s"
-                emptyColor="darkGray"
-                color="gray"
-                size="md"
-              />
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="flex text-2xl">
-                {/* TODO add color to theme */}
-                <span className={`${score == 1 ? "text-accent-3" : "text-[#FFE28A]"}`}>{rawScore.toFixed(2)}</span>
-                <Tooltip>
-                  Your Unique Humanity Score is based out of 100 and measures how unique you are. The current passing
-                  score threshold is 15.
-                </Tooltip>
+        <div className={`col-start-[-${isOnChainSyncEnabled ? 3 : 2}] col-end-[-1] flex justify-self-end`}>
+          {isLiveAlloScoreEnabled && (
+            <div className={"flex min-w-fit items-center"}>
+              <div className={`pr-2 ${passportSubmissionState === "APP_REQUEST_PENDING" ? "visible" : "invisible"}`}>
+                <Spinner
+                  className="my-[2px]"
+                  thickness="2px"
+                  speed="0.65s"
+                  emptyColor="darkGray"
+                  color="gray"
+                  size="md"
+                />
               </div>
-              <div className="flex whitespace-nowrap text-sm">{scoreDescription}</div>
+              <div className="flex flex-col items-center">
+                <div className="flex text-2xl">
+                  {/* TODO add color to theme */}
+                  <span className={`${score == 1 ? "text-accent-3" : "text-[#FFE28A]"}`}>{rawScore.toFixed(2)}</span>
+                  <Tooltip>
+                    Your Unique Humanity Score is based out of 100 and measures how unique you are. The current passing
+                    score threshold is 15.
+                  </Tooltip>
+                </div>
+                <div className="flex whitespace-nowrap text-sm">{scoreDescription}</div>
+              </div>
             </div>
-          </div>
-        ) : null}
+          )}
 
-        <div className="col-span-1 col-end-[-1] justify-self-end">
+          {isOnChainSyncEnabled && (
+            <div className="mx-4">
+              <SyncToChainButton />
+            </div>
+          )}
           {passport ? (
             <button
               data-testid="button-passport-json-mobile"
-              className="rounded-md border-2 border-gray-300 py-2 px-4"
+              className="h-10 w-10 rounded-md border border-muted"
               onClick={onOpen}
             >
               {`</>`}
@@ -265,7 +273,7 @@ export default function Dashboard() {
           ) : (
             <div
               data-testid="loading-spinner-passport"
-              className="flex flex-row items-center rounded-md border-2 border-gray-300 py-2 px-4"
+              className="flex flex-row items-center rounded-md border-2 border-muted py-2 px-4"
             >
               <Spinner
                 className="my-[2px]"

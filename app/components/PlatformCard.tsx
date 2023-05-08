@@ -72,8 +72,8 @@ export const PlatformCard = ({
   const hidePlatform = stampFilters && !Object.keys(stampFilters).includes(platform.platform);
   if (hidePlatform) return <></>;
 
-  // Hides Coinbase stamp if feature flag is off
-  if (process.env.NEXT_PUBLIC_FF_COINBASE_STAMP === "off" && platform.platform === "Coinbase") return <></>;
+  // Feature Flag Guild Stamp
+  if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP !== "on" && platform.platform === "GuildXYZ") return <></>;
 
   // returns a single Platform card
   return (
@@ -103,9 +103,9 @@ export const PlatformCard = ({
               </div>
             )}
         </div>
-        <div className="flex justify-center py-0 px-6 pb-6 md:block md:justify-start">
+        <div className="flex justify-center px-2 py-0 pb-6 md:block md:justify-start md:px-6">
           <h1 className="mb-0 text-lg md:mb-3">{platform.name}</h1>
-          <p className="pleading-relaxed hidden text-color-3 md:inline-block">{platform.description}</p>
+          <p className="pleading-relaxed hidden text-color-4 md:inline-block">{platform.description}</p>
         </div>
         <div className="mt-auto text-color-3">
           {selectedProviders[platform.platform].length > 0 ? (
