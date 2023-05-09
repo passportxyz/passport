@@ -15,6 +15,8 @@ const walletConnect = walletConnectModule();
 // Include ledger capabilities
 const ledger = ledgerModule();
 
+export const sepoliaChainId = "0xaa36a7";
+
 const chains = [
   {
     id: "0x1",
@@ -26,7 +28,7 @@ const chains = [
 
 if (process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on") {
   chains.push({
-    id: "0xaa36a7",
+    id: sepoliaChainId,
     token: "ETH",
     label: "Sepolia",
     rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SEPOLIA_RPC_URL as string,
