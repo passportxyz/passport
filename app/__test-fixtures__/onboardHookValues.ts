@@ -1,4 +1,5 @@
-import { Account, WalletState } from "@web3-onboard/core/dist/types";
+import { Account, ConnectedChain, WalletState } from "@web3-onboard/core/dist/types";
+import { sepoliaChainId } from "../utils/onboard";
 
 export const mockAddress = "0xmyAddress";
 export const mockAccount: Account = {
@@ -11,5 +12,11 @@ export const mockWallet: WalletState = {
   icon: "",
   provider: { on: jest.fn(), removeListener: jest.fn(), request: jest.fn() },
   accounts: [mockAccount],
-  chains: [],
+  chains: [
+    [
+      {
+        id: sepoliaChainId,
+      },
+    ] as unknown as ConnectedChain,
+  ],
 };

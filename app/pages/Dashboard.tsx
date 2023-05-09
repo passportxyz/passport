@@ -37,6 +37,7 @@ import { ExpiredStampModal } from "../components/ExpiredStampModal";
 import ProcessingPopup from "../components/ProcessingPopup";
 import SyncToChainButton from "../components/SyncToChainButton";
 import { getFilterName } from "../config/filters";
+import { sepoliaChainId } from "../utils/onboard";
 
 const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
 const isOnChainSyncEnabled = process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on";
@@ -257,7 +258,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {isOnChainSyncEnabled && (
+          {isOnChainSyncEnabled && wallet?.chains[0].id === sepoliaChainId && (
             <div className="mx-4">
               <SyncToChainButton />
             </div>

@@ -43,7 +43,7 @@ const SyncToChainButton = () => {
           const { v, r, s } = data.signature;
 
           const transaction = await gitcoinAttesterContract.addPassportWithSignature(
-            process.env.NEXT_PUBLIC_GITCOIN_VC_SCHEMA_ADDRESS as string,
+            process.env.NEXT_PUBLIC_GITCOIN_VC_SCHEMA_UUID as string,
             data.passport,
             v,
             r,
