@@ -13,8 +13,8 @@ export const PHIProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "PHI Activity",
     providers: [
-      { title: "Silver Rank", name: "PHIActivitySilver" },
-      { title: "Gold Rank", name: "PHIActivityGold" },
+      { title: "Active Rank Silver I ~ V (Earn 65,000 EXP ~ on Active Score)", name: "PHIActivitySilver" },
+      { title: "Active Rank Gold I ~ V (Earn 150,000 EXP ~ on Active Score)", name: "PHIActivityGold" },
     ],
   },
 ];
