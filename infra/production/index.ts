@@ -152,7 +152,8 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
     containers: {
       iam: {
         image: dockerGtcPassportIamImage,
-        memory: 1024,
+        memory: 4096,
+        cpu: 2000,
         portMappings: [httpsListener],
         links: [],
         secrets: [
@@ -290,10 +291,28 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
   },
 });
 
-const ecsTarget = new aws.appautoscaling.Target("autoscaling_target", {
+const ecsIamServiceAutoscalingTarget = new aws.appautoscaling.Target("autoscaling_target", {
   maxCapacity: 10,
   minCapacity: 1,
   resourceId: pulumi.interpolate`service/${cluster.cluster.name}/${service.service.name}`,
   scalableDimension: "ecs:service:DesiredCount",
   serviceNamespace: "ecs",
 });
+
+const ecsScorerServiceAutoscaling = new aws.appautoscaling.Policy(
+  "scorer-autoscaling-policy",
+  {
+    policyType: "TargetTrackingScaling",
+    resourceId: ecsIamServiceAutoscalingTarget.resourceId,
+    scalableDimension: ecsIamServiceAutoscalingTarget.scalableDimension,
+    serviceNamespace: ecsIamServiceAutoscalingTarget.serviceNamespace,
+    targetTrackingScalingPolicyConfiguration: {
+      predefinedMetricSpecification: {
+        predefinedMetricType: "ECSServiceAverageCPUUtilization",
+      },
+      targetValue: 70,
+      scaleInCooldown: 300,
+      scaleOutCooldown: 300,
+    },
+  }
+);
