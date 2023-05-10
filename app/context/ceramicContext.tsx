@@ -179,10 +179,12 @@ platforms.set("Coinbase", {
   }),
   platFormGroupSpec: Coinbase.CoinbaseProviderConfig,
 });
-platforms.set("GuildXYZ", {
-  platform: new GuildXYZ.GuildXYZPlatform(),
-  platFormGroupSpec: GuildXYZ.GuildXYZProviderConfig,
-});
+if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
+  platforms.set("GuildXYZ", {
+    platform: new GuildXYZ.GuildXYZPlatform(),
+    platFormGroupSpec: GuildXYZ.GuildXYZProviderConfig,
+  });
+}
 
 export enum IsLoadingPassportState {
   Idle,
