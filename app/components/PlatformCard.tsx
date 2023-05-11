@@ -1,10 +1,10 @@
 // --- React Methods
-import { useContext, useEffect } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 // --- Chakra UI Elements
 import { useDisclosure, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
-import { ShieldCheckIcon } from "@heroicons/react/20/solid";
+import { LinkIcon, ShieldCheckIcon } from "@heroicons/react/20/solid";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 // --- Types
@@ -14,12 +14,14 @@ import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
-import { pillLocalStorage } from "../context/userContext";
+import { pillLocalStorage, UserContext } from "../context/userContext";
 
 // --- Components
 import { JsonOutputModal } from "./JsonOutputModal";
 import { RemoveStampModal } from "./RemoveStampModal";
 import { getStampProviderFilters } from "../config/filters";
+import { graphql_fetch } from "../utils/helpers";
+import { ethers } from "ethers";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -46,6 +48,9 @@ export const PlatformCard = ({
   getUpdatedPlatforms,
   className,
 }: PlatformCardProps): JSX.Element => {
+  const [isOnChain, setIsOnChain] = useState(false);
+  const { wallet } = useContext(UserContext);
+
   // import all providers
   const { allProvidersState, passportHasCacaoError, handleDeleteStamps } = useContext(CeramicContext);
 
@@ -76,6 +81,58 @@ export const PlatformCard = ({
 
   // Feature Flag Guild Stamp
   if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP !== "on" && platform.platform === "GuildXYZ") return <></>;
+
+  // check on-chain status by checking if attestations exist for at least one provider of the stamp
+  const checkOnChainStatus = useCallback(async () => {
+    // get the attestions for given user
+    const res = await graphql_fetch(
+      `
+        query GetAttestations($recipient: StringFilter, $attester: StringFilter) {
+          attestations(where: {
+            recipient: $recipient,
+            attester: $attester
+          }) {
+            decodedDataJson
+            timeCreated
+          }
+        }
+      `,
+      {
+        recipient: { equals: ethers.getAddress(wallet?.accounts[0].address!) },
+        attester: { equals: process.env.NEXT_PUBLIC_GITCOIN_ATTESTER_CONTRACT_ADDRESS },
+      }
+    );
+
+    // sort the attestations by timeCreated in descending order
+    const sortedAttestations = res.data.attestations.sort((a: any, b: any) => b.timeCreated - a.timeCreated);
+
+    // find the latest timeCreated value
+    const latestTimeCreated = sortedAttestations[0]?.timeCreated;
+
+    // extract all providers with the latest timeCreated value
+    const latestProviders: string[] = [];
+    for (const attestation of sortedAttestations) {
+      const decodedData = JSON.parse(attestation.decodedDataJson);
+      const providerData = decodedData.find((data: any) => data.name === "provider");
+      if (providerData && attestation.timeCreated === latestTimeCreated) {
+        latestProviders.push(providerData.value.value);
+      }
+    }
+
+    // check if all selected providers are present in the latest bulk of providers
+    const isAllSelectedProvidersPresent = selectedProviders[platform.platform].every((provider) =>
+      latestProviders.includes(provider)
+    );
+
+    // set the on-chain status
+    setIsOnChain(isAllSelectedProvidersPresent);
+  }, [wallet?.accounts]);
+
+  useEffect(() => {
+    if (selectedProviders[platform.platform].length > 0) {
+      checkOnChainStatus();
+    }
+  }, [checkOnChainStatus]);
 
   // returns a single Platform card
   return (
@@ -115,6 +172,7 @@ export const PlatformCard = ({
               <Menu>
                 <MenuButton disabled={disabled} className="verify-btn flex" data-testid="card-menu-button">
                   <div className="m-auto flex items-center justify-center">
+                    {isOnChain ? <LinkIcon className="h-6 w-5 text-accent-3" /> : <></>}
                     <ShieldCheckIcon className="h-6 w-5 text-accent-3" />
                     <span className="mx-2 translate-y-[1px]">Verified</span>
                     <ChevronDownIcon className="h-6 w-6" />
