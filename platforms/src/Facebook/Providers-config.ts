@@ -15,10 +15,6 @@ export const FacebookProviderConfig: PlatformGroupSpec[] = [
     providers: [{ title: "Encrypted", name: "Facebook" }],
   },
   {
-    platformGroup: "Friends",
-    providers: [{ title: "Greater than 100", name: "FacebookFriends" }],
-  },
-  {
     platformGroup: "Profile",
     providers: [{ title: "Profile Picture attached", name: "FacebookProfilePicture" }],
   },
