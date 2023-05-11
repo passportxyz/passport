@@ -65,23 +65,15 @@ export function checkShowOnboard(): boolean {
  * @param variables - The variables to be used in the query
  * @returns The result of the query
  */
-export const graphql_fetch = async (query: string, variables: object = {}) => {
+export const graphql_fetch = async (endpoint: URL, query: string, variables: object = {}) => {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
 
-  if (!process.env.NEXT_PUBLIC_EAS_INDEXER_URL) {
-    throw new Error("NEXT_PUBLIC_EAS_INDEXER_URL is not defined");
-  }
-
   try {
-    const resp: AxiosResponse<any> = await axios.post(
-      process.env.NEXT_PUBLIC_EAS_INDEXER_URL,
-      JSON.stringify({ query, variables }),
-      {
-        headers,
-      }
-    );
+    const resp: AxiosResponse<any> = await axios.post(endpoint.toString(), JSON.stringify({ query, variables }), {
+      headers,
+    });
     return Promise.resolve(resp.data);
   } catch (error: any) {
     if (error.response) {

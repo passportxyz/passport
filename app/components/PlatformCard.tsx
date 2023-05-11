@@ -10,7 +10,9 @@ import { ChevronDownIcon } from "@heroicons/react/20/solid";
 // --- Types
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
-import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
+import { datadogLogs } from "@datadog/browser-logs";
+import { datadogRum } from "@datadog/browser-rum";
+import { STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
@@ -84,9 +86,14 @@ export const PlatformCard = ({
 
   // check on-chain status by checking if attestations exist for at least one provider of the stamp
   const checkOnChainStatus = useCallback(async () => {
-    // get the attestions for given user
-    const res = await graphql_fetch(
-      `
+    try {
+      if (!process.env.NEXT_PUBLIC_EAS_INDEXER_URL) {
+        throw new Error("NEXT_PUBLIC_EAS_INDEXER_URL is not defined");
+      }
+      // get the attestions for given user
+      const res = await graphql_fetch(
+        new URL(process.env.NEXT_PUBLIC_EAS_INDEXER_URL),
+        `
         query GetAttestations($recipient: StringFilter, $attester: StringFilter) {
           attestations(where: {
             recipient: $recipient,
@@ -97,35 +104,39 @@ export const PlatformCard = ({
           }
         }
       `,
-      {
-        recipient: { equals: ethers.getAddress(wallet?.accounts[0].address!) },
-        attester: { equals: process.env.NEXT_PUBLIC_GITCOIN_ATTESTER_CONTRACT_ADDRESS },
+        {
+          recipient: { equals: ethers.getAddress(wallet?.accounts[0].address!) },
+          attester: { equals: process.env.NEXT_PUBLIC_GITCOIN_ATTESTER_CONTRACT_ADDRESS },
+        }
+      );
+
+      // sort the attestations by timeCreated in descending order
+      const sortedAttestations = res.data.attestations.sort((a: any, b: any) => b.timeCreated - a.timeCreated);
+
+      // find the latest timeCreated value
+      const latestTimeCreated = sortedAttestations[0]?.timeCreated;
+
+      // extract all providers with the latest timeCreated value
+      const latestProviders: string[] = [];
+      for (const attestation of sortedAttestations) {
+        const decodedData = JSON.parse(attestation.decodedDataJson);
+        const providerData = decodedData.find((data: any) => data.name === "provider");
+        if (providerData && attestation.timeCreated === latestTimeCreated) {
+          latestProviders.push(providerData.value.value);
+        }
       }
-    );
 
-    // sort the attestations by timeCreated in descending order
-    const sortedAttestations = res.data.attestations.sort((a: any, b: any) => b.timeCreated - a.timeCreated);
+      // check if all selected providers are present in the latest bulk of providers
+      const isAllSelectedProvidersPresent = selectedProviders[platform.platform].every((provider) =>
+        latestProviders.includes(provider)
+      );
 
-    // find the latest timeCreated value
-    const latestTimeCreated = sortedAttestations[0]?.timeCreated;
-
-    // extract all providers with the latest timeCreated value
-    const latestProviders: string[] = [];
-    for (const attestation of sortedAttestations) {
-      const decodedData = JSON.parse(attestation.decodedDataJson);
-      const providerData = decodedData.find((data: any) => data.name === "provider");
-      if (providerData && attestation.timeCreated === latestTimeCreated) {
-        latestProviders.push(providerData.value.value);
-      }
+      // set the on-chain status
+      setIsOnChain(isAllSelectedProvidersPresent);
+    } catch (e: any) {
+      datadogLogs.logger.error("Failed to check on-chain status", e);
+      datadogRum.addError(e);
     }
-
-    // check if all selected providers are present in the latest bulk of providers
-    const isAllSelectedProvidersPresent = selectedProviders[platform.platform].every((provider) =>
-      latestProviders.includes(provider)
-    );
-
-    // set the on-chain status
-    setIsOnChain(isAllSelectedProvidersPresent);
   }, [wallet?.accounts]);
 
   useEffect(() => {
