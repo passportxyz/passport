@@ -3,6 +3,22 @@ name: Release and Deploy Passport
 ## To use this in a new repo
 ## 1. Copy this file
 ## 2. Configure secrets shown below
+ #    action_access_token
+ #    aws_access_key_id_production
+ #    aws_secret_access_key_production
+ #    aws_access_key_id_staging
+ #    aws_secret_access_key_staging
+ #    PULUMI_ACCESS_TOKEN
+ #    AWS_ACCESS_KEY_ID_PRODUCTION
+ #    AWS_ACCESS_KEY_ID_STAGING
+ #    AWS_SECRET_ACCESS_KEY_PRODUCTION
+ #    AWS_SECRET_ACCESS_KEY_STAGING
+ #    ECR_URL_PRODUCTION
+ #    ECR_URL_STAGING
+ #    ROUTE53_ZONE_ID_PRODUCTION
+ #    ROUTE53_ZONE_ID_STAGING
+ #    IAM_SERVER_SSM_ARN_PRODUCTION
+ #    IAM_SERVER_SSM_ARN_STAGING
 ## 3. Update input values ("with") below
 ## 4. Create an environment called "production" and add Required Reviewers
 
@@ -21,20 +37,4 @@ jobs:
       staging_domain: staging.passport-iam.gitcoin.co
       production_domain: passport-iam.gitcoin.co
       ecr_repository: passport
-    secrets:
-      action_access_token: ${{ secrets.action_access_token }}
-      aws_access_key_id_production: ${{ secrets.AWS_ACCESS_KEY_ID_PRODUCTION }}
-      aws_secret_access_key_production: ${{ secrets.AWS_SECRET_ACCESS_KEY_PRODUCTION }}
-      aws_access_key_id_staging: ${{ secrets.AWS_ACCESS_KEY_ID_STAGING }}
-      aws_secret_access_key_staging: ${{ secrets.AWS_SECRET_ACCESS_KEY_STAGING }}
-      PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-      AWS_ACCESS_KEY_ID_PRODUCTION: ${{ secrets.AWS_ACCESS_KEY_ID_PRODUCTION }}
-      AWS_ACCESS_KEY_ID_STAGING: ${{ secrets.AWS_ACCESS_KEY_ID_STAGING }}
-      AWS_SECRET_ACCESS_KEY_PRODUCTION: ${{ secrets.AWS_SECRET_ACCESS_KEY_PRODUCTION }}
-      AWS_SECRET_ACCESS_KEY_STAGING: ${{ secrets.AWS_SECRET_ACCESS_KEY_STAGING }}
-      ECR_URL_PRODUCTION: ${{secrets.ECR_URL_PRODUCTION}}
-      ECR_URL_STAGING: ${{secrets.ECR_URL_STAGING}}
-      ROUTE53_ZONE_ID_PRODUCTION: ${{ secrets.ROUTE53_ZONE_ID_PRODUCTION }}
-      ROUTE53_ZONE_ID_STAGING: ${{ secrets.ROUTE53_ZONE_ID_STAGING }}
-      IAM_SERVER_SSM_ARN_PRODUCTION: ${{ secrets.IAM_SERVER_SSM_ARN_PRODUCTION }}
-      IAM_SERVER_SSM_ARN_STAGING: ${{ secrets.IAM_SERVER_SSM_ARN_STAGING }}
+    secrets: inherit
