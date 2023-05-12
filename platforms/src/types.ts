@@ -120,7 +120,6 @@ export type PROVIDER_ID =
   | "TwitterFollowerGT5000"
   | "POAP"
   | "Facebook"
-  | "FacebookFriends"
   | "FacebookProfilePicture"
   | "Brightid"
   | "Github"

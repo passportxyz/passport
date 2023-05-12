@@ -60,7 +60,7 @@ export class FacebookProfilePictureProvider implements Provider {
         notExpired && formattedData.app_id === APP_ID && formattedData.is_valid && !!formattedData.user_id;
 
       // Get the FB profile
-      const profileResponseData = await verifyFacebookFriends(payload.proofs.accessToken);
+      const profileResponseData = await verifyFacebookProfilePic(payload.proofs.accessToken);
 
       if (profileResponseData.status != 200) {
         // The exception handle will catch that ...
@@ -89,7 +89,7 @@ export class FacebookProfilePictureProvider implements Provider {
   }
 }
 
-async function verifyFacebookFriends(userAccessToken: string): Promise<Response> {
+async function verifyFacebookProfilePic(userAccessToken: string): Promise<Response> {
   // see https://developers.facebook.com/docs/graph-api/reference/user/
   return axios.get("https://graph.facebook.com/me/", {
     headers: { "User-Agent": "Facebook Graph Client" },
