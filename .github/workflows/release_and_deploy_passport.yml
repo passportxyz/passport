@@ -1,10 +1,9 @@
-name: Release and Deploy This Repo
+name: Release and Deploy Passport
 
 ## To use this in a new repo
 ## 1. Copy this file
-## 2. create a personal access token (with all relevant permissions including workflow write) and add to the gh secrets as TOKEN
-## 3. Configure other secrets shown below
-## 3. Configure input values ("with") below
+## 2. Configure secrets shown below
+## 3. Update input values ("with") below
 ## 4. Create an environment called "production" and add Required Reviewers
 
 on:
@@ -16,7 +15,7 @@ jobs:
     uses: gitcoinco/gh-workflows/.github/workflows/release_and_deploy.yml@main
     with:
       repo_owner: gitcoinco
-      repo_name: gh-workflows
+      repo_name: passport
       staging_frontend_branch: test_frontend_build_staging
       production_frontend_branch: test_frontend_build_prod
       staging_domain: staging.passport-iam.gitcoin.co
