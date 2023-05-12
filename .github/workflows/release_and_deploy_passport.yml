@@ -1,0 +1,41 @@
+name: Release and Deploy This Repo
+
+## To use this in a new repo
+## 1. Copy this file
+## 2. create a personal access token (with all relevant permissions including workflow write) and add to the gh secrets as TOKEN
+## 3. Configure other secrets shown below
+## 3. Configure input values ("with") below
+## 4. Create an environment called "production" and add Required Reviewers
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy_passport:
+    permissions: write-all
+    uses: gitcoinco/gh-workflows/.github/workflows/release_and_deploy.yml@main
+    with:
+      repo_owner: gitcoinco
+      repo_name: gh-workflows
+      staging_frontend_branch: test_frontend_build_staging
+      production_frontend_branch: test_frontend_build_prod
+      staging_domain: staging.passport-iam.gitcoin.co
+      production_domain: passport-iam.gitcoin.co
+      ecr_repository: passport
+    secrets:
+      action_access_token: ${{ secrets.action_access_token }}
+      aws_access_key_id_production: ${{ secrets.AWS_ACCESS_KEY_ID_PRODUCTION }}
+      aws_secret_access_key_production: ${{ secrets.AWS_SECRET_ACCESS_KEY_PRODUCTION }}
+      aws_access_key_id_staging: ${{ secrets.AWS_ACCESS_KEY_ID_STAGING }}
+      aws_secret_access_key_staging: ${{ secrets.AWS_SECRET_ACCESS_KEY_STAGING }}
+      PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+      AWS_ACCESS_KEY_ID_PRODUCTION: ${{ secrets.AWS_ACCESS_KEY_ID_PRODUCTION }}
+      AWS_ACCESS_KEY_ID_STAGING: ${{ secrets.AWS_ACCESS_KEY_ID_STAGING }}
+      AWS_SECRET_ACCESS_KEY_PRODUCTION: ${{ secrets.AWS_SECRET_ACCESS_KEY_PRODUCTION }}
+      AWS_SECRET_ACCESS_KEY_STAGING: ${{ secrets.AWS_SECRET_ACCESS_KEY_STAGING }}
+      ECR_URL_PRODUCTION: ${{secrets.ECR_URL_PRODUCTION}}
+      ECR_URL_STAGING: ${{secrets.ECR_URL_STAGING}}
+      ROUTE53_ZONE_ID_PRODUCTION: ${{ secrets.ROUTE53_ZONE_ID_PRODUCTION }}
+      ROUTE53_ZONE_ID_STAGING: ${{ secrets.ROUTE53_ZONE_ID_STAGING }}
+      IAM_SERVER_SSM_ARN_PRODUCTION: ${{ secrets.IAM_SERVER_SSM_ARN_PRODUCTION }}
+      IAM_SERVER_SSM_ARN_STAGING: ${{ secrets.IAM_SERVER_SSM_ARN_STAGING }}
