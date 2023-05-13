@@ -76,20 +76,15 @@ export const PlatformCard = ({
 
   const disabled = passportHasCacaoError;
 
-  // hide platforms based on filter
-  const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;
-  const hidePlatform = stampFilters && !Object.keys(stampFilters).includes(platform.platform);
-  if (hidePlatform) return <></>;
-
-  // Feature Flag Guild Stamp
-  if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP !== "on" && platform.platform === "GuildXYZ") return <></>;
-
   // check on-chain status by checking if attestations exist for at least one provider of the stamp
   const checkOnChainStatus = useCallback(async () => {
     try {
+      if (selectedProviders[platform.platform].length === 0) return;
+
       if (!process.env.NEXT_PUBLIC_EAS_INDEXER_URL) {
         throw new Error("NEXT_PUBLIC_EAS_INDEXER_URL is not defined");
       }
+
       // get the attestions for given user
       const res = await graphql_fetch(
         new URL(process.env.NEXT_PUBLIC_EAS_INDEXER_URL),
@@ -137,13 +132,19 @@ export const PlatformCard = ({
       datadogLogs.logger.error("Failed to check on-chain status", e);
       datadogRum.addError(e);
     }
-  }, [wallet?.accounts]);
+  }, [wallet?.accounts, selectedProviders, platform.platform]);
 
   useEffect(() => {
-    if (selectedProviders[platform.platform].length > 0) {
-      checkOnChainStatus();
-    }
+    checkOnChainStatus();
   }, [checkOnChainStatus]);
+
+  // hide platforms based on filter
+  const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;
+  const hidePlatform = stampFilters && !Object.keys(stampFilters).includes(platform.platform);
+  if (hidePlatform) return <></>;
+
+  // Feature Flag Guild Stamp
+  if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP !== "on" && platform.platform === "GuildXYZ") return <></>;
 
   // returns a single Platform card
   return (

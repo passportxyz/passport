@@ -61,6 +61,7 @@ export function checkShowOnboard(): boolean {
 /**
  * Fetch data from a GraphQL endpoint
  *
+ * @param endpoint - The graphql endpoint
  * @param query - The query to be executed
  * @param variables - The variables to be used in the query
  * @returns The result of the query

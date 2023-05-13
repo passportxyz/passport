@@ -67,7 +67,7 @@ export const RefreshMyStampsModalContent = ({
     } else {
       setCanSubmit(false);
     }
-  });
+  }, [selectedProviders.length]);
 
   const handleRefreshSelectedStamps = async () => {
     try {
