@@ -1,23 +1,29 @@
 // --- React Methods
-import { useContext, useEffect } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 // --- Chakra UI Elements
 import { useDisclosure, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
+import { LinkIcon, ShieldCheckIcon } from "@heroicons/react/20/solid";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 // --- Types
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
-import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
+import { datadogLogs } from "@datadog/browser-logs";
+import { datadogRum } from "@datadog/browser-rum";
+import { STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
-import { pillLocalStorage } from "../context/userContext";
+import { pillLocalStorage, UserContext } from "../context/userContext";
 
 // --- Components
 import { JsonOutputModal } from "./JsonOutputModal";
 import { RemoveStampModal } from "./RemoveStampModal";
 import { getStampProviderFilters } from "../config/filters";
+import { graphql_fetch } from "../utils/helpers";
+import { ethers } from "ethers";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -44,6 +50,9 @@ export const PlatformCard = ({
   getUpdatedPlatforms,
   className,
 }: PlatformCardProps): JSX.Element => {
+  const [isOnChain, setIsOnChain] = useState(false);
+  const { wallet } = useContext(UserContext);
+
   // import all providers
   const { allProvidersState, passportHasCacaoError, handleDeleteStamps } = useContext(CeramicContext);
 
@@ -66,6 +75,70 @@ export const PlatformCard = ({
   } = useDisclosure();
 
   const disabled = passportHasCacaoError;
+
+  // check on-chain status by checking if attestations exist for at least one provider of the stamp
+  const checkOnChainStatus = useCallback(async () => {
+    try {
+      if (selectedProviders[platform.platform].length === 0) return;
+
+      if (!process.env.NEXT_PUBLIC_EAS_INDEXER_URL) {
+        throw new Error("NEXT_PUBLIC_EAS_INDEXER_URL is not defined");
+      }
+
+      // get the attestions for given user
+      const res = await graphql_fetch(
+        new URL(process.env.NEXT_PUBLIC_EAS_INDEXER_URL),
+        `
+        query GetAttestations($recipient: StringFilter, $attester: StringFilter) {
+          attestations(where: {
+            recipient: $recipient,
+            attester: $attester
+          }) {
+            decodedDataJson
+            timeCreated
+          }
+        }
+      `,
+        {
+          recipient: { equals: ethers.getAddress(wallet?.accounts[0].address!) },
+          attester: { equals: process.env.NEXT_PUBLIC_GITCOIN_ATTESTER_CONTRACT_ADDRESS },
+        }
+      );
+
+      // sort the attestations by timeCreated in descending order
+      const sortedAttestations = res.data.attestations.sort((a: any, b: any) => b.timeCreated - a.timeCreated);
+
+      // find the latest timeCreated value
+      const latestTimeCreated = sortedAttestations[0]?.timeCreated;
+
+      // extract all providers with the latest timeCreated value
+      const latestProviders: string[] = [];
+      for (const attestation of sortedAttestations) {
+        const decodedData = JSON.parse(attestation.decodedDataJson);
+        const providerData = decodedData.find((data: any) => data.name === "provider");
+        if (providerData && attestation.timeCreated === latestTimeCreated) {
+          latestProviders.push(providerData.value.value);
+        }
+      }
+
+      // check if all selected providers are present in the latest bulk of providers
+      const isAllSelectedProvidersPresent = selectedProviders[platform.platform].every((provider) =>
+        latestProviders.includes(provider)
+      );
+
+      // set the on-chain status
+      setIsOnChain(isAllSelectedProvidersPresent);
+    } catch (e: any) {
+      datadogLogs.logger.error("Failed to check on-chain status", e);
+      datadogRum.addError(e);
+    }
+  }, [wallet?.accounts, selectedProviders, platform.platform]);
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on") {
+      checkOnChainStatus();
+    }
+  }, [checkOnChainStatus]);
 
   // hide platforms based on filter
   const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;
@@ -113,23 +186,14 @@ export const PlatformCard = ({
               <Menu>
                 <MenuButton disabled={disabled} className="verify-btn flex" data-testid="card-menu-button">
                   <div className="m-auto flex items-center justify-center">
-                    <svg width="15" height="16" viewBox="0 0 15 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M0.449301 3.499C3.15674 3.46227 5.62356 2.42929 7.4998 0.75C9.37605 2.42929 11.8429 3.46227 14.5503 3.499C14.6486 4.0847 14.6998 4.68638 14.6998 5.30002C14.6998 10.0024 11.6945 14.0028 7.4998 15.4854C3.30511 14.0028 0.299805 10.0024 0.299805 5.30002C0.299805 4.68638 0.350982 4.0847 0.449301 3.499ZM10.8362 6.83638C11.1877 6.48491 11.1877 5.91506 10.8362 5.56359C10.4847 5.21212 9.91488 5.21212 9.56341 5.56359L6.5998 8.5272L5.4362 7.36359C5.08473 7.01212 4.51488 7.01212 4.16341 7.36359C3.81194 7.71506 3.81194 8.28491 4.16341 8.63638L5.96341 10.4364C6.31488 10.7879 6.88473 10.7879 7.2362 10.4364L10.8362 6.83638Z"
-                        fill="var(--color-accent-3)"
-                      />
-                    </svg>
+                    {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && isOnChain ? (
+                      <LinkIcon className="h-6 w-5 text-accent-3" />
+                    ) : (
+                      <></>
+                    )}
+                    <ShieldCheckIcon className="h-6 w-5 text-accent-3" />
                     <span className="mx-2 translate-y-[1px]">Verified</span>
-                    <svg width="11" height="7" viewBox="0 0 11 7" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M0.292787 1.29308C0.480314 1.10561 0.734622 1.00029 0.999786 1.00029C1.26495 1.00029 1.51926 1.10561 1.70679 1.29308L4.99979 4.58608L8.29279 1.29308C8.38503 1.19757 8.49538 1.12139 8.61738 1.06898C8.73939 1.01657 8.87061 0.988985 9.00339 0.987831C9.13616 0.986677 9.26784 1.01198 9.39074 1.06226C9.51364 1.11254 9.62529 1.18679 9.71918 1.28069C9.81307 1.37458 9.88733 1.48623 9.93761 1.60913C9.98789 1.73202 10.0132 1.8637 10.012 1.99648C10.0109 2.12926 9.9833 2.26048 9.93089 2.38249C9.87848 2.50449 9.8023 2.61483 9.70679 2.70708L5.70679 6.70708C5.51926 6.89455 5.26495 6.99987 4.99979 6.99987C4.73462 6.99987 4.48031 6.89455 4.29279 6.70708L0.292787 2.70708C0.105316 2.51955 0 2.26525 0 2.00008C0 1.73492 0.105316 1.48061 0.292787 1.29308Z"
-                        fill="currentColor"
-                      />
-                    </svg>
+                    <ChevronDownIcon className="h-6 w-6" />
                   </div>
                 </MenuButton>
                 <MenuList style={{ marginLeft: "16px" }}>
