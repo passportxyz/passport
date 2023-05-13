@@ -41,6 +41,7 @@ import {
 
 // All provider exports from platforms
 import { providers } from "@gitcoin/passport-platforms";
+import { log } from "console";
 
 // get DID from key
 const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
@@ -79,6 +80,7 @@ const ATTESTER_TYPES = {
     { name: "revocable", type: "bool" },
     { name: "refUID", type: "bytes32" },
     { name: "value", type: "uint256" },
+    { name: "nonce", type: "uint256" },
   ],
 };
 
@@ -364,6 +366,7 @@ type EasPassport = {
   revocable: boolean;
   refUID: string;
   value: number;
+  nonce: number;
 };
 
 type EasPayload = {
@@ -376,78 +379,92 @@ type EasPayload = {
   invalidCredentials: VerifiableCredential[];
 };
 
+// type EasRequestBody = {
+//   nonce: number;
+//   credentials: VerifiableCredential[];
+// };
+
 // Expose entry point for getting eas payload for moving stamps on-chain
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
-  const credentials: VerifiableCredential[] = req.body as VerifiableCredential[];
-  if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
+  try {
+    // const { credentials, nonce } = req.body as EasRequestBody;
+    const credentials: VerifiableCredential[] = req.body as VerifiableCredential[];
+    const nonce: number = req.body as number;
 
-  const recipient = credentials[0].credentialSubject.id.split(":")[4];
+    if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
 
-  if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
-    return void errorRes(res, "Invalid recipient", 400);
+    const recipient = credentials[0].credentialSubject.id.split(":")[4];
 
-  Promise.all(
-    credentials.map(async (credential) => {
-      return {
-        credential,
-        verified: issuer === credential.issuer && (await verifyCredential(DIDKit, credential)),
-      };
-    })
-  )
-    .then((credentialVerifications) => {
-      const invalidCredentials = credentialVerifications
-        .filter(({ verified }) => !verified)
-        .map(({ credential }) => credential);
+    if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
+      return void errorRes(res, "Invalid recipient", 400);
 
-      const stamps: EasStamp[] = credentialVerifications
-        .filter(({ verified }) => verified)
-        .map(({ credential }) => {
-          const encodedData = attestationSchemaEncoder.encodeData([
-            { name: "provider", value: credential.credentialSubject.provider, type: "string" },
-            { name: "hash", value: credential.credentialSubject.hash, type: "string" },
-          ]);
-          return {
-            provider: credential.credentialSubject.provider,
-            stampHash: credential.credentialSubject.hash,
-            expirationDate: credential.expirationDate,
-            encodedData,
-          };
-        });
+    Promise.all(
+      credentials.map(async (credential) => {
+        return {
+          credential,
+          verified: issuer === credential.issuer && (await verifyCredential(DIDKit, credential)),
+        };
+      })
+    )
+      .then((credentialVerifications) => {
+        const invalidCredentials = credentialVerifications
+          .filter(({ verified }) => !verified)
+          .map(({ credential }) => credential);
 
-      if (!stamps.length) return void errorRes(res, "No verifiable stamps provided", 400);
+        const stamps: EasStamp[] = credentialVerifications
+          .filter(({ verified }) => verified)
+          .map(({ credential }) => {
+            const encodedData = attestationSchemaEncoder.encodeData([
+              { name: "provider", value: credential.credentialSubject.provider, type: "string" },
+              { name: "hash", value: credential.credentialSubject.hash, type: "string" },
+            ]);
+            return {
+              provider: credential.credentialSubject.provider,
+              stampHash: credential.credentialSubject.hash,
+              expirationDate: credential.expirationDate,
+              encodedData,
+            };
+          });
 
-      const easPassport: EasPassport = {
-        stamps,
-        recipient,
-        expirationTime: NO_EXPIRATION,
-        revocable: true,
-        refUID: ZERO_BYTES32,
-        value: 0,
-      };
+        if (!stamps.length) return void errorRes(res, "No verifiable stamps provided", 400);
 
-      attestationSignerWallet
-        ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, easPassport)
-        .then((signature) => {
-          const { v, r, s } = utils.splitSignature(signature);
+        const easPassport: EasPassport = {
+          stamps,
+          recipient,
+          expirationTime: NO_EXPIRATION,
+          revocable: true,
+          refUID: ZERO_BYTES32,
+          value: 0,
+          nonce,
+        };
 
-          const payload: EasPayload = {
-            passport: easPassport,
-            signature: { v, r, s },
-            invalidCredentials,
-          };
+        attestationSignerWallet
+          ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, easPassport)
+          .then((signature) => {
+            const { v, r, s } = utils.splitSignature(signature);
 
-          return void res.json(payload);
-        })
-        .catch((error) => {
-          // TODO dont return real error
-          return void errorRes(res, String(error), 500);
-        });
-    })
-    .catch((error) => {
-      // TODO dont return real error
-      return void errorRes(res, String(error), 500);
-    });
+            const payload: EasPayload = {
+              passport: easPassport,
+              signature: { v, r, s },
+              invalidCredentials,
+            };
+
+            return void res.json(payload);
+          })
+          .catch((error) => {
+            // TODO dont return real error
+            return void errorRes(res, String(error), 500);
+          });
+      })
+      .catch((error) => {
+        // TODO dont return real error
+        return void errorRes(res, String(error), 500);
+      });
+  } catch (error) {
+    console.log(error);
+    return void errorRes(res, String(error), 500);
+  }
 });
 
 // procedure endpoints

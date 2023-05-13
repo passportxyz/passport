@@ -763,6 +763,7 @@ describe("POST /eas", () => {
         revocable: true,
         refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
         value: 0,
+        // nonce: ,
       },
       signature: expect.any(Object),
       invalidCredentials: [failedCredential],
