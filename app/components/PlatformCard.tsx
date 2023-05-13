@@ -135,7 +135,9 @@ export const PlatformCard = ({
   }, [wallet?.accounts, selectedProviders, platform.platform]);
 
   useEffect(() => {
-    checkOnChainStatus();
+    if (process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on") {
+      checkOnChainStatus();
+    }
   }, [checkOnChainStatus]);
 
   // hide platforms based on filter
@@ -184,7 +186,11 @@ export const PlatformCard = ({
               <Menu>
                 <MenuButton disabled={disabled} className="verify-btn flex" data-testid="card-menu-button">
                   <div className="m-auto flex items-center justify-center">
-                    {isOnChain ? <LinkIcon className="h-6 w-5 text-accent-3" /> : <></>}
+                    {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && isOnChain ? (
+                      <LinkIcon className="h-6 w-5 text-accent-3" />
+                    ) : (
+                      <></>
+                    )}
                     <ShieldCheckIcon className="h-6 w-5 text-accent-3" />
                     <span className="mx-2 translate-y-[1px]">Verified</span>
                     <ChevronDownIcon className="h-6 w-6" />
