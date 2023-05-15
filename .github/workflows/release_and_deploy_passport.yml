@@ -27,6 +27,7 @@ on:
 
 jobs:
   ref:
+    name: Load Commit Ref
     runs-on: ubuntu-latest
     steps:
       - id: ref
@@ -40,7 +41,7 @@ jobs:
 
   deploy_passport:
     needs: [ref]
-    name: Deploy Passport
+    name: Deploy
     permissions: write-all
     uses: gitcoinco/gh-workflows/.github/workflows/release_and_deploy.yml@main
     with:
