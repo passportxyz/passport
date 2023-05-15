@@ -36,7 +36,7 @@ jobs:
     permissions: write-all
     uses: gitcoinco/gh-workflows/.github/workflows/release_and_deploy.yml@main
     with:
-      refspec: ${{ inputs.commit }}
+      refspec: ${{ env.refspec }}
       repo_owner: gitcoinco
       repo_name: passport
       staging_frontend_branch: test_frontend_build_staging
