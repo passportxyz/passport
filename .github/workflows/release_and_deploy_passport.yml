@@ -48,8 +48,8 @@ jobs:
       refspec: ${{ needs.ref.outputs.refspec }}
       repo_owner: gitcoinco
       repo_name: passport
-      staging_frontend_branch: test_frontend_build_staging
-      production_frontend_branch: test_frontend_build_prod
+      staging_frontend_branch: staging-app
+      production_frontend_branch: production-app
       staging_domain: staging.passport-iam.gitcoin.co
       production_domain: passport-iam.gitcoin.co
       ecr_repository: passport
