@@ -102,7 +102,7 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
                       className="my-auto mr-2"
                     />
                   )}
-                  Try another stamp
+                  Try another wallet
                 </button>
               </div>
             </>
