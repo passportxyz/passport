@@ -33,9 +33,8 @@ jobs:
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
-      echo:
-        run: |
-          echo ${{ env.refspec }}
+      run: |
+        echo ${{ env.refspec }}
       #uses: gitcoinco/gh-workflows/.github/workflows/release_and_deploy.yml@main
       #with:
       #  refspec: ${{ inputs.commit }}
