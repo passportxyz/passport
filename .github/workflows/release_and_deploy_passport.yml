@@ -21,28 +21,27 @@ on:
   workflow_dispatch:
     inputs:
       commit:
-        description: "Commit to run on, leave blank to use current HEAD"
+        description: "Commit SHA. Leave blank to use current HEAD."
         type: string
         required: false
 
 env:
+  # Default to HEAD of the branch from
+  # which this workflow was triggered
   refspec: ${{ inputs.commit || github.ref }}
 
 jobs:
   deploy_passport:
+    name: Deploy Passport
     permissions: write-all
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo ${{ env.refspec }}
-      #uses: gitcoinco/gh-workflows/.github/workflows/release_and_deploy.yml@main
-      #with:
-      #  refspec: ${{ inputs.commit }}
-      #  repo_owner: gitcoinco
-      #  repo_name: passport
-      #  staging_frontend_branch: test_frontend_build_staging
-      #  production_frontend_branch: test_frontend_build_prod
-      #  staging_domain: staging.passport-iam.gitcoin.co
-      #  production_domain: passport-iam.gitcoin.co
-      #  ecr_repository: passport
-      #secrets: inherit
+    uses: gitcoinco/gh-workflows/.github/workflows/release_and_deploy.yml@main
+    with:
+      refspec: ${{ inputs.commit }}
+      repo_owner: gitcoinco
+      repo_name: passport
+      staging_frontend_branch: test_frontend_build_staging
+      production_frontend_branch: test_frontend_build_prod
+      staging_domain: staging.passport-iam.gitcoin.co
+      production_domain: passport-iam.gitcoin.co
+      ecr_repository: passport
+    secrets: inherit
