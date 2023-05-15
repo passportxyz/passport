@@ -3,11 +3,6 @@ name: Release and Deploy Passport
 ## To use this in a new repo
 ## 1. Copy this file
 ## 2. Configure secrets shown below
- #    action_access_token
- #    aws_access_key_id_production
- #    aws_secret_access_key_production
- #    aws_access_key_id_staging
- #    aws_secret_access_key_staging
  #    PULUMI_ACCESS_TOKEN
  #    AWS_ACCESS_KEY_ID_PRODUCTION
  #    AWS_ACCESS_KEY_ID_STAGING
@@ -24,12 +19,19 @@ name: Release and Deploy Passport
 
 on:
   workflow_dispatch:
+    inputs:
+      commit:
+        description: "Commit to run on, if blank the head of the selected branch is used"
+        type: string
+        required: false
+        default: ${{ github.ref }}
 
 jobs:
   deploy_passport:
     permissions: write-all
     uses: gitcoinco/gh-workflows/.github/workflows/release_and_deploy.yml@main
     with:
+      refspec: ${{ inputs.commit }}
       repo_owner: gitcoinco
       repo_name: passport
       staging_frontend_branch: test_frontend_build_staging
