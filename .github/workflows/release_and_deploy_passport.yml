@@ -37,7 +37,7 @@ jobs:
         run: |
           echo "refspec=${{ inputs.commit || github.sha }}" >> $GITHUB_OUTPUT
     outputs:
-      refspec: ${{ steps.version.outputs.refspec }}
+      refspec: ${{ steps.ref.outputs.refspec }}
 
   deploy_passport:
     needs: [ref]
