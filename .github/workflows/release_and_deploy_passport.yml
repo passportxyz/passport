@@ -34,7 +34,7 @@ jobs:
         # Default to HEAD of the branch from
         # which this workflow was triggered
         run: |
-          echo "refspec=${{ inputs.commit || github.ref }}" >> $GITHUB_OUTPUT
+          echo "refspec=${{ inputs.commit || github.sha }}" >> $GITHUB_OUTPUT
     outputs:
       refspec: ${{ steps.version.outputs.refspec }}
 
