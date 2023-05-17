@@ -1,5 +1,7 @@
-@import url("https://use.typekit.net/tdl1ktm.css");
 @import url("https://fonts.googleapis.com/css2?family=DM+Mono&display=swap");
+
+/* This sources Adobe CC fonts */
+@import url("https://use.typekit.net/tdl1ktm.css");
 
 @tailwind base;
 @tailwind components;

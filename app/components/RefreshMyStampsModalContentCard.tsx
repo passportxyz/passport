@@ -52,7 +52,7 @@ export const RefreshMyStampsModalContentCard = ({
                 onClick={() => setAccordionExpanded(!accordionExpanded)}
               >
                 <img src={currentPlatform?.icon} alt={currentPlatform?.name} className="mr-5 h-11 w-11" />
-                <p className="text-left font-body">{currentPlatform?.name}</p>
+                <p className="text-left">{currentPlatform?.name}</p>
               </AccordionButton>
             </div>
             <div className="grid grid-cols-2 items-center justify-end gap-8">

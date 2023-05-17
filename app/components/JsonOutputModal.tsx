@@ -56,7 +56,6 @@ export const JsonOutputModal = ({
         maxW="80%"
         maxH="80%"
         background="var(--color-background-2)"
-        textColor="var(--color-text)"
         border="solid 1px var(--color-accent-2)"
       >
         <ModalHeader borderBottomWidth={2} borderBottomColor="var(--color-accent2)">
