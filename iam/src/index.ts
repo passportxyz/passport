@@ -379,18 +379,16 @@ type EasPayload = {
   invalidCredentials: VerifiableCredential[];
 };
 
-// type EasRequestBody = {
-//   nonce: number;
-//   credentials: VerifiableCredential[];
-// };
+type EasRequestBody = {
+  nonce: number;
+  credentials: VerifiableCredential[];
+};
 
 // Expose entry point for getting eas payload for moving stamps on-chain
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
   try {
-    // const { credentials, nonce } = req.body as EasRequestBody;
-    const credentials: VerifiableCredential[] = req.body as VerifiableCredential[];
-    const nonce: number = req.body as number;
+    const { credentials, nonce } = req.body as EasRequestBody;
 
     if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
 
