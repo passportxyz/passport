@@ -15,7 +15,7 @@ export const LUNARPUNK_DARK_MODE: Theme = {
     text4: palette.moon[300],
   },
   fonts: {
-    body: "futura-pt",
+    body: "roboto",
     heading: "grad",
     alt: "DM Mono",
   },
