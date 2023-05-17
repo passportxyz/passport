@@ -147,7 +147,7 @@ export const AdditionalStampModal = ({
       <>
         <div className="flex w-full justify-start">
           <button onClick={() => setActivePlatform(null)}>
-            <img width="20px" src="./assets/arrow-left-icon.svg" alt="Check Icon" />
+            <img width="20px" className="invert" src="./assets/arrow-left-icon.svg" alt="Check Icon" />
           </button>
         </div>
         <PlatformDetails currentPlatform={platform!} />
@@ -195,15 +195,15 @@ export const AdditionalStampModal = ({
 
   return (
     <>
-      <div className="flex flex-col items-center text-center text-gray-900">
+      <div className="flex flex-col items-center text-center">
         <h2 className="mt-2 font-semibold">Stamp Verification</h2>
-        <p className="my-2 text-gray-600">We found the following stamps, select which ones you would like to link.</p>
-        <div className="my-4 flex w-full flex-col rounded bg-yellow p-4">
+        <p className="my-2">We found the following stamps, select which ones you would like to link.</p>
+        <div className="my-4 flex w-full flex-col rounded-md border border-accent-2 p-4">
           <p className="text-sm font-semibold">Second Account</p>
           <p className="text-sm">{additionalSigner.addr}</p>
         </div>
         <div className="flex w-full flex-col">
-          <p className="w-full text-left text-sm font-semibold text-gray-600">Accounts</p>
+          <p className="w-full text-left text-sm font-semibold">Accounts</p>
           <hr className="border-1" />
           {platformsLoading ? (
             <div className="mt-6 flex w-full justify-center">
@@ -216,27 +216,31 @@ export const AdditionalStampModal = ({
                 return (
                   <div key={platform.name}>
                     <div className="flex w-full justify-between">
-                      <div className="flex">
-                        <img width="25px" alt="Platform Image" src={platform?.icon} className="m-3" />
-                        <p className="pt-2 text-sm font-semibold">{platform.name}</p>
+                      <div className="flex items-center">
+                        <img alt="Platform Image" src={platform?.icon} className="m-3 h-8 w-8" />
+                        <p className="font-semibold">{platform.name}</p>
                       </div>
                       {verifiedPlatforms.includes(platform.name) ? (
                         <button
                           onClick={() => setActivePlatform(verifiedPlatform)}
-                          className="mt-2 flex h-8 w-24 items-center justify-center rounded-md bg-green-200 py-6 text-sm font-semibold "
+                          className="my-2 rounded-md border border-accent-2 bg-background-2 p-2"
                         >
-                          <img width="20px" alt="Check Icon" src="./assets/check-icon.svg" />
-                          Verified
+                          <div className="flex items-center">
+                            <img width="20px" className="pr-1" alt="Check Icon" src="./assets/check-icon.svg" />
+                            Verified
+                          </div>
                         </button>
                       ) : (
-                        <Button
+                        <button
                           data-testid={`${verifiedPlatform.platformProps.platform.path}-add-btn`}
-                          mt={2}
                           onClick={() => setActivePlatform(verifiedPlatform)}
+                          className="my-2 rounded-md bg-accent p-2"
                         >
-                          <img width="20px" alt="Plus Icon" src="./assets/plus-icon.svg" />
-                          Add
-                        </Button>
+                          <div className="flex items-center">
+                            <img className="pr-1 invert" width="20px" alt="Plus Icon" src="./assets/plus-icon.svg" />
+                            Add
+                          </div>
+                        </button>
                       )}
                     </div>
                     <hr className="border-1" />
@@ -246,7 +250,7 @@ export const AdditionalStampModal = ({
             })
           )}
           {!platformsLoading && possiblyVerifiedPlatforms.length === 0 && (
-            <p className="mt-4 font-semibold text-gray-600">Additional stamps were not Found</p>
+            <p className="mt-4 font-semibold">Additional stamps were not Found</p>
           )}
         </div>
       </div>

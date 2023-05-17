@@ -1,4 +1,5 @@
-@import url("https://fonts.googleapis.com/css?family=Libre+Franklin:400,600|Miriam+Libre:400|Baskervville:400");
+@import url("https://use.typekit.net/tdl1ktm.css");
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -21,14 +22,6 @@
   .secondary-btn {
     @apply border border-accent-2 text-white;
   }
-}
-
-.font-libre-franklin {
-  font-family: "Libre Franklin";
-}
-
-.font-miriam-libre {
-  font-family: "Miriam Libre";
 }
 
 .step-icon-inner {

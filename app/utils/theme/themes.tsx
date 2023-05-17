@@ -15,8 +15,8 @@ export const LUNARPUNK_DARK_MODE: Theme = {
     text4: palette.moon[300],
   },
   fonts: {
-    body: "Libre Franklin",
-    heading: "Miriam Libre",
-    cta: "Baskervville",
+    body: "futura-pt",
+    heading: "grad",
+    alt: "DM Mono",
   },
 };

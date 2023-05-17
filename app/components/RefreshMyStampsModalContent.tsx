@@ -159,7 +159,7 @@ export const RefreshMyStampsModalContent = ({
       <div className="grow">
         {validPlatforms.length > 0 ? (
           <div className="flex flex-col text-white">
-            <div className="mb-6 text-2xl">Stamps Found</div>
+            <div className="mb-6 font-heading text-2xl">Stamps Found</div>
             <div>
               {" "}
               {/* TODO: update comments */}

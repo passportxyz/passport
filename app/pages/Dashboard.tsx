@@ -216,7 +216,7 @@ export default function Dashboard() {
       <PageWidthGrid nested={true} className="my-4">
         <div className="col-span-3 flex items-center justify-items-center self-center lg:col-span-4">
           <div className="flex text-2xl">
-            My {filterName && `${filterName} `}Stamps
+            <span className="font-heading">My {filterName && `${filterName} `}Stamps</span>
             {filterName && (
               <a href="/#/dashboard">
                 <span data-testid="select-all" className={`pl-2 text-sm text-purple-connectPurple`}>

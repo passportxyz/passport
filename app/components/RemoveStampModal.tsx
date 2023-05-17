@@ -87,10 +87,10 @@ export const RemoveStampModal = ({
       >
         <ModalHeader>
           <img alt="shield alert" src="../assets/shield-alert.svg" className="m-auto mb-4 w-10" />
-          <p className="font-miriam-libre text-center">{title}</p>
+          <p className="text-center">{title}</p>
         </ModalHeader>
         <ModalCloseButton />
-        <ModalBody color="#757087" className="font-miriam-libre mb-10 overflow-auto text-center">
+        <ModalBody color="#757087" className="mb-10 overflow-auto text-center">
           {body}
         </ModalBody>
 
@@ -104,7 +104,7 @@ export const RemoveStampModal = ({
             borderWidth={1}
             borderColor="#e6e4e9"
           >
-            <span className="font-miriam-libre">{"Cancel"}</span>
+            <span>{"Cancel"}</span>
           </Button>
           <Button
             data-testid="button-stamp-removal"
@@ -114,9 +114,8 @@ export const RemoveStampModal = ({
             onClick={handleStampRemoval}
             isLoading={isLoading}
             loadingText="Removing Stamp"
-            className="font-miriam-libre"
           >
-            <span className="font-miriam-libre">{closeButtonText || "Remove Stamp"}</span>
+            <span>{closeButtonText || "Remove Stamp"}</span>
           </Button>
         </Stack>
       </ModalContent>
