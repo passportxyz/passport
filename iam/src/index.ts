@@ -395,7 +395,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 
       if (!stamps.length) return void errorRes(res, "No verifiable stamps provided", 400);
 
-      const fee = await getEASFeeAmount(stamps.length);
+      const fee = await getEASFeeAmount(2);
 
       const easPassport = {
         stamps,
