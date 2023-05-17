@@ -8,15 +8,10 @@ export type FooterProps = {
 
 export const Footer = ({ lightMode }: FooterProps): JSX.Element => {
   return (
-    <PageWidthGrid className="grid-flow-dense py-8 text-color-1 lg:flex" unconstrainedWidth>
+    <PageWidthGrid className="grid-flow-dense py-8 font-alt text-color-1 lg:flex" unconstrainedWidth>
       <div className="col-span-3 grow md:col-span-4">
-        <span className="text-color-3">Available on</span>
-        <a
-          href="https://ceramic.network/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="ml-1 hover:underline lg:ml-2"
-        >
+        <span className="text-color-3">Available on </span>
+        <a href="https://ceramic.network/" target="_blank" rel="noopener noreferrer" className="hover:underline">
           Ceramic.
         </a>
       </div>
