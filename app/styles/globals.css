@@ -43,6 +43,7 @@
   --account-center-position-right: 4.1rem;
   --account-center-border-radius: 16px;
   --onboard-action-required-btn-text-color: #fff;
+  --onboard-font-family-normal: var(--font-body);
 }
 
 @media (max-width: 1020px /* md */) {
