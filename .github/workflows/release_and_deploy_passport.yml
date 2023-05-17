@@ -50,7 +50,7 @@ jobs:
       repo_name: passport
       staging_frontend_branch: staging-app
       production_frontend_branch: production-app
-      staging_domain: iam.staging.passport.gitcoin.co
+      staging_domain: staging.passport.gitcoin.co
       production_domain: passport-iam.gitcoin.co
       ecr_repository: passport
     secrets: inherit
