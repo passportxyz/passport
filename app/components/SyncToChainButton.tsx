@@ -12,7 +12,7 @@ import GitcoinAttester from "../contracts/GitcoinAttester.json";
 import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
-import { VerifiableCredential } from "@gitcoin/passport-types";
+import { VerifiableCredential, EasPayload } from "@gitcoin/passport-types";
 
 const SyncToChainButton = () => {
   const { passport } = useContext(CeramicContext);
@@ -26,7 +26,10 @@ const SyncToChainButton = () => {
         setSyncingToChain(true);
         const credentials = passport.stamps.map(({ credential }: { credential: VerifiableCredential }) => credential);
 
-        const { data } = await axios.post(`${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas`, credentials);
+        const { data }: { data: EasPayload } = await axios.post(
+          `${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas`,
+          credentials
+        );
 
         if (data.error) console.log("error syncing credentials to chain: ", data.error, "credentials: ", credentials);
         if (data.invalidCredentials.length > 0)
@@ -47,7 +50,8 @@ const SyncToChainButton = () => {
             data.passport,
             v,
             r,
-            s
+            s,
+            { value: data.passport.fee }
           );
           toast({
             title: "Submitted",

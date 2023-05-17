@@ -27,9 +27,12 @@ import {
   CheckRequestBody,
   CheckResponseBody,
   VerifiableCredential,
+  EasStamp,
+  EasPayload,
 } from "@gitcoin/passport-types";
 
 import { getChallenge } from "./utils/challenge";
+import { getEASFeeAmount } from "./utils/easFees";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
@@ -79,6 +82,7 @@ const ATTESTER_TYPES = {
     { name: "revocable", type: "bool" },
     { name: "refUID", type: "bytes32" },
     { name: "value", type: "uint256" },
+    { name: "fee", type: "bytes32" },
   ],
 };
 
@@ -350,32 +354,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
     });
 });
 
-export type EasStamp = {
-  provider: string;
-  stampHash: string;
-  expirationDate: string;
-  encodedData: string;
-};
-
-type EasPassport = {
-  stamps: EasStamp[];
-  recipient: string;
-  expirationTime: number;
-  revocable: boolean;
-  refUID: string;
-  value: number;
-};
-
-type EasPayload = {
-  passport: EasPassport;
-  signature: {
-    v: number;
-    r: string;
-    s: string;
-  };
-  invalidCredentials: VerifiableCredential[];
-};
-
 // Expose entry point for getting eas payload for moving stamps on-chain
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
@@ -395,7 +373,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
       };
     })
   )
-    .then((credentialVerifications) => {
+    .then(async (credentialVerifications) => {
       const invalidCredentials = credentialVerifications
         .filter(({ verified }) => !verified)
         .map(({ credential }) => credential);
@@ -417,13 +395,16 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 
       if (!stamps.length) return void errorRes(res, "No verifiable stamps provided", 400);
 
-      const easPassport: EasPassport = {
+      const fee = await getEASFeeAmount(stamps.length);
+
+      const easPassport = {
         stamps,
         recipient,
         expirationTime: NO_EXPIRATION,
         revocable: true,
         refUID: ZERO_BYTES32,
         value: 0,
+        fee,
       };
 
       attestationSignerWallet

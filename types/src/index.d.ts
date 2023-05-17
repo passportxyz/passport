@@ -166,6 +166,34 @@ export type PassportLoadResponse = {
   errorDetails?: PassportLoadErrorDetails;
 };
 
+export type EasStamp = {
+  provider: string;
+  stampHash: string;
+  expirationDate: string;
+  encodedData: string;
+};
+
+export type EasPassport = {
+  stamps: EasStamp[];
+  recipient: string;
+  expirationTime: number;
+  revocable: boolean;
+  refUID: string;
+  value: number;
+  fee: string;
+};
+
+export type EasPayload = {
+  passport: EasPassport;
+  signature: {
+    v: number;
+    r: string;
+    s: string;
+  };
+  invalidCredentials: VerifiableCredential[];
+  error?: string;
+};
+
 // Passport DID
 export type DID = string;
 
