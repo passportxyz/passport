@@ -122,9 +122,9 @@ describe("SideBarContent", () => {
     props.currentProviders?.forEach((stamp) => {
       stamp.providers.forEach((provider, i) => {
         if (verifiedProviders.includes(provider.name as PROVIDER_ID)) {
-          expect(screen.getByTestId(`switch-${i}`)).toHaveAttribute("data-checked");
+          expect(screen.getByTestId(`switch-${i}`)).toHaveAttribute("data-headlessui-state", "checked");
         } else {
-          expect(screen.getByTestId(`switch-${i}`).attributes).not.toContain("data-checked");
+          expect(screen.getByTestId(`switch-${i}`).attributes).not.toContain("data-headlessui-state");
         }
       });
     });

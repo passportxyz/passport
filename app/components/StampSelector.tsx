@@ -1,12 +1,12 @@
+import React, { useContext } from "react";
 import { useRouter } from "next/router";
-import { Switch } from "@chakra-ui/react";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { PlatformGroupSpec } from "../config/providers";
 import { getStampProviderFilters } from "../config/filters";
 import { OnChainContext, OnChainProvidersType } from "../context/onChainContext";
 import { LinkIcon } from "@heroicons/react/20/solid";
-import { useContext } from "react";
+import Toggle from "./Toggle";
 
 type StampSelectorProps = {
   currentPlatform?: PlatformSpec | undefined;
@@ -70,9 +70,7 @@ export function StampSelector({
                 })}
               </ul>
               <div className="align-right flex">
-                <Switch
-                  colorScheme="accent"
-                  size="lg"
+                <Toggle
                   data-testid={`switch-${i}`}
                   isChecked={
                     stamp.providers?.reduce(
@@ -81,14 +79,14 @@ export function StampSelector({
                       false as boolean // typing the response - always bool
                     ) || false
                   }
-                  onChange={(e) => {
+                  onChange={(checked: boolean) => {
                     // grab all provider_ids for this group of stamps
                     const providerIds = stamp.providers?.map((provider) => provider.name as PROVIDER_ID);
 
                     // set the selected items by concating or filtering by providerId
                     setSelectedProviders &&
                       setSelectedProviders(
-                        e.target.checked
+                        checked
                           ? (selectedProviders || []).concat(providerIds)
                           : (selectedProviders || []).filter((id) => !providerIds.includes(id))
                       );

@@ -5,7 +5,7 @@ import { useMemo, useState, useRef } from "react";
 import { ValidatedProviderGroup } from "../signer/utils";
 
 // --- UI components
-import { Switch, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon } from "@chakra-ui/react";
+import { Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon } from "@chakra-ui/react";
 
 // --- Utils
 import { PlatformSpec } from "@gitcoin/passport-platforms";
@@ -13,6 +13,7 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 // --- App components
 import { RefreshMyStampsSelector } from "../components/RefreshMyStampsSelector";
+import Toggle from "./Toggle";
 
 type RefreshMyStampsModalCardProps = {
   platformGroups: ValidatedProviderGroup[];
@@ -57,19 +58,17 @@ export const RefreshMyStampsModalContentCard = ({
               </AccordionButton>
             </div>
             <div className="grid grid-cols-2 items-center justify-end gap-8">
-              <Switch
+              <Toggle
                 data-testid={`switch-${currentPlatform?.name}`}
-                value={`${currentPlatform?.name}`}
-                colorScheme="purple"
                 isChecked={checked}
-                onChange={(e) => {
-                  if (!e.target.checked && accordionExpanded) {
+                onChange={(checked: boolean) => {
+                  if (!checked && accordionExpanded) {
                     // collapse before disabling accordion
                     accordionButton.current?.click();
                     setAccordionExpanded(false);
                   }
                   setDisableExpand(!disableExpand);
-                  if (e.target.checked) {
+                  if (checked) {
                     setSelectedProviders((selectedProviders || []).concat(platformProviders));
                   } else {
                     setSelectedProviders(
