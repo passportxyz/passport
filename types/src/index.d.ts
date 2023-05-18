@@ -181,6 +181,7 @@ export type EasPassport = {
   revocable: boolean;
   refUID: string;
   value: any;
+  nonce: number;
   fee: any;
 };
 
@@ -193,6 +194,11 @@ export type EasPayload = {
   };
   invalidCredentials: VerifiableCredential[];
   error?: string;
+};
+
+export type EasRequestBody = {
+  nonce: number;
+  credentials: VerifiableCredential[];
 };
 
 // Passport DID

@@ -37,7 +37,7 @@ import { ExpiredStampModal } from "../components/ExpiredStampModal";
 import ProcessingPopup from "../components/ProcessingPopup";
 import SyncToChainButton from "../components/SyncToChainButton";
 import { getFilterName } from "../config/filters";
-import { sepoliaChainId } from "../utils/onboard";
+import { hardhatChainId, sepoliaChainId } from "../utils/onboard";
 
 const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
 const isOnChainSyncEnabled = process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on";
@@ -258,8 +258,9 @@ export default function Dashboard() {
             </div>
           )}
 
+
           <div className="ml-4 flex flex-col place-items-center gap-4 md:flex-row">
-            {isOnChainSyncEnabled && wallet?.chains[0].id === sepoliaChainId && <SyncToChainButton />}
+            {isOnChainSyncEnabled && (wallet?.chains[0].id === sepoliaChainId || wallet?.chains[0].id === hardhatChainId) && <SyncToChainButton />}
             {passport ? (
               <button
                 data-testid="button-passport-json-mobile"

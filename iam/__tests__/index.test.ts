@@ -19,6 +19,7 @@ import {
   ProviderContext,
   RequestPayload,
   ValidResponseBody,
+  VerifiableCredential,
   VerifiedPayload,
 } from "@gitcoin/passport-types";
 
@@ -720,8 +721,12 @@ describe("POST /check", function () {
 });
 
 describe("POST /eas", () => {
+  let getEASFeeAmountSpy: jest.SpyInstance;
   beforeEach(() => {
     jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+    getEASFeeAmountSpy = jest
+      .spyOn(easFeesMock, "getEASFeeAmount")
+      .mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
   });
 
   afterEach(() => {
@@ -730,6 +735,7 @@ describe("POST /eas", () => {
   });
 
   it("handles valid requests including some invalid credentials", async () => {
+    const nonce = 0;
     const failedCredential = {
       "@context": "https://www.w3.org/2018/credentials/v1",
       type: ["VerifiableCredential", "Stamp"],
@@ -774,6 +780,8 @@ describe("POST /eas", () => {
         revocable: true,
         refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
         value: 0,
+        fee: "25000000000000000",
+        nonce,
       },
       signature: expect.any(Object),
       invalidCredentials: [failedCredential],
@@ -781,16 +789,17 @@ describe("POST /eas", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas")
-      .send(credentials)
+      .send({ credentials, nonce })
       .set("Accept", "application/json")
       .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(response.body).toMatchObject(expectedPayload);
+    expect(response.body).toEqual(expectedPayload);
     expect(response.body.signature.r).toBe("r");
   });
 
   it("handles request with only invalid credentials", async () => {
+    const nonce = 0;
     const failedCredential = {
       "@context": "https://www.w3.org/2018/credentials/v1",
       type: ["VerifiableCredential", "Stamp"],
@@ -808,7 +817,7 @@ describe("POST /eas", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas")
-      .send(credentials)
+      .send({ credentials, nonce })
       .set("Accept", "application/json")
       .expect(400)
       .expect("Content-Type", /json/);
@@ -817,9 +826,11 @@ describe("POST /eas", () => {
   });
 
   it("handles missing stamps in the request body", async () => {
+    const nonce = 0;
+    const credentials: VerifiableCredential[] = [];
     const response = await request(app)
       .post("/api/v0.0.0/eas")
-      .send([])
+      .send({ credentials, nonce })
       .set("Accept", "application/json")
       .expect(400)
       .expect("Content-Type", /json/);
@@ -828,6 +839,7 @@ describe("POST /eas", () => {
   });
 
   it("handles invalid recipient in the request body", async () => {
+    const nonce = 0;
     const credentials = [
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
@@ -845,7 +857,7 @@ describe("POST /eas", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas")
-      .send(credentials)
+      .send({ credentials, nonce })
       .set("Accept", "application/json")
       .expect(400)
       .expect("Content-Type", /json/);
@@ -854,9 +866,7 @@ describe("POST /eas", () => {
   });
 
   it("returns the fee information in the response as wei units", async () => {
-    const getEASFeeAmountSpy = jest
-      .spyOn(easFeesMock, "getEASFeeAmount")
-      .mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
+    const nonce = 0;
     const expectedFeeUsd = 2;
 
     const credentials = [
@@ -896,7 +906,7 @@ describe("POST /eas", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas")
-      .send(credentials)
+      .send({ credentials, nonce })
       .set("Accept", "application/json")
       .expect(200)
       .expect("Content-Type", /json/);

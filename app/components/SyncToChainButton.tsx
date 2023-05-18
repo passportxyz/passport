@@ -16,7 +16,7 @@ import { VerifiableCredential, EasPayload } from "@gitcoin/passport-types";
 
 const SyncToChainButton = () => {
   const { passport } = useContext(CeramicContext);
-  const { wallet } = useContext(UserContext);
+  const { wallet, address } = useContext(UserContext);
   const [syncingToChain, setSyncingToChain] = useState(false);
   const toast = useToast();
 
@@ -25,24 +25,42 @@ const SyncToChainButton = () => {
       try {
         setSyncingToChain(true);
         const credentials = passport.stamps.map(({ credential }: { credential: VerifiableCredential }) => credential);
-
-        const { data }: { data: EasPayload } = await axios.post(
-          `${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas`,
-          credentials
+        const ethersProvider = new ethers.BrowserProvider(wallet.provider, "any");
+        const gitcoinAttesterContract = new ethers.Contract(
+          process.env.NEXT_PUBLIC_GITCOIN_ATTESTER_CONTRACT_ADDRESS as string,
+          GitcoinAttester.abi,
+          await ethersProvider.getSigner()
         );
+        const nonce = await gitcoinAttesterContract.recipientNonces(address);
 
-        if (data.error) console.log("error syncing credentials to chain: ", data.error, "credentials: ", credentials);
+        const { data }: { data: EasPayload } = await axios({
+          method: "post",
+          url: `${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas`,
+          data: {
+            credentials,
+            nonce,
+          },
+          headers: {
+            "Content-Type": "application/json",
+          },
+          transformRequest: [(data) => JSON.stringify(data, (k, v) => (typeof v === "bigint" ? v.toString() : v))],
+        });
+
+
+        if (data.error)
+          console.log(
+            "error syncing credentials to chain: ",
+            data.error,
+            "credentials: ",
+            credentials,
+            "nonce:",
+            nonce
+          );
         if (data.invalidCredentials.length > 0)
           console.log("not syncing invalid credentials: ", data.invalidCredentials);
         // TODO info toast for invalid credentials
 
         if (data.passport) {
-          const ethersProvider = new ethers.BrowserProvider(wallet.provider, "any");
-          const gitcoinAttesterContract = new ethers.Contract(
-            process.env.NEXT_PUBLIC_GITCOIN_ATTESTER_CONTRACT_ADDRESS as string,
-            GitcoinAttester.abi,
-            await ethersProvider.getSigner()
-          );
           const { v, r, s } = data.signature;
 
           const transaction = await gitcoinAttesterContract.addPassportWithSignature(
