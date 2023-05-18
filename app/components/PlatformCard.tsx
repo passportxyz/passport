@@ -113,13 +113,6 @@ export const PlatformCard = ({
               </svg>
             )}
           </div>
-          {updatedPlatforms &&
-            updatedPlatforms[platform.name] !== true &&
-            selectedProviders[platform.platform].length > 0 && (
-              <div className="inline-flex h-6 items-center rounded-xl border border-accent-3 px-2 text-xs text-accent-3">
-                Update
-              </div>
-            )}
         </div>
         <div className="flex justify-center px-2 py-0 pb-6 md:block md:justify-start md:px-6">
           <h1 className="mb-0 text-lg md:mb-3">{platform.name}</h1>
