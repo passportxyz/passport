@@ -22,7 +22,7 @@ import {
   Snapshot,
   Twitter,
   ZkSync,
-} from "./index";
+} from "./";
 
 export const getPlatformSpec = (platformName: string): PlatformSpec | undefined => {
   let platformspec: PlatformSpec | undefined = undefined;

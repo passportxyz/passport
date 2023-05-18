@@ -1,5 +1,5 @@
-import { PLATFORM_ID } from "@gitcoin/passport-types";
 import {
+  PlatformSpec,
   Brightid,
   Coinbase,
   Discord,
@@ -23,15 +23,6 @@ import {
   Twitter,
   ZkSync,
 } from "@gitcoin/passport-platforms";
-
-export type PlatformSpec = {
-  icon?: string | undefined;
-  platform: PLATFORM_ID;
-  name: string;
-  description: string;
-  connectMessage: string;
-  isEVM?: boolean;
-};
 
 export const getPlatformSpec = (platformName: string): PlatformSpec | undefined => {
   let platformspec: PlatformSpec | undefined = undefined;
