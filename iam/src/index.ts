@@ -26,7 +26,6 @@ import {
   ProviderContext,
   CheckRequestBody,
   CheckResponseBody,
-  VerifiableCredential,
   EasStamp,
   EasPayload,
   EasPassport,
@@ -426,7 +425,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 
         const fee = await getEASFeeAmount(2);
 
-        const easPassport = {
+        const easPassport: EasPassport = {
           stamps,
           recipient,
           expirationTime: NO_EXPIRATION,
@@ -435,17 +434,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           value: 0,
           fee: fee.toString(),
           nonce,
-          fee
         };
-
-        Promise.all(
-          credentials.map(async (credential) => {
-            return {
-              credential,
-              verified: issuer === credential.issuer && (await verifyCredential(DIDKit, credential)),
-            };
-          })
-        );
 
         attestationSignerWallet
           ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, easPassport)
