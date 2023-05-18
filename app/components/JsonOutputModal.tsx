@@ -56,15 +56,14 @@ export const JsonOutputModal = ({
         maxW="80%"
         maxH="80%"
         background="var(--color-background-2)"
-        textColor="var(--color-text)"
         border="solid 1px var(--color-accent-2)"
       >
         <ModalHeader borderBottomWidth={2} borderBottomColor="var(--color-accent2)">
-          <p className="font-miriam-libre text-color-1">{title}</p>
-          <p className="font-miriam-libre text-base font-normal text-color-1">{subheading}</p>
+          <p className="text-color-1">{title}</p>
+          <p className="text-base text-color-1">{subheading}</p>
         </ModalHeader>
         <ModalCloseButton color="var(--color-text-1)" />
-        <ModalBody className="font-miriam-libre overflow-auto text-color-4">
+        <ModalBody className="overflow-auto text-color-4">
           <pre data-testid="passport-json">{JSON.stringify(jsonOutput, null, "\t")}</pre>
         </ModalBody>
 
@@ -81,7 +80,7 @@ export const JsonOutputModal = ({
           >
             <ArrowDownTrayIcon fill="var(--color-text-1)" />
             &nbsp;
-            <span className="font-miriam-libre text-color-1">{"Download"}</span>
+            <span className="text-color-1">{"Download"}</span>
           </Button>
           <Button
             data-testid="button-passport-json-done"
@@ -91,7 +90,7 @@ export const JsonOutputModal = ({
             mr={3}
             onClick={onClose}
           >
-            <span className="font-miriam-libre">{closeButtonText || "Done"}</span>
+            <span>{closeButtonText || "Done"}</span>
           </Button>
         </ModalFooter>
       </ModalContent>

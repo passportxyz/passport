@@ -137,7 +137,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
                 />
               </button>
               <div className="flex-grow pl-6">
-                <h2 className="title-font mb-2 text-lg font-bold">Sponsored through Gitcoin for Bright ID</h2>
+                <h2 className="mb-2 text-lg font-bold">Sponsored through Gitcoin for Bright ID</h2>
                 <p className="text-base leading-relaxed">{`For verification status updates, check BrightID's App.`}</p>
                 <p className="text-base leading-relaxed">
                   Once you are verified by BrightID - return here to complete this Stamp.

@@ -1,6 +1,7 @@
 import { JsonRpcSigner } from "@ethersproject/providers";
 // BrightId Shared Types
 export { BrightIdProcedureResponse, BrightIdVerificationResponse, BrightIdSponsorshipResponse } from "./brightid";
+import { BigNumber } from "@ethersproject/bignumber";
 
 // Typing for required parts of DIDKit
 export type DIDKitLib = {
@@ -166,6 +167,34 @@ export type PassportLoadResponse = {
   errorDetails?: PassportLoadErrorDetails;
 };
 
+export type EasStamp = {
+  provider: string;
+  stampHash: string;
+  expirationDate: string;
+  encodedData: string;
+};
+
+export type EasPassport = {
+  stamps: EasStamp[];
+  recipient: string;
+  expirationTime: any;
+  revocable: boolean;
+  refUID: string;
+  value: any;
+  fee: any;
+};
+
+export type EasPayload = {
+  passport: EasPassport;
+  signature: {
+    v: number;
+    r: string;
+    s: string;
+  };
+  invalidCredentials: VerifiableCredential[];
+  error?: string;
+};
+
 // Passport DID
 export type DID = string;
 
@@ -207,7 +236,6 @@ export type PROVIDER_ID =
   | "TwitterFollowerGT5000"
   | "POAP"
   | "Facebook"
-  | "FacebookFriends"
   | "FacebookProfilePicture"
   | "Brightid"
   | "Github"

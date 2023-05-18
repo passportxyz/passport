@@ -27,9 +27,12 @@ import {
   CheckRequestBody,
   CheckResponseBody,
   VerifiableCredential,
+  EasStamp,
+  EasPayload,
 } from "@gitcoin/passport-types";
 
 import { getChallenge } from "./utils/challenge";
+import { getEASFeeAmount } from "./utils/easFees";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
@@ -43,8 +46,33 @@ import {
 import { providers } from "@gitcoin/passport-platforms";
 import { log } from "console";
 
+// ---- Config - check for all required env variables
+// We want to prevent the app from starting with default values or if it is misconfigured
+const configErrors = [];
+
+if (!process.env.IAM_JWK) {
+  configErrors.push("IAM_JWK is required");
+}
+
+if (!process.env.ATTESTATION_SIGNER_PRIVATE_KEY) {
+  configErrors.push("ATTESTATION_SIGNER_PRIVATE_KEY is required");
+}
+
+if (!process.env.GITCOIN_ATTESTER_CHAIN_ID) {
+  configErrors.push("GITCOIN_ATTESTER_CHAIN_ID is required");
+}
+
+if (!process.env.GITCOIN_ATTESTER_CONTRACT_ADDRESS) {
+  configErrors.push("GITCOIN_ATTESTER_CONTRACT_ADDRESS is required");
+}
+
+if (configErrors.length > 0) {
+  configErrors.forEach((error) => console.error(error));
+  throw new Error("Missing required configuration");
+}
+
 // get DID from key
-const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
+const key = process.env.IAM_JWK;
 const issuer = DIDKit.keyToDID("key", key);
 
 // export the current config
@@ -81,6 +109,7 @@ const ATTESTER_TYPES = {
     { name: "refUID", type: "bytes32" },
     { name: "value", type: "uint256" },
     { name: "nonce", type: "uint256" },
+    { name: "fee", type: "uint256" },
   ],
 };
 
@@ -352,33 +381,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
     });
 });
 
-export type EasStamp = {
-  provider: string;
-  stampHash: string;
-  expirationDate: string;
-  encodedData: string;
-};
-
-type EasPassport = {
-  stamps: EasStamp[];
-  recipient: string;
-  expirationTime: number;
-  revocable: boolean;
-  refUID: string;
-  value: number;
-  nonce: number;
-};
-
-type EasPayload = {
-  passport: EasPassport;
-  signature: {
-    v: number;
-    r: string;
-    s: string;
-  };
-  invalidCredentials: VerifiableCredential[];
-};
-
 type EasRequestBody = {
   nonce: number;
   credentials: VerifiableCredential[];
@@ -389,13 +391,58 @@ type EasRequestBody = {
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
   try {
     const { credentials, nonce } = req.body as EasRequestBody;
+  if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
 
-    if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
+  const recipient = credentials[0].credentialSubject.id.split(":")[4];
 
-    const recipient = credentials[0].credentialSubject.id.split(":")[4];
+  if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
+    return void errorRes(res, "Invalid recipient", 400);
 
-    if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
+  Promise.all(
+    credentials.map(async (credential) => {
+      return {
+        credential,
+        verified: issuer === credential.issuer && (await verifyCredential(DIDKit, credential)),
+      };
+    })
+  )
+    .then(async (credentialVerifications) => {
+      const invalidCredentials = credentialVerifications
+        .filter(({ verified }) => !verified)
+        .map(({ credential }) => credential);
+
+      const stamps: EasStamp[] = credentialVerifications
+        .filter(({ verified }) => verified)
+        .map(({ credential }) => {
+          const encodedData = attestationSchemaEncoder.encodeData([
+            { name: "provider", value: credential.credentialSubject.provider, type: "string" },
+            { name: "hash", value: credential.credentialSubject.hash, type: "string" },
+          ]);
+          return {
+            provider: credential.credentialSubject.provider,
+            stampHash: credential.credentialSubject.hash,
+            expirationDate: credential.expirationDate,
+            encodedData,
+          };
+        });
+
+     if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
       return void errorRes(res, "Invalid recipient", 400);
+    
+      const fee = await getEASFeeAmount(2);
+
+      const easPassport = {
+        stamps,
+        recipient,
+        expirationTime: NO_EXPIRATION,
+        revocable: true,
+        refUID: ZERO_BYTES32,
+        value: 0,
+        fee: fee.toString(),
+        nonce,
+      };
+
+   
 
     Promise.all(
       credentials.map(async (credential) => {
@@ -460,7 +507,6 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
         return void errorRes(res, String(error), 500);
       });
   } catch (error) {
-    console.log(error);
     return void errorRes(res, String(error), 500);
   }
 });

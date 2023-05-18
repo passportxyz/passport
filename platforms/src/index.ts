@@ -64,7 +64,6 @@ export const providers = new Providers([
   new Poh.PohProvider(),
   new POAP.POAPProvider(),
   new Facebook.FacebookProvider(),
-  new Facebook.FacebookFriendsProvider(),
   new Facebook.FacebookProfilePictureProvider(),
   new Brightid.BrightIdProvider(),
   new Github.GithubProvider(),

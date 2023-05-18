@@ -1,8 +1,8 @@
 // import React from "react";
 
 // --- Types
-import { CredentialResponseBody, Passport, PROVIDER_ID, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
-import { Providers, STAMP_PROVIDERS } from "../config/providers";
+import { CredentialResponseBody, PROVIDER_ID, VerifiableCredential } from "@gitcoin/passport-types";
+import axios, { AxiosResponse } from "axios";
 
 // --- Stamp Data Point Helpers
 export function difference(setA: Set<PROVIDER_ID>, setB: Set<PROVIDER_ID>) {
@@ -57,3 +57,32 @@ export function checkShowOnboard(): boolean {
 
   return onBoardOlderThanThreeMonths;
 }
+
+/**
+ * Fetch data from a GraphQL endpoint
+ *
+ * @param endpoint - The graphql endpoint
+ * @param query - The query to be executed
+ * @param variables - The variables to be used in the query
+ * @returns The result of the query
+ */
+export const graphql_fetch = async (endpoint: URL, query: string, variables: object = {}) => {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  try {
+    const resp: AxiosResponse<any> = await axios.post(endpoint.toString(), JSON.stringify({ query, variables }), {
+      headers,
+    });
+    return Promise.resolve(resp.data);
+  } catch (error: any) {
+    if (error.response) {
+      throw new Error(error.response.data);
+    } else if (error.request) {
+      throw new Error(`No response received: ${error.request}`);
+    } else {
+      throw new Error(`Request error: ${error.message}`);
+    }
+  }
+};

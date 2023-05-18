@@ -12,7 +12,7 @@ import GitcoinAttester from "../contracts/GitcoinAttester.json";
 import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
-import { VerifiableCredential } from "@gitcoin/passport-types";
+import { VerifiableCredential, EasPayload } from "@gitcoin/passport-types";
 
 const SyncToChainButton = () => {
   const { passport } = useContext(CeramicContext);
@@ -33,7 +33,7 @@ const SyncToChainButton = () => {
         );
         const nonce = await gitcoinAttesterContract.recipientNonces(address);
 
-        const { data } = await axios({
+        const { data }: { data: EasPayload } = await axios({
           method: "post",
           url: `${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas`,
           data: {
@@ -45,6 +45,7 @@ const SyncToChainButton = () => {
           },
           transformRequest: [(data) => JSON.stringify(data, (k, v) => (typeof v === "bigint" ? v.toString() : v))],
         });
+
 
         if (data.error)
           console.log(
@@ -67,7 +68,8 @@ const SyncToChainButton = () => {
             data.passport,
             v,
             r,
-            s
+            s,
+            { value: data.passport.fee }
           );
           toast({
             title: "Submitted",

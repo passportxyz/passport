@@ -76,7 +76,6 @@ describe("ExpiredStampModal", () => {
     expect(handleDeleteStamps).toHaveBeenCalledWith([
       "Ens",
       "Facebook",
-      "FacebookFriends",
       "FacebookProfilePicture",
       "Github",
       "FiveOrMoreGithubRepos",

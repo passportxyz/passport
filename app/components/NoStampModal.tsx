@@ -37,7 +37,11 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
       blockScrollOnMount={false}
     >
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent
+        background="var(--color-background-2)"
+        textColor="var(--color-text-1)"
+        border="solid 1px var(--color-accent-2)"
+      >
         <div className="m-3 flex flex-col items-center">
           <button
             onClick={() => {
@@ -102,7 +106,7 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
                       className="my-auto mr-2"
                     />
                   )}
-                  Try another stamp
+                  Try another wallet
                 </button>
               </div>
             </>
