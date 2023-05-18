@@ -157,9 +157,9 @@ const issueCredential = async (
     throw error && (error as CredentialResponseBody).error
       ? error
       : {
-        error: "Unable to verify with provider",
-        code: 400,
-      };
+          error: "Unable to verify with provider",
+          code: 400,
+        };
   }
 };
 

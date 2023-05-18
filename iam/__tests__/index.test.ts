@@ -847,7 +847,9 @@ describe("POST /eas", () => {
   });
 
   it("returns the fee information in the response as wei units", async () => {
-    const getEASFeeAmountSpy = jest.spyOn(easFeesMock, "getEASFeeAmount").mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
+    const getEASFeeAmountSpy = jest
+      .spyOn(easFeesMock, "getEASFeeAmount")
+      .mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
     const expectedFeeUsd = 2;
 
     const credentials = [
