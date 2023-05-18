@@ -1,5 +1,13 @@
 // ---- Testing libraries
 import request from "supertest";
+import * as DIDKit from "@spruceid/didkit-wasm-node";
+
+// --- Mocks - test configuration
+
+process.env.IAM_JWK = DIDKit.generateEd25519Key();
+process.env.ATTESTATION_SIGNER_PRIVATE_KEY = "0x04d16281ff3bf268b29cdd684183f72542757d24ae9fdfb863e7c755e599163a";
+process.env.GITCOIN_ATTESTER_CHAIN_ID = "11155111";
+process.env.GITCOIN_ATTESTER_CONTRACT_ADDRESS = "0xD8088f772006CAFD81082e8e2e467fA18564e879";
 
 // ---- Test subject
 import { app, config } from "../src/index";
