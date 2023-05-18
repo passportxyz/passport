@@ -721,8 +721,12 @@ describe("POST /check", function () {
 });
 
 describe("POST /eas", () => {
+  let getEASFeeAmountSpy: jest.SpyInstance;
   beforeEach(() => {
     jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+    getEASFeeAmountSpy = jest
+      .spyOn(easFeesMock, "getEASFeeAmount")
+      .mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
   });
 
   afterEach(() => {
@@ -776,6 +780,7 @@ describe("POST /eas", () => {
         revocable: true,
         refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
         value: 0,
+        fee: "25000000000000000",
         nonce,
       },
       signature: expect.any(Object),
@@ -861,9 +866,7 @@ describe("POST /eas", () => {
   });
 
   it("returns the fee information in the response as wei units", async () => {
-    const getEASFeeAmountSpy = jest
-      .spyOn(easFeesMock, "getEASFeeAmount")
-      .mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
+    const nonce = 0;
     const expectedFeeUsd = 2;
 
     const credentials = [
@@ -903,7 +906,7 @@ describe("POST /eas", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas")
-      .send(credentials)
+      .send({ credentials, nonce })
       .set("Accept", "application/json")
       .expect(200)
       .expect("Content-Type", /json/);

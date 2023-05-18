@@ -391,58 +391,12 @@ type EasRequestBody = {
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
   try {
     const { credentials, nonce } = req.body as EasRequestBody;
-  if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
+    if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
 
-  const recipient = credentials[0].credentialSubject.id.split(":")[4];
+    const recipient = credentials[0].credentialSubject.id.split(":")[4];
 
-  if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
-    return void errorRes(res, "Invalid recipient", 400);
-
-  Promise.all(
-    credentials.map(async (credential) => {
-      return {
-        credential,
-        verified: issuer === credential.issuer && (await verifyCredential(DIDKit, credential)),
-      };
-    })
-  )
-    .then(async (credentialVerifications) => {
-      const invalidCredentials = credentialVerifications
-        .filter(({ verified }) => !verified)
-        .map(({ credential }) => credential);
-
-      const stamps: EasStamp[] = credentialVerifications
-        .filter(({ verified }) => verified)
-        .map(({ credential }) => {
-          const encodedData = attestationSchemaEncoder.encodeData([
-            { name: "provider", value: credential.credentialSubject.provider, type: "string" },
-            { name: "hash", value: credential.credentialSubject.hash, type: "string" },
-          ]);
-          return {
-            provider: credential.credentialSubject.provider,
-            stampHash: credential.credentialSubject.hash,
-            expirationDate: credential.expirationDate,
-            encodedData,
-          };
-        });
-
-     if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
+    if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
       return void errorRes(res, "Invalid recipient", 400);
-    
-      const fee = await getEASFeeAmount(2);
-
-      const easPassport = {
-        stamps,
-        recipient,
-        expirationTime: NO_EXPIRATION,
-        revocable: true,
-        refUID: ZERO_BYTES32,
-        value: 0,
-        fee: fee.toString(),
-        nonce,
-      };
-
-   
 
     Promise.all(
       credentials.map(async (credential) => {
@@ -452,7 +406,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
         };
       })
     )
-      .then((credentialVerifications) => {
+      .then(async (credentialVerifications) => {
         const invalidCredentials = credentialVerifications
           .filter(({ verified }) => !verified)
           .map(({ credential }) => credential);
@@ -471,18 +425,29 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
               encodedData,
             };
           });
-
         if (!stamps.length) return void errorRes(res, "No verifiable stamps provided", 400);
 
-        const easPassport: EasPassport = {
+        const fee = await getEASFeeAmount(2);
+
+        const easPassport = {
           stamps,
           recipient,
           expirationTime: NO_EXPIRATION,
           revocable: true,
           refUID: ZERO_BYTES32,
           value: 0,
+          fee: fee.toString(),
           nonce,
         };
+
+        Promise.all(
+          credentials.map(async (credential) => {
+            return {
+              credential,
+              verified: issuer === credential.issuer && (await verifyCredential(DIDKit, credential)),
+            };
+          })
+        );
 
         attestationSignerWallet
           ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, easPassport)
