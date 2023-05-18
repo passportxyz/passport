@@ -17,5 +17,5 @@ export async function getEASFeeAmount(usdAmount: number): Promise<BigNumber> {
   });
 
   const ethAmount = usdAmount / ethUSD.data.ethereum.usd;
-  return utils.parseEther(ethAmount.toFixed(18)
+  return utils.parseEther(ethAmount.toFixed(18));
 }

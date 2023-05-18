@@ -715,7 +715,11 @@ describe("POST /check", function () {
 describe("POST /eas", () => {
   beforeEach(() => {
     jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
-    jest.spyOn(easFeesMock, "getEASFeeAmount").mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
+  });
+
+  afterEach(() => {
+    // restore the spy created with spyOn
+    jest.restoreAllMocks();
   });
 
   it("handles valid requests including some invalid credentials", async () => {
@@ -842,7 +846,10 @@ describe("POST /eas", () => {
     expect(response.body.error).toEqual("Invalid recipient");
   });
 
-  it("returns the fee information in the response", async () => {
+  it("returns the fee information in the response as wei units", async () => {
+    const getEASFeeAmountSpy = jest.spyOn(easFeesMock, "getEASFeeAmount").mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
+    const expectedFeeUsd = 2;
+
     const credentials = [
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
@@ -876,7 +883,6 @@ describe("POST /eas", () => {
         fee: "25000000000000000",
       },
       signature: expect.any(Object),
-      // invalidCredentials: [],
     };
 
     const response = await request(app)
@@ -887,6 +893,7 @@ describe("POST /eas", () => {
       .expect("Content-Type", /json/);
 
     expect(response.body).toMatchObject(expectedPayload);
-    expect(response.body.signature.r).toBe("r");
+    expect(getEASFeeAmountSpy).toHaveBeenCalledTimes(1);
+    expect(getEASFeeAmountSpy).toHaveBeenCalledWith(expectedFeeUsd);
   });
 });
