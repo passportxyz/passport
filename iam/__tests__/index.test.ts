@@ -769,9 +769,6 @@ describe("POST /eas", () => {
       passport: {
         stamps: [
           {
-            provider: "test",
-            stampHash: "test",
-            expirationDate: "9999-12-31T23:59:59Z",
             encodedData: "0x1234",
           },
         ],
@@ -888,9 +885,6 @@ describe("POST /eas", () => {
       passport: {
         stamps: [
           {
-            provider: "test",
-            stampHash: "test",
-            expirationDate: "9999-12-31T23:59:59Z",
             encodedData: "0x1234",
           },
         ],
