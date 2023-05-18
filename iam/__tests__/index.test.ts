@@ -778,7 +778,7 @@ describe("POST /eas", () => {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(response.body).toMatchObject(expectedPayload);
+    expect(response.body).toEqual(expectedPayload);
     expect(response.body.signature.r).toBe("r");
   });
 
