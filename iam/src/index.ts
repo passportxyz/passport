@@ -45,8 +45,33 @@ import {
 // All provider exports from platforms
 import { providers } from "@gitcoin/passport-platforms";
 
+// ---- Config - check for all required env variables
+// We want to prevent the app from starting with default values or if it is misconfigured
+const configErrors = [];
+
+if (!process.env.IAM_JWK) {
+  configErrors.push("IAM_JWK is required");
+}
+
+if (!process.env.ATTESTATION_SIGNER_PRIVATE_KEY) {
+  configErrors.push("ATTESTATION_SIGNER_PRIVATE_KEY is required");
+}
+
+if (!process.env.GITCOIN_ATTESTER_CHAIN_ID) {
+  configErrors.push("GITCOIN_ATTESTER_CHAIN_ID is required");
+}
+
+if (!process.env.GITCOIN_ATTESTER_CONTRACT_ADDRESS) {
+  configErrors.push("GITCOIN_ATTESTER_CONTRACT_ADDRESS is required");
+}
+
+if (configErrors.length > 0) {
+  configErrors.forEach((error) => console.error(error));
+  throw new Error("Missing required configuration");
+}
+
 // get DID from key
-const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
+const key = process.env.IAM_JWK;
 const issuer = DIDKit.keyToDID("key", key);
 
 // export the current config
@@ -58,16 +83,14 @@ export const config: {
   issuer,
 };
 
-const attestationSignerWallet = new ethers.Wallet(
-  process.env.ATTESTATION_SIGNER_PRIVATE_KEY || "0x04d16281ff3bf268b29cdd684183f72542757d24ae9fdfb863e7c755e599163a"
-);
+const attestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
 const attestationSchemaEncoder = new SchemaEncoder("string provider, string hash");
 
 const ATTESTER_DOMAIN = {
   name: "Attester",
   version: "1",
-  chainId: process.env.GITCOIN_ATTESTER_CHAIN_ID || "11155111",
-  verifyingContract: process.env.GITCOIN_ATTESTER_CONTRACT_ADDRESS || "0xD8088f772006CAFD81082e8e2e467fA18564e879",
+  chainId: process.env.GITCOIN_ATTESTER_CHAIN_ID,
+  verifyingContract: process.env.GITCOIN_ATTESTER_CONTRACT_ADDRESS,
 };
 
 const ATTESTER_TYPES = {
