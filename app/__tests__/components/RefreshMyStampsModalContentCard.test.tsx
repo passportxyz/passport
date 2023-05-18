@@ -28,7 +28,6 @@ const currentPlatform: PlatformSpec = {
   description: "Platform description",
   connectMessage: "Connect message",
   isEVM: false,
-  enablePlatformCardUpdate: false,
 };
 
 const selectedProviders: PROVIDER_ID[] = ["FirstEthTxnProvider"];

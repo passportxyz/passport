@@ -8,7 +8,6 @@ export type PlatformSpec = {
   description: string;
   connectMessage: string;
   isEVM?: boolean;
-  enablePlatformCardUpdate?: boolean;
 };
 
 export type ProviderSpec = {

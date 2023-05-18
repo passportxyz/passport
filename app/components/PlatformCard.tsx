@@ -114,7 +114,6 @@ export const PlatformCard = ({
             )}
           </div>
           {updatedPlatforms &&
-            platform?.enablePlatformCardUpdate &&
             updatedPlatforms[platform.name] !== true &&
             selectedProviders[platform.platform].length > 0 && (
               <div className="inline-flex h-6 items-center rounded-xl border border-accent-3 px-2 text-xs text-accent-3">
@@ -150,9 +149,6 @@ export const PlatformCard = ({
                     onClick={() => {
                       setCurrentPlatform(platform);
                       onOpen();
-                      if (platform.enablePlatformCardUpdate) {
-                        pillLocalStorage(platform.name);
-                      }
                       getUpdatedPlatforms();
                     }}
                     data-testid="manage-stamp"
@@ -195,9 +191,6 @@ export const PlatformCard = ({
               disabled={disabled}
               ref={btnRef.current}
               onClick={(e) => {
-                if (platform.enablePlatformCardUpdate) {
-                  pillLocalStorage(platform.platform);
-                }
                 setCurrentPlatform(platform);
                 onOpen();
               }}
