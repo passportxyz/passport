@@ -1,8 +1,9 @@
 // --- React Methods
 import React, { useContext, useEffect, useRef, useState } from "react";
 
-import { PLATFORMS, PlatformSpec } from "../config/platforms";
+import { PLATFORMS } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
+import { PlatformSpec } from "@gitcoin/passport-platforms";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";

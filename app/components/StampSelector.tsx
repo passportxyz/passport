@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { Switch } from "@chakra-ui/react";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
-import { PlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { PlatformGroupSpec } from "../config/providers";
 import { getStampProviderFilters } from "../config/filters";
 import { OnChainContext, OnChainProvidersType } from "../context/onChainContext";
