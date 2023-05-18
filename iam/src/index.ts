@@ -82,7 +82,7 @@ const ATTESTER_TYPES = {
     { name: "revocable", type: "bool" },
     { name: "refUID", type: "bytes32" },
     { name: "value", type: "uint256" },
-    { name: "fee", type: "bytes32" },
+    { name: "fee", type: "uint256" },
   ],
 };
 
@@ -358,6 +358,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
   const credentials: VerifiableCredential[] = req.body as VerifiableCredential[];
+  console.log("credentials: ", credentials);
   if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
 
   const recipient = credentials[0].credentialSubject.id.split(":")[4];
@@ -397,6 +398,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 
       const fee = await getEASFeeAmount(2);
 
+      console.log("fee: ", fee, typeof fee);
       const easPassport = {
         stamps,
         recipient,
@@ -404,7 +406,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
         revocable: true,
         refUID: ZERO_BYTES32,
         value: 0,
-        fee,
+        fee: fee.toString(),
       };
 
       attestationSignerWallet
@@ -421,11 +423,16 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           return void res.json(payload);
         })
         .catch((error) => {
-          // TODO dont return real error
+          console.error("-----------------------");
+          console.error(error);
+          console.error("-----------------------");
           return void errorRes(res, String(error), 500);
         });
     })
     .catch((error) => {
+      console.error("=======================");
+      console.error(error);
+      console.error("=======================");
       // TODO dont return real error
       return void errorRes(res, String(error), 500);
     });

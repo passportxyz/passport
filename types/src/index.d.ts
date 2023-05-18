@@ -1,6 +1,7 @@
 import { JsonRpcSigner } from "@ethersproject/providers";
 // BrightId Shared Types
 export { BrightIdProcedureResponse, BrightIdVerificationResponse, BrightIdSponsorshipResponse } from "./brightid";
+import { BigNumber } from "@ethersproject/bignumber";
 
 // Typing for required parts of DIDKit
 export type DIDKitLib = {
@@ -176,11 +177,11 @@ export type EasStamp = {
 export type EasPassport = {
   stamps: EasStamp[];
   recipient: string;
-  expirationTime: number;
+  expirationTime: any;
   revocable: boolean;
   refUID: string;
-  value: number;
-  fee: string;
+  value: any;
+  fee: any;
 };
 
 export type EasPayload = {

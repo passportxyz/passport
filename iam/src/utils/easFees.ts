@@ -1,7 +1,8 @@
 import axios from "axios";
 import { utils } from "ethers";
+import { BigNumber } from "@ethersproject/bignumber";
 
-export async function getEASFeeAmount(usdAmount: number): Promise<string> {
+export async function getEASFeeAmount(usdAmount: number): Promise<BigNumber> {
   const ethUSD: {
     data: {
       ethereum: {
@@ -16,5 +17,5 @@ export async function getEASFeeAmount(usdAmount: number): Promise<string> {
   });
 
   const ethAmount = usdAmount / ethUSD.data.ethereum.usd;
-  return utils.hexZeroPad(utils.parseEther(ethAmount.toString()).toHexString(), 32);
+  return utils.parseEther(ethAmount.toFixed(18)
 }
