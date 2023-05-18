@@ -29,6 +29,8 @@ import {
   VerifiableCredential,
   EasStamp,
   EasPayload,
+  EasPassport,
+  EasRequestBody,
 } from "@gitcoin/passport-types";
 
 import { getChallenge } from "./utils/challenge";
@@ -381,11 +383,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
     });
 });
 
-type EasRequestBody = {
-  nonce: number;
-  credentials: VerifiableCredential[];
-};
-
 // Expose entry point for getting eas payload for moving stamps on-chain
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
@@ -482,6 +479,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           refUID: ZERO_BYTES32,
           value: 0,
           nonce,
+          fee
         };
 
         attestationSignerWallet
