@@ -25,12 +25,13 @@ import { datadogLogs } from "@datadog/browser-logs";
 // --- UI components
 // TODO: re-add toasts after design updates
 import { NoSymbolIcon } from "@heroicons/react/20/solid";
-import { Spinner, Checkbox } from "@chakra-ui/react";
+import { Spinner } from "@chakra-ui/react";
 
 // --- App components
 import { RefreshMyStampsModalContentCardList } from "../components/RefreshMyStampsModalContentCardList";
 import { reduceStampResponse } from "../utils/helpers";
 import { ValidatedPlatform } from "../signer/utils";
+import Checkbox from "./Checkbox";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
@@ -236,15 +237,13 @@ export const RefreshMyStampsModalContent = ({
           </div>
         )}
       </div>
-      <div className="mt-6 mb-2 text-color-1">
+      <div className="mt-6 mb-2 flex text-color-1">
         <Checkbox
-          type="checkbox"
-          colorScheme="purple"
           data-testid="checkbox-onboard-hide"
+          id="checkbox-onboard-hide"
           isChecked={disableOnboard}
-          size="md"
-          onChange={(e) => {
-            if (e.target.checked) {
+          onChange={(checked: boolean) => {
+            if (checked) {
               const now = Math.floor(Date.now() / 1000);
               localStorage.setItem("onboardTS", now.toString());
               setDisplayOnboard(true);
@@ -253,9 +252,10 @@ export const RefreshMyStampsModalContent = ({
               setDisplayOnboard(false);
             }
           }}
-        >
+        />
+        <label className="pl-2" htmlFor="checkbox-onboard-hide">
           Skip welcome onboarding until stamps expire
-        </Checkbox>
+        </label>
       </div>
     </div>
   );

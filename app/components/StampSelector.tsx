@@ -42,7 +42,7 @@ export function StampSelector({
           <div key={i} className={`border-b border-accent-2 py-4 px-6 ${i ? "" : "border-t"}`}>
             <p className="ml-4 mb-1 text-sm text-color-4">{stamp.platformGroup}</p>
             <div className="flex flex-row justify-between">
-              <ul className="marker:leading-1 list-disc marker:text-3xl ">
+              <ul className="list-disc marker:text-3xl ">
                 {stamp.providers?.map((provider, i) => {
                   let bulletColor = "text-color-4";
                   let textColor = "text-color-4";
@@ -69,7 +69,7 @@ export function StampSelector({
                   );
                 })}
               </ul>
-              <div className="align-right flex">
+              <div className="align-right ml-2">
                 <Toggle
                   data-testid={`switch-${i}`}
                   isChecked={

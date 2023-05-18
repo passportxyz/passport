@@ -1,5 +1,5 @@
 // --- React hooks
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 
 // --- Types
 import { ValidatedProviderGroup } from "../signer/utils";
@@ -42,12 +42,19 @@ export const RefreshMyStampsModalContentCard = ({
     [selectedProviders, platformProviders]
   );
 
+  useEffect(() => {
+    setDisableExpand(!checked);
+    if (!checked && accordionExpanded) {
+      accordionButton.current?.click();
+    }
+  }, [checked]);
+
   return (
     <div>
       <Accordion allowToggle>
         <AccordionItem className="py-2 first:border-t-accent-2 first:border-b-accent-2" isDisabled={disableExpand}>
-          <div className="grid grid-cols-10 items-center justify-between text-white focus:shadow-none">
-            <div className="col-span-8 items-center justify-start">
+          <div className="flex items-center gap-4 text-white focus:shadow-none">
+            <div className="grow">
               <AccordionButton
                 _focus={{ outline: "none" }}
                 ref={accordionButton}
@@ -57,35 +64,26 @@ export const RefreshMyStampsModalContentCard = ({
                 <p className="text-left">{currentPlatform?.name}</p>
               </AccordionButton>
             </div>
-            <div className="grid grid-cols-2 items-center justify-end gap-8">
-              <Toggle
-                data-testid={`switch-${currentPlatform?.name}`}
-                isChecked={checked}
-                onChange={(checked: boolean) => {
-                  if (!checked && accordionExpanded) {
-                    // collapse before disabling accordion
-                    accordionButton.current?.click();
-                    setAccordionExpanded(false);
-                  }
-                  setDisableExpand(!disableExpand);
-                  if (checked) {
-                    setSelectedProviders((selectedProviders || []).concat(platformProviders));
-                  } else {
-                    setSelectedProviders(
-                      (selectedProviders || []).filter((provider) => platformProviders?.indexOf(provider) === -1)
-                    );
-                  }
-                }}
-              />
-              <AccordionIcon
-                className="cursor-pointer"
-                marginLeft="8px"
-                fontSize="28px"
-                onClick={() => {
-                  accordionButton.current?.click();
-                }}
-              />
-            </div>
+            <Toggle
+              data-testid={`switch-${currentPlatform?.name}`}
+              isChecked={checked}
+              onChange={(checked: boolean) => {
+                if (checked) {
+                  setSelectedProviders((selectedProviders || []).concat(platformProviders));
+                } else {
+                  setSelectedProviders(
+                    (selectedProviders || []).filter((provider) => platformProviders?.indexOf(provider) === -1)
+                  );
+                }
+              }}
+            />
+            <AccordionIcon
+              className={checked ? "cursor-pointer" : "cursor-not-allowed"}
+              fontSize="28px"
+              onClick={() => {
+                accordionButton.current?.click();
+              }}
+            />
           </div>
           <AccordionPanel borderTop="1px solid #083A40" marginTop="8px" paddingLeft="0" paddingRight="0">
             <RefreshMyStampsSelector
