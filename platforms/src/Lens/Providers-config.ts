@@ -1,7 +1,7 @@
 import { PlatformSpec, PlatformGroupSpec } from "../types";
 
 export const LensPlatformDetails: PlatformSpec = {
-  icon: "./assets/lensStampIcon.svg",
+  icon: "./assets/lensWhiteStampIcon.svg",
   platform: "Lens",
   name: "Lens",
   description: "Lens Profile Verification",
