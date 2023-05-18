@@ -27,9 +27,12 @@ import {
   CheckRequestBody,
   CheckResponseBody,
   VerifiableCredential,
+  EasStamp,
+  EasPayload,
 } from "@gitcoin/passport-types";
 
 import { getChallenge } from "./utils/challenge";
+import { getEASFeeAmount } from "./utils/easFees";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
@@ -55,14 +58,16 @@ export const config: {
   issuer,
 };
 
-const attestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
+const attestationSignerWallet = new ethers.Wallet(
+  process.env.ATTESTATION_SIGNER_PRIVATE_KEY || "0x04d16281ff3bf268b29cdd684183f72542757d24ae9fdfb863e7c755e599163a"
+);
 const attestationSchemaEncoder = new SchemaEncoder("string provider, string hash");
 
 const ATTESTER_DOMAIN = {
   name: "Attester",
   version: "1",
-  chainId: process.env.GITCOIN_ATTESTER_CHAIN_ID,
-  verifyingContract: process.env.GITCOIN_ATTESTER_CONTRACT_ADDRESS,
+  chainId: process.env.GITCOIN_ATTESTER_CHAIN_ID || "11155111",
+  verifyingContract: process.env.GITCOIN_ATTESTER_CONTRACT_ADDRESS || "0xD8088f772006CAFD81082e8e2e467fA18564e879",
 };
 
 const ATTESTER_TYPES = {
@@ -79,6 +84,7 @@ const ATTESTER_TYPES = {
     { name: "revocable", type: "bool" },
     { name: "refUID", type: "bytes32" },
     { name: "value", type: "uint256" },
+    { name: "fee", type: "uint256" },
   ],
 };
 
@@ -350,32 +356,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
     });
 });
 
-export type EasStamp = {
-  provider: string;
-  stampHash: string;
-  expirationDate: string;
-  encodedData: string;
-};
-
-type EasPassport = {
-  stamps: EasStamp[];
-  recipient: string;
-  expirationTime: number;
-  revocable: boolean;
-  refUID: string;
-  value: number;
-};
-
-type EasPayload = {
-  passport: EasPassport;
-  signature: {
-    v: number;
-    r: string;
-    s: string;
-  };
-  invalidCredentials: VerifiableCredential[];
-};
-
 // Expose entry point for getting eas payload for moving stamps on-chain
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
@@ -395,7 +375,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
       };
     })
   )
-    .then((credentialVerifications) => {
+    .then(async (credentialVerifications) => {
       const invalidCredentials = credentialVerifications
         .filter(({ verified }) => !verified)
         .map(({ credential }) => credential);
@@ -417,13 +397,16 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 
       if (!stamps.length) return void errorRes(res, "No verifiable stamps provided", 400);
 
-      const easPassport: EasPassport = {
+      const fee = await getEASFeeAmount(2);
+
+      const easPassport = {
         stamps,
         recipient,
         expirationTime: NO_EXPIRATION,
         revocable: true,
         refUID: ZERO_BYTES32,
         value: 0,
+        fee: fee.toString(),
       };
 
       attestationSignerWallet
@@ -440,11 +423,12 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           return void res.json(payload);
         })
         .catch((error) => {
-          // TODO dont return real error
+          console.error(error);
           return void errorRes(res, String(error), 500);
         });
     })
     .catch((error) => {
+      console.error(error);
       // TODO dont return real error
       return void errorRes(res, String(error), 500);
     });

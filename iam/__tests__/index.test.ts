@@ -14,11 +14,18 @@ import {
   VerifiedPayload,
 } from "@gitcoin/passport-types";
 
+import { utils } from "ethers";
+import * as easFeesMock from "../src/utils/easFees";
 import * as identityMock from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 jest.mock("ethers", () => {
+  const originalModule = jest.requireActual("ethers");
+  const ethers = originalModule.ethers;
+  const utils = originalModule.utils;
+
   return {
     utils: {
+      ...utils,
       getAddress: jest.fn().mockImplementation(() => {
         return "0x0";
       }),
@@ -29,15 +36,7 @@ jest.mock("ethers", () => {
         return { v: 0, r: "r", s: "s" };
       }),
     },
-    ethers: {
-      Wallet: jest.fn().mockImplementation(() => {
-        return {
-          _signTypedData: jest.fn().mockImplementation(() => {
-            return new Promise((r) => r("0xSignedData"));
-          }),
-        };
-      }),
-    },
+    ethers,
   };
 });
 
@@ -46,12 +45,12 @@ jest.mock("@ethereum-attestation-service/eas-sdk", () => {
     SchemaEncoder: jest.fn().mockImplementation(() => {
       return {
         encodeData: jest.fn().mockImplementation(() => {
-          return "0xEncodedData";
+          return "0x1234";
         }),
       };
     }),
     ZERO_BYTES32: "0x0000000000000000000000000000000000000000000000000000000000000000",
-    NO_EXPIRATION: -1,
+    NO_EXPIRATION: 0,
   };
 });
 
@@ -708,7 +707,6 @@ describe("POST /check", function () {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    console.log(response.body);
     expect(response.body.length).toEqual(0);
   });
 });
@@ -716,6 +714,11 @@ describe("POST /check", function () {
 describe("POST /eas", () => {
   beforeEach(() => {
     jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+  });
+
+  afterEach(() => {
+    // restore the spy created with spyOn
+    jest.restoreAllMocks();
   });
 
   it("handles valid requests including some invalid credentials", async () => {
@@ -755,11 +758,11 @@ describe("POST /eas", () => {
             provider: "test",
             stampHash: "test",
             expirationDate: "9999-12-31T23:59:59Z",
-            encodedData: "0xEncodedData",
+            encodedData: "0x1234",
           },
         ],
         recipient: "0x5678000000000000000000000000000000000000",
-        expirationTime: -1,
+        expirationTime: 0,
         revocable: true,
         refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
         value: 0,
@@ -840,5 +843,58 @@ describe("POST /eas", () => {
       .expect("Content-Type", /json/);
 
     expect(response.body.error).toEqual("Invalid recipient");
+  });
+
+  it("returns the fee information in the response as wei units", async () => {
+    const getEASFeeAmountSpy = jest
+      .spyOn(easFeesMock, "getEASFeeAmount")
+      .mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
+    const expectedFeeUsd = 2;
+
+    const credentials = [
+      {
+        "@context": "https://www.w3.org/2018/credentials/v1",
+        type: ["VerifiableCredential", "Stamp"],
+        issuer: config.issuer,
+        issuanceDate: new Date().toISOString(),
+        credentialSubject: {
+          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
+          provider: "test",
+          hash: "test",
+        },
+        expirationDate: "9999-12-31T23:59:59Z",
+      },
+    ];
+
+    const expectedPayload = {
+      passport: {
+        stamps: [
+          {
+            provider: "test",
+            stampHash: "test",
+            expirationDate: "9999-12-31T23:59:59Z",
+            encodedData: "0x1234",
+          },
+        ],
+        recipient: "0x5678000000000000000000000000000000000000",
+        expirationTime: 0,
+        revocable: true,
+        refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
+        value: 0,
+        fee: "25000000000000000",
+      },
+      signature: expect.any(Object),
+    };
+
+    const response = await request(app)
+      .post("/api/v0.0.0/eas")
+      .send(credentials)
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    expect(response.body).toMatchObject(expectedPayload);
+    expect(getEASFeeAmountSpy).toHaveBeenCalledTimes(1);
+    expect(getEASFeeAmountSpy).toHaveBeenCalledWith(expectedFeeUsd);
   });
 });
