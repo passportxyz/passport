@@ -36,7 +36,7 @@ jest.mock("ethers", () => {
         return { v: 0, r: "r", s: "s" };
       }),
     },
-    ethers: ethers,
+    ethers,
   };
 });
 
@@ -707,7 +707,6 @@ describe("POST /check", function () {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    console.log(response.body);
     expect(response.body.length).toEqual(0);
   });
 });
