@@ -2,7 +2,4 @@
 . "$(dirname "$0")/_/husky.sh"
 
 yarn run test
-# yarn run test:ceramic-integration
-# disabled integration test May 30 2023
-# it was causing too many errors and is 
-# addressed during build anyway <3MSG
+yarn run test:ceramic-integration

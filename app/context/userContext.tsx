@@ -22,7 +22,6 @@ import { AccountId } from "caip";
 import { DID } from "dids";
 import { Cacao } from "@didtools/cacao";
 import axios from "axios";
-import { isServerOnMaintenance } from "../utils/helpers";
 
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
@@ -289,17 +288,15 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     }
   };
 
-  if (!isServerOnMaintenance()) {
-    // Init onboard to enable hooks
-    useEffect((): void => {
-      setWeb3Onboard(initWeb3Onboard);
-    }, []);
+  // Init onboard to enable hooks
+  useEffect((): void => {
+    setWeb3Onboard(initWeb3Onboard);
+  }, []);
 
-    // Connect wallet on reload
-    useEffect((): void => {
-      setWalletFromLocalStorage();
-    }, []);
-  }
+  // Connect wallet on reload
+  useEffect((): void => {
+    setWalletFromLocalStorage();
+  }, []);
 
   useEffect((): void => {
     const loadDbAccessToken = async () => {

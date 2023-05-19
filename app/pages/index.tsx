@@ -11,12 +11,10 @@ import Home from "./Home";
 import Welcome from "./Welcome";
 import Dashboard from "./Dashboard";
 import Privacy from "./privacy";
-import Maintenance from "./Maintenance";
 
 // -- Datadog
 import { datadogRum } from "@datadog/browser-rum";
 import { datadogLogs } from "@datadog/browser-logs";
-import { isServerOnMaintenance } from "../utils/helpers";
 
 datadogRum.init({
   applicationId: process.env.NEXT_PUBLIC_DATADOG_APPLICATION_ID || "",
@@ -42,10 +40,6 @@ datadogLogs.init({
 });
 
 const App: NextPage = () => {
-  if (isServerOnMaintenance()) {
-    return <Maintenance />;
-  }
-
   return (
     <div>
       <Router>

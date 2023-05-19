@@ -9,7 +9,6 @@ import {
   PassportLoadResponse,
   PassportLoadErrorDetails,
   Passport,
-  StampPatch,
 } from "@gitcoin/passport-types";
 
 export class PassportDatabase implements DataStorageBase {
@@ -19,8 +18,15 @@ export class PassportDatabase implements DataStorageBase {
   did: string;
   logger: Logger;
   allowEmpty: boolean;
+  
 
-  constructor(passportScorerUrl: string, address: string, token: string, logger?: Logger, did?: CeramicDID) {
+  constructor(
+    passportScorerUrl: string,
+    address: string,
+    token: string,
+    logger?: Logger,
+    did?: CeramicDID,
+  ) {
     this.passportScorerUrl = passportScorerUrl;
     this.address = address;
     this.logger = logger;
@@ -53,10 +59,7 @@ export class PassportDatabase implements DataStorageBase {
         passport = {
           issuanceDate: null,
           expiryDate: null,
-          stamps: data.stamps.map((stamp: any) => ({
-            provider: stamp.stamp?.credentialSubject?.provider,
-            credential: stamp.stamp,
-          })),
+          stamps: data.stamps.map((stamp: any) => ({ provider: stamp.stamp?.credentialSubject?.provider, credential: stamp.stamp })),
         };
       } else {
         status = "DoesNotExist";
@@ -82,8 +85,9 @@ export class PassportDatabase implements DataStorageBase {
       }));
 
       await axios.post(`${this.passportScorerUrl}ceramic-cache/stamps/bulk`, stampsToSave, {
-        headers: { Authorization: `Bearer ${this.token}` },
-      });
+          headers:
+            { Authorization: `Bearer ${this.token}`},
+        });
     } catch (e) {
       this.logger.error(`Error saving stamp to passportScorer address:  ${this.address}:` + e.toString());
     }
@@ -101,21 +105,7 @@ export class PassportDatabase implements DataStorageBase {
         headers: { Authorization: `Bearer ${this.token}` },
       });
     } catch (e) {
-      this.logger.error(
-        `Error deleting stamp from passportScorer for ${providers.join(", ")} on ${this.address}: ` + e.toString()
-      );
+      this.logger.error(`Error deleting stamp from passportScorer for ${providers.join(", ")} on ${this.address}: ` + e.toString());
     }
   }
-
-  patchStamps = async (stampPatches: StampPatch[]): Promise<void> => {
-    this.logger.info(`patching stamps in passportScorer for address: ${this.address}`);
-    try {
-      const body = stampPatches.map(({ provider, credential }) => ({ provider, stamp: credential }));
-      await axios.patch(`${this.passportScorerUrl}ceramic-cache/stamps/bulk`, body, {
-        headers: { Authorization: `Bearer ${this.token}` },
-      });
-    } catch (e) {
-      this.logger.error(`Error patching stamps in passportScorer for address:  ${this.address}:` + e.toString());
-    }
-  };
 }

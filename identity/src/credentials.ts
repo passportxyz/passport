@@ -113,8 +113,7 @@ export const issueHashedCredential = async (
   DIDKit: DIDKitLib,
   key: string,
   address: string,
-  record: ProofRecord,
-  expiresInSeconds: number = CREDENTIAL_EXPIRES_AFTER_SECONDS
+  record: ProofRecord
 ): Promise<IssuedCredential> => {
   // Generate a hash like SHA256(IAM_PRIVATE_KEY+PII), where PII is the (deterministic) JSON representation
   // of the PII object after transforming it to an array of the form [[key:string, value:string], ...]
@@ -127,7 +126,7 @@ export const issueHashedCredential = async (
   );
 
   // generate a verifiableCredential
-  const credential = await _issueCredential(DIDKit, key, expiresInSeconds, {
+  const credential = await _issueCredential(DIDKit, key, CREDENTIAL_EXPIRES_AFTER_SECONDS, {
     credentialSubject: {
       "@context": [
         {

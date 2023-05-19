@@ -97,7 +97,7 @@ describe("Attempt verification", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        stakeAmount: "csgte5",
+        stakeAmount: "csgte1",
       },
     });
   });
@@ -166,7 +166,7 @@ describe("should return invalid payload", function () {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it("when stake amount is below 5 GTC for Bronze", async () => {
+  it("when stake amount is below 1 GTC for Bronze", async () => {
     jest.clearAllMocks();
     mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "500000000");
@@ -180,7 +180,7 @@ describe("should return invalid payload", function () {
 
     expect(communitystakingPayload).toMatchObject({ valid: false });
   });
-  it("when stake amount is below 20 GTC for Silver", async () => {
+  it("when stake amount is below 10 GTC for Silver", async () => {
     jest.clearAllMocks();
     mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "5000000000000000000");
@@ -194,7 +194,7 @@ describe("should return invalid payload", function () {
 
     expect(communitystakingPayload).toMatchObject({ valid: false });
   });
-  it("when stake amount is below 125 GTC for Gold", async () => {
+  it("when stake amount is below 100 GTC for Gold", async () => {
     jest.clearAllMocks();
     mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "40000000000000000000");
@@ -212,9 +212,9 @@ describe("should return invalid payload", function () {
 
 // All the positive cases for thresholds are tested
 describe("should return valid payload", function () {
-  it("when stake amount above 5 GTC for Bronze", async () => {
+  it("when stake amount above 1 GTC for Bronze", async () => {
     mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "6000000000000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "2000000000000000000");
     });
 
     const communitystaking = new CommunityStakingBronzeProvider();
@@ -225,12 +225,12 @@ describe("should return valid payload", function () {
 
     expect(communitystakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte5" },
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte1" },
     });
   });
-  it("when stake amount above 20 GTC for Silver", async () => {
+  it("when stake amount above 10 GTC for Silver", async () => {
     mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "25000000000000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "15000000000000000000");
     });
 
     const communitystaking = new CommunityStakingSilverProvider();
@@ -241,10 +241,10 @@ describe("should return valid payload", function () {
 
     expect(communitystakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte20" },
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte10" },
     });
   });
-  it("when stake amount above 125 GTC for Gold", async () => {
+  it("when stake amount above 100 GTC for Gold", async () => {
     mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "500000000000000000000");
     });
@@ -257,14 +257,14 @@ describe("should return valid payload", function () {
 
     expect(communitystakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte125" },
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte100" },
     });
   });
   // All values equal to tier amount
-  it("when stake amount is equal to 5 GTC for Bronze", async () => {
+  it("when stake amount is equal to 1 GTC for Bronze", async () => {
     jest.clearAllMocks();
     mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "5000000000000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "1000000000000000000");
     });
 
     const communitystaking = new CommunityStakingBronzeProvider();
@@ -275,13 +275,13 @@ describe("should return valid payload", function () {
 
     expect(communitystakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte5" },
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte1" },
     });
   });
-  it("when stake amount is equal to 20 GTC for Silver", async () => {
+  it("when stake amount is equal to 10 GTC for Silver", async () => {
     jest.clearAllMocks();
     mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "20000000000000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "10000000000000000000");
     });
 
     const communitystaking = new CommunityStakingSilverProvider();
@@ -292,13 +292,13 @@ describe("should return valid payload", function () {
 
     expect(communitystakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte20" },
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte10" },
     });
   });
-  it("when stake amount is equal to 125 GTC for Gold", async () => {
+  it("when stake amount is equal to 100 GTC for Gold", async () => {
     jest.clearAllMocks();
     mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "125000000000000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "100000000000000000000");
     });
 
     const communitystaking = new CommunityStakingGoldProvider();
@@ -309,7 +309,7 @@ describe("should return valid payload", function () {
 
     expect(communitystakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte125" },
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte100" },
     });
   });
 });

@@ -4,15 +4,21 @@
 import { ClearTextTwitterProvider } from "../Providers/clearTextTwitter";
 
 import { RequestPayload } from "@gitcoin/passport-types";
-import { auth, Client } from "twitter-api-sdk";
-import { getAuthClient, requestFindMyUser, TwitterFindMyUserResponse } from "../../Twitter/procedures/twitterOauth";
+import { auth } from "twitter-api-sdk";
+import {
+  deleteClient,
+  getClient,
+  requestFindMyUser,
+  TwitterFindMyUserResponse,
+} from "../../Twitter/procedures/twitterOauth";
 
 jest.mock("../../Twitter/procedures/twitterOauth", () => ({
-  getAuthClient: jest.fn(),
+  getClient: jest.fn(),
+  deleteClient: jest.fn(),
   requestFindMyUser: jest.fn(),
 }));
 
-const MOCK_TWITTER_CLIENT = new Client({} as auth.OAuth2User);
+const MOCK_TWITTER_OAUTH_CLIENT = {} as auth.OAuth2User;
 
 const MOCK_TWITTER_USER: TwitterFindMyUserResponse = {
   id: "123",
@@ -25,26 +31,25 @@ const code = "ABC123_ACCESSCODE";
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (getAuthClient as jest.Mock).mockReturnValue(MOCK_TWITTER_CLIENT);
+  (getClient as jest.Mock).mockReturnValue(MOCK_TWITTER_OAUTH_CLIENT);
 });
 
 describe("Attempt verification", function () {
   it("handles valid verification attempt", async () => {
+    (getClient as jest.Mock).mockReturnValue(MOCK_TWITTER_OAUTH_CLIENT);
     (requestFindMyUser as jest.Mock).mockResolvedValue(MOCK_TWITTER_USER);
 
     const twitter = new ClearTextTwitterProvider();
-    const verifiedPayload = await twitter.verify(
-      {
-        proofs: {
-          sessionKey,
-          code,
-        },
-      } as unknown as RequestPayload,
-      {}
-    );
+    const verifiedPayload = await twitter.verify({
+      proofs: {
+        sessionKey,
+        code,
+      },
+    } as unknown as RequestPayload);
 
-    expect(getAuthClient).toBeCalledWith(sessionKey, code, {});
-    expect(requestFindMyUser).toBeCalled();
+    expect(getClient).toBeCalledWith(sessionKey);
+    expect(requestFindMyUser).toBeCalledWith(MOCK_TWITTER_OAUTH_CLIENT, code);
+    expect(deleteClient).toBeCalledWith(sessionKey);
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
@@ -53,20 +58,35 @@ describe("Attempt verification", function () {
     });
   });
 
-  it("should return invalid payload when there is no username in requestFindMyUser response", async () => {
-    (requestFindMyUser as jest.Mock).mockResolvedValue({ username: undefined } as TwitterFindMyUserResponse);
+  it("should return invalid payload when unable to retrieve twitter oauth client", async () => {
+    (getClient as jest.Mock).mockReturnValue(undefined);
+    (requestFindMyUser as jest.Mock).mockImplementationOnce(async (client) => {
+      return client ? MOCK_TWITTER_USER : {};
+    });
 
     const twitter = new ClearTextTwitterProvider();
 
-    const verifiedPayload = await twitter.verify(
-      {
-        proofs: {
-          sessionKey,
-          code,
-        },
-      } as unknown as RequestPayload,
-      {}
-    );
+    const verifiedPayload = await twitter.verify({
+      proofs: {
+        sessionKey,
+        code,
+      },
+    } as unknown as RequestPayload);
+
+    expect(verifiedPayload).toMatchObject({ valid: false });
+  });
+
+  it("should return invalid payload when there is no username in requestFindMyUser response", async () => {
+    (requestFindMyUser as jest.Mock).mockResolvedValue({ username: undefined });
+
+    const twitter = new ClearTextTwitterProvider();
+
+    const verifiedPayload = await twitter.verify({
+      proofs: {
+        sessionKey,
+        code,
+      },
+    } as unknown as RequestPayload);
 
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
@@ -76,36 +96,12 @@ describe("Attempt verification", function () {
 
     const twitter = new ClearTextTwitterProvider();
 
-    const verifiedPayload = await twitter.verify(
-      {
-        proofs: {
-          sessionKey,
-          code,
-        },
-      } as unknown as RequestPayload,
-      {}
-    );
-
-    expect(verifiedPayload).toMatchObject({ valid: false });
-  });
-
-  it("should return invalid payload when unable to retrieve twitter oauth client", async () => {
-    (getAuthClient as jest.Mock).mockRejectedValue("unauthorized");
-    (requestFindMyUser as jest.Mock).mockImplementationOnce(async (client) => {
-      return client ? MOCK_TWITTER_USER : {};
-    });
-
-    const twitter = new ClearTextTwitterProvider();
-
-    const verifiedPayload = await twitter.verify(
-      {
-        proofs: {
-          sessionKey,
-          code,
-        },
-      } as unknown as RequestPayload,
-      {}
-    );
+    const verifiedPayload = await twitter.verify({
+      proofs: {
+        sessionKey,
+        code,
+      },
+    } as unknown as RequestPayload);
 
     expect(verifiedPayload).toMatchObject({ valid: false });
   });

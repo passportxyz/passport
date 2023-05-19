@@ -21,8 +21,8 @@ jobs:
         with:
           node-version: 16
           cache: "yarn"
-      - name: Install Packages
-        run: yarn install
+      - name: Lerna Bootstrap
+        run: lerna bootstrap
       - name: Run Tests
         run: |
           yarn test:iam

@@ -30,8 +30,17 @@ export const RefreshMyStampsModal = ({
         datatest-id="refresh-my-stamps-modal"
       >
         <ModalOverlay bg="blackAlpha.900" />
-        <ModalContent w="410px" minH="550px" maxH="auto">
-          <ModalCloseButton />
+        <ModalContent
+          rounded="none"
+          padding={5}
+          w="410px"
+          minH="550px"
+          maxH="auto"
+          backgroundColor="black"
+          borderWidth="1px"
+          borderColor="var(--color-accent-2)"
+        >
+          <ModalCloseButton color="var(--color-text-1)" />
           {validPlatforms ? (
             <>
               <RefreshMyStampsModalContent
@@ -41,14 +50,14 @@ export const RefreshMyStampsModal = ({
               />
             </>
           ) : (
-            <div className="p-4 md:p-6">
+            <>
               <div className="font-heading text-3xl text-white">Searching for Stamps</div>
               <div className="mt-2 font-alt text-white">
                 Give us a moment while we check your account for existing Stamps.
               </div>
               <RefreshStampsProgressSteps steps={steps} />
               <div className="text-center text-white">Please do not close the window.</div>
-            </div>
+            </>
           )}
         </ModalContent>
       </Modal>

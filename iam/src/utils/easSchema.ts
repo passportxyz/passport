@@ -1,18 +1,10 @@
 import { utils } from "ethers";
-import {
-  NO_EXPIRATION,
-  SchemaEncoder,
-  ZERO_BYTES32,
-  MultiAttestationRequest,
-  AttestationRequestData,
-} from "@ethereum-attestation-service/eas-sdk";
+import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { VerifiableCredential } from "@gitcoin/passport-types";
-
-import { fetchPassportScore } from "./scorerService";
 
 const attestationSchemaEncoder = new SchemaEncoder("bytes32 provider, bytes32 hash");
 
-export const encodeEasStamp = (credential: VerifiableCredential): string => {
+export function encodeEasStamp(credential: VerifiableCredential): string {
   // We hash the provider to get a bytes32 value
   const providerValue = utils.keccak256(utils.toUtf8Bytes(credential.credentialSubject.provider));
 
@@ -25,69 +17,4 @@ export const encodeEasStamp = (credential: VerifiableCredential): string => {
     { name: "hash", value: hashValue, type: "bytes32" },
   ]);
   return encodedData;
-};
-
-export type Score = {
-  score: number;
-  scorer_id: number;
-};
-
-export const encodeEasScore = (score: Score): string => {
-  const decimals = 18;
-
-  const bnScore = utils.parseUnits(score.score.toString(), decimals);
-
-  const schemaEncoder = new SchemaEncoder("uint256 score,uint32 scorer_id,uint8 score_decimals");
-  const encodedData = schemaEncoder.encodeData([
-    { name: "score", value: bnScore, type: "uint256" },
-    { name: "scorer_id", value: score.scorer_id, type: "uint32" },
-    { name: "score_decimals", value: decimals, type: "uint8" },
-  ]);
-
-  return encodedData;
-};
-
-type ValidatedCredential = {
-  credential: VerifiableCredential;
-  verified: boolean;
-};
-
-export const formatMultiAttestationRequest = async (
-  credentials: ValidatedCredential[],
-  recipient: string
-): Promise<MultiAttestationRequest[]> => {
-  const defaultRequestData = {
-    recipient,
-    expirationTime: NO_EXPIRATION,
-    revocable: true,
-    refUID: ZERO_BYTES32,
-    value: 0,
-  };
-
-  const stampRequestData: AttestationRequestData[] = credentials
-    .filter(({ verified }) => verified)
-    .map(({ credential }) => {
-      return {
-        ...defaultRequestData,
-        data: encodeEasStamp(credential),
-      };
-    });
-
-  const scoreRequestData: AttestationRequestData[] = [
-    {
-      ...defaultRequestData,
-      data: encodeEasScore(await fetchPassportScore(recipient)),
-    },
-  ];
-
-  return [
-    {
-      schema: process.env.EAS_GITCOIN_STAMP_SCHEMA,
-      data: stampRequestData,
-    },
-    {
-      schema: process.env.EAS_GITCOIN_SCORE_SCHEMA,
-      data: scoreRequestData,
-    },
-  ];
-};
+}

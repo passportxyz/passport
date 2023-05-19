@@ -62,8 +62,8 @@ describe("Attempt verification", function () {
     );
 
     // Check the request to get the user
-    expect(mockedAxios.get).toBeCalledWith("https://api.linkedin.com/rest/me", {
-      headers: { Authorization: "Bearer 762165719dhiqudgasyuqwt6235", "Linkedin-Version": 202305 },
+    expect(mockedAxios.get).toBeCalledWith("https://api.linkedin.com/v2/me", {
+      headers: { Authorization: "Bearer 762165719dhiqudgasyuqwt6235" },
     });
 
     expect(linkedinPayload).toEqual({
@@ -116,7 +116,7 @@ describe("Attempt verification", function () {
   });
 
   it("should return invalid payload when a bad status code is returned by linkedin user api", async () => {
-    mockedAxios.get.mockRejectedValueOnce(async () => {
+    mockedAxios.get.mockImplementation(async () => {
       return {
         status: 500,
       };

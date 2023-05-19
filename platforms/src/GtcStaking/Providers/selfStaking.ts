@@ -80,7 +80,7 @@ async function verifyStake(payload: RequestPayload): Promise<StakeResponse> {
 }
 
 // Export a Self Staking Bronze Stamp provider
-// User's self stake must be greater than 5 GTC
+// User's self stake must be greater than 1 GTC
 export class SelfStakingBronzeProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
   type = "SelfStakingBronze";
@@ -99,15 +99,15 @@ export class SelfStakingBronzeProvider implements Provider {
       const stakeData = await verifyStake(payload);
       const stakeAmount = stakeData.stakeAmount;
 
-      valid = stakeAmount >= 5.0;
+      valid = stakeAmount >= 1.0;
 
       return {
         valid,
         record: valid
           ? {
               address: payload.address,
-              // ssgt5 = Self staking greater than or equal to 5
-              stakeAmount: "ssgte5",
+              // ssgt1 = Self staking greater than or equal to 1
+              stakeAmount: "ssgte1",
             }
           : {},
       };
@@ -121,7 +121,7 @@ export class SelfStakingBronzeProvider implements Provider {
 }
 
 // Export a Self Staking Silver Stamp provider
-// User's self stake must be greater than or equal to 20 GTC
+// User's self stake must be greater than or equal to 10 GTC
 export class SelfStakingSilverProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
   type = "SelfStakingSilver";
@@ -140,15 +140,15 @@ export class SelfStakingSilverProvider implements Provider {
       const stakeData = await verifyStake(payload);
       const stakeAmount = stakeData.stakeAmount;
 
-      valid = stakeAmount >= 20.0;
+      valid = stakeAmount >= 10.0;
 
       return {
         valid,
         record: valid
           ? {
               address: payload.address,
-              // ssgt20 = Self staking greater than or equal 20
-              stakeAmount: "ssgte20",
+              // ssgt10 = Self staking greater than or equal 10
+              stakeAmount: "ssgte10",
             }
           : {},
       };
@@ -162,7 +162,7 @@ export class SelfStakingSilverProvider implements Provider {
 }
 
 // Export a Self Staking Gold Stamp provider
-// User's self stake must be greater than or equal to 125 GTC
+// User's self stake must be greater than or equal to 100 GTC
 export class SelfStakingGoldProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
   type = "SelfStakingGold";
@@ -181,15 +181,15 @@ export class SelfStakingGoldProvider implements Provider {
       const stakeData = await verifyStake(payload);
       const stakeAmount = stakeData.stakeAmount;
 
-      valid = stakeAmount >= 125.0;
+      valid = stakeAmount >= 100.0;
 
       return {
         valid,
         record: valid
           ? {
               address: payload.address,
-              // ssgt125 = Self staking greater than or equal to 125
-              stakeAmount: "ssgte125",
+              // ssgt100 = Self staking greater than or equal to 100
+              stakeAmount: "ssgte100",
             }
           : {},
       };

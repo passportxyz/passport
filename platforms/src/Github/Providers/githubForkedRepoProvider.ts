@@ -1,7 +1,15 @@
 // ----- Types
-import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
+import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../../types";
-import { getGithubUserData, getGithubUserRepos, GithubContext, GithubUserData } from "./github";
+import type { GithubFindMyUserResponse, GithubRepoRequestResponse } from "./types";
+import { requestAccessToken } from "./github";
+
+// ----- HTTP Client
+import axios from "axios";
+
+export type GithubTokenResponse = {
+  access_token: string;
+};
 
 // Export a Github Provider to carry out OAuth and return a record object
 export class ForkedGithubRepoProvider implements Provider {
@@ -17,23 +25,23 @@ export class ForkedGithubRepoProvider implements Provider {
   }
 
   // verify that the proof object contains valid === "true"
-  async verify(payload: RequestPayload, context: GithubContext): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     let valid = false,
-      verifiedUserPayload: GithubUserData = {},
-      errors: string[] | undefined;
+      accessToken: string,
+      verifiedUserPayload: GithubFindMyUserResponse = {},
+      verifiedUserRepoPayload: boolean;
 
     try {
-      verifiedUserPayload = await getGithubUserData(payload.proofs.code, context);
-      errors = verifiedUserPayload.errors;
-      if (verifiedUserPayload.id && !errors?.length)
-        valid = await userRepoForksCheck(verifiedUserPayload, payload.proofs.code, context);
+      accessToken = await requestAccessToken(payload.proofs.code, context);
+      verifiedUserPayload = await verifyGithub(accessToken);
+      verifiedUserRepoPayload = await verifyUserGithubRepo(verifiedUserPayload, accessToken);
+      valid = verifiedUserPayload && verifiedUserRepoPayload ? true : false;
     } catch (e) {
-      valid = false;
+      return { valid: false };
     }
 
     return {
       valid: valid,
-      error: errors,
       record: valid
         ? {
             id: `${verifiedUserPayload.id}gte1Fork`,
@@ -43,13 +51,74 @@ export class ForkedGithubRepoProvider implements Provider {
   }
 }
 
-const userRepoForksCheck = async (
-  userData: GithubUserData,
-  accessToken: string,
-  context: GithubContext
-): Promise<boolean> => {
-  const repos = await getGithubUserRepos(accessToken, context);
-  // Check to see if the authenticated GH user is the same as the repo owner,
-  // if the repo is not a fork of another repo, and if the repo fork count is gte 1
-  return repos.some((repo) => userData.id === repo.owner.id && !repo.fork && repo.forks_count >= 1);
+const verifyGithub = async (ghAccessToken: string): Promise<GithubFindMyUserResponse> => {
+  let userRequest;
+  try {
+    // Now that we have an access token fetch the user details
+    userRequest = await axios.get("https://api.github.com/user", {
+      headers: { Authorization: `token ${ghAccessToken}` },
+    });
+  } catch (e) {
+    const error = e as {
+      response: {
+        data: {
+          error_description: string;
+        };
+      };
+      request: string;
+      message: string;
+    };
+    if (error.response) {
+      throw `User GET request returned status code ${userRequest.status} instead of the expected 200`;
+    } else if (error.request) {
+      throw `A request was made, but no response was received: ${error.request}`;
+    } else {
+      throw `Error: ${error.message}`;
+    }
+  }
+  return userRequest.data as GithubFindMyUserResponse;
+};
+
+const verifyUserGithubRepo = async (userData: GithubFindMyUserResponse, ghAccessToken: string): Promise<boolean> => {
+  let repoRequest: GithubRepoRequestResponse;
+
+  try {
+    // fetch user's repo data
+    repoRequest = await axios.get(`https://api.github.com/users/${userData.login}/repos?per_page=100`, {
+      headers: { Authorization: `token ${ghAccessToken}` },
+    });
+    // Returns true for first instance of a user's repo that has been forked,
+    // false if no forks
+    if (repoRequest.status != 200) {
+      throw `Repo GET request returned status code ${repoRequest.status} instead of the expected 200`;
+    }
+  } catch (e) {
+    const error = e as {
+      response: {
+        data: {
+          error_description: string;
+        };
+      };
+      request: string;
+      message: string;
+    };
+    if (error.response) {
+      throw `User GET request returned status code ${repoRequest.status} instead of the expected 200`;
+    } else if (error.request) {
+      throw `A request was made, but no response was received: ${error.request}`;
+    } else {
+      throw `Error: ${error.message}`;
+    }
+  }
+  const userRepoForksCheck = (): boolean => {
+    for (let i = 0; i < repoRequest.data.length; i++) {
+      const repo = repoRequest.data[i];
+      // Check to see if the authenticated GH user is the same as the repo owner,
+      // if the repo is not a fork of another repo, and if the repo fork count is gte 1
+      if (userData.id === repo.owner.id && !repo.fork && repo.forks_count >= 1) {
+        return true;
+      }
+    }
+  };
+  return userRepoForksCheck();
 };

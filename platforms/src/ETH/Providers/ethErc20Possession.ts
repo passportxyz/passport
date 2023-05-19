@@ -1,12 +1,10 @@
 // ----- Types
 import type { Provider, ProviderOptions } from "../../types";
-import type { RequestPayload, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
+import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Ethers library
 import { Contract } from "ethers";
-import { parseUnits } from "@ethersproject/units";
-import { BigNumber } from "@ethersproject/bignumber";
-
+import { formatUnits } from "@ethersproject/units";
 // ----- RPC Getter
 import { getRPCProvider } from "../../utils/signer";
 
@@ -40,69 +38,36 @@ const ERC20_ABI = [
   },
 ];
 
-type EthErc20Context = ProviderContext & {
-  ethErc20?: {
-    counts?: {
-      eth?: BigNumber;
-      [tokenAddress: string]: BigNumber;
-    };
-  };
-};
-
-type Erc20Contract = Contract & {
-  balanceOf: (address: string) => Promise<BigNumber>;
-};
-
 // set the network rpc url based on env
 export const RPC_URL = process.env.RPC_URL;
 
 export async function getTokenBalance(
   address: string,
   tokenContractAddress: string,
-  payload: RequestPayload,
-  context: EthErc20Context
-): Promise<BigNumber> {
-  if (context.ethErc20?.counts?.[tokenContractAddress] === undefined) {
-    // define a provider using the rpc url
-    const staticProvider = getRPCProvider(payload);
-    // load Token contract
-    const readContract = new Contract(tokenContractAddress, ERC20_ABI, staticProvider) as Erc20Contract;
-    const tokenBalance = await readContract?.balanceOf(address);
-
-    if (!context.ethErc20) {
-      context.ethErc20 = {};
-    }
-    if (!context.ethErc20.counts) {
-      context.ethErc20.counts = {};
-    }
-    context.ethErc20.counts[tokenContractAddress] = tokenBalance;
-  }
-  return context.ethErc20.counts[tokenContractAddress];
+  decimalNumber: number,
+  payload: RequestPayload
+): Promise<number> {
+  // define a provider using the rpc url
+  const staticProvider = getRPCProvider(payload);
+  // load Token contract
+  const readContract = new Contract(tokenContractAddress, ERC20_ABI, staticProvider);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  const tokenBalance: string = await readContract?.balanceOf(address);
+  const balanceFormatted: string = formatUnits(tokenBalance, decimalNumber);
+  return parseFloat(balanceFormatted);
 }
 
-export async function getEthBalance(
-  address: string,
-  payload: RequestPayload,
-  context: EthErc20Context
-): Promise<BigNumber> {
-  if (context.ethErc20?.counts?.eth === undefined) {
-    // define a provider using the rpc url
-    const staticProvider = getRPCProvider(payload);
-    const ethBalance = await staticProvider?.getBalance(address);
-
-    if (!context.ethErc20) {
-      context.ethErc20 = {};
-    }
-    if (!context.ethErc20.counts) {
-      context.ethErc20.counts = {};
-    }
-    context.ethErc20.counts.eth = ethBalance;
-  }
-  return context.ethErc20.counts.eth;
+export async function getEthBalance(address: string, payload: RequestPayload): Promise<number> {
+  // define a provider using the rpc url
+  const staticProvider = getRPCProvider(payload);
+  const ethBalance = await staticProvider?.getBalance(address);
+  // convert a currency unit from wei to ether
+  const balanceFormatted: string = formatUnits(ethBalance, 18);
+  return parseFloat(balanceFormatted);
 }
 
-export type EthErc20PossessionProviderOptions = {
-  threshold: string;
+export type ethErc20PossessionProviderOptions = {
+  threshold: number;
   recordAttribute: string;
   contractAddress: string;
   decimalNumber: number;
@@ -115,8 +80,8 @@ export class EthErc20PossessionProvider implements Provider {
   type = "";
 
   // Options can be set here and/or via the constructor
-  _options: EthErc20PossessionProviderOptions = {
-    threshold: "1",
+  _options: ethErc20PossessionProviderOptions = {
+    threshold: 1,
     recordAttribute: "",
     contractAddress: "",
     decimalNumber: 18,
@@ -124,22 +89,22 @@ export class EthErc20PossessionProvider implements Provider {
   };
 
   // construct the provider instance with supplied options
-  constructor(options: Partial<EthErc20PossessionProviderOptions> = {}) {
+  constructor(options: ProviderOptions = {}) {
     this._options = { ...this._options, ...options };
     this.type = `${this._options.recordAttribute}#${this._options.threshold}`;
   }
 
   // verify that the proof object contains valid === "true"
-  async verify(payload: RequestPayload, context: EthErc20Context): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     const { address } = payload;
     let valid = false;
-    let amount: BigNumber = BigNumber.from("0");
+    let amount = 0;
 
     try {
       if (this._options.contractAddress.length > 0) {
-        amount = await getTokenBalance(address, this._options.contractAddress, payload, context);
+        amount = await getTokenBalance(address, this._options.contractAddress, this._options.decimalNumber, payload);
       } else {
-        amount = await getEthBalance(address, payload, context);
+        amount = await getEthBalance(address, payload);
       }
     } catch (e) {
       return {
@@ -147,10 +112,7 @@ export class EthErc20PossessionProvider implements Provider {
         error: [this._options.error],
       };
     } finally {
-      const bnThreshold = parseUnits(this._options.threshold, this._options.decimalNumber);
-      if (BigNumber.isBigNumber(amount)) {
-        valid = amount.gte(bnThreshold);
-      }
+      valid = amount >= this._options.threshold;
     }
     return {
       valid,

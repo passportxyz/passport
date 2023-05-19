@@ -51,6 +51,7 @@ describe("BrightidPlatform", () => {
       },
       userDid: "string",
       callbackUrl: "string",
+      selectedProviders: [],
       waitForRedirect: async () =>
         Promise.resolve({
           state: "brightId",

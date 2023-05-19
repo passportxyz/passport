@@ -22,13 +22,13 @@ export const ProviderConfig: PlatformGroupSpec[] = [
 
 export const providers: Provider[] = [
   new EthErc20PossessionProvider({
-    threshold: "100",
+    threshold: 100,
     recordAttribute: "gtcPossessionsGte",
     contractAddress: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f",
     error: "GTC Possessions >= 100 Provider verify Error",
   }),
   new EthErc20PossessionProvider({
-    threshold: "10",
+    threshold: 10,
     recordAttribute: "gtcPossessionsGte",
     contractAddress: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f",
     error: "GTC Possessions >= 10 Provider verify Error",

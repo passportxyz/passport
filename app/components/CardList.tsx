@@ -21,13 +21,12 @@ import PageWidthGrid from "../components/PageWidthGrid";
 
 export type CardListProps = {
   isLoading?: boolean;
+  cardClassName?: string;
 };
-
-const cardClassName = "col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-3";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
-export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
+export const CardList = ({ isLoading = false, cardClassName }: CardListProps): JSX.Element => {
   const { allProvidersState, allPlatforms } = useContext(CeramicContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef();
@@ -113,7 +112,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
 
   return (
     <>
-      <PageWidthGrid>
+      <PageWidthGrid nested={true}>
         {PLATFORMS.map((platform, i) => {
           return isLoading ? (
             <LoadingCard key={i} className={cardClassName} />

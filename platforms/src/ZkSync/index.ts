@@ -1,5 +1,4 @@
-export { ZkSyncLiteProvider } from "./Providers/zkSyncLite";
-export { ZkSyncEraProvider } from "./Providers/zkSyncEra";
+export { ZkSyncProvider } from "./Providers/zkSync";
 
 export { PlatformDetails, ProviderConfig, providers } from "./Providers-config";
 export { ZkSyncPlatform } from "./App-Bindings";

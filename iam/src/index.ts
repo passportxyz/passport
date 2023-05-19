@@ -13,6 +13,7 @@ import cors from "cors";
 
 // ---- Web3 packages
 import { utils, ethers } from "ethers";
+import { ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 
 // ---- Types
 import { Response } from "express";
@@ -25,14 +26,15 @@ import {
   ProviderContext,
   CheckRequestBody,
   CheckResponseBody,
+  EasStamp,
   EasPayload,
-  PassportAttestation,
+  EasPassport,
   EasRequestBody,
 } from "@gitcoin/passport-types";
 
 import { getChallenge } from "./utils/challenge";
 import { getEASFeeAmount } from "./utils/easFees";
-import { formatMultiAttestationRequest } from "./utils/easSchema";
+import { encodeEasStamp } from "./utils/easSchema";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
@@ -65,28 +67,8 @@ if (!process.env.GITCOIN_VERIFIER_CONTRACT_ADDRESS) {
   configErrors.push("GITCOIN_VERIFIER_CONTRACT_ADDRESS is required");
 }
 
-if (!process.env.ALLO_SCORER_ID) {
-  configErrors.push("ALLO_SCORER_ID is required");
-}
-
-if (!process.env.SCORER_ENDPOINT) {
-  configErrors.push("SCORER_ENDPOINT is required");
-}
-
-if (!process.env.SCORER_API_KEY) {
-  configErrors.push("SCORER_API_KEY is required");
-}
-
-if (!process.env.EAS_GITCOIN_STAMP_SCHEMA) {
-  configErrors.push("EAS_GITCOIN_STAMP_SCHEMA is required");
-}
-
-if (!process.env.EAS_GITCOIN_SCORE_SCHEMA) {
-  configErrors.push("EAS_GITCOIN_SCORE_SCHEMA is required");
-}
-
 if (configErrors.length > 0) {
-  configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
+  configErrors.forEach((error) => console.error(error));
   throw new Error("Missing required configuration");
 }
 
@@ -113,20 +95,14 @@ const ATTESTER_DOMAIN = {
 };
 
 const ATTESTER_TYPES = {
-  AttestationRequestData: [
+  Stamp: [{ name: "encodedData", type: "bytes" }],
+  Passport: [
+    { name: "stamps", type: "Stamp[]" },
     { name: "recipient", type: "address" },
     { name: "expirationTime", type: "uint64" },
     { name: "revocable", type: "bool" },
     { name: "refUID", type: "bytes32" },
-    { name: "data", type: "bytes" },
     { name: "value", type: "uint256" },
-  ],
-  MultiAttestationRequest: [
-    { name: "schema", type: "bytes32" },
-    { name: "data", type: "AttestationRequestData[]" },
-  ],
-  PassportAttestationRequest: [
-    { name: "multiAttestationRequest", type: "MultiAttestationRequest[]" },
     { name: "nonce", type: "uint256" },
     { name: "fee", type: "uint256" },
   ],
@@ -174,13 +150,7 @@ const issueCredential = async (
 
       try {
         // generate a VC for the given payload
-        const { credential } = await issueHashedCredential(
-          DIDKit,
-          key,
-          address,
-          record,
-          verifiedPayload.expiresInSeconds
-        );
+        const { credential } = await issueHashedCredential(DIDKit, key, address, record);
 
         return {
           record,
@@ -418,9 +388,6 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
     if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
       return void errorRes(res, "Invalid recipient", 400);
 
-    if (!credentials.every((credential) => credential.credentialSubject.id.split(":")[4] === recipient))
-      return void errorRes(res, "Every credential's id must be equivalent", 400);
-
     Promise.all(
       credentials.map(async (credential) => {
         return {
@@ -434,34 +401,54 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           .filter(({ verified }) => !verified)
           .map(({ credential }) => credential);
 
-        const multiAttestationRequest = await formatMultiAttestationRequest(credentialVerifications, recipient);
+        const stamps: EasStamp[] = credentialVerifications
+          .filter(({ verified }) => verified)
+          .map(({ credential }) => {
+            return {
+              encodedData: encodeEasStamp(credential),
+            };
+          });
 
         const fee = await getEASFeeAmount(2);
-        const passportAttestation: PassportAttestation = {
-          multiAttestationRequest,
-          nonce: Number(nonce),
+
+        const easPassport: EasPassport = {
+          stamps,
+          recipient,
+          expirationTime: NO_EXPIRATION,
+          revocable: true,
+          refUID: ZERO_BYTES32,
+          value: 0,
           fee: fee.toString(),
+          nonce,
         };
 
         attestationSignerWallet
-          ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, passportAttestation)
+          ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, easPassport)
           .then((signature) => {
             const { v, r, s } = utils.splitSignature(signature);
 
             const payload: EasPayload = {
-              passport: passportAttestation,
+              passport: easPassport,
               signature: { v, r, s },
               invalidCredentials,
             };
 
             return void res.json(payload);
           })
-          .catch(() => {
-            return void errorRes(res, "Error signing passport", 500);
+          .catch((error) => {
+            // TODO dont return real error
+            console.log("==================================");
+            console.log(error);
+            console.log("==================================");
+            return void errorRes(res, String(error), 500);
           });
       })
-      .catch(() => {
-        return void errorRes(res, "Error formatting onchain passport", 500);
+      .catch((error) => {
+        // TODO dont return real error
+        console.log("------------------------------------");
+        console.log(error);
+        console.log("------------------------------------");
+        return void errorRes(res, String(error), 500);
       });
   } catch (error) {
     return void errorRes(res, String(error), 500);

@@ -12,14 +12,16 @@ export type WelcomeWrapperProps = {
 
 export const WelcomeWrapper = ({ content, children }: WelcomeWrapperProps) => {
   return (
-    <div className="my-6 w-full text-center md:my-12">
-      <div className="font-heading text-3xl">{content.header}</div>
-      <div className="mt-8 w-full border border-accent-2 bg-background md:mt-12">
-        <img src={content.imgSrc} alt="welcome" className="aspect-[4/3] h-auto w-full" />
+    <>
+      <div className="mt-10 font-heading text-3xl">{content.header}</div>
+      <div className="mt-10 h-[240px] w-[295px] border border-accent-2 bg-background lg:h-[333.56px] lg:w-[410px]">
+        <img src={content.imgSrc} alt="welcome" className="h-full w-full" />
       </div>
-      <p className="mt-4 text-2xl text-muted md:mt-6">{content.subHeader}</p>
-      <p className="mt-2 text-color-4">{content.body}</p>
-      <div className="mt-4 flex w-full items-center justify-between">{children}</div>
-    </div>
+      <p className="mt-10 text-2xl text-muted">{content.subHeader}</p>
+      <p className="mt-2 mb-10 w-[343px] text-gray-300 lg:w-[410px]">{content.body}</p>
+      <div className="absolute bottom-10 mb-auto flex w-full items-center justify-between px-4 md:relative md:mt-16 md:px-0 lg:w-[410px]">
+        {children}
+      </div>
+    </>
   );
 };

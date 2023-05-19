@@ -201,7 +201,7 @@ describe("Attempt verification", function () {
       }
     );
 
-    expect(mockedAxios.get).toBeCalledTimes(1);
+    expect(mockedAxios.get).toBeCalledTimes(2);
 
     // Check the request to get the user
     expect(mockedAxios.get).toBeCalledWith("https://api.github.com/user", {

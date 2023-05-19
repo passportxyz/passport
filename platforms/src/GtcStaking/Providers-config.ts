@@ -21,17 +21,17 @@ export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Self GTC Staking",
     providers: [
-      { title: "5 GTC (Bronze)", name: "SelfStakingBronze" },
-      { title: "20 GTC (Silver)", name: "SelfStakingSilver" },
-      { title: "125 GTC (Gold)", name: "SelfStakingGold" },
+      { title: "1 GTC (Bronze)", name: "SelfStakingBronze" },
+      { title: "10 GTC (Silver)", name: "SelfStakingSilver" },
+      { title: "100 GTC (Gold)", name: "SelfStakingGold" },
     ],
   },
   {
     platformGroup: "Community GTC Staking",
     providers: [
-      { title: "5 GTC (Bronze)", name: "CommunityStakingBronze" },
-      { title: "20 GTC (Silver)", name: "CommunityStakingSilver" },
-      { title: "125 GTC (Gold)", name: "CommunityStakingGold" },
+      { title: "1 GTC (Bronze)", name: "CommunityStakingBronze" },
+      { title: "10 GTC (Silver)", name: "CommunityStakingSilver" },
+      { title: "100 GTC (Gold)", name: "CommunityStakingGold" },
     ],
   },
 ];

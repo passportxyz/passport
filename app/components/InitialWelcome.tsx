@@ -39,7 +39,7 @@ export const InitialWelcome = ({ onBoardFinished }: { onBoardFinished: () => voi
   return (
     <WelcomeWrapper content={welcomeSteps[step]}>
       <div className="flex w-full flex-col">
-        <div className="mb-4 flex w-full items-center justify-center">
+        <div className="mb-5 flex w-full items-center justify-center">
           Step {step + 1} of {welcomeSteps.length} {stepIndicator(step)}
         </div>
         <div className="grid w-full grid-cols-2 gap-4">

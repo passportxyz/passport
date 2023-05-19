@@ -285,26 +285,6 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "GITCOIN_VERIFIER_CHAIN_ID",
             valueFrom: `${IAM_SERVER_SSM_ARN}:GITCOIN_VERIFIER_CHAIN_ID::`,
           },
-          {
-            name: "ALLO_SCORER_ID",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:ALLO_SCORER_ID::`,
-          },
-          {
-            name: "SCORER_ENDPOINT",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:SCORER_ENDPOINT::`,
-          },
-          {
-            name: "SCORER_API_KEY",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:SCORER_API_KEY::`,
-          },
-          {
-            name: "EAS_GITCOIN_STAMP_SCHEMA",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:EAS_GITCOIN_STAMP_SCHEMA::`,
-          },
-          {
-            name: "EAS_GITCOIN_SCORE_SCHEMA",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:EAS_GITCOIN_SCORE_SCHEMA::`,
-          },
         ],
       },
     },
@@ -319,17 +299,20 @@ const ecsIamServiceAutoscalingTarget = new aws.appautoscaling.Target("autoscalin
   serviceNamespace: "ecs",
 });
 
-const ecsScorerServiceAutoscaling = new aws.appautoscaling.Policy("scorer-autoscaling-policy", {
-  policyType: "TargetTrackingScaling",
-  resourceId: ecsIamServiceAutoscalingTarget.resourceId,
-  scalableDimension: ecsIamServiceAutoscalingTarget.scalableDimension,
-  serviceNamespace: ecsIamServiceAutoscalingTarget.serviceNamespace,
-  targetTrackingScalingPolicyConfiguration: {
-    predefinedMetricSpecification: {
-      predefinedMetricType: "ECSServiceAverageCPUUtilization",
+const ecsScorerServiceAutoscaling = new aws.appautoscaling.Policy(
+  "scorer-autoscaling-policy",
+  {
+    policyType: "TargetTrackingScaling",
+    resourceId: ecsIamServiceAutoscalingTarget.resourceId,
+    scalableDimension: ecsIamServiceAutoscalingTarget.scalableDimension,
+    serviceNamespace: ecsIamServiceAutoscalingTarget.serviceNamespace,
+    targetTrackingScalingPolicyConfiguration: {
+      predefinedMetricSpecification: {
+        predefinedMetricType: "ECSServiceAverageCPUUtilization",
+      },
+      targetValue: 30,
+      scaleInCooldown: 300,
+      scaleOutCooldown: 300,
     },
-    targetValue: 30,
-    scaleInCooldown: 300,
-    scaleOutCooldown: 300,
-  },
-});
+  }
+);
