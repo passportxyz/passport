@@ -32,6 +32,7 @@ import { RefreshMyStampsModalContentCardList } from "../components/RefreshMyStam
 import { reduceStampResponse } from "../utils/helpers";
 import { ValidatedPlatform } from "../signer/utils";
 import Checkbox from "./Checkbox";
+import Button from "./Button";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
@@ -191,49 +192,45 @@ export const RefreshMyStampsModalContent = ({
                 </p>
               </div>
             )}
-            <div className="mt-16 mb-auto flex items-center justify-center">
-              <button className="secondary-btn mr-2 w-full rounded-sm py-2 px-6" onClick={() => navigate("/dashboard")}>
+            <div className="mt-16 grid grid-cols-2 items-center justify-center gap-6">
+              <Button variant="secondary" onClick={() => navigate("/dashboard")}>
                 Cancel
-              </button>
-              <button
-                className="ml-2 flex w-full items-center justify-center rounded-sm bg-accent py-2 px-2 disabled:cursor-not-allowed disabled:bg-muted disabled:text-black"
+              </Button>
+              <Button
                 onClick={() => {
                   handleRefreshSelectedStamps();
                 }}
                 disabled={!canSubmit || isLoading}
               >
-                <span className="flex">
-                  Confirm Stamps {isLoading && <Spinner size="sm" className="my-auto ml-2" />}
-                </span>
-              </button>
+                Confirm Stamps
+                {isLoading && <Spinner size="sm" />}
+              </Button>
             </div>
           </div>
         ) : (
-          <div className="flex flex-col content-end text-white">
+          <div className="flex flex-col items-center text-center text-white">
             <button
               className="mt-4 mb-6 flex h-10 w-10 items-center justify-center self-center rounded-full border border-accent-2"
               onClick={onClose}
             >
               <NoSymbolIcon className="h-7 w-7" aria-hidden="true" fill="var(--color-accent-3)" />
             </button>
-            <div className="text-center">
-              <div className="m-auto mb-6 w-3/4 text-3xl">No New Web3 Stamps Detected</div>
-              <div className="mt-24 text-xl text-muted">
-                We did not find any new Web3 stamps to add to your passport. Completing the actions for a web3 stamp and
-                resubmitting will ensure that stamp is added (for example: Obtain an ENS name, NFT, etc.). Please return
-                to the dashboard and select additional stamps to verify your unique humanity by connecting to external
-                accounts (for example: Gmail, Discord, etc).
-              </div>
+            <div className="w-3/4 text-3xl">No New Web3 Stamps Detected</div>
+            <div className="my-20 text-xl text-muted">
+              We did not find any new Web3 stamps to add to your passport. Completing the actions for a web3 stamp and
+              resubmitting will ensure that stamp is added (for example: Obtain an ENS name, NFT, etc.). Please return
+              to the dashboard and select additional stamps to verify your unique humanity by connecting to external
+              accounts (for example: Gmail, Discord, etc).
             </div>
-            <button
-              className="sidebar-verify-btn hover:backround-2 mt-36 mb-8 flex w-full items-center justify-center rounded-sm text-white"
+            <Button
+              className="w-full"
               onClick={() => {
                 navigate("/dashboard");
                 resetStampsAndProgressState();
               }}
             >
               Explore Stamps
-            </button>
+            </Button>
           </div>
         )}
       </div>
