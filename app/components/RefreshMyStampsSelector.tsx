@@ -38,7 +38,7 @@ export function RefreshMyStampsSelector({
                           key={`${provider.title}${i}`}
                           data-testid={`checkbox-${provider.name}`}
                           disabled={!platformChecked}
-                          isChecked={selectedProviders?.includes(provider.name)}
+                          checked={selectedProviders?.includes(provider.name)}
                           onChange={(checked: boolean) => {
                             // set the selected items by concatenating or filtering by providerId
                             setSelectedProviders(

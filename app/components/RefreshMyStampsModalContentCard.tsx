@@ -66,7 +66,7 @@ export const RefreshMyStampsModalContentCard = ({
             </div>
             <Toggle
               data-testid={`switch-${currentPlatform?.name}`}
-              isChecked={checked}
+              checked={checked}
               onChange={(checked: boolean) => {
                 if (checked) {
                   setSelectedProviders((selectedProviders || []).concat(platformProviders));

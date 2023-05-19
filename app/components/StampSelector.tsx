@@ -72,7 +72,7 @@ export function StampSelector({
               <div className="align-right ml-2">
                 <Toggle
                   data-testid={`switch-${i}`}
-                  isChecked={
+                  checked={
                     stamp.providers?.reduce(
                       (isPresent, provider) =>
                         isPresent || selectedProviders?.indexOf(provider.name as PROVIDER_ID) !== -1,

@@ -5,24 +5,22 @@ import { CheckIcon } from "@heroicons/react/24/outline";
 type CheckboxProps = {
   onChange: (checked: boolean) => void;
   className?: string;
-  isChecked?: boolean;
+  checked?: boolean;
   disabled?: boolean;
-  [key: string]: any;
+  id?: string;
 };
 
-const Checkbox = ({ className, isChecked, onChange, disabled, ...props }: CheckboxProps) => {
+const Checkbox = ({ className, ...props }: CheckboxProps) => {
   return (
     <Switch
-      checked={isChecked}
-      onChange={onChange}
-      className={`flex h-6 w-6 items-center justify-center rounded-md focus:border ${
-        disabled ? "bg-accent-2" : "ui-checked:bg-accent ui-not-checked:border ui-not-checked:bg-background"
-      } ${className}`}
-      disabled={disabled}
+      className={`group flex h-6 w-6 items-center justify-center rounded-md
+        focus:border disabled:bg-accent-2 enabled:ui-checked:bg-accent
+        enabled:ui-not-checked:border enabled:ui-not-checked:bg-background
+        ${className}`}
       {...props}
     >
       <CheckIcon
-        className={`invisible h-4 w-4 stroke-[3] text-color-1 ui-checked:visible ${disabled ? "text-color-4" : ""}`}
+        className={`invisible h-4 w-4 stroke-[3] text-color-1 group-disabled:text-color-4 ui-checked:visible`}
       />
     </Switch>
   );

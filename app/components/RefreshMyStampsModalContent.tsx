@@ -238,7 +238,7 @@ export const RefreshMyStampsModalContent = ({
         <Checkbox
           data-testid="checkbox-onboard-hide"
           id="checkbox-onboard-hide"
-          isChecked={disableOnboard}
+          checked={disableOnboard}
           onChange={(checked: boolean) => {
             if (checked) {
               const now = Math.floor(Date.now() / 1000);
