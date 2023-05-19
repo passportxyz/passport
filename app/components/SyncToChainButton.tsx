@@ -46,7 +46,6 @@ const SyncToChainButton = () => {
           transformRequest: [(data) => JSON.stringify(data, (k, v) => (typeof v === "bigint" ? v.toString() : v))],
         });
 
-
         if (data.error)
           console.log(
             "error syncing credentials to chain: ",
