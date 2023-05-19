@@ -323,4 +323,15 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
       providers: [{ title: "Member with 1 or more roles in Gitcoin Passport Guild", name: "GuildPassportMember" }],
     },
   ],
+  Civic: [
+    {
+      platformGroup: "Civic Pass",
+      providers: [
+        { title: "holds a Civic CAPTCHA Pass", name: "CivicCaptchaPass" },
+        { title: "holds a Civic Uniqueness Pass", name: "CivicUniquenessPass" },
+        { title: "holds a Civic Liveness Pass", name: "CivicLivenessPass" },
+        { title: "holds a Civic IDV Pass", name: "CivicIDVPass" },
+      ],
+    },
+  ],
 };
