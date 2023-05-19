@@ -5,11 +5,7 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import { datadogLogs } from "@datadog/browser-logs";
 
 // --- Identity tools
-import {
-  Stamp,
-  VerifiableCredential,
-  VerifiableCredentialRecord,
-} from "@gitcoin/passport-types";
+import { Stamp, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
 import { ProviderPayload } from "@gitcoin/passport-platforms";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
