@@ -3,10 +3,16 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
 // --- Types
-import { PlatformGroupSpec, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/types";
 
 // --- Identity tools
-import { Stamp, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
+import {
+  Stamp,
+  VerifiableCredential,
+  VerifiableCredentialRecord,
+  PROVIDER_ID,
+  PLATFORM_ID,
+} from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Contexts

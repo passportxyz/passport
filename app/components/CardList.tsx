@@ -14,7 +14,7 @@ import { SideBarContent } from "./SideBarContent";
 
 // --- Chakra UI Elements
 import { Drawer, DrawerOverlay, useDisclosure } from "@chakra-ui/react";
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { CeramicContext } from "../context/ceramicContext";
 import { PlatformCard } from "./PlatformCard";
 import PageWidthGrid from "../components/PageWidthGrid";
