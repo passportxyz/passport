@@ -37,6 +37,7 @@ import {
   Brightid,
   Coinbase,
   GuildXYZ,
+  Civic,
 } from "@gitcoin/passport-platforms";
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -185,6 +186,11 @@ if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
     platFormGroupSpec: GuildXYZ.GuildXYZProviderConfig,
   });
 }
+
+platforms.set("Civic", {
+  platform: new Civic.CivicPlatform(),
+  platFormGroupSpec: Civic.CivicProviderConfig,
+});
 
 export enum IsLoadingPassportState {
   Idle,
@@ -468,6 +474,22 @@ const startingAllProvidersState: AllProvidersState = {
   },
   GuildPassportMember: {
     providerSpec: getProviderSpec("GuildXYZ", "GuildPassportMember"),
+    stamp: undefined,
+  },
+  CivicCaptchaPass: {
+    providerSpec: getProviderSpec("Civic", "CivicCaptchaPass"),
+    stamp: undefined,
+  },
+  CivicUniquenessPass: {
+    providerSpec: getProviderSpec("Civic", "CivicUniquenessPass"),
+    stamp: undefined,
+  },
+  CivicLivenessPass: {
+    providerSpec: getProviderSpec("Civic", "CivicLivenessPass"),
+    stamp: undefined,
+  },
+  CivicIDVPass: {
+    providerSpec: getProviderSpec("Civic", "CivicIDVPass"),
     stamp: undefined,
   },
 };

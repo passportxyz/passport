@@ -27,6 +27,7 @@ import * as ClearText from "./ClearText";
 import * as Brightid from "./Brightid";
 import * as Coinbase from "./Coinbase";
 import * as GuildXYZ from "./GuildXYZ";
+import * as Civic from "./Civic";
 
 export {
   Brightid,
@@ -52,6 +53,7 @@ export {
   Twitter,
   Coinbase,
   GuildXYZ,
+  Civic,
 };
 
 // Initiate providers - new Providers should be registered in this array...
@@ -227,6 +229,26 @@ export const providers = new Providers([
   new GuildXYZ.GuildAdminProvider(),
   new GuildXYZ.GuildMemberProvider(),
   new GuildXYZ.GuildPassportMemberProvider(),
+  /////////////////////////////////////////////////////////////
+  // Civic Passes: Keep in sync with https://docs.civic.com/integration-guides/civic-idv-services/available-networks
+  // By default, excludes testnets. To include testnets, add `includeTestnets: true` to each provider.
+  ////////////////////////////////////////////////////////////
+  new Civic.CivicPassProvider({
+    passTypes: [Civic.CivicPassType.CAPTCHA],
+    type: "CivicCaptchaPass",
+  }),
+  new Civic.CivicPassProvider({
+    passTypes: [Civic.CivicPassType.UNIQUENESS],
+    type: "CivicUniquenessPass",
+  }),
+  new Civic.CivicPassProvider({
+    passTypes: [Civic.CivicPassType.LIVENESS],
+    type: "CivicLivenessPass",
+  }),
+  new Civic.CivicPassProvider({
+    passTypes: [Civic.CivicPassType.IDV],
+    type: "CivicIDVPass",
+  }),
 ]);
 
 export { Platform, AppContext, ProviderPayload, PlatformSpec } from "./types";

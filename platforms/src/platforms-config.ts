@@ -183,4 +183,12 @@ export const PLATFORMS: PlatformSpec[] = [
     connectMessage: "Verify Guilds",
     isEVM: true,
   },
+  {
+    icon: "./assets/civicStampIcon.svg",
+    platform: "Civic",
+    name: "Civic",
+    description: "Civic Profile Verification",
+    connectMessage: "Verify Account",
+    isEVM: true,
+  },
 ];

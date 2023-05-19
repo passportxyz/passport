@@ -194,4 +194,20 @@ export const PLATFORMS: PlatformSpec[] = [
     connectMessage: "Verify Guilds",
     isEVM: true,
   },
+  {
+    icon: "./assets/lensWhiteStampIcon.svg",
+    platform: "Lens",
+    name: "Lens",
+    description: "Connect your wallet to verify ownership of a Lens Profile.",
+    connectMessage: "Connect Walllet",
+    isEVM: true,
+  },
+  {
+    icon: "./assets/civicStampIcon.svg",
+    platform: "Civic",
+    name: "Civic",
+    description: "Connect your wallet to verify your Civic Passes.",
+    connectMessage: "Connect Wallet",
+    isEVM: true,
+  },
 ];
