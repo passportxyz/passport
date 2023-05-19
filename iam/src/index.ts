@@ -89,7 +89,7 @@ export const config: {
 const attestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
 
 const ATTESTER_DOMAIN = {
-  name: "Attester",
+  name: "GitcoinVerifier",
   version: "1",
   chainId: process.env.GITCOIN_ATTESTER_CHAIN_ID,
   verifyingContract: process.env.GITCOIN_ATTESTER_CONTRACT_ADDRESS,
