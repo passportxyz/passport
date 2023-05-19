@@ -1,8 +1,7 @@
 import { JsonRpcSigner } from "@ethersproject/providers";
 // BrightId Shared Types
 export { BrightIdProcedureResponse, BrightIdVerificationResponse, BrightIdSponsorshipResponse } from "./brightid";
-
-import { MultiAttestationRequest } from "@ethereum-attestation-service/eas-sdk";
+import { BigNumber } from "@ethersproject/bignumber";
 
 // Typing for required parts of DIDKit
 export type DIDKitLib = {
@@ -77,7 +76,6 @@ export type VerifiedPayload = {
   error?: string[];
   // This will be combined with the ProofRecord (built from the verified content in the Payload)
   record?: { [k: string]: string };
-  expiresInSeconds?: number;
 };
 
 export type CheckRequestBody = {
@@ -146,8 +144,6 @@ export type Stamp = {
   credential: VerifiableCredential;
 };
 
-export type StampPatch = Pick<Stamp, "provider"> & Partial<Pick<Stamp, "credential">>;
-
 export type Passport = {
   issuanceDate?: Date;
   expiryDate?: Date;
@@ -171,14 +167,23 @@ export type PassportLoadResponse = {
   errorDetails?: PassportLoadErrorDetails;
 };
 
-export type PassportAttestation = {
-  multiAttestationRequest: MultiAttestationRequest[];
+export type EasStamp = {
+  encodedData: string;
+};
+
+export type EasPassport = {
+  stamps: EasStamp[];
+  recipient: string;
+  expirationTime: any;
+  revocable: boolean;
+  refUID: string;
+  value: any;
   nonce: number;
   fee: any;
 };
 
 export type EasPayload = {
-  passport: PassportAttestation;
+  passport: EasPassport;
   signature: {
     v: number;
     r: string;
@@ -191,7 +196,6 @@ export type EasPayload = {
 export type EasRequestBody = {
   nonce: number;
   credentials: VerifiableCredential[];
-  dbAccessToken: string;
 };
 
 // Passport DID
@@ -222,9 +226,7 @@ export type PLATFORM_ID =
   | "Coinbase"
   | "GuildXYZ"
   | "Hypercerts"
-  | "PHI"
-  | "Holonym"
-  | "Idena";
+  | "Civic";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -247,12 +249,6 @@ export type PROVIDER_ID =
   | "ForkedGithubRepoProvider"
   | "StarredGithubRepoProvider"
   | "FiveOrMoreGithubRepos"
-  | "githubContributionActivityGte#30"
-  | "githubContributionActivityGte#60"
-  | "githubContributionActivityGte#120"
-  | "githubAccountCreationGte#90"
-  | "githubAccountCreationGte#180"
-  | "githubAccountCreationGte#365"
   | "GitcoinContributorStatistics#numGrantsContributeToGte#1"
   | "GitcoinContributorStatistics#numGrantsContributeToGte#10"
   | "GitcoinContributorStatistics#numGrantsContributeToGte#25"
@@ -292,7 +288,6 @@ export type PROVIDER_ID =
   | "CommunityStakingGold"
   | "NFT"
   | "ZkSync"
-  | "ZkSyncEra"
   | "Lens"
   | "GnosisSafe"
   | "Coinbase"
@@ -300,14 +295,6 @@ export type PROVIDER_ID =
   | "GuildAdmin"
   | "GuildPassportMember"
   | "Hypercerts"
-  | "PHIActivitySilver"
-  | "PHIActivityGold"
-  | "HolonymGovIdProvider"
-  | "IdenaState#Newbie"
-  | "IdenaState#Verified"
-  | "IdenaState#Human"
-  | "IdenaStake#1k"
-  | "IdenaStake#10k"
-  | "IdenaStake#100k"
-  | "IdenaAge#5"
-  | "IdenaAge#10";
+  | "CivicCaptchaPass"
+  | "CivicUniquenessPass"
+  | "CivicLivenessPass";

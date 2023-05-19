@@ -21,9 +21,7 @@ import * as Brightid from "./Brightid";
 import * as Coinbase from "./Coinbase";
 import * as GuildXYZ from "./GuildXYZ";
 import * as Hypercerts from "./Hypercerts";
-import * as PHI from "./PHI";
-import * as Holonym from "./Holonym";
-import * as Idena from "./Idena";
+import * as Civic from "./Civic";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
 type PlatformConfig = {
@@ -45,6 +43,7 @@ const platforms: Record<string, PlatformConfig> = {
   Facebook,
   Linkedin,
   Ens,
+  POAP,
   Brightid,
   Poh,
   ETH,
@@ -57,13 +56,7 @@ const platforms: Record<string, PlatformConfig> = {
   Coinbase,
   GuildXYZ,
   Hypercerts,
-  PHI,
-  Holonym,
-  Idena,
+  Civic,
 };
-
-if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {
-  platforms.POAP = POAP;
-}
 
 export default platforms;
