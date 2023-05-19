@@ -17,6 +17,7 @@ import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commo
 import { CeramicContext } from "../context/ceramicContext";
 import { PlatformCard } from "./PlatformCard";
 import PageWidthGrid from "../components/PageWidthGrid";
+import { OnChainContext } from "../context/onChainContext";
 
 export type CardListProps = {
   isLoading?: boolean;
@@ -32,6 +33,7 @@ export const CardList = ({ isLoading = false, cardClassName }: CardListProps): J
   const [currentPlatform, setCurrentPlatform] = useState<PlatformSpec | undefined>();
   const [currentProviders, setCurrentProviders] = useState<PlatformGroupSpec[]>([]);
   const [updatedPlatforms, setUpdatedPlatforms] = useState<UpdatedPlatforms | undefined>();
+  const { onChainProviders } = useContext(OnChainContext);
 
   // get the selected Providers
   const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
@@ -123,6 +125,7 @@ export const CardList = ({ isLoading = false, cardClassName }: CardListProps): J
               btnRef={btnRef}
               onOpen={onOpen}
               selectedProviders={selectedProviders}
+              onChainProviders={onChainProviders}
               updatedPlatforms={updatedPlatforms}
               getUpdatedPlatforms={getUpdatedPlatforms}
               setCurrentPlatform={setCurrentPlatform}

@@ -7,12 +7,14 @@ import { PlatformSpec, PlatformGroupSpec, PROVIDER_ID } from "@gitcoin/passport-
 
 import { StampSelector } from "./StampSelector";
 import { PlatformDetails } from "./PlatformDetails";
+import { OnChainProvidersType } from "../context/onChainContext";
 
 export type SideBarContentProps = {
   currentPlatform: PlatformSpec | undefined;
   currentProviders: PlatformGroupSpec[] | undefined;
   verifiedProviders: PROVIDER_ID[] | undefined;
   selectedProviders: PROVIDER_ID[] | undefined;
+  onChainProviders: OnChainProvidersType;
   setSelectedProviders: React.Dispatch<React.SetStateAction<PROVIDER_ID[]>> | undefined;
   isLoading: boolean | undefined;
   verifyButton: JSX.Element | undefined;
