@@ -402,13 +402,13 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           .filter(({ verified }) => !verified)
           .map(({ credential }) => credential);
 
-      const stamps: EasStamp[] = credentialVerifications
-        .filter(({ verified }) => verified)
-        .map(({ credential }) => {
-          return {
-            encodedData: encodeEasStamp(credential),
-          };
-        });
+        const stamps: EasStamp[] = credentialVerifications
+          .filter(({ verified }) => verified)
+          .map(({ credential }) => {
+            return {
+              encodedData: encodeEasStamp(credential),
+            };
+          });
 
         const fee = await getEASFeeAmount(2);
 

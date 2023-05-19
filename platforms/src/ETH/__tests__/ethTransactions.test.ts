@@ -90,7 +90,6 @@ const validEtherscanResponse = {
   },
 };
 
-
 const invalidEtherscanResponseLTHalfEthGasSpent = {
   data: {
     data: {
