@@ -75,7 +75,9 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
 
   // VerifiedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
-    providerIds.filter((providerId: any) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined")
+    providerIds.filter(
+      (providerId: any) => typeof allProvidersState[providerId as PROVIDER_ID]?.stamp?.credential !== "undefined"
+    )
   );
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
