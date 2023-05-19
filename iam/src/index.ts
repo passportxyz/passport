@@ -438,11 +438,17 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           })
           .catch((error) => {
             // TODO dont return real error
+            console.log("==================================");
+            console.log(error);
+            console.log("==================================");
             return void errorRes(res, String(error), 500);
           });
       })
       .catch((error) => {
         // TODO dont return real error
+        console.log("------------------------------------");
+        console.log(error);
+        console.log("------------------------------------");
         return void errorRes(res, String(error), 500);
       });
   } catch (error) {

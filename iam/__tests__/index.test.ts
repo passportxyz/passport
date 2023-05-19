@@ -21,6 +21,7 @@ import {
   ValidResponseBody,
   VerifiableCredential,
   VerifiedPayload,
+  EasStamp,
 } from "@gitcoin/passport-types";
 
 import { utils } from "ethers";
@@ -744,7 +745,7 @@ describe("POST /eas", () => {
       credentialSubject: {
         id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
         provider: "failure",
-        hash: "test",
+        hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
       },
       expirationDate: "9999-12-31T23:59:59Z",
     };
@@ -758,7 +759,7 @@ describe("POST /eas", () => {
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
           provider: "test",
-          hash: "test",
+          hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
         },
         expirationDate: "9999-12-31T23:59:59Z",
       },
@@ -805,21 +806,36 @@ describe("POST /eas", () => {
       credentialSubject: {
         id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
         provider: "failure",
-        hash: "test",
+        hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
       },
       expirationDate: "9999-12-31T23:59:59Z",
     };
 
     const credentials = [failedCredential];
+    const expectedPayload = {
+      passport: {
+        stamps: [] as EasStamp[],
+        recipient: "0x5678000000000000000000000000000000000000",
+        expirationTime: 0,
+        revocable: true,
+        refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
+        value: 0,
+        fee: "25000000000000000",
+        nonce,
+      },
+      signature: expect.any(Object),
+      invalidCredentials: [failedCredential],
+    };
 
     const response = await request(app)
       .post("/api/v0.0.0/eas")
       .send({ credentials, nonce })
       .set("Accept", "application/json")
-      .expect(400)
+      .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(response.body.error).toEqual("No verifiable stamps provided");
+    expect(response.body).toEqual(expectedPayload);
+    expect(response.body.signature.r).toBe("r");
   });
 
   it("handles missing stamps in the request body", async () => {
@@ -846,7 +862,7 @@ describe("POST /eas", () => {
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678",
           provider: "test",
-          hash: "test",
+          hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
         },
         expirationDate: "9999-12-31T23:59:59Z",
       },
@@ -875,7 +891,7 @@ describe("POST /eas", () => {
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
           provider: "test",
-          hash: "test",
+          hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
         },
         expirationDate: "9999-12-31T23:59:59Z",
       },
