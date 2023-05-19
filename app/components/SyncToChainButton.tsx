@@ -7,7 +7,7 @@ import { ethers } from "ethers";
 // --Chakra UI Elements
 import { Spinner, useToast } from "@chakra-ui/react";
 
-import GitcoinAttester from "../contracts/GitcoinAttester.json";
+import GitcoinVerifier from "../contracts/GitcoinVerifier.json";
 
 import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
@@ -28,7 +28,7 @@ const SyncToChainButton = () => {
         const ethersProvider = new ethers.BrowserProvider(wallet.provider, "any");
         const gitcoinAttesterContract = new ethers.Contract(
           process.env.NEXT_PUBLIC_GITCOIN_ATTESTER_CONTRACT_ADDRESS as string,
-          GitcoinAttester.abi,
+          GitcoinVerifier.abi,
           await ethersProvider.getSigner()
         );
         const nonce = await gitcoinAttesterContract.recipientNonces(address);
