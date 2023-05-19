@@ -14,7 +14,6 @@ export type SideBarContentProps = {
   currentProviders: PlatformGroupSpec[] | undefined;
   verifiedProviders: PROVIDER_ID[] | undefined;
   selectedProviders: PROVIDER_ID[] | undefined;
-  onChainProviders: OnChainProvidersType;
   setSelectedProviders: React.Dispatch<React.SetStateAction<PROVIDER_ID[]>> | undefined;
   isLoading: boolean | undefined;
   verifyButton: JSX.Element | undefined;
