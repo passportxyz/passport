@@ -13,7 +13,7 @@ import cors from "cors";
 
 // ---- Web3 packages
 import { utils, ethers } from "ethers";
-import { SchemaEncoder, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
+import { ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 
 // ---- Types
 import { Response } from "express";
@@ -34,6 +34,7 @@ import {
 
 import { getChallenge } from "./utils/challenge";
 import { getEASFeeAmount } from "./utils/easFees";
+import { encodeEasStamp } from "./utils/easSchema";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
@@ -86,7 +87,6 @@ export const config: {
 };
 
 const attestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
-const attestationSchemaEncoder = new SchemaEncoder("string provider, string hash");
 
 const ATTESTER_DOMAIN = {
   name: "Attester",
@@ -96,12 +96,7 @@ const ATTESTER_DOMAIN = {
 };
 
 const ATTESTER_TYPES = {
-  Stamp: [
-    { name: "provider", type: "string" },
-    { name: "stampHash", type: "string" },
-    { name: "expirationDate", type: "string" },
-    { name: "encodedData", type: "bytes" },
-  ],
+  Stamp: [{ name: "encodedData", type: "bytes" }],
   Passport: [
     { name: "stamps", type: "Stamp[]" },
     { name: "recipient", type: "address" },
@@ -410,18 +405,10 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
         const stamps: EasStamp[] = credentialVerifications
           .filter(({ verified }) => verified)
           .map(({ credential }) => {
-            const encodedData = attestationSchemaEncoder.encodeData([
-              { name: "provider", value: credential.credentialSubject.provider, type: "string" },
-              { name: "hash", value: credential.credentialSubject.hash, type: "string" },
-            ]);
             return {
-              provider: credential.credentialSubject.provider,
-              stampHash: credential.credentialSubject.hash,
-              expirationDate: credential.expirationDate,
-              encodedData,
+              encodedData: encodeEasStamp(credential),
             };
           });
-        if (!stamps.length) return void errorRes(res, "No verifiable stamps provided", 400);
 
         const fee = await getEASFeeAmount(2);
 
@@ -451,11 +438,17 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           })
           .catch((error) => {
             // TODO dont return real error
+            console.log("==================================");
+            console.log(error);
+            console.log("==================================");
             return void errorRes(res, String(error), 500);
           });
       })
       .catch((error) => {
         // TODO dont return real error
+        console.log("------------------------------------");
+        console.log(error);
+        console.log("------------------------------------");
         return void errorRes(res, String(error), 500);
       });
   } catch (error) {

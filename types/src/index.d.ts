@@ -168,9 +168,6 @@ export type PassportLoadResponse = {
 };
 
 export type EasStamp = {
-  provider: string;
-  stampHash: string;
-  expirationDate: string;
   encodedData: string;
 };
 

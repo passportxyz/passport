@@ -2,11 +2,11 @@
 
 module.exports = {
   // [...]
-  "preset": 'ts-jest',
-  "extensionsToTreatAsEsm": [".ts"],
-  "globals": {
+  preset: "ts-jest",
+  extensionsToTreatAsEsm: [".ts"],
+  globals: {
     "ts-jest": {
-      "useESM": true
-    }
-  }
-}
+      useESM: true,
+    },
+  },
+};
