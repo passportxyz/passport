@@ -16,16 +16,7 @@ import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import Tooltip from "../components/Tooltip";
 
 // --Chakra UI Elements
-import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalOverlay,
-  Spinner,
-  useDisclosure,
-} from "@chakra-ui/react";
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalOverlay, Spinner, useDisclosure } from "@chakra-ui/react";
 
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
@@ -39,6 +30,7 @@ import ProcessingPopup from "../components/ProcessingPopup";
 import SyncToChainButton from "../components/SyncToChainButton";
 import { getFilterName } from "../config/filters";
 import { hardhatChainId, sepoliaChainId } from "../utils/onboard";
+import { Button } from "../components/Button";
 
 const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
 const isOnChainSyncEnabled = process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on";
@@ -141,7 +133,11 @@ export default function Dashboard() {
   const retryModal = (
     <Modal isOpen={retryModalIsOpen} onClose={onRetryModalClose}>
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent
+        background="var(--color-background-2)"
+        textColor="var(--color-text-1)"
+        border="solid 1px var(--color-accent-2)"
+      >
         <ModalBody mt={4}>
           <div className="flex flex-row">
             <div className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-100 md:mr-10">
@@ -157,10 +153,10 @@ export default function Dashboard() {
         </ModalBody>
         {
           <ModalFooter py={3}>
-            <Button data-testid="retry-modal-try-again" variant="outline" mr={2} onClick={retryConnection}>
+            <Button data-testid="retry-modal-try-again" variant="secondary" className="mr-2" onClick={retryConnection}>
               Try Again
             </Button>
-            <Button data-testid="retry-modal-close" colorScheme="purple" onClick={closeModalAndDisconnect}>
+            <Button data-testid="retry-modal-close" onClick={closeModalAndDisconnect}>
               Done
             </Button>
           </ModalFooter>

@@ -10,6 +10,7 @@ import { UserContext } from "../context/userContext";
 import { AdditionalSignature, fetchAdditionalSigner } from "../signer/utils";
 
 import { AdditionalStampModal } from "./AdditionalStampModal";
+import { LoadButton } from "./LoadButton";
 
 export type NoStampModalProps = {
   isOpen: boolean;
@@ -37,11 +38,7 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
       blockScrollOnMount={false}
     >
       <ModalOverlay />
-      <ModalContent
-        background="var(--color-background-2)"
-        textColor="var(--color-text-1)"
-        border="solid 1px var(--color-accent-2)"
-      >
+      <ModalContent>
         <div className="m-3 flex flex-col items-center">
           <button
             onClick={() => {
@@ -79,9 +76,9 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
                 >
                   Go to ENS
                 </a> */}
-                <button
+                <LoadButton
                   data-testid="check-other-wallet"
-                  className="m-1 mx-auto flex w-full justify-center rounded-md bg-purple-connectPurple py-2 text-white hover:bg-purple-200 hover:text-black"
+                  className="m-1 w-full"
                   onClick={async () => {
                     // mark as verifying
                     setVerificationInProgress(true);
@@ -94,20 +91,10 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
                       setVerificationInProgress(false);
                     }
                   }}
+                  isLoading={verificationInProgress}
                 >
-                  {verificationInProgress && (
-                    <Spinner
-                      thickness="4px"
-                      speed="0.65s"
-                      emptyColor="gray.200"
-                      color="purple.500"
-                      size="sm"
-                      data-testid="loading-indicator"
-                      className="my-auto mr-2"
-                    />
-                  )}
                   Try another wallet
-                </button>
+                </LoadButton>
               </div>
             </>
           )}

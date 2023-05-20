@@ -19,9 +19,7 @@ const Checkbox = ({ className, ...props }: CheckboxProps) => {
         ${className}`}
       {...props}
     >
-      <CheckIcon
-        className={`invisible h-4 w-4 stroke-[3] text-color-1 group-disabled:text-color-4 ui-checked:visible`}
-      />
+      <CheckIcon className="invisible h-4 w-4 stroke-[3] text-color-1 group-disabled:text-color-4 ui-checked:visible" />
     </Switch>
   );
 };

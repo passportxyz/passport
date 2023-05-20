@@ -12,7 +12,7 @@ import {
   ModalFooter,
 } from "@chakra-ui/react";
 import { ArrowDownTrayIcon } from "@heroicons/react/20/solid";
-import Button from "./Button";
+import { Button } from "./Button";
 
 export type JsonOutputModalProps = {
   isOpen: boolean;
@@ -50,14 +50,7 @@ export const JsonOutputModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
-      <ModalContent
-        rounded={"none"}
-        padding={4}
-        maxW="80%"
-        maxH="80%"
-        background="var(--color-background-2)"
-        border="solid 1px var(--color-accent-2)"
-      >
+      <ModalContent rounded={"none"} padding={4} maxW="80%" maxH="80%" textColor="inherit">
         <ModalHeader borderBottomWidth={2} borderBottomColor="var(--color-accent2)">
           <p className="text-color-1">{title}</p>
           <p className="text-base text-color-1">{subheading}</p>

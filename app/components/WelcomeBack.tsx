@@ -13,7 +13,8 @@ import { UserContext } from "../context/userContext";
 // --- UI Components
 import { Spinner } from "@chakra-ui/react";
 import { WelcomeWrapper } from "./WelcomeWrapper";
-import Button from "./Button";
+import { Button } from "./Button";
+import { LoadButton } from "./LoadButton";
 
 export interface WelcomeBackProps {
   onOpen: () => void;
@@ -29,7 +30,7 @@ export const WelcomeBack = ({
   const { allPlatforms } = useContext(CeramicContext);
   const { address } = useContext(UserContext);
   const navigate = useNavigate();
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <WelcomeWrapper
@@ -41,19 +42,19 @@ export const WelcomeBack = ({
       }}
     >
       <div className="grid w-full grid-cols-2 gap-4">
-        <Button
+        <LoadButton
           data-testid="skip-for-now-button"
           variant="secondary"
+          isLoading={isLoading}
           onClick={() => {
-            setLoading(true);
+            setIsLoading(true);
             navigate("/dashboard");
             resetStampsAndProgressState();
-            setLoading(false);
+            setIsLoading(false);
           }}
         >
           Skip For Now
-          {isLoading ? <Spinner size="sm" className="my-auto ml-2" /> : <></>}
-        </Button>
+        </LoadButton>
         <Button
           data-testid="refresh-my-stamps-button"
           onClick={() => {

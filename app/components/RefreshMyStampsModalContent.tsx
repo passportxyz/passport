@@ -25,14 +25,14 @@ import { datadogLogs } from "@datadog/browser-logs";
 // --- UI components
 // TODO: re-add toasts after design updates
 import { NoSymbolIcon } from "@heroicons/react/20/solid";
-import { Spinner } from "@chakra-ui/react";
 
 // --- App components
 import { RefreshMyStampsModalContentCardList } from "../components/RefreshMyStampsModalContentCardList";
 import { reduceStampResponse } from "../utils/helpers";
 import { ValidatedPlatform } from "../signer/utils";
 import Checkbox from "./Checkbox";
-import Button from "./Button";
+import { Button } from "./Button";
+import { LoadButton } from "./LoadButton";
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
@@ -196,15 +196,15 @@ export const RefreshMyStampsModalContent = ({
               <Button variant="secondary" onClick={() => navigate("/dashboard")}>
                 Cancel
               </Button>
-              <Button
+              <LoadButton
                 onClick={() => {
                   handleRefreshSelectedStamps();
                 }}
                 disabled={!canSubmit || isLoading}
+                isLoading={isLoading}
               >
                 Confirm Stamps
-                {isLoading && <Spinner size="sm" />}
-              </Button>
+              </LoadButton>
             </div>
           </div>
         ) : (

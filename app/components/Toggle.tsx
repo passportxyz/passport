@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch, SwitchProps } from "@headlessui/react";
+import { Switch } from "@headlessui/react";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const toggleIconClassName = "relative left-[2px] top-[2px] h-4 w-4 stroke-[3]";

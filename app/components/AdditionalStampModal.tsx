@@ -10,9 +10,11 @@ import { fetchPossibleEVMStamps, ValidatedPlatform, AdditionalSignature } from "
 import { getPlatformSpec } from "../config/platforms";
 
 // Components
-import { Button, Spinner } from "@chakra-ui/react";
+import { Spinner } from "@chakra-ui/react";
 import { StampSelector } from "./StampSelector";
 import { PlatformDetails } from "./PlatformDetails";
+import { Button } from "./Button";
+import { LoadButton } from "./LoadButton";
 
 // Passport imports
 import { PROVIDER_ID, Stamp, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
@@ -112,7 +114,6 @@ export const AdditionalStampModal = ({
         setLoading(false);
       } catch (e) {
         datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
-        throw e;
       } finally {
         setLoading(false);
       }
@@ -167,7 +168,7 @@ export const AdditionalStampModal = ({
           <hr className="border-1" />
         </div>
 
-        <div className="flex flex-col">
+        <div className="mb-4 flex w-full flex-col">
           <StampSelector
             currentProviders={activePlatform.platformProps.platFormGroupSpec}
             verifiedProviders={verifiedProviders}
@@ -175,20 +176,9 @@ export const AdditionalStampModal = ({
             setSelectedProviders={(providerIds) => setSelectedProviders && setSelectedProviders(providerIds)}
           />
         </div>
-        <button
-          data-testid="verify-btn"
-          className="sidebar-verify-btn mx-auto flex justify-center"
-          onClick={handleFetchCredential}
-        >
-          {loading ? (
-            <>
-              <Spinner size="sm" className="my-auto mr-2" />
-              <p>Verifying</p>
-            </>
-          ) : (
-            <p>Verify</p>
-          )}
-        </button>
+        <LoadButton isLoading={loading} className="w-1/2" data-testid="verify-btn" onClick={handleFetchCredential}>
+          {loading ? "Verifying" : "Verify"}
+        </LoadButton>
       </>
     );
   }
@@ -221,26 +211,23 @@ export const AdditionalStampModal = ({
                         <p className="font-semibold">{platform.name}</p>
                       </div>
                       {verifiedPlatforms.includes(platform.name) ? (
-                        <button
-                          onClick={() => setActivePlatform(verifiedPlatform)}
-                          className="my-2 rounded-md border border-accent-2 bg-background-2 p-2"
-                        >
+                        <Button onClick={() => setActivePlatform(verifiedPlatform)} className="my-2">
                           <div className="flex items-center">
                             <img width="20px" className="pr-1" alt="Check Icon" src="./assets/check-icon.svg" />
                             Verified
                           </div>
-                        </button>
+                        </Button>
                       ) : (
-                        <button
+                        <Button
                           data-testid={`${verifiedPlatform.platformProps.platform.path}-add-btn`}
                           onClick={() => setActivePlatform(verifiedPlatform)}
-                          className="my-2 rounded-md bg-accent p-2"
+                          className="my-2"
                         >
                           <div className="flex items-center">
                             <img className="pr-1 invert" width="20px" alt="Plus Icon" src="./assets/plus-icon.svg" />
                             Add
                           </div>
-                        </button>
+                        </Button>
                       )}
                     </div>
                     <hr className="border-1" />
@@ -254,15 +241,15 @@ export const AdditionalStampModal = ({
           )}
         </div>
       </div>
-      <button
-        className="sidebar-verify-btn mx-auto flex justify-center"
+      <Button
+        className="mt-4 w-1/2"
         onClick={() => {
           resetState();
           onClose();
         }}
       >
         Done
-      </button>
+      </Button>
     </>
   );
 };
