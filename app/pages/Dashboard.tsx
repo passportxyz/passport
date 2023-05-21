@@ -3,6 +3,7 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 // --Components
 import PageRoot from "../components/PageRoot";
@@ -218,11 +219,13 @@ export default function Dashboard() {
           <div className="flex text-2xl">
             <span className="font-heading">My {filterName && `${filterName} `}Stamps</span>
             {filterName && (
-              <a href="/#/dashboard">
-                <span data-testid="select-all" className={`pl-2 text-sm text-purple-connectPurple`}>
-                  see all my stamps
-                </span>
-              </a>
+              <Link href="/dashboard">
+                <a>
+                  <span data-testid="select-all" className={`pl-2 text-sm text-purple-connectPurple`}>
+                    see all my stamps
+                  </span>
+                </a>
+              </Link>
             )}
             <Tooltip>
               Gitcoin Passport is an identity aggregator that helps you build a digital identifier showcasing your

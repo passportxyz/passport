@@ -4,6 +4,9 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { PlatformGroupSpec } from "../config/providers";
 import { getStampProviderFilters } from "../config/filters";
+import { OnChainContext, OnChainProvidersType } from "../context/onChainContext";
+import { LinkIcon } from "@heroicons/react/20/solid";
+import { useContext } from "react";
 
 type StampSelectorProps = {
   currentPlatform?: PlatformSpec | undefined;
@@ -20,6 +23,7 @@ export function StampSelector({
   selectedProviders,
   setSelectedProviders,
 }: StampSelectorProps) {
+  const { onChainProviders } = useContext(OnChainContext);
   // stamp filter
   const router = useRouter();
   const { filter } = router.query;
@@ -42,7 +46,7 @@ export function StampSelector({
                 {stamp.providers?.map((provider, i) => {
                   let bulletColor = "text-color-4";
                   let textColor = "text-color-4";
-                  if (verifiedProviders?.indexOf(provider.name as PROVIDER_ID) !== -1) {
+                  if (verifiedProviders?.indexOf(provider.name) !== -1) {
                     bulletColor = "text-accent";
                     textColor = "text-color-1";
                   }
@@ -52,7 +56,15 @@ export function StampSelector({
                       key={`${provider.title}${i}`}
                       data-testid={`indicator-${provider.name}`}
                     >
-                      <div className={`text-md relative top-[-0.3em] ${textColor}`}>{provider.title}</div>
+                      <div className={`text-md relative top-[-0.3em] ${textColor}`}>
+                        {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" &&
+                        onChainProviders[provider.name as keyof OnChainProvidersType]?.isOnChain ? (
+                          <LinkIcon className="mr-2 inline h-6 w-5 text-accent-3" />
+                        ) : (
+                          <LinkIcon className="mr-2 inline h-6 w-5 text-color-4" />
+                        )}
+                        {provider.title}
+                      </div>
                     </li>
                   );
                 })}

@@ -24,6 +24,7 @@ import { RemoveStampModal } from "./RemoveStampModal";
 import { getStampProviderFilters } from "../config/filters";
 import { graphql_fetch } from "../utils/helpers";
 import { ethers } from "ethers";
+import { OnChainProvidersType } from "../context/onChainContext";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -31,6 +32,7 @@ type PlatformCardProps = {
   i: number;
   platform: PlatformSpec;
   selectedProviders: SelectedProviders;
+  onChainProviders: OnChainProvidersType;
   updatedPlatforms: UpdatedPlatforms | undefined;
   btnRef: React.MutableRefObject<undefined>;
   onOpen: () => void;
@@ -43,6 +45,7 @@ export const PlatformCard = ({
   i,
   platform,
   selectedProviders,
+  onChainProviders,
   updatedPlatforms,
   btnRef,
   onOpen,
@@ -50,9 +53,6 @@ export const PlatformCard = ({
   getUpdatedPlatforms,
   className,
 }: PlatformCardProps): JSX.Element => {
-  const [isOnChain, setIsOnChain] = useState(false);
-  const { wallet } = useContext(UserContext);
-
   // import all providers
   const { allProvidersState, passportHasCacaoError, handleDeleteStamps } = useContext(CeramicContext);
 
@@ -76,69 +76,15 @@ export const PlatformCard = ({
 
   const disabled = passportHasCacaoError;
 
-  // check on-chain status by checking if attestations exist for at least one provider of the stamp
-  const checkOnChainStatus = useCallback(async () => {
-    try {
-      if (selectedProviders[platform.platform].length === 0) return;
+  // check if platform has on-chain providers
+  const hasOnChainProviders = () => {
+    const providers = selectedProviders[platform.platform];
+    if (!providers.length) return false;
 
-      if (!process.env.NEXT_PUBLIC_EAS_INDEXER_URL) {
-        throw new Error("NEXT_PUBLIC_EAS_INDEXER_URL is not defined");
-      }
-
-      // get the attestions for given user
-      const res = await graphql_fetch(
-        new URL(process.env.NEXT_PUBLIC_EAS_INDEXER_URL),
-        `
-        query GetAttestations($recipient: StringFilter, $attester: StringFilter) {
-          attestations(where: {
-            recipient: $recipient,
-            attester: $attester
-          }) {
-            decodedDataJson
-            timeCreated
-          }
-        }
-      `,
-        {
-          recipient: { equals: ethers.getAddress(wallet?.accounts[0].address!) },
-          attester: { equals: process.env.NEXT_PUBLIC_GITCOIN_ATTESTER_CONTRACT_ADDRESS },
-        }
-      );
-
-      // sort the attestations by timeCreated in descending order
-      const sortedAttestations = res.data.attestations.sort((a: any, b: any) => b.timeCreated - a.timeCreated);
-
-      // find the latest timeCreated value
-      const latestTimeCreated = sortedAttestations[0]?.timeCreated;
-
-      // extract all providers with the latest timeCreated value
-      const latestProviders: string[] = [];
-      for (const attestation of sortedAttestations) {
-        const decodedData = JSON.parse(attestation.decodedDataJson);
-        const providerData = decodedData.find((data: any) => data.name === "provider");
-        if (providerData && attestation.timeCreated === latestTimeCreated) {
-          latestProviders.push(providerData.value.value);
-        }
-      }
-
-      // check if all selected providers are present in the latest bulk of providers
-      const isAllSelectedProvidersPresent = selectedProviders[platform.platform].every((provider) =>
-        latestProviders.includes(provider)
-      );
-
-      // set the on-chain status
-      setIsOnChain(isAllSelectedProvidersPresent);
-    } catch (e: any) {
-      datadogLogs.logger.error("Failed to check on-chain status", e);
-      datadogRum.addError(e);
-    }
-  }, [wallet?.accounts, selectedProviders, platform.platform]);
-
-  useEffect(() => {
-    if (process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on") {
-      checkOnChainStatus();
-    }
-  }, [checkOnChainStatus]);
+    return providers.some(
+      (provider: PROVIDER_ID) => onChainProviders[provider as keyof OnChainProvidersType]?.isOnChain
+    );
+  };
 
   // hide platforms based on filter
   const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;
@@ -186,7 +132,7 @@ export const PlatformCard = ({
               <Menu>
                 <MenuButton disabled={disabled} className="verify-btn flex" data-testid="card-menu-button">
                   <div className="m-auto flex items-center justify-center">
-                    {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && isOnChain ? (
+                    {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && hasOnChainProviders() ? (
                       <LinkIcon className="h-6 w-5 text-accent-3" />
                     ) : (
                       <></>

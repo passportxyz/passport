@@ -5,12 +5,7 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import { datadogLogs } from "@datadog/browser-logs";
 
 // --- Identity tools
-import {
-  Stamp,
-  VerifiableCredential,
-  CredentialResponseBody,
-  VerifiableCredentialRecord,
-} from "@gitcoin/passport-types";
+import { Stamp, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
 import { ProviderPayload } from "@gitcoin/passport-platforms";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
@@ -25,7 +20,7 @@ import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 // --- Types
-import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PlatformGroupSpec, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { PlatformClass } from "@gitcoin/passport-platforms";
 import { getPlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/platforms-config";
 
@@ -73,14 +68,16 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
   const providerIds = useMemo(
     () =>
       platFormGroupSpec?.reduce((all, stamp) => {
-        return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+        return all.concat(stamp.providers?.map((provider: any) => provider.name as PROVIDER_ID));
       }, [] as PROVIDER_ID[]) || [],
     [platFormGroupSpec]
   );
 
-  // SelectedProviders will be passed in to the sidebar to be filled there...
+  // VerifiedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
-    providerIds.filter((providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined")
+    providerIds.filter(
+      (providerId: any) => typeof allProvidersState[providerId as PROVIDER_ID]?.stamp?.credential !== "undefined"
+    )
   );
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
@@ -126,7 +123,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
       toast({
         duration: 9000,
         isClosable: true,
-        render: (result) => (
+        render: (result: any) => (
           <div className="rounded-md bg-blue-darkblue p-2 text-white">
             <div className="flex p-4">
               <button className="inline-flex flex-shrink-0 cursor-not-allowed">
@@ -228,7 +225,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
       datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
       // grab all providers who are verified from the verify response
       const actualVerifiedProviders = providerIds.filter(
-        (providerId) =>
+        (providerId: any) =>
           !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
       );
       // both verified and selected should look the same after save
