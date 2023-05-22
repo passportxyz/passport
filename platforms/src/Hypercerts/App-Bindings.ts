@@ -1,4 +1,4 @@
-import { PlatformOptions } from "../types";
+import { AppContext, ProviderPayload } from "../types";
 import { Platform } from "../utils/platform";
 
 export class HypercertsPlatform extends Platform {
@@ -8,7 +8,8 @@ export class HypercertsPlatform extends Platform {
   redirectUri: string = null;
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-    return {};
+    const result = await Promise.resolve({});
+    return result;
   }
 
   getOAuthUrl(state: string): Promise<string> {
