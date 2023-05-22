@@ -1,7 +1,7 @@
 // --- React Methods
 import React from "react";
 
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 
 export type CustomToastProps = {
   platformId?: PLATFORM_ID | undefined;

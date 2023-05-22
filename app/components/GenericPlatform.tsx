@@ -5,7 +5,14 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import { datadogLogs } from "@datadog/browser-logs";
 
 // --- Identity tools
-import { Stamp, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
+import {
+  Stamp,
+  VerifiableCredential,
+  CredentialResponseBody,
+  VerifiableCredentialRecord,
+  PROVIDER_ID,
+  PLATFORM_ID,
+} from "@gitcoin/passport-types";
 import { ProviderPayload } from "@gitcoin/passport-platforms";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
@@ -20,7 +27,7 @@ import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 // --- Types
-import { PlatformGroupSpec, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { PlatformClass } from "@gitcoin/passport-platforms";
 import { getPlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/platforms-config";
 

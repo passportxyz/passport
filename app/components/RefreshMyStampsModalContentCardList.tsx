@@ -1,6 +1,6 @@
 // --- Types
 import { getPlatformSpec } from "../config/platforms";
-import { PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 // --- App components
 import { RefreshMyStampsModalContentCard } from "./RefreshMyStampsModalContentCard";

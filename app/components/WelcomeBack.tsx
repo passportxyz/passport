@@ -3,7 +3,7 @@ import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // --- Types
-import { PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
 
 // --- Contexts

@@ -8,7 +8,8 @@ import { ValidatedProviderGroup } from "../signer/utils";
 import { Switch, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon } from "@chakra-ui/react";
 
 // --- Utils
-import { PlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
+import { PlatformSpec } from "@gitcoin/passport-platforms";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 // --- App components
 import { RefreshMyStampsSelector } from "../components/RefreshMyStampsSelector";

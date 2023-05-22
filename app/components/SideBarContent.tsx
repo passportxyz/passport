@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 
 // --- Chakra UI Elements
-import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Switch, Spinner } from "@chakra-ui/react";
+import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Spinner } from "@chakra-ui/react";
 
-import { PlatformSpec, PlatformGroupSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PlatformSpec, PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/types";
+
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 import { StampSelector } from "./StampSelector";
 import { PlatformDetails } from "./PlatformDetails";

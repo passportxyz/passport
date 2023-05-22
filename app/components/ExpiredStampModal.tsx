@@ -1,11 +1,10 @@
-import { useContext, useEffect, useState } from "react";
-import { Button, Modal, ModalContent, ModalOverlay, Spinner, useToast } from "@chakra-ui/react";
+import { useContext, useState } from "react";
+import { Modal, ModalContent, ModalOverlay, Spinner, useToast } from "@chakra-ui/react";
 import { CeramicContext } from "../context/ceramicContext";
 import { getPlatformSpec } from "../config/platforms";
+import { STAMP_PROVIDERS } from "../config/providers";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { completedIcon } from "./Progress";
-import { PLATFORMS, PlatformSpec } from "../config/platforms";
-import { STAMP_PROVIDERS } from "../config/providers";
 
 export type ExpiredStampModalProps = {
   isOpen: boolean;
