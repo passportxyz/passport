@@ -47,7 +47,7 @@ export const RefreshMyStampsModalContentCard = ({
     if (!checked && accordionExpanded) {
       accordionButton.current?.click();
     }
-  }, [checked]);
+  }, [checked, accordionExpanded]);
 
   return (
     <div>

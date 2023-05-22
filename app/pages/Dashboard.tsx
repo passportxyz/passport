@@ -133,11 +133,7 @@ export default function Dashboard() {
   const retryModal = (
     <Modal isOpen={retryModalIsOpen} onClose={onRetryModalClose}>
       <ModalOverlay />
-      <ModalContent
-        background="var(--color-background-2)"
-        textColor="var(--color-text-1)"
-        border="solid 1px var(--color-accent-2)"
-      >
+      <ModalContent>
         <ModalBody mt={4}>
           <div className="flex flex-row">
             <div className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-100 md:mr-10">

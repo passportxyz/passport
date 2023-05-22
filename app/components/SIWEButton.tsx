@@ -1,7 +1,7 @@
 import React from "react";
-import { Button } from "./Button";
+import { Button, ButtonProps } from "./Button";
 
-const SIWEButton = (props: any) => {
+const SIWEButton = (props: ButtonProps) => {
   return (
     <Button {...props}>
       <svg width="12" height="20" fill="none" className="stroke-current">

@@ -3,7 +3,6 @@ import { ExpiredStampModal, getProviderIdsFromPlatformId } from "../../component
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
 import { UserContextState } from "../../context/userContext";
-import { Spinner } from "@chakra-ui/react";
 
 jest.mock("../../utils/onboard.ts");
 
