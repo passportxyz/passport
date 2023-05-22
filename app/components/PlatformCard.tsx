@@ -81,9 +81,13 @@ export const PlatformCard = ({
     const providers = selectedProviders[platform.platform];
     if (!providers.length) return false;
 
-    return providers.some(
-      (provider: PROVIDER_ID) => onChainProviders[provider as keyof OnChainProvidersType]?.isOnChain
-    );
+    return providers.some((provider: PROVIDER_ID) => {
+      const onChainProvider = onChainProviders[provider as keyof OnChainProvidersType];
+      const providerHash = allProvidersState[provider]?.stamp?.credential.credentialSubject.hash;
+
+      // return onChainProvider?.isOnChain && onChainProvider?.hashes.includes(providerHash);
+      return onChainProvider?.isOnChain
+    });
   };
 
   // hide platforms based on filter
