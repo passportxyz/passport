@@ -58,11 +58,11 @@ export function StampSelector({
                     >
                       <div className={`text-md relative top-[-0.3em] ${textColor}`}>
                         {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" &&
-                        onChainProviders[provider.name as keyof OnChainProvidersType]?.isOnChain ? (
-                          <LinkIcon className="mr-2 inline h-6 w-5 text-accent-3" />
-                        ) : (
-                          <LinkIcon className="mr-2 inline h-6 w-5 text-color-4" />
-                        )}
+                          (onChainProviders[provider.name as keyof OnChainProvidersType]?.isOnChain ? (
+                            <LinkIcon className="mr-2 inline h-6 w-5 text-accent-3" />
+                          ) : (
+                            <LinkIcon className="mr-2 inline h-6 w-5 text-color-4" />
+                          ))}
                         {provider.title}
                       </div>
                     </li>
