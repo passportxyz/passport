@@ -1,12 +1,9 @@
 import { screen, waitFor } from "@testing-library/react";
 import { ExpiredStampModal, getProviderIdsFromPlatformId } from "../../components/ExpiredStampModal";
-import {
-  makeTestCeramicContext,
-  makeTestUserContext,
-  renderWithContext,
-} from "../../__test-fixtures__/contextTestHelpers";
-import { CeramicContextState, IsLoadingPassportState } from "../../context/ceramicContext";
+import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
+import { CeramicContextState } from "../../context/ceramicContext";
 import { UserContextState } from "../../context/userContext";
+import { Spinner } from "@chakra-ui/react";
 
 jest.mock("../../utils/onboard.ts");
 
@@ -69,10 +66,13 @@ describe("ExpiredStampModal", () => {
       <ExpiredStampModal isOpen={true} onClose={() => {}} />
     );
 
-    screen.getByTestId("delete-duplicate").click();
+    const deleteButton = screen.getByTestId("delete-duplicate");
 
-    const spinner = screen.getByTestId("removing-stamps-spinner");
-    expect(spinner).toBeInTheDocument();
+    expect(deleteButton.getAttribute("disabled")).toBeNull();
+
+    deleteButton.click();
+    expect(deleteButton.getAttribute("disabled")).not.toBeNull();
+
     expect(handleDeleteStamps).toHaveBeenCalledWith([
       "Ens",
       "Facebook",
@@ -85,7 +85,6 @@ describe("ExpiredStampModal", () => {
       "FiftyOrMoreGithubFollowers",
       "Linkedin",
     ]);
-
-    await waitFor(() => expect(spinner).not.toBeInTheDocument());
+    await waitFor(() => expect(deleteButton.getAttribute("disabled")).toBeNull());
   });
 });
