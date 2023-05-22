@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { RefreshMyStampsSelector } from "../../components/RefreshMyStampsSelector";
-import { PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { ValidatedProviderGroup } from "../../signer/utils";
 
 const mockSetSelectedProviders = jest.fn();
