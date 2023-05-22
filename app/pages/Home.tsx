@@ -54,7 +54,7 @@ export default function Home() {
               Gitcoin Grants. The more you verify your identity, the more opportunities you will have to vote and
               participate across the web3.
             </div>
-            <SIWEButton testId="connectWalletButton" login={toggleConnection} className="mt-10" />
+            <SIWEButton data-testid="connectWalletButton" onClick={toggleConnection} className="mt-10" />
           </div>
         </PageWidthGrid>
         <Footer />

@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { CeramicContext } from "../context/ceramicContext";
 import { Progress, completedIcon, Status, Step } from "./Progress";
 import { useToast } from "@chakra-ui/react";
+import { Button } from "./Button";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
@@ -126,25 +127,24 @@ export const RefreshStampModal = ({ isOpen, onClose }: RefreshStampModalProps) =
                 We could not reset your Passport at the moment. Please try again or contact our support team.
               </p>
 
-              <div className="flex w-full">
-                <a
-                  href="https://support.gitcoin.co/gitcoin-knowledge-base/misc/contact-us"
-                  target="_blank"
-                  className="m-1 w-1/2 items-center rounded-md border py-2  text-center"
-                  rel="noreferrer"
+              <div className="grid w-full grid-cols-2 gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={() =>
+                    window.open("https://support.gitcoin.co/gitcoin-knowledge-base/misc/contact-us", "_blank")
+                  }
                 >
                   Contact Support
-                </a>
-                <button
+                </Button>
+                <Button
                   data-testid="check-other-wallet"
-                  className="m-1 mx-auto flex w-1/2 justify-center rounded-md bg-purple-connectPurple py-2 text-white hover:bg-purple-200 hover:text-black"
                   onClick={() => {
                     setResetError(false);
                     refreshPassportState();
                   }}
                 >
                   Try Again
-                </button>
+                </Button>
               </div>
             </div>
           ) : (

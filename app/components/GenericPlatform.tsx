@@ -21,6 +21,7 @@ import { SideBarContent } from "./SideBarContent";
 import { DoneToastContent } from "./DoneToastContent";
 import { useToast } from "@chakra-ui/react";
 import { GenericBanner } from "./GenericBanner";
+import { LoadButton } from "./LoadButton";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
@@ -390,6 +391,27 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
     }
   };
 
+  const buttonText = useMemo(() => {
+    const hasStamps = verifiedProviders.length > 0;
+
+    if (isLoading) {
+      if (hasStamps) {
+        return "Saving...";
+      }
+      return "Verifying...";
+    }
+
+    if (submitted && !canSubmit) {
+      return "Close";
+    }
+
+    if (hasStamps) {
+      return "Save";
+    }
+
+    return "Verify";
+  }, [isLoading, submitted, canSubmit, verifiedProviders.length]);
+
   return (
     <>
       <SideBarContent
@@ -401,16 +423,17 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
         isLoading={isLoading}
         infoElement={platform.banner ? <GenericBanner banner={platform.banner} /> : undefined}
         verifyButton={
-          <>
-            <button
+          <div className="px-4">
+            <LoadButton
+              className="mt-10 w-full"
+              isLoading={isLoading}
               disabled={!submitted && !canSubmit}
               onClick={canSubmit ? handleFetchCredential : onClose}
               data-testid={`button-verify-${platform.platformId}`}
-              className="sidebar-verify-btn"
             >
-              {submitted && !canSubmit ? "Close" : verifiedProviders.length > 0 ? "Save" : "Verify"}
-            </button>
-          </>
+              {buttonText}
+            </LoadButton>
+          </div>
         }
       />
       <NoStampModal isOpen={showNoStampModal} onClose={() => setShowNoStampModal(false)} />

@@ -14,16 +14,6 @@
   .verify-btn:disabled {
     @apply text-gray-400;
   }
-  .sidebar-verify-btn {
-    @apply mt-10 w-full rounded-md bg-accent py-2 text-white hover:bg-muted hover:text-background;
-  }
-  .sidebar-verify-btn:disabled {
-    @apply bg-muted text-background;
-  }
-
-  .secondary-btn {
-    @apply border border-accent-2 text-white;
-  }
 }
 
 .step-icon-inner {
