@@ -9,11 +9,11 @@ import {
   ModalHeader,
   ModalCloseButton,
   ModalBody,
-  Stack,
-  Button,
   useToast,
 } from "@chakra-ui/react";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { Button } from "./Button";
+import { LoadButton } from "./LoadButton";
 
 // --- Style Components
 import { DoneToastContent } from "./DoneToastContent";
@@ -80,7 +80,6 @@ export const RemoveStampModal = ({
         padding={5}
         maxW={{
           sm: "100%",
-          // md: "55%",
           md: "600px",
         }}
         maxH="80%"
@@ -94,30 +93,14 @@ export const RemoveStampModal = ({
           {body}
         </ModalBody>
 
-        <Stack direction={["column", "row"]} align="center">
-          <Button
-            data-testid="button-stamp-removal-cancel"
-            width="50%"
-            rounded={"base"}
-            onClick={onClose}
-            backgroundColor="#fff"
-            borderWidth={1}
-            borderColor="#e6e4e9"
-          >
-            <span>{"Cancel"}</span>
+        <div className="grid grid-cols-2 gap-4">
+          <Button data-testid="button-stamp-removal-cancel" variant="secondary" onClick={onClose}>
+            Cancel
           </Button>
-          <Button
-            data-testid="button-stamp-removal"
-            width="50%"
-            rounded={"base"}
-            colorScheme="purple"
-            onClick={handleStampRemoval}
-            isLoading={isLoading}
-            loadingText="Removing Stamp"
-          >
-            <span>{closeButtonText || "Remove Stamp"}</span>
-          </Button>
-        </Stack>
+          <LoadButton data-testid="button-stamp-removal" onClick={handleStampRemoval} isLoading={isLoading}>
+            {isLoading ? "Removing..." : closeButtonText || "Remove Stamp"}
+          </LoadButton>
+        </div>
       </ModalContent>
     </Modal>
   );

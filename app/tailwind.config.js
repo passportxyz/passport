@@ -63,5 +63,5 @@ module.exports = {
       default: "100vh",
     },
   },
-  plugins: [],
+  plugins: [require("@headlessui/tailwindcss")],
 };

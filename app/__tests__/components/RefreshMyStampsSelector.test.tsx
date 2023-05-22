@@ -48,7 +48,7 @@ describe("RefreshMyStampsSelector", () => {
     );
 
     const checkboxElement = screen.getByTestId(`checkbox-${validPlatformGroups[0].providers[0].name}`);
-    expect(checkboxElement).toHaveAttribute("data-checked");
+    expect(checkboxElement).toHaveAttribute("data-headlessui-state", "checked");
   });
 
   it("should disable checkboxes if platformChecked is false", () => {

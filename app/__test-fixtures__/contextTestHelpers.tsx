@@ -229,10 +229,9 @@ export const renderWithContext = (
   userContext: UserContextState,
   ceramicContext: CeramicContextState,
   ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>
-) => {
+) =>
   render(
     <UserContext.Provider value={userContext}>
       <CeramicContext.Provider value={ceramicContext}>{ui}</CeramicContext.Provider>
     </UserContext.Provider>
   );
-};

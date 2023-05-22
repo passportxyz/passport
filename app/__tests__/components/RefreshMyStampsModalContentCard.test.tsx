@@ -62,6 +62,6 @@ describe("RefreshMyStampsModalContentCard", () => {
     );
 
     const switchElement = screen.getByTestId(`switch-${currentPlatform.name}`);
-    expect(switchElement).toHaveAttribute("data-checked");
+    expect(switchElement).toHaveAttribute("data-headlessui-state", "checked");
   });
 });

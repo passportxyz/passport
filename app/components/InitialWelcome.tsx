@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { WelcomeWrapper } from "./WelcomeWrapper";
 import { useNavigate } from "react-router-dom";
+import { Button } from "./Button";
 
 const welcomeSteps = [
   {
@@ -41,20 +42,20 @@ export const InitialWelcome = ({ onBoardFinished }: { onBoardFinished: () => voi
         <div className="mb-5 flex w-full items-center justify-center">
           Step {step + 1} of {welcomeSteps.length} {stepIndicator(step)}
         </div>
-        <div className="flex w-full justify-end">
+        <div className="grid w-full grid-cols-2 gap-4">
           {step === 2 && (
-            <button
-              className="secondary-btn mr-2  w-1/2 rounded-sm py-2 px-6"
+            <Button
+              variant="secondary"
               onClick={() => {
                 setStep(0);
                 navigate("/dashboard");
               }}
             >
               Skip For Now
-            </button>
+            </Button>
           )}
-          <button
-            className="ml-2 w-1/2 rounded-sm bg-accent py-2 px-6"
+          <Button
+            className="col-start-2"
             onClick={() => {
               if (step + 1 === welcomeSteps.length) {
                 onBoardFinished();
@@ -64,7 +65,7 @@ export const InitialWelcome = ({ onBoardFinished }: { onBoardFinished: () => voi
             }}
           >
             Next
-          </button>
+          </Button>
         </div>
       </div>
     </WelcomeWrapper>

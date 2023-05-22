@@ -10,9 +10,9 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
-  Button,
 } from "@chakra-ui/react";
 import { ArrowDownTrayIcon } from "@heroicons/react/20/solid";
+import { Button } from "./Button";
 
 export type JsonOutputModalProps = {
   isOpen: boolean;
@@ -50,14 +50,7 @@ export const JsonOutputModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
-      <ModalContent
-        rounded={"none"}
-        padding={4}
-        maxW="80%"
-        maxH="80%"
-        background="var(--color-background-2)"
-        border="solid 1px var(--color-accent-2)"
-      >
+      <ModalContent rounded={"none"} padding={4} maxW="80%" maxH="80%" textColor="inherit">
         <ModalHeader borderBottomWidth={2} borderBottomColor="var(--color-accent2)">
           <p className="text-color-1">{title}</p>
           <p className="text-base text-color-1">{subheading}</p>
@@ -68,29 +61,12 @@ export const JsonOutputModal = ({
         </ModalBody>
 
         <ModalFooter borderTopWidth={2} borderTopColor="var(--color-accent2)">
-          <Button
-            data-testid="button-passport-json-download"
-            width={32}
-            rounded={"base"}
-            mr={3}
-            onClick={onDownload}
-            variant="outline"
-            borderColor="var(--color-accent2)"
-            _hover={{ bg: "var(--color-accent1)" }}
-          >
-            <ArrowDownTrayIcon fill="var(--color-text-1)" />
-            &nbsp;
-            <span className="text-color-1">{"Download"}</span>
+          <Button data-testid="button-passport-json-download" onClick={onDownload} variant="secondary">
+            <ArrowDownTrayIcon fill="var(--color-text-1)" width={16} />
+            Download
           </Button>
-          <Button
-            data-testid="button-passport-json-done"
-            width={24}
-            rounded={"base"}
-            colorScheme="purple"
-            mr={3}
-            onClick={onClose}
-          >
-            <span>{closeButtonText || "Done"}</span>
+          <Button data-testid="button-passport-json-done" onClick={onClose} className="ml-4">
+            {closeButtonText || "Done"}
           </Button>
         </ModalFooter>
       </ModalContent>
