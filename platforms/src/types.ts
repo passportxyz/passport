@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types"
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 
 export type PlatformSpec = {
   icon?: string | undefined;
