@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { execSync } from "child_process";
 
 // Get the command line argument
 const providerName: string = process.argv[2];
@@ -17,14 +18,46 @@ type FileStructure = {
 
 // Define the directory and file structure
 const structure: FileStructure = {
-  "App-Bindings.ts": "",
+  "App-Bindings.ts": `import { AppContext, ProviderPayload } from "../types";
+  import { Platform } from "../utils/platform";
+  
+  export class ${providerName}Platform extends Platform {
+    platformId = "${providerName}";
+    path = "${providerName}";
+    clientId: string = null;
+    redirectUri: string = null;
+  
+  
+  async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
+      const result = await Promise.resolve({});
+      return result;
+    }
+  
+    getOAuthUrl(state: string): Promise<string> {
+      throw new Error("Method not implemented.");
+    }
+  }
+  `,
   Providers: {
     __tests__: {
       [`${providerName}.test.ts`]: "",
     },
     [`${providerName}.ts`]: "",
   },
-  "Providers-config.ts": "",
+  "Providers-config.ts": `import { PlatformSpec, PlatformGroupSpec } from "../types";
+
+  export const ${providerName}PlatformDetails: PlatformSpec = {
+    icon: "./assets/${providerName.toLowerCase()}StampIcon.svg",
+    platform: "${providerName}",
+    name: "${providerName}",
+    description: "Connect your existing ${providerName} Account to verify",
+    connectMessage: "Connect Account",
+  };
+
+  export const ${providerName}ProviderConfig: PlatformGroupSpec[] = [
+    { platformGroup: "Account Name", providers: [{ title: "${providerName}", name: "${providerName}" }] },
+  ];
+`,
   "index.ts": "",
 };
 
@@ -45,5 +78,17 @@ function createStructure(basePath: string, structure: FileStructure): void {
   }
 }
 
-// Create the structure
-createStructure(__dirname, structure);
+// Create a new directory for the generated files
+const generatedFilesPath = path.join(__dirname, `../${providerName}`);
+fs.mkdirSync(generatedFilesPath, { recursive: true });
+
+// Create the structure inside the new directory
+createStructure(generatedFilesPath, structure);
+
+// Run Prettier on the generated code
+try {
+  execSync("yarn prettier");
+  console.log("Prettier formatting completed successfully.");
+} catch (error) {
+  console.error("Failed to run Prettier on the generated code:", error);
+}
