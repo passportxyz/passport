@@ -40,7 +40,13 @@ const structure: FileStructure = {
   `,
   Providers: {
     __tests__: {
-      [`${providerName}.test.ts`]: "",
+      [`${providerName}.test.ts`]: `
+      describe("Hypercerts", () => {
+        it("should be true", () => {
+          expect(true).toBe(true);
+        });
+      });      
+      `,
     },
     [`${providerName}.ts`]: "",
   },
