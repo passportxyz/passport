@@ -1,16 +1,26 @@
 import { init } from "@web3-onboard/react";
-import injectedModule from "@web3-onboard/injected-wallets";
+import injectedModule, { ProviderLabel } from "@web3-onboard/injected-wallets";
 import ledgerModule from "@web3-onboard/ledger";
 import walletConnectModule from "@web3-onboard/walletconnect";
-import walletLinkModule from "@web3-onboard/walletlink";
 
 // RPC urls
 const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL as string;
 
 // Injected wallet
-const injected = injectedModule();
-// web3Oboard modules
-const walletLink = walletLinkModule();
+const injected = injectedModule({
+  // display all wallets even if they are unavailable
+  displayUnavailable: true,
+  // do a manual sort of injected wallets so that MetaMask OKX and Coinbase are ordered first
+  sort: (wallets) => {
+    return [
+      wallets.find(({ label }) => label === ProviderLabel.MetaMask),
+      wallets.find(({ label }) => label === ProviderLabel.OKXWallet),
+      wallets.find(({ label }) => label === ProviderLabel.Coinbase),
+      ...wallets,
+    ];
+  },
+});
+// web3Onboard modules
 const walletConnect = walletConnectModule();
 // Include ledger capabilities
 const ledger = ledgerModule();
@@ -59,16 +69,12 @@ if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
 
 // Exports onboard-core instance (https://github.com/blocknative/web3-onboard)
 export const initWeb3Onboard = init({
-  wallets: [injected, ledger, walletLink, walletConnect],
+  wallets: [ledger, walletConnect, injected],
   chains: chains,
   appMetadata: {
     name: "Passport",
     icon: "/assets/gitcoinLogo.svg",
     logo: "/assets/gitcoinLogo.svg",
     description: "Decentralized Identity Verification",
-    recommendedInjectedWallets: [
-      { name: "Coinbase", url: "https://wallet.coinbase.com/" },
-      { name: "MetaMask", url: "https://metamask.io" },
-    ],
   },
 });
