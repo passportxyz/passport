@@ -101,7 +101,6 @@ const SyncToChainButton = () => {
         if (data.invalidCredentials.length > 0) {
           console.log("not syncing invalid credentials (invalid credentials): ", data.invalidCredentials);
         }
-        // TODO info toast for invalid credentials
 
         if (data.passport) {
           const { v, r, s } = data.signature;
@@ -190,7 +189,6 @@ const SyncToChainButton = () => {
           isError(e, "UNEXPECTED_ARGUMENT") ||
           isError(e, "VALUE_MISMATCH")
         ) {
-          // TODO: provide more info for the user to send over ????
           toast({
             title: "Error",
             description: (
@@ -215,7 +213,6 @@ const SyncToChainButton = () => {
           isError(e, "BAD_DATA") ||
           isError(e, "CANCELLED")
         ) {
-          // TODO: provide more info for the user to send over ????
           toast({
             title: "Error",
             description: (
@@ -229,7 +226,6 @@ const SyncToChainButton = () => {
             isClosable: true,
           });
         } else if (isError(e, "BUFFER_OVERRUN") || isError(e, "NUMERIC_FAULT")) {
-          // TODO: provide more info for the user to send over ????
           toast({
             title: "Error",
             description: (
