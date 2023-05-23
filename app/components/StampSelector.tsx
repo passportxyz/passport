@@ -34,12 +34,14 @@ export function StampSelector({
 
   // check if provider is on-chain
   const isProviderOnChain = (provider: PROVIDER_ID) => {
-    const providerSpec = getProviderSpec(currentPlatform!.platform, provider);
-    const providerObj = onChainProviders.find((p) => p.providerHash === providerSpec.hash);
+    if (currentPlatform) {
+      const providerSpec = getProviderSpec(currentPlatform.platform, provider);
+      const providerObj = onChainProviders.find((p) => p.providerHash === providerSpec.hash);
 
-    if (providerObj) {
-      const credentialHash = allProvidersState[provider]?.stamp?.credential.credentialSubject.hash;
-      return providerSpec.hash === providerObj.providerHash && credentialHash === providerObj.credentialHash;
+      if (providerObj) {
+        const credentialHash = allProvidersState[provider]?.stamp?.credential.credentialSubject.hash;
+        return providerSpec.hash === providerObj.providerHash && credentialHash === providerObj.credentialHash;
+      }
     }
 
     return false;
