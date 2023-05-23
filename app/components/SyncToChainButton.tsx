@@ -14,6 +14,49 @@ import { UserContext } from "../context/userContext";
 
 import { VerifiableCredential, EasPayload } from "@gitcoin/passport-types";
 
+export type ErrorDetailsProps = {
+  msg: string;
+  ethersError: EthersError;
+};
+
+const ErrorDetails = ({ msg, ethersError }: ErrorDetailsProps): JSX.Element => {
+  const [displayDetails, setDisplayDetails] = useState<string>("none");
+  const [textLabelDisplay, setTextLabelDisplay] = useState<string>("Show details");
+
+  const copyDetailsToClipboard = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    navigator.clipboard.writeText(ethersError.message);
+  };
+
+  const toggleDetails = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (displayDetails === "none") {
+      setDisplayDetails("block");
+      setTextLabelDisplay("Hide details");
+    } else {
+      setDisplayDetails("none");
+      setTextLabelDisplay("Show details");
+    }
+  };
+  return (
+    <div>
+      <p>{msg}</p>
+      <br></br>
+      Please{" "}
+      <b>
+        <a href="#" onClick={copyDetailsToClipboard}>
+          copy transaction details{" "}
+        </a>
+      </b>{" "}
+      in case you contact our support.{" "}
+      <a href="#" onClick={toggleDetails}>
+        {textLabelDisplay}
+      </a>
+      .<p style={{ display: displayDetails }}>{ethersError.message}</p>
+    </div>
+  );
+};
+
 const SyncToChainButton = () => {
   const { passport } = useContext(CeramicContext);
   const { wallet, address } = useContext(UserContext);
@@ -117,7 +160,7 @@ const SyncToChainButton = () => {
         } else if (isError(e, "CALL_EXCEPTION")) {
           toast({
             title: "Error",
-            description: "Error writing stamps to chain: " + e.reason,
+            description: <ErrorDetails msg={"Error writing stamps to chain: " + e.reason} ethersError={e} />,
             status: "error",
             duration: 9000,
             isClosable: true,
@@ -129,11 +172,14 @@ const SyncToChainButton = () => {
           isError(e, "UNCONFIGURED_NAME") ||
           isError(e, "OFFCHAIN_FAULT")
         ) {
-          // TODO: provide more info for the user to send over ????
           toast({
             title: "Error",
-            description:
-              "A Blockchain error occured while executing this transaction. Please try again in a few minutes.",
+            description: (
+              <ErrorDetails
+                msg={"A Blockchain error occured while executing this transaction. Please try again in a few minutes."}
+                ethersError={e}
+              />
+            ),
             status: "error",
             duration: 9000,
             isClosable: true,
@@ -147,8 +193,14 @@ const SyncToChainButton = () => {
           // TODO: provide more info for the user to send over ????
           toast({
             title: "Error",
-            description:
-              "Error calling the smart contract function. This is probably a fault in the app. Please try again or contact support if this does not work out.",
+            description: (
+              <ErrorDetails
+                msg={
+                  "Error calling the smart contract function. This is probably a fault in the app. Please try again or contact support if this does not work out."
+                }
+                ethersError={e}
+              />
+            ),
             status: "error",
             duration: 9000,
             isClosable: true,
@@ -166,8 +218,12 @@ const SyncToChainButton = () => {
           // TODO: provide more info for the user to send over ????
           toast({
             title: "Error",
-            description:
-              "An unexpected error occured while calling the smart contract function. Please contact support.",
+            description: (
+              <ErrorDetails
+                msg={"An unexpected error occured while calling the smart contract function. Please contact support."}
+                ethersError={e}
+              />
+            ),
             status: "error",
             duration: 9000,
             isClosable: true,
@@ -176,7 +232,12 @@ const SyncToChainButton = () => {
           // TODO: provide more info for the user to send over ????
           toast({
             title: "Error",
-            description: "An operationl error occured while calling the smart contract. Please contact support.",
+            description: (
+              <ErrorDetails
+                msg={"An operationl error occured while calling the smart contract. Please contact support."}
+                ethersError={e}
+              />
+            ),
             status: "error",
             duration: 9000,
             isClosable: true,
