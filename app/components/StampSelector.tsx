@@ -1,12 +1,14 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { useRouter } from "next/router";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { PlatformGroupSpec } from "../config/providers";
 import { getStampProviderFilters } from "../config/filters";
-import { OnChainContext, OnChainProvidersType } from "../context/onChainContext";
+import { OnChainContext } from "../context/onChainContext";
 import { LinkIcon } from "@heroicons/react/20/solid";
 import Toggle from "./Toggle";
+import { getProviderSpec } from "../utils/helpers";
+import { CeramicContext } from "../context/ceramicContext";
 
 type StampSelectorProps = {
   currentPlatform?: PlatformSpec | undefined;
@@ -23,11 +25,25 @@ export function StampSelector({
   selectedProviders,
   setSelectedProviders,
 }: StampSelectorProps) {
+  const { allProvidersState } = useContext(CeramicContext);
   const { onChainProviders } = useContext(OnChainContext);
   // stamp filter
   const router = useRouter();
   const { filter } = router.query;
   const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;
+
+  // check if provider is on-chain
+  const isProviderOnChain = (provider: PROVIDER_ID) => {
+    const providerSpec = getProviderSpec(currentPlatform!.platform, provider);
+    const providerObj = onChainProviders.find((p) => p.providerHash === providerSpec.hash);
+
+    if (providerObj) {
+      const credentialHash = allProvidersState[provider]?.stamp?.credential.credentialSubject.hash;
+      return providerSpec.hash === providerObj.providerHash && credentialHash === providerObj.credentialHash;
+    }
+
+    return false;
+  };
 
   return (
     <>
@@ -57,12 +73,11 @@ export function StampSelector({
                       data-testid={`indicator-${provider.name}`}
                     >
                       <div className={`text-md relative top-[-0.3em] ${textColor}`}>
-                        {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" &&
-                          (onChainProviders[provider.name as keyof OnChainProvidersType]?.isOnChain ? (
-                            <LinkIcon className="mr-2 inline h-6 w-5 text-accent-3" />
-                          ) : (
-                            <LinkIcon className="mr-2 inline h-6 w-5 text-color-4" />
-                          ))}
+                        {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && isProviderOnChain(provider.name) ? (
+                          <LinkIcon className="mr-2 inline h-6 w-5 text-accent-3" />
+                        ) : (
+                          <LinkIcon className="mr-2 inline h-6 w-5 text-color-4" />
+                        )}
                         {provider.title}
                       </div>
                     </li>
