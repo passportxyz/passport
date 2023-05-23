@@ -73,11 +73,11 @@ export function StampSelector({
                       data-testid={`indicator-${provider.name}`}
                     >
                       <div className={`text-md relative top-[-0.3em] ${textColor}`}>
-                        {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && isProviderOnChain(provider.name) ? (
+                        {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && (isProviderOnChain(provider.name) ? (
                           <LinkIcon className="mr-2 inline h-6 w-5 text-accent-3" />
                         ) : (
                           <LinkIcon className="mr-2 inline h-6 w-5 text-color-4" />
-                        )}
+                        ))}
                         {provider.title}
                       </div>
                     </li>
