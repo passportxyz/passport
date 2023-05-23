@@ -16,6 +16,7 @@ export type PlatformSpec = {
 export type ProviderSpec = {
   title: string;
   name: PROVIDER_ID;
+  hash?: string;
   icon?: string;
   description?: string;
 };
