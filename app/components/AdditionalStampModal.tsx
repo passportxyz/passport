@@ -99,7 +99,7 @@ export const AdditionalStampModal = ({
         datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
         // grab all providers who are verified from the verify response
         const actualVerifiedProviders = providerIds.filter(
-          (providerId) =>
+          (providerId: any) =>
             !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
         );
 
@@ -128,7 +128,7 @@ export const AdditionalStampModal = ({
 
   const providerIds =
     activePlatform?.platformProps.platFormGroupSpec?.reduce((all, stamp, i) => {
-      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+      return all.concat(stamp.providers?.map((provider: any) => provider.name as PROVIDER_ID));
     }, [] as PROVIDER_ID[]) || [];
 
   useEffect(() => {

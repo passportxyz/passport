@@ -79,7 +79,7 @@ const stampProviders: Readonly<Providers> = {
 };
 
 Object.keys(stampProviders).forEach((platformGroup) => {
-  stampProviders[platformGroup].forEach((platformGroupSpec: PlatformGroupSpec) => {
+  stampProviders[platformGroup as PLATFORM_ID].forEach((platformGroupSpec: PlatformGroupSpec) => {
     platformGroupSpec.providers.forEach((providerSpec: any) => {
       providerSpec.hash = ethers.keccak256(ethers.toUtf8Bytes(providerSpec.name));
     });
