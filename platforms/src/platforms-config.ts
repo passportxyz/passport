@@ -14,6 +14,7 @@ import {
   GTC,
   GtcStaking,
   GuildXYZ,
+  Hypercerts,
   Lens,
   Linkedin,
   NFT,
@@ -57,5 +58,6 @@ export const PLATFORMS: PlatformSpec[] = [
   GnosisSafe.GnosisSafePlatformDetails,
   Coinbase.CoinbasePlatformDetails,
   GuildXYZ.GuildXYZPlatformDetails,
+  Hypercerts.HypercertsPlatformDetails,
   // Signer.SignerPlatformDetails,
 ];

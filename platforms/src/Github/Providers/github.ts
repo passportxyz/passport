@@ -34,9 +34,7 @@ export class GithubProvider implements Provider {
     const address = (await getAddress(payload)).toLowerCase();
     const verifiedPayload = await verifyGithub(payload.proofs.code, context);
 
-    console.log("github - verifiedPayload", address, JSON.stringify(verifiedPayload));
     const valid = !!(!verifiedPayload.errors && verifiedPayload.id);
-    console.log("github - valid", address, valid);
 
     return {
       valid: valid,

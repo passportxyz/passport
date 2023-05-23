@@ -24,8 +24,10 @@ type ClaimTokensResponse = {
   claimTokens: ClaimToken[];
 };
 
-export class GuildMemberProvider implements Provider {
-  type: string;
+export class HypercertsProvider implements Provider {
+  // Give the provider a type so that we can select it with a payload
+  type = "Hypercerts";
+
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
       const url = "https://api.thegraph.com/subgraphs/name/hypercerts-admin/hypercerts-optimism-mainnet";
@@ -53,21 +55,23 @@ export class GuildMemberProvider implements Provider {
           }
         `,
         variables: {
-          owner: "0x0636f974d29d947d4946b2091d769ec6d2d415de",
+          owner: payload.address,
         },
       });
 
-      const claimedTokens = result.data.data.claimTokens;
+      const valid = result.data.data.claimTokens.length > 0;
 
       return {
-        valid: claimedTokens.length > 0,
+        valid: valid,
         record: {
           address,
         },
       };
-    } catch (e: unknown) {
-      const error = e as { response: { data: { message: string } } };
-      throw `The following error is being thrown: ${error.response.data.message}`;
+    } catch (e: any) {
+      return {
+        valid: false,
+        error: ["Self Staking Gold Provider verifyStake Error"],
+      };
     }
   }
 }

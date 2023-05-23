@@ -37,6 +37,7 @@ import {
   Brightid,
   Coinbase,
   GuildXYZ,
+  Hypercerts,
 } from "@gitcoin/passport-platforms";
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -178,6 +179,10 @@ platforms.set("Coinbase", {
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK,
   }),
   platFormGroupSpec: Coinbase.CoinbaseProviderConfig,
+});
+platforms.set("Hypercerts", {
+  platform: new Hypercerts.HypercertsPlatform(),
+  platFormGroupSpec: Hypercerts.HypercertsProviderConfig,
 });
 if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
   platforms.set("GuildXYZ", {
@@ -464,6 +469,10 @@ const startingAllProvidersState: AllProvidersState = {
   },
   GuildPassportMember: {
     providerSpec: getProviderSpec("GuildXYZ", "GuildPassportMember"),
+    stamp: undefined,
+  },
+  Hypercerts: {
+    providerSpec: getProviderSpec("Hypercerts", "Hypercerts"),
     stamp: undefined,
   },
 };
