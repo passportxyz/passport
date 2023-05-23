@@ -5,7 +5,7 @@
   "scripts": {
     "start": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next dev -p 3000",
     "export": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next build && next export",
-    "build": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next build",
+    "build": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) echo build && ts-node ./scripts/postBuild.ts",
     "prod-start": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next start",
     "clean": "rimraf node_modules && rimraf .next",
     "lint": "next lint && prettier --check .",
@@ -47,7 +47,8 @@
     "react-gtm-module": "^2.0.11",
     "react-popper": "^2.3.0",
     "react-router-dom": "^6.3.0",
-    "ts-debounce": "^4.0.0"
+    "ts-debounce": "^4.0.0",
+    "ts-node": "^10.8.0"
   },
   "devDependencies": {
     "@ceramicnetwork/common": "^2.2.1",
@@ -82,7 +83,6 @@
     "react-qr-code": "^2.0.7",
     "tailwindcss": "^3.0.7",
     "ts-jest": "^27.1.4",
-    "ts-node": "^10.8.0",
     "typescript": "4.5.4"
   },
   "resolutions": {

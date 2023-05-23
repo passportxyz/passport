@@ -1,5 +1,5 @@
 export { GTCStakingPlatform } from "./App-Bindings";
-export { GTCStakingPlatformDetails, GTCStakingProviderConfig } from "./Providers-config";
+export { PlatformDetails, ProviderConfig, providers } from "./Providers-config";
 export {
   SelfStakingBronzeProvider,
   SelfStakingGoldProvider,

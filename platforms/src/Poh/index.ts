@@ -1,3 +1,3 @@
 export { PohPlatform } from "./App-Bindings";
-export { PohPlatformDetails, PohProviderConfig } from "./Providers-config";
+export { PlatformDetails, ProviderConfig, providers } from "./Providers-config";
 export { PohProvider } from "./Providers/poh";
