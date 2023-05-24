@@ -24,6 +24,11 @@ type ClaimTokensResponse = {
   claimTokens: ClaimToken[];
 };
 
+function checkTokenCreation(claimTokens: ClaimToken[]): boolean {
+  const fifteenDaysAgo = Date.now() - 15 * 24 * 60 * 60 * 1000;
+  return claimTokens.every(({ claim: { creation } }) => Number(creation) * 1000 < fifteenDaysAgo);
+}
+
 export class HypercertsProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
   type = "Hypercerts";
@@ -59,7 +64,9 @@ export class HypercertsProvider implements Provider {
         },
       });
 
-      const valid = result.data.data.claimTokens.length > 0;
+      const { claimTokens } = result.data.data;
+
+      const valid = checkTokenCreation(claimTokens) && claimTokens.length > 1;
 
       return {
         valid: valid,
