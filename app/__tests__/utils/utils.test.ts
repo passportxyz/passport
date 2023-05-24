@@ -7,8 +7,8 @@ import {
   RequestPayload,
   VerifiedPayload,
 } from "@gitcoin/passport-types";
-import { VALID_ENS_VERIFICATION, VALID_LENS_VERIFICATION } from "../../__test-fixtures__/verifiableCredentialResults";
-import { Ens, Lens, Github } from "@gitcoin/passport-platforms";
+import { platforms } from "@gitcoin/passport-platforms";
+const { Ens, Lens, Github } = platforms;
 import { checkShowOnboard } from "../../utils/helpers";
 
 import axios from "axios";
@@ -16,12 +16,12 @@ import axios from "axios";
 const mockedAllPlatforms = new Map();
 mockedAllPlatforms.set("Ens", {
   platform: new Ens.EnsPlatform(),
-  platFormGroupSpec: Ens.EnsProviderConfig,
+  platFormGroupSpec: Ens.ProviderConfig,
 });
 
 mockedAllPlatforms.set("Lens", {
   platform: new Lens.LensPlatform(),
-  platFormGroupSpec: Lens.LensProviderConfig,
+  platFormGroupSpec: Lens.ProviderConfig,
 });
 
 mockedAllPlatforms.set("Github", {
@@ -29,7 +29,7 @@ mockedAllPlatforms.set("Github", {
     clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
   }),
-  platFormGroupSpec: Github.GithubProviderConfig,
+  platFormGroupSpec: Github.ProviderConfig,
 });
 
 describe("fetchPossibleEVMStamps", () => {
