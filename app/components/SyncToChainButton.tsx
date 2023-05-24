@@ -74,6 +74,19 @@ const SyncToChainButton = () => {
           GitcoinVerifier.abi,
           await ethersProvider.getSigner()
         );
+
+        if (credentials.length === 0) {
+          // Nothing to be broough on-chain
+          toast({
+            title: "Error",
+            description: "You do not have any stamps to bring on-chain.",
+            status: "warning",
+            duration: 9000,
+            isClosable: true,
+          });
+          return;
+        }
+
         const nonce = await gitcoinAttesterContract.recipientNonces(address);
         const { data }: { data: EasPayload } = await axios({
           method: "post",
@@ -139,31 +152,16 @@ const SyncToChainButton = () => {
         }
       } catch (e) {
         console.error("error syncing credentials to chain: ", e);
+        let toastDescription: string | JSX.Element =
+          "An unexpected error occured while trying to bring the data on-chain.";
+        debugger;
         if (isError(e, "ACTION_REJECTED")) {
-          toast({
-            title: "Error",
-            description: "Transaction rejected by user",
-            status: "error",
-            duration: 9000,
-            isClosable: true,
-          });
+          toastDescription = "Transaction rejected by user";
         } else if (isError(e, "INSUFFICIENT_FUNDS")) {
-          toast({
-            title: "Error",
-            description:
-              "You don't have sufficient funds to bring your stamps on-chain. Consider funding your wallet first.",
-            status: "error",
-            duration: 9000,
-            isClosable: true,
-          });
+          toastDescription =
+            "You don't have sufficient funds to bring your stamps on-chain. Consider funding your wallet first.";
         } else if (isError(e, "CALL_EXCEPTION")) {
-          toast({
-            title: "Error",
-            description: <ErrorDetails msg={"Error writing stamps to chain: " + e.reason} ethersError={e} />,
-            status: "error",
-            duration: 9000,
-            isClosable: true,
-          });
+          toastDescription = <ErrorDetails msg={"Error writing stamps to chain: " + e.reason} ethersError={e} />;
         } else if (
           isError(e, "NONCE_EXPIRED") ||
           isError(e, "REPLACEMENT_UNDERPRICED") ||
@@ -171,38 +169,26 @@ const SyncToChainButton = () => {
           isError(e, "UNCONFIGURED_NAME") ||
           isError(e, "OFFCHAIN_FAULT")
         ) {
-          toast({
-            title: "Error",
-            description: (
-              <ErrorDetails
-                msg={"A Blockchain error occured while executing this transaction. Please try again in a few minutes."}
-                ethersError={e}
-              />
-            ),
-            status: "error",
-            duration: 9000,
-            isClosable: true,
-          });
+          toastDescription = (
+            <ErrorDetails
+              msg={"A Blockchain error occured while executing this transaction. Please try again in a few minutes."}
+              ethersError={e}
+            />
+          );
         } else if (
           isError(e, "INVALID_ARGUMENT") ||
           isError(e, "MISSING_ARGUMENT") ||
           isError(e, "UNEXPECTED_ARGUMENT") ||
           isError(e, "VALUE_MISMATCH")
         ) {
-          toast({
-            title: "Error",
-            description: (
-              <ErrorDetails
-                msg={
-                  "Error calling the smart contract function. This is probably a fault in the app. Please try again or contact support if this does not work out."
-                }
-                ethersError={e}
-              />
-            ),
-            status: "error",
-            duration: 9000,
-            isClosable: true,
-          });
+          toastDescription = (
+            <ErrorDetails
+              msg={
+                "Error calling the smart contract function. This is probably a fault in the app. Please try again or contact support if this does not work out."
+              }
+              ethersError={e}
+            />
+          );
         } else if (
           isError(e, "UNKNOWN_ERROR") ||
           isError(e, "NOT_IMPLEMENTED") ||
@@ -213,40 +199,28 @@ const SyncToChainButton = () => {
           isError(e, "BAD_DATA") ||
           isError(e, "CANCELLED")
         ) {
-          toast({
-            title: "Error",
-            description: (
-              <ErrorDetails
-                msg={"An unexpected error occured while calling the smart contract function. Please contact support."}
-                ethersError={e}
-              />
-            ),
-            status: "error",
-            duration: 9000,
-            isClosable: true,
-          });
+          toastDescription = (
+            <ErrorDetails
+              msg={"An unexpected error occured while calling the smart contract function. Please contact support."}
+              ethersError={e}
+            />
+          );
         } else if (isError(e, "BUFFER_OVERRUN") || isError(e, "NUMERIC_FAULT")) {
-          toast({
-            title: "Error",
-            description: (
-              <ErrorDetails
-                msg={"An operationl error occured while calling the smart contract. Please contact support."}
-                ethersError={e}
-              />
-            ),
-            status: "error",
-            duration: 9000,
-            isClosable: true,
-          });
-        } else {
-          toast({
-            title: "Error",
-            description: "Failed to sync passport to chain",
-            status: "error",
-            duration: 9000,
-            isClosable: true,
-          });
+          toastDescription = (
+            <ErrorDetails
+              msg={"An operationl error occured while calling the smart contract. Please contact support."}
+              ethersError={e}
+            />
+          );
         }
+
+        toast({
+          title: "Error",
+          description: toastDescription,
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
       } finally {
         setSyncingToChain(false);
       }
