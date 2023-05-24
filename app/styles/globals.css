@@ -1,4 +1,7 @@
-@import url("https://fonts.googleapis.com/css?family=Libre+Franklin:400,600|Miriam+Libre:400|Baskervville:400");
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono&display=swap");
+
+/* This sources Adobe CC fonts */
+@import url("https://use.typekit.net/tdl1ktm.css");
 
 @tailwind base;
 @tailwind components;
@@ -11,24 +14,6 @@
   .verify-btn:disabled {
     @apply text-gray-400;
   }
-  .sidebar-verify-btn {
-    @apply mt-10 w-full rounded-md bg-accent py-2 text-white hover:bg-muted hover:text-background;
-  }
-  .sidebar-verify-btn:disabled {
-    @apply bg-muted text-background;
-  }
-
-  .secondary-btn {
-    @apply border border-accent-2 text-white;
-  }
-}
-
-.font-libre-franklin {
-  font-family: "Libre Franklin";
-}
-
-.font-miriam-libre {
-  font-family: "Miriam Libre";
 }
 
 .step-icon-inner {
@@ -48,6 +33,7 @@
   --account-center-position-right: 4.1rem;
   --account-center-border-radius: 16px;
   --onboard-action-required-btn-text-color: #fff;
+  --onboard-font-family-normal: var(--font-body);
 }
 
 @media (max-width: 1020px /* md */) {

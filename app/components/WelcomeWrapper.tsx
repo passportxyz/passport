@@ -13,7 +13,7 @@ export type WelcomeWrapperProps = {
 export const WelcomeWrapper = ({ content, children }: WelcomeWrapperProps) => {
   return (
     <>
-      <div className="mt-10 font-cta text-3xl">{content.header}</div>
+      <div className="mt-10 font-heading text-3xl">{content.header}</div>
       <div className="mt-10 h-[240px] w-[295px] border border-accent-2 bg-background lg:h-[333.56px] lg:w-[410px]">
         <img src={content.imgSrc} alt="welcome" className="h-full w-full" />
       </div>

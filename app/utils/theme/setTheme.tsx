@@ -16,7 +16,7 @@ const setTheme = ({ colors, fonts }: Theme) => {
 
   r.style.setProperty("--font-body", fonts.body);
   r.style.setProperty("--font-heading", fonts.heading);
-  r.style.setProperty("--font-cta", fonts.cta);
+  r.style.setProperty("--font-alt", fonts.alt);
 };
 
 export default setTheme;

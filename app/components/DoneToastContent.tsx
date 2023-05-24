@@ -1,7 +1,7 @@
 // --- React Methods
 import React from "react";
 
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 
 export type CustomToastProps = {
   platformId?: PLATFORM_ID | undefined;
@@ -35,7 +35,7 @@ export const DoneToastContent = ({
           </button>
         </div>
         <div className="flex-grow">
-          <h2 className="title-font mb-2 text-lg font-bold">{title}</h2>
+          <h2 className="mb-2 text-lg font-bold">{title}</h2>
           <p>{message || body}</p>
         </div>
         <div>

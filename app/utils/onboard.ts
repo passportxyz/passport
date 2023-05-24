@@ -16,6 +16,7 @@ const walletConnect = walletConnectModule();
 const ledger = ledgerModule();
 
 export const sepoliaChainId = "0xaa36a7";
+export const hardhatChainId = "0x7a69";
 
 const chains = [
   {
@@ -32,6 +33,12 @@ if (process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on") {
     token: "ETH",
     label: "Sepolia",
     rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SEPOLIA_RPC_URL as string,
+  });
+  chains.push({
+    id: hardhatChainId,
+    token: "ETH",
+    label: "Hardhat",
+    rpcUrl: "http://127.0.0.1:8545/",
   });
 }
 

@@ -10,6 +10,8 @@ import {
   VerifiableCredential,
   CredentialResponseBody,
   VerifiableCredentialRecord,
+  PROVIDER_ID,
+  PLATFORM_ID,
 } from "@gitcoin/passport-types";
 import { ProviderPayload } from "@gitcoin/passport-platforms";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
@@ -19,13 +21,14 @@ import { SideBarContent } from "./SideBarContent";
 import { DoneToastContent } from "./DoneToastContent";
 import { useToast } from "@chakra-ui/react";
 import { GenericBanner } from "./GenericBanner";
+import { LoadButton } from "./LoadButton";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 // --- Types
-import { PlatformGroupSpec, Platform, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/types";
 import { PlatformClass } from "@gitcoin/passport-platforms";
 import { getPlatformSpec } from "@gitcoin/passport-platforms/dist/commonjs/platforms-config";
 
@@ -73,14 +76,16 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
   const providerIds = useMemo(
     () =>
       platFormGroupSpec?.reduce((all, stamp) => {
-        return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+        return all.concat(stamp.providers?.map((provider: any) => provider.name as PROVIDER_ID));
       }, [] as PROVIDER_ID[]) || [],
     [platFormGroupSpec]
   );
 
-  // SelectedProviders will be passed in to the sidebar to be filled there...
+  // VerifiedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
-    providerIds.filter((providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined")
+    providerIds.filter(
+      (providerId: any) => typeof allProvidersState[providerId as PROVIDER_ID]?.stamp?.credential !== "undefined"
+    )
   );
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
@@ -126,7 +131,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
       toast({
         duration: 9000,
         isClosable: true,
-        render: (result) => (
+        render: (result: any) => (
           <div className="rounded-md bg-blue-darkblue p-2 text-white">
             <div className="flex p-4">
               <button className="inline-flex flex-shrink-0 cursor-not-allowed">
@@ -137,7 +142,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
                 />
               </button>
               <div className="flex-grow pl-6">
-                <h2 className="title-font mb-2 text-lg font-bold">Sponsored through Gitcoin for Bright ID</h2>
+                <h2 className="mb-2 text-lg font-bold">Sponsored through Gitcoin for Bright ID</h2>
                 <p className="text-base leading-relaxed">{`For verification status updates, check BrightID's App.`}</p>
                 <p className="text-base leading-relaxed">
                   Once you are verified by BrightID - return here to complete this Stamp.
@@ -228,7 +233,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
       datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
       // grab all providers who are verified from the verify response
       const actualVerifiedProviders = providerIds.filter(
-        (providerId) =>
+        (providerId: any) =>
           !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
       );
       // both verified and selected should look the same after save
@@ -386,6 +391,27 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
     }
   };
 
+  const buttonText = useMemo(() => {
+    const hasStamps = verifiedProviders.length > 0;
+
+    if (isLoading) {
+      if (hasStamps) {
+        return "Saving...";
+      }
+      return "Verifying...";
+    }
+
+    if (submitted && !canSubmit) {
+      return "Close";
+    }
+
+    if (hasStamps) {
+      return "Save";
+    }
+
+    return "Verify";
+  }, [isLoading, submitted, canSubmit, verifiedProviders.length]);
+
   return (
     <>
       <SideBarContent
@@ -397,16 +423,17 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
         isLoading={isLoading}
         infoElement={platform.banner ? <GenericBanner banner={platform.banner} /> : undefined}
         verifyButton={
-          <>
-            <button
+          <div className="px-4">
+            <LoadButton
+              className="mt-10 w-full"
+              isLoading={isLoading}
               disabled={!submitted && !canSubmit}
               onClick={canSubmit ? handleFetchCredential : onClose}
               data-testid={`button-verify-${platform.platformId}`}
-              className="sidebar-verify-btn"
             >
-              {submitted && !canSubmit ? "Close" : verifiedProviders.length > 0 ? "Save" : "Verify"}
-            </button>
-          </>
+              {buttonText}
+            </LoadButton>
+          </div>
         }
       />
       <NoStampModal isOpen={showNoStampModal} onClose={() => setShowNoStampModal(false)} />

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 
 // --- Chakra UI Elements
-import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Switch, Spinner } from "@chakra-ui/react";
+import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Spinner } from "@chakra-ui/react";
 
-import { PlatformSpec, PlatformGroupSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PlatformSpec, PlatformGroupSpec } from "@gitcoin/passport-platforms/dist/commonjs/types";
+
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 import { StampSelector } from "./StampSelector";
 import { PlatformDetails } from "./PlatformDetails";
@@ -94,20 +96,7 @@ export const SideBarContent = ({
               />
               {/* This is an optional element that can be used to provide more information */}
               {infoElement}
-              <div className="pl-4 pr-4 pb-4">
-                {isLoading ? (
-                  <button
-                    disabled
-                    data-testid="button-loading-twitter"
-                    className="sidebar-verify-btn mx-auto flex justify-center"
-                  >
-                    <Spinner size="sm" className="my-auto mr-2" />
-                    {verifiedProviders!.length > 0 ? <p>Saving</p> : <p>Verifying</p>}
-                  </button>
-                ) : (
-                  verifyButton
-                )}
-              </div>
+              {verifyButton}
             </div>
           </DrawerBody>
         </div>

@@ -19,7 +19,7 @@ jest.mock("react-router-dom", () => ({
 }));
 
 jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
-  fetchVerifiableCredential: jest.fn(),
+  fetchVerifiableCredential: jest.fn().mockResolvedValue({ credentials: [] } as unknown as CredentialResponseBody),
 }));
 
 const navigateMock = jest.fn();

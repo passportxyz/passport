@@ -11,6 +11,7 @@ import "../styles/globals.css";
 import { UserContextProvider } from "../context/userContext";
 import { CeramicContextProvider } from "../context/ceramicContext";
 import { ScorerContextProvider } from "../context/scorerContext";
+import { OnChainContextProvider } from "../context/onChainContext";
 import ManageAccountCenter from "../components/ManageAccountCenter";
 
 // --- Ceramic Tools
@@ -149,25 +150,28 @@ function App({ Component, pageProps }: AppProps) {
         <link rel="shortcut icon" href="/favicon.ico" />
         <title>Gitcoin Passport</title>
         {facebookSdkScript}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
       </Head>
       <SelfIdProvider
         client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}
         session={true}
       >
         <UserContextProvider>
-          <ScorerContextProvider>
-            <CeramicContextProvider>
-              <ManageAccountCenter>
-                <div className="font-body" suppressHydrationWarning>
-                  {typeof window === "undefined" ? null : (
-                    <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
-                      <Component {...pageProps} />
-                    </ThemeWrapper>
-                  )}
-                </div>
-              </ManageAccountCenter>
-            </CeramicContextProvider>
-          </ScorerContextProvider>
+          <OnChainContextProvider>
+            <ScorerContextProvider>
+              <CeramicContextProvider>
+                <ManageAccountCenter>
+                  <div className="font-body" suppressHydrationWarning>
+                    {typeof window === "undefined" ? null : (
+                      <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                        <Component {...pageProps} />
+                      </ThemeWrapper>
+                    )}
+                  </div>
+                </ManageAccountCenter>
+              </CeramicContextProvider>
+            </ScorerContextProvider>
+          </OnChainContextProvider>
         </UserContextProvider>
       </SelfIdProvider>
     </>

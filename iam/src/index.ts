@@ -13,7 +13,7 @@ import cors from "cors";
 
 // ---- Web3 packages
 import { utils, ethers } from "ethers";
-import { SchemaEncoder, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
+import { ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 
 // ---- Types
 import { Response } from "express";
@@ -26,10 +26,15 @@ import {
   ProviderContext,
   CheckRequestBody,
   CheckResponseBody,
-  VerifiableCredential,
+  EasStamp,
+  EasPayload,
+  EasPassport,
+  EasRequestBody,
 } from "@gitcoin/passport-types";
 
 import { getChallenge } from "./utils/challenge";
+import { getEASFeeAmount } from "./utils/easFees";
+import { encodeEasStamp } from "./utils/easSchema";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
@@ -42,8 +47,33 @@ import {
 // All provider exports from platforms
 import { providers } from "@gitcoin/passport-platforms";
 
+// ---- Config - check for all required env variables
+// We want to prevent the app from starting with default values or if it is misconfigured
+const configErrors = [];
+
+if (!process.env.IAM_JWK) {
+  configErrors.push("IAM_JWK is required");
+}
+
+if (!process.env.ATTESTATION_SIGNER_PRIVATE_KEY) {
+  configErrors.push("ATTESTATION_SIGNER_PRIVATE_KEY is required");
+}
+
+if (!process.env.GITCOIN_VERIFIER_CHAIN_ID) {
+  configErrors.push("GITCOIN_VERIFIER_CHAIN_ID is required");
+}
+
+if (!process.env.GITCOIN_VERIFIER_CONTRACT_ADDRESS) {
+  configErrors.push("GITCOIN_VERIFIER_CONTRACT_ADDRESS is required");
+}
+
+if (configErrors.length > 0) {
+  configErrors.forEach((error) => console.error(error));
+  throw new Error("Missing required configuration");
+}
+
 // get DID from key
-const key = process.env.IAM_JWK || DIDKit.generateEd25519Key();
+const key = process.env.IAM_JWK;
 const issuer = DIDKit.keyToDID("key", key);
 
 // export the current config
@@ -56,22 +86,16 @@ export const config: {
 };
 
 const attestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
-const attestationSchemaEncoder = new SchemaEncoder("string provider, string hash");
 
 const ATTESTER_DOMAIN = {
-  name: "Attester",
+  name: "GitcoinVerifier",
   version: "1",
-  chainId: process.env.GITCOIN_ATTESTER_CHAIN_ID,
-  verifyingContract: process.env.GITCOIN_ATTESTER_CONTRACT_ADDRESS,
+  chainId: process.env.GITCOIN_VERIFIER_CHAIN_ID,
+  verifyingContract: process.env.GITCOIN_VERIFIER_CONTRACT_ADDRESS,
 };
 
 const ATTESTER_TYPES = {
-  Stamp: [
-    { name: "provider", type: "string" },
-    { name: "stampHash", type: "string" },
-    { name: "expirationDate", type: "string" },
-    { name: "encodedData", type: "bytes" },
-  ],
+  Stamp: [{ name: "encodedData", type: "bytes" }],
   Passport: [
     { name: "stamps", type: "Stamp[]" },
     { name: "recipient", type: "address" },
@@ -79,6 +103,8 @@ const ATTESTER_TYPES = {
     { name: "revocable", type: "bool" },
     { name: "refUID", type: "bytes32" },
     { name: "value", type: "uint256" },
+    { name: "nonce", type: "uint256" },
+    { name: "fee", type: "uint256" },
   ],
 };
 
@@ -350,104 +376,83 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
     });
 });
 
-export type EasStamp = {
-  provider: string;
-  stampHash: string;
-  expirationDate: string;
-  encodedData: string;
-};
-
-type EasPassport = {
-  stamps: EasStamp[];
-  recipient: string;
-  expirationTime: number;
-  revocable: boolean;
-  refUID: string;
-  value: number;
-};
-
-type EasPayload = {
-  passport: EasPassport;
-  signature: {
-    v: number;
-    r: string;
-    s: string;
-  };
-  invalidCredentials: VerifiableCredential[];
-};
-
 // Expose entry point for getting eas payload for moving stamps on-chain
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
-  const credentials: VerifiableCredential[] = req.body as VerifiableCredential[];
-  if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
+  try {
+    const { credentials, nonce } = req.body as EasRequestBody;
+    if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
 
-  const recipient = credentials[0].credentialSubject.id.split(":")[4];
+    const recipient = credentials[0].credentialSubject.id.split(":")[4];
 
-  if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
-    return void errorRes(res, "Invalid recipient", 400);
+    if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
+      return void errorRes(res, "Invalid recipient", 400);
 
-  Promise.all(
-    credentials.map(async (credential) => {
-      return {
-        credential,
-        verified: issuer === credential.issuer && (await verifyCredential(DIDKit, credential)),
-      };
-    })
-  )
-    .then((credentialVerifications) => {
-      const invalidCredentials = credentialVerifications
-        .filter(({ verified }) => !verified)
-        .map(({ credential }) => credential);
+    Promise.all(
+      credentials.map(async (credential) => {
+        return {
+          credential,
+          verified: issuer === credential.issuer && (await verifyCredential(DIDKit, credential)),
+        };
+      })
+    )
+      .then(async (credentialVerifications) => {
+        const invalidCredentials = credentialVerifications
+          .filter(({ verified }) => !verified)
+          .map(({ credential }) => credential);
 
-      const stamps: EasStamp[] = credentialVerifications
-        .filter(({ verified }) => verified)
-        .map(({ credential }) => {
-          const encodedData = attestationSchemaEncoder.encodeData([
-            { name: "provider", value: credential.credentialSubject.provider, type: "string" },
-            { name: "hash", value: credential.credentialSubject.hash, type: "string" },
-          ]);
-          return {
-            provider: credential.credentialSubject.provider,
-            stampHash: credential.credentialSubject.hash,
-            expirationDate: credential.expirationDate,
-            encodedData,
-          };
-        });
+        const stamps: EasStamp[] = credentialVerifications
+          .filter(({ verified }) => verified)
+          .map(({ credential }) => {
+            return {
+              encodedData: encodeEasStamp(credential),
+            };
+          });
 
-      if (!stamps.length) return void errorRes(res, "No verifiable stamps provided", 400);
+        const fee = await getEASFeeAmount(2);
 
-      const easPassport: EasPassport = {
-        stamps,
-        recipient,
-        expirationTime: NO_EXPIRATION,
-        revocable: true,
-        refUID: ZERO_BYTES32,
-        value: 0,
-      };
+        const easPassport: EasPassport = {
+          stamps,
+          recipient,
+          expirationTime: NO_EXPIRATION,
+          revocable: true,
+          refUID: ZERO_BYTES32,
+          value: 0,
+          fee: fee.toString(),
+          nonce,
+        };
 
-      attestationSignerWallet
-        ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, easPassport)
-        .then((signature) => {
-          const { v, r, s } = utils.splitSignature(signature);
+        attestationSignerWallet
+          ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, easPassport)
+          .then((signature) => {
+            const { v, r, s } = utils.splitSignature(signature);
 
-          const payload: EasPayload = {
-            passport: easPassport,
-            signature: { v, r, s },
-            invalidCredentials,
-          };
+            const payload: EasPayload = {
+              passport: easPassport,
+              signature: { v, r, s },
+              invalidCredentials,
+            };
 
-          return void res.json(payload);
-        })
-        .catch((error) => {
-          // TODO dont return real error
-          return void errorRes(res, String(error), 500);
-        });
-    })
-    .catch((error) => {
-      // TODO dont return real error
-      return void errorRes(res, String(error), 500);
-    });
+            return void res.json(payload);
+          })
+          .catch((error) => {
+            // TODO dont return real error
+            console.log("==================================");
+            console.log(error);
+            console.log("==================================");
+            return void errorRes(res, String(error), 500);
+          });
+      })
+      .catch((error) => {
+        // TODO dont return real error
+        console.log("------------------------------------");
+        console.log(error);
+        console.log("------------------------------------");
+        return void errorRes(res, String(error), 500);
+      });
+  } catch (error) {
+    return void errorRes(res, String(error), 500);
+  }
 });
 
 // procedure endpoints

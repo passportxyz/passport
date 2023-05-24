@@ -1,5 +1,5 @@
 // --- UI Components
-import { Checkbox } from "@chakra-ui/react";
+import Checkbox from "./Checkbox";
 
 // --- Types
 import { PROVIDER_ID } from "@gitcoin/passport-types";
@@ -24,28 +24,25 @@ export function RefreshMyStampsSelector({
       {validPlatformGroups.map((group, i) => {
         return (
           <div key={i}>
-            <p className="mt-4 text-sm font-bold text-gray-400">{group.name}</p>
+            <p className="mt-4 text-sm text-color-4">{group.name}</p>
             <div>
               <ul className="marker:leading-1 marker:text-3xl ">
                 {group.providers.map((provider, i) => {
                   return (
                     <div key={`${provider.title}${i}`} className="mt-5 flex flex-row items-center justify-between">
                       <li key={`${provider.title}${i}`} data-testid={`indicator-${provider.name}`}>
-                        <div className="relative mr-10 text-sm text-white">{provider.title}</div>
+                        <div className="relative mr-10 text-sm text-color-1">{provider.title}</div>
                       </li>
-                      <div className="align-right flex rounded bg-white">
+                      <div className="align-right">
                         <Checkbox
-                          type="checkbox"
                           key={`${provider.title}${i}`}
-                          colorScheme="purple"
                           data-testid={`checkbox-${provider.name}`}
                           disabled={!platformChecked}
-                          isChecked={selectedProviders?.includes(provider.name)}
-                          size="lg"
-                          onChange={(e) => {
+                          checked={selectedProviders?.includes(provider.name)}
+                          onChange={(checked: boolean) => {
                             // set the selected items by concatenating or filtering by providerId
                             setSelectedProviders(
-                              e.target.checked
+                              checked
                                 ? (selectedProviders || []).concat(provider.name)
                                 : (selectedProviders || []).filter((providerId) => providerId !== provider.name)
                             );

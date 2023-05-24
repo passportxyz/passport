@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { RefreshMyStampsModalContentCard } from "../../components/RefreshMyStampsModalContentCard";
-import { PlatformSpec, PROVIDER_ID } from "@gitcoin/passport-platforms/src/types";
-import { PLATFORM_ID } from "@gitcoin/passport-types";
+import { PlatformSpec } from "@gitcoin/passport-platforms/src/types";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { ValidatedProviderGroup } from "../../signer/utils";
 
 beforeAll(() => {
@@ -62,6 +62,6 @@ describe("RefreshMyStampsModalContentCard", () => {
     );
 
     const switchElement = screen.getByTestId(`switch-${currentPlatform.name}`);
-    expect(switchElement).toHaveAttribute("data-checked");
+    expect(switchElement).toHaveAttribute("data-headlessui-state", "checked");
   });
 });

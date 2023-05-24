@@ -40,6 +40,7 @@ import {
   Civic,
 } from "@gitcoin/passport-platforms";
 import { PlatformProps } from "../components/GenericPlatform";
+import { getProviderSpec } from "../utils/helpers";
 
 // -- Trusted IAM servers DID
 const IAM_ISSUER_DID = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
@@ -206,12 +207,6 @@ export type AllProvidersState = {
   };
 };
 
-const getProviderSpec = (platform: PLATFORM_ID, provider: string): ProviderSpec => {
-  return STAMP_PROVIDERS[platform]
-    ?.find((i) => i.providers.find((p) => p.name == provider))
-    ?.providers.find((p) => p.name == provider) as ProviderSpec;
-};
-
 const startingAllProvidersState: AllProvidersState = {
   Google: {
     providerSpec: STAMP_PROVIDERS.Google as unknown as ProviderSpec,
@@ -255,10 +250,6 @@ const startingAllProvidersState: AllProvidersState = {
   },
   Facebook: {
     providerSpec: getProviderSpec("Facebook", "Facebook"),
-    stamp: undefined,
-  },
-  FacebookFriends: {
-    providerSpec: getProviderSpec("Facebook", "FacebookFriends"),
     stamp: undefined,
   },
   FacebookProfilePicture: {

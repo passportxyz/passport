@@ -126,7 +126,6 @@ describe("Fetch Credentials", function () {
 });
 
 describe("Generate Credentials", function () {
-
   beforeEach(() => {
     mockDIDKit.clearDidkitMocks();
   });
@@ -175,7 +174,13 @@ describe("Generate Credentials", function () {
       };
 
       const expectedHash: string =
-        "v0.0.0:" + base64.encode(createHash("sha256").update(key).update(JSON.stringify(objToSortedArray(record))).digest());
+        "v0.0.0:" +
+        base64.encode(
+          createHash("sha256")
+            .update(key)
+            .update(JSON.stringify(objToSortedArray(record)))
+            .digest()
+        );
       // details of this credential are created by issueHashedCredential - but the proof is added by DIDKit (which is mocked)
       const { credential } = await issueHashedCredential(DIDKit, key, "0x0", record);
       // expect to have called issueCredential

@@ -3,7 +3,7 @@ import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // --- Types
-import { PLATFORM_ID } from "@gitcoin/passport-platforms/dist/commonjs/types";
+import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
 
 // --- Contexts
@@ -13,6 +13,8 @@ import { UserContext } from "../context/userContext";
 // --- UI Components
 import { Spinner } from "@chakra-ui/react";
 import { WelcomeWrapper } from "./WelcomeWrapper";
+import { Button } from "./Button";
+import { LoadButton } from "./LoadButton";
 
 export interface WelcomeBackProps {
   onOpen: () => void;
@@ -28,7 +30,7 @@ export const WelcomeBack = ({
   const { allPlatforms } = useContext(CeramicContext);
   const { address } = useContext(UserContext);
   const navigate = useNavigate();
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <WelcomeWrapper
@@ -39,31 +41,30 @@ export const WelcomeBack = ({
         imgSrc: "./assets/welcome-back.png",
       }}
     >
-      <>
-        <button
+      <div className="grid w-full grid-cols-2 gap-4">
+        <LoadButton
           data-testid="skip-for-now-button"
-          className="secondary-btn mr-2 flex w-full items-center justify-center rounded-sm py-2 px-6"
+          variant="secondary"
+          isLoading={isLoading}
           onClick={() => {
-            setLoading(true);
+            setIsLoading(true);
             navigate("/dashboard");
             resetStampsAndProgressState();
-            setLoading(false);
+            setIsLoading(false);
           }}
         >
           Skip For Now
-          {isLoading ? <Spinner size="sm" className="my-auto ml-2" /> : <></>}
-        </button>
-        <button
+        </LoadButton>
+        <Button
           data-testid="refresh-my-stamps-button"
-          className="ml-2 w-full rounded-sm bg-accent py-2 px-2"
           onClick={() => {
             onOpen();
             handleFetchPossibleEVMStamps(address!, allPlatforms);
           }}
         >
           Refresh My Stamps
-        </button>
-      </>
+        </Button>
+      </div>
     </WelcomeWrapper>
   );
 };

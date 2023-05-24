@@ -57,11 +57,11 @@ module.exports = {
     fontFamily: {
       body: ["var(--font-body)"],
       heading: ["var(--font-heading)"],
-      cta: ["var(--font-cta)"],
+      alt: ["var(--font-alt)"],
     },
     minHeight: {
       default: "100vh",
     },
   },
-  plugins: [],
+  plugins: [require("@headlessui/tailwindcss")],
 };

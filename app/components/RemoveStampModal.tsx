@@ -9,11 +9,11 @@ import {
   ModalHeader,
   ModalCloseButton,
   ModalBody,
-  Stack,
-  Button,
   useToast,
 } from "@chakra-ui/react";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { Button } from "./Button";
+import { LoadButton } from "./LoadButton";
 
 // --- Style Components
 import { DoneToastContent } from "./DoneToastContent";
@@ -80,45 +80,27 @@ export const RemoveStampModal = ({
         padding={5}
         maxW={{
           sm: "100%",
-          // md: "55%",
           md: "600px",
         }}
         maxH="80%"
       >
         <ModalHeader>
           <img alt="shield alert" src="../assets/shield-alert.svg" className="m-auto mb-4 w-10" />
-          <p className="font-miriam-libre text-center">{title}</p>
+          <p className="text-center">{title}</p>
         </ModalHeader>
         <ModalCloseButton />
-        <ModalBody color="#757087" className="font-miriam-libre mb-10 overflow-auto text-center">
+        <ModalBody color="#757087" className="mb-10 overflow-auto text-center">
           {body}
         </ModalBody>
 
-        <Stack direction={["column", "row"]} align="center">
-          <Button
-            data-testid="button-stamp-removal-cancel"
-            width="50%"
-            rounded={"base"}
-            onClick={onClose}
-            backgroundColor="#fff"
-            borderWidth={1}
-            borderColor="#e6e4e9"
-          >
-            <span className="font-miriam-libre">{"Cancel"}</span>
+        <div className="grid grid-cols-2 gap-4">
+          <Button data-testid="button-stamp-removal-cancel" variant="secondary" onClick={onClose}>
+            Cancel
           </Button>
-          <Button
-            data-testid="button-stamp-removal"
-            width="50%"
-            rounded={"base"}
-            colorScheme="purple"
-            onClick={handleStampRemoval}
-            isLoading={isLoading}
-            loadingText="Removing Stamp"
-            className="font-miriam-libre"
-          >
-            <span className="font-miriam-libre">{closeButtonText || "Remove Stamp"}</span>
-          </Button>
-        </Stack>
+          <LoadButton data-testid="button-stamp-removal" onClick={handleStampRemoval} isLoading={isLoading}>
+            {isLoading ? "Removing..." : closeButtonText || "Remove Stamp"}
+          </LoadButton>
+        </div>
       </ModalContent>
     </Modal>
   );

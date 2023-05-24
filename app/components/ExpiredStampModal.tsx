@@ -1,11 +1,12 @@
-import { useContext, useEffect, useState } from "react";
-import { Button, Modal, ModalContent, ModalOverlay, Spinner, useToast } from "@chakra-ui/react";
+import { useContext, useState } from "react";
+import { Modal, ModalContent, ModalOverlay, useToast } from "@chakra-ui/react";
 import { CeramicContext } from "../context/ceramicContext";
 import { getPlatformSpec } from "../config/platforms";
+import { STAMP_PROVIDERS } from "../config/providers";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { completedIcon } from "./Progress";
-import { PLATFORMS, PlatformSpec } from "../config/platforms";
-import { STAMP_PROVIDERS } from "../config/providers";
+import { Button } from "./Button";
+import { LoadButton } from "./LoadButton";
 
 export type ExpiredStampModalProps = {
   isOpen: boolean;
@@ -74,7 +75,7 @@ export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) =
           >
             Why have my stamps expired?
           </a>
-          <p className="w-full text-left text-sm font-semibold text-gray-600">Accounts</p>
+          <p className="w-full text-left text-sm font-semibold text-gray-600">Stamps</p>
           <hr className="border-1 w-full" />
           {expiredPlatforms.map((platform) => {
             const spec = getPlatformSpec(platform as PLATFORM_ID);
@@ -88,21 +89,13 @@ export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) =
               </div>
             );
           })}
-          <div className="flex w-full">
-            <button
-              onClick={() => onClose()}
-              className="sidebar-verify-btn border-1  mr-2 w-1/2 border bg-transparent text-gray-900 hover:bg-inherit"
-            >
+          <div className="mt-4 grid w-full grid-cols-2 gap-2">
+            <Button onClick={onClose} variant="secondary">
               Cancel
-            </button>
-            <button
-              data-testid="delete-duplicate"
-              onClick={() => deleteAndNotify()}
-              className="sidebar-verify-btn w-1/2"
-            >
-              {isRemovingStamps && <Spinner data-testid="removing-stamps-spinner" size="sm" className="my-auto mr-2" />}{" "}
+            </Button>
+            <LoadButton data-testid="delete-duplicate" onClick={deleteAndNotify} isLoading={isRemovingStamps}>
               Remove
-            </button>
+            </LoadButton>
           </div>
         </div>
       </ModalContent>

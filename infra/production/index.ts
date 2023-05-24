@@ -278,12 +278,12 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             valueFrom: `${IAM_SERVER_SSM_ARN}:ATTESTATION_SIGNER_PRIVATE_KEY::`,
           },
           {
-            name: "GITCOIN_ATTESTER_CONTRACT_ADDRESS",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:GITCOIN_ATTESTER_CONTRACT_ADDRESS::`,
+            name: "GITCOIN_VERIFIER_CONTRACT_ADDRESS",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:GITCOIN_VERIFIER_CONTRACT_ADDRESS::`,
           },
           {
-            name: "GITCOIN_ATTESTER_CHAIN_ID",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:GITCOIN_ATTESTER_CHAIN_ID::`,
+            name: "GITCOIN_VERIFIER_CHAIN_ID",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:GITCOIN_VERIFIER_CHAIN_ID::`,
           },
         ],
       },

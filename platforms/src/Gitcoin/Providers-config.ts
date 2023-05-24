@@ -1,7 +1,7 @@
 import { PlatformSpec, PlatformGroupSpec } from "../types";
 
-export const gitcoinPlatformDetails: PlatformSpec = {
-  icon: "./assets/gitcoinStampIcon.svg",
+export const GitcoinPlatformDetails: PlatformSpec = {
+  icon: "./assets/gtcGrantsLightIcon.svg",
   platform: "Gitcoin",
   name: "Gitcoin",
   description: "Connect with Github to verify with your Gitcoin account.",
