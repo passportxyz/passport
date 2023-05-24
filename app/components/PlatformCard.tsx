@@ -79,11 +79,13 @@ export const PlatformCard = ({
 
     return providers.some((provider: PROVIDER_ID) => {
       const providerSpec = getProviderSpec(platform.platform, provider);
-      const providerObj = onChainProviders.find((p) => p.providerHash === providerSpec.hash);
+      const providerObjs = onChainProviders.filter((p) => p.providerHash === providerSpec.hash);
 
-      if (providerObj) {
-        const credentialHash = allProvidersState[provider]?.stamp?.credential.credentialSubject.hash;
-        return providerSpec.hash === providerObj.providerHash && credentialHash === providerObj.credentialHash;
+      if (providerObjs.length > 0) {
+        return providerObjs.some((providerObj) => {
+          const credentialHash = allProvidersState[provider]?.stamp?.credential.credentialSubject.hash;
+          return providerSpec.hash === providerObj.providerHash && credentialHash === providerObj.credentialHash;
+        });
       }
 
       return false;

@@ -36,11 +36,13 @@ export function StampSelector({
   const isProviderOnChain = (provider: PROVIDER_ID) => {
     if (currentPlatform) {
       const providerSpec = getProviderSpec(currentPlatform.platform, provider);
-      const providerObj = onChainProviders.find((p) => p.providerHash === providerSpec.hash);
+      const providerObjs = onChainProviders.filter((p) => p.providerHash === providerSpec.hash);
 
-      if (providerObj) {
-        const credentialHash = allProvidersState[provider]?.stamp?.credential.credentialSubject.hash;
-        return providerSpec.hash === providerObj.providerHash && credentialHash === providerObj.credentialHash;
+      if (providerObjs.length > 0) {
+        return providerObjs.some((providerObj) => {
+          const credentialHash = allProvidersState[provider]?.stamp?.credential.credentialSubject.hash;
+          return providerSpec.hash === providerObj.providerHash && credentialHash === providerObj.credentialHash;
+        });
       }
     }
 
@@ -75,11 +77,12 @@ export function StampSelector({
                       data-testid={`indicator-${provider.name}`}
                     >
                       <div className={`text-md relative top-[-0.3em] ${textColor}`}>
-                        {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && (isProviderOnChain(provider.name) ? (
-                          <LinkIcon className="mr-2 inline h-6 w-5 text-accent-3" />
-                        ) : (
-                          <LinkIcon className="mr-2 inline h-6 w-5 text-color-4" />
-                        ))}
+                        {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" &&
+                          (isProviderOnChain(provider.name) ? (
+                            <LinkIcon className="mr-2 inline h-6 w-5 text-accent-3" />
+                          ) : (
+                            <LinkIcon className="mr-2 inline h-6 w-5 text-color-4" />
+                          ))}
                         {provider.title}
                       </div>
                     </li>
