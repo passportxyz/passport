@@ -158,7 +158,6 @@ const SyncToChainButton = () => {
         console.error("error syncing credentials to chain: ", e);
         let toastDescription: string | JSX.Element =
           "An unexpected error occured while trying to bring the data on-chain.";
-        debugger;
         if (isError(e, "ACTION_REJECTED")) {
           toastDescription = "Transaction rejected by user";
         } else if (isError(e, "INSUFFICIENT_FUNDS")) {
