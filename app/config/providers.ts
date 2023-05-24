@@ -1,3 +1,4 @@
+import * as ethers from "ethers";
 import { PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-types";
 import {
   Brightid,
@@ -27,6 +28,7 @@ import {
 export type ProviderSpec = {
   title: string;
   name: PROVIDER_ID;
+  hash?: string;
   icon?: string;
   description?: string;
 };
@@ -45,7 +47,7 @@ export type Providers = {
   [platform in PLATFORM_ID]: PlatformGroupSpec[];
 };
 
-export const STAMP_PROVIDERS: Readonly<Providers> = {
+const stampProviders: Readonly<Providers> = {
   Google: Google.GoogleProviderConfig,
   Ens: Ens.EnsProviderConfig,
   Poh: Poh.PohProviderConfig,
@@ -75,3 +77,13 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
     },
   ],
 };
+
+Object.keys(stampProviders).forEach((platformGroup) => {
+  stampProviders[platformGroup as PLATFORM_ID].forEach((platformGroupSpec: PlatformGroupSpec) => {
+    platformGroupSpec.providers.forEach((providerSpec: any) => {
+      providerSpec.hash = ethers.keccak256(ethers.toUtf8Bytes(providerSpec.name));
+    });
+  });
+});
+
+export const STAMP_PROVIDERS: Readonly<Providers> = stampProviders;

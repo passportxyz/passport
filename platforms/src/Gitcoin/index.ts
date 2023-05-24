@@ -1,3 +1,3 @@
 export { GitcoinPlatform } from "./App-Bindings";
-export { GitcoinProviderConfig, gitcoinPlatformDetails } from "./Providers-config";
+export { GitcoinProviderConfig, GitcoinPlatformDetails } from "./Providers-config";
 export { GitcoinContributorStatisticsProvider, GitcoinGranteeStatisticsProvider } from "./Providers";

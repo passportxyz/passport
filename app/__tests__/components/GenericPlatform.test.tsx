@@ -34,6 +34,7 @@ const handleFetchCredential = jest.fn();
 
 jest.mock("../../utils/helpers.tsx", () => ({
   generateUID: jest.fn(),
+  getProviderSpec: jest.fn(),
   difference: (setA: any, setB: any) => ({
     size: 1,
   }),

@@ -9,7 +9,6 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 import { StampSelector } from "./StampSelector";
 import { PlatformDetails } from "./PlatformDetails";
-import { OnChainProvidersType } from "../context/onChainContext";
 
 export type SideBarContentProps = {
   currentPlatform: PlatformSpec | undefined;

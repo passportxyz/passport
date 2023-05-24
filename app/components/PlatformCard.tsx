@@ -1,5 +1,5 @@
 // --- React Methods
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { useRouter } from "next/router";
 
 // --- Chakra UI Elements
@@ -10,21 +10,18 @@ import { ChevronDownIcon } from "@heroicons/react/20/solid";
 // --- Types
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
-import { datadogLogs } from "@datadog/browser-logs";
-import { datadogRum } from "@datadog/browser-rum";
 import { STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
-import { pillLocalStorage, UserContext } from "../context/userContext";
+import { OnChainContext } from "../context/onChainContext";
+import { pillLocalStorage } from "../context/userContext";
 
 // --- Components
 import { JsonOutputModal } from "./JsonOutputModal";
 import { RemoveStampModal } from "./RemoveStampModal";
 import { getStampProviderFilters } from "../config/filters";
-import { graphql_fetch } from "../utils/helpers";
-import { ethers } from "ethers";
-import { OnChainProvidersType } from "../context/onChainContext";
+import { getProviderSpec } from "../utils/helpers";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -32,7 +29,6 @@ type PlatformCardProps = {
   i: number;
   platform: PlatformSpec;
   selectedProviders: SelectedProviders;
-  onChainProviders: OnChainProvidersType;
   updatedPlatforms: UpdatedPlatforms | undefined;
   btnRef: React.MutableRefObject<undefined>;
   onOpen: () => void;
@@ -45,7 +41,6 @@ export const PlatformCard = ({
   i,
   platform,
   selectedProviders,
-  onChainProviders,
   updatedPlatforms,
   btnRef,
   onOpen,
@@ -55,6 +50,7 @@ export const PlatformCard = ({
 }: PlatformCardProps): JSX.Element => {
   // import all providers
   const { allProvidersState, passportHasCacaoError, handleDeleteStamps } = useContext(CeramicContext);
+  const { onChainProviders } = useContext(OnChainContext);
 
   // stamp filter
   const router = useRouter();
@@ -81,9 +77,19 @@ export const PlatformCard = ({
     const providers = selectedProviders[platform.platform];
     if (!providers.length) return false;
 
-    return providers.some(
-      (provider: PROVIDER_ID) => onChainProviders[provider as keyof OnChainProvidersType]?.isOnChain
-    );
+    return providers.some((provider: PROVIDER_ID) => {
+      const providerSpec = getProviderSpec(platform.platform, provider);
+      const providerObjs = onChainProviders.filter((p) => p.providerHash === providerSpec.hash);
+
+      if (providerObjs.length > 0) {
+        return providerObjs.some((providerObj) => {
+          const credentialHash = allProvidersState[provider]?.stamp?.credential.credentialSubject.hash;
+          return providerSpec.hash === providerObj.providerHash && credentialHash === providerObj.credentialHash;
+        });
+      }
+
+      return false;
+    });
   };
 
   // hide platforms based on filter

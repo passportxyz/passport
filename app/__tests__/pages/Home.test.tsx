@@ -16,6 +16,7 @@ import { WalletState } from "@web3-onboard/core";
 
 jest.mock("../../utils/helpers", () => ({
   checkShowOnboard: jest.fn(),
+  getProviderSpec: jest.fn(),
 }));
 
 const navigate = jest.fn();

@@ -46,7 +46,6 @@ import {
 
 // All provider exports from platforms
 import { providers } from "@gitcoin/passport-platforms";
-import { log } from "console";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
