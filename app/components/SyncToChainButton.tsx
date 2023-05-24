@@ -13,6 +13,7 @@ import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 import { VerifiableCredential, EasPayload } from "@gitcoin/passport-types";
+import { OnChainContext } from "../context/onChainContext";
 
 export type ErrorDetailsProps = {
   msg: string;
@@ -60,6 +61,7 @@ const ErrorDetails = ({ msg, ethersError }: ErrorDetailsProps): JSX.Element => {
 const SyncToChainButton = () => {
   const { passport } = useContext(CeramicContext);
   const { wallet, address } = useContext(UserContext);
+  const { refreshOnChainProviders } = useContext(OnChainContext);
   const [syncingToChain, setSyncingToChain] = useState(false);
   const toast = useToast();
 
@@ -134,13 +136,15 @@ const SyncToChainButton = () => {
             isClosable: true,
           });
           await transaction.wait();
-          const easScannURL = `${process.env.NEXT_PUBLIC_EAS_EXPLORER}/address/${wallet.address}`;
+          const easScanURL = `${process.env.NEXT_PUBLIC_EAS_EXPLORER}/address/${address}`;
+          await refreshOnChainProviders();
+
           toast({
             title: "Success",
             description: (
               <p>
                 Passport successfully synced to chain.{" "}
-                <a href="https://sepolia.easscan.org/address/0x85fF01cfF157199527528788ec4eA6336615C989">
+                <a href={`${easScanURL}`} className="underline" target="_blank" rel="noopener noreferrer">
                   Check your stamps
                 </a>
               </p>
