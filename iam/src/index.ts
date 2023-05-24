@@ -60,12 +60,12 @@ if (!process.env.ATTESTATION_SIGNER_PRIVATE_KEY) {
   configErrors.push("ATTESTATION_SIGNER_PRIVATE_KEY is required");
 }
 
-if (!process.env.GITCOIN_ATTESTER_CHAIN_ID) {
-  configErrors.push("GITCOIN_ATTESTER_CHAIN_ID is required");
+if (!process.env.GITCOIN_VERIFIER_CHAIN_ID) {
+  configErrors.push("GITCOIN_VERIFIER_CHAIN_ID is required");
 }
 
-if (!process.env.GITCOIN_ATTESTER_CONTRACT_ADDRESS) {
-  configErrors.push("GITCOIN_ATTESTER_CONTRACT_ADDRESS is required");
+if (!process.env.GITCOIN_VERIFIER_CONTRACT_ADDRESS) {
+  configErrors.push("GITCOIN_VERIFIER_CONTRACT_ADDRESS is required");
 }
 
 if (configErrors.length > 0) {
@@ -91,8 +91,8 @@ const attestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER
 const ATTESTER_DOMAIN = {
   name: "GitcoinVerifier",
   version: "1",
-  chainId: process.env.GITCOIN_ATTESTER_CHAIN_ID,
-  verifyingContract: process.env.GITCOIN_ATTESTER_CONTRACT_ADDRESS,
+  chainId: process.env.GITCOIN_VERIFIER_CHAIN_ID,
+  verifyingContract: process.env.GITCOIN_VERIFIER_CONTRACT_ADDRESS,
 };
 
 const ATTESTER_TYPES = {

@@ -71,7 +71,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
       `,
         {
           recipient: { equals: ethers.getAddress(address!) },
-          attester: { equals: process.env.NEXT_PUBLIC_GITCOIN_ATTESTER_CONTRACT_ADDRESS },
+          attester: { equals: process.env.NEXT_PUBLIC_GITCOIN_VERIFIER_CONTRACT_ADDRESS },
         }
       );
 
