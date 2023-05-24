@@ -93,6 +93,8 @@ export const PlatformCard = ({
 
   // Feature Flag Guild Stamp
   if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP !== "on" && platform.platform === "GuildXYZ") return <></>;
+  // Feature Flag Hypercerts Stamp
+  if (process.env.NEXT_PUBLIC_FF_HYPERCERT_STAMP !== "on" && platform.platform === "Hypercerts") return <></>;
 
   // returns a single Platform card
   return (

@@ -180,10 +180,14 @@ platforms.set("Coinbase", {
   }),
   platFormGroupSpec: Coinbase.CoinbaseProviderConfig,
 });
-platforms.set("Hypercerts", {
-  platform: new Hypercerts.HypercertsPlatform(),
-  platFormGroupSpec: Hypercerts.HypercertsProviderConfig,
-});
+
+if (process.env.NEXT_PUBLIC_FF_HYPERCERT_STAMP === "on") {
+  platforms.set("Hypercerts", {
+    platform: new Hypercerts.HypercertsPlatform(),
+    platFormGroupSpec: Hypercerts.HypercertsProviderConfig,
+  });
+}
+
 if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
   platforms.set("GuildXYZ", {
     platform: new GuildXYZ.GuildXYZPlatform(),
