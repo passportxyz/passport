@@ -37,7 +37,7 @@ export const getPlatformSpec = (platformName: string): PlatformSpec | undefined 
 export const PLATFORMS: PlatformSpec[] = [
   GTC.GTCPlatformDetails,
   GtcStaking.GTCStakingPlatformDetails,
-  Gitcoin.gitcoinPlatformDetails,
+  Gitcoin.GitcoinPlatformDetails,
   Twitter.TwitterPlatformDetails,
   Discord.DiscordPlatformDetails,
   Google.GooglePlatformDetails,
