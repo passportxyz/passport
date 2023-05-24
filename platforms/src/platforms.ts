@@ -23,7 +23,9 @@ import * as Coinbase from "./Coinbase";
 import * as GuildXYZ from "./GuildXYZ";
 import * as Hypercerts from "./Hypercerts";
 
-const platforms = {
+// TODO Feature flags?
+
+const platforms: Record<string, any> = {
   Brightid,
   // TODO should remove?
   // ClearText,

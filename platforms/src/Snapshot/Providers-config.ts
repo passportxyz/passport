@@ -1,6 +1,7 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { SnapshotProposalsProvider, SnapshotVotesProvider } from "./Providers";
 
-export const SnapshotPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/snapshotStampIcon.svg",
   platform: "Snapshot",
   name: "Snapshot",
@@ -9,7 +10,7 @@ export const SnapshotPlatformDetails: PlatformSpec = {
   isEVM: true,
 };
 
-export const SnapshotProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Snapshot Voter",
     providers: [{ title: "Voted on 2 or more DAO proposals", name: "SnapshotVotesProvider" }],
@@ -21,3 +22,5 @@ export const SnapshotProviderConfig: PlatformGroupSpec[] = [
     ],
   },
 ];
+
+export const providers: Provider[] = [new SnapshotVotesProvider(), new SnapshotProposalsProvider()];
