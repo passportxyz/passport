@@ -22,6 +22,7 @@ import {
   Snapshot,
   Twitter,
   ZkSync,
+  Hypercerts,
 } from "@gitcoin/passport-platforms";
 
 export const getPlatformSpec = (platformName: string): PlatformSpec | undefined => {
@@ -57,5 +58,6 @@ export const PLATFORMS: PlatformSpec[] = [
   GnosisSafe.GnosisSafePlatformDetails,
   Coinbase.CoinbasePlatformDetails,
   GuildXYZ.GuildXYZPlatformDetails,
+  Hypercerts.HypercertsPlatformDetails,
   // Signer.SignerPlatformDetails,
 ];

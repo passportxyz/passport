@@ -27,6 +27,7 @@ import * as ClearText from "./ClearText";
 import * as Brightid from "./Brightid";
 import * as Coinbase from "./Coinbase";
 import * as GuildXYZ from "./GuildXYZ";
+import * as Hypercerts from "./Hypercerts";
 
 export {
   Brightid,
@@ -52,6 +53,7 @@ export {
   Twitter,
   Coinbase,
   GuildXYZ,
+  Hypercerts,
 };
 
 // Initiate providers - new Providers should be registered in this array...
@@ -226,6 +228,7 @@ export const providers = new Providers([
   new GuildXYZ.GuildAdminProvider(),
   new GuildXYZ.GuildMemberProvider(),
   new GuildXYZ.GuildPassportMemberProvider(),
+  new Hypercerts.HypercertsProvider(),
 ]);
 
 export { Platform, AppContext, ProviderPayload, PlatformSpec } from "./types";

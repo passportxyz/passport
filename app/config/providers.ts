@@ -15,6 +15,7 @@ import {
   GTC,
   GtcStaking,
   GuildXYZ,
+  Hypercerts,
   Lens,
   Linkedin,
   NFT,
@@ -70,6 +71,7 @@ const stampProviders: Readonly<Providers> = {
   Linkedin: Linkedin.LinkedinProviderConfig,
   Coinbase: Coinbase.CoinbaseProviderConfig,
   GuildXYZ: GuildXYZ.GuildXYZProviderConfig,
+  Hypercerts: Hypercerts.HypercertsProviderConfig,
   Signer: [
     {
       platformGroup: "Account Name",
