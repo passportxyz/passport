@@ -14,6 +14,7 @@
 
 # production
 /build
+public/platforms.json
 
 # misc
 .DS_Store
