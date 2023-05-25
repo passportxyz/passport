@@ -23,31 +23,30 @@ import * as Coinbase from "./Coinbase";
 import * as GuildXYZ from "./GuildXYZ";
 import * as Hypercerts from "./Hypercerts";
 
-// TODO Feature flags?
-
+// Order of this array determines order in the Passport UI
 const platforms: Record<string, any> = {
-  Brightid,
   // TODO should remove?
   // ClearText,
-  Google,
-  GtcStaking,
   GTC,
-  Linkedin,
-  Discord,
-  ZkSync,
-  ETH,
-  POAP,
-  GitPOAP,
-  NFT,
-  GnosisSafe,
-  Snapshot,
-  Poh,
-  Lens,
+  GtcStaking,
   Gitcoin,
+  Twitter,
+  Discord,
+  Google,
   Github,
   Facebook,
+  Linkedin,
   Ens,
-  Twitter,
+  POAP,
+  Brightid,
+  Poh,
+  ETH,
+  Snapshot,
+  GitPOAP,
+  NFT,
+  ZkSync,
+  Lens,
+  GnosisSafe,
   Coinbase,
   GuildXYZ,
   Hypercerts,
