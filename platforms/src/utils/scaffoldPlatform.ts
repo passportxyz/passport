@@ -41,7 +41,7 @@ const structure: FileStructure = {
   Providers: {
     __tests__: {
       [`${providerName}.test.ts`]: `
-      describe("Hypercerts", () => {
+      describe("${providerName}", () => {
         it("should be true", () => {
           expect(true).toBe(true);
         });
@@ -50,9 +50,10 @@ const structure: FileStructure = {
     },
     [`${providerName}.ts`]: "",
   },
-  "Providers-config.ts": `import { PlatformSpec, PlatformGroupSpec } from "../types";
+  "Providers-config.ts": `import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+  import { ${providerName}Provider } from "./Providers";
 
-  export const ${providerName}PlatformDetails: PlatformSpec = {
+  export const PlatformDetails: PlatformSpec = {
     icon: "./assets/${providerName.toLowerCase()}StampIcon.svg",
     platform: "${providerName}",
     name: "${providerName}",
@@ -60,9 +61,11 @@ const structure: FileStructure = {
     connectMessage: "Connect Account",
   };
 
-  export const ${providerName}ProviderConfig: PlatformGroupSpec[] = [
+  export const ProviderConfig: PlatformGroupSpec[] = [
     { platformGroup: "Account Name", providers: [{ title: "${providerName}", name: "${providerName}" }] },
   ];
+
+  export const providers: Provider[] = [new ${providerName}Provider()];
 `,
   "index.ts": "",
 };
