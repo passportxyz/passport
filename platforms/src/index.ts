@@ -2,6 +2,7 @@
 import { Providers } from "./utils/providers";
 import { SimpleProvider } from "./utils/simpleProvider";
 import { ClearTextSimpleProvider } from "./utils/clearTextSimpleProvider";
+import { ClearTextTwitterProvider, ClearTextGithubOrgProvider } from "./ClearText";
 
 import platforms from "./platforms";
 
@@ -21,16 +22,10 @@ export const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
   new ClearTextSimpleProvider(),
+  new ClearTextTwitterProvider(),
+  new ClearTextGithubOrgProvider(),
   ...platformProviders,
 ]);
-
-/*
-  [
-  // TODO what to do with these?
-  new ClearText.ClearTextGithubOrgProvider(),
-  new ClearText.ClearTextTwitterProvider(),
-]);
-*/
 
 export * from "./types";
 export { Platform as PlatformClass } from "./utils/platform";

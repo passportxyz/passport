@@ -14,7 +14,7 @@
 
 # production
 /build
-public/platforms.json
+public/stampMetadata.json
 
 # misc
 .DS_Store

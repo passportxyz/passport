@@ -17,7 +17,6 @@ import * as Linkedin from "./Linkedin";
 import * as GTC from "./GTC";
 import * as GtcStaking from "./GtcStaking";
 import * as Google from "./Google";
-import * as ClearText from "./ClearText";
 import * as Brightid from "./Brightid";
 import * as Coinbase from "./Coinbase";
 import * as GuildXYZ from "./GuildXYZ";
@@ -25,8 +24,6 @@ import * as Hypercerts from "./Hypercerts";
 
 // Order of this array determines order in the Passport UI
 const platforms: Record<string, any> = {
-  // TODO should remove?
-  // ClearText,
   GTC,
   GtcStaking,
   Gitcoin,

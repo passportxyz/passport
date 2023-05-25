@@ -73,7 +73,7 @@ platforms.set("Twitter", {
 
 platforms.set("GitPOAP", {
   platform: new GitPOAP.GitPOAPPlatform(),
-  platFormGroupSpec: GitPOAP.POAPProviderConfig,
+  platFormGroupSpec: GitPOAP.ProviderConfig,
 });
 
 platforms.set("Ens", {
@@ -188,7 +188,7 @@ platforms.set("Coinbase", {
 if (process.env.NEXT_PUBLIC_FF_HYPERCERT_STAMP === "on") {
   platforms.set("Hypercerts", {
     platform: new Hypercerts.HypercertsPlatform(),
-    platFormGroupSpec: Hypercerts.HypercertsProviderConfig,
+    platFormGroupSpec: Hypercerts.ProviderConfig,
   });
 }
 

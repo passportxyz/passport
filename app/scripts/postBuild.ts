@@ -1,14 +1,21 @@
 import dotenv from "dotenv";
 import { writeFileSync } from "fs";
 import { join } from "path";
+import { keccak256, toUtf8Bytes } from "ethers";
 
 import { PlatformGroupSpec, platforms } from "@gitcoin/passport-platforms";
 
 dotenv.config();
 
+type StampData = {
+  name: string;
+  description: string;
+  hash: string;
+};
+
 type GroupData = {
   name: string;
-  stamps: string[];
+  stamps: StampData[];
 };
 
 type PlatformData = {
@@ -19,19 +26,27 @@ type PlatformData = {
   groups: GroupData[];
 };
 
+const skipPlatforms = ["ClearText"];
+
 const formatPlatformGroups = (providerConfig: PlatformGroupSpec[]) =>
   providerConfig.reduce(
     (groups: GroupData[], group: PlatformGroupSpec) => [
       ...groups,
       {
         name: group.platformGroup,
-        stamps: group.providers.map(({ name }) => name),
+        stamps: group.providers.map(({ name, title }) => ({
+          name,
+          description: title,
+          hash: keccak256(toUtf8Bytes(name)),
+        })),
       },
     ],
     [] as GroupData[]
   );
 
 const platformsData = Object.entries(platforms).reduce((data, [id, platform]) => {
+  if (skipPlatforms.includes(id)) return data;
+
   const { name, icon, description, connectMessage } = platform.PlatformDetails;
   const groups = formatPlatformGroups(platform.ProviderConfig);
 
@@ -48,7 +63,7 @@ const platformsData = Object.entries(platforms).reduce((data, [id, platform]) =>
   ];
 }, [] as PlatformData[]);
 
-const outPath = join(__dirname, "..", "public", "platforms.json");
+const outPath = join(__dirname, "..", "public", "stampMetadata.json");
 console.log(`Saving platform info to JSON file at ${outPath}`);
 
 writeFileSync(outPath, JSON.stringify(platformsData));
