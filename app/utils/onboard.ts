@@ -8,6 +8,7 @@ import walletLinkModule from "@web3-onboard/walletlink";
 const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL as string;
 
 // // Injected wallet opt1
+
 const injected = injectedModule();
 
 // Injected wallet opt2
@@ -125,7 +126,7 @@ if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
 
 // Exports onboard-core instance (https://github.com/blocknative/web3-onboard)
 export const initWeb3Onboard = init({
-  wallets: [injected, ledger, walletLink, walletConnect],
+  wallets: [injected, ledger, walletConnect],
   chains: chains,
   appMetadata: {
     name: "Passport",
