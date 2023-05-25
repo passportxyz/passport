@@ -225,6 +225,7 @@ export type PLATFORM_ID =
   | "GnosisSafe"
   | "Coinbase"
   | "GuildXYZ"
+  | "Hypercerts"
   | "Civic";
 
 export type PROVIDER_ID =
@@ -293,6 +294,7 @@ export type PROVIDER_ID =
   | "GuildMember"
   | "GuildAdmin"
   | "GuildPassportMember"
+  | "Hypercerts"
   | "CivicCaptchaPass"
   | "CivicUniquenessPass"
   | "CivicLivenessPass"

@@ -22,6 +22,7 @@ import {
   Snapshot,
   Twitter,
   ZkSync,
+  Hypercerts,
   Civic,
 } from "@gitcoin/passport-platforms";
 
@@ -58,6 +59,7 @@ export const PLATFORMS: PlatformSpec[] = [
   GnosisSafe.GnosisSafePlatformDetails,
   Coinbase.CoinbasePlatformDetails,
   GuildXYZ.GuildXYZPlatformDetails,
+  Hypercerts.HypercertsPlatformDetails,
   // Signer.SignerPlatformDetails,
   Civic.CivicPlatformDetails,
 ];

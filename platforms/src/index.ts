@@ -27,6 +27,7 @@ import * as ClearText from "./ClearText";
 import * as Brightid from "./Brightid";
 import * as Coinbase from "./Coinbase";
 import * as GuildXYZ from "./GuildXYZ";
+import * as Hypercerts from "./Hypercerts";
 import * as Civic from "./Civic";
 
 export {
@@ -53,6 +54,7 @@ export {
   Twitter,
   Coinbase,
   GuildXYZ,
+  Hypercerts,
   Civic,
 };
 
@@ -228,6 +230,7 @@ export const providers = new Providers([
   new GuildXYZ.GuildAdminProvider(),
   new GuildXYZ.GuildMemberProvider(),
   new GuildXYZ.GuildPassportMemberProvider(),
+  new Hypercerts.HypercertsProvider(),
   /////////////////////////////////////////////////////////////
   // Civic Passes: Keep in sync with https://docs.civic.com/integration-guides/civic-idv-services/available-networks
   // By default, excludes testnets. To include testnets, add `includeTestnets: true` to each provider.
