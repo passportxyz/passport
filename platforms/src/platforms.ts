@@ -27,6 +27,7 @@ type PlatformConfig = {
   PlatformDetails: PlatformSpec;
   ProviderConfig: PlatformGroupSpec[];
   providers: Provider[];
+  [key: string]: any;
 };
 
 // Order of this array determines order in the Passport UI
