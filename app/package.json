@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "scripts": {
     "start": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next dev -p 3000",
-    "export": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next build && next export && ts-node ./scripts/postBuild.ts",
-    "build": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next build && ts-node ./scripts/postBuild.ts",
+    "export": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next build && next export && ts-node ./scripts/postBuild.ts out",
+    "build": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next build && ts-node ./scripts/postBuild.ts public",
     "prod-start": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next start",
     "clean": "rimraf node_modules && rimraf .next",
     "lint": "next lint && prettier --check .",
