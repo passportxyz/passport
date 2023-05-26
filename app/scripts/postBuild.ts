@@ -1,9 +1,14 @@
 import dotenv from "dotenv";
 import { writeFileSync } from "fs";
 import { join } from "path";
-import { keccak256, toUtf8Bytes } from "ethers";
 
 import { PlatformGroupSpec, platforms } from "@gitcoin/passport-platforms";
+
+const args = process.argv.slice(2);
+const [outputDirectory] = args;
+if (!outputDirectory) {
+  throw new Error("No output directory specified");
+}
 
 dotenv.config();
 
@@ -70,7 +75,7 @@ const platformsData = Object.entries(platforms).reduce((data, [id, platform]) =>
   ];
 }, [] as PlatformData[]);
 
-const outPath = join(__dirname, "..", "public", "stampMetadata.json");
-console.log(`Saving platform info to JSON file at ${outPath}`);
+const outputPath = join(outputDirectory, "stampMetadata.json");
+console.log(`Saving platform info to JSON file at ${outputPath}`);
 
-writeFileSync(outPath, JSON.stringify(platformsData));
+writeFileSync(outputPath, JSON.stringify(platformsData));
