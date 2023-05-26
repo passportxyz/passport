@@ -1,6 +1,8 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { FacebookProvider } from "./Providers/facebook";
+import { FacebookProfilePictureProvider } from "./Providers/facebookProfilePicture";
 
-export const FacebookPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/facebookStampIcon.svg",
   platform: "Facebook",
   name: "Facebook",
@@ -8,7 +10,7 @@ export const FacebookPlatformDetails: PlatformSpec = {
   connectMessage: "Connect Account",
 };
 
-export const FacebookProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name",
     providers: [{ title: "Encrypted", name: "Facebook" }],
@@ -18,3 +20,5 @@ export const FacebookProviderConfig: PlatformGroupSpec[] = [
     providers: [{ title: "Profile Picture attached", name: "FacebookProfilePicture" }],
   },
 ];
+
+export const providers: Provider[] = [new FacebookProvider(), new FacebookProfilePictureProvider()];

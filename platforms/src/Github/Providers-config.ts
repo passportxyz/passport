@@ -1,6 +1,14 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import {
+  TenOrMoreGithubFollowers,
+  FiftyOrMoreGithubFollowers,
+  GithubProvider,
+  ForkedGithubRepoProvider,
+  StarredGithubRepoProvider,
+  FiveOrMoreGithubRepos,
+} from "./Providers";
 
-export const GithubPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/githubWhiteStampIcon.svg",
   platform: "Github",
   name: "Github",
@@ -8,7 +16,7 @@ export const GithubPlatformDetails: PlatformSpec = {
   connectMessage: "Connect Account",
 };
 
-export const GithubProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name",
     providers: [{ title: "Encrypted", name: "Github" }],
@@ -43,4 +51,13 @@ export const GithubProviderConfig: PlatformGroupSpec[] = [
       },
     ],
   },
+];
+
+export const providers: Provider[] = [
+  new GithubProvider(),
+  new FiveOrMoreGithubRepos(),
+  new TenOrMoreGithubFollowers(),
+  new FiftyOrMoreGithubFollowers(),
+  new ForkedGithubRepoProvider(),
+  new StarredGithubRepoProvider(),
 ];

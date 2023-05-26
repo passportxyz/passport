@@ -1,6 +1,7 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { GnosisSafeProvider } from "./Providers";
 
-export const GnosisSafePlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/gnosisSafeStampIcon.svg",
   platform: "GnosisSafe",
   name: "Gnosis Safe",
@@ -9,9 +10,11 @@ export const GnosisSafePlatformDetails: PlatformSpec = {
   isEVM: true,
 };
 
-export const GnosisSafeProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name",
     providers: [{ title: "Encrypted", name: "GnosisSafe" }],
   },
 ];
+
+export const providers: Provider[] = [new GnosisSafeProvider()];

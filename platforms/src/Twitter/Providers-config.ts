@@ -1,6 +1,14 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import TwitterAuthProvider from "./Providers/TwitterAuthProvider";
+import {
+  TwitterFollowerGT100Provider,
+  TwitterFollowerGT500Provider,
+  TwitterFollowerGTE1000Provider,
+  TwitterFollowerGT5000Provider,
+} from "./Providers/TwitterFollowerProvider";
+import { TwitterTweetGT10Provider } from "./Providers/TwitterTweetsProvider";
 
-export const TwitterPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/twitterStampIcon.svg",
   platform: "Twitter",
   name: "Twitter",
@@ -8,7 +16,7 @@ export const TwitterPlatformDetails: PlatformSpec = {
   connectMessage: "Connect Account",
 };
 
-export const TwitterProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name",
     providers: [{ title: "Encrypted", name: "Twitter" }],
@@ -35,4 +43,13 @@ export const TwitterProviderConfig: PlatformGroupSpec[] = [
       },
     ],
   },
+];
+
+export const providers: Provider[] = [
+  new TwitterAuthProvider(),
+  new TwitterTweetGT10Provider(),
+  new TwitterFollowerGT100Provider(),
+  new TwitterFollowerGT500Provider(),
+  new TwitterFollowerGTE1000Provider(),
+  new TwitterFollowerGT5000Provider(),
 ];

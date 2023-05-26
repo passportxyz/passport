@@ -1,6 +1,7 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { PohProvider } from "./Providers/poh";
 
-export const PohPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/pohStampIcon.svg",
   platform: "Poh",
   name: "Proof of Humanity",
@@ -9,9 +10,11 @@ export const PohPlatformDetails: PlatformSpec = {
   isEVM: true,
 };
 
-export const PohProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name",
     providers: [{ title: "Encrypted", name: "Poh" }],
   },
 ];
+
+export const providers: Provider[] = [new PohProvider()];

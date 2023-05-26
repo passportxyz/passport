@@ -1,6 +1,7 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { POAPProvider } from "./Providers/poap";
 
-export const POAPPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/poapStampIcon.svg",
   platform: "POAP",
   name: "POAP",
@@ -9,9 +10,11 @@ export const POAPPlatformDetails: PlatformSpec = {
   isEVM: true,
 };
 
-export const POAPProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name",
     providers: [{ title: "Connect an account to a POAP owned for over 15 days.", name: "POAP" }],
   },
 ];
+
+export const providers: Provider[] = [new POAPProvider()];

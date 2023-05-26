@@ -1,6 +1,7 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { CoinbaseProvider } from "./Providers/coinbase";
 
-export const CoinbasePlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/coinbaseStampIcon.svg",
   platform: "Coinbase",
   name: "Coinbase",
@@ -8,9 +9,11 @@ export const CoinbasePlatformDetails: PlatformSpec = {
   connectMessage: "Connect Account",
 };
 
-export const CoinbaseProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name",
     providers: [{ title: "Encrypted", name: "Coinbase" }],
   },
 ];
+
+export const providers: Provider[] = [new CoinbaseProvider()];

@@ -1,6 +1,7 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { GitcoinContributorStatisticsProvider, GitcoinGranteeStatisticsProvider } from "./Providers";
 
-export const GitcoinPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/gtcGrantsLightIcon.svg",
   platform: "Gitcoin",
   name: "Gitcoin",
@@ -9,7 +10,7 @@ export const GitcoinPlatformDetails: PlatformSpec = {
   isEVM: true,
 };
 
-export const GitcoinProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Contributed to...",
     providers: [
@@ -63,4 +64,94 @@ export const GitcoinProviderConfig: PlatformGroupSpec[] = [
       },
     ],
   },
+];
+
+export const providers: Provider[] = [
+  // --- GitcoinContributorStatisticsProvider ---
+  new GitcoinContributorStatisticsProvider({
+    threshold: 1,
+    receivingAttribute: "num_grants_contribute_to",
+    recordAttribute: "numGrantsContributeToGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 10,
+    receivingAttribute: "num_grants_contribute_to",
+    recordAttribute: "numGrantsContributeToGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 25,
+    receivingAttribute: "num_grants_contribute_to",
+    recordAttribute: "numGrantsContributeToGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 100,
+    receivingAttribute: "num_grants_contribute_to",
+    recordAttribute: "numGrantsContributeToGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 10,
+    receivingAttribute: "total_contribution_amount",
+    recordAttribute: "totalContributionAmountGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 100,
+    receivingAttribute: "total_contribution_amount",
+    recordAttribute: "totalContributionAmountGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 1000,
+    receivingAttribute: "total_contribution_amount",
+    recordAttribute: "totalContributionAmountGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 1,
+    receivingAttribute: "num_rounds_contribute_to",
+    recordAttribute: "numRoundsContributedToGte",
+  }),
+  new GitcoinContributorStatisticsProvider({
+    threshold: 1,
+    receivingAttribute: "num_gr14_contributions",
+    recordAttribute: "numGr14ContributionsGte",
+  }),
+  // --- GitcoinGranteeStatisticsProvider ---
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 1,
+    receivingAttribute: "num_owned_grants",
+    recordAttribute: "numOwnedGrants",
+  }),
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 10,
+    receivingAttribute: "num_grant_contributors",
+    recordAttribute: "numGrantContributors",
+  }),
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 25,
+    receivingAttribute: "num_grant_contributors",
+    recordAttribute: "numGrantContributors",
+  }),
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 100,
+    receivingAttribute: "num_grant_contributors",
+    recordAttribute: "numGrantContributors",
+  }),
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 100,
+    receivingAttribute: "total_contribution_amount",
+    recordAttribute: "totalContributionAmount",
+  }),
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 1000,
+    receivingAttribute: "total_contribution_amount",
+    recordAttribute: "totalContributionAmount",
+  }),
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 10000,
+    receivingAttribute: "total_contribution_amount",
+    recordAttribute: "totalContributionAmount",
+  }),
+  new GitcoinGranteeStatisticsProvider({
+    threshold: 1,
+    receivingAttribute: "num_grants_in_eco_and_cause_rounds",
+    recordAttribute: "numGrantsInEcoAndCauseRound",
+  }),
 ];
