@@ -5,6 +5,7 @@ import { ClearTextSimpleProvider } from "./utils/clearTextSimpleProvider";
 import { ClearTextTwitterProvider, ClearTextGithubOrgProvider } from "./ClearText";
 
 import platforms from "./platforms";
+import { ethers } from "ethers";
 
 // Check that all platforms have a ProviderConfig, PlatformDetails, and providers
 Object.entries(platforms).map(([platformName, platform]) => {
@@ -17,6 +18,15 @@ Object.entries(platforms).map(([platformName, platform]) => {
 const platformProviders = Object.values(platforms)
   .map((platform) => platform.providers)
   .flat();
+
+// Set hash on each provider spec
+Object.values(platforms).map(({ ProviderConfig }) => {
+  ProviderConfig.map(({ providers }) => {
+    providers.map((provider) => {
+      provider.hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(provider.name));
+    });
+  });
+});
 
 export const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
