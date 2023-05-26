@@ -1,6 +1,14 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import {
+  SelfStakingBronzeProvider,
+  SelfStakingGoldProvider,
+  SelfStakingSilverProvider,
+  CommunityStakingBronzeProvider,
+  CommunityStakingGoldProvider,
+  CommunityStakingSilverProvider,
+} from "./Providers";
 
-export const GTCStakingPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/gtcStakingLogoIcon.svg",
   platform: "GtcStaking",
   name: "GTC Staking",
@@ -9,7 +17,7 @@ export const GTCStakingPlatformDetails: PlatformSpec = {
   isEVM: true,
 };
 
-export const GTCStakingProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Self GTC Staking",
     providers: [
@@ -28,4 +36,11 @@ export const GTCStakingProviderConfig: PlatformGroupSpec[] = [
   },
 ];
 
-// TODO: allow adding additional content to the side panel: Stake your GTC on the new Identity Staking site.
+export const providers: Provider[] = [
+  new SelfStakingBronzeProvider(),
+  new SelfStakingSilverProvider(),
+  new SelfStakingGoldProvider(),
+  new CommunityStakingBronzeProvider(),
+  new CommunityStakingSilverProvider(),
+  new CommunityStakingGoldProvider(),
+];

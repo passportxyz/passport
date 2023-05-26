@@ -8,4 +8,4 @@ export {
   TwitterFollowerGT5000Provider,
 } from "./Providers/TwitterFollowerProvider";
 export { TwitterTweetGT10Provider } from "./Providers/TwitterTweetsProvider";
-export { TwitterPlatformDetails, TwitterProviderConfig } from "./Providers-config";
+export { PlatformDetails, ProviderConfig, providers } from "./Providers-config";

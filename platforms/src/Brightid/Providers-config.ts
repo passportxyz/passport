@@ -1,6 +1,7 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { BrightIdProvider } from "./Providers/brightid";
 
-export const BrightidPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/brightidStampIcon.svg",
   platform: "Brightid",
   name: "BrightID",
@@ -9,9 +10,11 @@ export const BrightidPlatformDetails: PlatformSpec = {
   isEVM: true,
 };
 
-export const BrightidProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name",
     providers: [{ title: "Encrypted", name: "Brightid" }],
   },
 ];
+
+export const providers: Provider[] = [new BrightIdProvider()];
