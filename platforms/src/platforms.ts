@@ -21,9 +21,16 @@ import * as Brightid from "./Brightid";
 import * as Coinbase from "./Coinbase";
 import * as GuildXYZ from "./GuildXYZ";
 import * as Hypercerts from "./Hypercerts";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
+
+type PlatformConfig = {
+  PlatformDetails: PlatformSpec;
+  ProviderConfig: PlatformGroupSpec[];
+  providers: Provider[];
+};
 
 // Order of this array determines order in the Passport UI
-const platforms: Record<string, any> = {
+const platforms: Record<string, PlatformConfig> = {
   GTC,
   GtcStaking,
   Gitcoin,
