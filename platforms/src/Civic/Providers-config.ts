@@ -1,6 +1,8 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { CivicPassType } from "./Providers/passType";
+import { CivicPassProvider } from "./Providers/civic";
 
-export const CivicPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/civicStampIcon.svg",
   platform: "Civic",
   name: "Civic",
@@ -9,7 +11,7 @@ export const CivicPlatformDetails: PlatformSpec = {
   isEVM: true,
 };
 
-export const CivicProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Civic Pass",
     providers: [
@@ -19,4 +21,27 @@ export const CivicProviderConfig: PlatformGroupSpec[] = [
       { title: "holds a Civic IDV Pass", name: "CivicIDVPass" },
     ],
   },
+];
+
+/////////////////////////////////////////////////////////////
+// Civic Passes: Keep in sync with https://docs.com/integration-guides/civic-idv-services/available-networks
+// By default, excludes testnets. To include testnets, add `includeTestnets: true` to each provider.
+////////////////////////////////////////////////////////////
+export const providers: Provider[] = [
+  new CivicPassProvider({
+    passTypes: [CivicPassType.CAPTCHA],
+    type: "CivicCaptchaPass",
+  }),
+  new CivicPassProvider({
+    passTypes: [CivicPassType.UNIQUENESS],
+    type: "CivicUniquenessPass",
+  }),
+  new CivicPassProvider({
+    passTypes: [CivicPassType.LIVENESS],
+    type: "CivicLivenessPass",
+  }),
+  new CivicPassProvider({
+    passTypes: [CivicPassType.IDV],
+    type: "CivicIDVPass",
+  }),
 ];

@@ -201,7 +201,7 @@ if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
 
 platforms.set("Civic", {
   platform: new Civic.CivicPlatform(),
-  platFormGroupSpec: Civic.CivicProviderConfig,
+  platFormGroupSpec: Civic.ProviderConfig,
 });
 
 export enum IsLoadingPassportState {
