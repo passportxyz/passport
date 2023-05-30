@@ -1,6 +1,7 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { GuildMemberProvider, GuildAdminProvider, GuildPassportMemberProvider } from "./Providers/guildXYZ";
 
-export const GuildXYZPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/guildXYZStampIcon.svg",
   platform: "GuildXYZ",
   name: "Guild Membership and Roles",
@@ -9,7 +10,7 @@ export const GuildXYZPlatformDetails: PlatformSpec = {
   isEVM: true,
 };
 
-export const GuildXYZProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Guild Member",
     providers: [
@@ -34,4 +35,8 @@ export const GuildXYZProviderConfig: PlatformGroupSpec[] = [
   },
 ];
 
-// TODO: allow adding additional content to the side panel: Stake your GTC on the new Identity Staking site.
+export const providers: Provider[] = [
+  new GuildAdminProvider(),
+  new GuildMemberProvider(),
+  new GuildPassportMemberProvider(),
+];

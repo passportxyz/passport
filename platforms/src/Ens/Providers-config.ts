@@ -1,6 +1,7 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { EnsProvider } from "./Providers";
 
-export const EnsPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/ensStampIcon.svg",
   platform: "Ens",
   name: "ENS",
@@ -9,9 +10,11 @@ export const EnsPlatformDetails: PlatformSpec = {
   isEVM: true,
 };
 
-export const EnsProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name",
     providers: [{ title: "Encrypted", name: "Ens" }],
   },
 ];
+
+export const providers: Provider[] = [new EnsProvider()];

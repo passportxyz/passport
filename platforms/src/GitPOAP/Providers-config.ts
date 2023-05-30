@@ -1,6 +1,7 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { GitPOAPProvider } from "./Providers/gitpoap";
 
-export const GitPOAPPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/gitPOAPStampIcon.svg",
   platform: "GitPOAP",
   name: "GitPOAP",
@@ -9,9 +10,11 @@ export const GitPOAPPlatformDetails: PlatformSpec = {
   isEVM: true,
 };
 
-export const GitPOAPProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name",
     providers: [{ title: "Encrypted", name: "GitPOAP" }],
   },
 ];
+
+export const providers: Provider[] = [new GitPOAPProvider()];

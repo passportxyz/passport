@@ -1,6 +1,7 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { LinkedinProvider } from "./Providers/linkedin";
 
-export const LinkedinPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/linkedinStampIcon.svg",
   platform: "Linkedin",
   name: "Linkedin",
@@ -8,9 +9,11 @@ export const LinkedinPlatformDetails: PlatformSpec = {
   connectMessage: "Connect Account",
 };
 
-export const LinkedinProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name",
     providers: [{ title: "Encrypted", name: "Linkedin" }],
   },
 ];
+
+export const providers: Provider[] = [new LinkedinProvider()];

@@ -1,6 +1,7 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { GoogleProvider } from "./Providers/google";
 
-export const GooglePlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/googleStampIcon.svg",
   platform: "Google",
   name: "Google",
@@ -8,6 +9,8 @@ export const GooglePlatformDetails: PlatformSpec = {
   connectMessage: "Connect Account",
 };
 
-export const GoogleProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   { platformGroup: "Account Name", providers: [{ title: "Google", name: "Google" }] },
 ];
+
+export const providers: Provider[] = [new GoogleProvider()];

@@ -1,65 +1,7 @@
-import {
-  PlatformSpec,
-  Brightid,
-  Coinbase,
-  Discord,
-  Ens,
-  ETH,
-  Facebook,
-  Gitcoin,
-  Github,
-  GitPOAP,
-  GnosisSafe,
-  Google,
-  GTC,
-  GtcStaking,
-  GuildXYZ,
-  Lens,
-  Linkedin,
-  NFT,
-  POAP,
-  Poh,
-  Snapshot,
-  Twitter,
-  ZkSync,
-  Hypercerts,
-  Civic,
-} from "@gitcoin/passport-platforms";
+import { PlatformSpec, platforms } from "@gitcoin/passport-platforms";
 
 export const getPlatformSpec = (platformName: string): PlatformSpec | undefined => {
-  let platformspec: PlatformSpec | undefined = undefined;
-  PLATFORMS.forEach((platform) => {
-    if (platform.platform === platformName) {
-      platformspec = platform;
-    }
-  });
-  return platformspec;
+  return platforms[platformName]?.PlatformDetails;
 };
 
-export const PLATFORMS: PlatformSpec[] = [
-  GTC.GTCPlatformDetails,
-  GtcStaking.GTCStakingPlatformDetails,
-  Gitcoin.GitcoinPlatformDetails,
-  Twitter.TwitterPlatformDetails,
-  Discord.DiscordPlatformDetails,
-  Google.GooglePlatformDetails,
-  Github.GithubPlatformDetails,
-  Facebook.FacebookPlatformDetails,
-  Linkedin.LinkedinPlatformDetails,
-  Ens.EnsPlatformDetails,
-  POAP.POAPPlatformDetails,
-  Brightid.BrightidPlatformDetails,
-  Poh.PohPlatformDetails,
-  ETH.ETHPlatformDetails,
-  Snapshot.SnapshotPlatformDetails,
-  GitPOAP.GitPOAPPlatformDetails,
-  NFT.NFTPlatformDetails,
-  ZkSync.ZkSyncPlatformDetails,
-  Lens.LensPlatformDetails,
-  GnosisSafe.GnosisSafePlatformDetails,
-  Coinbase.CoinbasePlatformDetails,
-  GuildXYZ.GuildXYZPlatformDetails,
-  Hypercerts.HypercertsPlatformDetails,
-  // Signer.SignerPlatformDetails,
-  Civic.CivicPlatformDetails,
-];
+export const PLATFORMS: PlatformSpec[] = Object.values(platforms).map((platform) => platform.PlatformDetails);
