@@ -7,7 +7,7 @@ export class ZkSyncPlatform extends Platform {
 
   banner = {
     heading:
-      "Currently, only  We look for a transaction with a finalized status and an op.from field that matches the your address.",
+      'We currently only recognize finalized "TRANSFER" type transactions on ZkSync 1.0. This means that other transactions like MintNFT, Swap etc aren\'t recognized.',
   };
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
