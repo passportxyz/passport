@@ -4,7 +4,7 @@ import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
-import { zkSyncApiEnpoint, ZkSyncProvider } from "../Providers/zkSync";
+import { zkSyncApiEndpoint, ZkSyncProvider } from "../Providers/zkSync";
 
 jest.mock("axios");
 
@@ -129,7 +129,7 @@ describe("Verification succeeds", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEnpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
+    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
       params: {
         from: "latest",
         limit: 100,
@@ -165,7 +165,7 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEnpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
+    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
       params: {
         from: "latest",
         limit: 100,
@@ -197,7 +197,7 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEnpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
+    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
       params: {
         from: "latest",
         limit: 100,
@@ -230,7 +230,7 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEnpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
+    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
       params: {
         from: "latest",
         limit: 100,
@@ -263,7 +263,7 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEnpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
+    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
       params: {
         from: "latest",
         limit: 100,
@@ -289,7 +289,7 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEnpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
+    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
       params: {
         from: "latest",
         limit: 100,
