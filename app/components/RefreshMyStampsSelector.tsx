@@ -24,35 +24,35 @@ export function RefreshMyStampsSelector({
       {validPlatformGroups.map((group, i) => {
         return (
           <div key={i}>
-            <p className="mt-4 text-sm text-color-4">{group.name}</p>
+            <p className="my-4 text-sm text-color-4">{group.name}</p>
             <div>
-              <ul className="marker:leading-1 marker:text-3xl ">
-                {group.providers.map((provider, i) => {
-                  return (
-                    <div key={`${provider.title}${i}`} className="mt-5 flex flex-row items-center justify-between">
-                      <li key={`${provider.title}${i}`} data-testid={`indicator-${provider.name}`}>
-                        <div className="relative mr-10 text-sm text-color-1">{provider.title}</div>
-                      </li>
-                      <div className="align-right">
-                        <Checkbox
-                          key={`${provider.title}${i}`}
-                          data-testid={`checkbox-${provider.name}`}
-                          disabled={!platformChecked}
-                          checked={selectedProviders?.includes(provider.name)}
-                          onChange={(checked: boolean) => {
-                            // set the selected items by concatenating or filtering by providerId
-                            setSelectedProviders(
-                              checked
-                                ? (selectedProviders || []).concat(provider.name)
-                                : (selectedProviders || []).filter((providerId) => providerId !== provider.name)
-                            );
-                          }}
-                        />
-                      </div>
+              {group.providers.map((provider, i) => {
+                return (
+                  <div
+                    key={`${provider.title}${i}`}
+                    data-testid={`indicator-${provider.name}`}
+                    className="mb-8 flex flex-row items-center justify-between"
+                  >
+                    <div className="mr-10 text-color-1">{provider.title}</div>
+                    <div className="align-right">
+                      <Checkbox
+                        key={`${provider.title}${i}`}
+                        data-testid={`checkbox-${provider.name}`}
+                        disabled={!platformChecked}
+                        checked={selectedProviders?.includes(provider.name)}
+                        onChange={(checked: boolean) => {
+                          // set the selected items by concatenating or filtering by providerId
+                          setSelectedProviders(
+                            checked
+                              ? (selectedProviders || []).concat(provider.name)
+                              : (selectedProviders || []).filter((providerId) => providerId !== provider.name)
+                          );
+                        }}
+                      />
                     </div>
-                  );
-                })}
-              </ul>
+                  </div>
+                );
+              })}
             </div>
           </div>
         );

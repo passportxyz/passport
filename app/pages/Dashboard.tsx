@@ -11,6 +11,7 @@ import { CardList } from "../components/CardList";
 import { JsonOutputModal } from "../components/JsonOutputModal";
 import { Footer } from "../components/Footer";
 import Header from "../components/Header";
+import BodyWrapper from "../components/BodyWrapper";
 import PageWidthGrid from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import Tooltip from "../components/Tooltip";
@@ -206,7 +207,7 @@ export default function Dashboard() {
 
   const subheader = useMemo(
     () => (
-      <PageWidthGrid nested={true} className="my-4">
+      <PageWidthGrid className="my-4 min-h-[64px]">
         <div className="col-span-3 flex items-center justify-items-center self-center lg:col-span-4">
           <div className="flex text-2xl">
             <span className="font-heading">My {filterName && `${filterName} `}Stamps</span>
@@ -253,7 +254,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          <div className="ml-4 flex flex-col place-items-center gap-4 md:flex-row">
+          <div className="ml-4 flex flex-col place-items-center gap-4 self-center md:flex-row">
             {isOnChainSyncEnabled &&
               (wallet?.chains[0].id === sepoliaChainId || wallet?.chains[0].id === hardhatChainId) && (
                 <SyncToChainButton />
@@ -293,16 +294,15 @@ export default function Dashboard() {
       {modals}
       <HeaderContentFooterGrid>
         <Header subheader={subheader} />
-        <PageWidthGrid className="mt-8">
+        <BodyWrapper className="mt-4 md:mt-6">
           <CardList
-            cardClassName="col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-3"
             isLoading={
               isLoadingPassport == IsLoadingPassportState.Loading ||
               isLoadingPassport == IsLoadingPassportState.LoadingFromCeramic ||
               isLoadingPassport == IsLoadingPassportState.FailedToConnect
             }
           />
-        </PageWidthGrid>
+        </BodyWrapper>
         {/* This footer contains dark colored text and dark images */}
         <Footer lightMode={true} />
       </HeaderContentFooterGrid>

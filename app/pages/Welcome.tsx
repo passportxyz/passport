@@ -10,7 +10,7 @@ import { PlatformProps } from "../components/GenericPlatform";
 
 // --Components
 import MinimalHeader from "../components/MinimalHeader";
-import PageWidthGrid, { PAGE_PADDING } from "../components/PageWidthGrid";
+import { PAGE_PADDING } from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import PageRoot from "../components/PageRoot";
 import { WelcomeBack } from "../components/WelcomeBack";
@@ -27,6 +27,7 @@ import LoadingScreen from "../components/LoadingScreen";
 
 // --- Utils
 import { fetchPossibleEVMStamps, ValidatedPlatform } from "../signer/utils";
+import BodyWrapper from "../components/BodyWrapper";
 
 const MIN_DELAY = 50;
 const MAX_DELAY = 800;
@@ -141,8 +142,8 @@ export default function Welcome() {
         <div className={`${PAGE_PADDING} bg-background`}>
           <MinimalHeader className={`border-b border-accent-2`} />
         </div>
-        <PageWidthGrid>
-          <div className="col-span-4 mb-36 flex flex-col items-center text-center md:col-start-2 md:mb-0 lg:col-start-3 xl:col-span-6 xl:col-start-4">
+        <BodyWrapper className="flex justify-center">
+          <div className="max-w-[464px]">
             {isLoadingPassport === IsLoadingPassportState.Idle ||
             isLoadingPassport === IsLoadingPassportState.FailedToConnect ? (
               passport && passport.stamps.length > 0 ? (
@@ -165,7 +166,7 @@ export default function Welcome() {
               <LoadingScreen />
             )}
           </div>
-        </PageWidthGrid>
+        </BodyWrapper>
       </HeaderContentFooterGrid>
       <RefreshMyStampsModal
         steps={currentSteps}

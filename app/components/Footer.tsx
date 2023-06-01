@@ -1,6 +1,6 @@
 // --- React Methods
 import React from "react";
-import PageWidthGrid from "../components/PageWidthGrid";
+import PageWidthGrid, { PAGE_PADDING } from "../components/PageWidthGrid";
 
 export type FooterProps = {
   lightMode?: boolean;
@@ -8,7 +8,7 @@ export type FooterProps = {
 
 export const Footer = ({ lightMode }: FooterProps): JSX.Element => {
   return (
-    <PageWidthGrid className="grid-flow-dense py-8 font-alt text-color-1 lg:flex" unconstrainedWidth>
+    <PageWidthGrid className={`grid-flow-dense py-8 font-alt text-color-1 lg:flex ${PAGE_PADDING}`}>
       <div className="col-span-3 grow md:col-span-4">
         <span className="text-color-3">Available on </span>
         <a href="https://ceramic.network/" target="_blank" rel="noopener noreferrer" className="hover:underline">
