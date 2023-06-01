@@ -128,6 +128,7 @@ export class ZkSyncEraProvider implements Provider {
     const address = (await getAddress(payload)).toLowerCase();
 
     try {
+      console.log("address", address);
       const requestResponse = await axios.get(`${zkSyncEraApiEndpoint}transactions`, {
         params: {
           limit: 100,
@@ -136,27 +137,23 @@ export class ZkSyncEraProvider implements Provider {
         },
       });
 
+      console.log("response data", requestResponse.data);
+
       if (requestResponse.status == 200) {
         const zkSyncResponse = requestResponse.data;
 
-        if (zkSyncResponse.status === "success") {
-          // We consider the verification valid if this account has at least one verified
-          // transaction initiated by this account
-          for (let i = 0; i < zkSyncResponse.list.length; i++) {
-            const t = zkSyncResponse.list[i];
-            if (t.status === "verified") {
-              if (t.initiatorAddress === address) {
-                valid = true;
-                break;
-              }
-            }
+        // We consider the verification valid if this account has at least one verified
+        // transaction initiated by this account
+        for (let i = 0; i < zkSyncResponse.list.length; i++) {
+          const t = zkSyncResponse.list[i];
+          if (t.status === "verified" && t.initiatorAddress === address) {
+            valid = true;
+            break;
           }
+        }
 
-          if (!valid) {
-            error = ["Unable to find a verified transaction from the given address"];
-          }
-        } else {
-          error = [`ZKSync API Error '${zkSyncResponse.status}'. Details: '${zkSyncResponse.error.toString()}'.`];
+        if (!valid) {
+          error = ["Unable to find a verified transaction from the given address"];
         }
       } else {
         error = [`HTTP Error '${requestResponse.status}'. Details: '${requestResponse.statusText}'.`];
