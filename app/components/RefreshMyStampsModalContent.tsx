@@ -163,11 +163,11 @@ export const RefreshMyStampsModalContent = ({
   }, [validPlatforms]);
 
   return (
-    <div className="flex grow flex-col">
-      <div className="grow">
+    <div className="flex grow flex-col items-center pb-6">
+      <div className="w-full grow px-4 md:px-8">
         {validPlatforms.length > 0 ? (
           <div className="flex flex-col text-white">
-            <div className="mb-6 font-heading text-2xl">Stamps Found</div>
+            <div className="my-4 font-heading text-2xl md:my-6">Stamps Found</div>
             <div>
               {" "}
               {/* TODO: update comments */}
@@ -192,7 +192,7 @@ export const RefreshMyStampsModalContent = ({
                 </p>
               </div>
             )}
-            <div className="mt-16 grid grid-cols-2 items-center justify-center gap-6">
+            <div className="mt-8 grid grid-cols-2 items-center justify-center gap-6">
               <Button variant="secondary" onClick={() => navigate("/dashboard")}>
                 Cancel
               </Button>
@@ -234,7 +234,7 @@ export const RefreshMyStampsModalContent = ({
           </div>
         )}
       </div>
-      <div className="mt-6 mb-2 flex text-color-1">
+      <div className="mt-8 mb-2 flex text-color-1">
         <Checkbox
           data-testid="checkbox-onboard-hide"
           id="checkbox-onboard-hide"
