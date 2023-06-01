@@ -40,33 +40,6 @@ datadogLogs.init({
 });
 
 const App: NextPage = () => {
-  // pull any search params
-  const queryString = new URLSearchParams(window?.location?.search);
-  // Twitter oauth will attach code & state in oauth procedure
-  const queryError = queryString.get("error");
-  const queryCode = queryString.get("code");
-  const queryState = queryString.get("state");
-
-  // We expect for a queryState like" 'twitter-asdfgh', 'google-asdfghjk'
-  const providerPath = queryState?.split("-");
-  const provider = providerPath ? providerPath[0] : undefined;
-
-  // if Twitter oauth then submit message to other windows and close self
-  if ((queryError || queryCode) && queryState && provider) {
-    // shared message channel between windows (on the same domain)
-    const channel = new BroadcastChannel(`${provider}_oauth_channel`);
-
-    // only continue with the process if a code is returned
-    if (queryCode) {
-      channel.postMessage({ target: provider, data: { code: queryCode, state: queryState } });
-    }
-
-    // always close the redirected window
-    window.close();
-
-    return <div></div>;
-  }
-
   return (
     <div>
       <Router>
