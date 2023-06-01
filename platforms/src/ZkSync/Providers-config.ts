@@ -1,5 +1,6 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { ZkSyncProvider, ZkSyncEraProvider } from "./Providers/zkSync";
+import { ZkSyncProvider } from "./Providers/zkSync";
+import { ZkSyncEraProvider } from "./Providers/zkSyncEra";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/zksyncStampIcon.svg",
