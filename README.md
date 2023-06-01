@@ -63,6 +63,8 @@ cp ./schemas/.env-example.env ./schemas/.env
 yarn start
 ```
 
+4. Spin up the [Scorer API](https://github.com/gitcoinco/passport-scorer/tree/main/api). Further information is listed below.
+
 ## Passport Data
 
 A passport has two sources of data. The primary source is a postgres database that is hosted by gitcoin. To run the passport application locally you will need spin up the [Scorer API](https://github.com/gitcoinco/passport-scorer/tree/main/api). All relevant instructions to run the scorer api can be found [here](https://github.com/gitcoinco/passport-scorer/blob/main/SETUP.md). The sample environment variables in the .env-example.env files are configured to make requests to the scorer api running locally. Once the scorer api is running locally, you should have a reliable data source for development.
