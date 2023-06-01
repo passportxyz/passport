@@ -142,31 +142,29 @@ export default function Welcome() {
         <div className={`${PAGE_PADDING} bg-background`}>
           <MinimalHeader className={`border-b border-accent-2`} />
         </div>
-        <BodyWrapper>
-          <div className="grid grid-cols-[1fr_minmax(auto,464px)_1fr]">
-            <div className="col-start-2">
-              {isLoadingPassport === IsLoadingPassportState.Idle ||
-              isLoadingPassport === IsLoadingPassportState.FailedToConnect ? (
-                passport && passport.stamps.length > 0 ? (
-                  <WelcomeBack
-                    handleFetchPossibleEVMStamps={handleFetchPossibleEVMStamps}
-                    onOpen={onOpen}
-                    resetStampsAndProgressState={resetStampsAndProgressState}
-                  />
-                ) : (
-                  <InitialWelcome
-                    onBoardFinished={async () => {
-                      if (address) {
-                        handleFetchPossibleEVMStamps(address, allPlatforms);
-                        onOpen();
-                      }
-                    }}
-                  />
-                )
+        <BodyWrapper className="flex justify-center">
+          <div className="max-w-[464px]">
+            {isLoadingPassport === IsLoadingPassportState.Idle ||
+            isLoadingPassport === IsLoadingPassportState.FailedToConnect ? (
+              passport && passport.stamps.length > 0 ? (
+                <WelcomeBack
+                  handleFetchPossibleEVMStamps={handleFetchPossibleEVMStamps}
+                  onOpen={onOpen}
+                  resetStampsAndProgressState={resetStampsAndProgressState}
+                />
               ) : (
-                <LoadingScreen />
-              )}
-            </div>
+                <InitialWelcome
+                  onBoardFinished={async () => {
+                    if (address) {
+                      handleFetchPossibleEVMStamps(address, allPlatforms);
+                      onOpen();
+                    }
+                  }}
+                />
+              )
+            ) : (
+              <LoadingScreen />
+            )}
           </div>
         </BodyWrapper>
       </HeaderContentFooterGrid>
