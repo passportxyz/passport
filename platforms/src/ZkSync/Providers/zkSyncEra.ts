@@ -12,14 +12,14 @@ import { getAddress } from "../../utils/signer";
 export const zkSyncEraApiEndpoint = "https://zksync2-mainnet-explorer.zksync.io/";
 
 type ZKSyncEraTransaction = {
-    initiatorAddress: string;
-    status: string;
-  };
+  initiatorAddress: string;
+  status: string;
+};
 
 type ZkSyncEraResponse = {
-    list: ZKSyncEraTransaction[];
-    total: number;
-  };
+  list: ZKSyncEraTransaction[];
+  total: number;
+};
 
 // Export a Provider to verify ZkSync Era Transactions
 export class ZkSyncEraProvider implements Provider {
