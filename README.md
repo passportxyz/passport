@@ -63,7 +63,7 @@ cp ./schemas/.env-example.env ./schemas/.env
 yarn start
 ```
 
-4. Spin up the [Scorer API](https://github.com/gitcoinco/passport-scorer/tree/main/api). Further information is listed below.
+4. Run the [Passport Scorer API](https://github.com/gitcoinco/passport-scorer/tree/main/api) locally. Set up instructions are [here](https://github.com/gitcoinco/passport-scorer/blob/main/SETUP.md) 
 
 ## Passport Data
 
