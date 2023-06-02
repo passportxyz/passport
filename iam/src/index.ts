@@ -46,6 +46,7 @@ import {
 
 // All provider exports from platforms
 import { providers } from "@gitcoin/passport-platforms";
+import { clearCacheSession } from "@gitcoin/passport-platforms";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -356,6 +357,8 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
                 responses.push(response);
               } catch (error: unknown) {
                 responses.push((await error) as CredentialResponseBody);
+              } finally {
+                if (payload.proofs?.cacheToken) clearCacheSession(payload.proofs.cacheToken);
               }
             }
 
@@ -369,6 +372,9 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
               })
               .catch((error: CredentialResponseBody) => {
                 return void errorRes(res, error.error, error.code);
+              })
+              .finally(() => {
+                if (payload.proofs?.cacheToken) clearCacheSession(payload.proofs.cacheToken);
               });
           }
         }

@@ -1,4 +1,4 @@
-import { PlatformOptions } from "../types";
+import { PlatformOptions, AuthInfo } from "../types";
 import { Platform } from "../utils/platform";
 export class CoinbasePlatform extends Platform {
   platformId = "Coinbase";
@@ -12,10 +12,8 @@ export class CoinbasePlatform extends Platform {
     this.redirectUri = options.redirectUri as string;
   }
 
-  async getOAuthUrl(state: string): Promise<string> {
-    const coinbasebUrl = await Promise.resolve(
-      `https://www.coinbase.com/oauth/authorize?response_type=code&client_id=${this.clientId}&redirect_uri=${this.redirectUri}&state=${state}`
-    );
-    return coinbasebUrl;
+  async getAuthInfo(state: string): Promise<AuthInfo> {
+    const authUrl = `https://www.coinbase.com/oauth/authorize?response_type=code&client_id=${this.clientId}&redirect_uri=${this.redirectUri}&state=${state}`;
+    return { authUrl };
   }
 }

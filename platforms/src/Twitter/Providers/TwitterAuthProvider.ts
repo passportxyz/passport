@@ -2,7 +2,7 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
-import { deleteClient, getClient, requestFindMyUser, TwitterFindMyUserResponse } from "../procedures/twitterOauth";
+import { getClient, requestFindMyUser, TwitterFindMyUserResponse } from "../procedures/twitterOauth";
 import type { Provider, ProviderOptions } from "../../types";
 
 // Export a Twitter Provider to carry out OAuth and return a record object
@@ -24,7 +24,7 @@ export default class TwitterProvider implements Provider {
 
     try {
       if (payload.proofs) {
-        verifiedPayload = await verifyTwitter(payload.proofs.sessionKey, payload.proofs.code);
+        verifiedPayload = await verifyTwitter(payload.proofs.cacheToken, payload.proofs.code);
       }
     } catch (e) {
       return { valid: false };
@@ -43,13 +43,6 @@ export default class TwitterProvider implements Provider {
 
 // Perform verification on twitter access token
 async function verifyTwitter(sessionKey: string, code: string): Promise<TwitterFindMyUserResponse> {
-  const client = getClient(sessionKey);
-  let myUser;
-  if (client) {
-    myUser = await requestFindMyUser(client, code);
-    deleteClient(sessionKey);
-    return myUser;
-  }
-
-  throw "Unable to determin twitter user";
+  const client = await getClient(sessionKey);
+  return await requestFindMyUser(client, code);
 }

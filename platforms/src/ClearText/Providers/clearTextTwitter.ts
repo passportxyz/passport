@@ -2,12 +2,7 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
-import {
-  deleteClient,
-  getClient,
-  requestFindMyUser,
-  TwitterFindMyUserResponse,
-} from "../../Twitter/procedures/twitterOauth";
+import { getClient, requestFindMyUser, TwitterFindMyUserResponse } from "../../Twitter/procedures/twitterOauth";
 import type { Provider, ProviderOptions } from "../../types";
 // import { verifyTwitter } from "../providers/twitter";
 
@@ -48,11 +43,9 @@ export class ClearTextTwitterProvider implements Provider {
 }
 
 async function verifyUserTwitter(sessionKey: string, code: string): Promise<TwitterFindMyUserResponse> {
-  const client = getClient(sessionKey);
+  const client = await getClient(sessionKey);
 
   const myUser = await requestFindMyUser(client, code);
-
-  deleteClient(sessionKey);
 
   return myUser;
 }

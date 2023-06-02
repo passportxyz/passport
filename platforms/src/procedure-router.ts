@@ -5,6 +5,7 @@ import * as twitterOAuth from "./Twitter/procedures/twitterOauth";
 import { triggerBrightidSponsorship, verifyBrightidContextId } from "./Brightid/procedures/brightid";
 import path from "path";
 import * as idenaSignIn from "./Idena/procedures/idenaSignIn";
+import { initCacheSession } from "./utils/cache";
 
 export const router = Router();
 
@@ -29,15 +30,15 @@ export type IdenaAuthenticateRequestBody = {
 router.post("/twitter/generateAuthUrl", (req: Request, res: Response): void => {
   const { callback } = req.body as GenerateTwitterAuthUrlRequestBody;
   if (callback) {
-    const state = twitterOAuth.getSessionKey();
-    const client = twitterOAuth.initClient(callback, state);
+    const cacheToken = initCacheSession();
+    twitterOAuth.initClient(callback, cacheToken).then((client) => {
+      const data = {
+        authUrl: twitterOAuth.generateAuthURL(client, cacheToken),
+        cacheToken,
+      };
 
-    const data = {
-      state,
-      authUrl: twitterOAuth.generateAuthURL(client, state),
-    };
-
-    res.status(200).send(data);
+      res.status(200).send(data);
+    });
   } else {
     res.status(400);
   }

@@ -8,11 +8,10 @@ import {
 
 import { RequestPayload } from "@gitcoin/passport-types";
 import { auth } from "twitter-api-sdk";
-import { deleteClient, getClient, getFollowerCount, TwitterFollowerResponse } from "../procedures/twitterOauth";
+import { getClient, getFollowerCount, TwitterFollowerResponse } from "../procedures/twitterOauth";
 
 jest.mock("../procedures/twitterOauth", () => ({
   getClient: jest.fn(),
-  deleteClient: jest.fn(),
   getFollowerCount: jest.fn(),
 }));
 
@@ -45,7 +44,6 @@ describe("Attempt verification", function () {
 
     expect(getClient).toBeCalledWith(sessionKey);
     expect(getFollowerCount).toBeCalledWith(MOCK_TWITTER_OAUTH_CLIENT, code);
-    expect(deleteClient).toBeCalledWith(sessionKey);
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {

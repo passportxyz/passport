@@ -51,6 +51,8 @@ export type AccessTokenResult = {
 
 export type ProviderPayload = Record<string, unknown>;
 
+export type CacheToken = string;
+
 export type AppContext = {
   state: string;
   window: {
@@ -65,6 +67,11 @@ export type AppContext = {
   waitForRedirect(timeout?: number): Promise<ProviderPayload>;
 };
 
+export type AuthInfo = {
+  authUrl: string;
+  cacheToken?: CacheToken;
+};
+
 export interface Platform {
   platformId: string;
   path?: string;
@@ -77,8 +84,8 @@ export interface Platform {
     };
   };
   isEVM?: boolean;
-  // TODO: shall we drop the getOAuthUrl and getProviderProof, given that we have getProviderPayload
-  getOAuthUrl?(state: string): Promise<string>;
+  getAuthInfo?(state: string): Promise<AuthInfo>;
+  // TODO: shall we drop the getProviderProof, given that we have getProviderPayload
   getProviderProof?(): Promise<AccessTokenResult>;
   getProviderPayload(appContext: AppContext): Promise<ProviderPayload>;
 }

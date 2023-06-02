@@ -5,16 +5,10 @@ import { ClearTextTwitterProvider } from "../Providers/clearTextTwitter";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 import { auth } from "twitter-api-sdk";
-import {
-  deleteClient,
-  getClient,
-  requestFindMyUser,
-  TwitterFindMyUserResponse,
-} from "../../Twitter/procedures/twitterOauth";
+import { getClient, requestFindMyUser, TwitterFindMyUserResponse } from "../../Twitter/procedures/twitterOauth";
 
 jest.mock("../../Twitter/procedures/twitterOauth", () => ({
   getClient: jest.fn(),
-  deleteClient: jest.fn(),
   requestFindMyUser: jest.fn(),
 }));
 
@@ -49,7 +43,6 @@ describe("Attempt verification", function () {
 
     expect(getClient).toBeCalledWith(sessionKey);
     expect(requestFindMyUser).toBeCalledWith(MOCK_TWITTER_OAUTH_CLIENT, code);
-    expect(deleteClient).toBeCalledWith(sessionKey);
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {

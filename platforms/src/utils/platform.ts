@@ -1,4 +1,4 @@
-import { AppContext, ProviderPayload } from "../types";
+import { AppContext, AuthInfo, ProviderPayload } from "../types";
 
 export type PlatformOptions = {
   platformId: string;
@@ -27,7 +27,10 @@ export class Platform {
   isEVM?: boolean;
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-    const authUrl: string = await this.getOAuthUrl(appContext.state);
+    console.log("!!!!!");
+    const { authUrl, cacheToken } = await this.getAuthInfo(appContext.state);
+    console.log("authUrl", authUrl);
+    console.log("cacheToken", cacheToken);
     const width = 600;
     const height = 800;
     const left = appContext.screen.width / 2 - width / 2;
@@ -40,16 +43,19 @@ export class Platform {
       `toolbar=no, location=no, directories=no, status=no, menubar=no, resizable=no, copyhistory=no, width=${width}, height=${height}, top=${top}, left=${left}`
     );
 
+    console.log("about to wait for redirect");
     return appContext.waitForRedirect().then((data) => {
+      console.log("then");
       return {
         code: data.code,
         sessionKey: data.state,
         signature: data.signature,
+        cacheToken,
       };
     });
   }
 
-  getOAuthUrl(state?: string): Promise<string> {
+  getAuthInfo(state?: string): Promise<AuthInfo> {
     throw new Error("Method not implemented.");
   }
 }

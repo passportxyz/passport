@@ -3,11 +3,10 @@ import { TwitterTweetGT10Provider } from "../Providers/TwitterTweetsProvider";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 import { auth } from "twitter-api-sdk";
-import { deleteClient, getClient, getTweetCount, TwitterTweetResponse } from "../procedures/twitterOauth";
+import { getClient, getTweetCount, TwitterTweetResponse } from "../procedures/twitterOauth";
 
 jest.mock("../procedures/twitterOauth", () => ({
   getClient: jest.fn(),
-  deleteClient: jest.fn(),
   getTweetCount: jest.fn(),
 }));
 
@@ -40,7 +39,6 @@ describe("Attempt verification", function () {
 
     expect(getClient).toBeCalledWith(sessionKey);
     expect(getTweetCount).toBeCalledWith(MOCK_TWITTER_OAUTH_CLIENT, code);
-    expect(deleteClient).toBeCalledWith(sessionKey);
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {

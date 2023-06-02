@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { AccessTokenResult, AppContext, ProviderPayload, PlatformOptions } from "../types";
+import { PlatformOptions, AuthInfo } from "../types";
 import { Platform } from "../utils/platform";
 
 export class DiscordPlatform extends Platform {
@@ -15,8 +15,8 @@ export class DiscordPlatform extends Platform {
     this.redirectUri = options.redirectUri as string;
   }
 
-  async getOAuthUrl(state: string): Promise<string> {
+  async getAuthInfo(state: string): Promise<AuthInfo> {
     const authUrl = `https://discord.com/api/oauth2/authorize?response_type=code&scope=identify&client_id=${process.env.NEXT_PUBLIC_PASSPORT_DISCORD_CLIENT_ID}&state=${state}&redirect_uri=${process.env.NEXT_PUBLIC_PASSPORT_DISCORD_CALLBACK}`;
-    return authUrl;
+    return { authUrl };
   }
 }

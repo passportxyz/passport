@@ -2,14 +2,13 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
-import { deleteClient, getClient, getTweetCount, TwitterTweetResponse } from "../procedures/twitterOauth";
+import { getClient, getTweetCount, TwitterTweetResponse } from "../procedures/twitterOauth";
 import type { Provider, ProviderOptions } from "../../types";
 
 // Perform verification on twitter access token and retrieve follower count
 async function verifyTwitterTweets(sessionKey: string, code: string): Promise<TwitterTweetResponse> {
-  const client = getClient(sessionKey);
+  const client = await getClient(sessionKey);
   const data = await getTweetCount(client, code);
-  deleteClient(sessionKey);
   return data;
 }
 
