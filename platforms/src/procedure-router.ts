@@ -87,7 +87,7 @@ router.post("/idena/start-session", (req: Request, res: Response): void => {
     });
     return;
   }
-  const nonce = idenaSignIn.startIdenaSession(token, address);
+  const nonce = idenaSignIn.loadIdenaSession(token, address);
   if (!nonce) {
     res.status(200).send({
       error: "something went wrong while starting new session",

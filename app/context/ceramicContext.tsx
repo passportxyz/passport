@@ -203,6 +203,7 @@ if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
   });
 }
 
+<<<<<<< HEAD
 if (process.env.NEXT_PUBLIC_FF_PHI_STAMP === "on") {
   platforms.set("PHI", {
     platform: new PHI.PHIPlatform(),
@@ -217,10 +218,12 @@ if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP === "on") {
   });
 }
 
-platforms.set("Idena", {
-  platform: new Idena.IdenaPlatform(),
-  platFormGroupSpec: Idena.ProviderConfig,
-});
+if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP === "on") {
+  platforms.set("Idena", {
+    platform: new Idena.IdenaPlatform(),
+    platFormGroupSpec: Idena.ProviderConfig,
+  });
+}
 
 export enum IsLoadingPassportState {
   Idle,

@@ -3,7 +3,7 @@ import { Provider, ProviderOptions } from "../../types";
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Idena SignIn library
-import { requestIdentityStake } from "../procedures/idenaSignIn";
+import { IdenaContext, requestIdentityStake } from "../procedures/idenaSignIn";
 
 // Class used as a base for verifying Idena stake
 abstract class IdenaStakeProvider implements Provider {
@@ -23,9 +23,9 @@ abstract class IdenaStakeProvider implements Provider {
   }
 
   // verify that the proof object contains valid === "true"
-  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, context: IdenaContext): Promise<VerifiedPayload> {
     const token = payload.proofs.sessionKey;
-    const { valid, address, expiresInSeconds } = await checkStake(token, this.minStake);
+    const { valid, address, expiresInSeconds } = await checkStake(token, context, this.minStake);
     if (!valid) {
       return { valid: false };
     }
@@ -63,10 +63,11 @@ export class IdenaStake100kProvider extends IdenaStakeProvider {
 
 const checkStake = async (
   token: string,
+  context: IdenaContext,
   min: number
 ): Promise<{ valid: boolean; address?: string; expiresInSeconds?: number }> => {
   try {
-    const result = await requestIdentityStake(token);
+    const result = await requestIdentityStake(token, context);
     const expiresInSeconds = Math.max((new Date(result.expirationDate).getTime() - new Date().getTime()) / 1000);
     return { valid: result.stake > min, address: result.address, expiresInSeconds };
   } catch (e) {

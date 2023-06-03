@@ -3,7 +3,7 @@ import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { Provider, ProviderOptions } from "../../types";
 
 // ----- Idena SignIn library
-import { requestIdentityAge } from "../procedures/idenaSignIn";
+import { requestIdentityAge, IdenaContext } from "../procedures/idenaSignIn";
 
 // Class used as a base for verifying Idena age
 abstract class IdenaAgeProvider implements Provider {
@@ -23,9 +23,9 @@ abstract class IdenaAgeProvider implements Provider {
   }
 
   // verify that the proof object contains valid === "true"
-  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, context: IdenaContext): Promise<VerifiedPayload> {
     const token = payload.proofs.sessionKey;
-    const { valid, address, expiresInSeconds } = await checkAge(token, this.minAge);
+    const { valid, address, expiresInSeconds } = await checkAge(token, context, this.minAge);
     if (!valid) {
       return { valid: false };
     }
@@ -56,13 +56,14 @@ export class IdenaAge10Provider extends IdenaAgeProvider {
 
 const checkAge = async (
   token: string,
+  context: IdenaContext,
   min: number
 ): Promise<{ valid: boolean; address?: string; expiresInSeconds?: number }> => {
   try {
-    const result = await requestIdentityAge(token);
+    const result = await requestIdentityAge(token, context);
     const expiresInSeconds = Math.max((new Date(result.expirationDate).getTime() - new Date().getTime()) / 1000);
     return { valid: result.age > min, address: result.address, expiresInSeconds };
-  } catch (e) {
+  } catch {
     return { valid: false };
   }
 };
