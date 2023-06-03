@@ -27,10 +27,7 @@ export class Platform {
   isEVM?: boolean;
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-    console.log("!!!!!");
     const { authUrl, cacheToken } = await this.getAuthInfo(appContext.state);
-    console.log("authUrl", authUrl);
-    console.log("cacheToken", cacheToken);
     const width = 600;
     const height = 800;
     const left = appContext.screen.width / 2 - width / 2;
@@ -43,9 +40,7 @@ export class Platform {
       `toolbar=no, location=no, directories=no, status=no, menubar=no, resizable=no, copyhistory=no, width=${width}, height=${height}, top=${top}, left=${left}`
     );
 
-    console.log("about to wait for redirect");
     return appContext.waitForRedirect().then((data) => {
-      console.log("then");
       return {
         code: data.code,
         sessionKey: data.state,

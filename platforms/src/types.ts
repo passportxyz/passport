@@ -85,8 +85,6 @@ export interface Platform {
   };
   isEVM?: boolean;
   getAuthInfo?(state: string): Promise<AuthInfo>;
-  // TODO: shall we drop the getProviderProof, given that we have getProviderPayload
-  getProviderProof?(): Promise<AccessTokenResult>;
   getProviderPayload(appContext: AppContext): Promise<ProviderPayload>;
 }
 

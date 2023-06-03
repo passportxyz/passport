@@ -14,10 +14,12 @@ class PlatformsDataCache {
 
   constructor() {}
 
-  initSession(): CacheToken {
-    const cacheToken = crypto.randomBytes(32).toString("hex");
+  initSession(token?: CacheToken): CacheToken {
+    const cacheToken = token || crypto.randomBytes(32).toString("hex");
+
     this.cache[cacheToken] = {};
     this._setTimeout(cacheToken, this.initialTimeout);
+
     return cacheToken;
   }
 
@@ -66,7 +68,7 @@ class PlatformsDataCache {
 
 const platformsDataCache = new PlatformsDataCache();
 
-class PlatformsDataCacheSession {
+class CacheSession {
   cacheToken: CacheToken;
   platform: PLATFORM_ID;
 
@@ -81,14 +83,18 @@ class PlatformsDataCacheSession {
 }
 
 // Must be called to initiate a session
-export const initCacheSession = (): CacheToken => {
+// A token is only needed if your platform requires the token to be in a
+// specific format, otherwise a random token is automatically generated
+export const initCacheSession = (token?: CacheToken): CacheToken => {
   console.log("Initializing cache session");
-  return platformsDataCache.initSession();
+  return platformsDataCache.initSession(token);
 };
 
-export const loadCacheSession = (cacheToken: CacheToken, platform: PLATFORM_ID): PlatformsDataCacheSession => {
+// Right now the cache is only used by a single platform at a time,
+// but the platform argument is used to support bulk requests in the future
+export const loadCacheSession = (cacheToken: CacheToken, platform: PLATFORM_ID): CacheSession => {
   console.log(`Loading cache session ${cacheToken}, ${platform}`);
-  return new PlatformsDataCacheSession(cacheToken, platform);
+  return new CacheSession(cacheToken, platform);
 };
 
 export const clearCacheSession = (cacheToken: CacheToken) => {

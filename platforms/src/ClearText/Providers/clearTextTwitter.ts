@@ -43,9 +43,7 @@ export class ClearTextTwitterProvider implements Provider {
 }
 
 async function verifyUserTwitter(sessionKey: string, code: string): Promise<TwitterFindMyUserResponse> {
-  const client = await getClient(sessionKey);
-
-  const myUser = await requestFindMyUser(client, code);
+  const myUser = await requestFindMyUser(sessionKey, code);
 
   return myUser;
 }

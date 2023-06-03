@@ -43,6 +43,5 @@ export default class TwitterProvider implements Provider {
 
 // Perform verification on twitter access token
 async function verifyTwitter(sessionKey: string, code: string): Promise<TwitterFindMyUserResponse> {
-  const client = await getClient(sessionKey);
-  return await requestFindMyUser(client, code);
+  return await requestFindMyUser(sessionKey, code);
 }

@@ -42,11 +42,12 @@ export const getClient = async (sessionKey: string): Promise<auth.OAuth2User> =>
 };
 
 // retrieve the instatiated Client shared between Providers
-const getAuthClient = async (client: auth.OAuth2User, sessionKey: string): Promise<Client> => {
+const getAuthClient = async (sessionKey: string, code: string): Promise<Client> => {
   const session = loadCacheSession(sessionKey, "Twitter");
   return await session.get("authClient", async () => {
+    const client = await session.get<auth.OAuth2User>("oauthUser");
     // retrieve user's auth bearer token to authenticate client
-    await client.requestAccessToken(sessionKey);
+    await client.requestAccessToken(code);
     // associate and store the authedClient
     return new Client(client);
   });
@@ -67,9 +68,9 @@ export type TwitterFindMyUserResponse = {
   username?: string;
 };
 
-export const requestFindMyUser = async (client: auth.OAuth2User, code: string): Promise<TwitterFindMyUserResponse> => {
+export const requestFindMyUser = async (sessionKey: string, code: string): Promise<TwitterFindMyUserResponse> => {
   // return information about the (authenticated) requesting user
-  const twitterClient = await getAuthClient(client, code);
+  const twitterClient = await getAuthClient(sessionKey, code);
   const myUser = await twitterClient.users.findMyUser();
   return { ...myUser.data };
 };
@@ -79,9 +80,9 @@ export type TwitterFollowerResponse = {
   followerCount?: number;
 };
 
-export const getFollowerCount = async (client: auth.OAuth2User, code: string): Promise<TwitterFollowerResponse> => {
+export const getFollowerCount = async (sessionKey: string, code: string): Promise<TwitterFollowerResponse> => {
   // retrieve user's auth bearer token to authenticate client
-  const twitterClient = await getAuthClient(client, code);
+  const twitterClient = await getAuthClient(sessionKey, code);
 
   // public metrics returns more data on user
   const myUser = await twitterClient.users.findMyUser({
@@ -98,9 +99,9 @@ export type TwitterTweetResponse = {
   tweetCount?: number;
 };
 
-export const getTweetCount = async (client: auth.OAuth2User, code: string): Promise<TwitterTweetResponse> => {
+export const getTweetCount = async (sessionKey: string, code: string): Promise<TwitterTweetResponse> => {
   // retrieve user's auth bearer token to authenticate client
-  const twitterClient = await getAuthClient(client, code);
+  const twitterClient = await getAuthClient(sessionKey, code);
 
   // public metrics returns more data on user
   const myUser = await twitterClient.users.findMyUser({

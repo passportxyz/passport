@@ -7,8 +7,7 @@ import type { Provider, ProviderOptions } from "../../types";
 
 // Perform verification on twitter access token and retrieve follower count
 async function verifyTwitterTweets(sessionKey: string, code: string): Promise<TwitterTweetResponse> {
-  const client = await getClient(sessionKey);
-  const data = await getTweetCount(client, code);
+  const data = await getTweetCount(sessionKey, code);
   return data;
 }
 
