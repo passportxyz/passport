@@ -3,7 +3,7 @@ import { Provider, ProviderOptions } from "../../types";
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Idena SignIn library
-import { requestIdentityState } from "../procedures/idenaSignIn";
+import { IdenaContext, requestIdentityState } from "../procedures/idenaSignIn";
 
 // Class used as a base for verifying Idena state
 abstract class IdenaStateProvider implements Provider {
@@ -23,9 +23,9 @@ abstract class IdenaStateProvider implements Provider {
   }
 
   // verify that the proof object contains valid === "true"
-  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, context: IdenaContext): Promise<VerifiedPayload> {
     const token = payload.proofs.sessionKey;
-    const { valid, address, expiresInSeconds } = await checkState(token, this.state);
+    const { valid, address, expiresInSeconds } = await checkState(token, context, this.state);
     if (!valid) {
       return { valid: false };
     }
@@ -63,10 +63,11 @@ export class IdenaStateHumanProvider extends IdenaStateProvider {
 
 const checkState = async (
   token: string,
+  context: IdenaContext,
   expectedState: string
 ): Promise<{ valid: boolean; address?: string; expiresInSeconds?: number }> => {
   try {
-    const result = await requestIdentityState(token);
+    const result = await requestIdentityState(token, context);
     const expiresInSeconds = Math.max((new Date(result.expirationDate).getTime() - new Date().getTime()) / 1000);
     return { valid: result.state === expectedState, address: result.address, expiresInSeconds };
   } catch (e) {
