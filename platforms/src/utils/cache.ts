@@ -2,6 +2,8 @@ import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { CacheToken } from "../types";
 import crypto from "crypto";
 
+type CacheSession = Record<string, any>;
+
 class PlatformsDataCache {
   cache: Record<CacheToken, Partial<Record<PLATFORM_ID, Record<string, any>>>> = {};
 
@@ -24,31 +26,26 @@ class PlatformsDataCache {
   }
 
   clearSession(cacheToken: CacheToken) {
-    if (this.timeouts[cacheToken]) {
-      delete this.timeouts[cacheToken];
-    }
+    this._clearTimeout(cacheToken);
     if (this.cache[cacheToken]) {
       delete this.cache[cacheToken];
     }
   }
 
-  async get<T>(
-    cacheToken: CacheToken,
-    platform: PLATFORM_ID,
-    key: string,
-    generatorFunc?: () => Promise<T>
-  ): Promise<T> {
-    if (!this.cache[cacheToken]) throw new Error(`No session found for id ${cacheToken}`);
+  loadSession(token: CacheToken, platform: PLATFORM_ID): Record<string, any> {
+    this._clearTimeout(token);
 
-    this._clearTimeout(cacheToken);
+    if (!this.cache[token]) {
+      throw new Error("Cache session not found");
+    }
 
-    if (!this.cache[cacheToken][platform]) this.cache[cacheToken][platform] = {};
-    if (!this.cache[cacheToken][platform][key] && generatorFunc)
-      this.cache[cacheToken][platform][key] = await generatorFunc();
+    if (!this.cache[token][platform]) {
+      this.cache[token][platform] = {};
+    }
 
-    this._setTimeout(cacheToken);
+    this._setTimeout(token);
 
-    return this.cache[cacheToken][platform][key];
+    return this.cache[token][platform];
   }
 
   _clearTimeout(cacheToken: CacheToken) {
@@ -68,20 +65,6 @@ class PlatformsDataCache {
 
 const platformsDataCache = new PlatformsDataCache();
 
-class CacheSession {
-  cacheToken: CacheToken;
-  platform: PLATFORM_ID;
-
-  constructor(cacheToken: CacheToken, platform: PLATFORM_ID) {
-    this.cacheToken = cacheToken;
-    this.platform = platform;
-  }
-
-  async get<T>(key: string, generatorFunc?: () => Promise<T>): Promise<T> {
-    return platformsDataCache.get<T>(this.cacheToken, this.platform, key, generatorFunc);
-  }
-}
-
 // Must be called to initiate a session
 // A token is only needed if your platform requires the token to be in a
 // specific format, otherwise a random token is automatically generated
@@ -94,7 +77,7 @@ export const initCacheSession = (token?: CacheToken): CacheToken => {
 // but the platform argument is used to support bulk requests in the future
 export const loadCacheSession = (cacheToken: CacheToken, platform: PLATFORM_ID): CacheSession => {
   console.log(`Loading cache session ${cacheToken}, ${platform}`);
-  return new CacheSession(cacheToken, platform);
+  return platformsDataCache.loadSession(cacheToken, platform);
 };
 
 export const clearCacheSession = (cacheToken: CacheToken) => {
