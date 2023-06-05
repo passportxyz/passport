@@ -358,6 +358,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
                 responses.push((await error) as CredentialResponseBody);
               }
             }
+            if (payload.proofs?.cacheToken) clearCacheSession(payload.proofs.cacheToken);
 
             // return multiple responses in an array
             return res.json(responses);

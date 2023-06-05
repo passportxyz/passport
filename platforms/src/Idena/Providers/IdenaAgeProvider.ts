@@ -1,5 +1,5 @@
 // ----- Types
-import { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
+import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { Provider, ProviderOptions } from "../../types";
 
 // ----- Idena SignIn library
@@ -56,8 +56,8 @@ export class IdenaAge10Provider extends IdenaAgeProvider {
 
 const checkAge = async (
   token: string,
-  context: IdenaContext
-  min: number,
+  context: IdenaContext,
+  min: number
 ): Promise<{ valid: boolean; address?: string; expiresInSeconds?: number }> => {
   try {
     const result = await requestIdentityAge(token, context);
