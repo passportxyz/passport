@@ -9,10 +9,12 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 import { StampSelector } from "./StampSelector";
 import { PlatformDetails } from "./PlatformDetails";
+import { ProviderCards } from "./platform";
 
 export type SideBarContentProps = {
   currentPlatform: PlatformSpec | undefined;
   currentProviders: PlatformGroupSpec[] | undefined;
+  currentProviderCards: ProviderCards | undefined;
   verifiedProviders: PROVIDER_ID[] | undefined;
   selectedProviders: PROVIDER_ID[] | undefined;
   setSelectedProviders: React.Dispatch<React.SetStateAction<PROVIDER_ID[]>> | undefined;
@@ -24,6 +26,7 @@ export type SideBarContentProps = {
 export const SideBarContent = ({
   currentPlatform,
   currentProviders,
+  currentProviderCards,
   verifiedProviders,
   selectedProviders,
   setSelectedProviders,
@@ -90,6 +93,7 @@ export const SideBarContent = ({
               <StampSelector
                 currentPlatform={currentPlatform}
                 currentProviders={currentProviders}
+                currentProviderCards={currentProviderCards}
                 verifiedProviders={verifiedProviders}
                 selectedProviders={selectedProviders}
                 setSelectedProviders={(providerIds) => setSelectedProviders && setSelectedProviders(providerIds)}

@@ -85,6 +85,7 @@ export const CardList = ({ isLoading = false, cardClassName }: CardListProps): J
           <GenericPlatform
             platform={platformProps.platform}
             platFormGroupSpec={platformProps.platFormGroupSpec}
+            providerCards={platformProps.providerCards}
             onClose={onClose}
           />
         );
@@ -97,6 +98,7 @@ export const CardList = ({ isLoading = false, cardClassName }: CardListProps): J
         setSelectedProviders={undefined}
         currentPlatform={undefined}
         currentProviders={undefined}
+        currentProviderCards={undefined}
         isLoading={undefined}
         verifyButton={undefined}
       />

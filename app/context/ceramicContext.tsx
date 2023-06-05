@@ -44,6 +44,7 @@ const {
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 import { getProviderSpec } from "../utils/helpers";
+import { getProviderCards, ProviderCards } from "../components/platform";
 
 // -- Trusted IAM servers DID
 const IAM_ISSUER_DID = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
@@ -202,6 +203,7 @@ if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
 platforms.set("Civic", {
   platform: new Civic.CivicPlatform(),
   platFormGroupSpec: Civic.ProviderConfig,
+  providerCards: getProviderCards("Civic"),
 });
 
 export enum IsLoadingPassportState {
