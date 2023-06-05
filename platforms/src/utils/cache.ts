@@ -2,7 +2,7 @@ import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { CacheToken } from "../types";
 import crypto from "crypto";
 
-type CacheSession = Record<string, any>;
+export type CacheSession = Record<string, any>;
 
 class PlatformsDataCache {
   cache: Record<CacheToken, Partial<Record<PLATFORM_ID, Record<string, any>>>> = {};

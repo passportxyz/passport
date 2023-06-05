@@ -19,38 +19,29 @@ import { loadCacheSession } from "../../utils/cache";
 export const initClient = async (callback: string, sessionKey: string): Promise<auth.OAuth2User> => {
   if (process.env.TWITTER_CLIENT_ID && process.env.TWITTER_CLIENT_SECRET) {
     const session = loadCacheSession(sessionKey, "Twitter");
-    const oauthUser = await session.get("oauthUser", async () => {
-      return new auth.OAuth2User({
-        client_id: process.env.TWITTER_CLIENT_ID,
-        client_secret: process.env.TWITTER_CLIENT_SECRET,
-        scopes: ["tweet.read", "users.read"],
-        callback,
-      });
+    session.oauthUser = new auth.OAuth2User({
+      client_id: process.env.TWITTER_CLIENT_ID,
+      client_secret: process.env.TWITTER_CLIENT_SECRET,
+      scopes: ["tweet.read", "users.read"],
+      callback,
     });
-    return oauthUser;
+    return session.oauthUser;
   } else {
     throw "Missing TWITTER_CLIENT_ID or TWITTER_CLIENT_SECRET";
   }
 };
 
-// retrieve the raw client that is shared between Procedures
-export const getClient = async (sessionKey: string): Promise<auth.OAuth2User> => {
-  const session = loadCacheSession(sessionKey, "Twitter");
-  const oauthUser = await session.get<auth.OAuth2User>("oauthUser");
-  if (oauthUser) return oauthUser;
-  throw "Unable to get twitter oauthUser";
-};
-
-// retrieve the instatiated Client shared between Providers
+// retrieve the instantiated Client shared between Providers
 const getAuthClient = async (sessionKey: string, code: string): Promise<Client> => {
   const session = loadCacheSession(sessionKey, "Twitter");
-  return await session.get("authClient", async () => {
-    const client = await session.get<auth.OAuth2User>("oauthUser");
+  if (!session.authClient) {
+    const { oauthUser } = session;
     // retrieve user's auth bearer token to authenticate client
-    await client.requestAccessToken(code);
-    // associate and store the authedClient
-    return new Client(client);
-  });
+    await oauthUser.requestAccessToken(code);
+    // associate and store the Client
+    session.authClient = new Client(oauthUser);
+  }
+  return session.authClient;
 };
 
 // This method has side-effects which alter unaccessible state on the

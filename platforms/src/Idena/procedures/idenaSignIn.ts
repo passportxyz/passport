@@ -21,8 +21,10 @@ export const initSession = (): string => {
 
 export const loadIdenaSession = async (token: string, address: string): Promise<string | undefined> => {
   const session = loadCacheSession(token, "Idena");
-  const nonce = session.set("nonce", generateNonce());
-  session.set("address", address);
+  const nonce = generateNonce();
+
+  session.nonce = nonce;
+  session.address = address;
 
   return nonce;
 };
@@ -137,6 +139,8 @@ const request = async <T>(token: string, context: IdenaContext, method: IdenaMet
     if (!address || !session.signature) {
       throw "Invalid session, unable to retrieve authenticated address";
     }
+    context.idena.address = address;
+    clearCacheSession(token);
   }
 
   let response = context.idena.responses[method];

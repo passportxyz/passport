@@ -2,12 +2,12 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
-import { getClient, getTweetCount, TwitterTweetResponse } from "../procedures/twitterOauth";
+import { getTweetCount, TwitterTweetResponse } from "../procedures/twitterOauth";
 import type { Provider, ProviderOptions } from "../../types";
 
 // Perform verification on twitter access token and retrieve follower count
-async function verifyTwitterTweets(sessionKey: string, code: string): Promise<TwitterTweetResponse> {
-  const data = await getTweetCount(sessionKey, code);
+async function verifyTwitterTweets(cacheToken: string, code: string): Promise<TwitterTweetResponse> {
+  const data = await getTweetCount(cacheToken, code);
   return data;
 }
 
@@ -31,7 +31,7 @@ export class TwitterTweetGT10Provider implements Provider {
 
     try {
       if (payload && payload.proofs) {
-        data = await verifyTwitterTweets(payload.proofs.sessionKey, payload.proofs.code);
+        data = await verifyTwitterTweets(payload.proofs.cacheToken, payload.proofs.code);
         if (data && data.username && data.tweetCount) {
           valid = data.tweetCount > 10;
 

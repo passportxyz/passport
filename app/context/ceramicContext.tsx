@@ -200,10 +200,12 @@ if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
   });
 }
 
-platforms.set("Idena", {
-  platform: new Idena.IdenaPlatform(),
-  platFormGroupSpec: Idena.ProviderConfig,
-});
+if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP === "on") {
+  platforms.set("Idena", {
+    platform: new Idena.IdenaPlatform(),
+    platFormGroupSpec: Idena.ProviderConfig,
+  });
+}
 
 export enum IsLoadingPassportState {
   Idle,

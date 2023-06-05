@@ -2,7 +2,7 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
-import { getClient, requestFindMyUser, TwitterFindMyUserResponse } from "../../Twitter/procedures/twitterOauth";
+import { requestFindMyUser, TwitterFindMyUserResponse } from "../../Twitter/procedures/twitterOauth";
 import type { Provider, ProviderOptions } from "../../types";
 // import { verifyTwitter } from "../providers/twitter";
 

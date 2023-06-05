@@ -357,10 +357,9 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
                 responses.push(response);
               } catch (error: unknown) {
                 responses.push((await error) as CredentialResponseBody);
-              } finally {
-                if (payload.proofs?.cacheToken) clearCacheSession(payload.proofs.cacheToken);
               }
             }
+            if (payload.proofs?.cacheToken) clearCacheSession(payload.proofs.cacheToken);
 
             // return multiple responses in an array
             return res.json(responses);
@@ -372,9 +371,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
               })
               .catch((error: CredentialResponseBody) => {
                 return void errorRes(res, error.error, error.code);
-              })
-              .finally(() => {
-                if (payload.proofs?.cacheToken) clearCacheSession(payload.proofs.cacheToken);
               });
           }
         }

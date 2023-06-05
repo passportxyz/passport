@@ -2,7 +2,7 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
-import { getClient, requestFindMyUser, TwitterFindMyUserResponse } from "../procedures/twitterOauth";
+import { requestFindMyUser, TwitterFindMyUserResponse } from "../procedures/twitterOauth";
 import type { Provider, ProviderOptions } from "../../types";
 
 // Export a Twitter Provider to carry out OAuth and return a record object
@@ -42,6 +42,6 @@ export default class TwitterProvider implements Provider {
 }
 
 // Perform verification on twitter access token
-async function verifyTwitter(sessionKey: string, code: string): Promise<TwitterFindMyUserResponse> {
-  return await requestFindMyUser(sessionKey, code);
+async function verifyTwitter(cacheToken: string, code: string): Promise<TwitterFindMyUserResponse> {
+  return await requestFindMyUser(cacheToken, code);
 }

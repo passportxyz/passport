@@ -2,12 +2,12 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
-import { getClient, getFollowerCount, TwitterFollowerResponse } from "../procedures/twitterOauth";
+import { getFollowerCount, TwitterFollowerResponse } from "../procedures/twitterOauth";
 import type { Provider, ProviderOptions } from "../../types";
 
 // Perform verification on twitter access token and retrieve follower count
-async function verifyTwitterFollowers(sessionKey: string, code: string): Promise<TwitterFollowerResponse> {
-  const data = await getFollowerCount(sessionKey, code);
+async function verifyTwitterFollowers(cacheToken: string, code: string): Promise<TwitterFollowerResponse> {
+  const data = await getFollowerCount(cacheToken, code);
   return data;
 }
 
@@ -30,7 +30,7 @@ export class TwitterFollowerGT100Provider implements Provider {
     let record: { [k: string]: string } | undefined = undefined;
     try {
       if (payload && payload.proofs) {
-        data = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
+        data = await verifyTwitterFollowers(payload.proofs.cacheToken, payload.proofs.code);
         if (data.username && data.followerCount !== undefined && data.followerCount > 100) {
           valid = true;
           record = {
@@ -70,7 +70,7 @@ export class TwitterFollowerGT500Provider implements Provider {
 
     try {
       if (payload && payload.proofs) {
-        data = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
+        data = await verifyTwitterFollowers(payload.proofs.cacheToken, payload.proofs.code);
         if (data && data.username && data.followerCount) {
           valid = data.followerCount > 500;
           record = {
@@ -110,7 +110,7 @@ export class TwitterFollowerGTE1000Provider implements Provider {
 
     try {
       if (payload && payload.proofs) {
-        data = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
+        data = await verifyTwitterFollowers(payload.proofs.cacheToken, payload.proofs.code);
         if (data && data.followerCount && data.username) {
           valid = data.followerCount >= 1000;
           record = {
@@ -150,7 +150,7 @@ export class TwitterFollowerGT5000Provider implements Provider {
 
     try {
       if (payload && payload.proofs) {
-        data = await verifyTwitterFollowers(payload.proofs.sessionKey, payload.proofs.code);
+        data = await verifyTwitterFollowers(payload.proofs.cacheToken, payload.proofs.code);
         if (data && data.username && data.followerCount) {
           valid = data.followerCount > 5000;
           record = {
