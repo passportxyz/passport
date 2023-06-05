@@ -13,13 +13,20 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Civic Pass",
-    providers: [
-      { title: "holds a Civic CAPTCHA Pass", name: "CivicCaptchaPass" },
-      { title: "holds a Civic Uniqueness Pass", name: "CivicUniquenessPass" },
-      { title: "holds a Civic Liveness Pass", name: "CivicLivenessPass" },
-      { title: "holds a Civic IDV Pass", name: "CivicIDVPass" },
-    ],
+    platformGroup: "CAPTCHA Pass",
+    providers: [{ title: "holds a Civic CAPTCHA Pass", name: "CivicCaptchaPass" }],
+  },
+  {
+    platformGroup: "Uniqueness Pass",
+    providers: [{ title: "holds a Civic Uniqueness Pass", name: "CivicUniquenessPass" }],
+  },
+  {
+    platformGroup: "Liveness Pass",
+    providers: [{ title: "holds a Civic Liveness Pass", name: "CivicLivenessPass" }],
+  },
+  {
+    platformGroup: "IDV Pass",
+    providers: [{ title: "holds a Civic IDV Pass", name: "CivicIDVPass" }],
   },
 ];
 

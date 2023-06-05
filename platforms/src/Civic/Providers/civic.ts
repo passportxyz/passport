@@ -108,7 +108,7 @@ export class CivicPassProvider implements Provider {
       .map((response) => response.error?.error)
       .filter((errorMessage) => errorMessage !== undefined);
     const passes = passResponses.map((response) => response.pass).filter((pass) => pass !== undefined);
-    const valid = passes.length >= 1;
+    const valid = passes.length > 0;
 
     // convert the passes found to a record data structure of the form:
     // "passType": "chain1,chain2"
@@ -123,7 +123,7 @@ export class CivicPassProvider implements Provider {
     }, {} as Record<string, string>);
 
     return {
-      valid: valid,
+      valid,
       error,
       record: valid
         ? {
