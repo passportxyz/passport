@@ -11,4 +11,13 @@ export class CivicPlatform extends Platform {
   getProviderPayload(): Promise<ProviderPayload> {
     return Promise.resolve({});
   }
+
+  banner = {
+    heading: "How to get your Civic Pass",
+    content: "Visit the Civic website to get your Civic Pass.",
+    cta: {
+      label: "Get Civic Pass",
+      url: "https://demopass.civic.com/status#polygon",
+    },
+  };
 }
