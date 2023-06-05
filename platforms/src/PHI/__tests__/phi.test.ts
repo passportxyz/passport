@@ -164,7 +164,7 @@ describe("Attempt Silver verification", function () {
     }
   });
 
-  it("should return false if user does not have any PHI Siliver Object", async () => {
+  it("should return false if user does not have any PHI Silver Object", async () => {
     // We'll mock responses on each of the configured networks, and check the expected calls
     for (let i = 0; i < phiSubgraphs.length; i++) {
       const subgraphUrl = phiSubgraphs[i];

@@ -1,3 +1,3 @@
 export { PHIPlatform } from "./App-Bindings";
-export { PHIPlatformDetails, PHIProviderConfig } from "./Providers-config";
-export { PHIActivitySilverProvider, PHIActivityGoldProvider } from "./Providers";
+export { PlatformDetails, ProviderConfig, providers } from "./Providers-config";
+export { PHIActivitySilverProvider, PHIActivityGoldProvider } from "./Providers/phiActivity";

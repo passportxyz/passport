@@ -113,11 +113,6 @@ platforms.set("Snapshot", {
   platFormGroupSpec: Snapshot.ProviderConfig,
 });
 
-platforms.set("PHI", {
-  platform: new PHI.PHIPlatform(),
-  platFormGroupSpec: PHI.PHIProviderConfig,
-});
-
 platforms.set("Poh", {
   platform: new Poh.PohPlatform(),
   platFormGroupSpec: Poh.ProviderConfig,
@@ -202,6 +197,13 @@ if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
   platforms.set("GuildXYZ", {
     platform: new GuildXYZ.GuildXYZPlatform(),
     platFormGroupSpec: GuildXYZ.ProviderConfig,
+  });
+}
+
+if (process.env.NEXT_PUBLIC_FF_PHI_STAMP === "on") {
+  platforms.set("PHI", {
+    platform: new PHI.PHIPlatform(),
+    platFormGroupSpec: PHI.ProviderConfig,
   });
 }
 

@@ -1,6 +1,7 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { PHIActivityGoldProvider, PHIActivitySilverProvider } from "./Providers/phiActivity";
 
-export const PHIPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/phiLogoIcon.svg",
   platform: "PHI",
   name: "PHI",
@@ -9,7 +10,7 @@ export const PHIPlatformDetails: PlatformSpec = {
   isEVM: true,
 };
 
-export const PHIProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "PHI Activity",
     providers: [
@@ -18,3 +19,5 @@ export const PHIProviderConfig: PlatformGroupSpec[] = [
     ],
   },
 ];
+
+export const providers: Provider[] = [new PHIActivitySilverProvider(), new PHIActivityGoldProvider()];
