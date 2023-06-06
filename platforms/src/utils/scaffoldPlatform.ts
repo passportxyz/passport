@@ -18,7 +18,7 @@ type FileStructure = {
 
 // Define the directory and file structure
 const structure: FileStructure = {
-  "App-Bindings.ts": `import { AppContext, ProviderPayload, AuthInfo } from "../types";
+  "App-Bindings.ts": `import { AppContext, ProviderPayload } from "../types";
   import { Platform } from "../utils/platform";
   
   export class ${providerName}Platform extends Platform {
@@ -33,7 +33,7 @@ const structure: FileStructure = {
       return result;
     }
   
-    getAuthInfo(state: string): Promise<AuthInfo> {
+    getOAuthUrl(state: string): Promise<string> {
       throw new Error("Method not implemented.");
     }
   }

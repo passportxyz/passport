@@ -1,4 +1,4 @@
-import { AppContext, AuthInfo, ProviderPayload } from "../types";
+import { AppContext, ProviderPayload } from "../types";
 
 export type PlatformOptions = {
   platformId: string;
@@ -27,7 +27,7 @@ export class Platform {
   isEVM?: boolean;
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-    const { authUrl, cacheToken } = await this.getAuthInfo(appContext.state);
+    const authUrl: string = await this.getOAuthUrl(appContext.state);
     const width = 600;
     const height = 800;
     const left = appContext.screen.width / 2 - width / 2;
@@ -45,12 +45,11 @@ export class Platform {
         code: data.code,
         sessionKey: data.state,
         signature: data.signature,
-        cacheToken,
       };
     });
   }
 
-  getAuthInfo(state?: string): Promise<AuthInfo> {
+  getOAuthUrl(state?: string): Promise<string> {
     throw new Error("Method not implemented.");
   }
 }

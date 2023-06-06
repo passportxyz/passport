@@ -67,11 +67,6 @@ export type AppContext = {
   waitForRedirect(timeout?: number): Promise<ProviderPayload>;
 };
 
-export type AuthInfo = {
-  authUrl: string;
-  cacheToken?: CacheToken;
-};
-
 export interface Platform {
   platformId: string;
   path?: string;
@@ -84,7 +79,7 @@ export interface Platform {
     };
   };
   isEVM?: boolean;
-  getAuthInfo?(state: string): Promise<AuthInfo>;
+  getOAuthUrl?(state: string): Promise<string>;
   getProviderPayload(appContext: AppContext): Promise<ProviderPayload>;
 }
 

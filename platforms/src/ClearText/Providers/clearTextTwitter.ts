@@ -2,7 +2,12 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
-import { requestFindMyUser, TwitterFindMyUserResponse } from "../../Twitter/procedures/twitterOauth";
+import {
+  getAuthClient,
+  requestFindMyUser,
+  TwitterContext,
+  TwitterFindMyUserResponse,
+} from "../../Twitter/procedures/twitterOauth";
 import type { Provider, ProviderOptions } from "../../types";
 // import { verifyTwitter } from "../providers/twitter";
 
@@ -19,13 +24,13 @@ export class ClearTextTwitterProvider implements Provider {
   }
 
   // verify that the proof object contains valid === "true"
-  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, context: TwitterContext): Promise<VerifiedPayload> {
     let valid = false,
       verifiedPayload: TwitterFindMyUserResponse = {},
       pii;
 
     try {
-      verifiedPayload = await verifyUserTwitter(payload.proofs.sessionKey, payload.proofs.code);
+      verifiedPayload = await verifyUserTwitter(payload.proofs.sessionKey, payload.proofs.code, context);
     } catch (e) {
       return { valid: false };
     } finally {
@@ -42,8 +47,13 @@ export class ClearTextTwitterProvider implements Provider {
   }
 }
 
-async function verifyUserTwitter(sessionKey: string, code: string): Promise<TwitterFindMyUserResponse> {
-  const myUser = await requestFindMyUser(sessionKey, code);
+async function verifyUserTwitter(
+  sessionKey: string,
+  code: string,
+  context: TwitterContext
+): Promise<TwitterFindMyUserResponse> {
+  const twitterClient = await getAuthClient(sessionKey, code, context);
+  const myUser = await requestFindMyUser(twitterClient);
 
   return myUser;
 }

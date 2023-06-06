@@ -1,7 +1,15 @@
 import crypto from "crypto";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { initCacheSession, loadCacheSession } from "../../utils/cache";
+import { initCacheSession, loadCacheSession, clearCacheSession } from "../../utils/cache";
 import { ProviderContext } from "@gitcoin/passport-types";
+
+type IdenaCache = {
+  address?: string;
+  nonce?: string;
+  signature?: string;
+};
+
+const loadIdenaCache = (token: string): IdenaCache => loadCacheSession(token, "Idena");
 
 // Idena API url
 const API_URL = "https://api.idena.io/";
@@ -19,8 +27,8 @@ export const initSession = (): string => {
   return token;
 };
 
-export const loadIdenaSession = async (token: string, address: string): Promise<string | undefined> => {
-  const session = loadCacheSession(token, "Idena");
+export const loadIdenaSession = (token: string, address: string): string | undefined => {
+  const session = loadIdenaCache(token);
   const nonce = generateNonce();
 
   session.nonce = nonce;
@@ -30,7 +38,7 @@ export const loadIdenaSession = async (token: string, address: string): Promise<
 };
 
 export const authenticate = async (token: string, signature: string): Promise<boolean> => {
-  const session = loadCacheSession(token, "Idena");
+  const session = loadIdenaCache(token);
   if (!session.address || session.signature) {
     return;
   }
@@ -130,18 +138,21 @@ const apiClient = (): AxiosInstance => {
   });
 };
 
-const request = async <T>(token: string, context: IdenaContext, method: IdenaMethod): Promise<T> => {
+const loadSessionAddress = (token: string, context: IdenaContext): string => {
   if (!context.idena) context.idena = { responses: {} };
-  let address = context.idena.address;
-  if (!address) {
-    const session = loadCacheSession(token, "Idena");
-    address = session.address;
-    if (!address || !session.signature) {
+  if (!context.idena.address) {
+    const session = loadIdenaCache(token);
+    if (!session.address || !session.signature) {
       throw "Invalid session, unable to retrieve authenticated address";
     }
-    context.idena.address = address;
-    clearCacheSession(token);
+    context.idena.address = session.address;
+    clearCacheSession(token, "Idena");
   }
+  return context.idena.address;
+};
+
+const request = async <T>(token: string, context: IdenaContext, method: IdenaMethod): Promise<T> => {
+  const address = loadSessionAddress(token, context);
 
   let response = context.idena.responses[method];
   if (!response) {

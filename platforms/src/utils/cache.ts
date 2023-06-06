@@ -14,8 +14,6 @@ class PlatformsDataCache {
   initialTimeout: number = 1000 * 60 * 5; // 5 minutes
   timeout: number = 1000 * 60 * 3; // 3 minutes
 
-  constructor() {}
-
   initSession(token?: CacheToken): CacheToken {
     const cacheToken = token || crypto.randomBytes(32).toString("hex");
 
@@ -25,14 +23,17 @@ class PlatformsDataCache {
     return cacheToken;
   }
 
-  clearSession(cacheToken: CacheToken) {
+  clearSession(cacheToken: CacheToken, platform: PLATFORM_ID) {
     this._clearTimeout(cacheToken);
-    if (this.cache[cacheToken]) {
-      delete this.cache[cacheToken];
+    if (this.cache[cacheToken] && this.cache[cacheToken][platform]) {
+      delete this.cache[cacheToken][platform];
+      if (Object.keys(this.cache[cacheToken]).length === 0) {
+        delete this.cache[cacheToken];
+      }
     }
   }
 
-  loadSession(token: CacheToken, platform: PLATFORM_ID): Record<string, any> {
+  loadSession<T>(token: CacheToken, platform: PLATFORM_ID): T {
     this._clearTimeout(token);
 
     if (!this.cache[token]) {
@@ -45,7 +46,7 @@ class PlatformsDataCache {
 
     this._setTimeout(token);
 
-    return this.cache[token][platform];
+    return this.cache[token][platform] as T;
   }
 
   _clearTimeout(cacheToken: CacheToken) {
@@ -69,18 +70,15 @@ const platformsDataCache = new PlatformsDataCache();
 // A token is only needed if your platform requires the token to be in a
 // specific format, otherwise a random token is automatically generated
 export const initCacheSession = (token?: CacheToken): CacheToken => {
-  console.log("Initializing cache session");
   return platformsDataCache.initSession(token);
 };
 
 // Right now the cache is only used by a single platform at a time,
 // but the platform argument is used to support bulk requests in the future
-export const loadCacheSession = (cacheToken: CacheToken, platform: PLATFORM_ID): CacheSession => {
-  console.log(`Loading cache session ${cacheToken}, ${platform}`);
-  return platformsDataCache.loadSession(cacheToken, platform);
+export const loadCacheSession = <T>(cacheToken: CacheToken, platform: PLATFORM_ID): T => {
+  return platformsDataCache.loadSession<T>(cacheToken, platform);
 };
 
-export const clearCacheSession = (cacheToken: CacheToken) => {
-  console.log(`Clearing cache session ${cacheToken}`);
-  platformsDataCache.clearSession(cacheToken);
+export const clearCacheSession = (cacheToken: CacheToken, platform: PLATFORM_ID) => {
+  platformsDataCache.clearSession(cacheToken, platform);
 };

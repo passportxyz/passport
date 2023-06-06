@@ -12,4 +12,8 @@ export class HypercertsPlatform extends Platform {
     const result = await Promise.resolve({});
     return result;
   }
+
+  getOAuthUrl(state: string): Promise<string> {
+    throw new Error("Method not implemented.");
+  }
 }

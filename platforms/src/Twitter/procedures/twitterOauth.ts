@@ -1,5 +1,7 @@
 import { auth, Client } from "twitter-api-sdk";
-import { loadCacheSession } from "../../utils/cache";
+import { clearCacheSession, initCacheSession, loadCacheSession } from "../../utils/cache";
+import crypto from "crypto";
+import { ProviderContext } from "@gitcoin/passport-types";
 
 /*
   Procedure to generate auth URL & request access token for Twitter OAuth
@@ -10,38 +12,59 @@ import { loadCacheSession } from "../../utils/cache";
     during the requestAccessToken process.
 */
 
+export const generateSessionKey = (): string => {
+  return `twitter-${crypto.randomBytes(32).toString("hex")}`;
+};
+
+export type TwitterContext = ProviderContext & {
+  twitter?: {
+    authClient?: Client;
+  };
+};
+
+type TwitterCache = {
+  oauthUser?: auth.OAuth2User;
+};
+
+const loadTwitterCache = (token: string): TwitterCache => loadCacheSession(token, "Twitter");
+
 /**
  * Initializes a Twitter OAuth2 Authentication Client
  * @param callback redirect URI to use. Don’t use localhost as a callback URL - instead, please use a custom host locally or http(s)://127.0.0.1
  * @param sessionKey associates a specific auth.OAuth2User instance to a session
  * @returns instance of auth.OAuth2User
  */
-export const initClient = async (callback: string, sessionKey: string): Promise<auth.OAuth2User> => {
+export const initClient = (callback: string, sessionKey: string): auth.OAuth2User => {
   if (process.env.TWITTER_CLIENT_ID && process.env.TWITTER_CLIENT_SECRET) {
-    const session = loadCacheSession(sessionKey, "Twitter");
-    session.oauthUser = new auth.OAuth2User({
+    initCacheSession(sessionKey);
+    const session = loadTwitterCache(sessionKey);
+    const oauthUser = new auth.OAuth2User({
       client_id: process.env.TWITTER_CLIENT_ID,
       client_secret: process.env.TWITTER_CLIENT_SECRET,
       scopes: ["tweet.read", "users.read"],
       callback,
     });
-    return session.oauthUser;
+    session.oauthUser = oauthUser;
+    return oauthUser;
   } else {
     throw "Missing TWITTER_CLIENT_ID or TWITTER_CLIENT_SECRET";
   }
 };
 
 // retrieve the instantiated Client shared between Providers
-const getAuthClient = async (sessionKey: string, code: string): Promise<Client> => {
-  const session = loadCacheSession(sessionKey, "Twitter");
-  if (!session.authClient) {
+export const getAuthClient = async (sessionKey: string, code: string, context: TwitterContext): Promise<Client> => {
+  if (!context.twitter?.authClient) {
+    const session = loadTwitterCache(sessionKey);
     const { oauthUser } = session;
     // retrieve user's auth bearer token to authenticate client
     await oauthUser.requestAccessToken(code);
-    // associate and store the Client
-    session.authClient = new Client(oauthUser);
+
+    if (!context.twitter) context.twitter = {};
+    context.twitter.authClient = new Client(oauthUser);
+
+    clearCacheSession(sessionKey, "Twitter");
   }
-  return session.authClient;
+  return context.twitter.authClient;
 };
 
 // This method has side-effects which alter unaccessible state on the
@@ -59,9 +82,8 @@ export type TwitterFindMyUserResponse = {
   username?: string;
 };
 
-export const requestFindMyUser = async (sessionKey: string, code: string): Promise<TwitterFindMyUserResponse> => {
+export const requestFindMyUser = async (twitterClient: Client): Promise<TwitterFindMyUserResponse> => {
   // return information about the (authenticated) requesting user
-  const twitterClient = await getAuthClient(sessionKey, code);
   const myUser = await twitterClient.users.findMyUser();
   return { ...myUser.data };
 };
@@ -71,10 +93,7 @@ export type TwitterFollowerResponse = {
   followerCount?: number;
 };
 
-export const getFollowerCount = async (sessionKey: string, code: string): Promise<TwitterFollowerResponse> => {
-  // retrieve user's auth bearer token to authenticate client
-  const twitterClient = await getAuthClient(sessionKey, code);
-
+export const getFollowerCount = async (twitterClient: Client): Promise<TwitterFollowerResponse> => {
   // public metrics returns more data on user
   const myUser = await twitterClient.users.findMyUser({
     "user.fields": ["public_metrics"],
@@ -90,10 +109,7 @@ export type TwitterTweetResponse = {
   tweetCount?: number;
 };
 
-export const getTweetCount = async (sessionKey: string, code: string): Promise<TwitterTweetResponse> => {
-  // retrieve user's auth bearer token to authenticate client
-  const twitterClient = await getAuthClient(sessionKey, code);
-
+export const getTweetCount = async (twitterClient: Client): Promise<TwitterTweetResponse> => {
   // public metrics returns more data on user
   const myUser = await twitterClient.users.findMyUser({
     "user.fields": ["public_metrics"],
