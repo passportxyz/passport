@@ -7,16 +7,15 @@ import {
 } from "../Providers/TwitterFollowerProvider";
 
 import { RequestPayload } from "@gitcoin/passport-types";
-import { auth } from "twitter-api-sdk";
-import { deleteClient, getClient, getFollowerCount, TwitterFollowerResponse } from "../procedures/twitterOauth";
+import { auth, Client } from "twitter-api-sdk";
+import { getAuthClient, getFollowerCount, TwitterFollowerResponse } from "../procedures/twitterOauth";
 
 jest.mock("../procedures/twitterOauth", () => ({
-  getClient: jest.fn(),
-  deleteClient: jest.fn(),
   getFollowerCount: jest.fn(),
+  getAuthClient: jest.fn(),
 }));
 
-const MOCK_TWITTER_OAUTH_CLIENT = {} as auth.OAuth2User;
+const MOCK_TWITTER_CLIENT = new Client({} as auth.OAuth2User);
 
 const MOCK_TWITTER_USER: TwitterFollowerResponse = {
   username: "DpoppDev",
@@ -28,7 +27,7 @@ const code = "ABC123_ACCESSCODE";
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (getClient as jest.Mock).mockReturnValue(MOCK_TWITTER_OAUTH_CLIENT);
+  (getAuthClient as jest.Mock).mockReturnValue(MOCK_TWITTER_CLIENT);
 });
 
 describe("Attempt verification", function () {
@@ -36,16 +35,18 @@ describe("Attempt verification", function () {
     (getFollowerCount as jest.Mock).mockResolvedValue(MOCK_TWITTER_USER);
 
     const twitter = new TwitterFollowerGT100Provider();
-    const verifiedPayload = await twitter.verify({
-      proofs: {
-        sessionKey,
-        code,
-      },
-    } as unknown as RequestPayload);
+    const verifiedPayload = await twitter.verify(
+      {
+        proofs: {
+          sessionKey,
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
-    expect(getClient).toBeCalledWith(sessionKey);
-    expect(getFollowerCount).toBeCalledWith(MOCK_TWITTER_OAUTH_CLIENT, code);
-    expect(deleteClient).toBeCalledWith(sessionKey);
+    expect(getAuthClient).toBeCalledWith(sessionKey, code, {});
+    expect(getFollowerCount).toBeCalled();
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
@@ -55,35 +56,20 @@ describe("Attempt verification", function () {
     });
   });
 
-  it("should return invalid payload when unable to retrieve twitter oauth client", async () => {
-    (getClient as jest.Mock).mockReturnValue(undefined);
-    (getFollowerCount as jest.Mock).mockImplementationOnce(async (client) => {
-      return Promise.resolve(client ? MOCK_TWITTER_USER : {});
-    });
-
-    const twitter = new TwitterFollowerGT100Provider();
-
-    const verifiedPayload = await twitter.verify({
-      proofs: {
-        sessionKey,
-        code,
-      },
-    } as unknown as RequestPayload);
-
-    expect(verifiedPayload).toMatchObject({ valid: false });
-  });
-
   it("should return invalid payload when there is no username in requestFindMyUser response", async () => {
     (getFollowerCount as jest.Mock).mockResolvedValue({ username: undefined });
 
     const twitter = new TwitterFollowerGT100Provider();
 
-    const verifiedPayload = await twitter.verify({
-      proofs: {
-        sessionKey,
-        code,
-      },
-    } as unknown as RequestPayload);
+    const verifiedPayload = await twitter.verify(
+      {
+        proofs: {
+          sessionKey,
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
@@ -93,12 +79,15 @@ describe("Attempt verification", function () {
 
     const twitter = new TwitterFollowerGT100Provider();
 
-    const verifiedPayload = await twitter.verify({
-      proofs: {
-        sessionKey,
-        code,
-      },
-    } as unknown as RequestPayload);
+    const verifiedPayload = await twitter.verify(
+      {
+        proofs: {
+          sessionKey,
+          code,
+        },
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toMatchObject({ valid: false });
   });
@@ -109,12 +98,15 @@ describe("Attempt verification", function () {
 
       const twitter = new TwitterFollowerGT100Provider();
 
-      const verifiedPayload = await twitter.verify({
-        proofs: {
-          sessionKey,
-          code,
-        },
-      } as unknown as RequestPayload);
+      const verifiedPayload = await twitter.verify(
+        {
+          proofs: {
+            sessionKey,
+            code,
+          },
+        } as unknown as RequestPayload,
+        {}
+      );
 
       expect(verifiedPayload).toMatchObject({ valid: false });
     });
@@ -124,12 +116,15 @@ describe("Attempt verification", function () {
 
       const twitter = new TwitterFollowerGT500Provider();
 
-      const verifiedPayload = await twitter.verify({
-        proofs: {
-          sessionKey,
-          code,
-        },
-      } as unknown as RequestPayload);
+      const verifiedPayload = await twitter.verify(
+        {
+          proofs: {
+            sessionKey,
+            code,
+          },
+        } as unknown as RequestPayload,
+        {}
+      );
 
       expect(verifiedPayload).toMatchObject({ valid: false });
     });
@@ -139,12 +134,15 @@ describe("Attempt verification", function () {
 
       const twitter = new TwitterFollowerGTE1000Provider();
 
-      const verifiedPayload = await twitter.verify({
-        proofs: {
-          sessionKey,
-          code,
-        },
-      } as unknown as RequestPayload);
+      const verifiedPayload = await twitter.verify(
+        {
+          proofs: {
+            sessionKey,
+            code,
+          },
+        } as unknown as RequestPayload,
+        {}
+      );
 
       expect(verifiedPayload).toMatchObject({ valid: false });
     });
@@ -154,12 +152,15 @@ describe("Attempt verification", function () {
 
       const twitter = new TwitterFollowerGT5000Provider();
 
-      const verifiedPayload = await twitter.verify({
-        proofs: {
-          sessionKey,
-          code,
-        },
-      } as unknown as RequestPayload);
+      const verifiedPayload = await twitter.verify(
+        {
+          proofs: {
+            sessionKey,
+            code,
+          },
+        } as unknown as RequestPayload,
+        {}
+      );
 
       expect(verifiedPayload).toMatchObject({ valid: false });
     });
@@ -170,12 +171,15 @@ describe("Attempt verification", function () {
 
       const twitter = new TwitterFollowerGT100Provider();
 
-      const verifiedPayload = await twitter.verify({
-        proofs: {
-          sessionKey,
-          code,
-        },
-      } as unknown as RequestPayload);
+      const verifiedPayload = await twitter.verify(
+        {
+          proofs: {
+            sessionKey,
+            code,
+          },
+        } as unknown as RequestPayload,
+        {}
+      );
 
       expect(verifiedPayload).toMatchObject({ valid: true });
     });
@@ -185,12 +189,15 @@ describe("Attempt verification", function () {
 
       const twitter = new TwitterFollowerGT500Provider();
 
-      const verifiedPayload = await twitter.verify({
-        proofs: {
-          sessionKey,
-          code,
-        },
-      } as unknown as RequestPayload);
+      const verifiedPayload = await twitter.verify(
+        {
+          proofs: {
+            sessionKey,
+            code,
+          },
+        } as unknown as RequestPayload,
+        {}
+      );
 
       expect(verifiedPayload).toMatchObject({ valid: true });
     });
@@ -200,12 +207,15 @@ describe("Attempt verification", function () {
 
       const twitter = new TwitterFollowerGTE1000Provider();
 
-      const verifiedPayload = await twitter.verify({
-        proofs: {
-          sessionKey,
-          code,
-        },
-      } as unknown as RequestPayload);
+      const verifiedPayload = await twitter.verify(
+        {
+          proofs: {
+            sessionKey,
+            code,
+          },
+        } as unknown as RequestPayload,
+        {}
+      );
 
       expect(verifiedPayload).toMatchObject({ valid: true });
     });
@@ -215,14 +225,38 @@ describe("Attempt verification", function () {
 
       const twitter = new TwitterFollowerGT5000Provider();
 
-      const verifiedPayload = await twitter.verify({
+      const verifiedPayload = await twitter.verify(
+        {
+          proofs: {
+            sessionKey,
+            code,
+          },
+        } as unknown as RequestPayload,
+        {}
+      );
+
+      expect(verifiedPayload).toMatchObject({ valid: true });
+    });
+  });
+
+  it("should return invalid payload when unable to retrieve twitter oauth client", async () => {
+    (getAuthClient as jest.Mock).mockRejectedValue("Error");
+    (getFollowerCount as jest.Mock).mockImplementationOnce(async (client) => {
+      return Promise.resolve(client ? MOCK_TWITTER_USER : {});
+    });
+
+    const twitter = new TwitterFollowerGT100Provider();
+
+    const verifiedPayload = await twitter.verify(
+      {
         proofs: {
           sessionKey,
           code,
         },
-      } as unknown as RequestPayload);
+      } as unknown as RequestPayload,
+      {}
+    );
 
-      expect(verifiedPayload).toMatchObject({ valid: true });
-    });
+    expect(verifiedPayload).toMatchObject({ valid: false });
   });
 });
