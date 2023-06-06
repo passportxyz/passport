@@ -150,13 +150,7 @@ const issueCredential = async (
 
       try {
         // generate a VC for the given payload
-        const { credential } = await issueHashedCredential(
-          DIDKit,
-          key,
-          address,
-          record,
-          verifiedPayload.expiresInSeconds
-        );
+        const { credential } = await issueHashedCredential(DIDKit, key, address, record);
 
         return {
           record,

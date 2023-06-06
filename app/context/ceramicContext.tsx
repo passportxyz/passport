@@ -40,7 +40,6 @@ const {
   Coinbase,
   GuildXYZ,
   Hypercerts,
-  Idena,
 } = stampPlatforms;
 
 import { PlatformProps } from "../components/GenericPlatform";
@@ -197,13 +196,6 @@ if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
   platforms.set("GuildXYZ", {
     platform: new GuildXYZ.GuildXYZPlatform(),
     platFormGroupSpec: GuildXYZ.ProviderConfig,
-  });
-}
-
-if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP === "on") {
-  platforms.set("Idena", {
-    platform: new Idena.IdenaPlatform(),
-    platFormGroupSpec: Idena.ProviderConfig,
   });
 }
 

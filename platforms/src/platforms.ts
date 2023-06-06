@@ -21,7 +21,6 @@ import * as Brightid from "./Brightid";
 import * as Coinbase from "./Coinbase";
 import * as GuildXYZ from "./GuildXYZ";
 import * as Hypercerts from "./Hypercerts";
-import * as Idena from "./Idena";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
 type PlatformConfig = {
@@ -56,7 +55,6 @@ const platforms: Record<string, PlatformConfig> = {
   Coinbase,
   GuildXYZ,
   Hypercerts,
-  Idena,
 };
 
 export default platforms;
