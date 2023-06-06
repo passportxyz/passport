@@ -2,14 +2,17 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
-import { deleteClient, getClient, getTweetCount, TwitterTweetResponse } from "../procedures/twitterOauth";
+import { getAuthClient, getTweetCount, TwitterContext, TwitterTweetResponse } from "../procedures/twitterOauth";
 import type { Provider, ProviderOptions } from "../../types";
 
 // Perform verification on twitter access token and retrieve follower count
-async function verifyTwitterTweets(sessionKey: string, code: string): Promise<TwitterTweetResponse> {
-  const client = getClient(sessionKey);
-  const data = await getTweetCount(client, code);
-  deleteClient(sessionKey);
+async function verifyTwitterTweets(
+  sessionKey: string,
+  code: string,
+  context: TwitterContext
+): Promise<TwitterTweetResponse> {
+  const twitterClient = await getAuthClient(sessionKey, code, context);
+  const data = await getTweetCount(twitterClient);
   return data;
 }
 
@@ -26,14 +29,14 @@ export class TwitterTweetGT10Provider implements Provider {
   }
 
   // verify that the proof object contains valid === "true"
-  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, context: TwitterContext): Promise<VerifiedPayload> {
     let valid = false;
     let data: TwitterTweetResponse = {};
     let record: { [k: string]: string } | undefined = undefined;
 
     try {
       if (payload && payload.proofs) {
-        data = await verifyTwitterTweets(payload.proofs.sessionKey, payload.proofs.code);
+        data = await verifyTwitterTweets(payload.proofs.sessionKey, payload.proofs.code, context);
         if (data && data.username && data.tweetCount) {
           valid = data.tweetCount > 10;
 

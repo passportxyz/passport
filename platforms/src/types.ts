@@ -51,6 +51,8 @@ export type AccessTokenResult = {
 
 export type ProviderPayload = Record<string, unknown>;
 
+export type CacheToken = string;
+
 export type AppContext = {
   state: string;
   window: {
@@ -77,9 +79,7 @@ export interface Platform {
     };
   };
   isEVM?: boolean;
-  // TODO: shall we drop the getOAuthUrl and getProviderProof, given that we have getProviderPayload
   getOAuthUrl?(state: string): Promise<string>;
-  getProviderProof?(): Promise<AccessTokenResult>;
   getProviderPayload(appContext: AppContext): Promise<ProviderPayload>;
 }
 

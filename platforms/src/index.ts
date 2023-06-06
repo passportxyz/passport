@@ -40,3 +40,4 @@ export const providers = new Providers([
 export * from "./types";
 export { Platform as PlatformClass } from "./utils/platform";
 export { platforms as platforms };
+export { initCacheSession, loadCacheSession, clearCacheSession } from "./utils/cache";
