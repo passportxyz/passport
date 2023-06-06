@@ -25,8 +25,10 @@ class PlatformsDataCache {
 
   clearSession(cacheToken: CacheToken, platform: PLATFORM_ID) {
     this._clearTimeout(cacheToken);
-    if (this.cache[cacheToken] && this.cache[cacheToken][platform]) {
-      delete this.cache[cacheToken][platform];
+    if (this.cache[cacheToken]) {
+      if (this.cache[cacheToken][platform]) {
+        delete this.cache[cacheToken][platform];
+      }
       if (Object.keys(this.cache[cacheToken]).length === 0) {
         delete this.cache[cacheToken];
       }
