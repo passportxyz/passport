@@ -145,6 +145,8 @@ export type Stamp = {
   credential: VerifiableCredential;
 };
 
+export type StampPatch = Pick<Stamp, "provider"> & Partial<Pick<Stamp, "credential">>;
+
 export type Passport = {
   issuanceDate?: Date;
   expiryDate?: Date;
