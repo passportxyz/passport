@@ -169,21 +169,6 @@ export type PassportLoadResponse = {
   errorDetails?: PassportLoadErrorDetails;
 };
 
-export type EasStamp = {
-  encodedData: string;
-};
-
-export type EasPassport = {
-  stamps: EasStamp[];
-  recipient: string;
-  expirationTime: any;
-  revocable: boolean;
-  refUID: string;
-  value: any;
-  nonce: number;
-  fee: any;
-};
-
 export type PassportAttestation = {
   multiAttestationRequest: MultiAttestationRequest[];
   nonce: number;

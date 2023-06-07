@@ -6,7 +6,7 @@ import {
   MultiAttestationRequest,
   AttestationRequestData,
 } from "@ethereum-attestation-service/eas-sdk";
-import { VerifiableCredential, EasStamp } from "@gitcoin/passport-types";
+import { VerifiableCredential } from "@gitcoin/passport-types";
 
 import { fetchEncodedPassportScore } from "./scorerService";
 

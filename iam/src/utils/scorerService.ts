@@ -28,8 +28,7 @@ export async function fetchEncodedPassportScore(address: string, dbAccessToken: 
     };
 
     return easEncodeScore(score);
-  } catch (error) {
-    console.log({ error });
+  } catch {
     throw new Error("Error fetching score");
   }
 }

@@ -21,7 +21,6 @@ import {
   ValidResponseBody,
   VerifiableCredential,
   VerifiedPayload,
-  EasStamp,
 } from "@gitcoin/passport-types";
 
 import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";

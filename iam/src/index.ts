@@ -32,7 +32,7 @@ import {
 
 import { getChallenge } from "./utils/challenge";
 import { getEASFeeAmount } from "./utils/easFees";
-import { encodeEasStamp, formatMultiAttestationRequest } from "./utils/easSchema";
+import { formatMultiAttestationRequest } from "./utils/easSchema";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
@@ -44,7 +44,6 @@ import {
 
 // All provider exports from platforms
 import { providers } from "@gitcoin/passport-platforms";
-import { VerifiableCredential } from "@gitcoin/passport-types";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -432,20 +431,12 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 
             return void res.json(payload);
           })
-          .catch((error) => {
-            // TODO don't return real error
-            console.log("==================================");
-            console.log(error);
-            console.log("==================================");
-            return void errorRes(res, String(error), 500);
+          .catch(() => {
+            return void errorRes(res, "Error signing passport", 500);
           });
       })
-      .catch((error) => {
-        // TODO don't return real error
-        console.log("------------------------------------");
-        console.log(error);
-        console.log("------------------------------------");
-        return void errorRes(res, String(error), 500);
+      .catch(() => {
+        return void errorRes(res, "Error formatting onchain passport", 500);
       });
   } catch (error) {
     return void errorRes(res, String(error), 500);
