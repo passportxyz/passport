@@ -25,9 +25,8 @@ import {
 
 import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 
-import { BigNumber, utils } from "ethers";
+import { utils } from "ethers";
 import * as easFeesMock from "../src/utils/easFees";
-import * as scoreServiceMock from "../src/utils/scorerService";
 import * as identityMock from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 import * as easSchemaMock from "../src/utils/easSchema";
 
@@ -798,7 +797,6 @@ describe("POST /eas", () => {
     const expectedPayload = {
       passport: {
         multiAttestationRequest: mockMultiAttestationRequest,
-        recipient: "0x5678000000000000000000000000000000000000",
         fee: "25000000000000000",
         nonce,
       },
@@ -839,7 +837,6 @@ describe("POST /eas", () => {
     const expectedPayload = {
       passport: {
         multiAttestationRequest: [] as MultiAttestationRequest[],
-        recipient: "0x5678000000000000000000000000000000000000",
         fee: "25000000000000000",
         nonce,
       },
@@ -923,7 +920,6 @@ describe("POST /eas", () => {
     const expectedPayload = {
       passport: {
         multiAttestationRequest: mockMultiAttestationRequest,
-        recipient: "0x5678000000000000000000000000000000000000",
         fee: "25000000000000000",
         nonce,
       },
@@ -941,5 +937,41 @@ describe("POST /eas", () => {
     expect(response.body).toMatchObject(expectedPayload);
     expect(getEASFeeAmountSpy).toHaveBeenCalledTimes(1);
     expect(getEASFeeAmountSpy).toHaveBeenCalledWith(expectedFeeUsd);
+  });
+  it("should throw a 400 error if every credentialSubject.id is not equivalent", async () => {
+    const nonce = 0;
+    const credentials = [
+      {
+        "@context": "https://www.w3.org/2018/credentials/v1",
+        type: ["VerifiableCredential", "Stamp"],
+        issuer: config.issuer,
+        issuanceDate: new Date().toISOString(),
+        credentialSubject: {
+          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
+          provider: "test",
+          hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
+        },
+        expirationDate: "9999-12-31T23:59:59Z",
+      },
+      {
+        "@context": "https://www.w3.org/2018/credentials/v1",
+        type: ["VerifiableCredential", "Stamp"],
+        issuer: config.issuer,
+        issuanceDate: new Date().toISOString(),
+        credentialSubject: {
+          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000001",
+          provider: "test",
+          hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHla=",
+        },
+        expirationDate: "9999-12-31T23:59:59Z",
+      },
+    ];
+
+    const response = await request(app)
+      .post("/api/v0.0.0/eas")
+      .send({ credentials, nonce })
+      .set("Accept", "application/json");
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe("Every credential's id must be equivalent");
   });
 });
