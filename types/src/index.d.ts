@@ -225,7 +225,8 @@ export type PLATFORM_ID =
   | "GnosisSafe"
   | "Coinbase"
   | "GuildXYZ"
-  | "Hypercerts";
+  | "Hypercerts"
+  | "PHI";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -294,4 +295,6 @@ export type PROVIDER_ID =
   | "GuildMember"
   | "GuildAdmin"
   | "GuildPassportMember"
-  | "Hypercerts";
+  | "Hypercerts"
+  | "PHIActivitySilver"
+  | "PHIActivityGold";
