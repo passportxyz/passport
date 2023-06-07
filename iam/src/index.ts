@@ -108,7 +108,7 @@ const ATTESTER_TYPES = {
   ],
   PassportAttestationRequest: [
     { name: "multiAttestationRequest", type: "MultiAttestationRequest[]" },
-    { name: "recipient", type: "address" },   // TODO: remove this as it is already included in line 98
+    { name: "recipient", type: "address" }, // TODO: remove this as it is already included in line 98
     { name: "nonce", type: "uint256" },
     { name: "fee", type: "uint256" },
   ],
@@ -416,12 +416,11 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
         const fee = await getEASFeeAmount(2);
         const passportAttestation: PassportAttestation = {
           multiAttestationRequest,
-          recipient,  // Remove this, and the field for this in PassportAttestation
+          recipient, // Remove this, and the field for this in PassportAttestation
           nonce: Number(nonce),
           fee: fee.toString(),
         };
 
-        console.log("Going to sign ...")
         attestationSignerWallet
           ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {

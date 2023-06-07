@@ -762,7 +762,6 @@ const mockMultiAttestationRequest: MultiAttestationRequest[] = [
 
 describe("POST /eas", () => {
   let getEASFeeAmountSpy: jest.SpyInstance;
-  let fetchEncodedPassportScoreSpy: jest.SpyInstance;
   let formatMultiAttestationRequestSpy: jest.SpyInstance;
 
   beforeEach(() => {
@@ -770,10 +769,6 @@ describe("POST /eas", () => {
     getEASFeeAmountSpy = jest
       .spyOn(easFeesMock, "getEASFeeAmount")
       .mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
-
-    formatMultiAttestationRequestSpy = jest
-      .spyOn(easSchemaMock, "formatMultiAttestationRequest")
-      .mockReturnValue(Promise.resolve(mockMultiAttestationRequest));
   });
 
   afterEach(() => {
@@ -781,7 +776,10 @@ describe("POST /eas", () => {
     jest.restoreAllMocks();
   });
 
-  it.only("handles valid requests including some invalid credentials", async () => {
+  it("handles valid requests including some invalid credentials", async () => {
+    formatMultiAttestationRequestSpy = jest
+      .spyOn(easSchemaMock, "formatMultiAttestationRequest")
+      .mockReturnValue(Promise.resolve(mockMultiAttestationRequest));
     const nonce = 0;
     const failedCredential = {
       "@context": "https://www.w3.org/2018/credentials/v1",
@@ -821,6 +819,9 @@ describe("POST /eas", () => {
   });
 
   it("handles request with only invalid credentials", async () => {
+    formatMultiAttestationRequestSpy = jest
+      .spyOn(easSchemaMock, "formatMultiAttestationRequest")
+      .mockReturnValue(Promise.resolve([]));
     const nonce = 0;
     const failedCredential = {
       "@context": "https://www.w3.org/2018/credentials/v1",
@@ -838,12 +839,8 @@ describe("POST /eas", () => {
     const credentials = [failedCredential];
     const expectedPayload = {
       passport: {
-        stamps: [] as EasStamp[],
+        multiAttestationRequest: [] as MultiAttestationRequest[],
         recipient: "0x5678000000000000000000000000000000000000",
-        expirationTime: 0,
-        revocable: true,
-        refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
-        value: 0,
         fee: "25000000000000000",
         nonce,
       },
@@ -903,6 +900,9 @@ describe("POST /eas", () => {
   });
 
   it("returns the fee information in the response as wei units", async () => {
+    formatMultiAttestationRequestSpy = jest
+      .spyOn(easSchemaMock, "formatMultiAttestationRequest")
+      .mockReturnValue(Promise.resolve(mockMultiAttestationRequest));
     const nonce = 0;
     const expectedFeeUsd = 2;
 
@@ -923,19 +923,13 @@ describe("POST /eas", () => {
 
     const expectedPayload = {
       passport: {
-        stamps: [
-          {
-            encodedData: "0x1234",
-          },
-        ],
+        multiAttestationRequest: mockMultiAttestationRequest,
         recipient: "0x5678000000000000000000000000000000000000",
-        expirationTime: 0,
-        revocable: true,
-        refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
-        value: 0,
         fee: "25000000000000000",
+        nonce,
       },
       signature: expect.any(Object),
+      invalidCredentials: [] as VerifiableCredential[],
     };
 
     const response = await request(app)
