@@ -77,11 +77,11 @@ export const formatMultiAttestationRequest = async (
 
   return [
     {
-      schema: process.env.NEXT_PUBLIC_EAS_STAMP_SCHEMA,
+      schema: process.env.EAS_GITCOIN_STAMP_SCHEMA,
       data: stampRequestData,
     },
     {
-      schema: process.env.NEXT_PUBLIC_EAS_SCORE_SCHEMA,
+      schema: process.env.EAS_GITCOIN_SCORE_SCHEMA,
       data: scoreRequestData,
     },
   ];

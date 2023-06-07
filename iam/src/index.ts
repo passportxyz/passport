@@ -418,7 +418,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           multiAttestationRequest,
           recipient,
           nonce: Number(nonce),
-          fee,
+          fee: fee.toString(),
         };
 
         attestationSignerWallet
