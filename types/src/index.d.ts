@@ -186,7 +186,6 @@ export type EasPassport = {
 
 export type PassportAttestation = {
   multiAttestationRequest: MultiAttestationRequest[];
-  recipient: string;
   nonce: number;
   fee: any;
 };
