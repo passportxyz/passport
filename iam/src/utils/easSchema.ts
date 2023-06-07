@@ -1,6 +1,14 @@
 import { utils } from "ethers";
-import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import { VerifiableCredential } from "@gitcoin/passport-types";
+import {
+  NO_EXPIRATION,
+  SchemaEncoder,
+  ZERO_BYTES32,
+  MultiAttestationRequest,
+  AttestationRequestData,
+} from "@ethereum-attestation-service/eas-sdk";
+import { VerifiableCredential, EasStamp } from "@gitcoin/passport-types";
+
+import { fetchEncodedPassportScore } from "./scorerService";
 
 const attestationSchemaEncoder = new SchemaEncoder("bytes32 provider, bytes32 hash");
 
@@ -18,3 +26,63 @@ export function encodeEasStamp(credential: VerifiableCredential): string {
   ]);
   return encodedData;
 }
+
+export type Score = {
+  score: number;
+  scorer_id: number;
+};
+
+export const easEncodeScore = (score: Score): string => {
+  const schemaEncoder = new SchemaEncoder("uint32 score,uint32 scorer_id");
+  const encodedData = schemaEncoder.encodeData([
+    { name: "score", value: score.score, type: "uint32" },
+    { name: "scorer_id", value: score.scorer_id, type: "uint32" },
+  ]);
+  return encodedData;
+};
+
+type ValidatedCredential = {
+  credential: VerifiableCredential;
+  verified: boolean;
+};
+
+export const formatMultiAttestationRequest = async (
+  credentials: ValidatedCredential[],
+  recipient: string,
+  dbAccessToken: string
+): Promise<MultiAttestationRequest[]> => {
+  const defaultRequestData = {
+    recipient,
+    expirationTime: NO_EXPIRATION,
+    revocable: true,
+    refUID: ZERO_BYTES32,
+    value: 0,
+  };
+
+  const stampRequestData: AttestationRequestData[] = credentials
+    .filter(({ verified }) => verified)
+    .map(({ credential }) => {
+      return {
+        ...defaultRequestData,
+        data: encodeEasStamp(credential),
+      };
+    });
+
+  const scoreRequestData: AttestationRequestData[] = [
+    {
+      ...defaultRequestData,
+      data: await fetchEncodedPassportScore(recipient, dbAccessToken),
+    },
+  ];
+
+  return [
+    {
+      schema: process.env.NEXT_PUBLIC_EAS_STAMP_SCHEMA,
+      data: stampRequestData,
+    },
+    {
+      schema: process.env.NEXT_PUBLIC_EAS_SCORE_SCHEMA,
+      data: scoreRequestData,
+    },
+  ];
+};
