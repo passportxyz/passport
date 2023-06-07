@@ -384,7 +384,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
   try {
-    const { credentials, nonce, dbAccessToken } = req.body as EasRequestBody;
+    const { credentials, nonce } = req.body as EasRequestBody;
     if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
 
     const recipient = credentials[0].credentialSubject.id.split(":")[4];
@@ -408,11 +408,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           .filter(({ verified }) => !verified)
           .map(({ credential }) => credential);
 
-        const multiAttestationRequest = await formatMultiAttestationRequest(
-          credentialVerifications,
-          recipient,
-          dbAccessToken
-        );
+        const multiAttestationRequest = await formatMultiAttestationRequest(credentialVerifications, recipient);
 
         const fee = await getEASFeeAmount(2);
         const passportAttestation: PassportAttestation = {

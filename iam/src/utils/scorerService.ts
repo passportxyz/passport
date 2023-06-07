@@ -1,18 +1,20 @@
 import axios from "axios";
-import { easEncodeScore, Score } from "./easSchema";
+import { Score } from "./easSchema";
 
-const scorerApiGetScore = process.env.SCORER_ENDPOINT + "/score";
-
-export async function fetchEncodedPassportScore(address: string, dbAccessToken: string): Promise<string> {
+const scorerApiGetScore = `${process.env.SCORER_ENDPOINT}/registry/score/${process.env.ALLO_SCORER_ID}`;
+// Use public endpoint and static api key to fetch score
+export async function fetchPassportScore(address: string): Promise<Score> {
   try {
     const response: {
       data: {
         status: string;
-        score: number | string;
+        evidence: {
+          rawScore: string;
+        };
       };
     } = await axios.get(`${scorerApiGetScore}/${address}`, {
       headers: {
-        Authorization: `Bearer ${dbAccessToken}`,
+        "X-API-Key": process.env.SCORER_API_KEY,
       },
     });
 
@@ -22,13 +24,14 @@ export async function fetchEncodedPassportScore(address: string, dbAccessToken: 
       throw new Error(`Score not ready yet. Status: ${data.status}`);
     }
 
+    console.log(`Score: ${Number(data.evidence.rawScore)}`);
     const score: Score = {
-      score: Number(data.score),
+      score: Number(data.evidence.rawScore),
       scorer_id: Number(process.env.ALLO_SCORER_ID),
     };
 
-    return easEncodeScore(score);
-  } catch {
+    return score;
+  } catch (e) {
     throw new Error("Error fetching score");
   }
 }

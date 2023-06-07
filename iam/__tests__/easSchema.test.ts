@@ -32,7 +32,10 @@ describe("easSchema", () => {
 });
 
 jest.mock("../src/utils/scorerService", () => ({
-  fetchEncodedPassportScore: jest.fn().mockResolvedValue("mockEncodedScore"),
+  fetchPassportScore: jest.fn().mockResolvedValue({
+    score: 100,
+    scorer_id: 1,
+  }),
 }));
 
 const defaultRequestData = {
@@ -44,7 +47,6 @@ const defaultRequestData = {
 };
 
 describe("formatMultiAttestationRequest", () => {
-  beforeEach(() => {});
   it("should return formatted attestation request", async () => {
     const validatedCredentials = [
       {
@@ -68,9 +70,8 @@ describe("formatMultiAttestationRequest", () => {
     ];
 
     const recipient = "0x123";
-    const dbAccessToken = "mockAccessToken";
 
-    const result = await formatMultiAttestationRequest(validatedCredentials, recipient, dbAccessToken);
+    const result = await formatMultiAttestationRequest(validatedCredentials, recipient);
 
     expect(result).toEqual([
       {
@@ -87,7 +88,7 @@ describe("formatMultiAttestationRequest", () => {
         data: [
           {
             ...defaultRequestData,
-            data: "mockEncodedScore",
+            data: "0x00000000000000000000000000000000000000000000000000000000000000640000000000000000000000000000000000000000000000000000000000000001",
           },
         ],
       },

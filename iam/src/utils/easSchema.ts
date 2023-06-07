@@ -8,7 +8,7 @@ import {
 } from "@ethereum-attestation-service/eas-sdk";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 
-import { fetchEncodedPassportScore } from "./scorerService";
+import { fetchPassportScore } from "./scorerService";
 
 const attestationSchemaEncoder = new SchemaEncoder("bytes32 provider, bytes32 hash");
 
@@ -48,8 +48,7 @@ type ValidatedCredential = {
 
 export const formatMultiAttestationRequest = async (
   credentials: ValidatedCredential[],
-  recipient: string,
-  dbAccessToken: string
+  recipient: string
 ): Promise<MultiAttestationRequest[]> => {
   const defaultRequestData = {
     recipient,
@@ -71,7 +70,7 @@ export const formatMultiAttestationRequest = async (
   const scoreRequestData: AttestationRequestData[] = [
     {
       ...defaultRequestData,
-      data: await fetchEncodedPassportScore(recipient, dbAccessToken),
+      data: easEncodeScore(await fetchPassportScore(recipient)),
     },
   ];
 
