@@ -13,7 +13,6 @@ import cors from "cors";
 
 // ---- Web3 packages
 import { utils, ethers } from "ethers";
-import { ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 
 // ---- Types
 import { Response } from "express";
@@ -26,15 +25,14 @@ import {
   ProviderContext,
   CheckRequestBody,
   CheckResponseBody,
-  EasStamp,
   EasPayload,
-  EasPassport,
+  PassportAttestation,
   EasRequestBody,
 } from "@gitcoin/passport-types";
 
 import { getChallenge } from "./utils/challenge";
 import { getEASFeeAmount } from "./utils/easFees";
-import { encodeEasStamp } from "./utils/easSchema";
+import { encodeEasStamp, formatMultiAttestationRequest } from "./utils/easSchema";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
@@ -46,6 +44,7 @@ import {
 
 // All provider exports from platforms
 import { providers } from "@gitcoin/passport-platforms";
+import { VerifiableCredential } from "@gitcoin/passport-types";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -95,14 +94,21 @@ const ATTESTER_DOMAIN = {
 };
 
 const ATTESTER_TYPES = {
-  Stamp: [{ name: "encodedData", type: "bytes" }],
-  Passport: [
-    { name: "stamps", type: "Stamp[]" },
+  AttestationRequestData: [
     { name: "recipient", type: "address" },
     { name: "expirationTime", type: "uint64" },
     { name: "revocable", type: "bool" },
     { name: "refUID", type: "bytes32" },
+    { name: "data", type: "bytes" },
     { name: "value", type: "uint256" },
+  ],
+  MultiAttestationRequest: [
+    { name: "schema", type: "bytes32" },
+    { name: "data", type: "AttestationRequestData[]" },
+  ],
+  PassportAttestationRequest: [
+    { name: "multiAttestationRequest", type: "MultiAttestationRequest[]" },
+    { name: "recipient", type: "address" },
     { name: "nonce", type: "uint256" },
     { name: "fee", type: "uint256" },
   ],
@@ -380,7 +386,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
   try {
-    const { credentials, nonce } = req.body as EasRequestBody;
+    const { credentials, nonce, dbAccessToken } = req.body as EasRequestBody;
     if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
 
     const recipient = credentials[0].credentialSubject.id.split(":")[4];
@@ -401,34 +407,27 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           .filter(({ verified }) => !verified)
           .map(({ credential }) => credential);
 
-        const stamps: EasStamp[] = credentialVerifications
-          .filter(({ verified }) => verified)
-          .map(({ credential }) => {
-            return {
-              encodedData: encodeEasStamp(credential),
-            };
-          });
+        const multiAttestationRequest = await formatMultiAttestationRequest(
+          credentialVerifications,
+          recipient,
+          dbAccessToken
+        );
 
         const fee = await getEASFeeAmount(2);
-
-        const easPassport: EasPassport = {
-          stamps,
+        const passportAttestation: PassportAttestation = {
+          multiAttestationRequest,
           recipient,
-          expirationTime: NO_EXPIRATION,
-          revocable: true,
-          refUID: ZERO_BYTES32,
-          value: 0,
-          fee: fee.toString(),
-          nonce,
+          nonce: Number(nonce),
+          fee,
         };
 
         attestationSignerWallet
-          ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, easPassport)
+          ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {
             const { v, r, s } = utils.splitSignature(signature);
 
             const payload: EasPayload = {
-              passport: easPassport,
+              passport: passportAttestation,
               signature: { v, r, s },
               invalidCredentials,
             };

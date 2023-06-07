@@ -188,7 +188,7 @@ export type PassportAttestation = {
   multiAttestationRequest: MultiAttestationRequest[];
   recipient: string;
   nonce: number;
-  fee: number;
+  fee: any;
 };
 
 export type EasPayload = {
