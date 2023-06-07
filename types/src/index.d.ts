@@ -3,6 +3,8 @@ import { JsonRpcSigner } from "@ethersproject/providers";
 export { BrightIdProcedureResponse, BrightIdVerificationResponse, BrightIdSponsorshipResponse } from "./brightid";
 import { BigNumber } from "@ethersproject/bignumber";
 
+import { MultiAttestationRequest } from "@ethereum-attestation-service/eas-sdk";
+
 // Typing for required parts of DIDKit
 export type DIDKitLib = {
   verifyCredential: (vc: string, proofOptions: string) => Promise<string>;
@@ -182,8 +184,15 @@ export type EasPassport = {
   fee: any;
 };
 
+export type PassportAttestation = {
+  multiAttestationRequest: MultiAttestationRequest[];
+  recipient: string;
+  nonce: number;
+  fee: number;
+};
+
 export type EasPayload = {
-  passport: EasPassport;
+  passport: PassportAttestation;
   signature: {
     v: number;
     r: string;
@@ -196,6 +205,7 @@ export type EasPayload = {
 export type EasRequestBody = {
   nonce: number;
   credentials: VerifiableCredential[];
+  dbAccessToken: string;
 };
 
 // Passport DID
