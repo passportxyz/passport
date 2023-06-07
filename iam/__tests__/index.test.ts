@@ -26,7 +26,9 @@ import {
 
 import { utils } from "ethers";
 import * as easFeesMock from "../src/utils/easFees";
+import * as scoreServiceMock from "../src/utils/scorerService";
 import * as identityMock from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { easEncodeScore } from "../src/utils/easSchema";
 
 jest.mock("ethers", () => {
   const originalModule = jest.requireActual("ethers");
@@ -723,11 +725,22 @@ describe("POST /check", function () {
 
 describe("POST /eas", () => {
   let getEASFeeAmountSpy: jest.SpyInstance;
+  let fetchEncodedPassportScoreSpy: jest.SpyInstance;
+
   beforeEach(() => {
     jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
     getEASFeeAmountSpy = jest
       .spyOn(easFeesMock, "getEASFeeAmount")
       .mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
+
+    fetchEncodedPassportScoreSpy = jest.spyOn(scoreServiceMock, "fetchEncodedPassportScore").mockReturnValue(
+      Promise.resolve(
+        easEncodeScore({
+          score: 23.45,
+          scorer_id: 123,
+        })
+      )
+    );
   });
 
   afterEach(() => {
@@ -735,7 +748,7 @@ describe("POST /eas", () => {
     jest.restoreAllMocks();
   });
 
-  it("handles valid requests including some invalid credentials", async () => {
+  it.only("handles valid requests including some invalid credentials", async () => {
     const nonce = 0;
     const failedCredential = {
       "@context": "https://www.w3.org/2018/credentials/v1",

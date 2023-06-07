@@ -23,8 +23,7 @@ export async function fetchEncodedPassportScore(address: string, dbAccessToken: 
     }
 
     const score: Score = {
-      // TODO: a bit hacky
-      score: data.score === "0E-9" ? 0 : Number(data.score),
+      score: Number(data.score),
       scorer_id: Number(process.env.ALLO_SCORER_ID),
     };
 
