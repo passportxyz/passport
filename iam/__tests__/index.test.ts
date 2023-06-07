@@ -24,11 +24,13 @@ import {
   EasStamp,
 } from "@gitcoin/passport-types";
 
-import { utils } from "ethers";
+import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
+
+import { BigNumber, utils } from "ethers";
 import * as easFeesMock from "../src/utils/easFees";
 import * as scoreServiceMock from "../src/utils/scorerService";
 import * as identityMock from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
-import { easEncodeScore } from "../src/utils/easSchema";
+import * as easSchemaMock from "../src/utils/easSchema";
 
 jest.mock("ethers", () => {
   const originalModule = jest.requireActual("ethers");
@@ -723,9 +725,45 @@ describe("POST /check", function () {
   });
 });
 
+const mockMultiAttestationRequest: MultiAttestationRequest[] = [
+  {
+    schema: "0x853a55f39e2d1bf1e6731ae7148976fbbb0c188a898a233dba61a233d8c0e4a4",
+    data: [
+      {
+        recipient: "0x0987654321098765432109876543210987654321",
+        data: easSchemaMock.easEncodeScore({
+          score: 23.45,
+          scorer_id: 123,
+        }),
+        expirationTime: NO_EXPIRATION,
+        revocable: false,
+        refUID: ZERO_BYTES32,
+        value: "25000000000000000",
+      },
+    ],
+  },
+  {
+    schema: "0x853a55f39e2d1bf1e6731ae7148976fbbb0c188a898a233dba61a233d8c0e4a4",
+    data: [
+      {
+        recipient: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+        data: easSchemaMock.easEncodeScore({
+          score: 23.45,
+          scorer_id: 123,
+        }),
+        expirationTime: NO_EXPIRATION,
+        revocable: true,
+        refUID: ZERO_BYTES32,
+        value: "25000000000000000",
+      },
+    ],
+  },
+];
+
 describe("POST /eas", () => {
   let getEASFeeAmountSpy: jest.SpyInstance;
   let fetchEncodedPassportScoreSpy: jest.SpyInstance;
+  let formatMultiAttestationRequestSpy: jest.SpyInstance;
 
   beforeEach(() => {
     jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
@@ -733,14 +771,9 @@ describe("POST /eas", () => {
       .spyOn(easFeesMock, "getEASFeeAmount")
       .mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
 
-    fetchEncodedPassportScoreSpy = jest.spyOn(scoreServiceMock, "fetchEncodedPassportScore").mockReturnValue(
-      Promise.resolve(
-        easEncodeScore({
-          score: 23.45,
-          scorer_id: 123,
-        })
-      )
-    );
+    formatMultiAttestationRequestSpy = jest
+      .spyOn(easSchemaMock, "formatMultiAttestationRequest")
+      .mockReturnValue(Promise.resolve(mockMultiAttestationRequest));
   });
 
   afterEach(() => {
@@ -763,34 +796,12 @@ describe("POST /eas", () => {
       expirationDate: "9999-12-31T23:59:59Z",
     };
 
-    const credentials = [
-      {
-        "@context": "https://www.w3.org/2018/credentials/v1",
-        type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
-        issuanceDate: new Date().toISOString(),
-        credentialSubject: {
-          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
-          provider: "test",
-          hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
-        },
-        expirationDate: "9999-12-31T23:59:59Z",
-      },
-      failedCredential,
-    ];
+    const credentials = [failedCredential];
 
     const expectedPayload = {
       passport: {
-        stamps: [
-          {
-            encodedData: "0x1234",
-          },
-        ],
+        multiAttestationRequest: mockMultiAttestationRequest,
         recipient: "0x5678000000000000000000000000000000000000",
-        expirationTime: 0,
-        revocable: true,
-        refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
-        value: 0,
         fee: "25000000000000000",
         nonce,
       },
