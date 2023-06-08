@@ -65,6 +65,26 @@ if (!process.env.GITCOIN_VERIFIER_CONTRACT_ADDRESS) {
   configErrors.push("GITCOIN_VERIFIER_CONTRACT_ADDRESS is required");
 }
 
+if (!process.env.ALLO_SCORER_ID) {
+  configErrors.push("ALLO_SCORER_ID is required");
+}
+
+if (!process.env.SCORER_ENDPOINT) {
+  configErrors.push("SCORER_ENDPOINT is required");
+}
+
+if (!process.env.SCORER_API_KEY) {
+  configErrors.push("SCORER_API_KEY is required");
+}
+
+if (!process.env.EAS_GITCOIN_STAMP_SCHEMA) {
+  configErrors.push("EAS_GITCOIN_STAMP_SCHEMA is required");
+}
+
+if (!process.env.EAS_GITCOIN_SCORE_SCHEMA) {
+  configErrors.push("EAS_GITCOIN_SCORE_SCHEMA is required");
+}
+
 if (configErrors.length > 0) {
   configErrors.forEach((error) => console.error(error));
   throw new Error("Missing required configuration");
