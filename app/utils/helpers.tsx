@@ -113,8 +113,9 @@ export const isServerOnMaintenance = () => {
       const maintenancePeriod = JSON.parse(process.env.NEXT_PUBLIC_MAINTENANCE_MODE_ON);
       const start = new Date(maintenancePeriod[0]);
       const end = new Date(maintenancePeriod[1]);
+      const now = new Date();
 
-      return new Date() >= start && new Date() <= end;
+      return now >= start && now <= end;
     } catch (error) {
       return false;
     }

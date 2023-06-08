@@ -54,7 +54,6 @@ const App: NextPage = () => {
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/privacy" element={<Privacy />} />
-          <Route path="/maintenance" element={<Maintenance />} />
         </Routes>
       </Router>
     </div>
