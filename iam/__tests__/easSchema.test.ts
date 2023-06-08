@@ -1,17 +1,33 @@
-import { encodeEasStamp, formatMultiAttestationRequest } from "../src/utils/easSchema";
-import * as encodeEasStampModule from "../src/utils/easSchema";
+import * as easStampModule from "../src/utils/easSchema";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 import { BigNumber } from "ethers";
 import { NO_EXPIRATION, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";
+import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
+import { utils } from "ethers";
 
-describe("easSchema", () => {
-  it("returns a valid encoded schema", () => {
+jest.mock("../src/utils/scorerService", () => ({
+  fetchPassportScore: jest.fn(),
+}));
+
+const ensProviderConfig = {
+  platformGroup: "Account Name",
+  providers: [
+    {
+      title: "Encrypted",
+      name: "Ens",
+      hash: "0xb4448bd57db012361e41665a60f3906dda48b4ffc1e4b8151cb2b6d431861fae",
+    },
+  ],
+};
+
+describe("eas encoding", () => {
+  it("should use encodeEasStamp to format stamp data correctly", () => {
     const verifiableCredential: VerifiableCredential = {
       "@context": [],
       type: [],
       credentialSubject: {
         hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
-        provider: "SomeProvider",
+        provider: "Ens",
         id: "",
         "@context": [{}],
       },
@@ -27,16 +43,28 @@ describe("easSchema", () => {
       },
     };
 
-    const encodedData = encodeEasStamp(verifiableCredential);
+    const encodedData = easStampModule.encodeEasStamp(verifiableCredential);
+    const stampSchemaEncoder = new SchemaEncoder("bytes32 provider, bytes32 hash");
+    const decodedStampData = stampSchemaEncoder.decodeData(encodedData);
+    expect(decodedStampData[0].value.value).toEqual(ensProviderConfig.providers[0].hash);
   });
 });
 
-jest.mock("../src/utils/scorerService", () => ({
-  fetchPassportScore: jest.fn().mockResolvedValue({
-    score: 100,
+it("should use encodeEasScore to format score data correctly", () => {
+  const score = {
+    score: 0.5,
     scorer_id: 1,
-  }),
-}));
+  };
+  const encodedData = easStampModule.encodeEasScore(score);
+  const scoreSchemaEncoder = new SchemaEncoder("uint256 score,uint32 scorer_id,uint8 score_decimals");
+  const decodedScoreData = scoreSchemaEncoder.decodeData(encodedData);
+
+  const decimals = 18;
+
+  expect(decodedScoreData[0].value.value).toEqual(utils.parseUnits(score.score.toString(), decimals));
+  expect(decodedScoreData[1].value.value).toEqual(score.scorer_id);
+  expect(decodedScoreData[2].value.value).toEqual(decimals);
+});
 
 const defaultRequestData = {
   recipient: "0x123",
@@ -48,6 +76,9 @@ const defaultRequestData = {
 
 describe("formatMultiAttestationRequest", () => {
   it("should return formatted attestation request", async () => {
+    jest.spyOn(easStampModule, "encodeEasScore").mockReturnValue("0x00000000000000000000000");
+    jest.spyOn(easStampModule, "encodeEasStamp").mockReturnValue("0x00000000000000000000000");
+
     const validatedCredentials = [
       {
         credential: {
@@ -71,7 +102,7 @@ describe("formatMultiAttestationRequest", () => {
 
     const recipient = "0x123";
 
-    const result = await formatMultiAttestationRequest(validatedCredentials, recipient);
+    const result = await easStampModule.formatMultiAttestationRequest(validatedCredentials, recipient);
 
     expect(result).toEqual([
       {
@@ -79,7 +110,7 @@ describe("formatMultiAttestationRequest", () => {
         data: [
           {
             ...defaultRequestData,
-            data: "0xf16d3efd2054045b9debcc6eadf39c4d2cb45876dd5bd3d168b64a3bbd40aa9841d8c507c13a15bbc14fc1cffb89abed50636a5f820bb68370002a1802ac5e8b",
+            data: "0x00000000000000000000000",
           },
         ],
       },
@@ -88,7 +119,7 @@ describe("formatMultiAttestationRequest", () => {
         data: [
           {
             ...defaultRequestData,
-            data: "0x00000000000000000000000000000000000000000000000000000000000000640000000000000000000000000000000000000000000000000000000000000001",
+            data: "0x00000000000000000000000",
           },
         ],
       },

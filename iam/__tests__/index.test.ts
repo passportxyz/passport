@@ -729,7 +729,7 @@ const mockMultiAttestationRequest: MultiAttestationRequest[] = [
     data: [
       {
         recipient: "0x0987654321098765432109876543210987654321",
-        data: easSchemaMock.easEncodeScore({
+        data: easSchemaMock.encodeEasScore({
           score: 23.45,
           scorer_id: 123,
         }),
@@ -745,7 +745,7 @@ const mockMultiAttestationRequest: MultiAttestationRequest[] = [
     data: [
       {
         recipient: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-        data: easSchemaMock.easEncodeScore({
+        data: easSchemaMock.encodeEasScore({
           score: 23.45,
           scorer_id: 123,
         }),

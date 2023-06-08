@@ -24,7 +24,6 @@ export async function fetchPassportScore(address: string): Promise<Score> {
       throw new Error(`Score not ready yet. Status: ${data.status}`);
     }
 
-    console.log(`Score: ${Number(data.evidence.rawScore)}`);
     const score: Score = {
       score: Number(data.evidence.rawScore),
       scorer_id: Number(process.env.ALLO_SCORER_ID),

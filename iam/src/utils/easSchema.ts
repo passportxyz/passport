@@ -12,7 +12,7 @@ import { fetchPassportScore } from "./scorerService";
 
 const attestationSchemaEncoder = new SchemaEncoder("bytes32 provider, bytes32 hash");
 
-export function encodeEasStamp(credential: VerifiableCredential): string {
+export const encodeEasStamp = (credential: VerifiableCredential): string => {
   // We hash the provider to get a bytes32 value
   const providerValue = utils.keccak256(utils.toUtf8Bytes(credential.credentialSubject.provider));
 
@@ -25,19 +25,25 @@ export function encodeEasStamp(credential: VerifiableCredential): string {
     { name: "hash", value: hashValue, type: "bytes32" },
   ]);
   return encodedData;
-}
+};
 
 export type Score = {
   score: number;
   scorer_id: number;
 };
 
-export const easEncodeScore = (score: Score): string => {
-  const schemaEncoder = new SchemaEncoder("uint32 score,uint32 scorer_id");
+export const encodeEasScore = (score: Score): string => {
+  const decimals = 18;
+
+  const bnScore = utils.parseUnits(score.score.toString(), decimals);
+
+  const schemaEncoder = new SchemaEncoder("uint256 score,uint32 scorer_id,uint8 score_decimals");
   const encodedData = schemaEncoder.encodeData([
-    { name: "score", value: score.score, type: "uint32" },
+    { name: "score", value: bnScore, type: "uint256" },
     { name: "scorer_id", value: score.scorer_id, type: "uint32" },
+    { name: "score_decimals", value: decimals, type: "uint8" },
   ]);
+
   return encodedData;
 };
 
@@ -70,7 +76,7 @@ export const formatMultiAttestationRequest = async (
   const scoreRequestData: AttestationRequestData[] = [
     {
       ...defaultRequestData,
-      data: easEncodeScore(await fetchPassportScore(recipient)),
+      data: encodeEasScore(await fetchPassportScore(recipient)),
     },
   ];
 
