@@ -27,11 +27,11 @@ export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) =
       duration: 5000,
       isClosable: true,
       render: (result: any) => (
-        <div className="flex justify-between rounded-md bg-blue-darkblue p-4 text-white">
-          {completedIcon("./assets/purple-check-icon.svg")}
+        <div className="flex justify-between rounded-md bg-color-1 text-background-2">
+          {completedIcon("./assets/check-icon2.svg")}
           <p className="py-1 px-3">Your Passport has been reset.</p>
           <button className="sticky top-0" onClick={result.onClose}>
-            <img alt="close button" className="rounded-lg hover:bg-gray-500" src="./assets/x-icon.svg" />
+            <img alt="close button" className="rounded-lg hover:bg-gray-500" src="./assets/x-icon-black.svg" />
           </button>
         </div>
       ),

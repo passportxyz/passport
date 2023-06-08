@@ -57,7 +57,7 @@ enum VerificationStatuses {
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
-const checkIcon = "../../assets/check-icon.svg";
+const checkIcon2 = "../../assets/check-icon2.svg";
 
 type GenericPlatformProps = PlatformProps & { onClose: () => void };
 
@@ -132,14 +132,10 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
         duration: 9000,
         isClosable: true,
         render: (result: any) => (
-          <div className="rounded-md bg-blue-darkblue p-2 text-white">
+          <div className="rounded-md bg-color-1 text-background-2">
             <div className="flex p-4">
               <button className="inline-flex flex-shrink-0 cursor-not-allowed">
-                <img
-                  alt="information circle"
-                  className="sticky top-0 mb-20 p-2"
-                  src="./assets/information-circle-icon.svg"
-                />
+                <img alt="information circle" className="sticky top-0 mb-20 p-2" src="./assets/check-icon2.svg" />
               </button>
               <div className="flex-grow pl-6">
                 <h2 className="mb-2 text-lg font-bold">Sponsored through Gitcoin for Bright ID</h2>
@@ -149,7 +145,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
                 </p>
               </div>
               <button className="inline-flex flex-shrink-0 rounded-lg" onClick={result.onClose}>
-                <img alt="close button" className="rounded-lg p-2 hover:bg-gray-500" src="./assets/x-icon.svg" />
+                <img alt="close button" className="rounded-lg p-2 hover:bg-gray-500" src="./assets/x-icon-black.svg" />
               </button>
             </div>
           </div>
@@ -335,7 +331,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
         return {
           title: "Done!",
           body: `All ${platform.platformId} data points verified.`,
-          icon: checkIcon,
+          icon: checkIcon2,
           platformId: platform.platformId as PLATFORM_ID,
         };
       case VerificationStatuses.ReVerified:
@@ -344,7 +340,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
           body: `Successfully re-verified ${platform.platformId} data ${
             updatedVerifiedProviders.size > 1 ? "points" : "point"
           }.`,
-          icon: checkIcon,
+          icon: checkIcon2,
           platformId: platform.platformId as PLATFORM_ID,
         };
       case VerificationStatuses.PartiallyVerified:
@@ -353,14 +349,14 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
           body: `Successfully verified ${platform.platformId} data ${
             updatedMinusInitial.size > 1 ? "points" : "point"
           }.`,
-          icon: checkIcon,
+          icon: checkIcon2,
           platformId: platform.platformId as PLATFORM_ID,
         };
       case VerificationStatuses.AllRemoved:
         return {
           title: "Success!",
           body: `All ${platform.platformId} data points removed.`,
-          icon: checkIcon,
+          icon: checkIcon2,
           platformId: platform.platformId as PLATFORM_ID,
         };
       case VerificationStatuses.PartiallyRemoved:
@@ -369,7 +365,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
           body: `Successfully removed ${platform.platformId} data ${
             initialMinusUpdated.size > 1 ? "points" : "point"
           }.`,
-          icon: checkIcon,
+          icon: checkIcon2,
           platformId: platform.platformId as PLATFORM_ID,
         };
       case VerificationStatuses.PartiallyRemovedAndVerified:
@@ -378,14 +374,14 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
           body: `${initialMinusUpdated.size} ${platform.platformId} data ${
             initialMinusUpdated.size > 1 ? "points" : "point"
           } removed and ${updatedMinusInitial.size} verified.`,
-          icon: checkIcon,
+          icon: checkIcon2,
           platformId: platform.platformId as PLATFORM_ID,
         };
       case VerificationStatuses.Failed:
         return {
           title: "Verification Failed",
           body: "Please make sure you fulfill the requirements for this stamp.",
-          icon: "../../assets/verification-failed.svg",
+          icon: "../../assets/verification-failed-bright.svg",
           platformId: platform.platformId as PLATFORM_ID,
         };
     }

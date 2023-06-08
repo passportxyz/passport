@@ -47,20 +47,20 @@ export const RemoveStampModal = ({
       setIsLoading(true);
       await handleDeleteStamps(stampsToBeDeleted);
       toast({
-        duration: 5000,
+        duration: 9000,
         isClosable: true,
         render: (result: any) => (
           <DoneToastContent
             title="Success!"
             body="Stamp data has been removed."
-            icon="../assets/check-icon.svg"
+            icon="../assets/check-icon2.svg"
             result={result}
           />
         ),
       });
     } catch (error) {
       toast({
-        duration: 5000,
+        duration: 9000,
         status: "error",
         title: "Error!",
         description: "Something went wrong. Please try again.",
