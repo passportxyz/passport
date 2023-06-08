@@ -90,13 +90,16 @@ const SyncToChainButton = () => {
         }
 
         const nonce = await gitcoinAttesterContract.recipientNonces(address);
+
+        const payload = {
+          credentials,
+          nonce,
+        };
+
         const { data }: { data: EasPayload } = await axios({
           method: "post",
           url: `${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas`,
-          data: {
-            credentials,
-            nonce,
-          },
+          data: payload,
           headers: {
             "Content-Type": "application/json",
           },
@@ -120,14 +123,9 @@ const SyncToChainButton = () => {
         if (data.passport) {
           const { v, r, s } = data.signature;
 
-          const transaction = await gitcoinAttesterContract.addPassportWithSignature(
-            process.env.NEXT_PUBLIC_GITCOIN_VC_SCHEMA_UUID as string,
-            data.passport,
-            v,
-            r,
-            s,
-            { value: data.passport.fee }
-          );
+          const transaction = await gitcoinAttesterContract.verifyAndAttest(data.passport, v, r, s, {
+            value: data.passport.fee,
+          });
           toast({
             title: "Submitted",
             description: "Passport submitted to chain",

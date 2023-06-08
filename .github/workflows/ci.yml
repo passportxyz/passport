@@ -19,6 +19,11 @@ jobs:
 
     env:
       CERAMIC_CLIENT_URL: http://127.0.0.1:7007
+      ALLO_SCORER_ID: 3
+      SCORER_ENDPOINT: http://127.0.0.1:8002
+      SCORER_API_KEY: abcd
+      EAS_GITCOIN_STAMP_SCHEMA: 0x
+      EAS_GITCOIN_SCORE_SCHEMA: 0x
 
     steps:
       - uses: actions/checkout@v3
