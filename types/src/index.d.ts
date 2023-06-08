@@ -1,7 +1,6 @@
 import { JsonRpcSigner } from "@ethersproject/providers";
 // BrightId Shared Types
 export { BrightIdProcedureResponse, BrightIdVerificationResponse, BrightIdSponsorshipResponse } from "./brightid";
-import { BigNumber } from "@ethersproject/bignumber";
 
 // Typing for required parts of DIDKit
 export type DIDKitLib = {
