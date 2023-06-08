@@ -1,11 +1,10 @@
 name: Deploy IAM Server to Review
 
-# trigger: on push to `main` branch, AND only on changes to `iam/*` and `infra/review/**` files 
+# trigger: on push to `main` branch, AND only on changes to `iam/*` and `infra/review/**` files
 on:
   push:
     branches: [main]
   workflow_dispatch:
-  
 
 jobs:
   build-and-test:
