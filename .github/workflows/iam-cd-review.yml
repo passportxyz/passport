@@ -1,15 +1,20 @@
 name: Deploy IAM Server to Review
 
-# trigger: on push to `main` branch, AND only on changes to `iam/*` and `infra/review/**` files 
+# trigger: on push to `main` branch, AND only on changes to `iam/*` and `infra/review/**` files
 on:
   push:
     branches: [main]
   workflow_dispatch:
-  
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      ALLO_SCORER_ID: 1
+      SCORER_ENDPOINT: http://127.0.0.1:8002
+      SCORER_API_KEY: abcd
+      EAS_GITCOIN_STAMP_SCHEMA: 0x
+      EAS_GITCOIN_SCORE_SCHEMA: 0x
     steps:
       - uses: actions/checkout@v3
       # run tests
