@@ -24,7 +24,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 
 // --- UI components
 // TODO: re-add toasts after design updates
-import { NoSymbolIcon } from "@heroicons/react/20/solid";
+import { XMarkIcon } from "@heroicons/react/20/solid";
 
 // --- App components
 import { RefreshMyStampsModalContentCardList } from "../components/RefreshMyStampsModalContentCardList";
@@ -178,7 +178,7 @@ export const RefreshMyStampsModalContent = ({
                 setSelectedProviders={setSelectedProviders}
               />
             </div>
-            <div className="mt-8 cursor-pointer text-center text-pink-300 underline">
+            <div className="mt-8 cursor-pointer text-center text-color-3 underline">
               <a onClick={() => setShowDataInfo(!showDataInfo)}>How is my data stored?</a>
             </div>
             {showDataInfo && (
@@ -213,10 +213,10 @@ export const RefreshMyStampsModalContent = ({
               className="mt-4 mb-6 flex h-10 w-10 items-center justify-center self-center rounded-full border border-accent-2"
               onClick={onClose}
             >
-              <NoSymbolIcon className="h-7 w-7" aria-hidden="true" fill="var(--color-accent-3)" />
+              <XMarkIcon className="h-7 w-7" aria-hidden="true" fill="var(--color-text-1)" />
             </button>
             <div className="w-3/4 text-3xl">No New Web3 Stamps Detected</div>
-            <div className="my-20 text-xl text-muted">
+            <div className="my-20 text-xl text-color-3">
               We did not find any new Web3 stamps to add to your passport. Completing the actions for a web3 stamp and
               resubmitting will ensure that stamp is added (for example: Obtain an ENS name, NFT, etc.). Please return
               to the dashboard and select additional stamps to verify your unique humanity by connecting to external

@@ -49,7 +49,7 @@ export default function RefreshStampsProgressSteps({ steps }: RefreshStampsProgr
                   </span>
                 </span>
                 <span className="ml-12 -mt-2 flex min-w-0 flex-col">
-                  <span className="text-sm font-medium text-white">{step.name}</span>
+                  <span className="text-sm font-medium text-color-3">{step.name}</span>
                 </span>
               </>
             ) : (
