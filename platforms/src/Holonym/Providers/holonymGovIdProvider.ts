@@ -43,7 +43,7 @@ export class HolonymGovIdProvider implements Provider {
   // Verify that the address defined in the payload has proven uniqueness using Holonym
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
-    const address = await getAddress(payload);
+    const address = (await getAddress(payload)).toLowerCase();
 
     try {
       // define a provider using the alchemy api key
@@ -61,7 +61,6 @@ export class HolonymGovIdProvider implements Provider {
           ? {
               // store the address into the proof records
               address,
-              holonym: `Is unique for action ${actionId}, based on government ID`,
             }
           : undefined,
       };

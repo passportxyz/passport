@@ -292,5 +292,4 @@ export type PROVIDER_ID =
   | "Hypercerts"
   | "PHIActivitySilver"
   | "PHIActivityGold"
-  | "Holonym"
   | "HolonymGovIdProvider";

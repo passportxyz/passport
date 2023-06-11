@@ -1,6 +1,7 @@
-import { PlatformSpec, PlatformGroupSpec } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { HolonymGovIdProvider } from "./Providers/holonymGovIdProvider";
 
-export const HolonymPlatformDetails: PlatformSpec = {
+export const PlatformDetails: PlatformSpec = {
   icon: "./assets/holonymStampIcon.svg",
   platform: "Holonym",
   name: "Holonym",
@@ -10,9 +11,11 @@ export const HolonymPlatformDetails: PlatformSpec = {
   isEVM: true,
 };
 
-export const HolonymProviderConfig: PlatformGroupSpec[] = [
+export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Government ID",
     providers: [{ title: "Proven uniqueness using Holonym with government ID", name: "HolonymGovIdProvider" }],
   },
 ];
+
+export const providers: Provider[] = [new HolonymGovIdProvider()];

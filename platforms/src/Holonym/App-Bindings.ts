@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { AppContext, Platform, PlatformOptions, ProviderPayload } from "../types";
+import { AppContext, Platform, ProviderPayload } from "../types";
 
 export class HolonymPlatform implements Platform {
   platformId = "Holonym";

@@ -41,10 +41,10 @@ const {
   Coinbase,
   GuildXYZ,
   Hypercerts,
+  Holonym,
 } = stampPlatforms;
 
 import { PlatformProps } from "../components/GenericPlatform";
-import { getProviderSpec } from "../utils/helpers";
 
 // -- Trusted IAM servers DID
 const IAM_ISSUER_DID = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
@@ -204,6 +204,13 @@ if (process.env.NEXT_PUBLIC_FF_PHI_STAMP === "on") {
   platforms.set("PHI", {
     platform: new PHI.PHIPlatform(),
     platFormGroupSpec: PHI.ProviderConfig,
+  });
+}
+
+if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP === "on") {
+  platforms.set("Holonym", {
+    platform: new Holonym.HolonymPlatform(),
+    platFormGroupSpec: Holonym.ProviderConfig,
   });
 }
 
