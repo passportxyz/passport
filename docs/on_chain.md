@@ -220,7 +220,7 @@ contract Scorer {
 ```
 
 
-### Passport Attestation - Option 2
+### Passport Attestation - Option 2 (in progress)
 
 ```solidity
 
