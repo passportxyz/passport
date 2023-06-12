@@ -6,6 +6,7 @@ import {
   PLATFORM_ID,
   PROVIDER_ID,
   Stamp,
+  StampPatch,
 } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../config/providers";
 import { CeramicDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
@@ -57,6 +58,7 @@ export interface CeramicContextState {
   allPlatforms: Map<PLATFORM_ID, PlatformProps>;
   handleCreatePassport: () => Promise<void>;
   handleAddStamps: (stamps: Stamp[]) => Promise<void>;
+  handlePatchStamps: (stamps: StampPatch[]) => Promise<void>;
   handleDeleteStamps: (providerIds: PROVIDER_ID[]) => Promise<void>;
   handleCheckRefreshPassport: () => Promise<boolean>;
   cancelCeramicConnection: () => void;
@@ -253,6 +255,7 @@ const startingState: CeramicContextState = {
   allPlatforms: platforms,
   handleCreatePassport: async () => {},
   handleAddStamps: async () => {},
+  handlePatchStamps: async () => {},
   handleDeleteStamps: async () => {},
   handleCheckRefreshPassport: async () => false,
   passportHasCacaoError: false,
@@ -563,6 +566,37 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     }
   };
 
+  const handlePatchStamps = async (stampPatches: StampPatch[]): Promise<void> => {
+    try {
+      if (database) {
+        await database.patchStamps(stampPatches);
+        const newPassport = await fetchPassport(database, true);
+
+        if (ceramicClient && newPassport) {
+          const deleteProviderIds = stampPatches
+            .filter(({ credential }) => !credential)
+            .map(({ provider }) => provider);
+
+          if (deleteProviderIds.length)
+            await ceramicClient
+              .deleteStampIDs(deleteProviderIds)
+              .catch((e) => console.log("error deleting ceramic stamps", e));
+
+          await ceramicClient
+            .setStamps(newPassport.stamps)
+            .catch((e) => console.log("error setting ceramic stamps", e));
+        }
+
+        if (dbAccessToken) {
+          refreshScore(address, dbAccessToken);
+        }
+      }
+    } catch (e) {
+      datadogLogs.logger.error("Error patching stamps", { stampPatches, error: e });
+      throw e;
+    }
+  };
+
   const handleDeleteStamps = async (providerIds: PROVIDER_ID[]): Promise<void> => {
     try {
       if (database) {
@@ -607,20 +641,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     setAllProviderState(startingAllProvidersState);
   };
 
-  const stateMemo = useMemo(
-    () => ({
-      passport,
-      isLoadingPassport,
-      allProvidersState,
-      handleCreatePassport,
-      handleAddStamps,
-      handleDeleteStamps,
-      userDid,
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [passport, isLoadingPassport, allProvidersState, userDid]
-  );
-
   const providerProps = {
     passport,
     isLoadingPassport,
@@ -628,6 +648,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     allPlatforms: platforms,
     handleCreatePassport,
     handleAddStamps,
+    handlePatchStamps,
     handleDeleteStamps,
     handleCheckRefreshPassport,
     cancelCeramicConnection,

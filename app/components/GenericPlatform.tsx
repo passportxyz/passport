@@ -64,7 +64,7 @@ type GenericPlatformProps = PlatformProps & { onClose: () => void };
 
 export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: GenericPlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
-  const { handleAddStamps, handleDeleteStamps, allProvidersState, userDid } = useContext(CeramicContext);
+  const { handlePatchStamps, allProvidersState, userDid } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [showNoStampModal, setShowNoStampModal] = useState(false);
@@ -74,7 +74,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
   const toast = useToast();
 
   // find all providerIds
-  const providerIds = useMemo(
+  const platformProviderIds = useMemo(
     () =>
       platFormGroupSpec?.reduce((all, stamp) => {
         return all.concat(stamp.providers?.map((provider: any) => provider.name as PROVIDER_ID));
@@ -84,7 +84,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
 
   // VerifiedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
-    providerIds.filter(
+    platformProviderIds.filter(
       (providerId: any) => typeof allProvidersState[providerId as PROVIDER_ID]?.stamp?.credential !== "undefined"
     )
   );
@@ -209,9 +209,8 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
             ).credentials?.filter((cred: any) => !cred.error) || []
           : [];
 
-      const stampPatches: StampPatch[] = providerIds.map((provider: PROVIDER_ID) => {
+      const stampPatches: StampPatch[] = platformProviderIds.map((provider: PROVIDER_ID) => {
         const cred = verifiedCredentials.find((cred: any) => cred.record?.type === provider);
-
         if (cred) return { provider, credential: cred.credential as VerifiableCredential };
         else return { provider };
       });
@@ -220,7 +219,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
 
       datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
       // grab all providers who are verified from the verify response
-      const actualVerifiedProviders = providerIds.filter(
+      const actualVerifiedProviders = platformProviderIds.filter(
         (providerId: any) =>
           !!stampPatches.find((stampPatch) => stampPatch?.credential?.credentialSubject?.provider === providerId)
       );
@@ -293,7 +292,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
     initialMinusUpdated: Set<PROVIDER_ID>,
     updatedMinusInitial: Set<PROVIDER_ID>
   ) => {
-    if (updatedMinusInitial.size === providerIds.length) {
+    if (updatedMinusInitial.size === platformProviderIds.length) {
       return VerificationStatuses.AllVerified;
     } else if (updatedVerifiedProviders.size > 0 && updatedMinusInitial.size === 0 && initialMinusUpdated.size === 0) {
       return VerificationStatuses.ReVerified;
