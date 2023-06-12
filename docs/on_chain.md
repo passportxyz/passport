@@ -25,15 +25,23 @@ sequenceDiagram
     Passport App->>Verifier: PassportAttestationRequest
     Verifier->>Verifier : validate
     Verifier->>Attester : submitAttestations
+    activate Attester
     Attester->>Attester : validate sender
+    activate EAS
     Attester->>EAS : multiAttest
+    activate Resolver
     EAS->>Resolver : multiAttest
     Resolver-->>EAS : 
+    deactivate Resolver
     EAS-->>Attester : UUIDs: bytes32[]
+    deactivate EAS
     Attester-->>Verifier : 
+    deactivate Attester
     Verifier-->>Passport App : 
+    deactivate Verifier
     Passport App-->>User : display on-chain status
 ```
+
 
 ## Discoverability of attestations
 For our use-case it is important that given an ETH address of a user, we are able to determine all the stamps that the user owns.
