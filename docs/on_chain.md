@@ -176,7 +176,7 @@ Following changes are possible in the Passport App:
 
 ### Stamp Attestation - Option 1
 
-```sol
+```solidity
 
 contract Scorer {
     ...
