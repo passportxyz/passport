@@ -154,7 +154,7 @@ it("should indicate that there was an error issuing the credential", async () =>
   );
   renderWithContext(
     mockUserContext,
-    { ...mockCeramicContext, handleAddStamps: jest.fn().mockRejectedValue(500) },
+    { ...mockCeramicContext, handlePatchStamps: jest.fn().mockRejectedValue(500) },
     drawer()
   );
 
