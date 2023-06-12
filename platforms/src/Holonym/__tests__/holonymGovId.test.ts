@@ -14,7 +14,7 @@ jest.mock("ethers", () => {
   };
 });
 
-const MOCK_ADDRESS = "0xb4B6f1C68be31841B52F4015a31d1f38B99cDb71";
+const MOCK_ADDRESS = "0xb4b6f1c68be31841b52f4015a31d1f38b99cdb71";
 const actionId = 123456789;
 
 describe("Attempt verification", function () {
@@ -34,14 +34,13 @@ describe("Attempt verification", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS,
-        holonym: `Is unique for action ${actionId}, based on government ID`,
       },
     });
   });
 
   it("should return false for an address that has not proven uniqueness to Holonym government ID Sybil resistance smart contract", async () => {
     mockIsUniqueForAction.mockResolvedValueOnce(false);
-    const UNREGISTERED_ADDRESS = "0xUNREGISTERED";
+    const UNREGISTERED_ADDRESS = "0xunregistered";
 
     const holonym = new HolonymGovIdProvider();
     const verifiedPayload = await holonym.verify({
@@ -56,7 +55,7 @@ describe("Attempt verification", function () {
 
   it("should return error response when isUniqueForAction call errors", async () => {
     mockIsUniqueForAction.mockRejectedValueOnce("some error");
-    const UNREGISTERED_ADDRESS = "0xUNREGISTERED";
+    const UNREGISTERED_ADDRESS = "0xunregistered";
 
     const holonym = new HolonymGovIdProvider();
     const verifiedPayload = await holonym.verify({
