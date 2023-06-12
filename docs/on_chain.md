@@ -10,17 +10,29 @@ EAS provides the following facilities / feature:
 
 ```mermaid
 sequenceDiagram
-    participant User
+    actor User
     participant Passport App
     participant IAM Service
-    participant Verifier (On-Chain)
-    participant Attester (On-Chain)
-    participant EAS (On-Chain)
-    participant Resolver (On-Chain)
+    participant Verifier
+    participant Attester
+    participant EAS
+    participant Resolver
 
     User->>Passport App: "Write stamps on-chain"
     Passport App->>IAM Service: "Verify and attest payload"
-    IAM Service-->>Passport App: M
+    IAM Service-->>Passport App: PassportAttestationRequest
+    activate Verifier
+    Passport App->>Verifier: PassportAttestationRequest
+    Verifier->>Verifier : validate
+    Verifier->>Attester : submitAttestations
+    Attester->>Attester : validate sender
+    Attester->>EAS : multiAttest
+    EAS->>Resolver : multiAttest
+    Resolver-->>EAS : 
+    EAS-->>Attester : UUIDs: bytes32[]
+    Attester-->>Verifier : 
+    Verifier-->>Passport App : 
+    Passport App-->>User : display on-chain status
 ```
 
 ## Discoverability of attestations
