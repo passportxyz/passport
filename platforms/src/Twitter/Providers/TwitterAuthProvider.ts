@@ -32,6 +32,7 @@ export default class TwitterProvider implements Provider {
         verifiedPayload = await verifyTwitter(payload.proofs.sessionKey, payload.proofs.code, context);
       }
     } catch (e) {
+      console.log({ e }, "error in twitter AUTH provider");
       return { valid: false };
     } finally {
       valid = verifiedPayload && verifiedPayload.username ? true : false;

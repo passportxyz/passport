@@ -45,6 +45,7 @@ export class TwitterFollowerGT100Provider implements Provider {
         }
       }
     } catch (e) {
+      console.log({ e }, "Error TwitterFollowerGT500");
       return { valid: false };
     }
 
@@ -85,6 +86,7 @@ export class TwitterFollowerGT500Provider implements Provider {
         }
       }
     } catch (e) {
+      console.log({ e }, "Error TwitterFollowerGT500");
       return { valid: false };
     }
 
@@ -125,6 +127,7 @@ export class TwitterFollowerGTE1000Provider implements Provider {
         }
       }
     } catch (e) {
+      console.log({ e }, "Error TwitterFollowerGTE1000");
       return { valid: false };
     }
 
@@ -165,6 +168,7 @@ export class TwitterFollowerGT5000Provider implements Provider {
         }
       }
     } catch (e) {
+      console.log({ e }, "Error TwitterFollowerGT5000");
       return { valid: false };
     }
 
