@@ -221,6 +221,7 @@ export type PLATFORM_ID =
   | "Coinbase"
   | "GuildXYZ"
   | "Hypercerts"
+  | "CyberConnect"
   | "PHI";
 
 export type PROVIDER_ID =
@@ -291,5 +292,8 @@ export type PROVIDER_ID =
   | "GuildAdmin"
   | "GuildPassportMember"
   | "Hypercerts"
+  | "CyberProfilePremium"
+  | "CyberProfilePaid"
+  | "CyberProfileFree"
   | "PHIActivitySilver"
   | "PHIActivityGold";
