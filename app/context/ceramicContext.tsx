@@ -573,17 +573,19 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         const newPassport = await fetchPassport(database, true);
 
         if (ceramicClient && newPassport) {
-          try {
-            const deleteProviderIds = stampPatches
-              .filter(({ credential }) => !credential)
-              .map(({ provider }) => provider);
+          (async () => {
+            try {
+              const deleteProviderIds = stampPatches
+                .filter(({ credential }) => !credential)
+                .map(({ provider }) => provider);
 
-            if (deleteProviderIds.length) await ceramicClient.deleteStampIDs(deleteProviderIds);
+              if (deleteProviderIds.length) await ceramicClient.deleteStampIDs(deleteProviderIds);
 
-            await ceramicClient.setStamps(newPassport.stamps);
-          } catch (e) {
-            console.log("error patching ceramic stamps", e);
-          }
+              await ceramicClient.setStamps(newPassport.stamps);
+            } catch (e) {
+              console.log("error patching ceramic stamps", e);
+            }
+          })();
         }
 
         if (dbAccessToken) {
