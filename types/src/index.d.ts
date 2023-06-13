@@ -224,7 +224,9 @@ export type PLATFORM_ID =
   | "PHI"
   | "Holonym"
   | "Idena"
-  | "Civic";
+  | "Civic"
+  | "CyberConnect"
+  | "PHI";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -292,6 +294,9 @@ export type PROVIDER_ID =
   | "GuildAdmin"
   | "GuildPassportMember"
   | "Hypercerts"
+  | "CyberProfilePremium"
+  | "CyberProfilePaid"
+  | "CyberProfileFree"
   | "PHIActivitySilver"
   | "PHIActivityGold"
   | "HolonymGovIdProvider"
