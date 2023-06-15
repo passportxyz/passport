@@ -47,7 +47,7 @@ export const RemoveStampModal = ({
       setIsLoading(true);
       await handleDeleteStamps(stampsToBeDeleted);
       toast({
-        duration: 9000,
+        duration: 900000,
         isClosable: true,
         render: (result: any) => (
           <DoneToastContent
