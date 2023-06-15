@@ -24,8 +24,8 @@ jobs:
         with:
           node-version: 18
           cache: "yarn"
-      - name: Lerna Bootstrap
-        run: lerna bootstrap
+      - name: Install Packages
+        run: yarn install
       - name: Run Tests
         run: yarn test
       - name: Run Linter
