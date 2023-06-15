@@ -31,8 +31,8 @@ export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) =
       isClosable: true,
       render: (result: any) => (
         <DoneToastContent
-          title="Success"
-          message="Your expired stamps have been removed."
+          title="Reset"
+          message="Your Passport has been reset."
           icon="./assets/check-icon2.svg"
           result={result}
         />
