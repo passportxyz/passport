@@ -7,7 +7,7 @@ export type CustomToastProps = {
   platformId?: PLATFORM_ID | undefined;
   providerId?: PROVIDER_ID;
   title: string;
-  body: string;
+  body?: string | JSX.Element;
   icon: string;
   result: any;
   message?: boolean | string;
@@ -34,11 +34,11 @@ export const DoneToastContent = ({
             <img alt="information circle" className="sticky top-0 h-6" src={icon} />
           </div>
         </div>
-        <div className="flex-grow">
+        <div className="flex max-w-[200px] flex-col md:max-w-[390px]">
           <h2 className="mb-2 text-lg font-bold">{title}</h2>
-          <p>{message || body}</p>
+          {message ? <p>{message}</p> : body}
         </div>
-        <div>
+        <div className="flex flex-grow items-start justify-end">
           <button className="sticky top-0" onClick={result.onClose}>
             <img alt="close button" className="rounded-lg hover:bg-gray-500" src="./assets/x-icon-black.svg" />
           </button>

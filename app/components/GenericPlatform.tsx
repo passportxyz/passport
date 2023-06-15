@@ -57,7 +57,8 @@ enum VerificationStatuses {
 
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
-const checkIcon2 = "../../assets/check-icon2.svg";
+const success = "../../assets/check-icon2.svg";
+const fail = "../assets/verification-failed-bright.svg";
 
 type GenericPlatformProps = PlatformProps & { onClose: () => void };
 
@@ -135,7 +136,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
           <div className="rounded-md bg-color-1 text-background-2">
             <div className="flex p-4">
               <button className="inline-flex flex-shrink-0 cursor-not-allowed">
-                <img alt="information circle" className="sticky top-0 mb-20 p-2" src="./assets/check-icon2.svg" />
+                <img alt="information circle" className="sticky top-0 mb-20 p-2" src={success} />
               </button>
               <div className="flex-grow pl-6">
                 <h2 className="mb-2 text-lg font-bold">Sponsored through Gitcoin for Bright ID</h2>
@@ -154,11 +155,16 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
       datadogLogs.logger.info("Successfully sponsored user on BrightId", { platformId: platform.platformId });
     } else {
       toast({
-        title: "Failure",
-        description: "Failed to trigger BrightID Sponsorship",
-        status: "error",
         duration: 9000,
         isClosable: true,
+        render: (result: any) => (
+          <DoneToastContent
+            title="Failure"
+            message="Failed to trigger BrightID Sponsorship"
+            icon={fail}
+            result={result}
+          />
+        ),
       });
       datadogLogs.logger.error("Error sponsoring user", { platformId: platform.platformId });
       datadogRum.addError("Failed to sponsor user on BrightId", { platformId: platform.platformId });
@@ -276,7 +282,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
       doneToast(
         "Verification Failed",
         "There was an error verifying your stamp. Please try again.",
-        "../../assets/verification-failed.svg",
+        fail,
         platform.platformId as PLATFORM_ID
       );
     } finally {
@@ -331,7 +337,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
         return {
           title: "Done!",
           body: `All ${platform.platformId} data points verified.`,
-          icon: checkIcon2,
+          icon: success,
           platformId: platform.platformId as PLATFORM_ID,
         };
       case VerificationStatuses.ReVerified:
@@ -340,7 +346,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
           body: `Successfully re-verified ${platform.platformId} data ${
             updatedVerifiedProviders.size > 1 ? "points" : "point"
           }.`,
-          icon: checkIcon2,
+          icon: success,
           platformId: platform.platformId as PLATFORM_ID,
         };
       case VerificationStatuses.PartiallyVerified:
@@ -349,14 +355,14 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
           body: `Successfully verified ${platform.platformId} data ${
             updatedMinusInitial.size > 1 ? "points" : "point"
           }.`,
-          icon: checkIcon2,
+          icon: success,
           platformId: platform.platformId as PLATFORM_ID,
         };
       case VerificationStatuses.AllRemoved:
         return {
           title: "Success!",
           body: `All ${platform.platformId} data points removed.`,
-          icon: checkIcon2,
+          icon: success,
           platformId: platform.platformId as PLATFORM_ID,
         };
       case VerificationStatuses.PartiallyRemoved:
@@ -365,7 +371,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
           body: `Successfully removed ${platform.platformId} data ${
             initialMinusUpdated.size > 1 ? "points" : "point"
           }.`,
-          icon: checkIcon2,
+          icon: success,
           platformId: platform.platformId as PLATFORM_ID,
         };
       case VerificationStatuses.PartiallyRemovedAndVerified:
@@ -374,14 +380,14 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
           body: `${initialMinusUpdated.size} ${platform.platformId} data ${
             initialMinusUpdated.size > 1 ? "points" : "point"
           } removed and ${updatedMinusInitial.size} verified.`,
-          icon: checkIcon2,
+          icon: success,
           platformId: platform.platformId as PLATFORM_ID,
         };
       case VerificationStatuses.Failed:
         return {
           title: "Verification Failed",
           body: "Please make sure you fulfill the requirements for this stamp.",
-          icon: "../../assets/verification-failed-bright.svg",
+          icon: fail,
           platformId: platform.platformId as PLATFORM_ID,
         };
     }
