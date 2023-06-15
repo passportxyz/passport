@@ -4,7 +4,7 @@ import type { Provider, ProviderOptions } from "../../types";
 import { getErrorString, ProviderError } from "../../utils/errors";
 import { getAddress } from "../../utils/signer";
 import axios from "axios";
-import { GithubFindMyUserResponse, verifyGithub } from "../../Github/Providers/github";
+import { getGithubUserData } from "../../Github/Providers/github";
 
 const AMI_API_TOKEN = process.env.AMI_API_TOKEN;
 
@@ -44,14 +44,8 @@ export class GitcoinGrantStatisticsProvider implements Provider {
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     const address = (await getAddress(payload)).toLowerCase();
     let valid = false;
-    let githubUser: GithubFindMyUserResponse = context.githubUser as GithubFindMyUserResponse;
+    const githubUser = await getGithubUserData(payload.proofs.code, context);
     try {
-      if (!githubUser) {
-        githubUser = await verifyGithub(payload.proofs.code, context);
-        context["githubUser"] = githubUser;
-      }
-      console.log("gitcoin - githubUser", address, JSON.stringify(githubUser));
-
       // Only check the contribution condition if a valid github id has been received
       valid = !githubUser.errors && !!githubUser.id;
       if (valid) {
@@ -69,7 +63,10 @@ export class GitcoinGrantStatisticsProvider implements Provider {
           error: gitcoinGrantsStatistic.errors,
           record: valid
             ? {
-                id: githubUser.id,
+                // The type was previously incorrectly defined as string on the http response,
+                // and if we correctly called .toString() here instead of doing the forced cast,
+                // we would break our ability to hash against all previous records.
+                id: githubUser.id as unknown as string,
                 [this._options.recordAttribute]: `${this._options.threshold}`,
               }
             : undefined,
@@ -96,7 +93,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
 
 const getGitcoinStatistics = async (dataUrl: string, handle: string): Promise<GitcoinGrantStatistics> => {
   try {
-    // The gitcoin API excpects lowercase handle
+    // The gitcoin API expects lowercase handle
     const lowerHandle = handle.toLowerCase();
     const grantStatisticsRequest = await axios.get(`${dataUrl}?handle=${lowerHandle}`, {
       headers: { Authorization: `token ${AMI_API_TOKEN}` },
