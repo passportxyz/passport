@@ -11,7 +11,7 @@ import { getAddress } from "../../utils/signer";
 // Alchemy Api key
 export const apiKey = process.env.ALCHEMY_API_KEY;
 
-type GetContractForOwnerResponse = {
+type GetContractsForOwnerResponse = {
   contracts: any[];
   totalCount: number;
 };
@@ -39,7 +39,7 @@ export class NFTProvider implements Provider {
     const address = (await getAddress(payload)).toLowerCase();
 
     let valid = false;
-    let getContractForOwnerResponse: GetContractForOwnerResponse = {
+    let getContractsForOwnerResponse: GetContractsForOwnerResponse = {
       contracts: [],
       totalCount: 0,
     };
@@ -56,9 +56,9 @@ export class NFTProvider implements Provider {
       });
 
       if (requestResponse.status == 200) {
-        getContractForOwnerResponse = requestResponse.data as GetContractForOwnerResponse;
+        getContractsForOwnerResponse = requestResponse.data as GetContractsForOwnerResponse;
 
-        valid = getContractForOwnerResponse.totalCount > 0;
+        valid = getContractsForOwnerResponse.totalCount > 0;
       }
     } catch (error) {
       // Nothing to do here, valid will remain false
