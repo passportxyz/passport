@@ -44,6 +44,7 @@ const {
   Hypercerts,
   Holonym,
   Idena,
+  Clique,
 } = stampPlatforms;
 
 import { PlatformProps } from "../components/GenericPlatform";
@@ -187,6 +188,14 @@ platforms.set("Coinbase", {
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK,
   }),
   platFormGroupSpec: Coinbase.ProviderConfig,
+});
+
+platforms.set("Clique", {
+  platform: new Clique.CliquePlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+  }),
+  platFormGroupSpec: Clique.ProviderConfig,
 });
 
 if (process.env.NEXT_PUBLIC_FF_HYPERCERT_STAMP === "on") {

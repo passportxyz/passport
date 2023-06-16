@@ -305,6 +305,18 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "EAS_GITCOIN_SCORE_SCHEMA",
             valueFrom: `${IAM_SERVER_SSM_ARN}:EAS_GITCOIN_SCORE_SCHEMA::`,
           },
+          {
+            name: "CLIQUE_CLIENT_ID",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:CLIQUE_CLIENT_ID::`,
+          },
+          {
+            name: "CLIQUE_CLIENT_SECRET",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:CLIQUE_CLIENT_SECRET::`,
+          },
+          {
+            name: "CLIQUE_CALLBACK",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:CLIQUE_CALLBACK::`,
+          },
         ],
       },
     },
