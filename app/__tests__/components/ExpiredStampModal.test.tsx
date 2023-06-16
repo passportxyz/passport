@@ -73,7 +73,6 @@ describe("ExpiredStampModal", () => {
     expect(deleteButton.getAttribute("disabled")).not.toBeNull();
 
     expect(handleDeleteStamps).toHaveBeenCalledWith([
-      "Linkedin",
       "Github",
       "FiveOrMoreGithubRepos",
       "ForkedGithubRepoProvider",
@@ -82,6 +81,7 @@ describe("ExpiredStampModal", () => {
       "FiftyOrMoreGithubFollowers",
       "Facebook",
       "FacebookProfilePicture",
+      "Linkedin",
       "Ens",
     ]);
     await waitFor(() => expect(deleteButton.getAttribute("disabled")).toBeNull());
