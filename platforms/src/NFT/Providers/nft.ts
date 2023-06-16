@@ -10,7 +10,6 @@ import { getAddress } from "../../utils/signer";
 
 // Alchemy Api key
 export const apiKey = process.env.ALCHEMY_API_KEY;
-export const alchemyGetNFTsUrl = `https://eth-mainnet.g.alchemy.com/nft/v2/${apiKey}/getNFTs`;
 
 type NFTsResponse = {
   ownedNfts: [];
