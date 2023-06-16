@@ -19,6 +19,7 @@ import * as GtcStaking from "./GtcStaking";
 import * as Google from "./Google";
 import * as Brightid from "./Brightid";
 import * as Coinbase from "./Coinbase";
+import * as Clique from "./Clique";
 import * as GuildXYZ from "./GuildXYZ";
 import * as Hypercerts from "./Hypercerts";
 import * as PHI from "./PHI";
@@ -57,6 +58,7 @@ const platforms: Record<string, PlatformConfig> = {
   GuildXYZ,
   Hypercerts,
   PHI,
+  Clique,
 };
 
 export default platforms;

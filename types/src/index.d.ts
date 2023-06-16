@@ -221,7 +221,8 @@ export type PLATFORM_ID =
   | "Coinbase"
   | "GuildXYZ"
   | "Hypercerts"
-  | "PHI";
+  | "PHI"
+  | "Clique";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -292,4 +293,11 @@ export type PROVIDER_ID =
   | "GuildPassportMember"
   | "Hypercerts"
   | "PHIActivitySilver"
-  | "PHIActivityGold";
+  | "PHIActivityGold"
+  | "CliqueGithub"
+  | "CliqueGithubUsers#numFollowersGithub#50"
+  | "CliqueGithubRepo#sumCommitsPublicGithub#50"
+  | "CliqueGithubRepo#sumContributedToPublicGithub#50"
+  | "CliqueGithubRepo#sumIssuesPublicGithub#50"
+  | "CliqueGithubRepo#sumPRsPublicGithub#50"
+  | "CliqueGithubRepo#sumStarsPublicGithub#50";

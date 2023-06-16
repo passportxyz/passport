@@ -5,7 +5,7 @@
     "esModuleInterop": true,
     "declaration": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es6",
+    "target": "ES2016",
     "noImplicitAny": true,
     "moduleResolution": "node",
     "sourceMap": true,
