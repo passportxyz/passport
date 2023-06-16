@@ -1,6 +1,6 @@
 // ----- Types
 import type { Provider, ProviderOptions } from "../../types";
-import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
+import type { RequestPayload, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
 
 // ----- Ethers library
 import { Contract } from "ethers";
@@ -38,6 +38,15 @@ const ERC20_ABI = [
   },
 ];
 
+type EthErc20Context = ProviderContext & {
+  ethErc20?: {
+    counts?: {
+      eth?: number;
+      [tokenAddress: string]: number;
+    };
+  };
+};
+
 // set the network rpc url based on env
 export const RPC_URL = process.env.RPC_URL;
 
@@ -45,25 +54,42 @@ export async function getTokenBalance(
   address: string,
   tokenContractAddress: string,
   decimalNumber: number,
-  payload: RequestPayload
+  payload: RequestPayload,
+  context: EthErc20Context
 ): Promise<number> {
-  // define a provider using the rpc url
-  const staticProvider = getRPCProvider(payload);
-  // load Token contract
-  const readContract = new Contract(tokenContractAddress, ERC20_ABI, staticProvider);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-  const tokenBalance: string = await readContract?.balanceOf(address);
-  const balanceFormatted: string = formatUnits(tokenBalance, decimalNumber);
-  return parseFloat(balanceFormatted);
+  if (context.ethErc20?.counts?.[tokenContractAddress] === undefined) {
+    // define a provider using the rpc url
+    const staticProvider = getRPCProvider(payload);
+    // load Token contract
+    const readContract = new Contract(tokenContractAddress, ERC20_ABI, staticProvider);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+    const tokenBalance: string = await readContract?.balanceOf(address);
+    const balanceFormatted: string = formatUnits(tokenBalance, decimalNumber);
+
+    if (!context.ethErc20) context.ethErc20 = {};
+    if (!context.ethErc20.counts) context.ethErc20.counts = {};
+    context.ethErc20.counts[tokenContractAddress] = parseFloat(balanceFormatted);
+  }
+  return context.ethErc20.counts[tokenContractAddress];
 }
 
-export async function getEthBalance(address: string, payload: RequestPayload): Promise<number> {
-  // define a provider using the rpc url
-  const staticProvider = getRPCProvider(payload);
-  const ethBalance = await staticProvider?.getBalance(address);
-  // convert a currency unit from wei to ether
-  const balanceFormatted: string = formatUnits(ethBalance, 18);
-  return parseFloat(balanceFormatted);
+export async function getEthBalance(
+  address: string,
+  payload: RequestPayload,
+  context: EthErc20Context
+): Promise<number> {
+  if (context.ethErc20?.counts?.eth === undefined) {
+    // define a provider using the rpc url
+    const staticProvider = getRPCProvider(payload);
+    const ethBalance = await staticProvider?.getBalance(address);
+    // convert a currency unit from wei to ether
+    const balanceFormatted: string = formatUnits(ethBalance, 18);
+
+    if (!context.ethErc20) context.ethErc20 = {};
+    if (!context.ethErc20.counts) context.ethErc20.counts = {};
+    context.ethErc20.counts.eth = parseFloat(balanceFormatted);
+  }
+  return context.ethErc20.counts.eth;
 }
 
 export type ethErc20PossessionProviderOptions = {
@@ -95,16 +121,22 @@ export class EthErc20PossessionProvider implements Provider {
   }
 
   // verify that the proof object contains valid === "true"
-  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, context: EthErc20Context): Promise<VerifiedPayload> {
     const { address } = payload;
     let valid = false;
     let amount = 0;
 
     try {
       if (this._options.contractAddress.length > 0) {
-        amount = await getTokenBalance(address, this._options.contractAddress, this._options.decimalNumber, payload);
+        amount = await getTokenBalance(
+          address,
+          this._options.contractAddress,
+          this._options.decimalNumber,
+          payload,
+          context
+        );
       } else {
-        amount = await getEthBalance(address, payload);
+        amount = await getEthBalance(address, payload, context);
       }
     } catch (e) {
       return {

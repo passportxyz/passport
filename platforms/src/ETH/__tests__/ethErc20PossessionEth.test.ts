@@ -43,9 +43,12 @@ describe("Attempt verification", function () {
       recordAttribute: "ethPossessionsGte",
     });
 
-    const verifiedPayload = await ethPossessions.verify({
-      address: MOCK_ADDRESS_LOWER,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await ethPossessions.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(mockGetBalance).toBeCalledWith(MOCK_ADDRESS_LOWER);
     expect(formatUnits).toBeCalledWith(MOCK_BALANCE, 18);
@@ -67,9 +70,12 @@ describe("Attempt verification", function () {
       recordAttribute: "ethPossessionsGte",
     });
 
-    const verifiedPayload = await ethPossessions.verify({
-      address: MOCK_FAKE_ADDRESS,
-    } as RequestPayload);
+    const verifiedPayload = await ethPossessions.verify(
+      {
+        address: MOCK_FAKE_ADDRESS,
+      } as RequestPayload,
+      {}
+    );
 
     expect(mockGetBalance).toBeCalledWith(MOCK_FAKE_ADDRESS);
     expect(verifiedPayload).toEqual({
@@ -85,9 +91,12 @@ describe("Attempt verification", function () {
       recordAttribute: "ethPossessionsGte",
       error: "ETH Possessions >= 1 Provider verify Error",
     });
-    const verifiedPayload = await ethPossessions.verify({
-      address: MOCK_ADDRESS_LOWER,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await ethPossessions.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(mockGetBalance).toBeCalledWith(MOCK_ADDRESS_LOWER);
     expect(verifiedPayload).toEqual({
@@ -113,9 +122,12 @@ describe("Check valid cases for ETH Balances", function () {
       recordAttribute: "ethPossessionsGte",
     });
 
-    const verifiedPayload = await ethPossessions.verify({
-      address: MOCK_ADDRESS_LOWER,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await ethPossessions.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -131,9 +143,12 @@ describe("Check valid cases for ETH Balances", function () {
       threshold: 10,
       recordAttribute: "ethPossessionsGte",
     });
-    const verifiedPayload = await ethPossessions.verify({
-      address: MOCK_ADDRESS_LOWER,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await ethPossessions.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -150,9 +165,12 @@ describe("Check valid cases for ETH Balances", function () {
       threshold: 32,
       recordAttribute: "ethPossessionsGte",
     });
-    const verifiedPayload = await ethPossessions.verify({
-      address: MOCK_ADDRESS_LOWER,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await ethPossessions.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -179,9 +197,12 @@ describe("Check invalid cases for ETH Balances", function () {
       recordAttribute: "ethPossessionsGte",
     });
 
-    const verifiedPayload = await ethPossessions.verify({
-      address: MOCK_ADDRESS,
-    } as RequestPayload);
+    const verifiedPayload = await ethPossessions.verify(
+      {
+        address: MOCK_ADDRESS,
+      } as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -195,9 +216,12 @@ describe("Check invalid cases for ETH Balances", function () {
       recordAttribute: "ethPossessionsGte",
     });
 
-    const verifiedPayload = await ethPossessions.verify({
-      address: MOCK_ADDRESS,
-    } as RequestPayload);
+    const verifiedPayload = await ethPossessions.verify(
+      {
+        address: MOCK_ADDRESS,
+      } as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -211,9 +235,12 @@ describe("Check invalid cases for ETH Balances", function () {
       recordAttribute: "ethPossessionsGte",
     });
 
-    const verifiedPayload = await ethPossessions.verify({
-      address: MOCK_ADDRESS,
-    } as RequestPayload);
+    const verifiedPayload = await ethPossessions.verify(
+      {
+        address: MOCK_ADDRESS,
+      } as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: false,

@@ -43,9 +43,12 @@ describe("Attempt verification", function () {
       contractAddress: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f",
     });
 
-    const verifiedPayload = await gtcPossessions.verify({
-      address: MOCK_ADDRESS_LOWER,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await gtcPossessions.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(mockBalanceOf).toBeCalledWith(MOCK_ADDRESS_LOWER);
     expect(formatUnits).toBeCalledWith(MOCK_BALANCE, 18);
@@ -67,9 +70,12 @@ describe("Attempt verification", function () {
       error: "GTC Possessions >= 100 Provider verify Error",
     });
 
-    const verifiedPayload = await gtcPossessions.verify({
-      address: MOCK_FAKE_ADDRESS,
-    } as RequestPayload);
+    const verifiedPayload = await gtcPossessions.verify(
+      {
+        address: MOCK_FAKE_ADDRESS,
+      } as RequestPayload,
+      {}
+    );
 
     expect(mockBalanceOf).toBeCalledWith(MOCK_FAKE_ADDRESS);
     expect(verifiedPayload).toEqual({
@@ -87,9 +93,12 @@ describe("Attempt verification", function () {
       error: "GTC Possessions >= 100 Provider verify Error",
     });
 
-    const verifiedPayload = await gtcPossessions.verify({
-      address: MOCK_ADDRESS_LOWER,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await gtcPossessions.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(mockBalanceOf).toBeCalledWith(MOCK_ADDRESS_LOWER);
     expect(verifiedPayload).toEqual({
@@ -116,9 +125,12 @@ describe("Check valid cases for GTC Balances", function () {
       contractAddress: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f",
     });
 
-    const verifiedPayload = await gtcPossessions.verify({
-      address: MOCK_ADDRESS_LOWER,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await gtcPossessions.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -136,9 +148,12 @@ describe("Check valid cases for GTC Balances", function () {
       contractAddress: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f",
     });
 
-    const verifiedPayload = await gtcPossessions.verify({
-      address: MOCK_ADDRESS_LOWER,
-    } as RequestPayload);
+    const verifiedPayload = await gtcPossessions.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -166,9 +181,12 @@ describe("Check invalid cases for GTC Balances", function () {
       contractAddress: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f",
     });
 
-    const verifiedPayload = await gtcPossessions.verify({
-      address: MOCK_ADDRESS,
-    } as RequestPayload);
+    const verifiedPayload = await gtcPossessions.verify(
+      {
+        address: MOCK_ADDRESS,
+      } as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -183,9 +201,12 @@ describe("Check invalid cases for GTC Balances", function () {
       contractAddress: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f",
     });
 
-    const verifiedPayload = await gtcPossessions.verify({
-      address: MOCK_ADDRESS_LOWER,
-    } as RequestPayload);
+    const verifiedPayload = await gtcPossessions.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: false,
