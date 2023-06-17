@@ -11,7 +11,7 @@ import { getAddress } from "../../utils/signer";
 
 export const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY;
 
-const GOV_ID_SR_ADDRESS = "0x3497556f7D0bF602D4237Ecb8ae92840D09E4f63";
+const GOV_ID_SR_ADDRESS = "0xdD748977BAb5782625AF1466F4C5F02Eb92Fce31";
 
 // ABI for Holonym Sybil resistance contract based on government ID
 const GOV_ID_SR_ABI = [
@@ -21,7 +21,7 @@ const GOV_ID_SR_ABI = [
       { internalType: "uint256", name: "", type: "uint256" },
     ],
     name: "isUniqueForAction",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
+    outputs: [{ internalType: "bool", name: "unique", type: "bool" }],
     stateMutability: "view",
     type: "function",
   },
