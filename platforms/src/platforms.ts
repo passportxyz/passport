@@ -22,6 +22,7 @@ import * as Coinbase from "./Coinbase";
 import * as GuildXYZ from "./GuildXYZ";
 import * as Hypercerts from "./Hypercerts";
 import * as PHI from "./PHI";
+import * as Holonym from "./Holonym";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
 type PlatformConfig = {
@@ -57,6 +58,7 @@ const platforms: Record<string, PlatformConfig> = {
   GuildXYZ,
   Hypercerts,
   PHI,
+  Holonym,
 };
 
 export default platforms;

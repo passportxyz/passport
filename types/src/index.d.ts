@@ -221,7 +221,8 @@ export type PLATFORM_ID =
   | "Coinbase"
   | "GuildXYZ"
   | "Hypercerts"
-  | "PHI";
+  | "PHI"
+  | "Holonym";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -292,4 +293,5 @@ export type PROVIDER_ID =
   | "GuildPassportMember"
   | "Hypercerts"
   | "PHIActivitySilver"
-  | "PHIActivityGold";
+  | "PHIActivityGold"
+  | "HolonymGovIdProvider";
