@@ -283,7 +283,7 @@ export type PROVIDER_ID =
   | "CommunityStakingSilver"
   | "CommunityStakingGold"
   | "NFT"
-  | "ZkSync"
+  | "ZkSyncLite"
   | "ZkSyncEra"
   | "Lens"
   | "GnosisSafe"
