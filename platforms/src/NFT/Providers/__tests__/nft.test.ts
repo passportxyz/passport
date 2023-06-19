@@ -49,6 +49,7 @@ describe("Attempt verification", function () {
         params: {
           withMetadata: "false",
           owner: MOCK_ADDRESS_LOWER,
+          pageSize: 1,
         },
       });
 
