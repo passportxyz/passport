@@ -1,4 +1,11 @@
 # Intro
+
+----
+
+This documentation is outdated. The latest version has been moved to: https://github.com/gitcoinco/eas-proxy/tree/on_chain_docs/docs
+
+----
+
 The purpose of this document is to:
 - explain the current flow that is implemented as well as the next steps that are still pending
 - highlight the open points, and the points where a decision is pending
