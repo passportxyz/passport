@@ -14,7 +14,7 @@ export const PlatformDetails: PlatformSpec = {
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "zkSync Lite",
-    providers: [{ title: "Transacted on zkSync Lite", name: "ZkSyncLite" }],
+    providers: [{ title: "Transacted on zkSync Lite", name: "ZkSync" }],
   },
   {
     platformGroup: "zkSync Era",
