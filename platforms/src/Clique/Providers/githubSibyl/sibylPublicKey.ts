@@ -12,6 +12,7 @@ const forge = require("node-forge");
 export const getPublicKey = async (): Promise<string> => {
   const apiKey = process.env.CLIQUE_CLIENT_ID;
   const apiSecret = process.env.CLIQUE_CLIENT_SECRET;
+  const isProduction = Boolean(process.env.CLIQUE_CLIENT_PRODUCTION);
 
   if (!apiKey || !apiSecret) {
     return null;
@@ -20,7 +21,7 @@ export const getPublicKey = async (): Promise<string> => {
   const client = new CliqueClient({
     apiKey,
     apiSecret,
-    env: Environment.Test,
+    env: isProduction ? Environment.Production : Environment.Test,
   });
   const rsaPubKey: string = await client.attestor.getSibylPublicKey();
   return rsaPubKey;

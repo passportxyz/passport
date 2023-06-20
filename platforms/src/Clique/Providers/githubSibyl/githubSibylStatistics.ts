@@ -92,6 +92,7 @@ const getGithubSibylStatistics = async (
   try {
     const apiKey = process.env.CLIQUE_CLIENT_ID;
     const apiSecret = process.env.CLIQUE_CLIENT_SECRET;
+    const isProduction = Boolean(process.env.CLIQUE_CLIENT_PRODUCTION);
 
     if (!apiKey || !apiSecret) {
       return null;
@@ -99,7 +100,7 @@ const getGithubSibylStatistics = async (
     const client = new CliqueClient({
         apiKey,
         apiSecret,
-        env: Environment.Test,
+        env: isProduction ? Environment.Production : Environment.Test,
       });
     const rsaPubKey: string = await getPublicKey();
 
