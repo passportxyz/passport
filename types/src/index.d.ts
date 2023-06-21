@@ -77,6 +77,7 @@ export type VerifiedPayload = {
   error?: string[];
   // This will be combined with the ProofRecord (built from the verified content in the Payload)
   record?: { [k: string]: string };
+  expiresInSeconds?: number;
 };
 
 export type CheckRequestBody = {
@@ -222,7 +223,8 @@ export type PLATFORM_ID =
   | "GuildXYZ"
   | "Hypercerts"
   | "PHI"
-  | "Holonym";
+  | "Holonym"
+  | "Idena";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -294,4 +296,12 @@ export type PROVIDER_ID =
   | "Hypercerts"
   | "PHIActivitySilver"
   | "PHIActivityGold"
-  | "HolonymGovIdProvider";
+  | "HolonymGovIdProvider"
+  | "IdenaState#Newbie"
+  | "IdenaState#Verified"
+  | "IdenaState#Human"
+  | "IdenaStake#1k"
+  | "IdenaStake#10k"
+  | "IdenaStake#100k"
+  | "IdenaAge#5"
+  | "IdenaAge#10";
