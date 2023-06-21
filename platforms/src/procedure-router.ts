@@ -18,12 +18,10 @@ export type GenerateBrightidBody = {
 router.post("/twitter/generateAuthUrl", (req: Request, res: Response): void => {
   const { callback } = req.body as GenerateTwitterAuthUrlRequestBody;
   if (callback) {
-    const state = twitterOAuth.getSessionKey();
-    const client = twitterOAuth.initClient(callback, state);
-
+    const cacheToken = twitterOAuth.generateSessionKey();
+    const client = twitterOAuth.initClient(callback, cacheToken);
     const data = {
-      state,
-      authUrl: twitterOAuth.generateAuthURL(client, state),
+      authUrl: twitterOAuth.generateAuthURL(client, cacheToken),
     };
 
     res.status(200).send(data);

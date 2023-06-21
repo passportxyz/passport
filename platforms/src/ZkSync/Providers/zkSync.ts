@@ -9,7 +9,7 @@ import axios from "axios";
 import { getAddress } from "../../utils/signer";
 
 // https://docs.zksync.io/api/v0.2/
-export const zkSyncApiEnpoint = "https://api.zksync.io/api/v0.2/";
+export const zkSyncApiEndpoint = "https://api.zksync.io/api/v0.2/";
 
 // Pagination structure
 type Pagination = {
@@ -33,7 +33,7 @@ type ZkSyncResponse = {
   pagination: Pagination;
 };
 
-// Export a ZkSyncProvider Provider
+// Export a Provider to verify ZkSync Transactions
 export class ZkSyncProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
   type = "ZkSync";
@@ -55,7 +55,7 @@ export class ZkSyncProvider implements Provider {
     const address = (await getAddress(payload)).toLowerCase();
 
     try {
-      const requestResponse = await axios.get(`${zkSyncApiEnpoint}accounts/${address}/transactions`, {
+      const requestResponse = await axios.get(`${zkSyncApiEndpoint}accounts/${address}/transactions`, {
         params: {
           from: "latest",
           limit: 100,
@@ -71,11 +71,9 @@ export class ZkSyncProvider implements Provider {
           // transaction initiated by this account
           for (let i = 0; i < zkSyncResponse.result.list.length; i++) {
             const t = zkSyncResponse.result.list[i];
-            if (t.status === "finalized") {
-              if (t.op.from === address) {
-                valid = true;
-                break;
-              }
+            if (t.status === "finalized" && t.op.from === address) {
+              valid = true;
+              break;
             }
           }
 

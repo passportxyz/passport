@@ -9,7 +9,7 @@
 
 @layer components {
   .verify-btn {
-    @apply w-full border-t border-accent-2 p-3 hover:text-accent-3;
+    @apply w-full border-t border-accent-2 p-2 hover:text-accent-3;
   }
   .verify-btn:disabled {
     @apply text-gray-400;

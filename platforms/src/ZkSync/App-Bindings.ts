@@ -5,6 +5,11 @@ export class ZkSyncPlatform extends Platform {
   path = "ZkSync";
   isEVM = true;
 
+  banner = {
+    heading:
+      "We currently only recognize finalized 'TRANSFER' type transactions on ZkSync 1.0. This means that other transactions like MintNFT, Swap etc are not recognized.",
+  };
+
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     const result = await Promise.resolve({});
     return result;

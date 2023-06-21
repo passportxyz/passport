@@ -97,7 +97,7 @@ describe("Attempt verification", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        stakeAmount: "ssgte1",
+        stakeAmount: "ssgte5",
       },
     });
   });
@@ -165,7 +165,7 @@ describe("should return invalid payload", function () {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it("when stake amount is below 1 GTC for Bronze", async () => {
+  it("when stake amount is below 5 GTC for Bronze", async () => {
     jest.clearAllMocks();
     mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "100000000000000000");
@@ -179,7 +179,7 @@ describe("should return invalid payload", function () {
 
     expect(selfstakingPayload).toMatchObject({ valid: false });
   });
-  it("when stake amount is below 10 GTC for Silver", async () => {
+  it("when stake amount is below 20 GTC for Silver", async () => {
     jest.clearAllMocks();
     mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "3000000000000000000");
@@ -193,7 +193,7 @@ describe("should return invalid payload", function () {
 
     expect(selfstakingPayload).toMatchObject({ valid: false });
   });
-  it("when stake amount is below 100 GTC for Gold", async () => {
+  it("when stake amount is below 125 GTC for Gold", async () => {
     jest.clearAllMocks();
     mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "8000000000000000000");
@@ -211,9 +211,9 @@ describe("should return invalid payload", function () {
 
 // All the positive cases for thresholds are tested
 describe("should return valid payload", function () {
-  it("when stake amount above 1 GTC for Bronze", async () => {
+  it("when stake amount above 5 GTC for Bronze", async () => {
     mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "5000000000000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "8000000000000000000");
     });
 
     const selfstaking = new SelfStakingBronzeProvider();
@@ -224,10 +224,10 @@ describe("should return valid payload", function () {
 
     expect(selfstakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte1" },
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte5" },
     });
   });
-  it("when stake amount above 10 GTC for Silver", async () => {
+  it("when stake amount above 20 GTC for Silver", async () => {
     mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "60000000000000000000");
     });
@@ -240,10 +240,10 @@ describe("should return valid payload", function () {
 
     expect(selfstakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte10" },
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte20" },
     });
   });
-  it("when stake amount above 100 GTC for Gold", async () => {
+  it("when stake amount above 125 GTC for Gold", async () => {
     mockedAxiosPost.mockImplementation(async () => {
       return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "500000000000000000000");
     });
@@ -256,13 +256,13 @@ describe("should return valid payload", function () {
 
     expect(selfstakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte100" },
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte125" },
     });
   });
   // All amounts equal to tier amount
-  it("when stake amount equal to 1 GTC for Bronze", async () => {
+  it("when stake amount equal to 5 GTC for Bronze", async () => {
     mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "1000000000000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "5000000000000000000");
     });
 
     const selfstaking = new SelfStakingBronzeProvider();
@@ -273,12 +273,12 @@ describe("should return valid payload", function () {
 
     expect(selfstakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte1" },
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte5" },
     });
   });
-  it("when stake amount equal to 10 GTC for Silver", async () => {
+  it("when stake amount equal to 20 GTC for Silver", async () => {
     mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "10000000000000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "20000000000000000000");
     });
 
     const selfstaking = new SelfStakingSilverProvider();
@@ -289,12 +289,12 @@ describe("should return valid payload", function () {
 
     expect(selfstakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte10" },
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte20" },
     });
   });
-  it("when stake amount equal to 100 GTC for Gold", async () => {
+  it("when stake amount equal to 125 GTC for Gold", async () => {
     mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "100000000000000000000");
+      return generateSubgraphResponse(MOCK_ADDRESS_LOWER, "125000000000000000000");
     });
 
     const selfstaking = new SelfStakingGoldProvider();
@@ -305,7 +305,7 @@ describe("should return valid payload", function () {
 
     expect(selfstakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte100" },
+      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "ssgte125" },
     });
   });
 });

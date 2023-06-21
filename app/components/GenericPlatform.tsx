@@ -12,9 +12,10 @@ import {
   VerifiableCredentialRecord,
   PROVIDER_ID,
   PLATFORM_ID,
+  StampPatch,
 } from "@gitcoin/passport-types";
 import { ProviderPayload } from "@gitcoin/passport-platforms";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { fetchVerifiableCredential, verifyCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Style Components
 import { SideBarContent } from "./SideBarContent";
@@ -70,7 +71,7 @@ export const GenericPlatform = ({
   onClose,
 }: GenericPlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
-  const { handleAddStamps, handleDeleteStamps, allProvidersState, userDid } = useContext(CeramicContext);
+  const { handlePatchStamps, allProvidersState, userDid } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [showNoStampModal, setShowNoStampModal] = useState(false);
@@ -80,7 +81,7 @@ export const GenericPlatform = ({
   const toast = useToast();
 
   // find all providerIds
-  const providerIds = useMemo(
+  const platformProviderIds = useMemo(
     () =>
       platFormGroupSpec?.reduce((all, stamp) => {
         return all.concat(stamp.providers?.map((provider: any) => provider.name as PROVIDER_ID));
@@ -90,7 +91,7 @@ export const GenericPlatform = ({
 
   // VerifiedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
-    providerIds.filter(
+    platformProviderIds.filter(
       (providerId: any) => typeof allProvidersState[providerId as PROVIDER_ID]?.stamp?.credential !== "undefined"
     )
   );
@@ -198,50 +199,36 @@ export const GenericPlatform = ({
         return;
       }
 
-      // This array will contain all providers that new validated VCs
-      let vcs: Stamp[] = [];
+      const verifiedCredentials =
+        selectedProviders.length > 0
+          ? (
+              await fetchVerifiableCredential(
+                iamUrl,
+                {
+                  type: platform.platformId,
+                  types: selectedProviders,
+                  version: "0.0.0",
+                  address: address || "",
+                  proofs: providerPayload,
+                },
+                signer as { signMessage: (message: string) => Promise<string> }
+              )
+            ).credentials?.filter((cred: any) => !cred.error) || []
+          : [];
 
-      if (selectedProviders.length > 0) {
-        const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
-          iamUrl,
-          {
-            type: platform.platformId,
-            types: selectedProviders,
-            version: "0.0.0",
-            address: address || "",
-            proofs: providerPayload,
-          },
-          signer as { signMessage: (message: string) => Promise<string> }
-        );
+      const stampPatches: StampPatch[] = platformProviderIds.map((provider: PROVIDER_ID) => {
+        const cred = verifiedCredentials.find((cred: any) => cred.record?.type === provider);
+        if (cred) return { provider, credential: cred.credential as VerifiableCredential };
+        else return { provider };
+      });
 
-        // because we provided a types array in the params we expect to receive a
-        // credentials array in the response...
-        if (verified.credentials) {
-          for (let i = 0; i < verified.credentials.length; i++) {
-            let cred = verified.credentials[i];
-            if (!cred.error && providerIds.find((providerId: PROVIDER_ID) => cred?.record?.type === providerId)) {
-              // add each of the requested/received stamps to the passport...
-              vcs.push({
-                provider: cred.record?.type as PROVIDER_ID,
-                credential: cred.credential as VerifiableCredential,
-              });
-            }
-          }
-        }
-      }
+      await handlePatchStamps(stampPatches);
 
-      // Delete all stamps ...
-      await handleDeleteStamps(providerIds as PROVIDER_ID[]);
-
-      // .. and now add all newly validate stamps
-      if (vcs.length > 0) {
-        await handleAddStamps(vcs);
-      }
       datadogLogs.logger.info("Successfully saved Stamp", { platform: platform.platformId });
       // grab all providers who are verified from the verify response
-      const actualVerifiedProviders = providerIds.filter(
+      const actualVerifiedProviders = platformProviderIds.filter(
         (providerId: any) =>
-          !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
+          !!stampPatches.find((stampPatch) => stampPatch?.credential?.credentialSubject?.provider === providerId)
       );
       // both verified and selected should look the same after save
       setVerifiedProviders([...actualVerifiedProviders]);
@@ -312,7 +299,7 @@ export const GenericPlatform = ({
     initialMinusUpdated: Set<PROVIDER_ID>,
     updatedMinusInitial: Set<PROVIDER_ID>
   ) => {
-    if (updatedMinusInitial.size === providerIds.length) {
+    if (updatedMinusInitial.size === platformProviderIds.length) {
       return VerificationStatuses.AllVerified;
     } else if (updatedVerifiedProviders.size > 0 && updatedMinusInitial.size === 0 && initialMinusUpdated.size === 0) {
       return VerificationStatuses.ReVerified;

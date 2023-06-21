@@ -1,11 +1,10 @@
 name: Deploy IAM Server to Review
 
-# trigger: on push to `main` branch, AND only on changes to `iam/*` and `infra/review/**` files 
+# trigger: on push to `main` branch, AND only on changes to `iam/*` and `infra/review/**` files
 on:
   push:
     branches: [main]
   workflow_dispatch:
-  
 
 jobs:
   build-and-test:
@@ -18,8 +17,8 @@ jobs:
         with:
           node-version: 16
           cache: "yarn"
-      - name: Lerna Bootstrap
-        run: lerna bootstrap
+      - name: Install Packages
+        run: yarn install
       - name: Run Tests
         run: |
           yarn test:iam

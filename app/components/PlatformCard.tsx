@@ -99,40 +99,49 @@ export const PlatformCard = ({
 
   // Feature Flag Guild Stamp
   if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP !== "on" && platform.platform === "GuildXYZ") return <></>;
+
   // Feature Flag Hypercerts Stamp
   if (process.env.NEXT_PUBLIC_FF_HYPERCERT_STAMP !== "on" && platform.platform === "Hypercerts") return <></>;
+
+  // Feature Flag PHI Stamp
+  if (process.env.NEXT_PUBLIC_FF_PHI_STAMP !== "on" && platform.platform === "PHI") return <></>;
+
+  // Feature Flag Holonym Stamp
+  if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP !== "on" && platform.platform === "Holonym") return <></>;
 
   // returns a single Platform card
   return (
     <div className={className} key={`${platform.name}${i}`}>
       <div className="relative flex h-full flex-col border border-accent-2 bg-background-2 p-0">
-        <div className="flex flex-row p-6">
-          <div className="flex h-10 w-10 flex-grow justify-center md:justify-start">
-            {platform.icon ? (
-              <img src={platform.icon} alt={platform.name} className="h-10 w-10" />
-            ) : (
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M24.7999 24.8002H28.7999V28.8002H24.7999V24.8002ZM14 24.8002H18V28.8002H14V24.8002ZM3.19995 24.8002H7.19995V28.8002H3.19995V24.8002ZM24.7999 14.0002H28.7999V18.0002H24.7999V14.0002ZM14 14.0002H18V18.0002H14V14.0002ZM3.19995 14.0002H7.19995V18.0002H3.19995V14.0002ZM24.7999 3.2002H28.7999V7.2002H24.7999V3.2002ZM14 3.2002H18V7.2002H14V3.2002ZM3.19995 3.2002H7.19995V7.2002H3.19995V3.2002Z"
-                  fill="var(--color-muted)"
-                />
-              </svg>
-            )}
+        <div className="m-4 md:m-6 md:mb-10">
+          <div className="flex flex-row">
+            <div className="flex h-10 w-10 flex-grow justify-center md:justify-start">
+              {platform.icon ? (
+                <img src={platform.icon} alt={platform.name} className="h-10 w-10" />
+              ) : (
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M24.7999 24.8002H28.7999V28.8002H24.7999V24.8002ZM14 24.8002H18V28.8002H14V24.8002ZM3.19995 24.8002H7.19995V28.8002H3.19995V24.8002ZM24.7999 14.0002H28.7999V18.0002H24.7999V14.0002ZM14 14.0002H18V18.0002H14V14.0002ZM3.19995 14.0002H7.19995V18.0002H3.19995V14.0002ZM24.7999 3.2002H28.7999V7.2002H24.7999V3.2002ZM14 3.2002H18V7.2002H14V3.2002ZM3.19995 3.2002H7.19995V7.2002H3.19995V3.2002Z"
+                    fill="var(--color-muted)"
+                  />
+                </svg>
+              )}
+            </div>
+            {updatedPlatforms &&
+              platform?.enablePlatformCardUpdate &&
+              updatedPlatforms[platform.name] !== true &&
+              selectedProviders[platform.platform].length > 0 && (
+                <div className="inline-flex h-6 items-center rounded-xl border border-accent-3 px-2 text-xs text-accent-3">
+                  Update
+                </div>
+              )}
           </div>
-          {updatedPlatforms &&
-            platform?.enablePlatformCardUpdate &&
-            updatedPlatforms[platform.name] !== true &&
-            selectedProviders[platform.platform].length > 0 && (
-              <div className="inline-flex h-6 items-center rounded-xl border border-accent-3 px-2 text-xs text-accent-3">
-                Update
-              </div>
-            )}
-        </div>
-        <div className="flex justify-center px-2 py-0 pb-6 md:block md:justify-start md:px-6">
-          <h1 className="mb-0 text-lg md:mb-3">{platform.name}</h1>
-          <p className="pleading-relaxed hidden text-color-4 md:inline-block">{platform.description}</p>
+          <div className="mt-4 flex justify-center md:mt-6 md:block md:justify-start">
+            <h1 className="text-lg">{platform.name}</h1>
+            <p className="pleading-relaxed mt-2 hidden text-color-4 md:inline-block">{platform.description}</p>
+          </div>
         </div>
         <div className="mt-auto text-color-3">
           {selectedProviders[platform.platform].length > 0 ? (

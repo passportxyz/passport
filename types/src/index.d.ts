@@ -1,7 +1,8 @@
 import { JsonRpcSigner } from "@ethersproject/providers";
 // BrightId Shared Types
 export { BrightIdProcedureResponse, BrightIdVerificationResponse, BrightIdSponsorshipResponse } from "./brightid";
-import { BigNumber } from "@ethersproject/bignumber";
+
+import { MultiAttestationRequest } from "@ethereum-attestation-service/eas-sdk";
 
 // Typing for required parts of DIDKit
 export type DIDKitLib = {
@@ -144,6 +145,8 @@ export type Stamp = {
   credential: VerifiableCredential;
 };
 
+export type StampPatch = Pick<Stamp, "provider"> & Partial<Pick<Stamp, "credential">>;
+
 export type Passport = {
   issuanceDate?: Date;
   expiryDate?: Date;
@@ -167,23 +170,14 @@ export type PassportLoadResponse = {
   errorDetails?: PassportLoadErrorDetails;
 };
 
-export type EasStamp = {
-  encodedData: string;
-};
-
-export type EasPassport = {
-  stamps: EasStamp[];
-  recipient: string;
-  expirationTime: any;
-  revocable: boolean;
-  refUID: string;
-  value: any;
+export type PassportAttestation = {
+  multiAttestationRequest: MultiAttestationRequest[];
   nonce: number;
   fee: any;
 };
 
 export type EasPayload = {
-  passport: EasPassport;
+  passport: PassportAttestation;
   signature: {
     v: number;
     r: string;
@@ -196,6 +190,7 @@ export type EasPayload = {
 export type EasRequestBody = {
   nonce: number;
   credentials: VerifiableCredential[];
+  dbAccessToken: string;
 };
 
 // Passport DID
@@ -226,6 +221,8 @@ export type PLATFORM_ID =
   | "Coinbase"
   | "GuildXYZ"
   | "Hypercerts"
+  | "PHI"
+  | "Holonym"
   | "Civic";
 
 export type PROVIDER_ID =
@@ -288,6 +285,7 @@ export type PROVIDER_ID =
   | "CommunityStakingGold"
   | "NFT"
   | "ZkSync"
+  | "ZkSyncEra"
   | "Lens"
   | "GnosisSafe"
   | "Coinbase"
@@ -295,6 +293,9 @@ export type PROVIDER_ID =
   | "GuildAdmin"
   | "GuildPassportMember"
   | "Hypercerts"
+  | "PHIActivitySilver"
+  | "PHIActivityGold"
+  | "HolonymGovIdProvider"
   | "CivicCaptchaPass"
   | "CivicUniquenessPass"
   | "CivicLivenessPass"

@@ -287,6 +287,26 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "GITCOIN_VERIFIER_CHAIN_ID",
             valueFrom: `${IAM_SERVER_SSM_ARN}:GITCOIN_VERIFIER_CHAIN_ID::`,
           },
+          {
+            name: "ALLO_SCORER_ID",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:ALLO_SCORER_ID::`,
+          },
+          {
+            name: "SCORER_ENDPOINT",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:SCORER_ENDPOINT::`,
+          },
+          {
+            name: "SCORER_API_KEY",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:SCORER_API_KEY::`,
+          },
+          {
+            name: "EAS_GITCOIN_STAMP_SCHEMA",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:EAS_GITCOIN_STAMP_SCHEMA::`,
+          },
+          {
+            name: "EAS_GITCOIN_SCORE_SCHEMA",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:EAS_GITCOIN_SCORE_SCHEMA::`,
+          },
         ],
       },
     },

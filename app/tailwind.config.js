@@ -40,6 +40,9 @@ module.exports = {
         "color-3": "var(--color-text-3)",
         "color-4": "var(--color-text-4)",
       },
+      minHeight: {
+        default: "100vh",
+      },
     },
     fontSize: {
       // Set line-height to 150%
@@ -58,9 +61,6 @@ module.exports = {
       body: ["var(--font-body)"],
       heading: ["var(--font-heading)"],
       alt: ["var(--font-alt)"],
-    },
-    minHeight: {
-      default: "100vh",
     },
   },
   plugins: [require("@headlessui/tailwindcss")],

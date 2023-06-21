@@ -6,6 +6,7 @@ import {
   PLATFORM_ID,
   PROVIDER_ID,
   Stamp,
+  StampPatch,
 } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../config/providers";
 import { CeramicDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
@@ -24,6 +25,7 @@ const {
   Gitcoin,
   Facebook,
   Poh,
+  PHI,
   GitPOAP,
   NFT,
   GnosisSafe,
@@ -40,11 +42,10 @@ const {
   Coinbase,
   GuildXYZ,
   Hypercerts,
+  Holonym,
   Civic,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
-import { getProviderSpec } from "../utils/helpers";
-import { getProviderCards, ProviderCards } from "../components/platform";
 
 // -- Trusted IAM servers DID
 const IAM_ISSUER_DID = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
@@ -57,6 +58,7 @@ export interface CeramicContextState {
   allPlatforms: Map<PLATFORM_ID, PlatformProps>;
   handleCreatePassport: () => Promise<void>;
   handleAddStamps: (stamps: Stamp[]) => Promise<void>;
+  handlePatchStamps: (stamps: StampPatch[]) => Promise<void>;
   handleDeleteStamps: (providerIds: PROVIDER_ID[]) => Promise<void>;
   handleCheckRefreshPassport: () => Promise<boolean>;
   cancelCeramicConnection: () => void;
@@ -200,10 +202,23 @@ if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
   });
 }
 
+if (process.env.NEXT_PUBLIC_FF_PHI_STAMP === "on") {
+  platforms.set("PHI", {
+    platform: new PHI.PHIPlatform(),
+    platFormGroupSpec: PHI.ProviderConfig,
+  });
+}
+
+if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP === "on") {
+  platforms.set("Holonym", {
+    platform: new Holonym.HolonymPlatform(),
+    platFormGroupSpec: Holonym.ProviderConfig,
+  });
+}
+
 platforms.set("Civic", {
   platform: new Civic.CivicPlatform(),
   platFormGroupSpec: Civic.ProviderConfig,
-  providerCards: getProviderCards("Civic"),
 });
 
 export enum IsLoadingPassportState {
@@ -252,6 +267,7 @@ const startingState: CeramicContextState = {
   allPlatforms: platforms,
   handleCreatePassport: async () => {},
   handleAddStamps: async () => {},
+  handlePatchStamps: async () => {},
   handleDeleteStamps: async () => {},
   handleCheckRefreshPassport: async () => false,
   passportHasCacaoError: false,
@@ -562,6 +578,38 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     }
   };
 
+  const handlePatchStamps = async (stampPatches: StampPatch[]): Promise<void> => {
+    try {
+      if (database) {
+        await database.patchStamps(stampPatches);
+        const newPassport = await fetchPassport(database, true);
+
+        if (ceramicClient && newPassport) {
+          (async () => {
+            try {
+              const deleteProviderIds = stampPatches
+                .filter(({ credential }) => !credential)
+                .map(({ provider }) => provider);
+
+              if (deleteProviderIds.length) await ceramicClient.deleteStampIDs(deleteProviderIds);
+
+              await ceramicClient.setStamps(newPassport.stamps);
+            } catch (e) {
+              console.log("error patching ceramic stamps", e);
+            }
+          })();
+        }
+
+        if (dbAccessToken) {
+          refreshScore(address, dbAccessToken);
+        }
+      }
+    } catch (e) {
+      datadogLogs.logger.error("Error patching stamps", { stampPatches, error: e });
+      throw e;
+    }
+  };
+
   const handleDeleteStamps = async (providerIds: PROVIDER_ID[]): Promise<void> => {
     try {
       if (database) {
@@ -606,20 +654,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     setAllProviderState(startingAllProvidersState);
   };
 
-  const stateMemo = useMemo(
-    () => ({
-      passport,
-      isLoadingPassport,
-      allProvidersState,
-      handleCreatePassport,
-      handleAddStamps,
-      handleDeleteStamps,
-      userDid,
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [passport, isLoadingPassport, allProvidersState, userDid]
-  );
-
   const providerProps = {
     passport,
     isLoadingPassport,
@@ -627,6 +661,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     allPlatforms: platforms,
     handleCreatePassport,
     handleAddStamps,
+    handlePatchStamps,
     handleDeleteStamps,
     handleCheckRefreshPassport,
     cancelCeramicConnection,

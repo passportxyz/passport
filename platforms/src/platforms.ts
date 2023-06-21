@@ -21,6 +21,8 @@ import * as Brightid from "./Brightid";
 import * as Coinbase from "./Coinbase";
 import * as GuildXYZ from "./GuildXYZ";
 import * as Hypercerts from "./Hypercerts";
+import * as PHI from "./PHI";
+import * as Holonym from "./Holonym";
 import * as Civic from "./Civic";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
@@ -56,6 +58,8 @@ const platforms: Record<string, PlatformConfig> = {
   Coinbase,
   GuildXYZ,
   Hypercerts,
+  PHI,
+  Holonym,
   Civic,
 };
 

@@ -5,6 +5,7 @@ export const mockAddress = "0xmyAddress";
 export const mockAccount: Account = {
   address: mockAddress,
   ens: null,
+  uns: null,
   balance: null,
 };
 export const mockWallet: WalletState = {
