@@ -49,13 +49,16 @@ type EthErc20Context = ProviderContext & {
   };
 };
 
+type Erc20Contract = Contract & {
+  balanceOf: (address: string) => Promise<BigNumber>;
+};
+
 // set the network rpc url based on env
 export const RPC_URL = process.env.RPC_URL;
 
 export async function getTokenBalance(
   address: string,
   tokenContractAddress: string,
-  decimalNumber: number,
   payload: RequestPayload,
   context: EthErc20Context
 ): Promise<BigNumber> {
@@ -63,10 +66,8 @@ export async function getTokenBalance(
     // define a provider using the rpc url
     const staticProvider = getRPCProvider(payload);
     // load Token contract
-    const readContract = new Contract(tokenContractAddress, ERC20_ABI, staticProvider);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-    const tokenBalance: string = await readContract?.balanceOf(address);
-    const bnTokenBalance: BigNumber = parseUnits(tokenBalance, 0);
+    const readContract = new Contract(tokenContractAddress, ERC20_ABI, staticProvider) as Erc20Contract;
+    const tokenBalance = await readContract?.balanceOf(address);
 
     if (!context.ethErc20) {
       context.ethErc20 = {};
@@ -74,7 +75,7 @@ export async function getTokenBalance(
     if (!context.ethErc20.counts) {
       context.ethErc20.counts = {};
     }
-    context.ethErc20.counts[tokenContractAddress] = bnTokenBalance;
+    context.ethErc20.counts[tokenContractAddress] = tokenBalance;
   }
   return context.ethErc20.counts[tokenContractAddress];
 }
@@ -88,7 +89,6 @@ export async function getEthBalance(
     // define a provider using the rpc url
     const staticProvider = getRPCProvider(payload);
     const ethBalance = await staticProvider?.getBalance(address);
-    // convert a currency unit from wei to ether
 
     if (!context.ethErc20) {
       context.ethErc20 = {};
@@ -101,7 +101,7 @@ export async function getEthBalance(
   return context.ethErc20.counts.eth;
 }
 
-export type ethErc20PossessionProviderOptions = {
+export type EthErc20PossessionProviderOptions = {
   threshold: string;
   recordAttribute: string;
   contractAddress: string;
@@ -115,7 +115,7 @@ export class EthErc20PossessionProvider implements Provider {
   type = "";
 
   // Options can be set here and/or via the constructor
-  _options: ethErc20PossessionProviderOptions = {
+  _options: EthErc20PossessionProviderOptions = {
     threshold: "1",
     recordAttribute: "",
     contractAddress: "",
@@ -124,7 +124,7 @@ export class EthErc20PossessionProvider implements Provider {
   };
 
   // construct the provider instance with supplied options
-  constructor(options: ProviderOptions = {}) {
+  constructor(options: Partial<EthErc20PossessionProviderOptions> = {}) {
     this._options = { ...this._options, ...options };
     this.type = `${this._options.recordAttribute}#${this._options.threshold}`;
   }
@@ -137,13 +137,7 @@ export class EthErc20PossessionProvider implements Provider {
 
     try {
       if (this._options.contractAddress.length > 0) {
-        amount = await getTokenBalance(
-          address,
-          this._options.contractAddress,
-          this._options.decimalNumber,
-          payload,
-          context
-        );
+        amount = await getTokenBalance(address, this._options.contractAddress, payload, context);
       } else {
         amount = await getEthBalance(address, payload, context);
       }
