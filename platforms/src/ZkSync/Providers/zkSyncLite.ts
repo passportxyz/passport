@@ -36,7 +36,7 @@ type ZkSyncLiteResponse = {
 // Export a Provider to verify ZkSync Transactions
 export class ZkSyncLiteProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
-  type = "ZkSyncLite";
+  type = "ZkSync";
 
   // Options can be set here and/or via the constructor
   _options = {};
