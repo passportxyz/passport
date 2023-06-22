@@ -7,7 +7,7 @@ export class ZkSyncPlatform extends Platform {
 
   banner = {
     heading:
-      "We currently only recognize finalized 'TRANSFER' type transactions on ZkSync Lite. This means that other transactions like MintNFT, Swap etc are not recognized.",
+      "Only 'TRANSFER' transactions on ZkSync Lite are recognized. Transactions need to achieve verified status (may take up to 24hrs) across all zkSync networks to count. Other transaction types are not currently included.",
   };
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
