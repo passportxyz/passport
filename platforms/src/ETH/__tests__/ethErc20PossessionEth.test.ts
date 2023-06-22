@@ -22,7 +22,7 @@ jest.mock("@ethersproject/providers", () => {
 const MOCK_ADDRESS = "0x738488886dd94725864ae38252a90be1ab7609c7";
 const MOCK_ADDRESS_LOWER = MOCK_ADDRESS.toLowerCase();
 const MOCK_FAKE_ADDRESS = "FAKE_ADDRESS";
-const MOCK_BALANCE_ETH = units.parseUnits("200000000000000000000", 0);
+const MOCK_BALANCE_ETH = units.parseUnits("200", 18);
 
 describe("Attempt verification", function () {
   beforeEach(() => {
