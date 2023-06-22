@@ -21,7 +21,7 @@ jest.mock("ethers", () => {
 const MOCK_ADDRESS = "0x738488886dd94725864ae38252a90be1ab7609c7";
 const MOCK_ADDRESS_LOWER = MOCK_ADDRESS.toLowerCase();
 const MOCK_FAKE_ADDRESS = "FAKE_ADDRESS";
-const MOCK_BALANCE = "200000000000000000000";
+const MOCK_BALANCE = units.parseUnits("200", 18);
 
 describe("Attempt verification", function () {
   beforeEach(() => {
@@ -48,7 +48,6 @@ describe("Attempt verification", function () {
     expect(mockBalanceOf).toBeCalledWith(MOCK_ADDRESS_LOWER);
     // Check that parseUnits is called for threshold and balance
     expect(parseUnits).toBeCalledWith("100", 18);
-    expect(parseUnits).toBeCalledWith(MOCK_BALANCE, 0);
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
@@ -112,7 +111,7 @@ describe("Check valid cases for GTC Balances", function () {
   });
 
   it("Expected Greater than 10 GTC and GTC Balance is 15", async () => {
-    mockBalanceOf.mockResolvedValueOnce("15000000000000000000");
+    mockBalanceOf.mockResolvedValueOnce(units.parseUnits("15", 18));
     const gtcPossessions = new EthErc20PossessionProvider({
       threshold: "10",
       recordAttribute: "gtcPossessionsGte",
@@ -135,7 +134,7 @@ describe("Check valid cases for GTC Balances", function () {
     });
   });
   it("Expected Greater than 100 GTC and GTC Balance is 150", async () => {
-    mockBalanceOf.mockResolvedValueOnce("150000000000000000000");
+    mockBalanceOf.mockResolvedValueOnce(units.parseUnits("150", 18));
     const gtcPossessions = new EthErc20PossessionProvider({
       threshold: "100",
       recordAttribute: "gtcPossessionsGte",
@@ -165,7 +164,7 @@ describe("Check invalid cases for GTC Balances", function () {
     mockBalanceOf.mockResolvedValue(MOCK_BALANCE);
   });
   it("Expected Greater than 10 GTC and GTC Balance is 7", async () => {
-    mockBalanceOf.mockResolvedValueOnce("7000000000000000000");
+    mockBalanceOf.mockResolvedValueOnce(units.parseUnits("7", 18));
     const gtcPossessions = new EthErc20PossessionProvider({
       threshold: "10",
       recordAttribute: "gtcPossessionsGte",
@@ -185,7 +184,7 @@ describe("Check invalid cases for GTC Balances", function () {
     });
   });
   it("Expected Greater than 100 GTC and GTC Balance is 75", async () => {
-    mockBalanceOf.mockResolvedValueOnce("75000000000000000000");
+    mockBalanceOf.mockResolvedValueOnce(units.parseUnits("75", 18));
     const gtcPossessions = new EthErc20PossessionProvider({
       threshold: "100",
       recordAttribute: "gtcPossessionsGte",
