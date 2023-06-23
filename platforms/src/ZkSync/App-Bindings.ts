@@ -7,7 +7,7 @@ export class ZkSyncPlatform extends Platform {
 
   banner = {
     heading:
-      "Only 'TRANSFER' transactions on zkSync 1.0 are recognized. Transactions need to achieve verified status (may take up to 24hrs) across all zkSync networks to count. Other transaction types are not currently included.",
+      "Only 'TRANSFER' transactions on ZkSync Lite are recognized. Transactions need to achieve verified status (may take up to 24hrs) across all zkSync networks to count. Other transaction types are not currently included.",
   };
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
