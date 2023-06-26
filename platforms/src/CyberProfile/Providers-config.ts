@@ -1,9 +1,6 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import {
-  CyberProfilePremiumProvider,
-  CyberProfilePaidProvider,
-  CyberProfileFreeProvider,
-} from "./Providers/cyberconnect";
+import { CyberProfilePremiumProvider, CyberProfilePaidProvider } from "./Providers/cyberconnect";
+import { CyberProfileOrgMemberProvider } from "./Providers/cyberconnect_nonevm";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/cyberconnectLogoIcon.svg",
@@ -20,7 +17,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     providers: [
       { title: "Premium CyberProfile Handle ( length is between 1 and 6 characters )", name: "CyberProfilePremium" },
       { title: "Paid CyberProfile Handle ( length is between 7 and 12 characters )", name: "CyberProfilePaid" },
-      { title: "Free CyberProfile Handle ( length is between 13 and 20 characters )", name: "CyberProfileFree" },
+      { title: "Organization Membership", name: "CyberProfileOrgMember" },
     ],
   },
 ];
@@ -28,5 +25,5 @@ export const ProviderConfig: PlatformGroupSpec[] = [
 export const providers: Provider[] = [
   new CyberProfilePremiumProvider(),
   new CyberProfilePaidProvider(),
-  new CyberProfileFreeProvider(),
+  new CyberProfileOrgMemberProvider(),
 ];

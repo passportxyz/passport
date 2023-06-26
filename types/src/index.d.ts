@@ -294,6 +294,6 @@ export type PROVIDER_ID =
   | "Hypercerts"
   | "CyberProfilePremium"
   | "CyberProfilePaid"
-  | "CyberProfileFree"
+  | "CyberProfileOrgMember"
   | "PHIActivitySilver"
   | "PHIActivityGold";
