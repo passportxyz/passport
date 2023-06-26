@@ -4,7 +4,7 @@ import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
-import { zkSyncApiEndpoint, ZkSyncProvider } from "../Providers/zkSync";
+import { zkSyncLiteApiEndpoint, ZkSyncLiteProvider } from "../Providers/zkSyncLite";
 
 jest.mock("axios");
 
@@ -122,14 +122,14 @@ describe("Verification succeeds", function () {
       });
     });
 
-    const zkSyncProvider = new ZkSyncProvider();
-    const zkSyncPayload = await zkSyncProvider.verify({
+    const zkSyncLiteProvider = new ZkSyncLiteProvider();
+    const zkSyncLitePayload = await zkSyncLiteProvider.verify({
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
+    expect(mockedAxios.get).toBeCalledWith(`${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
       params: {
         from: "latest",
         limit: 100,
@@ -137,7 +137,7 @@ describe("Verification succeeds", function () {
       },
     });
 
-    expect(zkSyncPayload).toEqual({
+    expect(zkSyncLitePayload).toEqual({
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
@@ -158,14 +158,14 @@ describe("Verification fails", function () {
       });
     });
 
-    const zkSyncProvider = new ZkSyncProvider();
-    const zkSyncPayload = await zkSyncProvider.verify({
+    const zkSyncLiteProvider = new ZkSyncLiteProvider();
+    const zkSyncLitePayload = await zkSyncLiteProvider.verify({
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
+    expect(mockedAxios.get).toBeCalledWith(`${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
       params: {
         from: "latest",
         limit: 100,
@@ -173,7 +173,7 @@ describe("Verification fails", function () {
       },
     });
 
-    expect(zkSyncPayload).toEqual({
+    expect(zkSyncLitePayload).toEqual({
       valid: false,
       error: ["Unable to find a finalized transaction from the given address"],
     });
@@ -190,14 +190,14 @@ describe("Verification fails", function () {
       });
     });
 
-    const zkSyncProvider = new ZkSyncProvider();
-    const zkSyncPayload = await zkSyncProvider.verify({
+    const zkSyncLiteProvider = new ZkSyncLiteProvider();
+    const zkSyncLitePayload = await zkSyncLiteProvider.verify({
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
+    expect(mockedAxios.get).toBeCalledWith(`${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
       params: {
         from: "latest",
         limit: 100,
@@ -205,7 +205,7 @@ describe("Verification fails", function () {
       },
     });
 
-    expect(zkSyncPayload).toEqual({
+    expect(zkSyncLitePayload).toEqual({
       valid: false,
       error: ["Unable to find a finalized transaction from the given address"],
     });
@@ -223,14 +223,14 @@ describe("Verification fails", function () {
       });
     });
 
-    const zkSyncProvider = new ZkSyncProvider();
-    const zkSyncPayload = await zkSyncProvider.verify({
+    const zkSyncLiteProvider = new ZkSyncLiteProvider();
+    const zkSyncLitePayload = await zkSyncLiteProvider.verify({
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
+    expect(mockedAxios.get).toBeCalledWith(`${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
       params: {
         from: "latest",
         limit: 100,
@@ -238,9 +238,9 @@ describe("Verification fails", function () {
       },
     });
 
-    expect(zkSyncPayload).toEqual({
+    expect(zkSyncLitePayload).toEqual({
       valid: false,
-      error: ["ZKSync API Error 'error'. Details: 'some kind of error'."],
+      error: ["ZKSync Lite API Error 'error'. Details: 'some kind of error'."],
     });
   });
 
@@ -256,14 +256,14 @@ describe("Verification fails", function () {
       });
     });
 
-    const zkSyncProvider = new ZkSyncProvider();
-    const zkSyncPayload = await zkSyncProvider.verify({
+    const zkSyncLiteProvider = new ZkSyncLiteProvider();
+    const zkSyncLitePayload = await zkSyncLiteProvider.verify({
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
+    expect(mockedAxios.get).toBeCalledWith(`${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
       params: {
         from: "latest",
         limit: 100,
@@ -271,7 +271,7 @@ describe("Verification fails", function () {
       },
     });
 
-    expect(zkSyncPayload).toEqual({
+    expect(zkSyncLitePayload).toEqual({
       valid: false,
       error: ["HTTP Error '400'. Details: 'Bad Request'."],
     });
@@ -282,14 +282,14 @@ describe("Verification fails", function () {
       throw "something bad happened";
     });
 
-    const zkSyncProvider = new ZkSyncProvider();
-    const zkSyncPayload = await zkSyncProvider.verify({
+    const zkSyncLiteProvider = new ZkSyncLiteProvider();
+    const zkSyncLitePayload = await zkSyncLiteProvider.verify({
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
+    expect(mockedAxios.get).toBeCalledWith(`${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
       params: {
         from: "latest",
         limit: 100,
@@ -297,7 +297,7 @@ describe("Verification fails", function () {
       },
     });
 
-    expect(zkSyncPayload).toEqual({
+    expect(zkSyncLitePayload).toEqual({
       valid: false,
       error: ["Error getting transaction list for address"],
     });

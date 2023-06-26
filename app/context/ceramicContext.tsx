@@ -42,10 +42,11 @@ const {
   Coinbase,
   GuildXYZ,
   Hypercerts,
+  Holonym,
+  Idena,
 } = stampPlatforms;
 
 import { PlatformProps } from "../components/GenericPlatform";
-import { getProviderSpec } from "../utils/helpers";
 
 // -- Trusted IAM servers DID
 const IAM_ISSUER_DID = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
@@ -206,6 +207,20 @@ if (process.env.NEXT_PUBLIC_FF_PHI_STAMP === "on") {
   platforms.set("PHI", {
     platform: new PHI.PHIPlatform(),
     platFormGroupSpec: PHI.ProviderConfig,
+  });
+}
+
+if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP === "on") {
+  platforms.set("Holonym", {
+    platform: new Holonym.HolonymPlatform(),
+    platFormGroupSpec: Holonym.ProviderConfig,
+  });
+}
+
+if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP === "on") {
+  platforms.set("Idena", {
+    platform: new Idena.IdenaPlatform(),
+    platFormGroupSpec: Idena.ProviderConfig,
   });
 }
 
@@ -573,17 +588,19 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         const newPassport = await fetchPassport(database, true);
 
         if (ceramicClient && newPassport) {
-          try {
-            const deleteProviderIds = stampPatches
-              .filter(({ credential }) => !credential)
-              .map(({ provider }) => provider);
+          (async () => {
+            try {
+              const deleteProviderIds = stampPatches
+                .filter(({ credential }) => !credential)
+                .map(({ provider }) => provider);
 
-            if (deleteProviderIds.length) await ceramicClient.deleteStampIDs(deleteProviderIds);
+              if (deleteProviderIds.length) await ceramicClient.deleteStampIDs(deleteProviderIds);
 
-            await ceramicClient.setStamps(newPassport.stamps);
-          } catch (e) {
-            console.log("error patching ceramic stamps", e);
-          }
+              await ceramicClient.setStamps(newPassport.stamps);
+            } catch (e) {
+              console.log("error patching ceramic stamps", e);
+            }
+          })();
         }
 
         if (dbAccessToken) {

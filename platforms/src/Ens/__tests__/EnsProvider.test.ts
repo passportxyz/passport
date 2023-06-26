@@ -15,16 +15,12 @@ const MOCK_ENS = "dpopptest.eth";
 const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
 
 const EthersLookupAddressMock = jest.spyOn(StaticJsonRpcProvider.prototype, "lookupAddress");
-const EthersResolveAddressMock = jest.spyOn(StaticJsonRpcProvider.prototype, "resolveName");
 
 describe("Attempt verification", function () {
   beforeEach(() => {
     jest.clearAllMocks();
     EthersLookupAddressMock.mockImplementation(async (address) => {
       if (address === MOCK_ADDRESS) return MOCK_ENS;
-    });
-    EthersResolveAddressMock.mockImplementation(async (ens) => {
-      if (ens === MOCK_ENS) return MOCK_ADDRESS;
     });
     // eslint-disable-next-line @typescript-eslint/require-await
     mockSigner.getAddress = jest.fn(async () => MOCK_ADDRESS);
@@ -37,7 +33,6 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     expect(EthersLookupAddressMock).toBeCalledWith(MOCK_ADDRESS);
-    expect(EthersResolveAddressMock).toBeCalledWith(MOCK_ENS);
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
@@ -70,6 +65,6 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     expect(EthersLookupAddressMock).toBeCalledWith(MOCK_FAKE_ADDRESS);
-    expect(verifiedPayload).toEqual({ valid: false, error: ["Ens name was not found for given address."] });
+    expect(verifiedPayload).toEqual({ valid: false, error: ["Primary ENS name was not found for given address."] });
   });
 });

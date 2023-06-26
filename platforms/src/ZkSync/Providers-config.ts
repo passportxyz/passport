@@ -1,5 +1,5 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { ZkSyncProvider } from "./Providers/zkSync";
+import { ZkSyncLiteProvider } from "./Providers/zkSyncLite";
 import { ZkSyncEraProvider } from "./Providers/zkSyncEra";
 
 export const PlatformDetails: PlatformSpec = {
@@ -13,8 +13,8 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "zkSync 1.0",
-    providers: [{ title: "Transacted on zkSync 1.0", name: "ZkSync" }],
+    platformGroup: "zkSync Lite",
+    providers: [{ title: "Transacted on zkSync Lite", name: "ZkSync" }],
   },
   {
     platformGroup: "zkSync Era",
@@ -22,4 +22,4 @@ export const ProviderConfig: PlatformGroupSpec[] = [
   },
 ];
 
-export const providers: Provider[] = [new ZkSyncProvider(), new ZkSyncEraProvider()];
+export const providers: Provider[] = [new ZkSyncLiteProvider(), new ZkSyncEraProvider()];

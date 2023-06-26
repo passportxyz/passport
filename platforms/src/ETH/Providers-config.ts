@@ -38,17 +38,17 @@ export const providers: Provider[] = [
   new FirstEthTxnProvider(),
   new EthGTEOneTxnProvider(),
   new EthErc20PossessionProvider({
-    threshold: 32,
+    threshold: "32",
     recordAttribute: "ethPossessionsGte",
     error: "ETH Possessions >= 32 Provider verify Error",
   }),
   new EthErc20PossessionProvider({
-    threshold: 10,
+    threshold: "10",
     recordAttribute: "ethPossessionsGte",
     error: "ETH Possessions >= 10 Provider verify Error",
   }),
   new EthErc20PossessionProvider({
-    threshold: 1,
+    threshold: "1",
     recordAttribute: "ethPossessionsGte",
     error: "ETH Possessions >= 1 Provider verify Error",
   }),
