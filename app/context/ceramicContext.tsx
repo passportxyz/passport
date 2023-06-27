@@ -217,7 +217,9 @@ if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP === "on") {
 }
 
 platforms.set("Civic", {
-  platform: new Civic.CivicPlatform(),
+  platform: new Civic.CivicPlatform({
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_CIVIC_CALLBACK,
+  }),
   platFormGroupSpec: Civic.ProviderConfig,
 });
 
