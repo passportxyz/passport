@@ -6,7 +6,7 @@ type CivicPassType = "CivicCaptchaPass" | "CivicUniquenessPass" | "CivicLiveness
 
 const passTypeToUrl = (passType: CivicPassType) => {
   const pass = passType.toLowerCase().replace("civic", "").replace("pass", "");
-  return `https://demopass.civic.com?pass=${pass}`;
+  return `https://getpass.civic.com?pass=${pass}`;
 };
 
 export const PlatformGroupCard = ({ platformGroup, platform }: PlatformGroupCardProps) => {
