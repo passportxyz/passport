@@ -9,12 +9,10 @@ import { LinkIcon } from "@heroicons/react/20/solid";
 import Toggle from "./Toggle";
 import { getProviderSpec } from "../utils/helpers";
 import { CeramicContext } from "../context/ceramicContext";
-import { ProviderCards } from "./platform";
 
 type StampSelectorProps = {
   currentPlatform?: PlatformSpec | undefined;
   currentProviders: PlatformGroupSpec[] | undefined;
-  currentProviderCards: ProviderCards | undefined;
   verifiedProviders: PROVIDER_ID[] | undefined;
   selectedProviders: PROVIDER_ID[] | undefined;
   setSelectedProviders: (providerIds: PROVIDER_ID[]) => void;
@@ -23,7 +21,6 @@ type StampSelectorProps = {
 export function StampSelector({
   currentPlatform,
   currentProviders,
-  currentProviderCards,
   verifiedProviders,
   selectedProviders,
   setSelectedProviders,
@@ -88,9 +85,6 @@ export function StampSelector({
                           ))}
                         {provider.title}
                       </div>
-                      {currentProviderCards?.PlatformGroupCard && currentPlatform && (
-                        <currentProviderCards.PlatformGroupCard platformGroup={stamp} platform={currentPlatform} />
-                      )}
                     </li>
                   );
                 })}

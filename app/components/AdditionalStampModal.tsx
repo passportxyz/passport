@@ -171,7 +171,6 @@ export const AdditionalStampModal = ({
         <div className="mb-4 flex w-full flex-col">
           <StampSelector
             currentProviders={activePlatform.platformProps.platFormGroupSpec}
-            currentProviderCards={activePlatform.platformProps.providerCards}
             verifiedProviders={verifiedProviders}
             selectedProviders={selectedProviders}
             setSelectedProviders={(providerIds) => setSelectedProviders && setSelectedProviders(providerIds)}
