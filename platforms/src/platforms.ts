@@ -23,6 +23,7 @@ import * as GuildXYZ from "./GuildXYZ";
 import * as Hypercerts from "./Hypercerts";
 import * as PHI from "./PHI";
 import * as Holonym from "./Holonym";
+import * as Idena from "./Idena";
 import * as Civic from "./Civic";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
@@ -60,6 +61,7 @@ const platforms: Record<string, PlatformConfig> = {
   Hypercerts,
   PHI,
   Holonym,
+  Idena,
   Civic,
 };
 

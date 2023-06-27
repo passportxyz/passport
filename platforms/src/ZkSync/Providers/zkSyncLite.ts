@@ -9,7 +9,7 @@ import axios from "axios";
 import { getAddress } from "../../utils/signer";
 
 // https://docs.zksync.io/api/v0.2/
-export const zkSyncApiEndpoint = "https://api.zksync.io/api/v0.2/";
+export const zkSyncLiteApiEndpoint = "https://api.zksync.io/api/v0.2/";
 
 // Pagination structure
 type Pagination = {
@@ -20,21 +20,21 @@ type Pagination = {
 };
 
 // Defining interfaces for the data structure returned by the subgraph
-type ZKSyncTransaction = {
+type ZKSyncLiteTransaction = {
   txHash: string;
   op: { from: string; to: string };
   status: string;
 };
 
-type ZkSyncResponse = {
+type ZkSyncLiteResponse = {
   status: string;
   error: unknown;
-  result: { list: ZKSyncTransaction[] };
+  result: { list: ZKSyncLiteTransaction[] };
   pagination: Pagination;
 };
 
 // Export a Provider to verify ZkSync Transactions
-export class ZkSyncProvider implements Provider {
+export class ZkSyncLiteProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
   type = "ZkSync";
 
@@ -55,7 +55,7 @@ export class ZkSyncProvider implements Provider {
     const address = (await getAddress(payload)).toLowerCase();
 
     try {
-      const requestResponse = await axios.get(`${zkSyncApiEndpoint}accounts/${address}/transactions`, {
+      const requestResponse = await axios.get(`${zkSyncLiteApiEndpoint}accounts/${address}/transactions`, {
         params: {
           from: "latest",
           limit: 100,
@@ -64,13 +64,13 @@ export class ZkSyncProvider implements Provider {
       });
 
       if (requestResponse.status == 200) {
-        const zkSyncResponse = requestResponse.data as ZkSyncResponse;
+        const zkSyncLiteResponse = requestResponse.data as ZkSyncLiteResponse;
 
-        if (zkSyncResponse.status === "success") {
+        if (zkSyncLiteResponse.status === "success") {
           // We consider the verification valid if this account has at least one finalized
           // transaction initiated by this account
-          for (let i = 0; i < zkSyncResponse.result.list.length; i++) {
-            const t = zkSyncResponse.result.list[i];
+          for (let i = 0; i < zkSyncLiteResponse.result.list.length; i++) {
+            const t = zkSyncLiteResponse.result.list[i];
             if (t.status === "finalized" && t.op.from === address) {
               valid = true;
               break;
@@ -81,7 +81,9 @@ export class ZkSyncProvider implements Provider {
             error = ["Unable to find a finalized transaction from the given address"];
           }
         } else {
-          error = [`ZKSync API Error '${zkSyncResponse.status}'. Details: '${zkSyncResponse.error.toString()}'.`];
+          error = [
+            `ZKSync Lite API Error '${zkSyncLiteResponse.status}'. Details: '${zkSyncLiteResponse.error.toString()}'.`,
+          ];
         }
       } else {
         error = [`HTTP Error '${requestResponse.status}'. Details: '${requestResponse.statusText}'.`];

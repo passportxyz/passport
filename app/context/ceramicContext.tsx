@@ -43,6 +43,7 @@ const {
   GuildXYZ,
   Hypercerts,
   Holonym,
+  Idena,
   Civic,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
@@ -213,6 +214,13 @@ if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP === "on") {
   platforms.set("Holonym", {
     platform: new Holonym.HolonymPlatform(),
     platFormGroupSpec: Holonym.ProviderConfig,
+  });
+}
+
+if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP === "on") {
+  platforms.set("Idena", {
+    platform: new Idena.IdenaPlatform(),
+    platFormGroupSpec: Idena.ProviderConfig,
   });
 }
 
