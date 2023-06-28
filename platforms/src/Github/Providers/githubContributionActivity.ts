@@ -1,6 +1,6 @@
 import type { Provider } from "../../types";
 import { RequestPayload, ProviderContext, VerifiedPayload } from "@gitcoin/passport-types";
-import { requestAccessToken, fetchGithubUserData, ContributionsCollection } from "../githubClient";
+import { fetchGithubUserData, ContributionsCollection } from "../githubClient";
 
 export type GithubContributionActivityOptions = {
   threshold: string;
@@ -30,14 +30,13 @@ export class GithubContributionActivityProvider implements Provider {
   }
 
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
-    await requestAccessToken(payload.proofs.code, context);
-    const githubContributions = await fetchGithubUserData(context);
-
+    const githubContributions = await fetchGithubUserData(context, payload.proofs.code);
     const valid = checkContributionDays(parseInt(this._options.threshold), githubContributions.contributionData);
 
     return {
       valid,
       error: githubContributions.errors,
+      // double check record is sufficient, need to return address or userId?
       record: valid ? { id: `gte${this._options.threshold}GithubContributionActivity` } : undefined,
     };
   }

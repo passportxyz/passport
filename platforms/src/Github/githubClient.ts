@@ -95,15 +95,16 @@ const queryFunc = async (fromDate: string, toDate: string, accessToken: string):
 // This will be called once whether from the account creation provider or from the contribution provider
 // The second request is not needed for the account creation provider, but it is needed for the contribution provider
 // Possible optimization is to only call firstYearCollection if coming from the account creation provider, then call secondYearCollection if needed
-export const fetchGithubUserData = async (context: GithubContext): Promise<GithubUserData> => {
-  if (!context.github?.contributionData) {
+export const fetchGithubUserData = async (context: GithubContext, code: string): Promise<GithubUserData> => {
+  const accessToken = await requestAccessToken(code, context);
+  if (context.github.createdAt === undefined || context.github.contributionData === undefined) {
     try {
       const now = new Date();
       const oneYearAgo = new Date(new Date().setFullYear(now.getFullYear() - 1)).toISOString();
       const twoYearsAgo = new Date(new Date().setFullYear(now.getFullYear() - 2)).toISOString();
 
-      const firstYearCollection = await queryFunc(twoYearsAgo, oneYearAgo, context.github.accessToken);
-      const secondYearCollection = await queryFunc(oneYearAgo, now.toISOString(), context.github.accessToken);
+      const firstYearCollection = await queryFunc(twoYearsAgo, oneYearAgo, accessToken);
+      const secondYearCollection = await queryFunc(oneYearAgo, now.toISOString(), accessToken);
 
       const contributionCollection = {
         contributionCalendar: {
@@ -119,10 +120,11 @@ export const fetchGithubUserData = async (context: GithubContext): Promise<Githu
 
       if (!context.github) context.github = {};
       context.github.contributionData = contributionCollection;
-      context.github.createdAt = firstYearCollection.createdAt;
+      context.github.createdAt = firstYearCollection.createdAt ?? secondYearCollection.createdAt;
 
       return {
         contributionData: context.github.contributionData,
+        createdAt: context.github.createdAt,
       };
     } catch (_error) {
       const error = _error as ProviderError;
