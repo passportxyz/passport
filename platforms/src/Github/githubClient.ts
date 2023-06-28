@@ -6,7 +6,8 @@ const githubGraphEndpoint = "https://api.github.com/graphql";
 
 export type GithubContext = ProviderContext & {
   github?: {
-    userData?: ContributionsCollection;
+    createdAt?: string;
+    contributionData?: ContributionsCollection;
     accessToken?: string;
   };
 };
@@ -15,7 +16,8 @@ export type GithubTokenResponse = {
   access_token: string;
 };
 
-export type GithubContributionData = {
+export type GithubUserData = {
+  createdAt?: string;
   contributionData?: ContributionsCollection;
   errors?: string[];
 };
@@ -32,7 +34,7 @@ interface Viewer {
   contributionsCollection: ContributionsCollection;
 }
 
-interface ContributionsCollection {
+export interface ContributionsCollection {
   contributionCalendar: ContributionCalendar;
 }
 
@@ -54,7 +56,7 @@ type GithubContributionResponse = {
   data?: GitHubResponse;
 };
 
-const queryFunc = async (fromDate: string, toDate: string, accessToken: string) => {
+const queryFunc = async (fromDate: string, toDate: string, accessToken: string): Promise<Viewer> => {
   const query = `
     query {
       viewer {
@@ -84,11 +86,17 @@ const queryFunc = async (fromDate: string, toDate: string, accessToken: string) 
     }
   );
 
-  return result?.data?.data?.viewer?.contributionsCollection;
+  return {
+    contributionsCollection: result?.data?.data?.viewer?.contributionsCollection,
+    createdAt: result?.data?.data?.viewer?.createdAt,
+  };
 };
 
-export const fetchGithubUserContributions = async (context: GithubContext): Promise<GithubContributionData> => {
-  if (!context.github?.userData) {
+// This will be called once whether from the account creation provider or from the contribution provider
+// The second request is not needed for the account creation provider, but it is needed for the contribution provider
+// Possible optimization is to only call firstYearCollection if coming from the account creation provider, then call secondYearCollection if needed
+export const fetchGithubUserData = async (context: GithubContext): Promise<GithubUserData> => {
+  if (!context.github?.contributionData) {
     try {
       const now = new Date();
       const oneYearAgo = new Date(new Date().setFullYear(now.getFullYear() - 1)).toISOString();
@@ -100,20 +108,21 @@ export const fetchGithubUserContributions = async (context: GithubContext): Prom
       const contributionCollection = {
         contributionCalendar: {
           totalContributions:
-            firstYearCollection.contributionCalendar.totalContributions +
-            secondYearCollection.contributionCalendar.totalContributions,
+            firstYearCollection.contributionsCollection.contributionCalendar.totalContributions +
+            secondYearCollection.contributionsCollection.contributionCalendar.totalContributions,
           weeks: [
-            ...firstYearCollection.contributionCalendar.weeks,
-            ...secondYearCollection.contributionCalendar.weeks,
+            ...firstYearCollection.contributionsCollection.contributionCalendar.weeks,
+            ...secondYearCollection.contributionsCollection.contributionCalendar.weeks,
           ],
         },
       };
 
       if (!context.github) context.github = {};
-      context.github.userData = contributionCollection;
+      context.github.contributionData = contributionCollection;
+      context.github.createdAt = firstYearCollection.createdAt;
 
       return {
-        contributionData: context.github.userData,
+        contributionData: context.github.contributionData,
       };
     } catch (_error) {
       const error = _error as ProviderError;
@@ -128,7 +137,8 @@ export const fetchGithubUserContributions = async (context: GithubContext): Prom
     }
   }
   return {
-    contributionData: context.github.userData,
+    contributionData: context.github.contributionData,
+    createdAt: context.github.createdAt,
   };
 };
 
