@@ -3,9 +3,6 @@ import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import type { Provider, ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
-// ----- Ethers library
-import { utils } from "ethers";
-
 // ----- Credential verification
 import { getRPCProvider } from "../../utils/signer";
 
@@ -23,28 +20,25 @@ export class EnsProvider implements Provider {
 
   // Verify that the address defined in the payload has an ENS reverse lookup registered
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+    let error;
+    let valid = false;
+    let reportedName;
+
     try {
       const provider = getRPCProvider(payload);
+      reportedName = await provider.lookupAddress(payload.address);
+      valid = Boolean(reportedName);
+      if (!valid) error = ["Primary ENS name was not found for given address."];
+    } catch (e) {}
 
-      const reportedName = await provider.lookupAddress(payload.address);
-      if (!reportedName) return { valid: false, error: ["Ens name was not found for given address."] };
-
-      // lookup the address resolved to an ens name
-      const resolvedAddress = await provider.resolveName(reportedName);
-
-      // if the addresses match this is a valid ens lookup
-      const valid = utils.getAddress(payload.address) === utils.getAddress(resolvedAddress);
-
-      return {
-        valid: valid,
-        record: {
-          ens: valid ? reportedName : undefined,
-        },
-      };
-    } catch (e) {
-      return {
-        valid: false,
-      };
-    }
+    return {
+      valid: valid,
+      error: error,
+      record: valid
+        ? {
+            ens: reportedName,
+          }
+        : undefined,
+    };
   }
 }

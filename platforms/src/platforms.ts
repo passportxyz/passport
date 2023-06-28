@@ -23,6 +23,8 @@ import * as Clique from "./Clique";
 import * as GuildXYZ from "./GuildXYZ";
 import * as Hypercerts from "./Hypercerts";
 import * as PHI from "./PHI";
+import * as Holonym from "./Holonym";
+import * as Idena from "./Idena";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
 type PlatformConfig = {
@@ -59,6 +61,8 @@ const platforms: Record<string, PlatformConfig> = {
   Hypercerts,
   PHI,
   Clique,
+  Holonym,
+  Idena,
 };
 
 export default platforms;

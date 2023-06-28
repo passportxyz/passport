@@ -102,9 +102,14 @@ export const PlatformCard = ({
 
   // Feature Flag Hypercerts Stamp
   if (process.env.NEXT_PUBLIC_FF_HYPERCERT_STAMP !== "on" && platform.platform === "Hypercerts") return <></>;
+  // Feature Flag Idena Stamp
+  if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP !== "on" && platform.platform === "Idena") return <></>;
 
   // Feature Flag PHI Stamp
   if (process.env.NEXT_PUBLIC_FF_PHI_STAMP !== "on" && platform.platform === "PHI") return <></>;
+
+  // Feature Flag Holonym Stamp
+  if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP !== "on" && platform.platform === "Holonym") return <></>;
 
   // returns a single Platform card
   return (
