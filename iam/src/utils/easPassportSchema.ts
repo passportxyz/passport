@@ -1,4 +1,3 @@
-import { utils } from "ethers";
 import {
   NO_EXPIRATION,
   SchemaEncoder,
@@ -20,7 +19,7 @@ type PassportAttestationStamp = {
 
 const passportAttestationStampMap: Map<string, PassportAttestationStamp> = new Map();
 
-function addStamp(stampInfo: PassportAttestationStamp) {
+function addStamp(stampInfo: PassportAttestationStamp): void {
   passportAttestationStampMap.set(stampInfo.name, stampInfo);
 }
 
@@ -134,6 +133,13 @@ export const encodeEasPassport = (credentials: VerifiableCredential[]): string =
       //   issuancesDates: [],
       //   // We will use the ordering information to sort the hashes and issuancesDates arrays by the index and then bit
       //   ordering: [],
+    } as {
+      providers: BigNumber[];
+      info: {
+        hash: string;
+        stampInfo: PassportAttestationStamp;
+        issuanceDate: BigNumber;
+      }[];
     }
   );
 
