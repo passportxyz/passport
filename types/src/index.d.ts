@@ -307,9 +307,9 @@ export type PROVIDER_ID =
   | "IdenaAge#5"
   | "IdenaAge#10"
   | "CliqueGithub"
-  | "CliqueGithubUsers#numFollowersGithub#50"
-  | "CliqueGithubRepo#sumCommitsPublicGithub#50"
-  | "CliqueGithubRepo#sumContributedToPublicGithub#50"
-  | "CliqueGithubRepo#sumIssuesPublicGithub#50"
-  | "CliqueGithubRepo#sumPRsPublicGithub#50"
-  | "CliqueGithubRepo#sumStarsPublicGithub#50";
+  | "CliqueGithubUsers#numFollowersGithub#1"
+  | "CliqueGithubRepo#sumCommitsPublicGithub#1"
+  | "CliqueGithubRepo#sumContributedToPublicGithub#1"
+  | "CliqueGithubRepo#sumIssuesPublicGithub#1"
+  | "CliqueGithubRepo#sumPRsPublicGithub#1"
+  | "CliqueGithubRepo#sumStarsPublicGithub#1";

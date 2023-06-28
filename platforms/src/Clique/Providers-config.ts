@@ -21,8 +21,8 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     platformGroup: "Github Followers",
     providers: [
       {
-        title: "50 or more Github followers",
-        name: "CliqueGithubUsers#numFollowersGithub#50",
+        title: "one or more Github followers",
+        name: "CliqueGithubUsers#numFollowersGithub#1",
       },
     ],
   },
@@ -30,24 +30,24 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     platformGroup: "Github Repos",
     providers: [
       {
-        title: "50 or more Github repos commits",
-        name: "CliqueGithubRepo#sumCommitsPublicGithub#50",
+        title: "one or more Github repos commits",
+        name: "CliqueGithubRepo#sumCommitsPublicGithub#1",
       },
       {
-        title: "50 or more Github repos contributions",
-        name: "CliqueGithubRepo#sumContributedToPublicGithub#50",
+        title: "one or more Github repos contributions",
+        name: "CliqueGithubRepo#sumContributedToPublicGithub#1",
       },
       {
-        title: "50 or more Github repos issues",
-        name: "CliqueGithubRepo#sumIssuesPublicGithub#50",
+        title: "one or more Github repos issues",
+        name: "CliqueGithubRepo#sumIssuesPublicGithub#1",
       },
       {
-        title: "50 or more Github repos prs",
-        name: "CliqueGithubRepo#sumPRsPublicGithub#50",
+        title: "one or more Github repos prs",
+        name: "CliqueGithubRepo#sumPRsPublicGithub#1",
       },
       {
-        title: "50 or more Github repos stars",
-        name: "CliqueGithubRepo#sumStarsPublicGithub#50",
+        title: "one or more Github repos stars",
+        name: "CliqueGithubRepo#sumStarsPublicGithub#1",
       },
     ],
   },
