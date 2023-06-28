@@ -7,6 +7,7 @@ import {
   StarredGithubRepoProvider,
   FiveOrMoreGithubRepos,
 } from "./Providers";
+import { GithubContributionActivityProvider } from "./Providers/githubContributionActivity";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/githubWhiteStampIcon.svg",
@@ -18,36 +19,19 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Account Name",
-    providers: [{ title: "Encrypted", name: "Github" }],
-  },
-  {
-    platformGroup: "Repositories",
+    platformGroup: "Contribution Activity",
     providers: [
       {
-        title: "Five or more Github repos",
-        name: "FiveOrMoreGithubRepos",
+        title: "Contributions on at least 30 distinct days",
+        name: "githubContributionActivityGte#30",
       },
       {
-        title: "At least 1 Github repo forked by another user",
-        name: "ForkedGithubRepoProvider",
+        title: "Contributions on at least 60 distinct days",
+        name: "githubContributionActivityGte#60",
       },
       {
-        title: "At least 1 Github repo starred by another user",
-        name: "StarredGithubRepoProvider",
-      },
-    ],
-  },
-  {
-    platformGroup: "Followers",
-    providers: [
-      {
-        title: "Ten or more Github followers",
-        name: "TenOrMoreGithubFollowers",
-      },
-      {
-        title: "Fifty or more Github followers",
-        name: "FiftyOrMoreGithubFollowers",
+        title: "Contributions on at least 120 distinct days",
+        name: "githubContributionActivityGte#120",
       },
     ],
   },
@@ -60,4 +44,13 @@ export const providers: Provider[] = [
   new FiftyOrMoreGithubFollowers(),
   new ForkedGithubRepoProvider(),
   new StarredGithubRepoProvider(),
+  new GithubContributionActivityProvider({
+    threshold: "30",
+  }),
+  new GithubContributionActivityProvider({
+    threshold: "60",
+  }),
+  new GithubContributionActivityProvider({
+    threshold: "120",
+  }),
 ];
