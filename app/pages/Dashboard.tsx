@@ -33,6 +33,9 @@ import { getFilterName } from "../config/filters";
 import { hardhatChainId, sepoliaChainId } from "../utils/onboard";
 import { Button } from "../components/Button";
 
+// --- GTM Module
+import TagManager from "react-gtm-module";
+
 const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
 const isOnChainSyncEnabled = process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on";
 
@@ -45,6 +48,35 @@ export default function Dashboard() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const navigate = useNavigate();
+
+  // ------------------- BEGIN Data items for Google Tag Manager -------------------
+  const startTime = Date.now();
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const endTime = Date.now();
+      const durationInSeconds = (endTime - startTime) / 1000;
+
+      // Track the timing event
+      TagManager.dataLayer({
+        dataLayer: {
+          page: "/dashboard",
+          event: "passport_interaction_duration",
+          passportInteractionDurationCategory: "Passport Interaction",
+          passportInteractionDurationVar: "Passport Interaction",
+          passportInteractionDurationValue: durationInSeconds,
+        },
+        dataLayerName: "PageDataLayer",
+      });
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+  // ------------------- END Data items for Google Tag Manager -------------------
 
   const [viewerConnection, ceramicConnect] = useViewerConnection();
   const { isOpen: retryModalIsOpen, onOpen: onRetryModalOpen, onClose: onRetryModalClose } = useDisclosure();

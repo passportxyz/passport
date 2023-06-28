@@ -412,7 +412,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
         verifyButton={
           <div className="px-4">
             <LoadButton
-              className="mt-10 w-full"
+              className="button-verify mt-10 w-full"
               isLoading={isLoading}
               disabled={!submitted && !canSubmit}
               onClick={canSubmit ? handleFetchCredential : onClose}
