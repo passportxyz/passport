@@ -33,7 +33,7 @@ import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-
 import { utils } from "ethers";
 import * as easFeesMock from "../src/utils/easFees";
 import * as identityMock from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
-import * as easSchemaMock from "../src/utils/easSchema";
+import * as easSchemaMock from "../src/utils/easStampSchema";
 
 jest.mock("ethers", () => {
   const originalModule = jest.requireActual("ethers");

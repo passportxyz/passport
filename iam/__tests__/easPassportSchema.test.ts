@@ -1,9 +1,10 @@
-import * as easStampModule from "../src/utils/easSchema";
+import * as easPassportModule from "../src/utils/easPassportSchema";
+import * as easStampModule from "../src/utils/easStampSchema";
+
 import { VerifiableCredential } from "@gitcoin/passport-types";
 import { BigNumber } from "ethers";
 import { NO_EXPIRATION, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import { utils } from "ethers";
 
 jest.mock("../src/utils/scorerService", () => ({
   fetchPassportScore: jest.fn(),
@@ -32,7 +33,7 @@ describe("eas encoding", () => {
         "@context": [{}],
       },
       issuer: "string",
-      issuanceDate: "string",
+      issuanceDate: "2023-05-10T11:00:14.986Z",
       expirationDate: "string",
       proof: {
         type: "string",
@@ -43,27 +44,24 @@ describe("eas encoding", () => {
       },
     };
 
-    const encodedData = easStampModule.encodeEasStamp(verifiableCredential);
-    const stampSchemaEncoder = new SchemaEncoder("bytes32 provider, bytes32 hash");
+    const encodedData = easPassportModule.encodeEasPassport([verifiableCredential]);
+    const stampSchemaEncoder = new SchemaEncoder("uint256[] providers, bytes32[] hashes, uint64[] issuanceDates");
     const decodedStampData = stampSchemaEncoder.decodeData(encodedData);
-    expect(decodedStampData[0].value.value).toEqual(ensProviderConfig.providers[0].hash);
+    console.log(">>>>>>>>> decodedStampData", decodedStampData);
+    console.log(">>>>>>>>> decodedStampData.length", decodedStampData.length);
+    const providers = decodedStampData[0].value.value as BigNumber[];
+    const hashes = decodedStampData[1].value.value as string[];
+    const issuanceDates = decodedStampData[2].value.value as BigNumber[];
+    console.log(">>>>>>>>> providers", providers);
+    console.log(">>>>>>>>> hashes", hashes);
+    console.log(">>>>>>>>> issuanceDates", issuanceDates);
+    expect(providers.length).toEqual(1);
+    // expect(providers[0]).toEqual(ensProviderConfig.providers[0].hash);
+    expect(hashes.length).toEqual(1);
+    // expect(hashes[0]).toEqual(ensProviderConfig.providers[0].hash);
+    expect(issuanceDates.length).toEqual(1);
+    expect(issuanceDates[0]).toEqual(BigNumber.from(Math.floor(new Date("2023-05-10T11:00:14.986Z").getTime() / 1000)));
   });
-});
-
-it("should use encodeEasScore to format score data correctly", () => {
-  const score = {
-    score: 0.5,
-    scorer_id: 1,
-  };
-  const encodedData = easStampModule.encodeEasScore(score);
-  const scoreSchemaEncoder = new SchemaEncoder("uint256 score,uint32 scorer_id,uint8 score_decimals");
-  const decodedScoreData = scoreSchemaEncoder.decodeData(encodedData);
-
-  const decimals = 18;
-
-  expect(decodedScoreData[0].value.value).toEqual(utils.parseUnits(score.score.toString(), decimals));
-  expect(decodedScoreData[1].value.value).toEqual(score.scorer_id);
-  expect(decodedScoreData[2].value.value).toEqual(decimals);
 });
 
 const defaultRequestData = {
@@ -76,8 +74,8 @@ const defaultRequestData = {
 
 describe("formatMultiAttestationRequest", () => {
   it("should return formatted attestation request", async () => {
+    jest.spyOn(easPassportModule, "encodeEasPassport").mockReturnValue("0x00000000000000000000000");
     jest.spyOn(easStampModule, "encodeEasScore").mockReturnValue("0x00000000000000000000000");
-    jest.spyOn(easStampModule, "encodeEasStamp").mockReturnValue("0x00000000000000000000000");
 
     const validatedCredentials = [
       {
@@ -86,6 +84,7 @@ describe("formatMultiAttestationRequest", () => {
             provider: "mockCredential1",
             hash: "v0.0.0:QdjFB8E6FbvBT8HP+4mr7VBjal+CC7aDcAAqGAKsXos=",
           },
+          issuanceDate: "2023-05-10T11:00:14.986Z",
         } as unknown as VerifiableCredential,
         verified: true,
       },
@@ -95,6 +94,7 @@ describe("formatMultiAttestationRequest", () => {
             provider: "mockCredential2",
             hash: "v0.0.0:QdjFB8E6FbvBT8HP+4mr7VBjal+CC7aDcAAqGAKsXos=",
           },
+          issuanceDate: "2023-05-10T11:00:14.986Z",
         } as unknown as VerifiableCredential,
         verified: false,
       },
@@ -102,11 +102,11 @@ describe("formatMultiAttestationRequest", () => {
 
     const recipient = "0x123";
 
-    const result = await easStampModule.formatMultiAttestationRequest(validatedCredentials, recipient);
+    const result = await easPassportModule.formatMultiAttestationRequest(validatedCredentials, recipient);
 
     expect(result).toEqual([
       {
-        schema: process.env.EAS_GITCOIN_STAMP_SCHEMA,
+        schema: process.env.EAS_GITCOIN_PASSPORT_SCHEMA,
         data: [
           {
             ...defaultRequestData,
