@@ -37,6 +37,7 @@
     "@web3-onboard/walletlink": "^2.0.4",
     "broadcast-channel": "^4.11.0",
     "did-session": "^1.0.0",
+    "eslint-config-next": "^13.4.6",
     "ethers": "^6.3.0",
     "framer-motion": "^6.3.0",
     "next": "latest",
