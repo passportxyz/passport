@@ -6,9 +6,9 @@ import { GithubSibylUsersStatisticsProvider } from "./Providers/githubSibyl/gith
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/cliqueStampIcon.png",
   platform: "Clique",
-  name: "Clique",
-  description: "Clique possession and transaction verification",
-  connectMessage: "Verify Account",
+  name: "Clique ZK GitHub",
+  description: "Connect your existing Github account in a ZK way, provided by Clique.",
+  connectMessage: "Verify",
   isEVM: false,
 };
 
