@@ -91,10 +91,8 @@ export const fetchGithubUserContributions = async (context: GithubContext): Prom
   if (!context.github?.userData) {
     try {
       const now = new Date();
-      const oneYearAgo =
-        new Date(new Date().setFullYear(now.getFullYear() - 1)).toISOString().split("T")[0] + "T00:00:00Z";
-      const twoYearsAgo =
-        new Date(new Date().setFullYear(now.getFullYear() - 2)).toISOString().split("T")[0] + "T00:00:00Z";
+      const oneYearAgo = new Date(new Date().setFullYear(now.getFullYear() - 1)).toISOString();
+      const twoYearsAgo = new Date(new Date().setFullYear(now.getFullYear() - 2)).toISOString();
 
       const firstYearCollection = await queryFunc(twoYearsAgo, oneYearAgo, context.github.accessToken);
       const secondYearCollection = await queryFunc(oneYearAgo, now.toISOString(), context.github.accessToken);
