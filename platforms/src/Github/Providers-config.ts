@@ -7,6 +7,7 @@ import {
   StarredGithubRepoProvider,
   FiveOrMoreGithubRepos,
 } from "./Providers";
+import { GithubAccountCreationProvider } from "./Providers/githubAccountCreation";
 import { GithubContributionActivityProvider } from "./Providers/githubContributionActivity";
 
 export const PlatformDetails: PlatformSpec = {
@@ -18,6 +19,23 @@ export const PlatformDetails: PlatformSpec = {
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
+  {
+    platformGroup: "Account Creation",
+    providers: [
+      {
+        title: "Created at least 90 days ago",
+        name: "githubAccountCreationGte#90",
+      },
+      {
+        title: "Created at least 180 days ago",
+        name: "githubAccountCreationGte#180",
+      },
+      {
+        title: "Created at least 365 days ago",
+        name: "githubAccountCreationGte#365",
+      },
+    ],
+  },
   {
     platformGroup: "Contribution Activity",
     providers: [
@@ -44,6 +62,15 @@ export const providers: Provider[] = [
   new FiftyOrMoreGithubFollowers(),
   new ForkedGithubRepoProvider(),
   new StarredGithubRepoProvider(),
+  new GithubAccountCreationProvider({
+    threshold: "90",
+  }),
+  new GithubAccountCreationProvider({
+    threshold: "180",
+  }),
+  new GithubAccountCreationProvider({
+    threshold: "365",
+  }),
   new GithubContributionActivityProvider({
     threshold: "30",
   }),
