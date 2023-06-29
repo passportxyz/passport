@@ -22,10 +22,6 @@ import { CeramicContext } from "../context/ceramicContext";
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
 
-// --- UI components
-// TODO: re-add toasts after design updates
-import { NoSymbolIcon } from "@heroicons/react/20/solid";
-
 // --- App components
 import { RefreshMyStampsModalContentCardList } from "../components/RefreshMyStampsModalContentCardList";
 import { reduceStampResponse } from "../utils/helpers";
@@ -84,8 +80,10 @@ export const RefreshMyStampsModalContent = ({
       datadogLogs.logger.info("Successfully saved Stamp, onboard one step verification", {
         providers: selectedProviders,
       });
+      localStorage.setItem("successfulRefresh", "true");
     } catch (e) {
       datadogLogs.logger.error("Verification Error, onboard one step verification", { error: e });
+      localStorage.setItem("successfulRefresh", "false");
     }
     setLoading(false);
     navigate("/dashboard");
@@ -126,31 +124,11 @@ export const RefreshMyStampsModalContent = ({
         setVerifiedProviders([...actualVerifiedProviders]);
         setSelectedProviders([...actualVerifiedProviders]);
       }
-
-      // TODO: re-add toasts after design updates
-      // // Get the done toast messages
-      // const { title, body, icon, platformId } = getDoneToastMessages(
-      //   verificationStatus,
-      //   updatedVerifiedProviders,
-      //   initialMinusUpdated,
-      //   updatedMinusInitial
-      // );
-
-      // // Display done toast
-      // doneToast(title, body, icon, platformId);
-
-      // setLoading(false);
     } catch (e: unknown) {
       // TODO: update datadog logger
       // datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
       console.log(e);
       throw new Error();
-      // doneToast(
-      //   "Verification Failed",
-      //   "There was an error verifying your stamp. Please try again.",
-      //   "../../assets/verification-failed.svg",
-      //   platform.platformId as PLATFORM_ID
-      // );
     }
   };
 
@@ -178,7 +156,7 @@ export const RefreshMyStampsModalContent = ({
                 setSelectedProviders={setSelectedProviders}
               />
             </div>
-            <div className="mt-8 cursor-pointer text-center text-pink-300 underline">
+            <div className="mt-8 cursor-pointer text-center text-color-3 underline">
               <a onClick={() => setShowDataInfo(!showDataInfo)}>How is my data stored?</a>
             </div>
             {showDataInfo && (
@@ -209,14 +187,9 @@ export const RefreshMyStampsModalContent = ({
           </div>
         ) : (
           <div className="flex flex-col items-center text-center text-white">
-            <button
-              className="mt-4 mb-6 flex h-10 w-10 items-center justify-center self-center rounded-full border border-accent-2"
-              onClick={onClose}
-            >
-              <NoSymbolIcon className="h-7 w-7" aria-hidden="true" fill="var(--color-accent-3)" />
-            </button>
+            <div className="mt-4 mb-6 flex h-10 w-10"></div>
             <div className="w-3/4 text-3xl">No New Web3 Stamps Detected</div>
-            <div className="my-20 text-xl text-muted">
+            <div className="my-20 text-xl text-color-3">
               We did not find any new Web3 stamps to add to your passport. Completing the actions for a web3 stamp and
               resubmitting will ensure that stamp is added (for example: Obtain an ENS name, NFT, etc.). Please return
               to the dashboard and select additional stamps to verify your unique humanity by connecting to external
