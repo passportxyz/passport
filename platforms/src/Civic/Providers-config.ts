@@ -36,19 +36,19 @@ export const ProviderConfig: PlatformGroupSpec[] = [
 ////////////////////////////////////////////////////////////
 export const providers: Provider[] = [
   new CivicPassProvider({
-    passTypes: [CivicPassType.CAPTCHA],
+    passType: CivicPassType.CAPTCHA,
     type: "CivicCaptchaPass",
   }),
   new CivicPassProvider({
-    passTypes: [CivicPassType.UNIQUENESS],
+    passType: CivicPassType.UNIQUENESS,
     type: "CivicUniquenessPass",
   }),
   new CivicPassProvider({
-    passTypes: [CivicPassType.LIVENESS],
+    passType: CivicPassType.LIVENESS,
     type: "CivicLivenessPass",
   }),
   new CivicPassProvider({
-    passTypes: [CivicPassType.IDV],
+    passType: CivicPassType.IDV,
     type: "CivicIDVPass",
   }),
 ];
