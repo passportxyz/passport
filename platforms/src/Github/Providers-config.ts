@@ -1,12 +1,5 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import {
-  TenOrMoreGithubFollowers,
-  FiftyOrMoreGithubFollowers,
-  GithubProvider,
-  ForkedGithubRepoProvider,
-  StarredGithubRepoProvider,
-  FiveOrMoreGithubRepos,
-} from "./Providers";
+import { GithubProvider } from "./Providers";
 import { GithubAccountCreationProvider } from "./Providers/githubAccountCreation";
 import { GithubContributionActivityProvider } from "./Providers/githubContributionActivity";
 
@@ -57,11 +50,6 @@ export const ProviderConfig: PlatformGroupSpec[] = [
 
 export const providers: Provider[] = [
   new GithubProvider(),
-  new FiveOrMoreGithubRepos(),
-  new TenOrMoreGithubFollowers(),
-  new FiftyOrMoreGithubFollowers(),
-  new ForkedGithubRepoProvider(),
-  new StarredGithubRepoProvider(),
   new GithubAccountCreationProvider({
     threshold: "90",
   }),
