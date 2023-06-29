@@ -3,7 +3,7 @@
 /* eslint-disable prettier/prettier */
 // ----- Types
 import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import { CliqueClient, Environment } from "@cliqueofficial/clique-sdk";
+import { CliqueClient, Environment } from "@clique2046/clique-sdk";
 import type { Provider, ProviderOptions } from "../../../types";
 import { getErrorString, ProviderError } from "../../../utils/errors";
 import { getAddress } from "../../../utils/signer";

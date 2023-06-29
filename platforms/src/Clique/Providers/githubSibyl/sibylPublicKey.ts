@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable prettier/prettier */
-import { CliqueClient, Environment } from "@cliqueofficial/clique-sdk";
+import { CliqueClient, Environment } from "@clique2046/clique-sdk";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
 const forge = require("node-forge");
