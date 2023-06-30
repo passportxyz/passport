@@ -79,6 +79,31 @@ describe("githubClient", function () {
         contributionValid: true,
       });
     });
+    it("should not call fetchGithubUserData multiple times number of contribution days is valid", async () => {
+      const contributionsValidData = {
+        contributionData: {
+          contributionCollection: [
+            {
+              contributionCalendar: {
+                weeks: [
+                  {
+                    contributionDays: [mockContributionDay(1), mockContributionDay(2)], // Ensure that the contributions are valid
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      } as unknown as githubClient.GithubUserData;
+
+      mockFetchGithubUserDataCall.mockImplementation(() => {
+        return Promise.resolve(contributionsValidData);
+      });
+
+      await githubClient.fetchAndCheckContributions(mockGithubContext, "ABC123_ACCESSCODE", "1", 3);
+
+      expect(mockFetchGithubUserDataCall).toHaveBeenCalledTimes(1);
+    });
 
     it("handles errors correctly", async () => {
       mockFetchGithubUserDataCall.mockImplementation(() => {
