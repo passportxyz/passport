@@ -1,6 +1,6 @@
 import type { Provider } from "../../types";
 import { RequestPayload, ProviderContext, VerifiedPayload } from "@gitcoin/passport-types";
-import { fetchGithubUserData } from "../githubClient";
+import { fetchGithubUserData } from "./githubClient";
 
 export type GithubAccountCreationOptions = {
   threshold: string;
