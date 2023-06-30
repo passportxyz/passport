@@ -1,35 +1,37 @@
-// ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
 import { CivicPassProvider } from "../Providers/civic";
-import { CivicPassType } from "../Providers/passType";
-import { BigNumber } from "@ethersproject/bignumber";
+import { CivicPassLookupPass, CivicPassType, PassesForAddress } from "../Providers/types";
+import axios from "axios";
 
-const stubGetTokenIdsByOwnerAndNetwork = jest.fn();
-const stubGetToken = jest.fn();
+// Mock out all top level functions, such as get, put, delete and post:
+jest.mock("axios");
 
-jest.mock("ethers", () => {
-  return {
-    Contract: jest.fn().mockImplementation(() => {
-      return {
-        getTokenIdsByOwnerAndNetwork: stubGetTokenIdsByOwnerAndNetwork,
-        getToken: stubGetToken,
-      };
-    }),
-  };
-});
+const stubCivic = (passes: PassesForAddress["passes"]): void => {
+  (axios.get as jest.Mock).mockResolvedValue({
+    data: {
+      userAddress: { passes },
+    },
+  });
+};
+
+const stubCivicError = (error: string): void => {
+  (axios.get as jest.Mock).mockRejectedValue(new Error(error));
+};
+
+const now = Math.floor(Date.now() / 1000);
 
 const userAddress = "0x123";
 const requestPayload = { address: userAddress } as RequestPayload;
 const expirySeconds = 1000;
+const dummyPass = {
+  chain: "ETHEREUM_MAINNET",
+  expiry: now + expirySeconds,
+} as CivicPassLookupPass;
 
 describe("Civic Pass Provider", function () {
   beforeEach(() => {
     // return no passes by default
-    stubGetTokenIdsByOwnerAndNetwork.mockResolvedValue([]);
-    // if a pass is found, return a pass object
-    stubGetToken.mockResolvedValue({
-      expiration: BigNumber.from(Math.floor(Date.now() / 1000) + expirySeconds),
-    });
+    stubCivic({});
   });
 
   afterEach(() => {
@@ -49,7 +51,9 @@ describe("Civic Pass Provider", function () {
   });
 
   it("should return valid true if a pass is found", async () => {
-    stubGetTokenIdsByOwnerAndNetwork.mockResolvedValue([1]);
+    stubCivic({
+      UNIQUENESS: [dummyPass],
+    });
     const civic = new CivicPassProvider({
       type: "uniqueness",
       passType: CivicPassType.UNIQUENESS,
@@ -62,7 +66,9 @@ describe("Civic Pass Provider", function () {
   });
 
   it("should set the expiry equal to the pass expiry", async () => {
-    stubGetTokenIdsByOwnerAndNetwork.mockResolvedValue([1]);
+    stubCivic({
+      UNIQUENESS: [dummyPass],
+    });
     const civic = new CivicPassProvider({
       type: "uniqueness",
       passType: CivicPassType.UNIQUENESS,
@@ -74,26 +80,27 @@ describe("Civic Pass Provider", function () {
   });
 
   it("should populate the error array if an error is thrown while checking any pass", async () => {
-    stubGetTokenIdsByOwnerAndNetwork.mockRejectedValue(new Error("some error"));
+    const errorString = "some error";
+    stubCivicError(errorString);
     const civic = new CivicPassProvider({
       type: "uniqueness",
       passType: CivicPassType.UNIQUENESS,
-      chains: ["ETHEREUM_MAINNET"],
     });
     const verifiedPayload = await civic.verify(requestPayload);
 
     expect(verifiedPayload).toMatchObject({
       valid: false,
-      error: ["some error"],
+      error: [errorString],
     });
   });
 
   it("should return the pass details if a pass is found", async () => {
-    stubGetTokenIdsByOwnerAndNetwork.mockResolvedValue(true);
+    stubCivic({
+      UNIQUENESS: [dummyPass],
+    });
     const civic = new CivicPassProvider({
       type: "uniqueness",
       passType: CivicPassType.UNIQUENESS,
-      chains: ["ETHEREUM_MAINNET"],
     });
     const verifiedPayload = await civic.verify(requestPayload);
 
@@ -104,11 +111,12 @@ describe("Civic Pass Provider", function () {
   });
 
   it("should return the pass details if a pass is found on any chain", async () => {
-    stubGetTokenIdsByOwnerAndNetwork.mockResolvedValueOnce(false).mockResolvedValue(true);
+    stubCivic({
+      UNIQUENESS: [dummyPass, { ...dummyPass, chain: "POLYGON_POS_MAINNET" }],
+    });
     const civic = new CivicPassProvider({
       type: "uniqueness",
       passType: CivicPassType.UNIQUENESS,
-      chains: ["ETHEREUM_MAINNET", "POLYGON_POS_MAINNET"],
     });
     const verifiedPayload = await civic.verify(requestPayload);
 

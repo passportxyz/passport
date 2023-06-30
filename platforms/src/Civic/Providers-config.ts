@@ -1,5 +1,5 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { CivicPassType } from "./Providers/passType";
+import { CivicPassType } from "./Providers/types";
 import { CivicPassProvider } from "./Providers/civic";
 
 export const PlatformDetails: PlatformSpec = {
