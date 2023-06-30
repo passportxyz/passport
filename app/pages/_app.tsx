@@ -42,6 +42,8 @@ function App({ Component, pageProps }: AppProps) {
     TagManager.initialize({
       gtmId: `${GTM_ID}`,
       dataLayerName: "PageDataLayer",
+      auth: "x5QDV_TH-F5l1dOIBFeviA",
+      preview: "env-34",
     });
   }, []);
 
