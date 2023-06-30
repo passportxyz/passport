@@ -1,13 +1,5 @@
 import * as githubClient from "../githubClient";
 
-// import {
-//   fetchAndCheckContributions,
-//   ContributionDay,
-//   GithubUserData,
-//   Viewer,
-//   ContributionRange,
-// } from "../githubClient";
-
 const mockCode = "code123";
 const mockContributionRange: githubClient.ContributionRange = {
   from: "2022-07-01T00:00:00Z",
