@@ -1,7 +1,6 @@
 import { ProviderContext } from "@gitcoin/passport-types";
 import { ProviderError } from "../../utils/errors";
 import axios from "axios";
-import { avoidGithubRateLimit } from "./github";
 
 const githubGraphEndpoint = "https://api.github.com/graphql";
 
@@ -13,11 +12,21 @@ export type GithubContext = ProviderContext & {
       iteration: number;
     };
     accessToken?: string;
+    userData?: GithubUserMetaData;
   };
 };
 
 export type GithubTokenResponse = {
   access_token: string;
+};
+
+export type GithubUserMetaData = {
+  public_repos?: number;
+  id?: number;
+  login?: string;
+  followers?: number;
+  type?: string;
+  errors?: string[];
 };
 
 export type GithubUserData = {
@@ -26,6 +35,7 @@ export type GithubUserData = {
     contributionCollection: ContributionsCollection[];
     iteration: number;
   };
+  userData?: GithubUserMetaData;
   errors?: string[];
 };
 
@@ -234,4 +244,40 @@ export const fetchAndCheckContributions = async (
   }
 
   return { contributionValid };
+};
+
+export const getGithubUserData = async (code: string, context: GithubContext): Promise<GithubUserMetaData> => {
+  if (!context.github?.userData) {
+    try {
+      // retrieve user's auth bearer token to authenticate client
+      const accessToken = await requestAccessToken(code, context);
+
+      // Now that we have an access token fetch the user details
+      const userRequest = await axios.get("https://api.github.com/user", {
+        headers: { Authorization: `token ${accessToken}` },
+      });
+
+      if (!context.github) context.github = {};
+      context.github.userData = userRequest.data;
+    } catch (_error) {
+      const error = _error as ProviderError;
+      if (error?.response?.status === 429) {
+        return {
+          errors: ["Error getting getting github info", "Rate limit exceeded"],
+        };
+      }
+      return {
+        errors: ["Error getting getting github info", `${error?.message}`],
+      };
+    }
+  }
+  return context.github.userData;
+};
+
+// For everything after the initial user load, we need to avoid the secondary rate
+// limit by waiting 1 second between requests
+export const avoidGithubRateLimit = async (): Promise<void> => {
+  if (process.env.NODE_ENV === "test") return;
+
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 };

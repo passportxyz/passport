@@ -1,5 +1,4 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { GithubProvider } from "./Providers";
 import { GithubAccountCreationProvider } from "./Providers/githubAccountCreation";
 import { GithubContributionActivityProvider } from "./Providers/githubContributionActivity";
 
@@ -49,7 +48,6 @@ export const ProviderConfig: PlatformGroupSpec[] = [
 ];
 
 export const providers: Provider[] = [
-  new GithubProvider(),
   new GithubAccountCreationProvider({
     threshold: "90",
   }),

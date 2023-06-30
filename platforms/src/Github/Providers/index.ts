@@ -1,1 +1,0 @@
-export { GithubProvider } from "./github";
