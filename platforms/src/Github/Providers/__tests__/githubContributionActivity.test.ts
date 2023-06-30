@@ -13,7 +13,11 @@ describe("GithubContributionActivityProvider", function () {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  const mockContext: ProviderContext = {}; // define the mock context if needed
+  const mockContext: ProviderContext = {
+    github: {
+      id: "123",
+    },
+  };
   const mockPayload: RequestPayload = {
     address: "0x0",
     proofs: {
@@ -38,7 +42,7 @@ describe("GithubContributionActivityProvider", function () {
     expect(result).toEqual({
       valid: true,
       error: undefined,
-      record: { id: "gte1GithubContributionActivity" },
+      record: { id: "123" },
     });
   });
 

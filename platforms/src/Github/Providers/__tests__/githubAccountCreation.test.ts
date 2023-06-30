@@ -13,7 +13,11 @@ describe("GithubAccountCreationProvider", function () {
     jest.clearAllMocks();
   });
 
-  const mockContext: ProviderContext = {}; // define the mock context if needed
+  const mockContext: ProviderContext = {
+    github: {
+      id: "123",
+    },
+  };
 
   const mockPayload: RequestPayload = {
     address: "0x0",
@@ -39,7 +43,7 @@ describe("GithubAccountCreationProvider", function () {
     expect(result).toEqual({
       valid: true,
       error: undefined,
-      record: { id: "gte365GithubContributionActivity" },
+      record: { id: "123" },
     });
   });
 

@@ -1,6 +1,6 @@
 import type { Provider } from "../../types";
-import { RequestPayload, ProviderContext, VerifiedPayload } from "@gitcoin/passport-types";
-import { fetchGithubUserData } from "./githubClient";
+import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
+import { fetchGithubUserData, GithubContext } from "./githubClient";
 
 export type GithubAccountCreationOptions = {
   threshold: string;
@@ -27,15 +27,16 @@ export class GithubAccountCreationProvider implements Provider {
     this.type = `githubAccountCreationGte#${this._options.threshold}`;
   }
 
-  async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, context: GithubContext): Promise<VerifiedPayload> {
     const githubUserData = await fetchGithubUserData(context, payload.proofs.code);
     const valid = checkAccountCreationDays(parseInt(this._options.threshold), githubUserData.createdAt);
+
+    const githubId = context.github.id;
 
     return {
       valid,
       error: githubUserData.errors,
-      // double check record is sufficient, need to return address or userId?
-      record: valid ? { id: `gte${this._options.threshold}GithubContributionActivity` } : undefined,
+      record: valid ? { id: githubId } : undefined,
     };
   }
 }

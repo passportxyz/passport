@@ -7,6 +7,7 @@ const githubGraphEndpoint = "https://api.github.com/graphql";
 export type GithubContext = ProviderContext & {
   github?: {
     createdAt?: string;
+    id?: string;
     contributionData?: {
       contributionCollection: ContributionsCollection[];
       iteration: number;
@@ -31,6 +32,7 @@ export type GithubUserMetaData = {
 
 export type GithubUserData = {
   createdAt?: string;
+  id?: string;
   contributionData?: {
     contributionCollection: ContributionsCollection[];
     iteration: number;
@@ -48,6 +50,7 @@ interface GitHubResponse {
 
 export interface Viewer {
   createdAt: string;
+  id?: string;
   contributionsCollection: ContributionsCollection;
 }
 
@@ -78,6 +81,7 @@ export const queryFunc = async (fromDate: string, toDate: string, accessToken: s
     query {
       viewer {
         createdAt
+        id
         contributionsCollection(from: "${fromDate}", to: "${toDate}") {
           contributionCalendar {
             totalContributions
@@ -106,6 +110,7 @@ export const queryFunc = async (fromDate: string, toDate: string, accessToken: s
   return {
     contributionsCollection: result?.data?.data?.viewer?.contributionsCollection,
     createdAt: result?.data?.data?.viewer?.createdAt,
+    id: result?.data?.data?.viewer?.id,
   };
 };
 
@@ -131,7 +136,8 @@ export const fetchGithubUserData = async (
   const accessToken = await requestAccessToken(code, context);
   if (
     context.github.createdAt === undefined ||
-    context.github.contributionData.contributionCollection.length < contributionRange.iteration + 1
+    context.github.contributionData.contributionCollection.length < contributionRange.iteration + 1 ||
+    context.github.id === undefined
   ) {
     try {
       const collection = await queryFunc(contributionRange.from, contributionRange.to, accessToken);
@@ -143,10 +149,11 @@ export const fetchGithubUserData = async (
         iteration: contributionRange.iteration,
       };
       context.github.createdAt = collection.createdAt;
-
+      context.github.id = collection.id;
       return {
         contributionData: context.github.contributionData,
         createdAt: context.github.createdAt,
+        id: context.github.id,
       };
     } catch (_error) {
       const error = _error as ProviderError;
@@ -163,6 +170,7 @@ export const fetchGithubUserData = async (
   return {
     contributionData: context.github.contributionData,
     createdAt: context.github.createdAt,
+    id: context.github.id,
   };
 };
 
