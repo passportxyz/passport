@@ -1,12 +1,6 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import {
-  TenOrMoreGithubFollowers,
-  FiftyOrMoreGithubFollowers,
-  GithubProvider,
-  ForkedGithubRepoProvider,
-  StarredGithubRepoProvider,
-  FiveOrMoreGithubRepos,
-} from "./Providers";
+import { GithubAccountCreationProvider } from "./Providers/githubAccountCreation";
+import { GithubContributionActivityProvider } from "./Providers/githubContributionActivity";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/githubWhiteStampIcon.svg",
@@ -18,46 +12,58 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Account Name",
-    providers: [{ title: "Encrypted", name: "Github" }],
-  },
-  {
-    platformGroup: "Repositories",
+    platformGroup: "Account Creation",
     providers: [
       {
-        title: "Five or more Github repos",
-        name: "FiveOrMoreGithubRepos",
+        title: "Created at least 90 days ago",
+        name: "githubAccountCreationGte#90",
       },
       {
-        title: "At least 1 Github repo forked by another user",
-        name: "ForkedGithubRepoProvider",
+        title: "Created at least 180 days ago",
+        name: "githubAccountCreationGte#180",
       },
       {
-        title: "At least 1 Github repo starred by another user",
-        name: "StarredGithubRepoProvider",
+        title: "Created at least 365 days ago",
+        name: "githubAccountCreationGte#365",
       },
     ],
   },
   {
-    platformGroup: "Followers",
+    platformGroup: "Contribution Activity",
     providers: [
       {
-        title: "Ten or more Github followers",
-        name: "TenOrMoreGithubFollowers",
+        title: "Contributions on at least 30 distinct days",
+        name: "githubContributionActivityGte#30",
       },
       {
-        title: "Fifty or more Github followers",
-        name: "FiftyOrMoreGithubFollowers",
+        title: "Contributions on at least 60 distinct days",
+        name: "githubContributionActivityGte#60",
+      },
+      {
+        title: "Contributions on at least 120 distinct days",
+        name: "githubContributionActivityGte#120",
       },
     ],
   },
 ];
 
 export const providers: Provider[] = [
-  new GithubProvider(),
-  new FiveOrMoreGithubRepos(),
-  new TenOrMoreGithubFollowers(),
-  new FiftyOrMoreGithubFollowers(),
-  new ForkedGithubRepoProvider(),
-  new StarredGithubRepoProvider(),
+  new GithubAccountCreationProvider({
+    threshold: "90",
+  }),
+  new GithubAccountCreationProvider({
+    threshold: "180",
+  }),
+  new GithubAccountCreationProvider({
+    threshold: "365",
+  }),
+  new GithubContributionActivityProvider({
+    threshold: "30",
+  }),
+  new GithubContributionActivityProvider({
+    threshold: "60",
+  }),
+  new GithubContributionActivityProvider({
+    threshold: "120",
+  }),
 ];

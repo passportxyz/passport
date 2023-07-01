@@ -33,10 +33,12 @@ describe("ExpiredStampModal", () => {
       {
         ...mockCeramicContext,
         expiredProviders: [
-          "Github",
-          "FiveOrMoreGithubRepos",
-          "ForkedGithubRepoProvider",
-          "TenOrMoreGithubFollowers",
+          "githubAccountCreationGte#90",
+          "githubAccountCreationGte#180",
+          "githubAccountCreationGte#365",
+          "githubContributionActivityGte#30",
+          "githubContributionActivityGte#60",
+          "githubContributionActivityGte#120",
           "FirstEthTxnProvider",
           "EthGTEOneTxnProvider",
         ],
@@ -49,12 +51,12 @@ describe("ExpiredStampModal", () => {
   });
   it("should get a list of all PROVIDER_ID for a given platform", () => {
     expect(getProviderIdsFromPlatformId("Github")).toEqual([
-      "Github",
-      "FiveOrMoreGithubRepos",
-      "ForkedGithubRepoProvider",
-      "StarredGithubRepoProvider",
-      "TenOrMoreGithubFollowers",
-      "FiftyOrMoreGithubFollowers",
+      "githubAccountCreationGte#90",
+      "githubAccountCreationGte#180",
+      "githubAccountCreationGte#365",
+      "githubContributionActivityGte#30",
+      "githubContributionActivityGte#60",
+      "githubContributionActivityGte#120",
     ]);
   });
   it("should delete all stamps within each expired platform", async () => {
@@ -72,18 +74,7 @@ describe("ExpiredStampModal", () => {
     deleteButton.click();
     expect(deleteButton.getAttribute("disabled")).not.toBeNull();
 
-    expect(handleDeleteStamps).toHaveBeenCalledWith([
-      "Github",
-      "FiveOrMoreGithubRepos",
-      "ForkedGithubRepoProvider",
-      "StarredGithubRepoProvider",
-      "TenOrMoreGithubFollowers",
-      "FiftyOrMoreGithubFollowers",
-      "Facebook",
-      "FacebookProfilePicture",
-      "Linkedin",
-      "Ens",
-    ]);
+    expect(handleDeleteStamps).toHaveBeenCalledWith(["Facebook", "FacebookProfilePicture", "Linkedin", "Ens"]);
     await waitFor(() => expect(deleteButton.getAttribute("disabled")).toBeNull());
   });
 });

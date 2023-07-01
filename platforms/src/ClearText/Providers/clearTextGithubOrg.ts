@@ -50,7 +50,6 @@ export class ClearTextGithubOrgProvider implements Provider {
     let valid = false,
       ghVerification: GHVerification,
       pii;
-    console.log({ payload });
     try {
       ghVerification = await verifyGithub(payload.proofs.code, payload.org, payload.requestedClient);
     } catch (e) {

@@ -4,7 +4,7 @@ import type { Provider, ProviderOptions } from "../../types";
 import { getErrorString, ProviderError } from "../../utils/errors";
 import { getAddress } from "../../utils/signer";
 import axios from "axios";
-import { getGithubUserData } from "../../Github/Providers/github";
+import { getGithubUserData, GithubUserMetaData } from "../../Github/Providers/githubClient";
 
 const AMI_API_TOKEN = process.env.AMI_API_TOKEN;
 
@@ -42,15 +42,13 @@ export class GitcoinGrantStatisticsProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
-    const address = (await getAddress(payload)).toLowerCase();
     let valid = false;
-    const githubUser = await getGithubUserData(payload.proofs.code, context);
+    const githubUser: GithubUserMetaData = await getGithubUserData(payload.proofs.code, context);
     try {
       // Only check the contribution condition if a valid github id has been received
       valid = !githubUser.errors && !!githubUser.id;
       if (valid) {
         const gitcoinGrantsStatistic = await getGitcoinStatistics(this.dataUrl, githubUser.login);
-        console.log("gitcoin - getGitcoinStatistics", address, JSON.stringify(gitcoinGrantsStatistic));
 
         valid =
           !gitcoinGrantsStatistic.errors &&
@@ -99,11 +97,9 @@ const getGitcoinStatistics = async (dataUrl: string, handle: string): Promise<Gi
       headers: { Authorization: `token ${AMI_API_TOKEN}` },
     });
 
-    console.log("gitcoin - API response", handle, dataUrl, JSON.stringify(grantStatisticsRequest.data));
     return { record: grantStatisticsRequest.data } as GitcoinGrantStatistics;
   } catch (_error) {
     const error = _error as ProviderError;
-    console.log("gitcoinGrantsStatistics", dataUrl, handle, getErrorString(error));
     return {
       errors: [
         "Error getting user info",
