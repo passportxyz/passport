@@ -189,6 +189,7 @@ export const GenericPlatform = ({
         screen,
         userDid,
         callbackUrl: window.location.origin,
+        selectedProviders,
         waitForRedirect,
       })) as {
         [k: string]: string;
