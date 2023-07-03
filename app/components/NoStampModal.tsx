@@ -2,7 +2,7 @@
 import React, { useContext, useState } from "react";
 
 // --- Chakra Elements
-import { Modal, ModalOverlay, ModalContent, Spinner } from "@chakra-ui/react";
+import { Modal, ModalOverlay, ModalContent, ModalCloseButton } from "@chakra-ui/react";
 
 // --- Shared context
 import { UserContext } from "../context/userContext";
@@ -40,14 +40,12 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
       <ModalOverlay />
       <ModalContent>
         <div className="m-3 flex flex-col items-center">
-          <button
+          <ModalCloseButton
             onClick={() => {
               resetStateAndClose();
             }}
-            className="absolute right-3"
-          >
-            <img width="20px" src="./assets/x-mark-icon.svg" alt="Check Icon" />
-          </button>
+            color="var(--color-text-1)"
+          />
           {additionalSigner ? (
             <AdditionalStampModal
               additionalSigner={additionalSigner}
