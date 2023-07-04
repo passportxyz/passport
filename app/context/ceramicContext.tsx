@@ -44,6 +44,7 @@ const {
   Hypercerts,
   Holonym,
   Idena,
+  Aspecta,
 } = stampPlatforms;
 
 import { PlatformProps } from "../components/GenericPlatform";
@@ -187,6 +188,14 @@ platforms.set("Coinbase", {
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK,
   }),
   platFormGroupSpec: Coinbase.ProviderConfig,
+});
+
+platforms.set("Aspecta", {
+  platform: new Aspecta.AspectaPlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_ASPECTA_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_ASPECTA_CALLBACK,
+  }),
+  platFormGroupSpec: Aspecta.ProviderConfig,
 });
 
 if (process.env.NEXT_PUBLIC_FF_HYPERCERT_STAMP === "on") {

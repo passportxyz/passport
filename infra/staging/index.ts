@@ -307,6 +307,18 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "EAS_GITCOIN_SCORE_SCHEMA",
             valueFrom: `${IAM_SERVER_SSM_ARN}:EAS_GITCOIN_SCORE_SCHEMA::`,
           },
+          {
+            name: "ASPECTA_CLIENT_ID",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:ASPECTA_CLIENT_ID::`,
+          },
+          {
+            name: "ASPECTA_CLIENT_SECRET",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:ASPECTA_CLIENT_SECRET::`,
+          },
+          {
+            name: "ASPECTA_CALLBACK",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:ASPECTA_CALLBACK::`,
+          },
         ],
       },
     },

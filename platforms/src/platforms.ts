@@ -24,6 +24,7 @@ import * as Hypercerts from "./Hypercerts";
 import * as PHI from "./PHI";
 import * as Holonym from "./Holonym";
 import * as Idena from "./Idena";
+import * as Aspecta from "./Aspecta";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
 type PlatformConfig = {
@@ -61,6 +62,7 @@ const platforms: Record<string, PlatformConfig> = {
   PHI,
   Holonym,
   Idena,
+  Aspecta,
 };
 
 export default platforms;
