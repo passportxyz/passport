@@ -1,12 +1,6 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import TwitterAuthProvider from "./Providers/TwitterAuthProvider";
-import {
-  TwitterFollowerGT100Provider,
-  TwitterFollowerGT500Provider,
-  TwitterFollowerGTE1000Provider,
-  TwitterFollowerGT5000Provider,
-} from "./Providers/TwitterFollowerProvider";
-import { TwitterTweetGT10Provider } from "./Providers/TwitterTweetsProvider";
+import { TwitterAccountAgeProvider } from "./Providers/TwitterAccountAge";
+// import { TwitterTweetDaysProvider } from "./Providers/twitterTweetDays";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/twitterStampIcon.svg",
@@ -18,38 +12,58 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Account Name",
-    providers: [{ title: "Encrypted", name: "Twitter" }],
-  },
-  {
-    platformGroup: "Tweet/Posts",
-    providers: [{ title: "More than 10", name: "TwitterTweetGT10" }],
-  },
-  {
-    platformGroup: "Followers",
+    platformGroup: "Account Creation",
     providers: [
-      { title: "More than 100", name: "TwitterFollowerGT100" },
       {
-        title: "More than 500",
-        name: "TwitterFollowerGT500",
+        title: "Created at least 180 days ago",
+        name: "twitterAccountAgeGte#180",
       },
       {
-        title: "More than 1000",
-        name: "TwitterFollowerGTE1000",
+        title: "Created at least 180 days ago",
+        name: "twitterAccountAgeGte#365",
       },
       {
-        title: "More than 5000",
-        name: "TwitterFollowerGT5000",
+        title: "Created at least 180 days ago",
+        name: "twitterAccountAgeGte#730",
+      },
+    ],
+  },
+  {
+    platformGroup: "Consistent Engagement",
+    providers: [
+      {
+        title: "Tweet on at least 30 distinct days",
+        name: "twitterTweetDaysGte#30",
+      },
+      {
+        title: "Tweets on at least 60 distinct days",
+        name: "twitterTweetDaysGte#60",
+      },
+      {
+        title: "Tweets on at least 120 distinct days",
+        name: "twitterTweetDaysGte#120",
       },
     ],
   },
 ];
 
 export const providers: Provider[] = [
-  new TwitterAuthProvider(),
-  new TwitterTweetGT10Provider(),
-  new TwitterFollowerGT100Provider(),
-  new TwitterFollowerGT500Provider(),
-  new TwitterFollowerGTE1000Provider(),
-  new TwitterFollowerGT5000Provider(),
+  new TwitterAccountAgeProvider({
+    threshold: "180",
+  }),
+  new TwitterAccountAgeProvider({
+    threshold: "365",
+  }),
+  new TwitterAccountAgeProvider({
+    threshold: "730",
+  }),
+  // new TwitterTweetDaysProvider({
+  //   threshold: "30",
+  // }),
+  // new TwitterTweetDaysProvider({
+  //   threshold: "60",
+  // }),
+  // new TwitterTweetDaysProvider({
+  //   threshold: "120",
+  // }),
 ];
