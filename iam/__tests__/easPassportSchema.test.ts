@@ -263,14 +263,14 @@ describe("sortPassportAttestationData", () => {
         },
         {
           hash: "0x456",
-          issuanceDate: BigNumber.from(1000),
-          expirationDate: BigNumber.from(2000),
+          issuanceDate: BigNumber.from(1001),
+          expirationDate: BigNumber.from(2001),
           stampInfo: stamp2,
         },
         {
           hash: "0x789",
-          issuanceDate: BigNumber.from(1000),
-          expirationDate: BigNumber.from(2000),
+          issuanceDate: BigNumber.from(1002),
+          expirationDate: BigNumber.from(2002),
           stampInfo: stamp3,
         },
       ],
@@ -281,13 +281,13 @@ describe("sortPassportAttestationData", () => {
 
     expect(sortedAttestation.hashes).toEqual(["0x456", "0x789", "0x123"]);
     expect(sortedAttestation.issuancesDates).toEqual([
-      BigNumber.from(1000),
-      BigNumber.from(1000),
+      BigNumber.from(1001),
+      BigNumber.from(1002),
       BigNumber.from(1000),
     ]);
     expect(sortedAttestation.expirationDates).toEqual([
-      BigNumber.from(2000),
-      BigNumber.from(2000),
+      BigNumber.from(2001),
+      BigNumber.from(2002),
       BigNumber.from(2000),
     ]);
   });
