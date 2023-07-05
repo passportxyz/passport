@@ -1,8 +1,7 @@
 import { auth, Client } from "twitter-api-sdk";
-import { clearCacheSession, initCacheSession, loadCacheSession } from "../../utils/cache";
+import { clearCacheSession, initCacheSession, loadCacheSession } from "../../../utils/cache";
 import crypto from "crypto";
 import { ProviderContext } from "@gitcoin/passport-types";
-import { ProviderError } from "../../utils/errors";
 
 /*
   Procedure to generate auth URL & request access token for Twitter OAuth
@@ -19,22 +18,12 @@ export const generateSessionKey = (): string => {
 
 export type TwitterContext = ProviderContext & {
   twitter?: {
-    username?: string;
     authClient?: Client;
-    createdAt?: string;
-    id?: string;
   };
 };
 
 type TwitterCache = {
   oauthUser?: auth.OAuth2User;
-};
-
-export type TwitterUserData = {
-  username?: string;
-  createdAt?: string;
-  id?: string;
-  errors?: string[];
 };
 
 const loadTwitterCache = (token: string): TwitterCache => loadCacheSession(token, "Twitter");
@@ -79,7 +68,7 @@ export const getAuthClient = async (sessionKey: string, code: string, context: T
 };
 
 // This method has side-effects which alter unaccessible state on the
-// OAuth2User instance. The correct state values need to be present when we request the access token
+//   OAuth2User instance. The correct state values need to be present when we request the access token
 export const generateAuthURL = (client: auth.OAuth2User, state: string): string => {
   return client.generateAuthURL({
     state,
@@ -87,73 +76,46 @@ export const generateAuthURL = (client: auth.OAuth2User, state: string): string 
   });
 };
 
-export const getTwitterUserData = async (context: TwitterContext, twitterClient: Client): Promise<TwitterUserData> => {
-  if (
-    context.twitter.createdAt === undefined ||
-    context.twitter.id === undefined ||
-    context.twitter.username === undefined
-  ) {
-    try {
-      // return information about the (authenticated) requesting user
-      const user = await twitterClient.users.findMyUser({
-        "user.fields": ["created_at"],
-      });
+export type TwitterFindMyUserResponse = {
+  id?: string;
+  name?: string;
+  username?: string;
+};
 
-      if (!context.twitter) context.twitter = {};
+export const requestFindMyUser = async (twitterClient: Client): Promise<TwitterFindMyUserResponse> => {
+  // return information about the (authenticated) requesting user
+  const myUser = await twitterClient.users.findMyUser();
+  return { ...myUser.data };
+};
 
-      context.twitter.createdAt = user.data.created_at;
-      context.twitter.id = user.data.id;
-      context.twitter.username = user.data.username;
-      return {
-        createdAt: context.twitter.createdAt,
-        id: context.twitter.id,
-      };
-    } catch (_error) {
-      const error = _error as ProviderError;
-      if (error?.response?.status === 429) {
-        return {
-          errors: ["Error getting getting Twitter info", "Rate limit exceeded"],
-        };
-      }
-      return {
-        errors: ["Error getting getting Twitter info", `${error?.message}`],
-      };
-    }
-  }
+export type TwitterFollowerResponse = {
+  username?: string;
+  followerCount?: number;
+};
+
+export const getFollowerCount = async (twitterClient: Client): Promise<TwitterFollowerResponse> => {
+  // public metrics returns more data on user
+  const myUser = await twitterClient.users.findMyUser({
+    "user.fields": ["public_metrics"],
+  });
   return {
-    createdAt: context.twitter.createdAt,
-    id: context.twitter.id,
-    username: context.twitter.username,
+    username: myUser.data?.username,
+    followerCount: myUser.data?.public_metrics?.followers_count,
   };
 };
 
-export const getUserTweetTimeline = async (context: TwitterContext, twitterClient: Client): Promise<number> => {
-  let nextToken: string | undefined;
-  let tweetDays: Set<string>;
-  const userId = context.twitter.id;
-  // returns user tweet information
-  do {
-    const userTweetDaysResponse = await twitterClient.tweets.usersIdTweets(userId, {
-      max_results: 100,
-      pagination_token: nextToken,
-      "tweet.fields": ["created_at"],
-    });
-
-    for (const tweet of userTweetDaysResponse.data) {
-      // Extract date from created_at
-      const date = new Date(tweet.created_at).toISOString().split("T")[0];
-      tweetDays.add(date);
-    }
-    nextToken = userTweetDaysResponse.meta.next_token;
-  } while (nextToken);
-
-  return tweetDays.size;
+export type TwitterTweetResponse = {
+  username?: string;
+  tweetCount?: number;
 };
 
-// For everything after the initial user load, we need to avoid the secondary rate
-// limit by waiting 1 second between requests
-export const avoidTwitterRateLimit = async (): Promise<void> => {
-  if (process.env.NODE_ENV === "test") return;
-
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+export const getTweetCount = async (twitterClient: Client): Promise<TwitterTweetResponse> => {
+  // public metrics returns more data on user
+  const myUser = await twitterClient.users.findMyUser({
+    "user.fields": ["public_metrics"],
+  });
+  return {
+    username: myUser.data?.username,
+    tweetCount: myUser.data?.public_metrics?.tweet_count,
+  };
 };
