@@ -1,4 +1,4 @@
-import * as twitterAccountAge from "../Providers/TwitterAccountAge";
+import * as twitterAccountAge from "../Providers/twitterAccountAge";
 import { RequestPayload, ProviderContext } from "@gitcoin/passport-types";
 import { auth, Client } from "twitter-api-sdk";
 import { getTwitterUserData, getAuthClient } from "../procedures/twitterOauth";

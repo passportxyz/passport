@@ -1,5 +1,5 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { TwitterAccountAgeProvider } from "./Providers/TwitterAccountAge";
+import { TwitterAccountAgeProvider } from "./Providers/twitterAccountAge";
 // import { TwitterTweetDaysProvider } from "./Providers/twitterTweetDays";
 
 export const PlatformDetails: PlatformSpec = {
@@ -19,11 +19,11 @@ export const ProviderConfig: PlatformGroupSpec[] = [
         name: "twitterAccountAgeGte#180",
       },
       {
-        title: "Created at least 180 days ago",
+        title: "Created at least 1 year ago",
         name: "twitterAccountAgeGte#365",
       },
       {
-        title: "Created at least 180 days ago",
+        title: "Created at least 2 years ago",
         name: "twitterAccountAgeGte#730",
       },
     ],
