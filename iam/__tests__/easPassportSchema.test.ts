@@ -10,17 +10,6 @@ jest.mock("../src/utils/scorerService", () => ({
   fetchPassportScore: jest.fn(),
 }));
 
-const ensProviderConfig = {
-  platformGroup: "Account Name",
-  providers: [
-    {
-      title: "Encrypted",
-      name: "Ens",
-      hash: "0xb4448bd57db012361e41665a60f3906dda48b4ffc1e4b8151cb2b6d431861fae",
-    },
-  ],
-};
-
 describe("eas encoding", () => {
   it("should use encodeEasStamp to format stamp data correctly", () => {
     const verifiableCredential: VerifiableCredential = {
@@ -34,7 +23,7 @@ describe("eas encoding", () => {
       },
       issuer: "string",
       issuanceDate: "2023-05-10T11:00:14.986Z",
-      expirationDate: "string",
+      expirationDate: "2023-08-10T11:00:14.986Z",
       proof: {
         type: "string",
         proofPurpose: "string",
@@ -85,6 +74,7 @@ describe("formatMultiAttestationRequest", () => {
             hash: "v0.0.0:QdjFB8E6FbvBT8HP+4mr7VBjal+CC7aDcAAqGAKsXos=",
           },
           issuanceDate: "2023-05-10T11:00:14.986Z",
+          expirationDate: "2023-08-10T11:00:14.986Z",
         } as unknown as VerifiableCredential,
         verified: true,
       },
@@ -95,6 +85,7 @@ describe("formatMultiAttestationRequest", () => {
             hash: "v0.0.0:QdjFB8E6FbvBT8HP+4mr7VBjal+CC7aDcAAqGAKsXos=",
           },
           issuanceDate: "2023-05-10T11:00:14.986Z",
+          expirationDate: "2023-08-10T11:00:14.986Z",
         } as unknown as VerifiableCredential,
         verified: false,
       },
@@ -123,6 +114,181 @@ describe("formatMultiAttestationRequest", () => {
           },
         ],
       },
+    ]);
+  });
+});
+
+describe("formatPassportAttestationData", () => {
+  it("should format attestation data correctly", () => {
+    // Prepare a mock credential
+    const mockCredential: VerifiableCredential = {
+      "@context": [],
+      type: [],
+      credentialSubject: {
+        hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
+        provider: "mockProvider",
+        id: "",
+        "@context": [{}],
+      },
+      issuer: "string",
+      issuanceDate: "2023-01-01T00:00:00.000Z",
+      expirationDate: "2023-12-31T23:59:59.999Z",
+      proof: {
+        type: "string",
+        proofPurpose: "string",
+        verificationMethod: "string",
+        created: "string",
+        jws: "string",
+      },
+    };
+
+    // Prepare a mock stamp
+    const mockStamp = {
+      name: "mockProvider",
+      index: 0,
+      bit: 1,
+    };
+
+    // Add the mock stamp to the map
+    easPassportModule.passportAttestationStampMap.set(mockCredential.credentialSubject.provider, mockStamp);
+
+    const result: easPassportModule.PassportAttestationData = easPassportModule.formatPassportAttestationData([
+      mockCredential,
+    ]);
+
+    // Check that the resulting providers array has the expected value
+    // For the mockStamp, it should be [BigNumber.from(1 << 1)]
+    expect(result.providers).toEqual([BigNumber.from(1 << mockStamp.bit)]);
+
+    // Check that the info array contains an object with the expected values
+    expect(result.info).toHaveLength(1);
+    expect(result.info[0]).toMatchObject({
+      hash: "0x" + Buffer.from(mockCredential.credentialSubject.hash.split(":")[1], "base64").toString("hex"),
+      issuanceDate: BigNumber.from(Math.floor(new Date(mockCredential.issuanceDate).getTime() / 1000)),
+      expirationDate: BigNumber.from(Math.floor(new Date(mockCredential.expirationDate).getTime() / 1000)),
+      stampInfo: mockStamp,
+    });
+
+    // Remove the mock stamp from the map to not affect other tests
+    easPassportModule.passportAttestationStampMap.delete(mockCredential.credentialSubject.provider);
+  });
+  it("should return multiple provider bitmaps/bns if index exceeds range", () => {
+    // Prepare a mock credential
+    const mockCredential = {
+      credentialSubject: {
+        hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
+        provider: "mockProvider",
+      },
+      issuer: "string",
+      issuanceDate: "2023-01-01T00:00:00.000Z",
+      expirationDate: "2023-12-31T23:59:59.999Z",
+    } as unknown as VerifiableCredential;
+
+    const mockCredential1 = {
+      credentialSubject: {
+        hash: "v0.0.0:QdjFB8E6FbvBT8HP+4mr7VBjal+CC7aDcAAqGAKsXos=",
+        provider: "mockProvider1",
+      },
+      issuer: "string",
+      issuanceDate: "2023-01-01T00:00:00.000Z",
+      expirationDate: "2023-12-31T23:59:59.999Z",
+    } as unknown as VerifiableCredential;
+
+    // Prepare a mock stamp
+    const mockStamp = {
+      name: "mockProvider",
+      index: 0,
+      bit: 1,
+    };
+
+    const mockStamp1 = {
+      name: "mockProvider1",
+      index: 1,
+      bit: 0,
+    };
+
+    // Add the mock stamps to the map
+    easPassportModule.passportAttestationStampMap.set(mockCredential.credentialSubject.provider, mockStamp);
+    easPassportModule.passportAttestationStampMap.set(mockCredential1.credentialSubject.provider, mockStamp1);
+
+    const result: easPassportModule.PassportAttestationData = easPassportModule.formatPassportAttestationData([
+      mockCredential,
+      mockCredential1,
+    ]);
+
+    expect(result.providers).toEqual([BigNumber.from(1 << mockStamp.bit), BigNumber.from(1 << mockStamp1.bit)]);
+
+    // Check that the info array contains an object with the expected values
+    expect(result.info).toHaveLength(2);
+    expect(result.info[0]).toMatchObject({
+      hash: "0x" + Buffer.from(mockCredential.credentialSubject.hash.split(":")[1], "base64").toString("hex"),
+      issuanceDate: BigNumber.from(Math.floor(new Date(mockCredential.issuanceDate).getTime() / 1000)),
+      expirationDate: BigNumber.from(Math.floor(new Date(mockCredential.expirationDate).getTime() / 1000)),
+      stampInfo: mockStamp,
+    });
+
+    // Remove the mock stamp from the map to not affect other tests
+    easPassportModule.passportAttestationStampMap.delete(mockCredential.credentialSubject.provider);
+  });
+});
+
+describe("sortPassportAttestationData", () => {
+  it("should correctly sort the Attestation data", () => {
+    const stamp1 = {
+      name: "TestStamp1",
+      index: 2,
+      bit: 1,
+    };
+
+    const stamp2 = {
+      name: "TestStamp2",
+      index: 1,
+      bit: 2,
+    };
+
+    const stamp3 = {
+      name: "TestStamp3",
+      index: 2,
+      bit: 0,
+    };
+
+    const attestation: easPassportModule.PassportAttestationData = {
+      providers: [BigNumber.from(3), BigNumber.from(1), BigNumber.from(2)],
+      info: [
+        {
+          hash: "0x123",
+          issuanceDate: BigNumber.from(1000),
+          expirationDate: BigNumber.from(2000),
+          stampInfo: stamp1,
+        },
+        {
+          hash: "0x456",
+          issuanceDate: BigNumber.from(1000),
+          expirationDate: BigNumber.from(2000),
+          stampInfo: stamp2,
+        },
+        {
+          hash: "0x789",
+          issuanceDate: BigNumber.from(1000),
+          expirationDate: BigNumber.from(2000),
+          stampInfo: stamp3,
+        },
+      ],
+    };
+
+    const sortedAttestation: easPassportModule.AttestationData =
+      easPassportModule.sortPassportAttestationData(attestation);
+
+    expect(sortedAttestation.hashes).toEqual(["0x456", "0x789", "0x123"]);
+    expect(sortedAttestation.issuancesDates).toEqual([
+      BigNumber.from(1000),
+      BigNumber.from(1000),
+      BigNumber.from(1000),
+    ]);
+    expect(sortedAttestation.expirationDates).toEqual([
+      BigNumber.from(2000),
+      BigNumber.from(2000),
+      BigNumber.from(2000),
     ]);
   });
 });

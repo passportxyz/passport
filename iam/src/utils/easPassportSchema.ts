@@ -11,13 +11,25 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { fetchPassportScore } from "./scorerService";
 import { encodeEasScore } from "./easStampSchema";
 
+export type AttestationStampInfo = {
+  hash: string;
+  stampInfo: PassportAttestationStamp;
+  issuanceDate: BigNumber;
+  expirationDate: BigNumber;
+};
+
+export type PassportAttestationData = {
+  providers: BigNumber[];
+  info: AttestationStampInfo[];
+};
+
 type PassportAttestationStamp = {
   name: string;
   index: number;
   bit: number;
 };
 
-const passportAttestationStampMap: Map<string, PassportAttestationStamp> = new Map();
+export const passportAttestationStampMap: Map<string, PassportAttestationStamp> = new Map();
 
 function addStamp(stampInfo: PassportAttestationStamp): void {
   passportAttestationStampMap.set(stampInfo.name, stampInfo);
@@ -100,9 +112,9 @@ addStamp({ bit: 73, index: 0, name: "IdenaStake#100k" });
 addStamp({ bit: 74, index: 0, name: "IdenaAge#5" });
 addStamp({ bit: 75, index: 0, name: "IdenaAge#10" });
 
-export const encodeEasPassport = (credentials: VerifiableCredential[]): string => {
-  const attestation = credentials.reduce(
-    (acc, credential) => {
+export const formatPassportAttestationData = (credentials: VerifiableCredential[]): PassportAttestationData => {
+  return credentials.reduce(
+    (acc: PassportAttestationData, credential: VerifiableCredential) => {
       const stampInfo: PassportAttestationStamp = passportAttestationStampMap.get(
         credential.credentialSubject.provider
       );
@@ -134,17 +146,17 @@ export const encodeEasPassport = (credentials: VerifiableCredential[]): string =
     {
       providers: [],
       info: [],
-    } as {
-      providers: BigNumber[];
-      info: {
-        hash: string;
-        stampInfo: PassportAttestationStamp;
-        issuanceDate: BigNumber;
-        expirationDate: BigNumber;
-      }[];
     }
   );
+};
 
+export type AttestationData = {
+  hashes: string[];
+  issuancesDates: BigNumber[];
+  expirationDates: BigNumber[];
+};
+
+export const sortPassportAttestationData = (attestation: PassportAttestationData): AttestationData => {
   attestation.info = attestation.info.sort((a, b) => {
     // We want to order first by index position and then by bit order
     const indexCompare = a.stampInfo.index - b.stampInfo.index;
@@ -154,17 +166,28 @@ export const encodeEasPassport = (credentials: VerifiableCredential[]): string =
     return indexCompare;
   });
 
-  const providers = attestation.providers;
   const hashes = attestation.info.map((info) => info.hash);
   const issuancesDates = attestation.info.map((info) => info.issuanceDate);
   const expirationDates = attestation.info.map((info) => info.expirationDate);
+
+  return {
+    hashes,
+    issuancesDates,
+    expirationDates,
+  };
+};
+
+export const encodeEasPassport = (credentials: VerifiableCredential[]): string => {
+  const attestation = formatPassportAttestationData(credentials);
 
   const attestationSchemaEncoder = new SchemaEncoder(
     "uint256[] providers, bytes32[] hashes, uint64[] issuanceDates, uint64[] expirationDates"
   );
 
+  const { hashes, issuancesDates, expirationDates } = sortPassportAttestationData(attestation);
+
   const encodedData = attestationSchemaEncoder.encodeData([
-    { name: "providers", value: providers, type: "uint256[]" },
+    { name: "providers", value: attestation.providers, type: "uint256[]" },
     { name: "hashes", value: hashes, type: "bytes32[]" },
     { name: "issuanceDates", value: issuancesDates, type: "uint64[]" },
     { name: "expirationDates", value: expirationDates, type: "uint64[]" },
