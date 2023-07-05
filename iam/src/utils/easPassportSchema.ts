@@ -106,6 +106,7 @@ export const encodeEasPassport = (credentials: VerifiableCredential[]): string =
       const stampInfo: PassportAttestationStamp = passportAttestationStampMap.get(
         credential.credentialSubject.provider
       );
+
       if (stampInfo) {
         const index = stampInfo.index;
         if (acc.providers.length <= index) {
@@ -113,14 +114,18 @@ export const encodeEasPassport = (credentials: VerifiableCredential[]): string =
           acc.providers.length = index + 1;
           acc.providers[index] = BigNumber.from(0);
         }
-        acc.providers[index] = acc.providers[index].and(BigNumber.from(0).shl(stampInfo.bit));
+        // Shift the bit `1` to the left by the number of bits specified in the stamp info
+        acc.providers[index] = acc.providers[index].or(BigNumber.from(1).shl(stampInfo.bit));
+
         // We decode the original 256-bit hash value from the credential
         const hashValue = "0x" + Buffer.from(credential.credentialSubject.hash.split(":")[1], "base64").toString("hex");
         // Get the unix timestamp, the number of milliseconds since January 1, 1970, UTC
         const issuanceDate = Math.floor(new Date(credential.issuanceDate).getTime() / 1000);
+        const expirationDate = Math.floor(new Date(credential.expirationDate).getTime() / 1000);
         acc.info.push({
           hash: hashValue,
           issuanceDate: BigNumber.from(issuanceDate),
+          expirationDate: BigNumber.from(expirationDate),
           stampInfo: stampInfo,
         });
       }
@@ -129,22 +134,19 @@ export const encodeEasPassport = (credentials: VerifiableCredential[]): string =
     {
       providers: [],
       info: [],
-      //   hashes: [],
-      //   issuancesDates: [],
-      //   // We will use the ordering information to sort the hashes and issuancesDates arrays by the index and then bit
-      //   ordering: [],
     } as {
       providers: BigNumber[];
       info: {
         hash: string;
         stampInfo: PassportAttestationStamp;
         issuanceDate: BigNumber;
+        expirationDate: BigNumber;
       }[];
     }
   );
 
   attestation.info = attestation.info.sort((a, b) => {
-    // We want to order forst by index position and then by bit order
+    // We want to order first by index position and then by bit order
     const indexCompare = a.stampInfo.index - b.stampInfo.index;
     if (indexCompare === 0) {
       return a.stampInfo.bit - b.stampInfo.bit;
@@ -155,13 +157,17 @@ export const encodeEasPassport = (credentials: VerifiableCredential[]): string =
   const providers = attestation.providers;
   const hashes = attestation.info.map((info) => info.hash);
   const issuancesDates = attestation.info.map((info) => info.issuanceDate);
+  const expirationDates = attestation.info.map((info) => info.expirationDate);
 
-  const attestationSchemaEncoder = new SchemaEncoder("uint256[] providers, bytes32[] hashes, uint64[] issuanceDates");
+  const attestationSchemaEncoder = new SchemaEncoder(
+    "uint256[] providers, bytes32[] hashes, uint64[] issuanceDates, uint64[] expirationDates"
+  );
 
   const encodedData = attestationSchemaEncoder.encodeData([
     { name: "providers", value: providers, type: "uint256[]" },
     { name: "hashes", value: hashes, type: "bytes32[]" },
     { name: "issuanceDates", value: issuancesDates, type: "uint64[]" },
+    { name: "expirationDates", value: expirationDates, type: "uint64[]" },
   ]);
 
   return encodedData;
