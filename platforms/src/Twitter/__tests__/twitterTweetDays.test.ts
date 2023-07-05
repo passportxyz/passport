@@ -1,4 +1,4 @@
-import * as twitterTweetDays from "../Providers/twitterTweetDays";
+// import * as twitterTweetDays from "../Providers/twitterTweetDays";
 import { RequestPayload, ProviderContext } from "@gitcoin/passport-types";
 import { auth, Client } from "twitter-api-sdk";
 import { getTwitterUserData, getAuthClient } from "../procedures/twitterOauth";
