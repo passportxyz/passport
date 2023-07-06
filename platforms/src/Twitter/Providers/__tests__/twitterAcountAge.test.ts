@@ -5,7 +5,7 @@ import { getTwitterUserData, getAuthClient } from "../../procedures/twitterOauth
 
 const { TwitterAccountAgeProvider } = twitterAccountAge;
 
-jest.mock("../procedures/twitterOauth", () => ({
+jest.mock("../../procedures/twitterOauth", () => ({
   getTwitterUserData: jest.fn(),
   getAuthClient: jest.fn(),
 }));

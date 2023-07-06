@@ -10,7 +10,7 @@ import { RequestPayload } from "@gitcoin/passport-types";
 import { auth, Client } from "twitter-api-sdk";
 import { getAuthClient, getFollowerCount, TwitterFollowerResponse } from "./twitterOauth";
 
-jest.mock("../procedures/twitterOauth", () => ({
+jest.mock("./twitterOauth", () => ({
   getFollowerCount: jest.fn(),
   getAuthClient: jest.fn(),
 }));
