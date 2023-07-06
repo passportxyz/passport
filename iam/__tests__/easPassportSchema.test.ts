@@ -1,11 +1,9 @@
 import * as easPassportModule from "../src/utils/easPassportSchema";
 import * as easStampModule from "../src/utils/easStampSchema";
-import axios from "axios";
 
 import { VerifiableCredential } from "@gitcoin/passport-types";
 import { BigNumber } from "ethers";
 import { NO_EXPIRATION, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";
-import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 
 jest.mock("../src/utils/scorerService", () => ({
   fetchPassportScore: jest.fn(),
@@ -21,7 +19,7 @@ const defaultRequestData = {
 
 describe("formatMultiAttestationRequest", () => {
   it("should return formatted attestation request", async () => {
-    jest.spyOn(easPassportModule, "encodeEasPassport").mockReturnValue(Promise.resolve("0x00000000000000000000000"));
+    jest.spyOn(easPassportModule, "encodeEasPassport").mockReturnValue("0x00000000000000000000000");
     jest.spyOn(easStampModule, "encodeEasScore").mockReturnValue("0x00000000000000000000000");
 
     const validatedCredentials = [
@@ -111,7 +109,7 @@ describe("formatPassportAttestationData", () => {
 
     passportAttestationStampMap.set(mockCredential.credentialSubject.provider, mockStamp);
 
-    jest.spyOn(easPassportModule, "buildProviderBitMap").mockResolvedValue(passportAttestationStampMap);
+    jest.spyOn(easPassportModule, "buildProviderBitMap").mockReturnValue(passportAttestationStampMap);
 
     const result: easPassportModule.PassportAttestationData = await easPassportModule.formatPassportAttestationData([
       mockCredential,
@@ -171,7 +169,7 @@ describe("formatPassportAttestationData", () => {
     passportAttestationStampMap.set(mockCredential.credentialSubject.provider, mockStamp);
     passportAttestationStampMap.set(mockCredential1.credentialSubject.provider, mockStamp1);
 
-    jest.spyOn(easPassportModule, "buildProviderBitMap").mockResolvedValue(passportAttestationStampMap);
+    jest.spyOn(easPassportModule, "buildProviderBitMap").mockReturnValue(passportAttestationStampMap);
 
     const result: easPassportModule.PassportAttestationData = await easPassportModule.formatPassportAttestationData([
       mockCredential,
@@ -194,21 +192,6 @@ describe("formatPassportAttestationData", () => {
 describe("sortPassportAttestationData", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
-  });
-  it("should correctly utilize the first bit of the new bitmap when a new bitmap is created", async () => {
-    const stampNames = Array(257)
-      .fill(null)
-      .map((_, idx) => `stamp${idx}`);
-    const groupStamps = stampNames.map((name) => ({ name }));
-    const group = { name: "group1", stamps: groupStamps };
-    const stampMetadata: easPassportModule.StampMetadata = [{ id: "1", name: "metadata1", groups: [group] }];
-
-    jest.spyOn(axios, "get").mockResolvedValue({ data: stampMetadata });
-
-    const bitmap = await easPassportModule.buildProviderBitMap();
-
-    expect(bitmap.get("stamp255")).toEqual({ bit: 255, index: 0, name: "stamp255" });
-    expect(bitmap.get("stamp256")).toEqual({ bit: 0, index: 1, name: "stamp256" });
   });
   it("should correctly sort the Attestation data", () => {
     const stamp1 = {
@@ -267,5 +250,21 @@ describe("sortPassportAttestationData", () => {
       BigNumber.from(2002),
       BigNumber.from(2000),
     ]);
+  });
+});
+
+describe("buildProviderBitMapInfo", () => {
+  it("should correctly utilize the first bit of the new bitmap when a new bitmap is created", async () => {
+    const stampNames = Array(257)
+      .fill(null)
+      .map((_, idx) => `stamp${idx}`);
+    const groupStamps = stampNames.map((name) => ({ name }));
+    const group = { name: "group1", stamps: groupStamps };
+    const stampMetadata: easPassportModule.StampMetadata = [{ id: "1", name: "metadata1", groups: [group] }];
+
+    const bitmapInfo = easPassportModule.mapBitMapInfo(stampMetadata);
+
+    expect(bitmapInfo[bitmapInfo.length - 2]).toEqual({ bit: 255, index: 0, name: "stamp255" });
+    expect(bitmapInfo[bitmapInfo.length - 1]).toEqual({ bit: 0, index: 1, name: "stamp256" });
   });
 });

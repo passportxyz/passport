@@ -10,7 +10,8 @@ import { BigNumber } from "@ethersproject/bignumber";
 
 import { fetchPassportScore } from "./scorerService";
 import { encodeEasScore } from "./easStampSchema";
-import axios from "axios";
+
+import bitMapData from "../static/providerBitMapInfo.json";
 
 export type AttestationStampInfo = {
   hash: string;
@@ -41,23 +42,18 @@ export type StampMetadata = {
   }[];
 }[];
 
-type Stamp = {
+export type Stamp = {
   bit: number;
   index: number;
   name: string;
 };
 
-const stampMetadataEndpoint = process.env.PASSPORT_STAMP_METADATA_PATH || "";
-
-export const buildProviderBitMap = async (): Promise<Map<string, PassportAttestationStamp>> => {
-  const stampMetadata: {
-    data: StampMetadata;
-  } = await axios.get(stampMetadataEndpoint);
-
+// exported to buildProviderBitMap for formatting
+export const mapBitMapInfo = (metaData: StampMetadata): PassportAttestationStamp[] => {
   let bit = 0;
   let index = 0;
 
-  const formattedStamps: Stamp[] = stampMetadata.data.flatMap((entry) =>
+  return metaData.flatMap((entry) =>
     entry.groups.flatMap((group) =>
       group.stamps.map((stamp) => {
         const result = { bit: bit % 256, index, name: stamp.name };
@@ -67,20 +63,24 @@ export const buildProviderBitMap = async (): Promise<Map<string, PassportAttesta
       })
     )
   );
-
-  const passportAttestationStampMap: Map<string, PassportAttestationStamp> = new Map();
-
-  formattedStamps.forEach((stamp) => {
-    passportAttestationStampMap.set(stamp.name, stamp);
-  });
-
-  return passportAttestationStampMap;
 };
 
-export const formatPassportAttestationData = async (
-  credentials: VerifiableCredential[]
-): Promise<PassportAttestationData> => {
-  const passportAttestationStampMap = await buildProviderBitMap();
+export const buildProviderBitMap = (): Map<string, PassportAttestationStamp> => {
+  try {
+    // const parseBitMapInfo = JSON.parse(bitMapData as unknown as string);
+    const bitMapInfo = bitMapData as unknown as Stamp[];
+    const passportAttestationStampMap: Map<string, PassportAttestationStamp> = new Map();
+
+    bitMapInfo.forEach((stamp) => passportAttestationStampMap.set(stamp.name, stamp));
+
+    return passportAttestationStampMap;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const formatPassportAttestationData = (credentials: VerifiableCredential[]): PassportAttestationData => {
+  const passportAttestationStampMap = buildProviderBitMap();
   return credentials.reduce(
     (acc: PassportAttestationData, credential: VerifiableCredential) => {
       const stampInfo: PassportAttestationStamp = passportAttestationStampMap.get(
@@ -145,8 +145,8 @@ export const sortPassportAttestationData = (attestation: PassportAttestationData
   };
 };
 
-export const encodeEasPassport = async (credentials: VerifiableCredential[]): Promise<string> => {
-  const attestation = await formatPassportAttestationData(credentials);
+export const encodeEasPassport = (credentials: VerifiableCredential[]): string => {
+  const attestation = formatPassportAttestationData(credentials);
 
   const attestationSchemaEncoder = new SchemaEncoder(
     "uint256[] providers, bytes32[] hashes, uint64[] issuanceDates, uint64[] expirationDates"
@@ -184,7 +184,7 @@ export const formatMultiAttestationRequest = async (
   const stampRequestData: AttestationRequestData[] = [
     {
       ...defaultRequestData,
-      data: await encodeEasPassport(
+      data: encodeEasPassport(
         credentials
           .filter(({ verified }) => verified)
           .map(({ credential }) => {
