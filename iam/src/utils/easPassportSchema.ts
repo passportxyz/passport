@@ -149,7 +149,7 @@ export const encodeEasPassport = (credentials: VerifiableCredential[]): string =
   const attestation = formatPassportAttestationData(credentials);
 
   const attestationSchemaEncoder = new SchemaEncoder(
-    "uint256[] providers, bytes32[] hashes, uint64[] issuanceDates, uint64[] expirationDates"
+    "uint256[] providers, bytes32[] hashes, uint64[] issuanceDates, uint64[] expirationDates, uint16 providerMapVersion"
   );
 
   const { hashes, issuancesDates, expirationDates } = sortPassportAttestationData(attestation);
@@ -159,6 +159,9 @@ export const encodeEasPassport = (credentials: VerifiableCredential[]): string =
     { name: "hashes", value: hashes, type: "bytes32[]" },
     { name: "issuanceDates", value: issuancesDates, type: "uint64[]" },
     { name: "expirationDates", value: expirationDates, type: "uint64[]" },
+    // This will be used later for decoding provider mapping for scoring and within the resolver contract
+    // Currently set to zero but should be updated whenever providerBitMapInfo.json is updated
+    { name: "providerMapVersion", value: BigNumber.from(0), type: "uint16" },
   ]);
 
   return encodedData;
