@@ -1,5 +1,6 @@
 import * as easPassportModule from "../src/utils/easPassportSchema";
 import * as easStampModule from "../src/utils/easStampSchema";
+import axios from "axios";
 
 import { VerifiableCredential } from "@gitcoin/passport-types";
 import { BigNumber } from "ethers";
@@ -11,7 +12,7 @@ jest.mock("../src/utils/scorerService", () => ({
 }));
 
 describe("eas encoding", () => {
-  it("should use encodeEasStamp to format stamp data correctly", () => {
+  it("should use encodeEasStamp to format stamp data correctly", async () => {
     const verifiableCredential: VerifiableCredential = {
       "@context": [],
       type: [],
@@ -33,7 +34,7 @@ describe("eas encoding", () => {
       },
     };
 
-    const encodedData = easPassportModule.encodeEasPassport([verifiableCredential]);
+    const encodedData = await easPassportModule.encodeEasPassport([verifiableCredential]);
     const stampSchemaEncoder = new SchemaEncoder("uint256[] providers, bytes32[] hashes, uint64[] issuanceDates");
     const decodedStampData = stampSchemaEncoder.decodeData(encodedData);
     console.log(">>>>>>>>> decodedStampData", decodedStampData);
@@ -63,7 +64,7 @@ const defaultRequestData = {
 
 describe("formatMultiAttestationRequest", () => {
   it("should return formatted attestation request", async () => {
-    jest.spyOn(easPassportModule, "encodeEasPassport").mockReturnValue("0x00000000000000000000000");
+    jest.spyOn(easPassportModule, "encodeEasPassport").mockReturnValue(Promise.resolve("0x00000000000000000000000"));
     jest.spyOn(easStampModule, "encodeEasScore").mockReturnValue("0x00000000000000000000000");
 
     const validatedCredentials = [
@@ -119,7 +120,7 @@ describe("formatMultiAttestationRequest", () => {
 });
 
 describe("formatPassportAttestationData", () => {
-  it("should format attestation data correctly", () => {
+  it("should format attestation data correctly", async () => {
     // Prepare a mock credential
     const mockCredential: VerifiableCredential = {
       "@context": [],
@@ -149,10 +150,13 @@ describe("formatPassportAttestationData", () => {
       bit: 1,
     };
 
-    // Add the mock stamp to the map
-    easPassportModule.passportAttestationStampMap.set(mockCredential.credentialSubject.provider, mockStamp);
+    const passportAttestationStampMap: Map<string, easPassportModule.PassportAttestationStamp> = new Map();
 
-    const result: easPassportModule.PassportAttestationData = easPassportModule.formatPassportAttestationData([
+    passportAttestationStampMap.set(mockCredential.credentialSubject.provider, mockStamp);
+
+    jest.spyOn(easPassportModule, "buildProviderBitMap").mockResolvedValue(passportAttestationStampMap);
+
+    const result: easPassportModule.PassportAttestationData = await easPassportModule.formatPassportAttestationData([
       mockCredential,
     ]);
 
@@ -168,11 +172,8 @@ describe("formatPassportAttestationData", () => {
       expirationDate: BigNumber.from(Math.floor(new Date(mockCredential.expirationDate).getTime() / 1000)),
       stampInfo: mockStamp,
     });
-
-    // Remove the mock stamp from the map to not affect other tests
-    easPassportModule.passportAttestationStampMap.delete(mockCredential.credentialSubject.provider);
   });
-  it("should return multiple provider bitmaps/bns if index exceeds range", () => {
+  it("should return multiple provider bitmaps/bns if index exceeds range", async () => {
     // Prepare a mock credential
     const mockCredential = {
       credentialSubject: {
@@ -207,11 +208,15 @@ describe("formatPassportAttestationData", () => {
       bit: 0,
     };
 
-    // Add the mock stamps to the map
-    easPassportModule.passportAttestationStampMap.set(mockCredential.credentialSubject.provider, mockStamp);
-    easPassportModule.passportAttestationStampMap.set(mockCredential1.credentialSubject.provider, mockStamp1);
+    const passportAttestationStampMap: Map<string, easPassportModule.PassportAttestationStamp> = new Map();
 
-    const result: easPassportModule.PassportAttestationData = easPassportModule.formatPassportAttestationData([
+    // Add the mock stamps to the map
+    passportAttestationStampMap.set(mockCredential.credentialSubject.provider, mockStamp);
+    passportAttestationStampMap.set(mockCredential1.credentialSubject.provider, mockStamp1);
+
+    jest.spyOn(easPassportModule, "buildProviderBitMap").mockResolvedValue(passportAttestationStampMap);
+
+    const result: easPassportModule.PassportAttestationData = await easPassportModule.formatPassportAttestationData([
       mockCredential,
       mockCredential1,
     ]);
@@ -226,13 +231,28 @@ describe("formatPassportAttestationData", () => {
       expirationDate: BigNumber.from(Math.floor(new Date(mockCredential.expirationDate).getTime() / 1000)),
       stampInfo: mockStamp,
     });
-
-    // Remove the mock stamp from the map to not affect other tests
-    easPassportModule.passportAttestationStampMap.delete(mockCredential.credentialSubject.provider);
   });
 });
 
 describe("sortPassportAttestationData", () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+  it("should correctly utilize the first bit of the new bitmap when a new bitmap is created", async () => {
+    const stampNames = Array(257)
+      .fill(null)
+      .map((_, idx) => `stamp${idx}`);
+    const groupStamps = stampNames.map((name) => ({ name }));
+    const group = { name: "group1", stamps: groupStamps };
+    const stampMetadata: easPassportModule.StampMetadata = [{ id: "1", name: "metadata1", groups: [group] }];
+
+    jest.spyOn(axios, "get").mockResolvedValue({ data: stampMetadata });
+
+    const bitmap = await easPassportModule.buildProviderBitMap();
+
+    expect(bitmap.get("stamp255")).toEqual({ bit: 255, index: 0, name: "stamp255" });
+    expect(bitmap.get("stamp256")).toEqual({ bit: 0, index: 1, name: "stamp256" });
+  });
   it("should correctly sort the Attestation data", () => {
     const stamp1 = {
       name: "TestStamp1",
