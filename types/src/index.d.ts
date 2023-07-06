@@ -308,5 +308,4 @@ export type PROVIDER_ID =
   | "IdenaAge#10"
   | "CivicCaptchaPass"
   | "CivicUniquenessPass"
-  | "CivicLivenessPass"
-  | "CivicIDVPass";
+  | "CivicLivenessPass";

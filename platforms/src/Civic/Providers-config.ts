@@ -24,10 +24,6 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     platformGroup: "Liveness Pass",
     providers: [{ title: "holds a Civic Liveness Pass", name: "CivicLivenessPass" }],
   },
-  {
-    platformGroup: "IDV Pass",
-    providers: [{ title: "holds a Civic IDV Pass", name: "CivicIDVPass" }],
-  },
 ];
 
 /////////////////////////////////////////////////////////////
@@ -46,9 +42,5 @@ export const providers: Provider[] = [
   new CivicPassProvider({
     passType: CivicPassType.LIVENESS,
     type: "CivicLivenessPass",
-  }),
-  new CivicPassProvider({
-    passType: CivicPassType.IDV,
-    type: "CivicIDVPass",
   }),
 ];
