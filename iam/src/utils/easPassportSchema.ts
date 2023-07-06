@@ -47,10 +47,12 @@ type Stamp = {
   name: string;
 };
 
+const stampMetadataEndpoint = process.env.PASSPORT_STAMP_METADATA_PATH || "";
+
 export const buildProviderBitMap = async (): Promise<Map<string, PassportAttestationStamp>> => {
   const stampMetadata: {
     data: StampMetadata;
-  } = await axios.get(process.env.PASSPORT_STAMP_METADATA_PATH);
+  } = await axios.get(stampMetadataEndpoint);
 
   let bit = 0;
   let index = 0;
