@@ -86,6 +86,10 @@ if (!process.env.EAS_GITCOIN_SCORE_SCHEMA) {
   configErrors.push("EAS_GITCOIN_SCORE_SCHEMA is required");
 }
 
+if (!process.env.EAS_GITCOIN_PASSPORT_SCHEMA) {
+  configErrors.push("EAS_GITCOIN_PASSPORT_SCHEMA is required");
+}
+
 if (configErrors.length > 0) {
   configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
   throw new Error("Missing required configuration");
