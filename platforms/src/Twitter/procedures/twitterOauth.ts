@@ -23,6 +23,8 @@ export type TwitterContext = ProviderContext & {
     authClient?: Client;
     createdAt?: string;
     id?: string;
+    numberDaysTweeted?: number;
+    valid?: boolean;
   };
 };
 
@@ -34,6 +36,13 @@ export type TwitterUserData = {
   username?: string;
   createdAt?: string;
   id?: string;
+  errors?: string[];
+};
+
+export type UserTweetTimeline = {
+  id?: string;
+  numberDaysTweeted?: number;
+  valid?: boolean;
   errors?: string[];
 };
 
@@ -127,27 +136,71 @@ export const getTwitterUserData = async (context: TwitterContext, twitterClient:
   };
 };
 
-export const getUserTweetTimeline = async (context: TwitterContext, twitterClient: Client): Promise<number> => {
+export const getUserTweetTimeline = async (
+  context: TwitterContext,
+  twitterClient: Client
+): Promise<UserTweetTimeline> => {
   let nextToken: string | undefined;
   let tweetDays: Set<string>;
-  const userId = context.twitter.id;
-  // returns user tweet information
-  do {
-    const userTweetDaysResponse = await twitterClient.tweets.usersIdTweets(userId, {
-      max_results: 100,
-      pagination_token: nextToken,
-      "tweet.fields": ["created_at"],
-    });
+  if (context.twitter.numberDaysTweeted === undefined || context.twitter.valid === false) {
+    try {
+      // return information about the (authenticated) requesting user
+      const userId = (await twitterClient.users.findMyUser()).data.id;
 
-    for (const tweet of userTweetDaysResponse.data) {
-      // Extract date from created_at
-      const date = new Date(tweet.created_at).toISOString().split("T")[0];
-      tweetDays.add(date);
+      if (!context.twitter) context.twitter = {};
+      // returns user tweet information
+      do {
+        const userTweetDaysResponse = await twitterClient.tweets.usersIdTweets(userId, {
+          max_results: 100,
+          pagination_token: nextToken,
+          "tweet.fields": ["created_at"],
+        });
+        for (const tweet of userTweetDaysResponse.data) {
+          // Extract date from created_at
+          const date = new Date(tweet.created_at).toISOString().split("T")[0];
+          tweetDays.add(date);
+        }
+        nextToken = userTweetDaysResponse.meta.next_token;
+        // If user has already tweeted for 120 distinct days, no need to continue
+        if (tweetDays.size >= 120) {
+          context.twitter.id = userId;
+          context.twitter.numberDaysTweeted = tweetDays.size;
+          context.twitter.valid = true;
+          return {
+            id: userId,
+            numberDaysTweeted: tweetDays.size,
+            valid: true,
+          };
+        }
+        // Respect rate limits by sleeping for a short time after each request
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      } while (nextToken);
+      context.twitter.id = userId;
+      context.twitter.numberDaysTweeted = tweetDays.size;
+      context.twitter.valid = false;
+      return {
+        id: context.twitter.id,
+        numberDaysTweeted: context.twitter.numberDaysTweeted,
+        valid: context.twitter.valid,
+      };
+    } catch (_error) {
+      const error = _error as ProviderError;
+
+      if (error?.response?.status === 429) {
+        return {
+          errors: ["Error getting getting Twitter info", "Rate limit exceeded"],
+        };
+      }
+      return {
+        errors: ["Error getting getting Twitter info", `${error?.message}`],
+      };
     }
-    nextToken = userTweetDaysResponse.meta.next_token;
-  } while (nextToken);
-
-  return tweetDays.size;
+  }
+  return {
+    id: context.twitter.id,
+    numberDaysTweeted: context.twitter.numberDaysTweeted,
+    valid: context.twitter.valid,
+  };
 };
 
 // For everything after the initial user load, we need to avoid the secondary rate

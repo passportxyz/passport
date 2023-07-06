@@ -1,6 +1,6 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
 import { TwitterAccountAgeProvider } from "./Providers/twitterAccountAge";
-// import { TwitterTweetDaysProvider } from "./Providers/twitterTweetDays";
+import { TwitterTweetDaysProvider } from "./Providers/twitterTweetDays";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/twitterStampIcon.svg",
@@ -57,13 +57,13 @@ export const providers: Provider[] = [
   new TwitterAccountAgeProvider({
     threshold: "730",
   }),
-  // new TwitterTweetDaysProvider({
-  //   threshold: "30",
-  // }),
-  // new TwitterTweetDaysProvider({
-  //   threshold: "60",
-  // }),
-  // new TwitterTweetDaysProvider({
-  //   threshold: "120",
-  // }),
+  new TwitterTweetDaysProvider({
+    threshold: "30",
+  }),
+  new TwitterTweetDaysProvider({
+    threshold: "60",
+  }),
+  new TwitterTweetDaysProvider({
+    threshold: "120",
+  }),
 ];

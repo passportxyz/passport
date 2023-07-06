@@ -1,16 +1,15 @@
-import * as twitterAccountAge from "../Providers/twitterAccountAge";
+import * as twitterTweetDays from "../twitterTweetDays";
 import { RequestPayload, ProviderContext } from "@gitcoin/passport-types";
 import { auth, Client } from "twitter-api-sdk";
-import { getTwitterUserData, getAuthClient } from "../procedures/twitterOauth";
+import { getUserTweetTimeline, getAuthClient } from "../../procedures/twitterOauth";
+const { TwitterTweetDaysProvider } = twitterTweetDays;
 
-const { TwitterAccountAgeProvider } = twitterAccountAge;
-
-jest.mock("../procedures/twitterOauth", () => ({
-  getTwitterUserData: jest.fn(),
+jest.mock("../../procedures/twitterOauth", () => ({
+  getUserTweetTimeline: jest.fn(),
   getAuthClient: jest.fn(),
 }));
 
-describe("TwitterAccountAgeProvider", function () {
+describe("TwittewTweetDaysProvider", function () {
   beforeEach(() => {
     jest.clearAllMocks();
     (getAuthClient as jest.Mock).mockReturnValue(MOCK_TWITTER_CLIENT);
@@ -37,20 +36,21 @@ describe("TwitterAccountAgeProvider", function () {
   const sessionKey = mockPayload.proofs.sessionKey;
   const code = mockPayload.proofs.code;
 
-  it("handles valid account age", async () => {
-    (getTwitterUserData as jest.MockedFunction<typeof getTwitterUserData>).mockImplementation(() => {
+  it("handles valid tweet days count", async () => {
+    (getUserTweetTimeline as jest.MockedFunction<typeof getUserTweetTimeline>).mockImplementation(() => {
       return Promise.resolve({
-        createdAt: "2019-01-01T00:00:00Z",
+        numberDaysTweeted: 120,
+        valid: true,
         errors: undefined,
       });
     });
 
-    const provider = new TwitterAccountAgeProvider({ threshold: "730" });
+    const provider = new TwitterTweetDaysProvider({ threshold: "120" });
     const result = await provider.verify(mockPayload, mockContext);
 
     expect(getAuthClient).toBeCalledWith(sessionKey, code, mockContext);
     expect(getAuthClient).toHaveBeenCalledTimes(1);
-    expect(getTwitterUserData).toHaveBeenCalledTimes(1);
+    expect(getUserTweetTimeline).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: true,
       error: undefined,
@@ -59,19 +59,20 @@ describe("TwitterAccountAgeProvider", function () {
   });
 
   it("handles invalid account age", async () => {
-    (getTwitterUserData as jest.MockedFunction<typeof getTwitterUserData>).mockImplementation(() => {
+    (getUserTweetTimeline as jest.MockedFunction<typeof getUserTweetTimeline>).mockImplementation(() => {
       return Promise.resolve({
-        createdAt: new Date().toISOString(), // Account created today
+        numberDaysTweeted: 12,
+        valid: false,
         errors: undefined,
       });
     });
 
-    const provider = new TwitterAccountAgeProvider({ threshold: "730" });
+    const provider = new TwitterTweetDaysProvider({ threshold: "120" });
     const result = await provider.verify(mockPayload, mockContext);
 
     expect(getAuthClient).toBeCalledWith(sessionKey, code, mockContext);
     expect(getAuthClient).toHaveBeenCalledTimes(1);
-    expect(getTwitterUserData).toHaveBeenCalledTimes(1);
+    expect(getUserTweetTimeline).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: false,
       error: undefined,
@@ -80,19 +81,20 @@ describe("TwitterAccountAgeProvider", function () {
   });
 
   it("handles request errors", async () => {
-    (getTwitterUserData as jest.MockedFunction<typeof getTwitterUserData>).mockImplementation(() => {
+    (getUserTweetTimeline as jest.MockedFunction<typeof getUserTweetTimeline>).mockImplementation(() => {
       return Promise.resolve({
-        createdAt: undefined,
+        numberDaysTweeted: undefined,
+        valid: false,
         errors: ["Errors"],
       });
     });
 
-    const provider = new TwitterAccountAgeProvider({ threshold: "730" });
+    const provider = new TwitterTweetDaysProvider({ threshold: "120" });
     const result = await provider.verify(mockPayload, mockContext);
 
     expect(getAuthClient).toBeCalledWith(sessionKey, code, mockContext);
     expect(getAuthClient).toHaveBeenCalledTimes(1);
-    expect(getTwitterUserData).toHaveBeenCalledTimes(1);
+    expect(getUserTweetTimeline).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: false,
       error: ["Errors"],
