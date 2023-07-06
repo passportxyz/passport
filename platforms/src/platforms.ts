@@ -24,6 +24,7 @@ import * as Hypercerts from "./Hypercerts";
 import * as PHI from "./PHI";
 import * as Holonym from "./Holonym";
 import * as Idena from "./Idena";
+import * as HumannodeOauth2Service from "./HumanodeOAuth2Service";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
 type PlatformConfig = {
@@ -57,6 +58,7 @@ const platforms: Record<string, PlatformConfig> = {
   GnosisSafe,
   Coinbase,
   GuildXYZ,
+  HumannodeOauth2Service,
   Hypercerts,
   PHI,
   Holonym,
