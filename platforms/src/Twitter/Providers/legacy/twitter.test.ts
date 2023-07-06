@@ -1,5 +1,5 @@
 // ---- Test subject
-import TwitterProvider from "./TwitterAuthProvider";
+import { TwitterProvider } from "./TwitterAuthProvider";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 import { auth, Client } from "twitter-api-sdk";
