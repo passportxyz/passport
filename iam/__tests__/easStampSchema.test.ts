@@ -1,4 +1,4 @@
-import * as easStampModule from "../src/utils/easSchema";
+import * as easStampModule from "../src/utils/easStampSchema";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 import { BigNumber } from "ethers";
 import { NO_EXPIRATION, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";

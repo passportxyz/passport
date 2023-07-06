@@ -32,7 +32,8 @@ import {
 
 import { getChallenge } from "./utils/challenge";
 import { getEASFeeAmount } from "./utils/easFees";
-import { formatMultiAttestationRequest } from "./utils/easSchema";
+import * as stampSchema from "./utils/easStampSchema";
+import * as passportSchema from "./utils/easPassportSchema";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
@@ -406,7 +407,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
     });
 });
 
-// Expose entry point for getting eas payload for moving stamps on-chain
+// Expose entry point for getting eas payload for moving stamps on-chain (Stamp Attestations)
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
   try {
@@ -434,7 +435,75 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           .filter(({ verified }) => !verified)
           .map(({ credential }) => credential);
 
-        const multiAttestationRequest = await formatMultiAttestationRequest(credentialVerifications, recipient);
+        const multiAttestationRequest = await stampSchema.formatMultiAttestationRequest(
+          credentialVerifications,
+          recipient
+        );
+
+        const fee = await getEASFeeAmount(2);
+        const passportAttestation: PassportAttestation = {
+          multiAttestationRequest,
+          nonce: Number(nonce),
+          fee: fee.toString(),
+        };
+
+        attestationSignerWallet
+          ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, passportAttestation)
+          .then((signature) => {
+            const { v, r, s } = utils.splitSignature(signature);
+
+            const payload: EasPayload = {
+              passport: passportAttestation,
+              signature: { v, r, s },
+              invalidCredentials,
+            };
+
+            return void res.json(payload);
+          })
+          .catch(() => {
+            return void errorRes(res, "Error signing passport", 500);
+          });
+      })
+      .catch(() => {
+        return void errorRes(res, "Error formatting onchain passport", 500);
+      });
+  } catch (error) {
+    return void errorRes(res, String(error), 500);
+  }
+});
+
+// Expose entry point for getting eas payload for moving stamps on-chain (Passport Attestations)
+// This function will receive an array of stamps, validate them and return an array of eas payloads
+app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
+  try {
+    const { credentials, nonce } = req.body as EasRequestBody;
+    if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
+
+    const recipient = credentials[0].credentialSubject.id.split(":")[4];
+
+    if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
+      return void errorRes(res, "Invalid recipient", 400);
+
+    if (!credentials.every((credential) => credential.credentialSubject.id.split(":")[4] === recipient))
+      return void errorRes(res, "Every credential's id must be equivalent", 400);
+
+    Promise.all(
+      credentials.map(async (credential) => {
+        return {
+          credential,
+          verified: issuer === credential.issuer && (await verifyCredential(DIDKit, credential)),
+        };
+      })
+    )
+      .then(async (credentialVerifications) => {
+        const invalidCredentials = credentialVerifications
+          .filter(({ verified }) => !verified)
+          .map(({ credential }) => credential);
+
+        const multiAttestationRequest = await passportSchema.formatMultiAttestationRequest(
+          credentialVerifications,
+          recipient
+        );
 
         const fee = await getEASFeeAmount(2);
         const passportAttestation: PassportAttestation = {
