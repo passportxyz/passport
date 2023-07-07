@@ -13,6 +13,7 @@ process.env.SCORER_ENDPOINT = "http://127.0.0.1:8002";
 process.env.SCORER_API_KEY = "abcd";
 process.env.EAS_GITCOIN_STAMP_SCHEMA = "0x";
 process.env.EAS_GITCOIN_SCORE_SCHEMA = "0x";
+process.env.EAS_GITCOIN_PASSPORT_SCHEMA = "0x";
 
 // ---- Test subject
 import { app, config } from "../src/index";

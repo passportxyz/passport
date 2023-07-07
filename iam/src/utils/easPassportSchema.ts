@@ -66,17 +66,12 @@ export const mapBitMapInfo = (metaData: StampMetadata): PassportAttestationStamp
 };
 
 export const buildProviderBitMap = (): Map<string, PassportAttestationStamp> => {
-  try {
-    // const parseBitMapInfo = JSON.parse(bitMapData as unknown as string);
-    const bitMapInfo = bitMapData as unknown as Stamp[];
-    const passportAttestationStampMap: Map<string, PassportAttestationStamp> = new Map();
+  const bitMapInfo = bitMapData as unknown as Stamp[];
+  const passportAttestationStampMap: Map<string, PassportAttestationStamp> = new Map();
 
-    bitMapInfo.forEach((stamp) => passportAttestationStampMap.set(stamp.name, stamp));
+  bitMapInfo.forEach((stamp) => passportAttestationStampMap.set(stamp.name, stamp));
 
-    return passportAttestationStampMap;
-  } catch (e) {
-    console.error(e);
-  }
+  return passportAttestationStampMap;
 };
 
 export const formatPassportAttestationData = (credentials: VerifiableCredential[]): PassportAttestationData => {
