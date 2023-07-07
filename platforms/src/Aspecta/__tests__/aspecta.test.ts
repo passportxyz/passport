@@ -14,23 +14,23 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const validAspectaUserResponse = {
   data: {
-    "username": "ying",
-    "profile_url": "https://dev.aspecta.id/",
-    "nickname": "ying",
-    "avatar": "https://media/avatar/5af87dea80f7860bdefc32d654110ad8.jpg",
-    "introduction": "profileying162ying162ying162ying162ying162ying162ying162ying162ying162ying162ying162ying1"
+    username: "test",
+    profile_url: "",
+    nickname: "",
+    avatar: "",
+    introduction: "",
   },
   status: 200,
 };
 
 const validCodeResponse = {
   data: {
-    access_token: "HMGGPY1KRGmQAVrPjfwrwnuhATTMFCnNrmzZ5PSczt",
+    access_token: "HMGGPY1ASSDFJDFSJDSFSDFczt",
   },
   status: 200,
 };
 
-const code = "l4WUNccRrlNWT23nBV3RpxwODbma30ZuSU8s86KD8EE7Xzuq";
+const code = "ABCD_123321777";
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -53,8 +53,8 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     // Check the request to get the user
-    expect(mockedAxios.get).toBeCalledWith("https://api.dev.aspecta.id/v1/users/me", {
-      headers: { Authorization: "Bearer HMGGPY1KRGmQAVrPjfwrwnuhATTMFCnNrmzZ5PSczt" },
+    expect(mockedAxios.get).toBeCalledWith("https://api.aspecta.id/v1/users/me", {
+      headers: { Authorization: "Bearer HMGGPY1ASSDFJDFSJDSFSDFczt" },
     });
 
     expect(aspectaPayload).toEqual({
@@ -90,11 +90,11 @@ describe("Attempt verification", function () {
     mockedAxios.get.mockImplementation(async (url, config) => {
       return {
         data: {
-          "username": undefined,
-          "profile_url": "",
-          "nickname": "",
-          "avatar": "",
-          "introduction": ""
+          username: undefined,
+          profile_url: "",
+          nickname: "",
+          avatar: "",
+          introduction: "",
         },
         status: 200,
       };

@@ -14,9 +14,8 @@ export class AspectaPlatform extends Platform {
 
   async getOAuthUrl(state: string): Promise<string> {
     const AspectaUrl = await Promise.resolve(
-      `https://oauth2.dev.aspecta.id/auth/?grant_type=authorization_code&response_type=code&client_id=${this.clientId}&redirect_uri=${this.redirectUri}&scope=user&state=${state}`
+      `https://oauth2.aspecta.id/auth?grant_type=authorization_code&response_type=code&client_id=${this.clientId}&redirect_uri=${this.redirectUri}&scope=user&state=${state}`
     );
-    // TODO: oauth url需修改
     return AspectaUrl;
   }
 }

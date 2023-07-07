@@ -4,8 +4,8 @@ import { AspectaProvider } from "./Providers/aspecta";
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/aspectaLogo.svg",
   platform: "Aspecta",
-  name: "Aspecta",
-  description: "Connect your existing Aspecta account to verify.",
+  name: "Aspecta ID",
+  description: "Connect Your Aspecta ID to verify.",
   connectMessage: "Connect Account",
 };
 

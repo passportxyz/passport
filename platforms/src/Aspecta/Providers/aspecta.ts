@@ -8,11 +8,11 @@ export type AspectaTokenResponse = {
 };
 
 export type AspectaFindMyUserResponse = {
-  username?: string,
-  profile_url?: string,
-  nickname?: string,
-  avatar?: string,
-  introduction?: string
+  username?: string;
+  profile_url?: string;
+  nickname?: string;
+  avatar?: string;
+  introduction?: string;
 };
 
 // Export a Aspecta Provider to carry out OAuth and return a record object
@@ -57,9 +57,8 @@ const requestAccessToken = async (code: string): Promise<string> => {
 
   try {
     // Exchange the code for an access token
-    // TODO
     const tokenRequest = await axios.post(
-      "https://oauth2.dev.aspecta.id/api/v1/oauth/token/",
+      "https://oauth2.aspecta.id/token/",
       `grant_type=authorization_code&code=${code}&client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${redirectUri}`
     );
 
@@ -83,8 +82,7 @@ const verifyAspecta = async (code: string): Promise<AspectaFindMyUserResponse> =
   const accessToken = await requestAccessToken(code);
 
   // Now that we have an access token fetch the user details
-  //TODO
-  const userRequest = await axios.get("https://api.dev.aspecta.id/v1/users/me", {
+  const userRequest = await axios.get("https://api.aspecta.id/v1/users/me", {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
