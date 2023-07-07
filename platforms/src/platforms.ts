@@ -45,7 +45,6 @@ const platforms: Record<string, PlatformConfig> = {
   Facebook,
   Linkedin,
   Ens,
-  POAP,
   Brightid,
   Poh,
   ETH,
@@ -62,5 +61,9 @@ const platforms: Record<string, PlatformConfig> = {
   Holonym,
   Idena,
 };
+
+if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {
+  platforms.POAP = POAP;
+}
 
 export default platforms;
