@@ -13,7 +13,7 @@ const injected = injectedModule();
 // web3Onboard modules
 
 const walletConnectOptions: WalletConnectOptions = {
-  projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string,
+  projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string || "",
 };
 
 const walletConnect = walletConnectModule(walletConnectOptions);
