@@ -58,8 +58,14 @@ const requestAccessToken = async (code: string): Promise<string> => {
   try {
     // Exchange the code for an access token
     const tokenRequest = await axios.post(
-      "https://oauth2.aspecta.id/token/",
-      `grant_type=authorization_code&code=${code}&client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${redirectUri}`
+      "https://oauth2.aspecta.id/token",
+      `grant_type=authorization_code&code=${code}&redirect_uri=${redirectUri}`,
+      {
+        auth: {
+          username: `${clientId}`,
+          password: `${clientSecret}`,
+        },
+      }
     );
 
     if (tokenRequest.status != 200) {
