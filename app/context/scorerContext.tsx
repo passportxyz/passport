@@ -13,7 +13,7 @@ export type PassportSubmissionStateType =
   | "APP_REQUEST_PENDING"
   | "APP_REQUEST_ERROR"
   | "APP_REQUEST_SUCCESS";
-export type ScoreStateType = "APP_INITIAL" | "PROCESSING" | "ERROR" | "DONE";
+export type ScoreStateType = "APP_INITIAL" | "BULK_PROCESSING" | "PROCESSING" | "ERROR" | "DONE";
 
 export interface ScorerContextState {
   score: number;
@@ -98,7 +98,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
         let requestCount = 1;
         let scoreStatus = await loadScore(address, dbAccessToken);
 
-        while (scoreStatus === "PROCESSING" && requestCount < maxRequests) {
+        while ((scoreStatus === "PROCESSING" || scoreStatus === "BULK_PROCESSING") && requestCount < maxRequests) {
           requestCount++;
           await new Promise((resolve) => setTimeout(resolve, sleepTime));
           if (sleepTime < 10000) {
