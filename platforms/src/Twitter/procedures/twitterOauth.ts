@@ -142,6 +142,7 @@ export const getUserTweetTimeline = async (
 ): Promise<UserTweetTimeline> => {
   let nextToken: string | undefined;
   let tweetDays: Set<string>;
+  let apiCallCount = 0;
   if (context.twitter.numberDaysTweeted === undefined || context.twitter.valid === false) {
     try {
       // return information about the (authenticated) requesting user
@@ -155,6 +156,7 @@ export const getUserTweetTimeline = async (
           pagination_token: nextToken,
           "tweet.fields": ["created_at"],
         });
+        apiCallCount++;
         for (const tweet of userTweetDaysResponse.data) {
           // Extract date from created_at
           const date = new Date(tweet.created_at).toISOString().split("T")[0];
@@ -174,7 +176,7 @@ export const getUserTweetTimeline = async (
         }
         // Respect rate limits by sleeping for a short time after each request
         await new Promise((resolve) => setTimeout(resolve, 1000));
-      } while (nextToken);
+      } while (nextToken && apiCallCount <= 14);
       context.twitter.id = userId;
       context.twitter.numberDaysTweeted = tweetDays.size;
       context.twitter.valid = false;
