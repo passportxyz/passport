@@ -33,7 +33,7 @@
     "@web3-onboard/injected-wallets": "^2.9.0",
     "@web3-onboard/ledger": "^2.4.6",
     "@web3-onboard/react": "^2.8.4",
-    "@web3-onboard/walletconnect": "^2.3.8",
+    "@web3-onboard/walletconnect": "2.4.0",
     "@web3-onboard/walletlink": "^2.0.4",
     "broadcast-channel": "^4.11.0",
     "did-session": "^1.0.0",
