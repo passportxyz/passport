@@ -1,6 +1,5 @@
 import React from "react";
 import { screen, fireEvent } from "@testing-library/react";
-// import { TwitterPlatform } from "../../../components/PlatformCards";
 
 import { UserContextState } from "../../../context/userContext";
 import { STAMP_PROVIDERS } from "../../../config/providers";
