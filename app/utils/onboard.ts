@@ -1,7 +1,7 @@
 import { init } from "@web3-onboard/react";
 import injectedModule from "@web3-onboard/injected-wallets";
 import ledgerModule from "@web3-onboard/ledger";
-import walletConnectModule from "@web3-onboard/walletconnect";
+import walletConnectModule, { WalletConnectOptions } from "@web3-onboard/walletconnect";
 
 // RPC urls
 const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL as string;
@@ -12,7 +12,11 @@ const injected = injectedModule();
 
 // web3Onboard modules
 
-const walletConnect = walletConnectModule();
+const walletConnectOptions: WalletConnectOptions = {
+  projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string,
+};
+
+const walletConnect = walletConnectModule(walletConnectOptions);
 // Include ledger capabilities
 const ledger = ledgerModule();
 
