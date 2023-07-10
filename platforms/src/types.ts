@@ -64,6 +64,7 @@ export type AppContext = {
   };
   userDid?: string;
   callbackUrl?: string;
+  selectedProviders: PROVIDER_ID[]; // can be used to translate to a scope when making an oauth request
   waitForRedirect(timeout?: number): Promise<ProviderPayload>;
 };
 

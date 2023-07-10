@@ -1,4 +1,5 @@
 import { AppContext, ProviderPayload } from "../types";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 export type PlatformOptions = {
   platformId: string;
@@ -27,7 +28,7 @@ export class Platform {
   isEVM?: boolean;
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-    const authUrl: string = await this.getOAuthUrl(appContext.state);
+    const authUrl: string = await this.getOAuthUrl(appContext.state, appContext.selectedProviders);
     const width = 600;
     const height = 800;
     const left = appContext.screen.width / 2 - width / 2;
@@ -49,7 +50,7 @@ export class Platform {
     });
   }
 
-  getOAuthUrl(state?: string): Promise<string> {
+  getOAuthUrl(state?: string, providers?: PROVIDER_ID[]): Promise<string> {
     throw new Error("Method not implemented.");
   }
 }

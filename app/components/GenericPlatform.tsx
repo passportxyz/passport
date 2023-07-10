@@ -184,6 +184,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
         screen,
         userDid,
         callbackUrl: window.location.origin,
+        selectedProviders,
         waitForRedirect,
       })) as {
         [k: string]: string;
