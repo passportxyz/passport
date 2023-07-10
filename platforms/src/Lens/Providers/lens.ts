@@ -2,72 +2,38 @@
 import type { Provider, ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
-// ----- Ethers library
-import { Contract, BigNumber } from "ethers";
-import { StaticJsonRpcProvider } from "@ethersproject/providers";
+// ----- Libs
+import axios from "axios";
 
-// Lens Hub Proxy Contract Address
-const LENS_HUB_PROXY_CONTRACT_ADDRESS = "0xDb46d1Dc155634FbC732f92E853b10B288AD5a1d";
+interface DefaultProfile {
+  id: string;
+  handle: string;
+}
 
-// Lens Hub Proxy ABI functions needed to get the handle
-const LENS_HUB_PROXY_ABI = [
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "wallet",
-        type: "address",
-      },
-    ],
-    name: "defaultProfile",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "profileId",
-        type: "uint256",
-      },
-    ],
-    name: "getHandle",
-    outputs: [
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "address", name: "owner", type: "address" }],
-    name: "balanceOf",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-];
+interface Data {
+  defaultProfile: DefaultProfile;
+}
 
-// If the user owns a lens handle this will return a number greater than 0
-async function getNumberOfHandles(userAddress: string): Promise<number> {
-  const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(
-    process.env.POLYGON_RPC_URL || "https://polygon-rpc.com"
-  );
+interface GraphQlResponse {
+  data: Data;
+}
 
-  const contract = new Contract(LENS_HUB_PROXY_CONTRACT_ADDRESS, LENS_HUB_PROXY_ABI, provider);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-  const numberOfHandles: BigNumber = await contract.balanceOf(userAddress);
-  return numberOfHandles?._isBigNumber ? parseInt(numberOfHandles?._hex, 16) : 0;
+const lensApiEndpoint = "https://api.lens.dev";
+
+async function getLensProfile(userAddress: string): Promise<string> {
+  const query = `
+    query DefaultProfile {
+      defaultProfile(request: { ethereumAddress: "${userAddress}"}) {
+        id
+        handle
+      }
+    }
+  `;
+  const result: { data: GraphQlResponse } = await axios.post(lensApiEndpoint, {
+    query,
+  });
+
+  return result?.data?.data?.defaultProfile?.handle;
 }
 
 // Export a Lens Profile Provider
@@ -88,22 +54,21 @@ export class LensProfileProvider implements Provider {
     // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
     let valid = false;
-    let numberOfHandles: number;
+    let handle: string;
     try {
-      numberOfHandles = await getNumberOfHandles(address);
+      handle = await getLensProfile(address);
     } catch (e) {
       return {
         valid: false,
         error: ["Lens provider get user handle error"],
       };
     }
-    valid = numberOfHandles >= 1;
+    valid = !!handle;
     return Promise.resolve({
       valid: valid,
       record: valid
         ? {
-            address: address,
-            numberOfHandles: numberOfHandles.toString(),
+            handle,
           }
         : {},
     });
