@@ -315,6 +315,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "FF_NEW_GITHUB_STAMPS",
             valueFrom: `${IAM_SERVER_SSM_ARN}:FF_NEW_GITHUB_STAMPS::`,
           },
+          {
+            name: "INCLUDE_TESTNETS",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:INCLUDE_TESTNETS::`,
+          },
         ],
       },
     },
