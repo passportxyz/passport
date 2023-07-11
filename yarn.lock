@@ -6517,6 +6517,25 @@
     svelte "^3.49.0"
     svelte-i18n "^3.3.13"
 
+"@web3-onboard/core@^2.20.4":
+  version "2.20.4"
+  resolved "https://registry.yarnpkg.com/@web3-onboard/core/-/core-2.20.4.tgz#ccc9ff509e56720e526b4ceae5459a1f2a435d22"
+  integrity sha512-IFI3DVq5QgFj5w1TyL61gHmeOlkX8AJiBAARO3cd4zW8I3h9K2+7HeE7LbsfwefZYLILzXCfF0gMB3qRN/GWYQ==
+  dependencies:
+    "@web3-onboard/common" "^2.3.3"
+    bignumber.js "^9.0.0"
+    bnc-sdk "^4.6.7"
+    bowser "^2.11.0"
+    ethers "5.5.3"
+    eventemitter3 "^4.0.7"
+    joi "17.9.1"
+    lodash.merge "^4.6.2"
+    lodash.partition "^4.6.0"
+    nanoid "^4.0.0"
+    rxjs "^7.5.5"
+    svelte "^3.49.0"
+    svelte-i18n "^3.3.13"
+
 "@web3-onboard/injected-wallets@^2.9.0":
   version "2.9.0"
   resolved "https://registry.yarnpkg.com/@web3-onboard/injected-wallets/-/injected-wallets-2.9.0.tgz#e074dbc48516edf82f235c09fa936b18be19e533"
