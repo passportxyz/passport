@@ -2,7 +2,6 @@ import { init } from "@web3-onboard/react";
 import injectedModule from "@web3-onboard/injected-wallets";
 import ledgerModule from "@web3-onboard/ledger";
 import walletConnectModule, { WalletConnectOptions } from "@web3-onboard/walletconnect";
-import { InitOptions } from "@web3-onboard/core";
 
 // RPC urls
 const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL as string;
@@ -65,7 +64,7 @@ if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
     rpcUrl: "https://rpc.ftm.tools/",
   });
 }
-console.log({ onBoardExploreUrl });
+
 // Exports onboard-core instance (https://github.com/blocknative/web3-onboard)
 export const initWeb3Onboard = init({
   wallets: [injected, ledger, walletConnect],

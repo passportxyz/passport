@@ -9,13 +9,14 @@ const shouldMinimize = () => {
 
 const ManageAccountCenter = ({ children }: { children: React.ReactNode }) => {
   const updateAccountCenter = useAccountCenter();
+  const position = "topRight";
 
   useEffect(() => {
     const onEvent = () => {
       if (shouldMinimize()) {
-        updateAccountCenter({ minimal: true });
+        updateAccountCenter({ minimal: true, position });
       } else {
-        updateAccountCenter({ minimal: false });
+        updateAccountCenter({ minimal: false, position });
       }
     };
 
