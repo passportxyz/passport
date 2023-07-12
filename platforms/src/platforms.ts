@@ -25,6 +25,7 @@ import * as PHI from "./PHI";
 import * as Holonym from "./Holonym";
 import * as Idena from "./Idena";
 import * as Aspecta from "./Aspecta";
+import * as Civic from "./Civic";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
 type PlatformConfig = {
@@ -46,7 +47,6 @@ const platforms: Record<string, PlatformConfig> = {
   Facebook,
   Linkedin,
   Ens,
-  POAP,
   Brightid,
   Poh,
   ETH,
@@ -63,6 +63,11 @@ const platforms: Record<string, PlatformConfig> = {
   Holonym,
   Idena,
   Aspecta,
+  Civic,
 };
+
+if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {
+  platforms.POAP = POAP;
+}
 
 export default platforms;

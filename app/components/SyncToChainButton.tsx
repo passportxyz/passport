@@ -111,7 +111,7 @@ const SyncToChainButton = () => {
 
         const { data }: { data: EasPayload } = await axios({
           method: "post",
-          url: `${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas`,
+          url: `${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas/passport`,
           data: payload,
           headers: {
             "Content-Type": "application/json",

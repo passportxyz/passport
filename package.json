@@ -39,6 +39,8 @@
     "build:iam": "yarn workspace @gitcoin/passport-iam build",
     "build:app": "yarn workspace @gitcoin/passport-app build",
     "build:platforms": "yarn workspace @gitcoin/passport-platforms build",
+    "debug": "concurrently --kill-others \"yarn debug:iam\" \"yarn start:app\" \"yarn start:signer\"",
+    "debug:iam": "yarn workspace @gitcoin/passport-iam debug",
     "start": "concurrently --kill-others \"yarn start:iam\" \"yarn start:app\" \"yarn start:signer\"",
     "start:iam": "yarn workspace @gitcoin/passport-iam start",
     "start:signer": "yarn workspace @gitcoin/passport-signer start",

@@ -45,8 +45,8 @@ const {
   Holonym,
   Idena,
   Aspecta,
+  Civic,
 } = stampPlatforms;
-
 import { PlatformProps } from "../components/GenericPlatform";
 
 // -- Trusted IAM servers DID
@@ -142,10 +142,12 @@ platforms.set("ETH", {
   platFormGroupSpec: ETH.ProviderConfig,
 });
 
-platforms.set("POAP", {
-  platform: new POAP.POAPPlatform(),
-  platFormGroupSpec: POAP.ProviderConfig,
-});
+if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {
+  platforms.set("POAP", {
+    platform: new POAP.POAPPlatform(),
+    platFormGroupSpec: POAP.ProviderConfig,
+  });
+}
 
 platforms.set("Discord", {
   platform: new Discord.DiscordPlatform(),
@@ -232,6 +234,13 @@ if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP === "on") {
     platFormGroupSpec: Idena.ProviderConfig,
   });
 }
+
+platforms.set("Civic", {
+  platform: new Civic.CivicPlatform({
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_CIVIC_CALLBACK,
+  }),
+  platFormGroupSpec: Civic.ProviderConfig,
+});
 
 export enum IsLoadingPassportState {
   Idle,

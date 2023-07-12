@@ -306,6 +306,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             valueFrom: `${IAM_SERVER_SSM_ARN}:EAS_GITCOIN_SCORE_SCHEMA::`,
           },
           {
+            name: "EAS_GITCOIN_PASSPORT_SCHEMA",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:EAS_GITCOIN_PASSPORT_SCHEMA::`,
+          },
+          {
             name: "ASPECTA_CLIENT_ID",
             valueFrom: `${IAM_SERVER_SSM_ARN}:ASPECTA_CLIENT_ID::`,
           },
@@ -316,6 +320,14 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
           {
             name: "ASPECTA_CALLBACK",
             valueFrom: `${IAM_SERVER_SSM_ARN}:ASPECTA_CALLBACK::`,
+          },
+          {
+            name: "FF_NEW_GITHUB_STAMPS",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:FF_NEW_GITHUB_STAMPS::`,
+          },
+          {
+            name: "INCLUDE_TESTNETS",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:INCLUDE_TESTNETS::`,
           },
         ],
       },
