@@ -316,6 +316,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "INCLUDE_TESTNETS",
             valueFrom: `${IAM_SERVER_SSM_ARN}:INCLUDE_TESTNETS::`,
           },
+          {
+            name: "ZKSYNC_ERA_MAINNET_ENDPOINT",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:ZKSYNC_ERA_MAINNET_ENDPOINT::`,
+          },
         ],
       },
     },
