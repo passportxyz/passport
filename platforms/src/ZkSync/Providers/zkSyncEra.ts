@@ -43,7 +43,9 @@ export class ZkSyncEraProvider implements Provider {
     const address = (await getAddress(payload)).toLowerCase();
 
     try {
-      const requestResponse = await axios.get(`${zkSyncEraApiEndpoint}${address}&limit=100&direction=older`);
+      const requestResponse = await axios.get(
+        `${zkSyncEraApiEndpoint}/transactions?address=${address}&limit=100&direction=older`
+      );
       if (requestResponse.status == 200) {
         const zkSyncResponse = requestResponse.data as ZkSyncEraResponse;
 
