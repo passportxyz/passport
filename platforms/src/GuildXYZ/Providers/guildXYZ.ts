@@ -9,7 +9,7 @@ import { getAddress } from "../../utils/signer";
 
 type GuildMembership = {
   guildId: number;
-  roleids: number[];
+  roleIds: number[];
   isAdmin: boolean;
   isOwner: boolean;
 };
@@ -54,7 +54,7 @@ export async function checkGuildStats(memberships: GuildMembership[]): Promise<G
   const myGuildRoles = new Map<number, number>(); // key: guildId, value: roleIdsLength
   const adminOwnerGuilds = new Map<number, number>();
   memberships.forEach((membership) => {
-    myGuildRoles.set(membership.guildId, membership.roleids.length);
+    myGuildRoles.set(membership.guildId, membership.roleIds.length);
     adminOwnerGuilds.set(membership.guildId, membership.isAdmin || membership.isOwner ? 1 : 0);
   });
 
