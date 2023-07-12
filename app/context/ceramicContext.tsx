@@ -35,7 +35,6 @@ const {
   ZkSync,
   Discord,
   Linkedin,
-  GTC,
   GtcStaking,
   Google,
   Brightid,
@@ -159,11 +158,6 @@ platforms.set("Linkedin", {
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
   }),
   platFormGroupSpec: Linkedin.ProviderConfig,
-});
-
-platforms.set("GTC", {
-  platform: new GTC.GTCPlatform(),
-  platFormGroupSpec: GTC.ProviderConfig,
 });
 
 platforms.set("GtcStaking", {
