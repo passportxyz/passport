@@ -4,7 +4,7 @@ import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
-import { zkSyncEraApiEndpoint, ZkSyncEraProvider } from "../Providers/zkSyncEra";
+import { ZkSyncEraProvider } from "../Providers/zkSyncEra";
 
 jest.mock("axios");
 
@@ -12,78 +12,87 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
 const MOCK_ADDRESS_LOWER = MOCK_ADDRESS.toLocaleLowerCase();
 const BAD_ADDRESS = "0xsieh2863426gsaa";
+process.env.ZKSYNC_ERA_MAINNET_ENDPOINT = "https://zksync-era-api-endpoint.io";
 
-const validResponseList = [
+const validResponseItems = [
   {
     transactionHash: "0xsome_hash",
-    initiatorAddress: MOCK_ADDRESS_LOWER,
+    from: MOCK_ADDRESS_LOWER,
     status: "included",
   },
   {
     transactionHash: "0xsome_hash",
-    initiatorAddress: MOCK_ADDRESS_LOWER,
+    from: MOCK_ADDRESS_LOWER,
     status: "included",
   },
   {
     transactionHash: "0xsome_hash",
-    initiatorAddress: MOCK_ADDRESS_LOWER,
+    from: MOCK_ADDRESS_LOWER,
     status: "included",
   },
   {
     transactionHash: "0xsome_hash",
-    initiatorAddress: MOCK_ADDRESS_LOWER,
+    from: MOCK_ADDRESS_LOWER,
     status: "verified",
   },
 ];
 
-const inValidResponseListAddressNotInFromField = [
+const inValidResponseItemsAddressNotInFromField = [
   {
     transactionHash: "0xsome_hash",
-    initiatorAddress: BAD_ADDRESS,
+    from: BAD_ADDRESS,
     status: "included",
   },
   {
     transactionHash: "0xsome_hash",
-    initiatorAddress: BAD_ADDRESS,
+    from: BAD_ADDRESS,
     status: "included",
   },
   {
     transactionHash: "0xsome_hash",
-    initiatorAddress: BAD_ADDRESS,
+    from: BAD_ADDRESS,
     status: "included",
   },
   {
     transactionHash: "0xsome_hash",
-    initiatorAddress: BAD_ADDRESS,
+    from: BAD_ADDRESS,
     status: "verified",
   },
 ];
 
-const inValidResponseListNoFinalizedTransaction = [
+const inValidResponseItemsNoFinalizedTransaction = [
   {
     transactionHash: "0xsome_hash",
-    initiatorAddress: MOCK_ADDRESS_LOWER,
+    from: MOCK_ADDRESS_LOWER,
     status: "included",
   },
   {
     transactionHash: "0xsome_hash",
-    initiatorAddress: MOCK_ADDRESS_LOWER,
+    from: MOCK_ADDRESS_LOWER,
     status: "included",
   },
   {
     transactionHash: "0xsome_hash",
-    initiatorAddress: MOCK_ADDRESS_LOWER,
+    from: MOCK_ADDRESS_LOWER,
     status: "included",
   },
   {
     transactionHash: "0xsome_hash",
-    initiatorAddress: MOCK_ADDRESS_LOWER,
+    from: MOCK_ADDRESS_LOWER,
     status: "included",
   },
 ];
+
+const env = process.env;
 
 beforeEach(() => {
+  jest.resetModules();
+  process.env = { ...env };
   jest.clearAllMocks();
+});
+
+afterEach(() => {
+  process.env = env;
 });
 
 describe("Verification succeeds", function () {
@@ -91,7 +100,7 @@ describe("Verification succeeds", function () {
     (axios.get as jest.Mock).mockImplementation(() => {
       return Promise.resolve({
         status: 200,
-        data: { list: validResponseList },
+        data: { items: validResponseItems },
       });
     });
 
@@ -102,13 +111,9 @@ describe("Verification succeeds", function () {
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncEraApiEndpoint}transactions`, {
-      params: {
-        limit: 100,
-        direction: "older",
-        accountAddress: MOCK_ADDRESS_LOWER,
-      },
-    });
+    expect(mockedAxios.get).toBeCalledWith(
+      `${process.env.ZKSYNC_ERA_MAINNET_ENDPOINT}/transactions?address=${MOCK_ADDRESS_LOWER}&limit=100&direction=older`
+    );
 
     expect(zkSyncEraPayload).toEqual({
       valid: true,
@@ -120,11 +125,11 @@ describe("Verification succeeds", function () {
 });
 
 describe("Verification fails", function () {
-  it("when the response list does not contain any transaction initiated by the address we verify (address is not in from field)", async () => {
+  it("when the response items list does not contain any transaction initiated by the address we verify (address is not in from field)", async () => {
     (axios.get as jest.Mock).mockImplementation(() => {
       return Promise.resolve({
         status: 200,
-        data: { list: inValidResponseListAddressNotInFromField },
+        data: { items: inValidResponseItemsAddressNotInFromField },
       });
     });
 
@@ -135,13 +140,9 @@ describe("Verification fails", function () {
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncEraApiEndpoint}transactions`, {
-      params: {
-        limit: 100,
-        direction: "older",
-        accountAddress: MOCK_ADDRESS_LOWER,
-      },
-    });
+    expect(mockedAxios.get).toBeCalledWith(
+      `${process.env.ZKSYNC_ERA_MAINNET_ENDPOINT}/transactions?address=${MOCK_ADDRESS_LOWER}&limit=100&direction=older`
+    );
 
     expect(zkSyncEraPayload).toEqual({
       valid: false,
@@ -153,7 +154,7 @@ describe("Verification fails", function () {
     (axios.get as jest.Mock).mockImplementation(() => {
       return Promise.resolve({
         status: 200,
-        data: { list: inValidResponseListNoFinalizedTransaction },
+        data: { items: inValidResponseItemsNoFinalizedTransaction },
       });
     });
 
@@ -164,13 +165,9 @@ describe("Verification fails", function () {
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncEraApiEndpoint}transactions`, {
-      params: {
-        limit: 100,
-        direction: "older",
-        accountAddress: MOCK_ADDRESS_LOWER,
-      },
-    });
+    expect(mockedAxios.get).toBeCalledWith(
+      `${process.env.ZKSYNC_ERA_MAINNET_ENDPOINT}/transactions?address=${MOCK_ADDRESS_LOWER}&limit=100&direction=older`
+    );
 
     expect(zkSyncEraPayload).toEqual({
       valid: false,
@@ -183,7 +180,7 @@ describe("Verification fails", function () {
       return Promise.resolve({
         status: 400,
         statusText: "Bad Request",
-        data: { list: validResponseList },
+        data: { items: validResponseItems },
       });
     });
 
@@ -194,13 +191,9 @@ describe("Verification fails", function () {
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncEraApiEndpoint}transactions`, {
-      params: {
-        limit: 100,
-        direction: "older",
-        accountAddress: MOCK_ADDRESS_LOWER,
-      },
-    });
+    expect(mockedAxios.get).toBeCalledWith(
+      `${process.env.ZKSYNC_ERA_MAINNET_ENDPOINT}/transactions?address=${MOCK_ADDRESS_LOWER}&limit=100&direction=older`
+    );
 
     expect(zkSyncEraPayload).toEqual({
       valid: false,
@@ -220,13 +213,9 @@ describe("Verification fails", function () {
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncEraApiEndpoint}transactions`, {
-      params: {
-        limit: 100,
-        direction: "older",
-        accountAddress: MOCK_ADDRESS_LOWER,
-      },
-    });
+    expect(mockedAxios.get).toBeCalledWith(
+      `${process.env.ZKSYNC_ERA_MAINNET_ENDPOINT}/transactions?address=${MOCK_ADDRESS_LOWER}&limit=100&direction=older`
+    );
 
     expect(zkSyncEraPayload).toEqual({
       valid: false,
