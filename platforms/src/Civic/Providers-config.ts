@@ -8,7 +8,6 @@ export const PlatformDetails: PlatformSpec = {
   name: "Civic",
   description: "Civic Profile Verification",
   connectMessage: "Verify Account",
-  isEVM: true,
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
