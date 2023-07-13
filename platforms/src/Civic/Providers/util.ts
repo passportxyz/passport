@@ -22,6 +22,8 @@ const passLookupResponseToPass =
     identifier: pass.identifier,
   });
 
+const passTypesToNames = (passTypes: CivicPassType[]): string[] => passTypes.map((id) => CivicPassType[id]);
+
 /**
  * Look up all passes for a user's address.
  * The endpoint supports DID-lookup as well as looking up passes by an individual wallet.
@@ -84,9 +86,16 @@ const passLookupResponseToPass =
  * }
  * @param userAddress
  * @param includeTestnets
+ * @param passTypes
  */
-export const findAllPasses = async (userAddress: string, includeTestnets = false): Promise<Pass[]> => {
-  const queryString = `${CIVIC_URL}/${userAddress}?includeTestnets=${includeTestnets.toString()}`;
+export const findAllPasses = async (
+  userAddress: string,
+  includeTestnets = false,
+  passTypes?: CivicPassType[]
+): Promise<Pass[]> => {
+  const passTypesString = passTypes ? `&passTypes=${passTypesToNames(passTypes).join(",")}` : "";
+  const queryString = `${CIVIC_URL}/${userAddress}?includeTestnets=${includeTestnets.toString()}${passTypesString}`;
+  console.log(queryString);
   const response = await axios.get<CivicPassLookupResponse>(queryString).then((response) => response.data);
   return Object.entries(response).flatMap(([, passesForAddress]) =>
     Object.entries(passesForAddress.passes).flatMap(([passType, passes]) =>

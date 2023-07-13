@@ -10,13 +10,25 @@ describe("Civic Pass Provider Integration Test", function () {
   // Warning - this tests the real world chain status and the real-world Civic endpoint
   it("should return valid true if a pass is found", async () => {
     const civic = new CivicPassProvider({
-      type: "uniqueness",
+      type: "captcha",
       passType: CivicPassType.CAPTCHA,
     });
     const verifiedPayload = await civic.verify(requestPayload);
 
     expect(verifiedPayload).toMatchObject({
       valid: true,
+    });
+  });
+
+  it("should return valid false if a pass is not found", async () => {
+    const civic = new CivicPassProvider({
+      type: "idv",
+      passType: CivicPassType.IDV,
+    });
+    const verifiedPayload = await civic.verify(requestPayload);
+
+    expect(verifiedPayload).toMatchObject({
+      valid: false,
     });
   });
 });
