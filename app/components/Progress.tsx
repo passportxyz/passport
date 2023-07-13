@@ -24,7 +24,7 @@ type StepComponentProps = {
 
 export const completedIcon = (src: string) => (
   <span className="step-icon step-icon-completed flex h-9 items-center">
-    <span className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-teal-600">
+    <span className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full">
       <img alt="completed icon" className="sticky top-0 h-6" src={src} />
     </span>
   </span>

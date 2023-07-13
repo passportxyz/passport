@@ -18,11 +18,11 @@ describe("ExpiredStampModal", () => {
   it("should render a list of platforms", () => {
     renderWithContext(
       {} as UserContextState,
-      { ...mockCeramicContext, expiredProviders: ["Linkedin", "Ens", "POAP", "Lens"] },
+      { ...mockCeramicContext, expiredProviders: ["Linkedin", "Ens", "Lens"] },
       <ExpiredStampModal isOpen={true} onClose={() => {}} />
     );
 
-    const exptedProviders = ["Linkedin", "ENS", "POAP", "Lens"];
+    const exptedProviders = ["Linkedin", "ENS", "Lens"];
     exptedProviders.forEach((platform: string) => {
       expect(screen.getByText(platform)).toBeInTheDocument();
     });
@@ -36,7 +36,9 @@ describe("ExpiredStampModal", () => {
           "Github",
           "FiveOrMoreGithubRepos",
           "ForkedGithubRepoProvider",
+          "StarredGithubRepoProvider",
           "TenOrMoreGithubFollowers",
+          "FiftyOrMoreGithubFollowers",
           "FirstEthTxnProvider",
           "EthGTEOneTxnProvider",
         ],

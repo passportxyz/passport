@@ -9,15 +9,15 @@ import axios from "axios";
 import { getAddress } from "../../utils/signer";
 
 // This is used in the Era Explorer
-export const zkSyncEraApiEndpoint = "https://zksync2-mainnet-explorer.zksync.io/";
+export const zkSyncEraApiEndpoint = process.env.ZKSYNC_ERA_MAINNET_ENDPOINT || "";
 
 type ZKSyncEraTransaction = {
-  initiatorAddress: string;
+  from: string;
   status: string;
 };
 
 type ZkSyncEraResponse = {
-  list: ZKSyncEraTransaction[];
+  items: ZKSyncEraTransaction[];
   total: number;
 };
 
@@ -43,22 +43,17 @@ export class ZkSyncEraProvider implements Provider {
     const address = (await getAddress(payload)).toLowerCase();
 
     try {
-      const requestResponse = await axios.get(`${zkSyncEraApiEndpoint}transactions`, {
-        params: {
-          limit: 100,
-          direction: "older",
-          accountAddress: address,
-        },
-      });
-
+      const requestResponse = await axios.get(
+        `${zkSyncEraApiEndpoint}/transactions?address=${address}&limit=100&direction=older`
+      );
       if (requestResponse.status == 200) {
         const zkSyncResponse = requestResponse.data as ZkSyncEraResponse;
 
         // We consider the verification valid if this account has at least one verified
         // transaction initiated by this account
-        for (let i = 0; i < zkSyncResponse.list.length; i++) {
-          const t = zkSyncResponse.list[i];
-          if (t.status === "verified" && t.initiatorAddress === address) {
+        for (let i = 0; i < zkSyncResponse.items.length; i++) {
+          const tx = zkSyncResponse.items[i];
+          if (tx.status === "verified" && tx.from.toLowerCase() === address) {
             valid = true;
             break;
           }

@@ -8,6 +8,9 @@ import { completedIcon } from "./Progress";
 import { Button } from "./Button";
 import { LoadButton } from "./LoadButton";
 
+// --- Style Components
+import { DoneToastContent } from "./DoneToastContent";
+
 export type ExpiredStampModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -24,16 +27,15 @@ export const ExpiredStampModal = ({ isOpen, onClose }: ExpiredStampModalProps) =
 
   const successToast = () => {
     toast({
-      duration: 5000,
+      duration: 9000,
       isClosable: true,
       render: (result: any) => (
-        <div className="flex justify-between rounded-md bg-blue-darkblue p-4 text-white">
-          {completedIcon("./assets/purple-check-icon.svg")}
-          <p className="py-1 px-3">Your Passport has been reset.</p>
-          <button className="sticky top-0" onClick={result.onClose}>
-            <img alt="close button" className="rounded-lg hover:bg-gray-500" src="./assets/x-icon.svg" />
-          </button>
-        </div>
+        <DoneToastContent
+          title="Success"
+          message="Your expired stamps have been removed."
+          icon="./assets/check-icon2.svg"
+          result={result}
+        />
       ),
     });
   };

@@ -35,7 +35,6 @@ const {
   ZkSync,
   Discord,
   Linkedin,
-  GTC,
   GtcStaking,
   Google,
   Brightid,
@@ -141,10 +140,12 @@ platforms.set("ETH", {
   platFormGroupSpec: ETH.ProviderConfig,
 });
 
-platforms.set("POAP", {
-  platform: new POAP.POAPPlatform(),
-  platFormGroupSpec: POAP.ProviderConfig,
-});
+if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {
+  platforms.set("POAP", {
+    platform: new POAP.POAPPlatform(),
+    platFormGroupSpec: POAP.ProviderConfig,
+  });
+}
 
 platforms.set("Discord", {
   platform: new Discord.DiscordPlatform(),
@@ -157,11 +158,6 @@ platforms.set("Linkedin", {
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
   }),
   platFormGroupSpec: Linkedin.ProviderConfig,
-});
-
-platforms.set("GTC", {
-  platform: new GTC.GTCPlatform(),
-  platFormGroupSpec: GTC.ProviderConfig,
 });
 
 platforms.set("GtcStaking", {

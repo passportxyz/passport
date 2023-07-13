@@ -1,7 +1,7 @@
 // ----- Types
 import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import type { Provider, ProviderOptions } from "../../types";
-import { ProviderError } from "../../utils/errors";
+import type { Provider, ProviderOptions } from "../../../types";
+import { ProviderError } from "../../../utils/errors";
 import axios from "axios";
 
 export type GithubTokenResponse = {

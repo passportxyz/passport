@@ -39,7 +39,12 @@ declare global {
 
 function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
-    TagManager.initialize({ gtmId: `${GTM_ID}` });
+    TagManager.initialize({
+      gtmId: `${GTM_ID}`,
+      dataLayerName: "PageDataLayer",
+      auth: "x5QDV_TH-F5l1dOIBFeviA",
+      preview: "env-34",
+    });
   }, []);
 
   useEffect(() => {

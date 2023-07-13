@@ -15,9 +15,19 @@ import BodyWrapper from "../components/BodyWrapper";
 import PageWidthGrid from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import Tooltip from "../components/Tooltip";
+import { DoneToastContent } from "../components/DoneToastContent";
 
 // --Chakra UI Elements
-import { Modal, ModalBody, ModalContent, ModalFooter, ModalOverlay, Spinner, useDisclosure } from "@chakra-ui/react";
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalOverlay,
+  Spinner,
+  useDisclosure,
+  useToast,
+} from "@chakra-ui/react";
 
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
@@ -33,8 +43,14 @@ import { getFilterName } from "../config/filters";
 import { hardhatChainId, sepoliaChainId } from "../utils/onboard";
 import { Button } from "../components/Button";
 
+// --- GTM Module
+import TagManager from "react-gtm-module";
+
 const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
 const isOnChainSyncEnabled = process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on";
+
+const success = "../../assets/check-icon2.svg";
+const fail = "../assets/verification-failed-bright.svg";
 
 export default function Dashboard() {
   const { passport, isLoadingPassport, passportHasCacaoError, cancelCeramicConnection, expiredProviders } =
@@ -45,6 +61,35 @@ export default function Dashboard() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const navigate = useNavigate();
+
+  // ------------------- BEGIN Data items for Google Tag Manager -------------------
+  const startTime = Date.now();
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const endTime = Date.now();
+      const durationInSeconds = (endTime - startTime) / 1000;
+
+      // Track the timing event
+      TagManager.dataLayer({
+        dataLayer: {
+          page: "/dashboard",
+          event: "passport_interaction_duration",
+          passportInteractionDurationCategory: "Passport Interaction",
+          passportInteractionDurationVar: "Passport Interaction",
+          passportInteractionDurationValue: durationInSeconds,
+        },
+        dataLayerName: "PageDataLayer",
+      });
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+  // ------------------- END Data items for Google Tag Manager -------------------
 
   const [viewerConnection, ceramicConnect] = useViewerConnection();
   const { isOpen: retryModalIsOpen, onOpen: onRetryModalOpen, onClose: onRetryModalClose } = useDisclosure();
@@ -58,6 +103,8 @@ export default function Dashboard() {
   const { filter } = router.query;
   const filterName = filter?.length && typeof filter === "string" ? getFilterName(filter) : false;
 
+  const toast = useToast();
+
   // Route user to home when wallet is disconnected
   useEffect(() => {
     if (!wallet) {
@@ -68,6 +115,34 @@ export default function Dashboard() {
       }
     }
   }, [wallet, dbAccessToken, dbAccessTokenStatus]);
+
+  //show toasts from 1click flow
+  useEffect(() => {
+    const oneClickRefresh = localStorage.getItem("successfulRefresh");
+    if (oneClickRefresh && oneClickRefresh === "true") {
+      toast({
+        duration: 9000,
+        isClosable: true,
+        render: (result: any) => (
+          <DoneToastContent title="Success" message="Your stamps are verified!" icon={success} result={result} />
+        ),
+      });
+    } else if (oneClickRefresh && oneClickRefresh === "false") {
+      toast({
+        duration: 9000,
+        isClosable: true,
+        render: (result: any) => (
+          <DoneToastContent
+            title="Failure"
+            message="Stamps weren't verifed. Please try again."
+            icon={fail}
+            result={result}
+          />
+        ),
+      });
+    }
+    localStorage.removeItem("successfulRefresh");
+  }, []);
 
   // Allow user to retry Ceramic connection if failed
   const retryConnection = () => {

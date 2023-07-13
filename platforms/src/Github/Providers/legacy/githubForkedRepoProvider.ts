@@ -1,6 +1,6 @@
 // ----- Types
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import type { Provider, ProviderOptions } from "../../types";
+import type { Provider, ProviderOptions } from "../../../types";
 import { getGithubUserData, getGithubUserRepos, GithubContext, GithubUserData } from "./github";
 
 // Export a Github Provider to carry out OAuth and return a record object

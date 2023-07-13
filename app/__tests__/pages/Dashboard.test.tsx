@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, render } from "@testing-library/react";
 import Dashboard from "../../pages/Dashboard";
 import { UserContextState } from "../../context/userContext";
 import { mockAddress } from "../../__test-fixtures__/onboardHookValues";
@@ -13,7 +13,7 @@ import {
   renderWithContext,
 } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState, IsLoadingPassportState } from "../../context/ceramicContext";
-// import {RefreshStampModal} from "../../components/RefreshStampModal";
+import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
 
 jest.mock("../../utils/onboard.ts");
 
@@ -149,7 +149,30 @@ describe("when viewer connection status is connecting", () => {
   });
 });
 
-describe.only("when viewer connection status is connected", () => {
+describe.only("dashboard notifications", () => {
+  // using https://www.npmjs.com/package/jest-localstorage-mock to mock localStorage
+  beforeEach(async () => {
+    await closeAllToasts();
+    localStorage.removeItem("successfulRefresh");
+  });
+  it("should show success toast when stamps are verified", async () => {
+    localStorage.setItem("successfulRefresh", "true");
+    render(
+      <Router>
+        <Dashboard />
+      </Router>
+    );
+    expect(screen.getByText("Your stamps are verified!")).toBeInTheDocument();
+  });
+  it("should show error toast when stamps aren't verified", async () => {
+    localStorage.setItem("successfulRefresh", "false");
+    render(
+      <Router>
+        <Dashboard />
+      </Router>
+    );
+    expect(screen.getByText("Stamps weren't verifed. Please try again.")).toBeInTheDocument();
+  });
   it("should show a loading stamps alert", () => {
     (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }]);
     renderWithContext(

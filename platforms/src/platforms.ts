@@ -14,7 +14,6 @@ import * as ETH from "./ETH";
 import * as ZkSync from "./ZkSync";
 import * as Discord from "./Discord";
 import * as Linkedin from "./Linkedin";
-import * as GTC from "./GTC";
 import * as GtcStaking from "./GtcStaking";
 import * as Google from "./Google";
 import * as Brightid from "./Brightid";
@@ -36,7 +35,6 @@ type PlatformConfig = {
 
 // Order of this array determines order in the Passport UI
 const platforms: Record<string, PlatformConfig> = {
-  GTC,
   GtcStaking,
   Gitcoin,
   Twitter,
@@ -46,7 +44,6 @@ const platforms: Record<string, PlatformConfig> = {
   Facebook,
   Linkedin,
   Ens,
-  POAP,
   Brightid,
   Poh,
   ETH,
@@ -64,5 +61,9 @@ const platforms: Record<string, PlatformConfig> = {
   Idena,
   Civic,
 };
+
+if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {
+  platforms.POAP = POAP;
+}
 
 export default platforms;

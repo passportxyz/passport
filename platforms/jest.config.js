@@ -4,5 +4,5 @@ module.exports = {
     "^.+\\.tsx?$": "ts-jest",
   },
   modulePathIgnorePatterns: ["<rootDir>/dist/"],
-  setupFiles: ["dotenv/config"],
+  setupFiles: ["dotenv/config", "../platforms/testSetup.js"],
 };

@@ -15,10 +15,16 @@ import { UserContext } from "../context/userContext";
 import { VerifiableCredential, EasPayload } from "@gitcoin/passport-types";
 import { OnChainContext } from "../context/onChainContext";
 
+// --- Style Components
+import { DoneToastContent } from "./DoneToastContent";
+
 export type ErrorDetailsProps = {
   msg: string;
   ethersError: EthersError;
 };
+
+const fail = "../assets/verification-failed-bright.svg";
+const success = "../../assets/check-icon2.svg";
 
 const ErrorDetails = ({ msg, ethersError }: ErrorDetailsProps): JSX.Element => {
   const [displayDetails, setDisplayDetails] = useState<string>("none");
@@ -50,10 +56,12 @@ const ErrorDetails = ({ msg, ethersError }: ErrorDetailsProps): JSX.Element => {
         </a>
       </b>{" "}
       in case you contact our support.{" "}
-      <a href="#" onClick={toggleDetails}>
-        {textLabelDisplay}
-      </a>
-      .<p style={{ display: displayDetails }}>{ethersError.message}</p>
+      <b>
+        <a href="#" onClick={toggleDetails}>
+          {textLabelDisplay}
+        </a>
+      </b>
+      <div style={{ display: displayDetails, overflowY: "scroll", maxHeight: "200px" }}>{ethersError.message}</div>
     </div>
   );
 };
@@ -80,11 +88,16 @@ const SyncToChainButton = () => {
         if (credentials.length === 0) {
           // Nothing to be broough on-chain
           toast({
-            title: "Error",
-            description: "You do not have any stamps to bring on-chain.",
-            status: "warning",
             duration: 9000,
             isClosable: true,
+            render: (result: any) => (
+              <DoneToastContent
+                title="Error"
+                message="You do not have any stamps to bring on-chain."
+                icon={fail}
+                result={result}
+              />
+            ),
           });
           return;
         }
@@ -98,7 +111,7 @@ const SyncToChainButton = () => {
 
         const { data }: { data: EasPayload } = await axios({
           method: "post",
-          url: `${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas`,
+          url: `${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas/passport`,
           data: payload,
           headers: {
             "Content-Type": "application/json",
@@ -127,29 +140,35 @@ const SyncToChainButton = () => {
             value: data.passport.fee,
           });
           toast({
-            title: "Submitted",
-            description: "Passport submitted to chain",
-            status: "info",
-            duration: 5000,
+            duration: 9000,
             isClosable: true,
+            render: (result: any) => (
+              <DoneToastContent
+                title="Submitted"
+                message="Passport submitted to chain."
+                icon={success}
+                result={result}
+              />
+            ),
           });
           await transaction.wait();
           const easScanURL = `${process.env.NEXT_PUBLIC_EAS_EXPLORER}/address/${address}`;
           await refreshOnChainProviders();
+          const successSubmit = (
+            <p>
+              Passport successfully synced to chain.{" "}
+              <a href={`${easScanURL}`} className="underline" target="_blank" rel="noopener noreferrer">
+                Check your stamps
+              </a>
+            </p>
+          );
 
           toast({
-            title: "Success",
-            description: (
-              <p>
-                Passport successfully synced to chain.{" "}
-                <a href={`${easScanURL}`} className="underline" target="_blank" rel="noopener noreferrer">
-                  Check your stamps
-                </a>
-              </p>
-            ),
-            status: "success",
             duration: 9000,
             isClosable: true,
+            render: (result: any) => (
+              <DoneToastContent title="Success" body={successSubmit} icon={success} result={result} />
+            ),
           });
         }
       } catch (e) {
@@ -216,11 +235,11 @@ const SyncToChainButton = () => {
         }
 
         toast({
-          title: "Error",
-          description: toastDescription,
-          status: "error",
           duration: 9000,
           isClosable: true,
+          render: (result: any) => (
+            <DoneToastContent title="Error" body={toastDescription} icon={fail} result={result} />
+          ),
         });
       } finally {
         setSyncingToChain(false);

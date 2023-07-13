@@ -19,19 +19,19 @@ const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
 const mockGuildMemberships = [
   {
     guildId: 1,
-    roleids: [3, 4, 5, 6],
+    roleIds: [3, 4, 5, 6],
     isAdmin: false,
     isOwner: false,
   },
   {
     guildId: 2,
-    roleids: [3, 4, 5],
+    roleIds: [3, 4, 5],
     isAdmin: true,
     isOwner: false,
   },
   {
     guildId: 3,
-    roleids: [3, 4, 5],
+    roleIds: [3, 4, 5],
     isAdmin: false,
     isOwner: true,
   },
@@ -102,19 +102,19 @@ describe("Guild Providers", () => {
           ...mockGuildMemberships,
           {
             guildId: 4,
-            roleids: [6, 7, 8],
+            roleIds: [6, 7, 8],
             isAdmin: false,
             isOwner: true,
           },
           {
             guildId: 5,
-            roleids: [6, 7],
+            roleIds: [6, 7],
             isAdmin: false,
             isOwner: true,
           },
           {
             guildId: 6,
-            roleids: [6],
+            roleIds: [6],
             isAdmin: false,
             isOwner: true,
           },
@@ -199,7 +199,7 @@ describe("Guild Providers", () => {
         data: [
           {
             guildId: 1,
-            roleids: [1, 2],
+            roleIds: [1, 2],
             isAdmin: false,
             isOwner: false,
           },
@@ -273,19 +273,19 @@ describe("checkGuildStats()", () => {
     const memberships = [
       {
         guildId: 1,
-        roleids: [3, 4, 5, 6],
+        roleIds: [3, 4, 5, 6],
         isAdmin: false,
         isOwner: false,
       },
       {
         guildId: 2,
-        roleids: [3, 4, 5],
+        roleIds: [3, 4, 5],
         isAdmin: true,
         isOwner: false,
       },
       {
         guildId: 3,
-        roleids: [3, 4, 5],
+        roleIds: [3, 4, 5],
         isAdmin: false,
         isOwner: true,
       },
@@ -309,7 +309,7 @@ describe("checkGuildStats()", () => {
     const memberships = [
       {
         guildId: 4,
-        roleids: [3, 4, 5, 6],
+        roleIds: [3, 4, 5, 6],
         isAdmin: false,
         isOwner: false,
       },
@@ -333,19 +333,19 @@ describe("checkGuildStats()", () => {
     const memberships = [
       {
         guildId: 1,
-        roleids: [3, 4, 5, 6],
+        roleIds: [3, 4, 5, 6],
         isAdmin: false,
         isOwner: false,
       },
       {
         guildId: 2,
-        roleids: [3, 4, 5],
+        roleIds: [3, 4, 5],
         isAdmin: true,
         isOwner: false,
       },
       {
         guildId: 3,
-        roleids: [3, 4, 5],
+        roleIds: [3, 4, 5],
         isAdmin: false,
         isOwner: true,
       },

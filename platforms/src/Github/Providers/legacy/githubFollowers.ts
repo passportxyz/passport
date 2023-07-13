@@ -1,6 +1,6 @@
 // ----- Types
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import type { Provider, ProviderOptions } from "../../types";
+import type { Provider, ProviderOptions } from "../../../types";
 import { getGithubUserData, GithubContext, GithubUserData } from "./github";
 
 type GithubFollowersProviderOptions = {

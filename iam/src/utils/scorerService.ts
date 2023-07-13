@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Score } from "./easSchema";
+import { Score } from "./easStampSchema";
 
 const scorerApiGetScore = `${process.env.SCORER_ENDPOINT}/registry/score/${process.env.ALLO_SCORER_ID}`;
 // Use public endpoint and static api key to fetch score

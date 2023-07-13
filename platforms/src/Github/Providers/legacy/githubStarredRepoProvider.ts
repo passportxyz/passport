@@ -1,6 +1,6 @@
 // ----- Types
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import type { Provider, ProviderOptions } from "../../types";
+import type { Provider, ProviderOptions } from "../../../types";
 import { avoidGithubRateLimit, getGithubUserData, getGithubUserRepos, GithubContext, GithubUserData } from "./github";
 
 // ----- HTTP Client
