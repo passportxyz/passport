@@ -38,11 +38,9 @@ export class CivicPassProvider implements Provider {
     // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
     try {
-      const allPasses = await findAllPasses(address, this.includeTestnets);
-      const filteredPasses = allPasses.filter((pass) => pass.type === this.passType);
-
-      const valid = filteredPasses.length > 0;
-      const expiry = valid ? secondsFromNow(latestExpiry(filteredPasses)) : undefined;
+      const allPasses = await findAllPasses(address, this.includeTestnets, [this.passType]);
+      const valid = allPasses.length > 0;
+      const expiry = valid ? secondsFromNow(latestExpiry(allPasses)) : undefined;
 
       return {
         valid,
