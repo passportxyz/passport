@@ -95,7 +95,6 @@ export const findAllPasses = async (
 ): Promise<Pass[]> => {
   const passTypesString = passTypes ? `&passTypes=${passTypesToNames(passTypes).join(",")}` : "";
   const queryString = `${CIVIC_URL}/${userAddress}?includeTestnets=${includeTestnets.toString()}${passTypesString}`;
-  console.log(queryString);
   const response = await axios.get<CivicPassLookupResponse>(queryString).then((response) => response.data);
   return Object.entries(response).flatMap(([, passesForAddress]) =>
     Object.entries(passesForAddress.passes).flatMap(([passType, passes]) =>

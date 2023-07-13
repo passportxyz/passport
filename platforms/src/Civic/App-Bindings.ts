@@ -19,7 +19,6 @@ const mapProviderIDToScope = (provider: PROVIDER_ID): string | undefined => {
 export class CivicPlatform extends Platform {
   platformId = "Civic";
   path = "Civic";
-  isEVM = true;
 
   constructor(options: PlatformOptions = {}) {
     super();
