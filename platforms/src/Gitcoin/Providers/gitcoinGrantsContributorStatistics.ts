@@ -7,6 +7,6 @@ export class GitcoinContributorStatisticsProvider extends GitcoinGrantStatistics
   // construct the provider instance with supplied options
   constructor(options: ProviderOptions = {}) {
     super("GitcoinContributorStatistics", options);
-    this.dataUrl = "https://bounties.gitcoin.co/grants/v1/api/vc/contributor_statistics";
+    this.urlPath = "/contributor_statistics";
   }
 }

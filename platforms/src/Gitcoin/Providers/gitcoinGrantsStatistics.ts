@@ -1,12 +1,11 @@
 // ----- Types
 import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import type { Provider, ProviderOptions } from "../../types";
-import { getErrorString, ProviderError } from "../../utils/errors";
-import { getAddress } from "../../utils/signer";
+import { ProviderError } from "../../utils/errors";
 import axios from "axios";
 import { getGithubUserData, GithubUserMetaData } from "../../Github/Providers/githubClient";
 
-const AMI_API_TOKEN = process.env.AMI_API_TOKEN;
+const CGRANTS_API_TOKEN = process.env.CGRANTS_API_TOKEN;
 
 export type GitcoinGrantStatistics = {
   errors?: string[] | undefined;
@@ -24,8 +23,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
   // The type will be determined dynamically, from the options passed in to the constructor
   type = "";
 
-  // The URL from where to pull the data from
-  dataUrl = "";
+  urlPath = "";
 
   // Options can be set here and/or via the constructor
   _options: GitcoinGrantProviderOptions = {
@@ -48,7 +46,8 @@ export class GitcoinGrantStatisticsProvider implements Provider {
       // Only check the contribution condition if a valid github id has been received
       valid = !githubUser.errors && !!githubUser.id;
       if (valid) {
-        const gitcoinGrantsStatistic = await getGitcoinStatistics(this.dataUrl, githubUser.login);
+        const dataUrl = process.env.CGRANTS_API_URL + this.urlPath;
+        const gitcoinGrantsStatistic = await getGitcoinStatistics(dataUrl, githubUser.login);
 
         valid =
           !gitcoinGrantsStatistic.errors &&
@@ -94,7 +93,7 @@ const getGitcoinStatistics = async (dataUrl: string, handle: string): Promise<Gi
     // The gitcoin API expects lowercase handle
     const lowerHandle = handle.toLowerCase();
     const grantStatisticsRequest = await axios.get(`${dataUrl}?handle=${lowerHandle}`, {
-      headers: { Authorization: `token ${AMI_API_TOKEN}` },
+      headers: { Authorization: CGRANTS_API_TOKEN },
     });
 
     return { record: grantStatisticsRequest.data } as GitcoinGrantStatistics;
