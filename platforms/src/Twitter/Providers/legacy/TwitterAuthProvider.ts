@@ -2,16 +2,11 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
-import {
-  getAuthClient,
-  requestFindMyUser,
-  TwitterContext,
-  TwitterFindMyUserResponse,
-} from "../procedures/twitterOauth";
-import type { Provider, ProviderOptions } from "../../types";
+import { getAuthClient, requestFindMyUser, TwitterContext, TwitterFindMyUserResponse } from "./twitterOauth";
+import type { Provider, ProviderOptions } from "../../../types";
 
 // Export a Twitter Provider to carry out OAuth and return a record object
-export default class TwitterProvider implements Provider {
+export class TwitterProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
   type = "Twitter";
   // Options can be set here and/or via the constructor

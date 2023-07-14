@@ -2,8 +2,8 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Twitters OAuth2 library
-import { getAuthClient, getFollowerCount, TwitterContext, TwitterFollowerResponse } from "../procedures/twitterOauth";
-import type { Provider, ProviderOptions } from "../../types";
+import { getAuthClient, getFollowerCount, TwitterContext, TwitterFollowerResponse } from "./twitterOauth";
+import type { Provider, ProviderOptions } from "../../../types";
 
 // Perform verification on twitter access token and retrieve follower count
 async function verifyTwitterFollowers(

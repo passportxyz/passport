@@ -84,6 +84,30 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: getProviderSpec("Twitter", "TwitterTweetGT10"),
         stamp: undefined,
       },
+      "twitterAccountAgeGte#180": {
+        providerSpec: getProviderSpec("Twitter", "twitterAccountAgeGte#180"),
+        stamp: undefined,
+      },
+      "twitterAccountAgeGte#365": {
+        providerSpec: getProviderSpec("Twitter", "twitterAccountAgeGte#365"),
+        stamp: undefined,
+      },
+      "twitterAccountAgeGte#730": {
+        providerSpec: getProviderSpec("Twitter", "twitterAccountAgeGte#730"),
+        stamp: undefined,
+      },
+      "twitterTweetDaysGte#30": {
+        providerSpec: getProviderSpec("Twitter", "twitterTweetDaysGte#30"),
+        stamp: undefined,
+      },
+      "twitterTweetDaysGte#60": {
+        providerSpec: getProviderSpec("Twitter", "twitterTweetDaysGte#60"),
+        stamp: undefined,
+      },
+      "twitterTweetDaysGte#120": {
+        providerSpec: getProviderSpec("Twitter", "twitterTweetDaysGte#120"),
+        stamp: undefined,
+      },
       POAP: {
         providerSpec: getProviderSpec("POAP", "POAP"),
         stamp: undefined,

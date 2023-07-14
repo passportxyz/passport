@@ -4,13 +4,13 @@ import {
   TwitterFollowerGT500Provider,
   TwitterFollowerGTE1000Provider,
   TwitterFollowerGT5000Provider,
-} from "../Providers/TwitterFollowerProvider";
+} from "./TwitterFollowerProvider";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 import { auth, Client } from "twitter-api-sdk";
-import { getAuthClient, getFollowerCount, TwitterFollowerResponse } from "../procedures/twitterOauth";
+import { getAuthClient, getFollowerCount, TwitterFollowerResponse } from "./twitterOauth";
 
-jest.mock("../procedures/twitterOauth", () => ({
+jest.mock("./twitterOauth", () => ({
   getFollowerCount: jest.fn(),
   getAuthClient: jest.fn(),
 }));
