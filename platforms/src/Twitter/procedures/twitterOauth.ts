@@ -138,10 +138,11 @@ export const getTwitterUserData = async (context: TwitterContext, twitterClient:
 
 export const getUserTweetTimeline = async (
   context: TwitterContext,
-  twitterClient: Client
+  twitterClient: Client,
+  threshold: number
 ): Promise<UserTweetTimeline> => {
+  const tweetDays: Set<string> = new Set();
   let nextToken: string | undefined;
-  let tweetDays: Set<string>;
   let apiCallCount = 0;
   if (context.twitter.numberDaysTweeted === undefined || context.twitter.valid === false) {
     try {
@@ -163,8 +164,8 @@ export const getUserTweetTimeline = async (
           tweetDays.add(date);
         }
         nextToken = userTweetDaysResponse.meta.next_token;
-        // If user has already tweeted for 120 distinct days, no need to continue
-        if (tweetDays.size >= 120) {
+        // If user has already tweeted for more than the threshold distinct days, no need to continue
+        if (tweetDays.size >= threshold) {
           context.twitter.id = userId;
           context.twitter.numberDaysTweeted = tweetDays.size;
           context.twitter.valid = true;
@@ -176,7 +177,7 @@ export const getUserTweetTimeline = async (
         }
         // Respect rate limits by sleeping for a short time after each request
         await new Promise((resolve) => setTimeout(resolve, 1000));
-      } while (nextToken && apiCallCount <= 14);
+      } while (nextToken && (apiCallCount <= 14 || tweetDays.size >= 120));
       context.twitter.id = userId;
       context.twitter.numberDaysTweeted = tweetDays.size;
       context.twitter.valid = false;
@@ -203,12 +204,4 @@ export const getUserTweetTimeline = async (
     numberDaysTweeted: context.twitter.numberDaysTweeted,
     valid: context.twitter.valid,
   };
-};
-
-// For everything after the initial user load, we need to avoid the secondary rate
-// limit by waiting 1 second between requests
-export const avoidTwitterRateLimit = async (): Promise<void> => {
-  if (process.env.NODE_ENV === "test") return;
-
-  await new Promise((resolve) => setTimeout(resolve, 1000));
 };
