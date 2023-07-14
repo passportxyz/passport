@@ -311,4 +311,10 @@ export type PROVIDER_ID =
   | "twitterAccountAgeGte#730"
   | "twitterTweetDaysGte#30"
   | "twitterTweetDaysGte#60"
-  | "twitterTweetDaysGte#120";
+  | "twitterTweetDaysGte#120"
+  | "Twitter"
+  | "TwitterTweetGT10"
+  | "TwitterFollowerGT100"
+  | "TwitterFollowerGT500"
+  | "TwitterFollowerGTE1000"
+  | "TwitterFollowerGT5000";
