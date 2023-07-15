@@ -24,7 +24,6 @@ export type TwitterContext = ProviderContext & {
     createdAt?: string;
     id?: string;
     numberDaysTweeted?: number;
-    valid?: boolean;
   };
 };
 
@@ -42,7 +41,6 @@ export type TwitterUserData = {
 export type UserTweetTimeline = {
   id?: string;
   numberDaysTweeted?: number;
-  valid?: boolean;
   errors?: string[];
 };
 
@@ -138,13 +136,12 @@ export const getTwitterUserData = async (context: TwitterContext, twitterClient:
 
 export const getUserTweetTimeline = async (
   context: TwitterContext,
-  twitterClient: Client,
-  threshold: number
+  twitterClient: Client
 ): Promise<UserTweetTimeline> => {
   const tweetDays: Set<string> = new Set();
   let nextToken: string | undefined;
   let apiCallCount = 0;
-  if (context.twitter.numberDaysTweeted === undefined || context.twitter.valid === false) {
+  if (context.twitter.numberDaysTweeted === undefined) {
     try {
       // return information about the (authenticated) requesting user
       const userId = (await twitterClient.users.findMyUser()).data.id;
@@ -164,31 +161,18 @@ export const getUserTweetTimeline = async (
           tweetDays.add(date);
         }
         nextToken = userTweetDaysResponse.meta.next_token;
-        // If user has already tweeted for more than the threshold distinct days, no need to continue
-        if (tweetDays.size >= threshold) {
-          context.twitter.id = userId;
-          context.twitter.numberDaysTweeted = tweetDays.size;
-          context.twitter.valid = true;
-          return {
-            id: userId,
-            numberDaysTweeted: tweetDays.size,
-            valid: true,
-          };
-        }
+
+        context.twitter.id = userId;
+        context.twitter.numberDaysTweeted = tweetDays.size;
         // Respect rate limits by sleeping for a short time after each request
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } while (nextToken && (apiCallCount <= 14 || tweetDays.size >= 120));
-      context.twitter.id = userId;
-      context.twitter.numberDaysTweeted = tweetDays.size;
-      context.twitter.valid = false;
       return {
         id: context.twitter.id,
         numberDaysTweeted: context.twitter.numberDaysTweeted,
-        valid: context.twitter.valid,
       };
     } catch (_error) {
       const error = _error as ProviderError;
-
       if (error?.response?.status === 429) {
         return {
           errors: ["Error getting getting Twitter info", "Rate limit exceeded"],
@@ -202,6 +186,5 @@ export const getUserTweetTimeline = async (
   return {
     id: context.twitter.id,
     numberDaysTweeted: context.twitter.numberDaysTweeted,
-    valid: context.twitter.valid,
   };
 };
