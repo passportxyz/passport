@@ -5,8 +5,6 @@ import { ProviderError } from "../../utils/errors";
 import axios from "axios";
 import { getGithubUserData, GithubUserMetaData } from "../../Github/Providers/githubClient";
 
-const CGRANTS_API_TOKEN = process.env.CGRANTS_API_TOKEN;
-
 export type GitcoinGrantStatistics = {
   errors?: string[] | undefined;
   record?: { [k: string]: number };
@@ -47,7 +45,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
       valid = !githubUser.errors && !!githubUser.id;
       if (valid) {
         const dataUrl = process.env.CGRANTS_API_URL + this.urlPath;
-        const gitcoinGrantsStatistic = await getGitcoinStatistics(dataUrl, githubUser.login);
+        const gitcoinGrantsStatistic = await getGitcoinStatistics(dataUrl, githubUser.login, context);
 
         valid =
           !gitcoinGrantsStatistic.errors &&
@@ -88,24 +86,37 @@ export class GitcoinGrantStatisticsProvider implements Provider {
   }
 }
 
-const getGitcoinStatistics = async (dataUrl: string, handle: string): Promise<GitcoinGrantStatistics> => {
-  try {
-    // The gitcoin API expects lowercase handle
-    const lowerHandle = handle.toLowerCase();
-    const grantStatisticsRequest = await axios.get(`${dataUrl}?handle=${lowerHandle}`, {
-      headers: { Authorization: CGRANTS_API_TOKEN },
-    });
+type GitcoinStatisticsContext = {
+  gitcoinGrantStatistics?: { [k: string]: GitcoinGrantStatistics };
+};
 
-    return { record: grantStatisticsRequest.data } as GitcoinGrantStatistics;
-  } catch (_error) {
-    const error = _error as ProviderError;
-    return {
-      errors: [
-        "Error getting user info",
-        `${error?.message}`,
-        `Status ${error.response?.status}: ${error.response?.statusText}`,
-        `Details: ${JSON.stringify(error?.response?.data)}`,
-      ],
-    };
+const getGitcoinStatistics = async (
+  dataUrl: string,
+  handle: string,
+  context: GitcoinStatisticsContext
+): Promise<GitcoinGrantStatistics> => {
+  if (!context.gitcoinGrantStatistics?.[dataUrl]) {
+    try {
+      // The gitcoin API expects lowercase handle
+      const lowerHandle = handle.toLowerCase();
+      const grantStatisticsRequest = await axios.get(`${dataUrl}?handle=${lowerHandle}`, {
+        headers: { Authorization: process.env.CGRANTS_API_TOKEN },
+      });
+
+      if (!context.gitcoinGrantStatistics) context.gitcoinGrantStatistics = {};
+
+      context.gitcoinGrantStatistics[dataUrl] = { record: grantStatisticsRequest.data } as GitcoinGrantStatistics;
+    } catch (_error) {
+      const error = _error as ProviderError;
+      context.gitcoinGrantStatistics[dataUrl] = {
+        errors: [
+          "Error getting user info",
+          `${error?.message}`,
+          `Status ${error.response?.status}: ${error.response?.statusText}`,
+          `Details: ${JSON.stringify(error?.response?.data)}`,
+        ],
+      };
+    }
   }
+  return context.gitcoinGrantStatistics[dataUrl];
 };
