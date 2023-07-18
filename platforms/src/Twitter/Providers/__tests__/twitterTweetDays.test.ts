@@ -17,12 +17,6 @@ describe("TwittewTweetDaysProvider", function () {
 
   const MOCK_TWITTER_CLIENT = new Client({} as auth.OAuth2User);
 
-  const mockContext: ProviderContext = {
-    twitter: {
-      id: "123",
-    },
-  };
-
   const mockPayload: RequestPayload = {
     address: "0x0",
     proofs: {
@@ -36,14 +30,79 @@ describe("TwittewTweetDaysProvider", function () {
   const sessionKey = mockPayload.proofs.sessionKey;
   const code = mockPayload.proofs.code;
 
-  it("handles valid tweet days count", async () => {
+  it("handles gte 30 days tweet count", async () => {
     (getUserTweetTimeline as jest.MockedFunction<typeof getUserTweetTimeline>).mockImplementation(() => {
       return Promise.resolve({
-        numberDaysTweeted: 120,
-        valid: true,
+        numberDaysTweeted: 35,
         errors: undefined,
       });
     });
+
+    const mockContext: ProviderContext = {
+      twitter: {
+        id: "123",
+        numberDaysTweeted: 35,
+        errors: undefined,
+      },
+    };
+
+    const provider = new TwitterTweetDaysProvider({ threshold: "30" });
+    const result = await provider.verify(mockPayload, mockContext);
+
+    expect(getAuthClient).toBeCalledWith(sessionKey, code, mockContext);
+    expect(getAuthClient).toHaveBeenCalledTimes(1);
+    expect(getUserTweetTimeline).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      valid: true,
+      error: undefined,
+      record: { id: "123" },
+    });
+  });
+
+  it("handles gte 60 days tweet count", async () => {
+    (getUserTweetTimeline as jest.MockedFunction<typeof getUserTweetTimeline>).mockImplementation(() => {
+      return Promise.resolve({
+        numberDaysTweeted: 65,
+        errors: undefined,
+      });
+    });
+
+    const mockContext: ProviderContext = {
+      twitter: {
+        id: "123",
+        numberDaysTweeted: 65,
+        errors: undefined,
+      },
+    };
+
+    const provider = new TwitterTweetDaysProvider({ threshold: "60" });
+    const result = await provider.verify(mockPayload, mockContext);
+
+    expect(getAuthClient).toBeCalledWith(sessionKey, code, mockContext);
+    expect(getAuthClient).toHaveBeenCalledTimes(1);
+    expect(getUserTweetTimeline).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      valid: true,
+      error: undefined,
+      record: { id: "123" },
+    });
+  });
+
+  it("handles gte 120 days tweet count", async () => {
+    (getUserTweetTimeline as jest.MockedFunction<typeof getUserTweetTimeline>).mockImplementation(() => {
+      return Promise.resolve({
+        numberDaysTweeted: 120,
+        errors: undefined,
+      });
+    });
+
+    const mockContext: ProviderContext = {
+      twitter: {
+        id: "123",
+        numberDaysTweeted: 120,
+        errors: undefined,
+      },
+    };
 
     const provider = new TwitterTweetDaysProvider({ threshold: "120" });
     const result = await provider.verify(mockPayload, mockContext);
@@ -62,10 +121,17 @@ describe("TwittewTweetDaysProvider", function () {
     (getUserTweetTimeline as jest.MockedFunction<typeof getUserTweetTimeline>).mockImplementation(() => {
       return Promise.resolve({
         numberDaysTweeted: 12,
-        valid: false,
         errors: undefined,
       });
     });
+
+    const mockContext: ProviderContext = {
+      twitter: {
+        id: "123",
+        numberDaysTweeted: 12,
+        errors: undefined,
+      },
+    };
 
     const provider = new TwitterTweetDaysProvider({ threshold: "120" });
     const result = await provider.verify(mockPayload, mockContext);
@@ -84,10 +150,17 @@ describe("TwittewTweetDaysProvider", function () {
     (getUserTweetTimeline as jest.MockedFunction<typeof getUserTweetTimeline>).mockImplementation(() => {
       return Promise.resolve({
         numberDaysTweeted: undefined,
-        valid: false,
         errors: ["Errors"],
       });
     });
+
+    const mockContext: ProviderContext = {
+      twitter: {
+        id: "123",
+        numberDaysTweeted: 35,
+        errors: undefined,
+      },
+    };
 
     const provider = new TwitterTweetDaysProvider({ threshold: "120" });
     const result = await provider.verify(mockPayload, mockContext);

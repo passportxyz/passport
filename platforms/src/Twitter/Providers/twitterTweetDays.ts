@@ -6,11 +6,10 @@ import { TwitterContext, getAuthClient, getUserTweetTimeline, UserTweetTimeline 
 async function verifyTwitterTweetDays(
   sessionKey: string,
   code: string,
-  context: TwitterContext,
-  threshold: number
+  context: TwitterContext
 ): Promise<UserTweetTimeline> {
   const twitterClient = await getAuthClient(sessionKey, code, context);
-  const data = await getUserTweetTimeline(context, twitterClient, threshold);
+  const data = await getUserTweetTimeline(context, twitterClient);
   return data;
 }
 
@@ -32,15 +31,11 @@ export class TwitterTweetDaysProvider implements Provider {
   }
 
   async verify(payload: RequestPayload, context: TwitterContext): Promise<VerifiedPayload> {
-    const twitterTweetData = await verifyTwitterTweetDays(
-      payload.proofs.sessionKey,
-      payload.proofs.code,
-      context,
-      parseInt(this._options.threshold)
-    );
+    const twitterTweetData = await verifyTwitterTweetDays(payload.proofs.sessionKey, payload.proofs.code, context);
 
     const twitterUserId = context.twitter.id;
-    const valid = twitterTweetData.valid;
+    const numberDaysTweeted = context.twitter.numberDaysTweeted;
+    const valid = numberDaysTweeted >= parseInt(this._options.threshold);
 
     return {
       valid,
