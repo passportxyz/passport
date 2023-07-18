@@ -14,7 +14,7 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 const userHandle = "my-login-handle";
 const clientId = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-const gitcoinAmiApiToken = process.env.AMI_API_TOKEN;
+const cgrantsApiToken = process.env.CGRANTS_API_TOKEN;
 
 const validGithubUserResponse = {
   data: {
@@ -33,7 +33,8 @@ const validCodeResponse = {
   status: 200,
 };
 
-const testDataUrl = "https://bounties.gitcoin.co/grants/v1/api/vc/configurable_test_endpoint";
+const testDataUrlPath = "/testing";
+const testUrl = process.env.CGRANTS_API_URL + testDataUrlPath;
 const testProviderPrefix = "GitcoinGrantStatisticsProviderTester";
 
 const code = "ABC123_ACCESSCODE";
@@ -42,7 +43,7 @@ class GitcoinGrantStatisticsProviderTester extends GitcoinGrantStatisticsProvide
   // construct the provider instance with supplied options
   constructor(options: ProviderOptions = {}) {
     super(testProviderPrefix, options);
-    this.dataUrl = testDataUrl;
+    this.urlPath = testDataUrlPath;
   }
 }
 
@@ -65,7 +66,7 @@ describe("GitcoinGrantStatisticsProvider class", function () {
     });
 
     expect(gitcoin.type).toEqual(`${testProviderPrefix}#${recordAttribute}#${threshold}`);
-    expect(gitcoin.dataUrl).toEqual(testDataUrl);
+    expect(gitcoin.urlPath).toEqual(testDataUrlPath);
   });
 });
 
@@ -88,7 +89,7 @@ describe("Attempt verification %s", function () {
     ) => {
       (axios.get as jest.Mock).mockImplementation((url) => {
         if (url === "https://api.github.com/user") return Promise.resolve(validGithubUserResponse);
-        else if (url.startsWith(testDataUrl))
+        else if (url.includes(testDataUrlPath))
           return Promise.resolve({
             status: 200,
             data: {
@@ -135,8 +136,8 @@ describe("Attempt verification %s", function () {
       });
 
       // Check the request to get the contribution stats
-      expect(mockedAxios.get).toBeCalledWith(`${testDataUrl}?handle=${userHandle}`, {
-        headers: { Authorization: `token ${gitcoinAmiApiToken}` },
+      expect(mockedAxios.get).toBeCalledWith(`${testUrl}?handle=${userHandle}`, {
+        headers: { Authorization: cgrantsApiToken },
       });
 
       if (expectedValid)
@@ -416,8 +417,8 @@ describe("Attempt verification %s", function () {
     expect(mockedAxios.get).toBeCalledWith("https://api.github.com/user", {
       headers: { Authorization: `token ${githubAccessCode}` },
     });
-    expect(mockedAxios.get).nthCalledWith(2, `${testDataUrl}?handle=user-handle-with-upper`, {
-      headers: { Authorization: `token ${gitcoinAmiApiToken}` },
+    expect(mockedAxios.get).nthCalledWith(2, `${testUrl}?handle=user-handle-with-upper`, {
+      headers: { Authorization: cgrantsApiToken },
     });
     expect(gitcoinPayload).toMatchObject({ valid: false });
   });

@@ -155,6 +155,12 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
         cpu: 2048,
         portMappings: [httpsListener],
         links: [],
+        environment: [
+          {
+            name: "CGRANTS_API_URL",
+            value: "https://api.review.scorer.gitcoin.co/cgrants",
+          },
+        ],
         secrets: [
           {
             name: "IAM_JWK",
@@ -249,8 +255,8 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             valueFrom: `${IAM_SERVER_SSM_ARN}:POLYGON_RPC_URL::`,
           },
           {
-            name: "AMI_API_TOKEN",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:AMI_API_TOKEN::`,
+            name: "CGRANTS_API_TOKEN",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:CGRANTS_API_TOKEN::`,
           },
           {
             name: "GTC_STAKING_GRAPH_API_KEY",
