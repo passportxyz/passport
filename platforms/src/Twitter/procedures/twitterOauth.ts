@@ -13,6 +13,8 @@ import { ProviderError } from "../../utils/errors";
     during the requestAccessToken process.
 */
 
+const millisecondsInDay = 1000 * 3600 * 24;
+
 export const generateSessionKey = (): string => {
   return `twitter-${crypto.randomBytes(32).toString("hex")}`;
 };
@@ -138,7 +140,7 @@ export const getUserTweetTimeline = async (
   context: TwitterContext,
   twitterClient: Client
 ): Promise<UserTweetTimeline> => {
-  const tweetDays: Set<string> = new Set();
+  const tweetDays: Set<number> = new Set();
   let nextToken: string | undefined;
   let apiCallCount = 0;
   if (context.twitter.numberDaysTweeted === undefined) {
@@ -156,8 +158,9 @@ export const getUserTweetTimeline = async (
         });
         apiCallCount++;
         for (const tweet of userTweetDaysResponse.data) {
-          // Extract date from created_at
-          const date = new Date(tweet.created_at).toISOString().split("T")[0];
+          // Extract date from created_at and get time in number of milliseconds and divide into number of milliseconds in day and then floor the value
+
+          const date = Math.floor(new Date(tweet.created_at).getTime() / millisecondsInDay);
           tweetDays.add(date);
         }
         nextToken = userTweetDaysResponse.meta.next_token;
