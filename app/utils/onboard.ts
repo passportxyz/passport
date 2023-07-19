@@ -25,6 +25,7 @@ const ledger = ledgerModule();
 
 export const sepoliaChainId = "0xaa36a7";
 export const hardhatChainId = "0x7a69";
+export const baseGoerliChainId = "0x14a33";
 
 const chains = [
   {
@@ -47,6 +48,12 @@ if (process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on") {
     token: "ETH",
     label: "Hardhat",
     rpcUrl: "http://127.0.0.1:8545/",
+  });
+  chains.push({
+    id: "0x14a33",
+    token: "ETH",
+    label: "Base Goerli",
+    rpcUrl: "https://goerli.base.org/",
   });
 }
 

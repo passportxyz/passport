@@ -40,7 +40,7 @@ import { ExpiredStampModal } from "../components/ExpiredStampModal";
 import ProcessingPopup from "../components/ProcessingPopup";
 import SyncToChainButton from "../components/SyncToChainButton";
 import { getFilterName } from "../config/filters";
-import { hardhatChainId, sepoliaChainId } from "../utils/onboard";
+import { baseGoerliChainId, hardhatChainId, sepoliaChainId } from "../utils/onboard";
 import { Button } from "../components/Button";
 
 // --- GTM Module
@@ -331,9 +331,9 @@ export default function Dashboard() {
 
           <div className="ml-4 flex flex-col place-items-center gap-4 self-center md:flex-row">
             {isOnChainSyncEnabled &&
-              (wallet?.chains[0].id === sepoliaChainId || wallet?.chains[0].id === hardhatChainId) && (
-                <SyncToChainButton />
-              )}
+              (wallet?.chains[0].id === sepoliaChainId ||
+                wallet?.chains[0].id === hardhatChainId ||
+                wallet?.chains[0].id === baseGoerliChainId) && <SyncToChainButton />}
             {passport ? (
               <button
                 data-testid="button-passport-json-mobile"
