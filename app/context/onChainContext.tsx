@@ -11,6 +11,8 @@ import { SchemaEncoder, EAS } from "@ethereum-attestation-service/eas-sdk";
 import GitcoinResolver from "../contracts/GitcoinResolver.json";
 import { JsonRpcProvider } from "@ethersproject/providers";
 
+import axios from "axios";
+
 type OnChainProviderType = {
   providerHash: string;
   credentialHash: string;
@@ -68,12 +70,15 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
         );
         const decodedData = schemaEncoder.decodeData(passportAttestationData.data);
 
-        // debugger;
+        const providers = decodedData.filter((data) => data.name === "providers");
+
+        const providerBitMapInfo = await axios.get(
+          `${process.env.NEXT_PUBLIC_PASSPORT_IAM_STATIC_URL}/providerBitMapInfo.json`
+        );
 
         // Set the on-chain status
         setOnChainProviders([]);
       } catch (e: any) {
-        // debugger;
         datadogLogs.logger.error("Failed to check on-chain status", e);
         datadogRum.addError(e);
       }
