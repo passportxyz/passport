@@ -1,11 +1,15 @@
 // --- React Methods
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 
-import { graphql_fetch } from "../utils/helpers";
 import { ethers } from "ethers";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { UserContext } from "./userContext";
+
+import { SchemaEncoder, EAS } from "@ethereum-attestation-service/eas-sdk";
+
+import GitcoinResolver from "../contracts/GitcoinResolver.json";
+import { JsonRpcProvider } from "@ethersproject/providers";
 
 type OnChainProviderType = {
   providerHash: string;
@@ -26,63 +30,55 @@ const startingState: OnChainContextState = {
 export const OnChainContext = createContext(startingState);
 
 export const OnChainContextProvider = ({ children }: { children: any }) => {
-  const { address } = useContext(UserContext);
+  const { address, wallet } = useContext(UserContext);
   const [onChainProviders, setOnChainProviders] = useState<OnChainProviderType[]>([]);
 
   const fetchOnChainStatus = useCallback(async () => {
-    try {
-      if (!process.env.NEXT_PUBLIC_EAS_INDEXER_URL) {
-        throw new Error("NEXT_PUBLIC_EAS_INDEXER_URL is not defined");
+    if (wallet && address) {
+      try {
+        if (!process.env.NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS) {
+          throw new Error("NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS is not defined");
+        }
+
+        if (!process.env.NEXT_PUBLIC_EAS_ADDRESS) {
+          throw new Error("NEXT_PUBLIC_EAS_ADDRESS is not defined");
+        }
+
+        const ethersProvider = new ethers.BrowserProvider(wallet.provider, "any");
+        const signer = await ethersProvider.getSigner();
+
+        const gitcoinAttesterContract = new ethers.Contract(
+          process.env.NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS as string,
+          GitcoinResolver.abi,
+          signer
+        );
+
+        const passportUid = await gitcoinAttesterContract.passports(address);
+
+        const eas = new EAS(process.env.NEXT_PUBLIC_EAS_ADDRESS);
+
+        // needed for ethers v5 eas dependency
+        const ethersV5Provider = new JsonRpcProvider(process.env.NEXT_PUBLIC_PASSPORT_BASE_GOERLI_RPC_URL);
+        eas.connect(ethersV5Provider);
+
+        const passportAttestationData = await eas.getAttestation(passportUid);
+
+        const schemaEncoder = new SchemaEncoder(
+          "uint256[] providers,bytes32[] hashes,uint64[] issuanceDates,uint64[] expirationDates,uint16 providerMapVersion"
+        );
+        const decodedData = schemaEncoder.decodeData(passportAttestationData.data);
+
+        // debugger;
+
+        // Set the on-chain status
+        setOnChainProviders([]);
+      } catch (e: any) {
+        // debugger;
+        datadogLogs.logger.error("Failed to check on-chain status", e);
+        datadogRum.addError(e);
       }
-
-      // Get the attestations for the given user
-      const res = await graphql_fetch(
-        new URL(process.env.NEXT_PUBLIC_EAS_INDEXER_URL),
-        `
-        query GetAttestations($where: AttestationWhereInput) {
-          attestations(where: $where) {
-            decodedDataJson
-          }
-        }
-      `,
-        {
-          where: {
-            recipient: { equals: ethers.getAddress(address!) },
-            attester: { equals: process.env.NEXT_PUBLIC_GITCOIN_ATTESTER_CONTRACT_ADDRESS },
-            schemaId: { equals: process.env.NEXT_PUBLIC_GITCOIN_VC_SCHEMA_UUID },
-          },
-        }
-      );
-
-      const attestations = res.data.attestations;
-
-      let providers: OnChainProviderType[] = [];
-
-      // Extract all providers
-      attestations.forEach((attestation: any) => {
-        const { decodedDataJson } = attestation;
-        const decodedData = JSON.parse(decodedDataJson);
-        const providerData = decodedData.find((data: any) => data.name === "provider");
-        const hashData = decodedData.find((data: any) => data.name === "hash");
-
-        const hexValue = hashData.value.value.slice(2); // Remove the "0x" prefix
-        const base64EncodedBytes = Buffer.from(hexValue, "hex").toString("base64");
-
-        if (providerData) {
-          providers.push({
-            providerHash: providerData.value.value,
-            credentialHash: `v0.0.0:${base64EncodedBytes}`,
-          });
-        }
-      });
-
-      // Set the on-chain status
-      setOnChainProviders(providers);
-    } catch (e: any) {
-      datadogLogs.logger.error("Failed to check on-chain status", e);
-      datadogRum.addError(e);
     }
-  }, [address]);
+  }, [wallet, address]);
 
   const refreshOnChainProviders = () => {
     return fetchOnChainStatus();

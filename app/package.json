@@ -19,6 +19,7 @@
     "@didtools/pkh-ethereum": "^0.0.3",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
+    "@ethereum-attestation-service/eas-sdk": "^0.29.1",
     "@ethersproject/providers": "^5.6.4",
     "@gitcoin/passport-database-client": "^1.0.0",
     "@gitcoin/passport-identity": "^1.0.0",
