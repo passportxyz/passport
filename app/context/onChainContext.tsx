@@ -11,13 +11,17 @@ import { SchemaEncoder, EAS } from "@ethereum-attestation-service/eas-sdk";
 import GitcoinResolver from "../contracts/GitcoinResolver.json";
 import { JsonRpcProvider } from "@ethersproject/providers";
 
-import { StampBit } from "@gitcoin/passport-types";
+import { PROVIDER_ID, StampBit } from "@gitcoin/passport-types";
+
+import { BigNumber } from "@ethersproject/bignumber";
 
 import axios from "axios";
 
 type OnChainProviderType = {
-  providerHash: string;
+  providerName: PROVIDER_ID;
   credentialHash: string;
+  expirationDate: Date;
+  issuanceDate: Date;
 };
 
 export interface OnChainContextState {
@@ -83,27 +87,46 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
         );
         const decodedData = schemaEncoder.decodeData(passportAttestationData.data);
 
-        // Bignmuber[]
-        const providers = decodedData.filter((data) => data.name === "providers");
-
         const providerBitMapInfo = (await axios.get(
           `${process.env.NEXT_PUBLIC_PASSPORT_IAM_STATIC_URL}/providerBitMapInfo.json`
         )) as {
           data: StampBit[];
         };
 
-        let aggregatedBitMap = "";
-        // abstract binary from each provider
-        const providerValues = providers[0].value.value as BigInt[];
-        // assume that the provider values are in order
-        providerValues.forEach((providerValue: any) => {
-          const binaryRepresentation = hexToBinary(providerValue.toHexString());
-          aggregatedBitMap += binaryRepresentation;
-        });
+        type DecodedProviderInfo = {
+          providerName: PROVIDER_ID;
+          providerNumber: number;
+        };
 
-        debugger;
+        const providers = decodedData.find((data) => data.name === "providers")?.value.value as BigNumber[];
+        const issuanceDates = decodedData.find((data) => data.name === "issuanceDates")?.value.value as BigNumber[];
+        const expirationDates = decodedData.find((data) => data.name === "expirationDates")?.value.value as BigNumber[];
+        const hashes = decodedData.find((data) => data.name === "hashes")?.value.value as string[];
+
+        const onChainProviderInfo: DecodedProviderInfo[] = providerBitMapInfo.data
+          .map((info) => {
+            const providerMask = BigNumber.from(1).shl(info.bit);
+            const currentProvidersBitmap = providers[info.index];
+            if (currentProvidersBitmap && !providerMask.and(currentProvidersBitmap).eq(BigNumber.from(0))) {
+              return {
+                providerName: info.name,
+                providerNumber: info.index * 256 + info.bit,
+              };
+            }
+          })
+          .filter((provider): provider is DecodedProviderInfo => provider !== undefined);
+
+        const onChainProviders: OnChainProviderType[] = onChainProviderInfo
+          .sort((a, b) => a.providerNumber - b.providerNumber)
+          .map((providerInfo, index) => ({
+            providerName: providerInfo.providerName,
+            credentialHash: hashes[index],
+            expirationDate: new Date(expirationDates[index].toNumber() * 1000),
+            issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
+          }));
+
         // Set the on-chain status
-        setOnChainProviders([]);
+        setOnChainProviders(onChainProviders);
       } catch (e: any) {
         datadogLogs.logger.error("Failed to check on-chain status", e);
         datadogRum.addError(e);
