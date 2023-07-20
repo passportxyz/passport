@@ -120,7 +120,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
           .sort((a, b) => a.providerNumber - b.providerNumber)
           .map((providerInfo, index) => ({
             providerName: providerInfo.providerName,
-            credentialHash: hashes[index],
+            credentialHash: `v0.0.0:${Buffer.from(hashes[index].slice(2), "hex").toString("base64")}`,
             expirationDate: new Date(expirationDates[index].toNumber() * 1000),
             issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
           }));
