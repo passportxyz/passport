@@ -55,7 +55,6 @@ export async function decodeProviderInformation(attestation: Attestation): Promi
     "uint256[] providers,bytes32[] hashes,uint64[] issuanceDates,uint64[] expirationDates,uint16 providerMapVersion"
   );
   const decodedData = schemaEncoder.decodeData(attestation.data);
-  debugger;
   const providerBitMapInfo = (await axios.get(
     `${process.env.NEXT_PUBLIC_PASSPORT_IAM_STATIC_URL}/providerBitMapInfo.json`
   )) as {
