@@ -1,6 +1,7 @@
 // Provider Utils
 import { Providers } from "./utils/providers";
 import { SimpleProvider } from "./utils/simpleProvider";
+import { SimpleEvmProvider } from "./utils/simpleEvmProvider";
 import { ClearTextSimpleProvider } from "./utils/clearTextSimpleProvider";
 import { ClearTextTwitterProvider, ClearTextGithubOrgProvider } from "./ClearText";
 
@@ -31,6 +32,7 @@ Object.values(platforms).map(({ ProviderConfig }) => {
 export const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
+  new SimpleEvmProvider(),
   new ClearTextSimpleProvider(),
   new ClearTextTwitterProvider(),
   new ClearTextGithubOrgProvider(),
