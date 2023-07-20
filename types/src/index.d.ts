@@ -318,3 +318,9 @@ export type PROVIDER_ID =
   | "twitterTweetDaysGte#30"
   | "twitterTweetDaysGte#60"
   | "twitterTweetDaysGte#120";
+
+export type StampBit = {
+  bit: number;
+  index: number;
+  name: string;
+};

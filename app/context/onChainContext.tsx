@@ -11,6 +11,8 @@ import { SchemaEncoder, EAS } from "@ethereum-attestation-service/eas-sdk";
 import GitcoinResolver from "../contracts/GitcoinResolver.json";
 import { JsonRpcProvider } from "@ethersproject/providers";
 
+import { StampBit } from "@gitcoin/passport-types";
+
 import axios from "axios";
 
 type OnChainProviderType = {
@@ -30,6 +32,17 @@ const startingState: OnChainContextState = {
 
 // create our app context
 export const OnChainContext = createContext(startingState);
+
+function hexToBinary(hex: string): string {
+  let binary = "";
+  hex = hex.replace("0x", ""); // Remove '0x' if it exists
+  for (let i = 0; i < hex.length; i++) {
+    const hexDigit = parseInt(hex[i], 16); // Convert the hex digit to a base 10 integer
+    const binaryDigit = hexDigit.toString(2); // Convert the base 10 integer to binary
+    binary += binaryDigit.padStart(4, "0"); // Pad with zeros to ensure it's a 4-digit binary number
+  }
+  return binary;
+}
 
 export const OnChainContextProvider = ({ children }: { children: any }) => {
   const { address, wallet } = useContext(UserContext);
@@ -70,12 +83,25 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
         );
         const decodedData = schemaEncoder.decodeData(passportAttestationData.data);
 
+        // Bignmuber[]
         const providers = decodedData.filter((data) => data.name === "providers");
 
-        const providerBitMapInfo = await axios.get(
+        const providerBitMapInfo = (await axios.get(
           `${process.env.NEXT_PUBLIC_PASSPORT_IAM_STATIC_URL}/providerBitMapInfo.json`
-        );
+        )) as {
+          data: StampBit[];
+        };
 
+        let aggregatedBitMap = "";
+        // abstract binary from each provider
+        const providerValues = providers[0].value.value as BigInt[];
+        // assume that the provider values are in order
+        providerValues.forEach((providerValue: any) => {
+          const binaryRepresentation = hexToBinary(providerValue.toHexString());
+          aggregatedBitMap += binaryRepresentation;
+        });
+
+        debugger;
         // Set the on-chain status
         setOnChainProviders([]);
       } catch (e: any) {

@@ -5,7 +5,7 @@ import {
   MultiAttestationRequest,
   AttestationRequestData,
 } from "@ethereum-attestation-service/eas-sdk";
-import { VerifiableCredential } from "@gitcoin/passport-types";
+import { VerifiableCredential, StampBit } from "@gitcoin/passport-types";
 import { BigNumber } from "@ethersproject/bignumber";
 
 import { fetchPassportScore } from "./scorerService";
@@ -42,12 +42,6 @@ export type StampMetadata = {
   }[];
 }[];
 
-export type Stamp = {
-  bit: number;
-  index: number;
-  name: string;
-};
-
 // exported to buildProviderBitMap for formatting
 export const mapBitMapInfo = (metaData: StampMetadata): PassportAttestationStamp[] => {
   let bit = 0;
@@ -66,7 +60,7 @@ export const mapBitMapInfo = (metaData: StampMetadata): PassportAttestationStamp
 };
 
 export const buildProviderBitMap = (): Map<string, PassportAttestationStamp> => {
-  const bitMapInfo = bitMapData as unknown as Stamp[];
+  const bitMapInfo = bitMapData as unknown as StampBit[];
   const passportAttestationStampMap: Map<string, PassportAttestationStamp> = new Map();
 
   bitMapInfo.forEach((stamp) => passportAttestationStampMap.set(stamp.name, stamp));
