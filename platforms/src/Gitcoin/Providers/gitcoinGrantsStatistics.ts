@@ -4,6 +4,7 @@ import type { Provider, ProviderOptions } from "../../types";
 import { ProviderError } from "../../utils/errors";
 import axios from "axios";
 import { getGithubUserData, GithubUserMetaData } from "../../Github/Providers/githubClient";
+import { getAddress } from "../../utils/signer";
 
 export type GitcoinGrantStatistics = {
   errors?: string[] | undefined;
@@ -39,13 +40,14 @@ export class GitcoinGrantStatisticsProvider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     let valid = false;
+    const address = (await getAddress(payload)).toLowerCase();
     const githubUser: GithubUserMetaData = await getGithubUserData(payload.proofs.code, context);
     try {
       // Only check the contribution condition if a valid github id has been received
       valid = !githubUser.errors && !!githubUser.id;
       if (valid) {
         const dataUrl = process.env.CGRANTS_API_URL + this.urlPath;
-        const gitcoinGrantsStatistic = await getGitcoinStatistics(dataUrl, githubUser.login, context);
+        const gitcoinGrantsStatistic = await getGitcoinStatistics(dataUrl, githubUser.login, address, context);
 
         valid =
           !gitcoinGrantsStatistic.errors &&
@@ -93,17 +95,21 @@ type GitcoinStatisticsContext = {
 const getGitcoinStatistics = async (
   dataUrl: string,
   handle: string,
+  address: string,
   context: GitcoinStatisticsContext
 ): Promise<GitcoinGrantStatistics> => {
   if (!context.gitcoinGrantStatistics?.[dataUrl]) {
     try {
       // The gitcoin API expects lowercase handle
       const lowerHandle = handle.toLowerCase();
-      const grantStatisticsRequest = await axios.get(`${dataUrl}?handle=${lowerHandle}`, {
+      const grantStatisticsRequest = await axios.get(dataUrl, {
         headers: { Authorization: process.env.CGRANTS_API_TOKEN },
+        params: { handle: lowerHandle, address: address },
       });
 
-      if (!context.gitcoinGrantStatistics) context.gitcoinGrantStatistics = {};
+      if (!context.gitcoinGrantStatistics) {
+        context.gitcoinGrantStatistics = {};
+      }
 
       context.gitcoinGrantStatistics[dataUrl] = { record: grantStatisticsRequest.data } as GitcoinGrantStatistics;
     } catch (_error) {

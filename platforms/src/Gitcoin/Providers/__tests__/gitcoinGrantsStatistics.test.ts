@@ -136,8 +136,10 @@ describe("Attempt verification %s", function () {
       });
 
       // Check the request to get the contribution stats
-      expect(mockedAxios.get).toBeCalledWith(`${testUrl}?handle=${userHandle}`, {
+      expect(mockedAxios.get).toBeCalledWith(testUrl, {
         headers: { Authorization: cgrantsApiToken },
+        params: {handle: userHandle, address: "0x0"}
+
       });
 
       if (expectedValid)
@@ -417,8 +419,9 @@ describe("Attempt verification %s", function () {
     expect(mockedAxios.get).toBeCalledWith("https://api.github.com/user", {
       headers: { Authorization: `token ${githubAccessCode}` },
     });
-    expect(mockedAxios.get).nthCalledWith(2, `${testUrl}?handle=user-handle-with-upper`, {
+    expect(mockedAxios.get).nthCalledWith(2, testUrl, {
       headers: { Authorization: cgrantsApiToken },
+      params: {handle: "user-handle-with-upper", address: "0x0"}
     });
     expect(gitcoinPayload).toMatchObject({ valid: false });
   });
