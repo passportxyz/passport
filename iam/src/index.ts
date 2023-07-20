@@ -362,14 +362,17 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 
           const additionalSignerCredential = await verifyCredential(DIDKit, additionalChallenge);
 
-          const verifiedAddress = utils
-            .getAddress(utils.verifyMessage(additionalChallenge.credentialSubject.challenge, payload.signer.signature))
-            .toLocaleLowerCase();
+          // pull the address so that its stored in a predictable (checksummed) format
+          const verifiedAddress = utils.getAddress(
+            utils.verifyMessage(additionalChallenge.credentialSubject.challenge, payload.signer.signature)
+          );
 
           // if verifiedAddress does not equal the additional signer address throw an error because signature is invalid
-          if (!additionalSignerCredential || verifiedAddress !== payload.signer.address) {
+          if (!additionalSignerCredential || verifiedAddress.toLowerCase() !== payload.signer.address.toLowerCase()) {
             return void errorRes(res, "Unable to verify payload", 401);
           }
+
+          payload.signer.address = verifiedAddress;
         }
 
         // type is required because we need it to select the correct Identity Provider
