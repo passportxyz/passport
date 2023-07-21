@@ -45,6 +45,7 @@ import {
 
 // All provider exports from platforms
 import { providers } from "@gitcoin/passport-platforms";
+import path from "path";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -546,3 +547,5 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
 
 // procedure endpoints
 app.use("/procedure", procedureRouter);
+
+app.use("/static", express.static(path.join(__dirname, "static")));

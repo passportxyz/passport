@@ -1,15 +1,25 @@
 // --- React Methods
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 
-import { graphql_fetch } from "../utils/helpers";
 import { ethers } from "ethers";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { UserContext } from "./userContext";
 
+import { SchemaEncoder, EAS } from "@ethereum-attestation-service/eas-sdk";
+
+import { PROVIDER_ID, StampBit } from "@gitcoin/passport-types";
+
+import { BigNumber } from "@ethersproject/bignumber";
+
+import axios from "axios";
+import { decodeProviderInformation, getAttestationData } from "../utils/onChainStamps";
+
 type OnChainProviderType = {
-  providerHash: string;
+  providerName: PROVIDER_ID;
   credentialHash: string;
+  expirationDate: Date;
+  issuanceDate: Date;
 };
 
 export interface OnChainContextState {
@@ -25,64 +35,45 @@ const startingState: OnChainContextState = {
 // create our app context
 export const OnChainContext = createContext(startingState);
 
+export type DecodedProviderInfo = {
+  providerName: PROVIDER_ID;
+  providerNumber: number;
+};
+
 export const OnChainContextProvider = ({ children }: { children: any }) => {
-  const { address } = useContext(UserContext);
+  const { address, wallet } = useContext(UserContext);
   const [onChainProviders, setOnChainProviders] = useState<OnChainProviderType[]>([]);
 
   const fetchOnChainStatus = useCallback(async () => {
-    try {
-      if (!process.env.NEXT_PUBLIC_EAS_INDEXER_URL) {
-        throw new Error("NEXT_PUBLIC_EAS_INDEXER_URL is not defined");
+    if (wallet && address) {
+      try {
+        const passportAttestationData = await getAttestationData(wallet, address);
+
+        if (!passportAttestationData) {
+          return;
+        }
+
+        const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
+          passportAttestationData
+        );
+
+        const onChainProviders: OnChainProviderType[] = onChainProviderInfo
+          .sort((a, b) => a.providerNumber - b.providerNumber)
+          .map((providerInfo, index) => ({
+            providerName: providerInfo.providerName,
+            credentialHash: `v0.0.0:${Buffer.from(hashes[index].slice(2), "hex").toString("base64")}`,
+            expirationDate: new Date(expirationDates[index].toNumber() * 1000),
+            issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
+          }));
+
+        // Set the on-chain status
+        setOnChainProviders(onChainProviders);
+      } catch (e: any) {
+        datadogLogs.logger.error("Failed to check on-chain status", e);
+        datadogRum.addError(e);
       }
-
-      // Get the attestations for the given user
-      const res = await graphql_fetch(
-        new URL(process.env.NEXT_PUBLIC_EAS_INDEXER_URL),
-        `
-        query GetAttestations($where: AttestationWhereInput) {
-          attestations(where: $where) {
-            decodedDataJson
-          }
-        }
-      `,
-        {
-          where: {
-            recipient: { equals: ethers.getAddress(address!) },
-            attester: { equals: process.env.NEXT_PUBLIC_GITCOIN_ATTESTER_CONTRACT_ADDRESS },
-            schemaId: { equals: process.env.NEXT_PUBLIC_GITCOIN_VC_SCHEMA_UUID },
-          },
-        }
-      );
-
-      const attestations = res.data.attestations;
-
-      let providers: OnChainProviderType[] = [];
-
-      // Extract all providers
-      attestations.forEach((attestation: any) => {
-        const { decodedDataJson } = attestation;
-        const decodedData = JSON.parse(decodedDataJson);
-        const providerData = decodedData.find((data: any) => data.name === "provider");
-        const hashData = decodedData.find((data: any) => data.name === "hash");
-
-        const hexValue = hashData.value.value.slice(2); // Remove the "0x" prefix
-        const base64EncodedBytes = Buffer.from(hexValue, "hex").toString("base64");
-
-        if (providerData) {
-          providers.push({
-            providerHash: providerData.value.value,
-            credentialHash: `v0.0.0:${base64EncodedBytes}`,
-          });
-        }
-      });
-
-      // Set the on-chain status
-      setOnChainProviders(providers);
-    } catch (e: any) {
-      datadogLogs.logger.error("Failed to check on-chain status", e);
-      datadogRum.addError(e);
     }
-  }, [address]);
+  }, [wallet, address]);
 
   const refreshOnChainProviders = () => {
     return fetchOnChainStatus();
