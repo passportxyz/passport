@@ -8,7 +8,8 @@ export class GitcoinPlatform extends Platform {
   redirectUri: string = null;
 
   banner = {
-    heading: "The Gitcoin Grant stamp only recognizes contributions made during Gitcoin Grants rounds 1-15.",
+    heading:
+      "The Gitcoin Grant stamp recognizes contributions made during Gitcoin Grants rounds 1-15 (ended September 2022). Data from the latest rounds: Alpha (Jan '23) and Beta (April '23) is in the process of being added and should be added by Aug 15th.",
   };
 
   constructor(options: PlatformOptions = {}) {
