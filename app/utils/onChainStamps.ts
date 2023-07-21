@@ -39,7 +39,7 @@ export async function getAttestationData(wallet: WalletState, address: string): 
     eas.connect(ethersV5Provider);
 
     return await eas.getAttestation(passportUid);
-  } catch (e) {
+  } catch (e: any) {
     datadogLogs.logger.error("Failed to check on-chain status", e);
     datadogRum.addError(e);
   }
