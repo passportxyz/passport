@@ -7,7 +7,6 @@ import { getStampProviderFilters } from "../config/filters";
 import { OnChainContext } from "../context/onChainContext";
 import { LinkIcon } from "@heroicons/react/20/solid";
 import Toggle from "./Toggle";
-import { getProviderSpec } from "../utils/helpers";
 import { CeramicContext } from "../context/ceramicContext";
 
 type StampSelectorProps = {
