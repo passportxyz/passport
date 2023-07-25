@@ -330,9 +330,7 @@ export default function Dashboard() {
           )}
 
           <div className="ml-4 flex flex-col place-items-center gap-4 self-center md:flex-row">
-            <SyncToChainButton
-            // onClick={onOpen}
-            />
+            <SyncToChainButton />
             {passport ? (
               <button
                 data-testid="button-passport-json-mobile"
