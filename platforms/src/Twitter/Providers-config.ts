@@ -1,6 +1,5 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
 import { TwitterAccountAgeProvider } from "./Providers/twitterAccountAge";
-import { TwitterTweetDaysProvider } from "./Providers/twitterTweetDays";
 import * as legacyProviders from "./Providers/legacy";
 
 export const PlatformDetails: PlatformSpec = {
@@ -33,23 +32,6 @@ if (process.env.FF_NEW_TWITTER_STAMPS === "on" || process.env.NEXT_PUBLIC_FF_NEW
         },
       ],
     },
-    {
-      platformGroup: "Consistent Engagement",
-      providers: [
-        {
-          title: "Tweet on at least 30 distinct days",
-          name: "twitterTweetDaysGte#30",
-        },
-        {
-          title: "Tweets on at least 60 distinct days",
-          name: "twitterTweetDaysGte#60",
-        },
-        {
-          title: "Tweets on at least 120 distinct days",
-          name: "twitterTweetDaysGte#120",
-        },
-      ],
-    },
   ];
   providers = [
     new TwitterAccountAgeProvider({
@@ -60,15 +42,6 @@ if (process.env.FF_NEW_TWITTER_STAMPS === "on" || process.env.NEXT_PUBLIC_FF_NEW
     }),
     new TwitterAccountAgeProvider({
       threshold: "730",
-    }),
-    new TwitterTweetDaysProvider({
-      threshold: "30",
-    }),
-    new TwitterTweetDaysProvider({
-      threshold: "60",
-    }),
-    new TwitterTweetDaysProvider({
-      threshold: "120",
     }),
   ];
 } else {
