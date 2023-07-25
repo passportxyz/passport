@@ -330,10 +330,9 @@ export default function Dashboard() {
           )}
 
           <div className="ml-4 flex flex-col place-items-center gap-4 self-center md:flex-row">
-            {isOnChainSyncEnabled &&
-              (wallet?.chains[0].id === sepoliaChainId ||
-                wallet?.chains[0].id === hardhatChainId ||
-                wallet?.chains[0].id === baseGoerliChainId) && <SyncToChainButton />}
+            <SyncToChainButton
+            // onClick={onOpen}
+            />
             {passport ? (
               <button
                 data-testid="button-passport-json-mobile"
