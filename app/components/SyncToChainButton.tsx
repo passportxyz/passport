@@ -18,6 +18,7 @@ import { OnChainContext } from "../context/onChainContext";
 
 // --- Style Components
 import { DoneToastContent } from "./DoneToastContent";
+import { OnchainSidebar } from "./OnchainSidebar";
 
 export type ErrorDetailsProps = {
   msg: string;
@@ -72,6 +73,7 @@ const SyncToChainButton = () => {
   const { wallet, address } = useContext(UserContext);
   const { refreshOnChainProviders } = useContext(OnChainContext);
   const [syncingToChain, setSyncingToChain] = useState(false);
+  const [showSidebar, setShowSidebar] = useState<boolean>(false);
   const toast = useToast();
 
   const onSyncToChain = useCallback(async (wallet, passport) => {
