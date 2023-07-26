@@ -6,6 +6,7 @@ import { ethers, EthersError, isError, parseEther } from "ethers";
 
 // --Chakra UI Elements
 import { Spinner, useToast } from "@chakra-ui/react";
+import { LinkIcon } from "@heroicons/react/20/solid";
 
 import GitcoinVerifier from "../contracts/GitcoinVerifier.json";
 
@@ -250,13 +251,16 @@ const SyncToChainButton = () => {
   return (
     <button
       className="h-10 w-10 rounded-md border border-muted"
-      onClick={() => onSyncToChain(wallet, passport)}
+      // Add on-chain sidebar onOpen disclosure
+      // onClick={() => onOpen()}
       disabled={syncingToChain}
     >
       <div className={`${syncingToChain ? "block" : "hidden"} relative top-1`}>
         <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
       </div>
-      <div className={`${syncingToChain ? "hidden" : "block"}`}>{`⛓`}</div>
+      <div className={`${syncingToChain ? "hidden" : "block"} flex justify-center`}>
+        <LinkIcon width="24" />
+      </div>
     </button>
   );
 };
