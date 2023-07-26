@@ -27,7 +27,7 @@ export const sepoliaChainId = "0xaa36a7";
 export const hardhatChainId = "0x7a69";
 export const baseGoerliChainId = "0x14a33";
 
-const chains = [
+export const chains = [
   {
     id: "0x1",
     token: "ETH",

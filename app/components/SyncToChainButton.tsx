@@ -251,19 +251,21 @@ const SyncToChainButton = () => {
   }, []);
 
   return (
-    <button
-      className="h-10 w-10 rounded-md border border-muted"
-      // Add on-chain sidebar onOpen disclosure
-      // onClick={() => onOpen()}
-      disabled={syncingToChain}
-    >
-      <div className={`${syncingToChain ? "block" : "hidden"} relative top-1`}>
-        <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
-      </div>
-      <div className={`${syncingToChain ? "hidden" : "block"} flex justify-center`}>
-        <LinkIcon width="24" />
-      </div>
-    </button>
+    <>
+      <button
+        className="h-10 w-10 rounded-md border border-muted"
+        onClick={() => setShowSidebar(true)}
+        disabled={syncingToChain}
+      >
+        <div className={`${syncingToChain ? "block" : "hidden"} relative top-1`}>
+          <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
+        </div>
+        <div className={`${syncingToChain ? "hidden" : "block"} flex justify-center`}>
+          <LinkIcon width="24" />
+        </div>
+      </button>
+      <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
+    </>
   );
 };
 
