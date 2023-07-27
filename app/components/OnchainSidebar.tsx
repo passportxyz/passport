@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { chains } from "../utils/onboard";
 import { NetworkCard } from "./NetworkCard";
 
-export type OnchainSidebarProps = {
+type OnchainSidebarProps = {
   isOpen: boolean;
   onClose: () => void;
 };

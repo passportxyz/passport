@@ -6,6 +6,7 @@ import React from "react";
 import { render } from "@testing-library/react";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
+import { OnChainContextState } from "../context/onChainContext";
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -260,3 +261,29 @@ export const renderWithContext = (
       <CeramicContext.Provider value={ceramicContext}>{ui}</CeramicContext.Provider>
     </UserContext.Provider>
   );
+
+export const testOnChainContextState = (initialState?: Partial<OnChainContextState>): OnChainContextState => {
+  return {
+    onChainProviders: [
+      {
+        providerName: "githubAccountCreationGte#90",
+        credentialHash: "v0.0.0:rnutMGjNA2yPx/8xzJdn6sXDsY46lLUNV3DHAHoPJJg=",
+        expirationDate: new Date("2090-07-31T11:49:51.433Z"),
+        issuanceDate: new Date("2023-07-02T11:49:51.433Z"),
+      },
+      {
+        providerName: "githubAccountCreationGte#180",
+        credentialHash: "v0.0.0:rnutMGjNA2yPx/8xzJdn6sXDsY46lLUNV3DHAHoPJJg=",
+        expirationDate: new Date("2090-07-31T11:49:51.433Z"),
+        issuanceDate: new Date("2023-07-02T11:49:51.433Z"),
+      },
+      {
+        providerName: "githubAccountCreationGte#365",
+        credentialHash: "v0.0.0:rnutMGjNA2yPx/8xzJdn6sXDsY46lLUNV3DHAHoPJJg=",
+        expirationDate: new Date("2090-07-31T11:49:51.433Z"),
+        issuanceDate: new Date("2023-07-02T11:49:51.433Z"),
+      },
+    ],
+    refreshOnChainProviders: jest.fn(),
+  };
+};
