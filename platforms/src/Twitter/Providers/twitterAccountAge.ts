@@ -44,7 +44,9 @@ export class TwitterAccountAgeProvider implements Provider {
 
   async verify(payload: RequestPayload, context: TwitterContext): Promise<VerifiedPayload> {
     const twitterUserData = await verifyTwitterAccountAge(payload.proofs.sessionKey, payload.proofs.code, context);
-    const valid = checkTwitterAccountAge(parseInt(this._options.threshold), twitterUserData.createdAt);
+    const valid =
+      !twitterUserData.errors?.length &&
+      checkTwitterAccountAge(parseInt(this._options.threshold), twitterUserData.createdAt);
 
     const twitterUserId = context.twitter.id;
 

@@ -108,6 +108,10 @@ export const getTwitterUserData = async (context: TwitterContext, twitterClient:
         "user.fields": ["created_at"],
       });
 
+      return {
+        errors: [JSON.stringify(user)],
+      };
+
       if (!context.twitter) context.twitter = {};
 
       context.twitter.createdAt = user.data.created_at;
@@ -118,6 +122,9 @@ export const getTwitterUserData = async (context: TwitterContext, twitterClient:
         id: context.twitter.id,
       };
     } catch (_error) {
+      return {
+        errors: [JSON.stringify(_error)],
+      };
       const error = _error as ProviderError;
       if (error?.response?.status === 429) {
         return {
