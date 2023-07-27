@@ -257,9 +257,10 @@ export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps)
 
   return (
     <button
-      className="verify-btn center"
+      className={`verify-btn center ${!isActive && "cursor-not-allowed"}`}
       data-testid="card-menu-button"
       onClick={() => onSyncToChain(wallet, passport)}
+      disabled={!isActive}
     >
       <div className={`${syncingToChain ? "block" : "hidden"} relative top-1`}>
         <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
