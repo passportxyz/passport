@@ -61,54 +61,6 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: getProviderSpec("Poh", "Poh"),
         stamp: undefined,
       },
-      Twitter: {
-        providerSpec: getProviderSpec("Twitter", "Twitter"),
-        stamp: undefined,
-      },
-      TwitterFollowerGT100: {
-        providerSpec: getProviderSpec("Twitter", "TwitterFollowerGT100"),
-        stamp: undefined,
-      },
-      TwitterFollowerGT500: {
-        providerSpec: getProviderSpec("Twitter", "TwitterFollowerGT500"),
-        stamp: undefined,
-      },
-      TwitterFollowerGTE1000: {
-        providerSpec: getProviderSpec("Twitter", "TwitterFollowerGTE1000"),
-        stamp: undefined,
-      },
-      TwitterFollowerGT5000: {
-        providerSpec: getProviderSpec("Twitter", "TwitterFollowerGT5000"),
-        stamp: undefined,
-      },
-      TwitterTweetGT10: {
-        providerSpec: getProviderSpec("Twitter", "TwitterTweetGT10"),
-        stamp: undefined,
-      },
-      "twitterAccountAgeGte#180": {
-        providerSpec: getProviderSpec("Twitter", "twitterAccountAgeGte#180"),
-        stamp: undefined,
-      },
-      "twitterAccountAgeGte#365": {
-        providerSpec: getProviderSpec("Twitter", "twitterAccountAgeGte#365"),
-        stamp: undefined,
-      },
-      "twitterAccountAgeGte#730": {
-        providerSpec: getProviderSpec("Twitter", "twitterAccountAgeGte#730"),
-        stamp: undefined,
-      },
-      "twitterTweetDaysGte#30": {
-        providerSpec: getProviderSpec("Twitter", "twitterTweetDaysGte#30"),
-        stamp: undefined,
-      },
-      "twitterTweetDaysGte#60": {
-        providerSpec: getProviderSpec("Twitter", "twitterTweetDaysGte#60"),
-        stamp: undefined,
-      },
-      "twitterTweetDaysGte#120": {
-        providerSpec: getProviderSpec("Twitter", "twitterTweetDaysGte#120"),
-        stamp: undefined,
-      },
       POAP: {
         providerSpec: getProviderSpec("POAP", "POAP"),
         stamp: undefined,
@@ -123,30 +75,6 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
       },
       Brightid: {
         providerSpec: getProviderSpec("Brightid", "Brightid"),
-        stamp: undefined,
-      },
-      Github: {
-        providerSpec: getProviderSpec("Github", "Github"),
-        stamp: undefined,
-      },
-      TenOrMoreGithubFollowers: {
-        providerSpec: getProviderSpec("Github", "TenOrMoreGithubFollowers"),
-        stamp: undefined,
-      },
-      FiftyOrMoreGithubFollowers: {
-        providerSpec: getProviderSpec("Github", "FiftyOrMoreGithubFollowers"),
-        stamp: undefined,
-      },
-      ForkedGithubRepoProvider: {
-        providerSpec: getProviderSpec("Github", "ForkedGithubRepoProvider"),
-        stamp: undefined,
-      },
-      StarredGithubRepoProvider: {
-        providerSpec: getProviderSpec("Github", "StarredGithubRepoProvider"),
-        stamp: undefined,
-      },
-      FiveOrMoreGithubRepos: {
-        providerSpec: getProviderSpec("Github", "FiveOrMoreGithubRepos"),
         stamp: undefined,
       },
       Linkedin: {
