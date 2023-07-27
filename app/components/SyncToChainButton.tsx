@@ -1,32 +1,33 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-// --- React Methods
-import React, { useCallback, useContext, useState } from "react";
-import axios from "axios";
-import { ethers, EthersError, isError, parseEther } from "ethers";
-
-// --Chakra UI Elements
 import { Spinner, useToast } from "@chakra-ui/react";
-import { LinkIcon } from "@heroicons/react/20/solid";
-
-import GitcoinVerifier from "../contracts/GitcoinVerifier.json";
-
+import { EasPayload, VerifiableCredential } from "@gitcoin/passport-types";
+import { ethers, EthersError, isError } from "ethers";
+import { useCallback, useContext, useState } from "react";
 import { CeramicContext } from "../context/ceramicContext";
-import { UserContext } from "../context/userContext";
-
-import { VerifiableCredential, EasPayload } from "@gitcoin/passport-types";
 import { OnChainContext } from "../context/onChainContext";
-
-// --- Style Components
+import { UserContext } from "../context/userContext";
+import GitcoinVerifier from "../contracts/GitcoinVerifier.json";
 import { DoneToastContent } from "./DoneToastContent";
-import { OnchainSidebar } from "./OnchainSidebar";
+import { OnChainStatus } from "./NetworkCard";
+import axios from "axios";
+
+export function getButtonMsg(onChainStatus: OnChainStatus): string {
+  switch (onChainStatus) {
+    case OnChainStatus.NOT_MOVED:
+      return "Up to date";
+    case OnChainStatus.MOVED_OUT_OF_DATE:
+      return "Update";
+    case OnChainStatus.MOVED_UP_TO_DATE:
+      return "Up to date";
+  }
+}
+
+const fail = "../assets/verification-failed-bright.svg";
+const success = "../../assets/check-icon2.svg";
 
 export type ErrorDetailsProps = {
   msg: string;
   ethersError: EthersError;
 };
-
-const fail = "../assets/verification-failed-bright.svg";
-const success = "../../assets/check-icon2.svg";
 
 const ErrorDetails = ({ msg, ethersError }: ErrorDetailsProps): JSX.Element => {
   const [displayDetails, setDisplayDetails] = useState<string>("none");
@@ -68,12 +69,16 @@ const ErrorDetails = ({ msg, ethersError }: ErrorDetailsProps): JSX.Element => {
   );
 };
 
-const SyncToChainButton = () => {
+export type SyncToChainProps = {
+  onChainStatus: OnChainStatus;
+  isActive: boolean;
+};
+
+export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps): JSX.Element {
   const { passport } = useContext(CeramicContext);
   const { wallet, address } = useContext(UserContext);
   const { refreshOnChainProviders } = useContext(OnChainContext);
   const [syncingToChain, setSyncingToChain] = useState(false);
-  const [showSidebar, setShowSidebar] = useState<boolean>(false);
   const toast = useToast();
 
   const onSyncToChain = useCallback(async (wallet, passport) => {
@@ -250,23 +255,25 @@ const SyncToChainButton = () => {
     }
   }, []);
 
-  return (
-    <>
-      <button
-        className="h-10 w-10 rounded-md border border-muted"
-        onClick={() => setShowSidebar(true)}
-        disabled={syncingToChain}
-      >
-        <div className={`${syncingToChain ? "block" : "hidden"} relative top-1`}>
-          <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
-        </div>
-        <div className={`${syncingToChain ? "hidden" : "block"} flex justify-center`}>
-          <LinkIcon width="24" />
-        </div>
-      </button>
-      <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
-    </>
-  );
-};
+  const disableBtn = !isActive || onChainStatus === OnChainStatus.MOVED_UP_TO_DATE;
 
-export default SyncToChainButton;
+  return (
+    <button
+      className={`verify-btn center ${disableBtn && "cursor-not-allowed"}`}
+      data-testid="card-menu-button"
+      onClick={() => onSyncToChain(wallet, passport)}
+      disabled={disableBtn}
+    >
+      <div className={`${syncingToChain ? "block" : "hidden"} relative top-1`}>
+        <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
+      </div>
+      <span
+        className={`mx-2 translate-y-[1px] ${syncingToChain ? "hidden" : "block"} ${
+          onChainStatus === OnChainStatus.MOVED_UP_TO_DATE ? "text-accent-3" : "text-muted"
+        }`}
+      >
+        {isActive ? getButtonMsg(onChainStatus) : "Coming Soon"}
+      </span>
+    </button>
+  );
+}

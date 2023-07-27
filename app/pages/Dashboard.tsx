@@ -38,7 +38,7 @@ import { EthereumAuthProvider } from "@self.id/web";
 import { RefreshStampModal } from "../components/RefreshStampModal";
 import { ExpiredStampModal } from "../components/ExpiredStampModal";
 import ProcessingPopup from "../components/ProcessingPopup";
-import SyncToChainButton from "../components/SyncToChainButton";
+import InitiateOnChainButton from "../components/InitiateOnChainButton";
 import { getFilterName } from "../config/filters";
 import { baseGoerliChainId, hardhatChainId, sepoliaChainId } from "../utils/onboard";
 import { Button } from "../components/Button";
@@ -330,7 +330,7 @@ export default function Dashboard() {
           )}
 
           <div className="ml-4 flex flex-col place-items-center gap-4 self-center md:flex-row">
-            <SyncToChainButton />
+            {isOnChainSyncEnabled && <InitiateOnChainButton />}
             {passport ? (
               <button
                 data-testid="button-passport-json-mobile"

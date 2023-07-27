@@ -32,38 +32,39 @@ describe("ExpiredStampModal", () => {
       {} as UserContextState,
       {
         ...mockCeramicContext,
-        expiredProviders: [
-          "Github",
-          "FiveOrMoreGithubRepos",
-          "ForkedGithubRepoProvider",
-          "StarredGithubRepoProvider",
-          "TenOrMoreGithubFollowers",
-          "FiftyOrMoreGithubFollowers",
-          "FirstEthTxnProvider",
-          "EthGTEOneTxnProvider",
-        ],
+        expiredProviders: ["EthGTEOneTxnProvider"],
       },
       <ExpiredStampModal isOpen={true} onClose={() => {}} />
     );
 
-    expect(screen.getAllByText("Github").length).toBe(1);
     expect(screen.getAllByText("ETH").length).toBe(1);
   });
   it("should get a list of all PROVIDER_ID for a given platform", () => {
-    expect(getProviderIdsFromPlatformId("Github")).toEqual([
-      "Github",
-      "FiveOrMoreGithubRepos",
-      "ForkedGithubRepoProvider",
-      "StarredGithubRepoProvider",
-      "TenOrMoreGithubFollowers",
-      "FiftyOrMoreGithubFollowers",
+    expect(getProviderIdsFromPlatformId("Gitcoin")).toEqual([
+      "GitcoinContributorStatistics#numGrantsContributeToGte#1",
+      "GitcoinContributorStatistics#numGrantsContributeToGte#10",
+      "GitcoinContributorStatistics#numGrantsContributeToGte#25",
+      "GitcoinContributorStatistics#numGrantsContributeToGte#100",
+      "GitcoinContributorStatistics#totalContributionAmountGte#10",
+      "GitcoinContributorStatistics#totalContributionAmountGte#100",
+      "GitcoinContributorStatistics#totalContributionAmountGte#1000",
+      "GitcoinContributorStatistics#numGr14ContributionsGte#1",
+      "GitcoinContributorStatistics#numRoundsContributedToGte#1",
+      "GitcoinGranteeStatistics#numOwnedGrants#1",
+      "GitcoinGranteeStatistics#numGrantContributors#10",
+      "GitcoinGranteeStatistics#numGrantContributors#25",
+      "GitcoinGranteeStatistics#numGrantContributors#100",
+      "GitcoinGranteeStatistics#totalContributionAmount#100",
+      "GitcoinGranteeStatistics#totalContributionAmount#1000",
+      "GitcoinGranteeStatistics#totalContributionAmount#10000",
+      "GitcoinGranteeStatistics#numGrantsInEcoAndCauseRound#1",
     ]);
   });
   it("should delete all stamps within each expired platform", async () => {
     const handleDeleteStamps = jest.fn();
     renderWithContext(
       {} as UserContextState,
-      { ...mockCeramicContext, expiredProviders: ["Github", "Ens", "Linkedin", "Facebook"], handleDeleteStamps },
+      { ...mockCeramicContext, expiredProviders: ["Ens", "Linkedin", "Facebook"], handleDeleteStamps },
       <ExpiredStampModal isOpen={true} onClose={() => {}} />
     );
 
@@ -74,18 +75,7 @@ describe("ExpiredStampModal", () => {
     deleteButton.click();
     expect(deleteButton.getAttribute("disabled")).not.toBeNull();
 
-    expect(handleDeleteStamps).toHaveBeenCalledWith([
-      "Github",
-      "FiveOrMoreGithubRepos",
-      "ForkedGithubRepoProvider",
-      "StarredGithubRepoProvider",
-      "TenOrMoreGithubFollowers",
-      "FiftyOrMoreGithubFollowers",
-      "Facebook",
-      "FacebookProfilePicture",
-      "Linkedin",
-      "Ens",
-    ]);
+    expect(handleDeleteStamps).toHaveBeenCalledWith(["Facebook", "FacebookProfilePicture", "Linkedin", "Ens"]);
     await waitFor(() => expect(deleteButton.getAttribute("disabled")).toBeNull());
   });
 });

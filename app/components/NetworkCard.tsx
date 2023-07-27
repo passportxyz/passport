@@ -2,6 +2,8 @@ import { Stamp } from "@gitcoin/passport-types";
 import { useContext, useEffect, useState } from "react";
 import { CeramicContext, AllProvidersState, ProviderState } from "../context/ceramicContext";
 import { OnChainContext, OnChainProviderType } from "../context/onChainContext";
+import { UserContext } from "../context/userContext";
+import { SyncToChainButton } from "./SyncToChainButton";
 
 type Chain = {
   id: string;
@@ -18,40 +20,32 @@ export enum OnChainStatus {
 }
 
 type ProviderWithStamp = ProviderState & { stamp: Stamp };
-
 export const checkOnChainStatus = (
   allProvidersState: AllProvidersState,
   onChainProviders: OnChainProviderType[]
 ): OnChainStatus => {
-  if (onChainProviders.length === 0) {
-    return OnChainStatus.NOT_MOVED;
-  }
+  if (onChainProviders.length === 0) return OnChainStatus.NOT_MOVED;
+
   const verifiedDbProviders: ProviderWithStamp[] = Object.values(allProvidersState).filter(
     (provider): provider is ProviderWithStamp => provider.stamp !== undefined
   );
 
-  const onChainDifference = verifiedDbProviders.filter(
-    (provider) =>
-      !onChainProviders.some(
+  const [equivalentProviders, differentProviders] = verifiedDbProviders.reduce(
+    ([eq, diff], provider): [ProviderWithStamp[], ProviderWithStamp[]] => {
+      const isEquivalent = onChainProviders.some(
         (onChainProvider) =>
           onChainProvider.providerName === provider.stamp.provider &&
           onChainProvider.credentialHash === provider.stamp.credential.credentialSubject?.hash
-      )
+      );
+      return isEquivalent ? [[...eq, provider], diff] : [eq, [...diff, provider]];
+    },
+    [[], []] as [ProviderWithStamp[], ProviderWithStamp[]]
   );
 
-  return onChainDifference.length > 0 ? OnChainStatus.MOVED_OUT_OF_DATE : OnChainStatus.MOVED_UP_TO_DATE;
+  return equivalentProviders.length === onChainProviders.length && differentProviders.length === 0
+    ? OnChainStatus.MOVED_UP_TO_DATE
+    : OnChainStatus.MOVED_OUT_OF_DATE;
 };
-
-export function getButtonMsg(onChainStatus: OnChainStatus): string {
-  switch (onChainStatus) {
-    case OnChainStatus.NOT_MOVED:
-      return "Up to date";
-    case OnChainStatus.MOVED_OUT_OF_DATE:
-      return "Update";
-    case OnChainStatus.MOVED_UP_TO_DATE:
-      return "Up to date";
-  }
-}
 
 export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChains: string[] }) {
   const { allProvidersState } = useContext(CeramicContext);
@@ -65,14 +59,15 @@ export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChain
 
   useEffect(() => {
     const checkStatus = async () => {
-      const stampStatus = await checkOnChainStatus(allProvidersState, onChainProviders);
+      const savedNetworkProviders = onChainProviders[chain.id] || [];
+      const stampStatus = checkOnChainStatus(allProvidersState, savedNetworkProviders);
       setOnChainStatus(stampStatus);
     };
     checkStatus();
-  }, [allProvidersState, onChainProviders]);
+  }, [allProvidersState, chain.id, onChainProviders]);
 
   return (
-    <div className="border border-accent-2 bg-background-2 p-0">
+    <div className="mb-6 border border-accent-2 bg-background-2 p-0">
       <div className="mx-4 my-2">
         <div className="flex w-full">
           <div className="mr-4">
@@ -86,11 +81,7 @@ export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChain
           </div>
         </div>
       </div>
-      <button className="verify-btn center" data-testid="card-menu-button">
-        <span className="mx-2 translate-y-[1px] text-muted">
-          {isActive ? getButtonMsg(onChainStatus) : "Coming Soon"}
-        </span>
-      </button>
+      <SyncToChainButton onChainStatus={onChainStatus} isActive={isActive} />
     </div>
   );
 }
