@@ -15,13 +15,15 @@ import {
 import { CeramicContextState, IsLoadingPassportState } from "../../context/ceramicContext";
 import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
 
-jest.mock("../../utils/onboard.ts");
+jest.mock("../../utils/onboard.ts", () => ({
+  chains: [],
+}));
 
 jest.mock("../../components/RefreshStampModal", () => ({
   RefreshStampModal: () => <div>Refresh Modal</div>,
 }));
 
-jest.mock("../../components/SyncToChainButton", () => () => <div>Sync to Chain</div>);
+jest.mock("../../components/SyncToChainButton", () => <div>Sync to Chain</div>);
 
 jest.mock("@self.id/framework", () => {
   return {
