@@ -11,7 +11,7 @@ type Chain = {
   icon: string;
 };
 
-enum OnChainStatus {
+export enum OnChainStatus {
   NOT_MOVED,
   MOVED_OUT_OF_DATE,
   MOVED_UP_TO_DATE,
@@ -43,7 +43,14 @@ export const checkOnChainStatus = (
 };
 
 export function getButtonMsg(onChainStatus: OnChainStatus): string {
-  return "Up to date";
+  switch (onChainStatus) {
+    case OnChainStatus.NOT_MOVED:
+      return "Up to date";
+    case OnChainStatus.MOVED_OUT_OF_DATE:
+      return "Update";
+    case OnChainStatus.MOVED_UP_TO_DATE:
+      return "Up to date";
+  }
 }
 
 export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChains: string[] }) {
