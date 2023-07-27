@@ -1,4 +1,5 @@
 import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerOverlay, DrawerCloseButton } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import { chains } from "../utils/onboard";
 import { NetworkCard } from "./NetworkCard";
 
@@ -8,7 +9,16 @@ export type OnchainSidebarProps = {
 };
 
 export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
-  console.log({ chains });
+  const activeOnChainPassportChains = process.env.NEXT_PUBLIC_ACTIVE_ON_CHAIN_PASSPORT_CHAINIDS;
+  const [activeChains, setActiveChains] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (activeOnChainPassportChains) {
+      const chainsArray = JSON.parse(activeOnChainPassportChains);
+      setActiveChains(chainsArray);
+    }
+  }, [activeOnChainPassportChains]);
+
   return (
     <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose}>
       <DrawerOverlay />
@@ -32,7 +42,7 @@ export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
         </DrawerHeader>
         <DrawerBody>
           {chains.map((chain) => (
-            <NetworkCard key={chain.id} />
+            <NetworkCard key={chain.id} chain={chain} activeChains={activeChains} />
           ))}
         </DrawerBody>
       </DrawerContent>

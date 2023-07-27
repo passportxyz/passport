@@ -33,6 +33,7 @@ export const chains = [
     token: "ETH",
     label: "Ethereum Mainnet",
     rpcUrl: MAINNET_RPC_URL,
+    icon: "./assets/eth-network-logo.svg",
   },
 ];
 
@@ -42,18 +43,21 @@ if (process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on") {
     token: "ETH",
     label: "Sepolia",
     rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SEPOLIA_RPC_URL as string,
+    icon: "./assets/eth-network-logo.svg",
   });
   chains.push({
     id: hardhatChainId,
     token: "ETH",
     label: "Hardhat",
     rpcUrl: "http://127.0.0.1:8545/",
+    icon: "./assets/eth-network-logo.svg",
   });
   chains.push({
     id: "0x14a33",
     token: "ETH",
     label: "Base Goerli",
     rpcUrl: "https://goerli.base.org/",
+    icon: "./assets/goerli-base-logo.svg",
   });
 }
 
@@ -63,12 +67,14 @@ if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
     token: "MATIC",
     label: "Polygon Mainnet",
     rpcUrl: "https://matic-mainnet.chainstacklabs.com",
+    icon: "./assets/eth-network-logo.svg",
   });
   chains.push({
     id: "0xfa",
     token: "FTM",
     label: "Fantom Mainnet",
     rpcUrl: "https://rpc.ftm.tools/",
+    icon: "./assets/eth-network-logo.svg",
   });
 }
 

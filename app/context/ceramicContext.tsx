@@ -234,11 +234,13 @@ export enum IsLoadingPassportState {
   FailedToConnect,
 }
 
+export type ProviderState = {
+  providerSpec: ProviderSpec;
+  stamp?: Stamp;
+};
+
 export type AllProvidersState = {
-  [provider in PROVIDER_ID]?: {
-    providerSpec: ProviderSpec;
-    stamp?: Stamp;
-  };
+  [provider in PROVIDER_ID]?: ProviderState;
 };
 
 // Generate {<stampName>: {providerSpec, stamp}} for all stamps
