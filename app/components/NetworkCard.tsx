@@ -20,33 +20,35 @@ export enum OnChainStatus {
 }
 
 type ProviderWithStamp = ProviderState & { stamp: Stamp };
-
 export const checkOnChainStatus = (
   allProvidersState: AllProvidersState,
   onChainProviders: OnChainProviderType[]
 ): OnChainStatus => {
-  if (onChainProviders.length === 0) {
-    return OnChainStatus.NOT_MOVED;
-  }
+  if (onChainProviders.length === 0) return OnChainStatus.NOT_MOVED;
+
   const verifiedDbProviders: ProviderWithStamp[] = Object.values(allProvidersState).filter(
     (provider): provider is ProviderWithStamp => provider.stamp !== undefined
   );
 
-  const onChainDifference = verifiedDbProviders.filter(
-    (provider) =>
-      !onChainProviders.some(
+  const [equivalentProviders, differentProviders] = verifiedDbProviders.reduce(
+    ([eq, diff], provider): [ProviderWithStamp[], ProviderWithStamp[]] => {
+      const isEquivalent = onChainProviders.some(
         (onChainProvider) =>
           onChainProvider.providerName === provider.stamp.provider &&
           onChainProvider.credentialHash === provider.stamp.credential.credentialSubject?.hash
-      )
+      );
+      return isEquivalent ? [[...eq, provider], diff] : [eq, [...diff, provider]];
+    },
+    [[], []] as [ProviderWithStamp[], ProviderWithStamp[]]
   );
 
-  return onChainDifference.length > 0 ? OnChainStatus.MOVED_OUT_OF_DATE : OnChainStatus.MOVED_UP_TO_DATE;
+  return equivalentProviders.length === onChainProviders.length && differentProviders.length === 0
+    ? OnChainStatus.MOVED_UP_TO_DATE
+    : OnChainStatus.MOVED_OUT_OF_DATE;
 };
 
 export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChains: string[] }) {
   const { allProvidersState } = useContext(CeramicContext);
-  const { wallet } = useContext(UserContext);
   const { onChainProviders } = useContext(OnChainContext);
   const [isActive, setIsActive] = useState(false);
   const [onChainStatus, setOnChainStatus] = useState<OnChainStatus>(OnChainStatus.NOT_MOVED);
@@ -57,14 +59,12 @@ export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChain
 
   useEffect(() => {
     const checkStatus = async () => {
-      const savedNetworkProviders = onChainProviders[chain.id];
-      const stampStatus = savedNetworkProviders
-        ? await checkOnChainStatus(allProvidersState, onChainProviders[chain.id])
-        : OnChainStatus.NOT_MOVED;
+      const savedNetworkProviders = onChainProviders[chain.id] || [];
+      const stampStatus = checkOnChainStatus(allProvidersState, savedNetworkProviders);
       setOnChainStatus(stampStatus);
     };
     checkStatus();
-  }, [allProvidersState, onChainProviders]);
+  }, [allProvidersState, chain.id, onChainProviders]);
 
   return (
     <div className="mb-6 border border-accent-2 bg-background-2 p-0">
