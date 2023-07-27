@@ -21,7 +21,6 @@ import { pillLocalStorage } from "../context/userContext";
 import { JsonOutputModal } from "./JsonOutputModal";
 import { RemoveStampModal } from "./RemoveStampModal";
 import { getStampProviderFilters } from "../config/filters";
-import { getProviderSpec } from "../utils/helpers";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -50,7 +49,7 @@ export const PlatformCard = ({
 }: PlatformCardProps): JSX.Element => {
   // import all providers
   const { allProvidersState, passportHasCacaoError, handleDeleteStamps } = useContext(CeramicContext);
-  const { onChainProviders } = useContext(OnChainContext);
+  const { activeChainProviders } = useContext(OnChainContext);
 
   // stamp filter
   const router = useRouter();
@@ -78,7 +77,7 @@ export const PlatformCard = ({
     if (!providers.length) return false;
 
     return providers.some((provider: PROVIDER_ID) => {
-      const providerObj = onChainProviders.find((p) => p.providerName === provider);
+      const providerObj = activeChainProviders.find((p) => p.providerName === provider);
       if (providerObj) {
         return providerObj.credentialHash === allProvidersState[provider]?.stamp?.credential.credentialSubject.hash;
       }

@@ -1,7 +1,6 @@
 // --- React Methods
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 
-import { ethers } from "ethers";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { UserContext } from "./userContext";
@@ -9,6 +8,10 @@ import { UserContext } from "./userContext";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 import { decodeProviderInformation, getAttestationData } from "../utils/onChainStamps";
+
+export interface OnChainProviderMap {
+  [key: string]: OnChainProviderType[];
+}
 
 export type OnChainProviderType = {
   providerName: PROVIDER_ID;
@@ -18,12 +21,14 @@ export type OnChainProviderType = {
 };
 
 export interface OnChainContextState {
-  onChainProviders: OnChainProviderType[];
+  onChainProviders: OnChainProviderMap;
+  activeChainProviders: OnChainProviderType[];
   refreshOnChainProviders: () => Promise<void>;
 }
 
 const startingState: OnChainContextState = {
-  onChainProviders: [],
+  onChainProviders: {},
+  activeChainProviders: [],
   refreshOnChainProviders: async (): Promise<void> => {},
 };
 
@@ -37,7 +42,8 @@ export type DecodedProviderInfo = {
 
 export const OnChainContextProvider = ({ children }: { children: any }) => {
   const { address, wallet } = useContext(UserContext);
-  const [onChainProviders, setOnChainProviders] = useState<OnChainProviderType[]>([]);
+  const [onChainProviders, setOnChainProviders] = useState<OnChainProviderMap>({});
+  const [activeChainProviders, setactiveChainProviders] = useState<OnChainProviderType[]>([]);
 
   const fetchOnChainStatus = useCallback(async () => {
     if (wallet && address) {
@@ -60,9 +66,14 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
             expirationDate: new Date(expirationDates[index].toNumber() * 1000),
             issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
           }));
-
+        const chainId = wallet.chains[0].id;
         // Set the on-chain status
-        setOnChainProviders(onChainProviders);
+        setOnChainProviders((prevState) => ({
+          ...prevState,
+          [chainId]: onChainProviders,
+        }));
+
+        setactiveChainProviders(onChainProviders);
       } catch (e: any) {
         datadogLogs.logger.error("Failed to check on-chain status", e);
         datadogRum.addError(e);
@@ -83,6 +94,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   // use props as a way to pass configuration values
   const providerProps = {
     onChainProviders,
+    activeChainProviders,
     refreshOnChainProviders,
   };
 

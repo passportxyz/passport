@@ -264,7 +264,8 @@ export const renderWithContext = (
 
 export const testOnChainContextState = (initialState?: Partial<OnChainContextState>): OnChainContextState => {
   return {
-    onChainProviders: [
+    onChainProviders: {},
+    activeChainProviders: [
       {
         providerName: "githubAccountCreationGte#90",
         credentialHash: "v0.0.0:rnutMGjNA2yPx/8xzJdn6sXDsY46lLUNV3DHAHoPJJg=",

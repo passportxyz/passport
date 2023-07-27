@@ -2,6 +2,7 @@ import { Stamp } from "@gitcoin/passport-types";
 import { useContext, useEffect, useState } from "react";
 import { CeramicContext, AllProvidersState, ProviderState } from "../context/ceramicContext";
 import { OnChainContext, OnChainProviderType } from "../context/onChainContext";
+import { UserContext } from "../context/userContext";
 import { SyncToChainButton } from "./SyncToChainButton";
 
 type Chain = {
@@ -45,6 +46,7 @@ export const checkOnChainStatus = (
 
 export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChains: string[] }) {
   const { allProvidersState } = useContext(CeramicContext);
+  const { wallet } = useContext(UserContext);
   const { onChainProviders } = useContext(OnChainContext);
   const [isActive, setIsActive] = useState(false);
   const [onChainStatus, setOnChainStatus] = useState<OnChainStatus>(OnChainStatus.NOT_MOVED);
@@ -55,7 +57,10 @@ export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChain
 
   useEffect(() => {
     const checkStatus = async () => {
-      const stampStatus = await checkOnChainStatus(allProvidersState, onChainProviders);
+      const savedNetworkProviders = onChainProviders[chain.id];
+      const stampStatus = savedNetworkProviders
+        ? await checkOnChainStatus(allProvidersState, onChainProviders[chain.id])
+        : OnChainStatus.NOT_MOVED;
       setOnChainStatus(stampStatus);
     };
     checkStatus();

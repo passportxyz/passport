@@ -26,7 +26,7 @@ export function StampSelector({
   setSelectedProviders,
 }: StampSelectorProps) {
   const { allProvidersState } = useContext(CeramicContext);
-  const { onChainProviders } = useContext(OnChainContext);
+  const { activeChainProviders } = useContext(OnChainContext);
   // stamp filter
   const router = useRouter();
   const { filter } = router.query;
@@ -35,7 +35,7 @@ export function StampSelector({
   // check if provider is on-chain
   const isProviderOnChain = (provider: PROVIDER_ID) => {
     if (currentPlatform) {
-      const providerObj = onChainProviders.find((p) => p.providerName === provider);
+      const providerObj = activeChainProviders.find((p) => p.providerName === provider);
       if (providerObj) {
         return providerObj.credentialHash === allProvidersState[provider]?.stamp?.credential.credentialSubject.hash;
       }

@@ -255,17 +255,23 @@ export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps)
     }
   }, []);
 
+  const disableBtn = !isActive || onChainStatus === OnChainStatus.MOVED_UP_TO_DATE;
+
   return (
     <button
-      className={`verify-btn center ${!isActive && "cursor-not-allowed"}`}
+      className={`verify-btn center ${disableBtn && "cursor-not-allowed"}`}
       data-testid="card-menu-button"
       onClick={() => onSyncToChain(wallet, passport)}
-      disabled={!isActive}
+      disabled={disableBtn}
     >
       <div className={`${syncingToChain ? "block" : "hidden"} relative top-1`}>
         <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
       </div>
-      <span className={`mx-2 translate-y-[1px] text-muted ${syncingToChain ? "hidden" : "block"}`}>
+      <span
+        className={`mx-2 translate-y-[1px] ${syncingToChain ? "hidden" : "block"} ${
+          onChainStatus === OnChainStatus.MOVED_UP_TO_DATE ? "text-accent-3" : "text-muted"
+        }`}
+      >
         {isActive ? getButtonMsg(onChainStatus) : "Coming Soon"}
       </span>
     </button>
