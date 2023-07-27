@@ -6,16 +6,11 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { UserContext } from "./userContext";
 
-import { SchemaEncoder, EAS } from "@ethereum-attestation-service/eas-sdk";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
-import { PROVIDER_ID, StampBit } from "@gitcoin/passport-types";
-
-import { BigNumber } from "@ethersproject/bignumber";
-
-import axios from "axios";
 import { decodeProviderInformation, getAttestationData } from "../utils/onChainStamps";
 
-type OnChainProviderType = {
+export type OnChainProviderType = {
   providerName: PROVIDER_ID;
   credentialHash: string;
   expirationDate: Date;
