@@ -101,7 +101,7 @@ export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChain
           </div>
         </div>
       </div>
-      <SyncToChainButton onChainStatus={onChainStatus} isActive={isActive} />
+      <SyncToChainButton onChainStatus={onChainStatus} isActive={isActive} chainId={chain.id} />
     </div>
   );
 }

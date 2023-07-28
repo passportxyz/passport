@@ -9,6 +9,7 @@ import GitcoinVerifier from "../contracts/GitcoinVerifier.json";
 import { DoneToastContent } from "./DoneToastContent";
 import { OnChainStatus } from "./NetworkCard";
 import axios from "axios";
+import { useSetChain } from "@web3-onboard/react";
 
 export function getButtonMsg(onChainStatus: OnChainStatus): string {
   switch (onChainStatus) {
@@ -72,14 +73,25 @@ export const ErrorDetails = ({ msg, ethersError }: ErrorDetailsProps): JSX.Eleme
 export type SyncToChainProps = {
   onChainStatus: OnChainStatus;
   isActive: boolean;
+  chainId: string;
 };
 
-export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps): JSX.Element {
+export function SyncToChainButton({ onChainStatus, isActive, chainId }: SyncToChainProps): JSX.Element {
   const { passport } = useContext(CeramicContext);
   const { wallet, address } = useContext(UserContext);
   const { readOnChainData } = useContext(OnChainContext);
+  const [{ connectedChain }, setChain] = useSetChain();
   const [syncingToChain, setSyncingToChain] = useState(false);
   const toast = useToast();
+
+  const onInitiateSyncToChain = useCallback(async (wallet, passport) => {
+    if (connectedChain && connectedChain?.id !== chainId) {
+      const setChainResponse = await setChain({ chainId });
+      setChainResponse && (await onSyncToChain(wallet, passport));
+      return;
+    }
+    await onSyncToChain(wallet, passport);
+  }, []);
 
   const onSyncToChain = useCallback(async (wallet, passport) => {
     if (passport && wallet) {
@@ -261,7 +273,7 @@ export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps)
     <button
       className={`verify-btn center ${disableBtn && "cursor-not-allowed"}`}
       data-testid="card-menu-button"
-      onClick={() => onSyncToChain(wallet, passport)}
+      onClick={() => onInitiateSyncToChain(wallet, passport)}
       disabled={disableBtn}
     >
       <div className={`${syncingToChain ? "block" : "hidden"} relative top-1`}>
