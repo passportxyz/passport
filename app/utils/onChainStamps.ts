@@ -1,5 +1,5 @@
 import { WalletState } from "@web3-onboard/core";
-import { BrowserProvider, Contract } from "ethers";
+import { BrowserProvider, Contract, formatUnits, BigNumberish } from "ethers";
 import { BigNumber } from "@ethersproject/bignumber";
 import axios from "axios";
 import GitcoinResolver from "../contracts/GitcoinResolver.json";
@@ -97,38 +97,13 @@ export async function decodeProviderInformation(attestation: Attestation): Promi
 }
 
 export async function decodeScoreAttestation(attestation: Attestation): Promise<number> {
-  const schemaEncoder = new SchemaEncoder(
-    "uint256[] providers,bytes32[] hashes,uint64[] issuanceDates,uint64[] expirationDates,uint16 providerMapVersion"
-  );
+  const schemaEncoder = new SchemaEncoder("uint256 score,uint32 scorer_id,uint8 score_decimals");
   const decodedData = schemaEncoder.decodeData(attestation.data);
-  const providerBitMapInfo = (await axios.get(
-    `${process.env.NEXT_PUBLIC_PASSPORT_IAM_STATIC_URL}/providerBitMapInfo.json`
-  )) as {
-    data: StampBit[];
-  };
 
-  type DecodedProviderInfo = {
-    providerName: PROVIDER_ID;
-    providerNumber: number;
-  };
+  const score_as_integer = (decodedData.find(({ name }) => name === "score")?.value.value as BigNumber)._hex as string;
+  const score_decimals = decodedData.find(({ name }) => name === "score_decimals")?.value.value as number;
 
-  const providers = decodedData.find((data) => data.name === "providers")?.value.value as BigNumber[];
-  const issuanceDates = decodedData.find((data) => data.name === "issuanceDates")?.value.value as BigNumber[];
-  const expirationDates = decodedData.find((data) => data.name === "expirationDates")?.value.value as BigNumber[];
-  const hashes = decodedData.find((data) => data.name === "hashes")?.value.value as string[];
+  const score = parseFloat(formatUnits(score_as_integer, score_decimals));
 
-  const onChainProviderInfo: DecodedProviderInfo[] = providerBitMapInfo.data
-    .map((info) => {
-      const providerMask = BigNumber.from(1).shl(info.bit);
-      const currentProvidersBitmap = providers[info.index];
-      if (currentProvidersBitmap && !providerMask.and(currentProvidersBitmap).eq(BigNumber.from(0))) {
-        return {
-          providerName: info.name,
-          providerNumber: info.index * 256 + info.bit,
-        };
-      }
-    })
-    .filter((provider): provider is DecodedProviderInfo => provider !== undefined);
-
-  return { onChainProviderInfo, hashes, issuanceDates, expirationDates };
+  return score;
 }

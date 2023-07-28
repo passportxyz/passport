@@ -7,7 +7,7 @@ import { UserContext } from "./userContext";
 
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
-import { decodeProviderInformation, getAttestationData } from "../utils/onChainStamps";
+import { decodeProviderInformation, decodeScoreAttestation, getAttestationData } from "../utils/onChainStamps";
 
 export interface OnChainProviderMap {
   [key: string]: OnChainProviderType[];
@@ -77,7 +77,8 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
         }));
 
         setActiveChainProviders(onChainProviders);
-        setOnChainScore(1); // TODO
+
+        setOnChainScore(await decodeScoreAttestation(passportAttestationData.score));
       } catch (e: any) {
         datadogLogs.logger.error("Failed to check on-chain status", e);
         datadogRum.addError(e);
