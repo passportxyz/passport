@@ -13,6 +13,10 @@ export interface OnChainProviderMap {
   [key: string]: OnChainProviderType[];
 }
 
+export interface OnChainLastUpdates {
+  [key: string]: Date;
+}
+
 export type OnChainProviderType = {
   providerName: PROVIDER_ID;
   credentialHash: string;
@@ -22,6 +26,7 @@ export type OnChainProviderType = {
 
 export interface OnChainContextState {
   onChainProviders: OnChainProviderMap;
+  onChainLastUpdates: OnChainLastUpdates;
   activeChainProviders: OnChainProviderType[];
   onChainScore: number;
   readOnChainData: () => Promise<void>;
@@ -29,6 +34,7 @@ export interface OnChainContextState {
 
 const startingState: OnChainContextState = {
   onChainProviders: {},
+  onChainLastUpdates: {},
   activeChainProviders: [],
   onChainScore: 0,
   readOnChainData: async (): Promise<void> => {},
@@ -52,14 +58,17 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
     if (wallet && address) {
       try {
         const passportAttestationData = await getAttestationData(wallet, address);
-
         if (!passportAttestationData) {
           return;
         }
 
+        const chainId = wallet.chains[0].id;
+
         const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
           passportAttestationData.passport
         );
+
+        savePassportLastUpdated(passportAttestationData, chainId);
 
         const onChainProviders: OnChainProviderType[] = onChainProviderInfo
           .sort((a, b) => a.providerNumber - b.providerNumber)
@@ -69,7 +78,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
             expirationDate: new Date(expirationDates[index].toNumber() * 1000),
             issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
           }));
-        const chainId = wallet.chains[0].id;
+
         // Set the on-chain status
         setOnChainProviders((prevState) => ({
           ...prevState,
