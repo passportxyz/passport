@@ -40,7 +40,6 @@ import { ExpiredStampModal } from "../components/ExpiredStampModal";
 import ProcessingPopup from "../components/ProcessingPopup";
 import InitiateOnChainButton from "../components/InitiateOnChainButton";
 import { getFilterName } from "../config/filters";
-import { baseGoerliChainId, hardhatChainId, sepoliaChainId } from "../utils/onboard";
 import { Button } from "../components/Button";
 
 // --- GTM Module

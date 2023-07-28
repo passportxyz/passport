@@ -7,9 +7,10 @@ import { OnChainContext } from "../context/onChainContext";
 import { UserContext } from "../context/userContext";
 import GitcoinVerifier from "../contracts/GitcoinVerifier.json";
 import { DoneToastContent } from "./DoneToastContent";
-import { OnChainStatus } from "./NetworkCard";
+import { Chain, OnChainStatus } from "./NetworkCard";
 import axios from "axios";
 import { useSetChain } from "@web3-onboard/react";
+import Tooltip from "../components/Tooltip";
 
 export function getButtonMsg(onChainStatus: OnChainStatus): string {
   switch (onChainStatus) {
@@ -73,10 +74,10 @@ export const ErrorDetails = ({ msg, ethersError }: ErrorDetailsProps): JSX.Eleme
 export type SyncToChainProps = {
   onChainStatus: OnChainStatus;
   isActive: boolean;
-  chainId: string;
+  chain: Chain;
 };
 
-export function SyncToChainButton({ onChainStatus, isActive, chainId }: SyncToChainProps): JSX.Element {
+export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChainProps): JSX.Element {
   const { passport } = useContext(CeramicContext);
   const { wallet, address } = useContext(UserContext);
   const { readOnChainData } = useContext(OnChainContext);
@@ -85,8 +86,8 @@ export function SyncToChainButton({ onChainStatus, isActive, chainId }: SyncToCh
   const toast = useToast();
 
   const onInitiateSyncToChain = useCallback(async (wallet, passport) => {
-    if (connectedChain && connectedChain?.id !== chainId) {
-      const setChainResponse = await setChain({ chainId });
+    if (connectedChain && connectedChain?.id !== chain.id) {
+      const setChainResponse = await setChain({ chainId: chain.id });
       setChainResponse && (await onSyncToChain(wallet, passport));
       return;
     }
@@ -268,10 +269,11 @@ export function SyncToChainButton({ onChainStatus, isActive, chainId }: SyncToCh
   }, []);
 
   const disableBtn = !isActive || onChainStatus === OnChainStatus.MOVED_UP_TO_DATE;
+  const showToolTip = isActive && onChainStatus !== OnChainStatus.MOVED_UP_TO_DATE && chain.id !== connectedChain?.id;
 
   return (
     <button
-      className={`verify-btn center ${disableBtn && "cursor-not-allowed"}`}
+      className={`verify-btn center ${disableBtn && "cursor-not-allowed"} flex justify-center`}
       data-testid="card-menu-button"
       onClick={() => onInitiateSyncToChain(wallet, passport)}
       disabled={disableBtn}
@@ -280,12 +282,13 @@ export function SyncToChainButton({ onChainStatus, isActive, chainId }: SyncToCh
         <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
       </div>
       <span
-        className={`mx-2 translate-y-[1px] ${syncingToChain ? "hidden" : "block"} ${
+        className={`mx-1 translate-y-[1px] ${syncingToChain ? "hidden" : "block"} ${
           onChainStatus === OnChainStatus.MOVED_UP_TO_DATE ? "text-accent-3" : "text-muted"
         }`}
       >
         {isActive ? getButtonMsg(onChainStatus) : "Coming Soon"}
       </span>
+      {showToolTip && <Tooltip>You will be prompted to switch to {chain.label} and sign the transaction</Tooltip>}
     </button>
   );
 }

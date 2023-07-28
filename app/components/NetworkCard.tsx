@@ -5,7 +5,7 @@ import { OnChainContext, OnChainProviderType } from "../context/onChainContext";
 import { ScorerContext, ScoreStateType } from "../context/scorerContext";
 import { SyncToChainButton } from "./SyncToChainButton";
 
-type Chain = {
+export type Chain = {
   id: string;
   token: string;
   label: string;
@@ -101,7 +101,7 @@ export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChain
           </div>
         </div>
       </div>
-      <SyncToChainButton onChainStatus={onChainStatus} isActive={isActive} chainId={chain.id} />
+      <SyncToChainButton onChainStatus={onChainStatus} isActive={isActive} chain={chain} />
     </div>
   );
 }
