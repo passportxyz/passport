@@ -1,7 +1,5 @@
 import { Tag, TagLabel } from "@chakra-ui/react";
 
-type OnChainBadgeProps = {};
-
 export function OnChainTag({ marginLeft }: { marginLeft?: string }) {
   return (
     <Tag
