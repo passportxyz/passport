@@ -13,7 +13,7 @@ import axios from "axios";
 export function getButtonMsg(onChainStatus: OnChainStatus): string {
   switch (onChainStatus) {
     case OnChainStatus.NOT_MOVED:
-      return "Up to date";
+      return "Go";
     case OnChainStatus.MOVED_OUT_OF_DATE:
       return "Update";
     case OnChainStatus.MOVED_UP_TO_DATE:
@@ -29,7 +29,7 @@ export type ErrorDetailsProps = {
   ethersError: EthersError;
 };
 
-const ErrorDetails = ({ msg, ethersError }: ErrorDetailsProps): JSX.Element => {
+export const ErrorDetails = ({ msg, ethersError }: ErrorDetailsProps): JSX.Element => {
   const [displayDetails, setDisplayDetails] = useState<string>("none");
   const [textLabelDisplay, setTextLabelDisplay] = useState<string>("Show details");
 

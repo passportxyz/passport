@@ -57,12 +57,19 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   const readOnChainData = useCallback(async () => {
     if (wallet && address) {
       try {
-        const passportAttestationData = await getAttestationData(wallet, address);
+        // TODO: When we support multiple chains will need to refactor this to account for all possible chains
+        if (!process.env.NEXT_PUBLIC_ACTIVE_ON_CHAIN_PASSPORT_CHAINIDS) {
+          datadogLogs.logger.error("No active on-chain passport chain ids set");
+          datadogRum.addError("No active on-chain passport chain ids set");
+          return;
+        }
+        const activeChainIds = JSON.parse(process.env.NEXT_PUBLIC_ACTIVE_ON_CHAIN_PASSPORT_CHAINIDS);
+        const chainId = activeChainIds[0];
+
+        const passportAttestationData = await getAttestationData(wallet, address, chainId);
         if (!passportAttestationData) {
           return;
         }
-
-        const chainId = wallet.chains[0].id;
 
         const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
           passportAttestationData.passport
