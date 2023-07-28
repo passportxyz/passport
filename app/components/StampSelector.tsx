@@ -6,6 +6,7 @@ import { PlatformGroupSpec } from "../config/providers";
 import { getStampProviderFilters } from "../config/filters";
 import { OnChainContext } from "../context/onChainContext";
 import { LinkIcon } from "@heroicons/react/20/solid";
+import { OnChainTag } from "./OnChainTag";
 import Toggle from "./Toggle";
 import { getProviderSpec } from "../utils/helpers";
 import { CeramicContext } from "../context/ceramicContext";
@@ -71,14 +72,11 @@ export function StampSelector({
                       key={`${provider.title}${i}`}
                       data-testid={`indicator-${provider.name}`}
                     >
-                      <div className={`text-md relative top-[-0.3em] ${textColor}`}>
-                        {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" &&
-                          (isProviderOnChain(provider.name) ? (
-                            <LinkIcon className="mr-2 inline h-6 w-5 text-accent-3" />
-                          ) : (
-                            <LinkIcon className="mr-2 inline h-6 w-5 text-color-4" />
-                          ))}
+                      <div className={`text-md relative top-[-0.3em] ${textColor} flex items-center`}>
                         {provider.title}
+                        {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && isProviderOnChain(provider.name) && (
+                          <OnChainTag marginLeft="3" />
+                        )}
                       </div>
                     </li>
                   );
