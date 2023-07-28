@@ -205,17 +205,23 @@ const issueCredential = async (
       // return error message if an error is present
       // limit the error message string to 1000 chars
       throw {
-        error:
-          (verifiedPayload.error && verifiedPayload.error.join(", ").substring(0, 1000)) || "Unable to verify proofs",
+        error: (verifiedPayload.error && verifiedPayload.error.join(", ")) || "Unable to verify proofs",
         code: 403,
       };
     }
   } catch (error: unknown) {
+    let e;
+    try {
+      e = error.toString();
+    } catch {
+      e = error;
+    }
     // error response
     throw error && (error as CredentialResponseBody).error
       ? error
       : {
-          error: "Unable to verify with provider",
+          error: e,
+          location: "Unable to verify with provider",
           code: 400,
         };
   }

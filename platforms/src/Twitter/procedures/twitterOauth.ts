@@ -122,8 +122,14 @@ export const getTwitterUserData = async (context: TwitterContext, twitterClient:
         id: context.twitter.id,
       };
     } catch (_error) {
+      let e;
+      try {
+        e = _error.toString();
+      } catch {
+        e = _error;
+      }
       return {
-        errors: [JSON.stringify(_error)],
+        errors: [e],
       };
       const error = _error as ProviderError;
       if (error?.response?.status === 429) {
