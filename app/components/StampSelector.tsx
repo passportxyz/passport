@@ -38,8 +38,6 @@ export function StampSelector({
     if (currentPlatform) {
       const providerObj = activeChainProviders.find((p) => p.providerName === provider);
       if (providerObj) {
-        console.log(providerObj);
-
         return providerObj.credentialHash === allProvidersState[provider]?.stamp?.credential.credentialSubject.hash;
       }
     }
@@ -76,8 +74,9 @@ export function StampSelector({
                     >
                       <div className={`text-md relative top-[-0.3em] ${textColor} flex items-center`}>
                         {provider.title}
-                        {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" &&
-                          (isProviderOnChain(provider.name) ? <OnChainTag marginLeft="3" /> : <></>)}
+                        {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && isProviderOnChain(provider.name) && (
+                          <OnChainTag marginLeft="3" />
+                        )}
                       </div>
                     </li>
                   );
