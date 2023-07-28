@@ -21,6 +21,7 @@ import { pillLocalStorage } from "../context/userContext";
 import { JsonOutputModal } from "./JsonOutputModal";
 import { RemoveStampModal } from "./RemoveStampModal";
 import { getStampProviderFilters } from "../config/filters";
+import { OnChainTag } from "./OnChainTag";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -135,7 +136,14 @@ export const PlatformCard = ({
               )}
           </div>
           <div className="mt-4 flex justify-center md:mt-6 md:block md:justify-start">
-            <h1 className="text-lg">{platform.name}</h1>
+            <div className="flex flex-row">
+              <h1 className="mr-4 text-lg">{platform.name}</h1>
+              {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && hasOnChainProviders() ? (
+                <OnChainTag marginLeft="4" />
+              ) : (
+                <></>
+              )}
+            </div>
             <p className="pleading-relaxed mt-2 hidden text-color-4 md:inline-block">{platform.description}</p>
           </div>
         </div>
@@ -145,11 +153,6 @@ export const PlatformCard = ({
               <Menu>
                 <MenuButton disabled={disabled} className="verify-btn flex" data-testid="card-menu-button">
                   <div className="m-auto flex items-center justify-center">
-                    {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && hasOnChainProviders() ? (
-                      <LinkIcon className="h-6 w-5 text-accent-3" />
-                    ) : (
-                      <></>
-                    )}
                     <ShieldCheckIcon className="h-6 w-5 text-accent-3" />
                     <span className="mx-2 translate-y-[1px]">Verified</span>
                     <ChevronDownIcon className="h-6 w-6" />
