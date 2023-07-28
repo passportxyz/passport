@@ -136,13 +136,17 @@ export const PlatformCard = ({
               )}
           </div>
           <div className="mt-4 flex justify-center md:mt-6 md:block md:justify-start">
-            <div className="flex flex-row">
-              <h1 className="mr-4 text-lg">{platform.name}</h1>
-              {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && hasOnChainProviders() ? (
-                <OnChainTag marginLeft="4" />
-              ) : (
-                <></>
-              )}
+            <div
+              className={`flex flex-col place-items-start md:flex-row ${
+                platform.name.split(" ").length > 1 ? "items-center md:items-baseline" : "items-center"
+              }`}
+            >
+              <h1
+                className={`mr-0 text-lg md:mr-4 ${platform.name.split(" ").length > 1 ? "text-left" : "text-center"}`}
+              >
+                {platform.name}
+              </h1>
+              {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && hasOnChainProviders() ? <OnChainTag /> : <></>}
             </div>
             <p className="pleading-relaxed mt-2 hidden text-color-4 md:inline-block">{platform.description}</p>
           </div>
