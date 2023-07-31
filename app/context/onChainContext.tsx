@@ -87,7 +87,9 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   }, [wallet, address]);
 
   useEffect(() => {
-    readOnChainData();
+    if (process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on") {
+      readOnChainData();
+    }
   }, [readOnChainData, wallet, address]);
 
   // use props as a way to pass configuration values
