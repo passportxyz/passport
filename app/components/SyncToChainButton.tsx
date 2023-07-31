@@ -13,7 +13,7 @@ import axios from "axios";
 export function getButtonMsg(onChainStatus: OnChainStatus): string {
   switch (onChainStatus) {
     case OnChainStatus.NOT_MOVED:
-      return "Sync to chain";
+      return "Up to date";
     case OnChainStatus.MOVED_OUT_OF_DATE:
       return "Update";
     case OnChainStatus.MOVED_UP_TO_DATE:

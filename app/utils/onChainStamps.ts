@@ -1,5 +1,5 @@
 import { WalletState } from "@web3-onboard/core";
-import { BrowserProvider, Contract, formatUnits, BigNumberish } from "ethers";
+import { BrowserProvider, Contract, formatUnits } from "ethers";
 import { BigNumber } from "@ethersproject/bignumber";
 import axios from "axios";
 import GitcoinResolver from "../contracts/GitcoinResolver.json";
@@ -100,7 +100,7 @@ export async function decodeScoreAttestation(attestation: Attestation): Promise<
   const schemaEncoder = new SchemaEncoder("uint256 score,uint32 scorer_id,uint8 score_decimals");
   const decodedData = schemaEncoder.decodeData(attestation.data);
 
-  const score_as_integer = (decodedData.find(({ name }) => name === "score")?.value.value as BigNumber)._hex as string;
+  const score_as_integer = (decodedData.find(({ name }) => name === "score")?.value.value as BigNumber)._hex;
   const score_decimals = decodedData.find(({ name }) => name === "score_decimals")?.value.value as number;
 
   const score = parseFloat(formatUnits(score_as_integer, score_decimals));
