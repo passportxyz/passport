@@ -1,5 +1,5 @@
 import { Spinner, useToast } from "@chakra-ui/react";
-import { EasPayload, VerifiableCredential } from "@gitcoin/passport-types";
+import { EasPayload, Passport, VerifiableCredential } from "@gitcoin/passport-types";
 import { ethers, EthersError, isError } from "ethers";
 import { useCallback, useContext, useState } from "react";
 import { CeramicContext } from "../context/ceramicContext";
@@ -11,6 +11,7 @@ import { Chain, OnChainStatus } from "./NetworkCard";
 import axios from "axios";
 import { useSetChain } from "@web3-onboard/react";
 import Tooltip from "../components/Tooltip";
+import { WalletState } from "@web3-onboard/core";
 
 export function getButtonMsg(onChainStatus: OnChainStatus): string {
   switch (onChainStatus) {
@@ -130,15 +131,18 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
           nonce,
         };
 
-        const { data }: { data: EasPayload } = await axios({
-          method: "post",
-          url: `${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas/passport`,
-          data: payload,
-          headers: {
-            "Content-Type": "application/json",
-          },
-          transformRequest: [(data) => JSON.stringify(data, (k, v) => (typeof v === "bigint" ? v.toString() : v))],
-        });
+        const { data }: { data: EasPayload } = await axios.post(
+          `${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas/passport`,
+          {
+            data: payload,
+            headers: {
+              "Content-Type": "application/json",
+            },
+            transformRequest: [
+              (data: any) => JSON.stringify(data, (k, v) => (typeof v === "bigint" ? v.toString() : v)),
+            ],
+          }
+        );
 
         if (data.error) {
           console.error(
@@ -150,6 +154,7 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
             nonce
           );
         }
+
         if (data.invalidCredentials.length > 0) {
           console.log("not syncing invalid credentials (invalid credentials): ", data.invalidCredentials);
         }
@@ -274,7 +279,7 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
   return (
     <button
       className={`verify-btn center ${disableBtn && "cursor-not-allowed"} flex justify-center`}
-      data-testid="card-menu-button"
+      data-testid="sync-to-chain-button"
       onClick={() => onInitiateSyncToChain(wallet, passport)}
       disabled={disableBtn}
     >
