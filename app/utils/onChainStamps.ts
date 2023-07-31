@@ -1,5 +1,5 @@
 import { WalletState } from "@web3-onboard/core";
-import { BrowserProvider, Contract } from "ethers";
+import { BrowserProvider, Contract, formatUnits } from "ethers";
 import { BigNumber } from "@ethersproject/bignumber";
 import axios from "axios";
 import GitcoinResolver from "../contracts/GitcoinResolver.json";
@@ -11,7 +11,12 @@ import { datadogRum } from "@datadog/browser-rum";
 import { PROVIDER_ID, StampBit } from "@gitcoin/passport-types";
 import { DecodedProviderInfo } from "../context/onChainContext";
 
-export async function getAttestationData(wallet: WalletState, address: string): Promise<Attestation | undefined> {
+type AttestationData = {
+  passport: Attestation;
+  score: Attestation;
+};
+
+export async function getAttestationData(wallet: WalletState, address: string): Promise<AttestationData | undefined> {
   try {
     if (!process.env.NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS) {
       throw new Error("NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS is not defined");
@@ -24,13 +29,14 @@ export async function getAttestationData(wallet: WalletState, address: string): 
     const ethersProvider = new BrowserProvider(wallet.provider, "any");
     const signer = await ethersProvider.getSigner();
 
-    const gitcoinAttesterContract = new Contract(
+    const gitcoinResolverContract = new Contract(
       process.env.NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS as string,
       GitcoinResolver.abi,
       signer
     );
 
-    const passportUid = await gitcoinAttesterContract.passports(address);
+    const passportUid = await gitcoinResolverContract.passports(address);
+    const scoreUid = await gitcoinResolverContract.scores(address);
 
     const eas = new EAS(process.env.NEXT_PUBLIC_EAS_ADDRESS);
 
@@ -38,7 +44,10 @@ export async function getAttestationData(wallet: WalletState, address: string): 
     const ethersV5Provider = new JsonRpcProvider(process.env.NEXT_PUBLIC_PASSPORT_BASE_GOERLI_RPC_URL);
     eas.connect(ethersV5Provider);
 
-    return await eas.getAttestation(passportUid);
+    return {
+      passport: await eas.getAttestation(passportUid),
+      score: await eas.getAttestation(scoreUid),
+    };
   } catch (e: any) {
     datadogLogs.logger.error("Failed to check on-chain status", e);
     datadogRum.addError(e);
@@ -85,4 +94,16 @@ export async function decodeProviderInformation(attestation: Attestation): Promi
     .filter((provider): provider is DecodedProviderInfo => provider !== undefined);
 
   return { onChainProviderInfo, hashes, issuanceDates, expirationDates };
+}
+
+export async function decodeScoreAttestation(attestation: Attestation): Promise<number> {
+  const schemaEncoder = new SchemaEncoder("uint256 score,uint32 scorer_id,uint8 score_decimals");
+  const decodedData = schemaEncoder.decodeData(attestation.data);
+
+  const score_as_integer = (decodedData.find(({ name }) => name === "score")?.value.value as BigNumber)._hex;
+  const score_decimals = decodedData.find(({ name }) => name === "score_decimals")?.value.value as number;
+
+  const score = parseFloat(formatUnits(score_as_integer, score_decimals));
+
+  return score;
 }

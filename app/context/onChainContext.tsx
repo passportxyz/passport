@@ -7,7 +7,7 @@ import { UserContext } from "./userContext";
 
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
-import { decodeProviderInformation, getAttestationData } from "../utils/onChainStamps";
+import { decodeProviderInformation, decodeScoreAttestation, getAttestationData } from "../utils/onChainStamps";
 
 export interface OnChainProviderMap {
   [key: string]: OnChainProviderType[];
@@ -23,13 +23,15 @@ export type OnChainProviderType = {
 export interface OnChainContextState {
   onChainProviders: OnChainProviderMap;
   activeChainProviders: OnChainProviderType[];
-  refreshOnChainProviders: () => Promise<void>;
+  onChainScore: number;
+  readOnChainData: () => Promise<void>;
 }
 
 const startingState: OnChainContextState = {
   onChainProviders: {},
   activeChainProviders: [],
-  refreshOnChainProviders: async (): Promise<void> => {},
+  onChainScore: 0,
+  readOnChainData: async (): Promise<void> => {},
 };
 
 // create our app context
@@ -43,9 +45,10 @@ export type DecodedProviderInfo = {
 export const OnChainContextProvider = ({ children }: { children: any }) => {
   const { address, wallet } = useContext(UserContext);
   const [onChainProviders, setOnChainProviders] = useState<OnChainProviderMap>({});
-  const [activeChainProviders, setactiveChainProviders] = useState<OnChainProviderType[]>([]);
+  const [activeChainProviders, setActiveChainProviders] = useState<OnChainProviderType[]>([]);
+  const [onChainScore, setOnChainScore] = useState<number>(0);
 
-  const fetchOnChainStatus = useCallback(async () => {
+  const readOnChainData = useCallback(async () => {
     if (wallet && address) {
       try {
         const passportAttestationData = await getAttestationData(wallet, address);
@@ -55,7 +58,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
         }
 
         const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
-          passportAttestationData
+          passportAttestationData.passport
         );
 
         const onChainProviders: OnChainProviderType[] = onChainProviderInfo
@@ -73,7 +76,9 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
           [chainId]: onChainProviders,
         }));
 
-        setactiveChainProviders(onChainProviders);
+        setActiveChainProviders(onChainProviders);
+
+        setOnChainScore(await decodeScoreAttestation(passportAttestationData.score));
       } catch (e: any) {
         datadogLogs.logger.error("Failed to check on-chain status", e);
         datadogRum.addError(e);
@@ -81,21 +86,18 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
     }
   }, [wallet, address]);
 
-  const refreshOnChainProviders = () => {
-    return fetchOnChainStatus();
-  };
-
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on") {
-      fetchOnChainStatus();
+      readOnChainData();
     }
-  }, [fetchOnChainStatus]);
+  }, [readOnChainData, wallet, address]);
 
   // use props as a way to pass configuration values
   const providerProps = {
     onChainProviders,
     activeChainProviders,
-    refreshOnChainProviders,
+    readOnChainData,
+    onChainScore,
   };
 
   return <OnChainContext.Provider value={providerProps}>{children}</OnChainContext.Provider>;

@@ -213,6 +213,7 @@ export const testOnChainContextState = (initialState?: Partial<OnChainContextSta
         issuanceDate: new Date("2023-07-02T11:49:51.433Z"),
       },
     ],
-    refreshOnChainProviders: jest.fn(),
+    readOnChainData: jest.fn(),
+    onChainScore: 0,
   };
 };

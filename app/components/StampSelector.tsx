@@ -8,7 +8,6 @@ import { OnChainContext } from "../context/onChainContext";
 import { LinkIcon } from "@heroicons/react/20/solid";
 import { OnChainTag } from "./OnChainTag";
 import Toggle from "./Toggle";
-import { getProviderSpec } from "../utils/helpers";
 import { CeramicContext } from "../context/ceramicContext";
 
 type StampSelectorProps = {

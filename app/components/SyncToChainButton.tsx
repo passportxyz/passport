@@ -77,7 +77,7 @@ export type SyncToChainProps = {
 export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps): JSX.Element {
   const { passport } = useContext(CeramicContext);
   const { wallet, address } = useContext(UserContext);
-  const { refreshOnChainProviders } = useContext(OnChainContext);
+  const { readOnChainData } = useContext(OnChainContext);
   const [syncingToChain, setSyncingToChain] = useState(false);
   const toast = useToast();
 
@@ -161,7 +161,7 @@ export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps)
           });
           await transaction.wait();
           const easScanURL = `${process.env.NEXT_PUBLIC_EAS_EXPLORER}/address/${address}`;
-          await refreshOnChainProviders();
+          await readOnChainData();
           const successSubmit = (
             <p>
               Passport successfully synced to chain.{" "}
