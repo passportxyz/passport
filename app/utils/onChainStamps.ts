@@ -1,10 +1,6 @@
 import { WalletState } from "@web3-onboard/core";
-<<<<<<< HEAD
-import { BrowserProvider, Contract, formatUnits } from "ethers";
-=======
-import { BrowserProvider, Contract, JsonRpcProvider } from "ethers";
+import { Contract, JsonRpcProvider, formatUnits } from "ethers";
 import { JsonRpcProvider as V5JsonRpcProvider } from "@ethersproject/providers";
->>>>>>> 19f96fc7 (feat(app): allow querying passport status from non connected chain)
 import { BigNumber } from "@ethersproject/bignumber";
 import axios from "axios";
 import GitcoinResolver from "../contracts/GitcoinResolver.json";
@@ -16,12 +12,12 @@ import { PROVIDER_ID, StampBit } from "@gitcoin/passport-types";
 import { DecodedProviderInfo } from "../context/onChainContext";
 import { chains } from "./onboard";
 
-type AttestationData = {
+export type AttestationData = {
   passport: Attestation;
   score: Attestation;
 };
 
-export async function getAttestationData(wallet: WalletState, address: string): Promise<AttestationData | undefined> {
+export async function getAttestationData(address: string, chainId: string): Promise<AttestationData | undefined> {
   try {
     if (!process.env.NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS) {
       throw new Error("NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS is not defined");

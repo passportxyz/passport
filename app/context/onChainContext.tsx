@@ -8,6 +8,7 @@ import { UserContext } from "./userContext";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 import { decodeProviderInformation, decodeScoreAttestation, getAttestationData } from "../utils/onChainStamps";
+import { Attestation } from "@ethereum-attestation-service/eas-sdk";
 
 export interface OnChainProviderMap {
   [key: string]: OnChainProviderType[];
@@ -53,6 +54,15 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   const [onChainProviders, setOnChainProviders] = useState<OnChainProviderMap>({});
   const [activeChainProviders, setActiveChainProviders] = useState<OnChainProviderType[]>([]);
   const [onChainScore, setOnChainScore] = useState<number>(0);
+  const [onChainLastUpdates, setOnChainLastUpdates] = useState<OnChainLastUpdates>({});
+
+  const savePassportLastUpdated = (attestation: Attestation, chainId: string) => {
+    const lastUpdated = new Date(Number(BigInt(attestation.time.toString())) * 1000);
+    setOnChainLastUpdates((prevState) => ({
+      ...prevState,
+      [chainId]: lastUpdated,
+    }));
+  };
 
   const readOnChainData = useCallback(async () => {
     if (wallet && address) {
@@ -66,7 +76,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
         const activeChainIds = JSON.parse(process.env.NEXT_PUBLIC_ACTIVE_ON_CHAIN_PASSPORT_CHAINIDS);
         const chainId = activeChainIds[0];
 
-        const passportAttestationData = await getAttestationData(wallet, address, chainId);
+        const passportAttestationData = await getAttestationData(address, chainId);
         if (!passportAttestationData) {
           return;
         }
@@ -75,7 +85,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
           passportAttestationData.passport
         );
 
-        savePassportLastUpdated(passportAttestationData, chainId);
+        savePassportLastUpdated(passportAttestationData.passport, chainId);
 
         const onChainProviders: OnChainProviderType[] = onChainProviderInfo
           .sort((a, b) => a.providerNumber - b.providerNumber)
@@ -112,6 +122,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   const providerProps = {
     onChainProviders,
     activeChainProviders,
+    onChainLastUpdates,
     readOnChainData,
     onChainScore,
   };

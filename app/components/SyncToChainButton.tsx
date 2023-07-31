@@ -11,7 +11,6 @@ import { Chain, OnChainStatus } from "./NetworkCard";
 import axios from "axios";
 import { useSetChain } from "@web3-onboard/react";
 import Tooltip from "../components/Tooltip";
-import { WalletState } from "@web3-onboard/core";
 
 export function getButtonMsg(onChainStatus: OnChainStatus): string {
   switch (onChainStatus) {
@@ -133,8 +132,8 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
 
         const { data }: { data: EasPayload } = await axios.post(
           `${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas/passport`,
+          payload,
           {
-            data: payload,
             headers: {
               "Content-Type": "application/json",
             },
