@@ -56,11 +56,18 @@ describe("OnChainSidebar", () => {
 });
 
 describe("checkOnChainStatus", () => {
+  const issuanceDate0 = new Date();
+  const expirationDate0 = new Date();
+  const issuanceDate1 = new Date();
+  const expirationDate1 = new Date();
+
   const mockAllProvidersState: AllProvidersState = {
     ["Google"]: {
       stamp: {
         provider: "Google",
         credential: {
+          expirationDate: expirationDate0,
+          issuanceDate: issuanceDate0,
           credentialSubject: {
             hash: "hash1",
           },
@@ -71,6 +78,8 @@ describe("checkOnChainStatus", () => {
       stamp: {
         provider: "Ens",
         credential: {
+          expirationDate: expirationDate1,
+          issuanceDate: issuanceDate1,
           credentialSubject: {
             hash: "hash2",
           },
@@ -83,23 +92,35 @@ describe("checkOnChainStatus", () => {
     {
       providerName: "Google",
       credentialHash: "hash1",
-      expirationDate: new Date(),
-      issuanceDate: new Date(),
+      expirationDate: expirationDate0,
+      issuanceDate: issuanceDate0,
     },
     {
       providerName: "Ens",
       credentialHash: "hash2",
-      expirationDate: new Date(),
-      issuanceDate: new Date(),
+      expirationDate: expirationDate1,
+      issuanceDate: issuanceDate1,
     },
   ];
 
+  const onChainScore = 10.1;
+
   it("should return NOT_MOVED when onChainProviders is an empty array", () => {
-    expect(checkOnChainStatus(mockAllProvidersState, [])).toBe(OnChainStatus.NOT_MOVED);
+    expect(checkOnChainStatus(mockAllProvidersState, [], onChainScore, "DONE", onChainScore)).toBe(
+      OnChainStatus.NOT_MOVED
+    );
   });
 
   it("should return MOVED_UP_TO_DATE when onChainProviders matches with allProvidersState", () => {
-    expect(checkOnChainStatus(mockAllProvidersState, mockOnChainProviders)).toBe(OnChainStatus.MOVED_UP_TO_DATE);
+    expect(checkOnChainStatus(mockAllProvidersState, mockOnChainProviders, onChainScore, "DONE", onChainScore)).toBe(
+      OnChainStatus.MOVED_UP_TO_DATE
+    );
+  });
+
+  it("should return MOVED_OUT_OF_DATE when score does not match", () => {
+    expect(
+      checkOnChainStatus(mockAllProvidersState, mockOnChainProviders, onChainScore + 1, "DONE", onChainScore)
+    ).toBe(OnChainStatus.MOVED_OUT_OF_DATE);
   });
 
   it("should return MOVED_OUT_OF_DATE when there are differences between onChainProviders and allProvidersState", () => {
@@ -116,6 +137,8 @@ describe("checkOnChainStatus", () => {
         },
       } as unknown as ProviderState,
     };
-    expect(checkOnChainStatus(diffMockAllProviderState, mockOnChainProviders)).toBe(OnChainStatus.MOVED_OUT_OF_DATE);
+    expect(checkOnChainStatus(diffMockAllProviderState, mockOnChainProviders, onChainScore, "DONE", onChainScore)).toBe(
+      OnChainStatus.MOVED_OUT_OF_DATE
+    );
   });
 });
