@@ -3,13 +3,14 @@ import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import axios from "axios";
 import { Attestation } from "@ethereum-attestation-service/eas-sdk";
 import { BigNumber } from "@ethersproject/bignumber";
-import * as easModule from "@ethereum-attestation-service/eas-sdk";
 
 jest.mock("axios");
 jest.mock("@ethereum-attestation-service/eas-sdk", () => ({
   SchemaEncoder: jest.fn(),
   Attestation: jest.fn(),
 }));
+
+jest.mock("../../utils/onboard");
 
 describe("decodeProviderInformation", () => {
   beforeEach(() => {
