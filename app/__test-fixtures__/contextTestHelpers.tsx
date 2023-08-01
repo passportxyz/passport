@@ -215,5 +215,6 @@ export const testOnChainContextState = (initialState?: Partial<OnChainContextSta
     ],
     readOnChainData: jest.fn(),
     onChainScore: 0,
+    onChainLastUpdates: {},
   };
 };
