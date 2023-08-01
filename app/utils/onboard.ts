@@ -81,32 +81,27 @@ if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
     icon: "./assets/eth-network-logo.svg",
   });
 }
-
-const onChainPassportChainIds = JSON.parse(process.env.NEXT_PUBLIC_POSSIBLE_ON_CHAIN_PASSPORT_CHAINIDS || "[]");
-
-if (onChainPassportChainIds.length > 2) {
-  chains.push({
-    id: optimismChainId,
-    token: "ETH",
-    label: "Optimism Mainnet",
-    rpcUrl: "https://mainnet.optimism.io/",
-    icon: "./assets/op-logo.svg",
-  });
-  chains.push({
-    id: lineaChainId,
-    token: "ETH",
-    label: "Linea",
-    rpcUrl: "https://rpc.linea.build",
-    icon: "./assets/linea-logo.png",
-  });
-  chains.push({
-    id: pgnChainId,
-    token: "ETH",
-    label: "PGN",
-    rpcUrl: "https://rpc.publicgoods.network	",
-    icon: "./assets/pgn-logo.png",
-  });
-}
+chains.push({
+  id: optimismChainId,
+  token: "ETH",
+  label: "Optimism Mainnet",
+  rpcUrl: "https://mainnet.optimism.io/",
+  icon: "./assets/op-logo.svg",
+});
+chains.push({
+  id: lineaChainId,
+  token: "ETH",
+  label: "Linea",
+  rpcUrl: "https://rpc.linea.build",
+  icon: "./assets/linea-logo.png",
+});
+chains.push({
+  id: pgnChainId,
+  token: "ETH",
+  label: "PGN",
+  rpcUrl: "https://rpc.publicgoods.network	",
+  icon: "./assets/pgn-logo.png",
+});
 
 // Exports onboard-core instance (https://github.com/blocknative/web3-onboard)
 export const initWeb3Onboard = init({
