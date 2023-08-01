@@ -1,22 +1,23 @@
 import { WalletState } from "@web3-onboard/core";
-import { BrowserProvider, Contract, formatUnits } from "ethers";
+import { Contract, JsonRpcProvider, formatUnits } from "ethers";
+import { JsonRpcProvider as V5JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
 import axios from "axios";
 import GitcoinResolver from "../contracts/GitcoinResolver.json";
-import { JsonRpcProvider } from "@ethersproject/providers";
 import { Attestation, EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { PROVIDER_ID, StampBit } from "@gitcoin/passport-types";
 import { DecodedProviderInfo } from "../context/onChainContext";
+import { chains } from "./onboard";
 
-type AttestationData = {
+export type AttestationData = {
   passport: Attestation;
   score: Attestation;
 };
 
-export async function getAttestationData(wallet: WalletState, address: string): Promise<AttestationData | undefined> {
+export async function getAttestationData(address: string, chainId: string): Promise<AttestationData | undefined> {
   try {
     if (!process.env.NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS) {
       throw new Error("NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS is not defined");
@@ -26,13 +27,18 @@ export async function getAttestationData(wallet: WalletState, address: string): 
       throw new Error("NEXT_PUBLIC_EAS_ADDRESS is not defined");
     }
 
-    const ethersProvider = new BrowserProvider(wallet.provider, "any");
-    const signer = await ethersProvider.getSigner();
+    const activeChainRpc = chains.find((chain) => chain.id === chainId)?.rpcUrl;
+
+    if (!activeChainRpc) {
+      throw new Error(`No rpcUrl found for chainId ${chainId}`);
+    }
+
+    const ethersProvider = new JsonRpcProvider(activeChainRpc);
 
     const gitcoinResolverContract = new Contract(
       process.env.NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS as string,
       GitcoinResolver.abi,
-      signer
+      ethersProvider
     );
 
     const passportUid = await gitcoinResolverContract.passports(address);
@@ -41,7 +47,7 @@ export async function getAttestationData(wallet: WalletState, address: string): 
     const eas = new EAS(process.env.NEXT_PUBLIC_EAS_ADDRESS);
 
     // needed for ethers v5 eas dependency
-    const ethersV5Provider = new JsonRpcProvider(process.env.NEXT_PUBLIC_PASSPORT_BASE_GOERLI_RPC_URL);
+    const ethersV5Provider = new V5JsonRpcProvider(process.env.NEXT_PUBLIC_PASSPORT_BASE_GOERLI_RPC_URL);
     eas.connect(ethersV5Provider);
 
     return {
