@@ -196,13 +196,13 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
             ),
           });
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error("error syncing credentials to chain: ", e);
         let toastDescription: string | JSX.Element =
           "An unexpected error occured while trying to bring the data on-chain.";
         if (isError(e, "ACTION_REJECTED")) {
           toastDescription = "Transaction rejected by user";
-        } else if (isError(e, "INSUFFICIENT_FUNDS")) {
+        } else if (isError(e, "INSUFFICIENT_FUNDS") || e?.info?.error?.data?.message.includes("insufficient funds")) {
           toastDescription =
             "You don't have sufficient funds to bring your stamps on-chain. Consider funding your wallet first.";
         } else if (isError(e, "CALL_EXCEPTION")) {
