@@ -321,7 +321,7 @@ export default function Dashboard() {
                   <span className={`${score == 1 ? "text-accent-3" : "text-[#FFE28A]"}`}>{rawScore.toFixed(2)}</span>
                   <Tooltip>
                     Your Unique Humanity Score is based out of 100 and measures how unique you are. The current passing
-                    score threshold is 15.
+                    score threshold is 20.
                   </Tooltip>
                 </div>
                 <div className="flex whitespace-nowrap text-sm">{scoreDescription}</div>
