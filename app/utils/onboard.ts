@@ -82,7 +82,9 @@ if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
   });
 }
 
-if (process.env.NEXT_PUBLIC_ON_CHAIN_PASSPORT_CHAINS === "on") {
+const onChainPassportChainIds = JSON.parse(process.env.NEXT_PUBLIC_POSSIBLE_ON_CHAIN_PASSPORT_CHAINIDS || "[]");
+
+if (onChainPassportChainIds.length > 2) {
   chains.push({
     id: optimismChainId,
     token: "ETH",

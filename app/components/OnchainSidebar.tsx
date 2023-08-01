@@ -9,9 +9,9 @@ type OnchainSidebarProps = {
   onClose: () => void;
 };
 
-const deployedChains = chains.filter((chain) =>
-  [pgnChainId, lineaChainId, optimismChainId, goerliBaseChainId].includes(chain.id)
-);
+const onChainPassportChainIds = JSON.parse(process.env.NEXT_PUBLIC_POSSIBLE_ON_CHAIN_PASSPORT_CHAINIDS || "[]");
+
+const deployedChains = chains.filter((chain) => onChainPassportChainIds.includes(chain.id));
 
 export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
   const activeOnChainPassportChains = process.env.NEXT_PUBLIC_ACTIVE_ON_CHAIN_PASSPORT_CHAINIDS;
