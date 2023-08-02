@@ -4,14 +4,7 @@ import { CeramicContext, AllProvidersState, ProviderState } from "../context/cer
 import { OnChainContext, OnChainProviderType } from "../context/onChainContext";
 import { ScorerContext, ScoreStateType } from "../context/scorerContext";
 import { SyncToChainButton } from "./SyncToChainButton";
-
-export type Chain = {
-  id: string;
-  token: string;
-  label: string;
-  rpcUrl: string;
-  icon: string;
-};
+import { Chain } from "../utils/onboard";
 
 export enum OnChainStatus {
   NOT_MOVED,

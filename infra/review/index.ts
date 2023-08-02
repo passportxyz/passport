@@ -283,10 +283,6 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             valueFrom: `${IAM_SERVER_SSM_ARN}:ATTESTATION_SIGNER_PRIVATE_KEY::`,
           },
           {
-            name: "GITCOIN_VERIFIER_CONTRACT_ADDRESS",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:GITCOIN_VERIFIER_CONTRACT_ADDRESS::`,
-          },
-          {
             name: "GITCOIN_VERIFIER_CHAIN_ID",
             valueFrom: `${IAM_SERVER_SSM_ARN}:GITCOIN_VERIFIER_CHAIN_ID::`,
           },
@@ -305,14 +301,6 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
           {
             name: "EAS_GITCOIN_STAMP_SCHEMA",
             valueFrom: `${IAM_SERVER_SSM_ARN}:EAS_GITCOIN_STAMP_SCHEMA::`,
-          },
-          {
-            name: "EAS_GITCOIN_SCORE_SCHEMA",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:EAS_GITCOIN_SCORE_SCHEMA::`,
-          },
-          {
-            name: "EAS_GITCOIN_PASSPORT_SCHEMA",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:EAS_GITCOIN_PASSPORT_SCHEMA::`,
           },
           {
             name: "FF_NEW_GITHUB_STAMPS",

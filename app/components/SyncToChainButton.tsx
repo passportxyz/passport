@@ -1,13 +1,15 @@
 import { Spinner, useToast } from "@chakra-ui/react";
-import { EasPayload, Passport, VerifiableCredential } from "@gitcoin/passport-types";
+import { EasPayload, VerifiableCredential } from "@gitcoin/passport-types";
 import { ethers, EthersError, isError } from "ethers";
 import { useCallback, useContext, useState } from "react";
 import { CeramicContext } from "../context/ceramicContext";
 import { OnChainContext } from "../context/onChainContext";
 import { UserContext } from "../context/userContext";
-import GitcoinVerifier from "../contracts/GitcoinVerifier.json";
+import onchainInfo from "../../deployments/onchainInfo.json";
+import GitcoinVerifierAbi from "../../deployments/abi/GitcoinVerifier.json";
 import { DoneToastContent } from "./DoneToastContent";
-import { Chain, OnChainStatus } from "./NetworkCard";
+import { OnChainStatus } from "./NetworkCard";
+import { Chain } from "../utils/onboard";
 import axios from "axios";
 import { useSetChain } from "@web3-onboard/react";
 import Tooltip from "../components/Tooltip";
@@ -85,6 +87,22 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
   const [syncingToChain, setSyncingToChain] = useState(false);
   const toast = useToast();
 
+  const loadVerifierContract = useCallback(
+    async (wallet) => {
+      const ethersProvider = new ethers.BrowserProvider(wallet.provider, "any");
+
+      if (!Object.keys(onchainInfo).includes(chain.id)) {
+        throw new Error(`No onchainInfo found for chainId ${chain.id}`);
+      }
+      const onchainInfoChainId = chain.id as keyof typeof onchainInfo;
+      const verifierAddress = onchainInfo[onchainInfoChainId].GitcoinVerifier.address;
+      const verifierAbi = GitcoinVerifierAbi[onchainInfoChainId];
+
+      return new ethers.Contract(verifierAddress, verifierAbi, await ethersProvider.getSigner());
+    },
+    [chain]
+  );
+
   const onInitiateSyncToChain = useCallback(async (wallet, passport) => {
     if (connectedChain && connectedChain?.id !== chain.id) {
       const setChainResponse = await setChain({ chainId: chain.id });
@@ -99,15 +117,10 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
       try {
         setSyncingToChain(true);
         const credentials = passport.stamps.map(({ credential }: { credential: VerifiableCredential }) => credential);
-        const ethersProvider = new ethers.BrowserProvider(wallet.provider, "any");
-        const gitcoinAttesterContract = new ethers.Contract(
-          process.env.NEXT_PUBLIC_GITCOIN_VERIFIER_CONTRACT_ADDRESS as string,
-          GitcoinVerifier.abi,
-          await ethersProvider.getSigner()
-        );
+        const gitcoinVerifierContract = await loadVerifierContract(wallet);
 
         if (credentials.length === 0) {
-          // Nothing to be broough on-chain
+          // Nothing to be brought on-chain
           toast({
             duration: 9000,
             isClosable: true,
@@ -123,7 +136,7 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
           return;
         }
 
-        const nonce = await gitcoinAttesterContract.recipientNonces(address);
+        const nonce = await gitcoinVerifierContract.recipientNonces(address);
 
         const payload = {
           credentials,
@@ -138,7 +151,7 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
               "Content-Type": "application/json",
             },
             transformRequest: [
-              (data: any) => JSON.stringify(data, (k, v) => (typeof v === "bigint" ? v.toString() : v)),
+              (data: any) => JSON.stringify(data, (_k, v) => (typeof v === "bigint" ? v.toString() : v)),
             ],
           }
         );
@@ -161,7 +174,7 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
         if (data.passport) {
           const { v, r, s } = data.signature;
 
-          const transaction = await gitcoinAttesterContract.verifyAndAttest(data.passport, v, r, s, {
+          const transaction = await gitcoinVerifierContract.verifyAndAttest(data.passport, v, r, s, {
             value: data.passport.fee,
           });
           toast({
@@ -177,7 +190,12 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
             ),
           });
           await transaction.wait();
-          const easScanURL = `${process.env.NEXT_PUBLIC_EAS_EXPLORER}/address/${address}`;
+
+          const easScanBaseUrl = chain.easScanUrl;
+          if (!easScanBaseUrl) {
+            throw new Error(`No EAS scan URL found for chain ${chain.id}`);
+          }
+          const easScanURL = `${easScanBaseUrl}/address/${address}`;
           await readOnChainData();
           const successSubmit = (
             <p>
@@ -199,7 +217,7 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
       } catch (e: any) {
         console.error("error syncing credentials to chain: ", e);
         let toastDescription: string | JSX.Element =
-          "An unexpected error occured while trying to bring the data on-chain.";
+          "An unexpected error occurred while trying to bring the data on-chain.";
         if (isError(e, "ACTION_REJECTED")) {
           toastDescription = "Transaction rejected by user";
         } else if (isError(e, "INSUFFICIENT_FUNDS") || e?.info?.error?.data?.message.includes("insufficient funds")) {
@@ -216,7 +234,7 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
         ) {
           toastDescription = (
             <ErrorDetails
-              msg={"A Blockchain error occured while executing this transaction. Please try again in a few minutes."}
+              msg={"A Blockchain error occurred while executing this transaction. Please try again in a few minutes."}
               ethersError={e}
             />
           );
@@ -246,14 +264,14 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
         ) {
           toastDescription = (
             <ErrorDetails
-              msg={"An unexpected error occured while calling the smart contract function. Please contact support."}
+              msg={"An unexpected error occurred while calling the smart contract function. Please contact support."}
               ethersError={e}
             />
           );
         } else if (isError(e, "BUFFER_OVERRUN") || isError(e, "NUMERIC_FAULT")) {
           toastDescription = (
             <ErrorDetails
-              msg={"An operationl error occured while calling the smart contract. Please contact support."}
+              msg={"An operational error occurred while calling the smart contract. Please contact support."}
               ethersError={e}
             />
           );

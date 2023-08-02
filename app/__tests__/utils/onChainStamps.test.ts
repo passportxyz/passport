@@ -10,7 +10,10 @@ jest.mock("@ethereum-attestation-service/eas-sdk", () => ({
   Attestation: jest.fn(),
 }));
 
-jest.mock("../../utils/onboard");
+// Prevents issue with module import in jest
+jest.mock("../../utils/onboard", () => ({
+  chains: [{ id: "0x14a33", rpcUrl: "mockRpcUrl" }],
+}));
 
 describe("decodeProviderInformation", () => {
   beforeEach(() => {

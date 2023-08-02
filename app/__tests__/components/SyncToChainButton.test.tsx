@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { EthersError } from "ethers";
 import axios from "axios";
-import { getButtonMsg, ErrorDetails, SyncToChainButton } from "../../components/SyncToChainButton";
+import { getButtonMsg, SyncToChainButton } from "../../components/SyncToChainButton";
 import { OnChainStatus } from "../../components/NetworkCard";
 import { UserContextState } from "../../context/userContext";
 import {
@@ -10,13 +9,12 @@ import {
   renderWithContext,
 } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
-import { VerifiableCredential } from "@gitcoin/passport-types";
 
 jest.mock("../../utils/onboard.ts");
 const mockSetChain = jest.fn();
 const mockConnectedChain = {
   chains: [],
-  connectedChain: { id: "test1", namespace: "mock_namespace", name: "mock_name" },
+  connectedChain: { id: "0x14a33", namespace: "mock_namespace", name: "mock_name" },
   settingChain: false,
 };
 jest.mock("@web3-onboard/react", () => ({
@@ -103,7 +101,7 @@ describe("SyncToChainButton component", () => {
     renderWithContext(
       mockUserContext,
       { ...mockCeramicContext },
-      <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} isActive={true} chain={{ ...chain, id: "test1" }} />
+      <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} isActive={true} chain={{ ...chain, id: "0x14a33" }} />
     );
     const btn = screen.getByTestId("sync-to-chain-button");
     fireEvent.click(btn);
@@ -120,7 +118,7 @@ describe("SyncToChainButton component", () => {
         ...mockCeramicContext,
         passport: { ...mockCeramicContext.passport, stamps: [{ id: "test" } as any] },
       },
-      <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} isActive={true} chain={{ ...chain, id: "test1" }} />
+      <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} isActive={true} chain={{ ...chain, id: "0x14a33" }} />
     );
     const btn = screen.getByTestId("sync-to-chain-button");
     fireEvent.click(btn);

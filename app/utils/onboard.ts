@@ -31,7 +31,16 @@ export const lineaChainId = "0xe708";
 export const optimismChainId = "0xa";
 export const goerliBaseChainId = "0x14a33";
 
-export const chains = [
+export type Chain = {
+  id: string;
+  token: string;
+  label: string;
+  rpcUrl: string;
+  icon: string;
+  easScanUrl?: string;
+};
+
+export const chains: Chain[] = [
   {
     id: "0x1",
     token: "ETH",
@@ -62,6 +71,7 @@ if (process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on") {
     label: "Base Goerli",
     rpcUrl: "https://goerli.base.org/",
     icon: "./assets/goerli-base-logo.svg",
+    easScanUrl: "https://base-goerli.easscan.org",
   });
 }
 
@@ -106,7 +116,7 @@ chains.push({
 // Exports onboard-core instance (https://github.com/blocknative/web3-onboard)
 export const initWeb3Onboard = init({
   wallets: [injected, ledger, walletConnect],
-  chains: chains,
+  chains: chains.map(({ id, token, label, rpcUrl, icon }) => ({ id, token, label, rpcUrl, icon })),
   appMetadata: {
     name: "Passport",
     icon: "/assets/gitcoinLogo.svg",

@@ -1,32 +1,27 @@
-import { WalletState } from "@web3-onboard/core";
 import { Contract, JsonRpcProvider, formatUnits } from "ethers";
 import { JsonRpcProvider as V5JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
 import axios from "axios";
-import GitcoinResolver from "../contracts/GitcoinResolver.json";
+import onchainInfo from "../../deployments/onchainInfo.json";
+import GitcoinResolverAbi from "../../deployments/abi/GitcoinResolver.json";
 import { Attestation, EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
+import { chains } from "./onboard";
 
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { PROVIDER_ID, StampBit } from "@gitcoin/passport-types";
 import { DecodedProviderInfo } from "../context/onChainContext";
-import { chains } from "./onboard";
 
 export type AttestationData = {
   passport: Attestation;
   score: Attestation;
 };
 
-export async function getAttestationData(address: string, chainId: string): Promise<AttestationData | undefined> {
+export async function getAttestationData(
+  address: string,
+  chainId: keyof typeof onchainInfo
+): Promise<AttestationData | undefined> {
   try {
-    if (!process.env.NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS) {
-      throw new Error("NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS is not defined");
-    }
-
-    if (!process.env.NEXT_PUBLIC_EAS_ADDRESS) {
-      throw new Error("NEXT_PUBLIC_EAS_ADDRESS is not defined");
-    }
-
     const activeChainRpc = chains.find((chain) => chain.id === chainId)?.rpcUrl;
 
     if (!activeChainRpc) {
@@ -35,19 +30,20 @@ export async function getAttestationData(address: string, chainId: string): Prom
 
     const ethersProvider = new JsonRpcProvider(activeChainRpc);
 
-    const gitcoinResolverContract = new Contract(
-      process.env.NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS as string,
-      GitcoinResolver.abi,
-      ethersProvider
-    );
+    const resolverAddress = onchainInfo[chainId].GitcoinResolver.address;
+    const resolverAbi = GitcoinResolverAbi[chainId];
+    const gitcoinResolverContract = new Contract(resolverAddress, resolverAbi, ethersProvider);
 
-    const passportUid = await gitcoinResolverContract.passports(address);
-    const scoreUid = await gitcoinResolverContract.scores(address);
+    const passportSchema = onchainInfo[chainId].easSchemas.passport.uid;
+    const scoreSchema = onchainInfo[chainId].easSchemas.score.uid;
 
-    const eas = new EAS(process.env.NEXT_PUBLIC_EAS_ADDRESS);
+    const passportUid = await gitcoinResolverContract.userAttestations(address, passportSchema);
+    const scoreUid = await gitcoinResolverContract.userAttestations(address, scoreSchema);
+
+    const eas = new EAS(onchainInfo[chainId].EAS.address);
 
     // needed for ethers v5 eas dependency
-    const ethersV5Provider = new V5JsonRpcProvider(process.env.NEXT_PUBLIC_PASSPORT_BASE_GOERLI_RPC_URL);
+    const ethersV5Provider = new V5JsonRpcProvider(activeChainRpc);
     eas.connect(ethersV5Provider);
 
     return {
