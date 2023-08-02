@@ -31,7 +31,7 @@ export const lineaChainId = "0xe708";
 export const optimismChainId = "0xa";
 export const goerliBaseChainId = "0x14a33";
 
-type Chain = {
+export type Chain = {
   id: string;
   token: string;
   label: string;

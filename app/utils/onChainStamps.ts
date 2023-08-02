@@ -1,11 +1,9 @@
-import { WalletState } from "@web3-onboard/core";
 import { Contract, JsonRpcProvider, formatUnits } from "ethers";
 import { JsonRpcProvider as V5JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
 import axios from "axios";
 import onchainInfo from "../../deployments/onchainInfo.json";
 import GitcoinResolverAbi from "../../deployments/abi/GitcoinResolver.json";
-import { JsonRpcProvider } from "@ethersproject/providers";
 import { Attestation, EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { chains } from "./onboard";
 
@@ -13,7 +11,6 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { PROVIDER_ID, StampBit } from "@gitcoin/passport-types";
 import { DecodedProviderInfo } from "../context/onChainContext";
-import { chains } from "./onboard";
 
 export type AttestationData = {
   passport: Attestation;
@@ -25,14 +22,6 @@ export async function getAttestationData(
   chainId: keyof typeof onchainInfo
 ): Promise<AttestationData | undefined> {
   try {
-    if (!process.env.NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS) {
-      throw new Error("NEXT_PUBLIC_GITCOIN_RESOLVER_CONTRACT_ADDRESS is not defined");
-    }
-
-    if (!process.env.NEXT_PUBLIC_EAS_ADDRESS) {
-      throw new Error("NEXT_PUBLIC_EAS_ADDRESS is not defined");
-    }
-
     const activeChainRpc = chains.find((chain) => chain.id === chainId)?.rpcUrl;
 
     if (!activeChainRpc) {

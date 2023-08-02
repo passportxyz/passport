@@ -8,8 +8,8 @@ import { UserContext } from "../context/userContext";
 import onchainInfo from "../../deployments/onchainInfo.json";
 import GitcoinVerifierAbi from "../../deployments/abi/GitcoinVerifier.json";
 import { DoneToastContent } from "./DoneToastContent";
-import { Chain, OnChainStatus } from "./NetworkCard";
-import { chains } from "../utils/onboard";
+import { OnChainStatus } from "./NetworkCard";
+import { Chain } from "../utils/onboard";
 import axios from "axios";
 import { useSetChain } from "@web3-onboard/react";
 import Tooltip from "../components/Tooltip";
@@ -87,6 +87,22 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
   const [syncingToChain, setSyncingToChain] = useState(false);
   const toast = useToast();
 
+  const loadVerifierContract = useCallback(
+    async (wallet) => {
+      const ethersProvider = new ethers.BrowserProvider(wallet.provider, "any");
+
+      if (!Object.keys(onchainInfo).includes(chain.id)) {
+        throw new Error(`No onchainInfo found for chainId ${chain.id}`);
+      }
+      const onchainInfoChainId = chain.id as keyof typeof onchainInfo;
+      const verifierAddress = onchainInfo[onchainInfoChainId].GitcoinVerifier.address;
+      const verifierAbi = GitcoinVerifierAbi[onchainInfoChainId];
+
+      return new ethers.Contract(verifierAddress, verifierAbi, await ethersProvider.getSigner());
+    },
+    [chain]
+  );
+
   const onInitiateSyncToChain = useCallback(async (wallet, passport) => {
     if (connectedChain && connectedChain?.id !== chain.id) {
       const setChainResponse = await setChain({ chainId: chain.id });
@@ -101,17 +117,7 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
       try {
         setSyncingToChain(true);
         const credentials = passport.stamps.map(({ credential }: { credential: VerifiableCredential }) => credential);
-        const ethersProvider = new ethers.BrowserProvider(wallet.provider, "any");
-
-        const chainId = "0x14a33";
-        const verifierAddress = onchainInfo[chainId].GitcoinVerifier.address;
-        const verifierAbi = GitcoinVerifierAbi[chainId];
-
-        const gitcoinVerifierContract = new ethers.Contract(
-          verifierAddress,
-          verifierAbi,
-          await ethersProvider.getSigner()
-        );
+        const gitcoinVerifierContract = await loadVerifierContract(wallet);
 
         if (credentials.length === 0) {
           // Nothing to be brought on-chain
@@ -185,9 +191,9 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
           });
           await transaction.wait();
 
-          const easScanBaseUrl = chains.find((chain) => chain.id === chainId)?.easScanUrl;
+          const easScanBaseUrl = chain.easScanUrl;
           if (!easScanBaseUrl) {
-            throw new Error(`No EAS scan URL found for chain ${chainId}`);
+            throw new Error(`No EAS scan URL found for chain ${chain.id}`);
           }
           const easScanURL = `${easScanBaseUrl}/address/${address}`;
           await readOnChainData();
