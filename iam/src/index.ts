@@ -29,6 +29,7 @@ import {
   PassportAttestation,
   EasRequestBody,
 } from "@gitcoin/passport-types";
+import onchainInfo from "../../deployments/onchainInfo.json";
 
 import { getChallenge } from "./utils/challenge";
 import { getEASFeeAmount } from "./utils/easFees";
@@ -59,12 +60,8 @@ if (!process.env.ATTESTATION_SIGNER_PRIVATE_KEY) {
   configErrors.push("ATTESTATION_SIGNER_PRIVATE_KEY is required");
 }
 
-if (!process.env.GITCOIN_VERIFIER_CHAIN_ID) {
-  configErrors.push("GITCOIN_VERIFIER_CHAIN_ID is required");
-}
-
-if (!process.env.GITCOIN_VERIFIER_CONTRACT_ADDRESS) {
-  configErrors.push("GITCOIN_VERIFIER_CONTRACT_ADDRESS is required");
+if (!process.env.GITCOIN_VERIFIER_CHAIN_ID || process.env.GITCOIN_VERIFIER_CHAIN_ID.startsWith("0x")) {
+  configErrors.push("GITCOIN_VERIFIER_CHAIN_ID is required and must be in decimal format");
 }
 
 if (!process.env.ALLO_SCORER_ID) {
@@ -81,14 +78,6 @@ if (!process.env.SCORER_API_KEY) {
 
 if (!process.env.EAS_GITCOIN_STAMP_SCHEMA) {
   configErrors.push("EAS_GITCOIN_STAMP_SCHEMA is required");
-}
-
-if (!process.env.EAS_GITCOIN_SCORE_SCHEMA) {
-  configErrors.push("EAS_GITCOIN_SCORE_SCHEMA is required");
-}
-
-if (!process.env.EAS_GITCOIN_PASSPORT_SCHEMA) {
-  configErrors.push("EAS_GITCOIN_PASSPORT_SCHEMA is required");
 }
 
 if (configErrors.length > 0) {
@@ -111,11 +100,18 @@ export const config: {
 
 const attestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
 
+const attestationChainId = process.env.GITCOIN_VERIFIER_CHAIN_ID;
+const attestationChainIdHex = ("0x" + parseInt(attestationChainId).toString(16)) as keyof typeof onchainInfo;
+if (!Object.keys(onchainInfo).includes(attestationChainIdHex)) {
+  throw new Error(`No onchainInfo found for chainId ${attestationChainId} (hex: ${attestationChainIdHex})`);
+}
+const verifierAddress = onchainInfo[attestationChainIdHex].GitcoinVerifier.address;
+
 const ATTESTER_DOMAIN = {
   name: "GitcoinVerifier",
   version: "1",
-  chainId: process.env.GITCOIN_VERIFIER_CHAIN_ID,
-  verifyingContract: process.env.GITCOIN_VERIFIER_CONTRACT_ADDRESS,
+  chainId: attestationChainId,
+  verifyingContract: verifierAddress,
 };
 
 const ATTESTER_TYPES = {
@@ -222,7 +218,7 @@ const issueCredential = async (
 };
 
 // health check endpoint
-app.get("/health", (req, res) => {
+app.get("/health", (_req, res) => {
   const data = {
     message: "Ok",
     date: new Date(),
@@ -445,7 +441,8 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 
         const multiAttestationRequest = await stampSchema.formatMultiAttestationRequest(
           credentialVerifications,
-          recipient
+          recipient,
+          attestationChainIdHex
         );
 
         const fee = await getEASFeeAmount(2);
@@ -510,7 +507,8 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
 
         const multiAttestationRequest = await passportSchema.formatMultiAttestationRequest(
           credentialVerifications,
-          recipient
+          recipient,
+          attestationChainIdHex
         );
 
         const fee = await getEASFeeAmount(2);

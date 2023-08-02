@@ -1,5 +1,6 @@
 import * as easPassportModule from "../src/utils/easPassportSchema";
 import * as easStampModule from "../src/utils/easStampSchema";
+import onchainInfo from "../../deployments/onchainInfo.json";
 
 import { VerifiableCredential } from "@gitcoin/passport-types";
 import { BigNumber } from "ethers";
@@ -49,11 +50,14 @@ describe("formatMultiAttestationRequest", () => {
 
     const recipient = "0x123";
 
-    const result = await easPassportModule.formatMultiAttestationRequest(validatedCredentials, recipient);
+    const chainIdHex = "0x14a33";
+    const result = await easPassportModule.formatMultiAttestationRequest(validatedCredentials, recipient, chainIdHex);
+    const scoreSchema = onchainInfo[chainIdHex].easSchemas.score.uid;
+    const passportSchema = onchainInfo[chainIdHex].easSchemas.passport.uid;
 
     expect(result).toEqual([
       {
-        schema: process.env.EAS_GITCOIN_PASSPORT_SCHEMA,
+        schema: passportSchema,
         data: [
           {
             ...defaultRequestData,
@@ -62,7 +66,7 @@ describe("formatMultiAttestationRequest", () => {
         ],
       },
       {
-        schema: process.env.EAS_GITCOIN_SCORE_SCHEMA,
+        schema: scoreSchema,
         data: [
           {
             ...defaultRequestData,

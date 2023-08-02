@@ -10,6 +10,7 @@ import { BigNumber } from "@ethersproject/bignumber";
 
 import { fetchPassportScore } from "./scorerService";
 import { encodeEasScore } from "./easStampSchema";
+import onchainInfo from "../../../deployments/onchainInfo.json";
 
 import bitMapData from "../static/providerBitMapInfo.json";
 
@@ -163,7 +164,8 @@ type ValidatedCredential = {
 
 export const formatMultiAttestationRequest = async (
   credentials: ValidatedCredential[],
-  recipient: string
+  recipient: string,
+  chainIdHex: keyof typeof onchainInfo
 ): Promise<MultiAttestationRequest[]> => {
   const defaultRequestData = {
     recipient,
@@ -193,13 +195,15 @@ export const formatMultiAttestationRequest = async (
     },
   ];
 
+  const { easSchemas } = onchainInfo[chainIdHex];
+
   return [
     {
-      schema: process.env.EAS_GITCOIN_PASSPORT_SCHEMA,
+      schema: easSchemas.passport.uid,
       data: stampRequestData,
     },
     {
-      schema: process.env.EAS_GITCOIN_SCORE_SCHEMA,
+      schema: easSchemas.score.uid,
       data: scoreRequestData,
     },
   ];
