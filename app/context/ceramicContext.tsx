@@ -44,6 +44,7 @@ const {
   Holonym,
   Idena,
   Civic,
+  Allo,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -225,6 +226,11 @@ platforms.set("Civic", {
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_CIVIC_CALLBACK,
   }),
   platFormGroupSpec: Civic.ProviderConfig,
+});
+
+platforms.set("Allo", {
+  platform: new Allo.AlloPlatform({}),
+  platFormGroupSpec: Allo.ProviderConfig,
 });
 
 export enum IsLoadingPassportState {

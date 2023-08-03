@@ -224,7 +224,8 @@ export type PLATFORM_ID =
   | "PHI"
   | "Holonym"
   | "Idena"
-  | "Civic";
+  | "Civic"
+  | "Allo";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -317,7 +318,13 @@ export type PROVIDER_ID =
   | "twitterAccountAgeGte#730"
   | "twitterTweetDaysGte#30"
   | "twitterTweetDaysGte#60"
-  | "twitterTweetDaysGte#120";
+  | "twitterTweetDaysGte#120"
+  | "AlloContributorStatistics#alloProjectsContributedToGte#3"
+  | "AlloContributorStatistics#alloProjectsContributedToGte#5"
+  | "AlloContributorStatistics#alloProjectsContributedToGte#7"
+  | "AlloContributorStatistics#alloRoundsParticipatedInGte#2"
+  | "AlloContributorStatistics#alloRoundsParticipatedInGte#4"
+  | "AlloContributorStatistics#alloRoundsParticipatedInGte#6";
 
 export type StampBit = {
   bit: number;
