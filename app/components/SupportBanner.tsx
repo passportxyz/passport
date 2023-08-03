@@ -5,7 +5,6 @@ import { datadogRum } from "@datadog/browser-rum";
 import Warning from "./Warning";
 
 type SupportBannerProps = {
-  name: string;
   content: string;
   link: string;
   banner_id: number;
@@ -24,6 +23,7 @@ export function SupportBanner() {
             Authorization: `Bearer ${dbAccessToken}`,
           },
         });
+
         setBanners(banners.data);
       }
     })();
@@ -52,8 +52,8 @@ export function SupportBanner() {
       {banners.map((banner) => (
         <Warning
           key={banner.banner_id}
-          userWarning={{ name: banner.name, content: banner.content, link: banner.link, dismissible: true }}
-          onDismiss={() => dismissSupportBanner(banner.banner_id, dbAccessToken)}
+          userWarning={{ content: banner.content, link: banner.link, dismissible: true }}
+          onDismiss={() => dismissSupportBanner(banner.banner_id)}
           className="border-t border-accent-2 px-0"
         />
       ))}

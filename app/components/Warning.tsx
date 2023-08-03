@@ -22,7 +22,7 @@ export default function Warning({
       {content}{" "}
       {link && (
         <a href={link} target="_blank" rel="noreferrer" className="ml-2 underline">
-          More information
+          More information.
         </a>
       )}
       {dismissible && (
