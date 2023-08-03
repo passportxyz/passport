@@ -10,7 +10,6 @@ async function verifyTwitterAccountAge(
 ): Promise<TwitterUserData> {
   const twitterClient = await getAuthClient(sessionKey, code, context);
   const data = await getTwitterUserData(context, twitterClient);
-  console.log({ data });
   return data;
 }
 
