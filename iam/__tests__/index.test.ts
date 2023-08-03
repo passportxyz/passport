@@ -6,14 +6,11 @@ import * as DIDKit from "@spruceid/didkit-wasm-node";
 
 process.env.IAM_JWK = DIDKit.generateEd25519Key();
 process.env.ATTESTATION_SIGNER_PRIVATE_KEY = "0x04d16281ff3bf268b29cdd684183f72542757d24ae9fdfb863e7c755e599163a";
-process.env.GITCOIN_VERIFIER_CHAIN_ID = "11155111";
-process.env.GITCOIN_VERIFIER_CONTRACT_ADDRESS = "0xD8088f772006CAFD81082e8e2e467fA18564e879";
+process.env.GITCOIN_VERIFIER_CHAIN_ID = "84531";
 process.env.ALLO_SCORER_ID = "1";
 process.env.SCORER_ENDPOINT = "http://127.0.0.1:8002";
 process.env.SCORER_API_KEY = "abcd";
 process.env.EAS_GITCOIN_STAMP_SCHEMA = "0x";
-process.env.EAS_GITCOIN_SCORE_SCHEMA = "0x";
-process.env.EAS_GITCOIN_PASSPORT_SCHEMA = "0x";
 
 // ---- Test subject
 import { app, config } from "../src/index";

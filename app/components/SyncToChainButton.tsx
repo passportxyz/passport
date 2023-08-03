@@ -5,15 +5,19 @@ import { useCallback, useContext, useState } from "react";
 import { CeramicContext } from "../context/ceramicContext";
 import { OnChainContext } from "../context/onChainContext";
 import { UserContext } from "../context/userContext";
-import GitcoinVerifier from "../contracts/GitcoinVerifier.json";
+import onchainInfo from "../../deployments/onchainInfo.json";
+import GitcoinVerifierAbi from "../../deployments/abi/GitcoinVerifier.json";
 import { DoneToastContent } from "./DoneToastContent";
 import { OnChainStatus } from "./NetworkCard";
+import { Chain } from "../utils/onboard";
 import axios from "axios";
+import { useSetChain } from "@web3-onboard/react";
+import Tooltip from "../components/Tooltip";
 
 export function getButtonMsg(onChainStatus: OnChainStatus): string {
   switch (onChainStatus) {
     case OnChainStatus.NOT_MOVED:
-      return "Up to date";
+      return "Go";
     case OnChainStatus.MOVED_OUT_OF_DATE:
       return "Update";
     case OnChainStatus.MOVED_UP_TO_DATE:
@@ -29,7 +33,7 @@ export type ErrorDetailsProps = {
   ethersError: EthersError;
 };
 
-const ErrorDetails = ({ msg, ethersError }: ErrorDetailsProps): JSX.Element => {
+export const ErrorDetails = ({ msg, ethersError }: ErrorDetailsProps): JSX.Element => {
   const [displayDetails, setDisplayDetails] = useState<string>("none");
   const [textLabelDisplay, setTextLabelDisplay] = useState<string>("Show details");
 
@@ -72,29 +76,51 @@ const ErrorDetails = ({ msg, ethersError }: ErrorDetailsProps): JSX.Element => {
 export type SyncToChainProps = {
   onChainStatus: OnChainStatus;
   isActive: boolean;
+  chain: Chain;
 };
 
-export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps): JSX.Element {
+export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChainProps): JSX.Element {
   const { passport } = useContext(CeramicContext);
   const { wallet, address } = useContext(UserContext);
   const { readOnChainData } = useContext(OnChainContext);
+  const [{ connectedChain }, setChain] = useSetChain();
   const [syncingToChain, setSyncingToChain] = useState(false);
   const toast = useToast();
+
+  const loadVerifierContract = useCallback(
+    async (wallet) => {
+      const ethersProvider = new ethers.BrowserProvider(wallet.provider, "any");
+
+      if (!Object.keys(onchainInfo).includes(chain.id)) {
+        throw new Error(`No onchainInfo found for chainId ${chain.id}`);
+      }
+      const onchainInfoChainId = chain.id as keyof typeof onchainInfo;
+      const verifierAddress = onchainInfo[onchainInfoChainId].GitcoinVerifier.address;
+      const verifierAbi = GitcoinVerifierAbi[onchainInfoChainId];
+
+      return new ethers.Contract(verifierAddress, verifierAbi, await ethersProvider.getSigner());
+    },
+    [chain]
+  );
+
+  const onInitiateSyncToChain = useCallback(async (wallet, passport) => {
+    if (connectedChain && connectedChain?.id !== chain.id) {
+      const setChainResponse = await setChain({ chainId: chain.id });
+      setChainResponse && (await onSyncToChain(wallet, passport));
+      return;
+    }
+    await onSyncToChain(wallet, passport);
+  }, []);
 
   const onSyncToChain = useCallback(async (wallet, passport) => {
     if (passport && wallet) {
       try {
         setSyncingToChain(true);
         const credentials = passport.stamps.map(({ credential }: { credential: VerifiableCredential }) => credential);
-        const ethersProvider = new ethers.BrowserProvider(wallet.provider, "any");
-        const gitcoinAttesterContract = new ethers.Contract(
-          process.env.NEXT_PUBLIC_GITCOIN_VERIFIER_CONTRACT_ADDRESS as string,
-          GitcoinVerifier.abi,
-          await ethersProvider.getSigner()
-        );
+        const gitcoinVerifierContract = await loadVerifierContract(wallet);
 
         if (credentials.length === 0) {
-          // Nothing to be broough on-chain
+          // Nothing to be brought on-chain
           toast({
             duration: 9000,
             isClosable: true,
@@ -110,22 +136,25 @@ export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps)
           return;
         }
 
-        const nonce = await gitcoinAttesterContract.recipientNonces(address);
+        const nonce = await gitcoinVerifierContract.recipientNonces(address);
 
         const payload = {
           credentials,
           nonce,
         };
 
-        const { data }: { data: EasPayload } = await axios({
-          method: "post",
-          url: `${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas/passport`,
-          data: payload,
-          headers: {
-            "Content-Type": "application/json",
-          },
-          transformRequest: [(data) => JSON.stringify(data, (k, v) => (typeof v === "bigint" ? v.toString() : v))],
-        });
+        const { data }: { data: EasPayload } = await axios.post(
+          `${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas/passport`,
+          payload,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            transformRequest: [
+              (data: any) => JSON.stringify(data, (_k, v) => (typeof v === "bigint" ? v.toString() : v)),
+            ],
+          }
+        );
 
         if (data.error) {
           console.error(
@@ -137,6 +166,7 @@ export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps)
             nonce
           );
         }
+
         if (data.invalidCredentials.length > 0) {
           console.log("not syncing invalid credentials (invalid credentials): ", data.invalidCredentials);
         }
@@ -144,7 +174,7 @@ export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps)
         if (data.passport) {
           const { v, r, s } = data.signature;
 
-          const transaction = await gitcoinAttesterContract.verifyAndAttest(data.passport, v, r, s, {
+          const transaction = await gitcoinVerifierContract.verifyAndAttest(data.passport, v, r, s, {
             value: data.passport.fee,
           });
           toast({
@@ -160,7 +190,12 @@ export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps)
             ),
           });
           await transaction.wait();
-          const easScanURL = `${process.env.NEXT_PUBLIC_EAS_EXPLORER}/address/${address}`;
+
+          const easScanBaseUrl = chain.easScanUrl;
+          if (!easScanBaseUrl) {
+            throw new Error(`No EAS scan URL found for chain ${chain.id}`);
+          }
+          const easScanURL = `${easScanBaseUrl}/address/${address}`;
           await readOnChainData();
           const successSubmit = (
             <p>
@@ -179,13 +214,13 @@ export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps)
             ),
           });
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error("error syncing credentials to chain: ", e);
         let toastDescription: string | JSX.Element =
-          "An unexpected error occured while trying to bring the data on-chain.";
+          "An unexpected error occurred while trying to bring the data on-chain.";
         if (isError(e, "ACTION_REJECTED")) {
           toastDescription = "Transaction rejected by user";
-        } else if (isError(e, "INSUFFICIENT_FUNDS")) {
+        } else if (isError(e, "INSUFFICIENT_FUNDS") || e?.info?.error?.data?.message.includes("insufficient funds")) {
           toastDescription =
             "You don't have sufficient funds to bring your stamps on-chain. Consider funding your wallet first.";
         } else if (isError(e, "CALL_EXCEPTION")) {
@@ -199,7 +234,7 @@ export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps)
         ) {
           toastDescription = (
             <ErrorDetails
-              msg={"A Blockchain error occured while executing this transaction. Please try again in a few minutes."}
+              msg={"A Blockchain error occurred while executing this transaction. Please try again in a few minutes."}
               ethersError={e}
             />
           );
@@ -229,14 +264,14 @@ export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps)
         ) {
           toastDescription = (
             <ErrorDetails
-              msg={"An unexpected error occured while calling the smart contract function. Please contact support."}
+              msg={"An unexpected error occurred while calling the smart contract function. Please contact support."}
               ethersError={e}
             />
           );
         } else if (isError(e, "BUFFER_OVERRUN") || isError(e, "NUMERIC_FAULT")) {
           toastDescription = (
             <ErrorDetails
-              msg={"An operationl error occured while calling the smart contract. Please contact support."}
+              msg={"An operational error occurred while calling the smart contract. Please contact support."}
               ethersError={e}
             />
           );
@@ -256,24 +291,26 @@ export function SyncToChainButton({ onChainStatus, isActive }: SyncToChainProps)
   }, []);
 
   const disableBtn = !isActive || onChainStatus === OnChainStatus.MOVED_UP_TO_DATE;
+  const showToolTip = isActive && onChainStatus !== OnChainStatus.MOVED_UP_TO_DATE && chain.id !== connectedChain?.id;
 
   return (
     <button
-      className={`verify-btn center ${disableBtn && "cursor-not-allowed"}`}
-      data-testid="card-menu-button"
-      onClick={() => onSyncToChain(wallet, passport)}
+      className={`verify-btn center ${disableBtn && "cursor-not-allowed"} flex justify-center`}
+      data-testid="sync-to-chain-button"
+      onClick={() => onInitiateSyncToChain(wallet, passport)}
       disabled={disableBtn}
     >
       <div className={`${syncingToChain ? "block" : "hidden"} relative top-1`}>
         <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
       </div>
       <span
-        className={`mx-2 translate-y-[1px] ${syncingToChain ? "hidden" : "block"} ${
+        className={`mx-1 translate-y-[1px] ${syncingToChain ? "hidden" : "block"} ${
           onChainStatus === OnChainStatus.MOVED_UP_TO_DATE ? "text-accent-3" : "text-muted"
         }`}
       >
         {isActive ? getButtonMsg(onChainStatus) : "Coming Soon"}
       </span>
+      {showToolTip && <Tooltip>You will be prompted to switch to {chain.label} and sign the transaction</Tooltip>}
     </button>
   );
 }

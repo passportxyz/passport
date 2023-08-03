@@ -8,9 +8,14 @@ import { UserContext } from "./userContext";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 import { decodeProviderInformation, decodeScoreAttestation, getAttestationData } from "../utils/onChainStamps";
+import { Attestation } from "@ethereum-attestation-service/eas-sdk";
 
 export interface OnChainProviderMap {
   [key: string]: OnChainProviderType[];
+}
+
+export interface OnChainLastUpdates {
+  [key: string]: Date;
 }
 
 export type OnChainProviderType = {
@@ -22,6 +27,7 @@ export type OnChainProviderType = {
 
 export interface OnChainContextState {
   onChainProviders: OnChainProviderMap;
+  onChainLastUpdates: OnChainLastUpdates;
   activeChainProviders: OnChainProviderType[];
   onChainScore: number;
   readOnChainData: () => Promise<void>;
@@ -29,6 +35,7 @@ export interface OnChainContextState {
 
 const startingState: OnChainContextState = {
   onChainProviders: {},
+  onChainLastUpdates: {},
   activeChainProviders: [],
   onChainScore: 0,
   readOnChainData: async (): Promise<void> => {},
@@ -47,12 +54,29 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   const [onChainProviders, setOnChainProviders] = useState<OnChainProviderMap>({});
   const [activeChainProviders, setActiveChainProviders] = useState<OnChainProviderType[]>([]);
   const [onChainScore, setOnChainScore] = useState<number>(0);
+  const [onChainLastUpdates, setOnChainLastUpdates] = useState<OnChainLastUpdates>({});
+
+  const savePassportLastUpdated = (attestation: Attestation, chainId: string) => {
+    const lastUpdated = new Date(Number(BigInt(attestation.time.toString())) * 1000);
+    setOnChainLastUpdates((prevState) => ({
+      ...prevState,
+      [chainId]: lastUpdated,
+    }));
+  };
 
   const readOnChainData = useCallback(async () => {
     if (wallet && address) {
       try {
-        const passportAttestationData = await getAttestationData(wallet, address);
+        // TODO: When we support multiple chains will need to refactor this to account for all possible chains
+        if (!process.env.NEXT_PUBLIC_ACTIVE_ON_CHAIN_PASSPORT_CHAINIDS) {
+          datadogLogs.logger.error("No active on-chain passport chain ids set");
+          datadogRum.addError("No active on-chain passport chain ids set");
+          return;
+        }
+        const activeChainIds = JSON.parse(process.env.NEXT_PUBLIC_ACTIVE_ON_CHAIN_PASSPORT_CHAINIDS);
+        const chainId = activeChainIds[0];
 
+        const passportAttestationData = await getAttestationData(address, chainId);
         if (!passportAttestationData) {
           return;
         }
@@ -60,6 +84,8 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
         const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
           passportAttestationData.passport
         );
+
+        savePassportLastUpdated(passportAttestationData.passport, chainId);
 
         const onChainProviders: OnChainProviderType[] = onChainProviderInfo
           .sort((a, b) => a.providerNumber - b.providerNumber)
@@ -69,7 +95,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
             expirationDate: new Date(expirationDates[index].toNumber() * 1000),
             issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
           }));
-        const chainId = wallet.chains[0].id;
+
         // Set the on-chain status
         setOnChainProviders((prevState) => ({
           ...prevState,
@@ -96,6 +122,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   const providerProps = {
     onChainProviders,
     activeChainProviders,
+    onChainLastUpdates,
     readOnChainData,
     onChainScore,
   };

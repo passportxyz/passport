@@ -26,8 +26,21 @@ const ledger = ledgerModule();
 export const sepoliaChainId = "0xaa36a7";
 export const hardhatChainId = "0x7a69";
 export const baseGoerliChainId = "0x14a33";
+export const pgnChainId = "0x1a8";
+export const lineaChainId = "0xe708";
+export const optimismChainId = "0xa";
+export const goerliBaseChainId = "0x14a33";
 
-export const chains = [
+export type Chain = {
+  id: string;
+  token: string;
+  label: string;
+  rpcUrl: string;
+  icon: string;
+  easScanUrl?: string;
+};
+
+export const chains: Chain[] = [
   {
     id: "0x1",
     token: "ETH",
@@ -58,6 +71,7 @@ if (process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on") {
     label: "Base Goerli",
     rpcUrl: "https://goerli.base.org/",
     icon: "./assets/goerli-base-logo.svg",
+    easScanUrl: "https://base-goerli.easscan.org",
   });
 }
 
@@ -77,11 +91,32 @@ if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
     icon: "./assets/eth-network-logo.svg",
   });
 }
+chains.push({
+  id: optimismChainId,
+  token: "ETH",
+  label: "Optimism Mainnet",
+  rpcUrl: "https://mainnet.optimism.io/",
+  icon: "./assets/op-logo.svg",
+});
+chains.push({
+  id: lineaChainId,
+  token: "ETH",
+  label: "Linea",
+  rpcUrl: "https://rpc.linea.build",
+  icon: "./assets/linea-logo.png",
+});
+chains.push({
+  id: pgnChainId,
+  token: "ETH",
+  label: "PGN",
+  rpcUrl: "https://rpc.publicgoods.network	",
+  icon: "./assets/pgn-logo.png",
+});
 
 // Exports onboard-core instance (https://github.com/blocknative/web3-onboard)
 export const initWeb3Onboard = init({
   wallets: [injected, ledger, walletConnect],
-  chains: chains,
+  chains: chains.map(({ id, token, label, rpcUrl, icon }) => ({ id, token, label, rpcUrl, icon })),
   appMetadata: {
     name: "Passport",
     icon: "/assets/gitcoinLogo.svg",

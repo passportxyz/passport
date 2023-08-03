@@ -4,14 +4,7 @@ import { CeramicContext, AllProvidersState, ProviderState } from "../context/cer
 import { OnChainContext, OnChainProviderType } from "../context/onChainContext";
 import { ScorerContext, ScoreStateType } from "../context/scorerContext";
 import { SyncToChainButton } from "./SyncToChainButton";
-
-type Chain = {
-  id: string;
-  token: string;
-  label: string;
-  rpcUrl: string;
-  icon: string;
-};
+import { Chain } from "../utils/onboard";
 
 export enum OnChainStatus {
   NOT_MOVED,
@@ -60,7 +53,7 @@ export const checkOnChainStatus = (
 
 export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChains: string[] }) {
   const { allProvidersState } = useContext(CeramicContext);
-  const { onChainProviders, onChainScore } = useContext(OnChainContext);
+  const { onChainProviders, onChainScore, onChainLastUpdates } = useContext(OnChainContext);
   const { rawScore, scoreState } = useContext(ScorerContext);
   const [isActive, setIsActive] = useState(false);
   const [onChainStatus, setOnChainStatus] = useState<OnChainStatus>(OnChainStatus.NOT_MOVED);
@@ -94,12 +87,14 @@ export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChain
           <div>
             <div className="flex w-full flex-col">
               <h1 className="text-lg text-color-1">{chain.label}</h1>
-              <p className="mt-2 text-color-4 md:inline-block">Not moved yet</p>
+              <p className="mt-2 text-color-4 md:inline-block">
+                {onChainLastUpdates[chain.id] ? onChainLastUpdates[chain.id].toLocaleString() : "Not moved yet"}
+              </p>
             </div>
           </div>
         </div>
       </div>
-      <SyncToChainButton onChainStatus={onChainStatus} isActive={isActive} />
+      <SyncToChainButton onChainStatus={onChainStatus} isActive={isActive} chain={chain} />
     </div>
   );
 }

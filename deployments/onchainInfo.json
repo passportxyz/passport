@@ -1,0 +1,25 @@
+{
+  "0x14a33": {
+    "easSchemas": {
+      "passport": {
+        "uid": "0x9d43e5c201404b9ab0913bcd6475c78e32d32a4d78233b2c309e9b6828f59e45"
+      },
+      "score": {
+        "uid": "0xf72ba57b5fb4c12a5f967574bc44a11efb8be76bcfbf47ced36e1afe226ba702"
+      }
+    },
+    "EAS": {
+      "address": "0xAcfE09Fd03f7812F022FBf636700AdEA18Fd2A7A"
+    },
+    "GitcoinResolver": {
+      "address": "0xA10606c17d94a4DBDc4dD804d1B88fF5030aeE94"
+    },
+    "GitcoinVerifier": {
+      "address": "0x0Bfa7c7AF28F43295A0645077E5b13D41907F249"
+    },
+    "GitcoinAttester": {
+      "address": "0x5bbbc733e12f50e6834c40a90066f2f9ffb820e0"
+    }
+  }
+}
+

@@ -354,17 +354,6 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       setSigner(new Web3Provider(wallet.provider).getSigner());
       // Login to Ceramic
       passportLogin();
-      // attach listener
-      wallet.provider.on("chainChanged", async (chainId: string): Promise<void> => {
-        if (chainId !== "0x1") {
-          // logout
-          await disconnect({
-            label: wallet.label || "",
-          }).then(() => {
-            clearState();
-          });
-        }
-      });
     }
   }, [wallet]);
 
