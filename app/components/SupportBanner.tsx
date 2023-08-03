@@ -54,7 +54,7 @@ export function SupportBanner() {
           key={banner.banner_id}
           userWarning={{ content: banner.content, link: banner.link, dismissible: true }}
           onDismiss={() => dismissSupportBanner(banner.banner_id)}
-          className="border-t border-accent-2 px-0"
+          className="max-w-full border-t border-accent-2 px-4"
         />
       ))}
     </>
