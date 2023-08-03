@@ -28,10 +28,12 @@ export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
 const MULTICHAIN_ENABLED = process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE !== "off";
 
+type UserWarningName = "expiredStamp" | "cacaoError";
+
 export interface UserWarning {
   content: React.ReactNode;
   icon?: React.ReactNode;
-  name?: string;
+  name?: UserWarningName;
   dismissible?: boolean;
   link?: string;
 }
