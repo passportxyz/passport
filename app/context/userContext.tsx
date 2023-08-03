@@ -35,6 +35,7 @@ export interface UserWarning {
   icon?: React.ReactNode;
   name?: UserWarningName;
   dismissible?: boolean;
+  link?: string;
 }
 
 export interface UserContextState {

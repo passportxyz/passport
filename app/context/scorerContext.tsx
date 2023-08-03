@@ -4,7 +4,7 @@ import React, { createContext, useState } from "react";
 // --- Axios
 import axios, { AxiosError } from "axios";
 
-const scorerApiGetScore = process.env.NEXT_PUBLIC_SCORER_ENDPOINT + "/score";
+const scorerApiGetScore = process.env.NEXT_PUBLIC_SCORER_ENDPOINT + "/ceramic-cache/score";
 
 const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
 
