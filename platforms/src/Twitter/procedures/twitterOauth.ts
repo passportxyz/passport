@@ -116,6 +116,7 @@ export const getTwitterUserData = async (context: TwitterContext, twitterClient:
       return {
         createdAt: context.twitter.createdAt,
         id: context.twitter.id,
+        username: context.twitter.username,
       };
     } catch (_error) {
       const error = _error as ProviderError;
