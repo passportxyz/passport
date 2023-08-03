@@ -44,6 +44,7 @@ const {
   Holonym,
   Idena,
   Civic,
+  IDriss,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -225,6 +226,13 @@ platforms.set("Civic", {
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_CIVIC_CALLBACK,
   }),
   platFormGroupSpec: Civic.ProviderConfig,
+});
+
+platforms.set("IDriss", {
+  platform: new IDriss.IDrissPlatform({
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_CIVIC_CALLBACK,
+  }),
+  platFormGroupSpec: IDriss.ProviderConfig,
 });
 
 export enum IsLoadingPassportState {

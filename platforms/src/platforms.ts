@@ -24,6 +24,7 @@ import * as PHI from "./PHI";
 import * as Holonym from "./Holonym";
 import * as Idena from "./Idena";
 import * as Civic from "./Civic";
+import * as IDriss from "./IDriss";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
 type PlatformConfig = {
@@ -60,6 +61,7 @@ const platforms: Record<string, PlatformConfig> = {
   Holonym,
   Idena,
   Civic,
+  IDriss,
 };
 
 if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {

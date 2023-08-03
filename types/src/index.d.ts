@@ -224,7 +224,8 @@ export type PLATFORM_ID =
   | "PHI"
   | "Holonym"
   | "Idena"
-  | "Civic";
+  | "Civic"
+  | "IDriss";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -283,6 +284,7 @@ export type PROVIDER_ID =
   | "CommunityStakingSilver"
   | "CommunityStakingGold"
   | "NFT"
+  | "IDriss"
   | "ZkSync"
   | "ZkSyncEra"
   | "Lens"
