@@ -44,6 +44,7 @@ const {
   Holonym,
   Idena,
   Civic,
+  CyberConnect,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -225,6 +226,11 @@ platforms.set("Civic", {
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_CIVIC_CALLBACK,
   }),
   platFormGroupSpec: Civic.ProviderConfig,
+});
+
+platforms.set("CyberConnect", {
+  platform: new CyberConnect.CyberConnectPlatform(),
+  platFormGroupSpec: CyberConnect.ProviderConfig,
 });
 
 export enum IsLoadingPassportState {
