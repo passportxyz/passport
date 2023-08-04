@@ -1,6 +1,6 @@
 // ----- Types
 import type { Provider, ProviderOptions } from "../../types";
-import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
+import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Ethers library
 import { Contract, BigNumber } from "ethers";
@@ -27,25 +27,46 @@ const CYBERPROFILE_PROXY_ABI = [
   },
 ];
 
-// return 0 if no primary handle is found, otherwise return the length of the primary handle
-async function getLengthOfPrimaryHandle(userAddress: string): Promise<number> {
-  const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(
-    process.env.BSC_RPC_URL || "https://bsc-dataseed.binance.org/"
-  );
+export type GithubContext = ProviderContext & {
+  cyberConnect?: {
+    handleLength?: number;
+  };
+};
 
-  const contract = new Contract(CYBERPROFILE_PROXY_CONTRACT_ADDRESS, CYBERPROFILE_PROXY_ABI, provider);
-  // get primary profile id
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-  const profileId: BigNumber = await contract.getPrimaryProfile(userAddress);
-  // if no primary profile id is found (profileId == 0), return 0
-  if (profileId.isZero()) {
-    return 0;
+export type CyberConnectHandleResponse = {
+  handleLength?: number;
+  errors?: string[];
+};
+
+// return 0 if no primary handle is found, otherwise return the length of the primary handle
+async function getLengthOfPrimaryHandle(
+  userAddress: string,
+  context: GithubContext
+): Promise<CyberConnectHandleResponse> {
+  if (!context.cyberConnect?.handleLength) {
+    const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(
+      process.env.BSC_RPC_URL || "https://bsc-dataseed.binance.org/"
+    );
+
+    const contract = new Contract(CYBERPROFILE_PROXY_CONTRACT_ADDRESS, CYBERPROFILE_PROXY_ABI, provider);
+
+    if (!context.cyberConnect) context.cyberConnect = {};
+    // get primary profile id
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+    const profileId: BigNumber = await contract.getPrimaryProfile(userAddress);
+    // if no primary profile id is found (profileId == 0), return 0
+    if (profileId.isZero()) {
+      context.cyberConnect.handleLength = 0;
+      return context.cyberConnect;
+    }
+    // get primary profile handle
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+    const handle: string = await contract.getHandleByProfileId(profileId.toNumber());
+    context.cyberConnect.handleLength = handle.length;
+    // return the length of the primary handle
+    return context.cyberConnect;
   }
-  // get primary profile handle
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-  const handle: string = await contract.getHandleByProfileId(profileId.toNumber());
-  // return the length of the primary handle
-  return handle.length;
+  return context.cyberConnect;
 }
 
 // Export a CyberProfilePremiumProvider
@@ -62,13 +83,14 @@ export class CyberProfilePremiumProvider implements Provider {
   }
 
   // Verify that address defined in the payload has a handle length <= 6 and > 0
-  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
     let valid = false;
     let lengthOfPrimaryHandle: number;
     try {
-      lengthOfPrimaryHandle = await getLengthOfPrimaryHandle(address);
+      const { handleLength } = await getLengthOfPrimaryHandle(address, context);
+      lengthOfPrimaryHandle = handleLength;
     } catch (e) {
       return {
         valid: false,
@@ -101,13 +123,14 @@ export class CyberProfilePaidProvider implements Provider {
   }
 
   // Verify that address defined in the payload has a handle length <= 12 and > 6
-  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
     let valid = false;
     let lengthOfPrimaryHandle: number;
     try {
-      lengthOfPrimaryHandle = await getLengthOfPrimaryHandle(address);
+      const { handleLength } = await getLengthOfPrimaryHandle(address, context);
+      lengthOfPrimaryHandle = handleLength;
     } catch (e) {
       return {
         valid: false,

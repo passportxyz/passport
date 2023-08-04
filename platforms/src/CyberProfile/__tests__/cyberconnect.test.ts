@@ -12,9 +12,12 @@ const MOCK_FAKE_ADDRESS = "FAKE_ADDRESS";
 describe("Attempt premium verification", function () {
   it("handles valid verification attempt", async () => {
     const cc = new CyberProfilePremiumProvider();
-    const verifiedPayload = await cc.verify({
-      address: MOCK_ADDRESS_PREMIUM,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await cc.verify(
+      {
+        address: MOCK_ADDRESS_PREMIUM,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -26,9 +29,12 @@ describe("Attempt premium verification", function () {
 
   it("should return false for paid handle", async () => {
     const cc = new CyberProfilePremiumProvider();
-    const verifiedPayload = await cc.verify({
-      address: MOCK_ADDRESS_PAID,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await cc.verify(
+      {
+        address: MOCK_ADDRESS_PAID,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -38,9 +44,12 @@ describe("Attempt premium verification", function () {
 
   it("should return false for null address", async () => {
     const cc = new CyberProfilePremiumProvider();
-    const verifiedPayload = await cc.verify({
-      address: MOCK_ADDRESS_NULL,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await cc.verify(
+      {
+        address: MOCK_ADDRESS_NULL,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -50,9 +59,12 @@ describe("Attempt premium verification", function () {
 
   it("should return false for invalid address", async () => {
     const cc = new CyberProfilePremiumProvider();
-    const verifiedPayload = await cc.verify({
-      address: MOCK_FAKE_ADDRESS,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await cc.verify(
+      {
+        address: MOCK_FAKE_ADDRESS,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -64,9 +76,12 @@ describe("Attempt premium verification", function () {
 describe("Attempt paid verification", function () {
   it("handles valid verification attempt", async () => {
     const cc = new CyberProfilePaidProvider();
-    const verifiedPayload = await cc.verify({
-      address: MOCK_ADDRESS_PAID,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await cc.verify(
+      {
+        address: MOCK_ADDRESS_PAID,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -78,9 +93,12 @@ describe("Attempt paid verification", function () {
 
   it("should return false for premium handle", async () => {
     const cc = new CyberProfilePaidProvider();
-    const verifiedPayload = await cc.verify({
-      address: MOCK_ADDRESS_PREMIUM,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await cc.verify(
+      {
+        address: MOCK_ADDRESS_PREMIUM,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -90,9 +108,12 @@ describe("Attempt paid verification", function () {
 
   it("should return false for null address", async () => {
     const cc = new CyberProfilePaidProvider();
-    const verifiedPayload = await cc.verify({
-      address: MOCK_ADDRESS_NULL,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await cc.verify(
+      {
+        address: MOCK_ADDRESS_NULL,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -102,9 +123,12 @@ describe("Attempt paid verification", function () {
 
   it("should return false for invalid address", async () => {
     const cc = new CyberProfilePaidProvider();
-    const verifiedPayload = await cc.verify({
-      address: MOCK_FAKE_ADDRESS,
-    } as unknown as RequestPayload);
+    const verifiedPayload = await cc.verify(
+      {
+        address: MOCK_FAKE_ADDRESS,
+      } as unknown as RequestPayload,
+      {}
+    );
 
     expect(verifiedPayload).toEqual({
       valid: false,
