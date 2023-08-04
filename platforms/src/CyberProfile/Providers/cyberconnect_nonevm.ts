@@ -16,7 +16,7 @@ interface CheckOrgMemberResponse {
   };
 }
 
-const checkForOrgMember = async (url: string, address: string): Promise<boolean> => {
+export const checkForOrgMember = async (url: string, address: string): Promise<boolean> => {
   let isMember = false;
   let result: CheckOrgMemberResponse;
 

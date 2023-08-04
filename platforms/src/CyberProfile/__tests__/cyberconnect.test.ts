@@ -1,7 +1,7 @@
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
-import { CyberProfilePremiumProvider, CyberProfilePaidProvider } from "../Providers/cyberconnect";
-import { CyberProfileOrgMemberProvider } from "../Providers/cyberconnect_nonevm";
+import * as profileProviderModule from "../Providers/cyberconnect";
+import * as nonEvmProvider from "../Providers/cyberconnect_nonevm";
 
 const MOCK_ADDRESS_PREMIUM = "0xC47Aa859Fa329496dB6d498165da7e0B1FE13430"; // peiwen.cyber
 const MOCK_ADDRESS_PAID = "0x000aB43e658935BA39504a1424b01756c1E9644c"; // gasless.cyber
@@ -11,7 +11,12 @@ const MOCK_FAKE_ADDRESS = "FAKE_ADDRESS";
 
 describe("Attempt premium verification", function () {
   it("handles valid verification attempt", async () => {
-    const cc = new CyberProfilePremiumProvider();
+    const cc = new profileProviderModule.CyberProfilePremiumProvider();
+    jest.spyOn(profileProviderModule, "getLengthOfPrimaryHandle").mockResolvedValueOnce(
+      Promise.resolve({
+        handleLength: 5,
+      })
+    );
     const verifiedPayload = await cc.verify(
       {
         address: MOCK_ADDRESS_PREMIUM,
@@ -28,7 +33,12 @@ describe("Attempt premium verification", function () {
   });
 
   it("should return false for paid handle", async () => {
-    const cc = new CyberProfilePremiumProvider();
+    jest.spyOn(profileProviderModule, "getLengthOfPrimaryHandle").mockResolvedValueOnce(
+      Promise.resolve({
+        handleLength: 8,
+      })
+    );
+    const cc = new profileProviderModule.CyberProfilePremiumProvider();
     const verifiedPayload = await cc.verify(
       {
         address: MOCK_ADDRESS_PAID,
@@ -43,7 +53,8 @@ describe("Attempt premium verification", function () {
   });
 
   it("should return false for null address", async () => {
-    const cc = new CyberProfilePremiumProvider();
+    jest.spyOn(profileProviderModule, "getLengthOfPrimaryHandle").mockRejectedValueOnce("bad address");
+    const cc = new profileProviderModule.CyberProfilePremiumProvider();
     const verifiedPayload = await cc.verify(
       {
         address: MOCK_ADDRESS_NULL,
@@ -58,7 +69,8 @@ describe("Attempt premium verification", function () {
   });
 
   it("should return false for invalid address", async () => {
-    const cc = new CyberProfilePremiumProvider();
+    jest.spyOn(profileProviderModule, "getLengthOfPrimaryHandle").mockRejectedValueOnce("bad address");
+    const cc = new profileProviderModule.CyberProfilePremiumProvider();
     const verifiedPayload = await cc.verify(
       {
         address: MOCK_FAKE_ADDRESS,
@@ -75,7 +87,12 @@ describe("Attempt premium verification", function () {
 
 describe("Attempt paid verification", function () {
   it("handles valid verification attempt", async () => {
-    const cc = new CyberProfilePaidProvider();
+    jest.spyOn(profileProviderModule, "getLengthOfPrimaryHandle").mockResolvedValueOnce(
+      Promise.resolve({
+        handleLength: 8,
+      })
+    );
+    const cc = new profileProviderModule.CyberProfilePaidProvider();
     const verifiedPayload = await cc.verify(
       {
         address: MOCK_ADDRESS_PAID,
@@ -92,7 +109,12 @@ describe("Attempt paid verification", function () {
   });
 
   it("should return false for premium handle", async () => {
-    const cc = new CyberProfilePaidProvider();
+    jest.spyOn(profileProviderModule, "getLengthOfPrimaryHandle").mockResolvedValueOnce(
+      Promise.resolve({
+        handleLength: 5,
+      })
+    );
+    const cc = new profileProviderModule.CyberProfilePaidProvider();
     const verifiedPayload = await cc.verify(
       {
         address: MOCK_ADDRESS_PREMIUM,
@@ -107,7 +129,8 @@ describe("Attempt paid verification", function () {
   });
 
   it("should return false for null address", async () => {
-    const cc = new CyberProfilePaidProvider();
+    jest.spyOn(profileProviderModule, "getLengthOfPrimaryHandle").mockRejectedValueOnce("bad address");
+    const cc = new profileProviderModule.CyberProfilePaidProvider();
     const verifiedPayload = await cc.verify(
       {
         address: MOCK_ADDRESS_NULL,
@@ -122,7 +145,8 @@ describe("Attempt paid verification", function () {
   });
 
   it("should return false for invalid address", async () => {
-    const cc = new CyberProfilePaidProvider();
+    jest.spyOn(profileProviderModule, "getLengthOfPrimaryHandle").mockRejectedValueOnce("bad address");
+    const cc = new profileProviderModule.CyberProfilePaidProvider();
     const verifiedPayload = await cc.verify(
       {
         address: MOCK_FAKE_ADDRESS,
@@ -139,7 +163,8 @@ describe("Attempt paid verification", function () {
 
 describe("Attempt org membership verification", function () {
   it("handles valid verification attempt", async () => {
-    const cc = new CyberProfileOrgMemberProvider();
+    jest.spyOn(nonEvmProvider, "checkForOrgMember").mockResolvedValue(true);
+    const cc = new nonEvmProvider.CyberProfileOrgMemberProvider();
     const verifiedPayload = await cc.verify({
       address: MOCK_ADDRESS_ORG,
     } as unknown as RequestPayload);
@@ -153,7 +178,8 @@ describe("Attempt org membership verification", function () {
   });
 
   it("should return false for paid handle", async () => {
-    const cc = new CyberProfileOrgMemberProvider();
+    jest.spyOn(nonEvmProvider, "checkForOrgMember").mockResolvedValue(false);
+    const cc = new nonEvmProvider.CyberProfileOrgMemberProvider();
     const verifiedPayload = await cc.verify({
       address: MOCK_ADDRESS_PAID,
     } as unknown as RequestPayload);
@@ -165,7 +191,8 @@ describe("Attempt org membership verification", function () {
   });
 
   it("should return false for null address", async () => {
-    const cc = new CyberProfileOrgMemberProvider();
+    jest.spyOn(nonEvmProvider, "checkForOrgMember").mockResolvedValue(false);
+    const cc = new nonEvmProvider.CyberProfileOrgMemberProvider();
     const verifiedPayload = await cc.verify({
       address: MOCK_ADDRESS_NULL,
     } as unknown as RequestPayload);
@@ -177,7 +204,8 @@ describe("Attempt org membership verification", function () {
   });
 
   it("should return false for invalid address", async () => {
-    const cc = new CyberProfileOrgMemberProvider();
+    jest.spyOn(nonEvmProvider, "checkForOrgMember").mockRejectedValueOnce("bad address");
+    const cc = new nonEvmProvider.CyberProfileOrgMemberProvider();
     const verifiedPayload = await cc.verify({
       address: MOCK_FAKE_ADDRESS,
     } as unknown as RequestPayload);

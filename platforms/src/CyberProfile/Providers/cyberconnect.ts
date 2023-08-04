@@ -39,7 +39,7 @@ export type CyberConnectHandleResponse = {
 };
 
 // return 0 if no primary handle is found, otherwise return the length of the primary handle
-async function getLengthOfPrimaryHandle(
+export async function getLengthOfPrimaryHandle(
   userAddress: string,
   context: GithubContext
 ): Promise<CyberConnectHandleResponse> {
