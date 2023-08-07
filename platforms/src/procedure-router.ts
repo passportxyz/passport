@@ -26,19 +26,14 @@ export type IdenaAuthenticateRequestBody = {
   signature: string;
 };
 
-router.post("/twitter/generateAuthUrl", (req: Request, res: Response): void => {
-  const { callback } = req.body as GenerateTwitterAuthUrlRequestBody;
-  if (callback) {
-    const cacheToken = twitterOAuth.generateSessionKey();
-    const client = twitterOAuth.initClient(callback, cacheToken);
-    const data = {
-      authUrl: twitterOAuth.generateAuthURL(client, cacheToken),
-    };
+router.post("/twitter/generateAuthUrl", (_req: Request, res: Response): void => {
+  const authUrl = twitterOAuth.initClientAndGetAuthUrl();
 
-    res.status(200).send(data);
-  } else {
-    res.status(400);
-  }
+  const data = {
+    authUrl,
+  };
+
+  res.status(200).send(data);
 });
 
 router.post("/brightid/sponsor", (req: Request, res: Response): void => {

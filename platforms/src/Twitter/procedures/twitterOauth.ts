@@ -1,43 +1,30 @@
-import { auth, Client } from "twitter-api-sdk";
+import {
+  TwitterApi,
+  TwitterApiReadOnly,
+  ApiRequestError,
+  ApiResponseError,
+  ApiPartialResponseError,
+} from "twitter-api-v2";
+
 import { clearCacheSession, initCacheSession, loadCacheSession } from "../../utils/cache";
-import crypto from "crypto";
 import { ProviderContext } from "@gitcoin/passport-types";
-import { ProviderError } from "../../utils/errors";
-
-/*
-  Procedure to generate auth URL & request access token for Twitter OAuth
-
-  We MUST use the same instance/object of OAuth2User during generateAuthUrl AND requestAccessToken (bearer token) processes.
-  This is because there are private values (code_challenge, code_verifier) that are
-    set in the OAuth2User instance when generateAuthUrl action is performed -- these private values are used
-    during the requestAccessToken process.
-*/
-
-const millisecondsInDay = 1000 * 3600 * 24;
-
-export const generateSessionKey = (): string => {
-  return `twitter-${crypto.randomBytes(32).toString("hex")}`;
-};
+import { ProviderExternalVerificationError, ProviderInternalVerificationError } from "../../types";
 
 export type TwitterContext = ProviderContext & {
   twitter?: {
-    username?: string;
-    authClient?: Client;
-    createdAt?: string;
-    id?: string;
-    numberDaysTweeted?: number;
+    client?: TwitterApiReadOnly;
+    userData?: TwitterUserData;
   };
 };
 
 type TwitterCache = {
-  oauthUser?: auth.OAuth2User;
+  codeVerifier?: string;
 };
 
 export type TwitterUserData = {
   username?: string;
   createdAt?: string;
   id?: string;
-  errors?: string[];
 };
 
 export type UserTweetTimeline = {
@@ -46,149 +33,131 @@ export type UserTweetTimeline = {
   errors?: string[];
 };
 
-const loadTwitterCache = (token: string): TwitterCache => loadCacheSession(token, "Twitter");
+const loadTwitterCache = (token: string): TwitterCache => {
+  try {
+    return loadCacheSession(token, "Twitter");
+  } catch (e) {
+    throw new ProviderInternalVerificationError("Session missing or expired, try again");
+  }
+};
 
 /**
  * Initializes a Twitter OAuth2 Authentication Client
- * @param callback redirect URI to use. Don’t use localhost as a callback URL - instead, please use a custom host locally or http(s)://127.0.0.1
- * @param sessionKey associates a specific auth.OAuth2User instance to a session
- * @returns instance of auth.OAuth2User
  */
-export const initClient = (callback: string, sessionKey: string): auth.OAuth2User => {
+export const initClientAndGetAuthUrl = (): string => {
   if (process.env.TWITTER_CLIENT_ID && process.env.TWITTER_CLIENT_SECRET) {
-    initCacheSession(sessionKey);
-    const session = loadTwitterCache(sessionKey);
-    const oauthUser = new auth.OAuth2User({
-      client_id: process.env.TWITTER_CLIENT_ID,
-      client_secret: process.env.TWITTER_CLIENT_SECRET,
-      scopes: ["tweet.read", "users.read"],
-      callback,
+    const client = new TwitterApi({
+      appKey: process.env.TWITTER_CLIENT_ID,
+      appSecret: process.env.TWITTER_CLIENT_SECRET,
+    }).readOnly;
+
+    const { url, codeVerifier, state } = client.generateOAuth2AuthLink(process.env.TWITTER_CALLBACK, {
+      scope: ["tweet.read", "users.read"],
     });
-    session.oauthUser = oauthUser;
-    return oauthUser;
+
+    initCacheSession(state);
+    const session = loadTwitterCache(state);
+
+    session.codeVerifier = codeVerifier;
+
+    return url;
   } else {
     throw "Missing TWITTER_CLIENT_ID or TWITTER_CLIENT_SECRET";
   }
 };
 
 // retrieve the instantiated Client shared between Providers
-export const getAuthClient = async (sessionKey: string, code: string, context: TwitterContext): Promise<Client> => {
-  if (!context.twitter?.authClient) {
+export const getAuthClient = async (
+  sessionKey: string,
+  code: string,
+  context: TwitterContext
+): Promise<TwitterApiReadOnly> => {
+  if (!context.twitter?.client) {
     const session = loadTwitterCache(sessionKey);
-    const { oauthUser } = session;
-    // retrieve user's auth bearer token to authenticate client
-    await oauthUser.requestAccessToken(code);
+    const { codeVerifier } = session;
+
+    if (!codeVerifier || !sessionKey || !code) {
+      throw new ProviderExternalVerificationError("You denied the app or your session expired! Please try again.");
+    }
+
+    const client = await loginUser(code, codeVerifier);
 
     if (!context.twitter) context.twitter = {};
-    context.twitter.authClient = new Client(oauthUser);
+    context.twitter.client = client;
 
     clearCacheSession(sessionKey, "Twitter");
   }
-  return context.twitter.authClient;
+  return context.twitter.client;
 };
 
-// This method has side-effects which alter unaccessible state on the
-// OAuth2User instance. The correct state values need to be present when we request the access token
-export const generateAuthURL = (client: auth.OAuth2User, state: string): string => {
-  return client.generateAuthURL({
-    state,
-    code_challenge_method: "s256",
-  });
+const loginUser = async (code: string, codeVerifier: string): Promise<TwitterApiReadOnly> => {
+  const authClient = new TwitterApi({
+    appKey: process.env.TWITTER_CLIENT_ID,
+    appSecret: process.env.TWITTER_CLIENT_SECRET,
+  }).readOnly;
+
+  try {
+    const { client } = await authClient.loginWithOAuth2({
+      code,
+      codeVerifier,
+      redirectUri: process.env.TWITTER_CALLBACK,
+    });
+
+    return client.readOnly;
+  } catch (error) {
+    handleTwitterSdkRequestError("auth", error);
+  }
 };
 
-export const getTwitterUserData = async (context: TwitterContext, twitterClient: Client): Promise<TwitterUserData> => {
-  if (
-    context.twitter.createdAt === undefined ||
-    context.twitter.id === undefined ||
-    context.twitter.username === undefined
-  ) {
+export const getTwitterUserData = async (
+  context: TwitterContext,
+  twitterClient: TwitterApiReadOnly
+): Promise<TwitterUserData> => {
+  if (!context.twitter.userData) {
     try {
       // return information about the (authenticated) requesting user
-      const user = await twitterClient.users.findMyUser({
+      const user = await twitterClient.v2.me({
         "user.fields": ["created_at"],
       });
 
       if (!context.twitter) context.twitter = {};
+      if (!context.twitter.userData) context.twitter.userData = {};
 
-      context.twitter.createdAt = user.data.created_at;
-      context.twitter.id = user.data.id;
-      context.twitter.username = user.data.username;
-      return {
-        createdAt: context.twitter.createdAt,
-        id: context.twitter.id,
-        username: context.twitter.username,
-      };
-    } catch (_error) {
-      const error = _error as ProviderError;
-      if (error?.response?.status === 429) {
-        return {
-          errors: ["Error getting getting Twitter info", "Rate limit exceeded"],
-        };
-      }
-      return {
-        errors: ["Error getting getting Twitter info", `${error?.message}`],
-      };
+      context.twitter.userData.createdAt = user.data.created_at;
+      context.twitter.userData.id = user.data.id;
+      context.twitter.userData.username = user.data.username;
+    } catch (error) {
+      handleTwitterSdkRequestError("user", error);
     }
   }
-  return {
-    createdAt: context.twitter.createdAt,
-    id: context.twitter.id,
-    username: context.twitter.username,
-  };
+  return context.twitter.userData;
 };
 
-export const getUserTweetTimeline = async (
-  context: TwitterContext,
-  twitterClient: Client
-): Promise<UserTweetTimeline> => {
-  const tweetDays: Set<number> = new Set();
-  let nextToken: string | undefined;
-  let apiCallCount = 0;
-  if (context.twitter.numberDaysTweeted === undefined) {
-    try {
-      // return information about the (authenticated) requesting user
-      const userId = (await twitterClient.users.findMyUser()).data.id;
-
-      if (!context.twitter) context.twitter = {};
-      // returns user tweet information
-      do {
-        const userTweetDaysResponse = await twitterClient.tweets.usersIdTweets(userId, {
-          max_results: 100,
-          pagination_token: nextToken,
-          "tweet.fields": ["created_at"],
-        });
-        apiCallCount++;
-        for (const tweet of userTweetDaysResponse.data) {
-          // Extract date from created_at and get time in number of milliseconds and divide into number of milliseconds in day and then floor the value
-
-          const date = Math.floor(new Date(tweet.created_at).getTime() / millisecondsInDay);
-          tweetDays.add(date);
-        }
-        nextToken = userTweetDaysResponse.meta.next_token;
-
-        context.twitter.id = userId;
-        context.twitter.numberDaysTweeted = tweetDays.size;
-        // Respect rate limits by sleeping for a short time after each request
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      } while (nextToken && (apiCallCount <= 14 || tweetDays.size >= 120));
-      return {
-        id: context.twitter.id,
-        numberDaysTweeted: context.twitter.numberDaysTweeted,
-      };
-    } catch (_error) {
-      const error = _error as ProviderError;
-      if (error?.response?.status === 429) {
-        return {
-          errors: ["Error getting getting Twitter info", "Rate limit exceeded"],
-        };
-      }
-      return {
-        errors: ["Error getting getting Twitter info", `${error?.message}`],
-      };
-    }
+const handleTwitterSdkRequestError = (dataLabel: string, error: any): void => {
+  if (error instanceof ApiRequestError) {
+    const { requestError } = error;
+    throw new ProviderExternalVerificationError(
+      `Error requesting ${dataLabel} data: ${requestError.name} ${requestError.message}`
+    );
   }
-  return {
-    id: context.twitter.id,
-    numberDaysTweeted: context.twitter.numberDaysTweeted,
-  };
+
+  if (error instanceof ApiResponseError) {
+    const { data, code } = error;
+    let dataString = "";
+    try {
+      dataString = JSON.stringify(data);
+    } catch {}
+    throw new ProviderExternalVerificationError(
+      `Error retrieving ${dataLabel} data, code ${code}, data: ${dataString}`
+    );
+  }
+
+  if (error instanceof ApiPartialResponseError) {
+    const { rawContent, responseError } = error;
+    throw new ProviderExternalVerificationError(
+      `Retrieving Twitter ${dataLabel} data failed to complete, error: ${responseError.name} ${responseError.message}, raw data: ${rawContent}`
+    );
+  }
+
+  throw error;
 };
