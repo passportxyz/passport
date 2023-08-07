@@ -29,40 +29,40 @@ const CYBERPROFILE_PROXY_ABI = [
 
 export type GithubContext = ProviderContext & {
   cyberConnect?: {
-    handleLength?: number;
+    handle?: string;
   };
 };
 
 export type CyberConnectHandleResponse = {
-  handleLength?: number;
+  handle?: string;
   errors?: string[];
 };
 
 // return 0 if no primary handle is found, otherwise return the length of the primary handle
-export async function getLengthOfPrimaryHandle(
+export async function getPrimaryHandle(
   userAddress: string,
   context: GithubContext
 ): Promise<CyberConnectHandleResponse> {
-  if (!context.cyberConnect?.handleLength) {
+  if (!context.cyberConnect?.handle) {
     const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(
       process.env.BSC_RPC_URL || "https://bsc-dataseed.binance.org/"
     );
 
     const contract = new Contract(CYBERPROFILE_PROXY_CONTRACT_ADDRESS, CYBERPROFILE_PROXY_ABI, provider);
-
     if (!context.cyberConnect) context.cyberConnect = {};
     // get primary profile id
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
     const profileId: BigNumber = await contract.getPrimaryProfile(userAddress);
     // if no primary profile id is found (profileId == 0), return 0
     if (profileId.isZero()) {
-      context.cyberConnect.handleLength = 0;
+      context.cyberConnect.handle = "";
       return context.cyberConnect;
     }
     // get primary profile handle
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
     const handle: string = await contract.getHandleByProfileId(profileId.toNumber());
-    context.cyberConnect.handleLength = handle.length;
+
+    context.cyberConnect.handle = handle;
     // return the length of the primary handle
     return context.cyberConnect;
   }
@@ -87,22 +87,23 @@ export class CyberProfilePremiumProvider implements Provider {
     // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
     let valid = false;
-    let lengthOfPrimaryHandle: number;
+    let userHandle: string;
     try {
-      const { handleLength } = await getLengthOfPrimaryHandle(address, context);
-      lengthOfPrimaryHandle = handleLength;
+      const { handle } = await getPrimaryHandle(address, context);
+      userHandle = handle;
     } catch (e) {
       return {
         valid: false,
         error: ["CyberProfile provider get user primary handle error"],
       };
     }
+    const lengthOfPrimaryHandle = userHandle.length;
     valid = lengthOfPrimaryHandle <= 6 && lengthOfPrimaryHandle > 0;
     return Promise.resolve({
       valid: valid,
       record: valid
         ? {
-            address: address,
+            userHandle,
           }
         : {},
     });
@@ -127,22 +128,23 @@ export class CyberProfilePaidProvider implements Provider {
     // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
     let valid = false;
-    let lengthOfPrimaryHandle: number;
+    let userHandle: string;
     try {
-      const { handleLength } = await getLengthOfPrimaryHandle(address, context);
-      lengthOfPrimaryHandle = handleLength;
+      const { handle } = await getPrimaryHandle(address, context);
+      userHandle = handle;
     } catch (e) {
       return {
         valid: false,
         error: ["CyberProfile provider get user primary handle error"],
       };
     }
+    const lengthOfPrimaryHandle = userHandle.length;
     valid = lengthOfPrimaryHandle <= 12 && lengthOfPrimaryHandle > 6;
     return Promise.resolve({
       valid: valid,
       record: valid
         ? {
-            address: address,
+            userHandle,
           }
         : {},
     });
