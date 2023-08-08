@@ -78,7 +78,7 @@ export class Providers {
           let message =
             "There was an unexpected error during verification, this has been reported to the Gitcoin team.";
 
-          if (e instanceof Error) message += ` ${e.name} ${e.message}`;
+          if (e instanceof Error) message += ` ${e.name}`;
 
           return {
             valid: false,

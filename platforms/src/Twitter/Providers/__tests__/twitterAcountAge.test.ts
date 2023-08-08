@@ -75,11 +75,9 @@ describe("TwitterAccountAgeProvider", function () {
     expect(getAuthClient).toBeCalledWith(sessionKey, code, mockContext);
     expect(getAuthClient).toHaveBeenCalledTimes(1);
     expect(getTwitterUserData).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({
-      valid: false,
-      errors: [],
-      record: undefined,
-    });
+    expect(result.valid).toEqual(false);
+    expect(result.errors.length).toEqual(1);
+    expect(result.errors[0]).toMatch(/^Twitter account age is less than 730 days/);
   });
 
   it("handles ApiRequestError", async () => {
