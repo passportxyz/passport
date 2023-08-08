@@ -39,10 +39,10 @@ export const loadTwitterCache = (token: string): TwitterCache => {
  * Initializes a Twitter OAuth2 Authentication Client
  */
 export const initClientAndGetAuthUrl = (): string => {
-  if (process.env.TWITTER_APP_KEY && process.env.TWITTER_APP_SECRET) {
+  if (process.env.TWITTER_CLIENT_ID && process.env.TWITTER_CLIENT_SECRET) {
     const client = new TwitterApi({
-      appKey: process.env.TWITTER_APP_KEY,
-      appSecret: process.env.TWITTER_APP_SECRET,
+      appKey: process.env.TWITTER_CLIENT_ID,
+      appSecret: process.env.TWITTER_CLIENT_SECRET,
     }).readOnly;
 
     const { url, codeVerifier, state } = client.generateOAuth2AuthLink(process.env.TWITTER_CALLBACK, {
