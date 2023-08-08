@@ -38,6 +38,12 @@ export type CyberConnectHandleResponse = {
   errors?: string[];
 };
 
+interface CyberProfileContract extends Contract {
+  getPrimaryProfile?(address: string): Promise<BigNumber>;
+  getHandleByProfileId?(id: number): Promise<string>;
+  // add other methods as needed
+}
+
 // return 0 if no primary handle is found, otherwise return the length of the primary handle
 export async function getPrimaryHandle(
   userAddress: string,
@@ -48,10 +54,13 @@ export async function getPrimaryHandle(
       process.env.BSC_RPC_URL || "https://bsc-dataseed.binance.org/"
     );
 
-    const contract = new Contract(CYBERPROFILE_PROXY_CONTRACT_ADDRESS, CYBERPROFILE_PROXY_ABI, provider);
+    const contract: CyberProfileContract = new Contract(
+      CYBERPROFILE_PROXY_CONTRACT_ADDRESS,
+      CYBERPROFILE_PROXY_ABI,
+      provider
+    );
     if (!context.cyberConnect) context.cyberConnect = {};
     // get primary profile id
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
     const profileId: BigNumber = await contract.getPrimaryProfile(userAddress);
     // if no primary profile id is found (profileId == 0), return 0
     if (profileId.isZero()) {
@@ -59,7 +68,6 @@ export async function getPrimaryHandle(
       return context.cyberConnect;
     }
     // get primary profile handle
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
     const handle: string = await contract.getHandleByProfileId(profileId.toNumber());
 
     context.cyberConnect.handle = handle;
