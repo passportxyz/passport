@@ -225,8 +225,7 @@ export type PLATFORM_ID =
   | "Holonym"
   | "Idena"
   | "Civic"
-  | "CyberConnect"
-  | "PHI";
+  | "CyberConnect";
 
 export type PROVIDER_ID =
   | "Signer"
