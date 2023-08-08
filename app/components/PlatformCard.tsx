@@ -106,6 +106,8 @@ export const PlatformCard = ({
   // Feature Flag Holonym Stamp
   if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP !== "on" && platform.platform === "Holonym") return <></>;
 
+  if (process.env.NEXT_PUBLIC_FF_CYBERCONNECT_STAMPS !== "on" && platform.platform === "CyberConnect") return <></>;
+
   // returns a single Platform card
   return (
     <div className={className} key={`${platform.name}${i}`}>
