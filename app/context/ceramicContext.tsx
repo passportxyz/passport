@@ -228,10 +228,12 @@ platforms.set("Civic", {
   platFormGroupSpec: Civic.ProviderConfig,
 });
 
-platforms.set("CyberConnect", {
-  platform: new CyberConnect.CyberConnectPlatform(),
-  platFormGroupSpec: CyberConnect.ProviderConfig,
-});
+if (process.env.NEXT_PUBLIC_FF_CYBERCONNECT_STAMPS === "on") {
+  platforms.set("CyberConnect", {
+    platform: new CyberConnect.CyberConnectPlatform(),
+    platFormGroupSpec: CyberConnect.ProviderConfig,
+  });
+}
 
 export enum IsLoadingPassportState {
   Idle,
