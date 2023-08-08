@@ -11,13 +11,20 @@ export const cyberconnectGraphQL = "https://api.cyberconnect.dev/";
 interface CheckOrgMemberResponse {
   data: {
     data?: {
-      checkVerifiedOrganizationMember?: boolean;
+      checkVerifiedOrganizationMember?: {
+        isVerifiedOrganizationMember: boolean;
+        uniqueIdentifier: string;
+      };
     };
+    errors?: {
+      message: string;
+    }[];
   };
 }
 
-const checkForOrgMember = async (url: string, address: string): Promise<boolean> => {
+const checkForOrgMember = async (url: string, address: string): Promise<{ isMember: boolean; identifier: string }> => {
   let isMember = false;
+  let identifier = "";
   let result: CheckOrgMemberResponse;
 
   // Query the CyberConnect graphQL
@@ -28,15 +35,25 @@ const checkForOrgMember = async (url: string, address: string): Promise<boolean>
           checkVerifiedOrganizationMember (
             address: "${address}"
           )
+          {
+            isVerifiedOrganizationMember
+            uniqueIdentifier
+          }
         }`,
     });
+    if (result.data.errors) {
+      throw result.data.errors[0].message;
+    }
   } catch (e: unknown) {
-    const error = e as { errors: { message: string } };
-    throw `The following error is being thrown: ${error.errors.message}`;
+    throw `The following error is being thrown: ${JSON.stringify(e)}`;
   }
 
-  isMember = result.data.data.checkVerifiedOrganizationMember;
-  return isMember;
+  isMember = result.data.data.checkVerifiedOrganizationMember.isVerifiedOrganizationMember;
+  identifier = result.data.data.checkVerifiedOrganizationMember.uniqueIdentifier;
+  return {
+    isMember,
+    identifier,
+  };
 };
 
 // Export a CyberProfileOrgMemberProvider
@@ -57,23 +74,23 @@ export class CyberProfileOrgMemberProvider implements Provider {
     // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
     let valid = false;
-    let isMember: boolean;
     try {
-      isMember = await checkForOrgMember(cyberconnectGraphQL, address);
+      const { isMember, identifier } = await checkForOrgMember(cyberconnectGraphQL, address);
+      valid = isMember ? true : false;
+      return Promise.resolve({
+        valid: valid,
+        record: valid
+          ? {
+              address: address,
+              identifier: identifier,
+            }
+          : {},
+      });
     } catch (e) {
       return {
         valid: false,
         error: ["CyberProfile provider check organization membership error"],
       };
     }
-    valid = isMember ? true : false;
-    return Promise.resolve({
-      valid: valid,
-      record: valid
-        ? {
-            address: address,
-          }
-        : {},
-    });
   }
 }
