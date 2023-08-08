@@ -19,7 +19,7 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Self GTC Staking",
+    platformGroup: "GTC Staking from Self",
     providers: [
       { title: "5 GTC (Bronze)", name: "SelfStakingBronze" },
       { title: "20 GTC (Silver)", name: "SelfStakingSilver" },
@@ -27,7 +27,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     ],
   },
   {
-    platformGroup: "Community GTC Staking",
+    platformGroup: "GTC Staking from Community",
     providers: [
       { title: "5 GTC (Bronze)", name: "CommunityStakingBronze" },
       { title: "20 GTC (Silver)", name: "CommunityStakingSilver" },
