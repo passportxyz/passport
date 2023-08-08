@@ -1,22 +1,38 @@
 import * as twitterAccountAge from "../twitterAccountAge";
 import { RequestPayload, ProviderContext } from "@gitcoin/passport-types";
-import { auth, Client } from "twitter-api-sdk";
-import { getTwitterUserData, getAuthClient } from "../../procedures/twitterOauth";
+import { getTwitterUserData, getAuthClient, initClientAndGetAuthUrl } from "../../procedures/twitterOauth";
 
 const { TwitterAccountAgeProvider } = twitterAccountAge;
+
+process.env.TWITTER_APP_KEY= "test_client_id";
+process.env.TWITTER_APP_SECRET = "test_client_secret";
+process.env.TWITTER_CALLBACK = "test_callback";
 
 jest.mock("../../procedures/twitterOauth", () => ({
   getTwitterUserData: jest.fn(),
   getAuthClient: jest.fn(),
+  initClientAndGetAuthUrl: jest.fn().mockReturnValue("mocked_url"),
+  initCacheSession: jest.fn(),
+  loadTwitterCache: jest.fn().mockReturnValue({}),
+}));
+
+jest.mock("twitter-api-v2", () => ({
+  TwitterApi: jest.fn().mockImplementation(() => ({
+    readOnly: {
+      generateOAuth2AuthLink: jest.fn().mockReturnValue({
+        url: "mocked_url",
+        codeVerifier: "mocked_codeVerifier",
+        state: "mocked_state",
+      }),
+    },
+  })),
 }));
 
 describe("TwitterAccountAgeProvider", function () {
   beforeEach(() => {
     jest.clearAllMocks();
-    (getAuthClient as jest.Mock).mockReturnValue(MOCK_TWITTER_CLIENT);
+    getAuthClient as jest.Mock;
   });
-
-  const MOCK_TWITTER_CLIENT = new Client({} as auth.OAuth2User);
 
   const mockContext: ProviderContext = {
     twitter: {
@@ -37,11 +53,16 @@ describe("TwitterAccountAgeProvider", function () {
   const sessionKey = mockPayload.proofs.sessionKey;
   const code = mockPayload.proofs.code;
 
+  it("should initialize client and get auth url", async () => {
+    const result = initClientAndGetAuthUrl();
+    expect(result).toBe("mocked_url");
+  });
+
   it("handles valid account age", async () => {
     (getTwitterUserData as jest.MockedFunction<typeof getTwitterUserData>).mockImplementation(() => {
       return Promise.resolve({
         createdAt: "2019-01-01T00:00:00Z",
-        errors: undefined,
+        id: "123",
       });
     });
 
@@ -53,7 +74,7 @@ describe("TwitterAccountAgeProvider", function () {
     expect(getTwitterUserData).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: true,
-      error: undefined,
+      errors: [],
       record: { id: "123" },
     });
   });
@@ -61,8 +82,8 @@ describe("TwitterAccountAgeProvider", function () {
   it("handles invalid account age", async () => {
     (getTwitterUserData as jest.MockedFunction<typeof getTwitterUserData>).mockImplementation(() => {
       return Promise.resolve({
-        createdAt: new Date().toISOString(), // Account created today
-        errors: undefined,
+        createdAt: "2023-08-08T00:00:00Z", // Account created today
+        id: "123"
       });
     });
 
@@ -74,8 +95,10 @@ describe("TwitterAccountAgeProvider", function () {
     expect(getTwitterUserData).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: false,
-      error: undefined,
-      record: undefined,
+      errors: ["Twitter account age is less than 730 days (created at 2023-08-08T00:00:00Z)"],
+      record: {
+        id: "123",
+      },
     });
   });
 
@@ -83,7 +106,7 @@ describe("TwitterAccountAgeProvider", function () {
     (getTwitterUserData as jest.MockedFunction<typeof getTwitterUserData>).mockImplementation(() => {
       return Promise.resolve({
         createdAt: undefined,
-        errors: ["Errors"],
+        id: undefined,
       });
     });
 
@@ -95,8 +118,10 @@ describe("TwitterAccountAgeProvider", function () {
     expect(getTwitterUserData).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: false,
-      error: ["Errors"],
-      record: undefined,
+      errors: ["Twitter account age is less than 730 days (created at undefined)"],
+      record: {
+        id: undefined,
+      },
     });
   });
 });

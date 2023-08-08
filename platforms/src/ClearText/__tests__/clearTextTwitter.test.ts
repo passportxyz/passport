@@ -4,15 +4,19 @@
 import { ClearTextTwitterProvider } from "../Providers/clearTextTwitter";
 
 import { RequestPayload } from "@gitcoin/passport-types";
-import { auth, Client } from "twitter-api-sdk";
 import { getAuthClient, getTwitterUserData, TwitterUserData } from "../../Twitter/procedures/twitterOauth";
 
-jest.mock("../../Twitter/procedures/twitterOauth", () => ({
-  getAuthClient: jest.fn(),
-  getTwitterUserData: jest.fn(),
-}));
+process.env.TWITTER_CLIENT_ID = "test_client_id";
+process.env.TWITTER_CLIENT_SECRET = "test_client_secret";
+process.env.TWITTER_CALLBACK = "test_callback";
 
-const MOCK_TWITTER_CLIENT = new Client({} as auth.OAuth2User);
+jest.mock("../../procedures/twitterOauth", () => ({
+  getTwitterUserData: jest.fn(),
+  getAuthClient: jest.fn(),
+  initClientAndGetAuthUrl: jest.fn().mockReturnValue("mocked_url"),
+  initCacheSession: jest.fn(),
+  loadTwitterCache: jest.fn().mockReturnValue({}),
+}));
 
 const MOCK_TWITTER_USER: TwitterUserData = {
   id: "123",
@@ -24,7 +28,7 @@ const code = "ABC123_ACCESSCODE";
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (getAuthClient as jest.Mock).mockReturnValue(MOCK_TWITTER_CLIENT);
+  getAuthClient as jest.Mock;
 });
 
 describe("Attempt verification", function () {
