@@ -8,7 +8,6 @@ import * as Poh from "./Poh";
 import * as Snapshot from "./Snapshot";
 import * as GnosisSafe from "./GnosisSafe";
 import * as NFT from "./NFT";
-import * as GitPOAP from "./GitPOAP";
 import * as POAP from "./POAP";
 import * as ETH from "./ETH";
 import * as ZkSync from "./ZkSync";
@@ -48,7 +47,6 @@ const platforms: Record<string, PlatformConfig> = {
   Poh,
   ETH,
   Snapshot,
-  GitPOAP,
   NFT,
   ZkSync,
   Lens,

@@ -26,7 +26,6 @@ const {
   Facebook,
   Poh,
   PHI,
-  GitPOAP,
   NFT,
   GnosisSafe,
   Snapshot,
@@ -72,11 +71,6 @@ export const platforms = new Map<PLATFORM_ID, PlatformProps>();
 platforms.set("Twitter", {
   platform: new Twitter.TwitterPlatform(),
   platFormGroupSpec: Twitter.ProviderConfig,
-});
-
-platforms.set("GitPOAP", {
-  platform: new GitPOAP.GitPOAPPlatform(),
-  platFormGroupSpec: GitPOAP.ProviderConfig,
 });
 
 platforms.set("Ens", {
