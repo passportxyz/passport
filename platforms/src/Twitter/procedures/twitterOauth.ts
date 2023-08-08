@@ -41,20 +41,25 @@ export const loadTwitterCache = (token: string): TwitterCache => {
 export const initClientAndGetAuthUrl = (): string => {
   if (process.env.TWITTER_CLIENT_ID && process.env.TWITTER_CLIENT_SECRET) {
     const client = new TwitterApi({
-      appKey: process.env.TWITTER_CLIENT_ID,
-      appSecret: process.env.TWITTER_CLIENT_SECRET,
+      clientId: process.env.TWITTER_CLIENT_ID,
+      clientSecret: process.env.TWITTER_CLIENT_SECRET,
     }).readOnly;
 
     const { url, codeVerifier, state } = client.generateOAuth2AuthLink(process.env.TWITTER_CALLBACK, {
       scope: ["tweet.read", "users.read"],
     });
 
-    initCacheSession(state);
-    const session = loadTwitterCache(state);
+    // This is necessary because of how we use the state to
+    // direct the oauth window to the correct message channel
+    const newState = "twitter-" + state;
+    const newUrl = url.replace(state, newState);
+
+    initCacheSession(newState);
+    const session = loadTwitterCache(newState);
 
     session.codeVerifier = codeVerifier;
 
-    return url;
+    return newUrl;
   } else {
     throw "Missing TWITTER_CLIENT_ID or TWITTER_CLIENT_SECRET";
   }
@@ -86,8 +91,8 @@ export const getAuthClient = async (
 
 const loginUser = async (code: string, codeVerifier: string): Promise<TwitterApiReadOnly> => {
   const authClient = new TwitterApi({
-    appKey: process.env.TWITTER_CLIENT_ID,
-    appSecret: process.env.TWITTER_CLIENT_SECRET,
+    clientId: process.env.TWITTER_CLIENT_ID,
+    clientSecret: process.env.TWITTER_CLIENT_SECRET,
   }).readOnly;
 
   try {
