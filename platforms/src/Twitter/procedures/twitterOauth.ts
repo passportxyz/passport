@@ -90,6 +90,7 @@ export const getAuthClient = async (
 };
 
 const loginUser = async (code: string, codeVerifier: string): Promise<TwitterApiReadOnly> => {
+  throw new Error("Testing error alerts");
   const authClient = new TwitterApi({
     clientId: process.env.TWITTER_CLIENT_ID,
     clientSecret: process.env.TWITTER_CLIENT_SECRET,
