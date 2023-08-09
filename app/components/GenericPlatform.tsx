@@ -444,7 +444,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
         isOpen={payloadModalIsOpen}
         onClose={() => setPayloadModalIsOpen(false)}
         title="Verification Response"
-        subheading="See details"
+        subheading="To preserve your privacy, error information is not stored; please share with Gitcoin support at your discretion."
         jsonOutput={verificationResponse}
       />
       <NoStampModal isOpen={showNoStampModal} onClose={() => setShowNoStampModal(false)} />
