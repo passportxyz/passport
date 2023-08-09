@@ -15,7 +15,7 @@ const InitiateOnChainButton = () => {
     <>
       <button className="h-10 w-10 rounded-md border border-muted" onClick={() => setShowSidebar(true)}>
         <div className="flex justify-center">
-          <LinkIcon width="24" />
+          <img src="./assets/on-chain-icon.svg" className="p-2.5" alt="Initiate on chain passport icon" />
         </div>
       </button>
       <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
