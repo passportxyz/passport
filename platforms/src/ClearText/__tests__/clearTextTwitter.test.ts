@@ -10,7 +10,7 @@ process.env.TWITTER_CLIENT_ID = "test_client_id";
 process.env.TWITTER_CLIENT_SECRET = "test_client_secret";
 process.env.TWITTER_CALLBACK = "test_callback";
 
-jest.mock("../../procedures/twitterOauth", () => ({
+jest.mock("../../Twitter/procedures/twitterOauth", () => ({
   getTwitterUserData: jest.fn(),
   getAuthClient: jest.fn(),
   initClientAndGetAuthUrl: jest.fn().mockReturnValue("mocked_url"),

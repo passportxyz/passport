@@ -1,10 +1,9 @@
 /* eslint-disable */
 import * as twitterAccountAge from "../twitterAccountAge";
 import { RequestPayload, ProviderContext } from "@gitcoin/passport-types";
-import { ApiRequestError, ApiResponseError, ETwitterApiError,  } from "twitter-api-v2";
+import { ApiRequestError, ApiResponseError, ApiPartialResponseError } from "twitter-api-v2";
 import { getTwitterUserData, getAuthClient, initClientAndGetAuthUrl } from "../../procedures/twitterOauth";
-import { ClientRequest } from "http";
-import { ProviderExternalVerificationError, ProviderInternalVerificationError } from "../../../types";
+import { ProviderExternalVerificationError } from "../../../types";
 
 const { TwitterAccountAgeProvider } = twitterAccountAge;
 
@@ -107,12 +106,15 @@ describe("TwitterAccountAgeProvider", function () {
   });
 
   it("handles ApiRequestError", async () => {
-    const mockrequestError: Error = {
-      name: "ApiRequestError",
-      message: "API request error"
-    };
-
-    const mockProviderExternalVerificationError = new ProviderExternalVerificationError(`Error requesting user data: ${mockrequestError.name} ${mockrequestError.message}`);
+    const mockError = {
+        requestError: {
+          name: "ApiRequestError",
+          message: "API request error"
+        }
+    } as ApiRequestError;
+    const { requestError } = mockError;
+      
+    const mockProviderExternalVerificationError = new ProviderExternalVerificationError(`Error requesting user data: ${requestError.name} ${requestError.message}`);
 
     (getTwitterUserData as jest.MockedFunction<typeof getTwitterUserData>).mockImplementation(() => {
       throw mockProviderExternalVerificationError;
@@ -124,7 +126,69 @@ describe("TwitterAccountAgeProvider", function () {
       fail("Expected ProviderExternalVerificationError to be thrown");
     } catch (e) {
       expect(e).toBeInstanceOf(ProviderExternalVerificationError);
-      expect(e.message).toContain(`Error requesting user data: ${mockrequestError.name} ${mockrequestError.message}`);
+      expect(e.message).toContain(`Error requesting user data: ${requestError.name} ${requestError.message}`);
+    }
+  });
+
+  it("handles ApiResponseError", async () => {
+    const mockResponseError = {
+      data: {
+        error: "Error retrieving user data",
+        title: "Mock response error",
+        detail: "User not found",
+      },
+      code: 400,
+    } as ApiResponseError;
+
+    const { data, code } = mockResponseError;
+    const dataString = JSON.stringify(data)
+
+    const mockProviderExternalVerificationError = new ProviderExternalVerificationError( `Error retrieving user data, code ${code}, data: ${dataString}`);
+
+    (getTwitterUserData as jest.MockedFunction<typeof getTwitterUserData>).mockImplementation(() => {
+      throw mockProviderExternalVerificationError;
+    });
+
+    const provider = new TwitterAccountAgeProvider({ threshold: "730" });
+    try {
+      await provider.verify(mockPayload, mockContext);
+      fail("Expected ProviderExternalVerificationError to be thrown");
+    } catch (e) {
+      console.log(e.message);
+      
+      expect(e).toBeInstanceOf(ProviderExternalVerificationError);
+      expect(e.message).toContain("Error retrieving user data");
+      expect(e.message).toContain("400");
+      expect(e.message).toContain("User not found");
+    }
+  });
+
+  it("handles ApiPartialResponseError", async () => {
+    const mockPartialResponseError = {
+      rawContent: "PartialError",
+      responseError: {
+        name: "Api Partial Response Error",
+        message: "Data missing"
+      },
+    } as ApiPartialResponseError;
+
+    const { rawContent, responseError } = mockPartialResponseError;
+    
+    const mockProviderExternalVerificationError = new ProviderExternalVerificationError( `Retrieving Twitter user data failed to complete, error: ${responseError.name} ${responseError.message}, raw data: ${rawContent}`);
+
+    (getTwitterUserData as jest.MockedFunction<typeof getTwitterUserData>).mockImplementation(() => {
+      throw mockProviderExternalVerificationError;
+    });
+
+    const provider = new TwitterAccountAgeProvider({ threshold: "730" });
+    try {
+      await provider.verify(mockPayload, mockContext);
+      fail("Expected ProviderExternalVerificationError to be thrown");
+    } catch (e) {
+      expect(e).toBeInstanceOf(ProviderExternalVerificationError);
+      expect(e.message).toContain("Retrieving Twitter user data failed to complete");
+      expect(e.message).toContain("PartialError");
+      expect(e.message).toContain("Data missing");
     }
   });
 });
