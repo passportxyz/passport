@@ -32,6 +32,7 @@ const props: SideBarContentProps = {
     name: "Github",
     description: "Connect your existing Github account to verify.",
     connectMessage: "Connect Account",
+    website: "https://github.com",
   },
   currentProviders: [
     { platformGroup: "Account Name", providers: [{ title: "Encrypted", name: "Github" }] },

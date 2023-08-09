@@ -8,6 +8,7 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect your existing account to verify with Snapshot.",
   connectMessage: "Verify Account",
   isEVM: true,
+  website: "https://snapshot.org",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

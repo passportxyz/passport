@@ -9,6 +9,7 @@ export const PlatformDetails: PlatformSpec = {
   description: "ETH possession and transaction verification",
   connectMessage: "Verify Account",
   isEVM: true,
+  website: "https://ethereum.org",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

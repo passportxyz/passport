@@ -222,7 +222,7 @@ export const PlatformCard = ({
                 onOpen();
               }}
             >
-              {platform.connectMessage}
+              <a href={platform.website}>{platform.website}</a><br />{platform.connectMessage}
             </button>
           )}
         </div>

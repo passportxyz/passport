@@ -11,6 +11,7 @@ export type PlatformSpec = {
   connectMessage: string;
   isEVM?: boolean;
   enablePlatformCardUpdate?: boolean;
+  website: string;
 };
 
 export type ProviderSpec = {

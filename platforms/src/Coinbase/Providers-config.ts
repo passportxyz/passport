@@ -7,6 +7,7 @@ export const PlatformDetails: PlatformSpec = {
   name: "Coinbase",
   description: "Connect your existing account to verify with Coinbase.",
   connectMessage: "Connect Account",
+  website: "https://www.coinbase.com",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

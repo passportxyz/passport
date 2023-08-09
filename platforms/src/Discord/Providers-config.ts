@@ -7,6 +7,7 @@ export const PlatformDetails: PlatformSpec = {
   name: "Discord",
   description: "Connect your existing Discord account to verify.",
   connectMessage: "Connect Account",
+  website: "https://discord.com",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

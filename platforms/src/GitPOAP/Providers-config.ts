@@ -8,6 +8,7 @@ export const PlatformDetails: PlatformSpec = {
   description: "GitPOAP Verification",
   connectMessage: "Connect Account",
   isEVM: true,
+  website: "https://www.gitpoap.io",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

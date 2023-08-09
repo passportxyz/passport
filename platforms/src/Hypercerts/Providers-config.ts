@@ -8,6 +8,7 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect your wallet to verify that you hold Hypercerts",
   connectMessage: "Connect Wallet",
   isEVM: true,
+  website: "https://hypercerts.org",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

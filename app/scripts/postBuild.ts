@@ -22,6 +22,7 @@ type PlatformData = {
   icon: string;
   description: string;
   connectMessage: string;
+  website: string;
   groups: GroupData[];
 };
 
@@ -51,7 +52,7 @@ const formatPlatformGroups = (providerConfig: PlatformGroupSpec[]) =>
 const platformsData = Object.entries(platforms).reduce((data, [id, platform]) => {
   if (skipPlatforms.includes(id)) return data;
 
-  const { name, icon, description, connectMessage } = platform.PlatformDetails;
+  const { name, icon, description, connectMessage, website } = platform.PlatformDetails;
   if (!icon) throw new Error(`No icon defined for ${id}`);
 
   const groups = formatPlatformGroups(platform.ProviderConfig);
@@ -64,6 +65,7 @@ const platformsData = Object.entries(platforms).reduce((data, [id, platform]) =>
       icon,
       description,
       connectMessage,
+      website,
       groups,
     },
   ];

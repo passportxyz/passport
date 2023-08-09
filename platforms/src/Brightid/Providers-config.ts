@@ -8,6 +8,7 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect your BrightID",
   connectMessage: "Connect Account",
   isEVM: true,
+  website: "https://www.brightid.org",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

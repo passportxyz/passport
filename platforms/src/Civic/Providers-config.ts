@@ -8,6 +8,7 @@ export const PlatformDetails: PlatformSpec = {
   name: "Civic",
   description: "Civic Profile Verification",
   connectMessage: "Verify Account",
+  website: "https://www.civic.com",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
