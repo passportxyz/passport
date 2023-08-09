@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.settings.json",
   "compilerOptions": {
+    "lib": ["dom"],
     "module": "commonjs",
     "esModuleInterop": true,
     "declaration": true,

@@ -1,6 +1,10 @@
+/* eslint-disable */
 import * as twitterAccountAge from "../twitterAccountAge";
 import { RequestPayload, ProviderContext } from "@gitcoin/passport-types";
+import { ApiRequestError, ApiResponseError, ETwitterApiError,  } from "twitter-api-v2";
 import { getTwitterUserData, getAuthClient, initClientAndGetAuthUrl } from "../../procedures/twitterOauth";
+import { ClientRequest } from "http";
+import { ProviderExternalVerificationError, ProviderInternalVerificationError } from "../../../types";
 
 const { TwitterAccountAgeProvider } = twitterAccountAge;
 
@@ -102,26 +106,25 @@ describe("TwitterAccountAgeProvider", function () {
     });
   });
 
-  it("handles request errors", async () => {
+  it("handles ApiRequestError", async () => {
+    const mockrequestError: Error = {
+      name: "ApiRequestError",
+      message: "API request error"
+    };
+
+    const mockProviderExternalVerificationError = new ProviderExternalVerificationError(`Error requesting user data: ${mockrequestError.name} ${mockrequestError.message}`);
+
     (getTwitterUserData as jest.MockedFunction<typeof getTwitterUserData>).mockImplementation(() => {
-      return Promise.resolve({
-        createdAt: undefined,
-        id: undefined,
-      });
+      throw mockProviderExternalVerificationError;
     });
-
-    const provider = new TwitterAccountAgeProvider({ threshold: "730" });
-    const result = await provider.verify(mockPayload, mockContext);
-
-    expect(getAuthClient).toBeCalledWith(sessionKey, code, mockContext);
-    expect(getAuthClient).toHaveBeenCalledTimes(1);
-    expect(getTwitterUserData).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({
-      valid: false,
-      errors: ["Twitter account age is less than 730 days (created at undefined)"],
-      record: {
-        id: undefined,
-      },
-    });
+    
+    try {
+      const provider = new TwitterAccountAgeProvider({ threshold: "730" });
+      await provider.verify(mockPayload, mockContext);
+      fail("Expected ProviderExternalVerificationError to be thrown");
+    } catch (e) {
+      expect(e).toBeInstanceOf(ProviderExternalVerificationError);
+      expect(e.message).toContain(`Error requesting user data: ${mockrequestError.name} ${mockrequestError.message}`);
+    }
   });
 });
