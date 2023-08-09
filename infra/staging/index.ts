@@ -182,6 +182,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             valueFrom: `${IAM_SERVER_SSM_ARN}:GOOGLE_CALLBACK::`,
           },
           {
+            name: "TWITTER_CALLBACK",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:TWITTER_CALLBACK::`,
+          },
+          {
             name: "RPC_URL",
             valueFrom: `${IAM_SERVER_SSM_ARN}:MAINNET_RPC_URL::`,
           },
