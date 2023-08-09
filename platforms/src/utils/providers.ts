@@ -5,7 +5,7 @@ import type { RequestPayload, VerifiedPayload, ProviderContext } from "@gitcoin/
 const UPDATED_PROVIDERS = ["twitterAccountAgeGte#180", "twitterAccountAgeGte#365", "twitterAccountAgeGte#730"];
 
 function reportUnhandledError(type: string, address: string, e: unknown) {
-  if (process.env.EXIT_ON_UNHANDLED_ERROR === "true") {
+  if (process.env.EXIT_ON_UNHANDLED_ERROR === "true" && process.env.NODE_ENV === "development") {
     // To be used when running locally to ensure that unhandled errors are fixed
     console.error(`Unhandled error for type ${type}`, e);
     process.exit(1);
@@ -94,6 +94,8 @@ export class Providers {
 
           let message = "There was an unexpected error during verification.";
 
+          // The first line of the stack contains the error name and message. We'll keep this
+          // and the second line, the lowest level of the backtrace. The rest is dropped.
           if (e instanceof Error) message += ` ${e.stack.replace(/\n\s*(?= )/, "").replace(/\n.*$/gm, "")}`;
 
           return {
