@@ -15,6 +15,7 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect to Passport to verify your staking amount",
   connectMessage: "Verify amount",
   isEVM: true,
+  website: "https://staking.passport.gitcoin.co",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

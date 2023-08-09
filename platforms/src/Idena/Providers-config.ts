@@ -14,6 +14,7 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect your existing Identity to verify.",
   connectMessage: "Verify Identity",
   enablePlatformCardUpdate: true,
+  website: "https://www.idena.io",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
