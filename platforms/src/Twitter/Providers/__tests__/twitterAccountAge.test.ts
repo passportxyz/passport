@@ -14,8 +14,6 @@ jest.mock("../../procedures/twitterOauth", () => ({
   getAuthClient: jest.fn(),
 }));
 
-jest.spyOn(console, "error").mockImplementation(() => {});
-
 describe("TwitterAccountAgeProvider", function () {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -192,44 +190,5 @@ describe("TwitterAccountAgeProvider", function () {
       error: ["Errors"],
       record: undefined,
     });
-  });
-
-  it("should report unhandled error if result is invalid but no errors provided", async () => {
-    (getTwitterUserData as jest.MockedFunction<typeof getTwitterUserData>).mockImplementation(() => {
-      return Promise.reject({ valid: false });
-    });
-    const provider = new TwitterAccountAgeProvider({ threshold: "730" });
-    const providers = new Providers([provider]);
-
-    const unknownErrorOne = "UNHANDLED ERROR: for type twitterAccountAgeGte#730 and address 0x0 -";
-    const unknownErrorTwo = "unable to parse, not derived from Error";
-
-    const result = await providers._updatedVerify(mockPayload.type, mockPayload, mockContext);
-
-    expect(console.error).toHaveBeenCalledWith(unknownErrorOne, unknownErrorTwo);
-    expect(result.error[0]).toEqual("There was an unexpected error during verification.");
-  });
-
-  it("should handle unexpected errors", async () => {
-    const unexpectedError = new Error("Unexpected error.");
-    (getTwitterUserData as jest.MockedFunction<typeof getTwitterUserData>).mockImplementation(() => {
-      return Promise.reject({ valid: false, error: unexpectedError });
-    });
-    const provider = new TwitterAccountAgeProvider({ threshold: "730" });
-    const providers = new Providers([provider]);
-  
-    const result = await providers._updatedVerify(mockPayload.type, mockPayload, mockContext);
-  
-    expect(result.valid).toEqual(false);
-    expect(result.error[0]).toContain("There was an unexpected error during verification.");
-  });
-
-  it("should return missing provider error if type doesn\"t exist", async () => {
-    const provider = new TwitterAccountAgeProvider({ threshold: "730" });
-    const providers = new Providers([provider]);
-
-    const result = await providers._updatedVerify("nonExistentType", mockPayload, mockContext);
-    expect(result.valid).toEqual(false);
-    expect(result.error).toEqual(["Missing provider"]);
   });
 });

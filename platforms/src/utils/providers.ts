@@ -2,7 +2,12 @@
 import { Provider, ProviderExternalVerificationError, ProviderInternalVerificationError } from "../types";
 import type { RequestPayload, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
 
-const UPDATED_PROVIDERS = ["twitterAccountAgeGte#180", "twitterAccountAgeGte#365", "twitterAccountAgeGte#730"];
+const UPDATED_PROVIDERS = [
+  "twitterAccountAgeGte#180",
+  "twitterAccountAgeGte#365",
+  "twitterAccountAgeGte#730",
+  "Simple",
+];
 
 function reportUnhandledError(type: string, address: string, e: unknown) {
   if (process.env.EXIT_ON_UNHANDLED_ERROR === "true" && process.env.NODE_ENV === "development") {
