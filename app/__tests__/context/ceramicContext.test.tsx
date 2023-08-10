@@ -58,6 +58,7 @@ const stamps = [googleStampFixture, discordStampFixture, brightidStampFixture, f
   stamp.credential.expirationDate = "2099-05-15T21:04:01.708Z";
   stamp.credential.credentialSubject.id = "test-user-did";
   stamp.credential.issuer = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
+  stamp.credential.credentialSubject.provider = stamp.provider;
   return stamp;
 });
 
