@@ -461,7 +461,7 @@ describe("POST /verify", function () {
       .expect(403)
       .expect("Content-Type", /json/);
 
-    expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify proofs");
+    expect((response.body as ErrorResponseBody).error).toEqual("Proof is not valid");
   });
 
   it("handles exception if verify credential throws", async () => {

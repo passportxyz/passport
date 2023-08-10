@@ -74,6 +74,9 @@ export type ChallengePayload = {
 // response Object return by verify procedure
 export type VerifiedPayload = {
   valid: boolean;
+  errors?: string[];
+  // TODO: error should be removed, and errors should be made required
+  // We are currently transitioning providers over to use this scheme
   error?: string[];
   // This will be combined with the ProofRecord (built from the verified content in the Payload)
   record?: { [k: string]: string };

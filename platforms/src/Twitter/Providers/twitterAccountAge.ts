@@ -17,7 +17,7 @@ export type TwitterAccountAgeOptions = {
   threshold: string;
 };
 
-const checkTwitterAccountAge = (numberOfDays: number, createdAt: string): boolean => {
+const checkTwitterAccountAge = (numberOfDays: number, createdAt: string): { valid: boolean; errors: string[] } => {
   const creationDate = new Date(createdAt);
   // Get the current date
   const currentDate = new Date();
@@ -26,7 +26,17 @@ const checkTwitterAccountAge = (numberOfDays: number, createdAt: string): boolea
   // Convert to days
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-  return diffDays >= numberOfDays;
+  if (diffDays >= numberOfDays) {
+    return {
+      valid: true,
+      errors: [],
+    };
+  } else {
+    return {
+      valid: false,
+      errors: [`Twitter account age is less than ${numberOfDays} days (created at ${createdAt})`],
+    };
+  }
 };
 
 export class TwitterAccountAgeProvider implements Provider {
@@ -43,15 +53,14 @@ export class TwitterAccountAgeProvider implements Provider {
   }
 
   async verify(payload: RequestPayload, context: TwitterContext): Promise<VerifiedPayload> {
-    const twitterUserData = await verifyTwitterAccountAge(payload.proofs.sessionKey, payload.proofs.code, context);
-    const valid = checkTwitterAccountAge(parseInt(this._options.threshold), twitterUserData.createdAt);
+    const { id, createdAt } = await verifyTwitterAccountAge(payload.proofs.sessionKey, payload.proofs.code, context);
 
-    const twitterUserId = context.twitter.id;
+    const { valid, errors } = checkTwitterAccountAge(parseInt(this._options.threshold), createdAt);
 
     return {
       valid,
-      error: twitterUserData.errors,
-      record: valid ? { id: twitterUserId } : undefined,
+      errors,
+      record: { id },
     };
   }
 }

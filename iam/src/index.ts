@@ -18,16 +18,15 @@ import { utils, ethers } from "ethers";
 import { Response } from "express";
 import {
   RequestPayload,
-  ProofRecord,
   ChallengeRequestBody,
   VerifyRequestBody,
   CredentialResponseBody,
   ProviderContext,
   CheckRequestBody,
-  CheckResponseBody,
   EasPayload,
   PassportAttestation,
   EasRequestBody,
+  VerifiedPayload,
 } from "@gitcoin/passport-types";
 import onchainInfo from "../../deployments/onchainInfo.json";
 
@@ -45,7 +44,7 @@ import {
 } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // All provider exports from platforms
-import { providers } from "@gitcoin/passport-platforms";
+import { providers, platforms } from "@gitcoin/passport-platforms";
 import path from "path";
 
 // ---- Config - check for all required env variables
@@ -134,6 +133,26 @@ const ATTESTER_TYPES = {
   ],
 };
 
+const providerTypePlatformMap = Object.entries(platforms).reduce((acc, [platformName, { providers }]) => {
+  providers.forEach(({ type }) => {
+    acc[type] = platformName;
+  });
+  return acc;
+}, {} as { [k: string]: string });
+
+function groupProviderTypesByPlatform(types: string[]): string[][] {
+  return Object.values(
+    types.reduce((groupedProviders, type) => {
+      const platform = providerTypePlatformMap[type] || "generic";
+
+      if (!groupedProviders[platform]) groupedProviders[platform] = [];
+      groupedProviders[platform].push(type);
+
+      return groupedProviders;
+    }, {} as { [k: keyof typeof platforms]: string[] })
+  );
+}
+
 // create the app and run on port
 export const app = express();
 
@@ -144,77 +163,57 @@ app.use(express.json());
 app.use(cors());
 
 // return a JSON error response with a 400 status
-const errorRes = async (res: Response, error: string, errorCode: number): Promise<Response> =>
-  await new Promise((resolve) => resolve(res.status(errorCode).json({ error })));
+const errorRes = (res: Response, error: string, errorCode: number): Response => res.status(errorCode).json({ error });
 
 // return response for given payload
-const issueCredential = async (
+const issueCredentials = async (
+  types: string[],
   address: string,
-  type: string,
-  payload: RequestPayload,
-  context: ProviderContext
-): Promise<CredentialResponseBody> => {
-  try {
-    // if the payload includes an additional signer, use that to issue credential.
-    if (payload.signer) {
-      // We can assume that the signer is a valid address because the challenge was verified within the /verify endpoint
-      payload.address = payload.signer.address;
-    }
-    // verify the payload against the selected Identity Provider
-    const verifiedPayload = await providers.verify(type, payload, context);
-    // check if the request is valid against the selected Identity Provider
-    if (verifiedPayload && verifiedPayload?.valid === true) {
-      // construct a set of Proofs to issue a credential against (this record will be used to generate a sha256 hash of any associated PII)
-      const record: ProofRecord = {
-        // type and address will always be known and can be obtained from the resultant credential
-        type: verifiedPayload.record.pii ? `${type}#${verifiedPayload.record.pii}` : type,
-        // version is defined by entry point
-        version: "0.0.0",
-        // extend/overwrite with record returned from the provider
-        ...(verifiedPayload?.record || {}),
-      };
+  payload: RequestPayload
+): Promise<CredentialResponseBody[]> => {
+  // if the payload includes an additional signer, use that to issue credential.
+  if (payload.signer) {
+    // We can assume that the signer is a valid address because the challenge was verified within the /verify endpoint
+    payload.address = payload.signer.address;
+  }
+
+  const results = await verifyTypes(types, payload);
+
+  return await Promise.all(
+    results.map(async ({ verifyResult, code: verifyCode, error: verifyError, type }) => {
+      let code = verifyCode;
+      let error = verifyError;
+      let record, credential;
 
       try {
-        // generate a VC for the given payload
-        const { credential } = await issueHashedCredential(
-          DIDKit,
-          key,
-          address,
-          record,
-          verifiedPayload.expiresInSeconds
-        );
-
-        return {
-          record,
-          credential,
-        } as CredentialResponseBody;
-      } catch (error: unknown) {
-        if (error) {
-          // return error msg indicating a failure producing VC
-          throw {
-            error: "Unable to produce a verifiable credential",
-            code: 400,
+        // check if the request is valid against the selected Identity Provider
+        if (verifyResult.valid === true) {
+          // construct a set of Proofs to issue a credential against (this record will be used to generate a sha256 hash of any associated PII)
+          record = {
+            // type and address will always be known and can be obtained from the resultant credential
+            type: verifyResult.record.pii ? `${type}#${verifyResult.record.pii}` : type,
+            // version is defined by entry point
+            version: "0.0.0",
+            // extend/overwrite with record returned from the provider
+            ...(verifyResult?.record || {}),
           };
+
+          // generate a VC for the given payload
+          ({ credential } = await issueHashedCredential(DIDKit, key, address, record, verifyResult.expiresInSeconds));
         }
+      } catch {
+        error = "Unable to produce a verifiable credential";
+        code = 500;
       }
-    } else {
-      // return error message if an error is present
-      // limit the error message string to 1000 chars
-      throw {
-        error:
-          (verifiedPayload.error && verifiedPayload.error.join(", ").substring(0, 1000)) || "Unable to verify proofs",
-        code: 403,
+
+      return {
+        record,
+        credential,
+        code,
+        error,
       };
-    }
-  } catch (error: unknown) {
-    // error response
-    throw error && (error as CredentialResponseBody).error
-      ? error
-      : {
-          error: "Unable to verify with provider",
-          code: 400,
-        };
-  }
+    })
+  );
 };
 
 // health check endpoint
@@ -291,41 +290,64 @@ app.post("/api/v0.0.0/check", (req: Request, res: Response): void => {
     return void errorRes(res, "Incorrect payload", 400);
   }
 
-  // See note below about context
-  const context: ProviderContext = {};
-  const responses: CheckResponseBody[] = [];
   const types = (payload.types?.length ? payload.types : [payload.type]).filter((type) => type);
 
-  // This currently works for stamps which do not require the context
-  // Most oauth stamps will likely not work correctly unless only checking a single type
-  // TODO: In the platforms file, sort providers by platform. Here, process the
-  // platforms in parallel, but the providers in series. This will allow us to pass
-  // the context from one provider to the next. Do the same in the verify endpoint.
-  Promise.all(
-    types.map(async (type) => {
-      let valid = false;
-      let code, error;
-
-      try {
-        // verify the payload against the selected Identity Provider
-        const verifyResult = await providers.verify(type, payload, context);
-        valid = verifyResult.valid;
-        if (!valid) {
-          code = 403;
-          error =
-            (verifyResult.error && verifyResult.error.join(", ").substring(0, 1000)) || "Unable to verify provider";
-        }
-      } catch {
-        error = "Unable to verify provider";
-        code = 400;
-      } finally {
-        responses.push({ valid, type, code, error });
-      }
+  verifyTypes(types, payload)
+    .then((results) => {
+      const responses = results.map(({ verifyResult, type, error, code }) => ({
+        valid: verifyResult.valid,
+        type,
+        error,
+        code,
+      }));
+      res.json(responses);
     })
-  )
-    .then(() => res.json(responses))
     .catch(() => errorRes(res, "Unable to check payload", 500));
 });
+
+type VerifyTypeResult = {
+  verifyResult: VerifiedPayload;
+  type: string;
+  error?: string;
+  code?: number;
+};
+
+async function verifyTypes(types: string[], payload: RequestPayload): Promise<VerifyTypeResult[]> {
+  // define a context to be shared between providers in the verify request
+  // this is intended as a temporary storage for providers to share data
+  const context: ProviderContext = {};
+  const results: VerifyTypeResult[] = [];
+
+  await Promise.all(
+    // Run all platforms in parallel
+    groupProviderTypesByPlatform(types).map(async (platformTypes) => {
+      // Iterate over the types within a platform in series
+      // This enables providers within a platform to reliably share context
+      for (const type of platformTypes) {
+        let verifyResult: VerifiedPayload = { valid: false };
+        let code, error;
+
+        try {
+          // verify the payload against the selected Identity Provider
+          verifyResult = await providers.verify(type, payload, context);
+          if (!verifyResult.valid) {
+            code = 403;
+            // TODO to be changed to just verifyResult.errors when all providers are updated
+            const resultErrors = verifyResult.errors || verifyResult.error;
+            error = resultErrors?.join(", ")?.substring(0, 1000) || "Unable to verify provider";
+          }
+        } catch {
+          error = "Unable to verify provider";
+          code = 400;
+        }
+
+        results.push({ verifyResult, type, code, error });
+      }
+    })
+  );
+
+  return results;
+}
 
 // expose verify entry point
 app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
@@ -334,9 +356,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
   const challenge = requestBody.challenge;
   // get the payload from the JSON req body
   const payload = requestBody.payload;
-  // define a context to be shared between providers in the verify request
-  // this is intended as a temporary storage for providers to share data
-  const context: ProviderContext = {};
 
   // Check the challenge and the payload is valid before issuing a credential from a registered provider
   return void verifyCredential(DIDKit, challenge)
@@ -366,39 +385,25 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 
           // if verifiedAddress does not equal the additional signer address throw an error because signature is invalid
           if (!additionalSignerCredential || verifiedAddress.toLowerCase() !== payload.signer.address.toLowerCase()) {
-            return void errorRes(res, "Unable to verify payload", 401);
+            return void errorRes(res, "Unable to verify payload signer", 401);
           }
 
           payload.signer.address = verifiedAddress;
         }
 
+        const singleType = !payload.types?.length;
+        const types = (!singleType ? payload.types : [payload.type]).filter((type) => type);
+
         // type is required because we need it to select the correct Identity Provider
         if (isSigner && isType && payload && payload.type) {
-          // if multiple types are being requested - produce and return multiple vcs
-          if (payload.types && payload.types.length) {
-            // if payload.types then we want to iterate and return a VC for each type
-            const responses: CredentialResponseBody[] = [];
-            for (let i = 0; i < payload.types.length; i++) {
-              try {
-                const type = payload.types[i];
-                const response = await issueCredential(address, type, payload, context);
-                responses.push(response);
-              } catch (error: unknown) {
-                responses.push((await error) as CredentialResponseBody);
-              }
-            }
+          const responses = await issueCredentials(types, address, payload);
 
-            // return multiple responses in an array
-            return res.json(responses);
+          if (singleType) {
+            const response = responses[0];
+            if (response.code && response.error) return errorRes(res, response.error, response.code);
+            else return res.json(response);
           } else {
-            // make and return a single response
-            return issueCredential(address, payload.type, payload, context)
-              .then((response) => {
-                return res.json(response);
-              })
-              .catch((error: CredentialResponseBody) => {
-                return void errorRes(res, error.error, error.code);
-              });
+            return res.json(responses);
           }
         }
       }
@@ -406,8 +411,10 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
       // error response
       return void errorRes(res, "Unable to verify payload", 401);
     })
-    .catch(() => {
-      return void errorRes(res, "Unable to verify payload", 500);
+    .catch((error) => {
+      let message = "Unable to verify payload";
+      if (error instanceof Error) message += `: ${error.name}`;
+      return void errorRes(res, message, 500);
     });
 });
 

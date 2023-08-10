@@ -23,6 +23,7 @@ import { DoneToastContent } from "./DoneToastContent";
 import { useToast } from "@chakra-ui/react";
 import { GenericBanner } from "./GenericBanner";
 import { LoadButton } from "./LoadButton";
+import { JsonOutputModal } from "./JsonOutputModal";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
@@ -70,6 +71,8 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
   const [canSubmit, setCanSubmit] = useState(false);
   const [showNoStampModal, setShowNoStampModal] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [verificationResponse, setVerificationResponse] = useState<CredentialResponseBody[]>([]);
+  const [payloadModalIsOpen, setPayloadModalIsOpen] = useState(false);
 
   // --- Chakra functions
   const toast = useToast();
@@ -195,22 +198,24 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
         return;
       }
 
+      const verifyCredentialsResponse = await fetchVerifiableCredential(
+        iamUrl,
+        {
+          type: platform.platformId,
+          types: selectedProviders,
+          version: "0.0.0",
+          address: address || "",
+          proofs: providerPayload,
+        },
+        signer as { signMessage: (message: string) => Promise<string> }
+      );
+
       const verifiedCredentials =
         selectedProviders.length > 0
-          ? (
-              await fetchVerifiableCredential(
-                iamUrl,
-                {
-                  type: platform.platformId,
-                  types: selectedProviders,
-                  version: "0.0.0",
-                  address: address || "",
-                  proofs: providerPayload,
-                },
-                signer as { signMessage: (message: string) => Promise<string> }
-              )
-            ).credentials?.filter((cred: any) => !cred.error) || []
+          ? verifyCredentialsResponse.credentials?.filter((cred: any) => !cred.error) || []
           : [];
+
+      setVerificationResponse(verifyCredentialsResponse.credentials || []);
 
       const stampPatches: StampPatch[] = platformProviderIds.map((provider: PROVIDER_ID) => {
         const cred = verifiedCredentials.find((cred: any) => cred.record?.type === provider);
@@ -261,8 +266,17 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
         updatedMinusInitial
       );
 
+      const bodyWithDetailsLink = (
+        <>
+          {body}
+          <a className="cursor-pointer underline" onClick={() => setPayloadModalIsOpen(true)}>
+            See Details
+          </a>
+        </>
+      );
+
       // Display done toast
-      doneToast(title, body, icon, platformId);
+      doneToast(title, bodyWithDetailsLink, icon, platformId);
 
       setLoading(false);
     } catch (e) {
@@ -280,7 +294,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
   };
 
   // --- Done Toast Helper
-  const doneToast = (title: string, body: string, icon: string, platformId: PLATFORM_ID) => {
+  const doneToast = (title: string, body: string | JSX.Element, icon: string, platformId: PLATFORM_ID) => {
     toast({
       duration: 9000,
       isClosable: true,
@@ -425,6 +439,13 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
             </LoadButton>
           </div>
         }
+      />
+      <JsonOutputModal
+        isOpen={payloadModalIsOpen}
+        onClose={() => setPayloadModalIsOpen(false)}
+        title="Verification Response"
+        subheading="To preserve your privacy, error information is not stored; please share with Gitcoin support at your discretion."
+        jsonOutput={verificationResponse}
       />
       <NoStampModal isOpen={showNoStampModal} onClose={() => setShowNoStampModal(false)} />
     </>
