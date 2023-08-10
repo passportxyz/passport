@@ -332,8 +332,9 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
           verifyResult = await providers.verify(type, payload, context);
           if (!verifyResult.valid) {
             code = 403;
-            error =
-              (verifyResult.error && verifyResult.error.join(", ").substring(0, 1000)) || "Unable to verify provider";
+            // TODO to be changed to just verifyResult.errors when all providers are updated
+            const resultErrors = verifyResult.errors || verifyResult.error;
+            error = resultErrors?.join(", ")?.substring(0, 1000) || "Unable to verify provider";
           }
         } catch {
           error = "Unable to verify provider";

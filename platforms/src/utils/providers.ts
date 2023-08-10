@@ -92,6 +92,10 @@ export class Providers {
           return {
             valid: false,
             // TODO change to "errors" once everything is updated
+            // Also consider maybe not using error/errors as a key within the verification,
+            // but instead have a new "details" array which would really be more about
+            // "details of why you are not verified" which should be separated from
+            // the concept of "errors". The "error" key would only be set here
             error: [e.message],
           };
         } else {
