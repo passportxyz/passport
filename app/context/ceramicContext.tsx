@@ -291,6 +291,43 @@ const CERAMIC_TIMEOUT_MS = process.env.CERAMIC_TIMEOUT_MS || "10000";
 
 export const CeramicContext = createContext(startingState);
 
+export const cleanPassport = (
+  passport: Passport,
+  database: CeramicDatabase | PassportDatabase,
+  allProvidersState: AllProvidersState
+): {
+  passport: Passport;
+  expiredProviders: PROVIDER_ID[];
+} => {
+  const tempExpiredProviders: PROVIDER_ID[] = [];
+  const currentProviderIds = Object.keys(allProvidersState);
+  // clean stamp content if expired or from a different issuer
+  if (passport) {
+    passport.stamps = passport.stamps.filter((stamp: Stamp) => {
+      if (stamp) {
+        const providerId = stamp.credential.credentialSubject.provider as PROVIDER_ID;
+        if (!currentProviderIds.includes(providerId)) {
+          return false;
+        }
+
+        const has_expired = new Date(stamp.credential.expirationDate) < new Date();
+        if (has_expired) {
+          tempExpiredProviders.push(providerId);
+        }
+
+        const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
+        const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
+
+        return !has_expired && has_correct_issuer && has_correct_subject;
+      } else {
+        return false;
+      }
+    });
+  }
+
+  return { passport, expiredProviders: tempExpiredProviders };
+};
+
 export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
   const resolveCancel = useRef<() => void>();
@@ -377,7 +414,11 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     passport?: Passport,
     skipLoadingState?: boolean
   ): Passport => {
-    const cleanedPassport = cleanPassport(passport, database) as Passport;
+    if (!passport) {
+      passport = { stamps: [] };
+    }
+    const { passport: cleanedPassport, expiredProviders } = cleanPassport(passport, database, allProvidersState);
+    setExpiredProviders(expiredProviders);
     hydrateAllProvidersState(cleanedPassport);
     setPassport(cleanedPassport);
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Idle);
@@ -436,34 +477,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     setPassportHasCacaoError(CACAO_ERROR_STATUSES.includes(status));
 
     return passportToReturn;
-  };
-
-  const cleanPassport = (
-    passport: Passport | undefined | false,
-    database: CeramicDatabase | PassportDatabase
-  ): Passport | undefined | false => {
-    const tempExpiredProviders: PROVIDER_ID[] = [];
-    // clean stamp content if expired or from a different issuer
-    if (passport) {
-      passport.stamps = passport.stamps.filter((stamp: Stamp) => {
-        if (stamp) {
-          const has_expired = new Date(stamp.credential.expirationDate) < new Date();
-          if (has_expired) {
-            tempExpiredProviders.push(stamp.credential.credentialSubject.provider as PROVIDER_ID);
-          }
-
-          const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
-          const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
-
-          return !has_expired && has_correct_issuer && has_correct_subject;
-        } else {
-          return false;
-        }
-      });
-      setExpiredProviders(tempExpiredProviders);
-    }
-
-    return passport;
   };
 
   const handleCheckRefreshPassport = async (): Promise<boolean> => {
