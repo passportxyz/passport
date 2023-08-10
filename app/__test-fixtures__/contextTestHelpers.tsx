@@ -89,10 +89,6 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: getProviderSpec("Signer", "Signer"),
         stamp: undefined,
       },
-      GitPOAP: {
-        providerSpec: getProviderSpec("GitPOAP", "GitPOAP"),
-        stamp: undefined,
-      },
       "GitcoinContributorStatistics#numGrantsContributeToGte#1": {
         providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGrantsContributeToGte#1"),
         stamp: undefined,

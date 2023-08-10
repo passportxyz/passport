@@ -85,18 +85,6 @@ export const SUCCESFUL_BRIGHTID_RESULT: VerifiableCredentialRecord = {
   credential: credential,
 };
 
-export const SUCCESSFUL_GITPOAP_RESULT: VerifiableCredentialRecord = {
-  record: {
-    type: "GitPOAP",
-    address: "0xcF323CE817E25b4F784bC1e14c9A99A525fDC50f",
-    version: "0.0.0",
-    gitpoaps: "2734,2134,3256",
-  },
-  signature: "0xbdbac10fdb0921e73df7575e47cbda484be550c......8af1ad6eeee1ee94c9a0794a3812ae861f8898a973233abea1c",
-  challenge: credential,
-  credential: credential,
-};
-
 export const VALID_LENS_VERIFICATION = {
   providerType: "Lens",
   payload: {
