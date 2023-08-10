@@ -227,7 +227,8 @@ export type PLATFORM_ID =
   | "Holonym"
   | "Idena"
   | "Civic"
-  | "CyberConnect";
+  | "CyberConnect"
+  | "Allo";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -322,7 +323,8 @@ export type PROVIDER_ID =
   | "twitterAccountAgeGte#730"
   | "twitterTweetDaysGte#30"
   | "twitterTweetDaysGte#60"
-  | "twitterTweetDaysGte#120";
+  | "twitterTweetDaysGte#120"
+  | "Allo";
 
 export type StampBit = {
   bit: number;
