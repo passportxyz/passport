@@ -1,9 +1,9 @@
 import { AppContext, ProviderPayload } from "../types";
 import { Platform } from "../utils/platform";
 
-export class AlloPlatform extends Platform {
-  platformId = "Allo";
-  path = "Allo";
+export class GrantsStackPlatform extends Platform {
+  platformId = "GrantsStack";
+  path = "GrantsStack";
   clientId: string = null;
   redirectUri: string = null;
 

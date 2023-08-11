@@ -228,7 +228,7 @@ export type PLATFORM_ID =
   | "Idena"
   | "Civic"
   | "CyberConnect"
-  | "Allo";
+  | "GrantsStack";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -324,7 +324,7 @@ export type PROVIDER_ID =
   | "twitterTweetDaysGte#30"
   | "twitterTweetDaysGte#60"
   | "twitterTweetDaysGte#120"
-  | "Allo";
+  | "GrantsStack";
 
 export type StampBit = {
   bit: number;
