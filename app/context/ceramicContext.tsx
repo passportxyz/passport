@@ -45,6 +45,7 @@ const {
   Civic,
   CyberConnect,
   GrantsStack,
+  TrustaLabs,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -234,6 +235,13 @@ platforms.set("GrantsStack", {
   platform: new GrantsStack.GrantsStackPlatform(),
   platFormGroupSpec: GrantsStack.ProviderConfig,
 });
+
+if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS === "on") {
+  platforms.set("TrustaLabs", {
+    platform: new TrustaLabs.TrustaLabsPlatform(),
+    platFormGroupSpec: TrustaLabs.ProviderConfig,
+  });
+}
 
 export enum IsLoadingPassportState {
   Idle,
