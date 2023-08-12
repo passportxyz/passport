@@ -324,7 +324,12 @@ export type PROVIDER_ID =
   | "twitterTweetDaysGte#30"
   | "twitterTweetDaysGte#60"
   | "twitterTweetDaysGte#120"
-  | "GrantsStack";
+  | "GrantsStack3Projects"
+  | "GrantsStack5Projects"
+  | "GrantsStack7Projects"
+  | "GrantsStack2Programs"
+  | "GrantsStack4Programs"
+  | "GrantsStack6Programs";
 
 export type StampBit = {
   bit: number;
