@@ -2,7 +2,7 @@ import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
 import { GrantsStackProvider } from "./Providers/GrantsStack";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/grantsstackStampIcon.svg",
+  icon: "./assets/grantsStackLogo.svg",
   platform: "GrantsStack",
   name: "GrantsStack",
   description: "Connect your existing GrantsStack Account to verify",
