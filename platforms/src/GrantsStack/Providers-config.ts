@@ -31,26 +31,32 @@ export const ProviderConfig: PlatformGroupSpec[] = [
 export const providers: Provider[] = [
   new GrantsStackProvider({
     type: "GrantsStack3Projects",
+    dataKey: "projectCount",
     threshold: 3,
   }),
   new GrantsStackProvider({
     type: "GrantsStack5Projects",
+    dataKey: "projectCount",
     threshold: 5,
   }),
   new GrantsStackProvider({
     type: "GrantsStack7Projects",
+    dataKey: "projectCount",
     threshold: 7,
   }),
   new GrantsStackProvider({
     type: "GrantsStack2Programs",
+    dataKey: "programCount",
     threshold: 2,
   }),
   new GrantsStackProvider({
     type: "GrantsStack4Programs",
+    dataKey: "programCount",
     threshold: 4,
   }),
   new GrantsStackProvider({
     type: "GrantsStack6Programs",
+    dataKey: "programCount",
     threshold: 6,
   }),
 ];

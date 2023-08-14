@@ -35,7 +35,7 @@ describe("GrantsStackProvider", () => {
     it("should verify GrantsStack data and return valid true if threshold is met", async () => {
       const providerId = "GrantsStack5Projects";
       const threshold = 5;
-      const provider = new GrantsStackProvider({ type: providerId, threshold });
+      const provider = new GrantsStackProvider({ type: providerId, threshold, dataKey: "projectCount" });
       // Using the previously tested getGrantsStackData, we'll assume it works as expected
       const verifiedPayload = await provider.verify(requestPayload, {
         grantsStack: { projectCount: 10, programCount: 1 },
@@ -51,7 +51,7 @@ describe("GrantsStackProvider", () => {
 
     it("should verify GrantsStack data and return valid false if threshold is not met", async () => {
       const providerId = "GrantsStack5Projects";
-      const provider = new GrantsStackProvider({ type: providerId, threshold: 15 });
+      const provider = new GrantsStackProvider({ type: providerId, threshold: 15, dataKey: "projectCount" });
       const verifiedPayload = await provider.verify(requestPayload, {
         grantsStack: { projectCount: 10, programCount: 1 },
       });
@@ -62,7 +62,7 @@ describe("GrantsStackProvider", () => {
       const providerId = "GrantsStack5Projects";
       // Mock the axios response to throw an error in getGrantsStackData
       (axios.get as jest.Mock).mockRejectedValue(new Error("Network Error"));
-      const provider = new GrantsStackProvider({ type: providerId, threshold: 5 });
+      const provider = new GrantsStackProvider({ type: providerId, threshold: 5, dataKey: "projectCount" });
       await expect(() => provider.verify(requestPayload, {})).rejects.toThrow("Error verifying GrantsStack data");
     });
   });
