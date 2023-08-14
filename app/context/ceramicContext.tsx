@@ -230,12 +230,10 @@ if (process.env.NEXT_PUBLIC_FF_CYBERCONNECT_STAMPS === "on") {
   });
 }
 
-if (process.env.NEXT_PUBLIC_FF_GRANTS_STACK_STAMPS === "on") {
-  platforms.set("GrantsStack", {
-    platform: new GrantsStack.GrantsStackPlatform(),
-    platFormGroupSpec: GrantsStack.ProviderConfig,
-  });
-}
+platforms.set("GrantsStack", {
+  platform: new GrantsStack.GrantsStackPlatform(),
+  platFormGroupSpec: GrantsStack.ProviderConfig,
+});
 
 export enum IsLoadingPassportState {
   Idle,
