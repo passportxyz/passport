@@ -195,6 +195,7 @@ export type EasRequestBody = {
   nonce: number;
   credentials: VerifiableCredential[];
   dbAccessToken: string;
+  chainIdHex: string;
 };
 
 // Passport DID

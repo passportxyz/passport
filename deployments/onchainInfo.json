@@ -20,6 +20,28 @@
     "GitcoinAttester": {
       "address": "0x5bbbc733e12f50e6834c40a90066f2f9ffb820e0"
     }
+  },
+  "0xa": {
+    "easSchemas": {
+      "passport": {
+        "uid": "0x06e76a0c70f342ccf24c6cdb28746a39b3ddf761e32f609066e439ac19a27172"
+      },
+      "score": {
+        "uid": "0xe66ffc1aff5a4a6f4a2a2bed175b6800d4662a8c64f447d735d7e26d2af99aef"
+      }
+    },
+    "EAS": {
+      "address": "0x4200000000000000000000000000000000000021"
+    },
+    "GitcoinAttester": {
+      "address": "0xBC778313E52b1184A15D163b5d3a72AEF8d510A2"
+    },
+    "GitcoinVerifier": {
+      "address": "0xddcCd602E068C763369a61ea658476b3a4a97C82"
+    },
+    "GitcoinResolver": {
+      "address": "0xa8F02169D8fE0D48179C9d014AbCA1Ab4BCE0Cb8"
+    }
   }
 }
 

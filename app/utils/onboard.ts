@@ -97,6 +97,7 @@ chains.push({
   label: "Optimism Mainnet",
   rpcUrl: "https://mainnet.optimism.io/",
   icon: "./assets/op-logo.svg",
+  easScanUrl: "https://optimism.easscan.org",
 });
 chains.push({
   id: lineaChainId,
