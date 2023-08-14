@@ -21,7 +21,7 @@ type StatisticResponse = {
   num_gr14_contributions: number;
 };
 
-const getGrantsStackData = async (
+export const getGrantsStackData = async (
   payload: RequestPayload,
   context: GrantsStackContext
 ): Promise<GrantsStackContext> => {
@@ -41,7 +41,6 @@ const getGrantsStackData = async (
 
       return context.grantsStack;
     }
-    console.log("using context");
     return context.grantsStack;
   } catch (e) {
     throw new Error("Error getting GrantsStack data");
@@ -66,6 +65,7 @@ export class GrantsStackProvider implements Provider {
       return {
         valid,
         record: {
+          address: payload.address,
           contributionStatistic,
         },
       };
