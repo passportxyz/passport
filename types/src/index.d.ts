@@ -228,7 +228,8 @@ export type PLATFORM_ID =
   | "Idena"
   | "Civic"
   | "CyberConnect"
-  | "GrantsStack";
+  | "GrantsStack"
+  | "TrustaLabs";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -329,7 +330,8 @@ export type PROVIDER_ID =
   | "GrantsStack7Projects"
   | "GrantsStack2Programs"
   | "GrantsStack4Programs"
-  | "GrantsStack6Programs";
+  | "GrantsStack6Programs"
+  | "TrustaLabs";
 
 export type StampBit = {
   bit: number;

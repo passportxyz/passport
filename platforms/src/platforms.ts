@@ -25,6 +25,7 @@ import * as Idena from "./Idena";
 import * as Civic from "./Civic";
 import * as CyberConnect from "./CyberProfile";
 import * as GrantsStack from "./GrantsStack";
+import * as TrustaLabs from "./TrustaLabs";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
 type PlatformConfig = {
@@ -62,6 +63,7 @@ const platforms: Record<string, PlatformConfig> = {
   Civic,
   CyberConnect,
   GrantsStack,
+  TrustaLabs,
 };
 
 if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {

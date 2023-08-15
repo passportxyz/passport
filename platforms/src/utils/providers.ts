@@ -6,6 +6,7 @@ const UPDATED_PROVIDERS = [
   "twitterAccountAgeGte#180",
   "twitterAccountAgeGte#365",
   "twitterAccountAgeGte#730",
+  "TrustaLabs",
   "Simple",
 ];
 
