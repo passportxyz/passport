@@ -319,6 +319,14 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "ZKSYNC_ERA_MAINNET_ENDPOINT",
             valueFrom: `${IAM_SERVER_SSM_ARN}:ZKSYNC_ERA_MAINNET_ENDPOINT::`,
           },
+          {
+            name: "PASSPORT_SCORER_BACKEND",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:PASSPORT_SCORER_BACKEND::`,
+          },
+          {
+            name: "TRUSTA_LABS_ACCESS_TOKEN",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:TRUSTA_LABS_ACCESS_TOKEN::`,
+          },
         ],
       },
     },

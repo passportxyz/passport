@@ -2,7 +2,7 @@ import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
 import { TrustaLabsProvider } from "./Providers/TrustaLabs";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/trustalabsStampIcon.svg",
+  icon: "./assets/trustaLabsStampIcon.svg",
   platform: "TrustaLabs",
   name: "Trusta Labs",
   description: "Connect your existing TrustaLabs Account to verify",
