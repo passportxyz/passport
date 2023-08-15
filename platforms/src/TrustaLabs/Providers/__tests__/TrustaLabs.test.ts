@@ -12,63 +12,48 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
 const MOCK_ADDRESS_LOWER = MOCK_ADDRESS.toLocaleLowerCase();
 
-const SCORER_BACKEND = process.env.PASSPORT_SCORER_BACKEND;
-
-const validTrustaLabsResponse = {
+const makeResponse = (score: number) => ({
   data: {
     data: {
       address: MOCK_ADDRESS_LOWER,
-      sybilRiskScore: 20,
+      sybilRiskScore: score,
     },
     success: true,
     code: 0,
-    message: ""
+    message: "",
   },
-};
-
-const invalidTrustaLabsResponse = {
-  data: {
-    data: {
-      address: MOCK_ADDRESS_LOWER,
-      sybilRiskScore: 80,
-    },
-    success: true,
-    code: 0,
-    message: ""
-  },
-};
-
-const emptyTrustaLabsResponse = {
-  data: {
-    data: {
-      account: {},
-    },
-  },
-};
-
-const TRUSTA_LABS_API_ENDPOINT = "https://www.trustalabs.ai/service/openapi/queryRiskSummaryScore";
+});
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
 describe("TrustaLabs", () => {
-  it("handles valid verification attempt", async () => {
-    // mockedAxios.post.mockResolvedValue(validTrustaLabsResponse);
+  it.each([
+    [20, true],
+    [30.000045668, true],
+    [60, true],
+    [80, false],
+    [-1, true],
+    [-2, false],
+  ])("should return %s for score %s", async (score: number, expected: boolean) => {
+    mockedAxios.post.mockResolvedValue(makeResponse(score));
 
-    // const trustaLabsScore = new TrustaLabsProvider();
-    // const verifiedPayload = await trustaLabsScore.verify({
-    //   address: MOCK_ADDRESS,
-    // } as unknown as RequestPayload);
+    const trustaLabs = new TrustaLabsProvider();
+    const verifiedPayload = await trustaLabs.verify({
+      address: MOCK_ADDRESS,
+    } as RequestPayload);
 
-    // expect(axios.post).toHaveBeenCalledTimes(2);
+    expect(axios.post).toHaveBeenCalledTimes(2);
 
-    // expect(verifiedPayload).toEqual({
-    //   valid: true,
-    //   record: {
-    //     address: MOCK_ADDRESS_LOWER,
-    //   },
-    //   errors: []
-    // });
+    const { valid, record, errors } = verifiedPayload;
+    if (expected) {
+      expect(valid).toBe(true);
+      expect(record).toEqual({ address: MOCK_ADDRESS });
+      expect(errors).toEqual([]);
+    } else {
+      expect(valid).toBe(false);
+      expect(errors).toEqual([`Sybil score ${score} is outside of the allowed range (-1 to 60)`]);
+    }
   });
 });

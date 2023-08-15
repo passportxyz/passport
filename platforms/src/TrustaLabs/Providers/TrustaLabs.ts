@@ -5,7 +5,6 @@ import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import axios from "axios";
 
 // ----- Credential verification
-import { getAddress } from "../../utils/signer";
 import { ProviderExternalVerificationError } from "../../types";
 
 interface SubScore {
@@ -36,59 +35,88 @@ interface AxiosResponse {
 
 const TRUSTA_LABS_API_ENDPOINT = "https://www.trustalabs.ai/service/openapi/queryRiskSummaryScore";
 
-const SCORER_BACKEND = process.env.PASSPORT_SCORER_BACKEND;
+// Based on https://axios-http.com/docs/handling_errors
+const handleAxiosError = (error: any, label: string, secretsToHide?: string[]) => {
+  if (axios.isAxiosError(error)) {
+    let message = `Error making ${label} request, `;
+    if (error.response) {
+      // Received a non 2xx response
+      const { data, status, headers } = error.response;
+      message += `received error response with code ${status}: ${JSON.stringify(data)}, headers: ${JSON.stringify(
+        headers
+      )}`;
+    } else if (error.request) {
+      // No response received
+      message += "no response received";
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      message += error.message;
+    }
+    secretsToHide?.forEach((secret) => {
+      message = message.replace(secret, "[SECRET]");
+    });
+    throw new ProviderExternalVerificationError(message);
+  }
+  throw error;
+};
 
 const createUpdateDBScore = async (address: string, score: number) => {
+  const accessToken = process.env.CGRANTS_API_TOKEN;
   try {
-    const response = await axios.post(
-      `${SCORER_BACKEND}trusta_labs/trusta-labs-score`, { address, score },
+    await axios.post(
+      `${process.env.SCORER_ENDPOINT}/trusta_labs/trusta-labs-score`,
+      { address, score },
       {
         headers: {
-          Authorization: process.env.CGRANTS_API_TOKEN
-        }
-      },
+          Authorization: accessToken,
+        },
+      }
     );
-    const { data } = response;
-    return data.data;
   } catch (error) {
-    throw error;
+    handleAxiosError(error, "report score", [accessToken]);
   }
 };
 
-const getTrustaLabsRiskScore = async (userAddress: string): Promise<{ valid: boolean; errors: string[]; }> => {  
+const makeSybilScoreRequest = async (address: string) => {
+  const accessToken = process.env.TRUSTA_LABS_ACCESS_TOKEN;
   try {
-    const result: AxiosResponse = await axios.post(TRUSTA_LABS_API_ENDPOINT, {
-      address: userAddress, 
-      chainId: "1"
-      }, 
+    const result: AxiosResponse = await axios.post(
+      TRUSTA_LABS_API_ENDPOINT,
+      {
+        address,
+        chainId: "1",
+      },
       {
         headers: {
-          Authorization: `Bearer ${process.env.TRUSTA_LABS_ACCESS_TOKEN}`,
-          accept: 'application/json',
-          'content-type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
         },
-    });
-  
-    const sybilRiskScore = result.data.data.sybilRiskScore;
-    await createUpdateDBScore(userAddress, sybilRiskScore);
-
-    if (sybilRiskScore >= -1 && sybilRiskScore <= 60) {
-      return {
-        valid: true,
-        errors: [],
       }
-    } else if (sybilRiskScore === -2 || sybilRiskScore > 60) {
-      return {
-        valid: false,
-        errors: ["User does not qualify for this stamp"],
-      }
-    }
-  } catch (error) {
-    throw new ProviderExternalVerificationError(
-      `Error requesting data: ${error}.`
     );
+    return result.data.data.sybilRiskScore;
+  } catch (error) {
+    handleAxiosError(error, "sybil score", [accessToken]);
   }
-}
+};
+
+const verifyTrustaLabsRiskScore = async (address: string): Promise<{ valid: boolean; errors: string[] }> => {
+  const sybilRiskScore = await makeSybilScoreRequest(address);
+  await createUpdateDBScore(address, sybilRiskScore);
+
+  const lowerBound = -1;
+  const upperBound = 60;
+
+  if (sybilRiskScore >= lowerBound && sybilRiskScore <= upperBound) {
+    return {
+      valid: true,
+      errors: [],
+    };
+  } else {
+    return {
+      valid: false,
+      errors: [`Sybil score ${sybilRiskScore} is outside of the allowed range (${lowerBound} to ${upperBound})`],
+    };
+  }
+};
 
 export class TrustaLabsProvider implements Provider {
   type = "TrustaLabs";
@@ -102,18 +130,17 @@ export class TrustaLabsProvider implements Provider {
   }
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    // if a signer is provider we will use that address to verify against
-    const address = (await getAddress(payload)).toLowerCase();
-    const { valid, errors } = await getTrustaLabsRiskScore(address);
+    const { address } = payload;
 
-    return await Promise.resolve({
+    // if a signer is provider we will use that address to verify against
+    const { valid, errors } = await verifyTrustaLabsRiskScore(address);
+
+    return {
       valid,
       errors,
-      record: valid 
-        ? {
-            address: address,
-          }
-        : undefined,
-    });
+      record: {
+        address,
+      },
+    };
   }
 }

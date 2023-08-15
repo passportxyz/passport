@@ -108,6 +108,8 @@ export const PlatformCard = ({
 
   if (process.env.NEXT_PUBLIC_FF_CYBERCONNECT_STAMPS !== "on" && platform.platform === "CyberConnect") return <></>;
 
+  if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS !== "on" && platform.platform === "TrustaLabs") return <></>;
+
   // returns a single Platform card
   return (
     <div className={className} key={`${platform.name}${i}`}>
