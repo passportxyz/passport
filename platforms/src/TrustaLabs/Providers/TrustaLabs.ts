@@ -64,7 +64,7 @@ const createUpdateDBScore = async (address: string, score: number) => {
   const accessToken = process.env.CGRANTS_API_TOKEN;
   try {
     await axios.post(
-      `${process.env.SCORER_ENDPOINT}/trusta_labs/trusta-labs-score`,
+      `${process.env.PASSPORT_SCORER_BACKEND}trusta_labs/trusta-labs-score`,
       { address, score },
       {
         headers: {
