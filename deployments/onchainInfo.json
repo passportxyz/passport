@@ -15,7 +15,7 @@
       "address": "0xA10606c17d94a4DBDc4dD804d1B88fF5030aeE94"
     },
     "GitcoinVerifier": {
-      "address": "0x0Bfa7c7AF28F43295A0645077E5b13D41907F249"
+      "address": "0x5bC95C6e11520D25BE8c7bDf7AAc3E2eEAbD8564"
     },
     "GitcoinAttester": {
       "address": "0x5bbbc733e12f50e6834c40a90066f2f9ffb820e0"
@@ -24,23 +24,23 @@
   "0xa": {
     "easSchemas": {
       "passport": {
-        "uid": "0x06e76a0c70f342ccf24c6cdb28746a39b3ddf761e32f609066e439ac19a27172"
+        "uid": "0xa475887348fd4ee5f882a34e815ec93aa120f846895d06ec04d1f4e95ab6a9d3"
       },
       "score": {
-        "uid": "0xe66ffc1aff5a4a6f4a2a2bed175b6800d4662a8c64f447d735d7e26d2af99aef"
+        "uid": "0x21beda1e0938388ba669137313e462e07c9de77970e7df1b4d680eff1ae36c23"
       }
     },
     "EAS": {
       "address": "0x4200000000000000000000000000000000000021"
     },
     "GitcoinAttester": {
-      "address": "0xBC778313E52b1184A15D163b5d3a72AEF8d510A2"
+      "address": "0x5bC95C6e11520D25BE8c7bDf7AAc3E2eEAbD8564"
     },
     "GitcoinVerifier": {
-      "address": "0xddcCd602E068C763369a61ea658476b3a4a97C82"
+      "address": "0xCAa9E817f02486cE076560B77A86235Ef91c5d5D"
     },
     "GitcoinResolver": {
-      "address": "0xa8F02169D8fE0D48179C9d014AbCA1Ab4BCE0Cb8"
+      "address": "0x9A44DAA3823B21Df8d905AbD9c06b75131f43F38"
     }
   }
 }
