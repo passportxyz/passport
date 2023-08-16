@@ -125,38 +125,6 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGr14ContributionsGte#1"),
         stamp: undefined,
       },
-      "GitcoinGranteeStatistics#numOwnedGrants#1": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numOwnedGrants#1"),
-        stamp: undefined,
-      },
-      "GitcoinGranteeStatistics#numGrantContributors#10": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#10"),
-        stamp: undefined,
-      },
-      "GitcoinGranteeStatistics#numGrantContributors#25": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#25"),
-        stamp: undefined,
-      },
-      "GitcoinGranteeStatistics#numGrantContributors#100": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#100"),
-        stamp: undefined,
-      },
-      "GitcoinGranteeStatistics#totalContributionAmount#100": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#totalContributionAmount#100"),
-        stamp: undefined,
-      },
-      "GitcoinGranteeStatistics#totalContributionAmount#1000": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#totalContributionAmount#1000"),
-        stamp: undefined,
-      },
-      "GitcoinGranteeStatistics#totalContributionAmount#10000": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#totalContributionAmount#10000"),
-        stamp: undefined,
-      },
-      "GitcoinGranteeStatistics#numGrantsInEcoAndCauseRound#1": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantsInEcoAndCauseRound#1"),
-        stamp: undefined,
-      },
       Coinbase: {
         providerSpec: getProviderSpec("Coinbase", "Coinbase"),
         stamp: undefined,
