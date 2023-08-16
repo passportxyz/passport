@@ -1,5 +1,5 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { GitcoinContributorStatisticsProvider, GitcoinGranteeStatisticsProvider } from "./Providers";
+import { GitcoinContributorStatisticsProvider } from "./Providers";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/gtcGrantsLightIcon.svg",
@@ -33,35 +33,6 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     providers: [
       { title: "GR14", name: "GitcoinContributorStatistics#numGr14ContributionsGte#1" },
       { title: "at least 1 Round", name: "GitcoinContributorStatistics#numRoundsContributedToGte#1" },
-    ],
-  },
-  {
-    platformGroup: "Owner of...",
-    providers: [{ title: " at least 1 Grant", name: "GitcoinGranteeStatistics#numOwnedGrants#1" }],
-  },
-  {
-    platformGroup: "Grants have at least...",
-    providers: [
-      { title: "10 Contributors", name: "GitcoinGranteeStatistics#numGrantContributors#10" },
-      { title: "25 Contributors", name: "GitcoinGranteeStatistics#numGrantContributors#25" },
-      { title: "100 Contributors", name: "GitcoinGranteeStatistics#numGrantContributors#100" },
-    ],
-  },
-  {
-    platformGroup: "Grants have received...",
-    providers: [
-      { title: "at least $100", name: "GitcoinGranteeStatistics#totalContributionAmount#100" },
-      { title: "at least $1000", name: "GitcoinGranteeStatistics#totalContributionAmount#1000" },
-      { title: "at least $10000", name: "GitcoinGranteeStatistics#totalContributionAmount#10000" },
-    ],
-  },
-  {
-    platformGroup: "Eco/Cause Rounds",
-    providers: [
-      {
-        title: "owner of at least 1 Grant in Eco/Cause Rounds",
-        name: "GitcoinGranteeStatistics#numGrantsInEcoAndCauseRound#1",
-      },
     ],
   },
 ];
@@ -112,46 +83,5 @@ export const providers: Provider[] = [
     threshold: 1,
     receivingAttribute: "num_gr14_contributions",
     recordAttribute: "numGr14ContributionsGte",
-  }),
-  // --- GitcoinGranteeStatisticsProvider ---
-  new GitcoinGranteeStatisticsProvider({
-    threshold: 1,
-    receivingAttribute: "num_owned_grants",
-    recordAttribute: "numOwnedGrants",
-  }),
-  new GitcoinGranteeStatisticsProvider({
-    threshold: 10,
-    receivingAttribute: "num_grant_contributors",
-    recordAttribute: "numGrantContributors",
-  }),
-  new GitcoinGranteeStatisticsProvider({
-    threshold: 25,
-    receivingAttribute: "num_grant_contributors",
-    recordAttribute: "numGrantContributors",
-  }),
-  new GitcoinGranteeStatisticsProvider({
-    threshold: 100,
-    receivingAttribute: "num_grant_contributors",
-    recordAttribute: "numGrantContributors",
-  }),
-  new GitcoinGranteeStatisticsProvider({
-    threshold: 100,
-    receivingAttribute: "total_contribution_amount",
-    recordAttribute: "totalContributionAmount",
-  }),
-  new GitcoinGranteeStatisticsProvider({
-    threshold: 1000,
-    receivingAttribute: "total_contribution_amount",
-    recordAttribute: "totalContributionAmount",
-  }),
-  new GitcoinGranteeStatisticsProvider({
-    threshold: 10000,
-    receivingAttribute: "total_contribution_amount",
-    recordAttribute: "totalContributionAmount",
-  }),
-  new GitcoinGranteeStatisticsProvider({
-    threshold: 1,
-    receivingAttribute: "num_grants_in_eco_and_cause_rounds",
-    recordAttribute: "numGrantsInEcoAndCauseRound",
   }),
 ];
