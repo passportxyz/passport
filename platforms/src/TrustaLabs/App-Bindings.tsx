@@ -3,7 +3,7 @@ import { Platform } from "../utils/platform";
 import React from "react";
 
 const Link = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <a href={href} target="_blank" className="text-color-1 cursor-pointer underline">
+  <a href={href} target="_blank" className="text-color-1 cursor-pointer underline" rel="noreferrer">
     {children}
   </a>
 );
