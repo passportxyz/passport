@@ -6,14 +6,13 @@ import * as DIDKit from "@spruceid/didkit-wasm-node";
 
 process.env.IAM_JWK = DIDKit.generateEd25519Key();
 process.env.ATTESTATION_SIGNER_PRIVATE_KEY = "0x04d16281ff3bf268b29cdd684183f72542757d24ae9fdfb863e7c755e599163a";
-process.env.GITCOIN_VERIFIER_CHAIN_ID = "84531";
 process.env.ALLO_SCORER_ID = "1";
 process.env.SCORER_ENDPOINT = "http://127.0.0.1:8002";
 process.env.SCORER_API_KEY = "abcd";
 process.env.EAS_GITCOIN_STAMP_SCHEMA = "0x";
 
 // ---- Test subject
-import { app, config } from "../src/index";
+import { app, config, getAttestationDomainSeparator } from "../src/index";
 import { providers } from "@gitcoin/passport-platforms";
 
 // ---- Types
@@ -69,6 +68,8 @@ jest.mock("@ethereum-attestation-service/eas-sdk", () => {
     NO_EXPIRATION: 0,
   };
 });
+
+const chainIdHex = "0xa";
 
 describe("POST /challenge", function () {
   it("handles valid challenge requests", async () => {
@@ -810,13 +811,23 @@ describe("POST /eas", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas")
-      .send({ credentials, nonce })
+      .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(200)
       .expect("Content-Type", /json/);
 
     expect(response.body).toEqual(expectedPayload);
     expect(response.body.signature.r).toBe("r");
+  });
+
+  it("properly formats domain separator", () => {
+    const domainSeparator = getAttestationDomainSeparator("0xa");
+    expect(domainSeparator).toEqual({
+      name: "GitcoinVerifier",
+      version: "1",
+      chainId: "10",
+      verifyingContract: expect.stringMatching(/^0x[a-fA-F0-9]{40}$/),
+    });
   });
 
   it("handles request with only invalid credentials", async () => {
@@ -850,7 +861,7 @@ describe("POST /eas", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas")
-      .send({ credentials, nonce })
+      .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(200)
       .expect("Content-Type", /json/);
@@ -864,12 +875,25 @@ describe("POST /eas", () => {
     const credentials: VerifiableCredential[] = [];
     const response = await request(app)
       .post("/api/v0.0.0/eas")
-      .send({ credentials, nonce })
+      .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(400)
       .expect("Content-Type", /json/);
 
     expect(response.body.error).toEqual("No stamps provided");
+  });
+
+  it("handles bad chain ID", async () => {
+    const nonce = 0;
+    const credentials: VerifiableCredential[] = [];
+    const response = await request(app)
+      .post("/api/v0.0.0/eas")
+      .send({ credentials, nonce, chainIdHex: "0x694206969" })
+      .set("Accept", "application/json")
+      .expect(404)
+      .expect("Content-Type", /json/);
+
+    expect(response.body.error).toEqual("No onchainInfo found for chainId 0x694206969");
   });
 
   it("handles invalid recipient in the request body", async () => {
@@ -891,7 +915,7 @@ describe("POST /eas", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas")
-      .send({ credentials, nonce })
+      .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(400)
       .expect("Content-Type", /json/);
@@ -933,7 +957,7 @@ describe("POST /eas", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas")
-      .send({ credentials, nonce })
+      .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(200)
       .expect("Content-Type", /json/);
@@ -973,7 +997,7 @@ describe("POST /eas", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas")
-      .send({ credentials, nonce })
+      .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json");
     expect(response.status).toBe(400);
     expect(response.body.error).toBe("Every credential's id must be equivalent");
@@ -1000,7 +1024,7 @@ describe("POST /eas/passport", () => {
     const credentials: VerifiableCredential[] = [];
     const response = await request(app)
       .post("/api/v0.0.0/eas/passport")
-      .send({ credentials, nonce })
+      .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(400)
       .expect("Content-Type", /json/);
@@ -1027,7 +1051,7 @@ describe("POST /eas/passport", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas/passport")
-      .send({ credentials, nonce })
+      .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(400)
       .expect("Content-Type", /json/);
@@ -1066,7 +1090,7 @@ describe("POST /eas/passport", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas/passport")
-      .send({ credentials, nonce })
+      .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(400)
       .expect("Content-Type", /json/);
@@ -1093,7 +1117,7 @@ describe("POST /eas/passport", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas/passport")
-      .send({ credentials, nonce })
+      .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(200)
       .expect("Content-Type", /json/);
@@ -1125,7 +1149,7 @@ describe("POST /eas/passport", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas/passport")
-      .send({ credentials, nonce })
+      .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(500)
       .expect("Content-Type", /json/);
@@ -1154,7 +1178,7 @@ describe("POST /eas/passport", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas/passport")
-      .send({ credentials, nonce })
+      .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(500)
       .expect("Content-Type", /json/);

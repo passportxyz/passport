@@ -4,18 +4,24 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { UserContext } from "./userContext";
+import onchainInfo from "../../deployments/onchainInfo.json";
 
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 import { decodeProviderInformation, decodeScoreAttestation, getAttestationData } from "../utils/onChainStamps";
 import { Attestation } from "@ethereum-attestation-service/eas-sdk";
+import { useSetChain } from "@web3-onboard/react";
 
 export interface OnChainProviderMap {
-  [key: string]: OnChainProviderType[];
+  [chainId: string]: OnChainProviderType[];
 }
 
 export interface OnChainLastUpdates {
-  [key: string]: Date;
+  [chainId: string]: Date;
+}
+
+export interface OnChainScores {
+  [chainId: string]: number;
 }
 
 export type OnChainProviderType = {
@@ -29,7 +35,7 @@ export interface OnChainContextState {
   onChainProviders: OnChainProviderMap;
   onChainLastUpdates: OnChainLastUpdates;
   activeChainProviders: OnChainProviderType[];
-  onChainScore: number;
+  onChainScores: OnChainScores;
   readOnChainData: () => Promise<void>;
 }
 
@@ -37,7 +43,7 @@ const startingState: OnChainContextState = {
   onChainProviders: {},
   onChainLastUpdates: {},
   activeChainProviders: [],
-  onChainScore: 0,
+  onChainScores: {},
   readOnChainData: async (): Promise<void> => {},
 };
 
@@ -53,8 +59,9 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   const { address, wallet } = useContext(UserContext);
   const [onChainProviders, setOnChainProviders] = useState<OnChainProviderMap>({});
   const [activeChainProviders, setActiveChainProviders] = useState<OnChainProviderType[]>([]);
-  const [onChainScore, setOnChainScore] = useState<number>(0);
+  const [onChainScores, setOnChainScores] = useState<OnChainScores>({});
   const [onChainLastUpdates, setOnChainLastUpdates] = useState<OnChainLastUpdates>({});
+  const [{ connectedChain }] = useSetChain();
 
   const savePassportLastUpdated = (attestation: Attestation, chainId: string) => {
     const lastUpdated = new Date(Number(BigInt(attestation.time.toString())) * 1000);
@@ -67,44 +74,49 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   const readOnChainData = useCallback(async () => {
     if (wallet && address) {
       try {
-        // TODO: When we support multiple chains will need to refactor this to account for all possible chains
         if (!process.env.NEXT_PUBLIC_ACTIVE_ON_CHAIN_PASSPORT_CHAINIDS) {
           datadogLogs.logger.error("No active on-chain passport chain ids set");
           datadogRum.addError("No active on-chain passport chain ids set");
           return;
         }
         const activeChainIds = JSON.parse(process.env.NEXT_PUBLIC_ACTIVE_ON_CHAIN_PASSPORT_CHAINIDS);
-        const chainId = activeChainIds[0];
+        await Promise.all(
+          activeChainIds.map(async (chainId: string) => {
+            const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
+            if (!passportAttestationData) {
+              return;
+            }
 
-        const passportAttestationData = await getAttestationData(address, chainId);
-        if (!passportAttestationData) {
-          return;
-        }
+            const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
+              passportAttestationData.passport
+            );
 
-        const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
-          passportAttestationData.passport
+            savePassportLastUpdated(passportAttestationData.passport, chainId);
+
+            const onChainProviders: OnChainProviderType[] = onChainProviderInfo
+              .sort((a, b) => a.providerNumber - b.providerNumber)
+              .map((providerInfo, index) => ({
+                providerName: providerInfo.providerName,
+                credentialHash: `v0.0.0:${Buffer.from(hashes[index].slice(2), "hex").toString("base64")}`,
+                expirationDate: new Date(expirationDates[index].toNumber() * 1000),
+                issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
+              }));
+
+            // Set the on-chain status
+            setOnChainProviders((prevState) => ({
+              ...prevState,
+              [chainId]: onChainProviders,
+            }));
+
+            if (chainId === connectedChain?.id) setActiveChainProviders(onChainProviders);
+
+            const score = await decodeScoreAttestation(passportAttestationData.score);
+            setOnChainScores((prevState) => ({
+              ...prevState,
+              [chainId]: score,
+            }));
+          })
         );
-
-        savePassportLastUpdated(passportAttestationData.passport, chainId);
-
-        const onChainProviders: OnChainProviderType[] = onChainProviderInfo
-          .sort((a, b) => a.providerNumber - b.providerNumber)
-          .map((providerInfo, index) => ({
-            providerName: providerInfo.providerName,
-            credentialHash: `v0.0.0:${Buffer.from(hashes[index].slice(2), "hex").toString("base64")}`,
-            expirationDate: new Date(expirationDates[index].toNumber() * 1000),
-            issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
-          }));
-
-        // Set the on-chain status
-        setOnChainProviders((prevState) => ({
-          ...prevState,
-          [chainId]: onChainProviders,
-        }));
-
-        setActiveChainProviders(onChainProviders);
-
-        setOnChainScore(await decodeScoreAttestation(passportAttestationData.score));
       } catch (e: any) {
         datadogLogs.logger.error("Failed to check on-chain status", e);
         datadogRum.addError(e);
@@ -124,7 +136,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
     activeChainProviders,
     onChainLastUpdates,
     readOnChainData,
-    onChainScore,
+    onChainScores,
   };
 
   return <OnChainContext.Provider value={providerProps}>{children}</OnChainContext.Provider>;

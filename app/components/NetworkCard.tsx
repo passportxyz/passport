@@ -53,7 +53,7 @@ export const checkOnChainStatus = (
 
 export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChains: string[] }) {
   const { allProvidersState } = useContext(CeramicContext);
-  const { onChainProviders, onChainScore, onChainLastUpdates } = useContext(OnChainContext);
+  const { onChainProviders, onChainScores, onChainLastUpdates } = useContext(OnChainContext);
   const { rawScore, scoreState } = useContext(ScorerContext);
   const [isActive, setIsActive] = useState(false);
   const [onChainStatus, setOnChainStatus] = useState<OnChainStatus>(OnChainStatus.NOT_MOVED);
@@ -70,12 +70,12 @@ export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChain
         savedNetworkProviders,
         rawScore,
         scoreState,
-        onChainScore
+        onChainScores[chain.id]
       );
       setOnChainStatus(stampStatus);
     };
     checkStatus();
-  }, [allProvidersState, chain.id, onChainProviders, onChainScore, rawScore, scoreState]);
+  }, [allProvidersState, chain.id, onChainProviders, onChainScores, rawScore, scoreState]);
 
   return (
     <div className="mb-6 border border-accent-2 bg-background-2 p-0">

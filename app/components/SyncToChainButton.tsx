@@ -177,7 +177,6 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
 
           const transaction = await gitcoinVerifierContract.verifyAndAttest(data.passport, v, r, s, {
             value: data.passport.fee,
-            gasLimit: 1000000,
           });
           toast({
             duration: 9000,

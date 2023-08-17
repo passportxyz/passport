@@ -45,7 +45,8 @@
     "@types/supertest": "^2.0.12",
     "@types/webpack-env": "^1.16.3",
     "jest": "^27.5.1",
-    "supertest": "^6.2.2"
+    "supertest": "^6.2.2",
+    "ts-node": "^10.9.1"
   },
   "resolutions": {
     "leveldown": "6.1.1"

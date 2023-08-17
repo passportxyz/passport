@@ -95,9 +95,9 @@ export const config: {
 
 const attestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
 
-const getAttestationDomainSeparator = (chainIdHex: keyof typeof onchainInfo) => {
+export const getAttestationDomainSeparator = (chainIdHex: keyof typeof onchainInfo) => {
   const verifyingContract = onchainInfo[chainIdHex].GitcoinVerifier.address;
-  const chainId = parseInt(chainIdHex, 16);
+  const chainId = parseInt(chainIdHex, 16).toString();
   return {
     name: "GitcoinVerifier",
     version: "1",
