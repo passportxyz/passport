@@ -59,10 +59,6 @@ if (!process.env.ATTESTATION_SIGNER_PRIVATE_KEY) {
   configErrors.push("ATTESTATION_SIGNER_PRIVATE_KEY is required");
 }
 
-if (!process.env.GITCOIN_VERIFIER_CHAIN_ID || process.env.GITCOIN_VERIFIER_CHAIN_ID.startsWith("0x")) {
-  configErrors.push("GITCOIN_VERIFIER_CHAIN_ID is required and must be in decimal format");
-}
-
 if (!process.env.ALLO_SCORER_ID) {
   configErrors.push("ALLO_SCORER_ID is required");
 }
@@ -99,18 +95,15 @@ export const config: {
 
 const attestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
 
-const attestationChainId = process.env.GITCOIN_VERIFIER_CHAIN_ID;
-const attestationChainIdHex = ("0x" + parseInt(attestationChainId).toString(16)) as keyof typeof onchainInfo;
-if (!Object.keys(onchainInfo).includes(attestationChainIdHex)) {
-  throw new Error(`No onchainInfo found for chainId ${attestationChainId} (hex: ${attestationChainIdHex})`);
-}
-const verifierAddress = onchainInfo[attestationChainIdHex].GitcoinVerifier.address;
-
-const ATTESTER_DOMAIN = {
-  name: "GitcoinVerifier",
-  version: "1",
-  chainId: attestationChainId,
-  verifyingContract: verifierAddress,
+export const getAttestationDomainSeparator = (chainIdHex: keyof typeof onchainInfo) => {
+  const verifyingContract = onchainInfo[chainIdHex].GitcoinVerifier.address;
+  const chainId = parseInt(chainIdHex, 16).toString();
+  return {
+    name: "GitcoinVerifier",
+    version: "1",
+    chainId,
+    verifyingContract,
+  };
 };
 
 const ATTESTER_TYPES = {
@@ -422,7 +415,12 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
   try {
-    const { credentials, nonce } = req.body as EasRequestBody;
+    const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
+    if (!Object.keys(onchainInfo).includes(chainIdHex)) {
+      return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
+    }
+    const attestationChainIdHex = chainIdHex as keyof typeof onchainInfo;
+
     if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
 
     const recipient = credentials[0].credentialSubject.id.split(":")[4];
@@ -459,8 +457,10 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           fee: fee.toString(),
         };
 
+        const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
+
         attestationSignerWallet
-          ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, passportAttestation)
+          ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {
             const { v, r, s } = utils.splitSignature(signature);
 
@@ -488,7 +488,12 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
   try {
-    const { credentials, nonce } = req.body as EasRequestBody;
+    const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
+    if (!Object.keys(onchainInfo).includes(chainIdHex)) {
+      return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
+    }
+    const attestationChainIdHex = chainIdHex as keyof typeof onchainInfo;
+
     if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
 
     const recipient = credentials[0].credentialSubject.id.split(":")[4];
@@ -525,8 +530,10 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
           fee: fee.toString(),
         };
 
+        const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
+
         attestationSignerWallet
-          ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, passportAttestation)
+          ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {
             const { v, r, s } = utils.splitSignature(signature);
 

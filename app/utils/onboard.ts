@@ -94,9 +94,10 @@ if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
 chains.push({
   id: optimismChainId,
   token: "ETH",
-  label: "Optimism Mainnet",
+  label: "Optimism",
   rpcUrl: "https://mainnet.optimism.io/",
   icon: "./assets/op-logo.svg",
+  easScanUrl: "https://optimism.easscan.org",
 });
 chains.push({
   id: lineaChainId,

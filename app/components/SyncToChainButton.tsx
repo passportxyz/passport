@@ -141,6 +141,7 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
         const payload = {
           credentials,
           nonce,
+          chainIdHex: chain.id,
         };
 
         const { data }: { data: EasPayload } = await axios.post(

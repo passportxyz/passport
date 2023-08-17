@@ -47,7 +47,7 @@ const handleAxiosError = (error: any, label: string, secretsToHide?: string[]) =
       )}`;
     } else if (error.request) {
       // No response received
-      message += "no response received";
+      message += "no response received, " + error.message;
     } else {
       // Something happened in setting up the request that triggered an Error
       message += error.message;
