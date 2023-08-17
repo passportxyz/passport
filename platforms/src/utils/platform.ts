@@ -10,8 +10,8 @@ export type PlatformOptions = {
 };
 
 export type PlatformBanner = {
-  heading?: string;
-  content?: string;
+  heading?: React.ReactNode;
+  content?: React.ReactNode;
   cta?: {
     label: string;
     url: string;
