@@ -5,12 +5,12 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/trustaLabsStampIcon.svg",
   platform: "TrustaLabs",
   name: "Trusta Labs",
-  description: "Connect your existing TrustaLabs Account to verify",
+  description: "Launch Trusta's TrustScan to verify this account has non-Sybil behavior",
   connectMessage: "Connect Account",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
-  { platformGroup: "Trusta Labs", providers: [{ title: "Sybil Score", name: "TrustaLabs" }] },
+  { platformGroup: "Trusta Labs", providers: [{ title: "TrustScan Non-Sybil Account", name: "TrustaLabs" }] },
 ];
 
 export const providers: Provider[] = [new TrustaLabsProvider()];
