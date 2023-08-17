@@ -46,6 +46,7 @@ const {
   CyberConnect,
   GrantsStack,
   TrustaLabs,
+  Etherscore,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -242,6 +243,11 @@ if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS === "on") {
     platFormGroupSpec: TrustaLabs.ProviderConfig,
   });
 }
+
+platforms.set("Etherscore", {
+  platform: new Etherscore.EtherscorePlatform(),
+  platFormGroupSpec: Etherscore.ProviderConfig,
+});
 
 export enum IsLoadingPassportState {
   Idle,

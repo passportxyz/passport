@@ -26,6 +26,7 @@ import * as Civic from "./Civic";
 import * as CyberConnect from "./CyberProfile";
 import * as GrantsStack from "./GrantsStack";
 import * as TrustaLabs from "./TrustaLabs";
+import * as Etherscore from "./Etherscore";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
 type PlatformConfig = {
@@ -64,6 +65,7 @@ const platforms: Record<string, PlatformConfig> = {
   CyberConnect,
   GrantsStack,
   TrustaLabs,
+  Etherscore,
 };
 
 if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {

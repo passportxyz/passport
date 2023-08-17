@@ -229,7 +229,8 @@ export type PLATFORM_ID =
   | "Civic"
   | "CyberConnect"
   | "GrantsStack"
-  | "TrustaLabs";
+  | "TrustaLabs"
+  | "Etherscore";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -323,7 +324,10 @@ export type PROVIDER_ID =
   | "GrantsStack2Programs"
   | "GrantsStack4Programs"
   | "GrantsStack6Programs"
-  | "TrustaLabs";
+  | "TrustaLabs"
+  | "EtherscoreBronze"
+  | "EtherscoreSilver"
+  | "EtherscoreGold";
 
 export type StampBit = {
   bit: number;
