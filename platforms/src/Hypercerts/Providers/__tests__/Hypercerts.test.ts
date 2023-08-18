@@ -60,6 +60,7 @@ describe("Hypercerts Provider", () => {
 
     expect(verifiedPayload).toEqual({
       valid: true,
+      errors: [],
       record: {
         address: MOCK_ADDRESS_LOWER,
       },
@@ -84,6 +85,7 @@ describe("Hypercerts Provider", () => {
 
     expect(verifiedPayload).toEqual({
       valid: false,
+      errors: ["You have 0 valid Hypercerts and the minimum is 2"],
       record: {
         address: MOCK_ADDRESS_LOWER,
       },
@@ -104,7 +106,7 @@ describe("Hypercerts Provider", () => {
 
     expect(res).toMatchObject({
       valid: false,
-      error: ["Self Staking Gold Provider verifyStake Error"],
+      error: ["Error was thrown while verifying Hypercerts"],
     });
 
     expect(mockedAxiosPost).toBeCalledTimes(1);
@@ -118,6 +120,7 @@ describe("Hypercerts Provider", () => {
 
     expect(verifiedPayload).toEqual({
       valid: true,
+      errors: [],
       record: {
         address: MOCK_ADDRESS_LOWER,
       },
@@ -169,6 +172,7 @@ describe("Hypercerts Provider", () => {
 
     expect(verifiedPayload).toEqual({
       valid: false,
+      errors: ["You have 1 valid Hypercerts and the minimum is 2"],
       record: {
         address: MOCK_ADDRESS_LOWER,
       },

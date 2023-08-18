@@ -70,7 +70,7 @@ export class HypercertsProvider implements Provider {
 
       const valid = validTokenLength > 1;
 
-      const errors = !valid && [`You have ${validTokenLength} valid Hypercerts and the minimum is 2`];
+      const errors = !valid ? [`You have ${validTokenLength} valid Hypercerts and the minimum is 2`] : [];
 
       return {
         valid: valid,
