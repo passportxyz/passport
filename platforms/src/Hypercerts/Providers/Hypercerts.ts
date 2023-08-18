@@ -60,16 +60,21 @@ export class HypercertsProvider implements Provider {
           }
         `,
         variables: {
-          owner: payload.address,
+          owner: address,
         },
       });
 
       const { claimTokens } = result.data.data;
 
-      const valid = checkTokenCreation(claimTokens).length > 1;
+      const validTokenLength = checkTokenCreation(claimTokens).length;
+
+      const valid = validTokenLength > 1;
+
+      const errors = !valid && [`You have ${validTokenLength} valid Hypercerts and the minimum is 2`];
 
       return {
         valid: valid,
+        errors,
         record: {
           address,
         },
@@ -77,7 +82,7 @@ export class HypercertsProvider implements Provider {
     } catch (e: any) {
       return {
         valid: false,
-        error: ["Self Staking Gold Provider verifyStake Error"],
+        error: ["Error was thrown while verifying Hypercerts"],
       };
     }
   }
