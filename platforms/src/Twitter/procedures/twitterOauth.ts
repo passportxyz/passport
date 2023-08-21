@@ -99,7 +99,7 @@ const loginUser = async (code: string, codeVerifier: string): Promise<TwitterApi
     const { client } = await authClient.loginWithOAuth2({
       code,
       codeVerifier,
-      redirectUri: process.env.TWITTER_CALLBACK,
+      redirectUri: process.env.PASSPORT_TWITTER_CALLBACK || process.env.GRANTS_STACK_TWITTER_CALLBACK,
     });
 
     return client.readOnly;
