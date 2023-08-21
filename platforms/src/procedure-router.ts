@@ -9,7 +9,7 @@ import * as idenaSignIn from "./Idena/procedures/idenaSignIn";
 export const router = Router();
 
 export type GenerateTwitterAuthUrlRequestBody = {
-  callback: string;
+  callback?: string;
 };
 
 export type GenerateBrightidBody = {
@@ -26,8 +26,9 @@ export type IdenaAuthenticateRequestBody = {
   signature: string;
 };
 
-router.post("/twitter/generateAuthUrl", (_req: Request, res: Response): void => {
-  const authUrl = twitterOAuth.initClientAndGetAuthUrl();
+router.post("/twitter/generateAuthUrl", (req: Request, res: Response): void => {
+  const { callback: callbackOverride } = req.body as GenerateTwitterAuthUrlRequestBody;
+  const authUrl = twitterOAuth.initClientAndGetAuthUrl(callbackOverride);
 
   const data = {
     authUrl,

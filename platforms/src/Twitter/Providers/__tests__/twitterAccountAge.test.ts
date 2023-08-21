@@ -1,18 +1,26 @@
 /* eslint-disable */
 import * as twitterAccountAge from "../twitterAccountAge";
+import { clearCacheSession } from "../../../utils/cache";
 import { RequestPayload, ProviderContext } from "@gitcoin/passport-types";
 import { ApiRequestError, ApiResponseError, ApiPartialResponseError } from "twitter-api-v2";
-import { getTwitterUserData, getAuthClient } from "../../procedures/twitterOauth";
+import { getTwitterUserData, getAuthClient, initClientAndGetAuthUrl } from "../../procedures/twitterOauth";
 import { TwitterApi } from "twitter-api-v2";
 import { ProviderExternalVerificationError } from "../../../types";
 import { Providers } from "../../../utils/providers";
 
 const { TwitterAccountAgeProvider } = twitterAccountAge;
 
-jest.mock("../../procedures/twitterOauth", () => ({
-  getTwitterUserData: jest.fn(),
-  getAuthClient: jest.fn(),
-}));
+jest.mock("../../procedures/twitterOauth", () => {
+  const originalModule = jest.requireActual("../../procedures/twitterOauth");
+  return {
+    ...originalModule,
+    getTwitterUserData: jest.fn(),
+    getAuthClient: jest.fn(),
+  };
+});
+
+process.env.TWITTER_CLIENT_ID = "123";
+process.env.TWITTER_CLIENT_SECRET = "abc";
 
 describe("TwitterAccountAgeProvider", function () {
   beforeEach(() => {
@@ -190,5 +198,25 @@ describe("TwitterAccountAgeProvider", function () {
       error: ["Errors"],
       record: undefined,
     });
+  });
+
+  it("uses the default callback when no override is provided", async () => {
+    const oldCallback = process.env.TWITTER_CALLBACK;
+    try {
+      process.env.TWITTER_CALLBACK = "test_callback";
+      const authUrl = initClientAndGetAuthUrl();
+      expect(authUrl).toContain("redirect_uri=test_callback");
+      const state = authUrl.split("state=")[1].split("&")[0];
+      clearCacheSession(state, "Twitter");
+    } finally {
+      process.env.TWITTER_CALLBACK = oldCallback;
+    }
+  });
+
+  it("uses the override callback when provided", async () => {
+    const authUrl = initClientAndGetAuthUrl("override_callback");
+    expect(authUrl).toContain("redirect_uri=override_callback");
+    const state = authUrl.split("state=")[1].split("&")[0];
+    clearCacheSession(state, "Twitter");
   });
 });
