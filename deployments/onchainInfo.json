@@ -3,14 +3,6 @@
     "issuer": {
       "address": "0x5f603Ed913738d9105bAf3BD981AA4750016B167"
     },
-    "easSchemas": {
-      "passport": {
-        "uid": "0x9d43e5c201404b9ab0913bcd6475c78e32d32a4d78233b2c309e9b6828f59e45"
-      },
-      "score": {
-        "uid": "0xf72ba57b5fb4c12a5f967574bc44a11efb8be76bcfbf47ced36e1afe226ba702"
-      }
-    },
     "EAS": {
       "address": "0xAcfE09Fd03f7812F022FBf636700AdEA18Fd2A7A"
     },
@@ -22,31 +14,39 @@
     },
     "GitcoinAttester": {
       "address": "0x5bbbc733e12f50e6834c40a90066f2f9ffb820e0"
+    },
+    "easSchemas": {
+      "passport": {
+        "uid": "0x9d43e5c201404b9ab0913bcd6475c78e32d32a4d78233b2c309e9b6828f59e45"
+      },
+      "score": {
+        "uid": "0xf72ba57b5fb4c12a5f967574bc44a11efb8be76bcfbf47ced36e1afe226ba702"
+      }
     }
   },
   "0xa": {
     "issuer": {
-      "address": "0x5f603Ed913738d9105bAf3BD981AA4750016B167"
-    },
-    "easSchemas": {
-      "passport": {
-        "uid": "0xa475887348fd4ee5f882a34e815ec93aa120f846895d06ec04d1f4e95ab6a9d3"
-      },
-      "score": {
-        "uid": "0x21beda1e0938388ba669137313e462e07c9de77970e7df1b4d680eff1ae36c23"
-      }
+      "address": "0x804233b96cbd6d81efeb6517347177ef7bD488ED"
     },
     "EAS": {
       "address": "0x4200000000000000000000000000000000000021"
     },
     "GitcoinAttester": {
-      "address": "0x5bC95C6e11520D25BE8c7bDf7AAc3E2eEAbD8564"
+      "address": "0x843829986e895facd330486a61Ebee9E1f1adB1a"
     },
     "GitcoinVerifier": {
-      "address": "0xCAa9E817f02486cE076560B77A86235Ef91c5d5D"
+      "address": "0xa8eD4d2C3f6f98A55cdDEd97C5aE9B932B0633A4"
     },
     "GitcoinResolver": {
-      "address": "0x9A44DAA3823B21Df8d905AbD9c06b75131f43F38"
+      "address": "0xc94aBf0292Ac04AAC18C251d9C8169a8dd2BBbDC"
+    },
+    "easSchemas": {
+      "passport": {
+        "uid": "0xd7b8c4ffa4c9fd1ecb3f6db8201e916a8d7dba11f161c1b0b5ccf44ceb8e2a39"
+      },
+      "score": {
+        "uid": "0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89"
+      }
     }
   }
 }
