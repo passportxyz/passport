@@ -19,6 +19,7 @@ export type TwitterContext = ProviderContext & {
 
 type TwitterCache = {
   codeVerifier?: string;
+  callback?: string;
 };
 
 export type TwitterUserData = {
@@ -38,16 +39,15 @@ export const loadTwitterCache = (token: string): TwitterCache => {
 /**
  * Initializes a Twitter OAuth2 Authentication Client
  */
-export const initClientAndGetAuthUrl = (): string => {
+export const initClientAndGetAuthUrl = (callbackOverride?: string): string => {
   if (process.env.TWITTER_CLIENT_ID && process.env.TWITTER_CLIENT_SECRET) {
+    const callback = callbackOverride || process.env.TWITTER_CALLBACK;
     const client = new TwitterApi({
       clientId: process.env.TWITTER_CLIENT_ID,
       clientSecret: process.env.TWITTER_CLIENT_SECRET,
     }).readOnly;
 
-    const { url, codeVerifier, state } = client.generateOAuth2AuthLink(process.env.TWITTER_CALLBACK, {
-      scope: ["tweet.read", "users.read"],
-    });
+    const { url, codeVerifier, state } = client.generateOAuth2AuthLink(callback);
 
     // This is necessary because of how we use the state to
     // direct the oauth window to the correct message channel
@@ -58,6 +58,7 @@ export const initClientAndGetAuthUrl = (): string => {
     const session = loadTwitterCache(newState);
 
     session.codeVerifier = codeVerifier;
+    session.callback = callback;
 
     return newUrl;
   } else {
@@ -73,13 +74,13 @@ export const getAuthClient = async (
 ): Promise<TwitterApiReadOnly> => {
   if (!context.twitter?.client) {
     const session = loadTwitterCache(sessionKey);
-    const { codeVerifier } = session;
+    const { codeVerifier, callback } = session;
 
     if (!codeVerifier || !sessionKey || !code) {
       throw new ProviderExternalVerificationError("You denied the app or your session expired! Please try again.");
     }
 
-    const client = await loginUser(code, codeVerifier);
+    const client = await loginUser(code, codeVerifier, callback);
 
     if (!context.twitter) context.twitter = {};
     context.twitter.client = client;
@@ -89,7 +90,7 @@ export const getAuthClient = async (
   return context.twitter.client;
 };
 
-const loginUser = async (code: string, codeVerifier: string): Promise<TwitterApiReadOnly> => {
+const loginUser = async (code: string, codeVerifier: string, callback: string): Promise<TwitterApiReadOnly> => {
   const authClient = new TwitterApi({
     clientId: process.env.TWITTER_CLIENT_ID,
     clientSecret: process.env.TWITTER_CLIENT_SECRET,
@@ -99,7 +100,7 @@ const loginUser = async (code: string, codeVerifier: string): Promise<TwitterApi
     const { client } = await authClient.loginWithOAuth2({
       code,
       codeVerifier,
-      redirectUri: process.env.TWITTER_CALLBACK,
+      redirectUri: callback,
     });
 
     return client.readOnly;
