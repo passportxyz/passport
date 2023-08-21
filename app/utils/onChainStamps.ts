@@ -51,7 +51,7 @@ export async function getAttestationData(
       score: await eas.getAttestation(scoreUid),
     };
   } catch (e: any) {
-    datadogLogs.logger.error("Failed to check on-chain status", e);
+    datadogLogs.logger.error("Failed to check onchain status", e);
     datadogRum.addError(e);
   }
 }

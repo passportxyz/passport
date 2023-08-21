@@ -120,14 +120,14 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
         const gitcoinVerifierContract = await loadVerifierContract(wallet);
 
         if (credentials.length === 0) {
-          // Nothing to be brought on-chain
+          // Nothing to be brought onchain
           toast({
             duration: 9000,
             isClosable: true,
             render: (result: any) => (
               <DoneToastContent
                 title="Error"
-                message="You do not have any stamps to bring on-chain."
+                message="You do not have any Stamps to bring onchain."
                 icon={fail}
                 result={result}
               />
@@ -202,7 +202,7 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
             <p>
               Passport successfully synced to chain.{" "}
               <a href={`${easScanURL}`} className="underline" target="_blank" rel="noopener noreferrer">
-                Check your stamps
+                Check your attestations
               </a>
             </p>
           );
@@ -218,14 +218,14 @@ export function SyncToChainButton({ onChainStatus, isActive, chain }: SyncToChai
       } catch (e: any) {
         console.error("error syncing credentials to chain: ", e);
         let toastDescription: string | JSX.Element =
-          "An unexpected error occurred while trying to bring the data on-chain.";
+          "An unexpected error occurred while trying to bring the data onchain.";
         if (isError(e, "ACTION_REJECTED")) {
           toastDescription = "Transaction rejected by user";
         } else if (isError(e, "INSUFFICIENT_FUNDS") || e?.info?.error?.data?.message.includes("insufficient funds")) {
           toastDescription =
-            "You don't have sufficient funds to bring your stamps on-chain. Consider funding your wallet first.";
+            "You don't have sufficient funds to bring your Stamps onchain. Consider funding your wallet first.";
         } else if (isError(e, "CALL_EXCEPTION")) {
-          toastDescription = <ErrorDetails msg={"Error writing stamps to chain: " + e.reason} ethersError={e} />;
+          toastDescription = <ErrorDetails msg={"Error writing Stamps to chain: " + e.reason} ethersError={e} />;
         } else if (
           isError(e, "NONCE_EXPIRED") ||
           isError(e, "REPLACEMENT_UNDERPRICED") ||

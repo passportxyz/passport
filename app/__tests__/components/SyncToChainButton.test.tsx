@@ -105,7 +105,7 @@ describe("SyncToChainButton component", () => {
     );
     const btn = screen.getByTestId("sync-to-chain-button");
     fireEvent.click(btn);
-    await screen.findByText("You do not have any stamps to bring on-chain.");
+    await screen.findByText("You do not have any Stamps to bring onchain.");
   });
 
   it("should render success toast if stamps are brought on chain", async () => {

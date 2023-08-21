@@ -37,11 +37,12 @@ export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
         <DrawerCloseButton className="text-color-1" />
         <DrawerHeader className="text-center text-color-1">
           <div className="mt-10 justify-center">
-            <h2 className="mt-4 text-2xl">Go On-Chain</h2>
+            <h2 className="mt-4 text-2xl">Go Onchain</h2>
             <p className="text-base font-normal">
-              Moving your passport on-chain creates a tamper-proof record of your stamps. This is only required if
-              you&apos;re using applications that fetch Passport data from on-chain. Note: This involves blockchain
-              network fees and a $2 Gitcoin minting fee.
+              Minting your Passport onchain creates a tamper-proof record of your Gitcoin Passport onchain. This is only
+              required if you&apos;re using applications that fetch Gitcoin Passport data onchain. Note: Minting your
+              Passport onchain involves blockchain network fees and a $2 minting fee, which is directed to the Gitcoin
+              treasury.
             </p>
           </div>
         </DrawerHeader>
