@@ -5,8 +5,7 @@ import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { PlatformGroupSpec } from "../config/providers";
 import { getStampProviderFilters } from "../config/filters";
 import { OnChainContext } from "../context/onChainContext";
-import { LinkIcon } from "@heroicons/react/20/solid";
-import { OnChainTag } from "./OnChainTag";
+import { OnchainTag } from "./OnchainTag";
 import Toggle from "./Toggle";
 import { CeramicContext } from "../context/ceramicContext";
 
@@ -74,7 +73,7 @@ export function StampSelector({
                       <div className={`text-md relative top-[-0.3em] ${textColor} flex items-center`}>
                         {provider.title}
                         {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && isProviderOnChain(provider.name) && (
-                          <OnChainTag marginLeft="3" />
+                          <OnchainTag marginLeft="3" />
                         )}
                       </div>
                     </li>
