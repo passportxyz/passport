@@ -47,7 +47,9 @@ export const initClientAndGetAuthUrl = (callbackOverride?: string): string => {
       clientSecret: process.env.TWITTER_CLIENT_SECRET,
     }).readOnly;
 
-    const { url, codeVerifier, state } = client.generateOAuth2AuthLink(callback);
+    const { url, codeVerifier, state } = client.generateOAuth2AuthLink(callback, {
+      scope: ["tweet.read", "users.read"],
+    });
 
     // This is necessary because of how we use the state to
     // direct the oauth window to the correct message channel
