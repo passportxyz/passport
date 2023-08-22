@@ -82,7 +82,9 @@ export async function checkGuildStats(memberships: GuildMembership[]): Promise<G
 class GuildProvider {
   protected async checkMemberShipStats(address: string): Promise<GuildStats> {
     const memberships = await getGuildMemberships(address);
-    return await checkGuildStats(memberships);
+    // console.log("memberships", memberships);
+    const stats = await checkGuildStats(memberships);
+    return stats;
   }
 }
 
