@@ -75,8 +75,8 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
     if (wallet && address) {
       try {
         if (!process.env.NEXT_PUBLIC_ACTIVE_ON_CHAIN_PASSPORT_CHAINIDS) {
-          datadogLogs.logger.error("No active on-chain passport chain ids set");
-          datadogRum.addError("No active on-chain passport chain ids set");
+          datadogLogs.logger.error("No active onchain passport chain ids set");
+          datadogRum.addError("No active onchain passport chain ids set");
           return;
         }
         const activeChainIds = JSON.parse(process.env.NEXT_PUBLIC_ACTIVE_ON_CHAIN_PASSPORT_CHAINIDS);
@@ -102,7 +102,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
                 issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
               }));
 
-            // Set the on-chain status
+            // Set the onchain status
             setOnChainProviders((prevState) => ({
               ...prevState,
               [chainId]: onChainProviders,
@@ -118,7 +118,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
           })
         );
       } catch (e: any) {
-        datadogLogs.logger.error("Failed to check on-chain status", e);
+        datadogLogs.logger.error("Failed to check onchain status", e);
         datadogRum.addError(e);
       }
     }

@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 
 // --- Chakra UI Elements
 import { useDisclosure, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
-import { LinkIcon, ShieldCheckIcon } from "@heroicons/react/20/solid";
+import { ShieldCheckIcon } from "@heroicons/react/20/solid";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 // --- Types
@@ -21,7 +21,7 @@ import { pillLocalStorage } from "../context/userContext";
 import { JsonOutputModal } from "./JsonOutputModal";
 import { RemoveStampModal } from "./RemoveStampModal";
 import { getStampProviderFilters } from "../config/filters";
-import { OnChainTag } from "./OnChainTag";
+import { OnchainTag } from "./OnchainTag";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -72,8 +72,8 @@ export const PlatformCard = ({
 
   const disabled = passportHasCacaoError;
 
-  // check if platform has on-chain providers
-  const hasOnChainProviders = () => {
+  // check if platform has onchain providers
+  const hasOnchainProviders = () => {
     const providers = selectedProviders[platform.platform];
     if (!providers.length) return false;
 
@@ -150,7 +150,7 @@ export const PlatformCard = ({
               >
                 {platform.name}
               </h1>
-              {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && hasOnChainProviders() ? <OnChainTag /> : <></>}
+              {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && hasOnchainProviders() ? <OnchainTag /> : <></>}
             </div>
             <p className="pleading-relaxed mt-2 hidden text-color-4 md:inline-block">{platform.description}</p>
           </div>
