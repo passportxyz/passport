@@ -21,6 +21,7 @@ import { pillLocalStorage } from "../context/userContext";
 import { JsonOutputModal } from "./JsonOutputModal";
 import { RemoveStampModal } from "./RemoveStampModal";
 import { getStampProviderFilters } from "../config/filters";
+import { FeatureFlags } from "../config/feature_flags";
 import { OnchainTag } from "./OnchainTag";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
@@ -150,7 +151,7 @@ export const PlatformCard = ({
               >
                 {platform.name}
               </h1>
-              {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && hasOnchainProviders() ? <OnchainTag /> : <></>}
+              {FeatureFlags.FF_CHAIN_SYNC && hasOnchainProviders() ? <OnchainTag /> : <></>}
             </div>
             <p className="pleading-relaxed mt-2 hidden text-color-4 md:inline-block">{platform.description}</p>
           </div>

@@ -32,6 +32,7 @@ import {
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 import { ScorerContext } from "../context/scorerContext";
+import { FeatureFlags } from "../config/feature_flags";
 
 import { useViewerConnection } from "@self.id/framework";
 import { EthereumAuthProvider } from "@self.id/web";
@@ -46,7 +47,7 @@ import { Button } from "../components/Button";
 import TagManager from "react-gtm-module";
 
 const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
-const isOnChainSyncEnabled = process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on";
+const isOnChainSyncEnabled = FeatureFlags.FF_CHAIN_SYNC;
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
