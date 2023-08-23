@@ -9,6 +9,7 @@ import onchainInfo from "../../deployments/onchainInfo.json";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 import { decodeProviderInformation, decodeScoreAttestation, getAttestationData } from "../utils/onChainStamps";
+import { FeatureFlags } from "../config/feature_flags";
 import { Attestation } from "@ethereum-attestation-service/eas-sdk";
 import { useSetChain } from "@web3-onboard/react";
 
@@ -125,7 +126,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   }, [wallet, address]);
 
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on") {
+    if (FeatureFlags.FF_CHAIN_SYNC) {
       readOnChainData();
     }
   }, [readOnChainData, wallet, address]);
