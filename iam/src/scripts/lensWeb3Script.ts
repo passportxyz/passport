@@ -1,12 +1,20 @@
 /* eslint-disable */
-import axios from "axios";
-import { verifyTypes } from "../";
+import dotenv from "dotenv";
+dotenv.config({ path: "../../.env"});
+import { verifyTypes }  from "../index";
 import { RequestPayload } from "@gitcoin/passport-types";
 import { stakingSubgraph } from "@gitcoin/passport-platforms/src/GtcStaking/Providers/GtcStaking";
 import { BigNumber } from "ethers";
-import { error } from "console";
+import axios from "axios";
 
 // are idena and civic EVM platforms--they don't have isEVM = true
+
+// process.env.IAM_JWK;
+// process.env.ATTESTATION_SIGNER_PRIVATE_KEY;
+// process.env.ALLO_SCORER_ID;
+// process.env.SCORER_ENDPOINT;
+// process.env.SCORER_API_KEY;
+// process.env.EAS_GITCOIN_STAMP_SCHEMA;
 
 const SCORER_ID = process.env.ALLO_SCORER_ID || "";
 const API_KEY = process.env.SCORER_API_KEY || "";
@@ -156,6 +164,147 @@ const PROVIDER_ID = [
   "GrantsStack6Programs",
   "TrustaLabs"
 ]
+
+const web3Payloads = [
+  {
+    type: "Ens",
+    types: ["Ens"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "Poh",
+    types: ["Poh"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "Brightid",
+    types: ["Brightid"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "Gitcoin",
+    types: ["GitcoinContributorStatistics#numGrantsContributeToGte#1",
+      "GitcoinContributorStatistics#numGrantsContributeToGte#10",
+      "GitcoinContributorStatistics#numGrantsContributeToGte#25",
+      "GitcoinContributorStatistics#numGrantsContributeToGte#100",
+      "GitcoinContributorStatistics#totalContributionAmountGte#10",
+      "GitcoinContributorStatistics#totalContributionAmountGte#100",
+      "GitcoinContributorStatistics#totalContributionAmountGte#1000",
+      "GitcoinContributorStatistics#numRoundsContributedToGte#1",
+      "GitcoinContributorStatistics#numGr14ContributionsGte#1"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "Snapshot",
+    types: ["SnapshotProposalsProvider",
+      "SnapshotVotesProvider"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "ETH",
+    types: ["ethPossessionsGte#1",
+      "ethPossessionsGte#10",
+      "ethPossessionsGte#32",
+      "FirstEthTxnProvider",
+      "EthGTEOneTxnProvider",
+      "EthGasProvider"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "GtcStaking",
+    types: ["SelfStakingBronze",
+      "SelfStakingSilver",
+      "SelfStakingGold",
+      "CommunityStakingBronze",
+      "CommunityStakingSilver",
+      "CommunityStakingGold"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "NFT",
+    types: ["NFT"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "ZkSync",
+    types: ["ZkSync",
+      "ZkSyncEra"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "Lens",
+    types: ["Lens"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "GnosisSafe",
+    types: ["GnosisSafe"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "GuildXYZ",
+    types: ["GuildMember",
+      "GuildAdmin",
+      "GuildPassportMember"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "Hypercerts",
+    types: ["Hypercerts"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "PHI",
+    types: ["PHIActivitySilver",
+      "PHIActivityGold"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "Holonym",
+    types: ["HolonymGovIdProvider",],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "CyberConnect",
+    types: ["CyberProfilePremium",
+      "CyberProfilePaid",
+      "CyberProfileOrgMember"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "GrantsStack",
+    types: ["GrantsStack3Projects",
+      "GrantsStack5Projects",
+      "GrantsStack7Projects",
+      "GrantsStack2Programs",
+      "GrantsStack4Programs",
+      "GrantsStack6Programs"],
+    address: "",
+    version: "0.0.0",
+  },
+  {
+    type: "TrustaLabs",
+    types: ["TrustaLabs"],
+    address: "",
+    version: "0.0.0",
+  },
+]
 // First check if the address is already in scorer --> isAddressInRegistry()
 // -- if yes
 // ---- return ScorerType
@@ -186,14 +335,16 @@ function getStakeQuery(address: string): string {
   `;
 }
 
-const check = (payload: RequestPayload): void => {
+const check = async (payload: RequestPayload): Promise<void> => {
+  let responses;
   // types filters out the types into an individual type
   const types = (payload.types?.length ? payload.types : [payload.type]).filter((type) => type);
+  // console.log(types);
 
   // verifyTypes returns whether the type is valid
-  verifyTypes(types, payload)
+  await verifyTypes(types, payload)
     .then((results) => {
-      const responses = results.map(({ verifyResult, type, error, code }) => ({
+      responses = results.map(({ verifyResult, type, error, code }) => ({
         valid: verifyResult.valid,
         type,
         error,
@@ -201,6 +352,8 @@ const check = (payload: RequestPayload): void => {
       }));
     })
     .catch(() => "something went wrong");
+    console.log(responses);
+    
 };
 
 interface Output {
@@ -231,6 +384,12 @@ async function checkGTCStaked(address: string): Promise<UserStakes> {
 async function qualifiesForWeb3Stamp(address: string): Promise<boolean> {
   // TODO: Check if address qualifies for web3 stamp data points.
   try {
+    const checkedArray =  web3Payloads.map(payload => {
+      payload.address = address;
+      const checked = check(payload)
+      // console.log(checked);
+    });
+    
     return false;
   } catch (e) {
     console.error(e)
@@ -279,38 +438,39 @@ async function main(address: string): Promise<void> {
   let output: Output;
 
   if (await isAddressInRegistry(address)) {
-      const score = await scorePassport(address);
-      const gtcStaked = await checkGTCStaked(address);
+    const score = await scorePassport(address);
+    const gtcStaked = await checkGTCStaked(address);
 
-      // output = {
-      //     ScoreType: 'Passport',
-      //     Score: score,
-      //     GTC_Staked: gtcStaked,
-      //     AdditionalCriteria: {}
-      // };
+    // output = {
+    //     ScoreType: 'Passport',
+    //     Score: score,
+    //     GTC_Staked: gtcStaked,
+    //     AdditionalCriteria: {}
+    // };
 
-  // } else {
-  //     if (await qualifiesForWeb3Stamp(address)) {
-  //         const score = await scoreWeb3Stamps(address);
-  //         const gtcStaked = await checkGTCStaked(address);
+    // } else {
+    //     if (await qualifiesForWeb3Stamp(address)) {
+    //         const score = await scoreWeb3Stamps(address);
+    //         const gtcStaked = await checkGTCStaked(address);
 
-  //         output = {
-  //             ScoreType: 'Web3',
-  //             Score: score,
-  //             GTC_Staked: gtcStaked,
-  //             AdditionalCriteria: {}
-  //         };
-  //     } else {
-  //         output = {
-  //             ScoreType: 'Web3',
-  //             Score: 0,
-  //             GTC_Staked: gtcStaked,
-  //             AdditionalCriteria: {}
-  //         };
-  //     }
+    //         output = {
+    //             ScoreType: 'Web3',
+    //             Score: score,
+    //             GTC_Staked: gtcStaked,
+    //             AdditionalCriteria: {}
+    //         };
+    //     } else {
+    //         output = {
+    //             ScoreType: 'Web3',
+    //             Score: 0,
+    //             GTC_Staked: gtcStaked,
+    //             AdditionalCriteria: {}
+    //         };
+    //     }
   }
 
   // return output;
 }
 
-main("someAddress").then(console.log);
+// main("someAddress").then(console.log);
+qualifiesForWeb3Stamp("0xe4afbc14c3b52c04c273edcffc1f9568b5259cca")
