@@ -353,7 +353,6 @@ const check = async (payload: RequestPayload): Promise<void> => {
     })
     .catch(() => "something went wrong");
     console.log(responses);
-    
 };
 
 interface Output {
