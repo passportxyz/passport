@@ -47,7 +47,6 @@ import { Button } from "../components/Button";
 import TagManager from "react-gtm-module";
 
 const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
-const isOnChainSyncEnabled = FeatureFlags.FF_CHAIN_SYNC;
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -330,7 +329,7 @@ export default function Dashboard() {
           )}
 
           <div className="ml-4 flex flex-col place-items-center gap-4 self-center md:flex-row">
-            {isOnChainSyncEnabled && <InitiateOnChainButton />}
+            {FeatureFlags.FF_CHAIN_SYNC && <InitiateOnChainButton />}
             {passport ? (
               <button
                 data-testid="button-passport-json-mobile"
