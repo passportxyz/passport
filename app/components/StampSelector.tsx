@@ -8,6 +8,7 @@ import { OnChainContext } from "../context/onChainContext";
 import { OnchainTag } from "./OnchainTag";
 import Toggle from "./Toggle";
 import { CeramicContext } from "../context/ceramicContext";
+import { FeatureFlags } from "../config/feature_flags";
 
 type StampSelectorProps = {
   currentPlatform?: PlatformSpec | undefined;
@@ -72,7 +73,7 @@ export function StampSelector({
                     >
                       <div className={`text-md relative top-[-0.3em] ${textColor} flex items-center`}>
                         {provider.title}
-                        {process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on" && isProviderOnChain(provider.name) && (
+                        {FeatureFlags.FF_CHAIN_SYNC && isProviderOnChain(provider.name) && (
                           <OnchainTag marginLeft="3" />
                         )}
                       </div>

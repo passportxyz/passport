@@ -21,6 +21,7 @@ import { Provider as SelfIdProvider } from "@self.id/framework";
 import TagManager from "react-gtm-module";
 
 import { themes, ThemeWrapper } from "../utils/theme";
+import { FeatureFlags } from "../config/feature_flags";
 
 const FacebookAppId = process.env.NEXT_PUBLIC_PASSPORT_FACEBOOK_APP_ID || "";
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
@@ -120,6 +121,15 @@ function App({ Component, pageProps }: AppProps) {
 
       return <div></div>;
     }
+
+    // We want to allow the user to enable features by setting feature flags in URLs as well ...
+    if (queryString.get("FF_CHAIN_SYNC") === "on") {
+      FeatureFlags["FF_CHAIN_SYNC"] = true;
+    } else {
+      FeatureFlags["FF_CHAIN_SYNC"] = false;
+    }
+
+    FeatureFlags["FF_CHAIN_SYNC"] ||= process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on";
   }
 
   const facebookSdkScript = (
