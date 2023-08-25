@@ -44,6 +44,7 @@
     "@types/node-fetch": "latest",
     "@types/supertest": "^2.0.12",
     "@types/webpack-env": "^1.16.3",
+    "csv-parser": "^3.0.0",
     "jest": "^27.5.1",
     "supertest": "^6.2.2",
     "ts-node": "^10.9.1"
