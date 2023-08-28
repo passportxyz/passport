@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, useRef } from "react";
+import { createContext, useContext, useEffect, useState, useRef, useCallback } from "react";
 import {
   Passport,
   PassportLoadResponse,
@@ -369,6 +369,30 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     };
   }, [address]);
 
+  const processSuccessfulConnection = useCallback(() => {
+    if (!database && address && dbAccessToken && viewerConnection.status === "connected") {
+      // Ceramic Network Connection
+      const ceramicClientInstance = new CeramicDatabase(
+        viewerConnection.selfID.did,
+        process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
+        undefined,
+        datadogLogs.logger
+      );
+      setCeramicClient(ceramicClientInstance);
+      setUserDid(ceramicClientInstance.did);
+      // Ceramic cache db
+      const databaseInstance = new PassportDatabase(
+        process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT || "",
+        address,
+        dbAccessToken,
+        datadogLogs.logger,
+        viewerConnection.selfID.did
+      );
+
+      setDatabase(databaseInstance);
+    }
+  }, [address, dbAccessToken, viewerConnection, database]);
+
   useEffect((): void => {
     switch (viewerConnection.status) {
       case "idle": {
@@ -383,27 +407,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       case "connected": {
         if (dbAccessTokenStatus === "failed") {
           setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
-        } else if (dbAccessToken && address) {
-          // Ceramic Network Connection
-          const ceramicClientInstance = new CeramicDatabase(
-            viewerConnection.selfID.did,
-            process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
-            undefined,
-            datadogLogs.logger
-          );
-          setCeramicClient(ceramicClientInstance);
-          setUserDid(ceramicClientInstance.did);
-          // Ceramic cache db
-          const databaseInstance = new PassportDatabase(
-            process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT || "",
-            address,
-            dbAccessToken,
-            datadogLogs.logger,
-            viewerConnection.selfID.did
-          );
-
-          setDatabase(databaseInstance);
+          break;
         }
+        processSuccessfulConnection();
         break;
       }
       case "failed": {
@@ -415,13 +421,14 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       default:
         break;
     }
-  }, [viewerConnection.status, address, dbAccessToken, dbAccessTokenStatus]);
+  }, [viewerConnection, address, dbAccessToken, dbAccessTokenStatus, processSuccessfulConnection]);
 
   useEffect(() => {
-    if (database && ceramicClient) {
+    if (database) {
+      console.log({ database });
       fetchPassport(database, false, true);
     }
-  }, [database, ceramicClient]);
+  }, [database]);
 
   const passportLoadSuccess = (
     database: CeramicDatabase | PassportDatabase,
