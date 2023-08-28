@@ -63,7 +63,10 @@ export class PassportDatabase implements DataStorageBase {
       }
     } catch (e) {
       status = "ExceptionRaised";
-      this.logger.error(`[Scorer] Error when loading passport for did  ${this.address}:` + e.toString(), { error: e });
+      this.logger.error(
+        `[Scorer] Error thrown when making ${requestType} for passport with did ${this.address}: ` + e.toString(),
+        { error: e }
+      );
     } finally {
       return {
         passport,
