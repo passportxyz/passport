@@ -369,30 +369,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     };
   }, [address]);
 
-  const processSuccessfulConnection = useCallback(() => {
-    if (!database && address && dbAccessToken && viewerConnection.status === "connected") {
-      // Ceramic Network Connection
-      const ceramicClientInstance = new CeramicDatabase(
-        viewerConnection.selfID.did,
-        process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
-        undefined,
-        datadogLogs.logger
-      );
-      setCeramicClient(ceramicClientInstance);
-      setUserDid(ceramicClientInstance.did);
-      // Ceramic cache db
-      const databaseInstance = new PassportDatabase(
-        process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT || "",
-        address,
-        dbAccessToken,
-        datadogLogs.logger,
-        viewerConnection.selfID.did
-      );
-
-      setDatabase(databaseInstance);
-    }
-  }, [address, dbAccessToken, viewerConnection, database]);
-
   useEffect((): void => {
     switch (viewerConnection.status) {
       case "idle": {
@@ -408,8 +384,27 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         if (dbAccessTokenStatus === "failed") {
           setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
           break;
+        } else if (dbAccessToken && address && !database) {
+          // Ceramic Network Connection
+          const ceramicClientInstance = new CeramicDatabase(
+            viewerConnection.selfID.did,
+            process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
+            undefined,
+            datadogLogs.logger
+          );
+          setCeramicClient(ceramicClientInstance);
+          setUserDid(ceramicClientInstance.did);
+          // Ceramic cache db
+          const databaseInstance = new PassportDatabase(
+            process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT || "",
+            address,
+            dbAccessToken,
+            datadogLogs.logger,
+            viewerConnection.selfID.did
+          );
+
+          setDatabase(databaseInstance);
         }
-        processSuccessfulConnection();
         break;
       }
       case "failed": {
@@ -421,7 +416,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       default:
         break;
     }
-  }, [viewerConnection, address, dbAccessToken, dbAccessTokenStatus, processSuccessfulConnection]);
+  }, [viewerConnection, address, dbAccessToken, dbAccessTokenStatus]);
 
   useEffect(() => {
     if (database) {
