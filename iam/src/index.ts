@@ -298,7 +298,7 @@ app.post("/api/v0.0.0/check", (req: Request, res: Response): void => {
     .catch(() => errorRes(res, "Unable to check payload", 500));
 });
 
-type VerifyTypeResult = {
+export type VerifyTypeResult = {
   verifyResult: VerifiedPayload;
   type: string;
   error?: string;

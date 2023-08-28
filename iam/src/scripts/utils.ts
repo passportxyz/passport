@@ -8,7 +8,7 @@ export interface UserStakes {
 export interface Output {
   ScoreType: string;
   Score: Promise<number> | number;
-  GTCStaked: string;
+  GTCStaked: number;
   AdditionalCriteria?: object;
 }
 
@@ -18,6 +18,10 @@ export interface VerificationResults {
   code?: number;
   error?: string;
 }
+
+export interface Checkpoint {
+  lastProcessedAddress?: string; // This can be expanded as per your needs
+};
 
 export const GITCOIN_PASSPORT_WEIGHTS = [
   { name: "Brightid", score: "0.689" },
