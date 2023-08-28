@@ -39,14 +39,14 @@ export class PassportDatabase implements DataStorageBase {
     return "created";
   }
 
-  async getPassport(): Promise<PassportLoadResponse> {
+  processPassportResponse = async (request: Promise<any>, requestType: string): Promise<PassportLoadResponse> => {
     let passport: Passport;
     let status: PassportLoadStatus = "Success";
     let errorDetails: PassportLoadErrorDetails;
 
     try {
-      const response = await axios.get(`${this.passportScorerUrl}ceramic-cache/stamp?address=${this.address}`);
-      this.logger.info(`[Scorer] Loaded passport for did ${this.did} => ${this.address}`);
+      const response = await request;
+      this.logger.info(`[Scorer] made ${requestType} request for passport for did ${this.did} => ${this.address}`);
 
       const { data } = response;
       if (data && data.success && (this.allowEmpty || data.stamps.length !== 0)) {
@@ -71,51 +71,53 @@ export class PassportDatabase implements DataStorageBase {
         errorDetails,
       };
     }
+  };
+
+  async getPassport(): Promise<PassportLoadResponse> {
+    return await this.processPassportResponse(
+      axios.get(`${this.passportScorerUrl}ceramic-cache/stamp?address=${this.address}`),
+      "get"
+    );
   }
 
-  addStamps = async (stamps: Stamp[]): Promise<void> => {
+  addStamps = async (stamps: Stamp[]): Promise<PassportLoadResponse> => {
     this.logger.info(`adding stamp to passportScorer address: ${this.address}`);
-    try {
-      const stampsToSave = stamps.map((stamp) => ({
-        provider: stamp.provider,
-        stamp: stamp.credential,
-      }));
+    const stampsToSave = stamps.map((stamp) => ({
+      provider: stamp.provider,
+      stamp: stamp.credential,
+    }));
 
-      await axios.post(`${this.passportScorerUrl}ceramic-cache/stamps/bulk`, stampsToSave, {
+    return await this.processPassportResponse(
+      axios.post(`${this.passportScorerUrl}ceramic-cache/stamps/bulk`, stampsToSave, {
         headers: { Authorization: `Bearer ${this.token}` },
-      });
-    } catch (e) {
-      this.logger.error(`Error saving stamp to passportScorer address:  ${this.address}:` + e.toString());
-    }
+      }),
+      "post"
+    );
   };
 
   addStamp = async (stamp: Stamp): Promise<void> => {
     console.log("Not implemented");
   };
 
-  async deleteStamps(providers: PROVIDER_ID[]): Promise<void> {
+  deleteStamps = async (providers: PROVIDER_ID[]): Promise<PassportLoadResponse> => {
     this.logger.info(`deleting stamp from passportScorer for ${providers.join(", ")} on ${this.address}`);
-    try {
-      await axios.delete(`${this.passportScorerUrl}ceramic-cache/stamps/bulk`, {
+    return await this.processPassportResponse(
+      axios.delete(`${this.passportScorerUrl}ceramic-cache/stamps/bulk`, {
         data: providers.map((provider) => ({ provider })),
         headers: { Authorization: `Bearer ${this.token}` },
-      });
-    } catch (e) {
-      this.logger.error(
-        `Error deleting stamp from passportScorer for ${providers.join(", ")} on ${this.address}: ` + e.toString()
-      );
-    }
-  }
+      }),
+      "delete"
+    );
+  };
 
-  patchStamps = async (stampPatches: StampPatch[]): Promise<void> => {
+  patchStamps = async (stampPatches: StampPatch[]): Promise<PassportLoadResponse> => {
     this.logger.info(`patching stamps in passportScorer for address: ${this.address}`);
-    try {
-      const body = stampPatches.map(({ provider, credential }) => ({ provider, stamp: credential }));
-      await axios.patch(`${this.passportScorerUrl}ceramic-cache/stamps/bulk`, body, {
+    const body = stampPatches.map(({ provider, credential }) => ({ provider, stamp: credential }));
+    return await this.processPassportResponse(
+      axios.patch(`${this.passportScorerUrl}ceramic-cache/stamps/bulk`, body, {
         headers: { Authorization: `Bearer ${this.token}` },
-      });
-    } catch (e) {
-      this.logger.error(`Error patching stamps in passportScorer for address:  ${this.address}:` + e.toString());
-    }
+      }),
+      "patch"
+    );
   };
 }
