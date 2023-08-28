@@ -617,8 +617,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
         handlePassportUpdate(addResponse, database);
 
-        if (ceramicClient && passport) {
-          ceramicClient.setStamps(passport.stamps).catch((e) => console.log("error setting ceramic stamps", e));
+        if (ceramicClient && addResponse.passport) {
+          ceramicClient
+            .setStamps(addResponse.passport.stamps)
+            .catch((e) => console.log("error setting ceramic stamps", e));
         }
         if (dbAccessToken) {
           refreshScore(address, dbAccessToken);
@@ -636,7 +638,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         const patchResponse = await database.patchStamps(stampPatches);
         handlePassportUpdate(patchResponse, database);
 
-        if (ceramicClient && passport) {
+        if (ceramicClient && patchResponse.passport) {
           (async () => {
             try {
               const deleteProviderIds = stampPatches
@@ -645,7 +647,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
               if (deleteProviderIds.length) await ceramicClient.deleteStampIDs(deleteProviderIds);
 
-              await ceramicClient.setStamps(passport.stamps);
+              await ceramicClient.setStamps(patchResponse.passport?.stamps || []);
             } catch (e) {
               console.log("error patching ceramic stamps", e);
             }
@@ -667,8 +669,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       if (database) {
         const deleteResponse = await database.deleteStamps(providerIds);
         handlePassportUpdate(deleteResponse, database);
-        if (ceramicClient && status === "Success" && passport?.stamps) {
-          ceramicClient.setStamps(passport.stamps).catch((e) => console.log("error setting ceramic stamps", e));
+        if (ceramicClient && deleteResponse.status === "Success" && deleteResponse.passport?.stamps) {
+          ceramicClient
+            .setStamps(deleteResponse.passport.stamps)
+            .catch((e) => console.log("error setting ceramic stamps", e));
         }
         if (dbAccessToken) {
           refreshScore(address, dbAccessToken);

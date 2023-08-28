@@ -228,27 +228,24 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
       (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
         return {
           ...passportDbMocks,
-          addStamps: addStampsMock,
-          getPassport: jest
-            .fn()
-            .mockImplementationOnce(async () => {
-              return {
-                passport: {
-                  stamps: [],
-                },
-                errorDetails: {},
-                status: "Success",
-              };
-            })
-            .mockImplementationOnce(async () => {
-              return {
-                passport: {
-                  stamps,
-                },
-                errorDetails: {},
-                status: "Success",
-              };
-            }),
+          addStamps: addStampsMock.mockImplementationOnce(async () => {
+            return {
+              passport: {
+                stamps,
+              },
+              errorDetails: {},
+              status: "Success",
+            };
+          }),
+          getPassport: jest.fn().mockImplementationOnce(async () => {
+            return {
+              passport: {
+                stamps: [],
+              },
+              errorDetails: {},
+              status: "Success",
+            };
+          }),
           setStamps: setStampMock,
         };
       });
@@ -288,27 +285,24 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
       (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
         return {
           ...passportDbMocks,
-          deleteStamps: deleteStampsMock,
-          getPassport: jest
-            .fn()
-            .mockImplementationOnce(async () => {
-              return {
-                passport: {
-                  stamps,
-                },
-                errorDetails: {},
-                status: "Success",
-              };
-            })
-            .mockImplementationOnce(async () => {
-              return {
-                passport: {
-                  stamps: [],
-                },
-                errorDetails: {},
-                status: "Success",
-              };
-            }),
+          deleteStamps: deleteStampsMock.mockImplementationOnce(async () => {
+            return {
+              passport: {
+                stamps: [],
+              },
+              errorDetails: {},
+              status: "Success",
+            };
+          }),
+          getPassport: jest.fn().mockImplementationOnce(async () => {
+            return {
+              passport: {
+                stamps: [],
+              },
+              errorDetails: {},
+              status: "Success",
+            };
+          }),
         };
       });
       (CeramicDatabase as jest.Mock).mockImplementationOnce(() => {
@@ -346,27 +340,24 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
       return {
         ...passportDbMocks,
-        patchStamps: patchStampsMock,
-        getPassport: jest
-          .fn()
-          .mockImplementationOnce(async () => {
-            return {
-              passport: {
-                stamps: [],
-              },
-              errorDetails: {},
-              status: "Success",
-            };
-          })
-          .mockImplementationOnce(async () => {
-            return {
-              passport: {
-                stamps: added,
-              },
-              errorDetails: {},
-              status: "Success",
-            };
-          }),
+        patchStamps: patchStampsMock.mockImplementationOnce(async () => {
+          return {
+            passport: {
+              stamps: added,
+            },
+            errorDetails: {},
+            status: "Success",
+          };
+        }),
+        getPassport: jest.fn().mockImplementationOnce(async () => {
+          return {
+            passport: {
+              stamps: added,
+            },
+            errorDetails: {},
+            status: "Success",
+          };
+        }),
       };
     });
 
@@ -400,27 +391,24 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
       (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
         return {
           ...passportDbMocks,
-          patchStamps: patchStampsMock,
-          getPassport: jest
-            .fn()
-            .mockImplementationOnce(async () => {
-              return {
-                passport: {
-                  stamps: [],
-                },
-                errorDetails: {},
-                status: "Success",
-              };
-            })
-            .mockImplementationOnce(async () => {
-              return {
-                passport: {
-                  stamps,
-                },
-                errorDetails: {},
-                status: "Success",
-              };
-            }),
+          patchStamps: patchStampsMock.mockImplementationOnce(async () => {
+            return {
+              passport: {
+                stamps,
+              },
+              errorDetails: {},
+              status: "Success",
+            };
+          }),
+          getPassport: jest.fn().mockImplementationOnce(async () => {
+            return {
+              passport: {
+                stamps,
+              },
+              errorDetails: {},
+              status: "Success",
+            };
+          }),
         };
       });
 
