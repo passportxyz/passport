@@ -9,6 +9,7 @@ process.env.ATTESTATION_SIGNER_PRIVATE_KEY = "0x04d16281ff3bf268b29cdd684183f725
 process.env.ALLO_SCORER_ID = "1";
 process.env.SCORER_ENDPOINT = "http://127.0.0.1:8002";
 process.env.SCORER_API_KEY = "abcd";
+process.env.MORALIS_API_KEY = "abcd";
 process.env.EAS_GITCOIN_STAMP_SCHEMA = "0x";
 
 // ---- Test subject
@@ -69,6 +70,16 @@ jest.mock("@ethereum-attestation-service/eas-sdk", () => {
     NO_EXPIRATION: 0,
   };
 });
+
+jest.mock("moralis", () => ({
+  EvmApi: {
+    token: {
+      getTokenPrice: jest.fn().mockResolvedValue({
+        result: { usdPrice: 3000 },
+      }),
+    },
+  },
+}));
 
 const chainIdHex = "0xa";
 

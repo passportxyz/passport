@@ -7,6 +7,7 @@ dotenv.config();
 // ---- Server
 import express, { Request } from "express";
 import { router as procedureRouter } from "@gitcoin/passport-platforms/dist/commonjs/procedure-router";
+import { TypedDataDomain } from "@ethersproject/abstract-signer";
 
 // ---- Production plugins
 import cors from "cors";
@@ -76,6 +77,10 @@ if (!process.env.EAS_GITCOIN_STAMP_SCHEMA) {
   configErrors.push("EAS_GITCOIN_STAMP_SCHEMA is required");
 }
 
+if (!process.env.MORALIS_API_KEY) {
+  configErrors.push("MORALIS_API_KEY is required");
+}
+
 if (configErrors.length > 0) {
   configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
   throw new Error("Missing required configuration");
@@ -96,7 +101,7 @@ export const config: {
 
 const attestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
 
-export const getAttestationDomainSeparator = (chainIdHex: keyof typeof onchainInfo) => {
+export const getAttestationDomainSeparator = (chainIdHex: keyof typeof onchainInfo): TypedDataDomain => {
   const verifyingContract = onchainInfo[chainIdHex].GitcoinVerifier.address;
   const chainId = parseInt(chainIdHex, 16).toString();
   return {
