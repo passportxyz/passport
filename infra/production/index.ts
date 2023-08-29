@@ -152,8 +152,8 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
     containers: {
       iam: {
         image: dockerGtcPassportIamImage,
-        memory: 4096,
-        cpu: 4000,
+        memory: 8192,
+        cpu: 4096,
         portMappings: [httpsListener],
         links: [],
         environment: [
