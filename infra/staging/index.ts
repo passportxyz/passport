@@ -329,6 +329,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "TRUSTA_LABS_ACCESS_TOKEN",
             valueFrom: `${IAM_SERVER_SSM_ARN}:TRUSTA_LABS_ACCESS_TOKEN::`,
           },
+          {
+            name: "MORALIS_API_KEY",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:MORALIS_API_KEY::`,
+          },
         ],
       },
     },
