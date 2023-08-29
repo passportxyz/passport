@@ -46,6 +46,7 @@ import {
 // All provider exports from platforms
 import { providers, platforms } from "@gitcoin/passport-platforms";
 import path from "path";
+import { IAMError } from "./utils/scorerService";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -549,11 +550,21 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
             return void errorRes(res, "Error signing passport", 500);
           });
       })
-      .catch(() => {
-        return void errorRes(res, "Error formatting onchain passport", 500);
+      .catch((error) => {
+        if (IAMError.isIAMError(error)) {
+          const iamError: IAMError = error as IAMError;
+          return void errorRes(res, "Error formatting onchain passport: " + JSON.stringify(iamError.toJson()), 500);
+        } else {
+          return void errorRes(res, "Error formatting onchain passport: " + (error as Error).message, 500);
+        }
       });
   } catch (error) {
-    return void errorRes(res, String(error), 500);
+    if (IAMError.isIAMError(error)) {
+      const iamError: IAMError = error as IAMError;
+      return void errorRes(res, "Unexpected error when processing request: " + JSON.stringify(iamError.toJson()), 500);
+    } else {
+      return void errorRes(res, String(error), 500);
+    }
   }
 });
 
