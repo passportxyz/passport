@@ -32,6 +32,7 @@ import * as easFeesMock from "../src/utils/easFees";
 import * as identityMock from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 import * as easSchemaMock from "../src/utils/easStampSchema";
 import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
+import { IAMError } from "../src/utils/scorerService";
 
 jest.mock("ethers", () => {
   const originalModule = jest.requireActual("ethers");
@@ -1129,7 +1130,7 @@ describe("POST /eas/passport", () => {
   });
 
   it("handles error during the formatting of the passport", async () => {
-    formatMultiAttestationRequestSpy.mockRejectedValue(new Error("Formatting error"));
+    formatMultiAttestationRequestSpy.mockRejectedValue(new IAMError("Formatting error"));
 
     const nonce = 0;
     const credentials = [
@@ -1154,7 +1155,7 @@ describe("POST /eas/passport", () => {
       .expect(500)
       .expect("Content-Type", /json/);
 
-    expect(response.body.error).toEqual("Error formatting onchain passport");
+    expect(response.body.error).toEqual("Error formatting onchain passport, IAMError: Formatting error");
   });
 
   it("handles error during credential verification", async () => {
@@ -1183,6 +1184,6 @@ describe("POST /eas/passport", () => {
       .expect(500)
       .expect("Content-Type", /json/);
 
-    expect(response.body.error).toEqual("Error formatting onchain passport");
+    expect(response.body.error).toEqual("Error formatting onchain passport, Error: Verification error");
   });
 });

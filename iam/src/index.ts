@@ -159,6 +159,13 @@ app.use(cors());
 // return a JSON error response with a 400 status
 const errorRes = (res: Response, error: string, errorCode: number): Response => res.status(errorCode).json({ error });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const addErrorDetailsToMessage = (message: string, error: any): string => {
+  if (error instanceof IAMError || error instanceof Error) message += `, ${error.name}: ${error.message}`;
+
+  return message;
+};
+
 // return response for given payload
 const issueCredentials = async (
   types: string[],
@@ -551,20 +558,12 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
           });
       })
       .catch((error) => {
-        if (IAMError.isIAMError(error)) {
-          const iamError: IAMError = error as IAMError;
-          return void errorRes(res, "Error formatting onchain passport: " + JSON.stringify(iamError.toJson()), 500);
-        } else {
-          return void errorRes(res, "Error formatting onchain passport: " + (error as Error).message, 500);
-        }
+        const message = addErrorDetailsToMessage("Error formatting onchain passport", error);
+        return void errorRes(res, message, 500);
       });
   } catch (error) {
-    if (IAMError.isIAMError(error)) {
-      const iamError: IAMError = error as IAMError;
-      return void errorRes(res, "Unexpected error when processing request: " + JSON.stringify(iamError.toJson()), 500);
-    } else {
-      return void errorRes(res, String(error), 500);
-    }
+    const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
+    return void errorRes(res, message, 500);
   }
 });
 
