@@ -6,14 +6,15 @@ import walletConnectModule, { WalletConnectOptions } from "@web3-onboard/walletc
 // RPC urls
 const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL as string;
 
-// // Injected wallet - shows all available injected wallets
+// Injected wallet - shows all available injected wallets
 
 const injected = injectedModule();
 
 // web3Onboard modules
+const walletConnectProjectId = (process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string) || "default-project-id";
 
 const walletConnectOptions: WalletConnectOptions = {
-  projectId: (process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string) || "default-project-id",
+  projectId: walletConnectProjectId,
 };
 
 const onBoardExploreUrl =
@@ -21,7 +22,11 @@ const onBoardExploreUrl =
 
 const walletConnect = walletConnectModule(walletConnectOptions);
 // Include ledger capabilities
-const ledger = ledgerModule();
+const ledger = ledgerModule({
+  walletConnectVersion: 2,
+  enableDebugLogs: false,
+  projectId: walletConnectProjectId,
+});
 
 export const sepoliaChainId = "0xaa36a7";
 export const hardhatChainId = "0x7a69";
