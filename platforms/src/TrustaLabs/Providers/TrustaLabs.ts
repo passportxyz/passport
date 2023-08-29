@@ -1,11 +1,11 @@
 import type { Provider, ProviderOptions } from "../../types";
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 // ----- Libs
 import axios from "axios";
 
 // ----- Credential verification
-import { ProviderExternalVerificationError } from "../../types";
 
 interface SubScore {
   bulkOperationRisk: number;
@@ -35,31 +35,6 @@ interface AxiosResponse {
 
 const TRUSTA_LABS_API_ENDPOINT = "https://www.trustalabs.ai/service/openapi/queryRiskSummaryScore";
 
-// Based on https://axios-http.com/docs/handling_errors
-const handleAxiosError = (error: any, label: string, secretsToHide?: string[]) => {
-  if (axios.isAxiosError(error)) {
-    let message = `Error making ${label} request, `;
-    if (error.response) {
-      // Received a non 2xx response
-      const { data, status, headers } = error.response;
-      message += `received error response with code ${status}: ${JSON.stringify(data)}, headers: ${JSON.stringify(
-        headers
-      )}`;
-    } else if (error.request) {
-      // No response received
-      message += "no response received, " + error.message;
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      message += error.message;
-    }
-    secretsToHide?.forEach((secret) => {
-      message = message.replace(secret, "[SECRET]");
-    });
-    throw new ProviderExternalVerificationError(message);
-  }
-  throw error;
-};
-
 const createUpdateDBScore = async (address: string, score: number) => {
   const accessToken = process.env.CGRANTS_API_TOKEN;
   try {
@@ -73,7 +48,7 @@ const createUpdateDBScore = async (address: string, score: number) => {
       }
     );
   } catch (error) {
-    handleAxiosError(error, "report score", [accessToken]);
+    handleProviderAxiosError(error, "report score", [accessToken]);
   }
 };
 
@@ -94,7 +69,7 @@ const makeSybilScoreRequest = async (address: string) => {
     );
     return result.data.data.sybilRiskScore;
   } catch (error) {
-    handleAxiosError(error, "sybil score", [accessToken]);
+    handleProviderAxiosError(error, "sybil score", [accessToken]);
   }
 };
 
