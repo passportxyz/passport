@@ -10,6 +10,13 @@ export type DIDKitLib = {
   issueCredential: (credential: string, proofOptions: string, key: string) => Promise<string>;
   keyToDID: (method_pattern: string, jwk: string) => string;
   keyToVerificationMethod: (method_pattern: string, jwk: string) => Promise<string>;
+  /**
+   * @param {string} credential
+   * @param {string} linked_data_proof_options
+   * @param {string} public_key
+   * @returns {Promise<any>}
+   */
+  prepareIssueCredential(credential: string, linked_data_proof_options: string, public_key: string): Promise<any>;
 } & { [key: string]: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 // rough outline of a VerifiableCredential

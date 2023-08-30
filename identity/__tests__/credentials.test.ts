@@ -6,6 +6,7 @@ import {
   fetchChallengeCredential,
   fetchVerifiableCredential,
   objToSortedArray,
+  SignatureTypes,
 } from "../src/credentials";
 
 // ---- base64 encoding
@@ -139,7 +140,7 @@ describe("Generate Credentials", function () {
     };
 
     // details of this credential are created by issueChallengeCredential - but the proof is added by DIDKit (which is mocked)
-    const { credential } = await issueChallengeCredential(DIDKit, key, record);
+    const { credential } = await issueChallengeCredential(DIDKit, key, record, SignatureTypes.Eip712Signature2021);
 
     // expect to have called issueCredential
     expect(DIDKit.issueCredential).toHaveBeenCalled();
