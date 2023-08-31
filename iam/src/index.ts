@@ -40,9 +40,9 @@ import * as passportSchema from "./utils/easPassportSchema";
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 import {
   issueChallengeCredential,
+  issue712ChallengeCredential,
   issueHashedCredential,
   verifyCredential,
-  SignatureTypes,
 } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // All provider exports from platforms
@@ -240,6 +240,7 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
   const requestBody: ChallengeRequestBody = req.body as ChallengeRequestBody;
   // console.log("requestBody", requestBody);
   const payload: RequestPayload = requestBody.payload;
+
   // check for a valid payload
   if (payload.address && payload.type) {
     // ensure address is check-summed
@@ -259,18 +260,33 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
         ...(challenge?.record || {}),
       };
 
-      // generate a VC for the given payload
-      return void issueChallengeCredential(DIDKit, key, record, SignatureTypes.Ed25519Signature2018)
-        .then((credential) => {
-          // return the verifiable credential
-          return res.json(credential as CredentialResponseBody);
-        })
-        .catch((error) => {
-          if (error) {
-            // return error msg indicating a failure producing VC
-            return void errorRes(res, "Unable to produce a verifiable credential", 400);
-          }
-        });
+      if (payload?.signatureType && payload?.signatureType === "EIP712") {
+        // generate a VC for the given payload
+        return void issue712ChallengeCredential(DIDKit, eip712Key, record)
+          .then((credential) => {
+            // return the verifiable credential
+            return res.json(credential as CredentialResponseBody);
+          })
+          .catch((error) => {
+            if (error) {
+              // return error msg indicating a failure producing VC
+              return void errorRes(res, "Unable to produce a verifiable credential", 400);
+            }
+          });
+      } else {
+        // generate a VC for the given payload
+        return void issueChallengeCredential(DIDKit, key, record)
+          .then((credential) => {
+            // return the verifiable credential
+            return res.json(credential as CredentialResponseBody);
+          })
+          .catch((error) => {
+            if (error) {
+              // return error msg indicating a failure producing VC
+              return void errorRes(res, "Unable to produce a verifiable credential", 400);
+            }
+          });
+      }
     } else {
       // return error message if an error present
       // limit the error message string to 1000 chars
@@ -452,7 +468,7 @@ app.post("/api/v1.0.0/challenge", (req: Request, res: Response): void => {
       };
 
       // generate a VC for the given payload
-      return void issueChallengeCredential(DIDKit, eip712Key, record, SignatureTypes.Ed25519Signature2018)
+      return void issueChallengeCredential(DIDKit, eip712Key, record)
         .then((credential) => {
           // return the verifiable credential
           return res.json(credential as CredentialResponseBody);
