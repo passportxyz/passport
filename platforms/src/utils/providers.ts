@@ -8,6 +8,7 @@ const UPDATED_PROVIDERS = [
   "twitterAccountAgeGte#730",
   "TrustaLabs",
   "Simple",
+  "Hypercerts",
 ];
 
 function reportUnhandledError(type: string, address: string, e: unknown) {

@@ -12,36 +12,45 @@ const MOCK_ADDRESS_LOWER = MOCK_ADDRESS.toLowerCase();
 // Mock current date
 jest.spyOn(Date, "now").mockImplementation(() => 1677350400000); // This corresponds to "2023-01-25T00:00:00.000Z"
 
+const mockGoodClaimTokens = [
+  {
+    claim: {
+      creation: "1632189184",
+      owner: MOCK_ADDRESS_LOWER,
+      creator: "0x124",
+    },
+  },
+  {
+    claim: {
+      creation: "1632189185",
+      owner: MOCK_ADDRESS_LOWER,
+      creator: "0x123",
+    },
+  },
+];
+
+const mockBadClaimTokens = [
+  {
+    claim: {
+      creation: Math.floor(Date.now() / 1000).toString(),
+      owner: MOCK_ADDRESS_LOWER,
+      creator: "0x124",
+    },
+  },
+  {
+    claim: {
+      creation: "1632189185",
+      owner: MOCK_ADDRESS_LOWER,
+      creator: MOCK_ADDRESS_LOWER,
+    },
+  },
+];
+
 // Mock Claim Tokens Response
 const mockClaimTokensResponse = {
   data: {
     data: {
-      claimTokens: [
-        {
-          id: "1",
-          owner: MOCK_ADDRESS_LOWER,
-          tokenID: "1",
-          units: "100",
-          claim: {
-            id: "1",
-            creation: "1632189184",
-            uri: "https://hypercerts.com/token/1",
-            totalUnits: "1000",
-          },
-        },
-        {
-          id: "2",
-          owner: MOCK_ADDRESS_LOWER,
-          tokenID: "2",
-          units: "100",
-          claim: {
-            id: "2",
-            creation: "1632189185",
-            uri: "https://hypercerts.com/token/2",
-            totalUnits: "1000",
-          },
-        },
-      ],
+      claimTokens: [...mockGoodClaimTokens, ...mockBadClaimTokens],
     },
   },
 };
@@ -85,28 +94,10 @@ describe("Hypercerts Provider", () => {
 
     expect(verifiedPayload).toEqual({
       valid: false,
-      errors: ["You have 0 valid Hypercerts and the minimum is 2"],
+      errors: ["You have 0 valid Hypercerts and the minimum is 2."],
       record: {
         address: MOCK_ADDRESS_LOWER,
       },
-    });
-
-    expect(mockedAxiosPost).toBeCalledTimes(1);
-  });
-
-  it("should handle errors properly", async () => {
-    const mockErrorMessage = "Something went wrong!";
-    mockedAxiosPost.mockRejectedValueOnce({ status: 400, data: { error: { message: mockErrorMessage } } });
-
-    const hypercertsProvider = new HypercertsProvider();
-
-    const res = await hypercertsProvider.verify({
-      address: MOCK_ADDRESS,
-    } as RequestPayload);
-
-    expect(res).toMatchObject({
-      valid: false,
-      error: ["Error was thrown while verifying Hypercerts"],
     });
 
     expect(mockedAxiosPost).toBeCalledTimes(1);
@@ -129,38 +120,11 @@ describe("Hypercerts Provider", () => {
     expect(mockedAxiosPost).toBeCalledTimes(1);
   });
 
-  it("should handle claims less than 15 days old", async () => {
+  it("should provide details about invalid claims when applicable", async () => {
     mockedAxiosPost.mockResolvedValueOnce({
       data: {
         data: {
-          claimTokens: [
-            {
-              id: "1",
-              owner: MOCK_ADDRESS_LOWER,
-              tokenID: "1",
-              units: "100",
-              claim: {
-                id: "1",
-                // This timestamp corresponds to "2023-01-20T00:00:00.000Z" (less than 15 days ago)
-                creation: "1676889600",
-                uri: "https://hypercerts.com/token/1",
-                totalUnits: "1000",
-              },
-            },
-            {
-              id: "2",
-              owner: MOCK_ADDRESS_LOWER,
-              tokenID: "2",
-              units: "100",
-              claim: {
-                id: "2",
-                // Valid TS
-                creation: "1632189185",
-                uri: "https://hypercerts.com/token/2",
-                totalUnits: "1000",
-              },
-            },
-          ],
+          claimTokens: [mockGoodClaimTokens[0], ...mockBadClaimTokens],
         },
       },
     });
@@ -172,7 +136,9 @@ describe("Hypercerts Provider", () => {
 
     expect(verifiedPayload).toEqual({
       valid: false,
-      errors: ["You have 1 valid Hypercerts and the minimum is 2"],
+      errors: [
+        "You have 1 valid Hypercerts and the minimum is 2. 1 Hypercerts were ignored because you created them yourself. 1 Hypercerts were ignored because they were created less than 15 days ago.",
+      ],
       record: {
         address: MOCK_ADDRESS_LOWER,
       },
