@@ -84,108 +84,148 @@ const _issueEip712Credential = async (
   expiresInSeconds: number,
   fields: { [k: string]: any } // eslint-disable-line @typescript-eslint/no-explicit-any
 ): Promise<VerifiableCredential> => {
-  // get DID from key
-  const did = DIDKit.keyToDID("ethr", key);
+  try {
+    // get DID from key
+    const issuer = DIDKit.keyToDID("ethr", key);
 
-  const credentialInput = {
-    type: ["VerifiableCredential"],
-    issuer: did,
-    "@context": "https://www.w3.org/2018/credentials/v1",
-    issuanceDate: "2022-07-19T10:42:24.883Z",
-    expirationDate: "2022-10-17T10:42:24.883Z",
-    credentialSubject: {
-      id: "did:pkh:eip155:1:0x12FeD9f987bc340c6bE43fD80aD641E8cD740682",
-      hash: "v0.0.0:AjcRjxx7Hp3PKPSNwPeBJjR21pLyA14CVeQ1XijzxUc=",
-      provider: "Twitter",
-    },
-  };
+    const expirationDate = addSeconds(new Date(), expiresInSeconds).toISOString();
+    const credentialInput = {
+      "@context": ["https://www.w3.org/2018/credentials/v1"],
+      type: ["VerifiableCredential"],
+      issuer,
+      issuanceDate: "2022-07-19T10:42:24.883Z",
+      expirationDate,
+      ...fields,
+    };
 
-  const options = {
-    type: "EthereumEip712Signature2021",
-    eip712Domain: {
-      domain: {
-        name: "Passport",
+    const options = {
+      type: "EthereumEip712Signature2021",
+      eip712Domain: {
+        domain: {
+          name: "Passport",
+        },
+        types: {
+          Document: [
+            {
+              type: "string[]",
+              name: "@context",
+            },
+            {
+              type: "string[]",
+              name: "type",
+            },
+            {
+              type: "string",
+              name: "issuer",
+            },
+            {
+              type: "string",
+              name: "issuanceDate",
+            },
+            {
+              type: "string",
+              name: "expirationDate",
+            },
+            {
+              type: "CredentialSubject",
+              name: "credentialSubject",
+            },
+            {
+              type: "Proof",
+              name: "proof",
+            },
+          ],
+          Context: [
+            {
+              type: "string",
+              name: "provider",
+            },
+            {
+              type: "string",
+              name: "challenge",
+            },
+            {
+              type: "string",
+              name: "address",
+            },
+          ],
+          EIP712StringArray: [
+            {
+              type: "string",
+              name: "provider",
+            },
+            {
+              type: "string",
+              name: "challenge",
+            },
+            {
+              type: "string",
+              name: "address",
+            },
+          ],
+          CredentialSubject: [
+            {
+              type: "EIP712StringArray[]",
+              name: "@context",
+            },
+            {
+              type: "Context[]",
+              name: "context",
+            },
+            {
+              type: "string",
+              name: "id",
+            },
+            {
+              type: "string",
+              name: "provider",
+            },
+            {
+              type: "string",
+              name: "challenge",
+            },
+            {
+              type: "string",
+              name: "address",
+            },
+          ],
+          Proof: [
+            {
+              type: "string",
+              name: "@context",
+            },
+            {
+              type: "string",
+              name: "created",
+            },
+            {
+              type: "string",
+              name: "proofPurpose",
+            },
+            {
+              type: "string",
+              name: "type",
+            },
+            {
+              type: "string",
+              name: "verificationMethod",
+            },
+          ],
+        },
+        primaryType: "Document",
       },
-      types: {
-        Document: [
-          {
-            type: "string",
-            name: "@context",
-          },
-          {
-            type: "CredentialSubject",
-            name: "credentialSubject",
-          },
-          {
-            type: "string",
-            name: "expirationDate",
-          },
-          {
-            type: "string",
-            name: "issuanceDate",
-          },
-          {
-            type: "string",
-            name: "issuer",
-          },
-          {
-            type: "Proof",
-            name: "proof",
-          },
-          {
-            type: "string[]",
-            name: "type",
-          },
-        ],
-        Proof: [
-          {
-            type: "string",
-            name: "@context",
-          },
-          {
-            type: "string",
-            name: "created",
-          },
-          {
-            type: "string",
-            name: "proofPurpose",
-          },
-          {
-            type: "string",
-            name: "type",
-          },
-          {
-            type: "string",
-            name: "verificationMethod",
-          },
-        ],
-        CredentialSubject: [
-          {
-            type: "string",
-            name: "hash",
-          },
-          {
-            type: "string",
-            name: "id",
-          },
-          {
-            type: "string",
-            name: "provider",
-          },
-        ],
-      },
-      primaryType: "Document",
-    },
-  };
+    };
+    const credential = await DIDKit.issueCredential(
+      JSON.stringify(credentialInput, undefined, 2),
+      JSON.stringify(options, undefined, 2),
+      key
+    );
 
-  const credential = await DIDKit.issueCredential(
-    JSON.stringify(credentialInput, undefined, 2),
-    JSON.stringify(options, undefined, 2),
-    key
-  );
-
-  // parse the response of the DIDKit wasm
-  return JSON.parse(credential) as VerifiableCredential;
+    // parse the response of the DIDKit wasm
+    return JSON.parse(credential) as VerifiableCredential;
+  } catch (e) {
+    console.log({ e });
+  }
 };
 
 // Issue a VC with challenge data
