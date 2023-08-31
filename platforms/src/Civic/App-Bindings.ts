@@ -22,7 +22,7 @@ export class CivicPlatform extends Platform {
       "Once you have one or more Civic Passes, select them above and click 'Verify'. Note: Polygon is recommended for the lowest gas cost.",
     cta: {
       label: "Get Civic Pass",
-      url: "https://getpass.civic.com?scope=uniqueness,captcha,liveness&chain=polygon,arbitrum%20one,xdc,ethereum",
+      url: "https://getpass.civic.com?scope=uniqueness,captcha,liveness&chain=polygon,arbitrum%20one,xdc,ethereum,fantom",
     },
   };
 }
