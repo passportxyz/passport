@@ -222,7 +222,7 @@ describe("POST /verify", function () {
     expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
   });
 
-  it("handles valid challenge requests with EIP712 signature", async () => {
+  it("handles valid verify requests with EIP712 signature", async () => {
     // challenge received from the challenge endpoint
     const eip712Key = process.env.IAM_JWK_EIP712;
     const eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);

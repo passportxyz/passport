@@ -161,7 +161,7 @@ describe("Generate Credentials", function () {
     };
 
     // details of this credential are created by issueChallengeCredential - but the proof is added by DIDKit (which is mocked)
-    const { credential } = await issueChallengeCredential(DIDKit, key, record);
+    const { credential } = await issueChallengeCredential(DIDKit, key, record, "EIP712");
 
     // expect to have called issueCredential
     expect(DIDKit.issueCredential).toHaveBeenCalled();
@@ -187,33 +187,63 @@ describe("Generate Credentials", function () {
       ["type", "Simple"],
       ["version", "Test-Case-1"],
     ]);
-  }),
-    it("can generate a credential containing hash", async () => {
-      const record = {
-        type: "Simple",
-        version: "Test-Case-1",
-        address: "0x0",
-      };
+  });
+  it("can generate a credential containing hash", async () => {
+    const record = {
+      type: "Simple",
+      version: "Test-Case-1",
+      address: "0x0",
+    };
 
-      const expectedHash: string =
-        "v0.0.0:" +
-        base64.encode(
-          createHash("sha256")
-            .update(key)
-            .update(JSON.stringify(objToSortedArray(record)))
-            .digest()
-        );
-      // details of this credential are created by issueHashedCredential - but the proof is added by DIDKit (which is mocked)
-      const { credential } = await issueHashedCredential(DIDKit, key, "0x0", record);
-      // expect to have called issueCredential
-      expect(DIDKit.issueCredential).toHaveBeenCalled();
-      // expect the structure/details added by issueHashedCredential to be correct
-      expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
-      expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
-      expect(typeof credential.credentialSubject.hash).toEqual("string");
-      expect(credential.credentialSubject.hash).toEqual(expectedHash);
-      expect(typeof credential.proof).toEqual("object");
-    });
+    const expectedHash: string =
+      "v0.0.0:" +
+      base64.encode(
+        createHash("sha256")
+          .update(key)
+          .update(JSON.stringify(objToSortedArray(record)))
+          .digest()
+      );
+    // details of this credential are created by issueHashedCredential - but the proof is added by DIDKit (which is mocked)
+    const { credential } = await issueHashedCredential(DIDKit, key, "0x0", record);
+    // expect to have called issueCredential
+    expect(DIDKit.issueCredential).toHaveBeenCalled();
+    // expect the structure/details added by issueHashedCredential to be correct
+    expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
+    expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
+    expect(typeof credential.credentialSubject.hash).toEqual("string");
+    expect(credential.credentialSubject.hash).toEqual(expectedHash);
+    expect(typeof credential.proof).toEqual("object");
+  });
+  it("can generate an eip712 signed credential containing hash", async () => {
+    const record = {
+      type: "Simple",
+      version: "Test-Case-1",
+      address: "0x0",
+    };
+
+    const expectedHash: string =
+      "v0.0.0:" +
+      base64.encode(
+        createHash("sha256")
+          .update(key)
+          .update(JSON.stringify(objToSortedArray(record)))
+          .digest()
+      );
+    // details of this credential are created by issueHashedCredential - but the proof is added by DIDKit (which is mocked)
+    const { credential } = await issueHashedCredential(DIDKit, key, "0x0", record, 100, "EIP712");
+    // expect to have called issueCredential
+    expect(DIDKit.issueCredential).toHaveBeenCalled();
+    // expect the structure/details added by issueHashedCredential to be correct
+    expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
+    expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
+    expect(typeof credential.credentialSubject.hash).toEqual("string");
+    expect(credential.credentialSubject.hash).toEqual(expectedHash);
+    expect(typeof credential.proof).toEqual("object");
+    expect(credential["@context"]).toContain("https://w3id.org/vc/status-list/2021/v1");
+    expect(credential.credentialSubject.metaPointer).toBe(
+      "https://github.com/gitcoinco/passport-scorer/blob/main/api/scorer/settings/gitcoin_passport_weights.py"
+    );
+  });
 });
 
 describe("Verify Credentials", function () {
