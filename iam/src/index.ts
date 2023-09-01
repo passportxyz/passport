@@ -40,7 +40,6 @@ import * as passportSchema from "./utils/easPassportSchema";
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 import {
   issueChallengeCredential,
-  issue712ChallengeCredential,
   issueHashedCredential,
   verifyCredential,
 } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
