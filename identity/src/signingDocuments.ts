@@ -27,115 +27,93 @@ export type DocumentType = { [k: string]: Eip712Field[] };
 export const challengeSignatureDocument: ChallengeSignatureDocument<DocumentType> = {
   type: "EthereumEip712Signature2021",
   eip712Domain: {
+    domain: { name: "Passport" },
+    types: {
+      Document: [
+        { type: "string[]", name: "@context" },
+        { type: "string[]", name: "type" },
+        { type: "string", name: "issuer" },
+        { type: "string", name: "issuanceDate" },
+        { type: "string", name: "expirationDate" },
+        { type: "CredentialSubject", name: "credentialSubject" },
+        { type: "Proof", name: "proof" },
+      ],
+      Context: [
+        { type: "string", name: "provider" },
+        { type: "string", name: "challenge" },
+        { type: "string", name: "address" },
+      ],
+      EIP712StringArray: [
+        { type: "string", name: "provider" },
+        { type: "string", name: "challenge" },
+        { type: "string", name: "address" },
+      ],
+      CredentialSubject: [
+        { type: "EIP712StringArray[]", name: "@context" },
+        { type: "Context[]", name: "context" },
+        { type: "string", name: "id" },
+        { type: "string", name: "provider" },
+        { type: "string", name: "challenge" },
+        { type: "string", name: "address" },
+      ],
+      Proof: [
+        { type: "string", name: "@context" },
+        { type: "string", name: "created" },
+        { type: "string", name: "proofPurpose" },
+        { type: "string", name: "type" },
+        { type: "string", name: "verificationMethod" },
+      ],
+    },
+    primaryType: "Document",
+  },
+};
+
+export const stampCredentialDocument: ChallengeSignatureDocument<DocumentType> = {
+  type: "EthereumEip712Signature2021",
+  eip712Domain: {
     domain: {
-      name: "Passport",
+      name: "VerifiableCredential",
     },
     types: {
       Document: [
-        {
-          type: "string[]",
-          name: "@context",
-        },
-        {
-          type: "string[]",
-          name: "type",
-        },
-        {
-          type: "string",
-          name: "issuer",
-        },
-        {
-          type: "string",
-          name: "issuanceDate",
-        },
-        {
-          type: "string",
-          name: "expirationDate",
-        },
-        {
-          type: "CredentialSubject",
-          name: "credentialSubject",
-        },
-        {
-          type: "Proof",
-          name: "proof",
-        },
-      ],
-      Context: [
-        {
-          type: "string",
-          name: "provider",
-        },
-        {
-          type: "string",
-          name: "challenge",
-        },
-        {
-          type: "string",
-          name: "address",
-        },
-      ],
-      EIP712StringArray: [
-        {
-          type: "string",
-          name: "provider",
-        },
-        {
-          type: "string",
-          name: "challenge",
-        },
-        {
-          type: "string",
-          name: "address",
-        },
+        { name: "@context", type: "string[]" },
+        { name: "type", type: "string[]" },
+        { name: "issuer", type: "string" },
+        { name: "issuanceDate", type: "string" },
+        { name: "expirationDate", type: "string" },
+        { name: "credentialSubject", type: "CredentialSubject" },
+        { name: "proof", type: "Proof" },
+        { name: "credentialStatus", type: "CredentialStatus" },
       ],
       CredentialSubject: [
-        {
-          type: "EIP712StringArray[]",
-          name: "@context",
-        },
-        {
-          type: "Context[]",
-          name: "context",
-        },
-        {
-          type: "string",
-          name: "id",
-        },
-        {
-          type: "string",
-          name: "provider",
-        },
-        {
-          type: "string",
-          name: "challenge",
-        },
-        {
-          type: "string",
-          name: "address",
-        },
+        { name: "id", type: "string" },
+        { name: "provider", type: "string" },
+        { name: "metaPointer", type: "string" },
+        { name: "customInfo", type: "CustomInfo" },
+        { name: "hash", type: "string" },
+        { name: "@context", type: "Context[]" },
       ],
+      Context: [
+        { name: "customInfo", type: "string" },
+        { name: "hash", type: "string" },
+        { name: "metaPointer", type: "string" },
+        { name: "provider", type: "string" },
+      ],
+      CustomInfo: [{ name: "field1", type: "string" }],
       Proof: [
-        {
-          type: "string",
-          name: "@context",
-        },
-        {
-          type: "string",
-          name: "created",
-        },
-        {
-          type: "string",
-          name: "proofPurpose",
-        },
-        {
-          type: "string",
-          name: "type",
-        },
-        {
-          type: "string",
-          name: "verificationMethod",
-        },
+        { name: "@context", type: "string" },
+        { name: "type", type: "string" },
+        { name: "proofPurpose", type: "string" },
+        { name: "proofValue", type: "string" },
+        { name: "verificationMethod", type: "string" },
+        { name: "created", type: "string" },
+      ],
+      CredentialStatus: [
+        { name: "id", type: "string" },
+        { name: "type", type: "string" },
+        { name: "statusPurpose", type: "string" },
+        { name: "statusListIndex", type: "string" },
+        { name: "statusListCredential", type: "string" },
       ],
     },
     primaryType: "Document",

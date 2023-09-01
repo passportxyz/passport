@@ -6,7 +6,6 @@ import {
   fetchChallengeCredential,
   fetchVerifiableCredential,
   objToSortedArray,
-  SignatureTypes,
 } from "../src/credentials";
 
 // ---- base64 encoding
@@ -140,7 +139,29 @@ describe("Generate Credentials", function () {
     };
 
     // details of this credential are created by issueChallengeCredential - but the proof is added by DIDKit (which is mocked)
-    const { credential } = await issueChallengeCredential(DIDKit, key, record, SignatureTypes.Eip712Signature2021);
+    const { credential } = await issueChallengeCredential(DIDKit, key, record);
+
+    // expect to have called issueCredential
+    expect(DIDKit.issueCredential).toHaveBeenCalled();
+    // expect the structure/details added by issueChallengeCredential to be correct
+    expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
+    expect(credential.credentialSubject.provider).toEqual(`challenge-${record.type}`);
+    expect(credential.credentialSubject.challenge).toEqual(record.challenge);
+    expect(credential.credentialSubject.address).toEqual(record.address);
+    expect(typeof credential.proof).toEqual("object");
+  });
+
+  it("can generate am EIP712 signed challenge credential", async () => {
+    const record = {
+      type: "Simple",
+      address: "0x0",
+      version: "Test-Case-1",
+      challenge: "randomChallengeString",
+      signatureType: "EIP712",
+    };
+
+    // details of this credential are created by issueChallengeCredential - but the proof is added by DIDKit (which is mocked)
+    const { credential } = await issueChallengeCredential(DIDKit, key, record);
 
     // expect to have called issueCredential
     expect(DIDKit.issueCredential).toHaveBeenCalled();

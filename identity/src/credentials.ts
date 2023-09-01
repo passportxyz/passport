@@ -23,7 +23,12 @@ import { createHash } from "crypto";
 export const VERSION = "v0.0.0";
 
 // EIP712 document types
-import { ChallengeSignatureDocument, challengeSignatureDocument, DocumentType } from "./signingDocuments";
+import {
+  ChallengeSignatureDocument,
+  challengeSignatureDocument,
+  DocumentType,
+  stampCredentialDocument,
+} from "./signingDocuments";
 
 // Control expiry times of issued credentials
 export const CHALLENGE_EXPIRES_AFTER_SECONDS = 60; // 1min
@@ -102,7 +107,6 @@ const _issueEip712Credential = async (
       expirationDate,
       ...fields,
     };
-
     const credential = await DIDKit.issueCredential(
       JSON.stringify(credentialInput, undefined, 2),
       JSON.stringify(signingDocument, undefined, 2),
@@ -189,7 +193,8 @@ export const issueHashedCredential = async (
   key: string,
   address: string,
   record: ProofRecord,
-  expiresInSeconds: number = CREDENTIAL_EXPIRES_AFTER_SECONDS
+  expiresInSeconds: number = CREDENTIAL_EXPIRES_AFTER_SECONDS,
+  signatureType?: string
 ): Promise<IssuedCredential> => {
   // Generate a hash like SHA256(IAM_PRIVATE_KEY+PII), where PII is the (deterministic) JSON representation
   // of the PII object after transforming it to an array of the form [[key:string, value:string], ...]
@@ -201,21 +206,61 @@ export const issueHashedCredential = async (
       .digest()
   );
 
-  // generate a verifiableCredential
-  const credential = await _issueEd25519Credential(DIDKit, key, expiresInSeconds, {
-    credentialSubject: {
-      "@context": [
-        {
-          hash: "https://schema.org/Text",
-          provider: "https://schema.org/Text",
+  let credential: VerifiableCredential;
+  if (signatureType === "EIP712") {
+    // generate a verifiableCredential
+    credential = await _issueEip712Credential(
+      DIDKit,
+      key,
+      expiresInSeconds,
+      {
+        credentialSubject: {
+          "@context": [
+            {
+              customInfo: "https://schema.org/Thing",
+              hash: "https://schema.org/Text",
+              metaPointer: "https://schema.org/URL",
+              provider: "https://schema.org/Text",
+            },
+          ],
+          // construct a pkh DID on mainnet (:1) for the given wallet address
+          id: `did:pkh:eip155:1:${address}`,
+          provider: record.type,
+          metaPointer:
+            "https://github.com/gitcoinco/passport-scorer/blob/main/api/scorer/settings/gitcoin_passport_weights.py",
+          customInfo: {},
+          hash: `${VERSION}:${hash}`,
         },
-      ],
-      // construct a pkh DID on mainnet (:1) for the given wallet address
-      id: `did:pkh:eip155:1:${address}`,
-      provider: record.type,
-      hash: `${VERSION}:${hash}`,
-    },
-  });
+        // https://www.w3.org/TR/vc-status-list/#statuslist2021entry
+        // Can be added to support revocation
+        // credentialStatus: {
+        //   id: "",
+        //   type: "StatusList2021Entry",
+        //   statusPurpose: "revocation",
+        //   statusListIndex: "",
+        //   statusListCredential: "",
+        // },
+      },
+      stampCredentialDocument,
+      ["https://w3id.org/vc/status-list/2021/v1"]
+    );
+  } else {
+    // generate a verifiableCredential
+    credential = await _issueEd25519Credential(DIDKit, key, expiresInSeconds, {
+      credentialSubject: {
+        "@context": [
+          {
+            hash: "https://schema.org/Text",
+            provider: "https://schema.org/Text",
+          },
+        ],
+        // construct a pkh DID on mainnet (:1) for the given wallet address
+        id: `did:pkh:eip155:1:${address}`,
+        provider: record.type,
+        hash: `${VERSION}:${hash}`,
+      },
+    });
+  }
 
   // didkit-wasm-node returns credential as a string - parse for JSON
   return {
@@ -279,7 +324,6 @@ export const fetchVerifiableCredential = async (
     throw new Error("Unable to sign message without a signer");
   }
 
-  console.log({ payload });
   // first pull a challenge that can be signed by the user
   const { challenge } = await fetchChallengeCredential(iamUrl, payload);
 

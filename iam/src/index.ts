@@ -89,8 +89,9 @@ if (configErrors.length > 0) {
 
 // get DID from key
 const key = process.env.IAM_JWK;
-const eip712Key = process.env.IAM_JWK_EIP712;
 const issuer = DIDKit.keyToDID("key", key);
+const eip712Key = process.env.IAM_JWK_EIP712;
+const eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
 
 // export the current config
 export const config: {
@@ -206,8 +207,16 @@ const issueCredentials = async (
             ...(verifyResult?.record || {}),
           };
 
+          const currentKey = payload.signatureType === "EIP712" ? eip712Key : key;
           // generate a VC for the given payload
-          ({ credential } = await issueHashedCredential(DIDKit, key, address, record, verifyResult.expiresInSeconds));
+          ({ credential } = await issueHashedCredential(
+            DIDKit,
+            currentKey,
+            address,
+            record,
+            verifyResult.expiresInSeconds,
+            payload.signatureType
+          ));
         }
       } catch {
         error = "Unable to produce a verifiable credential";
@@ -384,7 +393,9 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
   // Check the challenge and the payload is valid before issuing a credential from a registered provider
   return void verifyCredential(DIDKit, challenge)
     .then(async (verified) => {
-      if (verified && issuer === challenge.issuer) {
+      const currentIssuer = requestBody.payload.signatureType === "EIP712" ? eip712Issuer : issuer;
+
+      if (verified && currentIssuer === challenge.issuer) {
         // pull the address and checksum so that its stored in a predictable format
         const address = utils.getAddress(
           utils.verifyMessage(challenge.credentialSubject.challenge, payload.proofs.signature)
@@ -400,6 +411,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
         if (payload.signer) {
           const additionalChallenge = payload.signer.challenge;
 
+          // TODO update to use eip712
           const additionalSignerCredential = await verifyCredential(DIDKit, additionalChallenge);
 
           // pull the address so that its stored in a predictable (checksummed) format
