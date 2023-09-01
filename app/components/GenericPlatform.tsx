@@ -6,10 +6,8 @@ import { datadogLogs } from "@datadog/browser-logs";
 
 // --- Identity tools
 import {
-  Stamp,
   VerifiableCredential,
   CredentialResponseBody,
-  VerifiableCredentialRecord,
   PROVIDER_ID,
   PLATFORM_ID,
   StampPatch,
@@ -206,6 +204,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
           version: "0.0.0",
           address: address || "",
           proofs: providerPayload,
+          signatureType: process.env.NEXT_PUBLIC_PASSPORT_IAM_SIGNATURE_TYPE,
         },
         signer as { signMessage: (message: string) => Promise<string> }
       );
