@@ -269,33 +269,19 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
         ...(challenge?.record || {}),
       };
 
-      if (payload?.signatureType && payload?.signatureType === "EIP712") {
-        // generate a VC for the given payload
-        return void issue712ChallengeCredential(DIDKit, eip712Key, record)
-          .then((credential) => {
-            // return the verifiable credential
-            return res.json(credential as CredentialResponseBody);
-          })
-          .catch((error) => {
-            if (error) {
-              // return error msg indicating a failure producing VC
-              return void errorRes(res, "Unable to produce a verifiable credential", 400);
-            }
-          });
-      } else {
-        // generate a VC for the given payload
-        return void issueChallengeCredential(DIDKit, key, record)
-          .then((credential) => {
-            // return the verifiable credential
-            return res.json(credential as CredentialResponseBody);
-          })
-          .catch((error) => {
-            if (error) {
-              // return error msg indicating a failure producing VC
-              return void errorRes(res, "Unable to produce a verifiable credential", 400);
-            }
-          });
-      }
+      const currentKey = payload.signatureType === "EIP712" ? eip712Key : key;
+      // generate a VC for the given payload
+      return void issueChallengeCredential(DIDKit, currentKey, record, payload.signatureType)
+        .then((credential) => {
+          // return the verifiable credential
+          return res.json(credential as CredentialResponseBody);
+        })
+        .catch((error) => {
+          if (error) {
+            // return error msg indicating a failure producing VC
+            return void errorRes(res, "Unable to produce a verifiable credential", 400);
+          }
+        });
     } else {
       // return error message if an error present
       // limit the error message string to 1000 chars
@@ -411,7 +397,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
         if (payload.signer) {
           const additionalChallenge = payload.signer.challenge;
 
-          // TODO update to use eip712
           const additionalSignerCredential = await verifyCredential(DIDKit, additionalChallenge);
 
           // pull the address so that its stored in a predictable (checksummed) format
@@ -452,63 +437,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
       if (error instanceof Error) message += `: ${error.name}`;
       return void errorRes(res, message, 500);
     });
-});
-
-// expose challenge entry point
-app.post("/api/v1.0.0/challenge", (req: Request, res: Response): void => {
-  // get the payload from the JSON req body
-  const requestBody: ChallengeRequestBody = req.body as ChallengeRequestBody;
-  // console.log("requestBody", requestBody);
-  const payload: RequestPayload = requestBody.payload;
-  // check for a valid payload
-  if (payload.address && payload.type) {
-    // ensure address is check-summed
-    payload.address = utils.getAddress(payload.address);
-    // generate a challenge for the given payload
-    const challenge = getChallenge(payload);
-    // if the request is valid then proceed to generate a challenge credential
-    if (challenge && challenge.valid === true) {
-      // construct a request payload to issue a credential against
-      const record: RequestPayload = {
-        // add fields to identify the bearer of the challenge
-        type: payload.type,
-        address: payload.address,
-        // version as defined by entry point
-        version: "0.0.0",
-        // extend/overwrite with record returned from the provider
-        ...(challenge?.record || {}),
-      };
-
-      // generate a VC for the given payload
-      return void issueChallengeCredential(DIDKit, eip712Key, record)
-        .then((credential) => {
-          // return the verifiable credential
-          return res.json(credential as CredentialResponseBody);
-        })
-        .catch((error) => {
-          if (error) {
-            // return error msg indicating a failure producing VC
-            return void errorRes(res, "Unable to produce a verifiable credential", 400);
-          }
-        });
-    } else {
-      // return error message if an error present
-      // limit the error message string to 1000 chars
-      return void errorRes(
-        res,
-        (challenge.error && challenge.error.join(", ").substring(0, 1000)) || "Unable to verify proofs",
-        403
-      );
-    }
-  }
-
-  if (!payload.address) {
-    return void errorRes(res, "Missing address from challenge request body", 400);
-  }
-
-  if (!payload.type) {
-    return void errorRes(res, "Missing type from challenge request body", 400);
-  }
 });
 
 // Expose entry point for getting eas payload for moving stamps on-chain (Stamp Attestations)
