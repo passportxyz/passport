@@ -101,6 +101,7 @@ export const RefreshMyStampsModalContent = ({
             version: "0.0.0",
             address: address || "",
             proofs: {},
+            signatureType: process.env.NEXT_PUBLIC_PASSPORT_IAM_SIGNATURE_TYPE,
           },
           signer as { signMessage: (message: string) => Promise<string> }
         );

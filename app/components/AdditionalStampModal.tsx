@@ -69,6 +69,7 @@ export const AdditionalStampModal = ({
                 signature: additionalSigner.sig,
                 address: additionalSigner.addr,
               },
+              signatureType: process.env.NEXT_PUBLIC_PASSPORT_IAM_SIGNATURE_TYPE,
             },
             // Should this be signed by the original signer so that it is included in the original signers Passport?
             signer as { signMessage: (message: string) => Promise<string> }
