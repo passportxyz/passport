@@ -22,6 +22,9 @@ import { createHash } from "crypto";
 // Keeping track of the hashing mechanism (algo + content)
 export const VERSION = "v0.0.0";
 
+// EIP712 document types
+import { ChallengeSignatureDocument, challengeSignatureDocument, DocumentType } from "./signingDocuments";
+
 // Control expiry times of issued credentials
 export const CHALLENGE_EXPIRES_AFTER_SECONDS = 60; // 1min
 export const CREDENTIAL_EXPIRES_AFTER_SECONDS = 90 * 86400; // 90days
@@ -82,7 +85,9 @@ const _issueEip712Credential = async (
   DIDKit: DIDKitLib,
   key: string,
   expiresInSeconds: number,
-  fields: { [k: string]: any } // eslint-disable-line @typescript-eslint/no-explicit-any
+  fields: { [k: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
+  signingDocument: ChallengeSignatureDocument<DocumentType>,
+  additionalContexts: string[] = []
 ): Promise<VerifiableCredential> => {
   try {
     // get DID from key
@@ -90,134 +95,17 @@ const _issueEip712Credential = async (
 
     const expirationDate = addSeconds(new Date(), expiresInSeconds).toISOString();
     const credentialInput = {
-      "@context": ["https://www.w3.org/2018/credentials/v1"],
+      "@context": ["https://www.w3.org/2018/credentials/v1", ...additionalContexts],
       type: ["VerifiableCredential"],
       issuer,
-      issuanceDate: "2022-07-19T10:42:24.883Z",
+      issuanceDate: new Date().toISOString(),
       expirationDate,
       ...fields,
     };
 
-    const options = {
-      type: "EthereumEip712Signature2021",
-      eip712Domain: {
-        domain: {
-          name: "Passport",
-        },
-        types: {
-          Document: [
-            {
-              type: "string[]",
-              name: "@context",
-            },
-            {
-              type: "string[]",
-              name: "type",
-            },
-            {
-              type: "string",
-              name: "issuer",
-            },
-            {
-              type: "string",
-              name: "issuanceDate",
-            },
-            {
-              type: "string",
-              name: "expirationDate",
-            },
-            {
-              type: "CredentialSubject",
-              name: "credentialSubject",
-            },
-            {
-              type: "Proof",
-              name: "proof",
-            },
-          ],
-          Context: [
-            {
-              type: "string",
-              name: "provider",
-            },
-            {
-              type: "string",
-              name: "challenge",
-            },
-            {
-              type: "string",
-              name: "address",
-            },
-          ],
-          EIP712StringArray: [
-            {
-              type: "string",
-              name: "provider",
-            },
-            {
-              type: "string",
-              name: "challenge",
-            },
-            {
-              type: "string",
-              name: "address",
-            },
-          ],
-          CredentialSubject: [
-            {
-              type: "EIP712StringArray[]",
-              name: "@context",
-            },
-            {
-              type: "Context[]",
-              name: "context",
-            },
-            {
-              type: "string",
-              name: "id",
-            },
-            {
-              type: "string",
-              name: "provider",
-            },
-            {
-              type: "string",
-              name: "challenge",
-            },
-            {
-              type: "string",
-              name: "address",
-            },
-          ],
-          Proof: [
-            {
-              type: "string",
-              name: "@context",
-            },
-            {
-              type: "string",
-              name: "created",
-            },
-            {
-              type: "string",
-              name: "proofPurpose",
-            },
-            {
-              type: "string",
-              name: "type",
-            },
-            {
-              type: "string",
-              name: "verificationMethod",
-            },
-          ],
-        },
-        primaryType: "Document",
-      },
-    };
     const credential = await DIDKit.issueCredential(
       JSON.stringify(credentialInput, undefined, 2),
-      JSON.stringify(options, undefined, 2),
+      JSON.stringify(signingDocument, undefined, 2),
       key
     );
 
@@ -236,22 +124,28 @@ export const issue712ChallengeCredential = async (
 ): Promise<IssuedCredential> => {
   // generate a verifiableCredential (60s ttl)
 
-  const credential = await _issueEip712Credential(DIDKit, key, CHALLENGE_EXPIRES_AFTER_SECONDS, {
-    credentialSubject: {
-      "@context": [
-        {
-          provider: "https://schema.org/Text",
-          challenge: "https://schema.org/Text",
-          address: "https://schema.org/Text",
-        },
-      ],
-      id: `did:pkh:eip155:1:${record.address}`,
-      provider: `challenge-${record.type}`,
-      // extra fields to convey challenge data
-      challenge: record.challenge,
-      address: record.address,
+  const credential = await _issueEip712Credential(
+    DIDKit,
+    key,
+    CHALLENGE_EXPIRES_AFTER_SECONDS,
+    {
+      credentialSubject: {
+        "@context": [
+          {
+            provider: "https://schema.org/Text",
+            challenge: "https://schema.org/Text",
+            address: "https://schema.org/Text",
+          },
+        ],
+        id: `did:pkh:eip155:1:${record.address}`,
+        provider: `challenge-${record.type}`,
+        // extra fields to convey challenge data
+        challenge: record.challenge,
+        address: record.address,
+      },
     },
-  });
+    challengeSignatureDocument
+  );
 
   // didkit-wasm-node returns credential as a string - parse for JSON
   return {
