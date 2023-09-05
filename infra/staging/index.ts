@@ -333,6 +333,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             name: "MORALIS_API_KEY",
             valueFrom: `${IAM_SERVER_SSM_ARN}:MORALIS_API_KEY::`,
           },
+          {
+            name: "IAM_JWK_EIP712",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:IAM_JWK_EIP712::`,
+          },
         ],
       },
     },
