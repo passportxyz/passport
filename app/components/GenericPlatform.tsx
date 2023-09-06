@@ -6,13 +6,12 @@ import { datadogLogs } from "@datadog/browser-logs";
 
 // --- Identity tools
 import {
-  Stamp,
   VerifiableCredential,
   CredentialResponseBody,
-  VerifiableCredentialRecord,
   PROVIDER_ID,
   PLATFORM_ID,
   StampPatch,
+  SignatureType,
 } from "@gitcoin/passport-types";
 import { ProviderPayload } from "@gitcoin/passport-platforms";
 import { fetchVerifiableCredential, verifyCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
@@ -206,6 +205,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
           version: "0.0.0",
           address: address || "",
           proofs: providerPayload,
+          signatureType: process.env.NEXT_PUBLIC_PASSPORT_IAM_SIGNATURE_TYPE as SignatureType,
         },
         signer as { signMessage: (message: string) => Promise<string> }
       );

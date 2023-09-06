@@ -8,6 +8,7 @@ import {
   IssuedChallenge,
   CredentialResponseBody,
   VerifiableCredentialRecord,
+  SignatureType,
 } from "@gitcoin/passport-types";
 
 // --- Node/Browser http req library
@@ -21,6 +22,14 @@ import { createHash } from "crypto";
 
 // Keeping track of the hashing mechanism (algo + content)
 export const VERSION = "v0.0.0";
+
+// EIP712 document types
+import {
+  DocumentSignatureTypes,
+  challengeSignatureDocument,
+  DocumentType,
+  stampCredentialDocument,
+} from "./signingDocuments";
 
 // Control expiry times of issued credentials
 export const CHALLENGE_EXPIRES_AFTER_SECONDS = 60; // 1min
@@ -44,7 +53,7 @@ export const objToSortedArray = (obj: { [k: string]: string }): string[][] => {
 };
 
 // Internal method to issue a verifiable credential
-const _issueCredential = async (
+const _issueEd25519Credential = async (
   DIDKit: DIDKitLib,
   key: string,
   expiresInSeconds: number,
@@ -78,29 +87,89 @@ const _issueCredential = async (
   return JSON.parse(credential) as VerifiableCredential;
 };
 
+const _issueEip712Credential = async (
+  DIDKit: DIDKitLib,
+  key: string,
+  expiresInSeconds: number,
+  fields: { [k: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
+  signingDocument: DocumentSignatureTypes<DocumentType>,
+  additionalContexts: string[] = []
+): Promise<VerifiableCredential> => {
+  // get DID from key
+  const issuer = DIDKit.keyToDID("ethr", key);
+
+  const expirationDate = addSeconds(new Date(), expiresInSeconds).toISOString();
+  const credentialInput = {
+    "@context": ["https://www.w3.org/2018/credentials/v1", ...additionalContexts],
+    type: ["VerifiableCredential"],
+    issuer,
+    issuanceDate: new Date().toISOString(),
+    expirationDate,
+    ...fields,
+  };
+
+  const credential = await DIDKit.issueCredential(
+    JSON.stringify(credentialInput),
+    JSON.stringify(signingDocument),
+    key
+  );
+
+  // parse the response of the DIDKit wasm
+  return JSON.parse(credential) as VerifiableCredential;
+};
+
 // Issue a VC with challenge data
 export const issueChallengeCredential = async (
   DIDKit: DIDKitLib,
   key: string,
-  record: RequestPayload
+  record: RequestPayload,
+  signatureType?: SignatureType
 ): Promise<IssuedCredential> => {
   // generate a verifiableCredential (60s ttl)
-  const credential = await _issueCredential(DIDKit, key, CHALLENGE_EXPIRES_AFTER_SECONDS, {
-    credentialSubject: {
-      "@context": [
-        {
-          provider: "https://schema.org/Text",
-          challenge: "https://schema.org/Text",
-          address: "https://schema.org/Text",
+  let credential: VerifiableCredential;
+  if (signatureType === "EIP712") {
+    const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);
+
+    credential = await _issueEip712Credential(
+      DIDKit,
+      key,
+      CHALLENGE_EXPIRES_AFTER_SECONDS,
+      {
+        credentialSubject: {
+          "@context": [
+            {
+              provider: "https://schema.org/Text",
+              challenge: "https://schema.org/Text",
+              address: "https://schema.org/Text",
+            },
+          ],
+          id: `did:pkh:eip155:1:${record.address}`,
+          provider: `challenge-${record.type}`,
+          // extra fields to convey challenge data
+          challenge: record.challenge,
+          address: record.address,
         },
-      ],
-      id: `did:pkh:eip155:1:${record.address}`,
-      provider: `challenge-${record.type}`,
-      // extra fields to convey challenge data
-      challenge: record.challenge,
-      address: record.address,
-    },
-  });
+      },
+      challengeSignatureDocument(verificationMethod)
+    );
+  } else {
+    credential = await _issueEd25519Credential(DIDKit, key, CHALLENGE_EXPIRES_AFTER_SECONDS, {
+      credentialSubject: {
+        "@context": [
+          {
+            provider: "https://schema.org/Text",
+            challenge: "https://schema.org/Text",
+            address: "https://schema.org/Text",
+          },
+        ],
+        id: `did:pkh:eip155:1:${record.address}`,
+        provider: `challenge-${record.type}`,
+        // extra fields to convey challenge data
+        challenge: record.challenge,
+        address: record.address,
+      },
+    });
+  }
 
   // didkit-wasm-node returns credential as a string - parse for JSON
   return {
@@ -114,7 +183,9 @@ export const issueHashedCredential = async (
   key: string,
   address: string,
   record: ProofRecord,
-  expiresInSeconds: number = CREDENTIAL_EXPIRES_AFTER_SECONDS
+  expiresInSeconds: number = CREDENTIAL_EXPIRES_AFTER_SECONDS,
+  signatureType?: string,
+  metaPointer?: string
 ): Promise<IssuedCredential> => {
   // Generate a hash like SHA256(IAM_PRIVATE_KEY+PII), where PII is the (deterministic) JSON representation
   // of the PII object after transforming it to an array of the form [[key:string, value:string], ...]
@@ -126,21 +197,61 @@ export const issueHashedCredential = async (
       .digest()
   );
 
-  // generate a verifiableCredential
-  const credential = await _issueCredential(DIDKit, key, expiresInSeconds, {
-    credentialSubject: {
-      "@context": [
-        {
-          hash: "https://schema.org/Text",
-          provider: "https://schema.org/Text",
+  let credential: VerifiableCredential;
+  if (signatureType === "EIP712") {
+    const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);
+    // generate a verifiableCredential
+    credential = await _issueEip712Credential(
+      DIDKit,
+      key,
+      expiresInSeconds,
+      {
+        credentialSubject: {
+          "@context": [
+            {
+              customInfo: "https://schema.org/Thing",
+              hash: "https://schema.org/Text",
+              metaPointer: "https://schema.org/URL",
+              provider: "https://schema.org/Text",
+            },
+          ],
+          // construct a pkh DID on mainnet (:1) for the given wallet address
+          id: `did:pkh:eip155:1:${address}`,
+          provider: record.type,
+          metaPointer,
+          customInfo: {},
+          hash: `${VERSION}:${hash}`,
         },
-      ],
-      // construct a pkh DID on mainnet (:1) for the given wallet address
-      id: `did:pkh:eip155:1:${address}`,
-      provider: record.type,
-      hash: `${VERSION}:${hash}`,
-    },
-  });
+        // https://www.w3.org/TR/vc-status-list/#statuslist2021entry
+        // Can be added to support revocation
+        // credentialStatus: {
+        //   id: "",
+        //   type: "StatusList2021Entry",
+        //   statusPurpose: "revocation",
+        //   statusListIndex: "",
+        //   statusListCredential: "",
+        // },
+      },
+      stampCredentialDocument(verificationMethod),
+      ["https://w3id.org/vc/status-list/2021/v1"]
+    );
+  } else {
+    // generate a verifiableCredential
+    credential = await _issueEd25519Credential(DIDKit, key, expiresInSeconds, {
+      credentialSubject: {
+        "@context": [
+          {
+            hash: "https://schema.org/Text",
+            provider: "https://schema.org/Text",
+          },
+        ],
+        // construct a pkh DID on mainnet (:1) for the given wallet address
+        id: `did:pkh:eip155:1:${address}`,
+        provider: record.type,
+        hash: `${VERSION}:${hash}`,
+      },
+    });
+  }
 
   // didkit-wasm-node returns credential as a string - parse for JSON
   return {
@@ -183,6 +294,7 @@ export const fetchChallengeCredential = async (iamUrl: string, payload: RequestP
         type: payload.type,
         // if an alt signer is being added pass it in to be included in the challenge string
         signer: payload.signer,
+        signatureType: payload.signatureType,
       },
     }
   );

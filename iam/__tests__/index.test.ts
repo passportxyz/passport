@@ -5,6 +5,8 @@ import * as DIDKit from "@spruceid/didkit-wasm-node";
 // --- Mocks - test configuration
 
 process.env.IAM_JWK = DIDKit.generateEd25519Key();
+process.env.IAM_JWK_EIP712 =
+  '{"kty":"EC","crv":"secp256k1","x":"PdB2nS-knyAxc6KPuxBr65vRpW-duAXwpeXlwGJ03eU","y":"MwoGZ08hF5uv-_UEC9BKsYdJVSbJNHcFhR1BZWer5RQ","d":"z9VrSNNZXf9ywUx3v_8cLDhSw8-pvAT9qu_WZmqqfWM"}';
 process.env.ATTESTATION_SIGNER_PRIVATE_KEY = "0x04d16281ff3bf268b29cdd684183f72542757d24ae9fdfb863e7c755e599163a";
 process.env.ALLO_SCORER_ID = "1";
 process.env.SCORER_ENDPOINT = "http://127.0.0.1:8002";
@@ -106,6 +108,29 @@ describe("POST /challenge", function () {
     expect((response.body as ValidResponseBody)?.credential?.credentialSubject?.id).toEqual(expectedId);
   });
 
+  it("handles valid challenge request with signatureType", async () => {
+    // as each signature is unique, each request results in unique output
+    const payload = {
+      type: "Simple",
+      address: "0x0",
+      signatureType: "EIP712",
+    };
+
+    // check that ID matches the payload (this has been mocked)
+    const expectedId = "did:pkh:eip155:1:0x0";
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/challenge")
+      .send({ payload })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    // expect the mocked credential to be returned and contain the expectedId
+    expect((response.body as ValidResponseBody)?.credential?.credentialSubject?.id).toEqual(expectedId);
+  });
+
   it("handles missing address from the challenge request body", async () => {
     // as each signature is unique, each request results in unique output
     const payload = {
@@ -177,6 +202,49 @@ describe("POST /verify", function () {
         username: "test",
         signature: "pass",
       },
+    };
+
+    // resolve the verification
+    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+
+    // check that ID matches the payload (this has been mocked)
+    const expectedId = "did:pkh:eip155:1:0x0";
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/verify")
+      .send({ challenge, payload })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    // check for an id match on the mocked credential
+    expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
+  });
+
+  it("handles valid verify requests with EIP712 signature", async () => {
+    // challenge received from the challenge endpoint
+    const eip712Key = process.env.IAM_JWK_EIP712;
+    const eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
+    const challenge = {
+      issuer: eip712Issuer,
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0x0",
+        provider: "challenge-Simple",
+        address: "0x0",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+    // payload containing a signature of the challenge in the challenge credential
+    const payload = {
+      type: "Simple",
+      address: "0x0",
+      proofs: {
+        valid: "true",
+        username: "test",
+        signature: "pass",
+      },
+      signatureType: "EIP712",
     };
 
     // resolve the verification

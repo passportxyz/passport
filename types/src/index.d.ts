@@ -10,6 +10,13 @@ export type DIDKitLib = {
   issueCredential: (credential: string, proofOptions: string, key: string) => Promise<string>;
   keyToDID: (method_pattern: string, jwk: string) => string;
   keyToVerificationMethod: (method_pattern: string, jwk: string) => Promise<string>;
+  /**
+   * @param {string} credential
+   * @param {string} linked_data_proof_options
+   * @param {string} public_key
+   * @returns {Promise<any>}
+   */
+  prepareIssueCredential(credential: string, linked_data_proof_options: string, public_key: string): Promise<any>;
 } & { [key: string]: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 // rough outline of a VerifiableCredential
@@ -23,6 +30,7 @@ export type VerifiableCredential = {
     provider?: string;
     address?: string;
     challenge?: string;
+    metaPointer?: string;
   };
   issuer: string;
   issuanceDate: string;
@@ -42,6 +50,8 @@ export type ProviderContext = {
   [key: string]: unknown;
 };
 
+export type SignatureType = "EIP712" | "Ed25519";
+
 // values received from client and fed into the verify route
 export type RequestPayload = {
   type: string;
@@ -59,6 +69,7 @@ export type RequestPayload = {
   jsonRpcSigner?: JsonRpcSigner;
   challenge?: string;
   issuer?: string;
+  signatureType?: SignatureType;
 };
 
 // response Object return by verify procedure

@@ -46,6 +46,7 @@ import {
 
 // All provider exports from platforms
 import { providers, platforms } from "@gitcoin/passport-platforms";
+
 import path from "path";
 import { IAMError } from "./utils/scorerService";
 
@@ -89,6 +90,8 @@ if (configErrors.length > 0) {
 // get DID from key
 const key = process.env.IAM_JWK;
 const issuer = DIDKit.keyToDID("key", key);
+const eip712Key = process.env.IAM_JWK_EIP712;
+const eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
 
 // export the current config
 export const config: {
@@ -204,8 +207,19 @@ const issueCredentials = async (
             ...(verifyResult?.record || {}),
           };
 
+          const metaPointer = platforms[type]?.PlatformDetails?.metaPointer;
+
+          const currentKey = payload.signatureType === "EIP712" ? eip712Key : key;
           // generate a VC for the given payload
-          ({ credential } = await issueHashedCredential(DIDKit, key, address, record, verifyResult.expiresInSeconds));
+          ({ credential } = await issueHashedCredential(
+            DIDKit,
+            currentKey,
+            address,
+            record,
+            verifyResult.expiresInSeconds,
+            payload.signatureType,
+            metaPointer
+          ));
         }
       } catch {
         error = "Unable to produce a verifiable credential";
@@ -238,6 +252,7 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
   const requestBody: ChallengeRequestBody = req.body as ChallengeRequestBody;
   // console.log("requestBody", requestBody);
   const payload: RequestPayload = requestBody.payload;
+
   // check for a valid payload
   if (payload.address && payload.type) {
     // ensure address is check-summed
@@ -257,8 +272,9 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
         ...(challenge?.record || {}),
       };
 
+      const currentKey = payload.signatureType === "EIP712" ? eip712Key : key;
       // generate a VC for the given payload
-      return void issueChallengeCredential(DIDKit, key, record)
+      return void issueChallengeCredential(DIDKit, currentKey, record, payload.signatureType)
         .then((credential) => {
           // return the verifiable credential
           return res.json(credential as CredentialResponseBody);
@@ -366,7 +382,9 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
   // Check the challenge and the payload is valid before issuing a credential from a registered provider
   return void verifyCredential(DIDKit, challenge)
     .then(async (verified) => {
-      if (verified && issuer === challenge.issuer) {
+      const currentIssuer = requestBody.payload.signatureType === "EIP712" ? eip712Issuer : issuer;
+
+      if (verified && currentIssuer === challenge.issuer) {
         // pull the address and checksum so that its stored in a predictable format
         const address = utils.getAddress(
           utils.verifyMessage(challenge.credentialSubject.challenge, payload.proofs.signature)
