@@ -109,8 +109,8 @@ const _issueEip712Credential = async (
   };
 
   const credential = await DIDKit.issueCredential(
-    JSON.stringify(credentialInput, undefined, 2),
-    JSON.stringify(signingDocument, undefined, 2),
+    JSON.stringify(credentialInput),
+    JSON.stringify(signingDocument),
     key
   );
 
@@ -184,7 +184,8 @@ export const issueHashedCredential = async (
   address: string,
   record: ProofRecord,
   expiresInSeconds: number = CREDENTIAL_EXPIRES_AFTER_SECONDS,
-  signatureType?: string
+  signatureType?: string,
+  metaPointer?: string
 ): Promise<IssuedCredential> => {
   // Generate a hash like SHA256(IAM_PRIVATE_KEY+PII), where PII is the (deterministic) JSON representation
   // of the PII object after transforming it to an array of the form [[key:string, value:string], ...]
@@ -217,7 +218,7 @@ export const issueHashedCredential = async (
           // construct a pkh DID on mainnet (:1) for the given wallet address
           id: `did:pkh:eip155:1:${address}`,
           provider: record.type,
-          metaPointer: undefined,
+          metaPointer,
           customInfo: {},
           hash: `${VERSION}:${hash}`,
         },

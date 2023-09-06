@@ -46,6 +46,7 @@ import {
 
 // All provider exports from platforms
 import { providers, platforms } from "@gitcoin/passport-platforms";
+
 import path from "path";
 import { IAMError } from "./utils/scorerService";
 
@@ -206,6 +207,8 @@ const issueCredentials = async (
             ...(verifyResult?.record || {}),
           };
 
+          const metaPointer = platforms[type]?.PlatformDetails?.metaPointer;
+
           const currentKey = payload.signatureType === "EIP712" ? eip712Key : key;
           // generate a VC for the given payload
           ({ credential } = await issueHashedCredential(
@@ -214,7 +217,8 @@ const issueCredentials = async (
             address,
             record,
             verifyResult.expiresInSeconds,
-            payload.signatureType
+            payload.signatureType,
+            metaPointer
           ));
         }
       } catch {
