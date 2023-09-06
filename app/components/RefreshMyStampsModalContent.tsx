@@ -6,13 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { PlatformGroupSpec } from "@gitcoin/passport-platforms";
 
 // --- Identity tools
-import {
-  Stamp,
-  VerifiableCredential,
-  VerifiableCredentialRecord,
-  PROVIDER_ID,
-  PLATFORM_ID,
-} from "@gitcoin/passport-types";
+import { Stamp, VerifiableCredentialRecord, PROVIDER_ID, PLATFORM_ID, SignatureType } from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Contexts
@@ -101,7 +95,7 @@ export const RefreshMyStampsModalContent = ({
             version: "0.0.0",
             address: address || "",
             proofs: {},
-            signatureType: process.env.NEXT_PUBLIC_PASSPORT_IAM_SIGNATURE_TYPE,
+            signatureType: process.env.NEXT_PUBLIC_PASSPORT_IAM_SIGNATURE_TYPE as SignatureType,
           },
           signer as { signMessage: (message: string) => Promise<string> }
         );

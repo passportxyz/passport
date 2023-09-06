@@ -8,6 +8,7 @@ import {
   IssuedChallenge,
   CredentialResponseBody,
   VerifiableCredentialRecord,
+  SignatureType,
 } from "@gitcoin/passport-types";
 
 // --- Node/Browser http req library
@@ -122,7 +123,7 @@ export const issueChallengeCredential = async (
   DIDKit: DIDKitLib,
   key: string,
   record: RequestPayload,
-  signatureType?: string
+  signatureType?: SignatureType
 ): Promise<IssuedCredential> => {
   // generate a verifiableCredential (60s ttl)
   let credential: VerifiableCredential;
@@ -213,8 +214,7 @@ export const issueHashedCredential = async (
           // construct a pkh DID on mainnet (:1) for the given wallet address
           id: `did:pkh:eip155:1:${address}`,
           provider: record.type,
-          metaPointer:
-            "https://github.com/gitcoinco/passport-scorer/blob/main/api/scorer/settings/gitcoin_passport_weights.py",
+          metaPointer: undefined,
           customInfo: {},
           hash: `${VERSION}:${hash}`,
         },

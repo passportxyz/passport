@@ -25,7 +25,7 @@ import * as mockDIDKit from "../__mocks__/didkit";
 
 // ---- Types
 import axios from "axios";
-import { DIDKitLib, RequestPayload, VerifiableCredential } from "@gitcoin/passport-types";
+import { DIDKitLib, RequestPayload, VerifiableCredential, SignatureType } from "@gitcoin/passport-types";
 
 // ---- Set up DIDKit mock
 const DIDKit: DIDKitLib = mockDIDKit as unknown as DIDKitLib;
@@ -151,13 +151,14 @@ describe("Generate Credentials", function () {
     expect(typeof credential.proof).toEqual("object");
   });
 
+  const signType: SignatureType = "EIP712";
   it("can generate am EIP712 signed challenge credential", async () => {
     const record = {
       type: "Simple",
       address: "0x0",
       version: "Test-Case-1",
       challenge: "randomChallengeString",
-      signatureType: "EIP712",
+      signatureType: signType,
     };
 
     // details of this credential are created by issueChallengeCredential - but the proof is added by DIDKit (which is mocked)

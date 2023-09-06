@@ -50,6 +50,8 @@ export type ProviderContext = {
   [key: string]: unknown;
 };
 
+export type SignatureType = "EIP712" | "Ed25519";
+
 // values received from client and fed into the verify route
 export type RequestPayload = {
   type: string;
@@ -67,7 +69,7 @@ export type RequestPayload = {
   jsonRpcSigner?: JsonRpcSigner;
   challenge?: string;
   issuer?: string;
-  signatureType?: string;
+  signatureType?: SignatureType;
 };
 
 // response Object return by verify procedure
