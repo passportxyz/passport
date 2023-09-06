@@ -15,17 +15,19 @@ interface Eip712Domain<T extends Eip712Type> {
   primaryType: keyof T;
 }
 
-export interface ChallengeSignatureDocument<T extends Eip712Type> {
+export interface DocumentSignatureTypes<T extends Eip712Type> {
   type: string;
   eip712Domain: Eip712Domain<T>;
+  verificationMethod: string;
 }
 
 // Example of usage:
 
 export type DocumentType = { [k: string]: Eip712Field[] };
 
-export const challengeSignatureDocument: ChallengeSignatureDocument<DocumentType> = {
+export const challengeSignatureDocument = (verificationMethod: string): DocumentSignatureTypes<DocumentType> => ({
   type: "EthereumEip712Signature2021",
+  verificationMethod,
   eip712Domain: {
     domain: { name: "Passport" },
     types: {
@@ -66,10 +68,11 @@ export const challengeSignatureDocument: ChallengeSignatureDocument<DocumentType
     },
     primaryType: "Document",
   },
-};
+});
 
-export const stampCredentialDocument: ChallengeSignatureDocument<DocumentType> = {
+export const stampCredentialDocument = (verificationMethod: string): DocumentSignatureTypes<DocumentType> => ({
   type: "EthereumEip712Signature2021",
+  verificationMethod,
   eip712Domain: {
     domain: {
       name: "VerifiableCredential",
@@ -118,4 +121,4 @@ export const stampCredentialDocument: ChallengeSignatureDocument<DocumentType> =
     },
     primaryType: "Document",
   },
-};
+});

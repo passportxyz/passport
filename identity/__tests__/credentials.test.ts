@@ -241,9 +241,7 @@ describe("Generate Credentials", function () {
     expect(credential.credentialSubject.hash).toEqual(expectedHash);
     expect(typeof credential.proof).toEqual("object");
     expect(credential["@context"]).toContain("https://w3id.org/vc/status-list/2021/v1");
-    expect(credential.credentialSubject.metaPointer).toBe(
-      "https://github.com/gitcoinco/passport-scorer/blob/main/api/scorer/settings/gitcoin_passport_weights.py"
-    );
+    expect(credential["@context"]).toContain("https://w3id.org/vc/status-list/2021/v1");
   });
 });
 

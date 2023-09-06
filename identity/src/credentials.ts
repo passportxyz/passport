@@ -25,7 +25,7 @@ export const VERSION = "v0.0.0";
 
 // EIP712 document types
 import {
-  ChallengeSignatureDocument,
+  DocumentSignatureTypes,
   challengeSignatureDocument,
   DocumentType,
   stampCredentialDocument,
@@ -92,7 +92,7 @@ const _issueEip712Credential = async (
   key: string,
   expiresInSeconds: number,
   fields: { [k: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
-  signingDocument: ChallengeSignatureDocument<DocumentType>,
+  signingDocument: DocumentSignatureTypes<DocumentType>,
   additionalContexts: string[] = []
 ): Promise<VerifiableCredential> => {
   // get DID from key
@@ -128,6 +128,8 @@ export const issueChallengeCredential = async (
   // generate a verifiableCredential (60s ttl)
   let credential: VerifiableCredential;
   if (signatureType === "EIP712") {
+    const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);
+
     credential = await _issueEip712Credential(
       DIDKit,
       key,
@@ -148,7 +150,7 @@ export const issueChallengeCredential = async (
           address: record.address,
         },
       },
-      challengeSignatureDocument
+      challengeSignatureDocument(verificationMethod)
     );
   } else {
     credential = await _issueEd25519Credential(DIDKit, key, CHALLENGE_EXPIRES_AFTER_SECONDS, {
@@ -196,6 +198,7 @@ export const issueHashedCredential = async (
 
   let credential: VerifiableCredential;
   if (signatureType === "EIP712") {
+    const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);
     // generate a verifiableCredential
     credential = await _issueEip712Credential(
       DIDKit,
@@ -228,7 +231,7 @@ export const issueHashedCredential = async (
         //   statusListCredential: "",
         // },
       },
-      stampCredentialDocument,
+      stampCredentialDocument(verificationMethod),
       ["https://w3id.org/vc/status-list/2021/v1"]
     );
   } else {
