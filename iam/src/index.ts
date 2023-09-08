@@ -492,8 +492,8 @@ app.post("/api/v0.0.0/convert", (req: Request, res: Response): void => {
               stampCredentialDocument(verificationMethod),
               ["https://w3id.org/vc/status-list/2021/v1"]
             )
-              .then((credential) => {
-                res.json(credential);
+              .then((newCredential) => {
+                res.json(newCredential);
               })
               .catch((error) => {
                 return void errorRes(res, addErrorDetailsToMessage("Failed to issue new credential", error), 500);

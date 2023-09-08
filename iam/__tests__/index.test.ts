@@ -1266,3 +1266,121 @@ describe("POST /eas/passport", () => {
     expect(response.body.error).toEqual("Error formatting onchain passport, Error: Verification error");
   });
 });
+
+describe("POST /convert", () => {
+  // let verifyCredentialSpy: jest.SpyInstance;
+  // let formatMultiAttestationRequestSpy: jest.SpyInstance;
+
+  beforeEach(() => {});
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("converts a credential into a valid credential of type EthereumEip712Signature2021", async () => {
+    let verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+    const expirationDate = new Date();
+    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
+
+    const response = await request(app)
+      .post("/api/v0.0.0/convert")
+      .send({
+        issuer: config.issuer,
+        expirationDate: expirationDate.toISOString(),
+        credentialSubject: {
+          id: "did:pkh:eip155:1:0x12345",
+          provider: "MyProvider",
+          hash: "v0.0.0:secret-hash",
+          "@context": [
+            {
+              hash: "https://schema.org/Text",
+              provider: "https://schema.org/Text",
+            },
+          ],
+        },
+      })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    const responseObject = response.body as VerifiableCredential;
+
+    expect(responseObject.proof.type).toEqual("EthereumEip712Signature2021");
+
+    verifyCredentialSpy.mockRestore();
+    const isValidCredential = await identityMock.verifyCredential(DIDKit, responseObject);
+    expect(isValidCredential).toBe(true);
+
+    // Just testing the validating the stamp when we tamper with a field fails
+    // --> just to double-check that the original verifyCredential is used, and not the mock
+    const isInvalidValidCredential = await identityMock.verifyCredential(DIDKit, {
+      ...responseObject,
+      issuer: "bad-issuer",
+    });
+    expect(isInvalidValidCredential).toBe(false);
+  });
+
+  it("fails to convert an invalid credential", async () => {
+    let verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(false);
+    const expirationDate = new Date();
+    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
+
+    const response = await request(app)
+      .post("/api/v0.0.0/convert")
+      .send({
+        issuer: config.issuer,
+        expirationDate: expirationDate.toISOString(),
+        credentialSubject: {
+          id: "did:pkh:eip155:1:0x12345",
+          provider: "MyProvider",
+          hash: "v0.0.0:secret-hash",
+          "@context": [
+            {
+              hash: "https://schema.org/Text",
+              provider: "https://schema.org/Text",
+            },
+          ],
+        },
+      })
+      .set("Accept", "application/json")
+      .expect(400)
+      .expect("Content-Type", /json/);
+
+    const responseObject = response.body as VerifiableCredential;
+    expect(responseObject).toEqual({
+      error: "Invalid credential.",
+    });
+  });
+
+  it("fails to convert a valid credential from invalid issuer", async () => {
+    let verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+    const expirationDate = new Date();
+    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
+
+    const response = await request(app)
+      .post("/api/v0.0.0/convert")
+      .send({
+        issuer: "bad-issuer",
+        expirationDate: expirationDate.toISOString(),
+        credentialSubject: {
+          id: "did:pkh:eip155:1:0x12345",
+          provider: "MyProvider",
+          hash: "v0.0.0:secret-hash",
+          "@context": [
+            {
+              hash: "https://schema.org/Text",
+              provider: "https://schema.org/Text",
+            },
+          ],
+        },
+      })
+      .set("Accept", "application/json")
+      .expect(400)
+      .expect("Content-Type", /json/);
+
+    const responseObject = response.body as VerifiableCredential;
+    expect(responseObject).toEqual({
+      error: "Invalid credential.",
+    });
+  });
+});
