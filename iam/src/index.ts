@@ -82,6 +82,10 @@ if (!process.env.MORALIS_API_KEY) {
   configErrors.push("MORALIS_API_KEY is required");
 }
 
+if (!process.env.IAM_JWK_EIP712) {
+  configErrors.push("IAM_JWK_EIP712 is required");
+}
+
 if (configErrors.length > 0) {
   configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
   throw new Error("Missing required configuration");
