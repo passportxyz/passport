@@ -48,6 +48,30 @@
         "uid": "0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89"
       }
     }
+  },
+  "0xe704": {
+    "issuer": {
+      "address": "0x5f603Ed913738d9105bAf3BD981AA4750016B167"
+    },
+    "EAS": {
+      "address": "0xAcA9CAe55CB292EBe024E1c2e747BE311Aa9A063"
+    },
+    "GitcoinAttester": {
+      "address": "0x8051Ec2474343da9E3d7ebC58485838c05316cf0"
+    },
+    "GitcoinVerifier": {
+      "address": "0x407921b6d1f5f5a5494A9d95F5B327f3A3628d61"
+    },
+    "GitcoinResolver": {
+      "address": "0xAcA9CAe55CB292EBe024E1c2e747BE311Aa9A063"
+    },
+    "easSchemas": {
+      "passport": {
+        "uid": "0x501E6FCADE7E3483D0AE7FCFEBB732907EBDA12B209F5116E52C02697062A50E"
+      },
+      "score": {
+        "uid": "0x01F031DA36192C34057C764239EB77BB6EC8EBFB808F72A7BB172F37A5BEC31F"
+      }
+    }
   }
 }
-

@@ -61,5 +61,9 @@
     "function upgradeTo(address newImplementation)",
     "function upgradeToAndCall(address newImplementation, bytes data) payable",
     "function userAttestations(address, bytes32) view returns (bytes32)"
+  ],
+  "0xe704": [
+    "function userAttestations(address, bytes32) view returns (bytes32)"
   ]
 }
+

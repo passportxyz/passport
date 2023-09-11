@@ -5,7 +5,7 @@ import axios from "axios";
 import onchainInfo from "../../deployments/onchainInfo.json";
 import GitcoinResolverAbi from "../../deployments/abi/GitcoinResolver.json";
 import { Attestation, EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import { chains } from "./onboard";
+import { chains } from "./chains";
 
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
