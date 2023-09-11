@@ -20,7 +20,13 @@ function configureFeatureFlag(
   }
 }
 
-export function configureFeatureFlags(queryString: URLSearchParams) {
+// FeatureFlags need to reliably be set before the chains are configured, and chains
+// must be configured before web3Onboard which must be initialized before any
+// React code, so we'll do it here.
+
+if (typeof window !== "undefined") {
+  const queryString = new URLSearchParams(window?.location?.search);
+
   // The env var names can't be dynamic due to the way Next.js works
   configureFeatureFlag(queryString, "FF_CHAIN_SYNC", process.env.NEXT_PUBLIC_FF_CHAIN_SYNC);
   configureFeatureFlag(queryString, "FF_LINEA_ATTESTATIONS", process.env.NEXT_PUBLIC_FF_LINEA_ATTESTATIONS);

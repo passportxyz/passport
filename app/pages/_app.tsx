@@ -21,7 +21,6 @@ import { Provider as SelfIdProvider } from "@self.id/framework";
 import TagManager from "react-gtm-module";
 
 import { themes, ThemeWrapper } from "../utils/theme";
-import { configureFeatureFlags } from "../config/feature_flags";
 
 const FacebookAppId = process.env.NEXT_PUBLIC_PASSPORT_FACEBOOK_APP_ID || "";
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
@@ -121,8 +120,6 @@ function App({ Component, pageProps }: AppProps) {
 
       return <div></div>;
     }
-
-    configureFeatureFlags(queryString);
   }
 
   const facebookSdkScript = (
