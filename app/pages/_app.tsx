@@ -1,8 +1,6 @@
 // --- React Methods
 import React, { useEffect } from "react";
 
-import { configureFeatureFlags, FeatureFlags } from "../config/feature_flags";
-
 import { BroadcastChannel } from "broadcast-channel";
 
 // --- Next Methods
