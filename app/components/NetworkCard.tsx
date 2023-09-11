@@ -5,6 +5,7 @@ import { OnChainContext, OnChainProviderType } from "../context/onChainContext";
 import { ScorerContext, ScoreStateType } from "../context/scorerContext";
 import { SyncToChainButton } from "./SyncToChainButton";
 import { Chain } from "../utils/chains";
+import { FeatureFlags } from "../config/feature_flags";
 
 export enum OnChainStatus {
   NOT_MOVED,
@@ -82,7 +83,9 @@ export function NetworkCard({ chain }: { chain: Chain }) {
           <div>
             <div className="flex w-full flex-col">
               <h1 className="text-lg text-color-1">{chain.label}</h1>
-              <h2 className="text-sm text-color-4">{chain.attestationProvider?.name}</h2>
+              {FeatureFlags.FF_LINEA_ATTESTATIONS && (
+                <h2 className="text-sm text-color-4">{chain.attestationProvider?.name}</h2>
+              )}
               <p className="mt-2 text-color-4 md:inline-block">
                 {onChainLastUpdates[chain.id] ? onChainLastUpdates[chain.id].toLocaleString() : "Not moved yet"}
               </p>
