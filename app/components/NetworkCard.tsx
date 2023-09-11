@@ -4,7 +4,7 @@ import { CeramicContext, AllProvidersState, ProviderState } from "../context/cer
 import { OnChainContext, OnChainProviderType } from "../context/onChainContext";
 import { ScorerContext, ScoreStateType } from "../context/scorerContext";
 import { SyncToChainButton } from "./SyncToChainButton";
-import { Chain } from "../utils/onboard";
+import { Chain } from "../utils/chains";
 
 export enum OnChainStatus {
   NOT_MOVED,
@@ -51,16 +51,11 @@ export const checkOnChainStatus = (
     : OnChainStatus.MOVED_OUT_OF_DATE;
 };
 
-export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChains: string[] }) {
+export function NetworkCard({ chain }: { chain: Chain }) {
   const { allProvidersState } = useContext(CeramicContext);
   const { onChainProviders, onChainScores, onChainLastUpdates } = useContext(OnChainContext);
   const { rawScore, scoreState } = useContext(ScorerContext);
-  const [isActive, setIsActive] = useState(false);
   const [onChainStatus, setOnChainStatus] = useState<OnChainStatus>(OnChainStatus.NOT_MOVED);
-
-  useEffect(() => {
-    setIsActive(activeChains.includes(chain.id));
-  }, [activeChains, chain.id]);
 
   useEffect(() => {
     const checkStatus = async () => {
@@ -81,12 +76,13 @@ export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChain
     <div className="mb-6 border border-accent-2 bg-background-2 p-0">
       <div className="mx-4 my-2">
         <div className="flex w-full">
-          <div className="mr-4">
+          <div className="mr-4 mt-1">
             <img className="max-h-6" src={chain.icon} alt={`${chain.label} logo`} />
           </div>
           <div>
             <div className="flex w-full flex-col">
               <h1 className="text-lg text-color-1">{chain.label}</h1>
+              <h2 className="text-sm text-color-4">{chain.attestationProvider?.name}</h2>
               <p className="mt-2 text-color-4 md:inline-block">
                 {onChainLastUpdates[chain.id] ? onChainLastUpdates[chain.id].toLocaleString() : "Not moved yet"}
               </p>
@@ -94,7 +90,7 @@ export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChain
           </div>
         </div>
       </div>
-      <SyncToChainButton onChainStatus={onChainStatus} isActive={isActive} chain={chain} />
+      <SyncToChainButton onChainStatus={onChainStatus} chain={chain} />
     </div>
   );
 }

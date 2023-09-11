@@ -1,29 +1,17 @@
 import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerOverlay, DrawerCloseButton } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import { chains } from "../utils/onboard";
+import { chains } from "../utils/chains";
 import { NetworkCard } from "./NetworkCard";
-import { pgnChainId, lineaChainId, optimismChainId, goerliBaseChainId } from "../utils/onboard";
 
 type OnchainSidebarProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
-const onChainPassportChainIds = JSON.parse(process.env.NEXT_PUBLIC_POSSIBLE_ON_CHAIN_PASSPORT_CHAINIDS || "[]");
-
-const deployedChains = chains.filter((chain) => onChainPassportChainIds.includes(chain.id));
+const chainsWithAttestations = chains.filter(
+  ({ attestationProvider }) => attestationProvider?.status === "comingSoon" || attestationProvider?.status === "enabled"
+);
 
 export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
-  const activeOnChainPassportChains = process.env.NEXT_PUBLIC_ACTIVE_ON_CHAIN_PASSPORT_CHAINIDS;
-  const [activeChains, setActiveChains] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (activeOnChainPassportChains) {
-      const chainsArray = JSON.parse(activeOnChainPassportChains);
-      setActiveChains(chainsArray);
-    }
-  }, [activeOnChainPassportChains]);
-
   return (
     <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose}>
       <DrawerOverlay />
@@ -47,8 +35,8 @@ export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
           </div>
         </DrawerHeader>
         <DrawerBody>
-          {deployedChains.map((chain) => (
-            <NetworkCard key={chain.id} chain={chain} activeChains={activeChains} />
+          {chainsWithAttestations.map((chain) => (
+            <NetworkCard key={chain.id} chain={chain} />
           ))}
         </DrawerBody>
       </DrawerContent>

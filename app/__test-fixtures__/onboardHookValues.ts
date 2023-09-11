@@ -1,6 +1,6 @@
 import { Account, ConnectedChain, WalletState } from "@web3-onboard/core/dist/types";
-import { sepoliaChainId } from "../utils/onboard";
 
+const sepoliaChainId = "0xaa36a7";
 export const mockAddress = "0xmyAddress";
 export const mockAccount: Account = {
   address: mockAddress,

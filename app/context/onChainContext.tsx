@@ -5,6 +5,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { UserContext } from "./userContext";
 import onchainInfo from "../../deployments/onchainInfo.json";
+import { chains } from "../utils/chains";
 
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
@@ -75,12 +76,10 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   const readOnChainData = useCallback(async () => {
     if (wallet && address) {
       try {
-        if (!process.env.NEXT_PUBLIC_ACTIVE_ON_CHAIN_PASSPORT_CHAINIDS) {
-          datadogLogs.logger.error("No active onchain passport chain ids set");
-          datadogRum.addError("No active onchain passport chain ids set");
-          return;
-        }
-        const activeChainIds = JSON.parse(process.env.NEXT_PUBLIC_ACTIVE_ON_CHAIN_PASSPORT_CHAINIDS);
+        const activeChainIds = chains
+          .filter(({ attestationProvider }) => attestationProvider?.status === "enabled")
+          .map(({ id }) => id);
+
         await Promise.all(
           activeChainIds.map(async (chainId: string) => {
             const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
@@ -119,6 +118,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
           })
         );
       } catch (e: any) {
+        console.error("Failed to check onchain status", e);
         datadogLogs.logger.error("Failed to check onchain status", e);
         datadogRum.addError(e);
       }
