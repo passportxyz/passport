@@ -49,8 +49,9 @@ const {
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
+import { CERAMIC_CACHE_ENDPOINT, IAM_ISSUER_DID } from "../config/stamp_config";
+
 // -- Trusted IAM servers DID
-const IAM_ISSUER_DID = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
 const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
 
 export interface CeramicContextState {
@@ -396,7 +397,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           setUserDid(ceramicClientInstance.did);
           // Ceramic cache db
           const databaseInstance = new PassportDatabase(
-            process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT || "",
+            CERAMIC_CACHE_ENDPOINT || "",
             address,
             dbAccessToken,
             datadogLogs.logger,

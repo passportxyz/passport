@@ -24,6 +24,9 @@ import { Cacao } from "@didtools/cacao";
 import axios from "axios";
 import { isServerOnMaintenance } from "../utils/helpers";
 
+// --- Utils & configs
+import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
+
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
 const MULTICHAIN_ENABLED = process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE !== "off";
@@ -146,7 +149,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     let nonce = null;
     try {
       // Get nonce from server
-      const nonceResponse = await axios.get(`${process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT}account/nonce`);
+      const nonceResponse = await axios.get(`${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/account/nonce`);
       nonce = nonceResponse.data.nonce;
     } catch (error) {
       const msg = `Failed to get nonce from server for user with did: ${did.parent}`;
@@ -176,10 +179,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       };
 
       try {
-        const authResponse = await axios.post(
-          `${process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT}ceramic-cache/authenticate`,
-          payloadForVerifier
-        );
+        const authResponse = await axios.post(`${CERAMIC_CACHE_ENDPOINT}/authenticate`, payloadForVerifier);
         const accessToken = authResponse.data?.access as string;
         return accessToken;
       } catch (error) {
