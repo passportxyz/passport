@@ -95,27 +95,41 @@ const _issueEip712Credential = async (
   signingDocument: DocumentSignatureTypes<DocumentType>,
   additionalContexts: string[] = []
 ): Promise<VerifiableCredential> => {
-  // get DID from key
-  const issuer = DIDKit.keyToDID("ethr", key);
+  try {
+    // get DID from key
+    const issuer = DIDKit.keyToDID("ethr", key);
 
-  const expirationDate = addSeconds(new Date(), expiresInSeconds).toISOString();
-  const credentialInput = {
-    "@context": ["https://www.w3.org/2018/credentials/v1", ...additionalContexts],
-    type: ["VerifiableCredential"],
-    issuer,
-    issuanceDate: new Date().toISOString(),
-    expirationDate,
-    ...fields,
-  };
+    const expirationDate = addSeconds(new Date(), expiresInSeconds).toISOString();
+    const credentialInput = {
+      "@context": ["https://www.w3.org/2018/credentials/v1", ...additionalContexts],
+      type: ["VerifiableCredential"],
+      issuer,
+      issuanceDate: new Date().toISOString(),
+      expirationDate,
+      ...fields,
+    };
 
-  const credential = await DIDKit.issueCredential(
-    JSON.stringify(credentialInput),
-    JSON.stringify(signingDocument),
-    key
-  );
+    const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);
 
-  // parse the response of the DIDKit wasm
-  return JSON.parse(credential) as VerifiableCredential;
+    const options: any = {
+      verificationMethod: null,
+      proofPurpose: "assertionMethod",
+      created: "",
+      challenge: null,
+      domain: null,
+      checks: null,
+      eip712Domain: null,
+      type_: "EthereumEip712Signature2021",
+      cryptosuite: null,
+    };
+
+    const credential = await DIDKit.issueCredential(JSON.stringify(credentialInput), JSON.stringify(options), key);
+
+    // parse the response of the DIDKit wasm
+    return JSON.parse(credential) as VerifiableCredential;
+  } catch (e) {
+    debugger;
+  }
 };
 
 // Issue a VC with challenge data
