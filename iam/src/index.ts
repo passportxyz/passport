@@ -475,15 +475,12 @@ app.post("/api/v0.0.0/convert", (req: Request, res: Response): void => {
               { expiresAt: new Date(credential.expirationDate) },
               {
                 credentialSubject: {
-                  "@context": [
-                    {
-                      customInfo: "https://schema.org/Thing",
-                      hash: "https://schema.org/Text",
-                      metaPointer: "https://schema.org/URL",
-                      provider: "https://schema.org/Text",
-                    },
-                  ],
-
+                  "@context": {
+                    customInfo: "https://schema.org/Thing",
+                    hash: "https://schema.org/Text",
+                    metaPointer: "https://schema.org/URL",
+                    provider: "https://schema.org/Text",
+                  },
                   id,
                   hash,
                   provider,
