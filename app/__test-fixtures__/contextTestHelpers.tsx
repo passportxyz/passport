@@ -135,7 +135,6 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
     handlePatchStamps: jest.fn(),
     handleCreatePassport: jest.fn(),
     handleDeleteStamps: jest.fn(),
-    handleCheckRefreshPassport: () => Promise.resolve(true),
     expiredProviders: [],
     passportHasCacaoError: false,
     cancelCeramicConnection: jest.fn(),

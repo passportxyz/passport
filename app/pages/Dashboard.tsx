@@ -36,7 +36,6 @@ import { FeatureFlags } from "../config/feature_flags";
 
 import { useViewerConnection } from "@self.id/framework";
 import { EthereumAuthProvider } from "@self.id/web";
-import { RefreshStampModal } from "../components/RefreshStampModal";
 import { ExpiredStampModal } from "../components/ExpiredStampModal";
 import ProcessingPopup from "../components/ProcessingPopup";
 import InitiateOnChainButton from "../components/InitiateOnChainButton";
@@ -93,7 +92,6 @@ export default function Dashboard() {
   const [viewerConnection, ceramicConnect] = useViewerConnection();
   const { isOpen: retryModalIsOpen, onOpen: onRetryModalOpen, onClose: onRetryModalClose } = useDisclosure();
 
-  const [refreshModal, setRefreshModal] = useState(false);
   const [expiredStampModal, setExpiredStampModal] = useState(false);
   const { dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
 
@@ -163,26 +161,6 @@ export default function Dashboard() {
       onRetryModalOpen();
     }
   }, [isLoadingPassport]);
-
-  useEffect(() => {
-    if (passportHasCacaoError) {
-      setUserWarning({
-        name: "cacaoError",
-        content: (
-          <div className="flex max-w-screen-lg flex-col items-center text-center">
-            We have detected some broken stamps in your passport. Your passport is currently locked because of this. We
-            need to fix these errors before you continue using Passport. This might take up to 5 minutes.
-            <button className="ml-2 flex underline" onClick={() => setRefreshModal(true)}>
-              Reset Passport <img className="ml-1 w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
-            </button>
-          </div>
-        ),
-        dismissible: false,
-      });
-    } else if (userWarning?.name === "cacaoError") {
-      setUserWarning();
-    }
-  }, [passportHasCacaoError]);
 
   useEffect(() => {
     if (expiredProviders.length > 0) {
@@ -272,7 +250,6 @@ export default function Dashboard() {
 
       {isLoadingPassport == IsLoadingPassportState.FailedToConnect && retryModal}
 
-      {refreshModal && <RefreshStampModal isOpen={refreshModal} onClose={() => setRefreshModal(false)} />}
       {expiredStampModal && (
         <ExpiredStampModal isOpen={expiredStampModal} onClose={() => setExpiredStampModal(false)} />
       )}

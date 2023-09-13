@@ -19,10 +19,6 @@ jest.mock("../../utils/onboard.ts", () => ({
   chains: [],
 }));
 
-jest.mock("../../components/RefreshStampModal", () => ({
-  RefreshStampModal: () => <div>Refresh Modal</div>,
-}));
-
 jest.mock("../../components/SyncToChainButton", () => <div>Sync to Chain</div>);
 
 jest.mock("@self.id/framework", () => {
