@@ -2,6 +2,8 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as awsx from "@pulumi/awsx";
 
+import { createIAMLogGroup, createPagerdutyTopic } from "../lib/service";
+
 // The following vars are not allowed to be undefined, hence the `${...}` magic
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
@@ -146,11 +148,15 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
   },
 });
 
+const alertTopic = createPagerdutyTopic();
+const logGroup = createIAMLogGroup({ alertTopic });
+
 const service = new awsx.ecs.FargateService("dpopp-iam", {
   cluster,
   desiredCount: 1,
   subnets: vpc.privateSubnetIds,
   taskDefinitionArgs: {
+    logGroup,
     executionRole: dpoppEcsRole,
     containers: {
       iam: {
