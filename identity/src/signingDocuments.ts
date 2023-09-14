@@ -10,6 +10,8 @@ interface Eip712Type {
 interface Eip712Domain<T extends Eip712Type> {
   domain: {
     name: string;
+    version?: string;
+    chainId?: string;
   };
   types: T;
   primaryType: keyof T;
@@ -29,7 +31,7 @@ export const challengeSignatureDocument = (verificationMethod: string): Document
   type: "EthereumEip712Signature2021",
   verificationMethod,
   eip712Domain: {
-    domain: { name: "Passport" },
+    domain: { name: "Passport", version: "0" },
     types: {
       Document: [
         { type: "string[]", name: "@context" },
@@ -40,19 +42,17 @@ export const challengeSignatureDocument = (verificationMethod: string): Document
         { type: "CredentialSubject", name: "credentialSubject" },
         { type: "Proof", name: "proof" },
       ],
+      EIP712Domain: [
+        { name: "name", type: "string" },
+        { name: "version", type: "string" },
+      ],
       Context: [
         { type: "string", name: "provider" },
         { type: "string", name: "challenge" },
         { type: "string", name: "address" },
       ],
-      EIP712StringArray: [
-        { type: "string", name: "provider" },
-        { type: "string", name: "challenge" },
-        { type: "string", name: "address" },
-      ],
       CredentialSubject: [
-        { type: "EIP712StringArray[]", name: "@context" },
-        { type: "Context[]", name: "context" },
+        { type: "Context", name: "@context" },
         { type: "string", name: "id" },
         { type: "string", name: "provider" },
         { type: "string", name: "challenge" },
@@ -75,7 +75,8 @@ export const stampCredentialDocument = (verificationMethod: string): DocumentSig
   verificationMethod,
   eip712Domain: {
     domain: {
-      name: "VerifiableCredential",
+      name: "Gitcoin Passport Verifiable Credential of Stamp data",
+      version: "0",
     },
     types: {
       Document: [
@@ -86,15 +87,19 @@ export const stampCredentialDocument = (verificationMethod: string): DocumentSig
         { name: "expirationDate", type: "string" },
         { name: "credentialSubject", type: "CredentialSubject" },
         { name: "proof", type: "Proof" },
-        { name: "credentialStatus", type: "CredentialStatus" },
+        // { name: "credentialStatus", type: "CredentialStatus" },
+      ],
+      EIP712Domain: [
+        { name: "name", type: "string" },
+        { name: "version", type: "string" },
       ],
       CredentialSubject: [
         { name: "id", type: "string" },
         { name: "provider", type: "string" },
-        { name: "metaPointer", type: "string" },
-        { name: "customInfo", type: "CustomInfo" },
+        // { name: "metaPointer", type: "string" },
+        // { name: "customInfo", type: "CustomInfo" },
         { name: "hash", type: "string" },
-        { name: "@context", type: "Context[]" },
+        { name: "@context", type: "Context" },
       ],
       Context: [
         { name: "customInfo", type: "string" },
@@ -102,7 +107,7 @@ export const stampCredentialDocument = (verificationMethod: string): DocumentSig
         { name: "metaPointer", type: "string" },
         { name: "provider", type: "string" },
       ],
-      CustomInfo: [{ name: "field1", type: "string" }],
+      // CustomInfo: [{ name: "field1", type: "string" }],
       Proof: [
         { name: "@context", type: "string" },
         { name: "type", type: "string" },
@@ -111,13 +116,13 @@ export const stampCredentialDocument = (verificationMethod: string): DocumentSig
         { name: "verificationMethod", type: "string" },
         { name: "created", type: "string" },
       ],
-      CredentialStatus: [
-        { name: "id", type: "string" },
-        { name: "type", type: "string" },
-        { name: "statusPurpose", type: "string" },
-        { name: "statusListIndex", type: "string" },
-        { name: "statusListCredential", type: "string" },
-      ],
+      // CredentialStatus: [
+      //   { name: "id", type: "string" },
+      //   { name: "type", type: "string" },
+      //   { name: "statusPurpose", type: "string" },
+      //   { name: "statusListIndex", type: "string" },
+      //   { name: "statusListCredential", type: "string" },
+      // ],
     },
     primaryType: "Document",
   },

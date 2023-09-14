@@ -103,32 +103,39 @@ export const issueEip712Credential = async (
   signingDocument: DocumentSignatureTypes<DocumentType>,
   additionalContexts: string[] = []
 ): Promise<VerifiableCredential> => {
-  // get DID from key
-  const issuer = DIDKit.keyToDID("ethr", key);
+  try {
+    // get DID from key
+    const issuer = DIDKit.keyToDID("ethr", key);
 
-  const expiresInSeconds = (expiration as CredentialExiresInSeconds).expiresInSeconds;
-  const expirationDate =
-    expiresInSeconds !== undefined
-      ? addSeconds(new Date(), expiresInSeconds).toISOString()
-      : (expiration as CredentialExiresAt).expiresAt.toISOString();
-  const credentialInput = {
-    "@context": ["https://www.w3.org/2018/credentials/v1", ...additionalContexts],
-    type: ["VerifiableCredential"],
-    issuer,
-    issuanceDate: new Date().toISOString(),
-    expirationDate,
-    ...fields,
-  };
+    const expiresInSeconds = (expiration as CredentialExiresInSeconds).expiresInSeconds;
+    const expirationDate =
+      expiresInSeconds !== undefined
+        ? addSeconds(new Date(), expiresInSeconds).toISOString()
+        : (expiration as CredentialExiresAt).expiresAt.toISOString();
+    const credentialInput = {
+      "@context": ["https://www.w3.org/2018/credentials/v1", ...additionalContexts],
+      type: ["VerifiableCredential"],
+      issuer,
+      issuanceDate: new Date().toISOString(),
+      expirationDate,
+      ...fields,
+    };
+    const credential = await DIDKit.issueCredential(
+      JSON.stringify(credentialInput),
+      JSON.stringify(signingDocument),
+      key
+    );
 
-  const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);
-  const options = {
-    verificationMethod,
-    type: "EthereumEip712Signature2021",
-  };
-  const credential = await DIDKit.issueCredential(JSON.stringify(credentialInput), JSON.stringify(options), key);
+    const preparedCredential = await DIDKit.prepareIssueCredential(
+      JSON.stringify(credentialInput),
+      JSON.stringify(signingDocument),
+      key
+    );
 
-  // parse the response of the DIDKit wasm
-  return JSON.parse(credential) as VerifiableCredential;
+    const preppedCred = JSON.parse(preparedCredential as string);
+    // parse the response of the DIDKit wasm
+    return JSON.parse(credential) as VerifiableCredential;
+  } catch (e) {}
 };
 
 // Issue a VC with challenge data
@@ -228,7 +235,11 @@ export const issueHashedCredential = async (
           id: `did:pkh:eip155:1:${address}`,
           provider: record.type,
           metaPointer,
-          customInfo: {},
+          //  removing since fields need to be either included or no when writing on chain
+          //  unable to hash an empty struct
+          // customInfo: {
+          //   description: "Passport Stamp",
+          // },
           hash: `${VERSION}:${hash}`,
         },
         // https://www.w3.org/TR/vc-status-list/#statuslist2021entry
