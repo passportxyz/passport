@@ -134,7 +134,7 @@ chainConfigs.push({
   id: optimismChainId,
   token: "ETH",
   label: "Optimism",
-  rpcUrl: "https://mainnet.optimism.io/",
+  rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_OP_RPC_URL as string,
   icon: "./assets/op-logo.svg",
   attestationProviderConfig: {
     name: "Ethereum Attestation Service",
