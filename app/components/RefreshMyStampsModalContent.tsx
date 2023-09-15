@@ -24,6 +24,9 @@ import Checkbox from "./Checkbox";
 import { Button } from "./Button";
 import { LoadButton } from "./LoadButton";
 
+// -- Utils
+import { IAM_SIGNATURE_TYPE } from "../config/stamp_config";
+
 const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
 export type RefreshMyStampsModalContentProps = {
@@ -95,7 +98,7 @@ export const RefreshMyStampsModalContent = ({
             version: "0.0.0",
             address: address || "",
             proofs: {},
-            signatureType: process.env.NEXT_PUBLIC_PASSPORT_IAM_SIGNATURE_TYPE as SignatureType,
+            signatureType: IAM_SIGNATURE_TYPE,
           },
           signer as { signMessage: (message: string) => Promise<string> }
         );

@@ -8,6 +8,7 @@ import { UserContext } from "../context/userContext";
 // utils
 import { fetchPossibleEVMStamps, ValidatedPlatform, AdditionalSignature } from "../signer/utils";
 import { getPlatformSpec } from "../config/platforms";
+import { IAM_SIGNATURE_TYPE } from "../config/stamp_config";
 
 // Components
 import { Spinner } from "@chakra-ui/react";
@@ -75,7 +76,7 @@ export const AdditionalStampModal = ({
                 signature: additionalSigner.sig,
                 address: additionalSigner.addr,
               },
-              signatureType: process.env.NEXT_PUBLIC_PASSPORT_IAM_SIGNATURE_TYPE as SignatureType,
+              signatureType: IAM_SIGNATURE_TYPE,
             },
             // Should this be signed by the original signer so that it is included in the original signers Passport?
             signer as { signMessage: (message: string) => Promise<string> }

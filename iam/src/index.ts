@@ -28,6 +28,7 @@ import {
   PassportAttestation,
   EasRequestBody,
   VerifiedPayload,
+  VerifiableCredential,
 } from "@gitcoin/passport-types";
 import onchainInfo from "../../deployments/onchainInfo.json";
 
@@ -42,7 +43,9 @@ import {
   issueChallengeCredential,
   issueHashedCredential,
   verifyCredential,
+  issueEip712Credential,
 } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { stampCredentialDocument } from "@gitcoin/passport-identity/dist/commonjs/src/signingDocuments";
 
 // All provider exports from platforms
 import { providers, platforms } from "@gitcoin/passport-platforms";
@@ -80,6 +83,10 @@ if (!process.env.EAS_GITCOIN_STAMP_SCHEMA) {
 
 if (!process.env.MORALIS_API_KEY) {
   configErrors.push("MORALIS_API_KEY is required");
+}
+
+if (!process.env.IAM_JWK_EIP712) {
+  configErrors.push("IAM_JWK_EIP712 is required");
 }
 
 if (configErrors.length > 0) {
@@ -169,8 +176,11 @@ const errorRes = (res: Response, error: string, errorCode: number): Response => 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const addErrorDetailsToMessage = (message: string, error: any): string => {
-  if (error instanceof IAMError || error instanceof Error) message += `, ${error.name}: ${error.message}`;
-
+  if (error instanceof IAMError || error instanceof Error) {
+    message += `, ${error.name}: ${error.message}`;
+  } else if (typeof error === "string") {
+    message += `, ${error}`;
+  }
   return message;
 };
 
@@ -439,6 +449,66 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
       let message = "Unable to verify payload";
       if (error instanceof Error) message += `: ${error.name}`;
       return void errorRes(res, message, 500);
+    });
+});
+
+// expose convert entry point that will convert a V1 stamp to V2 stamp (Ed25519Signature2018 to EIP712)
+app.post("/api/v0.0.0/convert", (req: Request, res: Response): void => {
+  const credential: VerifiableCredential = req.body as VerifiableCredential;
+
+  // Validate credential first
+  verifyCredential(DIDKit, credential)
+    .then((verified) => {
+      // If the credential has been succesfully validateLocaleAndSetLanguage,
+      // and if the issuer matches our expected issuer
+      // then issue the new credential
+      if (verified && issuer === credential.issuer) {
+        DIDKit.keyToVerificationMethod("ethr", eip712Key)
+          .then((_verificationMethod) => {
+            const verificationMethod = _verificationMethod as string;
+            // Extract the payload from the old VC
+            const { id, hash, provider } = credential.credentialSubject;
+
+            issueEip712Credential(
+              DIDKit,
+              eip712Key,
+              { expiresAt: new Date(credential.expirationDate) },
+              {
+                credentialSubject: {
+                  "@context": {
+                    customInfo: "https://schema.org/Thing",
+                    hash: "https://schema.org/Text",
+                    metaPointer: "https://schema.org/URL",
+                    provider: "https://schema.org/Text",
+                  },
+                  id,
+                  hash,
+                  provider,
+                },
+              },
+              stampCredentialDocument(verificationMethod),
+              ["https://w3id.org/vc/status-list/2021/v1"]
+            )
+              .then((newCredential) => {
+                res.json(newCredential);
+              })
+              .catch((error) => {
+                return void errorRes(res, addErrorDetailsToMessage("Failed to issue new credential", error), 500);
+              });
+          })
+          .catch((error) => {
+            return void errorRes(res, addErrorDetailsToMessage("Failed to create verification method", error), 500);
+          });
+      } else {
+        return void errorRes(res, "Invalid credential.", 400);
+      }
+    })
+    .catch((error) => {
+      return void errorRes(
+        res,
+        addErrorDetailsToMessage("Unable to validate the provided credential, an unexpected error occured", error),
+        500
+      );
     });
 });
 

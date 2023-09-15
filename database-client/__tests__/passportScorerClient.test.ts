@@ -56,7 +56,7 @@ describe("scorerClient", () => {
     await passportDatabase.addStamps(stamps);
 
     expect(logger.info).toHaveBeenCalledWith(`adding stamp to passportScorer address: ${address}`);
-    expect(axios.post).toHaveBeenCalledWith(`${passportScorerUrl}ceramic-cache/stamps/bulk`, stampsToSave, {
+    expect(axios.post).toHaveBeenCalledWith(`${passportScorerUrl}/stamps/bulk`, stampsToSave, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -127,7 +127,7 @@ describe("scorerClient", () => {
     await passportDatabase.patchStamps(stampPatches);
 
     expect(logger.info).toHaveBeenCalledWith(`patching stamps in passportScorer for address: ${address}`);
-    expect(axios.patch).toHaveBeenCalledWith(`${passportScorerUrl}ceramic-cache/stamps/bulk`, expectedCalldata, {
+    expect(axios.patch).toHaveBeenCalledWith(`${passportScorerUrl}/stamps/bulk`, expectedCalldata, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

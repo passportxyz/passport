@@ -32,6 +32,7 @@ import { UserContext } from "../context/userContext";
 import { PlatformGroupSpec } from "@gitcoin/passport-platforms";
 import { PlatformClass } from "@gitcoin/passport-platforms";
 import { getPlatformSpec } from "../config/platforms";
+import { IAM_SIGNATURE_TYPE } from "../config/stamp_config";
 
 // --- Helpers
 import { difference, generateUID } from "../utils/helpers";
@@ -205,7 +206,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
           version: "0.0.0",
           address: address || "",
           proofs: providerPayload,
-          signatureType: process.env.NEXT_PUBLIC_PASSPORT_IAM_SIGNATURE_TYPE as SignatureType,
+          signatureType: IAM_SIGNATURE_TYPE,
         },
         signer as { signMessage: (message: string) => Promise<string> }
       );
