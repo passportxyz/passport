@@ -660,6 +660,151 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
   }
 });
 
+app.get("/api/v0.0.0/eip712-signing-document", (req: Request, res: Response): void => {
+  // TypesOrURI implementation within spruce's DIDKit
+  // https://github.com/spruceid/ssi/blob/db906df40b24836f62a087b2e57f2d9b26a19ed8/ssi-ldp/src/eip712.rs#L369
+  res.json({
+    Context: [
+      {
+        name: "customInfo",
+        type: "string",
+      },
+      {
+        name: "hash",
+        type: "string",
+      },
+      {
+        name: "metaPointer",
+        type: "string",
+      },
+      {
+        name: "provider",
+        type: "string",
+      },
+    ],
+    CredentialStatus: [
+      {
+        name: "id",
+        type: "string",
+      },
+      {
+        name: "type",
+        type: "string",
+      },
+      {
+        name: "statusPurpose",
+        type: "string",
+      },
+      {
+        name: "statusListIndex",
+        type: "string",
+      },
+      {
+        name: "statusListCredential",
+        type: "string",
+      },
+    ],
+    CredentialSubject: [
+      {
+        name: "id",
+        type: "string",
+      },
+      {
+        name: "provider",
+        type: "string",
+      },
+      {
+        name: "metaPointer",
+        type: "string",
+      },
+      {
+        name: "customInfo",
+        type: "CustomInfo",
+      },
+      {
+        name: "hash",
+        type: "string",
+      },
+      {
+        name: "@context",
+        type: "Context",
+      },
+    ],
+    CustomInfo: [
+      {
+        name: "field1",
+        type: "string",
+      },
+    ],
+    Document: [
+      {
+        name: "@context",
+        type: "string[]",
+      },
+      {
+        name: "type",
+        type: "string[]",
+      },
+      {
+        name: "issuer",
+        type: "string",
+      },
+      {
+        name: "issuanceDate",
+        type: "string",
+      },
+      {
+        name: "expirationDate",
+        type: "string",
+      },
+      {
+        name: "credentialSubject",
+        type: "CredentialSubject",
+      },
+      {
+        name: "proof",
+        type: "Proof",
+      },
+      {
+        name: "credentialStatus",
+        type: "CredentialStatus",
+      },
+    ],
+    EIP712Domain: [
+      {
+        name: "name",
+        type: "string",
+      },
+    ],
+    Proof: [
+      {
+        name: "@context",
+        type: "string",
+      },
+      {
+        name: "type",
+        type: "string",
+      },
+      {
+        name: "proofPurpose",
+        type: "string",
+      },
+      {
+        name: "proofValue",
+        type: "string",
+      },
+      {
+        name: "verificationMethod",
+        type: "string",
+      },
+      {
+        name: "created",
+        type: "string",
+      },
+    ],
+  });
+});
+
 // procedure endpoints
 app.use("/procedure", procedureRouter);
 

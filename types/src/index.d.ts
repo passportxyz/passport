@@ -41,6 +41,7 @@ export type VerifiableCredential = {
     verificationMethod: string;
     created: string;
     jws: string;
+    eip712Domain?: { [key: string]: string };
   };
 };
 

@@ -51,7 +51,7 @@ export const challengeSignatureDocument = (verificationMethod: string): Document
         { type: "string", name: "address" },
       ],
       CredentialSubject: [
-        { type: "EIP712StringArray[]", name: "@context" },
+        { type: "EIP712StringArray", name: "@context" },
         { type: "Context[]", name: "context" },
         { type: "string", name: "id" },
         { type: "string", name: "provider" },
@@ -75,7 +75,7 @@ export const stampCredentialDocument = (verificationMethod: string): DocumentSig
   verificationMethod,
   eip712Domain: {
     domain: {
-      name: "VerifiableCredential",
+      name: "PassportStampCredential",
     },
     types: {
       Document: [
@@ -94,7 +94,7 @@ export const stampCredentialDocument = (verificationMethod: string): DocumentSig
         { name: "metaPointer", type: "string" },
         { name: "customInfo", type: "CustomInfo" },
         { name: "hash", type: "string" },
-        { name: "@context", type: "Context[]" },
+        { name: "@context", type: "Context" },
       ],
       Context: [
         { name: "customInfo", type: "string" },

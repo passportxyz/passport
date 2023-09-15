@@ -120,15 +120,18 @@ export const issueEip712Credential = async (
     ...fields,
   };
 
-  const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);
-  const options = {
-    verificationMethod,
-    type: "EthereumEip712Signature2021",
-  };
-  const credential = await DIDKit.issueCredential(JSON.stringify(credentialInput), JSON.stringify(options), key);
+  const credential = await DIDKit.issueCredential(
+    JSON.stringify(credentialInput),
+    JSON.stringify(signingDocument),
+    key
+  );
 
+  const parsedCredential = JSON.parse(credential) as VerifiableCredential;
+  if (signingDocument.eip712Domain.domain.name === "PassportStampCredential") {
+    parsedCredential.proof.eip712Domain.types = "https://passport-iam.gitcoin.co/api/v0.0.0/eip712-signing-document";
+  }
   // parse the response of the DIDKit wasm
-  return JSON.parse(credential) as VerifiableCredential;
+  return parsedCredential;
 };
 
 // Issue a VC with challenge data
