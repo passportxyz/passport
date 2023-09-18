@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/require-await */
 
 import { authenticate, loadIdenaSession } from "../procedures/idenaSignIn";
-import { initCacheSession, loadCacheSession } from "../../utils/cache";
+import { clearCacheSession, initCacheSession, loadCacheSession } from "../../utils/cache";
 
 // ----- Libs
 import axios from "axios";
@@ -41,6 +41,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  clearCacheSession(MOCK_SESSION_KEY, "Idena");
   jest.clearAllMocks();
 });
 
