@@ -72,13 +72,14 @@ jobs:
         uses: actions/setup-node@v2
         with:
           cache: "yarn"
-          cache-dependency-path: infra/production/package-lock.json
+          cache-dependency-path: infra/package-lock.json
       # Update the pulumi stack with new image
       - run: |
           npm install
+          cd prod
           pulumi stack select -c gitcoin/dpopp/production
           pulumi config -s gitcoin/dpopp/production set aws:region us-east-1 --non-interactive
-        working-directory: infra/production
+        working-directory: infra
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
       - uses: pulumi/actions@v3
