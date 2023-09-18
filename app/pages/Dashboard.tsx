@@ -189,7 +189,7 @@ export default function Dashboard() {
       <ModalContent>
         <ModalBody mt={4}>
           <div className="flex flex-row">
-            <div className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-100 md:mr-10">
+            <div className="bg-purple-100 inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full md:mr-10">
               <img alt="shield-exclamation-icon" src="./assets/shield-exclamation-icon.svg" />
             </div>
             <div className="flex flex-col" data-testid="retry-modal-content">
@@ -231,7 +231,7 @@ export default function Dashboard() {
           <>
             Connecting to Ceramic...
             <span
-              className="pl-4 text-white no-underline hover:cursor-pointer hover:underline md:pl-12"
+              className="text-white pl-4 no-underline hover:cursor-pointer hover:underline md:pl-12"
               onClick={cancelCeramicConnection}
             >
               Cancel
@@ -265,7 +265,7 @@ export default function Dashboard() {
             {filterName && (
               <Link href="/dashboard">
                 <a>
-                  <span data-testid="select-all" className={`pl-2 text-sm text-purple-connectPurple`}>
+                  <span data-testid="select-all" className={`text-purple-connectPurple pl-2 text-sm`}>
                     see all my stamps
                   </span>
                 </a>
@@ -337,19 +337,42 @@ export default function Dashboard() {
     [filterName, onOpen, passport, score, rawScore, scoreDescription, passportSubmissionState]
   );
 
+  const ScorePanel = ({ className }: { className: string }) => <div className={className}>Score Panel</div>;
+  const ValidStampsPanel = ({ className }: { className: string }) => (
+    <div className={className}>Valid Stamps Panel</div>
+  );
+  const ExpiredStampsPanel = ({ className }: { className: string }) => (
+    <div className={className}>Expired Stamps Panel</div>
+  );
+
+  const BgImage = ({ className }: { className: string }) => <div className={className}>BgImage</div>;
+
+  const SortMenu = ({ className }: { className: string }) => <button className={className}>Sort</button>;
+
   return (
     <PageRoot className="text-color-1">
       {modals}
       <HeaderContentFooterGrid>
         <Header subheader={subheader} />
         <BodyWrapper className="mt-4 md:mt-6">
-          <CardList
-            isLoading={
-              isLoadingPassport == IsLoadingPassportState.Loading ||
-              isLoadingPassport == IsLoadingPassportState.LoadingFromCeramic ||
-              isLoadingPassport == IsLoadingPassportState.FailedToConnect
-            }
-          />
+          <PageWidthGrid>
+            <ScorePanel className="col-span-full xl:col-span-8" />
+            <BgImage className="col-span-4 hidden xl:block" />
+            <h2 className="col-span-2 col-start-1">Add Stamps</h2>
+            <SortMenu className="col-end-[-1]" />
+            <CardList
+              className="col-span-full"
+              isLoading={
+                isLoadingPassport == IsLoadingPassportState.Loading ||
+                isLoadingPassport == IsLoadingPassportState.LoadingFromCeramic ||
+                isLoadingPassport == IsLoadingPassportState.FailedToConnect
+              }
+            />
+            <h3 className="col-span-2 col-start-1">Add Collected Stamps</h3>
+            <span className="col-end-[-1]">3/50</span>
+            <ValidStampsPanel className="col-span-full my-8" />
+            <ExpiredStampsPanel className="col-span-full" />
+          </PageWidthGrid>
         </BodyWrapper>
         {/* This footer contains dark colored text and dark images */}
         <Footer lightMode={true} />
