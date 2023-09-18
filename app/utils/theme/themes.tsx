@@ -15,6 +15,7 @@ export const LUNARPUNK_DARK_MODE: Theme = {
     text1: palette.white,
     text2: palette.seaFoam,
     text3: palette.nightBlue,
+    text4: palette.black,
   },
   fonts: {
     body: "futura-pt",

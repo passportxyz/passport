@@ -12,6 +12,7 @@ export type Theme = {
     text1: string;
     text2: string;
     text3: string;
+    text4: string;
   };
   fonts: {
     body: string;
