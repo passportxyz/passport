@@ -9,7 +9,6 @@ const getAssets = () => {
   return {
     passportLogo: "/assets/passportLogoWhite.svg",
     gitcoinLogo: "/assets/gitcoinLogoWhite.svg",
-    passportWord: "/assets/passportWordWhite.svg",
     logoLine: "/assets/logoLine.svg",
     emphasisColor: "white",
   };
