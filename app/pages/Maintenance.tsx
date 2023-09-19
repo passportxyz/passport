@@ -18,7 +18,7 @@ const Footer = () => (
 
 export default function Maintenance() {
   return (
-    <PageRoot className="text-color-2">
+    <PageRoot className="text-color-2" useLegacyBackground={true}>
       <HeaderContentFooterGrid>
         <div className={`${PAGE_PADDING} bg-background`}>
           <MinimalHeader className={`border-b border-accent-2`} />

@@ -43,11 +43,11 @@ export const RefreshMyStampsModal = ({
           ) : (
             <div className="p-4 md:p-6">
               <div className="font-heading text-3xl text-color-1">Searching for Stamps</div>
-              <div className="mt-2 font-alt text-color-3">
+              <div className="mt-2 font-alt text-color-2">
                 Give us a moment while we check your account for existing Stamps.
               </div>
               <RefreshStampsProgressSteps steps={steps} />
-              <div className="text-center text-color-3">Please do not close the window.</div>
+              <div className="text-center text-color-2">Please do not close the window.</div>
             </div>
           )}
         </ModalContent>

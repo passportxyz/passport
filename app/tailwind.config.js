@@ -8,27 +8,15 @@ module.exports = {
     },
     extend: {
       colors: {
-        purple: {
-          softpurple: "#757087",
-          darkpurple: "#0E0333",
-          connectPurple: "#6F3FF5",
-          gitcoinpurple: "#6f3ff5",
-          infoElementBorder: "#D5BDFF",
-          infoElementBG: "#F6F0FF",
-        },
-        yellow: "#FFF8DB",
-        blue: {
-          darkblue: "#0E0333",
-        },
-        green: {
-          jade: "#02E2AC",
-        },
         background: "var(--color-background)",
         "background-2": "var(--color-background-2)",
-        accent: "var(--color-accent)",
-        "accent-2": "var(--color-accent-2)",
-        "accent-3": "var(--color-accent-3)",
-        muted: "var(--color-muted)",
+        "background-3": "var(--color-background-3)",
+        foreground: "var(--color-foreground)",
+        "foreground-2": "var(--color-foreground-2)",
+        "foreground-3": "var(--color-foreground-3)",
+        "foreground-4": "var(--color-foreground-4)",
+        "foreground-5": "var(--color-foreground-5)",
+        "foreground-6": "var(--color-foreground-6)",
 
         // Text Colors
         // using this naming convention
@@ -39,6 +27,13 @@ module.exports = {
         "color-2": "var(--color-text-2)",
         "color-3": "var(--color-text-3)",
         "color-4": "var(--color-text-4)",
+
+        // Temporary, to be removed
+        accent: "#000",
+        "accent-2": "#000",
+        "accent-3": "#000",
+        muted: "#000",
+        "gray-400": "#000",
       },
       minHeight: {
         default: "100vh",
@@ -53,9 +48,9 @@ module.exports = {
       lg: ["18px", "1.5em"],
       xl: ["20px", "1.5em"],
       "2xl": ["24px", "1.5em"],
-      "3xl": ["30px", "1.5em"],
+      "3xl": ["32px", "1.5em"],
       "4xl": ["36px", "1.5em"],
-      "5xl": ["48px", "1.5em"],
+      "5xl": ["40px", "1.5em"],
     },
     fontFamily: {
       body: ["var(--font-body)"],

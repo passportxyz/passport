@@ -189,7 +189,7 @@ export default function Dashboard() {
       <ModalContent>
         <ModalBody mt={4}>
           <div className="flex flex-row">
-            <div className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-100 md:mr-10">
+            <div className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-background-2 md:mr-10">
               <img alt="shield-exclamation-icon" src="./assets/shield-exclamation-icon.svg" />
             </div>
             <div className="flex flex-col" data-testid="retry-modal-content">
@@ -218,7 +218,7 @@ export default function Dashboard() {
     <>
       {viewerConnection.status === "connecting" && (
         <ProcessingPopup data-testid="selfId-connection-alert">
-          Please user your wallet to sign the message prompt and complete the sign-in process.
+          Please use your wallet to sign the message prompt and complete the sign-in process.
         </ProcessingPopup>
       )}
 
@@ -231,7 +231,7 @@ export default function Dashboard() {
           <>
             Connecting to Ceramic...
             <span
-              className="pl-4 text-white no-underline hover:cursor-pointer hover:underline md:pl-12"
+              className="pl-4 text-color-1 no-underline hover:cursor-pointer hover:underline md:pl-12"
               onClick={cancelCeramicConnection}
             >
               Cancel
@@ -265,7 +265,7 @@ export default function Dashboard() {
             {filterName && (
               <Link href="/dashboard">
                 <a>
-                  <span data-testid="select-all" className={`pl-2 text-sm text-purple-connectPurple`}>
+                  <span data-testid="select-all" className={`text-purple-connectPurple pl-2 text-sm`}>
                     see all my stamps
                   </span>
                 </a>
@@ -337,19 +337,42 @@ export default function Dashboard() {
     [filterName, onOpen, passport, score, rawScore, scoreDescription, passportSubmissionState]
   );
 
+  const ScorePanel = ({ className }: { className: string }) => <div className={className}>Score Panel</div>;
+  const ValidStampsPanel = ({ className }: { className: string }) => (
+    <div className={className}>Valid Stamps Panel</div>
+  );
+  const ExpiredStampsPanel = ({ className }: { className: string }) => (
+    <div className={className}>Expired Stamps Panel</div>
+  );
+
+  const BgImage = ({ className }: { className: string }) => <div className={className}>BgImage</div>;
+
+  const SortMenu = ({ className }: { className: string }) => <button className={className}>Sort</button>;
+
   return (
     <PageRoot className="text-color-1">
       {modals}
       <HeaderContentFooterGrid>
         <Header subheader={subheader} />
         <BodyWrapper className="mt-4 md:mt-6">
-          <CardList
-            isLoading={
-              isLoadingPassport == IsLoadingPassportState.Loading ||
-              isLoadingPassport == IsLoadingPassportState.LoadingFromCeramic ||
-              isLoadingPassport == IsLoadingPassportState.FailedToConnect
-            }
-          />
+          <PageWidthGrid>
+            <ScorePanel className="col-span-full xl:col-span-8" />
+            <BgImage className="col-span-4 hidden xl:block" />
+            <span className="col-start-1 col-end-3 font-heading text-4xl">Add Stamps</span>
+            <SortMenu className="col-end-[-1]" />
+            <CardList
+              className="col-span-full"
+              isLoading={
+                isLoadingPassport == IsLoadingPassportState.Loading ||
+                isLoadingPassport == IsLoadingPassportState.LoadingFromCeramic ||
+                isLoadingPassport == IsLoadingPassportState.FailedToConnect
+              }
+            />
+            <span className="col-start-1 col-end-4 font-heading text-3xl">Add Collected Stamps</span>
+            <span className="col-end-[-1]">3/50</span>
+            <ValidStampsPanel className="col-span-full my-8" />
+            <ExpiredStampsPanel className="col-span-full" />
+          </PageWidthGrid>
         </BodyWrapper>
         {/* This footer contains dark colored text and dark images */}
         <Footer lightMode={true} />

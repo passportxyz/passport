@@ -5,10 +5,13 @@ const setTheme = ({ colors, fonts }: Theme) => {
 
   r.style.setProperty("--color-background", colors.background);
   r.style.setProperty("--color-background-2", colors.background2);
-  r.style.setProperty("--color-accent", colors.accent);
-  r.style.setProperty("--color-accent-2", colors.accent2);
-  r.style.setProperty("--color-accent-3", colors.accent3);
-  r.style.setProperty("--color-muted", colors.muted);
+  r.style.setProperty("--color-background-3", colors.background3);
+  r.style.setProperty("--color-foreground", colors.foreground);
+  r.style.setProperty("--color-foreground-2", colors.foreground2);
+  r.style.setProperty("--color-foreground-3", colors.foreground3);
+  r.style.setProperty("--color-foreground-4", colors.foreground4);
+  r.style.setProperty("--color-foreground-5", colors.foreground5);
+  r.style.setProperty("--color-foreground-6", colors.foreground5);
   r.style.setProperty("--color-text-1", colors.text1);
   r.style.setProperty("--color-text-2", colors.text2);
   r.style.setProperty("--color-text-3", colors.text3);
