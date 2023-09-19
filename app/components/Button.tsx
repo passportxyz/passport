@@ -11,8 +11,9 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 // e.g. <Button><Icon /><span>Click me</span></Button>
 export const Button = ({ variant, className, ...props }: ButtonProps) => {
   const variantClassName = useMemo(() => {
-    if (variant === "secondary") return "bg-background border border-accent-2 hover:bg-accent-2";
-    else return "bg-accent hover:bg-muted enabled:hover:text-accent";
+    if (variant === "secondary")
+      return "text-color-1 bg-background border border-foreground-1 rounded-s hover:bg-foreground-3";
+    else return "text-color-4 rounded-s enabled:hover:text-accent bg-foreground-2 hover:bg-foreground-4";
   }, [variant]);
 
   return (
