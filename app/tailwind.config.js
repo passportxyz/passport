@@ -6,35 +6,35 @@ module.exports = {
       lg: "1020px",
       xl: "1280px",
     },
-    colors: {
-      background: "var(--color-background)",
-      "background-2": "var(--color-background-2)",
-      "background-3": "var(--color-background-3)",
-      foreground: "var(--color-foreground)",
-      "foreground-2": "var(--color-foreground-2)",
-      "foreground-3": "var(--color-foreground-3)",
-      "foreground-4": "var(--color-foreground-4)",
-      "foreground-5": "var(--color-foreground-5)",
-      "foreground-6": "var(--color-foreground-6)",
-
-      // Text Colors
-      // using this naming convention
-      // so that e.g. text-color-1 can be used
-      //
-      // Don't use these for non-text colors
-      "color-1": "var(--color-text-1)",
-      "color-2": "var(--color-text-2)",
-      "color-3": "var(--color-text-3)",
-
-      // Temporary, to be removed
-      accent: "#000",
-      "accent-2": "#000",
-      "accent-3": "#000",
-      muted: "#000",
-      "color-4": "#000",
-      "gray-400": "#000",
-    },
     extend: {
+      colors: {
+        background: "var(--color-background)",
+        "background-2": "var(--color-background-2)",
+        "background-3": "var(--color-background-3)",
+        foreground: "var(--color-foreground)",
+        "foreground-2": "var(--color-foreground-2)",
+        "foreground-3": "var(--color-foreground-3)",
+        "foreground-4": "var(--color-foreground-4)",
+        "foreground-5": "var(--color-foreground-5)",
+        "foreground-6": "var(--color-foreground-6)",
+
+        // Text Colors
+        // using this naming convention
+        // so that e.g. text-color-1 can be used
+        //
+        // Don't use these for non-text colors
+        "color-1": "var(--color-text-1)",
+        "color-2": "var(--color-text-2)",
+        "color-3": "var(--color-text-3)",
+        "color-4": "var(--color-text-4)",
+
+        // Temporary, to be removed
+        accent: "#000",
+        "accent-2": "#000",
+        "accent-3": "#000",
+        muted: "#000",
+        "gray-400": "#000",
+      },
       minHeight: {
         default: "100vh",
       },
@@ -48,9 +48,9 @@ module.exports = {
       lg: ["18px", "1.5em"],
       xl: ["20px", "1.5em"],
       "2xl": ["24px", "1.5em"],
-      "3xl": ["30px", "1.5em"],
+      "3xl": ["32px", "1.5em"],
       "4xl": ["36px", "1.5em"],
-      "5xl": ["48px", "1.5em"],
+      "5xl": ["40px", "1.5em"],
     },
     fontFamily: {
       body: ["var(--font-body)"],

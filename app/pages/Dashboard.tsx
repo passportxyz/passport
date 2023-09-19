@@ -189,7 +189,7 @@ export default function Dashboard() {
       <ModalContent>
         <ModalBody mt={4}>
           <div className="flex flex-row">
-            <div className="bg-purple-100 inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full md:mr-10">
+            <div className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-background-2 md:mr-10">
               <img alt="shield-exclamation-icon" src="./assets/shield-exclamation-icon.svg" />
             </div>
             <div className="flex flex-col" data-testid="retry-modal-content">
@@ -218,7 +218,7 @@ export default function Dashboard() {
     <>
       {viewerConnection.status === "connecting" && (
         <ProcessingPopup data-testid="selfId-connection-alert">
-          Please user your wallet to sign the message prompt and complete the sign-in process.
+          Please use your wallet to sign the message prompt and complete the sign-in process.
         </ProcessingPopup>
       )}
 
@@ -231,7 +231,7 @@ export default function Dashboard() {
           <>
             Connecting to Ceramic...
             <span
-              className="text-white pl-4 no-underline hover:cursor-pointer hover:underline md:pl-12"
+              className="pl-4 text-color-1 no-underline hover:cursor-pointer hover:underline md:pl-12"
               onClick={cancelCeramicConnection}
             >
               Cancel
@@ -358,7 +358,7 @@ export default function Dashboard() {
           <PageWidthGrid>
             <ScorePanel className="col-span-full xl:col-span-8" />
             <BgImage className="col-span-4 hidden xl:block" />
-            <h2 className="col-span-2 col-start-1">Add Stamps</h2>
+            <span className="col-start-1 col-end-3 font-heading text-4xl">Add Stamps</span>
             <SortMenu className="col-end-[-1]" />
             <CardList
               className="col-span-full"
@@ -368,7 +368,7 @@ export default function Dashboard() {
                 isLoadingPassport == IsLoadingPassportState.FailedToConnect
               }
             />
-            <h3 className="col-span-2 col-start-1">Add Collected Stamps</h3>
+            <span className="col-start-1 col-end-4 font-heading text-3xl">Add Collected Stamps</span>
             <span className="col-end-[-1]">3/50</span>
             <ValidStampsPanel className="col-span-full my-8" />
             <ExpiredStampsPanel className="col-span-full" />

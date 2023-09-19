@@ -18,7 +18,7 @@ export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
       <DrawerContent
         style={{
           backgroundColor: "var(--color-background-2)",
-          border: "1px solid var(--color-accent-2)",
+          border: "1px solid var(--color-foreground-6)",
           borderRadius: "6px",
         }}
       >

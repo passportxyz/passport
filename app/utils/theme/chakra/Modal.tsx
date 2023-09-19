@@ -4,9 +4,9 @@ const Modal: ComponentStyleConfig = {
   parts: ["dialog"],
   baseStyle: {
     dialog: {
-      bg: "var(--color-background-2)",
+      bg: "var(--color-background)",
       color: "var(--color-text-1)",
-      border: "solid 1px var(--color-accent-2)",
+      border: "solid 1px var(--color-foreground-6)",
     },
   },
 };

@@ -12,14 +12,14 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 export const Button = ({ variant, className, ...props }: ButtonProps) => {
   const variantClassName = useMemo(() => {
     if (variant === "secondary")
-      return "text-color-1 bg-background border border-foreground-1 rounded-s hover:bg-foreground-3";
-    else return "text-color-4 rounded-s enabled:hover:text-accent bg-foreground-2 hover:bg-foreground-4";
+      return "text-foreground-2 bg-background border border-foreground-2 rounded-s hover:bg-foreground-3";
+    else return "text-color-4 rounded-s enabled:hover:text-color-1 bg-foreground-2 hover:bg-foreground-4";
   }, [variant]);
 
   return (
     <button
       className={`group flex items-center justify-center gap-4 rounded-md px-5 py-2 text-color-1
-        disabled:cursor-not-allowed disabled:bg-accent-2 disabled:brightness-75
+        disabled:cursor-not-allowed disabled:bg-foreground-3 disabled:brightness-75
         ${variantClassName} ${className}`}
       {...props}
     />

@@ -24,7 +24,7 @@ export function RefreshMyStampsSelector({
       {validPlatformGroups.map((group, i) => {
         return (
           <div key={i}>
-            <p className="my-4 text-sm text-color-4">{group.name}</p>
+            <p className="my-4 text-sm text-color-2">{group.name}</p>
             <div>
               {group.providers.map((provider, i) => {
                 return (

@@ -142,7 +142,7 @@ export const RefreshMyStampsModalContent = ({
     <div className="flex grow flex-col items-center pb-6">
       <div className="w-full grow px-4 md:px-8">
         {validPlatforms.length > 0 ? (
-          <div className="flex flex-col text-white">
+          <div className="flex flex-col text-color-1">
             <div className="my-4 font-heading text-2xl md:my-6">Stamps Found</div>
             <div>
               {" "}
@@ -154,7 +154,7 @@ export const RefreshMyStampsModalContent = ({
                 setSelectedProviders={setSelectedProviders}
               />
             </div>
-            <div className="mt-8 cursor-pointer text-center text-color-3 underline">
+            <div className="mt-8 cursor-pointer text-center text-color-2 underline">
               <a onClick={() => setShowDataInfo(!showDataInfo)}>How is my data stored?</a>
             </div>
             {showDataInfo && (
@@ -184,10 +184,10 @@ export const RefreshMyStampsModalContent = ({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center text-center text-white">
+          <div className="flex flex-col items-center text-center text-color-1">
             <div className="mt-4 mb-6 flex h-10 w-10"></div>
             <div className="w-3/4 text-3xl">No New Web3 Stamps Detected</div>
-            <div className="my-20 text-xl text-color-3">
+            <div className="my-20 text-xl text-color-2">
               We did not find any new Web3 stamps to add to your passport. Completing the actions for a web3 stamp and
               resubmitting will ensure that stamp is added (for example: Obtain an ENS name, NFT, etc.). Please return
               to the dashboard and select additional stamps to verify your unique humanity by connecting to external
