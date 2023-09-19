@@ -23,6 +23,7 @@ import { RemoveStampModal } from "./RemoveStampModal";
 import { getStampProviderFilters } from "../config/filters";
 import { FeatureFlags } from "../config/feature_flags";
 import { OnchainTag } from "./OnchainTag";
+import { Button } from "./Button";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -114,35 +115,36 @@ export const PlatformCard = ({
   // returns a single Platform card
   return (
     <div className={className} key={`${platform.name}${i}`}>
-      <div className="relative flex h-full flex-col border border-accent-2 bg-background-2 p-0">
-        <div className="m-4 md:m-6 md:mb-10">
-          <div className="flex flex-row">
-            <div className="flex h-10 w-10 flex-grow justify-center md:justify-start">
-              {platform.icon ? (
-                <img src={platform.icon} alt={platform.name} className="h-10 w-10" />
-              ) : (
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M24.7999 24.8002H28.7999V28.8002H24.7999V24.8002ZM14 24.8002H18V28.8002H14V24.8002ZM3.19995 24.8002H7.19995V28.8002H3.19995V24.8002ZM24.7999 14.0002H28.7999V18.0002H24.7999V14.0002ZM14 14.0002H18V18.0002H14V14.0002ZM3.19995 14.0002H7.19995V18.0002H3.19995V14.0002ZM24.7999 3.2002H28.7999V7.2002H24.7999V3.2002ZM14 3.2002H18V7.2002H14V3.2002ZM3.19995 3.2002H7.19995V7.2002H3.19995V3.2002Z"
-                    fill="var(--color-muted)"
-                  />
-                </svg>
-              )}
+      <div
+        style={{
+          background:
+            "linear-gradient(to bottom, var(--color-background) 30%, transparent 80%, var(--color-background-2) 100%)",
+        }}
+        className="relative flex h-full flex-col rounded-lg border border-foreground-6 bg-gradient-to-b from-background to-background-2 p-0"
+      >
+        <div className="m-6 flex h-full flex-col justify-between">
+          <div className="flex w-full items-center justify-between">
+            {platform.icon ? (
+              <img src={platform.icon} alt={platform.name} className="h-10 w-10" />
+            ) : (
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M24.7999 24.8002H28.7999V28.8002H24.7999V24.8002ZM14 24.8002H18V28.8002H14V24.8002ZM3.19995 24.8002H7.19995V28.8002H3.19995V24.8002ZM24.7999 14.0002H28.7999V18.0002H24.7999V14.0002ZM14 14.0002H18V18.0002H14V14.0002ZM3.19995 14.0002H7.19995V18.0002H3.19995V14.0002ZM24.7999 3.2002H28.7999V7.2002H24.7999V3.2002ZM14 3.2002H18V7.2002H14V3.2002ZM3.19995 3.2002H7.19995V7.2002H3.19995V3.2002Z"
+                  fill="var(--color-muted)"
+                />
+              </svg>
+            )}
+            <div className="text-right">
+              <h1 className="text-2xl text-color-2">2.61</h1>
+              <p className="text-xs">Available Points</p>
             </div>
-            {updatedPlatforms &&
-              platform?.enablePlatformCardUpdate &&
-              updatedPlatforms[platform.name] !== true &&
-              selectedProviders[platform.platform].length > 0 && (
-                <div className="inline-flex h-6 items-center rounded-xl border border-accent-3 px-2 text-xs text-accent-3">
-                  Update
-                </div>
-              )}
           </div>
-          <div className="mt-4 flex justify-center md:mt-6 md:block md:justify-start">
+
+          <div className="mt-4 flex justify-center md:mt-6 md:inline-block md:justify-start">
             <div
-              className={`flex flex-col place-items-start md:flex-row ${
+              className={`flex flex-col place-items-start text-color-2 md:flex-row ${
                 platform.name.split(" ").length > 1 ? "items-center md:items-baseline" : "items-center"
               }`}
             >
@@ -153,83 +155,15 @@ export const PlatformCard = ({
               </h1>
               {FeatureFlags.FF_CHAIN_SYNC && hasOnchainProviders() ? <OnchainTag /> : <></>}
             </div>
-            <p className="pleading-relaxed mt-2 hidden text-color-4 md:inline-block">{platform.description}</p>
+            <p className="pleading-relaxed mt-2 hidden text-base text-color-1 md:inline-block">
+              {platform.description}
+            </p>
           </div>
-        </div>
-        <div className="mt-auto text-color-3">
-          {selectedProviders[platform.platform].length > 0 ? (
-            <>
-              <Menu>
-                <MenuButton disabled={disabled} className="verify-btn flex" data-testid="card-menu-button">
-                  <div className="m-auto flex items-center justify-center">
-                    <ShieldCheckIcon className="h-6 w-5 text-accent-3" />
-                    <span className="mx-2 translate-y-[1px]">Verified</span>
-                    <ChevronDownIcon className="h-6 w-6" />
-                  </div>
-                </MenuButton>
-                <MenuList style={{ marginLeft: "16px" }}>
-                  <MenuItem onClick={onOpenJsonOutputModal} data-testid="view-json">
-                    View stamp JSON
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      setCurrentPlatform(platform);
-                      onOpen();
-                      if (platform.enablePlatformCardUpdate) {
-                        pillLocalStorage(platform.name);
-                      }
-                      getUpdatedPlatforms();
-                    }}
-                    data-testid="manage-stamp"
-                  >
-                    Manage stamp
-                  </MenuItem>
-                  <MenuItem onClick={onOpenRemoveStampModal} data-testid="remove-stamp">
-                    Remove stamp
-                  </MenuItem>
-                </MenuList>
-              </Menu>
-              <JsonOutputModal
-                isOpen={isOpenJsonOutputModal}
-                onClose={onCloseJsonOutputModal}
-                title={`${platform.name} JSON`}
-                subheading={`You can find the ${platform.name} JSON data below`}
-                jsonOutput={selectedProviders[platform.platform].map(
-                  (providerId) => allProvidersState[providerId]?.stamp?.credential
-                )}
-              />
-              <RemoveStampModal
-                isOpen={isOpenRemoveStampModal}
-                onClose={onCloseRemoveStampModal}
-                title={`Remove ${platform.name} Stamp`}
-                body={
-                  "This stamp will be removed from your Passport. You can still re-verify your stamp in the future."
-                }
-                stampsToBeDeleted={
-                  STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
-                    return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-                  }, [] as PROVIDER_ID[]) || []
-                }
-                handleDeleteStamps={handleDeleteStamps}
-                platformId={platform.name as PLATFORM_ID}
-              />
-            </>
-          ) : (
-            <button
-              className="verify-btn"
-              disabled={disabled}
-              ref={btnRef.current}
-              onClick={(e) => {
-                if (platform.enablePlatformCardUpdate) {
-                  pillLocalStorage(platform.platform);
-                }
-                setCurrentPlatform(platform);
-                onOpen();
-              }}
-            >
-              {platform.connectMessage}
-            </button>
-          )}
+          <div>
+            <Button variant="secondary" className="mt-5 w-auto bg-transparent">
+              Connect
+            </Button>
+          </div>
         </div>
       </div>
     </div>
