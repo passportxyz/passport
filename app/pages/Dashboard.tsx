@@ -16,6 +16,7 @@ import PageWidthGrid from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import Tooltip from "../components/Tooltip";
 import { DoneToastContent } from "../components/DoneToastContent";
+import { DashboardScorePanel } from "../components/DashboardScorePanel";
 
 // --Chakra UI Elements
 import {
@@ -131,7 +132,7 @@ export default function Dashboard() {
         render: (result: any) => (
           <DoneToastContent
             title="Failure"
-            message="Stamps weren't verifed. Please try again."
+            message="Stamps weren't verified. Please try again."
             icon={fail}
             result={result}
           />
@@ -260,23 +261,7 @@ export default function Dashboard() {
     () => (
       <PageWidthGrid className="my-4 min-h-[64px]">
         <div className="col-span-3 flex items-center justify-items-center self-center lg:col-span-4">
-          <div className="flex text-2xl">
-            <span className="font-heading">My {filterName && `${filterName} `}Stamps</span>
-            {filterName && (
-              <Link href="/dashboard">
-                <a>
-                  <span data-testid="select-all" className={`text-purple-connectPurple pl-2 text-sm`}>
-                    see all my stamps
-                  </span>
-                </a>
-              </Link>
-            )}
-            <Tooltip>
-              Gitcoin Passport is an identity aggregator that helps you build a digital identifier showcasing your
-              unique humanity. Select the verification stamps you&apos;d like to connect to start building your
-              passport. The more verifications you have&#44; the stronger your passport will be.
-            </Tooltip>
-          </div>
+          <div className="flex text-2xl"></div>
         </div>
         <div className={`col-span-1 col-end-[-1] flex justify-self-end`}>
           {isLiveAlloScoreEnabled && (
@@ -307,29 +292,6 @@ export default function Dashboard() {
 
           <div className="ml-4 flex flex-col place-items-center gap-4 self-center md:flex-row">
             {FeatureFlags.FF_CHAIN_SYNC && <InitiateOnChainButton />}
-            {passport ? (
-              <button
-                data-testid="button-passport-json-mobile"
-                className="h-10 w-10 rounded-md border border-muted"
-                onClick={onOpen}
-              >
-                {`</>`}
-              </button>
-            ) : (
-              <div
-                data-testid="loading-spinner-passport"
-                className="flex flex-row items-center rounded-md border-2 border-muted py-2 px-4"
-              >
-                <Spinner
-                  className="my-[2px]"
-                  thickness="2px"
-                  speed="0.65s"
-                  emptyColor="darkGray"
-                  color="gray"
-                  size="md"
-                />
-              </div>
-            )}
           </div>
         </div>
       </PageWidthGrid>
@@ -337,7 +299,6 @@ export default function Dashboard() {
     [filterName, onOpen, passport, score, rawScore, scoreDescription, passportSubmissionState]
   );
 
-  const ScorePanel = ({ className }: { className: string }) => <div className={className}>Score Panel</div>;
   const ValidStampsPanel = ({ className }: { className: string }) => (
     <div className={className}>Valid Stamps Panel</div>
   );
@@ -345,7 +306,11 @@ export default function Dashboard() {
     <div className={className}>Expired Stamps Panel</div>
   );
 
-  const BgImage = ({ className }: { className: string }) => <div className={className}>BgImage</div>;
+  const DashboardIllustration = ({ className }: { className: string }) => (
+    <div className={className}>
+      <img src="/assets/dashboardIllustration.png" />
+    </div>
+  );
 
   const SortMenu = ({ className }: { className: string }) => <button className={className}>Sort</button>;
 
@@ -353,11 +318,51 @@ export default function Dashboard() {
     <PageRoot className="text-color-1">
       {modals}
       <HeaderContentFooterGrid>
-        <Header subheader={subheader} />
+        <Header />
         <BodyWrapper className="mt-4 md:mt-6">
           <PageWidthGrid>
-            <ScorePanel className="col-span-full xl:col-span-8" />
-            <BgImage className="col-span-4 hidden xl:block" />
+            <div className="col-span-full xl:col-span-7 ">
+              <div className="flex items-center ">
+                <span className="mr-20 font-heading text-5xl">My {filterName && `${filterName} `}Stamps</span>
+                {passport ? (
+                  <button
+                    data-testid="button-passport-json-mobile"
+                    className="h-8 w-8 rounded-md border border-background-2 bg-background-4 text-foreground-3"
+                    onClick={onOpen}
+                    title="View Passport JSON"
+                  >
+                    {`</>`}
+                  </button>
+                ) : (
+                  <div
+                    data-testid="loading-spinner-passport"
+                    className="flex flex-row items-center rounded-md border-2 border-background-2 bg-background-4 py-1 px-[6px]"
+                  >
+                    <Spinner
+                      className="my-[2px]"
+                      thickness="2px"
+                      speed="0.65s"
+                      emptyColor="darkGray"
+                      color="gray"
+                      size="sm"
+                    />
+                  </div>
+                )}
+              </div>
+              {filterName && (
+                <div>
+                  <Link href="/#/dashboard">
+                    <a>
+                      <span data-testid="select-all" className={`pl-2 text-sm text-color-2`}>
+                        see all my stamps
+                      </span>
+                    </a>
+                  </Link>
+                </div>
+              )}
+            </div>
+            <DashboardIllustration className="col-start-8 col-end-[-1] row-span-2 hidden xl:block" />
+            <DashboardScorePanel className="col-span-full xl:col-span-7" />
             <span className="col-start-1 col-end-3 font-heading text-4xl">Add Stamps</span>
             <SortMenu className="col-end-[-1]" />
             <CardList
