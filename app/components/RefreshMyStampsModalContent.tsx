@@ -185,7 +185,7 @@ export const RefreshMyStampsModalContent = ({
           </div>
         ) : (
           <div className="flex flex-col items-center text-center text-color-1">
-            <div className="mt-4 mb-6 flex h-10 w-10"></div>
+            <div className="mb-6 mt-4 flex h-10 w-10"></div>
             <div className="w-3/4 text-3xl">No New Web3 Stamps Detected</div>
             <div className="my-20 text-xl text-color-2">
               We did not find any new Web3 stamps to add to your passport. Completing the actions for a web3 stamp and
@@ -205,7 +205,7 @@ export const RefreshMyStampsModalContent = ({
           </div>
         )}
       </div>
-      <div className="mt-8 mb-2 flex text-color-1">
+      <div className="mb-2 mt-8 flex text-color-1">
         <Checkbox
           data-testid="checkbox-onboard-hide"
           id="checkbox-onboard-hide"

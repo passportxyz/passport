@@ -54,8 +54,8 @@ export function StampSelector({
         if (hideStamp) return null;
 
         return (
-          <div key={i} className={`border-b border-accent-2 py-4 px-6 ${i ? "" : "border-t"}`}>
-            <p className="ml-4 mb-1 text-sm text-color-4">{stamp.platformGroup}</p>
+          <div key={i} className={`border-b border-accent-2 px-6 py-4 ${i ? "" : "border-t"}`}>
+            <p className="mb-1 ml-4 text-sm text-color-4">{stamp.platformGroup}</p>
             <div className="flex flex-row justify-between">
               <ul className="list-disc marker:text-3xl ">
                 {stamp.providers?.map((provider, i) => {

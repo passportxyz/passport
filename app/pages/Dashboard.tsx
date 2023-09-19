@@ -318,7 +318,7 @@ export default function Dashboard() {
             ) : (
               <div
                 data-testid="loading-spinner-passport"
-                className="flex flex-row items-center rounded-md border-2 border-muted py-2 px-4"
+                className="flex flex-row items-center rounded-md border-2 border-muted px-4 py-2"
               >
                 <Spinner
                   className="my-[2px]"
