@@ -73,21 +73,6 @@ export const PlatformCard = ({
 
   const disabled = passportHasCacaoError;
 
-  // check if platform has onchain providers
-  const hasOnchainProviders = () => {
-    const providers = selectedProviders[platform.platform];
-    if (!providers.length) return false;
-
-    return providers.some((provider: PROVIDER_ID) => {
-      const providerObj = activeChainProviders.find((p) => p.providerName === provider);
-      if (providerObj) {
-        return providerObj.credentialHash === allProvidersState[provider]?.stamp?.credential.credentialSubject.hash;
-      }
-
-      return false;
-    });
-  };
-
   // hide platforms based on filter
   const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;
   const hidePlatform = stampFilters && !Object.keys(stampFilters).includes(platform.platform);
@@ -126,7 +111,7 @@ export const PlatformCard = ({
                     fillRule="evenodd"
                     clipRule="evenodd"
                     d="M24.7999 24.8002H28.7999V28.8002H24.7999V24.8002ZM14 24.8002H18V28.8002H14V24.8002ZM3.19995 24.8002H7.19995V28.8002H3.19995V24.8002ZM24.7999 14.0002H28.7999V18.0002H24.7999V14.0002ZM14 14.0002H18V18.0002H14V14.0002ZM3.19995 14.0002H7.19995V18.0002H3.19995V14.0002ZM24.7999 3.2002H28.7999V7.2002H24.7999V3.2002ZM14 3.2002H18V7.2002H14V3.2002ZM3.19995 3.2002H7.19995V7.2002H3.19995V3.2002Z"
-                    fill="var(--color-muted)"
+                    fill="rgb(var(--color-muted))"
                   />
                 </svg>
               )}
@@ -151,7 +136,6 @@ export const PlatformCard = ({
               >
                 {platform.name}
               </h1>
-              {FeatureFlags.FF_CHAIN_SYNC && hasOnchainProviders() ? <OnchainTag /> : <></>}
             </div>
             <p className="pleading-relaxed mt-2 hidden text-color-4 md:inline-block">{platform.description}</p>
           </div>

@@ -17,6 +17,7 @@ import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import Tooltip from "../components/Tooltip";
 import { DoneToastContent } from "../components/DoneToastContent";
 import { DashboardScorePanel } from "../components/DashboardScorePanel";
+import { DashboardValidStampsPanel } from "../components/DashboardValidStampsPanel";
 
 // --Chakra UI Elements
 import {
@@ -33,26 +34,22 @@ import {
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 import { ScorerContext } from "../context/scorerContext";
-import { FeatureFlags } from "../config/feature_flags";
 
 import { useViewerConnection } from "@self.id/framework";
 import { EthereumAuthProvider } from "@self.id/web";
 import { ExpiredStampModal } from "../components/ExpiredStampModal";
 import ProcessingPopup from "../components/ProcessingPopup";
-import InitiateOnChainButton from "../components/InitiateOnChainButton";
 import { getFilterName } from "../config/filters";
 import { Button } from "../components/Button";
 
 // --- GTM Module
 import TagManager from "react-gtm-module";
 
-const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
-
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
 
 export default function Dashboard() {
-  const { passport, isLoadingPassport, passportHasCacaoError, cancelCeramicConnection, expiredProviders } =
+  const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms, cancelCeramicConnection, expiredProviders } =
     useContext(CeramicContext);
   const { wallet, toggleConnection, userWarning, setUserWarning } = useContext(UserContext);
   const { score, rawScore, refreshScore, scoreDescription, passportSubmissionState } = useContext(ScorerContext);
@@ -102,6 +99,14 @@ export default function Dashboard() {
   const filterName = filter?.length && typeof filter === "string" ? getFilterName(filter) : false;
 
   const toast = useToast();
+
+  const numPlatforms = useMemo(() => {
+    return Object.keys(Object.fromEntries(allPlatforms)).length;
+  }, [allPlatforms]);
+
+  const numVerifiedPlatforms = useMemo(() => {
+    return Object.keys(verifiedPlatforms).length;
+  }, [verifiedPlatforms]);
 
   // Route user to home when wallet is disconnected
   useEffect(() => {
@@ -257,62 +262,53 @@ export default function Dashboard() {
     </>
   );
 
-  const subheader = useMemo(
-    () => (
-      <PageWidthGrid className="my-4 min-h-[64px]">
-        <div className="col-span-3 flex items-center justify-items-center self-center lg:col-span-4">
-          <div className="flex text-2xl"></div>
-        </div>
-        <div className={`col-span-1 col-end-[-1] flex justify-self-end`}>
-          {isLiveAlloScoreEnabled && (
-            <div className={"flex min-w-fit items-center"}>
-              <div className={`pr-2 ${passportSubmissionState === "APP_REQUEST_PENDING" ? "visible" : "invisible"}`}>
-                <Spinner
-                  className="my-[2px]"
-                  thickness="2px"
-                  speed="0.65s"
-                  emptyColor="darkGray"
-                  color="gray"
-                  size="md"
-                />
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="flex text-2xl">
-                  {/* TODO add color to theme */}
-                  <span className={`${score == 1 ? "text-accent-3" : "text-[#FFE28A]"}`}>{rawScore.toFixed(2)}</span>
-                  <Tooltip>
-                    Your Unique Humanity Score is based out of 100 and measures how unique you are. The current passing
-                    score threshold is 20.
-                  </Tooltip>
-                </div>
-                <div className="flex whitespace-nowrap text-sm">{scoreDescription}</div>
-              </div>
-            </div>
-          )}
-
-          <div className="ml-4 flex flex-col place-items-center gap-4 self-center md:flex-row">
-            {FeatureFlags.FF_CHAIN_SYNC && <InitiateOnChainButton />}
-          </div>
-        </div>
-      </PageWidthGrid>
-    ),
-    [filterName, onOpen, passport, score, rawScore, scoreDescription, passportSubmissionState]
-  );
-
-  const ValidStampsPanel = ({ className }: { className: string }) => (
-    <div className={className}>Valid Stamps Panel</div>
-  );
   const ExpiredStampsPanel = ({ className }: { className: string }) => (
     <div className={className}>Expired Stamps Panel</div>
   );
 
   const DashboardIllustration = ({ className }: { className: string }) => (
     <div className={className}>
-      <img src="/assets/dashboardIllustration.png" />
+      <img alt="Shield" src="/assets/dashboardIllustration.png" />
     </div>
   );
 
   const SortMenu = ({ className }: { className: string }) => <button className={className}>Sort</button>;
+
+  const Subheader = ({ className }: { className: string }) => (
+    <div className={className}>
+      <div className="flex items-center ">
+        <span className="mr-20 font-heading text-5xl">My {filterName && `${filterName} `}Stamps</span>
+        {passport ? (
+          <button
+            data-testid="button-passport-json-mobile"
+            className="h-8 w-8 rounded-md border border-background-2 bg-background-4 text-foreground-3"
+            onClick={onOpen}
+            title="View Passport JSON"
+          >
+            {`</>`}
+          </button>
+        ) : (
+          <div
+            data-testid="loading-spinner-passport"
+            className="flex flex-row items-center rounded-md border-2 border-background-2 bg-background-4 py-1 px-[6px]"
+          >
+            <Spinner className="my-[2px]" thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="sm" />
+          </div>
+        )}
+      </div>
+      {filterName && (
+        <div>
+          <Link href="/#/dashboard">
+            <a>
+              <span data-testid="select-all" className={`pl-2 text-sm text-color-2`}>
+                see all my stamps
+              </span>
+            </a>
+          </Link>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <PageRoot className="text-color-1">
@@ -321,49 +317,10 @@ export default function Dashboard() {
         <Header />
         <BodyWrapper className="mt-4 md:mt-6">
           <PageWidthGrid>
-            <div className="col-span-full xl:col-span-7 ">
-              <div className="flex items-center ">
-                <span className="mr-20 font-heading text-5xl">My {filterName && `${filterName} `}Stamps</span>
-                {passport ? (
-                  <button
-                    data-testid="button-passport-json-mobile"
-                    className="h-8 w-8 rounded-md border border-background-2 bg-background-4 text-foreground-3"
-                    onClick={onOpen}
-                    title="View Passport JSON"
-                  >
-                    {`</>`}
-                  </button>
-                ) : (
-                  <div
-                    data-testid="loading-spinner-passport"
-                    className="flex flex-row items-center rounded-md border-2 border-background-2 bg-background-4 py-1 px-[6px]"
-                  >
-                    <Spinner
-                      className="my-[2px]"
-                      thickness="2px"
-                      speed="0.65s"
-                      emptyColor="darkGray"
-                      color="gray"
-                      size="sm"
-                    />
-                  </div>
-                )}
-              </div>
-              {filterName && (
-                <div>
-                  <Link href="/#/dashboard">
-                    <a>
-                      <span data-testid="select-all" className={`pl-2 text-sm text-color-2`}>
-                        see all my stamps
-                      </span>
-                    </a>
-                  </Link>
-                </div>
-              )}
-            </div>
+            <Subheader className="col-span-full xl:col-span-7 " />
             <DashboardIllustration className="col-start-8 col-end-[-1] row-span-2 hidden xl:block" />
-            <DashboardScorePanel className="col-span-full xl:col-span-7" />
-            <span className="col-start-1 col-end-3 font-heading text-4xl">Add Stamps</span>
+            <DashboardScorePanel className="col-span-full xl:col-span-7 xl:max-h-52" />
+            <span className="col-start-1 col-end-4 font-heading text-4xl">Add Stamps</span>
             <SortMenu className="col-end-[-1]" />
             <CardList
               className="col-span-full"
@@ -374,8 +331,10 @@ export default function Dashboard() {
               }
             />
             <span className="col-start-1 col-end-4 font-heading text-3xl">Add Collected Stamps</span>
-            <span className="col-end-[-1]">3/50</span>
-            <ValidStampsPanel className="col-span-full my-8" />
+            <span className="col-end-[-1] self-center font-alt text-3xl text-foreground-2">
+              {numVerifiedPlatforms}/{numPlatforms}
+            </span>
+            <DashboardValidStampsPanel className="col-span-full" />
             <ExpiredStampsPanel className="col-span-full" />
           </PageWidthGrid>
         </BodyWrapper>

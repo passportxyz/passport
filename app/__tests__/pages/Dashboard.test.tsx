@@ -169,7 +169,7 @@ describe.only("dashboard notifications", () => {
         <Dashboard />
       </Router>
     );
-    expect(screen.getByText("Stamps weren't verifed. Please try again.")).toBeInTheDocument();
+    expect(screen.getByText("Stamps weren't verified. Please try again.")).toBeInTheDocument();
   });
   it("should show a loading stamps alert", () => {
     (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }]);

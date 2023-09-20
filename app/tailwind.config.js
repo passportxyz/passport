@@ -8,26 +8,27 @@ module.exports = {
     },
     extend: {
       colors: {
-        background: "var(--color-background)",
-        "background-2": "var(--color-background-2)",
-        "background-3": "var(--color-background-3)",
-        "background-4": "var(--color-background-4)",
-        foreground: "var(--color-foreground)",
-        "foreground-2": "var(--color-foreground-2)",
-        "foreground-3": "var(--color-foreground-3)",
-        "foreground-4": "var(--color-foreground-4)",
-        "foreground-5": "var(--color-foreground-5)",
-        "foreground-6": "var(--color-foreground-6)",
+        background: "rgb(var(--color-background) / <alpha-value>)",
+        "background-1": "rgb(var(--color-background-1) / <alpha-value>)",
+        "background-2": "rgb(var(--color-background-2) / <alpha-value>)",
+        "background-3": "rgb(var(--color-background-3) / <alpha-value>)",
+        "background-4": "rgb(var(--color-background-4) / <alpha-value>)",
+        foreground: "rgb(var(--color-foreground) / <alpha-value>)",
+        "foreground-2": "rgb(var(--color-foreground-2) / <alpha-value>)",
+        "foreground-3": "rgb(var(--color-foreground-3) / <alpha-value>)",
+        "foreground-4": "rgb(var(--color-foreground-4) / <alpha-value>)",
+        "foreground-5": "rgb(var(--color-foreground-5) / <alpha-value>)",
+        "foreground-6": "rgb(var(--color-foreground-6) / <alpha-value>)",
 
         // Text Colors
         // using this naming convention
         // so that e.g. text-color-1 can be used
         //
         // Don't use these for non-text colors
-        "color-1": "var(--color-text-1)",
-        "color-2": "var(--color-text-2)",
-        "color-3": "var(--color-text-3)",
-        "color-4": "var(--color-text-4)",
+        "color-1": "rgb(var(--color-text-1) / <alpha-value>)",
+        "color-2": "rgb(var(--color-text-2) / <alpha-value>)",
+        "color-3": "rgb(var(--color-text-3) / <alpha-value>)",
+        "color-4": "rgb(var(--color-text-4) / <alpha-value>)",
 
         // Temporary, to be removed
         accent: "#000",

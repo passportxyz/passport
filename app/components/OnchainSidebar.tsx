@@ -17,8 +17,8 @@ export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
       <DrawerOverlay />
       <DrawerContent
         style={{
-          backgroundColor: "var(--color-background-2)",
-          border: "1px solid var(--color-foreground-6)",
+          backgroundColor: "rgb(var(--color-background))",
+          border: "1px solid rgb(var(--color-foreground-3))",
           borderRadius: "6px",
         }}
       >
