@@ -57,6 +57,16 @@ module.exports = {
       heading: ["var(--font-heading)"],
       alt: ["var(--font-alt)"],
     },
+    backgroundSize: {
+      "size-200": "200% 200%",
+    },
+    backgroundPosition: {
+      "pos-0": "0% 0%",
+      "pos-100": "100% 100%",
+    },
+    boxShadow: {
+      background3: "0 0 25px var(--color-background-3)",
+    },
   },
   plugins: [require("@headlessui/tailwindcss")],
 };

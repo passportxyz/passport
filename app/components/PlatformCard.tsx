@@ -1,5 +1,5 @@
 // --- React Methods
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useRouter } from "next/router";
 
 // --- Chakra UI Elements
@@ -53,6 +53,7 @@ export const PlatformCard = ({
   // import all providers
   const { allProvidersState, passportHasCacaoError, handleDeleteStamps } = useContext(CeramicContext);
   const { activeChainProviders } = useContext(OnChainContext);
+  const [showCardImg, setShowCardImg] = useState(false);
 
   // stamp filter
   const router = useRouter();
@@ -116,12 +117,17 @@ export const PlatformCard = ({
   return (
     <div className={className} key={`${platform.name}${i}`}>
       <div
-        style={{
-          background:
-            "linear-gradient(to bottom, var(--color-background) 30%, transparent 80%, var(--color-background-2) 100%)",
-        }}
-        className="relative flex h-full flex-col rounded-lg border border-foreground-6 bg-gradient-to-b from-background to-background-2 p-0"
+        onMouseEnter={() => setShowCardImg(true)}
+        onMouseLeave={() => setShowCardImg(false)}
+        className="duration-800 relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-6 bg-gradient-to-b from-background to-[#06153D] bg-size-200 bg-pos-0 p-0 transition-all hover:border-background-3 hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-background-2 hover:to-background-3 hover:bg-pos-100 hover:shadow-background3"
       >
+        {showCardImg && (
+          <img
+            src="./assets/card-background.svg"
+            alt="Honey Comb background image for stamp"
+            className="absolute bottom-0 right-0"
+          />
+        )}
         <div className="m-6 flex h-full flex-col justify-between">
           <div className="flex w-full items-center justify-between">
             {platform.icon ? (
@@ -160,7 +166,7 @@ export const PlatformCard = ({
             </p>
           </div>
           <div>
-            <Button variant="secondary" className="mt-5 w-auto bg-transparent">
+            <Button variant="secondary" className="mt-5 w-auto bg-transparent hover:bg-transparent">
               Connect
             </Button>
           </div>
