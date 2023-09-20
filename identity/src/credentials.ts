@@ -148,13 +148,12 @@ export const issueChallengeCredential = async (
       { expiresInSeconds: CHALLENGE_EXPIRES_AFTER_SECONDS },
       {
         credentialSubject: {
-          "@context": [
-            {
-              provider: "https://schema.org/Text",
-              challenge: "https://schema.org/Text",
-              address: "https://schema.org/Text",
-            },
-          ],
+          "@context": {
+            provider: "https://schema.org/Text",
+            challenge: "https://schema.org/Text",
+            address: "https://schema.org/Text",
+          },
+
           id: `did:pkh:eip155:1:${record.address}`,
           provider: `challenge-${record.type}`,
           // extra fields to convey challenge data
@@ -218,13 +217,11 @@ export const issueHashedCredential = async (
       { expiresInSeconds },
       {
         credentialSubject: {
-          "@context": [
-            {
-              hash: "https://schema.org/Text",
-              metaPointer: "https://schema.org/URL",
-              provider: "https://schema.org/Text",
-            },
-          ],
+          "@context": {
+            hash: "https://schema.org/Text",
+            metaPointer: "https://schema.org/URL",
+            provider: "https://schema.org/Text",
+          },
 
           // construct a pkh DID on mainnet (:1) for the given wallet address
           id: `did:pkh:eip155:1:${address}`,
