@@ -30,6 +30,7 @@ import {
   DocumentType,
   stampCredentialDocument,
 } from "./signingDocuments";
+import { escape } from "querystring";
 
 // Control expiry times of issued credentials
 export const CHALLENGE_EXPIRES_AFTER_SECONDS = 60; // 1min
@@ -104,31 +105,33 @@ export const issueEip712Credential = async (
   additionalContexts: string[] = []
 ): Promise<VerifiableCredential> => {
   // get DID from key
-  const issuer = DIDKit.keyToDID("ethr", key);
+  try {
+    const issuer = DIDKit.keyToDID("ethr", key);
 
-  const expiresInSeconds = (expiration as CredentialExiresInSeconds).expiresInSeconds;
-  const expirationDate =
-    expiresInSeconds !== undefined
-      ? addSeconds(new Date(), expiresInSeconds).toISOString()
-      : (expiration as CredentialExiresAt).expiresAt.toISOString();
-  const credentialInput = {
-    "@context": ["https://www.w3.org/2018/credentials/v1", ...additionalContexts],
-    type: ["VerifiableCredential"],
-    issuer,
-    issuanceDate: new Date().toISOString(),
-    expirationDate,
-    ...fields,
-  };
+    const expiresInSeconds = (expiration as CredentialExiresInSeconds).expiresInSeconds;
+    const expirationDate =
+      expiresInSeconds !== undefined
+        ? addSeconds(new Date(), expiresInSeconds).toISOString()
+        : (expiration as CredentialExiresAt).expiresAt.toISOString();
+    const credentialInput = {
+      "@context": ["https://www.w3.org/2018/credentials/v1", ...additionalContexts],
+      type: ["VerifiableCredential"],
+      issuer,
+      issuanceDate: new Date().toISOString(),
+      expirationDate,
+      ...fields,
+    };
 
-  const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);
-  const options = {
-    verificationMethod,
-    type: "EthereumEip712Signature2021",
-  };
-  const credential = await DIDKit.issueCredential(JSON.stringify(credentialInput), JSON.stringify(options), key);
+    // const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);
+    const options = signingDocument;
+    const credential = await DIDKit.issueCredential(JSON.stringify(credentialInput), JSON.stringify(options), key);
 
-  // parse the response of the DIDKit wasm
-  return JSON.parse(credential) as VerifiableCredential;
+    // parse the response of the DIDKit wasm
+    return JSON.parse(credential) as VerifiableCredential;
+  } catch (e) {
+    console.error("!!!!!!!!!!!!!!!");
+    console.error(e);
+  }
 };
 
 // Issue a VC with challenge data
@@ -149,11 +152,13 @@ export const issueChallengeCredential = async (
       { expiresInSeconds: CHALLENGE_EXPIRES_AFTER_SECONDS },
       {
         credentialSubject: {
-          "@context": {
-            provider: "https://schema.org/Text",
-            challenge: "https://schema.org/Text",
-            address: "https://schema.org/Text",
-          },
+          "@context": [
+            {
+              provider: "https://schema.org/Text",
+              challenge: "https://schema.org/Text",
+              address: "https://schema.org/Text",
+            },
+          ],
           id: `did:pkh:eip155:1:${record.address}`,
           provider: `challenge-${record.type}`,
           // extra fields to convey challenge data
@@ -217,18 +222,18 @@ export const issueHashedCredential = async (
       { expiresInSeconds },
       {
         credentialSubject: {
-          "@context": {
-            customInfo: "https://schema.org/Thing",
-            hash: "https://schema.org/Text",
-            metaPointer: "https://schema.org/URL",
-            provider: "https://schema.org/Text",
-          },
+          "@context": [
+            {
+              hash: "https://schema.org/Text",
+              metaPointer: "https://schema.org/URL",
+              provider: "https://schema.org/Text",
+            },
+          ],
 
           // construct a pkh DID on mainnet (:1) for the given wallet address
           id: `did:pkh:eip155:1:${address}`,
           provider: record.type,
-          metaPointer,
-          customInfo: {},
+          metaPointer: metaPointer ? metaPointer : "https://passporet.gitcoin.co",
           hash: `${VERSION}:${hash}`,
         },
         // https://www.w3.org/TR/vc-status-list/#statuslist2021entry
