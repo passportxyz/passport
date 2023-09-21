@@ -18,6 +18,7 @@ import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { CeramicContext } from "../context/ceramicContext";
 import { PlatformCard } from "./PlatformCard";
 import PageWidthGrid from "../components/PageWidthGrid";
+import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
 
 export type CardListProps = {
   isLoading?: boolean;
@@ -38,6 +39,7 @@ export const getStampProviderIds = (platform: PLATFORM_ID): PROVIDER_ID[] => {
 
 export const CardList = ({ className, isLoading = false }: CardListProps): JSX.Element => {
   const { allProvidersState, allPlatforms } = useContext(CeramicContext);
+  const { scoredPlatforms } = useContext(ScorerContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef();
   const [currentPlatform, setCurrentPlatform] = useState<PlatformSpec | undefined>();
@@ -117,10 +119,22 @@ export const CardList = ({ className, isLoading = false }: CardListProps): JSX.E
     }
   }, [currentPlatform]);
 
+  const [verified, unverified] = scoredPlatforms.reduce(
+    ([verified, unverified], platform): [PlatformScoreSpec[], PlatformScoreSpec[]] => {
+      return platform.earnedPoints === 0
+        ? [verified, [...unverified, platform]]
+        : [[...verified, platform], unverified];
+    },
+    [[], []] as [PlatformScoreSpec[], PlatformScoreSpec[]]
+  );
+
   return (
     <>
       <PageWidthGrid className={className}>
-        {PLATFORMS.sort((platform) => (selectedProviders[platform.platform].length > 0 ? 1 : -1)).map((platform, i) => {
+        {[
+          ...unverified.sort((a, b) => b.possiblePoints - a.possiblePoints),
+          ...verified.sort((platform) => platform.earnedPoints - platform.possiblePoints),
+        ].map((platform, i) => {
           return isLoading ? (
             <LoadingCard key={i} className={cardClassName} />
           ) : (

@@ -144,7 +144,14 @@ export const PlatformCard = ({
 
   // returns a single Platform card
   return (
-    <div className={className} key={`${platform.name}${i}`}>
+    <div
+      onClick={() => {
+        setCurrentPlatform(platform);
+        onOpen();
+      }}
+      className={className}
+      key={`${platform.name}${i}`}
+    >
       <div onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)} className={platformClasses}>
         {hovering && !hasProviders && (
           <img
