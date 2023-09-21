@@ -157,7 +157,6 @@ export const PlatformCard = ({
               >
                 {platform.name}
               </h1>
-              {FeatureFlags.FF_CHAIN_SYNC && hasOnchainProviders() ? <OnchainTag /> : <></>}
             </div>
             <p className="pleading-relaxed mt-2 hidden text-base text-color-1 md:inline-block">
               {platform.description}

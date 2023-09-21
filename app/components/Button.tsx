@@ -18,7 +18,7 @@ export const Button = ({ variant, className, ...props }: ButtonProps) => {
 
   return (
     <button
-      className={`group flex items-center justify-center gap-4 rounded-md px-5 py-2 text-color-1
+      className={`group flex items-center justify-center gap-4 rounded-md px-5 py-2 font-alt text-base text-color-1
         disabled:cursor-not-allowed disabled:bg-foreground-3 disabled:brightness-75
         ${variantClassName} ${className}`}
       {...props}

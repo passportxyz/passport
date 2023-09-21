@@ -87,7 +87,7 @@ export const RefreshMyStampsModalContentCard = ({
               }}
             />
           </div>
-          <AccordionPanel borderTop="1px solid var(--color-foreground-6)" padding="0">
+          <AccordionPanel borderTop="1px solid rgb(var(--color-foreground-6))" padding="0">
             <RefreshMyStampsSelector
               validPlatformGroups={platformGroups}
               selectedProviders={selectedProviders}

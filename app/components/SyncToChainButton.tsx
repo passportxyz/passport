@@ -74,9 +74,10 @@ export const ErrorDetails = ({ msg, ethersError }: ErrorDetailsProps): JSX.Eleme
 export type SyncToChainProps = {
   onChainStatus: OnChainStatus;
   chain: Chain;
+  className?: string;
 };
 
-export function SyncToChainButton({ onChainStatus, chain }: SyncToChainProps): JSX.Element {
+export function SyncToChainButton({ onChainStatus, chain, className }: SyncToChainProps): JSX.Element {
   const { attestationProvider } = chain;
   const { passport } = useContext(CeramicContext);
   const { wallet, address } = useContext(UserContext);
@@ -302,7 +303,7 @@ export function SyncToChainButton({ onChainStatus, chain }: SyncToChainProps): J
 
   return (
     <button
-      className={`verify-btn center ${disableBtn && "cursor-not-allowed"} flex justify-center`}
+      className={`center ${disableBtn && "cursor-not-allowed"} flex w-full justify-center p-2 ${className}`}
       data-testid="sync-to-chain-button"
       onClick={() => onInitiateSyncToChain(wallet, passport)}
       disabled={disableBtn}
@@ -312,7 +313,7 @@ export function SyncToChainButton({ onChainStatus, chain }: SyncToChainProps): J
       </div>
       <span
         className={`mx-1 translate-y-[1px] ${syncingToChain ? "hidden" : "block"} ${
-          onChainStatus === OnChainStatus.MOVED_UP_TO_DATE ? "text-accent-3" : "text-muted"
+          onChainStatus === OnChainStatus.MOVED_UP_TO_DATE ? "text-foreground-6" : "text-foreground-2"
         }`}
       >
         {isActive ? getButtonMsg(onChainStatus) : "Coming Soon"}

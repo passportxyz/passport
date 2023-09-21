@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useRef, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useRef, useMemo } from "react";
 import {
   Passport,
   PassportLoadResponse,
@@ -68,6 +68,8 @@ export interface CeramicContextState {
   expiredProviders: PROVIDER_ID[];
   passportHasCacaoError: boolean;
   passportLoadResponse?: PassportLoadResponse;
+  verifiedProviderIds: PROVIDER_ID[];
+  verifiedPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>>;
 }
 
 export const platforms = new Map<PLATFORM_ID, PlatformProps>();
@@ -298,9 +300,9 @@ const startingState: CeramicContextState = {
   userDid: undefined,
   expiredProviders: [],
   passportLoadResponse: undefined,
+  verifiedProviderIds: [],
+  verifiedPlatforms: {},
 };
-
-const CERAMIC_TIMEOUT_MS = process.env.CERAMIC_TIMEOUT_MS || "10000";
 
 export const CeramicContext = createContext(startingState);
 
@@ -613,6 +615,29 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     setAllProviderState(startingAllProvidersState);
   };
 
+  const verifiedProviderIds = useMemo(
+    () =>
+      Object.entries(allProvidersState).reduce((providerIds, [providerId, providerState]) => {
+        if (typeof providerState?.stamp?.credential !== "undefined") providerIds.push(providerId as PROVIDER_ID);
+        return providerIds;
+      }, [] as PROVIDER_ID[]),
+    [allProvidersState]
+  );
+
+  const verifiedPlatforms = useMemo(
+    () =>
+      Object.entries(Object.fromEntries(platforms)).reduce((validPlatformProps, [platformKey, platformProps]) => {
+        if (
+          platformProps.platFormGroupSpec.some(({ providers }) =>
+            providers.some(({ name }) => verifiedProviderIds.includes(name))
+          )
+        )
+          validPlatformProps[platformKey as PLATFORM_ID] = platformProps;
+        return validPlatformProps;
+      }, {} as Record<PLATFORM_ID, PlatformProps>),
+    [verifiedProviderIds, platforms]
+  );
+
   const providerProps = {
     passport,
     isLoadingPassport,
@@ -627,6 +652,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     expiredProviders,
     passportLoadResponse,
     passportHasCacaoError,
+    verifiedProviderIds,
+    verifiedPlatforms,
   };
 
   return <CeramicContext.Provider value={providerProps}>{children}</CeramicContext.Provider>;

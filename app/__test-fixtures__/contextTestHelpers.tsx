@@ -139,6 +139,8 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
     expiredProviders: [],
     passportHasCacaoError: false,
     cancelCeramicConnection: jest.fn(),
+    verifiedProviderIds: [],
+    verifiedPlatforms: {},
     ...initialState,
   };
 };
