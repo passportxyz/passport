@@ -115,7 +115,7 @@ export const CardList = ({ className, isLoading = false }: CardListProps): JSX.E
   return (
     <>
       <PageWidthGrid className={className}>
-        {PLATFORMS.map((platform, i) => {
+        {PLATFORMS.sort((platform) => (selectedProviders[platform.platform].length > 0 ? 1 : -1)).map((platform, i) => {
           return isLoading ? (
             <LoadingCard key={i} className={cardClassName} />
           ) : (
