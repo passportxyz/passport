@@ -1,8 +1,8 @@
 import type { ComponentStyleConfig } from "@chakra-ui/theme";
 
 const hoverStyle = {
-  bg: "var(--color-background-3)",
-  color: "var(--color-text-1)",
+  bg: "rgb(var(--color-background-3))",
+  color: "rgb(var(--color-text-1))",
 };
 
 const Menu: ComponentStyleConfig = {
@@ -13,8 +13,8 @@ const Menu: ComponentStyleConfig = {
       _focus: hoverStyle,
     },
     list: {
-      background: "var(--color-background)",
-      borderColor: "var(--color-background-3)",
+      background: "rgb(var(--color-background))",
+      borderColor: "rgb(var(--color-background-3))",
     },
   },
 };

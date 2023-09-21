@@ -66,7 +66,7 @@ type GenericPlatformProps = PlatformProps & { onClose: () => void };
 
 export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: GenericPlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
-  const { handlePatchStamps, allProvidersState, userDid } = useContext(CeramicContext);
+  const { handlePatchStamps, verifiedProviderIds, allProvidersState, userDid } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [showNoStampModal, setShowNoStampModal] = useState(false);
@@ -88,9 +88,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
 
   // VerifiedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
-    platformProviderIds.filter(
-      (providerId: any) => typeof allProvidersState[providerId as PROVIDER_ID]?.stamp?.credential !== "undefined"
-    )
+    platformProviderIds.filter((providerId: any) => verifiedProviderIds.includes(providerId))
   );
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);

@@ -8,8 +8,6 @@ import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
 
 const scorerApiGetScore = CERAMIC_CACHE_ENDPOINT + "/score";
 
-const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
-
 export type PassportSubmissionStateType =
   | "APP_INITIAL"
   | "APP_REQUEST_PENDING"
@@ -89,9 +87,6 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     dbAccessToken: string
     // submitPassportOnFailure: boolean = true
   ) => {
-    if (!isLiveAlloScoreEnabled) {
-      return;
-    }
     if (address) {
       const maxRequests = 30;
       let sleepTime = 1000;

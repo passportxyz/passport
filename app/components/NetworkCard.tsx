@@ -74,7 +74,7 @@ export function NetworkCard({ chain }: { chain: Chain }) {
   }, [allProvidersState, chain.id, onChainProviders, onChainScores, rawScore, scoreState]);
 
   return (
-    <div className="mb-6 border border-accent-2 bg-background-2 p-0">
+    <div className="mb-6 rounded border border-foreground-6 bg-background-4 p-0 text-color-2">
       <div className="mx-4 my-2">
         <div className="flex w-full">
           <div className="mr-4 mt-1">
@@ -83,17 +83,15 @@ export function NetworkCard({ chain }: { chain: Chain }) {
           <div>
             <div className="flex w-full flex-col">
               <h1 className="text-lg text-color-1">{chain.label}</h1>
-              {FeatureFlags.FF_LINEA_ATTESTATIONS && (
-                <h2 className="text-sm text-color-4">{chain.attestationProvider?.name}</h2>
-              )}
-              <p className="mt-2 text-color-4 md:inline-block">
+              {FeatureFlags.FF_LINEA_ATTESTATIONS && <h2 className="text-sm">{chain.attestationProvider?.name}</h2>}
+              <p className="mt-2 md:inline-block">
                 {onChainLastUpdates[chain.id] ? onChainLastUpdates[chain.id].toLocaleString() : "Not moved yet"}
               </p>
             </div>
           </div>
         </div>
       </div>
-      <SyncToChainButton onChainStatus={onChainStatus} chain={chain} />
+      <SyncToChainButton className="border-t border-foreground-6" onChainStatus={onChainStatus} chain={chain} />
     </div>
   );
 }

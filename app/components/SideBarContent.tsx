@@ -53,8 +53,8 @@ export const SideBarContent = ({
   return (
     <DrawerContent
       style={{
-        backgroundColor: "var(--color-background-2)",
-        border: "1px solid var(--color-accent-2)",
+        backgroundColor: "rgb(var(--color-background-2))",
+        border: "1px solid rgb(var(--color-accent-2))",
         borderRadius: "6px",
       }}
     >

@@ -4,7 +4,7 @@ import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { usePopper } from "react-popper";
 
 const TextAlignedInfoIcon = (): JSX.Element => (
-  <InformationCircleIcon className="relative top-[.125em] h-[1em] w-[1em] text-muted" />
+  <InformationCircleIcon className="relative top-[.125em] h-[1em] w-[1em] text-color-2" />
 );
 
 const TooltipPopover = ({ children }: { children: React.ReactNode }) => {
@@ -33,7 +33,7 @@ const TooltipPopover = ({ children }: { children: React.ReactNode }) => {
 
       <Popover.Panel
         ref={setPopperElement as unknown as Ref<HTMLDivElement>}
-        className={`invisible z-10 w-4/5 max-w-screen-md rounded-md border border-accent-2 bg-background text-sm group-hover:visible`}
+        className={`invisible z-10 w-4/5 max-w-screen-md rounded-md border border-foreground-6 bg-background text-sm text-color-1 group-hover:visible`}
         style={styles.popper}
         {...attributes.popper}
         static
