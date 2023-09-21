@@ -1,37 +1,28 @@
 // --- React Methods
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { useRouter } from "next/router";
-
-// --- Chakra UI Elements
-import { useDisclosure, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
-import { ShieldCheckIcon } from "@heroicons/react/20/solid";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 // --- Types
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
-import { STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
+import { UpdatedPlatforms } from "../config/providers";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
 import { OnChainContext } from "../context/onChainContext";
-import { pillLocalStorage } from "../context/userContext";
 
 // --- Components
-import { JsonOutputModal } from "./JsonOutputModal";
-import { RemoveStampModal } from "./RemoveStampModal";
 import { getStampProviderFilters } from "../config/filters";
 import { FeatureFlags } from "../config/feature_flags";
 import { OnchainTag } from "./OnchainTag";
 import { Button } from "./Button";
-import { ScorerContext, Weights } from "../context/scorerContext";
-import { getStampProviderIds } from "./CardList";
+import { PlatformScoreSpec } from "../context/scorerContext";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
 type PlatformCardProps = {
   i: number;
-  platform: PlatformSpec;
+  platform: PlatformScoreSpec;
   selectedProviders: SelectedProviders;
   updatedPlatforms: UpdatedPlatforms | undefined;
   btnRef: React.MutableRefObject<undefined>;
@@ -53,31 +44,13 @@ export const PlatformCard = ({
   className,
 }: PlatformCardProps): JSX.Element => {
   // import all providers
-  const { allProvidersState, passportHasCacaoError, handleDeleteStamps } = useContext(CeramicContext);
+  const { allProvidersState } = useContext(CeramicContext);
   const { activeChainProviders } = useContext(OnChainContext);
-  const { stampWeights, stampScores } = useContext(ScorerContext);
   const [hovering, setHovering] = useState(false);
-  const [possiblePoints, setPossiblePoints] = useState(0);
 
   // stamp filter
   const router = useRouter();
   const { filter } = router.query;
-
-  // useDisclosure to control JSON modal
-  const {
-    isOpen: isOpenJsonOutputModal,
-    onOpen: onOpenJsonOutputModal,
-    onClose: onCloseJsonOutputModal,
-  } = useDisclosure();
-
-  // useDisclosure to control stamp removal modal
-  const {
-    isOpen: isOpenRemoveStampModal,
-    onOpen: onOpenRemoveStampModal,
-    onClose: onCloseRemoveStampModal,
-  } = useDisclosure();
-
-  const disabled = passportHasCacaoError;
 
   // check if platform has onchain providers
   const hasOnchainProviders = () => {
@@ -93,18 +66,6 @@ export const PlatformCard = ({
       return false;
     });
   };
-
-  useEffect(() => {
-    if (stampWeights && stampScores) {
-      const providerIds = getStampProviderIds(platform.platform);
-      const availablePoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampWeights[key]) || 0), 0);
-      const earnedPoints = selectedProviders[platform.platform].reduce(
-        (acc, key) => acc + (parseFloat(stampScores[key]) || 0),
-        0
-      );
-      setPossiblePoints(availablePoints - earnedPoints);
-    }
-  }, [platform.platform, stampWeights, stampScores, selectedProviders]);
 
   // hide platforms based on filter
   const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;
@@ -129,12 +90,12 @@ export const PlatformCard = ({
 
   if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS !== "on" && platform.platform === "TrustaLabs") return <></>;
 
-  const hasProviders = selectedProviders[platform.platform].length > 0;
-  const platformClasses = hasProviders
+  const verified = platform.earnedPoints > 0;
+  const platformClasses = verified
     ? "duration-800 relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-3 p-0 transition-all hover:border-foreground-4 hover:bg-opacity-100 hover:bg-gradient-to-b hover:shadow-background-3-10 override-text-color text-foreground-3 hover:text-color-2"
     : "duration-800 relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-6 bg-gradient-to-b from-background to-[#06153D] bg-size-200 bg-pos-0 p-0 transition-all hover:border-background-3 hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-background-2 hover:to-background-3 hover:bg-pos-100 hover:shadow-background-3-25";
 
-  const imgFilter = hasProviders
+  const imgFilter = verified
     ? {
         filter: `invert(31%) sepia(13%) saturate(1992%) hue-rotate(100deg) brightness(67%) contrast(85%) grayscale(${
           hovering ? "70%" : "100%"
@@ -153,7 +114,7 @@ export const PlatformCard = ({
       key={`${platform.name}${i}`}
     >
       <div onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)} className={platformClasses}>
-        {hovering && !hasProviders && (
+        {hovering && !verified && (
           <img
             src="./assets/card-background.svg"
             alt="Honey Comb background image for stamp"
@@ -164,7 +125,7 @@ export const PlatformCard = ({
           <div className="flex w-full items-center justify-between">
             {platform.icon ? (
               <div style={imgFilter}>
-                <img src={platform.icon} alt={platform.name} className={`h-10 w-10 ${hasProviders && "grayscale"}`} />
+                <img src={platform.icon} alt={platform.name} className={`h-10 w-10 ${verified && "grayscale"}`} />
               </div>
             ) : (
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -177,7 +138,9 @@ export const PlatformCard = ({
               </svg>
             )}
             <div className={`text-right`}>
-              <h1 className="text-2xl text-color-2">{possiblePoints.toFixed(2)}</h1>
+              <h1 data-testid="available-points" className="text-2xl text-color-2">
+                {(platform.possiblePoints - platform.earnedPoints).toFixed(2)}
+              </h1>
               <p className="text-xs">Available Points</p>
             </div>
           </div>
@@ -189,6 +152,7 @@ export const PlatformCard = ({
               }`}
             >
               <h1
+                data-testid="platform-name"
                 className={`mr-0 text-lg md:mr-4 ${platform.name.split(" ").length > 1 ? "text-left" : "text-center"}`}
               >
                 {platform.name}
@@ -201,12 +165,13 @@ export const PlatformCard = ({
           </div>
           <div>
             <Button
+              data-testid="connect-button"
               variant="secondary"
               className={`mt-5 w-auto bg-transparent hover:bg-transparent ${
-                hasProviders && "hover:border-text-2 border-foreground-3"
+                verified && "hover:border-text-2 border-foreground-3"
               }`}
             >
-              Connect
+              {verified ? "Verified" : "Connect"}
             </Button>
           </div>
         </div>

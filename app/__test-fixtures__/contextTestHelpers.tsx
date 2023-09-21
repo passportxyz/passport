@@ -1,4 +1,5 @@
 import { UserContext, UserContextState } from "../context/userContext";
+import { ScorerContext, ScorerContextState } from "../context/scorerContext";
 import { CeramicContext, CeramicContextState, IsLoadingPassportState } from "../context/ceramicContext";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 import { mockAddress, mockWallet } from "./onboardHookValues";
@@ -145,12 +146,15 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
 export const renderWithContext = (
   userContext: UserContextState,
   ceramicContext: CeramicContextState,
-  ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>
+  ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>,
+  scorerContext?: ScorerContextState
 ) =>
   render(
-    <UserContext.Provider value={userContext}>
-      <CeramicContext.Provider value={ceramicContext}>{ui}</CeramicContext.Provider>
-    </UserContext.Provider>
+    <ScorerContext.Provider value={scorerContext ? scorerContext : ({} as ScorerContextState)}>
+      <UserContext.Provider value={userContext}>
+        <CeramicContext.Provider value={ceramicContext}>{ui}</CeramicContext.Provider>
+      </UserContext.Provider>
+    </ScorerContext.Provider>
   );
 
 export const testOnChainContextState = (initialState?: Partial<OnChainContextState>): OnChainContextState => {
