@@ -5,8 +5,10 @@ import React, { createContext, useState } from "react";
 import axios, { AxiosError } from "axios";
 
 import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 const scorerApiGetScore = CERAMIC_CACHE_ENDPOINT + "/score";
+const scorerApiGetWeights = CERAMIC_CACHE_ENDPOINT + "/weights";
 
 const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
 
@@ -17,6 +19,14 @@ export type PassportSubmissionStateType =
   | "APP_REQUEST_SUCCESS";
 export type ScoreStateType = "APP_INITIAL" | "BULK_PROCESSING" | "PROCESSING" | "ERROR" | "DONE";
 
+export type Weights = {
+  [key in PROVIDER_ID]: string;
+};
+
+export type StampScores = {
+  [key in PROVIDER_ID]: string;
+};
+
 export interface ScorerContextState {
   score: number;
   rawScore: number;
@@ -24,8 +34,10 @@ export interface ScorerContextState {
   scoreDescription: string;
   passportSubmissionState: PassportSubmissionStateType;
   scoreState: ScoreStateType;
-
+  stampScores?: StampScores;
+  stampWeights?: Weights;
   refreshScore: (address: string | undefined, dbAccessToken: string) => Promise<void>;
+  fetchStampWeights: () => Promise<void>;
   // submitPassport: (address: string | undefined) => Promise<void>;
 }
 
@@ -36,7 +48,10 @@ const startingState: ScorerContextState = {
   scoreDescription: "",
   passportSubmissionState: "APP_INITIAL",
   scoreState: "APP_INITIAL",
+  stampScores: {},
+  stampWeights: {},
   refreshScore: async (address: string | undefined, dbAccessToken: string): Promise<void> => {},
+  fetchStampWeights: async (): Promise<void> => {},
   // submitPassport: async (address: string | undefined): Promise<void> => {},
 };
 
@@ -50,6 +65,8 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const [scoreDescription, setScoreDescription] = useState("");
   const [passportSubmissionState, setPassportSubmissionState] = useState<PassportSubmissionStateType>("APP_INITIAL");
   const [scoreState, setScoreState] = useState<ScoreStateType>("APP_INITIAL");
+  const [stampScores, setStampScores] = useState<StampScores>();
+  const [stampWeights, setStampWeights] = useState<Weights>();
 
   const loadScore = async (address: string | undefined, dbAccessToken: string): Promise<string> => {
     try {
@@ -70,6 +87,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
         setRawScore(numRawScore);
         setThreshold(numThreshold);
         setScore(numScore);
+        setStampScores(response.data.stamp_scores);
 
         if (numRawScore > numThreshold) {
           setScoreDescription("Passing Score");
@@ -81,6 +99,15 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       return response.data.status;
     } catch (error) {
       throw error;
+    }
+  };
+
+  const fetchStampWeights = async () => {
+    try {
+      const response = await axios.get(`${scorerApiGetWeights}`);
+      setStampWeights(response.data);
+    } catch (error) {
+      setPassportSubmissionState("APP_REQUEST_ERROR");
     }
   };
 
@@ -127,7 +154,10 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     scoreDescription,
     passportSubmissionState,
     scoreState,
+    stampWeights,
+    stampScores,
     refreshScore,
+    fetchStampWeights,
     // submitPassport,
   };
 

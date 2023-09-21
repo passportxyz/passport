@@ -28,6 +28,14 @@ const cardClassName = "col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-3";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
+export const getStampProviderIds = (platform: PLATFORM_ID): PROVIDER_ID[] => {
+  return (
+    STAMP_PROVIDERS[platform]?.reduce((all, stamp) => {
+      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+    }, [] as PROVIDER_ID[]) || []
+  );
+};
+
 export const CardList = ({ className, isLoading = false }: CardListProps): JSX.Element => {
   const { allProvidersState, allPlatforms } = useContext(CeramicContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -40,10 +48,7 @@ export const CardList = ({ className, isLoading = false }: CardListProps): JSX.E
   const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
     PLATFORMS.reduce((plaforms, platform) => {
       // get all providerIds for this platform
-      const providerIds =
-        STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
-          return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-        }, [] as PROVIDER_ID[]) || [];
+      const providerIds = getStampProviderIds(platform.platform);
       // default to empty array for each platform
       plaforms[platform.platform] = providerIds.filter(
         (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"

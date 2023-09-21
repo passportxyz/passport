@@ -1,5 +1,5 @@
 // --- React Methods
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 // --- Chakra UI Elements
@@ -24,6 +24,8 @@ import { getStampProviderFilters } from "../config/filters";
 import { FeatureFlags } from "../config/feature_flags";
 import { OnchainTag } from "./OnchainTag";
 import { Button } from "./Button";
+import { ScorerContext, Weights } from "../context/scorerContext";
+import { getStampProviderIds } from "./CardList";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -53,7 +55,9 @@ export const PlatformCard = ({
   // import all providers
   const { allProvidersState, passportHasCacaoError, handleDeleteStamps } = useContext(CeramicContext);
   const { activeChainProviders } = useContext(OnChainContext);
+  const { stampWeights, stampScores } = useContext(ScorerContext);
   const [hovering, setHovering] = useState(false);
+  const [possiblePoints, setPossiblePoints] = useState(0);
 
   // stamp filter
   const router = useRouter();
@@ -89,6 +93,18 @@ export const PlatformCard = ({
       return false;
     });
   };
+
+  useEffect(() => {
+    if (stampWeights && stampScores) {
+      const providerIds = getStampProviderIds(platform.platform);
+      const availablePoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampWeights[key]) || 0), 0);
+      const earnedPoints = selectedProviders[platform.platform].reduce(
+        (acc, key) => acc + (parseFloat(stampScores[key]) || 0),
+        0
+      );
+      setPossiblePoints(availablePoints - earnedPoints);
+    }
+  }, [platform.platform, stampWeights, stampScores, selectedProviders]);
 
   // hide platforms based on filter
   const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;
@@ -154,7 +170,7 @@ export const PlatformCard = ({
               </svg>
             )}
             <div className={`text-right`}>
-              <h1 className="text-2xl text-color-2">2.61</h1>
+              <h1 className="text-2xl text-color-2">{possiblePoints.toFixed(2)}</h1>
               <p className="text-xs">Available Points</p>
             </div>
           </div>
