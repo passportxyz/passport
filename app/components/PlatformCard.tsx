@@ -53,7 +53,7 @@ export const PlatformCard = ({
   // import all providers
   const { allProvidersState, passportHasCacaoError, handleDeleteStamps } = useContext(CeramicContext);
   const { activeChainProviders } = useContext(OnChainContext);
-  const [showCardImg, setShowCardImg] = useState(false);
+  const [hovering, setHovering] = useState(false);
 
   // stamp filter
   const router = useRouter();
@@ -115,18 +115,22 @@ export const PlatformCard = ({
 
   const hasProviders = selectedProviders[platform.platform].length > 0;
   const platformClasses = hasProviders
-    ? "duration-800 relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-3 p-0 transition-all hover:border-foreground-4 hover:bg-opacity-100 hover:bg-gradient-to-b hover:shadow-background3"
-    : "duration-800 relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-6 bg-gradient-to-b from-background to-[#06153D] bg-size-200 bg-pos-0 p-0 transition-all hover:border-background-3 hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-background-2 hover:to-background-3 hover:bg-pos-100 hover:shadow-background3";
+    ? "duration-800 relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-3 p-0 transition-all hover:border-foreground-4 hover:bg-opacity-100 hover:bg-gradient-to-b hover:shadow-background-3-10 override-text-color text-foreground-3 hover:text-color-2"
+    : "duration-800 relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-6 bg-gradient-to-b from-background to-[#06153D] bg-size-200 bg-pos-0 p-0 transition-all hover:border-background-3 hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-background-2 hover:to-background-3 hover:bg-pos-100 hover:shadow-background-3-25";
+
+  const imgFilter = hasProviders
+    ? {
+        filter: `invert(31%) sepia(13%) saturate(1992%) hue-rotate(100deg) brightness(67%) contrast(85%) grayscale(${
+          hovering ? "70%" : "100%"
+        })`,
+      }
+    : {};
 
   // returns a single Platform card
   return (
     <div className={className} key={`${platform.name}${i}`}>
-      <div
-        onMouseEnter={() => setShowCardImg(true)}
-        onMouseLeave={() => setShowCardImg(false)}
-        className={platformClasses}
-      >
-        {showCardImg && !hasProviders && (
+      <div onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)} className={platformClasses}>
+        {hovering && !hasProviders && (
           <img
             src="./assets/card-background.svg"
             alt="Honey Comb background image for stamp"
@@ -136,7 +140,9 @@ export const PlatformCard = ({
         <div className="m-6 flex h-full flex-col justify-between">
           <div className="flex w-full items-center justify-between">
             {platform.icon ? (
-              <img src={platform.icon} alt={platform.name} className="h-10 w-10" />
+              <div style={imgFilter}>
+                <img src={platform.icon} alt={platform.name} className={`h-10 w-10 ${hasProviders && "grayscale"}`} />
+              </div>
             ) : (
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -147,7 +153,7 @@ export const PlatformCard = ({
                 />
               </svg>
             )}
-            <div className={`text-right ${hasProviders && "text-foreground-3"}`}>
+            <div className={`text-right`}>
               <h1 className="text-2xl text-color-2">2.61</h1>
               <p className="text-xs">Available Points</p>
             </div>
@@ -171,7 +177,12 @@ export const PlatformCard = ({
             </p>
           </div>
           <div>
-            <Button variant="secondary" className="mt-5 w-auto bg-transparent hover:bg-transparent">
+            <Button
+              variant="secondary"
+              className={`mt-5 w-auto bg-transparent hover:bg-transparent ${
+                hasProviders && "hover:border-text-2 border-foreground-3"
+              }`}
+            >
               Connect
             </Button>
           </div>
