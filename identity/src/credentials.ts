@@ -96,11 +96,21 @@ type CredentialExiresAt = {
   expiresAt: Date;
 };
 
+type Eip712CredentialSubject = {
+  "@context": object;
+  [k: string]: any;
+};
+
+type Eip712CredentialFields = {
+  credentialSubject: Eip712CredentialSubject;
+};
+
 export const issueEip712Credential = async (
   DIDKit: DIDKitLib,
   key: string,
   expiration: CredentialExiresInSeconds | CredentialExiresAt,
-  fields: { [k: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
+  // fields: { [k: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
+  fields: Eip712CredentialFields,
   signingDocument: DocumentSignatureTypes<DocumentType>,
   additionalContexts: string[] = []
 ): Promise<VerifiableCredential> => {
@@ -226,7 +236,7 @@ export const issueHashedCredential = async (
           // construct a pkh DID on mainnet (:1) for the given wallet address
           id: `did:pkh:eip155:1:${address}`,
           provider: record.type,
-          metaPointer: metaPointer ? metaPointer : "https://passporet.gitcoin.co",
+          metaPointer: metaPointer ? metaPointer : "https://passport.gitcoin.co",
           hash: `${VERSION}:${hash}`,
         },
         // https://www.w3.org/TR/vc-status-list/#statuslist2021entry
