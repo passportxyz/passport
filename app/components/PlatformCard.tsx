@@ -113,15 +113,20 @@ export const PlatformCard = ({
 
   if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS !== "on" && platform.platform === "TrustaLabs") return <></>;
 
+  const hasProviders = selectedProviders[platform.platform].length > 0;
+  const platformClasses = hasProviders
+    ? "duration-800 relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-3 p-0 transition-all hover:border-foreground-4 hover:bg-opacity-100 hover:bg-gradient-to-b hover:shadow-background3"
+    : "duration-800 relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-6 bg-gradient-to-b from-background to-[#06153D] bg-size-200 bg-pos-0 p-0 transition-all hover:border-background-3 hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-background-2 hover:to-background-3 hover:bg-pos-100 hover:shadow-background3";
+
   // returns a single Platform card
   return (
     <div className={className} key={`${platform.name}${i}`}>
       <div
         onMouseEnter={() => setShowCardImg(true)}
         onMouseLeave={() => setShowCardImg(false)}
-        className="duration-800 relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-6 bg-gradient-to-b from-background to-[#06153D] bg-size-200 bg-pos-0 p-0 transition-all hover:border-background-3 hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-background-2 hover:to-background-3 hover:bg-pos-100 hover:shadow-background3"
+        className={platformClasses}
       >
-        {showCardImg && (
+        {showCardImg && !hasProviders && (
           <img
             src="./assets/card-background.svg"
             alt="Honey Comb background image for stamp"
@@ -142,7 +147,7 @@ export const PlatformCard = ({
                 />
               </svg>
             )}
-            <div className="text-right">
+            <div className={`text-right ${hasProviders && "text-foreground-3"}`}>
               <h1 className="text-2xl text-color-2">2.61</h1>
               <p className="text-xs">Available Points</p>
             </div>
