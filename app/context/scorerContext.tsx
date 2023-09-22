@@ -149,25 +149,27 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   };
 
   const calculatePlatformScore = useCallback(() => {
-    const scoredPlatforms = PLATFORMS.map((platform) => {
-      const providerIds = getStampProviderIds(platform.platform);
-      const possiblePoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampWeights[key]) || 0), 0);
-      const earnedPoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampScores[key]) || 0), 0);
-      return {
-        ...platform,
-        possiblePoints,
-        earnedPoints,
-      };
-    });
-    setScoredPlatforms(scoredPlatforms);
+    if (stampScores && stampWeights) {
+      const scoredPlatforms = PLATFORMS.map((platform) => {
+        const providerIds = getStampProviderIds(platform.platform);
+        const possiblePoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampWeights[key]) || 0), 0);
+        const earnedPoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampScores[key]) || 0), 0);
+        return {
+          ...platform,
+          possiblePoints,
+          earnedPoints,
+        };
+      });
+      setScoredPlatforms(scoredPlatforms);
+    }
   }, [stampScores, stampWeights]);
 
   useEffect(() => {
-    if (stampScores && stampWeights) {
-      calculatePlatformScore();
-    } else {
+    if (!stampScores || !stampWeights) {
       setScoredPlatforms(PLATFORMS.map((platform) => ({ ...platform, possiblePoints: 0, earnedPoints: 0 })));
+      return;
     }
+    calculatePlatformScore();
   }, [stampScores, stampWeights]);
 
   // use props as a way to pass configuration values
