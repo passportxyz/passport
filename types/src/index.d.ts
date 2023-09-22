@@ -44,6 +44,43 @@ export type VerifiableCredential = {
   };
 };
 
+export type VerifiableEip712Credential = {
+  "@context": string[];
+  type: string[];
+  credentialSubject: {
+    id: string;
+    "@context": { [key: string]: string };
+    hash?: string;
+    provider?: string;
+    address?: string;
+    challenge?: string;
+    metaPointer?: string;
+  };
+  issuer: string;
+  issuanceDate: string;
+  expirationDate: string;
+  proof: {
+    "@context": string;
+    type: string;
+    proofPurpose: string;
+    proofValue: string;
+    verificationMethod: string;
+    created: string;
+    eip712Domain: {
+      domain: {
+        name: string;
+      };
+      primaryType: string;
+      types: {
+        [key: string]: {
+          name: string;
+          type: string;
+        }[];
+      };
+    };
+  };
+};
+
 // A ProviderContext is used as a temporary storage so that providers can can share data
 // between them, in case multiple VCs are requests in one http request
 export type ProviderContext = {
