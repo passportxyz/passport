@@ -476,7 +476,6 @@ app.post("/api/v0.0.0/convert", (req: Request, res: Response): void => {
               {
                 credentialSubject: {
                   "@context": {
-                    customInfo: "https://schema.org/Thing",
                     hash: "https://schema.org/Text",
                     metaPointer: "https://schema.org/URL",
                     provider: "https://schema.org/Text",
@@ -484,6 +483,7 @@ app.post("/api/v0.0.0/convert", (req: Request, res: Response): void => {
                   id,
                   hash,
                   provider,
+                  metaPointer: "https://passport.gitcoin.co",
                 },
               },
               stampCredentialDocument(verificationMethod),

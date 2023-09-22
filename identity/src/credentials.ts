@@ -30,6 +30,7 @@ import {
   DocumentType,
   stampCredentialDocument,
 } from "./signingDocuments";
+import { escape } from "querystring";
 
 // Control expiry times of issued credentials
 export const CHALLENGE_EXPIRES_AFTER_SECONDS = 60; // 1min
@@ -95,15 +96,26 @@ type CredentialExiresAt = {
   expiresAt: Date;
 };
 
+type Eip712CredentialSubject = {
+  "@context": object;
+  [k: string]: any;
+};
+
+type Eip712CredentialFields = {
+  credentialSubject: Eip712CredentialSubject;
+};
+
 export const issueEip712Credential = async (
   DIDKit: DIDKitLib,
   key: string,
   expiration: CredentialExiresInSeconds | CredentialExiresAt,
-  fields: { [k: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
+  // fields: { [k: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
+  fields: Eip712CredentialFields,
   signingDocument: DocumentSignatureTypes<DocumentType>,
   additionalContexts: string[] = []
 ): Promise<VerifiableCredential> => {
   // get DID from key
+
   const issuer = DIDKit.keyToDID("ethr", key);
 
   const expiresInSeconds = (expiration as CredentialExiresInSeconds).expiresInSeconds;
@@ -120,11 +132,8 @@ export const issueEip712Credential = async (
     ...fields,
   };
 
-  const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);
-  const options = {
-    verificationMethod,
-    type: "EthereumEip712Signature2021",
-  };
+  // const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);
+  const options = signingDocument;
   const credential = await DIDKit.issueCredential(JSON.stringify(credentialInput), JSON.stringify(options), key);
 
   // parse the response of the DIDKit wasm
@@ -154,6 +163,7 @@ export const issueChallengeCredential = async (
             challenge: "https://schema.org/Text",
             address: "https://schema.org/Text",
           },
+
           id: `did:pkh:eip155:1:${record.address}`,
           provider: `challenge-${record.type}`,
           // extra fields to convey challenge data
@@ -218,7 +228,6 @@ export const issueHashedCredential = async (
       {
         credentialSubject: {
           "@context": {
-            customInfo: "https://schema.org/Thing",
             hash: "https://schema.org/Text",
             metaPointer: "https://schema.org/URL",
             provider: "https://schema.org/Text",
@@ -227,8 +236,7 @@ export const issueHashedCredential = async (
           // construct a pkh DID on mainnet (:1) for the given wallet address
           id: `did:pkh:eip155:1:${address}`,
           provider: record.type,
-          metaPointer,
-          customInfo: {},
+          metaPointer: metaPointer ? metaPointer : "https://passport.gitcoin.co",
           hash: `${VERSION}:${hash}`,
         },
         // https://www.w3.org/TR/vc-status-list/#statuslist2021entry

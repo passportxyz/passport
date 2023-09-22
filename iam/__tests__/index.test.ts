@@ -25,6 +25,7 @@ import {
   RequestPayload,
   ValidResponseBody,
   VerifiableCredential,
+  VerifiableEip712Credential,
   VerifiedPayload,
 } from "@gitcoin/passport-types";
 
@@ -263,6 +264,69 @@ describe("POST /verify", function () {
 
     // check for an id match on the mocked credential
     expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
+  });
+
+  it("handles valid verify requests with EIP712 signature, and ethers can validate the credential", async () => {
+    const originalEthers = jest.requireActual("ethers");
+    // challenge received from the challenge endpoint
+    const eip712Key = process.env.IAM_JWK_EIP712;
+    const eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
+    const challenge = {
+      issuer: eip712Issuer,
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0x0",
+        provider: "challenge-Simple",
+        address: "0x0",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+    // payload containing a signature of the challenge in the challenge credential
+    const payload = {
+      type: "Simple",
+      address: "0x0",
+      proofs: {
+        valid: "true",
+        username: "test",
+        signature: "pass",
+      },
+      signatureType: "EIP712",
+    };
+
+    // resolve the verification
+    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+
+    // check that ID matches the payload (this has been mocked)
+    const expectedId = "did:pkh:eip155:1:0x0";
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/verify")
+      .send({ challenge, payload })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    const signedCredential = response.body.credential as VerifiableEip712Credential;
+
+    const standardizedTypes = signedCredential.proof.eip712Domain.types;
+    const domain = signedCredential.proof.eip712Domain.domain;
+
+    // Delete EIP712Domain so that ethers does not complain about the ambiguous primary type
+    delete standardizedTypes.EIP712Domain;
+
+    const signerAddress = originalEthers.utils.verifyTypedData(
+      domain,
+      standardizedTypes,
+      signedCredential,
+      signedCredential.proof.proofValue
+    );
+
+    const signerIssuedCredential = signerAddress.toLowerCase() === signedCredential.issuer.split(":").pop();
+
+    if (signerIssuedCredential) {
+      const splitSignature = originalEthers.utils.splitSignature(signedCredential.proof.proofValue);
+      return splitSignature;
+    }
   });
 
   it("handles valid challenge request returning PII", async () => {
@@ -1318,6 +1382,57 @@ describe("POST /convert", () => {
       issuer: "bad-issuer",
     });
     expect(isInvalidValidCredential).toBe(false);
+  });
+
+  it("converts a credential into a valid credential that sis validated succefully with ethers", async () => {
+    const originalEthers = jest.requireActual("ethers");
+
+    let verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+    const expirationDate = new Date();
+    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
+
+    const response = await request(app)
+      .post("/api/v0.0.0/convert")
+      .send({
+        issuer: config.issuer,
+        expirationDate: expirationDate.toISOString(),
+        credentialSubject: {
+          id: "did:pkh:eip155:1:0x12345",
+          provider: "MyProvider",
+          hash: "v0.0.0:secret-hash",
+          "@context": [
+            {
+              hash: "https://schema.org/Text",
+              provider: "https://schema.org/Text",
+            },
+          ],
+        },
+      })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    const signedCredential = response.body as VerifiableEip712Credential;
+
+    const standardizedTypes = signedCredential.proof.eip712Domain.types;
+    const domain = signedCredential.proof.eip712Domain.domain;
+
+    // Delete EIP712Domain so that ethers does not complain about the ambiguous primary type
+    delete standardizedTypes.EIP712Domain;
+
+    const signerAddress = originalEthers.utils.verifyTypedData(
+      domain,
+      standardizedTypes,
+      signedCredential,
+      signedCredential.proof.proofValue
+    );
+
+    const signerIssuedCredential = signerAddress.toLowerCase() === signedCredential.issuer.split(":").pop();
+
+    if (signerIssuedCredential) {
+      const splitSignature = originalEthers.utils.splitSignature(signedCredential.proof.proofValue);
+      return splitSignature;
+    }
   });
 
   it("fails to convert an invalid credential", async () => {
