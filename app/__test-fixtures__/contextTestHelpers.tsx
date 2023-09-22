@@ -145,14 +145,66 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
   };
 };
 
+export const scorerContext = {
+  scoredPlatforms: [
+    {
+      icon: "./assets/gtcStakingLogoIcon.svg",
+      platform: "GtcStaking",
+      name: "GTC Staking",
+      description: "Connect to passport to verify your staking amount.",
+      connectMessage: "Verify amount",
+      isEVM: true,
+      possiblePoints: 7.4399999999999995,
+      earnedPoints: 0,
+    },
+    {
+      icon: "./assets/gtcGrantsLightIcon.svg",
+      platform: "Gitcoin",
+      name: "Gitcoin",
+      description: "Connect with Github to verify with your Gitcoin account.",
+      connectMessage: "Connect Account",
+      isEVM: true,
+      possiblePoints: 12.93,
+      earnedPoints: 0,
+    },
+    {
+      icon: "./assets/twitterStampIcon.svg",
+      platform: "Twitter",
+      name: "Twitter",
+      description: "Connect your existing Twitter account to verify.",
+      connectMessage: "Connect Account",
+      possiblePoints: 3.63,
+      earnedPoints: 3.63,
+    },
+    {
+      icon: "./assets/discordStampIcon.svg",
+      platform: "Discord",
+      name: "Discord",
+      description: "Connect your existing Discord account to verify.",
+      connectMessage: "Connect Account",
+      possiblePoints: 0.689,
+      earnedPoints: 0,
+    },
+    {
+      icon: "./assets/googleStampIcon.svg",
+      platform: "Google",
+      name: "Google",
+      description: "Connect your existing Google Account to verify",
+      connectMessage: "Connect Account",
+      possiblePoints: 2.25,
+      earnedPoints: 1,
+    },
+  ],
+  rawScore: 0,
+} as unknown as ScorerContextState;
+
 export const renderWithContext = (
   userContext: UserContextState,
   ceramicContext: CeramicContextState,
-  ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>,
-  scorerContext?: ScorerContextState
+  ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>
 ) =>
   render(
-    <ScorerContext.Provider value={scorerContext ? scorerContext : ({} as ScorerContextState)}>
+    <ScorerContext.Provider value={scorerContext}>
       <UserContext.Provider value={userContext}>
         <CeramicContext.Provider value={ceramicContext}>{ui}</CeramicContext.Provider>
       </UserContext.Provider>

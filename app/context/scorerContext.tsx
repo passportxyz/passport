@@ -149,24 +149,24 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   };
 
   const calculatePlatformScore = useCallback(() => {
-    if (stampScores && stampWeights) {
-      const scoredPlatforms = PLATFORMS.map((platform) => {
-        const providerIds = getStampProviderIds(platform.platform);
-        const possiblePoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampWeights[key]) || 0), 0);
-        const earnedPoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampScores[key]) || 0), 0);
-        return {
-          ...platform,
-          possiblePoints,
-          earnedPoints,
-        };
-      });
-      setScoredPlatforms(scoredPlatforms);
-    }
+    const scoredPlatforms = PLATFORMS.map((platform) => {
+      const providerIds = getStampProviderIds(platform.platform);
+      const possiblePoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampWeights[key]) || 0), 0);
+      const earnedPoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampScores[key]) || 0), 0);
+      return {
+        ...platform,
+        possiblePoints,
+        earnedPoints,
+      };
+    });
+    setScoredPlatforms(scoredPlatforms);
   }, [stampScores, stampWeights]);
 
   useEffect(() => {
     if (stampScores && stampWeights) {
       calculatePlatformScore();
+    } else {
+      setScoredPlatforms(PLATFORMS.map((platform) => ({ ...platform, possiblePoints: 0, earnedPoints: 0 })));
     }
   }, [stampScores, stampWeights]);
 
