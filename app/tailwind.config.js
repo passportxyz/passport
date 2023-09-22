@@ -67,8 +67,8 @@ module.exports = {
       "pos-100": "100% 100%",
     },
     boxShadow: {
-      "background-3-25": "0 0 25px var(--color-background-3)",
-      "background-3-10": "0 0 10px var(--color-background-3)",
+      "background-3-25": "0 0 25px rgb(var(--color-background-3))",
+      "background-3-10": "0 0 10px rgb(var(--color-background-3))",
     },
   },
   plugins: [require("@headlessui/tailwindcss")],
