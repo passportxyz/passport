@@ -290,7 +290,7 @@ export default function Dashboard() {
         ) : (
           <div
             data-testid="loading-spinner-passport"
-            className="flex flex-row items-center rounded-md border-2 border-background-2 bg-background-4 py-1 px-[6px]"
+            className="flex flex-row items-center rounded-md border-2 border-background-2 bg-background-4 px-[6px] py-1"
           >
             <Spinner className="my-[2px]" thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="sm" />
           </div>

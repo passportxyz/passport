@@ -18,6 +18,7 @@ import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { CeramicContext } from "../context/ceramicContext";
 import { PlatformCard } from "./PlatformCard";
 import PageWidthGrid from "../components/PageWidthGrid";
+import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
 
 export type CardListProps = {
   isLoading?: boolean;
@@ -28,8 +29,17 @@ const cardClassName = "col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-3";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
+export const getStampProviderIds = (platform: PLATFORM_ID): PROVIDER_ID[] => {
+  return (
+    STAMP_PROVIDERS[platform]?.reduce((all, stamp) => {
+      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+    }, [] as PROVIDER_ID[]) || []
+  );
+};
+
 export const CardList = ({ className, isLoading = false }: CardListProps): JSX.Element => {
   const { allProvidersState, allPlatforms } = useContext(CeramicContext);
+  const { scoredPlatforms } = useContext(ScorerContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef();
   const [currentPlatform, setCurrentPlatform] = useState<PlatformSpec | undefined>();
@@ -40,10 +50,7 @@ export const CardList = ({ className, isLoading = false }: CardListProps): JSX.E
   const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
     PLATFORMS.reduce((plaforms, platform) => {
       // get all providerIds for this platform
-      const providerIds =
-        STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
-          return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-        }, [] as PROVIDER_ID[]) || [];
+      const providerIds = getStampProviderIds(platform.platform);
       // default to empty array for each platform
       plaforms[platform.platform] = providerIds.filter(
         (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
@@ -112,10 +119,22 @@ export const CardList = ({ className, isLoading = false }: CardListProps): JSX.E
     }
   }, [currentPlatform]);
 
+  const [verified, unverified] = scoredPlatforms.reduce(
+    ([verified, unverified], platform): [PlatformScoreSpec[], PlatformScoreSpec[]] => {
+      return platform.earnedPoints === 0
+        ? [verified, [...unverified, platform]]
+        : [[...verified, platform], unverified];
+    },
+    [[], []] as [PlatformScoreSpec[], PlatformScoreSpec[]]
+  );
+
   return (
     <>
       <PageWidthGrid className={className}>
-        {PLATFORMS.map((platform, i) => {
+        {[
+          ...unverified.sort((a, b) => b.possiblePoints - a.possiblePoints),
+          ...verified.sort((platform) => platform.earnedPoints - platform.possiblePoints),
+        ].map((platform, i) => {
           return isLoading ? (
             <LoadingCard key={i} className={cardClassName} />
           ) : (

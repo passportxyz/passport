@@ -33,7 +33,7 @@ export default function RefreshStampsProgressSteps({ steps }: RefreshStampsProgr
                     <CheckIcon className="h-5 w-5 text-color-1" aria-hidden="true" />
                   </span>
                 </span>
-                <span className="ml-12 -mt-2 flex min-w-0 flex-col">
+                <span className="-mt-2 ml-12 flex min-w-0 flex-col">
                   <span className="text-sm font-medium text-color-1">{step.name}</span>
                 </span>
               </>
@@ -51,7 +51,7 @@ export default function RefreshStampsProgressSteps({ steps }: RefreshStampsProgr
                     <span className="h-2.5 w-2.5 rounded-full bg-background-3" />
                   </span>
                 </span>
-                <span className="ml-12 -mt-2 flex min-w-0 flex-col">
+                <span className="-mt-2 ml-12 flex min-w-0 flex-col">
                   <span className="text-sm font-medium text-color-2">{step.name}</span>
                 </span>
               </>
@@ -69,7 +69,7 @@ export default function RefreshStampsProgressSteps({ steps }: RefreshStampsProgr
                     <span className="h-2.5 w-2.5 rounded-full bg-transparent group-hover:bg-foreground-3" />
                   </span>
                 </span>
-                <span className="ml-12 -mt-2 flex min-w-0 flex-col">
+                <span className="-mt-2 ml-12 flex min-w-0 flex-col">
                   <span className="text-sm font-medium text-color-1">{step.name}</span>
                 </span>
               </>

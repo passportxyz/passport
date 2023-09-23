@@ -19,6 +19,8 @@ jest.mock("../../utils/onboard.ts", () => ({
   chains: [],
 }));
 
+jest.mock("../../components/CardList", () => ({ CardList: () => <div>Card List</div> }));
+
 jest.mock("../../components/SyncToChainButton", () => <div>Sync to Chain</div>);
 
 jest.mock("@self.id/framework", () => {

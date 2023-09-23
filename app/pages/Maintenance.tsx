@@ -12,7 +12,7 @@ import BodyWrapper from "../components/BodyWrapper";
 const Footer = () => (
   <>
     <div className="h-20 lg:hidden" />
-    <div className="hidden h-[360px] bg-[url(/assets/backgroundRock.png)] bg-contain bg-top bg-no-repeat lg:block" />
+    <div className="bg-contain bg-top hidden h-[360px] bg-[url(/assets/backgroundRock.png)] bg-no-repeat lg:block" />
   </>
 );
 

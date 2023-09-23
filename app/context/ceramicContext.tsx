@@ -357,7 +357,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
 
   const { address, dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
-  const { refreshScore } = useContext(ScorerContext);
+  const { refreshScore, fetchStampWeights } = useContext(ScorerContext);
 
   useEffect(() => {
     return () => {
@@ -421,6 +421,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   useEffect(() => {
     if (database) {
+      fetchStampWeights();
       fetchPassport(database, false, true);
     }
   }, [database]);
@@ -506,7 +507,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const handleCreatePassport = async (): Promise<void> => {
     if (database) {
       setIsLoadingPassport(IsLoadingPassportState.LoadingFromCeramic);
-
       await database.createPassport();
       await fetchPassport(database);
     }

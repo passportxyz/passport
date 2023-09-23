@@ -36,6 +36,10 @@
   --onboard-font-family-normal: var(--font-body);
 }
 
+.override-text-color * {
+  color: inherit !important;
+}
+
 @media (max-width: 1020px /* md */) {
   :root {
     --account-center-position-right: 24px;
