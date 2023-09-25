@@ -128,13 +128,15 @@ export const CardList = ({ className, isLoading = false }: CardListProps): JSX.E
     [[], []] as [PlatformScoreSpec[], PlatformScoreSpec[]]
   );
 
+  const sortedPlatforms = [
+    ...unverified.sort((a, b) => b.possiblePoints - a.possiblePoints),
+    ...verified.sort((a, b) => b.possiblePoints - b.earnedPoints - (a.possiblePoints - a.earnedPoints)),
+  ];
+
   return (
     <>
       <PageWidthGrid className={className}>
-        {[
-          ...unverified.sort((a, b) => b.possiblePoints - a.possiblePoints),
-          ...verified.sort((platform) => platform.earnedPoints - platform.possiblePoints),
-        ].map((platform, i) => {
+        {sortedPlatforms.map((platform, i) => {
           return isLoading ? (
             <LoadingCard key={i} className={cardClassName} />
           ) : (
