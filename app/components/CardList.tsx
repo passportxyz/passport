@@ -121,7 +121,7 @@ export const CardList = ({ className, isLoading = false }: CardListProps): JSX.E
 
   const [verified, unverified] = scoredPlatforms.reduce(
     ([verified, unverified], platform): [PlatformScoreSpec[], PlatformScoreSpec[]] => {
-      return platform.earnedPoints === 0
+      return platform.earnedPoints === 0 && selectedProviders[platform.platform].length === 0
         ? [verified, [...unverified, platform]]
         : [[...verified, platform], unverified];
     },

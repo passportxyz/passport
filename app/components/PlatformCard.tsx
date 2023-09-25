@@ -52,21 +52,6 @@ export const PlatformCard = ({
   const router = useRouter();
   const { filter } = router.query;
 
-  // check if platform has onchain providers
-  const hasOnchainProviders = () => {
-    const providers = selectedProviders[platform.platform];
-    if (!providers.length) return false;
-
-    return providers.some((provider: PROVIDER_ID) => {
-      const providerObj = activeChainProviders.find((p) => p.providerName === provider);
-      if (providerObj) {
-        return providerObj.credentialHash === allProvidersState[provider]?.stamp?.credential.credentialSubject.hash;
-      }
-
-      return false;
-    });
-  };
-
   // hide platforms based on filter
   const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;
   const hidePlatform = stampFilters && !Object.keys(stampFilters).includes(platform.platform);
@@ -90,7 +75,8 @@ export const PlatformCard = ({
 
   if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS !== "on" && platform.platform === "TrustaLabs") return <></>;
 
-  const verified = platform.earnedPoints > 0;
+  const verified = platform.earnedPoints > 0 || selectedProviders[platform.platform].length > 0;
+
   const platformClasses = verified
     ? "duration-800 relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-3 p-0 transition-all hover:border-foreground-4 hover:bg-opacity-100 hover:bg-gradient-to-b hover:shadow-background-3-10 override-text-color text-foreground-3 hover:text-color-2"
     : "duration-800 relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-6 bg-gradient-to-b from-background to-[#06153D] bg-size-200 bg-pos-0 p-0 transition-all hover:border-background-3 hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-background-2 hover:to-background-3 hover:bg-pos-100 hover:shadow-background-3-25";
