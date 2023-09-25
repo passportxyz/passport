@@ -201,7 +201,7 @@ export const fetchAndCheckContributions = async (
   context: GithubContext,
   code: string,
   numberOfDays: string,
-  iterations = 3
+  iterations = 5
 ): Promise<{ contributionValid: boolean; errors?: string[] }> => {
   let contributionValid = false;
   // Initialize an object to keep track of unique contribution days
