@@ -12,14 +12,14 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/gtcStakingLogoIcon.svg",
   platform: "GtcStaking",
   name: "GTC Staking",
-  description: "Connect to passport to verify your staking amount.",
+  description: "Connect to Passport to verify your staking amount",
   connectMessage: "Verify amount",
   isEVM: true,
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Stakes on Yourself.",
+    platformGroup: "Self GTC Staking",
     providers: [
       { title: "5 GTC (Bronze)", name: "SelfStakingBronze" },
       { title: "20 GTC (Silver)", name: "SelfStakingSilver" },
@@ -27,7 +27,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     ],
   },
   {
-    platformGroup: "Stakes from Others.",
+    platformGroup: "Community GTC Staking",
     providers: [
       { title: "5 GTC (Bronze)", name: "CommunityStakingBronze" },
       { title: "20 GTC (Silver)", name: "CommunityStakingSilver" },

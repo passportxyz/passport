@@ -20,7 +20,6 @@ import { fetchVerifiableCredential, verifyCredential } from "@gitcoin/passport-i
 import { SideBarContent } from "./SideBarContent";
 import { DoneToastContent } from "./DoneToastContent";
 import { useToast } from "@chakra-ui/react";
-import { GenericBanner } from "./GenericBanner";
 import { LoadButton } from "./LoadButton";
 import { JsonOutputModal } from "./JsonOutputModal";
 
@@ -41,6 +40,7 @@ import { debounce } from "ts-debounce";
 import { BroadcastChannel } from "broadcast-channel";
 import { datadogRum } from "@datadog/browser-rum";
 import { NoStampModal } from "./NoStampModal";
+import { PlatformScoreSpec } from "../context/scorerContext";
 
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
@@ -62,11 +62,20 @@ const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
 
-type GenericPlatformProps = PlatformProps & { onClose: () => void };
+type GenericPlatformProps = PlatformProps & { onClose: () => void; platformScoreSpec: PlatformScoreSpec };
 
-export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: GenericPlatformProps): JSX.Element => {
+const arraysContainSameElements = (a: any[], b: any[]) => {
+  return a.length === b.length && a.every((v) => b.includes(v));
+};
+
+export const GenericPlatform = ({
+  platFormGroupSpec,
+  platform,
+  platformScoreSpec,
+  onClose,
+}: GenericPlatformProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
-  const { handlePatchStamps, verifiedProviderIds, allProvidersState, userDid } = useContext(CeramicContext);
+  const { handlePatchStamps, verifiedProviderIds, userDid } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [showNoStampModal, setShowNoStampModal] = useState(false);
@@ -98,7 +107,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
 
   // any time we change selection state...
   useEffect(() => {
-    setCanSubmit(selectedProviders.length !== verifiedProviders.length);
+    setCanSubmit(selectedProviders.length > 0 && !arraysContainSameElements(selectedProviders, verifiedProviders));
   }, [selectedProviders, verifiedProviders]);
 
   const waitForRedirect = (timeout?: number): Promise<ProviderPayload> => {
@@ -418,13 +427,14 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
   return (
     <>
       <SideBarContent
-        currentPlatform={getPlatformSpec(platform.platformId)}
+        onClose={onClose}
+        currentPlatform={platformScoreSpec}
+        bannerConfig={platform.banner}
         currentProviders={platFormGroupSpec}
         verifiedProviders={verifiedProviders}
         selectedProviders={selectedProviders}
         setSelectedProviders={setSelectedProviders}
         isLoading={isLoading}
-        infoElement={platform.banner ? <GenericBanner banner={platform.banner} /> : undefined}
         verifyButton={
           <div className="px-4">
             <LoadButton

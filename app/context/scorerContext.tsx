@@ -43,6 +43,7 @@ export interface ScorerContextState {
   scoredPlatforms: PlatformScoreSpec[];
   refreshScore: (address: string | undefined, dbAccessToken: string) => Promise<void>;
   fetchStampWeights: () => Promise<void>;
+  stampWeights: Partial<Weights>;
   // submitPassport: (address: string | undefined) => Promise<void>;
 }
 
@@ -56,6 +57,7 @@ const startingState: ScorerContextState = {
   scoredPlatforms: [],
   refreshScore: async (address: string | undefined, dbAccessToken: string): Promise<void> => {},
   fetchStampWeights: async (): Promise<void> => {},
+  stampWeights: {},
   // submitPassport: async (address: string | undefined): Promise<void> => {},
 };
 
@@ -70,7 +72,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const [passportSubmissionState, setPassportSubmissionState] = useState<PassportSubmissionStateType>("APP_INITIAL");
   const [scoreState, setScoreState] = useState<ScoreStateType>("APP_INITIAL");
   const [stampScores, setStampScores] = useState<StampScores>();
-  const [stampWeights, setStampWeights] = useState<Weights>();
+  const [stampWeights, setStampWeights] = useState<Partial<Weights>>({});
   const [scoredPlatforms, setScoredPlatforms] = useState<PlatformScoreSpec[]>([]);
 
   const loadScore = async (address: string | undefined, dbAccessToken: string): Promise<string> => {
@@ -152,7 +154,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     if (stampScores && stampWeights) {
       const scoredPlatforms = PLATFORMS.map((platform) => {
         const providerIds = getStampProviderIds(platform.platform);
-        const possiblePoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampWeights[key]) || 0), 0);
+        const possiblePoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampWeights[key] || "0") || 0), 0);
         const earnedPoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampScores[key]) || 0), 0);
         return {
           ...platform,

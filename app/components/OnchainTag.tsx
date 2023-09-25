@@ -10,6 +10,7 @@ export function OnchainTag({ marginLeft }: { marginLeft?: string }) {
       paddingY="2px"
       rounded="sm"
       size="sm"
+      title="Onchain"
     >
       <TagLabel>Onchain</TagLabel>
     </Tag>

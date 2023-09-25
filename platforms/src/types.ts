@@ -91,17 +91,19 @@ export type AppContext = {
   waitForRedirect(timeout?: number): Promise<ProviderPayload>;
 };
 
+export type PlatformBanner = {
+  heading?: React.ReactNode;
+  content?: React.ReactNode;
+  cta?: {
+    label: string;
+    url: string;
+  };
+};
+
 export interface Platform {
   platformId: string;
   path?: string;
-  banner?: {
-    heading?: string;
-    content?: string;
-    cta?: {
-      label: string;
-      url: string;
-    };
-  };
+  banner?: PlatformBanner;
   isEVM?: boolean;
   getOAuthUrl?(state: string): Promise<string>;
   getProviderPayload(appContext: AppContext): Promise<ProviderPayload>;

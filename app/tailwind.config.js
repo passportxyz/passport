@@ -29,6 +29,7 @@ module.exports = {
         "color-2": "rgb(var(--color-text-2) / <alpha-value>)",
         "color-3": "rgb(var(--color-text-3) / <alpha-value>)",
         "color-4": "rgb(var(--color-text-4) / <alpha-value>)",
+        "color-5": "rgb(var(--color-text-5) / <alpha-value>)",
 
         // Temporary, to be removed
         accent: "#000",
