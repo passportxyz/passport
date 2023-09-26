@@ -62,7 +62,7 @@ export class GithubProvider implements Provider {
 
     return {
       valid: valid,
-      error: verifiedPayload.errors,
+      errors: verifiedPayload.errors,
       record: valid
         ? {
             // The type was previously incorrectly defined as string on the http response,

@@ -1,10 +1,11 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // --- Api Library
 import axios from "axios";
 import { DateTime } from "luxon";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 const APP_ID = process.env.FACEBOOK_APP_ID;
 const APP_SECRET = process.env.FACEBOOK_APP_SECRET;
@@ -44,34 +45,43 @@ export class FacebookProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+    const errors = [];
+    let record = undefined,
+      valid = false;
     try {
       const responseData = await verifyFacebook(payload.proofs.accessToken);
       const formattedData = responseData?.data.data;
-
       const notExpired = DateTime.now() < DateTime.fromSeconds(formattedData.expires_at);
-      const valid: boolean =
-        notExpired && formattedData.app_id === APP_ID && formattedData.is_valid && !!formattedData.user_id;
-
+      if (notExpired) {
+        valid = notExpired && formattedData.app_id === APP_ID && formattedData.is_valid && !!formattedData.user_id;
+        record = {
+          user_id: formattedData.user_id,
+        };
+      } else {
+        errors.push("Error: We were unable to verify your Facebook account.");
+      }
       return {
         valid,
-        record: valid
-          ? {
-              user_id: formattedData.user_id,
-            }
-          : undefined,
+        record,
+        errors,
       };
-    } catch (e) {
-      return { valid: false };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Error verifying Facebook account: ${JSON.stringify(e)}`);
     }
   }
 }
 
 export async function verifyFacebook(userAccessToken: string): Promise<Response> {
-  // this is an alternative to generating an app auth token through a separate endpoint
-  // see https://developers.facebook.com/docs/facebook-login/guides/access-tokens#generating-an-app-access-token
-  const appAccessToken = `${APP_ID}|${APP_SECRET}`;
-  return axios.get("https://graph.facebook.com/debug_token/", {
-    headers: { "User-Agent": "Facebook Graph Client" },
-    params: { access_token: appAccessToken, input_token: userAccessToken },
-  });
+  try {
+    // this is an alternative to generating an app auth token through a separate endpoint
+    // see https://developers.facebook.com/docs/facebook-login/guides/access-tokens#generating-an-app-access-token
+    const appAccessToken = `${APP_ID}|${APP_SECRET}`;
+    return axios.get("https://graph.facebook.com/debug_token/", {
+      headers: { "User-Agent": "Facebook Graph Client" },
+      params: { access_token: appAccessToken, input_token: userAccessToken },
+    });
+  } catch (error: unknown) {
+    handleProviderAxiosError(error, "verify Facebook", [userAccessToken]);
+    return error;
+  }
 }

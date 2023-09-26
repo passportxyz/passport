@@ -1,10 +1,11 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
 import { snapshotGraphQLDatabase } from "./snapshotProposalsProvider";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 // Defining interfaces for the data structure returned by the Snapshot graphQL DB
 interface VotesQueryResponse {
@@ -28,7 +29,8 @@ interface SnapshotVotesQueryResult {
 }
 
 type SnapshotVotesCheckResult = {
-  votedOnGTETwoProposals: boolean;
+  valid: boolean;
+  errors?: string[];
 };
 
 // Export a Snapshot Votes Provider
@@ -47,34 +49,26 @@ export class SnapshotVotesProvider implements Provider {
   // Verify that the address that is passed in has voted on 2 or more DAO proposals
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     const address = payload.address.toLocaleLowerCase();
-    let valid = false,
-      verifiedPayload = {
-        votedOnGTETwoProposals: false,
-      };
 
     try {
-      verifiedPayload = await checkForSnapshotVotes(snapshotGraphQLDatabase, address);
-
-      valid = address && verifiedPayload.votedOnGTETwoProposals ? true : false;
-    } catch (e) {
-      return { valid: false };
+      const { valid, errors } = await checkForSnapshotVotes(snapshotGraphQLDatabase, address);
+      return Promise.resolve({
+        valid,
+        errors,
+        record: {
+          address,
+          votedOnGTETwoProposals: String(valid),
+        },
+      });
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Error verifying Snapshot proposal votes: ${JSON.stringify(e)}`);
     }
-
-    return Promise.resolve({
-      valid: valid,
-      record: valid
-        ? {
-            address: address,
-            hasVotedOnGTE2SnapshotProposals: String(valid),
-          }
-        : undefined,
-    });
   }
 }
 
 const checkForSnapshotVotes = async (url: string, address: string): Promise<SnapshotVotesCheckResult> => {
-  let votedOnGTETwoProposals = false;
   let result: VotesQueryResponse;
+  let voteCount = 0;
 
   // Query the Snapshot graphQL DB
   try {
@@ -96,21 +90,25 @@ const checkForSnapshotVotes = async (url: string, address: string): Promise<Snap
         }`,
     });
   } catch (e: unknown) {
-    const error = e as { response: { data: { message: string } } };
-    throw `The following error is being thrown: ${error.response.data.message}`;
+    handleProviderAxiosError(e, "Snapshot Votes error", [address]);
   }
 
   const votes = result.data.data.votes;
+  voteCount = votes.length;
 
   // Check to see if the user has voted on 2 or more DAO proposals, and if they have
   // set votedOnGTETwoProposals = true
-  if (votes.length >= 2) {
-    votedOnGTETwoProposals = true;
+  if (voteCount >= 2) {
+    return {
+      valid: true,
+      errors: undefined,
+    };
+  } else {
+    // Return false by default (if the proposals array is empty or there is no
+    // matching verification)
+    return {
+      valid: false,
+      errors: [`Snapshot proposal votes is ${voteCount}, which is less than required 2 per proposal.`],
+    };
   }
-
-  // Return false by default (if the proposals array is empty or there is no
-  // matching verification)
-  return {
-    votedOnGTETwoProposals,
-  };
 };

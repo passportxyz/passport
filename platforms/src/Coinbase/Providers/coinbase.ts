@@ -1,7 +1,9 @@
 // ----- Types
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import axios from "axios";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+// import { handleProviderAxiosError } from "utils/handleProviderAxiosError";
 
 export type CoinbaseTokenResponse = {
   access_token: string;
@@ -29,25 +31,30 @@ export class CoinbaseProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    let valid = false,
-      verifiedPayload: CoinbaseFindMyUserResponse = {};
-
     try {
-      verifiedPayload = await verifyCoinbase(payload.proofs.code);
-    } catch (e) {
-      return { valid: false };
-    } finally {
-      valid = verifiedPayload && verifiedPayload.data && verifiedPayload.data.id ? true : false;
-    }
+      const errors: VerifiedPayload["errors"] = [];
+      let valid = false,
+        verifiedPayload: CoinbaseFindMyUserResponse = {},
+        record = undefined;
 
-    return {
-      valid: valid,
-      record: valid
-        ? {
-            id: verifiedPayload.data.id,
-          }
-        : undefined,
-    };
+      verifiedPayload = await verifyCoinbase(payload.proofs.code);
+      valid = verifiedPayload && verifiedPayload.data && verifiedPayload.data.id ? true : false;
+
+      if (valid) {
+        record = {
+          id: verifiedPayload.data.id,
+        };
+      } else {
+        errors.push(`Error: We could not verify your Coinbase account: ${verifiedPayload.data.id}.`);
+      }
+      return {
+        valid,
+        errors,
+        record,
+      };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Coinbase account verification error: ${JSON.stringify(e)}`);
+    }
   }
 }
 
@@ -105,6 +112,7 @@ const verifyCoinbase = async (code: string): Promise<CoinbaseFindMyUserResponse>
     } else {
       throw `Error: ${error.message}`;
     }
+    handleProviderAxiosError(e, "Coinbase access token request error", [code]);
   }
   return userRequest.data as CoinbaseFindMyUserResponse;
 };

@@ -1,9 +1,12 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
+
+// ----- Utils
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 // Snapshot graphQL database
 export const snapshotGraphQLDatabase = "https://hub.snapshot.org/graphql";
@@ -50,31 +53,37 @@ export class SnapshotProposalsProvider implements Provider {
     let valid = false,
       verifiedPayload = {
         proposalHasVotes: false,
-      };
+      },
+      record = undefined;
+
+    const errors: string[] = [];
 
     try {
       verifiedPayload = await checkForSnapshotProposals(snapshotGraphQLDatabase, address);
 
       valid = address && verifiedPayload.proposalHasVotes ? true : false;
-    } catch (e) {
-      return { valid: false };
+      if (valid) {
+        record = {
+          address: address,
+          hasGT1SnapshotProposalsVotedOn: String(valid),
+        };
+      } else {
+        errors.push("Error: Your Snapshot proposals do not have enough votes to qualify for this stamp.");
+      }
+      return {
+        valid,
+        errors,
+        record,
+      };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Error verifying Snapshot proposals: ${JSON.stringify(e)}.`);
     }
-
-    return {
-      valid: valid,
-      record: valid
-        ? {
-            address: address,
-            hasGT1SnapshotProposalsVotedOn: String(valid),
-          }
-        : undefined,
-    };
   }
 }
 
 const checkForSnapshotProposals = async (url: string, address: string): Promise<SnapshotProposalCheckResult> => {
-  let proposalHasVotes = false;
-  let result: ProposalsQueryResponse;
+  let proposalHasVotes = false,
+    result: ProposalsQueryResponse;
 
   // Query the Snapshot graphQL DB
   try {
@@ -93,8 +102,7 @@ const checkForSnapshotProposals = async (url: string, address: string): Promise<
         }`,
     });
   } catch (e: unknown) {
-    const error = e as { response: { data: { message: string } } };
-    throw `The following error is being thrown: ${error.response.data.message}`;
+    handleProviderAxiosError(e, "Snapshot Proposals error", [address]);
   }
 
   const proposals = result.data.data.proposals;

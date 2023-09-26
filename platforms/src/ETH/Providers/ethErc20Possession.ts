@@ -10,6 +10,8 @@ import { BigNumber } from "@ethersproject/bignumber";
 // ----- RPC Getter
 import { getRPCProvider } from "../../utils/signer";
 
+// ----- Utils
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 /*
 Eth ERC20 Possession Provider can be used to check a greater than balance for ethereum or any other evm token (ERC20).
 By default this will verify the ethereum balance for the address in the parameter. To customize the
@@ -142,9 +144,10 @@ export class EthErc20PossessionProvider implements Provider {
         amount = await getEthBalance(address, payload, context);
       }
     } catch (e) {
+      handleProviderAxiosError(e, "eth balance", [address]);
       return {
         valid: false,
-        error: [this._options.error],
+        errors: [this._options.error],
       };
     } finally {
       const bnThreshold = parseUnits(this._options.threshold, this._options.decimalNumber);

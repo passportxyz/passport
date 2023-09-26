@@ -94,6 +94,6 @@ describe("Providers", function () {
 
     const result = await providers.verify("nonExistentType", mockPayload, mockContext);
     expect(result.valid).toEqual(false);
-    expect(result.error).toEqual(["Missing provider"]);
+    expect(result.errors).toEqual(["Missing provider"]);
   });
 });

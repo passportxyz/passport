@@ -1,7 +1,12 @@
 // ----- Types
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
+
+// ----- Libs
 import axios from "axios";
+
+// ----- Utils
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 export type DiscordTokenResponse = {
   access_token: string;
@@ -29,23 +34,32 @@ export class DiscordProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+    const errors = [];
     let valid = false,
-      verifiedPayload: DiscordFindMyUserResponse = {};
+      verifiedPayload: DiscordFindMyUserResponse = {},
+      record = undefined;
 
     try {
       verifiedPayload = await verifyDiscord(payload.proofs.code);
-    } catch (e) {
-      return { valid: false };
-    } finally {
-      valid = verifiedPayload && verifiedPayload.user?.id ? true : false;
-    }
+      if (verifiedPayload.user?.id) {
+        valid = verifiedPayload && verifiedPayload.user?.id ? true : false;
+        record = {
+          id: verifiedPayload.user?.id,
+        };
+      } else {
+        errors.push(
+          "Error: We were not able to verify a Discord account with your provided credentials. Please sign-up for a Discord account and try again."
+        );
+      }
 
-    return {
-      valid: valid,
-      record: {
-        id: verifiedPayload.user?.id,
-      },
-    };
+      return {
+        valid,
+        record,
+        errors,
+      };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Discord account check error: ${JSON.stringify(e)}`);
+    }
   }
 }
 
@@ -72,22 +86,29 @@ const requestAccessToken = async (code: string): Promise<string> => {
     const error = e as { response: { data: { error_description: string } } };
     // eslint-disable-next-line no-console
     console.error("Error when verifying discord account for user:", error.response?.data);
-    throw e;
+    handleProviderAxiosError(error, "error requesting discord access token", [code]);
   }
 };
 
 const verifyDiscord = async (code: string): Promise<DiscordFindMyUserResponse> => {
-  // retrieve user's auth bearer token to authenticate client
-  const accessToken = await requestAccessToken(code);
+  try {
+    // retrieve user's auth bearer token to authenticate client
+    const accessToken = await requestAccessToken(code);
 
-  // Now that we have an access token fetch the user details
-  const userRequest = await axios.get("https://discord.com/api/oauth2/@me", {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+    // Now that we have an access token fetch the user details
+    const userRequest = await axios.get("https://discord.com/api/oauth2/@me", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
-  if (userRequest.status != 200) {
-    throw `Get user request returned status code ${userRequest.status} instead of the expected 200`;
+    if (userRequest.status != 200) {
+      throw new ProviderExternalVerificationError(
+        `Get user request returned status code ${userRequest.status} instead of the expected 200`
+      );
+    }
+
+    return userRequest.data as DiscordFindMyUserResponse;
+  } catch (error: unknown) {
+    handleProviderAxiosError(error, "error verifying discord", [code]);
+    return error;
   }
-
-  return userRequest.data as DiscordFindMyUserResponse;
 };

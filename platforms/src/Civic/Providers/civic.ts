@@ -1,7 +1,10 @@
-import type { Provider } from "../../types";
+// ----- Types
+import { ProviderExternalVerificationError, type Provider } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { CivicPassType } from "./types";
-import { errorToString, findAllPasses, latestExpiry, secondsFromNow } from "./util";
+
+// ----- Utils
+import { findAllPasses, latestExpiry, secondsFromNow } from "./util";
 
 // If the environment variable INCLUDE_TESTNETS is set to true,
 // then passes on testnets will be included in the verification by default.
@@ -37,26 +40,34 @@ export class CivicPassProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
+    const errors = [];
+    let record = undefined;
+
     try {
       const allPasses = await findAllPasses(address, this.includeTestnets, [this.passType]);
       const valid = allPasses.length > 0;
+      try {
+        if (valid) {
+          record = { address };
+        } else {
+          errors.push(
+            `Error: You do not have enough passes to qualify for this stamp. All passes: ${allPasses.length}`
+          );
+        }
+      } catch (e: unknown) {
+        errors.push(String(e));
+      }
+
       const expiry = valid ? secondsFromNow(latestExpiry(allPasses)) : undefined;
 
       return {
         valid,
+        errors,
         expiresInSeconds: expiry,
-        record: valid
-          ? {
-              address: address,
-            }
-          : {},
+        record: record,
       };
-    } catch (e) {
-      return {
-        valid: false,
-        error: [errorToString(e)],
-        record: {},
-      };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Error verifying BrightID sponsorship: ${JSON.stringify(e)}`);
     }
   }
 }

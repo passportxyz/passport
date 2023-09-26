@@ -1,5 +1,5 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Ethers library
@@ -49,30 +49,34 @@ export async function getPrimaryHandle(
   userAddress: string,
   context: GithubContext
 ): Promise<CyberConnectHandleResponse> {
-  if (!context.cyberConnect?.handle) {
-    const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(
-      process.env.BSC_RPC_URL || "https://bsc-dataseed.binance.org/"
-    );
+  try {
+    if (!context.cyberConnect?.handle) {
+      const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(
+        process.env.BSC_RPC_URL || "https://bsc-dataseed.binance.org/"
+      );
 
-    const contract: CyberProfileContract = new Contract(
-      CYBERPROFILE_PROXY_CONTRACT_ADDRESS,
-      CYBERPROFILE_PROXY_ABI,
-      provider
-    );
-    if (!context.cyberConnect) context.cyberConnect = {};
-    // get primary profile id
-    const profileId: BigNumber = await contract.getPrimaryProfile(userAddress);
-    // if no primary profile id is found (profileId == 0), return 0
-    if (profileId.isZero()) {
-      context.cyberConnect.handle = "";
+      const contract: CyberProfileContract = new Contract(
+        CYBERPROFILE_PROXY_CONTRACT_ADDRESS,
+        CYBERPROFILE_PROXY_ABI,
+        provider
+      );
+      if (!context.cyberConnect) context.cyberConnect = {};
+      // get primary profile id
+      const profileId: BigNumber = await contract.getPrimaryProfile(userAddress);
+      // if no primary profile id is found (profileId == 0), return 0
+      if (profileId.isZero()) {
+        context.cyberConnect.handle = "";
+        return context.cyberConnect;
+      }
+      // get primary profile handle
+      const handle: string = await contract.getHandleByProfileId(profileId.toNumber());
+
+      context.cyberConnect.handle = handle;
+      // return the length of the primary handle
       return context.cyberConnect;
     }
-    // get primary profile handle
-    const handle: string = await contract.getHandleByProfileId(profileId.toNumber());
-
-    context.cyberConnect.handle = handle;
-    // return the length of the primary handle
-    return context.cyberConnect;
+  } catch (e: unknown) {
+    return { errors: [String(e)] };
   }
   return context.cyberConnect;
 }
@@ -94,27 +98,33 @@ export class CyberProfilePremiumProvider implements Provider {
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
-    let valid = false;
-    let userHandle: string;
+    const errors = [];
+    let valid = false,
+      userHandle: string,
+      record = undefined;
+
     try {
       const { handle } = await getPrimaryHandle(address, context);
       userHandle = handle;
-    } catch (e) {
-      return {
-        valid: false,
-        error: ["CyberProfile provider get user primary handle error"],
-      };
+      const lengthOfPrimaryHandle = userHandle.length;
+      valid = lengthOfPrimaryHandle <= 6 && lengthOfPrimaryHandle > 0;
+      if (valid === true) {
+        record = { userHandle };
+      } else {
+        errors.push(
+          `Error: The length of your primary handle is ${lengthOfPrimaryHandle}, which does not qualify for this stamp data point.`
+        );
+      }
+      return Promise.resolve({
+        valid,
+        record,
+        errors,
+      });
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(
+        `CyberProfile provider check organization membership error: ${JSON.stringify(e)}`
+      );
     }
-    const lengthOfPrimaryHandle = userHandle.length;
-    valid = lengthOfPrimaryHandle <= 6 && lengthOfPrimaryHandle > 0;
-    return Promise.resolve({
-      valid: valid,
-      record: valid
-        ? {
-            userHandle,
-          }
-        : {},
-    });
   }
 }
 
@@ -135,26 +145,31 @@ export class CyberProfilePaidProvider implements Provider {
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
-    let valid = false;
-    let userHandle: string;
+    const errors = [];
+    let valid = false,
+      userHandle: string,
+      record = undefined;
     try {
       const { handle } = await getPrimaryHandle(address, context);
       userHandle = handle;
-    } catch (e) {
-      return {
-        valid: false,
-        error: ["CyberProfile provider get user primary handle error"],
-      };
+      const lengthOfPrimaryHandle = userHandle.length;
+      valid = lengthOfPrimaryHandle <= 12 && lengthOfPrimaryHandle > 6;
+      if (valid === true) {
+        record = { userHandle };
+      } else {
+        errors.push(
+          `Error: The length of your primary handle is ${lengthOfPrimaryHandle}, which does not qualify for this stamp data point.`
+        );
+      }
+      return Promise.resolve({
+        valid,
+        record,
+        errors,
+      });
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(
+        `CyberProfile provider check organization membership error: ${JSON.stringify(e)}`
+      );
     }
-    const lengthOfPrimaryHandle = userHandle.length;
-    valid = lengthOfPrimaryHandle <= 12 && lengthOfPrimaryHandle > 6;
-    return Promise.resolve({
-      valid: valid,
-      record: valid
-        ? {
-            userHandle,
-          }
-        : {},
-    });
   }
 }

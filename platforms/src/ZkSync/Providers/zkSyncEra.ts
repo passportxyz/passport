@@ -7,6 +7,7 @@ import axios from "axios";
 
 // ----- Credential verification
 import { getAddress } from "../../utils/signer";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 // This is used in the Era Explorer
 export const zkSyncEraApiEndpoint = process.env.ZKSYNC_ERA_MAINNET_ENDPOINT || "";
@@ -38,7 +39,7 @@ export class ZkSyncEraProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
     let valid = false;
-    let error = undefined;
+    const errors = [];
 
     const address = (await getAddress(payload)).toLowerCase();
 
@@ -60,22 +61,22 @@ export class ZkSyncEraProvider implements Provider {
         }
 
         if (!valid) {
-          error = ["Unable to find a verified transaction from the given address"];
+          errors.push("Unable to find a verified transaction from the given address");
         }
       } else {
-        error = [`HTTP Error '${requestResponse.status}'. Details: '${requestResponse.statusText}'.`];
+        errors.push(`HTTP Error '${requestResponse.status}'. Details: '${requestResponse.statusText}'.`);
       }
-    } catch (exc) {
-      error = ["Error getting transaction list for address"];
+      return Promise.resolve({
+        valid: valid,
+        record: valid
+          ? {
+              address: address,
+            }
+          : undefined,
+        errors,
+      });
+    } catch (error) {
+      handleProviderAxiosError(error, "zkSync Era error");
     }
-    return Promise.resolve({
-      valid: valid,
-      record: valid
-        ? {
-            address: address,
-          }
-        : undefined,
-      error,
-    });
   }
 }

@@ -8,6 +8,9 @@ import axios from "axios";
 // ----- Credential verification
 import { getAddress } from "../../utils/signer";
 
+// ----- Utils
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+
 // Alchemy Api key
 export const apiKey = process.env.ALCHEMY_API_KEY;
 
@@ -38,11 +41,13 @@ export class NFTProvider implements Provider {
     // if a signer is provider we will use that address to verify against
     const address = (await getAddress(payload)).toLowerCase();
 
-    let valid = false;
+    const errors = [];
     let getContractsForOwnerResponse: GetContractsForOwnerResponse = {
-      contracts: [],
-      totalCount: 0,
-    };
+        contracts: [],
+        totalCount: 0,
+      },
+      valid = false,
+      record = undefined;
 
     const providerUrl = getNFTEndpoint();
 
@@ -59,19 +64,23 @@ export class NFTProvider implements Provider {
         getContractsForOwnerResponse = requestResponse.data as GetContractsForOwnerResponse;
 
         valid = getContractsForOwnerResponse.totalCount > 0;
+        record = {
+          address: address,
+          "NFT#numNFTsGte": "1",
+        };
+      } else {
+        errors.push(String(requestResponse.status));
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      errors.push(JSON.stringify(error));
       // Nothing to do here, valid will remain false
+      handleProviderAxiosError(error, "NFT check error", [address]);
     }
 
     return Promise.resolve({
-      valid: valid,
-      record: valid
-        ? {
-            address: address,
-            "NFT#numNFTsGte": "1",
-          }
-        : undefined,
+      valid,
+      errors,
+      record,
     });
   }
 }

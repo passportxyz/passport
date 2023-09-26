@@ -5,6 +5,9 @@ import type { Provider } from "../../types";
 // ----- Libs
 import axios from "axios";
 
+// ----- Utils
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+
 import { getAddress } from "../../utils/signer";
 
 type GuildMembership = {
@@ -39,44 +42,52 @@ export async function getGuildMemberships(address: string): Promise<GuildMembers
 }
 
 export async function getAllGuilds(): Promise<Guild[]> {
-  // https://api.guild.xyz/v1/guild
-  const guildResponse: {
-    data: Guild[];
-  } = await axios.get(`${guildBaseEndpoint}guild`);
+  try {
+    // https://api.guild.xyz/v1/guild
+    const guildResponse: {
+      data: Guild[];
+    } = await axios.get(`${guildBaseEndpoint}guild`);
 
-  return guildResponse.data;
+    return guildResponse.data;
+  } catch (error) {
+    handleProviderAxiosError(error, "get guilds");
+  }
 }
 
 export async function checkGuildStats(memberships: GuildMembership[]): Promise<GuildStats> {
-  // Member of more than 5 guilds and > 15 roles across those guilds (guilds over 250 members)
-  const allGuilds = await getAllGuilds();
+  try {
+    // Member of more than 5 guilds and > 15 roles across those guilds (guilds over 250 members)
+    const allGuilds = await getAllGuilds();
 
-  const myGuildRoles = new Map<number, number>(); // key: guildId, value: roleIdsLength
-  const adminOwnerGuilds = new Map<number, number>();
-  memberships.forEach((membership) => {
-    myGuildRoles.set(membership.guildId, membership.roleIds.length);
-    adminOwnerGuilds.set(membership.guildId, membership.isAdmin || membership.isOwner ? 1 : 0);
-  });
+    const myGuildRoles = new Map<number, number>(); // key: guildId, value: roleIdsLength
+    const adminOwnerGuilds = new Map<number, number>();
+    memberships.forEach((membership) => {
+      myGuildRoles.set(membership.guildId, membership.roleIds.length);
+      adminOwnerGuilds.set(membership.guildId, membership.isAdmin || membership.isOwner ? 1 : 0);
+    });
 
-  // Aggregate guild and role count
-  let guildCount = 0;
-  let totalRoles = 0;
-  let totalAdminOwner = 0;
+    // Aggregate guild and role count
+    let guildCount = 0;
+    let totalRoles = 0;
+    let totalAdminOwner = 0;
 
-  for (const guild of allGuilds) {
-    if (myGuildRoles.has(guild.id) && guild.memberCount > 250) {
-      guildCount++;
-      totalRoles += myGuildRoles.get(guild.id);
-      totalAdminOwner += adminOwnerGuilds.get(guild.id);
+    for (const guild of allGuilds) {
+      if (myGuildRoles.has(guild.id) && guild.memberCount > 250) {
+        guildCount++;
+        totalRoles += myGuildRoles.get(guild.id);
+        totalAdminOwner += adminOwnerGuilds.get(guild.id);
+      }
     }
-  }
 
-  // Check conditions
-  return {
-    guildCount,
-    totalRoles,
-    totalAdminOwner,
-  };
+    // Check conditions
+    return {
+      guildCount,
+      totalRoles,
+      totalAdminOwner,
+    };
+  } catch (error) {
+    handleProviderAxiosError(error, "check guild stats");
+  }
 }
 
 class GuildProvider {
@@ -105,7 +116,7 @@ export class GuildMemberProvider extends GuildProvider implements Provider {
     } catch (e) {
       return {
         valid: false,
-        error: ["Error verifying Guild Membership"],
+        errors: ["Error verifying Guild Membership"],
       };
     }
   }
@@ -133,7 +144,7 @@ export class GuildAdminProvider extends GuildProvider implements Provider {
     } catch (e) {
       return {
         valid: false,
-        error: ["Error verifying Guild Admin Membership"],
+        errors: ["Error verifying Guild Admin Membership"],
       };
     }
   }
@@ -163,7 +174,7 @@ export class GuildPassportMemberProvider implements Provider {
     } catch (e) {
       return {
         valid: false,
-        error: ["Error verifying Guild Passport Membership"],
+        errors: ["Error verifying Guild Passport Membership"],
       };
     }
   }

@@ -5,6 +5,9 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 // ----- Libs
 import axios from "axios";
 
+// ----- Utils
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+
 interface DefaultProfile {
   id: string;
   handle: string;
@@ -18,22 +21,40 @@ interface GraphQlResponse {
   data: Data;
 }
 
+interface LensProfileResponse {
+  valid: boolean;
+  handle?: string;
+  errors: string[];
+}
+
 const lensApiEndpoint = "https://api.lens.dev";
 
-async function getLensProfile(userAddress: string): Promise<string> {
-  const query = `
-    query DefaultProfile {
-      defaultProfile(request: { ethereumAddress: "${userAddress}"}) {
-        id
-        handle
+async function getLensProfile(userAddress: string): Promise<LensProfileResponse> {
+  try {
+    const query = `
+      query DefaultProfile {
+        defaultProfile(request: { ethereumAddress: "${userAddress}"}) {
+          id
+          handle
+        }
       }
-    }
-  `;
-  const result: { data: GraphQlResponse } = await axios.post(lensApiEndpoint, {
-    query,
-  });
+    `;
+    const result: { data: GraphQlResponse } = await axios.post(lensApiEndpoint, {
+      query,
+    });
 
-  return result?.data?.data?.defaultProfile?.handle;
+    return {
+      valid: true,
+      handle: result?.data?.data?.defaultProfile?.handle,
+      errors: [],
+    };
+  } catch (error) {
+    handleProviderAxiosError(error, "Lens profile check error", [userAddress]);
+    return {
+      valid: false,
+      errors: ["Error: We were unable to retrieve a Lens handle for your address."],
+    };
+  }
 }
 
 // Export a Lens Profile Provider
@@ -53,24 +74,17 @@ export class LensProfileProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
-    let valid = false;
-    let handle: string;
-    try {
-      handle = await getLensProfile(address);
-    } catch (e) {
-      return {
-        valid: false,
-        error: ["Lens provider get user handle error"],
-      };
+    let record = undefined;
+    const { valid, handle, errors } = await getLensProfile(address);
+
+    if (valid === true) {
+      record = { handle };
     }
-    valid = !!handle;
-    return Promise.resolve({
-      valid: valid,
-      record: valid
-        ? {
-            handle,
-          }
-        : {},
-    });
+
+    return {
+      valid,
+      record,
+      errors,
+    };
   }
 }

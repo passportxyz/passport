@@ -1,12 +1,12 @@
 // ----- Types
 import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import { ProviderError } from "../../utils/errors";
 import axios from "axios";
 import { getGithubUserData, GithubUserMetaData } from "../../Github/Providers/githubClient";
 
 export type GitcoinGrantStatistics = {
-  errors?: string[] | undefined;
+  error?: string | undefined;
   record?: { [k: string]: number };
 };
 
@@ -48,14 +48,14 @@ export class GitcoinGrantStatisticsProvider implements Provider {
         const gitcoinGrantsStatistic = await getGitcoinStatistics(dataUrl, githubUser.id, context);
 
         valid =
-          !gitcoinGrantsStatistic.errors &&
+          !gitcoinGrantsStatistic.error &&
           (gitcoinGrantsStatistic.record
             ? gitcoinGrantsStatistic.record[this._options.receivingAttribute] >= this._options.threshold
             : false);
 
         return {
           valid: valid,
-          error: gitcoinGrantsStatistic.errors,
+          errors: [gitcoinGrantsStatistic.error],
           record: valid
             ? {
                 // The type was previously incorrectly defined as string on the http response,
@@ -66,23 +66,16 @@ export class GitcoinGrantStatisticsProvider implements Provider {
               }
             : undefined,
         };
+      } else {
+        const ret = {
+          valid: valid,
+          errors: githubUser ? githubUser.errors : undefined,
+        };
+        return ret;
       }
-    } catch (e) {
-      return { valid: false };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Gitcoin Grants Statistic verification error: ${JSON.stringify(e)}.`);
     }
-
-    const ret = {
-      valid: valid,
-      error: githubUser ? githubUser.errors : undefined,
-      record: valid
-        ? {
-            id: `${githubUser.id}`,
-            [this._options.recordAttribute]: `${this._options.threshold}`,
-          }
-        : undefined,
-    };
-
-    return ret;
   }
 }
 
@@ -108,12 +101,9 @@ const getGitcoinStatistics = async (
     } catch (_error) {
       const error = _error as ProviderError;
       context.gitcoinGrantStatistics[dataUrl] = {
-        errors: [
-          "Error getting user info",
-          `${error?.message}`,
-          `Status ${error.response?.status}: ${error.response?.statusText}`,
-          `Details: ${JSON.stringify(error?.response?.data)}`,
-        ],
+        error: `Error getting user info: ${error?.message} - Status ${error.response?.status}: ${
+          error.response?.statusText
+        } - Details: ${JSON.stringify(error?.response?.data)}`,
       };
     }
   }

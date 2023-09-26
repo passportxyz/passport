@@ -1,11 +1,12 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // --- Api Library
 import axios from "axios";
 import { verifyFacebook } from "./facebook";
 import { DateTime } from "luxon";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 const APP_ID = process.env.FACEBOOK_APP_ID;
 
@@ -43,6 +44,10 @@ export class FacebookProfilePictureProvider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
+      const errors = [];
+      let record = undefined,
+        valid = false,
+        profileData;
       // Calling the verifyFacebook here, because we also want to get the user id associated with the
       // user token that was provided (this we do not get from the friends request).
       // And in addition we also validated the user token
@@ -54,45 +59,47 @@ export class FacebookProfilePictureProvider implements Provider {
       }
 
       const formattedData = tokenResponseData?.data.data;
-
       const notExpired = DateTime.now() < DateTime.fromSeconds(formattedData.expires_at);
       const isTokenValid: boolean =
         notExpired && formattedData.app_id === APP_ID && formattedData.is_valid && !!formattedData.user_id;
 
-      // Get the FB profile
-      const profileResponseData = await verifyFacebookProfilePic(payload.proofs.accessToken);
+      if (notExpired && isTokenValid) {
+        // Get the FB profile
+        const profileResponseData = await verifyFacebookProfilePic(payload.proofs.accessToken);
 
-      if (profileResponseData.status != 200) {
-        // The exception handle will catch that ...
-        throw profileResponseData.statusText;
+        profileData = profileResponseData?.data;
+
+        // User has profile picture if is_silhouette is false
+        const hasProfilePicture = !profileData.picture.data.is_silhouette;
+
+        valid = isTokenValid && hasProfilePicture;
+        record = {
+          userId: profileData.id,
+          hasProfilePicture: String(valid),
+        };
+      } else {
+        errors.push("Error: We were unable to verify your Facebook account profile picture.");
       }
-
-      const profileData = profileResponseData?.data;
-
-      // User has profile picture if is_silhouette is false
-      const hasProfilePicture = !profileData.picture.data.is_silhouette;
-
-      const valid = isTokenValid && hasProfilePicture;
 
       return {
         valid,
-        record: valid
-          ? {
-              userId: profileData.id,
-              hasProfilePicture: String(valid),
-            }
-          : undefined,
+        record,
+        errors,
       };
-    } catch (e) {
-      return { valid: false };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Error verifying Facebook account: ${JSON.stringify(e)}`);
     }
   }
 }
 
 async function verifyFacebookProfilePic(userAccessToken: string): Promise<Response> {
-  // see https://developers.facebook.com/docs/graph-api/reference/user/
-  return axios.get("https://graph.facebook.com/me/", {
-    headers: { "User-Agent": "Facebook Graph Client" },
-    params: { access_token: userAccessToken, fields: "id,picture{is_silhouette}" },
-  });
+  try {
+    // see https://developers.facebook.com/docs/graph-api/reference/user/
+    return axios.get("https://graph.facebook.com/me/", {
+      headers: { "User-Agent": "Facebook Graph Client" },
+      params: { access_token: userAccessToken, fields: "id,picture{is_silhouette}" },
+    });
+  } catch (error) {
+    handleProviderAxiosError(error, "Facebook profile picture", [userAccessToken]);
+  }
 }

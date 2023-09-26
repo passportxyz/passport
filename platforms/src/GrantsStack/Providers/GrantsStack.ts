@@ -1,6 +1,9 @@
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import { ProviderContext, PROVIDER_ID, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import axios from "axios";
+
+// ----- Utils
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 export type GrantsStackProviderOptions = ProviderOptions & {
   type: PROVIDER_ID;
@@ -46,7 +49,7 @@ export const getGrantsStackData = async (
     }
     return context.grantsStack;
   } catch (e) {
-    throw new Error("Error getting GrantsStack data");
+    handleProviderAxiosError(e, "grant stack data", [payload.address]);
   }
 };
 
@@ -63,21 +66,29 @@ export class GrantsStackProvider implements Provider {
 
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     try {
+      const errors = [];
+      let record = undefined;
       const grantsStackData = await getGrantsStackData(payload, context);
       const count = grantsStackData[this.dataKey];
       const valid = count >= this.threshold;
-      const errors = !valid ? [`${this.dataKey}: ${count} is less than ${this.threshold}`] : [];
       const contributionStatistic = `${this.type}-${this.threshold}-contribution-statistic`;
-      return {
-        valid,
-        errors,
-        record: {
+      if (valid) {
+        record = {
           address: payload.address,
           contributionStatistic,
-        },
+        };
+      } else {
+        errors.push(`${this.dataKey}: ${count} is less than ${this.threshold}`);
+      }
+      return {
+        valid,
+        record,
+        errors,
       };
-    } catch (e) {
-      throw new Error("Error verifying GrantsStack data");
+    } catch (error: unknown) {
+      throw new ProviderExternalVerificationError(
+        `Grant Stack contribution verification error: ${JSON.stringify(error)}.`
+      );
     }
   }
 }

@@ -1,5 +1,5 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Ethers library
@@ -43,7 +43,8 @@ export class PohProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
     const address = await getAddress(payload);
-
+    const errors: string[] = [];
+    let record = undefined;
     // attempt to verify POH...
     try {
       // define a provider using the rpc url
@@ -56,20 +57,22 @@ export class PohProvider implements Provider {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
       const valid: boolean = await readContract.isRegistered(address);
 
+      if (valid) {
+        record = {
+          // store the address into the proof records
+          address,
+        };
+      } else {
+        errors.push(`Error: Your address is not registered with Proof of Humanity -- isRegistered: ${String(valid)}.`);
+      }
+
       return {
         valid,
-        record: valid
-          ? {
-              // store the address into the proof records
-              address,
-            }
-          : undefined,
+        errors,
+        record,
       };
-    } catch (e) {
-      return {
-        valid: false,
-        error: [JSON.stringify(e)],
-      };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Error verifying Proof of Humanity: ${JSON.stringify(e)}.`);
     }
   }
 }
