@@ -68,7 +68,7 @@ export class SnapshotProposalsProvider implements Provider {
           hasGT1SnapshotProposalsVotedOn: String(valid),
         };
       } else {
-        errors.push("Error: Your Snapshot proposals do not have enough votes to qualify for this stamp.");
+        errors.push("Your Snapshot proposals do not have enough votes to qualify for this stamp.");
       }
       return {
         valid,

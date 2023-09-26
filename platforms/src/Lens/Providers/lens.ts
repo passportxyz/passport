@@ -43,17 +43,20 @@ async function getLensProfile(userAddress: string): Promise<LensProfileResponse>
       query,
     });
 
-    return {
-      valid: true,
-      handle: result?.data?.data?.defaultProfile?.handle,
-      errors: [],
-    };
+    if (result?.data?.data?.defaultProfile?.handle) {
+      return {
+        valid: true,
+        handle: result?.data?.data?.defaultProfile?.handle,
+        errors: [],
+      };
+    } else {
+      return {
+        valid: false,
+        errors: ["We were unable to retrieve a Lens handle for your address."],
+      };
+    }
   } catch (error) {
     handleProviderAxiosError(error, "Lens profile check error", [userAddress]);
-    return {
-      valid: false,
-      errors: ["Error: We were unable to retrieve a Lens handle for your address."],
-    };
   }
 }
 
@@ -75,10 +78,13 @@ export class LensProfileProvider implements Provider {
     // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
     let record = undefined;
-    const { valid, handle, errors } = await getLensProfile(address);
+    let errors: string[] = [];
+    const { valid, handle, errors: lensErrors } = await getLensProfile(address);
 
     if (valid === true) {
       record = { handle };
+    } else {
+      errors = lensErrors;
     }
 
     return {

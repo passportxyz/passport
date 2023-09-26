@@ -92,6 +92,10 @@ export class CyberProfileOrgMemberProvider implements Provider {
           orgMembership: identifier,
         };
       } else {
+        errors.push("We determined that you are not a member of CyberConnect, which disqualifies you for this stamp.");
+      }
+
+      if (!valid && error) {
         errors.push(error);
       }
 

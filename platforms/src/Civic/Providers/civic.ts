@@ -50,9 +50,7 @@ export class CivicPassProvider implements Provider {
         if (valid) {
           record = { address };
         } else {
-          errors.push(
-            `Error: You do not have enough passes to qualify for this stamp. All passes: ${allPasses.length}`
-          );
+          errors.push(`You do not have enough passes to qualify for this stamp. All passes: ${allPasses.length}.`);
         }
       } catch (e: unknown) {
         errors.push(String(e));

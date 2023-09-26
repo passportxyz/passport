@@ -38,7 +38,9 @@ export class GitcoinGrantStatisticsProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
-    let valid = false;
+    let valid = false,
+      record = undefined;
+    const errors = [];
     const githubUser: GithubUserMetaData = await getGithubUserData(payload.proofs.code, context);
     try {
       // Only check the contribution condition if a valid github id has been received
@@ -53,18 +55,30 @@ export class GitcoinGrantStatisticsProvider implements Provider {
             ? gitcoinGrantsStatistic.record[this._options.receivingAttribute] >= this._options.threshold
             : false);
 
+        if (valid === true) {
+          record = {
+            // The type was previously incorrectly defined as string on the http response,
+            // and if we correctly called .toString() here instead of doing the forced cast,
+            // we would break our ability to hash against all previous records.
+            id: githubUser.id as unknown as string,
+            [this._options.recordAttribute]: `${this._options.threshold}`,
+          };
+        } else {
+          errors.push(
+            `You do not qualify for this stamp. Your Grantee stats are less than the required thresholds: ${
+              gitcoinGrantsStatistic.record[this._options.receivingAttribute]
+            } out of ${this._options.threshold}.`
+          );
+        }
+
+        if (!valid && errors.length === 0) {
+          errors.push(gitcoinGrantsStatistic.error);
+        }
+
         return {
-          valid: valid,
-          errors: [gitcoinGrantsStatistic.error],
-          record: valid
-            ? {
-                // The type was previously incorrectly defined as string on the http response,
-                // and if we correctly called .toString() here instead of doing the forced cast,
-                // we would break our ability to hash against all previous records.
-                id: githubUser.id as unknown as string,
-                [this._options.recordAttribute]: `${this._options.threshold}`,
-              }
-            : undefined,
+          valid,
+          errors,
+          record,
         };
       } else {
         const ret = {

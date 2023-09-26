@@ -35,7 +35,7 @@ export class GithubContributionActivityProvider implements Provider {
       if (valid) {
         record = { id: githubId };
       } else {
-        errors.push("Error: Your Github contributions did not qualify for this stamp.");
+        errors.push("Your Github contributions did not qualify for this stamp.");
       }
 
       if (contributionResult.errors) {

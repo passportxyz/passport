@@ -108,11 +108,12 @@ export class CyberProfilePremiumProvider implements Provider {
       userHandle = handle;
       const lengthOfPrimaryHandle = userHandle.length;
       valid = lengthOfPrimaryHandle <= 6 && lengthOfPrimaryHandle > 0;
+
       if (valid === true) {
         record = { userHandle };
       } else {
         errors.push(
-          `Error: The length of your primary handle is ${lengthOfPrimaryHandle}, which does not qualify for this stamp data point.`
+          `The length of your primary handle is ${lengthOfPrimaryHandle}, which does not qualify for this stamp data point.`
         );
       }
       return Promise.resolve({
@@ -158,7 +159,7 @@ export class CyberProfilePaidProvider implements Provider {
         record = { userHandle };
       } else {
         errors.push(
-          `Error: The length of your primary handle is ${lengthOfPrimaryHandle}, which does not qualify for this stamp data point.`
+          `The length of your primary handle is ${lengthOfPrimaryHandle}, which does not qualify for this stamp data point.`
         );
       }
       return Promise.resolve({

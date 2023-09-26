@@ -44,7 +44,7 @@ export class BrightIdProvider implements Provider {
           };
         } else {
           errors.push(
-            `Error: You have not met the BrightID verification requirements by attending a connection party -- isUnique: ${String(
+            `You have not met the BrightID verification requirements by attending a connection party -- isUnique: ${String(
               isUnique
             )} & firstContextId: ${firstContextId}`
           );

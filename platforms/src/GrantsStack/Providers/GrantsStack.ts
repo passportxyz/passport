@@ -78,7 +78,7 @@ export class GrantsStackProvider implements Provider {
           contributionStatistic,
         };
       } else {
-        errors.push(`${this.dataKey}: ${count} is less than ${this.threshold}`);
+        errors.push(`You do not qualify for this stamp -- ${this.dataKey}: ${count} is less than ${this.threshold}`);
       }
       return {
         valid,

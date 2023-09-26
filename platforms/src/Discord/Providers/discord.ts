@@ -48,7 +48,7 @@ export class DiscordProvider implements Provider {
         };
       } else {
         errors.push(
-          "Error: We were not able to verify a Discord account with your provided credentials. Please sign-up for a Discord account and try again."
+          "We were not able to verify a Discord account with your provided credentials. Please sign-up for a Discord account and try again."
         );
       }
 

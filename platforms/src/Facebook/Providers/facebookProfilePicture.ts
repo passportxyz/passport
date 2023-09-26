@@ -78,7 +78,7 @@ export class FacebookProfilePictureProvider implements Provider {
           hasProfilePicture: String(valid),
         };
       } else {
-        errors.push("Error: We were unable to verify your Facebook account profile picture.");
+        errors.push("We were unable to verify your Facebook account profile picture.");
       }
 
       return {

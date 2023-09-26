@@ -65,9 +65,7 @@ export class HolonymGovIdProvider implements Provider {
         };
       } else {
         errors.push(
-          `Error: We were unable to verify that your address was unique for action -- isUniqueForAction: ${String(
-            valid
-          )}.`
+          `We were unable to verify that your address was unique for action -- isUniqueForAction: ${String(valid)}.`
         );
       }
 

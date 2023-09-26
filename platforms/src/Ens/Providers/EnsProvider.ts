@@ -35,6 +35,11 @@ export class EnsProvider implements Provider {
       } else {
         errors.push("Primary ENS name was not found for given address.");
       }
+
+      if (!valid && errors.length === 0) {
+        errors.push("We were unable to determine the cause of your error");
+      }
+
       return {
         valid,
         errors,

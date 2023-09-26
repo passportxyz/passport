@@ -1,5 +1,5 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
 
 // ----- Ethers library
@@ -133,37 +133,42 @@ export class EthErc20PossessionProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload, context: EthErc20Context): Promise<VerifiedPayload> {
-    const { address } = payload;
-    let valid = false;
-    let amount: BigNumber = BigNumber.from("0");
-
     try {
+      const { address } = payload;
+      let valid = false,
+        record = undefined;
+      let amount: BigNumber = BigNumber.from("0");
+      const errors: string[] = [];
+
       if (this._options.contractAddress.length > 0) {
         amount = await getTokenBalance(address, this._options.contractAddress, payload, context);
       } else {
         amount = await getEthBalance(address, payload, context);
       }
-    } catch (e) {
-      handleProviderAxiosError(e, "eth balance", [address]);
-      return {
-        valid: false,
-        errors: [this._options.error],
-      };
-    } finally {
+
       const bnThreshold = parseUnits(this._options.threshold, this._options.decimalNumber);
       if (BigNumber.isBigNumber(amount)) {
         valid = amount.gte(bnThreshold);
-      }
-    }
-    return {
-      valid,
-      record: valid
-        ? {
+        if (valid === true) {
+          record = {
             // store the address into the proof records
             address,
             [this._options.recordAttribute]: `${this._options.threshold}`,
-          }
-        : {},
-    };
+          };
+        } else {
+          errors.push(`You do not hold the required amount of ETH for this stamp. Your ETH: ${String(amount)}.`);
+        }
+      } else {
+        errors.push(this._options.error);
+      }
+
+      return {
+        valid,
+        record,
+        errors,
+      };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Error validating ETH amounts: ${JSON.stringify(e)}`);
+    }
   }
 }

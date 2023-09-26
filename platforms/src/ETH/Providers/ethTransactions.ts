@@ -281,7 +281,9 @@ const checkFirstTxn = (ethData: EtherscanRequestResponse["data"], address: strin
     return {
       valid: false,
       errors: [
-        `Your first transaction on Ethereum Mainnet was: ${successfulFirstTxn} ago, which is below the requirement of 30 days.`,
+        `Your first transaction on Ethereum Mainnet was: ${
+          successfulFirstTxn === undefined ? String(0) : String(successfulFirstTxn)
+        } days ago, which is below the requirement of 30 days.`,
       ],
     };
   }

@@ -100,7 +100,7 @@ export class PHIActivitySilverProvider implements Provider {
       if (valid) {
         record = { address };
       } else {
-        errors.push("Error: You have not claimed the required objects to be able to qualify for this stamp.");
+        errors.push("You have not claimed the required objects to be able to qualify for this stamp.");
       }
 
       return Promise.resolve({
@@ -176,7 +176,7 @@ export class PHIActivityGoldProvider implements Provider {
       if (valid) {
         record = { address };
       } else {
-        errors.push("Error: You have not claimed the required objects to be able to qualify for this stamp.");
+        errors.push("You have not claimed the required objects to be able to qualify for this stamp.");
       }
 
       return Promise.resolve({

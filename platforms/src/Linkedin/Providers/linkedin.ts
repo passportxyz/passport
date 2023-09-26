@@ -49,9 +49,7 @@ export class LinkedinProvider implements Provider {
             id: verifiedPayload.id,
           };
         } else {
-          errors.push(
-            `Error: we were unable to verify your LinkedIn account -- LinkedIn Account Valid: ${String(valid)}.`
-          );
+          errors.push(`We were unable to verify your LinkedIn account -- LinkedIn Account Valid: ${String(valid)}.`);
         }
       } else {
         errors.push(verifiedPayload.error);

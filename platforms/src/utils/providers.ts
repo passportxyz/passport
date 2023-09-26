@@ -34,42 +34,6 @@ export class Providers {
     }, {} as { [k: string]: Provider });
   }
 
-  // // Given the payload is valid return the response of the selected Providers verification proceedure
-  // async oldVerify(type: string, payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
-  //   if (UPDATED_PROVIDERS.includes(type)) {
-  //     return await this._updatedVerify(type, payload, context);
-  //   }
-
-  //   // collect provider from options
-  //   const provider = this._providers[type];
-
-  //   // if a provider is available - use it to verify the payload
-  //   if (provider) {
-  //     try {
-  //       // return the verification response
-  //       return await provider.verify(payload, context);
-  //     } catch (e) {
-  //       if (e instanceof Error) {
-  //         const message = `Unable to verify provider: ${e.stack.replace(/\n\s*(?= )/, "").replace(/\n.*$/gm, "")}`;
-
-  //         return {
-  //           valid: false,
-  //           error: [message],
-  //         };
-  //       }
-  //       throw e;
-  //     }
-  //   }
-
-  //   // unable to verify without provider
-  //   return {
-  //     valid: false,
-  //     error: ["Missing provider"],
-  //   };
-  // }
-
-  // TODO Once error handling is updated for all providers, rename this to verify
-  // and delete the old verify method and the UPDATED_PROVIDERS array
   async verify(type: string, payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     const provider = this._providers[type];
 

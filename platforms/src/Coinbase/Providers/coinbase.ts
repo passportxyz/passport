@@ -45,7 +45,7 @@ export class CoinbaseProvider implements Provider {
           id: verifiedPayload.data.id,
         };
       } else {
-        errors.push(`Error: We could not verify your Coinbase account: ${verifiedPayload.data.id}.`);
+        errors.push(`We could not verify your Coinbase account: ${verifiedPayload.data.id}.`);
       }
       return {
         valid,

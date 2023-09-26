@@ -58,7 +58,7 @@ export class FacebookProvider implements Provider {
           user_id: formattedData.user_id,
         };
       } else {
-        errors.push("Error: We were unable to verify your Facebook account.");
+        errors.push("We were unable to verify your Facebook account.");
       }
       return {
         valid,
