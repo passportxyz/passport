@@ -73,7 +73,7 @@ describe("SideBarContent", () => {
     expect(screen.getByText("Github")).toBeInTheDocument();
   });
 
-  it("should mark verified providers with green circle", () => {
+  it("should mark verified providers with green text", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />
@@ -83,11 +83,11 @@ describe("SideBarContent", () => {
     renderWithContext(mockUserContext, mockCeramicContext, drawer());
 
     verifiedProviders.forEach((provider) => {
-      expect(screen.getByTestId(`indicator-${provider}`)).toHaveClass("text-accent");
+      expect(screen.getByTestId(`indicator-${provider}`)).toHaveClass("text-color-2");
     });
   });
 
-  it("should mark non verified providers with grey circle", () => {
+  it("should mark non verified providers with white text", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />
@@ -106,7 +106,7 @@ describe("SideBarContent", () => {
     );
 
     nonVerifiedProviders?.forEach((provider) => {
-      expect(screen.getByTestId(`indicator-${provider}`)).toHaveClass("text-color-4");
+      expect(screen.getByTestId(`indicator-${provider}`)).toHaveClass("text-color-1");
     });
   });
 
@@ -122,9 +122,9 @@ describe("SideBarContent", () => {
     props.currentProviders?.forEach((stamp) => {
       stamp.providers.forEach((provider, i) => {
         if (verifiedProviders.includes(provider.name as PROVIDER_ID)) {
-          expect(screen.getByTestId(`switch-${i}`)).toHaveAttribute("data-headlessui-state", "checked");
+          expect(screen.getByTestId(`checkbox-${provider.name}`)).toHaveAttribute("data-headlessui-state", "checked");
         } else {
-          expect(screen.getByTestId(`switch-${i}`).attributes).not.toContain("data-headlessui-state");
+          expect(screen.getByTestId(`checkbox-${provider.name}`).attributes).not.toContain("data-headlessui-state");
         }
       });
     });

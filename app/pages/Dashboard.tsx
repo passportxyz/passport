@@ -14,7 +14,6 @@ import Header from "../components/Header";
 import BodyWrapper from "../components/BodyWrapper";
 import PageWidthGrid from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
-import Tooltip from "../components/Tooltip";
 import { DoneToastContent } from "../components/DoneToastContent";
 import { DashboardScorePanel } from "../components/DashboardScorePanel";
 import { DashboardValidStampsPanel } from "../components/DashboardValidStampsPanel";
@@ -52,7 +51,7 @@ export default function Dashboard() {
   const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms, cancelCeramicConnection, expiredProviders } =
     useContext(CeramicContext);
   const { wallet, toggleConnection, userWarning, setUserWarning } = useContext(UserContext);
-  const { score, rawScore, refreshScore, scoreDescription, passportSubmissionState } = useContext(ScorerContext);
+  const { refreshScore } = useContext(ScorerContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -272,8 +271,6 @@ export default function Dashboard() {
     </div>
   );
 
-  const SortMenu = ({ className }: { className: string }) => <button className={className}>Sort</button>;
-
   const Subheader = ({ className }: { className: string }) => (
     <div className={className}>
       <div className="flex items-center ">
@@ -321,7 +318,6 @@ export default function Dashboard() {
             <DashboardIllustration className="col-start-8 col-end-[-1] row-span-2 hidden xl:block" />
             <DashboardScorePanel className="col-span-full xl:col-span-7 xl:max-h-52" />
             <span className="col-start-1 col-end-4 font-heading text-4xl">Add Stamps</span>
-            <SortMenu className="col-end-[-1]" />
             <CardList
               className="col-span-full"
               isLoading={
@@ -331,7 +327,7 @@ export default function Dashboard() {
               }
             />
             <span className="col-start-1 col-end-4 font-heading text-3xl">Add Collected Stamps</span>
-            <span className="col-end-[-1] self-center font-alt text-3xl text-foreground-2">
+            <span className="col-end-[-1] self-center whitespace-nowrap text-right font-alt text-3xl text-foreground-2">
               {numVerifiedPlatforms}/{numPlatforms}
             </span>
             <DashboardValidStampsPanel className="col-span-full" />

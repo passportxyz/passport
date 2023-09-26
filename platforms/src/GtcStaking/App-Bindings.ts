@@ -9,10 +9,9 @@ export class GTCStakingPlatform implements Platform {
   redirectUri: string = null;
 
   banner = {
-    heading:
-      "You can connect your wallet to verify your staked GTC amount. Using Identity staking your GTC will be locked for up to 90 days and then can be un-staked or re-staked at that time. If you haven't staked yet, you can follow this link to do so.",
+    content: "If you haven't staked yet, you can do so now.",
     cta: {
-      label: "Go to Identity Staking",
+      label: "Identity Staking",
       url: "https://www.staking.passport.gitcoin.co/",
     },
   };

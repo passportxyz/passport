@@ -18,13 +18,7 @@ import { Button } from "./Button";
 import { LoadButton } from "./LoadButton";
 
 // Passport imports
-import {
-  PROVIDER_ID,
-  SignatureType,
-  Stamp,
-  VerifiableCredential,
-  VerifiableCredentialRecord,
-} from "@gitcoin/passport-types";
+import { PROVIDER_ID, Stamp, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Datadog

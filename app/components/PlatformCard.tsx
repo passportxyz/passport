@@ -1,20 +1,12 @@
 // --- React Methods
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 
 // --- Types
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
-import { PlatformSpec } from "@gitcoin/passport-platforms";
-import { UpdatedPlatforms } from "../config/providers";
-
-// --- Context
-import { CeramicContext } from "../context/ceramicContext";
-import { OnChainContext } from "../context/onChainContext";
 
 // --- Components
 import { getStampProviderFilters } from "../config/filters";
-import { FeatureFlags } from "../config/feature_flags";
-import { OnchainTag } from "./OnchainTag";
 import { Button } from "./Button";
 import { PlatformScoreSpec } from "../context/scorerContext";
 
@@ -24,11 +16,8 @@ type PlatformCardProps = {
   i: number;
   platform: PlatformScoreSpec;
   selectedProviders: SelectedProviders;
-  updatedPlatforms: UpdatedPlatforms | undefined;
-  btnRef: React.MutableRefObject<undefined>;
   onOpen: () => void;
-  setCurrentPlatform: React.Dispatch<React.SetStateAction<PlatformSpec | undefined>>;
-  getUpdatedPlatforms: () => void;
+  setCurrentPlatform: React.Dispatch<React.SetStateAction<PlatformScoreSpec | undefined>>;
   className?: string;
 };
 
@@ -36,16 +25,11 @@ export const PlatformCard = ({
   i,
   platform,
   selectedProviders,
-  updatedPlatforms,
-  btnRef,
   onOpen,
   setCurrentPlatform,
-  getUpdatedPlatforms,
   className,
 }: PlatformCardProps): JSX.Element => {
   // import all providers
-  const { allProvidersState } = useContext(CeramicContext);
-  const { activeChainProviders } = useContext(OnChainContext);
   const [hovering, setHovering] = useState(false);
 
   // stamp filter
