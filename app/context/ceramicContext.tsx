@@ -9,7 +9,7 @@ import {
   StampPatch,
 } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../config/providers";
-import { CeramicDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
+import { CeramicStorage, DataStorageBase, ComposeDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
 import { useViewerConnection } from "@self.id/framework";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
@@ -293,7 +293,7 @@ export const CeramicContext = createContext(startingState);
 
 export const cleanPassport = (
   passport: Passport,
-  database: CeramicDatabase | PassportDatabase,
+  database: CeramicStorage | DataStorageBase,
   allProvidersState: AllProvidersState
 ): {
   passport: Passport;
@@ -331,7 +331,7 @@ export const cleanPassport = (
 export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
   const resolveCancel = useRef<() => void>();
-  const [ceramicClient, setCeramicClient] = useState<CeramicDatabase | undefined>(undefined);
+  const [ceramicClient, setCeramicClient] = useState<ComposeDatabase | undefined>(undefined);
   const [isLoadingPassport, setIsLoadingPassport] = useState<IsLoadingPassportState>(IsLoadingPassportState.Loading);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
   const [userDid, setUserDid] = useState<string | undefined>();
@@ -375,11 +375,11 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           break;
         } else if (dbAccessToken && address && !database) {
           // Ceramic Network Connection
-          const ceramicClientInstance = new CeramicDatabase(
-            viewerConnection.selfID.did,
-            process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
-            undefined,
-            datadogLogs.logger
+          const ceramicClientInstance = new ComposeDatabase(
+            viewerConnection.selfID.did
+            // TODO
+            // process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
+            // datadogLogs.logger
           );
           setCeramicClient(ceramicClientInstance);
           setUserDid(ceramicClientInstance.did);
@@ -539,7 +539,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
                 .filter(({ credential }) => !credential)
                 .map(({ provider }) => provider);
 
-              if (deleteProviderIds.length) await ceramicClient.deleteStampIDs(deleteProviderIds);
+              // if (deleteProviderIds.length) await ceramicClient.deleteStampIDs(deleteProviderIds);
 
               await ceramicClient.setStamps(patchResponse.passport?.stamps || []);
             } catch (e) {

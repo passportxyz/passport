@@ -21,7 +21,7 @@ import { TileLoader } from "@glazed/tile-loader";
 import type { DID as CeramicDID } from "dids";
 import { StreamID } from "@ceramicnetwork/streamid";
 import axios from "axios";
-import { DataStorageBase } from "./types";
+import { CeramicStorage } from "./types";
 import { getTilesToCreate } from "./utils";
 
 // const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
@@ -62,7 +62,7 @@ type StampLoadResponse = {
   cacaoErrorStampIds: string[];
 };
 
-export class CeramicDatabase implements DataStorageBase {
+export class CeramicDatabase implements CeramicStorage {
   did: string;
   loader: TileLoader;
   ceramicClient: CeramicApi;
