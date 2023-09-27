@@ -1,11 +1,12 @@
 /* eslint-disable */
 // ---- Test subject
-import { CoinbaseProvider } from "../Providers/coinbase";
+import * as coinbaseProviderModule from "../Providers/coinbase";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
+import { ProviderExternalVerificationError } from "../../types";
 
 jest.mock("axios");
 
@@ -45,7 +46,7 @@ beforeEach(() => {
 
 describe("Attempt verification", function () {
   it("handles valid verification attempt", async () => {
-    const coinbase = new CoinbaseProvider();
+    const coinbase = new coinbaseProviderModule.CoinbaseProvider();
     const coinbasePayload = await coinbase.verify({
       proofs: {
         code,
@@ -73,22 +74,29 @@ describe("Attempt verification", function () {
       record: {
         id: validCoinbaseUserResponse.data.data.id,
       },
+      errors: [],
     });
   });
 
-  it("should return invalid payload when unable to retrieve auth token", async () => {
-    mockedAxios.post.mockImplementation(async (url, data, config) => {
+  it("should throw Provider External Verification error when unable to retrieve auth token", async () => {
+    const e = "Post for request returned status code 500 instead of the expected 200";
+    mockedAxios.post.mockImplementation(async () => {
       return {
         status: 500,
       };
     });
-
-    const coinbase = new CoinbaseProvider();
-    const coinbasePayload = await coinbase.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+    const coinbase = new coinbaseProviderModule.CoinbaseProvider();
+    expect(
+      await coinbase.verify({
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload)
+    ).toMatchObject({
+      valid: false,
+      record: undefined,
+      errors: [e],
+    });
     expect(mockedAxios.post).toBeCalledTimes(1);
     expect(mockedAxios.post).toBeCalledWith(
       `https://api.coinbase.com/oauth/token?grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
@@ -97,12 +105,10 @@ describe("Attempt verification", function () {
         headers: { Accept: "application/json" },
       }
     );
-
-    expect(coinbasePayload).toMatchObject({ valid: false });
   });
 
   it("should return invalid payload when there is no id in verify Coinbase response", async () => {
-    mockedAxios.get.mockImplementation(async (url, config) => {
+    mockedAxios.get.mockImplementation(async () => {
       return {
         data: {
           id: undefined,
@@ -113,12 +119,19 @@ describe("Attempt verification", function () {
       };
     });
 
-    const coinbase = new CoinbaseProvider();
-    const coinbasePayload = await coinbase.verify({
+    const coinbase = new coinbaseProviderModule.CoinbaseProvider();
+    expect(
+      await coinbase.verify({
       proofs: {
         code,
       },
-    } as unknown as RequestPayload);
+    } as unknown as RequestPayload)).toMatchObject(
+      { 
+        valid: false,
+        errors: ["TypeError: Cannot read properties of undefined (reading 'id')"],
+        record: undefined,
+      }
+    );
 
     expect(mockedAxios.post).toBeCalledTimes(1);
     // Check the request to get the token
@@ -134,7 +147,6 @@ describe("Attempt verification", function () {
     expect(mockedAxios.get).toBeCalledWith("https://api.coinbase.com/v2/user", {
       headers: { Authorization: "Bearer cnbstkn294745627362562" },
     });
-    expect(coinbasePayload).toMatchObject({ valid: false });
   });
 
   it("should return invalid payload when a bad status code is returned by coinbase user api", async () => {
@@ -144,7 +156,7 @@ describe("Attempt verification", function () {
       };
     });
 
-    const coinbase = new CoinbaseProvider();
+    const coinbase = new coinbaseProviderModule.CoinbaseProvider();
     const coinbasePayload = await coinbase.verify({
       proofs: {
         code,
@@ -167,6 +179,12 @@ describe("Attempt verification", function () {
       headers: { Authorization: "Bearer cnbstkn294745627362562" },
     });
 
-    expect(coinbasePayload).toMatchObject({ valid: false });
+    expect(coinbasePayload).toMatchObject(
+      { 
+        valid: false,
+        errors: ["Get user request returned status code 500 instead of the expected 200"],
+        record: undefined,
+      }
+    );
   });
 });
