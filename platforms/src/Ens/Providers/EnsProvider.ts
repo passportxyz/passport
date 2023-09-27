@@ -30,7 +30,7 @@ export class EnsProvider implements Provider {
       valid = !!reportedName;
       if (valid) {
         record = {
-          id: reportedName,
+          ens: reportedName,
         };
       } else {
         errors.push("Primary ENS name was not found for given address.");
@@ -46,7 +46,7 @@ export class EnsProvider implements Provider {
         record,
       };
     } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(`Error verifying ENS name: ${JSON.stringify(e)}`);
+      throw new ProviderExternalVerificationError(`Error verifying ENS name: ${String(e)}`);
     }
   }
 }

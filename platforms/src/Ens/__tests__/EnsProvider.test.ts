@@ -6,6 +6,7 @@ import { EnsProvider } from "../Providers/EnsProvider";
 import { StaticJsonRpcProvider, JsonRpcSigner } from "@ethersproject/providers";
 
 import { mock } from "jest-mock-extended";
+import { ProviderExternalVerificationError } from "../../types";
 
 jest.mock("@ethersproject/providers");
 
@@ -38,6 +39,7 @@ describe("Attempt verification", function () {
       record: {
         ens: MOCK_ENS,
       },
+      errors: [],
     });
   });
 
@@ -46,14 +48,12 @@ describe("Attempt verification", function () {
     const ens = new EnsProvider();
     const MOCK_FAKE_ADDRESS = "FAKE_ADDRESS";
 
-    const verifiedPayload = await ens.verify({
-      address: MOCK_FAKE_ADDRESS,
-    } as unknown as RequestPayload);
-
+    await expect(async () => {
+      return await ens.verify({
+        address: MOCK_FAKE_ADDRESS,
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(new ProviderExternalVerificationError("Error verifying ENS name: Invalid Address"));
     expect(EthersLookupAddressMock).toBeCalledWith(MOCK_FAKE_ADDRESS);
-    expect(verifiedPayload).toEqual({
-      valid: false,
-    });
   });
 
   it("should return false for an address without a valid ens name", async () => {
@@ -65,6 +65,10 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     expect(EthersLookupAddressMock).toBeCalledWith(MOCK_FAKE_ADDRESS);
-    expect(verifiedPayload).toEqual({ valid: false, error: ["Primary ENS name was not found for given address."] });
+    expect(verifiedPayload).toEqual({
+      valid: false,
+      errors: ["Primary ENS name was not found for given address."],
+      record: undefined,
+    });
   });
 });
