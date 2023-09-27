@@ -122,7 +122,7 @@ export class EthErc20PossessionProvider implements Provider {
     recordAttribute: "",
     contractAddress: "",
     decimalNumber: 18,
-    error: "Coin Possession Provider Error",
+    error: "Eth Possession Provider Error",
   };
 
   // construct the provider instance with supplied options
@@ -168,7 +168,7 @@ export class EthErc20PossessionProvider implements Provider {
         errors,
       };
     } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(`Error validating ETH amounts: ${JSON.stringify(e)}`);
+      throw new ProviderExternalVerificationError(`Error validating ETH amounts: ${String(e)}`);
     }
   }
 }
