@@ -41,15 +41,14 @@ export class DiscordProvider implements Provider {
 
     try {
       verifiedPayload = await verifyDiscord(payload.proofs.code);
-      if (verifiedPayload.user?.id) {
-        valid = verifiedPayload && verifiedPayload.user?.id ? true : false;
+
+      valid = verifiedPayload && verifiedPayload.user?.id ? true : false;
+      if (valid) {
         record = {
           id: verifiedPayload.user?.id,
         };
       } else {
-        errors.push(
-          "We were not able to verify a Discord account with your provided credentials. Please sign-up for a Discord account and try again."
-        );
+        errors.push("We were not able to verify a Discord account with your provided credentials.");
       }
 
       return {
@@ -58,7 +57,7 @@ export class DiscordProvider implements Provider {
         errors,
       };
     } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(`Discord account check error: ${JSON.stringify(e)}`);
+      throw new ProviderExternalVerificationError(`Discord account check error: ${String(e)}`);
     }
   }
 }
