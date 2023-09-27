@@ -20,46 +20,52 @@ export class BrightIdProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
       const errors = [];
-      let record = undefined;
+      let record = undefined,
+        valid = false;
       const did = payload.proofs?.did;
 
       const responseData = await verifyBrightidContextId(did || "");
-      let valid: boolean = responseData.valid;
+      const validResponse: boolean = responseData.valid;
+      const formattedData: BrightIdVerificationResponse = responseData?.result as BrightIdVerificationResponse;
+      // Unique is true if the user obtained "Meets" verification by attending a connection party
+      const isUnique = "unique" in formattedData && formattedData.unique === true;
+      const firstContextId =
+        "contextIds" in formattedData &&
+        formattedData.contextIds &&
+        formattedData.contextIds.length > 0 &&
+        formattedData.contextIds[0];
+      valid = firstContextId && isUnique;
+      if (validResponse && valid) {
+        record = {
+          context: "context" in formattedData && formattedData.context,
+          contextId: firstContextId,
+          meets: JSON.stringify(isUnique),
+        };
+      } else if (!isUnique && firstContextId && !validResponse) {
+        errors.push(
+          `You have not met the BrightID verification requirements by attending a connection party -- isUnique: ${String(
+            isUnique
+          )} & firstContextId: ${firstContextId}`
+        );
+      } else if (!isUnique && !firstContextId && !validResponse) {
+        errors.push("You have not met the BrightID verification requirements");
+      }
 
-      if (valid) {
-        const formattedData: BrightIdVerificationResponse = responseData?.result as BrightIdVerificationResponse;
-        // Unique is true if the user obtained "Meets" verification by attending a connection party
-        const isUnique = "unique" in formattedData && formattedData.unique === true;
-        const firstContextId =
-          "contextIds" in formattedData &&
-          formattedData.contextIds &&
-          formattedData.contextIds.length > 0 &&
-          formattedData.contextIds[0];
-        valid = (firstContextId && isUnique) || false;
-        if (valid === true) {
-          record = {
-            context: "context" in formattedData && formattedData.context,
-            contextId: firstContextId,
-            meets: JSON.stringify(isUnique),
-          };
-        } else {
-          errors.push(
-            `You have not met the BrightID verification requirements by attending a connection party -- isUnique: ${String(
-              isUnique
-            )} & firstContextId: ${firstContextId}`
-          );
-        }
-      } else {
+      if (responseData.error) {
         errors.push(responseData.error);
       }
 
-      return {
+      return Promise.resolve({
         valid,
         record,
         errors,
-      };
+      });
     } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(`Error verifying BrightID sponsorship: ${JSON.stringify(e)}`);
+      console.log(e);
+
+      return Promise.reject(
+        new ProviderExternalVerificationError(`Error verifying BrightID sponsorship: ${String(e)}`)
+      );
     }
   }
 }

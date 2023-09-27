@@ -6,7 +6,6 @@ import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
-import { ProviderExternalVerificationError } from "../../types";
 
 jest.mock("axios");
 

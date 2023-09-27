@@ -4,6 +4,7 @@ import { triggerBrightidSponsorship } from "../procedures/brightid";
 import { BrightIdVerificationResponse, BrightIdSponsorshipResponse } from "@gitcoin/passport-types";
 import { RequestPayload } from "@gitcoin/passport-types";
 import { verifyContextId, sponsor } from "brightid_sdk";
+import { ProviderExternalVerificationError } from "../../types";
 
 jest.mock("brightid_sdk", () => ({
   verifyContextId: jest.fn(),
@@ -92,26 +93,28 @@ describe("Attempt BrightId", () => {
       expect(result).toMatchObject({
         valid: false,
         record: undefined,
+        errors: ["You have not met the BrightID verification requirements"],
       });
     });
 
     it("thrown error from BrightId did as contextId verification attempt, returns valid false", async () => {
-      (verifyContextId as jest.Mock).mockRejectedValue("Thrown Error");
+      (verifyContextId as jest.Mock).mockRejectedValue(
+        "Error verifying BrightID sponsorship: TypeError: Cannot use 'in' operator to search for 'unique' in undefined"
+      );
 
-      const result = await new BrightIdProvider().verify({
-        proofs: {
-          did,
-        },
-      } as unknown as RequestPayload);
+      await expect(async () => {
+        return await new BrightIdProvider().verify({
+          proofs: {
+            did,
+          },
+        } as unknown as RequestPayload);
+      }).rejects.toThrow(ProviderExternalVerificationError);
 
       expect(verifyContextId).toBeCalledTimes(1);
-      expect(result).toMatchObject({
-        valid: false,
-      });
     });
 
-    it("user is sponsored but did not attend a connection party, returns valid false and record undefined", async () => {
-      (verifyContextId as jest.Mock).mockResolvedValue(nonUniqueResponse);
+    it("user is sponsored but did not attend a connection party, returns valid false, record undefined, and error reason", async () => {
+      (verifyContextId as jest.Mock).mockResolvedValueOnce(nonUniqueResponse);
 
       const result = await new BrightIdProvider().verify({
         proofs: {
@@ -123,6 +126,11 @@ describe("Attempt BrightId", () => {
       expect(result).toMatchObject({
         valid: false,
         record: undefined,
+        errors: [
+          `You have not met the BrightID verification requirements by attending a connection party -- isUnique: ${String(
+            nonUniqueResponse.unique
+          )} & firstContextId: ${nonUniqueResponse.contextIds[0]}`,
+        ],
       });
     });
   });
