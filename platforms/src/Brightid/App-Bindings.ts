@@ -49,7 +49,7 @@ export class BrightidPlatform extends Platform {
       `toolbar=no, location=no, directories=no, status=no, menubar=no, resizable=no, copyhistory=no, width=${width}, height=${height}, top=${top}, left=${left}`
     );
 
-    return appContext.waitForRedirect().then(async (response) => {
+    return appContext.waitForRedirect(this).then(async (response) => {
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(/\/*?$/, "")}/brightid/sponsor`,
         {

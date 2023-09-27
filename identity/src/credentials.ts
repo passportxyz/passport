@@ -58,34 +58,41 @@ const _issueEd25519Credential = async (
   DIDKit: DIDKitLib,
   key: string,
   expiresInSeconds: number,
-  fields: { [k: string]: any } // eslint-disable-line @typescript-eslint/no-explicit-any
+  fields: { [k: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
+  issuanceDate?: string,
+  expirationDate?: string
 ): Promise<VerifiableCredential> => {
-  // get DID from key
-  const issuer = DIDKit.keyToDID("key", key);
-  // read method from key
-  const verificationMethod = await DIDKit.keyToVerificationMethod("key", key);
-  // stringify assertionMethod we feed to didkit-wasm-node
-  const verifyWithMethod = JSON.stringify({
-    proofPurpose: "assertionMethod",
-    verificationMethod,
-  });
+  try {
+    // get DID from key
+    const issuer = DIDKit.keyToDID("key", key);
+    // read method from key
+    const verificationMethod = await DIDKit.keyToVerificationMethod("key", key);
+    // stringify assertionMethod we feed to didkit-wasm-node
+    const verifyWithMethod = JSON.stringify({
+      proofPurpose: "assertionMethod",
+      verificationMethod,
+    });
 
-  // generate a verifiableCredential
-  const credential = await DIDKit.issueCredential(
-    JSON.stringify({
-      "@context": ["https://www.w3.org/2018/credentials/v1"],
-      type: ["VerifiableCredential"],
-      issuer,
-      issuanceDate: new Date().toISOString(),
-      expirationDate: addSeconds(new Date(), expiresInSeconds).toISOString(),
-      ...fields,
-    }),
-    verifyWithMethod,
-    key
-  );
+    // generate a verifiableCredential
+    const credential = await DIDKit.issueCredential(
+      JSON.stringify({
+        "@context": ["https://www.w3.org/2018/credentials/v1"],
+        type: ["VerifiableCredential"],
+        issuer,
+        issuanceDate: issuanceDate ? issuanceDate : new Date().toISOString(),
+        expirationDate: expirationDate ? expirationDate : addSeconds(new Date(), expiresInSeconds).toISOString(),
+        ...fields,
+      }),
+      verifyWithMethod,
+      key
+    );
 
-  // parse the response of the DIDKit wasm
-  return JSON.parse(credential) as VerifiableCredential;
+    // parse the response of the DIDKit wasm
+    return JSON.parse(credential) as VerifiableCredential;
+  } catch (error) {
+    console.error("Error while issuing credential", error);
+    console.error("Error while issuing credential", error.message);
+  }
 };
 
 type CredentialExiresInSeconds = {
@@ -254,20 +261,27 @@ export const issueHashedCredential = async (
     );
   } else {
     // generate a verifiableCredential
-    credential = await _issueEd25519Credential(DIDKit, key, expiresInSeconds, {
-      credentialSubject: {
-        "@context": [
-          {
-            hash: "https://schema.org/Text",
-            provider: "https://schema.org/Text",
-          },
-        ],
-        // construct a pkh DID on mainnet (:1) for the given wallet address
-        id: `did:pkh:eip155:1:${address}`,
-        provider: record.type,
-        hash: `${VERSION}:${hash}`,
+    credential = await _issueEd25519Credential(
+      DIDKit,
+      key,
+      expiresInSeconds,
+      {
+        credentialSubject: {
+          "@context": [
+            {
+              hash: "https://schema.org/Text",
+              provider: "https://schema.org/Text",
+            },
+          ],
+          // construct a pkh DID on mainnet (:1) for the given wallet address
+          id: `did:pkh:eip155:1:${address}`,
+          provider: record.type,
+          hash: `${VERSION}:${hash}`,
+        },
       },
-    });
+      "2021-12-31T23:59:59Z",
+      "2022-12-31T23:59:59Z"
+    );
   }
 
   // didkit-wasm-node returns credential as a string - parse for JSON

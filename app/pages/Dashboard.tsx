@@ -17,6 +17,7 @@ import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import { DoneToastContent } from "../components/DoneToastContent";
 import { DashboardScorePanel } from "../components/DashboardScorePanel";
 import { DashboardValidStampsPanel } from "../components/DashboardValidStampsPanel";
+import { ExpiredStampsPanel } from "../components/ExpiredStampsPanel";
 
 // --Chakra UI Elements
 import {
@@ -36,7 +37,6 @@ import { ScorerContext } from "../context/scorerContext";
 
 import { useViewerConnection } from "@self.id/framework";
 import { EthereumAuthProvider } from "@self.id/web";
-import { ExpiredStampModal } from "../components/ExpiredStampModal";
 import ProcessingPopup from "../components/ProcessingPopup";
 import { getFilterName } from "../config/filters";
 import { Button } from "../components/Button";
@@ -50,7 +50,8 @@ const fail = "../assets/verification-failed-bright.svg";
 export default function Dashboard() {
   const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms, cancelCeramicConnection, expiredProviders } =
     useContext(CeramicContext);
-  const { wallet, toggleConnection, userWarning, setUserWarning } = useContext(UserContext);
+
+  const { wallet, toggleConnection, userWarning, setUserWarning } = useContext(UserContext); // TODO: geri: remove userWarning ???
   const { refreshScore } = useContext(ScorerContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -89,7 +90,6 @@ export default function Dashboard() {
   const [viewerConnection, ceramicConnect] = useViewerConnection();
   const { isOpen: retryModalIsOpen, onOpen: onRetryModalOpen, onClose: onRetryModalClose } = useDisclosure();
 
-  const [expiredStampModal, setExpiredStampModal] = useState(false);
   const { dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
 
   // stamp filter
@@ -167,27 +167,6 @@ export default function Dashboard() {
     }
   }, [isLoadingPassport]);
 
-  useEffect(() => {
-    if (expiredProviders.length > 0) {
-      setUserWarning({
-        name: "expiredStamp",
-        icon: <img className="mr-2 h-6" alt="Clock Icon" src="./assets/clock-icon.svg" />,
-        content: (
-          <div className="flex justify-center">
-            Some of your stamps have expired. You can remove them from your Passport.
-            <button className="ml-2 flex underline" onClick={() => setExpiredStampModal(true)}>
-              Remove Expired Stamps{" "}
-              <img className="ml-1 w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
-            </button>
-          </div>
-        ),
-        dismissible: false,
-      });
-    } else if (userWarning?.name === "expiredStamp") {
-      setUserWarning();
-    }
-  }, [expiredProviders]);
-
   const retryModal = (
     <Modal isOpen={retryModalIsOpen} onClose={onRetryModalClose}>
       <ModalOverlay />
@@ -254,15 +233,7 @@ export default function Dashboard() {
       />
 
       {isLoadingPassport == IsLoadingPassportState.FailedToConnect && retryModal}
-
-      {expiredStampModal && (
-        <ExpiredStampModal isOpen={expiredStampModal} onClose={() => setExpiredStampModal(false)} />
-      )}
     </>
-  );
-
-  const ExpiredStampsPanel = ({ className }: { className: string }) => (
-    <div className={className}>Expired Stamps Panel</div>
   );
 
   const DashboardIllustration = ({ className }: { className: string }) => (
@@ -307,6 +278,7 @@ export default function Dashboard() {
     </div>
   );
 
+  console.log("geri isLoadingPassport", isLoadingPassport);
   return (
     <PageRoot className="text-color-1">
       {modals}

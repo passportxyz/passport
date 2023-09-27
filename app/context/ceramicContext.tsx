@@ -50,6 +50,7 @@ const {
 import { PlatformProps } from "../components/GenericPlatform";
 
 import { CERAMIC_CACHE_ENDPOINT, IAM_ISSUER_DID } from "../config/stamp_config";
+import { Set } from "typescript";
 
 // -- Trusted IAM servers DID
 const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
@@ -66,6 +67,7 @@ export interface CeramicContextState {
   cancelCeramicConnection: () => void;
   userDid: string | undefined;
   expiredProviders: PROVIDER_ID[];
+  expiredPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>>;
   passportHasCacaoError: boolean;
   passportLoadResponse?: PassportLoadResponse;
   verifiedProviderIds: PROVIDER_ID[];
@@ -73,6 +75,7 @@ export interface CeramicContextState {
 }
 
 export const platforms = new Map<PLATFORM_ID, PlatformProps>();
+
 platforms.set("Twitter", {
   platform: new Twitter.TwitterPlatform(),
   platFormGroupSpec: Twitter.ProviderConfig,
@@ -176,6 +179,7 @@ platforms.set("Brightid", {
   platform: new Brightid.BrightidPlatform(),
   platFormGroupSpec: Brightid.ProviderConfig,
 });
+
 platforms.set("Coinbase", {
   platform: new Coinbase.CoinbasePlatform({
     clientId: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CLIENT_ID,
@@ -261,6 +265,31 @@ export type AllProvidersState = {
   [provider in PROVIDER_ID]?: ProviderState;
 };
 
+// Define and pre-compute sets for the platform types
+export const evmTypePlatforms = new Set<PLATFORM_ID>();
+export const nonEvmTypePlatforms = new Set<PLATFORM_ID>();
+export const evmTypeProviders = new Set<PROVIDER_ID>();
+export const nonEvmTypeProviders = new Set<PROVIDER_ID>();
+
+platforms.forEach(({ platFormGroupSpec, platform }, platformId) => {
+  if (platform.isEVM) {
+    evmTypePlatforms.add(platformId);
+  } else {
+    nonEvmTypePlatforms.add(platformId);
+  }
+  platFormGroupSpec.forEach(({ providers }) => {
+    providers.forEach(({ name }) => {
+      if (platform.isEVM) {
+        evmTypeProviders.add(name);
+      } else {
+        nonEvmTypeProviders.add(name);
+      }
+    });
+  });
+});
+
+// (([, { platformType }]) => platformType === "web3").map(([id]) => id));
+
 // Generate {<stampName>: {providerSpec, stamp}} for all stamps
 const startingAllProvidersState: AllProvidersState = Object.values(stampPlatforms).reduce(
   (allProvidersState, platform) => {
@@ -299,6 +328,7 @@ const startingState: CeramicContextState = {
   cancelCeramicConnection: () => {},
   userDid: undefined,
   expiredProviders: [],
+  expiredPlatforms: {},
   passportLoadResponse: undefined,
   verifiedProviderIds: [],
   verifiedPlatforms: {},
@@ -496,10 +526,13 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     skipLoadingState?: boolean,
     isInitialLoad?: boolean
   ): Promise<Passport | undefined> => {
+    console.log("geri - fetchPassport");
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
+    console.log("geri - fetchPassport");
 
     // fetch, clean and set the new Passport state
     const getResponse = await database.getPassport();
+    console.log("geri - fetchPassport", getResponse);
 
     return await handlePassportUpdate(getResponse, database, skipLoadingState, isInitialLoad);
   };
@@ -624,12 +657,27 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     [allProvidersState]
   );
 
+  console.log("geri - platforms", platforms);
   const verifiedPlatforms = useMemo(
     () =>
       Object.entries(Object.fromEntries(platforms)).reduce((validPlatformProps, [platformKey, platformProps]) => {
         if (
           platformProps.platFormGroupSpec.some(({ providers }) =>
             providers.some(({ name }) => verifiedProviderIds.includes(name))
+          )
+        )
+          validPlatformProps[platformKey as PLATFORM_ID] = platformProps;
+        return validPlatformProps;
+      }, {} as Record<PLATFORM_ID, PlatformProps>),
+    [verifiedProviderIds, platforms]
+  );
+
+  const expiredPlatforms = useMemo(
+    () =>
+      Object.entries(Object.fromEntries(platforms)).reduce((validPlatformProps, [platformKey, platformProps]) => {
+        if (
+          platformProps.platFormGroupSpec.some(({ providers }) =>
+            providers.some(({ name }) => expiredProviders.includes(name))
           )
         )
           validPlatformProps[platformKey as PLATFORM_ID] = platformProps;
@@ -650,6 +698,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     cancelCeramicConnection,
     userDid,
     expiredProviders,
+    expiredPlatforms,
     passportLoadResponse,
     passportHasCacaoError,
     verifiedProviderIds,

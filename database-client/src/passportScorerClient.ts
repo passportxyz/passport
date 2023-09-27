@@ -47,6 +47,7 @@ export class PassportDatabase implements DataStorageBase {
     try {
       const response = await request;
       this.logger.info(`[Scorer] made ${requestType} request for passport for did ${this.did} => ${this.address}`);
+      console.log(`geri - [Scorer] made ${requestType} request for passport for did ${this.did} => ${this.address}`);
 
       const { data } = response;
       if (data && data.success && (this.allowEmpty || data.stamps.length !== 0)) {
@@ -67,6 +68,9 @@ export class PassportDatabase implements DataStorageBase {
         `[Scorer] Error thrown when making ${requestType} for passport with did ${this.address}: ` + e.toString(),
         { error: e }
       );
+      console.log(
+        `geri - [Scorer] Error thrown when making ${requestType} for passport with did ${this.address}: ` + e.toString()
+      );
     } finally {
       return {
         passport,
@@ -77,6 +81,7 @@ export class PassportDatabase implements DataStorageBase {
   };
 
   async getPassport(): Promise<PassportLoadResponse> {
+    console.log(`geri - ${this.passportScorerUrl}/stamp?address=${this.address}`);
     return await this.processPassportResponse(
       axios.get(`${this.passportScorerUrl}/stamp?address=${this.address}`),
       "get"

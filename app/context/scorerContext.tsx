@@ -123,31 +123,31 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     dbAccessToken: string
     // submitPassportOnFailure: boolean = true
   ) => {
-    if (address) {
-      const maxRequests = 30;
-      let sleepTime = 1000;
-      setPassportSubmissionState("APP_REQUEST_PENDING");
-      try {
-        let requestCount = 1;
-        let scoreStatus = await loadScore(address, dbAccessToken);
+    // if (address) {
+    //   const maxRequests = 30;
+    //   let sleepTime = 1000;
+    //   setPassportSubmissionState("APP_REQUEST_PENDING");
+    //   try {
+    //     let requestCount = 1;
+    //     let scoreStatus = await loadScore(address, dbAccessToken);
 
-        while ((scoreStatus === "PROCESSING" || scoreStatus === "BULK_PROCESSING") && requestCount < maxRequests) {
-          requestCount++;
-          await new Promise((resolve) => setTimeout(resolve, sleepTime));
-          if (sleepTime < 10000) {
-            sleepTime += 500;
-          }
-          scoreStatus = await loadScore(address, dbAccessToken);
-        }
-        setPassportSubmissionState("APP_REQUEST_SUCCESS");
-      } catch (error: AxiosError | any) {
-        setPassportSubmissionState("APP_REQUEST_ERROR");
-        // Commenting this, as we don't want to submit passport on failure any more - this will be handled in the BE
-        // if (submitPassportOnFailure && error.response?.data?.detail === "Unable to get score for provided scorer.") {
-        //   submitPassport(address);
-        // }
-      }
-    }
+    //     while ((scoreStatus === "PROCESSING" || scoreStatus === "BULK_PROCESSING") && requestCount < maxRequests) {
+    //       requestCount++;
+    //       await new Promise((resolve) => setTimeout(resolve, sleepTime));
+    //       if (sleepTime < 10000) {
+    //         sleepTime += 500;
+    //       }
+    //       scoreStatus = await loadScore(address, dbAccessToken);
+    //     }
+    //     setPassportSubmissionState("APP_REQUEST_SUCCESS");
+    //   } catch (error: AxiosError | any) {
+    //     setPassportSubmissionState("APP_REQUEST_ERROR");
+    //     // Commenting this, as we don't want to submit passport on failure any more - this will be handled in the BE
+    //     // if (submitPassportOnFailure && error.response?.data?.detail === "Unable to get score for provided scorer.") {
+    //     //   submitPassport(address);
+    //     // }
+    //   }
+    // }
   };
 
   const calculatePlatformScore = useCallback(() => {
