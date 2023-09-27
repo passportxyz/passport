@@ -2,6 +2,7 @@ import { RequestPayload } from "@gitcoin/passport-types";
 import { CivicPassProvider } from "../Providers/civic";
 import { CivicPassLookupPass, CivicPassType, PassesForAddress } from "../Providers/types";
 import axios from "axios";
+import { ProviderExternalVerificationError } from "../../types";
 
 // Mock out all top level functions, such as get, put, delete and post:
 jest.mock("axios");
@@ -47,6 +48,8 @@ describe("Civic Pass Provider", function () {
 
     expect(verifiedPayload).toMatchObject({
       valid: false,
+      record: undefined,
+      errors: ["You do not have enough passes to qualify for this stamp. All passes: 0."],
     });
   });
 
@@ -62,6 +65,8 @@ describe("Civic Pass Provider", function () {
 
     expect(verifiedPayload).toMatchObject({
       valid: true,
+      record: { address: userAddress },
+      errors: [],
     });
   });
 
@@ -86,12 +91,12 @@ describe("Civic Pass Provider", function () {
       type: "uniqueness",
       passType: CivicPassType.UNIQUENESS,
     });
-    const verifiedPayload = await civic.verify(requestPayload);
 
-    expect(verifiedPayload).toMatchObject({
-      valid: false,
-      error: [errorString],
-    });
+    await expect(async () => {
+      return await civic.verify(requestPayload);
+    }).rejects.toThrow(
+      new ProviderExternalVerificationError("Error verifying BrightID sponsorship: Error: some error")
+    );
   });
 
   it("should return the pass details if a pass is found", async () => {
@@ -107,6 +112,7 @@ describe("Civic Pass Provider", function () {
     expect(verifiedPayload).toMatchObject({
       valid: true,
       record: {},
+      errors: [],
     });
   });
 
@@ -123,6 +129,7 @@ describe("Civic Pass Provider", function () {
     expect(verifiedPayload).toMatchObject({
       valid: true,
       record: {},
+      errors: [],
     });
   });
 });

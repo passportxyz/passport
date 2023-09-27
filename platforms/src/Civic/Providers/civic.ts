@@ -5,6 +5,7 @@ import { CivicPassType } from "./types";
 
 // ----- Utils
 import { findAllPasses, latestExpiry, secondsFromNow } from "./util";
+import { log } from "console";
 
 // If the environment variable INCLUDE_TESTNETS is set to true,
 // then passes on testnets will be included in the verification by default.
@@ -65,7 +66,9 @@ export class CivicPassProvider implements Provider {
         record: record,
       };
     } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(`Error verifying BrightID sponsorship: ${JSON.stringify(e)}`);
+      return Promise.reject(
+        new ProviderExternalVerificationError(`Error verifying BrightID sponsorship: ${String(e)}`)
+      );
     }
   }
 }
