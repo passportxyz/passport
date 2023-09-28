@@ -10,24 +10,25 @@ type StampsListProps = {
   className?: string;
 };
 
-
 const ExpiredStampsList = ({ className }: StampsListProps) => {
   const { expiredPlatforms } = useContext(CeramicContext);
 
   return (
     <div className={`flex flex-col items-center ${className}`}>
       <div className={`flex flex-wrap justify-center gap-8`}>
-        {Object.values(expiredPlatforms)
-          .map((platform) => getPlatformSpec(platform.platform.platformId))
-          .filter((platformSpec): platformSpec is PlatformSpec => !!platformSpec)
-          .map((platformSpec) => {
-            // check if platform has onchain providers
-            return (
-              <div key={platformSpec.platform} className="flex flex-col items-center">
-                <img alt="Platform Icon" src={platformSpec.icon} className="col-start-1 row-start-1 h-8 w-8" />
-              </div>
-            );
-          })}
+        {expiredPlatforms
+          ? Object.values(expiredPlatforms)
+              .map((platform) => getPlatformSpec(platform.platform.platformId))
+              .filter((platformSpec): platformSpec is PlatformSpec => !!platformSpec)
+              .map((platformSpec) => {
+                // check if platform has onchain providers
+                return (
+                  <div key={platformSpec.platform} className="flex flex-col items-center">
+                    <img alt="Platform Icon" src={platformSpec.icon} className="col-start-1 row-start-1 h-8 w-8" />
+                  </div>
+                );
+              })
+          : null}
       </div>
     </div>
   );
@@ -45,4 +46,3 @@ export const ExpiredStampsPanel = ({ className }: { className: string }) => {
     </div>
   );
 };
-
