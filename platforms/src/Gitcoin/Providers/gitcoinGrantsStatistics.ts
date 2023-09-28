@@ -39,15 +39,20 @@ export class GitcoinGrantStatisticsProvider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     let valid = false,
-      record = undefined;
+      record = undefined,
+      gitcoinGrantsStatistic;
     const errors = [];
-    const githubUser: GithubUserMetaData = await getGithubUserData(payload.proofs.code, context);
     try {
+      const githubUser: GithubUserMetaData = await getGithubUserData(payload.proofs.code, context);
       // Only check the contribution condition if a valid github id has been received
       valid = !githubUser.errors && !!githubUser.id;
       if (valid) {
         const dataUrl = process.env.CGRANTS_API_URL + this.urlPath;
-        const gitcoinGrantsStatistic = await getGitcoinStatistics(dataUrl, githubUser.id, context);
+        try {
+          gitcoinGrantsStatistic = await getGitcoinStatistics(dataUrl, githubUser.id, context);
+        } catch (error) {
+          errors.push(error);
+        }
 
         valid =
           !gitcoinGrantsStatistic.error &&
@@ -74,7 +79,6 @@ export class GitcoinGrantStatisticsProvider implements Provider {
         if (!valid && errors.length === 0) {
           errors.push(gitcoinGrantsStatistic.error);
         }
-
         return {
           valid,
           errors,
@@ -88,7 +92,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
         return ret;
       }
     } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(`Gitcoin Grants Statistic verification error: ${JSON.stringify(e)}.`);
+      throw new ProviderExternalVerificationError(`Gitcoin Grants Statistic verification error: ${String(e)}.`);
     }
   }
 }
