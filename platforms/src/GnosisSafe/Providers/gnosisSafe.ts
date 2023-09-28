@@ -61,7 +61,7 @@ export class GnosisSafeProvider implements Provider {
               address: address,
             }
           : undefined,
-        errors: errors.length ? errors : undefined,
+        errors: errors.length ? errors : [],
       });
     } catch (error: unknown) {
       throw new ProviderExternalVerificationError(`Error verifying Gnosis Safes: ${JSON.stringify(error)}`);

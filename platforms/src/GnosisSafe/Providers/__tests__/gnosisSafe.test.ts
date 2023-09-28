@@ -6,6 +6,7 @@ import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
+import { ProviderExternalVerificationError } from "../../../types";
 
 jest.mock("axios");
 
@@ -43,6 +44,7 @@ describe("Verification succeeds", function () {
       record: {
         address: MOCK_ADDRESS,
       },
+      errors: [],
     });
   });
 });
@@ -69,7 +71,8 @@ describe("Verification fails", function () {
 
     expect(gnosisSafePayload).toEqual({
       valid: false,
-      error: ["Unable to find any safes owned by the given address"],
+      errors: ["Unable to find any safes owned by the given address"],
+      record: undefined,
     });
   });
 
@@ -92,7 +95,8 @@ describe("Verification fails", function () {
 
     expect(gnosisSafePayload).toEqual({
       valid: false,
-      error: ["Unable to find any safes owned by the given address"],
+      errors: ["Unable to find any safes owned by the given address"],
+      record: undefined,
     });
   });
 
@@ -119,7 +123,8 @@ describe("Verification fails", function () {
 
     expect(gnosisSafePayload).toEqual({
       valid: false,
-      error: [`HTTP Error '400'. Details: 'Bad Request'.`],
+      errors: [`HTTP Error '400'. Details: 'Bad Request'.`],
+      record: undefined,
     });
   });
 
@@ -139,7 +144,19 @@ describe("Verification fails", function () {
 
     expect(gnosisSafePayload).toEqual({
       valid: false,
-      error: ["something bad happened"],
+      errors: ["something bad happened"],
+      record: undefined,
     });
+  });
+
+  it("should throw Provider External Verification error with empty address string", async () => {
+    const gnosisSafeProvider = new GnosisSafeProvider();
+    // Check the request to get the safes
+    await expect(async () => {
+      return await gnosisSafeProvider.verify({
+        address: "",
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(new ProviderExternalVerificationError(`Error verifying Gnosis Safes: {"reason":"invalid address","code":"INVALID_ARGUMENT","argument":"address","value":""}`));
+    expect(axios.get).toHaveBeenCalledTimes(0);
   });
 });
