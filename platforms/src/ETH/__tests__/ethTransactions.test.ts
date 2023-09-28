@@ -4,6 +4,7 @@ import { EthGasProvider, FirstEthTxnProvider, EthGTEOneTxnProvider } from "../Pr
 
 // ----- Types
 import { RequestPayload } from "@gitcoin/passport-types";
+import { ProviderExternalVerificationError } from "../../types";
 
 // ----- Libs
 import axios from "axios";
@@ -188,6 +189,7 @@ describe("Attempt verification for ETH gas provider stamp", function () {
         address: `${MOCK_ADDRESS_LOWER}`,
         hasGTEHalfEthSpentGasSpentOnTheMainnet: "true",
       },
+      errors: [],
     });
   });
 
@@ -207,7 +209,13 @@ describe("Attempt verification for ETH gas provider stamp", function () {
       `https://api.etherscan.io/api?module=account&action=txlistinternal&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
 
-    expect(verifiedPayload).toMatchObject({ valid: false });
+    expect(verifiedPayload).toMatchObject({
+      valid: false,
+      record: undefined,
+      errors: [
+        "The total amount you've spent on gas on Ethereum Mainnet is: 0, which is below the requirement of 0.5 ETH or 500000000000000000 Wei.",
+      ],
+    });
   });
 
   it("should return invalid payload when the user has no ethereum transactions (empty result array)", async () => {
@@ -226,29 +234,28 @@ describe("Attempt verification for ETH gas provider stamp", function () {
       `https://api.etherscan.io/api?module=account&action=txlistinternal&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
 
-    expect(verifiedPayload).toMatchObject({ valid: false });
+    expect(verifiedPayload).toMatchObject({
+      valid: false,
+      record: undefined,
+      errors: [
+        "The total amount you've spent on gas on Ethereum Mainnet is: 0, which is below the requirement of 0.5 ETH or 500000000000000000 Wei.",
+      ],
+    });
   });
 
   it("should return invalid payload if there is no address provided to the ETH gas provider verification method", async () => {
     mockNRequests(2, validEtherscanResponse, "");
 
     const ethGasProvider = new EthGasProvider();
-    const verifiedPayload = await ethGasProvider.verify({
-      address: "",
-    } as unknown as RequestPayload);
 
-    expect(axios.get).toHaveBeenCalledTimes(6);
-    expect(mockedAxios.get).toBeCalledWith(
-      `https://api.etherscan.io/api?module=account&action=txlist&address=&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
-    );
-    expect(mockedAxios.get).toBeCalledWith(
-      `https://api.etherscan.io/api?module=account&action=txlistinternal&address=&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
-    );
-
-    expect(verifiedPayload).toMatchObject({ valid: false });
+    await expect(async () => {
+      await ethGasProvider.verify({
+        address: "",
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(new ProviderExternalVerificationError("Bad address"));
   });
 
-  it("should return invalid payload when an exception is through when a request is made", async () => {
+  it("should throw Provider External Verification error when an exception is thrown when a request is made", async () => {
     mockedAxios.get.mockImplementation(async (url: any) => {
       if (url.includes("https://api.etherscan.io/api") && url.includes(BAD_MOCK_ADDRESS_LOWER)) {
         throw "an error";
@@ -256,16 +263,20 @@ describe("Attempt verification for ETH gas provider stamp", function () {
     });
 
     const ethGasProvider = new EthGasProvider();
-    const verifiedPayload = await ethGasProvider.verify({
-      address: BAD_MOCK_ADDRESS_LOWER,
-    } as unknown as RequestPayload);
 
+    expect(async () => {
+      await ethGasProvider.verify({
+        address: BAD_MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(
+      new ProviderExternalVerificationError(
+        "More than 0.5 in gas fees on Ethereum check error: an error."
+      )
+    );
     expect(axios.get).toHaveBeenCalledTimes(1);
     expect(mockedAxios.get).toBeCalledWith(
       `https://api.etherscan.io/api?module=account&action=txlist&address=${BAD_MOCK_ADDRESS_LOWER}&page=1&offset=${ETH_GAS_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
-
-    expect(verifiedPayload).toMatchObject({ valid: false });
   });
 });
 
@@ -292,6 +303,7 @@ describe("Attempt verification for gte 30 days since first ETH transaction stamp
         address: `${MOCK_ADDRESS_LOWER}`,
         hasGTE30DaysSinceFirstTxnOnTheMainnet: "true",
       },
+      errors: [],
     });
   });
 
@@ -308,7 +320,11 @@ describe("Attempt verification for gte 30 days since first ETH transaction stamp
       `https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
 
-    expect(verifiedPayload).toMatchObject({ valid: false });
+    expect(verifiedPayload).toMatchObject({
+      valid: false,
+      record: undefined,
+      errors: ["Your first transaction on Ethereum Mainnet was: 0 days ago, which is below the requirement of 30 days."],
+    });
   });
 
   it("should return invalid payload when the user has no ethereum transactions (empty result array)", async () => {
@@ -324,30 +340,36 @@ describe("Attempt verification for gte 30 days since first ETH transaction stamp
       `https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
 
-    expect(verifiedPayload).toMatchObject({ valid: false });
+    expect(verifiedPayload).toMatchObject({
+      valid: false,
+      record: undefined,
+      errors: ["Your first transaction on Ethereum Mainnet was: 0 days ago, which is below the requirement of 30 days."],
+    });
   });
 
-  it("should return invalid payload if there is no address provided to the ETH gas provider verification method", async () => {
+  it("should throw Provider External Verification error if there is no address provided to the ETH gas provider verification method", async () => {
     mockedAxios.get.mockImplementation(async (url) => {
       if (url.includes("https://api.etherscan.io/api")) {
         return Promise.resolve(invalidRequest.data);
       }
     });
-
     const firstEthTxnProvider = new FirstEthTxnProvider();
-    const verifiedPayload = await firstEthTxnProvider.verify({
-      address: "",
-    } as unknown as RequestPayload);
-
+    expect(async () => {
+      await firstEthTxnProvider.verify({
+        address: "",
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(
+      new ProviderExternalVerificationError(
+        "Thirty days or more since first transaction on Ethereum check error: TypeError: Cannot read properties of undefined (reading 'status')."
+      )
+    );
     expect(axios.get).toHaveBeenCalledTimes(1);
     expect(mockedAxios.get).toBeCalledWith(
       `https://api.etherscan.io/api?module=account&action=txlist&address=&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
-
-    expect(verifiedPayload).toMatchObject({ valid: false });
   });
 
-  it("should return invalid payload when an exception is through when a request is made", async () => {
+  it("should throw Provider External Verification error when an exception is thrown when a request is made", async () => {
     mockedAxios.get.mockImplementation(async (url) => {
       if (url.includes("https://api.etherscan.io/api") && url.includes(BAD_MOCK_ADDRESS_LOWER)) {
         throw "an error";
@@ -355,16 +377,20 @@ describe("Attempt verification for gte 30 days since first ETH transaction stamp
     });
 
     const firstEthTxnProvider = new FirstEthTxnProvider();
-    const verifiedPayload = await firstEthTxnProvider.verify({
-      address: BAD_MOCK_ADDRESS_LOWER,
-    } as unknown as RequestPayload);
 
+    expect(async () => {
+      return await firstEthTxnProvider.verify({
+        address: BAD_MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(
+      new ProviderExternalVerificationError(
+        "Thirty days or more since first transaction on Ethereum check error: an error."
+      )
+    );
     expect(axios.get).toHaveBeenCalledTimes(1);
     expect(mockedAxios.get).toBeCalledWith(
       `https://api.etherscan.io/api?module=account&action=txlist&address=${BAD_MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
-
-    expect(verifiedPayload).toMatchObject({ valid: false });
   });
 });
 
@@ -392,6 +418,7 @@ describe("Attempt verification for at least one ETH transaction on the mainnet s
         address: `${MOCK_ADDRESS_LOWER}`,
         hasGTE1ETHTxnOnTheMainnet: "true",
       },
+      errors: [],
     });
   });
 
@@ -408,7 +435,11 @@ describe("Attempt verification for at least one ETH transaction on the mainnet s
       `https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
 
-    expect(verifiedPayload).toMatchObject({ valid: false });
+    expect(verifiedPayload).toMatchObject({
+      valid: false,
+      record: undefined,
+      errors: ["You currently do not have 1 or more transactions on Ethereum Mainnet"],
+    });
   });
 
   it("should return invalid payload when the user has no ethereum transactions (empty result array)", async () => {
@@ -424,7 +455,11 @@ describe("Attempt verification for at least one ETH transaction on the mainnet s
       `https://api.etherscan.io/api?module=account&action=txlist&address=${MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
 
-    expect(verifiedPayload).toMatchObject({ valid: false });
+    expect(verifiedPayload).toMatchObject({
+      valid: false,
+      record: undefined,
+      errors: ["You currently do not have 1 or more transactions on Ethereum Mainnet"],
+    });
   });
 
   it("should return invalid payload if there is no address provided to the ETH gas provider verification method", async () => {
@@ -435,35 +470,45 @@ describe("Attempt verification for at least one ETH transaction on the mainnet s
     });
 
     const ethGTEOneTxnProvider = new EthGTEOneTxnProvider();
-    const verifiedPayload = await ethGTEOneTxnProvider.verify({
-      address: "",
-    } as unknown as RequestPayload);
+
+    expect(async () => {
+      await ethGTEOneTxnProvider.verify({
+        address: "",
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(
+      new ProviderExternalVerificationError(
+        "One or more Ethereum transactions check error: TypeError: Cannot read properties of undefined (reading 'data')."
+      )
+    );
 
     expect(axios.get).toHaveBeenCalledTimes(1);
     expect(mockedAxios.get).toBeCalledWith(
       `https://api.etherscan.io/api?module=account&action=txlist&address=&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
-
-    expect(verifiedPayload).toMatchObject({ valid: false });
   });
 
-  it("should return invalid payload when an exception is through when a request is made", async () => {
+  it("should throw Provider External Verification error when a request throws an error", async () => {
     mockedAxios.get.mockImplementation(async (url) => {
       if (url.includes("https://api.etherscan.io/api") && url.includes(MOCK_ADDRESS_LOWER)) {
-        return Promise.resolve(invalidRequest.data);
+        return Promise.resolve(invalidRequest.data?.error);
       }
     });
 
     const ethGTEOneTxnProvider = new EthGTEOneTxnProvider();
-    const verifiedPayload = await ethGTEOneTxnProvider.verify({
-      address: BAD_MOCK_ADDRESS_LOWER,
-    } as unknown as RequestPayload);
+
+    expect(async () => {
+      return await ethGTEOneTxnProvider.verify({
+        address: BAD_MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(
+      new ProviderExternalVerificationError(
+        "One or more Ethereum transactions check error: TypeError: Cannot read properties of undefined (reading 'data')."
+      )
+    );
 
     expect(axios.get).toHaveBeenCalledTimes(1);
     expect(mockedAxios.get).toBeCalledWith(
       `https://api.etherscan.io/api?module=account&action=txlist&address=${BAD_MOCK_ADDRESS_LOWER}&page=1&offset=${FIRST_ETH_GTE_TXN_OFFSET_COUNT}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
-
-    expect(verifiedPayload).toMatchObject({ valid: false });
   });
 });

@@ -72,6 +72,10 @@ export class EthGasProvider implements Provider {
       ethTokenTransactions: EtherscanRequestResponse["data"],
       record = undefined;
 
+    if (!address || address === "") {
+      throw new ProviderExternalVerificationError("Bad address");
+    }
+
     try {
       ethTransactions = await fetchEthereumData("txlist", address, offsetCount);
       ethInternalTransactions = await fetchEthereumData("txlistinternal", address, offsetCount);
@@ -92,9 +96,7 @@ export class EthGasProvider implements Provider {
         errors,
       };
     } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(
-        `More than 0.5 in gas fees on Ethereum check error: ${JSON.stringify(e)}.`
-      );
+      throw new ProviderExternalVerificationError(`More than 0.5 in gas fees on Ethereum check error: ${String(e)}.`);
     }
   }
 }
@@ -135,7 +137,7 @@ export class FirstEthTxnProvider implements Provider {
       };
     } catch (e: unknown) {
       throw new ProviderExternalVerificationError(
-        `Thirty days or more since first transaction on Ethereum check error: ${JSON.stringify(e)}.`
+        `Thirty days or more since first transaction on Ethereum check error: ${String(e)}.`
       );
     }
   }
@@ -176,9 +178,7 @@ export class EthGTEOneTxnProvider implements Provider {
         errors,
       };
     } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(
-        `One or more Ethereum transactions check error: ${JSON.stringify(e)}.`
-      );
+      throw new ProviderExternalVerificationError(`One or more Ethereum transactions check error: ${String(e)}.`);
     }
   }
 }
