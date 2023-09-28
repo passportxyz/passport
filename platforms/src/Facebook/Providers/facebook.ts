@@ -52,8 +52,8 @@ export class FacebookProvider implements Provider {
       const responseData = await verifyFacebook(payload.proofs.accessToken);
       const formattedData = responseData?.data.data;
       const notExpired = DateTime.now() < DateTime.fromSeconds(formattedData.expires_at);
-      if (notExpired) {
-        valid = notExpired && formattedData.app_id === APP_ID && formattedData.is_valid && !!formattedData.user_id;
+      valid = notExpired && formattedData.app_id === APP_ID && formattedData.is_valid && !!formattedData.user_id;
+      if (notExpired && valid) {
         record = {
           user_id: formattedData.user_id,
         };

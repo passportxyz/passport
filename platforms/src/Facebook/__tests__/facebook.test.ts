@@ -52,6 +52,7 @@ describe("Attempt verification", function () {
       record: {
         user_id: "some-user-id",
       },
+      errors: [],
     });
   });
 
@@ -74,6 +75,8 @@ describe("Attempt verification", function () {
     expect(axios.get).toHaveBeenCalledTimes(1);
     expect(result).toMatchObject({
       valid: false,
+      record: undefined,
+      errors: ["We were unable to verify your Facebook account."],
     });
   });
 
@@ -96,6 +99,8 @@ describe("Attempt verification", function () {
     expect(axios.get).toHaveBeenCalledTimes(1);
     expect(result).toMatchObject({
       valid: false,
+      record: undefined,
+      errors: ["We were unable to verify your Facebook account."],
     });
   });
 
@@ -118,6 +123,8 @@ describe("Attempt verification", function () {
     expect(axios.get).toHaveBeenCalledTimes(1);
     expect(result).toMatchObject({
       valid: false,
+      record: undefined,
+      errors: ["We were unable to verify your Facebook account."],
     });
   });
 
@@ -141,20 +148,21 @@ describe("Attempt verification", function () {
     expect(axios.get).toHaveBeenCalledTimes(1);
     expect(result).toMatchObject({
       valid: false,
+      record: undefined,
+      errors: ["We were unable to verify your Facebook account."],
     });
   });
 
   it("returns invalid response when call results in error", async () => {
     (axios.get as jest.Mock).mockRejectedValueOnce({ status: 400, data: { error: { message: "some error" } } });
-
-    const result = await new FacebookProvider().verify({
-      proofs: {
-        accessToken,
-      },
-    } as unknown as RequestPayload);
-
-    expect(result).toMatchObject({
-      valid: false,
-    });
+    await expect(async () => {
+      await new FacebookProvider().verify({
+        proofs: {
+          accessToken,
+        },
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(
+      `Error verifying Facebook account: {"status":${String(400)},"data":{"error":{"message":"some error"}}}`
+    );
   });
 });
