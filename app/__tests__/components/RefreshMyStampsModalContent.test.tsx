@@ -13,6 +13,7 @@ import { ValidatedPlatform } from "../../signer/utils";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 import { reduceStampResponse } from "../../utils/helpers";
 import { CredentialResponseBody } from "@gitcoin/passport-types";
+import { IAM_SIGNATURE_TYPE } from "../../config/stamp_config";
 
 jest.mock("react-router-dom", () => ({
   useNavigate: jest.fn(),
@@ -110,6 +111,7 @@ describe("RefreshMyStampsModalContent", () => {
           version: "0.0.0",
           address: "0xmyAddress",
           proofs: {},
+          signatureType: IAM_SIGNATURE_TYPE,
         },
         undefined
       )
