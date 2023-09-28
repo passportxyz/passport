@@ -1,6 +1,6 @@
 import axios from "axios";
 import { GrantsStackProvider, getGrantsStackData } from "../GrantsStack";
-import { RequestPayload, PROVIDER_ID } from "@gitcoin/passport-types";
+import { RequestPayload } from "@gitcoin/passport-types";
 
 // Mocking axios
 jest.mock("axios");
@@ -26,7 +26,7 @@ describe("GrantsStackProvider", () => {
       // Mock an axios error
       (axios.get as jest.Mock).mockRejectedValue(new Error("Network Error"));
       const context = {};
-      await expect(() => getGrantsStackData(requestPayload, context)).rejects.toThrow("Error getting GrantsStack data");
+      await expect(() => getGrantsStackData(requestPayload, context)).rejects.toThrow("Network Error");
     });
   });
 
@@ -50,12 +50,19 @@ describe("GrantsStackProvider", () => {
     });
 
     it("should verify GrantsStack data and return valid false if threshold is not met", async () => {
+      const projectCount = 10;
+      const programCount = 1;
+      const threshold = 15;
       const providerId = "GrantsStack5Projects";
-      const provider = new GrantsStackProvider({ type: providerId, threshold: 15, dataKey: "projectCount" });
+      const provider = new GrantsStackProvider({ type: providerId, threshold, dataKey: "projectCount" });
       const verifiedPayload = await provider.verify(requestPayload, {
-        grantsStack: { projectCount: 10, programCount: 1 },
+        grantsStack: { projectCount, programCount },
       });
-      expect(verifiedPayload).toMatchObject({ valid: false });
+      expect(verifiedPayload).toMatchObject({
+        valid: false,
+        record: undefined,
+        errors: [`You do not qualify for this stamp -- projectCount: ${projectCount} is less than ${threshold}`],
+      });
     });
 
     it("should throw an error if verification fails", async () => {
@@ -63,7 +70,9 @@ describe("GrantsStackProvider", () => {
       // Mock the axios response to throw an error in getGrantsStackData
       (axios.get as jest.Mock).mockRejectedValue(new Error("Network Error"));
       const provider = new GrantsStackProvider({ type: providerId, threshold: 5, dataKey: "projectCount" });
-      await expect(() => provider.verify(requestPayload, {})).rejects.toThrow("Error verifying GrantsStack data");
+      await expect(() => provider.verify(requestPayload, {})).rejects.toThrow(
+        "Grant Stack contribution verification error: Error: Network Error."
+      );
     });
   });
 });

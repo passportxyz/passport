@@ -86,9 +86,7 @@ export class GrantsStackProvider implements Provider {
         errors,
       };
     } catch (error: unknown) {
-      throw new ProviderExternalVerificationError(
-        `Grant Stack contribution verification error: ${JSON.stringify(error)}.`
-      );
+      throw new ProviderExternalVerificationError(`Grant Stack contribution verification error: ${String(error)}.`);
     }
   }
 }
