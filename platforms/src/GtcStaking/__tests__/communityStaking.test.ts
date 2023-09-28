@@ -82,26 +82,22 @@ describe("Attempt verification", function () {
         address: MOCK_ADDRESS_LOWER,
         stakeAmount: "csgte5",
       },
+      errors: [],
     });
   });
   it("handles invalid verification attempt where address is not proper ether address", async () => {
     const communityStakingProvider = new CommunityStakingBronzeProvider();
-    const verifiedPayload = await communityStakingProvider.verify(
-      {
-        address: "NOT_ADDRESS",
-      } as unknown as RequestPayload,
-      {}
-    );
-
     // Check the request to verify the subgraph query
-    expect(mockedAxiosPost).toBeCalledWith(stakingSubgraph, {
-      query: getSubgraphQuery("not_address"),
-    });
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      record: {},
-    });
+    await expect(async () => {
+      return await communityStakingProvider.verify(
+        {
+          address: "not_address",
+        } as unknown as RequestPayload,
+        {}
+      );
+    }).rejects.toThrow("CommunityStakingBronze verifyStake: Error: Not a proper address.");
   });
+
   it("handles invalid subgraph response", async () => {
     mockedAxiosPost.mockImplementationOnce((url, data) => {
       const query: string = (data as RequestData).query;
@@ -112,44 +108,36 @@ describe("Attempt verification", function () {
       }
     });
     const communityStakingProvider = new CommunityStakingBronzeProvider();
-    const verifiedPayload = await communityStakingProvider.verify(
-      {
-        address: MOCK_ADDRESS_LOWER,
-      } as unknown as RequestPayload,
-      {}
-    );
-
+    await expect(async () => {
+      return await communityStakingProvider.verify(
+        {
+          address: MOCK_ADDRESS_LOWER,
+        } as unknown as RequestPayload,
+        {}
+      );
+    }).rejects.toThrow("CommunityStakingBronze verifyStake: TypeError: Cannot read properties of undefined");
     // Check the request to verify the subgraph query
     // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockedAxiosPost).toBeCalledWith(stakingSubgraph, {
       query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
-    });
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      error: ["CommunityStakingBronze verifyStake Error"],
     });
   });
   it("handles invalid verification attempt where an exception is thrown", async () => {
-    mockedAxiosPost.mockImplementationOnce((url, data) => {
-      throw Error("CommunityStakingBronze verifyStake Error");
+    mockedAxiosPost.mockImplementationOnce(() => {
+      throw Error();
     });
     const communityStakingProvider = new CommunityStakingBronzeProvider();
-    const verifiedPayload = await communityStakingProvider.verify(
-      {
-        address: MOCK_ADDRESS_LOWER,
-      } as unknown as RequestPayload,
-      {}
-    );
 
     // Check the request to verify the subgraph query
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(mockedAxiosPost).toBeCalledWith(stakingSubgraph, {
-      query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
-    });
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      error: ["CommunityStakingBronze verifyStake Error"],
-    });
+    await expect(async () => {
+      return await communityStakingProvider.verify(
+        {
+          address: MOCK_ADDRESS_LOWER,
+        } as unknown as RequestPayload,
+        {}
+      );
+    }).rejects.toThrow("CommunityStakingBronze verifyStake: Error.");
   });
 });
 

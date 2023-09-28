@@ -94,7 +94,7 @@ export class GtcStakingProvider implements Provider {
         errors,
       };
     } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(`${this.type} verifyStake Error: ${JSON.stringify(e)}.`);
+      throw new ProviderExternalVerificationError(`${this.type} verifyStake: ${String(e)}.`);
     }
   }
 }
@@ -119,6 +119,11 @@ async function verifyStake(payload: RequestPayload, context: GtcStakingContext):
     if (!context.gtcStaking?.userStake) {
       const round = process.env.GTC_STAKING_ROUND || "1";
       const address = payload.address.toLowerCase();
+
+      if (!address || address.substring(0, 2) !== "0x") {
+        throw Error("Not a proper address");
+      }
+
       const response: StakeResponse = await axios.post(stakingSubgraph, {
         query: getStakeQuery(address, round),
       });
