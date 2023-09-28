@@ -1,27 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 // --- Chakra UI Elements
-import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, Spinner } from "@chakra-ui/react";
+import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, useDisclosure } from "@chakra-ui/react";
 
-import { PlatformSpec, PlatformGroupSpec } from "@gitcoin/passport-platforms";
+import { PlatformGroupSpec, PlatformBanner } from "@gitcoin/passport-platforms";
 
-import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 
 import { StampSelector } from "./StampSelector";
+import { Button } from "./Button";
 import { PlatformDetails } from "./PlatformDetails";
+import { PlatformScoreSpec } from "../context/scorerContext";
+import { RemoveStampModal } from "./RemoveStampModal";
+import { STAMP_PROVIDERS } from "../config/providers";
+import { CeramicContext } from "../context/ceramicContext";
+import Checkbox from "./Checkbox";
 
 export type SideBarContentProps = {
-  currentPlatform: PlatformSpec | undefined;
+  currentPlatform: PlatformScoreSpec | undefined;
   currentProviders: PlatformGroupSpec[] | undefined;
   verifiedProviders: PROVIDER_ID[] | undefined;
   selectedProviders: PROVIDER_ID[] | undefined;
   setSelectedProviders: React.Dispatch<React.SetStateAction<PROVIDER_ID[]>> | undefined;
   isLoading: boolean | undefined;
   verifyButton: JSX.Element | undefined;
-  infoElement?: JSX.Element | undefined;
+  onClose: () => void;
+  bannerConfig?: PlatformBanner;
 };
 
 export const SideBarContent = ({
+  onClose,
   currentPlatform,
   currentProviders,
   verifiedProviders,
@@ -29,16 +37,28 @@ export const SideBarContent = ({
   setSelectedProviders,
   isLoading,
   verifyButton,
-  infoElement,
+  bannerConfig,
 }: SideBarContentProps): JSX.Element => {
+  const { handleDeleteStamps } = useContext(CeramicContext);
   const [allProviderIds, setAllProviderIds] = useState<PROVIDER_ID[]>([]);
   const [allSelected, setAllSelected] = useState(false);
+
+  const {
+    isOpen: isOpenRemoveStampModal,
+    onOpen: onOpenRemoveStampModal,
+    onClose: onCloseRemoveStampModal,
+  } = useDisclosure();
+
+  const onRemoveStamps = async () => {
+    await handleDeleteStamps(allProviderIds);
+    onClose();
+  };
 
   // alter select-all state when items change
   useEffect(() => {
     // find all providerIds
     const providerIds =
-      currentProviders?.reduce((all, stamp, i) => {
+      currentProviders?.reduce((all, stamp) => {
         return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
       }, [] as PROVIDER_ID[]) || [];
 
@@ -53,40 +73,46 @@ export const SideBarContent = ({
   return (
     <DrawerContent
       style={{
-        backgroundColor: "var(--color-background-2)",
-        border: "1px solid var(--color-accent-2)",
+        backgroundColor: "rgb(var(--color-background))",
+        border: "1px solid rgb(var(--color-foreground-5))",
         borderRadius: "6px",
+        backgroundImage: "url('/assets/sidebarHeader.svg')",
+        backgroundRepeat: "no-repeat",
       }}
     >
-      <DrawerCloseButton disabled={isLoading} className={`z-10 text-color-1`} />
+      <DrawerCloseButton disabled={isLoading} className={`visible z-10 text-color-1 md:invisible`} />
       {currentPlatform && currentProviders ? (
-        <div className="overflow-auto">
-          <DrawerHeader style={{ fontWeight: "inherit" }}>
-            <PlatformDetails currentPlatform={currentPlatform!} />
+        <div className="overflow-auto p-10 text-color-1">
+          <DrawerHeader
+            style={{
+              fontWeight: "inherit",
+              padding: "0",
+            }}
+          >
+            <PlatformDetails
+              currentPlatform={currentPlatform}
+              bannerConfig={bannerConfig}
+              verifiedProviders={verifiedProviders}
+            />
           </DrawerHeader>
           <DrawerBody
             style={{
-              paddingInlineStart: "0",
-              paddingInlineEnd: "0",
-              WebkitPaddingStart: "0",
-              WebkitPaddingEnd: "0",
+              padding: "0",
             }}
           >
             <div>
-              <div className="flex pl-4 pr-6">
-                <span
-                  data-testid="select-all"
-                  className={`ml-auto py-2 text-sm ${
-                    !allSelected ? `cursor-pointer text-accent-3` : `cursor-default text-muted`
-                  } `}
-                  onClick={(e) => {
-                    // set the selected items by concating or filtering by providerId
-                    if (!allSelected) setSelectedProviders && setSelectedProviders(!allSelected ? allProviderIds : []);
-                  }}
-                >
-                  {allSelected ? `Selected!` : `Select all`}
-                </span>
+              <div className="mt-8 flex">
+                <Checkbox
+                  id="select-all"
+                  checked={allSelected}
+                  onChange={(checked) => setSelectedProviders && setSelectedProviders(checked ? allProviderIds : [])}
+                />
+
+                <label htmlFor="select-all" data-testid="select-all" className={`pl-2 font-alt text-sm`}>
+                  Select all
+                </label>
               </div>
+              <hr className="mt-4 border-foreground-3" />
               <StampSelector
                 currentPlatform={currentPlatform}
                 currentProviders={currentProviders}
@@ -94,11 +120,32 @@ export const SideBarContent = ({
                 selectedProviders={selectedProviders}
                 setSelectedProviders={(providerIds) => setSelectedProviders && setSelectedProviders(providerIds)}
               />
-              {/* This is an optional element that can be used to provide more information */}
-              {infoElement}
               {verifyButton}
+              <div className="mt-4 flex justify-center">
+                <button
+                  className="bg-background text-color-2 disabled:cursor-not-allowed disabled:brightness-50"
+                  disabled={!verifiedProviders || verifiedProviders?.length === 0}
+                  onClick={onOpenRemoveStampModal}
+                  data-testid="remove-stamp"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
           </DrawerBody>
+          <RemoveStampModal
+            isOpen={isOpenRemoveStampModal}
+            onClose={onCloseRemoveStampModal}
+            title={`Remove ${currentPlatform.name} Stamp`}
+            body={"This stamp will be removed from your Passport. You can still re-verify your stamp in the future."}
+            stampsToBeDeleted={
+              STAMP_PROVIDERS[currentPlatform.platform]?.reduce((all, stamp) => {
+                return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+              }, [] as PROVIDER_ID[]) || []
+            }
+            handleDeleteStamps={onRemoveStamps}
+            platformId={currentPlatform.name as PLATFORM_ID}
+          />
         </div>
       ) : (
         <div>

@@ -7,6 +7,7 @@ dotenv.config();
 // ---- Server
 import express, { Request } from "express";
 import { router as procedureRouter } from "@gitcoin/passport-platforms/dist/commonjs/procedure-router";
+import { TypedDataDomain } from "@ethersproject/abstract-signer";
 
 // ---- Production plugins
 import cors from "cors";
@@ -18,16 +19,16 @@ import { utils, ethers } from "ethers";
 import { Response } from "express";
 import {
   RequestPayload,
-  ProofRecord,
   ChallengeRequestBody,
   VerifyRequestBody,
   CredentialResponseBody,
   ProviderContext,
   CheckRequestBody,
-  CheckResponseBody,
   EasPayload,
   PassportAttestation,
   EasRequestBody,
+  VerifiedPayload,
+  VerifiableCredential,
 } from "@gitcoin/passport-types";
 import onchainInfo from "../../deployments/onchainInfo.json";
 
@@ -42,11 +43,15 @@ import {
   issueChallengeCredential,
   issueHashedCredential,
   verifyCredential,
+  issueEip712Credential,
 } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { stampCredentialDocument } from "@gitcoin/passport-identity/dist/commonjs/src/signingDocuments";
 
 // All provider exports from platforms
-import { providers } from "@gitcoin/passport-platforms";
+import { providers, platforms } from "@gitcoin/passport-platforms";
+
 import path from "path";
+import { IAMError } from "./utils/scorerService";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -58,10 +63,6 @@ if (!process.env.IAM_JWK) {
 
 if (!process.env.ATTESTATION_SIGNER_PRIVATE_KEY) {
   configErrors.push("ATTESTATION_SIGNER_PRIVATE_KEY is required");
-}
-
-if (!process.env.GITCOIN_VERIFIER_CHAIN_ID || process.env.GITCOIN_VERIFIER_CHAIN_ID.startsWith("0x")) {
-  configErrors.push("GITCOIN_VERIFIER_CHAIN_ID is required and must be in decimal format");
 }
 
 if (!process.env.ALLO_SCORER_ID) {
@@ -80,6 +81,14 @@ if (!process.env.EAS_GITCOIN_STAMP_SCHEMA) {
   configErrors.push("EAS_GITCOIN_STAMP_SCHEMA is required");
 }
 
+if (!process.env.MORALIS_API_KEY) {
+  configErrors.push("MORALIS_API_KEY is required");
+}
+
+if (!process.env.IAM_JWK_EIP712) {
+  configErrors.push("IAM_JWK_EIP712 is required");
+}
+
 if (configErrors.length > 0) {
   configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
   throw new Error("Missing required configuration");
@@ -88,6 +97,8 @@ if (configErrors.length > 0) {
 // get DID from key
 const key = process.env.IAM_JWK;
 const issuer = DIDKit.keyToDID("key", key);
+const eip712Key = process.env.IAM_JWK_EIP712;
+const eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
 
 // export the current config
 export const config: {
@@ -100,18 +111,15 @@ export const config: {
 
 const attestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
 
-const attestationChainId = process.env.GITCOIN_VERIFIER_CHAIN_ID;
-const attestationChainIdHex = ("0x" + parseInt(attestationChainId).toString(16)) as keyof typeof onchainInfo;
-if (!Object.keys(onchainInfo).includes(attestationChainIdHex)) {
-  throw new Error(`No onchainInfo found for chainId ${attestationChainId} (hex: ${attestationChainIdHex})`);
-}
-const verifierAddress = onchainInfo[attestationChainIdHex].GitcoinVerifier.address;
-
-const ATTESTER_DOMAIN = {
-  name: "GitcoinVerifier",
-  version: "1",
-  chainId: attestationChainId,
-  verifyingContract: verifierAddress,
+export const getAttestationDomainSeparator = (chainIdHex: keyof typeof onchainInfo): TypedDataDomain => {
+  const verifyingContract = onchainInfo[chainIdHex].GitcoinVerifier.address;
+  const chainId = parseInt(chainIdHex, 16).toString();
+  return {
+    name: "GitcoinVerifier",
+    version: "1",
+    chainId,
+    verifyingContract,
+  };
 };
 
 const ATTESTER_TYPES = {
@@ -134,6 +142,26 @@ const ATTESTER_TYPES = {
   ],
 };
 
+const providerTypePlatformMap = Object.entries(platforms).reduce((acc, [platformName, { providers }]) => {
+  providers.forEach(({ type }) => {
+    acc[type] = platformName;
+  });
+  return acc;
+}, {} as { [k: string]: string });
+
+function groupProviderTypesByPlatform(types: string[]): string[][] {
+  return Object.values(
+    types.reduce((groupedProviders, type) => {
+      const platform = providerTypePlatformMap[type] || "generic";
+
+      if (!groupedProviders[platform]) groupedProviders[platform] = [];
+      groupedProviders[platform].push(type);
+
+      return groupedProviders;
+    }, {} as { [k: keyof typeof platforms]: string[] })
+  );
+}
+
 // create the app and run on port
 export const app = express();
 
@@ -144,77 +172,78 @@ app.use(express.json());
 app.use(cors());
 
 // return a JSON error response with a 400 status
-const errorRes = async (res: Response, error: string, errorCode: number): Promise<Response> =>
-  await new Promise((resolve) => resolve(res.status(errorCode).json({ error })));
+const errorRes = (res: Response, error: string, errorCode: number): Response => res.status(errorCode).json({ error });
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const addErrorDetailsToMessage = (message: string, error: any): string => {
+  if (error instanceof IAMError || error instanceof Error) {
+    message += `, ${error.name}: ${error.message}`;
+  } else if (typeof error === "string") {
+    message += `, ${error}`;
+  }
+  return message;
+};
 
 // return response for given payload
-const issueCredential = async (
+const issueCredentials = async (
+  types: string[],
   address: string,
-  type: string,
-  payload: RequestPayload,
-  context: ProviderContext
-): Promise<CredentialResponseBody> => {
-  try {
-    // if the payload includes an additional signer, use that to issue credential.
-    if (payload.signer) {
-      // We can assume that the signer is a valid address because the challenge was verified within the /verify endpoint
-      payload.address = payload.signer.address;
-    }
-    // verify the payload against the selected Identity Provider
-    const verifiedPayload = await providers.verify(type, payload, context);
-    // check if the request is valid against the selected Identity Provider
-    if (verifiedPayload && verifiedPayload?.valid === true) {
-      // construct a set of Proofs to issue a credential against (this record will be used to generate a sha256 hash of any associated PII)
-      const record: ProofRecord = {
-        // type and address will always be known and can be obtained from the resultant credential
-        type: verifiedPayload.record.pii ? `${type}#${verifiedPayload.record.pii}` : type,
-        // version is defined by entry point
-        version: "0.0.0",
-        // extend/overwrite with record returned from the provider
-        ...(verifiedPayload?.record || {}),
-      };
+  payload: RequestPayload
+): Promise<CredentialResponseBody[]> => {
+  // if the payload includes an additional signer, use that to issue credential.
+  if (payload.signer) {
+    // We can assume that the signer is a valid address because the challenge was verified within the /verify endpoint
+    payload.address = payload.signer.address;
+  }
+
+  const results = await verifyTypes(types, payload);
+
+  return await Promise.all(
+    results.map(async ({ verifyResult, code: verifyCode, error: verifyError, type }) => {
+      let code = verifyCode;
+      let error = verifyError;
+      let record, credential;
 
       try {
-        // generate a VC for the given payload
-        const { credential } = await issueHashedCredential(
-          DIDKit,
-          key,
-          address,
-          record,
-          verifiedPayload.expiresInSeconds
-        );
-
-        return {
-          record,
-          credential,
-        } as CredentialResponseBody;
-      } catch (error: unknown) {
-        if (error) {
-          // return error msg indicating a failure producing VC
-          throw {
-            error: "Unable to produce a verifiable credential",
-            code: 400,
+        // check if the request is valid against the selected Identity Provider
+        if (verifyResult.valid === true) {
+          // construct a set of Proofs to issue a credential against (this record will be used to generate a sha256 hash of any associated PII)
+          record = {
+            // type and address will always be known and can be obtained from the resultant credential
+            type: verifyResult.record.pii ? `${type}#${verifyResult.record.pii}` : type,
+            // version is defined by entry point
+            version: "0.0.0",
+            // extend/overwrite with record returned from the provider
+            ...(verifyResult?.record || {}),
           };
+
+          const metaPointer = platforms[type]?.PlatformDetails?.metaPointer;
+
+          const currentKey = payload.signatureType === "EIP712" ? eip712Key : key;
+          // generate a VC for the given payload
+          ({ credential } = await issueHashedCredential(
+            DIDKit,
+            currentKey,
+            address,
+            record,
+            verifyResult.expiresInSeconds,
+            payload.signatureType,
+            metaPointer
+          ));
         }
+      } catch {
+        error = "Unable to produce a verifiable credential";
+        code = 500;
       }
-    } else {
-      // return error message if an error is present
-      // limit the error message string to 1000 chars
-      throw {
-        error:
-          (verifiedPayload.error && verifiedPayload.error.join(", ").substring(0, 1000)) || "Unable to verify proofs",
-        code: 403,
+
+      return {
+        record,
+        credential,
+        code,
+        error,
       };
-    }
-  } catch (error: unknown) {
-    // error response
-    throw error && (error as CredentialResponseBody).error
-      ? error
-      : {
-          error: "Unable to verify with provider",
-          code: 400,
-        };
-  }
+    })
+  );
 };
 
 // health check endpoint
@@ -233,6 +262,7 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
   const requestBody: ChallengeRequestBody = req.body as ChallengeRequestBody;
   // console.log("requestBody", requestBody);
   const payload: RequestPayload = requestBody.payload;
+
   // check for a valid payload
   if (payload.address && payload.type) {
     // ensure address is check-summed
@@ -252,8 +282,9 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
         ...(challenge?.record || {}),
       };
 
+      const currentKey = payload.signatureType === "EIP712" ? eip712Key : key;
       // generate a VC for the given payload
-      return void issueChallengeCredential(DIDKit, key, record)
+      return void issueChallengeCredential(DIDKit, currentKey, record, payload.signatureType)
         .then((credential) => {
           // return the verifiable credential
           return res.json(credential as CredentialResponseBody);
@@ -291,41 +322,64 @@ app.post("/api/v0.0.0/check", (req: Request, res: Response): void => {
     return void errorRes(res, "Incorrect payload", 400);
   }
 
-  // See note below about context
-  const context: ProviderContext = {};
-  const responses: CheckResponseBody[] = [];
   const types = (payload.types?.length ? payload.types : [payload.type]).filter((type) => type);
 
-  // This currently works for stamps which do not require the context
-  // Most oauth stamps will likely not work correctly unless only checking a single type
-  // TODO: In the platforms file, sort providers by platform. Here, process the
-  // platforms in parallel, but the providers in series. This will allow us to pass
-  // the context from one provider to the next. Do the same in the verify endpoint.
-  Promise.all(
-    types.map(async (type) => {
-      let valid = false;
-      let code, error;
-
-      try {
-        // verify the payload against the selected Identity Provider
-        const verifyResult = await providers.verify(type, payload, context);
-        valid = verifyResult.valid;
-        if (!valid) {
-          code = 403;
-          error =
-            (verifyResult.error && verifyResult.error.join(", ").substring(0, 1000)) || "Unable to verify provider";
-        }
-      } catch {
-        error = "Unable to verify provider";
-        code = 400;
-      } finally {
-        responses.push({ valid, type, code, error });
-      }
+  verifyTypes(types, payload)
+    .then((results) => {
+      const responses = results.map(({ verifyResult, type, error, code }) => ({
+        valid: verifyResult.valid,
+        type,
+        error,
+        code,
+      }));
+      res.json(responses);
     })
-  )
-    .then(() => res.json(responses))
     .catch(() => errorRes(res, "Unable to check payload", 500));
 });
+
+type VerifyTypeResult = {
+  verifyResult: VerifiedPayload;
+  type: string;
+  error?: string;
+  code?: number;
+};
+
+async function verifyTypes(types: string[], payload: RequestPayload): Promise<VerifyTypeResult[]> {
+  // define a context to be shared between providers in the verify request
+  // this is intended as a temporary storage for providers to share data
+  const context: ProviderContext = {};
+  const results: VerifyTypeResult[] = [];
+
+  await Promise.all(
+    // Run all platforms in parallel
+    groupProviderTypesByPlatform(types).map(async (platformTypes) => {
+      // Iterate over the types within a platform in series
+      // This enables providers within a platform to reliably share context
+      for (const type of platformTypes) {
+        let verifyResult: VerifiedPayload = { valid: false };
+        let code, error;
+
+        try {
+          // verify the payload against the selected Identity Provider
+          verifyResult = await providers.verify(type, payload, context);
+          if (!verifyResult.valid) {
+            code = 403;
+            // TODO to be changed to just verifyResult.errors when all providers are updated
+            const resultErrors = verifyResult.errors || verifyResult.error;
+            error = resultErrors?.join(", ")?.substring(0, 1000) || "Unable to verify provider";
+          }
+        } catch {
+          error = "Unable to verify provider";
+          code = 400;
+        }
+
+        results.push({ verifyResult, type, code, error });
+      }
+    })
+  );
+
+  return results;
+}
 
 // expose verify entry point
 app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
@@ -334,14 +388,13 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
   const challenge = requestBody.challenge;
   // get the payload from the JSON req body
   const payload = requestBody.payload;
-  // define a context to be shared between providers in the verify request
-  // this is intended as a temporary storage for providers to share data
-  const context: ProviderContext = {};
 
   // Check the challenge and the payload is valid before issuing a credential from a registered provider
   return void verifyCredential(DIDKit, challenge)
     .then(async (verified) => {
-      if (verified && issuer === challenge.issuer) {
+      const currentIssuer = requestBody.payload.signatureType === "EIP712" ? eip712Issuer : issuer;
+
+      if (verified && currentIssuer === challenge.issuer) {
         // pull the address and checksum so that its stored in a predictable format
         const address = utils.getAddress(
           utils.verifyMessage(challenge.credentialSubject.challenge, payload.proofs.signature)
@@ -366,39 +419,25 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 
           // if verifiedAddress does not equal the additional signer address throw an error because signature is invalid
           if (!additionalSignerCredential || verifiedAddress.toLowerCase() !== payload.signer.address.toLowerCase()) {
-            return void errorRes(res, "Unable to verify payload", 401);
+            return void errorRes(res, "Unable to verify payload signer", 401);
           }
 
           payload.signer.address = verifiedAddress;
         }
 
+        const singleType = !payload.types?.length;
+        const types = (!singleType ? payload.types : [payload.type]).filter((type) => type);
+
         // type is required because we need it to select the correct Identity Provider
         if (isSigner && isType && payload && payload.type) {
-          // if multiple types are being requested - produce and return multiple vcs
-          if (payload.types && payload.types.length) {
-            // if payload.types then we want to iterate and return a VC for each type
-            const responses: CredentialResponseBody[] = [];
-            for (let i = 0; i < payload.types.length; i++) {
-              try {
-                const type = payload.types[i];
-                const response = await issueCredential(address, type, payload, context);
-                responses.push(response);
-              } catch (error: unknown) {
-                responses.push((await error) as CredentialResponseBody);
-              }
-            }
+          const responses = await issueCredentials(types, address, payload);
 
-            // return multiple responses in an array
-            return res.json(responses);
+          if (singleType) {
+            const response = responses[0];
+            if (response.code && response.error) return errorRes(res, response.error, response.code);
+            else return res.json(response);
           } else {
-            // make and return a single response
-            return issueCredential(address, payload.type, payload, context)
-              .then((response) => {
-                return res.json(response);
-              })
-              .catch((error: CredentialResponseBody) => {
-                return void errorRes(res, error.error, error.code);
-              });
+            return res.json(responses);
           }
         }
       }
@@ -406,8 +445,70 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
       // error response
       return void errorRes(res, "Unable to verify payload", 401);
     })
-    .catch(() => {
-      return void errorRes(res, "Unable to verify payload", 500);
+    .catch((error) => {
+      let message = "Unable to verify payload";
+      if (error instanceof Error) message += `: ${error.name}`;
+      return void errorRes(res, message, 500);
+    });
+});
+
+// expose convert entry point that will convert a V1 stamp to V2 stamp (Ed25519Signature2018 to EIP712)
+app.post("/api/v0.0.0/convert", (req: Request, res: Response): void => {
+  const credential: VerifiableCredential = req.body as VerifiableCredential;
+
+  // Validate credential first
+  verifyCredential(DIDKit, credential)
+    .then((verified) => {
+      // If the credential has been succesfully validateLocaleAndSetLanguage,
+      // and if the issuer matches our expected issuer
+      // then issue the new credential
+      if (verified && issuer === credential.issuer) {
+        DIDKit.keyToVerificationMethod("ethr", eip712Key)
+          .then((_verificationMethod) => {
+            const verificationMethod = _verificationMethod as string;
+            // Extract the payload from the old VC
+            const { id, hash, provider } = credential.credentialSubject;
+
+            issueEip712Credential(
+              DIDKit,
+              eip712Key,
+              { expiresAt: new Date(credential.expirationDate) },
+              {
+                credentialSubject: {
+                  "@context": {
+                    hash: "https://schema.org/Text",
+                    metaPointer: "https://schema.org/URL",
+                    provider: "https://schema.org/Text",
+                  },
+                  id,
+                  hash,
+                  provider,
+                  metaPointer: "https://passport.gitcoin.co",
+                },
+              },
+              stampCredentialDocument(verificationMethod),
+              ["https://w3id.org/vc/status-list/2021/v1"]
+            )
+              .then((newCredential) => {
+                res.json(newCredential);
+              })
+              .catch((error) => {
+                return void errorRes(res, addErrorDetailsToMessage("Failed to issue new credential", error), 500);
+              });
+          })
+          .catch((error) => {
+            return void errorRes(res, addErrorDetailsToMessage("Failed to create verification method", error), 500);
+          });
+      } else {
+        return void errorRes(res, "Invalid credential.", 400);
+      }
+    })
+    .catch((error) => {
+      return void errorRes(
+        res,
+        addErrorDetailsToMessage("Unable to validate the provided credential, an unexpected error occured", error),
+        500
+      );
     });
 });
 
@@ -415,7 +516,12 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
   try {
-    const { credentials, nonce } = req.body as EasRequestBody;
+    const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
+    if (!Object.keys(onchainInfo).includes(chainIdHex)) {
+      return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
+    }
+    const attestationChainIdHex = chainIdHex as keyof typeof onchainInfo;
+
     if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
 
     const recipient = credentials[0].credentialSubject.id.split(":")[4];
@@ -452,8 +558,10 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           fee: fee.toString(),
         };
 
+        const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
+
         attestationSignerWallet
-          ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, passportAttestation)
+          ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {
             const { v, r, s } = utils.splitSignature(signature);
 
@@ -481,7 +589,12 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
   try {
-    const { credentials, nonce } = req.body as EasRequestBody;
+    const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
+    if (!Object.keys(onchainInfo).includes(chainIdHex)) {
+      return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
+    }
+    const attestationChainIdHex = chainIdHex as keyof typeof onchainInfo;
+
     if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
 
     const recipient = credentials[0].credentialSubject.id.split(":")[4];
@@ -518,8 +631,10 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
           fee: fee.toString(),
         };
 
+        const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
+
         attestationSignerWallet
-          ._signTypedData(ATTESTER_DOMAIN, ATTESTER_TYPES, passportAttestation)
+          ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {
             const { v, r, s } = utils.splitSignature(signature);
 
@@ -535,11 +650,13 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
             return void errorRes(res, "Error signing passport", 500);
           });
       })
-      .catch(() => {
-        return void errorRes(res, "Error formatting onchain passport", 500);
+      .catch((error) => {
+        const message = addErrorDetailsToMessage("Error formatting onchain passport", error);
+        return void errorRes(res, message, 500);
       });
   } catch (error) {
-    return void errorRes(res, String(error), 500);
+    const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
+    return void errorRes(res, message, 500);
   }
 });
 

@@ -32,7 +32,7 @@
     "@self.id/framework": "0.3.3",
     "@web3-onboard/core": "^2.20.4",
     "@web3-onboard/injected-wallets": "^2.9.0",
-    "@web3-onboard/ledger": "^2.4.6",
+    "@web3-onboard/ledger": "2.5.2",
     "@web3-onboard/react": "^2.8.9",
     "@web3-onboard/walletconnect": "^2.4.0",
     "@web3-onboard/walletlink": "^2.0.4",

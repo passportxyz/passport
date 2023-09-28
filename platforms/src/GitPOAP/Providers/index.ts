@@ -1,1 +1,0 @@
-export { GitPOAPProvider } from "./gitpoap";

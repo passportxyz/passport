@@ -19,6 +19,9 @@ import { JsonRpcSigner } from "@ethersproject/providers";
 import { mock } from "jest-mock-extended";
 import { Drawer, DrawerOverlay } from "@chakra-ui/react";
 import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
+import { PlatformScoreSpec } from "../../context/scorerContext";
+import { getPlatformSpec } from "../../config/platforms";
+import { PlatformSpec } from "@gitcoin/passport-platforms/src/types";
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -60,7 +63,11 @@ const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
   handleCreatePassport: mockCreatePassport,
 });
 
-// TODO
+const EnsScoreSpec: PlatformScoreSpec = {
+  ...(getPlatformSpec("Ens") as PlatformSpec),
+  possiblePoints: 3,
+  earnedPoints: 1,
+};
 
 describe("when user has not verified with EnsProvider", () => {
   beforeEach(async () => {
@@ -73,7 +80,12 @@ describe("when user has not verified with EnsProvider", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />
-        <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.ProviderConfig} />
+        <GenericPlatform
+          platform={new Ens.EnsPlatform()}
+          platFormGroupSpec={Ens.ProviderConfig}
+          platformScoreSpec={EnsScoreSpec}
+          onClose={() => {}}
+        />
       </Drawer>
     );
 
@@ -85,16 +97,21 @@ describe("when user has not verified with EnsProvider", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />
-        <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.ProviderConfig} />
+        <GenericPlatform
+          platform={new Ens.EnsPlatform()}
+          platFormGroupSpec={Ens.ProviderConfig}
+          platformScoreSpec={EnsScoreSpec}
+          onClose={() => {}}
+        />
       </Drawer>
     );
     renderWithContext(mockUserContext, mockCeramicContext, drawer());
 
     const firstSwitch = screen.queryByTestId("select-all");
-    await fireEvent.click(firstSwitch as HTMLElement);
+    fireEvent.click(firstSwitch as HTMLElement);
     const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
 
-    await fireEvent.click(initialVerifyButton as HTMLElement);
+    fireEvent.click(initialVerifyButton as HTMLElement);
     await waitFor(() => {
       expect(fetchVerifiableCredential).toHaveBeenCalled();
     });
@@ -103,16 +120,21 @@ describe("when user has not verified with EnsProvider", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />
-        <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.ProviderConfig} />
+        <GenericPlatform
+          platform={new Ens.EnsPlatform()}
+          platFormGroupSpec={Ens.ProviderConfig}
+          platformScoreSpec={EnsScoreSpec}
+          onClose={() => {}}
+        />
       </Drawer>
     );
     renderWithContext(mockUserContext, mockCeramicContext, drawer());
 
     const firstSwitch = screen.queryByTestId("select-all");
-    await fireEvent.click(firstSwitch as HTMLElement);
+    fireEvent.click(firstSwitch as HTMLElement);
     const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
 
-    await fireEvent.click(initialVerifyButton as HTMLElement);
+    fireEvent.click(initialVerifyButton as HTMLElement);
     // Wait to see the done toast
     await waitFor(() => {
       expect(screen.getByText("All Ens data points verified.")).toBeInTheDocument();
@@ -128,16 +150,21 @@ describe("Mulitple EVM plaftorms", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />
-        <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.ProviderConfig} />
+        <GenericPlatform
+          platform={new Ens.EnsPlatform()}
+          platFormGroupSpec={Ens.ProviderConfig}
+          platformScoreSpec={EnsScoreSpec}
+          onClose={() => {}}
+        />
       </Drawer>
     );
     renderWithContext(mockUserContext, mockCeramicContext, drawer());
 
     const firstSwitch = screen.queryByTestId("select-all");
-    await fireEvent.click(firstSwitch as HTMLElement);
+    fireEvent.click(firstSwitch as HTMLElement);
     const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
 
-    await fireEvent.click(initialVerifyButton as HTMLElement);
+    fireEvent.click(initialVerifyButton as HTMLElement);
     await waitFor(async () => {
       const verifyModal = await screen.findByRole("dialog");
       expect(verifyModal).toBeInTheDocument();
@@ -149,7 +176,12 @@ it("should indicate that there was an error issuing the credential", async () =>
   const drawer = () => (
     <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
       <DrawerOverlay />
-      <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.ProviderConfig} />
+      <GenericPlatform
+        platform={new Ens.EnsPlatform()}
+        platFormGroupSpec={Ens.ProviderConfig}
+        platformScoreSpec={EnsScoreSpec}
+        onClose={() => {}}
+      />
     </Drawer>
   );
   renderWithContext(
@@ -159,10 +191,10 @@ it("should indicate that there was an error issuing the credential", async () =>
   );
 
   const firstSwitch = screen.queryByTestId("select-all");
-  await fireEvent.click(firstSwitch as HTMLElement);
+  fireEvent.click(firstSwitch as HTMLElement);
   const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
 
-  await fireEvent.click(initialVerifyButton as HTMLElement);
+  fireEvent.click(initialVerifyButton as HTMLElement);
   await waitFor(() => {
     expect(screen.getByText("There was an error verifying your stamp. Please try again.")).toBeInTheDocument();
   });

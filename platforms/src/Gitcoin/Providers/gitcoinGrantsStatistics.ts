@@ -45,7 +45,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
       valid = !githubUser.errors && !!githubUser.id;
       if (valid) {
         const dataUrl = process.env.CGRANTS_API_URL + this.urlPath;
-        const gitcoinGrantsStatistic = await getGitcoinStatistics(dataUrl, githubUser.login, context);
+        const gitcoinGrantsStatistic = await getGitcoinStatistics(dataUrl, githubUser.id, context);
 
         valid =
           !gitcoinGrantsStatistic.errors &&
@@ -92,14 +92,13 @@ type GitcoinStatisticsContext = {
 
 const getGitcoinStatistics = async (
   dataUrl: string,
-  handle: string,
+  github_id: number,
   context: GitcoinStatisticsContext
 ): Promise<GitcoinGrantStatistics> => {
   if (!context.gitcoinGrantStatistics?.[dataUrl]) {
     try {
       // The gitcoin API expects lowercase handle
-      const lowerHandle = handle.toLowerCase();
-      const grantStatisticsRequest = await axios.get(`${dataUrl}?handle=${lowerHandle}`, {
+      const grantStatisticsRequest = await axios.get(`${dataUrl}?github_id=${github_id}`, {
         headers: { Authorization: process.env.CGRANTS_API_TOKEN },
       });
 

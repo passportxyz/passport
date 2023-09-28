@@ -12,13 +12,14 @@ jest.mock("axios");
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 const userHandle = "my-login-handle";
+const githubId = "18723656";
 const clientId = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 const cgrantsApiToken = process.env.CGRANTS_API_TOKEN;
 
 const validGithubUserResponse = {
   data: {
-    id: "18723656",
+    id: githubId,
     login: userHandle,
     type: "User",
   },
@@ -136,7 +137,7 @@ describe("Attempt verification %s", function () {
       });
 
       // Check the request to get the contribution stats
-      expect(mockedAxios.get).toBeCalledWith(`${testUrl}?handle=${userHandle}`, {
+      expect(mockedAxios.get).toBeCalledWith(`${testUrl}?github_id=${githubId}`, {
         headers: { Authorization: cgrantsApiToken },
       });
 
@@ -417,7 +418,7 @@ describe("Attempt verification %s", function () {
     expect(mockedAxios.get).toBeCalledWith("https://api.github.com/user", {
       headers: { Authorization: `token ${githubAccessCode}` },
     });
-    expect(mockedAxios.get).nthCalledWith(2, `${testUrl}?handle=user-handle-with-upper`, {
+    expect(mockedAxios.get).nthCalledWith(2, `${testUrl}?github_id=18723656`, {
       headers: { Authorization: cgrantsApiToken },
     });
     expect(gitcoinPayload).toMatchObject({ valid: false });

@@ -1,6 +1,12 @@
 import { render, waitFor, screen, waitForElementToBeRemoved, fireEvent } from "@testing-library/react";
 import { useContext, useState, useEffect } from "react";
-import { CeramicContext, CeramicContextProvider, CeramicContextState } from "../../context/ceramicContext";
+import {
+  AllProvidersState,
+  CeramicContext,
+  CeramicContextProvider,
+  CeramicContextState,
+  cleanPassport,
+} from "../../context/ceramicContext";
 import { CeramicDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
 import {
   googleStampFixture,
@@ -10,6 +16,7 @@ import {
 } from "../../__test-fixtures__/databaseStorageFixtures";
 import { makeTestUserContext } from "../../__test-fixtures__/contextTestHelpers";
 import { UserContext, UserContextState } from "../../context/userContext";
+import { Passport } from "@gitcoin/passport-types";
 
 const mockUserContext: UserContextState = makeTestUserContext();
 
@@ -51,6 +58,7 @@ const stamps = [googleStampFixture, discordStampFixture, brightidStampFixture, f
   stamp.credential.expirationDate = "2099-05-15T21:04:01.708Z";
   stamp.credential.credentialSubject.id = "test-user-did";
   stamp.credential.issuer = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
+  stamp.credential.credentialSubject.provider = stamp.provider;
   return stamp;
 });
 
@@ -220,27 +228,24 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
       (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
         return {
           ...passportDbMocks,
-          addStamps: addStampsMock,
-          getPassport: jest
-            .fn()
-            .mockImplementationOnce(async () => {
-              return {
-                passport: {
-                  stamps: [],
-                },
-                errorDetails: {},
-                status: "Success",
-              };
-            })
-            .mockImplementationOnce(async () => {
-              return {
-                passport: {
-                  stamps,
-                },
-                errorDetails: {},
-                status: "Success",
-              };
-            }),
+          addStamps: addStampsMock.mockImplementationOnce(async () => {
+            return {
+              passport: {
+                stamps,
+              },
+              errorDetails: {},
+              status: "Success",
+            };
+          }),
+          getPassport: jest.fn().mockImplementationOnce(async () => {
+            return {
+              passport: {
+                stamps: [],
+              },
+              errorDetails: {},
+              status: "Success",
+            };
+          }),
           setStamps: setStampMock,
         };
       });
@@ -280,27 +285,24 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
       (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
         return {
           ...passportDbMocks,
-          deleteStamps: deleteStampsMock,
-          getPassport: jest
-            .fn()
-            .mockImplementationOnce(async () => {
-              return {
-                passport: {
-                  stamps,
-                },
-                errorDetails: {},
-                status: "Success",
-              };
-            })
-            .mockImplementationOnce(async () => {
-              return {
-                passport: {
-                  stamps: [],
-                },
-                errorDetails: {},
-                status: "Success",
-              };
-            }),
+          deleteStamps: deleteStampsMock.mockImplementationOnce(async () => {
+            return {
+              passport: {
+                stamps: [],
+              },
+              errorDetails: {},
+              status: "Success",
+            };
+          }),
+          getPassport: jest.fn().mockImplementationOnce(async () => {
+            return {
+              passport: {
+                stamps: [],
+              },
+              errorDetails: {},
+              status: "Success",
+            };
+          }),
         };
       });
       (CeramicDatabase as jest.Mock).mockImplementationOnce(() => {
@@ -338,27 +340,24 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
       return {
         ...passportDbMocks,
-        patchStamps: patchStampsMock,
-        getPassport: jest
-          .fn()
-          .mockImplementationOnce(async () => {
-            return {
-              passport: {
-                stamps: [],
-              },
-              errorDetails: {},
-              status: "Success",
-            };
-          })
-          .mockImplementationOnce(async () => {
-            return {
-              passport: {
-                stamps: added,
-              },
-              errorDetails: {},
-              status: "Success",
-            };
-          }),
+        patchStamps: patchStampsMock.mockImplementationOnce(async () => {
+          return {
+            passport: {
+              stamps: added,
+            },
+            errorDetails: {},
+            status: "Success",
+          };
+        }),
+        getPassport: jest.fn().mockImplementationOnce(async () => {
+          return {
+            passport: {
+              stamps: added,
+            },
+            errorDetails: {},
+            status: "Success",
+          };
+        }),
       };
     });
 
@@ -392,27 +391,24 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
       (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
         return {
           ...passportDbMocks,
-          patchStamps: patchStampsMock,
-          getPassport: jest
-            .fn()
-            .mockImplementationOnce(async () => {
-              return {
-                passport: {
-                  stamps: [],
-                },
-                errorDetails: {},
-                status: "Success",
-              };
-            })
-            .mockImplementationOnce(async () => {
-              return {
-                passport: {
-                  stamps,
-                },
-                errorDetails: {},
-                status: "Success",
-              };
-            }),
+          patchStamps: patchStampsMock.mockImplementationOnce(async () => {
+            return {
+              passport: {
+                stamps,
+              },
+              errorDetails: {},
+              status: "Success",
+            };
+          }),
+          getPassport: jest.fn().mockImplementationOnce(async () => {
+            return {
+              passport: {
+                stamps,
+              },
+              errorDetails: {},
+              status: "Success",
+            };
+          }),
         };
       });
 
@@ -437,5 +433,60 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     } finally {
       console.log = oldConsoleLog;
     }
+  });
+});
+
+const userDid = "test-user-did";
+const mockDatabase = {
+  did: userDid,
+} as PassportDatabase;
+const mockProvidersState = {
+  google: true,
+  facebook: true,
+} as AllProvidersState;
+
+describe("cleanPassport function", () => {
+  it("removes expired stamps", () => {
+    const expiredStamp = {
+      credential: {
+        expirationDate: "2000-05-15T21:04:01.708Z",
+        credentialSubject: { provider: "google", id: "test-user-did" },
+        issuer: process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "",
+      },
+    };
+
+    const passport = { stamps: [expiredStamp] } as Passport;
+    const result = cleanPassport(passport, mockDatabase, mockProvidersState);
+    expect(result.passport.stamps).toHaveLength(0);
+    expect(result.expiredProviders).toContain("google");
+  });
+
+  it("keeps valid stamps", () => {
+    const validStamp = {
+      credential: {
+        expirationDate: "2099-05-15T21:04:01.708Z",
+        credentialSubject: { provider: "facebook", id: "test-user-did" },
+        issuer: process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "",
+      },
+    };
+
+    const passport = { stamps: [validStamp] } as Passport;
+    const result = cleanPassport(passport, mockDatabase, mockProvidersState);
+    expect(result.passport.stamps.length).toBe(1);
+    expect(result.expiredProviders.length).toBe(0);
+  });
+  it("filters out stamps that aren't in the providers state", () => {
+    const validStamp = {
+      credential: {
+        expirationDate: "2099-05-15T21:04:01.708Z",
+        credentialSubject: { provider: "poap", id: "test-user-did" },
+        issuer: process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "",
+      },
+    };
+
+    const passport = { stamps: [validStamp] } as Passport;
+    const result = cleanPassport(passport, mockDatabase, mockProvidersState);
+    expect(result.passport.stamps.length).toBe(0);
+    expect(result.expiredProviders.length).toBe(0);
   });
 });

@@ -2,6 +2,8 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as awsx from "@pulumi/awsx";
 
+import { createIAMLogGroup, createPagerdutyTopic } from "../lib/service";
+
 // The following vars are not allowed to be undefined, hence the `${...}` magic
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
@@ -146,11 +148,15 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
   },
 });
 
+const alertTopic = createPagerdutyTopic();
+const logGroup = createIAMLogGroup({ alertTopic });
+
 const service = new awsx.ecs.FargateService("dpopp-iam", {
   cluster,
   desiredCount: 1,
   subnets: vpc.privateSubnetIds,
   taskDefinitionArgs: {
+    logGroup,
     executionRole: dpoppEcsRole,
     containers: {
       iam: {
@@ -180,6 +186,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
           {
             name: "GOOGLE_CALLBACK",
             valueFrom: `${IAM_SERVER_SSM_ARN}:GOOGLE_CALLBACK::`,
+          },
+          {
+            name: "TWITTER_CALLBACK",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:TWITTER_CALLBACK::`,
           },
           {
             name: "RPC_URL",
@@ -318,8 +328,20 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             valueFrom: `${IAM_SERVER_SSM_ARN}:ZKSYNC_ERA_MAINNET_ENDPOINT::`,
           },
           {
-            name: "FF_NEW_TWITTER_STAMPS",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:FF_NEW_TWITTER_STAMPS::`,
+            name: "PASSPORT_SCORER_BACKEND",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:PASSPORT_SCORER_BACKEND::`,
+          },
+          {
+            name: "TRUSTA_LABS_ACCESS_TOKEN",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:TRUSTA_LABS_ACCESS_TOKEN::`,
+          },
+          {
+            name: "MORALIS_API_KEY",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:MORALIS_API_KEY::`,
+          },
+          {
+            name: "IAM_JWK_EIP712",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:IAM_JWK_EIP712::`,
           },
         ],
       },

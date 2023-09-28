@@ -19,9 +19,7 @@ jest.mock("../../utils/onboard.ts", () => ({
   chains: [],
 }));
 
-jest.mock("../../components/RefreshStampModal", () => ({
-  RefreshStampModal: () => <div>Refresh Modal</div>,
-}));
+jest.mock("../../components/CardList", () => ({ CardList: () => <div>Card List</div> }));
 
 jest.mock("../../components/SyncToChainButton", () => <div>Sync to Chain</div>);
 
@@ -173,7 +171,7 @@ describe.only("dashboard notifications", () => {
         <Dashboard />
       </Router>
     );
-    expect(screen.getByText("Stamps weren't verifed. Please try again.")).toBeInTheDocument();
+    expect(screen.getByText("Stamps weren't verified. Please try again.")).toBeInTheDocument();
   });
   it("should show a loading stamps alert", () => {
     (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }]);

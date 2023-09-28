@@ -5,7 +5,7 @@ import axios from "axios";
 import onchainInfo from "../../deployments/onchainInfo.json";
 import GitcoinResolverAbi from "../../deployments/abi/GitcoinResolver.json";
 import { Attestation, EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import { chains } from "./onboard";
+import { chains } from "./chains";
 
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
@@ -51,7 +51,7 @@ export async function getAttestationData(
       score: await eas.getAttestation(scoreUid),
     };
   } catch (e: any) {
-    datadogLogs.logger.error("Failed to check on-chain status", e);
+    datadogLogs.logger.error("Failed to check onchain status", e);
     datadogRum.addError(e);
   }
 }

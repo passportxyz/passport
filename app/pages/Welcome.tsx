@@ -137,10 +137,10 @@ export default function Welcome() {
   };
 
   return (
-    <PageRoot className="text-color-2">
+    <PageRoot useLegacyBackground={true} className="text-color-2">
       <HeaderContentFooterGrid>
         <div className={`${PAGE_PADDING} bg-background`}>
-          <MinimalHeader className={`border-b border-accent-2`} />
+          <MinimalHeader className={`border-b border-foreground-6`} />
         </div>
         <BodyWrapper className="flex justify-center">
           <div className="max-w-[464px]">

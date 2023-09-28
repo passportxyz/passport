@@ -1,10 +1,10 @@
 import dotenv from "dotenv";
+dotenv.config();
+
 import { writeFileSync } from "fs";
 import { join } from "path";
 
 import { PlatformGroupSpec, platforms } from "@gitcoin/passport-platforms";
-
-dotenv.config();
 
 type StampData = {
   name: string;

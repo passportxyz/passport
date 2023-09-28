@@ -81,8 +81,3 @@ export const linkedinStampFixture: Stamp = {
   provider: "Linkedin",
   credential,
 };
-
-export const gitpoapStampFixture: Stamp = {
-  provider: "GitPOAP",
-  credential,
-};

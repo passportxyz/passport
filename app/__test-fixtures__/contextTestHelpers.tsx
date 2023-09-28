@@ -1,4 +1,5 @@
 import { UserContext, UserContextState } from "../context/userContext";
+import { ScorerContext, ScorerContextState } from "../context/scorerContext";
 import { CeramicContext, CeramicContextState, IsLoadingPassportState } from "../context/ceramicContext";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 import { mockAddress, mockWallet } from "./onboardHookValues";
@@ -89,10 +90,6 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: getProviderSpec("Signer", "Signer"),
         stamp: undefined,
       },
-      GitPOAP: {
-        providerSpec: getProviderSpec("GitPOAP", "GitPOAP"),
-        stamp: undefined,
-      },
       "GitcoinContributorStatistics#numGrantsContributeToGte#1": {
         providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGrantsContributeToGte#1"),
         stamp: undefined,
@@ -129,38 +126,6 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGr14ContributionsGte#1"),
         stamp: undefined,
       },
-      "GitcoinGranteeStatistics#numOwnedGrants#1": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numOwnedGrants#1"),
-        stamp: undefined,
-      },
-      "GitcoinGranteeStatistics#numGrantContributors#10": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#10"),
-        stamp: undefined,
-      },
-      "GitcoinGranteeStatistics#numGrantContributors#25": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#25"),
-        stamp: undefined,
-      },
-      "GitcoinGranteeStatistics#numGrantContributors#100": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantContributors#100"),
-        stamp: undefined,
-      },
-      "GitcoinGranteeStatistics#totalContributionAmount#100": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#totalContributionAmount#100"),
-        stamp: undefined,
-      },
-      "GitcoinGranteeStatistics#totalContributionAmount#1000": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#totalContributionAmount#1000"),
-        stamp: undefined,
-      },
-      "GitcoinGranteeStatistics#totalContributionAmount#10000": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#totalContributionAmount#10000"),
-        stamp: undefined,
-      },
-      "GitcoinGranteeStatistics#numGrantsInEcoAndCauseRound#1": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinGranteeStatistics#numGrantsInEcoAndCauseRound#1"),
-        stamp: undefined,
-      },
       Coinbase: {
         providerSpec: getProviderSpec("Coinbase", "Coinbase"),
         stamp: undefined,
@@ -171,13 +136,67 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
     handlePatchStamps: jest.fn(),
     handleCreatePassport: jest.fn(),
     handleDeleteStamps: jest.fn(),
-    handleCheckRefreshPassport: () => Promise.resolve(true),
     expiredProviders: [],
     passportHasCacaoError: false,
     cancelCeramicConnection: jest.fn(),
+    verifiedProviderIds: [],
+    verifiedPlatforms: {},
     ...initialState,
   };
 };
+
+export const scorerContext = {
+  scoredPlatforms: [
+    {
+      icon: "./assets/gtcStakingLogoIcon.svg",
+      platform: "GtcStaking",
+      name: "GTC Staking",
+      description: "Connect to passport to verify your staking amount.",
+      connectMessage: "Verify amount",
+      isEVM: true,
+      possiblePoints: 7.4399999999999995,
+      earnedPoints: 0,
+    },
+    {
+      icon: "./assets/gtcGrantsLightIcon.svg",
+      platform: "Gitcoin",
+      name: "Gitcoin",
+      description: "Connect with Github to verify with your Gitcoin account.",
+      connectMessage: "Connect Account",
+      isEVM: true,
+      possiblePoints: 12.93,
+      earnedPoints: 0,
+    },
+    {
+      icon: "./assets/twitterStampIcon.svg",
+      platform: "Twitter",
+      name: "Twitter",
+      description: "Connect your existing Twitter account to verify.",
+      connectMessage: "Connect Account",
+      possiblePoints: 3.63,
+      earnedPoints: 3.63,
+    },
+    {
+      icon: "./assets/discordStampIcon.svg",
+      platform: "Discord",
+      name: "Discord",
+      description: "Connect your existing Discord account to verify.",
+      connectMessage: "Connect Account",
+      possiblePoints: 0.689,
+      earnedPoints: 0,
+    },
+    {
+      icon: "./assets/googleStampIcon.svg",
+      platform: "Google",
+      name: "Google",
+      description: "Connect your existing Google Account to verify",
+      connectMessage: "Connect Account",
+      possiblePoints: 2.25,
+      earnedPoints: 1,
+    },
+  ],
+  rawScore: 0,
+} as unknown as ScorerContextState;
 
 export const renderWithContext = (
   userContext: UserContextState,
@@ -185,9 +204,11 @@ export const renderWithContext = (
   ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>
 ) =>
   render(
-    <UserContext.Provider value={userContext}>
-      <CeramicContext.Provider value={ceramicContext}>{ui}</CeramicContext.Provider>
-    </UserContext.Provider>
+    <ScorerContext.Provider value={scorerContext}>
+      <UserContext.Provider value={userContext}>
+        <CeramicContext.Provider value={ceramicContext}>{ui}</CeramicContext.Provider>
+      </UserContext.Provider>
+    </ScorerContext.Provider>
   );
 
 export const testOnChainContextState = (initialState?: Partial<OnChainContextState>): OnChainContextState => {
@@ -214,7 +235,7 @@ export const testOnChainContextState = (initialState?: Partial<OnChainContextSta
       },
     ],
     readOnChainData: jest.fn(),
-    onChainScore: 0,
+    onChainScores: {},
     onChainLastUpdates: {},
   };
 };

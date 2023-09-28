@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, useRef } from "react";
+import { createContext, useContext, useEffect, useState, useRef, useMemo } from "react";
 import {
   Passport,
   PassportLoadResponse,
@@ -26,7 +26,6 @@ const {
   Facebook,
   Poh,
   PHI,
-  GitPOAP,
   NFT,
   GnosisSafe,
   Snapshot,
@@ -45,11 +44,15 @@ const {
   Idena,
   Civic,
   IDriss,
+  CyberConnect,
+  GrantsStack,
+  TrustaLabs,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
+import { CERAMIC_CACHE_ENDPOINT, IAM_ISSUER_DID } from "../config/stamp_config";
+
 // -- Trusted IAM servers DID
-const IAM_ISSUER_DID = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
 const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
 
 export interface CeramicContextState {
@@ -61,23 +64,19 @@ export interface CeramicContextState {
   handleAddStamps: (stamps: Stamp[]) => Promise<void>;
   handlePatchStamps: (stamps: StampPatch[]) => Promise<void>;
   handleDeleteStamps: (providerIds: PROVIDER_ID[]) => Promise<void>;
-  handleCheckRefreshPassport: () => Promise<boolean>;
   cancelCeramicConnection: () => void;
   userDid: string | undefined;
   expiredProviders: PROVIDER_ID[];
   passportHasCacaoError: boolean;
   passportLoadResponse?: PassportLoadResponse;
+  verifiedProviderIds: PROVIDER_ID[];
+  verifiedPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>>;
 }
 
 export const platforms = new Map<PLATFORM_ID, PlatformProps>();
 platforms.set("Twitter", {
   platform: new Twitter.TwitterPlatform(),
   platFormGroupSpec: Twitter.ProviderConfig,
-});
-
-platforms.set("GitPOAP", {
-  platform: new GitPOAP.GitPOAPPlatform(),
-  platFormGroupSpec: GitPOAP.ProviderConfig,
 });
 
 platforms.set("Ens", {
@@ -235,6 +234,25 @@ platforms.set("IDriss", {
   platFormGroupSpec: IDriss.ProviderConfig,
 });
 
+if (process.env.NEXT_PUBLIC_FF_CYBERCONNECT_STAMPS === "on") {
+  platforms.set("CyberConnect", {
+    platform: new CyberConnect.CyberConnectPlatform(),
+    platFormGroupSpec: CyberConnect.ProviderConfig,
+  });
+}
+
+platforms.set("GrantsStack", {
+  platform: new GrantsStack.GrantsStackPlatform(),
+  platFormGroupSpec: GrantsStack.ProviderConfig,
+});
+
+if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS === "on") {
+  platforms.set("TrustaLabs", {
+    platform: new TrustaLabs.TrustaLabsPlatform(),
+    platFormGroupSpec: TrustaLabs.ProviderConfig,
+  });
+}
+
 export enum IsLoadingPassportState {
   Idle,
   Loading,
@@ -285,17 +303,53 @@ const startingState: CeramicContextState = {
   handleAddStamps: async () => {},
   handlePatchStamps: async () => {},
   handleDeleteStamps: async () => {},
-  handleCheckRefreshPassport: async () => false,
   passportHasCacaoError: false,
   cancelCeramicConnection: () => {},
   userDid: undefined,
   expiredProviders: [],
   passportLoadResponse: undefined,
+  verifiedProviderIds: [],
+  verifiedPlatforms: {},
 };
 
-const CERAMIC_TIMEOUT_MS = process.env.CERAMIC_TIMEOUT_MS || "10000";
-
 export const CeramicContext = createContext(startingState);
+
+export const cleanPassport = (
+  passport: Passport,
+  database: CeramicDatabase | PassportDatabase,
+  allProvidersState: AllProvidersState
+): {
+  passport: Passport;
+  expiredProviders: PROVIDER_ID[];
+} => {
+  const tempExpiredProviders: PROVIDER_ID[] = [];
+  const currentProviderIds = Object.keys(allProvidersState);
+  // clean stamp content if expired or from a different issuer
+  if (passport) {
+    passport.stamps = passport.stamps.filter((stamp: Stamp) => {
+      if (stamp) {
+        const providerId = stamp.credential.credentialSubject.provider as PROVIDER_ID;
+        if (!currentProviderIds.includes(providerId)) {
+          return false;
+        }
+
+        const has_expired = new Date(stamp.credential.expirationDate) < new Date();
+        if (has_expired) {
+          tempExpiredProviders.push(providerId);
+        }
+
+        const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
+        const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
+
+        return !has_expired && has_correct_issuer && has_correct_subject;
+      } else {
+        return false;
+      }
+    });
+  }
+
+  return { passport, expiredProviders: tempExpiredProviders };
+};
 
 export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
@@ -311,7 +365,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
 
   const { address, dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
-  const { refreshScore } = useContext(ScorerContext);
+  const { refreshScore, fetchStampWeights } = useContext(ScorerContext);
 
   useEffect(() => {
     return () => {
@@ -338,7 +392,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       case "connected": {
         if (dbAccessTokenStatus === "failed") {
           setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
-        } else if (dbAccessToken && address) {
+          break;
+        } else if (dbAccessToken && address && !database) {
           // Ceramic Network Connection
           const ceramicClientInstance = new CeramicDatabase(
             viewerConnection.selfID.did,
@@ -350,7 +405,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           setUserDid(ceramicClientInstance.did);
           // Ceramic cache db
           const databaseInstance = new PassportDatabase(
-            process.env.NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT || "",
+            CERAMIC_CACHE_ENDPOINT || "",
             address,
             dbAccessToken,
             datadogLogs.logger,
@@ -370,20 +425,25 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       default:
         break;
     }
-  }, [viewerConnection.status, address, dbAccessToken, dbAccessTokenStatus]);
+  }, [viewerConnection, address, dbAccessToken, dbAccessTokenStatus]);
 
   useEffect(() => {
-    if (database && ceramicClient) {
+    if (database) {
+      fetchStampWeights();
       fetchPassport(database, false, true);
     }
-  }, [database, ceramicClient]);
+  }, [database]);
 
   const passportLoadSuccess = (
     database: CeramicDatabase | PassportDatabase,
     passport?: Passport,
     skipLoadingState?: boolean
   ): Passport => {
-    const cleanedPassport = cleanPassport(passport, database) as Passport;
+    if (!passport) {
+      passport = { stamps: [] };
+    }
+    const { passport: cleanedPassport, expiredProviders } = cleanPassport(passport, database, allProvidersState);
+    setExpiredProviders(expiredProviders);
     hydrateAllProvidersState(cleanedPassport);
     setPassport(cleanedPassport);
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Idle);
@@ -399,25 +459,20 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const passportLoadDoesNotExist = async () => {
     try {
       await handleCreatePassport();
-      // Start also fetching the passport from ceramic.
-      // If we are creating passport, this will already call loadCeramicPassport,
-      // so no need to call it again
-      loadCeramicPassport();
     } catch (e) {
       return false;
     }
   };
 
-  const fetchPassport = async (
+  const handlePassportUpdate = async (
+    passportResponse: PassportLoadResponse,
     database: CeramicDatabase | PassportDatabase,
     skipLoadingState?: boolean,
     isInitialLoad?: boolean
-  ): Promise<Passport | undefined> => {
-    if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
-
-    // fetch, clean and set the new Passport state
-    const { status, errorDetails, passport } = await database.getPassport();
+  ) => {
     let passportToReturn: Passport | undefined = undefined;
+
+    const { status, errorDetails, passport } = passportResponse;
 
     switch (status) {
       case "Success":
@@ -444,118 +499,23 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     return passportToReturn;
   };
 
-  const cleanPassport = (
-    passport: Passport | undefined | false,
-    database: CeramicDatabase | PassportDatabase
-  ): Passport | undefined | false => {
-    const tempExpiredProviders: PROVIDER_ID[] = [];
-    // clean stamp content if expired or from a different issuer
-    if (passport) {
-      passport.stamps = passport.stamps.filter((stamp: Stamp) => {
-        if (stamp) {
-          const has_expired = new Date(stamp.credential.expirationDate) < new Date();
-          if (has_expired) {
-            tempExpiredProviders.push(stamp.credential.credentialSubject.provider as PROVIDER_ID);
-          }
+  const fetchPassport = async (
+    database: CeramicDatabase | PassportDatabase,
+    skipLoadingState?: boolean,
+    isInitialLoad?: boolean
+  ): Promise<Passport | undefined> => {
+    if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
 
-          const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
-          const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
+    // fetch, clean and set the new Passport state
+    const getResponse = await database.getPassport();
 
-          return !has_expired && has_correct_issuer && has_correct_subject;
-        } else {
-          return false;
-        }
-      });
-      setExpiredProviders(tempExpiredProviders);
-    }
-
-    return passport;
-  };
-
-  const handleCheckRefreshPassport = async (): Promise<boolean> => {
-    let success = true;
-    if (ceramicClient && passportLoadResponse) {
-      let passportHasError = passportLoadResponse.status === "PassportCacaoError";
-      let failedStamps = passportLoadResponse.errorDetails?.stampStreamIds || [];
-      try {
-        if (passportHasError) {
-          passportHasError = !(await ceramicClient.refreshPassport());
-        }
-
-        if (failedStamps && failedStamps.length) {
-          try {
-            await ceramicClient.deleteStampIDs(failedStamps);
-            failedStamps = [];
-          } catch {}
-        }
-
-        // fetchPassport to reset passport state
-        await fetchPassport(ceramicClient);
-
-        success = !passportHasError && !failedStamps.length;
-      } catch {
-        success = false;
-      }
-    }
-    return success;
-  };
-
-  // Start also fetching the passport from ceramic.
-  // We only do this to asses the "health" of the Passport & Stamps
-  // In case of erros we will force a reset of the Pasport.
-  // In case of borked stamps, we will not reset those, we'll simply ignore the borked stamps
-  // and the user ca claim other stamps
-  const loadCeramicPassport = async (): Promise<PassportLoadResponse> => {
-    if (ceramicClient) {
-      const ret = await ceramicClient.getPassport();
-      switch (ret.status) {
-        case "Success":
-          // Ok, nothing to do for now
-          break;
-        case "StampCacaoError":
-          // Ok, nothing to do for now. We will ignore borked stamps
-          break;
-        case "PassportCacaoError":
-          // We need to reset the passport to the last stable state
-          datadogRum.addError(
-            "Passport CACAO error -- error thrown on initial fetch. Going to refresh passport with SyncOptions.SYNC_ALWAYS option",
-            { address }
-          );
-          await ceramicClient.refreshPassport();
-          break;
-        case "DoesNotExist":
-          // Ok, nothing to do for now
-          break;
-        case "ExceptionRaised":
-          // Ok, nothing to do for now
-          break;
-      }
-      return ret;
-    }
-    // We just return an error here
-    return { status: "ExceptionRaised", passport: undefined };
+    return await handlePassportUpdate(getResponse, database, skipLoadingState, isInitialLoad);
   };
 
   const handleCreatePassport = async (): Promise<void> => {
-    if (database && ceramicClient) {
+    if (database) {
       setIsLoadingPassport(IsLoadingPassportState.LoadingFromCeramic);
-
-      let initialStamps: Stamp[] = [];
-
-      try {
-        const { status, passport } = await Promise.race<PassportLoadResponse>([
-          returnEmptyPassportAfterTimeout(parseInt(CERAMIC_TIMEOUT_MS)),
-          returnEmptyPassportOnCancel(),
-          loadCeramicPassport(),
-        ]);
-        if (status === "Success" && passport?.stamps.length) {
-          initialStamps = passport.stamps;
-        }
-      } catch (e) {
-        console.error(e);
-      }
-
-      await database.createPassport(initialStamps);
+      await database.createPassport();
       await fetchPassport(database);
     }
   };
@@ -564,25 +524,17 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     if (resolveCancel?.current) resolveCancel.current();
   };
 
-  const returnEmptyPassportOnCancel = async (): Promise<PassportLoadResponse> =>
-    new Promise<PassportLoadResponse>((resolve) => {
-      resolveCancel.current = () => {
-        resolve({ status: "Success", passport: { stamps: [] } });
-      };
-    });
-
-  const returnEmptyPassportAfterTimeout = async (timeout: number): Promise<PassportLoadResponse> =>
-    new Promise<PassportLoadResponse>((resolve) =>
-      setTimeout(() => resolve({ status: "Success", passport: { stamps: [] } }), timeout)
-    );
-
   const handleAddStamps = async (stamps: Stamp[]): Promise<void> => {
     try {
       if (database) {
-        await database.addStamps(stamps);
-        const newPassport = await fetchPassport(database, true);
-        if (ceramicClient && newPassport) {
-          ceramicClient.setStamps(newPassport.stamps).catch((e) => console.log("error setting ceramic stamps", e));
+        const addResponse = await database.addStamps(stamps);
+
+        handlePassportUpdate(addResponse, database);
+
+        if (ceramicClient && addResponse.passport) {
+          ceramicClient
+            .setStamps(addResponse.passport.stamps)
+            .catch((e) => console.log("error setting ceramic stamps", e));
         }
         if (dbAccessToken) {
           refreshScore(address, dbAccessToken);
@@ -597,10 +549,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const handlePatchStamps = async (stampPatches: StampPatch[]): Promise<void> => {
     try {
       if (database) {
-        await database.patchStamps(stampPatches);
-        const newPassport = await fetchPassport(database, true);
+        const patchResponse = await database.patchStamps(stampPatches);
+        handlePassportUpdate(patchResponse, database);
 
-        if (ceramicClient && newPassport) {
+        if (ceramicClient && patchResponse.passport) {
           (async () => {
             try {
               const deleteProviderIds = stampPatches
@@ -609,7 +561,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
               if (deleteProviderIds.length) await ceramicClient.deleteStampIDs(deleteProviderIds);
 
-              await ceramicClient.setStamps(newPassport.stamps);
+              await ceramicClient.setStamps(patchResponse.passport?.stamps || []);
             } catch (e) {
               console.log("error patching ceramic stamps", e);
             }
@@ -629,11 +581,12 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const handleDeleteStamps = async (providerIds: PROVIDER_ID[]): Promise<void> => {
     try {
       if (database) {
-        await database.deleteStamps(providerIds);
-
-        const newPassport = await fetchPassport(database, true);
-        if (ceramicClient && newPassport) {
-          ceramicClient.setStamps(newPassport.stamps).catch((e) => console.log("error setting ceramic stamps", e));
+        const deleteResponse = await database.deleteStamps(providerIds);
+        handlePassportUpdate(deleteResponse, database);
+        if (ceramicClient && deleteResponse.status === "Success" && deleteResponse.passport?.stamps) {
+          ceramicClient
+            .setStamps(deleteResponse.passport.stamps)
+            .catch((e) => console.log("error setting ceramic stamps", e));
         }
         if (dbAccessToken) {
           refreshScore(address, dbAccessToken);
@@ -670,6 +623,29 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     setAllProviderState(startingAllProvidersState);
   };
 
+  const verifiedProviderIds = useMemo(
+    () =>
+      Object.entries(allProvidersState).reduce((providerIds, [providerId, providerState]) => {
+        if (typeof providerState?.stamp?.credential !== "undefined") providerIds.push(providerId as PROVIDER_ID);
+        return providerIds;
+      }, [] as PROVIDER_ID[]),
+    [allProvidersState]
+  );
+
+  const verifiedPlatforms = useMemo(
+    () =>
+      Object.entries(Object.fromEntries(platforms)).reduce((validPlatformProps, [platformKey, platformProps]) => {
+        if (
+          platformProps.platFormGroupSpec.some(({ providers }) =>
+            providers.some(({ name }) => verifiedProviderIds.includes(name))
+          )
+        )
+          validPlatformProps[platformKey as PLATFORM_ID] = platformProps;
+        return validPlatformProps;
+      }, {} as Record<PLATFORM_ID, PlatformProps>),
+    [verifiedProviderIds, platforms]
+  );
+
   const providerProps = {
     passport,
     isLoadingPassport,
@@ -679,12 +655,13 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     handleAddStamps,
     handlePatchStamps,
     handleDeleteStamps,
-    handleCheckRefreshPassport,
     cancelCeramicConnection,
     userDid,
     expiredProviders,
     passportLoadResponse,
     passportHasCacaoError,
+    verifiedProviderIds,
+    verifiedPlatforms,
   };
 
   return <CeramicContext.Provider value={providerProps}>{children}</CeramicContext.Provider>;

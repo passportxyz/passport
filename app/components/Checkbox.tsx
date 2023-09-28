@@ -13,13 +13,14 @@ type CheckboxProps = {
 const Checkbox = ({ className, ...props }: CheckboxProps) => {
   return (
     <Switch
-      className={`group flex h-6 w-6 items-center justify-center rounded-md
-        focus:border disabled:bg-accent-2 enabled:ui-checked:bg-accent
+      className={`group flex h-5 w-5 items-center justify-center rounded-sm
+        border-foreground focus:border focus:border-foreground-2
+        disabled:bg-foreground-3 enabled:ui-checked:bg-foreground-4
         enabled:ui-not-checked:border enabled:ui-not-checked:bg-background
         ${className}`}
       {...props}
     >
-      <CheckIcon className="invisible h-4 w-4 stroke-[3] text-color-1 group-disabled:text-color-4 ui-checked:visible" />
+      <CheckIcon className="invisible h-4 w-4 stroke-[3] text-color-4 group-disabled:text-color-4 ui-checked:visible" />
     </Switch>
   );
 };

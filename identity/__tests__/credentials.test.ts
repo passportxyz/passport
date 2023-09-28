@@ -25,7 +25,7 @@ import * as mockDIDKit from "../__mocks__/didkit";
 
 // ---- Types
 import axios from "axios";
-import { DIDKitLib, RequestPayload, VerifiableCredential } from "@gitcoin/passport-types";
+import { DIDKitLib, RequestPayload, VerifiableCredential, SignatureType } from "@gitcoin/passport-types";
 
 // ---- Set up DIDKit mock
 const DIDKit: DIDKitLib = mockDIDKit as unknown as DIDKitLib;
@@ -151,6 +151,29 @@ describe("Generate Credentials", function () {
     expect(typeof credential.proof).toEqual("object");
   });
 
+  const signType: SignatureType = "EIP712";
+  it("can generate am EIP712 signed challenge credential", async () => {
+    const record = {
+      type: "Simple",
+      address: "0x0",
+      version: "Test-Case-1",
+      challenge: "randomChallengeString",
+      signatureType: signType,
+    };
+
+    // details of this credential are created by issueChallengeCredential - but the proof is added by DIDKit (which is mocked)
+    const { credential } = await issueChallengeCredential(DIDKit, key, record, "EIP712");
+
+    // expect to have called issueCredential
+    expect(DIDKit.issueCredential).toHaveBeenCalled();
+    // expect the structure/details added by issueChallengeCredential to be correct
+    expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
+    expect(credential.credentialSubject.provider).toEqual(`challenge-${record.type}`);
+    expect(credential.credentialSubject.challenge).toEqual(record.challenge);
+    expect(credential.credentialSubject.address).toEqual(record.address);
+    expect(typeof credential.proof).toEqual("object");
+  });
+
   it("can convert an object to an sorted array for deterministic hashing", async () => {
     const record = {
       type: "Simple",
@@ -165,33 +188,61 @@ describe("Generate Credentials", function () {
       ["type", "Simple"],
       ["version", "Test-Case-1"],
     ]);
-  }),
-    it("can generate a credential containing hash", async () => {
-      const record = {
-        type: "Simple",
-        version: "Test-Case-1",
-        address: "0x0",
-      };
+  });
+  it("can generate a credential containing hash", async () => {
+    const record = {
+      type: "Simple",
+      version: "Test-Case-1",
+      address: "0x0",
+    };
 
-      const expectedHash: string =
-        "v0.0.0:" +
-        base64.encode(
-          createHash("sha256")
-            .update(key)
-            .update(JSON.stringify(objToSortedArray(record)))
-            .digest()
-        );
-      // details of this credential are created by issueHashedCredential - but the proof is added by DIDKit (which is mocked)
-      const { credential } = await issueHashedCredential(DIDKit, key, "0x0", record);
-      // expect to have called issueCredential
-      expect(DIDKit.issueCredential).toHaveBeenCalled();
-      // expect the structure/details added by issueHashedCredential to be correct
-      expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
-      expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
-      expect(typeof credential.credentialSubject.hash).toEqual("string");
-      expect(credential.credentialSubject.hash).toEqual(expectedHash);
-      expect(typeof credential.proof).toEqual("object");
-    });
+    const expectedHash: string =
+      "v0.0.0:" +
+      base64.encode(
+        createHash("sha256")
+          .update(key)
+          .update(JSON.stringify(objToSortedArray(record)))
+          .digest()
+      );
+    // details of this credential are created by issueHashedCredential - but the proof is added by DIDKit (which is mocked)
+    const { credential } = await issueHashedCredential(DIDKit, key, "0x0", record);
+    // expect to have called issueCredential
+    expect(DIDKit.issueCredential).toHaveBeenCalled();
+    // expect the structure/details added by issueHashedCredential to be correct
+    expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
+    expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
+    expect(typeof credential.credentialSubject.hash).toEqual("string");
+    expect(credential.credentialSubject.hash).toEqual(expectedHash);
+    expect(typeof credential.proof).toEqual("object");
+  });
+  it("can generate an eip712 signed credential containing hash", async () => {
+    const record = {
+      type: "Simple",
+      version: "Test-Case-1",
+      address: "0x0",
+    };
+
+    const expectedHash: string =
+      "v0.0.0:" +
+      base64.encode(
+        createHash("sha256")
+          .update(key)
+          .update(JSON.stringify(objToSortedArray(record)))
+          .digest()
+      );
+    // details of this credential are created by issueHashedCredential - but the proof is added by DIDKit (which is mocked)
+    const { credential } = await issueHashedCredential(DIDKit, key, "0x0", record, 100, "EIP712");
+    // expect to have called issueCredential
+    expect(DIDKit.issueCredential).toHaveBeenCalled();
+    // expect the structure/details added by issueHashedCredential to be correct
+    expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
+    expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
+    expect(typeof credential.credentialSubject.hash).toEqual("string");
+    expect(credential.credentialSubject.hash).toEqual(expectedHash);
+    expect(typeof credential.proof).toEqual("object");
+    expect(credential["@context"]).toContain("https://w3id.org/vc/status-list/2021/v1");
+    expect(credential["@context"]).toContain("https://w3id.org/vc/status-list/2021/v1");
+  });
 });
 
 describe("Verify Credentials", function () {

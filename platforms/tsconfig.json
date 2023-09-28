@@ -15,7 +15,8 @@
     "paths": {
       "*": ["../node_modules/*", "node_modules/*"]
     },
-    "jsx": "react"
+    "jsx": "react",
+    "lib": ["es6", "dom"]
   },
   "include": ["src/**/*", "__tests__/**/*"]
 }

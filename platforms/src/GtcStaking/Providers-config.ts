@@ -12,7 +12,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/gtcStakingLogoIcon.svg",
   platform: "GtcStaking",
   name: "GTC Staking",
-  description: "Connect to passport to verify your staking amount.",
+  description: "Connect to Passport to verify your staking amount",
   connectMessage: "Verify amount",
   isEVM: true,
 };

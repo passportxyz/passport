@@ -56,7 +56,7 @@ describe("scorerClient", () => {
     await passportDatabase.addStamps(stamps);
 
     expect(logger.info).toHaveBeenCalledWith(`adding stamp to passportScorer address: ${address}`);
-    expect(axios.post).toHaveBeenCalledWith(`${passportScorerUrl}ceramic-cache/stamps/bulk`, stampsToSave, {
+    expect(axios.post).toHaveBeenCalledWith(`${passportScorerUrl}/stamps/bulk`, stampsToSave, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -65,7 +65,8 @@ describe("scorerClient", () => {
 
   it("should log an error when axios.post fails", async () => {
     const error = new Error("Request failed");
-    jest.spyOn(axios, "post").mockImplementation((url: string): Promise<{}> => {
+    const request = "post";
+    jest.spyOn(axios, request).mockImplementation((url: string): Promise<{}> => {
       return new Promise((_, reject) => {
         reject(error);
       });
@@ -75,13 +76,15 @@ describe("scorerClient", () => {
 
     expect(logger.info).toHaveBeenCalledWith(`adding stamp to passportScorer address: ${address}`);
     expect(logger.error).toHaveBeenCalledWith(
-      `Error saving stamp to passportScorer address:  ${address}:${error.toString()}`
+      `[Scorer] Error thrown when making ${request} for passport with did ${address}: Error: Request failed`,
+      { error }
     );
   });
 
   it("should log an error when axios.delete fails", async () => {
     const error = new Error("Request failed");
-    jest.spyOn(axios, "delete").mockImplementation((url: string): Promise<{}> => {
+    const request = "delete";
+    jest.spyOn(axios, request).mockImplementation((url: string): Promise<{}> => {
       return new Promise((_, reject) => {
         reject(error);
       });
@@ -94,7 +97,8 @@ describe("scorerClient", () => {
       `deleting stamp from passportScorer for ${providerIds.join(", ")} on ${address}`
     );
     expect(logger.error).toHaveBeenCalledWith(
-      `Error deleting stamp from passportScorer for ${providerIds.join(", ")} on ${address}: Error: Request failed`
+      `[Scorer] Error thrown when making ${request} for passport with did ${address}: Error: Request failed`,
+      { error }
     );
   });
 
@@ -123,7 +127,7 @@ describe("scorerClient", () => {
     await passportDatabase.patchStamps(stampPatches);
 
     expect(logger.info).toHaveBeenCalledWith(`patching stamps in passportScorer for address: ${address}`);
-    expect(axios.patch).toHaveBeenCalledWith(`${passportScorerUrl}ceramic-cache/stamps/bulk`, expectedCalldata, {
+    expect(axios.patch).toHaveBeenCalledWith(`${passportScorerUrl}/stamps/bulk`, expectedCalldata, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -132,7 +136,8 @@ describe("scorerClient", () => {
 
   it("should log an error when axios.patch fails", async () => {
     const error = new Error("Request failed");
-    jest.spyOn(axios, "patch").mockImplementation((url: string): Promise<{}> => {
+    const request = "patch";
+    jest.spyOn(axios, request).mockImplementation((url: string): Promise<{}> => {
       return new Promise((_, reject) => {
         reject(error);
       });
@@ -142,7 +147,8 @@ describe("scorerClient", () => {
 
     expect(logger.info).toHaveBeenCalledWith(`patching stamps in passportScorer for address: ${address}`);
     expect(logger.error).toHaveBeenCalledWith(
-      `Error patching stamps in passportScorer for address:  ${address}:${error.toString()}`
+      `[Scorer] Error thrown when making ${request} for passport with did ${address}: ${error.toString()}`,
+      { error }
     );
   });
 });

@@ -4,7 +4,8 @@ import { CeramicContext, AllProvidersState, ProviderState } from "../context/cer
 import { OnChainContext, OnChainProviderType } from "../context/onChainContext";
 import { ScorerContext, ScoreStateType } from "../context/scorerContext";
 import { SyncToChainButton } from "./SyncToChainButton";
-import { Chain } from "../utils/onboard";
+import { Chain } from "../utils/chains";
+import { FeatureFlags } from "../config/feature_flags";
 
 export enum OnChainStatus {
   NOT_MOVED,
@@ -51,16 +52,11 @@ export const checkOnChainStatus = (
     : OnChainStatus.MOVED_OUT_OF_DATE;
 };
 
-export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChains: string[] }) {
+export function NetworkCard({ chain }: { chain: Chain }) {
   const { allProvidersState } = useContext(CeramicContext);
-  const { onChainProviders, onChainScore, onChainLastUpdates } = useContext(OnChainContext);
+  const { onChainProviders, onChainScores, onChainLastUpdates } = useContext(OnChainContext);
   const { rawScore, scoreState } = useContext(ScorerContext);
-  const [isActive, setIsActive] = useState(false);
   const [onChainStatus, setOnChainStatus] = useState<OnChainStatus>(OnChainStatus.NOT_MOVED);
-
-  useEffect(() => {
-    setIsActive(activeChains.includes(chain.id));
-  }, [activeChains, chain.id]);
 
   useEffect(() => {
     const checkStatus = async () => {
@@ -70,31 +66,32 @@ export function NetworkCard({ chain, activeChains }: { chain: Chain; activeChain
         savedNetworkProviders,
         rawScore,
         scoreState,
-        onChainScore
+        onChainScores[chain.id]
       );
       setOnChainStatus(stampStatus);
     };
     checkStatus();
-  }, [allProvidersState, chain.id, onChainProviders, onChainScore, rawScore, scoreState]);
+  }, [allProvidersState, chain.id, onChainProviders, onChainScores, rawScore, scoreState]);
 
   return (
-    <div className="mb-6 border border-accent-2 bg-background-2 p-0">
+    <div className="mb-6 rounded border border-foreground-6 bg-background-4 p-0 text-color-2">
       <div className="mx-4 my-2">
         <div className="flex w-full">
-          <div className="mr-4">
+          <div className="mr-4 mt-1">
             <img className="max-h-6" src={chain.icon} alt={`${chain.label} logo`} />
           </div>
           <div>
             <div className="flex w-full flex-col">
               <h1 className="text-lg text-color-1">{chain.label}</h1>
-              <p className="mt-2 text-color-4 md:inline-block">
+              {FeatureFlags.FF_LINEA_ATTESTATIONS && <h2 className="text-sm">{chain.attestationProvider?.name}</h2>}
+              <p className="mt-2 md:inline-block">
                 {onChainLastUpdates[chain.id] ? onChainLastUpdates[chain.id].toLocaleString() : "Not moved yet"}
               </p>
             </div>
           </div>
         </div>
       </div>
-      <SyncToChainButton onChainStatus={onChainStatus} isActive={isActive} chain={chain} />
+      <SyncToChainButton className="border-t border-foreground-6" onChainStatus={onChainStatus} chain={chain} />
     </div>
   );
 }

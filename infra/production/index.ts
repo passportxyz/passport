@@ -2,6 +2,8 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as awsx from "@pulumi/awsx";
 
+import { createIAMLogGroup, createPagerdutyTopic } from "../lib/service";
+
 // The following vars are not allowed to be undefined, hence the `${...}` magic
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
@@ -143,17 +145,21 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
   },
 });
 
+const alertTopic = createPagerdutyTopic();
+const logGroup = createIAMLogGroup({ alertTopic });
+
 const service = new awsx.ecs.FargateService("dpopp-iam", {
   cluster,
   desiredCount: 1,
   subnets: vpc.privateSubnetIds,
   taskDefinitionArgs: {
     executionRole: dpoppEcsRole,
+    logGroup,
     containers: {
       iam: {
         image: dockerGtcPassportIamImage,
-        memory: 2048,
-        cpu: 1000,
+        memory: 8192,
+        cpu: 4096,
         portMappings: [httpsListener],
         links: [],
         environment: [
@@ -178,6 +184,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
           {
             name: "GOOGLE_CALLBACK",
             valueFrom: `${IAM_SERVER_SSM_ARN}:GOOGLE_CALLBACK::`,
+          },
+          {
+            name: "TWITTER_CALLBACK",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:TWITTER_CALLBACK::`,
           },
           {
             name: "RPC_URL",
@@ -316,8 +326,20 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             valueFrom: `${IAM_SERVER_SSM_ARN}:ZKSYNC_ERA_MAINNET_ENDPOINT::`,
           },
           {
-            name: "FF_NEW_TWITTER_STAMPS",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:FF_NEW_TWITTER_STAMPS::`,
+            name: "PASSPORT_SCORER_BACKEND",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:PASSPORT_SCORER_BACKEND::`,
+          },
+          {
+            name: "TRUSTA_LABS_ACCESS_TOKEN",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:TRUSTA_LABS_ACCESS_TOKEN::`,
+          },
+          {
+            name: "MORALIS_API_KEY",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:MORALIS_API_KEY::`,
+          },
+          {
+            name: "IAM_JWK_EIP712",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:IAM_JWK_EIP712::`,
           },
         ],
       },
@@ -325,25 +347,25 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
   },
 });
 
-const ecsIamServiceAutoscalingTarget = new aws.appautoscaling.Target("autoscaling_target", {
-  maxCapacity: 10,
-  minCapacity: 1,
-  resourceId: pulumi.interpolate`service/${cluster.cluster.name}/${service.service.name}`,
-  scalableDimension: "ecs:service:DesiredCount",
-  serviceNamespace: "ecs",
-});
+// const ecsIamServiceAutoscalingTarget = new aws.appautoscaling.Target("autoscaling_target", {
+//   maxCapacity: 10,
+//   minCapacity: 1,
+//   resourceId: pulumi.interpolate`service/${cluster.cluster.name}/${service.service.name}`,
+//   scalableDimension: "ecs:service:DesiredCount",
+//   serviceNamespace: "ecs",
+// });
 
-const ecsScorerServiceAutoscaling = new aws.appautoscaling.Policy("scorer-autoscaling-policy", {
-  policyType: "TargetTrackingScaling",
-  resourceId: ecsIamServiceAutoscalingTarget.resourceId,
-  scalableDimension: ecsIamServiceAutoscalingTarget.scalableDimension,
-  serviceNamespace: ecsIamServiceAutoscalingTarget.serviceNamespace,
-  targetTrackingScalingPolicyConfiguration: {
-    predefinedMetricSpecification: {
-      predefinedMetricType: "ECSServiceAverageCPUUtilization",
-    },
-    targetValue: 30,
-    scaleInCooldown: 300,
-    scaleOutCooldown: 300,
-  },
-});
+// const ecsScorerServiceAutoscaling = new aws.appautoscaling.Policy("scorer-autoscaling-policy", {
+//   policyType: "TargetTrackingScaling",
+//   resourceId: ecsIamServiceAutoscalingTarget.resourceId,
+//   scalableDimension: ecsIamServiceAutoscalingTarget.scalableDimension,
+//   serviceNamespace: ecsIamServiceAutoscalingTarget.serviceNamespace,
+//   targetTrackingScalingPolicyConfiguration: {
+//     predefinedMetricSpecification: {
+//       predefinedMetricType: "ECSServiceAverageCPUUtilization",
+//     },
+//     targetValue: 30,
+//     scaleInCooldown: 300,
+//     scaleOutCooldown: 300,
+//   },
+// });

@@ -10,6 +10,13 @@ export type DIDKitLib = {
   issueCredential: (credential: string, proofOptions: string, key: string) => Promise<string>;
   keyToDID: (method_pattern: string, jwk: string) => string;
   keyToVerificationMethod: (method_pattern: string, jwk: string) => Promise<string>;
+  /**
+   * @param {string} credential
+   * @param {string} linked_data_proof_options
+   * @param {string} public_key
+   * @returns {Promise<any>}
+   */
+  prepareIssueCredential(credential: string, linked_data_proof_options: string, public_key: string): Promise<any>;
 } & { [key: string]: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 // rough outline of a VerifiableCredential
@@ -23,6 +30,7 @@ export type VerifiableCredential = {
     provider?: string;
     address?: string;
     challenge?: string;
+    metaPointer?: string;
   };
   issuer: string;
   issuanceDate: string;
@@ -36,11 +44,50 @@ export type VerifiableCredential = {
   };
 };
 
+export type VerifiableEip712Credential = {
+  "@context": string[];
+  type: string[];
+  credentialSubject: {
+    id: string;
+    "@context": { [key: string]: string };
+    hash?: string;
+    provider?: string;
+    address?: string;
+    challenge?: string;
+    metaPointer?: string;
+  };
+  issuer: string;
+  issuanceDate: string;
+  expirationDate: string;
+  proof: {
+    "@context": string;
+    type: string;
+    proofPurpose: string;
+    proofValue: string;
+    verificationMethod: string;
+    created: string;
+    eip712Domain: {
+      domain: {
+        name: string;
+      };
+      primaryType: string;
+      types: {
+        [key: string]: {
+          name: string;
+          type: string;
+        }[];
+      };
+    };
+  };
+};
+
 // A ProviderContext is used as a temporary storage so that providers can can share data
 // between them, in case multiple VCs are requests in one http request
 export type ProviderContext = {
   [key: string]: unknown;
 };
+
+export type SignatureType = "EIP712" | "Ed25519";
 
 // values received from client and fed into the verify route
 export type RequestPayload = {
@@ -59,6 +106,7 @@ export type RequestPayload = {
   jsonRpcSigner?: JsonRpcSigner;
   challenge?: string;
   issuer?: string;
+  signatureType?: SignatureType;
 };
 
 // response Object return by verify procedure
@@ -74,6 +122,9 @@ export type ChallengePayload = {
 // response Object return by verify procedure
 export type VerifiedPayload = {
   valid: boolean;
+  errors?: string[];
+  // TODO: error should be removed, and errors should be made required
+  // We are currently transitioning providers over to use this scheme
   error?: string[];
   // This will be combined with the ProofRecord (built from the verified content in the Payload)
   record?: { [k: string]: string };
@@ -192,6 +243,7 @@ export type EasRequestBody = {
   nonce: number;
   credentials: VerifiableCredential[];
   dbAccessToken: string;
+  chainIdHex: string;
 };
 
 // Passport DID
@@ -209,7 +261,6 @@ export type PLATFORM_ID =
   | "Gitcoin"
   | "Linkedin"
   | "Discord"
-  | "GitPOAP"
   | "Signer"
   | "Snapshot"
   | "ETH"
@@ -226,6 +277,9 @@ export type PLATFORM_ID =
   | "Idena"
   | "Civic"
   | "IDriss";
+  | "CyberConnect"
+  | "GrantsStack"
+  | "TrustaLabs";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -257,17 +311,8 @@ export type PROVIDER_ID =
   | "GitcoinContributorStatistics#totalContributionAmountGte#1000"
   | "GitcoinContributorStatistics#numRoundsContributedToGte#1"
   | "GitcoinContributorStatistics#numGr14ContributionsGte#1"
-  | "GitcoinGranteeStatistics#numOwnedGrants#1"
-  | "GitcoinGranteeStatistics#numGrantContributors#10"
-  | "GitcoinGranteeStatistics#numGrantContributors#25"
-  | "GitcoinGranteeStatistics#numGrantContributors#100"
-  | "GitcoinGranteeStatistics#totalContributionAmount#100"
-  | "GitcoinGranteeStatistics#totalContributionAmount#1000"
-  | "GitcoinGranteeStatistics#totalContributionAmount#10000"
-  | "GitcoinGranteeStatistics#numGrantsInEcoAndCauseRound#1"
   | "Linkedin"
   | "Discord"
-  | "GitPOAP"
   | "Snapshot"
   | "SnapshotProposalsProvider"
   | "SnapshotVotesProvider"
@@ -294,6 +339,9 @@ export type PROVIDER_ID =
   | "GuildAdmin"
   | "GuildPassportMember"
   | "Hypercerts"
+  | "CyberProfilePremium"
+  | "CyberProfilePaid"
+  | "CyberProfileOrgMember"
   | "PHIActivitySilver"
   | "PHIActivityGold"
   | "HolonymGovIdProvider"
@@ -319,7 +367,14 @@ export type PROVIDER_ID =
   | "twitterAccountAgeGte#730"
   | "twitterTweetDaysGte#30"
   | "twitterTweetDaysGte#60"
-  | "twitterTweetDaysGte#120";
+  | "twitterTweetDaysGte#120"
+  | "GrantsStack3Projects"
+  | "GrantsStack5Projects"
+  | "GrantsStack7Projects"
+  | "GrantsStack2Programs"
+  | "GrantsStack4Programs"
+  | "GrantsStack6Programs"
+  | "TrustaLabs";
 
 export type StampBit = {
   bit: number;

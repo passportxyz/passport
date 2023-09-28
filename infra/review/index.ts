@@ -179,6 +179,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             valueFrom: `${IAM_SERVER_SSM_ARN}:GOOGLE_CALLBACK::`,
           },
           {
+            name: "TWITTER_CALLBACK",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:TWITTER_CALLBACK::`,
+          },
+          {
             name: "RPC_URL",
             valueFrom: `${IAM_SERVER_SSM_ARN}:MAINNET_RPC_URL::`,
           },
@@ -315,8 +319,20 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             valueFrom: `${IAM_SERVER_SSM_ARN}:ZKSYNC_ERA_MAINNET_ENDPOINT::`,
           },
           {
-            name: "FF_NEW_TWITTER_STAMPS",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:FF_NEW_TWITTER_STAMPS::`,
+            name: "PASSPORT_SCORER_BACKEND",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:PASSPORT_SCORER_BACKEND::`,
+          },
+          {
+            name: "TRUSTA_LABS_ACCESS_TOKEN",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:TRUSTA_LABS_ACCESS_TOKEN::`,
+          },
+          {
+            name: "MORALIS_API_KEY",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:MORALIS_API_KEY::`,
+          },
+          {
+            name: "IAM_JWK_EIP712",
+            valueFrom: `${IAM_SERVER_SSM_ARN}:IAM_JWK_EIP712::`,
           },
         ],
       },

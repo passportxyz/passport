@@ -1,5 +1,6 @@
 import { AppContext, ProviderPayload } from "../types";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { Platform as PlatformType, PlatformBanner } from "../types";
 
 export type PlatformOptions = {
   platformId: string;
@@ -9,16 +10,7 @@ export type PlatformOptions = {
   state?: string;
 };
 
-export type PlatformBanner = {
-  heading?: string;
-  content?: string;
-  cta?: {
-    label: string;
-    url: string;
-  };
-};
-
-export class Platform {
+export class Platform implements PlatformType {
   platformId: string;
   path: string;
   clientId?: string;

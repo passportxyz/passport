@@ -8,7 +8,6 @@ import * as Poh from "./Poh";
 import * as Snapshot from "./Snapshot";
 import * as GnosisSafe from "./GnosisSafe";
 import * as NFT from "./NFT";
-import * as GitPOAP from "./GitPOAP";
 import * as POAP from "./POAP";
 import * as ETH from "./ETH";
 import * as ZkSync from "./ZkSync";
@@ -25,6 +24,9 @@ import * as Holonym from "./Holonym";
 import * as Idena from "./Idena";
 import * as Civic from "./Civic";
 import * as IDriss from "./IDriss";
+import * as CyberConnect from "./CyberProfile";
+import * as GrantsStack from "./GrantsStack";
+import * as TrustaLabs from "./TrustaLabs";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
 type PlatformConfig = {
@@ -49,7 +51,6 @@ const platforms: Record<string, PlatformConfig> = {
   Poh,
   ETH,
   Snapshot,
-  GitPOAP,
   NFT,
   ZkSync,
   Lens,
@@ -62,6 +63,9 @@ const platforms: Record<string, PlatformConfig> = {
   Idena,
   Civic,
   IDriss,
+  CyberConnect,
+  GrantsStack,
+  TrustaLabs,
 };
 
 if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {

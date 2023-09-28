@@ -44,7 +44,7 @@ export const NoStampModal = ({ isOpen, onClose }: NoStampModalProps) => {
             onClick={() => {
               resetStateAndClose();
             }}
-            color="var(--color-text-1)"
+            color="rgb(var(--color-text-1))"
           />
           {additionalSigner ? (
             <AdditionalStampModal

@@ -20,7 +20,6 @@ jest.mock("../../utils/helpers", () => ({
 }));
 
 const navigate = jest.fn();
-(checkShowOnboard as jest.Mock).mockReturnValue(true);
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: () => navigate,
@@ -78,8 +77,8 @@ test("clicking connect wallet button calls toggleConnection", async () => {
 });
 
 describe("Welcome navigation", () => {
-  it("calls navigate with /dashboard when wallet is connected and feature flag is off", () => {
-    process.env.NEXT_PUBLIC_FF_ONE_CLICK_VERIFICATION = "off";
+  it("calls navigate with /dashboard when wallet is connected but checkShowOnboard is false", () => {
+    (checkShowOnboard as jest.Mock).mockReturnValue(false);
     renderWithContext(
       { ...mockUserContext, wallet: {} as WalletState },
       { ...mockCeramicContext, passport: undefined },
@@ -90,20 +89,8 @@ describe("Welcome navigation", () => {
     expect(navigate).toHaveBeenCalledWith("/dashboard");
   });
 
-  it("calls navigate with /dashboard when wallet is connected and feature flag is on but checkShowOnboard is false", () => {
-    process.env.NEXT_PUBLIC_FF_ONE_CLICK_VERIFICATION = "off";
-    renderWithContext(
-      { ...mockUserContext, wallet: {} as WalletState },
-      { ...mockCeramicContext, passport: undefined },
-      <Router>
-        <Home />
-      </Router>
-    );
-    expect(navigate).toHaveBeenCalledWith("/dashboard");
-  });
-
-  it("calls navigate with /welcome when feature flag is on and checkShowOnboard is true", () => {
-    process.env.NEXT_PUBLIC_FF_ONE_CLICK_VERIFICATION = "on";
+  it("calls navigate with /welcome when checkShowOnboard is true", () => {
+    (checkShowOnboard as jest.Mock).mockReturnValue(true);
     renderWithContext(
       { ...mockUserContext, wallet: {} as WalletState },
       { ...mockCeramicContext, passport: undefined },

@@ -12,13 +12,13 @@ import BodyWrapper from "../components/BodyWrapper";
 const Footer = () => (
   <>
     <div className="h-20 lg:hidden" />
-    <div className="hidden h-[360px] bg-[url(/assets/backgroundRock.png)] bg-contain bg-top bg-no-repeat lg:block" />
+    <div className="bg-contain bg-top hidden h-[360px] bg-[url(/assets/backgroundRock.png)] bg-no-repeat lg:block" />
   </>
 );
 
 export default function Maintenance() {
   return (
-    <PageRoot className="text-color-2">
+    <PageRoot className="text-color-2" useLegacyBackground={true}>
       <HeaderContentFooterGrid>
         <div className={`${PAGE_PADDING} bg-background`}>
           <MinimalHeader className={`border-b border-accent-2`} />
