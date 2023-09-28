@@ -21,14 +21,18 @@ export class GithubContributionActivityProvider implements Provider {
 
   async verify(payload: RequestPayload, context: GithubContext): Promise<VerifiedPayload> {
     try {
-      let errors = [],
-        record = undefined,
+      const errors = [];
+      let record = undefined,
+        valid = false,
+        contributionResult;
+
+      try {
+        contributionResult = await fetchAndCheckContributions(context, payload.proofs.code, this._options.threshold);
+      } catch (e) {
         valid = false;
-      const contributionResult = await fetchAndCheckContributions(
-        context,
-        payload.proofs.code,
-        this._options.threshold
-      );
+        errors.push(e);
+      }
+
       valid = contributionResult.contributionValid;
       const githubId = context.github.id;
 
@@ -38,9 +42,6 @@ export class GithubContributionActivityProvider implements Provider {
         errors.push("Your Github contributions did not qualify for this stamp.");
       }
 
-      if (contributionResult.errors) {
-        errors = contributionResult.errors;
-      }
       return {
         valid,
         errors,

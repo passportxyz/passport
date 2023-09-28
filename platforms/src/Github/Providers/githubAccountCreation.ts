@@ -44,16 +44,33 @@ export class GithubAccountCreationProvider implements Provider {
   }
 
   async verify(payload: RequestPayload, context: GithubContext): Promise<VerifiedPayload> {
+    const userDataErrors = [];
+    let userDataValid = false,
+      record = undefined;
     try {
       const { createdAt } = await fetchGithubUserData(context, payload.proofs.code);
+      if (!createdAt) {
+        userDataValid = false;
+        userDataErrors.push("createdAt is undefined");
+        return {
+          valid: userDataValid,
+          errors: userDataErrors,
+          record: undefined,
+        };
+      }
+
       const { valid, errors } = checkAccountCreationDays(parseInt(this._options.threshold), createdAt);
 
       const githubId = context.github.id;
 
+      if (valid) {
+        record = { id: githubId };
+      }
+
       return {
         valid,
         errors,
-        record: { githubId },
+        record,
       };
     } catch (error: unknown) {
       throw new ProviderExternalVerificationError(

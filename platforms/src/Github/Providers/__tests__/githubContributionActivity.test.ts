@@ -31,7 +31,7 @@ describe("GithubContributionActivityProvider", function () {
     (fetchAndCheckContributions as jest.MockedFunction<typeof fetchAndCheckContributions>).mockImplementation(() => {
       return Promise.resolve({
         contributionValid: true,
-        errors: undefined,
+        errors: [],
       });
     });
 
@@ -41,7 +41,7 @@ describe("GithubContributionActivityProvider", function () {
     expect(fetchAndCheckContributions).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: true,
-      error: undefined,
+      errors: [],
       record: { id: "123" },
     });
   });
@@ -60,7 +60,7 @@ describe("GithubContributionActivityProvider", function () {
     expect(fetchAndCheckContributions).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: false,
-      error: ["Some error"],
+      errors: ["Your Github contributions did not qualify for this stamp."],
       record: undefined,
     });
   });
@@ -69,7 +69,7 @@ describe("GithubContributionActivityProvider", function () {
     (fetchAndCheckContributions as jest.MockedFunction<typeof fetchAndCheckContributions>).mockImplementation(() => {
       return Promise.resolve({
         contributionValid: false,
-        errors: undefined,
+        errors: ["Your Github contributions did not qualify for this stamp."],
       });
     });
 
@@ -79,7 +79,7 @@ describe("GithubContributionActivityProvider", function () {
     expect(fetchAndCheckContributions).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: false,
-      error: undefined,
+      errors: ["Your Github contributions did not qualify for this stamp."],
       record: undefined,
     });
   });
