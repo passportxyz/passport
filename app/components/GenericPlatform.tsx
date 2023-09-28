@@ -175,13 +175,10 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
     try {
       for (const platformId in platformGroups) {
         datadogLogs.logger.info("Saving Stamp", { platform: platformId });
-        const providersToClaim = platformGroups[platformId as PLATFORM_ID].providers;
+        const selectedProviders = platformGroups[platformId as PLATFORM_ID].providers;
         const platform = platforms.get(platformId as PLATFORM_ID)?.platform;
 
-        if (platform || platformId === "EVMBulkVerify") {
-          const state = `${platform.path}-` + generateUID(10);
-          console.log("geri - getting payload");
-
+        if ((platform || platformId === "EVMBulkVerify") && selectedProviders.length > 0) {
           // We set the providerPayload to be {} by default
           // This is ok if platformId === "EVMBulkVerify"
           // For other platforms the correct providerPayload will be set below
@@ -189,30 +186,30 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
 
           if (platform) {
             // This if should only be true if platformId !== "EVMBulkVerify"
+            const state = `${platform.path}-` + generateUID(10);
             providerPayload = (await platform.getProviderPayload({
               state,
               window,
               screen,
               userDid,
               callbackUrl: window.location.origin,
-              providersToClaim,
+              selectedProviders,
               waitForRedirect,
             })) as {
               [k: string]: string;
             };
 
             if (providerPayload.sessionKey === "brightid") {
-              handleSponsorship(platform, providerPayload.code);
+              handleSponsorship(platform, providerPayload.code as string);
               return;
             }
           }
 
-          console.log("geri - calling fetchVerifiableCredential");
           const verifyCredentialsResponse = await fetchVerifiableCredential(
             iamUrl,
             {
               type: platformId,
-              types: providersToClaim,
+              types: selectedProviders,
               version: "0.0.0",
               address: address || "",
               proofs: providerPayload,
@@ -221,14 +218,12 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
             signer as { signMessage: (message: string) => Promise<string> }
           );
 
-          console.log("geri - verifyCredentialsResponse", verifyCredentialsResponse);
-
           const verifiedCredentials =
-            providersToClaim.length > 0
+            selectedProviders.length > 0
               ? verifyCredentialsResponse.credentials?.filter((cred: any) => !cred.error) || []
               : [];
 
-          const stampPatches: StampPatch[] = providersToClaim.map((provider: PROVIDER_ID) => {
+          const stampPatches: StampPatch[] = selectedProviders.map((provider: PROVIDER_ID) => {
             const cred = verifiedCredentials.find((cred: any) => cred.record?.type === provider);
             if (cred) return { provider, credential: cred.credential as VerifiableCredential };
             else return { provider };
@@ -236,10 +231,11 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
 
           await handlePatchStamps(stampPatches);
         } else {
-          // TODO: geri: how to properly handle invalid platformId?
+          datadogLogs.logger.error("Request for claiming stamp for invalid platform", { platform: platformId });
         }
       }
     } catch (e) {
+      // TODO: geri: error handling
       throw e;
       // datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
       // doneToast(

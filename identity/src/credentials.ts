@@ -261,27 +261,20 @@ export const issueHashedCredential = async (
     );
   } else {
     // generate a verifiableCredential
-    credential = await _issueEd25519Credential(
-      DIDKit,
-      key,
-      expiresInSeconds,
-      {
-        credentialSubject: {
-          "@context": [
-            {
-              hash: "https://schema.org/Text",
-              provider: "https://schema.org/Text",
-            },
-          ],
-          // construct a pkh DID on mainnet (:1) for the given wallet address
-          id: `did:pkh:eip155:1:${address}`,
-          provider: record.type,
-          hash: `${VERSION}:${hash}`,
-        },
+    credential = await _issueEd25519Credential(DIDKit, key, expiresInSeconds, {
+      credentialSubject: {
+        "@context": [
+          {
+            hash: "https://schema.org/Text",
+            provider: "https://schema.org/Text",
+          },
+        ],
+        // construct a pkh DID on mainnet (:1) for the given wallet address
+        id: `did:pkh:eip155:1:${address}`,
+        provider: record.type,
+        hash: `${VERSION}:${hash}`,
       },
-      "2021-12-31T23:59:59Z",
-      "2022-12-31T23:59:59Z"
-    );
+    });
   }
 
   // didkit-wasm-node returns credential as a string - parse for JSON

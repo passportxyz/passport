@@ -51,78 +51,12 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
     return possibleProviders.filter((provider) => expiredProviders.includes(provider)).length > 0;
   });
 
-  // const handleFetchCredential = async (providerIDs: PROVIDER_ID[]): Promise<void> => {
-  //   const { evmProviders, nonEvmProviders } = providerIDs.reduce(
-  //     (acc, provider) => {
-  //       if (evmTypeProviders.has(provider)) {
-  //         acc.evmProviders.push(provider);
-  //       } else {
-  //         acc.nonEvmProviders.push(provider);
-  //       }
-  //       return acc;
-  //     },
-  //     {
-  //       evmProviders: [] as PROVIDER_ID[],
-  //       nonEvmProviders: [] as PROVIDER_ID[],
-  //     }
-  //   );
-
-  //   console.log("geri evmProviders", evmProviders);
-  //   console.log("geri nonEvmProviders", nonEvmProviders);
-
-  //   try {
-  //     if (evmProviders.length > 0 && false) {
-  //       const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
-  //         iamUrl,
-  //         {
-  //           type: "EVMBulkVerify",
-  //           types: evmProviders,
-  //           version: "0.0.0",
-  //           address: address || "",
-  //           proofs: {},
-  //           signatureType: IAM_SIGNATURE_TYPE,
-  //         },
-  //         signer as { signMessage: (message: string) => Promise<string> }
-  //       );
-
-  //       const vcs = reduceStampResponse(providerIDs, verified.credentials);
-
-  //       // Delete all stamps ...
-  //       await handleDeleteStamps(providerIDs as PROVIDER_ID[]);
-
-  //       // .. and now add all newly validate stamps
-  //       if (vcs.length > 0) {
-  //         await handleAddStamps(vcs);
-  //       }
-
-  //       // grab all providers who are verified from the verify response
-  //       // const actualVerifiedProviders = providerIDs.filter(
-  //       //   (providerId) =>
-  //       //     !!vcs.find((vc: Stamp | undefined) => vc?.credential?.credentialSubject?.provider === providerId)
-  //       // );
-  //       // both verified and selected should look the same after save
-  //       // setVerifiedProviders([...actualVerifiedProviders]);
-  //       // setSelectedProviders([...actualVerifiedProviders]);
-  //     }
-
-  //     if (nonEvmProviders.length > 1) {
-  //     }
-  //   } catch (e: unknown) {
-  //     // TODO: update datadog logger
-  //     // datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
-  //     console.log(e);
-  //     throw new Error();
-  //   }
-  // };
-
   const reverifyStamps = async () => {
     setIsReverifyingStamps(true);
 
     const stampsToReverify = expiredPlatforms.flatMap((platform) =>
       getProviderIdsFromPlatformId(platform as PLATFORM_ID)
     );
-
-    console.log("geri - expiredPlatforms", expiredPlatforms);
 
     const expiredPlatformsGroups = Object.keys(STAMP_PROVIDERS).reduce(
       (acc, platformId) => {
@@ -146,7 +80,6 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
       } as Record<PLATFORM_ID, { providers: PROVIDER_ID[] }> & { EVMBulkVerify: { providers: PROVIDER_ID[] } }
     );
 
-    console.log("geri - expiredPlatformsGroups: ", expiredPlatformsGroups);
     const { evmProviders, nonEvmProviders } = stampsToReverify.reduce(
       (acc, provider) => {
         if (evmTypeProviders.has(provider)) {
@@ -161,9 +94,6 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
         nonEvmProviders: [] as PROVIDER_ID[],
       }
     );
-
-    console.log("geri evmProviders", evmProviders);
-    console.log("geri nonEvmProviders", nonEvmProviders);
 
     await handleFetchCredential(expiredPlatformsGroups);
 

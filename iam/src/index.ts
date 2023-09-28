@@ -394,10 +394,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
     .then(async (verified) => {
       const currentIssuer = requestBody.payload.signatureType === "EIP712" ? eip712Issuer : issuer;
 
-      console.log("geri - requestBody.payload.signatureType", requestBody.payload.signatureType);
-      console.log("geri - currentIssuer", currentIssuer);
-      console.log("geri - challenge.issuer", challenge.issuer);
-      console.log("geri - verified", verified);
       if (verified && currentIssuer === challenge.issuer) {
         // pull the address and checksum so that its stored in a predictable format
         const address = utils.getAddress(
@@ -410,7 +406,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
         const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
         const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
 
-        console.log("geri - payload.signer", payload.signer);
         // if an additional signer is passed verify that message was signed by passed signer address
         if (payload.signer) {
           const additionalChallenge = payload.signer.challenge;
@@ -433,7 +428,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
         const singleType = !payload.types?.length;
         const types = (!singleType ? payload.types : [payload.type]).filter((type) => type);
 
-        console.log("geri - issuing credentials ...");
         // type is required because we need it to select the correct Identity Provider
         if (isSigner && isType && payload && payload.type) {
           const responses = await issueCredentials(types, address, payload);
@@ -448,7 +442,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
         }
       }
 
-      console.log("geri - challenge", challenge);
       // error response
       return void errorRes(res, "Unable to verify payload", 401);
     })

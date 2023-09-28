@@ -355,13 +355,13 @@ export const cleanPassport = (
           return false;
         }
 
-        const has_expired = new Date(stamp.credential.expirationDate) < new Date();
-        if (has_expired) {
-          tempExpiredProviders.push(providerId);
-        }
-
         const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
         const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
+        const has_expired = new Date(stamp.credential.expirationDate) < new Date();
+
+        if (has_expired && has_correct_issuer && has_correct_subject) {
+          tempExpiredProviders.push(providerId);
+        }
 
         return !has_expired && has_correct_issuer && has_correct_subject;
       } else {
@@ -526,13 +526,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     skipLoadingState?: boolean,
     isInitialLoad?: boolean
   ): Promise<Passport | undefined> => {
-    console.log("geri - fetchPassport");
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
-    console.log("geri - fetchPassport");
 
     // fetch, clean and set the new Passport state
     const getResponse = await database.getPassport();
-    console.log("geri - fetchPassport", getResponse);
 
     return await handlePassportUpdate(getResponse, database, skipLoadingState, isInitialLoad);
   };
@@ -657,7 +654,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     [allProvidersState]
   );
 
-  console.log("geri - platforms", platforms);
   const verifiedPlatforms = useMemo(
     () =>
       Object.entries(Object.fromEntries(platforms)).reduce((validPlatformProps, [platformKey, platformProps]) => {

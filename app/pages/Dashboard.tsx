@@ -278,7 +278,6 @@ export default function Dashboard() {
     </div>
   );
 
-  console.log("geri isLoadingPassport", isLoadingPassport);
   return (
     <PageRoot className="text-color-1">
       {modals}
