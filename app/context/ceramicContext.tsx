@@ -50,7 +50,6 @@ const {
 import { PlatformProps } from "../components/GenericPlatform";
 
 import { CERAMIC_CACHE_ENDPOINT, IAM_ISSUER_DID } from "../config/stamp_config";
-import { Set } from "typescript";
 
 // -- Trusted IAM servers DID
 const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];

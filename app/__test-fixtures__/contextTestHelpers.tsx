@@ -8,6 +8,7 @@ import { render } from "@testing-library/react";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
 import { OnChainContextState } from "../context/onChainContext";
+import { StampClaimingContext, StampClaimingContextState } from "../context/stampClaimingContext";
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -137,10 +138,20 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
     handleCreatePassport: jest.fn(),
     handleDeleteStamps: jest.fn(),
     expiredProviders: [],
+    expiredPlatforms: {},
     passportHasCacaoError: false,
     cancelCeramicConnection: jest.fn(),
     verifiedProviderIds: [],
     verifiedPlatforms: {},
+    ...initialState,
+  };
+};
+
+export const makeTestClaimingContext = (
+  initialState?: Partial<StampClaimingContextState>
+): StampClaimingContextState => {
+  return {
+    claimCredentials: jest.fn(),
     ...initialState,
   };
 };

@@ -21,7 +21,7 @@ import { Provider as SelfIdProvider } from "@self.id/framework";
 import TagManager from "react-gtm-module";
 
 import { themes, ThemeWrapper } from "../utils/theme";
-import { StampClaimingContextProvider } from "../components/GenericPlatform";
+import { StampClaimingContextProvider } from "../context/stampClaimingContext";
 
 const FacebookAppId = process.env.NEXT_PUBLIC_PASSPORT_FACEBOOK_APP_ID || "";
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";

@@ -17,7 +17,7 @@ import { getPlatformSpec } from "../config/platforms";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 import { reduceStampResponse } from "../utils/helpers";
 import { UserContext } from "../context/userContext";
-import { StampClaimingContext } from "./GenericPlatform";
+import { StampClaimForPlatform, StampClaimingContext } from "../context/stampClaimingContext";
 
 export type ExpiredStampModalProps = {
   isOpen: boolean;
@@ -28,7 +28,7 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
   const { expiredProviders, handleDeleteStamps, handleAddStamps } = useContext(CeramicContext);
   const [isReverifyingStamps, setIsReverifyingStamps] = useState(false);
   const { address, signer } = useContext(UserContext);
-  const { handleFetchCredential } = useContext(StampClaimingContext);
+  const { claimCredentials } = useContext(StampClaimingContext);
   const toast = useToast();
 
   const successToast = () => {
@@ -58,27 +58,26 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
       getProviderIdsFromPlatformId(platform as PLATFORM_ID)
     );
 
-    const expiredPlatformsGroups = Object.keys(STAMP_PROVIDERS).reduce(
-      (acc, platformId) => {
-        const possibleProviders = getProviderIdsFromPlatformId(platformId as PLATFORM_ID);
-        const expiredProvidersInPlatform = possibleProviders.filter((provider) => expiredProviders.includes(provider));
+    let stampClaims: StampClaimForPlatform[] = [];
+    let evmStampClaim: StampClaimForPlatform = {
+      platformId: "EVMBulkVerify",
+      selectedProviders: [],
+    };
+    const expiredPlatformsGroups = Object.keys(STAMP_PROVIDERS).forEach((_platformId) => {
+      const platformId = _platformId as PLATFORM_ID;
+      const possibleProviders = getProviderIdsFromPlatformId(platformId);
+      const expiredProvidersInPlatform = possibleProviders.filter((provider) => expiredProviders.includes(provider));
 
-        // const providersToClaim = platformGroups[platformId as PLATFORM_ID].providers;
-        const platform = platforms.get(platformId as PLATFORM_ID)?.platform;
+      const platform = platforms.get(platformId)?.platform;
 
-        if (expiredProvidersInPlatform.length > 0) {
-          if (platform?.isEVM) {
-            acc["EVMBulkVerify"] = { providers: expiredProvidersInPlatform };
-          } else {
-            acc[platformId as PLATFORM_ID] = { providers: expiredProvidersInPlatform };
-          }
+      if (expiredProvidersInPlatform.length > 0) {
+        if (platform?.isEVM) {
+          evmStampClaim.selectedProviders = [...expiredProvidersInPlatform, ...evmStampClaim.selectedProviders];
+        } else {
+          stampClaims.push({ platformId: platformId, selectedProviders: expiredProvidersInPlatform });
         }
-        return acc;
-      },
-      {
-        EVMBulkVerify: { providers: [] as PROVIDER_ID[] },
-      } as Record<PLATFORM_ID, { providers: PROVIDER_ID[] }> & { EVMBulkVerify: { providers: PROVIDER_ID[] } }
-    );
+      }
+    });
 
     const { evmProviders, nonEvmProviders } = stampsToReverify.reduce(
       (acc, provider) => {
@@ -95,7 +94,7 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
       }
     );
 
-    await handleFetchCredential(expiredPlatformsGroups);
+    await claimCredentials([evmStampClaim, ...stampClaims]);
 
     setIsReverifyingStamps(false);
     onClose();
