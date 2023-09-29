@@ -215,7 +215,12 @@ describe("Verification fails", function () {
       return await zkSyncEraProvider.verify({
         address: MOCK_ADDRESS,
       } as unknown as RequestPayload);
-    }).rejects.toThrow(new ProviderExternalVerificationError("something bad happened"));
+    }).rejects.toThrow(
+      new ProviderExternalVerificationError(
+        // eslint-disable-next-line quotes
+        'ZkSyncEra error was thrown while trying to verify transaction history. error: "something bad happened"'
+      )
+    );
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);

@@ -1,5 +1,5 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { Provider, ProviderExternalVerificationError, ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
@@ -7,7 +7,6 @@ import axios from "axios";
 
 // ----- Credential verification
 import { getAddress } from "../../utils/signer";
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 // This is used in the Era Explorer
 export const zkSyncEraApiEndpoint = process.env.ZKSYNC_ERA_MAINNET_ENDPOINT || "";
@@ -41,9 +40,8 @@ export class ZkSyncEraProvider implements Provider {
     let valid = false;
     const errors = [];
 
-    const address = (await getAddress(payload)).toLowerCase();
-
     try {
+      const address = (await getAddress(payload)).toLowerCase();
       const requestResponse = await axios.get(
         `${zkSyncEraApiEndpoint}/transactions?address=${address}&limit=100&direction=older`
       );
@@ -76,7 +74,9 @@ export class ZkSyncEraProvider implements Provider {
         errors,
       });
     } catch (error) {
-      handleProviderAxiosError(error, "zkSync Era error");
+      throw new ProviderExternalVerificationError(
+        `ZkSyncEra error was thrown while trying to verify transaction history. error: ${JSON.stringify(error)}`
+      );
     }
   }
 }
