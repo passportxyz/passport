@@ -97,13 +97,13 @@ export class CyberProfilePremiumProvider implements Provider {
   // Verify that address defined in the payload has a handle length <= 6 and > 0
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
-    const address = payload.address.toString().toLowerCase();
     const errors = [];
     let valid = false,
       userHandle: string,
-      record = undefined;
+      record = {};
 
     try {
+      const address = payload.address.toString().toLowerCase();
       const { handle } = await getPrimaryHandle(address, context);
       userHandle = handle;
       const lengthOfPrimaryHandle = userHandle.length;
@@ -121,7 +121,7 @@ export class CyberProfilePremiumProvider implements Provider {
         record,
         errors,
       });
-    } catch (e: unknown) {
+    } catch (e) {
       throw new ProviderExternalVerificationError(
         `CyberProfile provider check organization membership error: ${JSON.stringify(e)}`
       );
@@ -145,12 +145,12 @@ export class CyberProfilePaidProvider implements Provider {
   // Verify that address defined in the payload has a handle length <= 12 and > 6
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
-    const address = payload.address.toString().toLowerCase();
     const errors = [];
     let valid = false,
       userHandle: string,
-      record = undefined;
+      record = {};
     try {
+      const address = payload.address.toString().toLowerCase();
       const { handle } = await getPrimaryHandle(address, context);
       userHandle = handle;
       const lengthOfPrimaryHandle = userHandle.length;

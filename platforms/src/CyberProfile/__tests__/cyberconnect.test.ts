@@ -1,5 +1,7 @@
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
+import ts from "typescript";
+import { ProviderExternalVerificationError } from "../../types";
 import * as profileProviderModule from "../Providers/cyberconnect";
 import * as nonEvmProvider from "../Providers/cyberconnect_nonevm";
 
@@ -34,6 +36,7 @@ describe("Attempt premium verification", function () {
 
     expect(verifiedPayload).toEqual({
       valid: true,
+      errors: [],
       record: {
         userHandle: "peiwen",
       },
@@ -56,6 +59,7 @@ describe("Attempt premium verification", function () {
 
     expect(verifiedPayload).toEqual({
       valid: false,
+      errors: ["The length of your primary handle is 7, which does not qualify for this stamp data point."],
       record: {},
     });
   });
@@ -73,23 +77,24 @@ describe("Attempt premium verification", function () {
     expect(verifiedPayload).toEqual({
       valid: false,
       record: {},
+      errors: ["The length of your primary handle is 0, which does not qualify for this stamp data point."],
     });
   });
 
   it("should return false for invalid address", async () => {
     jest.spyOn(profileProviderModule, "getPrimaryHandle").mockRejectedValueOnce("bad address");
     const cc = new profileProviderModule.CyberProfilePremiumProvider();
-    const verifiedPayload = await cc.verify(
-      {
-        address: MOCK_FAKE_ADDRESS,
-      } as unknown as RequestPayload,
-      {}
-    );
 
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      error: ["CyberProfile provider get user primary handle error"],
-    });
+    await expect(async () => {
+      return await cc.verify(
+        {
+          address: MOCK_FAKE_ADDRESS,
+        } as unknown as RequestPayload,
+        {}
+      );
+    }).rejects.toThrow(
+      new ProviderExternalVerificationError("CyberProfile provider check organization membership error: {}")
+    );
   });
 });
 
@@ -110,6 +115,7 @@ describe("Attempt paid verification", function () {
 
     expect(verifiedPayload).toEqual({
       valid: true,
+      errors: [],
       record: {
         userHandle: "gasless",
       },
@@ -131,6 +137,7 @@ describe("Attempt paid verification", function () {
     );
 
     expect(verifiedPayload).toEqual({
+      errors: ["The length of your primary handle is 6, which does not qualify for this stamp data point."],
       valid: false,
       record: {},
     });
@@ -149,23 +156,24 @@ describe("Attempt paid verification", function () {
     expect(verifiedPayload).toEqual({
       valid: false,
       record: {},
+      errors: ["The length of your primary handle is 0, which does not qualify for this stamp data point."],
     });
   });
 
   it("should return false for invalid address", async () => {
     jest.spyOn(profileProviderModule, "getPrimaryHandle").mockRejectedValueOnce("bad address");
     const cc = new profileProviderModule.CyberProfilePaidProvider();
-    const verifiedPayload = await cc.verify(
-      {
-        address: MOCK_FAKE_ADDRESS,
-      } as unknown as RequestPayload,
-      {}
-    );
 
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      error: ["CyberProfile provider get user primary handle error"],
-    });
+    await expect(async () => {
+      return await cc.verify(
+        {
+          address: MOCK_FAKE_ADDRESS,
+        } as unknown as RequestPayload,
+        {}
+      );
+    }).rejects.toThrow(
+      new ProviderExternalVerificationError("CyberProfile provider check organization membership error: {}")
+    );
   });
 });
 
@@ -181,6 +189,7 @@ describe("Attempt org membership verification", function () {
 
     expect(verifiedPayload).toEqual({
       valid: true,
+      errors: [],
       record: {
         orgMembership: MOCK_ADDRESS_ORG_ID,
       },
@@ -197,6 +206,7 @@ describe("Attempt org membership verification", function () {
     expect(verifiedPayload).toEqual({
       valid: false,
       record: {},
+      errors: ["We determined that you are not a member of CyberConnect, which disqualifies you for this stamp."],
     });
   });
 
@@ -210,19 +220,20 @@ describe("Attempt org membership verification", function () {
     expect(verifiedPayload).toEqual({
       valid: false,
       record: {},
+      errors: ["We determined that you are not a member of CyberConnect, which disqualifies you for this stamp."],
     });
   });
 
   it("should return false for invalid address", async () => {
     jest.spyOn(nonEvmProvider, "checkForOrgMember").mockRejectedValueOnce("bad address");
     const cc = new nonEvmProvider.CyberProfileOrgMemberProvider();
-    const verifiedPayload = await cc.verify({
-      address: MOCK_FAKE_ADDRESS,
-    } as unknown as RequestPayload);
-
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      error: ["CyberProfile provider check organization membership error"],
-    });
+    await expect(async () => {
+      return await cc.verify({
+        address: MOCK_FAKE_ADDRESS,
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(
+      // eslint-disable-next-line quotes
+      new ProviderExternalVerificationError('CyberProfile provider check organization membership error: "bad address"')
+    );
   });
 });

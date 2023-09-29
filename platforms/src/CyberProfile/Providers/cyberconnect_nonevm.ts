@@ -77,12 +77,12 @@ export class CyberProfileOrgMemberProvider implements Provider {
   // Verify that address defined in the payload has a handle length > 12
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
-    const address = payload.address.toString().toLowerCase();
     const errors = [];
     let valid = false,
-      record = undefined;
+      record = {};
 
     try {
+      const address = payload.address.toString().toLowerCase();
       const { isMember, identifier, error } = await checkForOrgMember(cyberconnectGraphQL, address);
 
       valid = isMember ? true : false;
