@@ -110,7 +110,7 @@ const checkForSnapshotProposals = async (url: string, address: string): Promise<
   // Check to see if the user has any proposals, and if they do,
   // iterate through the proposals list to find the first instance of a
   // proposal with a total score > 0, which indicates it received votes
-  if (proposals.length > 0) {
+  if (proposals && proposals.length > 0) {
     const proposalCheck = proposals.findIndex((proposal) => proposal.scores_total > 0);
     proposalHasVotes = proposalCheck === -1 ? false : true;
   }

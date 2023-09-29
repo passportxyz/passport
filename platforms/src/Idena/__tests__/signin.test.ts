@@ -58,7 +58,7 @@ describe("Attempt signin", function () {
   });
 
   it("shouldn't generate nonce for wrong session", () => {
-    expect(() => loadIdenaSession("wrong_session_key", MOCK_ADDRESS)).toThrow("Cache session not found");
+    expect(() => loadIdenaSession("wrong_session_key", MOCK_ADDRESS)).toThrow("Session missing or expired, try again");
   });
 
   it("should authenticate", async () => {

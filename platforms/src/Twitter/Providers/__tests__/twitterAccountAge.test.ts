@@ -62,7 +62,7 @@ describe("TwitterAccountAgeProvider", function () {
     expect(getTwitterUserData).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: true,
-      errors: [],
+      errors: undefined,
       record: { id: "123" },
     });
   });
@@ -195,7 +195,7 @@ describe("TwitterAccountAgeProvider", function () {
     expect(getTwitterUserData).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: false,
-      error: ["Errors"],
+      errors: ["Errors"],
       record: undefined,
     });
   });

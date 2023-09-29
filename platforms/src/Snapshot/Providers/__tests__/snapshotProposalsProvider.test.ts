@@ -86,6 +86,7 @@ describe("Attempt verification", function () {
     expect(axios.post).toHaveBeenCalledTimes(1);
     expect(verifiedPayload).toEqual({
       valid: true,
+      errors: [],
       record: {
         address: `${MOCK_ADDRESS_LOWER}`,
         hasGT1SnapshotProposalsVotedOn: "true",
@@ -143,12 +144,12 @@ describe("Attempt verification", function () {
     });
 
     const snapshotProposalsProvider = new SnapshotProposalsProvider();
-    const verifiedPayload = await snapshotProposalsProvider.verify({
-      address: NO_MOCK_ADDRESS,
-    } as RequestPayload);
 
-    expect(axios.post).toHaveBeenCalledTimes(1);
-    expect(verifiedPayload).toMatchObject({ valid: false });
+    await expect(async () => {
+      return await snapshotProposalsProvider.verify({
+        address: MOCK_ADDRESS,
+      } as RequestPayload);
+    }).rejects.toThrowError("Error verifying Snapshot proposals: {}.");
   });
 
   it("should return invalid payload when a bad status code is returned after Snapshot graphQL query", async () => {
@@ -167,12 +168,12 @@ describe("Attempt verification", function () {
     });
 
     const snapshotProposalsProvider = new SnapshotProposalsProvider();
-    const verifiedPayload = await snapshotProposalsProvider.verify({
-      address: MOCK_ADDRESS,
-    } as RequestPayload);
 
-    expect(axios.post).toHaveBeenCalledTimes(1);
-    expect(verifiedPayload).toMatchObject({ valid: false });
+    await expect(async () => {
+      return await snapshotProposalsProvider.verify({
+        address: MOCK_ADDRESS,
+      } as RequestPayload);
+    }).rejects.toThrowError("Error verifying Snapshot proposals: {}.");
   });
 
   it("should return invalid payload when an exception is thrown when a request is made", async () => {
@@ -184,11 +185,11 @@ describe("Attempt verification", function () {
     });
 
     const snapshotProposalsProvider = new SnapshotProposalsProvider();
-    const verifiedPayload = await snapshotProposalsProvider.verify({
-      address: MOCK_ADDRESS,
-    } as RequestPayload);
 
-    expect(axios.post).toHaveBeenCalledTimes(1);
-    expect(verifiedPayload).toMatchObject({ valid: false });
+    await expect(async () => {
+      return await snapshotProposalsProvider.verify({
+        address: MOCK_ADDRESS,
+      } as RequestPayload);
+    }).rejects.toThrowError('Error verifying Snapshot proposals: "an error".');
   });
 });

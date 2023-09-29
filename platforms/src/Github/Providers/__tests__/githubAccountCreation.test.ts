@@ -48,10 +48,11 @@ describe("GithubAccountCreationProvider", function () {
   });
 
   it("handles account age below threshold", async () => {
+    const isoDate = new Date().toISOString();
     (fetchGithubUserData as jest.MockedFunction<typeof fetchGithubUserData>).mockImplementation(() => {
       return Promise.resolve({
         createdAt: new Date().toISOString(), // Account created today
-        errors: [`Github account age, 0, is less than the required 365 days (created at ${new Date().toISOString()})`],
+        errors: [`Github account age, 0, is less than the required 365 days (created at ${isoDate})`],
       });
     });
 
@@ -61,7 +62,7 @@ describe("GithubAccountCreationProvider", function () {
     expect(fetchGithubUserData).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: false,
-      errors: [`Github account age, 0, is less than the required 365 days (created at ${new Date().toISOString()})`],
+      errors: [`Github account age, 0, is less than the required 365 days (created at ${isoDate})`],
       record: undefined,
     });
   });

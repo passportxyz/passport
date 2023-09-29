@@ -36,6 +36,7 @@ describe("Attempt verification", function () {
 
     expect(verifiedPayload).toEqual({
       valid: true,
+      errors: [],
       record: {
         handle: MOCK_HANDLE,
       },
@@ -58,7 +59,8 @@ describe("Attempt verification", function () {
 
     expect(verifiedPayload).toEqual({
       valid: false,
-      record: {},
+      errors: ["We were unable to retrieve a Lens handle for your address."],
+      record: undefined,
     });
   });
 
@@ -66,13 +68,11 @@ describe("Attempt verification", function () {
     mockedAxios.post.mockRejectedValueOnce(new Error("some error"));
 
     const lens = new LensProfileProvider();
-    const verifiedPayload = await lens.verify({
-      address: MOCK_ADDRESS_LOWER,
-    } as RequestPayload);
-
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      error: ["Lens provider get user handle error"],
-    });
+    await expect(
+      async () =>
+        await lens.verify({
+          address: MOCK_ADDRESS_LOWER,
+        } as RequestPayload)
+    ).rejects.toThrowError("Error verifying Snapshot proposals: {}.");
   });
 });

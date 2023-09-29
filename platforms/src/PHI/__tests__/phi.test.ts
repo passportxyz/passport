@@ -126,6 +126,7 @@ describe("Attempt Silver verification", function () {
 
       expect(verifiedPayload).toEqual({
         valid: true,
+        errors: [],
         record: {
           address: MOCK_ADDRESS_LOWER,
         },
@@ -159,7 +160,8 @@ describe("Attempt Silver verification", function () {
 
       expect(verifiedPayload).toEqual({
         valid: false,
-        record: {},
+        errors: ["You have not claimed the required objects to be able to qualify for this stamp."],
+        record: undefined,
       });
     }
   });
@@ -190,7 +192,8 @@ describe("Attempt Silver verification", function () {
 
       expect(verifiedPayload).toEqual({
         valid: false,
-        record: {},
+        errors: ["You have not claimed the required objects to be able to qualify for this stamp."],
+        record: undefined,
       });
     }
   });
@@ -225,6 +228,7 @@ describe("Attempt Gold verification", function () {
 
       expect(verifiedPayload).toEqual({
         valid: true,
+        errors: [],
         record: {
           address: MOCK_ADDRESS_LOWER,
         },
@@ -258,7 +262,8 @@ describe("Attempt Gold verification", function () {
 
       expect(verifiedPayload).toEqual({
         valid: false,
-        record: {},
+        errors: ["You have not claimed the required objects to be able to qualify for this stamp."],
+        record: undefined,
       });
     }
   });
@@ -289,7 +294,8 @@ describe("Attempt Gold verification", function () {
 
       expect(verifiedPayload).toEqual({
         valid: false,
-        record: {},
+        errors: ["You have not claimed the required objects to be able to qualify for this stamp."],
+        record: undefined,
       });
     }
   });

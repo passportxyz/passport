@@ -68,6 +68,7 @@ describe("Attempt verification", function () {
 
     expect(linkedinPayload).toEqual({
       valid: true,
+      errors: [],
       record: {
         id: validLinkedinUserResponse.data.id,
       },
@@ -75,21 +76,18 @@ describe("Attempt verification", function () {
   });
 
   it("should return invalid payload when unable to retrieve auth token", async () => {
-    mockedAxios.post.mockImplementation(async () => {
-      return {
-        status: 500,
-      };
-    });
+    mockedAxios.post.mockRejectedValueOnce("bad request");
 
     const linkedin = new LinkedinProvider();
 
-    const linkedinPayload = await linkedin.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
-
-    expect(linkedinPayload).toMatchObject({ valid: false });
+    await expect(
+      async () =>
+        await linkedin.verify({
+          proofs: {
+            code,
+          },
+        } as unknown as RequestPayload)
+    ).rejects.toThrow("LinkedIn Account verification error: ");
   });
 
   it("should return invalid payload when there is no id in verifyLinkedin response", async () => {
@@ -124,12 +122,13 @@ describe("Attempt verification", function () {
 
     const linkedin = new LinkedinProvider();
 
-    const linkedinPayload = await linkedin.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
-
-    expect(linkedinPayload).toMatchObject({ valid: false });
+    await expect(
+      async () =>
+        await linkedin.verify({
+          proofs: {
+            code,
+          },
+        } as unknown as RequestPayload)
+    ).rejects.toThrow("LinkedIn Account verification error: ");
   });
 });

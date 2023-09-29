@@ -1,5 +1,5 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { Provider, ProviderExternalVerificationError, ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
@@ -75,22 +75,26 @@ export class LensProfileProvider implements Provider {
 
   // Verify that address defined in the payload has a lens handle
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    // if a signer is provider we will use that address to verify against
-    const address = payload.address.toString().toLowerCase();
-    let record = undefined;
-    let errors: string[] = [];
-    const { valid, handle, errors: lensErrors } = await getLensProfile(address);
+    try {
+      // if a signer is provider we will use that address to verify against
+      const address = payload.address.toString().toLowerCase();
+      let record = undefined;
+      let errors: string[] = [];
+      const { valid, handle, errors: lensErrors } = await getLensProfile(address);
 
-    if (valid === true) {
-      record = { handle };
-    } else {
-      errors = lensErrors;
+      if (valid === true) {
+        record = { handle };
+      } else {
+        errors = lensErrors;
+      }
+
+      return {
+        valid,
+        record,
+        errors,
+      };
+    } catch (e) {
+      throw new ProviderExternalVerificationError(`Error verifying Snapshot proposals: ${JSON.stringify(e)}.`);
     }
-
-    return {
-      valid,
-      record,
-      errors,
-    };
   }
 }

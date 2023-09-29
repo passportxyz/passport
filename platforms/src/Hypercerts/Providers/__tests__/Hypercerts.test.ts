@@ -86,9 +86,7 @@ describe("Hypercerts Provider", () => {
     expect(verifiedPayload).toEqual({
       valid: false,
       errors: ["You have 0 valid Hypercerts and the minimum is 2"],
-      record: {
-        address: MOCK_ADDRESS_LOWER,
-      },
+      record: undefined,
     });
 
     expect(mockedAxiosPost).toBeCalledTimes(1);
@@ -100,16 +98,12 @@ describe("Hypercerts Provider", () => {
 
     const hypercertsProvider = new HypercertsProvider();
 
-    const res = await hypercertsProvider.verify({
-      address: MOCK_ADDRESS,
-    } as RequestPayload);
-
-    expect(res).toMatchObject({
-      valid: false,
-      error: ["Error was thrown while verifying Hypercerts"],
-    });
-
-    expect(mockedAxiosPost).toBeCalledTimes(1);
+    await expect(
+      async () =>
+        await hypercertsProvider.verify({
+          address: MOCK_ADDRESS,
+        } as RequestPayload)
+    ).rejects.toThrowError("Error was thrown while verifying Hypercerts");
   });
 
   it("should handle claims older than 15 days", async () => {
@@ -173,9 +167,7 @@ describe("Hypercerts Provider", () => {
     expect(verifiedPayload).toEqual({
       valid: false,
       errors: ["You have 1 valid Hypercerts and the minimum is 2"],
-      record: {
-        address: MOCK_ADDRESS_LOWER,
-      },
+      record: undefined,
     });
 
     expect(mockedAxiosPost).toBeCalledTimes(1);
