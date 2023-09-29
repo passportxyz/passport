@@ -4,6 +4,7 @@ import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
+import { ProviderExternalVerificationError } from "../../types";
 import { ZkSyncEraProvider } from "../Providers/zkSyncEra";
 
 jest.mock("axios");
@@ -117,6 +118,7 @@ describe("Verification succeeds", function () {
 
     expect(zkSyncEraPayload).toEqual({
       valid: true,
+      errors: [],
       record: {
         address: MOCK_ADDRESS_LOWER,
       },
@@ -146,7 +148,7 @@ describe("Verification fails", function () {
 
     expect(zkSyncEraPayload).toEqual({
       valid: false,
-      error: ["Unable to find a verified transaction from the given address"],
+      errors: ["Unable to find a verified transaction from the given address"],
     });
   });
 
@@ -171,7 +173,7 @@ describe("Verification fails", function () {
 
     expect(zkSyncEraPayload).toEqual({
       valid: false,
-      error: ["Unable to find a verified transaction from the given address"],
+      errors: ["Unable to find a verified transaction from the given address"],
     });
   });
 
@@ -197,7 +199,8 @@ describe("Verification fails", function () {
 
     expect(zkSyncEraPayload).toEqual({
       valid: false,
-      error: ["HTTP Error '400'. Details: 'Bad Request'."],
+      record: undefined,
+      errors: ["HTTP Error '400'. Details: 'Bad Request'."],
     });
   });
 
@@ -207,19 +210,17 @@ describe("Verification fails", function () {
     });
 
     const zkSyncEraProvider = new ZkSyncEraProvider();
-    const zkSyncEraPayload = await zkSyncEraProvider.verify({
-      address: MOCK_ADDRESS,
-    } as unknown as RequestPayload);
+
+    await expect(async () => {
+      return await zkSyncEraProvider.verify({
+        address: MOCK_ADDRESS,
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(new ProviderExternalVerificationError("something bad happened"));
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
     expect(mockedAxios.get).toBeCalledWith(
       `${process.env.ZKSYNC_ERA_MAINNET_ENDPOINT}/transactions?address=${MOCK_ADDRESS_LOWER}&limit=100&direction=older`
     );
-
-    expect(zkSyncEraPayload).toEqual({
-      valid: false,
-      error: ["Error getting transaction list for address"],
-    });
   });
 });

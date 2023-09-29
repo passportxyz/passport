@@ -28,5 +28,5 @@ export const handleAxiosError = <T extends Error>(
     });
     throw new ErrorClass(message);
   }
-  throw error;
+  throw new ErrorClass(error);
 };
