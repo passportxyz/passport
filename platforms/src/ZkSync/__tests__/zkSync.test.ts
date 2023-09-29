@@ -4,6 +4,7 @@ import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
+import { ProviderExternalVerificationError } from "../../types";
 import { zkSyncLiteApiEndpoint, ZkSyncLiteProvider } from "../Providers/zkSyncLite";
 
 jest.mock("axios");
@@ -115,6 +116,7 @@ describe("Verification succeeds", function () {
     (axios.get as jest.Mock).mockImplementation(() => {
       return Promise.resolve({
         status: 200,
+        errors: [],
         data: {
           result: { list: validResponseList },
           status: "success",
@@ -139,6 +141,7 @@ describe("Verification succeeds", function () {
 
     expect(zkSyncLitePayload).toEqual({
       valid: true,
+      errors: [],
       record: {
         address: MOCK_ADDRESS_LOWER,
       },
@@ -175,7 +178,8 @@ describe("Verification fails", function () {
 
     expect(zkSyncLitePayload).toEqual({
       valid: false,
-      error: ["Unable to find a finalized transaction from the given address"],
+      record: undefined,
+      errors: ["Unable to find a finalized transaction from the given address"],
     });
   });
 
@@ -207,7 +211,8 @@ describe("Verification fails", function () {
 
     expect(zkSyncLitePayload).toEqual({
       valid: false,
-      error: ["Unable to find a finalized transaction from the given address"],
+      record: undefined,
+      errors: ["Unable to find a finalized transaction from the given address"],
     });
   });
 
@@ -240,7 +245,8 @@ describe("Verification fails", function () {
 
     expect(zkSyncLitePayload).toEqual({
       valid: false,
-      error: ["ZKSync Lite API Error 'error'. Details: 'some kind of error'."],
+      record: undefined,
+      errors: ["ZKSync Lite API Error 'error'. Details: 'some kind of error'."],
     });
   });
 
@@ -273,7 +279,8 @@ describe("Verification fails", function () {
 
     expect(zkSyncLitePayload).toEqual({
       valid: false,
-      error: ["HTTP Error '400'. Details: 'Bad Request'."],
+      record: undefined,
+      errors: ["HTTP Error '400'. Details: 'Bad Request'."],
     });
   });
 
@@ -283,23 +290,14 @@ describe("Verification fails", function () {
     });
 
     const zkSyncLiteProvider = new ZkSyncLiteProvider();
-    const zkSyncLitePayload = await zkSyncLiteProvider.verify({
-      address: MOCK_ADDRESS,
-    } as unknown as RequestPayload);
 
-    // Check the request to get the transactions
-    expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
-      params: {
-        from: "latest",
-        limit: 100,
-        direction: "older",
-      },
-    });
-
-    expect(zkSyncLitePayload).toEqual({
-      valid: false,
-      error: ["Error getting transaction list for address"],
-    });
+    await expect(async () => {
+      return await zkSyncLiteProvider.verify({
+        address: MOCK_ADDRESS,
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(
+      // eslint-disable-next-line quotes
+      new ProviderExternalVerificationError('Error getting transaction list for address: "something bad happened"')
+    );
   });
 });
