@@ -1,6 +1,5 @@
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
-import ts from "typescript";
 import { ProviderExternalVerificationError } from "../../types";
 import * as profileProviderModule from "../Providers/cyberconnect";
 import * as nonEvmProvider from "../Providers/cyberconnect_nonevm";
