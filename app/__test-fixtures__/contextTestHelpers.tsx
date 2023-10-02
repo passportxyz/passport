@@ -1,6 +1,6 @@
 import { UserContext, UserContextState } from "../context/userContext";
 import { ScorerContext, ScorerContextState } from "../context/scorerContext";
-import { CeramicContext, CeramicContextState, IsLoadingPassportState } from "../context/ceramicContext";
+import { CeramicContext, CeramicContextState, IsLoadingPassportState, platforms } from "../context/ceramicContext";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 import { mockAddress, mockWallet } from "./onboardHookValues";
 import React from "react";
@@ -144,6 +144,27 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
     verifiedProviderIds: [],
     verifiedPlatforms: {},
     ...initialState,
+  };
+};
+
+export const makeTestCeramicContextWithExpiredStamps = (
+  initialState?: Partial<CeramicContextState>
+): CeramicContextState => {
+  let expiredPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>> = {};
+
+  const ethPlatform = platforms.get("ETH");
+
+  if (ethPlatform) {
+    expiredPlatforms["ETH"] = {
+      platform: ethPlatform.platform,
+      platFormGroupSpec: ethPlatform.platFormGroupSpec,
+    };
+  }
+
+  return {
+    ...makeTestCeramicContext(initialState),
+    expiredPlatforms,
+    expiredProviders: ["ethPossessionsGte#1"],
   };
 };
 

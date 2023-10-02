@@ -35,14 +35,21 @@ const ExpiredStampsList = ({ className }: StampsListProps) => {
 };
 
 export const ExpiredStampsPanel = ({ className }: { className: string }) => {
+  const { expiredProviders } = useContext(CeramicContext);
+  console.log("ExpiredStampsPanel", expiredProviders);
   return (
     <div
       className={`flex flex-col items-center rounded border border-foreground-3 bg-gradient-to-b from-background to-background-2 text-xl text-foreground-2 ${className}`}
     >
       <div className="my-2">Expired Stamps</div>
       <div className="h-[2px] w-full bg-gradient-to-r from-background via-foreground-2 to-background" />
+
       <ExpiredStampsList className="m-6" />
-      <InitiateReverifyStampsButton className="mb-10" />
+      {expiredProviders.length > 0 ? (
+        <InitiateReverifyStampsButton className="mb-10" />
+      ) : (
+        <p className="mb-10">You don't have any expired stamps</p>
+      )}
     </div>
   );
 };

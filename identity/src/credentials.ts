@@ -91,7 +91,6 @@ const _issueEd25519Credential = async (
     return JSON.parse(credential) as VerifiableCredential;
   } catch (error) {
     console.error("Error while issuing credential", error);
-    console.error("Error while issuing credential", error.message);
   }
 };
 
