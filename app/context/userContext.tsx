@@ -219,11 +219,9 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       // mark that we're attempting to login
       setLoggingIn(true);
 
-      // Sessions will be serialized and stored in localhost
-      // The sessions are bound to an ETH address, this is why we use the address in the session key
-      const sessionKey = `didsession-${address}`;
-      const dbCacheTokenKey = `dbcache-token-${address}`;
-      const sessionStr = window.localStorage.getItem(sessionKey);
+      let sessionKey = "";
+      let dbCacheTokenKey = "";
+
       // with loaded chainId
       if (hasCorrectChainId) {
         // store in localstorage
@@ -232,12 +230,16 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         try {
           const address = wallet.accounts[0].address;
           const ethAuthProvider = new EthereumAuthProvider(wallet.provider, wallet.accounts[0].address.toLowerCase());
+          // Sessions will be serialized and stored in localhost
+          // The sessions are bound to an ETH address, this is why we use the address in the session key
+          sessionKey = `didsession-${address}`;
+          dbCacheTokenKey = `dbcache-token-${address}`;
+          const sessionStr = window.localStorage.getItem(sessionKey);
 
           // @ts-ignore
           // When sessionStr is null, this will create a new selfId. We want to avoid this, becasue we want to make sure
           // that chainId 1 is in the did
           let selfId = !!sessionStr ? await ceramicConnect(ethAuthProvider, sessionStr) : null;
-
           if (
             // @ts-ignore
             !selfId ||
