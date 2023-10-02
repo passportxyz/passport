@@ -48,7 +48,7 @@ export const ExpiredStampsPanel = ({ className }: { className: string }) => {
       {expiredProviders.length > 0 ? (
         <InitiateReverifyStampsButton className="mb-10" />
       ) : (
-        <p className="mb-10">You don't have any expired stamps</p>
+        <p className="mb-10">You don&apos;t have any expired stamps</p>
       )}
     </div>
   );

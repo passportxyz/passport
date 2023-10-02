@@ -62,36 +62,32 @@ const _issueEd25519Credential = async (
   issuanceDate?: string,
   expirationDate?: string
 ): Promise<VerifiableCredential> => {
-  try {
-    // get DID from key
-    const issuer = DIDKit.keyToDID("key", key);
-    // read method from key
-    const verificationMethod = await DIDKit.keyToVerificationMethod("key", key);
-    // stringify assertionMethod we feed to didkit-wasm-node
-    const verifyWithMethod = JSON.stringify({
-      proofPurpose: "assertionMethod",
-      verificationMethod,
-    });
+  // get DID from key
+  const issuer = DIDKit.keyToDID("key", key);
+  // read method from key
+  const verificationMethod = await DIDKit.keyToVerificationMethod("key", key);
+  // stringify assertionMethod we feed to didkit-wasm-node
+  const verifyWithMethod = JSON.stringify({
+    proofPurpose: "assertionMethod",
+    verificationMethod,
+  });
 
-    // generate a verifiableCredential
-    const credential = await DIDKit.issueCredential(
-      JSON.stringify({
-        "@context": ["https://www.w3.org/2018/credentials/v1"],
-        type: ["VerifiableCredential"],
-        issuer,
-        issuanceDate: issuanceDate ? issuanceDate : new Date().toISOString(),
-        expirationDate: expirationDate ? expirationDate : addSeconds(new Date(), expiresInSeconds).toISOString(),
-        ...fields,
-      }),
-      verifyWithMethod,
-      key
-    );
+  // generate a verifiableCredential
+  const credential = await DIDKit.issueCredential(
+    JSON.stringify({
+      "@context": ["https://www.w3.org/2018/credentials/v1"],
+      type: ["VerifiableCredential"],
+      issuer,
+      issuanceDate: issuanceDate ? issuanceDate : new Date().toISOString(),
+      expirationDate: expirationDate ? expirationDate : addSeconds(new Date(), expiresInSeconds).toISOString(),
+      ...fields,
+    }),
+    verifyWithMethod,
+    key
+  );
 
-    // parse the response of the DIDKit wasm
-    return JSON.parse(credential) as VerifiableCredential;
-  } catch (error) {
-    console.error("Error while issuing credential", error);
-  }
+  // parse the response of the DIDKit wasm
+  return JSON.parse(credential) as VerifiableCredential;
 };
 
 type CredentialExiresInSeconds = {

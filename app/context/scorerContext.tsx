@@ -130,7 +130,6 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     //   try {
     //     let requestCount = 1;
     //     let scoreStatus = await loadScore(address, dbAccessToken);
-
     //     while ((scoreStatus === "PROCESSING" || scoreStatus === "BULK_PROCESSING") && requestCount < maxRequests) {
     //       requestCount++;
     //       await new Promise((resolve) => setTimeout(resolve, sleepTime));

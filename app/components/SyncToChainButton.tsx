@@ -135,18 +135,14 @@ export function SyncToChainButton({ onChainStatus, chain, className }: SyncToCha
             chainIdHex: chain.id,
           };
 
-          const { data }: { data: EasPayload } = await axios.post(
-            `${iamUrl}v0.0.0/eas/passport`,
-            payload,
-            {
-              headers: {
-                "Content-Type": "application/json",
-              },
-              transformRequest: [
-                (data: any) => JSON.stringify(data, (_k, v) => (typeof v === "bigint" ? v.toString() : v)),
-              ],
-            }
-          );
+          const { data }: { data: EasPayload } = await axios.post(`${iamUrl}v0.0.0/eas/passport`, payload, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            transformRequest: [
+              (data: any) => JSON.stringify(data, (_k, v) => (typeof v === "bigint" ? v.toString() : v)),
+            ],
+          });
 
           if (data.error) {
             console.error(
