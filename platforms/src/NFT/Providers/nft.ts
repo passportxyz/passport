@@ -1,5 +1,5 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
@@ -7,6 +7,9 @@ import axios from "axios";
 
 // ----- Credential verification
 import { getAddress } from "../../utils/signer";
+
+// ----- Utils
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 // Alchemy Api key
 export const apiKey = process.env.ALCHEMY_API_KEY;
@@ -36,42 +39,52 @@ export class NFTProvider implements Provider {
   // Verify that address defined in the payload owns at least one POAP older than 15 days
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
-    const address = (await getAddress(payload)).toLowerCase();
-
-    let valid = false;
-    let getContractsForOwnerResponse: GetContractsForOwnerResponse = {
-      contracts: [],
-      totalCount: 0,
-    };
-
-    const providerUrl = getNFTEndpoint();
-
     try {
-      const requestResponse = await axios.get(providerUrl, {
-        params: {
-          withMetadata: "false",
-          owner: address,
-          pageSize: 1,
+      const address = (await getAddress(payload)).toLowerCase();
+
+      const errors = [];
+      let getContractsForOwnerResponse: GetContractsForOwnerResponse = {
+          contracts: [],
+          totalCount: 0,
         },
-      });
+        valid = false,
+        record = undefined,
+        requestResponse;
 
-      if (requestResponse.status == 200) {
-        getContractsForOwnerResponse = requestResponse.data as GetContractsForOwnerResponse;
-
-        valid = getContractsForOwnerResponse.totalCount > 0;
+      const providerUrl = getNFTEndpoint();
+      try {
+        requestResponse = await axios.get(providerUrl, {
+          params: {
+            withMetadata: "false",
+            owner: address,
+            pageSize: 1,
+          },
+        });
+      } catch (error) {
+        errors.push(error);
       }
-    } catch (error) {
-      // Nothing to do here, valid will remain false
-    }
+      getContractsForOwnerResponse = requestResponse.data as GetContractsForOwnerResponse;
 
-    return Promise.resolve({
-      valid: valid,
-      record: valid
-        ? {
-            address: address,
-            "NFT#numNFTsGte": "1",
-          }
-        : undefined,
-    });
+      valid = getContractsForOwnerResponse.totalCount > 0;
+
+      if (valid === true) {
+        record = {
+          address: address,
+          "NFT#numNFTsGte": "1",
+        };
+      } else {
+        errors.push(
+          `You do not have the required amount of NFTs -- Your NFT count: ${getContractsForOwnerResponse.totalCount}.`
+        );
+      }
+
+      return Promise.resolve({
+        valid,
+        errors,
+        record,
+      });
+    } catch (error: unknown) {
+      throw new ProviderExternalVerificationError(`NFT check error: ${JSON.stringify(error)}`);
+    }
   }
 }

@@ -1,5 +1,5 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload, BrightIdVerificationResponse } from "@gitcoin/passport-types";
 
 // --- verifyMethod in providers
@@ -19,11 +19,14 @@ export class BrightIdProvider implements Provider {
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
+      const errors = [];
+      let record = undefined,
+        valid = false;
       const did = payload.proofs?.did;
 
       const responseData = await verifyBrightidContextId(did || "");
+      const validResponse: boolean = responseData.valid;
       const formattedData: BrightIdVerificationResponse = responseData?.result as BrightIdVerificationResponse;
-
       // Unique is true if the user obtained "Meets" verification by attending a connection party
       const isUnique = "unique" in formattedData && formattedData.unique === true;
       const firstContextId =
@@ -31,20 +34,38 @@ export class BrightIdProvider implements Provider {
         formattedData.contextIds &&
         formattedData.contextIds.length > 0 &&
         formattedData.contextIds[0];
-      const valid: boolean = (firstContextId && isUnique) || false;
+      valid = firstContextId && isUnique;
+      if (validResponse && valid) {
+        record = {
+          context: "context" in formattedData && formattedData.context,
+          contextId: firstContextId,
+          meets: JSON.stringify(isUnique),
+        };
+      } else if (!isUnique && firstContextId && !validResponse) {
+        errors.push(
+          `You have not met the BrightID verification requirements by attending a connection party -- isUnique: ${String(
+            isUnique
+          )} & firstContextId: ${firstContextId}`
+        );
+      } else if (!isUnique && !firstContextId && !validResponse) {
+        errors.push("You have not met the BrightID verification requirements");
+      }
 
-      return {
+      if (responseData.error) {
+        errors.push(responseData.error);
+      }
+
+      return Promise.resolve({
         valid,
-        record: valid
-          ? {
-              context: "context" in formattedData && formattedData.context,
-              contextId: firstContextId,
-              meets: JSON.stringify(isUnique),
-            }
-          : undefined,
-      };
-    } catch (e) {
-      return { valid: false };
+        record,
+        errors,
+      });
+    } catch (e: unknown) {
+      console.log(e);
+
+      return Promise.reject(
+        new ProviderExternalVerificationError(`Error verifying BrightID sponsorship: ${String(e)}`)
+      );
     }
   }
 }

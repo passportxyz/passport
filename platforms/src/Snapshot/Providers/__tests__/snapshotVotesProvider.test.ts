@@ -6,6 +6,7 @@ import { snapshotGraphQLDatabase } from "../snapshotProposalsProvider";
 
 // ----- Libs
 import axios from "axios";
+import { ProviderExternalVerificationError } from "../../../types";
 
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -112,9 +113,10 @@ describe("Attempt verification", function () {
     expect(axios.post).toHaveBeenCalledTimes(1);
     expect(verifiedPayload).toEqual({
       valid: true,
+      errors: undefined,
       record: {
         address: `${MOCK_ADDRESS_LOWER}`,
-        hasVotedOnGTE2SnapshotProposals: "true",
+        votedOnGTETwoProposals: "true",
       },
     });
   });
@@ -145,12 +147,9 @@ describe("Attempt verification", function () {
     });
 
     const snapshotVotesProvider = new SnapshotVotesProvider();
-    const verifiedPayload = await snapshotVotesProvider.verify({
-      address: MOCK_ADDRESS,
-    } as RequestPayload);
-
-    expect(axios.post).toHaveBeenCalledTimes(1);
-    expect(verifiedPayload).toMatchObject({ valid: false });
+    await expect(async () => {
+      return await snapshotVotesProvider.verify({ address: MOCK_ADDRESS } as RequestPayload);
+    }).rejects.toThrow(new ProviderExternalVerificationError("Error verifying Snapshot proposal votes: {}"));
   });
 
   it("should return invalid payload when there is no address to send with the graphQL query", async () => {
@@ -169,12 +168,9 @@ describe("Attempt verification", function () {
     });
 
     const snapshotVotesProvider = new SnapshotVotesProvider();
-    const verifiedPayload = await snapshotVotesProvider.verify({
-      address: NO_MOCK_ADDRESS,
-    } as RequestPayload);
-
-    expect(axios.post).toHaveBeenCalledTimes(1);
-    expect(verifiedPayload).toMatchObject({ valid: false });
+    await expect(async () => {
+      return await snapshotVotesProvider.verify({ address: MOCK_ADDRESS } as RequestPayload);
+    }).rejects.toThrow(new ProviderExternalVerificationError("Error verifying Snapshot proposal votes: {}"));
   });
 
   it("should return invalid payload when a bad status code is returned after Snapshot graphQL query", async () => {
@@ -193,12 +189,9 @@ describe("Attempt verification", function () {
     });
 
     const snapshotVotesProvider = new SnapshotVotesProvider();
-    const verifiedPayload = await snapshotVotesProvider.verify({
-      address: MOCK_ADDRESS,
-    } as RequestPayload);
-
-    expect(axios.post).toHaveBeenCalledTimes(1);
-    expect(verifiedPayload).toMatchObject({ valid: false });
+    await expect(async () => {
+      return await snapshotVotesProvider.verify({ address: MOCK_ADDRESS } as RequestPayload);
+    }).rejects.toThrow(new ProviderExternalVerificationError("Error verifying Snapshot proposal votes: {}"));
   });
 
   it("should return invalid payload when an exception is thrown when a request is made", async () => {
@@ -210,11 +203,8 @@ describe("Attempt verification", function () {
     });
 
     const snapshotVotesProvider = new SnapshotVotesProvider();
-    const verifiedPayload = await snapshotVotesProvider.verify({
-      address: MOCK_ADDRESS,
-    } as RequestPayload);
-
-    expect(axios.post).toHaveBeenCalledTimes(1);
-    expect(verifiedPayload).toMatchObject({ valid: false });
+    await expect(async () => {
+      return await snapshotVotesProvider.verify({ address: MOCK_ADDRESS } as RequestPayload);
+    }).rejects.toThrow(new ProviderExternalVerificationError('Error verifying Snapshot proposal votes: "an error"'));
   });
 });

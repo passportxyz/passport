@@ -66,11 +66,14 @@ describe("githubClient", function () {
       mockFetchGithubUserDataCall.mockImplementation(() => {
         return Promise.resolve(mockFetchGithubUserData);
       });
-      const result = await githubClient.fetchAndCheckContributions(mockGithubContext, "ABC123_ACCESSCODE", "1", 3);
+      const numDays = "1";
+      const result = await githubClient.fetchAndCheckContributions(mockGithubContext, "ABC123_ACCESSCODE", numDays, 3);
       expect(result).toEqual({
         contributionValid: true,
+        numberOfDays: numDays,
       });
     });
+
     it("should not call fetchGithubUserData multiple times number of contribution days is valid", async () => {
       const contributionsValidData = {
         contributionData: {
@@ -115,10 +118,13 @@ describe("githubClient", function () {
         return Promise.resolve(mockFetchGithubUserData);
       });
 
-      const result = await githubClient.fetchAndCheckContributions(mockGithubContext, "ABC123_ACCESSCODE", "4", 3);
+      const numDays = "4";
+
+      const result = await githubClient.fetchAndCheckContributions(mockGithubContext, "ABC123_ACCESSCODE", numDays, 3);
 
       expect(result).toEqual({
         contributionValid: false,
+        numberOfDays: numDays,
       });
     });
   });

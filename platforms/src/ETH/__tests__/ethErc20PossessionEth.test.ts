@@ -7,6 +7,7 @@ import { EthErc20PossessionProvider } from "../Providers/ethErc20Possession";
 
 // ----- Ethers library
 import * as units from "@ethersproject/units";
+import { ProviderExternalVerificationError } from "../../types";
 
 const mockGetBalance = jest.fn();
 jest.mock("@ethersproject/providers", () => {
@@ -54,6 +55,7 @@ describe("Attempt verification", function () {
         address: MOCK_ADDRESS_LOWER,
         ethPossessionsGte: "1",
       },
+      errors: [],
     });
   });
 
@@ -76,7 +78,8 @@ describe("Attempt verification", function () {
     expect(mockGetBalance).toBeCalledWith(MOCK_FAKE_ADDRESS);
     expect(verifiedPayload).toEqual({
       valid: false,
-      record: {},
+      record: undefined,
+      errors: ["Eth Possession Provider Error"],
     });
   });
 
@@ -87,18 +90,16 @@ describe("Attempt verification", function () {
       recordAttribute: "ethPossessionsGte",
       error: "ETH Possessions >= 1 Provider verify Error",
     });
-    const verifiedPayload = await ethPossessions.verify(
+
+    expect(async () => {
+      await ethPossessions.verify(
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
       {}
     );
-
+    }).rejects.toThrow(new ProviderExternalVerificationError("Error validating ETH amounts: Error: some error"));
     expect(mockGetBalance).toBeCalledWith(MOCK_ADDRESS_LOWER);
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      error: ["ETH Possessions >= 1 Provider verify Error"],
-    });
   });
 });
 
@@ -128,6 +129,7 @@ describe("Check valid cases for ETH Balances", function () {
         address: MOCK_ADDRESS_LOWER,
         ethPossessionsGte: "1",
       },
+      errors: [],
     });
   });
   it("Expected Greater than 10 ETH and ETH Balance is 15", async () => {
@@ -149,6 +151,7 @@ describe("Check valid cases for ETH Balances", function () {
         address: MOCK_ADDRESS_LOWER,
         ethPossessionsGte: "10",
       },
+      errors: [],
     });
   });
   it("Expected Greater than 32 ETH and ETH Balance is 70", async () => {
@@ -171,6 +174,7 @@ describe("Check valid cases for ETH Balances", function () {
         address: MOCK_ADDRESS_LOWER,
         ethPossessionsGte: "32",
       },
+      errors: [],
     });
   });
 });
@@ -196,7 +200,8 @@ describe("Check invalid cases for ETH Balances", function () {
 
     expect(verifiedPayload).toEqual({
       valid: false,
-      record: {},
+      record: undefined,
+      errors: ["You do not hold the required amount of ETH for this stamp. Your ETH: 500000000000000000."],
     });
   });
   it("Expected Greater than 10 ETH and ETH Balance is 5", async () => {
@@ -215,7 +220,8 @@ describe("Check invalid cases for ETH Balances", function () {
 
     expect(verifiedPayload).toEqual({
       valid: false,
-      record: {},
+      record: undefined,
+      errors: ["You do not hold the required amount of ETH for this stamp. Your ETH: 5000000000000000000."],
     });
   });
   it("Expected Greater than 32 ETH and ETH Balance is 20", async () => {
@@ -234,7 +240,8 @@ describe("Check invalid cases for ETH Balances", function () {
 
     expect(verifiedPayload).toEqual({
       valid: false,
-      record: {},
+      record: undefined,
+      errors: ["You do not hold the required amount of ETH for this stamp. Your ETH: 20000000000000000000."],
     });
   });
 });

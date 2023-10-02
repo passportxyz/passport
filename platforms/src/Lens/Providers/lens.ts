@@ -1,9 +1,12 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { Provider, ProviderExternalVerificationError, ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
+
+// ----- Utils
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 interface DefaultProfile {
   id: string;
@@ -18,22 +21,43 @@ interface GraphQlResponse {
   data: Data;
 }
 
+interface LensProfileResponse {
+  valid: boolean;
+  handle?: string;
+  errors: string[];
+}
+
 const lensApiEndpoint = "https://api.lens.dev";
 
-async function getLensProfile(userAddress: string): Promise<string> {
-  const query = `
-    query DefaultProfile {
-      defaultProfile(request: { ethereumAddress: "${userAddress}"}) {
-        id
-        handle
+async function getLensProfile(userAddress: string): Promise<LensProfileResponse> {
+  try {
+    const query = `
+      query DefaultProfile {
+        defaultProfile(request: { ethereumAddress: "${userAddress}"}) {
+          id
+          handle
+        }
       }
-    }
-  `;
-  const result: { data: GraphQlResponse } = await axios.post(lensApiEndpoint, {
-    query,
-  });
+    `;
+    const result: { data: GraphQlResponse } = await axios.post(lensApiEndpoint, {
+      query,
+    });
 
-  return result?.data?.data?.defaultProfile?.handle;
+    if (result?.data?.data?.defaultProfile?.handle) {
+      return {
+        valid: true,
+        handle: result?.data?.data?.defaultProfile?.handle,
+        errors: [],
+      };
+    } else {
+      return {
+        valid: false,
+        errors: ["We were unable to retrieve a Lens handle for your address."],
+      };
+    }
+  } catch (error) {
+    handleProviderAxiosError(error, "Lens profile check error", [userAddress]);
+  }
 }
 
 // Export a Lens Profile Provider
@@ -51,26 +75,26 @@ export class LensProfileProvider implements Provider {
 
   // Verify that address defined in the payload has a lens handle
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    // if a signer is provider we will use that address to verify against
-    const address = payload.address.toString().toLowerCase();
-    let valid = false;
-    let handle: string;
     try {
-      handle = await getLensProfile(address);
-    } catch (e) {
+      // if a signer is provider we will use that address to verify against
+      const address = payload.address.toString().toLowerCase();
+      let record = undefined;
+      let errors: string[] = [];
+      const { valid, handle, errors: lensErrors } = await getLensProfile(address);
+
+      if (valid === true) {
+        record = { handle };
+      } else {
+        errors = lensErrors;
+      }
+
       return {
-        valid: false,
-        error: ["Lens provider get user handle error"],
+        valid,
+        record,
+        errors,
       };
+    } catch (e) {
+      throw new ProviderExternalVerificationError(`Error verifying Snapshot proposals: ${JSON.stringify(e)}.`);
     }
-    valid = !!handle;
-    return Promise.resolve({
-      valid: valid,
-      record: valid
-        ? {
-            handle,
-          }
-        : {},
-    });
   }
 }

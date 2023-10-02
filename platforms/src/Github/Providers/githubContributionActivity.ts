@@ -1,4 +1,4 @@
-import type { Provider } from "../../types";
+import { ProviderExternalVerificationError, type Provider } from "../../types";
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { fetchAndCheckContributions, GithubContext } from "./githubClient";
 
@@ -20,15 +20,35 @@ export class GithubContributionActivityProvider implements Provider {
   }
 
   async verify(payload: RequestPayload, context: GithubContext): Promise<VerifiedPayload> {
-    const contributionResult = await fetchAndCheckContributions(context, payload.proofs.code, this._options.threshold);
-    const valid = contributionResult.contributionValid;
+    try {
+      const errors = [];
+      let record = undefined,
+        valid = false,
+        contributionResult;
 
-    const githubId = context.github.id;
+      try {
+        contributionResult = await fetchAndCheckContributions(context, payload.proofs.code, this._options.threshold);
+      } catch (e) {
+        valid = false;
+        errors.push(e);
+      }
 
-    return {
-      valid,
-      error: contributionResult.errors,
-      record: valid ? { id: githubId } : undefined,
-    };
+      valid = contributionResult.contributionValid;
+      const githubId = context.github.id;
+
+      if (valid) {
+        record = { id: githubId };
+      } else {
+        errors.push("Your Github contributions did not qualify for this stamp.");
+      }
+
+      return {
+        valid,
+        errors,
+        record,
+      };
+    } catch (error: unknown) {
+      throw new ProviderExternalVerificationError(`Error verifying Github contributions: ${JSON.stringify(error)}`);
+    }
   }
 }

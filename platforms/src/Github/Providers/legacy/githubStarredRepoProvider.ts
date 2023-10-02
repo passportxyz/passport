@@ -42,7 +42,7 @@ export class StarredGithubRepoProvider implements Provider {
 
     return {
       valid: valid,
-      error: errors,
+      errors: errors,
       record: valid
         ? {
             id: `${verifiedUserPayload.id}gte1Star`,

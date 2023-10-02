@@ -2,6 +2,7 @@ import crypto from "crypto";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 import { initCacheSession, loadCacheSession, clearCacheSession } from "../../utils/cache";
 import { ProviderContext } from "@gitcoin/passport-types";
+import { ProviderExternalVerificationError, ProviderInternalVerificationError } from "../../types";
 
 type IdenaCache = {
   address?: string;
@@ -28,13 +29,17 @@ export const initSession = (): string => {
 };
 
 export const loadIdenaSession = (token: string, address: string): string | undefined => {
-  const session = loadIdenaCache(token);
-  const nonce = generateNonce();
+  try {
+    const session = loadIdenaCache(token);
+    const nonce = generateNonce();
 
-  session.nonce = nonce;
-  session.address = address;
+    session.nonce = nonce;
+    session.address = address;
 
-  return nonce;
+    return nonce;
+  } catch (error) {
+    throw new ProviderInternalVerificationError("Session missing or expired, try again");
+  }
 };
 
 export const authenticate = async (token: string, signature: string): Promise<boolean> => {
@@ -152,17 +157,22 @@ const loadSessionAddress = (token: string, context: IdenaContext): string => {
 };
 
 const request = async <T>(token: string, context: IdenaContext, method: IdenaMethod): Promise<T> => {
-  const address = loadSessionAddress(token, context);
+  try {
+    const address = loadSessionAddress(token, context);
 
-  let response = context.idena.responses[method];
-  if (!response) {
-    response = await apiClient().get(method.replace("_address_", address));
-    context.idena.responses[method] = response;
+    let response = context.idena.responses[method];
+    if (!response) {
+      response = await apiClient().get(method.replace("_address_", address));
+      context.idena.responses[method] = response;
+    }
+
+    if (response.status != 200) {
+      throw `get ${method} returned status code ${response.status} instead of the expected 200`;
+    }
+    return { ...response.data, address: address } as T;
+  } catch (error: unknown) {
+    throw new ProviderExternalVerificationError(
+      `Retrieving Idena data failed to complete, error: ${JSON.stringify(error)}.`
+    );
   }
-
-  if (response.status != 200) {
-    throw `get ${method} returned status code ${response.status} instead of the expected 200`;
-  }
-
-  return { ...response.data, address: address } as T;
 };

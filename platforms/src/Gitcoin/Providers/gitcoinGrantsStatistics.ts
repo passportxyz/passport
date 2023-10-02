@@ -1,12 +1,12 @@
 // ----- Types
 import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import { ProviderError } from "../../utils/errors";
 import axios from "axios";
 import { getGithubUserData, GithubUserMetaData } from "../../Github/Providers/githubClient";
 
 export type GitcoinGrantStatistics = {
-  errors?: string[] | undefined;
+  error?: string | undefined;
   record?: { [k: string]: number };
 };
 
@@ -38,51 +38,62 @@ export class GitcoinGrantStatisticsProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
-    let valid = false;
-    const githubUser: GithubUserMetaData = await getGithubUserData(payload.proofs.code, context);
+    let valid = false,
+      record = undefined,
+      gitcoinGrantsStatistic;
+    const errors = [];
     try {
+      const githubUser: GithubUserMetaData = await getGithubUserData(payload.proofs.code, context);
       // Only check the contribution condition if a valid github id has been received
       valid = !githubUser.errors && !!githubUser.id;
       if (valid) {
         const dataUrl = process.env.CGRANTS_API_URL + this.urlPath;
-        const gitcoinGrantsStatistic = await getGitcoinStatistics(dataUrl, githubUser.id, context);
+        try {
+          gitcoinGrantsStatistic = await getGitcoinStatistics(dataUrl, githubUser.id, context);
+        } catch (error) {
+          errors.push(error);
+        }
 
         valid =
-          !gitcoinGrantsStatistic.errors &&
+          !gitcoinGrantsStatistic.error &&
           (gitcoinGrantsStatistic.record
             ? gitcoinGrantsStatistic.record[this._options.receivingAttribute] >= this._options.threshold
             : false);
 
-        return {
-          valid: valid,
-          error: gitcoinGrantsStatistic.errors,
-          record: valid
-            ? {
-                // The type was previously incorrectly defined as string on the http response,
-                // and if we correctly called .toString() here instead of doing the forced cast,
-                // we would break our ability to hash against all previous records.
-                id: githubUser.id as unknown as string,
-                [this._options.recordAttribute]: `${this._options.threshold}`,
-              }
-            : undefined,
-        };
-      }
-    } catch (e) {
-      return { valid: false };
-    }
-
-    const ret = {
-      valid: valid,
-      error: githubUser ? githubUser.errors : undefined,
-      record: valid
-        ? {
-            id: `${githubUser.id}`,
+        if (valid === true) {
+          record = {
+            // The type was previously incorrectly defined as string on the http response,
+            // and if we correctly called .toString() here instead of doing the forced cast,
+            // we would break our ability to hash against all previous records.
+            id: githubUser.id as unknown as string,
             [this._options.recordAttribute]: `${this._options.threshold}`,
-          }
-        : undefined,
-    };
+          };
+        } else {
+          errors.push(
+            `You do not qualify for this stamp. Your Grantee stats are less than the required thresholds: ${
+              gitcoinGrantsStatistic.record[this._options.receivingAttribute]
+            } out of ${this._options.threshold}.`
+          );
+        }
 
-    return ret;
+        if (!valid && errors.length === 0) {
+          errors.push(gitcoinGrantsStatistic.error);
+        }
+        return {
+          valid,
+          errors,
+          record,
+        };
+      } else {
+        const ret = {
+          valid: valid,
+          errors: githubUser ? githubUser.errors : undefined,
+        };
+        return ret;
+      }
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Gitcoin Grants Statistic verification error: ${String(e)}.`);
+    }
   }
 }
 
@@ -108,12 +119,9 @@ const getGitcoinStatistics = async (
     } catch (_error) {
       const error = _error as ProviderError;
       context.gitcoinGrantStatistics[dataUrl] = {
-        errors: [
-          "Error getting user info",
-          `${error?.message}`,
-          `Status ${error.response?.status}: ${error.response?.statusText}`,
-          `Details: ${JSON.stringify(error?.response?.data)}`,
-        ],
+        error: `Error getting user info: ${error?.message} - Status ${error.response?.status}: ${
+          error.response?.statusText
+        } - Details: ${JSON.stringify(error?.response?.data)}`,
       };
     }
   }

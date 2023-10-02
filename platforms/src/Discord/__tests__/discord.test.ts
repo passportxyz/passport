@@ -8,6 +8,7 @@ import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
+import { ProviderExternalVerificationError } from "../../types";
 
 jest.mock("axios");
 
@@ -37,11 +38,11 @@ const code = "ABC123_ACCESSCODE";
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockedAxios.post.mockImplementation(async (url, data, config) => {
+  mockedAxios.post.mockImplementation(async () => {
     return validCodeResponse;
   });
 
-  mockedAxios.get.mockImplementation(async (url, config) => {
+  mockedAxios.get.mockImplementation(async () => {
     return validDiscordUserResponse;
   });
 });
@@ -65,13 +66,12 @@ describe("Attempt verification", function () {
       record: {
         id: validDiscordUserResponse.data.user.id,
       },
+      errors: [],
     });
   });
 
   it("should return invalid payload when unable to retrieve auth token", async () => {
-    const logSpy = jest.spyOn(console, "error").mockImplementation();
-
-    mockedAxios.post.mockImplementation(async (url, data, config) => {
+    mockedAxios.post.mockImplementation(async () => {
       return {
         status: 500,
       };
@@ -79,18 +79,21 @@ describe("Attempt verification", function () {
 
     const discord = new DiscordProvider();
 
-    const discordPayload = await discord.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
-
-    expect(discordPayload).toMatchObject({ valid: false });
-    expect(logSpy).toHaveBeenCalledWith("Error when verifying discord account for user:", undefined);
+    await expect(async () => {
+      return await discord.verify({
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(
+      new ProviderExternalVerificationError(
+        "Discord account check error: Post for request returned status code 500 instead of the expected 200"
+      )
+    );
   });
 
   it("should return invalid payload when there is no id in verifyDiscord response", async () => {
-    mockedAxios.get.mockImplementation(async (url, config) => {
+    mockedAxios.get.mockImplementation(async () => {
       return {
         data: {
           id: undefined,
@@ -109,11 +112,15 @@ describe("Attempt verification", function () {
       },
     } as unknown as RequestPayload);
 
-    expect(discordPayload).toMatchObject({ valid: false });
+    expect(discordPayload).toMatchObject({
+      valid: false,
+      errors: ["We were not able to verify a Discord account with your provided credentials."],
+      record: undefined,
+    });
   });
 
   it("should return invalid payload when a bad status code is returned by discord user api", async () => {
-    mockedAxios.get.mockImplementation(async (url, config) => {
+    mockedAxios.get.mockImplementation(async () => {
       return {
         status: 500,
       };
@@ -121,12 +128,16 @@ describe("Attempt verification", function () {
 
     const discord = new DiscordProvider();
 
-    const discordPayload = await discord.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
-
-    expect(discordPayload).toMatchObject({ valid: false });
+    await expect(async () => {
+      return await discord.verify({
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(
+      new ProviderExternalVerificationError(
+        "Discord account check error: ProviderExternalVerificationError: Get user request returned status code 500 instead of the expected 200"
+      )
+    );
   });
 });

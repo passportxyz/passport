@@ -6,6 +6,7 @@ import { RequestPayload } from "@gitcoin/passport-types";
 import axios from "axios";
 import { DateTime } from "luxon";
 import { FacebookProfilePictureProvider, FacebookProfileResponse } from "../Providers/facebookProfilePicture";
+import { ProviderExternalVerificationError } from "../../types";
 
 jest.mock("axios");
 
@@ -77,6 +78,7 @@ describe("Attempt Facebook friends verification", function () {
         userId: "some-user-id",
         hasProfilePicture: "true",
       },
+      errors: [],
     });
   });
 
@@ -95,7 +97,8 @@ describe("Attempt Facebook friends verification", function () {
         return Promise.resolve({
           status: 400,
           data: {
-            ...validProfileData,
+            id: null,
+            picture: undefined,
           },
         });
     });
@@ -118,6 +121,8 @@ describe("Attempt Facebook friends verification", function () {
 
     expect(result).toMatchObject({
       valid: false,
+      errors: ["Error retrieving user profile."],
+      record: undefined,
     });
   });
 
@@ -165,10 +170,12 @@ describe("Attempt Facebook friends verification", function () {
 
     expect(result).toMatchObject({
       valid: false,
+      errors: ["Error retrieving user profile."],
+      record: undefined,
     });
   });
 
-  it("returns invalid response when an error occurs when getting user profile", async () => {
+  it("throws Provider External Verification error when an error occurs when getting user profile", async () => {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://graph.facebook.com/debug_token/")
         return Promise.resolve({
@@ -182,11 +189,17 @@ describe("Attempt Facebook friends verification", function () {
       else if (url === "https://graph.facebook.com/me/") throw "some kind of error";
     });
 
-    const result = await new FacebookProfilePictureProvider().verify({
-      proofs: {
-        accessToken,
-      },
-    } as unknown as RequestPayload);
+    await expect(async () => {
+      await new FacebookProfilePictureProvider().verify({
+        proofs: {
+          accessToken,
+        },
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(
+      new ProviderExternalVerificationError(
+        "Error verifying Facebook account: TypeError: Cannot read properties of undefined (reading 'picture')"
+      )
+    );
 
     expect(axios.get).toHaveBeenCalledTimes(2);
     expect(axios.get).toBeCalledWith("https://graph.facebook.com/debug_token/", {
@@ -196,10 +209,6 @@ describe("Attempt Facebook friends verification", function () {
     expect(axios.get).toBeCalledWith("https://graph.facebook.com/me/", {
       headers: { "User-Agent": "Facebook Graph Client" },
       params: { access_token: accessToken, fields: "id,picture{is_silhouette}" },
-    });
-
-    expect(result).toMatchObject({
-      valid: false,
     });
   });
 
@@ -246,6 +255,8 @@ describe("Attempt Facebook friends verification", function () {
 
     expect(result).toMatchObject({
       valid: false,
+      errors: ["We were unable to verify your Facebook account profile picture."],
+      record: undefined,
     });
   });
 
@@ -288,10 +299,12 @@ describe("Attempt Facebook friends verification", function () {
 
     expect(result).toMatchObject({
       valid: false,
+      record: undefined,
+      errors: ["Profile picture is unavailable."],
     });
   });
 
-  it("returns invalid response when validation of the token fails `is_valid: false`", async () => {
+  it("throws Provider External Verification error when validation of the token fails `is_valid: false`", async () => {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://graph.facebook.com/debug_token/")
         return Promise.resolve({
@@ -303,14 +316,6 @@ describe("Attempt Facebook friends verification", function () {
             },
           },
         });
-      else if (url === "https://graph.facebook.com/me/")
-        return Promise.resolve({
-          status: 200,
-          data: {
-            ...validProfileData,
-            picture: undefined,
-          },
-        });
     });
 
     const result = await new FacebookProfilePictureProvider().verify({
@@ -319,22 +324,19 @@ describe("Attempt Facebook friends verification", function () {
       },
     } as unknown as RequestPayload);
 
-    expect(axios.get).toHaveBeenCalledTimes(2);
+    expect(axios.get).toHaveBeenCalledTimes(1);
     expect(axios.get).toBeCalledWith("https://graph.facebook.com/debug_token/", {
       headers: { "User-Agent": "Facebook Graph Client" },
       params: { access_token: appAccessToken, input_token: accessToken },
     });
-    expect(axios.get).toBeCalledWith("https://graph.facebook.com/me/", {
-      headers: { "User-Agent": "Facebook Graph Client" },
-      params: { access_token: accessToken, fields: "id,picture{is_silhouette}" },
-    });
-
     expect(result).toMatchObject({
       valid: false,
+      record: undefined,
+      errors: ["Invalid token"],
     });
   });
 
-  it("returns invalid response when validation of the token fails because of bad app ID", async () => {
+  it("returns invalid result when validation of the token fails because of bad app ID", async () => {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://graph.facebook.com/debug_token/")
         return Promise.resolve({
@@ -344,48 +346,6 @@ describe("Attempt Facebook friends verification", function () {
               ...validAccessTokenData,
               app_id: `BAD${process.env.FACEBOOK_APP_ID}`,
             },
-          },
-        });
-      else if (url === "https://graph.facebook.com/me/")
-        return Promise.resolve({
-          status: 200,
-          data: {
-            ...validProfileData,
-            picture: undefined,
-          },
-        });
-    });
-
-    const result = await new FacebookProfilePictureProvider().verify({
-      proofs: {
-        accessToken,
-      },
-    } as unknown as RequestPayload);
-
-    expect(axios.get).toHaveBeenCalledTimes(2);
-    expect(axios.get).toBeCalledWith("https://graph.facebook.com/debug_token/", {
-      headers: { "User-Agent": "Facebook Graph Client" },
-      params: { access_token: appAccessToken, input_token: accessToken },
-    });
-    expect(axios.get).toBeCalledWith("https://graph.facebook.com/me/", {
-      headers: { "User-Agent": "Facebook Graph Client" },
-      params: { access_token: accessToken, fields: "id,picture{is_silhouette}" },
-    });
-
-    expect(result).toMatchObject({
-      valid: false,
-    });
-  });
-
-  it("returns invalid response when validation of the token fails (exception thrown)", async () => {
-    (axios.get as jest.Mock).mockImplementation((url) => {
-      if (url === "https://graph.facebook.com/debug_token/") throw "some error";
-      else if (url === "https://graph.facebook.com/me/")
-        return Promise.resolve({
-          status: 200,
-          data: {
-            ...validProfileData,
-            picture: undefined,
           },
         });
     });
@@ -404,10 +364,40 @@ describe("Attempt Facebook friends verification", function () {
 
     expect(result).toMatchObject({
       valid: false,
+      record: undefined,
+      errors: ["Received App ID does not match with Passport's App ID."],
     });
   });
 
-  it("returns invalid response when validation of the token fails because of empty data", async () => {
+  it("throws Provider External Verification error when validation of the token fails (exception thrown)", async () => {
+    (axios.get as jest.Mock).mockImplementation((url) => {
+      if (url === "https://graph.facebook.com/debug_token/") throw "some error";
+      else if (url === "https://graph.facebook.com/me/")
+        return Promise.resolve({
+          status: 200,
+          data: {
+            ...validProfileData,
+            picture: undefined,
+          },
+        });
+    });
+
+    await expect(async () => {
+      await new FacebookProfilePictureProvider().verify({
+        proofs: {
+          accessToken,
+        },
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(new ProviderExternalVerificationError("Error verifying Facebook account: some error"));
+
+    expect(axios.get).toHaveBeenCalledTimes(1);
+    expect(axios.get).toBeCalledWith("https://graph.facebook.com/debug_token/", {
+      headers: { "User-Agent": "Facebook Graph Client" },
+      params: { access_token: appAccessToken, input_token: accessToken },
+    });
+  });
+
+  it("throws Provider External Verification error when validation of the token fails because of empty data", async () => {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://graph.facebook.com/debug_token/")
         return Promise.resolve({
@@ -426,20 +416,22 @@ describe("Attempt Facebook friends verification", function () {
         });
     });
 
-    const result = await new FacebookProfilePictureProvider().verify({
-      proofs: {
-        accessToken,
-      },
-    } as unknown as RequestPayload);
+    await expect(async () => {
+      await new FacebookProfilePictureProvider().verify({
+        proofs: {
+          accessToken,
+        },
+      } as unknown as RequestPayload);
+    }).rejects.toThrow(
+      new ProviderExternalVerificationError(
+        "Error verifying Facebook account: Error: fromSeconds requires a numerical input"
+      )
+    );
 
     expect(axios.get).toHaveBeenCalledTimes(1);
     expect(axios.get).toBeCalledWith("https://graph.facebook.com/debug_token/", {
       headers: { "User-Agent": "Facebook Graph Client" },
       params: { access_token: appAccessToken, input_token: accessToken },
-    });
-
-    expect(result).toMatchObject({
-      valid: false,
     });
   });
 });

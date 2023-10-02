@@ -1,9 +1,12 @@
 // ----- Types
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import type { Provider } from "../../types";
+import { ProviderExternalVerificationError, type Provider } from "../../types";
 
 // ----- Libs
 import axios from "axios";
+
+// ----- Utils
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 type Claim = {
   id: string;
@@ -34,6 +37,8 @@ export class HypercertsProvider implements Provider {
   type = "Hypercerts";
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+    const errors = [];
+    let record = undefined;
     try {
       const url = "https://api.thegraph.com/subgraphs/name/hypercerts-admin/hypercerts-optimism-mainnet";
       const address = payload.address.toLocaleLowerCase();
@@ -70,20 +75,19 @@ export class HypercertsProvider implements Provider {
 
       const valid = validTokenLength > 1;
 
-      const errors = !valid ? [`You have ${validTokenLength} valid Hypercerts and the minimum is 2`] : [];
+      if (!valid) {
+        errors.push(`You have ${validTokenLength} valid Hypercerts and the minimum is 2`);
+      } else {
+        record = { address };
+      }
 
       return {
-        valid: valid,
+        valid,
         errors,
-        record: {
-          address,
-        },
+        record,
       };
     } catch (e: any) {
-      return {
-        valid: false,
-        error: ["Error was thrown while verifying Hypercerts"],
-      };
+      throw new ProviderExternalVerificationError("Error was thrown while verifying Hypercerts");
     }
   }
 }

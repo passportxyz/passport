@@ -1,5 +1,6 @@
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
+import { ProviderExternalVerificationError } from "../../types";
 import { PohProvider } from "../Providers/poh";
 
 const mockIsRegistered = jest.fn();
@@ -31,6 +32,7 @@ describe("Attempt verification", function () {
     expect(mockIsRegistered).toBeCalledWith(MOCK_ADDRESS);
     expect(verifiedPayload).toEqual({
       valid: true,
+      errors: [],
       record: {
         address: MOCK_ADDRESS,
       },
@@ -48,6 +50,7 @@ describe("Attempt verification", function () {
 
     expect(mockIsRegistered).toBeCalledWith(UNREGISTERED_ADDRESS);
     expect(verifiedPayload).toEqual({
+      errors: ["Your address is not registered with Proof of Humanity -- isRegistered: false."],
       valid: false,
     });
   });
@@ -57,14 +60,13 @@ describe("Attempt verification", function () {
     const UNREGISTERED_ADDRESS = "0xUNREGISTERED";
 
     const poh = new PohProvider();
-    const verifiedPayload = await poh.verify({
-      address: UNREGISTERED_ADDRESS,
-    } as RequestPayload);
-
-    expect(mockIsRegistered).toBeCalledWith(UNREGISTERED_ADDRESS);
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      error: [JSON.stringify("some error")],
-    });
+    await expect(async () => {
+      return await poh.verify({
+        address: UNREGISTERED_ADDRESS,
+      } as RequestPayload);
+    }).rejects.toThrow(
+      // eslint-disable-next-line quotes
+      new ProviderExternalVerificationError('Error verifying Proof of Humanity: "some error".')
+    );
   });
 });

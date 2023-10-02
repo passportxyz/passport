@@ -6,7 +6,7 @@ import { RequestPayload } from "@gitcoin/passport-types";
 // ----- Libs
 import axios from "axios";
 import { GitcoinGrantStatisticsProvider } from "../gitcoinGrantsStatistics";
-import type { ProviderOptions } from "../../../types";
+import { ProviderExternalVerificationError, type ProviderOptions } from "../../../types";
 
 jest.mock("axios");
 
@@ -148,16 +148,19 @@ describe("Attempt verification %s", function () {
             id: validGithubUserResponse.data.id,
             [recordAttribute]: `${threshold}`,
           },
+          errors: [],
         });
       else
         expect(gitcoinPayload).toEqual({
           valid: false,
+          record: undefined,
+          errors: [`You do not qualify for this stamp. Your Grantee stats are less than the required thresholds: ${returnedValue} out of ${threshold}.`],
         });
     }
   );
 
-  it("should return invalid payload when unable to retrieve auth token (http status code 500 received)", async () => {
-    (axios.post as jest.Mock).mockImplementation(async (url, data, config) => {
+  it("should throw Provider Verification error when unable to retrieve auth token (http status code 500 received)", async () => {
+    (axios.post as jest.Mock).mockImplementation(async () => {
       return {
         status: 500,
       };
@@ -172,23 +175,24 @@ describe("Attempt verification %s", function () {
 
     const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
 
-    const gitcoinPayload = await github.verify(
-      {
-        address: "0x0",
-        proofs: {
-          code,
-        },
-      } as unknown as RequestPayload,
-      {}
-    );
+    await expect(async () => {
+      return await github.verify(
+        {
+          address: "0x0",
+          proofs: {
+            code,
+          },
+        } as unknown as RequestPayload,
+        {}
+      );
+    }).rejects.toThrow(new ProviderExternalVerificationError("Gitcoin Grants Statistic verification error: TypeError: Cannot read properties of undefined (reading 'access_token')."));
 
     expect(axios.post).toHaveBeenCalledTimes(1);
     expect(axios.get).toHaveBeenCalledTimes(0);
-    expect(gitcoinPayload).toMatchObject({ valid: false });
   });
 
-  it("should return invalid payload when unable to retrieve auth token (exception thrown)", async () => {
-    (axios.post as jest.Mock).mockImplementation(async (url, data, config) => {
+  it("should throw Provider External Verification error when unable to retrieve auth token (exception thrown)", async () => {
+    (axios.post as jest.Mock).mockImplementation(async () => {
       throw "Some kind of error";
     });
 
@@ -201,19 +205,20 @@ describe("Attempt verification %s", function () {
 
     const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
 
-    const gitcoinPayload = await github.verify(
-      {
-        address: "0x0",
-        proofs: {
-          code,
-        },
-      } as unknown as RequestPayload,
-      {}
-    );
+    await expect(async () => {
+      return await github.verify(
+        {
+          address: "0x0",
+          proofs: {
+            code,
+          },
+        } as unknown as RequestPayload,
+        {}
+      );
+    }).rejects.toThrow(new ProviderExternalVerificationError("Gitcoin Grants Statistic verification error: Some kind of error."));
 
     expect(axios.post).toHaveBeenCalledTimes(1);
     expect(axios.get).toHaveBeenCalledTimes(0);
-    expect(gitcoinPayload).toMatchObject({ valid: false });
   });
 
   it("should return invalid payload when there is no id in verifyGithub response", async () => {
@@ -271,7 +276,7 @@ describe("Attempt verification %s", function () {
     expect(gitcoinPayload).toMatchObject({ valid: false });
   });
 
-  it("should return invalid payload when a bad status code is returned by github user api", async () => {
+  it("should throw Provider External Verification error when a bad status code is returned by github user api", async () => {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://api.github.com/user") throw new Error("API EXCEPTION");
       else if (url.startsWith("https://bounties.gitcoin.co/grants/v1/api/vc/contributor_statistics"))
@@ -290,15 +295,17 @@ describe("Attempt verification %s", function () {
 
     const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
 
-    const gitcoinPayload = await github.verify(
-      {
-        address: "0x0",
-        proofs: {
-          code,
-        },
-      } as unknown as RequestPayload,
-      {}
-    );
+    await expect(async () => {
+      return await github.verify(
+        {
+          address: "0x0",
+          proofs: {
+            code,
+          },
+        } as unknown as RequestPayload,
+        {}
+      );
+    }).rejects.toThrow(new ProviderExternalVerificationError("Gitcoin Grants Statistic verification error: Error: API EXCEPTION."));
 
     expect(axios.post).toHaveBeenCalledTimes(1);
     // Check the request to get the token
@@ -315,10 +322,9 @@ describe("Attempt verification %s", function () {
     expect(mockedAxios.get).toBeCalledWith("https://api.github.com/user", {
       headers: { Authorization: `token ${githubAccessCode}` },
     });
-    expect(gitcoinPayload).toMatchObject({ valid: false });
   });
 
-  it("should return invalid payload when a bad response received when calling the github user api (exception thrown)", async () => {
+  it("should throw Provider External Verification error when a bad response received when calling the github user api (exception thrown)", async () => {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://api.github.com/user") throw "Some kind of error";
       else if (url.startsWith("https://bounties.gitcoin.co/grants/v1/api/vc/contributor_statistics"))
@@ -337,15 +343,17 @@ describe("Attempt verification %s", function () {
 
     const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
 
-    const gitcoinPayload = await github.verify(
-      {
-        address: "0x0",
-        proofs: {
-          code,
-        },
-      } as unknown as RequestPayload,
-      {}
-    );
+    await expect(async () => {
+      return await github.verify(
+        {
+          address: "0x0",
+          proofs: {
+            code,
+          },
+        } as unknown as RequestPayload,
+        {}
+      );
+    }).rejects.toThrow(new ProviderExternalVerificationError("Gitcoin Grants Statistic verification error: Some kind of error."));
 
     expect(axios.post).toHaveBeenCalledTimes(1);
     // Check the request to get the token
@@ -362,10 +370,9 @@ describe("Attempt verification %s", function () {
     expect(mockedAxios.get).toBeCalledWith("https://api.github.com/user", {
       headers: { Authorization: `token ${githubAccessCode}` },
     });
-    expect(gitcoinPayload).toMatchObject({ valid: false });
   });
 
-  it("should use the lowercase github handle when making querying the gitcoin API", async () => {
+  it("should use the lowercase github handle when making querying the gitcoin API and throw error if not", async () => {
     (axios.get as jest.Mock).mockImplementation((url) => {
       if (url === "https://api.github.com/user") {
         return Promise.resolve({
@@ -392,16 +399,17 @@ describe("Attempt verification %s", function () {
 
     const github = new GitcoinGrantStatisticsProviderTester({ threshold: 1 });
 
-    const gitcoinPayload = await github.verify(
-      {
-        address: "0x0",
-        proofs: {
-          code,
-        },
-      } as unknown as RequestPayload,
-      {}
-    );
-
+    await expect(async () => {
+      return await github.verify(
+        {
+          address: "0x0",
+          proofs: {
+            code,
+          },
+        } as unknown as RequestPayload,
+        {}
+      );
+    }).rejects.toThrowError("Gitcoin Grants Statistic verification error");
     expect(axios.post).toHaveBeenCalledTimes(1);
     // Check the request to get the token
     expect(mockedAxios.post).toBeCalledWith(
@@ -421,6 +429,5 @@ describe("Attempt verification %s", function () {
     expect(mockedAxios.get).nthCalledWith(2, `${testUrl}?github_id=18723656`, {
       headers: { Authorization: cgrantsApiToken },
     });
-    expect(gitcoinPayload).toMatchObject({ valid: false });
   });
 });

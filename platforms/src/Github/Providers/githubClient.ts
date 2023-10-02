@@ -1,6 +1,7 @@
 import { ProviderContext } from "@gitcoin/passport-types";
 import { ProviderError } from "../../utils/errors";
 import axios from "axios";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 const githubGraphEndpoint = "https://api.github.com/graphql";
 
@@ -77,41 +78,45 @@ type GithubContributionResponse = {
 };
 
 export const queryFunc = async (fromDate: string, toDate: string, accessToken: string): Promise<Viewer> => {
-  const query = `
-    query {
-      viewer {
-        createdAt
-        id
-        contributionsCollection(from: "${fromDate}", to: "${toDate}") {
-          contributionCalendar {
-            totalContributions
-            weeks {
-              contributionDays {
-                contributionCount
-                date
+  try {
+    const query = `
+      query {
+        viewer {
+          createdAt
+          id
+          contributionsCollection(from: "${fromDate}", to: "${toDate}") {
+            contributionCalendar {
+              totalContributions
+              weeks {
+                contributionDays {
+                  contributionCount
+                  date
+                }
               }
             }
           }
         }
       }
-    }
-  `;
+    `;
 
-  const result: GithubContributionResponse = await axios.post(
-    githubGraphEndpoint,
-    {
-      query,
-    },
-    {
-      headers: { Authorization: `token ${accessToken}` },
-    }
-  );
+    const result: GithubContributionResponse = await axios.post(
+      githubGraphEndpoint,
+      {
+        query,
+      },
+      {
+        headers: { Authorization: `token ${accessToken}` },
+      }
+    );
 
-  return {
-    contributionsCollection: result?.data?.data?.viewer?.contributionsCollection,
-    createdAt: result?.data?.data?.viewer?.createdAt,
-    id: result?.data?.data?.viewer?.id,
-  };
+    return {
+      contributionsCollection: result?.data?.data?.viewer?.contributionsCollection,
+      createdAt: result?.data?.data?.viewer?.createdAt,
+      id: result?.data?.data?.viewer?.id,
+    };
+  } catch (error) {
+    handleProviderAxiosError(error, "Github error retrieving contributions", [accessToken]);
+  }
 };
 
 export type ContributionRange = {
@@ -176,22 +181,26 @@ export const fetchGithubUserData = async (
 
 export const requestAccessToken = async (code: string, context: GithubContext): Promise<string> => {
   if (!context.github?.accessToken) {
-    const clientId = process.env.GITHUB_CLIENT_ID;
-    const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+    try {
+      const clientId = process.env.GITHUB_CLIENT_ID;
+      const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 
-    // Exchange the code for an access token
-    const tokenRequest = await axios.post(
-      `https://github.com/login/oauth/access_token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}`,
-      {},
-      {
-        headers: { Accept: "application/json" },
-      }
-    );
+      // Exchange the code for an access token
+      const tokenRequest = await axios.post(
+        `https://github.com/login/oauth/access_token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}`,
+        {},
+        {
+          headers: { Accept: "application/json" },
+        }
+      );
 
-    const tokenResponse = tokenRequest.data as GithubTokenResponse;
+      const tokenResponse = tokenRequest.data as GithubTokenResponse;
 
-    if (!context.github) context.github = {};
-    context.github.accessToken = tokenResponse.access_token;
+      if (!context.github) context.github = {};
+      context.github.accessToken = tokenResponse.access_token;
+    } catch (error) {
+      handleProviderAxiosError(error, "Github error requesting access token", [code]);
+    }
   }
 
   return context.github.accessToken;
@@ -202,7 +211,7 @@ export const fetchAndCheckContributions = async (
   code: string,
   numberOfDays: string,
   iterations = 3
-): Promise<{ contributionValid: boolean; errors?: string[] }> => {
+): Promise<{ contributionValid: boolean; numberOfDays?: string; errors?: string[] }> => {
   let contributionValid = false;
   // Initialize an object to keep track of unique contribution days
   const totalContributionsCalendar: { [key: string]: ContributionDay } = {};
@@ -251,7 +260,7 @@ export const fetchAndCheckContributions = async (
     }
   }
 
-  return { contributionValid };
+  return { contributionValid, numberOfDays };
 };
 
 export const getGithubUserData = async (code: string, context: GithubContext): Promise<GithubUserMetaData> => {
@@ -274,9 +283,7 @@ export const getGithubUserData = async (code: string, context: GithubContext): P
           errors: ["Error getting getting github info", "Rate limit exceeded"],
         };
       }
-      return {
-        errors: ["Error getting getting github info", `${error?.message}`],
-      };
+      handleProviderAxiosError(_error, "Error getting getting github info", [code]);
     }
   }
   return context.github.userData;

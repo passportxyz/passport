@@ -39,7 +39,7 @@ class GithubFollowersProvider implements Provider {
 
     return {
       valid: valid,
-      error: errors,
+      errors: errors,
       record: valid
         ? {
             id: verifiedPayload.id.toString() + `gte${this.minCount}GithubFollowers`,

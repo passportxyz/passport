@@ -1,6 +1,5 @@
-import { StaticJsonRpcProvider } from "@ethersproject/providers";
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Credential verification
@@ -20,25 +19,34 @@ export class EnsProvider implements Provider {
 
   // Verify that the address defined in the payload has an ENS reverse lookup registered
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    let error;
-    let valid = false;
-    let reportedName;
+    const errors = [];
+    let valid = false,
+      reportedName: string,
+      record = undefined;
 
     try {
       const provider = getRPCProvider(payload);
       reportedName = await provider.lookupAddress(payload.address);
-      valid = Boolean(reportedName);
-      if (!valid) error = ["Primary ENS name was not found for given address."];
-    } catch (e) {}
+      valid = !!reportedName;
+      if (valid) {
+        record = {
+          ens: reportedName,
+        };
+      } else {
+        errors.push("Primary ENS name was not found for given address.");
+      }
 
-    return {
-      valid: valid,
-      error: error,
-      record: valid
-        ? {
-            ens: reportedName,
-          }
-        : undefined,
-    };
+      if (!valid && errors.length === 0) {
+        errors.push("We were unable to determine the cause of your error");
+      }
+
+      return {
+        valid,
+        errors,
+        record,
+      };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Error verifying ENS name: ${String(e)}`);
+    }
   }
 }
