@@ -4,7 +4,7 @@ import React, { useContext, useState } from "react";
 
 // --- Style Components
 import { Button } from "./Button";
-import { CeramicContext, evmTypeProviders, platforms } from "../context/ceramicContext";
+import { CeramicContext, platforms } from "../context/ceramicContext";
 import { Modal, ModalContent, ModalOverlay, useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "./DoneToastContent";
 import { STAMP_PROVIDERS } from "../config/providers";
@@ -78,21 +78,6 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
         }
       }
     });
-
-    const { evmProviders, nonEvmProviders } = stampsToReverify.reduce(
-      (acc, provider) => {
-        if (evmTypeProviders.has(provider)) {
-          acc.evmProviders.push(provider);
-        } else {
-          acc.nonEvmProviders.push(provider);
-        }
-        return acc;
-      },
-      {
-        evmProviders: [] as PROVIDER_ID[],
-        nonEvmProviders: [] as PROVIDER_ID[],
-      }
-    );
 
     await claimCredentials([evmStampClaim, ...stampClaims]);
 

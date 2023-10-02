@@ -264,31 +264,6 @@ export type AllProvidersState = {
   [provider in PROVIDER_ID]?: ProviderState;
 };
 
-// Define and pre-compute sets for the platform types
-export const evmTypePlatforms = new Set<PLATFORM_ID>();
-export const nonEvmTypePlatforms = new Set<PLATFORM_ID>();
-export const evmTypeProviders = new Set<PROVIDER_ID>();
-export const nonEvmTypeProviders = new Set<PROVIDER_ID>();
-
-platforms.forEach(({ platFormGroupSpec, platform }, platformId) => {
-  if (platform.isEVM) {
-    evmTypePlatforms.add(platformId);
-  } else {
-    nonEvmTypePlatforms.add(platformId);
-  }
-  platFormGroupSpec.forEach(({ providers }) => {
-    providers.forEach(({ name }) => {
-      if (platform.isEVM) {
-        evmTypeProviders.add(name);
-      } else {
-        nonEvmTypeProviders.add(name);
-      }
-    });
-  });
-});
-
-// (([, { platformType }]) => platformType === "web3").map(([id]) => id));
-
 // Generate {<stampName>: {providerSpec, stamp}} for all stamps
 const startingAllProvidersState: AllProvidersState = Object.values(stampPlatforms).reduce(
   (allProvidersState, platform) => {
