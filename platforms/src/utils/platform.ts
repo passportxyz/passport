@@ -11,8 +11,8 @@ export type PlatformOptions = {
 };
 
 export class Platform implements PlatformType {
-  platformId: string;
-  path: string;
+  platformId = "";
+  path = "";
   clientId?: string;
   redirectUri?: string;
   state?: string;
