@@ -137,7 +137,9 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
           // We set the providerPayload to be {} by default
           // This is ok if platformId === "EVMBulkVerify"
           // For other platforms the correct providerPayload will be set below
-          let providerPayload: ProviderPayload = {};
+          let providerPayload: {
+            [k: string]: string;
+          } = {};
 
           if (platform) {
             // This if should only be true if platformId !== "EVMBulkVerify"
