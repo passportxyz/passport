@@ -100,4 +100,21 @@ describe("Welcome navigation", () => {
     );
     expect(navigate).toHaveBeenCalledWith("/welcome");
   });
+  it("should show wallet connection error toast if error is encountered", async () => {
+    renderWithContext(
+      {
+        ...mockUserContext,
+        wallet: {} as WalletState,
+        walletConnectionError: "error",
+        setWalletConnectionError: jest.fn(),
+      },
+      { ...mockCeramicContext, passport: undefined },
+      <Router>
+        <Home />
+      </Router>
+    );
+    await waitFor(() => {
+      expect(screen.getByText("Connection Error"));
+    });
+  });
 });
