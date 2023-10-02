@@ -121,14 +121,9 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
   };
 
   // fetch VCs from IAM server
-  const claimCredentials = async (
-    // platFormGroupSpec: PlatformGroupSpec[],
-    // platform: PlatformClass,
-    // selectedProviders: PROVIDER_ID[]
-    platformGroups: StampClaimForPlatform[]
-  ): Promise<any> => {
-    try {
-      for (let i = 0; i < platformGroups.length; i++) {
+  const claimCredentials = async (platformGroups: StampClaimForPlatform[]): Promise<any> => {
+    for (let i = 0; i < platformGroups.length; i++) {
+      try {
         const { platformId, selectedProviders } = platformGroups[i];
         datadogLogs.logger.info("Saving Stamp", { platform: platformId });
         const platform = platforms.get(platformId as PLATFORM_ID)?.platform;
@@ -190,17 +185,9 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
         } else {
           datadogLogs.logger.error("Request for claiming stamp for invalid platform", { platform: platformId });
         }
+      } catch (e) {
+        datadogLogs.logger.error("Verification Error", { error: e, platform: platformGroups[i] });
       }
-    } catch (e) {
-      // error: geri: error handling
-      throw e;
-      // datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
-      // doneToast(
-      //   "Verification Failed",
-      //   "There was an error verifying your stamp. Please try again.",
-      //   fail,
-      //   platform.platformId as PLATFORM_ID
-      // );
     }
   };
 

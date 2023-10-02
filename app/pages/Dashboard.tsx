@@ -51,7 +51,7 @@ export default function Dashboard() {
   const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms, cancelCeramicConnection, expiredProviders } =
     useContext(CeramicContext);
 
-  const { wallet, toggleConnection, userWarning, setUserWarning } = useContext(UserContext); // TODO: geri: remove userWarning ???
+  const { wallet, toggleConnection } = useContext(UserContext);
   const { refreshScore } = useContext(ScorerContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
