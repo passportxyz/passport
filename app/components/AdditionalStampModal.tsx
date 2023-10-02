@@ -8,7 +8,7 @@ import { UserContext } from "../context/userContext";
 // utils
 import { fetchPossibleEVMStamps, ValidatedPlatform, AdditionalSignature } from "../signer/utils";
 import { getPlatformSpec } from "../config/platforms";
-import { IAM_SIGNATURE_TYPE } from "../config/stamp_config";
+import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 
 // Components
 import { Spinner } from "@chakra-ui/react";
@@ -23,7 +23,6 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commo
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
-const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
 export const AdditionalStampModal = ({
   additionalSigner,

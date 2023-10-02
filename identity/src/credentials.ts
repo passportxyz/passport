@@ -58,7 +58,9 @@ const _issueEd25519Credential = async (
   DIDKit: DIDKitLib,
   key: string,
   expiresInSeconds: number,
-  fields: { [k: string]: any } // eslint-disable-line @typescript-eslint/no-explicit-any
+  fields: { [k: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
+  issuanceDate?: string,
+  expirationDate?: string
 ): Promise<VerifiableCredential> => {
   // get DID from key
   const issuer = DIDKit.keyToDID("key", key);
@@ -76,8 +78,8 @@ const _issueEd25519Credential = async (
       "@context": ["https://www.w3.org/2018/credentials/v1"],
       type: ["VerifiableCredential"],
       issuer,
-      issuanceDate: new Date().toISOString(),
-      expirationDate: addSeconds(new Date(), expiresInSeconds).toISOString(),
+      issuanceDate: issuanceDate ? issuanceDate : new Date().toISOString(),
+      expirationDate: expirationDate ? expirationDate : addSeconds(new Date(), expiresInSeconds).toISOString(),
       ...fields,
     }),
     verifyWithMethod,

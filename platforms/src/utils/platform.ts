@@ -11,8 +11,8 @@ export type PlatformOptions = {
 };
 
 export class Platform implements PlatformType {
-  platformId: string;
-  path: string;
+  platformId = "";
+  path = "";
   clientId?: string;
   redirectUri?: string;
   state?: string;
@@ -33,7 +33,7 @@ export class Platform implements PlatformType {
       `toolbar=no, location=no, directories=no, status=no, menubar=no, resizable=no, copyhistory=no, width=${width}, height=${height}, top=${top}, left=${left}`
     );
 
-    return appContext.waitForRedirect().then((data) => {
+    return appContext.waitForRedirect(this).then((data) => {
       return {
         code: data.code,
         sessionKey: data.state,

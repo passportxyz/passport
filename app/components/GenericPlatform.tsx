@@ -1,5 +1,5 @@
 // --- Methods
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
@@ -11,10 +11,8 @@ import {
   PROVIDER_ID,
   PLATFORM_ID,
   StampPatch,
-  SignatureType,
 } from "@gitcoin/passport-types";
-import { ProviderPayload } from "@gitcoin/passport-platforms";
-import { fetchVerifiableCredential, verifyCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Style Components
 import { SideBarContent } from "./SideBarContent";
@@ -26,18 +24,16 @@ import { JsonOutputModal } from "./JsonOutputModal";
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
+import { waitForRedirect } from "../context/stampClaimingContext";
 
 // --- Types
 import { PlatformGroupSpec } from "@gitcoin/passport-platforms";
 import { PlatformClass } from "@gitcoin/passport-platforms";
-import { getPlatformSpec } from "../config/platforms";
-import { IAM_SIGNATURE_TYPE } from "../config/stamp_config";
+import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 
 // --- Helpers
 import { difference, generateUID } from "../utils/helpers";
 
-import { debounce } from "ts-debounce";
-import { BroadcastChannel } from "broadcast-channel";
 import { datadogRum } from "@datadog/browser-rum";
 import { NoStampModal } from "./NoStampModal";
 import { PlatformScoreSpec } from "../context/scorerContext";
@@ -56,8 +52,6 @@ enum VerificationStatuses {
   PartiallyRemovedAndVerified,
   Failed,
 }
-
-const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -82,6 +76,7 @@ export const GenericPlatform = ({
   const [submitted, setSubmitted] = useState(false);
   const [verificationResponse, setVerificationResponse] = useState<CredentialResponseBody[]>([]);
   const [payloadModalIsOpen, setPayloadModalIsOpen] = useState(false);
+  // const { handleFetchCredential } = useContext(StampClaimingContext);
 
   // --- Chakra functions
   const toast = useToast();
@@ -109,34 +104,6 @@ export const GenericPlatform = ({
   useEffect(() => {
     setCanSubmit(selectedProviders.length > 0 && !arraysContainSameElements(selectedProviders, verifiedProviders));
   }, [selectedProviders, verifiedProviders]);
-
-  const waitForRedirect = (timeout?: number): Promise<ProviderPayload> => {
-    const channel = new BroadcastChannel(`${platform.path}_oauth_channel`);
-    const waitForRedirect = new Promise<ProviderPayload>((resolve, reject) => {
-      // Listener to watch for oauth redirect response on other windows (on the same host)
-      function listenForRedirect(e: { target: string; data: { code: string; state: string } }) {
-        // when receiving oauth response from a spawned child run fetchVerifiableCredential
-        if (e.target === platform.path) {
-          // pull data from message
-          const queryCode = e.data.code;
-          const queryState = e.data.state;
-          datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
-          try {
-            resolve({ code: queryCode, state: queryState });
-          } catch (e) {
-            datadogLogs.logger.error("Error saving Stamp", { platform: platform.platformId });
-            console.error(e);
-            reject(e);
-          }
-        }
-      }
-      // event handler will listen for messages from the child (debounced to avoid multiple submissions)
-      channel.onmessage = debounce(listenForRedirect, 300);
-    }).finally(() => {
-      channel.close();
-    });
-    return waitForRedirect;
-  };
 
   const handleSponsorship = async (result: string): Promise<void> => {
     if (result === "success") {

@@ -187,6 +187,7 @@ describe.only("dashboard notifications", () => {
       </Router>
     );
 
+    // We are waiting for a notification "One moment while we load your Stamps..."
     const databaseLoadingAlert = screen.getByTestId("db-stamps-alert");
     expect(databaseLoadingAlert).toBeInTheDocument();
   });

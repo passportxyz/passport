@@ -197,6 +197,7 @@ export type Stamp = {
   credential: VerifiableCredential;
 };
 
+// StampPatch should have "provider" mandatory and "credential" optional
 export type StampPatch = Pick<Stamp, "provider"> & Partial<Pick<Stamp, "credential">>;
 
 export type Passport = {

@@ -11,6 +11,7 @@ import { Chain } from "../utils/chains";
 import axios from "axios";
 import { useSetChain } from "@web3-onboard/react";
 import Tooltip from "../components/Tooltip";
+import { iamUrl } from "../config/stamp_config";
 
 export function getButtonMsg(onChainStatus: OnChainStatus): string {
   switch (onChainStatus) {
@@ -134,18 +135,14 @@ export function SyncToChainButton({ onChainStatus, chain, className }: SyncToCha
             chainIdHex: chain.id,
           };
 
-          const { data }: { data: EasPayload } = await axios.post(
-            `${process.env.NEXT_PUBLIC_PASSPORT_IAM_URL}v0.0.0/eas/passport`,
-            payload,
-            {
-              headers: {
-                "Content-Type": "application/json",
-              },
-              transformRequest: [
-                (data: any) => JSON.stringify(data, (_k, v) => (typeof v === "bigint" ? v.toString() : v)),
-              ],
-            }
-          );
+          const { data }: { data: EasPayload } = await axios.post(`${iamUrl}v0.0.0/eas/passport`, payload, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            transformRequest: [
+              (data: any) => JSON.stringify(data, (_k, v) => (typeof v === "bigint" ? v.toString() : v)),
+            ],
+          });
 
           if (data.error) {
             console.error(

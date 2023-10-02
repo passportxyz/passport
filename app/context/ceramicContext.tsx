@@ -66,6 +66,7 @@ export interface CeramicContextState {
   cancelCeramicConnection: () => void;
   userDid: string | undefined;
   expiredProviders: PROVIDER_ID[];
+  expiredPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>>;
   passportHasCacaoError: boolean;
   passportLoadResponse?: PassportLoadResponse;
   verifiedProviderIds: PROVIDER_ID[];
@@ -73,6 +74,7 @@ export interface CeramicContextState {
 }
 
 export const platforms = new Map<PLATFORM_ID, PlatformProps>();
+
 platforms.set("Twitter", {
   platform: new Twitter.TwitterPlatform(),
   platFormGroupSpec: Twitter.ProviderConfig,
@@ -176,6 +178,7 @@ platforms.set("Brightid", {
   platform: new Brightid.BrightidPlatform(),
   platFormGroupSpec: Brightid.ProviderConfig,
 });
+
 platforms.set("Coinbase", {
   platform: new Coinbase.CoinbasePlatform({
     clientId: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CLIENT_ID,
@@ -299,6 +302,7 @@ const startingState: CeramicContextState = {
   cancelCeramicConnection: () => {},
   userDid: undefined,
   expiredProviders: [],
+  expiredPlatforms: {},
   passportLoadResponse: undefined,
   verifiedProviderIds: [],
   verifiedPlatforms: {},
@@ -325,13 +329,13 @@ export const cleanPassport = (
           return false;
         }
 
-        const has_expired = new Date(stamp.credential.expirationDate) < new Date();
-        if (has_expired) {
-          tempExpiredProviders.push(providerId);
-        }
-
         const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
         const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
+        const has_expired = new Date(stamp.credential.expirationDate) < new Date();
+
+        if (has_expired && has_correct_issuer && has_correct_subject) {
+          tempExpiredProviders.push(providerId);
+        }
 
         return !has_expired && has_correct_issuer && has_correct_subject;
       } else {
@@ -638,6 +642,20 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     [verifiedProviderIds, platforms]
   );
 
+  const expiredPlatforms = useMemo(
+    () =>
+      Object.entries(Object.fromEntries(platforms)).reduce((validPlatformProps, [platformKey, platformProps]) => {
+        if (
+          platformProps.platFormGroupSpec.some(({ providers }) =>
+            providers.some(({ name }) => expiredProviders.includes(name))
+          )
+        )
+          validPlatformProps[platformKey as PLATFORM_ID] = platformProps;
+        return validPlatformProps;
+      }, {} as Record<PLATFORM_ID, PlatformProps>),
+    [verifiedProviderIds, platforms]
+  );
+
   const providerProps = {
     passport,
     isLoadingPassport,
@@ -650,6 +668,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     cancelCeramicConnection,
     userDid,
     expiredProviders,
+    expiredPlatforms,
     passportLoadResponse,
     passportHasCacaoError,
     verifiedProviderIds,

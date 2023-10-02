@@ -21,6 +21,7 @@ import { Provider as SelfIdProvider } from "@self.id/framework";
 import TagManager from "react-gtm-module";
 
 import { themes, ThemeWrapper } from "../utils/theme";
+import { StampClaimingContextProvider } from "../context/stampClaimingContext";
 
 const FacebookAppId = process.env.NEXT_PUBLIC_PASSPORT_FACEBOOK_APP_ID || "";
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
@@ -165,15 +166,17 @@ function App({ Component, pageProps }: AppProps) {
           <OnChainContextProvider>
             <ScorerContextProvider>
               <CeramicContextProvider>
-                <ManageAccountCenter>
-                  <div className="font-body" suppressHydrationWarning>
-                    {typeof window === "undefined" ? null : (
-                      <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
-                        <Component {...pageProps} />
-                      </ThemeWrapper>
-                    )}
-                  </div>
-                </ManageAccountCenter>
+                <StampClaimingContextProvider>
+                  <ManageAccountCenter>
+                    <div className="font-body" suppressHydrationWarning>
+                      {typeof window === "undefined" ? null : (
+                        <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                          <Component {...pageProps} />
+                        </ThemeWrapper>
+                      )}
+                    </div>
+                  </ManageAccountCenter>
+                </StampClaimingContextProvider>
               </CeramicContextProvider>
             </ScorerContextProvider>
           </OnChainContextProvider>

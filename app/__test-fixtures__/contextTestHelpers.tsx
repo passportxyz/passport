@@ -1,6 +1,6 @@
 import { UserContext, UserContextState } from "../context/userContext";
 import { ScorerContext, ScorerContextState } from "../context/scorerContext";
-import { CeramicContext, CeramicContextState, IsLoadingPassportState } from "../context/ceramicContext";
+import { CeramicContext, CeramicContextState, IsLoadingPassportState, platforms } from "../context/ceramicContext";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 import { mockAddress, mockWallet } from "./onboardHookValues";
 import React from "react";
@@ -8,6 +8,7 @@ import { render } from "@testing-library/react";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
 import { OnChainContextState } from "../context/onChainContext";
+import { StampClaimingContext, StampClaimingContextState } from "../context/stampClaimingContext";
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -137,10 +138,41 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
     handleCreatePassport: jest.fn(),
     handleDeleteStamps: jest.fn(),
     expiredProviders: [],
+    expiredPlatforms: {},
     passportHasCacaoError: false,
     cancelCeramicConnection: jest.fn(),
     verifiedProviderIds: [],
     verifiedPlatforms: {},
+    ...initialState,
+  };
+};
+
+export const makeTestCeramicContextWithExpiredStamps = (
+  initialState?: Partial<CeramicContextState>
+): CeramicContextState => {
+  let expiredPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>> = {};
+
+  const ethPlatform = platforms.get("ETH");
+
+  if (ethPlatform) {
+    expiredPlatforms["ETH"] = {
+      platform: ethPlatform.platform,
+      platFormGroupSpec: ethPlatform.platFormGroupSpec,
+    };
+  }
+
+  return {
+    ...makeTestCeramicContext(initialState),
+    expiredPlatforms,
+    expiredProviders: ["ethPossessionsGte#1"],
+  };
+};
+
+export const makeTestClaimingContext = (
+  initialState?: Partial<StampClaimingContextState>
+): StampClaimingContextState => {
+  return {
+    claimCredentials: jest.fn(),
     ...initialState,
   };
 };

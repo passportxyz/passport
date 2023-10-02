@@ -25,9 +25,7 @@ import { Button } from "./Button";
 import { LoadButton } from "./LoadButton";
 
 // -- Utils
-import { IAM_SIGNATURE_TYPE } from "../config/stamp_config";
-
-const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
+import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 
 export type RefreshMyStampsModalContentProps = {
   resetStampsAndProgressState: () => void;

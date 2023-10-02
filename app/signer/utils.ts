@@ -8,8 +8,8 @@ import { PlatformProps } from "../components/GenericPlatform";
 import { PlatformGroupSpec } from "../config/providers";
 
 import axios from "axios";
+import { iamUrl } from "../config/stamp_config";
 
-const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 const providerId: PROVIDER_ID = "Signer";
 const signerUrl = process.env.NEXT_PUBLIC_PASSPORT_SIGNER_URL || "http://localhost:8000/";
 export type AdditionalSignature = { addr: string; sig: string; msg: string; challenge: VerifiableCredential };

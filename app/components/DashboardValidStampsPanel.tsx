@@ -74,7 +74,7 @@ export const DashboardValidStampsPanel = ({ className }: { className: string }) 
       className={`flex flex-col items-center rounded border border-foreground-3 bg-gradient-to-b from-background to-background-2 text-xl text-foreground-2 ${className}`}
     >
       <div className="my-2">Valid Stamps</div>
-      <div className="h-[2px] w-full bg-gradient-to-r from-background-4 via-foreground-2 to-background" />
+      <div className="h-[2px] w-full bg-gradient-to-r from-background via-foreground-2 to-background" />
       <StampsList className="m-6" onChainPlatformIds={onChainPlatformIds} />
       <InitiateOnChainButton className="mb-2" />
       <span className={`mb-2 text-sm ${anyOnchain ? "visible" : "invisible"}`}>
