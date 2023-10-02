@@ -36,7 +36,7 @@ const ExpiredStampsList = ({ className }: StampsListProps) => {
 
 export const ExpiredStampsPanel = ({ className }: { className: string }) => {
   const { expiredProviders } = useContext(CeramicContext);
-  console.log("ExpiredStampsPanel", expiredProviders);
+
   return (
     <div
       className={`flex flex-col items-center rounded border border-foreground-3 bg-gradient-to-b from-background to-background-2 text-xl text-foreground-2 ${className}`}
