@@ -4,8 +4,7 @@
     { "path": "app" },
     { "path": "iam" },
     { "path": "identity" },
-    { "path": "types" },
-    // { "path": "signer" }
+    { "path": "types" }
   ],
   "exclude": ["node_modules"]
 }
