@@ -30,6 +30,7 @@ export const makeTestUserContext = (initialState?: Partial<UserContextState>): U
     dbAccessTokenStatus: "idle",
     userWarning: undefined,
     setUserWarning: jest.fn(),
+    setWalletConnectionError: jest.fn(),
     ...initialState,
   };
 };

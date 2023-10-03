@@ -54,6 +54,8 @@ export interface UserContextState {
   loggingIn: boolean;
   userWarning?: UserWarning;
   setUserWarning: (warning?: UserWarning) => void;
+  walletConnectionError?: string;
+  setWalletConnectionError: (error?: string) => void;
 }
 
 const startingState: UserContextState = {
@@ -69,6 +71,7 @@ const startingState: UserContextState = {
   loggingIn: false,
   userWarning: undefined,
   setUserWarning: () => {},
+  setWalletConnectionError: () => {},
 };
 
 export const pillLocalStorage = (platform?: string): void => {
@@ -98,6 +101,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   const [loggingIn, setLoggingIn] = useState<boolean>(false);
   const [dbAccessToken, setDbAccessToken] = useState<string | undefined>();
   const [dbAccessTokenStatus, setDbAccessTokenStatus] = useState<DbAuthTokenStatus>("idle");
+  const [walletConnectionError, setWalletConnectionError] = useState<string | undefined>();
 
   // clear all state
   const clearState = (): void => {
@@ -194,6 +198,18 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     }
   };
 
+  const handleConnectionError = async (sessionKey: string, dbCacheTokenKey: string, wallet: WalletState) => {
+    // disconnect wallet
+    await disconnect({
+      label: wallet.label || "",
+    });
+    // then clear local state
+    clearState();
+
+    window.localStorage.removeItem(sessionKey);
+    window.localStorage.removeItem(dbCacheTokenKey);
+  };
+
   // Attempt to login to Ceramic (on mainnet only)
   const passportLogin = async (): Promise<void> => {
     // check that passportLogin isn't mid-way through
@@ -202,6 +218,10 @@ export const UserContextProvider = ({ children }: { children: any }) => {
       const hasCorrectChainId = MULTICHAIN_ENABLED ? true : await ensureMainnet();
       // mark that we're attempting to login
       setLoggingIn(true);
+
+      let sessionKey = "";
+      let dbCacheTokenKey = "";
+
       // with loaded chainId
       if (hasCorrectChainId) {
         // store in localstorage
@@ -210,18 +230,16 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         try {
           const address = wallet.accounts[0].address;
           const ethAuthProvider = new EthereumAuthProvider(wallet.provider, wallet.accounts[0].address.toLowerCase());
-
           // Sessions will be serialized and stored in localhost
           // The sessions are bound to an ETH address, this is why we use the address in the session key
-          const sessionKey = `didsession-${address}`;
-          const dbCacheTokenKey = `dbcache-token-${address}`;
+          sessionKey = `didsession-${address}`;
+          dbCacheTokenKey = `dbcache-token-${address}`;
           const sessionStr = window.localStorage.getItem(sessionKey);
 
           // @ts-ignore
           // When sessionStr is null, this will create a new selfId. We want to avoid this, becasue we want to make sure
           // that chainId 1 is in the did
           let selfId = !!sessionStr ? await ceramicConnect(ethAuthProvider, sessionStr) : null;
-
           if (
             // @ts-ignore
             !selfId ||
@@ -263,16 +281,12 @@ export const UserContextProvider = ({ children }: { children: any }) => {
             // @ts-ignore
             selfId?.client?.session?.expireInSecs < 3600
           ) {
-            // disconnect from the invalid chain
-            await disconnect({
-              label: wallet.label || "",
-            });
-            // then clear local state
-            clearState();
-
-            window.localStorage.removeItem(sessionKey);
-            window.localStorage.removeItem(dbCacheTokenKey);
+            await handleConnectionError(sessionKey, dbCacheTokenKey, wallet);
           }
+        } catch (error) {
+          await handleConnectionError(sessionKey, dbCacheTokenKey, wallet);
+          setWalletConnectionError((error as Error).message);
+          datadogRum.addError(error);
         } finally {
           // mark that this login attempt is complete
           setLoggingIn(false);
@@ -423,6 +437,8 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     loggingIn,
     userWarning,
     setUserWarning,
+    walletConnectionError,
+    setWalletConnectionError,
   };
 
   return <UserContext.Provider value={providerProps}>{children}</UserContext.Provider>;
