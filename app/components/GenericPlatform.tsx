@@ -35,7 +35,6 @@ import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 import { difference, generateUID } from "../utils/helpers";
 
 import { datadogRum } from "@datadog/browser-rum";
-import { NoStampModal } from "./NoStampModal";
 import { PlatformScoreSpec } from "../context/scorerContext";
 
 export type PlatformProps = {
@@ -72,7 +71,6 @@ export const GenericPlatform = ({
   const { handlePatchStamps, verifiedProviderIds, userDid } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
-  const [showNoStampModal, setShowNoStampModal] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [verificationResponse, setVerificationResponse] = useState<CredentialResponseBody[]>([]);
   const [payloadModalIsOpen, setPayloadModalIsOpen] = useState(false);
@@ -224,14 +222,6 @@ export const GenericPlatform = ({
         initialMinusUpdated,
         updatedMinusInitial
       );
-
-      if (
-        verificationStatus === VerificationStatuses.Failed &&
-        platform.isEVM &&
-        process.env.NEXT_PUBLIC_FF_MULTI_EVM_SIGNER === "on"
-      ) {
-        setShowNoStampModal(true);
-      }
 
       // Get the done toast messages
       const { title, body, icon, platformId } = getDoneToastMessages(
@@ -423,7 +413,6 @@ export const GenericPlatform = ({
         subheading="To preserve your privacy, error information is not stored; please share with Gitcoin support at your discretion."
         jsonOutput={verificationResponse}
       />
-      <NoStampModal isOpen={showNoStampModal} onClose={() => setShowNoStampModal(false)} />
     </>
   );
 };
