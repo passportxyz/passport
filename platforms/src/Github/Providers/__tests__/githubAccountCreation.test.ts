@@ -62,7 +62,7 @@ describe("GithubAccountCreationProvider", function () {
     expect(fetchGithubUserData).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: false,
-      errors: [`Github account age, 0, is less than the required 365 days (created at ${isoDate})`],
+      errors: [expect.stringMatching("Github account age, 0, is less than the required 365 days")],
       record: undefined,
     });
   });

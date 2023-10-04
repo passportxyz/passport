@@ -14,6 +14,7 @@ import { IdenaStake100kProvider, IdenaStake10kProvider, IdenaStake1kProvider } f
 
 // ----- Libs
 import axios from "axios";
+import { ProviderExternalVerificationError, ProviderInternalVerificationError } from "../../types";
 
 jest.mock("axios");
 
@@ -121,41 +122,43 @@ describe("Attempt verification", function () {
     expect(mockedAxios.get).toBeCalledTimes(2);
     expect(mockedAxios.get).toBeCalledWith(`/api/identity/${MOCK_ADDRESS}/age`);
     expect(mockedAxios.get).toBeCalledWith("/api/epoch/last");
-    expect(verifiedPayload).toEqual({
-      valid: false,
-    });
+    expect(verifiedPayload).toEqual(
+      expect.objectContaining({
+        valid: false,
+        errors: [`Idena age "${ageResponse.data.result}" is less than required age of "10" epochs`],
+      })
+    );
   });
 
-  it("should return false for wrong sessionKey", async () => {
+  it("should return ProviderInternalVerificationError for wrong sessionKey", async () => {
     const provider = new IdenaAge5Provider();
     const payload = {
       proofs: {
         sessionKey: "sessionKey_wrong",
       },
     };
-    const verifiedPayload = await provider.verify(payload as unknown as RequestPayload, {} as IdenaContext);
+    await expect(provider.verify(payload as unknown as RequestPayload, {} as IdenaContext)).rejects.toThrow(
+      ProviderInternalVerificationError
+    );
     expect(mockedAxios.get).toBeCalledTimes(0);
-    expect(verifiedPayload).toEqual({
-      valid: false,
-    });
   });
 
-  it("should return false when the Idena API returns wrong response", async () => {
+  it("should throw ProviderExternalVerificationError return false when the Idena API returns an error response", async () => {
     mockedAxios.get.mockImplementation(async (url, config) => {
-      throw new Error("error");
+      throw new Error("Error");
     });
+    mockedAxios.isAxiosError.mockReturnValue(true);
     const provider = new IdenaAge5Provider();
     const payload = {
       proofs: {
         sessionKey: MOCK_SESSION_KEY,
       },
     };
-    const verifiedPayload = await provider.verify(payload as unknown as RequestPayload, {} as IdenaContext);
+    await expect(provider.verify(payload as unknown as RequestPayload, {} as IdenaContext)).rejects.toThrow(
+      ProviderExternalVerificationError
+    );
     expect(mockedAxios.get).toBeCalledTimes(1);
     expect(mockedAxios.get).toBeCalledWith(`/api/identity/${MOCK_ADDRESS}/age`);
-    expect(verifiedPayload).toEqual({
-      valid: false,
-    });
   });
 
   it("shouldn't duplicate requests to the Idena API within the same context", async () => {
@@ -214,6 +217,24 @@ describe("Check valid cases for state providers", function () {
       },
       expiresInSeconds: 86401,
     });
+  });
+
+  it("Incorrect state", async () => {
+    identityResponse.data.result.state = "Verified";
+    const provider = new IdenaStateNewbieProvider();
+    const payload = {
+      proofs: {
+        sessionKey: MOCK_SESSION_KEY,
+      },
+    };
+    const verifiedPayload = await provider.verify(payload as unknown as RequestPayload, {} as IdenaContext);
+
+    expect(verifiedPayload).toEqual(
+      expect.objectContaining({
+        valid: false,
+        errors: [`State "${identityResponse.data.result.state}" does not match required state "Newbie"`],
+      })
+    );
   });
 
   it("Expected Verified state", async () => {
@@ -293,5 +314,31 @@ describe("Check valid cases for stake balance providers", function () {
       },
       expiresInSeconds: 86401,
     });
+  });
+
+  it("Incorrect stake", async () => {
+    const stakeResponse = {
+      data: { result: { stake: "10000.123" } },
+      status: 200,
+    };
+
+    mockedAxios.get.mockImplementation(async (url, config) => {
+      return stakeResponse;
+    });
+
+    const provider = new IdenaStake100kProvider();
+    const payload = {
+      proofs: {
+        sessionKey: MOCK_SESSION_KEY,
+      },
+    };
+    const verifiedPayload = await provider.verify(payload as unknown as RequestPayload, {} as IdenaContext);
+
+    expect(verifiedPayload).toEqual(
+      expect.objectContaining({
+        valid: false,
+        errors: [`Stake "${stakeResponse.data.result.stake}" is not greater than minimum "100000" iDna`],
+      })
+    );
   });
 });

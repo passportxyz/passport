@@ -25,17 +25,15 @@ abstract class IdenaStateProvider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload, context: IdenaContext): Promise<VerifiedPayload> {
     const token = payload.proofs.sessionKey;
-    const { valid, address, expiresInSeconds } = await checkState(token, context, this.state);
-    if (!valid) {
-      return { valid: false };
-    }
+    const { valid, address, expiresInSeconds, errors } = await checkState(token, context, this.state);
     return {
-      valid: true,
+      valid,
       record: {
-        address: address,
+        address,
         state: this.state,
       },
-      expiresInSeconds: expiresInSeconds,
+      errors,
+      expiresInSeconds,
     };
   }
 }
@@ -65,12 +63,11 @@ const checkState = async (
   token: string,
   context: IdenaContext,
   expectedState: string
-): Promise<{ valid: boolean; address?: string; expiresInSeconds?: number }> => {
-  try {
-    const result = await requestIdentityState(token, context);
-    const expiresInSeconds = Math.max((new Date(result.expirationDate).getTime() - new Date().getTime()) / 1000, 0);
-    return { valid: result.state === expectedState, address: result.address, expiresInSeconds };
-  } catch (e) {
-    return { valid: false };
+): Promise<{ valid: boolean; address?: string; expiresInSeconds?: number; errors?: string[] }> => {
+  const result = await requestIdentityState(token, context);
+  const expiresInSeconds = Math.max((new Date(result.expirationDate).getTime() - new Date().getTime()) / 1000, 0);
+  if (result.state === expectedState) {
+    return { valid: true, address: result.address, expiresInSeconds };
   }
+  return { valid: false, errors: [`State "${result.state}" does not match required state "${expectedState}"`] };
 };
