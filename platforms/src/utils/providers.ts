@@ -2,6 +2,13 @@
 import { Provider, ProviderExternalVerificationError, ProviderInternalVerificationError } from "../types";
 import type { RequestPayload, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
 
+class NoFailureReasonError extends Error {
+  constructor() {
+    super("No failure reason provided");
+    this.name = "NoFailureReasonError";
+  }
+}
+
 function reportUnhandledError(type: string, address: string, e: unknown) {
   if (process.env.EXIT_ON_UNHANDLED_ERROR === "true" && process.env.NODE_ENV === "development") {
     // To be used when running locally to ensure that unhandled errors are fixed
@@ -41,7 +48,7 @@ export class Providers {
       try {
         const result = await provider.verify(payload, context);
         if (!result.valid && !result.errors) {
-          reportUnhandledError(type, payload.address, new Error("No reason provided for invalid payload"));
+          reportUnhandledError(type, payload.address, new NoFailureReasonError());
         }
         return result;
       } catch (e) {
