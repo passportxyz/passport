@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2023-10-06T18:42:44.883Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36" etag="Ub7w-y1Sxp801fOdF499" version="22.0.3" type="github">
+<mxfile host="app.diagrams.net" modified="2023-10-06T19:15:27.796Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36" etag="GBIjQ7DWq147Qv0_C6JO" version="22.0.3" type="github">
   <diagram id="prtHgNgQTEPvFCAcTncT" name="Page-1">
-    <mxGraphModel dx="2897" dy="1438" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="2983" dy="1564" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -203,7 +203,7 @@
         <mxCell id="uYgZu5FIEDiZeXpY4sAn-86" value="Gitcoin Gate &amp;nbsp;(coming soon)" style="verticalLabelPosition=bottom;sketch=0;aspect=fixed;html=1;verticalAlign=top;align=center;outlineConnect=0;shape=mxgraph.citrix.document;fillColor=none;strokeColor=default;dashed=1;dashPattern=12 12;" parent="uYgZu5FIEDiZeXpY4sAn-7" vertex="1">
           <mxGeometry x="910" y="250" width="47" height="72" as="geometry" />
         </mxCell>
-        <mxCell id="uYgZu5FIEDiZeXpY4sAn-88" value="- helper contracts to allow one to check a users score &amp;amp; attestations&lt;br&gt;- &quot;Gitcoin Gate&quot; would be a abase class to implement modifiers for gating contract calls" style="whiteSpace=wrap;html=1;shape=mxgraph.basic.document;align=left;" parent="uYgZu5FIEDiZeXpY4sAn-7" vertex="1">
+        <mxCell id="uYgZu5FIEDiZeXpY4sAn-88" value="- helper contracts to allow one to check a users score &amp;amp; attestations&lt;br&gt;- &quot;Gitcoin Gate&quot; would be a base class to implement modifiers for gating contract calls" style="whiteSpace=wrap;html=1;shape=mxgraph.basic.document;align=left;" parent="uYgZu5FIEDiZeXpY4sAn-7" vertex="1">
           <mxGeometry x="1100" y="90" width="190" height="180" as="geometry" />
         </mxCell>
         <mxCell id="uYgZu5FIEDiZeXpY4sAn-9" value="Ceramic" style="swimlane;whiteSpace=wrap;html=1;startSize=23;" parent="1" vertex="1">
@@ -224,16 +224,27 @@
         <mxCell id="uYgZu5FIEDiZeXpY4sAn-89" value="GraphQL API" style="sketch=0;html=1;dashed=0;whitespace=wrap;fillColor=#2875E2;strokeColor=#ffffff;points=[[0.005,0.63,0],[0.1,0.2,0],[0.9,0.2,0],[0.5,0,0],[0.995,0.63,0],[0.72,0.99,0],[0.5,1,0],[0.28,0.99,0]];verticalLabelPosition=bottom;align=center;verticalAlign=top;shape=mxgraph.kubernetes.icon;prIcon=api" parent="uYgZu5FIEDiZeXpY4sAn-9" vertex="1">
           <mxGeometry x="430" y="159" width="100" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="uYgZu5FIEDiZeXpY4sAn-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.005;entryY=0.63;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="uYgZu5FIEDiZeXpY4sAn-25" target="uYgZu5FIEDiZeXpY4sAn-21" edge="1">
-          <mxGeometry relative="1" as="geometry">
+        <mxCell id="uYgZu5FIEDiZeXpY4sAn-28" value="&lt;span style=&quot;color: rgb(0, 0, 0); font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(251, 251, 251); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;&quot;&gt;&amp;nbsp;using&amp;nbsp; https://api.scorer.gitcoin.co/registry&amp;nbsp;&lt;/span&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.005;entryY=0.63;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1.002;exitY=0.614;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="GmmuWClhJtt8EoiDCNr1-8" target="uYgZu5FIEDiZeXpY4sAn-21" edge="1">
+          <mxGeometry x="0.0011" relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="-460" y="257" />
-              <mxPoint x="-460" y="257" />
+              <mxPoint x="-468" y="262" />
+              <mxPoint x="-468" y="257" />
+            </Array>
+            <mxPoint x="-390" y="300" as="sourcePoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="GmmuWClhJtt8EoiDCNr1-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fillColor=#fa6800;strokeColor=#C73500;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="GmmuWClhJtt8EoiDCNr1-7" target="uYgZu5FIEDiZeXpY4sAn-52">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-670" y="400" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="-565" y="560" />
+              <mxPoint x="794" y="560" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="uYgZu5FIEDiZeXpY4sAn-25" value="Integrator / Partner&lt;br&gt;using&lt;br&gt;https://api.scorer.gitcoin.co/docs" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
-          <mxGeometry x="-600" y="220" width="30" height="60" as="geometry" />
+        <mxCell id="uYgZu5FIEDiZeXpY4sAn-25" value="Integrator / Partner" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
+          <mxGeometry x="-760" y="260" width="30" height="60" as="geometry" />
         </mxCell>
         <mxCell id="uYgZu5FIEDiZeXpY4sAn-33" value="Alchemy API (for certain providers)" style="sketch=0;html=1;dashed=0;whitespace=wrap;fillColor=#2875E2;strokeColor=#ffffff;points=[[0.005,0.63,0],[0.1,0.2,0],[0.9,0.2,0],[0.5,0,0],[0.995,0.63,0],[0.72,0.99,0],[0.5,1,0],[0.28,0.99,0]];verticalLabelPosition=bottom;align=center;verticalAlign=top;shape=mxgraph.kubernetes.icon;prIcon=api" parent="1" vertex="1">
           <mxGeometry x="1090" y="560" width="100" height="90" as="geometry" />
@@ -310,6 +321,12 @@
         </mxCell>
         <mxCell id="tRTAsfZlV08TQ8dc1hLh-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="uYgZu5FIEDiZeXpY4sAn-16" target="tRTAsfZlV08TQ8dc1hLh-14" edge="1">
           <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="GmmuWClhJtt8EoiDCNr1-7" value="Web3 Integration&lt;br&gt;see&amp;nbsp;https://github.com/gitcoinco/eas-proxy/tree/main/docs" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-670" y="320" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="GmmuWClhJtt8EoiDCNr1-8" value="Web2 Integration&lt;br&gt;using API drom https://api.scorer.gitcoin.co/docs&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-670" y="225" width="210" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
