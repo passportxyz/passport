@@ -7,6 +7,7 @@ import * as awsx from "@pulumi/awsx";
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
 export const domain = `iam.${process.env["DOMAIN"]}`; // like: iam.review.passport.gitcoin.co
 let IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
+let PASSPORT_VC_SECRETS_ARN = `${process.env["PASSPORT_VC_SECRETS_ARN"]}`;
 
 export const dockerGtcPassportIamImage = `${process.env["DOCKER_GTC_PASSPORT_IAM_IMAGE"]}`;
 
@@ -130,7 +131,7 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
           {
             Action: ["secretsmanager:GetSecretValue"],
             Effect: "Allow",
-            Resource: IAM_SERVER_SSM_ARN,
+            Resource: [IAM_SERVER_SSM_ARN, PASSPORT_VC_SECRETS_ARN],
           },
         ],
       }),
@@ -164,7 +165,7 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
         secrets: [
           {
             name: "IAM_JWK",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:IAM_JWK::`,
+            valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK::`,
           },
           {
             name: "GOOGLE_CLIENT_ID",
@@ -332,7 +333,7 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
           },
           {
             name: "IAM_JWK_EIP712",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:IAM_JWK_EIP712::`,
+            valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK_EIP712::`,
           },
         ],
       },
