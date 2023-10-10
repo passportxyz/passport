@@ -6,8 +6,6 @@ type AttestationProviderStatus = "enabled" | "comingSoon" | "disabled";
 type BaseProviderConfig = {
   name: string;
   status: AttestationProviderStatus;
-  // Only for testing/rollout
-  overrideVerifierAddress?: string;
 };
 
 type EASConfig = BaseProviderConfig & {
@@ -15,11 +13,12 @@ type EASConfig = BaseProviderConfig & {
   easScanUrl: string;
 };
 
-type VeraxConfig = BaseProviderConfig & {
-  name: "Verax";
+type VeraxAndEASConfig = BaseProviderConfig & {
+  name: "Verax + EAS";
+  easScanUrl: string;
 };
 
-export type AttestationProviderConfig = EASConfig | VeraxConfig;
+export type AttestationProviderConfig = EASConfig | VeraxAndEASConfig;
 
 export interface AttestationProvider {
   name: string;
@@ -34,21 +33,11 @@ class BaseAttestationProvider implements AttestationProvider {
   name = "Override this class";
   status: AttestationProviderStatus;
   hasWebViewer = false;
-  overrideVerifierAddress?: string;
   chainId: string;
 
-  constructor({
-    chainId,
-    status,
-    overrideVerifierAddress,
-  }: {
-    chainId: string;
-    status: AttestationProviderStatus;
-    overrideVerifierAddress?: string;
-  }) {
+  constructor({ chainId, status }: { chainId: string; status: AttestationProviderStatus }) {
     this.chainId = chainId;
     this.status = status;
-    this.overrideVerifierAddress = overrideVerifierAddress;
   }
 
   viewerUrl(_address: string): string {
@@ -63,7 +52,7 @@ class BaseAttestationProvider implements AttestationProvider {
   }
 
   verifierAddress(): string {
-    return this.overrideVerifierAddress || this.onchainInfo().GitcoinVerifier.address;
+    return this.onchainInfo().GitcoinVerifier.address;
   }
 
   verifierAbi(): any {
@@ -80,14 +69,12 @@ export class EASAttestationProvider extends BaseAttestationProvider {
     chainId,
     status,
     easScanUrl,
-    overrideVerifierAddress,
   }: {
     chainId: string;
     status: AttestationProviderStatus;
-    overrideVerifierAddress?: string;
     easScanUrl: string;
   }) {
-    super({ status, overrideVerifierAddress, chainId });
+    super({ status, chainId });
     this.easScanUrl = easScanUrl;
   }
 
@@ -96,6 +83,6 @@ export class EASAttestationProvider extends BaseAttestationProvider {
   }
 }
 
-export class VeraxAttestationProvider extends BaseAttestationProvider {
-  name = "Verax";
+export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
+  name = "Verax + EAS";
 }

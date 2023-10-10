@@ -83,7 +83,7 @@ export function NetworkCard({ chain }: { chain: Chain }) {
           <div>
             <div className="flex w-full flex-col">
               <h1 className="text-lg text-color-1">{chain.label}</h1>
-              {FeatureFlags.FF_LINEA_ATTESTATIONS && <h2 className="text-sm">{chain.attestationProvider?.name}</h2>}
+              <h2 className="text-sm">{chain.attestationProvider?.name}</h2>
               <p className="mt-2 md:inline-block">
                 {onChainLastUpdates[chain.id] ? onChainLastUpdates[chain.id].toLocaleString() : "Not moved yet"}
               </p>
