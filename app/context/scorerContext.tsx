@@ -75,21 +75,35 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const [stampWeights, setStampWeights] = useState<Partial<Weights>>({});
   const [scoredPlatforms, setScoredPlatforms] = useState<PlatformScoreSpec[]>([]);
 
-  const loadScore = async (address: string | undefined, dbAccessToken: string): Promise<string> => {
+  const loadScore = async (
+    address: string | undefined,
+    dbAccessToken: string,
+    rescore: boolean = false
+  ): Promise<string> => {
     try {
       setScoreState("APP_INITIAL");
-      const response = await axios.get(`${scorerApiGetScore}/${address}`, {
-        headers: {
-          Authorization: `Bearer ${dbAccessToken}`,
-        },
-      });
+      let response;
+      try {
+        response = await axios({
+          url: `${scorerApiGetScore}/${address}`,
+          method: rescore ? "post" : "get",
+          headers: {
+            Authorization: `Bearer ${dbAccessToken}`,
+          },
+        });
+      } catch (e) {
+        // Rethrow if this is already rescoring, to avoid loop
+        if (rescore) throw e;
+        else return loadScore(address, dbAccessToken, true);
+      }
       setScoreState(response.data.status);
       if (response.data.status === "DONE") {
-        setScore(response.data.score);
-
         const numRawScore = Number.parseFloat(response.data.evidence.rawScore);
         const numThreshold = Number.parseFloat(response.data.evidence.threshold);
         const numScore = Number.parseFloat(response.data.score);
+
+        if (needsRescore(rescore, numRawScore, response.data.stamp_scores))
+          return loadScore(address, dbAccessToken, true);
 
         setRawScore(numRawScore);
         setThreshold(numThreshold);
@@ -107,6 +121,16 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     } catch (error) {
       throw error;
     }
+  };
+
+  const needsRescore = (currentlyRescoring: boolean, rawScore: number, stamp_scores: any): boolean => {
+    let needsRescore = rawScore > 0;
+    if (!currentlyRescoring && needsRescore) {
+      try {
+        if (Object.keys(stamp_scores).length > 0) needsRescore = false;
+      } catch {}
+    }
+    return needsRescore;
   };
 
   const fetchStampWeights = async () => {
