@@ -3,7 +3,7 @@ import {
   AttestationProvider,
   AttestationProviderConfig,
   EASAttestationProvider,
-  VeraxAttestationProvider,
+  VeraxAndEASAttestationProvider,
 } from "./AttestationProvider";
 
 // RPC urls
@@ -47,8 +47,8 @@ export class Chain {
         case "Ethereum Attestation Service":
           this.attestationProvider = new EASAttestationProvider(attestationConfig);
           break;
-        case "Verax":
-          this.attestationProvider = new VeraxAttestationProvider(attestationConfig);
+        case "Verax + EAS":
+          this.attestationProvider = new VeraxAndEASAttestationProvider(attestationConfig);
           break;
         default:
           break;
@@ -96,9 +96,7 @@ if (usingTestEnvironment) {
       easScanUrl: "https://base-goerli.easscan.org",
     },
   });
-}
 
-if (FeatureFlags.FF_LINEA_ATTESTATIONS || usingTestEnvironment) {
   chainConfigs.push({
     id: lineaGoerliChainId,
     token: "ETH",
@@ -106,9 +104,9 @@ if (FeatureFlags.FF_LINEA_ATTESTATIONS || usingTestEnvironment) {
     rpcUrl: "https://rpc.goerli.linea.build",
     icon: "./assets/linea-logo.png",
     attestationProviderConfig: {
-      name: "Verax",
-      status: FeatureFlags.FF_LINEA_ATTESTATIONS ? "enabled" : "disabled",
-      overrideVerifierAddress: process.env.NEXT_PUBLIC_LINEA_VERIFIER_ADDRESS_OVERRIDE,
+      name: "Verax + EAS",
+      status: "enabled",
+      easScanUrl: "https://linea-goerli.easscan.org",
     },
   });
 }
@@ -150,8 +148,9 @@ chainConfigs.push({
   rpcUrl: "https://rpc.linea.build",
   icon: "./assets/linea-logo.png",
   attestationProviderConfig: {
-    name: "Verax",
-    status: "comingSoon",
+    name: "Verax + EAS",
+    status: FeatureFlags.FF_LINEA_ATTESTATIONS ? "enabled" : "comingSoon",
+    easScanUrl: "https://linea.easscan.org",
   },
 });
 
