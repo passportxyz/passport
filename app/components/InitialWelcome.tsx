@@ -32,7 +32,13 @@ const stepIndicator = (step: number) => {
   return <div className="ml-3 flex justify-center">{steps}</div>;
 };
 
-export const InitialWelcome = ({ onBoardFinished }: { onBoardFinished: () => void }) => {
+export const InitialWelcome = ({
+  onBoardFinished,
+  dashboardCustomizationKey,
+}: {
+  onBoardFinished: () => void;
+  dashboardCustomizationKey: string | null;
+}) => {
   const [step, setStep] = useState(0);
   const navigate = useNavigate();
 
@@ -48,7 +54,7 @@ export const InitialWelcome = ({ onBoardFinished }: { onBoardFinished: () => voi
               variant="secondary"
               onClick={() => {
                 setStep(0);
-                navigate("/dashboard");
+                navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`);
               }}
             >
               Skip For Now

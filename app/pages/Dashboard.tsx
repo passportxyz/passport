@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
-import React, { useContext, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
@@ -48,7 +48,8 @@ const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
 
 export default function Dashboard() {
-  const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms, cancelCeramicConnection, expiredProviders } =
+  const { customizationKey } = useParams();
+  const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms, cancelCeramicConnection } =
     useContext(CeramicContext);
 
   const { wallet, toggleConnection } = useContext(UserContext);
@@ -110,7 +111,7 @@ export default function Dashboard() {
   // Route user to home when wallet is disconnected
   useEffect(() => {
     if (!wallet) {
-      navigate("/");
+      navigate(`/${customizationKey ? `?dashboard=${customizationKey}` : ""}`);
     } else {
       if (dbAccessTokenStatus === "connected" && dbAccessToken) {
         refreshScore(wallet.accounts[0].address.toLowerCase(), dbAccessToken);
@@ -286,8 +287,10 @@ export default function Dashboard() {
         <BodyWrapper className="mt-4 md:mt-6">
           <PageWidthGrid>
             <Subheader className="col-span-full xl:col-span-7 " />
-            <DashboardIllustration className="col-start-8 col-end-[-1] row-span-2 hidden xl:block" />
             <DashboardScorePanel className="col-span-full xl:col-span-7 xl:max-h-52" />
+            {customizationKey || (
+              <DashboardIllustration className="col-start-8 col-end-[-1] row-span-2 hidden xl:block" />
+            )}
             <span className="col-start-1 col-end-4 font-heading text-4xl">Add Stamps</span>
             <CardList
               className="col-span-full"

@@ -11,6 +11,7 @@ export type RefreshMyStampsModalProps = {
   steps: Step[];
   validPlatforms: ValidatedPlatform[] | undefined;
   resetStampsAndProgressState: () => void;
+  dashboardCustomizationKey: string | null;
 };
 
 export const RefreshMyStampsModal = ({
@@ -19,6 +20,7 @@ export const RefreshMyStampsModal = ({
   steps,
   validPlatforms,
   resetStampsAndProgressState,
+  dashboardCustomizationKey,
 }: RefreshMyStampsModalProps) => {
   return (
     <>
@@ -38,6 +40,7 @@ export const RefreshMyStampsModal = ({
                 onClose={onClose}
                 validPlatforms={validPlatforms}
                 resetStampsAndProgressState={resetStampsAndProgressState}
+                dashboardCustomizationKey={dashboardCustomizationKey}
               />
             </>
           ) : (

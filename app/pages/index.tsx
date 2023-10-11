@@ -52,7 +52,10 @@ const App: NextPage = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/welcome" element={<Welcome />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard">
+            <Route path=":customizationKey" element={<Dashboard />} />
+            <Route path="" element={<Dashboard />} />
+          </Route>
           <Route path="/privacy" element={<Privacy />} />
         </Routes>
       </Router>

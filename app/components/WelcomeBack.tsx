@@ -11,7 +11,6 @@ import { CeramicContext } from "../context/ceramicContext";
 import { UserContext } from "../context/userContext";
 
 // --- UI Components
-import { Spinner } from "@chakra-ui/react";
 import { WelcomeWrapper } from "./WelcomeWrapper";
 import { Button } from "./Button";
 import { LoadButton } from "./LoadButton";
@@ -20,12 +19,14 @@ export interface WelcomeBackProps {
   onOpen: () => void;
   handleFetchPossibleEVMStamps: (addr: string, allPlats: Map<PLATFORM_ID, PlatformProps>) => void;
   resetStampsAndProgressState: () => void;
+  dashboardCustomizationKey: string | null;
 }
 
 export const WelcomeBack = ({
   onOpen,
   handleFetchPossibleEVMStamps,
   resetStampsAndProgressState,
+  dashboardCustomizationKey,
 }: WelcomeBackProps) => {
   const { allPlatforms } = useContext(CeramicContext);
   const { address } = useContext(UserContext);
@@ -48,7 +49,7 @@ export const WelcomeBack = ({
           isLoading={isLoading}
           onClick={() => {
             setIsLoading(true);
-            navigate("/dashboard");
+            navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`);
             resetStampsAndProgressState();
             setIsLoading(false);
           }}

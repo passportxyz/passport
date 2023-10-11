@@ -31,6 +31,7 @@ export type RefreshMyStampsModalContentProps = {
   resetStampsAndProgressState: () => void;
   onClose: () => void;
   validPlatforms: ValidatedPlatform[];
+  dashboardCustomizationKey: string | null;
 };
 
 export type evmPlatformProvider = {
@@ -43,6 +44,7 @@ export const RefreshMyStampsModalContent = ({
   onClose,
   validPlatforms,
   resetStampsAndProgressState,
+  dashboardCustomizationKey,
 }: RefreshMyStampsModalContentProps): JSX.Element => {
   const { address, signer } = useContext(UserContext);
   const { handleAddStamps, handleDeleteStamps } = useContext(CeramicContext);
@@ -81,7 +83,7 @@ export const RefreshMyStampsModalContent = ({
       localStorage.setItem("successfulRefresh", "false");
     }
     setLoading(false);
-    navigate("/dashboard");
+    navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`);
     resetStampsAndProgressState();
   };
 
@@ -167,7 +169,12 @@ export const RefreshMyStampsModalContent = ({
               </div>
             )}
             <div className="mt-8 grid grid-cols-2 items-center justify-center gap-6">
-              <Button variant="secondary" onClick={() => navigate("/dashboard")}>
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`)
+                }
+              >
                 Cancel
               </Button>
               <LoadButton
@@ -194,7 +201,7 @@ export const RefreshMyStampsModalContent = ({
             <Button
               className="w-full"
               onClick={() => {
-                navigate("/dashboard");
+                navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`);
                 resetStampsAndProgressState();
               }}
             >
