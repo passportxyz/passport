@@ -53,7 +53,7 @@ export const RefreshMyStampsModalContentCard = ({
     <div className="border-t border-foreground-6 last:border-b">
       <Accordion allowToggle>
         <AccordionItem padding={0} isDisabled={disableExpand} border="none">
-          <div className="focus:shadow-none flex items-center gap-4 text-color-1">
+          <div className="flex items-center gap-4 text-color-1 focus:shadow-none">
             <div className="grow">
               <AccordionButton
                 paddingY="16px"

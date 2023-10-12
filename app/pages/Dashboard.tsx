@@ -40,6 +40,7 @@ import { EthereumAuthProvider } from "@self.id/web";
 import ProcessingPopup from "../components/ProcessingPopup";
 import { getFilterName } from "../config/filters";
 import { Button } from "../components/Button";
+import { useDashboardCustomization } from "../hooks/useDashboardCustomization";
 
 // --- GTM Module
 import TagManager from "react-gtm-module";
@@ -49,6 +50,7 @@ const fail = "../assets/verification-failed-bright.svg";
 
 export default function Dashboard() {
   const { customizationKey } = useParams();
+  const { usingCustomPanel, CustomPanel } = useDashboardCustomization(customizationKey);
   const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms, cancelCeramicConnection } =
     useContext(CeramicContext);
 
@@ -287,10 +289,13 @@ export default function Dashboard() {
         <BodyWrapper className="mt-4 md:mt-6">
           <PageWidthGrid>
             <Subheader className="col-span-full xl:col-span-7 " />
-            <DashboardScorePanel className="col-span-full xl:col-span-7 xl:max-h-52" />
-            {customizationKey || (
+            <DashboardScorePanel
+              className={`col-span-full ${usingCustomPanel ? "lg:col-span-4" : "xl:max-h-52"} xl:col-span-7`}
+            />
+            {usingCustomPanel || (
               <DashboardIllustration className="col-start-8 col-end-[-1] row-span-2 hidden xl:block" />
             )}
+            {usingCustomPanel && <CustomPanel className="col-start-1 col-end-[-1] lg:col-start-5 xl:col-start-8" />}
             <span className="col-start-1 col-end-4 font-heading text-4xl">Add Stamps</span>
             <CardList
               className="col-span-full"

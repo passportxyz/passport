@@ -10,6 +10,7 @@ export const palette = Object.entries({
   darkPurple: "#08205f",
   iceBlue: "#c1f6ff",
   turquoise: "#074853",
+  paleYellow: "#d2dc95",
 }).reduce((rgbPalette, [name, hex]) => {
   rgbPalette[name] = hexToRGB(hex);
   return rgbPalette;

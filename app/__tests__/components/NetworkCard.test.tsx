@@ -1,7 +1,8 @@
 import React from "react";
 import { screen } from "@testing-library/react";
 
-import { NetworkCard, checkOnChainStatus, OnChainStatus } from "../../components/NetworkCard";
+import { NetworkCard } from "../../components/NetworkCard";
+import { checkOnChainStatus, OnChainStatus } from "../../hooks/useOnChainStatus";
 
 import {
   makeTestCeramicContext,

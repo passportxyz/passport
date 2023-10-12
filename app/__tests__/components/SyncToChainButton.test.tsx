@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import axios from "axios";
 import { getButtonMsg, SyncToChainButton } from "../../components/SyncToChainButton";
-import { OnChainStatus } from "../../components/NetworkCard";
+import { OnChainStatus } from "../../hooks/useOnChainStatus";
 import { UserContextState } from "../../context/userContext";
 import {
   makeTestCeramicContext,
