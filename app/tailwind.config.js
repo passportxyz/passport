@@ -19,6 +19,7 @@ module.exports = {
         "foreground-4": "rgb(var(--color-foreground-4) / <alpha-value>)",
         "foreground-5": "rgb(var(--color-foreground-5) / <alpha-value>)",
         "foreground-6": "rgb(var(--color-foreground-6) / <alpha-value>)",
+        "foreground-7": "rgb(var(--color-foreground-7) / <alpha-value>)",
 
         // Text Colors
         // using this naming convention
@@ -40,6 +41,10 @@ module.exports = {
       },
       minHeight: {
         default: "100vh",
+      },
+      boxShadow: {
+        "background-3-25": "0 0 25px rgb(var(--color-background-3))",
+        "background-3-10": "0 0 10px rgb(var(--color-background-3))",
       },
     },
     fontSize: {
@@ -66,10 +71,6 @@ module.exports = {
     backgroundPosition: {
       "pos-0": "0% 0%",
       "pos-100": "100% 100%",
-    },
-    boxShadow: {
-      "background-3-25": "0 0 25px rgb(var(--color-background-3))",
-      "background-3-10": "0 0 10px rgb(var(--color-background-3))",
     },
   },
   plugins: [require("@headlessui/tailwindcss")],

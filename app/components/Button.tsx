@@ -1,7 +1,7 @@
 import React, { ButtonHTMLAttributes, useMemo } from "react";
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "custom";
 };
 
 // Children are centered and spaced out with gap-4.
@@ -11,9 +11,14 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 // e.g. <Button><Icon /><span>Click me</span></Button>
 export const Button = ({ variant, className, ...props }: ButtonProps) => {
   const variantClassName = useMemo(() => {
-    if (variant === "secondary")
+    if (variant === "custom") {
+      return "";
+    } else if (variant === "secondary") {
       return "text-foreground-2 bg-background border border-foreground-2 rounded-s hover:bg-foreground-3";
-    else return "text-color-4 rounded-s enabled:hover:text-color-1 bg-foreground-2 hover:bg-foreground-4";
+    } else {
+      // primary, default
+      return "text-color-4 rounded-s enabled:hover:text-color-1 bg-foreground-2 hover:bg-foreground-4";
+    }
   }, [variant]);
 
   return (

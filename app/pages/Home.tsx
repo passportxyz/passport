@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps, @next/next/no-img-element */
 // --- React Methods
 import React, { useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 // --- Shared data context
 import { UserContext } from "../context/userContext";
@@ -27,16 +27,18 @@ const Footer = () => (
 export default function Home() {
   const { toggleConnection, wallet, walletConnectionError, setWalletConnectionError } = useContext(UserContext);
   const toast = useToast();
+  const [searchParams] = useSearchParams();
 
   const navigate = useNavigate();
 
   // Route user to dashboard when wallet is connected
   useEffect(() => {
     if (wallet) {
+      const dashboardCustomizationKey = searchParams.get("dashboard");
       if (checkShowOnboard()) {
-        navigate("/welcome");
+        navigate(`/welcome${dashboardCustomizationKey ? `?dashboard=${dashboardCustomizationKey}` : ""}`);
       } else {
-        navigate("/dashboard");
+        navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`);
       }
     }
   }, [wallet]);

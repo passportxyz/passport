@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
 import React, { useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 // --- Types
 import { Status, Step } from "../components/Progress";
@@ -37,13 +37,15 @@ export default function Welcome() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { passport, allPlatforms, isLoadingPassport } = useContext(CeramicContext);
   const { wallet, address } = useContext(UserContext);
+  const [searchParams] = useSearchParams();
+  const dashboardCustomizationKey = searchParams.get("dashboard");
 
   const navigate = useNavigate();
 
   // Route user to home page when wallet is disconnected
   useEffect(() => {
     if (!wallet) {
-      navigate("/");
+      navigate(`/${dashboardCustomizationKey ? `?dashboard=${dashboardCustomizationKey}` : ""}`);
     }
   }, [wallet]);
 
@@ -151,6 +153,7 @@ export default function Welcome() {
                   handleFetchPossibleEVMStamps={handleFetchPossibleEVMStamps}
                   onOpen={onOpen}
                   resetStampsAndProgressState={resetStampsAndProgressState}
+                  dashboardCustomizationKey={dashboardCustomizationKey}
                 />
               ) : (
                 <InitialWelcome
@@ -160,6 +163,7 @@ export default function Welcome() {
                       onOpen();
                     }
                   }}
+                  dashboardCustomizationKey={dashboardCustomizationKey}
                 />
               )
             ) : (
@@ -174,6 +178,7 @@ export default function Welcome() {
         onClose={onClose}
         validPlatforms={validPlatforms}
         resetStampsAndProgressState={resetStampsAndProgressState}
+        dashboardCustomizationKey={dashboardCustomizationKey}
       />
     </PageRoot>
   );
