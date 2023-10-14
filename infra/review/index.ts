@@ -1,7 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as awsx from "@pulumi/awsx";
-
+import * as awsx_classic from "@pulumi/awsx/classic";
 // The following vars are not allowed to be undefined, hence the `${...}` magic
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
@@ -14,7 +14,7 @@ export const dockerGtcPassportIamImage = `${process.env["DOCKER_GTC_PASSPORT_IAM
 // Set up VPC
 //////////////////////////////////////////////////////////////
 
-const vpc = new awsx.ec2.Vpc("gitcoin", {
+const vpc = new awsx_classic.ec2.Vpc("gitcoin", {
   subnets: [{ type: "public" }, { type: "private", mapPublicIpOnLaunch: true }],
 });
 
@@ -30,8 +30,10 @@ export const vpcPublicSubnet1 = vpcPublicSubnetIds.then((subnets) => {
 // Set up ALB and ECS cluster
 //////////////////////////////////////////////////////////////
 
-const cluster = new awsx.ecs.Cluster("gitcoin", { vpc });
-// export const clusterInstance = cluster;
+const cluster = new aws.ecs.Cluster("gitcoin", {settings: [{
+  name: "containerInsights",
+  value: "disabled" // for PROD : enabled
+}]}); 
 export const clusterId = cluster.id;
 
 // Generate an SSL certificate
@@ -61,7 +63,7 @@ const certificateValidation = new aws.acm.CertificateValidation(
 );
 
 // Creates an ALB associated with our custom VPC.
-const alb = new awsx.lb.ApplicationLoadBalancer(`gitcoin-service`, { vpc });
+const alb = new awsx_classic.lb.ApplicationLoadBalancer(`gitcoin-service`, { vpc });
 
 // Listen to HTTP traffic on port 80 and redirect to 443
 const httpListener = alb.createListener("web-listener", {
@@ -142,18 +144,74 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
   },
 });
 
+const ecsSg = new aws.ec2.SecurityGroup("gitcoin", {
+  description: "Managed by Pulumi",
+  vpcId: vpcID,
+  tags: {
+     Name: "gitcoin"
+  },
+  egress: [{
+    description: "allow output to any ipv4 address using any protocol",
+    cidrBlocks: ["0.0.0.0/0"],
+    fromPort: 0,
+    toPort: 0,
+    protocol: "-1"
+  }],
+  ingress: [
+    {
+      description: "allow incoming tcp on any port from any ipv4 address",
+      cidrBlocks: ["0.0.0.0/0"],
+      fromPort: 0,
+      toPort: 65535,
+      protocol: "tcp"
+    }, {
+    description: "allow ssh in from any ipv4 address",
+    cidrBlocks: ["0.0.0.0/0"],
+    fromPort: 22,
+    toPort: 22,
+    protocol: "tcp"
+  }]
+});
+
+const serviceLogGroup = new aws.cloudwatch.LogGroup("dpopp-iam", {
+  retentionInDays: 1,
+});
+
 const service = new awsx.ecs.FargateService("dpopp-iam", {
-  cluster,
+  cluster: clusterId,
   desiredCount: 1,
-  subnets: vpc.privateSubnetIds,
+  networkConfiguration: {
+    subnets: vpc.privateSubnetIds,
+    securityGroups:[ecsSg.id],
+    assignPublicIp: true
+  },
+  // enableEcsManagedTags: true ,
+  // propagateTags: "TASK_DEFINITION",  // The valid values are SERVICE and TASK_DEFINITION
+  loadBalancers: [{
+    containerName: "iam",
+    containerPort: 80,
+    targetGroupArn: target.targetGroup.arn 
+  }], 
   taskDefinitionArgs: {
-    executionRole: dpoppEcsRole,
+    logGroup: {
+      existing: serviceLogGroup,
+    },
+    executionRole: {
+      roleArn: dpoppEcsRole.arn,
+    },
     containers: {
       iam: {
+        name: "iam",
         image: dockerGtcPassportIamImage,
         memory: 4096,
         cpu: 2048,
-        portMappings: [httpsListener],
+        portMappings: [
+          {
+              "containerPort": 80,
+              "hostPort": 80,
+              "protocol": "tcp"
+          }
+        ],
         links: [],
         environment: [
           {
@@ -343,7 +401,7 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
 const ecsTarget = new aws.appautoscaling.Target("autoscaling_target", {
   maxCapacity: 10,
   minCapacity: 1,
-  resourceId: pulumi.interpolate`service/${cluster.cluster.name}/${service.service.name}`,
+  resourceId: pulumi.interpolate`service/${cluster.name}/${service.service.name}`,
   scalableDimension: "ecs:service:DesiredCount",
   serviceNamespace: "ecs",
 });
