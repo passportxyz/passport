@@ -4,6 +4,7 @@ import { useSyncToChainButton } from "../hooks/useSyncToChainButton";
 import { OnChainStatus, useOnChainStatus } from "../hooks/useOnChainStatus";
 import { chains } from "../utils/chains";
 import { LoadButton } from "./LoadButton";
+import Tooltip from "./Tooltip";
 
 const VeraxLogo = () => (
   <svg width="64" height="56" viewBox="0 0 64 56" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -20,10 +21,13 @@ const getButtonMsg = (onChainStatus: OnChainStatus): string => {
       return "Update";
     case OnChainStatus.MOVED_UP_TO_DATE:
       return "Already pushed";
+    case OnChainStatus.LOADING:
+      return "Loading";
   }
 };
 
-const chain = chains.find(({ label }) => label === "Linea Goerli");
+const LINEA_CHAIN_NAME = process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on" ? "Linea Goerli" : "Linea";
+const chain = chains.find(({ label }) => label === LINEA_CHAIN_NAME);
 
 export const VeraxPanel = ({ className }: { className: string }) => {
   const onChainStatus = useOnChainStatus({ chain });
@@ -46,7 +50,16 @@ export const VeraxPanel = ({ className }: { className: string }) => {
         <VeraxLogo />
         <span className="mt-1 text-3xl leading-none">Verax</span>
       </div>
-      <div className="flex flex-col justify-start gap-2 bg-gradient-to-b from-transparent to-foreground-7/[.26] p-6">
+      <div className="relative flex flex-col justify-start gap-2 bg-gradient-to-b from-transparent to-foreground-7/[.26] p-6">
+        <Tooltip
+          className={`absolute top-0 right-0 p-2 ${
+            needToSwitchChain && onChainStatus !== OnChainStatus.MOVED_UP_TO_DATE ? "block" : "hidden"
+          }`}
+          panelClassName="w-[200px] border-foreground-7"
+          iconClassName="text-foreground-7"
+        >
+          You will be prompted to switch to {chain?.label} and sign the transaction.
+        </Tooltip>
         {onChainStatus === OnChainStatus.NOT_MOVED ? (
           <>
             Verax is a community maintained public attestation registry on Linea. Push your Passport Stamps onto Verax
@@ -62,15 +75,10 @@ export const VeraxPanel = ({ className }: { className: string }) => {
             attestations from many sources to derive powerful reputation
           </p>
         )}
-        {needToSwitchChain && (
-          <span className="text-xs text-foreground-7 brightness-[1.4]">
-            You will be prompted to switch to {chain?.label} and sign the transaction.
-          </span>
-        )}
         <div className="grow" />
         <LoadButton
           {...props}
-          isLoading={syncingToChain}
+          isLoading={syncingToChain || onChainStatus === OnChainStatus.LOADING}
           variant="custom"
           className={`${props.className} rounded-s mr-2 mt-2 w-fit  self-end bg-foreground-7 text-color-4 hover:bg-foreground-7/75 enabled:hover:text-color-1 disabled:bg-foreground-7 disabled:brightness-100`}
         >
