@@ -89,6 +89,46 @@
     "GitcoinVeraxPortal": {
       "address": "0xECd3f8A3cC147b03356Fc2c2ac354baC8B21164E"
     }
+  },
+  "0xe708": {
+    "issuer": {
+      "address": "0x804233b96cbd6d81efeb6517347177ef7bD488ED"
+    },
+    "EAS": {
+      "address": "0xaEF4103A04090071165F78D45D83A0C0782c2B2a"
+    },
+    "GitcoinAttester": {
+      "address": "0xBC778313E52b1184A15D163b5d3a72AEF8d510A2"
+    },
+    "GitcoinVerifier": {
+      "address": "0xc94aBf0292Ac04AAC18C251d9C8169a8dd2BBbDC"
+    },
+    "GitcoinResolver": {
+      "address": "0x0a774AECE542a1A819107Eb3a06E9D515C67257a"
+    },
+    "easSchemas": {
+      "passport": {
+        "uid": "0x69b9d63ff6b161097cb4930e197a722bcf423f832d4e4cd3692449d5a1e1319f"
+      },
+      "score": {
+        "uid": "0x4da1eaac6346b8b79a705e3898a308062ca607f56c07762ef7b7ff8a7661843c"
+      }
+    },
+    "Verax": {
+      "AttestationRegistry": {
+        "address": "0x3de3893aa4Cdea029e84e75223a152FD08315138"
+      },
+      "schemas": {
+        "passport": {
+          "uid": "0x501e6fcade7e3483d0ae7fcfebb732907ebda12b209f5116e52c02697062a50e"
+        },
+        "score": {
+          "uid": "0x01f031da36192c34057c764239eb77bb6ec8ebfb808f72a7bb172f37a5bec31f"
+        }
+      }
+    },
+    "GitcoinVeraxPortal": {
+      "address": "0xCAa9E817f02486cE076560B77A86235Ef91c5d5D"
+    }
   }
 }
-

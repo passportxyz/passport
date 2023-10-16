@@ -1,8 +1,7 @@
-export type FEATURE_FLAG_TYPE = "FF_CHAIN_SYNC" | "FF_LINEA_ATTESTATIONS";
+export type FEATURE_FLAG_TYPE = "FF_CHAIN_SYNC";
 
 export let FeatureFlags: Record<FEATURE_FLAG_TYPE, boolean> = {
   FF_CHAIN_SYNC: false,
-  FF_LINEA_ATTESTATIONS: false,
 };
 
 function configureFeatureFlag(
@@ -29,5 +28,4 @@ if (typeof window !== "undefined") {
 
   // The env var names can't be dynamic due to the way Next.js works
   configureFeatureFlag(queryString, "FF_CHAIN_SYNC", process.env.NEXT_PUBLIC_FF_CHAIN_SYNC);
-  configureFeatureFlag(queryString, "FF_LINEA_ATTESTATIONS", process.env.NEXT_PUBLIC_FF_LINEA_ATTESTATIONS);
 }

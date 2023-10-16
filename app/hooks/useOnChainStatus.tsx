@@ -6,6 +6,7 @@ import { ScorerContext, ScoreStateType } from "../context/scorerContext";
 import { Chain } from "../utils/chains";
 
 export enum OnChainStatus {
+  LOADING,
   NOT_MOVED,
   MOVED_OUT_OF_DATE,
   MOVED_UP_TO_DATE,
@@ -20,9 +21,11 @@ export const checkOnChainStatus = (
   scoreState: ScoreStateType,
   onChainScore: number
 ): OnChainStatus => {
+  if (scoreState !== "DONE") return OnChainStatus.LOADING;
+
   if (onChainProviders.length === 0) return OnChainStatus.NOT_MOVED;
 
-  if (scoreState === "DONE" && rawScore !== onChainScore) return OnChainStatus.MOVED_OUT_OF_DATE;
+  if (rawScore !== onChainScore) return OnChainStatus.MOVED_OUT_OF_DATE;
 
   const verifiedDbProviders: ProviderWithStamp[] = Object.values(allProvidersState).filter(
     (provider): provider is ProviderWithStamp => provider.stamp !== undefined

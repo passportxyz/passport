@@ -84,5 +84,5 @@ export class EASAttestationProvider extends BaseAttestationProvider {
 }
 
 export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
-  name = "Verax + EAS";
+  name = "Verax, Ethereum Attestation Service";
 }

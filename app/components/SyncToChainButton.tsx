@@ -12,6 +12,8 @@ export function getButtonMsg(onChainStatus: OnChainStatus): string {
       return "Update";
     case OnChainStatus.MOVED_UP_TO_DATE:
       return "Up to date";
+    case OnChainStatus.LOADING:
+      return "Loading";
   }
 }
 
@@ -28,17 +30,19 @@ export function SyncToChainButton({ onChainStatus, chain, className }: SyncToCha
     getButtonMsg,
   });
 
+  const loading = syncingToChain || onChainStatus === OnChainStatus.LOADING;
+
   return (
     <button
       {...props}
       className={`center flex w-full justify-center p-2 ${className} ${props.className}`}
       data-testid="sync-to-chain-button"
     >
-      <div className={`${syncingToChain ? "block" : "hidden"} relative top-1`}>
+      <div className={`${loading ? "block" : "hidden"} relative top-1`}>
         <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
       </div>
       <span
-        className={`mx-1 translate-y-[1px] ${syncingToChain ? "hidden" : "block"} ${
+        className={`mx-1 translate-y-[1px] ${loading ? "hidden" : "block"} ${
           onChainStatus === OnChainStatus.MOVED_UP_TO_DATE ? "text-foreground-5" : "text-foreground-2"
         }`}
       >

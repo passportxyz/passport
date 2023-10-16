@@ -149,7 +149,7 @@ chainConfigs.push({
   icon: "./assets/linea-logo.png",
   attestationProviderConfig: {
     name: "Verax + EAS",
-    status: FeatureFlags.FF_LINEA_ATTESTATIONS ? "enabled" : "comingSoon",
+    status: "enabled",
     easScanUrl: "https://linea.easscan.org",
   },
 });
