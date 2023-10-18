@@ -8,22 +8,18 @@ const FIVE_MINUTES = 1000 * 60 * 5;
 const WETH_CONTRACT = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 
 class EthPriceLoader extends PassportCache {
-  cachedPrice: number;
-  lastUpdated: number;
   cachePeriod = FIVE_MINUTES;
 
   constructor() {
     super();
-    this.cachedPrice = 0;
-    this.lastUpdated = 0;
   }
 
   async getPrice(): Promise<number> {
-    if (await this.#needsUpdate()) {
+    if ((await this.#needsUpdate()) || Number(await this.get("ethPrice")) === 0) {
       await this.#requestCurrentPrice();
       await this.set("ethPriceLastUpdate", Date.now().toString());
     }
-    return this.cachedPrice;
+    return Number(await this.get("ethPrice"));
   }
 
   async #needsUpdate(): Promise<boolean> {
@@ -49,6 +45,7 @@ class EthPriceLoader extends PassportCache {
 const ethPriceLoader = new EthPriceLoader();
 
 export async function getEASFeeAmount(usdFeeAmount: number): Promise<BigNumber> {
+  await ethPriceLoader.init();
   const ethPrice = await ethPriceLoader.getPrice();
   const ethFeeAmount = usdFeeAmount / ethPrice;
   return utils.parseEther(ethFeeAmount.toFixed(18));
