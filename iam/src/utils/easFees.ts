@@ -18,7 +18,6 @@ class EthPriceLoader {
   async getPrice(): Promise<number> {
     if ((await this.#needsUpdate()) || (await this.cache.get("ethPrice")) === null) {
       await this.#requestCurrentPrice();
-      await this.cache.set("ethPriceLastUpdate", Date.now().toString());
     }
     return Number(await this.cache.get("ethPrice"));
   }
@@ -36,10 +35,11 @@ class EthPriceLoader {
         address: WETH_CONTRACT,
       });
       await this.cache.set("ethPrice", result.usdPrice.toString());
+      await this.cache.set("ethPriceLastUpdate", Date.now().toString());
     } catch (e) {
       let message = "Failed to get ETH price";
       if (e instanceof Error) message += `, ${e.name}: ${e.message}`;
-      throw new IAMError(message);
+      console.error(`REDIS CONNECTION ERROR: ${message}`);
     }
   }
 }

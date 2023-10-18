@@ -19,7 +19,6 @@ describe("PassportCache", () => {
     jest.clearAllMocks();
     passportCache = new PassportCache();
 
-    // Since we've mocked the createClient to return an object with mock functions, we can now get a reference to it.
     mockClient = createClient() as jest.Mocked<RedisClientType>;
   });
 
