@@ -7,24 +7,26 @@ import PassportCache from "./cache";
 const FIVE_MINUTES = 1000 * 60 * 5;
 const WETH_CONTRACT = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 
-class EthPriceLoader extends PassportCache {
+class EthPriceLoader {
   cachePeriod = FIVE_MINUTES;
+  cache: PassportCache = new PassportCache();
 
-  constructor() {
-    super();
+  async init(): Promise<void> {
+    await this.cache.init();
   }
 
   async getPrice(): Promise<number> {
-    if ((await this.#needsUpdate()) || Number(await this.get("ethPrice")) === 0) {
+    if ((await this.#needsUpdate()) || (await this.cache.get("ethPrice")) === null) {
       await this.#requestCurrentPrice();
-      await this.set("ethPriceLastUpdate", Date.now().toString());
+      await this.cache.set("ethPriceLastUpdate", Date.now().toString());
     }
-    return Number(await this.get("ethPrice"));
+    return Number(await this.cache.get("ethPrice"));
   }
 
   async #needsUpdate(): Promise<boolean> {
-    const lastUpdate = await this.get("ethPriceLastUpdate");
-    return Date.now() - Number(lastUpdate) > this.cachePeriod;
+    const lastUpdate = await this.cache.get("ethPriceLastUpdate");
+    const lastUpdateTimestamp = Date.now() - Number(lastUpdate || Date.now());
+    return lastUpdateTimestamp > this.cachePeriod;
   }
 
   async #requestCurrentPrice(): Promise<void> {
@@ -33,7 +35,7 @@ class EthPriceLoader extends PassportCache {
         chain: "0x1",
         address: WETH_CONTRACT,
       });
-      await this.set("ethPrice", result.usdPrice.toString());
+      await this.cache.set("ethPrice", result.usdPrice.toString());
     } catch (e) {
       let message = "Failed to get ETH price";
       if (e instanceof Error) message += `, ${e.name}: ${e.message}`;
