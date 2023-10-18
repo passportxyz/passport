@@ -353,25 +353,25 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
   },
 });
 
-// const ecsIamServiceAutoscalingTarget = new aws.appautoscaling.Target("autoscaling_target", {
-//   maxCapacity: 10,
-//   minCapacity: 1,
-//   resourceId: pulumi.interpolate`service/${cluster.cluster.name}/${service.service.name}`,
-//   scalableDimension: "ecs:service:DesiredCount",
-//   serviceNamespace: "ecs",
-// });
+const ecsIamServiceAutoscalingTarget = new aws.appautoscaling.Target("autoscaling_target", {
+  maxCapacity: 10,
+  minCapacity: 1,
+  resourceId: pulumi.interpolate`service/${cluster.cluster.name}/${service.service.name}`,
+  scalableDimension: "ecs:service:DesiredCount",
+  serviceNamespace: "ecs",
+});
 
-// const ecsScorerServiceAutoscaling = new aws.appautoscaling.Policy("scorer-autoscaling-policy", {
-//   policyType: "TargetTrackingScaling",
-//   resourceId: ecsIamServiceAutoscalingTarget.resourceId,
-//   scalableDimension: ecsIamServiceAutoscalingTarget.scalableDimension,
-//   serviceNamespace: ecsIamServiceAutoscalingTarget.serviceNamespace,
-//   targetTrackingScalingPolicyConfiguration: {
-//     predefinedMetricSpecification: {
-//       predefinedMetricType: "ECSServiceAverageCPUUtilization",
-//     },
-//     targetValue: 30,
-//     scaleInCooldown: 300,
-//     scaleOutCooldown: 300,
-//   },
-// });
+const ecsScorerServiceAutoscaling = new aws.appautoscaling.Policy("scorer-autoscaling-policy", {
+  policyType: "TargetTrackingScaling",
+  resourceId: ecsIamServiceAutoscalingTarget.resourceId,
+  scalableDimension: ecsIamServiceAutoscalingTarget.scalableDimension,
+  serviceNamespace: ecsIamServiceAutoscalingTarget.serviceNamespace,
+  targetTrackingScalingPolicyConfiguration: {
+    predefinedMetricSpecification: {
+      predefinedMetricType: "ECSServiceAverageCPUUtilization",
+    },
+    targetValue: 30,
+    scaleInCooldown: 300,
+    scaleOutCooldown: 300,
+  },
+});
