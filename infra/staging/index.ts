@@ -2,7 +2,7 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as awsx from "@pulumi/awsx";
 
-import { createIAMLogGroup, createPagerdutyTopic } from "../lib/service";
+import { createIAMLogGroup, createPagerdutyTopic, setupRedis } from "../lib/service";
 
 // The following vars are not allowed to be undefined, hence the `${...}` magic
 
@@ -27,49 +27,6 @@ export const vpcPublicSubnetIds = vpc.publicSubnetIds;
 export const vpcPublicSubnet1 = vpcPublicSubnetIds.then((subnets) => {
   return subnets[0];
 });
-
-//////////////////////////////////////////////////////////////
-// Set up Redis
-//////////////////////////////////////////////////////////////
-
-const redisSubnetGroup = new aws.elasticache.SubnetGroup("passport-redis-subnet", {
-  subnetIds: vpcPrivateSubnetIds,
-});
-
-const secgrp_redis = new aws.ec2.SecurityGroup("passport-redis-secgrp", {
-  description: "passport-redis-secgrp",
-  vpcId: vpc.vpcId,
-  ingress: [
-    {
-      protocol: "tcp",
-      fromPort: 6379,
-      toPort: 6379,
-      cidrBlocks: ["0.0.0.0/0"],
-    },
-  ],
-  egress: [
-    {
-      protocol: "-1",
-      fromPort: 0,
-      toPort: 0,
-      cidrBlocks: ["0.0.0.0/0"],
-    },
-  ],
-});
-
-const redis = new aws.elasticache.Cluster("passport-redis", {
-  engine: "redis",
-  engineVersion: "4.0.10",
-  nodeType: "cache.t2.small",
-  numCacheNodes: 1,
-  port: 6379,
-  subnetGroupName: redisSubnetGroup.name,
-  securityGroupIds: [secgrp_redis.id],
-});
-
-export const redisPrimaryNode = redis.cacheNodes[0];
-
-export const redisCacheOpsConnectionUrl = pulumi.interpolate`redis://${redisPrimaryNode.address}:${redisPrimaryNode.port}/0`;
 
 //////////////////////////////////////////////////////////////
 // Set up ALB and ECS cluster
@@ -190,6 +147,8 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
     dpopp: "",
   },
 });
+
+const redisCacheOpsConnectionUrl = setupRedis(vpcPrivateSubnetIds, vpc);
 
 const alertTopic = createPagerdutyTopic();
 const logGroup = createIAMLogGroup({ alertTopic });

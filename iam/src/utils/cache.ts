@@ -22,7 +22,7 @@ class PassportCache {
     try {
       await this.client.connect();
     } catch (err) {
-      // Send pd alert
+      console.error("REDIS CONNECTION ERROR: Error connecting to redis");
     }
   }
 
@@ -30,7 +30,7 @@ class PassportCache {
     try {
       await this.client.set(key, value);
     } catch (err) {
-      // Send pd alert
+      console.error("REDIS CONNECTION ERROR: Error writing to redis");
     }
   }
 
@@ -39,7 +39,7 @@ class PassportCache {
       const value = await this.client.get(key);
       return value;
     } catch (err) {
-      // Send pd alert
+      console.error("REDIS CONNECTION ERROR: Error reading from redis");
       return null;
     }
   }
@@ -48,7 +48,7 @@ class PassportCache {
     try {
       await this.client.hSet(hash, object);
     } catch (err) {
-      // Send pd alert
+      console.error("REDIS CONNECTION ERROR: Error writing to redis");
     }
   }
 
@@ -57,7 +57,7 @@ class PassportCache {
       const value = await this.client.hGetAll(hash);
       return value;
     } catch (err) {
-      // Send pd alert
+      console.error("REDIS CONNECTION ERROR: Error reading from redis");
       return {};
     }
   }

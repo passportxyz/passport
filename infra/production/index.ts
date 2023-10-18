@@ -2,7 +2,7 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as awsx from "@pulumi/awsx";
 
-import { createIAMLogGroup, createPagerdutyTopic } from "../lib/service";
+import { createIAMLogGroup, createPagerdutyTopic, setupRedis } from "../lib/service";
 
 // The following vars are not allowed to be undefined, hence the `${...}` magic
 
@@ -145,6 +145,8 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
   },
 });
 
+const redisCacheOpsConnectionUrl = setupRedis(vpcPrivateSubnetIds, vpc);
+
 const alertTopic = createPagerdutyTopic();
 const logGroup = createIAMLogGroup({ alertTopic });
 
@@ -166,6 +168,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
           {
             name: "CGRANTS_API_URL",
             value: "https://api.scorer.gitcoin.co/cgrants",
+          },
+          {
+            name: "REDIS_URL",
+            value: redisCacheOpsConnectionUrl,
           },
         ],
         secrets: [
