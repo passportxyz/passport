@@ -29,6 +29,49 @@ export const vpcPublicSubnet1 = vpcPublicSubnetIds.then((subnets) => {
 });
 
 //////////////////////////////////////////////////////////////
+// Set up Redis
+//////////////////////////////////////////////////////////////
+
+const redisSubnetGroup = new aws.elasticache.SubnetGroup("passport-redis-subnet", {
+  subnetIds: vpcPrivateSubnetIds,
+});
+
+const secgrp_redis = new aws.ec2.SecurityGroup("passport-redis-secgrp", {
+  description: "passport-redis-secgrp",
+  vpcId: vpc.vpcId,
+  ingress: [
+    {
+      protocol: "tcp",
+      fromPort: 6379,
+      toPort: 6379,
+      cidrBlocks: ["0.0.0.0/0"],
+    },
+  ],
+  egress: [
+    {
+      protocol: "-1",
+      fromPort: 0,
+      toPort: 0,
+      cidrBlocks: ["0.0.0.0/0"],
+    },
+  ],
+});
+
+const redis = new aws.elasticache.Cluster("passport-redis", {
+  engine: "redis",
+  engineVersion: "4.0.10",
+  nodeType: "cache.t2.small",
+  numCacheNodes: 1,
+  port: 6379,
+  subnetGroupName: redisSubnetGroup.name,
+  securityGroupIds: [secgrp_redis.id],
+});
+
+export const redisPrimaryNode = redis.cacheNodes[0];
+
+export const redisCacheOpsConnectionUrl = pulumi.interpolate`redis://${redisPrimaryNode.address}:${redisPrimaryNode.port}/0`;
+
+//////////////////////////////////////////////////////////////
 // Set up ALB and ECS cluster
 //////////////////////////////////////////////////////////////
 
@@ -168,6 +211,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
           {
             name: "CGRANTS_API_URL",
             value: "https://api.staging.scorer.gitcoin.co/cgrants",
+          },
+          {
+            name: "REDIS_URL",
+            value: redisCacheOpsConnectionUrl,
           },
         ],
         secrets: [
