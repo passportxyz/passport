@@ -1,0 +1,10 @@
+{
+    "name": "passport-iac",
+    "main": "index.js",
+    "dependencies": {
+        "@pulumi/pulumi": "^3.79.0",
+        "@pulumi/aws": "^6.0.2",
+        "@pulumi/awsx": "^1.0.5"
+    },
+    "main": "index.ts"
+}
