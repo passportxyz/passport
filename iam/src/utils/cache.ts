@@ -43,24 +43,6 @@ class PassportCache {
       return null;
     }
   }
-
-  public async setMap(hash: string, object: Record<string, string | number>): Promise<void> {
-    try {
-      await this.client.hSet(hash, object);
-    } catch (err) {
-      console.error("REDIS CONNECTION ERROR: Error writing to redis");
-    }
-  }
-
-  public async getMap(hash: string): Promise<Record<string, string>> {
-    try {
-      const value = await this.client.hGetAll(hash);
-      return value;
-    } catch (err) {
-      console.error("REDIS CONNECTION ERROR: Error reading from redis");
-      return {};
-    }
-  }
 }
 
 export default PassportCache;
