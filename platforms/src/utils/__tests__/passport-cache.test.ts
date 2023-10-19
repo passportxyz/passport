@@ -1,5 +1,5 @@
 import { createClient, RedisClientType } from "redis";
-import { PassportCache } from "../plassport-cache";
+import { PassportCache } from "../passport-cache";
 
 jest.mock("redis", () => ({
   createClient: jest.fn().mockReturnValue({
