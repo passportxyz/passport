@@ -1,6 +1,6 @@
 /* eslint-disable */
 import * as twitterAccountAge from "../twitterAccountAge";
-import { clearCacheSession } from "../../../utils/mem-cache";
+import { clearCacheSession } from "../../../utils/platform-cache";
 import { RequestPayload, ProviderContext } from "@gitcoin/passport-types";
 import { ApiRequestError, ApiResponseError, ApiPartialResponseError } from "twitter-api-v2";
 import { getTwitterUserData, getAuthClient, initClientAndGetAuthUrl } from "../../procedures/twitterOauth";
@@ -204,19 +204,19 @@ describe("TwitterAccountAgeProvider", function () {
     const oldCallback = process.env.TWITTER_CALLBACK;
     try {
       process.env.TWITTER_CALLBACK = "test_callback";
-      const authUrl = initClientAndGetAuthUrl();
+      const authUrl = await initClientAndGetAuthUrl();
       expect(authUrl).toContain("redirect_uri=test_callback");
       const state = authUrl.split("state=")[1].split("&")[0];
-      clearCacheSession(state, "Twitter");
+      await clearCacheSession(state);
     } finally {
       process.env.TWITTER_CALLBACK = oldCallback;
     }
   });
 
   it("uses the override callback when provided", async () => {
-    const authUrl = initClientAndGetAuthUrl("override_callback");
+    const authUrl = await initClientAndGetAuthUrl("override_callback");
     expect(authUrl).toContain("redirect_uri=override_callback");
     const state = authUrl.split("state=")[1].split("&")[0];
-    clearCacheSession(state, "Twitter");
+    await clearCacheSession(state);
   });
 });

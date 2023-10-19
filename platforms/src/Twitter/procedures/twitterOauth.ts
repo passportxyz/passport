@@ -6,7 +6,7 @@ import {
   ApiPartialResponseError,
 } from "twitter-api-v2";
 
-import { clearCacheSession, initCacheSession, loadCacheSession } from "../../utils/mem-cache";
+import { clearCacheSession, initCacheSession, loadCacheSession, PlatformSession } from "../../utils/platform-cache";
 import { ProviderContext } from "@gitcoin/passport-types";
 import { ProviderExternalVerificationError, ProviderInternalVerificationError } from "../../types";
 
@@ -28,9 +28,9 @@ export type TwitterUserData = {
   id?: string;
 };
 
-export const loadTwitterCache = (token: string): TwitterCache => {
+export const loadTwitterCache = async (token: string): Promise<PlatformSession<TwitterCache>> => {
   try {
-    return loadCacheSession(token, "Twitter");
+    return await loadCacheSession(token);
   } catch (e) {
     throw new ProviderInternalVerificationError("Session missing or expired, try again");
   }
@@ -39,7 +39,7 @@ export const loadTwitterCache = (token: string): TwitterCache => {
 /**
  * Initializes a Twitter OAuth2 Authentication Client
  */
-export const initClientAndGetAuthUrl = (callbackOverride?: string): string => {
+export const initClientAndGetAuthUrl = async (callbackOverride?: string): Promise<string> => {
   if (process.env.TWITTER_CLIENT_ID && process.env.TWITTER_CLIENT_SECRET) {
     const callback = callbackOverride || process.env.TWITTER_CALLBACK;
     const client = new TwitterApi({
@@ -56,11 +56,11 @@ export const initClientAndGetAuthUrl = (callbackOverride?: string): string => {
     const newState = "twitter-" + state;
     const newUrl = url.replace(state, newState);
 
-    initCacheSession(newState);
-    const session = loadTwitterCache(newState);
+    await initCacheSession(newState);
+    const session = await loadTwitterCache(newState);
 
-    session.codeVerifier = codeVerifier;
-    session.callback = callback;
+    await session.set("codeVerifier", codeVerifier);
+    await session.set("callback", callback);
 
     return newUrl;
   } else {
@@ -75,8 +75,9 @@ export const getAuthClient = async (
   context: TwitterContext
 ): Promise<TwitterApiReadOnly> => {
   if (!context.twitter?.client) {
-    const session = loadTwitterCache(sessionKey);
-    const { codeVerifier, callback } = session;
+    const session = await loadTwitterCache(sessionKey);
+    const codeVerifier = session.get("codeVerifier");
+    const callback = session.get("callback");
 
     if (!codeVerifier || !sessionKey || !code) {
       throw new ProviderExternalVerificationError("You denied the app or your session expired! Please try again.");
@@ -87,7 +88,7 @@ export const getAuthClient = async (
     if (!context.twitter) context.twitter = {};
     context.twitter.client = client;
 
-    clearCacheSession(sessionKey, "Twitter");
+    await clearCacheSession(sessionKey);
   }
   return context.twitter.client;
 };

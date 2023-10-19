@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/require-await */
 
 import { authenticate, loadIdenaSession } from "../procedures/idenaSignIn";
-import { clearCacheSession, initCacheSession, loadCacheSession } from "../../utils/mem-cache";
+import { clearCacheSession, initCacheSession, loadCacheSession } from "../../utils/platform-cache";
 
 // ----- Libs
 import axios from "axios";
@@ -27,8 +27,8 @@ const signatureAddressResponse = {
   status: 200,
 };
 
-beforeEach(() => {
-  initCacheSession(MOCK_SESSION_KEY);
+beforeEach(async () => {
+  await initCacheSession(MOCK_SESSION_KEY);
 
   mockedAxios.get.mockImplementation(async (url, config) => {
     switch (url) {
@@ -40,40 +40,44 @@ beforeEach(() => {
   mockedAxios.create = jest.fn(() => mockedAxios);
 });
 
-afterEach(() => {
-  clearCacheSession(MOCK_SESSION_KEY, "Idena");
+afterEach(async () => {
+  await clearCacheSession(MOCK_SESSION_KEY);
   jest.clearAllMocks();
 });
 
 describe("Attempt signin", function () {
-  it("should generate nonce", () => {
-    const nonce = loadIdenaSession(MOCK_SESSION_KEY, MOCK_ADDRESS);
+  it("should generate nonce", async () => {
+    const nonce = await loadIdenaSession(MOCK_SESSION_KEY, MOCK_ADDRESS);
     expect(nonce).toBeDefined();
 
-    const session: IdenaCache = loadCacheSession(MOCK_SESSION_KEY, "Idena");
+    const session = await loadCacheSession<IdenaCache>(MOCK_SESSION_KEY);
     expect(session).toBeDefined();
-    expect(session.nonce).toBe(nonce);
-    expect(session.address).toBe(MOCK_ADDRESS);
-    expect(session.signature).toBeUndefined();
+    expect(session.get("nonce")).toBe(nonce);
+    expect(session.get("address")).toBe(MOCK_ADDRESS);
+    expect(session.get("signature")).toBeUndefined();
   });
 
-  it("shouldn't generate nonce for wrong session", () => {
-    expect(() => loadIdenaSession("wrong_session_key", MOCK_ADDRESS)).toThrow("Session missing or expired, try again");
+  it("shouldn't generate nonce for wrong session", async () => {
+    await expect(async () => await loadIdenaSession("wrong_session_key", MOCK_ADDRESS)).rejects.toThrow(
+      "Session missing or expired, try again"
+    );
   });
 
   it("should authenticate", async () => {
-    const session: IdenaCache = loadCacheSession(MOCK_SESSION_KEY, "Idena");
-    session.address = MOCK_ADDRESS;
-    session.nonce = MOCK_NONCE;
+    const session = await loadCacheSession<IdenaCache>(MOCK_SESSION_KEY);
+    await session.set("address", MOCK_ADDRESS);
+    await session.set("nonce", MOCK_NONCE);
 
     const ok = await authenticate(MOCK_SESSION_KEY, MOCK_SIGNATURE);
-
     expect(ok).toBe(true);
     expect(mockedAxios.get).toBeCalledTimes(1);
     expect(mockedAxios.get).toBeCalledWith(`/api/SignatureAddress?value=${MOCK_NONCE}&signature=${MOCK_SIGNATURE}`);
-    expect(session).toBeDefined();
-    expect(session.address).toBe(MOCK_ADDRESS);
-    expect(session.signature).toBe(MOCK_SIGNATURE);
+
+    const updatedSession = await loadCacheSession<IdenaCache>(MOCK_SESSION_KEY);
+    expect(updatedSession).toBeDefined();
+
+    expect(updatedSession.get("address")).toBe(MOCK_ADDRESS);
+    expect(updatedSession.get("signature")).toBe(MOCK_SIGNATURE);
   });
 
   it("shouldn't authenticate when the Idena API returns wrong response", async () => {
@@ -81,26 +85,26 @@ describe("Attempt signin", function () {
       throw new Error("error");
     });
 
-    const session: IdenaCache = loadCacheSession(MOCK_SESSION_KEY, "Idena");
-    session.address = MOCK_ADDRESS;
-    session.nonce = MOCK_NONCE;
+    const session = await loadCacheSession<IdenaCache>(MOCK_SESSION_KEY);
+    await session.set("address", MOCK_ADDRESS);
+    await session.set("nonce", MOCK_NONCE);
 
     const ok = await authenticate(MOCK_SESSION_KEY, MOCK_SIGNATURE);
 
     expect(ok).toBe(false);
     expect(session).toBeDefined();
-    expect(session.address).toBe(MOCK_ADDRESS);
-    expect(session.signature).toBeUndefined();
+    expect(session.get("address")).toBe(MOCK_ADDRESS);
+    expect(session.get("signature")).toBeUndefined();
   });
 
   it("shouldn't authenticate when session has no nonce data", async () => {
     const ok = await authenticate(MOCK_SESSION_KEY, MOCK_SIGNATURE);
 
     expect(ok).toBe(false);
-    const session: IdenaCache = loadCacheSession(MOCK_SESSION_KEY, "Idena");
+    const session = await loadCacheSession<IdenaCache>(MOCK_SESSION_KEY);
     expect(session).toBeDefined();
-    expect(session.address).toBeUndefined();
-    expect(session.nonce).toBeUndefined();
-    expect(session.signature).toBeUndefined();
+    expect(session.get("address")).toBeUndefined();
+    expect(session.get("nonce")).toBeUndefined();
+    expect(session.get("signature")).toBeUndefined();
   });
 });

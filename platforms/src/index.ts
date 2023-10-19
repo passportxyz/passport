@@ -42,6 +42,6 @@ export const providers = new Providers([
 export * from "./types";
 export { Platform as PlatformClass } from "./utils/platform";
 export { platforms as platforms };
-export { initCacheSession, loadCacheSession, clearCacheSession } from "./utils/mem-cache";
+export { initCacheSession, loadCacheSession, clearCacheSession } from "./utils/platform-cache";
 export { handleAxiosError } from "./utils/handleAxiosError";
-export { PassportCache } from "./utils/cache";
+export { PassportCache } from "./utils/plassport-cache";

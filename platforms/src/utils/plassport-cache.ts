@@ -43,4 +43,40 @@ export class PassportCache {
       return null;
     }
   }
+
+  public async setHash(key: string, value: { [k: string]: string | null }): Promise<void> {
+    try {
+      await this.client.hSet(key, value);
+    } catch (err) {
+      console.error("REDIS CONNECTION ERROR: Error writing to redis");
+    }
+  }
+
+  public async getHash(key: string): Promise<{ [k: string]: string } | null> {
+    try {
+      const value = await this.client.hGetAll(key);
+      return value;
+    } catch (err) {
+      console.error("REDIS CONNECTION ERROR: Error reading from redis");
+      return null;
+    }
+  }
+
+  public async delete(key: string): Promise<void> {
+    try {
+      await this.client.del(key);
+    } catch (err) {
+      console.error("REDIS CONNECTION ERROR: Error deleting redis entry");
+      return null;
+    }
+  }
+
+  public async setTimeOut(key: string, expiresInSeconds: number): Promise<void> {
+    try {
+      await this.client.expire(key, expiresInSeconds);
+    } catch (err) {
+      console.error("REDIS CONNECTION ERROR: Error setting timeout");
+      return null;
+    }
+  }
 }
