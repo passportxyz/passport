@@ -1,91 +1,44 @@
-import { initCacheSession, loadCacheSession, clearCacheSession } from "../mem-cache";
-import crypto from "crypto";
+import { createClient, RedisClientType } from "redis";
+import { PassportCache } from "../cache";
 
-// Mock the crypto.randomBytes function
-jest.mock("crypto", () => ({
-  randomBytes: jest.fn().mockReturnValue({
-    toString: () => "mockedRandomToken",
+// Mock the Redis module with the methods you'll be using
+jest.mock("redis", () => ({
+  createClient: jest.fn().mockReturnValue({
+    connect: jest.fn(),
+    set: jest.fn(),
+    get: jest.fn(),
+    on: jest.fn(),
   }),
 }));
 
-describe("PlatformsDataCache", () => {
-  afterEach(() => {
+describe("PassportCache", () => {
+  let passportCache: PassportCache;
+  let mockClient: jest.Mocked<RedisClientType>;
+
+  beforeEach(() => {
     jest.clearAllMocks();
+    passportCache = new PassportCache();
+
+    mockClient = createClient() as jest.Mocked<RedisClientType>;
   });
 
-  it("initCacheSession should return a cache token", () => {
-    const result = initCacheSession();
-    expect(result).toBe("mockedRandomToken");
-    expect(crypto.randomBytes).toHaveBeenCalledWith(32);
-    clearCacheSession(result, "Github");
+  it("should set a key-value pair", async () => {
+    await passportCache.set("some_key", "some_value");
+    expect(mockClient.set).toHaveBeenCalledWith("some_key", "some_value");
   });
 
-  it("initCacheSession should return a provided cache token", () => {
-    const result = initCacheSession("providedToken");
-    expect(result).toBe("providedToken");
-    expect(crypto.randomBytes).not.toHaveBeenCalled();
-    clearCacheSession(result, "Github");
+  it("should get a value by key", async () => {
+    mockClient.get.mockResolvedValue("some_value");
+    const value = await passportCache.get("some_key");
+    expect(value).toEqual("some_value");
   });
 
-  it("loadCacheSession should return session data", () => {
-    const token = initCacheSession();
-    const platform = "Github";
-    const result = loadCacheSession(token, platform);
-    expect(result).toEqual({});
-    clearCacheSession(token, "Github");
-  });
+  it("should handle Redis errors gracefully when setting", async () => {
+    const consoleSpy = jest.spyOn(console, "error");
+    mockClient.set.mockRejectedValue(new Error("Redis Error"));
 
-  it("loadCacheSession should throw an error if session not found", () => {
-    const token = "nonexistentToken";
-    const platform = "Github";
-    expect(() => loadCacheSession(token, platform)).toThrow("Cache session not found");
-  });
+    await passportCache.set("some_key", "some_value");
 
-  it("clearCacheSession should clear a session if all providers cleared", () => {
-    const token = initCacheSession();
-    const platform = "Github";
-    clearCacheSession(token, platform);
-    expect(function () {
-      loadCacheSession(token, platform);
-    }).toThrow("Cache session not found");
-  });
-
-  it("clearCacheSession keep other providers when there are multiple", () => {
-    type TestCache = { foo?: string };
-    const token = initCacheSession();
-    const platform1 = "Github";
-    const platform2 = "Twitter";
-    const session1: TestCache = loadCacheSession(token, platform1);
-    const session2: TestCache = loadCacheSession(token, platform2);
-    session1.foo = "bar";
-    session2.foo = "baz";
-
-    clearCacheSession(token, platform1);
-
-    expect(loadCacheSession(token, platform2)).toEqual({ foo: "baz" });
-
-    clearCacheSession(token, platform2);
-  });
-
-  it("loadCacheSession should throw an error if cache token is undefined", () => {
-    const platform = "Github";
-    expect(() => loadCacheSession(undefined, platform)).toThrow("Cache session not found");
-  });
-
-  it("initCacheSession should initialize separate sessions for different cache tokens", () => {
-    const token1 = initCacheSession("token1");
-    const token2 = initCacheSession("token2");
-    const platform = "Github";
-
-    // Expect both sessions to be initialized separately
-    expect(loadCacheSession(token1, platform)).toEqual({});
-    expect(loadCacheSession(token2, platform)).toEqual({});
-
-    // Clear first session and expect only the first one to be cleared
-    clearCacheSession(token1, platform);
-    expect(() => loadCacheSession(token1, platform)).toThrow("Cache session not found");
-    expect(loadCacheSession(token2, platform)).toEqual({});
-
-    clearCacheSession(token2, platform);
+    expect(consoleSpy).toHaveBeenCalledWith("REDIS CONNECTION ERROR: Error writing to redis");
   });
 });

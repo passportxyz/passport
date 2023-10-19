@@ -1,7 +1,7 @@
 import { createClient } from "redis";
 import type { RedisClientType } from "redis";
 
-class PassportCache {
+export class PassportCache {
   private client: RedisClientType;
 
   constructor() {
@@ -10,7 +10,7 @@ class PassportCache {
     });
 
     this.client.on("error", (err) => {
-      // Send pd alert
+      console.error(`REDIS CONNECTION ERROR: ${String(err)}`);
     });
   }
 
@@ -44,5 +44,3 @@ class PassportCache {
     }
   }
 }
-
-export default PassportCache;

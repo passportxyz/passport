@@ -1,8 +1,7 @@
 import { utils } from "ethers";
 import { BigNumber } from "@ethersproject/bignumber";
 import Moralis from "moralis";
-import { IAMError } from "./scorerService";
-import PassportCache from "./cache";
+import { PassportCache } from "@gitcoin/passport-platforms";
 
 const FIVE_MINUTES = 1000 * 60 * 5;
 const WETH_CONTRACT = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";

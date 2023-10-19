@@ -44,3 +44,4 @@ export { Platform as PlatformClass } from "./utils/platform";
 export { platforms as platforms };
 export { initCacheSession, loadCacheSession, clearCacheSession } from "./utils/mem-cache";
 export { handleAxiosError } from "./utils/handleAxiosError";
+export { PassportCache } from "./utils/cache";

@@ -1,7 +1,7 @@
 import { getEASFeeAmount } from "../src/utils/easFees";
 import { utils } from "ethers";
 import Moralis from "moralis";
-import PassportCache from "../src/utils/cache";
+import { PassportCache } from "@gitcoin/passport-platforms";
 
 jest.mock("moralis", () => ({
   EvmApi: {
