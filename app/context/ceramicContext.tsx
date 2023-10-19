@@ -383,6 +383,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       }
       case "connecting": {
         setIsLoadingPassport(IsLoadingPassportState.Loading);
+        setCeramicClient(undefined);
+        setDatabase(undefined);
         break;
       }
       case "connected": {
