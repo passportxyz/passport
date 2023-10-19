@@ -1,6 +1,6 @@
 /* eslint-disable */
 import * as twitterAccountAge from "../twitterAccountAge";
-import { clearCacheSession } from "../../../utils/cache";
+import { clearCacheSession } from "../../../utils/mem-cache";
 import { RequestPayload, ProviderContext } from "@gitcoin/passport-types";
 import { ApiRequestError, ApiResponseError, ApiPartialResponseError } from "twitter-api-v2";
 import { getTwitterUserData, getAuthClient, initClientAndGetAuthUrl } from "../../procedures/twitterOauth";

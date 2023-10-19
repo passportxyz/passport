@@ -6,7 +6,7 @@ import {
   ApiPartialResponseError,
 } from "twitter-api-v2";
 
-import { clearCacheSession, initCacheSession, loadCacheSession } from "../../utils/cache";
+import { clearCacheSession, initCacheSession, loadCacheSession } from "../../utils/mem-cache";
 import { ProviderContext } from "@gitcoin/passport-types";
 import { ProviderExternalVerificationError, ProviderInternalVerificationError } from "../../types";
 

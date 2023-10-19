@@ -4,7 +4,7 @@
 import { ProviderContext, RequestPayload } from "@gitcoin/passport-types";
 import { IdenaAge10Provider, IdenaAge5Provider } from "../Providers/IdenaAgeProvider";
 import { IdenaContext } from "../procedures/idenaSignIn";
-import { initCacheSession, loadCacheSession } from "../../utils/cache";
+import { initCacheSession, loadCacheSession } from "../../utils/mem-cache";
 import {
   IdenaStateHumanProvider,
   IdenaStateNewbieProvider,

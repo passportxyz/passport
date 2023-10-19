@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { initCacheSession, loadCacheSession, clearCacheSession } from "../../utils/cache";
+import { initCacheSession, loadCacheSession, clearCacheSession } from "../../utils/mem-cache";
 import { ProviderContext } from "@gitcoin/passport-types";
 import { ProviderInternalVerificationError } from "../../types";
 import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";

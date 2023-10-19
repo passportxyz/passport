@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/require-await */
 
 import { authenticate, loadIdenaSession } from "../procedures/idenaSignIn";
-import { clearCacheSession, initCacheSession, loadCacheSession } from "../../utils/cache";
+import { clearCacheSession, initCacheSession, loadCacheSession } from "../../utils/mem-cache";
 
 // ----- Libs
 import axios from "axios";

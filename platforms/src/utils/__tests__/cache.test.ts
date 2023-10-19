@@ -1,4 +1,4 @@
-import { initCacheSession, loadCacheSession, clearCacheSession } from "../cache";
+import { initCacheSession, loadCacheSession, clearCacheSession } from "../mem-cache";
 import crypto from "crypto";
 
 // Mock the crypto.randomBytes function
