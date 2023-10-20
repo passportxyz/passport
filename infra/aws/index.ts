@@ -170,32 +170,12 @@ const cluster = new aws.ecs.Cluster(`gitcoin`,
     }
 );
 
-const service = new aws.ecs.Service(`dpopp-iam`, {
-    cluster: cluster.arn,
-    desiredCount: 1,
-    enableEcsManagedTags: true,
-    enableExecuteCommand: false,
-    iamRole: serviceRole.arn,
-    launchType: "FARGATE",
-    loadBalancers: [{
-        containerName: "iam",
-        containerPort: 80,
-        targetGroupArn: albTargetGroup.arn
-    }],
-    name: `dpopp-iam`,
-    networkConfiguration: {
-        subnets: vpcPrivateSubnets,
-        securityGroups: [serviceSG.id]
-    },
-    propagateTags: "TASK_DEFINITION",
-    tags: {
-        ...defaultTags,
-        Name: `dpopp-iam`
-    }
-});
-
 const serviceLogGroup = new aws.cloudwatch.LogGroup("dpopp-iam", {
+    name: "dpopp-iam",
     retentionInDays: 1, // TODO: make it as a paramater and change it for production & staging
+    tags: {
+      ...defaultTags
+    }
 });
 
 // TaskDefinition
@@ -204,8 +184,8 @@ const taskDefinition = new aws.ecs.TaskDefinition(`dpopp-iam`, {
     containerDefinitions: JSON.stringify([{
         name: "iam", 
         image: dockerGtcPassportIamImage, 
-        cpu: 4096, 
-        memory: 8192,
+        cpu: 2048,
+        memory: 4096,
         links: [], 
         essential: true, 
         portMappings: [{ 
@@ -220,8 +200,10 @@ const taskDefinition = new aws.ecs.TaskDefinition(`dpopp-iam`, {
         logConfiguration: { 
             logDriver: "awslogs", 
             options: { 
-                "awslogs-group": serviceLogGroup.name, 
-                "awslogs-region": region, 
+                // "awslogs-group": serviceLogGroup.name,  // TODO: fix this
+                "awslogs-group": "dpopp-iam",
+                "awslogs-region": "us-west-2",
+                // "awslogs-region": region.id, // TODO: fix this
                 "awslogs-stream-prefix": "iam" 
             } 
         }, 
@@ -401,7 +383,40 @@ const taskDefinition = new aws.ecs.TaskDefinition(`dpopp-iam`, {
           ],
         mountPoints: [], 
         volumesFrom: [] 
-    }])
+    }]),
+    executionRoleArn: serviceRole.arn,
+    cpu: "2048",
+    memory: "4096",
+    networkMode: "awsvpc",
+    requiresCompatibilities: ["FARGATE"],
+    tags: {
+      ...defaultTags,
+      EcsService: `dpopp-iam`
+    }
+});
+
+const service = new aws.ecs.Service(`dpopp-iam`, {
+  cluster: cluster.arn,
+  desiredCount: 1,
+  enableEcsManagedTags: true,
+  enableExecuteCommand: false,
+  launchType: "FARGATE",
+  loadBalancers: [{
+      containerName: "iam",
+      containerPort: 80,
+      targetGroupArn: albTargetGroup.arn
+  }],
+  name: `dpopp-iam`,
+  networkConfiguration: {
+      subnets: vpcPrivateSubnets,
+      securityGroups: [serviceSG.id]
+  },
+  propagateTags: "TASK_DEFINITION",
+  taskDefinition: taskDefinition.arn,
+  tags: {
+      ...defaultTags,
+      Name: `dpopp-iam`
+  }
 });
 
 // TODO:  Clarify this ?
@@ -411,4 +426,14 @@ const ecsTarget = new aws.appautoscaling.Target("autoscaling_target", {
     resourceId: pulumi.interpolate`service/${cluster.name}/${service.name}`,
     scalableDimension: "ecs:service:DesiredCount",
     serviceNamespace: "ecs",
+});
+
+
+
+const serviceRecord = new aws.route53.Record("passport-record", {
+    name: `test-passport`,
+    zoneId: "Z09837088RUQ2K5CRUKZ",
+    type: "CNAME",
+    ttl: 600,
+    records: ["core-alb-244061603.us-west-2.elb.amazonaws.com."]
 });

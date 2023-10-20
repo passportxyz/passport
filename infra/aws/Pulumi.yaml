@@ -2,5 +2,5 @@ name: passport-iac
 runtime:
   name: nodejs
   options:
-    typescript: false
+    typescript: true
 description: A minimal AWS JavaScript Pulumi program
