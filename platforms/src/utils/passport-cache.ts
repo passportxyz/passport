@@ -79,4 +79,13 @@ export class PassportCache {
       return null;
     }
   }
+
+  public async disconnect(): Promise<void> {
+    try {
+      await this.client.disconnect();
+    } catch (err) {
+      console.error("REDIS CONNECTION ERROR: Error closing redis connection");
+      return null;
+    }
+  }
 }
