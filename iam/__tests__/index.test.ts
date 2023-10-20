@@ -1,6 +1,7 @@
 // ---- Testing libraries
 import request from "supertest";
 import * as DIDKit from "@spruceid/didkit-wasm-node";
+import { PassportCache } from "@gitcoin/passport-platforms";
 
 // --- Mocks - test configuration
 
@@ -1243,6 +1244,15 @@ describe("POST /eas/passport", () => {
   });
 
   it("successfully verifies and formats passport", async () => {
+    jest.spyOn(PassportCache.prototype, "init").mockImplementation(() => Promise.resolve());
+    jest.spyOn(PassportCache.prototype, "set").mockImplementation(() => Promise.resolve());
+    jest.spyOn(PassportCache.prototype, "get").mockImplementation((key) => {
+      if (key === "ethPrice") {
+        return Promise.resolve("3000");
+      } else if (key === "ethPriceLastUpdate") {
+        return Promise.resolve((Date.now() - 1000 * 60 * 6).toString());
+      }
+    });
     const nonce = 0;
     const credentials = [
       {
