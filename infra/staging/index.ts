@@ -148,7 +148,7 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
   },
 });
 
-const redisCacheOpsConnectionUrl = setupRedis(vpcPrivateSubnetIds, vpc);
+const redisCacheOpsConnectionUrl = setupRedis(vpcPrivateSubnetIds, vpcID);
 
 const alertTopic = createPagerdutyTopic();
 const logGroup = createIAMLogGroup({ alertTopic });

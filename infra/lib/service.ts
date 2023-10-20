@@ -118,7 +118,7 @@ export function createIAMLogGroup({ alertTopic }: { alertTopic: aws.sns.Topic })
   return logGroup;
 }
 
-export function setupRedis(vpcPrivateSubnetIds: any, vpc: aws.ec2.Vpc) {
+export function setupRedis(vpcPrivateSubnetIds: any, vpcID: pulumi.Output<string>) {
   //////////////////////////////////////////////////////////////
   // Set up Redis
   //////////////////////////////////////////////////////////////
@@ -129,7 +129,7 @@ export function setupRedis(vpcPrivateSubnetIds: any, vpc: aws.ec2.Vpc) {
 
   const secgrp_redis = new aws.ec2.SecurityGroup("passport-redis-secgrp", {
     description: "passport-redis-secgrp",
-    vpcId: vpc.vpcId,
+    vpcId: vpcID,
     ingress: [
       {
         protocol: "tcp",

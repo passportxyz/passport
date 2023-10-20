@@ -144,7 +144,7 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
   },
 });
 
-const redisCacheOpsConnectionUrl = setupRedis(vpcPrivateSubnetIds, vpc);
+const redisCacheOpsConnectionUrl = setupRedis(vpcPrivateSubnetIds, vpcID);
 
 const service = new awsx.ecs.FargateService("dpopp-iam", {
   cluster,
