@@ -6,9 +6,9 @@ module.exports = {
     };
   },
   reactStrictMode: true,
-  webpack: function (config, options) {
+  webpack: function (config, { _isServer }) {
     config.experiments = { asyncWebAssembly: true };
-    config.resolve.fallback = { fs: false };
+    config.resolve.fallback = { fs: false, net: false, tls: false };
     return config;
   },
 };
