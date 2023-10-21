@@ -11,7 +11,6 @@ export class InMemoryRedisClient {
   constructor() {
     this.store = {}; // In-memory data store
     this.expirations = {}; // Keys' expiration time in milliseconds
-    this.timer = setInterval(() => this.expireKeys(), 1000);
   }
 
   async connect(): Promise<void> {
