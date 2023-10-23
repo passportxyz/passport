@@ -21,7 +21,7 @@ export class PlatformSession<T extends Record<string, string>> {
 
   async set(key: keyof T, value: T[keyof T]): Promise<void> {
     this.data[key] = value;
-    await this.cache.setHash(this.token, this.data);
+    await this.cache.setHash(this.token, key as string, value);
   }
 }
 
@@ -37,7 +37,6 @@ class PlatformsDataCache {
     await this.cache.init();
     const cacheToken = token || crypto.randomBytes(32).toString("hex");
 
-    await this.cache.setHash(cacheToken, {});
     await this.cache.setTimeOut(cacheToken, this.initialTimeout);
 
     return cacheToken;

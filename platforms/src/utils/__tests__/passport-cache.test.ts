@@ -16,7 +16,7 @@ describe("PassportCache", () => {
     expect(await passportCache.get("some_key")).toBe("some_value");
   });
   it("should set a key-value hash", async () => {
-    await passportCache.setHash("some_hash", { someValue: "400" });
+    await passportCache.setHash("some_key", "some_field", "400");
     // eslint-disable-next-line prettier/prettier
     expect(JSON.stringify(await passportCache.getHash("some_hash"))).toBe(JSON.stringify({ someValue: "400" }));
   });

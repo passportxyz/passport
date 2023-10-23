@@ -9,7 +9,7 @@ export class PassportCache {
       url: process.env.REDIS_URL,
     });
 
-    this.client.on("error", (err) => {
+    this.client.on("error", (err: any) => {
       console.error(`REDIS CONNECTION ERROR: ${String(err)}`);
     });
   }
@@ -21,7 +21,7 @@ export class PassportCache {
   private async connect(): Promise<void> {
     try {
       await this.client.connect();
-    } catch (err) {
+    } catch (err: any) {
       console.error("REDIS CONNECTION ERROR: Error connecting to redis");
     }
   }
@@ -29,8 +29,8 @@ export class PassportCache {
   public async set(key: string, value: string): Promise<void> {
     try {
       await this.client.set(key, value);
-    } catch (err) {
-      console.error("REDIS CONNECTION ERROR: Error writing to redis");
+    } catch (err: any) {
+      console.error(`REDIS CONNECTION ERROR: Error writing to redis ${String(err)}`);
     }
   }
 
@@ -38,17 +38,17 @@ export class PassportCache {
     try {
       const value = await this.client.get(key);
       return value;
-    } catch (err) {
+    } catch (err: any) {
       console.error("REDIS CONNECTION ERROR: Error reading from redis");
       return null;
     }
   }
 
-  public async setHash(key: string, value: { [k: string]: string | null }): Promise<void> {
+  public async setHash(key: string, field: string, value: string | null): Promise<void> {
     try {
-      await this.client.hSet(key, value);
-    } catch (err) {
-      console.error("REDIS CONNECTION ERROR: Error writing to redis");
+      await this.client.hSet(key, field, value);
+    } catch (err: any) {
+      console.error(`REDIS CONNECTION ERROR: Error writing to redis ${String(err)}`);
     }
   }
 
@@ -56,7 +56,7 @@ export class PassportCache {
     try {
       const value = await this.client.hGetAll(key);
       return value;
-    } catch (err) {
+    } catch (err: any) {
       console.error("REDIS CONNECTION ERROR: Error reading from redis");
       return null;
     }
@@ -65,7 +65,7 @@ export class PassportCache {
   public async delete(key: string): Promise<void> {
     try {
       await this.client.del(key);
-    } catch (err) {
+    } catch (err: any) {
       console.error("REDIS CONNECTION ERROR: Error deleting redis entry");
       return null;
     }
@@ -74,7 +74,7 @@ export class PassportCache {
   public async setTimeOut(key: string, expiresInSeconds: number): Promise<void> {
     try {
       await this.client.expire(key, expiresInSeconds);
-    } catch (err) {
+    } catch (err: any) {
       console.error("REDIS CONNECTION ERROR: Error setting timeout");
       return null;
     }
@@ -83,7 +83,7 @@ export class PassportCache {
   public async disconnect(): Promise<void> {
     try {
       await this.client.disconnect();
-    } catch (err) {
+    } catch (err: any) {
       console.error("REDIS CONNECTION ERROR: Error closing redis connection");
       return null;
     }
