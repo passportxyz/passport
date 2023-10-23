@@ -86,5 +86,81 @@ export function createIAMLogGroup({ alertTopic }: { alertTopic: aws.sns.Topic })
     treatMissingData: "notBreaching",
   });
 
+  new aws.cloudwatch.LogMetricFilter("redisConnectionErrors", {
+    logGroupName: logGroup.name,
+    metricTransformation: {
+      defaultValue: "0",
+      name: "redisConnectionError",
+      namespace: "/iam/errors/redis",
+      unit: "Count",
+      value: "1",
+    },
+    name: "Redis Connection Error",
+    pattern: '"REDIS CONNECTION ERROR:"',
+  });
+
+  new aws.cloudwatch.MetricAlarm("redisConnectionErrorsAlarm", {
+    alarmActions: [alertTopic.arn],
+    comparisonOperator: "GreaterThanOrEqualToThreshold",
+    datapointsToAlarm: 1,
+    evaluationPeriods: 1,
+    insufficientDataActions: [],
+    metricName: "redisConnectionError",
+    name: "Redis Connection Error",
+    namespace: "/iam/errors/redis",
+    okActions: [],
+    period: 21600,
+    statistic: "Sum",
+    threshold: 1,
+    treatMissingData: "notBreaching",
+  });
+
   return logGroup;
+}
+
+export function setupRedis(vpcPrivateSubnetIds: any, vpcID: pulumi.Output<string>) {
+  //////////////////////////////////////////////////////////////
+  // Set up Redis
+  //////////////////////////////////////////////////////////////
+
+  const redisSubnetGroup = new aws.elasticache.SubnetGroup("passport-redis-subnet", {
+    subnetIds: vpcPrivateSubnetIds,
+  });
+
+  const secgrp_redis = new aws.ec2.SecurityGroup("passport-redis-secgrp", {
+    description: "passport-redis-secgrp",
+    vpcId: vpcID,
+    ingress: [
+      {
+        protocol: "tcp",
+        fromPort: 6379,
+        toPort: 6379,
+        cidrBlocks: ["0.0.0.0/0"],
+      },
+    ],
+    egress: [
+      {
+        protocol: "-1",
+        fromPort: 0,
+        toPort: 0,
+        cidrBlocks: ["0.0.0.0/0"],
+      },
+    ],
+  });
+
+  const redis = new aws.elasticache.Cluster("passport-redis", {
+    engine: "redis",
+    engineVersion: "4.0.10",
+    nodeType: "cache.t2.small",
+    numCacheNodes: 1,
+    port: 6379,
+    subnetGroupName: redisSubnetGroup.name,
+    securityGroupIds: [secgrp_redis.id],
+  });
+
+  const redisPrimaryNode = redis.cacheNodes[0];
+
+  const redisCacheOpsConnectionUrl = pulumi.interpolate`redis://${redisPrimaryNode.address}:${redisPrimaryNode.port}/0`;
+
+  return redisCacheOpsConnectionUrl;
 }

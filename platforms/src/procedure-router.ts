@@ -28,13 +28,13 @@ export type IdenaAuthenticateRequestBody = {
 
 router.post("/twitter/generateAuthUrl", (req: Request, res: Response): void => {
   const { callback: callbackOverride } = req.body as GenerateTwitterAuthUrlRequestBody;
-  const authUrl = twitterOAuth.initClientAndGetAuthUrl(callbackOverride);
+  twitterOAuth.initClientAndGetAuthUrl(callbackOverride).then((authUrl) => {
+    const data = {
+      authUrl,
+    };
 
-  const data = {
-    authUrl,
-  };
-
-  res.status(200).send(data);
+    res.status(200).send(data);
+  });
 });
 
 router.post("/brightid/sponsor", (req: Request, res: Response): void => {
@@ -68,11 +68,19 @@ router.get("/brightid/information", (req: Request, res: Response): void => {
 });
 
 router.post("/idena/create-token", (req: Request, res: Response): void => {
-  const token = idenaSignIn.initSession();
-  const data = {
-    token: token,
-  };
-  res.status(200).send(data);
+  idenaSignIn
+    .initSession()
+    .then((token) => {
+      const data = {
+        token: token,
+      };
+      res.status(200).send(data);
+    })
+    .catch((error) => {
+      res.status(400).send({
+        error: `An error was encountered while creating a new token: ${String(error)}`,
+      });
+    });
 });
 
 router.post("/idena/start-session", (req: Request, res: Response): void => {
@@ -83,20 +91,28 @@ router.post("/idena/start-session", (req: Request, res: Response): void => {
     });
     return;
   }
-  const nonce = idenaSignIn.loadIdenaSession(token, address);
-  if (!nonce) {
-    res.status(200).send({
-      error: "something went wrong while starting new session",
+  idenaSignIn
+    .loadIdenaSession(token, address)
+    .then((nonce) => {
+      if (!nonce) {
+        res.status(200).send({
+          error: "something went wrong while starting new session",
+        });
+        return;
+      }
+      const data = {
+        success: true,
+        data: {
+          nonce: nonce,
+        },
+      };
+      res.status(200).send(data);
+    })
+    .catch((error) => {
+      res.status(400).send({
+        error: `An error was encountered while starting the session: ${String(error)}`,
+      });
     });
-    return;
-  }
-  const data = {
-    success: true,
-    data: {
-      nonce: nonce,
-    },
-  };
-  res.status(200).send(data);
 });
 
 router.post("/idena/authenticate", (req: Request, res: Response): void => {

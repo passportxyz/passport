@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { RefreshMyStampsModalContentCard } from "../../components/RefreshMyStampsModalContentCard";
-import { PlatformSpec } from "@gitcoin/passport-platforms/src/types";
+import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { ValidatedProviderGroup } from "../../signer/utils";
 

@@ -40,3 +40,8 @@ There are a few options for adding the variable into the build process:
 - (If the value can be public) Hardcode the value in plaintext into the Github Actions script and feed it into the
   Pulumi file as described above. Alternatively, hardcode the value into the Pulumi file directly. Also note that it can
   be added to `environment` array in the `iam` container definition instead of `secrets`, since the value can be public.
+
+## Cache
+
+Passport uses redis to handle caching. For local development you can spin up a redis instance using docker:
+`docker run -d -p 6379:6379 redis` or using whatever other method you prefer. The redis instance should be available at `localhost:6379` by default.

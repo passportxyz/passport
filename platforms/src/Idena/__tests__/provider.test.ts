@@ -4,7 +4,7 @@
 import { ProviderContext, RequestPayload } from "@gitcoin/passport-types";
 import { IdenaAge10Provider, IdenaAge5Provider } from "../Providers/IdenaAgeProvider";
 import { IdenaContext } from "../procedures/idenaSignIn";
-import { initCacheSession, loadCacheSession } from "../../utils/cache";
+import { initCacheSession, loadCacheSession, PlatformSession } from "../../utils/platform-cache";
 import {
   IdenaStateHumanProvider,
   IdenaStateNewbieProvider,
@@ -61,11 +61,11 @@ afterAll(() => {
   jest.useRealTimers();
 });
 
-beforeEach(() => {
-  initCacheSession(MOCK_SESSION_KEY);
-  const session: IdenaCache = loadCacheSession(MOCK_SESSION_KEY, "Idena");
-  session.address = MOCK_ADDRESS;
-  session.signature = "signature";
+beforeEach(async () => {
+  await initCacheSession(MOCK_SESSION_KEY);
+  const session = await loadCacheSession<IdenaCache>(MOCK_SESSION_KEY);
+  await session.set("address", MOCK_ADDRESS);
+  await session.set("signature", "signature");
 
   mockedAxios.get.mockImplementation(async (url, config) => {
     switch (url) {

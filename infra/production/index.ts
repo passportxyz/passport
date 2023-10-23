@@ -2,7 +2,7 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as awsx from "@pulumi/awsx";
 
-import { createIAMLogGroup, createPagerdutyTopic } from "../lib/service";
+import { createIAMLogGroup, createPagerdutyTopic, setupRedis } from "../lib/service";
 
 // The following vars are not allowed to be undefined, hence the `${...}` magic
 
@@ -145,6 +145,8 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
   },
 });
 
+const redisCacheOpsConnectionUrl = setupRedis(vpcPrivateSubnetIds, vpcID);
+
 const alertTopic = createPagerdutyTopic();
 const logGroup = createIAMLogGroup({ alertTopic });
 
@@ -166,6 +168,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
           {
             name: "CGRANTS_API_URL",
             value: "https://api.scorer.gitcoin.co/cgrants",
+          },
+          {
+            name: "REDIS_URL",
+            value: redisCacheOpsConnectionUrl,
           },
         ],
         secrets: [
@@ -347,25 +353,25 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
   },
 });
 
-// const ecsIamServiceAutoscalingTarget = new aws.appautoscaling.Target("autoscaling_target", {
-//   maxCapacity: 10,
-//   minCapacity: 1,
-//   resourceId: pulumi.interpolate`service/${cluster.cluster.name}/${service.service.name}`,
-//   scalableDimension: "ecs:service:DesiredCount",
-//   serviceNamespace: "ecs",
-// });
+const ecsIamServiceAutoscalingTarget = new aws.appautoscaling.Target("autoscaling_target", {
+  maxCapacity: 10,
+  minCapacity: 1,
+  resourceId: pulumi.interpolate`service/${cluster.cluster.name}/${service.service.name}`,
+  scalableDimension: "ecs:service:DesiredCount",
+  serviceNamespace: "ecs",
+});
 
-// const ecsScorerServiceAutoscaling = new aws.appautoscaling.Policy("scorer-autoscaling-policy", {
-//   policyType: "TargetTrackingScaling",
-//   resourceId: ecsIamServiceAutoscalingTarget.resourceId,
-//   scalableDimension: ecsIamServiceAutoscalingTarget.scalableDimension,
-//   serviceNamespace: ecsIamServiceAutoscalingTarget.serviceNamespace,
-//   targetTrackingScalingPolicyConfiguration: {
-//     predefinedMetricSpecification: {
-//       predefinedMetricType: "ECSServiceAverageCPUUtilization",
-//     },
-//     targetValue: 30,
-//     scaleInCooldown: 300,
-//     scaleOutCooldown: 300,
-//   },
-// });
+const ecsScorerServiceAutoscaling = new aws.appautoscaling.Policy("scorer-autoscaling-policy", {
+  policyType: "TargetTrackingScaling",
+  resourceId: ecsIamServiceAutoscalingTarget.resourceId,
+  scalableDimension: ecsIamServiceAutoscalingTarget.scalableDimension,
+  serviceNamespace: ecsIamServiceAutoscalingTarget.serviceNamespace,
+  targetTrackingScalingPolicyConfiguration: {
+    predefinedMetricSpecification: {
+      predefinedMetricType: "ECSServiceAverageCPUUtilization",
+    },
+    targetValue: 30,
+    scaleInCooldown: 300,
+    scaleOutCooldown: 300,
+  },
+});

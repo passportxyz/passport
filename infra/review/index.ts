@@ -2,6 +2,8 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as awsx from "@pulumi/awsx";
 
+import { setupRedis } from "../lib/service";
+
 // The following vars are not allowed to be undefined, hence the `${...}` magic
 
 let route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
@@ -142,6 +144,8 @@ const dpoppEcsRole = new aws.iam.Role("dpoppEcsRole", {
   },
 });
 
+const redisCacheOpsConnectionUrl = setupRedis(vpcPrivateSubnetIds, vpcID);
+
 const service = new awsx.ecs.FargateService("dpopp-iam", {
   cluster,
   desiredCount: 1,
@@ -159,6 +163,10 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
           {
             name: "CGRANTS_API_URL",
             value: "https://api.review.scorer.gitcoin.co/cgrants",
+          },
+          {
+            name: "REDIS_URL",
+            value: redisCacheOpsConnectionUrl,
           },
         ],
         secrets: [

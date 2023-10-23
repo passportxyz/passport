@@ -21,7 +21,7 @@ import { Drawer, DrawerOverlay } from "@chakra-ui/react";
 import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
 import { PlatformScoreSpec } from "../../context/scorerContext";
 import { getPlatformSpec } from "../../config/platforms";
-import { PlatformSpec } from "@gitcoin/passport-platforms/src/types";
+import { PlatformSpec } from "@gitcoin/passport-platforms";
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
