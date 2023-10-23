@@ -57,7 +57,7 @@ export class PassportCache {
       const value = await this.client.hGetAll(key);
       return value;
     } catch (err: any) {
-      console.error("REDIS CONNECTION ERROR: Error reading from redis");
+      console.error(`REDIS CONNECTION ERROR: Error reading from redis ${String(err)}`);
       return null;
     }
   }

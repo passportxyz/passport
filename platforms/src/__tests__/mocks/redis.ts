@@ -26,12 +26,17 @@ export class InMemoryRedisClient {
     return Promise.resolve(this.store[key] || null);
   }
 
-  async hSet(key: string, obj: Store): Promise<string> {
-    this.store[key] = { ...(this.store[key] || {}), ...obj };
+  async hSet(key: string, field: string, value: any): Promise<string> {
+    if (!this.store[key]) {
+      this.store[key] = {};
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    this.store[key][field] = value;
     return Promise.resolve("OK");
   }
 
-  async hGetAll(key: string): Promise<any> {
+  hGetAll(key: string): Promise<any> {
     return Promise.resolve(this.store[key] || null);
   }
 

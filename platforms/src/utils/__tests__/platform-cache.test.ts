@@ -9,8 +9,10 @@ jest.mock("crypto", () => ({
 }));
 
 describe("PlatformsDataCache", () => {
-  afterEach(() => {
+  afterEach(async () => {
     jest.clearAllMocks();
+    await clearCacheSession("token1");
+    await clearCacheSession("token2");
   });
 
   it("initCacheSession should return a cache token", async () => {
@@ -30,7 +32,9 @@ describe("PlatformsDataCache", () => {
   it("loadCacheSession should return session data", async () => {
     const token = await initCacheSession();
     const result = await loadCacheSession(token);
-    expect(result.data).toEqual({});
+    expect(result.data).toEqual({
+      initiated: "true",
+    });
     await clearCacheSession(token);
   });
 
@@ -59,8 +63,9 @@ describe("PlatformsDataCache", () => {
     await clearCacheSession(token);
 
     const token1Session = await loadCacheSession<TestCache>(token1);
-    expect(token1Session.data).toEqual({ foo: "baz" });
+    expect(token1Session.data).toEqual({ foo: "baz", initiated: "true" });
 
+    await clearCacheSession(token);
     await clearCacheSession(token1);
   });
 
@@ -75,14 +80,14 @@ describe("PlatformsDataCache", () => {
     const session1Data = await loadCacheSession(token1);
     const session2Data = await loadCacheSession(token2);
     // Expect both sessions to be initialized separately
-    expect(session1Data.data).toEqual({});
-    expect(session2Data.data).toEqual({});
+    expect(session1Data.data).toEqual({ initiated: "true" });
+    expect(session2Data.data).toEqual({ initiated: "true" });
 
     // Clear first session and expect only the first one to be cleared
     await clearCacheSession(token1);
     await expect(async () => await loadCacheSession(token1)).rejects.toThrow("Cache session not found");
     const session2 = await loadCacheSession(token2);
-    expect(session2.data).toEqual({});
+    expect(session2.data).toEqual({ initiated: "true" });
 
     await clearCacheSession(token2);
   });

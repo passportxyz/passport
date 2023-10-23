@@ -36,6 +36,7 @@ class PlatformsDataCache {
   async initSession(token?: CacheToken): Promise<CacheToken> {
     await this.cache.init();
     const cacheToken = token || crypto.randomBytes(32).toString("hex");
+    await this.cache.setHash(cacheToken, "initiated", "true");
 
     await this.cache.setTimeOut(cacheToken, this.initialTimeout);
 
@@ -55,7 +56,6 @@ class PlatformsDataCache {
     const session = new PlatformSession<T>(this.cache, token, userCache as T);
 
     await this.cache.setTimeOut(token, this.timeout);
-
     return session;
   }
 }
