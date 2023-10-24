@@ -22,7 +22,7 @@ export class PassportCache {
     try {
       await this.client.connect();
     } catch (err: any) {
-      console.error("REDIS CONNECTION ERROR: Error connecting to redis");
+      console.error(`REDIS CONNECTION ERROR: Error connecting to redis ${String(err)}`);
     }
   }
 
@@ -39,7 +39,7 @@ export class PassportCache {
       const value = await this.client.get(key);
       return value;
     } catch (err: any) {
-      console.error("REDIS CONNECTION ERROR: Error reading from redis");
+      console.error(`REDIS CONNECTION ERROR: Error reading from redis ${String(err)}`);
       return null;
     }
   }
@@ -66,7 +66,7 @@ export class PassportCache {
     try {
       await this.client.del(key);
     } catch (err: any) {
-      console.error("REDIS CONNECTION ERROR: Error deleting redis entry");
+      console.error(`REDIS CONNECTION ERROR: Error deleting redis entry ${String(err)}`);
       return null;
     }
   }
@@ -75,7 +75,7 @@ export class PassportCache {
     try {
       await this.client.expire(key, expiresInSeconds);
     } catch (err: any) {
-      console.error("REDIS CONNECTION ERROR: Error setting timeout");
+      console.error(`REDIS CONNECTION ERROR: Error setting timeout ${String(err)}`);
       return null;
     }
   }
@@ -84,7 +84,7 @@ export class PassportCache {
     try {
       await this.client.disconnect();
     } catch (err: any) {
-      console.error("REDIS CONNECTION ERROR: Error closing redis connection");
+      console.error(`REDIS CONNECTION ERROR: Error closing redis connection ${String(err)}`);
       return null;
     }
   }
