@@ -15,6 +15,7 @@ export class PassportCache {
   }
 
   async init(): Promise<void> {
+    if (this.client.isReady) return await Promise.resolve();
     await this.connect();
   }
 
