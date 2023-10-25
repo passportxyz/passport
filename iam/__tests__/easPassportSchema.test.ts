@@ -18,8 +18,8 @@ const defaultRequestData = {
   value: 0,
 };
 
-describe("formatMultiAttestationRequest", () => {
-  it("should return formatted attestation request", async () => {
+describe("formatMultiAttestationRequestWithPassportAndScore", () => {
+  it("should return formatted attestation request containing passport and score attestations", async () => {
     jest.spyOn(easPassportModule, "encodeEasPassport").mockReturnValue("0x00000000000000000000000");
     jest.spyOn(easStampModule, "encodeEasScore").mockReturnValue("0x00000000000000000000000");
 
@@ -51,7 +51,11 @@ describe("formatMultiAttestationRequest", () => {
     const recipient = "0x123";
 
     const chainIdHex = "0x14a33";
-    const result = await easPassportModule.formatMultiAttestationRequestWithPassportAndScore(validatedCredentials, recipient, chainIdHex);
+    const result = await easPassportModule.formatMultiAttestationRequestWithPassportAndScore(
+      validatedCredentials,
+      recipient,
+      chainIdHex
+    );
     const scoreSchema = onchainInfo[chainIdHex].easSchemas.score.uid;
     const passportSchema = onchainInfo[chainIdHex].easSchemas.passport.uid;
 
@@ -65,6 +69,29 @@ describe("formatMultiAttestationRequest", () => {
           },
         ],
       },
+      {
+        schema: scoreSchema,
+        data: [
+          {
+            ...defaultRequestData,
+            data: "0x00000000000000000000000",
+          },
+        ],
+      },
+    ]);
+  });
+});
+
+describe("formatMultiAttestationRequestWithScore", () => {
+  it("should return formatted attestation request containing passport and score attestations", async () => {
+    jest.spyOn(easStampModule, "encodeEasScore").mockReturnValue("0x00000000000000000000000");
+
+    const recipient = "0x123";
+    const chainIdHex = "0x14a33";
+    const result = await easPassportModule.formatMultiAttestationRequestWithScore(recipient, chainIdHex);
+    const scoreSchema = onchainInfo[chainIdHex].easSchemas.score.uid;
+
+    expect(result).toEqual([
       {
         schema: scoreSchema,
         data: [
