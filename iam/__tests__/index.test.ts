@@ -1206,6 +1206,7 @@ describe("POST /eas/passport", () => {
 
   it("should throw a 400 error if every credentialSubject.id is not equivalent", async () => {
     const nonce = 0;
+    const recipient = "0x5678000000000000000000000000000000000001";
     const credentials = [
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
@@ -1213,7 +1214,7 @@ describe("POST /eas/passport", () => {
         issuer: config.issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
-          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
+          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000002",
           provider: "test",
           hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
         },
@@ -1225,7 +1226,7 @@ describe("POST /eas/passport", () => {
         issuer: config.issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
-          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000001",
+          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000003",
           provider: "test1",
           hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
         },
@@ -1235,12 +1236,12 @@ describe("POST /eas/passport", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas/passport")
-      .send({ credentials, nonce, chainIdHex })
+      .send({ recipient, credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(400)
       .expect("Content-Type", /json/);
 
-    expect(response.body.error).toEqual("Every credential's id must be equivalent");
+    expect(response.body.error).toEqual("Every credential's id must be equivalent to that of the recipient");
   });
 
   it("successfully verifies and formats passport", async () => {
@@ -1254,6 +1255,7 @@ describe("POST /eas/passport", () => {
       }
     });
     const nonce = 0;
+    const recipient = "0x5678000000000000000000000000000000000000";
     const credentials = [
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
@@ -1261,7 +1263,7 @@ describe("POST /eas/passport", () => {
         issuer: config.issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
-          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
+          id: `did:pkh:eip155:1:${recipient}`,
           provider: "test",
           hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
         },
@@ -1271,7 +1273,7 @@ describe("POST /eas/passport", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas/passport")
-      .send({ credentials, nonce, chainIdHex })
+      .send({ recipient, credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(200)
       .expect("Content-Type", /json/);
@@ -1286,6 +1288,7 @@ describe("POST /eas/passport", () => {
     formatMultiAttestationRequestSpy.mockRejectedValue(new IAMError("Formatting error"));
 
     const nonce = 0;
+    const recipient = "0x5678000000000000000000000000000000000000";
     const credentials = [
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
@@ -1293,7 +1296,7 @@ describe("POST /eas/passport", () => {
         issuer: config.issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
-          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
+          id: `did:pkh:eip155:1:${recipient}`,
           provider: "test",
           hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
         },
@@ -1303,7 +1306,7 @@ describe("POST /eas/passport", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas/passport")
-      .send({ credentials, nonce, chainIdHex })
+      .send({ recipient, credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(500)
       .expect("Content-Type", /json/);
@@ -1315,6 +1318,7 @@ describe("POST /eas/passport", () => {
     verifyCredentialSpy.mockRejectedValue(new Error("Verification error"));
 
     const nonce = 0;
+    const recipient = "0x5678000000000000000000000000000000000000";
     const credentials = [
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
@@ -1322,7 +1326,7 @@ describe("POST /eas/passport", () => {
         issuer: config.issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
-          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
+          id: `did:pkh:eip155:1:${recipient}`,
           provider: "test",
           hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
         },
@@ -1332,7 +1336,7 @@ describe("POST /eas/passport", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas/passport")
-      .send({ credentials, nonce, chainIdHex })
+      .send({ recipient, credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(500)
       .expect("Content-Type", /json/);

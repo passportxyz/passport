@@ -589,7 +589,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
   try {
-    const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
+    const { recipient, credentials, nonce, chainIdHex } = req.body as EasRequestBody;
     if (!Object.keys(onchainInfo).includes(chainIdHex)) {
       return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
     }
@@ -597,13 +597,11 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
 
     if (!credentials || !credentials.length) return void errorRes(res, "No stamps provided", 400);
 
-    const recipient = credentials[0].credentialSubject.id.split(":")[4];
-
     if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
       return void errorRes(res, "Invalid recipient", 400);
 
     if (!credentials.every((credential) => credential.credentialSubject.id.split(":")[4] === recipient))
-      return void errorRes(res, "Every credential's id must be equivalent", 400);
+      return void errorRes(res, "Every credential's id must be equivalent to that of the recipient", 400);
 
     Promise.all(
       credentials.map(async (credential) => {
