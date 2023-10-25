@@ -873,7 +873,7 @@ describe("POST /check", function () {
   });
 });
 
-const mockMultiAttestationRequest: MultiAttestationRequest[] = [
+const mockMultiAttestationRequestWithPassportAndScore: MultiAttestationRequest[] = [
   {
     schema: "0x853a55f39e2d1bf1e6731ae7148976fbbb0c188a898a233dba61a233d8c0e4a4",
     data: [
@@ -927,7 +927,7 @@ describe("POST /eas", () => {
   it("handles valid requests including some invalid credentials", async () => {
     formatMultiAttestationRequestSpy = jest
       .spyOn(easSchemaMock, "formatMultiAttestationRequest")
-      .mockReturnValue(Promise.resolve(mockMultiAttestationRequest));
+      .mockReturnValue(Promise.resolve(mockMultiAttestationRequestWithPassportAndScore));
     const nonce = 0;
     const failedCredential = {
       "@context": "https://www.w3.org/2018/credentials/v1",
@@ -946,7 +946,7 @@ describe("POST /eas", () => {
 
     const expectedPayload = {
       passport: {
-        multiAttestationRequest: mockMultiAttestationRequest,
+        multiAttestationRequest: mockMultiAttestationRequestWithPassportAndScore,
         fee: "25000000000000000",
         nonce,
       },
@@ -1071,7 +1071,7 @@ describe("POST /eas", () => {
   it("returns the fee information in the response as wei units", async () => {
     formatMultiAttestationRequestSpy = jest
       .spyOn(easSchemaMock, "formatMultiAttestationRequest")
-      .mockReturnValue(Promise.resolve(mockMultiAttestationRequest));
+      .mockReturnValue(Promise.resolve(mockMultiAttestationRequestWithPassportAndScore));
     const nonce = 0;
     const expectedFeeUsd = 2;
 
@@ -1092,7 +1092,7 @@ describe("POST /eas", () => {
 
     const expectedPayload = {
       passport: {
-        multiAttestationRequest: mockMultiAttestationRequest,
+        multiAttestationRequest: mockMultiAttestationRequestWithPassportAndScore,
         fee: "25000000000000000",
         nonce,
       },
@@ -1156,8 +1156,8 @@ describe("POST /eas/passport", () => {
   beforeEach(() => {
     verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
     formatMultiAttestationRequestSpy = jest
-      .spyOn(easPassportSchemaMock, "formatMultiAttestationRequest")
-      .mockResolvedValue(mockMultiAttestationRequest);
+      .spyOn(easPassportSchemaMock, "formatMultiAttestationRequestWithPassportAndScore")
+      .mockResolvedValue(mockMultiAttestationRequestWithPassportAndScore);
   });
 
   afterEach(() => {
@@ -1276,7 +1276,7 @@ describe("POST /eas/passport", () => {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(response.body.passport.multiAttestationRequest).toEqual(mockMultiAttestationRequest);
+    expect(response.body.passport.multiAttestationRequest).toEqual(mockMultiAttestationRequestWithPassportAndScore);
     expect(response.body.passport.nonce).toEqual(nonce);
     expect(verifyCredentialSpy).toBeCalledTimes(credentials.length);
     expect(formatMultiAttestationRequestSpy).toBeCalled();

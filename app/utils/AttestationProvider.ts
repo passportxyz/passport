@@ -1,5 +1,7 @@
 import onchainInfo from "../../deployments/onchainInfo.json";
 import GitcoinVerifierAbi from "../../deployments/abi/GitcoinVerifier.json";
+import axios, { AxiosResponse } from "axios";
+import { iamUrl } from "../config/stamp_config";
 
 type AttestationProviderStatus = "enabled" | "comingSoon" | "disabled";
 
@@ -27,6 +29,7 @@ export interface AttestationProvider {
   viewerUrl: (address: string) => string;
   verifierAddress: () => string;
   verifierAbi: () => any;
+  getMultiAttestationRequest: (payload: {}) => Promise<AxiosResponse<any, any>>;
 }
 
 class BaseAttestationProvider implements AttestationProvider {
@@ -58,6 +61,15 @@ class BaseAttestationProvider implements AttestationProvider {
   verifierAbi(): any {
     return GitcoinVerifierAbi[this.chainId as keyof typeof GitcoinVerifierAbi];
   }
+
+  async getMultiAttestationRequest(payload: {}): Promise<AxiosResponse<any, any>> {
+    return axios.post(`${iamUrl}v0.0.0/eas/passport`, payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      transformRequest: [(data: any) => JSON.stringify(data, (_k, v) => (typeof v === "bigint" ? v.toString() : v))],
+    });
+  }
 }
 
 export class EASAttestationProvider extends BaseAttestationProvider {
@@ -85,4 +97,13 @@ export class EASAttestationProvider extends BaseAttestationProvider {
 
 export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
   name = "Verax, Ethereum Attestation Service (Score only)";
+
+  async getMultiAttestationRequest(payload: {}): Promise<AxiosResponse<any, any>> {
+    return axios.post(`${iamUrl}v0.0.0/eas/score`, payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      transformRequest: [(data: any) => JSON.stringify(data, (_k, v) => (typeof v === "bigint" ? v.toString() : v))],
+    });
+  }
 }

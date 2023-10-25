@@ -51,7 +51,7 @@ describe("formatMultiAttestationRequest", () => {
     const recipient = "0x123";
 
     const chainIdHex = "0x14a33";
-    const result = await easPassportModule.formatMultiAttestationRequest(validatedCredentials, recipient, chainIdHex);
+    const result = await easPassportModule.formatMultiAttestationRequestWithPassportAndScore(validatedCredentials, recipient, chainIdHex);
     const scoreSchema = onchainInfo[chainIdHex].easSchemas.score.uid;
     const passportSchema = onchainInfo[chainIdHex].easSchemas.passport.uid;
 
