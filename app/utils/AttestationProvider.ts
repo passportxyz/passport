@@ -61,7 +61,7 @@ class BaseAttestationProvider implements AttestationProvider {
 }
 
 export class EASAttestationProvider extends BaseAttestationProvider {
-  name = "Ethereum Attestation Service";
+  name = "Ethereum Attestation Service (Score & Passport)";
   hasWebViewer = true;
   easScanUrl: string;
 
@@ -84,5 +84,5 @@ export class EASAttestationProvider extends BaseAttestationProvider {
 }
 
 export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
-  name = "Verax, Ethereum Attestation Service";
+  name = "Verax, Ethereum Attestation Service (Score only)";
 }
