@@ -10,10 +10,13 @@ const startServer = async (): Promise<void> => {
     apiKey: process.env.MORALIS_API_KEY,
   });
 
-  app.listen(port, () => {
+  const server = app.listen(port, () => {
     // eslint-disable-next-line no-console
     console.log(`server started at http://localhost:${port}`);
   });
+
+  // This should be > the ELB idle timeout, which is 60 seconds
+  server.keepAliveTimeout = 61 * 1000;
 };
 
 startServer().catch((error) => {
