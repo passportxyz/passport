@@ -12,7 +12,7 @@ const InitiateOnChainButton = ({ className }: { className?: string }) => {
   return (
     <>
       <Button className={`${className}`} onClick={() => setShowSidebar(true)}>
-        Bring stamps onchain
+        Bring Passport onchain
       </Button>
       <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
     </>

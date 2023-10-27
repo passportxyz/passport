@@ -76,79 +76,79 @@ export const useSyncToChainButton = ({
           const nonce = await gitcoinVerifierContract.recipientNonces(address);
 
           const payload = {
+            recipient: address,
             credentials,
             nonce,
             chainIdHex: chain.id,
           };
 
-          const { data }: { data: EasPayload } = await axios.post(`${iamUrl}v0.0.0/eas/passport`, payload, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            transformRequest: [
-              (data: any) => JSON.stringify(data, (_k, v) => (typeof v === "bigint" ? v.toString() : v)),
-            ],
-          });
+          if (chain && chain.attestationProvider) {
+            const { data }: { data: EasPayload } = await chain.attestationProvider.getMultiAttestationRequest(payload);
 
-          if (data.error) {
-            console.error(
-              "error syncing credentials to chain: ",
-              data.error,
-              "credentials: ",
-              credentials,
-              "nonce:",
-              nonce
-            );
-          }
+            if (data.error) {
+              console.error(
+                "error syncing credentials to chain: ",
+                data.error,
+                "credentials: ",
+                credentials,
+                "nonce:",
+                nonce
+              );
+            }
 
-          if (data.invalidCredentials.length > 0) {
-            console.log("not syncing invalid credentials (invalid credentials): ", data.invalidCredentials);
-          }
+            if (data.invalidCredentials.length > 0) {
+              // This can only happen when trying to bring the entire passport onchain
+              // This cannot happen when we only bring the score onchain
+              // TODO: maybe we should prompt the user if he wants to continue? Maybe he wants to refresh his attenstations first?
+              console.log("not syncing invalid credentials (invalid credentials): ", data.invalidCredentials);
+            }
 
-          if (data.passport) {
-            const { v, r, s } = data.signature;
+            if (data.passport) {
+              const { v, r, s } = data.signature;
 
-            const transaction = await gitcoinVerifierContract.verifyAndAttest(data.passport, v, r, s, {
-              value: data.passport.fee,
-            });
-            toast({
-              duration: 9000,
-              isClosable: true,
-              render: (result: any) => (
-                <DoneToastContent
-                  title="Submitted"
-                  message="Passport submitted to chain."
-                  icon={success}
-                  result={result}
-                />
-              ),
-            });
-            await transaction.wait();
+              const transaction = await gitcoinVerifierContract.verifyAndAttest(data.passport, v, r, s, {
+                value: data.passport.fee,
+              });
 
-            await readOnChainData();
-            const successSubmit = (
-              <p>
-                Passport successfully synced to chain.{" "}
-                {chain?.attestationProvider?.hasWebViewer && address && (
-                  <a
-                    href={chain.attestationProvider.viewerUrl(address)}
-                    className="underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Check your attestations
-                  </a>
-                )}
-              </p>
-            );
+              toast({
+                duration: 9000,
+                isClosable: true,
+                render: (result: any) => (
+                  <DoneToastContent
+                    title="Submitted"
+                    message="Passport submitted to chain."
+                    icon={success}
+                    result={result}
+                  />
+                ),
+              });
+              await transaction.wait();
 
-            toast({
-              duration: 9000,
-              isClosable: true,
-              render: (result: any) => (
-                <DoneToastContent title="Success" body={successSubmit} icon={success} result={result} />
-              ),
-            });
+              await readOnChainData();
+              const successSubmit = (
+                <p>
+                  Passport successfully synced to chain.{" "}
+                  {chain?.attestationProvider?.hasWebViewer && address && (
+                    <a
+                      href={chain.attestationProvider.viewerUrl(address)}
+                      className="underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Check your attestations
+                    </a>
+                  )}
+                </p>
+              );
+
+              toast({
+                duration: 9000,
+                isClosable: true,
+                render: (result: any) => (
+                  <DoneToastContent title="Success" body={successSubmit} icon={success} result={result} />
+                ),
+              });
+            }
           }
         } catch (e: any) {
           console.error("error syncing credentials to chain: ", e);

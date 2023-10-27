@@ -240,7 +240,8 @@ export type EasPayload = {
 
 export type EasRequestBody = {
   nonce: number;
-  credentials: VerifiableCredential[];
+  recipient: string;
+  credentials?: VerifiableCredential[];
   dbAccessToken: string;
   chainIdHex: string;
 };

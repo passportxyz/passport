@@ -83,10 +83,12 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
         await Promise.all(
           activeChainIds.map(async (chainId: string) => {
             const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
+
             if (!passportAttestationData) {
               return;
             }
 
+            // Only if a passport attestation has been properly loaded
             const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
               passportAttestationData.passport
             );
@@ -110,7 +112,8 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
 
             if (chainId === connectedChain?.id) setActiveChainProviders(onChainProviders);
 
-            const score = await decodeScoreAttestation(passportAttestationData.score);
+            const score = decodeScoreAttestation(passportAttestationData.score);
+
             setOnChainScores((prevState) => ({
               ...prevState,
               [chainId]: score,

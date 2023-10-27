@@ -162,7 +162,7 @@ type ValidatedCredential = {
   verified: boolean;
 };
 
-export const formatMultiAttestationRequest = async (
+export const formatMultiAttestationRequestWithPassportAndScore = async (
   credentials: ValidatedCredential[],
   recipient: string,
   chainIdHex: keyof typeof onchainInfo
@@ -202,6 +202,35 @@ export const formatMultiAttestationRequest = async (
       schema: easSchemas.passport.uid,
       data: stampRequestData,
     },
+    {
+      schema: easSchemas.score.uid,
+      data: scoreRequestData,
+    },
+  ];
+};
+
+export const formatMultiAttestationRequestWithScore = async (
+  recipient: string,
+  chainIdHex: keyof typeof onchainInfo
+): Promise<MultiAttestationRequest[]> => {
+  const defaultRequestData = {
+    recipient,
+    expirationTime: NO_EXPIRATION,
+    revocable: true,
+    refUID: ZERO_BYTES32,
+    value: 0,
+  };
+
+  const scoreRequestData: AttestationRequestData[] = [
+    {
+      ...defaultRequestData,
+      data: encodeEasScore(await fetchPassportScore(recipient)),
+    },
+  ];
+
+  const { easSchemas } = onchainInfo[chainIdHex];
+
+  return [
     {
       schema: easSchemas.score.uid,
       data: scoreRequestData,

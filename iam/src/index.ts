@@ -589,21 +589,19 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
   try {
-    const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
+    const { recipient, credentials, nonce, chainIdHex } = req.body as EasRequestBody;
     if (!Object.keys(onchainInfo).includes(chainIdHex)) {
       return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
     }
     const attestationChainIdHex = chainIdHex as keyof typeof onchainInfo;
 
-    if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
-
-    const recipient = credentials[0].credentialSubject.id.split(":")[4];
+    if (!credentials || !credentials.length) return void errorRes(res, "No stamps provided", 400);
 
     if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
       return void errorRes(res, "Invalid recipient", 400);
 
     if (!credentials.every((credential) => credential.credentialSubject.id.split(":")[4] === recipient))
-      return void errorRes(res, "Every credential's id must be equivalent", 400);
+      return void errorRes(res, "Every credential's id must be equivalent to that of the recipient", 400);
 
     Promise.all(
       credentials.map(async (credential) => {
@@ -618,7 +616,7 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
           .filter(({ verified }) => !verified)
           .map(({ credential }) => credential);
 
-        const multiAttestationRequest = await passportSchema.formatMultiAttestationRequest(
+        const multiAttestationRequest = await passportSchema.formatMultiAttestationRequestWithPassportAndScore(
           credentialVerifications,
           recipient,
           attestationChainIdHex
@@ -654,6 +652,59 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
         const message = addErrorDetailsToMessage("Error formatting onchain passport", error);
         return void errorRes(res, message, 500);
       });
+  } catch (error) {
+    const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
+    return void errorRes(res, message, 500);
+  }
+});
+
+// Expose entry point for getting eas payload for moving only the score on-chain (Score Attestations)
+app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
+  try {
+    const { recipient, nonce, chainIdHex } = req.body as EasRequestBody;
+    if (!Object.keys(onchainInfo).includes(chainIdHex)) {
+      return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
+    }
+    const attestationChainIdHex = chainIdHex as keyof typeof onchainInfo;
+
+    if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
+      return void errorRes(res, "Invalid recipient", 400);
+
+    try {
+      const multiAttestationRequest = await passportSchema.formatMultiAttestationRequestWithScore(
+        recipient,
+        attestationChainIdHex
+      );
+
+      const fee = await getEASFeeAmount(2);
+      const passportAttestation: PassportAttestation = {
+        multiAttestationRequest,
+        nonce: Number(nonce),
+        fee: fee.toString(),
+      };
+
+      const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
+
+      attestationSignerWallet
+        ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+        .then((signature) => {
+          const { v, r, s } = utils.splitSignature(signature);
+
+          const payload: EasPayload = {
+            passport: passportAttestation,
+            signature: { v, r, s },
+            invalidCredentials: [],
+          };
+
+          return void res.json(payload);
+        })
+        .catch(() => {
+          return void errorRes(res, "Error signing score", 500);
+        });
+    } catch (error) {
+      const message = addErrorDetailsToMessage("Error formatting onchain score", error);
+      return void errorRes(res, message, 500);
+    }
   } catch (error) {
     const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
     return void errorRes(res, message, 500);
