@@ -48,8 +48,6 @@ describe("ExpiredStampModal", () => {
       "GitcoinContributorStatistics#totalContributionAmountGte#10",
       "GitcoinContributorStatistics#totalContributionAmountGte#100",
       "GitcoinContributorStatistics#totalContributionAmountGte#1000",
-      "GitcoinContributorStatistics#numGr14ContributionsGte#1",
-      "GitcoinContributorStatistics#numRoundsContributedToGte#1",
     ]);
   });
   it("should delete all stamps within each expired platform", async () => {
