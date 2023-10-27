@@ -62,10 +62,21 @@ export async function decodeProviderInformation(attestation: Attestation): Promi
   issuanceDates: BigNumber[];
   expirationDates: BigNumber[];
 }> {
+  if (attestation.data === "0x") {
+    return {
+      onChainProviderInfo: [],
+      hashes: [],
+      issuanceDates: [],
+      expirationDates: [],
+    };
+  }
+
   const schemaEncoder = new SchemaEncoder(
     "uint256[] providers,bytes32[] hashes,uint64[] issuanceDates,uint64[] expirationDates,uint16 providerMapVersion"
   );
+
   const decodedData = schemaEncoder.decodeData(attestation.data);
+
   const providerBitMapInfo = (await axios.get(
     `${process.env.NEXT_PUBLIC_PASSPORT_IAM_STATIC_URL}/providerBitMapInfo.json`
   )) as {
@@ -98,7 +109,11 @@ export async function decodeProviderInformation(attestation: Attestation): Promi
   return { onChainProviderInfo, hashes, issuanceDates, expirationDates };
 }
 
-export async function decodeScoreAttestation(attestation: Attestation): Promise<number> {
+export function decodeScoreAttestation(attestation: Attestation): number {
+  if (attestation.data === "0x") {
+    return NaN;
+  }
+
   const schemaEncoder = new SchemaEncoder("uint256 score,uint32 scorer_id,uint8 score_decimals");
   const decodedData = schemaEncoder.decodeData(attestation.data);
 

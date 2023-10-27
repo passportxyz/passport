@@ -97,6 +97,9 @@ export const useSyncToChainButton = ({
             }
 
             if (data.invalidCredentials.length > 0) {
+              // This can only happen when trying to bring the entire passport onchain
+              // This cannot happen when we only bring the score onchain
+              // TODO: maybe we should prompt the user if he wants to continue? Maybe he wants to refresh his attenstations first?
               console.log("not syncing invalid credentials (invalid credentials): ", data.invalidCredentials);
             }
 
@@ -106,6 +109,7 @@ export const useSyncToChainButton = ({
               const transaction = await gitcoinVerifierContract.verifyAndAttest(data.passport, v, r, s, {
                 value: data.passport.fee,
               });
+
               toast({
                 duration: 9000,
                 isClosable: true,
