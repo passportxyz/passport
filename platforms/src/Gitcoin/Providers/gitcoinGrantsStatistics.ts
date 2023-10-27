@@ -3,7 +3,6 @@ import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/
 import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import { ProviderError } from "../../utils/errors";
 import axios from "axios";
-import { getGithubUserData, GithubUserMetaData } from "../../Github/Providers/githubClient";
 
 export type GitcoinGrantStatistics = {
   error?: string | undefined;
@@ -21,7 +20,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
   // The type will be determined dynamically, from the options passed in to the constructor
   type = "";
 
-  urlPath = "";
+  urlPath = "/contributor_statistics";
 
   // Options can be set here and/or via the constructor
   _options: GitcoinGrantProviderOptions = {
@@ -43,54 +42,40 @@ export class GitcoinGrantStatisticsProvider implements Provider {
       gitcoinGrantsStatistic;
     const errors = [];
     try {
-      const githubUser: GithubUserMetaData = await getGithubUserData(payload.proofs.code, context);
-      // Only check the contribution condition if a valid github id has been received
-      valid = !githubUser.errors && !!githubUser.id;
-      if (valid) {
-        const dataUrl = process.env.CGRANTS_API_URL + this.urlPath;
-        try {
-          gitcoinGrantsStatistic = await getGitcoinStatistics(dataUrl, githubUser.id, context);
-        } catch (error) {
-          errors.push(error);
-        }
+      const dataUrl = process.env.CGRANTS_API_URL + this.urlPath;
+      const address = payload.address.toLowerCase();
+      gitcoinGrantsStatistic = await getGitcoinStatistics(dataUrl, address, context);
 
-        valid =
-          !gitcoinGrantsStatistic.error &&
-          (gitcoinGrantsStatistic.record
-            ? gitcoinGrantsStatistic.record[this._options.receivingAttribute] >= this._options.threshold
-            : false);
+      valid =
+        !gitcoinGrantsStatistic.error &&
+        (gitcoinGrantsStatistic.record
+          ? gitcoinGrantsStatistic.record[this._options.receivingAttribute] >= this._options.threshold
+          : false);
 
-        if (valid === true) {
-          record = {
-            // The type was previously incorrectly defined as string on the http response,
-            // and if we correctly called .toString() here instead of doing the forced cast,
-            // we would break our ability to hash against all previous records.
-            id: githubUser.id as unknown as string,
-            [this._options.recordAttribute]: `${this._options.threshold}`,
-          };
-        } else {
-          errors.push(
-            `You do not qualify for this stamp. Your Grantee stats are less than the required thresholds: ${
-              gitcoinGrantsStatistic.record[this._options.receivingAttribute]
-            } out of ${this._options.threshold}.`
-          );
-        }
-
-        if (!valid && errors.length === 0) {
-          errors.push(gitcoinGrantsStatistic.error);
-        }
-        return {
-          valid,
-          errors,
-          record,
+      if (valid === true) {
+        record = {
+          // The type was previously incorrectly defined as string on the http response,
+          // and if we correctly called .toString() here instead of doing the forced cast,
+          // we would break our ability to hash against all previous records.
+          address,
+          [this._options.recordAttribute]: `${this._options.threshold}`,
         };
       } else {
-        const ret = {
-          valid: valid,
-          errors: githubUser ? githubUser.errors : undefined,
-        };
-        return ret;
+        errors.push(
+          `You do not qualify for this stamp. Your Grantee stats are less than the required thresholds: ${
+            gitcoinGrantsStatistic.record[this._options.receivingAttribute]
+          } out of ${this._options.threshold}.`
+        );
       }
+
+      if (!valid && errors.length === 0) {
+        errors.push(gitcoinGrantsStatistic.error);
+      }
+      return {
+        valid,
+        errors,
+        record,
+      };
     } catch (e: unknown) {
       throw new ProviderExternalVerificationError(`Gitcoin Grants Statistic verification error: ${String(e)}.`);
     }
@@ -103,17 +88,16 @@ type GitcoinStatisticsContext = {
 
 const getGitcoinStatistics = async (
   dataUrl: string,
-  github_id: number,
+  address: string,
   context: GitcoinStatisticsContext
 ): Promise<GitcoinGrantStatistics> => {
   if (!context.gitcoinGrantStatistics?.[dataUrl]) {
     try {
-      // The gitcoin API expects lowercase handle
-      const grantStatisticsRequest = await axios.get(`${dataUrl}?github_id=${github_id}`, {
+      if (!context.gitcoinGrantStatistics) context.gitcoinGrantStatistics = {};
+
+      const grantStatisticsRequest = await axios.get(`${dataUrl}?address=${address}`, {
         headers: { Authorization: process.env.CGRANTS_API_TOKEN },
       });
-
-      if (!context.gitcoinGrantStatistics) context.gitcoinGrantStatistics = {};
 
       context.gitcoinGrantStatistics[dataUrl] = { record: grantStatisticsRequest.data } as GitcoinGrantStatistics;
     } catch (_error) {
@@ -123,6 +107,11 @@ const getGitcoinStatistics = async (
           error.response?.statusText
         } - Details: ${JSON.stringify(error?.response?.data)}`,
       };
+      throw new ProviderExternalVerificationError(
+        `Error getting user info: ${error?.message} - Status ${error.response?.status}: ${
+          error.response?.statusText
+        } - Details: ${JSON.stringify(error?.response?.data)}`
+      );
     }
   }
   return context.gitcoinGrantStatistics[dataUrl];
