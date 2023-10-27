@@ -160,8 +160,8 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
     containers: {
       iam: {
         image: dockerGtcPassportIamImage,
-        memory: 8192,
-        cpu: 4096,
+        memory: 2048,
+        cpu: 1024,
         portMappings: [httpsListener],
         links: [],
         environment: [
@@ -370,7 +370,7 @@ const ecsScorerServiceAutoscaling = new aws.appautoscaling.Policy("scorer-autosc
     predefinedMetricSpecification: {
       predefinedMetricType: "ECSServiceAverageCPUUtilization",
     },
-    targetValue: 30,
+    targetValue: 50,
     scaleInCooldown: 300,
     scaleOutCooldown: 300,
   },
