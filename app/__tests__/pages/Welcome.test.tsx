@@ -64,11 +64,11 @@ describe("Welcome", () => {
       </Router>
     );
 
-    expect(screen.getByText("Welcome Back!")).toBeInTheDocument();
-    expect(screen.getByText("One-Click Verification")).toBeInTheDocument();
+    expect(screen.getByText("Welcome back to Passport")).toBeInTheDocument();
+    expect(screen.getByText("Privacy-First Verification")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "You can now verify most web3 stamps and return to your destination faster with one-click verification!"
+        'Passport helps you collect "stamps" that prove your humanity and reputation. You decide what stamps are shown. And your privacy is protected at each step of the way.'
       )
     ).toBeInTheDocument();
   });
@@ -96,7 +96,7 @@ describe("when the user is navigated to the Welcome page", () => {
       </Router>
     );
 
-    expect(screen.getByTestId("refresh-my-stamps-button"));
+    expect(screen.getByTestId("next-button"));
   });
 });
 
@@ -136,7 +136,7 @@ describe("when the user clicks the Refresh My Stamps button it launches the Refr
       </Router>
     );
 
-    const buttonRefreshMyStampsModal = screen.queryByTestId("refresh-my-stamps-button");
+    const buttonRefreshMyStampsModal = screen.queryByTestId("next-button");
 
     fireEvent.click(buttonRefreshMyStampsModal!);
 

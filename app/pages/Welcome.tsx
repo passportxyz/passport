@@ -139,37 +139,35 @@ export default function Welcome() {
   };
 
   return (
-    <PageRoot useLegacyBackground={true} className="text-color-2">
+    <PageRoot className="text-color-2">
       <HeaderContentFooterGrid>
         <div className={`${PAGE_PADDING} bg-background`}>
           <MinimalHeader className={`border-b border-foreground-6`} />
         </div>
         <BodyWrapper className="flex justify-center">
-          <div className="max-w-[464px]">
-            {isLoadingPassport === IsLoadingPassportState.Idle ||
-            isLoadingPassport === IsLoadingPassportState.FailedToConnect ? (
-              passport && passport.stamps.length > 0 ? (
-                <WelcomeBack
-                  handleFetchPossibleEVMStamps={handleFetchPossibleEVMStamps}
-                  onOpen={onOpen}
-                  resetStampsAndProgressState={resetStampsAndProgressState}
-                  dashboardCustomizationKey={dashboardCustomizationKey}
-                />
-              ) : (
-                <InitialWelcome
-                  onBoardFinished={async () => {
-                    if (address) {
-                      handleFetchPossibleEVMStamps(address, allPlatforms);
-                      onOpen();
-                    }
-                  }}
-                  dashboardCustomizationKey={dashboardCustomizationKey}
-                />
-              )
+          {isLoadingPassport === IsLoadingPassportState.Idle ||
+          isLoadingPassport === IsLoadingPassportState.FailedToConnect ? (
+            passport && passport.stamps.length > 0 ? (
+              <WelcomeBack
+                handleFetchPossibleEVMStamps={handleFetchPossibleEVMStamps}
+                onOpen={onOpen}
+                resetStampsAndProgressState={resetStampsAndProgressState}
+                dashboardCustomizationKey={dashboardCustomizationKey}
+              />
             ) : (
-              <LoadingScreen />
-            )}
-          </div>
+              <InitialWelcome
+                onBoardFinished={async () => {
+                  if (address) {
+                    handleFetchPossibleEVMStamps(address, allPlatforms);
+                    onOpen();
+                  }
+                }}
+                dashboardCustomizationKey={dashboardCustomizationKey}
+              />
+            )
+          ) : (
+            <LoadingScreen />
+          )}
         </BodyWrapper>
       </HeaderContentFooterGrid>
       <RefreshMyStampsModal

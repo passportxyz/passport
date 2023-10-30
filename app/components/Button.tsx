@@ -14,10 +14,10 @@ export const Button = ({ variant, className, ...props }: ButtonProps) => {
     if (variant === "custom") {
       return "";
     } else if (variant === "secondary") {
-      return "text-foreground-2 bg-background border border-foreground-2 rounded-s hover:bg-foreground-3";
+      return "text-color-1 bg-background border border-foreground-3 rounded-s hover:border-foreground-4";
     } else {
       // primary, default
-      return "text-color-4 rounded-s enabled:hover:text-color-1 bg-foreground-2 hover:bg-foreground-4";
+      return "text-color-4 rounded-s bg-gradient-to-r  from-foreground-2 to-foreground-2 hover:to-foreground-4";
     }
   }, [variant]);
 
@@ -25,7 +25,7 @@ export const Button = ({ variant, className, ...props }: ButtonProps) => {
     <button
       className={`group flex items-center justify-center gap-4 rounded-md px-5 py-2 font-alt text-base text-color-1
         disabled:cursor-not-allowed disabled:bg-foreground-3 disabled:brightness-75
-        ${variantClassName} ${className}`}
+        ${variantClassName} focus:border-transparent focus:outline focus:outline-1 focus:outline-focus ${className}`}
       {...props}
     />
   );

@@ -25,11 +25,11 @@ describe("WelcomeBack", () => {
   it("renders the component", () => {
     render(<WelcomeBack {...defaultProps} />);
 
-    expect(screen.getByText("Welcome Back!")).toBeInTheDocument();
-    expect(screen.getByText("One-Click Verification")).toBeInTheDocument();
+    expect(screen.getByText("Welcome back to Passport")).toBeInTheDocument();
+    expect(screen.getByText("Privacy-First Verification")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "You can now verify most web3 stamps and return to your destination faster with one-click verification!"
+        'Passport helps you collect "stamps" that prove your humanity and reputation. You decide what stamps are shown. And your privacy is protected at each step of the way.'
       )
     ).toBeInTheDocument();
   });

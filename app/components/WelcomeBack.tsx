@@ -1,6 +1,5 @@
 // --- React & ReactDOM hooks
-import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
 
 // --- Types
 import { PLATFORM_ID } from "@gitcoin/passport-types";
@@ -12,8 +11,6 @@ import { UserContext } from "../context/userContext";
 
 // --- UI Components
 import { WelcomeWrapper } from "./WelcomeWrapper";
-import { Button } from "./Button";
-import { LoadButton } from "./LoadButton";
 
 export interface WelcomeBackProps {
   onOpen: () => void;
@@ -30,42 +27,29 @@ export const WelcomeBack = ({
 }: WelcomeBackProps) => {
   const { allPlatforms } = useContext(CeramicContext);
   const { address } = useContext(UserContext);
-  const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <WelcomeWrapper
       content={{
-        header: "Welcome Back!",
-        subHeader: "One-Click Verification",
-        body: "You can now verify most web3 stamps and return to your destination faster with one-click verification!",
-        imgSrc: "./assets/welcome-back.png",
-      }}
-    >
-      <div className="grid w-full grid-cols-2 gap-4">
-        <LoadButton
-          data-testid="skip-for-now-button"
-          variant="secondary"
-          isLoading={isLoading}
-          onClick={() => {
-            setIsLoading(true);
-            navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`);
+        header: "Welcome back to Passport",
+        subHeader: "Privacy-First Verification",
+        subHeaderIconSrc: "./assets/shieldLockIcon.svg",
+        buttonsConfig: {
+          onSkip: () => {
             resetStampsAndProgressState();
-            setIsLoading(false);
-          }}
-        >
-          Skip For Now
-        </LoadButton>
-        <Button
-          data-testid="refresh-my-stamps-button"
-          onClick={() => {
+          },
+          onNext: () => {
             onOpen();
             handleFetchPossibleEVMStamps(address!, allPlatforms);
-          }}
-        >
-          Refresh My Stamps
-        </Button>
-      </div>
+          },
+          dashboardCustomizationKey: dashboardCustomizationKey,
+          nextButtonText: "Refresh my stamps",
+          skipButtonText: "Go to dashboard",
+        },
+      }}
+    >
+      Passport helps you collect &quot;stamps&quot; that prove your humanity and reputation. You decide what stamps are
+      shown. And your privacy is protected at each step of the way.
     </WelcomeWrapper>
   );
 };

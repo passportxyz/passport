@@ -20,6 +20,7 @@ module.exports = {
         "foreground-5": "rgb(var(--color-foreground-5) / <alpha-value>)",
         "foreground-6": "rgb(var(--color-foreground-6) / <alpha-value>)",
         "foreground-7": "rgb(var(--color-foreground-7) / <alpha-value>)",
+        focus: "rgb(var(--color-focus) / <alpha-value>)",
 
         // Text Colors
         // using this naming convention
@@ -59,6 +60,7 @@ module.exports = {
       "3xl": ["32px", "1.5em"],
       "4xl": ["36px", "1.5em"],
       "5xl": ["40px", "1.5em"],
+      "6xl": ["80px", "1em"],
     },
     fontFamily: {
       body: ["var(--font-body)"],
