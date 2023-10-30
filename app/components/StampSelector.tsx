@@ -54,6 +54,10 @@ export function StampSelector({
         const hideStamp =
           stampFilters && currentPlatform && !stampFilters[currentPlatform?.platform]?.includes(stamp.platformGroup);
         if (hideStamp) return null;
+        else if (stampFilters) {
+          // only show first stamp when filtered
+          stamp.providers = [stamp.providers[0]];
+        }
 
         return (
           <div key={i} className={`mt-6`}>
