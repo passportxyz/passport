@@ -16,6 +16,7 @@ import { checkShowOnboard } from "../utils/helpers";
 import BodyWrapper from "../components/BodyWrapper";
 import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../components/DoneToastContent";
+import { useRouter } from "next/router";
 
 const Footer = () => (
   <>
@@ -28,6 +29,9 @@ export default function Home() {
   const { toggleConnection, wallet, walletConnectionError, setWalletConnectionError } = useContext(UserContext);
   const toast = useToast();
   const [searchParams] = useSearchParams();
+  // stamp filter
+  const router = useRouter();
+  const { filter } = router.query;
 
   const navigate = useNavigate();
 
@@ -35,7 +39,7 @@ export default function Home() {
   useEffect(() => {
     if (wallet) {
       const dashboardCustomizationKey = searchParams.get("dashboard");
-      if (checkShowOnboard()) {
+      if (checkShowOnboard() && !filter) {
         navigate(`/welcome${dashboardCustomizationKey ? `?dashboard=${dashboardCustomizationKey}` : ""}`);
       } else {
         navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`);
