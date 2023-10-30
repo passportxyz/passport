@@ -12,7 +12,7 @@ export const STAMP_FILTERS: {
       Google: ["Account Name"],
       Ens: ["Account Name"],
       Poh: ["Account Name"],
-      Twitter: ["Account Name"],
+      Twitter: ["Account Creation"],
       Facebook: ["Account Name"],
       Brightid: ["Account Name"],
       Linkedin: ["Account Name"],
