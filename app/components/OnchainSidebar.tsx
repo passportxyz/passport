@@ -18,14 +18,16 @@ export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
       <DrawerContent
         style={{
           backgroundColor: "rgb(var(--color-background))",
-          border: "1px solid rgb(var(--color-foreground-3))",
+          border: "1px solid rgb(var(--color-foreground-5))",
           borderRadius: "6px",
+          backgroundImage: "url('/assets/sidebarHeader.svg')",
+          backgroundRepeat: "no-repeat",
         }}
       >
-        <DrawerCloseButton className="text-color-1" />
+        <DrawerCloseButton className={`visible z-10 text-color-1 md:invisible`} />
         <DrawerHeader className="text-center text-color-1">
-          <div className="mt-10 justify-center">
-            <h2 className="mt-4 text-2xl">Go Onchain</h2>
+          <div className="mt-10 justify-center text-left">
+            <h2 className="text-3xl">Go Onchain</h2>
             <p className="text-base font-normal">
               Minting your Passport onchain creates a tamper-proof record of your Gitcoin Passport onchain. This is only
               required if you&apos;re using applications that fetch Gitcoin Passport data onchain. Note: Minting your

@@ -157,7 +157,7 @@ chainConfigs.push({
 chainConfigs.push({
   id: pgnChainId,
   token: "ETH",
-  label: "PGN",
+  label: "Public Goods Network",
   rpcUrl: "https://rpc.publicgoods.network	",
   icon: "./assets/pgn-logo.png",
   attestationProviderConfig: {
