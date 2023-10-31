@@ -58,9 +58,9 @@ jest.mock("ethers", () => {
 
 describe("getButtonMsg function", () => {
   it("returns correct messages for each OnChainStatus", () => {
-    expect(getButtonMsg(OnChainStatus.NOT_MOVED)).toEqual("Go");
+    expect(getButtonMsg(OnChainStatus.NOT_MOVED)).toEqual("Mint");
     expect(getButtonMsg(OnChainStatus.MOVED_OUT_OF_DATE)).toEqual("Update");
-    expect(getButtonMsg(OnChainStatus.MOVED_UP_TO_DATE)).toEqual("Up to date");
+    expect(getButtonMsg(OnChainStatus.MOVED_UP_TO_DATE)).toEqual("Minted");
   });
 });
 
@@ -120,7 +120,7 @@ describe("SyncToChainButton component", () => {
       <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={anotherChainWithEas} />
     );
     const btn = screen.getByTestId("sync-to-chain-button");
-    expect(btn).toHaveTextContent("Go");
+    expect(btn).toHaveTextContent("Mint");
     fireEvent.click(btn);
     await waitFor(() => expect(mockSetChain).toHaveBeenCalled());
   });
