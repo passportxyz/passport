@@ -58,7 +58,7 @@ export type DecodedProviderInfo = {
 };
 
 export const OnChainContextProvider = ({ children }: { children: any }) => {
-  const { address, wallet } = useContext(UserContext);
+  const { address } = useContext(UserContext);
   const [onChainProviders, setOnChainProviders] = useState<OnChainProviderMap>({});
   const [activeChainProviders, setActiveChainProviders] = useState<OnChainProviderType[]>([]);
   const [onChainScores, setOnChainScores] = useState<OnChainScores>({});
@@ -74,7 +74,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   };
 
   const readOnChainData = useCallback(async () => {
-    if (wallet && address) {
+    if (address) {
       try {
         const activeChainIds = chains
           .filter(({ attestationProvider }) => attestationProvider?.status === "enabled")
@@ -126,13 +126,13 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
         datadogRum.addError(e);
       }
     }
-  }, [wallet, address]);
+  }, [address]);
 
   useEffect(() => {
     if (FeatureFlags.FF_CHAIN_SYNC) {
       readOnChainData();
     }
-  }, [readOnChainData, wallet, address]);
+  }, [readOnChainData, address]);
 
   // use props as a way to pass configuration values
   const providerProps = {
