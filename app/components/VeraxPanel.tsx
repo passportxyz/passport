@@ -60,7 +60,7 @@ export const VeraxPanel = ({ className }: { className: string }) => {
         >
           You will be prompted to switch to {chain?.label} and sign the transaction.
         </Tooltip>
-        {onChainStatus === OnChainStatus.NOT_MOVED ? (
+        {onChainStatus === OnChainStatus.NOT_MOVED || onChainStatus === OnChainStatus.MOVED_OUT_OF_DATE ? (
           <>
             Verax is a community maintained public attestation registry on Linea. Push your Passport Stamps onto Verax
             to gain rewards for early adopters in the Linea ecosystem.
@@ -71,8 +71,8 @@ export const VeraxPanel = ({ className }: { className: string }) => {
           </>
         ) : (
           <p>
-            Verax is used to store attestations that can be consumed by dapps, allowing them to easily compose
-            attestations from many sources to derive powerful reputation
+            Verax is a community maintained public attestation registry on Linea. Push your Passport Stamps onto Verax
+            to gain rewards for early adopters in the Linea ecosystem.
           </p>
         )}
         <div className="grow" />
