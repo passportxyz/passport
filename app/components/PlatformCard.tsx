@@ -133,9 +133,9 @@ export const PlatformCard = ({
           <div>
             <Button
               data-testid="connect-button"
-              variant="secondary"
-              className={`mt-5 w-auto bg-transparent hover:bg-transparent ${
-                verified && "hover:border-text-2 border-foreground-3"
+              variant="custom"
+              className={`mt-5 w-auto border bg-transparent text-foreground-2 ${
+                verified ? "border-foreground-3" : "border-foreground-2"
               }`}
             >
               {verified ? "Verified" : "Connect"}
