@@ -600,7 +600,12 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
     if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
       return void errorRes(res, "Invalid recipient", 400);
 
-    if (!credentials.every((credential) => credential.credentialSubject.id.split(":")[4] === recipient))
+    if (
+      !credentials.every(
+        (credential) =>
+          credential.credentialSubject.id.split(":")[4].toLocaleLowerCase() === recipient.toLocaleLowerCase()
+      )
+    )
       return void errorRes(res, "Every credential's id must be equivalent to that of the recipient", 400);
 
     Promise.all(
