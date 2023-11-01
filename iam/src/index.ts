@@ -602,7 +602,8 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
 
     if (
       !credentials.every(
-        (credential) => credential.credentialSubject.id.split(":")[4].toLocaleLowerCase() === recipient
+        (credential) =>
+          credential.credentialSubject.id.split(":")[4].toLocaleLowerCase() === recipient.toLocaleLowerCase()
       )
     )
       return void errorRes(res, "Every credential's id must be equivalent to that of the recipient", 400);
