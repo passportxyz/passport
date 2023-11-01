@@ -5,8 +5,8 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/gtcGrantsLightIcon.svg",
   platform: "Gitcoin",
   name: "Gitcoin",
-  description: "Connect with Github to verify with your Gitcoin account.",
-  connectMessage: "Connect Account",
+  description: "Verify your Gitcoin Grants contributions",
+  connectMessage: "Verify Account",
   isEVM: true,
 };
 
