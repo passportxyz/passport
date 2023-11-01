@@ -372,7 +372,10 @@ export type PROVIDER_ID =
   | "GrantsStack2Programs"
   | "GrantsStack4Programs"
   | "GrantsStack6Programs"
-  | "TrustaLabs";
+  | "TrustaLabs"
+  | "BeginnerCommunityStaker"
+  | "ExperiencedCommunityStaker"
+  | "TrustedCitizen";
 
 export type StampBit = {
   bit: number;

@@ -4,7 +4,7 @@ export {
   SelfStakingBronzeProvider,
   SelfStakingGoldProvider,
   SelfStakingSilverProvider,
-  CommunityStakingBronzeProvider,
-  CommunityStakingGoldProvider,
-  CommunityStakingSilverProvider,
+  BeginnerCommunityStakerProvider,
+  ExperiencedCommunityStakerProvider,
+  TrustedCitizenProvider,
 } from "./Providers";

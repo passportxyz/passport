@@ -77,24 +77,31 @@ export function StampSelector({
               const checkboxId = `${provider.name}StampCheckbox`;
 
               return (
-                <div
-                  key={provider.name}
-                  data-testid={`indicator-${provider.name}`}
-                  className={`relative border-foreground-3 py-3 text-base ${
-                    i > 0 ? "border-t" : "border-none"
-                  } ${textColor} flex items-center`}
-                >
-                  <Checkbox
-                    data-testid={`checkbox-${provider.name}`}
-                    className="mr-2 shrink-0"
-                    id={checkboxId}
-                    checked={selected}
-                    onChange={onChange}
-                  />
-                  <label htmlFor={checkboxId}>{provider.title}</label>
-                  {FeatureFlags.FF_CHAIN_SYNC && isProviderOnChain(provider.name) && <OnchainTag marginLeft="3" />}
-                  <span className="ml-2 grow text-right">{weight}&nbsp;points</span>
-                </div>
+                <>
+                  <div
+                    key={provider.name}
+                    data-testid={`indicator-${provider.name}`}
+                    className={`relative border-foreground-3 py-3 text-base ${
+                      i > 0 ? "border-t" : "border-none"
+                    } ${textColor} flex items-center`}
+                  >
+                    <Checkbox
+                      data-testid={`checkbox-${provider.name}`}
+                      className="mr-2 shrink-0"
+                      id={checkboxId}
+                      checked={selected}
+                      onChange={onChange}
+                    />
+                    <label htmlFor={checkboxId}>{provider.title}</label>
+                    {FeatureFlags.FF_CHAIN_SYNC && isProviderOnChain(provider.name) && <OnchainTag marginLeft="3" />}
+                    <span className="ml-2 grow text-right">{weight}&nbsp;points</span>
+                  </div>
+                  {provider.description && (
+                    <>
+                      <p className="mb-2 px-2 text-sm italic">*{provider.description}</p>
+                    </>
+                  )}
+                </>
               );
             })}
           </div>
