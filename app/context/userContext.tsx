@@ -229,7 +229,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         // attempt to connect to ceramic (if it passes or fails always set loggingIn=false)
         try {
           const address = wallet.accounts[0].address;
-          const ethAuthProvider = new EthereumAuthProvider(wallet.provider, wallet.accounts[0].address.toLowerCase());
+          const ethAuthProvider = new EthereumAuthProvider(wallet.provider, address.toLowerCase());
           // Sessions will be serialized and stored in localhost
           // The sessions are bound to an ETH address, this is why we use the address in the session key
           sessionKey = `didsession-${address}`;
@@ -362,13 +362,15 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     if (!wallet) {
       clearState();
     } else {
-      // record connected wallet details
-      setWalletLabel(wallet.label);
-      setAddress(wallet.accounts[0].address);
-      // get the signer from an ethers wrapped Web3Provider
-      setSigner(new Web3Provider(wallet.provider).getSigner());
-      // Login to Ceramic
-      passportLogin();
+      if (wallet.accounts[0].address != address) {
+        // record connected wallet details
+        setWalletLabel(wallet.label);
+        setAddress(wallet.accounts[0].address);
+        // get the signer from an ethers wrapped Web3Provider
+        setSigner(new Web3Provider(wallet.provider).getSigner());
+        // Login to Ceramic
+        passportLogin();
+      }
     }
   }, [wallet]);
 
