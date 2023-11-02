@@ -1,5 +1,4 @@
 import { render, waitFor, screen, waitForElementToBeRemoved, fireEvent } from "@testing-library/react";
-import { useContext, useState, useEffect } from "react";
 import {
   AllProvidersState,
   CeramicContext,
@@ -14,18 +13,16 @@ import {
   brightidStampFixture,
   facebookStampFixture,
 } from "../../__test-fixtures__/databaseStorageFixtures";
-import { makeTestUserContext } from "../../__test-fixtures__/contextTestHelpers";
-import { UserContext, UserContextState } from "../../context/userContext";
 import { Passport } from "@gitcoin/passport-types";
-
-const mockUserContext: UserContextState = makeTestUserContext();
+import {
+  DatastoreConnectionContext,
+  DatastoreConnectionContextProvider,
+} from "../../context/datastoreConnectionContext";
 
 const viewerConnection = {
   status: "connected",
   selfID: "did:3:abc",
 };
-
-jest.mock("../../utils/onboard.ts");
 
 jest.mock("@self.id/framework", () => {
   return {
@@ -37,6 +34,14 @@ jest.mock("@didtools/cacao", () => ({
   Cacao: {
     fromBlockBytes: jest.fn(),
   },
+}));
+
+const mockWalletState = {
+  address: "0x123",
+};
+
+jest.mock("../../context/walletStore", () => ({
+  useWalletStore: (callback: (state: any) => any) => callback(mockWalletState),
 }));
 
 export const dbGetPassportMock = jest.fn().mockImplementation(() => {
@@ -93,7 +98,14 @@ const ceramicDbMocks = {
 };
 
 const mockComponent = () => (
-  <UserContext.Provider value={mockUserContext}>
+  <DatastoreConnectionContext.Provider
+    value={{
+      dbAccessToken: "token",
+      dbAccessTokenStatus: "idle",
+      connect: async () => {},
+      disconnect: async () => {},
+    }}
+  >
     <CeramicContextProvider>
       <CeramicContext.Consumer>
         {(value: CeramicContextState) => {
@@ -108,7 +120,7 @@ const mockComponent = () => (
         }}
       </CeramicContext.Consumer>
     </CeramicContextProvider>
-  </UserContext.Provider>
+  </DatastoreConnectionContext.Provider>
 );
 
 describe("CeramicContextProvider syncs stamp state with ceramic", () => {

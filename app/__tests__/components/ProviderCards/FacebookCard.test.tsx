@@ -2,19 +2,11 @@ import React from "react";
 import { screen, fireEvent } from "@testing-library/react";
 import { FacebookCard } from "../../../components/PlatformCards";
 
-import { UserContextState } from "../../../context/userContext";
 import { STAMP_PROVIDERS } from "../../../config/providers";
 import { facebookStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
-import {
-  makeTestCeramicContext,
-  makeTestUserContext,
-  renderWithContext,
-} from "../../../__test-fixtures__/contextTestHelpers";
+import { makeTestCeramicContext, renderWithContext } from "../../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../../context/ceramicContext";
 
-jest.mock("../../../utils/onboard.ts");
-
-const mockUserContext: UserContextState = makeTestUserContext();
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 describe("when user has not verified with FacebookProvider", () => {

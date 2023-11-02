@@ -7,7 +7,7 @@ import { PlatformProps } from "../components/GenericPlatform";
 
 // --- Contexts
 import { CeramicContext } from "../context/ceramicContext";
-import { UserContext } from "../context/userContext";
+import { useWalletStore } from "../context/walletStore";
 
 // --- UI Components
 import { WelcomeWrapper } from "./WelcomeWrapper";
@@ -26,7 +26,7 @@ export const WelcomeBack = ({
   dashboardCustomizationKey,
 }: WelcomeBackProps) => {
   const { allPlatforms } = useContext(CeramicContext);
-  const { address } = useContext(UserContext);
+  const address = useWalletStore((state) => state.address);
 
   return (
     <WelcomeWrapper

@@ -1,5 +1,4 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import "@testing-library/jest-dom/extend-expect";
 import { InitialWelcome } from "../../components/InitialWelcome";
 import { useNavigate } from "react-router-dom";
 

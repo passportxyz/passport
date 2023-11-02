@@ -2,17 +2,28 @@ import { render, waitFor, screen } from "@testing-library/react";
 import * as framework from "@self.id/framework";
 import { EthereumWebAuth } from "@didtools/pkh-ethereum";
 import { AccountId } from "caip";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { mockAddress, mockWallet } from "../../__test-fixtures__/onboardHookValues";
 import { makeTestCeramicContext } from "../../__test-fixtures__/contextTestHelpers";
 
-import { UserContext, UserContextProvider } from "../../context/userContext";
+import {
+  DatastoreConnectionContextProvider,
+  useDatastoreConnectionContext,
+} from "../../context/datastoreConnectionContext";
 import { CeramicContext } from "../../context/ceramicContext";
+import { Eip1193Provider } from "ethers";
 
-jest.mock("../../utils/onboard.ts");
-
-jest.mock("@web3-onboard/react", () => ({
-  useConnectWallet: () => [{ wallet: mockWallet }, () => Promise.resolve([mockWallet]), jest.fn()],
+jest.mock("axios", () => ({
+  get: () => ({
+    data: {
+      nonce: "123",
+    },
+  }),
+  post: () => ({
+    data: {
+      access: "456",
+    },
+  }),
 }));
 
 jest.mock("@didtools/pkh-ethereum", () => {
@@ -22,6 +33,16 @@ jest.mock("@didtools/pkh-ethereum", () => {
     },
   };
 });
+
+jest.mock("@didtools/cacao", () => ({
+  Cacao: {
+    fromBlockBytes: () => ({
+      p: {
+        iss: "did:3:myDid",
+      },
+    }),
+  },
+}));
 
 jest.mock("did-session", () => {
   return {
@@ -46,7 +67,7 @@ jest.mock("@self.id/framework", () => {
 });
 
 const TestingComponent = () => {
-  const { loggingIn, connect } = useContext(UserContext);
+  const { connect, dbAccessTokenStatus, dbAccessToken } = useDatastoreConnectionContext();
   const [session, setSession] = useState("");
 
   useEffect(() => {
@@ -57,8 +78,9 @@ const TestingComponent = () => {
   return (
     <div>
       <div data-testid="session-id">{session}</div>
-      <div>Logging In: {String(loggingIn)}</div>
-      <button onClick={connect}>Connect</button>
+      <div data-testid="db-access-token-status">Status: {dbAccessTokenStatus}</div>
+      <div data-testid="db-access-token">{dbAccessToken}</div>
+      <button onClick={() => connect("0xmyAddress", jest.fn() as unknown as Eip1193Provider)}>Connect</button>
     </div>
   );
 };
@@ -74,11 +96,11 @@ const mockCeramicContext = makeTestCeramicContext({
 describe("<UserContext>", () => {
   const renderTestComponent = () =>
     render(
-      <UserContextProvider>
+      <DatastoreConnectionContextProvider>
         <CeramicContext.Provider value={mockCeramicContext}>
           <TestingComponent />
         </CeramicContext.Provider>
-      </UserContextProvider>
+      </DatastoreConnectionContextProvider>
     );
 
   beforeEach(() => {
@@ -108,14 +130,29 @@ describe("<UserContext>", () => {
 
     screen.getByRole("button").click();
 
-    await waitFor(() => expect(screen.getByText("Logging In: false")).toBeInTheDocument());
     await waitFor(() => expect(screen.getByTestId("session-id").textContent).toBe(""));
   });
 
   describe("when using multichain", () => {
     beforeEach(async () => {
       const ceramicConnect = jest.fn().mockResolvedValueOnce({
-        client: {},
+        did: {
+          createDagJWS: () => ({
+            jws: {
+              link: {
+                bytes: [1, 2, 3, 4],
+              },
+              payload: "test-payload",
+              signatures: ["test-signature"],
+            },
+            cacaoBlock: "test-cacao-block",
+          }),
+        },
+        client: {
+          session: {
+            serialize: () => "test-session",
+          },
+        },
       });
       (framework.useViewerConnection as jest.Mock).mockReturnValue([
         { status: "connecting" },
@@ -124,36 +161,33 @@ describe("<UserContext>", () => {
       ]);
     });
 
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
     it("should use chain id 1 in the DID regardless of the wallet chain", async () => {
       renderTestComponent();
 
       screen.getByRole("button").click();
 
-      await waitFor(() => expect(screen.getByText("Logging In: true")).toBeInTheDocument());
-
-      await waitFor(() => expect(screen.getByText("Logging In: false")).toBeInTheDocument());
+      await waitFor(() => expect(screen.getByText("Status: connected")).toBeInTheDocument());
 
       expect(EthereumWebAuth.getAuthMethod as jest.Mock).toHaveBeenCalledWith(
-        mockWallet.provider,
+        expect.anything(),
         new AccountId({ address: mockAddress, chainId: "eip155:1" })
       );
     });
 
-    it("should create a DID with id 1 when switching to a different chain", async () => {
+    it("should reuse existing DIDsession when applicable", async () => {
       localStorage.setItem("didsession-0xmyAddress", "eyJzZXNzaW9uS2V5U2VlZCI6IlF5cTN4aW9ubGxD...");
 
       renderTestComponent();
 
       screen.getByRole("button").click();
 
-      await waitFor(() => expect(screen.getByText("Logging In: true")).toBeInTheDocument());
+      await waitFor(() => expect(screen.getByText("Status: connected")).toBeInTheDocument());
 
-      await waitFor(() => expect(screen.getByText("Logging In: false")).toBeInTheDocument());
-
-      expect(EthereumWebAuth.getAuthMethod as jest.Mock).toHaveBeenCalledWith(
-        mockWallet.provider,
-        new AccountId({ address: mockAddress, chainId: "eip155:1" })
-      );
+      expect(EthereumWebAuth.getAuthMethod as jest.Mock).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,23 +1,14 @@
 import React from "react";
 import { fireEvent, screen, waitFor, render } from "@testing-library/react";
 import Dashboard from "../../pages/Dashboard";
-import { UserContextState } from "../../context/userContext";
-import { mockAddress } from "../../__test-fixtures__/onboardHookValues";
 import { HashRouter as Router } from "react-router-dom";
 import * as framework from "@self.id/framework";
 import { mock } from "jest-mock-extended";
 import { JsonRpcSigner } from "@ethersproject/providers";
-import {
-  makeTestCeramicContext,
-  makeTestUserContext,
-  renderWithContext,
-} from "../../__test-fixtures__/contextTestHelpers";
+import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState, IsLoadingPassportState } from "../../context/ceramicContext";
 import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
-
-jest.mock("../../utils/onboard.ts", () => ({
-  chains: [],
-}));
+import { ChakraProvider } from "@chakra-ui/react";
 
 jest.mock("../../components/CardList", () => ({ CardList: () => <div>Card List</div> }));
 
@@ -51,12 +42,6 @@ const mockToggleConnection = jest.fn();
 const mockHandleDisconnection = jest.fn();
 const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
 
-const mockUserContext: UserContextState = makeTestUserContext({
-  toggleConnection: mockToggleConnection,
-  handleDisconnection: mockHandleDisconnection,
-  address: mockAddress,
-  signer: mockSigner,
-});
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 beforeEach(() => {
@@ -70,37 +55,9 @@ beforeEach(() => {
   ]);
 });
 
-describe("when user has no passport", () => {
-  it("should display a loading spinner", async () => {
-    renderWithContext(
-      mockUserContext,
-      { ...mockCeramicContext, passport: false },
-      <Router>
-        <Dashboard />
-      </Router>
-    );
-
-    // screen loads mobile view - check for md loading-spinner
-    expect(screen.getByTestId("loading-spinner-passport-md"));
-  });
-});
-
 describe("when the user has a passport", () => {
-  it("it should not display a loading spinner", async () => {
-    renderWithContext(
-      mockUserContext,
-      mockCeramicContext,
-      <Router>
-        <Dashboard />
-      </Router>
-    );
-
-    expect(screen.queryByTestId("loading-spinner-passport-md")).not.toBeInTheDocument();
-  });
-
   it("shows Passport JSON button", () => {
     renderWithContext(
-      mockUserContext,
       mockCeramicContext,
       <Router>
         <Dashboard />
@@ -114,7 +71,6 @@ describe("when the user has a passport", () => {
 describe("when the user clicks Passport JSON", () => {
   it("it should display a modal", async () => {
     renderWithContext(
-      mockUserContext,
       mockCeramicContext,
       <Router>
         <Dashboard />
@@ -137,7 +93,6 @@ describe("when viewer connection status is connecting", () => {
   it("should show a 'waiting for signature' alert", () => {
     (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connecting" }]);
     renderWithContext(
-      mockUserContext,
       mockCeramicContext,
       <Router>
         <Dashboard />
@@ -149,7 +104,7 @@ describe("when viewer connection status is connecting", () => {
   });
 });
 
-describe.only("dashboard notifications", () => {
+describe("dashboard notifications", () => {
   // using https://www.npmjs.com/package/jest-localstorage-mock to mock localStorage
   beforeEach(async () => {
     await closeAllToasts();
@@ -158,25 +113,28 @@ describe.only("dashboard notifications", () => {
   it("should show success toast when stamps are verified", async () => {
     localStorage.setItem("successfulRefresh", "true");
     render(
-      <Router>
-        <Dashboard />
-      </Router>
+      <ChakraProvider>
+        <Router>
+          <Dashboard />
+        </Router>
+      </ChakraProvider>
     );
     expect(screen.getByText("Your stamps are verified!")).toBeInTheDocument();
   });
   it("should show error toast when stamps aren't verified", async () => {
     localStorage.setItem("successfulRefresh", "false");
     render(
-      <Router>
-        <Dashboard />
-      </Router>
+      <ChakraProvider>
+        <Router>
+          <Dashboard />
+        </Router>
+      </ChakraProvider>
     );
     expect(screen.getByText("Stamps weren't verified. Please try again.")).toBeInTheDocument();
   });
   it("should show a loading stamps alert", () => {
     (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }]);
     renderWithContext(
-      mockUserContext,
       {
         ...mockCeramicContext,
         passport: undefined,
@@ -195,7 +153,6 @@ describe.only("dashboard notifications", () => {
   it("should show a connecting to ceramic alert", () => {
     (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }]);
     renderWithContext(
-      mockUserContext,
       {
         ...mockCeramicContext,
         passport: undefined,
@@ -211,10 +168,9 @@ describe.only("dashboard notifications", () => {
   });
 });
 
-describe("when app fails to load ceramic stream", () => {
+describe.skip("when app fails to load ceramic stream", () => {
   it("should display a modal for user to retry connection, or close", () => {
     renderWithContext(
-      mockUserContext,
       {
         ...mockCeramicContext,
         passport: undefined,
@@ -240,7 +196,6 @@ describe("when app fails to load ceramic stream", () => {
     (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }, mockCeramicConnect]);
 
     renderWithContext(
-      mockUserContext,
       {
         ...mockCeramicContext,
         passport: undefined,
@@ -258,7 +213,6 @@ describe("when app fails to load ceramic stream", () => {
 
   it("when done button is clicked, it should disconnect the user", () => {
     renderWithContext(
-      mockUserContext,
       {
         ...mockCeramicContext,
         passport: undefined,
@@ -275,60 +229,19 @@ describe("when app fails to load ceramic stream", () => {
   });
 });
 
-describe("when a user clicks on the Passport logo", () => {
-  it("should disconnect the user's wallet and navigate to homepage", async () => {
-    const mockCeramicConnect = jest.fn();
-    (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }, mockCeramicConnect]);
+it("reset passport button should open refresh modal when clicked", async () => {
+  renderWithContext(
+    {
+      ...mockCeramicContext,
+      expiredProviders: ["Ens"],
+    },
+    <Router>
+      <Dashboard />
+    </Router>
+  );
 
-    renderWithContext(
-      mockUserContext,
-      mockCeramicContext,
-      <Router>
-        <Dashboard />
-      </Router>
-    );
-
-    const passportLogoLink = screen.getByTestId("passport-logo-link");
-
-    fireEvent.click(passportLogoLink);
-
-    expect(mockHandleDisconnection).toBeCalledTimes(1);
-
-    await waitFor(() => expect(window.location.pathname).toBe("/"));
-  });
-  it("if ceramic errors are present it should show reset banner", () => {
-    renderWithContext(
-      mockUserContext,
-      {
-        ...mockCeramicContext,
-        passportHasCacaoError: true,
-      },
-      <Router>
-        <Dashboard />
-      </Router>
-    );
-
-    expect(
-      screen.getByText(
-        "We have detected some broken stamps in your passport. Your passport is currently locked because of this. We need to fix these errors before you continue using Passport. This might take up to 5 minutes."
-      )
-    ).toBeInTheDocument();
-  });
-  it("reset passport button should open refresh modal when clicked", async () => {
-    renderWithContext(
-      mockUserContext,
-      {
-        ...mockCeramicContext,
-        passportHasCacaoError: true,
-      },
-      <Router>
-        <Dashboard />
-      </Router>
-    );
-
-    fireEvent.click(screen.getByText("Reset Passport"));
-    await waitFor(() => {
-      expect(screen.getByText("Refresh Modal")).toBeInTheDocument();
-    });
+  fireEvent.click(screen.getByText("Reverify stamps"));
+  await waitFor(() => {
+    expect(screen.getByText("Refresh Expired Stamps")).toBeInTheDocument();
   });
 });

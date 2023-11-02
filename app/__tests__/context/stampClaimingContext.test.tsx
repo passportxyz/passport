@@ -1,12 +1,7 @@
 import { render, waitFor, screen, fireEvent } from "@testing-library/react";
 import { useContext } from "react";
-import {
-  makeTestCeramicContext,
-  makeTestClaimingContext,
-  makeTestUserContext,
-} from "../../__test-fixtures__/contextTestHelpers";
+import { makeTestCeramicContext, makeTestClaimingContext } from "../../__test-fixtures__/contextTestHelpers";
 
-import { UserContext } from "../../context/userContext";
 import { CeramicContext, platforms } from "../../context/ceramicContext";
 import { StampClaimingContext, StampClaimingContextProvider } from "../../context/stampClaimingContext";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
@@ -22,8 +17,6 @@ jest.mock("../../utils/helpers", () => ({
 jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
   fetchVerifiableCredential: jest.fn(),
 }));
-
-jest.mock("../../utils/onboard.ts");
 
 jest.mock("../../context/ceramicContext", () => {
   const originalModule = jest.requireActual("../../context/ceramicContext");
@@ -120,31 +113,23 @@ const mockCeramicContext = makeTestCeramicContext({
   },
 });
 
-const mockStampClaimingContext = makeTestClaimingContext({});
-
-const mockTestUserContext = makeTestUserContext({});
-
 describe("<StampClaimingContext>", () => {
   const renderTestComponent = () =>
     render(
-      <UserContext.Provider value={mockTestUserContext}>
-        <CeramicContext.Provider value={mockCeramicContext}>
-          <StampClaimingContextProvider>
-            <TestingComponent />
-          </StampClaimingContextProvider>
-        </CeramicContext.Provider>
-      </UserContext.Provider>
+      <CeramicContext.Provider value={mockCeramicContext}>
+        <StampClaimingContextProvider>
+          <TestingComponent />
+        </StampClaimingContextProvider>
+      </CeramicContext.Provider>
     );
 
   const renderTestComponentWithEvmStamp = () =>
     render(
-      <UserContext.Provider value={mockTestUserContext}>
-        <CeramicContext.Provider value={mockCeramicContext}>
-          <StampClaimingContextProvider>
-            <TestingComponentWithEvmStamp />
-          </StampClaimingContextProvider>
-        </CeramicContext.Provider>
-      </UserContext.Provider>
+      <CeramicContext.Provider value={mockCeramicContext}>
+        <StampClaimingContextProvider>
+          <TestingComponentWithEvmStamp />
+        </StampClaimingContextProvider>
+      </CeramicContext.Provider>
     );
 
   beforeEach(() => {

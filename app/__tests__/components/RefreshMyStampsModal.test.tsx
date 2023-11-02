@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import "@testing-library/jest-dom/extend-expect";
 import { RefreshMyStampsModal, RefreshMyStampsModalProps } from "../../components/RefreshMyStampsModal";
 import { ValidatedPlatform } from "../../signer/utils";
 
@@ -10,8 +9,6 @@ const defaultProps: RefreshMyStampsModalProps = {
   validPlatforms: undefined,
   resetStampsAndProgressState: jest.fn(),
 };
-
-jest.mock("../../utils/onboard");
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {

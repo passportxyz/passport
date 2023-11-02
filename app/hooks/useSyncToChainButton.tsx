@@ -4,13 +4,11 @@ import { ethers, EthersError, isError } from "ethers";
 import { useCallback, useContext, useState } from "react";
 import { CeramicContext } from "../context/ceramicContext";
 import { OnChainContext } from "../context/onChainContext";
-import { UserContext } from "../context/userContext";
+import { useWalletStore } from "../context/walletStore";
 import { DoneToastContent } from "../components/DoneToastContent";
-import { OnChainStatus } from "../hooks/useOnChainStatus";
+import { OnChainStatus } from "../utils/onChainStatus";
 import { Chain } from "../utils/chains";
-import axios from "axios";
 import { useSetChain } from "@web3-onboard/react";
-import { iamUrl } from "../config/stamp_config";
 
 const fail = "../assets/verification-failed-bright.svg";
 const success = "../../assets/check-icon2.svg";
@@ -25,16 +23,19 @@ export const useSyncToChainButton = ({
   getButtonMsg: (onChainStatus: OnChainStatus) => string;
 }) => {
   const toast = useToast();
+
+  const address = useWalletStore((state) => state.address);
+  const provider = useWalletStore((state) => state.provider);
+
   const { passport } = useContext(CeramicContext);
-  const { wallet, address } = useContext(UserContext);
   const { readOnChainData } = useContext(OnChainContext);
   const [{ connectedChain }, setChain] = useSetChain();
   const [syncingToChain, setSyncingToChain] = useState(false);
 
   const loadVerifierContract = useCallback(
-    async (wallet) => {
+    async (provider) => {
       if (!chain) return;
-      const ethersProvider = new ethers.BrowserProvider(wallet.provider, "any");
+      const ethersProvider = new ethers.BrowserProvider(provider, "any");
 
       if (chain.attestationProvider?.status !== "enabled") {
         throw new Error(`Active attestationProvider not found for chainId ${chain.id}`);
@@ -48,12 +49,12 @@ export const useSyncToChainButton = ({
   );
 
   const onSyncToChain = useCallback(
-    async (wallet, passport) => {
-      if (passport && wallet && chain) {
+    async (provider, passport) => {
+      if (passport && provider && chain) {
         try {
           setSyncingToChain(true);
           const credentials = passport.stamps.map(({ credential }: { credential: VerifiableCredential }) => credential);
-          const gitcoinVerifierContract = await loadVerifierContract(wallet);
+          const gitcoinVerifierContract = await loadVerifierContract(provider);
           if (!gitcoinVerifierContract) return;
 
           if (credentials.length === 0) {
@@ -232,13 +233,13 @@ export const useSyncToChainButton = ({
   );
 
   const onInitiateSyncToChain = useCallback(
-    async (wallet, passport) => {
+    async (provider, passport) => {
       if (connectedChain && chain && connectedChain?.id !== chain.id) {
         const setChainResponse = await setChain({ chainId: chain.id });
-        setChainResponse && (await onSyncToChain(wallet, passport));
+        setChainResponse && (await onSyncToChain(provider, passport));
         return;
       }
-      await onSyncToChain(wallet, passport);
+      await onSyncToChain(provider, passport);
     },
     [chain?.id, connectedChain, onSyncToChain, setChain]
   );
@@ -248,7 +249,7 @@ export const useSyncToChainButton = ({
   const needToSwitchChain =
     isActive && onChainStatus !== OnChainStatus.MOVED_UP_TO_DATE && chain.id !== connectedChain?.id;
 
-  const onClick = () => onInitiateSyncToChain(wallet, passport);
+  const onClick = () => onInitiateSyncToChain(provider, passport);
   const className = disableBtn ? "cursor-not-allowed" : "";
   const disabled = disableBtn;
 

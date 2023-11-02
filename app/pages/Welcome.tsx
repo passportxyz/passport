@@ -21,13 +21,14 @@ import { useDisclosure } from "@chakra-ui/react";
 
 // --- Contexts
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
-import { UserContext } from "../context/userContext";
+import { useWalletStore } from "../context/walletStore";
 import { InitialWelcome } from "../components/InitialWelcome";
 import LoadingScreen from "../components/LoadingScreen";
 
 // --- Utils
 import { fetchPossibleEVMStamps, ValidatedPlatform } from "../signer/utils";
 import BodyWrapper from "../components/BodyWrapper";
+import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 
 const MIN_DELAY = 50;
 const MAX_DELAY = 800;
@@ -36,7 +37,8 @@ const getStepDelay = () => Math.floor(Math.random() * (MAX_DELAY - MIN_DELAY + 1
 export default function Welcome() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { passport, allPlatforms, isLoadingPassport } = useContext(CeramicContext);
-  const { wallet, address } = useContext(UserContext);
+  const { dbAccessTokenStatus } = useDatastoreConnectionContext();
+  const address = useWalletStore((state) => state.address);
   const [searchParams] = useSearchParams();
   const dashboardCustomizationKey = searchParams.get("dashboard");
 
@@ -44,10 +46,10 @@ export default function Welcome() {
 
   // Route user to home page when wallet is disconnected
   useEffect(() => {
-    if (!wallet) {
+    if (!address) {
       navigate(`/${dashboardCustomizationKey ? `?dashboard=${dashboardCustomizationKey}` : ""}`);
     }
-  }, [wallet]);
+  }, [address]);
 
   const initialSteps = [
     {
@@ -145,8 +147,9 @@ export default function Welcome() {
           <MinimalHeader className={`border-b border-foreground-6`} />
         </div>
         <BodyWrapper className="flex justify-center">
-          {isLoadingPassport === IsLoadingPassportState.Idle ||
-          isLoadingPassport === IsLoadingPassportState.FailedToConnect ? (
+          {(isLoadingPassport === IsLoadingPassportState.Idle ||
+            isLoadingPassport === IsLoadingPassportState.FailedToConnect) &&
+          dbAccessTokenStatus === "connected" ? (
             passport && passport.stamps.length > 0 ? (
               <WelcomeBack
                 handleFetchPossibleEVMStamps={handleFetchPossibleEVMStamps}

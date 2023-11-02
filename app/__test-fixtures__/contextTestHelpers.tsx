@@ -1,39 +1,13 @@
-import { UserContext, UserContextState } from "../context/userContext";
 import { ScorerContext, ScorerContextState } from "../context/scorerContext";
 import { CeramicContext, CeramicContextState, IsLoadingPassportState, platforms } from "../context/ceramicContext";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
-import { mockAddress, mockWallet } from "./onboardHookValues";
 import React from "react";
 import { render } from "@testing-library/react";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
 import { OnChainContextState } from "../context/onChainContext";
-import { StampClaimingContext, StampClaimingContextState } from "../context/stampClaimingContext";
-
-jest.mock("@didtools/cacao", () => ({
-  Cacao: {
-    fromBlockBytes: jest.fn(),
-  },
-}));
-
-export const makeTestUserContext = (initialState?: Partial<UserContextState>): UserContextState => {
-  return {
-    loggedIn: true,
-    loggingIn: false,
-    connect: jest.fn(),
-    disconnect: jest.fn(),
-    address: mockAddress,
-    wallet: mockWallet,
-    signer: undefined,
-    walletLabel: mockWallet.label,
-    dbAccessToken: "token",
-    dbAccessTokenStatus: "idle",
-    userWarning: undefined,
-    setUserWarning: jest.fn(),
-    setWalletConnectionError: jest.fn(),
-    ...initialState,
-  };
-};
+import { StampClaimingContextState } from "../context/stampClaimingContext";
+import { DatastoreConnectionContext, DbAuthTokenStatus } from "../context/datastoreConnectionContext";
 
 export const getProviderSpec = (platform: PLATFORM_ID, provider: string): ProviderSpec => {
   return STAMP_PROVIDERS[platform]
@@ -231,17 +205,41 @@ export const scorerContext = {
   rawScore: 0,
 } as unknown as ScorerContextState;
 
+export const createWalletStoreMock = () => {
+  const mockConnect = jest.fn();
+
+  const mockWalletState = {
+    address: "0x123",
+    connect: mockConnect,
+  };
+
+  const walletStoreLibraryMock = {
+    useWalletStore: (callback: (state: any) => any) => callback(mockWalletState),
+  };
+
+  return {
+    walletStoreLibraryMock,
+    mockConnect,
+  };
+};
+
+const datastoreConnectionContext = {
+  connect: jest.fn(),
+  disconnect: jest.fn(),
+  dbAccessToken: "token",
+  dbAccessTokenStatus: "connected" as DbAuthTokenStatus,
+};
+
 export const renderWithContext = (
-  userContext: UserContextState,
   ceramicContext: CeramicContextState,
   ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>
 ) =>
   render(
-    <ScorerContext.Provider value={scorerContext}>
-      <UserContext.Provider value={userContext}>
+    <DatastoreConnectionContext.Provider value={datastoreConnectionContext}>
+      <ScorerContext.Provider value={scorerContext}>
         <CeramicContext.Provider value={ceramicContext}>{ui}</CeramicContext.Provider>
-      </UserContext.Provider>
-    </ScorerContext.Provider>
+      </ScorerContext.Provider>
+    </DatastoreConnectionContext.Provider>
   );
 
 export const testOnChainContextState = (initialState?: Partial<OnChainContextState>): OnChainContextState => {

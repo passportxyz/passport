@@ -2,7 +2,7 @@ import onchainInfo from "../../deployments/onchainInfo.json";
 import GitcoinVerifierAbi from "../../deployments/abi/GitcoinVerifier.json";
 import axios, { AxiosResponse } from "axios";
 import { iamUrl } from "../config/stamp_config";
-import { OnChainStatus } from "../hooks/useOnChainStatus";
+import { OnChainStatus } from "../utils/onChainStatus";
 import { ScoreStateType } from "../context/scorerContext";
 import { AllProvidersState, ProviderState } from "../context/ceramicContext";
 import { OnChainProviderType } from "../context/onChainContext";

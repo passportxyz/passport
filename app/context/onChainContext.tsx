@@ -1,9 +1,9 @@
 // --- React Methods
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useEffect, useState } from "react";
 
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
-import { UserContext } from "./userContext";
+import { useWalletStore } from "./walletStore";
 import onchainInfo from "../../deployments/onchainInfo.json";
 import { chains } from "../utils/chains";
 
@@ -58,7 +58,7 @@ export type DecodedProviderInfo = {
 };
 
 export const OnChainContextProvider = ({ children }: { children: any }) => {
-  const { address } = useContext(UserContext);
+  const address = useWalletStore((state) => state.address);
   const [onChainProviders, setOnChainProviders] = useState<OnChainProviderMap>({});
   const [activeChainProviders, setActiveChainProviders] = useState<OnChainProviderType[]>([]);
   const [onChainScores, setOnChainScores] = useState<OnChainScores>({});
@@ -74,17 +74,24 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   };
 
   const readOnChainData = useCallback(async () => {
-    if (address) {
+    if (address && connectedChain) {
       try {
         const activeChainIds = chains
           .filter(({ attestationProvider }) => attestationProvider?.status === "enabled")
           .map(({ id }) => id);
+
+        if (!activeChainIds.includes(connectedChain.id)) {
+          setActiveChainProviders([]);
+        }
 
         await Promise.all(
           activeChainIds.map(async (chainId: string) => {
             const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
 
             if (!passportAttestationData) {
+              if (chainId === connectedChain?.id) {
+                setActiveChainProviders([]);
+              }
               return;
             }
 
@@ -126,13 +133,13 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
         datadogRum.addError(e);
       }
     }
-  }, [address]);
+  }, [address, connectedChain]);
 
   useEffect(() => {
     if (FeatureFlags.FF_CHAIN_SYNC) {
       readOnChainData();
     }
-  }, [readOnChainData, address]);
+  }, [readOnChainData, address, connectedChain]);
 
   // use props as a way to pass configuration values
   const providerProps = {

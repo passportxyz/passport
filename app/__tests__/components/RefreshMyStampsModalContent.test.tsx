@@ -1,11 +1,7 @@
 import React from "react";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { RefreshMyStampsModalContent } from "../../components/RefreshMyStampsModalContent";
-import {
-  makeTestCeramicContext,
-  makeTestUserContext,
-  renderWithContext,
-} from "../../__test-fixtures__/contextTestHelpers";
+import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 
 import { useNavigate } from "react-router-dom";
 import { ValidatedPlatform } from "../../signer/utils";
@@ -31,10 +27,7 @@ const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
 
 const mockOnClose = jest.fn();
 const mockResetStampsAndProgressState = jest.fn();
-const mockUserContext = makeTestUserContext();
 const mockCeramicContext = makeTestCeramicContext();
-
-jest.mock("../../utils/onboard.ts");
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -44,6 +37,17 @@ jest.mock("@didtools/cacao", () => ({
 
 jest.mock("../../components/RefreshMyStampsModalContentCardList.tsx", () => ({
   RefreshMyStampsModalContentCardList: () => <div>RefreshMyStampsModalContentCardList</div>,
+}));
+
+const mockWalletState = {
+  address: "0xmyAddress",
+};
+
+const mockSigner = jest.fn();
+
+jest.mock("../../context/walletStore", () => ({
+  useWalletStore: (callback: (state: any) => any) => callback(mockWalletState),
+  useSigner: () => mockSigner,
 }));
 
 const validPlatforms: ValidatedPlatform[] = [
@@ -79,12 +83,12 @@ const validPlatforms: ValidatedPlatform[] = [
 describe("RefreshMyStampsModalContent", () => {
   it("renders the Stamps Found title when validPlatforms are provided", () => {
     renderWithContext(
-      mockUserContext,
       mockCeramicContext,
       <RefreshMyStampsModalContent
         onClose={mockOnClose}
         validPlatforms={validPlatforms}
         resetStampsAndProgressState={mockResetStampsAndProgressState}
+        dashboardCustomizationKey={null}
       />
     );
     expect(screen.getByText(/Stamps Found/i)).toBeInTheDocument();
@@ -92,12 +96,12 @@ describe("RefreshMyStampsModalContent", () => {
 
   it("calls handleRefreshSelectedStamps when the 'Confirm Stamps' button is clicked", async () => {
     renderWithContext(
-      mockUserContext,
       mockCeramicContext,
       <RefreshMyStampsModalContent
         onClose={mockOnClose}
         validPlatforms={validPlatforms}
         resetStampsAndProgressState={mockResetStampsAndProgressState}
+        dashboardCustomizationKey={null}
       />
     );
 
@@ -113,19 +117,19 @@ describe("RefreshMyStampsModalContent", () => {
           proofs: {},
           signatureType: IAM_SIGNATURE_TYPE,
         },
-        undefined
+        mockSigner
       )
     );
   });
 
   it("shows and hides the data storage info when the 'How is my data stored?' link is clicked", () => {
     renderWithContext(
-      mockUserContext,
       mockCeramicContext,
       <RefreshMyStampsModalContent
         onClose={mockOnClose}
         validPlatforms={validPlatforms}
         resetStampsAndProgressState={mockResetStampsAndProgressState}
+        dashboardCustomizationKey={null}
       />
     );
 

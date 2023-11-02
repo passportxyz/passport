@@ -13,7 +13,7 @@ import { CeramicDatabase, PassportDatabase } from "@gitcoin/passport-database-cl
 import { useViewerConnection } from "@self.id/framework";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
-import { UserContext } from "./userContext";
+import { useWalletStore } from "./walletStore";
 import { ScorerContext } from "./scorerContext";
 
 import { PlatformGroupSpec, platforms as stampPlatforms } from "@gitcoin/passport-platforms";
@@ -48,6 +48,7 @@ const {
 import { PlatformProps } from "../components/GenericPlatform";
 
 import { CERAMIC_CACHE_ENDPOINT, IAM_ISSUER_DID } from "../config/stamp_config";
+import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 
 // -- Trusted IAM servers DID
 const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
@@ -346,7 +347,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [viewerConnection] = useViewerConnection();
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
 
-  const { address, dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
+  const address = useWalletStore((state) => state.address);
+  const { dbAccessToken, dbAccessTokenStatus } = useDatastoreConnectionContext();
   const { refreshScore, fetchStampWeights } = useContext(ScorerContext);
 
   useEffect(() => {

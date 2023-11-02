@@ -1,30 +1,43 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import axios from "axios";
 import { getButtonMsg, SyncToChainButton } from "../../components/SyncToChainButton";
-import { OnChainStatus } from "../../hooks/useOnChainStatus";
-import { UserContextState } from "../../context/userContext";
-import {
-  makeTestCeramicContext,
-  makeTestUserContext,
-  renderWithContext,
-} from "../../__test-fixtures__/contextTestHelpers";
+import { OnChainStatus } from "../../utils/onChainStatus";
+import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
 import { Chain } from "../../utils/chains";
+import { ChakraProvider } from "@chakra-ui/react";
 
-jest.mock("../../utils/onboard.ts");
 const mockSetChain = jest.fn();
 const mockConnectedChain = {
   chains: [],
   connectedChain: { id: "0x14a33", namespace: "mock_namespace", name: "mock_name" },
   settingChain: false,
 };
+
 jest.mock("@web3-onboard/react", () => ({
+  init: () => ({
+    connectWallet: jest.fn(),
+    disconnectWallet: () => Promise.resolve(),
+    state: {
+      select: () => ({
+        subscribe: () => {},
+      }),
+    },
+  }),
   useSetChain: () => [mockConnectedChain, mockSetChain],
 }));
 
+const mockWalletState = {
+  address: "0x123",
+  provider: jest.fn(),
+};
+
+jest.mock("../../context/walletStore", () => ({
+  useWalletStore: (callback: (state: any) => any) => callback(mockWalletState),
+}));
+
 jest.mock("axios");
-// Create a jest mock function for recipientNonces and verifyAndAttest
-const mockRecipientNonces = jest.fn();
+// Create a jest mock function for verifyAndAttest
 const mockVerifyAndAttest = jest.fn().mockImplementation(() => {
   return {
     wait: () => Promise.resolve(undefined),
@@ -84,7 +97,6 @@ const chainWithEas = new Chain({
   },
 });
 
-const mockUserContext: UserContextState = makeTestUserContext();
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 describe("SyncToChainButton component", () => {
@@ -115,7 +127,6 @@ describe("SyncToChainButton component", () => {
     });
 
     renderWithContext(
-      mockUserContext,
       mockCeramicContext,
       <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={anotherChainWithEas} />
     );
@@ -126,9 +137,10 @@ describe("SyncToChainButton component", () => {
   });
   it("should render error toast if no stamps", async () => {
     renderWithContext(
-      mockUserContext,
       { ...mockCeramicContext },
-      <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} />
+      <ChakraProvider>
+        <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} />
+      </ChakraProvider>
     );
     const btn = screen.getByTestId("sync-to-chain-button");
     fireEvent.click(btn);
@@ -140,12 +152,13 @@ describe("SyncToChainButton component", () => {
       .spyOn(axios, "post")
       .mockResolvedValueOnce({ data: { invalidCredentials: [], passport: [], signature: { v: 8, r: "s", s: "a" } } });
     renderWithContext(
-      mockUserContext,
       {
         ...mockCeramicContext,
         passport: { ...mockCeramicContext.passport, stamps: [{ id: "test" } as any] },
       },
-      <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} />
+      <ChakraProvider>
+        <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} />
+      </ChakraProvider>
     );
     const btn = screen.getByTestId("sync-to-chain-button");
     fireEvent.click(btn);

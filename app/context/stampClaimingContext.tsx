@@ -11,7 +11,7 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commo
 
 // --- Context
 import { CeramicContext, platforms } from "../context/ceramicContext";
-import { UserContext } from "../context/userContext";
+import { useWalletStore, useSigner } from "../context/walletStore";
 
 // --- Types
 import { PlatformClass } from "@gitcoin/passport-platforms";
@@ -73,7 +73,8 @@ export const StampClaimingContext = createContext(startingState);
 
 export const StampClaimingContextProvider = ({ children }: { children: any }) => {
   const { handlePatchStamps, userDid } = useContext(CeramicContext);
-  const { address, signer } = useContext(UserContext);
+  const address = useWalletStore((state) => state.address);
+  const signer = useSigner();
   const toast = useToast();
 
   const handleSponsorship = async (platform: PlatformClass, result: string): Promise<void> => {
