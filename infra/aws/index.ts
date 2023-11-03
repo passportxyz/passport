@@ -35,7 +35,7 @@ const containerInsightsStatus = stack == "production" ? "enabled" : "disabled"
 // can be moved to core infrastructure if it is reused
 //////////////////////////////////////////////////////////////
 
-const serviceRole = new aws.iam.Role("dpoppEcsRole", {
+const serviceRole = new aws.iam.Role("passport-ecs-role", {
     assumeRolePolicy: JSON.stringify({
         Version: "2012-10-17",
         Statement: [{
@@ -68,8 +68,8 @@ const serviceRole = new aws.iam.Role("dpoppEcsRole", {
 // Load Balancer listerner rule & target group
 //////////////////////////////////////////////////////////////
 
-const albTargetGroup = new aws.lb.TargetGroup(`dpopp-iam`, {
-    name: `dpopp-iam`,
+const albTargetGroup = new aws.lb.TargetGroup(`passport-iam`, {
+    name: `passport-iam`,
     vpcId: vpcId,
     healthCheck: {
         enabled: true,
@@ -93,12 +93,12 @@ const albTargetGroup = new aws.lb.TargetGroup(`dpopp-iam`, {
     targetType: "ip",
     tags: {
         ...defaultTags,
-        Name: `dpopp-iam`
+        Name: `passport-iam`
     }
 });
 
 
-const albListenerRule = new aws.lb.ListenerRule(`dpopp-iam-https`, {
+const albListenerRule = new aws.lb.ListenerRule(`passport-iam-https`, {
     listenerArn: albHttpsListenerArn,
     actions: [{
         type: "forward",
@@ -112,7 +112,7 @@ const albListenerRule = new aws.lb.ListenerRule(`dpopp-iam-https`, {
     }],
     tags: {
         ...defaultTags,
-        Name: `dpopp-iam-https`
+        Name: `passport-iam-https`
     }
 });
 
@@ -120,19 +120,19 @@ const albListenerRule = new aws.lb.ListenerRule(`dpopp-iam-https`, {
 // Service SG
 //////////////////////////////////////////////////////////////
 
-const serviceSG = new aws.ec2.SecurityGroup(`dpopp-iam`, {
-    name: `dpopp-iam`,
+const serviceSG = new aws.ec2.SecurityGroup(`passport-iam`, {
+    name: `passport-iam`,
     vpcId: vpcId,
-    description: `Security Group for dpopp-iam service.`,
+    description: `Security Group for passport-iam service.`,
     tags: {
         ...defaultTags,
-        Name: `dpopp-iam`
+        Name: `passport-iam`
     }
 });
 // do no group the security group definition & rules in the same resource =>
 // it will cause the sg to be destroyed and recreated everytime the rules change
 // By managing them separately is easier to update the security group rules even outside of this stack
-const sgIngressRule80 = new aws.ec2.SecurityGroupRule(`dpopp-iam-80`, {
+const sgIngressRule80 = new aws.ec2.SecurityGroupRule(`passport-iam-80`, {
     securityGroupId: serviceSG.id,
     type: "ingress",
     fromPort: 80,
@@ -144,7 +144,7 @@ const sgIngressRule80 = new aws.ec2.SecurityGroupRule(`dpopp-iam-80`, {
 });
 
 // Allow all outbound traffic
-const sgEgressRule = new aws.ec2.SecurityGroupRule(`dpopp-iam-all`, {
+const sgEgressRule = new aws.ec2.SecurityGroupRule(`passport-iam-all`, {
     securityGroupId: serviceSG.id,
     type: "egress",
     fromPort: 0,
@@ -177,8 +177,8 @@ const cluster = new aws.ecs.Cluster(`gitcoin`,
     }
 );
 
-const serviceLogGroup = new aws.cloudwatch.LogGroup("dpopp-iam", {
-    name: "dpopp-iam",
+const serviceLogGroup = new aws.cloudwatch.LogGroup("passport-iam", {
+    name: "passport-iam",
     retentionInDays: 1, // TODO: make it as a paramater and change it for production & staging
     tags: {
       ...defaultTags
@@ -186,8 +186,8 @@ const serviceLogGroup = new aws.cloudwatch.LogGroup("dpopp-iam", {
 });
 
 // TaskDefinition
-const taskDefinition = new aws.ecs.TaskDefinition(`dpopp-iam`, {
-    family: `dpopp-iam`,
+const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
+    family: `passport-iam`,
     containerDefinitions: JSON.stringify([{
         name: "iam", 
         image: dockerGtcPassportIamImage, 
@@ -208,7 +208,7 @@ const taskDefinition = new aws.ecs.TaskDefinition(`dpopp-iam`, {
             logDriver: "awslogs", 
             options: { 
                 // "awslogs-group": serviceLogGroup.name,  // TODO: fix this
-                "awslogs-group": "dpopp-iam",
+                "awslogs-group": "passport-iam",
                 "awslogs-region": "us-west-2",
                 // "awslogs-region": region.id, // TODO: fix this
                 "awslogs-stream-prefix": "iam" 
@@ -398,11 +398,11 @@ const taskDefinition = new aws.ecs.TaskDefinition(`dpopp-iam`, {
     requiresCompatibilities: ["FARGATE"],
     tags: {
       ...defaultTags,
-      EcsService: `dpopp-iam`
+      EcsService: `passport-iam`
     }
 });
 
-const service = new aws.ecs.Service(`dpopp-iam`, {
+const service = new aws.ecs.Service(`passport-iam`, {
   cluster: cluster.arn,
   desiredCount: 1,
   enableEcsManagedTags: true,
@@ -413,7 +413,7 @@ const service = new aws.ecs.Service(`dpopp-iam`, {
       containerPort: 80,
       targetGroupArn: albTargetGroup.arn
   }],
-  name: `dpopp-iam`,
+  name: `passport-iam`,
   networkConfiguration: {
       subnets: vpcPrivateSubnets,
       securityGroups: [serviceSG.id]
@@ -422,7 +422,7 @@ const service = new aws.ecs.Service(`dpopp-iam`, {
   taskDefinition: taskDefinition.arn,
   tags: {
       ...defaultTags,
-      Name: `dpopp-iam`
+      Name: `passport-iam`
   }
 });
 
