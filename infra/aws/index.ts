@@ -3,14 +3,14 @@ import * as aws from "@pulumi/aws";
 
 // Secret was created manually in Oregon `us-west-2`
 const IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
-// const IAM_SERVER_SSM_ARN = "xxx"
+const PASSPORT_VC_SECRETS_ARN = `${process.env["PASSPORT_VC_SECRETS_ARN"]}`;
 
 const serviceHostHeader = `${process.env["SERVICE_HOST"]}`;
 const dockerGtcPassportIamImage = `${process.env["DOCKER_IMG"]}`;
 
 const stack = pulumi.getStack();
-const region = aws.getRegion({}); // TODO: fix this
-
+const region = aws.getRegion({});
+export const regionId = region.then(r => r.id);
 const coreInfraStack = new pulumi.StackReference(`gitcoin/core-infra/review`);
 
 export const vpcId = coreInfraStack.getOutput("vpcId");
@@ -49,7 +49,7 @@ const serviceRole = new aws.iam.Role("passport-ecs-role", {
             Statement: [{
                 Action: ["secretsmanager:GetSecretValue"],
                 Effect: "Allow",
-                Resource: IAM_SERVER_SSM_ARN,
+                Resource: [ IAM_SERVER_SSM_ARN,PASSPORT_VC_SECRETS_ARN ]
             }],
         }),
     }],
@@ -201,17 +201,14 @@ const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
         logConfiguration: {
             logDriver: "awslogs",
             options: {
-                // "awslogs-group": serviceLogGroup.name,  // TODO: fix this
-                "awslogs-group": "passport-iam",
-                "awslogs-region": "us-west-2",
-                // "awslogs-region": region.id, // TODO: fix this
-                "awslogs-stream-prefix": "iam"
+                "awslogs-group": "passport-iam", // "${serviceLogGroup.name}`,
+                "awslogs-region": `${regionId}`,
             }
         },
         secrets: [
             {
               name: "IAM_JWK",
-              valueFrom: `${IAM_SERVER_SSM_ARN}:IAM_JWK::`,
+              valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK::`,
             },
             {
               name: "GOOGLE_CLIENT_ID",
@@ -379,7 +376,7 @@ const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
             },
             {
               name: "IAM_JWK_EIP712",
-              valueFrom: `${IAM_SERVER_SSM_ARN}:IAM_JWK_EIP712::`,
+              valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK_EIP712::`,
             },
           ],
         mountPoints: [],
@@ -420,7 +417,6 @@ const service = new aws.ecs.Service(`passport-iam`, {
   }
 });
 
-// TODO:  Clarify this ?
 const ecsTarget = new aws.appautoscaling.Target("autoscaling_target", {
     maxCapacity: 10,
     minCapacity: 1,
