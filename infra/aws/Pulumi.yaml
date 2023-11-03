@@ -1,4 +1,4 @@
-name: passport-iac
+name: passport
 runtime:
   name: nodejs
   options:

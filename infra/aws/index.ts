@@ -11,15 +11,11 @@ const dockerGtcPassportIamImage = `${process.env["DOCKER_IMG"]}`;
 const stack = pulumi.getStack();
 const region = aws.getRegion({}); // TODO: fix this
 
-const coreInfraStack = new pulumi.StackReference(`gitcoin/core-network/${stack}`);
+const coreInfraStack = new pulumi.StackReference(`gitcoin/core-infra/review`);
 
-// TODO: Getting details out of core infra is not working ...
-const vpcId = coreInfraStack.getOutput("vpcId");
-// const vpcId = "xxx"
-const vpcPrivateSubnets = coreInfraStack.getOutput("privateSubnetIds");
-// const vpcPrivateSubnets = [...]
-const albHttpsListenerArn = coreInfraStack.getOutput("coreAlbListenerHttpsArn");
-// const albHttpsListenerArn = "xxx"
+export const vpcId = coreInfraStack.getOutput("vpcId");
+export const vpcPrivateSubnets = coreInfraStack.getOutput("privateSubnetIds");
+export const albHttpsListenerArn = coreInfraStack.getOutput("coreAlbListenerHttpsArn");
 
 const defaultTags = {
     ManagedBy: "pulumi",
@@ -28,7 +24,6 @@ const defaultTags = {
 };
 
 const containerInsightsStatus = stack == "production" ? "enabled" : "disabled"
-
 
 //////////////////////////////////////////////////////////////
 // Service IAM Role
@@ -62,7 +57,7 @@ const serviceRole = new aws.iam.Role("passport-ecs-role", {
     tags: {
         ...defaultTags,
     },
-});  
+});
 
 //////////////////////////////////////////////////////////////
 // Load Balancer listerner rule & target group
@@ -96,7 +91,6 @@ const albTargetGroup = new aws.lb.TargetGroup(`passport-iam`, {
         Name: `passport-iam`
     }
 });
-
 
 const albListenerRule = new aws.lb.ListenerRule(`passport-iam-https`, {
     listenerArn: albHttpsListenerArn,
@@ -138,7 +132,7 @@ const sgIngressRule80 = new aws.ec2.SecurityGroupRule(`passport-iam-80`, {
     fromPort: 80,
     toPort: 80,
     protocol: "tcp",
-    cidrBlocks: ["0.0.0.0/0"]  // TODO: improvements: allow only from the ALB's security group id 
+    cidrBlocks: ["0.0.0.0/0"]  // TODO: improvements: allow only from the ALB's security group id
 }, {
     dependsOn: [serviceSG]
 });
@@ -189,31 +183,31 @@ const serviceLogGroup = new aws.cloudwatch.LogGroup("passport-iam", {
 const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
     family: `passport-iam`,
     containerDefinitions: JSON.stringify([{
-        name: "iam", 
-        image: dockerGtcPassportIamImage, 
+        name: "iam",
+        image: dockerGtcPassportIamImage,
         cpu: 2048,
         memory: 4096,
-        links: [], 
-        essential: true, 
-        portMappings: [{ 
-            containerPort: 80, 
-            hostPort: 80, 
-            protocol: "tcp" 
-        }], 
-        environment: [{ 
-            name: "CGRANTS_API_URL", 
-            value: "https://api.scorer.gitcoin.co/cgrants" 
-        }], 
-        logConfiguration: { 
-            logDriver: "awslogs", 
-            options: { 
+        links: [],
+        essential: true,
+        portMappings: [{
+            containerPort: 80,
+            hostPort: 80,
+            protocol: "tcp"
+        }],
+        environment: [{
+            name: "CGRANTS_API_URL",
+            value: "https://api.scorer.gitcoin.co/cgrants"
+        }],
+        logConfiguration: {
+            logDriver: "awslogs",
+            options: {
                 // "awslogs-group": serviceLogGroup.name,  // TODO: fix this
                 "awslogs-group": "passport-iam",
                 "awslogs-region": "us-west-2",
                 // "awslogs-region": region.id, // TODO: fix this
-                "awslogs-stream-prefix": "iam" 
-            } 
-        }, 
+                "awslogs-stream-prefix": "iam"
+            }
+        },
         secrets: [
             {
               name: "IAM_JWK",
@@ -388,8 +382,8 @@ const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
               valueFrom: `${IAM_SERVER_SSM_ARN}:IAM_JWK_EIP712::`,
             },
           ],
-        mountPoints: [], 
-        volumesFrom: [] 
+        mountPoints: [],
+        volumesFrom: []
     }]),
     executionRoleArn: serviceRole.arn,
     cpu: "2048",
@@ -434,8 +428,6 @@ const ecsTarget = new aws.appautoscaling.Target("autoscaling_target", {
     scalableDimension: "ecs:service:DesiredCount",
     serviceNamespace: "ecs",
 });
-
-
 
 const serviceRecord = new aws.route53.Record("passport-record", {
     name: `test-passport`,
