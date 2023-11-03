@@ -81,7 +81,7 @@ export function StampSelector({
                   <div
                     key={provider.name}
                     data-testid={`indicator-${provider.name}`}
-                    className={`relative border-foreground-3 py-3 text-base ${
+                    className={`relative border-foreground-3 ${provider.description ? "pt-3" : "py-3"} text-base ${
                       i > 0 ? "border-t" : "border-none"
                     } ${textColor} flex items-center`}
                   >
@@ -98,7 +98,7 @@ export function StampSelector({
                   </div>
                   {provider.description && (
                     <>
-                      <p className="mb-2 px-2 text-sm italic">*{provider.description}</p>
+                      <p className="my-2 text-sm italic">{provider.description}</p>
                     </>
                   )}
                 </>

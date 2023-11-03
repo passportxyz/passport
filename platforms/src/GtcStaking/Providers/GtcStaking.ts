@@ -12,9 +12,10 @@ const apiKey = process.env.SCORER_API_KEY;
 type UserStake = {
   selfStake: number;
   communityStakes: Stake[];
+  error?: string;
 };
 
-type Stake = {
+export type Stake = {
   id: number;
   event_type: string;
   round_id: number;
@@ -27,9 +28,9 @@ type Stake = {
 };
 
 type CommunityStakingCounts = {
-  begCommStakeCount: number;
-  expCommStakeCount: number;
-  trustCitStakerCount: number;
+  bcs1gte5: number;
+  ecs2gte10: number;
+  tc5gte20: number;
 };
 export interface StakeResponse {
   data: {
@@ -75,18 +76,28 @@ export class GtcStakingProvider implements Provider {
       const address = payload.address.toLowerCase();
       const errors: string[] = [];
       let record = undefined,
+        valid = false,
+        stakeData;
+
+      if (!address || address.substring(0, 2) !== "0x" || address.length !== 42) {
         valid = false;
-      const stakeData = await verifyStake(payload, context);
+        throw Error("Not a proper ethereum address");
+      }
+
+      try {
+        stakeData = await verifyStake(payload, context);
+      } catch (error: unknown) {
+        errors.push(String(error));
+      }
+
       const selfStakeAmount = stakeData.selfStake;
       const communityStakes = stakeData.communityStakes;
       const commStakeCounts = checkCommunityStakes(communityStakes, address);
 
-      if (selfStakeAmount >= this.threshold) {
-        valid = true;
-      }
+      if (selfStakeAmount >= this.threshold) valid = true;
 
       for (const [key, val] of Object.entries(commStakeCounts)) {
-        if (val >= this.communityTypeCount) {
+        if (val >= this.communityTypeCount && this.identifier === key) {
           valid = true;
         }
       }
@@ -102,7 +113,7 @@ export class GtcStakingProvider implements Provider {
         );
       } else {
         errors.push(
-          "You are not staking enough on the community members and/or the community members are not staking enough on you 🥲"
+          "You are not staking enough on community members and/or community members are not staking enough on you 🥲"
         );
       }
 
@@ -118,35 +129,46 @@ export class GtcStakingProvider implements Provider {
 }
 
 function checkCommunityStakes(communityStakes: Stake[], address: string): CommunityStakingCounts {
-  let begCommStakeCount = 0;
-  let expCommStakeCount = 0;
+  let bcs1gte5 = 0;
+  let ecs2gte10 = 0;
   const trustCitStakers = new Set();
-  const trustCitStakerCount = trustCitStakers.size;
 
   communityStakes.forEach((stake: Stake) => {
     if (
-      (stake.address === address && parseInt(stake.amount) >= 5) ||
-      (stake.staker !== address && parseInt(stake.amount) >= 5)
+      stake.event_type === "Xstake" &&
+      stake.staked === true &&
+      parseInt(stake.amount) >= 5 &&
+      (stake.address === address || stake.staker === address)
     ) {
-      begCommStakeCount += 1;
+      bcs1gte5 += 1;
     }
 
     if (
-      (stake.address === address && parseInt(stake.amount) >= 10) ||
-      (stake.staker !== address && parseInt(stake.amount) >= 10)
+      stake.event_type === "Xstake" &&
+      stake.staked === true &&
+      parseInt(stake.amount) >= 10 &&
+      (stake.address === address || stake.staker === address)
     ) {
-      expCommStakeCount += 1;
+      ecs2gte10 += 1;
     }
 
-    if (stake.address === address && parseInt(stake.amount) >= 20) {
+    if (
+      stake.event_type === "Xstake" &&
+      stake.staked &&
+      stake.address === address &&
+      parseInt(stake.amount) >= 20 &&
+      trustCitStakers.size <= 5
+    ) {
       trustCitStakers.add(stake.staker);
     }
   });
 
+  const tc5gte20 = trustCitStakers.size;
+
   return {
-    begCommStakeCount,
-    expCommStakeCount,
-    trustCitStakerCount,
+    bcs1gte5,
+    ecs2gte10,
+    tc5gte20,
   };
 }
 
@@ -158,10 +180,6 @@ async function verifyStake(payload: RequestPayload, context: GtcStakingContext):
 
       const selfStakes: Stake[] = [];
       const communityStakes: Stake[] = [];
-
-      if (!address || address.substring(0, 2) !== "0x") {
-        throw Error("Not a proper address");
-      }
 
       const response: StakeResponse = await axios.get(`${gtcStakingEndpoint}/${address}/${round}`, {
         headers: { Authorization: `Bearer ${apiKey}` },
