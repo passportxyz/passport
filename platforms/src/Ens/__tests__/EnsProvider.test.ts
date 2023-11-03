@@ -3,7 +3,7 @@ import { RequestPayload } from "@gitcoin/passport-types";
 import { EnsProvider } from "../Providers/EnsProvider";
 
 // ----- Ethers library
-import { StaticJsonRpcProvider, JsonRpcSigner } from "@ethersproject/providers";
+import { StaticJsonRpcProvider, JsonRpcSigner, Resolver } from "@ethersproject/providers";
 
 import { mock } from "jest-mock-extended";
 import { ProviderExternalVerificationError } from "../../types";
@@ -16,12 +16,18 @@ const MOCK_ENS = "dpopptest.eth";
 const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
 
 const EthersLookupAddressMock = jest.spyOn(StaticJsonRpcProvider.prototype, "lookupAddress");
+const EthersGetResolverMock = jest.spyOn(StaticJsonRpcProvider.prototype, "getResolver");
 
 describe("Attempt verification", function () {
   beforeEach(() => {
     jest.clearAllMocks();
     EthersLookupAddressMock.mockImplementation(async (address) => {
       if (address === MOCK_ADDRESS) return MOCK_ENS;
+    });
+    EthersGetResolverMock.mockImplementation(() => {
+      return Promise.resolve({
+        address: "0x231b0ee14048e9dccd1d247744d114a4eb5E8e63",
+      } as Resolver);
     });
     // eslint-disable-next-line @typescript-eslint/require-await
     mockSigner.getAddress = jest.fn(async () => MOCK_ADDRESS);
@@ -34,12 +40,35 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     expect(EthersLookupAddressMock).toBeCalledWith(MOCK_ADDRESS);
+    expect(EthersGetResolverMock).toBeCalledWith(MOCK_ENS);
+
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
         ens: MOCK_ENS,
       },
       errors: [],
+    });
+  });
+
+  it("should return false for alternate resolvers", async () => {
+    EthersGetResolverMock.mockImplementation(async (_) => {
+      return Promise.resolve({
+        address: "0x123",
+      } as Resolver);
+    });
+
+    const ens = new EnsProvider();
+
+    const verifiedPayload = await ens.verify({
+      address: MOCK_ADDRESS,
+    } as unknown as RequestPayload);
+
+    expect(EthersLookupAddressMock).toBeCalledWith(MOCK_ADDRESS);
+
+    expect(verifiedPayload).toEqual({
+      valid: false,
+      errors: ["Apologies! Your primary ENS name uses an alternative resolver and is not eligible for the ENS stamp."],
     });
   });
 
