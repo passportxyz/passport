@@ -9,10 +9,9 @@ import {
 // ----- Libs
 import axios from "axios";
 import { Stake } from "../Providers/GtcStaking";
+import { ProviderExternalVerificationError } from "../../types";
 
 jest.mock("axios");
-
-const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
 const MOCK_ADDRESS_LOWER = MOCK_ADDRESS.toLowerCase();
@@ -144,7 +143,7 @@ describe("Attempt verification", function () {
         } as unknown as RequestPayload,
         {}
       );
-    }).rejects.toThrow("BeginnerCommunityStaker verifyStake: TypeError: Cannot read properties of undefined");
+    }).rejects.toThrow(ProviderExternalVerificationError);
   });
 });
 
@@ -230,7 +229,7 @@ describe("should return valid payload", function () {
 
   it("when user stakes more than 5 GTC on another community member for BeginnerCommunityStaker", async () => {
     (axios.get as jest.Mock).mockImplementation(() => {
-      return Promise.resolve(gtcStakingResponse("7", 2, "BeginnerCommunityStaker"));
+      return Promise.resolve(gtcStakingResponse("7", 1, "BeginnerCommunityStaker"));
     });
 
     const bcsStaking = new BeginnerCommunityStakerProvider();
@@ -253,7 +252,7 @@ describe("should return valid payload", function () {
 
   it("when more than 10 GTC is staked on a community member and a community member stakes more than 10 GTC on the user for ExperiencedCommunityStaker", async () => {
     (axios.get as jest.Mock).mockImplementation(() => {
-      return Promise.resolve(gtcStakingResponse("15", 3, "ExperiencedCommunityStaker"));
+      return Promise.resolve(gtcStakingResponse("15", 1, "ExperiencedCommunityStaker"));
     });
 
     const ecsStaking = new ExperiencedCommunityStakerProvider();
@@ -299,7 +298,7 @@ describe("should return valid payload", function () {
   // All values equal to tier amount
   it("when the user stakes exactly 5 GTC on a community member for BeginnerCommunityStaker", async () => {
     (axios.get as jest.Mock).mockImplementation(() => {
-      return Promise.resolve(gtcStakingResponse("5", 2, "BeginnerCommunityStaker"));
+      return Promise.resolve(gtcStakingResponse("5", 1, "BeginnerCommunityStaker"));
     });
 
     const bcsStaking = new BeginnerCommunityStakerProvider();
@@ -322,7 +321,7 @@ describe("should return valid payload", function () {
 
   it("when a community member stakes exactly 10 GTC on the user and the user stakes exactly 10 GTC on them for ExperiencedCommunityStaker", async () => {
     (axios.get as jest.Mock).mockImplementation(() => {
-      return Promise.resolve(gtcStakingResponse("10", 3, "ExperiencedCommunityStaker"));
+      return Promise.resolve(gtcStakingResponse("10", 1, "ExperiencedCommunityStaker"));
     });
 
     const ecsStaking = new ExperiencedCommunityStakerProvider();
