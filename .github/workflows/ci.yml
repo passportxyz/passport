@@ -46,7 +46,8 @@ jobs:
         working-directory: ./iam
       - name: Git 3
         run: |
-          git show main:iam/src/static/providerBitMapInfo.json
+          git fetch
+          git show origin/main:iam/src/static/providerBitMapInfo.json
         working-directory: ./iam
       - name: Build 2
         run: |
