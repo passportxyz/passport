@@ -57,5 +57,9 @@ jobs:
         run: |
           pwd
           ls -ls
+          ls -ls dist
+          ls -ls dist/iam
+          ls -ls dist/iam/src
+          ls -ls dist/iam/src/scripts
           node dist/iam/src/scripts/checkProviderBitMapInfo.js
         working-directory: ./iam
