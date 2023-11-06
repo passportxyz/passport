@@ -32,13 +32,23 @@ jobs:
       #   run: yarn lint
       - name: Workarround for build error
         run: rm -rf node_modules/@tendermint
-      - name: Run Build (ensure that build succeeds)
-        run: yarn build
+      # - name: Run Build (ensure that build succeeds)
+      #   run: yarn build
       # - name: Run Ceramic Integration Tests
       #   run: yarn test:ceramic-integration
-      - name: Run bitmap check
+      - name: Git 1
         run: |
           git status
+        working-directory: ./iam
+      - name: Git 2
+        run: |
           git log -n10 --format=format:%H -- ./src/static/providerBitMapInfo.json
+        working-directory: ./iam
+      - name: Build 2
+        run: |
+          yarn build
+        working-directory: ./iam
+      - name: Run bitmap check
+        run: |
           node dist/iam/src/scripts/checkProviderBitMapInfo.js
         working-directory: ./iam
