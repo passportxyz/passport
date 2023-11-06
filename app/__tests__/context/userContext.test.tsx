@@ -12,7 +12,7 @@ import { CeramicContext } from "../../context/ceramicContext";
 jest.mock("../../utils/onboard.ts");
 
 jest.mock("@web3-onboard/react", () => ({
-  useConnectWallet: () => [{ wallet: mockWallet }, jest.fn(), jest.fn()],
+  useConnectWallet: () => [{ wallet: mockWallet }, () => Promise.resolve([mockWallet]), jest.fn()],
 }));
 
 jest.mock("@didtools/pkh-ethereum", () => {
@@ -46,7 +46,7 @@ jest.mock("@self.id/framework", () => {
 });
 
 const TestingComponent = () => {
-  const { loggingIn } = useContext(UserContext);
+  const { loggingIn, connect } = useContext(UserContext);
   const [session, setSession] = useState("");
 
   useEffect(() => {
@@ -58,6 +58,7 @@ const TestingComponent = () => {
     <div>
       <div data-testid="session-id">{session}</div>
       <div>Logging In: {String(loggingIn)}</div>
+      <button onClick={connect}>Connect</button>
     </div>
   );
 };
@@ -105,6 +106,8 @@ describe("<UserContext>", () => {
 
     expect(screen.getByTestId("session-id")).toHaveTextContent("eyJzZXNzaW9uS2V5U2VlZCI6IlF5cTN4aW9ubGxD...");
 
+    screen.getByRole("button").click();
+
     await waitFor(() => expect(screen.getByText("Logging In: false")).toBeInTheDocument());
     await waitFor(() => expect(screen.getByTestId("session-id").textContent).toBe(""));
   });
@@ -124,6 +127,8 @@ describe("<UserContext>", () => {
     it("should use chain id 1 in the DID regardless of the wallet chain", async () => {
       renderTestComponent();
 
+      screen.getByRole("button").click();
+
       await waitFor(() => expect(screen.getByText("Logging In: true")).toBeInTheDocument());
 
       await waitFor(() => expect(screen.getByText("Logging In: false")).toBeInTheDocument());
@@ -138,6 +143,8 @@ describe("<UserContext>", () => {
       localStorage.setItem("didsession-0xmyAddress", "eyJzZXNzaW9uS2V5U2VlZCI6IlF5cTN4aW9ubGxD...");
 
       renderTestComponent();
+
+      screen.getByRole("button").click();
 
       await waitFor(() => expect(screen.getByText("Logging In: true")).toBeInTheDocument());
 

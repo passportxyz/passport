@@ -25,7 +25,7 @@ const Footer = () => (
 );
 
 export default function Home() {
-  const { toggleConnection, wallet, walletConnectionError, setWalletConnectionError } = useContext(UserContext);
+  const { connect, wallet, walletConnectionError, setWalletConnectionError } = useContext(UserContext);
   const toast = useToast();
   const [searchParams] = useSearchParams();
 
@@ -79,7 +79,7 @@ export default function Home() {
                 Gitcoin Grants. The more you verify your identity, the more opportunities you will have to vote and
                 participate across the web3.
               </div>
-              <SIWEButton data-testid="connectWalletButton" onClick={toggleConnection} className="mt-10" />
+              <SIWEButton data-testid="connectWalletButton" onClick={connect} className="mt-10" />
               {walletConnectionError && <div>{walletConnectionError}</div>}
             </div>
           </PageWidthGrid>

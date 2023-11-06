@@ -20,8 +20,8 @@ export const makeTestUserContext = (initialState?: Partial<UserContextState>): U
   return {
     loggedIn: true,
     loggingIn: false,
-    toggleConnection: jest.fn(),
-    handleDisconnection: jest.fn(),
+    connect: jest.fn(),
+    disconnect: jest.fn(),
     address: mockAddress,
     wallet: mockWallet,
     signer: undefined,

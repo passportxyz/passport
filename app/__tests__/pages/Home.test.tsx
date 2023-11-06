@@ -33,11 +33,11 @@ jest.mock("@didtools/cacao", () => ({
   },
 }));
 
-const mockToggleConnection = jest.fn();
+const mockConnect = jest.fn();
 
 const mockUserContext: UserContextState = makeTestUserContext({
   loggedIn: false,
-  toggleConnection: mockToggleConnection,
+  connect: mockConnect,
   address: undefined,
   wallet: null,
   signer: undefined,
@@ -57,7 +57,7 @@ test("renders connect wallet button", () => {
   expect(screen.getByTestId("connectWalletButton"));
 });
 
-test("clicking connect wallet button calls toggleConnection", async () => {
+test("clicking connect wallet button calls connect", async () => {
   expect.assertions(1);
 
   renderWithContext(
@@ -72,7 +72,7 @@ test("clicking connect wallet button calls toggleConnection", async () => {
   await userEvent.click(connectWalletButton);
 
   await waitFor(() => {
-    expect(mockToggleConnection).toBeCalledTimes(1);
+    expect(mockConnect).toBeCalledTimes(1);
   });
 });
 
