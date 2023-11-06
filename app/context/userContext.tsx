@@ -43,8 +43,8 @@ export interface UserWarning {
 
 export interface UserContextState {
   loggedIn: boolean;
-  toggleConnection: () => void;
-  handleDisconnection: () => void;
+  connect: () => Promise<void>;
+  disconnect: () => Promise<void>;
   address: string | undefined;
   wallet: WalletState | null;
   signer: JsonRpcSigner | undefined;
@@ -60,8 +60,8 @@ export interface UserContextState {
 
 const startingState: UserContextState = {
   loggedIn: false,
-  toggleConnection: () => {},
-  handleDisconnection: () => {},
+  connect: async () => {},
+  disconnect: async () => {},
   address: undefined,
   wallet: null,
   signer: undefined,
@@ -93,7 +93,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   const [userWarning, setUserWarning] = useState<UserWarning | undefined>();
 
   // Use onboard to control the current provider/wallets
-  const [{ wallet }, connect, disconnect] = useConnectWallet();
+  const [{ wallet }, web3OnboardConnect, web3OnboardDisconnect] = useConnectWallet();
   const [web3Onboard, setWeb3Onboard] = useState<OnboardAPI | undefined>();
   const [walletLabel, setWalletLabel] = useState<string | undefined>();
   const [address, setAddress] = useState<string>();
@@ -108,24 +108,6 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     setWalletLabel(undefined);
     setAddress(undefined);
     setSigner(undefined);
-  };
-
-  // Restore wallet connection from localStorage
-  const setWalletFromLocalStorage = async (): Promise<void> => {
-    const previouslyConnectedWallets = JSON.parse(
-      // retrieve localstorage state
-      window.localStorage.getItem("connectedWallets") || "[]"
-    ) as string[];
-    if (previouslyConnectedWallets?.length) {
-      connect({
-        autoSelect: {
-          label: previouslyConnectedWallets[0],
-          disableModals: true,
-        },
-      }).catch((e): void => {
-        throw e;
-      });
-    }
   };
 
   // Force user on to Mainnet
@@ -200,7 +182,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
 
   const handleConnectionError = async (sessionKey: string, dbCacheTokenKey: string, wallet: WalletState) => {
     // disconnect wallet
-    await disconnect({
+    await web3OnboardDisconnect({
       label: wallet.label || "",
     });
     // then clear local state
@@ -211,7 +193,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
   };
 
   // Attempt to login to Ceramic (on mainnet only)
-  const passportLogin = async (): Promise<void> => {
+  const passportLogin = async (wallet: WalletState): Promise<void> => {
     // check that passportLogin isn't mid-way through
     if (wallet && !loggingIn) {
       // ensure that passport is connected to mainnet
@@ -293,7 +275,7 @@ export const UserContextProvider = ({ children }: { children: any }) => {
         }
       } else {
         // disconnect from the invalid chain
-        await disconnect({
+        await web3OnboardDisconnect({
           label: wallet.label || "",
         });
         // then clear local state
@@ -308,11 +290,6 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     // Init onboard to enable hooks
     useEffect((): void => {
       setWeb3Onboard(initWeb3Onboard);
-    }, []);
-
-    // Connect wallet on reload
-    useEffect((): void => {
-      setWalletFromLocalStorage();
     }, []);
   }
 
@@ -358,27 +335,24 @@ export const UserContextProvider = ({ children }: { children: any }) => {
 
   // Update on wallet connect
   useEffect((): void => {
-    // no connection
-    if (!wallet) {
-      clearState();
-    } else {
-      if (wallet.accounts[0].address != address) {
-        // record connected wallet details
-        setWalletLabel(wallet.label);
-        setAddress(wallet.accounts[0].address);
-        // get the signer from an ethers wrapped Web3Provider
-        setSigner(new Web3Provider(wallet.provider).getSigner());
-        // Login to Ceramic
-        passportLogin();
+    (async () => {
+      // no connection
+      if (!wallet) {
+        clearState();
+      } else {
+        if (address && wallet.accounts[0].address != address) {
+          await disconnect();
+          clearState();
+        }
       }
-    }
+    })();
   }, [wallet]);
 
   useEffect((): void => {
     switch (viewerConnection.status) {
       case "failed": {
         // user refused to connect to ceramic -- disconnect them
-        disconnect({
+        web3OnboardDisconnect({
           label: walletLabel || "",
         });
         console.log("failed to connect self id :(");
@@ -389,48 +363,56 @@ export const UserContextProvider = ({ children }: { children: any }) => {
     }
   }, [viewerConnection.status]);
 
-  // Toggle connect/disconnect
-  const toggleConnection = (): void => {
-    if (!address) {
-      handleConnection();
-    } else {
-      handleDisconnection();
+  const connect = async (): Promise<void> => {
+    try {
+      const previouslyConnectedWallets = JSON.parse(
+        // retrieve localstorage state
+        window.localStorage.getItem("connectedWallets") || "[]"
+      ) as string[];
+      const connectOptions = previouslyConnectedWallets?.length
+        ? {
+            autoSelect: {
+              label: previouslyConnectedWallets[0],
+              disableModals: true,
+            },
+          }
+        : undefined;
+
+      const wallet = (await web3OnboardConnect(connectOptions))?.[0];
+
+      // record connected wallet details
+      setWalletLabel(wallet.label);
+      setAddress(wallet.accounts[0].address);
+      // get the signer from an ethers wrapped Web3Provider
+      setSigner(new Web3Provider(wallet.provider).getSigner());
+
+      await passportLogin(wallet);
+    } catch (error) {
+      datadogRum.addError(error);
+      throw error;
     }
   };
 
-  const handleConnection = (): void => {
-    connect()
-      .then(() => {
-        datadogLogs.logger.info("Connected to Wallet");
-        setLoggedIn(true);
-      })
-      .catch((e) => {
-        datadogRum.addError(e);
-        throw e;
+  const disconnect = async (): Promise<void> => {
+    try {
+      await web3OnboardDisconnect({
+        label: walletLabel || "",
       });
-  };
-
-  const handleDisconnection = (): void => {
-    disconnect({
-      label: walletLabel || "",
-    })
-      .then(() => {
-        setLoggedIn(false);
-        ceramicDisconnect();
-        window.localStorage.setItem("connectedWallets", "[]");
-      })
-      .catch((e) => {
-        datadogRum.addError(e);
-        throw e;
-      });
+      setLoggedIn(false);
+      ceramicDisconnect();
+      window.localStorage.setItem("connectedWallets", "[]");
+    } catch (e) {
+      datadogRum.addError(e);
+      throw e;
+    }
   };
 
   // use props as a way to pass configuration values
   const providerProps = {
     loggedIn,
     address,
-    toggleConnection,
-    handleDisconnection,
+    connect,
+    disconnect,
     wallet,
     signer,
     walletLabel,

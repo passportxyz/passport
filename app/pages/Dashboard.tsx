@@ -54,7 +54,7 @@ export default function Dashboard() {
   const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms, cancelCeramicConnection } =
     useContext(CeramicContext);
 
-  const { wallet, toggleConnection } = useContext(UserContext);
+  const { wallet, disconnect } = useContext(UserContext);
   const { refreshScore } = useContext(ScorerContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -160,8 +160,7 @@ export default function Dashboard() {
 
   const closeModalAndDisconnect = () => {
     onRetryModalClose();
-    // toggle wallet connect/disconnect
-    toggleConnection();
+    disconnect();
   };
 
   useEffect(() => {
