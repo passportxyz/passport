@@ -12,7 +12,7 @@ import currentBitmap from "../static/providerBitMapInfo.json";
 
 const processArgs = process.argv.slice(2);
 
-if(processArgs.length < 1) {
+if (processArgs.length < 1) {
   console.error("The following arguments are expected: <baseRevision>");
   process.exit(1);
 }
