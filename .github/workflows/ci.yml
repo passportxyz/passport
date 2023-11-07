@@ -53,7 +53,7 @@ jobs:
         run: |
           yarn build
         working-directory: ./iam
-      - name: Run bitmap check
+      - name: Check bitmap against main
         run: |
           pwd
           ls -ls
@@ -61,5 +61,15 @@ jobs:
           ls -ls dist/iam
           ls -ls dist/iam/src
           ls -ls dist/iam/src/scripts
-          node dist/iam/src/scripts/checkProviderBitMapInfo.js origin/main
+          node dist/iam/src/scripts/checkProviderBitMapInfoAgaistMain.js origin/main
+        working-directory: ./iam
+      - name: Check not providers are missing from bitmap
+        run: |
+          pwd
+          ls -ls
+          ls -ls dist
+          ls -ls dist/iam
+          ls -ls dist/iam/src
+          ls -ls dist/iam/src/scripts
+          node dist/iam/src/scripts/checkProviderBitMapInfoForMissingProviders.js
         working-directory: ./iam
