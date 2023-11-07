@@ -1,93 +1,137 @@
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
 import {
-  CommunityStakingBronzeProvider,
-  CommunityStakingSilverProvider,
-  CommunityStakingGoldProvider,
+  BeginnerCommunityStakerProvider,
+  ExperiencedCommunityStakerProvider,
+  TrustedCitizenProvider,
 } from "../Providers/communityStaking";
-
-import { stakingSubgraph, StakeResponse, getStakeQuery } from "../Providers/GtcStaking";
-
-const getSubgraphQuery = (address: string) => getStakeQuery(address, "1");
 
 // ----- Libs
 import axios from "axios";
+import { Stake } from "../Providers/GtcStaking";
+import { ProviderExternalVerificationError } from "../../types";
 
-const mockedAxiosPost = jest.spyOn(axios, "post");
+jest.mock("axios");
+
+// jest.mock("@ipld/dag-cbor", () => {
+//   const originalModule = jest.requireActual("@ipld/dag-cbor");
+//   // Mock the specific function or value you need, for example:
+//   return {
+//     __esModule: true, // this property makes it work as an ES module
+//     ...originalModule,
+//     encode: jest.fn().mockReturnValue("mocked encoded value"), // mock encode function
+//     decode: jest.fn().mockReturnValue({ /* mocked decoded value */ }), // mock decode function
+//   };
+// });
 
 const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
 const MOCK_ADDRESS_LOWER = MOCK_ADDRESS.toLowerCase();
 
-const generateSubgraphResponse = (total: string): Promise<StakeResponse> => {
-  return new Promise((resolve) => {
-    resolve({
-      data: {
-        data: {
-          users: [
-            {
-              stakes: [],
-              xstakeAggregates: [
-                {
-                  total,
-                },
-              ],
-            },
-          ],
-        },
-      },
-    });
-  });
+const invalidGtcStakingResponse = {
+  status: 500,
+  data: {},
 };
 
-const invalidCommunityStakingResponse = {
-  data: {
+const gtcStakingResponse = (gtcAmount: string, n: number, communityType: string) => {
+  const results: Stake[] = [];
+  const stakingResponse = {
+    status: 200,
     data: {
-      users: [{}],
+      results,
     },
-  },
+  };
+  const bcs = "BeginnerCommunityStaker";
+  const ecs = "ExperiencedCommunityStaker";
+  const tc = "TrustedCitizen";
+  for (let i = 0; i < n; i++) {
+    switch (communityType) {
+      case bcs:
+        results.push({
+          id: i,
+          event_type: "Xstake",
+          round_id: 1,
+          staker: MOCK_ADDRESS_LOWER,
+          address: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+          amount: gtcAmount,
+          staked: true,
+          block_number: 14124991,
+          tx_hash: `0x1234${i}`,
+        });
+        break;
+      case ecs:
+        results.push({
+          id: i,
+          event_type: "Xstake",
+          round_id: 1,
+          staker: MOCK_ADDRESS_LOWER,
+          address: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+          amount: gtcAmount,
+          staked: true,
+          block_number: 14124991,
+          tx_hash: `0x1235${i}`,
+        });
+        results.push({
+          id: i + 6,
+          event_type: "Xstake",
+          round_id: 1,
+          staker: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+          address: MOCK_ADDRESS_LOWER,
+          amount: gtcAmount,
+          staked: true,
+          block_number: 14124991,
+          tx_hash: `0x1234${i}`,
+        });
+        break;
+      case tc:
+        results.push({
+          id: i,
+          event_type: "Xstake",
+          round_id: 1,
+          staker: `0x6c5c1${i}e496c5164fef46c7${i}5c4a2d691bd9a${i}adb`,
+          address: MOCK_ADDRESS_LOWER,
+          amount: gtcAmount,
+          staked: true,
+          block_number: 14124991,
+          tx_hash: `0x1234${i}`,
+        });
+        break;
+      default:
+        break;
+    }
+  }
+  return stakingResponse;
 };
-
-interface RequestData {
-  query: string;
-}
 
 describe("Attempt verification", function () {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedAxiosPost.mockImplementation((url, data) => {
-      const query: string = (data as RequestData).query;
-      if (url === stakingSubgraph && query.includes(MOCK_ADDRESS_LOWER)) {
-        return generateSubgraphResponse("220000000000000000000");
-      }
-    });
   });
 
   it("handles valid verification attempt", async () => {
-    const communityStakingProvider = new CommunityStakingBronzeProvider();
-    const verifiedPayload = await communityStakingProvider.verify(
+    (axios.get as jest.Mock).mockImplementation(() => {
+      return Promise.resolve(gtcStakingResponse("5", 1, "BeginnerCommunityStaker"));
+    });
+
+    const bcsStaking = new BeginnerCommunityStakerProvider();
+    const bcsStakingPayload = await bcsStaking.verify(
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
       {}
     );
 
-    // Check the request to verify the subgraph query
-    expect(mockedAxiosPost).toBeCalledWith(stakingSubgraph, {
-      query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
-    });
-
-    expect(verifiedPayload).toEqual({
+    expect(bcsStakingPayload).toEqual({
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        stakeAmount: "csgte5",
+        stakeAmount: "bcs1gte5",
       },
       errors: [],
     });
   });
+
   it("handles invalid verification attempt where address is not proper ether address", async () => {
-    const communityStakingProvider = new CommunityStakingBronzeProvider();
-    // Check the request to verify the subgraph query
+    const communityStakingProvider = new BeginnerCommunityStakerProvider();
     await expect(async () => {
       return await communityStakingProvider.verify(
         {
@@ -95,19 +139,14 @@ describe("Attempt verification", function () {
         } as unknown as RequestPayload,
         {}
       );
-    }).rejects.toThrow("CommunityStakingBronze verifyStake: Error: Not a proper address.");
+    }).rejects.toThrow("BeginnerCommunityStaker verifyStake: Error: Not a proper ethereum address.");
   });
 
-  it("handles invalid subgraph response", async () => {
-    mockedAxiosPost.mockImplementationOnce((url, data) => {
-      const query: string = (data as RequestData).query;
-      if (url === stakingSubgraph && query.includes(MOCK_ADDRESS_LOWER)) {
-        return new Promise((resolve) => {
-          resolve(invalidCommunityStakingResponse);
-        });
-      }
+  it("handles invalid endpoint response", async () => {
+    (axios.get as jest.Mock).mockImplementation(() => {
+      return Promise.resolve(invalidGtcStakingResponse);
     });
-    const communityStakingProvider = new CommunityStakingBronzeProvider();
+    const communityStakingProvider = new BeginnerCommunityStakerProvider();
     await expect(async () => {
       return await communityStakingProvider.verify(
         {
@@ -115,29 +154,7 @@ describe("Attempt verification", function () {
         } as unknown as RequestPayload,
         {}
       );
-    }).rejects.toThrow("CommunityStakingBronze verifyStake: TypeError: Cannot read properties of undefined");
-    // Check the request to verify the subgraph query
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(mockedAxiosPost).toBeCalledWith(stakingSubgraph, {
-      query: getSubgraphQuery(MOCK_ADDRESS_LOWER),
-    });
-  });
-  it("handles invalid verification attempt where an exception is thrown", async () => {
-    mockedAxiosPost.mockImplementationOnce(() => {
-      throw Error();
-    });
-    const communityStakingProvider = new CommunityStakingBronzeProvider();
-
-    // Check the request to verify the subgraph query
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    await expect(async () => {
-      return await communityStakingProvider.verify(
-        {
-          address: MOCK_ADDRESS_LOWER,
-        } as unknown as RequestPayload,
-        {}
-      );
-    }).rejects.toThrow("CommunityStakingBronze verifyStake: Error.");
+    }).rejects.toThrow(ProviderExternalVerificationError);
   });
 });
 
@@ -146,177 +163,216 @@ describe("should return invalid payload", function () {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it("when stake amount is below 5 GTC for Bronze", async () => {
-    jest.clearAllMocks();
-    mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse("500000000");
+
+  it("when a user is staking on someone else or is staked on below 5 GTC for BeginnerCommunityStaker", async () => {
+    (axios.get as jest.Mock).mockImplementation(() => {
+      return Promise.resolve(gtcStakingResponse("2", 1, "BeginnerCommunityStaker"));
     });
 
-    const communitystaking = new CommunityStakingBronzeProvider();
-
-    const communitystakingPayload = await communitystaking.verify(
+    const bcStaking = new BeginnerCommunityStakerProvider();
+    const bcStakingPayload = await bcStaking.verify(
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
       {}
     );
 
-    expect(communitystakingPayload).toMatchObject({ valid: false });
+    expect(bcStakingPayload).toMatchObject({
+      valid: false,
+      record: undefined,
+      errors: [
+        "You are not staking enough on community members and/or community members are not staking enough on you 🥲",
+      ],
+    });
   });
-  it("when stake amount is below 20 GTC for Silver", async () => {
+
+  it("when a user is staking on 2 community members or is staked on by 2 community members below 10 GTC for ExperiencedCommunityStaker", async () => {
     jest.clearAllMocks();
-    mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse("5000000000000000000");
+    (axios.get as jest.Mock).mockImplementation(() => {
+      return Promise.resolve(gtcStakingResponse("6", 1, "ExperiencedCommunityStaker"));
     });
 
-    const communitystaking = new CommunityStakingSilverProvider();
-
-    const communitystakingPayload = await communitystaking.verify(
+    const ecsStaking = new ExperiencedCommunityStakerProvider();
+    const ecsStakingPayload = await ecsStaking.verify(
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
       {}
     );
 
-    expect(communitystakingPayload).toMatchObject({ valid: false });
+    expect(ecsStakingPayload).toMatchObject({
+      valid: false,
+      record: undefined,
+      errors: [
+        "You are not staking enough on community members and/or community members are not staking enough on you 🥲",
+      ],
+    });
   });
-  it("when stake amount is below 125 GTC for Gold", async () => {
-    jest.clearAllMocks();
-    mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse("40000000000000000000");
+
+  it("when user is staked on by 5 community members with less that 20 GTC for TrustedCitizen", async () => {
+    (axios.get as jest.Mock).mockImplementation(() => {
+      return Promise.resolve(gtcStakingResponse("18", 4, "TrustedCitizen"));
     });
 
-    const communitystaking = new CommunityStakingGoldProvider();
-
-    const communitystakingPayload = await communitystaking.verify(
+    const tcStaking = new TrustedCitizenProvider();
+    const tcStakingPayload = await tcStaking.verify(
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
       {}
     );
 
-    expect(communitystakingPayload).toMatchObject({ valid: false });
+    expect(tcStakingPayload).toMatchObject({
+      valid: false,
+      record: undefined,
+      errors: [
+        "You are not staking enough on community members and/or community members are not staking enough on you 🥲",
+      ],
+    });
   });
 });
 
 // All the positive cases for thresholds are tested
 describe("should return valid payload", function () {
-  it("when stake amount above 5 GTC for Bronze", async () => {
-    mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse("6000000000000000000");
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("when user stakes more than 5 GTC on another community member for BeginnerCommunityStaker", async () => {
+    (axios.get as jest.Mock).mockImplementation(() => {
+      return Promise.resolve(gtcStakingResponse("7", 1, "BeginnerCommunityStaker"));
     });
 
-    const communitystaking = new CommunityStakingBronzeProvider();
-
-    const communitystakingPayload = await communitystaking.verify(
+    const bcsStaking = new BeginnerCommunityStakerProvider();
+    const bcsStakingPayload = await bcsStaking.verify(
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
       {}
     );
 
-    expect(communitystakingPayload).toMatchObject({
+    expect(bcsStakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte5" },
+      record: {
+        address: MOCK_ADDRESS_LOWER,
+        stakeAmount: "bcs1gte5",
+      },
+      errors: [],
     });
   });
-  it("when stake amount above 20 GTC for Silver", async () => {
-    mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse("25000000000000000000");
+
+  it("when more than 10 GTC is staked on a community member and a community member stakes more than 10 GTC on the user for ExperiencedCommunityStaker", async () => {
+    (axios.get as jest.Mock).mockImplementation(() => {
+      return Promise.resolve(gtcStakingResponse("15", 1, "ExperiencedCommunityStaker"));
     });
 
-    const communitystaking = new CommunityStakingSilverProvider();
-
-    const communitystakingPayload = await communitystaking.verify(
+    const ecsStaking = new ExperiencedCommunityStakerProvider();
+    const ecsStakingPayload = await ecsStaking.verify(
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
       {}
     );
 
-    expect(communitystakingPayload).toMatchObject({
+    expect(ecsStakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte20" },
+      record: {
+        address: MOCK_ADDRESS_LOWER,
+        stakeAmount: "ecs2gte10",
+      },
+      errors: [],
     });
   });
-  it("when stake amount above 125 GTC for Gold", async () => {
-    mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse("500000000000000000000");
+
+  it("when more than 5 community members stake more than 20 GTC on the user for TrustedCitizen", async () => {
+    (axios.get as jest.Mock).mockImplementation(() => {
+      return Promise.resolve(gtcStakingResponse("25", 9, "TrustedCitizen"));
     });
 
-    const communitystaking = new CommunityStakingGoldProvider();
-
-    const communitystakingPayload = await communitystaking.verify(
+    const tcStaking = new TrustedCitizenProvider();
+    const tcStakingPayload = await tcStaking.verify(
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
       {}
     );
 
-    expect(communitystakingPayload).toMatchObject({
+    expect(tcStakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte125" },
+      record: {
+        address: MOCK_ADDRESS_LOWER,
+        stakeAmount: "tc5gte20",
+      },
+      errors: [],
     });
   });
   // All values equal to tier amount
-  it("when stake amount is equal to 5 GTC for Bronze", async () => {
-    jest.clearAllMocks();
-    mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse("5000000000000000000");
+  it("when the user stakes exactly 5 GTC on a community member for BeginnerCommunityStaker", async () => {
+    (axios.get as jest.Mock).mockImplementation(() => {
+      return Promise.resolve(gtcStakingResponse("5", 1, "BeginnerCommunityStaker"));
     });
 
-    const communitystaking = new CommunityStakingBronzeProvider();
-
-    const communitystakingPayload = await communitystaking.verify(
+    const bcsStaking = new BeginnerCommunityStakerProvider();
+    const bcsStakingPayload = await bcsStaking.verify(
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
       {}
     );
 
-    expect(communitystakingPayload).toMatchObject({
+    expect(bcsStakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte5" },
+      record: {
+        address: MOCK_ADDRESS_LOWER,
+        stakeAmount: "bcs1gte5",
+      },
+      errors: [],
     });
   });
-  it("when stake amount is equal to 20 GTC for Silver", async () => {
-    jest.clearAllMocks();
-    mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse("20000000000000000000");
+
+  it("when a community member stakes exactly 10 GTC on the user and the user stakes exactly 10 GTC on them for ExperiencedCommunityStaker", async () => {
+    (axios.get as jest.Mock).mockImplementation(() => {
+      return Promise.resolve(gtcStakingResponse("10", 1, "ExperiencedCommunityStaker"));
     });
 
-    const communitystaking = new CommunityStakingSilverProvider();
-
-    const communitystakingPayload = await communitystaking.verify(
+    const ecsStaking = new ExperiencedCommunityStakerProvider();
+    const ecsStakingPayload = await ecsStaking.verify(
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
       {}
     );
 
-    expect(communitystakingPayload).toMatchObject({
+    expect(ecsStakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte20" },
+      record: {
+        address: MOCK_ADDRESS_LOWER,
+        stakeAmount: "ecs2gte10",
+      },
+      errors: [],
     });
   });
-  it("when stake amount is equal to 125 GTC for Gold", async () => {
-    jest.clearAllMocks();
-    mockedAxiosPost.mockImplementation(async () => {
-      return generateSubgraphResponse("125000000000000000000");
+
+  it("when exactly 5 unique community members stake exactly 20 GTC on the user for TrustedCitizen", async () => {
+    (axios.get as jest.Mock).mockImplementation(() => {
+      return Promise.resolve(gtcStakingResponse("20", 5, "TrustedCitizen"));
     });
 
-    const communitystaking = new CommunityStakingGoldProvider();
-
-    const communitystakingPayload = await communitystaking.verify(
+    const tcStaking = new TrustedCitizenProvider();
+    const tcStakingPayload = await tcStaking.verify(
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
       {}
     );
 
-    expect(communitystakingPayload).toMatchObject({
+    expect(tcStakingPayload).toMatchObject({
       valid: true,
-      record: { address: MOCK_ADDRESS_LOWER, stakeAmount: "csgte125" },
+      record: {
+        address: MOCK_ADDRESS_LOWER,
+        stakeAmount: "tc5gte20",
+      },
+      errors: [],
     });
   });
 });

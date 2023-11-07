@@ -1,40 +1,39 @@
 import { GtcStakingProvider, GtcStakingProviderOptions } from "./GtcStaking";
-import { parseUnits } from "ethers/lib/utils";
 
 class CommunityStakingBaseProvider extends GtcStakingProvider {
   constructor(options: Omit<GtcStakingProviderOptions, "dataKey">) {
     super({
       ...options,
-      dataKey: "communityStake",
+      dataKey: "communityStakes",
     });
   }
 }
-export class CommunityStakingBronzeProvider extends CommunityStakingBaseProvider {
+export class BeginnerCommunityStakerProvider extends CommunityStakingBaseProvider {
   constructor() {
     super({
-      type: "CommunityStakingBronze",
-      weiThreshold: parseUnits("5", 18),
-      identifier: "csgte5",
-    });
-  }
-}
-
-export class CommunityStakingSilverProvider extends CommunityStakingBaseProvider {
-  constructor() {
-    super({
-      type: "CommunityStakingSilver",
-      weiThreshold: parseUnits("20", 18),
-      identifier: "csgte20",
+      type: "BeginnerCommunityStaker",
+      identifier: "bcs1gte5",
+      communityTypeCount: 1,
     });
   }
 }
 
-export class CommunityStakingGoldProvider extends CommunityStakingBaseProvider {
+export class ExperiencedCommunityStakerProvider extends CommunityStakingBaseProvider {
   constructor() {
     super({
-      type: "CommunityStakingGold",
-      weiThreshold: parseUnits("125", 18),
-      identifier: "csgte125",
+      type: "ExperiencedCommunityStaker",
+      identifier: "ecs2gte10",
+      communityTypeCount: 2,
+    });
+  }
+}
+
+export class TrustedCitizenProvider extends CommunityStakingBaseProvider {
+  constructor() {
+    super({
+      type: "TrustedCitizen",
+      identifier: "tc5gte20",
+      communityTypeCount: 5,
     });
   }
 }

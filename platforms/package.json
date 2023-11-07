@@ -20,8 +20,11 @@
     "@gitcoin/passport-types": "^1.0.0",
     "@spruceid/didkit-wasm": "^0.3.0-alpha0",
     "axios": "^0.26.1",
-    "typescript": "~4.6.3",
-    "redis": "^4.6.10"
+    "bignumber.js": "4.0.4",
+    "cid": "multiformats/cid",
+    "multiformats": "9",
+    "redis": "^4.6.10",
+    "typescript": "~4.6.3"
   },
   "devDependencies": {
     "jest": "^27.5.1",
