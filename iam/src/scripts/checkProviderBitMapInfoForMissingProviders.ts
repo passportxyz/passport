@@ -23,7 +23,7 @@ export const checkNoProvidersMissingInExpectedBitmap = (
 
   if (missingInExpectedSet.size > 0) {
     console.error("Items that are not in the expected (old) bitmap:");
-    console.error(JSON.stringify([...missingInExpectedSet]));
+    console.error(JSON.stringify([...missingInExpectedSet], undefined, 2));
   }
 
   return missingInExpectedSet.size === 0;

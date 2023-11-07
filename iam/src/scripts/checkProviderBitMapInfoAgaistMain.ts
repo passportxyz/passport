@@ -31,7 +31,7 @@ export const checkNoDeletionsInExpectedBitmap = (
 
   if (missingInExpectedSet.size > 0) {
     console.error("Items that have been removed:");
-    console.error(JSON.stringify([...missingInExpectedSet]));
+    console.error(JSON.stringify([...missingInExpectedSet], undefined, 2));
   }
 
   return missingInExpectedSet.size === 0;
