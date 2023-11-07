@@ -10,6 +10,13 @@ import { PlatformGroupSpec, platforms } from "@gitcoin/passport-platforms";
 import { PassportAttestationStamp, StampMetadata, mapBitMapInfo } from "../utils/easPassportSchema";
 import currentBitmap from "../static/providerBitMapInfo.json";
 
+const processArgs = process.argv.slice(2);
+
+if(processArgs.length < 1) {
+  console.error("The following arguments are expected: <baseRevision>");
+  process.exit(1);
+}
+
 const stampMetadataEndpoint = process.env.PASSPORT_STAMP_METADATA_PATH || "";
 
 type StampData = {
@@ -212,10 +219,10 @@ exec(command, (error, stdout, stderr) => {
   const revisions = stdout.split("\n");
   console.log(`Revisions:\n${JSON.stringify(revisions)}`);
 
-  const previousRevision = revisions[1];
-  console.log(`Previous revision:\n${previousRevision}`);
+  const baseRevision = processArgs[0];
+  console.log(`Base revision:\n${baseRevision}`);
 
-  const gutShowCommand = `git show ${previousRevision}:./src/static/providerBitMapInfo.json`;
+  const gutShowCommand = `git show ${baseRevision}:./src/static/providerBitMapInfo.json`;
 
   exec(gutShowCommand, (error, stdout, stderr) => {
     const previousBitmap = JSON.parse(stdout) as PassportAttestationStamp[];

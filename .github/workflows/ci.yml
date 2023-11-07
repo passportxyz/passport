@@ -61,5 +61,5 @@ jobs:
           ls -ls dist/iam
           ls -ls dist/iam/src
           ls -ls dist/iam/src/scripts
-          node dist/iam/src/scripts/checkProviderBitMapInfo.js
+          node dist/iam/src/scripts/checkProviderBitMapInfo.js origin/main
         working-directory: ./iam
