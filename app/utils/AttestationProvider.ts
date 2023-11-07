@@ -1,5 +1,6 @@
 import onchainInfo from "../../deployments/onchainInfo.json";
 import GitcoinVerifierAbi from "../../deployments/abi/GitcoinVerifier.json";
+import GitcoinPassportDecoderAbi from "../../deployments/abi/GitcoinPassportDecoder.json";
 import axios, { AxiosResponse } from "axios";
 import { iamUrl } from "../config/stamp_config";
 import { OnChainStatus } from "../hooks/useOnChainStatus";
@@ -36,6 +37,8 @@ export interface AttestationProvider {
   viewerUrl: (address: string) => string;
   verifierAddress: () => string;
   verifierAbi: () => any;
+  decoderAddress: () => string;
+  decoderAbi: () => any;
   getMultiAttestationRequest: (payload: {}) => Promise<AxiosResponse<any, any>>;
   checkOnChainStatus: (
     allProvidersState: AllProvidersState,
@@ -74,6 +77,14 @@ class BaseAttestationProvider implements AttestationProvider {
 
   verifierAbi(): any {
     return GitcoinVerifierAbi[this.chainId as keyof typeof GitcoinVerifierAbi];
+  }
+
+  decoderAddress(): string {
+    return this.onchainInfo().GitcoinPassportDecoder.address;
+  }
+
+  decoderAbi(): any {
+    return GitcoinPassportDecoderAbi[this.chainId as keyof typeof GitcoinPassportDecoderAbi];
   }
 
   async getMultiAttestationRequest(payload: {}): Promise<AxiosResponse<any, any>> {

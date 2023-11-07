@@ -5,7 +5,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { UserContext } from "./userContext";
 import onchainInfo from "../../deployments/onchainInfo.json";
-import { chains } from "../utils/chains";
+import { Chain, chains } from "../utils/chains";
 
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
@@ -13,6 +13,8 @@ import { decodeProviderInformation, decodeScoreAttestation, getAttestationData }
 import { FeatureFlags } from "../config/feature_flags";
 import { Attestation } from "@ethereum-attestation-service/eas-sdk";
 import { useSetChain } from "@web3-onboard/react";
+import { ethers } from "ethers";
+import { Contract } from "ethers";
 
 export interface OnChainProviderMap {
   [chainId: string]: OnChainProviderType[];
@@ -73,51 +75,68 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
     }));
   };
 
+  const loadDecoderContract = (chain: Chain): Contract => {
+    if (chain.attestationProvider?.status !== "enabled") {
+      throw new Error(`Active attestationProvider not found for chainId ${chain.id}`);
+    }
+
+    const provider = new ethers.JsonRpcProvider(chain.rpcUrl);
+
+    const decoderAddress = chain.attestationProvider.decoderAddress();
+    const decoderAbi = chain.attestationProvider.decoderAbi();
+
+    return new ethers.Contract(decoderAddress, decoderAbi, provider);
+  };
+
   const readOnChainData = useCallback(async () => {
     if (address) {
       try {
-        const activeChainIds = chains
-          .filter(({ attestationProvider }) => attestationProvider?.status === "enabled")
-          .map(({ id }) => id);
+        const activeChains = chains.filter(({ attestationProvider }) => attestationProvider?.status === "enabled");
+        // const decoderContract = await loadDecoderContract(wallet);
 
-        await Promise.all(
-          activeChainIds.map(async (chainId: string) => {
-            const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
+        const passportDecoder = await Promise.all(
+          activeChains.map(async (chain) => {
+            const decoderContract = await loadDecoderContract(chain);
 
-            if (!passportAttestationData) {
-              return;
-            }
+            const passportData = await decoderContract.getPassport(address);
+            debugger;
 
-            // Only if a passport attestation has been properly loaded
-            const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
-              passportAttestationData.passport
-            );
+            // const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
 
-            savePassportLastUpdated(passportAttestationData.passport, chainId);
+            // if (!passportAttestationData) {
+            //   return;
+            // }
 
-            const onChainProviders: OnChainProviderType[] = onChainProviderInfo
-              .sort((a, b) => a.providerNumber - b.providerNumber)
-              .map((providerInfo, index) => ({
-                providerName: providerInfo.providerName,
-                credentialHash: `v0.0.0:${Buffer.from(hashes[index].slice(2), "hex").toString("base64")}`,
-                expirationDate: new Date(expirationDates[index].toNumber() * 1000),
-                issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
-              }));
+            // // Only if a passport attestation has been properly loaded
+            // const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
+            //   passportAttestationData.passport
+            // );
 
-            // Set the onchain status
-            setOnChainProviders((prevState) => ({
-              ...prevState,
-              [chainId]: onChainProviders,
-            }));
+            // savePassportLastUpdated(passportAttestationData.passport, chainId);
 
-            if (chainId === connectedChain?.id) setActiveChainProviders(onChainProviders);
+            // const onChainProviders: OnChainProviderType[] = onChainProviderInfo
+            //   .sort((a, b) => a.providerNumber - b.providerNumber)
+            //   .map((providerInfo, index) => ({
+            //     providerName: providerInfo.providerName,
+            //     credentialHash: `v0.0.0:${Buffer.from(hashes[index].slice(2), "hex").toString("base64")}`,
+            //     expirationDate: new Date(expirationDates[index].toNumber() * 1000),
+            //     issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
+            //   }));
 
-            const score = decodeScoreAttestation(passportAttestationData.score);
+            // // Set the onchain status
+            // setOnChainProviders((prevState) => ({
+            //   ...prevState,
+            //   [chainId]: onChainProviders,
+            // }));
 
-            setOnChainScores((prevState) => ({
-              ...prevState,
-              [chainId]: score,
-            }));
+            // if (chainId === connectedChain?.id) setActiveChainProviders(onChainProviders);
+
+            // const score = decodeScoreAttestation(passportAttestationData.score);
+
+            // setOnChainScores((prevState) => ({
+            //   ...prevState,
+            //   [chainId]: score,
+            // }));
           })
         );
       } catch (e: any) {
