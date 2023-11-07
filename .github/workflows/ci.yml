@@ -40,10 +40,6 @@ jobs:
         run: |
           git status
         working-directory: ./iam
-      - name: Git 2
-        run: |
-          git log -n10 --format=format:%H -- ./src/static/providerBitMapInfo.json
-        working-directory: ./iam
       - name: Git 3
         run: |
           git fetch
