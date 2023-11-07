@@ -13,6 +13,17 @@ import { ProviderExternalVerificationError } from "../../types";
 
 jest.mock("axios");
 
+// jest.mock("@ipld/dag-cbor", () => {
+//   const originalModule = jest.requireActual("@ipld/dag-cbor");
+//   // Mock the specific function or value you need, for example:
+//   return {
+//     __esModule: true, // this property makes it work as an ES module
+//     ...originalModule,
+//     encode: jest.fn().mockReturnValue("mocked encoded value"), // mock encode function
+//     decode: jest.fn().mockReturnValue({ /* mocked decoded value */ }), // mock decode function
+//   };
+// });
+
 const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
 const MOCK_ADDRESS_LOWER = MOCK_ADDRESS.toLowerCase();
 
