@@ -36,6 +36,11 @@ jobs:
       #   run: yarn build
       # - name: Run Ceramic Integration Tests
       #   run: yarn test:ceramic-integration
+      - name: Git fetch
+        run: |
+          git fetch
+          git show origin/main:iam/src/static/providerBitMapInfo.json
+        working-directory: ./iam
       - name: Check bitmap against main
         run: |
           node dist/iam/src/scripts/checkProviderBitMapInfoAgaistMain.js origin/main
