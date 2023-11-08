@@ -41,6 +41,9 @@ const walletStore = create<{
             }
           : undefined;
         const wallet = (await onboard.connectWallet(connectOptions))[0];
+        if (!wallet) {
+          throw new Error("No wallet selected");
+        }
         window.localStorage.setItem("previouslyUsedWalletLabel", wallet.label);
 
         const walletData = parseWeb3OnboardWallet(wallet);

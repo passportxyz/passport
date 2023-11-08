@@ -15,6 +15,8 @@ import SIWEButton from "../components/SIWEButton";
 import { checkShowOnboard } from "../utils/helpers";
 import BodyWrapper from "../components/BodyWrapper";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
+import { useToast } from "@chakra-ui/react";
+import { DoneToastContent } from "../components/DoneToastContent";
 
 const Footer = () => (
   <>
@@ -26,8 +28,10 @@ const Footer = () => (
 export default function Home() {
   const address = useWalletStore((state) => state.address);
   const connectWallet = useWalletStore((state) => state.connect);
+  const connectError = useWalletStore((state) => state.error);
   const { connect: connectDatastore } = useDatastoreConnectionContext();
   const [searchParams] = useSearchParams();
+  const toast = useToast();
 
   const navigate = useNavigate();
 
@@ -42,6 +46,23 @@ export default function Home() {
       }
     }
   }, [address]);
+
+  useEffect(() => {
+    if (connectError) {
+      toast({
+        duration: 6000,
+        isClosable: true,
+        render: (result: any) => (
+          <DoneToastContent
+            title={"Connection Error"}
+            body={(connectError as Error).message}
+            icon="../assets/verification-failed-bright.svg"
+            result={result}
+          />
+        ),
+      });
+    }
+  }, [connectError]);
 
   return (
     <PageRoot useLegacyBackground={true} className="text-color-1">

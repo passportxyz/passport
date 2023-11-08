@@ -1,5 +1,5 @@
 // --- React Methods
-import React, { createContext, useCallback, useEffect, useState } from "react";
+import React, { createContext, useCallback, useEffect, useMemo, useState } from "react";
 
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
@@ -65,13 +65,13 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   const [onChainLastUpdates, setOnChainLastUpdates] = useState<OnChainLastUpdates>({});
   const [{ connectedChain }] = useSetChain();
 
-  const savePassportLastUpdated = (attestation: Attestation, chainId: string) => {
+  const savePassportLastUpdated = useCallback((attestation: Attestation, chainId: string) => {
     const lastUpdated = new Date(Number(BigInt(attestation.time.toString())) * 1000);
     setOnChainLastUpdates((prevState) => ({
       ...prevState,
       [chainId]: lastUpdated,
     }));
-  };
+  }, []);
 
   const readOnChainData = useCallback(async () => {
     if (address && connectedChain) {
@@ -142,13 +142,16 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   }, [readOnChainData, address, connectedChain]);
 
   // use props as a way to pass configuration values
-  const providerProps = {
-    onChainProviders,
-    activeChainProviders,
-    onChainLastUpdates,
-    readOnChainData,
-    onChainScores,
-  };
+  const providerProps = useMemo(
+    () => ({
+      onChainProviders,
+      activeChainProviders,
+      onChainLastUpdates,
+      readOnChainData,
+      onChainScores,
+    }),
+    [onChainProviders, activeChainProviders, onChainLastUpdates, readOnChainData, onChainScores]
+  );
 
   return <OnChainContext.Provider value={providerProps}>{children}</OnChainContext.Provider>;
 };

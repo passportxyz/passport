@@ -25,7 +25,6 @@ const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 describe("<ExpiredStampsPanel />", () => {
   it("renders the text informing use he does not have any expired stamps", () => {
-    console.log("mockCeramicContext", mockCeramicContext);
     renderWithContext(mockCeramicContext, <ExpiredStampsPanel className="col-span-full" />);
     expect(screen.queryByText("Expired Stamps")).toBeInTheDocument();
     expect(screen.queryByText("Reverify stamps")).not.toBeInTheDocument();
@@ -34,7 +33,6 @@ describe("<ExpiredStampsPanel />", () => {
   });
 
   it("renders the button to re-verify expired stamps, when there are expired stamps", () => {
-    console.log("mockCeramicContext", mockCeramicContext);
     renderWithContext(makeTestCeramicContextWithExpiredStamps(), <ExpiredStampsPanel className="col-span-full" />);
     expect(screen.queryByText("Expired Stamps")).toBeInTheDocument();
     expect(screen.queryByText("Reverify stamps")).toBeInTheDocument();
