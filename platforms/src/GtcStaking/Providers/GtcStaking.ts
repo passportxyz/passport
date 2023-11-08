@@ -147,7 +147,7 @@ async function checkCommunityStakes(communityStakes: Stake[], address: string): 
       if (currentAmount.gte(5) && currentAmount.lt(10)) {
         bcsMap.set(cid, (bcsMap.get(cid) || 0) + 1);
       }
-      if (currentAmount.gte(10)) {
+      if (currentAmount.gte(10) && currentAmount.lt(20)) {
         bcsMap.set(cid, (bcsMap.get(cid) || 0) + 1);
         ecsMap.set(cid, (ecsMap.get(cid) || 0) + 1);
       }
