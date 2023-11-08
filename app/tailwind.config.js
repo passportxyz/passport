@@ -47,6 +47,13 @@ module.exports = {
         "background-3-25": "0 0 25px rgb(var(--color-background-3))",
         "background-3-10": "0 0 10px rgb(var(--color-background-3))",
       },
+      backgroundSize: {
+        "size-200": "200% 200%",
+      },
+      backgroundPosition: {
+        "pos-0": "0% 0%",
+        "pos-100": "100% 100%",
+      },
     },
     fontSize: {
       // Set line-height to 150%
@@ -60,20 +67,14 @@ module.exports = {
       "3xl": ["32px", "1.5em"],
       "4xl": ["36px", "1.5em"],
       "5xl": ["40px", "1.5em"],
-      "6xl": ["80px", "1em"],
+      "6xl": ["64px", "1em"],
+      "7xl": ["80px", "1em"],
     },
     fontFamily: {
       body: ["var(--font-body)"],
       heading: ["var(--font-heading)"],
       alt: ["var(--font-alt)"],
     },
-    backgroundSize: {
-      "size-200": "200% 200%",
-    },
-    backgroundPosition: {
-      "pos-0": "0% 0%",
-      "pos-100": "100% 100%",
-    },
   },
-  plugins: [require("@headlessui/tailwindcss")],
+  plugins: [require("@headlessui/tailwindcss"), require("tailwind-gradient-mask-image")],
 };

@@ -19755,6 +19755,11 @@ table-layout@^1.0.2:
     typical "^5.2.0"
     wordwrapjs "^4.0.0"
 
+tailwind-gradient-mask-image@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/tailwind-gradient-mask-image/-/tailwind-gradient-mask-image-1.1.0.tgz#ee6ea2b0fbbd21f1942ebf694bf3d838c67190fe"
+  integrity sha512-sUhik6Srts8XvSpCFEelxF0hRud+eQI1TYgVH2sREtAavP+wEVE65JQCiDj/XBoTwCo+ElVAVNljjpfm2mCkKw==
+
 tailwindcss@^3.0.7:
   version "3.1.8"
   resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-3.1.8.tgz#4f8520550d67a835d32f2f4021580f9fddb7b741"
