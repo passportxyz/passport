@@ -88,55 +88,54 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
     return new ethers.Contract(decoderAddress, decoderAbi, provider);
   };
 
+  const parsePassportData = (passportResponse: any): OnChainProviderType[] => {
+    debugger;
+    return passportResponse.map((passport: any) => ({
+      providerName: passport[0],
+      credentialHash: `v0.0.0:${Buffer.from(passport[1], "hex").toString("base64")}`,
+      expirationDate: new Date(Number(passport[2]) * 1000),
+      issuanceDate: new Date(Number(passport[3]) * 1000),
+    }));
+  };
+
   const readOnChainData = useCallback(async () => {
     if (address) {
       try {
         const activeChains = chains.filter(({ attestationProvider }) => attestationProvider?.status === "enabled");
         // const decoderContract = await loadDecoderContract(wallet);
 
-        const passportDecoder = await Promise.all(
+        await Promise.all(
           activeChains.map(async (chain) => {
+            const chainId = chain.id;
+
             const decoderContract = await loadDecoderContract(chain);
 
-            const passportData = await decoderContract.getPassport(address);
-            debugger;
+            const onChainProviders = parsePassportData(await decoderContract.getPassport(address));
 
-            // const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
+            const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
 
-            // if (!passportAttestationData) {
-            //   return;
-            // }
+            if (!passportAttestationData) {
+              return;
+            }
 
-            // // Only if a passport attestation has been properly loaded
-            // const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
-            //   passportAttestationData.passport
-            // );
+            savePassportLastUpdated(passportAttestationData.passport, chainId);
 
-            // savePassportLastUpdated(passportAttestationData.passport, chainId);
+            console.log({ onChainProviders });
 
-            // const onChainProviders: OnChainProviderType[] = onChainProviderInfo
-            //   .sort((a, b) => a.providerNumber - b.providerNumber)
-            //   .map((providerInfo, index) => ({
-            //     providerName: providerInfo.providerName,
-            //     credentialHash: `v0.0.0:${Buffer.from(hashes[index].slice(2), "hex").toString("base64")}`,
-            //     expirationDate: new Date(expirationDates[index].toNumber() * 1000),
-            //     issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
-            //   }));
+            // Set the onchain status
+            setOnChainProviders((prevState) => ({
+              ...prevState,
+              [chainId]: onChainProviders,
+            }));
 
-            // // Set the onchain status
-            // setOnChainProviders((prevState) => ({
-            //   ...prevState,
-            //   [chainId]: onChainProviders,
-            // }));
+            if (chainId === connectedChain?.id) setActiveChainProviders(onChainProviders);
 
-            // if (chainId === connectedChain?.id) setActiveChainProviders(onChainProviders);
+            const score = decodeScoreAttestation(passportAttestationData.score);
 
-            // const score = decodeScoreAttestation(passportAttestationData.score);
-
-            // setOnChainScores((prevState) => ({
-            //   ...prevState,
-            //   [chainId]: score,
-            // }));
+            setOnChainScores((prevState) => ({
+              ...prevState,
+              [chainId]: score,
+            }));
           })
         );
       } catch (e: any) {
