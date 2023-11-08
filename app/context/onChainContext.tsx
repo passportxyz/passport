@@ -89,12 +89,11 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
   };
 
   const parsePassportData = (passportResponse: any): OnChainProviderType[] => {
-    debugger;
     return passportResponse.map((passport: any) => ({
       providerName: passport[0],
-      credentialHash: `v0.0.0:${Buffer.from(passport[1], "hex").toString("base64")}`,
-      expirationDate: new Date(Number(passport[2]) * 1000),
-      issuanceDate: new Date(Number(passport[3]) * 1000),
+      credentialHash: `v0.0.0:${Buffer.from(passport[1].replace(/^0x/, ""), "hex").toString("base64")}`,
+      expirationDate: Number(passport[3]) * 1000,
+      issuanceDate: Number(passport[2]) * 1000,
     }));
   };
 
@@ -102,7 +101,6 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
     if (address) {
       try {
         const activeChains = chains.filter(({ attestationProvider }) => attestationProvider?.status === "enabled");
-        // const decoderContract = await loadDecoderContract(wallet);
 
         await Promise.all(
           activeChains.map(async (chain) => {
@@ -111,7 +109,6 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
             const decoderContract = await loadDecoderContract(chain);
 
             const onChainProviders = parsePassportData(await decoderContract.getPassport(address));
-
             const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
 
             if (!passportAttestationData) {
