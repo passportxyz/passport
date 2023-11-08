@@ -18,14 +18,14 @@ const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 describe("SupportBanner", () => {
   it("should render banner", async () => {
     jest.spyOn(axios, "get").mockResolvedValueOnce({ data: mockBannerResponse });
-    renderWithContext(mockCeramicContext, <SupportBanner />);
+    renderWithContext(mockCeramicContext, <SupportBanner />, { dbAccessTokenStatus: "connected" });
 
     await screen.findByText(mockBannerResponse[0].content);
   });
 
   it("should render banner with link", async () => {
     jest.spyOn(axios, "get").mockResolvedValueOnce({ data: mockBannerResponse });
-    renderWithContext(mockCeramicContext, <SupportBanner />);
+    renderWithContext(mockCeramicContext, <SupportBanner />, { dbAccessTokenStatus: "connected" });
 
     const link = await screen.findByText("More information.");
     expect(link).toHaveAttribute("href", mockBannerResponse[0].link);
@@ -37,7 +37,7 @@ describe("SupportBanner", () => {
 
     jest.spyOn(axios, "get").mockResolvedValueOnce({ data: mockBannerResponse });
 
-    renderWithContext(mockCeramicContext, <SupportBanner />);
+    renderWithContext(mockCeramicContext, <SupportBanner />, { dbAccessTokenStatus: "connected" });
     const dismissBtn = await screen.findByText("Dismiss");
     fireEvent.click(dismissBtn);
     await waitFor(() => expect(dismissCall).toHaveBeenCalled());

@@ -8,11 +8,6 @@ import { Chain } from "../../utils/chains";
 import { ChakraProvider } from "@chakra-ui/react";
 
 const mockSetChain = jest.fn();
-const mockConnectedChain = {
-  chains: [],
-  connectedChain: { id: "0x14a33", namespace: "mock_namespace", name: "mock_name" },
-  settingChain: false,
-};
 
 jest.mock("@web3-onboard/react", () => ({
   init: () => ({
@@ -24,12 +19,13 @@ jest.mock("@web3-onboard/react", () => ({
       }),
     },
   }),
-  useSetChain: () => [mockConnectedChain, mockSetChain],
 }));
 
 const mockWalletState = {
   address: "0x123",
   provider: jest.fn(),
+  chain: "0x14a33",
+  setChain: mockSetChain,
 };
 
 jest.mock("../../context/walletStore", () => ({

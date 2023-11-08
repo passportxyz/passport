@@ -17,7 +17,7 @@ import { Eip1193Provider } from "ethers";
 
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
-type DatastoreConnectionContextState = {
+export type DatastoreConnectionContextState = {
   dbAccessTokenStatus: DbAuthTokenStatus;
   dbAccessToken?: string;
   disconnect: () => Promise<void>;

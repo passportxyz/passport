@@ -8,7 +8,6 @@ import { useWalletStore } from "../context/walletStore";
 import { DoneToastContent } from "../components/DoneToastContent";
 import { OnChainStatus } from "../utils/onChainStatus";
 import { Chain } from "../utils/chains";
-import { useSetChain } from "@web3-onboard/react";
 
 const fail = "../assets/verification-failed-bright.svg";
 const success = "../../assets/check-icon2.svg";
@@ -26,10 +25,11 @@ export const useSyncToChainButton = ({
 
   const address = useWalletStore((state) => state.address);
   const provider = useWalletStore((state) => state.provider);
+  const connectedChain = useWalletStore((state) => state.chain);
+  const setChain = useWalletStore((state) => state.setChain);
 
   const { passport } = useContext(CeramicContext);
   const { readOnChainData } = useContext(OnChainContext);
-  const [{ connectedChain }, setChain] = useSetChain();
   const [syncingToChain, setSyncingToChain] = useState(false);
 
   const loadVerifierContract = useCallback(
@@ -125,7 +125,7 @@ export const useSyncToChainButton = ({
               });
               await transaction.wait();
 
-              await readOnChainData();
+              await readOnChainData(chain.id);
               const successSubmit = (
                 <p>
                   Passport successfully synced to chain.{" "}
@@ -234,8 +234,8 @@ export const useSyncToChainButton = ({
 
   const onInitiateSyncToChain = useCallback(
     async (provider, passport) => {
-      if (connectedChain && chain && connectedChain?.id !== chain.id) {
-        const setChainResponse = await setChain({ chainId: chain.id });
+      if (connectedChain && chain && connectedChain !== chain.id) {
+        const setChainResponse = await setChain(chain.id);
         setChainResponse && (await onSyncToChain(provider, passport));
         return;
       }
@@ -246,8 +246,7 @@ export const useSyncToChainButton = ({
 
   const isActive = chain?.attestationProvider?.status === "enabled";
   const disableBtn = !isActive || onChainStatus === OnChainStatus.MOVED_UP_TO_DATE;
-  const needToSwitchChain =
-    isActive && onChainStatus !== OnChainStatus.MOVED_UP_TO_DATE && chain.id !== connectedChain?.id;
+  const needToSwitchChain = isActive && onChainStatus !== OnChainStatus.MOVED_UP_TO_DATE && chain.id !== connectedChain;
 
   const onClick = () => onInitiateSyncToChain(provider, passport);
   const className = disableBtn ? "cursor-not-allowed" : "";

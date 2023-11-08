@@ -7,7 +7,11 @@ import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
 import { OnChainContextState } from "../context/onChainContext";
 import { StampClaimingContextState } from "../context/stampClaimingContext";
-import { DatastoreConnectionContext, DbAuthTokenStatus } from "../context/datastoreConnectionContext";
+import {
+  DatastoreConnectionContext,
+  DatastoreConnectionContextState,
+  DbAuthTokenStatus,
+} from "../context/datastoreConnectionContext";
 
 export const getProviderSpec = (platform: PLATFORM_ID, provider: string): ProviderSpec => {
   return STAMP_PROVIDERS[platform]
@@ -227,15 +231,16 @@ const datastoreConnectionContext = {
   connect: jest.fn(),
   disconnect: jest.fn(),
   dbAccessToken: "token",
-  dbAccessTokenStatus: "connected" as DbAuthTokenStatus,
+  dbAccessTokenStatus: "idle" as DbAuthTokenStatus,
 };
 
 export const renderWithContext = (
   ceramicContext: CeramicContextState,
-  ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>
+  ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>,
+  datastoreContextOverride: Partial<DatastoreConnectionContextState> = {}
 ) =>
   render(
-    <DatastoreConnectionContext.Provider value={datastoreConnectionContext}>
+    <DatastoreConnectionContext.Provider value={{ ...datastoreConnectionContext, ...datastoreContextOverride }}>
       <ScorerContext.Provider value={scorerContext}>
         <CeramicContext.Provider value={ceramicContext}>{ui}</CeramicContext.Provider>
       </ScorerContext.Provider>

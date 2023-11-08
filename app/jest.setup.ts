@@ -20,7 +20,6 @@ jest.mock("@web3-onboard/react", () => ({
     },
   }),
   useConnectWallet: () => [{ wallet: mockWallet }, () => Promise.resolve([mockWallet]), jest.fn()],
-  useSetChain: () => [{ id: "0xa" }, jest.fn()],
 }));
 
 jest.mock("@web3-onboard/injected-wallets", () => ({

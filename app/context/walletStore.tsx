@@ -19,6 +19,7 @@ type ConnectCallback = (address: string, provider: Eip1193Provider) => Promise<v
 const walletStore = create<{
   connect: (callback: ConnectCallback) => Promise<void>;
   disconnect: () => Promise<void>;
+  setChain: (chain: string) => Promise<boolean>;
   provider?: Eip1193Provider;
   error?: any;
   chain?: string;
@@ -70,6 +71,12 @@ const walletStore = create<{
     window.localStorage.setItem("previouslyUsedWalletLabel", "");
 
     set({ address: undefined, chain: undefined, provider: undefined, error });
+  },
+  setChain: async (chainId: string) => {
+    const success = await onboard.setChain({ chainId });
+    if (success) set({ chain: chainId });
+    else console.error("Error setting chain");
+    return success;
   },
 }));
 

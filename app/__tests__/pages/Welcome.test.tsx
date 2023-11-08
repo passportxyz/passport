@@ -51,7 +51,8 @@ describe("Welcome", () => {
       ceramicWithPassport,
       <Router>
         <Welcome />
-      </Router>
+      </Router>,
+      { dbAccessTokenStatus: "connected" }
     );
 
     expect(screen.getByText("Welcome back to Passport")).toBeInTheDocument();
@@ -70,7 +71,8 @@ describe("when the user is navigated to the Welcome page", () => {
       ceramicWithPassport,
       <Router>
         <Welcome />
-      </Router>
+      </Router>,
+      { dbAccessTokenStatus: "connected" }
     );
 
     expect(screen.getByTestId("skip-for-now-button"));
@@ -81,7 +83,8 @@ describe("when the user is navigated to the Welcome page", () => {
       ceramicWithPassport,
       <Router>
         <Welcome />
-      </Router>
+      </Router>,
+      { dbAccessTokenStatus: "connected" }
     );
 
     expect(screen.getByTestId("next-button"));
@@ -119,7 +122,8 @@ describe("when the user clicks the Refresh My Stamps button it launches the Refr
       ceramicWithPassport,
       <Router>
         <Welcome />
-      </Router>
+      </Router>,
+      { dbAccessTokenStatus: "connected" }
     );
 
     const buttonRefreshMyStampsModal = screen.queryByTestId("next-button");
@@ -139,7 +143,8 @@ describe("when a new use visits the Welcome page", () => {
       { ...mockCeramicContext, passport: undefined },
       <Router>
         <Welcome />
-      </Router>
+      </Router>,
+      { dbAccessTokenStatus: "connected" }
     );
 
     expect(screen.getByTestId("initial-welcome")).toBeInTheDocument();
