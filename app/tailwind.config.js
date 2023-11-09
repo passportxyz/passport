@@ -44,8 +44,7 @@ module.exports = {
         default: "100vh",
       },
       boxShadow: {
-        "background-3-25": "0 0 25px rgb(var(--color-background-3))",
-        "background-3-10": "0 0 10px rgb(var(--color-background-3))",
+        "even-md": "0 0 12px",
       },
       backgroundSize: {
         "size-200": "200% 200%",
