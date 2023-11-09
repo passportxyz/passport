@@ -8,7 +8,6 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect an account to a POAP owned for over 15 days.",
   connectMessage: "Connect to POAP",
   isEVM: true,
-  website: "https://poap.xyz",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

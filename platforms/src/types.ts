@@ -4,6 +4,11 @@ import { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passp
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { Platform as PlatformClass } from "./utils/platform";
 
+type Website = {
+  uri: string;
+  display: string;
+};
+
 export type PlatformSpec = {
   icon?: string | undefined;
   platform: PLATFORM_ID;
@@ -13,7 +18,7 @@ export type PlatformSpec = {
   isEVM?: boolean;
   enablePlatformCardUpdate?: boolean;
   metaPointer?: string;
-  website: string;
+  website?: Website;
 };
 
 export type ProviderSpec = {

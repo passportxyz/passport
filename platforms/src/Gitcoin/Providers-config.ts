@@ -8,7 +8,6 @@ export const PlatformDetails: PlatformSpec = {
   description: "Verify your Gitcoin Grants contributions",
   connectMessage: "Verify Account",
   isEVM: true,
-  website: "https://www.gitcoin.co",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

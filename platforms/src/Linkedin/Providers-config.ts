@@ -7,7 +7,6 @@ export const PlatformDetails: PlatformSpec = {
   name: "Linkedin",
   description: "Connect your existing Linkedin account to verify.",
   connectMessage: "Connect Account",
-  website: "https://www.linkedin.com",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

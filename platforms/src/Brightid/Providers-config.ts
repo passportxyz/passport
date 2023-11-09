@@ -8,7 +8,10 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect your BrightID",
   connectMessage: "Connect Account",
   isEVM: true,
-  website: "https://www.brightid.org",
+  website: {
+    uri: "https://www.brightid.org",
+    display: "Connect to BrightID to verify your identity on Web3 without revealing any personal information.",
+  },
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

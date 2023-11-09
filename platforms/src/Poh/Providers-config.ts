@@ -8,7 +8,10 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect your wallet to start the process of verifying with Proof of Humanity.",
   connectMessage: "Connect Account",
   isEVM: true,
-  website: "https://proofofhumanity.id",
+  website: {
+    uri: "https://proofofhumanity.id/",
+    display: "Connect to Proof of Humanity to verify your human identity on Web3.",
+  },
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

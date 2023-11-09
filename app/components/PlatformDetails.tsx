@@ -119,6 +119,16 @@ export const PlatformDetails = ({
       </div>
       <p className="mt-8 text-base md:w-8/12">{currentPlatform?.description}</p>
       {bannerConfig && <GenericBanner banner={bannerConfig} />}
+      {currentPlatform?.website && (
+        <a
+          className="text-base leading-3 hover:underline"
+          href={currentPlatform?.website.uri}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {currentPlatform.website.display}
+        </a>
+      )}
       <hr className="mt-4 border-foreground-3" />
       <div className="my-4 grid grid-cols-[1fr_2px_1fr] gap-y-4 text-center">
         <div className={`flex flex-col items-center ${hasStamps ? "text-color-2" : "text-color-5"}`}>

@@ -8,7 +8,6 @@ export const PlatformDetails: PlatformSpec = {
   name: "Facebook",
   description: "Connect your existing account to verify with Facebook.",
   connectMessage: "Connect Account",
-  website: "https://www.facebook.com",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

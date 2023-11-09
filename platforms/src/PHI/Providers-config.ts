@@ -8,7 +8,6 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect your wallet to verify your phi activity.",
   connectMessage: "Verify Account",
   isEVM: true,
-  website: "https://philand.xyz",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
