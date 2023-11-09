@@ -9,7 +9,7 @@ import { Chain, chains } from "../utils/chains";
 
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
-import { decodeScoreAttestation, getAttestationData, parsePassportData } from "../utils/onChainStamps";
+import { decodeScoreAttestation, getAttestationData, loadDecoderContract } from "../utils/onChainStamps";
 import { FeatureFlags } from "../config/feature_flags";
 import { Attestation } from "@ethereum-attestation-service/eas-sdk";
 
@@ -85,7 +85,7 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
 
           await Promise.all(
             activeChains.map(async (chain) => {
-              const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
+              const passportAttestationData = await getAttestationData(address, chain.id as keyof typeof onchainInfo);
 
               if (!passportAttestationData) {
                 if (chainId === chain.id) {
@@ -94,23 +94,25 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
                 return;
               }
 
-              savePassportLastUpdated(passportAttestationData.passport, chainId);
+              savePassportLastUpdated(passportAttestationData.passport, chain.id);
 
-              const onChainProviders = (await chain.attestationProvider?.getOnChainPassportData(address, chain)) ?? [];
+              const decoderContract = loadDecoderContract(chain);
+              const providers =
+                (await chain.attestationProvider?.getOnChainPassportData(address, decoderContract)) ?? [];
 
               // Set the onchain status
               setOnChainProviders((prevState) => ({
                 ...prevState,
-                [chainId]: onChainProviders,
+                [chain.id]: providers,
               }));
 
-              if (chainId === chain.id) setActiveChainProviders(onChainProviders);
+              if (chainId === chain.id) setActiveChainProviders(providers);
 
               const score = decodeScoreAttestation(passportAttestationData.score);
 
               setOnChainScores((prevState) => ({
                 ...prevState,
-                [chainId]: score,
+                [chain.id]: score,
               }));
             })
           );

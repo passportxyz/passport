@@ -71,24 +71,19 @@ export function decodeScoreAttestation(attestation: Attestation): number {
   return score;
 }
 
-export const parsePassportData = (passportResponse: any): OnChainProviderType[] => {
-  return passportResponse.map((passport: any) => ({
-    providerName: passport[0],
-    credentialHash: `v0.0.0:${Buffer.from(passport[1].replace(/^0x/, ""), "hex").toString("base64")}`,
-    expirationDate: Number(passport[3]) * 1000,
-    issuanceDate: Number(passport[2]) * 1000,
-  }));
-};
-
 export const loadDecoderContract = (chain: Chain): Contract => {
   if (chain.attestationProvider?.status !== "enabled") {
     throw new Error(`Active attestationProvider not found for chainId ${chain.id}`);
   }
 
   const provider = new ethers.JsonRpcProvider(chain.rpcUrl);
+  try {
+    const decoderAddress = chain.attestationProvider.decoderAddress();
+    const decoderAbi = chain.attestationProvider.decoderAbi();
 
-  const decoderAddress = chain.attestationProvider.decoderAddress();
-  const decoderAbi = chain.attestationProvider.decoderAbi();
-
-  return new ethers.Contract(decoderAddress, decoderAbi, provider);
+    return new ethers.Contract(decoderAddress, decoderAbi, provider);
+  } catch (e: any) {
+    // decoder is not implemented on this chain so return empty contract. Contract will not be called
+    return new ethers.Contract("0x0", [], provider);
+  }
 };

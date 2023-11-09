@@ -8,8 +8,16 @@ import { ScoreStateType } from "../context/scorerContext";
 import { AllProvidersState, ProviderState } from "../context/ceramicContext";
 import { OnChainProviderType } from "../context/onChainContext";
 import { Stamp } from "@gitcoin/passport-types";
-import { loadDecoderContract, parsePassportData } from "./onChainStamps";
-import { Chain } from "./chains";
+import { Contract } from "ethers";
+
+export const parsePassportData = (passportResponse: any): OnChainProviderType[] => {
+  return passportResponse.map((passport: any) => ({
+    providerName: passport[0],
+    credentialHash: `v0.0.0:${Buffer.from(passport[1].replace(/^0x/, ""), "hex").toString("base64")}`,
+    expirationDate: Number(passport[3]) * 1000,
+    issuanceDate: Number(passport[2]) * 1000,
+  }));
+};
 
 type ProviderWithStamp = ProviderState & { stamp: Stamp };
 
@@ -49,7 +57,7 @@ export interface AttestationProvider {
     scoreState: ScoreStateType,
     onChainScore: number
   ) => OnChainStatus;
-  getOnChainPassportData: (address: string, chain: Chain) => Promise<OnChainProviderType[]>;
+  getOnChainPassportData: (address: string, decoderContract: Contract) => Promise<OnChainProviderType[]>;
 }
 
 class BaseAttestationProvider implements AttestationProvider {
@@ -140,7 +148,7 @@ class BaseAttestationProvider implements AttestationProvider {
       : OnChainStatus.MOVED_OUT_OF_DATE;
   }
 
-  async getOnChainPassportData(_address: string, _chain: Chain): Promise<OnChainProviderType[]> {
+  async getOnChainPassportData(_address: string, _decoderContract: Contract): Promise<OnChainProviderType[]> {
     return [];
   }
 }
@@ -167,9 +175,7 @@ export class EASAttestationProvider extends BaseAttestationProvider {
     return `${this.easScanUrl}/address/${address}`;
   }
 
-  async getOnChainPassportData(address: string, chain: Chain): Promise<OnChainProviderType[]> {
-    const decoderContract = await loadDecoderContract(chain);
-
+  async getOnChainPassportData(address: string, decoderContract: Contract): Promise<OnChainProviderType[]> {
     return parsePassportData(await decoderContract.getPassport(address));
   }
 }
@@ -201,7 +207,7 @@ export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
     return rawScore !== onChainScore ? OnChainStatus.MOVED_OUT_OF_DATE : OnChainStatus.MOVED_UP_TO_DATE;
   }
 
-  async getOnChainPassportData(_address: string, _chain: Chain): Promise<OnChainProviderType[]> {
+  async getOnChainPassportData(_address: string, _decoderContract: Contract): Promise<OnChainProviderType[]> {
     return [];
   }
 }
