@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { useRouter } from "next/router";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
@@ -49,14 +49,14 @@ export function StampSelector({
   return (
     <>
       {/* each of the available providers in this platform */}
-      {currentProviders?.map((stamp, i) => {
+      {currentProviders?.map((stamp) => {
         // hide stamps based on filter
         const hideStamp =
           stampFilters && currentPlatform && !stampFilters[currentPlatform?.platform]?.includes(stamp.platformGroup);
         if (hideStamp) return null;
 
         return (
-          <div key={i} className={`mt-6`}>
+          <div key={stamp.platformGroup} className={`mt-6`}>
             <p className="mb-1 text-xl">{stamp.platformGroup}</p>
             {stamp.providers?.map((provider, i) => {
               const verified = verifiedProviders?.indexOf(provider.name) !== -1;
@@ -77,9 +77,8 @@ export function StampSelector({
               const checkboxId = `${provider.name}StampCheckbox`;
 
               return (
-                <>
+                <React.Fragment key={provider.name}>
                   <div
-                    key={provider.name}
                     data-testid={`indicator-${provider.name}`}
                     className={`relative border-foreground-3 ${provider.description ? "pt-3" : "py-3"} text-base ${
                       i > 0 ? "border-t" : "border-none"
@@ -101,7 +100,7 @@ export function StampSelector({
                       <p className="my-2 text-sm italic">{provider.description}</p>
                     </>
                   )}
-                </>
+                </React.Fragment>
               );
             })}
           </div>

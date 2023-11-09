@@ -3,17 +3,10 @@ import { screen } from "@testing-library/react";
 
 import { NetworkCard } from "../../components/NetworkCard";
 
-import {
-  makeTestCeramicContext,
-  makeTestUserContext,
-  renderWithContext,
-} from "../../__test-fixtures__/contextTestHelpers";
+import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 
-import { UserContextState } from "../../context/userContext";
 import { CeramicContextState } from "../../context/ceramicContext";
 import { Drawer, DrawerOverlay } from "@chakra-ui/react";
-
-jest.mock("../../utils/onboard.ts");
 
 jest.mock("next/router", () => ({
   useRouter: () => ({
@@ -38,7 +31,6 @@ const chains = [
   },
 ];
 
-const mockUserContext: UserContextState = makeTestUserContext();
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 describe("OnChainSidebar", () => {
@@ -46,10 +38,10 @@ describe("OnChainSidebar", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />
-        <NetworkCard key={4} chain={chains[0]} activeChains={[chains[0].id, chains[1].id]} />
+        <NetworkCard key={4} chain={chains[0]} />
       </Drawer>
     );
-    renderWithContext(mockUserContext, mockCeramicContext, drawer());
+    renderWithContext(mockCeramicContext, drawer());
     expect(screen.getByText("Sepolia Testnet")).toBeInTheDocument();
   });
 });

@@ -2,20 +2,12 @@ import React from "react";
 import { fireEvent, screen } from "@testing-library/react";
 import { DiscordCard } from "../../../components/PlatformCards";
 
-import { UserContextState } from "../../../context/userContext";
-import {
-  makeTestCeramicContext,
-  makeTestUserContext,
-  renderWithContext,
-} from "../../../__test-fixtures__/contextTestHelpers";
+import { makeTestCeramicContext, renderWithContext } from "../../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../../context/ceramicContext";
 
 import { STAMP_PROVIDERS } from "../../../config/providers";
 import { discordStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
 
-jest.mock("../../../utils/onboard.ts");
-
-const mockUserContext: UserContextState = makeTestUserContext();
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 describe("when user has not verfied with DiscordProvider", () => {

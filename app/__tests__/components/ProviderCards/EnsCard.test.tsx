@@ -9,28 +9,18 @@ import { STAMP_PROVIDERS } from "../../../config/providers";
 import { ensStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
 import { SUCCESFUL_ENS_RESULT } from "../../../__test-fixtures__/verifiableCredentialResults";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
-import {
-  makeTestCeramicContext,
-  makeTestUserContext,
-  renderWithContext,
-} from "../../../__test-fixtures__/contextTestHelpers";
+import { makeTestCeramicContext, renderWithContext } from "../../../__test-fixtures__/contextTestHelpers";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { mock } from "jest-mock-extended";
 
 jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
   fetchVerifiableCredential: jest.fn(),
 }));
-jest.mock("../../../utils/onboard.ts");
 
 const mockToggleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
 const mockHandleAddStamp = jest.fn().mockResolvedValue(undefined);
 const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
-const mockUserContext: UserContextState = makeTestUserContext({
-  toggleConnection: mockToggleConnection,
-  address: mockAddress,
-  signer: mockSigner,
-});
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
   handleCreatePassport: mockCreatePassport,

@@ -1,10 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps, @next/next/no-img-element */
 // --- React Methods
-import React, { useEffect, useContext } from "react";
+import React, { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 // --- Shared data context
-import { UserContext } from "../context/userContext";
+import { useWalletStore } from "../context/walletStore";
 
 // --- Components
 import PageRoot from "../components/PageRoot";
@@ -14,6 +14,7 @@ import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import SIWEButton from "../components/SIWEButton";
 import { checkShowOnboard } from "../utils/helpers";
 import BodyWrapper from "../components/BodyWrapper";
+import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../components/DoneToastContent";
 
@@ -25,15 +26,18 @@ const Footer = () => (
 );
 
 export default function Home() {
-  const { connect, wallet, walletConnectionError, setWalletConnectionError } = useContext(UserContext);
-  const toast = useToast();
+  const address = useWalletStore((state) => state.address);
+  const connectWallet = useWalletStore((state) => state.connect);
+  const connectError = useWalletStore((state) => state.error);
+  const { connect: connectDatastore } = useDatastoreConnectionContext();
   const [searchParams] = useSearchParams();
+  const toast = useToast();
 
   const navigate = useNavigate();
 
   // Route user to dashboard when wallet is connected
   useEffect(() => {
-    if (wallet) {
+    if (address) {
       const dashboardCustomizationKey = searchParams.get("dashboard");
       if (checkShowOnboard()) {
         navigate(`/welcome${dashboardCustomizationKey ? `?dashboard=${dashboardCustomizationKey}` : ""}`);
@@ -41,25 +45,24 @@ export default function Home() {
         navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`);
       }
     }
-  }, [wallet]);
+  }, [address]);
 
   useEffect(() => {
-    if (walletConnectionError) {
+    if (connectError) {
       toast({
         duration: 6000,
         isClosable: true,
         render: (result: any) => (
           <DoneToastContent
             title={"Connection Error"}
-            body={walletConnectionError}
+            body={(connectError as Error).message}
             icon="../assets/verification-failed-bright.svg"
             result={result}
           />
         ),
       });
-      setWalletConnectionError(undefined);
     }
-  }, [walletConnectionError]);
+  }, [connectError]);
 
   return (
     <PageRoot useLegacyBackground={true} className="text-color-1">
@@ -79,8 +82,11 @@ export default function Home() {
                 Gitcoin Grants. The more you verify your identity, the more opportunities you will have to vote and
                 participate across the web3.
               </div>
-              <SIWEButton data-testid="connectWalletButton" onClick={connect} className="mt-10" />
-              {walletConnectionError && <div>{walletConnectionError}</div>}
+              <SIWEButton
+                data-testid="connectWalletButton"
+                onClick={() => connectWallet(connectDatastore)}
+                className="mt-10"
+              />
             </div>
           </PageWidthGrid>
         </BodyWrapper>

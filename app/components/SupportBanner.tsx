@@ -1,8 +1,8 @@
 import axios from "axios";
-import { useContext, useEffect, useState } from "react";
-import { UserContext } from "../context/userContext";
+import { useEffect, useState } from "react";
 import { datadogRum } from "@datadog/browser-rum";
 import Warning from "./Warning";
+import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 
 type SupportBannerProps = {
   content: string;
@@ -12,7 +12,7 @@ type SupportBannerProps = {
 
 export function SupportBanner() {
   const [banners, setBanners] = useState<SupportBannerProps[]>([]);
-  const { dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
+  const { dbAccessToken, dbAccessTokenStatus } = useDatastoreConnectionContext();
   useEffect(() => {
     (async function checkForBanners() {
       if (dbAccessTokenStatus === "connected" && dbAccessToken) {

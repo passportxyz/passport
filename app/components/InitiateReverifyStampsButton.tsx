@@ -9,14 +9,10 @@ import { Modal, ModalContent, ModalOverlay, useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "./DoneToastContent";
 import { STAMP_PROVIDERS } from "../config/providers";
 import { getProviderIdsFromPlatformId } from "./ExpiredStampModal";
-import { PLATFORM_ID, PROVIDER_ID, Stamp, VerifiableCredentialRecord } from "@gitcoin/passport-types";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { LoadButton } from "./LoadButton";
 import { getPlatformSpec } from "../config/platforms";
 // -- Utils
-import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
-import { reduceStampResponse } from "../utils/helpers";
-import { UserContext } from "../context/userContext";
 import { StampClaimForPlatform, StampClaimingContext } from "../context/stampClaimingContext";
 
 export type ExpiredStampModalProps = {
@@ -25,9 +21,8 @@ export type ExpiredStampModalProps = {
 };
 
 export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps) => {
-  const { expiredProviders, handleDeleteStamps, handleAddStamps } = useContext(CeramicContext);
+  const { expiredProviders } = useContext(CeramicContext);
   const [isReverifyingStamps, setIsReverifyingStamps] = useState(false);
-  const { address, signer } = useContext(UserContext);
   const { claimCredentials } = useContext(StampClaimingContext);
   const toast = useToast();
 
@@ -54,16 +49,13 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
   const reverifyStamps = async () => {
     setIsReverifyingStamps(true);
 
-    const stampsToReverify = expiredPlatforms.flatMap((platform) =>
-      getProviderIdsFromPlatformId(platform as PLATFORM_ID)
-    );
-
     let stampClaims: StampClaimForPlatform[] = [];
     let evmStampClaim: StampClaimForPlatform = {
       platformId: "EVMBulkVerify",
       selectedProviders: [],
     };
-    const expiredPlatformsGroups = Object.keys(STAMP_PROVIDERS).forEach((_platformId) => {
+
+    Object.keys(STAMP_PROVIDERS).forEach((_platformId) => {
       const platformId = _platformId as PLATFORM_ID;
       const possibleProviders = getProviderIdsFromPlatformId(platformId);
       const expiredProvidersInPlatform = possibleProviders.filter((provider) => expiredProviders.includes(provider));

@@ -1,13 +1,8 @@
-import { OnChainStatus } from "../../hooks/useOnChainStatus";
+import { OnChainStatus } from "../../utils/onChainStatus";
 
-import { makeTestCeramicContext, makeTestUserContext } from "../../__test-fixtures__/contextTestHelpers";
-
-import { UserContextState } from "../../context/userContext";
 import { CeramicContextState, AllProvidersState, ProviderState } from "../../context/ceramicContext";
 import { OnChainProviderType } from "../../context/onChainContext";
 import { EASAttestationProvider, VeraxAndEASAttestationProvider } from "../../utils/AttestationProvider";
-
-jest.mock("../../utils/onboard.ts");
 
 jest.mock("next/router", () => ({
   useRouter: () => ({
@@ -31,9 +26,6 @@ const chains = [
     icon: "ethereum.svg",
   },
 ];
-
-const mockUserContext: UserContextState = makeTestUserContext();
-const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 describe("EASAttestationProvider", () => {
   const easAttestationProvider = new EASAttestationProvider({

@@ -20,7 +20,7 @@ const onBoardExploreUrl =
 const walletConnect = walletConnectModule(walletConnectOptions);
 
 // Exports onboard-core instance (https://github.com/blocknative/web3-onboard)
-export const initWeb3Onboard = init({
+export const onboard = init({
   wallets: [injected, walletConnect],
   chains: chains.map(({ id, token, label, rpcUrl, icon }) => ({ id, token, label, rpcUrl, icon })),
   appMetadata: {

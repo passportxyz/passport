@@ -1,7 +1,8 @@
 // --- React Methods
 import React from "react";
 import { useSyncToChainButton } from "../hooks/useSyncToChainButton";
-import { OnChainStatus, useOnChainStatus } from "../hooks/useOnChainStatus";
+import { useOnChainStatus } from "../hooks/useOnChainStatus";
+import { OnChainStatus } from "../utils/onChainStatus";
 import { chains } from "../utils/chains";
 import { LoadButton } from "./LoadButton";
 import Tooltip from "./Tooltip";

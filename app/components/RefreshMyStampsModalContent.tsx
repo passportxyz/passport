@@ -10,7 +10,7 @@ import { Stamp, VerifiableCredentialRecord, PROVIDER_ID, PLATFORM_ID, SignatureT
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 // --- Contexts
-import { UserContext } from "../context/userContext";
+import { useSigner, useWalletStore } from "../context/walletStore";
 import { CeramicContext } from "../context/ceramicContext";
 
 // --- Datadog
@@ -46,7 +46,8 @@ export const RefreshMyStampsModalContent = ({
   resetStampsAndProgressState,
   dashboardCustomizationKey,
 }: RefreshMyStampsModalContentProps): JSX.Element => {
-  const { address, signer } = useContext(UserContext);
+  const address = useWalletStore((state) => state.address);
+  const signer = useSigner();
   const { handleAddStamps, handleDeleteStamps } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);

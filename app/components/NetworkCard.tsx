@@ -1,12 +1,13 @@
-import React, { useContext } from "react";
+import React from "react";
 import { SyncToChainButton } from "./SyncToChainButton";
 import { Chain } from "../utils/chains";
-import { OnChainStatus, useOnChainStatus } from "../hooks/useOnChainStatus";
-import { UserContext } from "../context/userContext";
+import { useOnChainStatus } from "../hooks/useOnChainStatus";
+import { OnChainStatus } from "../utils/onChainStatus";
+import { useWalletStore } from "../context/walletStore";
 
 export function NetworkCard({ chain }: { chain: Chain }) {
   const onChainStatus = useOnChainStatus({ chain });
-  const { address } = useContext(UserContext);
+  const address = useWalletStore((state) => state.address);
 
   const isOnChain =
     onChainStatus === OnChainStatus.MOVED_OUT_OF_DATE || onChainStatus === OnChainStatus.MOVED_UP_TO_DATE;

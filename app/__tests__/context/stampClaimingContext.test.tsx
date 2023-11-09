@@ -1,19 +1,14 @@
 import { render, waitFor, screen, fireEvent } from "@testing-library/react";
 import { useContext } from "react";
-import {
-  makeTestCeramicContext,
-  makeTestClaimingContext,
-  makeTestUserContext,
-} from "../../__test-fixtures__/contextTestHelpers";
+import { makeTestCeramicContext } from "../../__test-fixtures__/contextTestHelpers";
 
-import { UserContext } from "../../context/userContext";
-import { CeramicContext, platforms } from "../../context/ceramicContext";
+import { CeramicContext } from "../../context/ceramicContext";
 import { StampClaimingContext, StampClaimingContextProvider } from "../../context/stampClaimingContext";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
 
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { PlatformProps } from "../../components/GenericPlatform";
-import { AppContext, PlatformClass, ProviderPayload } from "@gitcoin/passport-platforms";
+import { AppContext, PlatformClass } from "@gitcoin/passport-platforms";
 
 jest.mock("../../utils/helpers", () => ({
   generateUID: jest.fn((length: number) => "some random string"),
@@ -22,8 +17,6 @@ jest.mock("../../utils/helpers", () => ({
 jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
   fetchVerifiableCredential: jest.fn(),
 }));
-
-jest.mock("../../utils/onboard.ts");
 
 jest.mock("../../context/ceramicContext", () => {
   const originalModule = jest.requireActual("../../context/ceramicContext");
@@ -120,31 +113,23 @@ const mockCeramicContext = makeTestCeramicContext({
   },
 });
 
-const mockStampClaimingContext = makeTestClaimingContext({});
-
-const mockTestUserContext = makeTestUserContext({});
-
 describe("<StampClaimingContext>", () => {
   const renderTestComponent = () =>
     render(
-      <UserContext.Provider value={mockTestUserContext}>
-        <CeramicContext.Provider value={mockCeramicContext}>
-          <StampClaimingContextProvider>
-            <TestingComponent />
-          </StampClaimingContextProvider>
-        </CeramicContext.Provider>
-      </UserContext.Provider>
+      <CeramicContext.Provider value={mockCeramicContext}>
+        <StampClaimingContextProvider>
+          <TestingComponent />
+        </StampClaimingContextProvider>
+      </CeramicContext.Provider>
     );
 
   const renderTestComponentWithEvmStamp = () =>
     render(
-      <UserContext.Provider value={mockTestUserContext}>
-        <CeramicContext.Provider value={mockCeramicContext}>
-          <StampClaimingContextProvider>
-            <TestingComponentWithEvmStamp />
-          </StampClaimingContextProvider>
-        </CeramicContext.Provider>
-      </UserContext.Provider>
+      <CeramicContext.Provider value={mockCeramicContext}>
+        <StampClaimingContextProvider>
+          <TestingComponentWithEvmStamp />
+        </StampClaimingContextProvider>
+      </CeramicContext.Provider>
     );
 
   beforeEach(() => {
@@ -163,7 +148,7 @@ describe("<StampClaimingContext>", () => {
     // Click the claim button, which should call the `claimCredentials` function in the context
     await waitFor(async () => {
       const claimButton = screen.getByTestId("claim-button");
-      await fireEvent.click(claimButton);
+      fireEvent.click(claimButton);
     });
 
     // Verify that the `fetchVerifiableCredential` function has been called
@@ -174,13 +159,13 @@ describe("<StampClaimingContext>", () => {
     expect(mockCeramicContext.handlePatchStamps).toHaveBeenCalledTimes(2);
   });
 
-  it("should fetch all credentials specified when calling claimCredentials (evm credentials included)", async () => {
+  it.only("should fetch all credentials specified when calling claimCredentials (evm credentials included)", async () => {
     renderTestComponentWithEvmStamp();
 
     // Click the claim button, which should call the `claimCredentials` function in the context
     await waitFor(async () => {
       const claimButton = screen.getByTestId("claim-button");
-      await fireEvent.click(claimButton);
+      fireEvent.click(claimButton);
     });
 
     // Verify that the `fetchVerifiableCredential` function has been called

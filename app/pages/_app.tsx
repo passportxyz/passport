@@ -8,8 +8,8 @@ import { AppProps } from "next/app";
 import Head from "next/head";
 
 import "../styles/globals.css";
-import { UserContextProvider } from "../context/userContext";
 import { CeramicContextProvider } from "../context/ceramicContext";
+import { DatastoreConnectionContextProvider } from "../context/datastoreConnectionContext";
 import { ScorerContextProvider } from "../context/scorerContext";
 import { OnChainContextProvider } from "../context/onChainContext";
 import ManageAccountCenter from "../components/ManageAccountCenter";
@@ -26,6 +26,20 @@ import { StampClaimingContextProvider } from "../context/stampClaimingContext";
 const FacebookAppId = process.env.NEXT_PUBLIC_PASSPORT_FACEBOOK_APP_ID || "";
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
 const INTERCOM_APP_ID = process.env.NEXT_PUBLIC_INTERCOM_APP_ID || "";
+
+const RenderOnlyOnClient = ({ children }: { children: React.ReactNode }) => {
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
+  return <>{children}</>;
+};
 
 // Type definition for the window object
 declare global {
@@ -162,25 +176,23 @@ function App({ Component, pageProps }: AppProps) {
         client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}
         session={true}
       >
-        <UserContextProvider>
+        <DatastoreConnectionContextProvider>
           <OnChainContextProvider>
             <ScorerContextProvider>
               <CeramicContextProvider>
                 <StampClaimingContextProvider>
                   <ManageAccountCenter>
-                    <div className="font-body" suppressHydrationWarning>
-                      {typeof window === "undefined" ? null : (
-                        <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
-                          <Component {...pageProps} />
-                        </ThemeWrapper>
-                      )}
-                    </div>
+                    <RenderOnlyOnClient>
+                      <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                        <Component {...pageProps} />
+                      </ThemeWrapper>
+                    </RenderOnlyOnClient>
                   </ManageAccountCenter>
                 </StampClaimingContextProvider>
               </CeramicContextProvider>
             </ScorerContextProvider>
           </OnChainContextProvider>
-        </UserContextProvider>
+        </DatastoreConnectionContextProvider>
       </SelfIdProvider>
     </>
   );

@@ -1,9 +1,9 @@
 // --- React Methods
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useEffect, useMemo, useState } from "react";
 
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
-import { UserContext } from "./userContext";
+import { useWalletStore } from "./walletStore";
 import onchainInfo from "../../deployments/onchainInfo.json";
 import { chains } from "../utils/chains";
 
@@ -12,7 +12,6 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { decodeProviderInformation, decodeScoreAttestation, getAttestationData } from "../utils/onChainStamps";
 import { FeatureFlags } from "../config/feature_flags";
 import { Attestation } from "@ethereum-attestation-service/eas-sdk";
-import { useSetChain } from "@web3-onboard/react";
 
 export interface OnChainProviderMap {
   [chainId: string]: OnChainProviderType[];
@@ -38,7 +37,7 @@ export interface OnChainContextState {
   onChainLastUpdates: OnChainLastUpdates;
   activeChainProviders: OnChainProviderType[];
   onChainScores: OnChainScores;
-  readOnChainData: () => Promise<void>;
+  readOnChainData: (overrideChain?: string) => Promise<void>;
 }
 
 const startingState: OnChainContextState = {
@@ -58,90 +57,104 @@ export type DecodedProviderInfo = {
 };
 
 export const OnChainContextProvider = ({ children }: { children: any }) => {
-  const { address } = useContext(UserContext);
+  const connectedChain = useWalletStore((state) => state.chain);
+  const address = useWalletStore((state) => state.address);
   const [onChainProviders, setOnChainProviders] = useState<OnChainProviderMap>({});
   const [activeChainProviders, setActiveChainProviders] = useState<OnChainProviderType[]>([]);
   const [onChainScores, setOnChainScores] = useState<OnChainScores>({});
   const [onChainLastUpdates, setOnChainLastUpdates] = useState<OnChainLastUpdates>({});
-  const [{ connectedChain }] = useSetChain();
 
-  const savePassportLastUpdated = (attestation: Attestation, chainId: string) => {
+  const savePassportLastUpdated = useCallback((attestation: Attestation, chainId: string) => {
     const lastUpdated = new Date(Number(BigInt(attestation.time.toString())) * 1000);
     setOnChainLastUpdates((prevState) => ({
       ...prevState,
       [chainId]: lastUpdated,
     }));
-  };
+  }, []);
 
-  const readOnChainData = useCallback(async () => {
-    if (address) {
-      try {
-        const activeChainIds = chains
-          .filter(({ attestationProvider }) => attestationProvider?.status === "enabled")
-          .map(({ id }) => id);
+  const readOnChainData = useCallback(
+    async (overrideChain?: string) => {
+      const chain = overrideChain || connectedChain;
+      if (address && chain) {
+        try {
+          const activeChainIds = chains
+            .filter(({ attestationProvider }) => attestationProvider?.status === "enabled")
+            .map(({ id }) => id);
 
-        await Promise.all(
-          activeChainIds.map(async (chainId: string) => {
-            const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
+          if (!activeChainIds.includes(chain)) {
+            setActiveChainProviders([]);
+          }
 
-            if (!passportAttestationData) {
-              return;
-            }
+          await Promise.all(
+            activeChainIds.map(async (chainId: string) => {
+              const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
 
-            // Only if a passport attestation has been properly loaded
-            const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
-              passportAttestationData.passport
-            );
+              if (!passportAttestationData) {
+                if (chainId === chain) {
+                  setActiveChainProviders([]);
+                }
+                return;
+              }
 
-            savePassportLastUpdated(passportAttestationData.passport, chainId);
+              // Only if a passport attestation has been properly loaded
+              const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
+                passportAttestationData.passport
+              );
 
-            const onChainProviders: OnChainProviderType[] = onChainProviderInfo
-              .sort((a, b) => a.providerNumber - b.providerNumber)
-              .map((providerInfo, index) => ({
-                providerName: providerInfo.providerName,
-                credentialHash: `v0.0.0:${Buffer.from(hashes[index].slice(2), "hex").toString("base64")}`,
-                expirationDate: new Date(expirationDates[index].toNumber() * 1000),
-                issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
+              savePassportLastUpdated(passportAttestationData.passport, chainId);
+
+              const onChainProviders: OnChainProviderType[] = onChainProviderInfo
+                .sort((a, b) => a.providerNumber - b.providerNumber)
+                .map((providerInfo, index) => ({
+                  providerName: providerInfo.providerName,
+                  credentialHash: `v0.0.0:${Buffer.from(hashes[index].slice(2), "hex").toString("base64")}`,
+                  expirationDate: new Date(expirationDates[index].toNumber() * 1000),
+                  issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
+                }));
+
+              // Set the onchain status
+              setOnChainProviders((prevState) => ({
+                ...prevState,
+                [chainId]: onChainProviders,
               }));
 
-            // Set the onchain status
-            setOnChainProviders((prevState) => ({
-              ...prevState,
-              [chainId]: onChainProviders,
-            }));
+              if (chainId === chain) setActiveChainProviders(onChainProviders);
 
-            if (chainId === connectedChain?.id) setActiveChainProviders(onChainProviders);
+              const score = decodeScoreAttestation(passportAttestationData.score);
 
-            const score = decodeScoreAttestation(passportAttestationData.score);
-
-            setOnChainScores((prevState) => ({
-              ...prevState,
-              [chainId]: score,
-            }));
-          })
-        );
-      } catch (e: any) {
-        console.error("Failed to check onchain status", e);
-        datadogLogs.logger.error("Failed to check onchain status", e);
-        datadogRum.addError(e);
+              setOnChainScores((prevState) => ({
+                ...prevState,
+                [chainId]: score,
+              }));
+            })
+          );
+        } catch (e: any) {
+          console.error("Failed to check onchain status", e);
+          datadogLogs.logger.error("Failed to check onchain status", e);
+          datadogRum.addError(e);
+        }
       }
-    }
-  }, [address]);
+    },
+    [address, connectedChain]
+  );
 
   useEffect(() => {
     if (FeatureFlags.FF_CHAIN_SYNC) {
       readOnChainData();
     }
-  }, [readOnChainData, address]);
+  }, [readOnChainData, address, connectedChain]);
 
   // use props as a way to pass configuration values
-  const providerProps = {
-    onChainProviders,
-    activeChainProviders,
-    onChainLastUpdates,
-    readOnChainData,
-    onChainScores,
-  };
+  const providerProps = useMemo(
+    () => ({
+      onChainProviders,
+      activeChainProviders,
+      onChainLastUpdates,
+      readOnChainData,
+      onChainScores,
+    }),
+    [onChainProviders, activeChainProviders, onChainLastUpdates, readOnChainData, onChainScores]
+  );
 
   return <OnChainContext.Provider value={providerProps}>{children}</OnChainContext.Provider>;
 };
