@@ -2,7 +2,7 @@ import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 
 import { CONTENT_MAX_WIDTH } from "./PageWidthGrid";
 
-import { UserWarning } from "../context/userContext";
+import { UserWarning } from "../context/userState";
 
 export default function Warning({
   userWarning,

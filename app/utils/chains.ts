@@ -1,4 +1,3 @@
-import { FeatureFlags } from "../config/feature_flags";
 import {
   AttestationProvider,
   AttestationProviderConfig,

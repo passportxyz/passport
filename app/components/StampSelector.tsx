@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { useRouter } from "next/router";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
@@ -49,14 +49,14 @@ export function StampSelector({
   return (
     <>
       {/* each of the available providers in this platform */}
-      {currentProviders?.map((stamp, i) => {
+      {currentProviders?.map((stamp) => {
         // hide stamps based on filter
         const hideStamp =
           stampFilters && currentPlatform && !stampFilters[currentPlatform?.platform]?.includes(stamp.platformGroup);
         if (hideStamp) return null;
 
         return (
-          <div key={i} className={`mt-6`}>
+          <div key={stamp.platformGroup} className={`mt-6`}>
             <p className="mb-1 text-xl">{stamp.platformGroup}</p>
             {stamp.providers?.map((provider, i) => {
               const verified = verifiedProviders?.indexOf(provider.name) !== -1;
@@ -77,24 +77,30 @@ export function StampSelector({
               const checkboxId = `${provider.name}StampCheckbox`;
 
               return (
-                <div
-                  key={provider.name}
-                  data-testid={`indicator-${provider.name}`}
-                  className={`relative border-foreground-3 py-3 text-base ${
-                    i > 0 ? "border-t" : "border-none"
-                  } ${textColor} flex items-center`}
-                >
-                  <Checkbox
-                    data-testid={`checkbox-${provider.name}`}
-                    className="mr-2 shrink-0"
-                    id={checkboxId}
-                    checked={selected}
-                    onChange={onChange}
-                  />
-                  <label htmlFor={checkboxId}>{provider.title}</label>
-                  {FeatureFlags.FF_CHAIN_SYNC && isProviderOnChain(provider.name) && <OnchainTag marginLeft="3" />}
-                  <span className="ml-2 grow text-right">{weight}&nbsp;points</span>
-                </div>
+                <React.Fragment key={provider.name}>
+                  <div
+                    data-testid={`indicator-${provider.name}`}
+                    className={`relative border-foreground-3 ${provider.description ? "pt-3" : "py-3"} text-base ${
+                      i > 0 ? "border-t" : "border-none"
+                    } ${textColor} flex items-center`}
+                  >
+                    <Checkbox
+                      data-testid={`checkbox-${provider.name}`}
+                      className="mr-2 shrink-0"
+                      id={checkboxId}
+                      checked={selected}
+                      onChange={onChange}
+                    />
+                    <label htmlFor={checkboxId}>{provider.title}</label>
+                    {FeatureFlags.FF_CHAIN_SYNC && isProviderOnChain(provider.name) && <OnchainTag marginLeft="3" />}
+                    <span className="ml-2 grow text-right">{weight}&nbsp;points</span>
+                  </div>
+                  {provider.description && (
+                    <>
+                      <p className="my-2 text-sm italic">{provider.description}</p>
+                    </>
+                  )}
+                </React.Fragment>
               );
             })}
           </div>

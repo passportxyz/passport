@@ -3,18 +3,11 @@ import { screen } from "@testing-library/react";
 
 import { SideBarContent, SideBarContentProps } from "../../components/SideBarContent";
 
-import {
-  makeTestCeramicContext,
-  makeTestUserContext,
-  renderWithContext,
-} from "../../__test-fixtures__/contextTestHelpers";
+import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 
-import { UserContextState } from "../../context/userContext";
 import { CeramicContextState } from "../../context/ceramicContext";
 import { Drawer, DrawerOverlay } from "@chakra-ui/react";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
-
-jest.mock("../../utils/onboard.ts");
 
 jest.mock("next/router", () => ({
   useRouter: () => ({
@@ -58,7 +51,6 @@ const props: SideBarContentProps = {
   verifyButton: undefined,
 };
 
-const mockUserContext: UserContextState = makeTestUserContext();
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 describe("SideBarContent", () => {
@@ -69,7 +61,7 @@ describe("SideBarContent", () => {
         <SideBarContent {...props} />
       </Drawer>
     );
-    renderWithContext(mockUserContext, mockCeramicContext, drawer());
+    renderWithContext(mockCeramicContext, drawer());
     expect(screen.getByText("Github")).toBeInTheDocument();
   });
 
@@ -80,7 +72,7 @@ describe("SideBarContent", () => {
         <SideBarContent {...props} />
       </Drawer>
     );
-    renderWithContext(mockUserContext, mockCeramicContext, drawer());
+    renderWithContext(mockCeramicContext, drawer());
 
     verifiedProviders.forEach((provider) => {
       expect(screen.getByTestId(`indicator-${provider}`)).toHaveClass("text-color-2");
@@ -94,7 +86,7 @@ describe("SideBarContent", () => {
         <SideBarContent {...props} />
       </Drawer>
     );
-    renderWithContext(mockUserContext, mockCeramicContext, drawer());
+    renderWithContext(mockCeramicContext, drawer());
 
     const allProviders = props.currentProviders
       ?.map((provider) => provider.providers)
@@ -117,7 +109,7 @@ describe("SideBarContent", () => {
         <SideBarContent {...props} />
       </Drawer>
     );
-    renderWithContext(mockUserContext, mockCeramicContext, drawer());
+    renderWithContext(mockCeramicContext, drawer());
 
     props.currentProviders?.forEach((stamp) => {
       stamp.providers.forEach((provider, i) => {

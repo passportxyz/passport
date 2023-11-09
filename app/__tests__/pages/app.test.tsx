@@ -2,7 +2,6 @@ import { render } from "@testing-library/react";
 import App from "../../pages/_app";
 import { AppProps } from "next/app";
 
-jest.mock("../../utils/onboard.ts");
 jest.mock("@datadog/browser-rum");
 jest.mock("@datadog/browser-logs");
 jest.mock("@didtools/cacao", () => ({

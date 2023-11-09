@@ -32,7 +32,7 @@ import {
 } from "@chakra-ui/react";
 
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
-import { UserContext } from "../context/userContext";
+import { useWalletStore } from "../context/walletStore";
 import { ScorerContext } from "../context/scorerContext";
 
 import { useViewerConnection } from "@self.id/framework";
@@ -44,6 +44,7 @@ import { useDashboardCustomization } from "../hooks/useDashboardCustomization";
 
 // --- GTM Module
 import TagManager from "react-gtm-module";
+import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -54,7 +55,11 @@ export default function Dashboard() {
   const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms, cancelCeramicConnection } =
     useContext(CeramicContext);
 
-  const { wallet, toggleConnection } = useContext(UserContext);
+  const address = useWalletStore((state) => state.address);
+  const provider = useWalletStore((state) => state.provider);
+
+  const { disconnect, dbAccessTokenStatus, dbAccessToken } = useDatastoreConnectionContext();
+
   const { refreshScore } = useContext(ScorerContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -93,8 +98,6 @@ export default function Dashboard() {
   const [viewerConnection, ceramicConnect] = useViewerConnection();
   const { isOpen: retryModalIsOpen, onOpen: onRetryModalOpen, onClose: onRetryModalClose } = useDisclosure();
 
-  const { dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
-
   // stamp filter
   const router = useRouter();
   const { filter } = router.query;
@@ -112,14 +115,14 @@ export default function Dashboard() {
 
   // Route user to home when wallet is disconnected
   useEffect(() => {
-    if (!wallet) {
+    if (!address) {
       navigate(`/${customizationKey ? `?dashboard=${customizationKey}` : ""}`);
     } else {
       if (dbAccessTokenStatus === "connected" && dbAccessToken) {
-        refreshScore(wallet.accounts[0].address.toLowerCase(), dbAccessToken);
+        refreshScore(address!.toLowerCase(), dbAccessToken);
       }
     }
-  }, [wallet, dbAccessToken, dbAccessTokenStatus]);
+  }, [address, dbAccessToken, dbAccessTokenStatus]);
 
   //show toasts from 1click flow
   useEffect(() => {
@@ -151,17 +154,16 @@ export default function Dashboard() {
 
   // Allow user to retry Ceramic connection if failed
   const retryConnection = () => {
-    if (isLoadingPassport == IsLoadingPassportState.FailedToConnect && wallet) {
+    if (isLoadingPassport == IsLoadingPassportState.FailedToConnect && address) {
       // connect to ceramic (deliberately connect with a lowercase DID to match reader)
-      ceramicConnect(new EthereumAuthProvider(wallet.provider, wallet.accounts[0].address.toLowerCase()));
+      ceramicConnect(new EthereumAuthProvider(provider, address!.toLowerCase()));
       onRetryModalClose();
     }
   };
 
   const closeModalAndDisconnect = () => {
     onRetryModalClose();
-    // toggle wallet connect/disconnect
-    toggleConnection();
+    disconnect();
   };
 
   useEffect(() => {
@@ -251,7 +253,7 @@ export default function Dashboard() {
         <span className="mr-20 font-heading text-5xl">My {filterName && `${filterName} `}Stamps</span>
         {passport ? (
           <button
-            data-testid="button-passport-json-mobile"
+            data-testid="button-passport-json"
             className="h-8 w-8 rounded-md border border-background-2 bg-background-4 text-foreground-3"
             onClick={onOpen}
             title="View Passport JSON"

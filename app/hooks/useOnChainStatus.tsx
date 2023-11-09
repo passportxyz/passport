@@ -4,13 +4,7 @@ import { OnChainContext } from "../context/onChainContext";
 import { ScorerContext } from "../context/scorerContext";
 import { Chain, chains } from "../utils/chains";
 import { AttestationProvider } from "../utils/AttestationProvider";
-
-export enum OnChainStatus {
-  LOADING,
-  NOT_MOVED,
-  MOVED_OUT_OF_DATE,
-  MOVED_UP_TO_DATE,
-}
+import { OnChainStatus } from "../utils/onChainStatus";
 
 export const useOnChainStatus = ({ chain }: { chain?: Chain }) => {
   const { allProvidersState } = useContext(CeramicContext);

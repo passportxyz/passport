@@ -1,5 +1,5 @@
 import { Spinner } from "@chakra-ui/react";
-import { OnChainStatus } from "../hooks/useOnChainStatus";
+import { OnChainStatus } from "../utils/onChainStatus";
 import Tooltip from "../components/Tooltip";
 import { Chain } from "../utils/chains";
 import { useSyncToChainButton } from "../hooks/useSyncToChainButton";

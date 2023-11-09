@@ -108,7 +108,7 @@ export const PlatformDetails = ({
   const possiblePoints = currentPlatformScoreSpec?.possiblePoints || 0;
 
   const pointsGained = +earnedPoints.toFixed(2);
-  const pointsAvailable = +(possiblePoints - earnedPoints).toFixed(2);
+  const pointsAvailable = +Math.max(possiblePoints - earnedPoints, 0).toFixed(2);
 
   return (
     <div className="w-full text-color-1">

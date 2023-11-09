@@ -107,7 +107,7 @@ export const PlatformCard = ({
             )}
             <div className={`text-right`}>
               <h1 data-testid="available-points" className="text-2xl text-color-2">
-                {(platform.possiblePoints - platform.earnedPoints).toFixed(2)}
+                {Math.max(platform.possiblePoints - platform.earnedPoints, 0).toFixed(2)}
               </h1>
               <p className="text-xs">Available Points</p>
             </div>

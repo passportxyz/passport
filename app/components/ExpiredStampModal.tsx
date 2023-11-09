@@ -4,7 +4,6 @@ import { CeramicContext } from "../context/ceramicContext";
 import { getPlatformSpec } from "../config/platforms";
 import { STAMP_PROVIDERS } from "../config/providers";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
-import { completedIcon } from "./Progress";
 import { Button } from "./Button";
 import { LoadButton } from "./LoadButton";
 
