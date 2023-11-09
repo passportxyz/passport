@@ -5,7 +5,10 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 // ----- Credential verification
 import { getRPCProvider } from "../../utils/signer";
 
-const ENS_PUBLIC_RESOLVER = "0x231b0ee14048e9dccd1d247744d114a4eb5e8e63";
+const ENS_PUBLIC_RESOLVERS = [
+  "0x231b0ee14048e9dccd1d247744d114a4eb5e8e63",
+  "0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41",
+];
 
 // Export a Ens Provider to carry out Ens name check and return a record object
 export class EnsProvider implements Provider {
@@ -32,7 +35,7 @@ export class EnsProvider implements Provider {
 
       if (reportedName) {
         const resolver = await provider.getResolver(reportedName);
-        if (resolver?.address?.toLowerCase() === ENS_PUBLIC_RESOLVER) {
+        if (ENS_PUBLIC_RESOLVERS.includes(resolver?.address?.toLowerCase())) {
           valid = true;
           record = {
             ens: reportedName,
