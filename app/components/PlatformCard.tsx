@@ -60,14 +60,14 @@ export const PlatformCard = ({
   const verified = platform.earnedPoints > 0 || selectedProviders[platform.platform].length > 0;
 
   const platformClasses = verified
-    ? "duration-800 relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-3 p-0 transition-all hover:border-foreground-4 hover:bg-opacity-100 hover:bg-gradient-to-b hover:shadow-background-3-10 override-text-color text-foreground-3 hover:text-color-2"
-    : "duration-800 relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-6 bg-gradient-to-b from-background to-[#06153D] bg-size-200 bg-pos-0 p-0 transition-all hover:border-background-3 hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-background-2 hover:to-background-3 hover:bg-pos-100 hover:shadow-background-3-25";
+    ? "border-foreground-5 hover:border-foreground-4 hover:to-foreground-5/50 hover:shadow-foreground-4 hover:text-color-2 text-foreground-5 override-text-color"
+    : "border-foreground-6 hover:border-background-3 hover:to-background-2 hover:shadow-background-3";
 
   const imgFilter = verified
     ? {
-        filter: `invert(31%) sepia(13%) saturate(1992%) hue-rotate(100deg) brightness(67%) contrast(85%) grayscale(${
-          hovering ? "70%" : "100%"
-        })`,
+        filter: `invert(27%) sepia(97%) saturate(295%) hue-rotate(113deg) brightness(${
+          hovering ? "100%" : "56%"
+        }) contrast(89%)`,
       }
     : {};
 
@@ -81,12 +81,16 @@ export const PlatformCard = ({
       className={className}
       key={`${platform.name}${i}`}
     >
-      <div onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)} className={platformClasses}>
-        {hovering && !verified && (
+      <div
+        onMouseEnter={() => setHovering(true)}
+        onMouseLeave={() => setHovering(false)}
+        className={`group relative flex h-full cursor-pointer flex-col rounded-lg border p-0 transition-all ease-out hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-transparent hover:shadow-even-md ${platformClasses}`}
+      >
+        {!verified && (
           <img
             src="./assets/card-background.svg"
-            alt="Honey Comb background image for stamp"
-            className="absolute bottom-0 right-0"
+            alt=""
+            className="absolute bottom-0 right-0 opacity-0 group-hover:opacity-100"
           />
         )}
         <div className="m-6 flex h-full flex-col justify-between">
@@ -121,12 +125,16 @@ export const PlatformCard = ({
             >
               <h1
                 data-testid="platform-name"
-                className={`mr-0 text-lg md:mr-4 ${platform.name.split(" ").length > 1 ? "text-left" : "text-center"}`}
+                className={`mr-0 text-xl md:mr-4 ${platform.name.split(" ").length > 1 ? "text-left" : "text-center"}`}
               >
                 {platform.name}
               </h1>
             </div>
-            <p className="pleading-relaxed mt-2 hidden text-base text-color-1 md:inline-block">
+            <p
+              className={`pleading-relaxed mt-2 hidden text-base text-color-1 md:inline-block ${
+                verified ? "invisible" : "visible"
+              } `}
+            >
               {platform.description}
             </p>
           </div>
@@ -135,7 +143,7 @@ export const PlatformCard = ({
               data-testid="connect-button"
               variant="custom"
               className={`mt-5 w-auto border bg-transparent text-foreground-2 ${
-                verified ? "border-foreground-3" : "border-foreground-2"
+                verified ? "border-foreground-5 group-hover:border-foreground-4" : "border-foreground-2"
               }`}
             >
               {verified ? "Verified" : "Connect"}
