@@ -72,6 +72,30 @@ describe("Attempt verification", function () {
     });
   });
 
+  it("should return true for old public resolver", async () => {
+    EthersGetResolverMock.mockImplementation(async (_) => {
+      return Promise.resolve({
+        address: "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
+      } as Resolver);
+    });
+
+    const ens = new EnsProvider();
+
+    const verifiedPayload = await ens.verify({
+      address: MOCK_ADDRESS,
+    } as unknown as RequestPayload);
+
+    expect(EthersLookupAddressMock).toBeCalledWith(MOCK_ADDRESS);
+
+    expect(verifiedPayload).toEqual({
+      valid: true,
+      record: {
+        ens: MOCK_ENS,
+      },
+      errors: [],
+    });
+  });
+
   it("should return false for invalid address", async () => {
     EthersLookupAddressMock.mockRejectedValueOnce("Invalid Address");
     const ens = new EnsProvider();
