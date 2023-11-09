@@ -14,10 +14,10 @@ export const Button = ({ variant, className, ...props }: ButtonProps) => {
     if (variant === "custom") {
       return "";
     } else if (variant === "secondary") {
-      return "text-color-1 bg-background border border-foreground-3 rounded-s hover:border-foreground-4";
+      return "text-color-1 bg-background border border-foreground-3 hover:border-foreground-4";
     } else {
       // primary, default
-      return "text-color-4 rounded-s bg-gradient-to-r  from-foreground-2 to-foreground-2 hover:to-foreground-4";
+      return "text-color-4 bg-gradient-to-r  from-foreground-2 to-foreground-2 hover:to-foreground-4";
     }
   }, [variant]);
 
