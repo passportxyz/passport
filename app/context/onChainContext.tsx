@@ -9,12 +9,10 @@ import { Chain, chains } from "../utils/chains";
 
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
-import { decodeProviderInformation, decodeScoreAttestation, getAttestationData } from "../utils/onChainStamps";
+import { decodeScoreAttestation, getAttestationData, parsePassportData } from "../utils/onChainStamps";
 import { FeatureFlags } from "../config/feature_flags";
 import { Attestation } from "@ethereum-attestation-service/eas-sdk";
 import { useSetChain } from "@web3-onboard/react";
-import { ethers } from "ethers";
-import { Contract } from "ethers";
 
 export interface OnChainProviderMap {
   [chainId: string]: OnChainProviderType[];
@@ -75,28 +73,6 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
     }));
   };
 
-  const loadDecoderContract = (chain: Chain): Contract => {
-    if (chain.attestationProvider?.status !== "enabled") {
-      throw new Error(`Active attestationProvider not found for chainId ${chain.id}`);
-    }
-
-    const provider = new ethers.JsonRpcProvider(chain.rpcUrl);
-
-    const decoderAddress = chain.attestationProvider.decoderAddress();
-    const decoderAbi = chain.attestationProvider.decoderAbi();
-
-    return new ethers.Contract(decoderAddress, decoderAbi, provider);
-  };
-
-  const parsePassportData = (passportResponse: any): OnChainProviderType[] => {
-    return passportResponse.map((passport: any) => ({
-      providerName: passport[0],
-      credentialHash: `v0.0.0:${Buffer.from(passport[1].replace(/^0x/, ""), "hex").toString("base64")}`,
-      expirationDate: Number(passport[3]) * 1000,
-      issuanceDate: Number(passport[2]) * 1000,
-    }));
-  };
-
   const readOnChainData = useCallback(async () => {
     if (address) {
       try {
@@ -106,9 +82,15 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
           activeChains.map(async (chain) => {
             const chainId = chain.id;
 
-            const decoderContract = await loadDecoderContract(chain);
+            const onChainProviders = (await chain.attestationProvider?.getOnChainPassportData(address, chain)) ?? [];
 
-            const onChainProviders = parsePassportData(await decoderContract.getPassport(address));
+            setOnChainProviders((prevState) => ({
+              ...prevState,
+              [chainId]: onChainProviders,
+            }));
+
+            if (chainId === connectedChain?.id) setActiveChainProviders(onChainProviders);
+
             const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
 
             if (!passportAttestationData) {
@@ -116,16 +98,6 @@ export const OnChainContextProvider = ({ children }: { children: any }) => {
             }
 
             savePassportLastUpdated(passportAttestationData.passport, chainId);
-
-            console.log({ onChainProviders });
-
-            // Set the onchain status
-            setOnChainProviders((prevState) => ({
-              ...prevState,
-              [chainId]: onChainProviders,
-            }));
-
-            if (chainId === connectedChain?.id) setActiveChainProviders(onChainProviders);
 
             const score = decodeScoreAttestation(passportAttestationData.score);
 

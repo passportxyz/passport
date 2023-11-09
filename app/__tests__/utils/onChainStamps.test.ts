@@ -1,8 +1,4 @@
-import { decodeProviderInformation } from "../../utils/onChainStamps";
-import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import axios from "axios";
-import { Attestation } from "@ethereum-attestation-service/eas-sdk";
-import { BigNumber } from "@ethersproject/bignumber";
+import { parsePassportData } from "../../utils/onChainStamps";
 
 jest.mock("axios");
 jest.mock("@ethereum-attestation-service/eas-sdk", () => ({
@@ -15,87 +11,48 @@ jest.mock("../../utils/onboard", () => ({
   chains: [{ id: "0x14a33", rpcUrl: "mockRpcUrl" }],
 }));
 
-describe("decodeProviderInformation", () => {
-  beforeEach(() => {
-    jest.restoreAllMocks();
-  });
-  it("decodes and sorts provider information with multiple provider maps", async () => {
-    (SchemaEncoder as unknown as jest.Mock).mockImplementation(() => ({
-      decodeData: jest.fn().mockReturnValue([
-        { name: "providers", value: { value: [BigNumber.from(1), BigNumber.from(2)] } },
-        { name: "issuanceDates", value: { value: ["issuanceDate1", "issuanceDate2"] } },
-        { name: "expirationDates", value: { value: ["expirationDate1", "expirationDate2"] } },
-        { name: "hashes", value: { value: ["hash1", "hash2"] } },
-      ]),
-    }));
-    process.env.NEXT_PUBLIC_PASSPORT_IAM_STATIC_URL = "mockStaticUrl";
-
-    const mockStampBits = [
-      { bit: 0, index: 0, name: "provider1" },
-      { bit: 1, index: 1, name: "provider2" },
+describe("parsePassportData", () => {
+  it("should return an array of OnChainProviderTypes", () => {
+    const passports = [
+      ["Provider1", "0x616263", "1622470087", "1622556487"],
+      ["Provider2", "0x646566", "1622470187", "1622556587"],
     ];
-    (axios.get as jest.Mock).mockResolvedValueOnce({ data: mockStampBits });
 
-    const mockAttestation = {
-      data: "0x0000000",
-    } as Attestation;
+    const result = parsePassportData(passports);
 
-    const result = await decodeProviderInformation(mockAttestation);
-
-    expect(axios.get).toHaveBeenCalledWith("mockStaticUrl/providerBitMapInfo.json");
-    expect(SchemaEncoder).toHaveBeenCalledWith(
-      "uint256[] providers,bytes32[] hashes,uint64[] issuanceDates,uint64[] expirationDates,uint16 providerMapVersion"
-    );
-    expect(result).toEqual({
-      onChainProviderInfo: [
-        { providerName: "provider1", providerNumber: 0 },
-        { providerName: "provider2", providerNumber: 257 },
-      ],
-      hashes: ["hash1", "hash2"],
-      issuanceDates: ["issuanceDate1", "issuanceDate2"],
-      expirationDates: ["expirationDate1", "expirationDate2"],
-    });
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(passports.length);
   });
 
-  it("decodes and sorts provider information with a single providermap", async () => {
-    const providerMap = BigNumber.from(11);
-    (SchemaEncoder as unknown as jest.Mock).mockImplementation(() => ({
-      decodeData: jest.fn().mockReturnValue([
-        { name: "providers", value: { value: [providerMap] } },
-        { name: "issuanceDates", value: { value: ["issuanceDate1", "issuanceDate2", "issuanceDate4"] } },
-        { name: "expirationDates", value: { value: ["expirationDate1", "expirationDate2", "expirationDate4"] } },
-        { name: "hashes", value: { value: ["hash1", "hash2", "hash3"] } },
-      ]),
-    }));
-    process.env.NEXT_PUBLIC_PASSPORT_IAM_STATIC_URL = "mockStaticUrl";
+  it("should correctly parse provider names", () => {
+    const passports = [["Provider1", "0x616263", "1622470087", "1622556487"]];
 
-    const mockStampBits = [
-      { bit: 0, index: 0, name: "provider1" },
-      { bit: 1, index: 0, name: "provider2" },
-      { bit: 2, index: 0, name: "provider3" },
-      { bit: 3, index: 0, name: "provider4" },
-    ];
-    (axios.get as jest.Mock).mockResolvedValueOnce({ data: mockStampBits });
+    const result = parsePassportData(passports);
 
-    const mockAttestation = {
-      data: "0x0000000",
-    } as Attestation;
+    expect(result[0].providerName).toBe("Provider1");
+  });
 
-    const result = await decodeProviderInformation(mockAttestation);
+  it("should correctly convert credentialHash to base64", () => {
+    const passports = [["Provider1", "0x616263", "1622470087", "1622556487"]];
 
-    expect(axios.get).toHaveBeenCalledWith("mockStaticUrl/providerBitMapInfo.json");
-    expect(SchemaEncoder).toHaveBeenCalledWith(
-      "uint256[] providers,bytes32[] hashes,uint64[] issuanceDates,uint64[] expirationDates,uint16 providerMapVersion"
-    );
-    expect(result).toEqual({
-      onChainProviderInfo: [
-        { providerName: "provider1", providerNumber: 0 },
-        { providerName: "provider2", providerNumber: 1 },
-        { providerName: "provider4", providerNumber: 3 },
-      ],
-      hashes: ["hash1", "hash2", "hash3"],
-      issuanceDates: ["issuanceDate1", "issuanceDate2", "issuanceDate4"],
-      expirationDates: ["expirationDate1", "expirationDate2", "expirationDate4"],
-    });
+    const result = parsePassportData(passports);
+
+    const expectedCredentialHash = Buffer.from("616263", "hex").toString("base64");
+    expect(result[0].credentialHash).toBe(`v0.0.0:${expectedCredentialHash}`);
+  });
+
+  it("should correctly convert dates to milliseconds", () => {
+    const passports = [["Provider1", "0x616263", "1622470087", "1622556487"]];
+
+    const result = parsePassportData(passports);
+
+    expect(result[0].issuanceDate).toBe(1622470087 * 1000);
+    expect(result[0].expirationDate).toBe(1622556487 * 1000);
+  });
+
+  it("should handle an empty array", () => {
+    const result = parsePassportData([]);
+
+    expect(result).toEqual([]);
   });
 });

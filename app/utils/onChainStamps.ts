@@ -1,16 +1,15 @@
 import { Contract, JsonRpcProvider, formatUnits } from "ethers";
 import { JsonRpcProvider as V5JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
-import axios from "axios";
 import onchainInfo from "../../deployments/onchainInfo.json";
 import GitcoinResolverAbi from "../../deployments/abi/GitcoinResolver.json";
 import { Attestation, EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import { chains } from "./chains";
+import { Chain, chains } from "./chains";
 
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
-import { PROVIDER_ID, StampBit } from "@gitcoin/passport-types";
-import { DecodedProviderInfo } from "../context/onChainContext";
+import { OnChainProviderType } from "../context/onChainContext";
+import { ethers } from "ethers";
 
 export type AttestationData = {
   passport: Attestation;
@@ -56,59 +55,6 @@ export async function getAttestationData(
   }
 }
 
-export async function decodeProviderInformation(attestation: Attestation): Promise<{
-  onChainProviderInfo: DecodedProviderInfo[];
-  hashes: string[];
-  issuanceDates: BigNumber[];
-  expirationDates: BigNumber[];
-}> {
-  if (attestation.data === "0x") {
-    return {
-      onChainProviderInfo: [],
-      hashes: [],
-      issuanceDates: [],
-      expirationDates: [],
-    };
-  }
-
-  const schemaEncoder = new SchemaEncoder(
-    "uint256[] providers,bytes32[] hashes,uint64[] issuanceDates,uint64[] expirationDates,uint16 providerMapVersion"
-  );
-
-  const decodedData = schemaEncoder.decodeData(attestation.data);
-
-  const providerBitMapInfo = (await axios.get(
-    `${process.env.NEXT_PUBLIC_PASSPORT_IAM_STATIC_URL}/providerBitMapInfo.json`
-  )) as {
-    data: StampBit[];
-  };
-
-  type DecodedProviderInfo = {
-    providerName: PROVIDER_ID;
-    providerNumber: number;
-  };
-
-  const providers = decodedData.find((data) => data.name === "providers")?.value.value as BigNumber[];
-  const issuanceDates = decodedData.find((data) => data.name === "issuanceDates")?.value.value as BigNumber[];
-  const expirationDates = decodedData.find((data) => data.name === "expirationDates")?.value.value as BigNumber[];
-  const hashes = decodedData.find((data) => data.name === "hashes")?.value.value as string[];
-
-  const onChainProviderInfo: DecodedProviderInfo[] = providerBitMapInfo.data
-    .map((info) => {
-      const providerMask = BigNumber.from(1).shl(info.bit);
-      const currentProvidersBitmap = providers[info.index];
-      if (currentProvidersBitmap && !providerMask.and(currentProvidersBitmap).eq(BigNumber.from(0))) {
-        return {
-          providerName: info.name,
-          providerNumber: info.index * 256 + info.bit,
-        };
-      }
-    })
-    .filter((provider): provider is DecodedProviderInfo => provider !== undefined);
-
-  return { onChainProviderInfo, hashes, issuanceDates, expirationDates };
-}
-
 export function decodeScoreAttestation(attestation: Attestation): number {
   if (attestation.data === "0x") {
     return NaN;
@@ -124,3 +70,25 @@ export function decodeScoreAttestation(attestation: Attestation): number {
 
   return score;
 }
+
+export const parsePassportData = (passportResponse: any): OnChainProviderType[] => {
+  return passportResponse.map((passport: any) => ({
+    providerName: passport[0],
+    credentialHash: `v0.0.0:${Buffer.from(passport[1].replace(/^0x/, ""), "hex").toString("base64")}`,
+    expirationDate: Number(passport[3]) * 1000,
+    issuanceDate: Number(passport[2]) * 1000,
+  }));
+};
+
+export const loadDecoderContract = (chain: Chain): Contract => {
+  if (chain.attestationProvider?.status !== "enabled") {
+    throw new Error(`Active attestationProvider not found for chainId ${chain.id}`);
+  }
+
+  const provider = new ethers.JsonRpcProvider(chain.rpcUrl);
+
+  const decoderAddress = chain.attestationProvider.decoderAddress();
+  const decoderAbi = chain.attestationProvider.decoderAbi();
+
+  return new ethers.Contract(decoderAddress, decoderAbi, provider);
+};
