@@ -7,10 +7,7 @@ export const PlatformDetails: PlatformSpec = {
   name: "Trusta Labs",
   description: "Launch Trusta's TrustScan to verify this account has non-Sybil behavior",
   connectMessage: "Connect Account",
-  website: {
-    uri: "https://www.trustalabs.ai/",
-    display: "Connect to Trusta Labs to verify your identity and reputation on Web3.",
-  },
+  website: "https://www.trustalabs.ai/",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

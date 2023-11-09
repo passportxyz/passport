@@ -9,10 +9,7 @@ export const PlatformDetails: PlatformSpec = {
   name: "Github",
   description: "Connect your existing Github account to verify.",
   connectMessage: "Connect Account",
-  website: {
-    uri: "https://github.com",
-    display: "Connect to GitHub to verify your code contributions.",
-  },
+  website: "https://github.com",
 };
 
 let providers: Provider[] = [];

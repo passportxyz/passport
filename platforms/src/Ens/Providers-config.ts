@@ -8,10 +8,7 @@ export const PlatformDetails: PlatformSpec = {
   description: "Purchase an .eth name to verify/ connect your existing account.",
   connectMessage: "Connect Account",
   isEVM: true,
-  website: {
-    uri: "https://ens.domains/",
-    display: "Connect to ENS to verify your ownership of your web3 domain name.",
-  },
+  website: "https://ens.domains/",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

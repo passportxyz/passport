@@ -18,7 +18,7 @@ export type PlatformSpec = {
   isEVM?: boolean;
   enablePlatformCardUpdate?: boolean;
   metaPointer?: string;
-  website?: Website;
+  website?: string;
 };
 
 export type ProviderSpec = {

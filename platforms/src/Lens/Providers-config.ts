@@ -8,10 +8,7 @@ export const PlatformDetails: PlatformSpec = {
   description: "Lens Profile Verification",
   connectMessage: "Verify Account",
   isEVM: true,
-  website: {
-    uri: "https://lens.xyz/",
-    display: "Connect to Lens to verify your social media presence on Web3.",
-  },
+  website: "https://lens.xyz/",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

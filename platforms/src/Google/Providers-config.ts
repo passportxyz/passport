@@ -7,10 +7,7 @@ export const PlatformDetails: PlatformSpec = {
   name: "Google",
   description: "Connect your existing Google Account to verify",
   connectMessage: "Connect Account",
-  website: {
-    uri: "https://www.google.com",
-    display: "Connect to Google to verify your email address.",
-  },
+  website: "https://www.google.com",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

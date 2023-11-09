@@ -8,10 +8,7 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect your Guild XYZ account to verify your memberships.",
   connectMessage: "Verify Guilds",
   isEVM: true,
-  website: {
-    uri: "https://guild.xyz",
-    display: "Connect to Guild to verify your membership in open source communities.",
-  },
+  website: "https://guild.xyz",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

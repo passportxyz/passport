@@ -7,10 +7,7 @@ export const PlatformDetails: PlatformSpec = {
   name: "Twitter",
   description: "Connect your existing Twitter account to verify.",
   connectMessage: "Connect Account",
-  website: {
-    uri: "https://x.com/",
-    display: "Connect to Twitter to verify your social media presence.",
-  },
+  website: "https://x.com/",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

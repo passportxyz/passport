@@ -7,10 +7,7 @@ export const PlatformDetails: PlatformSpec = {
   name: "Discord",
   description: "Connect your existing Discord account to verify.",
   connectMessage: "Connect Account",
-  website: {
-    uri: "https://discord.com",
-    display: "Connect your Discord account to Gitcoin Passport to identity and reputation in Web3 communities.",
-  },
+  website: "https://discord.com",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

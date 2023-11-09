@@ -8,10 +8,7 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect your existing account to verify with Snapshot.",
   connectMessage: "Verify Account",
   isEVM: true,
-  website: {
-    uri: "https://snapshot.org/",
-    display: "Connect to Snapshot to verify your DAO voting power.",
-  },
+  website: "https://snapshot.org/",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

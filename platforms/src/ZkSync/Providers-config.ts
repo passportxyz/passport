@@ -9,10 +9,7 @@ export const PlatformDetails: PlatformSpec = {
   description: "ZkSync Verification",
   connectMessage: "Verify Account",
   isEVM: true,
-  website: {
-    uri: "https://zksync.io/",
-    display: "Connect to zkSync to verify your zkSync wallet activity.",
-  },
+  website: "https://zksync.io/",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

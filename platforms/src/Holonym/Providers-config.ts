@@ -9,10 +9,7 @@ export const PlatformDetails: PlatformSpec = {
     "To verify your Holo, mint your Holo at app.holonym.id and then prove uniqueness at app.holonym.id/prove/uniqueness",
   connectMessage: "Connect Account",
   isEVM: true,
-  website: {
-    uri: "https://www.holonym.id",
-    display: "Connect to Holonym to verify your identity without revealing any personal information.",
-  },
+  website: "https://www.holonym.id",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

@@ -8,10 +8,7 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect a wallet and validate the stamp by retrieving an NFT.",
   connectMessage: "Connect NFT",
   isEVM: true,
-  website: {
-    uri: "https://ethereum.org/en/nft/",
-    display: "Connect your Ethereum wallet to verify that you own an Ethereum-based NFT.",
-  },
+  website: "https://ethereum.org/en/nft/",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
