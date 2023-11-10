@@ -122,8 +122,17 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
   };
 
   // fetch VCs from IAM server
-  const claimCredentials = async (platformGroups: StampClaimForPlatform[]): Promise<any> => {
+  const claimCredentials = async (
+    handleClaimStep: (
+      step: number, // Index in the for
+      status: string // "wait_confirmation" | "in_progress" | "all_done"
+    ) => Promise<void>,
+    platformGroups: StampClaimForPlatform[]
+  ): Promise<any> => {
     for (let i = 0; i < platformGroups.length; i++) {
+      await handleClaimStep(i, "wait_confirmation");
+      await handleClaimStep(i, "in_progress");
+
       try {
         const { platformId, selectedProviders } = platformGroups[i];
         datadogLogs.logger.info("Saving Stamp", { platform: platformId });
@@ -190,6 +199,8 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
         datadogLogs.logger.error("Verification Error", { error: e, platform: platformGroups[i] });
       }
     }
+    await handleClaimStep(-1, "all_done");
+
   };
 
   const providerProps = {

@@ -46,6 +46,13 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
     return possibleProviders.filter((provider) => expiredProviders.includes(provider)).length > 0;
   });
 
+  const handleClaimStep = async (
+    step: number, // Index in the for
+    status: string, // "wait_confirmation" | "in_progress" | "all_done"
+    ) => {
+      
+  }
+
   const reverifyStamps = async () => {
     setIsReverifyingStamps(true);
 
@@ -71,7 +78,7 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
       }
     });
 
-    await claimCredentials([evmStampClaim, ...stampClaims]);
+    await claimCredentials([handleClaimStep, evmStampClaim,  ...stampClaims]);
 
     setIsReverifyingStamps(false);
     onClose();
@@ -113,6 +120,9 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
           <div className="mt-4 grid w-full grid-cols-2 gap-2">
             <Button onClick={onClose} variant="secondary">
               Cancel
+            </Button>
+            <Button variant="secondary">
+              Next
             </Button>
             <LoadButton data-testid="delete-duplicate" onClick={reverifyStamps} isLoading={isReverifyingStamps}>
               Reverify Stamps
