@@ -63,14 +63,14 @@ export type StampClaimForPlatform = {
 
 export interface StampClaimingContextState {
   claimCredentials: (
-    handleClaimStep: (step: number, status: string) => Promise<string>,
+    handleClaimStep: (step: number, status: string) => Promise<void>,
     platformGroups: StampClaimForPlatform[]
   ) => Promise<void>;
 }
 
 const startingState: StampClaimingContextState = {
   claimCredentials: async (
-    handleClaimStep: (step: number, status: string) => Promise<string>,
+    handleClaimStep: (step: number, status: string) => Promise<void>,
     platformGroups: StampClaimForPlatform[]
   ) => {},
 };
@@ -129,17 +129,13 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
 
   // fetch VCs from IAM server
   const claimCredentials = async (
-    handleClaimStep: (step: number, status: string) => Promise<string>,
+    handleClaimStep: (step: number, status: string) => Promise<void>,
     platformGroups: StampClaimForPlatform[]
   ): Promise<any> => {
     for (let i = 0; i < platformGroups.length; i++) {
-      const { platformId, selectedProviders } = platformGroups[i];
-
-      if (platformId !== "EVMBulkVerify") {
-        const value = await handleClaimStep(i, "wait_confirmation");
-      }
-
       try {
+        const { platformId, selectedProviders } = platformGroups[i];
+        if (platformId !== "EVMBulkVerify") await handleClaimStep(i, "wait_confirmation");
         datadogLogs.logger.info("Saving Stamp", { platform: platformId });
         const platform = platforms.get(platformId as PLATFORM_ID)?.platform;
 
