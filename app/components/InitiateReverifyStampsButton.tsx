@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useRef, useEffect } from "react";
 
 // --- Style Components
 import { Button } from "./Button";
@@ -14,6 +14,8 @@ import { LoadButton } from "./LoadButton";
 import { getPlatformSpec } from "../config/platforms";
 // -- Utils
 import { StampClaimForPlatform, StampClaimingContext } from "../context/stampClaimingContext";
+import { rejects } from "assert";
+import { resolve } from "path";
 
 export type ExpiredStampModalProps = {
   isOpen: boolean;
@@ -23,7 +25,9 @@ export type ExpiredStampModalProps = {
 export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps) => {
   const { expiredProviders } = useContext(CeramicContext);
   const [isReverifyingStamps, setIsReverifyingStamps] = useState(false);
+  const [isClaimStampInProgress, setIsClaimStampInProgress] = useState(false);
   const { claimCredentials } = useContext(StampClaimingContext);
+  const [resolveFunction, setResolveFunction] = useState<Function>();
   const toast = useToast();
 
   const successToast = () => {
@@ -48,9 +52,21 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
 
   const handleClaimStep = async (
     step: number, // Index in the for
-    status: string, // "wait_confirmation" | "in_progress" | "all_done"
-    ) => {
-      
+    status: string, // "wait_confirmation" | "in_progress" | "all_done",
+  ): Promise<void> => {
+    console.log(status, step);
+    
+    if (status === "in_progress") {
+      // console.log(step)
+      // setIsClaimStampInProgress(true);
+      // enable button
+    } else if (status === "all_done") {
+      // setIsClaimStampInProgress(false);
+    } else {
+      return new Promise((resolve, reject) => {
+        setResolveFunction(resolve)
+      });
+    }
   }
 
   const reverifyStamps = async () => {
@@ -78,12 +94,19 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
       }
     });
 
-    await claimCredentials([handleClaimStep, evmStampClaim,  ...stampClaims]);
+    await claimCredentials(handleClaimStep, [evmStampClaim,  ...stampClaims]);
 
     setIsReverifyingStamps(false);
     onClose();
     successToast();
   };
+
+  const handleNextClick = () => {
+    console.log(resolveFunction);
+    if (resolveFunction) {
+      resolveFunction();
+    }
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} blockScrollOnMount={false}>
@@ -121,9 +144,10 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
             <Button onClick={onClose} variant="secondary">
               Cancel
             </Button>
-            <Button variant="secondary">
+            <LoadButton data-testid="delete-duplicate" onClick={handleNextClick}
+             isLoading={isClaimStampInProgress}>
               Next
-            </Button>
+            </LoadButton>
             <LoadButton data-testid="delete-duplicate" onClick={reverifyStamps} isLoading={isReverifyingStamps}>
               Reverify Stamps
             </LoadButton>

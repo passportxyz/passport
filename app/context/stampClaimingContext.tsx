@@ -62,11 +62,23 @@ export type StampClaimForPlatform = {
 };
 
 export interface StampClaimingContextState {
-  claimCredentials: (platformGroups: StampClaimForPlatform[]) => Promise<void>;
+  claimCredentials: (
+    handleClaimStep: (
+      step: number,
+      status: string,
+    ) => Promise<void>,
+    platformGroups: StampClaimForPlatform[], 
+  ) => Promise<void>;
 }
 
 const startingState: StampClaimingContextState = {
-  claimCredentials: async (platformGroups: StampClaimForPlatform[]) => {},
+  claimCredentials: async (
+    handleClaimStep: (
+      step: number,
+      status: string,
+    ) => Promise<void>,
+    platformGroups: StampClaimForPlatform[],
+  ) => {},
 };
 
 export const StampClaimingContext = createContext(startingState);
@@ -124,19 +136,21 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
   // fetch VCs from IAM server
   const claimCredentials = async (
     handleClaimStep: (
-      step: number, // Index in the for
-      status: string // "wait_confirmation" | "in_progress" | "all_done"
+      step: number,
+      status: string,
     ) => Promise<void>,
     platformGroups: StampClaimForPlatform[]
   ): Promise<any> => {
     for (let i = 0; i < platformGroups.length; i++) {
-      await handleClaimStep(i, "wait_confirmation");
-      await handleClaimStep(i, "in_progress");
+      const { platformId, selectedProviders } = platformGroups[i];
 
+      if (platformId !== "EVMBulkVerify") await handleClaimStep(i, "wait_confirmation");
+      
       try {
-        const { platformId, selectedProviders } = platformGroups[i];
         datadogLogs.logger.info("Saving Stamp", { platform: platformId });
         const platform = platforms.get(platformId as PLATFORM_ID)?.platform;
+        
+        if (platformId !== "EVMBulkVerify") await handleClaimStep(i, "in_progress");
 
         if ((platform || platformId === "EVMBulkVerify") && selectedProviders.length > 0) {
           // We set the providerPayload to be {} by default
@@ -166,7 +180,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
               return;
             }
           }
-
+          
           const verifyCredentialsResponse = await fetchVerifiableCredential(
             iamUrl,
             {
@@ -200,7 +214,6 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
       }
     }
     await handleClaimStep(-1, "all_done");
-
   };
 
   const providerProps = {
