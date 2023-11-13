@@ -5,12 +5,13 @@ import {
   MultiAttestationRequest,
   AttestationRequestData,
 } from "@ethereum-attestation-service/eas-sdk";
-import { VerifiableCredential, StampBit, PROVIDER_ID } from "@gitcoin/passport-types";
+import { VerifiableCredential, PROVIDER_ID } from "@gitcoin/passport-types";
 import { BigNumber } from "@ethersproject/bignumber";
 
 import { fetchPassportScore } from "./scorerService";
 import { encodeEasScore } from "./easStampSchema";
 import onchainInfo from "../../../deployments/onchainInfo.json";
+import { GitcoinPassportDecoder } from "./gitcoinDecoder";
 
 export type AttestationStampInfo = {
   hash: string;
@@ -53,12 +54,7 @@ export const mapBitMapInfo = (providers: PROVIDER_ID[]): PassportAttestationStam
   });
 };
 
-const fetchOnChainProviders = async (): Promise<PROVIDER_ID[]> => {
-  return await Promise.resolve([] as unknown as PROVIDER_ID[]);
-};
-
-export const buildProviderBitMap = async (): Promise<Map<string, PassportAttestationStamp>> => {
-  const providers = await fetchOnChainProviders();
+export const buildProviderBitMap = (providers: PROVIDER_ID[]): Map<string, PassportAttestationStamp> => {
   const bitMapInfo = mapBitMapInfo(providers);
   const passportAttestationStampMap: Map<string, PassportAttestationStamp> = new Map();
 
@@ -67,10 +63,11 @@ export const buildProviderBitMap = async (): Promise<Map<string, PassportAttesta
   return passportAttestationStampMap;
 };
 
-export const formatPassportAttestationData = async (
-  credentials: VerifiableCredential[]
-): Promise<PassportAttestationData> => {
-  const passportAttestationStampMap = await buildProviderBitMap();
+export const formatPassportAttestationData = (
+  credentials: VerifiableCredential[],
+  providers: PROVIDER_ID[]
+): PassportAttestationData => {
+  const passportAttestationStampMap = buildProviderBitMap(providers);
   return credentials.reduce(
     (acc: PassportAttestationData, credential: VerifiableCredential) => {
       const stampInfo: PassportAttestationStamp = passportAttestationStampMap.get(
@@ -135,8 +132,17 @@ export const sortPassportAttestationData = (attestation: PassportAttestationData
   };
 };
 
-export const encodeEasPassport = async (credentials: VerifiableCredential[], chainIdHex: string): Promise<string> => {
-  const attestation = await formatPassportAttestationData(credentials);
+export const encodeEasPassport = async (
+  credentials: VerifiableCredential[],
+  chainIdHex: keyof typeof onchainInfo
+): Promise<string> => {
+  const providerMapVersion = BigNumber.from(0);
+
+  const decoderContract = new GitcoinPassportDecoder(chainIdHex);
+  await decoderContract.init();
+  const providers = await decoderContract.onChainProviders(providerMapVersion);
+
+  const attestation = formatPassportAttestationData(credentials, providers);
 
   const attestationSchemaEncoder = new SchemaEncoder(
     "uint256[] providers, bytes32[] hashes, uint64[] issuanceDates, uint64[] expirationDates, uint16 providerMapVersion"
@@ -151,7 +157,7 @@ export const encodeEasPassport = async (credentials: VerifiableCredential[], cha
     { name: "expirationDates", value: expirationDates, type: "uint64[]" },
     // This will be used later for decoding provider mapping for scoring and within the resolver contract
     // Currently set to zero but should be updated whenever providerBitMapInfo.json is updated
-    { name: "providerMapVersion", value: BigNumber.from(0), type: "uint16" },
+    { name: "providerMapVersion", value: providerMapVersion, type: "uint16" },
   ]);
 
   return encodedData;
@@ -160,6 +166,54 @@ export const encodeEasPassport = async (credentials: VerifiableCredential[], cha
 type ValidatedCredential = {
   credential: VerifiableCredential;
   verified: boolean;
+};
+
+export const formatMultiAttestationRequestWithPassportAndScore = async (
+  credentials: ValidatedCredential[],
+  recipient: string,
+  chainIdHex: keyof typeof onchainInfo
+): Promise<MultiAttestationRequest[]> => {
+  const defaultRequestData = {
+    recipient,
+    expirationTime: NO_EXPIRATION,
+    revocable: true,
+    refUID: ZERO_BYTES32,
+    value: 0,
+  };
+
+  const stampRequestData: AttestationRequestData[] = [
+    {
+      ...defaultRequestData,
+      data: await encodeEasPassport(
+        credentials
+          .filter(({ verified }) => verified)
+          .map(({ credential }) => {
+            return credential;
+          }),
+        chainIdHex
+      ),
+    },
+  ];
+
+  const scoreRequestData: AttestationRequestData[] = [
+    {
+      ...defaultRequestData,
+      data: encodeEasScore(await fetchPassportScore(recipient)),
+    },
+  ];
+
+  const { easSchemas } = onchainInfo[chainIdHex];
+
+  return [
+    {
+      schema: easSchemas.passport.uid,
+      data: stampRequestData,
+    },
+    {
+      schema: easSchemas.score.uid,
+      data: scoreRequestData,
+    },
+  ];
 };
 
 export const formatMultiAttestationRequestWithScore = async (

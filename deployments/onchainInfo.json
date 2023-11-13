@@ -50,9 +50,6 @@
       "score": {
         "uid": "0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89"
       }
-    },
-    "GitcoinPassportDecoder": {
-      "address": "0xa180ec9260e20df46020505aB0D4d170629F2854 // TODO: update with valid deployment info"
     }
   },
   "0xe704": {
@@ -94,9 +91,6 @@
     },
     "GitcoinVeraxPortal": {
       "address": "0xECd3f8A3cC147b03356Fc2c2ac354baC8B21164E"
-    },
-    "GitcoinPassportDecoder": {
-      "address": "0xa180ec9260e20df46020505aB0D4d170629F2854 // TODO: update with valid deployment info"
     }
   },
   "0xe708": {
@@ -138,9 +132,6 @@
     },
     "GitcoinVeraxPortal": {
       "address": "0xCAa9E817f02486cE076560B77A86235Ef91c5d5D"
-    },
-    "GitcoinPassportDecoder": {
-      "address": "0xa180ec9260e20df46020505aB0D4d170629F2854 // TODO: update with valid deployment info"
     }
   }
 }

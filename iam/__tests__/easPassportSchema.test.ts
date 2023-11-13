@@ -2,7 +2,7 @@ import * as easPassportModule from "../src/utils/easPassportSchema";
 import * as easStampModule from "../src/utils/easStampSchema";
 import onchainInfo from "../../deployments/onchainInfo.json";
 
-import { VerifiableCredential } from "@gitcoin/passport-types";
+import { PROVIDER_ID, VerifiableCredential } from "@gitcoin/passport-types";
 import { BigNumber } from "ethers";
 import { NO_EXPIRATION, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";
 
@@ -20,7 +20,7 @@ const defaultRequestData = {
 
 describe("formatMultiAttestationRequestWithPassportAndScore", () => {
   it("should return formatted attestation request containing passport and score attestations", async () => {
-    jest.spyOn(easPassportModule, "encodeEasPassport").mockReturnValue("0x00000000000000000000000");
+    jest.spyOn(easPassportModule, "encodeEasPassport").mockResolvedValue("0x00000000000000000000000");
     jest.spyOn(easStampModule, "encodeEasScore").mockReturnValue("0x00000000000000000000000");
 
     const validatedCredentials = [
@@ -142,9 +142,10 @@ describe("formatPassportAttestationData", () => {
 
     jest.spyOn(easPassportModule, "buildProviderBitMap").mockReturnValue(passportAttestationStampMap);
 
-    const result: easPassportModule.PassportAttestationData = await easPassportModule.formatPassportAttestationData([
-      mockCredential,
-    ]);
+    const result: easPassportModule.PassportAttestationData = await easPassportModule.formatPassportAttestationData(
+      [mockCredential],
+      ["mockProvider"] as unknown as PROVIDER_ID[]
+    );
 
     // Check that the resulting providers array has the expected value
     // For the mockStamp, it should be [BigNumber.from(1 << 1)]
@@ -202,10 +203,10 @@ describe("formatPassportAttestationData", () => {
 
     jest.spyOn(easPassportModule, "buildProviderBitMap").mockReturnValue(passportAttestationStampMap);
 
-    const result: easPassportModule.PassportAttestationData = await easPassportModule.formatPassportAttestationData([
-      mockCredential,
-      mockCredential1,
-    ]);
+    const result: easPassportModule.PassportAttestationData = await easPassportModule.formatPassportAttestationData(
+      [mockCredential, mockCredential1],
+      ["mockProvider"] as unknown as PROVIDER_ID[]
+    );
 
     expect(result.providers).toEqual([BigNumber.from(1 << mockStamp.bit), BigNumber.from(1 << mockStamp1.bit)]);
 
@@ -288,12 +289,11 @@ describe("buildProviderBitMapInfo", () => {
   it("should correctly utilize the first bit of the new bitmap when a new bitmap is created", async () => {
     const stampNames = Array(257)
       .fill(null)
-      .map((_, idx) => `stamp${idx}`);
+      .map((_, idx) => `stamp${idx}`) as PROVIDER_ID[];
     const groupStamps = stampNames.map((name) => ({ name }));
     const group = { name: "group1", stamps: groupStamps };
-    const stampMetadata: easPassportModule.StampMetadata = [{ id: "1", name: "metadata1", groups: [group] }];
 
-    const bitmapInfo = easPassportModule.mapBitMapInfo(stampMetadata);
+    const bitmapInfo = easPassportModule.mapBitMapInfo(stampNames);
 
     expect(bitmapInfo[bitmapInfo.length - 2]).toEqual({ bit: 255, index: 0, name: "stamp255" });
     expect(bitmapInfo[bitmapInfo.length - 1]).toEqual({ bit: 0, index: 1, name: "stamp256" });
