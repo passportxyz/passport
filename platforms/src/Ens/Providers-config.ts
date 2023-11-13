@@ -5,7 +5,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/ensStampIcon.svg",
   platform: "Ens",
   name: "ENS",
-  description: "Purchase an .eth name to verify/ connect your existing account.",
+  description: "Connect to ENS to verify your ownership of your web3 domain name.",
   connectMessage: "Connect Account",
   isEVM: true,
   website: "https://ens.domains/",

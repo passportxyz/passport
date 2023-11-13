@@ -5,7 +5,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/pohStampIcon.svg",
   platform: "Poh",
   name: "Proof of Humanity",
-  description: "Connect your wallet to start the process of verifying with Proof of Humanity.",
+  description: "Connect to Proof of Humanity to verify your human identity on Web3.",
   connectMessage: "Connect Account",
   isEVM: true,
   website: "https://proofofhumanity.id/",

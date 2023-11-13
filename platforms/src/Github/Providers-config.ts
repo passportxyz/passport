@@ -7,7 +7,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/githubWhiteStampIcon.svg",
   platform: "Github",
   name: "Github",
-  description: "Connect your existing Github account to verify.",
+  description: "Connect to GitHub to verify your code contributions.",
   connectMessage: "Connect Account",
   website: "https://github.com",
 };

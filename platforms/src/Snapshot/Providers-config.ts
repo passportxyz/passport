@@ -5,7 +5,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/snapshotStampIcon.svg",
   platform: "Snapshot",
   name: "Snapshot",
-  description: "Connect your existing account to verify with Snapshot.",
+  description: "Connect to Snapshot to verify your DAO voting power.",
   connectMessage: "Verify Account",
   isEVM: true,
   website: "https://snapshot.org/",

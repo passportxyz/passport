@@ -5,7 +5,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/trustaLabsStampIcon.svg",
   platform: "TrustaLabs",
   name: "Trusta Labs",
-  description: "Launch Trusta's TrustScan to verify this account has non-Sybil behavior",
+  description: "Connect to Trusta Labs to verify your identity and reputation on Web3.",
   connectMessage: "Connect Account",
   website: "https://www.trustalabs.ai/",
 };

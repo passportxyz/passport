@@ -5,7 +5,8 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/phiLogoIcon.svg",
   platform: "PHI",
   name: "PHI",
-  description: "Connect your wallet to verify your phi activity.",
+  description: "Connect your Phi account and showcase your Phi quests.",
+  website: "https://philand.xyz/",
   connectMessage: "Verify Account",
   isEVM: true,
 };

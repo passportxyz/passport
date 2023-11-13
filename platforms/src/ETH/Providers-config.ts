@@ -6,7 +6,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/ethereumStampIcon.svg",
   platform: "ETH",
   name: "ETH",
-  description: "ETH possession and transaction verification",
+  description: "Connect to Ethereum to verify your network activity.",
   connectMessage: "Verify Account",
   isEVM: true,
   website: "https://ethereum.org",
