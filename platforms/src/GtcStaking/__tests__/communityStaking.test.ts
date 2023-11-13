@@ -124,9 +124,7 @@ describe("Attempt verification", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        stakeAmount: "bcs1gte5",
       },
-      errors: [],
     });
   });
 
@@ -139,7 +137,7 @@ describe("Attempt verification", function () {
         } as unknown as RequestPayload,
         {}
       );
-    }).rejects.toThrow("BeginnerCommunityStaker verifyStake: Error: Not a proper ethereum address.");
+    }).rejects.toThrow("Not a proper ethereum address");
   });
 
   it("handles invalid endpoint response", async () => {
@@ -155,6 +153,55 @@ describe("Attempt verification", function () {
         {}
       );
     }).rejects.toThrow(ProviderExternalVerificationError);
+  });
+
+  it("should combine stakes where applicable", async () => {
+    jest.clearAllMocks();
+    (axios.get as jest.Mock).mockImplementation(() => {
+      return Promise.resolve({
+        data: {
+          results: [
+            {
+              id: 1,
+              event_type: "Xstake",
+              round_id: 1,
+              staker: MOCK_ADDRESS_LOWER,
+              address: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+              amount: "3",
+              staked: true,
+              block_number: 14124991,
+              tx_hash: "0x12345",
+            },
+            {
+              id: 2,
+              event_type: "Xstake",
+              round_id: 1,
+              staker: MOCK_ADDRESS_LOWER,
+              address: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+              amount: "3",
+              staked: true,
+              block_number: 14124992,
+              tx_hash: "0x12346",
+            },
+          ],
+        },
+      });
+    });
+
+    const bcStaking = new BeginnerCommunityStakerProvider();
+    const bcStakingPayload = await bcStaking.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
+
+    expect(bcStakingPayload).toMatchObject({
+      valid: true,
+      record: {
+        address: MOCK_ADDRESS_LOWER,
+      },
+    });
   });
 });
 
@@ -179,9 +226,8 @@ describe("should return invalid payload", function () {
 
     expect(bcStakingPayload).toMatchObject({
       valid: false,
-      record: undefined,
       errors: [
-        "You are not staking enough on community members and/or community members are not staking enough on you 🥲",
+        "There are currently 0 community stakes of at least 5 GTC on/by your address, you need a minimum of 1 relevant community stakes to claim this stamp",
       ],
     });
   });
@@ -189,7 +235,7 @@ describe("should return invalid payload", function () {
   it("when a user is staking on 2 community members or is staked on by 2 community members below 10 GTC for ExperiencedCommunityStaker", async () => {
     jest.clearAllMocks();
     (axios.get as jest.Mock).mockImplementation(() => {
-      return Promise.resolve(gtcStakingResponse("6", 1, "ExperiencedCommunityStaker"));
+      return Promise.resolve(gtcStakingResponse("4", 1, "ExperiencedCommunityStaker"));
     });
 
     const ecsStaking = new ExperiencedCommunityStakerProvider();
@@ -202,16 +248,15 @@ describe("should return invalid payload", function () {
 
     expect(ecsStakingPayload).toMatchObject({
       valid: false,
-      record: undefined,
       errors: [
-        "You are not staking enough on community members and/or community members are not staking enough on you 🥲",
+        "There are currently 0 community stakes of at least 10 GTC on/by your address, you need a minimum of 2 relevant community stakes to claim this stamp",
       ],
     });
   });
 
-  it("when user is staked on by 5 community members with less that 20 GTC for TrustedCitizen", async () => {
+  it("when user is staked on by less than 5 community members with 20 GTC for TrustedCitizen", async () => {
     (axios.get as jest.Mock).mockImplementation(() => {
-      return Promise.resolve(gtcStakingResponse("18", 4, "TrustedCitizen"));
+      return Promise.resolve(gtcStakingResponse("25", 4, "TrustedCitizen"));
     });
 
     const tcStaking = new TrustedCitizenProvider();
@@ -224,9 +269,57 @@ describe("should return invalid payload", function () {
 
     expect(tcStakingPayload).toMatchObject({
       valid: false,
-      record: undefined,
       errors: [
-        "You are not staking enough on community members and/or community members are not staking enough on you 🥲",
+        "There are currently 4 community stakes of at least 20 GTC on/by your address, you need a minimum of 5 relevant community stakes to claim this stamp",
+      ],
+    });
+  });
+
+  it("should comprehend unstaking", async () => {
+    jest.clearAllMocks();
+    (axios.get as jest.Mock).mockImplementation(() => {
+      return Promise.resolve({
+        data: {
+          results: [
+            {
+              id: 1,
+              event_type: "Xstake",
+              round_id: 1,
+              staker: MOCK_ADDRESS_LOWER,
+              address: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+              amount: "10",
+              staked: true,
+              block_number: 14124991,
+              tx_hash: "0x12345",
+            },
+            {
+              id: 2,
+              event_type: "Xstake",
+              round_id: 1,
+              staker: MOCK_ADDRESS_LOWER,
+              address: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+              amount: "6",
+              staked: false,
+              block_number: 14124992,
+              tx_hash: "0x12346",
+            },
+          ],
+        },
+      });
+    });
+
+    const bcStaking = new BeginnerCommunityStakerProvider();
+    const bcStakingPayload = await bcStaking.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
+
+    expect(bcStakingPayload).toMatchObject({
+      valid: false,
+      errors: [
+        "There are currently 0 community stakes of at least 5 GTC on/by your address, you need a minimum of 1 relevant community stakes to claim this stamp",
       ],
     });
   });
@@ -255,9 +348,7 @@ describe("should return valid payload", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        stakeAmount: "bcs1gte5",
       },
-      errors: [],
     });
   });
 
@@ -278,9 +369,7 @@ describe("should return valid payload", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        stakeAmount: "ecs2gte10",
       },
-      errors: [],
     });
   });
 
@@ -301,9 +390,7 @@ describe("should return valid payload", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        stakeAmount: "tc5gte20",
       },
-      errors: [],
     });
   });
   // All values equal to tier amount
@@ -324,9 +411,7 @@ describe("should return valid payload", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        stakeAmount: "bcs1gte5",
       },
-      errors: [],
     });
   });
 
@@ -347,9 +432,7 @@ describe("should return valid payload", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        stakeAmount: "ecs2gte10",
       },
-      errors: [],
     });
   });
 
@@ -370,9 +453,7 @@ describe("should return valid payload", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        stakeAmount: "tc5gte20",
       },
-      errors: [],
     });
   });
 });
