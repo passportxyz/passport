@@ -1,6 +1,5 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
-import { coreAlbData } from '../../../passport-infra/aws/index';
 
 // Secret was created manually in Oregon `us-west-2`
 const IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
@@ -11,14 +10,18 @@ const route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
 const dockerGtcPassportIamImage = `${process.env["DOCKER_GTC_PASSPORT_IAM_IMAGE"]}`;
 
 const stack = pulumi.getStack();
-export const region = aws.getRegion({});
-export const regionId = region.then(r => r.id);
+const region = aws.getRegion({});
+const regionId = region.then(r => r.id);
 const coreInfraStack = new pulumi.StackReference(`gitcoin/core-infra/${stack}`);
 
 const vpcId = coreInfraStack.getOutput("vpcId");
 const vpcPrivateSubnets = coreInfraStack.getOutput("privateSubnetIds");
-const albData = coreInfraStack.getOutput("coreAlbData");
 const redisConnectionUrl = coreInfraStack.getOutput("staticRedisConnectionUrl");
+// ALB Data 
+const albDnsName = coreInfraStack.getOutput("coreAlbDns");
+const albZoneId = coreInfraStack.getOutput("coreAlbZoneId");
+const albHttpsListenerArn = coreInfraStack.getOutput("coreAlbHttpsListenerArn");
+// const albData = coreInfraStack.getOutput("coreAlbData");
 
 const defaultTags = {
     ManagedBy: "pulumi",
@@ -96,7 +99,7 @@ const albTargetGroup = new aws.lb.TargetGroup(`passport-iam`, {
 });
 
 const albListenerRule = new aws.lb.ListenerRule(`passport-iam-https`, {
-    listenerArn: coreAlbData.httpsListenerArn,
+    listenerArn: albHttpsListenerArn,
     actions: [{
         type: "forward",
         targetGroupArn: albTargetGroup.arn
@@ -432,13 +435,12 @@ const ecsTarget = new aws.appautoscaling.Target("autoscaling_target", {
 });
 
 const serviceRecord = new aws.route53.Record("passport-record", {
-    // TODO: fix this !!!
     name: route53Domain,
     zoneId: route53Zone,
     type: "A",
     aliases: [{
-      name: coreAlbData.dns,
-      zoneId: coreAlbData.zoneId,
+      name: albDnsName,
+      zoneId: albZoneId,
       evaluateTargetHealth: true
     }]
 });
