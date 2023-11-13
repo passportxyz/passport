@@ -29,10 +29,7 @@ const currentPlatform: PlatformSpec = {
   connectMessage: "Connect message",
   isEVM: false,
   enablePlatformCardUpdate: false,
-  website: {
-    uri: "https://platform.website",
-    display: "Platform website",
-  },
+  website: "https://platform.website",
 };
 
 const selectedProviders: PROVIDER_ID[] = ["FirstEthTxnProvider"];
