@@ -35,7 +35,7 @@ export class GitcoinPassportDecoder {
   }
 
   async #providersNeedUpdate(): Promise<boolean> {
-    const lastUpdate = await this.cache.get("ethPriceLastUpdate");
+    const lastUpdate = await this.cache.get("decodedProvidersLastUpdate");
     const lastUpdateTimestamp = Date.now() - Number(lastUpdate || Date.now());
     const twelveHrs = 1000 * 60 * 60 * 12;
     return lastUpdateTimestamp > twelveHrs;
@@ -46,6 +46,7 @@ export class GitcoinPassportDecoder {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
       const providers = await this.contract.getProviders(providerVersion);
       await this.cache.set("decodedProviders", JSON.stringify(providers));
+      await this.cache.set("decodedProvidersLastUpdate", Date.now().toString());
       return providers as unknown as PROVIDER_ID[];
     }
 
