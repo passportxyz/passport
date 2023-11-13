@@ -63,21 +63,15 @@ export type StampClaimForPlatform = {
 
 export interface StampClaimingContextState {
   claimCredentials: (
-    handleClaimStep: (
-      step: number,
-      status: string,
-    ) => Promise<void>,
-    platformGroups: StampClaimForPlatform[], 
+    handleClaimStep: (step: number, status: string) => Promise<string>,
+    platformGroups: StampClaimForPlatform[]
   ) => Promise<void>;
 }
 
 const startingState: StampClaimingContextState = {
   claimCredentials: async (
-    handleClaimStep: (
-      step: number,
-      status: string,
-    ) => Promise<void>,
-    platformGroups: StampClaimForPlatform[],
+    handleClaimStep: (step: number, status: string) => Promise<string>,
+    platformGroups: StampClaimForPlatform[]
   ) => {},
 };
 
@@ -135,21 +129,20 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
 
   // fetch VCs from IAM server
   const claimCredentials = async (
-    handleClaimStep: (
-      step: number,
-      status: string,
-    ) => Promise<void>,
+    handleClaimStep: (step: number, status: string) => Promise<string>,
     platformGroups: StampClaimForPlatform[]
   ): Promise<any> => {
     for (let i = 0; i < platformGroups.length; i++) {
       const { platformId, selectedProviders } = platformGroups[i];
 
-      if (platformId !== "EVMBulkVerify") await handleClaimStep(i, "wait_confirmation");
-      
+      if (platformId !== "EVMBulkVerify") {
+        const value = await handleClaimStep(i, "wait_confirmation");
+      }
+
       try {
         datadogLogs.logger.info("Saving Stamp", { platform: platformId });
         const platform = platforms.get(platformId as PLATFORM_ID)?.platform;
-        
+
         if (platformId !== "EVMBulkVerify") await handleClaimStep(i, "in_progress");
 
         if ((platform || platformId === "EVMBulkVerify") && selectedProviders.length > 0) {
@@ -180,7 +173,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
               return;
             }
           }
-          
+
           const verifyCredentialsResponse = await fetchVerifiableCredential(
             iamUrl,
             {
