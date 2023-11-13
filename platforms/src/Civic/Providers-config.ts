@@ -6,8 +6,9 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/civicStampIcon.svg",
   platform: "Civic",
   name: "Civic",
-  description: "Civic Profile Verification",
+  description: "Connect to Civic to verify your identity.",
   connectMessage: "Verify Account",
+  website: "https://www.civic.com",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

@@ -5,10 +5,10 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/holonymStampIcon.svg",
   platform: "Holonym",
   name: "Holonym",
-  description:
-    "To verify your Holo, mint your Holo at app.holonym.id and then prove uniqueness at app.holonym.id/prove/uniqueness",
+  description: "Connect to Holonym to verify your identity without revealing any personal information.",
   connectMessage: "Connect Account",
   isEVM: true,
+  website: "https://holonym.id/",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

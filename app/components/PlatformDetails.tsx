@@ -117,7 +117,18 @@ export const PlatformDetails = ({
         <h2 className="ml-4 text-2xl">{currentPlatform?.name}</h2>
         {!!verifiedProviders?.length && <PlatformJsonButton platformPassportData={platformPassportData} />}
       </div>
-      <p className="mt-8 text-base md:w-8/12">{currentPlatform?.description}</p>
+      {currentPlatform?.website ? (
+        <a
+          className="mt-8 inline-block text-base hover:underline md:w-8/12"
+          href={currentPlatform?.website}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {currentPlatform?.description}
+        </a>
+      ) : (
+        <p className="mt-8 text-base md:w-8/12">{currentPlatform?.description}</p>
+      )}
       {bannerConfig && <GenericBanner banner={bannerConfig} />}
       <hr className="mt-4 border-foreground-3" />
       <div className="my-4 grid grid-cols-[1fr_2px_1fr] gap-y-4 text-center">

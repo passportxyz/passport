@@ -5,9 +5,10 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/brightidStampIcon.svg",
   platform: "Brightid",
   name: "BrightID",
-  description: "Connect your BrightID",
+  description: "Connect to BrightID to verify your identity on Web3 without revealing any personal information.",
   connectMessage: "Connect Account",
   isEVM: true,
+  website: "https://brightid.org/",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
