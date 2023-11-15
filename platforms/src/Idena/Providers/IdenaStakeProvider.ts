@@ -22,7 +22,6 @@ abstract class IdenaStakeProvider implements Provider {
     this.minStake = minStake;
   }
 
-  // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload, context: IdenaContext): Promise<VerifiedPayload> {
     const token = payload.proofs.sessionKey;
     const { valid, address, expiresInSeconds, errors } = await checkStake(token, context, this.minStake);

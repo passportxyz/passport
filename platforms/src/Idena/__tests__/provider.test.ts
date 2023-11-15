@@ -220,8 +220,8 @@ describe("Check valid cases for state providers", function () {
   });
 
   it("Incorrect state", async () => {
-    identityResponse.data.result.state = "Verified";
-    const provider = new IdenaStateNewbieProvider();
+    identityResponse.data.result.state = "Newbie";
+    const provider = new IdenaStateVerifiedProvider();
     const payload = {
       proofs: {
         sessionKey: MOCK_SESSION_KEY,
@@ -232,13 +232,33 @@ describe("Check valid cases for state providers", function () {
     expect(verifiedPayload).toEqual(
       expect.objectContaining({
         valid: false,
-        errors: [`State "${identityResponse.data.result.state}" does not match required state "Newbie"`],
+        errors: [`State "${identityResponse.data.result.state}" does not match acceptable state(s) Verified, Human`],
       })
     );
   });
 
   it("Expected Verified state", async () => {
     identityResponse.data.result.state = "Verified";
+    const provider = new IdenaStateVerifiedProvider();
+    const payload = {
+      proofs: {
+        sessionKey: MOCK_SESSION_KEY,
+      },
+    };
+    const verifiedPayload = await provider.verify(payload as unknown as RequestPayload, {} as IdenaContext);
+
+    expect(verifiedPayload).toEqual({
+      valid: true,
+      record: {
+        address: MOCK_ADDRESS,
+        state: "Verified",
+      },
+      expiresInSeconds: 86401,
+    });
+  });
+
+  it("Higher states acceptable for lower state stamps", async () => {
+    identityResponse.data.result.state = "Human";
     const provider = new IdenaStateVerifiedProvider();
     const payload = {
       proofs: {
