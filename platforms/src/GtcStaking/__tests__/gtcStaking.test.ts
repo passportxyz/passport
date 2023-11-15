@@ -5,7 +5,7 @@ describe("GtcStakingProvider", () => {
   beforeAll(() => {
     process.env.GTC_STAKING_ROUNDS =
       // eslint-disable-next-line prettier/prettier, quotes
-      '[{"id": 4, "start": 1693526400, "duration": 7592340}, {"id": 5, "start": 1701118740, "duration": 7592340}]';
+      '[{"id": 4, "start": 1693526400, "duration": 7592340}, {"id": 5, "start": 1701118741, "duration": 8157658}]';
   });
   afterEach(() => {
     jest.restoreAllMocks();

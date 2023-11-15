@@ -318,8 +318,8 @@ const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
               valueFrom: `${IAM_SERVER_SSM_ARN}:GTC_STAKING_GRAPH_API_KEY::`,
             },
             {
-              name: "GTC_STAKING_ROUND",
-              valueFrom: `${IAM_SERVER_SSM_ARN}:GTC_STAKING_ROUND::`,
+              name: "GTC_STAKING_ROUNDS",
+              valueFrom: `${IAM_SERVER_SSM_ARN}:GTC_STAKING_ROUNDS::`,
             },
             {
               name: "COINBASE_CLIENT_ID",
