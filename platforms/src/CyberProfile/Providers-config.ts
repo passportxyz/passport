@@ -16,8 +16,8 @@ export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "CyberProfile Handle",
     providers: [
-      { title: "Premium CyberProfile Handle ( length is between 1 and 6 characters )", name: "CyberProfilePremium" },
-      { title: "Paid CyberProfile Handle ( length is between 7 and 12 characters )", name: "CyberProfilePaid" },
+      { title: "Premium CyberProfile Handle ( length is 6 characters or less )", name: "CyberProfilePremium" },
+      { title: "Paid CyberProfile Handle ( length is 12 characters or less )", name: "CyberProfilePaid" },
       { title: "Organization Membership", name: "CyberProfileOrgMember" },
     ],
   },
