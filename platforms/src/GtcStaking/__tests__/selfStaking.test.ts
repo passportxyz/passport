@@ -20,6 +20,10 @@ const round = 1;
 const gtcStakingEndpoint = `${process.env.PASSPORT_SCORER_BACKEND}registry/gtc-stake`;
 const apiKey = process.env.SCORER_API_KEY;
 
+process.env.GTC_STAKING_ROUNDS =
+  // eslint-disable-next-line prettier/prettier, quotes
+  '[{"id": 4, "start": 1693526400, "duration": 7592340}, {"id": 5, "start": 1701118741, "duration": 8157658}]';
+
 const invalidGtcStakingResponse = {
   status: 500,
   data: {},
