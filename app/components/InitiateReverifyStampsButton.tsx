@@ -8,26 +8,38 @@ import { CeramicContext, platforms } from "../context/ceramicContext";
 import { Modal, ModalContent, ModalOverlay, useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "./DoneToastContent";
 import { STAMP_PROVIDERS } from "../config/providers";
-import { getProviderIdsFromPlatformId } from "./ExpiredStampModal";
-import { PLATFORM_ID } from "@gitcoin/passport-types";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { LoadButton } from "./LoadButton";
 import { getPlatformSpec } from "../config/platforms";
 // -- Utils
 import { StampClaimForPlatform, StampClaimingContext } from "../context/stampClaimingContext";
 
+export const getProviderIdsFromPlatformId = (platformId: PLATFORM_ID): PROVIDER_ID[] => {
+  return STAMP_PROVIDERS[platformId as PLATFORM_ID].flatMap((x) => x.providers.map((y) => y.name));
+};
+
 export type ExpiredStampModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  setCurrentStepInProgress: (arg0: boolean) => void;
+  currentStepInProgress: boolean;
+  isReverifyingStamps: boolean;
+  setIsReverifyingStamps: (arg0: boolean) => void;
 };
 
 type WaitCondition = {
   doContinue: () => void;
 };
 
-export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps) => {
+export const ReverifyStampsModal = ({
+  isOpen,
+  onClose,
+  setCurrentStepInProgress,
+  currentStepInProgress,
+  isReverifyingStamps,
+  setIsReverifyingStamps,
+}: ExpiredStampModalProps) => {
   const { expiredProviders } = useContext(CeramicContext);
-  const [isReverifyingStamps, setIsReverifyingStamps] = useState(false);
-  const [currentStepCompleted, setCurrentStepCompleted] = useState(true);
   const { claimCredentials } = useContext(StampClaimingContext);
   const [waitForNext, setWaitForNext] = useState<WaitCondition>();
   const toast = useToast();
@@ -53,9 +65,10 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
   });
 
   const handleClaimStep = async (step: number, status: string): Promise<void> => {
-    setCurrentStepCompleted(false);
+    setCurrentStepInProgress(false);
+
     if (status === "in_progress") {
-      setCurrentStepCompleted(true);
+      setCurrentStepInProgress(true);
     } else {
       return new Promise<void>((resolve) => {
         setWaitForNext({ doContinue: resolve });
@@ -137,12 +150,20 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
             <Button onClick={onClose} variant="secondary">
               Cancel
             </Button>
-            {isReverifyingStamps ? (
-              <LoadButton data-testid="delete-duplicate" onClick={handleNextClick} isLoading={currentStepCompleted}>
+            {!isReverifyingStamps ? (
+              <LoadButton
+                data-testid="reverify-next-button"
+                onClick={currentStepInProgress ? handleNextClick : reverifyStamps}
+                isLoading={currentStepInProgress}
+              >
                 Next
               </LoadButton>
             ) : (
-              <LoadButton data-testid="delete-duplicate" onClick={reverifyStamps} isLoading={isReverifyingStamps}>
+              <LoadButton
+                data-testid="reverify-initial-button"
+                onClick={reverifyStamps}
+                isLoading={isReverifyingStamps}
+              >
                 Reverify Stamps
               </LoadButton>
             )}
@@ -153,15 +174,37 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
   );
 };
 
-const InitiateReverifyStampsButton = ({ className }: { className?: string }) => {
+export const InitiateReverifyStampsButton = ({ className }: { className?: string }) => {
   const [showExpiredStampsModal, setShowExpiredStampsModal] = useState<boolean>(false);
+  const [currentStepInProgress, setCurrentStepInProgress] = useState(true);
+  const [isReverifyingStamps, setIsReverifyingStamps] = useState(false);
+
+  const handleClose = () => {
+    setShowExpiredStampsModal(false);
+    setCurrentStepInProgress(false);
+    setIsReverifyingStamps(false);
+  };
+
+  const handleOpen = () => {
+    setShowExpiredStampsModal(true);
+    // if (currentStepInProgress) setIsReverifyingStamps(false);
+  };
 
   return (
     <>
-      <Button className={`${className}`} onClick={() => setShowExpiredStampsModal(true)}>
+      <Button data-testid="reverify-button" className={`${className}`} onClick={handleOpen}>
         Reverify stamps
       </Button>
-      {showExpiredStampsModal && <ReverifyStampsModal isOpen={true} onClose={() => setShowExpiredStampsModal(false)} />}
+      {showExpiredStampsModal && (
+        <ReverifyStampsModal
+          isOpen={true}
+          onClose={handleClose}
+          setCurrentStepInProgress={setCurrentStepInProgress}
+          currentStepInProgress={currentStepInProgress}
+          setIsReverifyingStamps={setIsReverifyingStamps}
+          isReverifyingStamps={isReverifyingStamps}
+        />
+      )}
     </>
   );
 };

@@ -135,11 +135,11 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
     for (let i = 0; i < platformGroups.length; i++) {
       try {
         const { platformId, selectedProviders } = platformGroups[i];
-        if (platformId !== "EVMBulkVerify") await handleClaimStep(i, "wait_confirmation");
+        if (platformId !== "EVMBulkVerify" && i > 0) await handleClaimStep(i, "wait_confirmation");
         datadogLogs.logger.info("Saving Stamp", { platform: platformId });
         const platform = platforms.get(platformId as PLATFORM_ID)?.platform;
 
-        if (platformId !== "EVMBulkVerify") await handleClaimStep(i, "in_progress");
+        await handleClaimStep(i, "in_progress");
 
         if ((platform || platformId === "EVMBulkVerify") && selectedProviders.length > 0) {
           // We set the providerPayload to be {} by default
