@@ -18,14 +18,26 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
+const mockTokenAddress = "0x06012c8cf97bead5deae237070f9587f8e7a266d";
+const mockTokenId = "100000";
+
+const mockContracts = [
+  {
+    address: mockTokenAddress,
+    tokenId: mockTokenId,
+  },
+];
+
 describe("Attempt verification", function () {
   it.each([
     [400, 1, false],
     [500, 200, false],
   ])(
-    " - when exeption is thrown with status of %p and totalCount is %p valid es expected to be %p",
+    " - when exception is thrown with status of %p and totalCount is %p valid es expected to be %p",
     async (httpStatus, totalCount: number, expectedValid: boolean) => {
-      (axios.get as jest.Mock).mockRejectedValueOnce("bad request");
+      (axios.get as jest.Mock).mockImplementationOnce(() => {
+        throw new Error("bad request");
+      });
       const nftProvider = new NFTProvider();
       await expect(async () => {
         return await nftProvider.verify({
@@ -33,7 +45,7 @@ describe("Attempt verification", function () {
         } as unknown as RequestPayload);
       }).rejects.toThrow(
         // eslint-disable-next-line quotes
-        new ProviderExternalVerificationError("NFT check error: {}")
+        new Error("bad request")
       );
 
       // Check the request to get the NFTs
@@ -43,6 +55,7 @@ describe("Attempt verification", function () {
           withMetadata: "false",
           owner: MOCK_ADDRESS_LOWER,
           pageSize: 1,
+          orderBy: "transferTime",
         },
       });
     }
@@ -53,7 +66,7 @@ describe("Attempt verification", function () {
         status: 200,
         data: {
           totalCount: 0,
-          ownedNfts: [],
+          contracts: [],
         },
       });
     });
@@ -67,7 +80,7 @@ describe("Attempt verification", function () {
     expect(nftPayload).toEqual({
       valid: false,
       record: undefined,
-      errors: ["You do not have the required amount of NFTs -- Your NFT count: 0."],
+      errors: ["You do not own any NFTs."],
     });
   });
   it.each([
@@ -81,7 +94,7 @@ describe("Attempt verification", function () {
           status: httpStatus,
           data: {
             totalCount: totalCount,
-            ownedNfts: [],
+            contracts: mockContracts,
           },
         });
       });
@@ -99,13 +112,14 @@ describe("Attempt verification", function () {
           withMetadata: "false",
           owner: MOCK_ADDRESS_LOWER,
           pageSize: 1,
+          orderBy: "transferTime",
         },
       });
       expect(nftPayload).toEqual({
         valid: true,
         record: {
-          address: MOCK_ADDRESS_LOWER,
-          "NFT#numNFTsGte": "1",
+          tokenAddress: mockTokenAddress,
+          tokenId: mockTokenId,
         },
         errors: [],
       });
