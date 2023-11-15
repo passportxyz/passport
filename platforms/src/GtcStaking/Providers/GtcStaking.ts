@@ -45,6 +45,12 @@ export type GtcStakingProviderOptions = {
   thresholdAmount: BigNumber;
 };
 
+export type RoundData = {
+  id: number;
+  start: number;
+  duration: number;
+};
+
 export class GtcStakingProvider implements Provider {
   type: PROVIDER_ID;
   thresholdAmount: BigNumber;
@@ -67,18 +73,25 @@ export class GtcStakingProvider implements Provider {
     return address;
   }
 
+  getCurrentRound(): number {
+    const stakingRounds = JSON.parse(process.env.GTC_STAKING_ROUNDS) as RoundData[];
+    const currentRound = stakingRounds.find((round) => {
+      const now = Date.now() / 1000;
+      return now >= round.start && now < round.start + round.duration;
+    });
+    return currentRound?.id || 0;
+  }
+
   async getStakes(payload: RequestPayload, context: GtcStakingContext): Promise<UserStake> {
     try {
       if (!context.gtcStaking?.userStake) {
-        const round = process.env.GTC_STAKING_ROUND || "1";
+        const round = this.getCurrentRound();
         const address = payload.address.toLowerCase();
 
         const selfStakes: Stake[] = [];
         const communityStakes: Stake[] = [];
 
-        const response: StakeResponse = await axios.get(`${gtcStakingEndpoint}/${address}/${round}`, {
-          headers: { Authorization: `Bearer ${apiKey}` },
-        });
+        const response: StakeResponse = await axios.get(`${gtcStakingEndpoint}/${address}/${round}`);
 
         const results: Stake[] = response?.data?.results;
         if (!results) throw new ProviderExternalVerificationError("No results returned from the GTC Staking API");
