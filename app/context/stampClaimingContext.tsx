@@ -1,5 +1,5 @@
 // --- Methods
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
@@ -66,6 +66,7 @@ export interface StampClaimingContextState {
     handleClaimStep: (step: number, status: string) => Promise<void>,
     platformGroups: StampClaimForPlatform[]
   ) => Promise<void>;
+  status: string;
 }
 
 const startingState: StampClaimingContextState = {
@@ -73,6 +74,7 @@ const startingState: StampClaimingContextState = {
     handleClaimStep: (step: number, status: string) => Promise<void>,
     platformGroups: StampClaimForPlatform[]
   ) => {},
+  status: "idle",
 };
 
 export const StampClaimingContext = createContext(startingState);
@@ -82,6 +84,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
   const address = useWalletStore((state) => state.address);
   const signer = useSigner();
   const toast = useToast();
+  const [status, setStatus] = useState("idle");
 
   const handleSponsorship = async (platform: PlatformClass, result: string): Promise<void> => {
     if (result === "success") {
@@ -129,19 +132,27 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
 
   // fetch VCs from IAM server
   const claimCredentials = async (
-    handleClaimStep: (step: number, status: string) => Promise<void>,
+    handleClaimStep: (step: number, status: string, platformId?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
     platformGroups: StampClaimForPlatform[]
   ): Promise<any> => {
+    // In `step` we count the number of steps / platforms we are processing.
+    // This will differnet form i because we may skip some platforms that have no expired
+    // providers
+    let step = -1;
     for (let i = 0; i < platformGroups.length; i++) {
+      setStatus("idle");
       try {
         const { platformId, selectedProviders } = platformGroups[i];
-        if (platformId !== "EVMBulkVerify" && i > 0) await handleClaimStep(i, "wait_confirmation");
-        datadogLogs.logger.info("Saving Stamp", { platform: platformId });
         const platform = platforms.get(platformId as PLATFORM_ID)?.platform;
 
-        await handleClaimStep(i, "in_progress");
-
         if ((platform || platformId === "EVMBulkVerify") && selectedProviders.length > 0) {
+          step++;
+          await handleClaimStep(step, "wait_confirmation", platformId);
+          datadogLogs.logger.info("Saving Stamp", { platform: platformId });
+          await handleClaimStep(step, "in_progress", platformId);
+          console.log("geri selectedProviders", selectedProviders);
+          setStatus("in_progress");
+
           // We set the providerPayload to be {} by default
           // This is ok if platformId === "EVMBulkVerify"
           // For other platforms the correct providerPayload will be set below
@@ -202,11 +213,13 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
         datadogLogs.logger.error("Verification Error", { error: e, platform: platformGroups[i] });
       }
     }
+    setStatus("idle");
     await handleClaimStep(-1, "all_done");
   };
 
   const providerProps = {
     claimCredentials,
+    status,
   };
 
   return <StampClaimingContext.Provider value={providerProps}>{children}</StampClaimingContext.Provider>;

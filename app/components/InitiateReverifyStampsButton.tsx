@@ -21,28 +21,20 @@ export const getProviderIdsFromPlatformId = (platformId: PLATFORM_ID): PROVIDER_
 export type ExpiredStampModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  setCurrentStepInProgress: (arg0: boolean) => void;
-  currentStepInProgress: boolean;
-  isReverifyingStamps: boolean;
-  setIsReverifyingStamps: (arg0: boolean) => void;
 };
 
 type WaitCondition = {
   doContinue: () => void;
 };
 
-export const ReverifyStampsModal = ({
-  isOpen,
-  onClose,
-  setCurrentStepInProgress,
-  currentStepInProgress,
-  isReverifyingStamps,
-  setIsReverifyingStamps,
-}: ExpiredStampModalProps) => {
+export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps) => {
   const { expiredProviders } = useContext(CeramicContext);
-  const { claimCredentials } = useContext(StampClaimingContext);
+  const { claimCredentials, status } = useContext(StampClaimingContext);
   const [waitForNext, setWaitForNext] = useState<WaitCondition>();
-  const [initialStepCompleted, setInitialStepCompleted] = useState(false);
+  // const [initialStepCompleted, setInitialStepCompleted] = useState(false);
+  const [currentStepInProgress, setCurrentStepInProgress] = useState(true);
+  const [isReverifyingStamps, setIsReverifyingStamps] = useState(false);
+
   const toast = useToast();
 
   const successToast = () => {
@@ -65,15 +57,22 @@ export const ReverifyStampsModal = ({
     return possibleProviders.filter((provider) => expiredProviders.includes(provider)).length > 0;
   });
 
-  const handleClaimStep = async (step: number, status: string): Promise<void> => {
-    // if (initialStepCompleted) {
-    //   setInitialStepCompleted(false);
-    // }
-    setCurrentStepInProgress(false);
-
+  const handleClaimStep = async (
+    step: number,
+    status: string,
+    platformId?: PLATFORM_ID | "EVMBulkVerify"
+  ): Promise<void> => {
+    console.log("geri - status,step", status, step, platformId);
     if (status === "in_progress") {
       setCurrentStepInProgress(true);
     } else {
+      if (step == 0) {
+        // We do not wait on the first step, the user has to click next only
+        // before getting to the next one
+        return;
+      }
+
+      setCurrentStepInProgress(false);
       return new Promise<void>((resolve) => {
         setWaitForNext({ doContinue: resolve });
       });
@@ -154,17 +153,17 @@ export const ReverifyStampsModal = ({
             <Button onClick={onClose} variant="secondary">
               Cancel
             </Button>
-            {isReverifyingStamps && initialStepCompleted ? (
+            {!isReverifyingStamps && status !== "in_progress" ? (
+              <LoadButton data-testid="reverify-initial-button" onClick={reverifyStamps}>
+                Reverify Stamps
+              </LoadButton>
+            ) : (
               <LoadButton
                 data-testid="reverify-next-button"
                 onClick={handleNextClick}
-                isLoading={currentStepInProgress}
+                isLoading={status === "in_progress"}
               >
                 Next
-              </LoadButton>
-            ) : (
-              <LoadButton data-testid="reverify-initial-button" onClick={reverifyStamps}>
-                Reverify Stamps
               </LoadButton>
             )}
           </div>
@@ -176,18 +175,13 @@ export const ReverifyStampsModal = ({
 
 export const InitiateReverifyStampsButton = ({ className }: { className?: string }) => {
   const [showExpiredStampsModal, setShowExpiredStampsModal] = useState<boolean>(false);
-  const [currentStepInProgress, setCurrentStepInProgress] = useState(true);
-  const [isReverifyingStamps, setIsReverifyingStamps] = useState(false);
 
   const handleClose = () => {
     setShowExpiredStampsModal(false);
-    setCurrentStepInProgress(false);
-    setIsReverifyingStamps(false);
   };
 
   const handleOpen = () => {
     setShowExpiredStampsModal(true);
-    if (currentStepInProgress) setIsReverifyingStamps(false);
   };
 
   return (
@@ -195,16 +189,7 @@ export const InitiateReverifyStampsButton = ({ className }: { className?: string
       <Button data-testid="reverify-button" className={`${className}`} onClick={handleOpen}>
         Reverify stamps
       </Button>
-      {showExpiredStampsModal && (
-        <ReverifyStampsModal
-          isOpen={true}
-          onClose={handleClose}
-          setCurrentStepInProgress={setCurrentStepInProgress}
-          currentStepInProgress={currentStepInProgress}
-          setIsReverifyingStamps={setIsReverifyingStamps}
-          isReverifyingStamps={isReverifyingStamps}
-        />
-      )}
+      {showExpiredStampsModal && <ReverifyStampsModal isOpen={true} onClose={handleClose} />}
     </>
   );
 };
