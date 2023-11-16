@@ -17,6 +17,7 @@ import Maintenance from "./Maintenance";
 import { datadogRum } from "@datadog/browser-rum";
 import { datadogLogs } from "@datadog/browser-logs";
 import { isServerOnMaintenance } from "../utils/helpers";
+import Script from "next/script";
 
 datadogRum.init({
   applicationId: process.env.NEXT_PUBLIC_DATADOG_APPLICATION_ID || "",
@@ -48,6 +49,16 @@ const App: NextPage = () => {
 
   return (
     <div>
+      <Script src="https://www.googletagmanager.com/gtag/js?id=UA-222069500-1" />
+      <Script id="google-analytics">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+        
+          gtag('config', 'UA-222069500-1');
+        `}
+      </Script>
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
