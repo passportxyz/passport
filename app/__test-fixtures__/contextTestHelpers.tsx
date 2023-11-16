@@ -152,6 +152,7 @@ export const makeTestClaimingContext = (
 ): StampClaimingContextState => {
   return {
     claimCredentials: jest.fn(),
+    status: "",
     ...initialState,
   };
 };
