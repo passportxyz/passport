@@ -63,7 +63,7 @@ export type StampClaimForPlatform = {
 
 export interface StampClaimingContextState {
   claimCredentials: (
-    handleClaimStep: (step: number, status: string) => Promise<void>,
+    handleClaimStep: (step: number, platformId?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
     platformGroups: StampClaimForPlatform[]
   ) => Promise<void>;
   status: string;
@@ -71,7 +71,7 @@ export interface StampClaimingContextState {
 
 const startingState: StampClaimingContextState = {
   claimCredentials: async (
-    handleClaimStep: (step: number, status: string) => Promise<void>,
+    handleClaimStep: (step: number, platformId?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
     platformGroups: StampClaimForPlatform[]
   ) => {},
   status: "idle",
@@ -132,7 +132,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
 
   // fetch VCs from IAM server
   const claimCredentials = async (
-    handleClaimStep: (step: number, status: string, platformId?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
+    handleClaimStep: (step: number, platformId?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
     platformGroups: StampClaimForPlatform[]
   ): Promise<any> => {
     // In `step` we count the number of steps / platforms we are processing.
@@ -147,10 +147,9 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
 
         if ((platform || platformId === "EVMBulkVerify") && selectedProviders.length > 0) {
           step++;
-          await handleClaimStep(step, "wait_confirmation", platformId);
+          await handleClaimStep(step, platformId);
           datadogLogs.logger.info("Saving Stamp", { platform: platformId });
-          await handleClaimStep(step, "in_progress", platformId);
-          console.log("geri selectedProviders", selectedProviders);
+          await handleClaimStep(step, platformId);
           setStatus("in_progress");
 
           // We set the providerPayload to be {} by default
@@ -214,7 +213,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
       }
     }
     setStatus("idle");
-    await handleClaimStep(-1, "all_done");
+    await handleClaimStep(-1);
   };
 
   const providerProps = {
