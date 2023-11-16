@@ -42,6 +42,7 @@ export const ReverifyStampsModal = ({
   const { expiredProviders } = useContext(CeramicContext);
   const { claimCredentials } = useContext(StampClaimingContext);
   const [waitForNext, setWaitForNext] = useState<WaitCondition>();
+  const [initialStepCompleted, setInitialStepCompleted] = useState(false);
   const toast = useToast();
 
   const successToast = () => {
@@ -65,6 +66,9 @@ export const ReverifyStampsModal = ({
   });
 
   const handleClaimStep = async (step: number, status: string): Promise<void> => {
+    // if (initialStepCompleted) {
+    //   setInitialStepCompleted(false);
+    // }
     setCurrentStepInProgress(false);
 
     if (status === "in_progress") {
@@ -150,20 +154,16 @@ export const ReverifyStampsModal = ({
             <Button onClick={onClose} variant="secondary">
               Cancel
             </Button>
-            {!isReverifyingStamps ? (
+            {isReverifyingStamps && initialStepCompleted ? (
               <LoadButton
                 data-testid="reverify-next-button"
-                onClick={currentStepInProgress ? handleNextClick : reverifyStamps}
+                onClick={handleNextClick}
                 isLoading={currentStepInProgress}
               >
                 Next
               </LoadButton>
             ) : (
-              <LoadButton
-                data-testid="reverify-initial-button"
-                onClick={reverifyStamps}
-                isLoading={isReverifyingStamps}
-              >
+              <LoadButton data-testid="reverify-initial-button" onClick={reverifyStamps}>
                 Reverify Stamps
               </LoadButton>
             )}
@@ -187,7 +187,7 @@ export const InitiateReverifyStampsButton = ({ className }: { className?: string
 
   const handleOpen = () => {
     setShowExpiredStampsModal(true);
-    // if (currentStepInProgress) setIsReverifyingStamps(false);
+    if (currentStepInProgress) setIsReverifyingStamps(false);
   };
 
   return (
