@@ -6,7 +6,12 @@ import { utils } from "ethers";
 import onchainInfo from "../../deployments/onchainInfo.json";
 
 jest.mock("../src/utils/scorerService", () => ({
-  fetchPassportScore: jest.fn(),
+  fetchPassportScore: jest.fn().mockImplementation(() => {
+    return Promise.resolve({
+      score: 10,
+      scorer_id: 335,
+    });
+  }),
 }));
 
 const ensProviderConfig = {
@@ -76,9 +81,6 @@ const defaultRequestData = {
 
 describe("formatMultiAttestationRequest", () => {
   it("should return formatted attestation request", async () => {
-    jest.spyOn(easStampModule, "encodeEasScore").mockReturnValue("0x00000000000000000000000");
-    jest.spyOn(easStampModule, "encodeEasStamp").mockReturnValue("0x00000000000000000000000");
-
     const validatedCredentials = [
       {
         credential: {
@@ -112,7 +114,7 @@ describe("formatMultiAttestationRequest", () => {
         data: [
           {
             ...defaultRequestData,
-            data: "0x00000000000000000000000",
+            data: expect.any(String),
           },
         ],
       },
@@ -121,7 +123,7 @@ describe("formatMultiAttestationRequest", () => {
         data: [
           {
             ...defaultRequestData,
-            data: "0x00000000000000000000000",
+            data: expect.any(String),
           },
         ],
       },

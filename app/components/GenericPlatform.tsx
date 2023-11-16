@@ -1,5 +1,5 @@
 // --- Methods
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
@@ -12,7 +12,7 @@ import {
   PLATFORM_ID,
   StampPatch,
 } from "@gitcoin/passport-types";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 
 // --- Style Components
 import { SideBarContent } from "./SideBarContent";
@@ -23,7 +23,7 @@ import { JsonOutputModal } from "./JsonOutputModal";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
-import { useSigner, useWalletStore } from "../context/walletStore";
+import { useWalletStore } from "../context/walletStore";
 import { waitForRedirect } from "../context/stampClaimingContext";
 
 // --- Types
@@ -32,10 +32,11 @@ import { PlatformClass } from "@gitcoin/passport-platforms";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 
 // --- Helpers
-import { difference, generateUID } from "../utils/helpers";
+import { createSignedPayload, difference, generateUID } from "../utils/helpers";
 
 import { datadogRum } from "@datadog/browser-rum";
 import { PlatformScoreSpec } from "../context/scorerContext";
+import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
@@ -68,13 +69,13 @@ export const GenericPlatform = ({
   onClose,
 }: GenericPlatformProps): JSX.Element => {
   const address = useWalletStore((state) => state.address);
-  const signer = useSigner();
   const { handlePatchStamps, verifiedProviderIds, userDid } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [verificationResponse, setVerificationResponse] = useState<CredentialResponseBody[]>([]);
   const [payloadModalIsOpen, setPayloadModalIsOpen] = useState(false);
+  const { did } = useDatastoreConnectionContext();
   // const { handleFetchCredential } = useContext(StampClaimingContext);
 
   // --- Chakra functions
@@ -153,6 +154,7 @@ export const GenericPlatform = ({
     datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
     setLoading(true);
     try {
+      if (!did) throw new Error("No DID found");
       const state = `${platform.path}-` + generateUID(10);
       const providerPayload = (await platform.getProviderPayload({
         state,
@@ -181,7 +183,7 @@ export const GenericPlatform = ({
           proofs: providerPayload,
           signatureType: IAM_SIGNATURE_TYPE,
         },
-        signer as { signMessage: (message: string) => Promise<string> }
+        (data: any) => createSignedPayload(did, data)
       );
 
       const verifiedCredentials =
@@ -246,6 +248,7 @@ export const GenericPlatform = ({
 
       setLoading(false);
     } catch (e) {
+      console.error(e);
       datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
       doneToast(
         "Verification Failed",

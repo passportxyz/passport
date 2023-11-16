@@ -8,18 +8,22 @@ import { EthereumWebAuth } from "@didtools/pkh-ethereum";
 import { DIDSession } from "did-session";
 import { DID } from "dids";
 import axios from "axios";
-import { Cacao } from "@didtools/cacao";
 import { AccountId } from "caip";
+import { MAX_VALID_DID_SESSION_AGE } from "@gitcoin/passport-identity";
 
 import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
 import { useToast } from "@chakra-ui/react";
 import { Eip1193Provider } from "ethers";
+import { createSignedPayload } from "../utils/helpers";
+
+const BUFFER_TIME_BEFORE_EXPIRATION = 60 * 60 * 1000;
 
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
 export type DatastoreConnectionContextState = {
   dbAccessTokenStatus: DbAuthTokenStatus;
   dbAccessToken?: string;
+  did?: DID;
   disconnect: () => Promise<void>;
   connect: (address: string, provider: Eip1193Provider) => Promise<void>;
 };
@@ -40,6 +44,8 @@ export const useDatastoreConnection = () => {
 
   const [dbAccessTokenStatus, setDbAccessTokenStatus] = useState<DbAuthTokenStatus>("idle");
   const [dbAccessToken, setDbAccessToken] = useState<string | undefined>();
+
+  const [did, setDid] = useState<DID>();
 
   useEffect(() => {
     // Clear status when wallet disconnected
@@ -81,37 +87,17 @@ export const useDatastoreConnection = () => {
     }
 
     const payloadToSign = { nonce };
+    const payloadForVerifier = {
+      ...(await createSignedPayload(did, payloadToSign)),
+      nonce,
+    };
 
-    // sign the payload as dag-jose
-    const { jws, cacaoBlock } = await did.createDagJWS(payloadToSign);
-
-    // Get the JWS & serialize it (this is what we would send to the BE)
-    const { link, payload, signatures } = jws;
-
-    if (cacaoBlock !== undefined) {
-      const cacao = await Cacao.fromBlockBytes(cacaoBlock);
-      const issuer = cacao.p.iss;
-
-      const payloadForVerifier = {
-        signatures: signatures,
-        payload: payload,
-        cid: Array.from(link ? link.bytes : []),
-        cacao: Array.from(cacaoBlock ? cacaoBlock : []),
-        issuer,
-        nonce: nonce,
-      };
-
-      try {
-        const authResponse = await axios.post(`${CERAMIC_CACHE_ENDPOINT}/authenticate`, payloadForVerifier);
-        const accessToken = authResponse.data?.access as string;
-        return accessToken;
-      } catch (error) {
-        const msg = `Failed to authenticate user with did: ${did.parent}`;
-        datadogRum.addError(msg);
-        throw msg;
-      }
-    } else {
-      const msg = `Failed to create DagJWS for did: ${did.parent}`;
+    try {
+      const authResponse = await axios.post(`${CERAMIC_CACHE_ENDPOINT}/authenticate`, payloadForVerifier);
+      const accessToken = authResponse.data?.access as string;
+      return accessToken;
+    } catch (error) {
+      const msg = `Failed to authenticate user with did: ${did.parent}`;
       datadogRum.addError(msg);
       throw msg;
     }
@@ -173,7 +159,14 @@ export const useDatastoreConnection = () => {
             // @ts-ignore
             !selfId ||
             // @ts-ignore
-            !selfId?.client?.session
+            !selfId?.client?.session ||
+            // @ts-ignore
+            selfId?.client?.session?.isExpired ||
+            // @ts-ignore
+            selfId?.client?.session?.expireInSecs < 3600 ||
+            // @ts-ignore
+            Date.now() - new Date(selfId?.client?.session?.cacao?.p?.iat).getTime() >
+              MAX_VALID_DID_SESSION_AGE - BUFFER_TIME_BEFORE_EXPIRATION
           ) {
             // If the session loaded is not valid, or if it is expired or close to expire, we create
             // a new session
@@ -198,16 +191,10 @@ export const useDatastoreConnection = () => {
             // Store the session in localstorage
             // @ts-ignore
             window.localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
-          } else if (
-            // @ts-ignore
-            selfId?.client?.session?.isExpired ||
-            // @ts-ignore
-            selfId?.client?.session?.expireInSecs < 3600
-          ) {
-            await handleConnectionError(sessionKey, dbCacheTokenKey);
           }
           if (selfId) {
             await loadDbAccessToken(address, selfId.did);
+            setDid(selfId.did);
           }
         } catch (error) {
           await handleConnectionError(sessionKey, dbCacheTokenKey);
@@ -233,9 +220,11 @@ export const useDatastoreConnection = () => {
   const disconnect = async () => {
     await disconnectWallet();
     disconnectCeramic();
+    setDid(undefined);
   };
 
   return {
+    did,
     connect,
     disconnect,
     dbAccessToken,
@@ -244,16 +233,17 @@ export const useDatastoreConnection = () => {
 };
 
 export const DatastoreConnectionContextProvider = ({ children }: { children: any }) => {
-  const { dbAccessToken, dbAccessTokenStatus, disconnect, connect } = useDatastoreConnection();
+  const { dbAccessToken, dbAccessTokenStatus, disconnect, connect, did } = useDatastoreConnection();
 
   const providerProps = useMemo(
     () => ({
+      did,
       connect,
       disconnect,
       dbAccessToken,
       dbAccessTokenStatus,
     }),
-    [dbAccessToken, dbAccessTokenStatus]
+    [dbAccessToken, dbAccessTokenStatus, did, connect, disconnect]
   );
 
   return <DatastoreConnectionContext.Provider value={providerProps}>{children}</DatastoreConnectionContext.Provider>;

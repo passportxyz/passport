@@ -8,12 +8,12 @@ import { mockAddress } from "../../../__test-fixtures__/onboardHookValues";
 import { STAMP_PROVIDERS } from "../../../config/providers";
 import { ensStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
 import { SUCCESFUL_ENS_RESULT } from "../../../__test-fixtures__/verifiableCredentialResults";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { makeTestCeramicContext, renderWithContext } from "../../../__test-fixtures__/contextTestHelpers";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { mock } from "jest-mock-extended";
 
-jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
+jest.mock("@gitcoin/passport-identity", () => ({
   fetchVerifiableCredential: jest.fn(),
 }));
 

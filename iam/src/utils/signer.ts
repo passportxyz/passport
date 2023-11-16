@@ -3,7 +3,7 @@ import type { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Credential verification
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-import { verifyCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { verifyCredential } from "@gitcoin/passport-identity";
 
 // ----- Verify signed message with ethers
 import { utils } from "ethers";

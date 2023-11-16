@@ -7,7 +7,6 @@ import {
   IssuedCredential,
   IssuedChallenge,
   CredentialResponseBody,
-  VerifiableCredentialRecord,
   SignatureType,
 } from "@gitcoin/passport-types";
 
@@ -23,6 +22,9 @@ import { createHash } from "crypto";
 // Keeping track of the hashing mechanism (algo + content)
 export const VERSION = "v0.0.0";
 
+const ONE_DAY_IN_MS = 1000 * 60 * 60 * 24;
+export const MAX_VALID_DID_SESSION_AGE = ONE_DAY_IN_MS;
+
 // EIP712 document types
 import {
   DocumentSignatureTypes,
@@ -30,7 +32,6 @@ import {
   DocumentType,
   stampCredentialDocument,
 } from "./signingDocuments";
-import { escape } from "querystring";
 
 // Control expiry times of issued credentials
 export const CHALLENGE_EXPIRES_AFTER_SECONDS = 60; // 1min
@@ -90,11 +91,11 @@ const _issueEd25519Credential = async (
   return JSON.parse(credential) as VerifiableCredential;
 };
 
-type CredentialExiresInSeconds = {
+type CredentialExpiresInSeconds = {
   expiresInSeconds: number;
 };
 
-type CredentialExiresAt = {
+type CredentialExpiresAt = {
   expiresAt: Date;
 };
 
@@ -110,7 +111,7 @@ type Eip712CredentialFields = {
 export const issueEip712Credential = async (
   DIDKit: DIDKitLib,
   key: string,
-  expiration: CredentialExiresInSeconds | CredentialExiresAt,
+  expiration: CredentialExpiresInSeconds | CredentialExpiresAt,
   // fields: { [k: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
   fields: Eip712CredentialFields,
   signingDocument: DocumentSignatureTypes<DocumentType>,
@@ -120,11 +121,11 @@ export const issueEip712Credential = async (
 
   const issuer = DIDKit.keyToDID("ethr", key);
 
-  const expiresInSeconds = (expiration as CredentialExiresInSeconds).expiresInSeconds;
+  const expiresInSeconds = (expiration as CredentialExpiresInSeconds).expiresInSeconds;
   const expirationDate =
     expiresInSeconds !== undefined
       ? addSeconds(new Date(), expiresInSeconds).toISOString()
-      : (expiration as CredentialExiresAt).expiresAt.toISOString();
+      : (expiration as CredentialExpiresAt).expiresAt.toISOString();
   const credentialInput = {
     "@context": ["https://www.w3.org/2018/credentials/v1", ...additionalContexts],
     type: ["VerifiableCredential"],
@@ -134,7 +135,6 @@ export const issueEip712Credential = async (
     ...fields,
   };
 
-  // const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);
   const options = signingDocument;
   const credential = await DIDKit.issueCredential(JSON.stringify(credentialInput), JSON.stringify(options), key);
 
@@ -327,28 +327,20 @@ export const fetchChallengeCredential = async (iamUrl: string, payload: RequestP
 export const fetchVerifiableCredential = async (
   iamUrl: string,
   payload: RequestPayload,
-  signer: { signMessage: (message: string) => Promise<string> } | undefined
-): Promise<VerifiableCredentialRecord> => {
-  // must provide signature for message
-  if (!signer) {
-    throw new Error("Unable to sign message without a signer");
-  }
-
+  createSignedPayload: (data: any) => Promise<any>
+): Promise<{ credentials: CredentialResponseBody[] }> => {
   // first pull a challenge that can be signed by the user
   const { challenge } = await fetchChallengeCredential(iamUrl, payload);
 
   // sign the challenge provided by the IAM
-  const signature = challenge.credentialSubject.challenge
-    ? (await signer.signMessage(challenge.credentialSubject.challenge)).toString()
+  const signedChallenge = challenge.credentialSubject.challenge
+    ? await createSignedPayload(challenge.credentialSubject.challenge)
     : "";
 
   // must provide signature for message
-  if (!signature) {
+  if (!signedChallenge) {
     throw new Error("Unable to sign message");
   }
-
-  // pass the signature as part of the proofs obj
-  payload.proofs = { ...payload.proofs, ...{ signature: signature } };
 
   // fetch a credential from the API that fits the version, payload and passes the signature message challenge
   const response: { data: CredentialResponseBody | CredentialResponseBody[] } = await axios.post(
@@ -356,16 +348,12 @@ export const fetchVerifiableCredential = async (
     {
       payload,
       challenge,
+      signedChallenge,
     }
   );
 
   // return everything that was used to create the credential (along with the credential)
   return {
-    signature,
-    challenge,
-    error: Array.isArray(response.data) ? null : response.data.error,
-    record: Array.isArray(response.data) ? null : response.data.record,
-    credential: Array.isArray(response.data) ? null : response.data.credential,
-    credentials: Array.isArray(response.data) ? response.data : null,
-  } as VerifiableCredentialRecord;
+    credentials: Array.isArray(response.data) ? response.data : [response.data],
+  };
 };

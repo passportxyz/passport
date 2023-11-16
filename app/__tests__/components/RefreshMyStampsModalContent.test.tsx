@@ -6,7 +6,7 @@ import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures
 import { useNavigate } from "react-router-dom";
 import { ValidatedPlatform } from "../../signer/utils";
 
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { reduceStampResponse } from "../../utils/helpers";
 import { CredentialResponseBody } from "@gitcoin/passport-types";
 import { IAM_SIGNATURE_TYPE } from "../../config/stamp_config";
@@ -15,7 +15,7 @@ jest.mock("react-router-dom", () => ({
   useNavigate: jest.fn(),
 }));
 
-jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
+jest.mock("@gitcoin/passport-identity", () => ({
   fetchVerifiableCredential: jest.fn().mockResolvedValue({ credentials: [] } as unknown as CredentialResponseBody),
 }));
 
@@ -43,11 +43,8 @@ const mockWalletState = {
   address: "0xmyAddress",
 };
 
-const mockSigner = jest.fn();
-
 jest.mock("../../context/walletStore", () => ({
   useWalletStore: (callback: (state: any) => any) => callback(mockWalletState),
-  useSigner: () => mockSigner,
 }));
 
 const validPlatforms: ValidatedPlatform[] = [
@@ -117,7 +114,7 @@ describe("RefreshMyStampsModalContent", () => {
           proofs: {},
           signatureType: IAM_SIGNATURE_TYPE,
         },
-        mockSigner
+        expect.any(Function)
       )
     );
   });

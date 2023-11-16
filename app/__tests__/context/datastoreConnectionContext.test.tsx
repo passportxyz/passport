@@ -107,32 +107,6 @@ describe("<UserContext>", () => {
     localStorage.setItem("connectedWallets", "[]");
   });
 
-  it("should delete localStorage item if session has expired", async () => {
-    const ceramicConnect = jest.fn().mockResolvedValueOnce({
-      client: {
-        session: {
-          isExpired: true,
-          expireInSecs: 3400,
-        },
-      },
-    });
-    (framework.useViewerConnection as jest.Mock).mockReturnValue([
-      { status: "connecting", selfID: { did: "did:test" } },
-      ceramicConnect,
-      jest.fn(),
-    ]);
-
-    localStorage.setItem("didsession-0xmyAddress", "eyJzZXNzaW9uS2V5U2VlZCI6IlF5cTN4aW9ubGxD...");
-
-    renderTestComponent();
-
-    expect(screen.getByTestId("session-id")).toHaveTextContent("eyJzZXNzaW9uS2V5U2VlZCI6IlF5cTN4aW9ubGxD...");
-
-    screen.getByRole("button").click();
-
-    await waitFor(() => expect(screen.getByTestId("session-id").textContent).toBe(""));
-  });
-
   describe("when using multichain", () => {
     beforeEach(async () => {
       const ceramicConnect = jest.fn().mockResolvedValueOnce({

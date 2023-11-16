@@ -6,13 +6,13 @@ import { mockAddress, mockWallet } from "../../../__test-fixtures__/onboardHookV
 import { STAMP_PROVIDERS } from "../../../config/providers";
 import { brightidStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
 import { SUCCESFUL_BRIGHTID_RESULT } from "../../../__test-fixtures__/verifiableCredentialResults";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { mock } from "jest-mock-extended";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { makeTestCeramicContext, renderWithContext } from "../../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../../context/ceramicContext";
 
-jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
+jest.mock("@gitcoin/passport-identity", () => ({
   fetchVerifiableCredential: jest.fn(),
 }));
 

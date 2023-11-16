@@ -1,23 +1,10 @@
 // ---- Testing libraries
 import request from "supertest";
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-import { PassportCache } from "@gitcoin/passport-platforms";
-
-// --- Mocks - test configuration
-
-process.env.IAM_JWK = DIDKit.generateEd25519Key();
-process.env.IAM_JWK_EIP712 =
-  '{"kty":"EC","crv":"secp256k1","x":"PdB2nS-knyAxc6KPuxBr65vRpW-duAXwpeXlwGJ03eU","y":"MwoGZ08hF5uv-_UEC9BKsYdJVSbJNHcFhR1BZWer5RQ","d":"z9VrSNNZXf9ywUx3v_8cLDhSw8-pvAT9qu_WZmqqfWM"}';
-process.env.ATTESTATION_SIGNER_PRIVATE_KEY = "0x04d16281ff3bf268b29cdd684183f72542757d24ae9fdfb863e7c755e599163a";
-process.env.ALLO_SCORER_ID = "1";
-process.env.SCORER_ENDPOINT = "http://127.0.0.1:8002";
-process.env.SCORER_API_KEY = "abcd";
-process.env.MORALIS_API_KEY = "abcd";
-process.env.EAS_GITCOIN_STAMP_SCHEMA = "0x";
+import { PassportCache, providers } from "@gitcoin/passport-platforms";
 
 // ---- Test subject
 import { app, config, getAttestationDomainSeparator } from "../src/index";
-import { providers } from "@gitcoin/passport-platforms";
 
 // ---- Types
 import {
@@ -34,10 +21,14 @@ import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-
 
 import { utils } from "ethers";
 import * as easFeesMock from "../src/utils/easFees";
-import * as identityMock from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import * as identityMock from "@gitcoin/passport-identity";
 import * as easSchemaMock from "../src/utils/easStampSchema";
 import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
 import { IAMError } from "../src/utils/scorerService";
+
+jest.mock("../src/utils/verifyDidChallenge", () => ({
+  verifyDidChallenge: jest.fn().mockImplementation(() => true),
+}));
 
 jest.mock("ethers", () => {
   const originalModule = jest.requireActual("ethers");
@@ -206,9 +197,6 @@ describe("POST /verify", function () {
       },
     };
 
-    // resolve the verification
-    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
-
     // check that ID matches the payload (this has been mocked)
     const expectedId = "did:pkh:eip155:1:0x0";
 
@@ -248,9 +236,6 @@ describe("POST /verify", function () {
       },
       signatureType: "EIP712",
     };
-
-    // resolve the verification
-    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
 
     // check that ID matches the payload (this has been mocked)
     const expectedId = "did:pkh:eip155:1:0x0";
@@ -292,9 +277,6 @@ describe("POST /verify", function () {
       },
       signatureType: "EIP712",
     };
-
-    // resolve the verification
-    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
 
     // check that ID matches the payload (this has been mocked)
     const expectedId = "did:pkh:eip155:1:0x0";
@@ -353,9 +335,6 @@ describe("POST /verify", function () {
       },
     };
 
-    // resolve the verification
-    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
-
     // check that ID matches the payload (this has been mocked)
     const expectedId = "did:pkh:eip155:1:0x0";
 
@@ -398,9 +377,6 @@ describe("POST /verify", function () {
       },
     };
 
-    // resolve the verification
-    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
-
     // check that ID matches the payload (this has been mocked)
     const expectedId = "did:pkh:eip155:1:0x0";
 
@@ -441,9 +417,6 @@ describe("POST /verify", function () {
         code: "SECRET_CODE",
       },
     };
-
-    // resolve the verification
-    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
 
     // spy on the providers
     jest
@@ -611,7 +584,7 @@ describe("POST /verify", function () {
   });
 
   it("handles exception if verify credential throws", async () => {
-    jest.spyOn(identityMock, "verifyCredential").mockRejectedValue("Verify Credential Error");
+    (identityMock.verifyCredential as jest.Mock).mockRejectedValueOnce(new Error("Verify Credential Error"));
 
     // challenge received from the challenge endpoint
     const challenge = {
@@ -642,7 +615,7 @@ describe("POST /verify", function () {
       .expect(500)
       .expect("Content-Type", /json/);
 
-    expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify payload");
+    expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify payload: Error");
   });
 
   it("handles invalid challenge request passed by the additional signer", async () => {
@@ -736,6 +709,7 @@ describe("POST /verify", function () {
       .expect("Content-Type", /json/);
   });
   it("should not issue credential for additional signer when invalid address is provided", async () => {
+    (identityMock.verifyCredential as jest.Mock).mockResolvedValueOnce(true);
     // challenge received from the challenge endpoint
     const challenge = {
       issuer: config.issuer,
@@ -770,9 +744,6 @@ describe("POST /verify", function () {
         },
       },
     };
-
-    // resolve the verification
-    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
 
     // create a req against the express app
     await request(app)
@@ -913,7 +884,6 @@ describe("POST /eas", () => {
   let formatMultiAttestationRequestSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
     getEASFeeAmountSpy = jest
       .spyOn(easFeesMock, "getEASFeeAmount")
       .mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
@@ -1150,11 +1120,10 @@ describe("POST /eas", () => {
 });
 
 describe("POST /eas/passport", () => {
-  let verifyCredentialSpy: jest.SpyInstance;
   let formatMultiAttestationRequestSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+    (identityMock.verifyCredential as jest.Mock).mockReset();
     formatMultiAttestationRequestSpy = jest
       .spyOn(easPassportSchemaMock, "formatMultiAttestationRequestWithPassportAndScore")
       .mockResolvedValue(mockMultiAttestationRequestWithPassportAndScore);
@@ -1247,7 +1216,7 @@ describe("POST /eas/passport", () => {
   it("successfully verifies and formats passport", async () => {
     jest.spyOn(PassportCache.prototype, "init").mockImplementation(() => Promise.resolve());
     jest.spyOn(PassportCache.prototype, "set").mockImplementation(() => Promise.resolve());
-    jest.spyOn(PassportCache.prototype, "get").mockImplementation((key) => {
+    jest.spyOn(PassportCache.prototype, "get").mockImplementation((key: any) => {
       if (key === "ethPrice") {
         return Promise.resolve("3000");
       } else if (key === "ethPriceLastUpdate") {
@@ -1280,7 +1249,7 @@ describe("POST /eas/passport", () => {
 
     expect(response.body.passport.multiAttestationRequest).toEqual(mockMultiAttestationRequestWithPassportAndScore);
     expect(response.body.passport.nonce).toEqual(nonce);
-    expect(verifyCredentialSpy).toBeCalledTimes(credentials.length);
+    expect(identityMock.verifyCredential).toBeCalledTimes(credentials.length);
     expect(formatMultiAttestationRequestSpy).toBeCalled();
   });
 
@@ -1315,7 +1284,7 @@ describe("POST /eas/passport", () => {
   });
 
   it("handles error during credential verification", async () => {
-    verifyCredentialSpy.mockRejectedValue(new Error("Verification error"));
+    (identityMock.verifyCredential as jest.Mock).mockRejectedValueOnce(new Error("Verification error"));
 
     const nonce = 0;
     const recipient = "0x5678000000000000000000000000000000000000";
@@ -1349,14 +1318,15 @@ describe("POST /convert", () => {
   // let verifyCredentialSpy: jest.SpyInstance;
   // let formatMultiAttestationRequestSpy: jest.SpyInstance;
 
-  beforeEach(() => {});
+  beforeEach(() => {
+    (identityMock.verifyCredential as jest.Mock).mockResolvedValue(true);
+  });
 
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
   it("converts a credential into a valid credential of type EthereumEip712Signature2021", async () => {
-    let verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
     const expirationDate = new Date();
     expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
 
@@ -1385,20 +1355,23 @@ describe("POST /convert", () => {
 
     expect(responseObject.proof.type).toEqual("EthereumEip712Signature2021");
 
-    verifyCredentialSpy.mockRestore();
-    const isValidCredential = await identityMock.verifyCredential(DIDKit, responseObject);
+    const isValidCredential = await (
+      identityMock as typeof identityMock & { realIdentity: typeof identityMock }
+    ).realIdentity.verifyCredential(DIDKit, responseObject);
     expect(isValidCredential).toBe(true);
 
     // Just testing the validating the stamp when we tamper with a field fails
     // --> just to double-check that the original verifyCredential is used, and not the mock
-    const isInvalidValidCredential = await identityMock.verifyCredential(DIDKit, {
+    const isInvalidValidCredential = await (
+      identityMock as typeof identityMock & { realIdentity: typeof identityMock }
+    ).realIdentity.verifyCredential(DIDKit, {
       ...responseObject,
       issuer: "bad-issuer",
     });
     expect(isInvalidValidCredential).toBe(false);
   });
 
-  it("converts a credential into a valid credential that sis validated succefully with ethers", async () => {
+  it("converts a credential into a valid credential that is validated successfully with ethers", async () => {
     const originalEthers = jest.requireActual("ethers");
 
     let verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);

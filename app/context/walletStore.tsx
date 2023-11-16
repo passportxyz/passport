@@ -99,11 +99,5 @@ onboard.state.select("wallets").subscribe((wallets) => {
   walletStore.setState(parseWeb3OnboardWallet(wallets[0]));
 });
 
-export const useSigner = () => {
-  const provider = walletStore((state) => state.provider);
-  const signer = useMemo(() => (provider ? new Web3Provider(provider).getSigner() : null), [provider]);
-  return signer;
-};
-
 // Export as hook
 export const useWalletStore = walletStore;
