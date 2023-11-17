@@ -69,7 +69,9 @@ const platformsData = Object.entries(platforms).reduce((data, [id, platform]) =>
   ];
 }, [] as PlatformData[]);
 
-const outPath = join(__dirname, "..", "public", "stampMetadata.json");
+const outPath = join(__dirname, "..", "out", "stampMetadata.json");
 console.log(`Saving platform info to JSON file at ${outPath}`);
+const outPath1 = join(__dirname, "..", "public", "stampMetadata.json");
+console.log(`Also saving platform info to JSON file at ${outPath1}`);
 
 writeFileSync(outPath, JSON.stringify(platformsData));
