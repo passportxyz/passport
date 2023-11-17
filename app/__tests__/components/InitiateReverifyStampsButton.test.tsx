@@ -5,7 +5,7 @@ import {
   ExpiredStampModalProps,
 } from "../../components/InitiateReverifyStampsButton";
 import { CeramicContextState, CeramicContext, platforms } from "../../context/ceramicContext";
-import { StampClaimingContext } from "../../context/stampClaimingContext";
+import { StampClaimingContext, StampClaimProgressStatus } from "../../context/stampClaimingContext";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 const defaultProps: ExpiredStampModalProps = {
@@ -45,7 +45,7 @@ const mockCeramicContext: CeramicContextState = {
 
 const mockStampClaimingContext = {
   claimCredentials: jest.fn(),
-  status: "",
+  status: StampClaimProgressStatus.Idle,
 };
 
 describe("InitiateReverifyStampsButton", () => {

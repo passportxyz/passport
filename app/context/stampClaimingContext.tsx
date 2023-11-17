@@ -29,7 +29,7 @@ import { DoneToastContent } from "../components/DoneToastContent";
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
 
-enum StampClaimProgressStatus {
+export enum StampClaimProgressStatus {
   Idle = "idle",
   InProgress = "in_progress",
 }
