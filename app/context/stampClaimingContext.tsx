@@ -1,5 +1,5 @@
 // --- Methods
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 // --- Datadog
 import { datadogLogs } from "@datadog/browser-logs";
@@ -28,6 +28,11 @@ import { DoneToastContent } from "../components/DoneToastContent";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
+
+export enum StampClaimProgressStatus {
+  Idle = "idle",
+  InProgress = "in_progress",
+}
 
 export const waitForRedirect = (platform: Platform, timeout?: number): Promise<ProviderPayload> => {
   const channel = new BroadcastChannel(`${platform.path}_oauth_channel`);
@@ -62,11 +67,19 @@ export type StampClaimForPlatform = {
 };
 
 export interface StampClaimingContextState {
-  claimCredentials: (platformGroups: StampClaimForPlatform[]) => Promise<void>;
+  claimCredentials: (
+    handleClaimStep: (step: number, platformId?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
+    platformGroups: StampClaimForPlatform[]
+  ) => Promise<void>;
+  status: StampClaimProgressStatus;
 }
 
 const startingState: StampClaimingContextState = {
-  claimCredentials: async (platformGroups: StampClaimForPlatform[]) => {},
+  claimCredentials: async (
+    handleClaimStep: (step: number, platformId?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
+    platformGroups: StampClaimForPlatform[]
+  ) => {},
+  status: StampClaimProgressStatus.Idle,
 };
 
 export const StampClaimingContext = createContext(startingState);
@@ -76,6 +89,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
   const address = useWalletStore((state) => state.address);
   const signer = useSigner();
   const toast = useToast();
+  const [status, setStatus] = useState(StampClaimProgressStatus.InProgress);
 
   const handleSponsorship = async (platform: PlatformClass, result: string): Promise<void> => {
     if (result === "success") {
@@ -122,14 +136,27 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
   };
 
   // fetch VCs from IAM server
-  const claimCredentials = async (platformGroups: StampClaimForPlatform[]): Promise<any> => {
+  const claimCredentials = async (
+    handleClaimStep: (step: number, platformId?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
+    platformGroups: StampClaimForPlatform[]
+  ): Promise<any> => {
+    // In `step` we count the number of steps / platforms we are processing.
+    // This will differnet form i because we may skip some platforms that have no expired
+    // providers
+    let step = -1;
     for (let i = 0; i < platformGroups.length; i++) {
+      setStatus(StampClaimProgressStatus.Idle);
       try {
         const { platformId, selectedProviders } = platformGroups[i];
-        datadogLogs.logger.info("Saving Stamp", { platform: platformId });
         const platform = platforms.get(platformId as PLATFORM_ID)?.platform;
 
         if ((platform || platformId === "EVMBulkVerify") && selectedProviders.length > 0) {
+          step++;
+          await handleClaimStep(step, platformId);
+          datadogLogs.logger.info("Saving Stamp", { platform: platformId });
+          await handleClaimStep(step, platformId);
+          setStatus(StampClaimProgressStatus.InProgress);
+
           // We set the providerPayload to be {} by default
           // This is ok if platformId === "EVMBulkVerify"
           // For other platforms the correct providerPayload will be set below
@@ -190,10 +217,13 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
         datadogLogs.logger.error("Verification Error", { error: e, platform: platformGroups[i] });
       }
     }
+    setStatus(StampClaimProgressStatus.Idle);
+    await handleClaimStep(-1);
   };
 
   const providerProps = {
     claimCredentials,
+    status,
   };
 
   return <StampClaimingContext.Provider value={providerProps}>{children}</StampClaimingContext.Provider>;

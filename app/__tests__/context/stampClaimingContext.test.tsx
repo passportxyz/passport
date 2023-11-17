@@ -49,6 +49,8 @@ jest.mock("../../context/ceramicContext", () => {
   };
 });
 
+const handleClaimStep = jest.fn();
+
 const TestingComponent = () => {
   const { claimCredentials } = useContext(StampClaimingContext);
 
@@ -57,7 +59,7 @@ const TestingComponent = () => {
       <button
         data-testid="claim-button"
         onClick={() => {
-          claimCredentials([
+          claimCredentials(handleClaimStep, [
             {
               platformId: "Google",
               selectedProviders: ["Google"],
@@ -83,7 +85,7 @@ const TestingComponentWithEvmStamp = () => {
       <button
         data-testid="claim-button"
         onClick={() => {
-          claimCredentials([
+          claimCredentials(handleClaimStep, [
             {
               platformId: "Google",
               selectedProviders: ["Google"],
@@ -159,7 +161,7 @@ describe("<StampClaimingContext>", () => {
     expect(mockCeramicContext.handlePatchStamps).toHaveBeenCalledTimes(2);
   });
 
-  it.only("should fetch all credentials specified when calling claimCredentials (evm credentials included)", async () => {
+  it("should fetch all credentials specified when calling claimCredentials (evm credentials included)", async () => {
     renderTestComponentWithEvmStamp();
 
     // Click the claim button, which should call the `claimCredentials` function in the context

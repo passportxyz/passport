@@ -6,7 +6,7 @@ import { render } from "@testing-library/react";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
 import { OnChainContextState } from "../context/onChainContext";
-import { StampClaimingContextState } from "../context/stampClaimingContext";
+import { StampClaimingContextState, StampClaimProgressStatus } from "../context/stampClaimingContext";
 import {
   DatastoreConnectionContext,
   DatastoreConnectionContextState,
@@ -152,6 +152,7 @@ export const makeTestClaimingContext = (
 ): StampClaimingContextState => {
   return {
     claimCredentials: jest.fn(),
+    status: StampClaimProgressStatus.Idle,
     ...initialState,
   };
 };
