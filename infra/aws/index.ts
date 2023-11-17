@@ -209,6 +209,7 @@ const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
             options: {
                 "awslogs-group": "passport-iam", // "${serviceLogGroup.name}`,
                 "awslogs-region": `${regionId}`,
+                "awslogs-create-group": "true",
                 "awslogs-stream-prefix": "iam"
             }
         },
