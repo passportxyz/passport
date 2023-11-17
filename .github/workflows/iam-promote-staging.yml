@@ -97,3 +97,4 @@ jobs:
           ROUTE_53_ZONE: ${{ secrets.ROUTE53_ZONE_ID_STAGING }}
           ROUTE_53_DOMAIN: ${{ secrets.DOMAIN_STAGING }}
           IAM_SERVER_SSM_ARN: ${{ secrets.IAM_SERVER_SSM_ARN_STAGING }}
+          PASSPORT_VC_SECRETS_ARN: ${{ secrets.PASSPORT_VC_SECRETS_ARN_STAGING }}
