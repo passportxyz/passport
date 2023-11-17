@@ -434,23 +434,14 @@ const ecsTarget = new aws.appautoscaling.Target("autoscaling_target", {
     serviceNamespace: "ecs",
 });
 
-// const serviceRecord = new aws.route53.Record("passport-record", {
-//     // This shoudl be a CNAME
-//     name: `iam`,
-//     zoneId: route53Zone,
-//     type: "A",
-//     aliases: [{
-//       name: albDnsName,
-//       zoneId: albZoneId,
-//       evaluateTargetHealth: true
-//     }]
-// });
-
 const serviceRecord = new aws.route53.Record("passport-record", {
-  name: route53Domain,
-  zoneId: route53Zone,
-  type: "CNAME",
-  ttl: 300,
-  records: [albDnsName] 
+    name: route53Domain,
+    zoneId: route53Zone,
+    type: "A",
+    aliases: [{
+      name: albDnsName,
+      zoneId: albZoneId,
+      evaluateTargetHealth: true
+    }]
 });
 
