@@ -447,7 +447,7 @@ const ecsTarget = new aws.appautoscaling.Target("autoscaling_target", {
 // });
 
 const serviceRecord = new aws.route53.Record("passport-record", {
-  name: `iam`,
+  name: route53Domain,
   zoneId: route53Zone,
   type: "CNAME",
   ttl: 300,
