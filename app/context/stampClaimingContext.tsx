@@ -29,6 +29,11 @@ import { DoneToastContent } from "../components/DoneToastContent";
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
 
+enum StampClaimProgressStatus {
+  Idle = "idle",
+  InProgress = "in_progress",
+}
+
 export const waitForRedirect = (platform: Platform, timeout?: number): Promise<ProviderPayload> => {
   const channel = new BroadcastChannel(`${platform.path}_oauth_channel`);
   const waitForRedirect = new Promise<ProviderPayload>((resolve, reject) => {
@@ -66,7 +71,7 @@ export interface StampClaimingContextState {
     handleClaimStep: (step: number, platformId?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
     platformGroups: StampClaimForPlatform[]
   ) => Promise<void>;
-  status: string;
+  status: StampClaimProgressStatus;
 }
 
 const startingState: StampClaimingContextState = {
@@ -74,7 +79,7 @@ const startingState: StampClaimingContextState = {
     handleClaimStep: (step: number, platformId?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
     platformGroups: StampClaimForPlatform[]
   ) => {},
-  status: "idle",
+  status: StampClaimProgressStatus.Idle,
 };
 
 export const StampClaimingContext = createContext(startingState);
@@ -84,7 +89,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
   const address = useWalletStore((state) => state.address);
   const signer = useSigner();
   const toast = useToast();
-  const [status, setStatus] = useState("idle");
+  const [status, setStatus] = useState(StampClaimProgressStatus.InProgress);
 
   const handleSponsorship = async (platform: PlatformClass, result: string): Promise<void> => {
     if (result === "success") {
@@ -140,7 +145,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
     // providers
     let step = -1;
     for (let i = 0; i < platformGroups.length; i++) {
-      setStatus("idle");
+      setStatus(StampClaimProgressStatus.Idle);
       try {
         const { platformId, selectedProviders } = platformGroups[i];
         const platform = platforms.get(platformId as PLATFORM_ID)?.platform;
@@ -150,7 +155,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
           await handleClaimStep(step, platformId);
           datadogLogs.logger.info("Saving Stamp", { platform: platformId });
           await handleClaimStep(step, platformId);
-          setStatus("in_progress");
+          setStatus(StampClaimProgressStatus.InProgress);
 
           // We set the providerPayload to be {} by default
           // This is ok if platformId === "EVMBulkVerify"
@@ -212,7 +217,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
         datadogLogs.logger.error("Verification Error", { error: e, platform: platformGroups[i] });
       }
     }
-    setStatus("idle");
+    setStatus(StampClaimProgressStatus.Idle);
     await handleClaimStep(-1);
   };
 
