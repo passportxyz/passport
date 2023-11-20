@@ -55,6 +55,24 @@ export default function Dashboard() {
   const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms, cancelCeramicConnection } =
     useContext(CeramicContext);
 
+  if (usingCustomPanel && customizationKey) {
+    document.title = `Gitcoin Passport | ${
+      customizationKey.charAt(0).toUpperCase() + customizationKey.slice(1)
+    } Dashboard`;
+    TagManager.dataLayer({
+      dataLayer: {
+        event: `${customizationKey}-dashboard-view`,
+      },
+    });
+  } else {
+    document.title = `Gitcoin Passport | Dashboard`;
+    TagManager.dataLayer({
+      dataLayer: {
+        event: "default-dashboard-view",
+      },
+    });
+  }
+
   const address = useWalletStore((state) => state.address);
   const provider = useWalletStore((state) => state.provider);
 
