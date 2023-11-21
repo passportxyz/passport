@@ -12,7 +12,7 @@ export const PlatformDetails: PlatformSpec = {
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name",
-    providers: [{ title: "Encrypted", name: "Coinbase" }],
+    providers: [{ title: "Encrypted", name: "CoinbaseDualVerification" }],
   },
 ];
 

@@ -106,8 +106,8 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGr14ContributionsGte#1"),
         stamp: undefined,
       },
-      Coinbase: {
-        providerSpec: getProviderSpec("Coinbase", "Coinbase"),
+      CoinbaseDualVerification: {
+        providerSpec: getProviderSpec("Coinbase", "CoinbaseDualVerification"),
         stamp: undefined,
       },
     },

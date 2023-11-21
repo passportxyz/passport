@@ -332,7 +332,7 @@ export type PROVIDER_ID =
   | "ZkSyncEra"
   | "Lens"
   | "GnosisSafe"
-  | "Coinbase"
+  | "CoinbaseDualVerification"
   | "GuildMember"
   | "GuildAdmin"
   | "GuildPassportMember"

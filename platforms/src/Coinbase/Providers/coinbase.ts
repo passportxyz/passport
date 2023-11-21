@@ -21,7 +21,7 @@ export type CoinbaseFindMyUserResponse = {
 
 export class CoinbaseProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
-  type = "Coinbase";
+  type = "CoinbaseDualVerification";
 
   // Options can be set here and/or via the constructor
   _options = {};
