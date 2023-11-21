@@ -34,29 +34,19 @@ export class CoinbaseProvider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
-      const errors = [];
-      let coinbaseAccountId = "",
-        record = undefined;
-
-      coinbaseAccountId = await verifyCoinbaseLogin(payload.proofs.code);
+      const coinbaseAccountId = await verifyCoinbaseLogin(payload.proofs.code);
 
       const verifiedCoinbaseAttestation = await verifyCoinbaseAttestation(payload.address);
 
       if (verifiedCoinbaseAttestation) {
-        record = {
-          id: coinbaseAccountId,
+        return {
+          valid: true,
+          errors: [],
+          record: { id: coinbaseAccountId },
         };
       } else {
-        errors.push(
-          `We could not find a Coinbase-verified onchain attestation for your account: ${coinbaseAccountId}.`
-        );
+        throw `We could not find a Coinbase-verified onchain attestation for your account: ${coinbaseAccountId}.`;
       }
-
-      return {
-        valid: true,
-        errors,
-        record,
-      };
     } catch (e: unknown) {
       return {
         valid: false,
@@ -126,45 +116,60 @@ export const verifyCoinbaseLogin = async (code: string): Promise<string> => {
 };
 
 const COINBASE_ATTESTER = "0x357458739F90461b99789350868CD7CF330Dd7EE";
-const baseEASScanUrl = "https://base.easscan.org/graphql";
+export const BASE_EAS_SCAN_URL = "https://base.easscan.org/graphql";
+export const VERIFIED_ACCOUNT_SCHEMA = "0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9";
 
 export type Attestation = {
   recipient: string;
   revocationTime: number;
   revoked: boolean;
   expirationTime: number;
+  schema: {
+    id: string;
+  };
 };
 
 export type EASQueryResponse = {
-  data: {
-    attestations: Attestation[];
+  data?: {
+    data?: {
+      attestations: Attestation[];
+    };
   };
 };
 
 export const verifyCoinbaseAttestation = async (address: string): Promise<boolean> => {
   const query = `
-  query CoinbaseAttestation {
-    attestations (where: {
-      attester: { equals: ${COINBASE_ATTESTER} },
-      recipient: { equals: ${address} }
-    }) {
-      recipient
-      revocationTime
-      revoked
-      expirationTime
+    query {
+      attestations (where: {
+          attester: { equals: "${COINBASE_ATTESTER}" },
+          recipient: { equals: "${address}" }
+      }) {
+        recipient
+        revocationTime
+        revoked
+        expirationTime
+        schema {
+          id
+        }
+      }
     }
-  }
   `;
-  const result: EASQueryResponse = await axios.post(baseEASScanUrl, {
+
+  const result: EASQueryResponse = await axios.post(BASE_EAS_SCAN_URL, {
     query,
   });
 
+  if (!result.data.data.attestations) {
+    throw "No attestations found for this address.";
+  }
+
   return (
-    result.data.attestations.filter(
+    result.data.data.attestations.filter(
       (attestation) =>
         attestation.revoked === false &&
         attestation.revocationTime === 0 &&
-        attestation.expirationTime > Date.now() / 1000
+        attestation.expirationTime === 0 &&
+        attestation.schema.id === VERIFIED_ACCOUNT_SCHEMA
     ).length > 0
   );
 };

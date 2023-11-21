@@ -4,8 +4,8 @@ import { CoinbaseProvider } from "./Providers/coinbase";
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/coinbaseStampIcon.svg",
   platform: "Coinbase",
-  name: "Coinbase",
-  description: "Connect your existing account to verify with Coinbase.",
+  name: "Coinbase Account & Identity Check",
+  description: "Dual Verification Credential",
   connectMessage: "Connect Account",
 };
 

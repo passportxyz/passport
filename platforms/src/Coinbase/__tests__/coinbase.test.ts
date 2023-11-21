@@ -27,6 +27,10 @@ const validCodeResponse = {
   status: 200,
 };
 
+const schema = {
+  id: coinbaseProviderModule.VERIFIED_ACCOUNT_SCHEMA,
+};
+
 const code = "ABC123_ACCESSCODE";
 const clientId = process.env.COINBASE_CLIENT_ID;
 const clientSecret = process.env.COINBASE_CLIENT_SECRET;
@@ -44,9 +48,7 @@ beforeEach(() => {
 });
 
 describe("verifyCoinbaseAttestation", () => {
-  const COINBASE_ATTESTER = "0x357458739F90461b99789350868CD7CF330Dd7EE";
   const testAddress = "0xTestAddress";
-  const baseEASScanUrl = "https://base.easscan.org/graphql";
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -54,14 +56,17 @@ describe("verifyCoinbaseAttestation", () => {
   it("should return true for a valid attestation", async () => {
     const mockResponse = {
       data: {
-        attestations: [
-          {
-            recipient: testAddress,
-            revocationTime: 0,
-            revoked: false,
-            expirationTime: Date.now() / 1000 + 10000, // 10 seconds in the future
-          },
-        ],
+        data: {
+          attestations: [
+            {
+              recipient: testAddress,
+              revocationTime: 0,
+              revoked: false,
+              expirationTime: 0, // 10 seconds in the future
+              schema,
+            },
+          ],
+        },
       },
     };
 
@@ -70,7 +75,7 @@ describe("verifyCoinbaseAttestation", () => {
     const result = await coinbaseProviderModule.verifyCoinbaseAttestation(testAddress);
 
     expect(result).toBe(true);
-    expect(mockedAxios.post).toHaveBeenCalledWith(baseEASScanUrl, {
+    expect(mockedAxios.post).toHaveBeenCalledWith(coinbaseProviderModule.BASE_EAS_SCAN_URL, {
       query: expect.any(String),
     });
   });
@@ -78,14 +83,16 @@ describe("verifyCoinbaseAttestation", () => {
   it("should return false for an attestation that is revoked", async () => {
     const mockResponse = {
       data: {
-        attestations: [
-          {
-            recipient: testAddress,
-            revocationTime: 0,
-            revoked: true,
-            expirationTime: Date.now() / 1000 + 10000,
-          },
-        ],
+        data: {
+          attestations: [
+            {
+              recipient: testAddress,
+              revocationTime: 0,
+              revoked: true,
+              expirationTime: Date.now() / 1000 + 10000,
+            },
+          ],
+        },
       },
     };
 
@@ -98,14 +105,16 @@ describe("verifyCoinbaseAttestation", () => {
   it("should return false for an attestation that is expired", async () => {
     const mockResponse = {
       data: {
-        attestations: [
-          {
-            recipient: testAddress,
-            revocationTime: 0,
-            revoked: false,
-            expirationTime: Date.now() / 1000 - 10000, // 10 seconds in the past
-          },
-        ],
+        data: {
+          attestations: [
+            {
+              recipient: testAddress,
+              revocationTime: 0,
+              revoked: false,
+              expirationTime: Date.now() / 1000 - 10000, // 10 seconds in the past
+            },
+          ],
+        },
       },
     };
 
