@@ -12,10 +12,12 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Account & Identity Verification",
+    platformGroup: "Account & Onchain Identity",
     providers: [
       {
-        title: "Your privacy is paramount. We only retain a unique hash to acknowledge your account's verification.",
+        title: "Privacy-First Verification",
+        description:
+          "Your privacy is paramount. We only retain a unique hash to acknowledge your account's verification.",
         name: "CoinbaseDualVerification",
       },
     ],
