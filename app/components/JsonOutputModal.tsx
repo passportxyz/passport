@@ -57,7 +57,9 @@ export const JsonOutputModal = ({
         </ModalHeader>
         <ModalCloseButton color="rgb(var(--color-text-1))" />
         <ModalBody className="overflow-auto text-color-1">
-          <pre data-testid="passport-json">{JSON.stringify(jsonOutput, null, "\t")}</pre>
+          <pre data-testid="passport-json" className="whitespace-pre-wrap">
+            {JSON.stringify(jsonOutput, null, "\t")}
+          </pre>
         </ModalBody>
 
         <ModalFooter borderTopWidth={2} borderTopColor="rgb(var(--color-foreground-6))">

@@ -5,14 +5,22 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/coinbaseStampIcon.svg",
   platform: "Coinbase",
   name: "Coinbase",
-  description: "Connect your existing account to verify with Coinbase.",
+  description: "Confirm Your Coinbase Account & Onchain Identity",
   connectMessage: "Connect Account",
+  website: "https://www.coinbase.com/onchain-verify",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Account Name",
-    providers: [{ title: "Encrypted", name: "Coinbase" }],
+    platformGroup: "Account & Onchain Identity",
+    providers: [
+      {
+        title: "Privacy-First Verification",
+        description:
+          "Your privacy is paramount. We only retain a unique hash to acknowledge your account's verification.",
+        name: "CoinbaseDualVerification",
+      },
+    ],
   },
 ];
 
