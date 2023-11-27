@@ -25,9 +25,11 @@ import * as identityMock from "@gitcoin/passport-identity";
 import * as easSchemaMock from "../src/utils/easStampSchema";
 import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
 import { IAMError } from "../src/utils/scorerService";
+import { VerifyDidChallengeBaseError, verifyDidChallenge } from "../src/utils/verifyDidChallenge";
 
 jest.mock("../src/utils/verifyDidChallenge", () => ({
-  verifyDidChallenge: jest.fn().mockImplementation(() => true),
+  verifyDidChallenge: jest.fn().mockImplementation(() => "0x0"),
+  VerifyDidChallengeBaseError: jest.requireActual("../src/utils/verifyDidChallenge").VerifyDidChallengeBaseError,
 }));
 
 jest.mock("ethers", () => {
@@ -175,7 +177,16 @@ describe("POST /challenge", function () {
 });
 
 describe("POST /verify", function () {
-  it("handles valid challenge requests", async () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("handles valid wallet-signed challenge requests", async () => {
+    // Mock the did-session method to throw an error, to ensure we're not calling it
+    (verifyDidChallenge as jest.Mock).mockImplementation(() => {
+      throw new VerifyDidChallengeBaseError("Verification failed, challenge mismatch");
+    });
+
     // challenge received from the challenge endpoint
     const challenge = {
       issuer: config.issuer,
@@ -212,6 +223,109 @@ describe("POST /verify", function () {
     expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
   });
 
+  it("handles valid did-session signed challenge requests", async () => {
+    (verifyDidChallenge as jest.Mock).mockImplementationOnce(() => {
+      return "0x123456";
+    });
+
+    // challenge received from the challenge endpoint
+    const challenge = {
+      issuer: config.issuer,
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0x0",
+        provider: "challenge-Simple",
+        address: "0x123456",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+
+    // payload containing a signature of the challenge in the challenge credential
+    const payload = {
+      type: "Simple",
+      address: "0x0",
+      proofs: {
+        valid: "true",
+        username: "test",
+      },
+    };
+
+    const signedChallenge = {
+      signatures: [
+        {
+          protected: "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ",
+          signature: "0x0",
+        },
+      ],
+      payload: "I commit that this wallet is under my control",
+      cid: [0, 1, 2],
+      cacao: [3, 4, 5],
+      issuer: "0x123456",
+    };
+
+    // check that ID matches the payload (this has been mocked)
+    const expectedId = "did:pkh:eip155:1:0x0";
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/verify")
+      .send({ challenge, payload, signedChallenge })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    // check for an id match on the mocked credential
+    expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
+  });
+
+  it("handles invalid did-session signed challenge requests", async () => {
+    (verifyDidChallenge as jest.Mock).mockImplementationOnce(() => {
+      throw new VerifyDidChallengeBaseError("Verification failed, challenge mismatch");
+    });
+
+    // challenge received from the challenge endpoint
+    const challenge = {
+      issuer: config.issuer,
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0x0",
+        provider: "challenge-Simple",
+        address: "0x123456",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+
+    // payload containing a signature of the challenge in the challenge credential
+    const payload = {
+      type: "Simple",
+      address: "0x0",
+      proofs: {
+        valid: "true",
+        username: "test",
+      },
+    };
+
+    const signedChallenge = {
+      signatures: [
+        {
+          protected: "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ",
+          signature: "0x0",
+        },
+      ],
+      payload: "I commit that this wallet is under my control",
+      cid: [0, 1, 2],
+      cacao: [3, 4, 5],
+      issuer: "0x123456",
+    };
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/verify")
+      .send({ challenge, payload, signedChallenge })
+      .set("Accept", "application/json")
+      .expect(401)
+      .expect("Content-Type", /json/);
+
+    expect((response.body as ErrorResponseBody).error).toEqual("Invalid challenge signature: Error");
+  });
   it("handles valid verify requests with EIP712 signature", async () => {
     // challenge received from the challenge endpoint
     const eip712Key = process.env.IAM_JWK_EIP712;
@@ -644,6 +758,9 @@ describe("POST /verify", function () {
       signer: {
         address: "0x0",
         challenge: {
+          credentialSubject: {
+            challenge: "I commit that this wallet is under my control",
+          },
           issuer: "did:key:z6Mkecq4nKTCniqNed5cdDSURj1JX4SEdNhvhitZ48HcJMnN",
         },
       },

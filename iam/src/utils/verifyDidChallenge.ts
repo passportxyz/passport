@@ -8,21 +8,26 @@ import { encode } from "multiformats/block";
 import { sha256 } from "multiformats/hashes/sha2";
 import { MAX_VALID_DID_SESSION_AGE } from "@gitcoin/passport-identity";
 
-class ChallengeMismatchError extends Error {
+export class VerifyDidChallengeBaseError extends Error {}
+
+class ChallengeMismatchError extends VerifyDidChallengeBaseError {
   constructor() {
     super("Verification failed, challenge mismatch");
+    this.name = "ChallengeMismatchError";
   }
 }
 
-class InvalidSignatureError extends Error {
+class InvalidSignatureError extends VerifyDidChallengeBaseError {
   constructor() {
     super("Verification failed, invalid signature");
+    this.name = "InvalidSignatureError";
   }
 }
 
-class CredentialTooOldError extends Error {
+class CredentialTooOldError extends VerifyDidChallengeBaseError {
   constructor() {
     super("Credential is too old");
+    this.name = "CredentialTooOldError";
   }
 }
 

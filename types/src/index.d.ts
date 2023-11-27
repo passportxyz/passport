@@ -165,7 +165,7 @@ export type ChallengeRequestBody = {
 export type VerifyRequestBody = {
   challenge: VerifiableCredential;
   payload: RequestPayload;
-  signedChallenge: SignedDidChallenge;
+  signedChallenge?: SignedDidChallenge;
 };
 
 // IAM HTTP Response body types

@@ -29,7 +29,7 @@ import {
 } from "@gitcoin/passport-types";
 import onchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
 
-import { getChallenge } from "./utils/challenge.js";
+import { getChallenge, verifyChallengeAndGetAddress } from "./utils/challenge.js";
 import { getEASFeeAmount } from "./utils/easFees.js";
 import * as stampSchema from "./utils/easStampSchema.js";
 import * as passportSchema from "./utils/easPassportSchema.js";
@@ -50,7 +50,7 @@ import { providers, platforms } from "@gitcoin/passport-platforms";
 import path from "path";
 import { fileURLToPath } from "url";
 import { IAMError } from "./utils/scorerService.js";
-import { verifyDidChallenge } from "./utils/verifyDidChallenge.js";
+import { VerifyDidChallengeBaseError } from "./utils/verifyDidChallenge.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -387,19 +387,21 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
   // get the payload from the JSON req body
   const payload = requestBody.payload;
 
-  const signedChallenge = requestBody.signedChallenge;
-
   // Check the challenge and the payload is valid before issuing a credential from a registered provider
   return void verifyCredential(DIDKit, challenge)
     .then(async (verified) => {
       const currentIssuer = requestBody.payload.signatureType === "EIP712" ? eip712Issuer : issuer;
 
       if (verified && currentIssuer === challenge.issuer) {
-        // pull the address and checksum so that its stored in a predictable format
-        const address = utils.getAddress(
-          await verifyDidChallenge(signedChallenge, challenge.credentialSubject.challenge)
-        );
-        // ensure the only address we save is that of the signer
+        let address;
+        try {
+          address = await verifyChallengeAndGetAddress(requestBody);
+        } catch (error) {
+          if (error instanceof VerifyDidChallengeBaseError) {
+            return void errorRes(res, `Invalid challenge signature: ${error.name}`, 401);
+          }
+          throw error;
+        }
         payload.address = address;
         payload.issuer = issuer;
         // the signer should be the address outlined in the challenge credential - rebuild the id to check for a full match
@@ -506,7 +508,7 @@ app.post("/api/v0.0.0/convert", (req: Request, res: Response): void => {
     .catch((error) => {
       return void errorRes(
         res,
-        addErrorDetailsToMessage("Unable to validate the provided credential, an unexpected error occured", error),
+        addErrorDetailsToMessage("Unable to validate the provided credential, an unexpected error ocurred", error),
         500
       );
     });
