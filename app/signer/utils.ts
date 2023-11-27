@@ -2,7 +2,7 @@
 import { datadogLogs } from "@datadog/browser-logs";
 
 // --- Identity tools
-import { fetchChallengeCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { fetchChallengeCredential } from "@gitcoin/passport-identity";
 import { CheckResponseBody, Passport, PLATFORM_ID, PROVIDER_ID, VerifiableCredential } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
 import { PlatformGroupSpec } from "../config/providers";

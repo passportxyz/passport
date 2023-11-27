@@ -3,6 +3,7 @@ import { JsonRpcSigner } from "@ethersproject/providers";
 export { BrightIdProcedureResponse, BrightIdVerificationResponse, BrightIdSponsorshipResponse } from "./brightid";
 
 import { MultiAttestationRequest } from "@ethereum-attestation-service/eas-sdk";
+import { JWSSignature } from "dids";
 
 // Typing for required parts of DIDKit
 export type DIDKitLib = {
@@ -89,6 +90,14 @@ export type ProviderContext = {
 
 export type SignatureType = "EIP712" | "Ed25519";
 
+export type SignedDidChallenge = {
+  signatures: JWSSignature[];
+  payload: any;
+  cid: number[];
+  cacao: number[];
+  issuer: string;
+};
+
 // values received from client and fed into the verify route
 export type RequestPayload = {
   type: string;
@@ -156,6 +165,7 @@ export type ChallengeRequestBody = {
 export type VerifyRequestBody = {
   challenge: VerifiableCredential;
   payload: RequestPayload;
+  signedChallenge?: SignedDidChallenge;
 };
 
 // IAM HTTP Response body types

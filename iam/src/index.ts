@@ -1,12 +1,9 @@
 // import { EnsProvider } from './providers/ens';
 // Should this file be an app factory? If it was, we could move the provider config to main.ts and test in isolation
-import dotenv from "dotenv";
-
-dotenv.config();
 
 // ---- Server
 import express, { Request } from "express";
-import { router as procedureRouter } from "@gitcoin/passport-platforms/dist/commonjs/procedure-router";
+import { router as procedureRouter } from "@gitcoin/passport-platforms/procedure-router";
 import { TypedDataDomain } from "@ethersproject/abstract-signer";
 
 // ---- Production plugins
@@ -30,12 +27,12 @@ import {
   VerifiedPayload,
   VerifiableCredential,
 } from "@gitcoin/passport-types";
-import onchainInfo from "../../deployments/onchainInfo.json";
+import onchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
 
-import { getChallenge } from "./utils/challenge";
-import { getEASFeeAmount } from "./utils/easFees";
-import * as stampSchema from "./utils/easStampSchema";
-import * as passportSchema from "./utils/easPassportSchema";
+import { getChallenge, verifyChallengeAndGetAddress } from "./utils/challenge.js";
+import { getEASFeeAmount } from "./utils/easFees.js";
+import * as stampSchema from "./utils/easStampSchema.js";
+import * as passportSchema from "./utils/easPassportSchema.js";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
@@ -44,14 +41,16 @@ import {
   issueHashedCredential,
   verifyCredential,
   issueEip712Credential,
-} from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
-import { stampCredentialDocument } from "@gitcoin/passport-identity/dist/commonjs/src/signingDocuments";
+  stampCredentialDocument,
+} from "@gitcoin/passport-identity";
 
 // All provider exports from platforms
 import { providers, platforms } from "@gitcoin/passport-platforms";
 
 import path from "path";
-import { IAMError } from "./utils/scorerService";
+import { fileURLToPath } from "url";
+import { IAMError } from "./utils/scorerService.js";
+import { VerifyDidChallengeBaseError } from "./utils/verifyDidChallenge.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -260,7 +259,6 @@ app.get("/health", (_req, res) => {
 app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
   // get the payload from the JSON req body
   const requestBody: ChallengeRequestBody = req.body as ChallengeRequestBody;
-  // console.log("requestBody", requestBody);
   const payload: RequestPayload = requestBody.payload;
 
   // check for a valid payload
@@ -395,11 +393,15 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
       const currentIssuer = requestBody.payload.signatureType === "EIP712" ? eip712Issuer : issuer;
 
       if (verified && currentIssuer === challenge.issuer) {
-        // pull the address and checksum so that its stored in a predictable format
-        const address = utils.getAddress(
-          utils.verifyMessage(challenge.credentialSubject.challenge, payload.proofs.signature)
-        );
-        // ensure the only address we save is that of the signer
+        let address;
+        try {
+          address = await verifyChallengeAndGetAddress(requestBody);
+        } catch (error) {
+          if (error instanceof VerifyDidChallengeBaseError) {
+            return void errorRes(res, `Invalid challenge signature: ${error.name}`, 401);
+          }
+          throw error;
+        }
         payload.address = address;
         payload.issuer = issuer;
         // the signer should be the address outlined in the challenge credential - rebuild the id to check for a full match
@@ -506,7 +508,7 @@ app.post("/api/v0.0.0/convert", (req: Request, res: Response): void => {
     .catch((error) => {
       return void errorRes(
         res,
-        addErrorDetailsToMessage("Unable to validate the provided credential, an unexpected error occured", error),
+        addErrorDetailsToMessage("Unable to validate the provided credential, an unexpected error ocurred", error),
         500
       );
     });
@@ -719,4 +721,5 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
 // procedure endpoints
 app.use("/procedure", procedureRouter);
 
+const __dirname = fileURLToPath(import.meta.url);
 app.use("/static", express.static(path.join(__dirname, "static")));

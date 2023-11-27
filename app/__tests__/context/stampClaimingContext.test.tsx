@@ -4,17 +4,18 @@ import { makeTestCeramicContext } from "../../__test-fixtures__/contextTestHelpe
 
 import { CeramicContext } from "../../context/ceramicContext";
 import { StampClaimingContext, StampClaimingContextProvider } from "../../context/stampClaimingContext";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { PlatformProps } from "../../components/GenericPlatform";
 import { AppContext, PlatformClass } from "@gitcoin/passport-platforms";
+import { DatastoreConnectionContext, DbAuthTokenStatus } from "../../context/datastoreConnectionContext";
 
 jest.mock("../../utils/helpers", () => ({
   generateUID: jest.fn((length: number) => "some random string"),
 }));
 
-jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
+jest.mock("@gitcoin/passport-identity", () => ({
   fetchVerifiableCredential: jest.fn(),
 }));
 
@@ -118,20 +119,40 @@ const mockCeramicContext = makeTestCeramicContext({
 describe("<StampClaimingContext>", () => {
   const renderTestComponent = () =>
     render(
-      <CeramicContext.Provider value={mockCeramicContext}>
-        <StampClaimingContextProvider>
-          <TestingComponent />
-        </StampClaimingContextProvider>
-      </CeramicContext.Provider>
+      <DatastoreConnectionContext.Provider
+        value={{
+          connect: jest.fn(),
+          disconnect: jest.fn(),
+          dbAccessToken: "token",
+          dbAccessTokenStatus: "idle" as DbAuthTokenStatus,
+          did: jest.fn() as any,
+        }}
+      >
+        <CeramicContext.Provider value={mockCeramicContext}>
+          <StampClaimingContextProvider>
+            <TestingComponent />
+          </StampClaimingContextProvider>
+        </CeramicContext.Provider>
+      </DatastoreConnectionContext.Provider>
     );
 
   const renderTestComponentWithEvmStamp = () =>
     render(
-      <CeramicContext.Provider value={mockCeramicContext}>
-        <StampClaimingContextProvider>
-          <TestingComponentWithEvmStamp />
-        </StampClaimingContextProvider>
-      </CeramicContext.Provider>
+      <DatastoreConnectionContext.Provider
+        value={{
+          connect: jest.fn(),
+          disconnect: jest.fn(),
+          dbAccessToken: "token",
+          dbAccessTokenStatus: "idle" as DbAuthTokenStatus,
+          did: jest.fn() as any,
+        }}
+      >
+        <CeramicContext.Provider value={mockCeramicContext}>
+          <StampClaimingContextProvider>
+            <TestingComponentWithEvmStamp />
+          </StampClaimingContextProvider>
+        </CeramicContext.Provider>
+      </DatastoreConnectionContext.Provider>
     );
 
   beforeEach(() => {

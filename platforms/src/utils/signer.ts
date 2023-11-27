@@ -6,7 +6,7 @@ import { JsonRpcProvider, JsonRpcSigner, StaticJsonRpcProvider } from "@etherspr
 
 // ----- Credential verification
 import * as DIDKit from "@spruceid/didkit-wasm";
-import { verifyCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { verifyCredential } from "@gitcoin/passport-identity";
 
 // ----- Verify signed message with ethers
 import { utils } from "ethers";

@@ -233,6 +233,7 @@ const datastoreConnectionContext = {
   disconnect: jest.fn(),
   dbAccessToken: "token",
   dbAccessTokenStatus: "idle" as DbAuthTokenStatus,
+  did: jest.fn() as any,
 };
 
 export const renderWithContext = (

@@ -1,5 +1,7 @@
+import "dotenv/config";
+
 // ---- Main App from index
-import { app } from "./index";
+import { app } from "./index.js";
 import Moralis from "moralis";
 
 // default port to listen on

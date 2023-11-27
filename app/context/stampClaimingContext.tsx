@@ -7,24 +7,25 @@ import { datadogLogs } from "@datadog/browser-logs";
 // --- Identity tools
 import { VerifiableCredential, PROVIDER_ID, PLATFORM_ID, StampPatch } from "@gitcoin/passport-types";
 import { Platform, ProviderPayload } from "@gitcoin/passport-platforms";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 
 // --- Context
 import { CeramicContext, platforms } from "../context/ceramicContext";
-import { useWalletStore, useSigner } from "../context/walletStore";
+import { useWalletStore } from "../context/walletStore";
 
 // --- Types
 import { PlatformClass } from "@gitcoin/passport-platforms";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 
 // --- Helpers
-import { generateUID } from "../utils/helpers";
+import { createSignedPayload, generateUID } from "../utils/helpers";
 
 import { debounce } from "ts-debounce";
 import { BroadcastChannel } from "broadcast-channel";
 import { datadogRum } from "@datadog/browser-rum";
 import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../components/DoneToastContent";
+import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -87,7 +88,7 @@ export const StampClaimingContext = createContext(startingState);
 export const StampClaimingContextProvider = ({ children }: { children: any }) => {
   const { handlePatchStamps, userDid } = useContext(CeramicContext);
   const address = useWalletStore((state) => state.address);
-  const signer = useSigner();
+  const { did } = useDatastoreConnectionContext();
   const toast = useToast();
   const [status, setStatus] = useState(StampClaimProgressStatus.InProgress);
 
@@ -140,10 +141,13 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
     handleClaimStep: (step: number, platformId?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
     platformGroups: StampClaimForPlatform[]
   ): Promise<any> => {
+    if (!did) throw new Error("No DID found");
+
     // In `step` we count the number of steps / platforms we are processing.
     // This will differnet form i because we may skip some platforms that have no expired
     // providers
     let step = -1;
+
     for (let i = 0; i < platformGroups.length; i++) {
       setStatus(StampClaimProgressStatus.Idle);
       try {
@@ -195,7 +199,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
               proofs: providerPayload,
               signatureType: IAM_SIGNATURE_TYPE,
             },
-            signer as { signMessage: (message: string) => Promise<string> }
+            (data: any) => createSignedPayload(did, data)
           );
 
           const verifiedCredentials =

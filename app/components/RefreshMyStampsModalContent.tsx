@@ -6,11 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { PlatformGroupSpec } from "@gitcoin/passport-platforms";
 
 // --- Identity tools
-import { Stamp, VerifiableCredentialRecord, PROVIDER_ID, PLATFORM_ID, SignatureType } from "@gitcoin/passport-types";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { Stamp, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-types";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 
 // --- Contexts
-import { useSigner, useWalletStore } from "../context/walletStore";
+import { useWalletStore } from "../context/walletStore";
 import { CeramicContext } from "../context/ceramicContext";
 
 // --- Datadog
@@ -18,7 +18,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 
 // --- App components
 import { RefreshMyStampsModalContentCardList } from "../components/RefreshMyStampsModalContentCardList";
-import { reduceStampResponse } from "../utils/helpers";
+import { createSignedPayload, reduceStampResponse } from "../utils/helpers";
 import { ValidatedPlatform } from "../signer/utils";
 import Checkbox from "./Checkbox";
 import { Button } from "./Button";
@@ -26,6 +26,7 @@ import { LoadButton } from "./LoadButton";
 
 // -- Utils
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
+import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 
 export type RefreshMyStampsModalContentProps = {
   resetStampsAndProgressState: () => void;
@@ -47,12 +48,12 @@ export const RefreshMyStampsModalContent = ({
   dashboardCustomizationKey,
 }: RefreshMyStampsModalContentProps): JSX.Element => {
   const address = useWalletStore((state) => state.address);
-  const signer = useSigner();
   const { handleAddStamps, handleDeleteStamps } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [showDataInfo, setShowDataInfo] = useState(false);
   const [disableOnboard, setDisplayOnboard] = useState(false);
+  const { did } = useDatastoreConnectionContext();
   const navigate = useNavigate();
 
   // TODO: update comments
@@ -90,8 +91,9 @@ export const RefreshMyStampsModalContent = ({
 
   const handleFetchCredential = async (providerIDs: PROVIDER_ID[]): Promise<void> => {
     try {
+      if (!did) throw new Error("No DID found");
       if (selectedProviders.length > 0) {
-        const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
+        const verified = await fetchVerifiableCredential(
           iamUrl,
           {
             type: "EVMBulkVerify",
@@ -101,7 +103,7 @@ export const RefreshMyStampsModalContent = ({
             proofs: {},
             signatureType: IAM_SIGNATURE_TYPE,
           },
-          signer as { signMessage: (message: string) => Promise<string> }
+          (data: any) => createSignedPayload(did, data)
         );
 
         const vcs = reduceStampResponse(selectedProviders, verified.credentials);

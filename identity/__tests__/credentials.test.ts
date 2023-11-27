@@ -41,8 +41,15 @@ describe("Fetch Credentials", function () {
     version: "Test-Case-1",
   };
 
-  const MOCK_SIGNATURE = "Signed Message";
-  const MOCK_SIGNER = { signMessage: jest.fn().mockImplementation(() => Promise.resolve(MOCK_SIGNATURE)) };
+  const MOCK_SIGNED_PAYLOAD = {
+    signatures: ["signature"],
+    payload: "0x123",
+    cid: ["0x456"],
+    cacao: ["0x789"],
+    issuer: "0x0",
+  };
+
+  const MOCK_CREATE_SIGNED_PAYLOAD = jest.fn().mockImplementation(() => Promise.resolve(MOCK_SIGNED_PAYLOAD));
 
   const IAM_CHALLENGE_ENDPOINT = `${IAM_URL}/v${payload.version}/challenge`;
   const expectedChallengeRequestBody = { payload: { address: payload.address, type: payload.type } };
@@ -51,13 +58,13 @@ describe("Fetch Credentials", function () {
   const expectedVerifyRequestBody = {
     payload: {
       ...payload,
-      proofs: { signature: MOCK_SIGNATURE },
     },
+    signedChallenge: MOCK_SIGNED_PAYLOAD,
     challenge: MOCK_CHALLENGE_CREDENTIAL,
   };
 
   beforeEach(() => {
-    MOCK_SIGNER.signMessage.mockClear();
+    MOCK_CREATE_SIGNED_PAYLOAD.mockClear();
     clearAxiosMocks();
   });
 
@@ -71,39 +78,29 @@ describe("Fetch Credentials", function () {
   });
 
   it("can fetch a verifiable credential", async () => {
-    const { credential, record, signature, challenge } = await fetchVerifiableCredential(IAM_URL, payload, MOCK_SIGNER);
+    const { credentials } = await fetchVerifiableCredential(IAM_URL, payload, MOCK_CREATE_SIGNED_PAYLOAD);
 
     // called to fetch the challenge and to verify
     expect(axios.post).toHaveBeenCalledTimes(2);
     expect(axios.post).toHaveBeenNthCalledWith(1, IAM_CHALLENGE_ENDPOINT, expectedChallengeRequestBody);
     expect(axios.post).toHaveBeenNthCalledWith(2, IAM_VERIFY_ENDPOINT, expectedVerifyRequestBody);
 
-    expect(MOCK_SIGNER.signMessage).toHaveBeenCalled();
-    expect(MOCK_SIGNER.signMessage).toHaveBeenCalledWith(MOCK_CHALLENGE_VALUE);
+    expect(MOCK_CREATE_SIGNED_PAYLOAD).toHaveBeenCalled();
+    expect(MOCK_CREATE_SIGNED_PAYLOAD).toHaveBeenCalledWith(MOCK_CHALLENGE_VALUE);
 
-    // we expect to get back the mocked response
-    expect(signature).toEqual(MOCK_SIGNATURE);
-    expect(challenge).toEqual(MOCK_CHALLENGE_CREDENTIAL);
-    expect(credential).toEqual(MOCK_VERIFY_RESPONSE_BODY.credential);
-    expect(record).toEqual(MOCK_VERIFY_RESPONSE_BODY.record);
-  });
-
-  it("will fail if not provided a signer to sign the message", async () => {
-    await expect(fetchVerifiableCredential(IAM_URL, payload, undefined)).rejects.toThrow(
-      "Unable to sign message without a signer"
-    );
-
-    expect(axios.post).not.toBeCalled();
+    expect(credentials).toEqual([MOCK_VERIFY_RESPONSE_BODY]);
   });
 
   it("will throw if signer rejects request for signature", async () => {
     // if the user rejects the signing then the signer will throw an error...
-    MOCK_SIGNER.signMessage.mockImplementation(async () => {
+    MOCK_CREATE_SIGNED_PAYLOAD.mockImplementation(async () => {
       throw new Error("Unable to sign");
     });
 
-    await expect(fetchVerifiableCredential(IAM_URL, payload, MOCK_SIGNER)).rejects.toThrow("Unable to sign");
-    expect(MOCK_SIGNER.signMessage).toHaveBeenCalled();
+    await expect(fetchVerifiableCredential(IAM_URL, payload, MOCK_CREATE_SIGNED_PAYLOAD)).rejects.toThrow(
+      "Unable to sign"
+    );
+    expect(MOCK_CREATE_SIGNED_PAYLOAD).toHaveBeenCalled();
   });
 
   it("will not attempt to sign if not provided a challenge in the challenge credential", async () => {
@@ -117,11 +114,13 @@ describe("Fetch Credentials", function () {
       },
     });
 
-    await expect(fetchVerifiableCredential(IAM_URL, payload, MOCK_SIGNER)).rejects.toThrow("Unable to sign message");
+    await expect(fetchVerifiableCredential(IAM_URL, payload, MOCK_CREATE_SIGNED_PAYLOAD)).rejects.toThrow(
+      "Unable to sign message"
+    );
 
     expect(axios.post).toHaveBeenNthCalledWith(1, IAM_CHALLENGE_ENDPOINT, expectedChallengeRequestBody);
     // NOTE: the signMessage function was never called
-    expect(MOCK_SIGNER.signMessage).not.toBeCalled();
+    expect(MOCK_CREATE_SIGNED_PAYLOAD).not.toBeCalled();
   });
 });
 

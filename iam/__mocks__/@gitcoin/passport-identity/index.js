@@ -1,3 +1,5 @@
+const realIdentity = require("@gitcoin/passport-identity");
+
 // mock everything that we're using in @gitcoin/passport-identity/dist/commonjs into an object and export it
 const identity = {};
 
@@ -13,24 +15,12 @@ identity.issueChallengeCredential = jest.fn(async (DIDKit, key, record) => ({
   },
 }));
 
-// always returns dummy VC
-identity.issueHashedCredential = jest.fn(async (DIDKit, key, address, record) => ({
-  record: {
-    type: record.type,
-    version: record.version,
-  },
-  credential: {
-    credentialSubject: {
-      id: `did:pkh:eip155:1:${address}`,
-      hash: "0x0-and-the-rest-of-hash",
-      provider: `${record.type}`,
-    },
-  },
-  proofs: [],
-}));
-
 // always verifies
 identity.verifyCredential = jest.fn(async () => true);
 
 // return full mock
-module.exports = identity;
+module.exports = {
+  ...realIdentity,
+  ...identity,
+  realIdentity,
+};
