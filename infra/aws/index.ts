@@ -203,6 +203,9 @@ const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
         environment: [{
             name: "CGRANTS_API_URL",
             value: "https://api.scorer.gitcoin.co/cgrants"
+        }, {
+            name: "REDIS_URL",
+            value: redisConnectionUrl,
         }],
         logConfiguration: {
             logDriver: "awslogs",
@@ -427,13 +430,29 @@ const service = new aws.ecs.Service(`passport-iam`, {
   dependsOn: [albTargetGroup, taskDefinition]
 });
 
-const ecsTarget = new aws.appautoscaling.Target("autoscaling_target", {
+const ecsAutoScalingTarget = new aws.appautoscaling.Target("autoscaling_target", {
     maxCapacity: 10,
     minCapacity: 1,
     resourceId: pulumi.interpolate`service/${cluster.name}/${service.name}`,
     scalableDimension: "ecs:service:DesiredCount",
     serviceNamespace: "ecs",
 });
+
+const  ecsAutoScalingPolicy =  new aws.appautoscaling.Policy("passport-autoscaling-policy", {
+    policyType: "TargetTrackingScaling",
+    resourceId: ecsAutoScalingTarget.resourceId,
+    scalableDimension: ecsAutoScalingTarget.scalableDimension,
+    serviceNamespace: ecsAutoScalingTarget.serviceNamespace,
+    targetTrackingScalingPolicyConfiguration: {
+      predefinedMetricSpecification: {
+        predefinedMetricType: "ECSServiceAverageCPUUtilization",
+      },
+      targetValue: 50,
+      scaleInCooldown: 300,
+      scaleOutCooldown: 300,
+    },
+  });
+  
 
 const serviceRecord = new aws.route53.Record("passport-record", {
     name: route53Domain,
