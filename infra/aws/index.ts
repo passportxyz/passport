@@ -23,6 +23,8 @@ const albZoneId = coreInfraStack.getOutput("coreAlbZoneId");
 const albHttpsListenerArn = coreInfraStack.getOutput("coreAlbHttpsListenerArn");
 // const albData = coreInfraStack.getOutput("coreAlbData");
 
+const snsAlertsTopicArn = coreInfraStack.getOutput("snsAlertsTopicArn");
+
 const defaultTags = {
     ManagedBy: "pulumi",
     PulumiStack: stack,
@@ -185,7 +187,72 @@ const serviceLogGroup = new aws.cloudwatch.LogGroup("passport-iam", {
     }
 });
 
-// TaskDefinition
+
+//////////////////////////////////////////////////////////////
+// CloudWatch Alerts
+//////////////////////////////////////////////////////////////
+
+const unhandledErrorsMetric = new aws.cloudwatch.LogMetricFilter("unhandledErrorsMetric", {
+  logGroupName: serviceLogGroup.name,
+  metricTransformation: {
+    defaultValue: "0",
+    name: "providerError",
+    namespace: "/iam/errors/unhandled",
+    unit: "Count",
+    value: "1",
+  },
+  name: "Unhandled Provider Errors",
+  pattern: '"UNHANDLED ERROR:" type address',
+});
+
+const unhandledErrorsAlarm = new aws.cloudwatch.MetricAlarm("unhandledErrorsAlarm", {
+  alarmActions: [snsAlertsTopicArn],
+  comparisonOperator: "GreaterThanOrEqualToThreshold",
+  datapointsToAlarm: 1,
+  evaluationPeriods: 1,
+  insufficientDataActions: [],
+  metricName: "providerError",
+  name: "Unhandled Provider Errors",
+  namespace: "/iam/errors/unhandled",
+  okActions: [],
+  period: 21600,
+  statistic: "Sum",
+  threshold: 1,
+  treatMissingData: "notBreaching",
+});
+
+const redisFilter = new aws.cloudwatch.LogMetricFilter("redisConnectionErrors", {
+  logGroupName: serviceLogGroup.name,
+  metricTransformation: {
+    defaultValue: "0",
+    name: "redisConnectionError",
+    namespace: "/iam/errors/redis",
+    unit: "Count",
+    value: "1",
+  },
+  name: "Redis Connection Error",
+  pattern: '"REDIS CONNECTION ERROR:"',
+});
+
+const redisErrorAlarm = new aws.cloudwatch.MetricAlarm("redisConnectionErrorsAlarm", {
+  alarmActions: [snsAlertsTopicArn],
+  comparisonOperator: "GreaterThanOrEqualToThreshold",
+  datapointsToAlarm: 1,
+  evaluationPeriods: 1,
+  insufficientDataActions: [],
+  metricName: "redisConnectionError",
+  name: "Redis Connection Error",
+  namespace: "/iam/errors/redis",
+  okActions: [],
+  period: 21600,
+  statistic: "Sum",
+  threshold: 1,
+  treatMissingData: "notBreaching",
+});
+
+//////////////////////////////////////////////////////////////
+// ECS Task & Service 
+//////////////////////////////////////////////////////////////
 const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
     family: `passport-iam`,
     containerDefinitions: JSON.stringify([{
