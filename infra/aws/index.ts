@@ -32,6 +32,11 @@ const defaultTags = {
 };
 
 const containerInsightsStatus = stack == "production" ? "enabled" : "disabled"
+const logsRetention = Object({
+  "review": 1,
+  "staging": 7,
+  "production": 30
+})
 
 //////////////////////////////////////////////////////////////
 // Service IAM Role
@@ -181,7 +186,7 @@ const cluster = new aws.ecs.Cluster(`gitcoin`,
 
 const serviceLogGroup = new aws.cloudwatch.LogGroup("passport-iam", {
     name: "passport-iam",
-    retentionInDays: 1, // TODO: make it as a paramater and change it for production & staging
+    retentionInDays: logsRetention[stack],
     tags: {
       ...defaultTags
     }
