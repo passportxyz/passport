@@ -16,7 +16,9 @@ const coreInfraStack = new pulumi.StackReference(`gitcoin/core-infra/${stack}`);
 
 const vpcId = coreInfraStack.getOutput("vpcId");
 const vpcPrivateSubnets = coreInfraStack.getOutput("privateSubnetIds");
-const redisConnectionUrl = coreInfraStack.getOutput("staticRedisConnectionUrl");
+const redisConnectionUrl = pulumi.interpolate`${coreInfraStack.getOutput("staticRedisConnectionUrl")}`;
+
+
 // ALB Data 
 const albDnsName = coreInfraStack.getOutput("coreAlbDns");
 const albZoneId = coreInfraStack.getOutput("coreAlbZoneId");
