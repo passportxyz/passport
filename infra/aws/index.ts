@@ -36,7 +36,22 @@ const logsRetention = Object({
   "review": 1,
   "staging": 7,
   "production": 30
-})
+});
+
+const serviceResources = Object({
+  "review": {
+    memory: 512, // 512 MiB
+    cpu: 256 // 0.25 vCPU
+  }, 
+  "staging": {
+    memory: 512, // 512 MiB
+    cpu: 256 // 0.25 vCPU
+  },
+  "production": {
+    memory: 2048, // 2GB
+    cpu: 1024 // 1vCPU
+  }
+});
 
 //////////////////////////////////////////////////////////////
 // Service IAM Role
@@ -263,8 +278,8 @@ const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
     containerDefinitions: JSON.stringify([{
         name: "iam",
         image: dockerGtcPassportIamImage,
-        cpu: 2048,
-        memory: 4096,
+        cpu: serviceResources[stack]["cpu"],
+        memory: serviceResources[stack]["memory"],
         links: [],
         essential: true,
         portMappings: [{
@@ -466,8 +481,8 @@ const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
         volumesFrom: []
     }]),
     executionRoleArn: serviceRole.arn,
-    cpu: "2048",
-    memory: "4096",
+    cpu: serviceResources[stack]["cpu"],
+    memory: serviceResources[stack]["memory"],
     networkMode: "awsvpc",
     requiresCompatibilities: ["FARGATE"],
     tags: {
