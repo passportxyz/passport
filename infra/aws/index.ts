@@ -25,6 +25,8 @@ const albZoneId = coreInfraStack.getOutput("coreAlbZoneId");
 const albHttpsListenerArn = coreInfraStack.getOutput("coreAlbHttpsListenerArn");
 // const albData = coreInfraStack.getOutput("coreAlbData");
 
+const snsAlertsTopicArn = coreInfraStack.getOutput("snsAlertsTopicArn");
+
 const defaultTags = {
     ManagedBy: "pulumi",
     PulumiStack: stack,
@@ -32,6 +34,26 @@ const defaultTags = {
 };
 
 const containerInsightsStatus = stack == "production" ? "enabled" : "disabled"
+const logsRetention = Object({
+  "review": 1,
+  "staging": 7,
+  "production": 30
+});
+
+const serviceResources = Object({
+  "review": {
+    memory: 512, // 512 MiB
+    cpu: 256 // 0.25 vCPU
+  }, 
+  "staging": {
+    memory: 512, // 512 MiB
+    cpu: 256 // 0.25 vCPU
+  },
+  "production": {
+    memory: 2048, // 2GB
+    cpu: 1024 // 1vCPU
+  }
+});
 
 //////////////////////////////////////////////////////////////
 // Service IAM Role
@@ -181,20 +203,85 @@ const cluster = new aws.ecs.Cluster(`gitcoin`,
 
 const serviceLogGroup = new aws.cloudwatch.LogGroup("passport-iam", {
     name: "passport-iam",
-    retentionInDays: 1, // TODO: make it as a paramater and change it for production & staging
+    retentionInDays: logsRetention[stack],
     tags: {
       ...defaultTags
     }
 });
 
-// TaskDefinition
+
+//////////////////////////////////////////////////////////////
+// CloudWatch Alerts
+//////////////////////////////////////////////////////////////
+
+const unhandledErrorsMetric = new aws.cloudwatch.LogMetricFilter("unhandledErrorsMetric", {
+  logGroupName: serviceLogGroup.name,
+  metricTransformation: {
+    defaultValue: "0",
+    name: "providerError",
+    namespace: "/iam/errors/unhandled",
+    unit: "Count",
+    value: "1",
+  },
+  name: "Unhandled Provider Errors",
+  pattern: '"UNHANDLED ERROR:" type address',
+});
+
+const unhandledErrorsAlarm = new aws.cloudwatch.MetricAlarm("unhandledErrorsAlarm", {
+  alarmActions: [snsAlertsTopicArn],
+  comparisonOperator: "GreaterThanOrEqualToThreshold",
+  datapointsToAlarm: 1,
+  evaluationPeriods: 1,
+  insufficientDataActions: [],
+  metricName: "providerError",
+  name: "Unhandled Provider Errors",
+  namespace: "/iam/errors/unhandled",
+  okActions: [],
+  period: 21600,
+  statistic: "Sum",
+  threshold: 1,
+  treatMissingData: "notBreaching",
+});
+
+const redisFilter = new aws.cloudwatch.LogMetricFilter("redisConnectionErrors", {
+  logGroupName: serviceLogGroup.name,
+  metricTransformation: {
+    defaultValue: "0",
+    name: "redisConnectionError",
+    namespace: "/iam/errors/redis",
+    unit: "Count",
+    value: "1",
+  },
+  name: "Redis Connection Error",
+  pattern: '"REDIS CONNECTION ERROR:"',
+});
+
+const redisErrorAlarm = new aws.cloudwatch.MetricAlarm("redisConnectionErrorsAlarm", {
+  alarmActions: [snsAlertsTopicArn],
+  comparisonOperator: "GreaterThanOrEqualToThreshold",
+  datapointsToAlarm: 1,
+  evaluationPeriods: 1,
+  insufficientDataActions: [],
+  metricName: "redisConnectionError",
+  name: "Redis Connection Error",
+  namespace: "/iam/errors/redis",
+  okActions: [],
+  period: 21600,
+  statistic: "Sum",
+  threshold: 1,
+  treatMissingData: "notBreaching",
+});
+
+//////////////////////////////////////////////////////////////
+// ECS Task & Service 
+//////////////////////////////////////////////////////////////
 const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
     family: `passport-iam`,
     containerDefinitions: JSON.stringify([{
         name: "iam",
         image: dockerGtcPassportIamImage,
-        cpu: 2048,
-        memory: 4096,
+        cpu: serviceResources[stack]["cpu"],
+        memory: serviceResources[stack]["memory"],
         links: [],
         essential: true,
         portMappings: [{
@@ -396,8 +483,8 @@ const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
         volumesFrom: []
     }]),
     executionRoleArn: serviceRole.arn,
-    cpu: "2048",
-    memory: "4096",
+    cpu: serviceResources[stack]["cpu"],
+    memory: serviceResources[stack]["memory"],
     networkMode: "awsvpc",
     requiresCompatibilities: ["FARGATE"],
     tags: {
