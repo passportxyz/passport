@@ -8,11 +8,6 @@ export class CyberConnectPlatform extends Platform {
   redirectUri: string = null;
   isEVM = true;
 
-  banner = {
-    content:
-      "Only CyberProfiles created using the legacy CyberConnect contracts on BSC are currently supported. We are working with CyberConnect to resolve this.",
-  };
-
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     const result = await Promise.resolve({});
     return result;
