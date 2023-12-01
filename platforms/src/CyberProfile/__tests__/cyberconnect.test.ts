@@ -4,6 +4,7 @@ import { ProviderExternalVerificationError } from "../../types";
 import * as profileProviderModule from "../Providers/cyberconnect";
 import * as nonEvmProvider from "../Providers/cyberconnect_nonevm";
 import * as ethers from "ethers";
+import axios from "axios";
 
 const MOCK_ADDRESS_PREMIUM = "0xc47aa859fa329496db6d498165da7e0b1fe13430";
 const MOCK_PROFILE_PREMIUM = 1;
@@ -16,6 +17,8 @@ const MOCK_ADDRESS_NULL = "0x0000000000000000000000000000000000000000";
 const MOCK_FAKE_ADDRESS = "FAKE_ADDRESS";
 
 const mockedEthers = ethers as jest.Mocked<typeof ethers>;
+
+jest.mock("axios");
 
 mockedEthers.Contract.prototype.getPrimaryProfile = jest.fn().mockImplementation((address: string) => {
   if (!address.startsWith("0x")) throw new Error("Invalid address");
@@ -41,6 +44,35 @@ mockedEthers.Contract.prototype.getHandleByProfileId = jest.fn().mockImplementat
 });
 
 describe("Attempt premium verification", function () {
+  it("works with the new cyberprofile system", async () => {
+    axios.post = jest.fn().mockResolvedValueOnce({
+      data: {
+        data: {
+          checkShortestCyberID: "123",
+        },
+      },
+    });
+
+    const cc = new profileProviderModule.CyberProfilePremiumProvider();
+
+    const verifiedPayload = await cc.verify(
+      {
+        address: "0x0",
+      } as unknown as RequestPayload,
+      {}
+    );
+
+    expect(verifiedPayload).toEqual({
+      valid: true,
+      errors: [],
+      record: {
+        userHandle: "123",
+      },
+    });
+
+    expect(mockedEthers.Contract.prototype.getPrimaryProfile).not.toHaveBeenCalled();
+  });
+
   it("handles valid verification attempt", async () => {
     const cc = new profileProviderModule.CyberProfilePremiumProvider();
 
@@ -58,6 +90,8 @@ describe("Attempt premium verification", function () {
         userHandle: "123",
       },
     });
+
+    expect(mockedEthers.Contract.prototype.getPrimaryProfile).toHaveBeenCalled();
   });
 
   it("should return false for paid handle", async () => {

@@ -1,10 +1,12 @@
 // ----- Types
-import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, Provider } from "../../types";
 import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Ethers library
 import { Contract, BigNumber } from "ethers";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+import axios from "axios";
 
 // CyberProfile Proxy Contract Address
 const CYBERPROFILE_PROXY_CONTRACT_ADDRESS = "0x2723522702093601e6360CAe665518C4f63e9dA6";
@@ -85,37 +87,64 @@ class CyberProfileBaseProvider implements Provider {
   }
 
   async getPrimaryHandle(userAddress: string, context: CyberConnextContext): Promise<string> {
+    if (context.cyberConnect?.handle === undefined) {
+      if (!context.cyberConnect) context.cyberConnect = {};
+
+      // CyberConnect moved to a new method of getting primary handle,
+      // so we try the new method first, and if it fails, we try the old method
+      context.cyberConnect.handle = await this.getPrimaryHandleForNewCyberProfile(userAddress);
+
+      if (!context.cyberConnect.handle)
+        context.cyberConnect.handle = await this.getPrimaryHandleForBSCCyberProfile(userAddress);
+    }
+
+    return context.cyberConnect.handle;
+  }
+
+  async getPrimaryHandleForNewCyberProfile(userAddress: string): Promise<string> {
     try {
-      if (context.cyberConnect?.handle === undefined) {
-        if (!context.cyberConnect) context.cyberConnect = {};
-        context.cyberConnect.handle = "";
+      const result: {
+        data?: {
+          data?: {
+            checkShortestCyberID?: string;
+          };
+        };
+      } = await axios.post("https://api.cyberconnect.dev/", {
+        query: `query {
+          checkShortestCyberID( address: "${userAddress}")
+        }`,
+      });
+      return result?.data?.data?.checkShortestCyberID;
+    } catch (e: unknown) {
+      handleProviderAxiosError(e, "New CyberProfile");
+    }
+  }
 
-        const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(
-          process.env.BSC_RPC_URL || "https://bsc-dataseed.binance.org/"
-        );
+  async getPrimaryHandleForBSCCyberProfile(userAddress: string): Promise<string> {
+    let handle = "";
+    try {
+      const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(
+        process.env.BSC_RPC_URL || "https://bsc-dataseed.binance.org/"
+      );
 
-        const contract: CyberProfileContract = new Contract(
-          CYBERPROFILE_PROXY_CONTRACT_ADDRESS,
-          CYBERPROFILE_PROXY_ABI,
-          provider
-        );
+      const contract: CyberProfileContract = new Contract(
+        CYBERPROFILE_PROXY_CONTRACT_ADDRESS,
+        CYBERPROFILE_PROXY_ABI,
+        provider
+      );
 
-        // get primary profile id
-        const profileId: BigNumber = await contract.getPrimaryProfile(userAddress);
+      // get primary profile id
+      const profileId: BigNumber = await contract.getPrimaryProfile(userAddress);
 
-        // if no primary profile id is found (profileId == 0), return 0
-        if (!profileId.isZero()) {
-          // get primary profile handle
-          const handle: string = await contract.getHandleByProfileId(profileId.toNumber());
-
-          context.cyberConnect.handle = handle;
-        }
+      // if no primary profile id is found (profileId == 0), return 0
+      if (!profileId.isZero()) {
+        // get primary profile handle
+        handle = await contract.getHandleByProfileId(profileId.toNumber());
       }
     } catch (e: unknown) {
       throw new ProviderExternalVerificationError(`Error getting primary handle from CyberProfile: ${String(e)}`);
     }
-
-    return context.cyberConnect.handle;
+    return handle;
   }
 }
 
