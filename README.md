@@ -43,7 +43,7 @@ Prerequisites: [Node (v16 LTS)](https://nodejs.org/en/download/) plus [Yarn](htt
 ```sh
 git clone https://github.com/gitcoinco/passport.git
 cd passport
-npm install --global lerna
+npm install --global lerna@^4.0.0
 lerna init
 lerna bootstrap
 ```
