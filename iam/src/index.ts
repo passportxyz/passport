@@ -721,5 +721,5 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
 // procedure endpoints
 app.use("/procedure", procedureRouter);
 
-const __dirname = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use("/static", express.static(path.join(__dirname, "static")));
