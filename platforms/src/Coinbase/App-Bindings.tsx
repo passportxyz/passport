@@ -14,6 +14,17 @@ export class CoinbasePlatform extends Platform {
   clientId: string = null;
   redirectUri: string = null;
 
+  banner = {
+    content: `Integrate your Coinbase account with your onchain identity to unlock a realm of
+      digital possibilities. This stamp requires you to have an active Coinbase account
+      and to establish your onchain identity on Base, bridging the gap between
+      traditional and decentralized finance.`.replace(/\s+/gm, " "),
+    cta: {
+      label: "Begin Your Onchain Verification Journey with Coinbase",
+      url: "https://www.coinbase.com/onchain-verify",
+    },
+  };
+
   constructor(options: PlatformOptions = {}) {
     super();
     this.clientId = options.clientId as string;
