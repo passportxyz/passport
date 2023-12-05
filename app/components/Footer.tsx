@@ -41,6 +41,14 @@ export const Footer = ({ lightMode }: FooterProps): JSX.Element => {
       >
         Git commit
       </a>
+      <a
+        href="https://www.gitcoin.co/privacy"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="col-span-4 hover:underline"
+      >
+        Gitcoin Privacy Policy
+      </a>
       <div className="col-start-[-2] col-end-[-1] flex items-center justify-self-end md:col-start-[-3]">
         <a href="https://github.com/gitcoinco/passport" target="_blank" rel="noopener noreferrer" className="mr-8">
           <img src={lightMode ? "./assets/githubLogoLight.svg" : "./assets/githubLogoDark.svg"} alt="Github Logo" />
