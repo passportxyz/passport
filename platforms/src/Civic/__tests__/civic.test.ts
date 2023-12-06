@@ -49,7 +49,28 @@ describe("Civic Pass Provider", function () {
     expect(verifiedPayload).toMatchObject({
       valid: false,
       record: undefined,
-      errors: ["You do not have enough passes to qualify for this stamp. All passes: 0."],
+      errors: ["You do not have a UNIQUENESS pass."],
+    });
+  });
+
+  it("should return detailed error for an expired pass", async () => {
+    const expiredPass = { ...dummyPass, expiry: now - 1 };
+
+    stubCivic({
+      UNIQUENESS: [expiredPass],
+    });
+
+    const civic = new CivicPassProvider({
+      type: "uniqueness",
+      passType: CivicPassType.UNIQUENESS,
+    });
+
+    const verifiedPayload = await civic.verify(requestPayload);
+
+    expect(verifiedPayload).toMatchObject({
+      valid: false,
+      record: undefined,
+      errors: ["Your UNIQUENESS pass is expired (older than 90 days)."],
     });
   });
 
@@ -66,7 +87,6 @@ describe("Civic Pass Provider", function () {
     expect(verifiedPayload).toMatchObject({
       valid: true,
       record: { address: userAddress },
-      errors: [],
     });
   });
 
@@ -84,21 +104,6 @@ describe("Civic Pass Provider", function () {
     expect(verifiedPayload.expiresInSeconds).toBeGreaterThan(expirySeconds - margin);
   });
 
-  it("should populate the error array if an error is thrown while checking any pass", async () => {
-    const errorString = "some error";
-    stubCivicError(errorString);
-    const civic = new CivicPassProvider({
-      type: "uniqueness",
-      passType: CivicPassType.UNIQUENESS,
-    });
-
-    await expect(async () => {
-      return await civic.verify(requestPayload);
-    }).rejects.toThrow(
-      new ProviderExternalVerificationError("Error verifying BrightID sponsorship: Error: some error")
-    );
-  });
-
   it("should return the pass details if a pass is found", async () => {
     stubCivic({
       UNIQUENESS: [dummyPass],
@@ -112,7 +117,6 @@ describe("Civic Pass Provider", function () {
     expect(verifiedPayload).toMatchObject({
       valid: true,
       record: {},
-      errors: [],
     });
   });
 
@@ -129,7 +133,6 @@ describe("Civic Pass Provider", function () {
     expect(verifiedPayload).toMatchObject({
       valid: true,
       record: {},
-      errors: [],
     });
   });
 });
