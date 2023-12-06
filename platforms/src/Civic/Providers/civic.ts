@@ -1,11 +1,10 @@
 // ----- Types
-import { ProviderExternalVerificationError, type Provider } from "../../types";
+import type { Provider } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { CivicPassType } from "./types";
 
 // ----- Utils
-import { findAllPasses, latestExpiry, secondsFromNow } from "./util";
-import { log } from "console";
+import { findAllPasses, latestExpiry, secondsFromNow, getNowAsBigNumberSeconds } from "./util";
 
 // If the environment variable INCLUDE_TESTNETS is set to true,
 // then passes on testnets will be included in the verification by default.
@@ -41,34 +40,36 @@ export class CivicPassProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
-    const errors = [];
+    const now = getNowAsBigNumberSeconds();
+    let errors = undefined;
     let record = undefined;
+    let valid = false;
 
-    try {
-      const allPasses = await findAllPasses(address, this.includeTestnets, [this.passType]);
-      const valid = allPasses.length > 0;
-      try {
-        if (valid) {
-          record = { address };
-        } else {
-          errors.push(`You do not have enough passes to qualify for this stamp. All passes: ${allPasses.length}.`);
-        }
-      } catch (e: unknown) {
-        errors.push(String(e));
+    const allPasses = await findAllPasses(address, this.includeTestnets, [this.passType]);
+
+    if (allPasses.length > 0) {
+      const validPasses = allPasses.filter((pass) => pass.expiry.gt(now));
+      if (validPasses.length > 0) {
+        record = { address };
+        valid = true;
+      } else {
+        errors = [
+          `Your ${CivicPassType[this.passType]} pass${
+            allPasses.length > 1 ? "es are" : " is"
+          } expired (older than 90 days).`,
+        ];
       }
-
-      const expiry = valid ? secondsFromNow(latestExpiry(allPasses)) : undefined;
-
-      return {
-        valid,
-        errors,
-        expiresInSeconds: expiry,
-        record: record,
-      };
-    } catch (e: unknown) {
-      return Promise.reject(
-        new ProviderExternalVerificationError(`Error verifying BrightID sponsorship: ${String(e)}`)
-      );
+    } else {
+      errors = [`You do not have a ${CivicPassType[this.passType]} pass.`];
     }
+
+    const expiresInSeconds = valid ? secondsFromNow(latestExpiry(allPasses)) : undefined;
+
+    return {
+      valid,
+      errors,
+      expiresInSeconds,
+      record,
+    };
   }
 }
