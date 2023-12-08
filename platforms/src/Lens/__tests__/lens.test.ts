@@ -21,9 +21,14 @@ describe("Attempt verification", function () {
     mockedAxios.post.mockResolvedValueOnce({
       data: {
         data: {
-          defaultProfile: {
-            id: MOCK_ADDRESS,
-            handle: MOCK_HANDLE,
+          ownedHandles: {
+            items: [
+              {
+                id: MOCK_ADDRESS,
+                fullHandle: MOCK_HANDLE,
+                ownedBy: MOCK_ADDRESS,
+              },
+            ],
           },
         },
       },
@@ -41,6 +46,31 @@ describe("Attempt verification", function () {
         handle: MOCK_HANDLE,
       },
     });
+  });
+
+  it("should return false if owner addresses do not match", async () => {
+    mockedAxios.post.mockResolvedValueOnce({
+      data: {
+        data: {
+          ownedHandles: {
+            items: [
+              {
+                id: MOCK_ADDRESS,
+                fullHandle: MOCK_HANDLE,
+                ownedBy: MOCK_FAKE_ADDRESS,
+              },
+            ],
+          },
+        },
+      },
+    });
+
+    const lens = new LensProfileProvider();
+    const verifiedPayload = await lens.verify({
+      address: MOCK_ADDRESS_LOWER,
+    } as RequestPayload);
+
+    expect(verifiedPayload.valid).toEqual(false);
   });
 
   it("should return false for an address without a lens handle", async () => {
