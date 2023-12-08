@@ -8,13 +8,16 @@ import axios from "axios";
 // ----- Utils
 import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
-interface DefaultProfile {
+interface Profile {
   id: string;
-  handle: string;
+  fullHandle: string;
+  ownedBy: string;
 }
 
 interface Data {
-  defaultProfile: DefaultProfile;
+  ownedHandles: {
+    items: Profile[];
+  };
 }
 
 interface GraphQlResponse {
@@ -27,15 +30,20 @@ interface LensProfileResponse {
   errors: string[];
 }
 
-const lensApiEndpoint = "https://api.lens.dev";
+const lensApiEndpoint = "https://api-v2.lens.dev/";
 
 async function getLensProfile(userAddress: string): Promise<LensProfileResponse> {
   try {
     const query = `
-      query DefaultProfile {
-        defaultProfile(request: { ethereumAddress: "${userAddress}"}) {
-          id
-          handle
+      query OwnedHandles {
+        ownedHandles(request: {
+          for: "${userAddress}"
+        }) {
+          items {
+            id
+            ownedBy
+            fullHandle
+          }
         }
       }
     `;
@@ -43,10 +51,16 @@ async function getLensProfile(userAddress: string): Promise<LensProfileResponse>
       query,
     });
 
-    if (result?.data?.data?.defaultProfile?.handle) {
+    const handles = result?.data?.data?.ownedHandles?.items;
+
+    const validHandle = handles?.find(
+      (handle) => handle.ownedBy.toLocaleLowerCase() === userAddress.toLocaleLowerCase()
+    );
+
+    if (validHandle) {
       return {
         valid: true,
-        handle: result?.data?.data?.defaultProfile?.handle,
+        handle: validHandle.fullHandle,
         errors: [],
       };
     } else {
