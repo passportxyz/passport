@@ -1,5 +1,8 @@
 {
   "0x14a33": [
+    "error InsufficientFee()",
+    "error InvalidNonce()",
+    "error InvalidSignature()",
     "event AdminChanged(address previousAdmin, address newAdmin)",
     "event BeaconUpgraded(address indexed beacon)",
     "event Initialized(uint8 version)",
