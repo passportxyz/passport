@@ -90,7 +90,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
   const address = useWalletStore((state) => state.address);
   const { did } = useDatastoreConnectionContext();
   const toast = useToast();
-  const [status, setStatus] = useState(StampClaimProgressStatus.InProgress);
+  const [status, setStatus] = useState(StampClaimProgressStatus.Idle);
 
   const handleSponsorship = async (platform: PlatformClass, result: string): Promise<void> => {
     if (result === "success") {
