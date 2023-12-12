@@ -45,6 +45,7 @@ import { useDashboardCustomization } from "../hooks/useDashboardCustomization";
 // --- GTM Module
 import TagManager from "react-gtm-module";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
+import { Chatbot } from "../components/Chatbot";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -333,6 +334,7 @@ export default function Dashboard() {
             <ExpiredStampsPanel className="col-span-full" />
           </PageWidthGrid>
         </BodyWrapper>
+        {address && <Chatbot address={address} />}
         {/* This footer contains dark colored text and dark images */}
         <Footer lightMode={true} />
       </HeaderContentFooterGrid>

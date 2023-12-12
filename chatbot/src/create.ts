@@ -1,26 +1,36 @@
 import "dotenv/config";
 import fs from "fs";
 import OpenAI from "openai";
+import { loadEnv } from "./utils";
 
-const main = async (env: Env) => {
+const { env } = loadEnv(["OPENAI_API_KEY"]);
+
+const main = async () => {
   const openai = new OpenAI({
     apiKey: env.OPENAI_API_KEY,
   });
 
-  const docsFile = await openai.files.create({ file: fs.createReadStream("docs.txt"), purpose: "assistants" });
+  let docsFile;
+  if (env.OPENAI_FILE_ID) {
+    console.log("Retrieving existing file", env.OPENAI_FILE_ID);
+    docsFile = await openai.files.retrieve(env.OPENAI_FILE_ID);
+  } else {
+    docsFile = await openai.files.create({ file: fs.createReadStream("docs.txt"), purpose: "assistants" });
+  }
 
-  const assistant = await openai.beta.assistants.create({
+  let processAssistant;
+  if (env.OPENAI_ASSISTANT_ID) {
+    console.log("Updating existing assistant", env.OPENAI_ASSISTANT_ID);
+    processAssistant = (options: any) => openai.beta.assistants.update(env.OPENAI_ASSISTANT_ID, options);
+  } else {
+    processAssistant = (options: any) => openai.beta.assistants.create(options);
+  }
+
+  const instructions = await fs.promises.readFile("instructions.txt", "utf8");
+
+  const assistant = await processAssistant({
     name: "Gitcoin Passport Assistant",
-    instructions: `As an expert in Gitcoin Passport, your role is to provide detailed
-      information and insights about the Gitcoin Passport application, its purpose, and
-      its use, particularly focusing on the various stamps it offers. Gitcoin Passport is
-      a vital identity verification application and Sybil resistance protocol, designed to
-      enhance the security and integrity of digital communities and projects. Your
-      responses should be informed, precise, and helpful to users seeking to understand
-      how Gitcoin Passport works, especially in regards to its verifiable credentials
-      or Stamps. Restrict answers to one clear and concise sentence. Restrict answers
-      to the knowledge in the attached documentation. The docs.txt file contains several
-      documents, each beginning with the marker ==> FILE_NAME <==`.replace(/\s+/gm, " "),
+    instructions,
     tools: [
       { type: "code_interpreter" },
       { type: "retrieval" },
@@ -49,25 +59,7 @@ const main = async (env: Env) => {
   return "Assistant created: " + assistant.id;
 };
 
-type Env = {
-  OPENAI_API_KEY?: string;
-};
-
-const setup = (envVars: (keyof Env)[]) => {
-  const env = envVars.reduce((env, key) => {
-    env[key] = process.env[key];
-    if (!env[key]) {
-      throw new Error(`${key} environment variable is required.`);
-    }
-    return env;
-  }, {} as Env) as Env;
-
-  return { env };
-};
-
-const { env } = setup(["OPENAI_API_KEY"]);
-
-main(env)
+main()
   .then(console.log)
   .catch((error: any) => {
     if (error instanceof OpenAI.APIError) {

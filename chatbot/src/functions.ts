@@ -1,8 +1,22 @@
 import "dotenv/config";
-import { loadEnv } from "./setup";
+import { loadEnv } from "./utils";
 import axios from "axios";
 
 const { env } = loadEnv(["PASSPORT_SCORER_API_KEY", "PASSPORT_SCORER_ID"]);
+
+export const runFunction = async (name: string, args: any) => {
+  return JSON.stringify(await getFunctionResponse(name, args));
+};
+
+const getFunctionResponse = async (name: string, args: string) => {
+  const parsedArgs = JSON.parse(args);
+  switch (name) {
+    case "get_score":
+      return await getScore(parsedArgs.address);
+    default:
+      return "null";
+  }
+};
 
 type GetScoreResponse = {
   data: {
@@ -14,7 +28,7 @@ type GetScoreResponse = {
   };
 };
 
-export const get_score = async (address: string) => {
+const getScore = async (address: string) => {
   const { data }: GetScoreResponse = await axios.post(
     "https://api.scorer.gitcoin.co/registry/submit-passport",
     {
