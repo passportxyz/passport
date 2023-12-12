@@ -13,6 +13,7 @@
   },
   "workspaces": [
     "app",
+    "chatbot",
     "database-client",
     "iam",
     "identity",
