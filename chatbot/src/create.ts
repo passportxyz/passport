@@ -51,6 +51,23 @@ const main = async () => {
           },
         },
       },
+      {
+        type: "function",
+        function: {
+          name: "get_stamps",
+          description: "Returns the Stamps for an address",
+          parameters: {
+            type: "object",
+            properties: {
+              address: {
+                type: "string",
+                description: "The address for which to get stamps",
+              },
+            },
+            required: ["address"],
+          },
+        },
+      },
     ],
     model: "gpt-3.5-turbo-1106",
     file_ids: [docsFile.id],
