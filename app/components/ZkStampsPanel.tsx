@@ -35,12 +35,15 @@ const StampsList = ({ className, onChainPlatformIds }: StampsListProps) => {
 export const ZkStampsPanel = ({ className }: { className: string }) => {
   const { verifiedPlatforms, allProvidersState } = useContext(CeramicContext);
 
-  console.log("geri verifiedPlatforms", verifiedPlatforms);
-  // for (const _providerId in allProvidersState) {
-  //   const providerId = _providerId as PROVIDER_ID;
-  //   console.log("geri providerId", providerId);
-  //   console.log("geri allProvidersState[providerId]", allProvidersState[providerId]);
-  // }
+  // console.log("geri verifiedPlatforms", verifiedPlatforms);
+
+  for (const _providerId in allProvidersState) {
+    const providerId = _providerId as PROVIDER_ID;
+    const providerState = allProvidersState[providerId];
+    if(providerState?.stamp) {
+      console.log("geri providerState?.stamp", providerState?.stamp);
+    }
+  }
 
   console.log("geri allProvidersState", allProvidersState);
   return (

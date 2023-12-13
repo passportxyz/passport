@@ -50,6 +50,7 @@ import { BarretenbergBackend, CompiledCircuit } from "@noir-lang/backend_barrete
 import { Noir } from "@noir-lang/noir_js";
 import zk_passport_score from "./zk_passport_score.json";
 import { ZkStampsPanel } from "../components/ZkStampsPanel";
+import { BigNumberish } from "ethers";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -312,8 +313,13 @@ export default function Dashboard() {
     const backend = new BarretenbergBackend(zk_passport_score as CompiledCircuit);
     const noir = new Noir(zk_passport_score as CompiledCircuit, backend);
 
+
+    console.log("geri bn stuff");
+    // const bn = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+    const bn = BigInt("0xffff");
+    console.log("geri bn", bn.toString());
     const input = {
-      x: [1, 1, 1, 1, 1],
+      x: ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "1", 1, 1, 1],
       y: [1, 1, 1, 4, 5],
     };
     // const input = {
@@ -333,6 +339,7 @@ export default function Dashboard() {
     console.log("results", proof.proof);
   };
 
+  
   return (
     <PageRoot className="text-color-1">
       {modals}
