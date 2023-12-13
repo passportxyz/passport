@@ -49,6 +49,7 @@ import { useDatastoreConnectionContext } from "../context/datastoreConnectionCon
 import { BarretenbergBackend, CompiledCircuit } from "@noir-lang/backend_barretenberg";
 import { Noir } from "@noir-lang/noir_js";
 import zk_passport_score from "./zk_passport_score.json";
+import { ZkStampsPanel } from "../components/ZkStampsPanel";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -342,6 +343,8 @@ export default function Dashboard() {
             <Subheader className="col-span-full xl:col-span-7 " />
             Hello World !!!
             <button onClick={computeProof}>Compute Proof</button>
+
+            <ZkStampsPanel className="col-span-full" />
             <DashboardScorePanel
               className={`col-span-full ${usingCustomPanel ? "lg:col-span-4" : "xl:max-h-52"} xl:col-span-7`}
             />
