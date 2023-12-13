@@ -9,7 +9,6 @@ module.exports = {
     extend: {
       colors: {
         background: "rgb(var(--color-background) / <alpha-value>)",
-        "background-1": "rgb(var(--color-background-1) / <alpha-value>)",
         "background-2": "rgb(var(--color-background-2) / <alpha-value>)",
         "background-3": "rgb(var(--color-background-3) / <alpha-value>)",
         "background-4": "rgb(var(--color-background-4) / <alpha-value>)",

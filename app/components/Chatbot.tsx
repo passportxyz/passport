@@ -1,5 +1,7 @@
 import React from "react";
 import axios from "axios";
+import { Disclosure } from "@headlessui/react";
+import { CONTENT_MAX_WIDTH, CONTENT_MAX_WIDTH_INCLUDING_PADDING, PAGE_PADDING } from "./PageWidthGrid";
 
 const PROXY_URL = "http://localhost:3030";
 
@@ -43,7 +45,7 @@ const roleToName = (role: MessageRole) => {
 
 const FINISHED_STATUSES = ["completed", "failed", "cancelled", "expired"];
 
-const ENABLED = true;
+const ENABLED = false;
 
 const getRun = async (threadId: string, runId: string) => {
   return (await axios.get(`${PROXY_URL}/thread/${threadId}/${runId}`)).data as Run;
@@ -187,40 +189,68 @@ const useChatbot = ({ address }: { address: string }) => {
 export const Chatbot = ({ address }: { address: string }) => {
   const { loading, messages, onSubmit, status } = useChatbot({ address });
 
-  return (
-    <div className="my-12 mx-auto flex h-96 w-3/4 flex-col rounded-sm bg-transparent p-8 shadow-even-md shadow-background-3">
-      <div className="flex flex-col-reverse overflow-y-auto">
-        <ul>
-          {messages
-            .map(({ text, role, id }) => (
-              <li className="my-3" key={id}>
-                <b>{roleToName(role)}</b>: {text}
-              </li>
-            ))
-            .flat()}
+  const [isOpen, setIsOpen] = React.useState(false);
 
-          {loading ? (
-            <li className="bold animate-pulse">Loading...</li>
-          ) : status !== "completed" ? (
-            <li className="bold">Error: {status}</li>
-          ) : null}
-        </ul>
-      </div>
-      <div className="grow" />
-      <div>
-        <input
-          className="mt-4 w-full rounded-sm text-color-3"
-          type="text"
-          placeholder="Message"
-          disabled={loading}
-          onKeyDown={async (e) => {
-            if (e.key === "Enter") {
-              const message = e.currentTarget.value;
-              e.currentTarget.value = "";
-              onSubmit(message);
-            }
-          }}
-        />
+  return (
+    <div
+      className={`fixed bottom-0 left-0 flex h-fit w-full items-end justify-center bg-gradient-to-b from-transparent to-background ${PAGE_PADDING} transition-all ${
+        isOpen ? "pt-96" : "pt-24"
+      }`}
+    >
+      <div
+        className={`mb-10 mt-8 flex w-full flex-col rounded border border-foreground-2 bg-background p-4 md:p-8 ${CONTENT_MAX_WIDTH}`}
+      >
+        <button onClick={() => setIsOpen((isOpen) => !isOpen)} className="self-end">
+          <div className="p-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className={`h-6 w-6 ${isOpen ? "rotate-180" : ""}`}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l7.5-7.5 7.5 7.5m-15 6l7.5-7.5 7.5 7.5" />
+            </svg>
+          </div>
+        </button>
+        <div className="flex flex-col-reverse overflow-y-auto">
+          <div className={`transition-all ${isOpen ? "h-[75vh] md:h-96 lg:h-80" : "h-0"}`}>
+            <ul>
+              {messages
+                .map(({ text, role, id }) => (
+                  <li className="my-3" key={id}>
+                    <b>{roleToName(role)}</b>: {text}
+                  </li>
+                ))
+                .flat()}
+
+              {loading ? (
+                <li className="bold animate-pulse">Loading...</li>
+              ) : status !== "completed" ? (
+                <li className="bold">Error: {status}</li>
+              ) : null}
+            </ul>
+          </div>
+        </div>
+        <div className="grow" />
+
+        <div>
+          <input
+            className="mt-4 w-full rounded-sm px-2 py-1 text-color-3"
+            type="text"
+            placeholder="Message"
+            disabled={loading}
+            onKeyDown={async (e) => {
+              if (e.key === "Enter") {
+                const message = e.currentTarget.value;
+                e.currentTarget.value = "";
+                setIsOpen(true);
+                onSubmit(message);
+              }
+            }}
+          />
+        </div>
       </div>
     </div>
   );

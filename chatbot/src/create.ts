@@ -68,6 +68,24 @@ const main = async () => {
           },
         },
       },
+      {
+        type: "function",
+        function: {
+          name: "flag_user",
+          description:
+            "Call this function to flag users who repeatedly submit off-topic queries or otherwise abuse the system",
+          parameters: {
+            type: "object",
+            properties: {
+              address: {
+                type: "string",
+                description: "The address of the user",
+              },
+            },
+            required: ["address"],
+          },
+        },
+      },
     ],
     model: "gpt-3.5-turbo-1106",
     file_ids: [docsFile.id],

@@ -17,6 +17,8 @@ const getFunctionResponse = async (name: string, args: string) => {
       return await getScore(parsedArgs.address);
     case "get_stamps":
       return await getStamps(parsedArgs.address);
+    case "flag_user":
+      return await flagUser(parsedArgs.address);
     default:
       return "null";
   }
@@ -79,4 +81,8 @@ const getScore = async (address: string) => {
     console.error("Error submitting passport:", e);
     return { success: false };
   }
+};
+
+const flagUser = async (address: string) => {
+  console.log("flagging user", address);
 };
