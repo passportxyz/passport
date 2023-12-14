@@ -32,7 +32,6 @@
     "@self.id/framework": "0.3.3",
     "@web3-onboard/core": "2.21.2",
     "@web3-onboard/injected-wallets": "2.10.7",
-    "@web3-onboard/ledger": "2.5.2",
     "@web3-onboard/react": "2.8.13",
     "@web3-onboard/walletconnect": "2.4.7",
     "@web3-onboard/walletlink": "2.1.3",
