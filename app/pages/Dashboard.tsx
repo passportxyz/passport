@@ -46,11 +46,7 @@ import { useDashboardCustomization } from "../hooks/useDashboardCustomization";
 import TagManager from "react-gtm-module";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 
-import { BarretenbergBackend, CompiledCircuit } from "@noir-lang/backend_barretenberg";
-import { Noir } from "@noir-lang/noir_js";
-import zk_passport_score from "./zk_passport_score.json";
 import { ZkStampsPanel } from "../components/ZkStampsPanel";
-import { BigNumberish } from "ethers";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -307,39 +303,6 @@ export default function Dashboard() {
     </div>
   );
 
-  const computeProof = async () => {
-    console.log("Computing proof ...");
-    // here's where the magic happens
-    const backend = new BarretenbergBackend(zk_passport_score as CompiledCircuit);
-    const noir = new Noir(zk_passport_score as CompiledCircuit, backend);
-
-
-    console.log("geri bn stuff");
-    // const bn = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-    const bn = BigInt("0xffff");
-    console.log("geri bn", bn.toString());
-    const input = {
-      x: ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "1", 1, 1, 1],
-      y: [1, 1, 1, 4, 5],
-    };
-    // const input = {
-    //   a: 3,
-    //   b: 1,
-    //   c: 1,
-    //   d: 1,
-    //   e: 1,
-    //   f: 1,
-    //   x: 1,
-    //   y: 2,
-    // };
-    console.log("zk_passport_score", zk_passport_score);
-    console.log("logs", "Generating proof... ⌛");
-    const proof = await noir.generateFinalProof(input);
-    console.log("logs", "Generating proof... ✅");
-    console.log("results", proof.proof);
-  };
-
-  
   return (
     <PageRoot className="text-color-1">
       {modals}
@@ -348,9 +311,6 @@ export default function Dashboard() {
         <BodyWrapper className="mt-4 md:mt-6">
           <PageWidthGrid>
             <Subheader className="col-span-full xl:col-span-7 " />
-            Hello World !!!
-            <button onClick={computeProof}>Compute Proof</button>
-
             <ZkStampsPanel className="col-span-full" />
             <DashboardScorePanel
               className={`col-span-full ${usingCustomPanel ? "lg:col-span-4" : "xl:max-h-52"} xl:col-span-7`}

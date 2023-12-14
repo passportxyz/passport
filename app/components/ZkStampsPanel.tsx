@@ -1,49 +1,126 @@
 import { PlatformSpec } from "@gitcoin/passport-platforms";
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { PLATFORM_ID, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
 import React, { useCallback, useContext, useMemo } from "react";
 import { getPlatformSpec } from "../config/platforms";
 import { CeramicContext } from "../context/ceramicContext";
-import { Button } from "@chakra-ui/react";
+import { BarretenbergBackend, CompiledCircuit } from "@noir-lang/backend_barretenberg";
+import { Noir } from "@noir-lang/noir_js";
+import zk_passport_score from "../circuits/zk_passport_score.json";
+import { LoadButton } from "./LoadButton";
+import pako from "pako";
+import { hexlify } from "ethers";
 
 type StampsListProps = {
   onChainPlatformIds: PLATFORM_ID[];
   className?: string;
 };
 
-const StampsList = ({ className, onChainPlatformIds }: StampsListProps) => {
-  const { verifiedPlatforms } = useContext(CeramicContext);
-
-  return (
-    <div className={`flex flex-col items-center ${className}`}>
-      <div className={`flex flex-wrap justify-center gap-8`}>
-        {Object.values(verifiedPlatforms)
-          .map((platform) => getPlatformSpec(platform.platform.platformId))
-          .filter((platformSpec): platformSpec is PlatformSpec => !!platformSpec)
-          .map((platformSpec) => {
-            // check if platform has onchain providers
-            return (
-              <div key={platformSpec.platform} className="flex flex-col items-center">
-                <img alt="Platform Icon" src={platformSpec.icon} className="col-start-1 row-start-1 h-8 w-8" />
-              </div>
-            );
-          })}
-      </div>
-    </div>
-  );
+const supportedProviders: Record<string, boolean> = {
+  "0x6f028453ddea055c2bfd6baeffa906ae6954e0bb90083e4b76c86058e9e2c08a": true,
+  "0xf610f88085f5955bccb50431e1315a28335522d87be5000ff334274cc9985741": true,
 };
+
+const supportedProviderNames = {
+  Facebook: true,
+  Google: true,
+};
+
+const orderStampProvidersForZkProof = [
+  "0x6f028453ddea055c2bfd6baeffa906ae6954e0bb90083e4b76c86058e9e2c08a", // Facebook
+  "0xf610f88085f5955bccb50431e1315a28335522d87be5000ff334274cc9985741", // Google
+];
 
 export const ZkStampsPanel = ({ className }: { className: string }) => {
   const { verifiedPlatforms, allProvidersState } = useContext(CeramicContext);
+  const [provingInProgress, setProvingInProgress] = React.useState(false);
+  const [proof, setProof] = React.useState("");
+  const zkStamps: Record<string, string> = {};
 
-  // console.log("geri verifiedPlatforms", verifiedPlatforms);
+  console.log("geri verifiedPlatforms", verifiedPlatforms);
 
   for (const _providerId in allProvidersState) {
     const providerId = _providerId as PROVIDER_ID;
     const providerState = allProvidersState[providerId];
-    if(providerState?.stamp) {
-      console.log("geri providerState?.stamp", providerState?.stamp);
+    const providerHash = providerState?.providerSpec?.hash;
+    // console.log("geri hash ", hash, typeof hash);
+    if (providerHash) {
+      if (supportedProviders[providerHash] && providerState?.stamp) {
+        console.log("geri providerState?.stamp", providerState.providerSpec.hash);
+        const stampHash = providerState.stamp.credential.credentialSubject.hash;
+        if (stampHash) {
+          zkStamps[providerHash] = "0x" + Buffer.from(stampHash.split(":")[1], "base64").toString("hex");
+        }
+      }
     }
   }
+
+  const computeProof = async () => {
+    setProvingInProgress(true);
+    try {
+      console.log("Computing proof ...");
+      // here's where the magic happens
+      const backend = new BarretenbergBackend(zk_passport_score as CompiledCircuit);
+      const noir = new Noir(zk_passport_score as CompiledCircuit, backend);
+
+      console.log("geri bn stuff");
+      // const bn = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+      const bn = BigInt("0xffff");
+      console.log("geri bn", bn.toString());
+      const input = {
+        hashes1: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+        hashes2: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+        providers1: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+        providers2: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+      };
+      const input1 = {
+        stampHashes: orderStampProvidersForZkProof.map((providerHash) => {
+          if (zkStamps[providerHash]) {
+            return zkStamps[providerHash];
+          } else {
+            return "0x0000000000000000000000000000000000000000000000000000000000000000";
+          }
+        }),
+        providerHashes: orderStampProvidersForZkProof,
+        providers1: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+        providers2: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+      };
+
+      // const input = {
+      //   a: 3,
+      //   b: 1,
+      //   c: 1,
+      //   d: 1,
+      //   e: 1,
+      //   f: 1,
+      //   x: 1,
+      //   y: 2,
+      // };
+      console.log("zk_passport_score", zk_passport_score);
+      console.log("logs", "Generating proof... ⌛");
+      const proof = await noir.generateFinalProof(input);
+      const publicInputs = Array.from(proof.publicInputs.entries());
+      const jsonProof = JSON.stringify({
+        proof: Array.from(proof.proof),
+        publicInputs: publicInputs,
+      });
+      // console.log("logs", "Generating proof... ✅");
+      // console.log("results", proof);
+      // console.log("results", proof.proof);
+      // console.log("results", jsonProof);
+      // let binaryString = pako.gzip(jsonProof, { to: 'string' });
+
+      // setProof(Buffer.from(binaryString).toString("base64"));
+      setProof(jsonProof);
+    } catch (e) {
+      console.error("Error while generating proof");
+      console.error(e);
+    }
+    setProvingInProgress(false);
+  };
+
+  const copyProofToClipboard = () => {
+    navigator.clipboard.writeText(proof);
+  };
 
   console.log("geri allProvidersState", allProvidersState);
   return (
@@ -57,13 +134,29 @@ export const ZkStampsPanel = ({ className }: { className: string }) => {
       <span className={`mb-2 text-sm ${anyOnchain ? "visible" : "invisible"}`}>
         <OnchainMarker /> = Onchain
       </span> */}
-      <Button
-        data-testid="connect-button"
-        variant="custom"
-        className="mt-5 mb-5 w-auto border border-foreground-2 bg-transparent text-foreground-2"
+      <LoadButton
+        className="button-verify mt-10 w-full"
+        isLoading={provingInProgress}
+        //  disabled={!submitted && !canSubmit}
+        onClick={computeProof}
       >
         Generate Zk Proof
-      </Button>
+      </LoadButton>
+      <LoadButton
+        className="button-verify mt-10 w-full"
+        isLoading={provingInProgress}
+        //  disabled={!submitted && !canSubmit}
+        onClick={copyProofToClipboard}
+      >
+        Copy Zk Proof to clipboard
+      </LoadButton>
+      {proof.length}
+      <a href={`http://localhost:3100/?proof=${proof}`}> Back to the voting App </a>
+      <div>
+        {proof.match(/.{1,64}/g)?.map((str: string) => (
+          <pre>{str}</pre>
+        ))}
+      </div>
     </div>
   );
 };
