@@ -43,6 +43,7 @@ module.exports = {
         default: "100vh",
       },
       boxShadow: {
+        "even-sm": "0 0 4px",
         "even-md": "0 0 12px",
       },
       backgroundSize: {

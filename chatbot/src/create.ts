@@ -11,11 +11,19 @@ const main = async () => {
   });
 
   let docsFile;
-  if (env.OPENAI_FILE_ID) {
-    console.log("Retrieving existing file", env.OPENAI_FILE_ID);
-    docsFile = await openai.files.retrieve(env.OPENAI_FILE_ID);
+  if (env.OPENAI_DOCS_FILE_ID) {
+    console.log("Retrieving existing file", env.OPENAI_DOCS_FILE_ID);
+    docsFile = await openai.files.retrieve(env.OPENAI_DOCS_FILE_ID);
   } else {
     docsFile = await openai.files.create({ file: fs.createReadStream("docs.txt"), purpose: "assistants" });
+  }
+
+  let faqFile;
+  if (env.OPENAI_FAQ_FILE_ID) {
+    console.log("Retrieving existing file", env.OPENAI_FAQ_FILE_ID);
+    faqFile = await openai.files.retrieve(env.OPENAI_FAQ_FILE_ID);
+  } else {
+    faqFile = await openai.files.create({ file: fs.createReadStream("faq.pdf"), purpose: "assistants" });
   }
 
   let processAssistant;
@@ -88,7 +96,7 @@ const main = async () => {
       },
     ],
     model: "gpt-3.5-turbo-1106",
-    file_ids: [docsFile.id],
+    file_ids: [docsFile.id, faqFile.id],
   });
 
   return "Assistant created: " + assistant.id;

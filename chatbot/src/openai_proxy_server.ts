@@ -75,7 +75,6 @@ const runRequiredAction = async (run: Run) => {
         console.log("debug - toolCall:", JSON.stringify(toolCall.function));
 
         const output = await runFunction(toolCall.function.name, toolCall.function.arguments);
-        console.log("debug - output:", output);
 
         return {
           tool_call_id: toolCall.id,
@@ -83,8 +82,6 @@ const runRequiredAction = async (run: Run) => {
         };
       })
     );
-
-    console.log("debug - tool_outputs:", tool_outputs);
 
     return await openai.beta.threads.runs.submitToolOutputs(run.thread_id, run.id, {
       tool_outputs,

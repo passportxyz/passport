@@ -11,7 +11,7 @@
     "createDocsFile": "find ../../passport-docs/pages/ -name '*.md*' | xargs tail -n +1  > docs.txt && echo '==> stampMetadata.json <==' >> docs.txt && cat ../app/public/stampMetadata.json | json_pp >> docs.txt",
     "start": "node dist/openai_proxy_server.js",
     "updateOpenAIResources": "node dist/create.js",
-    "build": "tsc && cp src/instructions.txt dist/instructions.txt"
+    "build": "tsc && cp instructions.txt faq.pdf docs.txt dist/"
   },
   "dependencies": {
     "axios": "^1.6.2",
