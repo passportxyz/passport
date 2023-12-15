@@ -1,14 +1,14 @@
 import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { PLATFORM_ID, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
-import React, { useCallback, useContext, useMemo } from "react";
+import React, { useCallback, useContext, useEffect, useMemo } from "react";
 import { getPlatformSpec } from "../config/platforms";
 import { CeramicContext } from "../context/ceramicContext";
+import { useZkStore, ZkStampInput } from "../context/zkContext";
 import { BarretenbergBackend, CompiledCircuit } from "@noir-lang/backend_barretenberg";
 import { Noir } from "@noir-lang/noir_js";
 import zk_passport_score from "../circuits/zk_passport_score.json";
 import { LoadButton } from "./LoadButton";
-import pako from "pako";
-import { hexlify } from "ethers";
+import { hexlify, getBytes } from "ethers";
 
 type StampsListProps = {
   onChainPlatformIds: PLATFORM_ID[];
@@ -34,25 +34,39 @@ export const ZkStampsPanel = ({ className }: { className: string }) => {
   const { verifiedPlatforms, allProvidersState } = useContext(CeramicContext);
   const [provingInProgress, setProvingInProgress] = React.useState(false);
   const [proof, setProof] = React.useState("");
-  const zkStamps: Record<string, string> = {};
+  const { stampInputs, stampsByProviderHash, addStamps, loadStamps, clearStamps } = useZkStore();
+
+  useEffect(loadStamps, []);
 
   console.log("geri verifiedPlatforms", verifiedPlatforms);
+  console.log("geri stampInputs", stampInputs);
 
-  for (const _providerId in allProvidersState) {
-    const providerId = _providerId as PROVIDER_ID;
-    const providerState = allProvidersState[providerId];
-    const providerHash = providerState?.providerSpec?.hash;
-    // console.log("geri hash ", hash, typeof hash);
-    if (providerHash) {
-      if (supportedProviders[providerHash] && providerState?.stamp) {
-        console.log("geri providerState?.stamp", providerState.providerSpec.hash);
-        const stampHash = providerState.stamp.credential.credentialSubject.hash;
-        if (stampHash) {
-          zkStamps[providerHash] = "0x" + Buffer.from(stampHash.split(":")[1], "base64").toString("hex");
+  const addStampsToCart = () => {
+    const zkStamps: Record<string, string> = {};
+    const zkStampsList: ZkStampInput[] = [];
+    for (const _providerId in allProvidersState) {
+      const providerId = _providerId as PROVIDER_ID;
+      const providerState = allProvidersState[providerId];
+      const providerHash = providerState?.providerSpec?.hash;
+      // console.log("geri hash ", hash, typeof hash);
+      if (providerHash) {
+        if (supportedProviders[providerHash] && providerState?.stamp) {
+          console.log("geri providerState?.stamp", providerState.providerSpec.hash);
+          const stampHash = providerState.stamp.credential.credentialSubject.hash;
+          if (stampHash) {
+            zkStamps[providerHash] = "0x" + Buffer.from(stampHash.split(":")[1], "base64").toString("hex");
+            zkStampsList.push({
+              providerName: providerState.providerSpec.name,
+              provider: providerHash,
+              hash: zkStamps[providerHash],
+            });
+          }
         }
       }
     }
-  }
+    console.log("geri zkStampsList", zkStampsList);
+    addStamps(zkStampsList);
+  };
 
   const computeProof = async () => {
     setProvingInProgress(true);
@@ -67,22 +81,284 @@ export const ZkStampsPanel = ({ className }: { className: string }) => {
       const bn = BigInt("0xffff");
       console.log("geri bn", bn.toString());
       const input = {
-        hashes1: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-        hashes2: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-        providers1: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-        providers2: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-      };
-      const input1 = {
-        stampHashes: orderStampProvidersForZkProof.map((providerHash) => {
-          if (zkStamps[providerHash]) {
-            return zkStamps[providerHash];
+        providers: orderStampProvidersForZkProof.map((providerHash) => Array.from(getBytes(providerHash))),
+        stamp_hashs: orderStampProvidersForZkProof.map((providerHash) => {
+          if (stampsByProviderHash[providerHash]) {
+            // return stampsByProviderHash[providerHash].hash.slice(2);
+            // return stampsByProviderHash[providerHash].hash;
+            // return [
+            //   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+            //   30, 31, 32,
+            // ];
+            console.log("geri stamp hashes:", stampsByProviderHash[providerHash].hash);
+            console.log("geri stamp hashes:", Array.from(getBytes(stampsByProviderHash[providerHash].hash)));
+            return Array.from(getBytes(stampsByProviderHash[providerHash].hash));
           } else {
-            return "0x0000000000000000000000000000000000000000000000000000000000000000";
+            return Array.from(getBytes("0x0000000000000000000000000000000000000000000000000000000000000000"));
           }
         }),
-        providerHashes: orderStampProvidersForZkProof,
-        providers1: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-        providers2: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+        pub_key_x: [
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+        ],
+        pub_key_y: [
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+        ],
+        signatures: [
+          [
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+          ],
+          [
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+          ],
+        ],
+
+        trusted_signer: "123",
+      };
+      console.log("geri input", input);
+
+      const input1 = {
+        // stamp_hashs: orderStampProvidersForZkProof.map((providerHash) => {
+        //   if (stampsByProviderHash[providerHash]) {
+        //     // return stampsByProviderHash[providerHash].hash.slice(2);
+        //     // return stampsByProviderHash[providerHash].hash;
+        //     return [
+        //       1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+        //       30, 31, 32,
+        //     ];
+        //   } else {
+        //     return "0000000000000000000000000000000000000000000000000000000000000000";
+        //   }
+        // }),
+        // providers: orderStampProvidersForZkProof.map((providerHash) => getBytes(providerHash)),
+        stamp_hashs: [
+          [
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+            30, 31, 32,
+          ],
+          [
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+            30, 31, 32,
+          ],
+        ],
+        providers: [
+          [
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+            30, 31, 32,
+          ],
+          [
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+            30, 31, 32,
+          ],
+        ],
+        signatures: [
+          [
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+            30, 31, 32, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+            27, 28, 29, 30, 31, 32,
+          ],
+          [
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+            30, 31, 32, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+            27, 28, 29, 30, 31, 32,
+          ],
+        ],
+        pub_key_x: [
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+          31, 32,
+        ],
+        pub_key_y: [
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+          31, 32,
+        ],
+        trusted_signer: 123456,
       };
 
       // const input = {
@@ -122,6 +398,15 @@ export const ZkStampsPanel = ({ className }: { className: string }) => {
     navigator.clipboard.writeText(proof);
   };
 
+  const zkStampListDisplay = stampInputs.map((stampInput) => {
+    return (
+      <li>
+        <pre>
+          Stamp {stampInput.hash} from {stampInput.providerName}
+        </pre>
+      </li>
+    );
+  });
   console.log("geri allProvidersState", allProvidersState);
   return (
     <div
@@ -134,6 +419,7 @@ export const ZkStampsPanel = ({ className }: { className: string }) => {
       <span className={`mb-2 text-sm ${anyOnchain ? "visible" : "invisible"}`}>
         <OnchainMarker /> = Onchain
       </span> */}
+      <ul>{zkStampListDisplay}</ul>
       <LoadButton
         className="button-verify mt-10 w-full"
         isLoading={provingInProgress}
@@ -149,6 +435,21 @@ export const ZkStampsPanel = ({ className }: { className: string }) => {
         onClick={copyProofToClipboard}
       >
         Copy Zk Proof to clipboard
+      </LoadButton>
+      <LoadButton
+        className="button-verify mt-10 w-full"
+        //  disabled={!submitted && !canSubmit}
+        onClick={addStampsToCart}
+      >
+        Add Stamps
+      </LoadButton>
+
+      <LoadButton
+        className="button-verify mt-10 w-full"
+        //  disabled={!submitted && !canSubmit}
+        onClick={clearStamps}
+      >
+        Clear Stamps
       </LoadButton>
       {proof.length}
       <a href={`http://localhost:3100/?proof=${proof}`}> Back to the voting App </a>
