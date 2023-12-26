@@ -1,6 +1,5 @@
 import * as Twitter from "./Twitter";
 import * as Ens from "./Ens";
-import * as Facebook from "./Facebook";
 import * as Github from "./Github";
 import * as Gitcoin from "./Gitcoin";
 import * as Lens from "./Lens";
@@ -41,7 +40,6 @@ const platforms: Record<string, PlatformConfig> = {
   Discord,
   Google,
   Github,
-  Facebook,
   Linkedin,
   Ens,
   Brightid,

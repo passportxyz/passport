@@ -11,7 +11,6 @@ import {
   googleStampFixture,
   discordStampFixture,
   brightidStampFixture,
-  facebookStampFixture,
 } from "../../__test-fixtures__/databaseStorageFixtures";
 import { Passport } from "@gitcoin/passport-types";
 import {
@@ -59,7 +58,7 @@ export const dbDeleteStampMock = jest.fn();
 export const dbDeleteStampsMock = jest.fn();
 export const dbCreatePassportMock = jest.fn();
 
-const stamps = [googleStampFixture, discordStampFixture, brightidStampFixture, facebookStampFixture].map((stamp) => {
+const stamps = [googleStampFixture, discordStampFixture, brightidStampFixture].map((stamp) => {
   stamp.credential.expirationDate = "2099-05-15T21:04:01.708Z";
   stamp.credential.credentialSubject.id = "test-user-did";
   stamp.credential.issuer = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
@@ -145,12 +144,12 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     });
     render(mockComponent());
 
-    await waitFor(() => expect(screen.getAllByText("# Stamps = 4")).toHaveLength(1));
+    await waitFor(() => expect(screen.getAllByText("# Stamps = 3")).toHaveLength(1));
   });
   it("should clean a dirty passport after successful fetch", async () => {
     const expiredStamp = {
-      ...facebookStampFixture,
-      credential: { ...facebookStampFixture.credential, expirationDate: "2021-05-15T21:04:01.708Z" },
+      ...googleStampFixture,
+      credential: { ...googleStampFixture.credential, expirationDate: "2021-05-15T21:04:01.708Z" },
     };
     (PassportDatabase as jest.Mock).mockImplementation(() => {
       return {
@@ -168,7 +167,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     });
     render(mockComponent());
 
-    await waitFor(() => expect(screen.getAllByText("# Stamps = 4")).toHaveLength(1));
+    await waitFor(() => expect(screen.getAllByText("# Stamps = 3")).toHaveLength(1));
   });
   it("should set passport to undefined if an exception is raised while fetching", async () => {
     (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
@@ -227,7 +226,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     });
     render(mockComponent());
 
-    await waitFor(() => expect(screen.getAllByText("# Stamps = 4")).toHaveLength(1));
+    await waitFor(() => expect(screen.getAllByText("# Stamps = 3")).toHaveLength(1));
   });
 
   it("should attempt to add stamps to database and ceramic", async () => {
@@ -454,7 +453,7 @@ const mockDatabase = {
 } as PassportDatabase;
 const mockProvidersState = {
   google: true,
-  facebook: true,
+  ens: true,
 } as AllProvidersState;
 
 describe("cleanPassport function", () => {
@@ -477,7 +476,7 @@ describe("cleanPassport function", () => {
     const validStamp = {
       credential: {
         expirationDate: "2099-05-15T21:04:01.708Z",
-        credentialSubject: { provider: "facebook", id: "test-user-did" },
+        credentialSubject: { provider: "google", id: "test-user-did" },
         issuer: process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "",
       },
     };

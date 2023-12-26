@@ -212,14 +212,6 @@ const service = new awsx.ecs.FargateService("dpopp-iam", {
             valueFrom: `${IAM_SERVER_SSM_ARN}:TWITTER_CLIENT_SECRET::`,
           },
           {
-            name: "FACEBOOK_APP_ID",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:FACEBOOK_APP_ID::`,
-          },
-          {
-            name: "FACEBOOK_APP_SECRET",
-            valueFrom: `${IAM_SERVER_SSM_ARN}:FACEBOOK_APP_SECRET::`,
-          },
-          {
             name: "BRIGHTID_PRIVATE_KEY",
             valueFrom: `${IAM_SERVER_SSM_ARN}:BRIGHTID_PRIVATE_KEY::`,
           },

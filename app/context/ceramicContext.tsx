@@ -23,7 +23,6 @@ const {
   Lens,
   Github,
   Gitcoin,
-  Facebook,
   Poh,
   PHI,
   NFT,
@@ -87,11 +86,6 @@ platforms.set("Ens", {
 platforms.set("NFT", {
   platform: new NFT.NFTPlatform(),
   platFormGroupSpec: NFT.ProviderConfig,
-});
-
-platforms.set("Facebook", {
-  platform: new Facebook.FacebookPlatform(),
-  platFormGroupSpec: Facebook.ProviderConfig,
 });
 
 platforms.set("Github", {

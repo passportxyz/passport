@@ -46,14 +46,6 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: getProviderSpec("POAP", "POAP"),
         stamp: undefined,
       },
-      Facebook: {
-        providerSpec: getProviderSpec("Facebook", "Facebook"),
-        stamp: undefined,
-      },
-      FacebookProfilePicture: {
-        providerSpec: getProviderSpec("Facebook", "FacebookProfilePicture"),
-        stamp: undefined,
-      },
       Brightid: {
         providerSpec: getProviderSpec("Brightid", "Brightid"),
         stamp: undefined,
