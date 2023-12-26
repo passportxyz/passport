@@ -23,7 +23,6 @@ import TagManager from "react-gtm-module";
 import { themes, ThemeWrapper } from "../utils/theme";
 import { StampClaimingContextProvider } from "../context/stampClaimingContext";
 
-const FacebookAppId = process.env.NEXT_PUBLIC_PASSPORT_FACEBOOK_APP_ID || "";
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
 const INTERCOM_APP_ID = process.env.NEXT_PUBLIC_INTERCOM_APP_ID || "";
 
@@ -137,39 +136,11 @@ function App({ Component, pageProps }: AppProps) {
     }
   }
 
-  const facebookSdkScript = (
-    <script
-      id="facebook-app-script"
-      dangerouslySetInnerHTML={{
-        __html: `
-          window.fbAsyncInit = function() {
-            FB.init({
-              appId      : '${FacebookAppId}',
-              cookie     : true,
-              xfbml      : true,
-              version    : 'v13.0'
-            });
-            FB.AppEvents.logPageView();
-          };
-
-          (function(d, s, id){
-            var js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) {return;}
-            js = d.createElement(s); js.id = id;
-            js.src = "https://connect.facebook.net/en_US/sdk.js";
-            fjs.parentNode.insertBefore(js, fjs);
-          }(document, 'script', 'facebook-jssdk'));
-        `,
-      }}
-    />
-  );
-
   return (
     <>
       <Head>
         <link rel="shortcut icon" href="/favicon.ico" />
         <title>Gitcoin Passport</title>
-        {facebookSdkScript}
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
       </Head>
       <SelfIdProvider

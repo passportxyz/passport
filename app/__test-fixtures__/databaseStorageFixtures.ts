@@ -46,11 +46,6 @@ export const twitterStampFixture: Stamp = {
   credential,
 };
 
-export const facebookStampFixture: Stamp = {
-  provider: "Facebook",
-  credential,
-};
-
 export const brightidStampFixture: Stamp = {
   provider: "Brightid",
   credential,

@@ -1,6 +1,4 @@
-
-
-export const getIamSecrets = (PASSPORT_VC_SECRETS_ARN:string, IAM_SERVER_SSM_ARN:string) => [
+export const getIamSecrets = (PASSPORT_VC_SECRETS_ARN: string, IAM_SERVER_SSM_ARN: string) => [
   {
     name: "IAM_JWK",
     valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK::`,
@@ -36,14 +34,6 @@ export const getIamSecrets = (PASSPORT_VC_SECRETS_ARN:string, IAM_SERVER_SSM_ARN
   {
     name: "TWITTER_CLIENT_SECRET",
     valueFrom: `${IAM_SERVER_SSM_ARN}:TWITTER_CLIENT_SECRET::`,
-  },
-  {
-    name: "FACEBOOK_APP_ID",
-    valueFrom: `${IAM_SERVER_SSM_ARN}:FACEBOOK_APP_ID::`,
-  },
-  {
-    name: "FACEBOOK_APP_SECRET",
-    valueFrom: `${IAM_SERVER_SSM_ARN}:FACEBOOK_APP_SECRET::`,
   },
   {
     name: "BRIGHTID_PRIVATE_KEY",
