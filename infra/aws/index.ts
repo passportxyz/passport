@@ -289,9 +289,6 @@ const containerDefinitions = pulumi.all([redisConnectionUrl]).apply(([_redisConn
       protocol: "tcp"
   }],
   environment: [{
-      name: "CGRANTS_API_URL",
-      value: "https://api.scorer.gitcoin.co/cgrants"
-  }, {
       name: "REDIS_URL",
       value: _redisConnectionUrl,
   }],

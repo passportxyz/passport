@@ -92,6 +92,10 @@ export const getIamSecrets = (PASSPORT_VC_SECRETS_ARN: string, IAM_SERVER_SSM_AR
     valueFrom: `${IAM_SERVER_SSM_ARN}:CGRANTS_API_TOKEN::`,
   },
   {
+    name: "CGRANTS_API_URL",
+    valueFrom: `${IAM_SERVER_SSM_ARN}:CGRANTS_API_URL::`,
+  },
+  {
     name: "GTC_STAKING_GRAPH_API_KEY",
     valueFrom: `${IAM_SERVER_SSM_ARN}:GTC_STAKING_GRAPH_API_KEY::`,
   },
