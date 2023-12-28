@@ -20,11 +20,13 @@ beforeEach(() => {
 
 const mockTokenAddress = "0x06012c8cf97bead5deae237070f9587f8e7a266d";
 const mockTokenId = "100000";
+const tokenType = "ERC721";
 
 const mockContracts = [
   {
     address: mockTokenAddress,
     tokenId: mockTokenId,
+    tokenType,
   },
 ];
 
@@ -52,9 +54,8 @@ describe("Attempt verification", function () {
       expect(axios.get).toHaveBeenCalledTimes(1);
       expect(mockedAxios.get).toBeCalledWith(getNFTEndpoint(), {
         params: {
-          withMetadata: "false",
+          withMetadata: "true",
           owner: MOCK_ADDRESS_LOWER,
-          pageSize: 1,
           orderBy: "transferTime",
         },
       });
@@ -109,9 +110,8 @@ describe("Attempt verification", function () {
       expect(axios.get).toHaveBeenCalledTimes(1);
       expect(mockedAxios.get).toBeCalledWith(getNFTEndpoint(), {
         params: {
-          withMetadata: "false",
+          withMetadata: "true",
           owner: MOCK_ADDRESS_LOWER,
-          pageSize: 1,
           orderBy: "transferTime",
         },
       });
@@ -125,4 +125,29 @@ describe("Attempt verification", function () {
       });
     }
   );
+  it("should not validate an ERC1155 token", async () => {
+    (axios.get as jest.Mock).mockImplementation((url) => {
+      return Promise.resolve({
+        status: 200,
+        data: {
+          totalCount: 1,
+          contracts: [
+            {
+              ...mockContracts[0],
+              tokenType: "ERC1155",
+            },
+          ],
+        },
+      });
+    });
+
+    const nftProvider = new NFTProvider();
+
+    await expect(
+      async () =>
+        await nftProvider.verify({
+          address: MOCK_ADDRESS,
+        } as unknown as RequestPayload)
+    ).rejects.toThrowError("Unable to find an ERC721 token that you own.");
+  });
 });
