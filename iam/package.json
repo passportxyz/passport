@@ -16,7 +16,8 @@
     "prod:start": "tsc && node .",
     "test": "jest --verbose",
     "prettier": "prettier --write .",
-    "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx ."
+    "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",
+    "checkProviders:base-goerli": "npx tsx src/scripts/checkOnChainProvidersAreInSync.ts https://base-goerli.g.alchemy.com/v2/ 0x14a33 0xa652BE6A92c7efbBfEEf6b67eEF10A146AAA8ADc"
   },
   "dependencies": {
     "@ethereum-attestation-service/eas-sdk": "^0.28.2",
@@ -40,9 +41,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.23.3",
-    "@babel/preset-env": "^7.23.3",
     "@babel/plugin-syntax-import-assertions": "^7.23.3",
     "@babel/plugin-transform-modules-commonjs": "^7.23.3",
+    "@babel/preset-env": "^7.23.3",
     "@babel/preset-typescript": "^7.23.3",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
@@ -57,7 +58,8 @@
     "jest": "^29.6.4",
     "supertest": "^6.2.2",
     "ts-jest": "^29.1.1",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "tsx": "^4.7.0"
   },
   "resolutions": {
     "leveldown": "6.1.1"
