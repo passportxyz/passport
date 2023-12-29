@@ -5,7 +5,8 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/nftStampIcon.svg",
   platform: "NFT",
   name: "NFT Holder",
-  description: "Connect your Ethereum wallet to verify that you own an Ethereum-based NFT.",
+  description:
+    "Connect your Ethereum wallet to verify that you own an Ethereum-based NFT. Currently, we only recognize NFTs (ERC-721s).",
   connectMessage: "Connect NFT",
   isEVM: true,
   website: "https://ethereum.org/en/nft/",
