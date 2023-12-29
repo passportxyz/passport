@@ -18,6 +18,7 @@ type GetContractsForOwnerResponse = {
   contracts: {
     address: string;
     tokenId: string;
+    tokenType: string;
   }[];
   totalCount: number;
 };
@@ -48,20 +49,21 @@ export class NFTProvider implements Provider {
     let valid = false,
       record = undefined;
 
-    const { totalCount, contracts } = await this.queryNFTs(address);
+    const data = await this.queryNFTs(address);
+
+    const { contracts, totalCount } = data;
 
     if (totalCount > 0) {
-      const tokenAddress = contracts?.[0]?.address;
-      const tokenId = contracts?.[0]?.tokenId;
+      const erc721 = contracts.find((contract) => contract.tokenType === "ERC721");
 
-      if (tokenAddress && tokenId) {
+      if (erc721) {
         valid = true;
         record = {
-          tokenAddress,
-          tokenId,
+          tokenAddress: erc721.address,
+          tokenId: erc721.tokenId,
         };
       } else {
-        throw new ProviderExternalVerificationError("Unable to find token info in response from NFT provider.");
+        throw new ProviderExternalVerificationError("Unable to find an ERC721 token that you own.");
       }
     } else {
       errors.push("You do not own any NFTs.");
@@ -80,9 +82,8 @@ export class NFTProvider implements Provider {
       return (
         await axios.get(providerUrl, {
           params: {
-            withMetadata: "false",
+            withMetadata: "true",
             owner: address,
-            pageSize: 1,
             orderBy: "transferTime",
           },
         })
