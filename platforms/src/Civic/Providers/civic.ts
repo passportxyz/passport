@@ -53,11 +53,7 @@ export class CivicPassProvider implements Provider {
         record = { address };
         valid = true;
       } else {
-        errors = [
-          `Your ${CivicPassType[this.passType]} pass${
-            allPasses.length > 1 ? "es are" : " is"
-          } expired (older than 90 days).`,
-        ];
+        errors = [`Your ${CivicPassType[this.passType]} pass${allPasses.length > 1 ? "es are" : " is"} expired.`];
       }
     } else {
       errors = [`You do not have a ${CivicPassType[this.passType]} pass.`];
