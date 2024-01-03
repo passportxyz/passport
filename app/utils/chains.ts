@@ -1,3 +1,4 @@
+import { TEST_MODE } from "../context/testModeState";
 import {
   AttestationProvider,
   AttestationProviderConfig,
@@ -66,7 +67,7 @@ const chainConfigs: ChainConfig[] = [
   },
 ];
 
-const usingTestEnvironment = process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on";
+const usingTestEnvironment = process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on" || TEST_MODE;
 
 if (usingTestEnvironment) {
   chainConfigs.push({
@@ -110,48 +111,50 @@ if (usingTestEnvironment) {
   });
 }
 
-if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
+if (!TEST_MODE) {
+  if (process.env.NEXT_PUBLIC_FF_MULTICHAIN_SIGNATURE === "on") {
+    chainConfigs.push({
+      id: "0x89",
+      token: "MATIC",
+      label: "Polygon Mainnet",
+      rpcUrl: "https://matic-mainnet.chainstacklabs.com",
+      icon: "./assets/eth-network-logo.svg",
+    });
+    chainConfigs.push({
+      id: "0xfa",
+      token: "FTM",
+      label: "Fantom Mainnet",
+      rpcUrl: "https://rpc.ftm.tools/",
+      icon: "./assets/eth-network-logo.svg",
+    });
+  }
+
   chainConfigs.push({
-    id: "0x89",
-    token: "MATIC",
-    label: "Polygon Mainnet",
-    rpcUrl: "https://matic-mainnet.chainstacklabs.com",
-    icon: "./assets/eth-network-logo.svg",
+    id: optimismChainId,
+    token: "ETH",
+    label: "Optimism",
+    rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_OP_RPC_URL as string,
+    icon: "./assets/op-logo.svg",
+    attestationProviderConfig: {
+      name: "Ethereum Attestation Service",
+      status: usingTestEnvironment ? "disabled" : "enabled",
+      easScanUrl: "https://optimism.easscan.org",
+    },
   });
+
   chainConfigs.push({
-    id: "0xfa",
-    token: "FTM",
-    label: "Fantom Mainnet",
-    rpcUrl: "https://rpc.ftm.tools/",
-    icon: "./assets/eth-network-logo.svg",
+    id: lineaChainId,
+    token: "ETH",
+    label: "Linea",
+    rpcUrl: "https://rpc.linea.build",
+    icon: "./assets/linea-logo.png",
+    attestationProviderConfig: {
+      name: "Verax + EAS",
+      status: "enabled",
+      easScanUrl: "https://linea.easscan.org",
+    },
   });
 }
-
-chainConfigs.push({
-  id: optimismChainId,
-  token: "ETH",
-  label: "Optimism",
-  rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_OP_RPC_URL as string,
-  icon: "./assets/op-logo.svg",
-  attestationProviderConfig: {
-    name: "Ethereum Attestation Service",
-    status: usingTestEnvironment ? "disabled" : "enabled",
-    easScanUrl: "https://optimism.easscan.org",
-  },
-});
-
-chainConfigs.push({
-  id: lineaChainId,
-  token: "ETH",
-  label: "Linea",
-  rpcUrl: "https://rpc.linea.build",
-  icon: "./assets/linea-logo.png",
-  attestationProviderConfig: {
-    name: "Verax + EAS",
-    status: "enabled",
-    easScanUrl: "https://linea.easscan.org",
-  },
-});
 
 chainConfigs.push({
   id: pgnChainId,

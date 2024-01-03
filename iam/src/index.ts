@@ -64,6 +64,10 @@ if (!process.env.ATTESTATION_SIGNER_PRIVATE_KEY) {
   configErrors.push("ATTESTATION_SIGNER_PRIVATE_KEY is required");
 }
 
+if (!process.env.TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY) {
+  configErrors.push("TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY is required");
+}
+
 if (!process.env.ALLO_SCORER_ID) {
   configErrors.push("ALLO_SCORER_ID is required");
 }
@@ -108,7 +112,19 @@ export const config: {
   issuer,
 };
 
-const attestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
+// Wallet to use for mainnets
+// Only functional in production (set to same as testnet for non-production environments)
+const productionAttestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
+// Wallet to use for testnets
+const testAttestationSignerWallet = new ethers.Wallet(process.env.TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY);
+
+const getAttestationSignerForChain = async (chainIdHex: keyof typeof onchainInfo): Promise<ethers.Wallet> => {
+  const productionAttestationIssuerAddress = await productionAttestationSignerWallet.getAddress();
+  const chainUsesProductionIssuer =
+    onchainInfo[chainIdHex].issuer.address.toLowerCase() === productionAttestationIssuerAddress.toLowerCase();
+
+  return chainUsesProductionIssuer ? productionAttestationSignerWallet : testAttestationSignerWallet;
+};
 
 export const getAttestationDomainSeparator = (chainIdHex: keyof typeof onchainInfo): TypedDataDomain => {
   const verifyingContract = onchainInfo[chainIdHex].GitcoinVerifier.address;
@@ -562,7 +578,9 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 
         const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
 
-        attestationSignerWallet
+        const signer = await getAttestationSignerForChain(attestationChainIdHex);
+
+        signer
           ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {
             const { v, r, s } = utils.splitSignature(signature);
@@ -638,7 +656,9 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
 
         const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
 
-        attestationSignerWallet
+        const signer = await getAttestationSignerForChain(attestationChainIdHex);
+
+        signer
           ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {
             const { v, r, s } = utils.splitSignature(signature);
@@ -692,7 +712,9 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
 
       const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
 
-      attestationSignerWallet
+      const signer = await getAttestationSignerForChain(attestationChainIdHex);
+
+      signer
         ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
         .then((signature) => {
           const { v, r, s } = utils.splitSignature(signature);
