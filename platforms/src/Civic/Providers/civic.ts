@@ -38,28 +38,28 @@ export class CivicPassProvider implements Provider {
 
   // Verify that address defined in the payload has a civic pass
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
     const now = getNowAsBigNumberSeconds();
-    let errors = undefined;
-    let record = undefined;
+    let errors, record, expiresInSeconds;
     let valid = false;
 
     const allPasses = await findAllPasses(address, this.includeTestnets, [this.passType]);
+    const activePasses = allPasses.filter(({ state }) => state === "ACTIVE");
+    const validPasses = activePasses.filter(({ expiry }) => expiry.gt(now));
 
-    if (allPasses.length > 0) {
-      const validPasses = allPasses.filter((pass) => pass.expiry.gt(now));
-      if (validPasses.length > 0) {
-        record = { address };
-        valid = true;
-      } else {
-        errors = [`Your ${CivicPassType[this.passType]} pass${allPasses.length > 1 ? "es are" : " is"} expired.`];
-      }
-    } else {
+    if (allPasses.length === 0) {
       errors = [`You do not have a ${CivicPassType[this.passType]} pass.`];
+    } else if (activePasses.length === 0) {
+      errors = [
+        `Your ${CivicPassType[this.passType]} pass${allPasses.length > 1 ? "es are" : " is"} frozen or revoked.`,
+      ];
+    } else if (validPasses.length === 0) {
+      errors = [`Your ${CivicPassType[this.passType]} pass${activePasses.length > 1 ? "es are" : " is"} expired.`];
+    } else {
+      record = { address };
+      valid = true;
+      expiresInSeconds = secondsFromNow(latestExpiry(validPasses));
     }
-
-    const expiresInSeconds = valid ? secondsFromNow(latestExpiry(allPasses)) : undefined;
 
     return {
       valid,

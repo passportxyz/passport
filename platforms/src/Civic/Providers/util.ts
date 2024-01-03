@@ -22,6 +22,7 @@ const passLookupResponseToPass =
     chain: pass.chain as SupportedChain,
     expiry: BigNumber.from(pass.expiry),
     identifier: pass.identifier,
+    state: pass.state,
   });
 
 const passTypesToNames = (passTypes: CivicPassType[]): string[] => passTypes.map((id) => CivicPassType[id]);
