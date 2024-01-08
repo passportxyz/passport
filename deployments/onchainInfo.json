@@ -1,5 +1,70 @@
 {
+  "0xaa37dc": {
+    "description": "Optimism Sepolia",
+    "issuer": {
+      "address": "0x5f603Ed913738d9105bAf3BD981AA4750016B167"
+    },
+    "EAS": {
+      "address": "0x4200000000000000000000000000000000000021"
+    },
+    "EASSchemaRegistry": {
+      "address": "0x4200000000000000000000000000000000000020"
+    },
+    "GitcoinResolver": {
+      "address": "0x074761E1Dc6E6cF9cdeE67dd180E01E818716Ce0"
+    },
+    "GitcoinVerifier": {
+      "address": "0x8D21C3360dcE1a9EBD3Da4373c4dAB7F81dd7233"
+    },
+    "GitcoinAttester": {
+      "address": "0x8B1A76795e3CbadD79C5410d2C4D4827D9C1503a"
+    },
+    "easSchemas": {
+      "passport": {
+        "uid": "0x7026a3d524ee3dae5859aa00cfc0f17a3dac05af70eb758b5c0a40692f1e60f3"
+      },
+      "score": {
+        "uid": "0xe9071177c724d1bd712e4b05b4ce5426e60e141d8aaec86e4e03f25901d0cd91"
+      }
+    },
+    "GitcoinPassportDecoder": {
+      "address": "0xe53C60F8069C2f0c3a84F9B3DB5cf56f3100ba56"
+    }
+  },
+  "0x1a4": {
+    "description": "Optimism Goerli",
+    "issuer": {
+      "address": "0x5f603Ed913738d9105bAf3BD981AA4750016B167"
+    },
+    "EAS": {
+      "address": "0x4200000000000000000000000000000000000021"
+    },
+    "EASSchemaRegistry": {
+      "address": "0x4200000000000000000000000000000000000020"
+    },
+    "GitcoinResolver": {
+      "address": "0x0BB1B1539f1535645821b88419E2BcB937F36cA7"
+    },
+    "GitcoinVerifier": {
+      "address": "0x074761E1Dc6E6cF9cdeE67dd180E01E818716Ce0"
+    },
+    "GitcoinAttester": {
+      "address": "0xbCD1f602b87704f071034f206Fb4ed5872DAfd91"
+    },
+    "easSchemas": {
+      "passport": {
+        "uid": "0x6868093985e2c8d5d67d5cfb1785ba1618792361d395db0feffab35c8ba00782"
+      },
+      "score": {
+        "uid": "0x1b3881ffb4a1311e7ffd27db310346d058c7fa435fe9de9426db9daa8de6abf5"
+      }
+    },
+    "GitcoinPassportDecoder": {
+      "address": "0xa9f07557c2AAf8C9b2FeAA82150C24bA094670e0"
+    }
+  },
   "0x14a33": {
+    "description": "Base Goerli",
     "issuer": {
       "address": "0x5f603Ed913738d9105bAf3BD981AA4750016B167"
     },
@@ -27,10 +92,11 @@
       }
     },
     "GitcoinPassportDecoder": {
-      "address": "0x88265f8860F78b7A448739bD79594bdC82329b69"
+      "address": "0xa652BE6A92c7efbBfEEf6b67eEF10A146AAA8ADc"
     }
   },
   "0xa": {
+    "description": "OP Mainnet",
     "issuer": {
       "address": "0x804233b96cbd6d81efeb6517347177ef7bD488ED"
     },
@@ -59,6 +125,7 @@
     }
   },
   "0xe704": {
+    "description": "Linea Testnet",
     "issuer": {
       "address": "0x5f603Ed913738d9105bAf3BD981AA4750016B167"
     },
@@ -103,6 +170,7 @@
     }
   },
   "0xe708": {
+    "description": "Linea",
     "issuer": {
       "address": "0x804233b96cbd6d81efeb6517347177ef7bD488ED"
     },
