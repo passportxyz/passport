@@ -70,7 +70,7 @@ describe("Civic Pass Provider", function () {
     expect(verifiedPayload).toMatchObject({
       valid: false,
       record: undefined,
-      errors: ["Your UNIQUENESS pass is expired (older than 90 days)."],
+      errors: ["Your UNIQUENESS pass is expired."],
     });
   });
 
