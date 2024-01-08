@@ -2,7 +2,6 @@ import { RequestPayload } from "@gitcoin/passport-types";
 import { CivicPassProvider } from "../Providers/civic";
 import { CivicPassLookupPass, CivicPassType, PassesForAddress } from "../Providers/types";
 import axios from "axios";
-import { ProviderExternalVerificationError } from "../../types";
 
 // Mock out all top level functions, such as get, put, delete and post:
 jest.mock("axios");
@@ -15,19 +14,21 @@ const stubCivic = (passes: PassesForAddress["passes"]): void => {
   });
 };
 
-const stubCivicError = (error: string): void => {
-  (axios.get as jest.Mock).mockRejectedValue(new Error(error));
-};
-
 const now = Math.floor(Date.now() / 1000);
 
 const userAddress = "0x123";
 const requestPayload = { address: userAddress } as RequestPayload;
 const expirySeconds = 1000;
-const dummyPass = {
+const dummyPass: CivicPassLookupPass = {
   chain: "ETHEREUM_MAINNET",
   expiry: now + expirySeconds,
-} as CivicPassLookupPass;
+  state: "ACTIVE",
+  type: {
+    slotId: 0,
+    address: userAddress,
+  },
+  identifier: "0x456",
+};
 
 describe("Civic Pass Provider", function () {
   beforeEach(() => {
@@ -71,6 +72,28 @@ describe("Civic Pass Provider", function () {
       valid: false,
       record: undefined,
       errors: ["Your UNIQUENESS pass is expired."],
+    });
+  });
+
+  it("should return detailed error for a revoked pass", async () => {
+    const revokedPass = { ...dummyPass };
+    revokedPass.state = "REVOKED";
+
+    stubCivic({
+      UNIQUENESS: [revokedPass],
+    });
+
+    const civic = new CivicPassProvider({
+      type: "uniqueness",
+      passType: CivicPassType.UNIQUENESS,
+    });
+
+    const verifiedPayload = await civic.verify(requestPayload);
+
+    expect(verifiedPayload).toMatchObject({
+      valid: false,
+      record: undefined,
+      errors: ["Your UNIQUENESS pass is frozen or revoked."],
     });
   });
 

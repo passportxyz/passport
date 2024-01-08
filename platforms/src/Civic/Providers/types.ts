@@ -28,6 +28,8 @@ export const supportedChains = [
 
 export type SupportedChain = typeof supportedChains[number];
 
+type CivicPassState = "ACTIVE" | "FROZEN" | "REVOKED";
+
 export type CivicPassLookupPass = {
   type: {
     slotId: number;
@@ -37,7 +39,7 @@ export type CivicPassLookupPass = {
   chain: string;
   identifier: string;
   expiry?: number;
-  state: "ACTIVE" | "FROZEN" | "REVOKED";
+  state: CivicPassState;
 };
 export type PassesForAddress = { passes: Record<string, CivicPassLookupPass[]> };
 export type CivicPassLookupResponse = Record<string, PassesForAddress>;
@@ -45,6 +47,7 @@ export type CivicPassLookupResponse = Record<string, PassesForAddress>;
 type PassDetails = {
   expiry?: BigNumber;
   identifier: string;
+  state: CivicPassState;
 };
 export type Pass = PassDetails & {
   type: CivicPassType;
