@@ -17,21 +17,28 @@ console.log("chainId                    :", chainId);
 console.log("decoderContractAddress     :", decoderContractAddress);
 
 function difference<T>(setA: Set<T>, setB: Set<T>): Set<T> {
-  let diff = new Set<T>(setA);
-  for (let elem of setB) {
+  const diff = new Set<T>(setA);
+  for (const elem of setB) {
     diff.delete(elem);
   }
   return diff;
 }
 
+interface CustomContract extends Contract {
+  getProviders: (arg0: number) => Promise<string[]>;
+}
+
 async function main() {
   let exitCode = 0;
   const provider = new providers.JsonRpcProvider(apiUrl);
-  const decoderContract = new Contract(decoderContractAddress, decoderAbi[chainId], provider);
+  const decoderContract = new Contract(
+    decoderContractAddress,
+    decoderAbi[chainId],
+    provider
+  ) as unknown as CustomContract;
 
-  const onChainProviders = new Set(
-    (await decoderContract.getProviders(0)).map((p: string, idx: number) => `${idx} => ${p}`)
-  );
+  const decoderProviders = (await decoderContract.getProviders(0)) as unknown as string[];
+  const onChainProviders = new Set(decoderProviders.map((p: string, idx: number) => `${idx} => ${p}`));
   const providerBitmapProviders = providerBitMapInfo.reduce((acc, cur) => {
     const idx = cur.index * 256 + cur.bit;
     acc.add(`${idx} => ${cur.name}`);
