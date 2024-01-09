@@ -37,6 +37,6 @@ jobs:
       - name: Run Ceramic Integration Tests
         run: yarn test:ceramic-integration
       - name: Check Optimism Sepolia Onchain Provider Bit Maps
-        run: yarn checkProviders:op-sepolia
+        run: yarn workspace @gitcoin/passport-iam checkProviders:op-sepolia
       - name: Check Optimism Onchain Provider Bit Maps
-        run: yarn checkProviders:op
+        run: yarn workspace @gitcoin/passport-iam checkProviders:op
