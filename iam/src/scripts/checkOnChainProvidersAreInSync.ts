@@ -26,6 +26,7 @@ function difference<T>(setA: Set<T>, setB: Set<T>): Set<T> {
 
 interface CustomContract extends Contract {
   getProviders: (arg0: number) => Promise<string[]>;
+  currentVersion: () => Promise<string>;
 }
 
 async function main() {
@@ -37,7 +38,10 @@ async function main() {
     provider
   ) as unknown as CustomContract;
 
-  const decoderProviders = (await decoderContract.getProviders(0)) as unknown as string[];
+  const latestOnChainProviderVersion = await decoderContract.currentVersion();
+  console.log("latestOnChainProviderVersion:", latestOnChainProviderVersion);
+
+  const decoderProviders = await decoderContract.getProviders(Number(latestOnChainProviderVersion));
   const onChainProviders = new Set(decoderProviders.map((p: string, idx: number) => `${idx} => ${p}`));
   const providerBitmapProviders = providerBitMapInfo.reduce((acc, cur) => {
     const idx = cur.index * 256 + cur.bit;
@@ -68,6 +72,7 @@ async function main() {
     console.log("❌ the following providers are missing on-chain", missingOffChain);
     exitCode = 1;
   }
+
   process.exit(exitCode);
 }
 
