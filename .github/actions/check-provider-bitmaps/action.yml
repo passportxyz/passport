@@ -20,10 +20,11 @@ runs:
       shell: bash
       env:
         ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP_SEPOLIA }}
-    - name: Check Optimism Onchain Provider Bitmaps
-      run: |
-        echo "📋📋📋 Check Optimism Onchain Provider Bitmaps"
-        yarn workspace @gitcoin/passport-iam checkProviders:op
-      shell: bash
-      env:
-        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}
+    # TODO: disabling the check for optimism base chain for now, as we have not yet deployed the decoder contract
+    # - name: Check Optimism Onchain Provider Bitmaps
+    #   run: |
+    #     echo "📋📋📋 Check Optimism Onchain Provider Bitmaps"
+    #     yarn workspace @gitcoin/passport-iam checkProviders:op
+    #   shell: bash
+    #   env:
+    #     ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}
