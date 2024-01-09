@@ -36,3 +36,7 @@ jobs:
         run: yarn build
       - name: Run Ceramic Integration Tests
         run: yarn test:ceramic-integration
+      - name: Check Onchain provider bit maps testnet
+        run: yarn checkProviders:op-sepolia
+      - name: Check Onchain provider bit maps OP
+        run: yarn checkProviders:op
