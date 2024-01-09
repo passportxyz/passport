@@ -12,7 +12,6 @@ const chainId = process.argv[3] as keyof typeof decoderAbi;
 const decoderContractAddress = process.argv[4];
 
 console.log("ethers version             :", version);
-console.log("apiUrl                     :", apiUrl);
 console.log("chainId                    :", chainId);
 console.log("decoderContractAddress     :", decoderContractAddress);
 
