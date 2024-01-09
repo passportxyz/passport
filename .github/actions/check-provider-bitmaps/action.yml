@@ -13,13 +13,17 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Check Optimism Sepolia Onchain Provider Bit Maps
-      run: yarn workspace @gitcoin/passport-iam checkProviders:op-sepolia
+    - name: Check Optimism Sepolia Onchain Provider Bitmaps
+      run: |
+        echo "📝📝📝 Check Optimism Sepolia Onchain Provider Bitmaps"
+        yarn workspace @gitcoin/passport-iam checkProviders:op-sepolia
       shell: bash
       env:
         ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP_SEPOLIA }}
-    - name: Check Optimism Onchain Provider Bit Maps
-      run: yarn workspace @gitcoin/passport-iam checkProviders:op
+    - name: Check Optimism Onchain Provider Bitmaps
+      run: |
+        echo "📝📝📝 Check Optimism Onchain Provider Bitmaps"
+        yarn workspace @gitcoin/passport-iam checkProviders:op
       shell: bash
       env:
         ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}
