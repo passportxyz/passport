@@ -15,14 +15,14 @@ runs:
   steps:
     - name: Check Optimism Sepolia Onchain Provider Bitmaps
       run: |
-        echo "📝📝📝 Check Optimism Sepolia Onchain Provider Bitmaps"
+        echo "📋📋📋 Check Optimism Sepolia Onchain Provider Bitmaps"
         yarn workspace @gitcoin/passport-iam checkProviders:op-sepolia
       shell: bash
       env:
         ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP_SEPOLIA }}
     - name: Check Optimism Onchain Provider Bitmaps
       run: |
-        echo "📝📝📝 Check Optimism Onchain Provider Bitmaps"
+        echo "📋📋📋 Check Optimism Onchain Provider Bitmaps"
         yarn workspace @gitcoin/passport-iam checkProviders:op
       shell: bash
       env:
