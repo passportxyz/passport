@@ -58,3 +58,6 @@ jobs:
         run: yarn install
       - name: Check provider bitmaps
         uses: ./.github/actions/check-provider-bitmaps
+        with:
+          ALCHEMY_API_KEY_OP: ${{ secrets.ALCHEMY_API_KEY_OP }}
+          ALCHEMY_API_KEY_OP_SEPOLIA: ${{ secrets.ALCHEMY_API_KEY_OP_SEPOLIA }}
