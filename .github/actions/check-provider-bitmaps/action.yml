@@ -1,0 +1,13 @@
+name: "Check Provider Bitmaps"
+description: "Checkout that the onchai provider bitmaps are in sync with the configuration in the code"
+runs:
+  using: "composite"
+  steps:
+    - name: Check Optimism Sepolia Onchain Provider Bit Maps
+      run: yarn workspace @gitcoin/passport-iam checkProviders:op-sepolia
+      env:
+        ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY_OP_SEPOLIA }}
+    - name: Check Optimism Onchain Provider Bit Maps
+      run: yarn workspace @gitcoin/passport-iam checkProviders:op
+      env:
+        ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY_OP }}
