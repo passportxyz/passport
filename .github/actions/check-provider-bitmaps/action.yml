@@ -1,0 +1,30 @@
+name: "Check Provider Bitmaps"
+description: "Checkout that the onchai provider bitmaps are in sync with the configuration in the code"
+
+inputs:
+  ALCHEMY_API_KEY_OP:
+    description: "Alchemy API key for Optimism"
+    required: true
+
+  ALCHEMY_API_KEY_OP_SEPOLIA:
+    description: "Alchemy API key for Optimism Sepolia"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check Optimism Sepolia Onchain Provider Bitmaps
+      run: |
+        echo "📋📋📋 Check Optimism Sepolia Onchain Provider Bitmaps"
+        yarn workspace @gitcoin/passport-iam checkProviders:op-sepolia
+      shell: bash
+      env:
+        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP_SEPOLIA }}
+    # TODO: disabling the check for optimism base chain for now, as we have not yet deployed the decoder contract
+    # - name: Check Optimism Onchain Provider Bitmaps
+    #   run: |
+    #     echo "📋📋📋 Check Optimism Onchain Provider Bitmaps"
+    #     yarn workspace @gitcoin/passport-iam checkProviders:op
+    #   shell: bash
+    #   env:
+    #     ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}

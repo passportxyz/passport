@@ -16,6 +16,7 @@ const pgnChainId = "0x1a8";
 const lineaChainId = "0xe708";
 const lineaGoerliChainId = "0xe704";
 const optimismChainId = "0xa";
+const sepoliaOPChainId = "0xaa37dc";
 
 type ChainConfig = {
   id: string;
@@ -84,16 +85,17 @@ if (usingTestEnvironment) {
     rpcUrl: "http://127.0.0.1:8545/",
     icon: "./assets/eth-network-logo.svg",
   });
+
   chainConfigs.push({
-    id: baseGoerliChainId,
+    id: sepoliaOPChainId,
     token: "ETH",
-    label: "Base Goerli",
-    rpcUrl: "https://goerli.base.org/",
-    icon: "./assets/goerli-base-logo.svg",
+    label: "OP Sepolia Testnet",
+    rpcUrl: "https://sepolia.optimism.io",
+    icon: "./assets/op-logo.svg",
     attestationProviderConfig: {
       name: "Ethereum Attestation Service",
       status: "enabled",
-      easScanUrl: "https://base-goerli.easscan.org",
+      easScanUrl: "https://optimism-sepolia.easscan.org",
     },
   });
 
