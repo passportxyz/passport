@@ -81,7 +81,7 @@ export class ETHAdvocateProvider extends AccountAnalysis {
   constructor() {
     super({
       type: "ETHAdvocate",
-      threshold: 0.5,
+      threshold: 50,
     });
   }
 }
@@ -90,7 +90,7 @@ export class ETHPioneerProvider extends AccountAnalysis {
   constructor() {
     super({
       type: "ETHPioneer",
-      threshold: 0.75,
+      threshold: 75,
     });
   }
 }
@@ -99,7 +99,7 @@ export class ETHMaxiProvider extends AccountAnalysis {
   constructor() {
     super({
       type: "ETHMaxi",
-      threshold: 1,
+      threshold: 100,
     });
   }
 }

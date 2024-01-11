@@ -1,6 +1,12 @@
 import { RequestPayload } from "@gitcoin/passport-types";
 import axios from "axios";
-import { ETHAdvocateProvider, ETHPioneerProvider, ETHMaxiProvider, ModelResponse } from "../Providers/accountAnalysis";
+import {
+  ETHAdvocateProvider,
+  ETHPioneerProvider,
+  ETHMaxiProvider,
+  ModelResponse,
+  getETHAnalysis,
+} from "../Providers/accountAnalysis";
 
 const mockAddress = "0x0";
 let mockContext = {};
@@ -22,7 +28,7 @@ describe("AccountAnalysis Providers", () => {
   });
 
   it("should validate inputs for ETHAdvocateProvider", async () => {
-    const mockedResponse = mockResponse(0.8);
+    const mockedResponse = mockResponse(80);
     mockedAxios.post.mockResolvedValueOnce(mockedResponse);
 
     const ethAdvocateProvider = new ETHAdvocateProvider();
@@ -33,7 +39,7 @@ describe("AccountAnalysis Providers", () => {
   });
 
   it("should validate inputs for ETHPioneerProvider", async () => {
-    const mockedResponse = mockResponse(0.8);
+    const mockedResponse = mockResponse(80);
     mockedAxios.post.mockResolvedValueOnce(mockedResponse);
     const ethAdvocateProvider = new ETHPioneerProvider();
     const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
@@ -44,7 +50,7 @@ describe("AccountAnalysis Providers", () => {
 
   it("should validate inputs for ETHMaxiProvider", async () => {
     jest.clearAllMocks();
-    const mockedResponse = mockResponse(1);
+    const mockedResponse = mockResponse(100);
     mockedAxios.post.mockResolvedValueOnce(mockedResponse);
     const ethAdvocateProvider = new ETHMaxiProvider();
     const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
@@ -72,16 +78,15 @@ describe("AccountAnalysis Providers", () => {
   });
   describe("getETHAnalysis", () => {
     it("should use value from context if present", async () => {
-      const mockedResponse = mockResponse(0.8);
+      const mockedResponse = mockResponse(80);
       mockedAxios.post.mockResolvedValueOnce(mockedResponse);
-      const ethAdvocateProvider = new ETHAdvocateProvider();
-      mockContext = {
-        ethAnalysis: {
-          human_probability: 0.9,
-        },
-      };
-      const response = await getETHAnalysis(mockAddress, mockContext);
-      expect(response).toEqual(mockContext.ethAnalysis);
+      mockContext = {};
+      const response1 = await getETHAnalysis(mockAddress, mockContext);
+      const response2 = await getETHAnalysis(mockAddress, mockContext);
+      expect(response1.human_probability).toEqual(80);
+      expect(response2.human_probability).toEqual(80);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(axios.post).toHaveBeenCalledTimes(1);
     });
   });
 });
