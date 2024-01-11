@@ -28,7 +28,7 @@ describe("AccountAnalysis Providers", () => {
   });
 
   it("should validate inputs for ETHAdvocateProvider", async () => {
-    const mockedResponse = mockResponse(80);
+    const mockedResponse = mockResponse(50);
     mockedAxios.post.mockResolvedValueOnce(mockedResponse);
 
     const ethAdvocateProvider = new ETHAdvocateProvider();
@@ -39,7 +39,7 @@ describe("AccountAnalysis Providers", () => {
   });
 
   it("should validate inputs for ETHPioneerProvider", async () => {
-    const mockedResponse = mockResponse(80);
+    const mockedResponse = mockResponse(75);
     mockedAxios.post.mockResolvedValueOnce(mockedResponse);
     const ethAdvocateProvider = new ETHPioneerProvider();
     const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
@@ -50,7 +50,7 @@ describe("AccountAnalysis Providers", () => {
 
   it("should validate inputs for ETHMaxiProvider", async () => {
     jest.clearAllMocks();
-    const mockedResponse = mockResponse(100);
+    const mockedResponse = mockResponse(88);
     mockedAxios.post.mockResolvedValueOnce(mockedResponse);
     const ethAdvocateProvider = new ETHMaxiProvider();
     const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
@@ -60,7 +60,7 @@ describe("AccountAnalysis Providers", () => {
   });
 
   it("should validate invalid inputs for ETHMaxiProvider", async () => {
-    const mockedResponse = mockResponse(0.99);
+    const mockedResponse = mockResponse(87);
     mockedAxios.post.mockResolvedValueOnce(mockedResponse);
     const ethAdvocateProvider = new ETHMaxiProvider();
     const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);

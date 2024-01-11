@@ -38,17 +38,17 @@ export async function getETHAnalysis(address: string, context: ETHAnalysisContex
 
 export type EthOptions = {
   type: PROVIDER_ID;
-  threshold: number;
+  minimum: number;
 };
 
 export class AccountAnalysis implements Provider {
   type: PROVIDER_ID;
-  threshold: number;
+  minimum: number;
 
   // construct the provider instance with supplied options
   constructor(options: EthOptions) {
     this.type = options.type;
-    this.threshold = options.threshold;
+    this.minimum = options.minimum;
   }
 
   async verify(payload: RequestPayload, context: ETHAnalysisContext): Promise<VerifiedPayload> {
@@ -56,11 +56,11 @@ export class AccountAnalysis implements Provider {
       const { address } = payload;
       const ethAnalysis = await getETHAnalysis(address, context);
 
-      if (ethAnalysis.human_probability < this.threshold) {
+      if (ethAnalysis.human_probability < this.minimum) {
         return {
           valid: false,
           errors: [
-            `You received a score of ${ethAnalysis.human_probability} from our analysis. You must have a score of ${this.threshold} or higher to obtain this stamp.`,
+            `You received a score of ${ethAnalysis.human_probability} from our analysis. You must have a score of ${this.minimum} or higher to obtain this stamp.`,
           ],
         };
       }
@@ -81,7 +81,7 @@ export class ETHAdvocateProvider extends AccountAnalysis {
   constructor() {
     super({
       type: "ETHAdvocate",
-      threshold: 50,
+      minimum: 50,
     });
   }
 }
@@ -90,7 +90,7 @@ export class ETHPioneerProvider extends AccountAnalysis {
   constructor() {
     super({
       type: "ETHPioneer",
-      threshold: 75,
+      minimum: 75,
     });
   }
 }
@@ -99,7 +99,7 @@ export class ETHMaxiProvider extends AccountAnalysis {
   constructor() {
     super({
       type: "ETHMaxi",
-      threshold: 100,
+      minimum: 88,
     });
   }
 }
