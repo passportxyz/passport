@@ -54,7 +54,7 @@ const validPlatforms: ValidatedPlatform[] = [
         name: "Eth",
         providers: [
           {
-            name: "FirstEthTxnProvider",
+            name: "ETHAdvocate",
             title: "First Eth Txn",
           },
         ],
@@ -67,7 +67,7 @@ const validPlatforms: ValidatedPlatform[] = [
           platformGroup: "Eth",
           providers: [
             {
-              name: "FirstEthTxnProvider",
+              name: "ETHAdvocate",
               title: "First Eth Txn",
             },
           ],
@@ -108,7 +108,7 @@ describe("RefreshMyStampsModalContent", () => {
         iamUrl,
         {
           type: "EVMBulkVerify",
-          types: ["FirstEthTxnProvider"],
+          types: ["ETHAdvocate"],
           version: "0.0.0",
           address: "0xmyAddress",
           proofs: {},
@@ -140,14 +140,14 @@ describe("RefreshMyStampsModalContent", () => {
 
   it("should return array of verified vcs from fetch response", async () => {
     expect(
-      reduceStampResponse(["ethPossessionsGte#32", "FirstEthTxnProvider"], [
+      reduceStampResponse(["ethPossessionsGte#32", "ETHAdvocate"], [
         {
           error: "Unable to verify proofs",
           code: 403,
         },
         {
           record: {
-            type: "FirstEthTxnProvider",
+            type: "ETHAdvocate",
             version: "0.0.0",
             address: "0xc79abb54e4824cdb65c71f2eeb2d7f2db5da1fb8",
             hasGTE30DaysSinceFirstTxnOnTheMainnet: "true",
@@ -157,7 +157,7 @@ describe("RefreshMyStampsModalContent", () => {
       ] as CredentialResponseBody[])
     ).toEqual([
       {
-        provider: "FirstEthTxnProvider",
+        provider: "ETHAdvocate",
         credential: {},
       },
     ]);
