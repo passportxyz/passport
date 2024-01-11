@@ -1,43 +1,33 @@
 import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerOverlay, DrawerCloseButton } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import { chains } from "../utils/onboard";
+import { chains } from "../utils/chains";
 import { NetworkCard } from "./NetworkCard";
-import { pgnChainId, lineaChainId, optimismChainId, goerliBaseChainId } from "../utils/onboard";
 
 type OnchainSidebarProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
-const onChainPassportChainIds = JSON.parse(process.env.NEXT_PUBLIC_POSSIBLE_ON_CHAIN_PASSPORT_CHAINIDS || "[]");
-
-const deployedChains = chains.filter((chain) => onChainPassportChainIds.includes(chain.id));
+const chainsWithAttestations = chains.filter(
+  ({ attestationProvider }) => attestationProvider?.status === "comingSoon" || attestationProvider?.status === "enabled"
+);
 
 export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
-  const activeOnChainPassportChains = process.env.NEXT_PUBLIC_ACTIVE_ON_CHAIN_PASSPORT_CHAINIDS;
-  const [activeChains, setActiveChains] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (activeOnChainPassportChains) {
-      const chainsArray = JSON.parse(activeOnChainPassportChains);
-      setActiveChains(chainsArray);
-    }
-  }, [activeOnChainPassportChains]);
-
   return (
     <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose}>
       <DrawerOverlay />
       <DrawerContent
         style={{
-          backgroundColor: "var(--color-background-2)",
-          border: "1px solid var(--color-accent-2)",
+          backgroundColor: "rgb(var(--color-background))",
+          border: "1px solid rgb(var(--color-foreground-5))",
           borderRadius: "6px",
+          backgroundImage: "url('/assets/sidebarHeader.svg')",
+          backgroundRepeat: "no-repeat",
         }}
       >
-        <DrawerCloseButton className="text-color-1" />
+        <DrawerCloseButton className={`visible z-10 text-color-1 md:invisible`} />
         <DrawerHeader className="text-center text-color-1">
-          <div className="mt-10 justify-center">
-            <h2 className="mt-4 text-2xl">Go Onchain</h2>
+          <div className="mt-10 justify-center text-left">
+            <h2 className="text-3xl">Go Onchain</h2>
             <p className="text-base font-normal">
               Minting your Passport onchain creates a tamper-proof record of your Gitcoin Passport onchain. This is only
               required if you&apos;re using applications that fetch Gitcoin Passport data onchain. Note: Minting your
@@ -47,8 +37,8 @@ export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
           </div>
         </DrawerHeader>
         <DrawerBody>
-          {deployedChains.map((chain) => (
-            <NetworkCard key={chain.id} chain={chain} activeChains={activeChains} />
+          {chainsWithAttestations.map((chain) => (
+            <NetworkCard key={chain.id} chain={chain} />
           ))}
         </DrawerBody>
       </DrawerContent>

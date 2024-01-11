@@ -2,8 +2,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 
 import { PLATFORMS } from "../config/platforms";
-import { PlatformGroupSpec, STAMP_PROVIDERS, UpdatedPlatforms } from "../config/providers";
-import { PlatformSpec } from "@gitcoin/passport-platforms";
+import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
 
 // --- Components
 import { LoadingCard } from "./LoadingCard";
@@ -18,65 +17,67 @@ import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { CeramicContext } from "../context/ceramicContext";
 import { PlatformCard } from "./PlatformCard";
 import PageWidthGrid from "../components/PageWidthGrid";
+import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
 
 export type CardListProps = {
   isLoading?: boolean;
+  className?: string;
 };
 
 const cardClassName = "col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-3";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
-export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
+export const getStampProviderIds = (platform: PLATFORM_ID): PROVIDER_ID[] => {
+  return (
+    STAMP_PROVIDERS[platform]?.reduce((all, stamp) => {
+      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+    }, [] as PROVIDER_ID[]) || []
+  );
+};
+
+export const CardList = ({ className, isLoading = false }: CardListProps): JSX.Element => {
   const { allProvidersState, allPlatforms } = useContext(CeramicContext);
+  const { scoredPlatforms } = useContext(ScorerContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef();
-  const [currentPlatform, setCurrentPlatform] = useState<PlatformSpec | undefined>();
+  const [currentPlatform, setCurrentPlatform] = useState<PlatformScoreSpec | undefined>();
   const [currentProviders, setCurrentProviders] = useState<PlatformGroupSpec[]>([]);
-  const [updatedPlatforms, setUpdatedPlatforms] = useState<UpdatedPlatforms | undefined>();
 
   // get the selected Providers
   const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
-    PLATFORMS.reduce((plaforms, platform) => {
+    PLATFORMS.reduce((platforms, platform) => {
       // get all providerIds for this platform
-      const providerIds =
-        STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
-          return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-        }, [] as PROVIDER_ID[]) || [];
+      const providerIds = getStampProviderIds(platform.platform);
       // default to empty array for each platform
-      plaforms[platform.platform] = providerIds.filter(
+      platforms[platform.platform] = providerIds.filter(
         (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
       );
       // return all platforms
-      return plaforms;
+      return platforms;
     }, {} as SelectedProviders)
   );
-
-  const getUpdatedPlatforms = () => {
-    const previouslyUpdatedPlatforms = localStorage.getItem("updatedPlatforms");
-    setUpdatedPlatforms(JSON.parse(previouslyUpdatedPlatforms || "{}"));
-  };
 
   // update when verifications change...
   useEffect(() => {
     // update all verfied states
     setSelectedProviders(
-      PLATFORMS.reduce((plaforms, platform) => {
+      PLATFORMS.reduce((platforms, platform) => {
         // get all providerIds for this platform
         const providerIds =
           STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
             return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
           }, [] as PROVIDER_ID[]) || [];
         // default to empty array for each platform
-        plaforms[platform.platform] = providerIds.filter(
+        platforms[platform.platform] = providerIds.filter(
           (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
         );
         // return all platforms
-        return plaforms;
+        return platforms;
       }, {} as SelectedProviders)
     );
-    getUpdatedPlatforms();
   }, [allProvidersState]);
+
   // Add the platforms to this switch so the sidebar content can populate dynamically
   const renderCurrentPlatformSelection = () => {
     if (currentPlatform) {
@@ -85,6 +86,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         return (
           <GenericPlatform
             platform={platformProps.platform}
+            platformScoreSpec={currentPlatform}
             platFormGroupSpec={platformProps.platFormGroupSpec}
             onClose={onClose}
           />
@@ -100,6 +102,7 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
         currentProviders={undefined}
         isLoading={undefined}
         verifyButton={undefined}
+        onClose={onClose}
       />
     );
   };
@@ -111,10 +114,24 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
     }
   }, [currentPlatform]);
 
+  const [verified, unverified] = scoredPlatforms.reduce(
+    ([verified, unverified], platform): [PlatformScoreSpec[], PlatformScoreSpec[]] => {
+      return platform.earnedPoints === 0 && selectedProviders[platform.platform].length === 0
+        ? [verified, [...unverified, platform]]
+        : [[...verified, platform], unverified];
+    },
+    [[], []] as [PlatformScoreSpec[], PlatformScoreSpec[]]
+  );
+
+  const sortedPlatforms = [
+    ...unverified.sort((a, b) => b.possiblePoints - a.possiblePoints),
+    ...verified.sort((a, b) => b.possiblePoints - b.earnedPoints - (a.possiblePoints - a.earnedPoints)),
+  ];
+
   return (
     <>
-      <PageWidthGrid>
-        {PLATFORMS.map((platform, i) => {
+      <PageWidthGrid className={className}>
+        {sortedPlatforms.map((platform, i) => {
           return isLoading ? (
             <LoadingCard key={i} className={cardClassName} />
           ) : (
@@ -122,11 +139,8 @@ export const CardList = ({ isLoading = false }: CardListProps): JSX.Element => {
               i={i}
               key={i}
               platform={platform}
-              btnRef={btnRef}
               onOpen={onOpen}
               selectedProviders={selectedProviders}
-              updatedPlatforms={updatedPlatforms}
-              getUpdatedPlatforms={getUpdatedPlatforms}
               setCurrentPlatform={setCurrentPlatform}
               className={cardClassName}
             />

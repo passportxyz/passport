@@ -38,7 +38,7 @@ describe("Providers", function () {
     expect(console.error).toHaveBeenCalledWith(unknownErrorMessagePartOne, unknownErrorMessagePartTwo);
     expect(result).toEqual({
       valid: false,
-      error: ["There was an unexpected error during verification."],
+      errors: ["There was an unexpected error during verification."],
     });
   });
 
@@ -63,7 +63,7 @@ describe("Providers", function () {
 
     expect(result).toEqual({
       valid: false,
-      error: [
+      errors: [
         expect.stringContaining(
           "There was an unexpected error during verification. MyError: I'm an unhandled error at"
         ),
@@ -84,7 +84,7 @@ describe("Providers", function () {
 
     expect(result).toEqual({
       valid: false,
-      error: ["I'm an expected error"],
+      errors: ["I'm an expected error"],
     });
   });
 
@@ -94,6 +94,6 @@ describe("Providers", function () {
 
     const result = await providers.verify("nonExistentType", mockPayload, mockContext);
     expect(result.valid).toEqual(false);
-    expect(result.error).toEqual(["Missing provider"]);
+    expect(result.errors).toEqual(["Missing provider"]);
   });
 });

@@ -5,9 +5,10 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/guildXYZStampIcon.svg",
   platform: "GuildXYZ",
   name: "Guild Membership and Roles",
-  description: "Connect your Guild XYZ account to verify your memberships.",
+  description: "Connect to Guild to verify your membership in open source communities.",
   connectMessage: "Verify Guilds",
   isEVM: true,
+  website: "https://guild.xyz/",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

@@ -2,6 +2,7 @@
 import { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { Platform as PlatformClass } from "./utils/platform";
 
 export type PlatformSpec = {
   icon?: string | undefined;
@@ -11,6 +12,8 @@ export type PlatformSpec = {
   connectMessage: string;
   isEVM?: boolean;
   enablePlatformCardUpdate?: boolean;
+  metaPointer?: string;
+  website?: string;
 };
 
 export type ProviderSpec = {
@@ -87,20 +90,22 @@ export type AppContext = {
   userDid?: string;
   callbackUrl?: string;
   selectedProviders: PROVIDER_ID[]; // can be used to translate to a scope when making an oauth request
-  waitForRedirect(timeout?: number): Promise<ProviderPayload>;
+  waitForRedirect(platform: PlatformClass, timeout?: number): Promise<ProviderPayload>;
+};
+
+export type PlatformBanner = {
+  heading?: React.ReactNode;
+  content?: React.ReactNode;
+  cta?: {
+    label: string;
+    url: string;
+  };
 };
 
 export interface Platform {
   platformId: string;
   path?: string;
-  banner?: {
-    heading?: string;
-    content?: string;
-    cta?: {
-      label: string;
-      url: string;
-    };
-  };
+  banner?: PlatformBanner;
   isEVM?: boolean;
   getOAuthUrl?(state: string): Promise<string>;
   getProviderPayload(appContext: AppContext): Promise<ProviderPayload>;

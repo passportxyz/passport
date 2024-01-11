@@ -8,9 +8,11 @@ export type FooterProps = {
 
 export const Footer = ({ lightMode }: FooterProps): JSX.Element => {
   return (
-    <PageWidthGrid className={`grid-flow-dense py-8 font-alt text-color-1 lg:flex ${PAGE_PADDING}`}>
+    <PageWidthGrid
+      className={`mt-2 grid-flow-dense bg-gradient-to-b from-background to-background-3 pb-12 pt-8 font-alt text-color-1 lg:flex ${PAGE_PADDING}`}
+    >
       <div className="col-span-3 grow md:col-span-4">
-        <span className="text-color-3">Available on </span>
+        Available on{" "}
         <a href="https://ceramic.network/" target="_blank" rel="noopener noreferrer" className="hover:underline">
           Ceramic.
         </a>
@@ -38,6 +40,14 @@ export const Footer = ({ lightMode }: FooterProps): JSX.Element => {
         className="col-span-4 hover:underline"
       >
         Git commit
+      </a>
+      <a
+        href="https://www.gitcoin.co/privacy"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="col-span-4 hover:underline"
+      >
+        Gitcoin Privacy Policy
       </a>
       <div className="col-start-[-2] col-end-[-1] flex items-center justify-self-end md:col-start-[-3]">
         <a href="https://github.com/gitcoinco/passport" target="_blank" rel="noopener noreferrer" className="mr-8">

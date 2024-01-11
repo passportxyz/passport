@@ -1,10 +1,14 @@
-import { StaticJsonRpcProvider } from "@ethersproject/providers";
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Credential verification
 import { getRPCProvider } from "../../utils/signer";
+
+const ENS_PUBLIC_RESOLVERS = [
+  "0x231b0ee14048e9dccd1d247744d114a4eb5e8e63",
+  "0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41",
+];
 
 // Export a Ens Provider to carry out Ens name check and return a record object
 export class EnsProvider implements Provider {
@@ -20,25 +24,38 @@ export class EnsProvider implements Provider {
 
   // Verify that the address defined in the payload has an ENS reverse lookup registered
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    let error;
-    let valid = false;
-    let reportedName;
+    const errors = [];
+    let valid = false,
+      reportedName: string,
+      record = undefined;
 
     try {
       const provider = getRPCProvider(payload);
       reportedName = await provider.lookupAddress(payload.address);
-      valid = Boolean(reportedName);
-      if (!valid) error = ["Primary ENS name was not found for given address."];
-    } catch (e) {}
 
-    return {
-      valid: valid,
-      error: error,
-      record: valid
-        ? {
+      if (reportedName) {
+        const resolver = await provider.getResolver(reportedName);
+        if (ENS_PUBLIC_RESOLVERS.includes(resolver?.address?.toLowerCase())) {
+          valid = true;
+          record = {
             ens: reportedName,
-          }
-        : undefined,
-    };
+          };
+        } else {
+          errors.push(
+            "Apologies! Your primary ENS name uses an alternative resolver and is not eligible for the ENS stamp."
+          );
+        }
+      } else {
+        errors.push("Primary ENS name was not found for given address.");
+      }
+
+      return {
+        valid,
+        errors,
+        record,
+      };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Error verifying ENS name: ${String(e)}`);
+    }
   }
 }

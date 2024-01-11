@@ -3,7 +3,7 @@ import { Button, ButtonProps } from "./Button";
 import { Spinner } from "@chakra-ui/react";
 
 export type LoadingButtonProps = ButtonProps & {
-  isLoading: boolean;
+  isLoading?: boolean;
 };
 
 export const LoadButton = ({ isLoading, disabled, children, ...props }: LoadingButtonProps) => {

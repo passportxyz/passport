@@ -1,15 +1,10 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import axios from "axios";
+import { useEffect } from "react";
 import { SupportBanner } from "../../components/SupportBanner";
 import { CeramicContextState } from "../../context/ceramicContext";
-import { UserContextState } from "../../context/userContext";
-import {
-  makeTestCeramicContext,
-  makeTestUserContext,
-  renderWithContext,
-} from "../../__test-fixtures__/contextTestHelpers";
-
-jest.mock("../../utils/onboard.ts");
+import { useSupportBanners } from "../../hooks/useSupportBanners";
+import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 
 const mockBannerResponse = [
   {
@@ -20,30 +15,41 @@ const mockBannerResponse = [
   },
 ];
 
-const mockUserContext: UserContextState = makeTestUserContext();
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
+
+const TestComponent = () => {
+  const { banners, loadBanners } = useSupportBanners();
+
+  useEffect(() => {
+    loadBanners();
+  }, [loadBanners]);
+
+  return <SupportBanner banners={banners} />;
+};
 
 describe("SupportBanner", () => {
   it("should render banner", async () => {
     jest.spyOn(axios, "get").mockResolvedValueOnce({ data: mockBannerResponse });
-    renderWithContext({ ...mockUserContext, dbAccessTokenStatus: "connected" }, mockCeramicContext, <SupportBanner />);
+    renderWithContext(mockCeramicContext, <TestComponent />, { dbAccessTokenStatus: "connected" });
 
     await screen.findByText(mockBannerResponse[0].content);
   });
+
   it("should render banner with link", async () => {
     jest.spyOn(axios, "get").mockResolvedValueOnce({ data: mockBannerResponse });
-    renderWithContext({ ...mockUserContext, dbAccessTokenStatus: "connected" }, mockCeramicContext, <SupportBanner />);
+    renderWithContext(mockCeramicContext, <TestComponent />, { dbAccessTokenStatus: "connected" });
 
     const link = await screen.findByText("More information.");
     expect(link).toHaveAttribute("href", mockBannerResponse[0].link);
   });
+
   it("should dismiss banner", async () => {
     const dismissCall = jest.spyOn(axios, "post");
     dismissCall.mockResolvedValueOnce({}); // Mock axios.post to resolve immediately
 
     jest.spyOn(axios, "get").mockResolvedValueOnce({ data: mockBannerResponse });
 
-    renderWithContext({ ...mockUserContext, dbAccessTokenStatus: "connected" }, mockCeramicContext, <SupportBanner />);
+    renderWithContext(mockCeramicContext, <TestComponent />, { dbAccessTokenStatus: "connected" });
     const dismissBtn = await screen.findByText("Dismiss");
     fireEvent.click(dismissBtn);
     await waitFor(() => expect(dismissCall).toHaveBeenCalled());

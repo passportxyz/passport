@@ -1,5 +1,5 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
@@ -7,6 +7,9 @@ import axios from "axios";
 
 // ----- Credential verification
 import { getAddress } from "../../utils/signer";
+
+// ----- Utils
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 // subgraphs to check
 export const phiSubgraphs = ["https://api.thegraph.com/subgraphs/name/zak3939/phiclaimcontract"];
@@ -52,48 +55,62 @@ export class PHIActivitySilverProvider implements Provider {
     // if a signer is provider we will use that address to verify against
     const address = (await getAddress(payload)).toLowerCase();
 
-    let phiCheckResult = {
-      hasClaimed: false,
-      phiquestList: null as string[],
-    };
+    const errors: string[] = [];
+    let record = undefined;
 
     async function checkForPHIActivity(url: string): Promise<PhiCheckResult> {
-      let hasClaimed = false;
-      let phiquestList = null as string[];
-      const result = await axios.post(url, {
-        query: `
-          {
-            logClaimObjects(
-              where: {tokenid_in: [100161,100162,100163,100164,100165], sender: "${address}"}
-            ) {
-              tokenid
-              blockNumber
+      try {
+        let hasClaimed = false;
+        let phiquestList = null as string[];
+        const result = await axios.post(url, {
+          query: `
+            {
+              logClaimObjects(
+                where: {tokenid_in: [100161,100162,100163,100164,100165], sender: "${address}"}
+              ) {
+                tokenid
+                blockNumber
+              }
             }
-          }
-          `,
-      });
-      const r = result as Result;
-      const records = r?.data?.data?.logClaimObjects || [];
+            `,
+        });
+        const r = result as Result;
+        const records = r?.data?.data?.logClaimObjects || [];
 
-      if (records.length > 0) {
-        hasClaimed = true;
-        phiquestList = records.map((record) => record.tokenid);
+        if (records.length > 0) {
+          hasClaimed = true;
+          phiquestList = records.map((record) => record.tokenid);
+        }
+
+        // Return false by default (if tokens array is empty or no matching verification)
+        return {
+          hasClaimed,
+          phiquestList,
+        };
+      } catch (e: unknown) {
+        errors.push(JSON.stringify(e));
+        handleProviderAxiosError(e, "PHI activity check error", [address]);
+      }
+    }
+
+    try {
+      const { hasClaimed } = await checkForPHIActivity(phiSubgraphs[0]);
+      const valid = hasClaimed;
+
+      if (valid) {
+        record = { address };
+      } else {
+        errors.push("You have not claimed the required objects to be able to qualify for this stamp.");
       }
 
-      // Return false by default (if tokens array is empty or no matching verification)
-      return {
-        hasClaimed,
-        phiquestList,
-      };
+      return Promise.resolve({
+        valid,
+        errors,
+        record,
+      });
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Error verifying PHI activity: ${JSON.stringify(e)}.`);
     }
-    phiCheckResult = await checkForPHIActivity(phiSubgraphs[0]);
-
-    return Promise.resolve({
-      valid: phiCheckResult.hasClaimed,
-      record: {
-        address: phiCheckResult.hasClaimed ? address : undefined,
-      },
-    });
   }
 }
 
@@ -115,48 +132,60 @@ export class PHIActivityGoldProvider implements Provider {
     // if a signer is provider we will use that address to verify against
     const address = (await getAddress(payload)).toLowerCase();
 
-    let phiCheckResult = {
-      hasClaimed: false,
-      phiquestList: null as string[],
-    };
+    const errors: string[] = [];
+    let record = undefined;
 
     async function checkForPHIActivity(url: string): Promise<PhiCheckResult> {
-      let hasClaimed = false;
-      let phiquestList = null as string[];
-      const result = await axios.post(url, {
-        query: `
-          {
-            logClaimObjects(
-              where: {tokenid_in: [100166,100167,100168,100169,100170], sender: "${address}"}
-            ) {
-              tokenid
-              blockNumber
+      try {
+        let hasClaimed = false;
+        let phiquestList = null as string[];
+        const result = await axios.post(url, {
+          query: `
+            {
+              logClaimObjects(
+                where: {tokenid_in: [100166,100167,100168,100169,100170], sender: "${address}"}
+              ) {
+                tokenid
+                blockNumber
+              }
             }
-          }
-          `,
-      });
+            `,
+        });
 
-      const r = result as Result;
-      const records = r?.data?.data?.logClaimObjects || [];
+        const r = result as Result;
+        const records = r?.data?.data?.logClaimObjects || [];
 
-      if (records.length > 0) {
-        hasClaimed = true;
-        phiquestList = records.map((record) => record.tokenid);
+        if (records.length > 0) {
+          hasClaimed = true;
+          phiquestList = records.map((record) => record.tokenid);
+        }
+
+        // Return false by default (if tokens array is empty or no matching verification)
+        return {
+          hasClaimed,
+          phiquestList,
+        };
+      } catch (e: unknown) {
+        errors.push(JSON.stringify(e));
+        handleProviderAxiosError(e, "PHI activity check error", [address]);
+      }
+    }
+    try {
+      const { hasClaimed } = await checkForPHIActivity(phiSubgraphs[0]);
+      const valid = hasClaimed;
+      if (valid) {
+        record = { address };
+      } else {
+        errors.push("You have not claimed the required objects to be able to qualify for this stamp.");
       }
 
-      // Return false by default (if tokens array is empty or no matching verification)
-      return {
-        hasClaimed,
-        phiquestList,
-      };
+      return Promise.resolve({
+        valid,
+        errors,
+        record,
+      });
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Error verifying PHI activity: ${JSON.stringify(e)}.`);
     }
-    phiCheckResult = await checkForPHIActivity(phiSubgraphs[0]);
-
-    return Promise.resolve({
-      valid: phiCheckResult.hasClaimed,
-      record: {
-        address: phiCheckResult.hasClaimed ? address : undefined,
-      },
-    });
   }
 }

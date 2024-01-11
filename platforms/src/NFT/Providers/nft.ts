@@ -1,5 +1,5 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
@@ -8,16 +8,23 @@ import axios from "axios";
 // ----- Credential verification
 import { getAddress } from "../../utils/signer";
 
+// ----- Utils
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+
 // Alchemy Api key
 export const apiKey = process.env.ALCHEMY_API_KEY;
 
 type GetContractsForOwnerResponse = {
-  contracts: any[];
+  contracts: {
+    address: string;
+    tokenId: string;
+    tokenType: string;
+  }[];
   totalCount: number;
 };
 
 export function getNFTEndpoint(): string {
-  return `https://eth-mainnet.g.alchemy.com/nft/v2/${apiKey}/getNFTs`;
+  return `https://eth-mainnet.g.alchemy.com/nft/v2/${apiKey}/getContractsForOwner`;
 }
 
 // Export a NFT Provider
@@ -38,40 +45,51 @@ export class NFTProvider implements Provider {
     // if a signer is provider we will use that address to verify against
     const address = (await getAddress(payload)).toLowerCase();
 
-    let valid = false;
-    let getContractsForOwnerResponse: GetContractsForOwnerResponse = {
-      contracts: [],
-      totalCount: 0,
-    };
+    const errors = [];
+    let valid = false,
+      record = undefined;
 
-    const providerUrl = getNFTEndpoint();
+    const data = await this.queryNFTs(address);
 
-    try {
-      const requestResponse = await axios.get(providerUrl, {
-        params: {
-          withMetadata: "false",
-          owner: address,
-          pageSize: 1,
-        },
-      });
+    const { contracts, totalCount } = data;
 
-      if (requestResponse.status == 200) {
-        getContractsForOwnerResponse = requestResponse.data as GetContractsForOwnerResponse;
+    if (totalCount > 0) {
+      const erc721 = contracts.find((contract) => contract.tokenType === "ERC721");
 
-        valid = getContractsForOwnerResponse.totalCount > 0;
+      if (erc721) {
+        valid = true;
+        record = {
+          tokenAddress: erc721.address,
+          tokenId: erc721.tokenId,
+        };
+      } else {
+        throw new ProviderExternalVerificationError("Unable to find an ERC721 token that you own.");
       }
-    } catch (error) {
-      // Nothing to do here, valid will remain false
+    } else {
+      errors.push("You do not own any NFTs.");
     }
 
-    return Promise.resolve({
-      valid: valid,
-      record: valid
-        ? {
-            address: address,
-            "NFT#numNFTsGte": "1",
-          }
-        : undefined,
-    });
+    return {
+      valid,
+      errors,
+      record,
+    };
+  }
+
+  async queryNFTs(address: string): Promise<GetContractsForOwnerResponse> {
+    const providerUrl = getNFTEndpoint();
+    try {
+      return (
+        await axios.get(providerUrl, {
+          params: {
+            withMetadata: "true",
+            owner: address,
+            orderBy: "transferTime",
+          },
+        })
+      ).data as GetContractsForOwnerResponse;
+    } catch (error) {
+      handleProviderAxiosError(error, "getContractsForOwner", [apiKey]);
+    }
   }
 }

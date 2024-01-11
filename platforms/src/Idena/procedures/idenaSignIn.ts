@@ -1,15 +1,15 @@
 import crypto from "crypto";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { initCacheSession, loadCacheSession, clearCacheSession } from "../../utils/cache";
+import { initCacheSession, loadCacheSession, clearCacheSession, PlatformSession } from "../../utils/platform-cache";
 import { ProviderContext } from "@gitcoin/passport-types";
+import { ProviderInternalVerificationError } from "../../types";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 type IdenaCache = {
   address?: string;
   nonce?: string;
   signature?: string;
 };
-
-const loadIdenaCache = (token: string): IdenaCache => loadCacheSession(token, "Idena");
 
 // Idena API url
 const API_URL = "https://api.idena.io/";
@@ -22,36 +22,42 @@ const generateNonce = (): string => {
   return `signin-${crypto.randomBytes(32).toString("hex")}`;
 };
 
-export const initSession = (): string => {
-  const token = initCacheSession(generateToken());
+export const initSession = async (): Promise<string> => {
+  const token = await initCacheSession(generateToken());
   return token;
 };
 
-export const loadIdenaSession = (token: string, address: string): string | undefined => {
-  const session = loadIdenaCache(token);
-  const nonce = generateNonce();
+const loadIdenaCache = async (token: string): Promise<PlatformSession<IdenaCache>> => await loadCacheSession(token);
 
-  session.nonce = nonce;
-  session.address = address;
+export const loadIdenaSession = async (token: string, address: string): Promise<string | undefined> => {
+  try {
+    const session = await loadIdenaCache(token);
+    const nonce = generateNonce();
 
-  return nonce;
+    await session.set("nonce", nonce);
+    await session.set("address", address);
+
+    return nonce;
+  } catch (error) {
+    throw new ProviderInternalVerificationError("Session missing or expired, try again");
+  }
 };
 
 export const authenticate = async (token: string, signature: string): Promise<boolean> => {
-  const session = loadIdenaCache(token);
-  if (!session.address || session.signature) {
+  const session = await loadCacheSession(token);
+  if (!session.get("address") || session.get("signature")) {
     return false;
   }
   let address;
   try {
-    address = await requestSignatureAddress(session.nonce, signature);
+    address = await requestSignatureAddress(session.get("nonce"), signature);
   } catch (e) {
     return false;
   }
-  if (!address || address.toLowerCase() !== session.address.toLowerCase()) {
+  if (!address || address.toLowerCase() !== session.get("address").toLowerCase()) {
     return false;
   }
-  session.signature = signature;
+  await session.set("signature", signature);
   return true;
 };
 
@@ -138,31 +144,35 @@ const apiClient = (): AxiosInstance => {
   });
 };
 
-const loadSessionAddress = (token: string, context: IdenaContext): string => {
+const loadSessionAddress = async (token: string, context: IdenaContext): Promise<string> => {
   if (!context.idena) context.idena = { responses: {} };
   if (!context.idena.address) {
-    const session = loadIdenaCache(token);
-    if (!session.address || !session.signature) {
-      throw "Invalid session, unable to retrieve authenticated address";
+    let session;
+    try {
+      session = await loadIdenaCache(token);
+    } catch {}
+
+    if (!session || !session.get("address") || !session.get("signature")) {
+      throw new ProviderInternalVerificationError("Session missing or expired, try again");
     }
-    context.idena.address = session.address;
-    clearCacheSession(token, "Idena");
+    context.idena.address = session.get("address");
+    await clearCacheSession(token);
   }
   return context.idena.address;
 };
 
 const request = async <T>(token: string, context: IdenaContext, method: IdenaMethod): Promise<T> => {
-  const address = loadSessionAddress(token, context);
+  const address = await loadSessionAddress(token, context);
 
   let response = context.idena.responses[method];
   if (!response) {
-    response = await apiClient().get(method.replace("_address_", address));
+    try {
+      response = await apiClient().get(method.replace("_address_", address));
+    } catch (error: unknown) {
+      handleProviderAxiosError(error, `Idena ${method}`);
+    }
     context.idena.responses[method] = response;
   }
 
-  if (response.status != 200) {
-    throw `get ${method} returned status code ${response.status} instead of the expected 200`;
-  }
-
-  return { ...response.data, address: address } as T;
+  return { ...response.data, address } as T;
 };

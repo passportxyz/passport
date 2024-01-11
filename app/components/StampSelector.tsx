@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { useRouter } from "next/router";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
@@ -6,9 +6,10 @@ import { PlatformGroupSpec } from "../config/providers";
 import { getStampProviderFilters } from "../config/filters";
 import { OnChainContext } from "../context/onChainContext";
 import { OnchainTag } from "./OnchainTag";
-import Toggle from "./Toggle";
 import { CeramicContext } from "../context/ceramicContext";
 import { FeatureFlags } from "../config/feature_flags";
+import Checkbox from "../components/Checkbox";
+import { ScorerContext } from "../context/scorerContext";
 
 type StampSelectorProps = {
   currentPlatform?: PlatformSpec | undefined;
@@ -27,6 +28,7 @@ export function StampSelector({
 }: StampSelectorProps) {
   const { allProvidersState } = useContext(CeramicContext);
   const { activeChainProviders } = useContext(OnChainContext);
+  const { stampWeights } = useContext(ScorerContext);
   // stamp filter
   const router = useRouter();
   const { filter } = router.query;
@@ -47,65 +49,60 @@ export function StampSelector({
   return (
     <>
       {/* each of the available providers in this platform */}
-      {currentProviders?.map((stamp, i) => {
+      {currentProviders?.map((stamp) => {
         // hide stamps based on filter
         const hideStamp =
           stampFilters && currentPlatform && !stampFilters[currentPlatform?.platform]?.includes(stamp.platformGroup);
         if (hideStamp) return null;
 
         return (
-          <div key={i} className={`border-b border-accent-2 py-4 px-6 ${i ? "" : "border-t"}`}>
-            <p className="ml-4 mb-1 text-sm text-color-4">{stamp.platformGroup}</p>
-            <div className="flex flex-row justify-between">
-              <ul className="list-disc marker:text-3xl ">
-                {stamp.providers?.map((provider, i) => {
-                  let bulletColor = "text-color-4";
-                  let textColor = "text-color-4";
-                  if (verifiedProviders?.indexOf(provider.name) !== -1) {
-                    bulletColor = "text-accent";
-                    textColor = "text-color-1";
-                  }
-                  return (
-                    <li
-                      className={`ml-4 ${bulletColor}`}
-                      key={`${provider.title}${i}`}
-                      data-testid={`indicator-${provider.name}`}
-                    >
-                      <div className={`text-md relative top-[-0.3em] ${textColor} flex items-center`}>
-                        {provider.title}
-                        {FeatureFlags.FF_CHAIN_SYNC && isProviderOnChain(provider.name) && (
-                          <OnchainTag marginLeft="3" />
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-              <div className="align-right ml-2">
-                <Toggle
-                  data-testid={`switch-${i}`}
-                  checked={
-                    stamp.providers?.reduce(
-                      (isPresent, provider) =>
-                        isPresent || selectedProviders?.indexOf(provider.name as PROVIDER_ID) !== -1,
-                      false as boolean // typing the response - always bool
-                    ) || false
-                  }
-                  onChange={(checked: boolean) => {
-                    // grab all provider_ids for this group of stamps
-                    const providerIds = stamp.providers?.map((provider) => provider.name as PROVIDER_ID);
+          <div key={stamp.platformGroup} className={`mt-6`}>
+            <p className="mb-1 text-xl">{stamp.platformGroup}</p>
+            {stamp.providers?.map((provider, i) => {
+              const verified = verifiedProviders?.indexOf(provider.name) !== -1;
+              const selected = selectedProviders?.indexOf(provider.name) !== -1;
 
-                    // set the selected items by concating or filtering by providerId
-                    setSelectedProviders &&
-                      setSelectedProviders(
-                        checked
-                          ? (selectedProviders || []).concat(providerIds)
-                          : (selectedProviders || []).filter((id) => !providerIds.includes(id))
-                      );
-                  }}
-                />
-              </div>
-            </div>
+              let textColor = verified ? "text-color-2" : "text-color-1";
+
+              const onChange = (checked: boolean) =>
+                setSelectedProviders(
+                  checked
+                    ? (selectedProviders || []).concat(provider.name)
+                    : (selectedProviders || []).filter((id) => id !== provider.name)
+                );
+
+              const rawWeight = stampWeights?.[provider.name];
+              const weight = rawWeight ? +parseFloat(rawWeight).toFixed(2) : 0;
+
+              const checkboxId = `${provider.name}StampCheckbox`;
+
+              return (
+                <React.Fragment key={provider.name}>
+                  <div
+                    data-testid={`indicator-${provider.name}`}
+                    className={`relative border-foreground-3 ${provider.description ? "pt-3" : "py-3"} text-base ${
+                      i > 0 ? "border-t" : "border-none"
+                    } ${textColor} flex items-center`}
+                  >
+                    <Checkbox
+                      data-testid={`checkbox-${provider.name}`}
+                      className="mr-2 shrink-0"
+                      id={checkboxId}
+                      checked={selected}
+                      onChange={onChange}
+                    />
+                    <label htmlFor={checkboxId}>{provider.title}</label>
+                    {FeatureFlags.FF_CHAIN_SYNC && isProviderOnChain(provider.name) && <OnchainTag marginLeft="3" />}
+                    <span className="ml-2 grow text-right">{weight}&nbsp;points</span>
+                  </div>
+                  {provider.description && (
+                    <>
+                      <p className="my-2 text-sm italic">{provider.description}</p>
+                    </>
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
         );
       })}

@@ -1,15 +1,23 @@
-import { PlatformOptions, ProviderPayload } from "../types";
+import { AppContext, PlatformOptions, ProviderPayload } from "../types";
 import { Platform } from "../utils/platform";
 
 export class GitcoinPlatform extends Platform {
   platformId = "Gitcoin";
-  path = "github";
+  path = "Gitcoin";
   clientId: string = null;
   redirectUri: string = null;
+  isEVM = true;
 
   banner = {
-    heading:
-      "The Gitcoin Grant stamp recognizes contributions made during Gitcoin Grants rounds 1-15 (ended September 2022). Please use the new GrantsStack stamp for donations from the latest rounds: Alpha (Jan '23) and Beta (April '23).",
+    heading: `
+      The Gitcoin Grant stamp recognizes contributions made during
+      all Gitcoin Grants rounds 1-18 (ended August 2023). Donations
+      made in the current round will not be counted until post-round
+      analysis is completed, usually ~3 weeks from the round end.
+      Only matching-eligible contributions for each round are counted.
+    `
+      .replace(/\s+/gm, " ")
+      .trim(),
   };
 
   constructor(options: PlatformOptions = {}) {
@@ -18,10 +26,8 @@ export class GitcoinPlatform extends Platform {
     this.redirectUri = options.redirectUri as string;
   }
 
-  async getOAuthUrl(state: string): Promise<string> {
-    const githubUrl = await Promise.resolve(
-      `https://github.com/login/oauth/authorize?client_id=${this.clientId}&redirect_uri=${this.redirectUri}&state=${state}`
-    );
-    return githubUrl;
+  async getProviderPayload(_appContext: AppContext): Promise<ProviderPayload> {
+    const result = await Promise.resolve({});
+    return result;
   }
 }

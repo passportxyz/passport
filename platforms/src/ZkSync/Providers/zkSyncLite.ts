@@ -1,5 +1,5 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
@@ -7,6 +7,7 @@ import axios from "axios";
 
 // ----- Credential verification
 import { getAddress } from "../../utils/signer";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 // https://docs.zksync.io/api/v0.2/
 export const zkSyncLiteApiEndpoint = "https://api.zksync.io/api/v0.2/";
@@ -48,20 +49,26 @@ export class ZkSyncLiteProvider implements Provider {
 
   // Verify that address defined in the payload has at least 1 finalized transactioin
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    // if a signer is provider we will use that address to verify against
-    let valid = false;
-    let error = undefined;
-
-    const address = (await getAddress(payload)).toLowerCase();
-
     try {
-      const requestResponse = await axios.get(`${zkSyncLiteApiEndpoint}accounts/${address}/transactions`, {
-        params: {
-          from: "latest",
-          limit: 100,
-          direction: "older",
-        },
-      });
+      // if a signer is provider we will use that address to verify against
+      let valid = false,
+        record = undefined,
+        requestResponse;
+      const errors: string[] = [];
+      const address = (await getAddress(payload)).toLowerCase();
+
+      try {
+        requestResponse = await axios.get(`${zkSyncLiteApiEndpoint}accounts/${address}/transactions`, {
+          params: {
+            from: "latest",
+            limit: 100,
+            direction: "older",
+          },
+        });
+      } catch (error: unknown) {
+        handleProviderAxiosError(error, "zkSync Lite", [address]);
+        errors.push(error as string);
+      }
 
       if (requestResponse.status == 200) {
         const zkSyncLiteResponse = requestResponse.data as ZkSyncLiteResponse;
@@ -73,32 +80,33 @@ export class ZkSyncLiteProvider implements Provider {
             const t = zkSyncLiteResponse.result.list[i];
             if (t.status === "finalized" && t.op.from === address) {
               valid = true;
+              record = {
+                address: address,
+              };
               break;
             }
           }
 
           if (!valid) {
-            error = ["Unable to find a finalized transaction from the given address"];
+            errors.push("Unable to find a finalized transaction from the given address");
           }
         } else {
-          error = [
-            `ZKSync Lite API Error '${zkSyncLiteResponse.status}'. Details: '${zkSyncLiteResponse.error.toString()}'.`,
-          ];
+          errors.push(
+            `ZKSync Lite API Error '${zkSyncLiteResponse.status}'. Details: '${zkSyncLiteResponse.error.toString()}'.`
+          );
         }
       } else {
-        error = [`HTTP Error '${requestResponse.status}'. Details: '${requestResponse.statusText}'.`];
+        errors.push(`HTTP Error '${requestResponse.status}'. Details: '${requestResponse.statusText}'.`);
       }
-    } catch (exc) {
-      error = ["Error getting transaction list for address"];
+      return Promise.resolve({
+        valid,
+        record,
+        errors,
+      });
+    } catch (error: unknown) {
+      throw new ProviderExternalVerificationError(
+        `Error getting transaction list for address: ${JSON.stringify(error)}`
+      );
     }
-    return Promise.resolve({
-      valid: valid,
-      record: valid
-        ? {
-            address: address,
-          }
-        : undefined,
-      error,
-    });
   }
 }

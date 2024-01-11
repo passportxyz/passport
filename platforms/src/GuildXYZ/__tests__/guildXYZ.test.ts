@@ -153,6 +153,7 @@ describe("Guild Providers", () => {
       const result = await provider.verify({ address: MOCK_ADDRESS } as RequestPayload);
       expect(result).toEqual({
         valid: true,
+        errors: [],
         record: {
           address: MOCK_ADDRESS,
         },
@@ -171,9 +172,10 @@ describe("Guild Providers", () => {
       const result = await provider.verify({ address: MOCK_ADDRESS } as RequestPayload);
       expect(result).toEqual({
         valid: false,
-        record: {
-          address: MOCK_ADDRESS,
-        },
+        errors: [
+          "Your Guild membership (> 5) and total roles (> 15) counts are below the required thresholds: Your Guild count: 3, you total roles: &10.",
+        ],
+        record: undefined,
       });
     });
   });
@@ -186,6 +188,7 @@ describe("Guild Providers", () => {
       const result = await provider.verify({ address: MOCK_ADDRESS } as RequestPayload);
       expect(result).toEqual({
         valid: true,
+        errors: [],
         record: {
           address: MOCK_ADDRESS,
         },
@@ -209,9 +212,8 @@ describe("Guild Providers", () => {
       const result = await provider.verify({ address: MOCK_ADDRESS } as RequestPayload);
       expect(result).toEqual({
         valid: false,
-        record: {
-          address: MOCK_ADDRESS,
-        },
+        errors: ["We did not find any Guilds that you are an admin of: 0."],
+        record: undefined,
       });
     });
 
@@ -220,11 +222,9 @@ describe("Guild Providers", () => {
 
       mockedAxios.get.mockRejectedValueOnce(new Error("Request failed"));
 
-      const result = await provider.verify({ address: MOCK_ADDRESS } as RequestPayload);
-      expect(result).toEqual({
-        valid: false,
-        error: ["Error verifying Guild Admin Membership"],
-      });
+      await expect(async () => await provider.verify({ address: MOCK_ADDRESS } as RequestPayload)).rejects.toThrow(
+        "Error verifying Guild Admin Membership: {}"
+      );
     });
   });
 
@@ -244,6 +244,7 @@ describe("Guild Providers", () => {
       const result = await provider.verify({ address: MOCK_ADDRESS } as RequestPayload);
       expect(result).toEqual({
         valid: true,
+        errors: [],
         record: {
           address: MOCK_ADDRESS,
         },
@@ -255,11 +256,9 @@ describe("Guild Providers", () => {
 
       mockedAxios.get.mockRejectedValueOnce(new Error("Request failed"));
 
-      const result = await provider.verify({ address: MOCK_ADDRESS } as RequestPayload);
-      expect(result).toEqual({
-        valid: false,
-        error: ["Error verifying Guild Passport Membership"],
-      });
+      await expect(async () => await provider.verify({ address: MOCK_ADDRESS } as RequestPayload)).rejects.toThrow(
+        "Error verifying Guild Passport Membership: {}"
+      );
     });
   });
 });
@@ -353,11 +352,6 @@ describe("checkGuildStats()", () => {
 
     mockedAxios.get.mockRejectedValueOnce(new Error("Request failed"));
 
-    try {
-      await checkGuildStats(memberships);
-    } catch (error) {
-      expect(error.message).toBe("Request failed");
-    }
-    expect(mockedAxios.get).toHaveBeenCalledWith("https://api.guild.xyz/v1/guild");
+    await expect(async () => await checkGuildStats(memberships)).rejects.toThrow("Error checking guild stats: {}");
   });
 });

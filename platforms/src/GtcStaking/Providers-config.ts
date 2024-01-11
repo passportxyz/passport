@@ -3,23 +3,24 @@ import {
   SelfStakingBronzeProvider,
   SelfStakingGoldProvider,
   SelfStakingSilverProvider,
-  CommunityStakingBronzeProvider,
-  CommunityStakingGoldProvider,
-  CommunityStakingSilverProvider,
+  BeginnerCommunityStakerProvider,
+  ExperiencedCommunityStakerProvider,
+  TrustedCitizenProvider,
 } from "./Providers";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/gtcStakingLogoIcon.svg",
   platform: "GtcStaking",
   name: "GTC Staking",
-  description: "Connect to passport to verify your staking amount.",
+  description: "Stake GTC to boost your trust in the Gitcoin ecosystem.",
   connectMessage: "Verify amount",
+  website: "https://staking.passport.gitcoin.co/",
   isEVM: true,
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Stakes on Yourself.",
+    platformGroup: "Self GTC Staking",
     providers: [
       { title: "5 GTC (Bronze)", name: "SelfStakingBronze" },
       { title: "20 GTC (Silver)", name: "SelfStakingSilver" },
@@ -27,11 +28,24 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     ],
   },
   {
-    platformGroup: "Stakes from Others.",
+    platformGroup: "Community GTC Staking",
     providers: [
-      { title: "5 GTC (Bronze)", name: "CommunityStakingBronze" },
-      { title: "20 GTC (Silver)", name: "CommunityStakingSilver" },
-      { title: "125 GTC (Gold)", name: "CommunityStakingGold" },
+      {
+        title: "Beginner Community Staker",
+        description: "Stake 5 GTC on at least 1 account or have 1 account stake 5 GTC on you.",
+        name: "BeginnerCommunityStaker",
+      },
+      {
+        title: "Experienced Community Staker",
+        description:
+          "Stake 10 GTC on at least 2 accounts or have 2 accounts stake 10 GTC on you. If someone stakes 10 GTC on you and you stake 10 GTC on them, that also qualifies.",
+        name: "ExperiencedCommunityStaker",
+      },
+      {
+        title: "Trusted Citizen",
+        description: "Receive stakes from 5 unique users, each staking a minimum of 20 GTC on you.",
+        name: "TrustedCitizen",
+      },
     ],
   },
 ];
@@ -40,7 +54,7 @@ export const providers: Provider[] = [
   new SelfStakingBronzeProvider(),
   new SelfStakingSilverProvider(),
   new SelfStakingGoldProvider(),
-  new CommunityStakingBronzeProvider(),
-  new CommunityStakingSilverProvider(),
-  new CommunityStakingGoldProvider(),
+  new BeginnerCommunityStakerProvider(),
+  new ExperiencedCommunityStakerProvider(),
+  new TrustedCitizenProvider(),
 ];

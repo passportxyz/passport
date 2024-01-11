@@ -3,6 +3,7 @@ import { JsonRpcSigner } from "@ethersproject/providers";
 export { BrightIdProcedureResponse, BrightIdVerificationResponse, BrightIdSponsorshipResponse } from "./brightid";
 
 import { MultiAttestationRequest } from "@ethereum-attestation-service/eas-sdk";
+import { JWSSignature } from "dids";
 
 // Typing for required parts of DIDKit
 export type DIDKitLib = {
@@ -10,6 +11,13 @@ export type DIDKitLib = {
   issueCredential: (credential: string, proofOptions: string, key: string) => Promise<string>;
   keyToDID: (method_pattern: string, jwk: string) => string;
   keyToVerificationMethod: (method_pattern: string, jwk: string) => Promise<string>;
+  /**
+   * @param {string} credential
+   * @param {string} linked_data_proof_options
+   * @param {string} public_key
+   * @returns {Promise<any>}
+   */
+  prepareIssueCredential(credential: string, linked_data_proof_options: string, public_key: string): Promise<any>;
 } & { [key: string]: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 // rough outline of a VerifiableCredential
@@ -23,6 +31,7 @@ export type VerifiableCredential = {
     provider?: string;
     address?: string;
     challenge?: string;
+    metaPointer?: string;
   };
   issuer: string;
   issuanceDate: string;
@@ -36,10 +45,57 @@ export type VerifiableCredential = {
   };
 };
 
+export type VerifiableEip712Credential = {
+  "@context": string[];
+  type: string[];
+  credentialSubject: {
+    id: string;
+    "@context": { [key: string]: string };
+    hash?: string;
+    provider?: string;
+    address?: string;
+    challenge?: string;
+    metaPointer?: string;
+  };
+  issuer: string;
+  issuanceDate: string;
+  expirationDate: string;
+  proof: {
+    "@context": string;
+    type: string;
+    proofPurpose: string;
+    proofValue: string;
+    verificationMethod: string;
+    created: string;
+    eip712Domain: {
+      domain: {
+        name: string;
+      };
+      primaryType: string;
+      types: {
+        [key: string]: {
+          name: string;
+          type: string;
+        }[];
+      };
+    };
+  };
+};
+
 // A ProviderContext is used as a temporary storage so that providers can can share data
 // between them, in case multiple VCs are requests in one http request
 export type ProviderContext = {
   [key: string]: unknown;
+};
+
+export type SignatureType = "EIP712" | "Ed25519";
+
+export type SignedDidChallenge = {
+  signatures: JWSSignature[];
+  payload: any;
+  cid: number[];
+  cacao: number[];
+  issuer: string;
 };
 
 // values received from client and fed into the verify route
@@ -59,6 +115,7 @@ export type RequestPayload = {
   jsonRpcSigner?: JsonRpcSigner;
   challenge?: string;
   issuer?: string;
+  signatureType?: SignatureType;
 };
 
 // response Object return by verify procedure
@@ -74,10 +131,8 @@ export type ChallengePayload = {
 // response Object return by verify procedure
 export type VerifiedPayload = {
   valid: boolean;
+  // failureReason?: string;
   errors?: string[];
-  // TODO: error should be removed, and errors should be made required
-  // We are currently transitioning providers over to use this scheme
-  error?: string[];
   // This will be combined with the ProofRecord (built from the verified content in the Payload)
   record?: { [k: string]: string };
   expiresInSeconds?: number;
@@ -110,6 +165,7 @@ export type ChallengeRequestBody = {
 export type VerifyRequestBody = {
   challenge: VerifiableCredential;
   payload: RequestPayload;
+  signedChallenge?: SignedDidChallenge;
 };
 
 // IAM HTTP Response body types
@@ -149,6 +205,7 @@ export type Stamp = {
   credential: VerifiableCredential;
 };
 
+// StampPatch should have "provider" mandatory and "credential" optional
 export type StampPatch = Pick<Stamp, "provider"> & Partial<Pick<Stamp, "credential">>;
 
 export type Passport = {
@@ -193,7 +250,8 @@ export type EasPayload = {
 
 export type EasRequestBody = {
   nonce: number;
-  credentials: VerifiableCredential[];
+  recipient: string;
+  credentials?: VerifiableCredential[];
   dbAccessToken: string;
   chainIdHex: string;
 };
@@ -284,7 +342,7 @@ export type PROVIDER_ID =
   | "ZkSyncEra"
   | "Lens"
   | "GnosisSafe"
-  | "Coinbase"
+  | "CoinbaseDualVerification"
   | "GuildMember"
   | "GuildAdmin"
   | "GuildPassportMember"
@@ -324,7 +382,10 @@ export type PROVIDER_ID =
   | "GrantsStack2Programs"
   | "GrantsStack4Programs"
   | "GrantsStack6Programs"
-  | "TrustaLabs";
+  | "TrustaLabs"
+  | "BeginnerCommunityStaker"
+  | "ExperiencedCommunityStaker"
+  | "TrustedCitizen";
 
 export type StampBit = {
   bit: number;

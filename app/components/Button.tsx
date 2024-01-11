@@ -1,7 +1,7 @@
 import React, { ButtonHTMLAttributes, useMemo } from "react";
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "custom";
 };
 
 // Children are centered and spaced out with gap-4.
@@ -11,15 +11,21 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 // e.g. <Button><Icon /><span>Click me</span></Button>
 export const Button = ({ variant, className, ...props }: ButtonProps) => {
   const variantClassName = useMemo(() => {
-    if (variant === "secondary") return "bg-background border border-accent-2 hover:bg-accent-2";
-    else return "bg-accent hover:bg-muted enabled:hover:text-accent";
+    if (variant === "custom") {
+      return "";
+    } else if (variant === "secondary") {
+      return "text-color-1 bg-background border border-foreground-3 hover:border-foreground-4";
+    } else {
+      // primary, default
+      return "text-color-4 bg-gradient-to-r  from-foreground-2 to-foreground-2 hover:to-foreground-4";
+    }
   }, [variant]);
 
   return (
     <button
-      className={`group flex items-center justify-center gap-4 rounded-md px-5 py-2 text-color-1
-        disabled:cursor-not-allowed disabled:bg-accent-2 disabled:brightness-75
-        ${variantClassName} ${className}`}
+      className={`group flex items-center justify-center gap-4 rounded-md px-5 py-2 font-alt text-base text-color-1
+        disabled:cursor-not-allowed disabled:bg-foreground-3 disabled:brightness-75
+        ${variantClassName} focus:border-transparent focus:outline focus:outline-1 focus:outline-focus ${className}`}
       {...props}
     />
   );

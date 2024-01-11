@@ -50,10 +50,10 @@ export const RefreshMyStampsModalContentCard = ({
   }, [checked, accordionExpanded]);
 
   return (
-    <div className="border-t border-accent-2 last:border-b">
+    <div className="border-t border-foreground-6 last:border-b">
       <Accordion allowToggle>
         <AccordionItem padding={0} isDisabled={disableExpand} border="none">
-          <div className="flex items-center gap-4 text-white focus:shadow-none">
+          <div className="flex items-center gap-4 text-color-1 focus:shadow-none">
             <div className="grow">
               <AccordionButton
                 paddingY="16px"
@@ -87,7 +87,7 @@ export const RefreshMyStampsModalContentCard = ({
               }}
             />
           </div>
-          <AccordionPanel borderTop="1px solid var(--color-accent-2)" padding="0">
+          <AccordionPanel borderTop="1px solid rgb(var(--color-foreground-6))" padding="0">
             <RefreshMyStampsSelector
               validPlatformGroups={platformGroups}
               selectedProviders={selectedProviders}

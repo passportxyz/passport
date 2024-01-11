@@ -14,19 +14,21 @@ const stubCivic = (passes: PassesForAddress["passes"]): void => {
   });
 };
 
-const stubCivicError = (error: string): void => {
-  (axios.get as jest.Mock).mockRejectedValue(new Error(error));
-};
-
 const now = Math.floor(Date.now() / 1000);
 
 const userAddress = "0x123";
 const requestPayload = { address: userAddress } as RequestPayload;
 const expirySeconds = 1000;
-const dummyPass = {
+const dummyPass: CivicPassLookupPass = {
   chain: "ETHEREUM_MAINNET",
   expiry: now + expirySeconds,
-} as CivicPassLookupPass;
+  state: "ACTIVE",
+  type: {
+    slotId: 0,
+    address: userAddress,
+  },
+  identifier: "0x456",
+};
 
 describe("Civic Pass Provider", function () {
   beforeEach(() => {
@@ -47,6 +49,51 @@ describe("Civic Pass Provider", function () {
 
     expect(verifiedPayload).toMatchObject({
       valid: false,
+      record: undefined,
+      errors: ["You do not have a UNIQUENESS pass."],
+    });
+  });
+
+  it("should return detailed error for an expired pass", async () => {
+    const expiredPass = { ...dummyPass, expiry: now - 1 };
+
+    stubCivic({
+      UNIQUENESS: [expiredPass],
+    });
+
+    const civic = new CivicPassProvider({
+      type: "uniqueness",
+      passType: CivicPassType.UNIQUENESS,
+    });
+
+    const verifiedPayload = await civic.verify(requestPayload);
+
+    expect(verifiedPayload).toMatchObject({
+      valid: false,
+      record: undefined,
+      errors: ["Your UNIQUENESS pass is expired."],
+    });
+  });
+
+  it("should return detailed error for a revoked pass", async () => {
+    const revokedPass = { ...dummyPass };
+    revokedPass.state = "REVOKED";
+
+    stubCivic({
+      UNIQUENESS: [revokedPass],
+    });
+
+    const civic = new CivicPassProvider({
+      type: "uniqueness",
+      passType: CivicPassType.UNIQUENESS,
+    });
+
+    const verifiedPayload = await civic.verify(requestPayload);
+
+    expect(verifiedPayload).toMatchObject({
+      valid: false,
+      record: undefined,
+      errors: ["Your UNIQUENESS pass is frozen or revoked."],
     });
   });
 
@@ -62,6 +109,7 @@ describe("Civic Pass Provider", function () {
 
     expect(verifiedPayload).toMatchObject({
       valid: true,
+      record: { address: userAddress },
     });
   });
 
@@ -77,21 +125,6 @@ describe("Civic Pass Provider", function () {
 
     const margin = 3;
     expect(verifiedPayload.expiresInSeconds).toBeGreaterThan(expirySeconds - margin);
-  });
-
-  it("should populate the error array if an error is thrown while checking any pass", async () => {
-    const errorString = "some error";
-    stubCivicError(errorString);
-    const civic = new CivicPassProvider({
-      type: "uniqueness",
-      passType: CivicPassType.UNIQUENESS,
-    });
-    const verifiedPayload = await civic.verify(requestPayload);
-
-    expect(verifiedPayload).toMatchObject({
-      valid: false,
-      error: [errorString],
-    });
   });
 
   it("should return the pass details if a pass is found", async () => {

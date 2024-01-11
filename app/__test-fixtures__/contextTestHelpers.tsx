@@ -1,36 +1,17 @@
-import { UserContext, UserContextState } from "../context/userContext";
-import { CeramicContext, CeramicContextState, IsLoadingPassportState } from "../context/ceramicContext";
+import { ScorerContext, ScorerContextState } from "../context/scorerContext";
+import { CeramicContext, CeramicContextState, IsLoadingPassportState, platforms } from "../context/ceramicContext";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
-import { mockAddress, mockWallet } from "./onboardHookValues";
 import React from "react";
 import { render } from "@testing-library/react";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
 import { OnChainContextState } from "../context/onChainContext";
-
-jest.mock("@didtools/cacao", () => ({
-  Cacao: {
-    fromBlockBytes: jest.fn(),
-  },
-}));
-
-export const makeTestUserContext = (initialState?: Partial<UserContextState>): UserContextState => {
-  return {
-    loggedIn: true,
-    loggingIn: false,
-    toggleConnection: jest.fn(),
-    handleDisconnection: jest.fn(),
-    address: mockAddress,
-    wallet: mockWallet,
-    signer: undefined,
-    walletLabel: mockWallet.label,
-    dbAccessToken: "token",
-    dbAccessTokenStatus: "idle",
-    userWarning: undefined,
-    setUserWarning: jest.fn(),
-    ...initialState,
-  };
-};
+import { StampClaimingContextState, StampClaimProgressStatus } from "../context/stampClaimingContext";
+import {
+  DatastoreConnectionContext,
+  DatastoreConnectionContextState,
+  DbAuthTokenStatus,
+} from "../context/datastoreConnectionContext";
 
 export const getProviderSpec = (platform: PLATFORM_ID, provider: string): ProviderSpec => {
   return STAMP_PROVIDERS[platform]
@@ -63,14 +44,6 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
       },
       POAP: {
         providerSpec: getProviderSpec("POAP", "POAP"),
-        stamp: undefined,
-      },
-      Facebook: {
-        providerSpec: getProviderSpec("Facebook", "Facebook"),
-        stamp: undefined,
-      },
-      FacebookProfilePicture: {
-        providerSpec: getProviderSpec("Facebook", "FacebookProfilePicture"),
         stamp: undefined,
       },
       Brightid: {
@@ -125,8 +98,8 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGr14ContributionsGte#1"),
         stamp: undefined,
       },
-      Coinbase: {
-        providerSpec: getProviderSpec("Coinbase", "Coinbase"),
+      CoinbaseDualVerification: {
+        providerSpec: getProviderSpec("Coinbase", "CoinbaseDualVerification"),
         stamp: undefined,
       },
     },
@@ -135,23 +108,137 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
     handlePatchStamps: jest.fn(),
     handleCreatePassport: jest.fn(),
     handleDeleteStamps: jest.fn(),
-    handleCheckRefreshPassport: () => Promise.resolve(true),
     expiredProviders: [],
+    expiredPlatforms: {},
     passportHasCacaoError: false,
     cancelCeramicConnection: jest.fn(),
+    verifiedProviderIds: [],
+    verifiedPlatforms: {},
     ...initialState,
   };
 };
 
+export const makeTestCeramicContextWithExpiredStamps = (
+  initialState?: Partial<CeramicContextState>
+): CeramicContextState => {
+  let expiredPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>> = {};
+
+  const ethPlatform = platforms.get("ETH");
+
+  if (ethPlatform) {
+    expiredPlatforms["ETH"] = {
+      platform: ethPlatform.platform,
+      platFormGroupSpec: ethPlatform.platFormGroupSpec,
+    };
+  }
+
+  return {
+    ...makeTestCeramicContext(initialState),
+    expiredPlatforms,
+    expiredProviders: ["ethPossessionsGte#1"],
+  };
+};
+
+export const makeTestClaimingContext = (
+  initialState?: Partial<StampClaimingContextState>
+): StampClaimingContextState => {
+  return {
+    claimCredentials: jest.fn(),
+    status: StampClaimProgressStatus.Idle,
+    ...initialState,
+  };
+};
+
+export const scorerContext = {
+  scoredPlatforms: [
+    {
+      icon: "./assets/gtcStakingLogoIcon.svg",
+      platform: "GtcStaking",
+      name: "GTC Staking",
+      description: "Connect to passport to verify your staking amount.",
+      connectMessage: "Verify amount",
+      isEVM: true,
+      possiblePoints: 7.4399999999999995,
+      earnedPoints: 0,
+    },
+    {
+      icon: "./assets/gtcGrantsLightIcon.svg",
+      platform: "Gitcoin",
+      name: "Gitcoin",
+      description: "Connect with Github to verify with your Gitcoin account.",
+      connectMessage: "Connect Account",
+      isEVM: true,
+      possiblePoints: 12.93,
+      earnedPoints: 0,
+    },
+    {
+      icon: "./assets/twitterStampIcon.svg",
+      platform: "Twitter",
+      name: "Twitter",
+      description: "Connect your existing Twitter account to verify.",
+      connectMessage: "Connect Account",
+      possiblePoints: 3.63,
+      earnedPoints: 3.63,
+    },
+    {
+      icon: "./assets/discordStampIcon.svg",
+      platform: "Discord",
+      name: "Discord",
+      description: "Connect your existing Discord account to verify.",
+      connectMessage: "Connect Account",
+      possiblePoints: 0.689,
+      earnedPoints: 0,
+    },
+    {
+      icon: "./assets/googleStampIcon.svg",
+      platform: "Google",
+      name: "Google",
+      description: "Connect your existing Google Account to verify",
+      connectMessage: "Connect Account",
+      possiblePoints: 2.25,
+      earnedPoints: 1,
+    },
+  ],
+  rawScore: 0,
+} as unknown as ScorerContextState;
+
+export const createWalletStoreMock = () => {
+  const mockConnect = jest.fn();
+
+  const mockWalletState = {
+    address: "0x123",
+    connect: mockConnect,
+  };
+
+  const walletStoreLibraryMock = {
+    useWalletStore: (callback: (state: any) => any) => callback(mockWalletState),
+  };
+
+  return {
+    walletStoreLibraryMock,
+    mockConnect,
+  };
+};
+
+const datastoreConnectionContext = {
+  connect: jest.fn(),
+  disconnect: jest.fn(),
+  dbAccessToken: "token",
+  dbAccessTokenStatus: "idle" as DbAuthTokenStatus,
+  did: jest.fn() as any,
+};
+
 export const renderWithContext = (
-  userContext: UserContextState,
   ceramicContext: CeramicContextState,
-  ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>
+  ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>,
+  datastoreContextOverride: Partial<DatastoreConnectionContextState> = {}
 ) =>
   render(
-    <UserContext.Provider value={userContext}>
-      <CeramicContext.Provider value={ceramicContext}>{ui}</CeramicContext.Provider>
-    </UserContext.Provider>
+    <DatastoreConnectionContext.Provider value={{ ...datastoreConnectionContext, ...datastoreContextOverride }}>
+      <ScorerContext.Provider value={scorerContext}>
+        <CeramicContext.Provider value={ceramicContext}>{ui}</CeramicContext.Provider>
+      </ScorerContext.Provider>
+    </DatastoreConnectionContext.Provider>
   );
 
 export const testOnChainContextState = (initialState?: Partial<OnChainContextState>): OnChainContextState => {

@@ -1,19 +1,11 @@
 import React from "react";
-import { screen, waitFor, fireEvent, render } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, fireEvent } from "@testing-library/react";
 import Welcome from "../../pages/Welcome";
-import { UserContextState } from "../../context/userContext";
 import { HashRouter as Router } from "react-router-dom";
 import * as framework from "@self.id/framework";
-import {
-  makeTestCeramicContext,
-  makeTestUserContext,
-  renderWithContext,
-} from "../../__test-fixtures__/contextTestHelpers";
+import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
 import { Stamp } from "@gitcoin/passport-types";
-
-jest.mock("../../utils/onboard.ts");
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -27,7 +19,6 @@ jest.mock("@self.id/framework", () => {
   };
 });
 
-const mockUserContext: UserContextState = makeTestUserContext();
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 const ceramicWithPassport = {
@@ -57,18 +48,18 @@ beforeEach(() => {
 describe("Welcome", () => {
   it("renders the page", () => {
     renderWithContext(
-      mockUserContext,
       ceramicWithPassport,
       <Router>
         <Welcome />
-      </Router>
+      </Router>,
+      { dbAccessTokenStatus: "connected" }
     );
 
-    expect(screen.getByText("Welcome Back!")).toBeInTheDocument();
-    expect(screen.getByText("One-Click Verification")).toBeInTheDocument();
+    expect(screen.getByText("Welcome back to Passport")).toBeInTheDocument();
+    expect(screen.getByText("Privacy-First Verification")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "You can now verify most web3 stamps and return to your destination faster with one-click verification!"
+        'Passport helps you collect "stamps" that prove your humanity and reputation. You decide what stamps are shown. And your privacy is protected at each step of the way.'
       )
     ).toBeInTheDocument();
   });
@@ -77,11 +68,11 @@ describe("Welcome", () => {
 describe("when the user is navigated to the Welcome page", () => {
   it("should render the Skip for Now button", () => {
     renderWithContext(
-      mockUserContext,
       ceramicWithPassport,
       <Router>
         <Welcome />
-      </Router>
+      </Router>,
+      { dbAccessTokenStatus: "connected" }
     );
 
     expect(screen.getByTestId("skip-for-now-button"));
@@ -89,14 +80,14 @@ describe("when the user is navigated to the Welcome page", () => {
 
   it("should render the Refresh My Stamps button", () => {
     renderWithContext(
-      mockUserContext,
       ceramicWithPassport,
       <Router>
         <Welcome />
-      </Router>
+      </Router>,
+      { dbAccessTokenStatus: "connected" }
     );
 
-    expect(screen.getByTestId("refresh-my-stamps-button"));
+    expect(screen.getByTestId("next-button"));
   });
 });
 
@@ -109,7 +100,6 @@ describe("when the user is navigated to the Welcome page", () => {
 //       useNavigate: () => jest.fn(),
 //     }));
 //     // renderWithContext(
-//     //   mockUserContext,
 //     //   mockCeramicContext,
 //     //   <Router>
 //     //     <Welcome />
@@ -129,14 +119,14 @@ describe("when the user is navigated to the Welcome page", () => {
 describe("when the user clicks the Refresh My Stamps button it launches the Refresh My Stamps modal", () => {
   it("should render the refresh stamps modal", () => {
     renderWithContext(
-      mockUserContext,
       ceramicWithPassport,
       <Router>
         <Welcome />
-      </Router>
+      </Router>,
+      { dbAccessTokenStatus: "connected" }
     );
 
-    const buttonRefreshMyStampsModal = screen.queryByTestId("refresh-my-stamps-button");
+    const buttonRefreshMyStampsModal = screen.queryByTestId("next-button");
 
     fireEvent.click(buttonRefreshMyStampsModal!);
 
@@ -150,11 +140,11 @@ describe("when the user clicks the Refresh My Stamps button it launches the Refr
 describe("when a new use visits the Welcome page", () => {
   it("should render the Skip for Now button", () => {
     renderWithContext(
-      mockUserContext,
       { ...mockCeramicContext, passport: undefined },
       <Router>
         <Welcome />
-      </Router>
+      </Router>,
+      { dbAccessTokenStatus: "connected" }
     );
 
     expect(screen.getByTestId("initial-welcome")).toBeInTheDocument();

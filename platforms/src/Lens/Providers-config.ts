@@ -5,9 +5,10 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/lensWhiteStampIcon.svg",
   platform: "Lens",
   name: "Lens",
-  description: "Lens Profile Verification",
+  description: "Connect to Lens to verify your social media presence on Web3.",
   connectMessage: "Verify Account",
   isEVM: true,
+  website: "https://lens.xyz/",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

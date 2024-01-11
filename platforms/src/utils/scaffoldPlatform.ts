@@ -59,6 +59,7 @@ const structure: FileStructure = {
     name: "${providerName}",
     description: "Connect your existing ${providerName} Account to verify",
     connectMessage: "Connect Account",
+    website: "${providerName} website",
   };
 
   export const ProviderConfig: PlatformGroupSpec[] = [

@@ -6,10 +6,10 @@ import {
   MultiAttestationRequest,
   AttestationRequestData,
 } from "@ethereum-attestation-service/eas-sdk";
-import onchainInfo from "../../../deployments/onchainInfo.json";
+import onchainInfo from "../../../deployments/onchainInfo.json" assert { type: "json" };
 import { VerifiableCredential } from "@gitcoin/passport-types";
 
-import { fetchPassportScore } from "./scorerService";
+import { fetchPassportScore } from "./scorerService.js";
 
 const attestationSchemaEncoder = new SchemaEncoder("bytes32 provider, bytes32 hash");
 

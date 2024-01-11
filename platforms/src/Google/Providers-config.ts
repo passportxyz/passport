@@ -5,8 +5,9 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/googleStampIcon.svg",
   platform: "Google",
   name: "Google",
-  description: "Connect your existing Google Account to verify",
+  description: "Connect to Google to verify your email address.",
   connectMessage: "Connect Account",
+  website: "https://www.google.com/",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

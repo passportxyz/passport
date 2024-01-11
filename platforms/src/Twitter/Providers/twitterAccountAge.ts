@@ -29,7 +29,7 @@ const checkTwitterAccountAge = (numberOfDays: number, createdAt: string): { vali
   if (diffDays >= numberOfDays) {
     return {
       valid: true,
-      errors: [],
+      errors: undefined,
     };
   } else {
     return {

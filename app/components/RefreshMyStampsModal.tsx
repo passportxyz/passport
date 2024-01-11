@@ -11,6 +11,7 @@ export type RefreshMyStampsModalProps = {
   steps: Step[];
   validPlatforms: ValidatedPlatform[] | undefined;
   resetStampsAndProgressState: () => void;
+  dashboardCustomizationKey: string | null;
 };
 
 export const RefreshMyStampsModal = ({
@@ -19,6 +20,7 @@ export const RefreshMyStampsModal = ({
   steps,
   validPlatforms,
   resetStampsAndProgressState,
+  dashboardCustomizationKey,
 }: RefreshMyStampsModalProps) => {
   return (
     <>
@@ -38,16 +40,17 @@ export const RefreshMyStampsModal = ({
                 onClose={onClose}
                 validPlatforms={validPlatforms}
                 resetStampsAndProgressState={resetStampsAndProgressState}
+                dashboardCustomizationKey={dashboardCustomizationKey}
               />
             </>
           ) : (
             <div className="p-4 md:p-6">
               <div className="font-heading text-3xl text-color-1">Searching for Stamps</div>
-              <div className="mt-2 font-alt text-color-3">
+              <div className="mt-2 font-alt text-color-2">
                 Give us a moment while we check your account for existing Stamps.
               </div>
               <RefreshStampsProgressSteps steps={steps} />
-              <div className="text-center text-color-3">Please do not close the window.</div>
+              <div className="text-center text-color-2">Please do not close the window.</div>
             </div>
           )}
         </ModalContent>

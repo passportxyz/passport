@@ -7,8 +7,40 @@ import { BigNumber } from "ethers";
 import { NO_EXPIRATION, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";
 
 jest.mock("../src/utils/scorerService", () => ({
-  fetchPassportScore: jest.fn(),
+  fetchPassportScore: jest.fn().mockImplementation(() => {
+    return Promise.resolve({
+      score: 10,
+      scorer_id: 335,
+    });
+  }),
 }));
+
+// Prepare a mock stamp
+const mockStamp = {
+  name: "mockProvider",
+  index: 0,
+  bit: 1,
+};
+
+const mockStamp1 = {
+  name: "mockProvider1",
+  index: 1,
+  bit: 0,
+};
+
+jest.mock("../src/static/providerBitMapInfo.json", () => [
+  {
+    name: "mockProvider",
+    index: 0,
+    bit: 1,
+  },
+
+  {
+    name: "mockProvider1",
+    index: 1,
+    bit: 0,
+  },
+]);
 
 const defaultRequestData = {
   recipient: "0x123",
@@ -18,11 +50,8 @@ const defaultRequestData = {
   value: 0,
 };
 
-describe("formatMultiAttestationRequest", () => {
-  it("should return formatted attestation request", async () => {
-    jest.spyOn(easPassportModule, "encodeEasPassport").mockReturnValue("0x00000000000000000000000");
-    jest.spyOn(easStampModule, "encodeEasScore").mockReturnValue("0x00000000000000000000000");
-
+describe("formatMultiAttestationRequestWithPassportAndScore", () => {
+  it("should return formatted attestation request containing passport and score attestations", async () => {
     const validatedCredentials = [
       {
         credential: {
@@ -51,7 +80,11 @@ describe("formatMultiAttestationRequest", () => {
     const recipient = "0x123";
 
     const chainIdHex = "0x14a33";
-    const result = await easPassportModule.formatMultiAttestationRequest(validatedCredentials, recipient, chainIdHex);
+    const result = await easPassportModule.formatMultiAttestationRequestWithPassportAndScore(
+      validatedCredentials,
+      recipient,
+      chainIdHex
+    );
     const scoreSchema = onchainInfo[chainIdHex].easSchemas.score.uid;
     const passportSchema = onchainInfo[chainIdHex].easSchemas.passport.uid;
 
@@ -61,10 +94,33 @@ describe("formatMultiAttestationRequest", () => {
         data: [
           {
             ...defaultRequestData,
-            data: "0x00000000000000000000000",
+            data: expect.any(String),
           },
         ],
       },
+      {
+        schema: scoreSchema,
+        data: [
+          {
+            ...defaultRequestData,
+            data: expect.any(String),
+          },
+        ],
+      },
+    ]);
+  });
+});
+
+describe("formatMultiAttestationRequestWithScore", () => {
+  it("should return formatted attestation request containing passport and score attestations", async () => {
+    jest.spyOn(easStampModule, "encodeEasScore").mockReturnValue("0x00000000000000000000000");
+
+    const recipient = "0x123";
+    const chainIdHex = "0x14a33";
+    const result = await easPassportModule.formatMultiAttestationRequestWithScore(recipient, chainIdHex);
+    const scoreSchema = onchainInfo[chainIdHex].easSchemas.score.uid;
+
+    expect(result).toEqual([
       {
         schema: scoreSchema,
         data: [
@@ -102,20 +158,7 @@ describe("formatPassportAttestationData", () => {
       },
     };
 
-    // Prepare a mock stamp
-    const mockStamp = {
-      name: "mockProvider",
-      index: 0,
-      bit: 1,
-    };
-
-    const passportAttestationStampMap: Map<string, easPassportModule.PassportAttestationStamp> = new Map();
-
-    passportAttestationStampMap.set(mockCredential.credentialSubject.provider, mockStamp);
-
-    jest.spyOn(easPassportModule, "buildProviderBitMap").mockReturnValue(passportAttestationStampMap);
-
-    const result: easPassportModule.PassportAttestationData = await easPassportModule.formatPassportAttestationData([
+    const result: easPassportModule.PassportAttestationData = easPassportModule.formatPassportAttestationData([
       mockCredential,
     ]);
 
@@ -132,6 +175,7 @@ describe("formatPassportAttestationData", () => {
       stampInfo: mockStamp,
     });
   });
+
   it("should return multiple provider bitmaps/bns if index exceeds range", async () => {
     // Prepare a mock credential
     const mockCredential = {
@@ -154,28 +198,7 @@ describe("formatPassportAttestationData", () => {
       expirationDate: "2023-12-31T23:59:59.999Z",
     } as unknown as VerifiableCredential;
 
-    // Prepare a mock stamp
-    const mockStamp = {
-      name: "mockProvider",
-      index: 0,
-      bit: 1,
-    };
-
-    const mockStamp1 = {
-      name: "mockProvider1",
-      index: 1,
-      bit: 0,
-    };
-
-    const passportAttestationStampMap: Map<string, easPassportModule.PassportAttestationStamp> = new Map();
-
-    // Add the mock stamps to the map
-    passportAttestationStampMap.set(mockCredential.credentialSubject.provider, mockStamp);
-    passportAttestationStampMap.set(mockCredential1.credentialSubject.provider, mockStamp1);
-
-    jest.spyOn(easPassportModule, "buildProviderBitMap").mockReturnValue(passportAttestationStampMap);
-
-    const result: easPassportModule.PassportAttestationData = await easPassportModule.formatPassportAttestationData([
+    const result: easPassportModule.PassportAttestationData = easPassportModule.formatPassportAttestationData([
       mockCredential,
       mockCredential1,
     ]);

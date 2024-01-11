@@ -1,7 +1,10 @@
+// ----- Types
 import type { Provider } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { CivicPassType } from "./types";
-import { errorToString, findAllPasses, latestExpiry, secondsFromNow } from "./util";
+
+// ----- Utils
+import { findAllPasses, latestExpiry, secondsFromNow, getNowAsBigNumberSeconds } from "./util";
 
 // If the environment variable INCLUDE_TESTNETS is set to true,
 // then passes on testnets will be included in the verification by default.
@@ -35,28 +38,34 @@ export class CivicPassProvider implements Provider {
 
   // Verify that address defined in the payload has a civic pass
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    // if a signer is provider we will use that address to verify against
     const address = payload.address.toString().toLowerCase();
-    try {
-      const allPasses = await findAllPasses(address, this.includeTestnets, [this.passType]);
-      const valid = allPasses.length > 0;
-      const expiry = valid ? secondsFromNow(latestExpiry(allPasses)) : undefined;
+    const now = getNowAsBigNumberSeconds();
+    let errors, record, expiresInSeconds;
+    let valid = false;
 
-      return {
-        valid,
-        expiresInSeconds: expiry,
-        record: valid
-          ? {
-              address: address,
-            }
-          : {},
-      };
-    } catch (e) {
-      return {
-        valid: false,
-        error: [errorToString(e)],
-        record: {},
-      };
+    const allPasses = await findAllPasses(address, this.includeTestnets, [this.passType]);
+    const activePasses = allPasses.filter(({ state }) => state === "ACTIVE");
+    const validPasses = activePasses.filter(({ expiry }) => expiry.gt(now));
+
+    if (allPasses.length === 0) {
+      errors = [`You do not have a ${CivicPassType[this.passType]} pass.`];
+    } else if (activePasses.length === 0) {
+      errors = [
+        `Your ${CivicPassType[this.passType]} pass${allPasses.length > 1 ? "es are" : " is"} frozen or revoked.`,
+      ];
+    } else if (validPasses.length === 0) {
+      errors = [`Your ${CivicPassType[this.passType]} pass${activePasses.length > 1 ? "es are" : " is"} expired.`];
+    } else {
+      record = { address };
+      valid = true;
+      expiresInSeconds = secondsFromNow(latestExpiry(validPasses));
     }
+
+    return {
+      valid,
+      errors,
+      expiresInSeconds,
+      record,
+    };
   }
 }

@@ -35,12 +35,12 @@ interface AxiosResponse {
 
 const TRUSTA_LABS_API_ENDPOINT = "https://www.trustalabs.ai/service/openapi/queryRiskSummaryScore";
 
-const createUpdateDBScore = async (address: string, score: number) => {
+const createUpdateDBScoreData = async (address: string, scoreData: TrustaLabsData) => {
   const accessToken = process.env.CGRANTS_API_TOKEN;
   try {
     await axios.post(
       `${process.env.PASSPORT_SCORER_BACKEND}trusta_labs/trusta-labs-score`,
-      { address, score },
+      { address, scoreData },
       {
         headers: {
           Authorization: accessToken,
@@ -52,10 +52,10 @@ const createUpdateDBScore = async (address: string, score: number) => {
   }
 };
 
-const makeSybilScoreRequest = async (address: string) => {
+const makeSybilScoreRequest = async (address: string): Promise<AxiosResponse> => {
   const accessToken = process.env.TRUSTA_LABS_ACCESS_TOKEN;
   try {
-    const result: AxiosResponse = await axios.post(
+    return await axios.post(
       TRUSTA_LABS_API_ENDPOINT,
       {
         address,
@@ -67,15 +67,17 @@ const makeSybilScoreRequest = async (address: string) => {
         },
       }
     );
-    return result.data.data.sybilRiskScore;
   } catch (error) {
     handleProviderAxiosError(error, "sybil score", [accessToken]);
   }
 };
 
 const verifyTrustaLabsRiskScore = async (address: string): Promise<{ valid: boolean; errors: string[] }> => {
-  const sybilRiskScore = await makeSybilScoreRequest(address);
-  await createUpdateDBScore(address, sybilRiskScore);
+  const sybilRiskResponse = await makeSybilScoreRequest(address);
+  const sybilScoreData = sybilRiskResponse.data.data;
+  await createUpdateDBScoreData(address, sybilScoreData);
+
+  const { sybilRiskScore } = sybilScoreData;
 
   const lowerBound = -1;
   const upperBound = 60;

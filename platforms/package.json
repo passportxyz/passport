@@ -3,6 +3,20 @@
   "version": "1.0.0",
   "license": "MIT",
   "main": "dist/commonjs/index.js",
+  "exports": {
+    ".": "./dist/commonjs/index.js",
+    "./procedure-router": "./dist/commonjs/procedure-router.js"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/commonjs/index.d.ts"
+      ],
+      "procedure-router": [
+        "./dist/commonjs/procedure-router.d.ts"
+      ]
+    }
+  },
   "directories": {
     "src": "src",
     "dist": "dist"
@@ -20,6 +34,10 @@
     "@gitcoin/passport-types": "^1.0.0",
     "@spruceid/didkit-wasm": "^0.3.0-alpha0",
     "axios": "^0.26.1",
+    "bignumber.js": "4.0.4",
+    "cid": "multiformats/cid",
+    "multiformats": "9",
+    "redis": "^4.6.10",
     "typescript": "~4.6.3"
   },
   "devDependencies": {

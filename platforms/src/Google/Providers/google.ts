@@ -4,9 +4,8 @@
 
 // ----- Types
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import { getErrorString, ProviderError } from "../../utils/errors";
-import { getAddress } from "../../utils/signer";
 import axios from "axios";
 
 // Checking a valid tokenId for a result from Google will result in the following type
@@ -45,16 +44,27 @@ export class GoogleProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    const address = (await getAddress(payload)).toLowerCase();
+    let record = undefined,
+      errors = [];
     const verifiedPayload = await verifyGoogle(payload.proofs.code);
     const valid = !verifiedPayload.errors && verifiedPayload.emailVerified;
-    console.log("google - verify - verifiedPayload", address, JSON.stringify(verifiedPayload));
-    return {
-      valid: valid,
-      error: verifiedPayload.errors,
-      record: {
+
+    if (valid) {
+      record = {
         email: verifiedPayload.email,
-      },
+      };
+    } else {
+      errors.push("We couldn't verify the Google email you attempted to authorize with.");
+    }
+
+    if (verifiedPayload.errors) {
+      errors = verifiedPayload.errors;
+    }
+
+    return {
+      valid,
+      errors,
+      record,
     };
   }
 }
@@ -77,18 +87,12 @@ export const requestAccessToken = async (code: string): Promise<string> => {
     );
 
     const tokenResponse = tokenRequest.data as GoogleTokenResponse;
-    console.log(
-      "google - tokenRequest.statusText, tokenRequest.status, tokenRequest.data",
-      tokenRequest.statusText,
-      tokenRequest.status,
-      JSON.stringify(tokenRequest.data)
-    );
+
     return tokenResponse.access_token;
   } catch (_error) {
     const error = _error as ProviderError;
     const errorString = getErrorString(error);
-    console.log(errorString);
-    throw new Error(errorString);
+    throw new ProviderExternalVerificationError(errorString);
   }
 };
 
@@ -103,14 +107,7 @@ export const verifyGoogle = async (code: string): Promise<UserInfo> => {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
-    console.log(
-      "google - userRequest.statusText, userRequest.status, userRequest.data",
-      userRequest.statusText,
-      userRequest.status,
-      JSON.stringify(userRequest.data)
-    );
     const userInfo: GoogleUserInfo = userRequest.data as GoogleUserInfo;
-    console.log("google - userInfo", JSON.stringify(userInfo));
 
     return {
       email: userInfo?.email,
@@ -118,9 +115,6 @@ export const verifyGoogle = async (code: string): Promise<UserInfo> => {
     };
   } catch (_error) {
     const error = _error as ProviderError;
-    const errorString = getErrorString(error);
-    console.log(errorString);
-
     return {
       errors: [
         "Error getting user info",

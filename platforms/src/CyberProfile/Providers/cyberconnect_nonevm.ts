@@ -1,9 +1,10 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 export const cyberconnectGraphQL = "https://api.cyberconnect.dev/";
 
@@ -25,7 +26,7 @@ interface CheckOrgMemberResponse {
 export const checkForOrgMember = async (
   url: string,
   address: string
-): Promise<{ isMember: boolean; identifier: string }> => {
+): Promise<{ isMember: boolean; identifier: string; error?: string }> => {
   let isMember = false;
   let identifier = "";
   let result: CheckOrgMemberResponse;
@@ -44,19 +45,20 @@ export const checkForOrgMember = async (
           }
         }`,
     });
-    if (result.data.errors) {
-      throw result.data.errors[0].message;
-    }
+    isMember = result.data.data.checkVerifiedOrganizationMember.isVerifiedOrganizationMember;
+    identifier = result.data.data.checkVerifiedOrganizationMember.uniqueIdentifier;
+    return {
+      isMember,
+      identifier,
+    };
   } catch (e: unknown) {
-    throw `The following error is being thrown: ${JSON.stringify(e)}`;
+    handleProviderAxiosError(e, "cyberconnect org member check", [address]);
+    return {
+      isMember: false,
+      identifier: "",
+      error: result?.data?.errors[0]?.message || "An unknown error occurred",
+    };
   }
-
-  isMember = result.data.data.checkVerifiedOrganizationMember.isVerifiedOrganizationMember;
-  identifier = result.data.data.checkVerifiedOrganizationMember.uniqueIdentifier;
-  return {
-    isMember,
-    identifier,
-  };
 };
 
 // Export a CyberProfileOrgMemberProvider
@@ -75,24 +77,37 @@ export class CyberProfileOrgMemberProvider implements Provider {
   // Verify that address defined in the payload has a handle length > 12
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
-    const address = payload.address.toString().toLowerCase();
-    let valid = false;
+    const errors = [];
+    let valid = false,
+      record = {};
+
     try {
-      const { isMember, identifier } = await checkForOrgMember(cyberconnectGraphQL, address);
+      const address = payload.address.toString().toLowerCase();
+      const { isMember, identifier, error } = await checkForOrgMember(cyberconnectGraphQL, address);
+
       valid = isMember ? true : false;
+
+      if (valid === true) {
+        record = {
+          orgMembership: identifier,
+        };
+      } else {
+        errors.push("We determined that you are not a member of CyberConnect, which disqualifies you for this stamp.");
+      }
+
+      if (!valid && error) {
+        errors.push(error);
+      }
+
       return Promise.resolve({
-        valid: valid,
-        record: valid
-          ? {
-              orgMembership: identifier,
-            }
-          : {},
+        valid,
+        record,
+        errors,
       });
-    } catch (e) {
-      return {
-        valid: false,
-        error: ["CyberProfile provider check organization membership error"],
-      };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(
+        `CyberProfile provider check organization membership error: ${JSON.stringify(e)}`
+      );
     }
   }
 }

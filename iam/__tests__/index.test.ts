@@ -1,20 +1,10 @@
 // ---- Testing libraries
 import request from "supertest";
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-
-// --- Mocks - test configuration
-
-process.env.IAM_JWK = DIDKit.generateEd25519Key();
-process.env.ATTESTATION_SIGNER_PRIVATE_KEY = "0x04d16281ff3bf268b29cdd684183f72542757d24ae9fdfb863e7c755e599163a";
-process.env.ALLO_SCORER_ID = "1";
-process.env.SCORER_ENDPOINT = "http://127.0.0.1:8002";
-process.env.SCORER_API_KEY = "abcd";
-process.env.MORALIS_API_KEY = "abcd";
-process.env.EAS_GITCOIN_STAMP_SCHEMA = "0x";
+import { PassportCache, providers } from "@gitcoin/passport-platforms";
 
 // ---- Test subject
 import { app, config, getAttestationDomainSeparator } from "../src/index";
-import { providers } from "@gitcoin/passport-platforms";
 
 // ---- Types
 import {
@@ -23,6 +13,7 @@ import {
   RequestPayload,
   ValidResponseBody,
   VerifiableCredential,
+  VerifiableEip712Credential,
   VerifiedPayload,
 } from "@gitcoin/passport-types";
 
@@ -30,10 +21,16 @@ import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-
 
 import { utils } from "ethers";
 import * as easFeesMock from "../src/utils/easFees";
-import * as identityMock from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import * as identityMock from "@gitcoin/passport-identity";
 import * as easSchemaMock from "../src/utils/easStampSchema";
 import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
 import { IAMError } from "../src/utils/scorerService";
+import { VerifyDidChallengeBaseError, verifyDidChallenge } from "../src/utils/verifyDidChallenge";
+
+jest.mock("../src/utils/verifyDidChallenge", () => ({
+  verifyDidChallenge: jest.fn().mockImplementation(() => "0x0"),
+  VerifyDidChallengeBaseError: jest.requireActual("../src/utils/verifyDidChallenge").VerifyDidChallengeBaseError,
+}));
 
 jest.mock("ethers", () => {
   const originalModule = jest.requireActual("ethers");
@@ -106,6 +103,29 @@ describe("POST /challenge", function () {
     expect((response.body as ValidResponseBody)?.credential?.credentialSubject?.id).toEqual(expectedId);
   });
 
+  it("handles valid challenge request with signatureType", async () => {
+    // as each signature is unique, each request results in unique output
+    const payload = {
+      type: "Simple",
+      address: "0x0",
+      signatureType: "EIP712",
+    };
+
+    // check that ID matches the payload (this has been mocked)
+    const expectedId = "did:pkh:eip155:1:0x0";
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/challenge")
+      .send({ payload })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    // expect the mocked credential to be returned and contain the expectedId
+    expect((response.body as ValidResponseBody)?.credential?.credentialSubject?.id).toEqual(expectedId);
+  });
+
   it("handles missing address from the challenge request body", async () => {
     // as each signature is unique, each request results in unique output
     const payload = {
@@ -157,7 +177,16 @@ describe("POST /challenge", function () {
 });
 
 describe("POST /verify", function () {
-  it("handles valid challenge requests", async () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("handles valid wallet-signed challenge requests", async () => {
+    // Mock the did-session method to throw an error, to ensure we're not calling it
+    (verifyDidChallenge as jest.Mock).mockImplementation(() => {
+      throw new VerifyDidChallengeBaseError("Verification failed, challenge mismatch");
+    });
+
     // challenge received from the challenge endpoint
     const challenge = {
       issuer: config.issuer,
@@ -179,8 +208,148 @@ describe("POST /verify", function () {
       },
     };
 
-    // resolve the verification
-    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+    // check that ID matches the payload (this has been mocked)
+    const expectedId = "did:pkh:eip155:1:0x0";
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/verify")
+      .send({ challenge, payload })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    // check for an id match on the mocked credential
+    expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
+  });
+
+  it("handles valid did-session signed challenge requests", async () => {
+    (verifyDidChallenge as jest.Mock).mockImplementationOnce(() => {
+      return "0x123456";
+    });
+
+    // challenge received from the challenge endpoint
+    const challenge = {
+      issuer: config.issuer,
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0x0",
+        provider: "challenge-Simple",
+        address: "0x123456",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+
+    // payload containing a signature of the challenge in the challenge credential
+    const payload = {
+      type: "Simple",
+      address: "0x0",
+      proofs: {
+        valid: "true",
+        username: "test",
+      },
+    };
+
+    const signedChallenge = {
+      signatures: [
+        {
+          protected: "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ",
+          signature: "0x0",
+        },
+      ],
+      payload: "I commit that this wallet is under my control",
+      cid: [0, 1, 2],
+      cacao: [3, 4, 5],
+      issuer: "0x123456",
+    };
+
+    // check that ID matches the payload (this has been mocked)
+    const expectedId = "did:pkh:eip155:1:0x0";
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/verify")
+      .send({ challenge, payload, signedChallenge })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    // check for an id match on the mocked credential
+    expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
+  });
+
+  it("handles invalid did-session signed challenge requests", async () => {
+    (verifyDidChallenge as jest.Mock).mockImplementationOnce(() => {
+      throw new VerifyDidChallengeBaseError("Verification failed, challenge mismatch");
+    });
+
+    // challenge received from the challenge endpoint
+    const challenge = {
+      issuer: config.issuer,
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0x0",
+        provider: "challenge-Simple",
+        address: "0x123456",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+
+    // payload containing a signature of the challenge in the challenge credential
+    const payload = {
+      type: "Simple",
+      address: "0x0",
+      proofs: {
+        valid: "true",
+        username: "test",
+      },
+    };
+
+    const signedChallenge = {
+      signatures: [
+        {
+          protected: "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ",
+          signature: "0x0",
+        },
+      ],
+      payload: "I commit that this wallet is under my control",
+      cid: [0, 1, 2],
+      cacao: [3, 4, 5],
+      issuer: "0x123456",
+    };
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/verify")
+      .send({ challenge, payload, signedChallenge })
+      .set("Accept", "application/json")
+      .expect(401)
+      .expect("Content-Type", /json/);
+
+    expect((response.body as ErrorResponseBody).error).toEqual("Invalid challenge signature: Error");
+  });
+  it("handles valid verify requests with EIP712 signature", async () => {
+    // challenge received from the challenge endpoint
+    const eip712Key = process.env.IAM_JWK_EIP712;
+    const eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
+    const challenge = {
+      issuer: eip712Issuer,
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0x0",
+        provider: "challenge-Simple",
+        address: "0x0",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+    // payload containing a signature of the challenge in the challenge credential
+    const payload = {
+      type: "Simple",
+      address: "0x0",
+      proofs: {
+        valid: "true",
+        username: "test",
+        signature: "pass",
+      },
+      signatureType: "EIP712",
+    };
 
     // check that ID matches the payload (this has been mocked)
     const expectedId = "did:pkh:eip155:1:0x0";
@@ -195,6 +364,66 @@ describe("POST /verify", function () {
 
     // check for an id match on the mocked credential
     expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
+  });
+
+  it("handles valid verify requests with EIP712 signature, and ethers can validate the credential", async () => {
+    const originalEthers = jest.requireActual("ethers");
+    // challenge received from the challenge endpoint
+    const eip712Key = process.env.IAM_JWK_EIP712;
+    const eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
+    const challenge = {
+      issuer: eip712Issuer,
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0x0",
+        provider: "challenge-Simple",
+        address: "0x0",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+    // payload containing a signature of the challenge in the challenge credential
+    const payload = {
+      type: "Simple",
+      address: "0x0",
+      proofs: {
+        valid: "true",
+        username: "test",
+        signature: "pass",
+      },
+      signatureType: "EIP712",
+    };
+
+    // check that ID matches the payload (this has been mocked)
+    const expectedId = "did:pkh:eip155:1:0x0";
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/verify")
+      .send({ challenge, payload })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    const signedCredential = response.body.credential as VerifiableEip712Credential;
+
+    const standardizedTypes = signedCredential.proof.eip712Domain.types;
+    const domain = signedCredential.proof.eip712Domain.domain;
+
+    // Delete EIP712Domain so that ethers does not complain about the ambiguous primary type
+    delete standardizedTypes.EIP712Domain;
+
+    const signerAddress = originalEthers.utils.verifyTypedData(
+      domain,
+      standardizedTypes,
+      signedCredential,
+      signedCredential.proof.proofValue
+    );
+
+    const signerIssuedCredential = signerAddress.toLowerCase() === signedCredential.issuer.split(":").pop();
+
+    if (signerIssuedCredential) {
+      const splitSignature = originalEthers.utils.splitSignature(signedCredential.proof.proofValue);
+      return splitSignature;
+    }
   });
 
   it("handles valid challenge request returning PII", async () => {
@@ -219,9 +448,6 @@ describe("POST /verify", function () {
         signature: "pass",
       },
     };
-
-    // resolve the verification
-    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
 
     // check that ID matches the payload (this has been mocked)
     const expectedId = "did:pkh:eip155:1:0x0";
@@ -265,9 +491,6 @@ describe("POST /verify", function () {
       },
     };
 
-    // resolve the verification
-    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
-
     // check that ID matches the payload (this has been mocked)
     const expectedId = "did:pkh:eip155:1:0x0";
 
@@ -308,9 +531,6 @@ describe("POST /verify", function () {
         code: "SECRET_CODE",
       },
     };
-
-    // resolve the verification
-    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
 
     // spy on the providers
     jest
@@ -478,7 +698,7 @@ describe("POST /verify", function () {
   });
 
   it("handles exception if verify credential throws", async () => {
-    jest.spyOn(identityMock, "verifyCredential").mockRejectedValue("Verify Credential Error");
+    (identityMock.verifyCredential as jest.Mock).mockRejectedValueOnce(new Error("Verify Credential Error"));
 
     // challenge received from the challenge endpoint
     const challenge = {
@@ -509,7 +729,7 @@ describe("POST /verify", function () {
       .expect(500)
       .expect("Content-Type", /json/);
 
-    expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify payload");
+    expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify payload: Error");
   });
 
   it("handles invalid challenge request passed by the additional signer", async () => {
@@ -538,6 +758,9 @@ describe("POST /verify", function () {
       signer: {
         address: "0x0",
         challenge: {
+          credentialSubject: {
+            challenge: "I commit that this wallet is under my control",
+          },
           issuer: "did:key:z6Mkecq4nKTCniqNed5cdDSURj1JX4SEdNhvhitZ48HcJMnN",
         },
       },
@@ -603,6 +826,7 @@ describe("POST /verify", function () {
       .expect("Content-Type", /json/);
   });
   it("should not issue credential for additional signer when invalid address is provided", async () => {
+    (identityMock.verifyCredential as jest.Mock).mockResolvedValueOnce(true);
     // challenge received from the challenge endpoint
     const challenge = {
       issuer: config.issuer,
@@ -637,9 +861,6 @@ describe("POST /verify", function () {
         },
       },
     };
-
-    // resolve the verification
-    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
 
     // create a req against the express app
     await request(app)
@@ -740,7 +961,7 @@ describe("POST /check", function () {
   });
 });
 
-const mockMultiAttestationRequest: MultiAttestationRequest[] = [
+const mockMultiAttestationRequestWithPassportAndScore: MultiAttestationRequest[] = [
   {
     schema: "0x853a55f39e2d1bf1e6731ae7148976fbbb0c188a898a233dba61a233d8c0e4a4",
     data: [
@@ -780,7 +1001,6 @@ describe("POST /eas", () => {
   let formatMultiAttestationRequestSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
     getEASFeeAmountSpy = jest
       .spyOn(easFeesMock, "getEASFeeAmount")
       .mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
@@ -794,7 +1014,7 @@ describe("POST /eas", () => {
   it("handles valid requests including some invalid credentials", async () => {
     formatMultiAttestationRequestSpy = jest
       .spyOn(easSchemaMock, "formatMultiAttestationRequest")
-      .mockReturnValue(Promise.resolve(mockMultiAttestationRequest));
+      .mockReturnValue(Promise.resolve(mockMultiAttestationRequestWithPassportAndScore));
     const nonce = 0;
     const failedCredential = {
       "@context": "https://www.w3.org/2018/credentials/v1",
@@ -813,7 +1033,7 @@ describe("POST /eas", () => {
 
     const expectedPayload = {
       passport: {
-        multiAttestationRequest: mockMultiAttestationRequest,
+        multiAttestationRequest: mockMultiAttestationRequestWithPassportAndScore,
         fee: "25000000000000000",
         nonce,
       },
@@ -938,7 +1158,7 @@ describe("POST /eas", () => {
   it("returns the fee information in the response as wei units", async () => {
     formatMultiAttestationRequestSpy = jest
       .spyOn(easSchemaMock, "formatMultiAttestationRequest")
-      .mockReturnValue(Promise.resolve(mockMultiAttestationRequest));
+      .mockReturnValue(Promise.resolve(mockMultiAttestationRequestWithPassportAndScore));
     const nonce = 0;
     const expectedFeeUsd = 2;
 
@@ -959,7 +1179,7 @@ describe("POST /eas", () => {
 
     const expectedPayload = {
       passport: {
-        multiAttestationRequest: mockMultiAttestationRequest,
+        multiAttestationRequest: mockMultiAttestationRequestWithPassportAndScore,
         fee: "25000000000000000",
         nonce,
       },
@@ -1017,14 +1237,13 @@ describe("POST /eas", () => {
 });
 
 describe("POST /eas/passport", () => {
-  let verifyCredentialSpy: jest.SpyInstance;
   let formatMultiAttestationRequestSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+    (identityMock.verifyCredential as jest.Mock).mockReset();
     formatMultiAttestationRequestSpy = jest
-      .spyOn(easPassportSchemaMock, "formatMultiAttestationRequest")
-      .mockResolvedValue(mockMultiAttestationRequest);
+      .spyOn(easPassportSchemaMock, "formatMultiAttestationRequestWithPassportAndScore")
+      .mockResolvedValue(mockMultiAttestationRequestWithPassportAndScore);
   });
 
   afterEach(() => {
@@ -1073,6 +1292,7 @@ describe("POST /eas/passport", () => {
 
   it("should throw a 400 error if every credentialSubject.id is not equivalent", async () => {
     const nonce = 0;
+    const recipient = "0x5678000000000000000000000000000000000001";
     const credentials = [
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
@@ -1080,7 +1300,7 @@ describe("POST /eas/passport", () => {
         issuer: config.issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
-          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
+          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000002",
           provider: "test",
           hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
         },
@@ -1092,7 +1312,7 @@ describe("POST /eas/passport", () => {
         issuer: config.issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
-          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000001",
+          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000003",
           provider: "test1",
           hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
         },
@@ -1102,16 +1322,26 @@ describe("POST /eas/passport", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas/passport")
-      .send({ credentials, nonce, chainIdHex })
+      .send({ recipient, credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(400)
       .expect("Content-Type", /json/);
 
-    expect(response.body.error).toEqual("Every credential's id must be equivalent");
+    expect(response.body.error).toEqual("Every credential's id must be equivalent to that of the recipient");
   });
 
   it("successfully verifies and formats passport", async () => {
+    jest.spyOn(PassportCache.prototype, "init").mockImplementation(() => Promise.resolve());
+    jest.spyOn(PassportCache.prototype, "set").mockImplementation(() => Promise.resolve());
+    jest.spyOn(PassportCache.prototype, "get").mockImplementation((key: any) => {
+      if (key === "ethPrice") {
+        return Promise.resolve("3000");
+      } else if (key === "ethPriceLastUpdate") {
+        return Promise.resolve((Date.now() - 1000 * 60 * 6).toString());
+      }
+    });
     const nonce = 0;
+    const recipient = "0x5678000000000000000000000000000000000000";
     const credentials = [
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
@@ -1119,7 +1349,7 @@ describe("POST /eas/passport", () => {
         issuer: config.issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
-          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
+          id: `did:pkh:eip155:1:${recipient}`,
           provider: "test",
           hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
         },
@@ -1129,14 +1359,14 @@ describe("POST /eas/passport", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas/passport")
-      .send({ credentials, nonce, chainIdHex })
+      .send({ recipient, credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(response.body.passport.multiAttestationRequest).toEqual(mockMultiAttestationRequest);
+    expect(response.body.passport.multiAttestationRequest).toEqual(mockMultiAttestationRequestWithPassportAndScore);
     expect(response.body.passport.nonce).toEqual(nonce);
-    expect(verifyCredentialSpy).toBeCalledTimes(credentials.length);
+    expect(identityMock.verifyCredential).toBeCalledTimes(credentials.length);
     expect(formatMultiAttestationRequestSpy).toBeCalled();
   });
 
@@ -1144,6 +1374,7 @@ describe("POST /eas/passport", () => {
     formatMultiAttestationRequestSpy.mockRejectedValue(new IAMError("Formatting error"));
 
     const nonce = 0;
+    const recipient = "0x5678000000000000000000000000000000000000";
     const credentials = [
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
@@ -1151,7 +1382,7 @@ describe("POST /eas/passport", () => {
         issuer: config.issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
-          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
+          id: `did:pkh:eip155:1:${recipient}`,
           provider: "test",
           hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
         },
@@ -1161,7 +1392,7 @@ describe("POST /eas/passport", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas/passport")
-      .send({ credentials, nonce, chainIdHex })
+      .send({ recipient, credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(500)
       .expect("Content-Type", /json/);
@@ -1170,9 +1401,10 @@ describe("POST /eas/passport", () => {
   });
 
   it("handles error during credential verification", async () => {
-    verifyCredentialSpy.mockRejectedValue(new Error("Verification error"));
+    (identityMock.verifyCredential as jest.Mock).mockRejectedValueOnce(new Error("Verification error"));
 
     const nonce = 0;
+    const recipient = "0x5678000000000000000000000000000000000000";
     const credentials = [
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
@@ -1180,7 +1412,7 @@ describe("POST /eas/passport", () => {
         issuer: config.issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
-          id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
+          id: `did:pkh:eip155:1:${recipient}`,
           provider: "test",
           hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
         },
@@ -1190,11 +1422,184 @@ describe("POST /eas/passport", () => {
 
     const response = await request(app)
       .post("/api/v0.0.0/eas/passport")
-      .send({ credentials, nonce, chainIdHex })
+      .send({ recipient, credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
       .expect(500)
       .expect("Content-Type", /json/);
 
     expect(response.body.error).toEqual("Error formatting onchain passport, Error: Verification error");
+  });
+});
+
+describe("POST /convert", () => {
+  // let verifyCredentialSpy: jest.SpyInstance;
+  // let formatMultiAttestationRequestSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    (identityMock.verifyCredential as jest.Mock).mockResolvedValue(true);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("converts a credential into a valid credential of type EthereumEip712Signature2021", async () => {
+    const expirationDate = new Date();
+    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
+
+    const response = await request(app)
+      .post("/api/v0.0.0/convert")
+      .send({
+        issuer: config.issuer,
+        expirationDate: expirationDate.toISOString(),
+        credentialSubject: {
+          id: "did:pkh:eip155:1:0x12345",
+          provider: "MyProvider",
+          hash: "v0.0.0:secret-hash",
+          "@context": [
+            {
+              hash: "https://schema.org/Text",
+              provider: "https://schema.org/Text",
+            },
+          ],
+        },
+      })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    const responseObject = response.body as VerifiableCredential;
+
+    expect(responseObject.proof.type).toEqual("EthereumEip712Signature2021");
+
+    const isValidCredential = await (
+      identityMock as typeof identityMock & { realIdentity: typeof identityMock }
+    ).realIdentity.verifyCredential(DIDKit, responseObject);
+    expect(isValidCredential).toBe(true);
+
+    // Just testing the validating the stamp when we tamper with a field fails
+    // --> just to double-check that the original verifyCredential is used, and not the mock
+    const isInvalidValidCredential = await (
+      identityMock as typeof identityMock & { realIdentity: typeof identityMock }
+    ).realIdentity.verifyCredential(DIDKit, {
+      ...responseObject,
+      issuer: "bad-issuer",
+    });
+    expect(isInvalidValidCredential).toBe(false);
+  });
+
+  it("converts a credential into a valid credential that is validated successfully with ethers", async () => {
+    const originalEthers = jest.requireActual("ethers");
+
+    let verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+    const expirationDate = new Date();
+    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
+
+    const response = await request(app)
+      .post("/api/v0.0.0/convert")
+      .send({
+        issuer: config.issuer,
+        expirationDate: expirationDate.toISOString(),
+        credentialSubject: {
+          id: "did:pkh:eip155:1:0x12345",
+          provider: "MyProvider",
+          hash: "v0.0.0:secret-hash",
+          "@context": [
+            {
+              hash: "https://schema.org/Text",
+              provider: "https://schema.org/Text",
+            },
+          ],
+        },
+      })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    const signedCredential = response.body as VerifiableEip712Credential;
+
+    const standardizedTypes = signedCredential.proof.eip712Domain.types;
+    const domain = signedCredential.proof.eip712Domain.domain;
+
+    // Delete EIP712Domain so that ethers does not complain about the ambiguous primary type
+    delete standardizedTypes.EIP712Domain;
+
+    const signerAddress = originalEthers.utils.verifyTypedData(
+      domain,
+      standardizedTypes,
+      signedCredential,
+      signedCredential.proof.proofValue
+    );
+
+    const signerIssuedCredential = signerAddress.toLowerCase() === signedCredential.issuer.split(":").pop();
+
+    if (signerIssuedCredential) {
+      const splitSignature = originalEthers.utils.splitSignature(signedCredential.proof.proofValue);
+      return splitSignature;
+    }
+  });
+
+  it("fails to convert an invalid credential", async () => {
+    let verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(false);
+    const expirationDate = new Date();
+    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
+
+    const response = await request(app)
+      .post("/api/v0.0.0/convert")
+      .send({
+        issuer: config.issuer,
+        expirationDate: expirationDate.toISOString(),
+        credentialSubject: {
+          id: "did:pkh:eip155:1:0x12345",
+          provider: "MyProvider",
+          hash: "v0.0.0:secret-hash",
+          "@context": [
+            {
+              hash: "https://schema.org/Text",
+              provider: "https://schema.org/Text",
+            },
+          ],
+        },
+      })
+      .set("Accept", "application/json")
+      .expect(400)
+      .expect("Content-Type", /json/);
+
+    const responseObject = response.body as VerifiableCredential;
+    expect(responseObject).toEqual({
+      error: "Invalid credential.",
+    });
+  });
+
+  it("fails to convert a valid credential from invalid issuer", async () => {
+    let verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
+    const expirationDate = new Date();
+    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
+
+    const response = await request(app)
+      .post("/api/v0.0.0/convert")
+      .send({
+        issuer: "bad-issuer",
+        expirationDate: expirationDate.toISOString(),
+        credentialSubject: {
+          id: "did:pkh:eip155:1:0x12345",
+          provider: "MyProvider",
+          hash: "v0.0.0:secret-hash",
+          "@context": [
+            {
+              hash: "https://schema.org/Text",
+              provider: "https://schema.org/Text",
+            },
+          ],
+        },
+      })
+      .set("Accept", "application/json")
+      .expect(400)
+      .expect("Content-Type", /json/);
+
+    const responseObject = response.body as VerifiableCredential;
+    expect(responseObject).toEqual({
+      error: "Invalid credential.",
+    });
   });
 });

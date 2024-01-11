@@ -6,7 +6,8 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/cyberconnectLogoIcon.svg",
   platform: "CyberConnect",
   name: "CyberConnect",
-  description: "Connect your wallet to verify your CyberProfile Handle.",
+  description: "Connect your Cyberconnect profile.",
+  website: "https://cyberconnect.me/",
   connectMessage: "Verify Account",
   isEVM: true,
 };
@@ -15,8 +16,8 @@ export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "CyberProfile Handle",
     providers: [
-      { title: "Premium CyberProfile Handle ( length is between 1 and 6 characters )", name: "CyberProfilePremium" },
-      { title: "Paid CyberProfile Handle ( length is between 7 and 12 characters )", name: "CyberProfilePaid" },
+      { title: "Premium CyberProfile Handle ( length is 6 characters or less )", name: "CyberProfilePremium" },
+      { title: "Paid CyberProfile Handle ( length is 12 characters or less )", name: "CyberProfilePaid" },
       { title: "Organization Membership", name: "CyberProfileOrgMember" },
     ],
   },

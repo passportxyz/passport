@@ -11,9 +11,10 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/idenaStampIcon.svg",
   platform: "Idena",
   name: "Idena",
-  description: "Connect your existing Identity to verify.",
+  description: "Connect to Idena to verify your human identity.",
   connectMessage: "Verify Identity",
   enablePlatformCardUpdate: true,
+  website: "https://idena.io/",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

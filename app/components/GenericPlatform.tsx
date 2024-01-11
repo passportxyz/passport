@@ -6,41 +6,37 @@ import { datadogLogs } from "@datadog/browser-logs";
 
 // --- Identity tools
 import {
-  Stamp,
   VerifiableCredential,
   CredentialResponseBody,
-  VerifiableCredentialRecord,
   PROVIDER_ID,
   PLATFORM_ID,
   StampPatch,
 } from "@gitcoin/passport-types";
-import { ProviderPayload } from "@gitcoin/passport-platforms";
-import { fetchVerifiableCredential, verifyCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 
 // --- Style Components
 import { SideBarContent } from "./SideBarContent";
 import { DoneToastContent } from "./DoneToastContent";
 import { useToast } from "@chakra-ui/react";
-import { GenericBanner } from "./GenericBanner";
 import { LoadButton } from "./LoadButton";
 import { JsonOutputModal } from "./JsonOutputModal";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
-import { UserContext } from "../context/userContext";
+import { useWalletStore } from "../context/walletStore";
+import { waitForRedirect } from "../context/stampClaimingContext";
 
 // --- Types
 import { PlatformGroupSpec } from "@gitcoin/passport-platforms";
 import { PlatformClass } from "@gitcoin/passport-platforms";
-import { getPlatformSpec } from "../config/platforms";
+import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 
 // --- Helpers
-import { difference, generateUID } from "../utils/helpers";
+import { createSignedPayload, difference, generateUID } from "../utils/helpers";
 
-import { debounce } from "ts-debounce";
-import { BroadcastChannel } from "broadcast-channel";
 import { datadogRum } from "@datadog/browser-rum";
-import { NoStampModal } from "./NoStampModal";
+import { PlatformScoreSpec } from "../context/scorerContext";
+import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
@@ -57,22 +53,30 @@ enum VerificationStatuses {
   Failed,
 }
 
-const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
-
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
 
-type GenericPlatformProps = PlatformProps & { onClose: () => void };
+type GenericPlatformProps = PlatformProps & { onClose: () => void; platformScoreSpec: PlatformScoreSpec };
 
-export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: GenericPlatformProps): JSX.Element => {
-  const { address, signer } = useContext(UserContext);
-  const { handlePatchStamps, allProvidersState, userDid } = useContext(CeramicContext);
+const arraysContainSameElements = (a: any[], b: any[]) => {
+  return a.length === b.length && a.every((v) => b.includes(v));
+};
+
+export const GenericPlatform = ({
+  platFormGroupSpec,
+  platform,
+  platformScoreSpec,
+  onClose,
+}: GenericPlatformProps): JSX.Element => {
+  const address = useWalletStore((state) => state.address);
+  const { handlePatchStamps, verifiedProviderIds, userDid } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
-  const [showNoStampModal, setShowNoStampModal] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [verificationResponse, setVerificationResponse] = useState<CredentialResponseBody[]>([]);
   const [payloadModalIsOpen, setPayloadModalIsOpen] = useState(false);
+  const { did } = useDatastoreConnectionContext();
+  // const { handleFetchCredential } = useContext(StampClaimingContext);
 
   // --- Chakra functions
   const toast = useToast();
@@ -88,9 +92,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
 
   // VerifiedProviders will be passed in to the sidebar to be filled there...
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
-    platformProviderIds.filter(
-      (providerId: any) => typeof allProvidersState[providerId as PROVIDER_ID]?.stamp?.credential !== "undefined"
-    )
+    platformProviderIds.filter((providerId: any) => verifiedProviderIds.includes(providerId))
   );
   // SelectedProviders will be passed in to the sidebar to be filled there...
   const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
@@ -100,36 +102,8 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
 
   // any time we change selection state...
   useEffect(() => {
-    setCanSubmit(selectedProviders.length !== verifiedProviders.length);
+    setCanSubmit(selectedProviders.length > 0 && !arraysContainSameElements(selectedProviders, verifiedProviders));
   }, [selectedProviders, verifiedProviders]);
-
-  const waitForRedirect = (timeout?: number): Promise<ProviderPayload> => {
-    const channel = new BroadcastChannel(`${platform.path}_oauth_channel`);
-    const waitForRedirect = new Promise<ProviderPayload>((resolve, reject) => {
-      // Listener to watch for oauth redirect response on other windows (on the same host)
-      function listenForRedirect(e: { target: string; data: { code: string; state: string } }) {
-        // when receiving oauth response from a spawned child run fetchVerifiableCredential
-        if (e.target === platform.path) {
-          // pull data from message
-          const queryCode = e.data.code;
-          const queryState = e.data.state;
-          datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
-          try {
-            resolve({ code: queryCode, state: queryState });
-          } catch (e) {
-            datadogLogs.logger.error("Error saving Stamp", { platform: platform.platformId });
-            console.error(e);
-            reject(e);
-          }
-        }
-      }
-      // event handler will listen for messages from the child (debounced to avoid multiple submissions)
-      channel.onmessage = debounce(listenForRedirect, 300);
-    }).finally(() => {
-      channel.close();
-    });
-    return waitForRedirect;
-  };
 
   const handleSponsorship = async (result: string): Promise<void> => {
     if (result === "success") {
@@ -180,6 +154,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
     datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
     setLoading(true);
     try {
+      if (!did) throw new Error("No DID found");
       const state = `${platform.path}-` + generateUID(10);
       const providerPayload = (await platform.getProviderPayload({
         state,
@@ -206,8 +181,9 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
           version: "0.0.0",
           address: address || "",
           proofs: providerPayload,
+          signatureType: IAM_SIGNATURE_TYPE,
         },
-        signer as { signMessage: (message: string) => Promise<string> }
+        (data: any) => createSignedPayload(did, data)
       );
 
       const verifiedCredentials =
@@ -250,14 +226,6 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
         updatedMinusInitial
       );
 
-      if (
-        verificationStatus === VerificationStatuses.Failed &&
-        platform.isEVM &&
-        process.env.NEXT_PUBLIC_FF_MULTI_EVM_SIGNER === "on"
-      ) {
-        setShowNoStampModal(true);
-      }
-
       // Get the done toast messages
       const { title, body, icon, platformId } = getDoneToastMessages(
         verificationStatus,
@@ -280,6 +248,7 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
 
       setLoading(false);
     } catch (e) {
+      console.error(e);
       datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
       doneToast(
         "Verification Failed",
@@ -419,13 +388,14 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
   return (
     <>
       <SideBarContent
-        currentPlatform={getPlatformSpec(platform.platformId)}
+        onClose={onClose}
+        currentPlatform={platformScoreSpec}
+        bannerConfig={platform.banner}
         currentProviders={platFormGroupSpec}
         verifiedProviders={verifiedProviders}
         selectedProviders={selectedProviders}
         setSelectedProviders={setSelectedProviders}
         isLoading={isLoading}
-        infoElement={platform.banner ? <GenericBanner banner={platform.banner} /> : undefined}
         verifyButton={
           <div className="px-4">
             <LoadButton
@@ -447,7 +417,6 @@ export const GenericPlatform = ({ platFormGroupSpec, platform, onClose }: Generi
         subheading="To preserve your privacy, error information is not stored; please share with Gitcoin support at your discretion."
         jsonOutput={verificationResponse}
       />
-      <NoStampModal isOpen={showNoStampModal} onClose={() => setShowNoStampModal(false)} />
     </>
   );
 };

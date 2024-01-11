@@ -1,12 +1,30 @@
-import { GtcStakingProvider, GtcStakingProviderOptions } from "./GtcStaking";
-import { parseUnits } from "ethers/lib/utils";
+import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
+import BigNumber from "bignumber.js";
+import { GtcStakingContext, GtcStakingProvider, GtcStakingProviderOptions } from "./GtcStaking";
 
 class SelfStakingBaseProvider extends GtcStakingProvider {
-  constructor(options: Omit<GtcStakingProviderOptions, "dataKey">) {
-    super({
-      ...options,
-      dataKey: "selfStake",
-    });
+  constructor(options: GtcStakingProviderOptions) {
+    super(options);
+  }
+
+  async verify(payload: RequestPayload, context: GtcStakingContext): Promise<VerifiedPayload> {
+    const address = this.getAddress(payload);
+    const stakeData = await this.getStakes(payload, context);
+    const selfStakeAmount = stakeData.selfStake;
+
+    if (selfStakeAmount.gte(this.thresholdAmount)) {
+      return {
+        valid: true,
+        record: { address },
+      };
+    } else {
+      return {
+        valid: false,
+        errors: [
+          `Your current GTC self staking amount is ${selfStakeAmount.toString()} GTC, which is below the required ${this.thresholdAmount.toString()} GTC for this stamp.`,
+        ],
+      };
+    }
   }
 }
 
@@ -14,8 +32,7 @@ export class SelfStakingBronzeProvider extends SelfStakingBaseProvider {
   constructor() {
     super({
       type: "SelfStakingBronze",
-      weiThreshold: parseUnits("5", 18),
-      identifier: "ssgte5",
+      thresholdAmount: new BigNumber(5),
     });
   }
 }
@@ -24,8 +41,7 @@ export class SelfStakingSilverProvider extends SelfStakingBaseProvider {
   constructor() {
     super({
       type: "SelfStakingSilver",
-      weiThreshold: parseUnits("20", 18),
-      identifier: "ssgte20",
+      thresholdAmount: new BigNumber(20),
     });
   }
 }
@@ -34,8 +50,7 @@ export class SelfStakingGoldProvider extends SelfStakingBaseProvider {
   constructor() {
     super({
       type: "SelfStakingGold",
-      weiThreshold: parseUnits("125", 18),
-      identifier: "ssgte125",
+      thresholdAmount: new BigNumber(125),
     });
   }
 }

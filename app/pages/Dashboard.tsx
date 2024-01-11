@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
-import React, { useContext, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
@@ -14,8 +14,10 @@ import Header from "../components/Header";
 import BodyWrapper from "../components/BodyWrapper";
 import PageWidthGrid from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
-import Tooltip from "../components/Tooltip";
 import { DoneToastContent } from "../components/DoneToastContent";
+import { DashboardScorePanel } from "../components/DashboardScorePanel";
+import { DashboardValidStampsPanel } from "../components/DashboardValidStampsPanel";
+import { ExpiredStampsPanel } from "../components/ExpiredStampsPanel";
 
 // --Chakra UI Elements
 import {
@@ -30,32 +32,55 @@ import {
 } from "@chakra-ui/react";
 
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
-import { UserContext } from "../context/userContext";
+import { useWalletStore } from "../context/walletStore";
 import { ScorerContext } from "../context/scorerContext";
-import { FeatureFlags } from "../config/feature_flags";
 
 import { useViewerConnection } from "@self.id/framework";
 import { EthereumAuthProvider } from "@self.id/web";
-import { RefreshStampModal } from "../components/RefreshStampModal";
-import { ExpiredStampModal } from "../components/ExpiredStampModal";
 import ProcessingPopup from "../components/ProcessingPopup";
-import InitiateOnChainButton from "../components/InitiateOnChainButton";
 import { getFilterName } from "../config/filters";
 import { Button } from "../components/Button";
+import { useDashboardCustomization } from "../hooks/useDashboardCustomization";
 
 // --- GTM Module
 import TagManager from "react-gtm-module";
-
-const isLiveAlloScoreEnabled = process.env.NEXT_PUBLIC_FF_LIVE_ALLO_SCORE === "on";
+import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
 
 export default function Dashboard() {
-  const { passport, isLoadingPassport, passportHasCacaoError, cancelCeramicConnection, expiredProviders } =
+  const { customizationKey } = useParams();
+  const { usingCustomPanel, CustomPanel } = useDashboardCustomization(customizationKey);
+  const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms, cancelCeramicConnection } =
     useContext(CeramicContext);
-  const { wallet, toggleConnection, userWarning, setUserWarning } = useContext(UserContext);
-  const { score, rawScore, refreshScore, scoreDescription, passportSubmissionState } = useContext(ScorerContext);
+
+  useEffect(() => {
+    if (usingCustomPanel && customizationKey) {
+      document.title = `Gitcoin Passport | ${
+        customizationKey.charAt(0).toUpperCase() + customizationKey.slice(1)
+      } Dashboard`;
+      TagManager.dataLayer({
+        dataLayer: {
+          event: `${customizationKey}-dashboard-view`,
+        },
+      });
+    } else {
+      document.title = `Gitcoin Passport | Dashboard`;
+      TagManager.dataLayer({
+        dataLayer: {
+          event: "default-dashboard-view",
+        },
+      });
+    }
+  }, [usingCustomPanel, customizationKey]);
+
+  const address = useWalletStore((state) => state.address);
+  const provider = useWalletStore((state) => state.provider);
+
+  const { disconnect, dbAccessTokenStatus, dbAccessToken } = useDatastoreConnectionContext();
+
+  const { refreshScore } = useContext(ScorerContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -93,10 +118,6 @@ export default function Dashboard() {
   const [viewerConnection, ceramicConnect] = useViewerConnection();
   const { isOpen: retryModalIsOpen, onOpen: onRetryModalOpen, onClose: onRetryModalClose } = useDisclosure();
 
-  const [refreshModal, setRefreshModal] = useState(false);
-  const [expiredStampModal, setExpiredStampModal] = useState(false);
-  const { dbAccessToken, dbAccessTokenStatus } = useContext(UserContext);
-
   // stamp filter
   const router = useRouter();
   const { filter } = router.query;
@@ -104,16 +125,24 @@ export default function Dashboard() {
 
   const toast = useToast();
 
+  const numPlatforms = useMemo(() => {
+    return Object.keys(Object.fromEntries(allPlatforms)).length;
+  }, [allPlatforms]);
+
+  const numVerifiedPlatforms = useMemo(() => {
+    return Object.keys(verifiedPlatforms).length;
+  }, [verifiedPlatforms]);
+
   // Route user to home when wallet is disconnected
   useEffect(() => {
-    if (!wallet) {
-      navigate("/");
+    if (!address) {
+      navigate(`/${customizationKey ? `?dashboard=${customizationKey}` : ""}`);
     } else {
       if (dbAccessTokenStatus === "connected" && dbAccessToken) {
-        refreshScore(wallet.accounts[0].address.toLowerCase(), dbAccessToken);
+        refreshScore(address!.toLowerCase(), dbAccessToken);
       }
     }
-  }, [wallet, dbAccessToken, dbAccessTokenStatus]);
+  }, [address, dbAccessToken, dbAccessTokenStatus]);
 
   //show toasts from 1click flow
   useEffect(() => {
@@ -133,7 +162,7 @@ export default function Dashboard() {
         render: (result: any) => (
           <DoneToastContent
             title="Failure"
-            message="Stamps weren't verifed. Please try again."
+            message="Stamps weren't verified. Please try again."
             icon={fail}
             result={result}
           />
@@ -145,17 +174,16 @@ export default function Dashboard() {
 
   // Allow user to retry Ceramic connection if failed
   const retryConnection = () => {
-    if (isLoadingPassport == IsLoadingPassportState.FailedToConnect && wallet) {
+    if (isLoadingPassport == IsLoadingPassportState.FailedToConnect && address) {
       // connect to ceramic (deliberately connect with a lowercase DID to match reader)
-      ceramicConnect(new EthereumAuthProvider(wallet.provider, wallet.accounts[0].address.toLowerCase()));
+      ceramicConnect(new EthereumAuthProvider(provider, address!.toLowerCase()));
       onRetryModalClose();
     }
   };
 
   const closeModalAndDisconnect = () => {
     onRetryModalClose();
-    // toggle wallet connect/disconnect
-    toggleConnection();
+    disconnect();
   };
 
   useEffect(() => {
@@ -164,54 +192,13 @@ export default function Dashboard() {
     }
   }, [isLoadingPassport]);
 
-  useEffect(() => {
-    if (passportHasCacaoError) {
-      setUserWarning({
-        name: "cacaoError",
-        content: (
-          <div className="flex max-w-screen-lg flex-col items-center text-center">
-            We have detected some broken stamps in your passport. Your passport is currently locked because of this. We
-            need to fix these errors before you continue using Passport. This might take up to 5 minutes.
-            <button className="ml-2 flex underline" onClick={() => setRefreshModal(true)}>
-              Reset Passport <img className="ml-1 w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
-            </button>
-          </div>
-        ),
-        dismissible: false,
-      });
-    } else if (userWarning?.name === "cacaoError") {
-      setUserWarning();
-    }
-  }, [passportHasCacaoError]);
-
-  useEffect(() => {
-    if (expiredProviders.length > 0) {
-      setUserWarning({
-        name: "expiredStamp",
-        icon: <img className="mr-2 h-6" alt="Clock Icon" src="./assets/clock-icon.svg" />,
-        content: (
-          <div className="flex justify-center">
-            Some of your stamps have expired. You can remove them from your Passport.
-            <button className="ml-2 flex underline" onClick={() => setExpiredStampModal(true)}>
-              Remove Expired Stamps{" "}
-              <img className="ml-1 w-6" src="./assets/arrow-right-icon.svg" alt="arrow-right"></img>
-            </button>
-          </div>
-        ),
-        dismissible: false,
-      });
-    } else if (userWarning?.name === "expiredStamp") {
-      setUserWarning();
-    }
-  }, [expiredProviders]);
-
   const retryModal = (
     <Modal isOpen={retryModalIsOpen} onClose={onRetryModalClose}>
       <ModalOverlay />
       <ModalContent>
         <ModalBody mt={4}>
           <div className="flex flex-row">
-            <div className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-100 md:mr-10">
+            <div className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-background-2 md:mr-10">
               <img alt="shield-exclamation-icon" src="./assets/shield-exclamation-icon.svg" />
             </div>
             <div className="flex flex-col" data-testid="retry-modal-content">
@@ -240,7 +227,7 @@ export default function Dashboard() {
     <>
       {viewerConnection.status === "connecting" && (
         <ProcessingPopup data-testid="selfId-connection-alert">
-          Please user your wallet to sign the message prompt and complete the sign-in process.
+          Please use your wallet to sign the message prompt and complete the sign-in process.
         </ProcessingPopup>
       )}
 
@@ -253,7 +240,7 @@ export default function Dashboard() {
           <>
             Connecting to Ceramic...
             <span
-              className="pl-4 text-white no-underline hover:cursor-pointer hover:underline md:pl-12"
+              className="pl-4 text-color-1 no-underline hover:cursor-pointer hover:underline md:pl-12"
               onClick={cancelCeramicConnection}
             >
               Cancel
@@ -271,108 +258,82 @@ export default function Dashboard() {
       />
 
       {isLoadingPassport == IsLoadingPassportState.FailedToConnect && retryModal}
-
-      {refreshModal && <RefreshStampModal isOpen={refreshModal} onClose={() => setRefreshModal(false)} />}
-      {expiredStampModal && (
-        <ExpiredStampModal isOpen={expiredStampModal} onClose={() => setExpiredStampModal(false)} />
-      )}
     </>
   );
 
-  const subheader = useMemo(
-    () => (
-      <PageWidthGrid className="my-4 min-h-[64px]">
-        <div className="col-span-3 flex items-center justify-items-center self-center lg:col-span-4">
-          <div className="flex text-2xl">
-            <span className="font-heading">My {filterName && `${filterName} `}Stamps</span>
-            {filterName && (
-              <Link href="/dashboard">
-                <a>
-                  <span data-testid="select-all" className={`pl-2 text-sm text-purple-connectPurple`}>
-                    see all my stamps
-                  </span>
-                </a>
-              </Link>
-            )}
-            <Tooltip>
-              Gitcoin Passport is an identity aggregator that helps you build a digital identifier showcasing your
-              unique humanity. Select the verification stamps you&apos;d like to connect to start building your
-              passport. The more verifications you have&#44; the stronger your passport will be.
-            </Tooltip>
-          </div>
-        </div>
-        <div className={`col-span-1 col-end-[-1] flex justify-self-end`}>
-          {isLiveAlloScoreEnabled && (
-            <div className={"flex min-w-fit items-center"}>
-              <div className={`pr-2 ${passportSubmissionState === "APP_REQUEST_PENDING" ? "visible" : "invisible"}`}>
-                <Spinner
-                  className="my-[2px]"
-                  thickness="2px"
-                  speed="0.65s"
-                  emptyColor="darkGray"
-                  color="gray"
-                  size="md"
-                />
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="flex text-2xl">
-                  {/* TODO add color to theme */}
-                  <span className={`${score == 1 ? "text-accent-3" : "text-[#FFE28A]"}`}>{rawScore.toFixed(2)}</span>
-                  <Tooltip>
-                    Your Unique Humanity Score is based out of 100 and measures how unique you are. The current passing
-                    score threshold is 20.
-                  </Tooltip>
-                </div>
-                <div className="flex whitespace-nowrap text-sm">{scoreDescription}</div>
-              </div>
-            </div>
-          )}
+  const DashboardIllustration = ({ className }: { className: string }) => (
+    <div className={className}>
+      <img alt="Shield" src="/assets/dashboardIllustration.png" />
+    </div>
+  );
 
-          <div className="ml-4 flex flex-col place-items-center gap-4 self-center md:flex-row">
-            {FeatureFlags.FF_CHAIN_SYNC && <InitiateOnChainButton />}
-            {passport ? (
-              <button
-                data-testid="button-passport-json-mobile"
-                className="h-10 w-10 rounded-md border border-muted"
-                onClick={onOpen}
-              >
-                {`</>`}
-              </button>
-            ) : (
-              <div
-                data-testid="loading-spinner-passport"
-                className="flex flex-row items-center rounded-md border-2 border-muted py-2 px-4"
-              >
-                <Spinner
-                  className="my-[2px]"
-                  thickness="2px"
-                  speed="0.65s"
-                  emptyColor="darkGray"
-                  color="gray"
-                  size="md"
-                />
-              </div>
-            )}
+  const Subheader = ({ className }: { className: string }) => (
+    <div className={className}>
+      <div className="flex items-center ">
+        <span className="mr-20 font-heading text-5xl">My {filterName && `${filterName} `}Stamps</span>
+        {passport ? (
+          <button
+            data-testid="button-passport-json"
+            className="h-8 w-8 rounded-md border border-background-2 bg-background-4 text-foreground-3"
+            onClick={onOpen}
+            title="View Passport JSON"
+          >
+            {`</>`}
+          </button>
+        ) : (
+          <div
+            data-testid="loading-spinner-passport"
+            className="flex flex-row items-center rounded-md border-2 border-background-2 bg-background-4 px-[6px] py-1"
+          >
+            <Spinner className="my-[2px]" thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="sm" />
           </div>
+        )}
+      </div>
+      {filterName && (
+        <div>
+          <Link href="/#/dashboard">
+            <a>
+              <span data-testid="select-all" className={`pl-2 text-sm text-color-2`}>
+                see all my stamps
+              </span>
+            </a>
+          </Link>
         </div>
-      </PageWidthGrid>
-    ),
-    [filterName, onOpen, passport, score, rawScore, scoreDescription, passportSubmissionState]
+      )}
+    </div>
   );
 
   return (
     <PageRoot className="text-color-1">
       {modals}
       <HeaderContentFooterGrid>
-        <Header subheader={subheader} />
+        <Header />
         <BodyWrapper className="mt-4 md:mt-6">
-          <CardList
-            isLoading={
-              isLoadingPassport == IsLoadingPassportState.Loading ||
-              isLoadingPassport == IsLoadingPassportState.LoadingFromCeramic ||
-              isLoadingPassport == IsLoadingPassportState.FailedToConnect
-            }
-          />
+          <PageWidthGrid>
+            <Subheader className="col-span-full xl:col-span-7 " />
+            <DashboardScorePanel
+              className={`col-span-full ${usingCustomPanel ? "lg:col-span-4" : "xl:max-h-52"} xl:col-span-7`}
+            />
+            {usingCustomPanel || (
+              <DashboardIllustration className="col-start-8 col-end-[-1] row-span-2 hidden xl:block" />
+            )}
+            {usingCustomPanel && <CustomPanel className="col-start-1 col-end-[-1] lg:col-start-5 xl:col-start-8" />}
+            <span className="col-start-1 col-end-4 font-heading text-4xl">Add Stamps</span>
+            <CardList
+              className="col-span-full"
+              isLoading={
+                isLoadingPassport == IsLoadingPassportState.Loading ||
+                isLoadingPassport == IsLoadingPassportState.LoadingFromCeramic ||
+                isLoadingPassport == IsLoadingPassportState.FailedToConnect
+              }
+            />
+            <span className="col-start-1 col-end-4 font-heading text-3xl">Add Collected Stamps</span>
+            <span className="col-end-[-1] self-center whitespace-nowrap text-right font-alt text-3xl text-foreground-2">
+              {numVerifiedPlatforms}/{numPlatforms}
+            </span>
+            <DashboardValidStampsPanel className="col-span-full" />
+            <ExpiredStampsPanel className="col-span-full" />
+          </PageWidthGrid>
         </BodyWrapper>
         {/* This footer contains dark colored text and dark images */}
         <Footer lightMode={true} />

@@ -1,6 +1,6 @@
 name: Deploy IAM Server to Review
 
-# trigger: on push to `main` branch, AND only on changes to `iam/*` and `infra/review/**` files
+# trigger: on push to `main` branch, AND only on changes to `iam/*` and `infra/aws/**` files
 on:
   push:
     branches: [main]
@@ -12,10 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       # run tests
-      - name: Use Node.js 16
+      - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
           cache: "yarn"
       - name: Install Packages
         run: yarn install
@@ -39,7 +39,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_REVIEW }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_REVIEW }}
-          aws-region: us-east-1
+          aws-region: us-west-2
 
       # login to docker for AWS
       - name: Login to Amazon ECR
@@ -68,27 +68,29 @@ jobs:
         uses: actions/setup-node@v2
         with:
           cache: "yarn"
-          cache-dependency-path: infra/review/package-lock.json
+          cache-dependency-path: infra/package-lock.json
       # Update the pulumi stack with new image
       - run: |
+          cd aws
           npm install
-          pulumi stack select -c gitcoin/dpopp/review
-          pulumi config -s gitcoin/dpopp/review set aws:region us-east-1 --non-interactive
-        working-directory: infra/review
+          pulumi stack select -c gitcoin/passport/review
+          pulumi config -s gitcoin/passport/review set aws:region us-west-2 --non-interactive
+        working-directory: infra
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
       - uses: pulumi/actions@v3
         id: pulumi
         with:
           command: up
-          stack-name: gitcoin/dpopp/review
+          stack-name: gitcoin/passport/review
           upsert: false
-          work-dir: infra/review
+          work-dir: infra/aws
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_REVIEW }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_REVIEW }}
           DOCKER_GTC_PASSPORT_IAM_IMAGE: ${{secrets.ECR_URL_REVIEW}}:${{ needs.build-and-test.outputs.dockerTag }}
           ROUTE_53_ZONE: ${{ secrets.ROUTE53_ZONE_ID_REVIEW }}
-          DOMAIN: ${{ secrets.DOMAIN_REVIEW }}
+          ROUTE_53_DOMAIN: ${{ secrets.DOMAIN_REVIEW }}
           IAM_SERVER_SSM_ARN: ${{ secrets.IAM_SERVER_SSM_ARN_REVIEW }}
+          PASSPORT_VC_SECRETS_ARN: ${{ secrets.PASSPORT_VC_SECRETS_ARN_REVIEW }}

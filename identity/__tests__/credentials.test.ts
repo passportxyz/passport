@@ -25,7 +25,7 @@ import * as mockDIDKit from "../__mocks__/didkit";
 
 // ---- Types
 import axios from "axios";
-import { DIDKitLib, RequestPayload, VerifiableCredential } from "@gitcoin/passport-types";
+import { DIDKitLib, RequestPayload, VerifiableCredential, SignatureType } from "@gitcoin/passport-types";
 
 // ---- Set up DIDKit mock
 const DIDKit: DIDKitLib = mockDIDKit as unknown as DIDKitLib;
@@ -41,8 +41,15 @@ describe("Fetch Credentials", function () {
     version: "Test-Case-1",
   };
 
-  const MOCK_SIGNATURE = "Signed Message";
-  const MOCK_SIGNER = { signMessage: jest.fn().mockImplementation(() => Promise.resolve(MOCK_SIGNATURE)) };
+  const MOCK_SIGNED_PAYLOAD = {
+    signatures: ["signature"],
+    payload: "0x123",
+    cid: ["0x456"],
+    cacao: ["0x789"],
+    issuer: "0x0",
+  };
+
+  const MOCK_CREATE_SIGNED_PAYLOAD = jest.fn().mockImplementation(() => Promise.resolve(MOCK_SIGNED_PAYLOAD));
 
   const IAM_CHALLENGE_ENDPOINT = `${IAM_URL}/v${payload.version}/challenge`;
   const expectedChallengeRequestBody = { payload: { address: payload.address, type: payload.type } };
@@ -51,13 +58,13 @@ describe("Fetch Credentials", function () {
   const expectedVerifyRequestBody = {
     payload: {
       ...payload,
-      proofs: { signature: MOCK_SIGNATURE },
     },
+    signedChallenge: MOCK_SIGNED_PAYLOAD,
     challenge: MOCK_CHALLENGE_CREDENTIAL,
   };
 
   beforeEach(() => {
-    MOCK_SIGNER.signMessage.mockClear();
+    MOCK_CREATE_SIGNED_PAYLOAD.mockClear();
     clearAxiosMocks();
   });
 
@@ -71,39 +78,29 @@ describe("Fetch Credentials", function () {
   });
 
   it("can fetch a verifiable credential", async () => {
-    const { credential, record, signature, challenge } = await fetchVerifiableCredential(IAM_URL, payload, MOCK_SIGNER);
+    const { credentials } = await fetchVerifiableCredential(IAM_URL, payload, MOCK_CREATE_SIGNED_PAYLOAD);
 
     // called to fetch the challenge and to verify
     expect(axios.post).toHaveBeenCalledTimes(2);
     expect(axios.post).toHaveBeenNthCalledWith(1, IAM_CHALLENGE_ENDPOINT, expectedChallengeRequestBody);
     expect(axios.post).toHaveBeenNthCalledWith(2, IAM_VERIFY_ENDPOINT, expectedVerifyRequestBody);
 
-    expect(MOCK_SIGNER.signMessage).toHaveBeenCalled();
-    expect(MOCK_SIGNER.signMessage).toHaveBeenCalledWith(MOCK_CHALLENGE_VALUE);
+    expect(MOCK_CREATE_SIGNED_PAYLOAD).toHaveBeenCalled();
+    expect(MOCK_CREATE_SIGNED_PAYLOAD).toHaveBeenCalledWith(MOCK_CHALLENGE_VALUE);
 
-    // we expect to get back the mocked response
-    expect(signature).toEqual(MOCK_SIGNATURE);
-    expect(challenge).toEqual(MOCK_CHALLENGE_CREDENTIAL);
-    expect(credential).toEqual(MOCK_VERIFY_RESPONSE_BODY.credential);
-    expect(record).toEqual(MOCK_VERIFY_RESPONSE_BODY.record);
-  });
-
-  it("will fail if not provided a signer to sign the message", async () => {
-    await expect(fetchVerifiableCredential(IAM_URL, payload, undefined)).rejects.toThrow(
-      "Unable to sign message without a signer"
-    );
-
-    expect(axios.post).not.toBeCalled();
+    expect(credentials).toEqual([MOCK_VERIFY_RESPONSE_BODY]);
   });
 
   it("will throw if signer rejects request for signature", async () => {
     // if the user rejects the signing then the signer will throw an error...
-    MOCK_SIGNER.signMessage.mockImplementation(async () => {
+    MOCK_CREATE_SIGNED_PAYLOAD.mockImplementation(async () => {
       throw new Error("Unable to sign");
     });
 
-    await expect(fetchVerifiableCredential(IAM_URL, payload, MOCK_SIGNER)).rejects.toThrow("Unable to sign");
-    expect(MOCK_SIGNER.signMessage).toHaveBeenCalled();
+    await expect(fetchVerifiableCredential(IAM_URL, payload, MOCK_CREATE_SIGNED_PAYLOAD)).rejects.toThrow(
+      "Unable to sign"
+    );
+    expect(MOCK_CREATE_SIGNED_PAYLOAD).toHaveBeenCalled();
   });
 
   it("will not attempt to sign if not provided a challenge in the challenge credential", async () => {
@@ -117,11 +114,13 @@ describe("Fetch Credentials", function () {
       },
     });
 
-    await expect(fetchVerifiableCredential(IAM_URL, payload, MOCK_SIGNER)).rejects.toThrow("Unable to sign message");
+    await expect(fetchVerifiableCredential(IAM_URL, payload, MOCK_CREATE_SIGNED_PAYLOAD)).rejects.toThrow(
+      "Unable to sign message"
+    );
 
     expect(axios.post).toHaveBeenNthCalledWith(1, IAM_CHALLENGE_ENDPOINT, expectedChallengeRequestBody);
     // NOTE: the signMessage function was never called
-    expect(MOCK_SIGNER.signMessage).not.toBeCalled();
+    expect(MOCK_CREATE_SIGNED_PAYLOAD).not.toBeCalled();
   });
 });
 
@@ -151,6 +150,29 @@ describe("Generate Credentials", function () {
     expect(typeof credential.proof).toEqual("object");
   });
 
+  const signType: SignatureType = "EIP712";
+  it("can generate am EIP712 signed challenge credential", async () => {
+    const record = {
+      type: "Simple",
+      address: "0x0",
+      version: "Test-Case-1",
+      challenge: "randomChallengeString",
+      signatureType: signType,
+    };
+
+    // details of this credential are created by issueChallengeCredential - but the proof is added by DIDKit (which is mocked)
+    const { credential } = await issueChallengeCredential(DIDKit, key, record, "EIP712");
+
+    // expect to have called issueCredential
+    expect(DIDKit.issueCredential).toHaveBeenCalled();
+    // expect the structure/details added by issueChallengeCredential to be correct
+    expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
+    expect(credential.credentialSubject.provider).toEqual(`challenge-${record.type}`);
+    expect(credential.credentialSubject.challenge).toEqual(record.challenge);
+    expect(credential.credentialSubject.address).toEqual(record.address);
+    expect(typeof credential.proof).toEqual("object");
+  });
+
   it("can convert an object to an sorted array for deterministic hashing", async () => {
     const record = {
       type: "Simple",
@@ -165,33 +187,61 @@ describe("Generate Credentials", function () {
       ["type", "Simple"],
       ["version", "Test-Case-1"],
     ]);
-  }),
-    it("can generate a credential containing hash", async () => {
-      const record = {
-        type: "Simple",
-        version: "Test-Case-1",
-        address: "0x0",
-      };
+  });
+  it("can generate a credential containing hash", async () => {
+    const record = {
+      type: "Simple",
+      version: "Test-Case-1",
+      address: "0x0",
+    };
 
-      const expectedHash: string =
-        "v0.0.0:" +
-        base64.encode(
-          createHash("sha256")
-            .update(key)
-            .update(JSON.stringify(objToSortedArray(record)))
-            .digest()
-        );
-      // details of this credential are created by issueHashedCredential - but the proof is added by DIDKit (which is mocked)
-      const { credential } = await issueHashedCredential(DIDKit, key, "0x0", record);
-      // expect to have called issueCredential
-      expect(DIDKit.issueCredential).toHaveBeenCalled();
-      // expect the structure/details added by issueHashedCredential to be correct
-      expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
-      expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
-      expect(typeof credential.credentialSubject.hash).toEqual("string");
-      expect(credential.credentialSubject.hash).toEqual(expectedHash);
-      expect(typeof credential.proof).toEqual("object");
-    });
+    const expectedHash: string =
+      "v0.0.0:" +
+      base64.encode(
+        createHash("sha256")
+          .update(key)
+          .update(JSON.stringify(objToSortedArray(record)))
+          .digest()
+      );
+    // details of this credential are created by issueHashedCredential - but the proof is added by DIDKit (which is mocked)
+    const { credential } = await issueHashedCredential(DIDKit, key, "0x0", record);
+    // expect to have called issueCredential
+    expect(DIDKit.issueCredential).toHaveBeenCalled();
+    // expect the structure/details added by issueHashedCredential to be correct
+    expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
+    expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
+    expect(typeof credential.credentialSubject.hash).toEqual("string");
+    expect(credential.credentialSubject.hash).toEqual(expectedHash);
+    expect(typeof credential.proof).toEqual("object");
+  });
+  it("can generate an eip712 signed credential containing hash", async () => {
+    const record = {
+      type: "Simple",
+      version: "Test-Case-1",
+      address: "0x0",
+    };
+
+    const expectedHash: string =
+      "v0.0.0:" +
+      base64.encode(
+        createHash("sha256")
+          .update(key)
+          .update(JSON.stringify(objToSortedArray(record)))
+          .digest()
+      );
+    // details of this credential are created by issueHashedCredential - but the proof is added by DIDKit (which is mocked)
+    const { credential } = await issueHashedCredential(DIDKit, key, "0x0", record, 100, "EIP712");
+    // expect to have called issueCredential
+    expect(DIDKit.issueCredential).toHaveBeenCalled();
+    // expect the structure/details added by issueHashedCredential to be correct
+    expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
+    expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
+    expect(typeof credential.credentialSubject.hash).toEqual("string");
+    expect(credential.credentialSubject.hash).toEqual(expectedHash);
+    expect(typeof credential.proof).toEqual("object");
+    expect(credential["@context"]).toContain("https://w3id.org/vc/status-list/2021/v1");
+    expect(credential["@context"]).toContain("https://w3id.org/vc/status-list/2021/v1");
+  });
 });
 
 describe("Verify Credentials", function () {

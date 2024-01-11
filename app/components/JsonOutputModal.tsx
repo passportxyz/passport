@@ -51,18 +51,20 @@ export const JsonOutputModal = ({
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent rounded={"none"} padding={4} maxW="80%" maxH="80%" textColor="inherit">
-        <ModalHeader borderBottomWidth={2} borderBottomColor="var(--color-accent2)">
+        <ModalHeader borderBottomWidth={2} borderBottomColor="rgb(var(--color-foreground-6))">
           <p className="text-color-1">{title}</p>
           <p className="text-base text-color-1">{subheading}</p>
         </ModalHeader>
-        <ModalCloseButton color="var(--color-text-1)" />
-        <ModalBody className="overflow-auto text-color-4">
-          <pre data-testid="passport-json">{JSON.stringify(jsonOutput, null, "\t")}</pre>
+        <ModalCloseButton color="rgb(var(--color-text-1))" />
+        <ModalBody className="overflow-auto text-color-1">
+          <pre data-testid="passport-json" className="whitespace-pre-wrap">
+            {JSON.stringify(jsonOutput, null, "\t")}
+          </pre>
         </ModalBody>
 
-        <ModalFooter borderTopWidth={2} borderTopColor="var(--color-accent2)">
+        <ModalFooter borderTopWidth={2} borderTopColor="rgb(var(--color-foreground-6))">
           <Button data-testid="button-passport-json-download" onClick={onDownload} variant="secondary">
-            <ArrowDownTrayIcon fill="var(--color-text-1)" width={16} />
+            <ArrowDownTrayIcon fill="rgb(var(--color-text-1))" width={16} />
             Download
           </Button>
           <Button data-testid="button-passport-json-done" onClick={onClose} className="ml-4">

@@ -1,5 +1,5 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { Provider, ProviderExternalVerificationError, ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
@@ -38,11 +38,10 @@ export class ZkSyncEraProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
     let valid = false;
-    let error = undefined;
-
-    const address = (await getAddress(payload)).toLowerCase();
+    const errors = [];
 
     try {
+      const address = (await getAddress(payload)).toLowerCase();
       const requestResponse = await axios.get(
         `${zkSyncEraApiEndpoint}/transactions?address=${address}&limit=100&direction=older`
       );
@@ -60,22 +59,24 @@ export class ZkSyncEraProvider implements Provider {
         }
 
         if (!valid) {
-          error = ["Unable to find a verified transaction from the given address"];
+          errors.push("Unable to find a verified transaction from the given address");
         }
       } else {
-        error = [`HTTP Error '${requestResponse.status}'. Details: '${requestResponse.statusText}'.`];
+        errors.push(`HTTP Error '${requestResponse.status}'. Details: '${requestResponse.statusText}'.`);
       }
-    } catch (exc) {
-      error = ["Error getting transaction list for address"];
+      return Promise.resolve({
+        valid: valid,
+        record: valid
+          ? {
+              address: address,
+            }
+          : undefined,
+        errors,
+      });
+    } catch (error) {
+      throw new ProviderExternalVerificationError(
+        `ZkSyncEra error was thrown while trying to verify transaction history. error: ${JSON.stringify(error)}`
+      );
     }
-    return Promise.resolve({
-      valid: valid,
-      record: valid
-        ? {
-            address: address,
-          }
-        : undefined,
-      error,
-    });
   }
 }

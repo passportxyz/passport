@@ -21,9 +21,14 @@ describe("Attempt verification", function () {
     mockedAxios.post.mockResolvedValueOnce({
       data: {
         data: {
-          defaultProfile: {
-            id: MOCK_ADDRESS,
-            handle: MOCK_HANDLE,
+          ownedHandles: {
+            items: [
+              {
+                id: MOCK_ADDRESS,
+                fullHandle: MOCK_HANDLE,
+                ownedBy: MOCK_ADDRESS,
+              },
+            ],
           },
         },
       },
@@ -36,10 +41,36 @@ describe("Attempt verification", function () {
 
     expect(verifiedPayload).toEqual({
       valid: true,
+      errors: [],
       record: {
         handle: MOCK_HANDLE,
       },
     });
+  });
+
+  it("should return false if owner addresses do not match", async () => {
+    mockedAxios.post.mockResolvedValueOnce({
+      data: {
+        data: {
+          ownedHandles: {
+            items: [
+              {
+                id: MOCK_ADDRESS,
+                fullHandle: MOCK_HANDLE,
+                ownedBy: MOCK_FAKE_ADDRESS,
+              },
+            ],
+          },
+        },
+      },
+    });
+
+    const lens = new LensProfileProvider();
+    const verifiedPayload = await lens.verify({
+      address: MOCK_ADDRESS_LOWER,
+    } as RequestPayload);
+
+    expect(verifiedPayload.valid).toEqual(false);
   });
 
   it("should return false for an address without a lens handle", async () => {
@@ -58,7 +89,8 @@ describe("Attempt verification", function () {
 
     expect(verifiedPayload).toEqual({
       valid: false,
-      record: {},
+      errors: ["We were unable to retrieve a Lens handle for your address."],
+      record: undefined,
     });
   });
 
@@ -66,13 +98,11 @@ describe("Attempt verification", function () {
     mockedAxios.post.mockRejectedValueOnce(new Error("some error"));
 
     const lens = new LensProfileProvider();
-    const verifiedPayload = await lens.verify({
-      address: MOCK_ADDRESS_LOWER,
-    } as RequestPayload);
-
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      error: ["Lens provider get user handle error"],
-    });
+    await expect(
+      async () =>
+        await lens.verify({
+          address: MOCK_ADDRESS_LOWER,
+        } as RequestPayload)
+    ).rejects.toThrowError("Error verifying Snapshot proposals: {}.");
   });
 });

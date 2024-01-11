@@ -1,9 +1,12 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
+
+// ---- Utils
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 
@@ -25,15 +28,18 @@ interface EtherscanRequestResponse {
 }
 
 interface EthGasCheck {
-  hasGTEHalfEthSpentGas: boolean;
+  valid: boolean;
+  errors?: string[];
 }
 
 interface EthFirstTxnCheck {
-  hasGTE30DaysSinceFirstTxn: boolean;
+  valid: boolean;
+  errors?: string[];
 }
 
 interface EthGTEOneTxnCheck {
-  hasGTEOneEthTxn: boolean;
+  valid: boolean;
+  errors?: string[];
 }
 
 interface Error {
@@ -61,13 +67,14 @@ export class EthGasProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     const address = payload.address.toLocaleLowerCase();
     const offsetCount = 500;
-    let valid = false,
-      ethTransactions: EtherscanRequestResponse["data"],
+    let ethTransactions: EtherscanRequestResponse["data"],
       ethInternalTransactions: EtherscanRequestResponse["data"],
       ethTokenTransactions: EtherscanRequestResponse["data"],
-      verifiedPayload = {
-        hasGTEHalfEthSpentGas: false,
-      };
+      record = undefined;
+
+    if (!address || address === "") {
+      throw new ProviderExternalVerificationError("Bad address");
+    }
 
     try {
       ethTransactions = await fetchEthereumData("txlist", address, offsetCount);
@@ -78,22 +85,19 @@ export class EthGasProvider implements Provider {
         .concat(ethInternalTransactions.result)
         .concat(ethTokenTransactions.result);
 
-      verifiedPayload = checkGasFees(combinedEthTransactions);
+      const { valid, errors } = checkGasFees(combinedEthTransactions);
 
-      valid = address && verifiedPayload.hasGTEHalfEthSpentGas ? true : false;
-    } catch (e) {
-      return { valid: false };
+      address && valid
+        ? (record = { address: address, hasGTEHalfEthSpentGasSpentOnTheMainnet: String(valid) })
+        : (record = undefined);
+      return {
+        valid,
+        record,
+        errors,
+      };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`More than 0.5 in gas fees on Ethereum check error: ${String(e)}.`);
     }
-
-    return {
-      valid: valid,
-      record: valid
-        ? {
-            address: address,
-            hasGTEHalfEthSpentGasSpentOnTheMainnet: String(valid),
-          }
-        : undefined,
-    };
   }
 }
 
@@ -115,30 +119,27 @@ export class FirstEthTxnProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     const address = payload.address.toLocaleLowerCase();
     const offsetCount = 100;
-    let valid = false,
-      ethData: EtherscanRequestResponse["data"],
-      verifiedPayload = {
-        hasGTE30DaysSinceFirstTxn: false,
-      };
+    let ethData: EtherscanRequestResponse["data"],
+      record = undefined;
 
     try {
       ethData = await fetchEthereumData("txlist", address, offsetCount);
-      verifiedPayload = checkFirstTxn(ethData, address);
+      const { valid, errors } = checkFirstTxn(ethData, address);
 
-      valid = address && verifiedPayload.hasGTE30DaysSinceFirstTxn ? true : false;
-    } catch (e) {
-      return { valid: false };
+      address && valid
+        ? (record = { address: address, hasGTE30DaysSinceFirstTxnOnTheMainnet: String(valid) })
+        : (record = undefined);
+
+      return {
+        valid,
+        record,
+        errors,
+      };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(
+        `Thirty days or more since first transaction on Ethereum check error: ${String(e)}.`
+      );
     }
-
-    return {
-      valid: valid,
-      record: valid
-        ? {
-            address: address,
-            hasGTE30DaysSinceFirstTxnOnTheMainnet: String(valid),
-          }
-        : undefined,
-    };
   }
 }
 
@@ -160,30 +161,25 @@ export class EthGTEOneTxnProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     const address = payload.address.toLocaleLowerCase();
     const offsetCount = 100;
-    let valid = false,
-      ethData: EtherscanRequestResponse["data"],
-      verifiedPayload = {
-        hasGTEOneEthTxn: false,
-      };
+    let ethData: EtherscanRequestResponse["data"],
+      record = undefined;
 
     try {
       ethData = await fetchEthereumData("txlist", address, offsetCount);
-      verifiedPayload = checkForTxns(ethData, address);
+      const { valid, errors } = checkForTxns(ethData, address);
 
-      valid = address && verifiedPayload.hasGTEOneEthTxn ? true : false;
-    } catch (e) {
-      return { valid: false };
+      address && valid
+        ? (record = { address: address, hasGTE1ETHTxnOnTheMainnet: String(valid) })
+        : (record = undefined);
+
+      return {
+        valid,
+        record,
+        errors,
+      };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`One or more Ethereum transactions check error: ${String(e)}.`);
     }
-
-    return {
-      valid: valid,
-      record: valid
-        ? {
-            address: address,
-            hasGTE1ETHTxnOnTheMainnet: String(valid),
-          }
-        : undefined,
-    };
   }
 }
 
@@ -206,7 +202,7 @@ const fetchEthereumData = async (
       etherscanRequestResponse = await axios.get(etherscanURL(pageNo));
     } catch (e: unknown) {
       const error = e as Error;
-      throw `The GET request resulted in a status code ${etherscanRequestResponse.status} error. Message: ${error.response.data.message}`;
+      handleProviderAxiosError(error, "ethereum data", [address]);
     }
 
     if (
@@ -228,7 +224,6 @@ const checkGasFees = (results: EtherscanRequestResponseData[]): EthGasCheck => {
   // set variables for gas fees calculations
   const weiLimit = BigInt(500000000000000000); // This is 0.5 ETH in wei
 
-  let hasGTEHalfEthSpentGas = false;
   let totalWeiSpent = BigInt(0);
 
   // Iterate through result array and add up the gas used per transaction
@@ -244,22 +239,29 @@ const checkGasFees = (results: EtherscanRequestResponseData[]): EthGasCheck => {
   }
 
   if (totalWeiSpent >= weiLimit) {
-    hasGTEHalfEthSpentGas = true;
+    return {
+      valid: true,
+      errors: [],
+    };
+  } else {
+    return {
+      valid: false,
+      errors: [
+        `The total amount you've spent on gas on Ethereum Mainnet is: ${totalWeiSpent}, which is below the requirement of 0.5 ETH or 500000000000000000 Wei.`,
+      ],
+    };
   }
-
-  return {
-    hasGTEHalfEthSpentGas,
-  };
 };
 
 const checkFirstTxn = (ethData: EtherscanRequestResponse["data"], address: string): EthFirstTxnCheck => {
   // set variables for timestamp to days calculations
-  let hasGTE30DaysSinceFirstTxn = false;
+  let hasGTE30DaysSinceFirstTxn = false,
+    successfulFirstTxn;
   const results = ethData.result;
 
   // Return the first successful transaction that was made >= 30 days ago by the wallet holder
   if (ethData.result.length > 0) {
-    const successfulFirstTxn = results.findIndex((result) => {
+    successfulFirstTxn = results.findIndex((result) => {
       const txnInMilliseconds = parseInt(result.timeStamp) * 1000;
       const todayInMilliseconds = new Date().getTime();
       const timeDifference = todayInMilliseconds - txnInMilliseconds;
@@ -270,10 +272,21 @@ const checkFirstTxn = (ethData: EtherscanRequestResponse["data"], address: strin
 
     successfulFirstTxn === -1 ? (hasGTE30DaysSinceFirstTxn = false) : (hasGTE30DaysSinceFirstTxn = true);
   }
-
-  return {
-    hasGTE30DaysSinceFirstTxn,
-  };
+  if (hasGTE30DaysSinceFirstTxn === true) {
+    return {
+      valid: true,
+      errors: [],
+    };
+  } else {
+    return {
+      valid: false,
+      errors: [
+        `Your first transaction on Ethereum Mainnet was: ${
+          successfulFirstTxn === undefined ? String(0) : String(successfulFirstTxn)
+        } days ago, which is below the requirement of 30 days.`,
+      ],
+    };
+  }
 };
 
 const checkForTxns = (ethData: EtherscanRequestResponse["data"], address: string): EthGTEOneTxnCheck => {
@@ -286,7 +299,15 @@ const checkForTxns = (ethData: EtherscanRequestResponse["data"], address: string
     hasGTEOneEthTxn = txnsCheck === -1 ? false : true;
   }
 
-  return {
-    hasGTEOneEthTxn,
-  };
+  if (hasGTEOneEthTxn === true) {
+    return {
+      valid: true,
+      errors: [],
+    };
+  } else {
+    return {
+      valid: false,
+      errors: ["You currently do not have 1 or more transactions on Ethereum Mainnet"],
+    };
+  }
 };

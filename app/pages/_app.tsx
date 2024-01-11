@@ -8,8 +8,8 @@ import { AppProps } from "next/app";
 import Head from "next/head";
 
 import "../styles/globals.css";
-import { UserContextProvider } from "../context/userContext";
 import { CeramicContextProvider } from "../context/ceramicContext";
+import { DatastoreConnectionContextProvider } from "../context/datastoreConnectionContext";
 import { ScorerContextProvider } from "../context/scorerContext";
 import { OnChainContextProvider } from "../context/onChainContext";
 import ManageAccountCenter from "../components/ManageAccountCenter";
@@ -21,11 +21,24 @@ import { Provider as SelfIdProvider } from "@self.id/framework";
 import TagManager from "react-gtm-module";
 
 import { themes, ThemeWrapper } from "../utils/theme";
-import { FeatureFlags } from "../config/feature_flags";
+import { StampClaimingContextProvider } from "../context/stampClaimingContext";
 
-const FacebookAppId = process.env.NEXT_PUBLIC_PASSPORT_FACEBOOK_APP_ID || "";
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
 const INTERCOM_APP_ID = process.env.NEXT_PUBLIC_INTERCOM_APP_ID || "";
+
+const RenderOnlyOnClient = ({ children }: { children: React.ReactNode }) => {
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
+  return <>{children}</>;
+};
 
 // Type definition for the window object
 declare global {
@@ -121,73 +134,36 @@ function App({ Component, pageProps }: AppProps) {
 
       return <div></div>;
     }
-
-    // We want to allow the user to enable features by setting feature flags in URLs as well ...
-    if (queryString.get("FF_CHAIN_SYNC") === "on") {
-      FeatureFlags["FF_CHAIN_SYNC"] = true;
-    } else {
-      FeatureFlags["FF_CHAIN_SYNC"] = false;
-    }
-
-    FeatureFlags["FF_CHAIN_SYNC"] ||= process.env.NEXT_PUBLIC_FF_CHAIN_SYNC === "on";
   }
-
-  const facebookSdkScript = (
-    <script
-      id="facebook-app-script"
-      dangerouslySetInnerHTML={{
-        __html: `
-          window.fbAsyncInit = function() {
-            FB.init({
-              appId      : '${FacebookAppId}',
-              cookie     : true,
-              xfbml      : true,
-              version    : 'v13.0'
-            });
-            FB.AppEvents.logPageView();
-          };
-
-          (function(d, s, id){
-            var js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) {return;}
-            js = d.createElement(s); js.id = id;
-            js.src = "https://connect.facebook.net/en_US/sdk.js";
-            fjs.parentNode.insertBefore(js, fjs);
-          }(document, 'script', 'facebook-jssdk'));
-        `,
-      }}
-    />
-  );
 
   return (
     <>
       <Head>
         <link rel="shortcut icon" href="/favicon.ico" />
         <title>Gitcoin Passport</title>
-        {facebookSdkScript}
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
       </Head>
       <SelfIdProvider
         client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}
         session={true}
       >
-        <UserContextProvider>
+        <DatastoreConnectionContextProvider>
           <OnChainContextProvider>
             <ScorerContextProvider>
               <CeramicContextProvider>
-                <ManageAccountCenter>
-                  <div className="font-body" suppressHydrationWarning>
-                    {typeof window === "undefined" ? null : (
+                <StampClaimingContextProvider>
+                  <ManageAccountCenter>
+                    <RenderOnlyOnClient>
                       <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
                         <Component {...pageProps} />
                       </ThemeWrapper>
-                    )}
-                  </div>
-                </ManageAccountCenter>
+                    </RenderOnlyOnClient>
+                  </ManageAccountCenter>
+                </StampClaimingContextProvider>
               </CeramicContextProvider>
             </ScorerContextProvider>
           </OnChainContextProvider>
-        </UserContextProvider>
+        </DatastoreConnectionContextProvider>
       </SelfIdProvider>
     </>
   );

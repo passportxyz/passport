@@ -25,17 +25,15 @@ abstract class IdenaAgeProvider implements Provider {
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload, context: IdenaContext): Promise<VerifiedPayload> {
     const token = payload.proofs.sessionKey;
-    const { valid, address, expiresInSeconds } = await checkAge(token, context, this.minAge);
-    if (!valid) {
-      return { valid: false };
-    }
+    const { valid, address, expiresInSeconds, errors } = await checkAge(token, context, this.minAge);
     return {
-      valid: true,
+      valid,
       record: {
-        address: address,
+        address,
         age: `gt${this.minAge}`,
       },
-      expiresInSeconds: expiresInSeconds,
+      errors,
+      expiresInSeconds,
     };
   }
 }
@@ -58,12 +56,10 @@ const checkAge = async (
   token: string,
   context: IdenaContext,
   min: number
-): Promise<{ valid: boolean; address?: string; expiresInSeconds?: number }> => {
-  try {
-    const result = await requestIdentityAge(token, context);
-    const expiresInSeconds = Math.max((new Date(result.expirationDate).getTime() - new Date().getTime()) / 1000, 0);
-    return { valid: result.age > min, address: result.address, expiresInSeconds };
-  } catch {
-    return { valid: false };
-  }
+): Promise<{ valid: boolean; address?: string; expiresInSeconds?: number; errors?: string[] }> => {
+  const result = await requestIdentityAge(token, context);
+  const expiresInSeconds = Math.max((new Date(result.expirationDate).getTime() - new Date().getTime()) / 1000, 0);
+
+  if (result.age > min) return { valid: true, address: result.address, expiresInSeconds };
+  return { valid: false, errors: [`Idena age "${result.age}" is less than required age of "${min}" epochs`] };
 };

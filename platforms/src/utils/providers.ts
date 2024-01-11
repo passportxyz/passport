@@ -2,13 +2,12 @@
 import { Provider, ProviderExternalVerificationError, ProviderInternalVerificationError } from "../types";
 import type { RequestPayload, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
 
-const UPDATED_PROVIDERS = [
-  "twitterAccountAgeGte#180",
-  "twitterAccountAgeGte#365",
-  "twitterAccountAgeGte#730",
-  "TrustaLabs",
-  "Simple",
-];
+class NoFailureReasonError extends Error {
+  constructor() {
+    super("No failure reason provided");
+    this.name = "NoFailureReasonError";
+  }
+}
 
 function reportUnhandledError(type: string, address: string, e: unknown) {
   if (process.env.EXIT_ON_UNHANDLED_ERROR === "true" && process.env.NODE_ENV === "development") {
@@ -42,62 +41,25 @@ export class Providers {
     }, {} as { [k: string]: Provider });
   }
 
-  // Given the payload is valid return the response of the selected Providers verification proceedure
   async verify(type: string, payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
-    if (UPDATED_PROVIDERS.includes(type)) {
-      return await this._updatedVerify(type, payload, context);
-    }
-
-    // collect provider from options
-    const provider = this._providers[type];
-
-    // if a provider is available - use it to verify the payload
-    if (provider) {
-      try {
-        // return the verification response
-        return await provider.verify(payload, context);
-      } catch (e) {
-        if (e instanceof Error) {
-          const message = `Unable to verify provider: ${e.stack.replace(/\n\s*(?= )/, "").replace(/\n.*$/gm, "")}`;
-
-          return {
-            valid: false,
-            error: [message],
-          };
-        }
-        throw e;
-      }
-    }
-
-    // unable to verify without provider
-    return {
-      valid: false,
-      error: ["Missing provider"],
-    };
-  }
-
-  // TODO Once error handling is updated for all providers, rename this to verify
-  // and delete the old verify method and the UPDATED_PROVIDERS array
-  async _updatedVerify(type: string, payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     const provider = this._providers[type];
 
     if (provider) {
       try {
         const result = await provider.verify(payload, context);
-        if (!result.valid && (!result.errors || result.errors.length === 0)) {
-          reportUnhandledError(type, payload.address, new Error("No reason provided for invalid payload"));
+        if (!result.valid && !result.errors) {
+          reportUnhandledError(type, payload.address, new NoFailureReasonError());
         }
         return result;
       } catch (e) {
         if (e instanceof ProviderExternalVerificationError || e instanceof ProviderInternalVerificationError) {
           return {
             valid: false,
-            // TODO change to "errors" once everything is updated
             // Also consider maybe not using error/errors as a key within the verification,
             // but instead have a new "details" array which would really be more about
             // "details of why you are not verified" which should be separated from
             // the concept of "errors". The "error" key would only be set here
-            error: [e.message],
+            errors: [e.message],
           };
         } else {
           reportUnhandledError(type, payload.address, e);
@@ -110,7 +72,7 @@ export class Providers {
 
           return {
             valid: false,
-            error: [message],
+            errors: [message],
           };
         }
       }
@@ -118,7 +80,7 @@ export class Providers {
 
     return {
       valid: false,
-      error: ["Missing provider"],
+      errors: ["Missing provider"],
     };
   }
 }

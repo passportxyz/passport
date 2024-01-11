@@ -6,7 +6,6 @@
     "identity",
     "schemas",
     "types",
-    "signer",
     "platforms"
   ],
   "npmClient": "yarn",

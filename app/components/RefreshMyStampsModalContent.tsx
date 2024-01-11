@@ -6,17 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { PlatformGroupSpec } from "@gitcoin/passport-platforms";
 
 // --- Identity tools
-import {
-  Stamp,
-  VerifiableCredential,
-  VerifiableCredentialRecord,
-  PROVIDER_ID,
-  PLATFORM_ID,
-} from "@gitcoin/passport-types";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
+import { Stamp, PROVIDER_ID, PLATFORM_ID } from "@gitcoin/passport-types";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 
 // --- Contexts
-import { UserContext } from "../context/userContext";
+import { useWalletStore } from "../context/walletStore";
 import { CeramicContext } from "../context/ceramicContext";
 
 // --- Datadog
@@ -24,18 +18,21 @@ import { datadogLogs } from "@datadog/browser-logs";
 
 // --- App components
 import { RefreshMyStampsModalContentCardList } from "../components/RefreshMyStampsModalContentCardList";
-import { reduceStampResponse } from "../utils/helpers";
+import { createSignedPayload, reduceStampResponse } from "../utils/helpers";
 import { ValidatedPlatform } from "../signer/utils";
 import Checkbox from "./Checkbox";
 import { Button } from "./Button";
 import { LoadButton } from "./LoadButton";
 
-const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
+// -- Utils
+import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
+import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 
 export type RefreshMyStampsModalContentProps = {
   resetStampsAndProgressState: () => void;
   onClose: () => void;
   validPlatforms: ValidatedPlatform[];
+  dashboardCustomizationKey: string | null;
 };
 
 export type evmPlatformProvider = {
@@ -48,13 +45,15 @@ export const RefreshMyStampsModalContent = ({
   onClose,
   validPlatforms,
   resetStampsAndProgressState,
+  dashboardCustomizationKey,
 }: RefreshMyStampsModalContentProps): JSX.Element => {
-  const { address, signer } = useContext(UserContext);
+  const address = useWalletStore((state) => state.address);
   const { handleAddStamps, handleDeleteStamps } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [showDataInfo, setShowDataInfo] = useState(false);
   const [disableOnboard, setDisplayOnboard] = useState(false);
+  const { did } = useDatastoreConnectionContext();
   const navigate = useNavigate();
 
   // TODO: update comments
@@ -86,14 +85,15 @@ export const RefreshMyStampsModalContent = ({
       localStorage.setItem("successfulRefresh", "false");
     }
     setLoading(false);
-    navigate("/dashboard");
+    navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`);
     resetStampsAndProgressState();
   };
 
   const handleFetchCredential = async (providerIDs: PROVIDER_ID[]): Promise<void> => {
     try {
+      if (!did) throw new Error("No DID found");
       if (selectedProviders.length > 0) {
-        const verified: VerifiableCredentialRecord = await fetchVerifiableCredential(
+        const verified = await fetchVerifiableCredential(
           iamUrl,
           {
             type: "EVMBulkVerify",
@@ -101,8 +101,9 @@ export const RefreshMyStampsModalContent = ({
             version: "0.0.0",
             address: address || "",
             proofs: {},
+            signatureType: IAM_SIGNATURE_TYPE,
           },
-          signer as { signMessage: (message: string) => Promise<string> }
+          (data: any) => createSignedPayload(did, data)
         );
 
         const vcs = reduceStampResponse(selectedProviders, verified.credentials);
@@ -144,7 +145,7 @@ export const RefreshMyStampsModalContent = ({
     <div className="flex grow flex-col items-center pb-6">
       <div className="w-full grow px-4 md:px-8">
         {validPlatforms.length > 0 ? (
-          <div className="flex flex-col text-white">
+          <div className="flex flex-col text-color-1">
             <div className="my-4 font-heading text-2xl md:my-6">Stamps Found</div>
             <div>
               {" "}
@@ -156,7 +157,7 @@ export const RefreshMyStampsModalContent = ({
                 setSelectedProviders={setSelectedProviders}
               />
             </div>
-            <div className="mt-8 cursor-pointer text-center text-color-3 underline">
+            <div className="mt-8 cursor-pointer text-center text-color-2 underline">
               <a onClick={() => setShowDataInfo(!showDataInfo)}>How is my data stored?</a>
             </div>
             {showDataInfo && (
@@ -171,7 +172,12 @@ export const RefreshMyStampsModalContent = ({
               </div>
             )}
             <div className="mt-8 grid grid-cols-2 items-center justify-center gap-6">
-              <Button variant="secondary" onClick={() => navigate("/dashboard")}>
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`)
+                }
+              >
                 Cancel
               </Button>
               <LoadButton
@@ -186,10 +192,10 @@ export const RefreshMyStampsModalContent = ({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center text-center text-white">
-            <div className="mt-4 mb-6 flex h-10 w-10"></div>
+          <div className="flex flex-col items-center text-center text-color-1">
+            <div className="mb-6 mt-4 flex h-10 w-10"></div>
             <div className="w-3/4 text-3xl">No New Web3 Stamps Detected</div>
-            <div className="my-20 text-xl text-color-3">
+            <div className="my-20 text-xl text-color-2">
               We did not find any new Web3 stamps to add to your passport. Completing the actions for a web3 stamp and
               resubmitting will ensure that stamp is added (for example: Obtain an ENS name, NFT, etc.). Please return
               to the dashboard and select additional stamps to verify your unique humanity by connecting to external
@@ -198,7 +204,7 @@ export const RefreshMyStampsModalContent = ({
             <Button
               className="w-full"
               onClick={() => {
-                navigate("/dashboard");
+                navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`);
                 resetStampsAndProgressState();
               }}
             >
@@ -207,7 +213,7 @@ export const RefreshMyStampsModalContent = ({
           </div>
         )}
       </div>
-      <div className="mt-8 mb-2 flex text-color-1">
+      <div className="mb-2 mt-8 flex text-color-1">
         <Checkbox
           data-testid="checkbox-onboard-hide"
           id="checkbox-onboard-hide"

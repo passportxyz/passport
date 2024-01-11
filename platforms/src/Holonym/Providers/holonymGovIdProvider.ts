@@ -1,5 +1,5 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Ethers library
@@ -44,6 +44,9 @@ export class HolonymGovIdProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
     const address = (await getAddress(payload)).toLowerCase();
+    const errors = [];
+    let record = undefined,
+      valid = false;
 
     try {
       // define a provider using the alchemy api key
@@ -53,22 +56,30 @@ export class HolonymGovIdProvider implements Provider {
 
       // Query contract for user's uniqueness
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-      const valid: boolean = await contract.isUniqueForAction(address, actionId);
+      valid = await contract.isUniqueForAction(address, actionId);
+
+      if (valid) {
+        record = {
+          // store the address into the proof records
+          address,
+        };
+      } else {
+        errors.push(
+          `We were unable to verify that your address was unique for action -- isUniqueForAction: ${String(valid)}.`
+        );
+      }
+
+      if (!valid && errors.length === 0) {
+        errors.push("We are unable to determine the error at this time.");
+      }
 
       return {
         valid,
-        record: valid
-          ? {
-              // store the address into the proof records
-              address,
-            }
-          : undefined,
+        record,
+        errors,
       };
-    } catch (e) {
-      return {
-        valid: false,
-        error: [JSON.stringify(e)],
-      };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Holonym Government ID verification failure: ${JSON.stringify(e)}.`);
     }
   }
 }

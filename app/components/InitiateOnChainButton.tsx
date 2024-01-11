@@ -2,22 +2,18 @@
 // --- React Methods
 import React, { useState } from "react";
 
-// --Chakra UI Elements
-import { LinkIcon } from "@heroicons/react/20/solid";
-
 // --- Style Components
 import { OnchainSidebar } from "./OnchainSidebar";
+import { Button } from "./Button";
 
-const InitiateOnChainButton = () => {
+const InitiateOnChainButton = ({ className }: { className?: string }) => {
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
 
   return (
     <>
-      <button className="h-10 w-10 rounded-md border border-muted" onClick={() => setShowSidebar(true)}>
-        <div className="flex justify-center">
-          <img src="./assets/on-chain-icon.svg" className="p-2.5" alt="Initiate on chain passport icon" />
-        </div>
-      </button>
+      <Button className={`${className}`} onClick={() => setShowSidebar(true)}>
+        Bring Passport onchain
+      </Button>
       <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
     </>
   );

@@ -39,7 +39,11 @@ export class PassportDatabase implements DataStorageBase {
     return "created";
   }
 
-  processPassportResponse = async (request: Promise<any>, requestType: string): Promise<PassportLoadResponse> => {
+  processPassportResponse = async (
+    request: Promise<any>,
+    requestType: string,
+    allowEmpty?: boolean
+  ): Promise<PassportLoadResponse> => {
     let passport: Passport;
     let status: PassportLoadStatus = "Success";
     let errorDetails: PassportLoadErrorDetails;
@@ -49,7 +53,7 @@ export class PassportDatabase implements DataStorageBase {
       this.logger.info(`[Scorer] made ${requestType} request for passport for did ${this.did} => ${this.address}`);
 
       const { data } = response;
-      if (data && data.success && (this.allowEmpty || data.stamps.length !== 0)) {
+      if (data && data.success && (this.allowEmpty || allowEmpty || data.stamps.length !== 0)) {
         passport = {
           issuanceDate: null,
           expiryDate: null,
@@ -78,7 +82,7 @@ export class PassportDatabase implements DataStorageBase {
 
   async getPassport(): Promise<PassportLoadResponse> {
     return await this.processPassportResponse(
-      axios.get(`${this.passportScorerUrl}ceramic-cache/stamp?address=${this.address}`),
+      axios.get(`${this.passportScorerUrl}/stamp?address=${this.address}`),
       "get"
     );
   }
@@ -91,7 +95,7 @@ export class PassportDatabase implements DataStorageBase {
     }));
 
     return await this.processPassportResponse(
-      axios.post(`${this.passportScorerUrl}ceramic-cache/stamps/bulk`, stampsToSave, {
+      axios.post(`${this.passportScorerUrl}/stamps/bulk`, stampsToSave, {
         headers: { Authorization: `Bearer ${this.token}` },
       }),
       "post"
@@ -105,11 +109,12 @@ export class PassportDatabase implements DataStorageBase {
   deleteStamps = async (providers: PROVIDER_ID[]): Promise<PassportLoadResponse> => {
     this.logger.info(`deleting stamp from passportScorer for ${providers.join(", ")} on ${this.address}`);
     return await this.processPassportResponse(
-      axios.delete(`${this.passportScorerUrl}ceramic-cache/stamps/bulk`, {
+      axios.delete(`${this.passportScorerUrl}/stamps/bulk`, {
         data: providers.map((provider) => ({ provider })),
         headers: { Authorization: `Bearer ${this.token}` },
       }),
-      "delete"
+      "delete",
+      true
     );
   };
 
@@ -117,7 +122,7 @@ export class PassportDatabase implements DataStorageBase {
     this.logger.info(`patching stamps in passportScorer for address: ${this.address}`);
     const body = stampPatches.map(({ provider, credential }) => ({ provider, stamp: credential }));
     return await this.processPassportResponse(
-      axios.patch(`${this.passportScorerUrl}ceramic-cache/stamps/bulk`, body, {
+      axios.patch(`${this.passportScorerUrl}/stamps/bulk`, body, {
         headers: { Authorization: `Bearer ${this.token}` },
       }),
       "patch"

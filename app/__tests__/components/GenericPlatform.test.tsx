@@ -5,20 +5,18 @@ import { GenericPlatform } from "../../components/GenericPlatform";
 import { platforms } from "@gitcoin/passport-platforms";
 const { Ens } = platforms;
 
-import { UserContextState } from "../../context/userContext";
 import { CeramicContextState } from "../../context/ceramicContext";
 import { mockAddress } from "../../__test-fixtures__/onboardHookValues";
 import { UN_SUCCESSFUL_ENS_RESULT, SUCCESFUL_ENS_RESULTS } from "../../__test-fixtures__/verifiableCredentialResults";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity/dist/commonjs/src/credentials";
-import {
-  makeTestCeramicContext,
-  makeTestUserContext,
-  renderWithContext,
-} from "../../__test-fixtures__/contextTestHelpers";
+import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
+import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { mock } from "jest-mock-extended";
-import { Drawer, DrawerOverlay } from "@chakra-ui/react";
+import { Drawer, DrawerOverlay, ChakraProvider } from "@chakra-ui/react";
 import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
+import { PlatformScoreSpec } from "../../context/scorerContext";
+import { getPlatformSpec } from "../../config/platforms";
+import { PlatformSpec } from "@gitcoin/passport-platforms";
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -26,13 +24,12 @@ jest.mock("@didtools/cacao", () => ({
   },
 }));
 
-jest.mock("@gitcoin/passport-identity/dist/commonjs/src/credentials", () => ({
+jest.mock("@gitcoin/passport-identity", () => ({
   fetchVerifiableCredential: jest.fn(),
 }));
-jest.mock("../../utils/onboard.ts");
-const handleFetchCredential = jest.fn();
 
 jest.mock("../../utils/helpers.tsx", () => ({
+  createSignedPayload: jest.fn(),
   generateUID: jest.fn(),
   getProviderSpec: jest.fn(),
   difference: (setA: any, setB: any) => ({
@@ -48,19 +45,17 @@ jest.mock("next/router", () => ({
 
 const mockToggleConnection = jest.fn();
 const mockCreatePassport = jest.fn();
-const mockHandleAddStamp = jest.fn().mockResolvedValue(undefined);
 const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
-const mockUserContext: UserContextState = makeTestUserContext({
-  toggleConnection: mockToggleConnection,
-  address: mockAddress,
-  signer: mockSigner,
-});
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
   handleCreatePassport: mockCreatePassport,
 });
 
-// TODO
+const EnsScoreSpec: PlatformScoreSpec = {
+  ...(getPlatformSpec("Ens") as PlatformSpec),
+  possiblePoints: 3,
+  earnedPoints: 1,
+};
 
 describe("when user has not verified with EnsProvider", () => {
   beforeEach(async () => {
@@ -73,11 +68,16 @@ describe("when user has not verified with EnsProvider", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />
-        <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.ProviderConfig} />
+        <GenericPlatform
+          platform={new Ens.EnsPlatform()}
+          platFormGroupSpec={Ens.ProviderConfig}
+          platformScoreSpec={EnsScoreSpec}
+          onClose={() => {}}
+        />
       </Drawer>
     );
 
-    renderWithContext(mockUserContext, mockCeramicContext, drawer());
+    renderWithContext(mockCeramicContext, drawer());
     const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
     expect(initialVerifyButton).toBeInTheDocument();
   });
@@ -85,34 +85,46 @@ describe("when user has not verified with EnsProvider", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />
-        <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.ProviderConfig} />
+        <GenericPlatform
+          platform={new Ens.EnsPlatform()}
+          platFormGroupSpec={Ens.ProviderConfig}
+          platformScoreSpec={EnsScoreSpec}
+          onClose={() => {}}
+        />
       </Drawer>
     );
-    renderWithContext(mockUserContext, mockCeramicContext, drawer());
+    renderWithContext(mockCeramicContext, drawer());
 
     const firstSwitch = screen.queryByTestId("select-all");
-    await fireEvent.click(firstSwitch as HTMLElement);
+    fireEvent.click(firstSwitch as HTMLElement);
     const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
 
-    await fireEvent.click(initialVerifyButton as HTMLElement);
+    fireEvent.click(initialVerifyButton as HTMLElement);
     await waitFor(() => {
       expect(fetchVerifiableCredential).toHaveBeenCalled();
     });
   });
   it("should show success toast when credential is fetched", async () => {
     const drawer = () => (
-      <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
-        <DrawerOverlay />
-        <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.ProviderConfig} />
-      </Drawer>
+      <ChakraProvider>
+        <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
+          <DrawerOverlay />
+          <GenericPlatform
+            platform={new Ens.EnsPlatform()}
+            platFormGroupSpec={Ens.ProviderConfig}
+            platformScoreSpec={EnsScoreSpec}
+            onClose={() => {}}
+          />
+        </Drawer>
+      </ChakraProvider>
     );
-    renderWithContext(mockUserContext, mockCeramicContext, drawer());
+    renderWithContext(mockCeramicContext, drawer());
 
     const firstSwitch = screen.queryByTestId("select-all");
-    await fireEvent.click(firstSwitch as HTMLElement);
+    fireEvent.click(firstSwitch as HTMLElement);
     const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
 
-    await fireEvent.click(initialVerifyButton as HTMLElement);
+    fireEvent.click(initialVerifyButton as HTMLElement);
     // Wait to see the done toast
     await waitFor(() => {
       expect(screen.getByText("All Ens data points verified.")).toBeInTheDocument();
@@ -128,16 +140,21 @@ describe("Mulitple EVM plaftorms", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />
-        <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.ProviderConfig} />
+        <GenericPlatform
+          platform={new Ens.EnsPlatform()}
+          platFormGroupSpec={Ens.ProviderConfig}
+          platformScoreSpec={EnsScoreSpec}
+          onClose={() => {}}
+        />
       </Drawer>
     );
-    renderWithContext(mockUserContext, mockCeramicContext, drawer());
+    renderWithContext(mockCeramicContext, drawer());
 
     const firstSwitch = screen.queryByTestId("select-all");
-    await fireEvent.click(firstSwitch as HTMLElement);
+    fireEvent.click(firstSwitch as HTMLElement);
     const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
 
-    await fireEvent.click(initialVerifyButton as HTMLElement);
+    fireEvent.click(initialVerifyButton as HTMLElement);
     await waitFor(async () => {
       const verifyModal = await screen.findByRole("dialog");
       expect(verifyModal).toBeInTheDocument();
@@ -147,22 +164,25 @@ describe("Mulitple EVM plaftorms", () => {
 
 it("should indicate that there was an error issuing the credential", async () => {
   const drawer = () => (
-    <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
-      <DrawerOverlay />
-      <GenericPlatform platform={new Ens.EnsPlatform()} platFormGroupSpec={Ens.ProviderConfig} />
-    </Drawer>
+    <ChakraProvider>
+      <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
+        <DrawerOverlay />
+        <GenericPlatform
+          platform={new Ens.EnsPlatform()}
+          platFormGroupSpec={Ens.ProviderConfig}
+          platformScoreSpec={EnsScoreSpec}
+          onClose={() => {}}
+        />
+      </Drawer>
+    </ChakraProvider>
   );
-  renderWithContext(
-    mockUserContext,
-    { ...mockCeramicContext, handlePatchStamps: jest.fn().mockRejectedValue(500) },
-    drawer()
-  );
+  renderWithContext({ ...mockCeramicContext, handlePatchStamps: jest.fn().mockRejectedValue(500) }, drawer());
 
   const firstSwitch = screen.queryByTestId("select-all");
-  await fireEvent.click(firstSwitch as HTMLElement);
+  fireEvent.click(firstSwitch as HTMLElement);
   const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
 
-  await fireEvent.click(initialVerifyButton as HTMLElement);
+  fireEvent.click(initialVerifyButton as HTMLElement);
   await waitFor(() => {
     expect(screen.getByText("There was an error verifying your stamp. Please try again.")).toBeInTheDocument();
   });

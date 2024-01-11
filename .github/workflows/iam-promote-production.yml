@@ -63,8 +63,25 @@ jobs:
     outputs:
       dockerTag: ${{ steps.vars.outputs.sha_short }}
 
+  check-provider-bitmap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.18
+          cache: "yarn"
+      - name: Install Packages
+        run: yarn install
+      - name: Check provider bitmaps
+        uses: ./.github/actions/check-provider-bitmaps
+        with:
+          ALCHEMY_API_KEY_OP: ${{ secrets.ALCHEMY_API_KEY_OP }}
+          ALCHEMY_API_KEY_OP_SEPOLIA: ${{ secrets.ALCHEMY_API_KEY_OP_SEPOLIA }}
+
   deploy-production:
-    needs: build-and-test
+    needs: [build-and-test, check-provider-bitmap]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -72,13 +89,14 @@ jobs:
         uses: actions/setup-node@v2
         with:
           cache: "yarn"
-          cache-dependency-path: infra/production/package-lock.json
+          cache-dependency-path: infra/package-lock.json
       # Update the pulumi stack with new image
       - run: |
           npm install
+          cd prod
           pulumi stack select -c gitcoin/dpopp/production
           pulumi config -s gitcoin/dpopp/production set aws:region us-east-1 --non-interactive
-        working-directory: infra/production
+        working-directory: infra
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
       - uses: pulumi/actions@v3

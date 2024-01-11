@@ -1,5 +1,6 @@
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
+import { ProviderExternalVerificationError } from "../../types";
 import { HolonymGovIdProvider } from "../Providers/holonymGovIdProvider";
 
 const mockIsUniqueForAction = jest.fn();
@@ -32,6 +33,7 @@ describe("Attempt verification", function () {
     expect(mockIsUniqueForAction).toBeCalledWith(MOCK_ADDRESS, actionId);
     expect(verifiedPayload).toEqual({
       valid: true,
+      errors: [],
       record: {
         address: MOCK_ADDRESS,
       },
@@ -50,6 +52,8 @@ describe("Attempt verification", function () {
     expect(mockIsUniqueForAction).toBeCalledWith(UNREGISTERED_ADDRESS, actionId);
     expect(verifiedPayload).toEqual({
       valid: false,
+      errors: ["We were unable to verify that your address was unique for action -- isUniqueForAction: false."],
+      record: undefined,
     });
   });
 
@@ -58,14 +62,11 @@ describe("Attempt verification", function () {
     const UNREGISTERED_ADDRESS = "0xunregistered";
 
     const holonym = new HolonymGovIdProvider();
-    const verifiedPayload = await holonym.verify({
-      address: UNREGISTERED_ADDRESS,
-    } as RequestPayload);
 
-    expect(mockIsUniqueForAction).toBeCalledWith(UNREGISTERED_ADDRESS, actionId);
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      error: [JSON.stringify("some error")],
-    });
+    await expect(async () => {
+      return await holonym.verify({
+        address: UNREGISTERED_ADDRESS,
+      } as RequestPayload);
+    }).rejects.toThrow(ProviderExternalVerificationError);
   });
 });

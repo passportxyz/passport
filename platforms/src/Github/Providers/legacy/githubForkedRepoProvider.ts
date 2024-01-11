@@ -33,7 +33,7 @@ export class ForkedGithubRepoProvider implements Provider {
 
     return {
       valid: valid,
-      error: errors,
+      errors: errors,
       record: valid
         ? {
             id: `${verifiedUserPayload.id}gte1Fork`,

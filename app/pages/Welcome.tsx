@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
 import React, { useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 // --- Types
 import { Status, Step } from "../components/Progress";
@@ -21,13 +21,14 @@ import { useDisclosure } from "@chakra-ui/react";
 
 // --- Contexts
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
-import { UserContext } from "../context/userContext";
+import { useWalletStore } from "../context/walletStore";
 import { InitialWelcome } from "../components/InitialWelcome";
 import LoadingScreen from "../components/LoadingScreen";
 
 // --- Utils
 import { fetchPossibleEVMStamps, ValidatedPlatform } from "../signer/utils";
 import BodyWrapper from "../components/BodyWrapper";
+import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 
 const MIN_DELAY = 50;
 const MAX_DELAY = 800;
@@ -36,16 +37,19 @@ const getStepDelay = () => Math.floor(Math.random() * (MAX_DELAY - MIN_DELAY + 1
 export default function Welcome() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { passport, allPlatforms, isLoadingPassport } = useContext(CeramicContext);
-  const { wallet, address } = useContext(UserContext);
+  const { dbAccessTokenStatus } = useDatastoreConnectionContext();
+  const address = useWalletStore((state) => state.address);
+  const [searchParams] = useSearchParams();
+  const dashboardCustomizationKey = searchParams.get("dashboard");
 
   const navigate = useNavigate();
 
   // Route user to home page when wallet is disconnected
   useEffect(() => {
-    if (!wallet) {
-      navigate("/");
+    if (!address) {
+      navigate(`/${dashboardCustomizationKey ? `?dashboard=${dashboardCustomizationKey}` : ""}`);
     }
-  }, [wallet]);
+  }, [address]);
 
   const initialSteps = [
     {
@@ -140,32 +144,33 @@ export default function Welcome() {
     <PageRoot className="text-color-2">
       <HeaderContentFooterGrid>
         <div className={`${PAGE_PADDING} bg-background`}>
-          <MinimalHeader className={`border-b border-accent-2`} />
+          <MinimalHeader className={`border-b border-foreground-6`} />
         </div>
         <BodyWrapper className="flex justify-center">
-          <div className="max-w-[464px]">
-            {isLoadingPassport === IsLoadingPassportState.Idle ||
-            isLoadingPassport === IsLoadingPassportState.FailedToConnect ? (
-              passport && passport.stamps.length > 0 ? (
-                <WelcomeBack
-                  handleFetchPossibleEVMStamps={handleFetchPossibleEVMStamps}
-                  onOpen={onOpen}
-                  resetStampsAndProgressState={resetStampsAndProgressState}
-                />
-              ) : (
-                <InitialWelcome
-                  onBoardFinished={async () => {
-                    if (address) {
-                      handleFetchPossibleEVMStamps(address, allPlatforms);
-                      onOpen();
-                    }
-                  }}
-                />
-              )
+          {(isLoadingPassport === IsLoadingPassportState.Idle ||
+            isLoadingPassport === IsLoadingPassportState.FailedToConnect) &&
+          dbAccessTokenStatus === "connected" ? (
+            passport && passport.stamps.length > 0 ? (
+              <WelcomeBack
+                handleFetchPossibleEVMStamps={handleFetchPossibleEVMStamps}
+                onOpen={onOpen}
+                resetStampsAndProgressState={resetStampsAndProgressState}
+                dashboardCustomizationKey={dashboardCustomizationKey}
+              />
             ) : (
-              <LoadingScreen />
-            )}
-          </div>
+              <InitialWelcome
+                onBoardFinished={async () => {
+                  if (address) {
+                    handleFetchPossibleEVMStamps(address, allPlatforms);
+                    onOpen();
+                  }
+                }}
+                dashboardCustomizationKey={dashboardCustomizationKey}
+              />
+            )
+          ) : (
+            <LoadingScreen />
+          )}
         </BodyWrapper>
       </HeaderContentFooterGrid>
       <RefreshMyStampsModal
@@ -174,6 +179,7 @@ export default function Welcome() {
         onClose={onClose}
         validPlatforms={validPlatforms}
         resetStampsAndProgressState={resetStampsAndProgressState}
+        dashboardCustomizationKey={dashboardCustomizationKey}
       />
     </PageRoot>
   );

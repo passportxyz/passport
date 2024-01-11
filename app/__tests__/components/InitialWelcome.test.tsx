@@ -1,5 +1,4 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import "@testing-library/jest-dom/extend-expect";
 import { InitialWelcome } from "../../components/InitialWelcome";
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +8,7 @@ jest.mock("react-router-dom", () => ({
 
 const defaultProps = {
   onBoardFinished: jest.fn(),
+  dashboardCustomizationKey: null,
 };
 
 describe("InitialWelcome", () => {
@@ -27,12 +27,12 @@ describe("InitialWelcome", () => {
     // Click "Next" to go to step 2
     fireEvent.click(nextButton);
     expect(screen.getByText("Introducing Passport Scoring")).toBeInTheDocument();
-    expect(screen.getByText("Get Your Unique Humanity Score")).toBeInTheDocument();
+    expect(screen.getByText("Your Unique Humanity Score")).toBeInTheDocument();
 
     // Click "Next" to go to step 3
     fireEvent.click(nextButton);
     expect(screen.getByText("Get Started")).toBeInTheDocument();
-    expect(screen.getByText("One-Click Verification")).toBeInTheDocument();
+    expect(screen.getByText("Verification Steps")).toBeInTheDocument();
 
     // Click "Next" to finish the steps
     fireEvent.click(nextButton);
@@ -52,7 +52,7 @@ describe("InitialWelcome", () => {
     // Click "Next" to go to step 3
     fireEvent.click(nextButton);
 
-    const skipButton = screen.getByText("Skip For Now");
+    const skipButton = screen.getByText("Skip for now");
 
     // Click "Skip For Now" to reset the step and navigate to the dashboard
     fireEvent.click(skipButton);

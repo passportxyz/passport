@@ -1,7 +1,6 @@
 import React from "react";
 import { screen, render, waitFor } from "@testing-library/react";
 
-import { UserContextState } from "../../context/userContext";
 import {
   RefreshMyStampsModalContentCardList,
   RefreshMyStampsModalCardListProps,
@@ -10,11 +9,7 @@ import {
   RefreshMyStampsModalContent,
   RefreshMyStampsModalContentProps,
 } from "../../components/RefreshMyStampsModalContent";
-import {
-  makeTestCeramicContext,
-  makeTestUserContext,
-  renderWithContext,
-} from "../../__test-fixtures__/contextTestHelpers";
+import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
 import { ValidatedPlatform } from "../../signer/utils";
 
@@ -40,9 +35,8 @@ const RefreshMyStampsModalContentPropsList: RefreshMyStampsModalContentProps = {
   resetStampsAndProgressState: jest.fn(),
   onClose: jest.fn(),
   validPlatforms,
+  dashboardCustomizationKey: null,
 };
-
-jest.mock("../../utils/onboard.ts");
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -60,7 +54,6 @@ jest.mock("../../components/RefreshMyStampsModalContentCard.tsx", () => ({
   ),
 }));
 
-const mockUserContext: UserContextState = makeTestUserContext();
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 beforeEach(() => {
@@ -77,7 +70,7 @@ describe("RefreshMyStampsModalContentCardList", () => {
       );
     };
 
-    renderWithContext(mockUserContext, mockCeramicContext, refreshModal());
+    renderWithContext(mockCeramicContext, refreshModal());
     await screen.findByTestId("refresh-my-stamps-modal-content-card");
   });
 
@@ -86,6 +79,7 @@ describe("RefreshMyStampsModalContentCardList", () => {
       resetStampsAndProgressState: jest.fn(),
       onClose: jest.fn(),
       validPlatforms: [],
+      dashboardCustomizationKey: null,
     };
 
     const refreshModal = () => {
@@ -96,7 +90,7 @@ describe("RefreshMyStampsModalContentCardList", () => {
       );
     };
 
-    renderWithContext(mockUserContext, mockCeramicContext, refreshModal());
+    renderWithContext(mockCeramicContext, refreshModal());
     await screen.findByText("No New Web3 Stamps Detected");
   });
 });

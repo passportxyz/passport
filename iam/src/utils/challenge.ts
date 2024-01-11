@@ -1,6 +1,8 @@
 // ---- Return randomBytes as a challenge to test that the user has control of a provided address
-import { ChallengePayload, RequestPayload } from "@gitcoin/passport-types";
+import { ChallengePayload, RequestPayload, VerifyRequestBody } from "@gitcoin/passport-types";
 import crypto from "crypto";
+import { verifyDidChallenge } from "./verifyDidChallenge.js";
+import { utils } from "ethers";
 // request a challenge sig
 export const getChallenge = (payload: RequestPayload): ChallengePayload => {
   // @TODO - expand this to allow providers to set custom challanges?
@@ -34,4 +36,18 @@ export const getChallenge = (payload: RequestPayload): ChallengePayload => {
       error: ["Missing address"],
     };
   }
+};
+
+export const verifyChallengeAndGetAddress = async ({
+  challenge,
+  payload,
+  signedChallenge,
+}: VerifyRequestBody): Promise<string> => {
+  // If signedChallenge is provided, use the did-session signed challenge
+  // otherwise, use the old wallet signed challenge
+  const uncheckedAddress = signedChallenge
+    ? await verifyDidChallenge(signedChallenge, challenge.credentialSubject.challenge)
+    : utils.verifyMessage(challenge.credentialSubject.challenge, payload.proofs.signature);
+
+  return utils.getAddress(uncheckedAddress);
 };
