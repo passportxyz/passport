@@ -10,7 +10,8 @@ import CredentialSchema from "./credential-compiled.json";
 const compose = new ComposeClient({
   ceramic: "http://localhost:7007",
   // TODO weird type error without the "as"
-  definition: CredentialSchema as RuntimeCompositeDefinition,
+  // TODO geri: check the cast below ...
+  definition: CredentialSchema as undefined as RuntimeCompositeDefinition,
 });
 
 // const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
