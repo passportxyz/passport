@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "clean": "rimraf node_modules",
-    "ceramic": "ceramic daemon",
-    "create-model": "node --experimental-json-modules ./scripts/create-model.mjs",
-    "publish-model": "node --experimental-json-modules ./scripts/publish-model.mjs"
+    "ceramic": "CERAMIC_ENABLE_EXPERIMENTAL_COMPOSE_DB=true ceramic daemon",
+    "models:create-composite": "composedb composite:create models/passportStamps.graphql --output=composites/gitcoin-passport-stamps-composite.json --did-private-key=${PRIVAKE_KEY}",
+    "models:deploy-composite": "composedb composite:deploy composites/gitcoin-passport-stamps-composite.json --ceramic-url=${CERAMIC_URL} --did-private-key=${PRIVAKE_KEY}",
+    "models:compile-composite": "composedb composite:compile composites/gitcoin-passport-stamps-composite.json definitions/gitcoin-passport-stamps.ts --ceramic-url=${CERAMIC_URL}"
   },
   "dependencies": {
     "@ceramicnetwork/http-client": "^2.2.1",
@@ -17,6 +18,7 @@
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
+    "@composedb/cli": "^0.6.1",
     "@ceramicnetwork/cli": "^2.3.1",
     "@glazed/devtools": "^0.2.0",
     "@types/node": "^16.11.6"

@@ -5,13 +5,11 @@ import { DID } from "dids";
 import { Stamp } from "@gitcoin/passport-types";
 
 import { CeramicStorage } from "./types";
-import CredentialSchema from "./credential-compiled.json";
+import { definition as GitcoinPassportStampDefinition } from "@gitcoin/passport-schemas/definitions/gitcoin-passport-stamps";
 
 const compose = new ComposeClient({
   ceramic: "http://localhost:7007",
-  // TODO weird type error without the "as"
-  // TODO geri: check the cast below ...
-  definition: CredentialSchema as undefined as RuntimeCompositeDefinition,
+  definition: GitcoinPassportStampDefinition,
 });
 
 // const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
