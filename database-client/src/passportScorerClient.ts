@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Logger } from "./ceramicClient";
+import { Logger } from "./logger";
 import { DataStorageBase } from "./types";
 import type { DID as CeramicDID } from "dids";
 import {
