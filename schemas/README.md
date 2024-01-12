@@ -1,27 +1,22 @@
-# Gitcoin Passport Ceramic Schemas
+# Gitcoin Passport Ceramic Ceramic Compose DB Setup
 
 ## Setup
 
-1. Install dependencies using `yarn install`
-1. Start a local Ceramic node using `yarn ceramic`
-1. Publish the model to your Ceramic node with `yarn publish-model`
+- `yarn install`
+- `yarn start:ceramic` to start local ceramic node
 
-## Scripts
+## GraphQL
 
-In the project directory, you can run:
+- Run the following commands to compile and deploy the schemas. I was unable to run them via yarn and had to run them from the command line. Will need ti fix passing the arguments via yarn.
 
-### `yarn create-model`
+  ````bash
+  TODO: Fix
 
-Runs the `create-model.mjs` script.
-This is only needed to make changes to the model used by the app.
-A hex-encoded 32-byte `SEED` environment variable must be present to create a key DID for the model when running the script.
+  ```bash
+  "models:create-composite": "composedb composite:create models/passportStamps.graphql --output=composites/gitcoin-passport-stamps-composite.json --did-private-key=${PRIVAKE_KEY}",
+    "models:deploy-composite": "composedb composite:deploy composites/gitcoin-passport-stamps-composite.json --ceramic-url=${CERAMIC_URL} --did-private-key=${PRIVAKE_KEY}",
+    "models:compile-composite": "composedb composite:compile composites/gitcoin-passport-stamps-composite.json definitions/gitcoin-passport-stamps.ts --ceramic-url=${CERAMIC_URL}"
+  ````
 
-Set the `CERAMIC_CLIENT_URL` environment variable to change the Ceramic node to run against - the scripts will default to `http://localhost:7007` if not provided.
-
-### `yarn publish-model`
-
-Runs the `publish-model.mjs` script to publish the models to Ceramic.
-
-## License
-
-Apache-2.0 OR MIT
+- Open `schemas/definitions/gitcoin-passport-stamps.ts` and copy the `definition` object into `schemas/composites/gitcoin-passport-stamps-composite.json`
+- run `yarn composedb graphql:server --ceramic-url=${CERAMIC_URL} --graphiql composites/gitcoin-passport-stamps-composite.json --did-private-key=${PRIVAKE_KEY} --port=5005`

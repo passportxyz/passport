@@ -2,6 +2,9 @@
   "name": "@gitcoin/passport-schemas",
   "version": "1.0.0",
   "private": true,
+  "injectEnvironmentFiles": [
+    ".env.yarn"
+  ],
   "scripts": {
     "clean": "rimraf node_modules",
     "ceramic": "CERAMIC_ENABLE_EXPERIMENTAL_COMPOSE_DB=true ceramic daemon",

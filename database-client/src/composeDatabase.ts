@@ -1,5 +1,5 @@
 import { ComposeClient } from "@composedb/client";
-import type { RuntimeCompositeDefinition } from "@composedb/types";
+// import type { RuntimeCompositeDefinition } from "@composedb/types";
 import { DID } from "dids";
 
 import { Stamp } from "@gitcoin/passport-types";

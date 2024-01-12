@@ -415,7 +415,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   }, [database]);
 
   const passportLoadSuccess = (
-    database: CeramicDatabase | PassportDatabase,
+    database: ComposeDatabase | PassportDatabase,
     passport?: Passport,
     skipLoadingState?: boolean
   ): Passport => {
@@ -446,7 +446,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const handlePassportUpdate = async (
     passportResponse: PassportLoadResponse,
-    database: CeramicDatabase | PassportDatabase,
+    database: ComposeDatabase | PassportDatabase,
     skipLoadingState?: boolean,
     isInitialLoad?: boolean
   ) => {
@@ -480,16 +480,17 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   };
 
   const fetchPassport = async (
-    database: CeramicDatabase | PassportDatabase,
+    database: ComposeDatabase | PassportDatabase,
     skipLoadingState?: boolean,
     isInitialLoad?: boolean
   ): Promise<Passport | undefined> => {
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
 
     // fetch, clean and set the new Passport state
-    const getResponse = await database.getPassport();
+    // const getResponse = await database.getPassport();
 
-    return await handlePassportUpdate(getResponse, database, skipLoadingState, isInitialLoad);
+    // return await handlePassportUpdate(getResponse, database, skipLoadingState, isInitialLoad);
+    return undefined;
   };
 
   const handleCreatePassport = async (): Promise<void> => {

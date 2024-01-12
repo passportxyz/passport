@@ -18,7 +18,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf dist node_modules",
-    "ceramic": "ceramic daemon",
+    "ceramic": "CERAMIC_ENABLE_EXPERIMENTAL_COMPOSE_DB='true' ceramic daemon --config composedb.config.json",
     "test:integration": "yarn build && yarn node --experimental-vm-modules $(yarn bin jest) -c jest.integration.config.js",
     "test": "yarn node --experimental-vm-modules $(yarn bin jest) -c jest.config.cjs"
   },
