@@ -58,7 +58,9 @@ type GitcoinPassportStampWrapper implements GitcoinPassportStampWrapperInterface
 
 # #### Create a type for the proof (this will most likely be reused) ####
 type GitcoinPassportVcProof {
-  _context: String! @string(minLength: 1, maxLength: 1024)
+  _context: [String!]!
+    @string(minLength: 1, maxLength: 1024)
+    @list(maxLength: 1024)
   type: String! @string(minLength: 1, maxLength: 1024)
   proofPurpose: String! @string(minLength: 1, maxLength: 1024)
   proofValue: String! @string(minLength: 1, maxLength: 1024)

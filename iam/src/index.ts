@@ -232,8 +232,6 @@ const issueCredentials = async (
             ...(verifyResult?.record || {}),
           };
 
-          const metaPointer = platforms[type]?.PlatformDetails?.metaPointer;
-
           const currentKey = payload.signatureType === "EIP712" ? eip712Key : key;
           // generate a VC for the given payload
           ({ credential } = await issueHashedCredential(
@@ -242,8 +240,7 @@ const issueCredentials = async (
             address,
             record,
             verifyResult.expiresInSeconds,
-            payload.signatureType,
-            metaPointer
+            payload.signatureType
           ));
         }
       } catch {
@@ -495,13 +492,11 @@ app.post("/api/v0.0.0/convert", (req: Request, res: Response): void => {
                 credentialSubject: {
                   "@context": {
                     hash: "https://schema.org/Text",
-                    metaPointer: "https://schema.org/URL",
                     provider: "https://schema.org/Text",
                   },
                   id,
                   hash,
                   provider,
-                  metaPointer: "https://passport.gitcoin.co",
                 },
               },
               stampCredentialDocument(verificationMethod),

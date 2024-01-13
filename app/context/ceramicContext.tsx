@@ -487,10 +487,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Loading);
 
     // fetch, clean and set the new Passport state
-    // const getResponse = await database.getPassport();
+    const getResponse = await database.getPassport();
 
-    // return await handlePassportUpdate(getResponse, database, skipLoadingState, isInitialLoad);
-    return undefined;
+    return await handlePassportUpdate(getResponse, database, skipLoadingState, isInitialLoad);
   };
 
   const handleCreatePassport = async (): Promise<void> => {
@@ -513,6 +512,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         handlePassportUpdate(addResponse, database);
 
         if (ceramicClient && addResponse.passport) {
+          debugger;
           ceramicClient
             .setStamps(addResponse.passport.stamps)
             .catch((e) => console.log("error setting ceramic stamps", e));

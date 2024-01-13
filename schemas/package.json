@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@ceramicnetwork/http-client": "^2.2.1",
+    "@composedb/types": "^0.6.0",
     "dids": "^3.0.0",
     "dotenv": "^16.0.0",
     "key-did-provider-ed25519": "^2.0.0",
@@ -21,8 +22,8 @@
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
-    "@composedb/cli": "^0.6.1",
     "@ceramicnetwork/cli": "^2.3.1",
+    "@composedb/cli": "^0.6.1",
     "@glazed/devtools": "^0.2.0",
     "@types/node": "^16.11.6"
   },

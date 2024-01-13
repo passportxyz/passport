@@ -2,10 +2,10 @@ import { ComposeClient } from "@composedb/client";
 // import type { RuntimeCompositeDefinition } from "@composedb/types";
 import { DID } from "dids";
 
-import { Stamp } from "@gitcoin/passport-types";
+import { PassportLoadResponse, Stamp } from "@gitcoin/passport-types";
 
 import { CeramicStorage } from "./types";
-import { definition as GitcoinPassportStampDefinition } from "@gitcoin/passport-schemas/definitions/gitcoin-passport-stamps";
+import { definition as GitcoinPassportStampDefinition } from "./gitcoin-passport-stamps";
 
 const compose = new ComposeClient({
   ceramic: "http://localhost:7007",
@@ -35,35 +35,76 @@ export class ComposeDatabase implements CeramicStorage {
 
   async setStamps(stamps: Stamp[]) {
     stamps.forEach(async (stamp) => {
-      console.log("stamp", stamp);
+      const { type, proof, credentialSubject, issuanceDate, expirationDate, issuer } = stamp.credential;
+
+      const input = {
+        content: {
+          _context: stamp.credential["@context"],
+          issuer,
+          issuanceDate,
+          expirationDate,
+          type,
+          credentialSubject: {
+            _context: credentialSubject["@context"],
+            ...credentialSubject,
+          },
+          proof,
+        },
+      };
+
+      console.log({ input });
+
       const result = await compose.executeQuery(
         `
-        mutation CreateGitcoinPassportVc($input: CreateGitcoinPassportVcInput!) {
-          createGitcoinPassportVc(input: $input) {
+        mutation CreateGitcoinPassportVc($input: CreateGitcoinPassportStampInput!) {
+          createGitcoinPassportStamp(input: $input) {
             document {
               id
-
             }
           }
         }`,
         {
-          input: {
-            content: {
-              issuer: stamp.credential.issuer,
-              issuanceDate: stamp.credential.issuanceDate,
-              expirationDate: stamp.credential.expirationDate,
-              type: stamp.credential.type,
-              credentialSubject: {
-                id: stamp.credential.credentialSubject.id,
-                provider: stamp.credential.credentialSubject.provider,
-                metaPointer: stamp.credential.credentialSubject.metaPointer,
-                hash: stamp.credential.credentialSubject.hash,
-              },
-            },
-          },
+          input,
         }
       );
       console.log("result", result);
     });
+  }
+
+  async getPassport(): Promise<PassportLoadResponse> {
+    // Implemented to comply with interface but not currently utilized
+    // const result = await compose.executeQuery(
+    //   `
+    //   query GetGitcoinPassportVcs($input: GetGitcoinPassportVcsInput!) {
+    //     getGitcoinPassportVcs(input: $input) {
+    //       document {
+    //         id
+    //         content {
+    //           issuer
+    //           issuanceDate
+    //           expirationDate
+    //           type
+    //           credentialSubject {
+    //             id
+    //             provider
+    //             metaPointer
+    //             hash
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }`,
+    //   {
+    //     input: {
+    //       where: {
+    //         issuer: this.did,
+    //       },
+    //     },
+    //   }
+    // );
+    // console.log("result", result);
+    return {
+      status: "ExceptionRaised",
+    };
   }
 }
