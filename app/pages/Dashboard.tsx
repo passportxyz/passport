@@ -52,8 +52,7 @@ const fail = "../assets/verification-failed-bright.svg";
 export default function Dashboard() {
   const { customizationKey } = useParams();
   const { usingCustomPanel, CustomPanel } = useDashboardCustomization(customizationKey);
-  const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms, cancelCeramicConnection } =
-    useContext(CeramicContext);
+  const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms } = useContext(CeramicContext);
 
   useEffect(() => {
     if (usingCustomPanel && customizationKey) {
@@ -235,17 +234,9 @@ export default function Dashboard() {
         <ProcessingPopup data-testid="db-stamps-alert">One moment while we load your Stamps...</ProcessingPopup>
       )}
 
-      {isLoadingPassport === IsLoadingPassportState.LoadingFromCeramic && (
-        <ProcessingPopup data-testid="ceramic-stamps-alert">
-          <>
-            Connecting to Ceramic...
-            <span
-              className="pl-4 text-color-1 no-underline hover:cursor-pointer hover:underline md:pl-12"
-              onClick={cancelCeramicConnection}
-            >
-              Cancel
-            </span>
-          </>
+      {isLoadingPassport === IsLoadingPassportState.CreatingPassport && (
+        <ProcessingPopup data-testid="initializing-alert">
+          <>Initializing your Passport...</>
         </ProcessingPopup>
       )}
 
@@ -323,7 +314,7 @@ export default function Dashboard() {
               className="col-span-full"
               isLoading={
                 isLoadingPassport == IsLoadingPassportState.Loading ||
-                isLoadingPassport == IsLoadingPassportState.LoadingFromCeramic ||
+                isLoadingPassport == IsLoadingPassportState.CreatingPassport ||
                 isLoadingPassport == IsLoadingPassportState.FailedToConnect
               }
             />
