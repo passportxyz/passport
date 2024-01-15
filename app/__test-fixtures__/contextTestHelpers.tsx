@@ -135,7 +135,7 @@ export const makeTestCeramicContextWithExpiredStamps = (
   return {
     ...makeTestCeramicContext(initialState),
     expiredPlatforms,
-    expiredProviders: ["ethPossessionsGte#1"],
+    expiredProviders: ["ETHAdvocate"],
   };
 };
 
