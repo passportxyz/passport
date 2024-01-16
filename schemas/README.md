@@ -13,9 +13,13 @@
   TODO: Fix
 
   ```bash
-  "models:create-composite": "composedb composite:create models/passportStamps.graphql --output=composites/gitcoin-passport-stamps-composite.json --did-private-key=${PRIVAKE_KEY}",
-    "models:deploy-composite": "composedb composite:deploy composites/gitcoin-passport-stamps-composite.json --ceramic-url=${CERAMIC_URL} --did-private-key=${PRIVAKE_KEY}",
-    "models:compile-composite": "composedb composite:compile composites/gitcoin-passport-stamps-composite.json definitions/gitcoin-passport-stamps.ts --ceramic-url=${CERAMIC_URL}"
+  composedb composite:create models/passportStamps.graphql --output=composites/gitcoin-passport-stamps-composite.json --did-private-key=${PRIVAKE_KEY}
+
+
+  composedb composite:deploy composites/gitcoin-passport-stamps-composite.json --ceramic-url=${CERAMIC_URL} --did-private-key=${PRIVAKE_KEY}
+
+
+  composedb composite:compile composites/gitcoin-passport-stamps-composite.json definitions/gitcoin-passport-stamps.ts --ceramic-url=${CERAMIC_URL}
   ````
 
 - Open `schemas/definitions/gitcoin-passport-stamps.ts` and copy the `definition` object into `schemas/composites/gitcoin-passport-stamps-composite.json`

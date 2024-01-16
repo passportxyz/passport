@@ -36,12 +36,21 @@ export type VerifiableCredential = {
   issuer: string;
   issuanceDate: string;
   expirationDate: string;
-  proof: {
+  proof?: {
     type: string;
     proofPurpose: string;
     verificationMethod: string;
     created: string;
     jws: string;
+    eip712Domain?: {
+      primaryType: string;
+      types: {
+        [key: string]: {
+          name: string;
+          type: string;
+        }[];
+      };
+    };
   };
 };
 

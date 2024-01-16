@@ -38,7 +38,7 @@
         "kjzl6hvfrbw6ca3q5r1rh58vf4f5umpwqovyyegbl6y5pxfw08g1bcu70l148bc",
         "kjzl6hvfrbw6c7bdo6avzvlic99m821vqs237lacri5cloqzug5ehhbqwhis1qi"
       ],
-      "id": "kjzl6hvfrbw6c8v5k4ga4eyw4kpem3kfm090clhjnn6a64jmrozagjumvov7k2a",
+      "id": "kjzl6hvfrbw6c74dtmpjszjfi0l55e3tidsqc2axb9h7ddjx0r9mgev2xb4p5gs",
       "accountRelation": { "type": "list" }
     },
     "GitcoinPassportStampWrapper": {
@@ -173,7 +173,11 @@
     "GitcoinPassportVcProof": {
       "type": { "type": "string", "required": true },
       "created": { "type": "datetime", "required": true },
-      "_context": { "type": "string", "required": true },
+      "_context": {
+        "type": "list",
+        "required": true,
+        "item": { "type": "string", "required": true }
+      },
       "proofValue": { "type": "string", "required": true },
       "eip712Domain": {
         "type": "reference",
