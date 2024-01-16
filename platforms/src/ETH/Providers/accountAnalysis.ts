@@ -24,7 +24,7 @@ export async function getETHAnalysis(address: string, context: ETHAnalysisContex
     return context.ethAnalysis.humanProbability;
   }
 
-  const response = (await axios.post(`${dataScienceEndpoint}/eth-stamp-predict`, {
+  const response = (await axios.post(`https://${dataScienceEndpoint}/eth-stamp-predict`, {
     address,
   })) as unknown as { data: ModelResponse };
 
