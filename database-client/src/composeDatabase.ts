@@ -2,7 +2,7 @@ import { ComposeClient } from "@composedb/client";
 // import type { RuntimeCompositeDefinition } from "@composedb/types";
 import { DID } from "dids";
 
-import { PassportLoadResponse, Stamp } from "@gitcoin/passport-types";
+import { PassportLoadResponse, Stamp, StampPatch } from "@gitcoin/passport-types";
 
 import { CeramicStorage } from "./types";
 import { definition as GitcoinPassportStampDefinition } from "./gitcoin-passport-stamps";
@@ -37,6 +37,30 @@ export class ComposeDatabase implements CeramicStorage {
     const { [oldKey]: old, ...others } = obj;
     return { ...others, [newKey]: old };
   }
+
+  patchStamps = async (stampPatches: StampPatch[]): Promise<PassportLoadResponse> => {
+    // fetch non deleted and revoked stamps
+    const existingStamps = await this.getPassport();
+
+    // get
+    // for p in payload:
+    //     if p.stamp:
+    //         stamp_object = CeramicCache(
+    //             type=CeramicCache.StampType.V1,
+    //             address=address,
+    //             provider=p.provider,
+    //             stamp=p.stamp,
+    //             updated_at=now,
+    //         )
+    //         stamp_objects.append(stamp_object)
+    //     else:
+    //         providers_to_delete.append(p.provider)
+
+    // Iterate through create and update and perform compose db action using stream id
+    return {
+      status: "Success",
+    };
+  };
 
   async setStamps(stamps: Stamp[]) {
     const existingStamps = await this.getPassport();
