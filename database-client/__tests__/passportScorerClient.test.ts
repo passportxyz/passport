@@ -14,7 +14,7 @@ const address = "0x123456789abcdef";
 
 jest.mock("axios");
 
-const stamps = [
+export const stamps = [
   { provider: "provider1", credential: "credential1" } as unknown as Stamp,
   { provider: "provider2", credential: "credential2" } as unknown as Stamp,
 ];
