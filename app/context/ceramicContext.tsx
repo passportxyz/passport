@@ -512,9 +512,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         handlePassportUpdate(addResponse, database);
 
         if (ceramicClient && addResponse.passport) {
-          debugger;
           ceramicClient
-            .setStamps(addResponse.passport.stamps)
+            .addStamps(addResponse.passport.stamps)
             .catch((e) => console.log("error setting ceramic stamps", e));
         }
         if (dbAccessToken) {
@@ -536,13 +535,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         if (ceramicClient && patchResponse.passport) {
           (async () => {
             try {
-              const deleteProviderIds = stampPatches
-                .filter(({ credential }) => !credential)
-                .map(({ provider }) => provider);
-
-              // if (deleteProviderIds.length) await ceramicClient.deleteStampIDs(deleteProviderIds);
-
-              await ceramicClient.setStamps(patchResponse.passport?.stamps || []);
+              await ceramicClient.patchStamps(stampPatches);
             } catch (e) {
               console.log("error patching ceramic stamps", e);
             }
@@ -565,9 +558,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         const deleteResponse = await database.deleteStamps(providerIds);
         handlePassportUpdate(deleteResponse, database);
         if (ceramicClient && deleteResponse.status === "Success" && deleteResponse.passport?.stamps) {
-          ceramicClient
-            .setStamps(deleteResponse.passport.stamps)
-            .catch((e) => console.log("error setting ceramic stamps", e));
+          ceramicClient.deleteStamps(providerIds).catch((e) => console.log("error setting ceramic stamps", e));
         }
         if (dbAccessToken) {
           refreshScore(address, dbAccessToken);
