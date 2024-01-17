@@ -3,10 +3,9 @@ interface GitcoinAttestation
   type: [String!]! @string(minLength: 1, maxLength: 1024) @list(maxLength: 1024)
 }
 
-interface VerifiableCredentialSubject
-  @createModel(description: "A verifiable credential subject interface") {
-  _id: String! @string(minLength: 1, maxLength: 1024)
-}
+# interface VerifiableCredentialSubject
+#   @createModel(description: "A verifiable credential subject interface") {
+# }
 
 interface VerifiableCredentialProof
   @createModel(description: "A verifiable credential proof interface") {
@@ -18,7 +17,7 @@ interface VerifiableCredential implements GitcoinAttestation
   type: [String!]! @string(minLength: 1, maxLength: 1024) @list(maxLength: 1024)
   issuer: String! @string(minLength: 1, maxLength: 1024)
   issuanceDate: DateTime!
-  expirationDate: DateTime!
+  expirationDate: DateTime
 }
 
 interface VerifiableCredential
@@ -26,7 +25,7 @@ interface VerifiableCredential
   type: [String!]! @string(minLength: 1, maxLength: 1024) @list(maxLength: 1024)
   issuer: String! @string(minLength: 1, maxLength: 1024)
   issuanceDate: DateTime!
-  expirationDate: DateTime!
+  expirationDate: DateTime
 }
 
 interface GitcoinPassportStampWrapperInterface
@@ -58,7 +57,7 @@ type GitcoinPassportStampWrapper implements GitcoinPassportStampWrapperInterface
 
 # #### Create a type for the proof (this will most likely be reused) ####
 type GitcoinPassportVcProof {
-  _context: [String!]!
+  _context: [String!]
     @string(minLength: 1, maxLength: 1024)
     @list(maxLength: 1024)
   type: String! @string(minLength: 1, maxLength: 1024)
@@ -117,15 +116,16 @@ type EIP712DomainTypes {
 # }
 
 type GitcoinPassportVcCredentialSubjectContext {
+  id: String! @string(minLength: 1, maxLength: 1024)
   hash: String! @string(minLength: 1, maxLength: 1024)
   provider: String! @string(minLength: 1, maxLength: 1024)
 }
 
-type GitcoinPassportVcCredentialSubject implements VerifiableCredentialSubject {
-  _id: String! @string(minLength: 1, maxLength: 1024)
+type GitcoinPassportVcCredentialSubject {
+  id: String! @string(minLength: 1, maxLength: 1024)
   provider: String! @string(minLength: 1, maxLength: 1024)
   hash: String! @string(minLength: 1, maxLength: 1024)
-  _context: GitcoinPassportVcCredentialSubjectContext!
+  _context: GitcoinPassportVcCredentialSubjectContext
 }
 
 type GitcoinPassportStamp implements VerifiableCredential
@@ -142,7 +142,7 @@ type GitcoinPassportStamp implements VerifiableCredential
   type: [String!]! @string(minLength: 1, maxLength: 1024) @list(maxLength: 1024)
   issuer: String! @string(minLength: 1, maxLength: 1024)
   issuanceDate: DateTime!
-  expirationDate: DateTime!
+  expirationDate: DateTime
   credentialSubject: GitcoinPassportVcCredentialSubject!
   proof: GitcoinPassportVcProof!
 }
