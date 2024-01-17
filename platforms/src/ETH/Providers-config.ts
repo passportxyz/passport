@@ -4,7 +4,7 @@ import { ETHAdvocateProvider, ETHPioneerProvider, ETHMaxiProvider } from "./Prov
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/ethereumStampIcon.svg",
   platform: "ETH",
-  name: "ETH",
+  name: "Ethereum",
   description: "Connect to Ethereum to verify your network activity.",
   connectMessage: "Verify Account",
   isEVM: true,
