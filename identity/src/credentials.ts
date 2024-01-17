@@ -100,6 +100,7 @@ type CredentialExpiresAt = {
 };
 
 type Eip712CredentialSubject = {
+  "@context": object;
   [k: string]: any;
 };
 
@@ -164,7 +165,7 @@ export const issueChallengeCredential = async (
             challenge: "https://schema.org/Text",
             address: "https://schema.org/Text",
           },
-          
+
           id: `did:pkh:eip155:1:${record.address}`,
           provider: `challenge-${record.type}`,
           // extra fields to convey challenge data
@@ -248,7 +249,7 @@ export const issueHashedCredential = async (
         // },
       },
       stampCredentialDocument(verificationMethod),
-      ["https://w3id.org/security/suites/eip712sig-2021/v1"]
+      ["https://w3id.org/vc/status-list/2021/v1"]
     );
   } else {
     // generate a verifiableCredential
