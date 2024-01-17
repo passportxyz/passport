@@ -82,6 +82,14 @@ export class ComposeDatabase implements CeramicStorage {
     return input;
   };
 
+  executeQuery = async (query: string, input: any): Promise<any> => {
+    const result = await this.compose.executeQuery(query, input);
+    if (result.errors) {
+      throw new Error(String(result.errors));
+    }
+    return result;
+  };
+
   addStamps = async (stamps: Stamp[]): Promise<PassportLoadResponse> => {
     const vcResponses = [];
     const wrapperResponses = [];
@@ -90,14 +98,14 @@ export class ComposeDatabase implements CeramicStorage {
       const input = this.formatCredentialInput(stamp);
       const result = (await this.compose.executeQuery(
         `
-          mutation CreateGitcoinPassportVc($input: CreateGitcoinPassportStampInput!) {
-            createGitcoinPassportStamp(input: $input) {
-              document {
-                id
-              }
+        mutation CreateGitcoinPassportVc($input: CreateGitcoinPassportStampInput!) {
+          createGitcoinPassportStamp(input: $input) {
+            document {
+              id
             }
           }
-        `,
+        }
+      `,
         {
           input,
         }
