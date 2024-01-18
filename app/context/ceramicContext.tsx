@@ -232,7 +232,7 @@ if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS === "on") {
 export enum IsLoadingPassportState {
   Idle,
   Loading,
-  LoadingFromCeramic,
+  CreatingPassport,
   FailedToConnect,
 }
 
@@ -494,7 +494,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const handleCreatePassport = async (): Promise<void> => {
     if (database) {
-      setIsLoadingPassport(IsLoadingPassportState.LoadingFromCeramic);
+      setIsLoadingPassport(IsLoadingPassportState.CreatingPassport);
       await database.createPassport();
       await fetchPassport(database);
     }
