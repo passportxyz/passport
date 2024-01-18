@@ -5,7 +5,7 @@ import { DID } from "dids";
 import { PassportLoadResponse, PROVIDER_ID, Stamp, StampPatch, VerifiableCredential } from "@gitcoin/passport-types";
 
 import { CeramicStorage } from "./types";
-import { definition as GitcoinPassportStampDefinition } from "./gitcoin-passport-stamps";
+import { definition as GitcoinPassportStampDefinition } from "@gitcoin/passport-schemas/dist/esm/gitcoin-passport-stamps";
 
 const compose = new ComposeClient({
   ceramic: "http://localhost:7007",
@@ -84,6 +84,7 @@ export class ComposeDatabase implements CeramicStorage {
   };
 
   addStamps = async (stamps: Stamp[]): Promise<PassportLoadResponse> => {
+    console.log("geri add stamps: ", stamps);
     const vcResponses = [];
     const wrapperResponses = [];
     stamps.forEach(async (stamp) => {
@@ -146,6 +147,7 @@ export class ComposeDatabase implements CeramicStorage {
   };
 
   deleteStamps = async (providers: PROVIDER_ID[]): Promise<PassportLoadResponse> => {
+    console.log("geri deleteStamps providers: ", providers);
     const existingPassport = await this.getPassportWithWrapper();
 
     const stampsToDelete = existingPassport.filter((stamp) =>
@@ -162,6 +164,7 @@ export class ComposeDatabase implements CeramicStorage {
   };
 
   deleteStamp = async (streamId: string): Promise<PassportLoadResponse> => {
+    console.log("geri deleteStamp providers: ", streamId);
     const deleteRequest = (await compose.executeQuery(
       `
       mutation SoftDeleteGitcoinStampWrapper($updateInput: UpdateGitcoinPassportStampWrapperInput!) {
@@ -205,6 +208,7 @@ export class ComposeDatabase implements CeramicStorage {
 
   patchStamps = async (stampPatches: StampPatch[]): Promise<PassportLoadResponse> => {
     // fetch non deleted and revoked stamps
+    console.log("geri patchStamps providers: ", stampPatches);
 
     const existingPassport = await this.getPassportWithWrapper();
 
