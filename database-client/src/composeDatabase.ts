@@ -110,7 +110,6 @@ export class ComposeDatabase implements CeramicStorage {
           input,
         }
       )) as { data: { createGitcoinPassportStamp: { document: { id: string } } } };
-
       vcResponses.push(result);
 
       const vcID = result?.data?.createGitcoinPassportStamp?.document?.id;
@@ -159,9 +158,11 @@ export class ComposeDatabase implements CeramicStorage {
       providers.includes(stamp.vc.credentialSubject.provider as PROVIDER_ID)
     );
 
-    stampsToDelete.map(async (stamp) => {
-      await this.deleteStamp(stamp.id);
-    });
+    await Promise.all(
+      stampsToDelete.map(async (stamp) => {
+        await this.deleteStamp(stamp.id);
+      })
+    );
 
     return {
       status: "Success",

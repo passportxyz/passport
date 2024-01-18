@@ -149,8 +149,14 @@ const stampsToPatch: StampPatch[] = credentials.map<StampPatch>((credential: Ver
   } as StampPatch;
 });
 
+const stampsToAdd: Stamp[] = credentials.map<Stamp>((credential: VerifiableEip712Credential) => {
+  return {
+    provider: credential.credentialSubject.provider,
+    credential,
+  } as Stamp;
+});
+
 beforeAll(async () => {
-  //   const TEST_SEED = fromString("b9ff51d1498c20f4555a1558395e76e572bee4c2e774f57dbd7b585ad3b3265b", "base16");
   const TEST_SEED = Uint8Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
 
   // Create and authenticate the DID
@@ -163,15 +169,40 @@ beforeAll(async () => {
   composeDatabase = new ComposeDatabase(testDID, process.env.CERAMIC_CLIENT_URL || "http://localhost:7007");
 });
 
-describe("calling addStamps", () => {
-  it("should write stamps to compose-db", async () => {
-    console.log("Testing test");
-    expect(1).toEqual(2);
+describe("Adding and deleting Stamps", () => {
+  it("should add stamps to compose-db", async () => {
+    let passportResult = await composeDatabase.getPassport();
+    expect(passportResult.status).toEqual("Success");
+    expect(passportResult.passport.stamps.length).toEqual(0);
+
+    await composeDatabase.addStamps(stampsToAdd);
+    const result = await composeDatabase.getPassport();
+    expect(result.status).toEqual("Success");
+    expect(result.passport.stamps.length).toEqual(1);
+    expect(result.passport.stamps[0].provider).toEqual(stampsToAdd[0].provider);
+  });
+  // it.only("should indicate that an error occurred if stamp is invalid", async () => {
+  //   const invalidStamp = stampsToAdd[0];
+  //   delete invalidStamp.credential.issuer;
+  //   const result = await composeDatabase.addStamps([invalidStamp]);
+  //   expect(result.status).toEqual("StampCacaoError");
+  //   expect(result.errorDetails).toBeDefined();
+  //   expect(result.errorDetails?.stampStreamIds.length).toEqual(1);
+  // });
+  it("should delete stamps from compose-db", async () => {
+    let passportResult = await composeDatabase.getPassport();
+    expect(passportResult.status).toEqual("Success");
+    expect(passportResult.passport.stamps.length).toEqual(1);
+
+    await composeDatabase.deleteStamps([stampsToAdd[0].provider]);
+    const result = await composeDatabase.getPassport();
+    expect(result.status).toEqual("Success");
+    expect(result.passport.stamps.length).toEqual(0);
   });
 });
 
 describe("calling patchStamps", () => {
-  it.only("should create new stamps compose-db", async () => {
+  it("should update a passport's stamps within compose-db", async () => {
     // First read should return 0 passports ...
     let passportResult = await composeDatabase.getPassport();
     expect(passportResult.status).toEqual("Success");
