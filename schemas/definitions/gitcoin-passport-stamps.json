@@ -1,59 +1,50 @@
 {
   "models": {
-    "VerifiableCredentialProof": {
-      "interface": true,
-      "implements": [],
-      "id": "kjzl6hvfrbw6cawb0os86aihrl55fnzkcjm6qtlkye0e7aejpza1da2nz8fkz59",
-      "accountRelation": { "type": "none" }
-    },
     "GitcoinAttestation": {
       "interface": true,
       "implements": [],
-      "id": "kjzl6hvfrbw6c7bdo6avzvlic99m821vqs237lacri5cloqzug5ehhbqwhis1qi",
+      "id": "kjzl6hvfrbw6c5nawcon8xmqyh270olex7ggbdrpam6w0rpewkn5jyybmkyc5rw",
       "accountRelation": { "type": "none" }
     },
-    "VerifiableCredentialSubject": {
+    "VerifiableCredentialProof": {
       "interface": true,
       "implements": [],
-      "id": "kjzl6hvfrbw6canjsg9rz6ggka52reuwpau0ocz3hmda8wi0b0ti8pn7p037sq3",
+      "id": "kjzl6hvfrbw6c73j1f2hikvr9fq31m1erw4ngur4g0ila46x2kbgx7g76xeom1w",
       "accountRelation": { "type": "none" }
     },
     "VerifiableCredential": {
       "interface": true,
       "implements": [
-        "kjzl6hvfrbw6c7bdo6avzvlic99m821vqs237lacri5cloqzug5ehhbqwhis1qi"
+        "kjzl6hvfrbw6c5nawcon8xmqyh270olex7ggbdrpam6w0rpewkn5jyybmkyc5rw"
       ],
-      "id": "kjzl6hvfrbw6ca3q5r1rh58vf4f5umpwqovyyegbl6y5pxfw08g1bcu70l148bc",
+      "id": "kjzl6hvfrbw6c9rm2lhkk2mv5v8ytatv6br7uy4ugewmf0zivk8xle3qmpbkzgd",
       "accountRelation": { "type": "none" }
     },
     "GitcoinPassportStampWrapperInterface": {
       "interface": true,
       "implements": [],
-      "id": "kjzl6hvfrbw6cbd0ycro86puamc46xfzm7bun5nh3ji8hgv4n56a21ssmeu7m1t",
+      "id": "kjzl6hvfrbw6c7f142kob3ps523tpf5dk49qwuritwwkinmqm5hk05lcmqm4zpz",
       "accountRelation": { "type": "none" }
-    },
-    "GitcoinPassportStampWrapper": {
-      "interface": false,
-      "implements": [
-        "kjzl6hvfrbw6cbd0ycro86puamc46xfzm7bun5nh3ji8hgv4n56a21ssmeu7m1t"
-      ],
-      "id": "kjzl6hvfrbw6c54frslemp7s17zp7v2323eesfwtplwr6r4pe482wedrpuk1817",
-      "accountRelation": { "type": "list" }
     },
     "GitcoinPassportStamp": {
       "interface": false,
       "implements": [
-        "kjzl6hvfrbw6ca3q5r1rh58vf4f5umpwqovyyegbl6y5pxfw08g1bcu70l148bc",
-        "kjzl6hvfrbw6c7bdo6avzvlic99m821vqs237lacri5cloqzug5ehhbqwhis1qi"
+        "kjzl6hvfrbw6c9rm2lhkk2mv5v8ytatv6br7uy4ugewmf0zivk8xle3qmpbkzgd",
+        "kjzl6hvfrbw6c5nawcon8xmqyh270olex7ggbdrpam6w0rpewkn5jyybmkyc5rw"
       ],
-      "id": "kjzl6hvfrbw6c74dtmpjszjfi0l55e3tidsqc2axb9h7ddjx0r9mgev2xb4p5gs",
+      "id": "kjzl6hvfrbw6c9vps5e4hr02jd7pznr4pcx5yvjjkloqpmhvskjrao64lsr3lg4",
+      "accountRelation": { "type": "list" }
+    },
+    "GitcoinPassportStampWrapper": {
+      "interface": false,
+      "implements": [
+        "kjzl6hvfrbw6c7f142kob3ps523tpf5dk49qwuritwwkinmqm5hk05lcmqm4zpz"
+      ],
+      "id": "kjzl6hvfrbw6ca5ea8vya01k59zeeyetyqbl5ke2xwj83ztl1h0smyq5jkjzb7j",
       "accountRelation": { "type": "list" }
     }
   },
   "objects": {
-    "VerifiableCredentialProof": {
-      "type": { "type": "string", "required": true }
-    },
     "GitcoinAttestation": {
       "type": {
         "type": "list",
@@ -61,8 +52,8 @@
         "item": { "type": "string", "required": true }
       }
     },
-    "VerifiableCredentialSubject": {
-      "_id": { "type": "string", "required": true }
+    "VerifiableCredentialProof": {
+      "type": { "type": "string", "required": true }
     },
     "VerifiableCredential": {
       "type": {
@@ -72,7 +63,7 @@
       },
       "issuer": { "type": "string", "required": true },
       "issuanceDate": { "type": "datetime", "required": true },
-      "expirationDate": { "type": "datetime", "required": true }
+      "expirationDate": { "type": "datetime", "required": false }
     },
     "GitcoinPassportStampWrapperInterface": {
       "vcID": { "type": "streamid", "required": true },
@@ -83,21 +74,7 @@
         "viewType": "relation",
         "relation": {
           "source": "document",
-          "model": "kjzl6hvfrbw6ca3q5r1rh58vf4f5umpwqovyyegbl6y5pxfw08g1bcu70l148bc",
-          "property": "vcID"
-        }
-      }
-    },
-    "GitcoinPassportStampWrapper": {
-      "vcID": { "type": "streamid", "required": true, "indexed": true },
-      "isDeleted": { "type": "boolean", "required": false, "indexed": true },
-      "isRevoked": { "type": "boolean", "required": false, "indexed": true },
-      "vc": {
-        "type": "view",
-        "viewType": "relation",
-        "relation": {
-          "source": "document",
-          "model": "kjzl6hvfrbw6ca3q5r1rh58vf4f5umpwqovyyegbl6y5pxfw08g1bcu70l148bc",
+          "model": "kjzl6hvfrbw6c9rm2lhkk2mv5v8ytatv6br7uy4ugewmf0zivk8xle3qmpbkzgd",
           "property": "vcID"
         }
       }
@@ -189,8 +166,8 @@
       "created": { "type": "datetime", "required": true },
       "_context": {
         "type": "list",
-        "required": true,
-        "item": { "type": "string", "required": true }
+        "required": false,
+        "item": { "type": "string", "required": false }
       },
       "proofValue": { "type": "string", "required": true },
       "eip712Domain": {
@@ -203,17 +180,18 @@
       "verificationMethod": { "type": "string", "required": true }
     },
     "GitcoinPassportVcCredentialSubjectContext": {
+      "id": { "type": "string", "required": true },
       "hash": { "type": "string", "required": true },
       "provider": { "type": "string", "required": true }
     },
     "GitcoinPassportVcCredentialSubject": {
-      "_id": { "type": "string", "required": true },
+      "id": { "type": "string", "required": true },
       "hash": { "type": "string", "required": true },
       "_context": {
         "type": "reference",
         "refType": "object",
         "refName": "GitcoinPassportVcCredentialSubjectContext",
-        "required": true
+        "required": false
       },
       "provider": { "type": "string", "required": true }
     },
@@ -238,7 +216,7 @@
       "issuanceDate": { "type": "datetime", "required": true, "indexed": true },
       "expirationDate": {
         "type": "datetime",
-        "required": true,
+        "required": false,
         "indexed": true
       },
       "credentialSubject": {
@@ -247,21 +225,31 @@
         "refName": "GitcoinPassportVcCredentialSubject",
         "required": true
       }
+    },
+    "GitcoinPassportStampWrapper": {
+      "vcID": { "type": "streamid", "required": true, "indexed": true },
+      "isDeleted": { "type": "boolean", "required": false, "indexed": true },
+      "isRevoked": { "type": "boolean", "required": false, "indexed": true },
+      "vc": {
+        "type": "view",
+        "viewType": "relation",
+        "relation": {
+          "source": "document",
+          "model": "kjzl6hvfrbw6c9rm2lhkk2mv5v8ytatv6br7uy4ugewmf0zivk8xle3qmpbkzgd",
+          "property": "vcID"
+        }
+      }
     }
   },
   "enums": {},
   "accountData": {
-    "verifiableCredentialProofList": {
-      "type": "connection",
-      "name": "VerifiableCredentialProof"
-    },
     "gitcoinAttestationList": {
       "type": "connection",
       "name": "GitcoinAttestation"
     },
-    "verifiableCredentialSubjectList": {
+    "verifiableCredentialProofList": {
       "type": "connection",
-      "name": "VerifiableCredentialSubject"
+      "name": "VerifiableCredentialProof"
     },
     "verifiableCredentialList": {
       "type": "connection",
@@ -271,13 +259,13 @@
       "type": "connection",
       "name": "GitcoinPassportStampWrapperInterface"
     },
-    "gitcoinPassportStampWrapperList": {
-      "type": "connection",
-      "name": "GitcoinPassportStampWrapper"
-    },
     "gitcoinPassportStampList": {
       "type": "connection",
       "name": "GitcoinPassportStamp"
+    },
+    "gitcoinPassportStampWrapperList": {
+      "type": "connection",
+      "name": "GitcoinPassportStampWrapper"
     }
   }
 }

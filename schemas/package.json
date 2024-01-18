@@ -6,6 +6,7 @@
     ".env.yarn"
   ],
   "scripts": {
+    "build": "tsc -b .",
     "clean": "rimraf node_modules",
     "ceramic": "CERAMIC_ENABLE_EXPERIMENTAL_COMPOSE_DB=true ceramic daemon",
     "models:create-composite": "composedb composite:create models/passportStamps.graphql --output=composites/gitcoin-passport-stamps-composite.json --did-private-key=${PRIVATE_KEY}",
