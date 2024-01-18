@@ -21,7 +21,7 @@ export type DIDKitLib = {
 } & { [key: string]: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 // rough outline of a VerifiableCredential
-export type VerifiableCredential = {
+export type VerifiableEd25519Credential = {
   "@context": string[];
   type: string[];
   credentialSubject: {
@@ -90,6 +90,8 @@ export type VerifiableEip712Credential = {
     };
   };
 };
+
+export type VerifiableCredential = VerifiableEd25519Credential | VerifiableEip712Credential;
 
 // A ProviderContext is used as a temporary storage so that providers can can share data
 // between them, in case multiple VCs are requests in one http request
@@ -208,7 +210,7 @@ export type VerifiableCredentialRecord = {
 
 export type Stamp = {
   provider: PROVIDER_ID;
-  credential: VerifiableCredential;
+  credential: VerifiableEd25519Credential | VerifiableEip712Credential;
 };
 
 // StampPatch should have "provider" mandatory and "credential" optional

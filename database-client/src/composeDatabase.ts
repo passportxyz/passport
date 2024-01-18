@@ -7,11 +7,6 @@ import { PassportLoadResponse, PROVIDER_ID, Stamp, StampPatch, VerifiableCredent
 import { CeramicStorage } from "./types";
 import { definition as GitcoinPassportStampDefinition } from "@gitcoin/passport-schemas/dist/esm/gitcoin-passport-stamps";
 
-const compose = new ComposeClient({
-  ceramic: "http://localhost:7007",
-  definition: GitcoinPassportStampDefinition,
-});
-
 // const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
 const COMMUNITY_TESTNET_CERAMIC_CLIENT_URL = "https://ceramic-clay.3boxlabs.com";
 
@@ -21,6 +16,7 @@ const COMMUNITY_TESTNET_CERAMIC_CLIENT_URL = "https://ceramic-clay.3boxlabs.com"
 
 type PassportWrapperLoadResponse = {
   id: string;
+  vcID: string;
   isDeleted: boolean;
   isRevoked: boolean;
   vc: VerifiableCredential;
@@ -28,9 +24,14 @@ type PassportWrapperLoadResponse = {
 
 export class ComposeDatabase implements CeramicStorage {
   did: string;
+  compose: ComposeClient;
 
-  constructor(did: DID) {
-    compose.setDID(did);
+  constructor(did: DID, ceramicUrl: string = COMMUNITY_TESTNET_CERAMIC_CLIENT_URL) {
+    this.compose = new ComposeClient({
+      ceramic: ceramicUrl,
+      definition: GitcoinPassportStampDefinition,
+    });
+    this.compose.setDID(did);
     this.did = (did.hasParent ? did.parent : did.id).toLowerCase();
   }
   setStamps: (stamps: Stamp[]) => Promise<void>;
@@ -59,7 +60,6 @@ export class ComposeDatabase implements CeramicStorage {
         credentialSubject: {
           ...credentialSubject,
           _context: credentialSubject["@context"],
-          _id: credentialSubject.id,
         },
         proof: {
           ...proof,
@@ -75,7 +75,6 @@ export class ComposeDatabase implements CeramicStorage {
       },
     };
 
-    delete input.content.credentialSubject.id;
     delete input.content.credentialSubject["@context"];
     delete input.content.proof["@context"];
     delete input.content.proof.eip712Domain.types["@context"];
@@ -84,12 +83,12 @@ export class ComposeDatabase implements CeramicStorage {
   };
 
   addStamps = async (stamps: Stamp[]): Promise<PassportLoadResponse> => {
-    console.log("geri add stamps: ", stamps);
     const vcResponses = [];
     const wrapperResponses = [];
-    stamps.forEach(async (stamp) => {
+    for (let i = 0; i < stamps.length; i++) {
+      const stamp = stamps[i];
       const input = this.formatCredentialInput(stamp);
-      const result = (await compose.executeQuery(
+      const result = (await this.compose.executeQuery(
         `
           mutation CreateGitcoinPassportVc($input: CreateGitcoinPassportStampInput!) {
             createGitcoinPassportStamp(input: $input) {
@@ -102,14 +101,14 @@ export class ComposeDatabase implements CeramicStorage {
         {
           input,
         }
-      )) as unknown as { data: { createGitcoinPassportStamp: { document: { id: string } } } };
+      )) as { data: { createGitcoinPassportStamp: { document: { id: string } } } };
 
       vcResponses.push(result);
 
       const vcID = result?.data?.createGitcoinPassportStamp?.document?.id;
 
       if (vcID) {
-        const wrapperResponse = (await compose.executeQuery(
+        const wrapperResponse = (await this.compose.executeQuery(
           `
           mutation CreateGitcoinStampWrapper($wrapperInput: CreateGitcoinPassportStampWrapperInput!) {
             createGitcoinPassportStampWrapper(input: $wrapperInput) {
@@ -138,16 +137,14 @@ export class ComposeDatabase implements CeramicStorage {
 
         wrapperResponses.push(wrapperResponse);
       }
-    });
+    }
 
-    console.log("add stamps response", { vcResponses, wrapperResponses });
     return {
       status: "Success",
     };
   };
 
   deleteStamps = async (providers: PROVIDER_ID[]): Promise<PassportLoadResponse> => {
-    console.log("geri deleteStamps providers: ", providers);
     const existingPassport = await this.getPassportWithWrapper();
 
     const stampsToDelete = existingPassport.filter((stamp) =>
@@ -164,8 +161,7 @@ export class ComposeDatabase implements CeramicStorage {
   };
 
   deleteStamp = async (streamId: string): Promise<PassportLoadResponse> => {
-    console.log("geri deleteStamp providers: ", streamId);
-    const deleteRequest = (await compose.executeQuery(
+    const deleteRequest = (await this.compose.executeQuery(
       `
       mutation SoftDeleteGitcoinStampWrapper($updateInput: UpdateGitcoinPassportStampWrapperInput!) {
         updateGitcoinPassportStampWrapper(input: $updateInput) {
@@ -191,8 +187,6 @@ export class ComposeDatabase implements CeramicStorage {
       };
     };
 
-    console.log("delete stamp response", { deleteRequest });
-
     return {
       status: "Success",
     };
@@ -200,22 +194,22 @@ export class ComposeDatabase implements CeramicStorage {
 
   findStreamId = (provider: PROVIDER_ID, wrappers: PassportWrapperLoadResponse[]): string => {
     const wrapper = wrappers.find((wrapper) => wrapper.vc.credentialSubject.provider === provider);
-    if (!wrapper) {
-      throw new Error("No wrapper found");
-    }
-    return wrapper.id;
+    return wrapper?.id;
   };
 
   patchStamps = async (stampPatches: StampPatch[]): Promise<PassportLoadResponse> => {
     // fetch non deleted and revoked stamps
-    console.log("geri patchStamps providers: ", stampPatches);
-
     const existingPassport = await this.getPassportWithWrapper();
 
     const deleteRequests = await Promise.all(
-      stampPatches
-        .filter((stampPatch) => !stampPatch.credential)
-        .map(async (stampPatch) => await this.deleteStamp(this.findStreamId(stampPatch.provider, existingPassport)))
+      // Only delete stamps that exist. Ignore providers that to not exist.
+      stampPatches.map(async (stampPatch) => {
+        const streamId = this.findStreamId(stampPatch.provider, existingPassport);
+        if (streamId) {
+          return await this.deleteStamp(this.findStreamId(stampPatch.provider, existingPassport));
+        }
+        return;
+      })
     );
 
     const stampsToCreate = stampPatches
@@ -227,15 +221,13 @@ export class ComposeDatabase implements CeramicStorage {
 
     const createRequest = await this.addStamps(stampsToCreate);
 
-    console.log("patch response", { deleteRequests, createRequest });
-
     return {
       status: "Success",
     };
   };
 
   async getPassportWithWrapper(): Promise<PassportWrapperLoadResponse[]> {
-    const result = (await compose.executeQuery(
+    const result = (await this.compose.executeQuery(
       `
       query passport($amount: Int, $wrapperFilter: GitcoinPassportStampWrapperObjectFilterInput) {
         viewer {
@@ -248,6 +240,7 @@ export class ComposeDatabase implements CeramicStorage {
                 id
                 isDeleted
                 isRevoked
+                vcID
                 vc {
                   ... on GitcoinPassportStamp {
                     id
@@ -259,7 +252,7 @@ export class ComposeDatabase implements CeramicStorage {
                     credentialSubject {
                       hash
                       provider
-                      _id
+                      id
                       _context {
                         hash
                         provider
@@ -287,6 +280,7 @@ export class ComposeDatabase implements CeramicStorage {
     )) as unknown as {
       data: { viewer: { gitcoinPassportStampWrapperList: { edges: { node: PassportWrapperLoadResponse }[] } } };
     };
+
     const wrappers = (result?.data?.viewer?.gitcoinPassportStampWrapperList?.edges || []).map((edge) => edge.node);
     return wrappers;
   }
@@ -301,7 +295,6 @@ export class ComposeDatabase implements CeramicStorage {
       credential: wrapper.vc,
     }));
 
-    console.log({ stamps });
     return {
       status: "Success",
       passport: {

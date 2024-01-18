@@ -1,29 +1,198 @@
-import { PassportLoadStatus, Passport, VerifiableCredential, Stamp, PROVIDER_ID } from "@gitcoin/passport-types";
+import {
+  PassportLoadStatus,
+  Passport,
+  VerifiableCredential,
+  Stamp,
+  PROVIDER_ID,
+  StampPatch,
+  VerifiableEip712Credential,
+} from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
 import { jest } from "@jest/globals";
-import testnetAliases from "./integration-test-model-aliases.json";
+import { fromString } from "uint8arrays/from-string";
 
-// import { CeramicDatabase } from "../src";
+import { ComposeDatabase } from "../src";
 
-// let testDID: DID;
-// let ceramicDatabase: CeramicDatabase;
+let testDID: DID;
+let composeDatabase: ComposeDatabase;
 
-// jest.setTimeout(180000);
+jest.setTimeout(180000);
 
-// beforeAll(async () => {
-//   const TEST_SEED = Uint8Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
+const credentials: VerifiableEip712Credential[] = [
+  {
+    "@context": ["https://www.w3.org/2018/credentials/v1", "https://w3id.org/security/suites/eip712sig-2021/v1"],
+    type: ["VerifiableCredential"],
+    credentialSubject: {
+      "@context": {
+        hash: "https://schema.org/Text",
+        provider: "https://schema.org/Text",
+        id: "https://schema.org/Text",
+      },
+      id: "did:pkh:eip155:1:0x85fF01cfF157199527528788ec4eA6336615C989",
+      provider: "EthGTEOneTxnProvider",
+      hash: "v0.0.0:8eDijgkeK2owdywp064QjP1aWMaon/xSSI83qxs/mHg=",
+    },
+    issuer: "did:ethr:0xd6fc34345bc8c8e5659a35bed9629d5558d48c4e",
+    issuanceDate: "2024-01-17T09:55:18.396Z",
+    proof: {
+      "@context": "https://w3id.org/security/suites/eip712sig-2021/v1",
+      type: "EthereumEip712Signature2021",
+      proofPurpose: "assertionMethod",
+      proofValue:
+        "0x05c3911b24f060fa931bae7256e6612f76b525357e0658a1aeb6d096dcae9ad92e4b9d9f92c196cf21486947dd709088de5b265ea130109206cc08769c70ff911b",
+      verificationMethod: "did:ethr:0xd6fc34345bc8c8e5659a35bed9629d5558d48c4e#controller",
+      created: "2024-01-17T09:55:18.402Z",
+      eip712Domain: {
+        domain: {
+          name: "VerifiableCredential",
+        },
+        primaryType: "Document",
+        types: {
+          "@context": [
+            {
+              name: "hash",
+              type: "string",
+            },
+            {
+              name: "provider",
+              type: "string",
+            },
+          ],
+          CredentialSubject: [
+            {
+              name: "@context",
+              type: "@context",
+            },
+            {
+              name: "hash",
+              type: "string",
+            },
+            {
+              name: "id",
+              type: "string",
+            },
+            {
+              name: "provider",
+              type: "string",
+            },
+          ],
+          Document: [
+            {
+              name: "@context",
+              type: "string[]",
+            },
+            {
+              name: "credentialSubject",
+              type: "CredentialSubject",
+            },
+            {
+              name: "expirationDate",
+              type: "string",
+            },
+            {
+              name: "issuanceDate",
+              type: "string",
+            },
+            {
+              name: "issuer",
+              type: "string",
+            },
+            {
+              name: "proof",
+              type: "Proof",
+            },
+            {
+              name: "type",
+              type: "string[]",
+            },
+          ],
+          EIP712Domain: [
+            {
+              name: "name",
+              type: "string",
+            },
+          ],
+          Proof: [
+            {
+              name: "@context",
+              type: "string",
+            },
+            {
+              name: "created",
+              type: "string",
+            },
+            {
+              name: "proofPurpose",
+              type: "string",
+            },
+            {
+              name: "type",
+              type: "string",
+            },
+            {
+              name: "verificationMethod",
+              type: "string",
+            },
+          ],
+        },
+      },
+    },
+    expirationDate: "2024-04-16T08:55:18.396Z",
+  },
+];
+const stampsToPatch: StampPatch[] = credentials.map<StampPatch>((credential: VerifiableEip712Credential) => {
+  return {
+    provider: credential.credentialSubject.provider,
+    credential,
+  } as StampPatch;
+});
 
-//   // Create and authenticate the DID
-//   testDID = new DID({
-//     provider: new Ed25519Provider(TEST_SEED),
-//     resolver: getResolver(),
-//   });
-//   await testDID.authenticate();
+beforeAll(async () => {
+  //   const TEST_SEED = fromString("b9ff51d1498c20f4555a1558395e76e572bee4c2e774f57dbd7b585ad3b3265b", "base16");
+  const TEST_SEED = Uint8Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
 
-//   ceramicDatabase = new CeramicDatabase(testDID, process.env.CERAMIC_CLIENT_URL, testnetAliases);
-// });
+  // Create and authenticate the DID
+  testDID = new DID({
+    provider: new Ed25519Provider(TEST_SEED),
+    resolver: getResolver(),
+  });
+  await testDID.authenticate();
+
+  composeDatabase = new ComposeDatabase(testDID, process.env.CERAMIC_CLIENT_URL || "http://localhost:7007");
+});
+
+describe("calling addStamps", () => {
+  it("should write stamps to compose-db", async () => {
+    console.log("Testing test");
+    expect(1).toEqual(2);
+  });
+});
+
+describe("calling patchStamps", () => {
+  it.only("should create new stamps compose-db", async () => {
+    // First read should return 0 passports ...
+    let passportResult = await composeDatabase.getPassport();
+    expect(passportResult.status).toEqual("Success");
+    expect(passportResult.passport.stamps.length).toEqual(0);
+
+    // Patch a stamp, then read again -> we expect the stamp to be created
+    await composeDatabase.patchStamps(stampsToPatch);
+    passportResult = await composeDatabase.getPassport();
+    expect(passportResult.status).toEqual("Success");
+    expect(passportResult.passport.stamps.length).toEqual(1);
+
+    // Patch a stamp again, then read again. We expect the new
+    const newStampPatch: StampPatch = JSON.parse(JSON.stringify(stampsToPatch[0]));
+    newStampPatch.credential.issuer = "Dummy Issuer";
+    await composeDatabase.patchStamps([newStampPatch]);
+    passportResult = await composeDatabase.getPassport();
+    expect(passportResult.status).toEqual("Success");
+    expect(passportResult.passport.stamps.length).toEqual(1);
+    expect(passportResult.passport.stamps[0].credential.issuer).toEqual("Dummy Issuer");
+  });
+});
 
 // afterAll(async () => {
 //   await ceramicDatabase.store.remove("Passport");

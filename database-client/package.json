@@ -34,7 +34,7 @@
     "dotenv": "^16.0.0",
     "key-did-provider-ed25519": "^2.0.0",
     "key-did-resolver": "^2.0.0",
-    "uint8arrays": "^3.0.0"
+    "uint8arrays": "^5.0.1"
   },
   "devDependencies": {
     "@ceramicnetwork/cli": "^3.2.0",
