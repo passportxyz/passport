@@ -377,8 +377,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           // Ceramic Network Connection
           const ceramicClientInstance = new ComposeDatabase(
             viewerConnection.selfID.did,
-            process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL
-            // datadogLogs.logger
+            process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
+            datadogLogs.logger
           );
           setCeramicClient(ceramicClientInstance);
           setUserDid(ceramicClientInstance.did);

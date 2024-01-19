@@ -14,6 +14,7 @@ import {
 import { CeramicStorage } from "./types";
 import { definition as GitcoinPassportStampDefinition } from "@gitcoin/passport-schemas/dist/esm/gitcoin-passport-stamps";
 import { GraphQLError } from "graphql";
+import { Logger } from "./logger";
 
 // const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
 const COMMUNITY_TESTNET_CERAMIC_CLIENT_URL = "https://ceramic-clay.3boxlabs.com";
@@ -21,7 +22,6 @@ const COMMUNITY_TESTNET_CERAMIC_CLIENT_URL = "https://ceramic-clay.3boxlabs.com"
 // Instead of implementing the CeramicStorage interface, we could
 // implement the DataStorageBase interface and this would be more flexible,
 // but it's not necessary now
-
 type PassportWrapperLoadResponse = {
   id: string;
   vcID: string;
@@ -90,8 +90,14 @@ const formatCredentialFromCeramic = (
 export class ComposeDatabase implements CeramicStorage {
   did: string;
   compose: ComposeClient;
+  logger: Logger;
 
-  constructor(did: DID, ceramicUrl: string = COMMUNITY_TESTNET_CERAMIC_CLIENT_URL) {
+  constructor(did: DID, ceramicUrl: string = COMMUNITY_TESTNET_CERAMIC_CLIENT_URL, logger?: Logger) {
+    if (logger) {
+      this.logger = logger;
+    } else {
+      this.logger = console;
+    }
     this.compose = new ComposeClient({
       ceramic: ceramicUrl,
       definition: GitcoinPassportStampDefinition,
