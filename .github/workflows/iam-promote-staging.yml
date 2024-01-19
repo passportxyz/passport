@@ -16,10 +16,10 @@ jobs:
         with:
           ref: ${{ github.event.inputs.commit }}
       # run tests
-      - name: Use Node.js 18
+      - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20.8
           cache: "yarn"
       - name: Install Packages
         run: yarn install
@@ -67,10 +67,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 18
+      - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: 18.18
+          node-version: 20.8
           cache: "yarn"
       - name: Install Packages
         run: yarn install
