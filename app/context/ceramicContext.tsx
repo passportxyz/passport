@@ -46,7 +46,7 @@ const {
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
-import { CERAMIC_CACHE_ENDPOINT, IAM_ISSUER_DID } from "../config/stamp_config";
+import { CERAMIC_CACHE_ENDPOINT, IAM_VALID_ISSUER_DIDS } from "../config/stamp_config";
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 
 // -- Trusted IAM servers DID
@@ -310,7 +310,7 @@ export const cleanPassport = (
           return false;
         }
 
-        const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
+        const has_correct_issuer = IAM_VALID_ISSUER_DIDS.has(stamp.credential.issuer);
         const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
         const has_expired = new Date(stamp.credential.expirationDate) < new Date();
 
@@ -376,9 +376,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         } else if (dbAccessToken && address && !database) {
           // Ceramic Network Connection
           const ceramicClientInstance = new ComposeDatabase(
-            viewerConnection.selfID.did
-            // TODO
-            // process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
+            viewerConnection.selfID.did,
+            process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL
             // datadogLogs.logger
           );
           setCeramicClient(ceramicClientInstance);
