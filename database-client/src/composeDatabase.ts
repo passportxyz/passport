@@ -12,7 +12,7 @@ import {
 } from "@gitcoin/passport-types";
 
 import { CeramicStorage } from "./types";
-import { definition as GitcoinPassportStampDefinition } from "@gitcoin/passport-schemas/dist/esm/gitcoin-passport-stamps";
+import { definition as GitcoinPassportStampDefinition } from "@gitcoin/passport-schemas";
 import { GraphQLError } from "graphql";
 import { Logger } from "./logger";
 
