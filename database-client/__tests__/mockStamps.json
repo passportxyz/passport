@@ -117,8 +117,7 @@
         "hash": "v0.0.0:eu7RH6ZXAtRhUm3wQ3jfMVYoJ18sXynFm2AvsjsT9FQ=",
         "@context": {
           "hash": "https://schema.org/Text",
-          "provider": "https://schema.org/Text",
-          "id": "https://schema.org/Text"
+          "provider": "https://schema.org/Text"
         },
         "provider": "GitcoinContributorStatistics#numGrantsContributeToGte#1"
       }
@@ -242,8 +241,7 @@
         "hash": "v0.0.0:VC1vOVLxD3X29DYfyyT58AA+j0rC5vkXNflCA94iApA=",
         "@context": {
           "hash": "https://schema.org/Text",
-          "provider": "https://schema.org/Text",
-          "id": "https://schema.org/Text"
+          "provider": "https://schema.org/Text"
         },
         "provider": "FirstEthTxnProvider"
       }
@@ -367,8 +365,7 @@
         "hash": "v0.0.0:Oea3wZ4eyz1+5XeCOJo+flx2vSlE9PiZcL9HZeQda44=",
         "@context": {
           "hash": "https://schema.org/Text",
-          "provider": "https://schema.org/Text",
-          "id": "https://schema.org/Text"
+          "provider": "https://schema.org/Text"
         },
         "provider": "EthGTEOneTxnProvider"
       }

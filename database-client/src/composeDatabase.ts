@@ -2,7 +2,14 @@ import { ComposeClient } from "@composedb/client";
 // import type { RuntimeCompositeDefinition } from "@composedb/types";
 import { DID } from "dids";
 
-import { PassportLoadResponse, PROVIDER_ID, Stamp, StampPatch, VerifiableCredential } from "@gitcoin/passport-types";
+import {
+  PassportLoadResponse,
+  PROVIDER_ID,
+  Stamp,
+  StampPatch,
+  VerifiableCredential,
+  VerifiableEip712CredentialComposeEncoded,
+} from "@gitcoin/passport-types";
 
 import { CeramicStorage } from "./types";
 import { definition as GitcoinPassportStampDefinition } from "@gitcoin/passport-schemas/dist/esm/gitcoin-passport-stamps";
@@ -20,7 +27,7 @@ type PassportWrapperLoadResponse = {
   vcID: string;
   isDeleted: boolean;
   isRevoked: boolean;
-  vc: VerifiableCredential;
+  vc: VerifiableEip712CredentialComposeEncoded;
 };
 
 export type GraphqlResponse<T> = {
@@ -37,6 +44,47 @@ export type DeleteStampResponse = {
 };
 export type GetVCResponse = {
   viewer: { gitcoinPassportStampWrapperList: { edges: { node: PassportWrapperLoadResponse }[] } };
+};
+
+const formatCredentialFromCeramic = (
+  encodedCredential: VerifiableEip712CredentialComposeEncoded
+): VerifiableCredential => {
+  const credential: VerifiableCredential = {
+    "@context": encodedCredential._context,
+    type: encodedCredential.type,
+    credentialSubject: {
+      "@context": encodedCredential.credentialSubject._context,
+      id: encodedCredential.credentialSubject.id,
+      hash: encodedCredential.credentialSubject.hash,
+      provider: encodedCredential.credentialSubject.provider,
+      // address: encodedCredential.credentialSubject.address,
+      // challenge: encodedCredential.credentialSubject.challenge,
+    },
+    issuer: encodedCredential.issuer,
+    issuanceDate: encodedCredential.issuanceDate,
+    expirationDate: encodedCredential.expirationDate,
+    proof: {
+      "@context": encodedCredential.proof._context,
+      type: encodedCredential.proof.type,
+      proofPurpose: encodedCredential.proof.proofPurpose,
+      proofValue: encodedCredential.proof.proofValue,
+      verificationMethod: encodedCredential.proof.verificationMethod,
+      created: encodedCredential.proof.created,
+      eip712Domain: {
+        domain: encodedCredential.proof.eip712Domain.domain,
+        primaryType: encodedCredential.proof.eip712Domain.primaryType,
+        types: {
+          "@context": encodedCredential.proof.eip712Domain.types._context,
+          // CredentialStatus: encodedCredential.proof.eip712Domain.types.CredentialStatus,
+          CredentialSubject: encodedCredential.proof.eip712Domain.types.CredentialSubject,
+          Document: encodedCredential.proof.eip712Domain.types.Document,
+          EIP712Domain: encodedCredential.proof.eip712Domain.types.EIP712Domain,
+          Proof: encodedCredential.proof.eip712Domain.types.Proof,
+        },
+      },
+    },
+  };
+  return credential;
 };
 
 export class ComposeDatabase implements CeramicStorage {
@@ -85,7 +133,7 @@ export class ComposeDatabase implements CeramicStorage {
             ...eip712Domain,
             types: {
               ...types,
-              Context: types["@context"],
+              _context: types["@context"],
             },
           },
         },
@@ -275,19 +323,55 @@ export class ComposeDatabase implements CeramicStorage {
                 vc {
                   ... on GitcoinPassportStamp {
                     id
-                    issuer
                     type
                     _context
-                    issuanceDate
                     expirationDate
+                    issuanceDate
+                    issuer
+                    proof {
+                      _context
+                      created
+                      eip712Domain {
+                        domain {
+                          name
+                        }
+                        primaryType
+                        types {
+                          _context {
+                            name
+                            type
+                          }
+                          CredentialSubject {
+                            name
+                            type
+                          }
+                          Document {
+                            type
+                            name
+                          }
+                          Proof {
+                            name
+                            type
+                          }
+                          EIP712Domain {
+                            name
+                            type
+                          }
+                        }
+                      }
+                      proofPurpose
+                      proofValue
+                      type
+                      verificationMethod
+                    }
                     credentialSubject {
-                      hash
-                      provider
-                      id
                       _context {
                         hash
                         provider
                       }
+                      hash
+                      id
+                      provider
                     }
                   }
                 }
@@ -323,7 +407,7 @@ export class ComposeDatabase implements CeramicStorage {
 
     const stamps = passportWithWrapper.map((wrapper) => ({
       provider: wrapper.vc.credentialSubject.provider as PROVIDER_ID,
-      credential: wrapper.vc,
+      credential: formatCredentialFromCeramic(wrapper.vc),
     }));
 
     return {

@@ -91,6 +91,45 @@ export type VerifiableEip712Credential = {
   };
 };
 
+/// Define a type for the credential as it is stored in compose
+/// This will be identical to VerifiableEip712Credential, with some characters like `@` escaped
+// being changed to `_`
+export type VerifiableEip712CredentialComposeEncoded = {
+  _context: string[];
+  type: string[];
+  credentialSubject: {
+    id: string;
+    _context: { [key: string]: string };
+    hash?: string;
+    provider?: string;
+    address?: string;
+    challenge?: string;
+    metaPointer?: string;
+  };
+  issuer: string;
+  issuanceDate: string;
+  expirationDate: string;
+  proof: {
+    _context: string;
+    type: string;
+    proofPurpose: string;
+    proofValue: string;
+    verificationMethod: string;
+    created: string;
+    eip712Domain: {
+      domain: {
+        name: string;
+      };
+      primaryType: string;
+      types: {
+        [key: string]: {
+          name: string;
+          type: string;
+        }[];
+      };
+    };
+  };
+};
 export type VerifiableCredential = VerifiableEd25519Credential | VerifiableEip712Credential;
 
 // A ProviderContext is used as a temporary storage so that providers can can share data
