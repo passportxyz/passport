@@ -12,9 +12,10 @@ import {
 } from "@gitcoin/passport-types";
 
 import { CeramicStorage } from "./types";
-import { definition as GitcoinPassportStampDefinition } from "@gitcoin/passport-schemas";
+import { definition as GitcoinPassportStampDefinition } from "./compose-schema-definition";
 import { GraphQLError } from "graphql";
 import { Logger } from "./logger";
+import { RuntimeCompositeDefinition } from "@composedb/types";
 
 // const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
 const COMMUNITY_TESTNET_CERAMIC_CLIENT_URL = "https://ceramic-clay.3boxlabs.com";
@@ -101,7 +102,7 @@ export class ComposeDatabase implements CeramicStorage {
     }
     this.compose = new ComposeClient({
       ceramic: ceramicUrl,
-      definition: GitcoinPassportStampDefinition,
+      definition: GitcoinPassportStampDefinition as RuntimeCompositeDefinition,
     });
     this.compose.setDID(did);
     this.did = (did.hasParent ? did.parent : did.id).toLowerCase();

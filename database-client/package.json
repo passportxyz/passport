@@ -26,7 +26,7 @@
   "dependencies": {
     "@ceramicnetwork/http-client": "^2.2.1",
     "@composedb/client": "^0.6.0",
-    "@gitcoin/passport-schemas": "^1.0.0",
+    "@composedb/types": "^0.6.0",
     "@glazed/datamodel": "^0.3.0",
     "@glazed/did-datastore": "^0.3.1",
     "@glazed/tile-loader": "^0.2.0",

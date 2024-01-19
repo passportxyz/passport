@@ -5,7 +5,7 @@
   "scripts": {
     "start": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next dev -p 3000",
     "export": "ts-node ./scripts/preBuild.ts && NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next build && next export",
-    "build": " ts-node ./scripts/preBuild.ts && NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next build",
+    "build": "tsx ./scripts/preBuild.tsx && NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next build",
     "prod-start": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next start",
     "clean": "rimraf node_modules && rimraf .next",
     "lint": "next lint && prettier --check .",
