@@ -15,7 +15,6 @@ import { CeramicStorage } from "./types";
 import { definition as GitcoinPassportStampDefinition } from "@gitcoin/passport-schemas/dist/esm/gitcoin-passport-stamps";
 import { GraphQLError } from "graphql";
 import { Logger } from "./logger";
-import { debug } from "console";
 
 // const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
 const COMMUNITY_TESTNET_CERAMIC_CLIENT_URL = "https://ceramic-clay.3boxlabs.com";
