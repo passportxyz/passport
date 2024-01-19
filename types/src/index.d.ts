@@ -269,7 +269,8 @@ export type PassportLoadStatus =
   | "PassportCacaoError";
 
 export type PassportLoadErrorDetails = {
-  stampStreamIds: string[];
+  stampStreamIds?: string[];
+  messages?: string[];
 };
 
 export type PassportLoadResponse = {

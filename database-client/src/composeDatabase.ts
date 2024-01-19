@@ -90,6 +90,7 @@ const formatCredentialFromCeramic = (
 export class ComposeDatabase implements CeramicStorage {
   did: string;
   compose: ComposeClient;
+  // logger should indicate with tag where error is coming from similar to: [Scorer]
   logger: Logger;
 
   constructor(did: DID, ceramicUrl: string = COMMUNITY_TESTNET_CERAMIC_CLIENT_URL, logger?: Logger) {
@@ -167,7 +168,7 @@ export class ComposeDatabase implements CeramicStorage {
     return {
       status: errorDetails.length > 0 ? "ExceptionRaised" : "Success",
       errorDetails: {
-        stampStreamIds: errorDetails,
+        messages: errorDetails,
       },
     };
   };
@@ -197,7 +198,9 @@ export class ComposeDatabase implements CeramicStorage {
     )) as GraphqlResponse<{ createGitcoinPassportStamp: { document: { id: string } } }>;
 
     if (result.errors) {
-      throw Error(String(result.errors));
+      throw Error(
+        `[ComposeDB] error thrown from mutation CreateGitcoinPassportVc, error: ${JSON.stringify(result.errors)}`
+      );
     }
 
     vcID = result?.data?.createGitcoinPassportStamp?.document?.id;
@@ -226,7 +229,11 @@ export class ComposeDatabase implements CeramicStorage {
       createGitcoinPassportStampWrapper: { document: { id: string; isDeleted: boolean; isRevoked: boolean } };
     }>;
     if (wrapperRequest.errors) {
-      throw Error(`${String(wrapperRequest.errors)} for vcID: ${vcID}`);
+      throw Error(
+        `[ComposeDB] error thrown from mutation CreateGitcoinStampWrapper, vcID: ${vcID} error: ${JSON.stringify(
+          wrapperRequest.errors
+        )}`
+      );
     }
     return {
       status: "Success",
@@ -301,12 +308,12 @@ export class ComposeDatabase implements CeramicStorage {
 
     const createRequest = await this.addStamps(stampsToCreate);
 
-    const errorDetails = [...deleteRequests.errorDetails.stampStreamIds, ...createRequest.errorDetails.stampStreamIds];
+    const errorDetails = [...deleteRequests.errorDetails.messages, ...createRequest.errorDetails.messages];
 
     return {
       status: errorDetails.length > 0 ? "ExceptionRaised" : "Success",
       errorDetails: {
-        stampStreamIds: errorDetails,
+        messages: errorDetails,
       },
     };
   };
@@ -402,25 +409,37 @@ export class ComposeDatabase implements CeramicStorage {
       viewer: { gitcoinPassportStampWrapperList: { edges: { node: PassportWrapperLoadResponse }[] } };
     }>;
 
+    if (result.errors) {
+      throw Error(String(result.errors));
+    }
+
     const wrappers = (result?.data?.viewer?.gitcoinPassportStampWrapperList?.edges || []).map((edge) => edge.node);
     return wrappers;
   }
 
   // @notice: this function is not returning the full credential, only what is necessary to patch stamps
   async getPassport(): Promise<PassportLoadResponse> {
-    // Implemented to comply with interface but not currently utilized outside of this class
-    const passportWithWrapper = await this.getPassportWithWrapper();
+    try {
+      const passportWithWrapper = await this.getPassportWithWrapper();
 
-    const stamps = passportWithWrapper.map((wrapper) => ({
-      provider: wrapper.vc.credentialSubject.provider as PROVIDER_ID,
-      credential: formatCredentialFromCeramic(wrapper.vc),
-    }));
+      const stamps = passportWithWrapper.map((wrapper) => ({
+        provider: wrapper.vc.credentialSubject.provider as PROVIDER_ID,
+        credential: formatCredentialFromCeramic(wrapper.vc),
+      }));
 
-    return {
-      status: "Success",
-      passport: {
-        stamps,
-      },
-    };
+      return {
+        status: "Success",
+        passport: {
+          stamps,
+        },
+      };
+    } catch (error) {
+      return {
+        status: "ExceptionRaised",
+        errorDetails: {
+          messages: [error.message],
+        },
+      };
+    }
   }
 }
