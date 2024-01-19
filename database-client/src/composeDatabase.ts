@@ -15,6 +15,7 @@ import { CeramicStorage } from "./types";
 import { definition as GitcoinPassportStampDefinition } from "@gitcoin/passport-schemas/dist/esm/gitcoin-passport-stamps";
 import { GraphQLError } from "graphql";
 import { Logger } from "./logger";
+import { debug } from "console";
 
 // const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
 const COMMUNITY_TESTNET_CERAMIC_CLIENT_URL = "https://ceramic-clay.3boxlabs.com";
@@ -165,20 +166,18 @@ export class ComposeDatabase implements CeramicStorage {
       .map((response) => response.reason)
       .flat();
 
-    return {
-      status: errorDetails.length > 0 ? "ExceptionRaised" : "Success",
-      errorDetails: {
-        messages: errorDetails,
-      },
-    };
-  };
-
-  executeQuery = async (query: string, input: any): Promise<any> => {
-    const result = await this.compose.executeQuery(query, input);
-    if (result.errors) {
-      throw new Error(String(result.errors));
+    if (errorDetails.length > 0) {
+      return {
+        status: "ExceptionRaised",
+        errorDetails: {
+          messages: errorDetails,
+        },
+      };
     }
-    return result;
+
+    return {
+      status: "Success",
+    };
   };
 
   addStamp = async (stamp: Stamp): Promise<PassportLoadResponse> => {
@@ -235,6 +234,7 @@ export class ComposeDatabase implements CeramicStorage {
         )}`
       );
     }
+
     return {
       status: "Success",
     };
@@ -274,7 +274,7 @@ export class ComposeDatabase implements CeramicStorage {
     }>;
 
     if (deleteRequest.errors) {
-      throw Error(`${String(deleteRequest.errors)} for vcID: ${streamId}`);
+      throw Error(`[ComposeDB] ${JSON.stringify(deleteRequest.errors)} for vcID: ${streamId}`);
     }
 
     return {
@@ -308,7 +308,10 @@ export class ComposeDatabase implements CeramicStorage {
 
     const createRequest = await this.addStamps(stampsToCreate);
 
-    const errorDetails = [...deleteRequests.errorDetails.messages, ...createRequest.errorDetails.messages];
+    const errorDetails = [
+      ...(deleteRequests?.errorDetails?.messages || []),
+      ...(createRequest?.errorDetails?.messages || []),
+    ];
 
     return {
       status: errorDetails.length > 0 ? "ExceptionRaised" : "Success",
@@ -417,11 +420,9 @@ export class ComposeDatabase implements CeramicStorage {
     return wrappers;
   }
 
-  // @notice: this function is not returning the full credential, only what is necessary to patch stamps
   async getPassport(): Promise<PassportLoadResponse> {
     try {
       const passportWithWrapper = await this.getPassportWithWrapper();
-
       const stamps = passportWithWrapper.map((wrapper) => ({
         provider: wrapper.vc.credentialSubject.provider as PROVIDER_ID,
         credential: formatCredentialFromCeramic(wrapper.vc),

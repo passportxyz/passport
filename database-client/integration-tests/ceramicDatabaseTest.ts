@@ -98,6 +98,7 @@ describe("getting a passport", () => {
     expect(stampData.provider).toEqual(stampsToAdd[0].provider);
     expect(stampData.credential.issuer).toEqual(stampsToAdd[0].credential.issuer);
     expect(stampData.credential.issuanceDate).toEqual(stampsToAdd[0].credential.issuanceDate);
+    await composeDatabase.deleteStamps([stampsToAdd[0].provider]);
   });
 });
 

@@ -1,10 +1,12 @@
 import { ComposeClient } from "@composedb/client";
-import { Stamp, StampPatch, VerifiableCredential } from "@gitcoin/passport-types";
+import { PROVIDER_ID, Stamp, StampPatch, VerifiableCredential } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { ComposeDatabase, GraphqlResponse } from "../src/composeDatabase";
 import { jest } from "@jest/globals";
 import mockStamps from "./mockStamps.json";
 import { GraphQLError } from "graphql";
+import exp from "constants";
+import { debug } from "console";
 
 let database: ComposeDatabase;
 
@@ -30,9 +32,135 @@ const mockComposeError = {
 
 const document = { id: "123" };
 
+const mockComposeVc = {
+  content: {
+    _context: ["https://www.w3.org/2018/credentials/v1", "https://w3id.org/vc/status-list/2021/v1"],
+    issuer: "did:ethr:0xd6fc34345bc8c8e5659a35bed9629d5558d48c4e",
+    issuanceDate: "2024-01-18T15:20:18.055Z",
+    expirationDate: "2024-04-17T14:20:18.055Z",
+    type: ["VerifiableCredential"],
+    credentialSubject: {
+      id: "did:pkh:eip155:1:0x0636F974D29d947d4946b2091d769ec6D2d415DE",
+      hash: "v0.0.0:eu7RH6ZXAtRhUm3wQ3jfMVYoJ18sXynFm2AvsjsT9FQ=",
+      provider: "GitcoinContributorStatistics#numGrantsContributeToGte#1",
+      _context: {
+        hash: "https://schema.org/Text",
+        provider: "https://schema.org/Text",
+      },
+    },
+    proof: {
+      type: "EthereumEip712Signature2021",
+      created: "2024-01-18T15:20:18.055Z",
+      proofValue:
+        "0xcd009c8caabd5549c0d20ce729271a10324c3c316972af5a715f801f387fefe76fbdcd657078d84a87fd452dbada03acfa2ce3e6efb829c086b31edeca4d54ae1b",
+      eip712Domain: {
+        types: {
+          CredentialSubject: [
+            {
+              name: "@context",
+              type: "@context",
+            },
+            {
+              name: "hash",
+              type: "string",
+            },
+            {
+              name: "id",
+              type: "string",
+            },
+            {
+              name: "provider",
+              type: "string",
+            },
+          ],
+          Document: [
+            {
+              name: "@context",
+              type: "string[]",
+            },
+            {
+              name: "credentialSubject",
+              type: "CredentialSubject",
+            },
+            {
+              name: "expirationDate",
+              type: "string",
+            },
+            {
+              name: "issuanceDate",
+              type: "string",
+            },
+            {
+              name: "issuer",
+              type: "string",
+            },
+            {
+              name: "proof",
+              type: "Proof",
+            },
+            {
+              name: "type",
+              type: "string[]",
+            },
+          ],
+          EIP712Domain: [
+            {
+              name: "name",
+              type: "string",
+            },
+          ],
+          Proof: [
+            {
+              name: "@context",
+              type: "string",
+            },
+            {
+              name: "created",
+              type: "string",
+            },
+            {
+              name: "proofPurpose",
+              type: "string",
+            },
+            {
+              name: "type",
+              type: "string",
+            },
+            {
+              name: "verificationMethod",
+              type: "string",
+            },
+          ],
+          _context: [
+            {
+              name: "hash",
+              type: "string",
+            },
+            {
+              name: "provider",
+              type: "string",
+            },
+          ],
+        },
+        domain: {
+          name: "VerifiableCredential",
+        },
+        primaryType: "Document",
+      },
+      proofPurpose: "assertionMethod",
+      verificationMethod: "did:ethr:0xd6fc34345bc8c8e5659a35bed9629d5558d48c4e#controller",
+      _context: "https://w3id.org/security/suites/eip712sig-2021/v1",
+    },
+  },
+};
 describe("Compose Database", () => {
   beforeEach(() => {
     database = new ComposeDatabase({ id: "id" } as unknown as DID);
+    jest.clearAllMocks();
+  });
+  it("should format a vc to compose specifications", () => {
+    const result = database.formatCredentialInput(mockStamps[0] as Stamp);
+    expect(result).toEqual(mockComposeVc);
   });
   describe("adding stamps", () => {
     it("should add a single stamp successfully", async () => {
@@ -70,12 +198,20 @@ describe("Compose Database", () => {
       );
     });
 
-    it.only("should allow bulk addition of stamps", async () => {
+    it("should allow bulk addition of stamps", async () => {
+      jest
+        .spyOn(ComposeClient.prototype, "executeQuery")
+        .mockResolvedValue({ data: { createGitcoinPassportStamp: { document } } });
+
+      const result = await database.addStamps(mockStamps as unknown as Stamp[]);
+      expect(result).toEqual({ status: "Success" });
+    });
+
+    it("should indicate where errors were thrown when creating bulk addition of stamps", async () => {
       let i = 0;
       jest
         .spyOn(ComposeClient.prototype, "executeQuery")
         .mockImplementation(async (query, variableValues): Promise<any> => {
-          console.log("mockComposeError", i);
           i++;
           if (i > 3) {
             return await Promise.resolve(mockComposeError);
@@ -83,48 +219,92 @@ describe("Compose Database", () => {
             return await Promise.resolve({ data: { createGitcoinPassportStamp: { document } } });
           }
         });
-      // if (query.includes("CreateGitcoinPassportVc") && input) {
       const result = await database.addStamps(mockStamps as unknown as Stamp[]);
-      debugger;
+      expect(result.status).toEqual("ExceptionRaised");
+      expect(result.errorDetails?.messages?.length).toEqual(3);
     });
   });
-  describe("deleting stamps", () => {});
-  describe("patching stamps", () => {
-    // it("should patch stamps", async () => {
-    //   jest
-    //     .spyOn(ComposeClient.prototype, "executeQuery")
-    //     .mockResolvedValueOnce({ data: { createGitcoinPassportStamp: { document: { id: "123" } } } });
-    //   database.patchStamps(mockStamp as unknown as StampPatch[]);
-    //   expect(ComposeClient.prototype.executeQuery).toHaveBeenCalled();
-    // });
-    // it("indicate the an error occurred while querying", async () => {
-    //   jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(mockComposeError);
-    // });
+  describe("getting stamps", () => {
+    it("should get stamps", async () => {
+      jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce({
+        data: {
+          viewer: {
+            gitcoinPassportStampWrapperList: { edges: [{ node: { vc: mockComposeVc.content } }] },
+          },
+        },
+      });
+      const passport = await database.getPassport();
+      expect(passport.passport?.stamps).toEqual([mockStamps[0]]);
+    });
+    it("should indicate the an error occurred while getting passport", async () => {
+      jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(mockComposeError);
+      const stamps = await database.getPassport();
+      expect(stamps.status).toEqual("ExceptionRaised");
+    });
   });
-  // describe("adding stamps", () => {
-  //   it("should add stamps", async () => {
-  //     jest
-  //       .spyOn(ComposeClient.prototype, "executeQuery")
-  //       .mockResolvedValueOnce({ data: { createGitcoinPassportStamp: { document: { id: "123" } } } });
-  //     database.addStamps([mockStamp as unknown as Stamp]);
-  //     expect(ComposeClient.prototype.executeQuery).toHaveBeenCalled();
-  //   });
-  //   it("indicate the an error occurred while querying", async () => {
-  //     jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(mockComposeError);
-  //   });
-  // });
-  // describe("getting a passport", () => {
-  //   it("should get stamps", async () => {
-  //     jest
-  //       .spyOn(ComposeClient.prototype, "executeQuery")
-  //       .mockResolvedValueOnce({ data: { viewer: { gitcoinPassportStampWrapperList: [{ document: mockStamp }] } } });
-  //     const stamps = await database.getPassport();
-  //     expect(stamps).toEqual([mockStamp]);
-  //   });
-  //   it("should indicate the an error occurred while querying", async () => {
-  //     jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(mockComposeError);
-  //     const stamps = await database.getPassport();
-  //     expect(stamps).toEqual({ status: "ExceptionRaised" });
-  //   });
-  // });
+  describe("deleting stamps", () => {
+    it("should delete stamps", async () => {
+      jest
+        .spyOn(ComposeClient.prototype, "executeQuery")
+        .mockResolvedValueOnce({ data: { deleteGitcoinPassportStamp: { document: { id: "123" } } } });
+      const results = await database.deleteStamps(mockStamps.map((stamp) => stamp.provider as PROVIDER_ID));
+      expect(ComposeClient.prototype.executeQuery).toHaveBeenCalled();
+      expect(results).toEqual({ status: "Success" });
+    });
+    it("indicate the an error occurred while querying", async () => {
+      jest
+        .spyOn(ComposeClient.prototype, "executeQuery")
+        .mockImplementation(async (query, variableValues): Promise<any> => {
+          const queryStr = query as string;
+          if (queryStr.includes("query passport")) {
+            return await Promise.resolve({
+              data: {
+                viewer: {
+                  gitcoinPassportStampWrapperList: { edges: [{ node: { vc: mockComposeVc.content } }] },
+                },
+              },
+            });
+          } else {
+            return await Promise.resolve(mockComposeError);
+          }
+        });
+      // jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(mockComposeError);
+      const result = await database.deleteStamps(mockStamps.map((stamp) => stamp.provider as PROVIDER_ID));
+      expect(result.status).toEqual("ExceptionRaised");
+      expect(ComposeClient.prototype.executeQuery).toHaveBeenCalledTimes(2);
+    });
+  });
+  describe("patching stamps", () => {
+    it("should patch stamps successfully when passport has no existing stamps", async () => {
+      jest
+        .spyOn(ComposeClient.prototype, "executeQuery")
+        .mockResolvedValue({ data: { createGitcoinPassportStamp: { document: { id: "123" } } } });
+
+      const result = await database.patchStamps(mockStamps as unknown as StampPatch[]);
+      expect(ComposeClient.prototype.executeQuery).toHaveBeenCalledTimes(7);
+      expect(result.status).toEqual("Success");
+    });
+
+    it("should delete existing stamps and create new ones", async () => {
+      jest
+        .spyOn(ComposeClient.prototype, "executeQuery")
+        .mockImplementation(async (query, variableValues): Promise<any> => {
+          const queryStr = query as string;
+          if (queryStr.includes("query passport")) {
+            return await Promise.resolve({
+              data: {
+                viewer: {
+                  gitcoinPassportStampWrapperList: { edges: [{ node: { vc: mockComposeVc.content } }] },
+                },
+              },
+            });
+          } else {
+            return await Promise.resolve({ data: { createGitcoinPassportStamp: { document: { id: "123" } } } });
+          }
+        });
+      const result = await database.patchStamps(mockStamps as unknown as StampPatch[]);
+      expect(ComposeClient.prototype.executeQuery).toHaveBeenCalledTimes(8);
+      expect(result.status).toEqual("Success");
+    });
+  });
 });
