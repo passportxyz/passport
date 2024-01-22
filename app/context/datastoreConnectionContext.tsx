@@ -4,7 +4,8 @@ import { datadogRum } from "@datadog/browser-rum";
 import { useWalletStore } from "./walletStore";
 import { DoneToastContent } from "../components/DoneToastContent";
 import { EthereumAuthProvider } from "@self.id/web";
-import { EthereumWebAuth } from "@didtools/pkh-ethereum";
+import { EthereumWebAuth, getAccountId } from "@didtools/pkh-ethereum";
+import { ComposeClient } from "@composedb/client";
 import { DIDSession } from "did-session";
 import { DID } from "dids";
 import axios from "axios";
@@ -15,6 +16,7 @@ import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
 import { useToast } from "@chakra-ui/react";
 import { Eip1193Provider } from "ethers";
 import { createSignedPayload } from "../utils/helpers";
+import { ComposeDatabase } from "@gitcoin/passport-database-client";
 
 const BUFFER_TIME_BEFORE_EXPIRATION = 60 * 60 * 1000;
 
@@ -145,6 +147,11 @@ export const useDatastoreConnection = () => {
 
         try {
           const ethAuthProvider = new EthereumAuthProvider(provider, address.toLowerCase());
+          const accountId = new AccountId({
+            chainId: "eip155:1",
+            address,
+          });
+          const authMethod = await EthereumWebAuth.getAuthMethod(provider, accountId);
           // Sessions will be serialized and stored in localhost
           // The sessions are bound to an ETH address, this is why we use the address in the session key
           sessionKey = `didsession-${address}`;
@@ -154,6 +161,8 @@ export const useDatastoreConnection = () => {
           // @ts-ignore
           // When sessionStr is null, this will create a new selfId. We want to avoid this, becasue we want to make sure
           // that chainId 1 is in the did
+          const session = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
+
           let selfId = !!sessionStr ? await connectCeramic(ethAuthProvider, sessionStr) : null;
           if (
             // @ts-ignore

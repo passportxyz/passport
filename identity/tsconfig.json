@@ -1,34 +1,18 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../tsconfig.settings.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": false,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
+    "module": "commonjs",
     "esModuleInterop": true,
-    "module": "esnext",
+    "declaration": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2022",
+    "noImplicitAny": true,
     "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true
+    "sourceMap": true,
+    "outDir": "dist/commonjs",
+    "allowJs": true,
+    "baseUrl": "src",
+    "skipLibCheck": true
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "./*.tsx",
-    "jest.config.ts",
-    "jest.setup.ts"
-  ],
-  "exclude": ["node_modules", "__tests__"],
-  "ts-node": {
-    "esm": true,
-    "compilerOptions": {
-      "module": "nodenext"
-    }
-  }
+  "include": ["src/**/*"]
 }
