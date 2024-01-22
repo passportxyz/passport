@@ -32,57 +32,56 @@ beforeAll(async () => {
   composeDatabase = new ComposeDatabase(testDID, process.env.CERAMIC_CLIENT_URL || "http://localhost:7007");
 });
 
-// TODO: geri add this back
-// describe("assuming a valid stamp is stored in ceramic", () => {
-//   it("should return a valid stamp that can be validated successfully", async () => {
-//     // Step 1: First, we need to create a valid stamp
-//     const verificationMethod: string = (await DIDKit.keyToVerificationMethod("ethr", eip712Key)) as string;
+describe("assuming a valid stamp is stored in ceramic", () => {
+  it("should return a valid stamp that can be validated successfully", async () => {
+    // Step 1: First, we need to create a valid stamp
+    const verificationMethod: string = (await DIDKit.keyToVerificationMethod("ethr", eip712Key)) as string;
 
-//     const credential = await issueEip712Credential(
-//       DIDKit,
-//       eip712Key,
-//       { expiresAt: new Date("2050-12-31") },
-//       {
-//         credentialSubject: {
-//           "@context": {
-//             hash: "https://schema.org/Text",
-//             provider: "https://schema.org/Text",
-//           },
-//           id: "did:3:0x123",
-//           hash: "0x123",
-//           provider: "Discord",
-//         },
-//       },
-//       stampCredentialDocument(verificationMethod),
-//       ["https://w3id.org/vc/status-list/2021/v1"]
-//     );
+    const credential = await issueEip712Credential(
+      DIDKit,
+      eip712Key,
+      { expiresAt: new Date("2050-12-31") },
+      {
+        credentialSubject: {
+          "@context": {
+            hash: "https://schema.org/Text",
+            provider: "https://schema.org/Text",
+          },
+          id: "did:3:0x123",
+          hash: "0x123",
+          provider: "Discord",
+        },
+      },
+      stampCredentialDocument(verificationMethod),
+      ["https://w3id.org/vc/status-list/2021/v1"]
+    );
 
-//     const stampsToAdd: Stamp[] = [
-//       {
-//         credential,
-//         provider: "Discord",
-//       },
-//     ];
+    const stampsToAdd: Stamp[] = [
+      {
+        credential,
+        provider: "Discord",
+      },
+    ];
 
-//     // Step 2: Write the stamp to compose
-//     const addRequest = await composeDatabase.addStamps(stampsToAdd);
-//     expect(addRequest.status).toEqual("Success");
+    // Step 2: Write the stamp to compose
+    const addRequest = await composeDatabase.addStamps(stampsToAdd);
+    expect(addRequest.status).toEqual("Success");
 
-//     // Step 3: Read the user passport
-//     const result = await composeDatabase.getPassport();
+    // Step 3: Read the user passport
+    const result = await composeDatabase.getPassport();
 
-//     expect(result.status).toEqual("Success");
-//     expect(result.passport.stamps.length).toEqual(1);
-//     expect(result.passport.stamps[0].provider).toEqual(stampsToAdd[0].provider);
+    expect(result.status).toEqual("Success");
+    expect(result.passport.stamps.length).toEqual(1);
+    expect(result.passport.stamps[0].provider).toEqual(stampsToAdd[0].provider);
 
-//     const readCredential = result.passport.stamps[0].credential;
-//     expect(readCredential).toEqual(credential);
+    const readCredential = result.passport.stamps[0].credential;
+    expect(readCredential).toEqual(credential);
 
-//     // Step 4: Validate the stamp
-//     const verificationResult = JSON.parse(
-//       await DIDKit.verifyCredential(JSON.stringify(readCredential), '{"proofPurpose":"assertionMethod"}')
-//     );
+    // Step 4: Validate the stamp
+    const verificationResult = JSON.parse(
+      await DIDKit.verifyCredential(JSON.stringify(readCredential), '{"proofPurpose":"assertionMethod"}')
+    );
 
-//     expect(verificationResult).toEqual({ checks: ["proof"], warnings: [], errors: [] });
-//   });
-// });
+    expect(verificationResult).toEqual({ checks: ["proof"], warnings: [], errors: [] });
+  });
+});
