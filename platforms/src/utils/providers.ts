@@ -32,13 +32,16 @@ export class Providers {
   // construct an array of providers
   constructor(_providers: Provider[]) {
     // reduce unique entries into _providers object
-    this._providers = _providers.reduce((providers, provider) => {
-      if (!providers[provider.type]) {
-        providers[provider.type] = provider;
-      }
+    this._providers = _providers.reduce(
+      (providers, provider) => {
+        if (!providers[provider.type]) {
+          providers[provider.type] = provider;
+        }
 
-      return providers;
-    }, {} as { [k: string]: Provider });
+        return providers;
+      },
+      {} as { [k: string]: Provider }
+    );
   }
 
   async verify(type: string, payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {

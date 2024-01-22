@@ -29,7 +29,7 @@ describe("Attempt verification", function () {
       address: MOCK_ADDRESS,
     } as RequestPayload);
 
-    expect(mockIsRegistered).toBeCalledWith(MOCK_ADDRESS);
+    expect(mockIsRegistered).toHaveBeenCalledWith(MOCK_ADDRESS);
     expect(verifiedPayload).toEqual({
       valid: true,
       errors: [],
@@ -48,7 +48,7 @@ describe("Attempt verification", function () {
       address: UNREGISTERED_ADDRESS,
     } as RequestPayload);
 
-    expect(mockIsRegistered).toBeCalledWith(UNREGISTERED_ADDRESS);
+    expect(mockIsRegistered).toHaveBeenCalledWith(UNREGISTERED_ADDRESS);
     expect(verifiedPayload).toEqual({
       errors: ["Your address is not registered with Proof of Humanity -- isRegistered: false."],
       valid: false,

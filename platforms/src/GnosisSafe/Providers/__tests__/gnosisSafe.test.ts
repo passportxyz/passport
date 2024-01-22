@@ -156,7 +156,11 @@ describe("Verification fails", function () {
       return await gnosisSafeProvider.verify({
         address: "",
       } as unknown as RequestPayload);
-    }).rejects.toThrow(new ProviderExternalVerificationError(`Error verifying Gnosis Safes: {"reason":"invalid address","code":"INVALID_ARGUMENT","argument":"address","value":""}`));
+    }).rejects.toThrow(
+      new ProviderExternalVerificationError(
+        `Error verifying Gnosis Safes: {"reason":"invalid address","code":"INVALID_ARGUMENT","argument":"address","value":""}`
+      )
+    );
     expect(axios.get).toHaveBeenCalledTimes(0);
   });
 });

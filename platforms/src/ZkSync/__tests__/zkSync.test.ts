@@ -131,13 +131,16 @@ describe("Verification succeeds", function () {
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
-      params: {
-        from: "latest",
-        limit: 100,
-        direction: "older",
-      },
-    });
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      `${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`,
+      {
+        params: {
+          from: "latest",
+          limit: 100,
+          direction: "older",
+        },
+      }
+    );
 
     expect(zkSyncLitePayload).toEqual({
       valid: true,
@@ -168,13 +171,16 @@ describe("Verification fails", function () {
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
-      params: {
-        from: "latest",
-        limit: 100,
-        direction: "older",
-      },
-    });
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      `${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`,
+      {
+        params: {
+          from: "latest",
+          limit: 100,
+          direction: "older",
+        },
+      }
+    );
 
     expect(zkSyncLitePayload).toEqual({
       valid: false,
@@ -201,13 +207,16 @@ describe("Verification fails", function () {
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
-      params: {
-        from: "latest",
-        limit: 100,
-        direction: "older",
-      },
-    });
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      `${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`,
+      {
+        params: {
+          from: "latest",
+          limit: 100,
+          direction: "older",
+        },
+      }
+    );
 
     expect(zkSyncLitePayload).toEqual({
       valid: false,
@@ -235,13 +244,16 @@ describe("Verification fails", function () {
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
-      params: {
-        from: "latest",
-        limit: 100,
-        direction: "older",
-      },
-    });
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      `${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`,
+      {
+        params: {
+          from: "latest",
+          limit: 100,
+          direction: "older",
+        },
+      }
+    );
 
     expect(zkSyncLitePayload).toEqual({
       valid: false,
@@ -269,13 +281,16 @@ describe("Verification fails", function () {
 
     // Check the request to get the transactions
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`, {
-      params: {
-        from: "latest",
-        limit: 100,
-        direction: "older",
-      },
-    });
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      `${zkSyncLiteApiEndpoint}accounts/${MOCK_ADDRESS_LOWER}/transactions`,
+      {
+        params: {
+          from: "latest",
+          limit: 100,
+          direction: "older",
+        },
+      }
+    );
 
     expect(zkSyncLitePayload).toEqual({
       valid: false,

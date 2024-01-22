@@ -44,8 +44,8 @@ describe("Attempt verification", function () {
       {}
     );
 
-    expect(getAuthClient).toBeCalledWith(sessionKey, code, {});
-    expect(getTwitterUserData).toBeCalled();
+    expect(getAuthClient).toHaveBeenCalledWith(sessionKey, code, {});
+    expect(getTwitterUserData).toHaveBeenCalled();
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {

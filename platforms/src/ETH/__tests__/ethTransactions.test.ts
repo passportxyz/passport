@@ -269,9 +269,7 @@ describe("Attempt verification for ETH gas provider stamp", function () {
         address: BAD_MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload);
     }).rejects.toThrow(
-      new ProviderExternalVerificationError(
-        "More than 0.5 in gas fees on Ethereum check error: an error."
-      )
+      new ProviderExternalVerificationError("More than 0.5 in gas fees on Ethereum check error: an error.")
     );
     expect(axios.get).toHaveBeenCalledTimes(1);
     expect(mockedAxios.get).toBeCalledWith(
@@ -323,7 +321,9 @@ describe("Attempt verification for gte 30 days since first ETH transaction stamp
     expect(verifiedPayload).toMatchObject({
       valid: false,
       record: undefined,
-      errors: ["Your first transaction on Ethereum Mainnet was: 0 days ago, which is below the requirement of 30 days."],
+      errors: [
+        "Your first transaction on Ethereum Mainnet was: 0 days ago, which is below the requirement of 30 days.",
+      ],
     });
   });
 
@@ -343,7 +343,9 @@ describe("Attempt verification for gte 30 days since first ETH transaction stamp
     expect(verifiedPayload).toMatchObject({
       valid: false,
       record: undefined,
-      errors: ["Your first transaction on Ethereum Mainnet was: 0 days ago, which is below the requirement of 30 days."],
+      errors: [
+        "Your first transaction on Ethereum Mainnet was: 0 days ago, which is below the requirement of 30 days.",
+      ],
     });
   });
 

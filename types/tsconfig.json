@@ -6,7 +6,9 @@
     "declaration": true,
     "rootDir": ".",
     "types": ["node"],
-    "outDir": "/tmp/tsc-output"
+    "outDir": "/tmp/tsc-output",
+    "skipLibCheck": true,
+    "noImplicitAny": true
   },
   "include": ["src"]
 }

@@ -35,6 +35,7 @@ module.exports = {
     "@typescript-eslint/no-misused-promises": 1,
     "@typescript-eslint/no-floating-promises": 1,
     "@typescript-eslint/no-unsafe-assignment": "warn",
+    "@typescript-eslint/no-explicit-any": "warn",
   },
   settings: {
     "import/resolver": {

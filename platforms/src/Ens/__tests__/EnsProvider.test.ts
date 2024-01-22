@@ -39,8 +39,8 @@ describe("Attempt verification", function () {
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
 
-    expect(EthersLookupAddressMock).toBeCalledWith(MOCK_ADDRESS);
-    expect(EthersGetResolverMock).toBeCalledWith(MOCK_ENS);
+    expect(EthersLookupAddressMock).toHaveBeenCalledWith(MOCK_ADDRESS);
+    expect(EthersGetResolverMock).toHaveBeenCalledWith(MOCK_ENS);
 
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -64,7 +64,7 @@ describe("Attempt verification", function () {
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
 
-    expect(EthersLookupAddressMock).toBeCalledWith(MOCK_ADDRESS);
+    expect(EthersLookupAddressMock).toHaveBeenCalledWith(MOCK_ADDRESS);
 
     expect(verifiedPayload).toEqual({
       valid: false,
@@ -85,7 +85,7 @@ describe("Attempt verification", function () {
       address: MOCK_ADDRESS,
     } as unknown as RequestPayload);
 
-    expect(EthersLookupAddressMock).toBeCalledWith(MOCK_ADDRESS);
+    expect(EthersLookupAddressMock).toHaveBeenCalledWith(MOCK_ADDRESS);
 
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -106,7 +106,7 @@ describe("Attempt verification", function () {
         address: MOCK_FAKE_ADDRESS,
       } as unknown as RequestPayload);
     }).rejects.toThrow(new ProviderExternalVerificationError("Error verifying ENS name: Invalid Address"));
-    expect(EthersLookupAddressMock).toBeCalledWith(MOCK_FAKE_ADDRESS);
+    expect(EthersLookupAddressMock).toHaveBeenCalledWith(MOCK_FAKE_ADDRESS);
   });
 
   it("should return false for an address without a valid ens name", async () => {
@@ -117,7 +117,7 @@ describe("Attempt verification", function () {
       address: MOCK_FAKE_ADDRESS,
     } as unknown as RequestPayload);
 
-    expect(EthersLookupAddressMock).toBeCalledWith(MOCK_FAKE_ADDRESS);
+    expect(EthersLookupAddressMock).toHaveBeenCalledWith(MOCK_FAKE_ADDRESS);
     expect(verifiedPayload).toEqual({
       valid: false,
       errors: ["Primary ENS name was not found for given address."],

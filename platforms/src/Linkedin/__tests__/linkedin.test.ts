@@ -53,7 +53,7 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     // Check the request to get the token
-    expect(mockedAxios.post).toBeCalledWith(
+    expect(mockedAxios.post).toHaveBeenCalledWith(
       `https://www.linkedin.com/oauth/v2/accessToken?grant_type=authorization_code&code=${code}&client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${process.env.LINKEDIN_CALLBACK}`,
       {},
       {
@@ -62,7 +62,7 @@ describe("Attempt verification", function () {
     );
 
     // Check the request to get the user
-    expect(mockedAxios.get).toBeCalledWith("https://api.linkedin.com/rest/me", {
+    expect(mockedAxios.get).toHaveBeenCalledWith("https://api.linkedin.com/rest/me", {
       headers: { Authorization: "Bearer 762165719dhiqudgasyuqwt6235", "Linkedin-Version": 202305 },
     });
 

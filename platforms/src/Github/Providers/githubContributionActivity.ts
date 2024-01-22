@@ -21,7 +21,7 @@ export class GithubContributionActivityProvider implements Provider {
 
   async verify(payload: RequestPayload, context: GithubContext): Promise<VerifiedPayload> {
     try {
-      const errors:string[] = [];
+      const errors: string[] = [];
       let record = undefined,
         valid = false,
         contributionResult;
@@ -30,7 +30,7 @@ export class GithubContributionActivityProvider implements Provider {
         contributionResult = await fetchAndCheckContributions(context, payload.proofs.code, this._options.threshold);
       } catch (e) {
         valid = false;
-        errors.push(e.toString());
+        errors.push(String(e));
       }
 
       valid = contributionResult.contributionValid;

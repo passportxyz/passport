@@ -104,26 +104,21 @@ export const useDatastoreConnection = () => {
     // 1. if the user has nonde
     // 2. in case a new session has been created (access tokens should expire similar to sessions)
     // TODO: verifying the validity of the access token would also make sense => check the expiration data in the token
-    if (!dbAccessToken) {
-      setDbAccessTokenStatus("connecting");
 
-      try {
-        dbAccessToken = await getPassportDatabaseAccessToken(did);
-        // Store the session in localstorage
-        // @ts-ignore
-        window.localStorage.setItem(dbCacheTokenKey, dbAccessToken);
-        setDbAccessToken(dbAccessToken || undefined);
-        setDbAccessTokenStatus(dbAccessToken ? "connected" : "failed");
-      } catch (error) {
-        setDbAccessTokenStatus("failed");
-
-        // Should we logout the user here? They will be unable to write to passport
-        const msg = `Error getting access token for did: ${did}`;
-        datadogRum.addError(msg);
-      }
-    } else {
+    try {
+      dbAccessToken = await getPassportDatabaseAccessToken(did);
+      // Store the session in localstorage
+      // @ts-ignore
+      window.localStorage.setItem(dbCacheTokenKey, dbAccessToken);
       setDbAccessToken(dbAccessToken || undefined);
-      setDbAccessTokenStatus(dbAccessToken ? "connected" : "failed");
+      const status = dbAccessToken ? "connected" : "failed";
+      setDbAccessTokenStatus("connected");
+    } catch (error) {
+      setDbAccessTokenStatus("failed");
+
+      // Should we logout the user here? They will be unable to write to passport
+      const msg = `Error getting access token for did: ${did}`;
+      datadogRum.addError(msg);
     }
   }, []);
 
@@ -134,7 +129,6 @@ export const useDatastoreConnection = () => {
         let dbCacheTokenKey = "";
 
         try {
-          const ethAuthProvider = new EthereumAuthProvider(provider, address.toLowerCase());
           const accountId = new AccountId({
             chainId: "eip155:1",
             address,

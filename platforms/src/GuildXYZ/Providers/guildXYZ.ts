@@ -116,7 +116,7 @@ export class GuildMemberProvider extends GuildProvider implements Provider {
       try {
         membershipStats = await this.checkMemberShipStats(address);
       } catch (error) {
-        errors.push(error.toString());
+        errors.push(String(error));
       }
 
       const guildCount = membershipStats.guildCount;
@@ -160,7 +160,7 @@ export class GuildAdminProvider extends GuildProvider implements Provider {
       try {
         membershipStats = await this.checkMemberShipStats(address);
       } catch (error) {
-        errors.push(error.toString());
+        errors.push(String(error));
       }
 
       valid = membershipStats.totalAdminOwner > 0;

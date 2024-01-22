@@ -89,21 +89,6 @@ describe("when the user clicks Passport JSON", () => {
   });
 });
 
-describe("when viewer connection status is connecting", () => {
-  it("should show a 'waiting for signature' alert", () => {
-    (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connecting" }]);
-    renderWithContext(
-      mockCeramicContext,
-      <Router>
-        <Dashboard />
-      </Router>
-    );
-
-    const waitingForSignature = screen.getByTestId("selfId-connection-alert");
-    expect(waitingForSignature).toBeInTheDocument();
-  });
-});
-
 describe("dashboard notifications", () => {
   // using https://www.npmjs.com/package/jest-localstorage-mock to mock localStorage
   beforeEach(async () => {

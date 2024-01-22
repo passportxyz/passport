@@ -13,21 +13,13 @@ import {
   brightidStampFixture,
 } from "../../__test-fixtures__/databaseStorageFixtures";
 import { Passport } from "@gitcoin/passport-types";
-import {
-  DatastoreConnectionContext,
-  DatastoreConnectionContextProvider,
-} from "../../context/datastoreConnectionContext";
+import { DatastoreConnectionContext } from "../../context/datastoreConnectionContext";
+import { DID } from "dids";
 
 const viewerConnection = {
   status: "connected",
   selfID: "did:3:abc",
 };
-
-jest.mock("@self.id/framework", () => {
-  return {
-    useViewerConnection: () => [viewerConnection],
-  };
-});
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -109,6 +101,10 @@ const mockComponent = () => (
     value={{
       dbAccessToken: "token",
       dbAccessTokenStatus: "idle",
+      did: {
+        id: "did:3:abc",
+        parent: "did:3:abc",
+      } as unknown as DID,
       connect: async () => {},
       disconnect: async () => {},
     }}

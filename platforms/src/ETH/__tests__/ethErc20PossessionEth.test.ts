@@ -93,11 +93,11 @@ describe("Attempt verification", function () {
 
     expect(async () => {
       await ethPossessions.verify(
-      {
-        address: MOCK_ADDRESS_LOWER,
-      } as unknown as RequestPayload,
-      {}
-    );
+        {
+          address: MOCK_ADDRESS_LOWER,
+        } as unknown as RequestPayload,
+        {}
+      );
     }).rejects.toThrow(new ProviderExternalVerificationError("Error validating ETH amounts: Error: some error"));
     expect(mockGetBalance).toBeCalledWith(MOCK_ADDRESS_LOWER);
   });

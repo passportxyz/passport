@@ -57,7 +57,7 @@ describe("Attempt verification", function () {
     } as unknown as RequestPayload);
 
     // Check the request to get the user
-    expect(mockedAxios.get).toBeCalledWith("https://discord.com/api/oauth2/@me", {
+    expect(mockedAxios.get).toHaveBeenCalledWith("https://discord.com/api/oauth2/@me", {
       headers: { Authorization: "Bearer 762165719dhiqudgasyuqwt6235" },
     });
 

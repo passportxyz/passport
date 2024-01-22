@@ -47,7 +47,7 @@ export class GnosisSafeProvider implements Provider {
         const ownerSafes = await getSafes(address);
         valid = !!ownerSafes.safes && ownerSafes.safes.length >= 1;
       } catch (e) {
-        errors.push((e as unknown).toString());
+        errors.push(String(e));
       }
 
       if (!valid && errors.length === 0) {
