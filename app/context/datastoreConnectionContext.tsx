@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
-import { useViewerConnection } from "@self.id/framework";
 import { datadogRum } from "@datadog/browser-rum";
 import { useWalletStore } from "./walletStore";
 import { DoneToastContent } from "../components/DoneToastContent";
@@ -26,20 +25,19 @@ export type DatastoreConnectionContextState = {
   dbAccessTokenStatus: DbAuthTokenStatus;
   dbAccessToken?: string;
   did?: DID;
-  disconnect: () => Promise<void>;
+  disconnect: (address: string) => Promise<void>;
   connect: (address: string, provider: Eip1193Provider) => Promise<void>;
 };
 
 export const DatastoreConnectionContext = createContext<DatastoreConnectionContextState>({
   dbAccessTokenStatus: "idle",
-  disconnect: async () => {},
+  disconnect: async (address: string) => {},
   connect: async () => {},
 });
 
 // In the app, the context hook should be used. This is only exported for testing
 export const useDatastoreConnection = () => {
   const toast = useToast();
-  const [ceramicConnection, connectCeramic, disconnectCeramic] = useViewerConnection();
 
   const disconnectWallet = useWalletStore((state) => state.disconnect);
   const chain = useWalletStore((state) => state.chain);
@@ -55,26 +53,16 @@ export const useDatastoreConnection = () => {
       setDbAccessTokenStatus("idle");
       setDbAccessToken(undefined);
     }
-  }, [chain]);
+  }, [chain, dbAccessTokenStatus]);
 
-  useEffect((): void => {
-    switch (ceramicConnection.status) {
-      case "failed": {
-        // user refused to connect to ceramic -- disconnect them
-        disconnectWallet();
-        console.log("failed to connect self id :(", ceramicConnection.error);
-        break;
-      }
-      default:
-        break;
-    }
-  }, [ceramicConnection.status]);
-
-  const handleConnectionError = async (sessionKey: string, dbCacheTokenKey: string) => {
-    await disconnectWallet();
-    window.localStorage.removeItem(sessionKey);
-    window.localStorage.removeItem(dbCacheTokenKey);
-  };
+  const handleConnectionError = useCallback(
+    async (sessionKey: string, dbCacheTokenKey: string) => {
+      await disconnectWallet();
+      window.localStorage.removeItem(sessionKey);
+      window.localStorage.removeItem(dbCacheTokenKey);
+    },
+    [disconnectWallet]
+  );
 
   const getPassportDatabaseAccessToken = async (did: DID): Promise<string> => {
     let nonce = null;
@@ -105,7 +93,7 @@ export const useDatastoreConnection = () => {
     }
   };
 
-  const loadDbAccessToken = async (address: string, did: DID) => {
+  const loadDbAccessToken = useCallback(async (address: string, did: DID) => {
     const dbCacheTokenKey = `dbcache-token-${address}`;
     // TODO: if we load the token from the localstorage we should validate it
     // let dbAccessToken = window.localStorage.getItem(dbCacheTokenKey);
@@ -137,7 +125,7 @@ export const useDatastoreConnection = () => {
       setDbAccessToken(dbAccessToken || undefined);
       setDbAccessTokenStatus(dbAccessToken ? "connected" : "failed");
     }
-  };
+  }, []);
 
   const connect = useCallback(
     async (address: string, provider: Eip1193Provider) => {
@@ -157,53 +145,26 @@ export const useDatastoreConnection = () => {
           sessionKey = `didsession-${address}`;
           dbCacheTokenKey = `dbcache-token-${address}`;
           const sessionStr = window.localStorage.getItem(sessionKey);
+          let session: DIDSession | undefined = undefined;
+          if (sessionStr) {
+            session = await DIDSession.fromSession(sessionStr);
+          }
 
-          // @ts-ignore
-          // When sessionStr is null, this will create a new selfId. We want to avoid this, becasue we want to make sure
-          // that chainId 1 is in the did
-          const session = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
-
-          let selfId = !!sessionStr ? await connectCeramic(ethAuthProvider, sessionStr) : null;
           if (
-            // @ts-ignore
-            !selfId ||
-            // @ts-ignore
-            !selfId?.client?.session ||
-            // @ts-ignore
-            selfId?.client?.session?.isExpired ||
-            // @ts-ignore
-            selfId?.client?.session?.expireInSecs < 3600 ||
-            // @ts-ignore
-            Date.now() - new Date(selfId?.client?.session?.cacao?.p?.iat).getTime() >
+            !session ||
+            session.isExpired ||
+            session.expireInSecs < 3600 ||
+            !session.hasSession ||
+            Date.now() - new Date(session?.cacao?.p?.iat).getTime() >
               MAX_VALID_DID_SESSION_AGE - BUFFER_TIME_BEFORE_EXPIRATION
           ) {
-            // If the session loaded is not valid, or if it is expired or close to expire, we create
-            // a new session
-            // Also we enforce the "1" chainId, as we always want to use mainnet dids, in order to avoid confusion
-            // as to where a passport / stamp has been stored
-            const authMethod = await EthereumWebAuth.getAuthMethod(
-              provider,
-              new AccountId({
-                chainId: "eip155:1",
-                address,
-              })
-            );
-
-            const session = await DIDSession.authorize(authMethod, {
-              resources: ["ceramic://*"],
-            });
-            const newSessionStr = session.serialize();
-
-            // @ts-ignore
-            selfId = await connectCeramic(ethAuthProvider, newSessionStr);
-
+            session = await DIDSession.authorize(authMethod, { resources: ["ceramic://*"] });
             // Store the session in localstorage
-            // @ts-ignore
-            window.localStorage.setItem(sessionKey, selfId?.client?.session?.serialize());
+            window.localStorage.setItem(sessionKey, session.serialize());
           }
-          if (selfId) {
-            await loadDbAccessToken(address, selfId.did);
-            setDid(selfId.did);
+          if (session) {
+            await loadDbAccessToken(address, session.did);
+            setDid(session.did);
           }
         } catch (error) {
           await handleConnectionError(sessionKey, dbCacheTokenKey);
@@ -223,13 +184,12 @@ export const useDatastoreConnection = () => {
         }
       }
     },
-    [connectCeramic, toast]
+    [handleConnectionError, loadDbAccessToken, toast]
   );
 
-  const disconnect = async () => {
+  const disconnect = async (address: string) => {
     await disconnectWallet();
-    disconnectCeramic();
-    setDid(undefined);
+    localStorage.removeItem(`didsession-${address}`);
   };
 
   return {

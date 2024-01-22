@@ -114,8 +114,6 @@ export default function Dashboard() {
     };
   }, []);
   // ------------------- END Data items for Google Tag Manager -------------------
-
-  const [viewerConnection, ceramicConnect] = useViewerConnection();
   const { isOpen: retryModalIsOpen, onOpen: onRetryModalOpen, onClose: onRetryModalClose } = useDisclosure();
 
   // stamp filter
@@ -176,14 +174,13 @@ export default function Dashboard() {
   const retryConnection = () => {
     if (isLoadingPassport == IsLoadingPassportState.FailedToConnect && address) {
       // connect to ceramic (deliberately connect with a lowercase DID to match reader)
-      ceramicConnect(new EthereumAuthProvider(provider, address!.toLowerCase()));
       onRetryModalClose();
     }
   };
 
   const closeModalAndDisconnect = () => {
     onRetryModalClose();
-    disconnect();
+    disconnect(address!);
   };
 
   useEffect(() => {
@@ -225,12 +222,6 @@ export default function Dashboard() {
 
   const modals = (
     <>
-      {viewerConnection.status === "connecting" && (
-        <ProcessingPopup data-testid="selfId-connection-alert">
-          Please use your wallet to sign the message prompt and complete the sign-in process.
-        </ProcessingPopup>
-      )}
-
       {isLoadingPassport === IsLoadingPassportState.Loading && (
         <ProcessingPopup data-testid="db-stamps-alert">One moment while we load your Stamps...</ProcessingPopup>
       )}

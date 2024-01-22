@@ -10,7 +10,6 @@ import {
 } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../config/providers";
 import { CeramicStorage, DataStorageBase, ComposeDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
-import { useViewerConnection } from "@self.id/framework";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { useWalletStore } from "./walletStore";
@@ -338,11 +337,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [expiredProviders, setExpiredProviders] = useState<PROVIDER_ID[]>([]);
   const [passportLoadResponse, setPassportLoadResponse] = useState<PassportLoadResponse | undefined>();
   const [passportHasCacaoError, setPassportHasCacaoError] = useState<boolean>(false);
-  const [viewerConnection] = useViewerConnection();
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
 
   const address = useWalletStore((state) => state.address);
-  const { dbAccessToken, dbAccessTokenStatus } = useDatastoreConnectionContext();
+  const { dbAccessToken, did } = useDatastoreConnectionContext();
   const { refreshScore, fetchStampWeights } = useContext(ScorerContext);
 
   useEffect(() => {
@@ -357,54 +355,37 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   }, [address]);
 
   useEffect((): void => {
-    switch (viewerConnection.status) {
-      case "idle": {
-        setCeramicClient(undefined);
-        setDatabase(undefined);
-        break;
-      }
-      case "connecting": {
-        setIsLoadingPassport(IsLoadingPassportState.Loading);
-        setCeramicClient(undefined);
-        setDatabase(undefined);
-        break;
-      }
-      case "connected": {
-        if (dbAccessTokenStatus === "failed") {
-          setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
-          break;
-        } else if (dbAccessToken && address && !database) {
-          // Ceramic Network Connection
-          const ceramicClientInstance = new ComposeDatabase(
-            viewerConnection.selfID.did,
-            process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
-            datadogLogs.logger
-          );
-          setCeramicClient(ceramicClientInstance);
-          setUserDid(ceramicClientInstance.did);
-          // Ceramic cache db
-          const databaseInstance = new PassportDatabase(
-            CERAMIC_CACHE_ENDPOINT || "",
-            address,
-            dbAccessToken,
-            datadogLogs.logger,
-            viewerConnection.selfID.did
-          );
+    try {
+      if (dbAccessToken && address && !database && did) {
+        // Ceramic Network Connection
+        const ceramicClientInstance = new ComposeDatabase(
+          did,
+          process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
+          datadogLogs.logger
+        );
+        setCeramicClient(ceramicClientInstance);
+        setUserDid(ceramicClientInstance.did);
+        // Ceramic cache db
+        const databaseInstance = new PassportDatabase(
+          CERAMIC_CACHE_ENDPOINT || "",
+          address,
+          dbAccessToken,
+          datadogLogs.logger,
+          did
+        );
 
-          setDatabase(databaseInstance);
-        }
-        break;
-      }
-      case "failed": {
-        console.log("failed to connect self id :(");
+        setDatabase(databaseInstance);
+      } else {
         setCeramicClient(undefined);
         setDatabase(undefined);
-        break;
+        setIsLoadingPassport(IsLoadingPassportState.Loading);
       }
-      default:
-        break;
+    } catch (e) {
+      console.log("failed to connect self id :(");
+      setCeramicClient(undefined);
+      setDatabase(undefined);
     }
-  }, [viewerConnection, address, dbAccessToken, dbAccessTokenStatus]);
+  }, [address, dbAccessToken]);
 
   useEffect(() => {
     if (database) {
@@ -605,29 +586,35 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const verifiedPlatforms = useMemo(
     () =>
-      Object.entries(Object.fromEntries(platforms)).reduce((validPlatformProps, [platformKey, platformProps]) => {
-        if (
-          platformProps.platFormGroupSpec.some(({ providers }) =>
-            providers.some(({ name }) => verifiedProviderIds.includes(name))
+      Object.entries(Object.fromEntries(platforms)).reduce(
+        (validPlatformProps, [platformKey, platformProps]) => {
+          if (
+            platformProps.platFormGroupSpec.some(({ providers }) =>
+              providers.some(({ name }) => verifiedProviderIds.includes(name))
+            )
           )
-        )
-          validPlatformProps[platformKey as PLATFORM_ID] = platformProps;
-        return validPlatformProps;
-      }, {} as Record<PLATFORM_ID, PlatformProps>),
+            validPlatformProps[platformKey as PLATFORM_ID] = platformProps;
+          return validPlatformProps;
+        },
+        {} as Record<PLATFORM_ID, PlatformProps>
+      ),
     [verifiedProviderIds, platforms]
   );
 
   const expiredPlatforms = useMemo(
     () =>
-      Object.entries(Object.fromEntries(platforms)).reduce((validPlatformProps, [platformKey, platformProps]) => {
-        if (
-          platformProps.platFormGroupSpec.some(({ providers }) =>
-            providers.some(({ name }) => expiredProviders.includes(name))
+      Object.entries(Object.fromEntries(platforms)).reduce(
+        (validPlatformProps, [platformKey, platformProps]) => {
+          if (
+            platformProps.platFormGroupSpec.some(({ providers }) =>
+              providers.some(({ name }) => expiredProviders.includes(name))
+            )
           )
-        )
-          validPlatformProps[platformKey as PLATFORM_ID] = platformProps;
-        return validPlatformProps;
-      }, {} as Record<PLATFORM_ID, PlatformProps>),
+            validPlatformProps[platformKey as PLATFORM_ID] = platformProps;
+          return validPlatformProps;
+        },
+        {} as Record<PLATFORM_ID, PlatformProps>
+      ),
     [verifiedProviderIds, platforms]
   );
 
