@@ -18,10 +18,10 @@
   "dependencies": {
     "@ceramicnetwork/http-client": "^2.2.1",
     "@composedb/types": "^0.6.0",
-    "dids": "^3.0.0",
+    "dids": "^5.0.2",
     "dotenv": "^16.0.0",
     "key-did-provider-ed25519": "^2.0.0",
-    "key-did-resolver": "^2.0.0",
+    "key-did-resolver": "^4.0.0",
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {

@@ -1,20 +1,29 @@
 {
-  "extends": "../tsconfig.settings.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "module": "esnext",
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "allowJs": true,
-    "target": "es6",
-    "noImplicitAny": true,
+    "module": "esnext",
     "moduleResolution": "node",
-    "sourceMap": true,
-    "outDir": "dist",
-    "baseUrl": ".",
     "resolveJsonModule": true,
-    "paths": {
-      "*": ["../node_modules/*", "node_modules/*"]
-    }
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "strictNullChecks": false 
   },
-  "include": ["src/**/*", "__tests__/**/*"]
+  "include": ["src/**/*", "__tests__/**/*"],
+  "exclude": ["node_modules"],
+  "ts-node": {
+    "esm": true,
+    "compilerOptions": {
+      "module": "nodenext"
+    }
+  }
 }
+

@@ -22,15 +22,14 @@ const eip712Key = IAM_JWK_EIP712;
 beforeAll(async () => {
   const TEST_SEED = Uint8Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
 
-// TODO: geri add this back
-  // // Create and authenticate the DID
-  // testDID = new DID({
-  //   provider: new Ed25519Provider(TEST_SEED),
-  //   resolver: getResolver(),
-  // });
-  // await testDID.authenticate();
+  // Create and authenticate the DID
+  testDID = new DID({
+    provider: new Ed25519Provider(TEST_SEED),
+    resolver: getResolver(),
+  });
+  await testDID.authenticate();
 
-  // composeDatabase = new ComposeDatabase(testDID, process.env.CERAMIC_CLIENT_URL || "http://localhost:7007");
+  composeDatabase = new ComposeDatabase(testDID, process.env.CERAMIC_CLIENT_URL || "http://localhost:7007");
 });
 
 // TODO: geri add this back

@@ -1,6 +1,6 @@
 // ----- Types
 import { Provider, ProviderOptions } from "../../types";
-import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
+import { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Idena SignIn library
 import { IdenaContext, requestIdentityState } from "../procedures/idenaSignIn";
@@ -24,7 +24,9 @@ abstract class IdenaStateProvider implements Provider {
     this.acceptableStates = acceptableStates;
   }
 
-  async verify(payload: RequestPayload, context: IdenaContext): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, _context?: ProviderContext): Promise<VerifiedPayload> {
+    // TODO: geri review this
+    const context = _context as IdenaContext;
     const token = payload.proofs.sessionKey;
     const { valid, address, expiresInSeconds, errors } = await this.checkState(token, context);
     return {

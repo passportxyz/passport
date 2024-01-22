@@ -284,7 +284,7 @@ export const verifyCredential = async (DIDKit: DIDKitLib, credential: Verifiable
     try {
       // parse the result of attempting to verify
       const verify = JSON.parse(
-        await DIDKit.verifyCredential(JSON.stringify(credential), `{"proofPurpose":"${proof.proofPurpose}"}`)
+        await DIDKit.verifyCredential(JSON.stringify(credential), `{"proofPurpose":"${proof?.proofPurpose}"}`)
       ) as { checks: string[]; warnings: string[]; errors: string[] };
 
       // did we get any errors when we attempted to verify?

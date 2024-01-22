@@ -110,13 +110,13 @@ export class GuildMemberProvider extends GuildProvider implements Provider {
       let valid = false,
         record = undefined,
         membershipStats;
-      const errors = [];
+      const errors: string[] = [];
       const address = await getAddress(payload);
 
       try {
         membershipStats = await this.checkMemberShipStats(address);
       } catch (error) {
-        errors.push(error);
+        errors.push(error.toString());
       }
 
       const guildCount = membershipStats.guildCount;
@@ -155,12 +155,12 @@ export class GuildAdminProvider extends GuildProvider implements Provider {
       let valid = false,
         record = undefined,
         membershipStats;
-      const errors = [];
+      const errors: string[] = [];
       const address = await getAddress(payload);
       try {
         membershipStats = await this.checkMemberShipStats(address);
       } catch (error) {
-        errors.push(error);
+        errors.push(error.toString());
       }
 
       valid = membershipStats.totalAdminOwner > 0;

@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.settings.json",
   "compilerOptions": {
+    "target": "ES2022",
     "composite": true,
     "declaration": true,
     "rootDir": ".",
