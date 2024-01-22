@@ -1,21 +1,18 @@
 {
   "extends": "../tsconfig.settings.json",
   "compilerOptions": {
-    "module": "esnext",
+    "module": "commonjs",
     "esModuleInterop": true,
     "declaration": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es5",
+    "target": "ES2022",
+    "noImplicitAny": true,
     "moduleResolution": "node",
     "sourceMap": true,
-    "outDir": "dist/esm",
+    "outDir": "dist/commonjs",
     "allowJs": true,
     "baseUrl": "src",
-    "paths": {
-      "*": ["../node_modules/*", "node_modules/*"]
-    },
-    "skipLibCheck": true,
-    "resolveJsonModule": true
+    "skipLibCheck": true
   },
-  "include": ["composites", "definitions", "models"]
+  "include": ["src/**/*"]
 }

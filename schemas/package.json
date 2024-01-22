@@ -1,8 +1,16 @@
 {
   "name": "@gitcoin/passport-schemas",
   "version": "1.0.0",
-  "private": true,
-  "type": "module",
+  "license": "MIT",
+  "main": "dist/commonjs/index.js",
+  "directories": {
+    "src": "src",
+    "dist": "dist"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
   "injectEnvironmentFiles": [
     ".env.yarn"
   ],
@@ -13,7 +21,7 @@
     "graphql:server": "composedb graphql:server --ceramic-url=${CERAMIC_URL} --graphiql definitions/gitcoin-passport-stamps.json --did-private-key=${PRIVATE_KEY} --port=5005",
     "models:create-composite": "composedb composite:create models/passportStamps.graphql --output=composites/gitcoin-passport-stamps-composite.json --did-private-key=${PRIVATE_KEY}",
     "models:deploy-composite": "composedb composite:deploy composites/gitcoin-passport-stamps-composite.json --ceramic-url=${CERAMIC_URL} --did-private-key=${PRIVATE_KEY}",
-    "models:compile-composite": "composedb composite:compile composites/gitcoin-passport-stamps-composite.json definitions/gitcoin-passport-stamps.ts --ceramic-url=${CERAMIC_URL} && composedb composite:compile composites/gitcoin-passport-stamps-composite.json definitions/gitcoin-passport-stamps.json --ceramic-url=${CERAMIC_URL}"
+    "models:compile-composite": "composedb composite:compile composites/gitcoin-passport-stamps-composite.json src/definitions/ts/gitcoin-passport-stamps.ts --ceramic-url=${CERAMIC_URL} && composedb composite:compile composites/gitcoin-passport-stamps-composite.json src/definitions/json/gitcoin-passport-stamps.json --ceramic-url=${CERAMIC_URL}"
   },
   "dependencies": {
     "@ceramicnetwork/http-client": "^2.2.1",

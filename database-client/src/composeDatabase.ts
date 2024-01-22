@@ -12,7 +12,7 @@ import {
 } from "@gitcoin/passport-types";
 
 import { CeramicStorage } from "./types";
-import { definition as GitcoinPassportStampDefinition } from "./compose-schema-definition";
+import { definition as GitcoinPassportStampDefinition } from "@gitcoin/passport-schemas";
 import { GraphQLError } from "graphql";
 import { Logger } from "./logger";
 import { RuntimeCompositeDefinition } from "@composedb/types";
