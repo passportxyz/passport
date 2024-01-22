@@ -1,5 +1,5 @@
 import { useToast } from "@chakra-ui/react";
-import { EasPayload, VerifiableCredential } from "@gitcoin/passport-types";
+import { EasPayload, VerifiableCredential, Passport } from "@gitcoin/passport-types";
 import { ethers, EthersError, isError } from "ethers";
 import { useCallback, useContext, useState } from "react";
 import { CeramicContext } from "../context/ceramicContext";
@@ -33,7 +33,7 @@ export const useSyncToChainButton = ({
   const [syncingToChain, setSyncingToChain] = useState(false);
 
   const loadVerifierContract = useCallback(
-    async (provider) => {
+    async (provider: ethers.Eip1193Provider) => {
       if (!chain) return;
       const ethersProvider = new ethers.BrowserProvider(provider, "any");
 
@@ -49,7 +49,7 @@ export const useSyncToChainButton = ({
   );
 
   const onSyncToChain = useCallback(
-    async (provider, passport) => {
+    async (provider: ethers.Eip1193Provider | undefined, passport: Passport | undefined | false) => {
       if (passport && provider && chain) {
         try {
           setSyncingToChain(true);
@@ -233,7 +233,7 @@ export const useSyncToChainButton = ({
   );
 
   const onInitiateSyncToChain = useCallback(
-    async (provider, passport) => {
+    async (provider: ethers.Eip1193Provider | undefined, passport: Passport | undefined | false) => {
       if (connectedChain && chain && connectedChain !== chain.id) {
         const setChainResponse = await setChain(chain.id);
         setChainResponse && (await onSyncToChain(provider, passport));
@@ -249,6 +249,7 @@ export const useSyncToChainButton = ({
   const needToSwitchChain = isActive && onChainStatus !== OnChainStatus.MOVED_UP_TO_DATE && chain.id !== connectedChain;
 
   const onClick = () => onInitiateSyncToChain(provider, passport);
+
   const className = disableBtn ? "cursor-not-allowed" : "";
   const disabled = disableBtn;
 
