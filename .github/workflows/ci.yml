@@ -32,7 +32,8 @@ jobs:
           - 7007:7007
 
         volumes:
-          - ${GITHUB_WORKSPACE}/daemon.config.json:/root/.ceramic/daemon.config.json
+          # TODO: use GITHUB_WORKSPACE var here ..
+          - /home/runner/work/passport/passport/daemon.config.json:/root/.ceramic/daemon.config.json
 
     steps:
       - uses: actions/checkout@v3
