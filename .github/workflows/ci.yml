@@ -65,6 +65,7 @@ jobs:
       - name: Start Ceramic Daemon
         uses: ./
         with:
+          working-directory: ./
           start: |
             mkdir $HOME/.ceramic
             echo "${CERAMIC_CONFIG}" > $HOME/.ceramic/daemon.config.json
