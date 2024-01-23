@@ -70,8 +70,10 @@ describe("Attempt signin", function () {
 
     const ok = await authenticate(MOCK_SESSION_KEY, MOCK_SIGNATURE);
     expect(ok).toBe(true);
-    expect(mockedAxios.get).toBeCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`/api/SignatureAddress?value=${MOCK_NONCE}&signature=${MOCK_SIGNATURE}`);
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      `/api/SignatureAddress?value=${MOCK_NONCE}&signature=${MOCK_SIGNATURE}`
+    );
 
     const updatedSession = await loadCacheSession<IdenaCache>(MOCK_SESSION_KEY);
     expect(updatedSession).toBeDefined();

@@ -1,11 +1,14 @@
 {
   "extends": "../tsconfig.settings.json",
   "compilerOptions": {
+    "target": "ES2022",
     "composite": true,
     "declaration": true,
     "rootDir": ".",
     "types": ["node"],
-    "outDir": "/tmp/tsc-output"
+    "outDir": "/tmp/tsc-output",
+    "skipLibCheck": true,
+    "noImplicitAny": true
   },
   "include": ["src"]
 }

@@ -38,13 +38,14 @@
     "cid": "multiformats/cid",
     "multiformats": "9",
     "redis": "^4.6.10",
-    "typescript": "~4.6.3"
+    "typescript": "^5.3.3"
   },
   "devDependencies": {
     "jest": "^27.5.1",
     "jest-mock-extended": "^3.0.4",
     "ts-jest": "^27.1.4",
-    "ts-node": "^10.8.0"
+    "ts-node": "^10.8.0",
+    "eslint-plugin-prettier": "^5.1.3"
   },
   "scripts": {
     "clean": "rimraf dist node_modules",

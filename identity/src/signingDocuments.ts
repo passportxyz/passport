@@ -91,10 +91,6 @@ export const stampCredentialDocument = (verificationMethod: string): DocumentSig
         },
         {
           type: "string",
-          name: "metaPointer",
-        },
-        {
-          type: "string",
           name: "provider",
         },
       ],
@@ -162,10 +158,6 @@ export const stampCredentialDocument = (verificationMethod: string): DocumentSig
         {
           type: "string",
           name: "id",
-        },
-        {
-          type: "string",
-          name: "metaPointer",
         },
         {
           type: "string",

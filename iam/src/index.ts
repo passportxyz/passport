@@ -157,23 +157,29 @@ const ATTESTER_TYPES = {
   ],
 };
 
-const providerTypePlatformMap = Object.entries(platforms).reduce((acc, [platformName, { providers }]) => {
-  providers.forEach(({ type }) => {
-    acc[type] = platformName;
-  });
-  return acc;
-}, {} as { [k: string]: string });
+const providerTypePlatformMap = Object.entries(platforms).reduce(
+  (acc, [platformName, { providers }]) => {
+    providers.forEach(({ type }) => {
+      acc[type] = platformName;
+    });
+    return acc;
+  },
+  {} as { [k: string]: string }
+);
 
 function groupProviderTypesByPlatform(types: string[]): string[][] {
   return Object.values(
-    types.reduce((groupedProviders, type) => {
-      const platform = providerTypePlatformMap[type] || "generic";
+    types.reduce(
+      (groupedProviders, type) => {
+        const platform = providerTypePlatformMap[type] || "generic";
 
-      if (!groupedProviders[platform]) groupedProviders[platform] = [];
-      groupedProviders[platform].push(type);
+        if (!groupedProviders[platform]) groupedProviders[platform] = [];
+        groupedProviders[platform].push(type);
 
-      return groupedProviders;
-    }, {} as { [k: keyof typeof platforms]: string[] })
+        return groupedProviders;
+      },
+      {} as { [k: keyof typeof platforms]: string[] }
+    )
   );
 }
 
@@ -232,8 +238,6 @@ const issueCredentials = async (
             ...(verifyResult?.record || {}),
           };
 
-          const metaPointer = platforms[type]?.PlatformDetails?.metaPointer;
-
           const currentKey = payload.signatureType === "EIP712" ? eip712Key : key;
           // generate a VC for the given payload
           ({ credential } = await issueHashedCredential(
@@ -242,8 +246,7 @@ const issueCredentials = async (
             address,
             record,
             verifyResult.expiresInSeconds,
-            payload.signatureType,
-            metaPointer
+            payload.signatureType
           ));
         }
       } catch {
@@ -495,13 +498,11 @@ app.post("/api/v0.0.0/convert", (req: Request, res: Response): void => {
                 credentialSubject: {
                   "@context": {
                     hash: "https://schema.org/Text",
-                    metaPointer: "https://schema.org/URL",
                     provider: "https://schema.org/Text",
                   },
                   id,
                   hash,
                   provider,
-                  metaPointer: "https://passport.gitcoin.co",
                 },
               },
               stampCredentialDocument(verificationMethod),

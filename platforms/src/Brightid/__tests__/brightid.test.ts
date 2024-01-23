@@ -69,8 +69,8 @@ describe("Attempt BrightId", () => {
         },
       } as unknown as RequestPayload);
 
-      expect(verifyContextId).toBeCalledTimes(1);
-      expect(verifyContextId).toBeCalledWith("Gitcoin", did);
+      expect(verifyContextId).toHaveBeenCalledTimes(1);
+      expect(verifyContextId).toHaveBeenCalledWith("Gitcoin", did);
       expect(result).toMatchObject({
         valid: true,
         record: {
@@ -89,7 +89,7 @@ describe("Attempt BrightId", () => {
         },
       } as unknown as RequestPayload);
 
-      expect(verifyContextId).toBeCalledTimes(1);
+      expect(verifyContextId).toHaveBeenCalledTimes(1);
       expect(result).toMatchObject({
         valid: false,
         record: undefined,
@@ -110,7 +110,7 @@ describe("Attempt BrightId", () => {
         } as unknown as RequestPayload);
       }).rejects.toThrow(ProviderExternalVerificationError);
 
-      expect(verifyContextId).toBeCalledTimes(1);
+      expect(verifyContextId).toHaveBeenCalledTimes(1);
     });
 
     it("user is sponsored but did not attend a connection party, returns valid false, record undefined, and error reason", async () => {
@@ -122,7 +122,7 @@ describe("Attempt BrightId", () => {
         },
       } as unknown as RequestPayload);
 
-      expect(verifyContextId).toBeCalledTimes(1);
+      expect(verifyContextId).toHaveBeenCalledTimes(1);
       expect(result).toMatchObject({
         valid: false,
         record: undefined,
@@ -140,8 +140,8 @@ describe("Attempt BrightId", () => {
       (sponsor as jest.Mock).mockResolvedValue(validSponsorshipResponse);
       const result = await triggerBrightidSponsorship(did);
 
-      expect(sponsor).toBeCalledTimes(1);
-      expect(sponsor).toBeCalledWith(process.env.BRIGHTID_PRIVATE_KEY || "", "Gitcoin", did);
+      expect(sponsor).toHaveBeenCalledTimes(1);
+      expect(sponsor).toHaveBeenCalledWith(process.env.BRIGHTID_PRIVATE_KEY || "", "Gitcoin", did);
       expect(result).toMatchObject({
         valid: true,
         result: validSponsorshipResponse,
@@ -152,8 +152,8 @@ describe("Attempt BrightId", () => {
       (sponsor as jest.Mock).mockResolvedValue(invalidSponsorshipResponse);
       const result = await triggerBrightidSponsorship(did);
 
-      expect(sponsor).toBeCalledTimes(1);
-      expect(sponsor).toBeCalledWith(process.env.BRIGHTID_PRIVATE_KEY || "", "Gitcoin", did);
+      expect(sponsor).toHaveBeenCalledTimes(1);
+      expect(sponsor).toHaveBeenCalledWith(process.env.BRIGHTID_PRIVATE_KEY || "", "Gitcoin", did);
       expect(result).toMatchObject({
         valid: false,
         result: invalidSponsorshipResponse,
@@ -164,8 +164,8 @@ describe("Attempt BrightId", () => {
       (sponsor as jest.Mock).mockRejectedValue("Thrown Error");
       const result = await triggerBrightidSponsorship(did);
 
-      expect(sponsor).toBeCalledTimes(1);
-      expect(sponsor).toBeCalledWith(process.env.BRIGHTID_PRIVATE_KEY || "", "Gitcoin", did);
+      expect(sponsor).toHaveBeenCalledTimes(1);
+      expect(sponsor).toHaveBeenCalledWith(process.env.BRIGHTID_PRIVATE_KEY || "", "Gitcoin", did);
       expect(result).toMatchObject({
         valid: false,
         error: "Thrown Error",

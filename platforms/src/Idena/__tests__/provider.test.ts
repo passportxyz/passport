@@ -97,9 +97,9 @@ describe("Attempt verification", function () {
     };
     const verifiedPayload = await provider.verify(payload as unknown as RequestPayload, {} as IdenaContext);
 
-    expect(mockedAxios.get).toBeCalledTimes(2);
-    expect(mockedAxios.get).toBeCalledWith(`/api/identity/${MOCK_ADDRESS}/age`);
-    expect(mockedAxios.get).toBeCalledWith("/api/epoch/last");
+    expect(mockedAxios.get).toHaveBeenCalledTimes(2);
+    expect(mockedAxios.get).toHaveBeenCalledWith(`/api/identity/${MOCK_ADDRESS}/age`);
+    expect(mockedAxios.get).toHaveBeenCalledWith("/api/epoch/last");
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
@@ -119,9 +119,9 @@ describe("Attempt verification", function () {
     };
     const verifiedPayload = await provider.verify(payload as unknown as RequestPayload, {} as IdenaContext);
 
-    expect(mockedAxios.get).toBeCalledTimes(2);
-    expect(mockedAxios.get).toBeCalledWith(`/api/identity/${MOCK_ADDRESS}/age`);
-    expect(mockedAxios.get).toBeCalledWith("/api/epoch/last");
+    expect(mockedAxios.get).toHaveBeenCalledTimes(2);
+    expect(mockedAxios.get).toHaveBeenCalledWith(`/api/identity/${MOCK_ADDRESS}/age`);
+    expect(mockedAxios.get).toHaveBeenCalledWith("/api/epoch/last");
     expect(verifiedPayload).toEqual(
       expect.objectContaining({
         valid: false,
@@ -140,7 +140,7 @@ describe("Attempt verification", function () {
     await expect(provider.verify(payload as unknown as RequestPayload, {} as IdenaContext)).rejects.toThrow(
       ProviderInternalVerificationError
     );
-    expect(mockedAxios.get).toBeCalledTimes(0);
+    expect(mockedAxios.get).toHaveBeenCalledTimes(0);
   });
 
   it("should throw ProviderExternalVerificationError return false when the Idena API returns an error response", async () => {
@@ -157,8 +157,8 @@ describe("Attempt verification", function () {
     await expect(provider.verify(payload as unknown as RequestPayload, {} as IdenaContext)).rejects.toThrow(
       ProviderExternalVerificationError
     );
-    expect(mockedAxios.get).toBeCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`/api/identity/${MOCK_ADDRESS}/age`);
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    expect(mockedAxios.get).toHaveBeenCalledWith(`/api/identity/${MOCK_ADDRESS}/age`);
   });
 
   it("shouldn't duplicate requests to the Idena API within the same context", async () => {
@@ -173,9 +173,9 @@ describe("Attempt verification", function () {
     await provider1.verify(payload as unknown as RequestPayload, context as IdenaContext);
     await provider2.verify(payload as unknown as RequestPayload, context as IdenaContext);
 
-    expect(mockedAxios.get).toBeCalledTimes(2);
-    expect(mockedAxios.get).toBeCalledWith(`/api/identity/${MOCK_ADDRESS}/age`);
-    expect(mockedAxios.get).toBeCalledWith("/api/epoch/last");
+    expect(mockedAxios.get).toHaveBeenCalledTimes(2);
+    expect(mockedAxios.get).toHaveBeenCalledWith(`/api/identity/${MOCK_ADDRESS}/age`);
+    expect(mockedAxios.get).toHaveBeenCalledWith("/api/epoch/last");
   });
 });
 

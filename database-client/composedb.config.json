@@ -1,0 +1,24 @@
+{
+  "anchor": {},
+  "http-api": {
+    "cors-allowed-origins": [".*"],
+    "admin-dids": [
+      "did:key:z6MknU3gBqubYTbXbHnHzpJurGyrssbpLdS7Mbz1uHdGdzdo",
+      "did:key:z6Mki9zj9fFYxBbQcaC6EJvST8XHv7i4iXsP281gJV5nM5Hy#z6Mki9zj9fFYxBbQcaC6EJvST8XHv7i4iXsP281gJV5nM5Hy"
+    ]
+  },
+  "ipfs": { "mode": "bundled" },
+  "logger": { "log-level": 2, "log-to-files": false },
+  "metrics": { "metrics-exporter-enabled": false, "metrics-port": 9090 },
+  "network": { "name": "inmemory" },
+  "node": {},
+  "state-store": {
+    "mode": "fs",
+    "local-directory": "/Users/timschultz/repos/compose-db/ceramic-app/ceramic-app-app/.ceramic/.ceramic/statestore/"
+  },
+  "indexing": {
+    "db": "sqlite:///Users/timschultz/repos/compose-db/ceramic-app/ceramic-app-app/.ceramic/indexing.sqlite",
+    "allow-queries-before-historical-sync": true,
+    "models": []
+  }
+}

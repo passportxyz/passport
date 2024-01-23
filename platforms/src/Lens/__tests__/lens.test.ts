@@ -103,6 +103,6 @@ describe("Attempt verification", function () {
         await lens.verify({
           address: MOCK_ADDRESS_LOWER,
         } as RequestPayload)
-    ).rejects.toThrowError("Error verifying Snapshot proposals: {}.");
+    ).rejects.toThrow("Error verifying Snapshot proposals: {}.");
   });
 });

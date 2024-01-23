@@ -39,7 +39,7 @@ const gtcStakingResponse = (gtcAmount: string) => {
           event_type: "SelfStake",
           round_id: 1,
           staker: MOCK_ADDRESS,
-          address: null as null,
+          address: "0x1234",
           amount: gtcAmount,
           staked: true,
           block_number: 14124991,

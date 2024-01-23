@@ -33,7 +33,7 @@ describe("Attempt verification", function () {
       },
     } as unknown as RequestPayload);
 
-    expect(verifyGoogleMock).toBeCalledWith(MOCK_TOKEN_ID);
+    expect(verifyGoogleMock).toHaveBeenCalledWith(MOCK_TOKEN_ID);
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
@@ -61,7 +61,7 @@ describe("Attempt verification", function () {
       },
     } as unknown as RequestPayload);
 
-    expect(verifyGoogleMock).toBeCalledWith(MOCK_TOKEN_ID);
+    expect(verifyGoogleMock).toHaveBeenCalledWith(MOCK_TOKEN_ID);
     expect(verifiedPayload).toEqual({
       valid: false,
       record: undefined,
@@ -95,8 +95,8 @@ describe("verifyGoogle", function () {
     });
 
     const verifiedGoogleResponse = await google.verifyGoogle(MOCK_TOKEN_ID);
-    expect(requestAccessTokenMock).toBeCalledWith(MOCK_TOKEN_ID);
-    expect(userInfoMock).toBeCalledWith("https://www.googleapis.com/oauth2/v2/userinfo", {
+    expect(requestAccessTokenMock).toHaveBeenCalledWith(MOCK_TOKEN_ID);
+    expect(userInfoMock).toHaveBeenCalledWith("https://www.googleapis.com/oauth2/v2/userinfo", {
       headers: { Authorization: `Bearer ${MOCK_ACCESS_TOKEN}` },
     });
     expect(verifiedGoogleResponse).toEqual({
@@ -126,9 +126,9 @@ describe("verifyGoogle", function () {
         "Details: " + JSON.stringify({ error: { message: "error message for user data request" } }),
       ],
     });
-    expect(requestAccessTokenMock).toBeCalledWith(MOCK_TOKEN_ID);
-    expect(userInfoMock).toBeCalledTimes(1);
-    expect(userInfoMock).toBeCalledWith("https://www.googleapis.com/oauth2/v2/userinfo", {
+    expect(requestAccessTokenMock).toHaveBeenCalledWith(MOCK_TOKEN_ID);
+    expect(userInfoMock).toHaveBeenCalledTimes(1);
+    expect(userInfoMock).toHaveBeenCalledWith("https://www.googleapis.com/oauth2/v2/userinfo", {
       headers: { Authorization: `Bearer ${MOCK_ACCESS_TOKEN}` },
     });
   });

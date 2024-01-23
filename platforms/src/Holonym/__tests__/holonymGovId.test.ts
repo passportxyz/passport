@@ -30,7 +30,7 @@ describe("Attempt verification", function () {
       address: MOCK_ADDRESS,
     } as RequestPayload);
 
-    expect(mockIsUniqueForAction).toBeCalledWith(MOCK_ADDRESS, actionId);
+    expect(mockIsUniqueForAction).toHaveBeenCalledWith(MOCK_ADDRESS, actionId);
     expect(verifiedPayload).toEqual({
       valid: true,
       errors: [],
@@ -49,7 +49,7 @@ describe("Attempt verification", function () {
       address: UNREGISTERED_ADDRESS,
     } as RequestPayload);
 
-    expect(mockIsUniqueForAction).toBeCalledWith(UNREGISTERED_ADDRESS, actionId);
+    expect(mockIsUniqueForAction).toHaveBeenCalledWith(UNREGISTERED_ADDRESS, actionId);
     expect(verifiedPayload).toEqual({
       valid: false,
       errors: ["We were unable to verify that your address was unique for action -- isUniqueForAction: false."],

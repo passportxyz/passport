@@ -1,0 +1,148 @@
+interface GitcoinAttestation
+  @createModel(description: "Base class for any Gitcoin attestation") {
+  type: [String!]! @string(minLength: 1, maxLength: 1024) @list(maxLength: 1024)
+}
+
+# interface VerifiableCredentialSubject
+#   @createModel(description: "A verifiable credential subject interface") {
+# }
+
+interface VerifiableCredentialProof
+  @createModel(description: "A verifiable credential proof interface") {
+  type: String! @string(minLength: 1, maxLength: 1024)
+}
+
+interface VerifiableCredential implements GitcoinAttestation
+  @createModel(description: "A verifiable credential interface") {
+  type: [String!]! @string(minLength: 1, maxLength: 1024) @list(maxLength: 1024)
+  issuer: String! @string(minLength: 1, maxLength: 1024)
+  issuanceDate: DateTime!
+  expirationDate: DateTime
+}
+
+interface VerifiableCredential
+  @createModel(description: "A verifiable credential interface") {
+  type: [String!]! @string(minLength: 1, maxLength: 1024) @list(maxLength: 1024)
+  issuer: String! @string(minLength: 1, maxLength: 1024)
+  issuanceDate: DateTime!
+  expirationDate: DateTime
+}
+
+interface GitcoinPassportStampWrapperInterface
+  @createModel(
+    accountRelation: LIST
+    description: "Interface for GitcoinPassportStampWrapper"
+  ) {
+  vcID: StreamID! @documentReference(model: "VerifiableCredential")
+  vc: VerifiableCredential! @relationDocument(property: "vcID")
+
+  isDeleted: Boolean
+  isRevoked: Boolean
+}
+
+type GitcoinPassportStampWrapper implements GitcoinPassportStampWrapperInterface
+  @createModel(
+    accountRelation: LIST
+    description: "GitcoinPassportStampWrapper"
+  )
+  @createIndex(fields: [{ path: "vcID" }])
+  @createIndex(fields: [{ path: "isDeleted" }])
+  @createIndex(fields: [{ path: "isRevoked" }]) {
+  vcID: StreamID! @documentReference(model: "VerifiableCredential")
+  vc: VerifiableCredential! @relationDocument(property: "vcID")
+
+  isDeleted: Boolean
+  isRevoked: Boolean
+}
+
+# #### Create a type for the proof (this will most likely be reused) ####
+type GitcoinPassportVcProof {
+  _context: String! @string(minLength: 1, maxLength: 1024)
+  # _context: [String!]
+  #   @string(minLength: 1, maxLength: 1024)
+  #   @list(maxLength: 1024)
+  type: String! @string(minLength: 1, maxLength: 1024)
+  proofPurpose: String! @string(minLength: 1, maxLength: 1024)
+  proofValue: String! @string(minLength: 1, maxLength: 1024)
+  verificationMethod: String! @string(minLength: 1, maxLength: 1024)
+  created: DateTime!
+  eip712Domain: EIP712Domain!
+}
+
+type EIP712Domain {
+  primaryType: String! @string(minLength: 1, maxLength: 1024)
+  domain: EIP712DomainDomain!
+  types: EIP712DomainTypes!
+}
+
+type EIP712ValueType {
+  name: String! @string(minLength: 1, maxLength: 1024)
+  type: String! @string(minLength: 1, maxLength: 1024)
+}
+
+type EIP712DomainDomain {
+  # TODO: add optional fields ... ???
+  name: String! @string(minLength: 1, maxLength: 1024)
+}
+
+type EIP712DomainTypes {
+  _context: [EIP712ValueType] @list(maxLength: 1024)
+  CredentialStatus: [EIP712ValueType] @list(maxLength: 1024)  # TODO: geri is this field required ???
+  CredentialSubject: [EIP712ValueType] @list(maxLength: 1024)
+  Document: [EIP712ValueType] @list(maxLength: 1024)
+  EIP712Domain: [EIP712ValueType] @list(maxLength: 1024)
+  Proof: [EIP712ValueType] @list(maxLength: 1024)
+}
+############################################################################################
+# #### Implementation of GitcoinPassportStamp (the binary provider based one) ####
+############################################################################################
+# Sample VC
+# {
+#   "type": [
+#     "VerifiableCredential", "GitcoinPassportStamp"
+#   ],
+#   "@context": [
+#     "https://www.w3.org/2018/credentials/v1", "https://credentials.passport.gitcoin.co/"
+#   ],
+#   "issuer": "...",
+#   "issuanceDate": "2023-10-23T13:32:52.935Z",
+#   "expirationDate": "2024-01-21T13:32:52.935Z",
+#   "credentialSubject": {
+#     "id": "did:pkh:eip155:1:0x0000000000000000000000000000000000000000",
+#     "hash": "v0.0.0:12121212121212121212121212121212121212",
+#     "provider": "MyProvider",
+#     "@context": [...]
+#   },
+#   "proof": {...}
+# }
+
+type GitcoinPassportVcCredentialSubjectContext {
+  hash: String! @string(minLength: 1, maxLength: 1024)
+  provider: String! @string(minLength: 1, maxLength: 1024)
+}
+
+type GitcoinPassportVcCredentialSubject {
+  id: String! @string(minLength: 1, maxLength: 1024)
+  provider: String! @string(minLength: 1, maxLength: 1024)
+  hash: String! @string(minLength: 1, maxLength: 1024)
+  _context: GitcoinPassportVcCredentialSubjectContext
+}
+
+type GitcoinPassportStamp implements VerifiableCredential
+  @createModel(
+    accountRelation: LIST
+    description: "A gitcoin passport stamp with a provider and hash"
+  )
+  @createIndex(fields: [{ path: "issuer" }])
+  @createIndex(fields: [{ path: "issuanceDate" }])
+  @createIndex(fields: [{ path: "expirationDate" }]) {
+  _context: [String!]!
+    @string(minLength: 1, maxLength: 1024)
+    @list(maxLength: 1024)
+  type: [String!]! @string(minLength: 1, maxLength: 1024) @list(maxLength: 1024)
+  issuer: String! @string(minLength: 1, maxLength: 1024)
+  issuanceDate: DateTime!
+  expirationDate: DateTime
+  credentialSubject: GitcoinPassportVcCredentialSubject!
+  proof: GitcoinPassportVcProof!
+}

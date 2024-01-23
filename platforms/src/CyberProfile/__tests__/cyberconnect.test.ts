@@ -20,7 +20,7 @@ const mockedEthers = ethers as jest.Mocked<typeof ethers>;
 
 jest.mock("axios");
 
-mockedEthers.Contract.prototype.getPrimaryProfile = jest.fn().mockImplementation((address: string) => {
+(mockedEthers.Contract.prototype.getPrimaryProfile as jest.Mock) = jest.fn().mockImplementation((address: string) => {
   if (!address.startsWith("0x")) throw new Error("Invalid address");
   return Promise.resolve(
     ethers.BigNumber.from(
@@ -33,15 +33,17 @@ mockedEthers.Contract.prototype.getPrimaryProfile = jest.fn().mockImplementation
   );
 });
 
-mockedEthers.Contract.prototype.getHandleByProfileId = jest.fn().mockImplementation((profileId: number) => {
-  return Promise.resolve(
-    {
-      [MOCK_PROFILE_PREMIUM]: "123",
-      [MOCK_PROFILE_PAID]: "1234567",
-      [MOCK_PROFILE_UNPAID]: "1234567890123",
-    }[profileId] || ""
-  );
-});
+(mockedEthers.Contract.prototype.getHandleByProfileId as jest.Mock) = jest
+  .fn()
+  .mockImplementation((profileId: number) => {
+    return Promise.resolve(
+      {
+        [MOCK_PROFILE_PREMIUM]: "123",
+        [MOCK_PROFILE_PAID]: "1234567",
+        [MOCK_PROFILE_UNPAID]: "1234567890123",
+      }[profileId] || ""
+    );
+  });
 
 describe("Attempt premium verification", function () {
   it("works with the new cyberprofile system", async () => {

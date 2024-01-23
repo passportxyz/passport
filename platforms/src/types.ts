@@ -12,7 +12,6 @@ export type PlatformSpec = {
   connectMessage: string;
   isEVM?: boolean;
   enablePlatformCardUpdate?: boolean;
-  metaPointer?: string;
   website?: string;
 };
 

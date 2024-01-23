@@ -143,10 +143,7 @@ function App({ Component, pageProps }: AppProps) {
         <title>Gitcoin Passport</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
       </Head>
-      <SelfIdProvider
-        client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}
-        session={true}
-      >
+      <SelfIdProvider client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}>
         <DatastoreConnectionContextProvider>
           <OnChainContextProvider>
             <ScorerContextProvider>

@@ -9,8 +9,7 @@ import {
   StampPatch,
 } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../config/providers";
-import { CeramicDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
-import { useViewerConnection } from "@self.id/framework";
+import { CeramicStorage, DataStorageBase, ComposeDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { useWalletStore } from "./walletStore";
@@ -46,7 +45,7 @@ const {
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
-import { CERAMIC_CACHE_ENDPOINT, IAM_ISSUER_DID } from "../config/stamp_config";
+import { CERAMIC_CACHE_ENDPOINT, IAM_VALID_ISSUER_DIDS } from "../config/stamp_config";
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 
 // -- Trusted IAM servers DID
@@ -293,7 +292,7 @@ export const CeramicContext = createContext(startingState);
 
 export const cleanPassport = (
   passport: Passport,
-  database: CeramicDatabase | PassportDatabase,
+  database: CeramicStorage | DataStorageBase,
   allProvidersState: AllProvidersState
 ): {
   passport: Passport;
@@ -310,7 +309,7 @@ export const cleanPassport = (
           return false;
         }
 
-        const has_correct_issuer = stamp.credential.issuer === IAM_ISSUER_DID;
+        const has_correct_issuer = IAM_VALID_ISSUER_DIDS.has(stamp.credential.issuer);
         const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
         const has_expired = new Date(stamp.credential.expirationDate) < new Date();
 
@@ -331,18 +330,17 @@ export const cleanPassport = (
 export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
   const resolveCancel = useRef<() => void>();
-  const [ceramicClient, setCeramicClient] = useState<CeramicDatabase | undefined>(undefined);
+  const [ceramicClient, setCeramicClient] = useState<ComposeDatabase | undefined>(undefined);
   const [isLoadingPassport, setIsLoadingPassport] = useState<IsLoadingPassportState>(IsLoadingPassportState.Loading);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
   const [userDid, setUserDid] = useState<string | undefined>();
   const [expiredProviders, setExpiredProviders] = useState<PROVIDER_ID[]>([]);
   const [passportLoadResponse, setPassportLoadResponse] = useState<PassportLoadResponse | undefined>();
   const [passportHasCacaoError, setPassportHasCacaoError] = useState<boolean>(false);
-  const [viewerConnection] = useViewerConnection();
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
 
   const address = useWalletStore((state) => state.address);
-  const { dbAccessToken, dbAccessTokenStatus } = useDatastoreConnectionContext();
+  const { dbAccessToken, did } = useDatastoreConnectionContext();
   const { refreshScore, fetchStampWeights } = useContext(ScorerContext);
 
   useEffect(() => {
@@ -357,55 +355,37 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   }, [address]);
 
   useEffect((): void => {
-    switch (viewerConnection.status) {
-      case "idle": {
-        setCeramicClient(undefined);
-        setDatabase(undefined);
-        break;
-      }
-      case "connecting": {
-        setIsLoadingPassport(IsLoadingPassportState.Loading);
-        setCeramicClient(undefined);
-        setDatabase(undefined);
-        break;
-      }
-      case "connected": {
-        if (dbAccessTokenStatus === "failed") {
-          setIsLoadingPassport(IsLoadingPassportState.FailedToConnect);
-          break;
-        } else if (dbAccessToken && address && !database) {
-          // Ceramic Network Connection
-          const ceramicClientInstance = new CeramicDatabase(
-            viewerConnection.selfID.did,
-            process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
-            undefined,
-            datadogLogs.logger
-          );
-          setCeramicClient(ceramicClientInstance);
-          setUserDid(ceramicClientInstance.did);
-          // Ceramic cache db
-          const databaseInstance = new PassportDatabase(
-            CERAMIC_CACHE_ENDPOINT || "",
-            address,
-            dbAccessToken,
-            datadogLogs.logger,
-            viewerConnection.selfID.did
-          );
+    try {
+      if (dbAccessToken && address && !database && did) {
+        // Ceramic Network Connection
+        const ceramicClientInstance = new ComposeDatabase(
+          did,
+          process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
+          datadogLogs.logger
+        );
+        setCeramicClient(ceramicClientInstance);
+        setUserDid(ceramicClientInstance.did);
+        // Ceramic cache db
+        const databaseInstance = new PassportDatabase(
+          CERAMIC_CACHE_ENDPOINT || "",
+          address,
+          dbAccessToken,
+          datadogLogs.logger,
+          did
+        );
 
-          setDatabase(databaseInstance);
-        }
-        break;
-      }
-      case "failed": {
-        console.log("failed to connect self id :(");
+        setDatabase(databaseInstance);
+      } else {
         setCeramicClient(undefined);
         setDatabase(undefined);
-        break;
+        setIsLoadingPassport(IsLoadingPassportState.Loading);
       }
-      default:
-        break;
+    } catch (e) {
+      console.log("failed to connect self id :(");
+      setCeramicClient(undefined);
+      setDatabase(undefined);
     }
-  }, [viewerConnection, address, dbAccessToken, dbAccessTokenStatus]);
+  }, [address, dbAccessToken]);
 
   useEffect(() => {
     if (database) {
@@ -415,7 +395,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   }, [database]);
 
   const passportLoadSuccess = (
-    database: CeramicDatabase | PassportDatabase,
+    database: ComposeDatabase | PassportDatabase,
     passport?: Passport,
     skipLoadingState?: boolean
   ): Passport => {
@@ -446,7 +426,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const handlePassportUpdate = async (
     passportResponse: PassportLoadResponse,
-    database: CeramicDatabase | PassportDatabase,
+    database: ComposeDatabase | PassportDatabase,
     skipLoadingState?: boolean,
     isInitialLoad?: boolean
   ) => {
@@ -480,7 +460,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   };
 
   const fetchPassport = async (
-    database: CeramicDatabase | PassportDatabase,
+    database: ComposeDatabase | PassportDatabase,
     skipLoadingState?: boolean,
     isInitialLoad?: boolean
   ): Promise<Passport | undefined> => {
@@ -513,7 +493,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
         if (ceramicClient && addResponse.passport) {
           ceramicClient
-            .setStamps(addResponse.passport.stamps)
+            .addStamps(addResponse.passport.stamps)
             .catch((e) => console.log("error setting ceramic stamps", e));
         }
         if (dbAccessToken) {
@@ -535,13 +515,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         if (ceramicClient && patchResponse.passport) {
           (async () => {
             try {
-              const deleteProviderIds = stampPatches
-                .filter(({ credential }) => !credential)
-                .map(({ provider }) => provider);
-
-              if (deleteProviderIds.length) await ceramicClient.deleteStampIDs(deleteProviderIds);
-
-              await ceramicClient.setStamps(patchResponse.passport?.stamps || []);
+              await ceramicClient.patchStamps(stampPatches);
             } catch (e) {
               console.log("error patching ceramic stamps", e);
             }
@@ -564,9 +538,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         const deleteResponse = await database.deleteStamps(providerIds);
         handlePassportUpdate(deleteResponse, database);
         if (ceramicClient && deleteResponse.status === "Success" && deleteResponse.passport?.stamps) {
-          ceramicClient
-            .setStamps(deleteResponse.passport.stamps)
-            .catch((e) => console.log("error setting ceramic stamps", e));
+          ceramicClient.deleteStamps(providerIds).catch((e) => console.log("error setting ceramic stamps", e));
         }
         if (dbAccessToken) {
           refreshScore(address, dbAccessToken);
@@ -614,29 +586,35 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const verifiedPlatforms = useMemo(
     () =>
-      Object.entries(Object.fromEntries(platforms)).reduce((validPlatformProps, [platformKey, platformProps]) => {
-        if (
-          platformProps.platFormGroupSpec.some(({ providers }) =>
-            providers.some(({ name }) => verifiedProviderIds.includes(name))
+      Object.entries(Object.fromEntries(platforms)).reduce(
+        (validPlatformProps, [platformKey, platformProps]) => {
+          if (
+            platformProps.platFormGroupSpec.some(({ providers }) =>
+              providers.some(({ name }) => verifiedProviderIds.includes(name))
+            )
           )
-        )
-          validPlatformProps[platformKey as PLATFORM_ID] = platformProps;
-        return validPlatformProps;
-      }, {} as Record<PLATFORM_ID, PlatformProps>),
+            validPlatformProps[platformKey as PLATFORM_ID] = platformProps;
+          return validPlatformProps;
+        },
+        {} as Record<PLATFORM_ID, PlatformProps>
+      ),
     [verifiedProviderIds, platforms]
   );
 
   const expiredPlatforms = useMemo(
     () =>
-      Object.entries(Object.fromEntries(platforms)).reduce((validPlatformProps, [platformKey, platformProps]) => {
-        if (
-          platformProps.platFormGroupSpec.some(({ providers }) =>
-            providers.some(({ name }) => expiredProviders.includes(name))
+      Object.entries(Object.fromEntries(platforms)).reduce(
+        (validPlatformProps, [platformKey, platformProps]) => {
+          if (
+            platformProps.platFormGroupSpec.some(({ providers }) =>
+              providers.some(({ name }) => expiredProviders.includes(name))
+            )
           )
-        )
-          validPlatformProps[platformKey as PLATFORM_ID] = platformProps;
-        return validPlatformProps;
-      }, {} as Record<PLATFORM_ID, PlatformProps>),
+            validPlatformProps[platformKey as PLATFORM_ID] = platformProps;
+          return validPlatformProps;
+        },
+        {} as Record<PLATFORM_ID, PlatformProps>
+      ),
     [verifiedProviderIds, platforms]
   );
 

@@ -92,7 +92,7 @@ export class ZkSyncLiteProvider implements Provider {
           }
         } else {
           errors.push(
-            `ZKSync Lite API Error '${zkSyncLiteResponse.status}'. Details: '${zkSyncLiteResponse.error.toString()}'.`
+            `ZKSync Lite API Error '${zkSyncLiteResponse.status}'. Details: '${String(zkSyncLiteResponse.error)}'.`
           );
         }
       } else {

@@ -1,23 +1,40 @@
 {
   "name": "@gitcoin/passport-schemas",
   "version": "1.0.0",
-  "private": true,
+  "license": "MIT",
+  "main": "dist/commonjs/index.js",
+  "directories": {
+    "src": "src",
+    "dist": "dist"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "injectEnvironmentFiles": [
+    ".env.yarn"
+  ],
   "scripts": {
+    "build": "tsc -b .",
     "clean": "rimraf node_modules",
-    "ceramic": "ceramic daemon",
-    "create-model": "node --experimental-json-modules ./scripts/create-model.mjs",
-    "publish-model": "node --experimental-json-modules ./scripts/publish-model.mjs"
+    "ceramic": "CERAMIC_ENABLE_EXPERIMENTAL_COMPOSE_DB=true ceramic daemon",
+    "graphql:server": "composedb graphql:server --ceramic-url=${CERAMIC_URL} --graphiql definitions/gitcoin-passport-stamps.json --did-private-key=${PRIVATE_KEY} --port=5005",
+    "models:create-composite": "composedb composite:create models/passportStamps.graphql --output=composites/gitcoin-passport-stamps-composite.json --did-private-key=${PRIVATE_KEY}",
+    "models:deploy-composite": "composedb composite:deploy composites/gitcoin-passport-stamps-composite.json --ceramic-url=${CERAMIC_URL} --did-private-key=${PRIVATE_KEY}",
+    "models:compile-composite": "composedb composite:compile composites/gitcoin-passport-stamps-composite.json src/definitions/ts/gitcoin-passport-stamps.ts --ceramic-url=${CERAMIC_URL} && composedb composite:compile composites/gitcoin-passport-stamps-composite.json src/definitions/json/gitcoin-passport-stamps.json --ceramic-url=${CERAMIC_URL}"
   },
   "dependencies": {
     "@ceramicnetwork/http-client": "^2.2.1",
-    "dids": "^3.0.0",
+    "@composedb/types": "^0.6.0",
+    "dids": "^5.0.2",
     "dotenv": "^16.0.0",
     "key-did-provider-ed25519": "^2.0.0",
-    "key-did-resolver": "^2.0.0",
+    "key-did-resolver": "^4.0.0",
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
     "@ceramicnetwork/cli": "^2.3.1",
+    "@composedb/cli": "^0.6.1",
     "@glazed/devtools": "^0.2.0",
     "@types/node": "^16.11.6"
   },

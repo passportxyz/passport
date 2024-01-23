@@ -21,7 +21,7 @@ export type DIDKitLib = {
 } & { [key: string]: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 // rough outline of a VerifiableCredential
-export type VerifiableCredential = {
+export type VerifiableEd25519Credential = {
   "@context": string[];
   type: string[];
   credentialSubject: {
@@ -36,12 +36,21 @@ export type VerifiableCredential = {
   issuer: string;
   issuanceDate: string;
   expirationDate: string;
-  proof: {
+  proof?: {
     type: string;
     proofPurpose: string;
     verificationMethod: string;
     created: string;
     jws: string;
+    eip712Domain?: {
+      primaryType: string;
+      types: {
+        [key: string]: {
+          name: string;
+          type: string;
+        }[];
+      };
+    };
   };
 };
 
@@ -81,6 +90,47 @@ export type VerifiableEip712Credential = {
     };
   };
 };
+
+/// Define a type for the credential as it is stored in compose
+/// This will be identical to VerifiableEip712Credential, with some characters like `@` escaped
+// being changed to `_`
+export type VerifiableEip712CredentialComposeEncoded = {
+  _context: string[];
+  type: string[];
+  credentialSubject: {
+    id: string;
+    _context: { [key: string]: string };
+    hash?: string;
+    provider?: string;
+    address?: string;
+    challenge?: string;
+    metaPointer?: string;
+  };
+  issuer: string;
+  issuanceDate: string;
+  expirationDate: string;
+  proof: {
+    _context: string;
+    type: string;
+    proofPurpose: string;
+    proofValue: string;
+    verificationMethod: string;
+    created: string;
+    eip712Domain: {
+      domain: {
+        name: string;
+      };
+      primaryType: string;
+      types: {
+        [key: string]: {
+          name: string;
+          type: string;
+        }[];
+      };
+    };
+  };
+};
+export type VerifiableCredential = VerifiableEd25519Credential | VerifiableEip712Credential;
 
 // A ProviderContext is used as a temporary storage so that providers can can share data
 // between them, in case multiple VCs are requests in one http request
@@ -198,11 +248,8 @@ export type VerifiableCredentialRecord = {
 };
 
 export type Stamp = {
-  // recordUserName: string;
-  // credentialIssuer: string;
-  streamId?: string; // Must not be undefined for stamps loaded from ceramic
   provider: PROVIDER_ID;
-  credential: VerifiableCredential;
+  credential: VerifiableEd25519Credential | VerifiableEip712Credential;
 };
 
 // StampPatch should have "provider" mandatory and "credential" optional
@@ -222,7 +269,8 @@ export type PassportLoadStatus =
   | "PassportCacaoError";
 
 export type PassportLoadErrorDetails = {
-  stampStreamIds: string[];
+  stampStreamIds?: string[];
+  messages?: string[];
 };
 
 export type PassportLoadResponse = {

@@ -6,28 +6,20 @@ import {
   CeramicContextState,
   cleanPassport,
 } from "../../context/ceramicContext";
-import { CeramicDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
+import { ComposeDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
 import {
   googleStampFixture,
   discordStampFixture,
   brightidStampFixture,
 } from "../../__test-fixtures__/databaseStorageFixtures";
 import { Passport } from "@gitcoin/passport-types";
-import {
-  DatastoreConnectionContext,
-  DatastoreConnectionContextProvider,
-} from "../../context/datastoreConnectionContext";
+import { DatastoreConnectionContext } from "../../context/datastoreConnectionContext";
+import { DID } from "dids";
 
 const viewerConnection = {
   status: "connected",
   selfID: "did:3:abc",
 };
-
-jest.mock("@self.id/framework", () => {
-  return {
-    useViewerConnection: () => [viewerConnection],
-  };
-});
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -93,14 +85,26 @@ const ceramicDbMocks = {
   addStamps: dbAddStampsMock,
   deleteStamp: dbDeleteStampMock,
   deleteStamps: dbDeleteStampsMock,
+  patchStamps: jest.fn(),
   did: "test-user-did",
 };
+
+jest.mock("@gitcoin/passport-database-client", () => {
+  return {
+    ComposeDatabase: jest.fn().mockImplementation(() => ceramicDbMocks),
+    PassportDatabase: jest.fn().mockImplementation(() => passportDbMocks),
+  };
+});
 
 const mockComponent = () => (
   <DatastoreConnectionContext.Provider
     value={{
       dbAccessToken: "token",
       dbAccessTokenStatus: "idle",
+      did: {
+        id: "did:3:abc",
+        parent: "did:3:abc",
+      } as unknown as DID,
       connect: async () => {},
       disconnect: async () => {},
     }}
@@ -124,7 +128,7 @@ const mockComponent = () => (
 
 describe("CeramicContextProvider syncs stamp state with ceramic", () => {
   beforeEach(() => {
-    (CeramicDatabase as jest.Mock).mockImplementation(() => ceramicDbMocks);
+    (ComposeDatabase as jest.Mock).mockImplementation(() => ceramicDbMocks);
   });
 
   it("should return passport and stamps after successful fetch", async () => {
@@ -210,7 +214,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
           }),
       };
     });
-    (CeramicDatabase as jest.Mock).mockImplementationOnce(() => {
+    (ComposeDatabase as jest.Mock).mockImplementationOnce(() => {
       return {
         ...ceramicDbMocks,
         getPassport: jest.fn().mockImplementation(async () => {
@@ -235,7 +239,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
       console.log = jest.fn();
 
       const addStampsMock = jest.fn();
-      const setStampMock = jest.fn().mockRejectedValue(new Error("Error"));
+      const addStampMock = jest.fn().mockRejectedValue(new Error("Error"));
       (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
         return {
           ...passportDbMocks,
@@ -257,10 +261,9 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
               status: "Success",
             };
           }),
-          setStamps: setStampMock,
         };
       });
-      (CeramicDatabase as jest.Mock).mockImplementationOnce(() => {
+      (ComposeDatabase as jest.Mock).mockImplementationOnce(() => {
         return {
           ...ceramicDbMocks,
           getPassport: jest.fn().mockImplementation(async () => {
@@ -272,7 +275,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
               status: "Success",
             };
           }),
-          setStamps: setStampMock,
+          addStamps: addStampMock,
         };
       });
       render(mockComponent());
@@ -280,7 +283,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
       await waitFor(() => fireEvent.click(screen.getByText("handleAddStamps")));
       await waitFor(() => {
         expect(addStampsMock).toHaveBeenCalled();
-        expect(setStampMock).toHaveBeenCalledWith(stamps);
+        expect(addStampMock).toHaveBeenCalledWith(stamps);
         expect(console.log).toHaveBeenCalledWith("error setting ceramic stamps", new Error("Error"));
       });
     } finally {
@@ -291,8 +294,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     const oldConsoleLog = console.log;
     try {
       console.log = jest.fn();
-      const deleteStampsMock = jest.fn();
-      const setStampMock = jest.fn().mockRejectedValue(new Error("Error"));
+      const deleteStampsMock = jest.fn().mockRejectedValue("Error");
       (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
         return {
           ...passportDbMocks,
@@ -316,19 +318,10 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
           }),
         };
       });
-      (CeramicDatabase as jest.Mock).mockImplementationOnce(() => {
+      (ComposeDatabase as jest.Mock).mockImplementationOnce(() => {
         return {
           ...ceramicDbMocks,
-          getPassport: jest.fn().mockImplementation(async () => {
-            return {
-              passport: {
-                stamps: [],
-              },
-              errorDetails: {},
-              status: "Success",
-            };
-          }),
-          setStamps: setStampMock,
+          deleteStamps: deleteStampsMock,
         };
       });
       render(mockComponent());
@@ -336,7 +329,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
       await waitFor(() => fireEvent.click(screen.getByText("handleDeleteStamps")));
       await waitFor(() => {
         expect(deleteStampsMock).toHaveBeenCalled();
-        expect(setStampMock).toHaveBeenCalledWith([]);
+        expect(deleteStampsMock).toHaveBeenCalledWith(stamps.map((stamp) => stamp.provider));
       });
     } finally {
       console.log = oldConsoleLog;
@@ -345,7 +338,6 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
 
   it("should patch stamps in database and delete + add stamps in ceramic", async () => {
     const added = stampPatches.filter(({ credential }) => credential);
-    const deletedProviders = stampPatches.filter(({ credential }) => !credential).map(({ provider }) => provider);
 
     const patchStampsMock = jest.fn();
     (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
@@ -375,10 +367,9 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     const setStampMock = jest.fn();
     const deleteStampsMock = jest.fn();
 
-    (CeramicDatabase as jest.Mock).mockImplementationOnce(() => {
+    (ComposeDatabase as jest.Mock).mockImplementationOnce(() => {
       return {
         ...ceramicDbMocks,
-        setStamps: setStampMock,
         deleteStampIDs: deleteStampsMock,
       };
     });
@@ -388,8 +379,6 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     await waitFor(() => fireEvent.click(screen.getByText("handlePatchStamps")));
     await waitFor(() => {
       expect(patchStampsMock).toHaveBeenCalledWith(stampPatches);
-      expect(deleteStampsMock).toHaveBeenCalledWith(deletedProviders);
-      expect(setStampMock).toHaveBeenCalledWith(added);
     });
   });
 
@@ -398,7 +387,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     try {
       console.log = jest.fn();
 
-      const patchStampsMock = jest.fn();
+      const patchStampsMock = jest.fn().mockRejectedValue(new Error("Error"));
       (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
         return {
           ...passportDbMocks,
@@ -426,11 +415,12 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
       const setStampMock = jest.fn().mockRejectedValue(new Error("Error"));
       const deleteStampsMock = jest.fn();
 
-      (CeramicDatabase as jest.Mock).mockImplementationOnce(() => {
+      (ComposeDatabase as jest.Mock).mockImplementationOnce(() => {
         return {
           ...ceramicDbMocks,
           setStamps: setStampMock,
           deleteStampIDs: deleteStampsMock,
+          patchStamps: patchStampsMock,
         };
       });
 

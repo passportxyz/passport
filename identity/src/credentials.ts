@@ -206,8 +206,7 @@ export const issueHashedCredential = async (
   address: string,
   record: ProofRecord,
   expiresInSeconds: number = CREDENTIAL_EXPIRES_AFTER_SECONDS,
-  signatureType?: string,
-  metaPointer?: string
+  signatureType?: string
 ): Promise<IssuedCredential> => {
   // Generate a hash like SHA256(IAM_PRIVATE_KEY+PII), where PII is the (deterministic) JSON representation
   // of the PII object after transforming it to an array of the form [[key:string, value:string], ...]
@@ -231,14 +230,12 @@ export const issueHashedCredential = async (
         credentialSubject: {
           "@context": {
             hash: "https://schema.org/Text",
-            metaPointer: "https://schema.org/URL",
             provider: "https://schema.org/Text",
           },
 
           // construct a pkh DID on mainnet (:1) for the given wallet address
           id: `did:pkh:eip155:1:${address}`,
           provider: record.type,
-          metaPointer: metaPointer ? metaPointer : "https://passport.gitcoin.co",
           hash: `${VERSION}:${hash}`,
         },
         // https://www.w3.org/TR/vc-status-list/#statuslist2021entry
@@ -287,7 +284,7 @@ export const verifyCredential = async (DIDKit: DIDKitLib, credential: Verifiable
     try {
       // parse the result of attempting to verify
       const verify = JSON.parse(
-        await DIDKit.verifyCredential(JSON.stringify(credential), `{"proofPurpose":"${proof.proofPurpose}"}`)
+        await DIDKit.verifyCredential(JSON.stringify(credential), `{"proofPurpose":"${proof?.proofPurpose}"}`)
       ) as { checks: string[]; warnings: string[]; errors: string[] };
 
       // did we get any errors when we attempted to verify?
