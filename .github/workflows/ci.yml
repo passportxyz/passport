@@ -7,20 +7,48 @@ on:
     branches: [main]
 
 jobs:
-  pre:
+  ceramic-config:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Debug
+      - name: Ceramic Config
         run: |
           echo ${GITHUB_WORKSPACE}
           echo "List files in GITHUB_WORKSPACE"
           ls ${GITHUB_WORKSPACE}
           echo "Pwd"
           pwd
+          run: |
+          python -c "import json; \
+          data = { \
+              "anchor": {"auth-method": "did"}, \
+              "http-api": { \
+                  "cors-allowed-origins": [".*"], \
+                  "admin-dids": [ \
+                      "did:key:z6MkgUzNYV8J1yw43wj9K2CbhTZoN25uZ6TJ3Gi4cYVpZyDb", \
+                  ], \
+              }, \
+              "ipfs": {"mode": "bundled", "disable-peer-data-sync": False}, \
+              "logger": {"log-level": 2, "log-to-files": False}, \
+              "metrics": {"metrics-exporter-enabled": False}, \
+              "network": {"name": "testnet-clay"}, \
+              "node": {}, \
+              "state-store": { \
+                  "mode": "fs", \
+                  "local-directory": "/home/root/.ceramic/statestore/", \
+              }, \
+              "indexing": { \
+                  "db": "sqlite:///home/root/.ceramic/indexing.sqlite", \
+                  "allow-queries-before-historical-sync": True, \
+                  "disable-composedb": False, \
+                  "enable-historical-sync": False, \
+              }, \
+          } \
+          with open('${GITHUB_WORKSPACE}/daemon.config.json', 'w') as f: \
+          json.dump(data, f, indent=4)"
 
   build:
-    needs: [pre]
+    needs: [ceramic-config]
     runs-on: ubuntu-latest
 
     # Run a local ceramic nod to test against
@@ -29,6 +57,9 @@ jobs:
         image: ceramicnetwork/js-ceramic:3.2.0
         ports:
           - 7007:7007
+
+        volumes:
+          - ${GITHUB_WORKSPACE}/daemon.config.json:/root/.ceramic/daemon.config.json
 
     steps:
       - uses: actions/checkout@v3
