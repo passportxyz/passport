@@ -433,7 +433,10 @@ export type PROVIDER_ID =
   | "TrustaLabs"
   | "BeginnerCommunityStaker"
   | "ExperiencedCommunityStaker"
-  | "TrustedCitizen";
+  | "TrustedCitizen"
+  | "ETHAdvocate"
+  | "ETHPioneer"
+  | "ETHMaxi";
 
 export type StampBit = {
   bit: number;

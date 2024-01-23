@@ -135,20 +135,20 @@ describe("dashboard notifications", () => {
     expect(databaseLoadingAlert).toBeInTheDocument();
   });
 
-  it("should show a connecting to ceramic alert", () => {
+  it("should show an initializing passport alert", () => {
     (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }]);
     renderWithContext(
       {
         ...mockCeramicContext,
         passport: undefined,
-        isLoadingPassport: IsLoadingPassportState.LoadingFromCeramic,
+        isLoadingPassport: IsLoadingPassportState.CreatingPassport,
       },
       <Router>
         <Dashboard />
       </Router>
     );
 
-    const ceramicLoadingAlert = screen.getByTestId("ceramic-stamps-alert");
+    const ceramicLoadingAlert = screen.getByTestId("initializing-alert");
     expect(ceramicLoadingAlert).toBeInTheDocument();
   });
 });
