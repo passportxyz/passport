@@ -24,13 +24,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Debug
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Container
+        # -v $PWD/daemon.config.json:/path/inside/container/daemon.config.json
         run: |
-          echo ${GITHUB_WORKSPACE}
-          echo "List files in GITHUB_WORKSPACE"
-          ls ${GITHUB_WORKSPACE}
-          echo "Pwd"
-          cat ${GITHUB_WORKSPACE}/daemon.config.json
+          echo "$CERAMIC_CONFIG" > $HOME/.ceramic/daemon.config.json
+
+          docker run --rm -p 7007:7007 ceramicnetwork/js-ceramic:3.2.0
+
+        env:
+          CERAMIC_CONFIG: ${{ secrets.CERAMIC_CONFIG }}
 
   build:
     # needs: [ceramic-config]
@@ -45,7 +50,7 @@ jobs:
 
         volumes:
           # TODO: use GITHUB_WORKSPACE var here ..
-          - /home/runner/work/passport/passport/daemon.config.json:/root/.ceramic/daemon.config.json
+          - ${GITHUB_WORKSPACE}/daemon.config.json:/root/.ceramic/daemon.config.json
 
     steps:
       - uses: actions/checkout@v3
