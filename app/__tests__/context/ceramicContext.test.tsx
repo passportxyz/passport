@@ -284,7 +284,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
       await waitFor(() => {
         expect(addStampsMock).toHaveBeenCalled();
         expect(addStampMock).toHaveBeenCalledWith(stamps);
-        expect(console.log).toHaveBeenCalledWith("error setting ceramic stamps", new Error("Error"));
+        expect(console.log).toHaveBeenCalledWith("error adding ceramic stamps", new Error("Error"));
       });
     } finally {
       console.log = oldConsoleLog;

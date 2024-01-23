@@ -42,12 +42,12 @@ describe("adding and deleting stamps", () => {
     expect(result.passport.stamps.length).toEqual(1);
     expect(result.passport.stamps[0].provider).toEqual(stampsToAdd[0].provider);
   });
+
   it("should indicate an error when adding a stamp", async () => {
     const result = await composeDatabase.addStamps([badStamp]);
-    expect(result.status).toEqual("ExceptionRaised");
-    expect(result.errorDetails).toBeDefined();
-    expect(result.errorDetails?.messages.length).toEqual(1);
+    expect(result.filter(({ secondaryStorageError }) => secondaryStorageError).length).toEqual(1);
   });
+
   it("should delete stamps from compose-db", async () => {
     let passportResult = await composeDatabase.getPassport();
     expect(passportResult.status).toEqual("Success");
@@ -64,9 +64,7 @@ describe("adding and deleting stamps", () => {
     expect(passportResult.passport.stamps.length).toEqual(0);
 
     const result = await composeDatabase.addStamps([badStamp, stampsToAdd[0]]);
-    expect(result.status).toEqual("ExceptionRaised");
-    expect(result.errorDetails).toBeDefined();
-    expect(result.errorDetails?.messages.length).toEqual(1);
+    expect(result.filter(({ secondaryStorageError }) => secondaryStorageError).length).toEqual(1);
 
     let newPassport = await composeDatabase.getPassport();
     expect(newPassport.status).toEqual("Success");
@@ -126,8 +124,6 @@ describe("updating an existing passport", () => {
   });
   it("should indicate that an error was thrown while patching stamps", async () => {
     const result = await composeDatabase.patchStamps([badStamp]);
-    expect(result.status).toEqual("ExceptionRaised");
-    expect(result.errorDetails).toBeDefined();
-    expect(result.errorDetails?.messages.length).toEqual(1);
+    expect(result.adds.filter(({ secondaryStorageError }) => secondaryStorageError).length).toEqual(1);
   });
 });
