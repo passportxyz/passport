@@ -18,30 +18,29 @@ jobs:
           ls ${GITHUB_WORKSPACE}
           echo "Pwd"
           pwd
-          run: |
           python -c "import json; \
           data = { \
-              "anchor": {"auth-method": "did"}, \
-              "http-api": { \
-                  "cors-allowed-origins": [".*"], \
-                  "admin-dids": [ \
-                      "did:key:z6MkgUzNYV8J1yw43wj9K2CbhTZoN25uZ6TJ3Gi4cYVpZyDb", \
+              'anchor': {'auth-method': 'did'}, \
+              'http-api': { \
+                  'cors-allowed-origins': ['.*'], \
+                  'admin-dids': [ \
+                      'did:key:z6MkgUzNYV8J1yw43wj9K2CbhTZoN25uZ6TJ3Gi4cYVpZyDb', \
                   ], \
               }, \
-              "ipfs": {"mode": "bundled", "disable-peer-data-sync": False}, \
-              "logger": {"log-level": 2, "log-to-files": False}, \
-              "metrics": {"metrics-exporter-enabled": False}, \
-              "network": {"name": "testnet-clay"}, \
-              "node": {}, \
-              "state-store": { \
-                  "mode": "fs", \
-                  "local-directory": "/home/root/.ceramic/statestore/", \
+              'ipfs': {'mode': 'bundled', 'disable-peer-data-sync': False}, \
+              'logger': {'log-level': 2, 'log-to-files': False}, \
+              'metrics': {'metrics-exporter-enabled': False}, \
+              'network': {'name': 'testnet-clay'}, \
+              'node': {}, \
+              'state-store': { \
+                  'mode': 'fs', \
+                  'local-directory': '/home/root/.ceramic/statestore/', \
               }, \
-              "indexing": { \
-                  "db": "sqlite:///home/root/.ceramic/indexing.sqlite", \
-                  "allow-queries-before-historical-sync": True, \
-                  "disable-composedb": False, \
-                  "enable-historical-sync": False, \
+              'indexing': { \
+                  'db': 'sqlite:///home/root/.ceramic/indexing.sqlite', \
+                  'allow-queries-before-historical-sync': True, \
+                  'disable-composedb': False, \
+                  'enable-historical-sync': False, \
               }, \
           } \
           with open('${GITHUB_WORKSPACE}/daemon.config.json', 'w') as f: \
