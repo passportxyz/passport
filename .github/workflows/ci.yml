@@ -7,13 +7,26 @@ on:
     branches: [main]
 
 jobs:
+  pre:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Debug
+        run: |
+          echo ${GITHUB_WORKSPACE}
+          echo "List files in GITHUB_WORKSPACE"
+          ls ${GITHUB_WORKSPACE}
+          echo "Pwd"
+          pwd
+
   build:
+    needs: [pre]
     runs-on: ubuntu-latest
 
     # Run a local ceramic nod to test against
     services:
       ceramic:
-        image: ceramicnetwork/js-ceramic:2.20.0
+        image: ceramicnetwork/js-ceramic:3.2.0
         ports:
           - 7007:7007
 
