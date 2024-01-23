@@ -36,6 +36,8 @@ jobs:
         run: yarn build
       - name: Run Ceramic Integration Tests
         run: yarn test:ceramic-integration
+        env:
+          CERAMIC_CLIENT_URL: ${{secrets.CERAMIC_CLIENT_URL}}
 
   check-provider-bitmap:
     runs-on: ubuntu-latest
