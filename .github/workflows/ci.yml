@@ -43,11 +43,11 @@ jobs:
     runs-on: ubuntu-latest
 
     # Run a local ceramic node to test against
-    services:
-      ceramic:
-        image: ceramicnetwork/js-ceramic:3.2.0
-        ports:
-          - 7007:7007
+    # services:
+    #   ceramic:
+    #     image: ceramicnetwork/js-ceramic:3.2.0
+    #     ports:
+    #       - 7007:7007
 
     steps:
       - uses: actions/checkout@v3
@@ -58,10 +58,6 @@ jobs:
           cache: "yarn"
       - name: Install Packages
         run: yarn install
-      - name: Run Tests
-        run: yarn test
-      - name: Run Linter
-        run: yarn lint
       - name: Workarround for build error
         run: rm -rf node_modules/@tendermint
       - name: Run Build (ensure that build succeeds)
@@ -84,6 +80,10 @@ jobs:
         run: yarn test:ceramic-integration
         env:
           CERAMIC_CLIENT_URL: "http://localhost:7007"
+      - name: Run Tests
+        run: yarn test
+      - name: Run Linter
+        run: yarn lint
 
   check-provider-bitmap:
     runs-on: ubuntu-latest
