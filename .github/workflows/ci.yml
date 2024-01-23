@@ -42,15 +42,12 @@ jobs:
     # needs: [ceramic-config]
     runs-on: ubuntu-latest
 
-    # Run a local ceramic nod to test against
+    # Run a local ceramic node to test against
     services:
       ceramic:
         image: ceramicnetwork/js-ceramic:3.2.0
         ports:
           - 7007:7007
-
-        volumes:
-          - ${CERAMIC_CONFIG}:$HOME/.ceramic/daemon.config.json
 
     steps:
       - uses: actions/checkout@v3
