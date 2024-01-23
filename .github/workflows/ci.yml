@@ -20,6 +20,18 @@ jobs:
           pwd
           echo '{"anchor": {"auth-method": "did"}, "http-api": {"cors-allowed-origins": [".*"], "admin-dids": ["did:key:z6MkgUzNYV8J1yw43wj9K2CbhTZoN25uZ6TJ3Gi4cYVpZyDb"]}, "ipfs": {"mode": "bundled", "disable-peer-data-sync": false}, "logger": {"log-level": 2, "log-to-files": false}, "metrics": {"metrics-exporter-enabled": false}, "network": {"name": "testnet-clay"}, "node": {}, "state-store": {"mode": "fs", "local-directory": "/home/root/.ceramic/statestore/"}, "indexing": {"db": "sqlite:///home/root/.ceramic/indexing.sqlite", "allow-queries-before-historical-sync": true, "disable-composedb": false, "enable-historical-sync": false}}' > ${GITHUB_WORKSPACE}/daemon.config.json
 
+  debug:
+    runs-on: ubuntu-latest
+        
+    steps:
+      - name: Debug
+        run: |
+          echo ${GITHUB_WORKSPACE}
+          echo "List files in GITHUB_WORKSPACE"
+          ls ${GITHUB_WORKSPACE}
+          echo "Pwd"
+          cat ${GITHUB_WORKSPACE}/daemon.config.json
+
   build:
     needs: [ceramic-config]
     runs-on: ubuntu-latest
