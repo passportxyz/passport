@@ -7,33 +7,33 @@ on:
     branches: [main]
 
 jobs:
-  ceramic-config:
-    runs-on: ubuntu-latest
+  # ceramic-config:
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Ceramic Config
-        run: |
-          echo ${GITHUB_WORKSPACE}
-          echo "List files in GITHUB_WORKSPACE"
-          ls ${GITHUB_WORKSPACE}
-          echo "Pwd"
-          pwd
-          echo '{"anchor": {"auth-method": "did"}, "http-api": {"cors-allowed-origins": [".*"], "admin-dids": ["did:key:z6MkgUzNYV8J1yw43wj9K2CbhTZoN25uZ6TJ3Gi4cYVpZyDb"]}, "ipfs": {"mode": "bundled", "disable-peer-data-sync": false}, "logger": {"log-level": 2, "log-to-files": false}, "metrics": {"metrics-exporter-enabled": false}, "network": {"name": "testnet-clay"}, "node": {}, "state-store": {"mode": "fs", "local-directory": "/home/root/.ceramic/statestore/"}, "indexing": {"db": "sqlite:///home/root/.ceramic/indexing.sqlite", "allow-queries-before-historical-sync": true, "disable-composedb": false, "enable-historical-sync": false}}' > ${GITHUB_WORKSPACE}/daemon.config.json
+  #   steps:
+  #     - name: Ceramic Config
+  #       run: |
+  #         echo ${GITHUB_WORKSPACE}
+  #         echo "List files in GITHUB_WORKSPACE"
+  #         ls ${GITHUB_WORKSPACE}
+  #         echo "Pwd"
+  #         pwd
+  #         echo '{"anchor": {"auth-method": "did"}, "http-api": {"cors-allowed-origins": [".*"], "admin-dids": ["did:key:z6MkgUzNYV8J1yw43wj9K2CbhTZoN25uZ6TJ3Gi4cYVpZyDb"]}, "ipfs": {"mode": "bundled", "disable-peer-data-sync": false}, "logger": {"log-level": 2, "log-to-files": false}, "metrics": {"metrics-exporter-enabled": false}, "network": {"name": "testnet-clay"}, "node": {}, "state-store": {"mode": "fs", "local-directory": "/home/root/.ceramic/statestore/"}, "indexing": {"db": "sqlite:///home/root/.ceramic/indexing.sqlite", "allow-queries-before-historical-sync": true, "disable-composedb": false, "enable-historical-sync": false}}' > ${GITHUB_WORKSPACE}/daemon.config.json
 
-  debug:
-    runs-on: ubuntu-latest
+  # debug:
+  #   runs-on: ubuntu-latest
         
-    steps:
-      - name: Debug
-        run: |
-          echo ${GITHUB_WORKSPACE}
-          echo "List files in GITHUB_WORKSPACE"
-          ls ${GITHUB_WORKSPACE}
-          echo "Pwd"
-          cat ${GITHUB_WORKSPACE}/daemon.config.json
+  #   steps:
+  #     - name: Debug
+  #       run: |
+  #         echo ${GITHUB_WORKSPACE}
+  #         echo "List files in GITHUB_WORKSPACE"
+  #         ls ${GITHUB_WORKSPACE}
+  #         echo "Pwd"
+  #         cat ${GITHUB_WORKSPACE}/daemon.config.json
 
   build:
-    needs: [ceramic-config]
+    # needs: [ceramic-config]
     runs-on: ubuntu-latest
 
     # Run a local ceramic nod to test against
@@ -43,9 +43,9 @@ jobs:
         ports:
           - 7007:7007
 
-        volumes:
-          # TODO: use GITHUB_WORKSPACE var here ..
-          - /home/runner/work/passport/passport/daemon.config.json:/root/.ceramic/daemon.config.json
+        # volumes:
+        #   # TODO: use GITHUB_WORKSPACE var here ..
+        #   - /home/runner/work/passport/passport/daemon.config.json:/root/.ceramic/daemon.config.json
 
     steps:
       - uses: actions/checkout@v3
