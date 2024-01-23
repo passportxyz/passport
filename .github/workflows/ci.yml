@@ -63,13 +63,8 @@ jobs:
       - name: Run Build (ensure that build succeeds)
         run: yarn build
       - name: Start Ceramic Daemon
-        uses: ./
+        uses: ./schemas/Dockerfile
         with:
-          working-directory: ./
-          start: |
-            mkdir $HOME/.ceramic
-            echo "${CERAMIC_CONFIG}" > $HOME/.ceramic/daemon.config.json
-            docker run --rm -p 7007:7007 ceramicnetwork/js-ceramic:3.2.0
           wait-on: "http://localhost:7007"
         env:
           CERAMIC_CONFIG: ${{ secrets.CERAMIC_CONFIG }}
