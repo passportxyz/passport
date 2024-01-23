@@ -30,7 +30,8 @@ jobs:
       - name: Set up Docker Container
         # -v $PWD/daemon.config.json:/path/inside/container/daemon.config.json
         run: |
-          echo "$CERAMIC_CONFIG" > $HOME/.ceramic/daemon.config.json
+          mkdir $HOME/.ceramic
+          echo "${CERAMIC_CONFIG}" > $HOME/.ceramic/daemon.config.json
 
           docker run --rm -p 7007:7007 ceramicnetwork/js-ceramic:3.2.0
 
