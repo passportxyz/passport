@@ -65,7 +65,7 @@ describe("assuming a valid stamp is stored in ceramic", () => {
 
     // Step 2: Write the stamp to compose
     const addRequest = await composeDatabase.addStamps(stampsToAdd);
-    expect(addRequest.status).toEqual("Success");
+    expect(addRequest[0].secondaryStorageError).toBeUndefined();
 
     // Step 3: Read the user passport
     const result = await composeDatabase.getPassport();
