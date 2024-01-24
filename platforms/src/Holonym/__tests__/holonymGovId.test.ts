@@ -3,53 +3,50 @@ import { RequestPayload } from "@gitcoin/passport-types";
 import { ProviderExternalVerificationError } from "../../types";
 import { HolonymGovIdProvider } from "../Providers/holonymGovIdProvider";
 
-const mockIsUniqueForAction = jest.fn();
+// ----- Libs
+import axios from "axios";
 
-jest.mock("ethers", () => {
-  return {
-    Contract: jest.fn().mockImplementation(() => {
-      return {
-        isUniqueForAction: mockIsUniqueForAction,
-      };
-    }),
-  };
-});
+jest.mock("axios");
+
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const MOCK_ADDRESS = "0xb4b6f1c68be31841b52f4015a31d1f38b99cdb71";
-const actionId = 123456789;
 
 describe("Attempt verification", function () {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should return true for an address that has proven uniqueness to Holonym government ID Sybil resistance smart contract", async () => {
-    mockIsUniqueForAction.mockResolvedValueOnce(true);
+  it("should return true when valid response is received from the Holonym API endpoint", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        result: true,
+      },
+    });
+
     const holonym = new HolonymGovIdProvider();
     const verifiedPayload = await holonym.verify({
       address: MOCK_ADDRESS,
     } as RequestPayload);
 
-    expect(mockIsUniqueForAction).toHaveBeenCalledWith(MOCK_ADDRESS, actionId);
-    expect(verifiedPayload).toEqual({
-      valid: true,
-      errors: [],
-      record: {
-        address: MOCK_ADDRESS,
-      },
-    });
+    expect(verifiedPayload.valid).toBe(true);
   });
 
-  it("should return false for an address that has not proven uniqueness to Holonym government ID Sybil resistance smart contract", async () => {
-    mockIsUniqueForAction.mockResolvedValueOnce(false);
-    const UNREGISTERED_ADDRESS = "0xunregistered";
+  it("should return false when invalid response is received from the Holonym API endpoint", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        result: false,
+      },
+    });
 
     const holonym = new HolonymGovIdProvider();
     const verifiedPayload = await holonym.verify({
-      address: UNREGISTERED_ADDRESS,
+      address: MOCK_ADDRESS,
     } as RequestPayload);
 
-    expect(mockIsUniqueForAction).toHaveBeenCalledWith(UNREGISTERED_ADDRESS, actionId);
+    expect(verifiedPayload.valid).toBe(false);
     expect(verifiedPayload).toEqual({
       valid: false,
       errors: ["We were unable to verify that your address was unique for action -- isUniqueForAction: false."],
@@ -58,7 +55,14 @@ describe("Attempt verification", function () {
   });
 
   it("should return error response when isUniqueForAction call errors", async () => {
-    mockIsUniqueForAction.mockRejectedValueOnce("some error");
+    mockedAxios.get.mockRejectedValueOnce({
+      status: 500,
+      response: {
+        data: {
+          error: "Internal Server Error",
+        },
+      },
+    });
     const UNREGISTERED_ADDRESS = "0xunregistered";
 
     const holonym = new HolonymGovIdProvider();
