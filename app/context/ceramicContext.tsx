@@ -396,16 +396,18 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   useEffect(() => {
     if (ceramicClient) {
-      ceramicClient.getPassport().then((passportResponse) => {
-        console.log("loaded passport from compose-db", passportResponse);
-        datadogLogs.logger.info("loaded passport from compose-db", { passportResponse });
-      }).catch((e) => {
-        console.log("failed to load passport from compose-db", e);
-        datadogLogs.logger.error("failed to load passport from compose-db", { error: e});
-      });
+      ceramicClient
+        .getPassport()
+        .then((passportResponse) => {
+          console.log("loaded passport from compose-db", passportResponse);
+          datadogLogs.logger.info("loaded passport from compose-db", { passportResponse });
+        })
+        .catch((e) => {
+          console.log("failed to load passport from compose-db", e);
+          datadogLogs.logger.error("failed to load passport from compose-db", { error: e });
+        });
     }
   }, [ceramicClient]);
-
 
   const passportLoadSuccess = (
     database: ComposeDatabase | PassportDatabase,
