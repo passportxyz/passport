@@ -297,7 +297,9 @@ export class ComposeDatabase implements CeramicStorage {
   };
 
   patchStamps = async (stampPatches: StampPatch[]): Promise<PassportLoadResponse> => {
+    console.log("patchStamps:", stampPatches);
     const deleteRequests = await this.deleteStamps(stampPatches.map((patch) => patch.provider));
+    console.log("patchStamps deleteRequests:", deleteRequests);
 
     const stampsToCreate = stampPatches
       .filter((stampPatch) => stampPatch.credential)
@@ -306,13 +308,16 @@ export class ComposeDatabase implements CeramicStorage {
         credential: stampPatch.credential,
       }));
 
+    console.log("patchStamps stampsToCreate:", stampsToCreate);
     const createRequest = await this.addStamps(stampsToCreate);
+    console.log("patchStamps createRequest:", createRequest);
 
     const errorDetails = [
       ...(deleteRequests?.errorDetails?.messages || []),
       ...(createRequest?.errorDetails?.messages || []),
     ];
 
+    console.log("patchStamps errorDetails:", errorDetails);
     return {
       status: errorDetails.length > 0 ? "ExceptionRaised" : "Success",
       errorDetails: {
