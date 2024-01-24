@@ -35,7 +35,7 @@ jest.mock("../../context/walletStore", () => ({
   useWalletStore: (callback: (state: any) => any) => callback(mockWalletState),
 }));
 
-export const dbGetPassportMock = jest.fn().mockImplementation(() => {
+export const dbGetPassportMock = jest.fn().mockImplementation(async () => {
   return {
     passport: {
       stamps: [],
@@ -80,7 +80,7 @@ const passportDbMocks = {
 
 const ceramicDbMocks = {
   createPassport: dbCreatePassportMock,
-  getPassport: jest.fn(),
+  getPassport: dbGetPassportMock,
   addStamp: dbAddStampMock,
   addStamps: dbAddStampsMock,
   deleteStamp: dbDeleteStampMock,
