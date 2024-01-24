@@ -1,11 +1,11 @@
 import {
   PROVIDER_ID,
   Stamp,
-  PassportLoadStatus,
   PassportLoadResponse,
-  PassportLoadErrorDetails,
-  Passport,
   StampPatch,
+  SecondaryStorageAddResponse,
+  SecondaryStorageDeleteResponse,
+  SecondaryStorageBulkPatchResponse,
 } from "@gitcoin/passport-types";
 
 // Class used as a base for each DataStorage Type
@@ -21,8 +21,12 @@ export interface DataStorageBase {
   deleteStamps: (providers: PROVIDER_ID[]) => Promise<PassportLoadResponse>;
 }
 
-export interface CeramicStorage {
+// To start reading from a secondary storage, CeramicContext will
+// need to be updated to handle propagation of this data, etc.
+// For now, we'll just define the write-only interface
+export interface WriteOnlySecondaryDataStorageBase {
   did: string;
-  setStamps: (stamps: Stamp[]) => Promise<void>;
-  deleteStampIDs: (streamIds: string[]) => Promise<void>;
+  addStamps: (stamps: Stamp[]) => Promise<SecondaryStorageAddResponse[]>;
+  patchStamps: (stampPatches: StampPatch[]) => Promise<SecondaryStorageBulkPatchResponse>;
+  deleteStamps: (providers: PROVIDER_ID[]) => Promise<SecondaryStorageDeleteResponse[]>;
 }

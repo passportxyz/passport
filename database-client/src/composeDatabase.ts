@@ -1,5 +1,4 @@
 import { ComposeClient } from "@composedb/client";
-// import type { RuntimeCompositeDefinition } from "@composedb/types";
 import { DID } from "dids";
 
 import {
@@ -9,20 +8,20 @@ import {
   StampPatch,
   VerifiableCredential,
   VerifiableEip712CredentialComposeEncoded,
+  SecondaryStorageAddResponse,
+  SecondaryStorageDeleteResponse,
+  SecondaryStorageBulkPatchResponse,
 } from "@gitcoin/passport-types";
 
-import { CeramicStorage } from "./types";
 import { definition as GitcoinPassportStampDefinition } from "@gitcoin/passport-schemas";
 import { GraphQLError } from "graphql";
 import { Logger } from "./logger";
+import { WriteOnlySecondaryDataStorageBase } from "./types";
 import { RuntimeCompositeDefinition } from "@composedb/types";
 
 // const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
 const COMMUNITY_TESTNET_CERAMIC_CLIENT_URL = "https://ceramic-clay.3boxlabs.com";
 
-// Instead of implementing the CeramicStorage interface, we could
-// implement the DataStorageBase interface and this would be more flexible,
-// but it's not necessary now
 type PassportWrapperLoadResponse = {
   id: string;
   vcID: string;
@@ -88,7 +87,7 @@ const formatCredentialFromCeramic = (
   return credential;
 };
 
-export class ComposeDatabase implements CeramicStorage {
+export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
   did: string;
   compose: ComposeClient;
   // logger should indicate with tag where error is coming from similar to: [Scorer]
@@ -106,13 +105,6 @@ export class ComposeDatabase implements CeramicStorage {
     });
     this.compose.setDID(did);
     this.did = (did.hasParent ? did.parent : did.id).toLowerCase();
-  }
-  setStamps: (stamps: Stamp[]) => Promise<void>;
-  deleteStampIDs: (streamIds: string[]) => Promise<void>;
-
-  replaceKey(obj, oldKey, newKey) {
-    const { [oldKey]: old, ...others } = obj;
-    return { ...others, [newKey]: old };
   }
 
   formatCredentialInput = (stamp: Stamp) => {
@@ -160,27 +152,23 @@ export class ComposeDatabase implements CeramicStorage {
     return wrapper?.id;
   };
 
-  checkSettledResponse = (settledPromises: PromiseSettledResult<PassportLoadResponse>[]): PassportLoadResponse => {
+  checkSettledResponse = <T>(settledPromises: PromiseSettledResult<T>[]): T[] => {
     const errorDetails = settledPromises
       .filter((response): response is PromiseRejectedResult => response.status === "rejected")
       .map((response) => response.reason)
       .flat();
 
     if (errorDetails.length > 0) {
-      return {
-        status: "ExceptionRaised",
-        errorDetails: {
-          messages: errorDetails,
-        },
-      };
+      const aggregateErrorMessage = errorDetails.map((e) => `${e.name}: ${e.message}\n${e.stack}`);
+      throw Error(aggregateErrorMessage.join("\n"));
     }
 
-    return {
-      status: "Success",
-    };
+    return settledPromises
+      .filter((response): response is PromiseFulfilledResult<T> => response.status === "fulfilled")
+      .map((response) => response.value);
   };
 
-  addStamp = async (stamp: Stamp): Promise<PassportLoadResponse> => {
+  addStamp = async (stamp: Stamp): Promise<SecondaryStorageAddResponse> => {
     let vcID;
     const input = this.formatCredentialInput(stamp);
     const result = (await this.compose.executeQuery(
@@ -196,15 +184,16 @@ export class ComposeDatabase implements CeramicStorage {
       { input }
     )) as GraphqlResponse<{ createGitcoinPassportStamp: { document: { id: string } } }>;
 
+    let secondaryStorageError: string | undefined;
+    let streamId: string | undefined;
     if (result.errors) {
-      throw Error(
-        `[ComposeDB] error thrown from mutation CreateGitcoinPassportVc, error: ${JSON.stringify(result.errors)}`
-      );
-    }
-
-    vcID = result?.data?.createGitcoinPassportStamp?.document?.id;
-    const wrapperRequest = (await this.compose.executeQuery(
-      `
+      secondaryStorageError = `[ComposeDB] error from mutation CreateGitcoinPassportVc, error: ${JSON.stringify(
+        result.errors
+      )}`;
+    } else {
+      vcID = result?.data?.createGitcoinPassportStamp?.document?.id;
+      const wrapperRequest = (await this.compose.executeQuery(
+        `
           mutation CreateGitcoinStampWrapper($wrapperInput: CreateGitcoinPassportStampWrapperInput!) {
             createGitcoinPassportStampWrapper(input: $wrapperInput) {
               document {
@@ -215,32 +204,38 @@ export class ComposeDatabase implements CeramicStorage {
             }
           }
         `,
-      {
-        wrapperInput: {
-          content: {
-            vcID,
-            isDeleted: false,
-            isRevoked: false,
+        {
+          wrapperInput: {
+            content: {
+              vcID,
+              isDeleted: false,
+              isRevoked: false,
+            },
           },
-        },
-      }
-    )) as GraphqlResponse<{
-      createGitcoinPassportStampWrapper: { document: { id: string; isDeleted: boolean; isRevoked: boolean } };
-    }>;
-    if (wrapperRequest.errors) {
-      throw Error(
-        `[ComposeDB] error thrown from mutation CreateGitcoinStampWrapper, vcID: ${vcID} error: ${JSON.stringify(
+        }
+      )) as GraphqlResponse<{
+        createGitcoinPassportStampWrapper: { document: { id: string; isDeleted: boolean; isRevoked: boolean } };
+      }>;
+
+      streamId = wrapperRequest?.data?.createGitcoinPassportStampWrapper?.document?.id;
+
+      if (wrapperRequest.errors) {
+        secondaryStorageError = `[ComposeDB] error thrown from mutation CreateGitcoinStampWrapper, vcID: ${vcID} error: ${JSON.stringify(
           wrapperRequest.errors
-        )}`
-      );
+        )}`;
+      } else if (!streamId) {
+        secondaryStorageError = `[ComposeDB] For vcID: ${vcID} error: streamId is undefined`;
+      }
     }
 
     return {
-      status: "Success",
+      provider: stamp.credential.credentialSubject.provider as PROVIDER_ID,
+      secondaryStorageId: streamId,
+      secondaryStorageError,
     };
   };
 
-  addStamps = async (stamps: Stamp[]): Promise<PassportLoadResponse> => {
+  addStamps = async (stamps: Stamp[]): Promise<SecondaryStorageAddResponse[]> => {
     const vcPromises = stamps.map(async (stamp) => await this.addStamp(stamp));
 
     const addRequests = await Promise.allSettled(vcPromises);
@@ -248,7 +243,7 @@ export class ComposeDatabase implements CeramicStorage {
     return this.checkSettledResponse(addRequests);
   };
 
-  deleteStamp = async (streamId: string): Promise<PassportLoadResponse> => {
+  deleteStamp = async (streamId: string): Promise<SecondaryStorageDeleteResponse> => {
     const deleteRequest = (await this.compose.executeQuery(
       `
       mutation SoftDeleteGitcoinStampWrapper($updateInput: UpdateGitcoinPassportStampWrapperInput!) {
@@ -273,16 +268,18 @@ export class ComposeDatabase implements CeramicStorage {
       createGitcoinPassportStampWrapper: { document: { id: string; isDeleted: boolean; isRevoked: boolean } };
     }>;
 
+    let secondaryStorageError: string | undefined;
     if (deleteRequest.errors) {
-      throw Error(`[ComposeDB] ${JSON.stringify(deleteRequest.errors)} for vcID: ${streamId}`);
+      secondaryStorageError = `[ComposeDB] ${JSON.stringify(deleteRequest.errors)} for vcID: ${streamId}`;
     }
 
     return {
-      status: "Success",
+      secondaryStorageId: streamId,
+      secondaryStorageError,
     };
   };
 
-  deleteStamps = async (providers: PROVIDER_ID[]): Promise<PassportLoadResponse> => {
+  deleteStamps = async (providers: PROVIDER_ID[]): Promise<SecondaryStorageDeleteResponse[]> => {
     const existingPassport = await this.getPassportWithWrapper();
 
     const stampsToDelete = existingPassport.filter((stamp) =>
@@ -296,8 +293,10 @@ export class ComposeDatabase implements CeramicStorage {
     return this.checkSettledResponse(deleteRequests);
   };
 
-  patchStamps = async (stampPatches: StampPatch[]): Promise<PassportLoadResponse> => {
-    const deleteRequests = await this.deleteStamps(stampPatches.map((patch) => patch.provider));
+  patchStamps = async (stampPatches: StampPatch[]): Promise<SecondaryStorageBulkPatchResponse> => {
+    console.log("patchStamps:", stampPatches);
+    const deleteResponses = await this.deleteStamps(stampPatches.map((patch) => patch.provider));
+    console.log("patchStamps deleteResponses:", deleteResponses);
 
     const stampsToCreate = stampPatches
       .filter((stampPatch) => stampPatch.credential)
@@ -306,18 +305,13 @@ export class ComposeDatabase implements CeramicStorage {
         credential: stampPatch.credential,
       }));
 
-    const createRequest = await this.addStamps(stampsToCreate);
-
-    const errorDetails = [
-      ...(deleteRequests?.errorDetails?.messages || []),
-      ...(createRequest?.errorDetails?.messages || []),
-    ];
+    console.log("patchStamps stampsToCreate:", stampsToCreate);
+    const addResponses = await this.addStamps(stampsToCreate);
+    console.log("patchStamps addResponses:", addResponses);
 
     return {
-      status: errorDetails.length > 0 ? "ExceptionRaised" : "Success",
-      errorDetails: {
-        messages: errorDetails,
-      },
+      adds: addResponses,
+      deletes: deleteResponses,
     };
   };
 

@@ -248,12 +248,36 @@ export type VerifiableCredentialRecord = {
 };
 
 export type Stamp = {
+  id?: number;
   provider: PROVIDER_ID;
   credential: VerifiableEd25519Credential | VerifiableEip712Credential;
 };
 
 // StampPatch should have "provider" mandatory and "credential" optional
 export type StampPatch = Pick<Stamp, "provider"> & Partial<Pick<Stamp, "credential">>;
+
+export type ComposeDBSaveStatus = "saved" | "failed";
+export type ComposeDBMetadataRequest = {
+  id: number;
+  compose_db_save_status: ComposeDBSaveStatus;
+  compose_db_stream_id: string | undefined;
+};
+
+export type SecondaryStorageAddResponse = {
+  provider: string;
+  secondaryStorageId?: string;
+  secondaryStorageError?: string;
+};
+
+export type SecondaryStorageDeleteResponse = {
+  secondaryStorageId: string;
+  secondaryStorageError?: string;
+};
+
+export type SecondaryStorageBulkPatchResponse = {
+  adds: SecondaryStorageAddResponse[];
+  deletes: SecondaryStorageDeleteResponse[];
+};
 
 export type Passport = {
   issuanceDate?: Date;

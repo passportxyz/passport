@@ -1,15 +1,18 @@
 import { createContext, useContext, useEffect, useState, useRef, useMemo } from "react";
 import {
+  ComposeDBMetadataRequest,
+  ComposeDBSaveStatus,
   Passport,
   PassportLoadResponse,
   PassportLoadStatus,
   PLATFORM_ID,
   PROVIDER_ID,
+  SecondaryStorageBulkPatchResponse,
   Stamp,
   StampPatch,
 } from "@gitcoin/passport-types";
 import { ProviderSpec } from "../config/providers";
-import { CeramicStorage, DataStorageBase, ComposeDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
+import { DataStorageBase, ComposeDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { useWalletStore } from "./walletStore";
@@ -292,7 +295,7 @@ export const CeramicContext = createContext(startingState);
 
 export const cleanPassport = (
   passport: Passport,
-  database: CeramicStorage | DataStorageBase,
+  database: DataStorageBase,
   allProvidersState: AllProvidersState
 ): {
   passport: Passport;
@@ -410,7 +413,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   }, [ceramicClient]);
 
   const passportLoadSuccess = (
-    database: ComposeDatabase | PassportDatabase,
+    database: PassportDatabase,
     passport?: Passport,
     skipLoadingState?: boolean
   ): Passport => {
@@ -441,7 +444,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const handlePassportUpdate = async (
     passportResponse: PassportLoadResponse,
-    database: ComposeDatabase | PassportDatabase,
+    database: PassportDatabase,
     skipLoadingState?: boolean,
     isInitialLoad?: boolean
   ) => {
@@ -475,7 +478,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   };
 
   const fetchPassport = async (
-    database: ComposeDatabase | PassportDatabase,
+    database: PassportDatabase,
     skipLoadingState?: boolean,
     isInitialLoad?: boolean
   ): Promise<Passport | undefined> => {
@@ -507,9 +510,19 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         handlePassportUpdate(addResponse, database);
 
         if (ceramicClient && addResponse.passport) {
-          ceramicClient
-            .addStamps(addResponse.passport.stamps)
-            .catch((e) => console.log("error setting ceramic stamps", e));
+          (async () => {
+            try {
+              const composeDBAddResponse = await ceramicClient.addStamps(stamps);
+              const composeDBMetadata = processComposeDBMetadata(addResponse.passport, {
+                adds: composeDBAddResponse,
+                deletes: [],
+              });
+              await database.patchStampComposeDBMetadata(composeDBMetadata);
+            } catch (e) {
+              console.log("error adding ceramic stamps", e);
+              datadogLogs.logger.error("Error adding ceramic stamps", { stamps, error: e });
+            }
+          })();
         }
         if (dbAccessToken) {
           refreshScore(address, dbAccessToken);
@@ -521,6 +534,51 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     }
   };
 
+  const processComposeDBMetadata = (
+    updatedPassport: Passport | undefined,
+    composeDBPatchResponse: SecondaryStorageBulkPatchResponse
+  ): ComposeDBMetadataRequest[] => {
+    composeDBPatchResponse.deletes.forEach(({ secondaryStorageId, secondaryStorageError }) => {
+      if (secondaryStorageError) {
+        console.log(`Failed to delete stamp ${secondaryStorageId} from secondary storage: ${secondaryStorageError}`);
+        datadogLogs.logger.error(
+          `Failed to delete stamp ${secondaryStorageId} from secondary storage: ${secondaryStorageError}`
+        );
+      }
+    });
+
+    return composeDBPatchResponse.adds
+      .map((addResponse) => {
+        const { provider, secondaryStorageId, secondaryStorageError } = addResponse;
+
+        if (secondaryStorageError) {
+          console.log(
+            `Failed to add stamp ${secondaryStorageId} to secondary storage, error: ${secondaryStorageError}`
+          );
+          datadogLogs.logger.error("Error adding stamp to secondary storage", {
+            stamp: addResponse,
+            error: secondaryStorageError,
+          });
+        }
+
+        const primaryStorageId = updatedPassport?.stamps.find((stamp) => stamp.provider === provider)?.id;
+
+        if (!primaryStorageId) {
+          console.log(`Stamp ID not found for provider ${provider} when adding to secondary storage`);
+          datadogLogs.logger.error(`Stamp ID not found for provider ${provider} when adding to secondary storage`);
+        } else {
+          const compose_db_save_status: ComposeDBSaveStatus =
+            !secondaryStorageError && secondaryStorageId ? "saved" : "failed";
+          return {
+            id: primaryStorageId,
+            compose_db_stream_id: secondaryStorageId,
+            compose_db_save_status,
+          };
+        }
+      })
+      .filter((v?: ComposeDBMetadataRequest): v is ComposeDBMetadataRequest => Boolean(v));
+  };
+
   const handlePatchStamps = async (stampPatches: StampPatch[]): Promise<void> => {
     try {
       if (database) {
@@ -530,9 +588,12 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         if (ceramicClient && patchResponse.passport) {
           (async () => {
             try {
-              await ceramicClient.patchStamps(stampPatches);
+              const composeDBPatchResponse = await ceramicClient.patchStamps(stampPatches);
+              const composeDBMetadata = processComposeDBMetadata(patchResponse.passport, composeDBPatchResponse);
+              await database.patchStampComposeDBMetadata(composeDBMetadata);
             } catch (e) {
               console.log("error patching ceramic stamps", e);
+              datadogLogs.logger.error("Error patching ceramic stamps", { stampPatches, error: e });
             }
           })();
         }
@@ -553,7 +614,15 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         const deleteResponse = await database.deleteStamps(providerIds);
         handlePassportUpdate(deleteResponse, database);
         if (ceramicClient && deleteResponse.status === "Success" && deleteResponse.passport?.stamps) {
-          ceramicClient.deleteStamps(providerIds).catch((e) => console.log("error setting ceramic stamps", e));
+          (async () => {
+            try {
+              const responses = await ceramicClient.deleteStamps(providerIds);
+              processComposeDBMetadata(deleteResponse.passport, { adds: [], deletes: responses });
+            } catch (e) {
+              console.log("error deleting ceramic stamps", e);
+              datadogLogs.logger.error("Error deleting ceramic stamps", { providerIds, error: e });
+            }
+          })();
         }
         if (dbAccessToken) {
           refreshScore(address, dbAccessToken);

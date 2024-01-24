@@ -10,6 +10,7 @@ import {
   PassportLoadErrorDetails,
   Passport,
   StampPatch,
+  ComposeDBMetadataRequest,
 } from "@gitcoin/passport-types";
 
 export class PassportDatabase implements DataStorageBase {
@@ -60,6 +61,7 @@ export class PassportDatabase implements DataStorageBase {
           issuanceDate: null,
           expiryDate: null,
           stamps: data.stamps.map((stamp: any) => ({
+            id: stamp.id,
             provider: stamp.stamp?.credentialSubject?.provider,
             credential: stamp.stamp,
           })),
@@ -121,6 +123,15 @@ export class PassportDatabase implements DataStorageBase {
     const body = stampPatches.map(({ provider, credential }) => ({ provider, stamp: credential }));
     return await this.processPassportResponse(
       axios.patch(`${this.passportScorerUrl}/stamps/bulk`, body, {
+        headers: { Authorization: `Bearer ${this.token}` },
+      }),
+      "patch"
+    );
+  };
+
+  patchStampComposeDBMetadata = async (composeDBMetadata: ComposeDBMetadataRequest[]): Promise<void> => {
+    await this.processPassportResponse(
+      axios.patch(`${this.passportScorerUrl}/stamps/bulk/meta/compose-db`, composeDBMetadata, {
         headers: { Authorization: `Bearer ${this.token}` },
       }),
       "patch"
