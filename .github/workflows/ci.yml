@@ -70,8 +70,8 @@ jobs:
       #     CERAMIC_CONFIG: ${{ secrets.CERAMIC_CONFIG }}
       - name: Deploy Schema
         run: |
-          cd schemas 
-          yarn models:deploy-composite
+          cd ./schemas
+          yarn composedb composite:deploy composites/gitcoin-passport-stamps-composite.json --ceramic-url=${CERAMIC_URL} --did-private-key=${PRIVATE_KEY}
         env:
           PRIVATE_KEY: ${{ secrets.CERAMIC_PRIVATE_KEY }}
           CERAMIC_URL: "http://localhost:7007"
