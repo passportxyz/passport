@@ -58,9 +58,12 @@ jobs:
           cache: "yarn"
       - name: Install Packages
         run: yarn install
-      - name: Check if Ceramic is up
+      - name: Wait for Ceramic to be ready
         run: |
-          curl -f http://localhost:7007
+          until curl --output /dev/null --silent --head --fail http://localhost:7007; do
+            echo 'Waiting for Ceramic service...'
+            sleep 5
+          done
       - name: Deploy Schema
         run: |
           cd ./schemas
