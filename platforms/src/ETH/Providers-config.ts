@@ -13,11 +13,24 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Ethereum Account Verification",
+    platformGroup: "Ethereum Involvement Spectrum",
     providers: [
-      { title: "ETH Advocate", name: "ETHAdvocate" },
-      { title: "ETH Pioneer", name: "ETHPioneer" },
-      { title: "ETH Maxi", name: "ETHMaxi" },
+      {
+        title: "1. ETH Enthusiast",
+        name: "ETHAdvocate",
+        description: "Your journey begins here, showcasing initial engagement and support for the Ethereum ecosystem.",
+      },
+      {
+        title: "2. ETH Pioneer",
+        name: "ETHPioneer",
+        description: "A step up, reflecting ongoing commitment and active participation in Ethereum's growth.",
+      },
+      {
+        title: "3. ETH Maxi",
+        name: "ETHMaxi",
+        description:
+          "The ultimate badge of honor, embodying full-fledged advocacy and a dominant presence in the community.",
+      },
     ],
   },
 ];

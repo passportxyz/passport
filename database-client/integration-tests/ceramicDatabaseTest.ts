@@ -38,7 +38,6 @@ describe("adding and deleting stamps", () => {
 
     const addRequest = await composeDatabase.addStamps(stampsToAdd);
     const result = await composeDatabase.getPassport();
-    debugger;
     expect(result.status).toEqual("Success");
     expect(result.passport.stamps.length).toEqual(1);
     expect(result.passport.stamps[0].provider).toEqual(stampsToAdd[0].provider);
