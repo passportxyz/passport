@@ -21,22 +21,22 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     platformGroup: "Ethereum Involvement Spectrum",
     providers: [
       {
-        title: "1. ETH Enthusiast",
+        title: "ETH Enthusiast",
         name: "ETHEnthusiast",
         description: "Your journey begins here, showcasing initial engagement and support for the Ethereum ecosystem.",
       },
       {
-        title: "2. ETH Pioneer",
+        title: "ETH Pioneer",
         name: "ETHPioneer",
         description: "A step up, reflecting ongoing commitment and active participation in Ethereum's growth.",
       },
       {
-        title: "3. ETH Advocate",
+        title: "ETH Advocate",
         name: "ETHAdvocate",
         description: "Continued commitment and participation in the Ethereum ecosystem.",
       },
       {
-        title: "4. ETH Maxi",
+        title: "ETH Maxi",
         name: "ETHMaxi",
         description:
           "The ultimate badge of honor, embodying full-fledged advocacy and a dominant presence in the community.",
