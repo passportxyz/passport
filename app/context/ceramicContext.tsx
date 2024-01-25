@@ -366,7 +366,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
           datadogLogs.logger
         );
-        setCeramicClient(ceramicClientInstance);
+        if (process.env.NEXT_PUBLIC_FF_CERAMIC_CLIENT && process.env.NEXT_PUBLIC_FF_CERAMIC_CLIENT === "on") {
+          setCeramicClient(ceramicClientInstance);
+        }
         setUserDid(ceramicClientInstance.did);
         // Ceramic cache db
         const databaseInstance = new PassportDatabase(
