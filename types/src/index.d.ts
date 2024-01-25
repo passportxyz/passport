@@ -460,7 +460,8 @@ export type PROVIDER_ID =
   | "TrustedCitizen"
   | "ETHAdvocate"
   | "ETHPioneer"
-  | "ETHMaxi";
+  | "ETHMaxi"
+  | "ETHEnthusiast";
 
 export type StampBit = {
   bit: number;
