@@ -77,6 +77,24 @@ export class AccountAnalysis implements Provider {
   }
 }
 
+export class ETHEnthusiastProvider extends AccountAnalysis {
+  constructor() {
+    super({
+      type: "ETHEnthusiast",
+      minimum: 1,
+    });
+  }
+}
+
+export class ETHPioneerProvider extends AccountAnalysis {
+  constructor() {
+    super({
+      type: "ETHPioneer",
+      minimum: 25,
+    });
+  }
+}
+
 export class ETHAdvocateProvider extends AccountAnalysis {
   constructor() {
     super({
@@ -86,20 +104,11 @@ export class ETHAdvocateProvider extends AccountAnalysis {
   }
 }
 
-export class ETHPioneerProvider extends AccountAnalysis {
-  constructor() {
-    super({
-      type: "ETHPioneer",
-      minimum: 75,
-    });
-  }
-}
-
 export class ETHMaxiProvider extends AccountAnalysis {
   constructor() {
     super({
       type: "ETHMaxi",
-      minimum: 88,
+      minimum: 75,
     });
   }
 }
