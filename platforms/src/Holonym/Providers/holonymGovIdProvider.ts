@@ -2,30 +2,20 @@
 import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
-// ----- Ethers library
-import { Contract } from "ethers";
-import { AlchemyProvider } from "@ethersproject/providers";
+// ----- Libs
+import axios from "axios";
 
 // ----- Credential verification
 import { getAddress } from "../../utils/signer";
 
-export const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY;
+// ----- Utils
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
-const GOV_ID_SR_ADDRESS = "0xdD748977BAb5782625AF1466F4C5F02Eb92Fce31";
+export const holonymApiEndpoint = "https://api.holonym.io/sybil-resistance/gov-id/optimism";
 
-// ABI for Holonym Sybil resistance contract based on government ID
-const GOV_ID_SR_ABI = [
-  {
-    inputs: [
-      { internalType: "address", name: "", type: "address" },
-      { internalType: "uint256", name: "", type: "uint256" },
-    ],
-    name: "isUniqueForAction",
-    outputs: [{ internalType: "bool", name: "unique", type: "bool" }],
-    stateMutability: "view",
-    type: "function",
-  },
-];
+type SybilResistanceResponse = {
+  result: boolean;
+};
 
 const actionId = 123456789;
 
@@ -49,14 +39,9 @@ export class HolonymGovIdProvider implements Provider {
       valid = false;
 
     try {
-      // define a provider using the alchemy api key
-      const provider: AlchemyProvider = new AlchemyProvider("optimism", ALCHEMY_API_KEY);
-
-      const contract = new Contract(GOV_ID_SR_ADDRESS, GOV_ID_SR_ABI, provider);
-
-      // Query contract for user's uniqueness
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-      valid = await contract.isUniqueForAction(address, actionId);
+      // Check if address is unique for default Holonym action ID
+      const response = await getIsUnique(address);
+      valid = response.result;
 
       if (valid) {
         record = {
@@ -83,3 +68,17 @@ export class HolonymGovIdProvider implements Provider {
     }
   }
 }
+
+const getIsUnique = async (address: string): Promise<SybilResistanceResponse> => {
+  try {
+    const requestResponse = await axios.get(`${holonymApiEndpoint}?user=${address}&action-id=${actionId}`);
+
+    if (requestResponse.status != 200) {
+      throw [`HTTP Error '${requestResponse.status}'. Details: '${requestResponse.statusText}'.`];
+    }
+
+    return requestResponse.data as SybilResistanceResponse;
+  } catch (error: unknown) {
+    handleProviderAxiosError(error, "holonym", [address]);
+  }
+};
