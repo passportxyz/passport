@@ -190,41 +190,57 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
       secondaryStorageError = `[ComposeDB] error from mutation CreateGitcoinPassportVc, error: ${JSON.stringify(
         result.errors
       )}`;
+
+      console.error(`[ComposeDB] ${this.did} addStamp ${secondaryStorageError}`);
+      this.logger.error(`[ComposeDB] ${this.did} addStamp failed to add stamp`, { error: result.errors });
     } else {
       vcID = result?.data?.createGitcoinPassportStamp?.document?.id;
-      const wrapperRequest = (await this.compose.executeQuery(
-        `
-          mutation CreateGitcoinStampWrapper($wrapperInput: CreateGitcoinPassportStampWrapperInput!) {
-            createGitcoinPassportStampWrapper(input: $wrapperInput) {
-              document {
-                id
-                isDeleted
-                isRevoked
+
+      if (vcID) {
+        const wrapperRequest = (await this.compose.executeQuery(
+          `
+            mutation CreateGitcoinStampWrapper($wrapperInput: CreateGitcoinPassportStampWrapperInput!) {
+              createGitcoinPassportStampWrapper(input: $wrapperInput) {
+                document {
+                  id
+                  isDeleted
+                  isRevoked
+                }
               }
             }
-          }
-        `,
-        {
-          wrapperInput: {
-            content: {
-              vcID,
-              isDeleted: false,
-              isRevoked: false,
+          `,
+          {
+            wrapperInput: {
+              content: {
+                vcID,
+                isDeleted: false,
+                isRevoked: false,
+              },
             },
-          },
+          }
+        )) as GraphqlResponse<{
+          createGitcoinPassportStampWrapper: { document: { id: string; isDeleted: boolean; isRevoked: boolean } };
+        }>;
+
+        streamId = wrapperRequest?.data?.createGitcoinPassportStampWrapper?.document?.id;
+
+        if (wrapperRequest.errors) {
+          secondaryStorageError = `[ComposeDB] error thrown from mutation CreateGitcoinStampWrapper, vcID: ${vcID} error: ${JSON.stringify(
+            wrapperRequest.errors
+          )}`;
+          console.error(`[ComposeDB] ${this.did} addStamp ${secondaryStorageError}`);
+          this.logger.error(`[ComposeDB] ${this.did} addStamp failed to add stamp wrapper`, {
+            error: wrapperRequest.errors,
+          });
+        } else if (!streamId) {
+          secondaryStorageError = `[ComposeDB] For vcID: ${vcID} error: streamId=${streamId}`;
+          console.error(`[ComposeDB] ${this.did} addStamp ${secondaryStorageError}`);
+          this.logger.error(`[ComposeDB] ${this.did} addStamp ${secondaryStorageError}`);
         }
-      )) as GraphqlResponse<{
-        createGitcoinPassportStampWrapper: { document: { id: string; isDeleted: boolean; isRevoked: boolean } };
-      }>;
-
-      streamId = wrapperRequest?.data?.createGitcoinPassportStampWrapper?.document?.id;
-
-      if (wrapperRequest.errors) {
-        secondaryStorageError = `[ComposeDB] error thrown from mutation CreateGitcoinStampWrapper, vcID: ${vcID} error: ${JSON.stringify(
-          wrapperRequest.errors
-        )}`;
-      } else if (!streamId) {
-        secondaryStorageError = `[ComposeDB] For vcID: ${vcID} error: streamId is undefined`;
+      } else {
+        secondaryStorageError = `[ComposeDB] error: streamId=${vcID}`;
+        console.error(`[ComposeDB] ${this.did} addStamp ${secondaryStorageError}`);
+        this.logger.error(`[ComposeDB] ${this.did} addStamp ${secondaryStorageError}`);
       }
     }
 
@@ -236,11 +252,17 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
   };
 
   addStamps = async (stamps: Stamp[]): Promise<SecondaryStorageAddResponse[]> => {
+    console.log(`[ComposeDB] ${this.did} addStamps:`, { stamps });
+    this.logger.info(`[ComposeDB] ${this.did} addStamps`, { stamps });
+
     const vcPromises = stamps.map(async (stamp) => await this.addStamp(stamp));
 
     const addRequests = await Promise.allSettled(vcPromises);
 
-    return this.checkSettledResponse(addRequests);
+    const ret = this.checkSettledResponse(addRequests);
+    console.log(`[ComposeDB] ${this.did} addStamps ret:`, { ret });
+    this.logger.info(`[ComposeDB] ${this.did} addStamps ret`, { ret });
+    return ret;
   };
 
   deleteStamp = async (streamId: string): Promise<SecondaryStorageDeleteResponse> => {
@@ -271,6 +293,8 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
     let secondaryStorageError: string | undefined;
     if (deleteRequest.errors) {
       secondaryStorageError = `[ComposeDB] ${JSON.stringify(deleteRequest.errors)} for vcID: ${streamId}`;
+      console.error(`[ComposeDB] ${this.did} deleteStamp error`, deleteRequest.errors);
+      this.logger.error(`[ComposeDB] ${this.did} deleteStamp error`, { error: deleteRequest.errors });
     }
 
     return {
@@ -280,6 +304,9 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
   };
 
   deleteStamps = async (providers: PROVIDER_ID[]): Promise<SecondaryStorageDeleteResponse[]> => {
+    console.log(`[ComposeDB] ${this.did} deleteStamps:`, { providers });
+    this.logger.info(`[ComposeDB] ${this.did} deleteStamps`, { providers });
+
     const existingPassport = await this.getPassportWithWrapper();
 
     const stampsToDelete = existingPassport.filter((stamp) =>
@@ -290,13 +317,19 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
       stampsToDelete.map(async (stamp) => await this.deleteStamp(stamp.id))
     );
 
-    return this.checkSettledResponse(deleteRequests);
+    const ret = this.checkSettledResponse(deleteRequests);
+    console.log(`[ComposeDB] ${this.did} deleteStamps ret:`, { ret });
+    this.logger.info(`[ComposeDB] ${this.did} deleteStamps ret`, { ret });
+    return ret;
   };
 
   patchStamps = async (stampPatches: StampPatch[]): Promise<SecondaryStorageBulkPatchResponse> => {
-    console.log("patchStamps:", stampPatches);
+    console.log(`[ComposeDB] ${this.did} patchStamps:`, stampPatches);
+    this.logger.info(`[ComposeDB] ${this.did} patchStamps`, { stampPatches });
+
     const deleteResponses = await this.deleteStamps(stampPatches.map((patch) => patch.provider));
-    console.log("patchStamps deleteResponses:", deleteResponses);
+    console.log(`[ComposeDB] ${this.did} patchStamps deleteResponses:`, deleteResponses);
+    this.logger.info(`[ComposeDB] ${this.did} patchStamps deleteResponses`, { deleteResponses });
 
     const stampsToCreate = stampPatches
       .filter((stampPatch) => stampPatch.credential)
@@ -304,10 +337,12 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
         provider: stampPatch.provider,
         credential: stampPatch.credential,
       }));
+    console.log(`[ComposeDB] ${this.did} patchStamps stampsToCreate:`, stampsToCreate);
+    this.logger.info(`[ComposeDB] ${this.did} patchStamps stampsToCreate`, { stampsToCreate });
 
-    console.log("patchStamps stampsToCreate:", stampsToCreate);
     const addResponses = await this.addStamps(stampsToCreate);
-    console.log("patchStamps addResponses:", addResponses);
+    console.log(`[ComposeDB] ${this.did} patchStamps addResponses:`, addResponses);
+    this.logger.info(`[ComposeDB] ${this.did} patchStamps addResponses`, { addResponses });
 
     return {
       adds: addResponses,
@@ -416,12 +451,16 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
 
   async getPassport(): Promise<PassportLoadResponse> {
     try {
+      console.log(`[ComposeDB] ${this.did} getPassport`);
+      this.logger.info(`[ComposeDB] ${this.did} getPassport`);
       const passportWithWrapper = await this.getPassportWithWrapper();
       const stamps = passportWithWrapper.map((wrapper) => ({
         provider: wrapper.vc.credentialSubject.provider as PROVIDER_ID,
         credential: formatCredentialFromCeramic(wrapper.vc),
       }));
 
+      console.log(`[ComposeDB] ${this.did} getPassport:`, stamps);
+      this.logger.info(`[ComposeDB] ${this.did} getPassport`, { stamps });
       return {
         status: "Success",
         passport: {
@@ -429,6 +468,8 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
         },
       };
     } catch (error) {
+      console.error(`[ComposeDB] ${this.did} getPassport error:`, error);
+      this.logger.error(`[ComposeDB] ${this.did} getPassport error`, { error });
       return {
         status: "ExceptionRaised",
         errorDetails: {
