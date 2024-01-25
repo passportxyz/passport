@@ -10,10 +10,9 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/ethereumStampIcon.svg",
   platform: "ETH",
   name: "Ethereum",
-  description: "Connect to Ethereum to verify your network activity.",
+  description: "Verify Ethereum activity.",
   connectMessage: "Verify Account",
   isEVM: true,
-  website: "https://ethereum.org",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
