@@ -16,6 +16,8 @@ import { Passport } from "@gitcoin/passport-types";
 import { DatastoreConnectionContext } from "../../context/datastoreConnectionContext";
 import { DID } from "dids";
 
+process.env.NEXT_PUBLIC_FF_CERAMIC_CLIENT = "on";
+
 const viewerConnection = {
   status: "connected",
   selfID: "did:3:abc",
