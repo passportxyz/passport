@@ -13,6 +13,8 @@ export const PlatformDetails: PlatformSpec = {
   description: "Verify Ethereum activity.",
   connectMessage: "Verify Account",
   isEVM: true,
+  website:
+    "https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/navigating-your-ethereum-stamp-insights-and-updates",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
