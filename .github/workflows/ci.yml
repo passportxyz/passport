@@ -39,7 +39,7 @@ jobs:
     # Run a local ceramic nod to test against
     services:
       ceramic:
-        image: ceramicnetwork/js-ceramic:3.2.0
+        image: nutrina/js-ceramic:3.2.0
         ports:
           - 7007:7007
 
@@ -64,10 +64,16 @@ jobs:
         run: rm -rf node_modules/@tendermint
       - name: Run Build (ensure that build succeeds)
         run: yarn build
+      - name: Deploy Ceramic Models
+        working-directory: ./schemas
+        run: yarn models:deploy-composite
+        env:
+          CERAMIC_URL: http://localhost:7007
+          PRIVATE_KEY: ${{secrets.CERAMIC_PRIVATE_KEY}}
       - name: Run Ceramic Integration Tests
         run: yarn test:ceramic-integration
         env:
-          CERAMIC_CLIENT_URL: ${{secrets.CERAMIC_CLIENT_URL}}
+          CERAMIC_CLIENT_URL: http://localhost:7007
 
   check-provider-bitmap:
     runs-on: ubuntu-latest
