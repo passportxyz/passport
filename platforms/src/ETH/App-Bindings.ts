@@ -14,6 +14,10 @@ export class ETHPlatform extends Platform {
       behavior. The number of points you'll receive is based on many factors related to
       the overall activity of the address.
     `,
+    cta: {
+      label: "Find out more",
+      url: "https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/navigating-your-ethereum-stamp-insights-and-updates",
+    },
   };
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
