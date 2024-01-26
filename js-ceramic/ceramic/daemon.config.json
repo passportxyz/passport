@@ -1,0 +1,36 @@
+{
+  "anchor": {
+    "auth-method": "did"
+  },
+  "http-api": {
+    "cors-allowed-origins": [".*"],
+    "admin-dids": ["did:key:z6MkgUzNYV8J1yw43wj9K2CbhTZoN25uZ6TJ3Gi4cYVpZyDb"]
+  },
+  "ipfs": {
+    "mode": "bundled",
+    "disable-peer-data-sync": false
+  },
+  "logger": {
+    "log-level": 2,
+    "log-to-files": false
+  },
+  "metrics": {
+    "metrics-exporter-enabled": false
+  },
+  "network": {
+    "name": "testnet-clay"
+  },
+  "node": {
+    "private-seed-url": "inplace:ed25519#b7d1fc8db6162b7fd9ab19a5486d9c5f8f0134ac87932266033732d5fb5f1c26"
+  },
+  "state-store": {
+    "mode": "fs",
+    "local-directory": "/ceramic/statestore/"
+  },
+  "indexing": {
+    "db": "sqlite:///ceramic/indexing.sqlite",
+    "allow-queries-before-historical-sync": true,
+    "disable-composedb": false,
+    "enable-historical-sync": false
+  }
+}
