@@ -56,7 +56,7 @@ describe("formatMultiAttestationRequestWithPassportAndScore", () => {
       {
         credential: {
           credentialSubject: {
-            provider: "mockCredential1",
+            provider: "mockProvider",
             hash: "v0.0.0:QdjFB8E6FbvBT8HP+4mr7VBjal+CC7aDcAAqGAKsXos=",
           },
           issuanceDate: "2023-05-10T11:00:14.986Z",
@@ -67,7 +67,7 @@ describe("formatMultiAttestationRequestWithPassportAndScore", () => {
       {
         credential: {
           credentialSubject: {
-            provider: "mockCredential2",
+            provider: "mockProvider1",
             hash: "v0.0.0:QdjFB8E6FbvBT8HP+4mr7VBjal+CC7aDcAAqGAKsXos=",
           },
           issuanceDate: "2023-05-10T11:00:14.986Z",
@@ -213,6 +213,22 @@ describe("formatPassportAttestationData", () => {
       expirationDate: BigNumber.from(Math.floor(new Date(mockCredential.expirationDate).getTime() / 1000)),
       stampInfo: mockStamp,
     });
+  });
+  it("should throw an error if the provider is not supported", async () => {
+    // Prepare a mock credential
+    const mockCredential = {
+      credentialSubject: {
+        hash: "v0.0.0:8JZcQJy6uwNGPDZnvfGbEs6mf5OZVD1mUOdhKNrOHls=",
+        provider: "newProvider",
+      },
+      issuer: "string",
+      issuanceDate: "2023-01-01T00:00:00.000Z",
+      expirationDate: "2023-12-31T23:59:59.999Z",
+    } as unknown as VerifiableCredential;
+
+    expect(() => easPassportModule.formatPassportAttestationData([mockCredential])).toThrow(
+      `Provider ${mockCredential.credentialSubject.provider} not supported. Please contact support.`
+    );
   });
 });
 
