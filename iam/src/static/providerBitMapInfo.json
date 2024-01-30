@@ -112,5 +112,9 @@
   { "bit": 74, "index": 0, "name": "BeginnerCommunityStaker" },
   { "bit": 75, "index": 0, "name": "ExperiencedCommunityStaker" },
   { "bit": 76, "index": 0, "name": "TrustedCitizen" },
-  { "bit": 77, "index": 0, "name": "CoinbaseDualVerification" }
+  { "bit": 77, "index": 0, "name": "CoinbaseDualVerification" },
+  { "bit": 78, "index": 0, "name": "ETHEnthusiast" },
+  { "bit": 79, "index": 0, "name": "ETHAdvocate" },
+  { "bit": 80, "index": 0, "name": "ETHPioneer" },
+  { "bit": 81, "index": 0, "name": "ETHMaxi" }
 ]
