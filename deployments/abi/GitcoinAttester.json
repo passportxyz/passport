@@ -29,6 +29,7 @@
   "0xa": [
     "event AdminChanged(address previousAdmin, address newAdmin)",
     "event BeaconUpgraded(address indexed beacon)",
+    "event EASSet(address eas)",
     "event Initialized(uint8 version)",
     "event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)",
     "event Paused(address account)",
@@ -37,6 +38,7 @@
     "event VerifierAdded(address verifier)",
     "event VerifierRemoved(address verifier)",
     "function addVerifier(address _verifier)",
+    "function eas() view returns (address)",
     "function initialize()",
     "function owner() view returns (address)",
     "function pause()",
