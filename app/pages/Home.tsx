@@ -39,6 +39,8 @@ export default function Home() {
 
   useEffect(() => {
     if (connectError) {
+      console.log("displaying Connection Error", connectError);
+      console.log("displaying Connection Error", (connectError as Error).message);
       toast({
         duration: 6000,
         isClosable: true,

@@ -41,10 +41,23 @@ const walletStore = create<{
               },
             }
           : undefined;
-        const wallet = (await onboard.connectWallet(connectOptions))[0];
+        let wallet = (await onboard.connectWallet(connectOptions))[0];
+
+        if (!wallet) {
+          // This error can be caused if the user changed the wallet he is using in the mean time,
+          // for example he switched from MM -> Rabby
+          // So let's try first without the previouslyUsedWalletLabel
+          console.debug(
+            "No wallet selected when trying to connect with `previouslyUsedWalletLabel`. Retrying without it."
+          );
+
+          wallet = (await onboard.connectWallet())[0];
+        }
+
         if (!wallet) {
           throw new Error("No wallet selected");
         }
+
         window.localStorage.setItem("previouslyUsedWalletLabel", wallet.label);
 
         const walletData = parseWeb3OnboardWallet(wallet);
