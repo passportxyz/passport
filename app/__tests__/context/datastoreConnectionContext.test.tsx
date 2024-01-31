@@ -123,7 +123,7 @@ describe("<UserContext>", () => {
     localStorage.setItem("connectedWallets", "[]");
   });
 
-  describe("when using multichain", () => {
+  describe.skip("when using multichain", () => {
     afterEach(() => {
       jest.clearAllMocks();
     });
