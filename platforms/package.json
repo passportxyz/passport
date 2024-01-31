@@ -35,8 +35,7 @@
     "@spruceid/didkit-wasm": "^0.3.0-alpha0",
     "axios": "^0.26.1",
     "bignumber.js": "4.0.4",
-    "cid": "multiformats/cid",
-    "multiformats": "9",
+    "multiformats": "^13.0.0",
     "redis": "^4.6.10",
     "typescript": "^5.3.3"
   },
