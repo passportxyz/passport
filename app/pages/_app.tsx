@@ -15,7 +15,7 @@ import { OnChainContextProvider } from "../context/onChainContext";
 import ManageAccountCenter from "../components/ManageAccountCenter";
 
 // --- Ceramic Tools
-// import { Provider as SelfIdProvider } from "@self.id/framework";
+import { Provider as SelfIdProvider } from "@self.id/framework";
 
 // --- GTM Module
 import TagManager from "react-gtm-module";
@@ -143,23 +143,25 @@ function App({ Component, pageProps }: AppProps) {
         <title>Gitcoin Passport</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
       </Head>
-      <DatastoreConnectionContextProvider>
-        <OnChainContextProvider>
-          <ScorerContextProvider>
-            <CeramicContextProvider>
-              <StampClaimingContextProvider>
-                <ManageAccountCenter>
-                  <RenderOnlyOnClient>
-                    <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
-                      <Component {...pageProps} />
-                    </ThemeWrapper>
-                  </RenderOnlyOnClient>
-                </ManageAccountCenter>
-              </StampClaimingContextProvider>
-            </CeramicContextProvider>
-          </ScorerContextProvider>
-        </OnChainContextProvider>
-      </DatastoreConnectionContextProvider>
+      <SelfIdProvider client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}>
+        <DatastoreConnectionContextProvider>
+          <OnChainContextProvider>
+            <ScorerContextProvider>
+              <CeramicContextProvider>
+                <StampClaimingContextProvider>
+                  <ManageAccountCenter>
+                    <RenderOnlyOnClient>
+                      <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                        <Component {...pageProps} />
+                      </ThemeWrapper>
+                    </RenderOnlyOnClient>
+                  </ManageAccountCenter>
+                </StampClaimingContextProvider>
+              </CeramicContextProvider>
+            </ScorerContextProvider>
+          </OnChainContextProvider>
+        </DatastoreConnectionContextProvider>
+      </SelfIdProvider>
     </>
   );
 }

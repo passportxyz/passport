@@ -25,9 +25,7 @@ jobs:
           node-version: 20.8.1
           cache: "yarn"
       - name: Install Packages
-        run: |
-        yarn set version 4.1.0
-        yarn install
+        run: yarn install
       - name: Run Tests
         run: yarn test
       - name: Run Linter
