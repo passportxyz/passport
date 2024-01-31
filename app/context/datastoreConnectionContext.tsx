@@ -127,16 +127,13 @@ export const useDatastoreConnection = () => {
     async (address: string, provider: Eip1193Provider) => {
       if (address) {
         try {
-          datadogLogs.logger.info("Testing browser crypto lib", {
-            random: window.crypto.getRandomValues(new Uint32Array(3)).toString(),
+          datadogLogs.logger.info("Testing browser buffer lib", {
+            buffer: `${globalThis.Buffer}`,
           });
-          console.log("Testing browser crypto lib", {
-            random: window.crypto.getRandomValues(new Uint32Array(3)).toString(),
+          console.log("Testing browser buffer lib", {
+            buffer: `${globalThis.Buffer}`,
           });
-        } catch (error) {
-          datadogLogs.logger.error("Browser crypto lib not available", { error });
-          console.log("Browser crypto lib not available", { error });
-        }
+        } catch {}
 
         let sessionKey = "";
         let dbCacheTokenKey = "";
@@ -176,7 +173,20 @@ export const useDatastoreConnection = () => {
           //   // Store the session in localstorage
           //   // window.localStorage.setItem(sessionKey, session.serialize());
           // }
-          let session: DIDSession = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
+          let session: DIDSession | undefined = undefined;
+          try {
+            session = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
+          } catch (error) {
+            if (globalThis.Buffer) {
+              const oldBuffer = globalThis.Buffer;
+              globalThis.Buffer = undefined as any;
+              session = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
+              globalThis.Buffer = oldBuffer;
+            } else {
+              throw error;
+            }
+          }
+
           if (session) {
             await loadDbAccessToken(address, session.did);
             setDid(session.did);
