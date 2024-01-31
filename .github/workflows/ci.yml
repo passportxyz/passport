@@ -26,8 +26,8 @@ jobs:
           cache: "yarn"
       - name: Install Packages
         run: |
-        yarn set version 4.1.0
-        yarn install
+          yarn set version 4.1.0
+          yarn install
       - name: Run Tests
         run: yarn test
       - name: Run Linter
@@ -57,7 +57,9 @@ jobs:
           node-version: 20.8
           cache: "yarn"
       - name: Install Packages
-        run: yarn install
+        run: |
+          yarn set version 4.1.0
+          yarn install
       - name: Check provider bitmaps
         uses: ./.github/actions/check-provider-bitmaps
         with:
