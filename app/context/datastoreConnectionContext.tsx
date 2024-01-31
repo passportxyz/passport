@@ -16,6 +16,7 @@ import { useToast } from "@chakra-ui/react";
 import { Eip1193Provider } from "ethers";
 import { createSignedPayload } from "../utils/helpers";
 import { ComposeDatabase } from "@gitcoin/passport-database-client";
+import { datadogLogs } from "@datadog/browser-logs";
 
 const BUFFER_TIME_BEFORE_EXPIRATION = 60 * 60 * 1000;
 
@@ -125,6 +126,18 @@ export const useDatastoreConnection = () => {
   const connect = useCallback(
     async (address: string, provider: Eip1193Provider) => {
       if (address) {
+        try {
+          datadogLogs.logger.info("Testing browser crypto lib", {
+            random: window.crypto.getRandomValues(new Uint32Array(3)).toString(),
+          });
+          console.log("Testing browser crypto lib", {
+            random: window.crypto.getRandomValues(new Uint32Array(3)).toString(),
+          });
+        } catch (error) {
+          datadogLogs.logger.error("Browser crypto lib not available", { error });
+          console.log("Browser crypto lib not available", { error });
+        }
+
         let sessionKey = "";
         let dbCacheTokenKey = "";
 
