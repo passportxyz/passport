@@ -150,6 +150,7 @@ export const useDatastoreConnection = () => {
           }
 
           if (
+            true || // Hotfix: Hardcoding this here, as we always want a session created by DIDSession.get ... (at least for now)
             !session ||
             session.isExpired ||
             session.expireInSecs < 3600 ||
@@ -157,9 +158,10 @@ export const useDatastoreConnection = () => {
             Date.now() - new Date(session?.cacao?.p?.iat).getTime() >
               MAX_VALID_DID_SESSION_AGE - BUFFER_TIME_BEFORE_EXPIRATION
           ) {
-            session = await DIDSession.authorize(authMethod, { resources: ["ceramic://*"] });
+            // session = await DIDSession.authorize(authMethod, { resources: ["ceramic://*"] });
+            session = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
             // Store the session in localstorage
-            window.localStorage.setItem(sessionKey, session.serialize());
+            // window.localStorage.setItem(sessionKey, session.serialize());
           }
           if (session) {
             await loadDbAccessToken(address, session.did);
