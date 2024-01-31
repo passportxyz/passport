@@ -140,8 +140,13 @@ export const useDatastoreConnection = () => {
           dbCacheTokenKey = `dbcache-token-${address}`;
           const sessionStr = window.localStorage.getItem(sessionKey);
           let session: DIDSession | undefined = undefined;
-          if (sessionStr) {
-            session = await DIDSession.fromSession(sessionStr);
+          try {
+            if (sessionStr) {
+              session = await DIDSession.fromSession(sessionStr);
+            }
+          } catch (error) {
+            console.log("Error parsing session from localStorage:", error);
+            window.localStorage.removeItem(sessionKey);
           }
 
           if (
