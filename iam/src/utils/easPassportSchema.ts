@@ -98,6 +98,8 @@ export const formatPassportAttestationData = (credentials: VerifiableCredential[
           expirationDate: BigNumber.from(expirationDate),
           stampInfo: stampInfo,
         });
+      } else {
+        throw new Error(`Provider ${credential.credentialSubject.provider} not supported. Please contact support.`);
       }
       return acc;
     },
