@@ -168,8 +168,10 @@ export const useDatastoreConnection = () => {
           // Extensions which inject the Buffer library break the
           // did-session library, so we need to remove it
           if (globalThis.Buffer) {
+            datadogLogs.logger.warn("Buffer library is injected, setting to undefined", {
+              buffer: `${globalThis.Buffer}`,
+            });
             globalThis.Buffer = undefined as any;
-            datadogRum.addError("Buffer library is injected");
             console.log(
               "Warning: Buffer library is injected! This will be overwritten in order to avoid conflicts with did-session."
             );
