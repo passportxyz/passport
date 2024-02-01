@@ -126,15 +126,6 @@ export const useDatastoreConnection = () => {
   const connect = useCallback(
     async (address: string, provider: Eip1193Provider) => {
       if (address) {
-        try {
-          datadogLogs.logger.info("Testing browser buffer lib", {
-            buffer: `${globalThis.Buffer}`,
-          });
-          console.log("Testing browser buffer lib", {
-            buffer: `${globalThis.Buffer}`,
-          });
-        } catch {}
-
         let sessionKey = "";
         let dbCacheTokenKey = "";
 
@@ -173,19 +164,19 @@ export const useDatastoreConnection = () => {
           //   // Store the session in localstorage
           //   // window.localStorage.setItem(sessionKey, session.serialize());
           // }
-          let session: DIDSession | undefined = undefined;
-          try {
-            session = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
-          } catch (error) {
-            if (globalThis.Buffer) {
-              const oldBuffer = globalThis.Buffer;
-              globalThis.Buffer = undefined as any;
-              session = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
-              globalThis.Buffer = oldBuffer;
-            } else {
-              throw error;
-            }
+
+          // Extensions which inject the Buffer library break the
+          // did-session library, so we need to remove it
+          if (globalThis.Buffer) {
+            globalThis.Buffer = undefined as any;
+            datadogRum.addError("Buffer library is injected");
+            console.log(
+              "Warning: Buffer library is injected! This will be overwritten in order to avoid conflicts with did-session."
+            );
+          } else {
+            console.log("Buffer library is not injected (this is good)");
           }
+          let session: DIDSession = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
 
           if (session) {
             await loadDbAccessToken(address, session.did);
