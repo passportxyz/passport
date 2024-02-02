@@ -73,9 +73,9 @@ const verifySignature = async (signedChallenge: SignedDidChallenge, cacao: Cacao
 const verifyAgeAndGetCacao = async (signedChallenge: SignedDidChallenge): Promise<Cacao> => {
   try {
     const cacao = await Cacao.fromBlockBytes(new Uint8Array(signedChallenge.cacao));
-    // if (Date.now() - new Date(cacao.p.iat).getTime() < MAX_VALID_DID_SESSION_AGE) {
-    return cacao;
-    // }
+    if (new Date(cacao.p.exp).getTime() < Date.now()) {
+      return cacao;
+    }
   } catch (e) {
     console.error(e);
   }
