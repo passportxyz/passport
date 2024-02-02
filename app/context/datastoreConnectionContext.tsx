@@ -134,37 +134,8 @@ export const useDatastoreConnection = () => {
             chainId: "eip155:1",
             address,
           });
-          const authMethod = await EthereumWebAuth.getAuthMethod(provider, accountId);
-          // Sessions will be serialized and stored in localhost
-          // The sessions are bound to an ETH address, this is why we use the address in the session key
-          sessionKey = `didsession-${address}`;
-          dbCacheTokenKey = `dbcache-token-${address}`;
-          // const sessionStr = window.localStorage.getItem(sessionKey);
-          // let session: DIDSession | undefined = undefined;
-          // try {
-          //   if (sessionStr) {
-          //     session = await DIDSession.fromSession(sessionStr);
-          //   }
-          // } catch (error) {
-          //   console.log("Error parsing session from localStorage:", error);
-          //   window.localStorage.removeItem(sessionKey);
-          // }
 
-          // if (
-          //   true
-          //   //  || // Hotfix: Hardcoding this here, as we always want a session created by DIDSession.get ... (at least for now)
-          //   // !session ||
-          //   // session.isExpired ||
-          //   // session.expireInSecs < 3600 ||
-          //   // !session.hasSession ||
-          //   // Date.now() - new Date(session?.cacao?.p?.iat).getTime() >
-          //   //   MAX_VALID_DID_SESSION_AGE - BUFFER_TIME_BEFORE_EXPIRATION
-          // ) {
-          //   // session = await DIDSession.authorize(authMethod, { resources: ["ceramic://*"] });
-          //   // Store the session in localstorage
-          //   // window.localStorage.setItem(sessionKey, session.serialize());
-          // }
-
+          // Remove Buffer library if it is injected
           // Extensions which inject the Buffer library break the
           // did-session library, so we need to remove it
           if (globalThis.Buffer) {
@@ -175,10 +146,36 @@ export const useDatastoreConnection = () => {
             console.log(
               "Warning: Buffer library is injected! This will be overwritten in order to avoid conflicts with did-session."
             );
-          } else {
-            console.log("Buffer library is not injected (this is good)");
           }
-          let session: DIDSession = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
+
+          const authMethod = await EthereumWebAuth.getAuthMethod(provider, accountId);
+          // Sessions will be serialized and stored in localhost
+          // The sessions are bound to an ETH address, this is why we use the address in the session key
+          sessionKey = `didsession-${address}`;
+          dbCacheTokenKey = `dbcache-token-${address}`;
+          const sessionStr = window.localStorage.getItem(sessionKey);
+          let session: DIDSession | undefined = undefined;
+          try {
+            if (sessionStr) {
+              session = await DIDSession.fromSession(sessionStr);
+            }
+          } catch (error) {
+            console.log("Error parsing session from localStorage:", error);
+            window.localStorage.removeItem(sessionKey);
+          }
+
+          if (
+            !session ||
+            session.isExpired ||
+            session.expireInSecs < 3600 ||
+            !session.hasSession ||
+            Date.now() - new Date(session?.cacao?.p?.iat).getTime() >
+              MAX_VALID_DID_SESSION_AGE - BUFFER_TIME_BEFORE_EXPIRATION
+          ) {
+            session = await DIDSession.authorize(authMethod, { resources: ["ceramic://*"] });
+            // Store the session in localstorage
+            window.localStorage.setItem(sessionKey, session.serialize());
+          }
 
           if (session) {
             await loadDbAccessToken(address, session.did);
