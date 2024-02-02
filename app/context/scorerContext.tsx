@@ -102,9 +102,6 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
         const numThreshold = Number.parseFloat(response.data.evidence.threshold);
         const numScore = Number.parseFloat(response.data.score);
 
-        if (needsRescore(rescore, numRawScore, response.data.stamp_scores))
-          return loadScore(address, dbAccessToken, true);
-
         setRawScore(numRawScore);
         setThreshold(numThreshold);
         setScore(numScore);
@@ -121,16 +118,6 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     } catch (error) {
       throw error;
     }
-  };
-
-  const needsRescore = (currentlyRescoring: boolean, rawScore: number, stamp_scores: any): boolean => {
-    let needsRescore = rawScore > 0;
-    if (!currentlyRescoring && needsRescore) {
-      try {
-        if (Object.keys(stamp_scores).length > 0) needsRescore = false;
-      } catch {}
-    }
-    return needsRescore;
   };
 
   const fetchStampWeights = async () => {
