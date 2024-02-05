@@ -56,6 +56,13 @@ enum VerificationStatuses {
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
 
+class InvalidSessionError extends Error {
+  constructor() {
+    super("Session is invalid");
+    this.name = "InvalidSessionError";
+  }
+}
+
 type GenericPlatformProps = PlatformProps & { onClose: () => void; platformScoreSpec: PlatformScoreSpec };
 
 const arraysContainSameElements = (a: any[], b: any[]) => {
@@ -75,7 +82,7 @@ export const GenericPlatform = ({
   const [submitted, setSubmitted] = useState(false);
   const [verificationResponse, setVerificationResponse] = useState<CredentialResponseBody[]>([]);
   const [payloadModalIsOpen, setPayloadModalIsOpen] = useState(false);
-  const { did } = useDatastoreConnectionContext();
+  const { did, checkSessionIsValid } = useDatastoreConnectionContext();
   // const { handleFetchCredential } = useContext(StampClaimingContext);
 
   // --- Chakra functions
@@ -155,6 +162,7 @@ export const GenericPlatform = ({
     setLoading(true);
     try {
       if (!did) throw new Error("No DID found");
+
       const state = `${platform.path}-` + generateUID(10);
       const providerPayload = (await platform.getProviderPayload({
         state,
@@ -172,6 +180,8 @@ export const GenericPlatform = ({
         handleSponsorship(providerPayload.code);
         return;
       }
+
+      if (!checkSessionIsValid()) throw new InvalidSessionError();
 
       const verifyCredentialsResponse = await fetchVerifiableCredential(
         iamUrl,
@@ -248,14 +258,23 @@ export const GenericPlatform = ({
 
       setLoading(false);
     } catch (e) {
-      console.error(e);
-      datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
-      doneToast(
-        "Verification Failed",
-        "There was an error verifying your stamp. Please try again.",
-        fail,
-        platform.platformId as PLATFORM_ID
-      );
+      if (e instanceof InvalidSessionError) {
+        doneToast(
+          "Session Invalid",
+          "Please refresh the page to reset your session.",
+          fail,
+          platform.platformId as PLATFORM_ID
+        );
+      } else {
+        console.error(e);
+        datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
+        doneToast(
+          "Verification Failed",
+          "There was an error verifying your stamp. Please try again.",
+          fail,
+          platform.platformId as PLATFORM_ID
+        );
+      }
     } finally {
       setLoading(false);
       setSubmitted(true);

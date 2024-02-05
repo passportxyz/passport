@@ -28,12 +28,14 @@ export type DatastoreConnectionContextState = {
   did?: DID;
   disconnect: (address: string) => Promise<void>;
   connect: (address: string, provider: Eip1193Provider) => Promise<void>;
+  checkSessionIsValid: () => boolean;
 };
 
 export const DatastoreConnectionContext = createContext<DatastoreConnectionContextState>({
   dbAccessTokenStatus: "idle",
   disconnect: async (address: string) => {},
   connect: async () => {},
+  checkSessionIsValid: () => false,
 });
 
 // In the app, the context hook should be used. This is only exported for testing
@@ -47,6 +49,7 @@ export const useDatastoreConnection = () => {
   const [dbAccessToken, setDbAccessToken] = useState<string | undefined>();
 
   const [did, setDid] = useState<DID>();
+  const [checkSessionIsValid, setCheckSessionIsValid] = useState<() => boolean>(() => false);
 
   useEffect(() => {
     // Clear status when wallet disconnected
@@ -183,6 +186,11 @@ export const useDatastoreConnection = () => {
           if (session) {
             await loadDbAccessToken(address, session.did);
             setDid(session.did);
+
+            // session.isExpired looks like a static variable so this looks like a bug,
+            // but isExpired is a getter, so it's actually checking the current status
+            // whenever checkSessionIsValid is called
+            setCheckSessionIsValid(() => () => !session.isExpired);
           }
         } catch (error) {
           await handleConnectionError(sessionKey, dbCacheTokenKey);
@@ -216,11 +224,13 @@ export const useDatastoreConnection = () => {
     disconnect,
     dbAccessToken,
     dbAccessTokenStatus,
+    checkSessionIsValid,
   };
 };
 
 export const DatastoreConnectionContextProvider = ({ children }: { children: any }) => {
-  const { dbAccessToken, dbAccessTokenStatus, disconnect, connect, did } = useDatastoreConnection();
+  const { dbAccessToken, dbAccessTokenStatus, disconnect, connect, did, checkSessionIsValid } =
+    useDatastoreConnection();
 
   const providerProps = useMemo(
     () => ({
@@ -229,8 +239,9 @@ export const DatastoreConnectionContextProvider = ({ children }: { children: any
       disconnect,
       dbAccessToken,
       dbAccessTokenStatus,
+      checkSessionIsValid,
     }),
-    [dbAccessToken, dbAccessTokenStatus, did, connect, disconnect]
+    [dbAccessToken, dbAccessTokenStatus, did, connect, disconnect, checkSessionIsValid]
   );
 
   return <DatastoreConnectionContext.Provider value={providerProps}>{children}</DatastoreConnectionContext.Provider>;
