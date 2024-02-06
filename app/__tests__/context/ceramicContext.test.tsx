@@ -15,6 +15,7 @@ import {
 import { Passport } from "@gitcoin/passport-types";
 import { DatastoreConnectionContext } from "../../context/datastoreConnectionContext";
 import { DID } from "dids";
+import { ChakraProvider } from "@chakra-ui/react";
 
 process.env.NEXT_PUBLIC_FF_CERAMIC_CLIENT = "on";
 
@@ -98,34 +99,37 @@ jest.mock("@gitcoin/passport-database-client", () => {
   };
 });
 
-const mockComponent = () => (
-  <DatastoreConnectionContext.Provider
-    value={{
-      dbAccessToken: "token",
-      dbAccessTokenStatus: "idle",
-      did: {
-        id: "did:3:abc",
-        parent: "did:3:abc",
-      } as unknown as DID,
-      connect: async () => {},
-      disconnect: async () => {},
-    }}
-  >
-    <CeramicContextProvider>
-      <CeramicContext.Consumer>
-        {(value: CeramicContextState) => {
-          return (
-            <>
-              <div># Stamps = {value.passport && value.passport.stamps.length}</div>
-              <div onClick={() => value.handleAddStamps(stamps)}>handleAddStamps</div>
-              <div onClick={() => value.handleDeleteStamps(stampProviderIds)}>handleDeleteStamps</div>
-              <div onClick={() => value.handlePatchStamps(stampPatches)}>handlePatchStamps</div>
-            </>
-          );
-        }}
-      </CeramicContext.Consumer>
-    </CeramicContextProvider>
-  </DatastoreConnectionContext.Provider>
+const mockComponent = ({ invalidSession }: { invalidSession?: boolean } = {}) => (
+  <ChakraProvider>
+    <DatastoreConnectionContext.Provider
+      value={{
+        dbAccessToken: "token",
+        dbAccessTokenStatus: "idle",
+        did: {
+          id: "did:3:abc",
+          parent: "did:3:abc",
+        } as unknown as DID,
+        connect: async () => {},
+        disconnect: async () => {},
+        checkSessionIsValid: () => !invalidSession,
+      }}
+    >
+      <CeramicContextProvider>
+        <CeramicContext.Consumer>
+          {(value: CeramicContextState) => {
+            return (
+              <>
+                <div># Stamps = {value.passport && value.passport.stamps.length}</div>
+                <div onClick={() => value.handleAddStamps(stamps)}>handleAddStamps</div>
+                <div onClick={() => value.handleDeleteStamps(stampProviderIds)}>handleDeleteStamps</div>
+                <div onClick={() => value.handlePatchStamps(stampPatches)}>handlePatchStamps</div>
+              </>
+            );
+          }}
+        </CeramicContext.Consumer>
+      </CeramicContextProvider>
+    </DatastoreConnectionContext.Provider>
+  </ChakraProvider>
 );
 
 describe("CeramicContextProvider syncs stamp state with ceramic", () => {
@@ -436,6 +440,53 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     } finally {
       console.log = oldConsoleLog;
     }
+  });
+
+  it("should show an error toast but continue if ceramic patch fails due to invalid session", async () => {
+    (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
+      return {
+        ...passportDbMocks,
+        patchStamps: patchStampsMock.mockImplementationOnce(async () => {
+          return {
+            passport: {
+              stamps,
+            },
+            errorDetails: {},
+            status: "Success",
+          };
+        }),
+        getPassport: jest.fn().mockImplementationOnce(async () => {
+          return {
+            passport: {
+              stamps,
+            },
+            errorDetails: {},
+            status: "Success",
+          };
+        }),
+      };
+    });
+
+    const patchStampsMock = jest.fn();
+
+    (ComposeDatabase as jest.Mock).mockImplementationOnce(() => {
+      return {
+        ...ceramicDbMocks,
+        patchStamps: patchStampsMock,
+      };
+    });
+
+    render(mockComponent({ invalidSession: true }));
+
+    await waitFor(() => fireEvent.click(screen.getByText("handlePatchStamps")));
+    await waitFor(() => expect(patchStampsMock).toHaveBeenCalledWith(stampPatches));
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          "Your update was not logged to Ceramic. Please refresh the page to reset your Ceramic session."
+        )
+      ).toBeInTheDocument()
+    );
   });
 });
 
