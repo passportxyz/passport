@@ -104,6 +104,7 @@ describe("when user has not verified with EnsProvider", () => {
       expect(fetchVerifiableCredential).toHaveBeenCalled();
     });
   });
+
   it("should show success toast when credential is fetched", async () => {
     const drawer = () => (
       <ChakraProvider>
@@ -128,6 +129,35 @@ describe("when user has not verified with EnsProvider", () => {
     // Wait to see the done toast
     await waitFor(() => {
       expect(screen.getByText("All Ens data points verified.")).toBeInTheDocument();
+    });
+  });
+
+  it("should prompt user to refresh when session expired", async () => {
+    const drawer = () => (
+      <ChakraProvider>
+        <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
+          <DrawerOverlay />
+          <GenericPlatform
+            platform={new Ens.EnsPlatform()}
+            platFormGroupSpec={Ens.ProviderConfig}
+            platformScoreSpec={EnsScoreSpec}
+            onClose={() => {}}
+          />
+        </Drawer>
+      </ChakraProvider>
+    );
+    renderWithContext(mockCeramicContext, drawer(), {
+      checkSessionIsValid: () => false,
+    });
+
+    const firstSwitch = screen.queryByTestId("select-all");
+    fireEvent.click(firstSwitch as HTMLElement);
+    const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
+
+    fireEvent.click(initialVerifyButton as HTMLElement);
+    // Wait to see the error toast
+    await waitFor(() => {
+      expect(screen.getByText("Please refresh the page to reset your session.")).toBeInTheDocument();
     });
   });
 });

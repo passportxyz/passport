@@ -226,6 +226,7 @@ const datastoreConnectionContext = {
   dbAccessToken: "token",
   dbAccessTokenStatus: "idle" as DbAuthTokenStatus,
   did: jest.fn() as any,
+  checkSessionIsValid: jest.fn().mockImplementation(() => true),
 };
 
 export const renderWithContext = (

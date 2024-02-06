@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useRef, useMemo } from "react";
+import { createContext, useContext, useEffect, useState, useRef, useMemo, useCallback } from "react";
 import {
   ComposeDBMetadataRequest,
   ComposeDBSaveStatus,
@@ -50,6 +50,8 @@ import { PlatformProps } from "../components/GenericPlatform";
 
 import { CERAMIC_CACHE_ENDPOINT, IAM_VALID_ISSUER_DIDS } from "../config/stamp_config";
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
+import { useToast } from "@chakra-ui/react";
+import { DoneToastContent } from "../components/DoneToastContent";
 
 // -- Trusted IAM servers DID
 const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
@@ -343,8 +345,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
 
   const address = useWalletStore((state) => state.address);
-  const { dbAccessToken, did } = useDatastoreConnectionContext();
+  const { dbAccessToken, did, checkSessionIsValid } = useDatastoreConnectionContext();
   const { refreshScore, fetchStampWeights } = useContext(ScorerContext);
+
+  const toast = useToast();
 
   useEffect(() => {
     return () => {
@@ -413,6 +417,24 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         });
     }
   }, [ceramicClient]);
+
+  const checkAndAlertInvalidCeramicSession = useCallback(() => {
+    if (!checkSessionIsValid()) {
+      toast({
+        render: (result: any) => (
+          <DoneToastContent
+            title="Ceramic Session Invalid"
+            body="Your update was not logged to Ceramic. Please refresh the page to reset your Ceramic session."
+            icon="../assets/verification-failed-bright.svg"
+            result={result}
+          />
+        ),
+        duration: 9000,
+        isClosable: true,
+      });
+      throw new Error("Session Expired");
+    }
+  }, [toast, checkSessionIsValid]);
 
   const passportLoadSuccess = (
     database: PassportDatabase,
@@ -514,6 +536,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         if (ceramicClient && addResponse.passport) {
           (async () => {
             try {
+              checkAndAlertInvalidCeramicSession();
               const composeDBAddResponse = await ceramicClient.addStamps(stamps);
               const composeDBMetadata = processComposeDBMetadata(addResponse.passport, {
                 adds: composeDBAddResponse,
@@ -590,6 +613,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         if (ceramicClient && patchResponse.passport) {
           (async () => {
             try {
+              checkAndAlertInvalidCeramicSession();
               const composeDBPatchResponse = await ceramicClient.patchStamps(stampPatches);
               const composeDBMetadata = processComposeDBMetadata(patchResponse.passport, composeDBPatchResponse);
               await database.patchStampComposeDBMetadata(composeDBMetadata);
@@ -618,6 +642,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         if (ceramicClient && deleteResponse.status === "Success" && deleteResponse.passport?.stamps) {
           (async () => {
             try {
+              checkAndAlertInvalidCeramicSession();
               const responses = await ceramicClient.deleteStamps(providerIds);
               processComposeDBMetadata(deleteResponse.passport, { adds: [], deletes: responses });
             } catch (e) {
