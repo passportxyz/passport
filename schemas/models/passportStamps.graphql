@@ -20,14 +20,6 @@ interface VerifiableCredential implements GitcoinAttestation
   expirationDate: DateTime
 }
 
-interface VerifiableCredential
-  @createModel(description: "A verifiable credential interface") {
-  type: [String!]! @string(minLength: 1, maxLength: 1024) @list(maxLength: 1024)
-  issuer: String! @string(minLength: 1, maxLength: 1024)
-  issuanceDate: DateTime!
-  expirationDate: DateTime
-}
-
 interface GitcoinPassportStampWrapperInterface
   @createModel(
     accountRelation: LIST
@@ -87,7 +79,7 @@ type EIP712DomainDomain {
 
 type EIP712DomainTypes {
   _context: [EIP712ValueType] @list(maxLength: 1024)
-  CredentialStatus: [EIP712ValueType] @list(maxLength: 1024)  # TODO: geri is this field required ???
+  CredentialStatus: [EIP712ValueType] @list(maxLength: 1024) # TODO: geri is this field required ???
   CredentialSubject: [EIP712ValueType] @list(maxLength: 1024)
   Document: [EIP712ValueType] @list(maxLength: 1024)
   EIP712Domain: [EIP712ValueType] @list(maxLength: 1024)
