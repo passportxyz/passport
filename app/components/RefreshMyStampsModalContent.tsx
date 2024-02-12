@@ -158,16 +158,18 @@ export const RefreshMyStampsModalContent = ({
               />
             </div>
             <div className="mt-8 cursor-pointer text-center text-color-2 underline">
-              <a onClick={() => setShowDataInfo(!showDataInfo)}>How is my data stored?</a>
+              <a onClick={() => setShowDataInfo(!showDataInfo)}>Understanding Your Data Storage in Gitcoin Passport</a>
             </div>
             {showDataInfo && (
               <div className="pt-3 text-justify">
                 <p>
-                  The only information in your passport is the Decentralized Identifier (DID) associated with your
-                  Ethereum address and the Verifiable Credentials (VCs) issued for each service you connect to your
-                  passport. No identifiable details are stored in your passport as we encrypt the account details when
-                  creating your VCs. You can inspect the data yourself in the Gitcoin Passport by clicking the &lt;/&gt;
-                  Passport JSON button in the upper right of the Passport dashboard.
+                  In crafting your Gitcoin Passport experience, we prioritize both the security of your digital identity
+                  and the seamless portability of your data. By encrypting your information and linking it to a unique 
+                  code associated with your Ethereum address, we ensure your details are kept private. Our secure storage
+                  strategy leverages both our proprietary database and the Ceramic network, enhancing your data's integrity 
+                  and accessibility. Additionally, integration with Ethereum's Layer 2 solutions, such as Optimism and 
+                  Linea, further facilitates the efficient and secure portability of your data across platforms. This 
+                  thoughtful approach underscores our dedication to a secure, human-friendly, and interconnected Web3 journey.
                 </p>
               </div>
             )}
