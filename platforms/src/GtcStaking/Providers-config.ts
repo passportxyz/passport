@@ -38,7 +38,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
       {
         title: "Experienced Community Staker",
         description:
-          "Stake 10 GTC on at least 2 accounts or have 2 accounts stake 10 GTC on you. If someone stakes 10 GTC on you and you stake 10 GTC on them, that also qualifies.",
+          "Participate in two staking actions, each involving at least 10 GTC. Options include: staking on two different accounts, receiving stakes from two different accounts, or a mutual stake. Every stake must be a minimum of 10 GTC.",
         name: "ExperiencedCommunityStaker",
       },
       {
