@@ -32,18 +32,23 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     providers: [
       {
         title: "Beginner Community Staker",
-        description: "Stake 5 GTC on at least 1 account or have 1 account stake 5 GTC on you.",
+        description: "Stake 5 GTC on one account or have one account stake 5 GTC on you.",
         name: "BeginnerCommunityStaker",
       },
       {
         title: "Experienced Community Staker",
-        description:
-          "Stake 10 GTC on at least 2 accounts or have 2 accounts stake 10 GTC on you. If someone stakes 10 GTC on you and you stake 10 GTC on them, that also qualifies.",
+        description: `At least two community stakes of at least 10 GTC each (a
+                     minimum of 20 GTC total). Options include: staking on two
+                     different accounts, receiving stakes from two different
+                     accounts, or a mutual stake.`,
         name: "ExperiencedCommunityStaker",
       },
       {
         title: "Trusted Citizen",
-        description: "Receive stakes from 5 unique users, each staking a minimum of 20 GTC on you.",
+        description: `At least five community stakes of at least 20 GTC each (a
+                     minimum of 100 GTC total). Options include: staking on five
+                     different accounts, receiving stakes from five different
+                     accounts, or a mix.`,
         name: "TrustedCitizen",
       },
     ],
