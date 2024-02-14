@@ -156,13 +156,11 @@ describe("Attempt verification", function () {
       "Error making Coinbase access token request, received error response with code 500: {}, headers: {}"
     );
     expect(mockedAxios.post).toBeCalledTimes(1);
-    expect(mockedAxios.post).toBeCalledWith("https://api.coinbase.com/oauth/token", {
-      grant_type: "authorization_code",
-      client_id: clientId,
-      client_secret: clientSecret,
-      code: code,
-      redirect_uri: callback,
-    });
+    expect(mockedAxios.post).toBeCalledWith(
+      "https://api.coinbase.com/oauth/token",
+      `grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
+      { headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" } }
+    );
   });
 
   it("should return invalid payload when there is no id in verify Coinbase response", async () => {
@@ -191,13 +189,11 @@ describe("Attempt verification", function () {
 
     expect(mockedAxios.post).toBeCalledTimes(1);
     // Check the request to get the token
-    expect(mockedAxios.post).toBeCalledWith("https://api.coinbase.com/oauth/token", {
-      grant_type: "authorization_code",
-      client_id: clientId,
-      client_secret: clientSecret,
-      code: code,
-      redirect_uri: callback,
-    });
+    expect(mockedAxios.post).toBeCalledWith(
+      "https://api.coinbase.com/oauth/token",
+      `grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
+      { headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" } }
+    );
     expect(mockedAxios.get).toBeCalledTimes(1);
     // Check the request to get the user
     expect(mockedAxios.get).toBeCalledWith("https://api.coinbase.com/v2/user", {
@@ -232,13 +228,11 @@ describe("Attempt verification", function () {
     expect(mockedAxios.post).toBeCalledTimes(1);
 
     // Check the request to get the token
-    expect(mockedAxios.post).toBeCalledWith("https://api.coinbase.com/oauth/token", {
-      grant_type: "authorization_code",
-      client_id: clientId,
-      client_secret: clientSecret,
-      code: code,
-      redirect_uri: callback,
-    });
+    expect(mockedAxios.post).toBeCalledWith(
+      "https://api.coinbase.com/oauth/token",
+      `grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
+      { headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" } }
+    );
     expect(mockedAxios.get).toBeCalledTimes(1);
     // Check the request to get the user
     expect(mockedAxios.get).toBeCalledWith("https://api.coinbase.com/v2/user", {
@@ -265,13 +259,11 @@ describe("Attempt verification", function () {
     expect(mockedAxios.post).toBeCalledTimes(1);
 
     // Check the request to get the token
-    expect(mockedAxios.post).toBeCalledWith("https://api.coinbase.com/oauth/token", {
-      grant_type: "authorization_code",
-      client_id: clientId,
-      client_secret: clientSecret,
-      code: code,
-      redirect_uri: callback,
-    });
+    expect(mockedAxios.post).toBeCalledWith(
+      "https://api.coinbase.com/oauth/token",
+      `grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
+      { headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" } }
+    );
     expect(mockedAxios.get).toBeCalledTimes(1);
     // Check the request to get the user
     expect(mockedAxios.get).toBeCalledWith("https://api.coinbase.com/v2/user", {
@@ -296,13 +288,11 @@ describe("Attempt verification", function () {
 
     expect(mockedAxios.post).toBeCalledTimes(1);
     // Check the request to get the token
-    expect(mockedAxios.post).toBeCalledWith("https://api.coinbase.com/oauth/token", {
-      grant_type: "authorization_code",
-      client_id: clientId,
-      client_secret: clientSecret,
-      code: code,
-      redirect_uri: callback,
-    });
+    expect(mockedAxios.post).toBeCalledWith(
+      "https://api.coinbase.com/oauth/token",
+      `grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
+      { headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" } }
+    );
 
     expect(mockedAxios.get).toBeCalledTimes(1);
     // Check the request to get the user

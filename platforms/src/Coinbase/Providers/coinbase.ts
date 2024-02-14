@@ -53,17 +53,26 @@ export const requestAccessToken = async (code: string): Promise<string | undefin
 
   let tokenRequest: { data?: CoinbaseTokenResponse };
   try {
+    // Used to format POST body as expected
+    const params = new URLSearchParams();
+    params.append("grant_type", "authorization_code");
+    params.append("client_id", clientId);
+    params.append("client_secret", clientSecret);
+    params.append("code", code);
+    params.append("redirect_uri", callback);
+
     // Exchange the code for an access token
-    tokenRequest = await axios.post("https://api.coinbase.com/oauth/token", {
-      grant_type: "authorization_code",
-      client_id: clientId,
-      client_secret: clientSecret,
-      code,
-      redirect_uri: callback,
+    tokenRequest = await axios.post("https://api.coinbase.com/oauth/token", params.toString(), {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
+      },
     });
   } catch (e) {
+    console.log("error", e);
     handleProviderAxiosError(e, "Coinbase access token", [clientSecret, code]);
   }
+  console.log("tokenRequest", tokenRequest);
 
   return tokenRequest?.data?.access_token;
 };
