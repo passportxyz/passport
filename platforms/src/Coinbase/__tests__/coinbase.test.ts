@@ -5,7 +5,7 @@ import * as coinbaseProviderModule from "../Providers/coinbase";
 import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 jest.mock("axios");
 
@@ -133,32 +133,36 @@ describe("verifyCoinbaseAttestation", () => {
 
 describe("Attempt verification", function () {
   it("should throw Provider External Verification error when unable to retrieve auth token", async () => {
-    const e = "Post for request returned status code 500 instead of the expected 200";
-    mockedAxios.post.mockImplementation(async () => {
-      return {
-        status: 500,
-      };
-    });
+    const mockAxiosError = new Error("Network error") as AxiosError;
+    mockedAxios.isAxiosError.mockReturnValueOnce(true);
+    mockAxiosError.response = {
+      status: 500,
+      data: {},
+      headers: {},
+      statusText: "Internal Server Error",
+      config: {},
+    };
+
+    mockedAxios.post.mockRejectedValueOnce(mockAxiosError);
+
     const coinbase = new coinbaseProviderModule.CoinbaseProvider();
-    expect(
-      await coinbase.verify({
+    await expect(
+      coinbase.verify({
         proofs: {
           code,
         },
       } as unknown as RequestPayload)
-    ).toMatchObject({
-      valid: false,
-      record: undefined,
-      errors: [e],
-    });
-    expect(mockedAxios.post).toBeCalledTimes(1);
-    expect(mockedAxios.post).toBeCalledWith(
-      `https://api.coinbase.com/oauth/token?grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
-      {},
-      {
-        headers: { Accept: "application/json" },
-      }
+    ).rejects.toThrow(
+      "Error making Coinbase access token request, received error response with code 500: {}, headers: {}"
     );
+    expect(mockedAxios.post).toBeCalledTimes(1);
+    expect(mockedAxios.post).toBeCalledWith("https://api.coinbase.com/oauth/token", {
+      grant_type: "authorization_code",
+      client_id: clientId,
+      client_secret: clientSecret,
+      code: code,
+      redirect_uri: callback,
+    });
   });
 
   it("should return invalid payload when there is no id in verify Coinbase response", async () => {
@@ -183,18 +187,17 @@ describe("Attempt verification", function () {
     ).toMatchObject({
       valid: false,
       errors: ["Coinbase user id was not found."],
-      record: undefined,
     });
 
     expect(mockedAxios.post).toBeCalledTimes(1);
     // Check the request to get the token
-    expect(mockedAxios.post).toBeCalledWith(
-      `https://api.coinbase.com/oauth/token?grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
-      {},
-      {
-        headers: { Accept: "application/json" },
-      }
-    );
+    expect(mockedAxios.post).toBeCalledWith("https://api.coinbase.com/oauth/token", {
+      grant_type: "authorization_code",
+      client_id: clientId,
+      client_secret: clientSecret,
+      code: code,
+      redirect_uri: callback,
+    });
     expect(mockedAxios.get).toBeCalledTimes(1);
     // Check the request to get the user
     expect(mockedAxios.get).toBeCalledWith("https://api.coinbase.com/v2/user", {
@@ -203,9 +206,52 @@ describe("Attempt verification", function () {
   });
 
   it("should return invalid payload when a bad status code is returned by coinbase user api", async () => {
+    const mockAxiosError = new Error("Network error") as AxiosError;
+    mockedAxios.isAxiosError.mockReturnValueOnce(true);
+    mockAxiosError.response = {
+      status: 500,
+      data: {},
+      headers: {},
+      statusText: "Internal Server Error",
+      config: {},
+    };
+
+    mockedAxios.get.mockRejectedValueOnce(mockAxiosError);
+
+    const coinbase = new coinbaseProviderModule.CoinbaseProvider();
+    await expect(
+      coinbase.verify({
+        proofs: {
+          code,
+        },
+      } as unknown as RequestPayload)
+    ).rejects.toThrow(
+      "Error making Coinbase user info request, received error response with code 500: {}, headers: {}"
+    );
+
+    expect(mockedAxios.post).toBeCalledTimes(1);
+
+    // Check the request to get the token
+    expect(mockedAxios.post).toBeCalledWith("https://api.coinbase.com/oauth/token", {
+      grant_type: "authorization_code",
+      client_id: clientId,
+      client_secret: clientSecret,
+      code: code,
+      redirect_uri: callback,
+    });
+    expect(mockedAxios.get).toBeCalledTimes(1);
+    // Check the request to get the user
+    expect(mockedAxios.get).toBeCalledWith("https://api.coinbase.com/v2/user", {
+      headers: { Authorization: "Bearer cnbstkn294745627362562" },
+    });
+  });
+
+  it("should fail if unable to find ID", async () => {
     mockedAxios.get.mockImplementation(async (url, config) => {
       return {
-        status: 500,
+        data: {
+          id: undefined,
+        },
       };
     });
 
@@ -219,13 +265,13 @@ describe("Attempt verification", function () {
     expect(mockedAxios.post).toBeCalledTimes(1);
 
     // Check the request to get the token
-    expect(mockedAxios.post).toBeCalledWith(
-      `https://api.coinbase.com/oauth/token?grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
-      {},
-      {
-        headers: { Accept: "application/json" },
-      }
-    );
+    expect(mockedAxios.post).toBeCalledWith("https://api.coinbase.com/oauth/token", {
+      grant_type: "authorization_code",
+      client_id: clientId,
+      client_secret: clientSecret,
+      code: code,
+      redirect_uri: callback,
+    });
     expect(mockedAxios.get).toBeCalledTimes(1);
     // Check the request to get the user
     expect(mockedAxios.get).toBeCalledWith("https://api.coinbase.com/v2/user", {
@@ -234,8 +280,7 @@ describe("Attempt verification", function () {
 
     expect(coinbasePayload).toMatchObject({
       valid: false,
-      errors: ["Get user request returned status code 500 instead of the expected 200"],
-      record: undefined,
+      errors: ["Coinbase user id was not found."],
     });
   });
 
@@ -251,13 +296,13 @@ describe("Attempt verification", function () {
 
     expect(mockedAxios.post).toBeCalledTimes(1);
     // Check the request to get the token
-    expect(mockedAxios.post).toBeCalledWith(
-      `https://api.coinbase.com/oauth/token?grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
-      {},
-      {
-        headers: { Accept: "application/json" },
-      }
-    );
+    expect(mockedAxios.post).toBeCalledWith("https://api.coinbase.com/oauth/token", {
+      grant_type: "authorization_code",
+      client_id: clientId,
+      client_secret: clientSecret,
+      code: code,
+      redirect_uri: callback,
+    });
 
     expect(mockedAxios.get).toBeCalledTimes(1);
     // Check the request to get the user
@@ -265,12 +310,8 @@ describe("Attempt verification", function () {
       headers: { Authorization: "Bearer cnbstkn294745627362562" },
     });
 
-    expect(coinbasePayload).toEqual({
-      valid: true,
-      record: {
-        id: validCoinbaseUserResponse.data.data.id,
-      },
-      errors: [],
-    });
+    expect(coinbasePayload).toEqual(
+      expect.objectContaining({ valid: true, record: { id: validCoinbaseUserResponse.data.data.id } })
+    );
   });
 });
