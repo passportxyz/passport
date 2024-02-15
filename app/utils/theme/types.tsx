@@ -24,3 +24,11 @@ export type Theme = {
     alt: string;
   };
 };
+
+export type CustomizationTheme = {
+  colors: {
+    customizationBackground1: string;
+    customizationBackground2: string;
+    customizationForeground1: string;
+  };
+};

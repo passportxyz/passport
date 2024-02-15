@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps, @next/next/no-img-element */
 // --- React Methods
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 // --- Shared data context
@@ -22,13 +22,15 @@ export default function Home() {
   const { connect: connectDatastore } = useDatastoreConnectionContext();
   const [searchParams] = useSearchParams();
   const toast = useToast();
+  const [enableEthBranding, setEnableEthBranding] = useState(false);
 
   const navigate = useNavigate();
 
   // Route user to dashboard when wallet is connected
   useEffect(() => {
+    const dashboardCustomizationKey = searchParams.get("dashboard");
+    setEnableEthBranding(!dashboardCustomizationKey);
     if (address) {
-      const dashboardCustomizationKey = searchParams.get("dashboard");
       if (checkShowOnboard()) {
         navigate(`/welcome${dashboardCustomizationKey ? `?dashboard=${dashboardCustomizationKey}` : ""}`);
       } else {
@@ -80,6 +82,7 @@ export default function Home() {
             stamps are shown. And your privacy is protected at each step of the way.
           </div>
           <SIWEButton
+            enableEthBranding={enableEthBranding}
             data-testid="connectWalletButton"
             onClick={() => connectWallet(connectDatastore)}
             className="col-span-2 mt-4 lg:w-3/4"
