@@ -633,7 +633,9 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
       credentials.map(async (credential) => {
         return {
           credential,
-          verified: issuer === credential.issuer && (await verifyCredential(DIDKit, credential)),
+          verified:
+            (issuer === credential.issuer || eip712Issuer === credential.issuer) &&
+            (await verifyCredential(DIDKit, credential)),
         };
       })
     )
