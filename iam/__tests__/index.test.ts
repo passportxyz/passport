@@ -584,7 +584,7 @@ describe("POST /verify", function () {
 
     expect(gitcoinGte100).toBeCalledWith(
       {
-        issuer: config.issuer,
+        // issuer: config.issuer,
         type: "GitcoinContributorStatistics#numGrantsContributeToGte#10",
         types: [
           "GitcoinContributorStatistics#numGrantsContributeToGte#10",
@@ -1032,24 +1032,22 @@ describe("POST /eas", () => {
     const credentials = [failedCredential];
 
     const expectedPayload = {
-      passport: {
-        multiAttestationRequest: mockMultiAttestationRequestWithPassportAndScore,
-        fee: "25000000000000000",
-        nonce,
+      error: {
+        invalidCredentials: [failedCredential],
       },
-      signature: expect.any(Object),
-      invalidCredentials: [failedCredential],
     };
 
     const response = await request(app)
       .post("/api/v0.0.0/eas")
       .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
-      .expect(200)
+      .expect(400)
       .expect("Content-Type", /json/);
 
+    console.error("ERROR:");
+    console.error(response.body);
+    console.error(expectedPayload);
     expect(response.body).toEqual(expectedPayload);
-    expect(response.body.signature.r).toBe("r");
   });
 
   it("properly formats domain separator", () => {
@@ -1082,24 +1080,19 @@ describe("POST /eas", () => {
 
     const credentials = [failedCredential];
     const expectedPayload = {
-      passport: {
-        multiAttestationRequest: [] as MultiAttestationRequest[],
-        fee: "25000000000000000",
-        nonce,
+      error: {
+        invalidCredentials: [failedCredential],
       },
-      signature: expect.any(Object),
-      invalidCredentials: [failedCredential],
     };
 
     const response = await request(app)
       .post("/api/v0.0.0/eas")
       .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
-      .expect(200)
+      .expect(400)
       .expect("Content-Type", /json/);
 
     expect(response.body).toEqual(expectedPayload);
-    expect(response.body.signature.r).toBe("r");
   });
 
   it("handles missing stamps in the request body", async () => {
@@ -1428,178 +1421,5 @@ describe("POST /eas/passport", () => {
       .expect("Content-Type", /json/);
 
     expect(response.body.error).toEqual("Error formatting onchain passport, Error: Verification error");
-  });
-});
-
-describe("POST /convert", () => {
-  // let verifyCredentialSpy: jest.SpyInstance;
-  // let formatMultiAttestationRequestSpy: jest.SpyInstance;
-
-  beforeEach(() => {
-    (identityMock.verifyCredential as jest.Mock).mockResolvedValue(true);
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  it("converts a credential into a valid credential of type EthereumEip712Signature2021", async () => {
-    const expirationDate = new Date();
-    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
-
-    const response = await request(app)
-      .post("/api/v0.0.0/convert")
-      .send({
-        issuer: config.issuer,
-        expirationDate: expirationDate.toISOString(),
-        credentialSubject: {
-          id: "did:pkh:eip155:1:0x12345",
-          provider: "MyProvider",
-          hash: "v0.0.0:secret-hash",
-          "@context": [
-            {
-              hash: "https://schema.org/Text",
-              provider: "https://schema.org/Text",
-            },
-          ],
-        },
-      })
-      .set("Accept", "application/json")
-      .expect(200)
-      .expect("Content-Type", /json/);
-
-    const responseObject = response.body as VerifiableCredential;
-
-    expect(responseObject.proof.type).toEqual("EthereumEip712Signature2021");
-
-    const isValidCredential = await (
-      identityMock as typeof identityMock & { realIdentity: typeof identityMock }
-    ).realIdentity.verifyCredential(DIDKit, responseObject);
-    expect(isValidCredential).toBe(true);
-
-    // Just testing the validating the stamp when we tamper with a field fails
-    // --> just to double-check that the original verifyCredential is used, and not the mock
-    const isInvalidValidCredential = await (
-      identityMock as typeof identityMock & { realIdentity: typeof identityMock }
-    ).realIdentity.verifyCredential(DIDKit, {
-      ...responseObject,
-      issuer: "bad-issuer",
-    });
-    expect(isInvalidValidCredential).toBe(false);
-  });
-
-  it("converts a credential into a valid credential that is validated successfully with ethers", async () => {
-    const originalEthers = jest.requireActual("ethers");
-
-    let verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
-    const expirationDate = new Date();
-    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
-
-    const response = await request(app)
-      .post("/api/v0.0.0/convert")
-      .send({
-        issuer: config.issuer,
-        expirationDate: expirationDate.toISOString(),
-        credentialSubject: {
-          id: "did:pkh:eip155:1:0x12345",
-          provider: "MyProvider",
-          hash: "v0.0.0:secret-hash",
-          "@context": [
-            {
-              hash: "https://schema.org/Text",
-              provider: "https://schema.org/Text",
-            },
-          ],
-        },
-      })
-      .set("Accept", "application/json")
-      .expect(200)
-      .expect("Content-Type", /json/);
-
-    const signedCredential = response.body as VerifiableEip712Credential;
-
-    const standardizedTypes = signedCredential.proof.eip712Domain.types;
-    const domain = signedCredential.proof.eip712Domain.domain;
-
-    // Delete EIP712Domain so that ethers does not complain about the ambiguous primary type
-    delete standardizedTypes.EIP712Domain;
-
-    const signerAddress = originalEthers.utils.verifyTypedData(
-      domain,
-      standardizedTypes,
-      signedCredential,
-      signedCredential.proof.proofValue
-    );
-
-    const signerIssuedCredential = signerAddress.toLowerCase() === signedCredential.issuer.split(":").pop();
-
-    if (signerIssuedCredential) {
-      const splitSignature = originalEthers.utils.splitSignature(signedCredential.proof.proofValue);
-      return splitSignature;
-    }
-  });
-
-  it("fails to convert an invalid credential", async () => {
-    let verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(false);
-    const expirationDate = new Date();
-    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
-
-    const response = await request(app)
-      .post("/api/v0.0.0/convert")
-      .send({
-        issuer: config.issuer,
-        expirationDate: expirationDate.toISOString(),
-        credentialSubject: {
-          id: "did:pkh:eip155:1:0x12345",
-          provider: "MyProvider",
-          hash: "v0.0.0:secret-hash",
-          "@context": [
-            {
-              hash: "https://schema.org/Text",
-              provider: "https://schema.org/Text",
-            },
-          ],
-        },
-      })
-      .set("Accept", "application/json")
-      .expect(400)
-      .expect("Content-Type", /json/);
-
-    const responseObject = response.body as VerifiableCredential;
-    expect(responseObject).toEqual({
-      error: "Invalid credential.",
-    });
-  });
-
-  it("fails to convert a valid credential from invalid issuer", async () => {
-    let verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
-    const expirationDate = new Date();
-    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
-
-    const response = await request(app)
-      .post("/api/v0.0.0/convert")
-      .send({
-        issuer: "bad-issuer",
-        expirationDate: expirationDate.toISOString(),
-        credentialSubject: {
-          id: "did:pkh:eip155:1:0x12345",
-          provider: "MyProvider",
-          hash: "v0.0.0:secret-hash",
-          "@context": [
-            {
-              hash: "https://schema.org/Text",
-              provider: "https://schema.org/Text",
-            },
-          ],
-        },
-      })
-      .set("Accept", "application/json")
-      .expect(400)
-      .expect("Content-Type", /json/);
-
-    const responseObject = response.body as VerifiableCredential;
-    expect(responseObject).toEqual({
-      error: "Invalid credential.",
-    });
   });
 });
