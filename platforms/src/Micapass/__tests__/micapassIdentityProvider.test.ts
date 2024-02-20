@@ -11,7 +11,9 @@ jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const MOCK_ADDRESS = "0xb4b6f1c68be31841b52f4015a31d1f38b99cdb71";
+const MOCK_ADDRESS_LOWER = MOCK_ADDRESS.toLowerCase();
 const MOCK_IDENTITY_ADDRESS = "0x6905ab6992b15118eF29D318A959aAfEA2256041";
+const MOCK_IDENTITY_ADDRESS_LOWER = MOCK_IDENTITY_ADDRESS.toLowerCase();
 
 describe("Attempt verification", function () {
   beforeEach(() => {
@@ -33,8 +35,8 @@ describe("Attempt verification", function () {
     } as RequestPayload);
 
     expect(verifiedPayload.valid).toBe(true);
-    expect(verifiedPayload.record?.address).toBe(MOCK_ADDRESS);
-    expect(verifiedPayload.record?.identityAddress).toBe(MOCK_IDENTITY_ADDRESS);
+    expect(verifiedPayload.record?.address).toBe(MOCK_ADDRESS_LOWER);
+    expect(verifiedPayload.record?.identityAddress).toBe(MOCK_IDENTITY_ADDRESS_LOWER);
   });
 
   it("includes proper expiration duration if provided", async function () {

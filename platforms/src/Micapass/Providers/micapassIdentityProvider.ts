@@ -31,7 +31,7 @@ export class MicapassIdentityProvider implements Provider {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async verify(payload: RequestPayload, context?: ProviderContext): Promise<VerifiedPayload> {
-    const extractedAddress: string = await getAddress(payload);
+    const extractedAddress: string = (await getAddress(payload)).toLowerCase();
     const errors = [];
     try {
       const response: IsIdentityDeployedResponse = await this.getIsIdentityDeployed(extractedAddress);
@@ -44,7 +44,7 @@ export class MicapassIdentityProvider implements Provider {
       }
 
       const expiresIn = response?.data?.expiresIn;
-      const identityAddress = response?.data?.identity;
+      const identityAddress = response?.data?.identity?.toLowerCase();
 
       // Record must include user's address, identity address as well as
       // other records for this verification, received from Micapass backend
