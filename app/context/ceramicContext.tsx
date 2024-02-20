@@ -45,6 +45,7 @@ const {
   Civic,
   CyberConnect,
   TrustaLabs,
+  Micapass,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -230,6 +231,13 @@ if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS === "on") {
   platforms.set("TrustaLabs", {
     platform: new TrustaLabs.TrustaLabsPlatform(),
     platFormGroupSpec: TrustaLabs.ProviderConfig,
+  });
+}
+
+if (process.env.NEXT_PUBLIC_FF_MICAPASS_STAMP === "on") {
+  platforms.set("Micapass", {
+    platform: new Micapass.MicapassPlatform(),
+    platFormGroupSpec: Micapass.ProviderConfig,
   });
 }
 

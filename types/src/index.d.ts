@@ -360,7 +360,8 @@ export type PLATFORM_ID =
   | "Civic"
   | "CyberConnect"
   | "GrantsStack"
-  | "TrustaLabs";
+  | "TrustaLabs"
+  | "Micapass";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -461,7 +462,10 @@ export type PROVIDER_ID =
   | "ETHAdvocate"
   | "ETHPioneer"
   | "ETHMaxi"
-  | "ETHEnthusiast";
+  | "ETHEnthusiast"
+  | "MicapassIdentityProvider"
+  | "MicapassKycProvider"
+  | "MicapassWalletScreeningProvider";
 
 export type StampBit = {
   bit: number;
