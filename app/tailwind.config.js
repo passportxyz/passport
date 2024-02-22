@@ -1,5 +1,11 @@
 module.exports = {
-  content: ["./pages/**/*.{ts,tsx}", "./config/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./pages/_app.tsx"],
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./config/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./pages/_app.tsx",
+    "./hooks/**/*.{ts,tsx}",
+  ],
   theme: {
     screens: {
       md: "480px",
@@ -32,6 +38,12 @@ module.exports = {
         "color-3": "rgb(var(--color-text-3) / <alpha-value>)",
         "color-4": "rgb(var(--color-text-4) / <alpha-value>)",
         "color-5": "rgb(var(--color-text-5) / <alpha-value>)",
+
+        // Set this variable dynamically to allow for customization
+        // colors defined by an API call
+        "customization-background-1": "rgb(var(--color-customization-background-1) / <alpha-value>)",
+        "customization-background-2": "rgb(var(--color-customization-background-2) / <alpha-value>)",
+        "customization-foreground-1": "rgb(var(--color-customization-foreground-1) / <alpha-value>)",
 
         // Temporary, to be removed
         accent: "#000",

@@ -41,6 +41,7 @@ import ProcessingPopup from "../components/ProcessingPopup";
 import { getFilterName } from "../config/filters";
 import { Button } from "../components/Button";
 import { useDashboardCustomization } from "../hooks/useDashboardCustomization";
+import { DynamicCustomDashboardPanel } from "../components/CustomDashboardPanel";
 
 // --- GTM Module
 import TagManager from "react-gtm-module";
@@ -51,11 +52,12 @@ const fail = "../assets/verification-failed-bright.svg";
 
 export default function Dashboard() {
   const { customizationKey } = useParams();
-  const { usingCustomPanel, CustomPanel } = useDashboardCustomization(customizationKey);
+  const { customizationConfig, customizationEnabled } = useDashboardCustomization(customizationKey);
+  const { useCustomDashboardPanel } = customizationConfig;
   const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms } = useContext(CeramicContext);
 
   useEffect(() => {
-    if (usingCustomPanel && customizationKey) {
+    if (customizationEnabled && customizationKey) {
       document.title = `Gitcoin Passport | ${
         customizationKey.charAt(0).toUpperCase() + customizationKey.slice(1)
       } Dashboard`;
@@ -72,7 +74,7 @@ export default function Dashboard() {
         },
       });
     }
-  }, [usingCustomPanel, customizationKey]);
+  }, [customizationEnabled, customizationKey]);
 
   const address = useWalletStore((state) => state.address);
   const provider = useWalletStore((state) => state.provider);
@@ -294,12 +296,17 @@ export default function Dashboard() {
           <PageWidthGrid>
             <Subheader className="col-span-full xl:col-span-7 " />
             <DashboardScorePanel
-              className={`col-span-full ${usingCustomPanel ? "lg:col-span-4" : "xl:max-h-52"} xl:col-span-7`}
+              className={`col-span-full ${useCustomDashboardPanel ? "lg:col-span-4" : "xl:max-h-52"} xl:col-span-7`}
             />
-            {usingCustomPanel || (
+            {useCustomDashboardPanel || (
               <DashboardIllustration className="col-start-8 col-end-[-1] row-span-2 hidden xl:block" />
             )}
-            {usingCustomPanel && <CustomPanel className="col-start-1 col-end-[-1] lg:col-start-5 xl:col-start-8" />}
+            {useCustomDashboardPanel && (
+              <DynamicCustomDashboardPanel
+                customizationKey={customizationKey}
+                className="col-start-1 col-end-[-1] lg:col-start-5 xl:col-start-8"
+              />
+            )}
             <span className="col-start-1 col-end-4 font-heading text-4xl">Add Stamps</span>
             <CardList
               className="col-span-full"
