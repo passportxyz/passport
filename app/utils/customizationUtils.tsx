@@ -100,12 +100,16 @@ export const requestDynamicCustomizationConfig = async (
           background: "dots",
         },
         body: {
-          mainText: `The Avalanche Community Grant Rounds require you to achieve a score greater than 20 to qualify
+          mainText: `The Avalanche Community Grant Rounds require you to achieve a score greater than 25 to qualify
             for voting. The only way to reach this score is to complete identification via Civic or Holonym.`,
           subText: (
             <div>
               You can{" "}
-              <a href="" style={{ color: "rgb(var(--color-text-2))", textDecoration: "underline" }} target="_blank">
+              <a
+                href="https://t.me/avalanchegrants"
+                style={{ color: "rgb(var(--color-text-2))", textDecoration: "underline" }}
+                target="_blank"
+              >
                 join Avalanche on telegram
               </a>{" "}
               if you have any questions or need support.
@@ -113,7 +117,7 @@ export const requestDynamicCustomizationConfig = async (
           ),
           action: {
             text: "Avalanche Grants",
-            url: "",
+            url: "https://grants.avax.network/",
           },
         },
       },
