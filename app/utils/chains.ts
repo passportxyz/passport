@@ -156,6 +156,14 @@ if (!TEST_MODE) {
       easScanUrl: "https://linea.easscan.org",
     },
   });
+
+  chainConfigs.push({
+    id: "0xa86a",
+    token: "AVAX",
+    label: "Avalanche",
+    rpcUrl: "https://api.avax.network/ext/bc/C/rpc",
+    icon: "./assets/avax-logo.svg",
+  });
 }
 
 chainConfigs.push({
