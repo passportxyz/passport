@@ -33,6 +33,7 @@ export class CivicPlatform extends Platform {
             paddingLeft: "2px",
           }}
           target="_blank"
+          rel="noreferrer"
         >
           Learn more
         </a>
