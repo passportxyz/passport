@@ -25,7 +25,6 @@ import {
   PassportAttestation,
   EasRequestBody,
   VerifiedPayload,
-  VerifiableCredential,
 } from "@gitcoin/passport-types";
 import onchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
 
@@ -36,13 +35,7 @@ import * as passportSchema from "./utils/easPassportSchema.js";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-import {
-  issueChallengeCredential,
-  issueHashedCredential,
-  verifyCredential,
-  issueEip712Credential,
-  stampCredentialDocument,
-} from "@gitcoin/passport-identity";
+import { issueChallengeCredential, issueHashedCredential, verifyCredential } from "@gitcoin/passport-identity";
 
 // All provider exports from platforms
 import { providers, platforms } from "@gitcoin/passport-platforms";
