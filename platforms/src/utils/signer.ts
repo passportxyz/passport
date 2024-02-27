@@ -2,7 +2,7 @@
 import type { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Verify signed message with ethers
-import { JsonRpcProvider, JsonRpcSigner, StaticJsonRpcProvider } from "@ethersproject/providers";
+import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
 // ----- Credential verification
 import * as DIDKit from "@spruceid/didkit-wasm";
@@ -21,13 +21,15 @@ export const getRPCProvider = (payload: RequestPayload): StaticJsonRpcProvider =
 };
 
 // get the address associated with the signer in the payload
-export const getAddress = async ({ address, signer, issuer }: RequestPayload): Promise<string> => {
+export const getAddress = async ({ address, signer }: RequestPayload): Promise<string> => {
   // if signer proof is provided, check validity and return associated address instead of controller
   if (signer && signer.challenge && signer.signature) {
     // test the provided credential has not been tampered with
     const verified = await verifyCredential(DIDKit, signer.challenge);
     // check the credential was issued by us for this user...
-    if (verified && issuer === signer.challenge.issuer && address === signer.challenge.credentialSubject.address) {
+    // Regarding the issuer, this is not verified here. If the issuer is one of the valid (trusted)
+    // issuers should be checked before calling this function.
+    if (verified && address === signer.challenge.credentialSubject.address) {
       // which ever wallet signed this message is the wallet we want to use in provider verifications
       return utils.getAddress(utils.verifyMessage(signer.challenge.credentialSubject.challenge, signer.signature));
     }

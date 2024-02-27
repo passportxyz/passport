@@ -134,9 +134,9 @@ export const useDatastoreConnection = () => {
 
         try {
           const accountId = new AccountId({
-            // We always use chain id 1 for now for all sessions, to avoid users 
+            // We always use chain id 1 for now for all sessions, to avoid users
             // switching networks and not see their stamps any more
-            chainId: "eip155:1",  
+            chainId: "eip155:1",
             address,
           });
           const authMethod = await EthereumWebAuth.getAuthMethod(provider, accountId);
