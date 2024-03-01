@@ -25,7 +25,7 @@ export class CivicPlatform extends Platform {
         cost. After passes have been issued to your linked wallet, select the corresponding box(es) below and click
         SAVE. Gitcoin will check for passes and save those that are valid.{" "}
         <a
-          href="https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/how-do-i-add-passport-stamps/guide-to-add-lens-stamp-to-gitcoin-passport"
+          href="https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/how-do-i-add-passport-stamps/civic-stamp-verification-guide-for-gitcoin-passport"
           style={{
             color: "rgb(var(--color-foreground-2))",
             textDecoration: "underline",
