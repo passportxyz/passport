@@ -102,15 +102,6 @@ function hasValidIssuer(issuer: string): boolean {
   return validIssuers.has(issuer);
 }
 
-// export the current config
-export const config: {
-  key: string;
-  issuer: string;
-} = {
-  key,
-  issuer: __issuer,
-};
-
 // Wallet to use for mainnets
 // Only functional in production (set to same as testnet for non-production environments)
 const productionAttestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);

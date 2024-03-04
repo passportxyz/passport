@@ -4,7 +4,7 @@ import * as DIDKit from "@spruceid/didkit-wasm-node";
 import { PassportCache, providers } from "@gitcoin/passport-platforms";
 
 // ---- Test subject
-import { app, config, getAttestationDomainSeparator } from "../src/index";
+import { app, getAttestationDomainSeparator } from "../src/index";
 
 // ---- Types
 import {
@@ -27,10 +27,22 @@ import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
 import { IAMError } from "../src/utils/scorerService";
 import { VerifyDidChallengeBaseError, verifyDidChallenge } from "../src/utils/verifyDidChallenge";
 
+const eip712Key = process.env.IAM_JWK_EIP712;
+const issuer = DIDKit.keyToDID("ethr", eip712Key);
+
 jest.mock("../src/utils/verifyDidChallenge", () => ({
   verifyDidChallenge: jest.fn().mockImplementation(() => "0x0"),
   VerifyDidChallengeBaseError: jest.requireActual("../src/utils/verifyDidChallenge").VerifyDidChallengeBaseError,
 }));
+
+jest.mock("../src/index", () => {
+  // Require the actual module
+  const actualModule = jest.requireActual("../src/index");
+  return {
+    ...actualModule, // Spread all original functions and attributes
+    validIssuers: new Set([]),
+  };
+});
 
 jest.mock("ethers", () => {
   const originalModule = jest.requireActual("ethers");
@@ -189,7 +201,7 @@ describe("POST /verify", function () {
 
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-Simple",
@@ -230,7 +242,7 @@ describe("POST /verify", function () {
 
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-Simple",
@@ -284,7 +296,7 @@ describe("POST /verify", function () {
 
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-Simple",
@@ -430,7 +442,7 @@ describe("POST /verify", function () {
     const provider = "ClearTextSimple";
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: `challenge-${provider}`,
@@ -471,7 +483,7 @@ describe("POST /verify", function () {
   it("handles valid challenge requests with multiple types", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-any",
@@ -510,7 +522,7 @@ describe("POST /verify", function () {
   it("handles valid challenge requests with multiple types, and acumulates values between provider calls", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-GitcoinContributorStatistics#numGrantsContributeToGte#10",
@@ -584,7 +596,7 @@ describe("POST /verify", function () {
 
     expect(gitcoinGte100).toBeCalledWith(
       {
-        // issuer: config.issuer,
+        // issuer: issuer,
         type: "GitcoinContributorStatistics#numGrantsContributeToGte#10",
         types: [
           "GitcoinContributorStatistics#numGrantsContributeToGte#10",
@@ -635,7 +647,7 @@ describe("POST /verify", function () {
   it("handles invalid challenge requests where challenge credential subject signature checks fail", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0xNotAnEthereumAddress#challenge-Simple",
         address: "0xNotAnEthereumAddress",
@@ -667,7 +679,7 @@ describe("POST /verify", function () {
   it("handles invalid challenge requests where 'valid' proof is passed as false (test against Simple Provider)", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-Simple",
@@ -702,7 +714,7 @@ describe("POST /verify", function () {
 
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0xNotAnEthereumAddress",
         type: "challenge-Simple",
@@ -735,7 +747,7 @@ describe("POST /verify", function () {
   it("handles invalid challenge request passed by the additional signer", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-any",
@@ -781,7 +793,7 @@ describe("POST /verify", function () {
   it("handles valid challenge request passed by the additional signer", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-any",
@@ -829,7 +841,7 @@ describe("POST /verify", function () {
     (identityMock.verifyCredential as jest.Mock).mockResolvedValueOnce(true);
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-any",
@@ -1127,7 +1139,7 @@ describe("POST /eas", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678",
@@ -1159,7 +1171,7 @@ describe("POST /eas", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
@@ -1197,7 +1209,7 @@ describe("POST /eas", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
@@ -1209,7 +1221,7 @@ describe("POST /eas", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000001",
@@ -1262,7 +1274,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678",
@@ -1290,7 +1302,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000002",
@@ -1302,7 +1314,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000003",
@@ -1339,7 +1351,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: `did:pkh:eip155:1:${recipient}`,
@@ -1372,7 +1384,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: `did:pkh:eip155:1:${recipient}`,
@@ -1402,7 +1414,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: `did:pkh:eip155:1:${recipient}`,
