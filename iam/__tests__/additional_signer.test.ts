@@ -1,8 +1,12 @@
 // ---- Testing libraries
 import request from "supertest";
+import * as DIDKit from "@spruceid/didkit-wasm-node";
 
 // ---- Test subject
-import { app, config } from "../src/index";
+import { app } from "../src/index";
+
+const eip712Key = process.env.IAM_JWK_EIP712;
+const issuer = DIDKit.keyToDID("ethr", eip712Key);
 
 jest.mock("../src/utils/verifyDidChallenge", () => ({
   verifyDidChallenge: jest.fn().mockImplementation(() => true),
@@ -41,7 +45,7 @@ jest.mock("ethers", () => {
 describe("POST /verify", function () {
   it("produces the same hash for an additional signer as if the passport is used directly", async () => {
     const challengeForReqWithAdditionalSigner = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x1",
         provider: "challenge-any",
@@ -75,7 +79,7 @@ describe("POST /verify", function () {
     };
 
     const challengeForReqWithoutAdditionalSigner = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0xAbC",
         provider: "challenge-any",
