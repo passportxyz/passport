@@ -4,9 +4,9 @@ import * as DIDKit from "@spruceid/didkit-wasm-node";
 
 // ---- Test subject
 import { app } from "../src/index";
+import { getEip712Issuer } from "../src/issuers";
 
-const eip712Key = process.env.IAM_JWK_EIP712;
-const issuer = DIDKit.keyToDID("ethr", eip712Key);
+const issuer = getEip712Issuer();
 
 jest.mock("../src/utils/verifyDidChallenge", () => ({
   verifyDidChallenge: jest.fn().mockImplementation(() => true),

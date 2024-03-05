@@ -32,6 +32,7 @@ import { getChallenge, verifyChallengeAndGetAddress } from "./utils/challenge.js
 import { getEASFeeAmount } from "./utils/easFees.js";
 import * as stampSchema from "./utils/easStampSchema.js";
 import * as passportSchema from "./utils/easPassportSchema.js";
+import { hasValidIssuer, getIssuerKey } from "./issuers.js";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
@@ -88,18 +89,6 @@ if (!process.env.IAM_JWK_EIP712) {
 if (configErrors.length > 0) {
   configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
   throw new Error("Missing required configuration");
-}
-
-// get DID from key
-const key = process.env.IAM_JWK;
-const __issuer = DIDKit.keyToDID("key", key);
-const eip712Key = process.env.IAM_JWK_EIP712;
-const __eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
-
-const validIssuers = new Set([__issuer, __eip712Issuer]);
-
-function hasValidIssuer(issuer: string): boolean {
-  return validIssuers.has(issuer);
 }
 
 // Wallet to use for mainnets
@@ -229,7 +218,7 @@ const issueCredentials = async (
             ...(verifyResult?.record || {}),
           };
 
-          const currentKey = payload.signatureType === "EIP712" ? eip712Key : key;
+          const currentKey = getIssuerKey(payload.signatureType);
           // generate a VC for the given payload
           ({ credential } = await issueHashedCredential(
             DIDKit,
@@ -290,7 +279,7 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
         ...(challenge?.record || {}),
       };
 
-      const currentKey = payload.signatureType === "EIP712" ? eip712Key : key;
+      const currentKey = getIssuerKey(payload.signatureType);
       // generate a VC for the given payload
       return void issueChallengeCredential(DIDKit, currentKey, record, payload.signatureType)
         .then((credential) => {

@@ -26,9 +26,9 @@ import * as easSchemaMock from "../src/utils/easStampSchema";
 import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
 import { IAMError } from "../src/utils/scorerService";
 import { VerifyDidChallengeBaseError, verifyDidChallenge } from "../src/utils/verifyDidChallenge";
+import { getEip712Issuer } from "../src/issuers";
 
-const eip712Key = process.env.IAM_JWK_EIP712;
-const issuer = DIDKit.keyToDID("ethr", eip712Key);
+const issuer = getEip712Issuer();
 
 jest.mock("../src/utils/verifyDidChallenge", () => ({
   verifyDidChallenge: jest.fn().mockImplementation(() => "0x0"),
