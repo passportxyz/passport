@@ -62,8 +62,29 @@ describe("EthPriceLoader", () => {
 
       (Moralis.EvmApi.token.getTokenPrice as jest.Mock).mockRejectedValueOnce(new Error("Failed fetching price"));
       await getEASFeeAmount(2);
+      expect(consoleSpy).toHaveBeenCalledWith("MORALIS ERROR: Failed to get ETH price, Error: Failed fetching price");
+    });
+
+    it("should handle Redis errors gracefully", async () => {
+      const consoleSpy = jest.spyOn(console, "error");
+      let count = 0;
+      jest.spyOn(PassportCache.prototype, "get").mockImplementation((key) => {
+        count += 1;
+        if (key === "ethPrice") {
+          if (count === 1) {
+            return Promise.resolve(null);
+          }
+          return Promise.resolve("3000");
+        } else if (key === "ethPriceLastUpdate") {
+          return Promise.resolve((Date.now() - 1000 * 60 * 6).toString());
+        }
+      });
+
+      jest.spyOn(PassportCache.prototype, "set").mockRejectedValueOnce(new Error("Failed to store in cache"));
+
+      await getEASFeeAmount(2);
       expect(consoleSpy).toHaveBeenCalledWith(
-        "REDIS CONNECTION ERROR: Failed to get ETH price, Error: Failed fetching price"
+        "REDIS CONNECTION ERROR: Failed to cache ETH price, Error: Failed to store in cache"
       );
     });
   });
