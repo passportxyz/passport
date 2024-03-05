@@ -249,6 +249,7 @@ const unhandledErrorsMetric = new aws.cloudwatch.LogMetricFilter("unhandledError
 
 const unhandledErrorsAlarm = new aws.cloudwatch.MetricAlarm("unhandledErrorsAlarm", {
   alarmActions: [snsAlertsTopicArn],
+  okActions: [snsAlertsTopicArn],
   comparisonOperator: "GreaterThanOrEqualToThreshold",
   datapointsToAlarm: 1,
   evaluationPeriods: 1,
@@ -256,7 +257,6 @@ const unhandledErrorsAlarm = new aws.cloudwatch.MetricAlarm("unhandledErrorsAlar
   metricName: "providerError",
   name: "Unhandled Provider Errors",
   namespace: "/iam/errors/unhandled",
-  okActions: [],
   period: 21600,
   statistic: "Sum",
   threshold: 1,
@@ -278,6 +278,7 @@ const redisFilter = new aws.cloudwatch.LogMetricFilter("redisConnectionErrors", 
 
 const redisErrorAlarm = new aws.cloudwatch.MetricAlarm("redisConnectionErrorsAlarm", {
   alarmActions: [snsAlertsTopicArn],
+  okActions: [snsAlertsTopicArn],
   comparisonOperator: "GreaterThanOrEqualToThreshold",
   datapointsToAlarm: 1,
   evaluationPeriods: 1,
@@ -285,7 +286,35 @@ const redisErrorAlarm = new aws.cloudwatch.MetricAlarm("redisConnectionErrorsAla
   metricName: "redisConnectionError",
   name: "Redis Connection Error",
   namespace: "/iam/errors/redis",
-  okActions: [],
+  period: 21600,
+  statistic: "Sum",
+  threshold: 1,
+  treatMissingData: "notBreaching",
+});
+
+const moralisFilter = new aws.cloudwatch.LogMetricFilter("moralisErrors", {
+  logGroupName: serviceLogGroup.name,
+  metricTransformation: {
+    defaultValue: "0",
+    name: "moralisError",
+    namespace: "/iam/errors/moralis",
+    unit: "Count",
+    value: "1",
+  },
+  name: "Redis Connection Error",
+  pattern: '"MORALIS ERROR:"',
+});
+
+const moralisErrorAlarm = new aws.cloudwatch.MetricAlarm("moralisErrorsAlarm", {
+  alarmActions: [snsAlertsTopicArn],
+  okActions: [snsAlertsTopicArn],
+  comparisonOperator: "GreaterThanOrEqualToThreshold",
+  datapointsToAlarm: 1,
+  evaluationPeriods: 1,
+  insufficientDataActions: [],
+  metricName: "moralisError",
+  name: "Moralis Error",
+  namespace: "/iam/errors/moralis",
   period: 21600,
   statistic: "Sum",
   threshold: 1,
