@@ -17,6 +17,7 @@ import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
 import { PlatformScoreSpec } from "../../context/scorerContext";
 import { getPlatformSpec } from "../../config/platforms";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -32,9 +33,13 @@ jest.mock("../../utils/helpers.tsx", () => ({
   createSignedPayload: jest.fn(),
   generateUID: jest.fn(),
   getProviderSpec: jest.fn(),
-  difference: (setA: any, setB: any) => ({
-    size: 1,
-  }),
+  difference: (setA: any, setB: any) => {
+    const _difference = new Set(setA);
+    setB.forEach((elem: any) => {
+      _difference.delete(elem);
+    });
+    return _difference;
+  },
 }));
 
 jest.mock("next/router", () => ({
@@ -158,6 +163,56 @@ describe("when user has not verified with EnsProvider", () => {
     // Wait to see the error toast
     await waitFor(() => {
       expect(screen.getByText("Please refresh the page to reset your session.")).toBeInTheDocument();
+    });
+  });
+});
+
+describe("when user has previously verified with EnsProvider", () => {
+  beforeEach(async () => {
+    await closeAllToasts();
+    (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
+      credentials: [UN_SUCCESSFUL_ENS_RESULT],
+    });
+  });
+
+  it("should show re-verified toast when credential is selected but no longer able to be re-claimed", async () => {
+    const extraProvider = "FakeExtraProviderRequiredForCanSubmitLogic" as PROVIDER_ID;
+    const drawer = () => (
+      <ChakraProvider>
+        <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
+          <DrawerOverlay />
+          <GenericPlatform
+            platform={new Ens.EnsPlatform()}
+            platFormGroupSpec={[
+              {
+                ...Ens.ProviderConfig[0],
+                providers: [...Ens.ProviderConfig[0].providers, { title: "Extra", name: extraProvider }],
+              },
+            ]}
+            platformScoreSpec={EnsScoreSpec}
+            onClose={() => {}}
+          />
+        </Drawer>
+      </ChakraProvider>
+    );
+    renderWithContext(
+      {
+        ...mockCeramicContext,
+        verifiedProviderIds: ["Ens"],
+        handlePatchStamps: jest.fn(),
+      },
+      drawer()
+    );
+
+    const firstSwitch = screen.queryByTestId("select-all");
+    fireEvent.click(firstSwitch as HTMLElement);
+    const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
+    fireEvent.click(initialVerifyButton as HTMLElement);
+
+    // Wait to see the done toast
+    await waitFor(() => {
+      expect(screen.getByText("Successfully re-verified Ens data point.")).toBeInTheDocument();
+      expect(fetchVerifiableCredential).toHaveBeenCalled();
     });
   });
 });
