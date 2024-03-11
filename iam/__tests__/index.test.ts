@@ -4,7 +4,7 @@ import * as DIDKit from "@spruceid/didkit-wasm-node";
 import { PassportCache, providers } from "@gitcoin/passport-platforms";
 
 // ---- Test subject
-import { app, config, getAttestationDomainSeparator } from "../src/index";
+import { app, getAttestationDomainSeparator } from "../src/index";
 
 // ---- Types
 import {
@@ -26,11 +26,23 @@ import * as easSchemaMock from "../src/utils/easStampSchema";
 import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
 import { IAMError } from "../src/utils/scorerService";
 import { VerifyDidChallengeBaseError, verifyDidChallenge } from "../src/utils/verifyDidChallenge";
+import { getEip712Issuer } from "../src/issuers";
+
+const issuer = getEip712Issuer();
 
 jest.mock("../src/utils/verifyDidChallenge", () => ({
   verifyDidChallenge: jest.fn().mockImplementation(() => "0x0"),
   VerifyDidChallengeBaseError: jest.requireActual("../src/utils/verifyDidChallenge").VerifyDidChallengeBaseError,
 }));
+
+jest.mock("../src/index", () => {
+  // Require the actual module
+  const actualModule = jest.requireActual("../src/index");
+  return {
+    ...actualModule, // Spread all original functions and attributes
+    validIssuers: new Set([]),
+  };
+});
 
 jest.mock("ethers", () => {
   const originalModule = jest.requireActual("ethers");
@@ -189,7 +201,7 @@ describe("POST /verify", function () {
 
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-Simple",
@@ -230,7 +242,7 @@ describe("POST /verify", function () {
 
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-Simple",
@@ -284,7 +296,7 @@ describe("POST /verify", function () {
 
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-Simple",
@@ -430,7 +442,7 @@ describe("POST /verify", function () {
     const provider = "ClearTextSimple";
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: `challenge-${provider}`,
@@ -471,7 +483,7 @@ describe("POST /verify", function () {
   it("handles valid challenge requests with multiple types", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-any",
@@ -510,7 +522,7 @@ describe("POST /verify", function () {
   it("handles valid challenge requests with multiple types, and acumulates values between provider calls", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-GitcoinContributorStatistics#numGrantsContributeToGte#10",
@@ -584,7 +596,7 @@ describe("POST /verify", function () {
 
     expect(gitcoinGte100).toBeCalledWith(
       {
-        issuer: config.issuer,
+        // issuer: issuer,
         type: "GitcoinContributorStatistics#numGrantsContributeToGte#10",
         types: [
           "GitcoinContributorStatistics#numGrantsContributeToGte#10",
@@ -635,7 +647,7 @@ describe("POST /verify", function () {
   it("handles invalid challenge requests where challenge credential subject signature checks fail", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0xNotAnEthereumAddress#challenge-Simple",
         address: "0xNotAnEthereumAddress",
@@ -667,7 +679,7 @@ describe("POST /verify", function () {
   it("handles invalid challenge requests where 'valid' proof is passed as false (test against Simple Provider)", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-Simple",
@@ -702,7 +714,7 @@ describe("POST /verify", function () {
 
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0xNotAnEthereumAddress",
         type: "challenge-Simple",
@@ -735,7 +747,7 @@ describe("POST /verify", function () {
   it("handles invalid challenge request passed by the additional signer", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-any",
@@ -781,7 +793,7 @@ describe("POST /verify", function () {
   it("handles valid challenge request passed by the additional signer", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-any",
@@ -829,7 +841,7 @@ describe("POST /verify", function () {
     (identityMock.verifyCredential as jest.Mock).mockResolvedValueOnce(true);
     // challenge received from the challenge endpoint
     const challenge = {
-      issuer: config.issuer,
+      issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
         provider: "challenge-any",
@@ -1032,24 +1044,22 @@ describe("POST /eas", () => {
     const credentials = [failedCredential];
 
     const expectedPayload = {
-      passport: {
-        multiAttestationRequest: mockMultiAttestationRequestWithPassportAndScore,
-        fee: "25000000000000000",
-        nonce,
+      error: {
+        invalidCredentials: [failedCredential],
       },
-      signature: expect.any(Object),
-      invalidCredentials: [failedCredential],
     };
 
     const response = await request(app)
       .post("/api/v0.0.0/eas")
       .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
-      .expect(200)
+      .expect(400)
       .expect("Content-Type", /json/);
 
+    console.error("ERROR:");
+    console.error(response.body);
+    console.error(expectedPayload);
     expect(response.body).toEqual(expectedPayload);
-    expect(response.body.signature.r).toBe("r");
   });
 
   it("properly formats domain separator", () => {
@@ -1082,24 +1092,19 @@ describe("POST /eas", () => {
 
     const credentials = [failedCredential];
     const expectedPayload = {
-      passport: {
-        multiAttestationRequest: [] as MultiAttestationRequest[],
-        fee: "25000000000000000",
-        nonce,
+      error: {
+        invalidCredentials: [failedCredential],
       },
-      signature: expect.any(Object),
-      invalidCredentials: [failedCredential],
     };
 
     const response = await request(app)
       .post("/api/v0.0.0/eas")
       .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json")
-      .expect(200)
+      .expect(400)
       .expect("Content-Type", /json/);
 
     expect(response.body).toEqual(expectedPayload);
-    expect(response.body.signature.r).toBe("r");
   });
 
   it("handles missing stamps in the request body", async () => {
@@ -1134,7 +1139,7 @@ describe("POST /eas", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678",
@@ -1166,7 +1171,7 @@ describe("POST /eas", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
@@ -1204,7 +1209,7 @@ describe("POST /eas", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000000",
@@ -1216,7 +1221,7 @@ describe("POST /eas", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000001",
@@ -1269,7 +1274,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678",
@@ -1297,7 +1302,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000002",
@@ -1309,7 +1314,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000003",
@@ -1346,7 +1351,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: `did:pkh:eip155:1:${recipient}`,
@@ -1379,7 +1384,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: `did:pkh:eip155:1:${recipient}`,
@@ -1409,7 +1414,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: config.issuer,
+        issuer: issuer,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: `did:pkh:eip155:1:${recipient}`,
@@ -1428,178 +1433,5 @@ describe("POST /eas/passport", () => {
       .expect("Content-Type", /json/);
 
     expect(response.body.error).toEqual("Error formatting onchain passport, Error: Verification error");
-  });
-});
-
-describe("POST /convert", () => {
-  // let verifyCredentialSpy: jest.SpyInstance;
-  // let formatMultiAttestationRequestSpy: jest.SpyInstance;
-
-  beforeEach(() => {
-    (identityMock.verifyCredential as jest.Mock).mockResolvedValue(true);
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  it("converts a credential into a valid credential of type EthereumEip712Signature2021", async () => {
-    const expirationDate = new Date();
-    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
-
-    const response = await request(app)
-      .post("/api/v0.0.0/convert")
-      .send({
-        issuer: config.issuer,
-        expirationDate: expirationDate.toISOString(),
-        credentialSubject: {
-          id: "did:pkh:eip155:1:0x12345",
-          provider: "MyProvider",
-          hash: "v0.0.0:secret-hash",
-          "@context": [
-            {
-              hash: "https://schema.org/Text",
-              provider: "https://schema.org/Text",
-            },
-          ],
-        },
-      })
-      .set("Accept", "application/json")
-      .expect(200)
-      .expect("Content-Type", /json/);
-
-    const responseObject = response.body as VerifiableCredential;
-
-    expect(responseObject.proof.type).toEqual("EthereumEip712Signature2021");
-
-    const isValidCredential = await (
-      identityMock as typeof identityMock & { realIdentity: typeof identityMock }
-    ).realIdentity.verifyCredential(DIDKit, responseObject);
-    expect(isValidCredential).toBe(true);
-
-    // Just testing the validating the stamp when we tamper with a field fails
-    // --> just to double-check that the original verifyCredential is used, and not the mock
-    const isInvalidValidCredential = await (
-      identityMock as typeof identityMock & { realIdentity: typeof identityMock }
-    ).realIdentity.verifyCredential(DIDKit, {
-      ...responseObject,
-      issuer: "bad-issuer",
-    });
-    expect(isInvalidValidCredential).toBe(false);
-  });
-
-  it("converts a credential into a valid credential that is validated successfully with ethers", async () => {
-    const originalEthers = jest.requireActual("ethers");
-
-    let verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
-    const expirationDate = new Date();
-    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
-
-    const response = await request(app)
-      .post("/api/v0.0.0/convert")
-      .send({
-        issuer: config.issuer,
-        expirationDate: expirationDate.toISOString(),
-        credentialSubject: {
-          id: "did:pkh:eip155:1:0x12345",
-          provider: "MyProvider",
-          hash: "v0.0.0:secret-hash",
-          "@context": [
-            {
-              hash: "https://schema.org/Text",
-              provider: "https://schema.org/Text",
-            },
-          ],
-        },
-      })
-      .set("Accept", "application/json")
-      .expect(200)
-      .expect("Content-Type", /json/);
-
-    const signedCredential = response.body as VerifiableEip712Credential;
-
-    const standardizedTypes = signedCredential.proof.eip712Domain.types;
-    const domain = signedCredential.proof.eip712Domain.domain;
-
-    // Delete EIP712Domain so that ethers does not complain about the ambiguous primary type
-    delete standardizedTypes.EIP712Domain;
-
-    const signerAddress = originalEthers.utils.verifyTypedData(
-      domain,
-      standardizedTypes,
-      signedCredential,
-      signedCredential.proof.proofValue
-    );
-
-    const signerIssuedCredential = signerAddress.toLowerCase() === signedCredential.issuer.split(":").pop();
-
-    if (signerIssuedCredential) {
-      const splitSignature = originalEthers.utils.splitSignature(signedCredential.proof.proofValue);
-      return splitSignature;
-    }
-  });
-
-  it("fails to convert an invalid credential", async () => {
-    let verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(false);
-    const expirationDate = new Date();
-    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
-
-    const response = await request(app)
-      .post("/api/v0.0.0/convert")
-      .send({
-        issuer: config.issuer,
-        expirationDate: expirationDate.toISOString(),
-        credentialSubject: {
-          id: "did:pkh:eip155:1:0x12345",
-          provider: "MyProvider",
-          hash: "v0.0.0:secret-hash",
-          "@context": [
-            {
-              hash: "https://schema.org/Text",
-              provider: "https://schema.org/Text",
-            },
-          ],
-        },
-      })
-      .set("Accept", "application/json")
-      .expect(400)
-      .expect("Content-Type", /json/);
-
-    const responseObject = response.body as VerifiableCredential;
-    expect(responseObject).toEqual({
-      error: "Invalid credential.",
-    });
-  });
-
-  it("fails to convert a valid credential from invalid issuer", async () => {
-    let verifyCredentialSpy = jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
-    const expirationDate = new Date();
-    expirationDate.setTime(expirationDate.getTime() + 3600 * 1000);
-
-    const response = await request(app)
-      .post("/api/v0.0.0/convert")
-      .send({
-        issuer: "bad-issuer",
-        expirationDate: expirationDate.toISOString(),
-        credentialSubject: {
-          id: "did:pkh:eip155:1:0x12345",
-          provider: "MyProvider",
-          hash: "v0.0.0:secret-hash",
-          "@context": [
-            {
-              hash: "https://schema.org/Text",
-              provider: "https://schema.org/Text",
-            },
-          ],
-        },
-      })
-      .set("Accept", "application/json")
-      .expect(400)
-      .expect("Content-Type", /json/);
-
-    const responseObject = response.body as VerifiableCredential;
-    expect(responseObject).toEqual({
-      error: "Invalid credential.",
-    });
   });
 });

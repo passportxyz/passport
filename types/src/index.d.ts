@@ -164,7 +164,6 @@ export type RequestPayload = {
   };
   jsonRpcSigner?: JsonRpcSigner;
   challenge?: string;
-  issuer?: string;
   signatureType?: SignatureType;
 };
 
