@@ -8,6 +8,7 @@ import {
   IssuedChallenge,
   CredentialResponseBody,
   SignatureType,
+  ValidResponseBody,
 } from "@gitcoin/passport-types";
 
 // --- Node/Browser http req library
@@ -315,9 +316,16 @@ export const fetchChallengeCredential = async (iamUrl: string, payload: RequestP
     }
   );
 
-  return {
-    challenge: response.data.credential,
-  } as IssuedChallenge;
+  const data = response.data;
+
+  if ("error" in data && data.error) {
+    console.error("Error fetching challenge credential", data.error);
+    throw new Error("Unable to fetch challenge credential");
+  } else {
+    return {
+      challenge: (data as ValidResponseBody).credential,
+    } as IssuedChallenge;
+  }
 };
 
 // Fetch a verifiableCredential

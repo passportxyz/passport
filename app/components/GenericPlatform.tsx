@@ -6,11 +6,11 @@ import { datadogLogs } from "@datadog/browser-logs";
 
 // --- Identity tools
 import {
-  VerifiableCredential,
   CredentialResponseBody,
   PROVIDER_ID,
   PLATFORM_ID,
   StampPatch,
+  ValidResponseBody,
 } from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 
@@ -198,16 +198,23 @@ export const GenericPlatform = ({
 
       const verifiedCredentials =
         selectedProviders.length > 0
-          ? verifyCredentialsResponse.credentials?.filter((cred: any) => !cred.error) || []
+          ? verifyCredentialsResponse.credentials?.filter((cred: any): cred is ValidResponseBody => !cred.error) || []
           : [];
 
       setVerificationResponse(verifyCredentialsResponse.credentials || []);
 
-      const stampPatches: StampPatch[] = platformProviderIds.map((provider: PROVIDER_ID) => {
-        const cred = verifiedCredentials.find((cred: any) => cred.record?.type === provider);
-        if (cred) return { provider, credential: cred.credential as VerifiableCredential };
-        else return { provider };
-      });
+      // If the stamp was selected and can be claimed, return the {provider, credential} to add the stamp
+      // If the stamp was not selected, return {provider} to delete the stamp
+      // If the stamp was selected but cannot be claimed, return null to do nothing and
+      //   therefore keep any existing valid stamp if it exists
+      const stampPatches: StampPatch[] = platformProviderIds
+        .map((provider: PROVIDER_ID) => {
+          const cred = verifiedCredentials.find((cred: any) => cred.record?.type === provider);
+          if (cred) return { provider, credential: cred.credential };
+          else if (!selectedProviders.includes(provider)) return { provider };
+          else return null;
+        })
+        .filter((patch): patch is StampPatch => Boolean(patch));
 
       await handlePatchStamps(stampPatches);
 
@@ -217,6 +224,16 @@ export const GenericPlatform = ({
         (providerId: any) =>
           !!stampPatches.find((stampPatch) => stampPatch?.credential?.credentialSubject?.provider === providerId)
       );
+
+      // `verifiedProviders` still holds the previously verified providers. If the user
+      // can no longer claim the credential, but they still have a valid credential that
+      // was previously verified, AND they had selected it, we want to keep it
+      verifiedProviders.forEach((provider) => {
+        if (!actualVerifiedProviders.includes(provider) && selectedProviders.includes(provider)) {
+          actualVerifiedProviders.push(provider);
+        }
+      });
+
       // both verified and selected should look the same after save
       setVerifiedProviders([...actualVerifiedProviders]);
       setSelectedProviders([...actualVerifiedProviders]);

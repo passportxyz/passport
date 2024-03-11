@@ -433,7 +433,8 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 
           if (singleType) {
             const response = responses[0];
-            if (response.code && response.error) return errorRes(res, response.error, response.code);
+            if ("error" in response && response.code && response.error)
+              return errorRes(res, response.error, response.code);
             else return res.json(response);
           } else {
             return res.json(responses);

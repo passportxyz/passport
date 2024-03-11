@@ -1,8 +1,13 @@
 // import React from "react";
 
 // --- Types
-import { PLATFORM_ID } from "@gitcoin/passport-types";
-import { CredentialResponseBody, PROVIDER_ID, VerifiableCredential } from "@gitcoin/passport-types";
+import {
+  PLATFORM_ID,
+  ValidResponseBody,
+  CredentialResponseBody,
+  PROVIDER_ID,
+  VerifiableCredential,
+} from "@gitcoin/passport-types";
 import axios, { AxiosResponse } from "axios";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 import { datadogRum } from "@datadog/browser-rum";
@@ -32,10 +37,8 @@ export function generateUID(length: number) {
 export function reduceStampResponse(providerIDs: PROVIDER_ID[], verifiedCredentials?: CredentialResponseBody[]) {
   if (!verifiedCredentials) return [];
   return verifiedCredentials
-    .filter(
-      (credential) =>
-        !credential.error && providerIDs.find((providerId: PROVIDER_ID) => credential?.record?.type === providerId)
-    )
+    .filter((credential): credential is ValidResponseBody => !("error" in credential && credential.error))
+    .filter((credential) => providerIDs.find((providerId: PROVIDER_ID) => credential?.record?.type === providerId))
     .map((credential) => ({
       provider: credential.record?.type as PROVIDER_ID,
       credential: credential.credential as VerifiableCredential,

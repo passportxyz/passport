@@ -226,7 +226,7 @@ export type ErrorResponseBody = {
   error?: string;
   code?: number;
 };
-export type CredentialResponseBody = ValidResponseBody & ErrorResponseBody;
+export type CredentialResponseBody = ValidResponseBody | ErrorResponseBody;
 
 // Issued Credential response
 export type IssuedChallenge = {
