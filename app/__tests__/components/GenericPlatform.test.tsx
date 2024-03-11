@@ -195,11 +195,13 @@ describe("when user has previously verified with EnsProvider", () => {
         </Drawer>
       </ChakraProvider>
     );
+
+    const handlePatchStampsMock = jest.fn();
     renderWithContext(
       {
         ...mockCeramicContext,
         verifiedProviderIds: ["Ens"],
-        handlePatchStamps: jest.fn(),
+        handlePatchStamps: handlePatchStampsMock,
       },
       drawer()
     );
@@ -211,6 +213,9 @@ describe("when user has previously verified with EnsProvider", () => {
 
     // Wait to see the done toast
     await waitFor(() => {
+      // Empty b/c don't qualify for any stamps but also don't want to delete any stamps
+      expect(handlePatchStampsMock).toHaveBeenCalledWith([]);
+
       expect(screen.getByText("Successfully re-verified Ens data point.")).toBeInTheDocument();
       expect(fetchVerifiableCredential).toHaveBeenCalled();
     });
