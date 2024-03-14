@@ -65,14 +65,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           cache: "yarn"
-          cache-dependency-path: infra/package-lock.json
+          cache-dependency-path: infra/yarn.lock
       # Update the pulumi stack with new image
       - run: |
           cd aws
-          npm install
+          yarn install
           pulumi stack select -c gitcoin/passport/review
           pulumi config -s gitcoin/passport/review set aws:region us-west-2 --non-interactive
         working-directory: infra
