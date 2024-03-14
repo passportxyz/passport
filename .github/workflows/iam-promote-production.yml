@@ -94,7 +94,7 @@ jobs:
       - run: |
           yarn install
           cd prod
-          pulumi stack select -c gitcoin/dpopp/production
+          pulumi stack select -c gitcoin/passport/production
           pulumi config -s gitcoin/dpopp/production set aws:region us-east-1 --non-interactive
         working-directory: infra
         env:
