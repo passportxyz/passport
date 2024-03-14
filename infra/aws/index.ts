@@ -1,6 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import { getIamSecrets } from "./iam_secrets";
+import { createAmplifyStakingApp } from "../lib/staking/app";
 
 // Secret was created manually in Oregon `us-west-2`
 const IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
@@ -56,6 +57,27 @@ const serviceResources = Object({
     memory: 2048, // 2GB
     cpu: 1024, // 1vCPU
   },
+});
+
+const stakingEnvVars = Object({
+  review: {
+    NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.review.scorer.gitcoin.co/ceramic-cache",
+    NEXT_PUBLIC_SCORER_ENDPOINT: "https://api.review.scorer.gitcoin.co",
+  },
+  staging: {
+    NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.staging.scorer.gitcoin.co/ceramic-cache",
+    NEXT_PUBLIC_SCORER_ENDPOINT: "https://api.staging.scorer.gitcoin.co",
+  },
+  production: {
+    NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.scorer.gitcoin.co/ceramic-cache",
+    NEXT_PUBLIC_SCORER_ENDPOINT: "https://api.scorer.gitcoin.co",
+  },
+});
+
+const stakingBranches = Object({
+  review: "main",
+  staging: "app-staging",
+  production: "app-production",
 });
 
 //////////////////////////////////////////////////////////////
@@ -448,4 +470,19 @@ const serviceRecord = new aws.route53.Record("passport-record", {
       evaluateTargetHealth: true,
     },
   ],
+});
+
+coreInfraStack.getOutput("newPassportDomain").apply((domainName) => {
+  const stakingApp = createAmplifyStakingApp(
+    `${process.env["STAKING_APP_GITHUB_URL"]}`,
+    `${process.env["STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY"]}`,
+    domainName,
+    "stake",
+    stakingBranches[stack],
+    stakingEnvVars[stack],
+    { ...defaultTags, Name: "staking-app" },
+    (process.env["STAKING_APP_ENABLE_AUTH"] || "false").toLowerCase() == "true",
+    process.env["STAKING_APP_BASIC_AUTH_USERNAME"],
+    process.env["STAKING_APP_BASIC_AUTH_PASSWORD"]
+  );
 });
