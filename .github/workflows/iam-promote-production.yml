@@ -86,13 +86,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           cache: "yarn"
-          cache-dependency-path: infra/package-lock.json
+          cache-dependency-path: infra/yarn.lock
       # Update the pulumi stack with new image
       - run: |
-          npm install
+          yarn install
           cd prod
           pulumi stack select -c gitcoin/dpopp/production
           pulumi config -s gitcoin/dpopp/production set aws:region us-east-1 --non-interactive
