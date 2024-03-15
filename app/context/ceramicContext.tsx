@@ -233,11 +233,12 @@ if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS === "on") {
     platFormGroupSpec: TrustaLabs.ProviderConfig,
   });
 }
-
-platforms.set("Uber", {
-  platform: new Uber.UberPlatform(),
-  platFormGroupSpec: Uber.ProviderConfig,
-});
+if (process.env.NEXT_PUBLIC_FF_UBER_STAMPS === "on") {
+  platforms.set("Uber", {
+    platform: new Uber.UberPlatform(),
+    platFormGroupSpec: Uber.ProviderConfig,
+  });
+}
 
 export enum IsLoadingPassportState {
   Idle,
