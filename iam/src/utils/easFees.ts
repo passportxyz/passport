@@ -33,12 +33,19 @@ class EthPriceLoader {
         chain: "0x1",
         address: WETH_CONTRACT,
       });
-      await this.cache.set("ethPrice", result.usdPrice.toString());
-      await this.cache.set("ethPriceLastUpdate", Date.now().toString());
+
+      try {
+        await this.cache.set("ethPrice", result.usdPrice.toString());
+        await this.cache.set("ethPriceLastUpdate", Date.now().toString());
+      } catch (e) {
+        let message = "Failed to cache ETH price";
+        if (e instanceof Error) message += `, ${e.name}: ${e.message}`;
+        console.error(`REDIS CONNECTION ERROR: ${message}`);
+      }
     } catch (e) {
       let message = "Failed to get ETH price";
       if (e instanceof Error) message += `, ${e.name}: ${e.message}`;
-      console.error(`REDIS CONNECTION ERROR: ${message}`);
+      console.error(`MORALIS ERROR: ${message}`);
     }
   }
 }

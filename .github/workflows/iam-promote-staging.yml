@@ -86,14 +86,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           cache: "yarn"
-          cache-dependency-path: infra/package-lock.json
+          cache-dependency-path: infra/yarn.lock
       # Update the pulumi stack with new image
       - run: |
           cd aws 
-          npm install
+          yarn install
           pulumi stack select -c gitcoin/passport/staging
           pulumi config -s gitcoin/passport/staging set aws:region us-west-2 --non-interactive
         working-directory: infra
@@ -115,3 +115,10 @@ jobs:
           ROUTE_53_DOMAIN: ${{ secrets.DOMAIN_STAGING }}
           IAM_SERVER_SSM_ARN: ${{ secrets.IAM_SERVER_SSM_ARN_STAGING }}
           PASSPORT_VC_SECRETS_ARN: ${{ secrets.PASSPORT_VC_SECRETS_ARN_STAGING }}
+
+          STAKING_APP_GITHUB_URL: ${{ vars.STAKING_APP_GITHUB_URL_STAGING }}
+          STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY: ${{ secrets.STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY_STAGING }}
+          STAKING_APP_ENABLE_AUTH: ${{ vars.STAKING_APP_ENABLE_AUTH_STAGING }}
+          STAKING_APP_BASIC_AUTH_USERNAME: ${{ vars.STAKING_APP_BASIC_AUTH_USERNAME_STAGING }}
+          STAKING_APP_BASIC_AUTH_PASSWORD: ${{ secrets.STAKING_APP_BASIC_AUTH_PASSWORD_STAGING }}
+          

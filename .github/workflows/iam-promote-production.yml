@@ -86,15 +86,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           cache: "yarn"
-          cache-dependency-path: infra/package-lock.json
+          cache-dependency-path: infra/yarn.lock
       # Update the pulumi stack with new image
       - run: |
-          npm install
+          yarn install
           cd prod
-          pulumi stack select -c gitcoin/dpopp/production
+          pulumi stack select -c gitcoin/passport/production
           pulumi config -s gitcoin/dpopp/production set aws:region us-east-1 --non-interactive
         working-directory: infra
         env:
@@ -114,3 +114,10 @@ jobs:
           ROUTE_53_ZONE: ${{ secrets.ROUTE53_ZONE_ID_PRODUCTION }}
           DOMAIN: passport-iam.gitcoin.co
           IAM_SERVER_SSM_ARN: ${{ secrets.IAM_SERVER_SSM_ARN_PRODUCTION }}
+
+          STAKING_APP_GITHUB_URL: ${{ vars.STAKING_APP_GITHUB_URL_PRODUCTION }}
+          STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY: ${{ secrets.STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY_PRODUCTION }}
+          STAKING_APP_ENABLE_AUTH: ${{ vars.STAKING_APP_ENABLE_AUTH_PRODUCTION }}
+          STAKING_APP_BASIC_AUTH_USERNAME: ${{ vars.STAKING_APP_BASIC_AUTH_USERNAME_PRODUCTION }}
+          STAKING_APP_BASIC_AUTH_PASSWORD: ${{ secrets.STAKING_APP_BASIC_AUTH_PASSWORD_PRODUCTION }}
+          

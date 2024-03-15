@@ -25,7 +25,6 @@ import {
   PassportAttestation,
   EasRequestBody,
   VerifiedPayload,
-  VerifiableCredential,
 } from "@gitcoin/passport-types";
 import onchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
 
@@ -33,16 +32,11 @@ import { getChallenge, verifyChallengeAndGetAddress } from "./utils/challenge.js
 import { getEASFeeAmount } from "./utils/easFees.js";
 import * as stampSchema from "./utils/easStampSchema.js";
 import * as passportSchema from "./utils/easPassportSchema.js";
+import { hasValidIssuer, getIssuerKey } from "./issuers.js";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-import {
-  issueChallengeCredential,
-  issueHashedCredential,
-  verifyCredential,
-  issueEip712Credential,
-  stampCredentialDocument,
-} from "@gitcoin/passport-identity";
+import { issueChallengeCredential, issueHashedCredential, verifyCredential } from "@gitcoin/passport-identity";
 
 // All provider exports from platforms
 import { providers, platforms } from "@gitcoin/passport-platforms";
@@ -96,21 +90,6 @@ if (configErrors.length > 0) {
   configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
   throw new Error("Missing required configuration");
 }
-
-// get DID from key
-const key = process.env.IAM_JWK;
-const issuer = DIDKit.keyToDID("key", key);
-const eip712Key = process.env.IAM_JWK_EIP712;
-const eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
-
-// export the current config
-export const config: {
-  key: string;
-  issuer: string;
-} = {
-  key,
-  issuer,
-};
 
 // Wallet to use for mainnets
 // Only functional in production (set to same as testnet for non-production environments)
@@ -187,7 +166,8 @@ app.use(express.json());
 app.use(cors());
 
 // return a JSON error response with a 400 status
-const errorRes = (res: Response, error: string, errorCode: number): Response => res.status(errorCode).json({ error });
+const errorRes = (res: Response, error: string | object, errorCode: number): Response =>
+  res.status(errorCode).json({ error });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const addErrorDetailsToMessage = (message: string, error: any): string => {
@@ -232,7 +212,7 @@ const issueCredentials = async (
             ...(verifyResult?.record || {}),
           };
 
-          const currentKey = payload.signatureType === "EIP712" ? eip712Key : key;
+          const currentKey = getIssuerKey(payload.signatureType);
           // generate a VC for the given payload
           ({ credential } = await issueHashedCredential(
             DIDKit,
@@ -293,7 +273,7 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
         ...(challenge?.record || {}),
       };
 
-      const currentKey = payload.signatureType === "EIP712" ? eip712Key : key;
+      const currentKey = getIssuerKey(payload.signatureType);
       // generate a VC for the given payload
       return void issueChallengeCredential(DIDKit, currentKey, record, payload.signatureType)
         .then((credential) => {
@@ -393,6 +373,7 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
 }
 
 // expose verify entry point
+// verify a users claim to stamps and issue the stamps if the claim is valid
 app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
   const requestBody: VerifyRequestBody = req.body as VerifyRequestBody;
   // each verify request should be received with a challenge credential detailing a signature contained in the RequestPayload.proofs
@@ -403,9 +384,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
   // Check the challenge and the payload is valid before issuing a credential from a registered provider
   return void verifyCredential(DIDKit, challenge)
     .then(async (verified) => {
-      const currentIssuer = requestBody.payload.signatureType === "EIP712" ? eip712Issuer : issuer;
-
-      if (verified && currentIssuer === challenge.issuer) {
+      if (verified && hasValidIssuer(challenge.issuer)) {
         let address;
         try {
           address = await verifyChallengeAndGetAddress(requestBody);
@@ -416,7 +395,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
           throw error;
         }
         payload.address = address;
-        payload.issuer = issuer;
         // the signer should be the address outlined in the challenge credential - rebuild the id to check for a full match
         const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
         const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
@@ -449,7 +427,8 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 
           if (singleType) {
             const response = responses[0];
-            if (response.code && response.error) return errorRes(res, response.error, response.code);
+            if ("error" in response && response.code && response.error)
+              return errorRes(res, response.error, response.code);
             else return res.json(response);
           } else {
             return res.json(responses);
@@ -464,64 +443,6 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
       let message = "Unable to verify payload";
       if (error instanceof Error) message += `: ${error.name}`;
       return void errorRes(res, message, 500);
-    });
-});
-
-// expose convert entry point that will convert a V1 stamp to V2 stamp (Ed25519Signature2018 to EIP712)
-app.post("/api/v0.0.0/convert", (req: Request, res: Response): void => {
-  const credential: VerifiableCredential = req.body as VerifiableCredential;
-
-  // Validate credential first
-  verifyCredential(DIDKit, credential)
-    .then((verified) => {
-      // If the credential has been succesfully validateLocaleAndSetLanguage,
-      // and if the issuer matches our expected issuer
-      // then issue the new credential
-      if (verified && issuer === credential.issuer) {
-        DIDKit.keyToVerificationMethod("ethr", eip712Key)
-          .then((_verificationMethod) => {
-            const verificationMethod = _verificationMethod as string;
-            // Extract the payload from the old VC
-            const { id, hash, provider } = credential.credentialSubject;
-
-            issueEip712Credential(
-              DIDKit,
-              eip712Key,
-              { expiresAt: new Date(credential.expirationDate) },
-              {
-                credentialSubject: {
-                  "@context": {
-                    hash: "https://schema.org/Text",
-                    provider: "https://schema.org/Text",
-                  },
-                  id,
-                  hash,
-                  provider,
-                },
-              },
-              stampCredentialDocument(verificationMethod),
-              ["https://w3id.org/vc/status-list/2021/v1"]
-            )
-              .then((newCredential) => {
-                res.json(newCredential);
-              })
-              .catch((error) => {
-                return void errorRes(res, addErrorDetailsToMessage("Failed to issue new credential", error), 500);
-              });
-          })
-          .catch((error) => {
-            return void errorRes(res, addErrorDetailsToMessage("Failed to create verification method", error), 500);
-          });
-      } else {
-        return void errorRes(res, "Invalid credential.", 400);
-      }
-    })
-    .catch((error) => {
-      return void errorRes(
-        res,
-        addErrorDetailsToMessage("Unable to validate the provided credential, an unexpected error ocurred", error),
-        500
-      );
     });
 });
 
@@ -549,7 +470,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
       credentials.map(async (credential) => {
         return {
           credential,
-          verified: issuer === credential.issuer && (await verifyCredential(DIDKit, credential)),
+          verified: hasValidIssuer(credential.issuer) && (await verifyCredential(DIDKit, credential)),
         };
       })
     )
@@ -557,6 +478,10 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
         const invalidCredentials = credentialVerifications
           .filter(({ verified }) => !verified)
           .map(({ credential }) => credential);
+
+        if (invalidCredentials.length > 0) {
+          return void errorRes(res, { invalidCredentials }, 400);
+        }
 
         const multiAttestationRequest = await stampSchema.formatMultiAttestationRequest(
           credentialVerifications,
@@ -627,9 +552,7 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
       credentials.map(async (credential) => {
         return {
           credential,
-          verified:
-            (issuer === credential.issuer || eip712Issuer === credential.issuer) &&
-            (await verifyCredential(DIDKit, credential)),
+          verified: hasValidIssuer(credential.issuer) && (await verifyCredential(DIDKit, credential)),
         };
       })
     )

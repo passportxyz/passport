@@ -164,7 +164,6 @@ export type RequestPayload = {
   };
   jsonRpcSigner?: JsonRpcSigner;
   challenge?: string;
-  issuer?: string;
   signatureType?: SignatureType;
 };
 
@@ -227,7 +226,7 @@ export type ErrorResponseBody = {
   error?: string;
   code?: number;
 };
-export type CredentialResponseBody = ValidResponseBody & ErrorResponseBody;
+export type CredentialResponseBody = ValidResponseBody | ErrorResponseBody;
 
 // Issued Credential response
 export type IssuedChallenge = {

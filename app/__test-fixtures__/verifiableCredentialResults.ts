@@ -44,8 +44,8 @@ export const SUCCESFUL_ENS_RESULTS: CredentialResponseBody = {
 };
 
 export const UN_SUCCESSFUL_ENS_RESULT: CredentialResponseBody = {
-  record: { type: "Ens", version: "0.0.0", ens: "jimmyjim.eth" },
-  credential,
+  code: 403,
+  error: "You can't claim this stamp",
 };
 
 export const SUCCESFUL_POAP_RESULT: VerifiableCredentialRecord = {
