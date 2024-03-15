@@ -360,7 +360,8 @@ export type PLATFORM_ID =
   | "Civic"
   | "CyberConnect"
   | "GrantsStack"
-  | "TrustaLabs";
+  | "TrustaLabs"
+  | "Uber";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -461,7 +462,11 @@ export type PROVIDER_ID =
   | "ETHAdvocate"
   | "ETHPioneer"
   | "ETHMaxi"
-  | "ETHEnthusiast";
+  | "ETHEnthusiast"
+  | "uberRidesGte#1"
+  | "uberRidesGte#10"
+  | "uberRidesGte#100"
+  | "uberRidesGte#1000";
 
 export type StampBit = {
   bit: number;
