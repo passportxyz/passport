@@ -387,6 +387,13 @@
     "@pulumi/pulumi" "^3.0.0"
     semver "^5.4.0"
 
+"@pulumi/github@^6.1.0":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@pulumi/github/-/github-6.1.0.tgz#301006c034cf47f4847d262b6556f476b38211c9"
+  integrity sha512-zSN0bT80T/QPhWRheJBhQxikBGSfPbRa9VKBzPSlGHNcsptxZRpZLyjw7MDr7IDne9QfzfG5VE+HSZEtmMlS4Q==
+  dependencies:
+    "@pulumi/pulumi" "^3.0.0"
+
 "@pulumi/pulumi@^3.0.0":
   version "3.109.0"
   resolved "https://registry.yarnpkg.com/@pulumi/pulumi/-/pulumi-3.109.0.tgz#9d0171a43c195f386eb59364e3f0d263427b7b13"
