@@ -472,8 +472,8 @@ const serviceRecord = new aws.route53.Record("passport-record", {
   ],
 });
 
-coreInfraStack.getOutput("newPassportDomain").apply((domainName) => {
-  const stakingApp = createAmplifyStakingApp(
+const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((domainName) => {
+  const stakingAppInfo = createAmplifyStakingApp(
     `${process.env["STAKING_APP_GITHUB_URL"]}`,
     `${process.env["STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY"]}`,
     domainName,
@@ -485,4 +485,7 @@ coreInfraStack.getOutput("newPassportDomain").apply((domainName) => {
     process.env["STAKING_APP_BASIC_AUTH_USERNAME"],
     process.env["STAKING_APP_BASIC_AUTH_PASSWORD"]
   );
+  return stakingAppInfo;
 });
+
+export const amplifyAppHookUrl = pulumi.secret(amplifyAppInfo.webHook.url);

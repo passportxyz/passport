@@ -1,6 +1,7 @@
 import * as aws from "@pulumi/aws";
 import { Input } from "@pulumi/pulumi";
 import * as std from "@pulumi/std";
+import * as github from "@pulumi/github";
 
 export function createAmplifyStakingApp(
   githubUrl: string,
@@ -15,7 +16,7 @@ export function createAmplifyStakingApp(
   enableBasicAuth: boolean,
   username?: string,
   password?: string
-): aws.amplify.App {
+): { app: aws.amplify.App; webHook: aws.amplify.Webhook } {
   const name = `${prefix}.${domainName}`;
   const amplifyApp = new aws.amplify.App(name, {
     name: name,
@@ -77,6 +78,27 @@ applications:
       },
     ],
   });
+  const webHook = new aws.amplify.Webhook(`${name}-${branchName}`, {
+    appId: amplifyApp.id,
+    branchName: branchName,
+    description: `trigger build from branch ${branchName}`,
+  });
 
-  return amplifyApp;
+  // // Define a GitHub repository webhook for the repository to trigger Amplify builds.
+  // const repoWebhook = new github.RepositoryWebhook("repoWebhook", {
+  //   // Use the repository name and owner from above
+  //   repository: "id-staking-v2-app",
+  //   // Set the configuration for the webhook.
+  //   configuration: {
+  //     url: webHook.url, // Use the webhook URL from the Amplify app
+  //     contentType: "json", // Webhook payload format
+  //     insecureSsl: false, // Use SSL for communication
+  //     secret: "<YOUR_WEBHOOK_SECRET>", // Use a secret token for securing webhook payloads
+  //   },
+  //   // Trigger the webhook on push events to any branch.
+  //   events: ["push"],
+  //   active: true, // The webhook is active
+  // });
+
+  return { app: amplifyApp, webHook: webHook };
 }
