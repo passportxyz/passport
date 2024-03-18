@@ -6,7 +6,7 @@ export class UberPlatform extends Platform {
   path = "uber";
 
   getRequestUrl(state: string, callbackUrl?: string): string {
-    return `http://localhost:3004/integration?state=${state}&redirect_uri=${callbackUrl}`;
+    return `https://publish-credentials.reclaimprotocol.org/integration?state=${state}&redirect_uri=${callbackUrl}`;
   }
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
