@@ -1,13 +1,14 @@
 import axios from "axios";
-import type { Provider } from "../../types";
 import { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { Proof, Reclaim } from "@reclaimprotocol/js-sdk";
+import { ProviderExternalVerificationError, type Provider } from "../../types";
+
 type StatusResponse = {
   session: {
     proofs: Proof[];
   };
 };
-async function verifyUberRides(code: string): Promise<{ id: string; rides: number }> {
+async function verifyUberRides(code: string): Promise<{ rides: number }> {
   const reclaimClient = new Reclaim.ProofRequest(process.env.NEXT_PUBLIC_RECLAIM_APP_ID, { sessionId: code });
   const res = await axios.get(reclaimClient.getStatusUrl());
   const data = res.data as StatusResponse;
@@ -18,7 +19,6 @@ async function verifyUberRides(code: string): Promise<{ id: string; rides: numbe
     }
     const { extractedParameterValues }: { extractedParameterValues: { rides_count: number } } = proof;
     return {
-      id: code,
       rides: extractedParameterValues.rides_count,
     };
   } else {
@@ -58,14 +58,18 @@ export class UberRidesProvider implements Provider {
   }
 
   async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
-    const { id, rides } = await verifyUberRides(payload.proofs.code);
+    try {
+      const { rides } = await verifyUberRides(payload.proofs.code);
 
-    const { valid, errors } = checkUberRides(parseInt(this._options.threshold), rides);
+      const { valid, errors } = checkUberRides(parseInt(this._options.threshold), rides);
 
-    return {
-      valid,
-      errors,
-      record: { id },
-    };
+      return {
+        valid,
+        errors,
+        record: { address: payload.address },
+      };
+    } catch (e: unknown) {
+      throw new ProviderExternalVerificationError(`Error verifying Reclaim Proof: ${String(e)}`);
+    }
   }
 }
