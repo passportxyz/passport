@@ -5,7 +5,8 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/uber-icon.svg",
   platform: "Uber",
   name: "Uber",
-  description: "Connect to Uber to verify your number of rides.",
+  description:
+    "Using Reclaim's zk technology, you can connect your Uber account without sharing any of the account information with Reclaim or Passport",
   connectMessage: "Connect Account",
   website: "https://uber.com/",
 };
