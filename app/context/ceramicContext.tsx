@@ -45,6 +45,7 @@ const {
   Civic,
   CyberConnect,
   TrustaLabs,
+  Uber,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -232,6 +233,12 @@ if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS === "on") {
     platFormGroupSpec: TrustaLabs.ProviderConfig,
   });
 }
+if (process.env.NEXT_PUBLIC_FF_UBER_STAMPS === "on") {
+  platforms.set("Uber", {
+    platform: new Uber.UberPlatform(),
+    platFormGroupSpec: Uber.ProviderConfig,
+  });
+}
 
 export enum IsLoadingPassportState {
   Idle,
@@ -279,12 +286,12 @@ const startingState: CeramicContextState = {
   isLoadingPassport: IsLoadingPassportState.Loading,
   allProvidersState: startingAllProvidersState,
   allPlatforms: platforms,
-  handleCreatePassport: async () => {},
-  handleAddStamps: async () => {},
-  handlePatchStamps: async () => {},
-  handleDeleteStamps: async () => {},
+  handleCreatePassport: async () => { },
+  handleAddStamps: async () => { },
+  handlePatchStamps: async () => { },
+  handleDeleteStamps: async () => { },
   passportHasCacaoError: false,
-  cancelCeramicConnection: () => {},
+  cancelCeramicConnection: () => { },
   userDid: undefined,
   expiredProviders: [],
   expiredPlatforms: {},
