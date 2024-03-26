@@ -11,6 +11,13 @@ const route53Domain = `${process.env["ROUTE_53_DOMAIN"]}`;
 const route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
 const dockerGtcPassportIamImage = `${process.env["DOCKER_GTC_PASSPORT_IAM_IMAGE"]}`;
 
+const opSepoliaRpcUrl = `${process.env["STAKING_OP_SEPOLIA_RPC_URL"]}`;
+const opRpcUrl = `${process.env["STAKING_OP_RPC_URL"]}`;
+const mainnetRpcUrl = `${process.env["STAKING_MAINNET_RPC_URL"]}`;
+const dataDogClientTokenReview = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_REVIEW"]}`;
+const dataDogClientTokenStaging = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_STAGING"]}`;
+const dataDogClientTokenProduction = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_PRODUCTION"]}`;
+
 const stack = pulumi.getStack();
 const region = aws.getRegion({});
 const regionId = region.then((r) => r.id);
@@ -63,14 +70,32 @@ const stakingEnvVars = Object({
   review: {
     NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.review.scorer.gitcoin.co/ceramic-cache",
     NEXT_PUBLIC_SCORER_ENDPOINT: "https://api.review.scorer.gitcoin.co",
+    NEXT_PUBLIC_OP_SEPOLIA_RPC_URL: opSepoliaRpcUrl,
+    NEXT_PUBLIC_MAINNET_RPC_URL: mainnetRpcUrl,
+    NEXT_PUBLIC_OP_RPC_URL: opRpcUrl,
+    NEXT_PUBLIC_DATADOG_CLIENT_TOKEN: dataDogClientTokenReview,
+    NEXT_PUBLIC_DATADOG_SERVICE: "staking-app-review",
+    NEXT_PUBLIC_DATADOG_ENV: "review",
   },
   staging: {
     NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.staging.scorer.gitcoin.co/ceramic-cache",
     NEXT_PUBLIC_SCORER_ENDPOINT: "https://api.staging.scorer.gitcoin.co",
+    NEXT_PUBLIC_OP_SEPOLIA_RPC_URL: opSepoliaRpcUrl,
+    NEXT_PUBLIC_MAINNET_RPC_URL: mainnetRpcUrl,
+    NEXT_PUBLIC_OP_RPC_URL: opRpcUrl,
+    NEXT_PUBLIC_DATADOG_CLIENT_TOKEN: dataDogClientTokenStaging,
+    NEXT_PUBLIC_DATADOG_SERVICE: "staking-app-staging",
+    NEXT_PUBLIC_DATADOG_ENV: "staging",
   },
   production: {
     NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.scorer.gitcoin.co/ceramic-cache",
     NEXT_PUBLIC_SCORER_ENDPOINT: "https://api.scorer.gitcoin.co",
+    NEXT_PUBLIC_OP_SEPOLIA_RPC_URL: opSepoliaRpcUrl,
+    NEXT_PUBLIC_MAINNET_RPC_URL: mainnetRpcUrl,
+    NEXT_PUBLIC_OP_RPC_URL: opRpcUrl,
+    NEXT_PUBLIC_DATADOG_CLIENT_TOKEN: dataDogClientTokenProduction,
+    NEXT_PUBLIC_DATADOG_SERVICE: "staking-app-prod",
+    NEXT_PUBLIC_DATADOG_ENV: "prod",
   },
 });
 
