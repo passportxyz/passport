@@ -84,6 +84,8 @@ applications:
     description: `trigger build from branch ${branchName}`,
   });
 
+  // Note!!!: at the moment this step is done manually & it is required to be configured only once / repository / environment 
+  //   - To be improved: investigate & automate github webhook creation
   // // Define a GitHub repository webhook for the repository to trigger Amplify builds.
   // const repoWebhook = new github.RepositoryWebhook("repoWebhook", {
   //   // Use the repository name and owner from above
