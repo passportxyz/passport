@@ -101,8 +101,8 @@ const stakingEnvVars = Object({
 
 const stakingBranches = Object({
   review: "main",
-  staging: "app-staging",
-  production: "app-production",
+  staging: "staging-app",
+  production: "production-app",
 });
 
 //////////////////////////////////////////////////////////////
