@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "./Button";
 import { LoadButton } from "./LoadButton";
 import { WebmVideo } from "./WebmVideo";
+import { useNavigateToPage } from "../hooks/useCustomization";
 
 type WelcomePageButtonsProps = {
-  dashboardCustomizationKey: string | null;
   onSkip: () => void;
   onNext: () => void;
   nextButtonText?: string;
@@ -85,14 +84,13 @@ const StepIndicator = ({ current, total, className }: StepsConfig & { className?
 );
 
 const WelcomePageButtons = ({
-  dashboardCustomizationKey,
   onSkip,
   onNext,
   nextButtonText,
   skipButtonText,
 }: WelcomePageButtonsProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const navigateToPage = useNavigateToPage();
 
   return (
     <div className="grid w-full grid-cols-2 gap-4">
@@ -103,7 +101,7 @@ const WelcomePageButtons = ({
         isLoading={isLoading}
         onClick={() => {
           setIsLoading(true);
-          navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`);
+          navigateToPage("dashboard");
           onSkip();
           setIsLoading(false);
         }}

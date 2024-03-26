@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps, @next/next/no-img-element */
 // --- React Methods
 import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 
 // --- Shared data context
 import { useWalletStore } from "../context/walletStore";
@@ -14,27 +13,28 @@ import { useDatastoreConnectionContext } from "../context/datastoreConnectionCon
 import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../components/DoneToastContent";
 import { WebmVideo } from "../components/WebmVideo";
+import { DEFAULT_CUSTOMIZATION_KEY, useCustomization, useNavigateToPage } from "../hooks/useCustomization";
 
 export default function Home() {
   const address = useWalletStore((state) => state.address);
   const connectWallet = useWalletStore((state) => state.connect);
   const connectError = useWalletStore((state) => state.error);
   const { connect: connectDatastore } = useDatastoreConnectionContext();
-  const [searchParams] = useSearchParams();
   const toast = useToast();
   const [enableEthBranding, setEnableEthBranding] = useState(false);
+  const customization = useCustomization();
 
-  const navigate = useNavigate();
+  const navigateToPage = useNavigateToPage();
 
   // Route user to dashboard when wallet is connected
   useEffect(() => {
-    const dashboardCustomizationKey = searchParams.get("dashboard");
-    setEnableEthBranding(!dashboardCustomizationKey);
+    const usingCustomization = customization.key !== DEFAULT_CUSTOMIZATION_KEY;
+    setEnableEthBranding(!usingCustomization);
     if (address) {
       if (checkShowOnboard()) {
-        navigate(`/welcome${dashboardCustomizationKey ? `?dashboard=${dashboardCustomizationKey}` : ""}`);
+        navigateToPage("welcome");
       } else {
-        navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`);
+        navigateToPage("dashboard");
       }
     }
   }, [address]);

@@ -2,6 +2,7 @@ import React from "react";
 import { CustomizationTheme } from "../utils/theme/types";
 
 export type BasicCustomization = {
+  key: string;
   customizationTheme?: CustomizationTheme;
   useCustomDashboardPanel: boolean;
 };
@@ -44,6 +45,7 @@ export const requestDynamicCustomizationConfig = async (
 
   if (customizationKey === "avalanche") {
     return {
+      key: "avalanche",
       useCustomDashboardPanel: true,
       dashboardPanel: {
         logo: {

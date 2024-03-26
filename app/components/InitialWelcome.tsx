@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { WelcomeWrapper } from "./WelcomeWrapper";
 
-export const InitialWelcome = ({
-  onBoardFinished,
-  dashboardCustomizationKey,
-}: {
-  onBoardFinished: () => void;
-  dashboardCustomizationKey: string | null;
-}) => {
+export const InitialWelcome = ({ onBoardFinished }: { onBoardFinished: () => void }) => {
   const [step, setStep] = useState(0);
 
   const onSkip = () => {
@@ -27,7 +21,6 @@ export const InitialWelcome = ({
       buttonsConfig: {
         onSkip,
         onNext: () => setStep(1),
-        dashboardCustomizationKey,
       },
     },
     {
@@ -42,7 +35,6 @@ export const InitialWelcome = ({
       buttonsConfig: {
         onSkip,
         onNext: () => setStep(2),
-        dashboardCustomizationKey,
       },
     },
     {
@@ -63,7 +55,6 @@ export const InitialWelcome = ({
       buttonsConfig: {
         onSkip,
         onNext: () => onBoardFinished(),
-        dashboardCustomizationKey,
         nextButtonText: "Verify stamps",
       },
     },

@@ -3,7 +3,7 @@ import { VeraxPanel } from "../components/VeraxPanel";
 import { TestingPanel } from "../components/TestingPanel";
 import { Button } from "../components/Button";
 import { CustomizationLogoBackground, isDynamicCustomization } from "../utils/customizationUtils";
-import { useDashboardCustomization } from "../hooks/useDashboardCustomization";
+import { useCustomization } from "../hooks/useCustomization";
 
 type CustomDashboardPanelProps = {
   logo: {
@@ -61,31 +61,24 @@ export const CustomDashboardPanel = ({ logo, className, children }: CustomDashbo
   );
 };
 
-export const DynamicCustomDashboardPanel = ({
-  className,
-  customizationKey,
-}: {
-  className: string;
-  customizationKey?: string;
-}) => {
-  const { customizationConfig } = useDashboardCustomization(customizationKey);
+export const DynamicCustomDashboardPanel = ({ className }: { className: string }) => {
+  const customization = useCustomization();
 
   // First, check to see if the customization key is one of the built-in ones
-  switch (customizationKey) {
+  switch (customization.key) {
     case "testing":
       return <TestingPanel className={className} />;
     case "verax":
       return <VeraxPanel className={className} />;
     default:
-      // If there is no customization key, return an empty div
-      if (!customizationKey || !isDynamicCustomization(customizationConfig)) {
+      if (!isDynamicCustomization(customization)) {
         return <div></div>;
       }
   }
 
   // Otherwise, it's a dynamically defined panel
 
-  const { logo, body } = customizationConfig.dashboardPanel;
+  const { logo, body } = customization.dashboardPanel;
 
   return (
     <CustomDashboardPanel className={className} logo={logo}>
