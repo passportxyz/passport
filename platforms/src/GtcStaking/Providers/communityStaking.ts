@@ -1,6 +1,6 @@
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import BigNumber from "bignumber.js";
-import { GtcStakingContext, GtcStakingProvider, GtcStakingProviderOptions, Stake } from "./GtcStaking";
+import { GtcStakingContext, GtcStakingProvider, GtcStakingProviderOptions, Stake, StakeV2 } from "./GtcStaking";
 
 class CommunityStakingBaseProvider extends GtcStakingProvider {
   minimumCountCommunityStakes: number;
@@ -14,10 +14,12 @@ class CommunityStakingBaseProvider extends GtcStakingProvider {
     const address = this.getAddress(payload);
     const stakeData = await this.getStakes(payload, context);
     const communityStakes = stakeData.communityStakes;
+    const communityStakesV2 = stakeData.communityStakesV2;
 
     const countRelevantStakes = this.getCountRelevantStakes(communityStakes, address);
-
-    if (countRelevantStakes >= this.minimumCountCommunityStakes) {
+    const countRelevantStakesV2 = this.getCountRelevantStakesV2(communityStakesV2, address);
+    const totalCountRelevantStakes = countRelevantStakes + countRelevantStakesV2;
+    if (totalCountRelevantStakes >= this.minimumCountCommunityStakes) {
       return {
         valid: true,
         record: { address },
@@ -26,7 +28,7 @@ class CommunityStakingBaseProvider extends GtcStakingProvider {
       return {
         valid: false,
         errors: [
-          `There are currently ${countRelevantStakes} community stakes of at least ${this.thresholdAmount.toString()} GTC on/by your address, ` +
+          `There are currently ${totalCountRelevantStakes} community stakes of at least ${this.thresholdAmount.toString()} GTC on/by your address, ` +
             `you need a minimum of ${this.minimumCountCommunityStakes} relevant community stakes to claim this stamp`,
         ],
       };
@@ -58,6 +60,38 @@ class CommunityStakingBaseProvider extends GtcStakingProvider {
       }
     }
 
+    return [...Object.entries(stakesByAddressOnOthers), ...Object.entries(stakesOnAddressByOthers)].reduce(
+      (count, [_address, amount]) => {
+        if (amount.gte(this.thresholdAmount)) {
+          return count + 1;
+        }
+        return count;
+      },
+      0
+    );
+  }
+
+  getCountRelevantStakesV2(communityStakes: StakeV2[], address: string): number {
+    const stakesOnAddressByOthers: Record<string, BigNumber> = {};
+    const stakesByAddressOnOthers: Record<string, BigNumber> = {};
+
+    for (let i = 0; i < communityStakes.length; i++) {
+      const stake = communityStakes[i];
+      const stakeAmount =  new BigNumber(stake.amount);
+
+      if (stake.staker === address && stake.stakee !== address) {
+        stakesByAddressOnOthers[stake.stakee] ||= new BigNumber(0);
+        if (new Date(stake.unlock_time) > new Date()) {
+          stakesByAddressOnOthers[stake.stakee] = stakesByAddressOnOthers[stake.stakee].plus(stakeAmount);
+        } 
+      } else if (stake.stakee === address && stake.staker !== address) {
+        stakesOnAddressByOthers[stake.staker] ||= new BigNumber(0);
+        if (new Date(stake.unlock_time) > new Date()) {
+          stakesOnAddressByOthers[stake.staker] = stakesOnAddressByOthers[stake.staker].plus(stakeAmount);
+        } 
+      }
+    }
+    
     return [...Object.entries(stakesByAddressOnOthers), ...Object.entries(stakesOnAddressByOthers)].reduce(
       (count, [_address, amount]) => {
         if (amount.gte(this.thresholdAmount)) {
