@@ -79,6 +79,7 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
   // Otherwise, it's a dynamically defined panel
 
   const { logo, body } = customization.dashboardPanel;
+  console.log("geri logo, body", logo, body);
 
   return (
     <CustomDashboardPanel className={className} logo={logo}>

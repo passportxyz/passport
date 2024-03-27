@@ -62,6 +62,8 @@ export const CustomizationUrlLayoutRoute = () => {
   const key = useCustomizationKeyFromUrl();
   const setCustomizationKey = useSetCustomizationKey();
 
+  console.log("geri key", key);
+
   useEffect(() => {
     setCustomizationKey(key);
   }, [key, setCustomizationKey]);

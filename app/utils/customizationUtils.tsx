@@ -1,5 +1,7 @@
 import React from "react";
 import { CustomizationTheme } from "../utils/theme/types";
+import { CUSTOMIZATION_ENDPOINT } from "../config/customization_config";
+import axios from "axios";
 
 export type BasicCustomization = {
   key: string;
@@ -131,6 +133,10 @@ export const requestDynamicCustomizationConfig = async (
         },
       },
     };
+  } else {
+    const customizationResponse = await axios.get(`${CUSTOMIZATION_ENDPOINT}/${customizationKey}`);
+    console.log("customizationResponse", customizationResponse);
+    return customizationResponse.data;
   }
 };
 
