@@ -40,7 +40,7 @@ const gtcStakingResponse = (gtcAmount: string) => {
           event_type: "SelfStake",
           round_id: 1,
           staker: MOCK_ADDRESS,
-          address: "0x1234",  // Shouldn't it be the same address MOCK_ADDRESS_LOWER ? 
+          address: "0x1234", // Shouldn't it be the same address MOCK_ADDRESS_LOWER ?
           amount: gtcAmount,
           staked: true,
           block_number: 14124991,
@@ -64,9 +64,8 @@ const gtcStakingResponseV2 = (gtcAmount: string) => {
         unlock_time: unlock_time.toDateString(),
         lock_time: now.toDateString(),
         staker: MOCK_ADDRESS_LOWER,
-        stakee:  MOCK_ADDRESS_LOWER,
+        stakee: MOCK_ADDRESS_LOWER,
         amount: gtcAmount,
-       
       },
     ],
   };
@@ -234,7 +233,6 @@ describe("should return valid payload", function () {
       if (url.startsWith(gtcStakingEndpoint)) {
         return Promise.resolve(gtcStakingResponse("6"));
       }
-
     });
 
     const selfstaking = new SelfStakingBronzeProvider();
@@ -359,7 +357,7 @@ describe("should return valid payload", function () {
   });
 });
 
-// Identity Staking V2 
+// Identity Staking V2
 describe("Attempt verification V2", function () {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -387,7 +385,6 @@ describe("Attempt verification V2", function () {
     });
   });
 });
-
 
 // All the negative cases for thresholds are tested V2
 describe("should return invalid payload V2", function () {
@@ -482,7 +479,6 @@ describe("should return valid payload V2", function () {
       if (url.startsWith(gtcStakingEndpointV2)) {
         return Promise.resolve(gtcStakingResponseV2("6"));
       }
-
     });
 
     const selfstaking = new SelfStakingBronzeProvider();
@@ -617,7 +613,6 @@ describe("should return valid payload V1 & V2", function () {
       if (url.startsWith(gtcStakingEndpointV2)) {
         return Promise.resolve(gtcStakingResponseV2("3"));
       }
-
     });
 
     const selfstaking = new SelfStakingBronzeProvider();

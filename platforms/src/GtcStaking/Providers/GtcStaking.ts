@@ -105,23 +105,25 @@ export class GtcStakingProvider implements Provider {
         const round = this.getCurrentRound();
         const address = payload.address.toLowerCase();
 
-        // Verify id staking legacy  
+        // Verify id staking legacy
         const selfStakes: Stake[] = [];
         const communityStakes: Stake[] = [];
 
         const response: StakeResponse = await axios.get(`${gtcStakingEndpoint}/${address}/${round}`);
         const results: Stake[] = response?.data?.results || [];
-       
+
         // Verify id staking V2
         const selfStakesV2: StakeV2[] = [];
         const communityStakesV2: StakeV2[] = [];
-        
+
         const responseV2: StakeV2Response = await axios.get(`${gtcStakingEndpointV2}/${address}`, {
-          headers: { Authorization: process.env.CGRANTS_API_TOKEN},
+          headers: { Authorization: process.env.CGRANTS_API_TOKEN },
         });
-        const resultsV2: StakeV2[] = (responseV2?.status >= 200 && responseV2?.status < 300  && responseV2?.data ) ? responseV2?.data : [];
-        
-        if ((results.length == 0) && (resultsV2.length == 0) ) throw new ProviderExternalVerificationError("No results returned from the GTC Staking API");
+        const resultsV2: StakeV2[] =
+          responseV2?.status >= 200 && responseV2?.status < 300 && responseV2?.data ? responseV2?.data : [];
+
+        if (results.length == 0 && resultsV2.length == 0)
+          throw new ProviderExternalVerificationError("No results returned from the GTC Staking API");
 
         // V0
         results.forEach((stake: Stake) => {
@@ -129,8 +131,8 @@ export class GtcStakingProvider implements Provider {
         });
 
         // V2
-        resultsV2.forEach( (stake:StakeV2) => {
-          stake.staker ==  stake.stakee ? selfStakesV2.push(stake) : communityStakesV2.push(stake);
+        resultsV2.forEach((stake: StakeV2) => {
+          stake.staker == stake.stakee ? selfStakesV2.push(stake) : communityStakesV2.push(stake);
         });
 
         const selfStake: BigNumber = selfStakes.reduce((totalStake, currentStake) => {
@@ -141,8 +143,7 @@ export class GtcStakingProvider implements Provider {
           }
         }, new BigNumber(0));
 
-
-        // SelfStake => total 
+        // SelfStake => total
         const selfStakeV2: BigNumber = selfStakesV2.reduce((totalStake, currentStake) => {
           if (new Date(currentStake.unlock_time) > new Date()) {
             return totalStake.plus(new BigNumber(currentStake.amount));
@@ -151,7 +152,7 @@ export class GtcStakingProvider implements Provider {
 
         if (!context.gtcStaking) context.gtcStaking = {};
 
-        const totalSelfStaked = selfStake.plus(selfStakeV2) // Return total from legacy self staked & V2 self staked
+        const totalSelfStaked = selfStake.plus(selfStakeV2); // Return total from legacy self staked & V2 self staked
         context.gtcStaking.userStake = { selfStake: totalSelfStaked, communityStakes, communityStakesV2 };
       }
     } catch (error) {

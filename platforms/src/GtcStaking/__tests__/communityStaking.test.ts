@@ -774,7 +774,7 @@ describe("should return invalid payload V2", function () {
 });
 
 // All the positive cases for thresholds are tested V2
-describe("should return valid payload", function () {
+describe("should return valid payload V2", function () {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -942,7 +942,7 @@ describe("should return valid payload Id Staking V1 & V2", function () {
                 amount: "10",
                 staked: true,
                 block_number: 14124991,
-                tx_hash: `0x12351`,
+                tx_hash: "0x12351",
               },
             ],
           },
@@ -952,22 +952,20 @@ describe("should return valid payload Id Staking V1 & V2", function () {
         const now = new Date();
         const unlock_time = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000); // + 2 days
 
-        return Promise.resolve(
-          {
-            status: 200,
-            data: [
-              {
-                id: 1,
-                chain: 1,
-                unlock_time: unlock_time.toDateString(),
-                lock_time: now.toDateString(),
-                staker: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
-                stakee: MOCK_ADDRESS_LOWER,
-                amount: "10",
-              },
-            ],
-          }
-        );
+        return Promise.resolve({
+          status: 200,
+          data: [
+            {
+              id: 1,
+              chain: 1,
+              unlock_time: unlock_time.toDateString(),
+              lock_time: now.toDateString(),
+              staker: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+              stakee: MOCK_ADDRESS_LOWER,
+              amount: "10",
+            },
+          ],
+        });
       }
     });
 

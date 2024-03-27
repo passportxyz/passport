@@ -77,21 +77,21 @@ class CommunityStakingBaseProvider extends GtcStakingProvider {
 
     for (let i = 0; i < communityStakes.length; i++) {
       const stake = communityStakes[i];
-      const stakeAmount =  new BigNumber(stake.amount);
+      const stakeAmount = new BigNumber(stake.amount);
 
       if (stake.staker === address && stake.stakee !== address) {
         stakesByAddressOnOthers[stake.stakee] ||= new BigNumber(0);
         if (new Date(stake.unlock_time) > new Date()) {
           stakesByAddressOnOthers[stake.stakee] = stakesByAddressOnOthers[stake.stakee].plus(stakeAmount);
-        } 
+        }
       } else if (stake.stakee === address && stake.staker !== address) {
         stakesOnAddressByOthers[stake.staker] ||= new BigNumber(0);
         if (new Date(stake.unlock_time) > new Date()) {
           stakesOnAddressByOthers[stake.staker] = stakesOnAddressByOthers[stake.staker].plus(stakeAmount);
-        } 
+        }
       }
     }
-    
+
     return [...Object.entries(stakesByAddressOnOthers), ...Object.entries(stakesOnAddressByOthers)].reduce(
       (count, [_address, amount]) => {
         if (amount.gte(this.thresholdAmount)) {
