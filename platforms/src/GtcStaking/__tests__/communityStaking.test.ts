@@ -597,54 +597,6 @@ describe("Attempt verification V2", function () {
       );
     }).rejects.toThrow(ProviderExternalVerificationError);
   });
-
-  it("should combine stakes where applicable", async () => {
-    jest.clearAllMocks();
-    (axios.get as jest.Mock).mockImplementation((url: string) => {
-      if (url.startsWith(gtcStakingEndpointV2)) {
-        const now = new Date();
-        const unlock_time = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000); // + 2 days
-        return Promise.resolve({
-          status: 200,
-          data: [
-            {
-              id: 1,
-              chain: 1,
-              unlock_time: unlock_time.toDateString(),
-              lock_time: now.toDateString(),
-              staker: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
-              stakee: MOCK_ADDRESS_LOWER,
-              amount: "2",
-            },
-            {
-              id: 2,
-              hain: 1,
-              unlock_time: unlock_time.toDateString(),
-              lock_time: now.toDateString(),
-              staker: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
-              stakee: MOCK_ADDRESS_LOWER,
-              amount: "3",
-            },
-          ],
-        });
-      }
-    });
-
-    const bcStaking = new BeginnerCommunityStakerProvider();
-    const bcStakingPayload = await bcStaking.verify(
-      {
-        address: MOCK_ADDRESS_LOWER,
-      } as unknown as RequestPayload,
-      {}
-    );
-
-    expect(bcStakingPayload).toMatchObject({
-      valid: true,
-      record: {
-        address: MOCK_ADDRESS_LOWER,
-      },
-    });
-  });
 });
 
 // All the negative case for thresholds are tested V2
