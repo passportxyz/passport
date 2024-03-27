@@ -79,7 +79,7 @@ class CommunityStakingBaseProvider extends GtcStakingProvider {
       // if stake is not expired
       if (new Date(stake.unlock_time) > new Date()) {
         if (stake.staker === address && stake.stakee !== address) {
-          stakesByAddressOnOthers[stake.staker] = new BigNumber(stake.amount);
+          stakesByAddressOnOthers[stake.stakee] = new BigNumber(stake.amount);
         }
         if (stake.staker !== address && stake.stakee === address) {
           stakesOnAddressByOthers[stake.staker] = new BigNumber(stake.amount);

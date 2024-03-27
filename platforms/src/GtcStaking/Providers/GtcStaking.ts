@@ -131,8 +131,15 @@ export class GtcStakingProvider implements Provider {
         });
 
         // V2
+        let selfStakeV2 = new BigNumber(0);
         resultsV2.forEach((stake: StakeV2) => {
-          stake.staker == stake.stakee ? selfStakesV2.push(stake) : communityStakesV2.push(stake);
+          if (stake.staker == stake.stakee) {
+            if (new Date(stake.unlock_time) > new Date()) {
+              selfStakeV2 = new BigNumber(stake.amount);
+            }
+          } else {
+            communityStakesV2.push(stake);
+          }
         });
 
         const selfStake: BigNumber = selfStakes.reduce((totalStake, currentStake) => {
@@ -141,14 +148,6 @@ export class GtcStakingProvider implements Provider {
           } else {
             return totalStake.minus(new BigNumber(currentStake.amount));
           }
-        }, new BigNumber(0));
-
-        // SelfStake => total
-        const selfStakeV2: BigNumber = selfStakesV2.reduce((totalStake, currentStake) => {
-          if (new Date(currentStake.unlock_time) > new Date()) {
-            return totalStake.plus(new BigNumber(currentStake.amount));
-          }
-          return totalStake;
         }, new BigNumber(0));
 
         if (!context.gtcStaking) context.gtcStaking = {};
