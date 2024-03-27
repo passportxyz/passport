@@ -692,7 +692,6 @@ describe("should return invalid payload V2", function () {
     });
   });
 
-  // TODO: @Larisa include expired usecase
 
   it("when a user is staking on 2 community members or is staked on by 2 community members below 10 GTC for ExperiencedCommunityStaker", async () => {
     jest.clearAllMocks();
