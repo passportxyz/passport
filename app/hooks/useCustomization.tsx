@@ -45,12 +45,16 @@ const loadConfigForCustomizationKey = async (customizationKey?: string): Promise
       break;
     default:
       if (customizationKey) {
+        console.log("requestDynamicCustomizationConfig", customizationKey);
         const dynamicConfig = await requestDynamicCustomizationConfig(customizationKey);
+        console.log("dynamicConfig", dynamicConfig);
         if (dynamicConfig) {
           config = dynamicConfig;
         }
       }
   }
+
+  console.log("loadConfigForCustomizationKey", config);
 
   return config;
 };
@@ -85,19 +89,21 @@ export const useNavigateToPage = () => {
 
   const navigateToPage = (page: Page) => {
     const path = page === "home" ? "" : page;
-    navigate((key === DEFAULT_CUSTOMIZATION_KEY ? "/" : `/${key}/`) + path);
+    navigate((!key || key === DEFAULT_CUSTOMIZATION_KEY ? "/" : `/${key}/`) + path);
   };
 
   return navigateToPage;
 };
 
 // Don't use this directly, use the CustomizationUrlLayoutRoute component instead
-const useSetCustomizationKey = (): ((customizationKey: string | undefined) => Promise<void>) => {
+// This is only exported for testing purposes
+export const useSetCustomizationKey = (): ((customizationKey: string | undefined) => Promise<void>) => {
   const setCustomizationConfig = useSetAtom(customizationConfigAtom);
 
   const setCustomizationKey = useCallback(
     async (customizationKey: string | undefined) => {
       if (customizationKey) {
+        console.log("setCustomizationKey", customizationKey);
         const customizationConfig = await loadConfigForCustomizationKey(customizationKey);
         setCustomizationConfig(customizationConfig);
         if (customizationConfig.customizationTheme) {
@@ -113,6 +119,7 @@ const useSetCustomizationKey = (): ((customizationKey: string | undefined) => Pr
   return setCustomizationKey;
 };
 
+// This is probably the only thing you should use from this file
 export const useCustomization = (): Customization => {
   return useAtomValue(customizationConfigAtom);
 };

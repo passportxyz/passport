@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 jest.mock("react-router-dom", () => ({
   useNavigate: jest.fn(),
+  useParams: jest.fn(() => ({})),
 }));
 
 const defaultProps = {

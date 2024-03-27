@@ -134,9 +134,12 @@ export const requestDynamicCustomizationConfig = async (
       },
     };
   } else {
-    const customizationResponse = await axios.get(`${CUSTOMIZATION_ENDPOINT}/${customizationKey}`);
-    console.log("customizationResponse", customizationResponse);
-    return customizationResponse.data;
+    try {
+      const response = await axios.get(`${CUSTOMIZATION_ENDPOINT}/${customizationKey}`);
+      return response.data;
+    } catch {
+      return undefined;
+    }
   }
 };
 
