@@ -649,6 +649,157 @@ describe("should return valid payload V2", function () {
   });
 });
 
+// All the positive cases for thresholds are tested
+describe("should return valid payload V1 & V2", function () {
+  it("when stake amount above 5 GTC for Bronze", async () => {
+    (axios.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.startsWith(gtcStakingEndpoint)) {
+        return Promise.resolve(gtcStakingResponse("3"));
+      }
+      if (url.startsWith(gtcStakingEndpointV2)) {
+        return Promise.resolve(gtcStakingResponseV2("3"));
+      }
 
+    });
 
-// TODO: add tests for V1 & V2 combined 
+    const selfstaking = new SelfStakingBronzeProvider();
+
+    const selfstakingPayload = await selfstaking.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
+
+    expect(selfstakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER },
+    });
+  });
+
+  it("when stake amount above 20 GTC for Silver", async () => {
+    (axios.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.startsWith(gtcStakingEndpoint)) {
+        return Promise.resolve(gtcStakingResponse("10"));
+      }
+      if (url.startsWith(gtcStakingEndpointV2)) {
+        return Promise.resolve(gtcStakingResponseV2("11"));
+      }
+    });
+
+    const selfstaking = new SelfStakingSilverProvider();
+
+    const selfstakingPayload = await selfstaking.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
+
+    expect(selfstakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER },
+    });
+  });
+
+  it("when stake amount above 125 GTC for Gold", async () => {
+    (axios.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.startsWith(gtcStakingEndpoint)) {
+        return Promise.resolve(gtcStakingResponse("50"));
+      }
+      if (url.startsWith(gtcStakingEndpointV2)) {
+        return Promise.resolve(gtcStakingResponseV2("76"));
+      }
+    });
+
+    const selfstaking = new SelfStakingGoldProvider();
+
+    const selfstakingPayload = await selfstaking.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
+
+    expect(selfstakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER },
+    });
+  });
+
+  // All amounts equal to tier amount
+  it("when stake amount equal to 5 GTC for Bronze", async () => {
+    (axios.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.startsWith(gtcStakingEndpoint)) {
+        return Promise.resolve(gtcStakingResponse("2"));
+      }
+      if (url.startsWith(gtcStakingEndpointV2)) {
+        return Promise.resolve(gtcStakingResponseV2("3"));
+      }
+    });
+
+    const selfstaking = new SelfStakingBronzeProvider();
+
+    const selfstakingPayload = await selfstaking.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
+
+    expect(selfstakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER },
+    });
+  });
+
+  it("when stake amount equal to 20 GTC for Silver", async () => {
+    (axios.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.startsWith(gtcStakingEndpoint)) {
+        return Promise.resolve(gtcStakingResponse("10"));
+      }
+      if (url.startsWith(gtcStakingEndpointV2)) {
+        return Promise.resolve(gtcStakingResponseV2("10"));
+      }
+    });
+
+    const selfstaking = new SelfStakingSilverProvider();
+
+    const selfstakingPayload = await selfstaking.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
+
+    expect(selfstakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER },
+    });
+  });
+
+  it("when stake amount equal to 125 GTC for Gold", async () => {
+    (axios.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.startsWith(gtcStakingEndpoint)) {
+        return Promise.resolve(gtcStakingResponse("100"));
+      }
+      if (url.startsWith(gtcStakingEndpointV2)) {
+        return Promise.resolve(gtcStakingResponseV2("25"));
+      }
+    });
+
+    const selfstaking = new SelfStakingGoldProvider();
+
+    const selfstakingPayload = await selfstaking.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
+
+    expect(selfstakingPayload).toMatchObject({
+      valid: true,
+      record: { address: MOCK_ADDRESS_LOWER },
+    });
+  });
+});
