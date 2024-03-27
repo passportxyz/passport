@@ -75,22 +75,17 @@ class CommunityStakingBaseProvider extends GtcStakingProvider {
     const stakesOnAddressByOthers: Record<string, BigNumber> = {};
     const stakesByAddressOnOthers: Record<string, BigNumber> = {};
 
-    for (let i = 0; i < communityStakes.length; i++) {
-      const stake = communityStakes[i];
-      const stakeAmount = new BigNumber(stake.amount);
-
-      if (stake.staker === address && stake.stakee !== address) {
-        stakesByAddressOnOthers[stake.stakee] ||= new BigNumber(0);
-        if (new Date(stake.unlock_time) > new Date()) {
-          stakesByAddressOnOthers[stake.stakee] = stakesByAddressOnOthers[stake.stakee].plus(stakeAmount);
+    communityStakes.forEach((stake) => {
+      // if stake is not expired
+      if (new Date(stake.unlock_time) > new Date()) {
+        if (stake.staker === address && stake.stakee !== address) {
+          stakesByAddressOnOthers[stake.staker] = new BigNumber(stake.amount);
         }
-      } else if (stake.stakee === address && stake.staker !== address) {
-        stakesOnAddressByOthers[stake.staker] ||= new BigNumber(0);
-        if (new Date(stake.unlock_time) > new Date()) {
-          stakesOnAddressByOthers[stake.staker] = stakesOnAddressByOthers[stake.staker].plus(stakeAmount);
+        if (stake.staker !== address && stake.stakee === address) {
+          stakesOnAddressByOthers[stake.staker] = new BigNumber(stake.amount);
         }
       }
-    }
+    });
 
     return [...Object.entries(stakesByAddressOnOthers), ...Object.entries(stakesOnAddressByOthers)].reduce(
       (count, [_address, amount]) => {
