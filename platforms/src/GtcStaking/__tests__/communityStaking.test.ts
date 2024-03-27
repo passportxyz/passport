@@ -68,7 +68,7 @@ const gtcStakingResponse = (gtcAmount: string, n: number, communityType: string)
           event_type: "Xstake",
           round_id: 1,
           staker: MOCK_ADDRESS_LOWER,
-          address: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+          address: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1ad1",
           amount: gtcAmount,
           staked: true,
           block_number: 14124991,
@@ -146,7 +146,7 @@ const gtcStakingResponseV2 = (gtcAmount: string, n: number, communityType: strin
           chain: 1,
           unlock_time: unlock_time.toDateString(),
           lock_time: now.toDateString(),
-          staker:  "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+          staker: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
           stakee: MOCK_ADDRESS_LOWER,
           amount: gtcAmount,
         });
@@ -561,9 +561,7 @@ describe("Attempt verification V2", function () {
   it("handles valid verification attempt", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2
-          ("5", 1, "BeginnerCommunityStaker")
-          );
+        return Promise.resolve(gtcStakingResponseV2("5", 1, "BeginnerCommunityStaker"));
       }
     });
 
@@ -582,20 +580,6 @@ describe("Attempt verification V2", function () {
       },
     });
   });
-
-  // // For bad address make sure you return 4XX
-  // // TODO: @Larisa clarify this ?
-  // it("handles invalid verification attempt where address is not proper ether address", async () => {
-  //   const communityStakingProvider = new BeginnerCommunityStakerProvider();
-  //   await expect(async () => {
-  //     return await communityStakingProvider.verify(
-  //       {
-  //         address: "not_address",
-  //       } as unknown as RequestPayload,
-  //       {}
-  //     );
-  //   }).rejects.toThrow("Not a proper ethereum address");
-  // });
 
   it("handles invalid endpoint response", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
@@ -692,7 +676,6 @@ describe("should return invalid payload V2", function () {
     });
   });
 
-
   it("when a user is staking on 2 community members or is staked on by 2 community members below 10 GTC for ExperiencedCommunityStaker", async () => {
     jest.clearAllMocks();
     (axios.get as jest.Mock).mockImplementation((url: string) => {
@@ -750,25 +733,25 @@ describe("should return invalid payload V2", function () {
         return Promise.resolve({
           status: 200,
           data: [
-              {
-                id: 1,
-                chain: 1,
-                unlock_time: unlock_time.toDateString(),
-                lock_time: locked_time.toDateString(),
-                stakee: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
-                staker: MOCK_ADDRESS_LOWER,
-                amount: "10"
-              },
-              {
-                id: 2,
-                chain: 1,
-                unlock_time: unlock_time.toDateString(),
-                lock_time: locked_time.toDateString(),
-                stakee: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
-                staker: MOCK_ADDRESS_LOWER,
-                amount: "6"
-              },
-            ],
+            {
+              id: 1,
+              chain: 1,
+              unlock_time: unlock_time.toDateString(),
+              lock_time: locked_time.toDateString(),
+              stakee: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+              staker: MOCK_ADDRESS_LOWER,
+              amount: "10",
+            },
+            {
+              id: 2,
+              chain: 1,
+              unlock_time: unlock_time.toDateString(),
+              lock_time: locked_time.toDateString(),
+              stakee: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+              staker: MOCK_ADDRESS_LOWER,
+              amount: "6",
+            },
+          ],
         });
       }
     });
@@ -912,130 +895,121 @@ describe("should return valid payload", function () {
   });
 });
 
+describe("should return valid payload Id Staking V1 & V2", function () {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-// describe("should return valid payload Id Staking V1 & V2", function () {
-//   beforeEach(() => {
-//     jest.clearAllMocks();
-//   });
+  it("when user stakes more than 5 GTC on another community member for BeginnerCommunityStaker", async () => {
+    (axios.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.startsWith(gtcStakingEndpoint)) {
+        return Promise.resolve(gtcStakingResponse("5", 1, "BeginnerCommunityStaker"));
+      }
+      if (url.startsWith(gtcStakingEndpointV2)) {
+        return Promise.resolve(gtcStakingResponseV2("5", 1, "BeginnerCommunityStaker"));
+      }
+    });
 
-//   // it("when user stakes more than 5 GTC on another community member for BeginnerCommunityStaker", async () => {
-//   //   (axios.get as jest.Mock).mockImplementation((url: string) => {
-//   //     if (url.startsWith(gtcStakingEndpoint)) {
-//   //       return Promise.resolve(gtcStakingResponse("3", 1, "BeginnerCommunityStaker"));
-//   //     }
-//   //     if (url.startsWith(gtcStakingEndpointV2)) {
-//   //       return Promise.resolve(gtcStakingResponseV2("3", 1, "BeginnerCommunityStaker"));
-//   //     }
-//   //   });
+    const bcsStaking = new BeginnerCommunityStakerProvider();
+    const bcsStakingPayload = await bcsStaking.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
 
-//   //   const bcsStaking = new BeginnerCommunityStakerProvider();
-//   //   const bcsStakingPayload = await bcsStaking.verify(
-//   //     {
-//   //       address: MOCK_ADDRESS_LOWER,
-//   //     } as unknown as RequestPayload,
-//   //     {}
-//   //   );
+    expect(bcsStakingPayload).toMatchObject({
+      valid: true,
+      record: {
+        address: MOCK_ADDRESS_LOWER,
+      },
+    });
+  });
 
-//   //   expect(bcsStakingPayload).toMatchObject({
-//   //     valid: true,
-//   //     record: {
-//   //       address: MOCK_ADDRESS_LOWER,
-//   //     },
-//   //   });
-//   // });
+  it("when more than 10 GTC is staked on a community member and a community member stakes more than 10 GTC on the user for ExperiencedCommunityStaker", async () => {
+    (axios.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.startsWith(gtcStakingEndpoint)) {
+        return Promise.resolve({
+          status: 200,
+          data: {
+            results: [
+              {
+                id: 1,
+                event_type: "Xstake",
+                round_id: 1,
+                staker: MOCK_ADDRESS_LOWER,
+                address: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1ad1",
+                amount: "10",
+                staked: true,
+                block_number: 14124991,
+                tx_hash: `0x12351`,
+              },
+            ],
+          },
+        });
+      }
+      if (url.startsWith(gtcStakingEndpointV2)) {
+        const now = new Date();
+        const unlock_time = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000); // + 2 days
 
-//   // it("when more than 10 GTC is staked on a community member and a community member stakes more than 10 GTC on the user for ExperiencedCommunityStaker", async () => {
-//   //   (axios.get as jest.Mock).mockImplementation((url: string) => {
-//   //     if (url.startsWith(gtcStakingEndpoint)) {
-//   //       return Promise.resolve(gtcStakingResponse("6", 1, "ExperiencedCommunityStaker"));
-//   //     }
-//   //     if (url.startsWith(gtcStakingEndpointV2)) {
-//   //       return Promise.resolve(gtcStakingResponseV2("6", 1, "ExperiencedCommunityStaker"));
-//   //     }
-//   //   });
+        return Promise.resolve(
+          {
+            status: 200,
+            data: [
+              {
+                id: 1,
+                chain: 1,
+                unlock_time: unlock_time.toDateString(),
+                lock_time: now.toDateString(),
+                staker: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+                stakee: MOCK_ADDRESS_LOWER,
+                amount: "10",
+              },
+            ],
+          }
+        );
+      }
+    });
 
-//   //   const ecsStaking = new ExperiencedCommunityStakerProvider();
-//   //   const ecsStakingPayload = await ecsStaking.verify(
-//   //     {
-//   //       address: MOCK_ADDRESS_LOWER,
-//   //     } as unknown as RequestPayload,
-//   //     {}
-//   //   );
+    const ecsStaking = new ExperiencedCommunityStakerProvider();
+    const ecsStakingPayload = await ecsStaking.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
 
-//   //   expect(ecsStakingPayload).toMatchObject({
-//   //     valid: true,
-//   //     record: {
-//   //       address: MOCK_ADDRESS_LOWER,
-//   //     },
-//   //   });
-//   // });
+    expect(ecsStakingPayload).toMatchObject({
+      valid: true,
+      record: {
+        address: MOCK_ADDRESS_LOWER,
+      },
+    });
+  });
 
-//   // it("when more than 5 community members stake more than 20 GTC on the user for TrustedCitizen", async () => {
-//   //   (axios.get as jest.Mock).mockImplementation((url: string) => {
-//   //     if (url.startsWith(gtcStakingEndpointV2)) {
-//   //       return Promise.resolve(gtcStakingResponseV2("25", 9, "TrustedCitizen"));
-//   //     }
-//   //   });
+  it("when more than 5 community members stake more than 20 GTC on the user for TrustedCitizen", async () => {
+    (axios.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.startsWith(gtcStakingEndpoint)) {
+        return Promise.resolve(gtcStakingResponse("25", 3, "TrustedCitizen"));
+      }
+      if (url.startsWith(gtcStakingEndpointV2)) {
+        return Promise.resolve(gtcStakingResponseV2("25", 2, "TrustedCitizen"));
+      }
+    });
 
-//   //   const tcStaking = new TrustedCitizenProvider();
-//   //   const tcStakingPayload = await tcStaking.verify(
-//   //     {
-//   //       address: MOCK_ADDRESS_LOWER,
-//   //     } as unknown as RequestPayload,
-//   //     {}
-//   //   );
+    const tcStaking = new TrustedCitizenProvider();
+    const tcStakingPayload = await tcStaking.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
 
-//   //   expect(tcStakingPayload).toMatchObject({
-//   //     valid: true,
-//   //     record: {
-//   //       address: MOCK_ADDRESS_LOWER,
-//   //     },
-//   //   });
-//   // });
-//   // // All values equal to tier amount
-//   // it("when the user stakes exactly 5 GTC on a community member for BeginnerCommunityStaker", async () => {
-//   //   (axios.get as jest.Mock).mockImplementation((url: string) => {
-//   //     if (url.startsWith(gtcStakingEndpointV2)) {
-//   //       return Promise.resolve(gtcStakingResponseV2("5", 1, "BeginnerCommunityStaker"));
-//   //     }
-//   //   });
-
-//   //   const bcsStaking = new BeginnerCommunityStakerProvider();
-//   //   const bcsStakingPayload = await bcsStaking.verify(
-//   //     {
-//   //       address: MOCK_ADDRESS_LOWER,
-//   //     } as unknown as RequestPayload,
-//   //     {}
-//   //   );
-
-//   //   expect(bcsStakingPayload).toMatchObject({
-//   //     valid: true,
-//   //     record: {
-//   //       address: MOCK_ADDRESS_LOWER,
-//   //     },
-//   //   });
-//   // });
-
-//   // it("when a community member stakes exactly 10 GTC on the user and the user stakes exactly 10 GTC on them for ExperiencedCommunityStaker", async () => {
-//   //   (axios.get as jest.Mock).mockImplementation((url: string) => {
-//   //     if (url.startsWith(gtcStakingEndpointV2)) {
-//   //       return Promise.resolve(gtcStakingResponseV2("10", 1, "ExperiencedCommunityStaker"));
-//   //     }
-//   //   });
-
-//   //   const ecsStaking = new ExperiencedCommunityStakerProvider();
-//   //   const ecsStakingPayload = await ecsStaking.verify(
-//   //     {
-//   //       address: MOCK_ADDRESS_LOWER,
-//   //     } as unknown as RequestPayload,
-//   //     {}
-//   //   );
-
-//   //   expect(ecsStakingPayload).toMatchObject({
-//   //     valid: true,
-//   //     record: {
-//   //       address: MOCK_ADDRESS_LOWER,
-//   //     },
-//   //   });
-//   // });
-// });
+    expect(tcStakingPayload).toMatchObject({
+      valid: true,
+      record: {
+        address: MOCK_ADDRESS_LOWER,
+      },
+    });
+  });
+});

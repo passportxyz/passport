@@ -386,48 +386,6 @@ describe("Attempt verification V2", function () {
       },
     });
   });
-
-  // it("handles invalid verification attempt where address is not proper ether address", async () => {
-  //   const selfStakingProvider = new SelfStakingBronzeProvider();
-  //   await expect(async () => {
-  //     return await selfStakingProvider.verify(
-  //       {
-  //         address: "NOT_ADDRESS",
-  //       } as unknown as RequestPayload,
-  //       {}
-  //     );
-  //   }).rejects.toThrow(new ProviderExternalVerificationError("Not a proper ethereum address"));
-  // });
-
-  // it("handles invalid subgraph response", async () => {
-  //   mockedAxios.get.mockResolvedValueOnce(invalidGtcStakingResponse);
-  //   const selfStakingProvider = new SelfStakingBronzeProvider();
-
-  //   await expect(async () => {
-  //     await selfStakingProvider.verify(
-  //       {
-  //         address: MOCK_ADDRESS_LOWER,
-  //       } as unknown as RequestPayload,
-  //       {}
-  //     );
-  //   }).rejects.toThrow("No results returned from the GTC Staking API");
-  // });
-
-  // it("handles invalid verification attempt where an exception is thrown", async () => {
-  //   mockedAxios.get.mockImplementationOnce(() => {
-  //     throw Error("SelfStakingBronze verifyStake Error");
-  //   });
-  //   const selfStakingProvider = new SelfStakingBronzeProvider();
-  //   await expect(async () => {
-  //     await selfStakingProvider.verify(
-  //       {
-  //         address: MOCK_ADDRESS_LOWER,
-  //       } as unknown as RequestPayload,
-  //       {}
-  //     );
-  //   }).rejects.toThrow("SelfStakingBronze verifyStake Error");
-  // });
-
 });
 
 
