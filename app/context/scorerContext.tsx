@@ -9,6 +9,8 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PLATFORMS } from "../config/platforms";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { getStampProviderIds } from "../components/CardList";
+import { useCustomization } from "../hooks/useCustomization";
+import { isDynamicCustomization } from "../utils/customizationUtils";
 
 const scorerApiGetScore = CERAMIC_CACHE_ENDPOINT + "/score";
 const scorerApiGetWeights = CERAMIC_CACHE_ENDPOINT + "/weights";
@@ -74,6 +76,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const [stampScores, setStampScores] = useState<StampScores>();
   const [stampWeights, setStampWeights] = useState<Partial<Weights>>({});
   const [scoredPlatforms, setScoredPlatforms] = useState<PlatformScoreSpec[]>([]);
+  const customization = useCustomization();
 
   const loadScore = async (
     address: string | undefined,
@@ -84,9 +87,18 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       setScoreState("APP_INITIAL");
       let response;
       try {
+        const useAlternateScorer = isDynamicCustomization(customization) && customization.scorer?.id;
+
+        // Always use POST when there is an alternate scorer, since
+        // the ceramic-cache requests won't refresh the alternate score
+        const method = rescore || useAlternateScorer ? "post" : "get";
+
+        let data = useAlternateScorer ? { alternate_scorer_id: customization.scorer?.id } : undefined;
+
         response = await axios({
           url: `${scorerApiGetScore}/${address}`,
-          method: rescore ? "post" : "get",
+          data,
+          method,
           headers: {
             Authorization: `Bearer ${dbAccessToken}`,
           },

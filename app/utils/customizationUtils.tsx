@@ -11,7 +11,8 @@ const sanitize = DOMPurify.sanitize;
 export const initializeDOMPurify = () => {
   // This fails if done at the top level of the file
   DOMPurify.addHook("afterSanitizeAttributes", function (node) {
-    // set all elements owning target to target=_blank
+    // set all elements owning target to target=_blank and rel=noopener
+    // otherwise DOMPurify removes the target attribute
     if ("target" in node) {
       node.setAttribute("target", "_blank");
       node.setAttribute("rel", "noopener");
@@ -77,8 +78,6 @@ type CustomizationResponse = {
 
 const SanitizedHTMLComponent = ({ html }: { html: string }) => {
   const sanitizedHTML = useMemo(() => html && sanitize(html), [html]);
-  console.log("html", html);
-  console.log("sanitizedHTML", sanitizedHTML);
 
   if (!html) {
     return null;
