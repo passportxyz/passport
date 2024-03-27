@@ -1,5 +1,5 @@
 import { setCustomizationTheme } from "../utils/theme/setCustomizationTheme";
-import { Customization, requestDynamicCustomizationConfig } from "../utils/customizationUtils";
+import { Customization, initializeDOMPurify, requestDynamicCustomizationConfig } from "../utils/customizationUtils";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect } from "react";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
@@ -45,16 +45,12 @@ const loadConfigForCustomizationKey = async (customizationKey?: string): Promise
       break;
     default:
       if (customizationKey) {
-        console.log("requestDynamicCustomizationConfig", customizationKey);
         const dynamicConfig = await requestDynamicCustomizationConfig(customizationKey);
-        console.log("dynamicConfig", dynamicConfig);
         if (dynamicConfig) {
           config = dynamicConfig;
         }
       }
   }
-
-  console.log("loadConfigForCustomizationKey", config);
 
   return config;
 };
@@ -66,7 +62,9 @@ export const CustomizationUrlLayoutRoute = () => {
   const key = useCustomizationKeyFromUrl();
   const setCustomizationKey = useSetCustomizationKey();
 
-  console.log("geri key", key);
+  useEffect(() => {
+    initializeDOMPurify();
+  }, []);
 
   useEffect(() => {
     setCustomizationKey(key);
@@ -103,7 +101,6 @@ export const useSetCustomizationKey = (): ((customizationKey: string | undefined
   const setCustomizationKey = useCallback(
     async (customizationKey: string | undefined) => {
       if (customizationKey) {
-        console.log("setCustomizationKey", customizationKey);
         const customizationConfig = await loadConfigForCustomizationKey(customizationKey);
         setCustomizationConfig(customizationConfig);
         if (customizationConfig.customizationTheme) {

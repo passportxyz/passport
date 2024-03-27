@@ -20,7 +20,7 @@ export const setCustomizationTheme = ({ colors }: CustomizationTheme) => {
 };
 
 const convertHexToRGB = (color: string) => {
-  if (color.length === 7 && color.startsWith("#")) {
+  if (color.startsWith("#")) {
     return hexToRGB(color);
   }
   return color;

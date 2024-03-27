@@ -28,8 +28,6 @@ export default function Home() {
 
   // Route user to dashboard when wallet is connected
   useEffect(() => {
-    const usingCustomization = customization.key !== DEFAULT_CUSTOMIZATION_KEY;
-    setEnableEthBranding(!usingCustomization);
     if (address) {
       if (checkShowOnboard()) {
         navigateToPage("welcome");
@@ -38,6 +36,11 @@ export default function Home() {
       }
     }
   }, [address]);
+
+  useEffect(() => {
+    const usingCustomization = customization.key !== DEFAULT_CUSTOMIZATION_KEY;
+    setEnableEthBranding(!usingCustomization);
+  }, [customization.key]);
 
   useEffect(() => {
     if (connectError) {

@@ -21,7 +21,7 @@ export const palette = Object.entries({
 );
 
 export function hexToRGB(hex: string) {
-  var r = parseInt(hex.slice(1, 3), 16) || 0,
+  const r = parseInt(hex.slice(1, 3), 16) || 0,
     g = parseInt(hex.slice(3, 5), 16) || 0,
     b = parseInt(hex.slice(5, 7), 16) || 0;
 
