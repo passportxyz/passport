@@ -148,6 +148,7 @@ export class GtcStakingProvider implements Provider {
           if (new Date(currentStake.unlock_time) > new Date()) {
             return totalStake.plus(new BigNumber(currentStake.amount));
           }
+          return totalStake;
         }, new BigNumber(0));
 
         if (!context.gtcStaking) context.gtcStaking = {};
