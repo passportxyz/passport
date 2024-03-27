@@ -4,6 +4,7 @@ import { CUSTOMIZATION_ENDPOINT } from "../config/customization_config";
 import axios from "axios";
 import * as DOMPurify from "dompurify";
 import parse from "html-react-parser";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 const sanitize = DOMPurify.sanitize;
 
@@ -27,6 +28,10 @@ export type BasicCustomization = {
 export type CustomizationLogoBackground = "dots" | "none";
 
 export type DynamicCustomization = BasicCustomization & {
+  scorer?: {
+    id?: number;
+    weights?: Record<PROVIDER_ID, string>;
+  };
   dashboardPanel: {
     logo: {
       image: React.ReactNode;
@@ -49,6 +54,10 @@ export type Customization = BasicCustomization | DynamicCustomization;
 type CustomizationResponse = {
   customizationTheme?: CustomizationTheme;
   useCustomDashboardPanel?: boolean;
+  scorer?: {
+    id?: number;
+    weights?: Record<PROVIDER_ID, string>;
+  };
   dashboardPanel?: {
     logo?: {
       image?: string;
@@ -88,6 +97,10 @@ export const requestDynamicCustomizationConfig = async (
       key: customizationKey,
       customizationTheme: customizationResponse.customizationTheme,
       useCustomDashboardPanel: customizationResponse.useCustomDashboardPanel || false,
+      scorer: {
+        id: customizationResponse.scorer?.id,
+        weights: customizationResponse.scorer?.weights,
+      },
       dashboardPanel: {
         logo: {
           image: <SanitizedHTMLComponent html={customizationResponse.dashboardPanel?.logo?.image || ""} />,
