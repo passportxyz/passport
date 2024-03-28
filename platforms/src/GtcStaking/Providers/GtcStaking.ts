@@ -48,7 +48,9 @@ export interface StakeResponse {
 
 export interface StakeV2Response {
   status: number;
-  data: StakeV2[];
+  data: {
+    items: StakeV2[];
+  };
 }
 
 export type GtcStakingContext = ProviderContext & {
@@ -120,7 +122,7 @@ export class GtcStakingProvider implements Provider {
           headers: { Authorization: process.env.CGRANTS_API_TOKEN },
         });
         const resultsV2: StakeV2[] =
-          responseV2?.status >= 200 && responseV2?.status < 300 && responseV2?.data ? responseV2?.data : [];
+          responseV2?.status >= 200 && responseV2?.status < 300 && responseV2?.data ? responseV2?.data?.items : [];
 
         if (results.length == 0 && resultsV2.length == 0)
           throw new ProviderExternalVerificationError("No results returned from the GTC Staking API");
