@@ -11,7 +11,7 @@ import { useCustomization } from "../hooks/useCustomization";
 import { isDynamicCustomization } from "../utils/customizationUtils";
 import { getStampProviderIds } from "./CardList";
 
-type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
+export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
 type PlatformCardProps = {
   i: number;
@@ -30,7 +30,6 @@ export const PlatformCard = ({
   setCurrentPlatform,
   className,
 }: PlatformCardProps): JSX.Element => {
-  // import all providers
   const [hovering, setHovering] = useState(false);
   const platformIsExcluded = usePlatformIsExcluded(platform);
 
