@@ -134,12 +134,15 @@ export default function Dashboard() {
   useEffect(() => {
     if (!address) {
       navigateToPage("home");
-    } else {
-      if (dbAccessTokenStatus === "connected" && dbAccessToken) {
-        refreshScore(address!.toLowerCase(), dbAccessToken);
-      }
     }
-  }, [address, dbAccessToken, dbAccessTokenStatus]);
+  }, [address]);
+
+  // Fetch score on page load and when the customization key changes
+  useEffect(() => {
+    if (address && dbAccessTokenStatus === "connected" && dbAccessToken) {
+      refreshScore(address.toLowerCase(), dbAccessToken);
+    }
+  }, [dbAccessTokenStatus, dbAccessToken, address, customization.key]);
 
   //show toasts from 1click flow
   useEffect(() => {

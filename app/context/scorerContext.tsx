@@ -43,7 +43,7 @@ export interface ScorerContextState {
   passportSubmissionState: PassportSubmissionStateType;
   scoreState: ScoreStateType;
   scoredPlatforms: PlatformScoreSpec[];
-  refreshScore: (address: string | undefined, dbAccessToken: string) => Promise<void>;
+  refreshScore: (address: string | undefined, dbAccessToken: string, forceRescore?: boolean) => Promise<void>;
   fetchStampWeights: () => Promise<void>;
   stampWeights: Partial<Weights>;
   // submitPassport: (address: string | undefined) => Promise<void>;
@@ -57,7 +57,11 @@ const startingState: ScorerContextState = {
   passportSubmissionState: "APP_INITIAL",
   scoreState: "APP_INITIAL",
   scoredPlatforms: [],
-  refreshScore: async (address: string | undefined, dbAccessToken: string): Promise<void> => {},
+  refreshScore: async (
+    address: string | undefined,
+    dbAccessToken: string,
+    forceRescore: boolean = false
+  ): Promise<void> => {},
   fetchStampWeights: async (): Promise<void> => {},
   stampWeights: {},
   // submitPassport: async (address: string | undefined): Promise<void> => {},
@@ -89,14 +93,14 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       try {
         const useAlternateScorer = isDynamicCustomization(customization) && customization.scorer?.id;
 
-        // Always use POST when there is an alternate scorer, since
-        // the ceramic-cache requests won't refresh the alternate score
-        const method = rescore || useAlternateScorer ? "post" : "get";
+        const method = rescore ? "post" : "get";
 
-        let data = useAlternateScorer ? { alternate_scorer_id: customization.scorer?.id } : undefined;
+        const url = `${scorerApiGetScore}/${address}${useAlternateScorer && method === "get" ? `?alternate_scorer_id=${customization.scorer?.id}` : ""}`;
+        const data =
+          useAlternateScorer && method === "post" ? { alternate_scorer_id: customization.scorer?.id } : undefined;
 
         response = await axios({
-          url: `${scorerApiGetScore}/${address}`,
+          url,
           data,
           method,
           headers: {
@@ -151,7 +155,8 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
 
   const refreshScore = async (
     address: string | undefined,
-    dbAccessToken: string
+    dbAccessToken: string,
+    forceRescore: boolean = false
     // submitPassportOnFailure: boolean = true
   ) => {
     if (address) {
@@ -160,7 +165,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       setPassportSubmissionState("APP_REQUEST_PENDING");
       try {
         let requestCount = 1;
-        let scoreStatus = await loadScore(address, dbAccessToken);
+        let scoreStatus = await loadScore(address, dbAccessToken, forceRescore);
         while ((scoreStatus === "PROCESSING" || scoreStatus === "BULK_PROCESSING") && requestCount < maxRequests) {
           requestCount++;
           await new Promise((resolve) => setTimeout(resolve, sleepTime));
