@@ -345,11 +345,11 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [passportLoadResponse, setPassportLoadResponse] = useState<PassportLoadResponse | undefined>();
   const [passportHasCacaoError, setPassportHasCacaoError] = useState<boolean>(false);
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
-  const customization = useCustomization();
 
   const address = useWalletStore((state) => state.address);
   const { dbAccessToken, did, checkSessionIsValid } = useDatastoreConnectionContext();
   const { refreshScore, fetchStampWeights } = useContext(ScorerContext);
+  const customization = useCustomization();
 
   const toast = useToast();
 
@@ -404,7 +404,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       fetchStampWeights();
       fetchPassport(database, false, true);
     }
-  }, [database]);
+  }, [database, customization]);
 
   useEffect(() => {
     if (ceramicClient) {
