@@ -110,6 +110,9 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       }
       setScoreState(response.data.status);
       if (response.data.status === "DONE") {
+        if (!response.data.evidence) {
+          console.error("Invalid scorer configured. Please configure a 'binary weighted' scorer");
+        }
         const numRawScore = Number.parseFloat(response.data.evidence.rawScore);
         const numThreshold = Number.parseFloat(response.data.evidence.threshold);
         const numScore = Number.parseFloat(response.data.score);
@@ -134,8 +137,13 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
 
   const fetchStampWeights = async () => {
     try {
-      const response = await axios.get(`${scorerApiGetWeights}`);
-      setStampWeights(response.data);
+      if (isDynamicCustomization(customization) && customization.scorer?.weights) {
+        setStampWeights(customization.scorer?.weights);
+      } else {
+        // TODO: Fetching the default weights, could become part of the customization step ...
+        const response = await axios.get(`${scorerApiGetWeights}`);
+        setStampWeights(response.data);
+      }
     } catch (error) {
       setPassportSubmissionState("APP_REQUEST_ERROR");
     }
