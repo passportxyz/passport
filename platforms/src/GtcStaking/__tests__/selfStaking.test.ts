@@ -57,17 +57,19 @@ const gtcStakingResponseV2 = (gtcAmount: string) => {
 
   return {
     status: 200,
-    data: [
-      {
-        id: 0,
-        chain: 1,
-        unlock_time: unlock_time.toDateString(),
-        lock_time: now.toDateString(),
-        staker: MOCK_ADDRESS_LOWER,
-        stakee: MOCK_ADDRESS_LOWER,
-        amount: gtcAmount,
-      },
-    ],
+    data: {
+      items: [
+        {
+          id: 0,
+          chain: 1,
+          unlock_time: unlock_time.toDateString(),
+          lock_time: now.toDateString(),
+          staker: MOCK_ADDRESS_LOWER,
+          stakee: MOCK_ADDRESS_LOWER,
+          amount: gtcAmount,
+        },
+      ],
+    },
   };
 };
 
@@ -400,7 +402,7 @@ describe("should return invalid payload V2", function () {
       }
     });
 
-    const gtcStakeAmount = gtcStakingResponseV2("4").data[0].amount;
+    const gtcStakeAmount = gtcStakingResponseV2("4").data.items[0].amount;
 
     const selfstaking = new SelfStakingBronzeProvider();
     const selfstakingPayload = await selfstaking.verify(
@@ -426,7 +428,7 @@ describe("should return invalid payload V2", function () {
       }
     });
 
-    const gtcStakeAmount = gtcStakingResponseV2("18").data[0].amount;
+    const gtcStakeAmount = gtcStakingResponseV2("18").data.items[0].amount;
 
     const selfstaking = new SelfStakingSilverProvider();
     const selfstakingPayload = await selfstaking.verify(
@@ -452,7 +454,7 @@ describe("should return invalid payload V2", function () {
       }
     });
 
-    const gtcStakeAmount = gtcStakingResponseV2("122").data[0].amount;
+    const gtcStakeAmount = gtcStakingResponseV2("122").data.items[0].amount;
 
     const selfstaking = new SelfStakingGoldProvider();
 

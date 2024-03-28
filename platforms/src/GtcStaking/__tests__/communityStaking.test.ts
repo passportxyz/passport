@@ -110,7 +110,9 @@ const gtcStakingResponseV2 = (gtcAmount: string, n: number, communityType: strin
   const data: StakeV2[] = [];
   const stakingResponse = {
     status: 200,
-    data: data,
+    data: {
+      items: data,
+    },
   };
   const bcs = "BeginnerCommunityStaker";
   const ecs = "ExperiencedCommunityStaker";
@@ -684,26 +686,28 @@ describe("should return invalid payload V2", function () {
         const locked_time = new Date(now.getTime() - 32 * 24 * 60 * 60 * 1000); // - 32 days
         return Promise.resolve({
           status: 200,
-          data: [
-            {
-              id: 1,
-              chain: 1,
-              unlock_time: unlock_time.toDateString(),
-              lock_time: locked_time.toDateString(),
-              stakee: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
-              staker: MOCK_ADDRESS_LOWER,
-              amount: "10",
-            },
-            {
-              id: 2,
-              chain: 1,
-              unlock_time: unlock_time.toDateString(),
-              lock_time: locked_time.toDateString(),
-              stakee: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
-              staker: MOCK_ADDRESS_LOWER,
-              amount: "6",
-            },
-          ],
+          data: {
+            items: [
+              {
+                id: 1,
+                chain: 1,
+                unlock_time: unlock_time.toDateString(),
+                lock_time: locked_time.toDateString(),
+                stakee: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+                staker: MOCK_ADDRESS_LOWER,
+                amount: "10",
+              },
+              {
+                id: 2,
+                chain: 1,
+                unlock_time: unlock_time.toDateString(),
+                lock_time: locked_time.toDateString(),
+                stakee: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+                staker: MOCK_ADDRESS_LOWER,
+                amount: "6",
+              },
+            ],
+          },
         });
       }
     });
@@ -906,17 +910,19 @@ describe("should return valid payload Id Staking V1 & V2", function () {
 
         return Promise.resolve({
           status: 200,
-          data: [
-            {
-              id: 1,
-              chain: 1,
-              unlock_time: unlock_time.toDateString(),
-              lock_time: now.toDateString(),
-              staker: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
-              stakee: MOCK_ADDRESS_LOWER,
-              amount: "10",
-            },
-          ],
+          data: {
+            items: [
+              {
+                id: 1,
+                chain: 1,
+                unlock_time: unlock_time.toDateString(),
+                lock_time: now.toDateString(),
+                staker: "0x6c5c1ce496c5164fef46c715c4a2d691bd9a1adb",
+                stakee: MOCK_ADDRESS_LOWER,
+                amount: "10",
+              },
+            ],
+          },
         });
       }
     });
