@@ -7,12 +7,14 @@ import axios from "axios";
 import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 import BigNumber from "bignumber.js";
 
-const gtcStakingEndpoint = `${process.env.PASSPORT_SCORER_BACKEND}registry/gtc-stake`;
+export const gtcStakingEndpoint = `${process.env.PASSPORT_SCORER_BACKEND}registry/gtc-stake`;
+export const gtcStakingEndpointV2 = `${process.env.PASSPORT_SCORER_BACKEND}stake/gtc`;
 const apiKey = process.env.SCORER_API_KEY;
 
 type UserStake = {
   selfStake: BigNumber;
   communityStakes: Stake[];
+  communityStakesV2: StakeV2[];
   error?: string;
 };
 
@@ -28,9 +30,26 @@ export type Stake = {
   tx_hash: string;
 };
 
+export type StakeV2 = {
+  id: number;
+  chain: number;
+  lock_time: string;
+  unlock_time: string;
+  staker: string;
+  stakee: string;
+  amount: string;
+};
+
 export interface StakeResponse {
   data: {
     results: Stake[];
+  };
+}
+
+export interface StakeV2Response {
+  status: number;
+  data: {
+    items: StakeV2[];
   };
 }
 
@@ -88,16 +107,40 @@ export class GtcStakingProvider implements Provider {
         const round = this.getCurrentRound();
         const address = payload.address.toLowerCase();
 
+        // Verify id staking legacy
         const selfStakes: Stake[] = [];
         const communityStakes: Stake[] = [];
 
         const response: StakeResponse = await axios.get(`${gtcStakingEndpoint}/${address}/${round}`);
+        const results: Stake[] = response?.data?.results || [];
 
-        const results: Stake[] = response?.data?.results;
-        if (!results) throw new ProviderExternalVerificationError("No results returned from the GTC Staking API");
+        // Verify id staking V2
+        const selfStakesV2: StakeV2[] = [];
+        const communityStakesV2: StakeV2[] = [];
 
+        const responseV2: StakeV2Response = await axios.get(`${gtcStakingEndpointV2}/${address}`, {
+          headers: { Authorization: process.env.CGRANTS_API_TOKEN },
+        });
+        const resultsV2: StakeV2[] = responseV2?.data?.items || [];
+
+        if (results.length == 0 && resultsV2.length == 0)
+          throw new ProviderExternalVerificationError("No results returned from the GTC Staking API");
+
+        // V0
         results.forEach((stake: Stake) => {
           stake.event_type === "SelfStake" ? selfStakes.push(stake) : communityStakes.push(stake);
+        });
+
+        // V2
+        let selfStakeV2 = new BigNumber(0);
+        resultsV2.forEach((stake: StakeV2) => {
+          if (stake.staker == stake.stakee) {
+            if (new Date(stake.unlock_time) > new Date()) {
+              selfStakeV2 = new BigNumber(stake.amount);
+            }
+          } else {
+            communityStakesV2.push(stake);
+          }
         });
 
         const selfStake: BigNumber = selfStakes.reduce((totalStake, currentStake) => {
@@ -110,7 +153,8 @@ export class GtcStakingProvider implements Provider {
 
         if (!context.gtcStaking) context.gtcStaking = {};
 
-        context.gtcStaking.userStake = { selfStake, communityStakes };
+        const totalSelfStaked = selfStake.plus(selfStakeV2); // Return total from legacy self staked & V2 self staked
+        context.gtcStaking.userStake = { selfStake: totalSelfStaked, communityStakes, communityStakesV2 };
       }
     } catch (error) {
       handleProviderAxiosError(error, "Verify GTC stake", [payload.address]);
