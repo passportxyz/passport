@@ -16,8 +16,8 @@ class CommunityStakingBaseProvider extends GtcStakingProvider {
     const communityStakes = stakeData.communityStakes;
     const communityStakesV2 = stakeData.communityStakesV2;
 
-    const countRelevantStakes = this.getCountRelevantStakes(communityStakes, address);
-    const countRelevantStakesV2 = this.getCountRelevantStakesV2(communityStakesV2, address);
+    const countRelevantStakes = this.getCountRelevantStakes(communityStakes, address) || 0;
+    const countRelevantStakesV2 = this.getCountRelevantStakesV2(communityStakesV2, address) || 0;
     const totalCountRelevantStakes = countRelevantStakes + countRelevantStakesV2;
     if (totalCountRelevantStakes >= this.minimumCountCommunityStakes) {
       return {
@@ -126,5 +126,49 @@ export class TrustedCitizenProvider extends CommunityStakingBaseProvider {
       thresholdAmount: new BigNumber(20),
       minimumCountCommunityStakes: 5,
     });
+  }
+
+  getCountRelevantStakes(communityStakes: Stake[], address: string): number {
+    const stakesOnAddressByOthers: Record<string, BigNumber> = {};
+
+    for (let i = 0; i < communityStakes.length; i++) {
+      const stake = communityStakes[i];
+      const stakeAmount = new BigNumber(stake.amount);
+
+      if (stake.staker !== address && stake.address === address) {
+        stakesOnAddressByOthers[stake.staker] ||= new BigNumber(0);
+        if (stake.staked) {
+          stakesOnAddressByOthers[stake.staker] = stakesOnAddressByOthers[stake.staker].plus(stakeAmount);
+        } else {
+          stakesOnAddressByOthers[stake.staker] = stakesOnAddressByOthers[stake.staker].sub(stakeAmount);
+        }
+      }
+    }
+
+    return Object.entries(stakesOnAddressByOthers).reduce((count, [_address, amount]) => {
+      if (amount.gte(this.thresholdAmount)) {
+        return count + 1;
+      }
+      return count;
+    }, 0);
+  }
+
+  getCountRelevantStakesV2(communityStakes: StakeV2[], address: string): number {
+    const stakesOnAddressByOthers: Record<string, BigNumber> = {};
+    communityStakes.forEach((stake) => {
+      // if stake is not expired
+      if (new Date(stake.unlock_time) > new Date()) {
+        if (stake.staker !== address && stake.stakee === address) {
+          stakesOnAddressByOthers[stake.staker] = new BigNumber(stake.amount);
+        }
+      }
+    });
+
+    return Object.entries(stakesOnAddressByOthers).reduce((count, [_address, amount]) => {
+      if (amount.gte(this.thresholdAmount)) {
+        return count + 1;
+      }
+      return count;
+    }, 0);
   }
 }

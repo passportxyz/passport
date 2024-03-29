@@ -356,6 +356,90 @@ describe("should return invalid payload", function () {
     });
   });
 
+  it("when user is staked on by less than 5 community members with 20 GTC for TrustedCitizen, but the user staked on others", async () => {
+    (axios.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.startsWith(gtcStakingEndpoint)) {
+        return Promise.resolve({
+          status: 200,
+          data: {
+            results: [
+              {
+                id: 1,
+                event_type: "Xstake",
+                round_id: 1,
+                staker: "0x1",
+                address: MOCK_ADDRESS_LOWER,
+                amount: "100",
+                staked: true,
+                block_number: 14124991,
+                tx_hash: "0x12341",
+              },
+              {
+                id: 2,
+                event_type: "Xstake",
+                round_id: 1,
+                staker: "0x2",
+                address: MOCK_ADDRESS_LOWER,
+                amount: "100",
+                staked: true,
+                block_number: 14124991,
+                tx_hash: "0x12342",
+              },
+              {
+                id: 3,
+                event_type: "Xstake",
+                round_id: 1,
+                staker: "0x3",
+                address: MOCK_ADDRESS_LOWER,
+                amount: "100",
+                staked: true,
+                block_number: 14124991,
+                tx_hash: "0x12343",
+              },
+              {
+                id: 4,
+                event_type: "Xstake",
+                round_id: 1,
+                staker: "0x4",
+                address: MOCK_ADDRESS_LOWER,
+                amount: "100",
+                staked: true,
+                block_number: 14124991,
+                tx_hash: "0x12344",
+              },
+              {
+                id: 5,
+                event_type: "SelfStake",
+                round_id: 1,
+                staker: MOCK_ADDRESS, // switch the values staker & address to have a Stake made by me on others
+                address: "0x5",
+                amount: "100",
+                staked: true,
+                block_number: 14124995,
+                tx_hash: "0x1235",
+              },
+            ],
+          },
+        });
+      }
+    });
+
+    const tcStaking = new TrustedCitizenProvider();
+    const tcStakingPayload = await tcStaking.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
+
+    expect(tcStakingPayload).toMatchObject({
+      valid: false,
+      errors: [
+        "There are currently 4 community stakes of at least 20 GTC on/by your address, you need a minimum of 5 relevant community stakes to claim this stamp",
+      ],
+    });
+  });
+
   it("should comprehend unstaking", async () => {
     jest.clearAllMocks();
     (axios.get as jest.Mock).mockImplementation((url: string) => {
@@ -654,10 +738,64 @@ describe("should return invalid payload V2", function () {
     });
   });
 
-  it("when user is staked on by less than 5 community members with 20 GTC for TrustedCitizen", async () => {
+  it("when user is staked on by less than 5 community members with 20 GTC for TrustedCitizen, but the user staked on others", async () => {
+    const now = new Date();
+    const unlock_time = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000); // - 2 days
+
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("25", 4, "TrustedCitizen"));
+        return Promise.resolve({
+          status: 200,
+          data: {
+            items: [
+              {
+                id: 1,
+                chain: 1,
+                unlock_time: unlock_time.toDateString(),
+                lock_time: now.toDateString(),
+                staker: "0x1",
+                stakee: MOCK_ADDRESS_LOWER,
+                amount: "100",
+              },
+              {
+                id: 2,
+                chain: 1,
+                unlock_time: unlock_time.toDateString(),
+                lock_time: now.toDateString(),
+                staker: "0x2",
+                stakee: MOCK_ADDRESS_LOWER,
+                amount: "100",
+              },
+              {
+                id: 3,
+                chain: 1,
+                unlock_time: unlock_time.toDateString(),
+                lock_time: now.toDateString(),
+                staker: "0x3",
+                stakee: MOCK_ADDRESS_LOWER,
+                amount: "100",
+              },
+              {
+                id: 4,
+                chain: 1,
+                unlock_time: unlock_time.toDateString(),
+                lock_time: now.toDateString(),
+                staker: "0x4",
+                stakee: MOCK_ADDRESS_LOWER,
+                amount: "100",
+              },
+              {
+                id: 5,
+                chain: 1,
+                unlock_time: unlock_time.toDateString(),
+                lock_time: now.toDateString(),
+                stakee: "0x5",
+                staker: MOCK_ADDRESS_LOWER, // switch the values staker & stakee to have a Stake made by me on others
+                amount: "100",
+              },
+            ],
+          },
+        });
       }
     });
 
