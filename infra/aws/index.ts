@@ -76,6 +76,9 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_DATADOG_CLIENT_TOKEN: dataDogClientTokenReview,
     NEXT_PUBLIC_DATADOG_SERVICE: "staking-app-review",
     NEXT_PUBLIC_DATADOG_ENV: "review",
+    NEXT_PUBLIC_ENABLE_MAINNET: "on",
+    NEXT_PUBLIC_ENABLE_OP_MAINNET: "on",
+    NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "on",
   },
   staging: {
     NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.staging.scorer.gitcoin.co/ceramic-cache",
@@ -86,6 +89,9 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_DATADOG_CLIENT_TOKEN: dataDogClientTokenStaging,
     NEXT_PUBLIC_DATADOG_SERVICE: "staking-app-staging",
     NEXT_PUBLIC_DATADOG_ENV: "staging",
+    NEXT_PUBLIC_ENABLE_MAINNET: "on",
+    NEXT_PUBLIC_ENABLE_OP_MAINNET: "on",
+    NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "on",
   },
   production: {
     NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.scorer.gitcoin.co/ceramic-cache",
@@ -96,6 +102,9 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_DATADOG_CLIENT_TOKEN: dataDogClientTokenProduction,
     NEXT_PUBLIC_DATADOG_SERVICE: "staking-app-prod",
     NEXT_PUBLIC_DATADOG_ENV: "prod",
+    NEXT_PUBLIC_ENABLE_MAINNET: "on",
+    NEXT_PUBLIC_ENABLE_OP_MAINNET: "on",
+    NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "off",
   },
 });
 
