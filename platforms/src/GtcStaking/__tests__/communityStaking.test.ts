@@ -409,7 +409,7 @@ describe("should return invalid payload", function () {
               },
               {
                 id: 5,
-                event_type: "SelfStake", 
+                event_type: "SelfStake",
                 round_id: 1,
                 staker: MOCK_ADDRESS, // switch the values staker & address to have a Stake made by me on others
                 address: "0x5",
