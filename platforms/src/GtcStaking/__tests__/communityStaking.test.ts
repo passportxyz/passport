@@ -409,9 +409,9 @@ describe("should return invalid payload", function () {
               },
               {
                 id: 5,
-                event_type: "SelfStake",
+                event_type: "SelfStake", 
                 round_id: 1,
-                staker: MOCK_ADDRESS,
+                staker: MOCK_ADDRESS, // switch the values staker & address to have a Stake made by me on others
                 address: "0x5",
                 amount: "100",
                 staked: true,
@@ -790,7 +790,7 @@ describe("should return invalid payload V2", function () {
                 unlock_time: unlock_time.toDateString(),
                 lock_time: now.toDateString(),
                 stakee: "0x5",
-                staker: MOCK_ADDRESS_LOWER,
+                staker: MOCK_ADDRESS_LOWER, // switch the values staker & stakee to have a Stake made by me on others
                 amount: "100",
               },
             ],
