@@ -34,10 +34,10 @@ datadogRum.init({
 
 datadogLogs.init({
   clientToken: process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || "",
-  site: "datadoghq.eu",
+  site: process.env.NEXT_PUBLIC_DATADOG_SITE || "",
   forwardErrorsToLogs: true,
   sampleRate: 100,
-  service: `passport-frontend`,
+  service: process.env.NEXT_PUBLIC_DATADOG_SERVICE || "",
   env: process.env.NEXT_PUBLIC_DATADOG_ENV || "",
 });
 
