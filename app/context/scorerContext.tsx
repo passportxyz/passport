@@ -9,6 +9,8 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PLATFORMS } from "../config/platforms";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { getStampProviderIds } from "../components/CardList";
+import { useCustomization } from "../hooks/useCustomization";
+import { isDynamicCustomization } from "../utils/customizationUtils";
 
 const scorerApiGetScore = CERAMIC_CACHE_ENDPOINT + "/score";
 const scorerApiGetWeights = CERAMIC_CACHE_ENDPOINT + "/weights";
@@ -41,7 +43,7 @@ export interface ScorerContextState {
   passportSubmissionState: PassportSubmissionStateType;
   scoreState: ScoreStateType;
   scoredPlatforms: PlatformScoreSpec[];
-  refreshScore: (address: string | undefined, dbAccessToken: string) => Promise<void>;
+  refreshScore: (address: string | undefined, dbAccessToken: string, forceRescore?: boolean) => Promise<void>;
   fetchStampWeights: () => Promise<void>;
   stampWeights: Partial<Weights>;
   // submitPassport: (address: string | undefined) => Promise<void>;
@@ -55,7 +57,11 @@ const startingState: ScorerContextState = {
   passportSubmissionState: "APP_INITIAL",
   scoreState: "APP_INITIAL",
   scoredPlatforms: [],
-  refreshScore: async (address: string | undefined, dbAccessToken: string): Promise<void> => {},
+  refreshScore: async (
+    address: string | undefined,
+    dbAccessToken: string,
+    forceRescore: boolean = false
+  ): Promise<void> => {},
   fetchStampWeights: async (): Promise<void> => {},
   stampWeights: {},
   // submitPassport: async (address: string | undefined): Promise<void> => {},
@@ -74,6 +80,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const [stampScores, setStampScores] = useState<StampScores>();
   const [stampWeights, setStampWeights] = useState<Partial<Weights>>({});
   const [scoredPlatforms, setScoredPlatforms] = useState<PlatformScoreSpec[]>([]);
+  const customization = useCustomization();
 
   const loadScore = async (
     address: string | undefined,
@@ -84,9 +91,18 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       setScoreState("APP_INITIAL");
       let response;
       try {
+        const useAlternateScorer = isDynamicCustomization(customization) && customization.scorer?.id;
+
+        const method = rescore ? "post" : "get";
+
+        const url = `${scorerApiGetScore}/${address}${useAlternateScorer && method === "get" ? `?alternate_scorer_id=${customization.scorer?.id}` : ""}`;
+        const data =
+          useAlternateScorer && method === "post" ? { alternate_scorer_id: customization.scorer?.id } : undefined;
+
         response = await axios({
-          url: `${scorerApiGetScore}/${address}`,
-          method: rescore ? "post" : "get",
+          url,
+          data,
+          method,
           headers: {
             Authorization: `Bearer ${dbAccessToken}`,
           },
@@ -98,6 +114,9 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       }
       setScoreState(response.data.status);
       if (response.data.status === "DONE") {
+        if (!response.data.evidence) {
+          console.error("Invalid scorer configured. Please configure a 'binary weighted' scorer");
+        }
         const numRawScore = Number.parseFloat(response.data.evidence.rawScore);
         const numThreshold = Number.parseFloat(response.data.evidence.threshold);
         const numScore = Number.parseFloat(response.data.score);
@@ -122,8 +141,13 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
 
   const fetchStampWeights = async () => {
     try {
-      const response = await axios.get(`${scorerApiGetWeights}`);
-      setStampWeights(response.data);
+      if (isDynamicCustomization(customization) && customization.scorer?.weights) {
+        setStampWeights(customization.scorer?.weights);
+      } else {
+        // TODO: Fetching the default weights, could become part of the customization step ...
+        const response = await axios.get(`${scorerApiGetWeights}`);
+        setStampWeights(response.data);
+      }
     } catch (error) {
       setPassportSubmissionState("APP_REQUEST_ERROR");
     }
@@ -131,7 +155,8 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
 
   const refreshScore = async (
     address: string | undefined,
-    dbAccessToken: string
+    dbAccessToken: string,
+    forceRescore: boolean = false
     // submitPassportOnFailure: boolean = true
   ) => {
     if (address) {
@@ -140,7 +165,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       setPassportSubmissionState("APP_REQUEST_PENDING");
       try {
         let requestCount = 1;
-        let scoreStatus = await loadScore(address, dbAccessToken);
+        let scoreStatus = await loadScore(address, dbAccessToken, forceRescore);
         while ((scoreStatus === "PROCESSING" || scoreStatus === "BULK_PROCESSING") && requestCount < maxRequests) {
           requestCount++;
           await new Promise((resolve) => setTimeout(resolve, sleepTime));

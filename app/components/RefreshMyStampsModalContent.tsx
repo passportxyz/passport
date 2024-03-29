@@ -1,6 +1,5 @@
 // --- React & ReactDOM hooks
 import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
 
 // --- Types
 import { PlatformGroupSpec } from "@gitcoin/passport-platforms";
@@ -27,12 +26,12 @@ import { LoadButton } from "./LoadButton";
 // -- Utils
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
+import { useNavigateToPage } from "../hooks/useCustomization";
 
 export type RefreshMyStampsModalContentProps = {
   resetStampsAndProgressState: () => void;
   onClose: () => void;
   validPlatforms: ValidatedPlatform[];
-  dashboardCustomizationKey: string | null;
 };
 
 export type evmPlatformProvider = {
@@ -45,7 +44,6 @@ export const RefreshMyStampsModalContent = ({
   onClose,
   validPlatforms,
   resetStampsAndProgressState,
-  dashboardCustomizationKey,
 }: RefreshMyStampsModalContentProps): JSX.Element => {
   const address = useWalletStore((state) => state.address);
   const { handleAddStamps, handleDeleteStamps } = useContext(CeramicContext);
@@ -54,7 +52,7 @@ export const RefreshMyStampsModalContent = ({
   const [showDataInfo, setShowDataInfo] = useState(false);
   const [disableOnboard, setDisplayOnboard] = useState(false);
   const { did } = useDatastoreConnectionContext();
-  const navigate = useNavigate();
+  const navigateToPage = useNavigateToPage();
 
   // TODO: update comments
   // SelectedProviders will be passed in to the sidebar to be filled there...
@@ -85,7 +83,7 @@ export const RefreshMyStampsModalContent = ({
       localStorage.setItem("successfulRefresh", "false");
     }
     setLoading(false);
-    navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`);
+    navigateToPage("dashboard");
     resetStampsAndProgressState();
   };
 
@@ -172,12 +170,7 @@ export const RefreshMyStampsModalContent = ({
               </div>
             )}
             <div className="mt-8 grid grid-cols-2 items-center justify-center gap-6">
-              <Button
-                variant="secondary"
-                onClick={() =>
-                  navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`)
-                }
-              >
+              <Button variant="secondary" onClick={() => navigateToPage("dashboard")}>
                 Cancel
               </Button>
               <LoadButton
@@ -204,7 +197,7 @@ export const RefreshMyStampsModalContent = ({
             <Button
               className="w-full"
               onClick={() => {
-                navigate(`/dashboard${dashboardCustomizationKey ? `/${dashboardCustomizationKey}` : ""}`);
+                navigateToPage("dashboard");
                 resetStampsAndProgressState();
               }}
             >

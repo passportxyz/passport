@@ -1,5 +1,5 @@
 import React from "react";
-import { screen, render, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 
 import {
   RefreshMyStampsModalContentCardList,
@@ -35,7 +35,6 @@ const RefreshMyStampsModalContentPropsList: RefreshMyStampsModalContentProps = {
   resetStampsAndProgressState: jest.fn(),
   onClose: jest.fn(),
   validPlatforms,
-  dashboardCustomizationKey: null,
 };
 
 jest.mock("@didtools/cacao", () => ({
@@ -46,6 +45,7 @@ jest.mock("@didtools/cacao", () => ({
 
 jest.mock("react-router-dom", () => ({
   useNavigate: () => jest.fn(),
+  useParams: jest.fn(() => ({})),
 }));
 
 jest.mock("../../components/RefreshMyStampsModalContentCard.tsx", () => ({
@@ -79,7 +79,6 @@ describe("RefreshMyStampsModalContentCardList", () => {
       resetStampsAndProgressState: jest.fn(),
       onClose: jest.fn(),
       validPlatforms: [],
-      dashboardCustomizationKey: null,
     };
 
     const refreshModal = () => {

@@ -13,6 +13,7 @@ import { IAM_SIGNATURE_TYPE } from "../../config/stamp_config";
 
 jest.mock("react-router-dom", () => ({
   useNavigate: jest.fn(),
+  useParams: jest.fn(() => ({})),
 }));
 
 jest.mock("@gitcoin/passport-identity", () => ({
@@ -85,7 +86,6 @@ describe("RefreshMyStampsModalContent", () => {
         onClose={mockOnClose}
         validPlatforms={validPlatforms}
         resetStampsAndProgressState={mockResetStampsAndProgressState}
-        dashboardCustomizationKey={null}
       />
     );
     expect(screen.getByText(/Stamps Found/i)).toBeInTheDocument();
@@ -98,7 +98,6 @@ describe("RefreshMyStampsModalContent", () => {
         onClose={mockOnClose}
         validPlatforms={validPlatforms}
         resetStampsAndProgressState={mockResetStampsAndProgressState}
-        dashboardCustomizationKey={null}
       />
     );
 
@@ -126,7 +125,6 @@ describe("RefreshMyStampsModalContent", () => {
         onClose={mockOnClose}
         validPlatforms={validPlatforms}
         resetStampsAndProgressState={mockResetStampsAndProgressState}
-        dashboardCustomizationKey={null}
       />
     );
 

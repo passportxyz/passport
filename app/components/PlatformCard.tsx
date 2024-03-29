@@ -1,16 +1,17 @@
 // --- React Methods
-import { useState } from "react";
-import { useRouter } from "next/router";
+import { useMemo, useState } from "react";
 
 // --- Types
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 
 // --- Components
-import { getStampProviderFilters } from "../config/filters";
 import { Button } from "./Button";
 import { PlatformScoreSpec } from "../context/scorerContext";
+import { useCustomization } from "../hooks/useCustomization";
+import { isDynamicCustomization } from "../utils/customizationUtils";
+import { getStampProviderIds } from "./CardList";
 
-type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
+export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
 type PlatformCardProps = {
   i: number;
@@ -29,33 +30,10 @@ export const PlatformCard = ({
   setCurrentPlatform,
   className,
 }: PlatformCardProps): JSX.Element => {
-  // import all providers
   const [hovering, setHovering] = useState(false);
+  const platformIsExcluded = usePlatformIsExcluded(platform);
 
-  // stamp filter
-  const router = useRouter();
-  const { filter } = router.query;
-
-  // hide platforms based on filter
-  const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;
-  const hidePlatform = stampFilters && !Object.keys(stampFilters).includes(platform.platform);
-  if (hidePlatform) return <></>;
-
-  // Feature Flag Guild Stamp
-  if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP !== "on" && platform.platform === "GuildXYZ") return <></>;
-
-  // Feature Flag Idena Stamp
-  if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP !== "on" && platform.platform === "Idena") return <></>;
-
-  // Feature Flag PHI Stamp
-  if (process.env.NEXT_PUBLIC_FF_PHI_STAMP !== "on" && platform.platform === "PHI") return <></>;
-
-  // Feature Flag Holonym Stamp
-  if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP !== "on" && platform.platform === "Holonym") return <></>;
-
-  if (process.env.NEXT_PUBLIC_FF_CYBERCONNECT_STAMPS !== "on" && platform.platform === "CyberConnect") return <></>;
-
-  if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS !== "on" && platform.platform === "TrustaLabs") return <></>;
+  if (platformIsExcluded) return <></>;
 
   const verified = platform.earnedPoints > 0 || selectedProviders[platform.platform].length > 0;
 
@@ -153,4 +131,39 @@ export const PlatformCard = ({
       </div>
     </div>
   );
+};
+
+const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
+  const customization = useCustomization();
+
+  const excludedByCustomization = useMemo(() => {
+    const providers = getStampProviderIds(platform.platform);
+    return (
+      isDynamicCustomization(customization) &&
+      customization.scorer?.weights &&
+      !providers.some((provider) => parseInt(customization.scorer?.weights?.[provider] || "") > 0)
+    );
+  }, [customization.key, platform.platform]);
+
+  const excludedByFeatureFlag = useMemo(() => {
+    // Feature Flag Guild Stamp
+    if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP !== "on" && platform.platform === "GuildXYZ") return true;
+
+    // Feature Flag Idena Stamp
+    if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP !== "on" && platform.platform === "Idena") return true;
+
+    // Feature Flag PHI Stamp
+    if (process.env.NEXT_PUBLIC_FF_PHI_STAMP !== "on" && platform.platform === "PHI") return true;
+
+    // Feature Flag Holonym Stamp
+    if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP !== "on" && platform.platform === "Holonym") return true;
+
+    if (process.env.NEXT_PUBLIC_FF_CYBERCONNECT_STAMPS !== "on" && platform.platform === "CyberConnect") return true;
+
+    if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS !== "on" && platform.platform === "TrustaLabs") return true;
+
+    return false;
+  }, [platform.platform]);
+
+  return excludedByCustomization || excludedByFeatureFlag;
 };

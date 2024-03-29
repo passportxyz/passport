@@ -16,14 +16,12 @@ export interface WelcomeBackProps {
   onOpen: () => void;
   handleFetchPossibleEVMStamps: (addr: string, allPlats: Map<PLATFORM_ID, PlatformProps>) => void;
   resetStampsAndProgressState: () => void;
-  dashboardCustomizationKey: string | null;
 }
 
 export const WelcomeBack = ({
   onOpen,
   handleFetchPossibleEVMStamps,
   resetStampsAndProgressState,
-  dashboardCustomizationKey,
 }: WelcomeBackProps) => {
   const { allPlatforms } = useContext(CeramicContext);
   const address = useWalletStore((state) => state.address);
@@ -42,7 +40,6 @@ export const WelcomeBack = ({
             onOpen();
             handleFetchPossibleEVMStamps(address!, allPlatforms);
           },
-          dashboardCustomizationKey: dashboardCustomizationKey,
           nextButtonText: "Refresh my stamps",
           skipButtonText: "Go to dashboard",
         },

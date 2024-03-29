@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
 import React, { useContext, useEffect, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
@@ -40,7 +39,7 @@ import { EthereumAuthProvider } from "@self.id/web";
 import ProcessingPopup from "../components/ProcessingPopup";
 import { getFilterName } from "../config/filters";
 import { Button } from "../components/Button";
-import { useDashboardCustomization } from "../hooks/useDashboardCustomization";
+import { DEFAULT_CUSTOMIZATION_KEY, useCustomization, useNavigateToPage } from "../hooks/useCustomization";
 import { DynamicCustomDashboardPanel } from "../components/CustomDashboardPanel";
 
 // --- GTM Module
@@ -51,19 +50,18 @@ const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
 
 export default function Dashboard() {
-  const { customizationKey } = useParams();
-  const { customizationConfig, customizationEnabled } = useDashboardCustomization(customizationKey);
-  const { useCustomDashboardPanel } = customizationConfig;
+  const customization = useCustomization();
+  const { useCustomDashboardPanel } = customization;
   const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms } = useContext(CeramicContext);
 
   useEffect(() => {
-    if (customizationEnabled && customizationKey) {
+    if (customization.key !== DEFAULT_CUSTOMIZATION_KEY) {
       document.title = `Gitcoin Passport | ${
-        customizationKey.charAt(0).toUpperCase() + customizationKey.slice(1)
+        customization.key.charAt(0).toUpperCase() + customization.key.slice(1)
       } Dashboard`;
       TagManager.dataLayer({
         dataLayer: {
-          event: `${customizationKey}-dashboard-view`,
+          event: `${customization.key}-dashboard-view`,
         },
       });
     } else {
@@ -74,7 +72,7 @@ export default function Dashboard() {
         },
       });
     }
-  }, [customizationEnabled, customizationKey]);
+  }, [customization.key]);
 
   const address = useWalletStore((state) => state.address);
   const provider = useWalletStore((state) => state.provider);
@@ -85,7 +83,7 @@ export default function Dashboard() {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const navigate = useNavigate();
+  const navigateToPage = useNavigateToPage();
 
   // ------------------- BEGIN Data items for Google Tag Manager -------------------
   const startTime = Date.now();
@@ -135,13 +133,16 @@ export default function Dashboard() {
   // Route user to home when wallet is disconnected
   useEffect(() => {
     if (!address) {
-      navigate(`/${customizationKey ? `?dashboard=${customizationKey}` : ""}`);
-    } else {
-      if (dbAccessTokenStatus === "connected" && dbAccessToken) {
-        refreshScore(address!.toLowerCase(), dbAccessToken);
-      }
+      navigateToPage("home");
     }
-  }, [address, dbAccessToken, dbAccessTokenStatus]);
+  }, [address]);
+
+  // Fetch score on page load and when the customization key changes
+  useEffect(() => {
+    if (address && dbAccessTokenStatus === "connected" && dbAccessToken) {
+      refreshScore(address.toLowerCase(), dbAccessToken);
+    }
+  }, [dbAccessTokenStatus, dbAccessToken, address, customization.key]);
 
   //show toasts from 1click flow
   useEffect(() => {
@@ -298,14 +299,10 @@ export default function Dashboard() {
             <DashboardScorePanel
               className={`col-span-full ${useCustomDashboardPanel ? "lg:col-span-4" : "xl:max-h-52"} xl:col-span-7`}
             />
-            {useCustomDashboardPanel || (
+            {useCustomDashboardPanel ? (
+              <DynamicCustomDashboardPanel className="col-start-1 col-end-[-1] lg:col-start-5 xl:col-start-8" />
+            ) : (
               <DashboardIllustration className="col-start-8 col-end-[-1] row-span-2 hidden xl:block" />
-            )}
-            {useCustomDashboardPanel && (
-              <DynamicCustomDashboardPanel
-                customizationKey={customizationKey}
-                className="col-start-1 col-end-[-1] lg:col-start-5 xl:col-start-8"
-              />
             )}
             <span className="col-start-1 col-end-4 font-heading text-4xl">Add Stamps</span>
             <CardList

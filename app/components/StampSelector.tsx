@@ -1,15 +1,15 @@
-import React, { useContext } from "react";
-import { useRouter } from "next/router";
+import React, { useContext, useMemo } from "react";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { PlatformGroupSpec } from "../config/providers";
-import { getStampProviderFilters } from "../config/filters";
 import { OnChainContext } from "../context/onChainContext";
 import { OnchainTag } from "./OnchainTag";
 import { CeramicContext } from "../context/ceramicContext";
 import { FeatureFlags } from "../config/feature_flags";
 import Checkbox from "../components/Checkbox";
 import { ScorerContext } from "../context/scorerContext";
+import { useCustomization } from "../hooks/useCustomization";
+import { isDynamicCustomization } from "../utils/customizationUtils";
 
 type StampSelectorProps = {
   currentPlatform?: PlatformSpec | undefined;
@@ -29,10 +29,7 @@ export function StampSelector({
   const { allProvidersState } = useContext(CeramicContext);
   const { activeChainProviders } = useContext(OnChainContext);
   const { stampWeights } = useContext(ScorerContext);
-  // stamp filter
-  const router = useRouter();
-  const { filter } = router.query;
-  const stampFilters = filter?.length && typeof filter === "string" ? getStampProviderFilters(filter) : false;
+  const includedGroupsAndProviders = useIncludedGroupsAndProviders(currentProviders || []);
 
   // check if provider is on-chain
   const isProviderOnChain = (provider: PROVIDER_ID) => {
@@ -51,14 +48,17 @@ export function StampSelector({
       {/* each of the available providers in this platform */}
       {currentProviders?.map((stamp) => {
         // hide stamps based on filter
-        const hideStamp =
-          stampFilters && currentPlatform && !stampFilters[currentPlatform?.platform]?.includes(stamp.platformGroup);
-        if (hideStamp) return null;
+        if (includedGroupsAndProviders[stamp.platformGroup].length === 0) {
+          return null;
+        }
 
         return (
           <div key={stamp.platformGroup} className={`mt-6`}>
             <p className="mb-1 text-xl">{stamp.platformGroup}</p>
             {stamp.providers?.map((provider, i) => {
+              if (!includedGroupsAndProviders[stamp.platformGroup].includes(provider.name)) {
+                return null;
+              }
               const verified = verifiedProviders?.indexOf(provider.name) !== -1;
               const selected = selectedProviders?.indexOf(provider.name) !== -1;
 
@@ -109,3 +109,30 @@ export function StampSelector({
     </>
   );
 }
+
+const useIncludedGroupsAndProviders = (specs: PlatformGroupSpec[]): Record<string, string[]> => {
+  const customization = useCustomization();
+
+  const included = useMemo(() => {
+    const included: Record<string, string[]> = {};
+    specs.forEach((spec) => {
+      const providers = spec.providers?.map((p) => p.name) || [];
+
+      if (!isDynamicCustomization(customization) || !customization.scorer?.weights) {
+        included[spec.platformGroup] = providers;
+        return;
+      }
+
+      included[spec.platformGroup] = providers.reduce((includedProviders, provider) => {
+        if (parseInt(customization.scorer?.weights?.[provider] || "0") > 0) {
+          includedProviders.push(provider);
+        }
+        return includedProviders;
+      }, [] as string[]);
+    });
+
+    return included;
+  }, [specs, customization]);
+
+  return included;
+};

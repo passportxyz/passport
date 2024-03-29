@@ -5,7 +5,6 @@ const defaultProps: WelcomeBackProps = {
   onOpen: jest.fn(),
   handleFetchPossibleEVMStamps: jest.fn(),
   resetStampsAndProgressState: jest.fn(),
-  dashboardCustomizationKey: null,
 };
 
 jest.mock("@didtools/cacao", () => ({
@@ -16,6 +15,7 @@ jest.mock("@didtools/cacao", () => ({
 
 jest.mock("react-router-dom", () => ({
   useNavigate: () => jest.fn(),
+  useParams: jest.fn(() => ({})),
 }));
 
 describe("WelcomeBack", () => {

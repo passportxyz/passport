@@ -52,6 +52,8 @@ import { CERAMIC_CACHE_ENDPOINT, IAM_VALID_ISSUER_DIDS } from "../config/stamp_c
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../components/DoneToastContent";
+import { useCustomization } from "../hooks/useCustomization";
+import { isDynamicCustomization } from "../utils/customizationUtils";
 
 // -- Trusted IAM servers DID
 const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
@@ -347,6 +349,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const address = useWalletStore((state) => state.address);
   const { dbAccessToken, did, checkSessionIsValid } = useDatastoreConnectionContext();
   const { refreshScore, fetchStampWeights } = useContext(ScorerContext);
+  const customization = useCustomization();
 
   const toast = useToast();
 
@@ -401,7 +404,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       fetchStampWeights();
       fetchPassport(database, false, true);
     }
-  }, [database]);
+  }, [database, customization]);
 
   useEffect(() => {
     if (ceramicClient) {
@@ -549,9 +552,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
             }
           })();
         }
-        if (dbAccessToken) {
-          refreshScore(address, dbAccessToken);
-        }
+        loadScore();
       }
     } catch (e) {
       datadogLogs.logger.error("Error adding multiple stamps", { stamps, error: e });
@@ -623,10 +624,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
             }
           })();
         }
-
-        if (dbAccessToken) {
-          refreshScore(address, dbAccessToken);
-        }
+        loadScore();
       }
     } catch (e) {
       datadogLogs.logger.error("Error patching stamps", { stampPatches, error: e });
@@ -651,13 +649,22 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
             }
           })();
         }
-        if (dbAccessToken) {
-          refreshScore(address, dbAccessToken);
-        }
+        loadScore();
       }
     } catch (e) {
       datadogLogs.logger.error("Error deleting multiple stamps", { providerIds, error: e });
       throw e;
+    }
+  };
+
+  const loadScore = () => {
+    if (dbAccessToken) {
+      // Currently the ceramic-cache/stamps endpoints refresh the main scorer,
+      // but not any alternate scorer used by a customization. So, we must
+      // force a refresh in that case. If we start passing the alternate_scorer_id
+      // to the ceramic-cache/stamps endpoints, we can remove this.
+      const forceRefresh = Boolean(isDynamicCustomization(customization) && customization.scorer?.id);
+      refreshScore(address, dbAccessToken, forceRefresh);
     }
   };
 
