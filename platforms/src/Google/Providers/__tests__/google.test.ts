@@ -75,7 +75,7 @@ describe("verifyGoogle", function () {
     jest.restoreAllMocks();
   });
 
-  it("should suceed when a access token and user info are obtained", async () => {
+  it("should succeed when a access token and user info are obtained", async () => {
     const requestAccessTokenMock = jest.spyOn(google, "requestAccessToken").mockImplementation((): Promise<string> => {
       return new Promise((resolve) => {
         resolve(MOCK_ACCESS_TOKEN);

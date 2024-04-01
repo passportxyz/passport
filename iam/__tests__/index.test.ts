@@ -519,7 +519,7 @@ describe("POST /verify", function () {
     expect((response.body[1] as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
   });
 
-  it("handles valid challenge requests with multiple types, and acumulates values between provider calls", async () => {
+  it("handles valid challenge requests with multiple types, and accumulates values between provider calls", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
       issuer: issuer,
