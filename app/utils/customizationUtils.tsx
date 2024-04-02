@@ -35,6 +35,7 @@ export type DynamicCustomization = BasicCustomization & {
   };
   scorerPanel?: {
     title?: string;
+    text?: string;
   };
   dashboardPanel: {
     logo: {
@@ -64,6 +65,7 @@ type CustomizationResponse = {
   };
   scorerPanel?: {
     title?: string;
+    text?: string;
   };
   dashboardPanel?: {
     logo?: {
@@ -108,6 +110,7 @@ export const requestDynamicCustomizationConfig = async (
       },
       scorerPanel: {
         title: customizationResponse.scorerPanel?.title,
+        text: customizationResponse.scorerPanel?.text,
       },
       dashboardPanel: {
         logo: {

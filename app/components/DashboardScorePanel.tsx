@@ -101,6 +101,7 @@ const ScoreRing = ({ className }: { className: string }) => {
 export const DashboardScorePanel = ({ className }: { className: string }) => {
   const customization = useCustomization();
   const customTitle = isDynamicCustomization(customization) ? customization.scorerPanel?.title : undefined;
+  const customText = isDynamicCustomization(customization) ? customization.scorerPanel?.text : undefined;
 
   return (
     <div
@@ -115,9 +116,9 @@ export const DashboardScorePanel = ({ className }: { className: string }) => {
         <ScoreRing className="shrink-0" />
         <div className="mx-6 h-3/4 w-[2px] shrink-0 bg-gradient-to-t from-background-4 via-foreground-2 to-background-4" />
         <p className="shrink">
-          Your {customTitle || "Unique Humanity Score"} is based out of 100 and measures your uniqueness. The current
-          passing threshold is 20. Scores may vary across different apps, especially due to abuse or attacks on the
-          service.
+          {customText ||
+            "Your Unique Humanity Score is based out of 100 and measures your uniqueness. The current passing threshold is 20. " +
+              "Scores may vary across different apps, especially due to abuse or attacks on the service."}
         </p>
       </div>
     </div>
