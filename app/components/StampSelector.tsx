@@ -124,7 +124,7 @@ const useIncludedGroupsAndProviders = (specs: PlatformGroupSpec[]): Record<strin
       }
 
       included[spec.platformGroup] = providers.reduce((includedProviders, provider) => {
-        if (parseInt(customization.scorer?.weights?.[provider] || "0") > 0) {
+        if (parseFloat(customization.scorer?.weights?.[provider] || "0") > 0) {
           includedProviders.push(provider);
         }
         return includedProviders;

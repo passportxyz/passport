@@ -96,8 +96,16 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
         const method = rescore ? "post" : "get";
 
         const url = `${scorerApiGetScore}/${address}${useAlternateScorer && method === "get" ? `?alternate_scorer_id=${customization.scorer?.id}` : ""}`;
-        const data =
-          useAlternateScorer && method === "post" ? { alternate_scorer_id: customization.scorer?.id } : undefined;
+        let data: any;
+        if (method === "post") {
+          if (useAlternateScorer)
+            data = {
+              alternate_scorer_id: customization.scorer?.id,
+            };
+          else data = {};
+        } else {
+          data = {};
+        }
 
         response = await axios({
           url,
