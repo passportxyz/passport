@@ -140,7 +140,7 @@ export default function Dashboard() {
   // Fetch score on page load and when the customization key changes
   useEffect(() => {
     if (address && dbAccessTokenStatus === "connected" && dbAccessToken) {
-      refreshScore(address.toLowerCase(), dbAccessToken);
+      refreshScore(address.toLowerCase(), dbAccessToken, true);
     }
   }, [dbAccessTokenStatus, dbAccessToken, address, customization.key]);
 
