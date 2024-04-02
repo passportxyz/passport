@@ -33,6 +33,9 @@ export type DynamicCustomization = BasicCustomization & {
     id?: number;
     weights?: Record<PROVIDER_ID, string>;
   };
+  scorerPanel?: {
+    title?: string;
+  };
   dashboardPanel: {
     logo: {
       image: React.ReactNode;
@@ -58,6 +61,9 @@ type CustomizationResponse = {
   scorer?: {
     id?: number;
     weights?: Record<PROVIDER_ID, string>;
+  };
+  scorerPanel?: {
+    title?: string;
   };
   dashboardPanel?: {
     logo?: {
@@ -99,6 +105,9 @@ export const requestDynamicCustomizationConfig = async (
       scorer: {
         id: customizationResponse.scorer?.id,
         weights: customizationResponse.scorer?.weights,
+      },
+      scorerPanel: {
+        title: customizationResponse.scorerPanel?.title,
       },
       dashboardPanel: {
         logo: {

@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import { ScorerContext } from "../context/scorerContext";
 
 import { Spinner } from "@chakra-ui/react";
+import { useCustomization } from "../hooks/useCustomization";
+import { isDynamicCustomization } from "../utils/customizationUtils";
 
 // Hexagon SVGs generated using https://codepen.io/wvr/pen/WrNgJp
 // with the values listed below for each ring
@@ -96,22 +98,28 @@ const ScoreRing = ({ className }: { className: string }) => {
   );
 };
 
-export const DashboardScorePanel = ({ className }: { className: string }) => (
-  <div
-    className={`${className} flex flex-col rounded border border-foreground-3 bg-gradient-to-b from-background to-background-4`}
-  >
-    <div className="flex p-4">
-      <img alt="Person Icon" className="mr-2" src="/assets/personIcon.svg" />
-      <span>Default Humanity Score</span>
+export const DashboardScorePanel = ({ className }: { className: string }) => {
+  const customization = useCustomization();
+  const customTitle = isDynamicCustomization(customization) ? customization.scorerPanel?.title : undefined;
+
+  return (
+    <div
+      className={`${className} flex flex-col rounded border border-foreground-3 bg-gradient-to-b from-background to-background-4`}
+    >
+      <div className="flex p-4">
+        <img alt="Person Icon" className="mr-2" src="/assets/personIcon.svg" />
+        <span>{customTitle || "Default Humanity Score"}</span>
+      </div>
+      <div className="my-2 h-[2px] w-full bg-gradient-to-r from-background-4 via-foreground-2 to-background-4" />
+      <div className="flex grow items-center p-4 text-foreground-2">
+        <ScoreRing className="shrink-0" />
+        <div className="mx-6 h-3/4 w-[2px] shrink-0 bg-gradient-to-t from-background-4 via-foreground-2 to-background-4" />
+        <p className="shrink">
+          Your {customTitle || "Unique Humanity Score"} is based out of 100 and measures your uniqueness. The current
+          passing threshold is 20. Scores may vary across different apps, especially due to abuse or attacks on the
+          service.
+        </p>
+      </div>
     </div>
-    <div className="my-2 h-[2px] w-full bg-gradient-to-r from-background-4 via-foreground-2 to-background-4" />
-    <div className="flex grow items-center p-4 text-foreground-2">
-      <ScoreRing className="shrink-0" />
-      <div className="mx-6 h-3/4 w-[2px] shrink-0 bg-gradient-to-t from-background-4 via-foreground-2 to-background-4" />
-      <p className="shrink">
-        Your Unique Humanity Score is based out of 100 and measures your uniqueness. The current passing threshold is
-        20. Scores may vary across different apps, especially due to abuse or attacks on the service.
-      </p>
-    </div>
-  </div>
-);
+  );
+};
