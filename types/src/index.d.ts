@@ -422,8 +422,6 @@ export type PROVIDER_ID =
   | "IdenaStake#1k"
   | "IdenaStake#10k"
   | "IdenaStake#100k"
-  | "IdenaAge#5"
-  | "IdenaAge#10"
   | "CivicCaptchaPass"
   | "CivicUniquenessPass"
   | "CivicLivenessPass"

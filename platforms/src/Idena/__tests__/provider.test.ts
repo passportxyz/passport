@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/require-await */
 
 import { ProviderContext, RequestPayload } from "@gitcoin/passport-types";
-import { IdenaAge10Provider, IdenaAge5Provider } from "../Providers/IdenaAgeProvider";
 import { IdenaContext } from "../procedures/idenaSignIn";
 import { initCacheSession, loadCacheSession, PlatformSession } from "../../utils/platform-cache";
 import {
@@ -85,98 +84,6 @@ beforeEach(async () => {
 
 afterEach(() => {
   jest.clearAllMocks();
-});
-
-describe("Attempt verification", function () {
-  it("should return valid response", async () => {
-    const provider = new IdenaAge5Provider();
-    const payload = {
-      proofs: {
-        sessionKey: MOCK_SESSION_KEY,
-      },
-    };
-    const verifiedPayload = await provider.verify(payload as unknown as RequestPayload, {} as IdenaContext);
-
-    expect(mockedAxios.get).toHaveBeenCalledTimes(2);
-    expect(mockedAxios.get).toHaveBeenCalledWith(`/api/identity/${MOCK_ADDRESS}/age`);
-    expect(mockedAxios.get).toHaveBeenCalledWith("/api/epoch/last");
-    expect(verifiedPayload).toEqual({
-      valid: true,
-      record: {
-        address: MOCK_ADDRESS,
-        age: "gt5",
-      },
-      expiresInSeconds: 86401,
-    });
-  });
-
-  it("should return false for low age", async () => {
-    const provider = new IdenaAge10Provider();
-    const payload = {
-      proofs: {
-        sessionKey: MOCK_SESSION_KEY,
-      },
-    };
-    const verifiedPayload = await provider.verify(payload as unknown as RequestPayload, {} as IdenaContext);
-
-    expect(mockedAxios.get).toHaveBeenCalledTimes(2);
-    expect(mockedAxios.get).toHaveBeenCalledWith(`/api/identity/${MOCK_ADDRESS}/age`);
-    expect(mockedAxios.get).toHaveBeenCalledWith("/api/epoch/last");
-    expect(verifiedPayload).toEqual(
-      expect.objectContaining({
-        valid: false,
-        errors: [`Idena age "${ageResponse.data.result}" is less than required age of "10" epochs`],
-      })
-    );
-  });
-
-  it("should return ProviderInternalVerificationError for wrong sessionKey", async () => {
-    const provider = new IdenaAge5Provider();
-    const payload = {
-      proofs: {
-        sessionKey: "sessionKey_wrong",
-      },
-    };
-    await expect(provider.verify(payload as unknown as RequestPayload, {} as IdenaContext)).rejects.toThrow(
-      ProviderInternalVerificationError
-    );
-    expect(mockedAxios.get).toHaveBeenCalledTimes(0);
-  });
-
-  it("should throw ProviderExternalVerificationError return false when the Idena API returns an error response", async () => {
-    mockedAxios.get.mockImplementation(async (url, config) => {
-      throw new Error("Error");
-    });
-    mockedAxios.isAxiosError.mockReturnValue(true);
-    const provider = new IdenaAge5Provider();
-    const payload = {
-      proofs: {
-        sessionKey: MOCK_SESSION_KEY,
-      },
-    };
-    await expect(provider.verify(payload as unknown as RequestPayload, {} as IdenaContext)).rejects.toThrow(
-      ProviderExternalVerificationError
-    );
-    expect(mockedAxios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toHaveBeenCalledWith(`/api/identity/${MOCK_ADDRESS}/age`);
-  });
-
-  it("shouldn't duplicate requests to the Idena API within the same context", async () => {
-    const provider1 = new IdenaAge5Provider();
-    const provider2 = new IdenaAge10Provider();
-    const context: ProviderContext = {};
-    const payload = {
-      proofs: {
-        sessionKey: MOCK_SESSION_KEY,
-      },
-    };
-    await provider1.verify(payload as unknown as RequestPayload, context as IdenaContext);
-    await provider2.verify(payload as unknown as RequestPayload, context as IdenaContext);
-
-    expect(mockedAxios.get).toHaveBeenCalledTimes(2);
-    expect(mockedAxios.get).toHaveBeenCalledWith(`/api/identity/${MOCK_ADDRESS}/age`);
-    expect(mockedAxios.get).toHaveBeenCalledWith("/api/epoch/last");
-  });
 });
 
 describe("Check valid cases for state providers", function () {
