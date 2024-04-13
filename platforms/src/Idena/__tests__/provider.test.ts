@@ -9,7 +9,6 @@ import {
   IdenaStateNewbieProvider,
   IdenaStateVerifiedProvider,
 } from "../Providers/IdenaStateProvider";
-import { IdenaStake100kProvider, IdenaStake10kProvider, IdenaStake1kProvider } from "../Providers/IdenaStakeProvider";
 
 // ----- Libs
 import axios from "axios";
@@ -182,90 +181,5 @@ describe("Check valid cases for state providers", function () {
       },
       expiresInSeconds: 86401,
     });
-  });
-});
-
-describe("Check valid cases for stake balance providers", function () {
-  it("Expected Greater than 1k iDna", async () => {
-    const provider = new IdenaStake1kProvider();
-    const payload = {
-      proofs: {
-        sessionKey: MOCK_SESSION_KEY,
-      },
-    };
-    const verifiedPayload = await provider.verify(payload as unknown as RequestPayload, {} as IdenaContext);
-
-    expect(verifiedPayload).toEqual({
-      valid: true,
-      record: {
-        address: MOCK_ADDRESS,
-        stake: "gt1",
-      },
-      expiresInSeconds: 86401,
-    });
-  });
-
-  it("Expected Greater than 10k iDna", async () => {
-    const provider = new IdenaStake10kProvider();
-    const payload = {
-      proofs: {
-        sessionKey: MOCK_SESSION_KEY,
-      },
-    };
-    const verifiedPayload = await provider.verify(payload as unknown as RequestPayload, {} as IdenaContext);
-
-    expect(verifiedPayload).toEqual({
-      valid: true,
-      record: {
-        address: MOCK_ADDRESS,
-        stake: "gt10",
-      },
-      expiresInSeconds: 86401,
-    });
-  });
-
-  it("Expected Greater than 100k iDna", async () => {
-    const provider = new IdenaStake100kProvider();
-    const payload = {
-      proofs: {
-        sessionKey: MOCK_SESSION_KEY,
-      },
-    };
-    const verifiedPayload = await provider.verify(payload as unknown as RequestPayload, {} as IdenaContext);
-
-    expect(verifiedPayload).toEqual({
-      valid: true,
-      record: {
-        address: MOCK_ADDRESS,
-        stake: "gt100",
-      },
-      expiresInSeconds: 86401,
-    });
-  });
-
-  it("Incorrect stake", async () => {
-    const stakeResponse = {
-      data: { result: { stake: "10000.123" } },
-      status: 200,
-    };
-
-    mockedAxios.get.mockImplementation(async (url, config) => {
-      return stakeResponse;
-    });
-
-    const provider = new IdenaStake100kProvider();
-    const payload = {
-      proofs: {
-        sessionKey: MOCK_SESSION_KEY,
-      },
-    };
-    const verifiedPayload = await provider.verify(payload as unknown as RequestPayload, {} as IdenaContext);
-
-    expect(verifiedPayload).toEqual(
-      expect.objectContaining({
-        valid: false,
-        errors: [`Stake "${stakeResponse.data.result.stake}" is not greater than minimum "100000" iDna`],
-      })
-    );
   });
 });

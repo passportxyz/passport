@@ -1,5 +1,4 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { IdenaStake1kProvider, IdenaStake10kProvider, IdenaStake100kProvider } from "./Providers/IdenaStakeProvider";
 import {
   IdenaStateNewbieProvider,
   IdenaStateVerifiedProvider,
@@ -25,21 +24,10 @@ export const ProviderConfig: PlatformGroupSpec[] = [
       { title: "Human", name: "IdenaState#Human" },
     ],
   },
-  {
-    platformGroup: "Identity Stake",
-    providers: [
-      { title: "more than 1k iDna", name: "IdenaStake#1k" },
-      { title: "more than 10k iDna", name: "IdenaStake#10k" },
-      { title: "more than 100k iDna", name: "IdenaStake#100k" },
-    ],
-  },
 ];
 
 export const providers: Provider[] = [
   new IdenaStateNewbieProvider(),
   new IdenaStateVerifiedProvider(),
   new IdenaStateHumanProvider(),
-  new IdenaStake1kProvider(),
-  new IdenaStake10kProvider(),
-  new IdenaStake100kProvider(),
 ];
