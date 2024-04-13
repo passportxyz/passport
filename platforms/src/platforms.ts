@@ -3,7 +3,6 @@ import * as Ens from "./Ens";
 import * as Github from "./Github";
 import * as Gitcoin from "./Gitcoin";
 import * as Lens from "./Lens";
-import * as Poh from "./Poh";
 import * as Snapshot from "./Snapshot";
 import * as GnosisSafe from "./GnosisSafe";
 import * as NFT from "./NFT";
@@ -42,7 +41,6 @@ const platforms: Record<string, PlatformConfig> = {
   Linkedin,
   Ens,
   Brightid,
-  Poh,
   ETH,
   Snapshot,
   NFT,

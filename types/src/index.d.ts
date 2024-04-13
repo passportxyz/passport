@@ -333,7 +333,6 @@ export type DID = string;
 export type PLATFORM_ID =
   | "Google"
   | "Ens"
-  | "Poh"
   | "Twitter"
   | "POAP"
   | "Facebook"
