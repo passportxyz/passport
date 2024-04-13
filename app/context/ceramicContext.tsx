@@ -20,12 +20,10 @@ import { ScorerContext } from "./scorerContext";
 
 import { PlatformGroupSpec, platforms as stampPlatforms } from "@gitcoin/passport-platforms";
 const {
-  Twitter,
   Ens,
   Lens,
   Github,
   Gitcoin,
-  Poh,
   PHI,
   NFT,
   GnosisSafe,
@@ -79,11 +77,6 @@ export interface CeramicContextState {
 
 export const platforms = new Map<PLATFORM_ID, PlatformProps>();
 
-platforms.set("Twitter", {
-  platform: new Twitter.TwitterPlatform(),
-  platFormGroupSpec: Twitter.ProviderConfig,
-});
-
 platforms.set("Ens", {
   platform: new Ens.EnsPlatform(),
   platFormGroupSpec: Ens.ProviderConfig,
@@ -113,11 +106,6 @@ platforms.set("Gitcoin", {
 platforms.set("Snapshot", {
   platform: new Snapshot.SnapshotPlatform(),
   platFormGroupSpec: Snapshot.ProviderConfig,
-});
-
-platforms.set("Poh", {
-  platform: new Poh.PohPlatform(),
-  platFormGroupSpec: Poh.ProviderConfig,
 });
 
 platforms.set("ZkSync", {

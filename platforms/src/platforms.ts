@@ -1,4 +1,3 @@
-import * as Twitter from "./Twitter";
 import * as Ens from "./Ens";
 import * as Github from "./Github";
 import * as Gitcoin from "./Gitcoin";
@@ -34,7 +33,6 @@ type PlatformConfig = {
 const platforms: Record<string, PlatformConfig> = {
   GtcStaking,
   Gitcoin,
-  Twitter,
   Discord,
   Google,
   Github,

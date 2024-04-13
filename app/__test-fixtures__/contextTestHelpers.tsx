@@ -38,8 +38,8 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: getProviderSpec("Ens", "Ens"),
         stamp: undefined,
       },
-      Poh: {
-        providerSpec: getProviderSpec("Poh", "Poh"),
+      Github: {
+        providerSpec: getProviderSpec("Github", "githubContributionActivityGte#30"),
         stamp: undefined,
       },
       POAP: {
