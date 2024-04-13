@@ -42,7 +42,7 @@ export const pohStampFixture: Stamp = {
 };
 
 export const twitterStampFixture: Stamp = {
-  provider: "ZkSync",
+  provider: "ZkSyncEra",
   credential,
 };
 
