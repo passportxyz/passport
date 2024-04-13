@@ -17,7 +17,6 @@ import * as Google from "./Google";
 import * as Brightid from "./Brightid";
 import * as Coinbase from "./Coinbase";
 import * as GuildXYZ from "./GuildXYZ";
-import * as PHI from "./PHI";
 import * as Holonym from "./Holonym";
 import * as Idena from "./Idena";
 import * as Civic from "./Civic";
@@ -52,7 +51,6 @@ const platforms: Record<string, PlatformConfig> = {
   GnosisSafe,
   Coinbase,
   GuildXYZ,
-  PHI,
   Holonym,
   Idena,
   Civic,

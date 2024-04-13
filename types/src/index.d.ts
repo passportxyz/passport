@@ -413,8 +413,6 @@ export type PROVIDER_ID =
   | "CyberProfilePremium"
   | "CyberProfilePaid"
   | "CyberProfileOrgMember"
-  | "PHIActivitySilver"
-  | "PHIActivityGold"
   | "HolonymGovIdProvider"
   | "IdenaState#Newbie"
   | "IdenaState#Verified"
