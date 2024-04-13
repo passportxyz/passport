@@ -2,7 +2,6 @@ import { RequestPayload } from "@gitcoin/passport-types";
 import axios from "axios";
 import {
   ETHAdvocateProvider,
-  ETHPioneerProvider,
   ETHMaxiProvider,
   ModelResponse,
   getETHAnalysis,
@@ -33,17 +32,6 @@ describe("AccountAnalysis Providers", () => {
     mockedAxios.post.mockResolvedValueOnce(mockedResponse);
 
     const ethAdvocateProvider = new ETHEnthusiastProvider();
-    const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
-
-    expect(payload.valid).toBe(true);
-    expect(payload.record).toEqual({ address: mockAddress });
-  });
-
-  it("should validate inputs for ETHPioneerProvider", async () => {
-    const mockedResponse = mockResponse(25);
-    mockedAxios.post.mockResolvedValueOnce(mockedResponse);
-
-    const ethAdvocateProvider = new ETHPioneerProvider();
     const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
 
     expect(payload.valid).toBe(true);

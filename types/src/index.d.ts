@@ -424,7 +424,6 @@ export type PROVIDER_ID =
   | "ExperiencedCommunityStaker"
   | "TrustedCitizen"
   | "ETHAdvocate"
-  | "ETHPioneer"
   | "ETHMaxi"
   | "ETHEnthusiast";
 

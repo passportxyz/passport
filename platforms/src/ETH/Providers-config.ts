@@ -1,10 +1,5 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import {
-  ETHAdvocateProvider,
-  ETHPioneerProvider,
-  ETHMaxiProvider,
-  ETHEnthusiastProvider,
-} from "./Providers/accountAnalysis";
+import { ETHAdvocateProvider, ETHMaxiProvider, ETHEnthusiastProvider } from "./Providers/accountAnalysis";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/ethereumStampIcon.svg",
@@ -27,11 +22,6 @@ export const ProviderConfig: PlatformGroupSpec[] = [
         description: "Your journey begins here, showcasing initial engagement and support for the Ethereum ecosystem.",
       },
       {
-        title: "ETH Pioneer",
-        name: "ETHPioneer",
-        description: "A step up, reflecting ongoing commitment and active participation in Ethereum's growth.",
-      },
-      {
         title: "ETH Advocate",
         name: "ETHAdvocate",
         description: "Continued commitment and participation in the Ethereum ecosystem.",
@@ -46,9 +36,4 @@ export const ProviderConfig: PlatformGroupSpec[] = [
   },
 ];
 
-export const providers: Provider[] = [
-  new ETHEnthusiastProvider(),
-  new ETHPioneerProvider(),
-  new ETHAdvocateProvider(),
-  new ETHMaxiProvider(),
-];
+export const providers: Provider[] = [new ETHEnthusiastProvider(), new ETHAdvocateProvider(), new ETHMaxiProvider()];
