@@ -356,7 +356,6 @@ export type PLATFORM_ID =
   | "Holonym"
   | "Idena"
   | "Civic"
-  | "CyberConnect"
   | "GrantsStack"
   | "TrustaLabs";
 
@@ -407,9 +406,6 @@ export type PROVIDER_ID =
   | "GuildAdmin"
   | "GuildPassportMember"
   | "Hypercerts"
-  | "CyberProfilePremium"
-  | "CyberProfilePaid"
-  | "CyberProfileOrgMember"
   | "HolonymGovIdProvider"
   | "IdenaState#Newbie"
   | "IdenaState#Verified"

@@ -18,7 +18,6 @@ import * as GuildXYZ from "./GuildXYZ";
 import * as Holonym from "./Holonym";
 import * as Idena from "./Idena";
 import * as Civic from "./Civic";
-import * as CyberConnect from "./CyberProfile";
 import * as TrustaLabs from "./TrustaLabs";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
@@ -50,7 +49,6 @@ const platforms: Record<string, PlatformConfig> = {
   Holonym,
   Idena,
   Civic,
-  CyberConnect,
   TrustaLabs,
 };
 
