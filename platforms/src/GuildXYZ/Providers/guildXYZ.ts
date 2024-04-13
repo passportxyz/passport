@@ -102,47 +102,6 @@ class GuildProvider {
   }
 }
 
-export class GuildMemberProvider extends GuildProvider implements Provider {
-  type = "GuildMember";
-
-  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    try {
-      let valid = false,
-        record = undefined,
-        membershipStats;
-      const errors: string[] = [];
-      const address = await getAddress(payload);
-
-      try {
-        membershipStats = await this.checkMemberShipStats(address);
-      } catch (error) {
-        errors.push(String(error));
-      }
-
-      const guildCount = membershipStats.guildCount;
-      const roleCount = membershipStats.totalRoles;
-      valid = guildCount > 5 && roleCount > 15;
-
-      if (valid) {
-        record = {
-          address,
-        };
-      } else {
-        errors.push(
-          `Your Guild membership (> 5) and total roles (> 15) counts are below the required thresholds: Your Guild count: ${guildCount}, you total roles: &${roleCount}.`
-        );
-      }
-      return {
-        valid,
-        record,
-        errors,
-      };
-    } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(`Error verifying Guild Membership: ${JSON.stringify(e)}`);
-    }
-  }
-}
-
 export const checkGuildOwner = (memberships: GuildMembership[]): boolean => {
   return memberships.some((membership) => membership.isOwner || membership.isAdmin);
 };

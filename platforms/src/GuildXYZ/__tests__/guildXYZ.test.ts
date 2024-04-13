@@ -4,7 +4,6 @@ import axios from "axios";
 import {
   getGuildMemberships,
   getAllGuilds,
-  GuildMemberProvider,
   GuildAdminProvider,
   GuildPassportMemberProvider,
   PASSPORT_GUILD_ID,
@@ -93,92 +92,6 @@ describe("Guild Providers", () => {
     expect(mockedAxios.get).toHaveBeenCalledWith("https://api.guild.xyz/v1/guild");
   });
 
-  describe("GuildMemberProvider", () => {
-    it("verifies GuildMember correctly", async () => {
-      const provider = new GuildMemberProvider();
-
-      mockedAxios.get.mockResolvedValueOnce({
-        data: [
-          ...mockGuildMemberships,
-          {
-            guildId: 4,
-            roleIds: [6, 7, 8],
-            isAdmin: false,
-            isOwner: true,
-          },
-          {
-            guildId: 5,
-            roleIds: [6, 7],
-            isAdmin: false,
-            isOwner: true,
-          },
-          {
-            guildId: 6,
-            roleIds: [6],
-            isAdmin: false,
-            isOwner: true,
-          },
-        ],
-      });
-      mockedAxios.get.mockResolvedValueOnce({
-        data: [
-          ...mockAllGuilds,
-          {
-            id: 4,
-            name: "Guild D",
-            roles: ["Role 6"],
-            imageUrl: "https://example.com/guildC.png",
-            urlName: "guild-c",
-            memberCount: 300,
-          },
-          {
-            id: 5,
-            name: "Guild E",
-            roles: ["Role 6"],
-            imageUrl: "https://example.com/guildC.png",
-            urlName: "guild-c",
-            memberCount: 300,
-          },
-          {
-            id: 6,
-            name: "Guild F",
-            roles: ["Role 6"],
-            imageUrl: "https://example.com/guildC.png",
-            urlName: "guild-c",
-            memberCount: 300,
-          },
-        ],
-      });
-
-      const result = await provider.verify({ address: MOCK_ADDRESS } as RequestPayload);
-      expect(result).toEqual({
-        valid: true,
-        errors: [],
-        record: {
-          address: MOCK_ADDRESS,
-        },
-      });
-    });
-    it("should return invalid if has insufficient guilds", async () => {
-      const provider = new GuildMemberProvider();
-
-      mockedAxios.get.mockResolvedValueOnce({
-        data: mockGuildMemberships,
-      });
-      mockedAxios.get.mockResolvedValueOnce({
-        data: mockAllGuilds,
-      });
-
-      const result = await provider.verify({ address: MOCK_ADDRESS } as RequestPayload);
-      expect(result).toEqual({
-        valid: false,
-        errors: [
-          "Your Guild membership (> 5) and total roles (> 15) counts are below the required thresholds: Your Guild count: 3, you total roles: &10.",
-        ],
-        record: undefined,
-      });
-    });
-  });
   describe("GuildAdminProvider", () => {
     it("verifies GuildAdmin correctly", async () => {
       const provider = new GuildAdminProvider();

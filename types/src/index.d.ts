@@ -407,7 +407,6 @@ export type PROVIDER_ID =
   | "Lens"
   | "GnosisSafe"
   | "CoinbaseDualVerification"
-  | "GuildMember"
   | "GuildAdmin"
   | "GuildPassportMember"
   | "Hypercerts"
