@@ -19,7 +19,7 @@ interface SnapshotVotesQueryResult {
     },
     space?: {
       id?: string;
-    },
+    }
   ];
 }
 
