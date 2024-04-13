@@ -385,7 +385,6 @@ export type PROVIDER_ID =
   | "Discord"
   | "Snapshot"
   | "SnapshotProposalsProvider"
-  | "SnapshotVotesProvider"
   | "ethPossessionsGte#1"
   | "ethPossessionsGte#10"
   | "ethPossessionsGte#32"
