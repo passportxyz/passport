@@ -190,7 +190,7 @@ describe("POST /challenge", function () {
 
 describe("POST /verify", function () {
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it("handles valid wallet-signed challenge requests", async () => {
@@ -520,24 +520,27 @@ describe("POST /verify", function () {
   });
 
   it("handles valid challenge requests with multiple types, and acumulates values between provider calls", async () => {
+    // Just pick the first 3 providers
+    const providerNamesKeys = Object.keys(providers._providers);
+    const provider_1 = providerNamesKeys[0];
+    const provider_2 = providerNamesKeys[1];
+    const provider_3 = providerNamesKeys[2];
+
     // challenge received from the challenge endpoint
     const challenge = {
       issuer: issuer,
       credentialSubject: {
         id: "did:pkh:eip155:1:0x0",
-        provider: "challenge-GitcoinContributorStatistics#numGrantsContributeToGte#10",
+        provider: `challenge-${provider_1}`,
         address: "0x0",
         challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
       },
     };
+
     // payload containing a signature of the challenge in the challenge credential
     const payload = {
-      type: "GitcoinContributorStatistics#numGrantsContributeToGte#10",
-      types: [
-        "GitcoinContributorStatistics#numGrantsContributeToGte#10",
-        "GitcoinContributorStatistics#numGrantsContributeToGte#25",
-        "GitcoinContributorStatistics#numGrantsContributeToGte#100",
-      ],
+      type: provider_1,
+      types: [provider_1, provider_2, provider_3],
       address: "0x0",
       proofs: {
         code: "SECRET_CODE",
@@ -546,7 +549,7 @@ describe("POST /verify", function () {
 
     // spy on the providers
     jest
-      .spyOn(providers._providers["GitcoinContributorStatistics#numGrantsContributeToGte#10"], "verify")
+      .spyOn(providers._providers[provider_1], "verify")
       .mockImplementation(async (payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> => {
         context["update_1"] = true;
         return {
@@ -557,10 +560,9 @@ describe("POST /verify", function () {
         };
       });
     jest
-      .spyOn(providers._providers["GitcoinContributorStatistics#numGrantsContributeToGte#25"], "verify")
+      .spyOn(providers._providers[provider_2], "verify")
       .mockImplementation(async (payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> => {
         context["update_2"] = true;
-
         return {
           valid: true,
           record: {
@@ -569,7 +571,7 @@ describe("POST /verify", function () {
         };
       });
     const gitcoinGte100 = jest
-      .spyOn(providers._providers["GitcoinContributorStatistics#numGrantsContributeToGte#100"], "verify")
+      .spyOn(providers._providers[provider_3], "verify")
       .mockImplementation(async (payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> => {
         return {
           valid: true,
@@ -597,12 +599,8 @@ describe("POST /verify", function () {
     expect(gitcoinGte100).toBeCalledWith(
       {
         // issuer: issuer,
-        type: "GitcoinContributorStatistics#numGrantsContributeToGte#10",
-        types: [
-          "GitcoinContributorStatistics#numGrantsContributeToGte#10",
-          "GitcoinContributorStatistics#numGrantsContributeToGte#25",
-          "GitcoinContributorStatistics#numGrantsContributeToGte#100",
-        ],
+        type: provider_1,
+        types: [provider_1, provider_2, provider_3],
         address: "0x0",
         proofs: { code: "SECRET_CODE" },
       },
