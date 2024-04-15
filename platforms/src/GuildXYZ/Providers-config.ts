@@ -1,5 +1,5 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { GuildMemberProvider, GuildAdminProvider, GuildPassportMemberProvider } from "./Providers/guildXYZ";
+import { GuildAdminProvider, GuildPassportMemberProvider } from "./Providers/guildXYZ";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/guildXYZStampIcon.svg",
@@ -12,15 +12,6 @@ export const PlatformDetails: PlatformSpec = {
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
-  {
-    platformGroup: "Guild Member",
-    providers: [
-      {
-        title: "Member of more than 5 guilds and more than 15 roles*",
-        name: "GuildMember",
-      },
-    ],
-  },
   {
     platformGroup: "Guild Admin",
     providers: [
@@ -36,8 +27,4 @@ export const ProviderConfig: PlatformGroupSpec[] = [
   },
 ];
 
-export const providers: Provider[] = [
-  new GuildAdminProvider(),
-  new GuildMemberProvider(),
-  new GuildPassportMemberProvider(),
-];
+export const providers: Provider[] = [new GuildAdminProvider(), new GuildPassportMemberProvider()];

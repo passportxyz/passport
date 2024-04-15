@@ -13,15 +13,6 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Contributed to...",
-    providers: [
-      { title: "at least 1 Grant", name: "GitcoinContributorStatistics#numGrantsContributeToGte#1" },
-      { title: "at least 10 Grants", name: "GitcoinContributorStatistics#numGrantsContributeToGte#10" },
-      { title: "at least 25 Grants", name: "GitcoinContributorStatistics#numGrantsContributeToGte#25" },
-      { title: "at least 100 Grants", name: "GitcoinContributorStatistics#numGrantsContributeToGte#100" },
-    ],
-  },
-  {
     platformGroup: "Contributed ($)...",
     providers: [
       { title: "at least $10", name: "GitcoinContributorStatistics#totalContributionAmountGte#10" },
@@ -33,26 +24,6 @@ export const ProviderConfig: PlatformGroupSpec[] = [
 
 export const providers: Provider[] = [
   // --- GitcoinContributorStatisticsProvider ---
-  new GitcoinContributorStatisticsProvider({
-    threshold: 1,
-    receivingAttribute: "num_grants_contribute_to",
-    recordAttribute: "numGrantsContributeToGte",
-  }),
-  new GitcoinContributorStatisticsProvider({
-    threshold: 10,
-    receivingAttribute: "num_grants_contribute_to",
-    recordAttribute: "numGrantsContributeToGte",
-  }),
-  new GitcoinContributorStatisticsProvider({
-    threshold: 25,
-    receivingAttribute: "num_grants_contribute_to",
-    recordAttribute: "numGrantsContributeToGte",
-  }),
-  new GitcoinContributorStatisticsProvider({
-    threshold: 100,
-    receivingAttribute: "num_grants_contribute_to",
-    recordAttribute: "numGrantsContributeToGte",
-  }),
   new GitcoinContributorStatisticsProvider({
     threshold: 10,
     receivingAttribute: "total_contribution_amount",

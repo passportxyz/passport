@@ -10,13 +10,11 @@ export class GithubPlatform extends Platform {
     super();
     this.clientId = options.clientId as string;
     this.redirectUri = options.redirectUri as string;
-    if (process.env.NEXT_PUBLIC_FF_NEW_GITHUB_STAMPS === "on") {
-      this.banner = {
-        heading: "Verifying Contribution Activity",
-        content:
-          "For the Contribution Activity credentials, make sure your contribution data is public. Go to Settings > Public Profile > Contributions & Activity and uncheck 'Make profile private and hide activity'. Verify your contribution history with your Gitcoin Passport!",
-      };
-    }
+    this.banner = {
+      heading: "Verifying Contribution Activity",
+      content:
+        "For the Contribution Activity credentials, make sure your contribution data is public. Go to Settings > Public Profile > Contributions & Activity and uncheck 'Make profile private and hide activity'. Verify your contribution history with your Gitcoin Passport!",
+    };
   }
 
   async getOAuthUrl(state: string): Promise<string> {

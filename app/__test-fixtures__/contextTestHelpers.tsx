@@ -38,8 +38,8 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: getProviderSpec("Ens", "Ens"),
         stamp: undefined,
       },
-      Poh: {
-        providerSpec: getProviderSpec("Poh", "Poh"),
+      Github: {
+        providerSpec: getProviderSpec("Github", "githubContributionActivityGte#30"),
         stamp: undefined,
       },
       POAP: {
@@ -60,22 +60,6 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
       },
       Signer: {
         providerSpec: getProviderSpec("Signer", "Signer"),
-        stamp: undefined,
-      },
-      "GitcoinContributorStatistics#numGrantsContributeToGte#1": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGrantsContributeToGte#1"),
-        stamp: undefined,
-      },
-      "GitcoinContributorStatistics#numGrantsContributeToGte#10": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGrantsContributeToGte#10"),
-        stamp: undefined,
-      },
-      "GitcoinContributorStatistics#numGrantsContributeToGte#25": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGrantsContributeToGte#25"),
-        stamp: undefined,
-      },
-      "GitcoinContributorStatistics#numGrantsContributeToGte#100": {
-        providerSpec: getProviderSpec("Gitcoin", "GitcoinContributorStatistics#numGrantsContributeToGte#100"),
         stamp: undefined,
       },
       "GitcoinContributorStatistics#totalContributionAmountGte#10": {
@@ -247,19 +231,19 @@ export const testOnChainContextState = (initialState?: Partial<OnChainContextSta
     onChainProviders: {},
     activeChainProviders: [
       {
-        providerName: "githubAccountCreationGte#90",
+        providerName: "githubContributionActivityGte#30",
         credentialHash: "v0.0.0:rnutMGjNA2yPx/8xzJdn6sXDsY46lLUNV3DHAHoPJJg=",
         expirationDate: new Date("2090-07-31T11:49:51.433Z"),
         issuanceDate: new Date("2023-07-02T11:49:51.433Z"),
       },
       {
-        providerName: "githubAccountCreationGte#180",
+        providerName: "githubContributionActivityGte#60",
         credentialHash: "v0.0.0:rnutMGjNA2yPx/8xzJdn6sXDsY46lLUNV3DHAHoPJJg=",
         expirationDate: new Date("2090-07-31T11:49:51.433Z"),
         issuanceDate: new Date("2023-07-02T11:49:51.433Z"),
       },
       {
-        providerName: "githubAccountCreationGte#365",
+        providerName: "githubContributionActivityGte#120",
         credentialHash: "v0.0.0:rnutMGjNA2yPx/8xzJdn6sXDsY46lLUNV3DHAHoPJJg=",
         expirationDate: new Date("2090-07-31T11:49:51.433Z"),
         issuanceDate: new Date("2023-07-02T11:49:51.433Z"),

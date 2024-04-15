@@ -1,6 +1,6 @@
 [
   {
-    "provider": "GitcoinContributorStatistics#numGrantsContributeToGte#1",
+    "provider": "GitcoinContributorStatistics#totalContributionAmountGte#10",
     "credential": {
       "type": ["VerifiableCredential"],
       "proof": {
@@ -119,7 +119,7 @@
           "hash": "https://schema.org/Text",
           "provider": "https://schema.org/Text"
         },
-        "provider": "GitcoinContributorStatistics#numGrantsContributeToGte#1"
+        "provider": "GitcoinContributorStatistics#totalContributionAmountGte#10"
       }
     }
   },

@@ -42,7 +42,7 @@ const mockComposeVc = {
     credentialSubject: {
       id: "did:pkh:eip155:1:0x0636F974D29d947d4946b2091d769ec6D2d415DE",
       hash: "v0.0.0:eu7RH6ZXAtRhUm3wQ3jfMVYoJ18sXynFm2AvsjsT9FQ=",
-      provider: "GitcoinContributorStatistics#numGrantsContributeToGte#1",
+      provider: "GitcoinContributorStatistics#totalContributionAmountGte#10",
       _context: {
         hash: "https://schema.org/Text",
         provider: "https://schema.org/Text",

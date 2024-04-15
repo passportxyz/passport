@@ -37,12 +37,12 @@ export const ensStampFixture: Stamp = {
 };
 
 export const pohStampFixture: Stamp = {
-  provider: "Poh",
+  provider: "Lens",
   credential,
 };
 
 export const twitterStampFixture: Stamp = {
-  provider: "Twitter",
+  provider: "ZkSyncEra",
   credential,
 };
 

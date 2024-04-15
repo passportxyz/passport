@@ -158,8 +158,6 @@ const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
     // Feature Flag Holonym Stamp
     if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP !== "on" && platform.platform === "Holonym") return true;
 
-    if (process.env.NEXT_PUBLIC_FF_CYBERCONNECT_STAMPS !== "on" && platform.platform === "CyberConnect") return true;
-
     if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS !== "on" && platform.platform === "TrustaLabs") return true;
 
     return false;

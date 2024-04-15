@@ -1,9 +1,7 @@
-import * as Twitter from "./Twitter";
 import * as Ens from "./Ens";
 import * as Github from "./Github";
 import * as Gitcoin from "./Gitcoin";
 import * as Lens from "./Lens";
-import * as Poh from "./Poh";
 import * as Snapshot from "./Snapshot";
 import * as GnosisSafe from "./GnosisSafe";
 import * as NFT from "./NFT";
@@ -17,11 +15,9 @@ import * as Google from "./Google";
 import * as Brightid from "./Brightid";
 import * as Coinbase from "./Coinbase";
 import * as GuildXYZ from "./GuildXYZ";
-import * as PHI from "./PHI";
 import * as Holonym from "./Holonym";
 import * as Idena from "./Idena";
 import * as Civic from "./Civic";
-import * as CyberConnect from "./CyberProfile";
 import * as TrustaLabs from "./TrustaLabs";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
@@ -36,14 +32,12 @@ type PlatformConfig = {
 const platforms: Record<string, PlatformConfig> = {
   GtcStaking,
   Gitcoin,
-  Twitter,
   Discord,
   Google,
   Github,
   Linkedin,
   Ens,
   Brightid,
-  Poh,
   ETH,
   Snapshot,
   NFT,
@@ -52,11 +46,9 @@ const platforms: Record<string, PlatformConfig> = {
   GnosisSafe,
   Coinbase,
   GuildXYZ,
-  PHI,
   Holonym,
   Idena,
   Civic,
-  CyberConnect,
   TrustaLabs,
 };
 

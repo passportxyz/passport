@@ -26,7 +26,7 @@ export const supportedChains = [
   "XDC_APOTHEM",
 ] as const;
 
-export type SupportedChain = (typeof supportedChains)[number];
+export type SupportedChain = typeof supportedChains[number];
 
 type CivicPassState = "ACTIVE" | "FROZEN" | "REVOKED";
 

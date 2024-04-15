@@ -144,10 +144,6 @@ export const getIamSecrets = (PASSPORT_VC_SECRETS_ARN: string, IAM_SERVER_SSM_AR
     valueFrom: `${IAM_SERVER_SSM_ARN}:EAS_GITCOIN_STAMP_SCHEMA::`,
   },
   {
-    name: "FF_NEW_GITHUB_STAMPS",
-    valueFrom: `${IAM_SERVER_SSM_ARN}:FF_NEW_GITHUB_STAMPS::`,
-  },
-  {
     name: "INCLUDE_TESTNETS",
     valueFrom: `${IAM_SERVER_SSM_ARN}:INCLUDE_TESTNETS::`,
   },

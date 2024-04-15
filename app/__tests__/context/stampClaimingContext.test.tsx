@@ -67,7 +67,7 @@ const TestingComponent = () => {
             },
             {
               platformId: "Gitcoin",
-              selectedProviders: ["GitcoinContributorStatistics#numGrantsContributeToGte#1"],
+              selectedProviders: ["GitcoinContributorStatistics#totalContributionAmountGte#10"],
             },
           ]);
         }}
@@ -93,7 +93,7 @@ const TestingComponentWithEvmStamp = () => {
             },
             {
               platformId: "Gitcoin",
-              selectedProviders: ["GitcoinContributorStatistics#numGrantsContributeToGte#1"],
+              selectedProviders: ["GitcoinContributorStatistics#totalContributionAmountGte#10"],
             },
             {
               platformId: "EVMBulkVerify",
