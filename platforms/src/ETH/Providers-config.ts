@@ -1,5 +1,12 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { ETHAdvocateProvider, ETHMaxiProvider, ETHEnthusiastProvider } from "./Providers/accountAnalysis";
+import {
+  ETHAdvocateProvider,
+  ETHMaxiProvider,
+  ETHEnthusiastProvider,
+  EthGasSpentProvider,
+  EthDaysActiveProvider,
+  EthTransactionsProvider,
+} from "./Providers/accountAnalysis";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/ethereumStampIcon.svg",
@@ -14,26 +21,52 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Ethereum Involvement Spectrum",
+    platformGroup: "Engagement Milestones",
     providers: [
       {
         title: "ETH Enthusiast",
-        name: "ETHEnthusiast",
-        description: "Your journey begins here, showcasing initial engagement and support for the Ethereum ecosystem.",
+        name: "ETHScore#50",
+        description: "Marks the initiation of engagement within the Ethereum ecosystem.",
       },
       {
         title: "ETH Advocate",
-        name: "ETHAdvocate",
-        description: "Continued commitment and participation in the Ethereum ecosystem.",
+        name: "ETHScore#75",
+        description: "Represents a higher level of commitment and activity.",
       },
       {
         title: "ETH Maxi",
-        name: "ETHMaxi",
-        description:
-          "The ultimate badge of honor, embodying full-fledged advocacy and a dominant presence in the community.",
+        name: "ETHScore#90",
+        description: "Denotes exceptional involvement and dedication.",
+      },
+    ],
+  },
+  {
+    platformGroup: "Your Ethereum Activity Metrics",
+    providers: [
+      {
+        title: "Spend more than 0.25 ETH on gas",
+        name: "ETHGasSpent#0.25",
+        description: "Highlights significant financial engagement with the network.",
+      },
+      {
+        title: "Execute over 100 transactions",
+        name: "ETHnumTransactions#100",
+        description: "Indicates a robust level of transactional activity.",
+      },
+      {
+        title: "Active on over 50 distinct days",
+        name: "ETHDaysActive#50",
+        description: "Showcases sustained interaction with Ethereum.",
       },
     ],
   },
 ];
 
-export const providers: Provider[] = [new ETHEnthusiastProvider(), new ETHAdvocateProvider(), new ETHMaxiProvider()];
+export const providers: Provider[] = [
+  new ETHEnthusiastProvider(),
+  new ETHAdvocateProvider(),
+  new ETHMaxiProvider(),
+  new EthGasSpentProvider(),
+  new EthDaysActiveProvider(),
+  new EthTransactionsProvider(),
+];
