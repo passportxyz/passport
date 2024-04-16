@@ -24,7 +24,6 @@ const {
   Lens,
   Github,
   Gitcoin,
-  PHI,
   NFT,
   GnosisSafe,
   Snapshot,
@@ -41,7 +40,6 @@ const {
   Holonym,
   Idena,
   Civic,
-  CyberConnect,
   TrustaLabs,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
@@ -178,13 +176,6 @@ if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
   platforms.set("GuildXYZ", {
     platform: new GuildXYZ.GuildXYZPlatform(),
     platFormGroupSpec: GuildXYZ.ProviderConfig,
-  });
-}
-
-if (process.env.NEXT_PUBLIC_FF_PHI_STAMP === "on") {
-  platforms.set("PHI", {
-    platform: new PHI.PHIPlatform(),
-    platFormGroupSpec: PHI.ProviderConfig,
   });
 }
 
