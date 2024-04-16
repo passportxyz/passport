@@ -398,6 +398,13 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         .catch((e) => {
           console.log("failed to load passport from compose-db", e);
           datadogLogs.logger.error("failed to load passport from compose-db", { error: e });
+        })
+        .then((passportResponse) => {
+          handleComposeRetry(passportResponse.passport?.stamps || []);
+        })
+        .catch((e) => {
+          console.log("failed to retry compose-db stamps", e);
+          datadogLogs.logger.error("failed to retry compose-db stamps", { error: e });
         });
     }
   }, [ceramicClient]);
@@ -635,6 +642,45 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     } catch (e) {
       datadogLogs.logger.error("Error deleting multiple stamps", { providerIds, error: e });
       throw e;
+    }
+  };
+
+  const handleComposeRetry = async (composeStamps: Stamp[]): Promise<SecondaryStorageBulkPatchResponse | void> => {
+    if (ceramicClient) {
+      if (!composeStamps.length) {
+        console.log("No stamps to retry");
+      }
+      try {
+        // get the current passport from the database
+        const getResponse = await database.getPassport();
+        if (getResponse.status === "Success") {
+          const { stamps } = getResponse.passport;
+          // using stamps as the source of truth, filter stamps for where the issuanceDate does not match the composeStamp if there is a composeStamp with the same provider
+          const stampsToRetry = stamps.filter((stamp: Stamp) => {
+            const existingStamp = composeStamps.find((composeStamp: Stamp) => stamp.provider === composeStamp.provider);
+            if (stamp.credential.issuanceDate !== existingStamp?.credential.issuanceDate) {
+              return true;
+            }
+          });
+          // then add the stamps to ComposeDB
+          if (stampsToRetry.length > 0) {
+            // first make sure that the user has a valid session
+            checkAndAlertInvalidCeramicSession();
+            // perform an update using the stamps that need to be retried
+            const composeDBPatchResponse = await ceramicClient.patchStamps(stampsToRetry);
+            const composeDBMetadata = processComposeDBMetadata(getResponse.passport, composeDBPatchResponse);
+            await database.patchStampComposeDBMetadata(composeDBMetadata);
+            return composeDBPatchResponse;
+          } else {
+            console.log("No stamps to retry");
+          }
+        } else {
+          console.log("Failed to get passport from database");
+        }
+      } catch (e) {
+        console.log("error adding ceramic stamps", e);
+        datadogLogs.logger.error("Error adding ceramic stamps", { stamps: composeStamps, error: e });
+      }
     }
   };
 
