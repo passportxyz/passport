@@ -59,16 +59,19 @@ class NftCollectorBaseProvider extends NftBaseProvider {
     const response = await this.queryNftStampApi(address);
     const data = response.data;
     const human_probability = data.human_probability;
+
     if (human_probability >= this.thresholdAmount) {
-      const ret: string = human_probability.toString();
       return {
         valid: true,
-        record: { ret },
+        record: { 
+          human_probability: human_probability.toString(),
+          address
+         },
       };
     } else {
       return {
         valid: false,
-        errors: [`Your internal NFTScore is  ${human_probability}. You need a minimum of ${50} to claim this stamp`],
+        errors: [`Your internal NFTScore is  ${human_probability}. You need a minimum of ${this.thresholdAmount} to claim this stamp`],
       };
     }
   }
