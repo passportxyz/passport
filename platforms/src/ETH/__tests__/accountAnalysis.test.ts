@@ -81,8 +81,8 @@ describe("AccountAnalysis Providers", () => {
       mockContext = {};
       const response1 = await getETHAnalysis(mockAddress, mockContext);
       const response2 = await getETHAnalysis(mockAddress, mockContext);
-      expect(response1.human_probability).toEqual(80);
-      expect(response2.human_probability).toEqual(80);
+      expect(response1.humanProbability).toEqual(80);
+      expect(response2.humanProbability).toEqual(80);
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(axios.post).toHaveBeenCalledTimes(1);
     });
