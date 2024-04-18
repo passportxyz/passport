@@ -21,53 +21,49 @@ const mockResponse = (score: number): { data: ModelResponse } => ({
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+const scoreTestCases = [
+  //[score, [result for ZkSyncScore5Provider, result for ZkSyncScore20Provider, result for ZkSyncScore50Provider]]
+  [0, [false, false, false]],
+  [1, [false, false, false]],
+  [5, [true, false, false]],
+  [20, [true, true, false]],
+  [50, [true, true, true]],
+  [100, [true, true, true]],
+]
+  .map(([score, expected]: [number, boolean[]]) => {
+    return [
+      [score, expected[0], ZkSyncScore5Provider],
+      [score, expected[1], ZkSyncScore20Provider],
+      [score, expected[2], ZkSyncScore50Provider],
+    ];
+  })
+  .flat() as [
+  number,
+  boolean,
+  typeof ZkSyncScore5Provider | typeof ZkSyncScore20Provider | typeof ZkSyncScore50Provider,
+][];
+
 describe("AccountAnalysis Providers", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockContext = {};
   });
 
-  it("should validate inputs for ZkSyncScore5Provider", async () => {
-    const mockedResponse = mockResponse(5);
-    mockedAxios.post.mockResolvedValueOnce(mockedResponse);
+  describe("should return valid/invalid based on score", () => {
+    it.each(scoreTestCases)("score %i should return %s for %p", async (score, expected, provider) => {
+      const mockedResponse = mockResponse(score);
+      mockedAxios.post.mockResolvedValueOnce(mockedResponse);
+      const ethAdvocateProvider = new provider();
+      const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
 
-    const ethAdvocateProvider = new ZkSyncScore5Provider();
-    const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
-
-    expect(payload.valid).toBe(true);
-    expect(payload.record).toEqual({ address: mockAddress });
+      expect(payload.valid).toBe(expected);
+      if (expected) {
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(payload.record).toEqual({ address: mockAddress });
+      }
+    });
   });
 
-  it("should validate inputs for ZkSyncScore20Provider", async () => {
-    const mockedResponse = mockResponse(50);
-    mockedAxios.post.mockResolvedValueOnce(mockedResponse);
-    const ethAdvocateProvider = new ZkSyncScore20Provider();
-    const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
-
-    expect(payload.valid).toBe(true);
-    expect(payload.record).toEqual({ address: mockAddress });
-  });
-
-  it("should validate inputs for ZkSyncScore50Provider", async () => {
-    jest.clearAllMocks();
-    const mockedResponse = mockResponse(88);
-    mockedAxios.post.mockResolvedValueOnce(mockedResponse);
-    const ethAdvocateProvider = new ZkSyncScore50Provider();
-    const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
-
-    expect(payload.valid).toBe(true);
-    expect(payload.record).toEqual({ address: mockAddress });
-  });
-
-  it("should validate invalid inputs for ZkSyncScore50Provider", async () => {
-    const mockedResponse = mockResponse(40);
-    mockedAxios.post.mockResolvedValueOnce(mockedResponse);
-    const ethAdvocateProvider = new ZkSyncScore50Provider();
-    const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
-
-    expect(payload.valid).toBe(false);
-    expect(payload.errors).toBeDefined();
-  });
   it("should handle errors gracefully", async () => {
     jest.clearAllMocks();
     mockedAxios.post.mockRejectedValueOnce(new Error("Test Error"));
