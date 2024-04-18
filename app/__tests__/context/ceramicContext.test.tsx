@@ -4,7 +4,6 @@ import {
   CeramicContext,
   CeramicContextProvider,
   CeramicContextState,
-  IsLoadingPassportState,
   handleComposeRetry,
   cleanPassport,
 } from "../../context/ceramicContext";
@@ -19,9 +18,6 @@ import { Passport, SecondaryStorageBulkPatchResponse, Stamp } from "@gitcoin/pas
 import { DatastoreConnectionContext } from "../../context/datastoreConnectionContext";
 import { DID } from "dids";
 import { ChakraProvider } from "@chakra-ui/react";
-import exp from "constants";
-import { get } from "http";
-import mock from "jest-mock-extended/lib/Mock";
 
 process.env.NEXT_PUBLIC_FF_CERAMIC_CLIENT = "on";
 
@@ -725,7 +721,7 @@ jest.mock("@gitcoin/passport-database-client", () => {
   };
 });
 
-const mockComponent = ({ invalidSession }: { invalidSession?: boolean } = {}, p0: boolean) => (
+const mockComponent = ({ invalidSession }: { invalidSession?: boolean } = {}) => (
   <ChakraProvider>
     <DatastoreConnectionContext.Provider
       value={{
