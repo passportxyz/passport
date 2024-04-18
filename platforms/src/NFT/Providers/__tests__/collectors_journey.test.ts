@@ -5,7 +5,7 @@ import { DigitalCollectorProvider, ArtAficionadoProvider, NFTVisionaryProvider }
 import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { ProviderExternalVerificationError } from "../../../types";
 
 jest.mock("axios");
@@ -23,7 +23,6 @@ describe("Valid stamp verification Collector's Journey", function () {
     (axios.post as jest.Mock).mockImplementation((url) => {
       return Promise.resolve({
         data: {
-          statusCode: 200,
           data: {
             human_probability: 50,
           },
@@ -49,7 +48,6 @@ describe("Valid stamp verification Collector's Journey", function () {
     (axios.post as jest.Mock).mockImplementation((url) => {
       return Promise.resolve({
         data: {
-          statusCode: 200,
           data: {
             human_probability: 60,
           },
@@ -75,7 +73,6 @@ describe("Valid stamp verification Collector's Journey", function () {
     (axios.post as jest.Mock).mockImplementation((url) => {
       return Promise.resolve({
         data: {
-          statusCode: 200,
           data: {
             human_probability: 75,
           },
@@ -101,7 +98,6 @@ describe("Valid stamp verification Collector's Journey", function () {
     (axios.post as jest.Mock).mockImplementation((url) => {
       return Promise.resolve({
         data: {
-          statusCode: 200,
           data: {
             human_probability: 80,
           },
@@ -127,7 +123,6 @@ describe("Valid stamp verification Collector's Journey", function () {
     (axios.post as jest.Mock).mockImplementation((url) => {
       return Promise.resolve({
         data: {
-          statusCode: 200,
           data: {
             human_probability: 90,
           },
@@ -153,7 +148,6 @@ describe("Valid stamp verification Collector's Journey", function () {
     (axios.post as jest.Mock).mockImplementation((url) => {
       return Promise.resolve({
         data: {
-          statusCode: 200,
           data: {
             human_probability: 100,
           },
@@ -185,7 +179,6 @@ describe("Invalid stamp verification Collector's Journey", function () {
     (axios.post as jest.Mock).mockImplementation((url) => {
       return Promise.resolve({
         data: {
-          statusCode: 200,
           data: {
             human_probability: 45,
           },
@@ -208,7 +201,6 @@ describe("Invalid stamp verification Collector's Journey", function () {
     (axios.post as jest.Mock).mockImplementation((url) => {
       return Promise.resolve({
         data: {
-          statusCode: 200,
           data: {
             human_probability: 65,
           },
@@ -231,7 +223,6 @@ describe("Invalid stamp verification Collector's Journey", function () {
     (axios.post as jest.Mock).mockImplementation((url) => {
       return Promise.resolve({
         data: {
-          statusCode: 200,
           data: {
             human_probability: 85,
           },
@@ -245,8 +236,56 @@ describe("Invalid stamp verification Collector's Journey", function () {
     } as unknown as RequestPayload);
 
     expect(nftVisionaryPayload).toEqual({
-        valid: false,
-        errors: [ "Your internal NFTScore is  85. You need a minimum of 90 to claim this stamp"],
+      valid: false,
+      errors: ["Your internal NFTScore is  85. You need a minimum of 90 to claim this stamp"],
     });
+  });
+
+  it("Should return invalid stamp for NFTVisionary (undefined)", async () => {
+    (axios.post as jest.Mock).mockImplementation((url) => {
+      return Promise.resolve({
+        data: {
+          data: {},
+        },
+      });
+    });
+
+    const nftVisionaryProvider = new NFTVisionaryProvider();
+    const nftVisionaryPayload = await nftVisionaryProvider.verify({
+      address: MOCK_ADDRESS_LOWER,
+    } as unknown as RequestPayload);
+
+    expect(nftVisionaryPayload).toEqual({
+      valid: false,
+      errors: ["Your internal NFTScore is  undefined. You need a minimum of 90 to claim this stamp"],
+    });
+  });
+});
+
+describe("Test Error cases for stamp  verification", function () {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should throw Provider External Verification error when unable to access nft stamp api", async () => {
+    const mockAxiosError = new Error("Network error") as AxiosError;
+    mockedAxios.isAxiosError.mockReturnValueOnce(true);
+    mockAxiosError.response = {
+      status: 500,
+      data: {},
+      headers: {},
+      statusText: "Internal Server Error",
+      config: {},
+    };
+
+    mockedAxios.post.mockRejectedValueOnce(mockAxiosError);
+
+    const digitalCollectorProvider = new DigitalCollectorProvider();
+
+    await expect(
+      digitalCollectorProvider.verify({
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload)
+    ).rejects.toThrow("Error making queryNftStampApi request, received error response with code 500: {}, headers: {}");
   });
 });

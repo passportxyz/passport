@@ -20,19 +20,19 @@ export const ProviderConfig: PlatformGroupSpec[] = [
         name: "DigitalCollector",
         title: "Digital Collector",
         description:
-          "Recognizes users beginning to explore the NFT space with a budding collection. (INTERNAL NFTScore > 50)",
+          "Recognizes users beginning to explore the NFT space with a budding collection.",
       },
       {
         name: "ArtAficionado",
         title: "Art Aficionado",
         description:
-          "Highlights users with a significant, more curated NFT portfolio that demonstrates their deeper involvement and appreciation for digital art and assets. (INTERNAL NFTScore > 75)",
+          "Highlights users with a significant, more curated NFT portfolio that demonstrates their deeper involvement and appreciation for digital art and assets.",
       },
       {
         name: "NFTVisionary",
         title: "NFT Visionary",
         description:
-          "Distinguishes users at the forefront of the NFT movement, showcasing exceptional collections that set trends within the community. (INTERNAL NFTScore > 90)",
+          "Distinguishes users at the forefront of the NFT movement, showcasing exceptional collections that set trends within the community.",
       },
     ],
   },

@@ -16,9 +16,6 @@ import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 const dataScienceEndpoint = process.env.DATA_SCIENCE_API_URL;
 
 type NftApiResponse = {
-  statusCode: number;
-  statusDescription: string;
-  isBase64Encoded: boolean;
   data: {
     human_probability: number;
     has_safe_nft: string;
@@ -85,7 +82,7 @@ class NftCollectorBaseProvider extends NftBaseProvider {
         })
       ).data as NftApiResponse;
     } catch (error) {
-      handleProviderAxiosError(error, "queryNftStampApi", [address]);
+      handleProviderAxiosError(error, "queryNftStampApi", []);
     }
   }
 }
