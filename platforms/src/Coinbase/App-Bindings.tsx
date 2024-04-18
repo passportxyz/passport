@@ -2,12 +2,6 @@ import { PlatformOptions } from "../types";
 import { Platform } from "../utils/platform";
 import React from "react";
 
-const Link = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <a href={href} target="_blank" className="text-color-1 cursor-pointer underline" rel="noreferrer">
-    {children}
-  </a>
-);
-
 export class CoinbasePlatform extends Platform {
   platformId = "Coinbase";
   path = "coinbase";
@@ -15,10 +9,27 @@ export class CoinbasePlatform extends Platform {
   redirectUri: string = null;
 
   banner = {
-    content: `Integrate your Coinbase account with your onchain identity to unlock a realm of
-      digital possibilities. This stamp requires you to have an active Coinbase account
-      and to establish your onchain identity on Base, bridging the gap between
-      traditional and decentralized finance.`.replace(/\s+/gm, " "),
+    content: (
+      <div>
+        Secure the Coinbase Stamp by completing a Coinbase attestation onchain. Ensure you have an active Coinbase
+        account with a verified government ID to mint your onchain attestation, elevating your Passport&apos;s
+        credibility and trust.{" "}
+        <a
+          href="https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/how-do-i-add-passport-stamps/guide-to-add-coinbase-stamp-to-passport"
+          style={{
+            color: "rgb(var(--color-foreground-2))",
+            textDecoration: "underline",
+            cursor: "pointer",
+            paddingLeft: "2px",
+          }}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Learn more
+        </a>
+        .
+      </div>
+    ),
     cta: {
       label: "Begin Your Onchain Verification Journey with Coinbase",
       url: "https://www.coinbase.com/onchain-verify",

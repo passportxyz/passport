@@ -346,7 +346,6 @@ export type PLATFORM_ID =
   | "ETH"
   | "GtcStaking"
   | "NFT"
-  | "ZkSync"
   | "Lens"
   | "GnosisSafe"
   | "Coinbase"
@@ -357,6 +356,7 @@ export type PLATFORM_ID =
   | "Idena"
   | "Civic"
   | "GrantsStack"
+  | "ZkSync"
   | "TrustaLabs";
 
 export type PROVIDER_ID =
@@ -396,6 +396,9 @@ export type PROVIDER_ID =
   | "SelfStakingGold"
   | "NFT"
   | "ZkSyncEra"
+  | "zkSyncScore#20"
+  | "zkSyncScore#50"
+  | "zkSyncScore#5"
   | "Lens"
   | "GnosisSafe"
   | "CoinbaseDualVerification"

@@ -1,39 +1,47 @@
 // ----- Types
-import { ProviderExternalVerificationError, type Provider } from "../../types";
+import { type Provider } from "../../types";
 import type { RequestPayload, VerifiedPayload, ProviderContext, PROVIDER_ID } from "@gitcoin/passport-types";
 import axios from "axios";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
-type HumanProbability = {
-  human_probability: number;
-};
+type HumanProbability = number;
 
 export type ModelResponse = {
-  data: HumanProbability;
+  data: {
+    human_probability: HumanProbability;
+  };
+};
+
+type ETHAnalysis = {
+  humanProbability: HumanProbability;
 };
 
 export type ETHAnalysisContext = ProviderContext & {
-  ethAnalysis?: {
-    humanProbability?: HumanProbability;
-  };
+  ethAnalysis?: ETHAnalysis;
 };
 
 const dataScienceEndpoint = process.env.DATA_SCIENCE_API_URL;
 
-export async function getETHAnalysis(address: string, context: ETHAnalysisContext): Promise<HumanProbability> {
-  if (context?.ethAnalysis?.humanProbability) {
-    return context.ethAnalysis.humanProbability;
+export async function getETHAnalysis(address: string, context: ETHAnalysisContext): Promise<ETHAnalysis> {
+  if (!context?.ethAnalysis) {
+    const response = await fetchModelData<ModelResponse>(address, "eth-stamp-predict");
+
+    context.ethAnalysis = {
+      humanProbability: response.data.human_probability,
+    };
   }
+  return context.ethAnalysis;
+}
 
-  const response = (await axios.post(`http://${dataScienceEndpoint}/eth-stamp-predict`, {
-    address,
-  })) as unknown as { data: ModelResponse };
-
-  const humanProbability = response.data.data;
-
-  context.ethAnalysis = {
-    humanProbability,
-  };
-  return humanProbability;
+export async function fetchModelData<T>(address: string, url_subpath: string): Promise<T> {
+  try {
+    const response = await axios.post(`http://${dataScienceEndpoint}/${url_subpath}`, {
+      address,
+    });
+    return response.data as T;
+  } catch (e) {
+    handleProviderAxiosError(e, "model data (" + url_subpath + ")", [dataScienceEndpoint]);
+  }
 }
 
 export type EthOptions = {
@@ -52,28 +60,24 @@ export class AccountAnalysis implements Provider {
   }
 
   async verify(payload: RequestPayload, context: ETHAnalysisContext): Promise<VerifiedPayload> {
-    try {
-      const { address } = payload;
-      const ethAnalysis = await getETHAnalysis(address, context);
+    const { address } = payload;
+    const ethAnalysis = await getETHAnalysis(address, context);
 
-      if (ethAnalysis.human_probability < this.minimum) {
-        return {
-          valid: false,
-          errors: [
-            `You received a score of ${ethAnalysis.human_probability} from our analysis. You must have a score of ${this.minimum} or higher to obtain this stamp.`,
-          ],
-        };
-      }
-
+    if (ethAnalysis.humanProbability < this.minimum) {
       return {
-        valid: true,
-        record: {
-          address,
-        },
+        valid: false,
+        errors: [
+          `You received a score of ${ethAnalysis.humanProbability} from our analysis. You must have a score of ${this.minimum} or higher to obtain this stamp.`,
+        ],
       };
-    } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(`Error validating ETH amounts: ${String(e)}`);
     }
+
+    return {
+      valid: true,
+      record: {
+        address,
+      },
+    };
   }
 }
 
