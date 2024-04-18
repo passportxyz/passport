@@ -3,16 +3,14 @@ import { type Provider } from "../../types";
 import type { RequestPayload, VerifiedPayload, ProviderContext, PROVIDER_ID } from "@gitcoin/passport-types";
 import { fetchModelData } from "../../ETH/Providers/accountAnalysis";
 
-type HumanProbability = number;
-
 export type ModelResponse = {
   data: {
-    human_probability: HumanProbability;
+    human_probability: number;
   };
 };
 
 type ZkSyncAnalysis = {
-  humanProbability: HumanProbability;
+  humanProbability: number;
 };
 
 export type ZkSyncAnalysisContext = ProviderContext & {
