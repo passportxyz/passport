@@ -397,7 +397,7 @@ export type PROVIDER_ID =
   | "NFT"
   | "DigitalCollector"
   | "ArtAficionado"
-  | "NFTVisionary"
+  | "NftVisionary"
   | "ZkSyncEra"
   | "Lens"
   | "GnosisSafe"

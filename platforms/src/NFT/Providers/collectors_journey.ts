@@ -42,7 +42,7 @@ class NftBaseProvider implements Provider {
   }
 }
 
-class NftCollectorBaseProvider extends NftBaseProvider {
+export class NftCollectorBaseProvider extends NftBaseProvider {
   constructor(options: NftProviderOptions) {
     super(options);
     this.thresholdAmount = options.thresholdAmount;
@@ -105,10 +105,10 @@ export class ArtAficionadoProvider extends NftCollectorBaseProvider {
   }
 }
 
-export class NFTVisionaryProvider extends NftCollectorBaseProvider {
+export class NftVisionaryProvider extends NftCollectorBaseProvider {
   constructor() {
     super({
-      type: "NFTVisionary",
+      type: "NftVisionary",
       thresholdAmount: 90,
     });
   }

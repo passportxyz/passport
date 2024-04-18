@@ -1,2 +1,2 @@
 export { NFTProvider } from "./nft";
-export { DigitalCollectorProvider, ArtAficionadoProvider, NFTVisionaryProvider } from "./collectors_journey";
+export { DigitalCollectorProvider, ArtAficionadoProvider, NftVisionaryProvider, NftCollectorBaseProvider } from "./collectors_journey";
