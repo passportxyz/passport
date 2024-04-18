@@ -37,52 +37,44 @@ const mockResponse = ({
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+const scoreTestCases = [
+  //[score, [result for ETHEnthusiastProvider, result for ETHAdvocateProvider, result for ETHMaxiProvider]]
+  [0, [false, false, false]],
+  [1, [false, false, false]],
+  [50, [true, false, false]],
+  [75, [true, true, false]],
+  [88, [true, true, false]],
+  [90, [true, true, true]],
+  [100, [true, true, true]],
+]
+  .map(([score, expected]: [number, boolean[]]) => {
+    return [
+      [score, expected[0], ETHEnthusiastProvider],
+      [score, expected[1], ETHAdvocateProvider],
+      [score, expected[2], ETHMaxiProvider],
+    ];
+  })
+  .flat() as [number, boolean, typeof ETHEnthusiastProvider | typeof ETHAdvocateProvider | typeof ETHMaxiProvider][];
+
 describe("AccountAnalysis Providers", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockContext = {};
   });
 
-  it("should validate inputs for ETHEnthusiastProvider", async () => {
-    const mockedResponse = mockResponse({ score: 50 });
-    mockedAxios.post.mockResolvedValueOnce(mockedResponse);
+  describe("should check human_probability", () => {
+    it.each(scoreTestCases)("for score %i should return %s for %p", async (score, expected, provider) => {
+      const mockedResponse = mockResponse({ score });
+      mockedAxios.post.mockResolvedValueOnce(mockedResponse);
+      const ethAdvocateProvider = new provider();
+      const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
 
-    const ethAdvocateProvider = new ETHEnthusiastProvider();
-    const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
-
-    expect(payload.valid).toBe(true);
-    expect(payload.record).toEqual({ address: mockAddress });
-  });
-
-  it("should validate inputs for ETHAdvocateProvider", async () => {
-    const mockedResponse = mockResponse({ score: 92 });
-    mockedAxios.post.mockResolvedValueOnce(mockedResponse);
-    const ethAdvocateProvider = new ETHAdvocateProvider();
-    const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
-
-    expect(payload.valid).toBe(true);
-    expect(payload.record).toEqual({ address: mockAddress });
-  });
-
-  it("should validate inputs for ETHMaxiProvider", async () => {
-    jest.clearAllMocks();
-    const mockedResponse = mockResponse({ score: 98 });
-    mockedAxios.post.mockResolvedValueOnce(mockedResponse);
-    const ethAdvocateProvider = new ETHMaxiProvider();
-    const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
-
-    expect(payload.valid).toBe(true);
-    expect(payload.record).toEqual({ address: mockAddress });
-  });
-
-  it("should validate invalid inputs for ETHMaxiProvider", async () => {
-    const mockedResponse = mockResponse({ score: 70 });
-    mockedAxios.post.mockResolvedValueOnce(mockedResponse);
-    const ethAdvocateProvider = new ETHMaxiProvider();
-    const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
-
-    expect(payload.valid).toBe(false);
-    expect(payload.errors).toBeDefined();
+      expect(payload.valid).toBe(expected);
+      if (expected) {
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(payload.record).toEqual({ address: mockAddress });
+      }
+    });
   });
 
   it("should validate inputs for EthDaysActiveProvider", async () => {
@@ -143,7 +135,6 @@ describe("AccountAnalysis Providers", () => {
   });
 
   it("should handle errors gracefully", async () => {
-    jest.clearAllMocks();
     mockedAxios.post.mockRejectedValueOnce(new Error("Test Error"));
     const ethAdvocateProvider = new ETHMaxiProvider();
     await expect(ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext)).rejects.toThrow();
