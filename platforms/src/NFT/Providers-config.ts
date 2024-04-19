@@ -1,12 +1,11 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { NFTProvider, DigitalCollectorProvider, ArtAficionadoProvider, NftVisionaryProvider} from "./Providers";
+import { NFTProvider, DigitalCollectorProvider, ArtAficionadoProvider, NftVisionaryProvider } from "./Providers";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/nftStampIcon.svg",
   platform: "NFT",
-  name: "NFT Holder",
-  description:
-    "Connect your Ethereum wallet to verify that you own an Ethereum-based NFT. Currently, we only recognize NFTs (ERC-721s).",
+  name: "NFT",
+  description: "Connect your Ethereum wallet to verify your Ethereum Mainnet NFTs.",
   connectMessage: "Connect NFT",
   isEVM: true,
   website: "https://ethereum.org/en/nft/",
@@ -19,8 +18,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
       {
         name: "DigitalCollector",
         title: "Digital Collector",
-        description:
-          "Recognizes users beginning to explore the NFT space with a budding collection.",
+        description: "Recognizes users beginning to explore the NFT space with a budding collection.",
       },
       {
         name: "ArtAficionado",
@@ -38,11 +36,14 @@ export const ProviderConfig: PlatformGroupSpec[] = [
   },
   {
     platformGroup: "NFT Ownership Verification",
-    providers: [{ 
-      name: "NFT",
-      title: "NFT Holder",  
-      description: "Verifies users possessing at least one NFT on the Ethereum mainnet, serving as the foundational credential within the NFT stamp category."
-    },],
+    providers: [
+      {
+        name: "NFT",
+        title: "Holds at least 1 NFT (ERC-721)",
+        description:
+          "Verifies users possessing at least one ERC-721 NFT on the Ethereum mainnet, serving as the foundational credential within the NFT stamp category.",
+      },
+    ],
   },
 ];
 
@@ -50,5 +51,5 @@ export const providers: Provider[] = [
   new NFTProvider(),
   new DigitalCollectorProvider(),
   new ArtAficionadoProvider(),
-  new NftVisionaryProvider()
+  new NftVisionaryProvider(),
 ];
