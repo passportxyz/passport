@@ -6,8 +6,12 @@ export class ZkSyncPlatform extends Platform {
   isEVM = true;
 
   banner = {
-    heading:
-      "Only 'TRANSFER' transactions on ZkSync Lite are recognized. Transactions need to achieve verified status (may take up to 24hrs) across all zkSync networks to count. Other transaction types are not currently included.",
+    content:
+      "Click verify to process your zkSync Era transactions. Passport uses a constantly evolving model to review your transaction history and compare against known Sybil behavior. The number of points you'll receive is based on many factors related to the overall activity of the address.",
+    cta: {
+      label: "Learn more",
+      url: "https://support.passport.xyz/passport-knowledge-base/how-do-i-add-passport-stamps/zksync-stamp",
+    },
   };
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
