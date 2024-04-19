@@ -341,8 +341,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [ceramicClient, setCeramicClient] = useState<ComposeDatabase | undefined>(undefined);
   const [isLoadingPassport, setIsLoadingPassport] = useState<IsLoadingPassportState>(IsLoadingPassportState.Loading);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
-  const [pdbPass, setPdbPass] = useState<Passport>();
-  const [cdbStamps, setCdbStamps] = useState<Stamp[]>([]);
+  const [initialPassport, setInitialPassport] = useState<Passport | undefined>(undefined);
+  const [initialCeramicStamps, setInitialCeramicStamps] = useState<Stamp[] | undefined>(undefined);
   const [userDid, setUserDid] = useState<string | undefined>();
   const [expiredProviders, setExpiredProviders] = useState<PROVIDER_ID[]>([]);
   const [passportLoadResponse, setPassportLoadResponse] = useState<PassportLoadResponse | undefined>();
@@ -407,7 +407,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       fetchStampWeights();
       fetchPassport(database, false, true).then((passport) => {
         if (passport) {
-          setPdbPass(passport);
+          setInitialPassport(passport);
         }
       });
     }
@@ -421,7 +421,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           if (passportResponse !== undefined) {
             const { passport } = passportResponse;
             if (passport) {
-              setCdbStamps(passport.stamps);
+              setInitialCeramicStamps(passport.stamps);
             }
             console.log("loaded passport from compose-db", passportResponse);
             datadogLogs.logger.info("loaded passport from compose-db", { passportResponse });
@@ -435,8 +435,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   }, [ceramicClient]);
 
   useEffect(() => {
-    if (pdbPass && ceramicClient) {
-      handleComposeRetry(cdbStamps, pdbPass, ceramicClient)
+    if (initialPassport && ceramicClient && initialCeramicStamps) {
+      handleComposeRetry(initialCeramicStamps, initialPassport, ceramicClient)
         .then((response) => {
           if (response) {
             console.log("retry response", response);
@@ -447,7 +447,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           datadogLogs.logger.error("Error retrying stamps", { error: e });
         });
     }
-  }, [pdbPass, cdbStamps, ceramicClient]);
+  }, [initialCeramicStamps, initialPassport, ceramicClient]);
 
   const checkAndAlertInvalidCeramicSession = useCallback(() => {
     if (!checkSessionIsValid()) {
