@@ -258,7 +258,7 @@ export const handleComposeRetry = async (
       // using stamps as the source of truth, filter stamps for where the issuanceDate does not match the composeStamp if there is a composeStamp with the same provider
       const stampsToRetry = passDbPassport.stamps.filter((stamp: Stamp) => {
         const existingStamp = composeStamps.find((composeStamp: Stamp) => stamp.provider === composeStamp.provider);
-        if (stamp.credential.issuanceDate !== existingStamp?.credential.issuanceDate) {
+        if (!existingStamp || stamp.credential.issuanceDate !== existingStamp.credential.issuanceDate) {
           return true;
         }
       });
