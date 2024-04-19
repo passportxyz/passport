@@ -1,6 +1,11 @@
 /* eslint-disable */
 // ---- Test subject
-import { DigitalCollectorProvider, ArtAficionadoProvider, NftVisionaryProvider, NftCollectorBaseProvider } from "../collectors_journey";
+import {
+  DigitalCollectorProvider,
+  ArtAficionadoProvider,
+  NftVisionaryProvider,
+  NftCollectorBaseProvider,
+} from "../collectors_journey";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 
@@ -264,28 +269,33 @@ describe("Invalid stamp verification Collector's Journey", function () {
 describe("Test Error cases for stamp  verification", function () {
   beforeEach(() => {
     jest.clearAllMocks();
-  })
- it.each([
-  new DigitalCollectorProvider(),
-  new ArtAficionadoProvider(),
-  new NftVisionaryProvider()
- ])("should throw Provider External Verification error when unable to access nft stamp api", async (nftProvider: NftCollectorBaseProvider) => {
-    const mockAxiosError = new Error("Network error") as AxiosError;
-    mockedAxios.isAxiosError.mockReturnValueOnce(true);
-    mockAxiosError.response = {
-      status: 500,
-      data: {},
-      headers: {},
-      statusText: "Internal Server Error",
-      config: {},
-    };
-
-    mockedAxios.post.mockRejectedValueOnce(mockAxiosError);
-
-    await expect(
-      nftProvider.verify({
-        address: MOCK_ADDRESS_LOWER,
-      } as unknown as RequestPayload)
-    ).rejects.toThrow("Error making queryNftStampApi request, received error response with code 500: {}, headers: {}");
   });
+  it.each([
+    ["DigitalCollectorProvider", new DigitalCollectorProvider()],
+    ["ArtAficionadoProvider", new ArtAficionadoProvider()],
+    ["NftVisionaryProvider", new NftVisionaryProvider()],
+  ])(
+    "%p should throw Provider External Verification error when unable to access nft stamp api",
+    async (nftProviderName: string, nftProvider: NftCollectorBaseProvider) => {
+      const mockAxiosError = new Error("Network error") as AxiosError;
+      mockedAxios.isAxiosError.mockReturnValueOnce(true);
+      mockAxiosError.response = {
+        status: 500,
+        data: {},
+        headers: {},
+        statusText: "Internal Server Error",
+        config: {},
+      };
+
+      mockedAxios.post.mockRejectedValueOnce(mockAxiosError);
+
+      await expect(
+        nftProvider.verify({
+          address: MOCK_ADDRESS_LOWER,
+        } as unknown as RequestPayload)
+      ).rejects.toThrow(
+        "Error making queryNftStampApi request, received error response with code 500: {}, headers: {}"
+      );
+    }
+  );
 });
