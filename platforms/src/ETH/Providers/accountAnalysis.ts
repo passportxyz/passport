@@ -28,7 +28,7 @@ const dataScienceEndpoint = process.env.DATA_SCIENCE_API_URL;
 
 export async function getETHAnalysis(address: string, context: ETHAnalysisContext): Promise<ETHAnalysis> {
   if (!context?.ethAnalysis) {
-    const { data } = await fetchModelData<ModelResponse>(address, "eth-stamp-predict-v2");
+    const { data } = await fetchModelData<ModelResponse>(address, "eth-stamp-v2-predict");
 
     context.ethAnalysis = {
       humanProbability: data.human_probability,
