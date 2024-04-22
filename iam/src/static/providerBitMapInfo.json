@@ -116,5 +116,17 @@
   { "bit": 78, "index": 0, "name": "ETHEnthusiast" },
   { "bit": 79, "index": 0, "name": "ETHAdvocate" },
   { "bit": 80, "index": 0, "name": "ETHPioneer" },
-  { "bit": 81, "index": 0, "name": "ETHMaxi" }
+  { "bit": 81, "index": 0, "name": "ETHMaxi" },
+  { "bit": 82, "index": 0, "name": "ETHScore#50" },
+  { "bit": 83, "index": 0, "name": "ETHScore#75" },
+  { "bit": 84, "index": 0, "name": "ETHScore#90" },
+  { "bit": 85, "index": 0, "name": "ETHGasSpent#0.25" },
+  { "bit": 86, "index": 0, "name": "ETHnumTransactions#100" },
+  { "bit": 87, "index": 0, "name": "ETHDaysActive#50" },
+  { "bit": 88, "index": 0, "name": "DigitalCollector" },
+  { "bit": 89, "index": 0, "name": "ArtAficionado" },
+  { "bit": 90, "index": 0, "name": "NftVisionary" },
+  { "bit": 91, "index": 0, "name": "zkSyncScore#5" },
+  { "bit": 92, "index": 0, "name": "zkSyncScore#20" },
+  { "bit": 93, "index": 0, "name": "zkSyncScore#50" }
 ]
