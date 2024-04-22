@@ -41,6 +41,7 @@ const {
   Idena,
   Civic,
   TrustaLabs,
+  Outdid,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -170,6 +171,14 @@ platforms.set("Coinbase", {
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK,
   }),
   platFormGroupSpec: Coinbase.ProviderConfig,
+});
+
+platforms.set("Outdid", {
+  platform: new Outdid.OutdidPlatform({
+    clientId: process.env.NEXT_PUBLIC_OUTDID_API_KEY,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_OUTDID_CALLBACK,
+  }),
+  platFormGroupSpec: Outdid.ProviderConfig,
 });
 
 if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {

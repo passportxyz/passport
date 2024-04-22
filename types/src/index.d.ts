@@ -357,7 +357,8 @@ export type PLATFORM_ID =
   | "Civic"
   | "GrantsStack"
   | "ZkSync"
-  | "TrustaLabs";
+  | "TrustaLabs"
+  | "Outdid";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -427,7 +428,8 @@ export type PROVIDER_ID =
   | "TrustedCitizen"
   | "ETHAdvocate"
   | "ETHMaxi"
-  | "ETHEnthusiast";
+  | "ETHEnthusiast"
+  | "Outdid";
 
 export type StampBit = {
   bit: number;

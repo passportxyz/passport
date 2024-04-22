@@ -50,6 +50,10 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: getProviderSpec("Brightid", "Brightid"),
         stamp: undefined,
       },
+      Outdid: {
+        providerSpec: getProviderSpec("Outdid", "Outdid"),
+        stamp: undefined,
+      },
       Linkedin: {
         providerSpec: getProviderSpec("Linkedin", "Linkedin"),
         stamp: undefined,
