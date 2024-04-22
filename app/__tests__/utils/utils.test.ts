@@ -9,9 +9,8 @@ import {
 } from "@gitcoin/passport-types";
 import { platforms } from "@gitcoin/passport-platforms";
 const { Ens, Lens, Github } = platforms;
-import { checkShowOnboard } from "../../utils/helpers";
-
 import axios from "axios";
+import { _checkShowOnboard } from "../../utils/helpers";
 
 const mockedAllPlatforms = new Map();
 mockedAllPlatforms.set("Ens", {
@@ -68,25 +67,47 @@ describe("checkShowOnboard", () => {
     localStorage.clear();
   });
 
-  it("returns true if onboardTS is not set in localStorage", () => {
-    expect(checkShowOnboard()).toBe(true);
+  it("returns true if onboardTS is not set in localStorage", async () => {
+    expect(_checkShowOnboard("")).toBe(true);
   });
 
-  it("returns true if onboardTS is set and older than 3 months", () => {
+  it("returns true if onboardTS is set and older than 3 months", async () => {
     const olderTimestamp = Math.floor(Date.now() / 1000) - 3 * 30 * 24 * 60 * 60 - 1;
     localStorage.setItem("onboardTS", olderTimestamp.toString());
-    expect(checkShowOnboard()).toBe(true);
+    expect(_checkShowOnboard("")).toBe(true);
   });
 
-  it("returns false if onboardTS is set and within the last 3 months", () => {
+  it("returns false if onboardTS is set and within the last 3 months", async () => {
     const recentTimestamp = Math.floor(Date.now() / 1000) - 2 * 30 * 24 * 60 * 60;
     localStorage.setItem("onboardTS", recentTimestamp.toString());
-    expect(checkShowOnboard()).toBe(false);
+    expect(_checkShowOnboard("")).toBe(false);
   });
 
-  it("returns true if onboardTS is set and exactly 3 months old", () => {
+  it("returns true if onboardTS is set and exactly 3 months old", async () => {
     const threeMonthsOldTimestamp = Math.floor(Date.now() / 1000) - 3 * 30 * 24 * 60 * 60;
     localStorage.setItem("onboardTS", threeMonthsOldTimestamp.toString());
-    expect(checkShowOnboard()).toBe(true);
+    expect(_checkShowOnboard("")).toBe(true);
+  });
+
+  it("returns true if ONBOARD_RESET_INDEX newly set", async () => {
+    const recentTimestamp = Math.floor(Date.now() / 1000) - 2 * 30 * 24 * 60 * 60;
+    localStorage.setItem("onboardTS", recentTimestamp.toString());
+    expect(_checkShowOnboard("1")).toBe(true);
+  });
+
+  it("returns false if ONBOARD_RESET_INDEX set but already processed and re-skipped", async () => {
+    const recentTimestamp = Math.floor(Date.now() / 1000) - 2 * 30 * 24 * 60 * 60;
+    localStorage.setItem("onboardTS", recentTimestamp.toString());
+    expect(_checkShowOnboard("1")).toBe(true);
+    localStorage.setItem("onboardTS", recentTimestamp.toString());
+    expect(_checkShowOnboard("1")).toBe(false);
+  });
+
+  it("returns true if ONBOARD_RESET_INDEX set, re-skipped, then changed again", async () => {
+    const recentTimestamp = Math.floor(Date.now() / 1000) - 2 * 30 * 24 * 60 * 60;
+    localStorage.setItem("onboardTS", recentTimestamp.toString());
+    expect(_checkShowOnboard("1")).toBe(true);
+    localStorage.setItem("onboardTS", recentTimestamp.toString());
+    expect(_checkShowOnboard("2")).toBe(true);
   });
 });
