@@ -60,15 +60,17 @@ export class NftCollectorBaseProvider extends NftBaseProvider {
     if (human_probability >= this.thresholdAmount) {
       return {
         valid: true,
-        record: { 
+        record: {
           human_probability: human_probability.toString(),
-          address
-         },
+          address,
+        },
       };
     } else {
       return {
         valid: false,
-        errors: [`Your internal NFTScore is  ${human_probability}. You need a minimum of ${this.thresholdAmount} to claim this stamp`],
+        errors: [
+          `Your internal NFTScore is  ${human_probability}. You need a minimum of ${this.thresholdAmount} to claim this stamp`,
+        ],
       };
     }
   }
@@ -90,7 +92,7 @@ export class NftCollectorBaseProvider extends NftBaseProvider {
 export class DigitalCollectorProvider extends NftCollectorBaseProvider {
   constructor() {
     super({
-      type: "DigitalCollector",
+      type: "NFTScore#50",
       thresholdAmount: 50,
     });
   }
@@ -99,7 +101,7 @@ export class DigitalCollectorProvider extends NftCollectorBaseProvider {
 export class ArtAficionadoProvider extends NftCollectorBaseProvider {
   constructor() {
     super({
-      type: "ArtAficionado",
+      type: "NFTScore#75",
       thresholdAmount: 75,
     });
   }
@@ -108,7 +110,7 @@ export class ArtAficionadoProvider extends NftCollectorBaseProvider {
 export class NftVisionaryProvider extends NftCollectorBaseProvider {
   constructor() {
     super({
-      type: "NftVisionary",
+      type: "NFTScore#90",
       thresholdAmount: 90,
     });
   }
