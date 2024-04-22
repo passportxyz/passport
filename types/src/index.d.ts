@@ -425,9 +425,12 @@ export type PROVIDER_ID =
   | "BeginnerCommunityStaker"
   | "ExperiencedCommunityStaker"
   | "TrustedCitizen"
-  | "ETHAdvocate"
-  | "ETHMaxi"
-  | "ETHEnthusiast";
+  | "ETHScore#50"
+  | "ETHScore#75"
+  | "ETHScore#90"
+  | "ETHDaysActive#50"
+  | "ETHGasSpent#0.25"
+  | "ETHnumTransactions#100";
 
 export type StampBit = {
   bit: number;
