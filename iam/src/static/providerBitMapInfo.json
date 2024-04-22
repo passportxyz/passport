@@ -128,5 +128,8 @@
   { "bit": 90, "index": 0, "name": "NftVisionary" },
   { "bit": 91, "index": 0, "name": "zkSyncScore#5" },
   { "bit": 92, "index": 0, "name": "zkSyncScore#20" },
-  { "bit": 93, "index": 0, "name": "zkSyncScore#50" }
+  { "bit": 93, "index": 0, "name": "zkSyncScore#50" },
+  { "bit": 94, "index": 0, "name": "NFTScore#50" },
+  { "bit": 95, "index": 0, "name": "NFTScore#75" },
+  { "bit": 96, "index": 0, "name": "NFTScore#90" }
 ]
