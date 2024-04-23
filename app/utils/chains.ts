@@ -164,6 +164,14 @@ if (!TEST_MODE) {
     rpcUrl: "https://api.avax.network/ext/bc/C/rpc",
     icon: "./assets/avax-logo.svg",
   });
+
+  chainConfigs.push({
+    id: "0xa4b1",
+    token: "ETH",
+    label: "Arbitrum One",
+    rpcUrl: "https://arb1.arbitrum.io/rpc",
+    icon: "./assets/arbitrum-arb-logo.svg",
+  });
 }
 
 chainConfigs.push({
