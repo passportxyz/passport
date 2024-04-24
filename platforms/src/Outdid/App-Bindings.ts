@@ -7,6 +7,10 @@ export class OutdidPlatform extends Platform {
     path = "outdid";
     clientId: string = null;
     redirectUri: string = null;
+
+    banner = {
+      heading: "Outdid is an app which scans the NFC chip of your passport and generates a Zero-Knowledge Proof that you are a unique human. Most importantly, all of your private data stays on your phone - not even Outdid can see it :)"
+    };
  
     constructor(options: PlatformOptions = {}) {
         super();
