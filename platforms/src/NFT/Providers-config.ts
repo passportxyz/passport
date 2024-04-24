@@ -16,18 +16,18 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     platformGroup: "Collector's Journey",
     providers: [
       {
-        name: "DigitalCollector",
+        name: "NFTScore#50",
         title: "Digital Collector",
         description: "Recognizes users beginning to explore the NFT space with a budding collection.",
       },
       {
-        name: "ArtAficionado",
+        name: "NFTScore#75",
         title: "Art Aficionado",
         description:
           "Highlights users with a significant, more curated NFT portfolio that demonstrates their deeper involvement and appreciation for digital art and assets.",
       },
       {
-        name: "NftVisionary",
+        name: "NFTScore#90",
         title: "NFT Visionary",
         description:
           "Distinguishes users at the forefront of the NFT movement, showcasing exceptional collections that set trends within the community.",

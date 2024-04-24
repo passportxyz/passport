@@ -123,7 +123,7 @@ export const makeTestCeramicContextWithExpiredStamps = (
   return {
     ...makeTestCeramicContext(initialState),
     expiredPlatforms,
-    expiredProviders: ["ETHAdvocate"],
+    expiredProviders: ["ETHScore#75"],
   };
 };
 

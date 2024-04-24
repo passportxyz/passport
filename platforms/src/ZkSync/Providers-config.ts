@@ -14,17 +14,6 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Transactional Verification",
-    providers: [
-      {
-        title: "Verified Transactor",
-        name: "ZkSyncEra",
-        description:
-          "Recognizes users whose transactions on zkSync Era have achieved verified status, confirming their active participation and trust in the platform.",
-      },
-    ],
-  },
-  {
     platformGroup: "Engagement Levels in zkSync Era",
     providers: [
       {
@@ -41,6 +30,17 @@ export const ProviderConfig: PlatformGroupSpec[] = [
         title: "zkSync Champion",
         name: "zkSyncScore#50",
         description: "For leading users who significantly contribute to and influence the zkSync community.",
+      },
+    ],
+  },
+  {
+    platformGroup: "Transactional Verification",
+    providers: [
+      {
+        title: "Verified Transactor",
+        name: "ZkSyncEra",
+        description:
+          "Recognizes users whose transactions on zkSync Era have achieved verified status, confirming their active participation and trust in the platform.",
       },
     ],
   },
