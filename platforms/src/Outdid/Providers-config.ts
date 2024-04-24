@@ -5,7 +5,7 @@ export const PlatformDetails: PlatformSpec = {
     icon: "./assets/outdidStampIcon.svg",
     platform: "Outdid",
     name: "Outdid",
-    description: "Connect to Outdid to verify you are a unique person.",
+    description: "Outdid's free ZK ID verification brings a strong sybil signal with complete privacy and anonymity.",
     connectMessage: "Connect Account",
 };
     
@@ -14,7 +14,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     platformGroup: "Name of the Stamp platform group",
     providers: [
         {
-            title: "Verify your identity with Outdid",
+            title: "ZK-prove your identity with Outdid",
             description: "Outdid uses zero-knowledge cryptography to ensure you are a unique human without revealing any personal information.",
             name: "Outdid",
         },
