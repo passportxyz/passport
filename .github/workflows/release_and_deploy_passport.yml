@@ -43,7 +43,7 @@ jobs:
     needs: [ref]
     name: Deploy
     permissions: write-all
-    uses: gitcoinco/gh-workflows/.github/workflows/release_and_deploy.yml@2372_stake_prd
+    uses: gitcoinco/gh-workflows/.github/workflows/release_and_deploy.yml@main
     with:
       refspec: ${{ needs.ref.outputs.refspec }}
       repo_owner: gitcoinco
