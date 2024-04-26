@@ -379,6 +379,13 @@
     "@types/aws-lambda" "8.10.93"
     mime "^2.0.0"
 
+"@pulumi/cloudflare@^5.26.0":
+  version "5.26.0"
+  resolved "https://registry.yarnpkg.com/@pulumi/cloudflare/-/cloudflare-5.26.0.tgz#f1593b6ee16b8ee24a42ddf74467ab44b6f8fe15"
+  integrity sha512-M9TXQTn/3QllxG/oxWvVUzCkmSL520QH4WIK0Ua/4zy0y2e/mYf+klB7Sg0vLhLpUG2ZtcBdxInl4eUIgizExw==
+  dependencies:
+    "@pulumi/pulumi" "^3.0.0"
+
 "@pulumi/docker@^3.0.0":
   version "3.6.1"
   resolved "https://registry.yarnpkg.com/@pulumi/docker/-/docker-3.6.1.tgz#a216c9bd2bbd35dd7091db2827a3a434adff021c"

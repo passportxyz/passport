@@ -17,6 +17,7 @@ const mainnetRpcUrl = `${process.env["STAKING_MAINNET_RPC_URL"]}`;
 const dataDogClientTokenReview = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_REVIEW"]}`;
 const dataDogClientTokenStaging = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_STAGING"]}`;
 const dataDogClientTokenProduction = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_PRODUCTION"]}`;
+const cloudflareZoneId = `${process.env["CLOUDFLARE_ZONE_ID"]}`;
 
 const stack = pulumi.getStack();
 const region = aws.getRegion({});
@@ -511,6 +512,8 @@ const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((doma
     `${process.env["STAKING_APP_GITHUB_URL"]}`,
     `${process.env["STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY"]}`,
     domainName,
+    stack === "production" ? `passport.xyz` : '', // cloudflareDomain
+    stack === "production" ? cloudflareZoneId : '',  // cloudFlareZoneId
     "stake",
     stakingBranches[stack],
     stakingEnvVars[stack],
