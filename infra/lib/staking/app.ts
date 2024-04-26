@@ -105,11 +105,13 @@ applications:
     const certRecord = domainCert.apply((_cert) => {
       const certDetails = _cert.split(" "); // Name Type Value
       const certRecord = new cloudflare.Record("cloudflare-certificate-record", {
-        name: certDetails[0],
+        name: certDetails[0].replace(cloudflareDomain, ''), // remove the autocomplete domain
         zoneId: cloudflareZoneId,
         type: certDetails[1],
         value: certDetails[2],
         allowOverwrite: true,
+        comment: `Certificate for *.${cloudflareDomain}`
+
         // ttl: 3600
       });
       return certRecord;
@@ -124,8 +126,8 @@ applications:
           type: domainDetails[1],
           value: domainDetails[2],
           allowOverwrite: true,
+          comment: `Points to AWS Amplify for stake V2 app`
         });
-
         return record;
       });
     });
