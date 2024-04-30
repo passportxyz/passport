@@ -105,7 +105,7 @@ applications:
     const certRecord = domainCert.apply((_cert) => {
       const certDetails = _cert.split(" "); // Name Type Value
       const certRecord = new cloudflare.Record("cloudflare-certificate-record", {
-        name: certDetails[0].replace(cloudflareDomain, ''), // remove the autocomplete domain
+        name: certDetails[0].replace(`.${cloudflareDomain}.`, ''), // remove the autocomplete domain
         zoneId: cloudflareZoneId,
         type: certDetails[1],
         value: certDetails[2],
