@@ -18,9 +18,9 @@ export type ZkSyncAnalysisContext = ProviderContext & {
 };
 
 export async function getZkSyncAnalysis(address: string, context: ZkSyncAnalysisContext): Promise<ZkSyncAnalysis> {
-  if (!context?.zkSyncAnalysis) {
-    const response = await fetchModelData<ModelResponse>(address, "zksync-model-predict");
 
+  if (!context?.zkSyncAnalysis) {
+    const response = await fetchModelData<ModelResponse>(address, "zksync-model-v2-predict") 
     context.zkSyncAnalysis = {
       humanProbability: response.data.human_probability,
     };
