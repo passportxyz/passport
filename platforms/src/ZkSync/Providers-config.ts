@@ -19,17 +19,17 @@ export const ProviderConfig: PlatformGroupSpec[] = [
       {
         title: "Engagement Explorer",
         name: "zkSyncScore#5",
-        description: "For users who are actively exploring various features of zkSync Era.",
+        description: "For users who authentically engage with the platform's varied features, showcasing unique, real-world usage.",
       },
       {
         title: "L2 Believer",
         name: "zkSyncScore#20",
-        description: "For users who regularly transact and demonstrate reliance on the zkSync Era platform.",
+        description: "Rewards users who demonstrate genuine and consistent use, reflecting their true reliance on zkSync Era.",
       },
       {
         title: "zkSync Champion",
         name: "zkSyncScore#50",
-        description: "For leading users who significantly contribute to and influence the zkSync community.",
+        description: "For leaders who contribute uniquely and authentically, positively impacting the community.",
       },
     ],
   },
