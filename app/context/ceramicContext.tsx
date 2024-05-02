@@ -248,6 +248,35 @@ const startingAllProvidersState: AllProvidersState = Object.values(stampPlatform
   {}
 );
 
+export const handleComposeRetry = async (
+  composeStamps: Stamp[],
+  passDbPassport: Passport,
+  ceramicClient?: ComposeDatabase
+): Promise<SecondaryStorageBulkPatchResponse | void> => {
+  if (ceramicClient) {
+    try {
+      // using stamps as the source of truth, filter stamps for where the issuanceDate does not match the composeStamp if there is a composeStamp with the same provider
+      const stampsToRetry = passDbPassport.stamps.filter((stamp: Stamp) => {
+        const existingStamp = composeStamps.find((composeStamp: Stamp) => stamp.provider === composeStamp.provider);
+        if (!existingStamp || stamp.credential.issuanceDate !== existingStamp.credential.issuanceDate) {
+          return true;
+        }
+      });
+      // then add the stamps to ComposeDB
+      if (stampsToRetry.length > 0) {
+        // perform an update using the stamps that need to be retried
+        const composeDBPatchResponse = await ceramicClient.patchStamps(stampsToRetry);
+        return composeDBPatchResponse;
+      } else {
+        console.log("No stamps to retry");
+      }
+    } catch (e) {
+      console.log("error adding ceramic stamps", e);
+      datadogLogs.logger.error("Error adding ceramic stamps", { stamps: composeStamps, error: e });
+    }
+  }
+};
+
 const startingState: CeramicContextState = {
   passport: undefined,
   isLoadingPassport: IsLoadingPassportState.Loading,
@@ -312,6 +341,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [ceramicClient, setCeramicClient] = useState<ComposeDatabase | undefined>(undefined);
   const [isLoadingPassport, setIsLoadingPassport] = useState<IsLoadingPassportState>(IsLoadingPassportState.Loading);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
+  const [initialPassport, setInitialPassport] = useState<Passport | undefined>(undefined);
+  const [initialCeramicStamps, setInitialCeramicStamps] = useState<Stamp[] | undefined>(undefined);
   const [userDid, setUserDid] = useState<string | undefined>();
   const [expiredProviders, setExpiredProviders] = useState<PROVIDER_ID[]>([]);
   const [passportLoadResponse, setPassportLoadResponse] = useState<PassportLoadResponse | undefined>();
@@ -374,7 +405,11 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   useEffect(() => {
     if (database) {
       fetchStampWeights();
-      fetchPassport(database, false, true);
+      fetchPassport(database, false, true).then((passport) => {
+        if (passport) {
+          setInitialPassport(passport);
+        }
+      });
     }
   }, [database, customization]);
 
@@ -383,8 +418,14 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       ceramicClient
         .getPassport()
         .then((passportResponse) => {
-          console.log("loaded passport from compose-db", passportResponse);
-          datadogLogs.logger.info("loaded passport from compose-db", { passportResponse });
+          if (passportResponse !== undefined) {
+            const { passport } = passportResponse;
+            if (passport) {
+              setInitialCeramicStamps(passport.stamps);
+            }
+            console.log("loaded passport from compose-db", passportResponse);
+            datadogLogs.logger.info("loaded passport from compose-db", { passportResponse });
+          }
         })
         .catch((e) => {
           console.log("failed to load passport from compose-db", e);
@@ -392,6 +433,21 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         });
     }
   }, [ceramicClient]);
+
+  useEffect(() => {
+    if (initialPassport && ceramicClient && initialCeramicStamps) {
+      handleComposeRetry(initialCeramicStamps, initialPassport, ceramicClient)
+        .then((response) => {
+          if (response) {
+            console.log("retry response", response);
+          }
+        })
+        .catch((e) => {
+          console.log("error retrying stamps", e);
+          datadogLogs.logger.error("Error retrying stamps", { error: e });
+        });
+    }
+  }, [initialCeramicStamps, initialPassport, ceramicClient]);
 
   const checkAndAlertInvalidCeramicSession = useCallback(() => {
     if (!checkSessionIsValid()) {
