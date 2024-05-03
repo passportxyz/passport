@@ -58,8 +58,8 @@ const serviceResources = Object({
     cpu: 256, // 0.25 vCPU
   },
   staging: {
-    memory: 512, // 512 MiB
-    cpu: 256, // 0.25 vCPU
+    memory: 2048, // 2GB
+    cpu: 1024, // 1vCPU
   },
   production: {
     memory: 2048, // 2GB
