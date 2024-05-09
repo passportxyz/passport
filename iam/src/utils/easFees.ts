@@ -18,6 +18,10 @@ class EthPriceLoader {
     if ((await this.#needsUpdate()) || (await this.cache.get("ethPrice")) === null) {
       await this.#requestCurrentPrice();
     }
+    // We read the number that we return from the cache again
+    // This might seem redundant in the case that 'this.#requestCurrentPrice()' might have just re-fetched price from Moralis
+    // but it also serves as a fallback in case price-fetching failed, and we continue to use (the somewhat outdate price)
+    // from our cache
     return Number(await this.cache.get("ethPrice"));
   }
 
