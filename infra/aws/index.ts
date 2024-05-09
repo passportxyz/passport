@@ -67,6 +67,20 @@ const serviceResources = Object({
   },
 });
 
+export type AlarmConfigurations = {
+  moralisErrorThreshold: number; // threshold for moralis logged errors
+  moralisErrorPeriod: number; // period for reporting moralis logged errors
+  redisErrorThreshold: number; // threshold for redis logged errors
+  redisErrorPeriod: number; // period for reporting redis logged errors
+};
+
+const alarmConfigurations: AlarmConfigurations = {
+  moralisErrorThreshold: 1, // threshold for moralis logged errors
+  moralisErrorPeriod: 1800, // period for moralis logged errors, set to 30 min for now
+  redisErrorThreshold: 1, // threshold for redis logged errors
+  redisErrorPeriod: 1800, // period for redis logged errors, set to 30 min for now
+};
+
 const stakingEnvVars = Object({
   review: {
     NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.review.scorer.gitcoin.co/ceramic-cache",
@@ -343,9 +357,9 @@ const redisErrorAlarm = new aws.cloudwatch.MetricAlarm("redisConnectionErrorsAla
   metricName: "redisConnectionError",
   name: "Redis Connection Error",
   namespace: "/iam/errors/redis",
-  period: 21600,
+  period: alarmConfigurations.redisErrorPeriod,
   statistic: "Sum",
-  threshold: 1,
+  threshold: alarmConfigurations.redisErrorThreshold,
   treatMissingData: "notBreaching",
 });
 
@@ -372,9 +386,9 @@ const moralisErrorAlarm = new aws.cloudwatch.MetricAlarm("moralisErrorsAlarm", {
   metricName: "moralisError",
   name: "Moralis Error",
   namespace: "/iam/errors/moralis",
-  period: 21600,
+  period: alarmConfigurations.moralisErrorPeriod,
   statistic: "Sum",
-  threshold: 1,
+  threshold: alarmConfigurations.moralisErrorThreshold,
   treatMissingData: "notBreaching",
 });
 
@@ -512,8 +526,8 @@ const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((doma
     `${process.env["STAKING_APP_GITHUB_URL"]}`,
     `${process.env["STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY"]}`,
     domainName,
-    stack === "production" ? `passport.xyz` : '', // cloudflareDomain
-    stack === "production" ? cloudflareZoneId : '',  // cloudFlareZoneId
+    stack === "production" ? `passport.xyz` : "", // cloudflareDomain
+    stack === "production" ? cloudflareZoneId : "", // cloudFlareZoneId
     "stake",
     stakingBranches[stack],
     stakingEnvVars[stack],
