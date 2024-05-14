@@ -32,6 +32,7 @@
     "dotenv": "^16.0.0",
     "ethers": "^5.0.32",
     "express": "4",
+    "express-timeout-handler": "^2.2.2",
     "google-auth-library": "^7.14.1",
     "luxon": "^2.4.0",
     "moralis": "^2.24.2",
