@@ -19,13 +19,13 @@ export class OutdidPlatform extends Platform {
     }
 
     async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-        const { successRedirect, requestID } = (await axios.post(`${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(
+        const { successRedirect, verificationID } = (await axios.post(`${process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(
           /\/*?$/,
           ""
         )}/outdid/connect`, {
           callback: `${this.redirectUri}?error=false&code=null&state=outdid`,
           userDid: appContext.userDid,
-        })).data as { successRedirect: string, requestID: string };
+        })).data as { successRedirect: string, verificationID: string };
         const width = 800;
         const height = 900;
         const left = appContext.screen.width / 2 - width / 2;
@@ -41,7 +41,7 @@ export class OutdidPlatform extends Platform {
         const response = await appContext.waitForRedirect(this);
 
         return {
-          requestID,
+          verificationID,
           code: "success",
           sessionKey: response.state,
           userDid: appContext.userDid,
