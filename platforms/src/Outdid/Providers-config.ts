@@ -7,6 +7,7 @@ export const PlatformDetails: PlatformSpec = {
     name: "Outdid",
     description: "Outdid's free ZK ID verification brings a strong sybil signal with complete privacy and anonymity.",
     connectMessage: "Connect Account",
+    website: "https://outdid.io/",
 };
     
 export const ProviderConfig: PlatformGroupSpec[] = [

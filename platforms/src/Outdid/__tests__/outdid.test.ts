@@ -13,7 +13,7 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const userDid = "mock user DID";
 const userID = "mock unique user ID";
-const requestID = "11112222";
+const verificationID = "11112222";
 const redirect = process.env.NEXT_PUBLIC_PASSPORT_OUTDID_CALLBACK;
 
 beforeEach(() => {
@@ -29,14 +29,14 @@ describe("Attempt Outdid verification", function () {
     const outdid = new OutdidProvider();
     const outdidPayload = await outdid.verify({
         proofs: {
-            requestID,
+            verificationID,
             userDid,
         },
     } as unknown as RequestPayload);
 
     expect(mockedAxios.get).toBeCalledTimes(1);
     expect(mockedAxios.get).toBeCalledWith(
-        `https://api.outdid.io/verification-request?requestID=${requestID}`,
+        `https://api.outdid.io/v1/verification-request?verificationID=${verificationID}`,
     );
 
     return outdidPayload;
@@ -136,7 +136,7 @@ describe("Attempt Outdid request verification", function () {
             return {
                 data: {
                     successRedirect,
-                    requestID,
+                    verificationID,
                 },
                 status: 200,
             };
@@ -145,7 +145,7 @@ describe("Attempt Outdid request verification", function () {
 
         expect(mockedAxios.post).toBeCalledTimes(1);
         expect(mockedAxios.post).toBeCalledWith(
-            `https://api.outdid.io/verification-request?apiKey=${process.env.OUTDID_API_KEY}&apiSecret=${process.env.OUTDID_API_SECRET}`,
+            `https://api.outdid.io/v1/verification-request?apiKey=${process.env.OUTDID_API_KEY}&apiSecret=${process.env.OUTDID_API_SECRET}`,
             expect.objectContaining({
                 verificationParameters: { uniqueness: true },
                 verificationType: "icao",
@@ -156,7 +156,7 @@ describe("Attempt Outdid request verification", function () {
 
         expect(verificationRequestData).toEqual({ 
             successRedirect,
-            requestID
+            verificationID
          });
       });
 });

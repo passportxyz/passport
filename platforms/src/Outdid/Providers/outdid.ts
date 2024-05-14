@@ -26,9 +26,9 @@ export class OutdidProvider implements Provider {
     let id = "";
     const errors: string[] = [];
     try {
-      const requestID = payload.proofs?.requestID;
+      const verificationID = payload.proofs?.verificationID;
 
-      const verificationData: OutdidVerification = await axios.get(`https://api.outdid.io/verification-request?requestID=${requestID}`)
+      const verificationData: OutdidVerification = await axios.get(`https://api.outdid.io/v1/verification-request?verificationID=${verificationID}`)
         .then((response: {data: OutdidVerification}) => response.data);
 
       id = verificationData.uniqueID;
