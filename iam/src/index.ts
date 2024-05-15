@@ -27,7 +27,6 @@ import {
   VerifiedPayload,
 } from "@gitcoin/passport-types";
 import onchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
-import * as timeout from "express-timeout-handler";
 
 import { getChallenge, verifyChallengeAndGetAddress } from "./utils/challenge.js";
 import { getEASFeeAmount } from "./utils/easFees.js";
@@ -165,16 +164,6 @@ function groupProviderTypesByPlatform(types: string[]): string[][] {
 
 // create the app and run on port
 export const app = express();
-
-const timeoutOptions = {
-  timeout: 55000,
-  onTimeout: function (req: Request, res: Response): void {
-    res.status(408).send("Request timedout");
-  },
-};
-
-// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-app.use(timeout.handler(timeoutOptions));
 
 // parse JSON post bodies
 app.use(express.json());
