@@ -94,6 +94,7 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_ENABLE_MAINNET: "on",
     NEXT_PUBLIC_ENABLE_OP_MAINNET: "on",
     NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "on",
+    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: "42cf1c799a9682a59b7f026f8bbfcdfc",
   },
   staging: {
     NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.staging.scorer.gitcoin.co/ceramic-cache",
@@ -107,6 +108,7 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_ENABLE_MAINNET: "on",
     NEXT_PUBLIC_ENABLE_OP_MAINNET: "on",
     NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "on",
+    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: "42cf1c799a9682a59b7f026f8bbfcdfc",
   },
   production: {
     NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.scorer.gitcoin.co/ceramic-cache",
@@ -120,6 +122,7 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_ENABLE_MAINNET: "on",
     NEXT_PUBLIC_ENABLE_OP_MAINNET: "on",
     NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "off",
+    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: "42cf1c799a9682a59b7f026f8bbfcdfc",
   },
 });
 
