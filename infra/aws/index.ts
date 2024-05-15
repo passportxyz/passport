@@ -19,6 +19,9 @@ const dataDogClientTokenStaging = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_S
 const dataDogClientTokenProduction = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_PRODUCTION"]}`;
 const cloudflareZoneId = `${process.env["CLOUDFLARE_ZONE_ID"]}`;
 
+const PROVISION_STAGING_FOR_LOADTEST =
+  `${process.env["PROVISION_STAGING_FOR_LOADTEST"]}`.toLowerCase() === "true";
+
 const stack = pulumi.getStack();
 const region = aws.getRegion({});
 const regionId = region.then((r) => r.id);
@@ -52,19 +55,21 @@ const logsRetention = Object({
   production: 30,
 });
 
+const productionService = {
+  memory: 2048, // 2GB
+  cpu: 1024, // 1vCPU
+}
+
 const serviceResources = Object({
   review: {
     memory: 512, // 512 MiB
     cpu: 256, // 0.25 vCPU
   },
-  staging: {
+  staging: PROVISION_STAGING_FOR_LOADTEST ? productionService : {
     memory: 512, // 512 MiB
     cpu: 256, // 0.25 vCPU
   },
-  production: {
-    memory: 2048, // 2GB
-    cpu: 1024, // 1vCPU
-  },
+  production: productionService,
 });
 
 export type AlarmConfigurations = {
