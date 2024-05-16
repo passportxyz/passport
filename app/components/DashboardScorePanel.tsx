@@ -4,6 +4,7 @@ import { ScorerContext } from "../context/scorerContext";
 import { Spinner } from "@chakra-ui/react";
 import { useCustomization } from "../hooks/useCustomization";
 import { isDynamicCustomization } from "../utils/customizationUtils";
+import { use1ClickVerification } from "../hooks/use1ClickVerification";
 
 // Hexagon SVGs generated using https://codepen.io/wvr/pen/WrNgJp
 // with the values listed below for each ring
@@ -103,9 +104,15 @@ export const DashboardScorePanel = ({ className }: { className: string }) => {
   const customTitle = isDynamicCustomization(customization) ? customization.scorerPanel?.title : undefined;
   const customText = isDynamicCustomization(customization) ? customization.scorerPanel?.text : undefined;
 
+  const { fetchCredentials } = use1ClickVerification();
+
+  useEffect(() => {
+    fetchCredentials();
+  }, []);
+
   return (
     <div
-      className={`${className} flex flex-col border  border-foreground-6 text-foreground rounded bg-gradient-to-b from-background to-background-2`}
+      className={`${className} flex flex-col border  border-foreground-6 rounded bg-gradient-to-b from-background to-background-2`}
     >
       <div className="flex p-4 border-b border-foreground-6">
         <img alt="Person Icon" className="mr-2" src="/assets/personIcon.svg" />
@@ -116,7 +123,7 @@ export const DashboardScorePanel = ({ className }: { className: string }) => {
           <ScoreRing className="shrink-0" />
         </div>
 
-        <p className="shrink p-4">
+        <p className="shrink p-4 text-foreground">
           {customText ||
             "Your Unique Humanity Score is based out of 100 and measures your uniqueness. The current passing threshold is 20. " +
               "Scores may vary across different apps, especially due to abuse or attacks on the service."}
