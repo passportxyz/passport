@@ -9,7 +9,7 @@ type WelcomePageButtonsProps = {
   onNext: () => void;
   nextButtonText?: string;
   skipButtonText?: string;
-  displaySkipBtn: boolean;
+  displaySkipBtn?: boolean;
 };
 
 type StepsConfig = {
@@ -19,12 +19,12 @@ type StepsConfig = {
 
 export type Content = {
   header: string;
-  subHeader: string;
-  subHeaderIconSrc: string;
-  backgroudIconSrc: string;
-  stampIcon: string;
-  scoreIcon: string;
-  displayPlatformCard: boolean;
+  subHeader?: string;
+  subHeaderIconSrc?: string;
+  backgroudIconSrc?: string;
+  stampIcon?: string;
+  scoreIcon?: string;
+  displayPlatformCard?: boolean;
   buttonsConfig: WelcomePageButtonsProps;
   stepsConfig?: StepsConfig;
 };

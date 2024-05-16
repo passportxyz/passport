@@ -137,7 +137,6 @@ export default function Welcome() {
       throw new Error();
     }
   };
-  console.log("LARISA passport : ", passport)
   return (
     <PageRoot className="text-color-2">
       <HeaderContentFooterGrid>
