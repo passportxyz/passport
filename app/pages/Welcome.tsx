@@ -137,7 +137,7 @@ export default function Welcome() {
       throw new Error();
     }
   };
-
+  console.log("LARISA passport : ", passport)
   return (
     <PageRoot className="text-color-2">
       <HeaderContentFooterGrid>
@@ -147,13 +147,19 @@ export default function Welcome() {
         <BodyWrapper className="flex justify-center">
           {(isLoadingPassport === IsLoadingPassportState.Idle ||
             isLoadingPassport === IsLoadingPassportState.FailedToConnect) &&
-          dbAccessTokenStatus === "connected" ? (
+            dbAccessTokenStatus === "connected" ?  (
             passport && passport.stamps.length > 0 ? (
-              <WelcomeBack
-                handleFetchPossibleEVMStamps={handleFetchPossibleEVMStamps}
-                onOpen={onOpen}
-                resetStampsAndProgressState={resetStampsAndProgressState}
-              />
+              // if user did not skip it before
+              <InitialWelcome
+              onBoardFinished={async () => {
+                if (address) {
+                  handleFetchPossibleEVMStamps(address, allPlatforms);
+                  onOpen();
+                }
+              }}
+              hasPassports={true}
+            />
+
             ) : (
               <InitialWelcome
                 onBoardFinished={async () => {
@@ -162,6 +168,7 @@ export default function Welcome() {
                     onOpen();
                   }
                 }}
+                hasPassports={true}
               />
             )
           ) : (

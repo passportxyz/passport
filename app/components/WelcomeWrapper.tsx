@@ -9,6 +9,7 @@ type WelcomePageButtonsProps = {
   onNext: () => void;
   nextButtonText?: string;
   skipButtonText?: string;
+  displaySkipBtn: boolean;
 };
 
 type StepsConfig = {
@@ -23,6 +24,7 @@ export type Content = {
   backgroudIconSrc: string;
   stampIcon: string;
   scoreIcon: string;
+  displayPlatformCard: boolean;
   buttonsConfig: WelcomePageButtonsProps;
   stepsConfig?: StepsConfig;
 };
@@ -33,24 +35,21 @@ export type WelcomeWrapperProps = {
 };
 
 const PlatformCard = ({}) => {
-  const platformClasses = "border-foreground-6";
-  const platform_icon = "./assets/googleStampIcon.svg";
-  const platform_name = "Google";
-  const platform_description = "Connect to Google to verify your email address.";
-  const platform_possiblePoints = "0.53";
+  const icon = "./assets/googleStampIcon.svg";
+  const name = "Google";
+  const description = "Connect to Google to verify your email address.";
+  const possiblePoints = "0.53";
   return (
-    <div className="w-full h-full items-center justify-center">
-      <div className="bg-gradient-to-b from-blue-900 to-blue-700 rounded-lg shadow-lg max-w-sm relative">
-        <div className="flex w-full items-center justify-between">
-          <img src={platform_icon} alt="Icon" className="h-10 w-10" />
-          <div className="text-right">
-            <h1 className="ttext-2xl text-color-2">7.57</h1>
-            <p className="text-xs text-white">Available points</p>
-          </div>
+    <div className="p-2 relative rounded-lg shadow-lg ">
+      <div className="flex items-center justify-between">
+        <img src={icon} alt="Icon" className="h-7 w-7" />
+        <div className="text-right">
+          <h1 className="text-xl text-blue-400">{possiblePoints}</h1>
+          <p className="text-xs text-white">Available points</p>
         </div>
-        <h2 className="mt-4 text-2xl font-bold text-blue-400">Google</h2>
-        {/* <p className="mt-2 text-white">Stake GTC to boost your trust in the Gitcoin ecosystem.</p> */}
       </div>
+      <h2 className="mt-4 text-l font-bold text-blue-400">{name}</h2>
+      <p className="mt-2 text-white text-xs">{description}</p>
     </div>
   );
 };
@@ -73,20 +72,18 @@ export const WelcomeWrapper = ({ content, children }: WelcomeWrapperProps) => {
           {/* Extra row span is for spacing */}
           <div className="self-center md:col-start-2 md:row-span-5 relative w-full h-full">
             <img className="absolute inset-0 w-full h-full" src={content.backgroudIconSrc} alt="Background Icon" />
-            <img className="absolute inset-0 w-64 h-64 m-auto" src={content.stampIcon} alt="Stamp" />
+            {content.stampIcon ? (
+              <img className="absolute inset-0 w-64 h-64 m-auto" src={content.stampIcon} alt="Stamp" />
+            ) : null}
             {content.scoreIcon ? (
               <img className="absolute inset-0 w-32 h-32 m-auto" src={content.scoreIcon} alt="Score" />
             ) : null}
-            <div className="absolute inset-0 w-32 h-32 justify-center m-auto">
-              <PlatformCard />
-            </div>
+            {content.displayPlatformCard ? (
+              <div className="absolute inset-0 m-auto w-40 h-40 flex justify-center items-center">
+                <PlatformCard />
+              </div>
+            ) : null}
           </div>
-          {/* <WebmVideo
-            className="self-center md:col-start-2 md:row-span-5"
-            src="./assets/onboarding.webm"
-            fallbackSrc="./assets/onboarding.svg"
-            alt="Welcome"
-          /> */}
 
           <div className="flex grow flex-col justify-between gap-4 md:gap-8">
             <div>{children}</div>
@@ -126,26 +123,30 @@ const WelcomePageButtons = ({
   onNext,
   nextButtonText,
   skipButtonText,
+  displaySkipBtn = true,
 }: WelcomePageButtonsProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
   const navigateToPage = useNavigateToPage();
 
   return (
     <div className="grid w-full grid-cols-2 gap-4">
-      <LoadButton
-        data-testid="skip-for-now-button"
-        className="col-span-full row-start-2 md:col-span-1 md:row-start-1"
-        variant="secondary"
-        isLoading={isLoading}
-        onClick={() => {
-          setIsLoading(true);
-          navigateToPage("dashboard");
-          onSkip();
-          setIsLoading(false);
-        }}
-      >
-        {skipButtonText || "Skip for now"}
-      </LoadButton>
+      {displaySkipBtn ? (
+        <LoadButton
+          data-testid="skip-for-now-button"
+          className="col-span-full row-start-2 md:col-span-1 md:row-start-1"
+          variant="secondary"
+          isLoading={isLoading}
+          onClick={() => {
+            setIsLoading(true);
+            navigateToPage("dashboard");
+            onSkip();
+            setIsLoading(false);
+          }}
+        >
+          {skipButtonText || "Skip for now"}
+        </LoadButton>
+      ) : null}
+
       <Button data-testid="next-button" onClick={onNext} className="col-span-full md:col-span-1">
         {nextButtonText || "Next"}
       </Button>
