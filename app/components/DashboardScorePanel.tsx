@@ -17,7 +17,7 @@ const earlyStartOffset = 6;
 // dashes and dashoffset are used to create a progress ring
 const dashLength = 255;
 
-const ScoreRing = ({ className }: { className: string }) => {
+const ScoreRing = ({ className }: { className?: string }) => {
   const { rawScore, passportSubmissionState } = React.useContext(ScorerContext);
 
   const [displayScore, setDisplayScore] = React.useState(0);
@@ -34,7 +34,7 @@ const ScoreRing = ({ className }: { className: string }) => {
         <path
           className="translate-x-[3.5px] translate-y-[4.0px] transition-[stroke-dashoffset] delay-300 duration-1000 ease-in-out"
           fill="transparent"
-          stroke="currentColor"
+          stroke="rgb(var(--color-background)"
           strokeWidth="8"
           strokeDasharray={dashLength}
           strokeDashoffset={dashLength * (1 - displayScore / 100) - earlyStartOffset}
@@ -45,7 +45,7 @@ const ScoreRing = ({ className }: { className: string }) => {
         <path
           className="translate-x-[3.5px] translate-y-[4.0px]"
           fill="transparent"
-          stroke={displayScore < 100 ? "rgb(var(--color-background))" : "currentColor"}
+          stroke={displayScore < 100 ? "rgb(var(--color-foreground-4))" : "rgb(var(--color-background)"}
           strokeWidth="8"
           strokeDasharray={dashLength}
           strokeDashoffset={dashLength - earlyStartOffset}
@@ -56,7 +56,7 @@ const ScoreRing = ({ className }: { className: string }) => {
         <path
           className="translate-x-[3.5px] translate-y-[4.0px]"
           fill="transparent"
-          stroke={displayScore < 100 ? "rgb(var(--color-background-4) / .6)" : "currentColor"}
+          stroke={displayScore < 100 ? "rgb(var(--color-background-4) / .6)" : "rgb(var(--color-background)"}
           strokeWidth="8"
           strokeDasharray={dashLength}
           strokeDashoffset={dashLength - earlyStartOffset}
@@ -65,7 +65,7 @@ const ScoreRing = ({ className }: { className: string }) => {
         {/* inner ring l = 38, r=7 */}
         <path
           fill="transparent"
-          stroke="currentColor"
+          stroke="rgb(var(--color-background)"
           strokeWidth="2"
           className="translate-x-[7.8px] translate-y-[9px]"
           d="M26.846787517317594 3.4999999999999996Q32.90896534380867 0 38.97114317029974 3.5L59.75575286112626 15.5Q65.81793068761733 19 65.81793068761733 26L65.81793068761733 50Q65.81793068761733 57 59.75575286112626 60.5L38.97114317029974 72.5Q32.90896534380867 76 26.846787517317598 72.5L6.06217782649107 60.5Q0 57 0 50L0 26Q0 19 6.062177826491071 15.5Z"
@@ -73,7 +73,7 @@ const ScoreRing = ({ className }: { className: string }) => {
         {/* outer ring l = 48, r=7 */}
         <path
           fill="transparent"
-          stroke="currentColor"
+          stroke="rgb(var(--color-background)"
           strokeWidth="2"
           d="M34.64101615137754 3.4999999999999996Q40.703193977868615 0 46.76537180435969 3.4999999999999996L75.34421012924616 20Q81.40638795573723 23.5 81.40638795573723 30.5L81.40638795573723 63.5Q81.40638795573723 70.5 75.34421012924616 74L46.76537180435969 90.5Q40.703193977868615 94 34.64101615137754 90.5L6.062177826491071 74Q0 70.5 0 63.5L0 30.5Q0 23.5 6.062177826491071 20Z"
         ></path>
@@ -104,18 +104,13 @@ export const DashboardScorePanel = ({ className }: { className: string }) => {
   const customText = isDynamicCustomization(customization) ? customization.scorerPanel?.text : undefined;
 
   return (
-    <div
-      className={`${className} flex flex-col rounded border border-foreground-3 bg-gradient-to-b from-background to-background-4`}
-    >
-      <div className="flex p-4">
-        <img alt="Person Icon" className="mr-2" src="/assets/personIcon.svg" />
-        <span>{customTitle || "Default Humanity Score"}</span>
+    <div className={`${className} flex text-foreground rounded bg-gradient-to-b from-background to-background-2`}>
+      <div className="w-[200] bg-gradient-to-r from-foreground-2 to-foreground-4 p-4 rounded-l">
+        <ScoreRing />
       </div>
-      <div className="my-2 h-[2px] w-full bg-gradient-to-r from-background-4 via-foreground-2 to-background-4" />
-      <div className="flex grow items-center p-4 text-foreground-2">
-        <ScoreRing className="shrink-0" />
-        <div className="mx-6 h-3/4 w-[2px] shrink-0 bg-gradient-to-t from-background-4 via-foreground-2 to-background-4" />
-        <p className="shrink">
+
+      <div className="flex w-full border border-foreground-3 rounded-r items-center p-4">
+        <p>
           {customText ||
             "Your Unique Humanity Score is based out of 100 and measures your uniqueness. The current passing threshold is 20. " +
               "Scores may vary across different apps, especially due to abuse or attacks on the service."}
