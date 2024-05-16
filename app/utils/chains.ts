@@ -11,12 +11,12 @@ const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL as stri
 
 const sepoliaChainId = "0xaa36a7";
 const hardhatChainId = "0x7a69";
-const baseGoerliChainId = "0x14a33";
 const pgnChainId = "0x1a8";
 const lineaChainId = "0xe708";
 const lineaGoerliChainId = "0xe704";
 const optimismChainId = "0xa";
 const sepoliaOPChainId = "0xaa37dc";
+const arbitrumChainId = "0xa4b1";
 
 type ChainConfig = {
   id: string;
@@ -166,11 +166,17 @@ if (!TEST_MODE) {
   });
 
   chainConfigs.push({
-    id: "0xa4b1",
+    id: arbitrumChainId,
     token: "ETH",
     label: "Arbitrum One",
-    rpcUrl: "https://arb1.arbitrum.io/rpc",
+    // rpcUrl: "https://arb1.arbitrum.io/rpc",
+    rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_ARB_RPC_URL as string,
     icon: "./assets/arbitrum-arb-logo.svg",
+    attestationProviderConfig: {
+      name: "Ethereum Attestation Service",
+      status: usingTestEnvironment ? "disabled" : "enabled",
+      easScanUrl: "https://arbitrum.easscan.org",
+    },
   });
 }
 
@@ -178,7 +184,7 @@ chainConfigs.push({
   id: pgnChainId,
   token: "ETH",
   label: "Public Goods Network",
-  rpcUrl: "https://rpc.publicgoods.network	",
+  rpcUrl: "https://rpc.publicgoods.network",
   icon: "./assets/pgn-logo.png",
   attestationProviderConfig: {
     name: "Ethereum Attestation Service",

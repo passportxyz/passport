@@ -219,5 +219,37 @@
     "GitcoinPassportDecoder": {
       "address": "0x423cd60ab053F1b63D6F78c8c0c63e20F009d669"
     }
+  },
+  "0xa4b1": {
+    "description": "Arbitrum",
+    "issuer": {
+      "address": "0x804233b96cbd6d81efeb6517347177ef7bD488ED"
+    },
+    "EAS": {
+      "address": "0xbD75f629A22Dc1ceD33dDA0b68c546A1c035c458"
+    },
+    "EASSchemaRegistry": {
+      "address": "0xA310da9c5B885E7fb3fbA9D66E9Ba6Df512b78eB"
+    },
+    "GitcoinAttester": {
+      "address": "0x7848a3578Ff2E1F134659a23f64A404a4D710475"
+    },
+    "GitcoinVerifier": {
+      "address": "0xD250f1d777b49A8e0cEe834d88B47e09E1333705"
+    },
+    "GitcoinResolver": {
+      "address": "0x90E2C4472Df225e8D31f44725B75FFaA244d5D33"
+    },
+    "easSchemas": {
+      "passport": {
+        "uid": "0x8ae6ee946bf1c936584cacc969bf7e9d0b274631c818df7e45c246051b364341"
+      },
+      "score": {
+        "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
+      }
+    },
+    "GitcoinPassportDecoder": {
+      "address": "0x123"
+    }
   }
 }
