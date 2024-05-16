@@ -105,17 +105,18 @@ export const DashboardScorePanel = ({ className }: { className: string }) => {
 
   return (
     <div
-      className={`${className} flex flex-col rounded border border-foreground-3 bg-gradient-to-b from-background to-background-4`}
+      className={`${className} flex flex-col border  border-foreground-6 text-foreground rounded bg-gradient-to-b from-background to-background-2`}
     >
-      <div className="flex p-4">
+      <div className="flex p-4 border-b border-foreground-6">
         <img alt="Person Icon" className="mr-2" src="/assets/personIcon.svg" />
         <span>{customTitle || "Default Humanity Score"}</span>
       </div>
-      <div className="my-2 h-[2px] w-full bg-gradient-to-r from-background-4 via-foreground-2 to-background-4" />
-      <div className="flex grow items-center p-4 text-foreground-2">
-        <ScoreRing className="shrink-0" />
-        <div className="mx-6 h-3/4 w-[2px] shrink-0 bg-gradient-to-t from-background-4 via-foreground-2 to-background-4" />
-        <p className="shrink">
+      <div className="flex grow items-center text-foreground-2">
+        <div className="border-r border-foreground-6 p-4 h-full flex items-center">
+          <ScoreRing className="shrink-0" />
+        </div>
+
+        <p className="shrink p-4">
           {customText ||
             "Your Unique Humanity Score is based out of 100 and measures your uniqueness. The current passing threshold is 20. " +
               "Scores may vary across different apps, especially due to abuse or attacks on the service."}

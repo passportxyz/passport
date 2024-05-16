@@ -296,16 +296,15 @@ export default function Dashboard() {
         <Header />
         <BodyWrapper className="mt-4 md:mt-6">
           <PageWidthGrid>
-            <Subheader className="col-span-full xl:col-span-7 " />
-            <DashboardScorePanel
-              className={`col-span-full ${useCustomDashboardPanel ? "lg:col-span-4" : "xl:max-h-52"} xl:col-span-7`}
-            />
+            <Subheader className={` ${useCustomDashboardPanel ? "col-span-full" : "col-span-7"}`} />
             {useCustomDashboardPanel ? (
-              <DynamicCustomDashboardPanel className="col-start-1 col-end-[-1] lg:col-start-5 xl:col-start-8" />
+              <DynamicCustomDashboardPanel className="col-start-1 col-end-[-1] xl:col-start-8 row-span-2 mt-6" />
             ) : (
-              <DashboardIllustration className="col-start-8 col-end-[-1] row-span-2 hidden xl:block" />
+              <DashboardIllustration className="col-span-5 row-span-5 hidden xl:block" />
             )}
-            <span className="col-start-1 col-end-4 font-heading text-4xl">Add Stamps</span>
+            <DashboardScorePanel className="col-span-full xl:col-span-7" />
+
+            <span className="col-start-1 col-end-12 font-heading text-4xl">Add Stamps</span>
             <CardList
               className="col-span-full"
               isLoading={
