@@ -10,10 +10,11 @@ export const InitialWelcome = ({ onBoardFinished }: { onBoardFinished: () => voi
 
   const welcomeSteps = [
     {
-      header: "Welcome to Gitcoin Passport!",
-      subHeader: "Privacy-First Verification",
-      subHeaderIconSrc: "./assets/shieldLockIcon.svg",
-      body: 'Passport helps you collect "stamps" that prove your humanity and reputation. You decide what stamps are shown. And your privacy is protected at each step of the way.',
+      header: "Build Your Passport Score",
+      backgroudIconSrc: "./assets/passportBackgroundLogo.svg",
+      stampIcon: "./assets/gitcoin-flower.svg",
+      scoreIcon: "./assets/passport_score.svg",
+      body: 'Your Passport Score verifies your Web3 and Web2 presence, opening up a realm of possibilities as you accumulate Stamps and build your score. A higher score equals greater trust, paving the way for you to engage with community programs and governance.',
       stepsConfig: {
         current: 1,
         total: 3,
@@ -24,10 +25,12 @@ export const InitialWelcome = ({ onBoardFinished }: { onBoardFinished: () => voi
       },
     },
     {
-      header: "Introducing Passport Scoring",
-      subHeader: "Your Unique Humanity Score",
-      subHeaderIconSrc: "./assets/hexagonIcon.svg",
-      body: "Your Unique Humanity Score represents your trustworthiness to web3 projects. Increase your score to unlock higher quality experiences.",
+      // TODO: back button
+      header: "Accumulate Verified Stamps",
+      body: "Stamps affirm your identity and are key to accessing Web3's offerings. They are akin to digital visas, each one from a different verifier, showcasing your active participation. To obtain a Stamp, follow the specific verifier's process. Each Stamp you collect has a 90-day validity, symbolizing your ongoing engagement and ensuring the Passport's integrity.",
+      backgroudIconSrc: "./assets/passportBackgroundLogo.svg",
+      stampIcon:"./assets/stamp-cards.svg",
+      scoreIcon: "", 
       stepsConfig: {
         current: 2,
         total: 3,

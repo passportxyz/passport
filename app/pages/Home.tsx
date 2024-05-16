@@ -81,8 +81,7 @@ export default function Home() {
             className="col-span-2 w-full max-w-md lg:col-start-1 lg:row-span-6 lg:mr-8 lg:max-w-2xl"
           />
           <div className="col-span-2 max-w-md text-lg lg:max-w-sm">
-            Passport helps you collect &ldquo;stamps&rdquo; that prove your humanity and reputation. You decide what
-            stamps are shown. And your privacy is protected at each step of the way.
+          Access a world of Web3 opportunities securely with a single sign-in.
           </div>
           <SIWEButton
             enableEthBranding={enableEthBranding}
