@@ -145,7 +145,7 @@ export default function Welcome() {
         <BodyWrapper className="flex justify-center">
           {(isLoadingPassport === IsLoadingPassportState.Idle ||
             isLoadingPassport === IsLoadingPassportState.FailedToConnect) &&
-            dbAccessTokenStatus === "connected" ? (
+          dbAccessTokenStatus === "connected" ? (
             passport && passport.stamps.length > 0 ? (
               <InitialWelcome
                 onBoardFinished={async () => {
