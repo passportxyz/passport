@@ -4,7 +4,9 @@ import { ScorerContext } from "../context/scorerContext";
 import { Spinner } from "@chakra-ui/react";
 import { useCustomization } from "../hooks/useCustomization";
 import { isDynamicCustomization } from "../utils/customizationUtils";
-import { use1ClickVerification } from "../hooks/use1ClickVerification";
+import { useOneClickVerification } from "../hooks/useOneClickVerification";
+import { useAtom } from "jotai";
+import { userVerificationAtom } from "../context/userState";
 
 // Hexagon SVGs generated using https://codepen.io/wvr/pen/WrNgJp
 // with the values listed below for each ring
@@ -20,13 +22,18 @@ const dashLength = 255;
 
 const ScoreRing = ({ className }: { className: string }) => {
   const { rawScore, passportSubmissionState } = React.useContext(ScorerContext);
+  const [verificationState, setUserVerificationState] = useAtom(userVerificationAtom);
 
   const [displayScore, setDisplayScore] = React.useState(0);
 
   // This enables the animation on page load
   useEffect(() => {
-    setDisplayScore(rawScore);
-  }, [rawScore]);
+    if (verificationState.loading) {
+      setDisplayScore(0);
+    } else {
+      setDisplayScore(rawScore);
+    }
+  }, [rawScore, verificationState.loading]);
 
   return (
     <div className={`${className} grid place-items-center`}>
@@ -81,15 +88,10 @@ const ScoreRing = ({ className }: { className: string }) => {
       </svg>
 
       <div className="col-start-1 row-start-1 text-2xl">
-        {passportSubmissionState === "APP_REQUEST_PENDING" ? (
-          <div className="translate-y-1">
-            <Spinner
-              thickness="2px"
-              speed="0.65s"
-              emptyColor="rgb(var(--color-foreground-2)/.25)"
-              color="rgb(var(--color-foreground-2)/.75)"
-              size="lg"
-            />
+        {passportSubmissionState === "APP_REQUEST_PENDING" || verificationState.loading ? (
+          <div className="w-full">
+            <p className="text-sm mt-1/2">Updating</p>
+            <p className="text-sm font-extrabold text-center leading-3">...</p>
           </div>
         ) : (
           <span>{+displayScore.toFixed(2)}</span>
@@ -103,12 +105,6 @@ export const DashboardScorePanel = ({ className }: { className: string }) => {
   const customization = useCustomization();
   const customTitle = isDynamicCustomization(customization) ? customization.scorerPanel?.title : undefined;
   const customText = isDynamicCustomization(customization) ? customization.scorerPanel?.text : undefined;
-
-  const { fetchCredentials } = use1ClickVerification();
-
-  useEffect(() => {
-    fetchCredentials();
-  }, []);
 
   return (
     <div

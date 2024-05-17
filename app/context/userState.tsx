@@ -15,3 +15,15 @@ export interface UserWarning {
 }
 
 export const userWarningAtom = atom<UserWarning | undefined>(undefined);
+
+export interface UserVerification {
+  loading: boolean;
+  error?: string;
+  validatedPlatforms: string[];
+}
+
+export const userVerificationAtom = atom<UserVerification>({
+  loading: false,
+  error: undefined,
+  validatedPlatforms: [],
+});

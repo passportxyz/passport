@@ -1,43 +1,38 @@
-import { PLATFORM_ID, PROVIDER_ID, Passport, StampPatch, ValidResponseBody } from "@gitcoin/passport-types";
-import { useState, useEffect, useCallback, useContext } from "react";
-import { PlatformProps } from "../components/GenericPlatform";
-import { ValidatedPlatform, fetchPossibleEVMStamps } from "../signer/utils";
+import { PROVIDER_ID, StampPatch, ValidResponseBody } from "@gitcoin/passport-types";
+import { useContext } from "react";
+import { fetchPossibleEVMStamps } from "../signer/utils";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { createSignedPayload } from "../utils/helpers";
 import { CeramicContext } from "../context/ceramicContext";
 import { useWalletStore } from "../context/walletStore";
-import { ScorerContext } from "../context/scorerContext";
+import { useAtom } from "jotai";
+import { userVerificationAtom } from "../context/userState";
 
-export const use1ClickVerification = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [refreshed, setRefreshed] = useState(false);
-  const [validatedPlatforms, setValidatedPlatforms] = useState<ValidatedPlatform[]>([]);
+export const useOneClickVerification = () => {
+  const [verificationState, setUserVerificationState] = useAtom(userVerificationAtom);
+
   const { did } = useDatastoreConnectionContext();
   const { passport, allPlatforms, handlePatchStamps } = useContext(CeramicContext);
   const address = useWalletStore((state) => state.address);
 
-  const fetchCredentials = useCallback(async () => {
-    if (refreshed) {
+  const initiateVerification = async function () {
+    if (!did || !address) {
       return;
     }
-    if (!did) {
-      return;
-    }
-
-    if (!address) {
-      return;
-    }
-
-    setIsLoading(true);
+    setUserVerificationState({
+      ...verificationState,
+      loading: true,
+    });
 
     try {
-      const possiblePlatforms = await fetchPossibleEVMStamps(address, allPlatforms, passport);
+      const possiblePlatforms = await fetchPossibleEVMStamps(address, allPlatforms, passport, true);
       if (possiblePlatforms.length === 0) {
-        setIsLoading(false);
-        setRefreshed(true);
+        setUserVerificationState({
+          ...verificationState,
+          loading: false,
+        });
         // Nothing to do
         return;
       }
@@ -77,12 +72,17 @@ export const use1ClickVerification = () => {
 
       await handlePatchStamps(stampPatches);
     } catch (error) {
-      setIsLoading(false);
-      setError(error as Error);
+      setUserVerificationState({
+        ...verificationState,
+        loading: false,
+        error: String(error),
+      });
     }
-    setRefreshed(true);
-    setIsLoading(false);
-  }, [refreshed, did, address, allPlatforms, passport, handlePatchStamps]);
+    setUserVerificationState({
+      ...verificationState,
+      loading: false,
+    });
+  };
 
-  return { error, validatedPlatforms, isLoading, fetchCredentials };
+  return { initiateVerification };
 };

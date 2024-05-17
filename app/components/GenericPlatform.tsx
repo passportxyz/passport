@@ -37,6 +37,8 @@ import { createSignedPayload, difference, generateUID } from "../utils/helpers";
 import { datadogRum } from "@datadog/browser-rum";
 import { PlatformScoreSpec } from "../context/scorerContext";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
+import { useAtom } from "jotai";
+import { userVerificationAtom } from "../context/userState";
 
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
@@ -83,6 +85,7 @@ export const GenericPlatform = ({
   const [verificationResponse, setVerificationResponse] = useState<CredentialResponseBody[]>([]);
   const [payloadModalIsOpen, setPayloadModalIsOpen] = useState(false);
   const { did, checkSessionIsValid } = useDatastoreConnectionContext();
+  const [verificationState, setUserVerificationState] = useAtom(userVerificationAtom);
   // const { handleFetchCredential } = useContext(StampClaimingContext);
 
   // --- Chakra functions
@@ -401,6 +404,10 @@ export const GenericPlatform = ({
   };
 
   const buttonText = useMemo(() => {
+    if (verificationState.loading) {
+      return "Verifying...";
+    }
+
     const hasStamps = verifiedProviders.length > 0;
 
     if (isLoading) {
@@ -419,7 +426,7 @@ export const GenericPlatform = ({
     }
 
     return "Verify";
-  }, [isLoading, submitted, canSubmit, verifiedProviders.length]);
+  }, [isLoading, submitted, canSubmit, verifiedProviders.length, verificationState.loading]);
 
   return (
     <>
@@ -436,7 +443,7 @@ export const GenericPlatform = ({
           <div className="px-4">
             <LoadButton
               className="button-verify mt-10 w-full"
-              isLoading={isLoading}
+              isLoading={isLoading || verificationState.loading}
               disabled={!submitted && !canSubmit}
               onClick={canSubmit ? handleFetchCredential : onClose}
               data-testid={`button-verify-${platform.platformId}`}
