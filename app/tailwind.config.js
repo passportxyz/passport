@@ -38,6 +38,7 @@ module.exports = {
         "color-3": "rgb(var(--color-text-3) / <alpha-value>)",
         "color-4": "rgb(var(--color-text-4) / <alpha-value>)",
         "color-5": "rgb(var(--color-text-5) / <alpha-value>)",
+        "color-6": "rgb(var(--color-text-6) / <alpha-value>)",
 
         // Set this variable dynamically to allow for customization
         // colors defined by an API call

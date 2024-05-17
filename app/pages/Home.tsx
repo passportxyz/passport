@@ -70,7 +70,12 @@ export default function Home() {
           alt=""
         />
         <div className="z-10 grid grid-flow-row grid-cols-2 gap-4 lg:grid-flow-col">
-          <div className="col-span-2 text-6xl md:text-7xl lg:row-start-2">Passport</div>
+          <div className="col-span-2 text-6xl md:text-7xl lg:row-start-2">
+            <div className="grid grid-flow-col justify-start">
+              <img src="./assets/passportLogoWhite.svg" alt="Icon" className="h-20 self-center" />
+              <p className="p-2">Passport</p>
+            </div>
+          </div>
           <div className="col-span-2 mb-4 text-2xl leading-none text-foreground-2 md:text-5xl">
             Unlock the best of web3
           </div>
@@ -78,11 +83,10 @@ export default function Home() {
             src="/assets/splashPageLogo.webm"
             fallbackSrc="/assets/splashPageLogoFallback.svg"
             alt="Passport Logo"
-            className="col-span-2 w-full max-w-md lg:col-start-1 lg:row-span-6 lg:mr-8 lg:max-w-2xl"
+            className="col-span-2 w-full max-w-md lg:col-start-3 lg:row-span-6 lg:mr-8 lg:max-w-2xl"
           />
           <div className="col-span-2 max-w-md text-lg lg:max-w-sm">
-            Passport helps you collect &ldquo;stamps&rdquo; that prove your humanity and reputation. You decide what
-            stamps are shown. And your privacy is protected at each step of the way.
+            Access a world of Web3 opportunities securely with a single sign-in.
           </div>
           <SIWEButton
             enableEthBranding={enableEthBranding}

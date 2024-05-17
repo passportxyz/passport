@@ -12,7 +12,6 @@ import MinimalHeader from "../components/MinimalHeader";
 import { PAGE_PADDING } from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import PageRoot from "../components/PageRoot";
-import { WelcomeBack } from "../components/WelcomeBack";
 import { RefreshMyStampsModal } from "../components/RefreshMyStampsModal";
 
 // --Chakra UI Elements
@@ -137,7 +136,6 @@ export default function Welcome() {
       throw new Error();
     }
   };
-
   return (
     <PageRoot className="text-color-2">
       <HeaderContentFooterGrid>
@@ -148,34 +146,19 @@ export default function Welcome() {
           {(isLoadingPassport === IsLoadingPassportState.Idle ||
             isLoadingPassport === IsLoadingPassportState.FailedToConnect) &&
           dbAccessTokenStatus === "connected" ? (
-            passport && passport.stamps.length > 0 ? (
-              <WelcomeBack
-                handleFetchPossibleEVMStamps={handleFetchPossibleEVMStamps}
-                onOpen={onOpen}
-                resetStampsAndProgressState={resetStampsAndProgressState}
-              />
-            ) : (
-              <InitialWelcome
-                onBoardFinished={async () => {
-                  if (address) {
-                    handleFetchPossibleEVMStamps(address, allPlatforms);
-                    onOpen();
-                  }
-                }}
-              />
-            )
+            <InitialWelcome
+              onBoardFinished={async () => {
+                if (address) {
+                  navigateToPage("dashboard");
+                }
+              }}
+              hasPassports={(passport && passport.stamps.length > 0) || false}
+            />
           ) : (
             <LoadingScreen />
           )}
         </BodyWrapper>
       </HeaderContentFooterGrid>
-      <RefreshMyStampsModal
-        steps={currentSteps}
-        isOpen={isOpen}
-        onClose={onClose}
-        validPlatforms={validPlatforms}
-        resetStampsAndProgressState={resetStampsAndProgressState}
-      />
     </PageRoot>
   );
 }
