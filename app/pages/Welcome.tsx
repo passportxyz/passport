@@ -146,20 +146,9 @@ export default function Welcome() {
         <BodyWrapper className="flex justify-center">
           {(isLoadingPassport === IsLoadingPassportState.Idle ||
             isLoadingPassport === IsLoadingPassportState.FailedToConnect) &&
-            dbAccessTokenStatus === "connected" ?  (
+          dbAccessTokenStatus === "connected" ? (
             passport && passport.stamps.length > 0 ? (
               // if user did not skip it before
-              <InitialWelcome
-              onBoardFinished={async () => {
-                if (address) {
-                  handleFetchPossibleEVMStamps(address, allPlatforms);
-                  onOpen();
-                }
-              }}
-              hasPassports={true}
-            />
-
-            ) : (
               <InitialWelcome
                 onBoardFinished={async () => {
                   if (address) {
@@ -168,6 +157,17 @@ export default function Welcome() {
                   }
                 }}
                 hasPassports={true}
+              />
+            ) : (
+              <InitialWelcome
+                onBoardFinished={async () => {
+                  if (address) {
+                    handleFetchPossibleEVMStamps(address, allPlatforms);
+                    onOpen();
+                  }
+                }}
+                // This should be false
+                hasPassports={false}
               />
             )
           ) : (

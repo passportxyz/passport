@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Button } from "./Button";
 import { LoadButton } from "./LoadButton";
-import { WebmVideo } from "./WebmVideo";
+// import { WebmVideo } from "./WebmVideo";
 import { useNavigateToPage } from "../hooks/useCustomization";
+import Checkbox from "./Checkbox";
 
 type WelcomePageButtonsProps = {
   onSkip: () => void;
@@ -10,6 +11,7 @@ type WelcomePageButtonsProps = {
   nextButtonText?: string;
   skipButtonText?: string;
   displaySkipBtn?: boolean;
+  showSkipNextTime?: boolean;
 };
 
 type StepsConfig = {
@@ -124,32 +126,58 @@ const WelcomePageButtons = ({
   nextButtonText,
   skipButtonText,
   displaySkipBtn = true,
+  showSkipNextTime = false,
 }: WelcomePageButtonsProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
   const navigateToPage = useNavigateToPage();
-
+  const [skipNextTime, setSkipNextTime] = useState(false);
   return (
-    <div className="grid w-full grid-cols-2 gap-4">
-      {displaySkipBtn ? (
-        <LoadButton
-          data-testid="skip-for-now-button"
-          className="col-span-full row-start-2 md:col-span-1 md:row-start-1"
-          variant="secondary"
-          isLoading={isLoading}
-          onClick={() => {
-            setIsLoading(true);
-            navigateToPage("dashboard");
-            onSkip();
-            setIsLoading(false);
-          }}
-        >
-          {skipButtonText || "Skip for now"}
-        </LoadButton>
-      ) : null}
+    <div>
+      <div className="grid w-full grid-cols-2 gap-4">
+        {displaySkipBtn ? (
+          <LoadButton
+            data-testid="skip-for-now-button"
+            className="col-span-full row-start-2 md:col-span-1 md:row-start-1"
+            variant="secondary"
+            isLoading={isLoading}
+            onClick={() => {
+              setIsLoading(true);
+              navigateToPage("dashboard");
+              onSkip();
+              setIsLoading(false);
+            }}
+          >
+            {skipButtonText || "Skip for now"}
+          </LoadButton>
+        ) : null}
 
-      <Button data-testid="next-button" onClick={onNext} className="col-span-full md:col-span-1">
-        {nextButtonText || "Next"}
-      </Button>
+        <Button data-testid="next-button" onClick={onNext} className="col-span-full md:col-span-1">
+          {nextButtonText || "Next"}
+        </Button>
+      </div>
+
+      {showSkipNextTime ? (
+        <div className="mt-8 flex">
+          <Checkbox
+            className="my-5"
+            id="skip-next-time"
+            checked={skipNextTime}
+            onChange={(checked) => {
+              if (checked) {
+                const now = Math.floor(Date.now() / 1000);
+                localStorage.setItem("onboardTS", now.toString());
+                setSkipNextTime(true);
+              } else {
+                localStorage.removeItem("onboardTS");
+                setSkipNextTime(false);
+              }
+            }}
+          />
+          <label htmlFor="skip-next-time" className={`my-5 pl-2 font-alt text-sm`}>
+            Skip this screen next time
+          </label>
+        </div>
+      ) : null}
     </div>
   );
 };

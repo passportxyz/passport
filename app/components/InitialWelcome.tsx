@@ -16,7 +16,7 @@ export const InitialWelcome = ({
 
   const welcomeSteps = [
     {
-      header: "Build Your Passport Score", // TODO: split the text
+      header: "Build Your Passport Score",
       backgroudIconSrc: "./assets/passportBackgroundLogo.svg",
       stampIcon: "./assets/gitcoin-flower.svg",
       scoreIcon: "./assets/passport_score.svg",
@@ -68,8 +68,8 @@ export const InitialWelcome = ({
         displaySkipBtn: hasPassports ? false : true,
         onNext: () => onBoardFinished(),
         nextButtonText: "Verify",
+        showSkipNextTime: hasPassports ? true : false,
       },
-      // TODO: manage additional skip button 
     },
   ];
 
