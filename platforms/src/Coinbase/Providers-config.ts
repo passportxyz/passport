@@ -5,7 +5,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/coinbaseStampIcon.svg",
   platform: "Coinbase",
   name: "Coinbase",
-  description: "Confirm Your Coinbase Account & Onchain Identity",
+  description: "Confirm Your Coinbase Verified ID",
   connectMessage: "Connect Account",
   website: "https://www.coinbase.com/onchain-verify",
 };
