@@ -11,11 +11,12 @@ export class CoinbasePlatform extends Platform {
   banner = {
     content: (
       <div>
-        Secure the Coinbase Stamp by completing a Coinbase attestation onchain. Ensure you have an active Coinbase
-        account with a verified government ID to mint your onchain attestation, elevating your Passport&apos;s
-        credibility and trust.{" "}
+        Obtain the Coinbase stamp by completing the following 2 steps to prove your Coinbase Verified ID and Coinbase
+        account: <br />
+        <br />
+        Step 1:{" "}
         <a
-          href="https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/how-do-i-add-passport-stamps/guide-to-add-coinbase-stamp-to-passport"
+          href="https://www.coinbase.com/onchain-verify"
           style={{
             color: "rgb(var(--color-foreground-2))",
             textDecoration: "underline",
@@ -25,14 +26,17 @@ export class CoinbasePlatform extends Platform {
           target="_blank"
           rel="noreferrer"
         >
-          Learn more
-        </a>
-        .
+          Verify Coinbase ID
+        </a>{" "}
+        on this wallet address <br />
+        Step 2: Click Verify below to sign into your Coinbase account <br />
+        You cannot complete without completing the Coinbase attestation onchain in Step 1. Ensure you have an active
+        Coinbase account with a verified government ID to mint your onchain attestation for free on base.
       </div>
     ),
     cta: {
-      label: "Begin Your Onchain Verification Journey with Coinbase",
-      url: "https://www.coinbase.com/onchain-verify",
+      label: "Support guide on adding Coinbase",
+      url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/guide-to-add-coinbase-stamp-to-passport",
     },
   };
 
