@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { WelcomeWrapper } from "./WelcomeWrapper";
+import { useNavigateToPage } from "../hooks/useCustomization";
 
 export const InitialWelcome = ({
   onBoardFinished,
@@ -13,6 +14,7 @@ export const InitialWelcome = ({
   const onSkip = () => {
     setStep(0);
   };
+  const navigateToPage = useNavigateToPage();
 
   const welcomeSteps = [
     {
@@ -27,7 +29,9 @@ export const InitialWelcome = ({
       },
       buttonsConfig: {
         skipButtonText: "Skip",
-        onSkip,
+        onSkip: () => {
+          navigateToPage("dashboard");
+        },
         onNext: () => setStep(1),
       },
     },
@@ -42,7 +46,8 @@ export const InitialWelcome = ({
         total: 3,
       },
       buttonsConfig: {
-        onSkip,
+        skipButtonText: "Back",
+        onSkip: () => setStep(0),
         onNext: () => setStep(2),
       },
     },
@@ -63,11 +68,11 @@ export const InitialWelcome = ({
         total: 3,
       },
       buttonsConfig: {
-        skipButtonText: "Skip",
-        onSkip,
+        skipButtonText: "Back",
+        onSkip: () => setStep(0),
         displaySkipBtn: hasPassports ? false : true,
         onNext: () => onBoardFinished(),
-        nextButtonText: "Verify",
+        nextButtonText: hasPassports ? "Get Started" : "Verify",
         showSkipNextTime: hasPassports ? true : false,
       },
     },

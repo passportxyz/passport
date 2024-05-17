@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "./Button";
 import { LoadButton } from "./LoadButton";
-import { useNavigateToPage } from "../hooks/useCustomization";
 import Checkbox from "./Checkbox";
 
 type WelcomePageButtonsProps = {
@@ -128,7 +127,6 @@ const WelcomePageButtons = ({
   showSkipNextTime = false,
 }: WelcomePageButtonsProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
-  const navigateToPage = useNavigateToPage();
   const [skipNextTime, setSkipNextTime] = useState(false);
   return (
     <div>
@@ -141,7 +139,6 @@ const WelcomePageButtons = ({
             isLoading={isLoading}
             onClick={() => {
               setIsLoading(true);
-              navigateToPage("dashboard");
               onSkip();
               setIsLoading(false);
             }}

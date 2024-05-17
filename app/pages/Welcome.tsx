@@ -146,39 +146,19 @@ export default function Welcome() {
           {(isLoadingPassport === IsLoadingPassportState.Idle ||
             isLoadingPassport === IsLoadingPassportState.FailedToConnect) &&
           dbAccessTokenStatus === "connected" ? (
-            passport && passport.stamps.length > 0 ? (
-              <InitialWelcome
-                onBoardFinished={async () => {
-                  if (address) {
-                    handleFetchPossibleEVMStamps(address, allPlatforms);
-                    onOpen();
-                  }
-                }}
-                hasPassports={true}
-              />
-            ) : (
-              <InitialWelcome
-                onBoardFinished={async () => {
-                  if (address) {
-                    handleFetchPossibleEVMStamps(address, allPlatforms);
-                    onOpen();
-                  }
-                }}
-                hasPassports={false}
-              />
-            )
+            <InitialWelcome
+              onBoardFinished={async () => {
+                if (address) {
+                  navigateToPage("dashboard");
+                }
+              }}
+              hasPassports={(passport && passport.stamps.length > 0) || false}
+            />
           ) : (
             <LoadingScreen />
           )}
         </BodyWrapper>
       </HeaderContentFooterGrid>
-      <RefreshMyStampsModal
-        steps={currentSteps}
-        isOpen={isOpen}
-        onClose={onClose}
-        validPlatforms={validPlatforms}
-        resetStampsAndProgressState={resetStampsAndProgressState}
-      />
     </PageRoot>
   );
 }
