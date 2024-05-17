@@ -78,27 +78,3 @@ export const InitialWelcome = ({
 
   return <WelcomeWrapper content={content}>{body}</WelcomeWrapper>;
 };
-
-const ListItem = ({ children, number }: { children: React.ReactNode; number: number }) => (
-  <li className="flex items-start gap-2 py-1">
-    <ListMarker number={number} />
-    <div className="leading-6">{children}</div>
-  </li>
-);
-
-const ListMarker = ({ number }: { number: number }) => (
-  <div className="h-6 w-6">
-    <svg width="24" height="25" className="col-start-1 row-start-1">
-      <defs>
-        <linearGradient id="Gradient" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="rgb(var(--color-foreground))" />
-          <stop offset="100%" stopColor="rgb(var(--color-foreground-2))" />
-        </linearGradient>
-      </defs>
-      <circle r="11" cx="12" cy="12" stroke="url(#Gradient)" strokeWidth="1" />
-      <text x="50%" y="55%" textAnchor="middle" fill="white" dominantBaseline="middle">
-        {number}
-      </text>
-    </svg>
-  </div>
-);

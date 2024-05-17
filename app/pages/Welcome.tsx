@@ -12,7 +12,6 @@ import MinimalHeader from "../components/MinimalHeader";
 import { PAGE_PADDING } from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import PageRoot from "../components/PageRoot";
-import { WelcomeBack } from "../components/WelcomeBack";
 import { RefreshMyStampsModal } from "../components/RefreshMyStampsModal";
 
 // --Chakra UI Elements
@@ -146,9 +145,8 @@ export default function Welcome() {
         <BodyWrapper className="flex justify-center">
           {(isLoadingPassport === IsLoadingPassportState.Idle ||
             isLoadingPassport === IsLoadingPassportState.FailedToConnect) &&
-          dbAccessTokenStatus === "connected" ? (
+            dbAccessTokenStatus === "connected" ? (
             passport && passport.stamps.length > 0 ? (
-              // if user did not skip it before
               <InitialWelcome
                 onBoardFinished={async () => {
                   if (address) {
@@ -166,7 +164,6 @@ export default function Welcome() {
                     onOpen();
                   }
                 }}
-                // This should be false
                 hasPassports={false}
               />
             )

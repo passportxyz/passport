@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "./Button";
 import { LoadButton } from "./LoadButton";
-// import { WebmVideo } from "./WebmVideo";
 import { useNavigateToPage } from "../hooks/useCustomization";
 import Checkbox from "./Checkbox";
 
