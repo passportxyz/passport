@@ -8,41 +8,41 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { createSignedPayload } from "../utils/helpers";
 import { CeramicContext } from "../context/ceramicContext";
 import { useWalletStore } from "../context/walletStore";
+import { ScorerContext } from "../context/scorerContext";
 
 export const use1ClickVerification = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [refreshed, setRefreshed] = useState(false);
   const [validatedPlatforms, setValidatedPlatforms] = useState<ValidatedPlatform[]>([]);
   const { did } = useDatastoreConnectionContext();
-  const { passport, allPlatforms } = useContext(CeramicContext);
+  const { passport, allPlatforms, handlePatchStamps } = useContext(CeramicContext);
   const address = useWalletStore((state) => state.address);
 
   const fetchCredentials = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
+    if (refreshed) {
+      return;
+    }
     if (!did) {
-      setIsLoading(false);
-      setError(new Error("No DID found"));
       return;
     }
 
     if (!address) {
-      setIsLoading(false);
-      setError(new Error("No address"));
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      const validatedPlatforms = await fetchPossibleEVMStamps(address, allPlatforms, passport);
-      if (validatedPlatforms.length === 0) {
+      const possiblePlatforms = await fetchPossibleEVMStamps(address, allPlatforms, passport);
+      if (possiblePlatforms.length === 0) {
         setIsLoading(false);
+        setRefreshed(true);
         // Nothing to do
         return;
       }
-      setValidatedPlatforms(validatedPlatforms);
-      const platformTypes = validatedPlatforms.map((platform) => platform.platformProps.platform.platformId);
-      const validatedProviderIds = validatedPlatforms
+      const platformTypes = possiblePlatforms.map((platform) => platform.platformProps.platform.platformId);
+      const validatedProviderIds = possiblePlatforms
         .map((platform) =>
           platform.platformProps.platFormGroupSpec.map((group) => group.providers.map((provider) => provider.name))
         )
@@ -65,26 +65,24 @@ export const use1ClickVerification = () => {
       const validCredentials =
         credentialResponse.credentials?.filter((cred: any): cred is ValidResponseBody => !cred.error) || [];
 
-      // console.log({ patches });
+      const stampPatches: StampPatch[] = validatedProviderIds
+        .map((provider: PROVIDER_ID) => {
+          const { credential } =
+            validCredentials.find((cred) => cred.credential.credentialSubject.provider === provider) || {};
+          if (credential) return { provider, credential };
+          else if (!validatedProviderIds.includes(provider)) return { provider };
+          else return null;
+        })
+        .filter((patch): patch is StampPatch => patch !== null);
 
-      // const stampPatches: StampPatch[] = validatedProviderIds
-      //   .map((provider: PROVIDER_ID) => {
-      //     const { credential } =
-      //       validCredentials.find((cred) => cred.credential.credentialSubject.provider === provider) || {};
-      //     if (credential) return { provider, credential };
-      //     // shouldn't need this
-      //     // else if (!selectedProviders.includes(provider)) return { provider };
-      //     else return null;
-      //   })
-      //   .filter((patch): patch is StampPatch => patch !== null);
-
-      // await handlePatchStamps(stampPatches);
+      await handlePatchStamps(stampPatches);
     } catch (error) {
+      setIsLoading(false);
       setError(error as Error);
     }
-
+    setRefreshed(true);
     setIsLoading(false);
-  }, [address, allPlatforms, passport, did]);
+  }, [refreshed, did, address, allPlatforms, passport, handlePatchStamps]);
 
-  return { isLoading, error, validatedPlatforms, fetchCredentials };
+  return { error, validatedPlatforms, isLoading, fetchCredentials };
 };
