@@ -23,7 +23,7 @@ export class OutdidPlatform extends Platform {
           /\/*?$/,
           ""
         )}/outdid/connect`, {
-          callback: `${this.redirectUri}?error=false&code=null&state=outdid`,
+          callback: `${this.redirectUri}?error=false&code=null&state=${appContext.state}`,
           userDid: appContext.userDid,
         })).data as { successRedirect: string, verificationID: string };
         const width = 800;
