@@ -106,6 +106,7 @@ describe("Attempt Outdid verification", function () {
     const outdidPayload = await mockProvider({
         data: {
             verificationName: userDid,
+            uniqueID: userID,
             parameters: undefined,
             status: "failed",
         },
