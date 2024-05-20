@@ -14,6 +14,10 @@ export class GithubPlatform extends Platform {
       heading: "Verifying Contribution Activity",
       content:
         "For the Contribution Activity credentials, make sure your contribution data is public. Go to Settings > Public Profile > Contributions & Activity and uncheck 'Make profile private and hide activity'. Verify your contribution history with your Gitcoin Passport!",
+      cta: {
+        label: "Learn more",
+        url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-a-github-account-to-passport",
+      },
     };
   }
 

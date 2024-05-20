@@ -11,6 +11,13 @@ export class IdenaPlatform extends Platform {
   platformId = "Idena";
   path = "idena";
 
+  banner = {
+    cta: {
+      label: "Learn more",
+      url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/idena-stamp",
+    },
+  };
+
   async getOAuthUrl(): Promise<string> {
     const procedureUrl = process.env.NEXT_PUBLIC_PASSPORT_PROCEDURE_URL?.replace(/\/*?$/, "");
     const idenaCallback = process.env.NEXT_PUBLIC_PASSPORT_IDENA_CALLBACK?.replace(/\/*?$/, "");

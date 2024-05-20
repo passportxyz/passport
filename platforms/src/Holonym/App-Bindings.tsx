@@ -20,7 +20,7 @@ export class HolonymPlatform implements Platform {
     ),
     cta: {
       label: "Learn more",
-      url: "https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/how-do-i-add-passport-stamps/guide-to-add-holonym-stamp-to-gitcoin-passport",
+      url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/guide-to-add-holonym-stamp-to-gitcoin-passport",
     },
   };
 

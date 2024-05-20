@@ -9,6 +9,12 @@ export class LinkedinPlatform extends Platform {
     this.clientId = options.clientId as string;
     this.redirectUri = options.redirectUri as string;
     this.state = options.state as string;
+    this.banner = {
+      cta: {
+        label: "Learn more",
+        url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/guide-to-add-a-linkedin-stamp-to-passport",
+      },
+    }
   }
 
   async getOAuthUrl(state: string): Promise<string> {
