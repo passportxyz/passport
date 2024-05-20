@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
 import { ScorerContext } from "../context/scorerContext";
 
-import { Spinner } from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import { useCustomization } from "../hooks/useCustomization";
 import { isDynamicCustomization } from "../utils/customizationUtils";
-import { useOneClickVerification } from "../hooks/useOneClickVerification";
 import { useAtom } from "jotai";
-import { userVerificationAtom } from "../context/userState";
+import { mutableUserVerificationAtom } from "../context/userState";
+import { DoneToastContent } from "./DoneToastContent";
 
 // Hexagon SVGs generated using https://codepen.io/wvr/pen/WrNgJp
 // with the values listed below for each ring
@@ -22,9 +22,9 @@ const dashLength = 255;
 
 const ScoreRing = ({ className }: { className: string }) => {
   const { rawScore, passportSubmissionState } = React.useContext(ScorerContext);
-  const [verificationState, setUserVerificationState] = useAtom(userVerificationAtom);
-
+  const [verificationState, _setUserVerificationState] = useAtom(mutableUserVerificationAtom);
   const [displayScore, setDisplayScore] = React.useState(0);
+  const toast = useToast();
 
   // This enables the animation on page load
   useEffect(() => {
@@ -34,6 +34,23 @@ const ScoreRing = ({ className }: { className: string }) => {
       setDisplayScore(rawScore);
     }
   }, [rawScore, verificationState.loading]);
+
+  useEffect(() => {
+    if (verificationState.success === true) {
+      toast({
+        duration: 9000,
+        isClosable: true,
+        render: (result: any) => (
+          <DoneToastContent
+            title="Success!"
+            message="Your passport has been re0issued."
+            icon="../assets/check-icon2.svg"
+            result={verificationState.success}
+          />
+        ),
+      });
+    }
+  }, [toast, verificationState.success]);
 
   return (
     <div className={`${className} grid place-items-center`}>

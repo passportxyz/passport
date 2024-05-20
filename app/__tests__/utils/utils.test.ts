@@ -1,8 +1,9 @@
-import { fetchPossibleEVMStamps } from "../../signer/utils";
+import { fetchPossibleEVMStamps, getTypesToCheck } from "../../signer/utils";
 import { providers } from "@gitcoin/passport-platforms";
 import {
   CheckRequestBody,
   CheckResponseBody,
+  Passport,
   ProviderContext,
   RequestPayload,
   VerifiedPayload,
@@ -11,6 +12,7 @@ import { platforms } from "@gitcoin/passport-platforms";
 const { Ens, Lens, Github } = platforms;
 import axios from "axios";
 import { _checkShowOnboard } from "../../utils/helpers";
+import { PlatformProps } from "../../components/GenericPlatform";
 
 const mockedAllPlatforms = new Map();
 mockedAllPlatforms.set("Ens", {
@@ -59,6 +61,21 @@ describe("fetchPossibleEVMStamps", () => {
     expect(result.length).toBe(1);
 
     expect(result[0].platformProps.platform.path).toBe("Ens");
+  });
+  it("should return existing stamps to check", async () => {
+    const passport = {
+      stamps: [
+        {
+          provider: "Ens",
+        },
+      ],
+    } as Passport;
+    const allPlatformsData = Array.from(mockedAllPlatforms.values());
+    const evmPlatforms: PlatformProps[] = allPlatformsData.filter(({ platform }) => platform.isEVM);
+    const types = getTypesToCheck(evmPlatforms, passport, true);
+
+    expect(types.length).toBe(2);
+    expect(types).toEqual(["Ens", "Lens"]);
   });
 });
 

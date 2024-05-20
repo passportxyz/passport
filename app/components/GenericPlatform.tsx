@@ -38,7 +38,7 @@ import { datadogRum } from "@datadog/browser-rum";
 import { PlatformScoreSpec } from "../context/scorerContext";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useAtom } from "jotai";
-import { userVerificationAtom } from "../context/userState";
+import { mutableUserVerificationAtom } from "../context/userState";
 
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
@@ -85,8 +85,7 @@ export const GenericPlatform = ({
   const [verificationResponse, setVerificationResponse] = useState<CredentialResponseBody[]>([]);
   const [payloadModalIsOpen, setPayloadModalIsOpen] = useState(false);
   const { did, checkSessionIsValid } = useDatastoreConnectionContext();
-  const [verificationState, setUserVerificationState] = useAtom(userVerificationAtom);
-  // const { handleFetchCredential } = useContext(StampClaimingContext);
+  const [verificationState, _setUserVerificationState] = useAtom(mutableUserVerificationAtom);
 
   // --- Chakra functions
   const toast = useToast();
@@ -403,8 +402,13 @@ export const GenericPlatform = ({
     }
   };
 
+  const isReverifying = useMemo(
+    () => verificationState.loading && verificationState.possiblePlatforms.includes(platform.platformId),
+    [verificationState.loading, verificationState.possiblePlatforms, platform.platformId]
+  );
+
   const buttonText = useMemo(() => {
-    if (verificationState.loading) {
+    if (isReverifying) {
       return "Verifying...";
     }
 
@@ -426,7 +430,7 @@ export const GenericPlatform = ({
     }
 
     return "Verify";
-  }, [isLoading, submitted, canSubmit, verifiedProviders.length, verificationState.loading]);
+  }, [isReverifying, verifiedProviders.length, isLoading, submitted, canSubmit]);
 
   return (
     <>
@@ -443,7 +447,7 @@ export const GenericPlatform = ({
           <div className="px-4">
             <LoadButton
               className="button-verify mt-10 w-full"
-              isLoading={isLoading || verificationState.loading}
+              isLoading={isLoading || isReverifying}
               disabled={!submitted && !canSubmit}
               onClick={canSubmit ? handleFetchCredential : onClose}
               data-testid={`button-verify-${platform.platformId}`}

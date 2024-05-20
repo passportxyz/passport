@@ -8,10 +8,10 @@ import { createSignedPayload } from "../utils/helpers";
 import { CeramicContext } from "../context/ceramicContext";
 import { useWalletStore } from "../context/walletStore";
 import { useAtom } from "jotai";
-import { userVerificationAtom } from "../context/userState";
+import { mutableUserVerificationAtom } from "../context/userState";
 
 export const useOneClickVerification = () => {
-  const [verificationState, setUserVerificationState] = useAtom(userVerificationAtom);
+  const [verificationState, setUserVerificationState] = useAtom(mutableUserVerificationAtom);
 
   const { did } = useDatastoreConnectionContext();
   const { passport, allPlatforms, handlePatchStamps } = useContext(CeramicContext);
@@ -37,6 +37,10 @@ export const useOneClickVerification = () => {
         return;
       }
       const platformTypes = possiblePlatforms.map((platform) => platform.platformProps.platform.platformId);
+      setUserVerificationState({
+        ...verificationState,
+        possiblePlatforms: platformTypes,
+      });
       const validatedProviderIds = possiblePlatforms
         .map((platform) =>
           platform.platformProps.platFormGroupSpec.map((group) => group.providers.map((provider) => provider.name))
@@ -71,17 +75,20 @@ export const useOneClickVerification = () => {
         .filter((patch): patch is StampPatch => patch !== null);
 
       await handlePatchStamps(stampPatches);
+      setUserVerificationState({
+        ...verificationState,
+        loading: false,
+        success: true,
+        possiblePlatforms: [],
+      });
     } catch (error) {
       setUserVerificationState({
         ...verificationState,
         loading: false,
         error: String(error),
+        possiblePlatforms: [],
       });
     }
-    setUserVerificationState({
-      ...verificationState,
-      loading: false,
-    });
   };
 
   return { initiateVerification };

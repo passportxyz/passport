@@ -25,7 +25,7 @@ export type ValidatedPlatform = {
   platformProps: PlatformProps;
 };
 
-const getTypesToCheck = (
+export const getTypesToCheck = (
   evmPlatforms: PlatformProps[],
   passport: Passport | undefined | false,
   reIssueStamps: boolean = false
