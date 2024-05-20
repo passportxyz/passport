@@ -5,6 +5,7 @@ import * as twitterOAuth from "./Twitter/procedures/twitterOauth";
 import { triggerBrightidSponsorship, verifyBrightidContextId } from "./Brightid/procedures/brightid";
 import path from "path";
 import * as idenaSignIn from "./Idena/procedures/idenaSignIn";
+import { outdidRequestVerification } from "./Outdid/procedures/outdidVerification";
 
 export const router = Router();
 
@@ -148,4 +149,17 @@ router.post("/idena/authenticate", (req: Request, res: Response): void => {
         });
       }
     });
+});
+
+router.post("/outdid/connect", (req: Request, res: Response): void => {
+  const body = req.body as { userDid?: string, callback?: string };
+  if (body && body.userDid && body.callback) {
+    outdidRequestVerification(body.userDid, body.callback).then((response) => {
+      res.status(200).send(response);
+    }).catch((_) => {
+      res.status(400).send();
+    });
+  } else {
+    res.status(400).send();
+  }
 });

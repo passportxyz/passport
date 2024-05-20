@@ -160,6 +160,8 @@ const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
 
     if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS !== "on" && platform.platform === "TrustaLabs") return true;
 
+    if (process.env.NEXT_PUBLIC_FF_OUTDID_STAMP !== "on" && platform.platform === "Outdid") return true;
+
     return false;
   }, [platform.platform]);
 
