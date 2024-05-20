@@ -432,9 +432,6 @@ export type PROVIDER_ID =
   | "ETHDaysActive#50"
   | "ETHGasSpent#0.25"
   | "ETHnumTransactions#100"
-  | "ETHAdvocate"
-  | "ETHMaxi"
-  | "ETHEnthusiast"
   | "Outdid";
 
 export type StampBit = {
