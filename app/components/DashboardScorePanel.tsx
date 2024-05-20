@@ -43,7 +43,7 @@ const ScoreRing = ({ className }: { className: string }) => {
         render: (result: any) => (
           <DoneToastContent
             title="Success!"
-            message="Your passport has been re0issued."
+            message="Your stamps are verified!"
             icon="../assets/check-icon2.svg"
             result={verificationState.success}
           />
