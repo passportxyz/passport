@@ -167,4 +167,12 @@ export const getIamSecrets = (PASSPORT_VC_SECRETS_ARN: string, IAM_SERVER_SSM_AR
     name: "IAM_JWK_EIP712",
     valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK_EIP712::`,
   },
+  {
+    name: "OUTDID_API_KEY",
+    valueFrom: `${IAM_SERVER_SSM_ARN}:OUTDID_API_KEY::`,
+  },
+  {
+    name: "OUTDID_API_SECRET",
+    valueFrom: `${PASSPORT_VC_SECRETS_ARN}:OUTDID_API_SECRET::`,
+  },
 ];
