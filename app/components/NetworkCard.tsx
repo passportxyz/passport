@@ -31,7 +31,7 @@ export function NetworkCard({ chain }: { chain: Chain }) {
                   href={chain.attestationProvider?.viewerUrl(address)}
                   className="pt-2 text-sm text-foreground-2 underline"
                 >
-                  Check attestation on EAS
+                  {chain.attestationProvider?.attestationExplorerLinkText}
                 </a>
               )}
               <h2 className="my-3 pt-2 text-right text-base text-color-1">Moved</h2>
