@@ -12,7 +12,6 @@ import MinimalHeader from "../components/MinimalHeader";
 import { PAGE_PADDING } from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import PageRoot from "../components/PageRoot";
-import { RefreshMyStampsModal } from "../components/RefreshMyStampsModal";
 
 // --Chakra UI Elements
 import { useDisclosure } from "@chakra-ui/react";
