@@ -28,7 +28,7 @@ export class CoinbasePlatform extends Platform {
         >
           Verify Coinbase ID
         </a>{" "}
-        on this wallet address <br />
+        on this wallet address <br /><br />
         Step 2: Click Verify below to sign into your Coinbase account <br />
         You cannot complete without completing the Coinbase attestation onchain in Step 1. Ensure you have an active
         Coinbase account with a verified government ID to mint your onchain attestation for free on base.
