@@ -26,10 +26,6 @@ const ceramicWithPassport = {
   passport: { stamps: [{} as Stamp] },
 } as unknown as CeramicContextState;
 
-jest.mock("../../components/RefreshMyStampsModal.tsx", () => ({
-  RefreshMyStampsModal: () => <div data-testid="refresh-my-stamps-modal" />,
-}));
-
 jest.mock("../../components/InitialWelcome.tsx", () => ({
   InitialWelcome: () => <div data-testid="initial-welcome" />,
 }));

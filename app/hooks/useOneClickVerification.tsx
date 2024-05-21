@@ -39,6 +39,7 @@ export const useOneClickVerification = () => {
       const platformTypes = possiblePlatforms.map((platform) => platform.platformProps.platform.platformId);
       setUserVerificationState({
         ...verificationState,
+        loading: true,
         possiblePlatforms: platformTypes,
       });
       const validatedProviderIds = possiblePlatforms
