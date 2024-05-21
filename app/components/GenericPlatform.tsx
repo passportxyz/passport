@@ -37,6 +37,8 @@ import { createSignedPayload, difference, generateUID } from "../utils/helpers";
 import { datadogRum } from "@datadog/browser-rum";
 import { PlatformScoreSpec } from "../context/scorerContext";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
+import { useAtom } from "jotai";
+import { mutableUserVerificationAtom } from "../context/userState";
 
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
@@ -83,7 +85,7 @@ export const GenericPlatform = ({
   const [verificationResponse, setVerificationResponse] = useState<CredentialResponseBody[]>([]);
   const [payloadModalIsOpen, setPayloadModalIsOpen] = useState(false);
   const { did, checkSessionIsValid } = useDatastoreConnectionContext();
-  // const { handleFetchCredential } = useContext(StampClaimingContext);
+  const [verificationState, _setUserVerificationState] = useAtom(mutableUserVerificationAtom);
 
   // --- Chakra functions
   const toast = useToast();
@@ -400,7 +402,16 @@ export const GenericPlatform = ({
     }
   };
 
+  const isReverifying = useMemo(
+    () => verificationState.loading && verificationState.possiblePlatforms.includes(platform.platformId),
+    [verificationState.loading, verificationState.possiblePlatforms, platform.platformId]
+  );
+
   const buttonText = useMemo(() => {
+    if (isReverifying) {
+      return "Verifying...";
+    }
+
     const hasStamps = verifiedProviders.length > 0;
 
     if (isLoading) {
@@ -419,7 +430,7 @@ export const GenericPlatform = ({
     }
 
     return "Verify";
-  }, [isLoading, submitted, canSubmit, verifiedProviders.length]);
+  }, [isReverifying, verifiedProviders.length, isLoading, submitted, canSubmit]);
 
   return (
     <>
@@ -436,7 +447,7 @@ export const GenericPlatform = ({
           <div className="px-4">
             <LoadButton
               className="button-verify mt-10 w-full"
-              isLoading={isLoading}
+              isLoading={isLoading || isReverifying}
               disabled={!submitted && !canSubmit}
               onClick={canSubmit ? handleFetchCredential : onClose}
               data-testid={`button-verify-${platform.platformId}`}

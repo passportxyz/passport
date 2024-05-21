@@ -20,4 +20,4 @@ const IAM_ISSUER_DID_V2 = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID_V2 || 
 // We are going tu support multiple valid issuers
 export const IAM_VALID_ISSUER_DIDS = new Set([IAM_ISSUER_DID_V2, IAM_ISSUER_DID_V1]);
 
-export const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "";
+export const iamUrl = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "http://localhost:80/api/";

@@ -1,9 +1,12 @@
 import React, { useEffect } from "react";
 import { ScorerContext } from "../context/scorerContext";
 
-import { Spinner } from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import { useCustomization } from "../hooks/useCustomization";
 import { isDynamicCustomization } from "../utils/customizationUtils";
+import { useAtom } from "jotai";
+import { mutableUserVerificationAtom } from "../context/userState";
+import { DoneToastContent } from "./DoneToastContent";
 
 // Hexagon SVGs generated using https://codepen.io/wvr/pen/WrNgJp
 // with the values listed below for each ring
@@ -19,13 +22,35 @@ const dashLength = 255;
 
 const ScoreRing = ({ className }: { className: string }) => {
   const { rawScore, passportSubmissionState } = React.useContext(ScorerContext);
-
+  const [verificationState, _setUserVerificationState] = useAtom(mutableUserVerificationAtom);
   const [displayScore, setDisplayScore] = React.useState(0);
+  const toast = useToast();
 
   // This enables the animation on page load
   useEffect(() => {
-    setDisplayScore(rawScore);
-  }, [rawScore]);
+    if (verificationState.loading) {
+      setDisplayScore(0);
+    } else {
+      setDisplayScore(rawScore);
+    }
+  }, [rawScore, verificationState.loading]);
+
+  useEffect(() => {
+    if (verificationState.success === true) {
+      toast({
+        duration: 9000,
+        isClosable: true,
+        render: (result: any) => (
+          <DoneToastContent
+            title="Success!"
+            message="Your stamps are verified!"
+            icon="../assets/check-icon2.svg"
+            result={verificationState.success}
+          />
+        ),
+      });
+    }
+  }, [toast, verificationState.success]);
 
   return (
     <div className={`${className} grid place-items-center`}>
@@ -80,15 +105,10 @@ const ScoreRing = ({ className }: { className: string }) => {
       </svg>
 
       <div className="col-start-1 row-start-1 text-2xl">
-        {passportSubmissionState === "APP_REQUEST_PENDING" ? (
-          <div className="translate-y-1">
-            <Spinner
-              thickness="2px"
-              speed="0.65s"
-              emptyColor="rgb(var(--color-foreground-2)/.25)"
-              color="rgb(var(--color-foreground-2)/.75)"
-              size="lg"
-            />
+        {passportSubmissionState === "APP_REQUEST_PENDING" || verificationState.loading ? (
+          <div className="w-full">
+            <p className="text-sm mt-1/2">Updating</p>
+            <p className="text-sm font-extrabold text-center leading-3">...</p>
           </div>
         ) : (
           <span>{+displayScore.toFixed(2)}</span>
@@ -105,20 +125,20 @@ export const DashboardScorePanel = ({ className }: { className: string }) => {
 
   return (
     <div
-      className={`${className} flex flex-col rounded border border-foreground-3 bg-gradient-to-b from-background to-background-4`}
+      className={`${className} flex flex-col border  border-foreground-6 rounded bg-gradient-to-b from-background to-background-2`}
     >
-      <div className="flex p-4">
+      <div className="flex p-4 border-b border-foreground-6">
         <img alt="Person Icon" className="mr-2" src="/assets/personIcon.svg" />
         <span>{customTitle || "Default Humanity Score"}</span>
       </div>
-      <div className="my-2 h-[2px] w-full bg-gradient-to-r from-background-4 via-foreground-2 to-background-4" />
-      <div className="flex grow items-center p-4 text-foreground-2">
-        <ScoreRing className="shrink-0" />
-        <div className="mx-6 h-3/4 w-[2px] shrink-0 bg-gradient-to-t from-background-4 via-foreground-2 to-background-4" />
-        <p className="shrink">
+      <div className="flex grow items-center text-foreground-2">
+        <div className="border-r border-foreground-6 p-4 h-full flex items-center">
+          <ScoreRing className="shrink-0" />
+        </div>
+
+        <p className="shrink p-4 text-foreground">
           {customText ||
-            "Your Unique Humanity Score is based out of 100 and measures your uniqueness. The current passing threshold is 20. " +
-              "Scores may vary across different apps, especially due to abuse or attacks on the service."}
+            "Your Unique Humanity Score measures how unique and human you are. Passport-protected apps use this score to ensure authentic engagement. Most applications require a score of at least 20 to participate. Scores can vary across apps, especially due to misuse or attacks."}
         </p>
       </div>
     </div>

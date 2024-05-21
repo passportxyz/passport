@@ -25,14 +25,18 @@ export type ValidatedPlatform = {
   platformProps: PlatformProps;
 };
 
-const getTypesToCheck = (evmPlatforms: PlatformProps[], passport: Passport | undefined | false): PROVIDER_ID[] => {
+export const getTypesToCheck = (
+  evmPlatforms: PlatformProps[],
+  passport: Passport | undefined | false,
+  reIssueStamps: boolean = false
+): PROVIDER_ID[] => {
   const existingProviders = passport && passport.stamps.map((stamp) => stamp.provider);
 
   const evmProviders: PROVIDER_ID[] = evmPlatforms
     .map(({ platFormGroupSpec }) => platFormGroupSpec.map(({ providers }) => providers.map(({ name }) => name)))
     .flat(2);
 
-  if (existingProviders) {
+  if (existingProviders && !reIssueStamps) {
     return evmProviders.filter((provider) => !existingProviders.includes(provider));
   } else {
     return evmProviders;
@@ -46,14 +50,15 @@ const filterUndefined = <T>(item: T | undefined): item is T => !!item;
 export const fetchPossibleEVMStamps = async (
   address: string,
   allPlatforms: Map<PLATFORM_ID, PlatformProps>,
-  passport: Passport | undefined | false
+  passport: Passport | undefined | false,
+  reIssueStamps: boolean = false
 ): Promise<ValidatedPlatform[]> => {
   const allPlatformsData = Array.from(allPlatforms.values());
   const evmPlatforms: PlatformProps[] = allPlatformsData.filter(({ platform }) => platform.isEVM);
 
   const payload = {
     type: "bulk",
-    types: getTypesToCheck(evmPlatforms, passport),
+    types: getTypesToCheck(evmPlatforms, passport, reIssueStamps),
     address,
     version: "0.0.0",
   };
