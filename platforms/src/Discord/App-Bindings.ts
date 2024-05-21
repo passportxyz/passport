@@ -13,6 +13,12 @@ export class DiscordPlatform extends Platform {
     super();
     this.clientId = options.clientId as string;
     this.redirectUri = options.redirectUri as string;
+    this.banner = {
+      cta: {
+        label: "Learn more",
+        url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-a-discord-account-to-passport",
+      },
+    };
   }
 
   async getOAuthUrl(state: string): Promise<string> {

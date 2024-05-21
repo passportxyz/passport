@@ -8,6 +8,13 @@ export class BrightidPlatform extends Platform {
   clientId: string = null;
   redirectUri: string = null;
 
+  banner = {
+    cta: {
+      label: "Learn more",
+      url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-brightid-to-passport",
+    },
+  };
+
   async handleVerifyContextId(userDid: string): Promise<boolean> {
     try {
       const res = await axios.post(

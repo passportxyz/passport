@@ -23,6 +23,10 @@ export class TrustaLabsPlatform extends Platform {
         <Link href="https://trusta-labs.gitbook.io/trustalabs/trustscan/q-and-a-for-sybil-score">Q&A</Link>.
       </div>
     ),
+    cta: {
+      label: "Learn more",
+      url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/guide-to-add-trusta-labs-stamp-to-passport",
+    },
   };
 
   async getProviderPayload(_appContext: AppContext): Promise<ProviderPayload> {
