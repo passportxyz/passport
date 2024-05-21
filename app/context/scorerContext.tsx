@@ -122,22 +122,35 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       }
       setScoreState(response.data.status);
       if (response.data.status === "DONE") {
-        if (!response.data.evidence) {
-          console.error("Invalid scorer configured. Please configure a 'binary weighted' scorer");
-        }
-        const numRawScore = Number.parseFloat(response.data.evidence.rawScore);
-        const numThreshold = Number.parseFloat(response.data.evidence.threshold);
-        const numScore = Number.parseFloat(response.data.score);
+        // We need to handle the 2 types the scorers that the backend allows: binary as well as not-binary
+        if (response.data.evidence) {
+          // This is a binary scorer (binary scorers have the evidence data)
+          const numRawScore = Number.parseFloat(response.data.evidence.rawScore);
+          const numThreshold = Number.parseFloat(response.data.evidence.threshold);
+          const numScore = Number.parseFloat(response.data.score);
 
-        setRawScore(numRawScore);
-        setThreshold(numThreshold);
-        setScore(numScore);
-        setStampScores(response.data.stamp_scores);
+          setRawScore(numRawScore);
+          setThreshold(numThreshold);
+          setScore(numScore);
+          setStampScores(response.data.stamp_scores);
 
-        if (numRawScore > numThreshold) {
-          setScoreDescription("Passing Score");
+          if (numRawScore > numThreshold) {
+            setScoreDescription("Passing Score");
+          } else {
+            setScoreDescription("Low Score");
+          }
         } else {
-          setScoreDescription("Low Score");
+          // This is not a binary scorer
+          const numRawScore = Number.parseFloat(response.data.score);
+          const numThreshold = 0;
+          const numScore = Number.parseFloat(response.data.score);
+
+          setRawScore(numRawScore);
+          setThreshold(numThreshold);
+          setScore(numScore);
+          setStampScores(response.data.stamp_scores);
+
+          setScoreDescription("");
         }
       }
 
