@@ -28,7 +28,7 @@ export class GTCStakingPlatform extends Platform {
   banner = {
     content: (
       <div>
-        "If you haven't staked yet, you can do so now."
+        If you haven't staked yet, you can do so now.
         <a
           href="https://support.passport.xyz/passport-knowledge-base/gtc-staking/identity-staking-questions"
           style={{
