@@ -15,8 +15,8 @@ export class ETHPlatform extends Platform {
       the overall activity of the address.
     `,
     cta: {
-      label: "Find out more",
-      url: "https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/navigating-your-ethereum-stamp-insights-and-updates",
+      label: "Learn more",
+      url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/verifying-ethereum-transactions-to-passport",
     },
   };
 

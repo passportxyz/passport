@@ -34,8 +34,8 @@ export class GitcoinPlatform extends Platform {
       </div>
     ),
     cta: {
-      label: "Find out more",
-      url: "https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/understanding-your-eligibility-for-the-gitcoin-grants-stamp-on-gitcoin-passport",
+      label: "Learn more",
+      url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-gitcoin-grants-to-passport",
     },
   };
 
