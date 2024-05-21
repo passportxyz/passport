@@ -138,8 +138,7 @@ export const DashboardScorePanel = ({ className }: { className: string }) => {
 
         <p className="shrink p-4 text-foreground">
           {customText ||
-            "Your Unique Humanity Score is based out of 100 and measures your uniqueness. The current passing threshold is 20. " +
-              "Scores may vary across different apps, especially due to abuse or attacks on the service."}
+            "Your Unique Humanity Score measures how unique and human you are. Passport-protected apps use this score to ensure authentic engagement. Most applications require a score of at least 20 to participate. Scores can vary across apps, especially due to misuse or attacks."}
         </p>
       </div>
     </div>

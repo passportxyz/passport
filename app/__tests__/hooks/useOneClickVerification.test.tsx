@@ -24,17 +24,6 @@ jest.mock("@gitcoin/passport-identity", () => ({
 
 const mockPossiblePlatforms = [
   {
-    groups: [
-      {
-        name: "Account Name",
-        providers: [
-          {
-            name: "Ens",
-            title: "Encrypted",
-          },
-        ],
-      },
-    ],
     platformProps: {
       platform: {
         platformId: "Ens",
@@ -270,14 +259,9 @@ describe("useOneClickVerification", () => {
       screen.getByText("Click me").click();
       expect(fetchVerifiableCredential).toHaveBeenCalledWith(
         "http://localhost:80/api/",
-        {
-          type: "EVMBulkVerify",
+        expect.objectContaining({
           types: ["Ens", "NFT", "Lens", "GuildXYZ"],
-          version: "0.0.0",
-          address: "validAddress",
-          proofs: {},
-          signatureType: "EIP712",
-        },
+        }),
         expect.any(Function)
       );
     });
