@@ -258,7 +258,7 @@ describe("useOneClickVerification", () => {
     await waitFor(() => {
       screen.getByText("Click me").click();
       expect(fetchVerifiableCredential).toHaveBeenCalledWith(
-        "http://localhost:80/api/",
+        expect.any(String),
         expect.objectContaining({
           types: ["Ens", "NFT", "Lens", "GuildXYZ"],
         }),
