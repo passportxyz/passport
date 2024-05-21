@@ -33,6 +33,7 @@ export interface AttestationProvider {
   name: string;
   status: AttestationProviderStatus;
   hasWebViewer: boolean;
+  attestationExplorerLinkText: string;
   viewerUrl: (address: string) => string;
   verifierAddress: () => string;
   verifierAbi: () => any;
@@ -50,6 +51,7 @@ class BaseAttestationProvider implements AttestationProvider {
   name = "Override this class";
   status: AttestationProviderStatus;
   hasWebViewer = false;
+  attestationExplorerLinkText = "Check attestation on EAS";
   chainId: string;
 
   constructor({ chainId, status }: { chainId: string; status: AttestationProviderStatus }) {
@@ -152,6 +154,7 @@ export class EASAttestationProvider extends BaseAttestationProvider {
 
 export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
   name = "Verax, Ethereum Attestation Service (Score only)";
+  attestationExplorerLinkText = "Check attestation on Verax";
 
   async getMultiAttestationRequest(payload: {}): Promise<AxiosResponse<any, any>> {
     return axios.post(`${iamUrl}v0.0.0/eas/score`, payload, {
@@ -160,6 +163,10 @@ export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
       },
       transformRequest: [(data: any) => JSON.stringify(data, (_k, v) => (typeof v === "bigint" ? v.toString() : v))],
     });
+  }
+
+  viewerUrl(address: string): string {
+    return this.easScanUrl;
   }
 
   checkOnChainStatus(

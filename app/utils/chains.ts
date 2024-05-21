@@ -153,7 +153,7 @@ if (!TEST_MODE) {
     attestationProviderConfig: {
       name: "Verax + EAS",
       status: "enabled",
-      easScanUrl: "https://linea.easscan.org",
+      easScanUrl: "https://explorer.ver.ax/linea/attestations/my_attestations",
     },
   });
 
