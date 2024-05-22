@@ -1,0 +1,5 @@
+npm i -g fswatch reload @mermaid-js/mermaid-cli
+
+reload -e svg -b
+
+fswatch -o tst.mmd | xargs -n1 -I{} mmdc -i tst.mmd -o tst.svg
