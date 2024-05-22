@@ -24,7 +24,6 @@ const ScoreRing = ({ className }: { className: string }) => {
   const { rawScore, passportSubmissionState } = React.useContext(ScorerContext);
   const [verificationState, _setUserVerificationState] = useAtom(mutableUserVerificationAtom);
   const [displayScore, setDisplayScore] = React.useState(0);
-  const toast = useToast();
 
   // This enables the animation on page load
   useEffect(() => {
@@ -34,23 +33,6 @@ const ScoreRing = ({ className }: { className: string }) => {
       setDisplayScore(rawScore);
     }
   }, [rawScore, verificationState.loading]);
-
-  useEffect(() => {
-    if (verificationState.success === true) {
-      toast({
-        duration: 9000,
-        isClosable: true,
-        render: (result: any) => (
-          <DoneToastContent
-            title="Success!"
-            message="Your stamps are verified!"
-            icon="../assets/check-icon2.svg"
-            result={result}
-          />
-        ),
-      });
-    }
-  }, [toast, verificationState.success]);
 
   return (
     <div className={`${className} grid place-items-center`}>
