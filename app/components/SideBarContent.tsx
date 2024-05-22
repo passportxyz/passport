@@ -8,7 +8,6 @@ import { PlatformGroupSpec, PlatformBanner } from "@gitcoin/passport-platforms";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 
 import { StampSelector } from "./StampSelector";
-import { Button } from "./Button";
 import { PlatformDetails } from "./PlatformDetails";
 import { PlatformScoreSpec } from "../context/scorerContext";
 import { RemoveStampModal } from "./RemoveStampModal";

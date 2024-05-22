@@ -14,15 +14,37 @@ import { SideBarContent } from "./SideBarContent";
 // --- Chakra UI Elements
 import { Drawer, DrawerOverlay, useDisclosure } from "@chakra-ui/react";
 import { PLATFORM_ID, PROVIDER_ID, PLATFORM_CATEGORY } from "@gitcoin/passport-types";
+import { CeramicContext } from "../context/ceramicContext";
+import { PlatformCard } from "./PlatformCard";
 import PageWidthGrid from "../components/PageWidthGrid";
 import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
-import {Category} from "./Category";
-import { CeramicContext } from "../context/ceramicContext";
 
+import {
+  ChakraProvider,
+  Box,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
+  Text,
+} from "@chakra-ui/react";
+import { PlatformSpec } from "@gitcoin/passport-platforms/*";
 export type CardListProps = {
   isLoading?: boolean;
   className?: string;
-  initialOpen?: boolean;
+};
+
+const cardClassName = "col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-3";
+
+type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
+
+export const getStampProviderIds = (platform: PLATFORM_ID): PROVIDER_ID[] => {
+  return (
+    STAMP_PROVIDERS[platform]?.reduce((all, stamp) => {
+      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+    }, [] as PROVIDER_ID[]) || []
+  );
 };
 
 // TODO : where should this be defined?
@@ -63,26 +85,15 @@ export const PLATFORM_CATEGORIES: PLATFORM_CATEGORY[] = [
   },
 ];
 
-
-type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
-
-export const getStampProviderIds = (platform: PLATFORM_ID): PROVIDER_ID[] => {
-  return (
-    STAMP_PROVIDERS[platform]?.reduce((all, stamp) => {
-      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-    }, [] as PROVIDER_ID[]) || []
-  );
-};
-
-export const CardList = ({ className, isLoading = false, initialOpen = true }: CardListProps): JSX.Element => {
-
+export const CardList = ({ className, isLoading = false }: CardListProps): JSX.Element => {
   const { allProvidersState, allPlatforms } = useContext(CeramicContext);
   const { scoredPlatforms } = useContext(ScorerContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef();
-  
-  const [currentProviders, setCurrentProviders] = useState<PlatformGroupSpec[]>([]);
   const [currentPlatform, setCurrentPlatform] = useState<PlatformScoreSpec | undefined>();
+  const [currentProviders, setCurrentProviders] = useState<PlatformGroupSpec[]>([]);
+
+  // get the selected Providers
   const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
     PLATFORMS.reduce((platforms, platform) => {
       // get all providerIds for this platform
@@ -95,43 +106,8 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
       return platforms;
     }, {} as SelectedProviders)
   );
-  const [dropDownOpen, setDropDownOpen] = useState<boolean>(false);
-  const openRef = React.useRef(dropDownOpen);
-  openRef.current = dropDownOpen;
 
-  // Unmounting the panel on a delay to allow the animation to complete
-  const [panelMounted, setPanelMounted] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (initialOpen) {
-      handleOpen();
-    }
-  }, [initialOpen]);
-
-  const handleOpen = () => {
-    setPanelMounted(true);
-  };
-
-  useEffect(() => {
-    // Causes this to open one render after mounting, so animation can play
-    setDropDownOpen(panelMounted);
-  }, [panelMounted]);
-
-  const handleClose = () => {
-    setDropDownOpen(false);
-    setTimeout(() => {
-      // Only unmount the panel if it's still closed
-      // Need to use ref to access runtime state here
-      const isOpen = openRef.current;
-      if (!isOpen) setPanelMounted(false);
-    }, 150);
-  };
-
-  const handleClick = () => {
-    if (dropDownOpen) handleClose();
-    else handleOpen();
-  };
-
+  // update when verifications change...
   useEffect(() => {
     // update all verfied states
     setSelectedProviders(
@@ -154,8 +130,12 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
   // Add the platforms to this switch so the sidebar content can populate dynamically
   const renderCurrentPlatformSelection = () => {
     if (currentPlatform) {
+      console.log("currentPlatform", currentPlatform);
+      console.log("HERE1");
       const platformProps = allPlatforms.get(currentPlatform.platform);
       if (platformProps) {
+        console.log("HERE2");
+        console.log("platformProps", platformProps);
         return (
           <GenericPlatform
             platform={platformProps.platform}
@@ -166,6 +146,7 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
         );
       }
     }
+    console.log("HERE3");
     return (
       <SideBarContent
         verifiedProviders={undefined}
@@ -230,12 +211,44 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
   return (
     <>
       <PageWidthGrid className={className}>
-        {/* <Disclosure as="div" className={className} defaultOpen={true}> */}
-        {Object.keys(groupedPlatforms).map((category) => {
-          return (
-            <Category className={className} category={groupedPlatforms[category]}  key={category}/>
-          );
-        })}
+        <Accordion allowMultiple>
+          {Object.keys(groupedPlatforms).map((category) => {
+            return (
+              <AccordionItem className="w-max" key={category}>
+                <h2>
+                  <AccordionButton className="max-w-md p-2 mx-auto" w="100%">
+                    <Box as="span" className="max-w-md" flex="1" textAlign="left">
+                      {category}
+                    </Box>
+                    <AccordionIcon />
+                  </AccordionButton>
+                </h2>
+                <AccordionPanel pb={0}>
+                  <Text mb={4} className="text-color-2">
+                    {/* {Category_Description[category]} */}
+                  </Text>
+                  <div>
+                    {groupedPlatforms[category].sortedPlatforms.map((platform, i) => {
+                      return isLoading ? (
+                        <LoadingCard key={i} className={cardClassName} />
+                      ) : (
+                        <PlatformCard
+                          i={i}
+                          key={i}
+                          platform={platform}
+                          onOpen={onOpen}
+                          selectedProviders={selectedProviders}
+                          setCurrentPlatform={setCurrentPlatform}
+                          className={cardClassName}
+                        />
+                      );
+                    })}
+                  </div>
+                </AccordionPanel>
+              </AccordionItem>
+            );
+          })}
+        </Accordion>
       </PageWidthGrid>
       {/* sidebar */}
       {currentProviders && (

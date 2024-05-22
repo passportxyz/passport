@@ -360,6 +360,12 @@ export type PLATFORM_ID =
   | "TrustaLabs"
   | "Outdid";
 
+export type PLATFORM_CATEGORY = {
+  name: string;
+  description: string;
+  platforms: PLATFORM_ID[];
+};
+
 export type PROVIDER_ID =
   | "Signer"
   | "Google"
