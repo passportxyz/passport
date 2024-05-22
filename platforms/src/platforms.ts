@@ -20,6 +20,7 @@ import * as Idena from "./Idena";
 import * as Civic from "./Civic";
 import * as TrustaLabs from "./TrustaLabs";
 import * as Outdid from "./Outdid";
+import * as ProofOfPassport from "./ProofOfPassport";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
 type PlatformConfig = {
@@ -52,6 +53,7 @@ const platforms: Record<string, PlatformConfig> = {
   Civic,
   TrustaLabs,
   Outdid,
+  ProofOfPassport,
 };
 
 if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {

@@ -42,6 +42,7 @@ const {
   Civic,
   TrustaLabs,
   Outdid,
+  ProofOfPassport,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -182,6 +183,11 @@ if (process.env.NEXT_PUBLIC_FF_OUTDID_STAMP === "on") {
     platFormGroupSpec: Outdid.ProviderConfig,
   });
 }
+
+platforms.set("ProofOfPassport", {
+  platform: new ProofOfPassport.ProofOfPassportPlatform(),
+  platFormGroupSpec: ProofOfPassport.ProviderConfig,
+});
 
 if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
   platforms.set("GuildXYZ", {
