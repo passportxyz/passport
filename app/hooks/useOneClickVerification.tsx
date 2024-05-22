@@ -9,6 +9,7 @@ import { CeramicContext } from "../context/ceramicContext";
 import { useWalletStore } from "../context/walletStore";
 import { useAtom } from "jotai";
 import { mutableUserVerificationAtom } from "../context/userState";
+import { datadogLogs } from "@datadog/browser-logs";
 
 export const useOneClickVerification = () => {
   const [verificationState, setUserVerificationState] = useAtom(mutableUserVerificationAtom);
@@ -21,6 +22,7 @@ export const useOneClickVerification = () => {
     if (!did || !address) {
       return;
     }
+    datadogLogs.logger.info("Initiating one click verification", { address });
     setUserVerificationState({
       ...verificationState,
       loading: true,
@@ -82,6 +84,7 @@ export const useOneClickVerification = () => {
         success: true,
         possiblePlatforms: [],
       });
+      datadogLogs.logger.info("Successfully completed one click verification", { address });
     } catch (error) {
       setUserVerificationState({
         ...verificationState,
@@ -89,6 +92,7 @@ export const useOneClickVerification = () => {
         error: String(error),
         possiblePlatforms: [],
       });
+      datadogLogs.logger.error("Error when attempting on click verification", { error: String(error) });
     }
   };
 

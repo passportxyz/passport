@@ -45,7 +45,7 @@ const ScoreRing = ({ className }: { className: string }) => {
             title="Success!"
             message="Your stamps are verified!"
             icon="../assets/check-icon2.svg"
-            result={verificationState.success}
+            result={result}
           />
         ),
       });
