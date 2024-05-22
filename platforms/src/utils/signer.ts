@@ -13,9 +13,16 @@ import { utils } from "ethers";
 
 // set the network rpc url based on env
 const RPC_URL = process.env.RPC_URL;
+const OP_RPC_URL = process.env.OP_RPC_URL;
 
 export const getRPCProvider = (payload: RequestPayload): StaticJsonRpcProvider => {
   const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(RPC_URL);
+
+  return provider;
+};
+
+export const getOptimismRPCProvider = (payload: RequestPayload): StaticJsonRpcProvider => {
+  const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(OP_RPC_URL);
 
   return provider;
 };

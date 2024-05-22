@@ -359,7 +359,7 @@ export type PLATFORM_ID =
   | "ZkSync"
   | "TrustaLabs"
   | "Outdid"
-  | "ProofofPassport";
+  | "ProofOfPassport";
 
 export type PROVIDER_ID =
   | "Signer"
@@ -434,7 +434,7 @@ export type PROVIDER_ID =
   | "ETHGasSpent#0.25"
   | "ETHnumTransactions#100"
   | "Outdid"
-  | "ProofofPassport";
+  | "ProofOfPassport";
 
 export type StampBit = {
   bit: number;
