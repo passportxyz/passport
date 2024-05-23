@@ -69,6 +69,7 @@ const chainConfigs: ChainConfig[] = [
 ];
 
 const usingTestEnvironment = process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on" || TEST_MODE;
+const enableArbitrum = process.env.NEXT_PUBLIC_ENABLE_ARBITRUM === "on";
 
 if (usingTestEnvironment) {
   chainConfigs.push({
@@ -165,19 +166,21 @@ if (!TEST_MODE) {
     icon: "./assets/avax-logo.svg",
   });
 
-  chainConfigs.push({
-    id: arbitrumChainId,
-    token: "ETH",
-    label: "Arbitrum One",
-    // rpcUrl: "https://arb1.arbitrum.io/rpc",
-    rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_ARB_RPC_URL as string,
-    icon: "./assets/arbitrum-arb-logo.svg",
-    attestationProviderConfig: {
-      name: "Ethereum Attestation Service",
-      status: usingTestEnvironment ? "disabled" : "enabled",
-      easScanUrl: "https://arbitrum.easscan.org",
-    },
-  });
+  if (enableArbitrum) {
+    chainConfigs.push({
+      id: arbitrumChainId,
+      token: "ETH",
+      label: "Arbitrum One",
+      // rpcUrl: "https://arb1.arbitrum.io/rpc",
+      rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_ARB_RPC_URL as string,
+      icon: "./assets/arbitrum-arb-logo.svg",
+      attestationProviderConfig: {
+        name: "Ethereum Attestation Service",
+        status: usingTestEnvironment ? "disabled" : "enabled",
+        easScanUrl: "https://arbitrum.easscan.org",
+      },
+    });
+  }
 }
 
 chainConfigs.push({
