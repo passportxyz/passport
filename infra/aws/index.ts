@@ -19,8 +19,9 @@ const dataDogClientTokenStaging = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_S
 const dataDogClientTokenProduction = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_PRODUCTION"]}`;
 const cloudflareZoneId = `${process.env["CLOUDFLARE_ZONE_ID"]}`;
 
-const PROVISION_STAGING_FOR_LOADTEST =
-  `${process.env["PROVISION_STAGING_FOR_LOADTEST"]}`.toLowerCase() === "true";
+const PROVISION_STAGING_FOR_LOADTEST = `${process.env["PROVISION_STAGING_FOR_LOADTEST"]}`.toLowerCase() === "true";
+const walletConnectProjectId = `${process.env["STAKING_WALLET_CONNECT_PROJECT_ID"]}`;
+const stakingIntercomAppId = `${process.env["STAKING_INTERCOM_APP_ID"]}`;
 
 const stack = pulumi.getStack();
 const region = aws.getRegion({});
@@ -58,17 +59,19 @@ const logsRetention = Object({
 const productionService = {
   memory: 2048, // 2GB
   cpu: 1024, // 1vCPU
-}
+};
 
 const serviceResources = Object({
   review: {
     memory: 512, // 512 MiB
     cpu: 256, // 0.25 vCPU
   },
-  staging: PROVISION_STAGING_FOR_LOADTEST ? productionService : {
-    memory: 512, // 512 MiB
-    cpu: 256, // 0.25 vCPU
-  },
+  staging: PROVISION_STAGING_FOR_LOADTEST
+    ? productionService
+    : {
+        memory: 512, // 512 MiB
+        cpu: 256, // 0.25 vCPU
+      },
   production: productionService,
 });
 
@@ -99,7 +102,8 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_ENABLE_MAINNET: "on",
     NEXT_PUBLIC_ENABLE_OP_MAINNET: "on",
     NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "on",
-    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: "42cf1c799a9682a59b7f026f8bbfcdfc",
+    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: walletConnectProjectId,
+    NEXT_PUBLIC_INTERCOM_APP_ID: stakingIntercomAppId,
   },
   staging: {
     NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.staging.scorer.gitcoin.co/ceramic-cache",
@@ -113,7 +117,8 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_ENABLE_MAINNET: "on",
     NEXT_PUBLIC_ENABLE_OP_MAINNET: "on",
     NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "on",
-    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: "42cf1c799a9682a59b7f026f8bbfcdfc",
+    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: walletConnectProjectId,
+    NEXT_PUBLIC_INTERCOM_APP_ID: stakingIntercomAppId,
   },
   production: {
     NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.scorer.gitcoin.co/ceramic-cache",
@@ -127,7 +132,8 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_ENABLE_MAINNET: "on",
     NEXT_PUBLIC_ENABLE_OP_MAINNET: "on",
     NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "off",
-    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: "42cf1c799a9682a59b7f026f8bbfcdfc",
+    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: walletConnectProjectId,
+    NEXT_PUBLIC_INTERCOM_APP_ID: stakingIntercomAppId,
   },
 });
 
