@@ -1,6 +1,6 @@
-import React, { useCallback, useContext } from "react";
+import React, { useCallback, useContext, useEffect } from "react";
 import { Button } from "./Button";
-import { Spinner } from "@chakra-ui/react";
+import { Spinner, useToast } from "@chakra-ui/react";
 import { PROVIDER_ID, StampPatch, ValidResponseBody, VerifiableCredential } from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
@@ -8,8 +8,11 @@ import { createSignedPayload } from "../utils/helpers";
 import { useWalletStore } from "../context/walletStore";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { CeramicContext } from "../context/ceramicContext";
+import { DoneToastContent } from "./DoneToastContent";
 
 type ZKEmailStatus = "idle" | "searching" | "proving" | "claiming" | "done";
+
+const success = "../../assets/check-icon2.svg";
 
 const searchForProviders = async (): Promise<PROVIDER_ID[]> => {
   // TODO Real thing
@@ -80,6 +83,7 @@ export const ZKEmail = ({ className }: { className: string }) => {
   const [proofs, setProofs] = React.useState<string[]>([]);
   const isLoading = status === "searching" || status === "proving";
   const claimStamps = useClaimZKEmailStamps();
+  const toast = useToast();
 
   const reset = () => {
     setStatus("idle");
@@ -113,6 +117,23 @@ export const ZKEmail = ({ className }: { className: string }) => {
 
     setStatus("done");
   };
+
+  useEffect(() => {
+    if (status === "done") {
+      toast({
+        duration: 9000,
+        isClosable: true,
+        render: (result: any) => (
+          <DoneToastContent
+            title="Success"
+            message={`Auto-verified ${proofs.length} stamps!`}
+            icon={success}
+            result={result}
+          />
+        ),
+      });
+    }
+  }, [status]);
 
   return (
     <div className={`flex items-center ${className}`}>
