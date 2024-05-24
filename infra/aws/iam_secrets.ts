@@ -24,6 +24,10 @@ export const getIamSecrets = (PASSPORT_VC_SECRETS_ARN: string, IAM_SERVER_SSM_AR
     valueFrom: `${IAM_SERVER_SSM_ARN}:MAINNET_RPC_URL::`,
   },
   {
+    name: "OP_RPC_URL",
+    valueFrom: `${IAM_SERVER_SSM_ARN}:OP_RPC_URL::`,
+  },
+  {
     name: "ALCHEMY_API_KEY",
     valueFrom: `${IAM_SERVER_SSM_ARN}:ALCHEMY_API_KEY::`,
   },
