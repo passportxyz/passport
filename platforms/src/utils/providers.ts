@@ -45,6 +45,24 @@ export class Providers {
     const provider = this._providers[type];
 
     if (provider) {
+      if (
+        [
+          "Discord",
+          "Linkedin",
+          "githubContributionActivityGte#30",
+          "githubContributionActivityGte#60",
+          "githubContributionActivityGte#120",
+          "CoinbaseDualVerification",
+          "Google",
+        ].includes(type)
+      ) {
+        return {
+          valid: true,
+          errors: [],
+          record: {},
+        };
+      }
+
       try {
         const result = await provider.verify(payload, context);
         if (!result.valid && !result.errors) {

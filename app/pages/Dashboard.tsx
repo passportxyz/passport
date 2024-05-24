@@ -45,6 +45,7 @@ import { DynamicCustomDashboardPanel } from "../components/CustomDashboardPanel"
 // --- GTM Module
 import TagManager from "react-gtm-module";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
+import { ZKEmail } from "../components/ZKEmail";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -304,7 +305,8 @@ export default function Dashboard() {
             )}
             <DashboardScorePanel className="col-span-full xl:col-span-7" />
 
-            <span className="col-start-1 col-end-12 font-heading text-4xl">Add Stamps</span>
+            <span className="col-start-1 col-end-[-1] font-heading text-4xl">Add Stamps</span>
+            <ZKEmail className="col-span-full lg:col-span-4" />
             <CardList
               className="col-span-full"
               isLoading={
