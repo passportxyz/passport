@@ -1,0 +1,38 @@
+name: Deploy to Branch (Release Frontend)
+
+on:
+  workflow_call:
+    inputs:
+      refspec:
+        required: true
+        type: string
+      owner:
+        required: true
+        type: string
+      repo:
+        required: true
+        type: string
+      destination_branch:
+        required: true
+        type: string
+
+
+permissions: write-all
+jobs:
+  deploy_to_branch:
+    name: Deploy to Branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.github_token }}
+          ref: main
+          fetch-depth: 0
+      - name: Push to Branch
+        run: |
+          git fetch
+          git checkout -b ${{ inputs.destination_branch }} 
+          git reset --hard ${{ inputs.refspec }}
+          git reset HEAD -- .github/workflows
+          git remote set-url origin https://${{ secrets.github_token }}@github.com/${{ inputs.owner }}/${{ inputs.repo }}.git
+          git push origin ${{ inputs.destination_branch }} -f

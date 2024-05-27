@@ -1,4 +1,4 @@
-name: Release and Deploy Passport
+name: Release and Deploy This Repo
 
 ## To use this in a new repo
 ## 1. Copy this file
@@ -48,9 +48,8 @@ jobs:
       refspec: ${{ needs.ref.outputs.refspec }}
       repo_owner: gitcoinco
       repo_name: passport
-      staging_frontend_branch: staging-app
-      production_frontend_branch: production-app
-      # TODO: use values from secrets
+      staging_frontend_branch: test_frontend_build_staging
+      production_frontend_branch: test_frontend_build_prod
       staging_domain: iam.staging.passport.gitcoin.co
       production_domain: passport-iam.gitcoin.co
       ecr_repository: passport
