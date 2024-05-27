@@ -14,6 +14,7 @@ const dockerGtcPassportIamImage = `${process.env["DOCKER_GTC_PASSPORT_IAM_IMAGE"
 const opSepoliaRpcUrl = `${process.env["STAKING_OP_SEPOLIA_RPC_URL"]}`;
 const opRpcUrl = `${process.env["STAKING_OP_RPC_URL"]}`;
 const mainnetRpcUrl = `${process.env["STAKING_MAINNET_RPC_URL"]}`;
+const arbitrumRpcUrl = `${process.env["STAKING_ARBITRUM_RPC_URL"]}`;
 const dataDogClientTokenReview = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_REVIEW"]}`;
 const dataDogClientTokenStaging = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_STAGING"]}`;
 const dataDogClientTokenProduction = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_PRODUCTION"]}`;
@@ -104,6 +105,8 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "on",
     NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: walletConnectProjectId,
     NEXT_PUBLIC_INTERCOM_APP_ID: stakingIntercomAppId,
+    NEXT_PUBLIC_ENABLE_ARBITRUM_MAINNET: "on",
+    NEXT_PUBLIC_ARBITRUM_RPC_URL: arbitrumRpcUrl,
   },
   staging: {
     NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.staging.scorer.gitcoin.co/ceramic-cache",
@@ -119,6 +122,8 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "on",
     NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: walletConnectProjectId,
     NEXT_PUBLIC_INTERCOM_APP_ID: stakingIntercomAppId,
+    NEXT_PUBLIC_ENABLE_ARBITRUM_MAINNET: "on",
+    NEXT_PUBLIC_ARBITRUM_RPC_URL:arbitrumRpcUrl, 
   },
   production: {
     NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.scorer.gitcoin.co/ceramic-cache",
@@ -134,6 +139,8 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "off",
     NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: walletConnectProjectId,
     NEXT_PUBLIC_INTERCOM_APP_ID: stakingIntercomAppId,
+    NEXT_PUBLIC_ENABLE_ARBITRUM_MAINNET: "on",
+    NEXT_PUBLIC_ARBITRUM_RPC_URL: arbitrumRpcUrl,
   },
 });
 

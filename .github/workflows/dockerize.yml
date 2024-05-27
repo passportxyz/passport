@@ -1,0 +1,104 @@
+name: Dockerize
+
+on:
+  workflow_call:
+    inputs:
+      repository:
+        description: "Repository in format owner/repo"
+        required: true
+        type: string
+      refspec:
+        description: "Commit ref"
+        required: true
+        type: string
+      docker_tag:
+        description: "Commit short SHA"
+        required: true
+        type: string
+      ecr_repository:
+        required: true
+        type: string
+    secrets:
+      aws_access_key_id_staging:
+        required: true
+      aws_secret_access_key_staging:
+        required: true
+      aws_access_key_id_production:
+        required: true
+      aws_secret_access_key_production:
+        required: true
+
+jobs:
+  dockerize:
+    name: Dockerize
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.repository }}
+          ref: ${{ inputs.refspec }}
+
+      # configure AWS credentials
+      - name: Configure Staging AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.aws_access_key_id_staging }}
+          aws-secret-access-key: ${{ secrets.aws_secret_access_key_staging }}
+          aws-region: us-west-2
+
+      # login to docker for AWS
+      - name: Login to Staging Amazon ECR
+        id: login-ecr-staging
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # build, tag, and push to ECR
+      - name: Build, tag, and push image to Staging Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr-staging.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.ecr_repository }}
+          IMAGE_TAG: ${{ inputs.docker_tag }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f iam/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Configure Production AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.aws_access_key_id_production }}
+          aws-secret-access-key: ${{ secrets.aws_secret_access_key_production }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR Production
+        id: login-ecr-production
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Tag and push image to Production Amazon ECR
+        env:
+          ECR_REGISTRY_STAGING: ${{ steps.login-ecr-staging.outputs.registry }}
+          ECR_REGISTRY_PRODUCTION: ${{ steps.login-ecr-production.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.ecr_repository }}
+          IMAGE_TAG: ${{ inputs.docker_tag }}
+        run: |
+          docker tag $ECR_REGISTRY_STAGING/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY_PRODUCTION/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY_PRODUCTION/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Configure Oregon Production AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.aws_access_key_id_production }}
+          aws-secret-access-key: ${{ secrets.aws_secret_access_key_production }}
+          aws-region: us-west-2
+
+      - name: Login to Oregon Amazon ECR Production
+        id: login-ecr-production-us-west-2
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Tag and push Oregon image to Production Amazon ECR
+        env:
+          ECR_REGISTRY_STAGING: ${{ steps.login-ecr-staging.outputs.registry }}
+          ECR_REGISTRY_PRODUCTION: ${{ steps.login-ecr-production-us-west-2.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.ecr_repository }}
+          IMAGE_TAG: ${{ inputs.docker_tag }}
+        run: |
+          docker tag $ECR_REGISTRY_STAGING/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY_PRODUCTION/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY_PRODUCTION/$ECR_REPOSITORY:$IMAGE_TAG
