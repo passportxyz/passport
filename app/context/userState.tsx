@@ -19,7 +19,6 @@ export const userWarningAtom = atom<UserWarning | undefined>(undefined);
 export interface UserVerification {
   loading: boolean;
   success: boolean;
-  possiblePlatforms: string[];
   error?: string;
 }
 
@@ -27,7 +26,6 @@ export const userVerificationAtom = atom<UserVerification>({
   loading: false,
   success: false,
   error: undefined,
-  possiblePlatforms: [],
 });
 
 export const mutableUserVerificationAtom = atom(
