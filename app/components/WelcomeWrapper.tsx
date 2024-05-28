@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button } from "./Button";
 import { LoadButton } from "./LoadButton";
 import Checkbox from "./Checkbox";
+import WelcomeFooter from "./WelcomeFooter";
 
 type WelcomePageButtonsProps = {
   onSkip: () => void;

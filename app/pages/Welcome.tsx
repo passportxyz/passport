@@ -28,6 +28,7 @@ import BodyWrapper from "../components/BodyWrapper";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useNavigateToPage } from "../hooks/useCustomization";
 import { useOneClickVerification } from "../hooks/useOneClickVerification";
+import WelcomeFooter from "../components/WelcomeFooter";
 
 const MIN_DELAY = 50;
 const MAX_DELAY = 800;
@@ -99,6 +100,7 @@ export default function Welcome() {
             <LoadingScreen />
           )}
         </BodyWrapper>
+        <WelcomeFooter />
       </HeaderContentFooterGrid>
     </PageRoot>
   );
