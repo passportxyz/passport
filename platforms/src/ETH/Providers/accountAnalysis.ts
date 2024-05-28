@@ -42,9 +42,13 @@ export async function getETHAnalysis(address: string, context: ETHAnalysisContex
 
 export async function fetchModelData<T>(address: string, url_subpath: string): Promise<T> {
   try {
+    console.log("fetching model data");
+    await new Promise((resolve) => setTimeout(resolve, 60000));
+
     const response = await axios.post(`http://${dataScienceEndpoint}/${url_subpath}`, {
       address,
     });
+    console.log("model data fetched");
     return response.data as T;
   } catch (e) {
     handleProviderAxiosError(e, "model data (" + url_subpath + ")", [dataScienceEndpoint]);
