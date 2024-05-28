@@ -403,8 +403,8 @@ export const GenericPlatform = ({
   };
 
   const isReverifying = useMemo(
-    () => verificationState.loading && verificationState.possiblePlatforms.includes(platform.platformId),
-    [verificationState.loading, verificationState.possiblePlatforms, platform.platformId]
+    () => verificationState.loading && platform.isEVM,
+    [verificationState.loading, platform.isEVM]
   );
 
   const buttonText = useMemo(() => {
