@@ -45,7 +45,6 @@ export const useOneClickVerification = () => {
       setUserVerificationState({
         ...verificationState,
         loading: true,
-        possiblePlatforms: platformTypes,
       });
       const validatedProviderIds = possiblePlatforms
         .map((platform) =>
@@ -85,7 +84,6 @@ export const useOneClickVerification = () => {
         ...verificationState,
         loading: false,
         success: true,
-        possiblePlatforms: [],
       });
       toast({
         duration: 9000,
@@ -105,7 +103,6 @@ export const useOneClickVerification = () => {
         ...verificationState,
         loading: false,
         error: String(error),
-        possiblePlatforms: [],
       });
       datadogLogs.logger.error("Error when attempting on click verification", { error: String(error) });
     }
