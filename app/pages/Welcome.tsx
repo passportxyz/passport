@@ -83,7 +83,7 @@ export default function Welcome() {
         <div className={`${PAGE_PADDING} bg-background`}>
           <MinimalHeader className={`border-b border-foreground-6`} />
         </div>
-        <BodyWrapper className="flex flex-grow justify-center">
+        <BodyWrapper className="flex justify-center">
           {(isLoadingPassport === IsLoadingPassportState.Idle ||
             isLoadingPassport === IsLoadingPassportState.FailedToConnect) &&
           dbAccessTokenStatus === "connected" ? (

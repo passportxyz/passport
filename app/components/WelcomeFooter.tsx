@@ -75,10 +75,10 @@ const SyncIcon = () => (
 
 const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
   return (
-    <footer className="flex justify-between items-center px-4 py-8 bg-black text-white text-sm grid-flow-col w-full max-w-full h-full ">
-      <div className="flex items-start justify-between">
-        <span className="ml-10">Available on</span>
-        <div className="mx-4">
+    <footer className="lg:flex justify-between items-center px-4 py-8 bg-black text-white text-sm grid-flow-col w-full max-w-full">
+      <div className="flex items-start justify-start lg:justify-between my-4 lg:my-0">
+        <span>Available on</span>
+        <div className="mx-4 ">
           <OptimismIcon />
         </div>
         <div className="mx-4">
@@ -88,16 +88,16 @@ const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean
           <CeramicIcon />
         </div>
       </div>
-      <div className="flex gap-4">
+      <div className="flex items-start justify-end lg:justify-between my-4 lg:my-0">
         {displayPrivacyPolicy ? (
-          <a href="#" className="hover:underline">
+          <a href="#" className="hover:underline px-2">
             Privacy Policy
           </a>
         ) : null}
-        <a href="#" className="hover:underline">
+        <a href="#" className="hover:underline px-2">
           Learn More
         </a>
-        <a href="#" className="hover:underline">
+        <a href="#" className="hover:underline px-2">
           Gitcoin Passport Scorer
         </a>
         <div className="mx-2">
