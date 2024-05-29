@@ -78,12 +78,12 @@ export default function Welcome() {
   ];
 
   return (
-    <PageRoot className="text-color-2">
+    <PageRoot className="text-color-2 flex flex-col min-h-screen">
       <HeaderContentFooterGrid>
         <div className={`${PAGE_PADDING} bg-background`}>
           <MinimalHeader className={`border-b border-foreground-6`} />
         </div>
-        <BodyWrapper className="flex justify-center">
+        <BodyWrapper className="flex flex-grow justify-center">
           {(isLoadingPassport === IsLoadingPassportState.Idle ||
             isLoadingPassport === IsLoadingPassportState.FailedToConnect) &&
           dbAccessTokenStatus === "connected" ? (

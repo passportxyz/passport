@@ -75,9 +75,9 @@ const SyncIcon = () => (
 
 const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
   return (
-    <footer className="flex justify-between items-center p-4 bg-black text-white text-sm m-4 grid grid-flow-col w-full">
-      <div className="flex items-start  justify-between ml-10">
-        <span>Available on</span>
+    <footer className="flex justify-between items-center p-4 bg-black text-white text-sm grid-flow-col w-full max-w-full h-full my-4">
+      <div className="flex items-start justify-between">
+        <span className="ml-10">Available on</span>
         <div className="mx-4">
           <OptimismIcon />
         </div>
@@ -103,7 +103,7 @@ const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean
         <div className="mx-2">
           <GitHubIcon />
         </div>
-        <div className="mx-2 mr-20">
+        <div className="mx-2 mr-10">
           <SyncIcon />
         </div>
       </div>
