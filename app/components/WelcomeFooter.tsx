@@ -75,7 +75,7 @@ const SyncIcon = () => (
 
 const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
   return (
-    <footer className="flex justify-between items-center p-4 bg-black text-white text-sm grid-flow-col w-full max-w-full h-full my-4">
+    <footer className="flex justify-between items-center px-4 py-8 bg-black text-white text-sm grid-flow-col w-full max-w-full h-full ">
       <div className="flex items-start justify-between">
         <span className="ml-10">Available on</span>
         <div className="mx-4">
