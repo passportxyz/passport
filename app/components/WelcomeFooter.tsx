@@ -73,29 +73,39 @@ const SyncIcon = () => (
   </svg>
 );
 
-const WelcomeFooter: React.FC = () => {
+const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
   return (
-    <footer className="flex justify-between items-center p-4 bg-black text-white text-sm m-4 grid grid-flow-col ">
-      <div className="flex items-start  justify-between">
-        <span className="m-2">Available on</span>
-        <OptimismIcon />
-        <LIcon />
-        <CeramicIcon />
+    <footer className="flex justify-between items-center p-4 bg-black text-white text-sm m-4 grid grid-flow-col w-full">
+      <div className="flex items-start  justify-between ml-10">
+        <span>Available on</span>
+        <div className="mx-4">
+          <OptimismIcon />
+        </div>
+        <div className="mx-4">
+          <LIcon />
+        </div>
+        <div className="mx-4">
+          <CeramicIcon />
+        </div>
       </div>
       <div className="flex gap-4">
-        <a href="#" className="hover:underline">
-          Privacy Policy
-        </a>
+        {displayPrivacyPolicy ? (
+          <a href="#" className="hover:underline">
+            Privacy Policy
+          </a>
+        ) : null}
         <a href="#" className="hover:underline">
           Learn More
         </a>
         <a href="#" className="hover:underline">
           Gitcoin Passport Scorer
         </a>
-      </div>
-      <div className="flex">
-        <GitHubIcon />
-        <SyncIcon />
+        <div className="mx-2">
+          <GitHubIcon />
+        </div>
+        <div className="mx-2 mr-20">
+          <SyncIcon />
+        </div>
       </div>
     </footer>
   );

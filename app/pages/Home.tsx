@@ -64,7 +64,7 @@ export default function Home() {
 
   return (
     <PageRoot className="text-color-1">
-      <div className="flex h-full min-h-default items-center justify-center self-center p-8">
+      <div className="flex h-full min-h-default items-center justify-center self-center p-8 grid-flow-rows grid">
         <div className="z-10 grid grid-flow-row grid-cols-2 gap-4 lg:grid-flow-col">
           <div className="col-span-2 text-6xl md:text-7xl lg:row-start-2">
             <div className="grid grid-flow-col justify-start">
@@ -91,8 +91,8 @@ export default function Home() {
             className="col-span-2 mt-4 lg:w-3/4"
           />
         </div>
+        <WelcomeFooter displayPrivacyPolicy={true} />
       </div>
-      <WelcomeFooter />
     </PageRoot>
   );
 }
