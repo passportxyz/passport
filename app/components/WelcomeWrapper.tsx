@@ -56,8 +56,8 @@ const PlatformCard = ({}) => {
 
 export const WelcomeWrapper = ({ content, children }: WelcomeWrapperProps) => {
   return (
-    <div className="grid grid-rows-4-4">
-      <div className="row-start-1 row-end-4 p-4 text-lg text-color-1 md:row-end-3 md:pt-80">
+    <div className="grid grid-rows-[minmax(0,1fr)_min-content_minmax(0,2fr)] grid-flow-rows">
+      <div className="row-start-1 p-4 text-lg text-color-1 md:row-start-2">
         <div className="flex h-full w-full auto-rows-min flex-col gap-2 md:grid md:grid-cols-2">
           <div className="flex flex-col gap-2 place-items-start">
             <div className="font-heading text-4xl text-foreground-2 md:text-5xl lg:text-7xl">{content.header}</div>
@@ -91,11 +91,9 @@ export const WelcomeWrapper = ({ content, children }: WelcomeWrapperProps) => {
           </div>
         </div>
       </div>
+
       {content.stepsConfig && (
-        <StepIndicator
-          {...content.stepsConfig}
-          className="row-start-3 mb-10 hidden self-end justify-self-center md:flex"
-        />
+        <StepIndicator {...content.stepsConfig} className="row-start-3 justify-self-center mb-10 hidden md:flex" />
       )}
     </div>
   );
