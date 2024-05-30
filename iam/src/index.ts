@@ -334,6 +334,28 @@ app.post("/api/v0.0.0/check", (req: Request, res: Response): void => {
     .catch(() => errorRes(res, "Unable to check payload", 500));
 });
 
+app.post("/api/v0.0.0/check/async", (req: Request, res: Response): void => {
+  const { payload } = req.body as CheckRequestBody;
+
+  if (!payload || !(payload.type || payload.types)) {
+    return void errorRes(res, "Incorrect payload", 400);
+  }
+
+  const types = (payload.types?.length ? payload.types : [payload.type]).filter((type) => type);
+
+  verifyTypesAsync(types, payload)
+    .then((results) => {
+      const responses = results.map(({ verifyResult, type, error, code }) => ({
+        valid: verifyResult.valid,
+        type,
+        error,
+        code,
+      }));
+      res.json(responses);
+    })
+    .catch(() => errorRes(res, "Unable to check payload", 500));
+});
+
 type VerifyTypeResult = {
   verifyResult: VerifiedPayload;
   type: string;
@@ -341,17 +363,53 @@ type VerifyTypeResult = {
   code?: number;
 };
 
-async function verifyTypes(types: string[], payload: RequestPayload): Promise<VerifyTypeResult[]> {
+export async function verifyTypesAsync(types: string[], payload: RequestPayload): Promise<VerifyTypeResult[]> {
+  const context: ProviderContext = {};
+  const results: VerifyTypeResult[] = [];
+
+  await Promise.all(
+    groupProviderTypesByPlatform(types).map(async (platformTypes) => {
+      const verificationPromises = platformTypes.map(async (type) => {
+        let verifyResult: VerifiedPayload = { valid: false };
+        let code, error;
+
+        try {
+          verifyResult = await providers.verify(type, payload, context);
+          if (!verifyResult.valid) {
+            code = 403;
+            const resultErrors = verifyResult.errors;
+            error = resultErrors?.join(", ")?.substring(0, 1000) || "Unable to verify provider";
+          }
+        } catch {
+          error = "Unable to verify provider";
+          code = 400;
+        }
+
+        results.push({ verifyResult, type, code, error });
+      });
+
+      // Wait for all verification processes within this platform group to complete
+      await Promise.all(verificationPromises);
+    })
+  );
+
+  return results;
+}
+
+export async function verifyTypes(types: string[], payload: RequestPayload): Promise<VerifyTypeResult[]> {
   // define a context to be shared between providers in the verify request
   // this is intended as a temporary storage for providers to share data
+  const startTime = Date.now();
   const context: ProviderContext = {};
   const results: VerifyTypeResult[] = [];
 
   await Promise.all(
     // Run all platforms in parallel
     groupProviderTypesByPlatform(types).map(async (platformTypes) => {
+      const logTime = () => `Elapsed time: ${Date.now() - startTime}ms`;
       // Iterate over the types within a platform in series
       // This enables providers within a platform to reliably share context
+      console.log({ logTime: logTime() });
       for (const type of platformTypes) {
         let verifyResult: VerifiedPayload = { valid: false };
         let code, error;
