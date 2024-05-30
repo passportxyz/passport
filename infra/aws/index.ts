@@ -107,6 +107,7 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_INTERCOM_APP_ID: stakingIntercomAppId,
     NEXT_PUBLIC_ENABLE_ARBITRUM_MAINNET: "on",
     NEXT_PUBLIC_ARBITRUM_RPC_URL: arbitrumRpcUrl,
+    NEXT_PUBLIC_GET_GTC_STAKE_API="https://api.scorer.gitcoin.co/registry/gtc-stake/"
   },
   staging: {
     NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.staging.scorer.gitcoin.co/ceramic-cache",
@@ -124,6 +125,7 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_INTERCOM_APP_ID: stakingIntercomAppId,
     NEXT_PUBLIC_ENABLE_ARBITRUM_MAINNET: "on",
     NEXT_PUBLIC_ARBITRUM_RPC_URL:arbitrumRpcUrl, 
+    NEXT_PUBLIC_GET_GTC_STAKE_API="https://api.scorer.gitcoin.co/registry/gtc-stake/"
   },
   production: {
     NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.scorer.gitcoin.co/ceramic-cache",
@@ -141,6 +143,7 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_INTERCOM_APP_ID: stakingIntercomAppId,
     NEXT_PUBLIC_ENABLE_ARBITRUM_MAINNET: "on",
     NEXT_PUBLIC_ARBITRUM_RPC_URL: arbitrumRpcUrl,
+    NEXT_PUBLIC_GET_GTC_STAKE_API="https://api.scorer.gitcoin.co/registry/gtc-stake/"
   },
 });
 
