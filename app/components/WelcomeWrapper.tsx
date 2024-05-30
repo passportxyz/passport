@@ -93,7 +93,10 @@ export const WelcomeWrapper = ({ content, children }: WelcomeWrapperProps) => {
       </div>
 
       {content.stepsConfig && (
-        <StepIndicator {...content.stepsConfig} className="row-start-3 justify-self-center mb-10 hidden md:flex" />
+        <StepIndicator
+          {...content.stepsConfig}
+          className="z-10 fixed bottom-20 row-start-3 justify-self-center mb-10 hidden md:flex"
+        />
       )}
     </div>
   );

@@ -87,10 +87,6 @@ export const InitialWelcome = ({
           90 day default expiry period for Stamps, you can re-verify whenever you need.
         </p>
       ),
-      stepsConfig: {
-        current: 3,
-        total: 3,
-      },
       buttonsConfig: {
         skipButtonText: "Back",
         onSkip: () => setStep(1),
