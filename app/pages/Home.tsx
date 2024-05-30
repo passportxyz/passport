@@ -14,6 +14,7 @@ import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../components/DoneToastContent";
 import { WebmVideo } from "../components/WebmVideo";
 import { DEFAULT_CUSTOMIZATION_KEY, useCustomization, useNavigateToPage } from "../hooks/useCustomization";
+import WelcomeFooter from "../components/WelcomeFooter";
 
 export default function Home() {
   const address = useWalletStore((state) => state.address);
@@ -62,14 +63,9 @@ export default function Home() {
   }, [connectError]);
 
   return (
-    <PageRoot className="text-color-1">
-      <div className="flex h-full min-h-default items-center justify-center self-center p-8">
-        <img
-          className="absolute bottom-0 right-0 z-0 h-auto w-full opacity-30 gradient-mask-t-0 md:h-[110%] md:w-auto md:gradient-mask-l-0"
-          src="/assets/splashPageTexture.png"
-          alt=""
-        />
-        <div className="z-10 grid grid-flow-row grid-cols-2 gap-4 lg:grid-flow-col">
+    <PageRoot className="text-color-1 flex flex-col min-h-screen">
+      <div className="flex-grow items-center justify-center self-center p-8">
+        <div className="z-10 grid grid-flow-row grid-cols-2 gap-4 lg:grid-flow-col p-2">
           <div className="col-span-2 text-6xl md:text-7xl lg:row-start-2">
             <div className="grid grid-flow-col justify-start">
               <img src="./assets/passportLogoWhite.svg" alt="Icon" className="h-20 self-center" />
@@ -96,6 +92,7 @@ export default function Home() {
           />
         </div>
       </div>
+      <WelcomeFooter displayPrivacyPolicy={true} />
     </PageRoot>
   );
 }
