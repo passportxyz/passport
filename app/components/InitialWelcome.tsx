@@ -11,12 +11,8 @@ export const InitialWelcome = ({
 }) => {
   const [step, setStep] = useState(0);
 
-  const onSkip = () => {
-    setStep(0);
-  };
   const navigateToPage = useNavigateToPage();
-
-  const welcomeSteps = [
+  const welcomeStepsNewUser = [
     {
       header: "Build Your Passport Score",
       backgroudIconSrc: "./assets/passportBackgroundLogo.svg",
@@ -52,15 +48,15 @@ export const InitialWelcome = ({
       },
     },
     {
-      header: hasPassports ? "Auto refresh" : "Get verified with one simple step",
+      header: "Get verified with one simple step",
       backgroudIconSrc: "./assets/passportBackgroundLogo.svg",
       stampIcon: "./assets/passport-flash.svg",
       body: (
         <p>
-          <span className="text-color-6">Verify your identity with just one click.</span> Our system will check your ETH
-          account for activities that match our Stamp criteria. This quick verification is your first step into a
-          broader Web3 world, giving you immediate access to what you qualify for today. To keep up with our 90 day
-          default expiry period for Stamps, you can re-verify whenever you need.
+          <span className="text-color-6 font-bold">Verify your identity with just one click.</span> Our system will
+          check your ETH account for activities that match our Stamp criteria. This quick verification is your first
+          step into a broader Web3 world, giving you immediate access to what you qualify for today. To keep up with our
+          90 day default expiry period for Stamps, you can re-verify whenever you need.
         </p>
       ),
       stepsConfig: {
@@ -69,14 +65,40 @@ export const InitialWelcome = ({
       },
       buttonsConfig: {
         skipButtonText: "Back",
-        onSkip: () => setStep(0),
-        displaySkipBtn: hasPassports ? false : true,
+        onSkip: () => setStep(1),
+        displaySkipBtn: true,
         onNext: () => onBoardFinished(),
-        nextButtonText: hasPassports ? "Get Started" : "Verify",
-        showSkipNextTime: hasPassports ? true : false,
+        nextButtonText: "Verify",
+        showSkipNextTime: false,
       },
     },
   ];
+
+  const welcomeStepsReturningUser = [
+    {
+      header: "Auto refresh",
+      backgroudIconSrc: "./assets/passportBackgroundLogo.svg",
+      stampIcon: "./assets/passport-flash.svg",
+      body: (
+        <p>
+          <span className="text-color-6 font-bold">Verify your identity with just one click.</span> Our system will
+          check your ETH account for activities that match our Stamp criteria. This quick verification is your first
+          step into a broader Web3 world, giving you immediate access to what you qualify for today. To keep up with our
+          90 day default expiry period for Stamps, you can re-verify whenever you need.
+        </p>
+      ),
+      buttonsConfig: {
+        skipButtonText: "Back",
+        onSkip: () => setStep(1),
+        displaySkipBtn: false,
+        onNext: () => onBoardFinished(),
+        nextButtonText: "Get Started",
+        showSkipNextTime: true,
+      },
+    },
+  ];
+
+  const welcomeSteps = hasPassports ? welcomeStepsReturningUser : welcomeStepsNewUser;
 
   const content = welcomeSteps[step];
   const body = content.body;

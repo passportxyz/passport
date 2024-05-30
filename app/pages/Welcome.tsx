@@ -28,6 +28,7 @@ import BodyWrapper from "../components/BodyWrapper";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useNavigateToPage } from "../hooks/useCustomization";
 import { useOneClickVerification } from "../hooks/useOneClickVerification";
+import WelcomeFooter from "../components/WelcomeFooter";
 
 const MIN_DELAY = 50;
 const MAX_DELAY = 800;
@@ -77,7 +78,7 @@ export default function Welcome() {
   ];
 
   return (
-    <PageRoot className="text-color-2">
+    <PageRoot className="text-color-2 flex flex-col min-h-screen">
       <HeaderContentFooterGrid>
         <div className={`${PAGE_PADDING} bg-background`}>
           <MinimalHeader className={`border-b border-foreground-6`} />
@@ -99,6 +100,7 @@ export default function Welcome() {
             <LoadingScreen />
           )}
         </BodyWrapper>
+        <WelcomeFooter displayPrivacyPolicy={(passport && passport.stamps.length > 0) || true} />
       </HeaderContentFooterGrid>
     </PageRoot>
   );

@@ -89,27 +89,6 @@ describe("InitialWelcomeReturningUser", () => {
   it("renders the component and displays the first step", () => {
     render(<InitialWelcome {...defaultPropsReturningUser} />);
 
-    expect(screen.getByText("Build Your Passport Score")).toBeInTheDocument();
-  });
-
-  it("navigates through the steps and calls onBoardFinished when completed", () => {
-    render(<InitialWelcome {...defaultPropsReturningUser} />);
-
-    const nextButton = screen.getByText("Next");
-
-    // Click "Next" to go to step 2
-    fireEvent.click(nextButton);
-    expect(screen.getByText("Accumulate Verified Stamps")).toBeInTheDocument();
-
-    // Click "Next" to go to step 3
-    fireEvent.click(nextButton);
     expect(screen.getByText("Auto refresh")).toBeInTheDocument();
-    expect(screen.getByText("Get Started")).toBeInTheDocument();
-
-    // Click "Get Started" to finish the steps
-    const getStartedButton = screen.getByText("Get Started");
-    fireEvent.click(getStartedButton);
-
-    expect(defaultPropsReturningUser.onBoardFinished).toHaveBeenCalledTimes(1);
   });
 });
