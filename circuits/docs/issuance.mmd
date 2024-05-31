@@ -1,0 +1,45 @@
+graph TB
+
+    A(Wallet A)-->Process[Initiate Check for A]
+    Process-->Verify
+    Data[# Contributions\n+ Github ID]---ProcessProviderResponse[ ]:::empty
+    SignedResponse["`**Signed Response**
+      Credential
+      Address: A
+      Sign(Credential, A)`"]-->CommitmentCircuit
+    subgraph User
+      A
+      subgraph CommitmentCircuit
+        CommitmentPublic["`**Public**
+          Commitment
+          *= Hash(Secret, UUID)*
+          Issuer`"]
+        CommitmentPrivate["`**Private**
+          Proof of Ownership over A
+          Secret
+          Signed Response`"]
+      end
+    end
+    subgraph Issuer
+      Process
+      ProcessProviderResponse-->Nullifier["`**Nullifier**
+        Hash(Github ID)
+        Expiry`"]
+      ProcessProviderResponse-->Credential["`**Credential**
+        UUID: 123
+        Assertion
+        *ex. # Contributions > 100*
+        ...`"]
+      Credential-->SignedResponse
+      Nullifier-->NullifierDB[(Private\nNullifier\nDatabase)]
+      subgraph Commitment\nMerkle Tree
+        MerkleRoot[root]---MerkleSplitter[ ]:::empty
+        MerkleSplitter---MerkleLeaf1[...]
+        MerkleSplitter---MerkleLeaf2[...]
+      end
+    end
+    subgraph Provider ex. Github
+      Verify[Verify Login]-->Data
+    end
+    CommitmentPublic-->MerkleLeaf2
+    classDef empty width:0px,height:0px;

@@ -1,5 +1,16 @@
-npm i -g fswatch reload @mermaid-js/mermaid-cli
+npm i -g reload @mermaid-js/mermaid-cli
 
 reload -e svg -b
 
+# macOS
+npm i -g fswatch
 fswatch -o tst.mmd | xargs -n1 -I{} mmdc -i tst.mmd -o tst.svg
+
+# linux
+sudo apt install inotify-tools
+inotifywait -m -e modify --format %e/%f . |
+while IFS=/ read -r events file; do
+  if [ "$file" = "tst.mmd" ]; then
+    mmdc -i tst.mmd -o tst.svg
+  fi
+done
