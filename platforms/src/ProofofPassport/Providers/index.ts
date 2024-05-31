@@ -1,0 +1,1 @@
+export { ProofOfPassportProvider } from "./proofOfPassport";
