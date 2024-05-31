@@ -10,6 +10,16 @@ jest.mock("@ethereum-attestation-service/eas-sdk", () => ({
   Attestation: jest.fn(),
 }));
 
+jest.mock("../../../deployments/providerBitMapInfo.json", () => (
+  [
+    { bit: 0, index: 0, name: "provider1" },
+    { bit: 1, index: 0, name: "provider2" },
+    { bit: 2, index: 0, name: "provider3" },
+    { bit: 3, index: 0, name: "provider4" },
+    { bit: 1, index: 1, name: "provider257" },
+  ]
+))
+
 describe("decodeProviderInformation", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
@@ -25,11 +35,7 @@ describe("decodeProviderInformation", () => {
     }));
     process.env.NEXT_PUBLIC_PASSPORT_IAM_STATIC_URL = "mockStaticUrl";
 
-    const mockStampBits = [
-      { bit: 0, index: 0, name: "provider1" },
-      { bit: 1, index: 1, name: "provider2" },
-    ];
-    (axios.get as jest.Mock).mockResolvedValueOnce({ data: mockStampBits });
+    
 
     const mockAttestation = {
       data: "0x0000000",
@@ -37,14 +43,13 @@ describe("decodeProviderInformation", () => {
 
     const result = await decodeProviderInformation(mockAttestation);
 
-    expect(axios.get).toHaveBeenCalledWith("mockStaticUrl/providerBitMapInfo.json");
     expect(SchemaEncoder).toHaveBeenCalledWith(
       "uint256[] providers,bytes32[] hashes,uint64[] issuanceDates,uint64[] expirationDates,uint16 providerMapVersion"
     );
     expect(result).toEqual({
       onChainProviderInfo: [
         { providerName: "provider1", providerNumber: 0 },
-        { providerName: "provider2", providerNumber: 257 },
+        { providerName: "provider257", providerNumber: 257 },
       ],
       hashes: ["hash1", "hash2"],
       issuanceDates: ["issuanceDate1", "issuanceDate2"],
@@ -62,15 +67,6 @@ describe("decodeProviderInformation", () => {
         { name: "hashes", value: { value: ["hash1", "hash2", "hash3"] } },
       ]),
     }));
-    process.env.NEXT_PUBLIC_PASSPORT_IAM_STATIC_URL = "mockStaticUrl";
-
-    const mockStampBits = [
-      { bit: 0, index: 0, name: "provider1" },
-      { bit: 1, index: 0, name: "provider2" },
-      { bit: 2, index: 0, name: "provider3" },
-      { bit: 3, index: 0, name: "provider4" },
-    ];
-    (axios.get as jest.Mock).mockResolvedValueOnce({ data: mockStampBits });
 
     const mockAttestation = {
       data: "0x0000000",
@@ -78,7 +74,6 @@ describe("decodeProviderInformation", () => {
 
     const result = await decodeProviderInformation(mockAttestation);
 
-    expect(axios.get).toHaveBeenCalledWith("mockStaticUrl/providerBitMapInfo.json");
     expect(SchemaEncoder).toHaveBeenCalledWith(
       "uint256[] providers,bytes32[] hashes,uint64[] issuanceDates,uint64[] expirationDates,uint16 providerMapVersion"
     );

@@ -526,7 +526,7 @@ const ecsAutoScalingPolicy = new aws.appautoscaling.Policy("passport-autoscaling
     predefinedMetricSpecification: {
       predefinedMetricType: "ECSServiceAverageCPUUtilization",
     },
-    targetValue: 50,
+    targetValue: 25,
     scaleInCooldown: 300,
     scaleOutCooldown: 300,
   },

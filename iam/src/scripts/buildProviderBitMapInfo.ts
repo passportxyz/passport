@@ -16,7 +16,7 @@ const formatProviderBitMapInfo = async (): Promise<void> => {
 
   const bitMapInfo = mapBitMapInfo(stampMetadata.data);
 
-  const outPath = join(__dirname, "..", "static", "providerBitMapInfo.json");
+  const outPath = join(__dirname, "..", "..", "deployments", "providerBitMapInfo.json");
   console.log(`Saving platform info to JSON file at ${outPath}`);
 
   writeFileSync(outPath, JSON.stringify(bitMapInfo));

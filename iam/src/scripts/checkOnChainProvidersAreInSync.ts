@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import { providers, Contract, version } from "ethers";
 import decoderAbi from "../../../deployments/abi/GitcoinPassportDecoder.json";
 
-import providerBitMapInfo from "../static/providerBitMapInfo.json";
+import providerBitMapInfo from "../../../deployments/providerBitMapInfo.json";
 dotenv.config();
 
 console.log(process.argv);

@@ -28,7 +28,7 @@ const mockStamp1 = {
   bit: 0,
 };
 
-jest.mock("../src/static/providerBitMapInfo.json", () => [
+jest.mock("../../deployments/providerBitMapInfo.json", () => [
   {
     name: "mockProvider",
     index: 0,

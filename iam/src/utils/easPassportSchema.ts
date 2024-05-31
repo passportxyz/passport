@@ -12,7 +12,7 @@ import { fetchPassportScore } from "./scorerService.js";
 import { encodeEasScore } from "./easStampSchema.js";
 import onchainInfo from "../../../deployments/onchainInfo.json" assert { type: "json" };
 
-import bitMapData from "../static/providerBitMapInfo.json" assert { type: "json" };
+import providerBitMapInfo from "../../../deployments/providerBitMapInfo.json" assert { type: "json" };
 
 export type AttestationStampInfo = {
   hash: string;
@@ -61,7 +61,7 @@ export const mapBitMapInfo = (metaData: StampMetadata): PassportAttestationStamp
 };
 
 export const buildProviderBitMap = (): Map<string, PassportAttestationStamp> => {
-  const bitMapInfo = bitMapData as unknown as StampBit[];
+  const bitMapInfo = providerBitMapInfo as unknown as StampBit[];
   const passportAttestationStampMap: Map<string, PassportAttestationStamp> = new Map();
 
   bitMapInfo.forEach((stamp) => passportAttestationStampMap.set(stamp.name, stamp));

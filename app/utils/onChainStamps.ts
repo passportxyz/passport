@@ -1,9 +1,9 @@
 import { Contract, JsonRpcProvider, formatUnits } from "ethers";
 import { JsonRpcProvider as V5JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
-import axios from "axios";
 import onchainInfo from "../../deployments/onchainInfo.json";
 import GitcoinResolverAbi from "../../deployments/abi/GitcoinResolver.json";
+import providerBitMapInfo from "../../deployments/providerBitMapInfo.json";
 import { Attestation, EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { chains } from "./chains";
 
@@ -77,12 +77,6 @@ export async function decodeProviderInformation(attestation: Attestation): Promi
 
   const decodedData = schemaEncoder.decodeData(attestation.data);
 
-  const providerBitMapInfo = (await axios.get(
-    `${process.env.NEXT_PUBLIC_PASSPORT_IAM_STATIC_URL}/providerBitMapInfo.json`
-  )) as {
-    data: StampBit[];
-  };
-
   type DecodedProviderInfo = {
     providerName: PROVIDER_ID;
     providerNumber: number;
@@ -93,7 +87,7 @@ export async function decodeProviderInformation(attestation: Attestation): Promi
   const expirationDates = decodedData.find((data) => data.name === "expirationDates")?.value.value as BigNumber[];
   const hashes = decodedData.find((data) => data.name === "hashes")?.value.value as string[];
 
-  const onChainProviderInfo: DecodedProviderInfo[] = providerBitMapInfo.data
+  const onChainProviderInfo: DecodedProviderInfo[] = providerBitMapInfo
     .map((info) => {
       const providerMask = BigNumber.from(1).shl(info.bit);
       const currentProvidersBitmap = providers[info.index];
