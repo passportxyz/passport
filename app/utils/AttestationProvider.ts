@@ -29,6 +29,11 @@ type VeraxAndEASConfig = BaseProviderConfig & {
 
 export type AttestationProviderConfig = EASConfig | VeraxAndEASConfig;
 
+export type OnChainState = {
+  status: OnChainStatus;
+  expirationDate?: Date;
+};
+
 export interface AttestationProvider {
   name: string;
   status: AttestationProviderStatus;
@@ -38,13 +43,13 @@ export interface AttestationProvider {
   verifierAddress: () => string;
   verifierAbi: () => any;
   getMultiAttestationRequest: (payload: {}) => Promise<AxiosResponse<any, any>>;
-  checkOnChainStatus: (
+  checkOnChainState: (
     allProvidersState: AllProvidersState,
     onChainProviders: OnChainProviderType[],
     rawScore: number,
     scoreState: ScoreStateType,
     onChainScore: number
-  ) => OnChainStatus;
+  ) => OnChainState;
 }
 
 class BaseAttestationProvider implements AttestationProvider {
@@ -87,45 +92,59 @@ class BaseAttestationProvider implements AttestationProvider {
     });
   }
 
-  checkOnChainStatus(
+  checkOnChainState(
     allProvidersState: AllProvidersState,
     onChainProviders: OnChainProviderType[],
     rawScore: number,
     scoreState: ScoreStateType,
     onChainScore: number
-  ): OnChainStatus {
+  ): OnChainState {
     // This is default implementation that will check for differences in
     // the on-chain providers and on-chain score
-    if (scoreState !== "DONE") return OnChainStatus.LOADING;
+    let status = OnChainStatus.LOADING;
+    const expirationDate = new Date(); // TODO
 
-    if (onChainProviders.length === 0) return OnChainStatus.NOT_MOVED;
+    if (scoreState === "DONE") {
+      if (onChainProviders.length === 0) {
+        status = OnChainStatus.NOT_MOVED;
+      } else {
+        if (expirationDate && new Date() > expirationDate) {
+          status = OnChainStatus.MOVED_EXPIRED;
+        } else if (rawScore !== onChainScore) {
+          status = OnChainStatus.MOVED_OUT_OF_DATE;
+        } else {
+          const verifiedDbProviders: ProviderWithStamp[] = Object.values(allProvidersState).filter(
+            (provider): provider is ProviderWithStamp => provider.stamp !== undefined
+          );
 
-    if (rawScore !== onChainScore) return OnChainStatus.MOVED_OUT_OF_DATE;
+          const [equivalentProviders, differentProviders] = verifiedDbProviders.reduce(
+            ([eq, diff], provider): [ProviderWithStamp[], ProviderWithStamp[]] => {
+              const expirationDateSeconds = Math.floor(
+                new Date(provider.stamp.credential.expirationDate).valueOf() / 1000
+              );
+              const issuanceDateSeconds = Math.floor(new Date(provider.stamp.credential.issuanceDate).valueOf() / 1000);
 
-    const verifiedDbProviders: ProviderWithStamp[] = Object.values(allProvidersState).filter(
-      (provider): provider is ProviderWithStamp => provider.stamp !== undefined
-    );
+              const isEquivalent = onChainProviders.some(
+                (onChainProvider) =>
+                  onChainProvider.providerName === provider.stamp.provider &&
+                  onChainProvider.credentialHash === provider.stamp.credential.credentialSubject?.hash &&
+                  Math.floor(onChainProvider.expirationDate.valueOf() / 1000) === expirationDateSeconds &&
+                  Math.floor(onChainProvider.issuanceDate.valueOf() / 1000) === issuanceDateSeconds
+              );
+              return isEquivalent ? [[...eq, provider], diff] : [eq, [...diff, provider]];
+            },
+            [[], []] as [ProviderWithStamp[], ProviderWithStamp[]]
+          );
 
-    const [equivalentProviders, differentProviders] = verifiedDbProviders.reduce(
-      ([eq, diff], provider): [ProviderWithStamp[], ProviderWithStamp[]] => {
-        const expirationDateSeconds = Math.floor(new Date(provider.stamp.credential.expirationDate).valueOf() / 1000);
-        const issuanceDateSeconds = Math.floor(new Date(provider.stamp.credential.issuanceDate).valueOf() / 1000);
+          status =
+            equivalentProviders.length === onChainProviders.length && differentProviders.length === 0
+              ? OnChainStatus.MOVED_UP_TO_DATE
+              : OnChainStatus.MOVED_OUT_OF_DATE;
+        }
+      }
+    }
 
-        const isEquivalent = onChainProviders.some(
-          (onChainProvider) =>
-            onChainProvider.providerName === provider.stamp.provider &&
-            onChainProvider.credentialHash === provider.stamp.credential.credentialSubject?.hash &&
-            Math.floor(onChainProvider.expirationDate.valueOf() / 1000) === expirationDateSeconds &&
-            Math.floor(onChainProvider.issuanceDate.valueOf() / 1000) === issuanceDateSeconds
-        );
-        return isEquivalent ? [[...eq, provider], diff] : [eq, [...diff, provider]];
-      },
-      [[], []] as [ProviderWithStamp[], ProviderWithStamp[]]
-    );
-
-    return equivalentProviders.length === onChainProviders.length && differentProviders.length === 0
-      ? OnChainStatus.MOVED_UP_TO_DATE
-      : OnChainStatus.MOVED_OUT_OF_DATE;
+    return { status, expirationDate };
   }
 }
 
@@ -169,18 +188,22 @@ export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
     return this.easScanUrl;
   }
 
-  checkOnChainStatus(
+  checkOnChainState(
     allProvidersState: AllProvidersState,
     onChainProviders: OnChainProviderType[],
     rawScore: number,
     scoreState: ScoreStateType,
     onChainScore: number
-  ): OnChainStatus {
+  ): OnChainState {
+    let status = OnChainStatus.LOADING;
+    let expirationDate = undefined; // TODO
+
     // This is specific implementation for Verax where we only check for the score to be different
-    if (scoreState !== "DONE" || onChainScore === undefined) {
-      return OnChainStatus.LOADING;
+    if (scoreState === "DONE" && onChainScore !== undefined) {
+      if (Number.isNaN(onChainScore)) status = OnChainStatus.NOT_MOVED;
+      else status = rawScore !== onChainScore ? OnChainStatus.MOVED_OUT_OF_DATE : OnChainStatus.MOVED_UP_TO_DATE;
     }
-    if (Number.isNaN(onChainScore)) return OnChainStatus.NOT_MOVED;
-    return rawScore !== onChainScore ? OnChainStatus.MOVED_OUT_OF_DATE : OnChainStatus.MOVED_UP_TO_DATE;
+
+    return { status, expirationDate };
   }
 }

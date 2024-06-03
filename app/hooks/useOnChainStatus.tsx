@@ -3,10 +3,10 @@ import { CeramicContext } from "../context/ceramicContext";
 import { OnChainContext } from "../context/onChainContext";
 import { ScorerContext } from "../context/scorerContext";
 import { Chain, chains } from "../utils/chains";
-import { AttestationProvider } from "../utils/AttestationProvider";
+import { AttestationProvider, OnChainState } from "../utils/AttestationProvider";
 import { OnChainStatus } from "../utils/onChainStatus";
 
-export const useOnChainStatus = ({ chain }: { chain?: Chain }) => {
+export const useOnChainState = ({ chain }: { chain?: Chain }): OnChainState => {
   const { allProvidersState } = useContext(CeramicContext);
   const { onChainProviders, onChainScores } = useContext(OnChainContext);
   const { rawScore, scoreState } = useContext(ScorerContext);
@@ -22,19 +22,19 @@ export const useOnChainStatus = ({ chain }: { chain?: Chain }) => {
       )?.attestationProvider;
 
       const savedNetworkProviders = onChainProviders[chain.id] || [];
-      const stampStatus = attestationProvider
-        ? attestationProvider.checkOnChainStatus(
+      const { status } = attestationProvider
+        ? attestationProvider.checkOnChainState(
             allProvidersState,
             savedNetworkProviders,
             rawScore,
             scoreState,
             onChainScores[chain.id]
           )
-        : OnChainStatus.NOT_MOVED;
-      setOnChainStatus(stampStatus);
+        : { status: OnChainStatus.NOT_MOVED };
+      setOnChainStatus(status);
     };
     checkStatus();
   }, [allProvidersState, chain?.id, onChainProviders, onChainScores, rawScore, scoreState]);
 
-  return onChainStatus;
+  return { status: onChainStatus };
 };
