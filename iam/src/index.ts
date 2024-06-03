@@ -344,7 +344,6 @@ type VerifyTypeResult = {
 
 export async function verifyTypes(types: string[], payload: RequestPayload): Promise<VerifyTypeResult[]> {
   const context: ProviderContext = {};
-  // const results: VerifyTypeResult[] = [];
 
   const processGroupedTypes = async (
     types: string[]
@@ -379,7 +378,7 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
   };
 
   const results = await pMap(groupProviderTypesByPlatform(types), processGroupedTypes, {
-    concurrency: 5,
+    concurrency: 10,
     stopOnError: false,
   });
 
