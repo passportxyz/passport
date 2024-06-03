@@ -6,24 +6,24 @@ graph TB
       B(Wallet B)
       subgraph CommitmentCircuit
         CommitmentPublic["`**Public**
-          B
+          Address: B
           Assertion[n]
           Merkle Root
           Community ID
           Community Nullifier[n]
-          *= Hash(secret, UUID, community ID)*
+          *= Hash(Secret, Credential[n].UUID, Community ID)*
           Issuer
           Expiry[n]`"]
         CommitmentPrivate["`**Private**
           Secret
           Credential[n]
-          Commitment + Merkle Path[n]`"]:::FixFont
+          Merkle Path[n]`"]:::FixFont
       end
     end
 
     subgraph Scorer
       StoredCredential["`**Stored Credential[n]**
-          B
+          Address: B
           Assertion
           Community ID
           Community Nullifier
@@ -33,4 +33,4 @@ graph TB
     end
 
     Score-->B
-    CommitmentCircuit-->StoredCredential
+    CommitmentPublic-->StoredCredential

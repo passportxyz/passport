@@ -1,37 +1,46 @@
 graph TB
-
+    %%{init: {"flowchart": {"htmlLabels": false}} }%%
+    classDef empty width:0px,height:0px;
     A(Wallet A)-->Process[Initiate Check for A]
     Process-->Verify
-    Data[# Contributions\n+ Github ID]---ProcessProviderResponse[ ]:::empty
+    Data[# Contributions\n+ Github ID]-->Credential
     SignedResponse["`**Signed Response**
       Credential
       Address: A
-      Sign(Credential, A)`"]-->CommitmentCircuit
+      User Nullifier
+      Sign(Credential, A, UserNullifier)`"]-->CommitmentCircuit
     subgraph User
-      A
+      A-->UserNullifier
+      Secret-->UserNullifier["`User Nullifier
+      *= Hash(Secret, A)*`"]
+      Secret-->CommitmentPrivate
       subgraph CommitmentCircuit
         CommitmentPublic["`**Public**
+          Issuer
           Commitment
-          *= Hash(Secret, UUID)*
-          Issuer`"]
+          *= Hash(Secret, Credential.UUID)*`"]
         CommitmentPrivate["`**Private**
           Proof of Ownership over A
           Secret
-          Signed Response`"]
+          Signed Response *= (Credential, A, User Nullifier)*`"]
       end
     end
     subgraph Issuer
       Process
-      ProcessProviderResponse-->Nullifier["`**Nullifier**
-        Hash(Github ID)
-        Expiry`"]
-      ProcessProviderResponse-->Credential["`**Credential**
+      Credential["`**Credential**
         UUID: 123
         Assertion
         *ex. # Contributions > 100*
         ...`"]
+      Credential-->IssuanceNullifier["`**Nullifier Entry**
+        Address: A
+        Expiry
+        User Nullifier
+        UUID
+        Issuance Nullifier
+        *= Hash(Github ID)*`"]
       Credential-->SignedResponse
-      Nullifier-->NullifierDB[(Private\nNullifier\nDatabase)]
+      IssuanceNullifier-->NullifierDB[(Private\nNullifier\nDatabase)]
       subgraph Commitment\nMerkle Tree
         MerkleRoot[root]---MerkleSplitter[ ]:::empty
         MerkleSplitter---MerkleLeaf1[...]
@@ -41,5 +50,7 @@ graph TB
     subgraph Provider ex. Github
       Verify[Verify Login]-->Data
     end
+    UserNullifier---UserNullifierSplitter[ ]:::empty
+    UserNullifierSplitter-->IssuanceNullifier
+    UserNullifierSplitter-->SignedResponse
     CommitmentPublic-->MerkleLeaf2
-    classDef empty width:0px,height:0px;
