@@ -10,15 +10,13 @@ jest.mock("@ethereum-attestation-service/eas-sdk", () => ({
   Attestation: jest.fn(),
 }));
 
-jest.mock("../../../deployments/providerBitMapInfo.json", () => (
-  [
-    { bit: 0, index: 0, name: "provider1" },
-    { bit: 1, index: 0, name: "provider2" },
-    { bit: 2, index: 0, name: "provider3" },
-    { bit: 3, index: 0, name: "provider4" },
-    { bit: 1, index: 1, name: "provider257" },
-  ]
-))
+jest.mock("../../../deployments/providerBitMapInfo.json", () => [
+  { bit: 0, index: 0, name: "provider1" },
+  { bit: 1, index: 0, name: "provider2" },
+  { bit: 2, index: 0, name: "provider3" },
+  { bit: 3, index: 0, name: "provider4" },
+  { bit: 1, index: 1, name: "provider257" },
+]);
 
 describe("decodeProviderInformation", () => {
   beforeEach(() => {
@@ -34,8 +32,6 @@ describe("decodeProviderInformation", () => {
       ]),
     }));
     process.env.NEXT_PUBLIC_PASSPORT_IAM_STATIC_URL = "mockStaticUrl";
-
-    
 
     const mockAttestation = {
       data: "0x0000000",
