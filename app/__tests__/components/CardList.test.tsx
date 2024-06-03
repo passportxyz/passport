@@ -4,6 +4,7 @@ import { screen } from "@testing-library/react";
 import { CardList, CardListProps } from "../../components/CardList";
 import { makeTestCeramicContext, renderWithContext, scorerContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
+import { Category, CategoryProps } from "../../components/Category";
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -20,6 +21,44 @@ jest.mock("next/router", () => ({
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 let cardListProps: CardListProps = {};
+// let categoryProps: CategoryProps = {
+//   category: {
+//     name: "Social & Professional Platforms",
+//     description: "Link your profiles from established social media and professional networking sites for verification.",
+//     sortedPlatforms: [
+//       {
+//         connectMessage: "Connect Account",
+//         description: "Connect to GitHub to verify your code contributions.",
+//         earnedPoints: 0,
+//         icon: "./assets/githubWhiteStampIcon.svg",
+//         name: "Github",
+//         platform: "Github",
+//         possiblePoints: 7.0600000000000005,
+//         website: "https://github.com",
+//       },
+//       {
+//         connectMessage: "Connect Account",
+//         description: "Connect to Google to verify your email address.",
+//         earnedPoints: 0,
+//         icon: "./assets/googleStampIcon.svg",
+//         name: "Google",
+//         platform: "Google",
+//         possiblePoints: 0.525,
+//         website: "https://www.google.com/",
+//       },
+//       {
+//         connectMessage: "Connect Account",
+//         description: "Connect your Discord account to Gitcoin Passport to identity and reputation in Web3 communities.",
+//         earnedPoints: 0,
+//         icon: "./assets/discordStampIcon.svg",
+//         name: "Discord",
+//         platform: "Discord",
+//         possiblePoints: 0.516,
+//         website: "https://discord.com/",
+//       },
+//     ],
+//   },
+// };
 
 describe("<CardList />", () => {
   beforeEach(() => {
@@ -49,7 +88,7 @@ describe("<CardList />", () => {
   it("renders cards by verification status and possible points", () => {
     renderWithContext(mockCeramicContext, <CardList {...cardListProps} />);
     const possiblePoints = screen.getAllByTestId("platform-name").map((el) => el.textContent);
-    expect(possiblePoints).toEqual(["Gitcoin", "GTC Staking", "Discord", "Google", "Twitter"]);
+    expect(possiblePoints).toEqual(["Gitcoin", "GTC Staking", "Discord", "Google"]);
   });
   it("should indicate on card whether or not it has been verified", () => {
     renderWithContext(mockCeramicContext, <CardList {...cardListProps} />);
@@ -65,6 +104,6 @@ describe("<CardList />", () => {
   it("should render available points", () => {
     renderWithContext(mockCeramicContext, <CardList {...cardListProps} />);
     const availablePnts = screen.getAllByTestId("available-points").map((el) => el.textContent);
-    expect(availablePnts).toEqual(["12.93", "7.44", "0.69", "1.25", "0.00"]);
+    expect(availablePnts).toEqual(["12.93", "7.44", "0.69", "1.25"]);
   });
 });

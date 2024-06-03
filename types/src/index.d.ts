@@ -360,6 +360,49 @@ export type PLATFORM_ID =
   | "TrustaLabs"
   | "Outdid";
 
+export type PLATFORM_CATEGORY = {
+  name: string;
+  description: string;
+  platforms: PLATFORM_ID[];
+};
+// THIS is a config
+export const PLATFORM_CATEGORIES: PLATFORM_CATEGORY[] = [
+  {
+    name: "Blockchain & Crypto Networks",
+    description: "Connect your blockchain-based profiles and assets to prove your identity.",
+    platforms: [
+      "ETH",
+      "NFT",
+      "GtcStaking",
+      "Idena",
+      "Gitcoin",
+      "ZkSync",
+      "GuildXYZ",
+      "Lens",
+      "Snapshot",
+      "GnosisSafe",
+      "Brightid",
+      "TrustaLabs",
+      "Ens",
+    ],
+  },
+  {
+    name: "Government IDs",
+    description: "Use your government-issued IDs or complete a KYC process with our partners to verify your identity.",
+    platforms: ["Coinbase", "Holonym"],
+  },
+  {
+    name: "Social & Professional Platforms",
+    description: "Link your profiles from established social media and professional networking sites for verification.",
+    platforms: ["Github", "Linkedin", "Google", "Discord"],
+  },
+  {
+    name: "Biometric Verification",
+    description: "Connect your blockchain-based profiles and assets to prove your identity.",
+    platforms: ["Civic"],
+  },
+];
+
 export type PROVIDER_ID =
   | "Signer"
   | "Google"

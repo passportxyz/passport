@@ -2,14 +2,15 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { PLATFORMS } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
 import { LoadingCard } from "./LoadingCard";
-import { useDisclosure } from "@chakra-ui/react";
-import { PLATFORM_ID, PROVIDER_ID, PLATFORM_CATEGORY } from "@gitcoin/passport-types";
+import { GenericPlatform } from "./GenericPlatform";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { CeramicContext } from "../context/ceramicContext";
 import { PlatformCard } from "./PlatformCard";
-import PageWidthGrid from "../components/PageWidthGrid";
 import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
 import { Disclosure } from "@headlessui/react";
 import { DropDownIcon } from "./DropDownIcon";
+import { SideBarContent } from "./SideBarContent";
+import { Drawer, DrawerOverlay, useDisclosure } from "@chakra-ui/react";
 
 export type Category = {
   name: string;
@@ -77,8 +78,9 @@ export const Category = ({
   };
 
   const { isOpen, onOpen, onClose } = useDisclosure();
-
+  const btnRef = useRef();
   const [currentPlatform, setCurrentPlatform] = useState<PlatformScoreSpec | undefined>();
+  const [currentProviders, setCurrentProviders] = useState<PlatformGroupSpec[]>([]);
   const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
     PLATFORMS.reduce((platforms, platform) => {
       const providerIds = getStampProviderIds(platform.platform);
@@ -88,6 +90,42 @@ export const Category = ({
       return platforms;
     }, {} as SelectedProviders)
   );
+
+  // Add the platforms to this switch so the sidebar content can populate dynamically
+  const renderCurrentPlatformSelection = () => {
+    if (currentPlatform) {
+      const platformProps = allPlatforms.get(currentPlatform.platform);
+      if (platformProps) {
+        return (
+          <GenericPlatform
+            platform={platformProps.platform}
+            platformScoreSpec={currentPlatform}
+            platFormGroupSpec={platformProps.platFormGroupSpec}
+            onClose={onClose}
+          />
+        );
+      }
+    }
+    return (
+      <SideBarContent
+        verifiedProviders={undefined}
+        selectedProviders={undefined}
+        setSelectedProviders={undefined}
+        currentPlatform={undefined}
+        currentProviders={undefined}
+        isLoading={undefined}
+        verifyButton={undefined}
+        onClose={onClose}
+      />
+    );
+  };
+
+  useEffect(() => {
+    // set providers for the current platform
+    if (currentPlatform) {
+      setCurrentProviders(STAMP_PROVIDERS[currentPlatform.platform]);
+    }
+  }, [currentPlatform]);
 
   return (
     <>
@@ -123,6 +161,12 @@ export const Category = ({
           </Disclosure.Panel>
         )}
       </Disclosure>
+      {currentProviders && (
+        <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose} finalFocusRef={btnRef.current}>
+          <DrawerOverlay />
+          {renderCurrentPlatformSelection()}
+        </Drawer>
+      )}
     </>
   );
 };
