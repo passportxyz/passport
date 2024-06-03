@@ -342,7 +342,7 @@ type VerifyTypeResult = {
   code?: number;
 };
 
-const limit = pLimit(5);
+const limit = pLimit(15);
 
 export async function verifyTypes(types: string[], payload: RequestPayload): Promise<VerifyTypeResult[]> {
   const context: ProviderContext = {};
