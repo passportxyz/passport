@@ -13,18 +13,55 @@ import { SideBarContent } from "./SideBarContent";
 
 // --- Chakra UI Elements
 import { Drawer, DrawerOverlay, useDisclosure } from "@chakra-ui/react";
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
-import { CeramicContext } from "../context/ceramicContext";
-import { PlatformCard } from "./PlatformCard";
+import { PLATFORM_ID, PROVIDER_ID, PLATFORM_CATEGORY } from "@gitcoin/passport-types";
 import PageWidthGrid from "../components/PageWidthGrid";
 import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
+import { Category } from "./Category";
+import { CeramicContext } from "../context/ceramicContext";
+import { platform } from "os";
 
 export type CardListProps = {
   isLoading?: boolean;
   className?: string;
+  initialOpen?: boolean;
 };
 
-const cardClassName = "col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-3";
+export const PLATFORM_CATEGORIES: PLATFORM_CATEGORY[] = [
+  {
+    name: "Blockchain & Crypto Networks",
+    description: "Connect your blockchain-based profiles and assets to prove your identity.",
+    platforms: [
+      "ETH",
+      "NFT",
+      "GtcStaking",
+      "Idena",
+      "Gitcoin",
+      "ZkSync",
+      "GuildXYZ",
+      "Lens",
+      "Snapshot",
+      "GnosisSafe",
+      "Brightid",
+      "TrustaLabs",
+      "Ens",
+    ],
+  },
+  {
+    name: "Government IDs",
+    description: "Use your government-issued IDs or complete a KYC process with our partners to verify your identity.",
+    platforms: ["Coinbase", "Holonym"],
+  },
+  {
+    name: "Social & Professional Platforms",
+    description: "Link your profiles from established social media and professional networking sites for verification.",
+    platforms: ["Github", "Linkedin", "Google", "Discord"],
+  },
+  {
+    name: "Biometric Verification",
+    description: "Connect your blockchain-based profiles and assets to prove your identity.",
+    platforms: ["Civic"],
+  },
+];
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -36,15 +73,14 @@ export const getStampProviderIds = (platform: PLATFORM_ID): PROVIDER_ID[] => {
   );
 };
 
-export const CardList = ({ className, isLoading = false }: CardListProps): JSX.Element => {
+export const CardList = ({ className, isLoading = false, initialOpen = true }: CardListProps): JSX.Element => {
   const { allProvidersState, allPlatforms } = useContext(CeramicContext);
   const { scoredPlatforms } = useContext(ScorerContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef();
-  const [currentPlatform, setCurrentPlatform] = useState<PlatformScoreSpec | undefined>();
-  const [currentProviders, setCurrentProviders] = useState<PlatformGroupSpec[]>([]);
 
-  // get the selected Providers
+  const [currentProviders, setCurrentProviders] = useState<PlatformGroupSpec[]>([]);
+  const [currentPlatform, setCurrentPlatform] = useState<PlatformScoreSpec | undefined>();
   const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
     PLATFORMS.reduce((platforms, platform) => {
       // get all providerIds for this platform
@@ -57,8 +93,43 @@ export const CardList = ({ className, isLoading = false }: CardListProps): JSX.E
       return platforms;
     }, {} as SelectedProviders)
   );
+  const [dropDownOpen, setDropDownOpen] = useState<boolean>(false);
+  const openRef = React.useRef(dropDownOpen);
+  openRef.current = dropDownOpen;
 
-  // update when verifications change...
+  // Unmounting the panel on a delay to allow the animation to complete
+  const [panelMounted, setPanelMounted] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (initialOpen) {
+      handleOpen();
+    }
+  }, [initialOpen]);
+
+  const handleOpen = () => {
+    setPanelMounted(true);
+  };
+
+  useEffect(() => {
+    // Causes this to open one render after mounting, so animation can play
+    setDropDownOpen(panelMounted);
+  }, [panelMounted]);
+
+  // const handleClose = () => {
+  //   setDropDownOpen(false);
+  //   setTimeout(() => {
+  //     // Only unmount the panel if it's still closed
+  //     // Need to use ref to access runtime state here
+  //     const isOpen = openRef.current;
+  //     if (!isOpen) setPanelMounted(false);
+  //   }, 150);
+  // };
+
+  // const handleClick = () => {
+  //   if (dropDownOpen) handleClose();
+  //   else handleOpen();
+  // };
+
   useEffect(() => {
     // update all verfied states
     setSelectedProviders(
@@ -128,26 +199,42 @@ export const CardList = ({ className, isLoading = false }: CardListProps): JSX.E
     ...verified.sort((a, b) => b.possiblePoints - b.earnedPoints - (a.possiblePoints - a.earnedPoints)),
   ];
 
+  const groupedPlatforms: {
+    [key: string]: {
+      name: string;
+      description: string;
+      sortedPlatforms: PlatformScoreSpec[];
+    };
+  } = {};
+
+  // Generate grouped stamps
+  PLATFORM_CATEGORIES.forEach((category) => {
+    groupedPlatforms[category.name] = {
+      name: category.name,
+      description: category.description,
+      sortedPlatforms: [],
+    };
+  });
+
+  sortedPlatforms.forEach((stamp) => {
+    PLATFORM_CATEGORIES.forEach((category) => {
+      if (category.platforms.includes(stamp.platform)) {
+        groupedPlatforms[category.name].sortedPlatforms.push(stamp);
+      }
+    });
+  });
+
+  // Use as in id staking
   return (
     <>
       <PageWidthGrid className={className}>
-        {sortedPlatforms.map((platform, i) => {
-          return isLoading ? (
-            <LoadingCard key={i} className={cardClassName} />
-          ) : (
-            <PlatformCard
-              i={i}
-              key={i}
-              platform={platform}
-              onOpen={onOpen}
-              selectedProviders={selectedProviders}
-              setCurrentPlatform={setCurrentPlatform}
-              className={cardClassName}
-            />
-          );
+        {Object.keys(groupedPlatforms).map((category) => {
+          const sortedPlatforms = groupedPlatforms[category].sortedPlatforms;
+          const shouldDisplayCategory = sortedPlatforms.some((platform) => platform.possiblePoints > 0);
+          if (!shouldDisplayCategory) return null;
+          return <Category className={className} category={groupedPlatforms[category]} key={category} />;
         })}
       </PageWidthGrid>
-      {/* sidebar */}
       {currentProviders && (
         <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose} finalFocusRef={btnRef.current}>
           <DrawerOverlay />
