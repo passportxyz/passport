@@ -1,14 +1,7 @@
-// --- React Methods
 import React, { useContext, useEffect, useRef, useState } from "react";
-
 import { PLATFORMS } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
-
-// --- Components
 import { LoadingCard } from "./LoadingCard";
-
-
-// --- Chakra UI Elements
 import { useDisclosure } from "@chakra-ui/react";
 import { PLATFORM_ID, PROVIDER_ID, PLATFORM_CATEGORY } from "@gitcoin/passport-types";
 import { CeramicContext } from "../context/ceramicContext";
@@ -17,8 +10,6 @@ import PageWidthGrid from "../components/PageWidthGrid";
 import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
 import { Disclosure } from "@headlessui/react";
 import { DropDownIcon } from "./DropDownIcon";
-
-import { Box, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Text } from "@chakra-ui/react";
 
 export type Category = {
   name: string;
@@ -33,7 +24,7 @@ export type CategoryProps = {
   category: Category;
 };
 
-const cardClassName = "col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-3";
+const cardClassName = "col-span-2 md:col-span-1 lg:col-span-1 xl:col-span-1";
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -56,7 +47,6 @@ export const Category = ({
   const openRef = React.useRef(dropDownOpen);
   openRef.current = dropDownOpen;
 
-  // Unmounting the panel on a delay to allow the animation to complete
   const [panelMounted, setPanelMounted] = useState<boolean>(false);
 
   useEffect(() => {
@@ -70,15 +60,12 @@ export const Category = ({
   };
 
   useEffect(() => {
-    // Causes this to open one render after mounting, so animation can play
     setDropDownOpen(panelMounted);
   }, [panelMounted]);
 
   const handleClose = () => {
     setDropDownOpen(false);
     setTimeout(() => {
-      // Only unmount the panel if it's still closed
-      // Need to use ref to access runtime state here
       const isOpen = openRef.current;
       if (!isOpen) setPanelMounted(false);
     }, 150);
@@ -91,23 +78,17 @@ export const Category = ({
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  //
-
   const [currentPlatform, setCurrentPlatform] = useState<PlatformScoreSpec | undefined>();
-  // get the selected Providers
   const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
     PLATFORMS.reduce((platforms, platform) => {
-      // get all providerIds for this platform
       const providerIds = getStampProviderIds(platform.platform);
-      // default to empty array for each platform
       platforms[platform.platform] = providerIds.filter(
         (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
       );
-      // return all platforms
       return platforms;
     }, {} as SelectedProviders)
   );
-  // Use as in id staking
+
   return (
     <>
       <Disclosure as="div" className={className} defaultOpen={true} key={category.name}>
@@ -120,9 +101,9 @@ export const Category = ({
           <DropDownIcon isOpen={dropDownOpen} className="px-4" />
         </Disclosure.Button>
         {panelMounted && (
-          <Disclosure.Panel className={`flex flex-col gap-8 transition-all transit duration-150 ease-in-out`} static>
+          <Disclosure.Panel className={`transition-all transit duration-150 ease-in-out`} static>
             <span className="text-color-2 py-2">{category.description}</span>
-            <div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 my-4">
               {category.sortedPlatforms.map((platform, i) => {
                 return isLoading ? (
                   <LoadingCard key={i} className={cardClassName} />

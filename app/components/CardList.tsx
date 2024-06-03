@@ -16,7 +16,7 @@ import { Drawer, DrawerOverlay, useDisclosure } from "@chakra-ui/react";
 import { PLATFORM_ID, PROVIDER_ID, PLATFORM_CATEGORY } from "@gitcoin/passport-types";
 import PageWidthGrid from "../components/PageWidthGrid";
 import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
-import {Category} from "./Category";
+import { Category } from "./Category";
 import { CeramicContext } from "../context/ceramicContext";
 
 export type CardListProps = {
@@ -63,7 +63,6 @@ export const PLATFORM_CATEGORIES: PLATFORM_CATEGORY[] = [
   },
 ];
 
-
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
 export const getStampProviderIds = (platform: PLATFORM_ID): PROVIDER_ID[] => {
@@ -75,12 +74,11 @@ export const getStampProviderIds = (platform: PLATFORM_ID): PROVIDER_ID[] => {
 };
 
 export const CardList = ({ className, isLoading = false, initialOpen = true }: CardListProps): JSX.Element => {
-
   const { allProvidersState, allPlatforms } = useContext(CeramicContext);
   const { scoredPlatforms } = useContext(ScorerContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef();
-  
+
   const [currentProviders, setCurrentProviders] = useState<PlatformGroupSpec[]>([]);
   const [currentPlatform, setCurrentPlatform] = useState<PlatformScoreSpec | undefined>();
   const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
@@ -232,9 +230,7 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
       <PageWidthGrid className={className}>
         {/* <Disclosure as="div" className={className} defaultOpen={true}> */}
         {Object.keys(groupedPlatforms).map((category) => {
-          return (
-            <Category className={className} category={groupedPlatforms[category]}  key={category}/>
-          );
+          return <Category className={className} category={groupedPlatforms[category]} key={category} />;
         })}
       </PageWidthGrid>
       {/* sidebar */}
