@@ -481,7 +481,7 @@ const service = new aws.ecs.Service(
   `passport-iam`,
   {
     cluster: cluster.arn,
-    desiredCount: 1,
+    desiredCount: 2,
     enableEcsManagedTags: true,
     enableExecuteCommand: false,
     launchType: "FARGATE",
@@ -510,8 +510,8 @@ const service = new aws.ecs.Service(
 );
 
 const ecsAutoScalingTarget = new aws.appautoscaling.Target("autoscaling_target", {
-  maxCapacity: 10,
-  minCapacity: 1,
+  maxCapacity: 20,
+  minCapacity: 2,
   resourceId: pulumi.interpolate`service/${cluster.name}/${service.name}`,
   scalableDimension: "ecs:service:DesiredCount",
   serviceNamespace: "ecs",
@@ -528,7 +528,7 @@ const ecsAutoScalingPolicy = new aws.appautoscaling.Policy("passport-autoscaling
     },
     targetValue: 25,
     scaleInCooldown: 300,
-    scaleOutCooldown: 300,
+    scaleOutCooldown: 180,
   },
 });
 

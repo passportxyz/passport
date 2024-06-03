@@ -45,6 +45,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { IAMError } from "./utils/scorerService.js";
 import { VerifyDidChallengeBaseError } from "./utils/verifyDidChallenge.js";
+import pLimit from "p-limit";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -341,35 +342,41 @@ type VerifyTypeResult = {
   code?: number;
 };
 
+const limit = pLimit(5);
+
 export async function verifyTypes(types: string[], payload: RequestPayload): Promise<VerifyTypeResult[]> {
   const context: ProviderContext = {};
   const results: VerifyTypeResult[] = [];
 
+  let typeCount = 0;
   await Promise.all(
     groupProviderTypesByPlatform(types).map(async (platformTypes) => {
-      const verificationPromises = platformTypes.map(async (type) => {
-        let verifyResult: VerifiedPayload = { valid: false };
-        let code, error;
+      for (const type of platformTypes) {
+        typeCount++;
+        console.log({ type, typeCount });
+        await limit(async () => {
+          let verifyResult: VerifiedPayload = { valid: false };
+          let code, error;
 
-        try {
-          verifyResult = await providers.verify(type, payload, context);
-          if (!verifyResult.valid) {
-            code = 403;
-            const resultErrors = verifyResult.errors;
-            error = resultErrors?.join(", ")?.substring(0, 1000) || "Unable to verify provider";
+          try {
+            verifyResult = await providers.verify(type, payload, context);
+            if (!verifyResult.valid) {
+              code = 403;
+              const resultErrors = verifyResult.errors;
+              error = resultErrors?.join(", ")?.substring(0, 1000) || "Unable to verify provider";
+            }
+          } catch {
+            error = "Unable to verify provider";
+            code = 400;
           }
-        } catch {
-          error = "Unable to verify provider";
-          code = 400;
-        }
 
-        results.push({ verifyResult, type, code, error });
-      });
-
-      // Wait for all verification processes within this platform group to complete
-      await Promise.all(verificationPromises);
+          results.push({ verifyResult, type, code, error });
+        });
+      }
     })
   );
+
+  console.log({ typeCount });
 
   return results;
 }
