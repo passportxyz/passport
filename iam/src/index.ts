@@ -347,12 +347,15 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
 
   const processGroupedTypes = async (
     types: string[]
-  ): Promise<{
-    verifyResult: VerifiedPayload;
-    code: number;
-    error: string;
-    type: string;
-  }> => {
+  ): Promise<
+    {
+      verifyResult: VerifiedPayload;
+      code: number;
+      error: string;
+      type: string;
+    }[]
+  > => {
+    const results = [];
     for (const type of types) {
       let verifyResult: VerifiedPayload = { valid: false };
       let code, error;
@@ -368,13 +371,9 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
         error = "Unable to verify provider";
         code = 400;
       }
-      return {
-        verifyResult,
-        type,
-        code,
-        error,
-      };
+      results.push({ verifyResult, type, code, error });
     }
+    return results;
   };
 
   const results = await pMap(groupProviderTypesByPlatform(types), processGroupedTypes, {
@@ -382,7 +381,7 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
     stopOnError: false,
   });
 
-  return results;
+  return results.flat();
 }
 
 // expose verify entry point
