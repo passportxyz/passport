@@ -151,15 +151,19 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
           const sortedPlatforms = groupedPlatforms[category].sortedPlatforms;
           const shouldDisplayCategory = sortedPlatforms.some((platform) => platform.possiblePoints > 0);
           if (!shouldDisplayCategory) return null;
-          console.log("groupedPlatforms[category] = ", groupedPlatforms[category]);
-          return <Category className={className} category={groupedPlatforms[category]} key={category} />;
+          return (
+            <Category
+              className={className}
+              category={groupedPlatforms[category]}
+              key={category}
+              isLoading={isLoading}
+            />
+          );
         })}
       </PageWidthGrid>
-      {/* {currentProviders && ( */}
       <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose} finalFocusRef={btnRef.current}>
         <DrawerOverlay />
       </Drawer>
-      {/* )} */}
     </>
   );
 };
