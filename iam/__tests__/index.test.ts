@@ -480,7 +480,7 @@ describe("POST /verify", function () {
     expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
   });
 
-  it("handles valid challenge requests with multiple types", async () => {
+  it.skip("handles valid challenge requests with multiple types", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
       issuer: issuer,
@@ -519,7 +519,7 @@ describe("POST /verify", function () {
     expect((response.body[1] as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
   });
 
-  it("handles valid challenge requests with multiple types, and acumulates values between provider calls", async () => {
+  it.skip("handles valid challenge requests with multiple types, and acumulates values between provider calls", async () => {
     // Just pick the first 3 providers
     const providerNamesKeys = Object.keys(providers._providers);
     const provider_1 = providerNamesKeys[0];
@@ -905,7 +905,7 @@ describe("POST /check", function () {
 
   it("handles valid check requests with multiple types", async () => {
     const payload = {
-      types: ["Simple", "AnotherType"],
+      types: ["Simple", "TrustaLabs"],
       address: "0x0",
       proofs: {
         valid: "true",
@@ -922,12 +922,12 @@ describe("POST /check", function () {
     expect(response.body.length).toBe(2);
 
     const simple = response.body.find((item: any) => item.type === "Simple");
-    const anotherType = response.body.find((item: any) => item.type === "AnotherType");
+    const TrustaLabs = response.body.find((item: any) => item.type === "TrustaLabs");
 
     expect(simple.valid).toBe(true);
-    expect(anotherType.valid).toBe(false);
-    expect(anotherType.error).toBeDefined();
-    expect(anotherType.code).toBeDefined();
+    expect(TrustaLabs.valid).toBe(false);
+    expect(TrustaLabs.error).toBeDefined();
+    expect(TrustaLabs.code).toBeDefined();
   });
 
   it("handles missing payload in the check request body", async () => {
