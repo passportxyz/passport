@@ -1,9 +1,7 @@
 import { PlatformSpec } from "@gitcoin/passport-platforms";
-import { PLATFORM_ID } from "@gitcoin/passport-types";
-import React, { useCallback, useContext, useMemo } from "react";
+import React, { useContext } from "react";
 import { getPlatformSpec } from "../config/platforms";
 import { CeramicContext } from "../context/ceramicContext";
-import { OnChainContext } from "../context/onChainContext";
 import InitiateReverifyStampsButton from "./InitiateReverifyStampsButton";
 
 type StampsListProps = {

@@ -3,8 +3,8 @@ import { PLATFORM_ID } from "@gitcoin/passport-types";
 import React, { useCallback, useContext, useMemo } from "react";
 import { getPlatformSpec } from "../config/platforms";
 import { CeramicContext } from "../context/ceramicContext";
-import { OnChainContext } from "../context/onChainContext";
 import InitiateOnChainButton from "./InitiateOnChainButton";
+import { useOnChainData } from "../hooks/useOnChainData";
 
 type StampsListProps = {
   onChainPlatformIds: PLATFORM_ID[];
@@ -42,7 +42,7 @@ const StampsList = ({ className, onChainPlatformIds }: StampsListProps) => {
 
 export const DashboardValidStampsPanel = ({ className }: { className: string }) => {
   const { verifiedPlatforms, allProvidersState } = useContext(CeramicContext);
-  const { activeChainProviders } = useContext(OnChainContext);
+  const { activeChainProviders } = useOnChainData();
 
   const hasOnchainProviders = useCallback(
     (platformId: PLATFORM_ID) => {
