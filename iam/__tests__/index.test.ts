@@ -480,7 +480,7 @@ describe("POST /verify", function () {
     expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
   });
 
-  it.skip("handles valid challenge requests with multiple types", async () => {
+  it("handles valid challenge requests with multiple types", async () => {
     // challenge received from the challenge endpoint
     const challenge = {
       issuer: issuer,
@@ -494,7 +494,7 @@ describe("POST /verify", function () {
     // payload containing a signature of the challenge in the challenge credential
     const payload = {
       type: "any",
-      types: ["Simple", "Simple"],
+      types: ["Simple", "Simples"],
       address: "0x0",
       proofs: {
         valid: "true",
@@ -519,7 +519,7 @@ describe("POST /verify", function () {
     expect((response.body[1] as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
   });
 
-  it.skip("handles valid challenge requests with multiple types, and acumulates values between provider calls", async () => {
+  it("handles valid challenge requests with multiple types, and acumulates values between provider calls", async () => {
     // Just pick the first 3 providers
     const providerNamesKeys = Object.keys(providers._providers);
     const provider_1 = providerNamesKeys[0];
