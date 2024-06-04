@@ -378,7 +378,7 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
   };
 
   const results = await pMap(groupProviderTypesByPlatform(types), processGroupedTypes, {
-    concurrency: 10,
+    concurrency: 5,
     stopOnError: false,
   });
 
