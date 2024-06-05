@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { PLATFORMS } from "../config/platforms";
 import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
 import { LoadingCard } from "./LoadingCard";
@@ -72,10 +72,10 @@ export const Category = ({
     }, 150);
   };
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     if (dropDownOpen) handleClose();
     else handleOpen();
-  };
+  }, [dropDownOpen]);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef();
