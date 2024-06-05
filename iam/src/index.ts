@@ -352,26 +352,39 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
     groupProviderTypesByPlatform(types).map(async (platformTypes) => {
       // Iterate over the types within a platform in series
       // This enables providers within a platform to reliably share context
-      for (const type of platformTypes) {
-        let verifyResult: VerifiedPayload = { valid: false };
-        let code, error;
+      const timeout = new Promise((_resolve, reject) => {
+        setTimeout(() => {
+          console.log("Request timed out", platformTypes);
+          reject(new Error("Request timed out"));
+        }, 30000);
+      });
+      const realFunction = async (): Promise<void> => {
+        console.log("Checking platform types: ", platformTypes);
+        for (const type of platformTypes) {
+          let verifyResult: VerifiedPayload = { valid: false };
+          let code, error;
 
-        try {
-          // verify the payload against the selected Identity Provider
-          verifyResult = await providers.verify(type, payload, context);
-          if (!verifyResult.valid) {
-            code = 403;
-            // TODO to be changed to just verifyResult.errors when all providers are updated
-            const resultErrors = verifyResult.errors;
-            error = resultErrors?.join(", ")?.substring(0, 1000) || "Unable to verify provider";
+          try {
+            // verify the payload against the selected Identity Provider
+            verifyResult = await providers.verify(type, payload, context);
+
+            await Promise.race([timeout, verifyResult]);
+
+            if (!verifyResult.valid) {
+              code = 403;
+              // TODO to be changed to just verifyResult.errors when all providers are updated
+              const resultErrors = verifyResult.errors;
+              error = resultErrors?.join(", ")?.substring(0, 1000) || "Unable to verify provider";
+            }
+          } catch {
+            error = "Unable to verify provider";
+            code = 400;
           }
-        } catch {
-          error = "Unable to verify provider";
-          code = 400;
-        }
 
-        results.push({ verifyResult, type, code, error });
-      }
+          results.push({ verifyResult, type, code, error });
+        }
+      };
+      await Promise.race([timeout, realFunction()]);
     })
   );
 
