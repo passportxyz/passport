@@ -29,7 +29,7 @@ let categoryProps: CategoryProps = {
       {
         connectMessage: "Connect Account",
         description: "Connect to GitHub to verify your code contributions.",
-        earnedPoints: 0,
+        earnedPoints: 3,
         icon: "./assets/githubWhiteStampIcon.svg",
         name: "Github",
         platform: "Github",
@@ -90,8 +90,9 @@ describe("<CardList />", () => {
     const possiblePoints = screen.getAllByTestId("platform-name").map((el) => el.textContent);
     expect(possiblePoints).toEqual(["Gitcoin", "GTC Staking", "Discord", "Google"]);
   });
+
   it("should indicate on card whether or not it has been verified", () => {
-    renderWithContext(mockCeramicContext, <Category category={categoryProps["category"]} />);
+    render(<Category category={categoryProps["category"]} />);
     const verifiedBtnCnt = screen
       .getAllByTestId("connect-button")
       .map((el) => el.textContent)
@@ -99,7 +100,7 @@ describe("<CardList />", () => {
 
     expect(verifiedBtnCnt).toBeGreaterThan(0);
     expect(verifiedBtnCnt).toEqual(
-      scorerContext.scoredPlatforms.filter((platform) => platform.earnedPoints > 0).length
+      categoryProps["category"].sortedPlatforms.filter((platform) => platform.earnedPoints > 0).length
     );
   });
   it("should render available points", () => {
