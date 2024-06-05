@@ -352,8 +352,9 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
     groupProviderTypesByPlatform(types).map(async (platformTypes) => {
       // Iterate over the types within a platform in series
       // This enables providers within a platform to reliably share context
-      const timeout = new Promise((_resolve, reject) => {
-        setTimeout(() => {
+      let timeout: NodeJS.Timeout | undefined = undefined;
+      const timeoutPromise = new Promise((_resolve, reject) => {
+        timeout = setTimeout(() => {
           console.log("Request timed out", platformTypes);
           reject(new Error("Request timed out"));
         }, 30000);
@@ -384,7 +385,8 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
           results.push({ verifyResult, type, code, error });
         }
       };
-      await Promise.race([timeout, realFunction()]);
+      await Promise.race([timeoutPromise, realFunction()]);
+      clearTimeout(timeout);
     })
   );
 
