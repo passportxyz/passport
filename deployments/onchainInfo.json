@@ -235,7 +235,7 @@
       "address": "0x7848a3578Ff2E1F134659a23f64A404a4D710475"
     },
     "GitcoinVerifier": {
-      "address": "0xD250f1d777b49A8e0cEe834d88B47e09E1333705"
+      "address": "0xc4858e4D177Bf0d14571F91401492d62aa608047"
     },
     "GitcoinResolver": {
       "address": "0x90E2C4472Df225e8D31f44725B75FFaA244d5D33"
@@ -250,6 +250,70 @@
     },
     "GitcoinPassportDecoder": {
       "address": "0x2050256A91cbABD7C42465aA0d5325115C1dEB43"
+    }
+  },
+  "0x144": {
+    "description": "zkSync Era",
+    "issuer": {
+      "address": "0x804233b96cbd6d81efeb6517347177ef7bD488ED"
+    },
+    "EAS": {
+      "address": "0x21d8d4eE83b80bc0Cc0f2B7df3117Cf212d02901"
+    },
+    "EASSchemaRegistry": {
+      "address": "0xB8566376dFe68B76FA985D5448cc2FbD578412a2"
+    },
+    "GitcoinAttester": {
+      "address": "0x2B5D97CBE50eA9bf809CbE18A2003E4Cb4D283cC"
+    },
+    "GitcoinVerifier": {
+      "address": "0xfCC2d308FD4De098D08f056c424C969d728912bF"
+    },
+    "GitcoinResolver": {
+      "address": "0x8789129C5968EdcA5Cb392C4a9A9D7EFB590A838"
+    },
+    "GitcoinPassportDecoder": {
+      "address": "0x1166FCDCA3B04311Ba9E2eD5ad2c660E730e1386"
+    },
+    "easSchemas": {
+      "passport": {
+        "uid": "0x71b9da9e4a2ecd8c87ad57d29ef64b9e63887d54039c97c294a6ecba8a8dfb4e"
+      },
+      "score": {
+        "uid": "0xfa8f39bf31b38893697a46f2607ef58ef3ec66308840a1e351304d26823a297c"
+      }
+    }
+  },
+  "0x12c": {
+    "description": "zkSync Sepolia",
+    "issuer": {
+      "address": "0x5f603Ed913738d9105bAf3BD981AA4750016B167"
+    },
+    "EAS": {
+      "address": "0x21d8d4eE83b80bc0Cc0f2B7df3117Cf212d02901"
+    },
+    "EASSchemaRegistry": {
+      "address": "0xB8566376dFe68B76FA985D5448cc2FbD578412a2"
+    },
+    "GitcoinAttester": {
+      "address": "0x2B5D97CBE50eA9bf809CbE18A2003E4Cb4D283cC"
+    },
+    "GitcoinVerifier": {
+      "address": "0xfCC2d308FD4De098D08f056c424C969d728912bF"
+    },
+    "GitcoinResolver": {
+      "address": "0x8789129C5968EdcA5Cb392C4a9A9D7EFB590A838"
+    },
+    "GitcoinPassportDecoder": {
+      "address": "0x23AF92Af3b5D6faAD920C3CAA4F9A3d4352D6834"
+    },
+    "easSchemas": {
+      "passport": {
+        "uid": ""
+      },
+      "score": {
+        "uid": ""
+      }
     }
   }
 }

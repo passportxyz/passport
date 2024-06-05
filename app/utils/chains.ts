@@ -15,6 +15,7 @@ const pgnChainId = "0x1a8";
 const lineaChainId = "0xe708";
 const lineaGoerliChainId = "0xe704";
 const optimismChainId = "0xa";
+const zkSyncChainId = "0x144";
 const sepoliaOPChainId = "0xaa37dc";
 const arbitrumChainId = "0xa4b1";
 
@@ -143,6 +144,21 @@ if (!TEST_MODE) {
       easScanUrl: "https://optimism.easscan.org",
     },
   });
+
+  if (process.env.NEXT_PUBLIC_FF_ONCHAIN_ZKSYNC === "on") {
+    chainConfigs.push({
+      id: zkSyncChainId,
+      token: "ETH",
+      label: "zkSync",
+      rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_ZKSYNC_RPC_URL as string,
+      icon: "./assets/zksyncStampIcon.svg",
+      attestationProviderConfig: {
+        name: "Ethereum Attestation Service",
+        status: usingTestEnvironment ? "disabled" : "enabled",
+        easScanUrl: "https://zksync.easscan.org",
+      },
+    });
+  }
 
   chainConfigs.push({
     id: lineaChainId,
