@@ -39,7 +39,7 @@ import * as DIDKit from "@spruceid/didkit-wasm-node";
 import { issueChallengeCredential, issueHashedCredential, verifyCredential } from "@gitcoin/passport-identity";
 
 // All provider exports from platforms
-import { providers, platforms } from "@gitcoin/passport-platforms";
+import { providers, platforms, ProviderExternalVerificationError } from "@gitcoin/passport-platforms";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -352,41 +352,32 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
     groupProviderTypesByPlatform(types).map(async (platformTypes) => {
       // Iterate over the types within a platform in series
       // This enables providers within a platform to reliably share context
-      let timeout: NodeJS.Timeout | undefined = undefined;
-      const timeoutPromise = new Promise((_resolve, reject) => {
-        timeout = setTimeout(() => {
-          console.log("Request timed out", platformTypes);
-          reject(new Error("Request timed out"));
-        }, 30000);
-      });
-      const realFunction = async (): Promise<void> => {
-        console.log("Checking platform types: ", platformTypes);
-        for (const type of platformTypes) {
-          let verifyResult: VerifiedPayload = { valid: false };
-          let code, error;
+      for (const type of platformTypes) {
+        let verifyResult: VerifiedPayload = { valid: false };
+        let code, error;
 
-          try {
-            // verify the payload against the selected Identity Provider
-            verifyResult = await providers.verify(type, payload, context);
-
-            await Promise.race([timeout, verifyResult]);
-
-            if (!verifyResult.valid) {
-              code = 403;
-              // TODO to be changed to just verifyResult.errors when all providers are updated
-              const resultErrors = verifyResult.errors;
-              error = resultErrors?.join(", ")?.substring(0, 1000) || "Unable to verify provider";
-            }
-          } catch {
-            error = "Unable to verify provider";
-            code = 400;
+        try {
+          // verify the payload against the selected Identity Provider
+          verifyResult = await providers.verify(type, payload, context);
+          if (!verifyResult.valid) {
+            code = 403;
+            // TODO to be changed to just verifyResult.errors when all providers are updated
+            const resultErrors = verifyResult.errors;
+            error = resultErrors?.join(", ")?.substring(0, 1000) || "Unable to verify provider";
           }
-
-          results.push({ verifyResult, type, code, error });
+        } catch (e) {
+          error = "Unable to verify provider";
+          code = 400;
+          if (e instanceof ProviderExternalVerificationError && e.message.includes("timeout")) {
+            code = 403;
+            results.push({ verifyResult, type, code, error });
+            // If a request times out exit loop and return results so additional requests are not made
+            return results;
+          }
         }
-      };
-      await Promise.race([timeoutPromise, realFunction()]);
-      clearTimeout(timeout);
+
+        results.push({ verifyResult, type, code, error });
+      }
     })
   );
 
