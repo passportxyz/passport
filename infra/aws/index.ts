@@ -556,9 +556,9 @@ const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((doma
     stakingBranches[stack],
     stakingEnvVars[stack],
     { ...defaultTags, Name: "staking-app" },
-    (process.env["STAKING_APP_ENABLE_AUTH"] || "false").toLowerCase() == "true",
-    process.env["STAKING_APP_BASIC_AUTH_USERNAME"],
-    process.env["STAKING_APP_BASIC_AUTH_PASSWORD"]
+    false,
+    "",
+    ""
   );
   return stakingAppInfo;
 });
