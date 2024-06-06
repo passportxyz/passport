@@ -39,7 +39,7 @@ import * as DIDKit from "@spruceid/didkit-wasm-node";
 import { issueChallengeCredential, issueHashedCredential, verifyCredential } from "@gitcoin/passport-identity";
 
 // All provider exports from platforms
-import { providers, platforms, ProviderExternalVerificationError } from "@gitcoin/passport-platforms";
+import { providers, platforms } from "@gitcoin/passport-platforms";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -365,7 +365,7 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
             const resultErrors = verifyResult.errors;
             error = resultErrors?.join(", ")?.substring(0, 1000) || "Unable to verify provider";
             if (error.includes(`Request timeout while verifying ${type}.`)) {
-              console.log(`Request timeout while verifying ${type}. CAUGHT ERROR TIMEOUT`);
+              console.log(`Request timeout while verifying ${type}`);
               // If a request times out exit loop and return results so additional requests are not made
               break;
             }
