@@ -365,17 +365,15 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
             // TODO to be changed to just verifyResult.errors when all providers are updated
             const resultErrors = verifyResult.errors;
             error = resultErrors?.join(", ")?.substring(0, 1000) || "Unable to verify provider";
+            if (error.includes(`Request timeout while verifying ${type}.`)) {
+              console.log(`Request timeout while verifying ${type}. CAUGHT ERROR TIMEOUT`);
+              // If a request times out exit loop and return results so additional requests are not made
+              break;
+            }
           }
         } catch (e) {
           error = "Unable to verify provider";
           code = 400;
-          if (e instanceof ProviderExternalVerificationError && e.message.includes("timeout")) {
-            console.log("Request timeout while verifying", type, ". It took over 30000 ms to complete.");
-            code = 403;
-            results.push({ verifyResult, type, code, error });
-            // If a request times out exit loop and return results so additional requests are not made
-            return results;
-          }
         }
 
         results.push({ verifyResult, type, code, error });
