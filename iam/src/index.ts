@@ -357,6 +357,7 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
         let code, error;
 
         try {
+          console.log("verifying type", type);
           // verify the payload against the selected Identity Provider
           verifyResult = await providers.verify(type, payload, context);
           if (!verifyResult.valid) {
@@ -369,6 +370,7 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
           error = "Unable to verify provider";
           code = 400;
           if (e instanceof ProviderExternalVerificationError && e.message.includes("timeout")) {
+            console.log("Request timeout while verifying", type, ". It took over 30000 ms to complete.");
             code = 403;
             results.push({ verifyResult, type, code, error });
             // If a request times out exit loop and return results so additional requests are not made
