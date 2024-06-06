@@ -260,7 +260,16 @@ describe("useOneClickVerification", () => {
       expect(fetchVerifiableCredential).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          types: ["Ens", "NFT", "Lens", "GuildXYZ"],
+          types: [
+            "Ens",
+            "NFTScore#50",
+            "NFTScore#75",
+            "NFTScore#90",
+            "NFT",
+            "Lens",
+            "GuildAdmin",
+            "GuildPassportMember",
+          ],
         }),
         expect.any(Function)
       );

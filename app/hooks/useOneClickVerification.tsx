@@ -41,7 +41,7 @@ export const useOneClickVerification = () => {
         // Nothing to do
         return;
       }
-      const platformTypes = possiblePlatforms.map((platform) => platform.platformProps.platform.platformId);
+
       setUserVerificationState({
         ...verificationState,
         loading: true,
@@ -56,7 +56,7 @@ export const useOneClickVerification = () => {
         iamUrl,
         {
           type: "EVMBulkVerify",
-          types: platformTypes,
+          types: validatedProviderIds,
           version: "0.0.0",
           address: address || "",
           proofs: {},
