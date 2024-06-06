@@ -481,7 +481,7 @@ const service = new aws.ecs.Service(
   `passport-iam`,
   {
     cluster: cluster.arn,
-    desiredCount: 2,
+    desiredCount: stack === "production" ? 2 : 1,
     enableEcsManagedTags: true,
     enableExecuteCommand: false,
     launchType: "FARGATE",
