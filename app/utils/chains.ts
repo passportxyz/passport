@@ -196,17 +196,4 @@ if (!TEST_MODE) {
   });
 }
 
-// chainConfigs.push({
-//   id: pgnChainId,
-//   token: "ETH",
-//   label: "Public Goods Network",
-//   rpcUrl: "https://rpc.publicgoods.network",
-//   icon: "./assets/pgn-logo.png",
-//   attestationProviderConfig: {
-//     name: "Ethereum Attestation Service",
-//     status: "comingSoon",
-//     easScanUrl: "",
-//   },
-// });
-
 export const chains: Chain[] = chainConfigs.map((config) => new Chain(config));
