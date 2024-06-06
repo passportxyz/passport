@@ -92,33 +92,31 @@ export const Category = ({
   );
 
   // Add the platforms to this switch so the sidebar content can populate dynamically
-  const renderCurrentPlatformSelection = () => {
-    if (currentPlatform) {
-      const platformProps = allPlatforms.get(currentPlatform.platform);
-      if (platformProps) {
-        return (
-          <GenericPlatform
-            platform={platformProps.platform}
-            platformScoreSpec={currentPlatform}
-            platFormGroupSpec={platformProps.platFormGroupSpec}
-            onClose={onClose}
-          />
-        );
-      }
+  let currentPlatformSelection = (
+    <SideBarContent
+      verifiedProviders={undefined}
+      selectedProviders={undefined}
+      setSelectedProviders={undefined}
+      currentPlatform={undefined}
+      currentProviders={undefined}
+      isLoading={undefined}
+      verifyButton={undefined}
+      onClose={onClose}
+    />
+  );
+  if (currentPlatform) {
+    const platformProps = allPlatforms.get(currentPlatform.platform);
+    if (platformProps) {
+      currentPlatformSelection = (
+        <GenericPlatform
+          platform={platformProps.platform}
+          platformScoreSpec={currentPlatform}
+          platFormGroupSpec={platformProps.platFormGroupSpec}
+          onClose={onClose}
+        />
+      );
     }
-    return (
-      <SideBarContent
-        verifiedProviders={undefined}
-        selectedProviders={undefined}
-        setSelectedProviders={undefined}
-        currentPlatform={undefined}
-        currentProviders={undefined}
-        isLoading={undefined}
-        verifyButton={undefined}
-        onClose={onClose}
-      />
-    );
-  };
+  }
 
   useEffect(() => {
     // set providers for the current platform
@@ -164,7 +162,7 @@ export const Category = ({
       {currentProviders && (
         <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose} finalFocusRef={btnRef.current}>
           <DrawerOverlay />
-          {renderCurrentPlatformSelection()}
+          {currentPlatformSelection}
         </Drawer>
       )}
     </>
