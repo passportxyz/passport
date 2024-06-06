@@ -357,7 +357,6 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
         let code, error;
 
         try {
-          console.log("verifying type", type);
           // verify the payload against the selected Identity Provider
           verifyResult = await providers.verify(type, payload, context);
           if (!verifyResult.valid) {
