@@ -1,10 +1,40 @@
 /* eslint-disable */
-import { RequestPayload, ProviderContext } from "@gitcoin/passport-types";
+import { RequestPayload, ProviderContext, VerifiedPayload } from "@gitcoin/passport-types";
 import { ProviderExternalVerificationError } from "../../types";
-import { Providers } from "../providers";
+import { Providers, withTimeout } from "../providers";
 import { SimpleProvider, verifySimpleProvider } from "../simpleProvider";
 
 jest.spyOn(console, "error").mockImplementation(() => {});
+
+
+jest.useFakeTimers(); // Use Jest's timer mocks
+
+describe("withTimeout", () => {
+  beforeAll(() => {
+    jest.spyOn(global, 'clearTimeout');
+  });
+  it("should resolve with the correct value if the promise resolves before the timeout", async () => {
+    const expectedValue = { valid: true };
+    const fastPromise = new Promise((resolve) => setTimeout(() => resolve(expectedValue), 1000)) as Promise<VerifiedPayload>;
+
+    const resultPromise = withTimeout(3000, fastPromise, "testType");
+    jest.advanceTimersByTime(1000); // Fast-forward until all timers are executed
+
+    await expect(resultPromise).resolves.toEqual(expectedValue);
+    expect(clearTimeout).toHaveBeenCalledTimes(1);
+  });
+
+  it("should reject with a timeout error if the promise does not resolve in time", async () => {
+    const slowPromise = new Promise((resolve) => setTimeout(() => resolve({ valid: true }), 5000)) as Promise<VerifiedPayload>;
+
+    const resultPromise = withTimeout(3000, slowPromise, "testType");
+    jest.advanceTimersByTime(3001); // Fast-forward until the timeout should occur
+
+    await expect(resultPromise).rejects.toThrow(ProviderExternalVerificationError);
+    await expect(resultPromise).rejects.toThrow("Request timeout while verifying testType. It took over 3000 ms to complete.");
+    expect(clearTimeout).toHaveBeenCalledTimes(1);
+  });
+});
 
 describe("Providers", function () {
   beforeEach(() => {
