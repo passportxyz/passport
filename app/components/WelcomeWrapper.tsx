@@ -56,7 +56,7 @@ const PlatformCard = ({}) => {
 
 export const WelcomeWrapper = ({ content, children }: WelcomeWrapperProps) => {
   return (
-    <div className="inline-block md:grid grid-rows-[minmax(0,1fr)_min-content_minmax(0,2fr)] grid-flow-rows">
+    <div className="overflow-auto pb-32 inline-block md:grid grid-rows-[minmax(0,1fr)_min-content_minmax(0,2fr)] grid-flow-rows">
       <div className="row-start-1 p-4 text-lg text-color-1 md:row-start-2">
         <div className="flex h-full w-full auto-rows-min flex-col gap-2 md:grid md:grid-cols-2">
           <div className="flex row-start-2 flex-col gap-2 place-items-start">
