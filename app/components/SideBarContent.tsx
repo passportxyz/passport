@@ -76,8 +76,6 @@ export const SideBarContent = ({
         backgroundColor: "rgb(var(--color-background))",
         border: "1px solid rgb(var(--color-foreground-5))",
         borderRadius: "6px",
-        backgroundImage: "url('/assets/sidebarHeader.svg')",
-        backgroundRepeat: "no-repeat",
       }}
     >
       <DrawerCloseButton disabled={isLoading} className={`visible z-10 text-color-1 md:invisible`} />

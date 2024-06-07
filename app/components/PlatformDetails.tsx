@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { PlatformBanner, PlatformSpec } from "@gitcoin/passport-platforms";
 import { GenericBanner } from "./GenericBanner";
 import { JsonOutputModal } from "./JsonOutputModal";
@@ -39,43 +39,63 @@ const isoToDateString = (isoDate: string) => {
 const ProgressBar = ({ pointsGained, pointsAvailable }: { pointsGained: number; pointsAvailable: number }) => {
   const percentGained = (pointsGained / (pointsGained + pointsAvailable)) * 100 || 0;
 
-  // Offset for the beginning of the progress bar
-  const startOffset = 2;
-  const progressBarOffset = percentGained + startOffset;
+  const pageWidth = window.innerWidth;
+
+  const padding = 80; // 40 px on either side
+  const sliderWidth = 366;
+  let fullSliderWidth = 366;
+
+  if (pageWidth < sliderWidth + padding) {
+    fullSliderWidth = pageWidth - padding;
+  }
+
+  const indicatorWidth = fullSliderWidth * (percentGained / 100);
 
   return (
-    <svg viewBox="0 8 104 4">
-      {/* Rounded left edge */}
-      <path d="M2,10 L2,10" strokeLinecap="round" strokeWidth={4} stroke="rgb(var(--color-foreground-2))" />
+    <div className="relative h-6">
+      <svg className="absolute top-1.5 z-0" viewBox="0 8 104 4">
+        <path d="M102,10 L102,10" strokeLinecap="round" strokeWidth={2} stroke="rgb(var(--color-foreground-4))" />
+        <path d="M2,10 L102,10" strokeLinecap="butt" strokeWidth={2} stroke="rgb(var(--color-foreground-4))" />
+        <path d="M2,10 L2,10" strokeLinecap="round" strokeWidth={2} stroke="rgb(var(--color-foreground-4))" />
+      </svg>
+      <svg
+        className="absolute"
+        id="mySvg"
+        width="366"
+        height="26"
+        viewBox="0 0 366 26"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect
+          x="2.5"
+          y="2.5"
+          width={indicatorWidth}
+          height="21"
+          rx="10.5"
+          fill="#C1F6FF"
+          stroke="#0E2825"
+          stroke-width="5"
+          className="transition-[stroke-dashoffset] delay-100 duration-1000 ease-in-out"
+        />
+      </svg>
+    </div>
+  );
+};
 
-      {/* Rounded right edge */}
-      <path d="M102,10 L102,10" strokeLinecap="round" strokeWidth={4} stroke="rgb(var(--color-foreground-4))" />
+const ExpirationIndicator = ({ expirationDate }: { expirationDate: string }) => {
+  const now = new Date().getTime();
+  const expirationMillis = new Date(expirationDate).getTime();
+  const oneDay = 24 * 60 * 60 * 1000;
+  const daysUntilExpiration = (expirationMillis - now) / oneDay;
+  const status = daysUntilExpiration > 45 ? "#A0FE7F" : daysUntilExpiration > 10 ? "#FEF17F" : "#FEA57F";
+  console.log({ days: Number(daysUntilExpiration.toFixed()), status });
 
-      {/* Background w/ "available" color */}
-      <path d="M2,10 L102,10" strokeLinecap="butt" strokeWidth={4} stroke="rgb(var(--color-foreground-4))" />
-
-      {/* Black progress bar, sticks out a little further than the main progress bar to show a black line */}
-      <path
-        d={`M2,10 L102,10`}
-        strokeLinecap="butt"
-        strokeWidth={4}
-        stroke="rgb(var(--color-background))"
-        strokeDasharray="102"
-        strokeDashoffset={104 - progressBarOffset - 0.75}
-        className="transition-[stroke-dashoffset] delay-100 duration-1000 ease-in-out"
-      />
-
-      {/* Main progress bar */}
-      <path
-        d={`M2,10 L102,10`}
-        strokeLinecap={percentGained < 100 ? "butt" : "round"}
-        strokeWidth={4}
-        stroke="rgb(var(--color-foreground-2))"
-        strokeDasharray="102"
-        strokeDashoffset={104 - progressBarOffset}
-        className="transition-[stroke-dashoffset] delay-100 duration-1000 ease-in-out"
-      />
-    </svg>
+  return (
+    <div className="pl-4 flex items-center text-color-6 bg-gradient-to-b from-background via-background to-[#082F2A] border border-t-0 rounded-t-none rounded-b-lg border-foreground-5 py-2">
+      <span className={`text-3xl pr-2 text-[${status}]`}>{daysUntilExpiration.toFixed(0)}</span> days until stamps
+      expire
+    </div>
   );
 };
 
@@ -101,9 +121,6 @@ export const PlatformDetails = ({
 
   const hasStamps = platformPassportData && !!platformPassportData.length;
 
-  const earnedDate = hasStamps ? isoToDateString(platformPassportData[0].credential.issuanceDate) : "mm.dd.yyyy";
-  const expiresDate = hasStamps ? isoToDateString(platformPassportData[0].credential.expirationDate) : "mm.dd.yyyy";
-
   const earnedPoints = currentPlatformScoreSpec?.earnedPoints || 0;
   const possiblePoints = currentPlatformScoreSpec?.possiblePoints || 0;
 
@@ -117,43 +134,23 @@ export const PlatformDetails = ({
         <h2 className="ml-4 text-2xl">{currentPlatform?.name}</h2>
         {!!verifiedProviders?.length && <PlatformJsonButton platformPassportData={platformPassportData} />}
       </div>
-      {currentPlatform?.website ? (
-        <a
-          className="mt-8 inline-block text-base hover:underline md:w-8/12"
-          href={currentPlatform?.website}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {currentPlatform?.description}
-        </a>
-      ) : (
-        <p className="mt-8 text-base md:w-8/12">{currentPlatform?.description}</p>
-      )}
       {bannerConfig && <GenericBanner banner={bannerConfig} />}
-      <hr className="mt-4 border-foreground-3" />
-      <div className="my-4 grid grid-cols-[1fr_2px_1fr] gap-y-4 text-center">
-        <div className={`flex flex-col items-center ${hasStamps ? "text-color-2" : "text-color-5"}`}>
-          <StarIcon width="40" />
-          <span className="font-bold">Earned</span>
-          <span className="">{earnedDate}</span>
-        </div>
-        <div className={`col-start-3 flex flex-col items-center ${hasStamps ? "text-color-2" : "text-color-5"}`}>
-          <ClockIcon width="40" />
-          <span className="font-bold">Expires</span>
-          <span className="">{expiresDate}</span>
-        </div>
-        <hr className="col-span-full border-foreground-3" />
-        <div className="flex flex-col items-center text-foreground-2">
-          <span className="text-4xl">{pointsGained}</span>
-          <span className="">Points Gained</span>
-        </div>
-        <div className="border-r border-foreground-3" />
-        <div className="flex flex-col items-center text-color-2">
-          <span className="text-4xl">{pointsAvailable}</span>
-          <span className="">Available Points</span>
-        </div>
-      </div>
-      <ProgressBar pointsGained={pointsGained} pointsAvailable={pointsAvailable} />
+      {hasStamps && (
+        <>
+          <div className="mt-4 border-foreground-5 border rounded-t-lg px-4 py-2 bg-gradient-to-b from-background via-background to-[#082F2A]">
+            <div className="flex justify-between">
+              <p className="text-color-6">points gained</p>
+              <p className="text-color-2">points left</p>
+            </div>
+            <div className="flex justify-between text-5xl">
+              <p className="text-color-6">{pointsGained}</p>
+              <p className="text-color-2">{pointsAvailable}</p>
+            </div>
+          </div>
+          <ExpirationIndicator expirationDate={platformPassportData[0].credential.expirationDate} />
+          <ProgressBar pointsGained={pointsGained} pointsAvailable={pointsAvailable} />
+        </>
+      )}
     </div>
   );
 };
