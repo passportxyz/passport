@@ -93,6 +93,7 @@ export const SideBarContent = ({
               verifiedProviders={verifiedProviders}
             />
           </DrawerHeader>
+          {verifyButton}
           <DrawerBody
             style={{
               padding: "0",
@@ -118,7 +119,6 @@ export const SideBarContent = ({
                 selectedProviders={selectedProviders}
                 setSelectedProviders={(providerIds) => setSelectedProviders && setSelectedProviders(providerIds)}
               />
-              {verifyButton}
               <div className="mt-4 flex justify-center">
                 <button
                   className="bg-background text-color-2 disabled:cursor-not-allowed disabled:brightness-50"

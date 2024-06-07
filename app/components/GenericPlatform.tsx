@@ -409,15 +409,10 @@ export const GenericPlatform = ({
 
   const buttonText = useMemo(() => {
     if (isReverifying) {
-      return "Verifying...";
+      return "Reverifying...";
     }
 
-    const hasStamps = verifiedProviders.length > 0;
-
     if (isLoading) {
-      if (hasStamps) {
-        return "Saving...";
-      }
       return "Verifying...";
     }
 
@@ -425,12 +420,27 @@ export const GenericPlatform = ({
       return "Close";
     }
 
-    if (hasStamps) {
-      return "Save";
+    const hasStamps = verifiedProviders.length > 0;
+
+    if (hasStamps && selectedProviders.length === verifiedProviders.length) {
+      return (
+        <>
+          <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M1.55019 4.83333L4.31019 8.5L11.4502 1.5"
+              stroke="#010101"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          Verified
+        </>
+      );
     }
 
     return "Verify";
-  }, [isReverifying, verifiedProviders.length, isLoading, submitted, canSubmit]);
+  }, [isReverifying, isLoading, submitted, canSubmit, verifiedProviders.length, selectedProviders.length]);
 
   return (
     <>
@@ -444,17 +454,15 @@ export const GenericPlatform = ({
         setSelectedProviders={setSelectedProviders}
         isLoading={isLoading}
         verifyButton={
-          <div className="px-4">
-            <LoadButton
-              className="button-verify mt-10 w-full"
-              isLoading={isLoading || isReverifying}
-              disabled={!submitted && !canSubmit}
-              onClick={canSubmit ? handleFetchCredential : onClose}
-              data-testid={`button-verify-${platform.platformId}`}
-            >
-              {buttonText}
-            </LoadButton>
-          </div>
+          <LoadButton
+            className="mt-10 w-full bg-gradient-to-3 from-foreground-2 to-foreground-4"
+            isLoading={isLoading || isReverifying}
+            disabled={!submitted && !canSubmit}
+            onClick={canSubmit ? handleFetchCredential : onClose}
+            data-testid={`button-verify-${platform.platformId}`}
+          >
+            {buttonText}
+          </LoadButton>
         }
       />
       <JsonOutputModal

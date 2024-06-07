@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { PlatformBanner, PlatformSpec } from "@gitcoin/passport-platforms";
 import { GenericBanner } from "./GenericBanner";
 import { JsonOutputModal } from "./JsonOutputModal";
@@ -31,19 +31,14 @@ const PlatformJsonButton = ({ platformPassportData }: { platformPassportData: an
   );
 };
 
-const isoToDateString = (isoDate: string) => {
-  const date = new Date(isoDate);
-  return `${date.getMonth() + 1}.${date.getDate()}.${date.getFullYear()}`;
-};
-
 const ProgressBar = ({ pointsGained, pointsAvailable }: { pointsGained: number; pointsAvailable: number }) => {
   const percentGained = (pointsGained / (pointsGained + pointsAvailable)) * 100 || 0;
 
   const pageWidth = window.innerWidth;
 
   const padding = 80; // 40 px on either side
-  const sliderWidth = 366;
-  let fullSliderWidth = 366;
+  const sliderWidth = 332;
+  let fullSliderWidth = 332;
 
   if (pageWidth < sliderWidth + padding) {
     fullSliderWidth = pageWidth - padding;
@@ -89,7 +84,6 @@ const ExpirationIndicator = ({ expirationDate }: { expirationDate: string }) => 
   const oneDay = 24 * 60 * 60 * 1000;
   const daysUntilExpiration = (expirationMillis - now) / oneDay;
   const status = daysUntilExpiration > 45 ? "#A0FE7F" : daysUntilExpiration > 10 ? "#FEF17F" : "#FEA57F";
-  console.log({ days: Number(daysUntilExpiration.toFixed()), status });
 
   return (
     <div className="pl-4 flex items-center text-color-6 bg-gradient-to-b from-background via-background to-[#082F2A] border border-t-0 rounded-t-none rounded-b-lg border-foreground-5 py-2">
@@ -146,9 +140,9 @@ export const PlatformDetails = ({
               <p className="text-color-6">{pointsGained}</p>
               <p className="text-color-2">{pointsAvailable}</p>
             </div>
+            <ProgressBar pointsGained={pointsGained} pointsAvailable={pointsAvailable} />
           </div>
           <ExpirationIndicator expirationDate={platformPassportData[0].credential.expirationDate} />
-          <ProgressBar pointsGained={pointsGained} pointsAvailable={pointsAvailable} />
         </>
       )}
     </div>
