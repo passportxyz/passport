@@ -93,6 +93,8 @@ const ExpirationIndicator = ({ expirationDate }: { expirationDate: string }) => 
   );
 };
 
+export const customSideBarGradient = "bg-gradient-to-b from-background via-background to-[#082F2A]";
+
 export const PlatformDetails = ({
   currentPlatform,
   bannerConfig,
@@ -131,7 +133,7 @@ export const PlatformDetails = ({
       {bannerConfig && <GenericBanner banner={bannerConfig} />}
       {hasStamps && (
         <>
-          <div className="mt-4 border-foreground-5 border rounded-t-lg px-4 py-2 bg-gradient-to-b from-background via-background to-[#082F2A]">
+          <div className={`mt-4 border-foreground-5 border rounded-t-lg px-4 py-2 ${customSideBarGradient}`}>
             <div className="flex justify-between">
               <p className="text-color-6">points gained</p>
               <p className="text-color-2">points left</p>

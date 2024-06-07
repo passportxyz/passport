@@ -100,18 +100,6 @@ export const SideBarContent = ({
             }}
           >
             <div>
-              <div className="mt-8 flex">
-                <Checkbox
-                  id="select-all"
-                  checked={allSelected}
-                  onChange={(checked) => setSelectedProviders && setSelectedProviders(checked ? allProviderIds : [])}
-                />
-
-                <label htmlFor="select-all" data-testid="select-all" className={`pl-2 font-alt text-sm`}>
-                  Select all
-                </label>
-              </div>
-              <hr className="mt-4 border-foreground-3" />
               <StampSelector
                 currentPlatform={currentPlatform}
                 currentProviders={currentProviders}
@@ -119,16 +107,6 @@ export const SideBarContent = ({
                 selectedProviders={selectedProviders}
                 setSelectedProviders={(providerIds) => setSelectedProviders && setSelectedProviders(providerIds)}
               />
-              <div className="mt-4 flex justify-center">
-                <button
-                  className="bg-background text-color-2 disabled:cursor-not-allowed disabled:brightness-50"
-                  disabled={!verifiedProviders || verifiedProviders?.length === 0}
-                  onClick={onOpenRemoveStampModal}
-                  data-testid="remove-stamp"
-                >
-                  Remove
-                </button>
-              </div>
             </div>
           </DrawerBody>
           <RemoveStampModal
