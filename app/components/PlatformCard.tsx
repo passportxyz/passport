@@ -52,6 +52,7 @@ export const PlatformCard = ({
   // returns a single Platform card
   return (
     <div
+      data-testid="platform-card"
       onClick={() => {
         setCurrentPlatform(platform);
         onOpen();
