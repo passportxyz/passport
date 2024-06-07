@@ -1,17 +1,18 @@
 import React from "react";
 import { SyncToChainButton } from "./SyncToChainButton";
 import { Chain } from "../utils/chains";
-import { useOnChainState } from "../hooks/useOnChainStatus";
+import { useOnChainStatus } from "../hooks/useOnChainStatus";
 import { OnChainStatus } from "../utils/onChainStatus";
 import { useWalletStore } from "../context/walletStore";
+import { useOnChainData } from "../hooks/useOnChainData";
+import { Spinner } from "@chakra-ui/react";
 
 const formatDate = (date: Date): string =>
   Intl.DateTimeFormat("en-US", { month: "short", day: "2-digit", year: "numeric" }).format(date);
 
 export function NetworkCard({ chain }: { chain: Chain }) {
-  // TODO
-  const expirationDate = new Date("1/1/2024");
-  const { status } = useOnChainState({ chain });
+  const status = useOnChainStatus({ chain });
+  const { expirationDate } = useOnChainData().data[chain.id] || {};
   const address = useWalletStore((state) => state.address);
 
   const isOnChain = [
@@ -50,12 +51,14 @@ export function NetworkCard({ chain }: { chain: Chain }) {
               >
                 {expired ? (
                   "Expired"
-                ) : (
+                ) : expirationDate ? (
                   <>
                     Expires
                     <br />
                     {formatDate(expirationDate)}
                   </>
+                ) : (
+                  <Spinner size="sm" />
                 )}
               </div>
             </>

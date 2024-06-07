@@ -28,6 +28,7 @@ export interface OnChainLastUpdates {
 type SingleChainData = {
   score: number;
   providers: OnChainProviderType[];
+  expirationDate?: Date;
 };
 
 export interface OnChainScores {
@@ -67,6 +68,7 @@ const getOnChainDataForChain = async ({
   const passportAttestationData = await getAttestationData(address!, chainId as keyof typeof onchainInfo);
   let providers: OnChainProviderType[] = [];
   let score = 0;
+  let expirationDate: Date | undefined;
   if (passportAttestationData) {
     const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
       passportAttestationData.passport
@@ -81,13 +83,14 @@ const getOnChainDataForChain = async ({
         issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
       }));
 
-    score = decodeScoreAttestation(passportAttestationData.score);
+    ({ score, expirationDate } = decodeScoreAttestation(passportAttestationData.score));
   }
 
   return {
     chainId,
     providers,
     score,
+    expirationDate,
   };
 };
 

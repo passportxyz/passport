@@ -37,14 +37,16 @@ export function SyncToChainButton({ onChainStatus, chain, className }: SyncToCha
   return (
     <button
       {...props}
-      className={`center flex justify-center p-2 ${className} ${props.className} h-11 w-fit rounded border ${expired ? "border-focus" : "disabled:border-foreground-6 border-foreground-2"}`}
+      className={`center flex justify-center items-center p-2 ${className} ${props.className} h-11 w-fit rounded border ${expired ? "border-focus" : "disabled:border-foreground-6 border-foreground-2"}`}
       data-testid="sync-to-chain-button"
     >
       <div className={`${loading ? "block" : "hidden"} relative top-1`}>
         <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
       </div>
       {needToSwitchChain && (
-        <Tooltip className="px-0">You will be prompted to switch to {chain.label} and sign the transaction</Tooltip>
+        <Tooltip className="px-0" iconClassName={expired ? "text-focus" : ""}>
+          You will be prompted to switch to {chain.label} and sign the transaction
+        </Tooltip>
       )}
       <span
         className={`mx-1 translate-y-[1px] ${loading ? "hidden" : "block"} ${

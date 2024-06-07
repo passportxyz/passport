@@ -8,7 +8,7 @@ import { Button } from "./Button";
 import { ScorerContext } from "../context/scorerContext";
 import { useContext, useState } from "react";
 import { CustomDashboardPanel } from "./CustomDashboardPanel";
-import { useOnChainState } from "../hooks/useOnChainStatus";
+import { useOnChainStatus } from "../hooks/useOnChainStatus";
 
 const VeraxLogo = () => (
   <svg width="64" height="56" viewBox="0 0 64 56" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -41,7 +41,7 @@ const LINEA_CHAIN_NAME = process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on" ? "Line
 const chain = chains.find(({ label }) => label === LINEA_CHAIN_NAME);
 
 export const VeraxPanel = ({ className }: { className: string }) => {
-  const { status: onChainStatus } = useOnChainState({ chain });
+  const onChainStatus = useOnChainStatus({ chain });
   const { score } = useContext(ScorerContext);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
