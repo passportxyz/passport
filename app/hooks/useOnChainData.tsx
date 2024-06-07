@@ -1,5 +1,5 @@
 // --- React Methods
-import React, { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
@@ -65,7 +65,7 @@ const getOnChainDataForChain = async ({
   address: string;
   chainId: string;
 }): Promise<GetOnChainDataForChainResult> => {
-  const passportAttestationData = await getAttestationData(address!, chainId as keyof typeof onchainInfo);
+  const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
   let providers: OnChainProviderType[] = [];
   let score = 0;
   let expirationDate: Date | undefined;
@@ -97,7 +97,7 @@ const getOnChainDataForChain = async ({
 const useOnChainDataQuery = (address?: string) => {
   // Combines results of all queries into a single object
   const combine = useCallback((results: UseQueryResult<GetOnChainDataForChainResult>[]) => {
-    const isPending = results.some((result) => result.isLoading);
+    const isPending = results.some((result) => result.isPending);
     const isError = results.some((result) => result.isError);
     const error = results.find((result) => result.isError)?.error;
 
@@ -135,11 +135,11 @@ export const useOnChainData = (): OnChainData => {
   const address = useWalletStore((state) => state.address);
   const queryClient = useQueryClient();
 
-  const { data: onChainData, isError, error, isPending } = useOnChainDataQuery(address);
+  const { data, isError, error, isPending } = useOnChainDataQuery(address);
 
   const activeChainProviders = useMemo(
-    () => (connectedChain && onChainData ? onChainData[connectedChain]?.providers : null) || [],
-    [connectedChain, onChainData]
+    () => (connectedChain && data ? data[connectedChain]?.providers : null) || [],
+    [connectedChain, data]
   );
 
   useEffect(() => {
@@ -163,11 +163,11 @@ export const useOnChainData = (): OnChainData => {
 
   return useMemo(
     () => ({
-      data: onChainData || {},
+      data: data || {},
       activeChainProviders,
       isPending,
       refresh,
     }),
-    [onChainData, activeChainProviders, isPending, refresh]
+    [data, activeChainProviders, isPending, refresh]
   );
 };
