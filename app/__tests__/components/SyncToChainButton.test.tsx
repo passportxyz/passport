@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import axios from "axios";
 import { getButtonMsg, SyncToChainButton } from "../../components/SyncToChainButton";
 import { OnChainStatus } from "../../utils/onChainStatus";
@@ -97,17 +97,26 @@ const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 describe("SyncToChainButton component", () => {
   it("should show coming soon if in active", async () => {
-    render(<SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithoutEas} />);
+    renderWithContext(
+      mockCeramicContext,
+      <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithoutEas} />
+    );
 
     expect(screen.getByText("Coming Soon")).toBeInTheDocument();
   });
   it("should be disabled if not active", async () => {
-    render(<SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithoutEas} />);
+    renderWithContext(
+      mockCeramicContext,
+      <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithoutEas} />
+    );
     const btn = screen.getByTestId("sync-to-chain-button");
     expect(btn).toHaveAttribute("disabled");
   });
   it("should be disabled if up to date", async () => {
-    render(<SyncToChainButton onChainStatus={OnChainStatus.MOVED_UP_TO_DATE} chain={chainWithEas} />);
+    renderWithContext(
+      mockCeramicContext,
+      <SyncToChainButton onChainStatus={OnChainStatus.MOVED_UP_TO_DATE} chain={chainWithEas} />
+    );
     const btn = screen.getByTestId("sync-to-chain-button");
     expect(btn).toHaveAttribute("disabled");
   });

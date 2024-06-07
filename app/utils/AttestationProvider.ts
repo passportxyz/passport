@@ -5,7 +5,7 @@ import { iamUrl } from "../config/stamp_config";
 import { OnChainStatus } from "../utils/onChainStatus";
 import { ScoreStateType } from "../context/scorerContext";
 import { AllProvidersState, ProviderState } from "../context/ceramicContext";
-import { OnChainProviderType } from "../context/onChainContext";
+import { OnChainProviderType } from "../hooks/useOnChainData";
 import { Stamp } from "@gitcoin/passport-types";
 
 type ProviderWithStamp = ProviderState & { stamp: Stamp };

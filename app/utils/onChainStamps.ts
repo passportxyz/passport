@@ -10,7 +10,7 @@ import { chains } from "./chains";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { PROVIDER_ID, StampBit } from "@gitcoin/passport-types";
-import { DecodedProviderInfo } from "../context/onChainContext";
+import { DecodedProviderInfo } from "../hooks/useOnChainData";
 
 export type AttestationData = {
   passport: Attestation;

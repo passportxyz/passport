@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { useCustomization } from "../../hooks/useCustomization";
@@ -17,14 +18,17 @@ describe("<StampSelector />", () => {
   describe("exclusion tests", () => {
     const renderTestComponent = (customization: any) => {
       (useCustomization as jest.Mock).mockReturnValue(customization);
+      const queryClient = new QueryClient();
       render(
-        <StampSelector
-          currentPlatform={GtcStaking.PlatformDetails}
-          currentProviders={GtcStaking.ProviderConfig}
-          selectedProviders={[] as PROVIDER_ID[]}
-          verifiedProviders={[] as PROVIDER_ID[]}
-          setSelectedProviders={() => {}}
-        />
+        <QueryClientProvider client={queryClient}>
+          <StampSelector
+            currentPlatform={GtcStaking.PlatformDetails}
+            currentProviders={GtcStaking.ProviderConfig}
+            selectedProviders={[] as PROVIDER_ID[]}
+            verifiedProviders={[] as PROVIDER_ID[]}
+            setSelectedProviders={() => {}}
+          />
+        </QueryClientProvider>
       );
     };
 
