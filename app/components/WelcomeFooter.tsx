@@ -1,4 +1,5 @@
 import React from "react";
+import { useMediaQuery } from "react-responsive";
 
 const OptimismIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-6 h-6 mx-2">
@@ -73,7 +74,7 @@ const SyncIcon = () => (
   </svg>
 );
 
-const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
+const BigScreenWelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
   return (
     <footer className="lg:flex fixed bottom-0 justify-between items-center px-4 py-8 bg-black text-white text-sm grid-flow-col w-full max-w-full">
       <div className="flex items-start justify-start lg:justify-between my-4 lg:my-0">
@@ -108,6 +109,56 @@ const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean
         </div>
       </div>
     </footer>
+  );
+};
+
+const PhoneWelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
+  return (
+    <footer className="lg:flex fixed bottom-0 left-0 right-0 justify-between items-center px-4 py-8 bg-black text-white text-sm grid-flow-col w-full max-w-full z-20 max-h-[120px]">
+      <div className="flex items-start justify-start lg:justify-between flex-wrap">
+        <span className="px-2">Available on</span>
+        <div className="mx-4">
+          <OptimismIcon />
+        </div>
+        <div className="mx-4">
+          <LIcon />
+        </div>
+        <div className="mx-4">
+          <CeramicIcon />
+        </div>
+      </div>
+      <div className="flex items-start my-1 flex-wrap">
+        {displayPrivacyPolicy ? (
+          <a href="#" className="hover:underline px-2">
+            Privacy Policy
+          </a>
+        ) : null}
+        <a href="#" className="hover:underline px-2">
+          Learn More
+        </a>
+        <a href="#" className="hover:underline px-2">
+          Gitcoin Passport Scorer
+        </a>
+      </div>
+      <div className="flex items-start flex-wrap">
+        <div className="mx-2">
+          <GitHubIcon />
+        </div>
+        <div className="mx-2 mr-10">
+          <SyncIcon />
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
+  const isPhone = useMediaQuery({ query: "(max-width: 768px)" });
+
+  return isPhone ? (
+    <PhoneWelcomeFooter displayPrivacyPolicy={displayPrivacyPolicy} />
+  ) : (
+    <BigScreenWelcomeFooter displayPrivacyPolicy={displayPrivacyPolicy} />
   );
 };
 
