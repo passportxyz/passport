@@ -63,8 +63,8 @@ export default function Home() {
   }, [connectError]);
 
   return (
-    <PageRoot className="text-color-1 flex flex-col min-h-screen">
-      <div className="flex-grow items-center justify-center self-center p-8">
+    <PageRoot className="text-color-1 flex flex-col min-h-screen overflow-auto pb-32">
+      <div className="flex-grow items-center justify-center self-center p-8 overflow-auto">
         <div className="z-10 grid grid-flow-row grid-cols-2 gap-4 lg:grid-flow-col p-2">
           <div className="col-span-2 text-6xl md:text-7xl lg:row-start-2">
             <div className="grid grid-flow-col justify-start">
