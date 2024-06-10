@@ -112,15 +112,10 @@ class BaseAttestationProvider implements AttestationProvider {
 
     const [equivalentProviders, differentProviders] = verifiedDbProviders.reduce(
       ([eq, diff], provider): [ProviderWithStamp[], ProviderWithStamp[]] => {
-        const expirationDateSeconds = Math.floor(new Date(provider.stamp.credential.expirationDate).valueOf() / 1000);
-        const issuanceDateSeconds = Math.floor(new Date(provider.stamp.credential.issuanceDate).valueOf() / 1000);
-
         const isEquivalent = onChainProviders.some(
           (onChainProvider) =>
             onChainProvider.providerName === provider.stamp.provider &&
-            onChainProvider.credentialHash === provider.stamp.credential.credentialSubject?.hash &&
-            Math.floor(onChainProvider.expirationDate.valueOf() / 1000) === expirationDateSeconds &&
-            Math.floor(onChainProvider.issuanceDate.valueOf() / 1000) === issuanceDateSeconds
+            onChainProvider.credentialHash === provider.stamp.credential.credentialSubject?.hash
         );
         return isEquivalent ? [[...eq, provider], diff] : [eq, [...diff, provider]];
       },
