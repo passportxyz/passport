@@ -11,7 +11,6 @@ import "../styles/globals.css";
 import { CeramicContextProvider } from "../context/ceramicContext";
 import { DatastoreConnectionContextProvider } from "../context/datastoreConnectionContext";
 import { ScorerContextProvider } from "../context/scorerContext";
-import { OnChainContextProvider } from "../context/onChainContext";
 import ManageAccountCenter from "../components/ManageAccountCenter";
 
 // --- Ceramic Tools
@@ -22,9 +21,12 @@ import TagManager from "react-gtm-module";
 
 import { themes, ThemeWrapper } from "../utils/theme";
 import { StampClaimingContextProvider } from "../context/stampClaimingContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
 const INTERCOM_APP_ID = process.env.NEXT_PUBLIC_INTERCOM_APP_ID || "";
+
+const queryClient = new QueryClient();
 
 const RenderOnlyOnClient = ({ children }: { children: React.ReactNode }) => {
   const [isMounted, setIsMounted] = React.useState(false);
@@ -143,9 +145,9 @@ function App({ Component, pageProps }: AppProps) {
         <title>Gitcoin Passport</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
       </Head>
-      <SelfIdProvider client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}>
-        <DatastoreConnectionContextProvider>
-          <OnChainContextProvider>
+      <QueryClientProvider client={queryClient}>
+        <SelfIdProvider client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}>
+          <DatastoreConnectionContextProvider>
             <ScorerContextProvider>
               <CeramicContextProvider>
                 <StampClaimingContextProvider>
@@ -159,9 +161,9 @@ function App({ Component, pageProps }: AppProps) {
                 </StampClaimingContextProvider>
               </CeramicContextProvider>
             </ScorerContextProvider>
-          </OnChainContextProvider>
-        </DatastoreConnectionContextProvider>
-      </SelfIdProvider>
+          </DatastoreConnectionContextProvider>
+        </SelfIdProvider>
+      </QueryClientProvider>
     </>
   );
 }

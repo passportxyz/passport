@@ -5,13 +5,13 @@ import React from "react";
 import { render } from "@testing-library/react";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
-import { OnChainContextState } from "../context/onChainContext";
 import { StampClaimingContextState, StampClaimProgressStatus } from "../context/stampClaimingContext";
 import {
   DatastoreConnectionContext,
   DatastoreConnectionContextState,
   DbAuthTokenStatus,
 } from "../context/datastoreConnectionContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export const getProviderSpec = (platform: PLATFORM_ID, provider: string): ProviderSpec => {
   return STAMP_PROVIDERS[platform]
@@ -221,40 +221,15 @@ export const renderWithContext = (
   ceramicContext: CeramicContextState,
   ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>,
   datastoreContextOverride: Partial<DatastoreConnectionContextState> = {}
-) =>
-  render(
-    <DatastoreConnectionContext.Provider value={{ ...datastoreConnectionContext, ...datastoreContextOverride }}>
-      <ScorerContext.Provider value={scorerContext}>
-        <CeramicContext.Provider value={ceramicContext}>{ui}</CeramicContext.Provider>
-      </ScorerContext.Provider>
-    </DatastoreConnectionContext.Provider>
+) => {
+  const queryClient = new QueryClient();
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <DatastoreConnectionContext.Provider value={{ ...datastoreConnectionContext, ...datastoreContextOverride }}>
+        <ScorerContext.Provider value={scorerContext}>
+          <CeramicContext.Provider value={ceramicContext}>{ui}</CeramicContext.Provider>
+        </ScorerContext.Provider>
+      </DatastoreConnectionContext.Provider>
+    </QueryClientProvider>
   );
-
-export const testOnChainContextState = (initialState?: Partial<OnChainContextState>): OnChainContextState => {
-  return {
-    onChainProviders: {},
-    activeChainProviders: [
-      {
-        providerName: "githubContributionActivityGte#30",
-        credentialHash: "v0.0.0:rnutMGjNA2yPx/8xzJdn6sXDsY46lLUNV3DHAHoPJJg=",
-        expirationDate: new Date("2090-07-31T11:49:51.433Z"),
-        issuanceDate: new Date("2023-07-02T11:49:51.433Z"),
-      },
-      {
-        providerName: "githubContributionActivityGte#60",
-        credentialHash: "v0.0.0:rnutMGjNA2yPx/8xzJdn6sXDsY46lLUNV3DHAHoPJJg=",
-        expirationDate: new Date("2090-07-31T11:49:51.433Z"),
-        issuanceDate: new Date("2023-07-02T11:49:51.433Z"),
-      },
-      {
-        providerName: "githubContributionActivityGte#120",
-        credentialHash: "v0.0.0:rnutMGjNA2yPx/8xzJdn6sXDsY46lLUNV3DHAHoPJJg=",
-        expirationDate: new Date("2090-07-31T11:49:51.433Z"),
-        issuanceDate: new Date("2023-07-02T11:49:51.433Z"),
-      },
-    ],
-    readOnChainData: jest.fn(),
-    onChainScores: {},
-    onChainLastUpdates: {},
-  };
 };

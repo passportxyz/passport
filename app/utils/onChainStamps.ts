@@ -10,12 +10,20 @@ import { chains } from "./chains";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { PROVIDER_ID, StampBit } from "@gitcoin/passport-types";
-import { DecodedProviderInfo } from "../context/onChainContext";
+import { DecodedProviderInfo } from "../hooks/useOnChainData";
 
 export type AttestationData = {
   passport: Attestation;
   score: Attestation;
 };
+
+type DecodedScoreAttestation = {
+  score: number;
+  issuanceDate?: Date;
+  expirationDate?: Date;
+};
+
+const SCORE_MAX_AGE_MILLISECONDS = 1000 * 60 * 60 * 24 * 90; // 90 days
 
 export async function getAttestationData(
   address: string,
@@ -109,9 +117,11 @@ export async function decodeProviderInformation(attestation: Attestation): Promi
   return { onChainProviderInfo, hashes, issuanceDates, expirationDates };
 }
 
-export function decodeScoreAttestation(attestation: Attestation): number {
+export function decodeScoreAttestation(attestation: Attestation): DecodedScoreAttestation {
   if (attestation.data === "0x") {
-    return NaN;
+    return {
+      score: NaN,
+    };
   }
 
   const schemaEncoder = new SchemaEncoder("uint256 score,uint32 scorer_id,uint8 score_decimals");
@@ -121,6 +131,12 @@ export function decodeScoreAttestation(attestation: Attestation): number {
   const score_decimals = decodedData.find(({ name }) => name === "score_decimals")?.value.value as number;
 
   const score = parseFloat(formatUnits(score_as_integer, score_decimals));
+  const issuanceDate = new Date(BigNumber.from(attestation.time).mul(1000).toNumber()) || undefined;
+  const expirationDate = issuanceDate ? new Date(issuanceDate.getTime() + SCORE_MAX_AGE_MILLISECONDS) : undefined;
 
-  return score;
+  return {
+    score,
+    issuanceDate,
+    expirationDate,
+  };
 }

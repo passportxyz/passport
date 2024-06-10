@@ -2,7 +2,7 @@ import React, { useContext, useMemo } from "react";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { PlatformGroupSpec } from "../config/providers";
-import { OnChainContext } from "../context/onChainContext";
+import { useOnChainData } from "../hooks/useOnChainData";
 import { OnchainTag } from "./OnchainTag";
 import { CeramicContext } from "../context/ceramicContext";
 import { FeatureFlags } from "../config/feature_flags";
@@ -27,7 +27,7 @@ export function StampSelector({
   setSelectedProviders,
 }: StampSelectorProps) {
   const { allProvidersState } = useContext(CeramicContext);
-  const { activeChainProviders } = useContext(OnChainContext);
+  const { activeChainProviders } = useOnChainData();
   const { stampWeights } = useContext(ScorerContext);
   const includedGroupsAndProviders = useIncludedGroupsAndProviders(currentProviders || []);
 

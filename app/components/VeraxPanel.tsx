@@ -1,5 +1,4 @@
 import { useSyncToChainButton } from "../hooks/useSyncToChainButton";
-import { useOnChainStatus } from "../hooks/useOnChainStatus";
 import { OnChainStatus } from "../utils/onChainStatus";
 import { chains } from "../utils/chains";
 import { LoadButton } from "./LoadButton";
@@ -9,6 +8,7 @@ import { Button } from "./Button";
 import { ScorerContext } from "../context/scorerContext";
 import { useContext, useState } from "react";
 import { CustomDashboardPanel } from "./CustomDashboardPanel";
+import { useOnChainStatus } from "../hooks/useOnChainStatus";
 
 const VeraxLogo = () => (
   <svg width="64" height="56" viewBox="0 0 64 56" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -28,6 +28,7 @@ const getButtonMsg = (onChainStatus: OnChainStatus): string => {
     case OnChainStatus.NOT_MOVED:
       return "Push to Verax";
     case OnChainStatus.MOVED_OUT_OF_DATE:
+    case OnChainStatus.MOVED_EXPIRED:
       return "Update";
     case OnChainStatus.MOVED_UP_TO_DATE:
       return "Already pushed";

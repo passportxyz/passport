@@ -1,4 +1,5 @@
 import React from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, screen, waitFor, render } from "@testing-library/react";
 import Dashboard from "../../pages/Dashboard";
 import { HashRouter as Router } from "react-router-dom";
@@ -97,23 +98,29 @@ describe("dashboard notifications", () => {
   });
   it("should show success toast when stamps are verified", async () => {
     localStorage.setItem("successfulRefresh", "true");
+    const queryClient = new QueryClient();
     render(
-      <ChakraProvider>
-        <Router>
-          <Dashboard />
-        </Router>
-      </ChakraProvider>
+      <QueryClientProvider client={queryClient}>
+        <ChakraProvider>
+          <Router>
+            <Dashboard />
+          </Router>
+        </ChakraProvider>
+      </QueryClientProvider>
     );
     expect(screen.getByText("Your stamps are verified!")).toBeInTheDocument();
   });
   it("should show error toast when stamps aren't verified", async () => {
     localStorage.setItem("successfulRefresh", "false");
+    const queryClient = new QueryClient();
     render(
-      <ChakraProvider>
-        <Router>
-          <Dashboard />
-        </Router>
-      </ChakraProvider>
+      <QueryClientProvider client={queryClient}>
+        <ChakraProvider>
+          <Router>
+            <Dashboard />
+          </Router>
+        </ChakraProvider>
+      </QueryClientProvider>
     );
     expect(screen.getByText("Stamps weren't verified. Please try again.")).toBeInTheDocument();
   });

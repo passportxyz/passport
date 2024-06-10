@@ -9,6 +9,7 @@ export function getButtonMsg(onChainStatus: OnChainStatus): string {
     case OnChainStatus.NOT_MOVED:
       return "Mint";
     case OnChainStatus.MOVED_OUT_OF_DATE:
+    case OnChainStatus.MOVED_EXPIRED:
       return "Update";
     case OnChainStatus.MOVED_UP_TO_DATE:
       return "Minted";
@@ -31,30 +32,33 @@ export function SyncToChainButton({ onChainStatus, chain, className }: SyncToCha
   });
 
   const loading = syncingToChain || onChainStatus === OnChainStatus.LOADING;
+  const expired = onChainStatus === OnChainStatus.MOVED_EXPIRED;
 
   return (
-    <div className="flex justify-end">
-      <button
-        {...props}
-        className={`center flex justify-center p-2 ${className} ${props.className} h-11 disabled:border-foreground-6`}
-        data-testid="sync-to-chain-button"
-      >
-        <div className={`${loading ? "block" : "hidden"} relative top-1`}>
-          <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
-        </div>
-        {needToSwitchChain && (
-          <Tooltip className="px-0">You will be prompted to switch to {chain.label} and sign the transaction</Tooltip>
-        )}
-        <span
-          className={`mx-1 translate-y-[1px] ${loading ? "hidden" : "block"} ${
-            onChainStatus === OnChainStatus.MOVED_UP_TO_DATE || chain.attestationProvider?.status === "comingSoon"
+    <button
+      {...props}
+      className={`center flex justify-center items-center p-2 ${className} ${props.className} h-11 w-fit rounded border ${expired ? "border-focus" : "disabled:border-foreground-6 border-foreground-2"}`}
+      data-testid="sync-to-chain-button"
+    >
+      <div className={`${loading ? "block" : "hidden"} relative top-1`}>
+        <Spinner thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="md" />
+      </div>
+      {needToSwitchChain && (
+        <Tooltip className="px-0" iconClassName={expired ? "text-focus" : ""}>
+          You will be prompted to switch to {chain.label} and sign the transaction
+        </Tooltip>
+      )}
+      <span
+        className={`mx-1 translate-y-[1px] ${loading ? "hidden" : "block"} ${
+          expired
+            ? "text-focus"
+            : onChainStatus === OnChainStatus.MOVED_UP_TO_DATE || chain.attestationProvider?.status === "comingSoon"
               ? "text-foreground-6"
               : "text-foreground-2"
-          }`}
-        >
-          {text}
-        </span>
-      </button>
-    </div>
+        }`}
+      >
+        {text}
+      </span>
+    </button>
   );
 }

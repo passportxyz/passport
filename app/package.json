@@ -31,6 +31,7 @@
     "@heroicons/react": "^2.0.17",
     "@popperjs/core": "^2.11.7",
     "@self.id/framework": "^0.4.0",
+    "@tanstack/react-query": "^5.40.0",
     "@web3-onboard/core": "2.21.2",
     "@web3-onboard/injected-wallets": "2.10.7",
     "@web3-onboard/react": "2.8.13",
@@ -62,6 +63,7 @@
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^12.1.5",
+    "@tanstack/eslint-plugin-query": "^5.35.6",
     "@testing-library/jest-dom": "^6.1.4",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.5.1",

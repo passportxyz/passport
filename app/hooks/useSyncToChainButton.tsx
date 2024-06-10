@@ -3,11 +3,11 @@ import { EasPayload, VerifiableCredential, Passport } from "@gitcoin/passport-ty
 import { ethers, EthersError, isError } from "ethers";
 import { useCallback, useContext, useState } from "react";
 import { CeramicContext } from "../context/ceramicContext";
-import { OnChainContext } from "../context/onChainContext";
 import { useWalletStore } from "../context/walletStore";
 import { DoneToastContent } from "../components/DoneToastContent";
 import { OnChainStatus } from "../utils/onChainStatus";
 import { Chain } from "../utils/chains";
+import { useOnChainData } from "./useOnChainData";
 
 const fail = "../assets/verification-failed-bright.svg";
 const success = "../../assets/check-icon2.svg";
@@ -29,7 +29,7 @@ export const useSyncToChainButton = ({
   const setChain = useWalletStore((state) => state.setChain);
 
   const { passport } = useContext(CeramicContext);
-  const { readOnChainData } = useContext(OnChainContext);
+  const { refresh } = useOnChainData();
   const [syncingToChain, setSyncingToChain] = useState(false);
 
   const loadVerifierContract = useCallback(
@@ -100,7 +100,7 @@ export const useSyncToChainButton = ({
             if (data.invalidCredentials.length > 0) {
               // This can only happen when trying to bring the entire passport onchain
               // This cannot happen when we only bring the score onchain
-              // TODO: maybe we should prompt the user if he wants to continue? Maybe he wants to refresh his attenstations first?
+              // TODO: maybe we should prompt the user if he wants to continue? Maybe he wants to refresh his attestations first?
               console.log("not syncing invalid credentials (invalid credentials): ", data.invalidCredentials);
             }
 
@@ -125,7 +125,8 @@ export const useSyncToChainButton = ({
               });
               await transaction.wait();
 
-              await readOnChainData(chain.id);
+              refresh(chain.id);
+
               const successSubmit = (
                 <p>
                   Passport successfully synced to chain.{" "}
@@ -229,7 +230,7 @@ export const useSyncToChainButton = ({
         }
       }
     },
-    [address, chain?.attestationProvider, chain?.id, loadVerifierContract, readOnChainData, toast]
+    [address, chain?.attestationProvider, chain?.id, loadVerifierContract, refresh, toast]
   );
 
   const onInitiateSyncToChain = useCallback(

@@ -4,19 +4,31 @@ import { Chain } from "../utils/chains";
 import { useOnChainStatus } from "../hooks/useOnChainStatus";
 import { OnChainStatus } from "../utils/onChainStatus";
 import { useWalletStore } from "../context/walletStore";
+import { useOnChainData } from "../hooks/useOnChainData";
+import { Spinner } from "@chakra-ui/react";
+
+const formatDate = (date: Date): string =>
+  Intl.DateTimeFormat("en-US", { month: "short", day: "2-digit", year: "numeric" }).format(date);
 
 export function NetworkCard({ chain }: { chain: Chain }) {
-  const onChainStatus = useOnChainStatus({ chain });
+  const status = useOnChainStatus({ chain });
+  const { expirationDate } = useOnChainData().data[chain.id] || {};
   const address = useWalletStore((state) => state.address);
 
-  const isOnChain =
-    onChainStatus === OnChainStatus.MOVED_OUT_OF_DATE || onChainStatus === OnChainStatus.MOVED_UP_TO_DATE;
+  const isOnChain = [
+    OnChainStatus.MOVED_OUT_OF_DATE,
+    OnChainStatus.MOVED_UP_TO_DATE,
+    OnChainStatus.MOVED_EXPIRED,
+  ].includes(status);
+
+  const expired = status === OnChainStatus.MOVED_EXPIRED;
+
   return (
     <div
       className={`${
-        chain?.attestationProvider?.status === "enabled" &&
-        "bg-background-4 bg-gradient-to-b from-background to-[#06153D]"
-      } mb-6 rounded border border-foreground-6  p-2 align-middle text-color-2`}
+        chain?.attestationProvider?.status === "enabled" && "bg-gradient-to-b from-background"
+      } ${expired ? "to-focus/25 border-focus text-focus" : "to-background-2/50 border-foreground-6 text-color-2"}
+      mb-6 rounded border p-2 align-middle`}
     >
       <div className="mx-4 my-2">
         <div className={`${isOnChain ? "grid-rows-2" : "grid-rows-1"} grid grid-flow-col  gap-4 space-y-2`}>
@@ -29,19 +41,29 @@ export function NetworkCard({ chain }: { chain: Chain }) {
               {address && (
                 <a
                   href={chain.attestationProvider?.viewerUrl(address)}
-                  className="pt-2 text-sm text-foreground-2 underline"
+                  className={`pt-2 text-sm ${expired ? "text-inherit" : "text-foreground-2"} underline`}
                 >
                   {chain.attestationProvider?.attestationExplorerLinkText}
                 </a>
               )}
-              <h2 className="my-3 pt-2 text-right text-base text-color-1">Moved</h2>
+              <div
+                className={`my-3 pt-2 text-right text-base ${expired ? "text-inherit" : "text-color-1"} leading-tight`}
+              >
+                {expired ? (
+                  "Expired"
+                ) : expirationDate ? (
+                  <>
+                    Expires
+                    <br />
+                    {formatDate(expirationDate)}
+                  </>
+                ) : (
+                  <Spinner size="sm" />
+                )}
+              </div>
             </>
           )}
-          <SyncToChainButton
-            className="inline-block rounded border border-foreground-2"
-            onChainStatus={onChainStatus}
-            chain={chain}
-          />
+          <SyncToChainButton className="justify-self-end" onChainStatus={status} chain={chain} />
         </div>
       </div>
     </div>
