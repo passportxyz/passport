@@ -128,7 +128,11 @@ export const Category = ({
   return (
     <>
       <Disclosure as="div" className={className} defaultOpen={true} key={category.name}>
-        <Disclosure.Button className="flex items-center border-b border-foreground-2" onClick={handleClick} as="div">
+        <Disclosure.Button
+          className="flex items-center border-b border-foreground-2 cursor-pointer"
+          onClick={handleClick}
+          as="div"
+        >
           <div className="grow flex flex-col items-start mr-1">
             <div className="text-xl text-color-6 font-bold lg:text-2xl leading-none lg:leading-none text-left py-2">
               {category.name}
