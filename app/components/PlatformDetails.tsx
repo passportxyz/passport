@@ -1,4 +1,4 @@
-import React, { Fragment, Ref, useContext, useMemo, useState } from "react";
+import React, { Fragment, Ref, useContext, useEffect, useMemo, useState } from "react";
 import { PlatformBanner, PlatformSpec } from "@gitcoin/passport-platforms";
 import { GenericBanner } from "./GenericBanner";
 import { JsonOutputModal } from "./JsonOutputModal";
@@ -47,7 +47,7 @@ const PlatformJsonButton = ({
     <>
       <Popover className="relative">
         <>
-          <Popover.Button ref={setReferenceElement as unknown as Ref<HTMLButtonElement>} className="ml-auto">
+          <Popover.Button ref={setReferenceElement as unknown as Ref<HTMLButtonElement>} className="ml-auto p-2">
             <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <ellipse cx="2" cy="2" rx="2" ry="2" fill="white" />
               <ellipse cx="2" cy="8" rx="2" ry="2" fill="white" />
@@ -134,7 +134,7 @@ const ProgressBar = ({ pointsGained, pointsAvailable }: { pointsGained: number; 
           fill="#C1F6FF"
           stroke="#0E2825"
           strokeWidth="5"
-          className="transition-[stroke-dashoffset] delay-100 duration-1000 ease-in-out"
+          className="transition-all duration-700 ease-in-out"
         />
       </svg>
     </div>
