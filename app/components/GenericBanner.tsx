@@ -4,12 +4,12 @@ export function GenericBanner({ banner }: { banner: PlatformBanner }) {
   return (
     <div className="mt-8 text-sm">
       {banner.heading && (
-        <p className="mb-2 font-bold inline-block">
+        <p className="mb-2 font-normal inline-block">
           {banner.heading}{" "}
           {banner.cta && (
             <a
               href={banner.cta.url}
-              className="inline-block underline text-color-5"
+              className="inline-block underline text-color-5 font-bold"
               target="_blank"
               rel="noopener noreferrer"
             >

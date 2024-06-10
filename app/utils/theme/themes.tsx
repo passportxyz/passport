@@ -23,8 +23,9 @@ export const LUNARPUNK_DARK_MODE: Theme = {
     focus: palette.red,
   },
   fonts: {
-    body: "futura-pt",
-    heading: "futura-pt",
+    body: "Poppins",
+    // body: "futura-pt",
+    heading: "Poppins",
     alt: "DM Mono",
   },
 };

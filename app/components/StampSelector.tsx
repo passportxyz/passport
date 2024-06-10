@@ -87,17 +87,17 @@ export function StampSelector({
                       <p className={`${verified && "font-bold text-color-6"}`}>
                         {verified && checkMark()} {provider.title}
                       </p>
-                      {provider.description && <p className="my-2 text-sm">{provider.description}</p>}
+                      {provider.description && <p className="my-2 text-sm leading-tight">{provider.description}</p>}
                     </div>
 
                     {/* TODO: dbl check with product this is not needed */}
                     {/* {FeatureFlags.FF_CHAIN_SYNC && isProviderOnChain(provider.name) && <OnchainTag marginLeft="3" />} */}
                     <div
-                      className={`bg-gradient-to-r from-foreground-2 to-foreground-4 w-1/4 flex items-center ${verified && "text-background-4"}`}
+                      className={`${verified && "bg-gradient-to-r from-foreground-2 to-foreground-4"} w-1/4 flex items-center ${verified && "text-background-4"}`}
                     >
-                      <p className="text-center w-full">
+                      <p className="text-2xl text-center w-full text-s leading-none">
                         <span className={`${verified && "font-bold"}`}>{weight}</span> <br />
-                        points{" "}
+                        <span className="text-base">points</span>
                       </p>
                     </div>
                   </div>
