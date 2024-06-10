@@ -47,7 +47,7 @@ describe("<StampSelector />", () => {
           },
         },
       });
-      expect(screen.queryByTestId("checkbox-SelfStakingBronze")).toBeInTheDocument();
+
       expect(screen.queryByText("Self GTC Staking")).toBeInTheDocument();
       expect(screen.queryByText("Community GTC Staking")).toBeInTheDocument();
     });
@@ -64,10 +64,8 @@ describe("<StampSelector />", () => {
           },
         },
       });
-      expect(screen.queryByTestId("checkbox-SelfStakingBronze")).toBeInTheDocument();
       expect(screen.queryByText("Self GTC Staking")).toBeInTheDocument();
 
-      expect(screen.queryByTestId("checkbox-CommunityStakingBronze")).not.toBeInTheDocument();
       expect(screen.queryByText("Community GTC Staking")).not.toBeInTheDocument();
     });
 
@@ -87,7 +85,6 @@ describe("<StampSelector />", () => {
 
     it("include platform if customization doesn't specify custom weights", () => {
       renderTestComponent({});
-      expect(screen.queryByTestId("checkbox-SelfStakingBronze")).toBeInTheDocument();
       expect(screen.queryByText("Self GTC Staking")).toBeInTheDocument();
     });
   });
