@@ -5,7 +5,7 @@ export const Spinner = () => (
     <path
       d="M1.74414 10.0003C1.74414 5.71535 5.21779 2.2417 9.50276 2.2417"
       stroke="black"
-      stroke-width="3"
+      strokeWidth="3"
       stroke-linecap="round"
     />
   </svg>

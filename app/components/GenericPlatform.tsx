@@ -103,16 +103,14 @@ export const GenericPlatform = ({
   const [verifiedProviders, setVerifiedProviders] = useState<PROVIDER_ID[]>(
     platformProviderIds.filter((providerId: any) => verifiedProviderIds.includes(providerId))
   );
-  // SelectedProviders will be passed in to the sidebar to be filled there...
-  const [selectedProviders, setSelectedProviders] = useState<PROVIDER_ID[]>([...verifiedProviders]);
 
   // Create Set to check initial verified providers
   const initialVerifiedProviders = new Set(verifiedProviders);
 
   // any time we change selection state...
   useEffect(() => {
-    setCanSubmit(selectedProviders.length > 0 && !arraysContainSameElements(selectedProviders, verifiedProviders));
-  }, [selectedProviders, verifiedProviders]);
+    setCanSubmit(platformProviderIds.length > 0 && !arraysContainSameElements(platformProviderIds, verifiedProviders));
+  }, [platformProviderIds, verifiedProviders]);
 
   const handleSponsorship = async (result: string): Promise<void> => {
     if (result === "success") {
@@ -162,6 +160,8 @@ export const GenericPlatform = ({
   const handleFetchCredential = async (): Promise<void> => {
     datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
     setLoading(true);
+    const selectedProviders = platformProviderIds;
+
     try {
       if (!did) throw new Error("No DID found");
 
@@ -238,7 +238,6 @@ export const GenericPlatform = ({
 
       // both verified and selected should look the same after save
       setVerifiedProviders([...actualVerifiedProviders]);
-      setSelectedProviders([...actualVerifiedProviders]);
 
       // Create Set to check changed providers after verification
       const updatedVerifiedProviders = new Set(actualVerifiedProviders);
@@ -322,7 +321,8 @@ export const GenericPlatform = ({
       return VerificationStatuses.ReVerified;
     } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size === 0) {
       return VerificationStatuses.PartiallyVerified;
-    } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0 && selectedProviders.length === 0) {
+      // dbl check below
+    } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0 && platformProviderIds.length === 0) {
       return VerificationStatuses.AllRemoved;
     } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
       return VerificationStatuses.PartiallyRemoved;
@@ -422,16 +422,16 @@ export const GenericPlatform = ({
 
     const hasStamps = verifiedProviders.length > 0;
 
-    if (hasStamps && selectedProviders.length === verifiedProviders.length) {
+    if (hasStamps && platformProviderIds.length === verifiedProviders.length) {
       return (
         <>
           <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M1.55019 4.83333L4.31019 8.5L11.4502 1.5"
               stroke="#010101"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
           Verified
@@ -440,7 +440,7 @@ export const GenericPlatform = ({
     }
 
     return "Verify";
-  }, [isReverifying, isLoading, submitted, canSubmit, verifiedProviders.length, selectedProviders.length]);
+  }, [isReverifying, isLoading, submitted, canSubmit, verifiedProviders.length, platformProviderIds.length]);
 
   return (
     <>
@@ -450,8 +450,6 @@ export const GenericPlatform = ({
         bannerConfig={platform.banner}
         currentProviders={platFormGroupSpec}
         verifiedProviders={verifiedProviders}
-        selectedProviders={selectedProviders}
-        setSelectedProviders={setSelectedProviders}
         isLoading={isLoading}
         verifyButton={
           <LoadButton

@@ -20,6 +20,7 @@ const setTheme = ({ colors, fonts }: Theme) => {
   r.style.setProperty("--color-text-4", colors.text4);
   r.style.setProperty("--color-text-5", colors.text5);
   r.style.setProperty("--color-text-6", colors.text6);
+  r.style.setProperty("--color-text-7", colors.text7);
   r.style.setProperty("--color-focus", colors.focus);
 
   r.style.setProperty("--font-body", fonts.body);

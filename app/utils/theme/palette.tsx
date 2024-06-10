@@ -14,6 +14,7 @@ export const palette = Object.entries({
   red: "#ff8846",
   brightBlue: "#4abeff",
   lightGrey: "#d2d2d2",
+  orange: "#FF8846",
 }).reduce(
   (rgbPalette, [name, hex]) => {
     rgbPalette[name] = hexToRGB(hex);

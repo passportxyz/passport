@@ -14,8 +14,6 @@ type StampSelectorProps = {
   currentPlatform?: PlatformSpec | undefined;
   currentProviders: PlatformGroupSpec[] | undefined;
   verifiedProviders: PROVIDER_ID[] | undefined;
-  selectedProviders: PROVIDER_ID[] | undefined;
-  setSelectedProviders: (providerIds: PROVIDER_ID[]) => void;
 };
 
 const checkMark = () => (
@@ -23,20 +21,14 @@ const checkMark = () => (
     <path
       d="M1.74412 4.33333L4.32795 8L11.0122 1"
       stroke="#C1F6FF"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
 
-export function StampSelector({
-  currentPlatform,
-  currentProviders,
-  verifiedProviders,
-  selectedProviders,
-  setSelectedProviders,
-}: StampSelectorProps) {
+export function StampSelector({ currentPlatform, currentProviders, verifiedProviders }: StampSelectorProps) {
   const { allProvidersState } = useContext(CeramicContext);
   const { activeChainProviders } = useOnChainData();
   const { stampWeights } = useContext(ScorerContext);

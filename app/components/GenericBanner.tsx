@@ -4,7 +4,7 @@ export function GenericBanner({ banner }: { banner: PlatformBanner }) {
   return (
     <div className="mt-8 text-sm">
       {banner.heading && (
-        <p className="mb-2 font-normal inline-block">
+        <div className="mb-2 font-normal inline-block">
           {banner.heading}{" "}
           {banner.cta && (
             <a
@@ -16,9 +16,9 @@ export function GenericBanner({ banner }: { banner: PlatformBanner }) {
               {banner.cta.label}
             </a>
           )}
-        </p>
+        </div>
       )}
-      <p className="mb-2 inline-block">{banner.content}</p>
+      <div className="mb-2 inline-block">{banner.content}</div>
     </div>
   );
 }
