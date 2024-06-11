@@ -3,7 +3,6 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { PlatformGroupSpec } from "../config/providers";
 import { useOnChainData } from "../hooks/useOnChainData";
-import { OnchainTag } from "./OnchainTag";
 import { CeramicContext } from "../context/ceramicContext";
 import { ScorerContext } from "../context/scorerContext";
 import { useCustomization } from "../hooks/useCustomization";
@@ -82,8 +81,6 @@ export function StampSelector({ currentPlatform, currentProviders, verifiedProvi
                       {provider.description && <p className="my-2 text-sm leading-tight">{provider.description}</p>}
                     </div>
 
-                    {/* TODO: dbl check with product this is not needed */}
-                    {/* {FeatureFlags.FF_CHAIN_SYNC && isProviderOnChain(provider.name) && <OnchainTag marginLeft="3" />} */}
                     <div
                       className={`${verified && "bg-gradient-to-r from-foreground-2 to-foreground-4"} w-1/4 flex items-center ${verified && "text-background-4"}`}
                     >
