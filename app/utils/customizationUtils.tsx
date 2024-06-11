@@ -52,6 +52,7 @@ export type DynamicCustomization = BasicCustomization & {
       };
     };
   };
+  allowList: boolean;
 };
 
 export type Customization = BasicCustomization | DynamicCustomization;
@@ -82,6 +83,7 @@ type CustomizationResponse = {
       };
     };
   };
+  allowList?: boolean;
 };
 
 const SanitizedHTMLComponent = ({ html }: { html: string }) => {
@@ -129,6 +131,7 @@ export const requestDynamicCustomizationConfig = async (
           },
         },
       },
+      allowList: customizationResponse.allowList || false,
     };
   } catch (e) {
     console.error("Failed to fetch customization config", e);

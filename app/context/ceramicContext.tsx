@@ -42,6 +42,7 @@ const {
   Civic,
   TrustaLabs,
   Outdid,
+  AllowList,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -364,6 +365,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [passportLoadResponse, setPassportLoadResponse] = useState<PassportLoadResponse | undefined>();
   const [passportHasCacaoError, setPassportHasCacaoError] = useState<boolean>(false);
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
+  const [allPlatforms, setAllPlatforms] = useState<Map<PLATFORM_ID, PlatformProps>>(new Map());
 
   const address = useWalletStore((state) => state.address);
   const { dbAccessToken, did, checkSessionIsValid } = useDatastoreConnectionContext();
@@ -371,6 +373,16 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const customization = useCustomization();
 
   const toast = useToast();
+
+  useEffect(() => {
+    if (isDynamicCustomization(customization) && customization.allowList) {
+      platforms.set("AllowList", {
+        platform: new AllowList.AllowListPlatform(),
+        platFormGroupSpec: AllowList.ProviderConfig,
+      });
+      setAllPlatforms(platforms);
+    }
+  }, [customization]);
 
   useEffect(() => {
     return () => {
@@ -427,7 +439,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         }
       });
     }
-  }, [database, customization]);
+  }, [database]);
 
   useEffect(() => {
     if (ceramicClient) {
@@ -828,7 +840,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     passport,
     isLoadingPassport,
     allProvidersState,
-    allPlatforms: platforms,
+    allPlatforms,
     handleCreatePassport,
     handleAddStamps,
     handlePatchStamps,

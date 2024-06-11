@@ -11,6 +11,8 @@ import PageWidthGrid from "../components/PageWidthGrid";
 import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
 import { Category } from "./Category";
 import { CeramicContext } from "../context/ceramicContext";
+import { useCustomization } from "../hooks/useCustomization";
+import { isDynamicCustomization } from "../utils/customizationUtils";
 
 export type CardListProps = {
   isLoading?: boolean;
@@ -68,6 +70,7 @@ export const getStampProviderIds = (platform: PLATFORM_ID): PROVIDER_ID[] => {
 export const CardList = ({ className, isLoading = false, initialOpen = true }: CardListProps): JSX.Element => {
   const { allProvidersState, allPlatforms } = useContext(CeramicContext);
   const { scoredPlatforms } = useContext(ScorerContext);
+  const customization = useCustomization();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef();
 
@@ -125,6 +128,10 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
       sortedPlatforms: PlatformScoreSpec[];
     };
   } = {};
+
+  if (isDynamicCustomization(customization) && customization.allowList) {
+    PLATFORM_CATEGORIES[0].platforms.push("AllowList");
+  }
 
   // Generate grouped stamps
   PLATFORM_CATEGORIES.forEach((category) => {
