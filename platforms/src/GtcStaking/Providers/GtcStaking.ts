@@ -115,7 +115,6 @@ export class GtcStakingProvider implements Provider {
         const results: Stake[] = response?.data?.results || [];
 
         // Verify id staking V2
-        const selfStakesV2: StakeV2[] = [];
         const communityStakesV2: StakeV2[] = [];
 
         const responseV2: StakeV2Response = await axios.get(`${gtcStakingEndpointV2}/${address}`, {
@@ -136,7 +135,7 @@ export class GtcStakingProvider implements Provider {
         resultsV2.forEach((stake: StakeV2) => {
           if (stake.staker == stake.stakee) {
             if (new Date(stake.unlock_time) > new Date()) {
-              selfStakeV2 = new BigNumber(stake.amount);
+              selfStakeV2 = selfStakeV2.plus(new BigNumber(stake.amount));
             }
           } else {
             communityStakesV2.push(stake);

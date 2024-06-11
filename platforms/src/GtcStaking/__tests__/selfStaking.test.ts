@@ -51,24 +51,29 @@ const gtcStakingResponse = (gtcAmount: string) => {
   };
 };
 
-const gtcStakingResponseV2 = (gtcAmount: string) => {
+interface TestStake {
+  amount: string;
+  chain: number;
+}
+
+const gtcStakingResponseV2 = (stakes: TestStake[]) => {
   const now = new Date();
   const unlock_time = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000); // + 2 days
 
   return {
     status: 200,
     data: {
-      items: [
-        {
-          id: 0,
-          chain: 1,
+      items: stakes.map((testStake, idx) => {
+        return {
+          id: idx,
+          chain: testStake.chain,
           unlock_time: unlock_time.toDateString(),
           lock_time: now.toDateString(),
           staker: MOCK_ADDRESS_LOWER,
           stakee: MOCK_ADDRESS_LOWER,
-          amount: gtcAmount,
-        },
-      ],
+          amount: testStake.amount,
+        };
+      }),
     },
   };
 };
@@ -365,14 +370,98 @@ describe("Attempt verification V2", function () {
     jest.clearAllMocks();
   });
 
-  it("handles valid verification attempt", async () => {
+  it("handles valid verification attempt with 1 self-stake", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("10"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "10", chain: 1 }]));
       }
     });
 
     const selfStakingProvider = new SelfStakingBronzeProvider();
+    const verifiedPayload = await selfStakingProvider.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
+    expect(verifiedPayload).toEqual({
+      valid: true,
+      record: {
+        address: MOCK_ADDRESS_LOWER,
+      },
+    });
+  });
+
+  it("handles valid verification attempt with multiple self-stakes for bronze level", async () => {
+    (axios.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.startsWith(gtcStakingEndpointV2)) {
+        return Promise.resolve(
+          gtcStakingResponseV2([
+            { amount: "2", chain: 1 },
+            { amount: "2", chain: 2 },
+            { amount: "1", chain: 3 },
+          ])
+        );
+      }
+    });
+
+    const selfStakingProvider = new SelfStakingBronzeProvider();
+    const verifiedPayload = await selfStakingProvider.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
+    expect(verifiedPayload).toEqual({
+      valid: true,
+      record: {
+        address: MOCK_ADDRESS_LOWER,
+      },
+    });
+  });
+
+  it("handles valid verification attempt with multiple self-stakes for silver level", async () => {
+    (axios.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.startsWith(gtcStakingEndpointV2)) {
+        return Promise.resolve(
+          gtcStakingResponseV2([
+            { amount: "2", chain: 1 },
+            { amount: "8", chain: 2 },
+            { amount: "10", chain: 3 },
+          ])
+        );
+      }
+    });
+
+    const selfStakingProvider = new SelfStakingSilverProvider();
+    const verifiedPayload = await selfStakingProvider.verify(
+      {
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload,
+      {}
+    );
+    expect(verifiedPayload).toEqual({
+      valid: true,
+      record: {
+        address: MOCK_ADDRESS_LOWER,
+      },
+    });
+  });
+
+  it("handles valid verification attempt with multiple self-stakes for gold level", async () => {
+    (axios.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.startsWith(gtcStakingEndpointV2)) {
+        return Promise.resolve(
+          gtcStakingResponseV2([
+            { amount: "35", chain: 1 },
+            { amount: "80", chain: 2 },
+            { amount: "10", chain: 3 },
+          ])
+        );
+      }
+    });
+
+    const selfStakingProvider = new SelfStakingGoldProvider();
     const verifiedPayload = await selfStakingProvider.verify(
       {
         address: MOCK_ADDRESS_LOWER,
@@ -398,11 +487,11 @@ describe("should return invalid payload V2", function () {
     jest.clearAllMocks();
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("4"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "4", chain: 1 }]));
       }
     });
 
-    const gtcStakeAmount = gtcStakingResponseV2("4").data.items[0].amount;
+    const gtcStakeAmount = gtcStakingResponseV2([{ amount: "4", chain: 1 }]).data.items[0].amount;
 
     const selfstaking = new SelfStakingBronzeProvider();
     const selfstakingPayload = await selfstaking.verify(
@@ -424,11 +513,11 @@ describe("should return invalid payload V2", function () {
     jest.clearAllMocks();
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("18"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "18", chain: 1 }]));
       }
     });
 
-    const gtcStakeAmount = gtcStakingResponseV2("18").data.items[0].amount;
+    const gtcStakeAmount = gtcStakingResponseV2([{ amount: "18", chain: 1 }]).data.items[0].amount;
 
     const selfstaking = new SelfStakingSilverProvider();
     const selfstakingPayload = await selfstaking.verify(
@@ -450,11 +539,11 @@ describe("should return invalid payload V2", function () {
     jest.clearAllMocks();
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("122"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "122", chain: 1 }]));
       }
     });
 
-    const gtcStakeAmount = gtcStakingResponseV2("122").data.items[0].amount;
+    const gtcStakeAmount = gtcStakingResponseV2([{ amount: "122", chain: 1 }]).data.items[0].amount;
 
     const selfstaking = new SelfStakingGoldProvider();
 
@@ -479,7 +568,7 @@ describe("should return valid payload V2", function () {
   it("when stake amount above 5 GTC for Bronze", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("6"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "6", chain: 1 }]));
       }
     });
 
@@ -500,7 +589,7 @@ describe("should return valid payload V2", function () {
   it("when stake amount above 20 GTC for Silver", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("21"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "21", chain: 1 }]));
       }
     });
 
@@ -521,7 +610,7 @@ describe("should return valid payload V2", function () {
   it("when stake amount above 125 GTC for Gold", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("126"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "126", chain: 1 }]));
       }
     });
 
@@ -543,7 +632,7 @@ describe("should return valid payload V2", function () {
   it("when stake amount equal to 5 GTC for Bronze", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("5"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "5", chain: 1 }]));
       }
     });
 
@@ -564,7 +653,7 @@ describe("should return valid payload V2", function () {
   it("when stake amount equal to 20 GTC for Silver", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("20"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "20", chain: 1 }]));
       }
     });
 
@@ -585,7 +674,7 @@ describe("should return valid payload V2", function () {
   it("when stake amount equal to 125 GTC for Gold", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("125"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "125", chain: 1 }]));
       }
     });
 
@@ -613,7 +702,7 @@ describe("should return valid payload V1 & V2", function () {
         return Promise.resolve(gtcStakingResponse("3"));
       }
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("3"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "3", chain: 1 }]));
       }
     });
 
@@ -638,7 +727,7 @@ describe("should return valid payload V1 & V2", function () {
         return Promise.resolve(gtcStakingResponse("10"));
       }
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("11"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "11", chain: 1 }]));
       }
     });
 
@@ -663,7 +752,7 @@ describe("should return valid payload V1 & V2", function () {
         return Promise.resolve(gtcStakingResponse("50"));
       }
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("76"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "76", chain: 1 }]));
       }
     });
 
@@ -689,7 +778,7 @@ describe("should return valid payload V1 & V2", function () {
         return Promise.resolve(gtcStakingResponse("2"));
       }
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("3"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "3", chain: 1 }]));
       }
     });
 
@@ -714,7 +803,7 @@ describe("should return valid payload V1 & V2", function () {
         return Promise.resolve(gtcStakingResponse("10"));
       }
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("10"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "10", chain: 1 }]));
       }
     });
 
@@ -739,7 +828,7 @@ describe("should return valid payload V1 & V2", function () {
         return Promise.resolve(gtcStakingResponse("100"));
       }
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2("25"));
+        return Promise.resolve(gtcStakingResponseV2([{ amount: "25", chain: 1 }]));
       }
     });
 
