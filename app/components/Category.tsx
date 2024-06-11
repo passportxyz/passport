@@ -95,8 +95,6 @@ export const Category = ({
   let currentPlatformSelection = (
     <SideBarContent
       verifiedProviders={undefined}
-      selectedProviders={undefined}
-      setSelectedProviders={undefined}
       currentPlatform={undefined}
       currentProviders={undefined}
       isLoading={undefined}
