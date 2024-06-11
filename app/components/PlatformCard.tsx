@@ -1,12 +1,16 @@
 // --- React Methods
-import { useMemo, useState } from "react";
+import { useMemo, useState, useContext } from "react";
+
+// --- Using date library
+import { formatDistanceToNow } from "date-fns";
 
 // --- Types
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { PLATFORM_ID, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
 
 // --- Components
 import { Button } from "./Button";
 import { PlatformScoreSpec } from "../context/scorerContext";
+import { CeramicContext } from "../context/ceramicContext";
 import { useCustomization } from "../hooks/useCustomization";
 import { isDynamicCustomization } from "../utils/customizationUtils";
 import { getStampProviderIds } from "./CardList";
@@ -32,13 +36,39 @@ export const PlatformCard = ({
 }: PlatformCardProps): JSX.Element => {
   const [hovering, setHovering] = useState(false);
   const platformIsExcluded = usePlatformIsExcluded(platform);
+  const { passport } = useContext(CeramicContext);
+  const platformProviders = selectedProviders[platform.platform];
+  let earliestExpirationDate: Date | null = null;
+
+  // Get the stamps for this platform
+  // Also check for the earliest expiration date
+  const platformStamps: Partial<Record<PROVIDER_ID, Stamp>> = !passport
+    ? {}
+    : platformProviders.reduce<Partial<Record<PROVIDER_ID, Stamp>>>((acc, provider) => {
+        const stamp = passport?.stamps.find((stamps) => stamps.provider === provider);
+        if (stamp) {
+          const d = new Date(stamp.credential.expirationDate);
+          if (!earliestExpirationDate || d < earliestExpirationDate) {
+            earliestExpirationDate = d;
+          }
+        }
+        acc[provider] = stamp;
+        return acc;
+      }, {});
+
+  // Get the string refering to the eraliest expiration date
+  const distanceToExpiration = earliestExpirationDate ? formatDistanceToNow(earliestExpirationDate) : "";
+
+  console.log("geri platformStamps", platformStamps);
+  console.log("geri earliestExpirationDate", earliestExpirationDate);
+  console.log("geri distanceToExpiration", distanceToExpiration);
 
   if (platformIsExcluded) return <></>;
 
   const verified = platform.earnedPoints > 0 || selectedProviders[platform.platform].length > 0;
 
   const platformClasses = verified
-    ? "border-foreground-5 hover:border-foreground-4 hover:to-foreground-5/50 hover:shadow-foreground-4 hover:text-color-2 text-foreground-5 override-text-color"
+    ? "border-foreground-5 hover:border-foreground-4 hover:to-foreground-5/50 hover:shadow-foreground-4 hover:text-color-2 text-foreground-5"
     : "border-foreground-6 hover:border-background-3 hover:to-background-2 hover:shadow-background-3";
 
   const imgFilter = verified
@@ -117,7 +147,7 @@ export const PlatformCard = ({
               {platform.description}
             </p>
           </div>
-          <div>
+          {!verified && (
             <Button
               data-testid="connect-button"
               variant="custom"
@@ -126,9 +156,22 @@ export const PlatformCard = ({
               }`}
             >
               {verified ? "Verified" : "Connect"}
-            </Button>
-          </div>
+            </Button>)}
         </div>
+        {verified && (
+          <div className="flex items-center px-4 py-2 border-t border-foreground-4">
+            <div className="flex-none">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M12 6C12 6.78793 11.8448 7.56815 11.5433 8.2961C11.2417 9.02405 10.7998 9.68549 10.2426 10.2426C9.68549 10.7998 9.02405 11.2417 8.2961 11.5433C7.56815 11.8448 6.78793 12 6 12L6 6H12Z"
+                  fill="#C1F6FF"
+                />
+                <circle cx="6" cy="6" r="5.5" stroke="#C1F6FF" />
+              </svg>
+            </div>
+            <div className="flex-1 pl-2 text-foreground-2 override-text-color">{distanceToExpiration} until expiry</div>
+          </div>
+        )}
       </div>
     </div>
   );
