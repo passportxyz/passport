@@ -12,9 +12,12 @@ import { mutableUserVerificationAtom } from "../context/userState";
 import { datadogLogs } from "@datadog/browser-logs";
 import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../components/DoneToastContent";
+import { useCustomization } from "./useCustomization";
+import { isDynamicCustomization } from "../utils/customizationUtils";
 
 export const useOneClickVerification = () => {
   const [verificationState, setUserVerificationState] = useAtom(mutableUserVerificationAtom);
+  const customization = useCustomization();
 
   const { did } = useDatastoreConnectionContext();
   const { passport, allPlatforms, handlePatchStamps } = useContext(CeramicContext);
@@ -32,7 +35,13 @@ export const useOneClickVerification = () => {
     });
 
     try {
-      const possiblePlatforms = await fetchPossibleEVMStamps(address, allPlatforms, passport, true);
+      let proofs: { [k: string]: string } = {};
+
+      if (isDynamicCustomization(customization) && customization.allowList) {
+        proofs.allowListType = customization.key;
+      }
+
+      const possiblePlatforms = await fetchPossibleEVMStamps(address, allPlatforms, passport, true, proofs);
       if (possiblePlatforms.length === 0) {
         setUserVerificationState({
           ...verificationState,
@@ -59,7 +68,7 @@ export const useOneClickVerification = () => {
           types: validatedProviderIds,
           version: "0.0.0",
           address: address || "",
-          proofs: {},
+          proofs,
           signatureType: IAM_SIGNATURE_TYPE,
         },
         (data: any) => createSignedPayload(did, data)

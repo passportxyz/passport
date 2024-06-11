@@ -26,6 +26,8 @@ import { datadogRum } from "@datadog/browser-rum";
 import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../components/DoneToastContent";
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
+import { isDynamicCustomization } from "../utils/customizationUtils";
+import { useCustomization } from "../hooks/useCustomization";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -89,6 +91,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
   const { handlePatchStamps, userDid } = useContext(CeramicContext);
   const address = useWalletStore((state) => state.address);
   const { did } = useDatastoreConnectionContext();
+  const customization = useCustomization();
   const toast = useToast();
   const [status, setStatus] = useState(StampClaimProgressStatus.Idle);
 
@@ -167,6 +170,10 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
           let providerPayload: {
             [k: string]: string;
           } = {};
+
+          if (isDynamicCustomization(customization) && customization.allowList) {
+            providerPayload.allowListType = customization.key;
+          }
 
           if (platform) {
             // This if should only be true if platformId !== "EVMBulkVerify"

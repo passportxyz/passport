@@ -2,7 +2,6 @@
 import { datadogLogs } from "@datadog/browser-logs";
 
 // --- Identity tools
-import { fetchChallengeCredential } from "@gitcoin/passport-identity";
 import { CheckResponseBody, Passport, PLATFORM_ID, PROVIDER_ID, VerifiableCredential } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
 import { PlatformGroupSpec } from "../config/providers";
@@ -51,7 +50,8 @@ export const fetchPossibleEVMStamps = async (
   address: string,
   allPlatforms: Map<PLATFORM_ID, PlatformProps>,
   passport: Passport | undefined | false,
-  reIssueStamps: boolean = false
+  reIssueStamps: boolean = false,
+  proofs?: { [k: string]: string }
 ): Promise<ValidatedPlatform[]> => {
   const allPlatformsData = Array.from(allPlatforms.values());
   const evmPlatforms: PlatformProps[] = allPlatformsData.filter(({ platform }) => platform.isEVM);
@@ -61,6 +61,7 @@ export const fetchPossibleEVMStamps = async (
     types: getTypesToCheck(evmPlatforms, passport, reIssueStamps),
     address,
     version: "0.0.0",
+    proofs,
   };
 
   let response: { data: CheckResponseBody[] };

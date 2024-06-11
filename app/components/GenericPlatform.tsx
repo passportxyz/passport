@@ -39,6 +39,8 @@ import { PlatformScoreSpec } from "../context/scorerContext";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useAtom } from "jotai";
 import { mutableUserVerificationAtom } from "../context/userState";
+import { isDynamicCustomization } from "../utils/customizationUtils";
+import { useCustomization } from "../hooks/useCustomization";
 
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
@@ -86,6 +88,7 @@ export const GenericPlatform = ({
   const [payloadModalIsOpen, setPayloadModalIsOpen] = useState(false);
   const { did, checkSessionIsValid } = useDatastoreConnectionContext();
   const [verificationState, _setUserVerificationState] = useAtom(mutableUserVerificationAtom);
+  const customization = useCustomization();
 
   // --- Chakra functions
   const toast = useToast();
@@ -177,6 +180,10 @@ export const GenericPlatform = ({
       })) as {
         [k: string]: string;
       };
+
+      if (isDynamicCustomization(customization) && customization.allowList) {
+        providerPayload.allowListType = customization.key;
+      }
 
       if (providerPayload.sessionKey === "brightid") {
         handleSponsorship(providerPayload.code);
