@@ -100,8 +100,6 @@ describe("when user has not verified with EnsProvider", () => {
     );
     renderWithContext(mockCeramicContext, drawer());
 
-    const firstSwitch = screen.queryByTestId("select-all");
-    fireEvent.click(firstSwitch as HTMLElement);
     const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
 
     fireEvent.click(initialVerifyButton as HTMLElement);
@@ -126,8 +124,6 @@ describe("when user has not verified with EnsProvider", () => {
     );
     renderWithContext(mockCeramicContext, drawer());
 
-    const firstSwitch = screen.queryByTestId("select-all");
-    fireEvent.click(firstSwitch as HTMLElement);
     const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
 
     fireEvent.click(initialVerifyButton as HTMLElement);
@@ -155,8 +151,6 @@ describe("when user has not verified with EnsProvider", () => {
       checkSessionIsValid: () => false,
     });
 
-    const firstSwitch = screen.queryByTestId("select-all");
-    fireEvent.click(firstSwitch as HTMLElement);
     const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
 
     fireEvent.click(initialVerifyButton as HTMLElement);
@@ -205,9 +199,6 @@ describe("when user has previously verified with EnsProvider", () => {
       },
       drawer()
     );
-
-    const firstSwitch = screen.queryByTestId("select-all");
-    fireEvent.click(firstSwitch as HTMLElement);
     const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
     fireEvent.click(initialVerifyButton as HTMLElement);
 
@@ -240,8 +231,6 @@ describe("Mulitple EVM plaftorms", () => {
     );
     renderWithContext(mockCeramicContext, drawer());
 
-    const firstSwitch = screen.queryByTestId("select-all");
-    fireEvent.click(firstSwitch as HTMLElement);
     const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
 
     fireEvent.click(initialVerifyButton as HTMLElement);
@@ -267,9 +256,6 @@ it("should indicate that there was an error issuing the credential", async () =>
     </ChakraProvider>
   );
   renderWithContext({ ...mockCeramicContext, handlePatchStamps: jest.fn().mockRejectedValue(500) }, drawer());
-
-  const firstSwitch = screen.queryByTestId("select-all");
-  fireEvent.click(firstSwitch as HTMLElement);
   const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
 
   fireEvent.click(initialVerifyButton as HTMLElement);

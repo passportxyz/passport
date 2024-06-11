@@ -76,11 +76,11 @@ describe("SideBarContent", () => {
     renderWithContext(mockCeramicContext, drawer());
 
     verifiedProviders.forEach((provider) => {
-      expect(screen.getByTestId(`indicator-${provider}`)).toHaveClass("text-color-2");
+      expect(screen.getByTestId(`indicator-${provider}`)).toHaveClass("border-foreground-2");
     });
   });
 
-  it("should mark non verified providers with white text", () => {
+  it("should mark non verified providers with dull border", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />
@@ -99,27 +99,7 @@ describe("SideBarContent", () => {
     );
 
     nonVerifiedProviders?.forEach((provider) => {
-      expect(screen.getByTestId(`indicator-${provider}`)).toHaveClass("text-color-1");
-    });
-  });
-
-  it("should set switches as checked", () => {
-    const drawer = () => (
-      <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
-        <DrawerOverlay />
-        <SideBarContent {...props} />
-      </Drawer>
-    );
-    renderWithContext(mockCeramicContext, drawer());
-
-    props.currentProviders?.forEach((stamp) => {
-      stamp.providers.forEach((provider, i) => {
-        if (verifiedProviders.includes(provider.name as PROVIDER_ID)) {
-          expect(screen.getByTestId(`checkbox-${provider.name}`)).toHaveAttribute("data-headlessui-state", "checked");
-        } else {
-          expect(screen.getByTestId(`checkbox-${provider.name}`).attributes).not.toContain("data-headlessui-state");
-        }
-      });
+      expect(screen.getByTestId(`indicator-${provider}`)).toHaveClass("border-color-3");
     });
   });
 });
