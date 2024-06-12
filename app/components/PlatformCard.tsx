@@ -37,15 +37,11 @@ type StampProps = {
 };
 
 const DefaultStamp = ({ idx, platform, className, onClick }: StampProps) => {
-  const [hovering, setHovering] = useState(false);
-  const platformClasses = "bg-gradient-to-b from-background to-background-2/70 hover:border-background-3 hover:to-background-2 hover:shadow-background-3 border-foreground-6";
-
   return (
     <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
       <div
-        onMouseEnter={() => setHovering(true)}
-        onMouseLeave={() => setHovering(false)}
-        className={`group relative flex h-full cursor-pointer flex-col rounded-lg border p-0 transition-all ease-out ${platformClasses}`}
+        className="group relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-6 p-0 transition-all ease-out bg-gradient-to-b from-background to-background-2/70 
+        hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-transparent hover:shadow-even-md hover:border-background-3 hover:to-background-2 hover:shadow-background-3"
       >
         <img
           src="./assets/card-background.svg"
@@ -96,7 +92,7 @@ const DefaultStamp = ({ idx, platform, className, onClick }: StampProps) => {
           <Button
             data-testid="connect-button"
             variant="custom"
-            className="mt-5 w-auto border bg-transparent text-foreground-2 border-foreground-2"
+            className="mt-5 w-auto border bg-transparent text-foreground-2 border-foreground-2 z-10"
           >
             Connect
           </Button>
