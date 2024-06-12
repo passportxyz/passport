@@ -10,6 +10,7 @@ import { RemoveStampModal } from "./RemoveStampModal";
 import { STAMP_PROVIDERS } from "../config/providers";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { ProgressBar } from "./ProgressBar";
+import { getDaysToExpiration } from "../utils/duration";
 
 const PlatformJsonButton = ({
   platformPassportData,
@@ -93,16 +94,13 @@ const PlatformJsonButton = ({
 };
 
 const ExpirationIndicator = ({ expirationDate }: { expirationDate: string }) => {
-  const now = new Date().getTime();
-  const expirationMillis = new Date(expirationDate).getTime();
-  const oneDay = 24 * 60 * 60 * 1000;
-  const daysUntilExpiration = (expirationMillis - now) / oneDay;
+  const daysUntilExpiration = getDaysToExpiration({ expirationDate });
   const status = daysUntilExpiration > 45 ? "#A0FE7F" : daysUntilExpiration > 10 ? "#FEF17F" : "#FEA57F";
 
   return (
     <div className="pl-4 flex items-center text-color-6 bg-gradient-to-b from-background via-background to-[#082F2A] border border-t-0 rounded-t-none rounded-b-lg border-foreground-5 py-2">
-      <span className={`text-3xl pr-2 text-[${status}]`}>{daysUntilExpiration.toFixed(0)}</span> days until stamps
-      expire
+      <span className={`text-3xl pr-2 text-[${status}]`}>{daysUntilExpiration}</span>{" "}
+      {daysUntilExpiration === 1 ? "day" : "days"} until stamps expire
     </div>
   );
 };

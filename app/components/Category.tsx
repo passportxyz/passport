@@ -144,7 +144,7 @@ export const Category = ({
         {panelMounted && (
           <Disclosure.Panel className={`transition-all transit duration-150 ease-in-out my-4`} static>
             <span className="text-color-2 py-2 my-4">{category.description}</span>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 my-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 my-8">
               {category.sortedPlatforms.map((platform, i) => {
                 return isLoading ? (
                   <LoadingCard key={i} className={cardClassName} />

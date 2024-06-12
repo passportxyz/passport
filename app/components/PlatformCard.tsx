@@ -1,9 +1,6 @@
 // --- React Methods
 import { useMemo, useState, useContext } from "react";
 
-// --- Using date library
-import { formatDistanceToNow } from "date-fns";
-
 // --- Types
 import { PLATFORM_ID, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
 
@@ -15,6 +12,7 @@ import { useCustomization } from "../hooks/useCustomization";
 import { isDynamicCustomization } from "../utils/customizationUtils";
 import { getStampProviderIds } from "./CardList";
 import { ProgressBar } from "./ProgressBar";
+import { getDaysToExpiration } from "../utils/duration";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -30,7 +28,7 @@ type PlatformCardProps = {
 type StampProps = {
   idx: number;
   platform: PlatformScoreSpec;
-  distanceToExpiration?: string;
+  daysUntilExpiration?: number;
   className?: string;
   onClick: () => void;
 };
@@ -101,9 +99,8 @@ const DefaultStamp = ({ idx, platform, className, onClick }: StampProps) => {
   );
 };
 
-const VerifiedStamp = ({ idx, platform, distanceToExpiration, className, onClick }: StampProps) => {
+const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick }: StampProps) => {
   const [hovering, setHovering] = useState(false);
-  const platformClasses = "bg-gradient-to-b from-background to-foreground-5/70";
   const imgFilter = {
     filter: `invert(27%) sepia(97%) saturate(295%) hue-rotate(113deg) brightness(${
       hovering ? "100%" : "56%"
@@ -114,7 +111,10 @@ const VerifiedStamp = ({ idx, platform, distanceToExpiration, className, onClick
       <div
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
-        className={`group relative flex h-full cursor-pointer flex-col rounded-lg border p-0 transition-all ease-out ${platformClasses}`}
+        className="group relative flex h-full cursor-pointer flex-col rounded-lg border p-0 transition-all ease-out
+        hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-transparent hover:shadow-even-md 
+        border-foreground-5 hover:border-foreground-4 hover:to-foreground-5/70 hover:shadow-foreground-4
+        bg-gradient-to-b from-background to-foreground-5/40"
       >
         <div className="m-6 flex h-full flex-col justify-between">
           <div className="flex w-full items-center justify-between">
@@ -155,9 +155,13 @@ const VerifiedStamp = ({ idx, platform, distanceToExpiration, className, onClick
             </p>
           </div>
 
-          <div>Points gained</div>
+          <div className="text-color-6">Points gained</div>
           <div className="text-2xl font-bold">{platform.earnedPoints.toFixed(2)}</div>
-          <ProgressBar pointsGained={platform.earnedPoints} pointsAvailable={platform.possiblePoints - platform.earnedPoints} isSlim={true} />
+          <ProgressBar
+            pointsGained={platform.earnedPoints}
+            pointsAvailable={platform.possiblePoints - platform.earnedPoints}
+            isSlim={true}
+          />
         </div>
         <div className="flex items-center px-4 py-2 border-t border-foreground-4">
           <div className="flex-none">
@@ -169,14 +173,16 @@ const VerifiedStamp = ({ idx, platform, distanceToExpiration, className, onClick
               <circle cx="6" cy="6" r="5.5" stroke="#C1F6FF" />
             </svg>
           </div>
-          <div className="flex-1 pl-2 text-foreground-2 override-text-color">{distanceToExpiration} until expiry</div>
+          <div className="flex-1 pl-2 text-foreground-2 override-text-color">
+            {daysUntilExpiration} {daysUntilExpiration === 1 ? "day" : "days"} until stamps expire
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-const ExpiredStamp = ({ idx, platform, distanceToExpiration, className, onClick }: StampProps) => {
+const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick }: StampProps) => {
   return <></>;
 };
 
@@ -214,7 +220,7 @@ export const PlatformCard = ({
       }, {});
 
   // Get the string refering to the eraliest expiration date
-  const distanceToExpiration = earliestExpirationDate ? formatDistanceToNow(earliestExpirationDate) : "";
+  const daysUntilExpiration = getDaysToExpiration({ expirationDate: earliestExpirationDate });
   let isExpired: boolean = now.getTime() - earliestExpirationDate.getTime() > 0;
 
   if (platformIsExcluded) return <></>;
@@ -227,7 +233,6 @@ export const PlatformCard = ({
     <DefaultStamp
       idx={i}
       platform={platform}
-      distanceToExpiration={distanceToExpiration}
       className={className}
       onClick={() => {
         setCurrentPlatform(platform);
@@ -241,7 +246,7 @@ export const PlatformCard = ({
       <VerifiedStamp
         idx={i}
         platform={platform}
-        distanceToExpiration={distanceToExpiration}
+        daysUntilExpiration={daysUntilExpiration}
         className={className}
         onClick={() => {
           setCurrentPlatform(platform);
@@ -257,7 +262,7 @@ export const PlatformCard = ({
       <ExpiredStamp
         idx={i}
         platform={platform}
-        distanceToExpiration={distanceToExpiration}
+        daysUntilExpiration={daysUntilExpiration}
         className={className}
         onClick={() => {
           setCurrentPlatform(platform);
