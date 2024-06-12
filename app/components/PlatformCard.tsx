@@ -38,7 +38,7 @@ type StampProps = {
 
 const DefaultStamp = ({ idx, platform, className, onClick }: StampProps) => {
   const [hovering, setHovering] = useState(false);
-  const platformClasses = "bg-gradient-to-b from-background to-background-2/70";
+  const platformClasses = "bg-gradient-to-b from-background to-background-2/70 hover:border-background-3 hover:to-background-2 hover:shadow-background-3 border-foreground-6";
 
   return (
     <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
