@@ -12,21 +12,20 @@ export interface AllowListResponse {
 
 export class AllowListProvider implements Provider {
   type = "AllowList";
-  
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
       const { address } = payload;
-      const {allowListType} = payload.proofs;
-      const response: AllowListResponse = await axios.get(`${allowListEndpoint}/${allowListType}/${address}`);
+      const { allowList } = payload.proofs;
+      const response: AllowListResponse = await axios.get(`${allowListEndpoint}/${allowList}/${address}`);
       const valid = response.data.on_list;
 
       return {
         valid,
-        record: { address },
-      }
+        record: { address, allowList },
+      };
     } catch (e) {
       throw new ProviderExternalVerificationError(String(e));
-    } 
+    }
   }
 }

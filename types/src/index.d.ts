@@ -367,6 +367,7 @@ export type PLATFORM_CATEGORY = {
   platforms: PLATFORM_ID[];
 };
 
+export type DynamicProviderId = `AllowList#${string}`;
 export type PROVIDER_ID =
   | "Signer"
   | "Google"
@@ -440,7 +441,8 @@ export type PROVIDER_ID =
   | "ETHGasSpent#0.25"
   | "ETHnumTransactions#100"
   | "Outdid"
-  | "AllowList";
+  | "AllowList"
+  | DynamicProviderId;
 
 export type StampBit = {
   bit: number;

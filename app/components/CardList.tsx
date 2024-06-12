@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 
 import { PLATFORMS } from "../config/platforms";
-import { PlatformGroupSpec, STAMP_PROVIDERS } from "../config/providers";
+import { PlatformGroupSpec, STAMP_PROVIDERS, customStampProviders } from "../config/providers";
 
 // --- Chakra UI Elements
 import { Drawer, DrawerOverlay, useDisclosure } from "@chakra-ui/react";
@@ -38,6 +38,7 @@ export const PLATFORM_CATEGORIES: PLATFORM_CATEGORY[] = [
       "Brightid",
       "TrustaLabs",
       "Ens",
+      "AllowList",
     ],
   },
   {
@@ -94,7 +95,9 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
       PLATFORMS.reduce((platforms, platform) => {
         // get all providerIds for this platform
         const providerIds =
-          STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
+          customStampProviders(isDynamicCustomization(customization) ? customization : undefined)[
+            platform.platform
+          ]?.reduce((all, stamp) => {
             return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
           }, [] as PROVIDER_ID[]) || [];
         // default to empty array for each platform

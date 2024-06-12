@@ -185,6 +185,18 @@ const addErrorDetailsToMessage = (message: string, error: any): string => {
   return message;
 };
 
+const modifyRecordType = (record: { [k: string]: string }, type: string): string => {
+  if (record.pii) {
+    return `${type}#${record.pii}`;
+  }
+
+  if (record.allowList) {
+    return `${type}#${record.allowList}`;
+  }
+
+  return type;
+};
+
 // return response for given payload
 const issueCredentials = async (
   types: string[],
@@ -211,7 +223,7 @@ const issueCredentials = async (
           // construct a set of Proofs to issue a credential against (this record will be used to generate a sha256 hash of any associated PII)
           record = {
             // type and address will always be known and can be obtained from the resultant credential
-            type: verifyResult.record.pii ? `${type}#${verifyResult.record.pii}` : type,
+            type: modifyRecordType(verifyResult.record, type),
             // version is defined by entry point
             version: "0.0.0",
             // extend/overwrite with record returned from the provider

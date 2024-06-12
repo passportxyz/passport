@@ -172,7 +172,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
           } = {};
 
           if (isDynamicCustomization(customization) && customization.allowList) {
-            providerPayload.allowListType = customization.key;
+            providerPayload.allowList = customization.key;
           }
 
           if (platform) {

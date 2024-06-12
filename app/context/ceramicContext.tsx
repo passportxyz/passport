@@ -51,7 +51,7 @@ import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../components/DoneToastContent";
 import { useCustomization } from "../hooks/useCustomization";
-import { isDynamicCustomization } from "../utils/customizationUtils";
+import { DynamicCustomization, isDynamicCustomization } from "../utils/customizationUtils";
 
 // -- Trusted IAM servers DID
 const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
@@ -351,6 +351,23 @@ export const cleanPassport = (
   return { passport, expiredProviders: tempExpiredProviders, expirationDateProviders };
 };
 
+export const updateAllowListGroupSpec = (
+  existingGroupSpec: PlatformGroupSpec[],
+  customization: DynamicCustomization
+): PlatformGroupSpec[] => {
+  return existingGroupSpec.map((groupSpec) => {
+    return {
+      ...groupSpec,
+      providers: groupSpec.providers.map((provider) => {
+        if (provider.name === "AllowList") {
+          return { ...provider, name: `${provider.name}#${customization.key}` };
+        }
+        return provider;
+      }),
+    };
+  });
+};
+
 export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
   const resolveCancel = useRef<() => void>();
@@ -376,9 +393,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   useEffect(() => {
     if (isDynamicCustomization(customization) && customization.allowList) {
+      const platFormGroupSpec = updateAllowListGroupSpec(AllowList.ProviderConfig, customization);
       platforms.set("AllowList", {
         platform: new AllowList.AllowListPlatform(),
-        platFormGroupSpec: AllowList.ProviderConfig,
+        platFormGroupSpec,
       });
       setAllPlatforms(platforms);
     }

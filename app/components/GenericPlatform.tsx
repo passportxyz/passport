@@ -181,8 +181,15 @@ export const GenericPlatform = ({
         [k: string]: string;
       };
 
+      let types = selectedProviders;
       if (isDynamicCustomization(customization) && customization.allowList) {
-        providerPayload.allowListType = customization.key;
+        providerPayload.allowList = customization.key;
+        types = types.map((provider) => {
+          if (provider.includes("Allow")) {
+            return provider.split("#")[0];
+          }
+          return provider;
+        }) as PROVIDER_ID[];
       }
 
       if (providerPayload.sessionKey === "brightid") {
@@ -196,7 +203,7 @@ export const GenericPlatform = ({
         iamUrl,
         {
           type: platform.platformId,
-          types: selectedProviders,
+          types,
           version: "0.0.0",
           address: address || "",
           proofs: providerPayload,

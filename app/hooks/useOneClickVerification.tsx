@@ -38,7 +38,7 @@ export const useOneClickVerification = () => {
       let proofs: { [k: string]: string } = {};
 
       if (isDynamicCustomization(customization) && customization.allowList) {
-        proofs.allowListType = customization.key;
+        proofs.allowList = customization.key;
       }
 
       const possiblePlatforms = await fetchPossibleEVMStamps(address, allPlatforms, passport, true, proofs);
@@ -57,7 +57,18 @@ export const useOneClickVerification = () => {
       });
       const validatedProviderIds = possiblePlatforms
         .map((platform) =>
-          platform.platformProps.platFormGroupSpec.map((group) => group.providers.map((provider) => provider.name))
+          platform.platformProps.platFormGroupSpec.map((group) =>
+            group.providers.map((provider) => {
+              if (
+                provider.name.startsWith("AllowList") &&
+                isDynamicCustomization(customization) &&
+                customization.allowList
+              ) {
+                return provider.name.split("#")[0];
+              }
+              return provider.name;
+            })
+          )
         )
         .flat(2);
 

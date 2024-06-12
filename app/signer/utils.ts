@@ -32,7 +32,16 @@ export const getTypesToCheck = (
   const existingProviders = passport && passport.stamps.map((stamp) => stamp.provider);
 
   const evmProviders: PROVIDER_ID[] = evmPlatforms
-    .map(({ platFormGroupSpec }) => platFormGroupSpec.map(({ providers }) => providers.map(({ name }) => name)))
+    .map(({ platFormGroupSpec }) =>
+      platFormGroupSpec.map(({ providers }) =>
+        providers.map(({ name }) => {
+          if (name.startsWith("AllowList")) {
+            return "AllowList";
+          }
+          return name;
+        })
+      )
+    )
     .flat(2);
 
   if (existingProviders && !reIssueStamps) {

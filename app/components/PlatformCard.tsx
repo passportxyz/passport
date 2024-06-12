@@ -331,10 +331,16 @@ const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
 
   const excludedByCustomization = useMemo(() => {
     const providers = getStampProviderIds(platform.platform);
+
     return (
       isDynamicCustomization(customization) &&
       customization.scorer?.weights &&
-      !providers.some((provider) => parseFloat(customization.scorer?.weights?.[provider] || "") > 0)
+      !providers.some((provider) => {
+        if (provider === "AllowList") {
+          return parseFloat(customization.scorer?.weights?.[`${provider}#${customization.key}`] || "") > 0;
+        }
+        return parseFloat(customization.scorer?.weights?.[provider] || "") > 0;
+      })
     );
   }, [customization, platform.platform]);
 
