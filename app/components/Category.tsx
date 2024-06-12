@@ -110,7 +110,10 @@ export const Category = ({
           platform={platformProps.platform}
           platformScoreSpec={currentPlatform}
           platFormGroupSpec={platformProps.platFormGroupSpec}
-          onClose={onClose}
+          onClose={() => {
+            setCurrentPlatform(undefined);
+            onClose();
+          }}
         />
       );
     }

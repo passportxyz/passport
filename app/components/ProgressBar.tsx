@@ -1,4 +1,12 @@
-export const ProgressBar = ({ pointsGained, pointsAvailable }: { pointsGained: number; pointsAvailable: number }) => {
+import React from "react";
+
+interface ProgressBarProps {
+  pointsGained: number;
+  pointsAvailable: number;
+  isSlim?: boolean;
+}
+
+export const ProgressBar: React.FC<ProgressBarProps> = ({ pointsGained, pointsAvailable, isSlim = false }) => {
   const percentGained = (pointsGained / (pointsGained + pointsAvailable)) * 100 || 0;
 
   const pageWidth = window.innerWidth;
@@ -13,12 +21,32 @@ export const ProgressBar = ({ pointsGained, pointsAvailable }: { pointsGained: n
 
   const indicatorWidth = fullSliderWidth * (percentGained / 100);
 
+  const barHeight = isSlim ? 4 : 21;
+  const strokeWidth = isSlim ? 1 : 5;
   return (
-    <div className="relative h-6">
-      <svg className="absolute top-1.5 z-0" viewBox="0 8 104 4">
-        <path d="M102,10 L102,10" strokeLinecap="round" strokeWidth={2} stroke="rgb(var(--color-foreground-4))" />
-        <path d="M2,10 L102,10" strokeLinecap="butt" strokeWidth={2} stroke="rgb(var(--color-foreground-4))" />
-        <path d="M2,10 L2,10" strokeLinecap="round" strokeWidth={2} stroke="rgb(var(--color-foreground-4))" />
+    <div className={`relative ${isSlim ? "h-1.5" : "h-6"}`}>
+      <svg
+        className={`absolute ${isSlim ? "top-0.5" : "top-1.5"} z-0`}
+        viewBox={`0 ${isSlim ? 9 : 8} 104 ${isSlim ? 2 : 4}`}
+      >
+        <path
+          d={`M102,${isSlim ? 10 : 10} L102,${isSlim ? 10 : 10}`}
+          strokeLinecap="round"
+          strokeWidth={isSlim ? 1 : 2}
+          stroke="rgb(var(--color-foreground-4))"
+        />
+        <path
+          d={`M2,${isSlim ? 10 : 10} L102,${isSlim ? 10 : 10}`}
+          strokeLinecap="butt"
+          strokeWidth={isSlim ? 1 : 2}
+          stroke="rgb(var(--color-foreground-4))"
+        />
+        <path
+          d={`M2,${isSlim ? 10 : 10} L2,${isSlim ? 10 : 10}`}
+          strokeLinecap="round"
+          strokeWidth={isSlim ? 1 : 2}
+          stroke="rgb(var(--color-foreground-4))"
+        />
       </svg>
       <svg
         className="absolute"
@@ -33,11 +61,11 @@ export const ProgressBar = ({ pointsGained, pointsAvailable }: { pointsGained: n
           x="2.5"
           y="2.5"
           width={indicatorWidth}
-          height="21"
+          height={barHeight}
           rx="10.5"
           fill="#C1F6FF"
           stroke="#0E2825"
-          strokeWidth="5"
+          strokeWidth={strokeWidth}
           className="transition-all duration-700 ease-in-out"
         />
       </svg>

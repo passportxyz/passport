@@ -15,6 +15,7 @@ import { useCustomization } from "../hooks/useCustomization";
 import { isDynamicCustomization } from "../utils/customizationUtils";
 import { getStampProviderIds } from "./CardList";
 import { ProgressBar } from "./ProgressBar";
+import { on } from "events";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -27,147 +28,20 @@ type PlatformCardProps = {
   className?: string;
 };
 
-export const PlatformCard = ({
-  i,
-  platform,
-  selectedProviders,
-  onOpen,
-  setCurrentPlatform,
-  className,
-}: PlatformCardProps): JSX.Element => {
+type StampProps = {
+  idx: number;
+  platform: PlatformScoreSpec;
+  distanceToExpiration?: string;
+  className?: string;
+  onClick: () => void;
+};
+
+const DefaultStamp = ({ idx, platform, className, onClick }: StampProps) => {
   const [hovering, setHovering] = useState(false);
-  const platformIsExcluded = usePlatformIsExcluded(platform);
-  const { passport } = useContext(CeramicContext);
-  const platformProviders = selectedProviders[platform.platform];
-  let earliestExpirationDate: Date = new Date();
-  let hasExpirationDate = false;
-  let now = new Date();
-  // Get the stamps for this platform
-  // Also check for the earliest expiration date
-  const platformStamps: Partial<Record<PROVIDER_ID, Stamp>> = !passport
-    ? {}
-    : platformProviders.reduce<Partial<Record<PROVIDER_ID, Stamp>>>((acc, provider) => {
-        const stamp = passport?.stamps.find((stamps) => stamps.provider === provider);
-        if (stamp) {
-          const d = new Date(stamp.credential.expirationDate);
-          if (!hasExpirationDate || d < earliestExpirationDate) {
-            earliestExpirationDate = d;
-            hasExpirationDate = true;
-          }
-        }
-        acc[provider] = stamp;
-        return acc;
-      }, {});
+  const platformClasses = "bg-gradient-to-b from-background to-background-2/70";
 
-  // Get the string refering to the eraliest expiration date
-  const distanceToExpiration = earliestExpirationDate ? formatDistanceToNow(earliestExpirationDate) : "";
-  let isExpired: boolean = now.getTime() - earliestExpirationDate.getTime() > 0;
-
-  if (platformIsExcluded) return <></>;
-
-  const verified = platform.earnedPoints > 0 || selectedProviders[platform.platform].length > 0;
-
-  const platformClasses = verified
-    ? "bg-gradient-to-b from-background to-foreground-5/70"
-    : "bg-gradient-to-b from-background to-background-2/70";
-
-  const imgFilter = verified
-    ? {
-        filter: `invert(27%) sepia(97%) saturate(295%) hue-rotate(113deg) brightness(${
-          hovering ? "100%" : "56%"
-        }) contrast(89%)`,
-      }
-    : {};
-
-  // returns a single Platform card
-  return verified ? (
-    // The verified state of the card
-    <div
-      data-testid="platform-card"
-      onClick={() => {
-        setCurrentPlatform(platform);
-        onOpen();
-      }}
-      className={className}
-      key={`${platform.name}${i}`}
-    >
-      <div
-        onMouseEnter={() => setHovering(true)}
-        onMouseLeave={() => setHovering(false)}
-        className={`group relative flex h-full cursor-pointer flex-col rounded-lg border p-0 transition-all ease-out ${platformClasses}`}
-      >
-        <div className="m-6 flex h-full flex-col justify-between">
-          <div className="flex w-full items-center justify-between">
-            {platform.icon ? (
-              <div style={imgFilter}>
-                <img src={platform.icon} alt={platform.name} className={`h-10 w-10 ${verified && "grayscale"}`} />
-              </div>
-            ) : (
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M24.7999 24.8002H28.7999V28.8002H24.7999V24.8002ZM14 24.8002H18V28.8002H14V24.8002ZM3.19995 24.8002H7.19995V28.8002H3.19995V24.8002ZM24.7999 14.0002H28.7999V18.0002H24.7999V14.0002ZM14 14.0002H18V18.0002H14V14.0002ZM3.19995 14.0002H7.19995V18.0002H3.19995V14.0002ZM24.7999 3.2002H28.7999V7.2002H24.7999V3.2002ZM14 3.2002H18V7.2002H14V3.2002ZM3.19995 3.2002H7.19995V7.2002H3.19995V3.2002Z"
-                  fill="var(--color-muted)"
-                />
-              </svg>
-            )}
-            <div className="bg-foreground-4 px-2 py-1 rounded text-right font-alt text-black">
-              <p className="text-xs">Verified</p>
-            </div>
-          </div>
-
-          <div className="mt-4 flex justify-center h-full md:mt-6 md:inline-block md:justify-start">
-            <div
-              className={`flex flex-col place-items-start text-color-2 md:flex-row ${
-                platform.name.split(" ").length > 1 ? "items-center md:items-baseline" : "items-center"
-              }`}
-            >
-              <h1
-                data-testid="platform-name"
-                className={`mr-0 text-xl md:mr-4 ${platform.name.split(" ").length > 1 ? "text-left" : "text-center"}`}
-              >
-                {platform.name}
-              </h1>
-            </div>
-            <p
-              className={`flex-1 pleading-relaxed mt-2 hidden text-sm text-color-1 md:inline-block ${
-                verified ? "invisible" : "visible"
-              } `}
-            >
-              {platform.description}
-            </p>
-          </div>
-
-          <div>Points gained</div>
-          <div className="text-2xl font-bold">{platform.earnedPoints.toFixed(2)}</div>
-          <ProgressBar pointsGained={platform.earnedPoints} pointsAvailable={platform.possiblePoints} />
-        </div>
-        <div className="flex items-center px-4 py-2 border-t border-foreground-4">
-          <div className="flex-none">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M12 6C12 6.78793 11.8448 7.56815 11.5433 8.2961C11.2417 9.02405 10.7998 9.68549 10.2426 10.2426C9.68549 10.7998 9.02405 11.2417 8.2961 11.5433C7.56815 11.8448 6.78793 12 6 12L6 6H12Z"
-                fill="#C1F6FF"
-              />
-              <circle cx="6" cy="6" r="5.5" stroke="#C1F6FF" />
-            </svg>
-          </div>
-          <div className="flex-1 pl-2 text-foreground-2 override-text-color">{distanceToExpiration} until expiry</div>
-        </div>
-      </div>
-    </div>
-  ) : (
-    // The not-verified state of the card
-    <div
-      data-testid="platform-card"
-      onClick={() => {
-        setCurrentPlatform(platform);
-        onOpen();
-      }}
-      className={className}
-      key={`${platform.name}${i}`}
-    >
+  return (
+    <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
       <div
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
@@ -181,8 +55,8 @@ export const PlatformCard = ({
         <div className="m-6 flex h-full flex-col justify-between">
           <div className="flex w-full items-center justify-between">
             {platform.icon ? (
-              <div style={imgFilter}>
-                <img src={platform.icon} alt={platform.name} className={`h-10 w-10 ${verified && "grayscale"}`} />
+              <div>
+                <img src={platform.icon} alt={platform.name} className="h-10 w-10" />
               </div>
             ) : (
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -215,27 +89,188 @@ export const PlatformCard = ({
                 {platform.name}
               </h1>
             </div>
-            <p
-              className={`flex-1 pleading-relaxed mt-2 hidden text-sm text-color-1 md:inline-block ${
-                verified ? "invisible" : "visible"
-              } `}
-            >
+            <p className="flex-1 pleading-relaxed mt-2 hidden text-sm text-color-1 md:inline-block visible">
               {platform.description}
             </p>
           </div>
           <Button
             data-testid="connect-button"
             variant="custom"
-            className={`mt-5 w-auto border bg-transparent text-foreground-2 ${
-              verified ? "border-foreground-5 group-hover:border-foreground-4" : "border-foreground-2"
-            }`}
+            className="mt-5 w-auto border bg-transparent text-foreground-2 border-foreground-2"
           >
-            {verified ? "Verified" : "Connect"}
+            Connect
           </Button>
         </div>
       </div>
     </div>
   );
+};
+
+const VerifiedStamp = ({ idx, platform, distanceToExpiration, className, onClick }: StampProps) => {
+  const [hovering, setHovering] = useState(false);
+  const platformClasses = "bg-gradient-to-b from-background to-foreground-5/70";
+  const imgFilter = {
+    filter: `invert(27%) sepia(97%) saturate(295%) hue-rotate(113deg) brightness(${
+      hovering ? "100%" : "56%"
+    }) contrast(89%)`,
+  };
+  return (
+    <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
+      <div
+        onMouseEnter={() => setHovering(true)}
+        onMouseLeave={() => setHovering(false)}
+        className={`group relative flex h-full cursor-pointer flex-col rounded-lg border p-0 transition-all ease-out ${platformClasses}`}
+      >
+        <div className="m-6 flex h-full flex-col justify-between">
+          <div className="flex w-full items-center justify-between">
+            {platform.icon ? (
+              <div style={imgFilter}>
+                <img src={platform.icon} alt={platform.name} className="h-10 w-10 grayscale" />
+              </div>
+            ) : (
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M24.7999 24.8002H28.7999V28.8002H24.7999V24.8002ZM14 24.8002H18V28.8002H14V24.8002ZM3.19995 24.8002H7.19995V28.8002H3.19995V24.8002ZM24.7999 14.0002H28.7999V18.0002H24.7999V14.0002ZM14 14.0002H18V18.0002H14V14.0002ZM3.19995 14.0002H7.19995V18.0002H3.19995V14.0002ZM24.7999 3.2002H28.7999V7.2002H24.7999V3.2002ZM14 3.2002H18V7.2002H14V3.2002ZM3.19995 3.2002H7.19995V7.2002H3.19995V3.2002Z"
+                  fill="var(--color-muted)"
+                />
+              </svg>
+            )}
+            <div className="bg-foreground-4 px-2 py-1 rounded text-right font-alt text-black">
+              <p className="text-xs">Verified</p>
+            </div>
+          </div>
+
+          <div className="mt-4 flex justify-center h-full md:mt-6 md:inline-block md:justify-start">
+            <div
+              className={`flex flex-col place-items-start text-color-2 md:flex-row ${
+                platform.name.split(" ").length > 1 ? "items-center md:items-baseline" : "items-center"
+              }`}
+            >
+              <h1
+                data-testid="platform-name"
+                className={`mr-0 text-xl md:mr-4 ${platform.name.split(" ").length > 1 ? "text-left" : "text-center"}`}
+              >
+                {platform.name}
+              </h1>
+            </div>
+            <p className="flex-1 pleading-relaxed mt-2 hidden text-sm text-color-1 md:inline-block invisible">
+              {platform.description}
+            </p>
+          </div>
+
+          <div>Points gained</div>
+          <div className="text-2xl font-bold">{platform.earnedPoints.toFixed(2)}</div>
+          <ProgressBar pointsGained={platform.earnedPoints} pointsAvailable={platform.possiblePoints} isSlim={true} />
+        </div>
+        <div className="flex items-center px-4 py-2 border-t border-foreground-4">
+          <div className="flex-none">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M12 6C12 6.78793 11.8448 7.56815 11.5433 8.2961C11.2417 9.02405 10.7998 9.68549 10.2426 10.2426C9.68549 10.7998 9.02405 11.2417 8.2961 11.5433C7.56815 11.8448 6.78793 12 6 12L6 6H12Z"
+                fill="#C1F6FF"
+              />
+              <circle cx="6" cy="6" r="5.5" stroke="#C1F6FF" />
+            </svg>
+          </div>
+          <div className="flex-1 pl-2 text-foreground-2 override-text-color">{distanceToExpiration} until expiry</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ExpiredStamp = ({ idx, platform, distanceToExpiration, className, onClick }: StampProps) => {
+  return <></>;
+};
+
+export const PlatformCard = ({
+  i,
+  platform,
+  selectedProviders,
+  onOpen,
+  setCurrentPlatform,
+  className,
+}: PlatformCardProps): JSX.Element => {
+  const platformIsExcluded = usePlatformIsExcluded(platform);
+  const { passport } = useContext(CeramicContext);
+  const platformProviders = selectedProviders[platform.platform];
+  let earliestExpirationDate: Date = new Date();
+  let hasExpirationDate = false;
+  let now = new Date();
+
+  // Get the stamps for this platform
+  // Also check for the earliest expiration date
+  const platformStamps: Partial<Record<PROVIDER_ID, Stamp>> = !passport
+    ? {}
+    : platformProviders.reduce<Partial<Record<PROVIDER_ID, Stamp>>>((acc, provider) => {
+        const stamp = passport?.stamps.find((stamps) => stamps.provider === provider);
+        if (stamp) {
+          const d = new Date(stamp.credential.expirationDate);
+          if (!hasExpirationDate || d < earliestExpirationDate) {
+            earliestExpirationDate = d;
+            hasExpirationDate = true;
+          }
+        }
+        acc[provider] = stamp;
+        return acc;
+      }, {});
+
+  // Get the string refering to the eraliest expiration date
+  const distanceToExpiration = earliestExpirationDate ? formatDistanceToNow(earliestExpirationDate) : "";
+  let isExpired: boolean = now.getTime() - earliestExpirationDate.getTime() > 0;
+
+  if (platformIsExcluded) return <></>;
+
+  const verified = platform.earnedPoints > 0 || selectedProviders[platform.platform].length > 0;
+
+  // returns a single Platform card
+  let stamp = (
+    // The not-verified & not-expired state of the card
+    <DefaultStamp
+      idx={i}
+      platform={platform}
+      distanceToExpiration={distanceToExpiration}
+      className={className}
+      onClick={() => {
+        setCurrentPlatform(platform);
+        onOpen();
+      }}
+    ></DefaultStamp>
+  );
+  if (verified) {
+    stamp = (
+      // The verified state of the card
+      <VerifiedStamp
+        idx={i}
+        platform={platform}
+        distanceToExpiration={distanceToExpiration}
+        className={className}
+        onClick={() => {
+          setCurrentPlatform(platform);
+          onOpen();
+        }}
+      ></VerifiedStamp>
+    );
+  }
+
+  if (isExpired) {
+    stamp = (
+      // The expired state of the card
+      <ExpiredStamp
+        idx={i}
+        platform={platform}
+        distanceToExpiration={distanceToExpiration}
+        className={className}
+        onClick={() => {
+          setCurrentPlatform(platform);
+          onOpen();
+        }}
+      ></ExpiredStamp>
+    );
+  }
+  return stamp;
 };
 
 const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
@@ -248,7 +283,7 @@ const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
       customization.scorer?.weights &&
       !providers.some((provider) => parseFloat(customization.scorer?.weights?.[provider] || "") > 0)
     );
-  }, [customization.key, platform.platform]);
+  }, [customization, platform.platform]);
 
   const excludedByFeatureFlag = useMemo(() => {
     // Feature Flag Guild Stamp
