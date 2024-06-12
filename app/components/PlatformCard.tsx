@@ -192,7 +192,8 @@ export const PlatformCard = ({
   const platformIsExcluded = usePlatformIsExcluded(platform);
   const { passport } = useContext(CeramicContext);
   const platformProviders = selectedProviders[platform.platform];
-  let earliestExpirationDate: Date = new Date();
+  // initialized earliestExpirationDate with the expiration date of the first stamp (if any stamp is available)
+  let earliestExpirationDate: Date = passport ? new Date(passport.stamps[0]?.credential.expirationDate) : new Date();
   let hasExpirationDate = false;
   let now = new Date();
 
