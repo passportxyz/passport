@@ -1,4 +1,4 @@
-import { PLATFORM_ID } from "@gitcoin/passport-types";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { platforms, ProviderSpec, PlatformGroupSpec } from "@gitcoin/passport-platforms";
 import { DynamicCustomization } from "../utils/customizationUtils";
 export type { ProviderSpec, PlatformGroupSpec };
@@ -48,4 +48,12 @@ export const customStampProviders = (customization?: DynamicCustomization): Prov
     };
   });
   return customStampProviders;
+};
+
+export const getStampProviderIds = (platform: PLATFORM_ID, providers: Providers): PROVIDER_ID[] => {
+  return (
+    providers[platform]?.reduce((all, stamp) => {
+      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
+    }, [] as PROVIDER_ID[]) || []
+  );
 };

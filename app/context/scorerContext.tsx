@@ -8,9 +8,9 @@ import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PLATFORMS } from "../config/platforms";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
-import { getStampProviderIds } from "../components/CardList";
 import { useCustomization } from "../hooks/useCustomization";
 import { isDynamicCustomization } from "../utils/customizationUtils";
+import { customStampProviders, getStampProviderIds } from "../config/providers";
 
 const scorerApiGetScore = CERAMIC_CACHE_ENDPOINT + "/score";
 const scorerApiGetWeights = CERAMIC_CACHE_ENDPOINT + "/weights";
@@ -209,7 +209,10 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const calculatePlatformScore = useCallback(() => {
     if (stampScores && stampWeights) {
       const scoredPlatforms = PLATFORMS.map((platform) => {
-        const providerIds = getStampProviderIds(platform.platform);
+        const providerIds = getStampProviderIds(
+          platform.platform,
+          customStampProviders(isDynamicCustomization(customization) ? customization : undefined)
+        );
         const possiblePoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampWeights[key] || "0") || 0), 0);
         const earnedPoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampScores[key]) || 0), 0);
         return {

@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 
 import { PLATFORMS } from "../config/platforms";
-import { PlatformGroupSpec, STAMP_PROVIDERS, customStampProviders } from "../config/providers";
+import { PlatformGroupSpec, customStampProviders, getStampProviderIds } from "../config/providers";
 
 // --- Chakra UI Elements
 import { Drawer, DrawerOverlay, useDisclosure } from "@chakra-ui/react";
@@ -60,14 +60,6 @@ export const PLATFORM_CATEGORIES: PLATFORM_CATEGORY[] = [
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
-export const getStampProviderIds = (platform: PLATFORM_ID): PROVIDER_ID[] => {
-  return (
-    STAMP_PROVIDERS[platform]?.reduce((all, stamp) => {
-      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-    }, [] as PROVIDER_ID[]) || []
-  );
-};
-
 export const CardList = ({ className, isLoading = false, initialOpen = true }: CardListProps): JSX.Element => {
   const { allProvidersState, allPlatforms } = useContext(CeramicContext);
   const { scoredPlatforms } = useContext(ScorerContext);
@@ -79,7 +71,10 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
   const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
     PLATFORMS.reduce((platforms, platform) => {
       // get all providerIds for this platform
-      const providerIds = getStampProviderIds(platform.platform);
+      const providerIds = getStampProviderIds(
+        platform.platform,
+        customStampProviders(isDynamicCustomization(customization) ? customization : undefined)
+      );
       // default to empty array for each platform
       platforms[platform.platform] = providerIds.filter(
         (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"

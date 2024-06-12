@@ -10,9 +10,9 @@ import { PlatformScoreSpec } from "../context/scorerContext";
 import { CeramicContext } from "../context/ceramicContext";
 import { useCustomization } from "../hooks/useCustomization";
 import { isDynamicCustomization } from "../utils/customizationUtils";
-import { getStampProviderIds } from "./CardList";
 import { ProgressBar } from "./ProgressBar";
 import { getDaysToExpiration } from "../utils/duration";
+import { customStampProviders, getStampProviderIds } from "../config/providers";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -330,7 +330,10 @@ const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
   const customization = useCustomization();
 
   const excludedByCustomization = useMemo(() => {
-    const providers = getStampProviderIds(platform.platform);
+    const providers = getStampProviderIds(
+      platform.platform,
+      customStampProviders(isDynamicCustomization(customization) ? customization : undefined)
+    );
 
     return (
       isDynamicCustomization(customization) &&

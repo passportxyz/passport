@@ -91,7 +91,10 @@ export const fetchPossibleEVMStamps = async (
   // Define helper functions to filter out invalid providers and groups
   const getValidGroupProviders = (groupSpec: PlatformGroupSpec): ValidatedProvider[] =>
     groupSpec.providers.reduce((providers: ValidatedProvider[], provider) => {
-      const { name, title } = provider;
+      let { name, title } = provider;
+      if (name.startsWith("AllowList")) {
+        name = name.split("#")[0] as PROVIDER_ID;
+      }
       if (validPlatformIds.includes(name)) return [...providers, { name, title }];
       else return providers;
     }, []);
