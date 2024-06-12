@@ -10,9 +10,9 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ pointsGained, pointsAv
   const percentGained = (pointsGained / (pointsGained + pointsAvailable)) * 100 || 0;
 
   const gainedBarWidth = isSlim ? 3 : 6;
-  const remainingBarWidth = isSlim ? 1 : 3;
+  const remainingBarWidth = isSlim ? 3 : 3;
   const capDistance = isSlim ? 2 : 4; // The additional space required at the progress bar end, to allow for nice rounding
-  const gainedBarBorder = isSlim ? 1 : 3;
+  const gainedBarBorder = isSlim ? 3 : 3;
 
   const heightClass = `h-[${gainedBarWidth + 2 * gainedBarBorder}px]`;
   return (

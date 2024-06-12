@@ -4,6 +4,7 @@ export type Theme = {
     background2: string;
     background3: string;
     background4: string;
+    background5: string;
     foreground: string;
     foreground2: string;
     foreground3: string;

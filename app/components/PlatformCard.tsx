@@ -163,7 +163,7 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick 
             isSlim={true}
           />
         </div>
-        <div className="flex items-center px-4 py-2 border-t border-foreground-4">
+        <div className="flex items-center mt-5 px-4 py-2 border-t border-foreground-4">
           <div className="flex-none">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -183,7 +183,78 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick 
 };
 
 const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick }: StampProps) => {
-  return <></>;
+  const [hovering, setHovering] = useState(false);
+  const imgFilter = {
+    filter: `invert(27%) sepia(97%) saturate(295%) hue-rotate(113deg) brightness(${
+      hovering ? "100%" : "56%"
+    }) contrast(89%)`,
+  };
+  return (
+    <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
+      <div
+        onMouseEnter={() => setHovering(true)}
+        onMouseLeave={() => setHovering(false)}
+        className="group relative flex h-full cursor-pointer flex-col rounded-lg border border-background-5 p-0 transition-all ease-out 
+        bg-gradient-to-b from-background to-background-5/30 
+        hover:bg-opacity-100 hover:from-transparent hover:shadow-even-md hover:border-background-5 hover:to-background-5/60 hover:shadow-background-5"
+      >
+        <div className="m-6 flex h-full flex-col justify-between">
+          <div className="flex w-full items-center justify-between">
+            {platform.icon ? (
+              <div style={imgFilter}>
+                <img src={platform.icon} alt={platform.name} className="h-10 w-10 grayscale" />
+              </div>
+            ) : (
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M24.7999 24.8002H28.7999V28.8002H24.7999V24.8002ZM14 24.8002H18V28.8002H14V24.8002ZM3.19995 24.8002H7.19995V28.8002H3.19995V24.8002ZM24.7999 14.0002H28.7999V18.0002H24.7999V14.0002ZM14 14.0002H18V18.0002H14V14.0002ZM3.19995 14.0002H7.19995V18.0002H3.19995V14.0002ZM24.7999 3.2002H28.7999V7.2002H24.7999V3.2002ZM14 3.2002H18V7.2002H14V3.2002ZM3.19995 3.2002H7.19995V7.2002H3.19995V3.2002Z"
+                  fill="var(--color-muted)"
+                />
+              </svg>
+            )}
+            <div className="bg-background-5 px-2 py-1 rounded text-right font-alt text-black">
+              <p className="text-xs">Expired</p>
+            </div>
+          </div>
+
+          <div className="mt-4 flex justify-center h-full md:mt-6 md:inline-block md:justify-start">
+            <div
+              className={`flex flex-col place-items-start text-color-2 md:flex-row ${
+                platform.name.split(" ").length > 1 ? "items-center md:items-baseline" : "items-center"
+              }`}
+            >
+              <h1
+                data-testid="platform-name"
+                className={`mr-0 text-xl md:mr-4 ${platform.name.split(" ").length > 1 ? "text-left" : "text-center"}`}
+              >
+                {platform.name}
+              </h1>
+            </div>
+            <p className="flex-1 pleading-relaxed mt-2 hidden text-sm text-color-1 md:inline-block invisible">
+              {platform.description}
+            </p>
+          </div>
+
+          <div className="text-color-6">Points gained</div>
+          <div className="text-2xl font-bold">{platform.earnedPoints.toFixed(2)}</div>
+          <ProgressBar
+            pointsGained={platform.earnedPoints}
+            pointsAvailable={platform.possiblePoints - platform.earnedPoints}
+            isSlim={true}
+          />
+        </div>
+        <Button
+            data-testid="update-button"
+            variant="custom"
+            className="mb-5 mx-5 w-auto border bg-transparent border-background-5 text-color-7 z-10"
+          >
+            Update
+          </Button>
+      </div>
+    </div>
+  );
 };
 
 export const PlatformCard = ({
@@ -221,28 +292,29 @@ export const PlatformCard = ({
 
   // Get the string refering to the eraliest expiration date
   const daysUntilExpiration = getDaysToExpiration({ expirationDate: earliestExpirationDate });
-  let isExpired: boolean = now.getTime() - earliestExpirationDate.getTime() > 0;
+  const isExpired: boolean = now.getTime() - earliestExpirationDate.getTime() > 0;
 
   if (platformIsExcluded) return <></>;
 
   const verified = platform.earnedPoints > 0 || selectedProviders[platform.platform].length > 0;
 
   // returns a single Platform card
-  let stamp = (
-    // The not-verified & not-expired state of the card
-    <DefaultStamp
-      idx={i}
-      platform={platform}
-      className={className}
-      onClick={() => {
-        setCurrentPlatform(platform);
-        onOpen();
-      }}
-    ></DefaultStamp>
-  );
-  if (verified) {
+  let stamp = null;
+  if (verified && isExpired) {
     stamp = (
-      // The verified state of the card
+      <ExpiredStamp
+        idx={i}
+        platform={platform}
+        className={className}
+        onClick={() => {
+          setCurrentPlatform(platform);
+          onOpen();
+        }}
+      />
+    );
+  } else if (verified) {
+    // The not-verified & not-expired state of the card
+    stamp = (
       <VerifiedStamp
         idx={i}
         platform={platform}
@@ -252,25 +324,22 @@ export const PlatformCard = ({
           setCurrentPlatform(platform);
           onOpen();
         }}
-      ></VerifiedStamp>
+      />
     );
-  }
-
-  if (isExpired) {
+  } else {
     stamp = (
-      // The expired state of the card
-      <ExpiredStamp
+      <DefaultStamp
         idx={i}
         platform={platform}
-        daysUntilExpiration={daysUntilExpiration}
         className={className}
         onClick={() => {
           setCurrentPlatform(platform);
           onOpen();
         }}
-      ></ExpiredStamp>
+      />
     );
   }
+
   return stamp;
 };
 

@@ -19,6 +19,7 @@ module.exports = {
         "background-2": "rgb(var(--color-background-2) / <alpha-value>)",
         "background-3": "rgb(var(--color-background-3) / <alpha-value>)",
         "background-4": "rgb(var(--color-background-4) / <alpha-value>)",
+        "background-5": "rgb(var(--color-background-5) / <alpha-value>)",
         foreground: "rgb(var(--color-foreground) / <alpha-value>)",
         "foreground-2": "rgb(var(--color-foreground-2) / <alpha-value>)",
         "foreground-3": "rgb(var(--color-foreground-3) / <alpha-value>)",
