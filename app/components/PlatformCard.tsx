@@ -39,8 +39,9 @@ export const PlatformCard = ({
   const platformIsExcluded = usePlatformIsExcluded(platform);
   const { passport } = useContext(CeramicContext);
   const platformProviders = selectedProviders[platform.platform];
-  let earliestExpirationDate: Date | null = null;
-
+  let earliestExpirationDate: Date = new Date();
+  let hasExpirationDate = false;
+  let now = new Date();
   // Get the stamps for this platform
   // Also check for the earliest expiration date
   const platformStamps: Partial<Record<PROVIDER_ID, Stamp>> = !passport
@@ -49,8 +50,9 @@ export const PlatformCard = ({
         const stamp = passport?.stamps.find((stamps) => stamps.provider === provider);
         if (stamp) {
           const d = new Date(stamp.credential.expirationDate);
-          if (!earliestExpirationDate || d < earliestExpirationDate) {
+          if (!hasExpirationDate || d < earliestExpirationDate) {
             earliestExpirationDate = d;
+            hasExpirationDate = true;
           }
         }
         acc[provider] = stamp;
@@ -59,6 +61,7 @@ export const PlatformCard = ({
 
   // Get the string refering to the eraliest expiration date
   const distanceToExpiration = earliestExpirationDate ? formatDistanceToNow(earliestExpirationDate) : "";
+  let isExpired: boolean = now.getTime() - earliestExpirationDate.getTime() > 0;
 
   if (platformIsExcluded) return <></>;
 
