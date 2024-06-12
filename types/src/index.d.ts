@@ -359,7 +359,7 @@ export type PLATFORM_ID =
   | "ZkSync"
   | "TrustaLabs"
   | "Outdid"
-  | "AllowList";
+  | "AddressList";
 
 export type PLATFORM_CATEGORY = {
   name: string;
@@ -367,7 +367,6 @@ export type PLATFORM_CATEGORY = {
   platforms: PLATFORM_ID[];
 };
 
-export type DynamicProviderId = `AllowList#${string}`;
 export type PROVIDER_ID =
   | "Signer"
   | "Google"
@@ -441,8 +440,8 @@ export type PROVIDER_ID =
   | "ETHGasSpent#0.25"
   | "ETHnumTransactions#100"
   | "Outdid"
-  | "AllowList"
-  | DynamicProviderId;
+  | "AddressList"
+  | `AddressList#${string}`;
 
 export type StampBit = {
   bit: number;

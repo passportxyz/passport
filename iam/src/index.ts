@@ -190,8 +190,8 @@ const modifyRecordType = (record: { [k: string]: string }, type: string): string
     return `${type}#${record.pii}`;
   }
 
-  if (record.allowList) {
-    return `${type}#${record.allowList}`;
+  if (record.addressList) {
+    return `${type}#${record.addressList}`;
   }
 
   return type;

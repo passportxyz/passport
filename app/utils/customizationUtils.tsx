@@ -4,7 +4,8 @@ import { CUSTOMIZATION_ENDPOINT } from "../config/customization_config";
 import axios from "axios";
 import * as DOMPurify from "dompurify";
 import parse from "html-react-parser";
-import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { PlatformGroupSpec } from "@gitcoin/passport-platforms/*";
 
 const sanitize = DOMPurify.sanitize;
 
@@ -52,7 +53,7 @@ export type DynamicCustomization = BasicCustomization & {
       };
     };
   };
-  allowList: boolean;
+  addressListProviders?: PlatformGroupSpec[];
 };
 
 export type Customization = BasicCustomization | DynamicCustomization;
@@ -83,7 +84,6 @@ type CustomizationResponse = {
       };
     };
   };
-  allowList?: boolean;
 };
 
 const SanitizedHTMLComponent = ({ html }: { html: string }) => {
@@ -102,6 +102,21 @@ export const requestDynamicCustomizationConfig = async (
   try {
     const response = await axios.get(`${CUSTOMIZATION_ENDPOINT}/${customizationKey}`);
     const customizationResponse: CustomizationResponse = response.data;
+    const addressListProviders: PlatformGroupSpec[] = Object.keys(customizationResponse.scorer?.weights || [])
+      .filter((key) => key.startsWith("AddressList"))
+      .map((name) => {
+        return {
+          platformGroup: "Custom Allow Lists",
+          providers: [
+            {
+              title: "Allow List Provider",
+              description: "If your address exists within the integrators list you get the stamps you're golden",
+              name: name as PROVIDER_ID,
+            },
+          ],
+        };
+      });
+
     return {
       key: customizationKey,
       customizationTheme: customizationResponse.customizationTheme,
@@ -131,7 +146,7 @@ export const requestDynamicCustomizationConfig = async (
           },
         },
       },
-      allowList: customizationResponse.allowList || false,
+      addressListProviders: addressListProviders.length ? addressListProviders : undefined,
     };
   } catch (e) {
     console.error("Failed to fetch customization config", e);

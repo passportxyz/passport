@@ -35,8 +35,8 @@ export const getTypesToCheck = (
     .map(({ platFormGroupSpec }) =>
       platFormGroupSpec.map(({ providers }) =>
         providers.map(({ name }) => {
-          if (name.startsWith("AllowList")) {
-            return "AllowList";
+          if (name.startsWith("AddressList")) {
+            return "AddressList";
           }
           return name;
         })
@@ -92,7 +92,7 @@ export const fetchPossibleEVMStamps = async (
   const getValidGroupProviders = (groupSpec: PlatformGroupSpec): ValidatedProvider[] =>
     groupSpec.providers.reduce((providers: ValidatedProvider[], provider) => {
       let { name, title } = provider;
-      if (name.startsWith("AllowList")) {
+      if (name.startsWith("AddressList")) {
         name = name.split("#")[0] as PROVIDER_ID;
       }
       if (validPlatformIds.includes(name)) return [...providers, { name, title }];

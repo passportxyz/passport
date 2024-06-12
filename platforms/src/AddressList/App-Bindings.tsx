@@ -3,9 +3,9 @@ import React from "react";
 import { AppContext, PlatformOptions, ProviderPayload } from "../types";
 import { Platform } from "../utils/platform";
 
-export class AllowListPlatform extends Platform {
-  platformId = "AllowList";
-  path = "AllowList";
+export class AddressListPlatform extends Platform {
+  platformId = "AddressList";
+  path = "AddressList";
   isEVM = true;
   clientId: string = null;
 
@@ -21,5 +21,4 @@ export class AllowListPlatform extends Platform {
   getOAuthUrl(state: string): Promise<string> {
     throw new Error("Method not implemented.");
   }
-
 }

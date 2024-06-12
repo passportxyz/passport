@@ -36,11 +36,11 @@ export const customStampProviders = (customization?: DynamicCustomization): Prov
   }
 
   const customStampProviders = JSON.parse(JSON.stringify(STAMP_PROVIDERS)) as Providers;
-  customStampProviders.AllowList = customStampProviders.AllowList.map((groupSpec) => {
+  customStampProviders.AddressList = customStampProviders.AddressList.map((groupSpec) => {
     return {
       ...groupSpec,
       providers: groupSpec.providers.map((provider) => {
-        if (provider.name === "AllowList") {
+        if (provider.name === "AddressList") {
           return { ...provider, name: `${provider.name}#${customization.key}` };
         }
         return provider;

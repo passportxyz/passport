@@ -1,3 +1,0 @@
-export {
-  AllowListProvider
-} from "./allowList";

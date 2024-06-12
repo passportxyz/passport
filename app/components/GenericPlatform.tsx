@@ -182,10 +182,10 @@ export const GenericPlatform = ({
       };
 
       let types = selectedProviders;
-      if (isDynamicCustomization(customization) && customization.allowList) {
-        providerPayload.allowList = customization.key;
+      if (isDynamicCustomization(customization) && customization.addressListProviders) {
+        providerPayload.addressList = customization.key;
         types = types.map((provider) => {
-          if (provider.includes("Allow")) {
+          if (provider.includes("AddressList")) {
             return provider.split("#")[0];
           }
           return provider;

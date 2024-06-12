@@ -20,7 +20,7 @@ import * as Idena from "./Idena";
 import * as Civic from "./Civic";
 import * as TrustaLabs from "./TrustaLabs";
 import * as Outdid from "./Outdid";
-import * as AllowList from "./AllowList";
+import * as AddressList from "./AddressList";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
 type PlatformConfig = {
@@ -53,7 +53,7 @@ const platforms: Record<string, PlatformConfig> = {
   Civic,
   TrustaLabs,
   Outdid,
-  AllowList,
+  AddressList,
 };
 
 if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {

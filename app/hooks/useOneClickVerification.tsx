@@ -37,8 +37,8 @@ export const useOneClickVerification = () => {
     try {
       let proofs: { [k: string]: string } = {};
 
-      if (isDynamicCustomization(customization) && customization.allowList) {
-        proofs.allowList = customization.key;
+      if (isDynamicCustomization(customization) && customization.addressListProviders) {
+        proofs.addressList = customization.key;
       }
 
       const possiblePlatforms = await fetchPossibleEVMStamps(address, allPlatforms, passport, true, proofs);
@@ -60,9 +60,9 @@ export const useOneClickVerification = () => {
           platform.platformProps.platFormGroupSpec.map((group) =>
             group.providers.map((provider) => {
               if (
-                provider.name.startsWith("AllowList") &&
+                provider.name.startsWith("AddressList") &&
                 isDynamicCustomization(customization) &&
-                customization.allowList
+                customization.addressListProviders
               ) {
                 return provider.name.split("#")[0];
               }

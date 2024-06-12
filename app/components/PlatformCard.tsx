@@ -339,7 +339,8 @@ const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
       isDynamicCustomization(customization) &&
       customization.scorer?.weights &&
       !providers.some((provider) => {
-        if (provider === "AllowList") {
+        console.log({ provider });
+        if (provider === "AddressList") {
           return parseFloat(customization.scorer?.weights?.[`${provider}#${customization.key}`] || "") > 0;
         }
         return parseFloat(customization.scorer?.weights?.[provider] || "") > 0;

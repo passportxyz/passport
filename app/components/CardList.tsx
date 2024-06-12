@@ -38,7 +38,7 @@ export const PLATFORM_CATEGORIES: PLATFORM_CATEGORY[] = [
       "Brightid",
       "TrustaLabs",
       "Ens",
-      "AllowList",
+      "AddressList",
     ],
   },
   {
@@ -127,8 +127,8 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
     };
   } = {};
 
-  if (isDynamicCustomization(customization) && customization.allowList) {
-    PLATFORM_CATEGORIES[0].platforms.push("AllowList");
+  if (isDynamicCustomization(customization) && customization.addressListProviders) {
+    PLATFORM_CATEGORIES[0].platforms.push("AddressList");
   }
 
   // Generate grouped stamps

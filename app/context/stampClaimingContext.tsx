@@ -171,8 +171,8 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
             [k: string]: string;
           } = {};
 
-          if (isDynamicCustomization(customization) && customization.allowList) {
-            providerPayload.allowList = customization.key;
+          if (isDynamicCustomization(customization) && customization.addressListProviders) {
+            providerPayload.addressList = customization.key;
           }
 
           if (platform) {

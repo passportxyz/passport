@@ -42,7 +42,7 @@ const {
   Civic,
   TrustaLabs,
   Outdid,
-  AllowList,
+  AddressList,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -351,15 +351,15 @@ export const cleanPassport = (
   return { passport, expiredProviders: tempExpiredProviders, expirationDateProviders };
 };
 
-export const updateAllowListGroupSpec = (
+export const updateAddressListGroupSpec = (
   existingGroupSpec: PlatformGroupSpec[],
-  customization: DynamicCustomization
+  providers: PlatformGroupSpec[]
 ): PlatformGroupSpec[] => {
   return existingGroupSpec.map((groupSpec) => {
     return {
       ...groupSpec,
       providers: groupSpec.providers.map((provider) => {
-        if (provider.name === "AllowList") {
+        if (provider.name === "AddressList") {
           return { ...provider, name: `${provider.name}#${customization.key}` };
         }
         return provider;
@@ -392,13 +392,19 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const toast = useToast();
 
   useEffect(() => {
-    if (isDynamicCustomization(customization) && customization.allowList) {
-      const platFormGroupSpec = updateAllowListGroupSpec(AllowList.ProviderConfig, customization);
-      platforms.set("AllowList", {
-        platform: new AllowList.AllowListPlatform(),
-        platFormGroupSpec,
+    if (isDynamicCustomization(customization) && customization.addressListProviders) {
+      // Update Platforms
+      platforms.set("AddressList", {
+        platform: new AddressList.AddressListPlatform(),
+        platFormGroupSpec: customization.addressListProviders,
       });
       setAllPlatforms(platforms);
+
+      // Update all provider state
+      setAllProviderState({
+        ...allProvidersState,
+        [`AddressList#${customization.key}`]: allProvidersState.AddressList,
+      });
     }
   }, [customization]);
 
