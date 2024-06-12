@@ -11,9 +11,9 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ pointsGained, pointsAv
 
   const gainedBarWidth = isSlim ? 3 : 6;
   const remainingBarWidth = isSlim ? 1 : 3;
-  const capDistance = isSlim ? 2 : 4;
+  const capDistance = isSlim ? 2 : 4; // The additional space required at the progress bar end, to allow for nice rounding
   const gainedBarBorder = isSlim ? 1 : 3;
-  
+
   const heightClass = `h-[${gainedBarWidth + 2 * gainedBarBorder}px]`;
   return (
     <div className={heightClass}>
@@ -27,8 +27,24 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ pointsGained, pointsAv
           stroke-width={remainingBarWidth}
           stroke-linecap="round"
         />
-        <line x1={capDistance} y1="5" x2={percentGained} y2="5" stroke="#0E2825" stroke-width={gainedBarWidth + gainedBarBorder} stroke-linecap="round" />
-        <line x1={capDistance} y1="5" x2={percentGained} y2="5" stroke="#C1F6FF" stroke-width={gainedBarWidth} stroke-linecap="round" />
+        <line
+          x1={capDistance}
+          y1="5"
+          x2={percentGained}
+          y2="5"
+          stroke="#0E2825"
+          stroke-width={gainedBarWidth + gainedBarBorder}
+          stroke-linecap="round"
+        />
+        <line
+          x1={capDistance}
+          y1="5"
+          x2={percentGained}
+          y2="5"
+          stroke="#C1F6FF"
+          stroke-width={gainedBarWidth}
+          stroke-linecap="round"
+        />
       </svg>
     </div>
   );
