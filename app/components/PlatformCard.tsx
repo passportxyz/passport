@@ -133,7 +133,9 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick 
               </svg>
             )}
             <div className="bg-foreground-4 px-2 py-1 rounded text-right font-alt text-black">
-              <p className="text-xs">Verified</p>
+              <p className="text-xs" data-testid="verified-label">
+                Verified
+              </p>
             </div>
           </div>
 
@@ -246,12 +248,12 @@ const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick }
           />
         </div>
         <Button
-            data-testid="update-button"
-            variant="custom"
-            className="mb-5 mx-5 w-auto border bg-transparent border-background-5 text-color-7 z-10"
-          >
-            Update
-          </Button>
+          data-testid="update-button"
+          variant="custom"
+          className="mb-5 mx-5 w-auto border bg-transparent border-background-5 text-color-7 z-10"
+        >
+          Update
+        </Button>
       </div>
     </div>
   );

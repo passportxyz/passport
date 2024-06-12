@@ -92,21 +92,30 @@ describe("<CardList />", () => {
   });
 
   it("should indicate on card whether or not it has been verified", () => {
+    // This should no longer show the verrified button, but have the verified label instead & no button
     render(<Category category={categoryProps["category"]} />);
     const verifiedBtnCnt = screen
       .getAllByTestId("connect-button")
       .map((el) => el.textContent)
       .filter((text) => text === "Verified").length;
 
-    expect(verifiedBtnCnt).toBeGreaterThan(0);
-    expect(verifiedBtnCnt).toEqual(
+    const verifiedLabelCnt = screen
+      .getAllByTestId("verified-label")
+      .map((el) => el.textContent)
+      .filter((text) => text === "Verified").length;
+
+    expect(verifiedBtnCnt).toEqual(0);
+    expect(verifiedLabelCnt).toBeGreaterThan(0);
+    expect(verifiedLabelCnt).toEqual(
       categoryProps["category"].sortedPlatforms.filter((platform) => platform.earnedPoints > 0).length
     );
   });
   it("should render available points", () => {
     renderWithContext(mockCeramicContext, <CardList {...cardListProps} />);
     const availablePnts = screen.getAllByTestId("available-points").map((el) => el.textContent);
-    expect(availablePnts).toEqual(["12.93", "7.44", "0.69", "1.25"]);
+
+    //the verified stamp no longer shows the score of availablepoints
+    expect(availablePnts).toEqual(["12.93", "7.44", "0.69"]);
   });
 });
 
