@@ -15,7 +15,6 @@ import { useCustomization } from "../hooks/useCustomization";
 import { isDynamicCustomization } from "../utils/customizationUtils";
 import { getStampProviderIds } from "./CardList";
 import { ProgressBar } from "./ProgressBar";
-import { on } from "events";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -158,7 +157,7 @@ const VerifiedStamp = ({ idx, platform, distanceToExpiration, className, onClick
 
           <div>Points gained</div>
           <div className="text-2xl font-bold">{platform.earnedPoints.toFixed(2)}</div>
-          <ProgressBar pointsGained={platform.earnedPoints} pointsAvailable={platform.possiblePoints} isSlim={true} />
+          <ProgressBar pointsGained={platform.earnedPoints} pointsAvailable={platform.possiblePoints - platform.earnedPoints} isSlim={true} />
         </div>
         <div className="flex items-center px-4 py-2 border-t border-foreground-4">
           <div className="flex-none">
