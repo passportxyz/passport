@@ -1,6 +1,7 @@
-import { PlatformOptions } from "../types";
-import { Platform } from "../utils/platform";
+import { AppContext, PlatformOptions, ProviderPayload } from "../types";
+import { Platform, ProviderPreCheckError } from "../utils/platform";
 import React from "react";
+import { verifyCoinbaseAttestation } from "./Providers/coinbase";
 
 export class CoinbasePlatform extends Platform {
   platformId = "Coinbase";
@@ -28,7 +29,8 @@ export class CoinbasePlatform extends Platform {
         >
           Verify Coinbase ID
         </a>{" "}
-        on this wallet address <br /><br />
+        on this wallet address <br />
+        <br />
         Step 2: Click Verify below to sign into your Coinbase account <br />
         You cannot complete without completing the Coinbase attestation onchain in Step 1. Ensure you have an active
         Coinbase account with a verified government ID to mint your onchain attestation for free on base.
@@ -44,6 +46,18 @@ export class CoinbasePlatform extends Platform {
     super();
     this.clientId = options.clientId as string;
     this.redirectUri = options.redirectUri as string;
+  }
+
+  async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
+    const address = appContext.userDid.split(":")[4].toLowerCase();
+    const hasAttestation = await verifyCoinbaseAttestation(address);
+    if (!hasAttestation) {
+      throw new ProviderPreCheckError(
+        "You need to verify your Coinbase ID onchain before you can verify your Coinbase account."
+      );
+    }
+
+    return super.getProviderPayload(appContext);
   }
 
   async getOAuthUrl(state: string): Promise<string> {
