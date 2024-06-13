@@ -2,7 +2,7 @@
 // ---- Test subject
 import { verifyCoinbaseAttestation } from "../Providers/coinbase";
 import { CoinbasePlatform } from "../App-Bindings";
-import { ProviderPreCheckError } from "../../utils/platform";
+import { PlatformPreCheckError } from "../../utils/platform";
 
 jest.mock("../Providers/coinbase");
 
@@ -39,7 +39,7 @@ describe("getProviderInfo", () => {
     expect(mockedVerifyCoinbaseAttestation).toHaveBeenCalledWith("0x12345");
   });
 
-  it("should return ProviderPreCheckError for an invalid attestation", async () => {
+  it("should return PlatformPreCheckError for an invalid attestation", async () => {
     mockedVerifyCoinbaseAttestation.mockResolvedValueOnce(false);
     await expect(
       new CoinbasePlatform({
@@ -47,7 +47,7 @@ describe("getProviderInfo", () => {
         redirectUri: "redirectUri",
       }).getProviderPayload(appContext)
     ).rejects.toThrowError(
-      new ProviderPreCheckError(
+      new PlatformPreCheckError(
         "You need to verify your Coinbase ID onchain before you can verify your Coinbase account."
       )
     );

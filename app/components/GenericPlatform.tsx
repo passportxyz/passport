@@ -27,7 +27,7 @@ import { useWalletStore } from "../context/walletStore";
 import { waitForRedirect } from "../context/stampClaimingContext";
 
 // --- Types
-import { PlatformGroupSpec, ProviderPreCheckError } from "@gitcoin/passport-platforms";
+import { PlatformGroupSpec, PlatformPreCheckError } from "@gitcoin/passport-platforms";
 import { PlatformClass } from "@gitcoin/passport-platforms";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 
@@ -283,7 +283,7 @@ export const GenericPlatform = ({
           fail,
           platform.platformId as PLATFORM_ID
         );
-      } else if (e instanceof ProviderPreCheckError) {
+      } else if (e instanceof PlatformPreCheckError) {
         doneToast("Verification Failed", e.message, fail, platform.platformId as PLATFORM_ID);
       } else {
         console.error(e);

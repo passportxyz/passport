@@ -1,5 +1,5 @@
 import { AppContext, PlatformOptions, ProviderPayload } from "../types";
-import { Platform, ProviderPreCheckError } from "../utils/platform";
+import { Platform, PlatformPreCheckError } from "../utils/platform";
 import React from "react";
 import { verifyCoinbaseAttestation } from "./Providers/coinbase";
 
@@ -52,7 +52,7 @@ export class CoinbasePlatform extends Platform {
     const address = appContext.userDid.split(":")[4].toLowerCase();
     const hasAttestation = await verifyCoinbaseAttestation(address);
     if (!hasAttestation) {
-      throw new ProviderPreCheckError(
+      throw new PlatformPreCheckError(
         "You need to verify your Coinbase ID onchain before you can verify your Coinbase account."
       );
     }
