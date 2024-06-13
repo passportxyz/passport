@@ -364,11 +364,9 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
         let verifyResult: VerifiedPayload = { valid: false };
         let code, error;
 
-        // Account for address list providers. Route all allow list types to AddressList proivder and include suffix in payload
-
-        if (type.startsWith("AddressList")) {
-          payload.proofs.addressList = type.split("#")[1];
-          type = "AddressList";
+        if (type.startsWith("AllowList")) {
+          payload.proofs.allowList = type.split("#")[1];
+          type = "AllowList";
         }
 
         try {
@@ -385,8 +383,8 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
               break;
             }
           }
-          if (type === "AddressList") {
-            type = `AddressList#${verifyResult.record.addressList}`;
+          if (type === "AllowList") {
+            type = `AllowList#${verifyResult.record.allowList}`;
           }
         } catch (e) {
           error = "Unable to verify provider";

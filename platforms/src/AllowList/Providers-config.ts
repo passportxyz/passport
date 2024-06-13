@@ -1,10 +1,10 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { AddressListProvider } from "./Providers";
+import { AllowListProvider } from "./Providers";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "tbd",
-  platform: "AddressList",
-  name: "AddressList",
+  platform: "AllowList",
+  name: "AllowList",
   description: "tbd",
   connectMessage: "Verify",
   isEVM: true,
@@ -17,10 +17,10 @@ export const ProviderConfig: PlatformGroupSpec[] = [
       {
         title: "Allow List Provider",
         description: "If your address exists within the integrators list you get the stamps",
-        name: "AddressList",
+        name: "AllowList",
       },
     ],
   },
 ];
 
-export const providers: Provider[] = [new AddressListProvider()];
+export const providers: Provider[] = [new AllowListProvider()];

@@ -1,1 +1,0 @@
-export { AddressListProvider } from "./addressList";

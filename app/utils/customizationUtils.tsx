@@ -53,7 +53,7 @@ export type DynamicCustomization = BasicCustomization & {
       };
     };
   };
-  addressListProviders?: PlatformGroupSpec[];
+  allowListProviders?: PlatformGroupSpec[];
 };
 
 export type Customization = BasicCustomization | DynamicCustomization;
@@ -102,8 +102,8 @@ export const requestDynamicCustomizationConfig = async (
   try {
     const response = await axios.get(`${CUSTOMIZATION_ENDPOINT}/${customizationKey}`);
     const customizationResponse: CustomizationResponse = response.data;
-    const addressListProviders: PlatformGroupSpec[] = Object.keys(customizationResponse.scorer?.weights || [])
-      .filter((key) => key.startsWith("AddressList"))
+    const allowListProviders: PlatformGroupSpec[] = Object.keys(customizationResponse.scorer?.weights || [])
+      .filter((key) => key.startsWith("AllowList"))
       .map((name) => {
         return {
           platformGroup: "Custom Allow Lists",
@@ -146,7 +146,7 @@ export const requestDynamicCustomizationConfig = async (
           },
         },
       },
-      addressListProviders: addressListProviders.length ? addressListProviders : undefined,
+      allowListProviders: allowListProviders.length ? allowListProviders : undefined,
     };
   } catch (e) {
     console.error("Failed to fetch customization config", e);

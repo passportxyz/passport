@@ -4,25 +4,25 @@ import axios from "axios";
 
 export const allowListEndpoint = `${process.env.PASSPORT_SCORER_BACKEND}registry/allow-list`;
 
-export interface AddressListResponse {
+export interface AllowListResponse {
   data: {
     on_list: boolean;
   };
 }
 
-export class AddressListProvider implements Provider {
-  type = "AddressList";
+export class AllowListProvider implements Provider {
+  type = "AllowList";
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
       const { address } = payload;
-      const { addressList } = payload.proofs;
-      const response: AddressListResponse = await axios.get(`${allowListEndpoint}/${addressList}/${address}`);
+      const { allowList } = payload.proofs;
+      const response: AllowListResponse = await axios.get(`${allowListEndpoint}/${allowList}/${address}`);
       const valid = response.data.on_list;
 
       return {
         valid,
-        record: { address, addressList },
+        record: { address, allowList },
       };
     } catch (e) {
       throw new ProviderExternalVerificationError(String(e));

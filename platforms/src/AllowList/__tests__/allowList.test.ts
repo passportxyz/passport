@@ -1,13 +1,13 @@
 // Import the necessary modules and mock axios
 import { RequestPayload } from "@gitcoin/passport-types";
-import { AddressListProvider } from "../Providers/addressList"; // Adjust the import path as necessary
+import { AllowListProvider } from "../Providers/allowList"; // Adjust the import path as necessary
 import { ProviderExternalVerificationError } from "../../types";
 import axios from "axios";
 
 jest.mock("axios");
 
 const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
-describe("AddressListProvider verification", function () {
+describe("AllowListProvider verification", function () {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -24,7 +24,7 @@ describe("AddressListProvider verification", function () {
       }
     });
 
-    const allowListProvider = new AddressListProvider();
+    const allowListProvider = new AllowListProvider();
     const payload = await allowListProvider.verify({
       address: MOCK_ADDRESS,
     } as RequestPayload);
@@ -49,7 +49,7 @@ describe("AddressListProvider verification", function () {
       }
     });
 
-    const allowListProvider = new AddressListProvider();
+    const allowListProvider = new AllowListProvider();
     const payload = await allowListProvider.verify({
       address: MOCK_ADDRESS,
     } as RequestPayload);
@@ -66,7 +66,7 @@ describe("AddressListProvider verification", function () {
     // Simulating an axios error
     (axios.get as jest.Mock).mockRejectedValue("Network error");
 
-    const allowListProvider = new AddressListProvider();
+    const allowListProvider = new AllowListProvider();
     await expect(
       allowListProvider.verify({
         address: MOCK_ADDRESS,

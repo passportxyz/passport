@@ -182,8 +182,8 @@ export const GenericPlatform = ({
       };
 
       let types = selectedProviders;
-      if (isDynamicCustomization(customization) && customization.addressListProviders) {
-        providerPayload.addressList = customization.key;
+      if (isDynamicCustomization(customization) && customization.allowListProviders) {
+        providerPayload.allowList = customization.key;
         types = types.map((provider) => provider) as PROVIDER_ID[];
       }
 

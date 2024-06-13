@@ -3,9 +3,9 @@ import React from "react";
 import { AppContext, PlatformOptions, ProviderPayload } from "../types";
 import { Platform } from "../utils/platform";
 
-export class AddressListPlatform extends Platform {
-  platformId = "AddressList";
-  path = "AddressList";
+export class AllowListPlatform extends Platform {
+  platformId = "AllowList";
+  path = "AllowList";
   isEVM = true;
   clientId: string = null;
 
