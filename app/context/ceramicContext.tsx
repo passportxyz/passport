@@ -51,7 +51,7 @@ import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../components/DoneToastContent";
 import { useCustomization } from "../hooks/useCustomization";
-import { DynamicCustomization, isDynamicCustomization } from "../utils/customizationUtils";
+import { isDynamicCustomization } from "../utils/customizationUtils";
 
 // -- Trusted IAM servers DID
 const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
@@ -377,7 +377,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   useEffect(() => {
     if (isDynamicCustomization(customization) && customization.allowListProviders) {
       const { allowListProviders } = customization;
-      // Update Platforms
+      // Set AllowList platform providers based on customization
       platforms.set("AllowList", {
         platform: new AllowList.AllowListPlatform(),
         platFormGroupSpec: allowListProviders,

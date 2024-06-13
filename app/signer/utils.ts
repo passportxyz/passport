@@ -50,8 +50,7 @@ export const fetchPossibleEVMStamps = async (
   address: string,
   allPlatforms: Map<PLATFORM_ID, PlatformProps>,
   passport: Passport | undefined | false,
-  reIssueStamps: boolean = false,
-  proofs?: { [k: string]: string }
+  reIssueStamps: boolean = false
 ): Promise<ValidatedPlatform[]> => {
   const allPlatformsData = Array.from(allPlatforms.values());
   const evmPlatforms: PlatformProps[] = allPlatformsData.filter(({ platform }) => platform.isEVM);
@@ -61,7 +60,6 @@ export const fetchPossibleEVMStamps = async (
     types: getTypesToCheck(evmPlatforms, passport, reIssueStamps),
     address,
     version: "0.0.0",
-    proofs,
   };
 
   let response: { data: CheckResponseBody[] };
@@ -82,7 +80,7 @@ export const fetchPossibleEVMStamps = async (
   // Define helper functions to filter out invalid providers and groups
   const getValidGroupProviders = (groupSpec: PlatformGroupSpec): ValidatedProvider[] =>
     groupSpec.providers.reduce((providers: ValidatedProvider[], provider) => {
-      let { name, title } = provider;
+      const { name, title } = provider;
       if (validPlatformIds.includes(name)) return [...providers, { name, title }];
       else return providers;
     }, []);

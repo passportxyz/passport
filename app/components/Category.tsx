@@ -11,7 +11,7 @@ import { Disclosure } from "@headlessui/react";
 import { DropDownIcon } from "./DropDownIcon";
 import { SideBarContent } from "./SideBarContent";
 import { Drawer, DrawerOverlay, useDisclosure } from "@chakra-ui/react";
-import { DynamicCustomization, isDynamicCustomization } from "../utils/customizationUtils";
+import { isDynamicCustomization } from "../utils/customizationUtils";
 import { useCustomization } from "../hooks/useCustomization";
 
 export type Category = {

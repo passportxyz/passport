@@ -88,7 +88,6 @@ export const GenericPlatform = ({
   const [payloadModalIsOpen, setPayloadModalIsOpen] = useState(false);
   const { did, checkSessionIsValid } = useDatastoreConnectionContext();
   const [verificationState, _setUserVerificationState] = useAtom(mutableUserVerificationAtom);
-  const customization = useCustomization();
 
   // --- Chakra functions
   const toast = useToast();
@@ -181,8 +180,6 @@ export const GenericPlatform = ({
         [k: string]: string;
       };
 
-      let types = selectedProviders;
-
       if (providerPayload.sessionKey === "brightid") {
         handleSponsorship(providerPayload.code);
         return;
@@ -194,7 +191,7 @@ export const GenericPlatform = ({
         iamUrl,
         {
           type: platform.platformId,
-          types,
+          types: selectedProviders,
           version: "0.0.0",
           address: address || "",
           proofs: providerPayload,

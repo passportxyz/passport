@@ -30,6 +30,7 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
   ],
 };
 
+// maybe consolidate the two below
 export const customStampProviders = (customization?: DynamicCustomization): Providers => {
   if (!customization || !customization.allowListProviders) {
     return STAMP_PROVIDERS;

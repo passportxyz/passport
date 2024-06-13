@@ -35,9 +35,7 @@ export const useOneClickVerification = () => {
     });
 
     try {
-      let proofs: { [k: string]: string } = {};
-
-      const possiblePlatforms = await fetchPossibleEVMStamps(address, allPlatforms, passport, true, proofs);
+      const possiblePlatforms = await fetchPossibleEVMStamps(address, allPlatforms, passport, true);
       if (possiblePlatforms.length === 0) {
         setUserVerificationState({
           ...verificationState,
@@ -75,7 +73,7 @@ export const useOneClickVerification = () => {
           types: validatedProviderIds,
           version: "0.0.0",
           address: address || "",
-          proofs,
+          proofs: {},
           signatureType: IAM_SIGNATURE_TYPE,
         },
         (data: any) => createSignedPayload(did, data)

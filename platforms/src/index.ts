@@ -29,7 +29,6 @@ Object.values(platforms).map(({ ProviderConfig }) => {
   });
 });
 
-
 export const providers = new Providers([
   // Example provider which verifies the payload when `payload.proofs.valid === "true"`
   new SimpleProvider(),
