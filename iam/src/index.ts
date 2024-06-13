@@ -357,7 +357,10 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
         let code, error;
 
         if (type.startsWith("AllowList")) {
-          payload.proofs.allowList = type.split("#")[1];
+          payload.proofs = {
+            ...payload.proofs,
+            allowList: type.split("#")[1],
+          };
           type = "AllowList";
         }
 

@@ -107,7 +107,7 @@ class BaseAttestationProvider implements AttestationProvider {
     if (rawScore !== onChainScore) return OnChainStatus.MOVED_OUT_OF_DATE;
 
     const verifiedDbProviders: ProviderWithStamp[] = Object.values(allProvidersState).filter(
-      (provider): provider is ProviderWithStamp => provider.stamp !== undefined
+      (provider): provider is ProviderWithStamp => provider?.stamp !== undefined
     );
 
     const [equivalentProviders, differentProviders] = verifiedDbProviders.reduce(

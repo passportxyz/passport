@@ -383,6 +383,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         platFormGroupSpec: allowListProviders,
       });
       setAllPlatforms(platforms);
+    } else {
+      setAllPlatforms(platforms);
     }
   }, [customization]);
 

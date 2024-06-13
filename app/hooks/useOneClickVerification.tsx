@@ -12,12 +12,9 @@ import { mutableUserVerificationAtom } from "../context/userState";
 import { datadogLogs } from "@datadog/browser-logs";
 import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../components/DoneToastContent";
-import { useCustomization } from "./useCustomization";
-import { isDynamicCustomization } from "../utils/customizationUtils";
 
 export const useOneClickVerification = () => {
   const [verificationState, setUserVerificationState] = useAtom(mutableUserVerificationAtom);
-  const customization = useCustomization();
 
   const { did } = useDatastoreConnectionContext();
   const { passport, allPlatforms, handlePatchStamps } = useContext(CeramicContext);
@@ -51,18 +48,7 @@ export const useOneClickVerification = () => {
       });
       const validatedProviderIds = possiblePlatforms
         .map((platform) =>
-          platform.platformProps.platFormGroupSpec.map((group) =>
-            group.providers.map((provider) => {
-              if (
-                provider.name.startsWith("AllowList") &&
-                isDynamicCustomization(customization) &&
-                customization.allowListProviders
-              ) {
-                return provider.name.split("#")[0];
-              }
-              return provider.name;
-            })
-          )
+          platform.platformProps.platFormGroupSpec.map((group) => group.providers.map((provider) => provider.name))
         )
         .flat(2);
 
