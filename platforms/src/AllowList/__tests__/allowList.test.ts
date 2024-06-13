@@ -7,6 +7,14 @@ import axios from "axios";
 jest.mock("axios");
 
 const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
+
+const payload = {
+  address: MOCK_ADDRESS,
+  proofs: {
+    allowList: "test",
+  },
+} as unknown as RequestPayload;
+
 describe("AllowListProvider verification", function () {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -14,7 +22,7 @@ describe("AllowListProvider verification", function () {
 
   it("handles valid allow list verification attempt", async () => {
     // Mocking axios response for a valid case
-    (axios.get as jest.Mock).mockImplementation((url: string) => {
+    const axiosMock = (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.includes("registry/allow-list")) {
         return Promise.resolve({
           data: {
@@ -25,14 +33,13 @@ describe("AllowListProvider verification", function () {
     });
 
     const allowListProvider = new AllowListProvider();
-    const payload = await allowListProvider.verify({
-      address: MOCK_ADDRESS,
-    } as RequestPayload);
+    const verification = await allowListProvider.verify(payload);
 
-    expect(payload).toEqual({
+    expect(verification).toEqual({
       valid: true,
       record: {
         address: MOCK_ADDRESS,
+        allowList: "test",
       },
     });
   });
@@ -50,14 +57,13 @@ describe("AllowListProvider verification", function () {
     });
 
     const allowListProvider = new AllowListProvider();
-    const payload = await allowListProvider.verify({
-      address: MOCK_ADDRESS,
-    } as RequestPayload);
+    const verification = await allowListProvider.verify(payload);
 
-    expect(payload).toEqual({
+    expect(verification).toEqual({
       valid: false,
       record: {
         address: MOCK_ADDRESS,
+        allowList: "test",
       },
     });
   });
