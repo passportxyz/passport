@@ -7,10 +7,12 @@ import { CeramicContext } from "../context/ceramicContext";
 import { ScorerContext } from "../context/scorerContext";
 import { Popover, Transition } from "@headlessui/react";
 import { RemoveStampModal } from "./RemoveStampModal";
-import { STAMP_PROVIDERS } from "../config/providers";
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { ProgressBar } from "./ProgressBar";
 import { getDaysToExpiration } from "../utils/duration";
+import { customStampProviders, getStampProviderIds } from "../config/providers";
+import { PLATFORM_ID } from "@gitcoin/passport-types";
+import { isDynamicCustomization } from "../utils/customizationUtils";
+import { useCustomization } from "../hooks/useCustomization";
 
 const PlatformJsonButton = ({
   platformPassportData,
@@ -22,6 +24,7 @@ const PlatformJsonButton = ({
   onClose: () => void;
 }) => {
   const { handleDeleteStamps } = useContext(CeramicContext);
+  const customization = useCustomization();
   const [stampDetailsModal, setStampDetailsModal] = useState(false);
   const [removeStampModal, setRemoveStampModal] = useState(false);
   const [referenceElement, setReferenceElement] = useState(null);
@@ -32,10 +35,10 @@ const PlatformJsonButton = ({
   //   onClose: onCloseRemoveStampModal,
   // } = useDisclosure();
 
-  const providerIds =
-    STAMP_PROVIDERS[platform.platform]?.reduce((all, stamp) => {
-      return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-    }, [] as PROVIDER_ID[]) || [];
+  const providerIds = getStampProviderIds(
+    platform.platform,
+    customStampProviders(isDynamicCustomization(customization) ? customization : undefined)
+  );
 
   const onRemoveStamps = async () => {
     await handleDeleteStamps(providerIds);

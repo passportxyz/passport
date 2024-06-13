@@ -171,10 +171,6 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
             [k: string]: string;
           } = {};
 
-          if (isDynamicCustomization(customization) && customization.allowListProviders) {
-            providerPayload.allowList = customization.key;
-          }
-
           if (platform) {
             // This if should only be true if platformId !== "EVMBulkVerify"
             const state = `${platform.path}-` + generateUID(10);

@@ -37,10 +37,6 @@ export const useOneClickVerification = () => {
     try {
       let proofs: { [k: string]: string } = {};
 
-      if (isDynamicCustomization(customization) && customization.allowListProviders) {
-        proofs.allowList = customization.key;
-      }
-
       const possiblePlatforms = await fetchPossibleEVMStamps(address, allPlatforms, passport, true, proofs);
       if (possiblePlatforms.length === 0) {
         setUserVerificationState({

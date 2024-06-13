@@ -117,8 +117,6 @@ export const Category = ({
     }
   }
 
-  console.log({ allPlatforms });
-
   useEffect(() => {
     // set providers for the current platform
     if (currentPlatform) {

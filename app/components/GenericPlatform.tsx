@@ -182,10 +182,6 @@ export const GenericPlatform = ({
       };
 
       let types = selectedProviders;
-      if (isDynamicCustomization(customization) && customization.allowListProviders) {
-        providerPayload.allowList = customization.key;
-        types = types.map((provider) => provider) as PROVIDER_ID[];
-      }
 
       if (providerPayload.sessionKey === "brightid") {
         handleSponsorship(providerPayload.code);

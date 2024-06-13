@@ -351,23 +351,6 @@ export const cleanPassport = (
   return { passport, expiredProviders: tempExpiredProviders, expirationDateProviders };
 };
 
-export const updateAllowListGroupSpec = (
-  existingGroupSpec: PlatformGroupSpec[],
-  providers: PlatformGroupSpec[]
-): PlatformGroupSpec[] => {
-  return existingGroupSpec.map((groupSpec) => {
-    return {
-      ...groupSpec,
-      providers: groupSpec.providers.map((provider) => {
-        if (provider.name === "AllowList") {
-          return { ...provider, name: `${provider.name}#${customization.key}` };
-        }
-        return provider;
-      }),
-    };
-  });
-};
-
 export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
   const resolveCancel = useRef<() => void>();
@@ -393,18 +376,13 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   useEffect(() => {
     if (isDynamicCustomization(customization) && customization.allowListProviders) {
+      const { allowListProviders } = customization;
       // Update Platforms
       platforms.set("AllowList", {
         platform: new AllowList.AllowListPlatform(),
-        platFormGroupSpec: customization.allowListProviders,
+        platFormGroupSpec: allowListProviders,
       });
       setAllPlatforms(platforms);
-
-      // Update all provider state
-      setAllProviderState({
-        ...allProvidersState,
-        [`AllowList#${customization.key}`]: allProvidersState.AllowList,
-      });
     }
   }, [customization]);
 
@@ -754,9 +732,29 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   };
 
   const hydrateAllProvidersState = (passport?: Passport) => {
+    let existingProviderState = allProvidersState;
+    if (isDynamicCustomization(customization) && customization.allowListProviders) {
+      const providerSpecs = customization.allowListProviders.map(({ providers }) => providers).flat();
+
+      const allowListProviderState = providerSpecs.reduce(
+        (providerState, providerSpec) => ({
+          ...providerState,
+          [providerSpec.name]: {
+            providerSpec,
+            stamp: undefined,
+          },
+        }),
+        {}
+      );
+      existingProviderState = {
+        ...existingProviderState,
+        ...allowListProviderState,
+      };
+    }
+
     if (passport) {
       // set stamps into allProvidersState
-      let newAllProviderState = { ...startingAllProvidersState };
+      let newAllProviderState = { ...existingProviderState };
       passport.stamps.forEach((stamp: Stamp) => {
         const { provider } = stamp;
         const providerState = allProvidersState[provider];

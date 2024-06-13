@@ -127,10 +127,6 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
     };
   } = {};
 
-  if (isDynamicCustomization(customization) && customization.allowListProviders) {
-    PLATFORM_CATEGORIES[0].platforms.push("AllowList");
-  }
-
   // Generate grouped stamps
   PLATFORM_CATEGORIES.forEach((category) => {
     groupedPlatforms[category.name] = {
