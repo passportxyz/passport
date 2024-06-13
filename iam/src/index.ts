@@ -190,10 +190,6 @@ const modifyRecordType = (record: { [k: string]: string }, type: string): string
     return `${type}#${record.pii}`;
   }
 
-  if (record.addressList) {
-    return `${type}#${record.addressList}`;
-  }
-
   return type;
 };
 
@@ -364,9 +360,16 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
     groupProviderTypesByPlatform(types).map(async (platformTypes) => {
       // Iterate over the types within a platform in series
       // This enables providers within a platform to reliably share context
-      for (const type of platformTypes) {
+      for (let type of platformTypes) {
         let verifyResult: VerifiedPayload = { valid: false };
         let code, error;
+
+        // Account for address list providers. Route all allow list types to AddressList proivder and include suffix in payload
+
+        if (type.startsWith("AddressList")) {
+          payload.proofs.addressList = type.split("#")[1];
+          type = "AddressList";
+        }
 
         try {
           // verify the payload against the selected Identity Provider
@@ -381,6 +384,9 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
               // If a request times out exit loop and return results so additional requests are not made
               break;
             }
+          }
+          if (type === "AddressList") {
+            type = `AddressList#${verifyResult.record.addressList}`;
           }
         } catch (e) {
           error = "Unable to verify provider";

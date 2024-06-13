@@ -16,13 +16,13 @@ export class AddressListProvider implements Provider {
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
       const { address } = payload;
-      const { allowList } = payload.proofs;
-      const response: AddressListResponse = await axios.get(`${allowListEndpoint}/${allowList}/${address}`);
+      const { addressList } = payload.proofs;
+      const response: AddressListResponse = await axios.get(`${allowListEndpoint}/${addressList}/${address}`);
       const valid = response.data.on_list;
 
       return {
         valid,
-        record: { address, allowList },
+        record: { address, addressList },
       };
     } catch (e) {
       throw new ProviderExternalVerificationError(String(e));

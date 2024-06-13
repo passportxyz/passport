@@ -32,16 +32,7 @@ export const getTypesToCheck = (
   const existingProviders = passport && passport.stamps.map((stamp) => stamp.provider);
 
   const evmProviders: PROVIDER_ID[] = evmPlatforms
-    .map(({ platFormGroupSpec }) =>
-      platFormGroupSpec.map(({ providers }) =>
-        providers.map(({ name }) => {
-          if (name.startsWith("AddressList")) {
-            return "AddressList";
-          }
-          return name;
-        })
-      )
-    )
+    .map(({ platFormGroupSpec }) => platFormGroupSpec.map(({ providers }) => providers.map(({ name }) => name)))
     .flat(2);
 
   if (existingProviders && !reIssueStamps) {
@@ -92,9 +83,6 @@ export const fetchPossibleEVMStamps = async (
   const getValidGroupProviders = (groupSpec: PlatformGroupSpec): ValidatedProvider[] =>
     groupSpec.providers.reduce((providers: ValidatedProvider[], provider) => {
       let { name, title } = provider;
-      if (name.startsWith("AddressList")) {
-        name = name.split("#")[0] as PROVIDER_ID;
-      }
       if (validPlatformIds.includes(name)) return [...providers, { name, title }];
       else return providers;
     }, []);

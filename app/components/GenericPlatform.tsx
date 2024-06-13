@@ -184,12 +184,7 @@ export const GenericPlatform = ({
       let types = selectedProviders;
       if (isDynamicCustomization(customization) && customization.addressListProviders) {
         providerPayload.addressList = customization.key;
-        types = types.map((provider) => {
-          if (provider.includes("AddressList")) {
-            return provider.split("#")[0];
-          }
-          return provider;
-        }) as PROVIDER_ID[];
+        types = types.map((provider) => provider) as PROVIDER_ID[];
       }
 
       if (providerPayload.sessionKey === "brightid") {
