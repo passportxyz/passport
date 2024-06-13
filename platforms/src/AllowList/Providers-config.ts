@@ -2,10 +2,10 @@ import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
 import { AllowListProvider } from "./Providers";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "tbd",
+  icon: "./assets/passportLogoWhite.svg",
   platform: "AllowList",
   name: "AllowList",
-  description: "tbd",
+  description: "Verify you are part of a community",
   connectMessage: "Verify",
   isEVM: true,
 };

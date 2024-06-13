@@ -31,22 +31,12 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
 };
 
 export const customStampProviders = (customization?: DynamicCustomization): Providers => {
-  if (!customization) {
+  if (!customization || !customization.allowListProviders) {
     return STAMP_PROVIDERS;
   }
 
   const customStampProviders = JSON.parse(JSON.stringify(STAMP_PROVIDERS)) as Providers;
-  customStampProviders.AllowList = customStampProviders.AllowList.map((groupSpec) => {
-    return {
-      ...groupSpec,
-      providers: groupSpec.providers.map((provider) => {
-        if (provider.name === "AllowList") {
-          return { ...provider, name: `${provider.name}#${customization.key}` };
-        }
-        return provider;
-      }),
-    };
-  });
+  customStampProviders.AllowList = customization.allowListProviders;
   return customStampProviders;
 };
 

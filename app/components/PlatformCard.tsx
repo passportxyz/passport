@@ -335,6 +335,11 @@ const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
       customStampProviders(isDynamicCustomization(customization) ? customization : undefined)
     );
 
+    // Hide allow list if no points were earned when onboarding
+    if (platform.name.startsWith("AllowList") && platform.earnedPoints === 0) {
+      return true;
+    }
+
     return (
       isDynamicCustomization(customization) &&
       customization.scorer?.weights &&
