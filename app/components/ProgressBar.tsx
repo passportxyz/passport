@@ -24,8 +24,8 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ pointsGained, pointsAv
           x2={100 + capDistance}
           y2="5"
           stroke="rgb(var(--color-foreground-4))"
-          stroke-width={remainingBarWidth}
-          stroke-linecap="round"
+          strokeWidth={remainingBarWidth}
+          strokeLinecap="round"
         />
         <line
           x1={capDistance}
@@ -33,8 +33,8 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ pointsGained, pointsAv
           x2={percentGained + capDistance}
           y2="5"
           stroke="#0E2825"
-          stroke-width={gainedBarWidth + gainedBarBorder}
-          stroke-linecap="round"
+          strokeWidth={gainedBarWidth + gainedBarBorder}
+          strokeLinecap="round"
         />
         <line
           x1={capDistance}
@@ -42,8 +42,8 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ pointsGained, pointsAv
           x2={percentGained + capDistance}
           y2="5"
           stroke="#C1F6FF"
-          stroke-width={gainedBarWidth}
-          stroke-linecap="round"
+          strokeWidth={gainedBarWidth}
+          strokeLinecap="round"
         />
       </svg>
     </div>

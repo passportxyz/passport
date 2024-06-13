@@ -119,7 +119,7 @@ export const PlatformDetails = ({
   onClose: () => void;
 }) => {
   const { scoredPlatforms } = useContext(ScorerContext);
-  const { passport } = useContext(CeramicContext);
+  const { passport, platformExpirationDates } = useContext(CeramicContext);
 
   const currentPlatformScoreSpec = scoredPlatforms.find((platform) => platform.name === currentPlatform.name);
 
@@ -166,7 +166,7 @@ export const PlatformDetails = ({
             </div>
             <ProgressBar pointsGained={pointsGained} pointsAvailable={pointsAvailable} />
           </div>
-          <ExpirationIndicator expirationDate={platformPassportData[0].credential.expirationDate} />
+          <ExpirationIndicator expirationDate={platformExpirationDates[currentPlatform.platform as PLATFORM_ID]} />
         </>
       )}
     </div>

@@ -217,7 +217,9 @@ const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick }
               </svg>
             )}
             <div className="bg-background-5 px-2 py-1 rounded text-right font-alt text-black">
-              <p className="text-xs">Expired</p>
+              <p className="text-xs" data-testid="expired-label">
+                Expired
+              </p>
             </div>
           </div>
 
@@ -268,38 +270,17 @@ export const PlatformCard = ({
   className,
 }: PlatformCardProps): JSX.Element => {
   const platformIsExcluded = usePlatformIsExcluded(platform);
-  const { passport } = useContext(CeramicContext);
-  const platformProviders = selectedProviders[platform.platform];
-  // initialized earliestExpirationDate with the expiration date of the first stamp (if any stamp is available)
-  let earliestExpirationDate: Date = passport ? new Date(passport.stamps[0]?.credential.expirationDate) : new Date();
-  let hasExpirationDate = false;
-  let now = new Date();
+  const { platformExpirationDates, expiredPlatforms } = useContext(CeramicContext);
 
-  // Get the stamps for this platform
-  // Also check for the earliest expiration date
-  const platformStamps: Partial<Record<PROVIDER_ID, Stamp>> = !passport
-    ? {}
-    : platformProviders.reduce<Partial<Record<PROVIDER_ID, Stamp>>>((acc, provider) => {
-        const stamp = passport?.stamps.find((stamps) => stamps.provider === provider);
-        if (stamp) {
-          const d = new Date(stamp.credential.expirationDate);
-          if (!hasExpirationDate || d < earliestExpirationDate) {
-            earliestExpirationDate = d;
-            hasExpirationDate = true;
-          }
-        }
-        acc[provider] = stamp;
-        return acc;
-      }, {});
+  const isExpired: boolean = platform.platform in expiredPlatforms;
 
-  // Get the string refering to the eraliest expiration date
-  const daysUntilExpiration = getDaysToExpiration({ expirationDate: earliestExpirationDate });
-  const isExpired: boolean = now.getTime() - earliestExpirationDate.getTime() > 0;
+  const daysUntilExpiration = getDaysToExpiration({
+    expirationDate: platformExpirationDates[platform.platform as PLATFORM_ID] || "",
+  });
 
   if (platformIsExcluded) return <></>;
 
   const verified = platform.earnedPoints > 0 || selectedProviders[platform.platform].length > 0;
-
   // returns a single Platform card
   let stamp = null;
   if (verified && isExpired) {

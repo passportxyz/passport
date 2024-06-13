@@ -1,10 +1,16 @@
 import React from "react";
-import { screen, render, fireEvent } from "@testing-library/react";
+import { screen, render } from "@testing-library/react";
 
 import { CardList, CardListProps } from "../../components/CardList";
-import { makeTestCeramicContext, renderWithContext, scorerContext } from "../../__test-fixtures__/contextTestHelpers";
-import { CeramicContextState } from "../../context/ceramicContext";
+import {
+  makeTestCeramicContext,
+  makeTestCeramicContextWithExpiredStamps,
+  renderWithContext,
+} from "../../__test-fixtures__/contextTestHelpers";
+import { CeramicContext, CeramicContextState } from "../../context/ceramicContext";
 import { Category, CategoryProps } from "../../components/Category";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { PlatformCard, SelectedProviders } from "../../components/PlatformCard";
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -92,7 +98,6 @@ describe("<CardList />", () => {
   });
 
   it("should indicate on card whether or not it has been verified", () => {
-    // This should no longer show the verrified button, but have the verified label instead & no button
     render(<Category category={categoryProps["category"]} />);
     const verifiedBtnCnt = screen
       .getAllByTestId("connect-button")
@@ -110,6 +115,45 @@ describe("<CardList />", () => {
       categoryProps["category"].sortedPlatforms.filter((platform) => platform.earnedPoints > 0).length
     );
   });
+
+  it("should indicate on card whether or not it has been expired", () => {
+    const mockCeramicContextWithExpiredStamps: CeramicContextState = makeTestCeramicContextWithExpiredStamps();
+
+    const mockSetCurrentPlatform = jest.fn();
+    const mockOnOpen = jest.fn();
+    render(
+      <CeramicContext.Provider value={mockCeramicContextWithExpiredStamps}>
+        <PlatformCard
+          i={0}
+          platform={{
+            platform: "ETH",
+            name: "ETH",
+            description: "ETH",
+            connectMessage: "ETH",
+            possiblePoints: 10,
+            earnedPoints: 7,
+          }}
+          selectedProviders={{ ETH: [] as PROVIDER_ID[] } as SelectedProviders}
+          onOpen={mockOnOpen}
+          setCurrentPlatform={mockSetCurrentPlatform}
+        />
+      </CeramicContext.Provider>
+    );
+
+    const updateBtnCnt = screen
+      .getAllByTestId("update-button")
+      .map((el) => el.textContent)
+      .filter((text) => text === "Update").length;
+
+    const expiredLabelCnt = screen
+      .getAllByTestId("expired-label")
+      .map((el) => el.textContent)
+      .filter((text) => text === "Expired").length;
+
+    expect(updateBtnCnt).toBeGreaterThan(0);
+    expect(expiredLabelCnt).toBeGreaterThan(0);
+  });
+
   it("should render available points", () => {
     renderWithContext(mockCeramicContext, <CardList {...cardListProps} />);
     const availablePnts = screen.getAllByTestId("available-points").map((el) => el.textContent);

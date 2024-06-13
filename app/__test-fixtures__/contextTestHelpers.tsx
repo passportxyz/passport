@@ -102,6 +102,7 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
     cancelCeramicConnection: jest.fn(),
     verifiedProviderIds: [],
     verifiedPlatforms: {},
+    platformExpirationDates: {},
     ...initialState,
   };
 };
