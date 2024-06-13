@@ -167,7 +167,7 @@ export const PlatformDetails = ({
             <ProgressBar pointsGained={pointsGained} pointsAvailable={pointsAvailable} />
           </div>
           <ExpirationIndicator
-            expirationDate={platformExpirationDates[currentPlatform.platform as PLATFORM_ID] || ""}
+            expirationDate={platformExpirationDates[currentPlatform.platform as PLATFORM_ID]?.toDateString() || ""}
           />
         </>
       )}

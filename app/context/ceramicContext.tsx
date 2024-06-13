@@ -794,13 +794,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         if (!earliestExpirationDate) {
           earliestExpirationDate = expirationDateProviders[provider.name];
         }
-        if (
-          expirationDateProviders &&
-          provider.name in expirationDateProviders &&
-          expirationDateProviders[provider.name] &&
-          earliestExpirationDate &&
-          earliestExpirationDate > expirationDateProviders[provider.name as PROVIDER_ID]
-        ) {
+        const d = expirationDateProviders[provider.name as PROVIDER_ID];
+        if (d && earliestExpirationDate && earliestExpirationDate > d) {
           earliestExpirationDate = expirationDateProviders[provider.name];
         }
         ret[platformKey as PLATFORM_ID] = earliestExpirationDate;
