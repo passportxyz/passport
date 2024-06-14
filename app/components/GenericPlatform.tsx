@@ -39,8 +39,6 @@ import { PlatformScoreSpec } from "../context/scorerContext";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useAtom } from "jotai";
 import { mutableUserVerificationAtom } from "../context/userState";
-import { isDynamicCustomization } from "../utils/customizationUtils";
-import { useCustomization } from "../hooks/useCustomization";
 
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];

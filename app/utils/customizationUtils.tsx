@@ -96,26 +96,30 @@ const SanitizedHTMLComponent = ({ html }: { html: string }) => {
   return parse(sanitizedHTML);
 };
 
+export const buildAllowListProviders = (wieghts?: Record<PROVIDER_ID, string>) => {
+  return Object.keys(wieghts || [])
+    .filter((key) => key.startsWith("AllowList"))
+    .map((name) => {
+      return {
+        platformGroup: "Custom Allow Lists",
+        providers: [
+          {
+            title: "Allow List Provider",
+            description: "If your address exists within the integrators list you get the stamps you're golden",
+            name: name as PROVIDER_ID,
+          },
+        ],
+      };
+    });
+};
+
 export const requestDynamicCustomizationConfig = async (
   customizationKey: string
 ): Promise<DynamicCustomization | undefined> => {
   try {
     const response = await axios.get(`${CUSTOMIZATION_ENDPOINT}/${customizationKey}`);
     const customizationResponse: CustomizationResponse = response.data;
-    const allowListProviders: PlatformGroupSpec[] = Object.keys(customizationResponse.scorer?.weights || [])
-      .filter((key) => key.startsWith("AllowList"))
-      .map((name) => {
-        return {
-          platformGroup: "Custom Allow Lists",
-          providers: [
-            {
-              title: "Allow List Provider",
-              description: "If your address exists within the integrators list you get the stamps you're golden",
-              name: name as PROVIDER_ID,
-            },
-          ],
-        };
-      });
+    const allowListProviders: PlatformGroupSpec[] = buildAllowListProviders(customizationResponse.scorer?.weights);
 
     return {
       key: customizationKey,

@@ -341,7 +341,7 @@ type VerifyTypeResult = {
   code?: number;
 };
 
-async function verifyTypes(types: string[], payload: RequestPayload): Promise<VerifyTypeResult[]> {
+export async function verifyTypes(types: string[], payload: RequestPayload): Promise<VerifyTypeResult[]> {
   // define a context to be shared between providers in the verify request
   // this is intended as a temporary storage for providers to share data
   const context: ProviderContext = {};
