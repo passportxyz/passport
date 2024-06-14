@@ -42,6 +42,7 @@ const {
   Civic,
   TrustaLabs,
   Outdid,
+  AllowList,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -364,6 +365,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [passportLoadResponse, setPassportLoadResponse] = useState<PassportLoadResponse | undefined>();
   const [passportHasCacaoError, setPassportHasCacaoError] = useState<boolean>(false);
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
+  const [allPlatforms, setAllPlatforms] = useState<Map<PLATFORM_ID, PlatformProps>>(new Map());
 
   const address = useWalletStore((state) => state.address);
   const { dbAccessToken, did, checkSessionIsValid } = useDatastoreConnectionContext();
@@ -371,6 +373,20 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const customization = useCustomization();
 
   const toast = useToast();
+
+  useEffect(() => {
+    if (isDynamicCustomization(customization) && customization.allowListProviders) {
+      const { allowListProviders } = customization;
+      // Set AllowList platform providers based on customization
+      platforms.set("AllowList", {
+        platform: new AllowList.AllowListPlatform(),
+        platFormGroupSpec: allowListProviders,
+      });
+      setAllPlatforms(platforms);
+    } else {
+      setAllPlatforms(platforms);
+    }
+  }, [customization]);
 
   useEffect(() => {
     return () => {
@@ -427,7 +443,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         }
       });
     }
-  }, [database, customization]);
+  }, [database]);
 
   useEffect(() => {
     if (ceramicClient) {
@@ -718,9 +734,29 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   };
 
   const hydrateAllProvidersState = (passport?: Passport) => {
+    let existingProviderState = allProvidersState;
+    if (isDynamicCustomization(customization) && customization.allowListProviders) {
+      const providerSpecs = customization.allowListProviders.map(({ providers }) => providers).flat();
+
+      const allowListProviderState = providerSpecs.reduce(
+        (providerState, providerSpec) => ({
+          ...providerState,
+          [providerSpec.name]: {
+            providerSpec,
+            stamp: undefined,
+          },
+        }),
+        {}
+      );
+      existingProviderState = {
+        ...existingProviderState,
+        ...allowListProviderState,
+      };
+    }
+
     if (passport) {
       // set stamps into allProvidersState
-      let newAllProviderState = { ...startingAllProvidersState };
+      let newAllProviderState = { ...existingProviderState };
       passport.stamps.forEach((stamp: Stamp) => {
         const { provider } = stamp;
         const providerState = allProvidersState[provider];
@@ -828,7 +864,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     passport,
     isLoadingPassport,
     allProvidersState,
-    allPlatforms: platforms,
+    allPlatforms,
     handleCreatePassport,
     handleAddStamps,
     handlePatchStamps,

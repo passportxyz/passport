@@ -33,20 +33,6 @@ export const SideBarContent = ({
   verifyButton,
   bannerConfig,
 }: SideBarContentProps): JSX.Element => {
-  const { handleDeleteStamps } = useContext(CeramicContext);
-  const [allProviderIds, setAllProviderIds] = useState<PROVIDER_ID[]>([]);
-
-  // alter select-all state when items change
-  useEffect(() => {
-    // find all providerIds
-    const providerIds =
-      currentProviders?.reduce((all, stamp) => {
-        return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-      }, [] as PROVIDER_ID[]) || [];
-
-    setAllProviderIds(providerIds);
-  }, [currentProviders]);
-
   return (
     <DrawerContent
       style={{

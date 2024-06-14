@@ -221,13 +221,14 @@ const datastoreConnectionContext = {
 export const renderWithContext = (
   ceramicContext: CeramicContextState,
   ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>,
-  datastoreContextOverride: Partial<DatastoreConnectionContextState> = {}
+  datastoreContextOverride: Partial<DatastoreConnectionContextState> = {},
+  scorerContextOverride: Partial<ScorerContextState> = {}
 ) => {
   const queryClient = new QueryClient();
   return render(
     <QueryClientProvider client={queryClient}>
       <DatastoreConnectionContext.Provider value={{ ...datastoreConnectionContext, ...datastoreContextOverride }}>
-        <ScorerContext.Provider value={scorerContext}>
+        <ScorerContext.Provider value={{ ...scorerContext, ...scorerContextOverride }}>
           <CeramicContext.Provider value={ceramicContext}>{ui}</CeramicContext.Provider>
         </ScorerContext.Provider>
       </DatastoreConnectionContext.Provider>

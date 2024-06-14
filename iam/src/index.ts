@@ -341,7 +341,7 @@ type VerifyTypeResult = {
   code?: number;
 };
 
-async function verifyTypes(types: string[], payload: RequestPayload): Promise<VerifyTypeResult[]> {
+export async function verifyTypes(types: string[], payload: RequestPayload): Promise<VerifyTypeResult[]> {
   // define a context to be shared between providers in the verify request
   // this is intended as a temporary storage for providers to share data
   const context: ProviderContext = {};
@@ -352,9 +352,17 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
     groupProviderTypesByPlatform(types).map(async (platformTypes) => {
       // Iterate over the types within a platform in series
       // This enables providers within a platform to reliably share context
-      for (const type of platformTypes) {
+      for (let type of platformTypes) {
         let verifyResult: VerifiedPayload = { valid: false };
         let code, error;
+
+        if (type.startsWith("AllowList")) {
+          payload.proofs = {
+            ...payload.proofs,
+            allowList: type.split("#")[1],
+          };
+          type = "AllowList";
+        }
 
         try {
           // verify the payload against the selected Identity Provider
@@ -369,6 +377,9 @@ async function verifyTypes(types: string[], payload: RequestPayload): Promise<Ve
               // If a request times out exit loop and return results so additional requests are not made
               break;
             }
+          }
+          if (type === "AllowList") {
+            type = `AllowList#${verifyResult.record.allowList}`;
           }
         } catch (e) {
           error = "Unable to verify provider";

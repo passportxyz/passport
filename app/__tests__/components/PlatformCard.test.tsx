@@ -7,7 +7,9 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { useCustomization } from "../../hooks/useCustomization";
 
 // mock useCustomization
-jest.mock("../../hooks/useCustomization");
+jest.mock("../../hooks/useCustomization", () => ({
+  useCustomization: jest.fn(),
+}));
 
 describe("<PlatformCard />", () => {
   beforeEach(() => {
@@ -67,6 +69,40 @@ describe("<PlatformCard />", () => {
     it("include platform if customization doesn't specify custom weights", () => {
       renderTestComponent({});
       expect(screen.queryByTestId("platform-name")).toBeInTheDocument();
+    });
+    it("should show allow list stamp if user has points", () => {
+      (useCustomization as jest.Mock).mockReturnValue({
+        scorer: {
+          wieghts: {
+            "AllowList#test": 10,
+          },
+        },
+      });
+      const AllowListPlatform = getPlatformSpec("AllowList") as PlatformSpec;
+      const platformScoreSpec = {
+        ...AllowListPlatform,
+        possiblePoints: 6,
+        earnedPoints: 1,
+      };
+      render(<PlatformCard i={0} platform={platformScoreSpec} onOpen={() => {}} setCurrentPlatform={() => {}} />);
+      expect(screen.getByTestId("platform-name")).toBeInTheDocument();
+    });
+    it("should hide allow list if no points are earned", () => {
+      (useCustomization as jest.Mock).mockReturnValue({
+        scorer: {
+          wieghts: {
+            "AllowList#test": 10,
+          },
+        },
+      });
+      const AllowListPlatform = getPlatformSpec("AllowList") as PlatformSpec;
+      const platformScoreSpec = {
+        ...AllowListPlatform,
+        possiblePoints: 6,
+        earnedPoints: 0,
+      };
+      render(<PlatformCard i={0} platform={platformScoreSpec} onOpen={() => {}} setCurrentPlatform={() => {}} />);
+      expect(screen.queryByTestId("platform-name")).not.toBeInTheDocument();
     });
   });
 });

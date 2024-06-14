@@ -4,7 +4,8 @@ import { CUSTOMIZATION_ENDPOINT } from "../config/customization_config";
 import axios from "axios";
 import * as DOMPurify from "dompurify";
 import parse from "html-react-parser";
-import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { PlatformGroupSpec } from "@gitcoin/passport-platforms/*";
 
 const sanitize = DOMPurify.sanitize;
 
@@ -52,6 +53,7 @@ export type DynamicCustomization = BasicCustomization & {
       };
     };
   };
+  allowListProviders?: PlatformGroupSpec[];
 };
 
 export type Customization = BasicCustomization | DynamicCustomization;
@@ -94,12 +96,31 @@ const SanitizedHTMLComponent = ({ html }: { html: string }) => {
   return parse(sanitizedHTML);
 };
 
+export const buildAllowListProviders = (wieghts?: Record<PROVIDER_ID, string>) => {
+  return Object.keys(wieghts || [])
+    .filter((key) => key.startsWith("AllowList"))
+    .map((name) => {
+      return {
+        platformGroup: "Custom Allow Lists",
+        providers: [
+          {
+            title: "Allow List Provider",
+            description: "If your address exists within the integrators list you get the stamps you're golden",
+            name: name as PROVIDER_ID,
+          },
+        ],
+      };
+    });
+};
+
 export const requestDynamicCustomizationConfig = async (
   customizationKey: string
 ): Promise<DynamicCustomization | undefined> => {
   try {
     const response = await axios.get(`${CUSTOMIZATION_ENDPOINT}/${customizationKey}`);
     const customizationResponse: CustomizationResponse = response.data;
+    const allowListProviders: PlatformGroupSpec[] = buildAllowListProviders(customizationResponse.scorer?.weights);
+
     return {
       key: customizationKey,
       customizationTheme: customizationResponse.customizationTheme,
@@ -129,6 +150,7 @@ export const requestDynamicCustomizationConfig = async (
           },
         },
       },
+      allowListProviders: allowListProviders.length ? allowListProviders : undefined,
     };
   } catch (e) {
     console.error("Failed to fetch customization config", e);

@@ -358,7 +358,8 @@ export type PLATFORM_ID =
   | "GrantsStack"
   | "ZkSync"
   | "TrustaLabs"
-  | "Outdid";
+  | "Outdid"
+  | "AllowList";
 
 export type PLATFORM_CATEGORY = {
   name: string;
@@ -438,7 +439,9 @@ export type PROVIDER_ID =
   | "ETHDaysActive#50"
   | "ETHGasSpent#0.25"
   | "ETHnumTransactions#100"
-  | "Outdid";
+  | "Outdid"
+  | "AllowList"
+  | `AllowList#${string}`;
 
 export type StampBit = {
   bit: number;
