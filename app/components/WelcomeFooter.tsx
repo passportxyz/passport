@@ -63,7 +63,7 @@ const WelcomeFooter = ({ displayPrivacyPolicy, fixed }: { displayPrivacyPolicy: 
         {chains.map(({ href, icon, key }) => {
           return (
             <div key={key} className="flex m-1 md:m-2 lg:m-3">
-              <a className="self-start" target="_blank" href={href} alt={key}>
+              <a className="self-start" target="_blank" href={href}>
                 <img src={icon} className="w-[20px] md:w-[35px] h-[20px] md:h-[35px]" />
               </a>
             </div>
