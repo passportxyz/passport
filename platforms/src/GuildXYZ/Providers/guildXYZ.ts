@@ -1,12 +1,10 @@
 // ----- Types
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { ProviderExternalVerificationError, type Provider } from "../../types";
+import { createGuildClient } from "@guildxyz/sdk";
 
-// ----- Libs
-import axios from "axios";
-
-// ----- Utils
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+// The only parameter is the name of your project
+const guildClient = createGuildClient("Passport");
 
 import { getAddress } from "../../utils/signer";
 
@@ -19,10 +17,6 @@ type GuildMembership = {
 
 type Guild = {
   id: number;
-  name: string;
-  roles: string[]; // names of the roles
-  imageUrl: string;
-  urlName: string;
   memberCount: number;
 };
 
@@ -32,36 +26,19 @@ type GuildStats = {
   totalAdminOwner: number;
 };
 
-const guildBaseEndpoint = "https://api.guild.xyz/v1/";
-
 export async function getGuildMemberships(address: string): Promise<GuildMembership[]> {
-  try {
-    const memberShipResponse: {
-      data: GuildMembership[];
-    } = await axios.get(`${guildBaseEndpoint}user/membership/${address}`);
-    return memberShipResponse.data;
-  } catch (error: unknown) {
-    handleProviderAxiosError(error, "get guild memberships", [address]);
-  }
+  // Get current memberships of a user
+  return await guildClient.user.getMemberships(address);
 }
 
-export async function getAllGuilds(): Promise<Guild[]> {
-  try {
-    // https://api.guild.xyz/v1/guild
-    const guildResponse: {
-      data: Guild[];
-    } = await axios.get(`${guildBaseEndpoint}guild`);
-
-    return guildResponse.data;
-  } catch (error) {
-    handleProviderAxiosError(error, "get all guilds");
-  }
+async function getUserGuilds(memberships: GuildMembership[]): Promise<Guild[]> {
+  const userGuildIds = memberships.map((membership) => membership.guildId);
+  return guildClient.guild.getMany(userGuildIds);
 }
 
 export async function checkGuildStats(memberships: GuildMembership[]): Promise<GuildStats> {
   try {
     // Member of more than 5 guilds and > 15 roles across those guilds (guilds over 250 members)
-    const allGuilds = await getAllGuilds();
 
     const myGuildRoles = new Map<number, number>(); // key: guildId, value: roleIdsLength
     const adminOwnerGuilds = new Map<number, number>();
@@ -70,12 +47,14 @@ export async function checkGuildStats(memberships: GuildMembership[]): Promise<G
       adminOwnerGuilds.set(membership.guildId, membership.isAdmin || membership.isOwner ? 1 : 0);
     });
 
+    const userGuilds = await getUserGuilds(memberships);
+
     // Aggregate guild and role count
     let guildCount = 0;
     let totalRoles = 0;
     let totalAdminOwner = 0;
 
-    for (const guild of allGuilds) {
+    for (const guild of userGuilds) {
       if (myGuildRoles.has(guild.id) && guild.memberCount > 250) {
         guildCount++;
         totalRoles += myGuildRoles.get(guild.id);
@@ -110,18 +89,13 @@ export class GuildAdminProvider extends GuildProvider implements Provider {
   type = "GuildAdmin";
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    try {
-      let valid = false,
-        record = undefined,
-        membershipStats;
-      const errors: string[] = [];
-      const address = await getAddress(payload);
-      try {
-        membershipStats = await this.checkMemberShipStats(address);
-      } catch (error) {
-        errors.push(String(error));
-      }
+    let record = undefined,
+      valid = false;
+    const errors: string[] = [];
+    const address = await getAddress(payload);
 
+    try {
+      const membershipStats = await this.checkMemberShipStats(address);
       valid = membershipStats.totalAdminOwner > 0;
 
       if (valid) {
@@ -129,17 +103,21 @@ export class GuildAdminProvider extends GuildProvider implements Provider {
           address,
         };
       } else {
-        errors.push(`We did not find any Guilds that you are an admin of: ${membershipStats.totalAdminOwner}.`);
+        errors.push("We did not find any Guilds that you are an admin of.");
       }
-
-      return {
-        valid,
-        record,
-        errors,
-      };
-    } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(`Error verifying Guild Admin Membership: ${JSON.stringify(e)}`);
+    } catch (error: unknown) {
+      if ((error as Error)?.message?.includes("User not found")) {
+        errors.push("Unable to find user in the Guild system. Please join a Guild first.");
+      } else {
+        throw error;
+      }
     }
+
+    return {
+      valid,
+      record,
+      errors,
+    };
   }
 }
 
@@ -153,20 +131,16 @@ export class GuildPassportMemberProvider implements Provider {
   type = "GuildPassportMember";
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+    const errors: string[] = [];
+    let valid = false;
+
+    let record = undefined;
+    const address = await getAddress(payload);
+
     try {
-      const errors: string[] = [];
-      let valid = false,
-        record = undefined,
-        memberships;
-      const address = await getAddress(payload);
-
-      try {
-        memberships = await getGuildMemberships(address);
-      } catch (error: unknown) {
-        errors.push(String(error));
-      }
-
+      const memberships = await getGuildMemberships(address);
       valid = checkPassportGuild(memberships);
+
       if (valid) {
         record = {
           address,
@@ -174,14 +148,18 @@ export class GuildPassportMemberProvider implements Provider {
       } else {
         errors.push("You are not a member of the Passport Guild, thus, you do not qualify for this stamp.");
       }
-
-      return {
-        valid,
-        record,
-        errors,
-      };
-    } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(`Error verifying Guild Passport Membership: ${JSON.stringify(e)}.`);
+    } catch (error: unknown) {
+      if ((error as Error)?.message?.includes("User not found")) {
+        errors.push("Unable to find user in the Guild system. Please join a Guild first.");
+      } else {
+        throw error;
+      }
     }
+
+    return {
+      valid,
+      record,
+      errors,
+    };
   }
 }
