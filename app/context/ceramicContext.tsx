@@ -72,6 +72,7 @@ export interface CeramicContextState {
   passportLoadResponse?: PassportLoadResponse;
   verifiedProviderIds: PROVIDER_ID[];
   verifiedPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>>;
+  platformExpirationDates: Partial<Record<PLATFORM_ID, Date>>; // the value shlould be the earliest expiration date
 }
 
 export const platforms = new Map<PLATFORM_ID, PlatformProps>();
@@ -302,6 +303,7 @@ const startingState: CeramicContextState = {
   userDid: undefined,
   expiredProviders: [],
   expiredPlatforms: {},
+  platformExpirationDates: {}, // <platform_id> : <earliest_exp_date>
   passportLoadResponse: undefined,
   verifiedProviderIds: [],
   verifiedPlatforms: {},
@@ -316,10 +318,11 @@ export const cleanPassport = (
 ): {
   passport: Passport;
   expiredProviders: PROVIDER_ID[];
+  expirationDateProviders: Partial<Record<PROVIDER_ID, Date>>;
 } => {
   const tempExpiredProviders: PROVIDER_ID[] = [];
   const currentProviderIds = Object.keys(allProvidersState);
-  // clean stamp content if expired or from a different issuer
+  let expirationDateProviders: Partial<Record<PROVIDER_ID, Date>> = {};
   if (passport) {
     passport.stamps = passport.stamps.filter((stamp: Stamp) => {
       if (stamp) {
@@ -332,6 +335,8 @@ export const cleanPassport = (
         const has_correct_subject = stamp.credential.credentialSubject.id.toLowerCase() === database.did;
         const has_expired = new Date(stamp.credential.expirationDate) < new Date();
 
+        expirationDateProviders[providerId] = new Date(stamp.credential.expirationDate);
+
         if (has_expired && has_correct_issuer && has_correct_subject) {
           tempExpiredProviders.push(providerId);
         }
@@ -342,8 +347,7 @@ export const cleanPassport = (
       }
     });
   }
-
-  return { passport, expiredProviders: tempExpiredProviders };
+  return { passport, expiredProviders: tempExpiredProviders, expirationDateProviders };
 };
 
 export const CeramicContextProvider = ({ children }: { children: any }) => {
@@ -356,6 +360,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [initialCeramicStamps, setInitialCeramicStamps] = useState<Stamp[] | undefined>(undefined);
   const [userDid, setUserDid] = useState<string | undefined>();
   const [expiredProviders, setExpiredProviders] = useState<PROVIDER_ID[]>([]);
+  const [expirationDateProviders, setExpirationDateProviders] = useState<Partial<Record<PROVIDER_ID, Date>>>({}); // <provider> : <expiration_date>
   const [passportLoadResponse, setPassportLoadResponse] = useState<PassportLoadResponse | undefined>();
   const [passportHasCacaoError, setPassportHasCacaoError] = useState<boolean>(false);
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
@@ -486,8 +491,13 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     if (!passport) {
       passport = { stamps: [] };
     }
-    const { passport: cleanedPassport, expiredProviders } = cleanPassport(passport, database, allProvidersState);
+    const {
+      passport: cleanedPassport,
+      expiredProviders,
+      expirationDateProviders,
+    } = cleanPassport(passport, database, allProvidersState);
     setExpiredProviders(expiredProviders);
+    setExpirationDateProviders(expirationDateProviders);
     hydrateAllProvidersState(cleanedPassport);
     setPassport(cleanedPassport);
     if (!skipLoadingState) setIsLoadingPassport(IsLoadingPassportState.Idle);
@@ -757,7 +767,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       ),
     [verifiedProviderIds, platforms]
   );
-
   const expiredPlatforms = useMemo(
     () =>
       Object.entries(Object.fromEntries(platforms)).reduce(
@@ -774,6 +783,46 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       ),
     [verifiedProviderIds, platforms]
   );
+
+  const platformExpirationDates = useMemo(() => {
+    let ret = {} as Partial<Record<PLATFORM_ID, Date>>;
+    platforms.forEach((platformProps, platformKey) => {
+      const providerGroups = platformProps.platFormGroupSpec;
+
+      // Determine the realiest expiration date for each platform
+      // This will iterate over all platform groups, check the earliest expiration date for each group, and then the earliest expiration for the platform
+      const earliestExpirationDate = providerGroups.reduce(
+        (earliestGroupExpirationDate, groupSpec) => {
+          const earliestPlatformExpirationDate: Date | undefined = groupSpec.providers.reduce(
+            (earliestProviderDate, provider) => {
+              const d = expirationDateProviders[provider.name as PROVIDER_ID];
+              if (earliestProviderDate && d && d < earliestProviderDate) {
+                return d;
+              }
+              // If one of d or earliestProviderDate is undefined, this will return the one that is defined
+              // or undefined if both are undefined
+              return d || earliestProviderDate;
+            },
+            undefined as Date | undefined
+          );
+
+          if (
+            earliestPlatformExpirationDate &&
+            earliestGroupExpirationDate &&
+            earliestPlatformExpirationDate < earliestGroupExpirationDate
+          ) {
+            return earliestPlatformExpirationDate;
+          }
+          // If one of earliestPlatformExpirationDate or earliestGroupExpirationDate is undefined, this will return the one that is defined
+          // or undefined if both are undefined
+          return earliestPlatformExpirationDate || earliestGroupExpirationDate;
+        },
+        undefined as Date | undefined
+      );
+      ret[platformKey as PLATFORM_ID] = earliestExpirationDate;
+    });
+    return ret;
+  }, [verifiedProviderIds, platforms, expirationDateProviders]);
 
   const providerProps = {
     passport,
@@ -792,6 +841,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     passportHasCacaoError,
     verifiedProviderIds,
     verifiedPlatforms,
+    platformExpirationDates,
   };
 
   return <CeramicContext.Provider value={providerProps}>{children}</CeramicContext.Provider>;

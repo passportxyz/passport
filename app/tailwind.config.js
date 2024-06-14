@@ -19,6 +19,7 @@ module.exports = {
         "background-2": "rgb(var(--color-background-2) / <alpha-value>)",
         "background-3": "rgb(var(--color-background-3) / <alpha-value>)",
         "background-4": "rgb(var(--color-background-4) / <alpha-value>)",
+        "background-5": "rgb(var(--color-background-5) / <alpha-value>)",
         foreground: "rgb(var(--color-foreground) / <alpha-value>)",
         "foreground-2": "rgb(var(--color-foreground-2) / <alpha-value>)",
         "foreground-3": "rgb(var(--color-foreground-3) / <alpha-value>)",
@@ -40,6 +41,9 @@ module.exports = {
         "color-5": "rgb(var(--color-text-5) / <alpha-value>)",
         "color-6": "rgb(var(--color-text-6) / <alpha-value>)",
         "color-7": "rgb(var(--color-text-7) / <alpha-value>)",
+        "color-8": "rgb(var(--color-text-8) / <alpha-value>)",
+        "color-9": "rgb(var(--color-text-9) / <alpha-value>)",
+        "color-10": "rgb(var(--color-text-10) / <alpha-value>)",
 
         // Set this variable dynamically to allow for customization
         // colors defined by an API call
