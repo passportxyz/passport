@@ -93,7 +93,7 @@ const PlatformJsonButton = ({
   );
 };
 
-const ExpirationIndicator = ({ expirationDate }: { expirationDate: string }) => {
+const ExpirationIndicator = ({ expirationDate }: { expirationDate: Date | string }) => {
   const daysUntilExpiration = getDaysToExpiration({ expirationDate });
   const status = daysUntilExpiration > 45 ? "#A0FE7F" : daysUntilExpiration > 10 ? "#FEF17F" : "#FEA57F";
 
@@ -167,7 +167,7 @@ export const PlatformDetails = ({
             <ProgressBar pointsGained={pointsGained} pointsAvailable={pointsAvailable} />
           </div>
           <ExpirationIndicator
-            expirationDate={platformExpirationDates[currentPlatform.platform as PLATFORM_ID]?.toDateString() || ""}
+            expirationDate={platformExpirationDates[currentPlatform.platform as PLATFORM_ID] || ""}
           />
         </>
       )}
