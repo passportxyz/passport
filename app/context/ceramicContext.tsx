@@ -787,19 +787,39 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const platformExpirationDates = useMemo(() => {
     let ret = {} as Partial<Record<PLATFORM_ID, Date>>;
     platforms.forEach((platformProps, platformKey) => {
-      let earliestExpirationDate: Date | undefined;
-      const providers = platformProps.platFormGroupSpec;
+      const providerGroups = platformProps.platFormGroupSpec;
 
-      providers[0].providers.forEach((provider) => {
-        if (!earliestExpirationDate) {
-          earliestExpirationDate = expirationDateProviders[provider.name];
-        }
-        const d = expirationDateProviders[provider.name as PROVIDER_ID];
-        if (d && earliestExpirationDate && earliestExpirationDate > d) {
-          earliestExpirationDate = expirationDateProviders[provider.name];
-        }
-        ret[platformKey as PLATFORM_ID] = earliestExpirationDate;
-      });
+      // Determine the realiest expiration date for each platform
+      // This will iterate over all platform groups, check the earliest expiration date for each group, and then the earliest expiration for the platform
+      const earliestExpirationDate = providerGroups.reduce(
+        (earliestGroupExpirationDate, groupSpec) => {
+          const earliestPlatformExpirationDate: Date | undefined = groupSpec.providers.reduce(
+            (earliestProviderDate, provider) => {
+              const d = expirationDateProviders[provider.name as PROVIDER_ID];
+              if (earliestProviderDate && d && d < earliestProviderDate) {
+                return d;
+              }
+              // If one of d or earliestProviderDate is undefined, this will return the one that is defined
+              // or undefined if both are undefined
+              return d || earliestProviderDate;
+            },
+            undefined as Date | undefined
+          );
+
+          if (
+            earliestPlatformExpirationDate &&
+            earliestGroupExpirationDate &&
+            earliestPlatformExpirationDate < earliestGroupExpirationDate
+          ) {
+            return earliestPlatformExpirationDate;
+          }
+          // If one of earliestPlatformExpirationDate or earliestGroupExpirationDate is undefined, this will return the one that is defined
+          // or undefined if both are undefined
+          return earliestPlatformExpirationDate || earliestGroupExpirationDate;
+        },
+        undefined as Date | undefined
+      );
+      ret[platformKey as PLATFORM_ID] = earliestExpirationDate;
     });
     return ret;
   }, [verifiedProviderIds, platforms, expirationDateProviders]);
