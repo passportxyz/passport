@@ -19,6 +19,9 @@ export type Theme = {
     text5: string;
     text6: string;
     text7: string;
+    text8: string;
+    text9: string;
+    text10: string;
     focus: string;
   };
   fonts: {

@@ -95,11 +95,12 @@ const PlatformJsonButton = ({
 
 const ExpirationIndicator = ({ expirationDate }: { expirationDate: Date | string }) => {
   const daysUntilExpiration = getDaysToExpiration({ expirationDate });
-  const status = daysUntilExpiration > 45 ? "#A0FE7F" : daysUntilExpiration > 10 ? "#FEF17F" : "#FEA57F";
 
+  const statusClass =
+    daysUntilExpiration > 45 ? "text-color-8" : daysUntilExpiration > 10 ? "text-color-9" : "text-color-10";
   return (
     <div className="pl-4 flex items-center text-color-6 bg-gradient-to-b from-background via-background to-[#082F2A] border border-t-0 rounded-t-none rounded-b-lg border-foreground-5 py-2">
-      <span className={`text-3xl pr-2 text-[${status}]`}>{daysUntilExpiration}</span>{" "}
+      <span className={`text-3xl pr-2 ${statusClass}`}>{daysUntilExpiration}</span>{" "}
       {daysUntilExpiration === 1 ? "day" : "days"} until stamps expire
     </div>
   );
