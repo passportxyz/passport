@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" style="enable-background:new 0 0 400 400;"
+    version="1.1" viewBox="0 0 400 400" x="0px" y="0px">
+    <style type="text/css">
+        .st0{fill-rule:evenodd;clip-rule:evenodd;}
+        .st1{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
+</style>
+    <rect class="st0" height="400" width="400" />
+    <g>
+        <path class="st1" d="M316,199l-66.7-66.4v48.6l-66.2,48.7l66.2,0v35.5L316,199z" />
+        <path class="st1" d="M81,199l66.7,66.4v-48.3l66.2-49.1l-66.2,0v-35.5L81,199z" />
+    </g>
+</svg>

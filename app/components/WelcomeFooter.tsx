@@ -1,53 +1,4 @@
 import React from "react";
-import { useMediaQuery } from "react-responsive";
-
-const OptimismIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-6 h-6 mx-2">
-    <circle cx="16" cy="16" r="16" fill="#FF1A1A" />
-    <text x="50%" y="50%" textAnchor="middle" fill="white" dy=".3em" fontSize="10">
-      OP
-    </text>
-  </svg>
-);
-
-const LIcon = () => (
-  <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M15.7292 20.0008H0V3.24609H3.59887V16.7536H15.7292V19.999V20.0008Z" fill="white" />
-    <path
-      d="M15.7297 6.49072C17.5027 6.49072 18.94 5.0377 18.94 3.24534C18.94 1.45299 17.5027 0 15.7297 0C13.9568 0 12.5195 1.45299 12.5195 3.24534C12.5195 5.0377 13.9568 6.49072 15.7297 6.49072Z"
-      fill="white"
-    />
-  </svg>
-);
-
-const CeramicIcon = () => (
-  <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M13.5685 0.303498C13.9415 0.513678 14.2501 0.821638 14.4611 1.19421C15.6497 3.29309 16.8707 4.96927 18.1242 6.22279C19.3717 7.47029 21.0431 8.6909 23.1385 9.88466L23.2021 9.92083C24.3328 10.5621 24.7295 11.9985 24.0883 13.1291C23.8777 13.5004 23.5701 13.8074 23.1985 14.0174C21.1275 15.187 19.462 16.3936 18.2018 17.637C16.9279 18.8939 15.6848 20.5935 14.4725 22.7358L14.4357 22.8008C14.0082 23.5597 13.2227 23.9902 12.4102 23.9995V5.50423e-06C12.8031 -0.000844899 13.2017 0.0968097 13.5685 0.303498Z"
-      fill="#FF3600"
-    />
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M15.2197 9.0627L15.2672 9.10941L15.2859 9.12804L15.3047 9.14663C16.8707 10.6905 16.8887 13.2115 15.3449 14.7776L15.3255 14.7971L15.306 14.8165L15.2815 14.8408L15.2571 14.8652C14.4725 15.6543 13.4415 16.0492 12.4102 16.0493V7.92774C13.4236 7.92668 14.4372 8.30511 15.2197 9.0627H15.2197Z"
-      fill="#FFB08A"
-    />
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M11.2601 0.303478C10.8871 0.513666 10.5785 0.821633 10.3675 1.19421C9.17892 3.29309 7.95788 4.96925 6.70436 6.22277C5.45686 7.47027 3.78546 8.6909 1.69013 9.88464L1.62649 9.9208C0.495857 10.562 0.0990834 11.9985 0.740328 13.1291C0.950901 13.5004 1.25848 13.8074 1.63013 14.0173C3.70109 15.187 5.36664 16.3936 6.62684 17.637C7.9007 18.8939 9.14379 20.5935 10.3562 22.7358L10.3929 22.8008C10.8204 23.5597 11.6059 23.9901 12.4185 23.9995V5.76826e-06C12.0255 -0.000864882 11.6269 0.0968099 11.2602 0.303478H11.2601Z"
-      fill="#FFB08A"
-    />
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M9.60341 9.0627L9.55593 9.10941L9.53725 9.12804L9.51846 9.14665C7.9524 10.6905 7.9344 13.2115 9.47822 14.7775L9.49762 14.7971L9.51716 14.8165L9.54162 14.8408L9.56604 14.8652C10.3506 15.6543 11.3817 16.0492 12.413 16.0493V7.92774C11.3996 7.9267 10.3859 8.30511 9.60341 9.0627Z"
-      fill="#FF3600"
-    />
-  </svg>
-);
 
 const GitHubIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-6 h-6 mx-2">
@@ -74,78 +25,70 @@ const SyncIcon = () => (
   </svg>
 );
 
+const chains = [
+  {
+    key: "Optimism",
+    icon: "/assets/optimism-icon.svg",
+    href: "https://docs.passport.gitcoin.co/building-with-passport/smart-contracts/contract-reference#decoder-contract-addresses",
+  },
+  {
+    key: "Linea",
+    icon: "/assets/linea-icon.svg",
+    href: "https://docs.passport.gitcoin.co/building-with-passport/smart-contracts/contract-reference#decoder-contract-addresses",
+  },
+  {
+    key: "Ceramic",
+    icon: "/assets/ceramic-icon.svg",
+    href: "https://docs.passport.gitcoin.co/building-with-passport/composedb",
+  },
+  {
+    key: "ZkSync",
+    icon: "/assets/zksync-icon.svg",
+    href: "#",
+  },
+  {
+    key: "Arbitrum",
+    icon: "/assets/arbitrum-icon.svg",
+    href: "#",
+  },
+];
+
 const BigScreenWelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
   return (
-    <footer className="lg:flex fixed bottom-0 justify-between items-center px-4 py-8 bg-black text-white text-sm grid-flow-col w-full max-w-full">
-      <div className="flex items-start justify-start lg:justify-between my-4 lg:my-0">
-        <span className="ml-10">Available on</span>
-        <div className="mx-4">
-          <OptimismIcon />
-        </div>
-        <div className="mx-4">
-          <LIcon />
-        </div>
-        <div className="mx-4">
-          <CeramicIcon />
-        </div>
+    <footer className="flex fixed bottom-0 items-center justify-between p-4 bg-black text-white text-sm w-full max-w-full overflow-auto">
+      <div className="flex items-start  justify-start lg:justify-between flex-wrap">
+        <span className="lg:ml-10 self-center">Available on</span>
+        {chains.map(({ href, icon, key }) => {
+          return (
+            <div key={key} className="flex m-1 md:m-2 lg:m-3">
+              <a className="self-start" target="_blank" href={href} alt={key}>
+                <img src={icon} className="w-[20px] md:w-[35px] h-[20px] md:h-[35px]" />
+              </a>
+            </div>
+          );
+        })}
       </div>
-      <div className="flex items-start justify-end lg:justify-between my-4 lg:my-0">
+      <div className="flex items-end justify-center md:justify-end flex-wrap">
         {displayPrivacyPolicy ? (
-          <a href="#" className="hover:underline px-2">
+          <a href="https://www.gitcoin.co/privacy" className="hover:underline px-2  ">
             Privacy Policy
           </a>
         ) : null}
-        <a href="#" className="hover:underline px-2">
+        <a href="https://docs.passport.xyz/" className="hover:underline px-2">
           Learn More
         </a>
-        <a href="#" className="hover:underline px-2">
+        <a href="https://scorer.gitcoin.co/" className="hover:underline px-2">
           Gitcoin Passport Scorer
         </a>
-        <div className="mx-2">
-          <GitHubIcon />
-        </div>
-        <div className="mx-2 mr-10">
-          <SyncIcon />
-        </div>
-      </div>
-    </footer>
-  );
-};
-
-const PhoneWelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
-  return (
-    <footer className="lg:flex fixed bottom-0 left-0 right-0 justify-between items-center px-4 py-8 bg-black text-white text-sm grid-flow-col w-full max-w-full z-20 max-h-[120px]">
-      <div className="flex items-start justify-start lg:justify-between flex-wrap">
-        <span className="px-2">Available on</span>
-        <div className="mx-4">
-          <OptimismIcon />
-        </div>
-        <div className="mx-4">
-          <LIcon />
-        </div>
-        <div className="mx-4">
-          <CeramicIcon />
-        </div>
-      </div>
-      <div className="flex items-start my-1 flex-wrap">
-        {displayPrivacyPolicy ? (
-          <a href="#" className="hover:underline px-2">
-            Privacy Policy
-          </a>
-        ) : null}
-        <a href="#" className="hover:underline px-2">
-          Learn More
-        </a>
-        <a href="#" className="hover:underline px-2">
-          Gitcoin Passport Scorer
-        </a>
-      </div>
-      <div className="flex items-start flex-wrap">
-        <div className="mx-2">
-          <GitHubIcon />
-        </div>
-        <div className="mx-2 mr-10">
-          <SyncIcon />
+        <div className="flex items-end justify-end flex-wrap">
+          <div className="px-2">
+            <a href="https://passport.gitcoin.co/">
+              <GitHubIcon />
+            </a>
+          </div>
+          <div className="px-2 mr-20">
+            <SyncIcon />
+          </div>
         </div>
       </div>
     </footer>
@@ -153,13 +96,7 @@ const PhoneWelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: bo
 };
 
 const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
-  const isPhone = useMediaQuery({ query: "(max-width: 768px)" });
-
-  return isPhone ? (
-    <PhoneWelcomeFooter displayPrivacyPolicy={displayPrivacyPolicy} />
-  ) : (
-    <BigScreenWelcomeFooter displayPrivacyPolicy={displayPrivacyPolicy} />
-  );
+  return <BigScreenWelcomeFooter displayPrivacyPolicy={displayPrivacyPolicy} />;
 };
 
 export default WelcomeFooter;
