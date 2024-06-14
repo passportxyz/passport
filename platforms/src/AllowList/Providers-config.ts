@@ -2,9 +2,9 @@ import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
 import { AllowListProvider } from "./Providers";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/passportLogoWhite.svg",
+  icon: "./assets/star-light.svg",
   platform: "AllowList",
-  name: "AllowList",
+  name: "Guest List",
   description: "Verify you are part of a community",
   connectMessage: "Verify",
   isEVM: true,
@@ -12,11 +12,11 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Custom Allow List",
+    platformGroup: "Guest List",
     providers: [
       {
         title: "Allow List Provider",
-        description: "If your address exists within the integrators list you get the stamps",
+        description: "Congrats! You are part of this community.",
         name: "AllowList",
       },
     ],

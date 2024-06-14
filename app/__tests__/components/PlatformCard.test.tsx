@@ -84,15 +84,7 @@ describe("<PlatformCard />", () => {
         possiblePoints: 6,
         earnedPoints: 1,
       };
-      render(
-        <PlatformCard
-          i={0}
-          platform={platformScoreSpec}
-          selectedProviders={{ GtcStaking: [] as PROVIDER_ID[] } as SelectedProviders}
-          onOpen={() => {}}
-          setCurrentPlatform={() => {}}
-        />
-      );
+      render(<PlatformCard i={0} platform={platformScoreSpec} onOpen={() => {}} setCurrentPlatform={() => {}} />);
       expect(screen.getByTestId("platform-name")).toBeInTheDocument();
     });
     it("should hide allow list if no points are earned", () => {
@@ -109,15 +101,7 @@ describe("<PlatformCard />", () => {
         possiblePoints: 6,
         earnedPoints: 0,
       };
-      render(
-        <PlatformCard
-          i={0}
-          platform={platformScoreSpec}
-          selectedProviders={{ GtcStaking: [] as PROVIDER_ID[] } as SelectedProviders}
-          onOpen={() => {}}
-          setCurrentPlatform={() => {}}
-        />
-      );
+      render(<PlatformCard i={0} platform={platformScoreSpec} onOpen={() => {}} setCurrentPlatform={() => {}} />);
       expect(screen.queryByTestId("platform-name")).not.toBeInTheDocument();
     });
   });

@@ -4,8 +4,6 @@ import React, { useContext, useState, useEffect } from "react";
 
 // --- Types
 import { Status, Step } from "../components/Progress";
-import { PLATFORM_ID } from "@gitcoin/passport-types";
-import { PlatformProps } from "../components/GenericPlatform";
 
 // --Components
 import MinimalHeader from "../components/MinimalHeader";
@@ -23,7 +21,6 @@ import { InitialWelcome } from "../components/InitialWelcome";
 import LoadingScreen from "../components/LoadingScreen";
 
 // --- Utils
-import { fetchPossibleEVMStamps, ValidatedPlatform } from "../signer/utils";
 import BodyWrapper from "../components/BodyWrapper";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useNavigateToPage } from "../hooks/useCustomization";
@@ -32,11 +29,9 @@ import WelcomeFooter from "../components/WelcomeFooter";
 
 const MIN_DELAY = 50;
 const MAX_DELAY = 800;
-const getStepDelay = () => Math.floor(Math.random() * (MAX_DELAY - MIN_DELAY + 1) + MIN_DELAY);
 
 export default function Welcome() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const { passport, allPlatforms, isLoadingPassport } = useContext(CeramicContext);
+  const { passport, isLoadingPassport } = useContext(CeramicContext);
   const { dbAccessTokenStatus } = useDatastoreConnectionContext();
   const address = useWalletStore((state) => state.address);
   const { initiateVerification } = useOneClickVerification();
@@ -49,33 +44,6 @@ export default function Welcome() {
       navigateToPage("home");
     }
   }, [address]);
-
-  const initialSteps = [
-    {
-      name: "Scanning",
-      status: Status.SUCCESS,
-    },
-    {
-      name: "Double Checking",
-      status: Status.NOT_STARTED,
-    },
-    {
-      name: "Validating",
-      status: Status.NOT_STARTED,
-    },
-    {
-      name: "Brewing Coffee",
-      status: Status.NOT_STARTED,
-    },
-    {
-      name: "Almost there",
-      status: Status.NOT_STARTED,
-    },
-    {
-      name: "Ready for review",
-      status: Status.NOT_STARTED,
-    },
-  ];
 
   return (
     <PageRoot className="text-color-2 flex flex-col min-h-screen">

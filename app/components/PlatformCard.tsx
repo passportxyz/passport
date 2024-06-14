@@ -13,13 +13,13 @@ import { isDynamicCustomization } from "../utils/customizationUtils";
 import { ProgressBar } from "./ProgressBar";
 import { getDaysToExpiration } from "../utils/duration";
 import { customStampProviders, getStampProviderIds } from "../config/providers";
+import { PLATFORMS } from "../config/platforms";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
 type PlatformCardProps = {
   i: number;
   platform: PlatformScoreSpec;
-  selectedProviders: SelectedProviders;
   onOpen: () => void;
   setCurrentPlatform: React.Dispatch<React.SetStateAction<PlatformScoreSpec | undefined>>;
   className?: string;
@@ -264,13 +264,24 @@ const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick }
 export const PlatformCard = ({
   i,
   platform,
-  selectedProviders,
   onOpen,
   setCurrentPlatform,
   className,
 }: PlatformCardProps): JSX.Element => {
   const platformIsExcluded = usePlatformIsExcluded(platform);
-  const { platformExpirationDates, expiredPlatforms } = useContext(CeramicContext);
+  const { platformExpirationDates, expiredPlatforms, allProvidersState } = useContext(CeramicContext);
+  const customization = useCustomization();
+
+  const selectedProviders = PLATFORMS.reduce((platforms, platform) => {
+    const providerIds = getStampProviderIds(
+      platform.platform,
+      customStampProviders(isDynamicCustomization(customization) ? customization : undefined)
+    );
+    platforms[platform.platform] = providerIds.filter(
+      (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
+    );
+    return platforms;
+  }, {} as SelectedProviders);
 
   const isExpired: boolean = platform.platform in expiredPlatforms;
 
@@ -336,7 +347,7 @@ const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
     );
 
     // Hide allow list if no points were earned when onboarding
-    if (platform.name.startsWith("AllowList") && platform.earnedPoints === 0) {
+    if (platform.platform.startsWith("AllowList") && platform.earnedPoints === 0) {
       return true;
     }
 
@@ -347,7 +358,7 @@ const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
         return parseFloat(customization.scorer?.weights?.[provider] || "") > 0;
       })
     );
-  }, [customization, platform.platform]);
+  }, [customization, platform.earnedPoints, platform.platform]);
 
   const excludedByFeatureFlag = useMemo(() => {
     // Feature Flag Guild Stamp

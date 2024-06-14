@@ -9,8 +9,8 @@ import {
 } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContext, CeramicContextState } from "../../context/ceramicContext";
 import { Category, CategoryProps } from "../../components/Category";
-import { PROVIDER_ID } from "@gitcoin/passport-types";
-import { PlatformCard, SelectedProviders } from "../../components/PlatformCard";
+import { PlatformCard } from "../../components/PlatformCard";
+import { PlatformScoreSpec } from "../../context/scorerContext";
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -133,7 +133,6 @@ describe("<CardList />", () => {
             possiblePoints: 10,
             earnedPoints: 7,
           }}
-          selectedProviders={{ ETH: [] as PROVIDER_ID[] } as SelectedProviders}
           onOpen={mockOnOpen}
           setCurrentPlatform={mockSetCurrentPlatform}
         />
@@ -160,6 +159,28 @@ describe("<CardList />", () => {
 
     //the verified stamp no longer shows the score of availablepoints
     expect(availablePnts).toEqual(["12.93", "7.44", "0.69"]);
+  });
+  it("renders allowList if stamp is present", () => {
+    const scorerContext = {
+      scoredPlatforms: [
+        {
+          icon: "./assets/star-light.svg",
+          platform: "AllowList",
+          name: "Guest List",
+          description: "Verify you are part of a community",
+          connectMessage: "Verify",
+          isEVM: true,
+          possiblePoints: 100,
+          earnedPoints: 100,
+        },
+      ] as PlatformScoreSpec[],
+    };
+    renderWithContext(mockCeramicContext, <CardList {...cardListProps} />, {}, scorerContext);
+    expect(screen.getByText("Guest List")).toBeInTheDocument();
+  });
+  it("should not render allow list", () => {
+    renderWithContext(mockCeramicContext, <CardList {...cardListProps} />);
+    expect(screen.queryByText("Guest List")).not.toBeInTheDocument();
   });
 });
 

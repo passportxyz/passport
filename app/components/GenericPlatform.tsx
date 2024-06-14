@@ -17,7 +17,7 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 // --- Style Components
 import { SideBarContent } from "./SideBarContent";
 import { DoneToastContent } from "./DoneToastContent";
-import { useToast } from "@chakra-ui/react";
+import { Drawer, DrawerOverlay, useToast } from "@chakra-ui/react";
 import { LoadButton } from "./LoadButton";
 import { JsonOutputModal } from "./JsonOutputModal";
 
@@ -65,7 +65,11 @@ class InvalidSessionError extends Error {
   }
 }
 
-type GenericPlatformProps = PlatformProps & { onClose: () => void; platformScoreSpec: PlatformScoreSpec };
+type GenericPlatformProps = PlatformProps & {
+  isOpen: boolean;
+  onClose: () => void;
+  platformScoreSpec: PlatformScoreSpec;
+};
 
 const arraysContainSameElements = (a: any[], b: any[]) => {
   return a.length === b.length && a.every((v) => b.includes(v));
@@ -75,10 +79,11 @@ export const GenericPlatform = ({
   platFormGroupSpec,
   platform,
   platformScoreSpec,
+  isOpen,
   onClose,
 }: GenericPlatformProps): JSX.Element => {
   const address = useWalletStore((state) => state.address);
-  const { handlePatchStamps, verifiedProviderIds, userDid } = useContext(CeramicContext);
+  const { handlePatchStamps, verifiedProviderIds, userDid, allPlatforms } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -443,7 +448,8 @@ export const GenericPlatform = ({
   }, [isReverifying, isLoading, submitted, canSubmit, verifiedProviders.length, platformProviderIds.length]);
 
   return (
-    <>
+    <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose}>
+      <DrawerOverlay />
       <SideBarContent
         onClose={onClose}
         currentPlatform={platformScoreSpec}
@@ -470,6 +476,6 @@ export const GenericPlatform = ({
         subheading="To preserve your privacy, error information is not stored; please share with Gitcoin support at your discretion."
         jsonOutput={verificationResponse}
       />
-    </>
+    </Drawer>
   );
 };

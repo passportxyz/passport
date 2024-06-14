@@ -29,12 +29,6 @@ const PlatformJsonButton = ({
   const [removeStampModal, setRemoveStampModal] = useState(false);
   const [referenceElement, setReferenceElement] = useState(null);
 
-  // const {
-  //   isOpen: isOpenRemoveStampModal,
-  //   onOpen: onOpenRemoveStampModal,
-  //   onClose: onCloseRemoveStampModal,
-  // } = useDisclosure();
-
   const providerIds = getStampProviderIds(
     platform.platform,
     customStampProviders(isDynamicCustomization(customization) ? customization : undefined)

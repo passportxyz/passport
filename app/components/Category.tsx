@@ -73,56 +73,10 @@ export const Category = ({
   }, [dropDownOpen]);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const btnRef = useRef();
+
   const [currentPlatform, setCurrentPlatform] = useState<PlatformScoreSpec | undefined>();
-  const [currentProviders, setCurrentProviders] = useState<PlatformGroupSpec[]>([]);
-  const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
-    PLATFORMS.reduce((platforms, platform) => {
-      const providerIds = getStampProviderIds(
-        platform.platform,
-        customStampProviders(isDynamicCustomization(customization) ? customization : undefined)
-      );
-      platforms[platform.platform] = providerIds.filter(
-        (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
-      );
-      return platforms;
-    }, {} as SelectedProviders)
-  );
 
-  // Add the platforms to this switch so the sidebar content can populate dynamically
-  let currentPlatformSelection = (
-    <SideBarContent
-      verifiedProviders={undefined}
-      currentPlatform={undefined}
-      currentProviders={undefined}
-      isLoading={undefined}
-      verifyButton={undefined}
-      onClose={onClose}
-    />
-  );
-  if (currentPlatform) {
-    const platformProps = allPlatforms.get(currentPlatform.platform);
-    if (platformProps) {
-      currentPlatformSelection = (
-        <GenericPlatform
-          platform={platformProps.platform}
-          platformScoreSpec={currentPlatform}
-          platFormGroupSpec={platformProps.platFormGroupSpec}
-          onClose={() => {
-            setCurrentPlatform(undefined);
-            onClose();
-          }}
-        />
-      );
-    }
-  }
-
-  useEffect(() => {
-    // set providers for the current platform
-    if (currentPlatform) {
-      setCurrentProviders(STAMP_PROVIDERS[currentPlatform.platform]);
-    }
-  }, [currentPlatform]);
+  const platformProps = currentPlatform?.platform && allPlatforms.get(currentPlatform.platform);
 
   return (
     <>
@@ -152,7 +106,6 @@ export const Category = ({
                     key={i}
                     platform={platform}
                     onOpen={onOpen}
-                    selectedProviders={selectedProviders}
                     setCurrentPlatform={setCurrentPlatform}
                     className={cardClassName}
                   />
@@ -162,11 +115,17 @@ export const Category = ({
           </Disclosure.Panel>
         )}
       </Disclosure>
-      {currentProviders && (
-        <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose} finalFocusRef={btnRef.current}>
-          <DrawerOverlay />
-          {currentPlatformSelection}
-        </Drawer>
+      {platformProps && currentPlatform && (
+        <GenericPlatform
+          platform={platformProps.platform}
+          platformScoreSpec={currentPlatform}
+          platFormGroupSpec={platformProps.platFormGroupSpec}
+          isOpen={isOpen}
+          onClose={() => {
+            setCurrentPlatform(undefined);
+            onClose();
+          }}
+        />
       )}
     </>
   );

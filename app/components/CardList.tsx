@@ -5,7 +5,7 @@ import { PLATFORMS } from "../config/platforms";
 import { PlatformGroupSpec, customStampProviders, getStampProviderIds } from "../config/providers";
 
 // --- Chakra UI Elements
-import { Drawer, DrawerOverlay, useDisclosure } from "@chakra-ui/react";
+import { useDisclosure } from "@chakra-ui/react";
 import { PLATFORM_ID, PROVIDER_ID, PLATFORM_CATEGORY } from "@gitcoin/passport-types";
 import PageWidthGrid from "../components/PageWidthGrid";
 import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
@@ -13,6 +13,8 @@ import { Category } from "./Category";
 import { CeramicContext } from "../context/ceramicContext";
 import { useCustomization } from "../hooks/useCustomization";
 import { isDynamicCustomization } from "../utils/customizationUtils";
+import { PlatformCard } from "./PlatformCard";
+import { GenericPlatform } from "./GenericPlatform";
 
 export type CardListProps = {
   isLoading?: boolean;
@@ -38,7 +40,6 @@ export const PLATFORM_CATEGORIES: PLATFORM_CATEGORY[] = [
       "Brightid",
       "TrustaLabs",
       "Ens",
-      "AllowList",
     ],
   },
   {
@@ -65,9 +66,8 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
   const { scoredPlatforms } = useContext(ScorerContext);
   const customization = useCustomization();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const btnRef = useRef();
+  const [currentPlatform, setCurrentPlatform] = useState<PlatformScoreSpec | undefined>();
 
-  const [currentProviders, setCurrentProviders] = useState<PlatformGroupSpec[]>([]);
   const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
     PLATFORMS.reduce((platforms, platform) => {
       // get all providerIds for this platform
@@ -144,10 +144,22 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
     });
   });
 
+  const allowList = scoredPlatforms.find((platform) => platform.platform.startsWith("AllowList"));
+  const platformProps = currentPlatform?.platform && allPlatforms.get(currentPlatform.platform);
   // Use as in id staking
   return (
     <>
       <PageWidthGrid className={className}>
+        {allowList && (
+          <PlatformCard
+            i={0}
+            key={0}
+            platform={allowList}
+            onOpen={onOpen}
+            setCurrentPlatform={setCurrentPlatform}
+            className="col-span-3 bg-[url('/assets/star.svg')] bg-auto bg-center bg-no-repeat"
+          />
+        )}
         {Object.keys(groupedPlatforms).map((category) => {
           const sortedPlatforms = groupedPlatforms[category].sortedPlatforms;
           const shouldDisplayCategory = sortedPlatforms.some((platform) => platform.possiblePoints > 0);
@@ -162,9 +174,18 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
           );
         })}
       </PageWidthGrid>
-      <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose} finalFocusRef={btnRef.current}>
-        <DrawerOverlay />
-      </Drawer>
+      {platformProps && currentPlatform && (
+        <GenericPlatform
+          platform={platformProps.platform}
+          platformScoreSpec={currentPlatform}
+          platFormGroupSpec={platformProps.platFormGroupSpec}
+          isOpen={isOpen}
+          onClose={() => {
+            setCurrentPlatform(undefined);
+            onClose();
+          }}
+        />
+      )}
     </>
   );
 };

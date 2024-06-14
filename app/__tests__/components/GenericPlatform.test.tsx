@@ -71,15 +71,13 @@ describe("when user has not verified with EnsProvider", () => {
   });
   it("should display a verification button", () => {
     const drawer = () => (
-      <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
-        <DrawerOverlay />
-        <GenericPlatform
-          platform={new Ens.EnsPlatform()}
-          platFormGroupSpec={Ens.ProviderConfig}
-          platformScoreSpec={EnsScoreSpec}
-          onClose={() => {}}
-        />
-      </Drawer>
+      <GenericPlatform
+        isOpen={true}
+        platform={new Ens.EnsPlatform()}
+        platFormGroupSpec={Ens.ProviderConfig}
+        platformScoreSpec={EnsScoreSpec}
+        onClose={() => {}}
+      />
     );
 
     renderWithContext(mockCeramicContext, drawer());
@@ -88,15 +86,13 @@ describe("when user has not verified with EnsProvider", () => {
   });
   it("should attempt to fetch a verifiable credential when the button is clicked", async () => {
     const drawer = () => (
-      <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
-        <DrawerOverlay />
-        <GenericPlatform
-          platform={new Ens.EnsPlatform()}
-          platFormGroupSpec={Ens.ProviderConfig}
-          platformScoreSpec={EnsScoreSpec}
-          onClose={() => {}}
-        />
-      </Drawer>
+      <GenericPlatform
+        isOpen={true}
+        platform={new Ens.EnsPlatform()}
+        platFormGroupSpec={Ens.ProviderConfig}
+        platformScoreSpec={EnsScoreSpec}
+        onClose={() => {}}
+      />
     );
     renderWithContext(mockCeramicContext, drawer());
 
@@ -111,15 +107,13 @@ describe("when user has not verified with EnsProvider", () => {
   it("should show success toast when credential is fetched", async () => {
     const drawer = () => (
       <ChakraProvider>
-        <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
-          <DrawerOverlay />
-          <GenericPlatform
-            platform={new Ens.EnsPlatform()}
-            platFormGroupSpec={Ens.ProviderConfig}
-            platformScoreSpec={EnsScoreSpec}
-            onClose={() => {}}
-          />
-        </Drawer>
+        <GenericPlatform
+          platform={new Ens.EnsPlatform()}
+          isOpen={true}
+          platFormGroupSpec={Ens.ProviderConfig}
+          platformScoreSpec={EnsScoreSpec}
+          onClose={() => {}}
+        />
       </ChakraProvider>
     );
     renderWithContext(mockCeramicContext, drawer());
@@ -136,15 +130,13 @@ describe("when user has not verified with EnsProvider", () => {
   it("should prompt user to refresh when session expired", async () => {
     const drawer = () => (
       <ChakraProvider>
-        <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
-          <DrawerOverlay />
-          <GenericPlatform
-            platform={new Ens.EnsPlatform()}
-            platFormGroupSpec={Ens.ProviderConfig}
-            platformScoreSpec={EnsScoreSpec}
-            onClose={() => {}}
-          />
-        </Drawer>
+        <GenericPlatform
+          isOpen={true}
+          platform={new Ens.EnsPlatform()}
+          platFormGroupSpec={Ens.ProviderConfig}
+          platformScoreSpec={EnsScoreSpec}
+          onClose={() => {}}
+        />
       </ChakraProvider>
     );
     renderWithContext(mockCeramicContext, drawer(), {
@@ -173,20 +165,18 @@ describe("when user has previously verified with EnsProvider", () => {
     const extraProvider = "FakeExtraProviderRequiredForCanSubmitLogic" as PROVIDER_ID;
     const drawer = () => (
       <ChakraProvider>
-        <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
-          <DrawerOverlay />
-          <GenericPlatform
-            platform={new Ens.EnsPlatform()}
-            platFormGroupSpec={[
-              {
-                ...Ens.ProviderConfig[0],
-                providers: [...Ens.ProviderConfig[0].providers, { title: "Extra", name: extraProvider }],
-              },
-            ]}
-            platformScoreSpec={EnsScoreSpec}
-            onClose={() => {}}
-          />
-        </Drawer>
+        <GenericPlatform
+          isOpen={true}
+          platform={new Ens.EnsPlatform()}
+          platFormGroupSpec={[
+            {
+              ...Ens.ProviderConfig[0],
+              providers: [...Ens.ProviderConfig[0].providers, { title: "Extra", name: extraProvider }],
+            },
+          ]}
+          platformScoreSpec={EnsScoreSpec}
+          onClose={() => {}}
+        />
       </ChakraProvider>
     );
 
@@ -219,15 +209,13 @@ describe("Mulitple EVM plaftorms", () => {
       credentials: [UN_SUCCESSFUL_ENS_RESULT],
     });
     const drawer = () => (
-      <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
-        <DrawerOverlay />
-        <GenericPlatform
-          platform={new Ens.EnsPlatform()}
-          platFormGroupSpec={Ens.ProviderConfig}
-          platformScoreSpec={EnsScoreSpec}
-          onClose={() => {}}
-        />
-      </Drawer>
+      <GenericPlatform
+        isOpen={true}
+        platform={new Ens.EnsPlatform()}
+        platFormGroupSpec={Ens.ProviderConfig}
+        platformScoreSpec={EnsScoreSpec}
+        onClose={() => {}}
+      />
     );
     renderWithContext(mockCeramicContext, drawer());
 
@@ -244,15 +232,13 @@ describe("Mulitple EVM plaftorms", () => {
 it("should indicate that there was an error issuing the credential", async () => {
   const drawer = () => (
     <ChakraProvider>
-      <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
-        <DrawerOverlay />
-        <GenericPlatform
-          platform={new Ens.EnsPlatform()}
-          platFormGroupSpec={Ens.ProviderConfig}
-          platformScoreSpec={EnsScoreSpec}
-          onClose={() => {}}
-        />
-      </Drawer>
+      <GenericPlatform
+        isOpen={true}
+        platform={new Ens.EnsPlatform()}
+        platFormGroupSpec={Ens.ProviderConfig}
+        platformScoreSpec={EnsScoreSpec}
+        onClose={() => {}}
+      />
     </ChakraProvider>
   );
   renderWithContext({ ...mockCeramicContext, handlePatchStamps: jest.fn().mockRejectedValue(500) }, drawer());
