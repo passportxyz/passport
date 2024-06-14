@@ -1,10 +1,16 @@
 // ----- Types
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { ProviderExternalVerificationError, type Provider } from "../../types";
-import { createGuildClient } from "@guildxyz/sdk";
+import { createGuildClient, GuildClient } from "@guildxyz/sdk";
 
-// The only parameter is the name of your project
-const guildClient = createGuildClient("Passport");
+// Need to do it like this to support mocking in tests
+let guildClient: GuildClient | undefined;
+const getGuildClient = () => {
+  if (!guildClient || process.env.NODE_ENV === "test") {
+    guildClient = createGuildClient("Passport");
+  }
+  return guildClient;
+};
 
 import { getAddress } from "../../utils/signer";
 
@@ -20,72 +26,50 @@ type Guild = {
   memberCount: number;
 };
 
-type GuildStats = {
-  guildCount: number;
-  totalRoles: number;
+type GuildAdminStats = {
   totalAdminOwner: number;
 };
 
+const MINIMUM_GUILD_MEMBER_COUNT = 250;
+
 export async function getGuildMemberships(address: string): Promise<GuildMembership[]> {
   // Get current memberships of a user
-  return await guildClient.user.getMemberships(address);
+  return await getGuildClient().user.getMemberships(address);
 }
 
 async function getUserGuilds(memberships: GuildMembership[]): Promise<Guild[]> {
+  if (memberships.length === 0) {
+    return [];
+  }
   const userGuildIds = memberships.map((membership) => membership.guildId);
-  return guildClient.guild.getMany(userGuildIds);
+  return getGuildClient().guild.getMany(userGuildIds);
 }
 
-export async function checkGuildStats(memberships: GuildMembership[]): Promise<GuildStats> {
-  try {
-    // Member of more than 5 guilds and > 15 roles across those guilds (guilds over 250 members)
+export async function checkGuildAdminStats(memberships: GuildMembership[]): Promise<GuildAdminStats> {
+  const userGuilds = await getUserGuilds(memberships);
+  const userGuildsById = userGuilds.reduce(
+    (acc, guild) => {
+      acc[guild.id] = guild;
+      return acc;
+    },
+    {} as Record<number, Guild>
+  );
 
-    const myGuildRoles = new Map<number, number>(); // key: guildId, value: roleIdsLength
-    const adminOwnerGuilds = new Map<number, number>();
-    memberships.forEach((membership) => {
-      myGuildRoles.set(membership.guildId, membership.roleIds.length);
-      adminOwnerGuilds.set(membership.guildId, membership.isAdmin || membership.isOwner ? 1 : 0);
-    });
+  console.log("memberships", memberships);
 
-    const userGuilds = await getUserGuilds(memberships);
+  const qualifyingMemberships = memberships.filter(
+    (membership) =>
+      (membership.isAdmin || membership.isOwner) &&
+      userGuildsById[membership.guildId].memberCount > MINIMUM_GUILD_MEMBER_COUNT
+  );
 
-    // Aggregate guild and role count
-    let guildCount = 0;
-    let totalRoles = 0;
-    let totalAdminOwner = 0;
-
-    for (const guild of userGuilds) {
-      if (myGuildRoles.has(guild.id) && guild.memberCount > 250) {
-        guildCount++;
-        totalRoles += myGuildRoles.get(guild.id);
-        totalAdminOwner += adminOwnerGuilds.get(guild.id);
-      }
-    }
-
-    // Check conditions
-    return {
-      guildCount,
-      totalRoles,
-      totalAdminOwner,
-    };
-  } catch (error: unknown) {
-    throw new ProviderExternalVerificationError(`Error checking guild stats: ${JSON.stringify(error)}`);
-  }
+  // Check conditions
+  return {
+    totalAdminOwner: qualifyingMemberships.length,
+  };
 }
 
-class GuildProvider {
-  protected async checkMemberShipStats(address: string): Promise<GuildStats> {
-    const memberships = await getGuildMemberships(address);
-    const stats = await checkGuildStats(memberships);
-    return stats;
-  }
-}
-
-export const checkGuildOwner = (memberships: GuildMembership[]): boolean => {
-  return memberships.some((membership) => membership.isOwner || membership.isAdmin);
-};
-
-export class GuildAdminProvider extends GuildProvider implements Provider {
+export class GuildAdminProvider implements Provider {
   type = "GuildAdmin";
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
@@ -95,15 +79,18 @@ export class GuildAdminProvider extends GuildProvider implements Provider {
     const address = await getAddress(payload);
 
     try {
-      const membershipStats = await this.checkMemberShipStats(address);
-      valid = membershipStats.totalAdminOwner > 0;
+      const memberships = await getGuildMemberships(address);
+      const { totalAdminOwner } = await checkGuildAdminStats(memberships);
+      valid = totalAdminOwner > 0;
 
       if (valid) {
         record = {
           address,
         };
       } else {
-        errors.push("We did not find any Guilds that you are an admin of.");
+        errors.push(
+          `We did not find any Guilds that you are an admin of with greater than ${MINIMUM_GUILD_MEMBER_COUNT} members.`
+        );
       }
     } catch (error: unknown) {
       if ((error as Error)?.message?.includes("User not found")) {
@@ -124,7 +111,8 @@ export class GuildAdminProvider extends GuildProvider implements Provider {
 export const PASSPORT_GUILD_ID = 19282;
 
 const checkPassportGuild = (memberships: GuildMembership[]): boolean => {
-  return memberships.some((membership) => membership.guildId === PASSPORT_GUILD_ID);
+  const passportMembership = memberships.find((membership) => membership.guildId === PASSPORT_GUILD_ID);
+  return Boolean(passportMembership) && passportMembership.roleIds.length > 0;
 };
 
 export class GuildPassportMemberProvider implements Provider {
@@ -146,7 +134,7 @@ export class GuildPassportMemberProvider implements Provider {
           address,
         };
       } else {
-        errors.push("You are not a member of the Passport Guild, thus, you do not qualify for this stamp.");
+        errors.push("You do not hold any roles in the Passport Guild, thus, you do not qualify for this stamp.");
       }
     } catch (error: unknown) {
       if ((error as Error)?.message?.includes("User not found")) {
