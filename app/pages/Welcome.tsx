@@ -100,7 +100,7 @@ export default function Welcome() {
             <LoadingScreen />
           )}
         </BodyWrapper>
-        <WelcomeFooter displayPrivacyPolicy={(passport && passport.stamps.length > 0) || true} />
+        <WelcomeFooter displayPrivacyPolicy={(passport && passport.stamps.length > 0) || true} fixed={true} />
       </HeaderContentFooterGrid>
     </PageRoot>
   );

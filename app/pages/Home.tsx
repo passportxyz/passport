@@ -92,7 +92,7 @@ export default function Home() {
           />
         </div>
       </div>
-      <WelcomeFooter displayPrivacyPolicy={true} />
+      <WelcomeFooter displayPrivacyPolicy={true} fixed={true} />
     </PageRoot>
   );
 }

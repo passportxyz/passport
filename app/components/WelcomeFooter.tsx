@@ -53,9 +53,11 @@ const chains = [
   },
 ];
 
-const BigScreenWelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
+const WelcomeFooter = ({ displayPrivacyPolicy, fixed }: { displayPrivacyPolicy: boolean; fixed: boolean }) => {
   return (
-    <footer className="flex fixed bottom-0 items-center justify-between p-4 bg-black text-white text-sm w-full max-w-full overflow-auto">
+    <footer
+      className={`flex bottom-0 items-center justify-between p-4  bg-black text-white text-sm w-full max-w-full overflow-auto ${fixed ? "fixed" : ""}`}
+    >
       <div className="flex items-start  justify-start lg:justify-between flex-wrap">
         <span className="lg:ml-10 self-center">Available on</span>
         {chains.map(({ href, icon, key }) => {
@@ -93,10 +95,6 @@ const BigScreenWelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy
       </div>
     </footer>
   );
-};
-
-const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
-  return <BigScreenWelcomeFooter displayPrivacyPolicy={displayPrivacyPolicy} />;
 };
 
 export default WelcomeFooter;
