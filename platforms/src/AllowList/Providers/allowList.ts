@@ -6,7 +6,7 @@ export const allowListEndpoint = `${process.env.PASSPORT_SCORER_BACKEND}registry
 
 export interface AllowListResponse {
   data: {
-    on_list: boolean;
+    is_member: boolean;
   };
 }
 
@@ -18,7 +18,7 @@ export class AllowListProvider implements Provider {
       const { address } = payload;
       const { allowList } = payload.proofs;
       const response: AllowListResponse = await axios.get(`${allowListEndpoint}/${allowList}/${address}`);
-      const valid = response.data.on_list;
+      const valid = response.data.is_member;
 
       return {
         valid,

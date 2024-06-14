@@ -26,7 +26,7 @@ describe("AllowListProvider verification", function () {
       if (url.includes("registry/allow-list")) {
         return Promise.resolve({
           data: {
-            on_list: true,
+            is_member: true,
           },
         });
       }
@@ -50,7 +50,7 @@ describe("AllowListProvider verification", function () {
       if (url.includes("registry/allow-list")) {
         return Promise.resolve({
           data: {
-            on_list: false,
+            is_member: false,
           },
         });
       }
