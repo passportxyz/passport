@@ -18,6 +18,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ pointsGained, pointsAv
   return (
     <div className={heightClass}>
       <svg viewBox={`0 0 ${100 + 2 * capDistance} 10`} preserveAspectRatio="none">
+        {/* We draw the thinner bar, that indicates the remaining part */}
         <line
           x1={capDistance}
           y1="5"
@@ -27,6 +28,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ pointsGained, pointsAv
           strokeWidth={remainingBarWidth}
           strokeLinecap="round"
         />
+        {/* We draw the "border" as wider bar than the "gained" bar. */}
         <line
           x1={capDistance}
           y1="5"
@@ -36,6 +38,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ pointsGained, pointsAv
           strokeWidth={gainedBarWidth + gainedBarBorder}
           strokeLinecap="round"
         />
+        {/* We draw the "gained" part of the bar, on top of the "border". What remains visible of the border bar will look like a nice border */}
         <line
           x1={capDistance}
           y1="5"
