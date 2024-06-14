@@ -23,7 +23,7 @@ export class AllowListProvider implements Provider {
       return {
         valid,
         record: { address, allowList },
-        errors: !valid && [`${address} was not found on the list`],
+        errors: valid ? [] : [`${address} was not found on the list`],
       };
     } catch (e) {
       throw new ProviderExternalVerificationError(String(e));

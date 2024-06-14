@@ -41,6 +41,7 @@ describe("AllowListProvider verification", function () {
         address: MOCK_ADDRESS,
         allowList: "test",
       },
+      errors: [],
     });
   });
 
@@ -65,6 +66,7 @@ describe("AllowListProvider verification", function () {
         address: MOCK_ADDRESS,
         allowList: "test",
       },
+      errors: [`${MOCK_ADDRESS} was not found on the list`],
     });
   });
 
