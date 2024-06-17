@@ -43,12 +43,12 @@ const chains = [
   },
   {
     key: "ZkSync",
-    icon: "/assets/zksync-icon.svg",
+    icon: "/assets/zksyncStampIcon.svg",
     href: "#",
   },
   {
     key: "Arbitrum",
-    icon: "/assets/arbitrum-icon.svg",
+    icon: "/assets/arbitrum-arb-logo.svg",
     href: "#",
   },
 ];
