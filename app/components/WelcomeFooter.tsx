@@ -29,12 +29,12 @@ const chains = [
   {
     key: "Optimism",
     icon: "/assets/optimism-icon.svg",
-    href: "https://docs.passport.gitcoin.co/building-with-passport/smart-contracts/contract-reference#decoder-contract-addresses",
+    href: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
   },
   {
     key: "Linea",
     icon: "/assets/linea-icon.svg",
-    href: "https://docs.passport.gitcoin.co/building-with-passport/smart-contracts/contract-reference#decoder-contract-addresses",
+    href: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
   },
   {
     key: "Ceramic",
@@ -44,12 +44,12 @@ const chains = [
   {
     key: "ZkSync",
     icon: "/assets/zksyncStampIcon.svg",
-    href: "#",
+    href: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
   },
   {
     key: "Arbitrum",
     icon: "/assets/arbitrum-arb-logo.svg",
-    href: "#",
+    href: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
   },
 ];
 
@@ -76,7 +76,7 @@ const WelcomeFooter = ({ displayPrivacyPolicy, fixed }: { displayPrivacyPolicy: 
             Privacy Policy
           </a>
         ) : null}
-        <a href="https://docs.passport.xyz/" className="hover:underline px-2">
+        <a href="https://support.passport.xyz/passport-knowledge-base" className="hover:underline px-2">
           Learn More
         </a>
         <a href="https://scorer.gitcoin.co/" className="hover:underline px-2">
@@ -89,7 +89,9 @@ const WelcomeFooter = ({ displayPrivacyPolicy, fixed }: { displayPrivacyPolicy: 
             </a>
           </div>
           <div className="px-2 mr-20">
-            <SyncIcon />
+            <a href="https://docs.passport.xyz/">
+              <SyncIcon />
+            </a>
           </div>
         </div>
       </div>
