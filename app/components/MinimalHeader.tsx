@@ -1,6 +1,7 @@
 // --- React methods
 import React, { useMemo } from "react";
 import { AccountCenter } from "./AccountCenter";
+import { Notifications } from "./Notifications";
 
 type MinimalHeaderProps = {
   className?: string;
