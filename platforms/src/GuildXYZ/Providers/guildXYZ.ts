@@ -1,12 +1,16 @@
 // ----- Types
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { ProviderExternalVerificationError, type Provider } from "../../types";
+import { createGuildClient, GuildClient } from "@guildxyz/sdk";
 
-// ----- Libs
-import axios from "axios";
-
-// ----- Utils
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+// Need to do it like this to support mocking in tests
+let guildClient: GuildClient | undefined;
+const getGuildClient = () => {
+  if (!guildClient || process.env.NODE_ENV === "test") {
+    guildClient = createGuildClient("Passport");
+  }
+  return guildClient;
+};
 
 import { getAddress } from "../../utils/signer";
 
@@ -19,169 +23,131 @@ type GuildMembership = {
 
 type Guild = {
   id: number;
-  name: string;
-  roles: string[]; // names of the roles
-  imageUrl: string;
-  urlName: string;
   memberCount: number;
 };
 
-type GuildStats = {
-  guildCount: number;
-  totalRoles: number;
+type GuildAdminStats = {
   totalAdminOwner: number;
 };
 
-const guildBaseEndpoint = "https://api.guild.xyz/v1/";
+const MINIMUM_GUILD_MEMBER_COUNT = 250;
 
 export async function getGuildMemberships(address: string): Promise<GuildMembership[]> {
-  try {
-    const memberShipResponse: {
-      data: GuildMembership[];
-    } = await axios.get(`${guildBaseEndpoint}user/membership/${address}`);
-    return memberShipResponse.data;
-  } catch (error: unknown) {
-    handleProviderAxiosError(error, "get guild memberships", [address]);
-  }
+  // Get current memberships of a user
+  return await getGuildClient().user.getMemberships(address);
 }
 
-export async function getAllGuilds(): Promise<Guild[]> {
-  try {
-    // https://api.guild.xyz/v1/guild
-    const guildResponse: {
-      data: Guild[];
-    } = await axios.get(`${guildBaseEndpoint}guild`);
-
-    return guildResponse.data;
-  } catch (error) {
-    handleProviderAxiosError(error, "get all guilds");
+async function getUserGuilds(memberships: GuildMembership[]): Promise<Guild[]> {
+  if (memberships.length === 0) {
+    return [];
   }
+  const userGuildIds = memberships.map((membership) => membership.guildId);
+  return getGuildClient().guild.getMany(userGuildIds);
 }
 
-export async function checkGuildStats(memberships: GuildMembership[]): Promise<GuildStats> {
-  try {
-    // Member of more than 5 guilds and > 15 roles across those guilds (guilds over 250 members)
-    const allGuilds = await getAllGuilds();
+export async function checkGuildAdminStats(memberships: GuildMembership[]): Promise<GuildAdminStats> {
+  const userGuilds = await getUserGuilds(memberships);
+  const userGuildsById = userGuilds.reduce(
+    (acc, guild) => {
+      acc[guild.id] = guild;
+      return acc;
+    },
+    {} as Record<number, Guild>
+  );
 
-    const myGuildRoles = new Map<number, number>(); // key: guildId, value: roleIdsLength
-    const adminOwnerGuilds = new Map<number, number>();
-    memberships.forEach((membership) => {
-      myGuildRoles.set(membership.guildId, membership.roleIds.length);
-      adminOwnerGuilds.set(membership.guildId, membership.isAdmin || membership.isOwner ? 1 : 0);
-    });
+  console.log("memberships", memberships);
 
-    // Aggregate guild and role count
-    let guildCount = 0;
-    let totalRoles = 0;
-    let totalAdminOwner = 0;
+  const qualifyingMemberships = memberships.filter(
+    (membership) =>
+      (membership.isAdmin || membership.isOwner) &&
+      userGuildsById[membership.guildId].memberCount > MINIMUM_GUILD_MEMBER_COUNT
+  );
 
-    for (const guild of allGuilds) {
-      if (myGuildRoles.has(guild.id) && guild.memberCount > 250) {
-        guildCount++;
-        totalRoles += myGuildRoles.get(guild.id);
-        totalAdminOwner += adminOwnerGuilds.get(guild.id);
-      }
-    }
-
-    // Check conditions
-    return {
-      guildCount,
-      totalRoles,
-      totalAdminOwner,
-    };
-  } catch (error: unknown) {
-    throw new ProviderExternalVerificationError(`Error checking guild stats: ${JSON.stringify(error)}`);
-  }
+  // Check conditions
+  return {
+    totalAdminOwner: qualifyingMemberships.length,
+  };
 }
 
-class GuildProvider {
-  protected async checkMemberShipStats(address: string): Promise<GuildStats> {
-    const memberships = await getGuildMemberships(address);
-    const stats = await checkGuildStats(memberships);
-    return stats;
-  }
-}
-
-export const checkGuildOwner = (memberships: GuildMembership[]): boolean => {
-  return memberships.some((membership) => membership.isOwner || membership.isAdmin);
-};
-
-export class GuildAdminProvider extends GuildProvider implements Provider {
+export class GuildAdminProvider implements Provider {
   type = "GuildAdmin";
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    try {
-      let valid = false,
-        record = undefined,
-        membershipStats;
-      const errors: string[] = [];
-      const address = await getAddress(payload);
-      try {
-        membershipStats = await this.checkMemberShipStats(address);
-      } catch (error) {
-        errors.push(String(error));
-      }
+    let record = undefined,
+      valid = false;
+    const errors: string[] = [];
+    const address = await getAddress(payload);
 
-      valid = membershipStats.totalAdminOwner > 0;
+    try {
+      const memberships = await getGuildMemberships(address);
+      const { totalAdminOwner } = await checkGuildAdminStats(memberships);
+      valid = totalAdminOwner > 0;
 
       if (valid) {
         record = {
           address,
         };
       } else {
-        errors.push(`We did not find any Guilds that you are an admin of: ${membershipStats.totalAdminOwner}.`);
+        errors.push(
+          `We did not find any Guilds that you are an admin of with greater than ${MINIMUM_GUILD_MEMBER_COUNT} members.`
+        );
       }
-
-      return {
-        valid,
-        record,
-        errors,
-      };
-    } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(`Error verifying Guild Admin Membership: ${JSON.stringify(e)}`);
+    } catch (error: unknown) {
+      if ((error as Error)?.message?.includes("User not found")) {
+        errors.push("Unable to find user in the Guild system. Please join a Guild first.");
+      } else {
+        throw error;
+      }
     }
+
+    return {
+      valid,
+      record,
+      errors,
+    };
   }
 }
 
 export const PASSPORT_GUILD_ID = 19282;
 
 const checkPassportGuild = (memberships: GuildMembership[]): boolean => {
-  return memberships.some((membership) => membership.guildId === PASSPORT_GUILD_ID);
+  const passportMembership = memberships.find((membership) => membership.guildId === PASSPORT_GUILD_ID);
+  return Boolean(passportMembership) && passportMembership.roleIds.length > 0;
 };
 
 export class GuildPassportMemberProvider implements Provider {
   type = "GuildPassportMember";
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+    const errors: string[] = [];
+    let valid = false;
+
+    let record = undefined;
+    const address = await getAddress(payload);
+
     try {
-      const errors: string[] = [];
-      let valid = false,
-        record = undefined,
-        memberships;
-      const address = await getAddress(payload);
-
-      try {
-        memberships = await getGuildMemberships(address);
-      } catch (error: unknown) {
-        errors.push(String(error));
-      }
-
+      const memberships = await getGuildMemberships(address);
       valid = checkPassportGuild(memberships);
+
       if (valid) {
         record = {
           address,
         };
       } else {
-        errors.push("You are not a member of the Passport Guild, thus, you do not qualify for this stamp.");
+        errors.push("You do not hold any roles in the Passport Guild, thus, you do not qualify for this stamp.");
       }
-
-      return {
-        valid,
-        record,
-        errors,
-      };
-    } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(`Error verifying Guild Passport Membership: ${JSON.stringify(e)}.`);
+    } catch (error: unknown) {
+      if ((error as Error)?.message?.includes("User not found")) {
+        errors.push("Unable to find user in the Guild system. Please join a Guild first.");
+      } else {
+        throw error;
+      }
     }
+
+    return {
+      valid,
+      record,
+      errors,
+    };
   }
 }
