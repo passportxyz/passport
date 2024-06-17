@@ -39,7 +39,7 @@ const chains = [
   {
     key: "Ceramic",
     icon: "/assets/ceramic-icon.svg",
-    href: "https://docs.passport.gitcoin.co/building-with-passport/composedb",
+    href: "https://support.passport.xyz/passport-knowledge-base/faq/common-questions/what-is-ceramic",
   },
   {
     key: "ZkSync",
