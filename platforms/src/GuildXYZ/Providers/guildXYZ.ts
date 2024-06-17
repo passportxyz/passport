@@ -55,8 +55,6 @@ export async function checkGuildAdminStats(memberships: GuildMembership[]): Prom
     {} as Record<number, Guild>
   );
 
-  console.log("memberships", memberships);
-
   const qualifyingMemberships = memberships.filter(
     (membership) =>
       (membership.isAdmin || membership.isOwner) &&
