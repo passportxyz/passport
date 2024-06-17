@@ -2,6 +2,12 @@ import { AppContext, ProviderPayload } from "../types";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { Platform as PlatformType, PlatformBanner } from "../types";
 
+export class PlatformPreCheckError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
 export type PlatformOptions = {
   platformId: string;
   path: string;
