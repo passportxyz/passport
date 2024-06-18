@@ -1,4 +1,4 @@
-import React, { Fragment, Ref, useState } from "react";
+import React, { Fragment } from "react";
 import { Popover, Transition } from "@headlessui/react";
 
 type NotificationProps = {
@@ -28,7 +28,6 @@ const Notification: React.FC<NotificationProps> = ({ message, index, linkText, l
 };
 
 export const Notifications: React.FC = () => {
-  const [referenceElement, setReferenceElement] = useState(null);
   const hasNotifications = true;
   const notifications = [
     {
@@ -44,7 +43,7 @@ export const Notifications: React.FC = () => {
     <div className="w-full flex justify-end">
       <Popover className="relative">
         <>
-          <Popover.Button className="ml-auto p-6" ref={setReferenceElement as unknown as Ref<HTMLButtonElement>}>
+          <Popover.Button className="ml-auto p-6">
             <div className="relative">
               {notifications.length > 0 && (
                 <div
@@ -55,7 +54,7 @@ export const Notifications: React.FC = () => {
               )}
               <img
                 className="h-6 w-6"
-                alt={`Notifications indicator. User currently ${hasNotifications ? "has" : "doesn't have"} notification`}
+                alt={`Notifications indicator. User currently ${hasNotifications ? "has" : "doesn't have"} notifications`}
                 src={hasNotifications ? "./assets/full-bell.svg" : "./assets/empty-bell.svg"}
               />
             </div>
