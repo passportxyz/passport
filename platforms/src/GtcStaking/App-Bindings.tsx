@@ -2,6 +2,7 @@
 import React from "react";
 import { AppContext, PlatformOptions, ProviderPayload } from "../types";
 import { Platform } from "../utils/platform";
+import { Hyperlink } from "../utils/Hyperlink";
 
 export class GTCStakingPlatform extends Platform {
   platformId = "GtcStaking";
@@ -24,24 +25,16 @@ export class GTCStakingPlatform extends Platform {
     throw new Error("Method not implemented.");
   }
 
-
   banner = {
     content: (
       <div>
         If you haven't staked yet, you can do so now.
-        <a
+        <Hyperlink
           href="https://support.passport.xyz/passport-knowledge-base/gtc-staking/identity-staking-questions"
-          style={{
-            color: "rgb(var(--color-foreground-2))",
-            textDecoration: "underline",
-            cursor: "pointer",
-            paddingLeft: "2px",
-          }}
-          target="_blank"
-          rel="noreferrer"
+          className="pl-1"
         >
           Learn more
-        </a>
+        </Hyperlink>
       </div>
     ),
     cta: {
@@ -49,5 +42,4 @@ export class GTCStakingPlatform extends Platform {
       url: "https://www.staking.passport.gitcoin.co/",
     },
   };
-
 }

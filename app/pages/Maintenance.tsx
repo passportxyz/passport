@@ -5,6 +5,7 @@ import React from "react";
 // --- Components
 import PageRoot from "../components/PageRoot";
 import { WebmVideo } from "../components/WebmVideo";
+import { Hyperlink } from "@gitcoin/passport-platforms";
 
 export default function Maintenance() {
   return (
@@ -29,15 +30,7 @@ export default function Maintenance() {
           <div className="col-span-2 max-w-md text-lg lg:max-w-sm">
             Gitcoin Passport is currently down for scheduled maintenance. Please check back again as we will be back up
             shortly. For more information, check{" "}
-            <a
-              className="text-foreground-4 hover:underline"
-              href="https://twitter.com/gitcoinpassport"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              @GitcoinPassport
-            </a>{" "}
-            for updates.
+            <Hyperlink href="https://twitter.com/gitcoinpassport">@GitcoinPassport</Hyperlink> for updates.
           </div>
         </div>
       </div>

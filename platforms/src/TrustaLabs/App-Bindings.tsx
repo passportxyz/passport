@@ -1,12 +1,7 @@
+import { Hyperlink } from "../utils/Hyperlink";
 import { AppContext, ProviderPayload } from "../types";
 import { Platform } from "../utils/platform";
 import React from "react";
-
-const Link = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <a href={href} target="_blank" className="text-color-1 cursor-pointer underline" rel="noreferrer">
-    {children}
-  </a>
-);
 
 export class TrustaLabsPlatform extends Platform {
   platformId = "TrustaLabs";
@@ -16,11 +11,11 @@ export class TrustaLabsPlatform extends Platform {
   banner = {
     content: (
       <div>
-        This uses Trusta&apos;s <Link href="https://www.trustalabs.ai/trustscan">TrustScan</Link> product based on your
-        activities on Eth Mainnet. You will not be able to claim the stamp if you lack sufficient data or have Sybil
-        like patterns they have detected. Note, the MEDIA score for zkSync is different from this score. For more
-        questions please see their{" "}
-        <Link href="https://trusta-labs.gitbook.io/trustalabs/trustscan/q-and-a-for-sybil-score">Q&A</Link>.
+        This uses Trusta&apos;s <Hyperlink href="https://www.trustalabs.ai/trustscan">TrustScan</Hyperlink> product
+        based on your activities on Eth Mainnet. You will not be able to claim the stamp if you lack sufficient data or
+        have Sybil like patterns they have detected. Note, the MEDIA score for zkSync is different from this score. For
+        more questions please see their{" "}
+        <Hyperlink href="https://trusta-labs.gitbook.io/trustalabs/trustscan/q-and-a-for-sybil-score">Q&A</Hyperlink>.
       </div>
     ),
     cta: {

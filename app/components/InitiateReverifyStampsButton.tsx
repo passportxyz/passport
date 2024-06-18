@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
-import React, { useContext, useState, useRef, useEffect } from "react";
+import React, { useContext, useState } from "react";
 
 // --- Style Components
 import { Button } from "./Button";
@@ -13,6 +13,7 @@ import { LoadButton } from "./LoadButton";
 import { getPlatformSpec } from "../config/platforms";
 // -- Utils
 import { StampClaimForPlatform, StampClaimingContext } from "../context/stampClaimingContext";
+import { Hyperlink } from "@gitcoin/passport-platforms";
 
 export const getProviderIdsFromPlatformId = (platformId: PLATFORM_ID): PROVIDER_ID[] => {
   return STAMP_PROVIDERS[platformId as PLATFORM_ID].flatMap((x) => x.providers.map((y) => y.name));
@@ -122,14 +123,12 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
           </div>
           <p className="m-1 text-sm font-bold">Refresh Expired Stamps</p>
           <p className="m-1 mb-4 text-center">These expired stamps will be refreshed in your Passport.</p>
-          <a
-            className="mb-1 text-center text-sm text-blue-600 underline"
+          <Hyperlink
+            className="mb-1 text-sm"
             href="https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/common-questions/why-have-my-stamps-expired"
-            target="_blank"
-            rel="noopener noreferrer"
           >
             Why have my stamps expired?
-          </a>
+          </Hyperlink>
           <p className="w-full text-left text-sm font-semibold text-gray-600">Stamps</p>
           <hr className="border-1 w-full" />
           {expiredPlatforms.map((platform) => {
