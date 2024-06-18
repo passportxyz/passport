@@ -8,7 +8,7 @@ import Link from "next/link";
 import PageRoot from "../components/PageRoot";
 import { CardList } from "../components/CardList";
 import { JsonOutputModal } from "../components/JsonOutputModal";
-import { Footer } from "../components/Footer";
+import WelcomeFooter from "../components/WelcomeFooter";
 import Header from "../components/Header";
 import BodyWrapper from "../components/BodyWrapper";
 import PageWidthGrid from "../components/PageWidthGrid";
@@ -45,6 +45,7 @@ import { DynamicCustomDashboardPanel } from "../components/CustomDashboardPanel"
 // --- GTM Module
 import TagManager from "react-gtm-module";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
+import Welcome from "./Welcome";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -322,7 +323,7 @@ export default function Dashboard() {
           </PageWidthGrid>
         </BodyWrapper>
         {/* This footer contains dark colored text and dark images */}
-        <Footer lightMode={true} />
+        <WelcomeFooter displayPrivacyPolicy={false} fixed={false} />
       </HeaderContentFooterGrid>
     </PageRoot>
   );
