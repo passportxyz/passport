@@ -21,6 +21,7 @@ export const getProviderSpec = (platform: PLATFORM_ID, provider: string): Provid
 
 export const makeTestCeramicContext = (initialState?: Partial<CeramicContextState>): CeramicContextState => {
   return {
+    databaseReady: false,
     userDid: undefined,
     passport: {
       issuanceDate: new Date(),

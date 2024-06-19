@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
@@ -40,6 +40,7 @@ import { getFilterName } from "../config/filters";
 import { Button } from "../components/Button";
 import { DEFAULT_CUSTOMIZATION_KEY, useCustomization, useNavigateToPage } from "../hooks/useCustomization";
 import { DynamicCustomDashboardPanel } from "../components/CustomDashboardPanel";
+import hash from "object-hash";
 
 // --- GTM Module
 import TagManager from "react-gtm-module";
@@ -56,9 +57,17 @@ export default function Dashboard() {
   const address = useWalletStore((state) => state.address);
   const { initiateVerification } = useOneClickVerification();
 
+  // This shouldn't be necessary, but using this to prevent unnecessary re-initialization
+  // until ceramicContext is refactored and memoized
+  const verifiedParamsHash = useRef<string | undefined>(undefined);
+
   useEffect(() => {
     if (did && address && databaseReady) {
-      initiateVerification(did, address);
+      const paramsHash = hash.sha1({ did, address, allPlatforms, databaseReady });
+      if (paramsHash !== verifiedParamsHash.current) {
+        initiateVerification(did, address);
+        verifiedParamsHash.current = paramsHash;
+      }
     }
   }, [allPlatforms, did, address, databaseReady]);
 
