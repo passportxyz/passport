@@ -734,7 +734,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   };
 
   const hydrateAllProvidersState = (passport?: Passport) => {
-    let existingProviderState = allProvidersState;
+    let existingProviderState = startingAllProvidersState;
     if (isDynamicCustomization(customization) && customization.allowListProviders) {
       const providerSpecs = customization.allowListProviders.map(({ providers }) => providers).flat();
 
