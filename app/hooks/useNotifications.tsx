@@ -17,7 +17,7 @@ const fetchNotifications = async (expiredChainIds?: string[], dbAccessToken?: st
   const res = await axios.post(
     `${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/passport-admin/notifications`,
     {
-      expiredChainIds,
+      expired_chain_ids: expiredChainIds,
     },
     {
       headers: {
