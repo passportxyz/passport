@@ -23,7 +23,7 @@ describe("AllowListProvider verification", function () {
   it("handles valid allow list verification attempt", async () => {
     // Mocking axios response for a valid case
     const axiosMock = (axios.get as jest.Mock).mockImplementation((url: string) => {
-      if (url.includes("registry/allow-list")) {
+      if (url.includes("account/allow-list")) {
         return Promise.resolve({
           data: {
             is_member: true,
@@ -48,7 +48,7 @@ describe("AllowListProvider verification", function () {
   it("handles invalid allow list verification attempt", async () => {
     // Mocking axios response for an invalid case
     (axios.get as jest.Mock).mockImplementation((url: string) => {
-      if (url.includes("registry/allow-list")) {
+      if (url.includes("account/allow-list")) {
         return Promise.resolve({
           data: {
             is_member: false,
