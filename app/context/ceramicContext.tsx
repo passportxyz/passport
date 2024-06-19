@@ -74,6 +74,7 @@ export interface CeramicContextState {
   verifiedProviderIds: PROVIDER_ID[];
   verifiedPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>>;
   platformExpirationDates: Partial<Record<PLATFORM_ID, Date>>; // the value should be the earliest expiration date
+  databaseReady: boolean;
 }
 
 export const platforms = new Map<PLATFORM_ID, PlatformProps>();
@@ -308,6 +309,7 @@ const startingState: CeramicContextState = {
   passportLoadResponse: undefined,
   verifiedProviderIds: [],
   verifiedPlatforms: {},
+  databaseReady: false,
 };
 
 export const CeramicContext = createContext(startingState);
@@ -793,12 +795,14 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     setAllProviderState(startingAllProvidersState);
   };
 
-  const verifiedProviderIds = useMemo(() => {
-    return Object.entries(allProvidersState).reduce((providerIds, [providerId, providerState]) => {
-      if (typeof providerState?.stamp?.credential !== "undefined") providerIds.push(providerId as PROVIDER_ID);
-      return providerIds;
-    }, [] as PROVIDER_ID[]);
-  }, [allProvidersState]);
+  const verifiedProviderIds = useMemo(
+    () =>
+      Object.entries(allProvidersState).reduce((providerIds, [providerId, providerState]) => {
+        if (typeof providerState?.stamp?.credential !== "undefined") providerIds.push(providerId as PROVIDER_ID);
+        return providerIds;
+      }, [] as PROVIDER_ID[]),
+    [allProvidersState]
+  );
 
   const verifiedPlatforms = useMemo(
     () =>
@@ -891,6 +895,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     verifiedProviderIds,
     verifiedPlatforms,
     platformExpirationDates,
+    databaseReady: !!database,
   };
 
   return <CeramicContext.Provider value={providerProps}>{children}</CeramicContext.Provider>;

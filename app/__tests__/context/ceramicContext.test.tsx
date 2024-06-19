@@ -14,7 +14,7 @@ import {
   discordStampFixture,
   brightidStampFixture,
 } from "../../__test-fixtures__/databaseStorageFixtures";
-import { Passport, SecondaryStorageBulkPatchResponse, Stamp } from "@gitcoin/passport-types";
+import { PROVIDER_ID, Passport, SecondaryStorageBulkPatchResponse, Stamp } from "@gitcoin/passport-types";
 import { DatastoreConnectionContext } from "../../context/datastoreConnectionContext";
 import { DID } from "dids";
 import { ChakraProvider } from "@chakra-ui/react";
@@ -1186,33 +1186,35 @@ const mockProvidersState = {
   ens: true,
 } as AllProvidersState;
 
+const mockValidProviders = ["Google", "ENS"] as PROVIDER_ID[];
+
 describe("cleanPassport function", () => {
   it("removes expired stamps", () => {
     const expiredStamp = {
       credential: {
         expirationDate: "2000-05-15T21:04:01.708Z",
-        credentialSubject: { provider: "google", id: "test-user-did" },
+        credentialSubject: { provider: "Google", id: "test-user-did" },
         issuer: process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "",
       },
     };
 
     const passport = { stamps: [expiredStamp] } as Passport;
-    const result = cleanPassport(passport, mockDatabase, mockProvidersState);
+    const result = cleanPassport(passport, mockDatabase, mockValidProviders);
     expect(result.passport.stamps).toHaveLength(0);
-    expect(result.expiredProviders).toContain("google");
+    expect(result.expiredProviders).toContain("Google");
   });
 
   it("keeps valid stamps", () => {
     const validStamp = {
       credential: {
         expirationDate: "2099-05-15T21:04:01.708Z",
-        credentialSubject: { provider: "google", id: "test-user-did" },
+        credentialSubject: { provider: "Google", id: "test-user-did" },
         issuer: process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "",
       },
     };
 
     const passport = { stamps: [validStamp] } as Passport;
-    const result = cleanPassport(passport, mockDatabase, mockProvidersState);
+    const result = cleanPassport(passport, mockDatabase, mockValidProviders);
     expect(result.passport.stamps.length).toBe(1);
     expect(result.expiredProviders.length).toBe(0);
   });
@@ -1226,7 +1228,7 @@ describe("cleanPassport function", () => {
     };
 
     const passport = { stamps: [validStamp] } as Passport;
-    const result = cleanPassport(passport, mockDatabase, mockProvidersState);
+    const result = cleanPassport(passport, mockDatabase, mockValidProviders);
     expect(result.passport.stamps.length).toBe(0);
     expect(result.expiredProviders.length).toBe(0);
   });

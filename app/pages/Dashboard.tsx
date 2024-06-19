@@ -51,16 +51,16 @@ const fail = "../assets/verification-failed-bright.svg";
 export default function Dashboard() {
   const customization = useCustomization();
   const { useCustomDashboardPanel } = customization;
-  const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms } = useContext(CeramicContext);
+  const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms, databaseReady } = useContext(CeramicContext);
   const { disconnect, dbAccessTokenStatus, dbAccessToken, did } = useDatastoreConnectionContext();
   const address = useWalletStore((state) => state.address);
   const { initiateVerification } = useOneClickVerification();
 
   useEffect(() => {
-    if (did && address) {
+    if (did && address && databaseReady) {
       initiateVerification(did, address);
     }
-  }, [allPlatforms, did, address]);
+  }, [allPlatforms, did, address, databaseReady]);
 
   useEffect(() => {
     if (customization.key !== DEFAULT_CUSTOMIZATION_KEY) {

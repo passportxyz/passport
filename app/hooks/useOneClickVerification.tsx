@@ -93,6 +93,7 @@ export const useOneClickVerification = () => {
       });
       datadogLogs.logger.info("Successfully completed one click verification", { address });
     } catch (error) {
+      console.error("Error when attempting one click verification", error);
       setUserVerificationState({
         ...verificationState,
         loading: false,

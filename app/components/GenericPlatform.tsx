@@ -109,10 +109,6 @@ export const GenericPlatform = ({
     platformProviderIds.filter((providerId: any) => verifiedProviderIds.includes(providerId))
   );
 
-  useEffect(() => {
-    setVerifiedProviders(platformProviderIds.filter((providerId: any) => verifiedProviderIds.includes(providerId)));
-  }, [verifiedProviderIds, platformProviderIds]);
-
   // Create Set to check initial verified providers
   const initialVerifiedProviders = new Set(verifiedProviders);
 
