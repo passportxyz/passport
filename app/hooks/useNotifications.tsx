@@ -1,80 +1,99 @@
-import { useContext, useEffect, useMemo, useState } from "react";
-import { useOnChainStatus } from "./useOnChainStatus";
-import { chains } from "../utils/chains";
-import axios, { AxiosResponse } from "axios";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useOnChainData } from "./useOnChainData";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 export type Notification = {
   notification_id: string;
-  type: string;
+  type: "Custom" | "Expiry" | "OnChainExpiry" | "Deduplication";
   content: string;
   dismissed: boolean;
+};
+
+const fetchNotifications = async (expiredChainIds?: string[], dbAccessToken?: string) => {
+  if (!dbAccessToken || !expiredChainIds) return;
+  const res = await axios.post(
+    `${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/passport-admin/notifications`,
+    {
+      expiredChainIds,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${dbAccessToken}`,
+      },
+    }
+  );
+  return res.data;
+};
+
+const dismissNotification = async (
+  notification_id: string,
+  dismissalType: "delete" | "read",
+  dbAccessToken?: string
+) => {
+  if (!dbAccessToken) return;
+  const res = await axios.patch(
+    `${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/passport-admin/notifications/${notification_id}`,
+    { dismissal_type: dismissalType },
+    {
+      headers: {
+        Authorization: `Bearer ${dbAccessToken}`,
+      },
+    }
+  );
+
+  return res.data;
+};
+
+export const useDismissNotification = (notification_id: string, dismissalType: "delete" | "read") => {
+  const { dbAccessToken } = useDatastoreConnectionContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => dismissNotification(notification_id, dismissalType, dbAccessToken),
+    onSuccess: () => {
+      const currentNotifications: Notification[] = queryClient.getQueryData(["notifications"]) || [];
+      const updatedNotifications =
+        dismissalType === "delete"
+          ? currentNotifications.filter((notification) => notification.notification_id !== notification_id)
+          : currentNotifications.map((notification) =>
+              notification.notification_id === notification_id ? { ...notification, dismissed: true } : notification
+            );
+
+      queryClient.setQueryData(["notifications"], updatedNotifications);
+    },
+  });
 };
 
 export const useNotifications = () => {
   const { dbAccessTokenStatus, dbAccessToken } = useDatastoreConnectionContext();
   const { data: onChainData } = useOnChainData();
 
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [expiredChainIds, setExpiredChainIds] = useState<string[] | undefined>();
 
-  const fetchNotifications = useMemo(async () => {
-    const expiredChainIds = Object.keys(onChainData).reduce<string[]>((acc, chainId) => {
+  useEffect(() => {
+    if (!onChainData || !onChainData.data) return;
+    const expiredIds = Object.keys(onChainData).reduce<string[]>((acc, chainId) => {
       const data = onChainData[chainId];
       if (data?.expirationDate && data.expirationDate.getTime() < new Date().getTime()) {
         acc.push(chainId);
       }
       return acc;
     }, []);
-    if (!dbAccessToken || dbAccessTokenStatus !== "connected" || expiredChainIds) return;
-    try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/passport-admin/notifications`,
-        {
-          expiredChainIds,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${dbAccessToken}`,
-          },
-        }
-      );
-      setNotifications(response.data.notifications);
-    } catch (error) {
-      console.error("Error fetching notifications", error);
-    }
-  }, [dbAccessToken, dbAccessTokenStatus, onChainData]);
 
-  const dismissNotification = async (notification_id: string, dismissalType: "delete" | "read") => {
-    if (!dbAccessToken) return;
-    try {
-      const res = await axios.patch(
-        `${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/passport-admin/notifications/${notification_id}`,
-        { dismissal_type: dismissalType },
-        {
-          headers: {
-            Authorization: `Bearer ${dbAccessToken}`,
-          },
-        }
-      );
-      if (res.status === 200) {
-        const updatedNotifications =
-          dismissalType === "delete"
-            ? notifications.filter((notification) => notification.notification_id !== notification_id)
-            : notifications.map((notification) =>
-                notification.notification_id === notification_id ? { ...notification, dismissed: true } : notification
-              );
-        setNotifications(updatedNotifications);
-      }
-    } catch (error) {
-      console.error("Error dismissing notification", error);
-    }
-  };
+    setExpiredChainIds(expiredIds);
+  }, [onChainData]);
+
+  const { data: notifications, error } = useQuery<Notification[], Error>({
+    queryKey: ["notifications"],
+    queryFn: () => fetchNotifications(expiredChainIds, dbAccessToken),
+    enabled: !!dbAccessToken && !!expiredChainIds?.length && dbAccessTokenStatus === "connected",
+  });
 
   return {
-    dismissNotification,
-    setExpiredChainIds,
-    fetchNotifications,
+    error,
+    notifications,
   };
 };
