@@ -54,6 +54,7 @@ export type DynamicCustomization = BasicCustomization & {
     };
   };
   allowListProviders?: PlatformGroupSpec[];
+  includedChainIds?: string[];
 };
 
 export type Customization = BasicCustomization | DynamicCustomization;
@@ -84,6 +85,7 @@ type CustomizationResponse = {
       };
     };
   };
+  includedChainIds?: string[];
 };
 
 const SanitizedHTMLComponent = ({ html }: { html: string }) => {
@@ -151,6 +153,7 @@ export const requestDynamicCustomizationConfig = async (
         },
       },
       allowListProviders: allowListProviders.length ? allowListProviders : undefined,
+      includedChainIds: customizationResponse.includedChainIds,
     };
   } catch (e) {
     console.error("Failed to fetch customization config", e);

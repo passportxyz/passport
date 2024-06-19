@@ -1,10 +1,25 @@
 import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerOverlay, DrawerCloseButton } from "@chakra-ui/react";
 import { chains } from "../utils/chains";
 import { NetworkCard } from "./NetworkCard";
+import { useCustomization } from "../hooks/useCustomization";
+import { Customization, isDynamicCustomization } from "../utils/customizationUtils";
 
 type OnchainSidebarProps = {
   isOpen: boolean;
   onClose: () => void;
+};
+
+const validateIncludedChainIds = (customization: Customization, id: string) => {
+  // if apply includedChainIds
+  if (
+    isDynamicCustomization(customization) &&
+    customization.includedChainIds &&
+    customization.includedChainIds?.length > 0
+  ) {
+    return customization.includedChainIds.includes(id);
+  } else {
+    return true;
+  }
 };
 
 const chainsWithAttestations = chains.filter(
@@ -12,6 +27,12 @@ const chainsWithAttestations = chains.filter(
 );
 
 export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
+  const customization = useCustomization();
+  const validChains = chains.filter(
+    ({ attestationProvider, id }) =>
+      (attestationProvider?.status === "comingSoon" || attestationProvider?.status === "enabled") &&
+      validateIncludedChainIds(customization, id)
+  );
   return (
     <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose}>
       <DrawerOverlay />
@@ -37,7 +58,7 @@ export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
           </div>
         </DrawerHeader>
         <DrawerBody>
-          {chainsWithAttestations.map((chain) => (
+          {validChains.map((chain) => (
             <NetworkCard key={chain.id} chain={chain} />
           ))}
         </DrawerBody>
