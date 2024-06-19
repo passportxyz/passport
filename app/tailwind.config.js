@@ -5,6 +5,8 @@ module.exports = {
     "./components/**/*.{ts,tsx}",
     "./pages/_app.tsx",
     "./hooks/**/*.{ts,tsx}",
+    // Without this, classNames used only in /platforms wouldn't be included
+    "../platforms/src/**/*.tsx",
   ],
   theme: {
     screens: {

@@ -3,6 +3,7 @@ import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
 import { CONTENT_MAX_WIDTH } from "./PageWidthGrid";
 
 import { UserWarning } from "../context/userState";
+import { Hyperlink } from "@gitcoin/passport-platforms";
 
 export default function Warning({
   userWarning,
@@ -25,9 +26,9 @@ export default function Warning({
       )}
       {content}{" "}
       {link && (
-        <a href={link} target="_blank" rel="noreferrer" className="ml-2 underline">
+        <Hyperlink href={link} className="ml-2">
           More information.
-        </a>
+        </Hyperlink>
       )}
       {dismissible && (
         <button onClick={onDismiss} className="ml-2 underline">

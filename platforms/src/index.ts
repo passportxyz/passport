@@ -46,3 +46,4 @@ export { initCacheSession, loadCacheSession, clearCacheSession } from "./utils/p
 export { handleAxiosError } from "./utils/handleAxiosError";
 export { PassportCache } from "./utils/passport-cache";
 export { PlatformPreCheckError } from "./utils/platform";
+export { Hyperlink } from "./utils/Hyperlink";

@@ -2,6 +2,7 @@ import { AppContext, PlatformOptions, ProviderPayload } from "../types";
 import { Platform, PlatformPreCheckError } from "../utils/platform";
 import React from "react";
 import { verifyCoinbaseAttestation } from "./Providers/coinbase";
+import { Hyperlink } from "../utils/Hyperlink";
 
 export class CoinbasePlatform extends Platform {
   platformId = "Coinbase";
@@ -16,19 +17,9 @@ export class CoinbasePlatform extends Platform {
         account: <br />
         <br />
         Step 1:{" "}
-        <a
-          href="https://www.coinbase.com/onchain-verify"
-          style={{
-            color: "rgb(var(--color-foreground-2))",
-            textDecoration: "underline",
-            cursor: "pointer",
-            paddingLeft: "2px",
-          }}
-          target="_blank"
-          rel="noreferrer"
-        >
+        <Hyperlink className="pl-1" href="https://www.coinbase.com/onchain-verify">
           Verify Coinbase ID
-        </a>{" "}
+        </Hyperlink>{" "}
         on this wallet address <br />
         <br />
         Step 2: Click Verify below to sign into your Coinbase account <br />

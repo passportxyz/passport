@@ -6,6 +6,7 @@ import { OnChainStatus } from "../utils/onChainStatus";
 import { useWalletStore } from "../context/walletStore";
 import { useOnChainData } from "../hooks/useOnChainData";
 import { Spinner } from "@chakra-ui/react";
+import { Hyperlink } from "@gitcoin/passport-platforms";
 
 const formatDate = (date: Date): string =>
   Intl.DateTimeFormat("en-US", { month: "short", day: "2-digit", year: "numeric" }).format(date);
@@ -39,12 +40,12 @@ export function NetworkCard({ chain }: { chain: Chain }) {
           {isOnChain && (
             <>
               {address && (
-                <a
-                  href={chain.attestationProvider?.viewerUrl(address)}
-                  className={`pt-2 text-sm ${expired ? "text-inherit" : "text-foreground-2"} underline`}
+                <Hyperlink
+                  href={chain.attestationProvider?.viewerUrl(address) || ""}
+                  className={`pt-2 text-sm ${expired ? "text-inherit" : ""}`}
                 >
                   {chain.attestationProvider?.attestationExplorerLinkText}
-                </a>
+                </Hyperlink>
               )}
               <div
                 className={`my-3 pt-2 text-right text-base ${expired ? "text-inherit" : "text-color-1"} leading-tight`}

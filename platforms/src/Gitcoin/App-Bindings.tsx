@@ -1,6 +1,7 @@
 import React from "react";
 import { AppContext, PlatformOptions, ProviderPayload } from "../types";
 import { Platform } from "../utils/platform";
+import { Hyperlink } from "../utils/Hyperlink";
 
 export class GitcoinPlatform extends Platform {
   platformId = "Gitcoin";
@@ -14,15 +15,7 @@ export class GitcoinPlatform extends Platform {
       <div>
         To qualify for the Gitcoin stamp, your contributions must be made to grant rounds officially funded by Gitcoin.
         This includes designated rounds such as Citizens rounds, GG18, GG19, among others, as detailed{" "}
-        <a
-          href="https://github.com/ufkhan97/gitcoin-grants-heroku/blob/main/all_rounds.csv"
-          target="_blank"
-          rel="noreferrer"
-          className="underline text-foreground-4"
-        >
-          here
-        </a>
-        .
+        <Hyperlink href="https://github.com/ufkhan97/gitcoin-grants-heroku/blob/main/all_rounds.csv">here</Hyperlink>.
       </div>
     ),
     content: (
