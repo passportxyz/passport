@@ -9,8 +9,7 @@ type OnchainSidebarProps = {
   onClose: () => void;
 };
 
-const validateIncludedChainIds = (customization: Customization, id: string) => {
-  // if apply includedChainIds
+export const parseValidChains = (customization: Customization, id: string) => {
   if (
     isDynamicCustomization(customization) &&
     customization.includedChainIds &&
@@ -22,16 +21,12 @@ const validateIncludedChainIds = (customization: Customization, id: string) => {
   }
 };
 
-const chainsWithAttestations = chains.filter(
-  ({ attestationProvider }) => attestationProvider?.status === "comingSoon" || attestationProvider?.status === "enabled"
-);
-
 export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
   const customization = useCustomization();
   const validChains = chains.filter(
     ({ attestationProvider, id }) =>
       (attestationProvider?.status === "comingSoon" || attestationProvider?.status === "enabled") &&
-      validateIncludedChainIds(customization, id)
+      parseValidChains(customization, id)
   );
   return (
     <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose}>
