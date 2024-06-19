@@ -96,8 +96,8 @@ const SanitizedHTMLComponent = ({ html }: { html: string }) => {
   return parse(sanitizedHTML);
 };
 
-export const buildAllowListProviders = (wieghts?: Record<PROVIDER_ID, string>) => {
-  return Object.keys(wieghts || [])
+export const buildAllowListProviders = (weights?: Record<PROVIDER_ID, string>) => {
+  return Object.keys(weights || [])
     .filter((key) => key.startsWith("AllowList"))
     .map((name) => {
       return {
@@ -105,7 +105,7 @@ export const buildAllowListProviders = (wieghts?: Record<PROVIDER_ID, string>) =
         providers: [
           {
             title: "Allow List Provider",
-            description: "If your address exists within the integrators list you get the stamps you're golden",
+            description: "Check to see if you are on the Guest List.",
             name: name as PROVIDER_ID,
           },
         ],

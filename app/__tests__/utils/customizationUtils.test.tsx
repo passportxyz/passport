@@ -30,7 +30,7 @@ describe("buildAllowListProviders", () => {
         providers: [
           {
             title: "Allow List Provider",
-            description: "If your address exists within the integrators list you get the stamps you're golden",
+            description: "Check to see if you are on the Guest List.",
             name: "AllowList#1",
           },
         ],
@@ -40,7 +40,7 @@ describe("buildAllowListProviders", () => {
         providers: [
           {
             title: "Allow List Provider",
-            description: "If your address exists within the integrators list you get the stamps you're golden",
+            description: "Check to see if you are on the Guest List.",
             name: "AllowList#2",
           },
         ],

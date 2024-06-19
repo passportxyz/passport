@@ -73,7 +73,8 @@ export interface CeramicContextState {
   passportLoadResponse?: PassportLoadResponse;
   verifiedProviderIds: PROVIDER_ID[];
   verifiedPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>>;
-  platformExpirationDates: Partial<Record<PLATFORM_ID, Date>>; // the value shlould be the earliest expiration date
+  platformExpirationDates: Partial<Record<PLATFORM_ID, Date>>; // the value should be the earliest expiration date
+  databaseReady: boolean;
 }
 
 export const platforms = new Map<PLATFORM_ID, PlatformProps>();
@@ -308,6 +309,7 @@ const startingState: CeramicContextState = {
   passportLoadResponse: undefined,
   verifiedProviderIds: [],
   verifiedPlatforms: {},
+  databaseReady: false,
 };
 
 export const CeramicContext = createContext(startingState);
@@ -315,20 +317,19 @@ export const CeramicContext = createContext(startingState);
 export const cleanPassport = (
   passport: Passport,
   database: DataStorageBase,
-  allProvidersState: AllProvidersState
+  validProviderIds: PROVIDER_ID[]
 ): {
   passport: Passport;
   expiredProviders: PROVIDER_ID[];
   expirationDateProviders: Partial<Record<PROVIDER_ID, Date>>;
 } => {
   const tempExpiredProviders: PROVIDER_ID[] = [];
-  const currentProviderIds = Object.keys(allProvidersState);
   let expirationDateProviders: Partial<Record<PROVIDER_ID, Date>> = {};
   if (passport) {
     passport.stamps = passport.stamps.filter((stamp: Stamp) => {
       if (stamp) {
         const providerId = stamp.credential.credentialSubject.provider as PROVIDER_ID;
-        if (!currentProviderIds.includes(providerId)) {
+        if (!validProviderIds.includes(providerId)) {
           return false;
         }
 
@@ -372,6 +373,18 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const { refreshScore, fetchStampWeights } = useContext(ScorerContext);
   const customization = useCustomization();
 
+  const providerSpecs = useMemo(() => {
+    const providerSpecs: Partial<Record<PROVIDER_ID, ProviderSpec>> = {};
+    allPlatforms.forEach((platformProps) => {
+      platformProps.platFormGroupSpec.forEach(({ providers }) => {
+        providers.forEach((provider) => {
+          providerSpecs[provider.name] = provider;
+        });
+      });
+    });
+    return providerSpecs;
+  }, [allPlatforms]);
+
   const toast = useToast();
 
   useEffect(() => {
@@ -382,9 +395,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         platform: new AllowList.AllowListPlatform(),
         platFormGroupSpec: allowListProviders,
       });
-      setAllPlatforms(platforms);
+      setAllPlatforms(new Map(platforms));
     } else {
-      setAllPlatforms(platforms);
+      platforms.delete("AllowList");
+      setAllPlatforms(new Map(platforms));
     }
   }, [customization]);
 
@@ -436,7 +450,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   useEffect(() => {
     if (database) {
-      fetchStampWeights();
       fetchPassport(database, false, true).then((passport) => {
         if (passport) {
           setInitialPassport(passport);
@@ -444,6 +457,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       });
     }
   }, [database]);
+
+  useEffect(() => {
+    fetchStampWeights();
+  }, [customization.key]);
 
   useEffect(() => {
     if (ceramicClient) {
@@ -511,7 +528,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       passport: cleanedPassport,
       expiredProviders,
       expirationDateProviders,
-    } = cleanPassport(passport, database, allProvidersState);
+    } = cleanPassport(passport, database, Object.keys(providerSpecs) as PROVIDER_ID[]);
     setExpiredProviders(expiredProviders);
     setExpirationDateProviders(expirationDateProviders);
     hydrateAllProvidersState(cleanedPassport);
@@ -734,7 +751,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   };
 
   const hydrateAllProvidersState = (passport?: Passport) => {
-    let existingProviderState = startingAllProvidersState;
+    let existingProviderState = { ...startingAllProvidersState };
     if (isDynamicCustomization(customization) && customization.allowListProviders) {
       const providerSpecs = customization.allowListProviders.map(({ providers }) => providers).flat();
 
@@ -759,10 +776,10 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       let newAllProviderState = { ...existingProviderState };
       passport.stamps.forEach((stamp: Stamp) => {
         const { provider } = stamp;
-        const providerState = allProvidersState[provider];
-        if (providerState) {
+        const providerSpec = providerSpecs[provider];
+        if (providerSpec) {
           const newProviderState = {
-            providerSpec: providerState.providerSpec,
+            providerSpec,
             stamp,
           };
           newAllProviderState[provider] = newProviderState;
@@ -789,7 +806,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const verifiedPlatforms = useMemo(
     () =>
-      Object.entries(Object.fromEntries(platforms)).reduce(
+      Object.entries(Object.fromEntries(allPlatforms)).reduce(
         (validPlatformProps, [platformKey, platformProps]) => {
           if (
             platformProps.platFormGroupSpec.some(({ providers }) =>
@@ -801,11 +818,11 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         },
         {} as Record<PLATFORM_ID, PlatformProps>
       ),
-    [verifiedProviderIds, platforms]
+    [verifiedProviderIds, allPlatforms]
   );
   const expiredPlatforms = useMemo(
     () =>
-      Object.entries(Object.fromEntries(platforms)).reduce(
+      Object.entries(Object.fromEntries(allPlatforms)).reduce(
         (validPlatformProps, [platformKey, platformProps]) => {
           if (
             platformProps.platFormGroupSpec.some(({ providers }) =>
@@ -817,15 +834,15 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         },
         {} as Record<PLATFORM_ID, PlatformProps>
       ),
-    [verifiedProviderIds, platforms]
+    [verifiedProviderIds, allPlatforms]
   );
 
   const platformExpirationDates = useMemo(() => {
     let ret = {} as Partial<Record<PLATFORM_ID, Date>>;
-    platforms.forEach((platformProps, platformKey) => {
+    allPlatforms.forEach((platformProps, platformKey) => {
       const providerGroups = platformProps.platFormGroupSpec;
 
-      // Determine the realiest expiration date for each platform
+      // Determine the earliest expiration date for each platform
       // This will iterate over all platform groups, check the earliest expiration date for each group, and then the earliest expiration for the platform
       const earliestExpirationDate = providerGroups.reduce(
         (earliestGroupExpirationDate, groupSpec) => {
@@ -858,7 +875,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       ret[platformKey as PLATFORM_ID] = earliestExpirationDate;
     });
     return ret;
-  }, [verifiedProviderIds, platforms, expirationDateProviders]);
+  }, [verifiedProviderIds, allPlatforms, expirationDateProviders]);
 
   const providerProps = {
     passport,
@@ -878,6 +895,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     verifiedProviderIds,
     verifiedPlatforms,
     platformExpirationDates,
+    databaseReady: !!database,
   };
 
   return <CeramicContext.Provider value={providerProps}>{children}</CeramicContext.Provider>;

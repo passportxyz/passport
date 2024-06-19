@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
@@ -33,19 +33,18 @@ import {
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 import { useWalletStore } from "../context/walletStore";
 import { ScorerContext } from "../context/scorerContext";
+import { useOneClickVerification } from "../hooks/useOneClickVerification";
 
-import { useViewerConnection } from "@self.id/framework";
-import { EthereumAuthProvider } from "@self.id/web";
 import ProcessingPopup from "../components/ProcessingPopup";
 import { getFilterName } from "../config/filters";
 import { Button } from "../components/Button";
 import { DEFAULT_CUSTOMIZATION_KEY, useCustomization, useNavigateToPage } from "../hooks/useCustomization";
 import { DynamicCustomDashboardPanel } from "../components/CustomDashboardPanel";
+import hash from "object-hash";
 
 // --- GTM Module
 import TagManager from "react-gtm-module";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
-import Welcome from "./Welcome";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -53,7 +52,24 @@ const fail = "../assets/verification-failed-bright.svg";
 export default function Dashboard() {
   const customization = useCustomization();
   const { useCustomDashboardPanel } = customization;
-  const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms } = useContext(CeramicContext);
+  const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms, databaseReady } = useContext(CeramicContext);
+  const { disconnect, dbAccessTokenStatus, dbAccessToken, did } = useDatastoreConnectionContext();
+  const address = useWalletStore((state) => state.address);
+  const { initiateVerification } = useOneClickVerification();
+
+  // This shouldn't be necessary, but using this to prevent unnecessary re-initialization
+  // until ceramicContext is refactored and memoized
+  const verifiedParamsHash = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (did && address && databaseReady) {
+      const paramsHash = hash.sha1({ did, address, allPlatforms, databaseReady });
+      if (paramsHash !== verifiedParamsHash.current) {
+        initiateVerification(did, address);
+        verifiedParamsHash.current = paramsHash;
+      }
+    }
+  }, [allPlatforms, did, address, databaseReady]);
 
   useEffect(() => {
     if (customization.key !== DEFAULT_CUSTOMIZATION_KEY) {
@@ -74,11 +90,6 @@ export default function Dashboard() {
       });
     }
   }, [customization.key]);
-
-  const address = useWalletStore((state) => state.address);
-  const provider = useWalletStore((state) => state.provider);
-
-  const { disconnect, dbAccessTokenStatus, dbAccessToken } = useDatastoreConnectionContext();
 
   const { refreshScore } = useContext(ScorerContext);
 
