@@ -18,7 +18,9 @@ export class AllowListProvider implements Provider {
     try {
       const { address } = payload;
       const { allowList } = payload.proofs;
-      const response: AllowListResponse = await axios.get(`${allowListEndpoint}/${allowList}/${address}`);
+      const response: AllowListResponse = await axios.get(`${allowListEndpoint}/${allowList}/${address}`, {
+        headers: { Authorization: process.env.CGRANTS_API_TOKEN },
+      });
       const valid = response.data.is_member;
 
       return {
