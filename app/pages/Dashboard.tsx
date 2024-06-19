@@ -33,9 +33,8 @@ import {
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 import { useWalletStore } from "../context/walletStore";
 import { ScorerContext } from "../context/scorerContext";
+import { useOneClickVerification } from "../hooks/useOneClickVerification";
 
-import { useViewerConnection } from "@self.id/framework";
-import { EthereumAuthProvider } from "@self.id/web";
 import ProcessingPopup from "../components/ProcessingPopup";
 import { getFilterName } from "../config/filters";
 import { Button } from "../components/Button";
@@ -45,7 +44,6 @@ import { DynamicCustomDashboardPanel } from "../components/CustomDashboardPanel"
 // --- GTM Module
 import TagManager from "react-gtm-module";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
-import Welcome from "./Welcome";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -54,6 +52,15 @@ export default function Dashboard() {
   const customization = useCustomization();
   const { useCustomDashboardPanel } = customization;
   const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms } = useContext(CeramicContext);
+  const { disconnect, dbAccessTokenStatus, dbAccessToken, did } = useDatastoreConnectionContext();
+  const address = useWalletStore((state) => state.address);
+  const { initiateVerification } = useOneClickVerification();
+
+  useEffect(() => {
+    if (did && address) {
+      initiateVerification(did, address);
+    }
+  }, [allPlatforms, did, address]);
 
   useEffect(() => {
     if (customization.key !== DEFAULT_CUSTOMIZATION_KEY) {
@@ -74,11 +81,6 @@ export default function Dashboard() {
       });
     }
   }, [customization.key]);
-
-  const address = useWalletStore((state) => state.address);
-  const provider = useWalletStore((state) => state.provider);
-
-  const { disconnect, dbAccessTokenStatus, dbAccessToken } = useDatastoreConnectionContext();
 
   const { refreshScore } = useContext(ScorerContext);
 

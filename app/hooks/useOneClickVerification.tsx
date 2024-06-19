@@ -1,30 +1,24 @@
 import { PROVIDER_ID, StampPatch, ValidResponseBody } from "@gitcoin/passport-types";
 import { useContext } from "react";
 import { fetchPossibleEVMStamps } from "../signer/utils";
-import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { createSignedPayload } from "../utils/helpers";
 import { CeramicContext } from "../context/ceramicContext";
-import { useWalletStore } from "../context/walletStore";
 import { useAtom } from "jotai";
 import { mutableUserVerificationAtom } from "../context/userState";
 import { datadogLogs } from "@datadog/browser-logs";
 import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../components/DoneToastContent";
+import { DID } from "dids";
 
 export const useOneClickVerification = () => {
   const [verificationState, setUserVerificationState] = useAtom(mutableUserVerificationAtom);
 
-  const { did } = useDatastoreConnectionContext();
   const { passport, allPlatforms, handlePatchStamps } = useContext(CeramicContext);
-  const address = useWalletStore((state) => state.address);
   const toast = useToast();
 
-  const initiateVerification = async function () {
-    if (!did || !address) {
-      return;
-    }
+  const initiateVerification = async function (did: DID, address: string) {
     datadogLogs.logger.info("Initiating one click verification", { address });
     setUserVerificationState({
       ...verificationState,

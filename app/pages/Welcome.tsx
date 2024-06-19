@@ -1,18 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
-import React, { useContext, useState, useEffect } from "react";
-
-// --- Types
-import { Status, Step } from "../components/Progress";
+import React, { useContext, useEffect } from "react";
 
 // --Components
 import MinimalHeader from "../components/MinimalHeader";
 import { PAGE_PADDING } from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import PageRoot from "../components/PageRoot";
-
-// --Chakra UI Elements
-import { useDisclosure } from "@chakra-ui/react";
 
 // --- Contexts
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
@@ -24,17 +18,12 @@ import LoadingScreen from "../components/LoadingScreen";
 import BodyWrapper from "../components/BodyWrapper";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useNavigateToPage } from "../hooks/useCustomization";
-import { useOneClickVerification } from "../hooks/useOneClickVerification";
 import WelcomeFooter from "../components/WelcomeFooter";
-
-const MIN_DELAY = 50;
-const MAX_DELAY = 800;
 
 export default function Welcome() {
   const { passport, isLoadingPassport } = useContext(CeramicContext);
   const { dbAccessTokenStatus } = useDatastoreConnectionContext();
   const address = useWalletStore((state) => state.address);
-  const { initiateVerification } = useOneClickVerification();
 
   const navigateToPage = useNavigateToPage();
 
@@ -58,7 +47,6 @@ export default function Welcome() {
             <InitialWelcome
               onBoardFinished={async () => {
                 if (address) {
-                  initiateVerification();
                   navigateToPage("dashboard");
                 }
               }}
