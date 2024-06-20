@@ -388,7 +388,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const toast = useToast();
 
   useEffect(() => {
-    if (isDynamicCustomization(customization) && customization.allowListProviders) {
+    if (customization.allowListProviders) {
       const { allowListProviders } = customization;
       // Set AllowList platform providers based on customization
       platforms.set("AllowList", {

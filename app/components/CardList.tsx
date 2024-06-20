@@ -12,7 +12,6 @@ import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
 import { Category } from "./Category";
 import { CeramicContext } from "../context/ceramicContext";
 import { useCustomization } from "../hooks/useCustomization";
-import { isDynamicCustomization } from "../utils/customizationUtils";
 import { PlatformCard } from "./PlatformCard";
 import { GenericPlatform } from "./GenericPlatform";
 
@@ -71,10 +70,7 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
   const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
     PLATFORMS.reduce((platforms, platform) => {
       // get all providerIds for this platform
-      const providerIds = getStampProviderIds(
-        platform.platform,
-        customStampProviders(isDynamicCustomization(customization) ? customization : undefined)
-      );
+      const providerIds = getStampProviderIds(platform.platform, customStampProviders(customization));
       // default to empty array for each platform
       platforms[platform.platform] = providerIds.filter(
         (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
@@ -90,9 +86,7 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
       PLATFORMS.reduce((platforms, platform) => {
         // get all providerIds for this platform
         const providerIds =
-          customStampProviders(isDynamicCustomization(customization) ? customization : undefined)[
-            platform.platform
-          ]?.reduce((all, stamp) => {
+          customStampProviders(customization)[platform.platform]?.reduce((all, stamp) => {
             return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
           }, [] as PROVIDER_ID[]) || [];
         // default to empty array for each platform

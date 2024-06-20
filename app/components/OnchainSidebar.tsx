@@ -2,7 +2,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerOverlay, DrawerC
 import { chains } from "../utils/chains";
 import { NetworkCard } from "./NetworkCard";
 import { useCustomization } from "../hooks/useCustomization";
-import { Customization, isDynamicCustomization } from "../utils/customizationUtils";
+import { Customization } from "../utils/customizationUtils";
 
 type OnchainSidebarProps = {
   isOpen: boolean;
@@ -10,11 +10,7 @@ type OnchainSidebarProps = {
 };
 
 export const parseValidChains = (customization: Customization, id: string) => {
-  if (
-    isDynamicCustomization(customization) &&
-    customization.includedChainIds &&
-    customization.includedChainIds?.length > 0
-  ) {
+  if (customization.includedChainIds && customization.includedChainIds?.length > 0) {
     return customization.includedChainIds.includes(id);
   } else {
     return true;

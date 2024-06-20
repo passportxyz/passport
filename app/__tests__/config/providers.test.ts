@@ -1,6 +1,6 @@
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { Providers, customStampProviders, getStampProviderIds } from "../../config/providers";
-import { DynamicCustomization } from "../../utils/customizationUtils";
+import { Customization } from "../../utils/customizationUtils";
 import { Provider } from "ethers";
 
 jest.mock("@gitcoin/passport-platforms", () => ({
@@ -27,13 +27,13 @@ describe("customStampProviders", () => {
   });
 
   it("returns default providers if customization does not have allowListProviders", () => {
-    const customization = { otherField: "value" } as unknown as DynamicCustomization;
+    const customization = { otherField: "value" } as unknown as Customization;
     const result = customStampProviders(customization);
     expect(result).toEqual(STAMP_PROVIDERS);
   });
 
   it("returns custom providers if customization contains allowListProviders", () => {
-    const customization = { allowListProviders: CUSTOM_PROVIDERS.AllowList } as unknown as DynamicCustomization;
+    const customization = { allowListProviders: CUSTOM_PROVIDERS.AllowList } as unknown as Customization;
     const result = customStampProviders(customization);
     expect(result.AllowList).toEqual(CUSTOM_PROVIDERS.AllowList);
   });

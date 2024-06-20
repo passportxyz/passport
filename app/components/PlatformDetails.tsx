@@ -11,7 +11,6 @@ import { ProgressBar } from "./ProgressBar";
 import { getDaysToExpiration } from "../utils/duration";
 import { customStampProviders, getStampProviderIds } from "../config/providers";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
-import { isDynamicCustomization } from "../utils/customizationUtils";
 import { useCustomization } from "../hooks/useCustomization";
 
 const PlatformJsonButton = ({
@@ -29,10 +28,7 @@ const PlatformJsonButton = ({
   const [removeStampModal, setRemoveStampModal] = useState(false);
   const [referenceElement, setReferenceElement] = useState(null);
 
-  const providerIds = getStampProviderIds(
-    platform.platform,
-    customStampProviders(isDynamicCustomization(customization) ? customization : undefined)
-  );
+  const providerIds = getStampProviderIds(platform.platform, customStampProviders(customization));
 
   const onRemoveStamps = async () => {
     await handleDeleteStamps(providerIds);

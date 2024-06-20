@@ -9,7 +9,6 @@ import { Button } from "./Button";
 import { PlatformScoreSpec } from "../context/scorerContext";
 import { CeramicContext } from "../context/ceramicContext";
 import { useCustomization } from "../hooks/useCustomization";
-import { isDynamicCustomization } from "../utils/customizationUtils";
 import { ProgressBar } from "./ProgressBar";
 import { getDaysToExpiration } from "../utils/duration";
 import { customStampProviders, getStampProviderIds } from "../config/providers";
@@ -273,10 +272,7 @@ export const PlatformCard = ({
   const customization = useCustomization();
 
   const selectedProviders = PLATFORMS.reduce((platforms, platform) => {
-    const providerIds = getStampProviderIds(
-      platform.platform,
-      customStampProviders(isDynamicCustomization(customization) ? customization : undefined)
-    );
+    const providerIds = getStampProviderIds(platform.platform, customStampProviders(customization));
     platforms[platform.platform] = providerIds.filter(
       (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
     );
@@ -341,10 +337,7 @@ const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
   const customization = useCustomization();
 
   const excludedByCustomization = useMemo(() => {
-    const providers = getStampProviderIds(
-      platform.platform,
-      customStampProviders(isDynamicCustomization(customization) ? customization : undefined)
-    );
+    const providers = getStampProviderIds(platform.platform, customStampProviders(customization));
 
     // Hide allow list if no points were earned when onboarding
     if (platform.platform.startsWith("AllowList") && platform.earnedPoints === 0) {
@@ -352,7 +345,6 @@ const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
     }
 
     return (
-      isDynamicCustomization(customization) &&
       customization.scorer?.weights &&
       !providers.some((provider) => {
         return parseFloat(customization.scorer?.weights?.[provider] || "") > 0;

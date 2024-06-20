@@ -32,10 +32,6 @@ jest.mock("../../hooks/useCustomization", () => ({
   useCustomization: jest.fn(),
 }));
 
-jest.mock("../../utils/customizationUtils", () => ({
-  isDynamicCustomization: jest.fn(),
-}));
-
 describe("DashboardScorePanel", () => {
   it("should indicate the loading state", () => {
     renderWithContext(mockCeramicContext, <DashboardScorePanel className="test" />);

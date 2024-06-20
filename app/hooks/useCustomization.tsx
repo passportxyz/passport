@@ -1,5 +1,5 @@
 import { setCustomizationTheme } from "../utils/theme/setCustomizationTheme";
-import { Customization, initializeDOMPurify, requestDynamicCustomizationConfig } from "../utils/customizationUtils";
+import { Customization, initializeDOMPurify, requestCustomizationConfig } from "../utils/customizationUtils";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect } from "react";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
@@ -9,52 +9,20 @@ export const DEFAULT_CUSTOMIZATION_KEY = "none";
 const DEFAULT_CUSTOMIZATION: Customization = {
   key: DEFAULT_CUSTOMIZATION_KEY,
   useCustomDashboardPanel: false,
+  dashboardPanel: {
+    logo: {
+      image: null,
+    },
+    body: {
+      mainText: null,
+      subText: null,
+      action: {
+        text: "",
+        url: "",
+      },
+    },
+  },
 };
-
-const loadConfigForCustomizationKey = async (customizationKey?: string): Promise<Customization> => {
-  let config = DEFAULT_CUSTOMIZATION;
-
-  // In the future, no additional "cases" should need to be added here.
-  // Customizations should be defined in the backend and loaded dynamically.
-  switch (customizationKey) {
-    case "testing":
-      config = {
-        key: "testing",
-        useCustomDashboardPanel: true,
-        customizationTheme: {
-          colors: {
-            customizationBackground1: "var(--color-focus)",
-            customizationBackground2: "var(--color-focus)",
-            customizationForeground1: "var(--color-text-4)",
-          },
-        },
-      };
-      break;
-    case "verax":
-      config = {
-        key: "verax",
-        useCustomDashboardPanel: true,
-        customizationTheme: {
-          colors: {
-            customizationBackground1: "var(--color-foreground-7)",
-            customizationBackground2: "var(--color-foreground-7)",
-            customizationForeground1: "var(--color-text-4)",
-          },
-        },
-      };
-      break;
-    default:
-      if (customizationKey) {
-        const dynamicConfig = await requestDynamicCustomizationConfig(customizationKey);
-        if (dynamicConfig) {
-          config = dynamicConfig;
-        }
-      }
-  }
-
-  return config;
-};
-
 const customizationConfigAtom = atom<Customization>(DEFAULT_CUSTOMIZATION);
 
 // Use as a layout Route element to set the customization key based on the URL
@@ -101,7 +69,10 @@ export const useSetCustomizationKey = (): ((customizationKey: string | undefined
   const setCustomizationKey = useCallback(
     async (customizationKey: string | undefined) => {
       if (customizationKey) {
-        const customizationConfig = await loadConfigForCustomizationKey(customizationKey);
+        const customizationConfig = await requestCustomizationConfig(customizationKey);
+        if (!customizationConfig) {
+          return;
+        }
         setCustomizationConfig(customizationConfig);
         if (customizationConfig.customizationTheme) {
           setCustomizationTheme(customizationConfig.customizationTheme);

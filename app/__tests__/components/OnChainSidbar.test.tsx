@@ -1,10 +1,10 @@
 import { parseValidChains } from "../../components/OnchainSidebar";
-import { Customization, DynamicCustomization } from "../../utils/customizationUtils";
+import { Customization } from "../../utils/customizationUtils";
 
 const customization = {
   includedChainIds: ["1", "2", "3"],
   dashboardPanel: {},
-} as unknown as DynamicCustomization;
+} as unknown as Customization;
 
 describe("Displaying Chains", () => {
   it("should return true if the chain is included in the customization", () => {

@@ -4,7 +4,7 @@ import { CUSTOMIZATION_ENDPOINT } from "../config/customization_config";
 import axios from "axios";
 import * as DOMPurify from "dompurify";
 import parse from "html-react-parser";
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformGroupSpec } from "@gitcoin/passport-platforms/*";
 
 const sanitize = DOMPurify.sanitize;
@@ -21,23 +21,11 @@ export const initializeDOMPurify = () => {
   });
 };
 
-export type BasicCustomization = {
-  key: string;
-  customizationTheme?: CustomizationTheme;
-  useCustomDashboardPanel: boolean;
-};
-
 export type CustomizationLogoBackground = "dots" | "none";
 
-export type DynamicCustomization = BasicCustomization & {
-  scorer?: {
-    id?: number;
-    weights?: Record<PROVIDER_ID, string>;
-  };
-  scorerPanel?: {
-    title?: string;
-    text?: string;
-  };
+export type Customization = {
+  key: string;
+  useCustomDashboardPanel: boolean;
   dashboardPanel: {
     logo: {
       image: React.ReactNode;
@@ -53,11 +41,18 @@ export type DynamicCustomization = BasicCustomization & {
       };
     };
   };
+  customizationTheme?: CustomizationTheme;
+  scorer?: {
+    id?: number;
+    weights?: Record<PROVIDER_ID, string>;
+  };
+  scorerPanel?: {
+    title?: string;
+    text?: string;
+  };
   allowListProviders?: PlatformGroupSpec[];
   includedChainIds?: string[];
 };
-
-export type Customization = BasicCustomization | DynamicCustomization;
 
 type CustomizationResponse = {
   customizationTheme?: CustomizationTheme;
@@ -115,9 +110,7 @@ export const buildAllowListProviders = (weights?: Record<PROVIDER_ID, string>) =
     });
 };
 
-export const requestDynamicCustomizationConfig = async (
-  customizationKey: string
-): Promise<DynamicCustomization | undefined> => {
+export const requestCustomizationConfig = async (customizationKey: string): Promise<Customization | undefined> => {
   try {
     const response = await axios.get(`${CUSTOMIZATION_ENDPOINT}/${customizationKey}`);
     const customizationResponse: CustomizationResponse = response.data;
@@ -161,6 +154,6 @@ export const requestDynamicCustomizationConfig = async (
   }
 };
 
-export const isDynamicCustomization = (config: Customization): config is DynamicCustomization => {
-  return (config as DynamicCustomization).dashboardPanel !== undefined;
+export const isDynamicCustomization = (config: Customization): config is Customization => {
+  return (config as Customization).useCustomDashboardPanel !== undefined;
 };

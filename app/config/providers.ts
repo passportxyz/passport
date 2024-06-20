@@ -1,6 +1,6 @@
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { platforms, ProviderSpec, PlatformGroupSpec } from "@gitcoin/passport-platforms";
-import { DynamicCustomization } from "../utils/customizationUtils";
+import { Customization } from "../utils/customizationUtils";
 export type { ProviderSpec, PlatformGroupSpec };
 
 export type UpdatedPlatforms = {
@@ -31,7 +31,7 @@ export const STAMP_PROVIDERS: Readonly<Providers> = {
 };
 
 // maybe consolidate the two below
-export const customStampProviders = (customization?: DynamicCustomization): Providers => {
+export const customStampProviders = (customization?: Customization): Providers => {
   if (!customization || !customization.allowListProviders) {
     return STAMP_PROVIDERS;
   }
