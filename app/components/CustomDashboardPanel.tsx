@@ -68,7 +68,9 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
     return <VeraxPanel className={className} />;
   }
 
-  // Otherwise, it's a dynamically defined panel
+  if (customization.key === "testing") {
+    return <TestingPanel className={className} />;
+  }
 
   const { logo, body } = customization.dashboardPanel;
 

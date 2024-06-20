@@ -6,7 +6,6 @@ import { useOnChainData } from "../hooks/useOnChainData";
 import { CeramicContext } from "../context/ceramicContext";
 import { ScorerContext } from "../context/scorerContext";
 import { useCustomization } from "../hooks/useCustomization";
-import { isDynamicCustomization } from "../utils/customizationUtils";
 import { customSideBarGradient } from "./PlatformDetails";
 
 type StampSelectorProps = {

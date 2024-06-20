@@ -51,7 +51,6 @@ import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 import { useToast } from "@chakra-ui/react";
 import { DoneToastContent } from "../components/DoneToastContent";
 import { useCustomization } from "../hooks/useCustomization";
-import { isDynamicCustomization } from "../utils/customizationUtils";
 
 // -- Trusted IAM servers DID
 const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
@@ -745,14 +744,14 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       // but not any alternate scorer used by a customization. So, we must
       // force a refresh in that case. If we start passing the alternate_scorer_id
       // to the ceramic-cache/stamps endpoints, we can remove this.
-      const forceRefresh = Boolean(isDynamicCustomization(customization) && customization.scorer?.id);
+      const forceRefresh = Boolean(customization.scorer?.id);
       refreshScore(address, dbAccessToken, forceRefresh);
     }
   };
 
   const hydrateAllProvidersState = (passport?: Passport) => {
     let existingProviderState = { ...startingAllProvidersState };
-    if (isDynamicCustomization(customization) && customization.allowListProviders) {
+    if (customization.allowListProviders) {
       const providerSpecs = customization.allowListProviders.map(({ providers }) => providers).flat();
 
       const allowListProviderState = providerSpecs.reduce(

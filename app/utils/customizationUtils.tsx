@@ -148,7 +148,3 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
     includedChainIds: customizationResponse.includedChainIds,
   };
 };
-
-export const isDynamicCustomization = (config: Customization): config is Customization => {
-  return (config as Customization).useCustomDashboardPanel !== undefined;
-};
