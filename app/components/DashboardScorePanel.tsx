@@ -1,12 +1,9 @@
 import React, { useEffect } from "react";
 import { ScorerContext } from "../context/scorerContext";
 
-import { useToast } from "@chakra-ui/react";
 import { useCustomization } from "../hooks/useCustomization";
-import { isDynamicCustomization } from "../utils/customizationUtils";
 import { useAtom } from "jotai";
 import { mutableUserVerificationAtom } from "../context/userState";
-import { DoneToastContent } from "./DoneToastContent";
 
 // Hexagon SVGs generated using https://codepen.io/wvr/pen/WrNgJp
 // with the values listed below for each ring
@@ -102,8 +99,8 @@ const ScoreRing = ({ className }: { className: string }) => {
 
 export const DashboardScorePanel = ({ className }: { className: string }) => {
   const customization = useCustomization();
-  const customTitle = isDynamicCustomization(customization) ? customization.scorerPanel?.title : undefined;
-  const customText = isDynamicCustomization(customization) ? customization.scorerPanel?.text : undefined;
+  const customTitle = customization?.scorerPanel?.title;
+  const customText = customization?.scorerPanel?.text;
 
   return (
     <div

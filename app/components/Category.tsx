@@ -1,6 +1,4 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { PLATFORMS } from "../config/platforms";
-import { PlatformGroupSpec, STAMP_PROVIDERS, customStampProviders, getStampProviderIds } from "../config/providers";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { LoadingCard } from "./LoadingCard";
 import { GenericPlatform } from "./GenericPlatform";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
@@ -9,9 +7,7 @@ import { PlatformCard } from "./PlatformCard";
 import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
 import { Disclosure } from "@headlessui/react";
 import { DropDownIcon } from "./DropDownIcon";
-import { SideBarContent } from "./SideBarContent";
-import { Drawer, DrawerOverlay, useDisclosure } from "@chakra-ui/react";
-import { isDynamicCustomization } from "../utils/customizationUtils";
+import { useDisclosure } from "@chakra-ui/react";
 import { useCustomization } from "../hooks/useCustomization";
 
 export type Category = {

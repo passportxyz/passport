@@ -9,7 +9,6 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PLATFORMS } from "../config/platforms";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { useCustomization } from "../hooks/useCustomization";
-import { isDynamicCustomization } from "../utils/customizationUtils";
 import { customStampProviders, getStampProviderIds } from "../config/providers";
 
 const scorerApiGetScore = CERAMIC_CACHE_ENDPOINT + "/score";
@@ -91,7 +90,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       setScoreState("APP_INITIAL");
       let response;
       try {
-        const useAlternateScorer = isDynamicCustomization(customization) && customization.scorer?.id;
+        const useAlternateScorer = customization.scorer?.id;
 
         const method = rescore ? "post" : "get";
 
@@ -162,7 +161,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
 
   const fetchStampWeights = async () => {
     try {
-      if (isDynamicCustomization(customization) && customization.scorer?.weights) {
+      if (customization.scorer?.weights) {
         setStampWeights(customization.scorer?.weights);
       } else {
         // TODO: Fetching the default weights, could become part of the customization step ...
@@ -209,10 +208,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const calculatePlatformScore = useCallback(() => {
     if (stampScores && stampWeights) {
       const scoredPlatforms = PLATFORMS.map((platform) => {
-        const providerIds = getStampProviderIds(
-          platform.platform,
-          customStampProviders(isDynamicCustomization(customization) ? customization : undefined)
-        );
+        const providerIds = getStampProviderIds(platform.platform, customStampProviders(customization));
         const possiblePoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampWeights[key] || "0") || 0), 0);
         const earnedPoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampScores[key]) || 0), 0);
         return {

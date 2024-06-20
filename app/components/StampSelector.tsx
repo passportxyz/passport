@@ -6,7 +6,6 @@ import { useOnChainData } from "../hooks/useOnChainData";
 import { CeramicContext } from "../context/ceramicContext";
 import { ScorerContext } from "../context/scorerContext";
 import { useCustomization } from "../hooks/useCustomization";
-import { isDynamicCustomization } from "../utils/customizationUtils";
 import { customSideBarGradient } from "./PlatformDetails";
 
 type StampSelectorProps = {
@@ -108,7 +107,7 @@ const useIncludedGroupsAndProviders = (specs: PlatformGroupSpec[]): Record<strin
     specs.forEach((spec) => {
       const providers = spec.providers?.map((p) => p.name) || [];
 
-      if (!isDynamicCustomization(customization) || !customization.scorer?.weights) {
+      if (!customization.scorer?.weights) {
         included[spec.platformGroup] = providers;
         return;
       }

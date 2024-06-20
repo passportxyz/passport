@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { VeraxPanel } from "../components/VeraxPanel";
 import { TestingPanel } from "../components/TestingPanel";
 import { Button } from "../components/Button";
-import { CustomizationLogoBackground, isDynamicCustomization } from "../utils/customizationUtils";
+import { CustomizationLogoBackground } from "../utils/customizationUtils";
 import { useCustomization } from "../hooks/useCustomization";
 
 type CustomDashboardPanelProps = {
@@ -64,19 +64,13 @@ export const CustomDashboardPanel = ({ logo, className, children }: CustomDashbo
 export const DynamicCustomDashboardPanel = ({ className }: { className: string }) => {
   const customization = useCustomization();
 
-  // First, check to see if the customization key is one of the built-in ones
-  switch (customization.key) {
-    case "testing":
-      return <TestingPanel className={className} />;
-    case "verax":
-      return <VeraxPanel className={className} />;
-    default:
-      if (!isDynamicCustomization(customization)) {
-        return <div></div>;
-      }
+  if (customization.key === "verax") {
+    return <VeraxPanel className={className} />;
   }
 
-  // Otherwise, it's a dynamically defined panel
+  if (customization.key === "testing") {
+    return <TestingPanel className={className} />;
+  }
 
   const { logo, body } = customization.dashboardPanel;
 
