@@ -69,7 +69,7 @@ jest.mock("axios", () => {
   };
 });
 
-const TestingComponent = ({ customizationKey }: { customizationKey: string }) => {
+const TestingComponent = ({ customizationKey }: { customizationKey?: string }) => {
   const customization = useCustomization();
   const { useCustomDashboardPanel, customizationTheme, key } = customization;
   const setCustomizationKey = useSetCustomizationKey();
@@ -100,20 +100,6 @@ describe("useCustomization", () => {
       expect(
         screen.getByText((str) => str.includes("The Avalanche Community Grant Rounds require"))
       ).toBeInTheDocument();
-    });
-  });
-
-  it("should render panel for hardcoded customization", async () => {
-    render(<TestingComponent customizationKey="testing" />);
-    await waitFor(() => {
-      expect(document.querySelector("[data-testid=customizationKey]")?.textContent).toBe("testing");
-      expect(document.querySelector("[data-testid=useCustomDashboardPanel]")?.textContent).toBe("true");
-      expect(document.querySelector("[data-testid=customizationThemeBackgroundColor1]")?.textContent).toBe(
-        "var(--color-focus)"
-      );
-      expect(document.querySelector("html")).toHaveStyle("--color-customization-background-1: var(--color-focus)");
-
-      expect(screen.getByText((str) => str.includes("Click below to enable test mode"))).toBeInTheDocument();
     });
   });
 

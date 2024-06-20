@@ -69,16 +69,14 @@ export const useSetCustomizationKey = (): ((customizationKey: string | undefined
   const setCustomizationKey = useCallback(
     async (customizationKey: string | undefined) => {
       if (customizationKey) {
-        const customizationConfig = await requestCustomizationConfig(customizationKey);
-        if (!customizationConfig) {
-          return;
+        try {
+          const customizationConfig = await requestCustomizationConfig(customizationKey);
+          customizationConfig && setCustomizationConfig(customizationConfig);
+          customizationConfig?.customizationTheme && setCustomizationTheme(customizationConfig.customizationTheme);
+        } catch (e) {
+          console.error("Failed to load customization config", e);
+          setCustomizationConfig(DEFAULT_CUSTOMIZATION);
         }
-        setCustomizationConfig(customizationConfig);
-        if (customizationConfig.customizationTheme) {
-          setCustomizationTheme(customizationConfig.customizationTheme);
-        }
-      } else {
-        setCustomizationConfig(DEFAULT_CUSTOMIZATION);
       }
     },
     [setCustomizationConfig]

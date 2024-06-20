@@ -111,47 +111,42 @@ export const buildAllowListProviders = (weights?: Record<PROVIDER_ID, string>) =
 };
 
 export const requestCustomizationConfig = async (customizationKey: string): Promise<Customization | undefined> => {
-  try {
-    const response = await axios.get(`${CUSTOMIZATION_ENDPOINT}/${customizationKey}`);
-    const customizationResponse: CustomizationResponse = response.data;
-    const allowListProviders: PlatformGroupSpec[] = buildAllowListProviders(customizationResponse.scorer?.weights);
+  const response = await axios.get(`${CUSTOMIZATION_ENDPOINT}/${customizationKey}`);
+  const customizationResponse: CustomizationResponse = response.data;
+  const allowListProviders: PlatformGroupSpec[] = buildAllowListProviders(customizationResponse.scorer?.weights);
 
-    return {
-      key: customizationKey,
-      customizationTheme: customizationResponse.customizationTheme,
-      useCustomDashboardPanel: customizationResponse.useCustomDashboardPanel || false,
-      scorer: {
-        id: customizationResponse.scorer?.id,
-        weights: customizationResponse.scorer?.weights,
+  return {
+    key: customizationKey,
+    customizationTheme: customizationResponse.customizationTheme,
+    useCustomDashboardPanel: customizationResponse.useCustomDashboardPanel || false,
+    scorer: {
+      id: customizationResponse.scorer?.id,
+      weights: customizationResponse.scorer?.weights,
+    },
+    scorerPanel: {
+      title: customizationResponse.scorerPanel?.title,
+      text: customizationResponse.scorerPanel?.text,
+    },
+    dashboardPanel: {
+      logo: {
+        image: <SanitizedHTMLComponent html={customizationResponse.dashboardPanel?.logo?.image || ""} />,
+        caption: <SanitizedHTMLComponent html={customizationResponse.dashboardPanel?.logo?.caption || ""} />,
+        background:
+          (customizationResponse.dashboardPanel?.logo?.background?.toLowerCase() as CustomizationLogoBackground) ||
+          "none",
       },
-      scorerPanel: {
-        title: customizationResponse.scorerPanel?.title,
-        text: customizationResponse.scorerPanel?.text,
-      },
-      dashboardPanel: {
-        logo: {
-          image: <SanitizedHTMLComponent html={customizationResponse.dashboardPanel?.logo?.image || ""} />,
-          caption: <SanitizedHTMLComponent html={customizationResponse.dashboardPanel?.logo?.caption || ""} />,
-          background:
-            (customizationResponse.dashboardPanel?.logo?.background?.toLowerCase() as CustomizationLogoBackground) ||
-            "none",
+      body: {
+        mainText: <SanitizedHTMLComponent html={customizationResponse.dashboardPanel?.body?.mainText || ""} />,
+        subText: <SanitizedHTMLComponent html={customizationResponse.dashboardPanel?.body?.subText || ""} />,
+        action: {
+          text: customizationResponse.dashboardPanel?.body?.action?.text || "",
+          url: sanitize(customizationResponse.dashboardPanel?.body?.action?.url || ""),
         },
-        body: {
-          mainText: <SanitizedHTMLComponent html={customizationResponse.dashboardPanel?.body?.mainText || ""} />,
-          subText: <SanitizedHTMLComponent html={customizationResponse.dashboardPanel?.body?.subText || ""} />,
-          action: {
-            text: customizationResponse.dashboardPanel?.body?.action?.text || "",
-            url: sanitize(customizationResponse.dashboardPanel?.body?.action?.url || ""),
-          },
-        },
       },
-      allowListProviders: allowListProviders.length ? allowListProviders : undefined,
-      includedChainIds: customizationResponse.includedChainIds,
-    };
-  } catch (e) {
-    console.error("Failed to fetch customization config", e);
-    return undefined;
-  }
+    },
+    allowListProviders: allowListProviders.length ? allowListProviders : undefined,
+    includedChainIds: customizationResponse.includedChainIds,
+  };
 };
 
 export const isDynamicCustomization = (config: Customization): config is Customization => {

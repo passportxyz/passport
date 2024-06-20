@@ -99,8 +99,8 @@ const ScoreRing = ({ className }: { className: string }) => {
 
 export const DashboardScorePanel = ({ className }: { className: string }) => {
   const customization = useCustomization();
-  const customTitle = customization.scorerPanel?.title || undefined;
-  const customText = customization.scorerPanel?.text || undefined;
+  const customTitle = customization?.scorerPanel?.title;
+  const customText = customization?.scorerPanel?.text;
 
   return (
     <div

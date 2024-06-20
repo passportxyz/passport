@@ -108,7 +108,7 @@ const useIncludedGroupsAndProviders = (specs: PlatformGroupSpec[]): Record<strin
     specs.forEach((spec) => {
       const providers = spec.providers?.map((p) => p.name) || [];
 
-      if (!isDynamicCustomization(customization) || !customization.scorer?.weights) {
+      if (!customization.scorer?.weights) {
         included[spec.platformGroup] = providers;
         return;
       }
