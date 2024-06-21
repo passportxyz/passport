@@ -4,20 +4,25 @@ import { useDatastoreConnectionContext } from "../context/datastoreConnectionCon
 import { useOnChainData } from "./useOnChainData";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { debug } from "console";
 
 export type Notification = {
   notification_id: string;
-  type: "Custom" | "Expiry" | "OnChainExpiry" | "Deduplication";
+  type: "custom" | "stamp_expiry" | "on_chain_expiry" | "deduplication";
   content: string;
-  dismissed: boolean;
+  is_read: boolean;
+  link: string;
+};
+
+type Notifications = {
+  items: Notification[];
 };
 
 const fetchNotifications = async (expiredChainIds?: string[], dbAccessToken?: string) => {
-  if (!dbAccessToken || !expiredChainIds) return;
   const res = await axios.post(
     `${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/passport-admin/notifications`,
     {
-      expired_chain_ids: expiredChainIds,
+      expired_chain_ids: expiredChainIds || [],
     },
     {
       headers: {
@@ -34,7 +39,7 @@ const dismissNotification = async (
   dbAccessToken?: string
 ) => {
   if (!dbAccessToken) return;
-  const res = await axios.patch(
+  const res = await axios.post(
     `${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/passport-admin/notifications/${notification_id}`,
     { dismissal_type: dismissalType },
     {
@@ -54,15 +59,15 @@ export const useDismissNotification = (notification_id: string, dismissalType: "
   return useMutation({
     mutationFn: () => dismissNotification(notification_id, dismissalType, dbAccessToken),
     onSuccess: () => {
-      const currentNotifications: Notification[] = queryClient.getQueryData(["notifications"]) || [];
+      const { items }: Notifications = queryClient.getQueryData(["notifications"]) || { items: [] };
       const updatedNotifications =
         dismissalType === "delete"
-          ? currentNotifications.filter((notification) => notification.notification_id !== notification_id)
-          : currentNotifications.map((notification) =>
-              notification.notification_id === notification_id ? { ...notification, dismissed: true } : notification
+          ? items.filter((notification) => notification.notification_id !== notification_id)
+          : items.map((notification) =>
+              notification.notification_id === notification_id ? { ...notification, is_read: true } : notification
             );
 
-      queryClient.setQueryData(["notifications"], updatedNotifications);
+      queryClient.setQueryData(["notifications"], { items: updatedNotifications });
     },
   });
 };
@@ -86,14 +91,14 @@ export const useNotifications = () => {
     setExpiredChainIds(expiredIds);
   }, [onChainData]);
 
-  const { data: notifications, error } = useQuery<Notification[], Error>({
+  const { data: notifications, error } = useQuery<Notifications, Error>({
     queryKey: ["notifications"],
     queryFn: () => fetchNotifications(expiredChainIds, dbAccessToken),
-    enabled: !!dbAccessToken && !!expiredChainIds?.length && dbAccessTokenStatus === "connected",
+    enabled: !!dbAccessToken && dbAccessTokenStatus === "connected",
   });
 
   return {
     error,
-    notifications,
+    notifications: notifications?.items || [],
   };
 };

@@ -1,32 +1,90 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useContext, useMemo } from "react";
 import { Popover, Transition } from "@headlessui/react";
 import { useNotifications, useDismissNotification, Notification } from "../hooks/useNotifications";
-import { OnchainSidebar } from "./OnchainSidebar";
+import { StampClaimForPlatform, StampClaimingContext } from "../context/stampClaimingContext";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { CeramicContext } from "../context/ceramicContext";
 
 export type NotificationProps = {
-  notification_id: string;
-  type: "Custom" | "Expiry" | "OnChainExpiry" | "Deduplication";
-  content: string;
-  dismissed: boolean;
+  notification: Notification;
 } & {
   setShowSidebar: (show: boolean) => void;
 };
 
-const Content = ({ type, content }: NotificationProps) => {
+const ExpiryAction = ({
+  content,
+  provider,
+  notification_id,
+}: {
+  content: string;
+  provider: PROVIDER_ID;
+  notification_id: string;
+}) => {
+  const { claimCredentials } = useContext(StampClaimingContext);
+  const { expiredPlatforms } = useContext(CeramicContext);
+
+  const platformId = Object.values(expiredPlatforms)
+    .filter((platform) => {
+      const providers = platform.platFormGroupSpec
+        .map((spec) => spec.providers.map((provider) => provider.name))
+        .flat();
+
+      return providers.includes(provider);
+    })
+    .map((platform) => platform.platform.platformId)[0];
+
+  const deleteMutation = useDismissNotification(notification_id, "delete");
+
+  const refreshStamp = async (stamp: StampClaimForPlatform) => {
+    await claimCredentials(async () => await Promise.resolve(), [stamp]);
+    deleteMutation.mutate();
+  };
+
+  const message = useMemo(() => {
+    const claim: StampClaimForPlatform = {
+      platformId: platformId as PLATFORM_ID,
+      selectedProviders: [provider],
+    };
+
+    const parts = content.split(/(reverify)/i);
+    return parts.map((part, index) =>
+      part.toLowerCase() === "reverify" ? (
+        <div className="inline-block underline cursor-pointer" key={index} onClick={() => refreshStamp(claim)}>
+          {part}
+        </div>
+      ) : (
+        part
+      )
+    );
+  }, [platformId, provider, content, claimCredentials]);
+
+  return <>{message}</>;
+};
+
+const Content = ({ notification }: { notification: Notification }) => {
+  const { content, link, type } = notification;
   switch (type) {
-    case "Custom":
-      return <span>{content}</span>;
-    case "Expiry":
-      return <span>Your {content} stamp has expired. Please reverify to keep your Passport up to date.</span>;
-    case "OnChainExpiry":
-      return <span>Your on-chain Passport on {content} has expired. Update now to maintain your active status.</span>;
-    case "Deduplication":
+    case "custom":
       return (
         <span>
-          {/* TODO: content might need to be an object/array? */}
-          You have claimed the same {content} stamp in two Passports. We only count your stamp once. This duplicate is
-          in your wallet {content}. Learn more about deduplication{" "}
-          <a href="link-to-deduplication" target="_blank">
+          {content}. Learn more{" "}
+          <a className="underline" href={link} target="_blank">
+            here
+          </a>
+          .
+        </span>
+      );
+    case "stamp_expiry":
+      return (
+        <ExpiryAction content={content} provider={link as PROVIDER_ID} notification_id={notification.notification_id} />
+      );
+    case "on_chain_expiry":
+      return <span>{content}</span>;
+    case "deduplication":
+      return (
+        <span>
+          {content}{" "}
+          <a className="underline" href="link-to-deduplication" target="_blank">
             here
           </a>
           .
@@ -35,8 +93,9 @@ const Content = ({ type, content }: NotificationProps) => {
   }
 };
 
-const Notification: React.FC<NotificationProps> = ({ notification_id, content, type, dismissed, setShowSidebar }) => {
-  const messageClasses = `text-sm w-5/6 ${dismissed ? "text-foreground-4" : "text-foreground-2"}`;
+const NotificationComponent: React.FC<NotificationProps> = ({ notification, setShowSidebar }) => {
+  const { notification_id, content, is_read, link, type } = notification;
+  const messageClasses = `text-sm w-5/6 ${is_read ? "text-foreground-4" : "text-foreground-2"}`;
 
   const dismissMutation = useDismissNotification(notification_id, "read");
   const deleteMutation = useDismissNotification(notification_id, "delete");
@@ -45,15 +104,17 @@ const Notification: React.FC<NotificationProps> = ({ notification_id, content, t
     <>
       {/* ${index > 0 && "border-t border-foreground-5"} */}
       <div
-        className={`flex justify-start items-center p-4 relative ${type === "OnChainExpiry" && "cursor-pointer"}`}
+        className={`flex justify-start items-center p-4 relative ${type === "on_chain_expiry" && "cursor-pointer"}`}
         onClick={() => {
-          if (type === "OnChainExpiry") {
+          if (type === "on_chain_expiry") {
             setShowSidebar(true);
           }
         }}
       >
-        <span className={`p-1 mr-2 text-xs rounded-full ${dismissed ? "bg-transparent" : "bg-background-5 "}`}></span>
-        <span className={messageClasses}>{content}</span>
+        <span className={`p-1 mr-2 text-xs rounded-full ${is_read ? "bg-transparent" : "bg-background-5 "}`}></span>
+        <span className={messageClasses}>
+          <Content notification={notification} />
+        </span>
         <div className="absolute top-1 right-3 z-10">
           <Popover className="relative">
             <>
@@ -95,37 +156,11 @@ export type NotificationsProps = {
 };
 
 export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) => {
-  const { notifications: _notifications } = useNotifications();
-  const notifications = [
-    {
-      notification_id: "n1",
-      type: "Custom",
-      content: "Welcome to our service! Get started by visiting your dashboard.",
-      dismissed: false,
-    },
-    {
-      notification_id: "n2",
-      type: "Expiry",
-      content: "Your subscription is expiring soon. Renew now to keep using all features.",
-      dismissed: false,
-    },
-    {
-      notification_id: "n3",
-      type: "OnChainExpiry",
-      content: "Your on-chain credentials will expire in 3 days. Update your details to stay active.",
-      dismissed: true,
-    },
-    {
-      notification_id: "n4",
-      type: "Deduplication",
-      content: "We have detected duplicate entries in your data. Please review them.",
-      dismissed: false,
-    },
-  ];
+  const { notifications } = useNotifications();
   const hasNotifications = notifications.length > 0;
 
   return (
-    <div className="w-full flex justify-end">
+    <div className="w-full flex justify-end z-10">
       <Popover className="relative">
         <>
           <Popover.Button className="ml-auto p-6">
@@ -134,7 +169,7 @@ export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) 
                 <div
                   className={`${notifications.length > 10 ? "-right-5" : "-right-2"} absolute -top-3 rounded-full bg-background-5 px-1 border-4 border-background text-[10px] text-background leading-2`}
                 >
-                  {notifications.filter((not) => !not.dismissed).length}
+                  {notifications.filter((not) => !not.is_read).length}
                 </div>
               )}
               <img
@@ -153,22 +188,25 @@ export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) 
             leaveFrom="opacity-100 translate-y-0"
             leaveTo="opacity-0 translate-y-1"
           >
-            <Popover.Panel className="absolute w-60 right-1 flex flex-col border-foreground-5 border rounded bg-gradient-to-b from-background via-background to-[#082F2A]">
+            <Popover.Panel className="absolute w-96 md:w-72 right-1 flex flex-col border-foreground-5 border rounded bg-gradient-to-b from-background via-background to-[#082F2A]">
               <div className="w-full relative">
                 <div className="absolute top-[-6px] w-[10px] h-[10px] right-7 border-l bg-background border-b border-foreground-5 transform rotate-[135deg]"></div>
               </div>
-              {notifications
-                .sort((a, b) => (a.dismissed === b.dismissed ? 0 : a.dismissed ? 1 : -1))
-                .map((notification, index) => (
-                  <Notification
-                    key={notification.notification_id}
-                    notification_id={notification.notification_id}
-                    content={notification.content}
-                    dismissed={notification.dismissed}
-                    type={notification.type as Notification["type"]}
-                    setShowSidebar={() => setShowSidebar(true)}
-                  />
-                ))}
+              <div className="overflow-y-auto max-h-[40vh]">
+                {notifications.length > 0 ? (
+                  notifications
+                    .sort((a, b) => (a.is_read === b.is_read ? 0 : a.is_read ? 1 : -1))
+                    .map((notification) => (
+                      <NotificationComponent
+                        key={notification.notification_id}
+                        notification={notification}
+                        setShowSidebar={() => setShowSidebar(true)}
+                      />
+                    ))
+                ) : (
+                  <p className="p-2">Congrats! You have no notifications.</p>
+                )}
+              </div>
             </Popover.Panel>
           </Transition>
         </>
