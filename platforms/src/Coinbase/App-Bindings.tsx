@@ -41,7 +41,20 @@ export class CoinbasePlatform extends Platform {
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     const address = appContext.userDid.split(":")[4].toLowerCase();
-    const hasAttestation = await verifyCoinbaseAttestation(address);
+
+    let hasAttestation = false;
+
+    try {
+      hasAttestation = await verifyCoinbaseAttestation(address);
+    } catch (e) {
+      console.error("Unable to complete Coinbase attestation pre-check", e);
+
+      // There are occasional CORS issues which we can't identify the cause of
+      // currently, so if this request fails just ignore it and do the standard
+      // flow
+      hasAttestation = true;
+    }
+
     if (!hasAttestation) {
       throw new PlatformPreCheckError(
         "You need to verify your Coinbase ID onchain before you can verify your Coinbase account."
