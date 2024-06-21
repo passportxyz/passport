@@ -46,7 +46,9 @@ export class CoinbasePlatform extends Platform {
 
     try {
       hasAttestation = await verifyCoinbaseAttestation(address);
-    } catch {
+    } catch (e) {
+      console.error("Unable to complete Coinbase attestation pre-check", e);
+
       // There are occasional CORS issues which we can't identify the cause of
       // currently, so if this request fails just ignore it and do the standard
       // flow
