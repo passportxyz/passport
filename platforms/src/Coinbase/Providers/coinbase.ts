@@ -120,7 +120,7 @@ export const verifyCoinbaseAttestation = async (address: string): Promise<boolea
     query {
       attestations (where: {
           attester: { equals: "${COINBASE_ATTESTER}" },
-          recipient: { equals: "${address}" }
+          recipient: { equals: "${address}", mode: insensitive }
       }) {
         recipient
         revocationTime
