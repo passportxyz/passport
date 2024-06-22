@@ -35,12 +35,11 @@ const ExpiryAction = ({
 
   const deleteMutation = useDismissNotification(notification_id, "delete");
 
-  const refreshStamp = async (stamp: StampClaimForPlatform) => {
-    await claimCredentials(async () => await Promise.resolve(), [stamp]);
-    deleteMutation.mutate();
-  };
-
   const message = useMemo(() => {
+    const refreshStamp = async (stamp: StampClaimForPlatform) => {
+      await claimCredentials(async () => await Promise.resolve(), [stamp]);
+      deleteMutation.mutate();
+    };
     const claim: StampClaimForPlatform = {
       platformId: platformId as PLATFORM_ID,
       selectedProviders: [provider],
@@ -56,7 +55,7 @@ const ExpiryAction = ({
         part
       )
     );
-  }, [platformId, provider, content, claimCredentials]);
+  }, [platformId, provider, content, claimCredentials, deleteMutation]);
 
   return <>{message}</>;
 };
@@ -94,7 +93,7 @@ const Content = ({ notification }: { notification: Notification }) => {
 };
 
 const NotificationComponent: React.FC<NotificationProps> = ({ notification, setShowSidebar }) => {
-  const { notification_id, content, is_read, link, type } = notification;
+  const { notification_id, is_read, type } = notification;
   const messageClasses = `text-sm w-5/6 ${is_read ? "text-foreground-4" : "text-foreground-2"}`;
 
   const dismissMutation = useDismissNotification(notification_id, "read");
@@ -102,7 +101,6 @@ const NotificationComponent: React.FC<NotificationProps> = ({ notification, setS
 
   return (
     <>
-      {/* ${index > 0 && "border-t border-foreground-5"} */}
       <div
         className={`flex justify-start items-center p-4 relative ${type === "on_chain_expiry" && "cursor-pointer"}`}
         onClick={() => {
@@ -111,7 +109,10 @@ const NotificationComponent: React.FC<NotificationProps> = ({ notification, setS
           }
         }}
       >
-        <span className={`p-1 mr-2 text-xs rounded-full ${is_read ? "bg-transparent" : "bg-background-5 "}`}></span>
+        <span
+          data-testid="read-indicator"
+          className={`p-1 mr-2 text-xs rounded-full ${is_read ? "bg-transparent" : "bg-background-5 "}`}
+        ></span>
         <span className={messageClasses}>
           <Content notification={notification} />
         </span>
@@ -163,7 +164,7 @@ export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) 
     <div className="w-full flex justify-end z-10">
       <Popover className="relative">
         <>
-          <Popover.Button className="ml-auto p-6">
+          <Popover.Button className="ml-auto p-6" data-testid="notification-bell">
             <div className="relative">
               {notifications.length > 0 && (
                 <div
