@@ -17,6 +17,7 @@ const optimismChainId = "0xa";
 const zkSyncChainId = "0x144";
 const sepoliaOPChainId = "0xaa37dc";
 const arbitrumChainId = "0xa4b1";
+const scrollChainId = "0x82750";
 
 type ChainConfig = {
   id: string;
@@ -193,6 +194,21 @@ if (!TEST_MODE) {
       easScanUrl: "https://arbitrum.easscan.org",
     },
   });
+
+  if (process.env.NEXT_PUBLIC_FF_ONCHAIN_SCROLL === "on") {
+    chainConfigs.push({
+      id: scrollChainId,
+      token: "ETH",
+      label: "Scroll",
+      rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SCROLL_RPC_URL as string,
+      icon: "./assets/Scroll_Logomark.673577c8260b63ae56867bc9af6af514.svg",
+      attestationProviderConfig: {
+        name: "Ethereum Attestation Service",
+        status: usingTestEnvironment ? "disabled" : "enabled",
+        easScanUrl: "https://scroll.easscan.org",
+      },
+    });
+  }
 }
 
 export const chains: Chain[] = chainConfigs.map((config) => new Chain(config));
