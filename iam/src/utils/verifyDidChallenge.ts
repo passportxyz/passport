@@ -7,6 +7,7 @@ import * as dagCBOR from "@ipld/dag-cbor";
 import { encode } from "multiformats/block";
 import { sha256 } from "multiformats/hashes/sha2";
 import { MAX_VALID_DID_SESSION_AGE } from "@gitcoin/passport-identity";
+import { ethers } from "ethers";
 
 export class VerifyDidChallengeBaseError extends Error {}
 
@@ -30,6 +31,24 @@ class CredentialTooOldError extends VerifyDidChallengeBaseError {
     this.name = "CredentialTooOldError";
   }
 }
+
+const GITCOIN_PASSPORT_DECODER = "0x..."; // Replace with the actual contract address
+const GitcoinPassportDecoderABI = [
+  // Add the ABI for the getScore function here
+  "function getScore(address) view returns (uint256)"
+];
+
+export const checkBadgeEligibility = async (provider: ethers.providers.Provider, address: string): Promise<boolean> => {
+  const passportDecoderContract = new ethers.Contract(GITCOIN_PASSPORT_DECODER, GitcoinPassportDecoderABI, provider);
+  
+  try {
+    const score = await passportDecoderContract.getScore(address);
+    return score.gt(0); // Return true if the score is greater than 0
+  } catch (error) {
+    console.error("Error checking badge eligibility:", error);
+    return false;
+  }
+};
 
 const verifyMatchesExpectedChallenge = async (
   signedChallenge: SignedDidChallenge,
