@@ -687,3 +687,30 @@ app.use("/procedure", procedureRouter);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use("/static", express.static(path.join(__dirname, "static")));
+
+// Check Eligibility For Minting Badge
+app.get("/check", (req: Request, res: Response): void => {
+  const { badge, recipient } = req.query;
+
+  if (!badge || !recipient) {
+    return void errorRes(res, "Missing badge or recipient parameter", 400);
+  }
+
+  // TODO: Implement the actual eligibility check logic here
+  // This is a placeholder implementation
+  const isEligible = Math.random() < 0.5; // 50% chance of being eligible
+
+  if (isEligible) {
+    res.json({
+      code: 1,
+      message: "success",
+      eligibility: true
+    });
+  } else {
+    res.json({
+      code: 0,
+      message: "Recipient is not eligible for this badge",
+      eligibility: false
+    });
+  }
+});
