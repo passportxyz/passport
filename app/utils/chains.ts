@@ -8,6 +8,7 @@ import {
 
 // RPC urls
 const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL as string;
+const scroll_enabled = process.env.NEXT_PUBLIC_SCROLL_ENABLED === "on";
 
 const sepoliaChainId = "0xaa36a7";
 const hardhatChainId = "0x7a69";
@@ -200,11 +201,11 @@ if (!TEST_MODE) {
     token: "ETH",
     label: "Scroll",
     rpcUrl: "https://rpc.scroll.io",
-    icon: "./assets/scroll-logo.svg", // You may need to add this asset
+    icon: "./assets/scroll.png",
     attestationProviderConfig: {
       name: "Ethereum Attestation Service",
-      status: "enabled",
-      easScanUrl: "https://scroll.easscan.org", // This URL may need to be confirmed
+      status: scroll_enabled ? "enabled" : "disabled",
+      easScanUrl: "https://scroll.easscan.org",
     },
   });
 }
