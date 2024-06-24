@@ -26,7 +26,7 @@ import {
   EasRequestBody,
   VerifiedPayload,
 } from "@gitcoin/passport-types";
-import onchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
+import onchainInfo from "../../deployments/onchainInfo.json";
 
 import { getChallenge, verifyChallengeAndGetAddress } from "./utils/challenge.js";
 import { getEASFeeAmount } from "./utils/easFees.js";
@@ -39,7 +39,7 @@ import * as DIDKit from "@spruceid/didkit-wasm-node";
 import { issueChallengeCredential, issueHashedCredential, verifyCredential } from "@gitcoin/passport-identity";
 
 // All provider exports from platforms
-import { providers, platforms } from "@gitcoin/passport-platforms";
+import { providers, platforms, verifyAttestation } from "@gitcoin/passport-platforms";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -688,29 +688,77 @@ app.use("/procedure", procedureRouter);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use("/static", express.static(path.join(__dirname, "static")));
 
+const prom = async () => {
+  await Promise.resolve("yo");
+};
+
 // Check Eligibility For Minting Badge
-app.get("/check", (req: Request, res: Response): void => {
+app.get("/scroll/check", async (req: Request, res: Response): Promise<void> => {
   const { badge, recipient } = req.query;
 
-  if (!badge || !recipient) {
+  if (!badge || !recipient || typeof recipient !== "string" || typeof badge !== "string") {
     return void errorRes(res, "Missing badge or recipient parameter", 400);
   }
 
-  // TODO: Implement the actual eligibility check logic here
-  // This is a placeholder implementation
-  const isEligible = Math.random() < 0.5; // 50% chance of being eligible
+  const SCROLL_CHAIN_ID: keyof typeof onchainInfo = "0x82750";
+  const scoreSchema = onchainInfo[SCROLL_CHAIN_ID].easSchemas.score.uid;
 
-  if (isEligible) {
-    res.json({
+  try {
+    const result = await verifyAttestation(recipient, badge, scoreSchema);
+    if (result) {
+      return void res.json({
+        code: 1,
+        message: "success",
+        eligibility: true,
+      });
+    } else {
+      return void res.json({
+        code: 0,
+        message: "Score was not found for this recipient",
+        eligibility: false,
+      });
+    }
+  } catch (error) {
+    console.error("Error verifying attestation:", error);
+    return void errorRes(res, "Error verifying attestation", 500);
+  }
+});
+
+// Claim Badge
+app.get("/claim", async (req: Request, res: Response): Promise<void> => {
+  const { badge, recipient } = req.query;
+
+  if (!badge || !recipient || typeof recipient !== "string" || typeof badge !== "string") {
+    return void errorRes(res, "Missing badge or recipient parameter", 400);
+  }
+
+  try {
+    // Here you would implement the logic to claim the badge
+    // This is a placeholder for the actual implementation
+    const tx = {
+      hash: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      from: recipient,
+      to: badge,
+      data: "0x...", // The actual data for the transaction
+    };
+
+    return void res.json({
       code: 1,
       message: "success",
-      eligibility: true
+      tx: tx,
     });
-  } else {
-    res.json({
-      code: 0,
-      message: "Recipient is not eligible for this badge",
-      eligibility: false
-    });
+  } catch (error) {
+    console.error("Error claiming badge:", error);
+    if (error instanceof Error) {
+      return void res.json({
+        code: 0,
+        message: error.message,
+      });
+    } else {
+      return void res.json({
+        code: 0,
+        message: "An unknown error occurred",
+      });
+    }
   }
 });

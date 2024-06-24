@@ -93,62 +93,11 @@ export const verifyCoinbaseLogin = async (code: string): Promise<string | undefi
   return userResponse?.data?.data?.id;
 };
 
+import { verifyAttestation } from "../../utils/eas";
+
 const COINBASE_ATTESTER = "0x357458739F90461b99789350868CD7CF330Dd7EE";
-export const BASE_EAS_SCAN_URL = "https://base.easscan.org/graphql";
-export const VERIFIED_ACCOUNT_SCHEMA = "0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9";
-
-export type Attestation = {
-  recipient: string;
-  revocationTime: number;
-  revoked: boolean;
-  expirationTime: number;
-  schema: {
-    id: string;
-  };
-};
-
-export type EASQueryResponse = {
-  data?: {
-    data?: {
-      attestations: Attestation[];
-    };
-  };
-};
+const VERIFIED_ACCOUNT_SCHEMA = "0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9";
 
 export const verifyCoinbaseAttestation = async (address: string): Promise<boolean> => {
-  const query = `
-    query {
-      attestations (where: {
-          attester: { equals: "${COINBASE_ATTESTER}" },
-          recipient: { equals: "${address}", mode: insensitive }
-      }) {
-        recipient
-        revocationTime
-        revoked
-        expirationTime
-        schema {
-          id
-        }
-      }
-    }
-  `;
-
-  let result: EASQueryResponse;
-  try {
-    result = await axios.post(BASE_EAS_SCAN_URL, {
-      query,
-    });
-  } catch (e) {
-    handleProviderAxiosError(e, "Coinbase attestation", []);
-  }
-
-  return (
-    (result?.data?.data?.attestations || []).filter(
-      (attestation) =>
-        attestation.revoked === false &&
-        attestation.revocationTime === 0 &&
-        attestation.expirationTime === 0 &&
-        attestation.schema.id === VERIFIED_ACCOUNT_SCHEMA
-    ).length > 0
-  );
+  return verifyAttestation(address, COINBASE_ATTESTER, VERIFIED_ACCOUNT_SCHEMA);
 };

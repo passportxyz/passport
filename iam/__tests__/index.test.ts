@@ -1,7 +1,7 @@
 // ---- Testing libraries
 import request from "supertest";
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-import { PassportCache, providers } from "@gitcoin/passport-platforms";
+import { PassportCache, providers, verifyAttestation } from "@gitcoin/passport-platforms";
 import axios from "axios";
 
 // ---- Test subject
@@ -28,6 +28,8 @@ import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
 import { IAMError } from "../src/utils/scorerService";
 import { VerifyDidChallengeBaseError, verifyDidChallenge } from "../src/utils/verifyDidChallenge";
 import { getEip712Issuer } from "../src/issuers";
+
+const mockedVerifyAttestation = verifyAttestation as jest.MockedFunction<typeof verifyAttestation>;
 
 const issuer = getEip712Issuer();
 
@@ -1467,3 +1469,78 @@ describe("POST /eas/passport", () => {
 });
 
 describe("verifyTypes", () => {});
+
+describe("GET /scroll/check", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should return eligibility true when verifyAttestation returns true", async () => {
+    mockedVerifyAttestation.mockResolvedValue(true);
+
+    const response = await request(app)
+      .get("/scroll/check")
+      .query({ badge: "testBadge", recipient: "0x1234567890123456789012345678901234567890" })
+      .expect(200);
+
+    expect(response.body).toEqual({
+      code: 1,
+      message: "success",
+      eligibility: true,
+    });
+    expect(mockedVerifyAttestation).toHaveBeenCalledWith(
+      "0x1234567890123456789012345678901234567890",
+      "testBadge",
+      expect.any(String)
+    );
+  });
+
+  it("should return eligibility false when verifyAttestation returns false", async () => {
+    mockedVerifyAttestation.mockResolvedValue(false);
+
+    const response = await request(app)
+      .get("/scroll/check")
+      .query({ badge: "testBadge", recipient: "0x1234567890123456789012345678901234567890" })
+      .expect(200);
+
+    expect(response.body).toEqual({
+      code: 0,
+      message: "Score was not found for this recipient",
+      eligibility: false,
+    });
+    expect(mockedVerifyAttestation).toHaveBeenCalledWith(
+      "0x1234567890123456789012345678901234567890",
+      "testBadge",
+      expect.any(String)
+    );
+  });
+
+  it("should return 400 error when badge or recipient is missing", async () => {
+    const response = await request(app)
+      .get("/scroll/check")
+      .query({ recipient: "0x1234567890123456789012345678901234567890" })
+      .expect(400);
+
+    expect(response.body).toEqual({
+      error: "Missing badge or recipient parameter",
+    });
+  });
+
+  it("should return 500 error when verifyAttestation throws an error", async () => {
+    mockedVerifyAttestation.mockRejectedValue(new Error("Test error"));
+
+    const response = await request(app)
+      .get("/scroll/check")
+      .query({ badge: "testBadge", recipient: "0x1234567890123456789012345678901234567890" })
+      .expect(500);
+
+    expect(response.body).toEqual({
+      error: "Error verifying attestation",
+    });
+    expect(mockedVerifyAttestation).toHaveBeenCalledWith(
+      "0x1234567890123456789012345678901234567890",
+      "testBadge",
+      expect.any(String)
+    );
+  });
+});
