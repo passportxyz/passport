@@ -193,6 +193,20 @@ if (!TEST_MODE) {
       easScanUrl: "https://arbitrum.easscan.org",
     },
   });
+
+  // Add Scroll chain
+  chainConfigs.push({
+    id: "0x82750",
+    token: "ETH",
+    label: "Scroll",
+    rpcUrl: "https://rpc.scroll.io",
+    icon: "./assets/scroll-logo.svg", // You may need to add this asset
+    attestationProviderConfig: {
+      name: "Ethereum Attestation Service",
+      status: "enabled",
+      easScanUrl: "https://scroll.easscan.org", // This URL may need to be confirmed
+    },
+  });
 }
 
 export const chains: Chain[] = chainConfigs.map((config) => new Chain(config));
