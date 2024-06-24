@@ -20,6 +20,9 @@
       "address": "0x8B1A76795e3CbadD79C5410d2C4D4827D9C1503a"
     },
     "easSchemas": {
+      "namingSchema": {
+        "uid": ""
+      },
       "passport": {
         "uid": "0x7026a3d524ee3dae5859aa00cfc0f17a3dac05af70eb758b5c0a40692f1e60f3"
       },
@@ -52,6 +55,9 @@
       "address": "0xbCD1f602b87704f071034f206Fb4ed5872DAfd91"
     },
     "easSchemas": {
+      "namingSchema": {
+        "uid": ""
+      },
       "passport": {
         "uid": "0x6868093985e2c8d5d67d5cfb1785ba1618792361d395db0feffab35c8ba00782"
       },
@@ -84,6 +90,9 @@
       "address": "0x2716d65e8f41C4114182B165Bb0247EEf5F7B1D5"
     },
     "easSchemas": {
+      "namingSchema": {
+        "uid": ""
+      },
       "passport": {
         "uid": "0x463f7e91cd5a44fe22d4df4b9d6595f0d432c8f6a473eed28b0b8c6bafe4f5a0"
       },
@@ -116,6 +125,9 @@
       "address": "0xc94aBf0292Ac04AAC18C251d9C8169a8dd2BBbDC"
     },
     "easSchemas": {
+      "namingSchema": {
+        "uid": ""
+      },
       "passport": {
         "uid": "0xd7b8c4ffa4c9fd1ecb3f6db8201e916a8d7dba11f161c1b0b5ccf44ceb8e2a39"
       },
@@ -148,6 +160,9 @@
       "address": "0xF10123d11313524b1f28E154451333010C449380"
     },
     "easSchemas": {
+      "namingSchema": {
+        "uid": ""
+      },
       "passport": {
         "uid": "0xcb8249c3683aea44f288676b787359ade1bf213b1ece0e6a242ffa93dde72c6d"
       },
@@ -193,6 +208,9 @@
       "address": "0x0a774AECE542a1A819107Eb3a06E9D515C67257a"
     },
     "easSchemas": {
+      "namingSchema": {
+        "uid": ""
+      },
       "passport": {
         "uid": "0x69b9d63ff6b161097cb4930e197a722bcf423f832d4e4cd3692449d5a1e1319f"
       },
@@ -241,6 +259,9 @@
       "address": "0x90E2C4472Df225e8D31f44725B75FFaA244d5D33"
     },
     "easSchemas": {
+      "namingSchema": {
+        "uid": ""
+      },
       "passport": {
         "uid": "0x8ae6ee946bf1c936584cacc969bf7e9d0b274631c818df7e45c246051b364341"
       },
@@ -276,6 +297,9 @@
       "address": "0x1166FCDCA3B04311Ba9E2eD5ad2c660E730e1386"
     },
     "easSchemas": {
+      "namingSchema": {
+        "uid": ""
+      },
       "passport": {
         "uid": "0x71b9da9e4a2ecd8c87ad57d29ef64b9e63887d54039c97c294a6ecba8a8dfb4e"
       },
@@ -308,11 +332,84 @@
       "address": "0x23AF92Af3b5D6faAD920C3CAA4F9A3d4352D6834"
     },
     "easSchemas": {
+      "namingSchema": {
+        "uid": ""
+      },
       "passport": {
         "uid": ""
       },
       "score": {
         "uid": ""
+      }
+    }
+  },
+  "0x8274f": {
+    "description": "Scroll Sepolia",
+    "issuer": {
+      "address": "0x5f603Ed913738d9105bAf3BD981AA4750016B167"
+    },
+    "EAS": {
+      "address": "0xaEF4103A04090071165F78D45D83A0C0782c2B2a"
+    },
+    "EASSchemaRegistry": {
+      "address": "0x55D26f9ae0203EF95494AE4C170eD35f4Cf77797"
+    },
+    "GitcoinAttester": {
+      "address": "0xCc90105D4A2aa067ee768120AdA19886021dF422"
+    },
+    "GitcoinVerifier": {
+      "address": "0x16db23c4b99bbC9A6Bf55dF7a787C9AEFD261185"
+    },
+    "GitcoinResolver": {
+      "address": "0x90E2C4472Df225e8D31f44725B75FFaA244d5D33"
+    },
+    "GitcoinPassportDecoder": {
+      "address": "0x2443D22Db6d25D141A1138D80724e3Eee54FD4C2"
+    },
+    "easSchemas": {
+      "namingSchema": {
+        "uid": "0x44d562ac1d7cd77e232978687fea027ace48f719cf1d58c7888e509663bb87fc"
+      },
+      "passport": {
+        "uid": "0x8ae6ee946bf1c936584cacc969bf7e9d0b274631c818df7e45c246051b364341"
+      },
+      "score": {
+        "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
+      }
+    }
+  },
+  "0x82750": {
+    "description": "Scroll",
+    "issuer": {
+      "address": "0x804233b96cbd6d81efeb6517347177ef7bD488ED"
+    },
+    "EAS": {
+      "address": "0xC47300428b6AD2c7D03BB76D05A176058b47E6B0"
+    },
+    "EASSchemaRegistry": {
+      "address": "0xD2CDF46556543316e7D34e8eDc4624e2bB95e3B6"
+    },
+    "GitcoinAttester": {
+      "address": "0xCc90105D4A2aa067ee768120AdA19886021dF422"
+    },
+    "GitcoinVerifier": {
+      "address": "0x16db23c4b99bbC9A6Bf55dF7a787C9AEFD261185"
+    },
+    "GitcoinResolver": {
+      "address": "0x90E2C4472Df225e8D31f44725B75FFaA244d5D33"
+    },
+    "GitcoinPassportDecoder": {
+      "address": "0x8A5820030188346cC9532a1dD9FD2EF8d8F464de"
+    },
+    "easSchemas": {
+      "namingSchema": {
+        "uid": "0x44d562ac1d7cd77e232978687fea027ace48f719cf1d58c7888e509663bb87fc"
+      },
+      "passport": {
+        "uid": "0x8ae6ee946bf1c936584cacc969bf7e9d0b274631c818df7e45c246051b364341"
+      },
+      "score": {
+        "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
       }
     }
   }
