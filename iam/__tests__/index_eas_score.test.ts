@@ -77,7 +77,7 @@ const mockMultiAttestationRequestWithScore: MultiAttestationRequest[] = [
         expirationTime: NO_EXPIRATION,
         revocable: false,
         refUID: ZERO_BYTES32,
-        value: "25000000000000000",
+        value: BigInt("25000000000000000"),
       },
     ],
   },

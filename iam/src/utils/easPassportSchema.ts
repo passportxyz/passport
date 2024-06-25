@@ -153,7 +153,7 @@ export const encodeEasPassport = (credentials: VerifiableCredential[]): string =
     { name: "expirationDates", value: expirationDates, type: "uint64[]" },
     // This will be used later for decoding provider mapping for scoring and within the resolver contract
     // Currently set to zero but should be updated whenever providerBitMapInfo.json is updated
-    { name: "providerMapVersion", value: BigNumber.from(0), type: "uint16" },
+    { name: "providerMapVersion", value: 0, type: "uint16" },
   ]);
 
   return encodedData;
@@ -174,7 +174,7 @@ export const formatMultiAttestationRequestWithPassportAndScore = async (
     expirationTime: NO_EXPIRATION,
     revocable: true,
     refUID: ZERO_BYTES32,
-    value: 0,
+    value: BigInt(0),
   };
 
   const stampRequestData: AttestationRequestData[] = [
@@ -220,7 +220,7 @@ export const formatMultiAttestationRequestWithScore = async (
     expirationTime: NO_EXPIRATION,
     revocable: true,
     refUID: ZERO_BYTES32,
-    value: 0,
+    value: BigInt(0),
   };
 
   const scoreRequestData: AttestationRequestData[] = [

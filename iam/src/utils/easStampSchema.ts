@@ -63,7 +63,7 @@ export const formatMultiAttestationRequest = async (
     expirationTime: NO_EXPIRATION,
     revocable: true,
     refUID: ZERO_BYTES32,
-    value: 0,
+    value: BigInt(0),
   };
 
   const stampRequestData: AttestationRequestData[] = credentials

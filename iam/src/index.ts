@@ -23,7 +23,7 @@ import {
   EasRequestBody,
   VerifiedPayload,
 } from "@gitcoin/passport-types";
-import onchainInfo from "../../deployments/onchainInfo.json";
+import onchainInfo from "../../deployments/onchainInfo.json" with { type: "json" };
 
 import { getChallenge, verifyChallengeAndGetAddress } from "./utils/challenge.js";
 import { getEASFeeAmount } from "./utils/easFees.js";
@@ -42,8 +42,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { IAMError } from "./utils/scorerService.js";
 import { VerifyDidChallengeBaseError } from "./utils/verifyDidChallenge.js";
-import { EIP712Proxy } from "@ethereum-attestation-service/eas-sdk/dist/eip712-proxy";
-import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
+import { EIP712Proxy } from "@ethereum-attestation-service/eas-sdk/dist/eip712-proxy.js";
+import { EAS, SchemaEncoder, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -725,6 +725,7 @@ app.get("/scroll/check", async (req: Request, res: Response): Promise<void> => {
 
 // Claim Badge
 app.get("/scroll/claim", async (req: Request, res: Response): Promise<void> => {
+  // See example implementation here: https://github.com/scroll-tech/canvas-contracts/blob/master/examples/src/attest-server.js
   const { badge: badgeAddress, recipient } = req.query;
 
   if (!recipient || typeof recipient !== "string")
@@ -733,7 +734,7 @@ app.get("/scroll/claim", async (req: Request, res: Response): Promise<void> => {
 
   const eligibility = true; // Check scorer
   if (!eligibility) return void res.json({ code: 0, message: "not eligible" });
-  if (typeof badgeAddress !== "string") return void res.json({ code: 0, message: "invalid parameter \"badge\"" });
+  if (typeof badgeAddress !== "string") return void res.json({ code: 0, message: "invalid parameter 'badge'" });
 
   const proxy = new EIP712Proxy(badgeAddress);
 
@@ -751,37 +752,43 @@ app.get("/scroll/claim", async (req: Request, res: Response): Promise<void> => {
   // claimer vs attester?
   // const claimer = (new ethers.Wallet(process.env.CLAIMER_PRIVATE_KEY)).connect(provider);
   const delegatedProxy = await proxy.connect(signer).getDelegated();
-  const signature = await delegatedProxy.signDelegatedProxyAttestation(
-    {
-      schema: process.env.SCROLL_BADGE_SCHEMA_UID,
-      recipient,
-      data,
-      revocable: true,
-      refUID: "0x",
-      expirationTime: 0,
-      deadline,
-    },
-    signer
-  );
+  const attestation = {
+    // attestation data
+    schema: process.env.SCROLL_BADGE_SCHEMA_UID,
+    recipient,
+    data,
+
+    // unused fields
+    revocable: true,
+    refUID: ZERO_BYTES32,
+    value: BigInt(0),
+    expirationTime: NO_EXPIRATION,
+
+    // signature details
+    deadline,
+    attester: signer.address,
+  };
+  const signature = await delegatedProxy.signDelegatedProxyAttestation(attestation, signer);
 
   // claimer vs attester
-  // const req = {
-  //   schema: attestation.schema,
-  //   data: attestation,
-  //   attester: attestation.attester,
-  //   signature: signature.signature,
-  //   deadline: attestation.deadline,
-  // }
+  const attestByDelegationInput = {
+    schema: attestation.schema,
+    data: attestation,
+    attester: attestation.attester,
+    signature: signature.signature,
+    deadline: attestation.deadline,
+  };
   // const res = await attesterProxy.connect(claimer).attestByDelegationProxy(badge);
-  proxy.connect(signer).attestByDelegationProxy(
-    {
-        schema: process.env.SCROLL_BADGE_SCHEMA_UID,,
-        data,
-        attester: attestation.attester,
-        signature: signature.signature,
-        deadline: attestation.deadline,
-      }
-  )
+  // proxy.connect(signer).attestByDelegationProxy(
+  //   {
+  //       schema: process.env.SCROLL_BADGE_SCHEMA_UID,
+  //       data,
+  //       attester: attestation.attester,
+  //       signature: signature.signature,
+  //       deadline: attestation.deadline,
+  //     }
+  // )
 
-  return void res.json({ code: 1, message: "success" });
+  const tx = await proxy.contract.populateTransaction.attestByDelegation(attestByDelegationInput);
+  res.json({ code: 1, message: "success", tx });
 });
