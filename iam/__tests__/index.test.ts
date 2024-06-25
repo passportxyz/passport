@@ -3,6 +3,7 @@ import request from "supertest";
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 // import { PassportCache, providers, verifyAttestation } from "@gitcoin/passport-platforms";
 import * as mockedPlatformModule from "@gitcoin/passport-platforms";
+import type { ethers } from "ethers";
 
 const { PassportCache, providers } = mockedPlatformModule;
 import axios from "axios";
@@ -23,7 +24,7 @@ import {
 
 import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 
-import { utils } from "ethers";
+import { parseEther, Signature } from "ethers";
 import * as easFeesMock from "../src/utils/easFees";
 import * as identityMock from "@gitcoin/passport-identity";
 import * as easSchemaMock from "../src/utils/easStampSchema";
@@ -34,14 +35,19 @@ import { getEip712Issuer } from "../src/issuers";
 
 const issuer = getEip712Issuer();
 
-jest.mock("../src/utils/verifyDidChallenge", () => ({
-  verifyDidChallenge: jest.fn().mockImplementation(() => "0x0"),
-  VerifyDidChallengeBaseError: jest.requireActual("../src/utils/verifyDidChallenge").VerifyDidChallengeBaseError,
-}));
+jest.mock("../src/utils/verifyDidChallenge", () => {
+  const verification = jest.requireActual<typeof import("../src/utils/verifyDidChallenge")>(
+    "../src/utils/verifyDidChallenge"
+  );
+  return {
+    ...verification,
+    verifyDidChallenge: jest.fn().mockImplementation(() => "0x0"),
+  };
+});
 
 jest.mock("../src/index", () => {
   // Require the actual module
-  const actualModule = jest.requireActual("../src/index");
+  const actualModule = jest.requireActual<typeof import("../src/index")>("../src/index");
   return {
     ...actualModule, // Spread all original functions and attributes
     validIssuers: new Set([]),
@@ -49,24 +55,19 @@ jest.mock("../src/index", () => {
 });
 
 jest.mock("ethers", () => {
-  const originalModule = jest.requireActual("ethers");
-  const ethers = originalModule.ethers;
-  const utils = originalModule.utils;
+  const ethers = jest.requireActual<typeof import("ethers")>("ethers");
 
   return {
-    utils: {
-      ...utils,
-      getAddress: jest.fn().mockImplementation(() => {
-        return "0x0";
-      }),
-      verifyMessage: jest.fn().mockImplementation(() => {
-        return "string";
-      }),
-      splitSignature: jest.fn().mockImplementation(() => {
-        return { v: 0, r: "r", s: "s" };
-      }),
-    },
-    ethers,
+    ...ethers,
+    getAddress: jest.fn().mockImplementation(() => {
+      return "0x0";
+    }),
+    verifyMessage: jest.fn().mockImplementation(() => {
+      return "string";
+    }),
+    splitSignature: jest.fn().mockImplementation(() => {
+      return { v: 0, r: "r", s: "s" };
+    }),
   };
 });
 
@@ -383,7 +384,7 @@ describe("POST /verify", function () {
   });
 
   it("handles valid verify requests with EIP712 signature, and ethers can validate the credential", async () => {
-    const originalEthers = jest.requireActual("ethers");
+    const originalEthers = jest.requireActual<typeof import("ethers")>("ethers");
     // challenge received from the challenge endpoint
     const eip712Key = process.env.IAM_JWK_EIP712;
     const eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
@@ -427,7 +428,7 @@ describe("POST /verify", function () {
     // Delete EIP712Domain so that ethers does not complain about the ambiguous primary type
     delete standardizedTypes.EIP712Domain;
 
-    const signerAddress = originalEthers.utils.verifyTypedData(
+    const signerAddress = originalEthers.verifyTypedData(
       domain,
       standardizedTypes,
       signedCredential,
@@ -437,7 +438,7 @@ describe("POST /verify", function () {
     const signerIssuedCredential = signerAddress.toLowerCase() === signedCredential.issuer.split(":").pop();
 
     if (signerIssuedCredential) {
-      const splitSignature = originalEthers.utils.splitSignature(signedCredential.proof.proofValue);
+      const splitSignature = Signature.from(signedCredential.proof.proofValue);
       return splitSignature;
     }
   });
@@ -1048,7 +1049,7 @@ describe("POST /eas", () => {
   beforeEach(() => {
     getEASFeeAmountSpy = jest
       .spyOn(easFeesMock, "getEASFeeAmount")
-      .mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
+      .mockReturnValue(Promise.resolve(parseEther("0.025")));
   });
 
   afterEach(() => {

@@ -17,24 +17,19 @@ jest.mock("@gitcoin/passport-identity", () => ({
 }));
 
 jest.mock("ethers", () => {
-  const originalModule = jest.requireActual("ethers");
-  const ethers = originalModule.ethers;
-  const utils = originalModule.utils;
+  const ethers = jest.requireActual<typeof import("ethers")>("ethers");
 
   return {
-    utils: {
-      ...utils,
-      getAddress: jest.fn().mockImplementation(() => {
-        return "0x0";
-      }),
-      verifyMessage: jest.fn().mockImplementation(() => {
-        return "string";
-      }),
-      splitSignature: jest.fn().mockImplementation(() => {
-        return { v: 0, r: "r", s: "s" };
-      }),
-    },
-    ethers,
+    ...ethers,
+    getAddress: jest.fn().mockImplementation(() => {
+      return "0x0";
+    }),
+    verifyMessage: jest.fn().mockImplementation(() => {
+      return "string";
+    }),
+    splitSignature: jest.fn().mockImplementation(() => {
+      return { v: 0, r: "r", s: "s" };
+    }),
   };
 });
 
@@ -134,7 +129,7 @@ describe("POST /eas/score", () => {
 
     expect(response.body.passport.multiAttestationRequest).toEqual(mockMultiAttestationRequestWithScore);
     expect(response.body.passport.nonce).toEqual(nonce);
-    expect(formatMultiAttestationRequestSpy).toBeCalled();
+    expect(formatMultiAttestationRequestSpy).toHaveBeenCalled();
   });
 
   it("handles error during the formatting of the score", async () => {

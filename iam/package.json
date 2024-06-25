@@ -28,6 +28,7 @@
     "@spruceid/didkit-wasm-node": "^0.2.1",
     "axios": "^0.27.2",
     "brightid_sdk": "^1.0.1",
+    "ceramic-cacao": "^1.4.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "ethers": "^6.13.1",
@@ -37,7 +38,8 @@
     "moralis": "^2.24.2",
     "tslint": "^6.1.3",
     "twitter-api-v2": "^1.15.1",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "multiformats": "^13.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.3",

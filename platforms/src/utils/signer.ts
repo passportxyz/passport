@@ -9,7 +9,7 @@ import * as DIDKit from "@spruceid/didkit-wasm";
 import { verifyCredential } from "@gitcoin/passport-identity";
 
 // ----- Verify signed message with ethers
-import { utils } from "ethers";
+import { getAddress, verifyMessage } from "ethers";
 
 // set the network rpc url based on env
 const RPC_URL = process.env.RPC_URL;
@@ -21,7 +21,7 @@ export const getRPCProvider = (payload: RequestPayload): StaticJsonRpcProvider =
 };
 
 // get the address associated with the signer in the payload
-export const getAddress = async ({ address, signer }: RequestPayload): Promise<string> => {
+export const getAddressFromCredential = async ({ address, signer }: RequestPayload): Promise<string> => {
   // if signer proof is provided, check validity and return associated address instead of controller
   if (signer && signer.challenge && signer.signature) {
     // test the provided credential has not been tampered with
@@ -31,7 +31,7 @@ export const getAddress = async ({ address, signer }: RequestPayload): Promise<s
     // issuers should be checked before calling this function.
     if (verified && address === signer.challenge.credentialSubject.address) {
       // which ever wallet signed this message is the wallet we want to use in provider verifications
-      return utils.getAddress(utils.verifyMessage(signer.challenge.credentialSubject.challenge, signer.signature));
+      return getAddress(verifyMessage(signer.challenge.credentialSubject.challenge, signer.signature));
     }
   }
 

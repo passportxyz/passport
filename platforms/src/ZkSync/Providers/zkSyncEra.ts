@@ -6,7 +6,7 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import axios from "axios";
 
 // ----- Credential verification
-import { getAddress } from "../../utils/signer";
+import { getAddressFromCredential } from "../../utils/signer";
 
 // This is used in the Era Explorer
 export const zkSyncEraApiEndpoint = process.env.ZKSYNC_ERA_MAINNET_ENDPOINT || "";
@@ -41,7 +41,7 @@ export class ZkSyncEraProvider implements Provider {
     const errors = [];
 
     try {
-      const address = (await getAddress(payload)).toLowerCase();
+      const address = (await getAddressFromCredential(payload)).toLowerCase();
       const requestResponse = await axios.get(
         `${zkSyncEraApiEndpoint}/transactions?address=${address}&limit=100&direction=older`
       );

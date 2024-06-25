@@ -6,7 +6,7 @@ import type { PROVIDER_ID, ProviderContext, RequestPayload, VerifiedPayload } fr
 import axios from "axios";
 
 // ----- Credential verification
-import { getAddress } from "../../utils/signer";
+import { getAddressFromCredential } from "../../utils/signer";
 
 // ----- Utils
 import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
@@ -51,7 +51,7 @@ export class NftCollectorBaseProvider extends NftBaseProvider {
   // Verify that address defined in the payload owns at least one POAP older than 15 days
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
-    const address = (await getAddress(payload)).toLowerCase();
+    const address = (await getAddressFromCredential(payload)).toLowerCase();
 
     const response = await this.queryNftStampApi(address);
     const data = response.data;

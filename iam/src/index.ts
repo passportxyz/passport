@@ -1,13 +1,11 @@
 // ---- Server
 import express, { Request } from "express";
 import { router as procedureRouter } from "@gitcoin/passport-platforms/procedure-router";
-import { TypedDataDomain } from "@ethersproject/abstract-signer";
 
 // ---- Production plugins
 import cors from "cors";
 
 // ---- Web3 packages
-import { utils, ethers, BigNumber } from "ethers";
 
 // ---- Types
 import { Response } from "express";
@@ -23,7 +21,7 @@ import {
   EasRequestBody,
   VerifiedPayload,
 } from "@gitcoin/passport-types";
-import onchainInfo from "../../deployments/onchainInfo.json" with { type: "json" };
+import onchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
 
 import { getChallenge, verifyChallengeAndGetAddress } from "./utils/challenge.js";
 import { getEASFeeAmount } from "./utils/easFees.js";
@@ -44,6 +42,7 @@ import { IAMError } from "./utils/scorerService.js";
 import { VerifyDidChallengeBaseError } from "./utils/verifyDidChallenge.js";
 import { EIP712Proxy } from "@ethereum-attestation-service/eas-sdk/dist/eip712-proxy.js";
 import { EAS, SchemaEncoder, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
+import { getAddress, verifyMessage, Wallet, TypedDataDomain, Signature } from "ethers";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -92,11 +91,11 @@ if (configErrors.length > 0) {
 
 // Wallet to use for mainnets
 // Only functional in production (set to same as testnet for non-production environments)
-const productionAttestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
+const productionAttestationSignerWallet = new Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
 // Wallet to use for testnets
-const testAttestationSignerWallet = new ethers.Wallet(process.env.TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY);
+const testAttestationSignerWallet = new Wallet(process.env.TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY);
 
-export const getAttestationSignerForChain = async (chainIdHex: keyof typeof onchainInfo): Promise<ethers.Wallet> => {
+export const getAttestationSignerForChain = async (chainIdHex: keyof typeof onchainInfo): Promise<Wallet> => {
   const productionAttestationIssuerAddress = await productionAttestationSignerWallet.getAddress();
   const chainUsesProductionIssuer =
     onchainInfo[chainIdHex].issuer.address.toLowerCase() === productionAttestationIssuerAddress.toLowerCase();
@@ -262,7 +261,7 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
   // check for a valid payload
   if (payload.address && payload.type) {
     // ensure address is check-summed
-    payload.address = utils.getAddress(payload.address);
+    payload.address = getAddress(payload.address);
     // generate a challenge for the given payload
     const challenge = getChallenge(payload);
     // if the request is valid then proceed to generate a challenge credential
@@ -427,8 +426,8 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
           const additionalSignerCredential = await verifyCredential(DIDKit, additionalChallenge);
 
           // pull the address so that its stored in a predictable (checksummed) format
-          const verifiedAddress = utils.getAddress(
-            utils.verifyMessage(additionalChallenge.credentialSubject.challenge, payload.signer.signature)
+          const verifiedAddress = getAddress(
+            verifyMessage(additionalChallenge.credentialSubject.challenge, payload.signer.signature)
           );
 
           // if verifiedAddress does not equal the additional signer address throw an error because signature is invalid
@@ -522,9 +521,9 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
         const signer = await getAttestationSignerForChain(attestationChainIdHex);
 
         signer
-          ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+          .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {
-            const { v, r, s } = utils.splitSignature(signature);
+            const { v, r, s } = Signature.from(signature);
 
             const payload: EasPayload = {
               passport: passportAttestation,
@@ -600,9 +599,9 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
         const signer = await getAttestationSignerForChain(attestationChainIdHex);
 
         signer
-          ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+          .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {
-            const { v, r, s } = utils.splitSignature(signature);
+            const { v, r, s } = Signature.from(signature);
 
             const payload: EasPayload = {
               passport: passportAttestation,
@@ -656,9 +655,9 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
       const signer = await getAttestationSignerForChain(attestationChainIdHex);
 
       signer
-        ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+        .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
         .then((signature) => {
-          const { v, r, s } = utils.splitSignature(signature);
+          const { v, r, s } = Signature.from(signature);
 
           const payload: EasPayload = {
             passport: passportAttestation,
@@ -765,7 +764,7 @@ app.get("/scroll/claim", async (req: Request, res: Response): Promise<void> => {
     expirationTime: NO_EXPIRATION,
 
     // signature details
-    deadline,
+    deadline: BigInt(deadline),
     attester: signer.address,
   };
   const signature = await delegatedProxy.signDelegatedProxyAttestation(attestation, signer);
@@ -789,6 +788,7 @@ app.get("/scroll/claim", async (req: Request, res: Response): Promise<void> => {
   //     }
   // )
 
-  const tx = await proxy.contract.populateTransaction.attestByDelegation(attestByDelegationInput);
+  const tx = await proxy.contract.attestByDelegation.populateTransaction(attestByDelegationInput);
+  // const tx = await proxy.contract.populateTransaction.attestByDelegation(attestByDelegationInput);
   res.json({ code: 1, message: "success", tx });
 });
