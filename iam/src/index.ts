@@ -1,6 +1,3 @@
-// import { EnsProvider } from './providers/ens';
-// Should this file be an app factory? If it was, we could move the provider config to main.ts and test in isolation
-
 // ---- Server
 import express, { Request } from "express";
 import { router as procedureRouter } from "@gitcoin/passport-platforms/procedure-router";
@@ -10,7 +7,7 @@ import { TypedDataDomain } from "@ethersproject/abstract-signer";
 import cors from "cors";
 
 // ---- Web3 packages
-import { utils, ethers } from "ethers";
+import { utils, ethers, BigNumber } from "ethers";
 
 // ---- Types
 import { Response } from "express";
@@ -45,6 +42,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { IAMError } from "./utils/scorerService.js";
 import { VerifyDidChallengeBaseError } from "./utils/verifyDidChallenge.js";
+import { EIP712Proxy } from "@ethereum-attestation-service/eas-sdk/dist/eip712-proxy";
+import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -97,7 +96,7 @@ const productionAttestationSignerWallet = new ethers.Wallet(process.env.ATTESTAT
 // Wallet to use for testnets
 const testAttestationSignerWallet = new ethers.Wallet(process.env.TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY);
 
-const getAttestationSignerForChain = async (chainIdHex: keyof typeof onchainInfo): Promise<ethers.Wallet> => {
+export const getAttestationSignerForChain = async (chainIdHex: keyof typeof onchainInfo): Promise<ethers.Wallet> => {
   const productionAttestationIssuerAddress = await productionAttestationSignerWallet.getAddress();
   const chainUsesProductionIssuer =
     onchainInfo[chainIdHex].issuer.address.toLowerCase() === productionAttestationIssuerAddress.toLowerCase();
@@ -725,40 +724,64 @@ app.get("/scroll/check", async (req: Request, res: Response): Promise<void> => {
 });
 
 // Claim Badge
-app.get("/claim", async (req: Request, res: Response): Promise<void> => {
-  const { badge, recipient } = req.query;
+app.get("/scroll/claim", async (req: Request, res: Response): Promise<void> => {
+  const { badge: badgeAddress, recipient } = req.query;
 
-  if (!badge || !recipient || typeof recipient !== "string" || typeof badge !== "string") {
-    return void errorRes(res, "Missing badge or recipient parameter", 400);
-  }
+  if (!recipient || typeof recipient !== "string")
+    return void res.json({ code: 0, message: "missing query parameter 'recipient'" });
+  if (!badgeAddress) return void res.json({ code: 0, message: "missing parameter 'badge'" });
 
-  try {
-    // Here you would implement the logic to claim the badge
-    // This is a placeholder for the actual implementation
-    const tx = {
-      hash: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-      from: recipient,
-      to: badge,
-      data: "0x...", // The actual data for the transaction
-    };
+  const eligibility = true; // Check scorer
+  if (!eligibility) return void res.json({ code: 0, message: "not eligible" });
+  if (typeof badgeAddress !== "string") return void res.json({ code: 0, message: "invalid parameter \"badge\"" });
 
-    return void res.json({
-      code: 1,
-      message: "success",
-      tx: tx,
-    });
-  } catch (error) {
-    console.error("Error claiming badge:", error);
-    if (error instanceof Error) {
-      return void res.json({
-        code: 0,
-        message: error.message,
-      });
-    } else {
-      return void res.json({
-        code: 0,
-        message: "An unknown error occurred",
-      });
-    }
-  }
+  const proxy = new EIP712Proxy(badgeAddress);
+
+  const encoder = new SchemaEncoder(process.env.SCROLL_BADGE_SCHEMA);
+  const data = encoder.encodeData([
+    { name: "badge", value: badgeAddress, type: "address" },
+    { name: "payload", value: "0x", type: "bytes" },
+  ]);
+
+  const currentTime = Math.floor(new Date().getTime() / 1000);
+  const deadline = currentTime + 3600;
+
+  const SCROLL_CHAIN_ID: keyof typeof onchainInfo = "0x82750";
+  const signer = await getAttestationSignerForChain(SCROLL_CHAIN_ID);
+  // claimer vs attester?
+  // const claimer = (new ethers.Wallet(process.env.CLAIMER_PRIVATE_KEY)).connect(provider);
+  const delegatedProxy = await proxy.connect(signer).getDelegated();
+  const signature = await delegatedProxy.signDelegatedProxyAttestation(
+    {
+      schema: process.env.SCROLL_BADGE_SCHEMA_UID,
+      recipient,
+      data,
+      revocable: true,
+      refUID: "0x",
+      expirationTime: 0,
+      deadline,
+    },
+    signer
+  );
+
+  // claimer vs attester
+  // const req = {
+  //   schema: attestation.schema,
+  //   data: attestation,
+  //   attester: attestation.attester,
+  //   signature: signature.signature,
+  //   deadline: attestation.deadline,
+  // }
+  // const res = await attesterProxy.connect(claimer).attestByDelegationProxy(badge);
+  proxy.connect(signer).attestByDelegationProxy(
+    {
+        schema: process.env.SCROLL_BADGE_SCHEMA_UID,,
+        data,
+        attester: attestation.attester,
+        signature: signature.signature,
+        deadline: attestation.deadline,
+      }
+  )
+
+  return void res.json({ code: 1, message: "success" });
 });

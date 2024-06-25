@@ -95,8 +95,8 @@ export const verifyCoinbaseLogin = async (code: string): Promise<string | undefi
 
 import { verifyAttestation } from "../../utils/eas";
 
-const COINBASE_ATTESTER = "0x357458739F90461b99789350868CD7CF330Dd7EE";
-const VERIFIED_ACCOUNT_SCHEMA = "0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9";
+export const COINBASE_ATTESTER = "0x357458739F90461b99789350868CD7CF330Dd7EE";
+export const VERIFIED_ACCOUNT_SCHEMA = "0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9";
 
 export const verifyCoinbaseAttestation = async (address: string): Promise<boolean> => {
   return verifyAttestation(address, COINBASE_ATTESTER, VERIFIED_ACCOUNT_SCHEMA);
