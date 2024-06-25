@@ -11,7 +11,8 @@ export type Notification = {
   type: "custom" | "stamp_expiry" | "on_chain_expiry" | "deduplication";
   content: string;
   is_read: boolean;
-  link: string;
+  link: string | undefined;
+  link_text: string | undefined;
 };
 
 type Notifications = {

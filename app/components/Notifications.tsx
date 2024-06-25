@@ -61,16 +61,20 @@ const ExpiryAction = ({
 };
 
 const Content = ({ notification }: { notification: Notification }) => {
-  const { content, link, type } = notification;
+  const { content, link, type, link_text } = notification;
+  console.log("link", link, "link_text", link_text);
+  const linkSpan =
+    link && link_text ? (
+      <a className="underline" href={link} target="_blank">
+        {link_text}.
+      </a>
+    ) : null;
+  console.log("linkSpan", linkSpan);
   switch (type) {
     case "custom":
       return (
         <span>
-          {content}. Learn more{" "}
-          <a className="underline" href={link} target="_blank">
-            here
-          </a>
-          .
+          {content} {linkSpan}
         </span>
       );
     case "stamp_expiry":
@@ -78,15 +82,17 @@ const Content = ({ notification }: { notification: Notification }) => {
         <ExpiryAction content={content} provider={link as PROVIDER_ID} notification_id={notification.notification_id} />
       );
     case "on_chain_expiry":
-      return <span>{content}</span>;
+      return (
+        <span>
+          {content}
+          {linkSpan}
+        </span>
+      );
     case "deduplication":
       return (
         <span>
-          {content}{" "}
-          <a className="underline" href="link-to-deduplication" target="_blank">
-            here
-          </a>
-          .
+          {content}
+          {linkSpan}
         </span>
       );
   }
@@ -159,7 +165,7 @@ export type NotificationsProps = {
 export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) => {
   const { notifications } = useNotifications();
   const hasNotifications = notifications.length > 0;
-
+  console.log("notifications", notifications);
   return (
     <div className="w-full flex justify-end z-10">
       <Popover className="relative">
