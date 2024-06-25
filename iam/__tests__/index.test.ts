@@ -30,20 +30,16 @@ import * as identityMock from "@gitcoin/passport-identity";
 import * as easSchemaMock from "../src/utils/easStampSchema";
 import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
 import { IAMError } from "../src/utils/scorerService";
-import { VerifyDidChallengeBaseError, verifyDidChallenge } from "../src/utils/verifyDidChallenge";
+import { VerifyDidChallengeBaseError } from "../src/utils/verifyDidChallenge";
+import { verifyDidChallenge } from "../src/utils/verifyDidChallenge";
 import { getEip712Issuer } from "../src/issuers";
 
 const issuer = getEip712Issuer();
 
-jest.mock("../src/utils/verifyDidChallenge", () => {
-  const verification = jest.requireActual<typeof import("../src/utils/verifyDidChallenge")>(
-    "../src/utils/verifyDidChallenge"
-  );
-  return {
-    ...verification,
-    verifyDidChallenge: jest.fn().mockImplementation(() => "0x0"),
-  };
-});
+jest.mock("../src/utils/verifyDidChallenge", () => ({
+  verifyDidChallenge: jest.fn().mockImplementation(() => "0x0"),
+  VerifyDidChallengeBaseError: class VerifyDidChallengeBaseError extends Error {},
+}));
 
 jest.mock("../src/index", () => {
   // Require the actual module
@@ -1017,10 +1013,10 @@ const mockMultiAttestationRequestWithPassportAndScore: MultiAttestationRequest[]
           score: 23.45,
           scorer_id: 123,
         }),
-        expirationTime: NO_EXPIRATION,
+        expirationTime: NO_EXPIRATION.toString(),
         revocable: false,
         refUID: ZERO_BYTES32,
-        value: BigInt("25000000000000000"),
+        value: "25000000000000000",
       },
     ],
   },
@@ -1033,10 +1029,10 @@ const mockMultiAttestationRequestWithPassportAndScore: MultiAttestationRequest[]
           score: 23.45,
           scorer_id: 123,
         }),
-        expirationTime: NO_EXPIRATION,
+        expirationTime: NO_EXPIRATION.toString(),
         revocable: true,
         refUID: ZERO_BYTES32,
-        value: BigInt("25000000000000000"),
+        value: "25000000000000000",
       },
     ],
   },

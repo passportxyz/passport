@@ -74,13 +74,14 @@ const getOnChainDataForChain = async ({
       passportAttestationData.passport
     );
 
+    console.log({ onChainProviderInfo, hashes, issuanceDates, expirationDates })
     providers = onChainProviderInfo
       .sort((a, b) => a.providerNumber - b.providerNumber)
       .map((providerInfo, index) => ({
         providerName: providerInfo.providerName,
         credentialHash: `v0.0.0:${Buffer.from(hashes[index].slice(2), "hex").toString("base64")}`,
-        expirationDate: new Date(expirationDates[index].toNumber() * 1000),
-        issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
+        expirationDate: new Date(Number(expirationDates[index]) * 1000),
+        issuanceDate: new Date(Number(issuanceDates[index]) * 1000),
       }));
 
     ({ score, expirationDate } = decodeScoreAttestation(passportAttestationData.score));

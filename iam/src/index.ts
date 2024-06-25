@@ -41,7 +41,12 @@ import { fileURLToPath } from "url";
 import { IAMError } from "./utils/scorerService.js";
 import { VerifyDidChallengeBaseError } from "./utils/verifyDidChallenge.js";
 import { EIP712Proxy } from "@ethereum-attestation-service/eas-sdk/dist/eip712-proxy.js";
-import { EAS, SchemaEncoder, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
+import {
+  SchemaEncoder,
+  ZERO_BYTES32,
+  NO_EXPIRATION,
+  AttestationRequestData,
+} from "@ethereum-attestation-service/eas-sdk";
 import { getAddress, verifyMessage, Wallet, TypedDataDomain, Signature } from "ethers";
 
 // ---- Config - check for all required env variables
@@ -588,8 +593,16 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
         );
 
         const fee = await getEASFeeAmount(2);
+
         const passportAttestation: PassportAttestation = {
-          multiAttestationRequest,
+          multiAttestationRequest: multiAttestationRequest.map((request) => ({
+            ...request,
+            data: request.data.map((data) => ({
+              ...data,
+              value: data.value.toString(),
+              expirationTime: data.expirationTime.toString(),
+            })) as unknown as AttestationRequestData[],
+          })),
           nonce: Number(nonce),
           fee: fee.toString(),
         };
@@ -611,7 +624,8 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
 
             return void res.json(payload);
           })
-          .catch(() => {
+          .catch((e) => {
+            console.error("Error signing score", e);
             return void errorRes(res, "Error signing passport", 500);
           });
       })
@@ -645,7 +659,14 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
 
       const fee = await getEASFeeAmount(2);
       const passportAttestation: PassportAttestation = {
-        multiAttestationRequest,
+        multiAttestationRequest: multiAttestationRequest.map((request) => ({
+          ...request,
+          data: request.data.map((data) => ({
+            ...data,
+            value: data.value.toString(),
+            expirationTime: data.expirationTime.toString(),
+          })) as unknown as AttestationRequestData[],
+        })),
         nonce: Number(nonce),
         fee: fee.toString(),
       };
@@ -653,7 +674,6 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
       const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
 
       const signer = await getAttestationSignerForChain(attestationChainIdHex);
-
       signer
         .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
         .then((signature) => {
@@ -667,7 +687,7 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
 
           return void res.json(payload);
         })
-        .catch(() => {
+        .catch((e) => {
           return void errorRes(res, "Error signing score", 500);
         });
     } catch (error) {

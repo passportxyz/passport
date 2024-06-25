@@ -12,6 +12,10 @@ import * as easSchemaMock from "../src/utils/easStampSchema";
 import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
 import { IAMError } from "../src/utils/scorerService";
 
+jest.mock("../src/utils/verifyDidChallenge", () => ({
+  verifyDidChallenge: jest.fn(),
+}));
+
 jest.mock("@gitcoin/passport-identity", () => ({
   ...jest.requireActual("@gitcoin/passport-identity"),
 }));
@@ -69,10 +73,10 @@ const mockMultiAttestationRequestWithScore: MultiAttestationRequest[] = [
           score: 23.45,
           scorer_id: 123,
         }),
-        expirationTime: NO_EXPIRATION,
+        expirationTime: NO_EXPIRATION.toString(),
         revocable: false,
         refUID: ZERO_BYTES32,
-        value: BigInt("25000000000000000"),
+        value: "25000000000000000",
       },
     ],
   },

@@ -49,8 +49,11 @@ const mockGetSigner = jest.fn().mockImplementation(() => {
 
 // Mock the ethers.BrowserProvider class
 jest.mock("ethers", () => {
+  const ethers = jest.requireActual<typeof import("ethers")>("ethers");
   return {
+    ...ethers,
     ethers: {
+      
       BrowserProvider: jest.fn().mockImplementation(() => {
         return { getSigner: mockGetSigner };
       }),

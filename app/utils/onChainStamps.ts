@@ -67,8 +67,8 @@ export async function getAttestationData(
 export async function decodeProviderInformation(attestation: Attestation): Promise<{
   onChainProviderInfo: DecodedProviderInfo[];
   hashes: string[];
-  issuanceDates: BigNumber[];
-  expirationDates: BigNumber[];
+  issuanceDates: bigint[];
+  expirationDates: bigint[];
 }> {
   if (attestation.data === "0x") {
     return {
@@ -96,9 +96,9 @@ export async function decodeProviderInformation(attestation: Attestation): Promi
     providerNumber: number;
   };
 
-  const providers = decodedData.find((data) => data.name === "providers")?.value.value as BigNumber[];
-  const issuanceDates = decodedData.find((data) => data.name === "issuanceDates")?.value.value as BigNumber[];
-  const expirationDates = decodedData.find((data) => data.name === "expirationDates")?.value.value as BigNumber[];
+  const providers = decodedData.find((data) => data.name === "providers")?.value.value as bigint[];
+  const issuanceDates = decodedData.find((data) => data.name === "issuanceDates")?.value.value as bigint[];
+  const expirationDates = decodedData.find((data) => data.name === "expirationDates")?.value.value as bigint[];
   const hashes = decodedData.find((data) => data.name === "hashes")?.value.value as string[];
 
   const onChainProviderInfo: DecodedProviderInfo[] = providerBitMapInfo.data
@@ -127,9 +127,10 @@ export function decodeScoreAttestation(attestation: Attestation): DecodedScoreAt
   const schemaEncoder = new SchemaEncoder("uint256 score,uint32 scorer_id,uint8 score_decimals");
   const decodedData = schemaEncoder.decodeData(attestation.data);
 
-  const score_as_integer = (decodedData.find(({ name }) => name === "score")?.value.value as BigNumber)._hex;
-  const score_decimals = decodedData.find(({ name }) => name === "score_decimals")?.value.value as number;
+  const score_as_integer = decodedData.find(({ name }) => name === "score")?.value.value as bigint;
+  const score_decimals = decodedData.find(({ name }) => name === "score_decimals")?.value.value as bigint;
 
+  console.log({ score_as_integer, score_decimals })
   const score = parseFloat(formatUnits(score_as_integer, score_decimals));
   const issuanceDate = new Date(BigNumber.from(attestation.time).mul(1000).toNumber()) || undefined;
   const expirationDate = issuanceDate ? new Date(issuanceDate.getTime() + SCORE_MAX_AGE_MILLISECONDS) : undefined;
