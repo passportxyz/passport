@@ -4,10 +4,10 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
-import { utils } from "ethers";
+import { getAddress } from "ethers";
 
 // ----- Credential verification
-import { getAddress } from "../../utils/signer";
+import { getAddressFromCredential } from "../../utils/signer";
 
 // ----- Utils
 import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
@@ -40,7 +40,7 @@ export class GnosisSafeProvider implements Provider {
       const errors = [];
 
       // Get the address. Note: this is expected to be a checksumed address (this is what the gnosis safe API expects)
-      const address = utils.getAddress(await getAddress(payload));
+      const address = getAddress(await getAddressFromCredential(payload));
 
       // Check if address is owner of at least 1 safe
       try {

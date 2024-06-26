@@ -12,7 +12,7 @@ const getGuildClient = () => {
   return guildClient;
 };
 
-import { getAddress } from "../../utils/signer";
+import { getAddressFromCredential } from "../../utils/signer";
 
 type GuildMembership = {
   guildId: number;
@@ -74,7 +74,7 @@ export class GuildAdminProvider implements Provider {
     let record = undefined,
       valid = false;
     const errors: string[] = [];
-    const address = await getAddress(payload);
+    const address = await getAddressFromCredential(payload);
 
     try {
       const memberships = await getGuildMemberships(address);
@@ -121,7 +121,7 @@ export class GuildPassportMemberProvider implements Provider {
     let valid = false;
 
     let record = undefined;
-    const address = await getAddress(payload);
+    const address = await getAddressFromCredential(payload);
 
     try {
       const memberships = await getGuildMemberships(address);
