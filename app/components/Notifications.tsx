@@ -107,19 +107,19 @@ const NotificationComponent: React.FC<NotificationProps> = ({ notification, setS
 
   return (
     <>
-      <div
-        className={`flex justify-start items-center p-4 relative ${type === "on_chain_expiry" && "cursor-pointer"}`}
-        onClick={() => {
-          if (type === "on_chain_expiry") {
-            setShowSidebar(true);
-          }
-        }}
-      >
+      <div className={`flex justify-start items-center p-4 relative ${type === "on_chain_expiry" && "cursor-pointer"}`}>
         <span
           data-testid="read-indicator"
           className={`p-1 mr-2 text-xs rounded-full ${is_read ? "bg-transparent" : "bg-background-5 "}`}
         ></span>
-        <span className={messageClasses}>
+        <span
+          className={messageClasses}
+          onClick={() => {
+            if (type === "on_chain_expiry") {
+              setShowSidebar(true);
+            }
+          }}
+        >
           <Content notification={notification} />
         </span>
         <div className="absolute top-1 right-3 z-10">

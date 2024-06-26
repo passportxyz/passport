@@ -3,6 +3,7 @@ import React, { useMemo } from "react";
 import { AccountCenter } from "./AccountCenter";
 import { Notifications } from "./Notifications";
 import { OnchainSidebar } from "./OnchainSidebar";
+import { useOneClickVerification } from "../hooks/useOneClickVerification";
 
 type MinimalHeaderProps = {
   className?: string;
@@ -20,6 +21,7 @@ const getAssets = () => {
 const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
   const assets = useMemo(() => getAssets(), []);
   const [showSidebar, setShowSidebar] = React.useState(false);
+  const { verificationState } = useOneClickVerification();
 
   return (
     <>
@@ -35,7 +37,8 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
         <div className="flex-1">
           <AccountCenter />
         </div>
-        <Notifications setShowSidebar={() => setShowSidebar(true)} />
+        {verificationState.error !== undefined ||
+          (verificationState.success && <Notifications setShowSidebar={() => setShowSidebar(true)} />)}
       </div>
     </>
   );

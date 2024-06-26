@@ -103,5 +103,5 @@ export const useOneClickVerification = () => {
     }
   };
 
-  return { initiateVerification };
+  return { initiateVerification, verificationState };
 };

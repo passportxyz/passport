@@ -5,6 +5,7 @@ import { useOnChainData } from "./useOnChainData";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { debug } from "console";
+import { chains } from "../utils/chains";
 
 export type Notification = {
   notification_id: string;
@@ -19,11 +20,16 @@ type Notifications = {
   items: Notification[];
 };
 
-const fetchNotifications = async (expiredChainIds?: string[], dbAccessToken?: string) => {
+type ExpiredChain = {
+  id: string;
+  name: string;
+};
+
+const fetchNotifications = async (expiredChains?: ExpiredChain[], dbAccessToken?: string) => {
   const res = await axios.post(
     `${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/passport-admin/notifications`,
     {
-      expired_chain_ids: expiredChainIds || [],
+      expired_chain_ids: expiredChains || [],
     },
     {
       headers: {
@@ -77,25 +83,26 @@ export const useNotifications = () => {
   const { dbAccessTokenStatus, dbAccessToken } = useDatastoreConnectionContext();
   const { data: onChainData } = useOnChainData();
 
-  const [expiredChainIds, setExpiredChainIds] = useState<string[] | undefined>();
+  const [expiredChains, setExpiredChains] = useState<ExpiredChain[] | undefined>();
 
   useEffect(() => {
-    if (!onChainData || !onChainData.data) return;
-    const expiredIds = Object.keys(onChainData).reduce<string[]>((acc, chainId) => {
+    if (!onChainData) return;
+    const expiredChains = Object.keys(onChainData).reduce<ExpiredChain[]>((acc, chainId) => {
       const data = onChainData[chainId];
       if (data?.expirationDate && data.expirationDate.getTime() < new Date().getTime()) {
-        acc.push(chainId);
+        const name = chains.find((chain) => chain.id === chainId)?.label || "";
+        acc.push({ id: chainId, name });
       }
       return acc;
     }, []);
 
-    setExpiredChainIds(expiredIds);
+    setExpiredChains(expiredChains);
   }, [onChainData]);
 
   const { data: notifications, error } = useQuery<Notifications, Error>({
     queryKey: ["notifications"],
-    queryFn: () => fetchNotifications(expiredChainIds, dbAccessToken),
-    enabled: !!dbAccessToken && dbAccessTokenStatus === "connected",
+    queryFn: () => fetchNotifications(expiredChains, dbAccessToken),
+    enabled: !!dbAccessToken && dbAccessTokenStatus === "connected" && expiredChains !== undefined,
   });
 
   return {
