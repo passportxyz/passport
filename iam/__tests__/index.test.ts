@@ -1501,7 +1501,7 @@ describe("GET /scroll/check", () => {
 
     expect(response.body).toEqual({
       code: 0,
-      message: "0x1234567890123456789012345678901234567890 does not have a an attestation with a score above 20",
+      message: "0x1234567890123456789012345678901234567890 does not have an attestation with a score above 20",
       eligibility: false,
     });
   });

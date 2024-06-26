@@ -723,13 +723,13 @@ app.get("/scroll/check", async (req: Request, res: Response): Promise<void> => {
   const scoreSchema = onchainInfo[SCROLL_CHAIN_ID].easSchemas.score.uid;
 
   try {
-    const attestations = await getAttestations(recipient, scoreSchema, process.env.SCROLL_EAS_SCAN_URL);
+    const attestations = await getAttestations(recipient, badge, process.env.SCROLL_EAS_SCAN_URL);
     const score = parseScoreFromAttestation(attestations, process.env.SCROLL_BADGE_SCHEMA_UID);
 
     const eligibility = Boolean(score && score >= 20);
     return void res.json({
       code: eligibility ? 1 : 0,
-      message: eligibility ? "success" : `${recipient} does not have a an attestation with a score above 20`,
+      message: eligibility ? "success" : `${recipient} does not have an attestation with a score above 20`,
       eligibility,
     });
   } catch (error) {
@@ -754,60 +754,64 @@ app.get("/scroll/claim", async (req: Request, res: Response): Promise<void> => {
   if (!eligibility) return void res.json({ eligibility, code: 0, message: "not eligible" });
   if (typeof badge !== "string") return void res.json({ eligibility, code: 0, message: "invalid parameter 'badge'" });
 
-  const proxy = new EIP712Proxy(badge);
+  try {
+    const proxy = new EIP712Proxy(badge);
 
-  const encoder = new SchemaEncoder(process.env.SCROLL_BADGE_SCHEMA);
-  const data = encoder.encodeData([
-    { name: "badge", value: badge, type: "address" },
-    { name: "payload", value: "0x", type: "bytes" },
-  ]);
+    const encoder = new SchemaEncoder(process.env.SCROLL_BADGE_SCHEMA);
+    const data = encoder.encodeData([
+      { name: "badge", value: badge, type: "address" },
+      { name: "payload", value: "0x", type: "bytes" },
+    ]);
 
-  const currentTime = Math.floor(new Date().getTime() / 1000);
-  const deadline = currentTime + 3600;
+    const currentTime = Math.floor(new Date().getTime() / 1000);
+    const deadline = currentTime + 3600;
 
-  const SCROLL_CHAIN_ID: keyof typeof onchainInfo = "0x82750";
-  const signer = await getAttestationSignerForChain(SCROLL_CHAIN_ID);
-  // claimer vs attester?
-  // const claimer = (new ethers.Wallet(process.env.CLAIMER_PRIVATE_KEY)).connect(provider);
-  const delegatedProxy = await proxy.connect(signer).getDelegated();
-  const attestation = {
-    // attestation data
-    schema: process.env.SCROLL_BADGE_SCHEMA_UID,
-    recipient,
-    data,
+    const SCROLL_CHAIN_ID: keyof typeof onchainInfo = "0x82750";
+    const signer = await getAttestationSignerForChain(SCROLL_CHAIN_ID);
 
-    // unused fields
-    revocable: true,
-    refUID: ZERO_BYTES32,
-    value: BigInt(0),
-    expirationTime: NO_EXPIRATION,
+    const delegatedProxy = await proxy.connect(signer).getDelegated();
+    const attestation = {
+      // attestation data
+      schema: process.env.SCROLL_BADGE_SCHEMA_UID,
+      recipient,
+      data,
 
-    // signature details
-    deadline: BigInt(deadline),
-    attester: signer.address,
-  };
-  const signature = await delegatedProxy.signDelegatedProxyAttestation(attestation, signer);
+      // unused fields
+      revocable: true,
+      refUID: ZERO_BYTES32,
+      value: BigInt(0),
+      expirationTime: NO_EXPIRATION,
 
-  // claimer vs attester
-  const attestByDelegationInput = {
-    schema: attestation.schema,
-    data: attestation,
-    attester: attestation.attester,
-    signature: signature.signature,
-    deadline: attestation.deadline,
-  };
-  // const res = await attesterProxy.connect(claimer).attestByDelegationProxy(badge);
-  // proxy.connect(signer).attestByDelegationProxy(
-  //   {
-  //       schema: process.env.SCROLL_BADGE_SCHEMA_UID,
-  //       data,
-  //       attester: attestation.attester,
-  //       signature: signature.signature,
-  //       deadline: attestation.deadline,
-  //     }
-  // )
+      // signature details
+      deadline: BigInt(deadline),
+      attester: signer.address,
+    };
+    const signature = await delegatedProxy.signDelegatedProxyAttestation(attestation, signer);
 
-  const tx = await proxy.contract.attestByDelegation.populateTransaction(attestByDelegationInput);
-  // const tx = await proxy.contract.populateTransaction.attestByDelegation(attestByDelegationInput);
-  res.json({ code: 1, message: "success", tx });
+    // claimer vs attester
+    const attestByDelegationInput = {
+      schema: attestation.schema,
+      data: attestation,
+      attester: attestation.attester,
+      signature: signature.signature,
+      deadline: attestation.deadline,
+    };
+    // const res = await attesterProxy.connect(claimer).attestByDelegationProxy(badge);
+    // proxy.connect(signer).attestByDelegationProxy(
+    //   {
+    //       schema: process.env.SCROLL_BADGE_SCHEMA_UID,
+    //       data,
+    //       attester: attestation.attester,
+    //       signature: signature.signature,
+    //       deadline: attestation.deadline,
+    //     }
+    // )
+
+    const tx = await proxy.contract.attestByDelegation.populateTransaction(attestByDelegationInput);
+    // const tx = await proxy.contract.populateTransaction.attestByDelegation(attestByDelegationInput);
+    return void res.json({ code: 1, message: "success", tx });
+  } catch (e) {
+    console.error("Error claiming badge:", e);
+    return void res.json({ code: 0, message: String(e) });
+  }
 });
