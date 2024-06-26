@@ -6,7 +6,6 @@ import * as mockedPlatformModule from "@gitcoin/passport-platforms";
 import type { ethers } from "ethers";
 
 const { PassportCache, providers } = mockedPlatformModule;
-import axios from "axios";
 
 // ---- Test subject
 import { app, getAttestationDomainSeparator, verifyTypes } from "../src/index";
@@ -1474,6 +1473,7 @@ describe("verifyTypes", () => {});
 describe("GET /scroll/check", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(mockedPlatformModule, "getAttestations").mockResolvedValue([]);
   });
 
   it("should return eligibility true when parseScoreFromAttestation returns true", async () => {
