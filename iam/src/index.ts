@@ -41,14 +41,9 @@ import { fileURLToPath } from "url";
 import { IAMError } from "./utils/scorerService.js";
 import { VerifyDidChallengeBaseError } from "./utils/verifyDidChallenge.js";
 import { EIP712Proxy } from "@ethereum-attestation-service/eas-sdk/dist/eip712-proxy.js";
-import {
-  SchemaEncoder,
-  ZERO_BYTES32,
-  NO_EXPIRATION,
-  AttestationRequestData,
-} from "@ethereum-attestation-service/eas-sdk";
+import { SchemaEncoder, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 import { getAddress, verifyMessage, Wallet, TypedDataDomain, Signature } from "ethers";
-import { serializeJson } from "./utils/json.js";
+import { toJsonObject } from "./utils/json.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -537,7 +532,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
               invalidCredentials,
             };
 
-            return void res.type("application/json").send(serializeJson(payload));
+            return void res.type("application/json").send(toJsonObject(payload));
           })
           .catch(() => {
             return void errorRes(res, "Error signing passport", 500);
@@ -596,14 +591,7 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
         const fee = await getEASFeeAmount(2);
 
         const passportAttestation: PassportAttestation = {
-          multiAttestationRequest: multiAttestationRequest.map((request) => ({
-            ...request,
-            data: request.data.map((data) => ({
-              ...data,
-              value: data.value.toString(),
-              expirationTime: data.expirationTime.toString(),
-            })) as unknown as AttestationRequestData[],
-          })),
+          multiAttestationRequest,
           nonce: Number(nonce),
           fee: fee.toString(),
         };
@@ -623,7 +611,7 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
               invalidCredentials,
             };
 
-            return void res.json(payload);
+            return void res.json(toJsonObject(payload));
           })
           .catch((e) => {
             console.error("Error signing score", e);
@@ -660,14 +648,7 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
 
       const fee = await getEASFeeAmount(2);
       const passportAttestation: PassportAttestation = {
-        multiAttestationRequest: multiAttestationRequest.map((request) => ({
-          ...request,
-          data: request.data.map((data) => ({
-            ...data,
-            value: data.value.toString(),
-            expirationTime: data.expirationTime.toString(),
-          })) as unknown as AttestationRequestData[],
-        })),
+        multiAttestationRequest,
         nonce: Number(nonce),
         fee: fee.toString(),
       };
@@ -686,7 +667,7 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
             invalidCredentials: [],
           };
 
-          return void res.json(payload);
+          return void res.json(toJsonObject(payload));
         })
         .catch((e) => {
           return void errorRes(res, "Error signing score", 500);
@@ -707,10 +688,6 @@ app.use("/procedure", procedureRouter);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use("/static", express.static(path.join(__dirname, "static")));
 
-const prom = async () => {
-  await Promise.resolve("yo");
-};
-
 // Check Eligibility For Minting Badge
 app.get("/scroll/check", async (req: Request, res: Response): Promise<void> => {
   const { badge, recipient } = req.query;
@@ -718,9 +695,6 @@ app.get("/scroll/check", async (req: Request, res: Response): Promise<void> => {
   if (!badge || !recipient || typeof recipient !== "string" || typeof badge !== "string") {
     return void errorRes(res, "Missing badge or recipient parameter", 400);
   }
-
-  const SCROLL_CHAIN_ID: keyof typeof onchainInfo = "0x82750";
-  const scoreSchema = onchainInfo[SCROLL_CHAIN_ID].easSchemas.score.uid;
 
   try {
     const attestations = await getAttestations(recipient, badge, process.env.SCROLL_EAS_SCAN_URL);

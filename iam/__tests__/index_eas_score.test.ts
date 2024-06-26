@@ -74,10 +74,29 @@ const mockMultiAttestationRequestWithScore: MultiAttestationRequest[] = [
           score: 23.45,
           scorer_id: 123,
         }),
-        expirationTime: BigInt(NO_EXPIRATION),  // We want explicit BigInt here, otherwise expect(...).toEqual(...) will fail
+        expirationTime: BigInt(NO_EXPIRATION),
         revocable: false,
         refUID: ZERO_BYTES32,
         value: 25000000000000000n,
+      },
+    ],
+  },
+];
+
+const mockSerializedMultiAttestationResponseWithScore = [
+  {
+    schema: "0x853a55f39e2d1bf1e6731ae7148976fbbb0c188a898a233dba61a233d8c0e4a4",
+    data: [
+      {
+        recipient: "0x0987654321098765432109876543210987654321",
+        data: easSchemaMock.encodeEasScore({
+          score: 23.45,
+          scorer_id: 123,
+        }),
+        expirationTime: NO_EXPIRATION.toString(),
+        revocable: false,
+        refUID: ZERO_BYTES32,
+        value: "25000000000000000",
       },
     ],
   },
@@ -132,7 +151,7 @@ describe("POST /eas/score", () => {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(response.body.passport.multiAttestationRequest).toEqual(toJsonObject(mockMultiAttestationRequestWithScore));
+    expect(response.body.passport.multiAttestationRequest).toEqual(mockSerializedMultiAttestationResponseWithScore);
     expect(response.body.passport.nonce).toEqual(nonce);
     expect(formatMultiAttestationRequestSpy).toHaveBeenCalled();
   });
