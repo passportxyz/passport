@@ -1,5 +1,4 @@
-import { Contract, JsonRpcProvider, formatUnits } from "ethers";
-import { JsonRpcProvider as V5JsonRpcProvider } from "@ethersproject/providers";
+import { Contract, JsonRpcProvider, formatUnits, Signer, BrowserProvider, Eip1193Provider } from "ethers";
 import { BigNumber } from "@ethersproject/bignumber";
 import axios from "axios";
 import onchainInfo from "../../deployments/onchainInfo.json";
@@ -27,16 +26,17 @@ const SCORE_MAX_AGE_MILLISECONDS = 1000 * 60 * 60 * 24 * 90; // 90 days
 
 export async function getAttestationData(
   address: string,
-  chainId: keyof typeof onchainInfo
+  chainId: keyof typeof onchainInfo,
+  provider: Eip1193Provider
 ): Promise<AttestationData | undefined> {
   try {
     const activeChainRpc = chains.find((chain) => chain.id === chainId)?.rpcUrl;
-
     if (!activeChainRpc) {
       throw new Error(`No rpcUrl found for chainId ${chainId}`);
     }
 
-    const ethersProvider = new JsonRpcProvider(activeChainRpc);
+    const ethersProvider = new BrowserProvider(provider, "any");
+    const signer = await ethersProvider.getSigner();
 
     const resolverAddress = onchainInfo[chainId].GitcoinResolver.address;
     const resolverAbi = GitcoinResolverAbi[chainId];
@@ -50,9 +50,7 @@ export async function getAttestationData(
 
     const eas = new EAS(onchainInfo[chainId].EAS.address);
 
-    // needed for ethers v5 eas dependency
-    const ethersV5Provider = new V5JsonRpcProvider(activeChainRpc);
-    eas.connect(ethersV5Provider);
+    eas.connect(signer);
 
     return {
       passport: await eas.getAttestation(passportUid),

@@ -48,7 +48,7 @@ import {
   AttestationRequestData,
 } from "@ethereum-attestation-service/eas-sdk";
 import { getAddress, verifyMessage, Wallet, TypedDataDomain, Signature } from "ethers";
-import { serializeJson } from "./utils/json";
+import { serializeJson } from "./utils/json.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
