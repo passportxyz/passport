@@ -1,6 +1,10 @@
 import { RequestPayload } from "@gitcoin/passport-types";
 import { getChallenge } from "../src/utils/challenge";
 
+jest.mock("../src/utils/verifyDidChallenge", () => ({
+  verifyDidChallenge: jest.fn(),
+}));
+
 describe("getChallenge", () => {
   it("returns a challenge for SignerChallenge", () => {
     const requestPayload: RequestPayload = {

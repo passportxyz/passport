@@ -6,7 +6,7 @@ import { ClearTextSimpleProvider } from "./utils/clearTextSimpleProvider";
 import { ClearTextTwitterProvider, ClearTextGithubOrgProvider } from "./ClearText";
 
 import platforms from "./platforms";
-import { ethers } from "ethers";
+import { keccak256, toUtf8Bytes } from "ethers";
 
 // Check that all platforms have a ProviderConfig, PlatformDetails, and providers
 Object.entries(platforms).map(([platformName, platform]) => {
@@ -24,7 +24,7 @@ const platformProviders = Object.values(platforms)
 Object.values(platforms).map(({ ProviderConfig }) => {
   ProviderConfig.map(({ providers }) => {
     providers.map((provider) => {
-      provider.hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(provider.name));
+      provider.hash = keccak256(toUtf8Bytes(provider.name));
     });
   });
 });
@@ -42,6 +42,7 @@ export const providers = new Providers([
 export * from "./types";
 export { Platform as PlatformClass } from "./utils/platform";
 export { platforms as platforms };
+export { parseScoreFromAttestation, getAttestations } from "./utils/eas";
 export { initCacheSession, loadCacheSession, clearCacheSession } from "./utils/platform-cache";
 export { handleAxiosError } from "./utils/handleAxiosError";
 export { PassportCache } from "./utils/passport-cache";
