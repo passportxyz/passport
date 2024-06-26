@@ -25,6 +25,7 @@ type ChainConfig = {
   label: string;
   rpcUrl: string;
   icon: string;
+  chainLink?: string; // Link to which to redirect if a user clicks the chain icon in the footer for example
   attestationProviderConfig?: AttestationProviderConfig;
 };
 
@@ -37,12 +38,13 @@ export class Chain {
   chainLink?: string; // Link to which to redirect if a user clicks the chain icon in the footer for example
   attestationProvider?: AttestationProvider;
 
-  constructor({ id, token, label, rpcUrl, icon, attestationProviderConfig }: ChainConfig) {
+  constructor({ id, token, label, rpcUrl, icon, attestationProviderConfig, chainLink }: ChainConfig) {
     this.id = id;
     this.token = token;
     this.label = label;
     this.rpcUrl = rpcUrl;
     this.icon = icon;
+    this.chainLink = chainLink;
 
     if (attestationProviderConfig) {
       const attestationConfig = { ...attestationProviderConfig, chainId: this.id };
@@ -94,6 +96,7 @@ if (usingTestEnvironment) {
     label: "OP Sepolia Testnet",
     rpcUrl: "https://sepolia.optimism.io",
     icon: "./assets/op-logo.svg",
+    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
     attestationProviderConfig: {
       name: "Ethereum Attestation Service",
       status: "enabled",
@@ -153,6 +156,7 @@ if (!TEST_MODE) {
       label: "zkSync",
       rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_ZKSYNC_RPC_URL as string,
       icon: "./assets/zksyncStampIcon.svg",
+      chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
       attestationProviderConfig: {
         name: "Ethereum Attestation Service",
         status: usingTestEnvironment ? "disabled" : "enabled",
@@ -167,6 +171,7 @@ if (!TEST_MODE) {
     label: "Linea",
     rpcUrl: "https://rpc.linea.build",
     icon: "./assets/linea-logo.png",
+    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
     attestationProviderConfig: {
       name: "Verax + EAS",
       status: "enabled",
@@ -189,6 +194,7 @@ if (!TEST_MODE) {
     // rpcUrl: "https://arb1.arbitrum.io/rpc",
     rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_ARB_RPC_URL as string,
     icon: "./assets/arbitrum-arb-logo.svg",
+    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
     attestationProviderConfig: {
       name: "Ethereum Attestation Service",
       status: usingTestEnvironment ? "disabled" : "enabled",
@@ -203,6 +209,7 @@ if (!TEST_MODE) {
       label: "Scroll",
       rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SCROLL_RPC_URL as string,
       icon: "./assets/scroll-logo.svg",
+      chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
       attestationProviderConfig: {
         name: "Ethereum Attestation Service",
         status: usingTestEnvironment ? "disabled" : "enabled",
