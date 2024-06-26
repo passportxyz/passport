@@ -83,15 +83,13 @@ const Content = ({ notification }: { notification: Notification }) => {
     case "on_chain_expiry":
       return (
         <span>
-          {content}
-          {linkSpan}
+          {content} {linkSpan}
         </span>
       );
     case "deduplication":
       return (
         <span>
-          {content}
-          {linkSpan}
+          {content} {linkSpan}
         </span>
       );
   }
