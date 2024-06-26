@@ -1,4 +1,5 @@
 import React from "react";
+import { Chain, chains } from "../utils/chains";
 
 const GitHubIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-6 h-6 mx-2">
@@ -25,33 +26,18 @@ const SyncIcon = () => (
   </svg>
 );
 
-const chains = [
-  {
-    key: "Optimism",
-    icon: "/assets/optimism-icon.svg",
-    href: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
-  },
-  {
-    key: "Linea",
-    icon: "/assets/linea-icon.svg",
-    href: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
-  },
-  {
-    key: "Ceramic",
-    icon: "/assets/ceramic-icon.svg",
-    href: "https://support.passport.xyz/passport-knowledge-base/faq/common-questions/what-is-ceramic",
-  },
-  {
-    key: "ZkSync",
-    icon: "/assets/zksyncStampIcon.svg",
-    href: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
-  },
-  {
-    key: "Arbitrum",
-    icon: "/assets/arbitrum-arb-logo.svg",
-    href: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
-  },
-];
+const chainsForFooter = (
+  [
+    {
+      icon: "/assets/ceramic-icon.svg",
+      chainLink: "https://support.passport.xyz/passport-knowledge-base/faq/common-questions/what-is-ceramic",
+      id: "-",
+      token: "-",
+      label: "Ceramic",
+      rpcUrl: "-",
+    },
+  ] as Chain[]
+).concat(chains.filter((chain) => !!chain.attestationProvider));
 
 const WelcomeFooter = ({ displayPrivacyPolicy, fixed }: { displayPrivacyPolicy: boolean; fixed: boolean }) => {
   return (
@@ -60,10 +46,10 @@ const WelcomeFooter = ({ displayPrivacyPolicy, fixed }: { displayPrivacyPolicy: 
     >
       <div className="flex items-start  justify-start lg:justify-between flex-wrap">
         <span className="lg:ml-10 self-center">Available on</span>
-        {chains.map(({ href, icon, key }) => {
+        {chainsForFooter.map(({ chainLink, icon }, idx) => {
           return (
-            <div key={key} className="flex m-1 md:m-2 lg:m-3">
-              <a className="self-start" target="_blank" href={href}>
+            <div key={idx} className="flex m-1 md:m-2 lg:m-3">
+              <a className="self-start" target="_blank" href={chainLink}>
                 <img src={icon} className="w-[20px] md:w-[35px] h-[20px] md:h-[35px]" />
               </a>
             </div>

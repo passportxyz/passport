@@ -34,6 +34,7 @@ export class Chain {
   label: string;
   rpcUrl: string;
   icon: string;
+  chainLink?: string; // Link to which to redirect if a user clicks the chain icon in the footer for example
   attestationProvider?: AttestationProvider;
 
   constructor({ id, token, label, rpcUrl, icon, attestationProviderConfig }: ChainConfig) {
@@ -201,7 +202,7 @@ if (!TEST_MODE) {
       token: "ETH",
       label: "Scroll",
       rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SCROLL_RPC_URL as string,
-      icon: "./assets/Scroll_Logomark.673577c8260b63ae56867bc9af6af514.svg",
+      icon: "./assets/scroll-logo.svg",
       attestationProviderConfig: {
         name: "Ethereum Attestation Service",
         status: usingTestEnvironment ? "disabled" : "enabled",
