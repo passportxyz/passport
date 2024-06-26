@@ -74,7 +74,6 @@ const getOnChainDataForChain = async ({
       passportAttestationData.passport
     );
 
-    console.log({ onChainProviderInfo, hashes, issuanceDates, expirationDates })
     providers = onChainProviderInfo
       .sort((a, b) => a.providerNumber - b.providerNumber)
       .map((providerInfo, index) => ({

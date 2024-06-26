@@ -130,7 +130,6 @@ export function decodeScoreAttestation(attestation: Attestation): DecodedScoreAt
   const score_as_integer = decodedData.find(({ name }) => name === "score")?.value.value as bigint;
   const score_decimals = decodedData.find(({ name }) => name === "score_decimals")?.value.value as bigint;
 
-  console.log({ score_as_integer, score_decimals })
   const score = parseFloat(formatUnits(score_as_integer, score_decimals));
   const issuanceDate = new Date(BigNumber.from(attestation.time).mul(1000).toNumber()) || undefined;
   const expirationDate = issuanceDate ? new Date(issuanceDate.getTime() + SCORE_MAX_AGE_MILLISECONDS) : undefined;

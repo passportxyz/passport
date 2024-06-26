@@ -53,7 +53,6 @@ jest.mock("ethers", () => {
   return {
     ...ethers,
     ethers: {
-      
       BrowserProvider: jest.fn().mockImplementation(() => {
         return { getSigner: mockGetSigner };
       }),
