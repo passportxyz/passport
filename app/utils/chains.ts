@@ -25,7 +25,7 @@ type ChainConfig = {
   label: string;
   rpcUrl: string;
   icon: string;
-  chainLink?: string; // Link to which to redirect if a user clicks the chain icon in the footer for example
+  chainLink: string; // Link to which to redirect if a user clicks the chain icon in the footer for example
   attestationProviderConfig?: AttestationProviderConfig;
 };
 
@@ -35,7 +35,7 @@ export class Chain {
   label: string;
   rpcUrl: string;
   icon: string;
-  chainLink?: string; // Link to which to redirect if a user clicks the chain icon in the footer for example
+  chainLink: string; // Link to which to redirect if a user clicks the chain icon in the footer for example
   attestationProvider?: AttestationProvider;
 
   constructor({ id, token, label, rpcUrl, icon, attestationProviderConfig, chainLink }: ChainConfig) {
@@ -69,6 +69,7 @@ const chainConfigs: ChainConfig[] = [
     label: "Ethereum Mainnet",
     rpcUrl: MAINNET_RPC_URL,
     icon: "./assets/eth-network-logo.svg",
+    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
   },
 ];
 
@@ -81,6 +82,7 @@ if (usingTestEnvironment) {
     label: "Sepolia",
     rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SEPOLIA_RPC_URL as string,
     icon: "./assets/eth-network-logo.svg",
+    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
   });
   chainConfigs.push({
     id: hardhatChainId,
@@ -88,6 +90,7 @@ if (usingTestEnvironment) {
     label: "Hardhat",
     rpcUrl: "http://127.0.0.1:8545/",
     icon: "./assets/eth-network-logo.svg",
+    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
   });
 
   chainConfigs.push({
@@ -110,6 +113,7 @@ if (usingTestEnvironment) {
     label: "Linea Goerli",
     rpcUrl: "https://rpc.goerli.linea.build",
     icon: "./assets/linea-logo.png",
+    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
     attestationProviderConfig: {
       name: "Verax + EAS",
       status: "enabled",
@@ -126,6 +130,7 @@ if (!TEST_MODE) {
       label: "Polygon Mainnet",
       rpcUrl: "https://matic-mainnet.chainstacklabs.com",
       icon: "./assets/eth-network-logo.svg",
+      chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
     });
     chainConfigs.push({
       id: "0xfa",
@@ -133,6 +138,7 @@ if (!TEST_MODE) {
       label: "Fantom Mainnet",
       rpcUrl: "https://rpc.ftm.tools/",
       icon: "./assets/eth-network-logo.svg",
+      chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
     });
   }
 
@@ -142,6 +148,7 @@ if (!TEST_MODE) {
     label: "Optimism",
     rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_OP_RPC_URL as string,
     icon: "./assets/op-logo.svg",
+    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
     attestationProviderConfig: {
       name: "Ethereum Attestation Service",
       status: usingTestEnvironment ? "disabled" : "enabled",
@@ -185,6 +192,7 @@ if (!TEST_MODE) {
     label: "Avalanche",
     rpcUrl: "https://api.avax.network/ext/bc/C/rpc",
     icon: "./assets/avax-logo.svg",
+    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
   });
 
   chainConfigs.push({
