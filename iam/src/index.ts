@@ -48,6 +48,7 @@ import {
   AttestationRequestData,
 } from "@ethereum-attestation-service/eas-sdk";
 import { getAddress, verifyMessage, Wallet, TypedDataDomain, Signature } from "ethers";
+import { serializeJson } from "./utils/json";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -139,29 +140,23 @@ const ATTESTER_TYPES = {
   ],
 };
 
-const providerTypePlatformMap = Object.entries(platforms).reduce(
-  (acc, [platformName, { providers }]) => {
-    providers.forEach(({ type }) => {
-      acc[type] = platformName;
-    });
-    return acc;
-  },
-  {} as { [k: string]: string }
-);
+const providerTypePlatformMap = Object.entries(platforms).reduce((acc, [platformName, { providers }]) => {
+  providers.forEach(({ type }) => {
+    acc[type] = platformName;
+  });
+  return acc;
+}, {} as { [k: string]: string });
 
 function groupProviderTypesByPlatform(types: string[]): string[][] {
   return Object.values(
-    types.reduce(
-      (groupedProviders, type) => {
-        const platform = providerTypePlatformMap[type] || "generic";
+    types.reduce((groupedProviders, type) => {
+      const platform = providerTypePlatformMap[type] || "generic";
 
-        if (!groupedProviders[platform]) groupedProviders[platform] = [];
-        groupedProviders[platform].push(type);
+      if (!groupedProviders[platform]) groupedProviders[platform] = [];
+      groupedProviders[platform].push(type);
 
-        return groupedProviders;
-      },
-      {} as { [k: keyof typeof platforms]: string[] }
-    )
+      return groupedProviders;
+    }, {} as { [k: keyof typeof platforms]: string[] })
   );
 }
 
@@ -536,9 +531,10 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
               invalidCredentials,
             };
 
-            return void res.json(payload);
+            return void res.type("application/json").send(serializeJson(payload));
           })
-          .catch(() => {
+          .catch((e) => {
+            console.log("geri 1 - Error signing passport", e);
             return void errorRes(res, "Error signing passport", 500);
           });
       })
@@ -625,6 +621,7 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
             return void res.json(payload);
           })
           .catch((e) => {
+            console.log("geri 2 - Error signing passport", e);
             console.error("Error signing score", e);
             return void errorRes(res, "Error signing passport", 500);
           });

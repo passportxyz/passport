@@ -10,6 +10,7 @@ import axios from "axios";
 
 // ---- Test subject
 import { app, getAttestationDomainSeparator, verifyTypes } from "../src/index";
+import { toJsonObject } from "../src/utils/json";
 
 // ---- Types
 import {
@@ -1013,10 +1014,10 @@ const mockMultiAttestationRequestWithPassportAndScore: MultiAttestationRequest[]
           score: 23.45,
           scorer_id: 123,
         }),
-        expirationTime: NO_EXPIRATION.toString(),
+        expirationTime: BigInt(NO_EXPIRATION), // We want explicit BigInt otherwise expect(...).toBe(...) will fail
         revocable: false,
         refUID: ZERO_BYTES32,
-        value: "25000000000000000",
+        value: 25000000000000000n,
       },
     ],
   },
@@ -1029,10 +1030,10 @@ const mockMultiAttestationRequestWithPassportAndScore: MultiAttestationRequest[]
           score: 23.45,
           scorer_id: 123,
         }),
-        expirationTime: NO_EXPIRATION.toString(),
+        expirationTime: BigInt(NO_EXPIRATION), // We want explicit BigInt otherwise expect(...).toBe(...) will fail
         revocable: true,
         refUID: ZERO_BYTES32,
-        value: "25000000000000000",
+        value: 25000000000000000n,
       },
     ],
   },
@@ -1214,7 +1215,7 @@ describe("POST /eas", () => {
 
     const expectedPayload = {
       passport: {
-        multiAttestationRequest: mockMultiAttestationRequestWithPassportAndScore,
+        multiAttestationRequest: toJsonObject(mockMultiAttestationRequestWithPassportAndScore),
         fee: "25000000000000000",
         nonce,
       },
@@ -1399,7 +1400,9 @@ describe("POST /eas/passport", () => {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(response.body.passport.multiAttestationRequest).toEqual(mockMultiAttestationRequestWithPassportAndScore);
+    expect(response.body.passport.multiAttestationRequest).toEqual(
+      toJsonObject(mockMultiAttestationRequestWithPassportAndScore)
+    );
     expect(response.body.passport.nonce).toEqual(nonce);
     expect(identityMock.verifyCredential).toHaveBeenCalledTimes(credentials.length);
     expect(formatMultiAttestationRequestSpy).toHaveBeenCalled();
