@@ -6,7 +6,6 @@ import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios, { AxiosError } from "axios";
-import { BASE_EAS_SCAN_URL } from "../../utils/eas";
 
 jest.mock("axios");
 
@@ -76,7 +75,7 @@ describe("verifyCoinbaseAttestation", () => {
     const result = await coinbaseProviderModule.verifyCoinbaseAttestation(testAddress);
 
     expect(result).toBe(true);
-    expect(mockedAxios.post).toHaveBeenCalledWith(BASE_EAS_SCAN_URL, {
+    expect(mockedAxios.post).toHaveBeenCalledWith(coinbaseProviderModule.BASE_EAS_SCAN_URL, {
       query: expect.any(String),
     });
   });

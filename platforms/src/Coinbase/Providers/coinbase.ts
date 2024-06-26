@@ -93,11 +93,20 @@ export const verifyCoinbaseLogin = async (code: string): Promise<string | undefi
   return userResponse?.data?.data?.id;
 };
 
-import { verifyAttestation } from "../../utils/eas";
+import { getAttestations } from "../../utils/eas";
 
 export const COINBASE_ATTESTER = "0x357458739F90461b99789350868CD7CF330Dd7EE";
 export const VERIFIED_ACCOUNT_SCHEMA = "0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9";
+export const BASE_EAS_SCAN_URL = "https://base.easscan.org/graphql";
 
 export const verifyCoinbaseAttestation = async (address: string): Promise<boolean> => {
-  return verifyAttestation(address, COINBASE_ATTESTER, VERIFIED_ACCOUNT_SCHEMA);
+  const attestations = await getAttestations(address, COINBASE_ATTESTER, BASE_EAS_SCAN_URL);
+  VERIFIED_ACCOUNT_SCHEMA
+  return attestations.filter(
+    (attestation) =>
+      attestation.revoked === false &&
+      attestation.revocationTime === 0 &&
+      attestation.expirationTime === 0 &&
+      attestation.schema.id === VERIFIED_ACCOUNT_SCHEMA
+  ).length > 0;
 };

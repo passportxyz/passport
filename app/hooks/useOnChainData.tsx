@@ -128,7 +128,7 @@ const useOnChainDataQuery = (address?: string) => {
     queries: ENABLED_CHAIN_IDS.map((chainId) => ({
       enabled: FeatureFlags.FF_CHAIN_SYNC && Boolean(address) && Boolean(provider),
       queryKey: [ALL_CHAIN_DATA_QUERY_KEY, address, chainId],
-      queryFn: () => getOnChainDataForChain({ address: address!, chainId, provider }),
+      queryFn: () => getOnChainDataForChain({ address: address!, chainId, provider: provider! }),
     })),
     combine,
   });

@@ -1476,8 +1476,8 @@ describe("GET /scroll/check", () => {
     jest.clearAllMocks();
   });
 
-  it("should return eligibility true when verifyAttestation returns true", async () => {
-    jest.spyOn(mockedPlatformModule, "verifyAttestation").mockResolvedValue(true);
+  it("should return eligibility true when parseScoreFromAttestation returns true", async () => {
+    jest.spyOn(mockedPlatformModule, "parseScoreFromAttestation").mockReturnValue(20);
 
     const response = await request(app)
       .get("/scroll/check")
@@ -1491,8 +1491,8 @@ describe("GET /scroll/check", () => {
     });
   });
 
-  it("should return eligibility false when verifyAttestation returns false", async () => {
-    jest.spyOn(mockedPlatformModule, "verifyAttestation").mockResolvedValue(false);
+  it("should return eligibility false when parseScoreFromAttestation returns false", async () => {
+    jest.spyOn(mockedPlatformModule, "parseScoreFromAttestation").mockReturnValue(null);
 
     const response = await request(app)
       .get("/scroll/check")
@@ -1501,7 +1501,7 @@ describe("GET /scroll/check", () => {
 
     expect(response.body).toEqual({
       code: 0,
-      message: "Score was not found for this recipient",
+      message: "0x1234567890123456789012345678901234567890 does not have a an attestation with a score above 20",
       eligibility: false,
     });
   });
@@ -1518,7 +1518,7 @@ describe("GET /scroll/check", () => {
   });
 
   it("should return 500 error when verifyAttestation throws an error", async () => {
-    jest.spyOn(mockedPlatformModule, "verifyAttestation").mockRejectedValue("Error");
+    jest.spyOn(mockedPlatformModule, "getAttestations").mockRejectedValue("Error");
 
     const response = await request(app)
       .get("/scroll/check")

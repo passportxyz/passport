@@ -34,7 +34,7 @@ import * as DIDKit from "@spruceid/didkit-wasm-node";
 import { issueChallengeCredential, issueHashedCredential, verifyCredential } from "@gitcoin/passport-identity";
 
 // All provider exports from platforms
-import { providers, platforms, verifyAttestation } from "@gitcoin/passport-platforms";
+import { providers, platforms, getAttestations, parseScoreFromAttestation } from "@gitcoin/passport-platforms";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -723,20 +723,15 @@ app.get("/scroll/check", async (req: Request, res: Response): Promise<void> => {
   const scoreSchema = onchainInfo[SCROLL_CHAIN_ID].easSchemas.score.uid;
 
   try {
-    const result = await verifyAttestation(recipient, badge, scoreSchema);
-    if (result) {
-      return void res.json({
-        code: 1,
-        message: "success",
-        eligibility: true,
-      });
-    } else {
-      return void res.json({
-        code: 0,
-        message: "Score was not found for this recipient",
-        eligibility: false,
-      });
-    }
+    const attestations = await getAttestations(recipient, scoreSchema, process.env.SCROLL_EAS_SCAN_URL);
+    const score = parseScoreFromAttestation(attestations, process.env.SCROLL_BADGE_SCHEMA_UID);
+
+    const eligibility = Boolean(score && score >= 20);
+    return void res.json({
+      code: eligibility ? 1 : 0,
+      message: eligibility ? "success" : `${recipient} does not have a an attestation with a score above 20`,
+      eligibility,
+    });
   } catch (error) {
     console.error("Error verifying attestation:", error);
     return void errorRes(res, "Error verifying attestation", 500);
@@ -746,21 +741,24 @@ app.get("/scroll/check", async (req: Request, res: Response): Promise<void> => {
 // Claim Badge
 app.get("/scroll/claim", async (req: Request, res: Response): Promise<void> => {
   // See example implementation here: https://github.com/scroll-tech/canvas-contracts/blob/master/examples/src/attest-server.js
-  const { badge: badgeAddress, recipient } = req.query;
+  const { badge, recipient } = req.query;
 
   if (!recipient || typeof recipient !== "string")
     return void res.json({ code: 0, message: "missing query parameter 'recipient'" });
-  if (!badgeAddress) return void res.json({ code: 0, message: "missing parameter 'badge'" });
+  if (!badge || typeof badge !== "string") return void res.json({ code: 0, message: "missing parameter 'badge'" });
 
-  const eligibility = true; // Check scorer
-  if (!eligibility) return void res.json({ code: 0, message: "not eligible" });
-  if (typeof badgeAddress !== "string") return void res.json({ code: 0, message: "invalid parameter 'badge'" });
+  const attestations = await getAttestations(recipient, badge, process.env.SCROLL_EAS_SCAN_URL);
+  const score = parseScoreFromAttestation(attestations, process.env.SCROLL_BADGE_SCHEMA_UID);
 
-  const proxy = new EIP712Proxy(badgeAddress);
+  const eligibility = score && score >= 20;
+  if (!eligibility) return void res.json({ eligibility, code: 0, message: "not eligible" });
+  if (typeof badge !== "string") return void res.json({ eligibility, code: 0, message: "invalid parameter 'badge'" });
+
+  const proxy = new EIP712Proxy(badge);
 
   const encoder = new SchemaEncoder(process.env.SCROLL_BADGE_SCHEMA);
   const data = encoder.encodeData([
-    { name: "badge", value: badgeAddress, type: "address" },
+    { name: "badge", value: badge, type: "address" },
     { name: "payload", value: "0x", type: "bytes" },
   ]);
 
