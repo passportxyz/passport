@@ -539,8 +539,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 
             return void res.type("application/json").send(serializeJson(payload));
           })
-          .catch((e) => {
-            console.log("geri 1 - Error signing passport", e);
+          .catch(() => {
             return void errorRes(res, "Error signing passport", 500);
           });
       })
@@ -627,7 +626,6 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
             return void res.json(payload);
           })
           .catch((e) => {
-            console.log("geri 2 - Error signing passport", e);
             console.error("Error signing score", e);
             return void errorRes(res, "Error signing passport", 500);
           });
