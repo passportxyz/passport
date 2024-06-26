@@ -62,14 +62,13 @@ const ExpiryAction = ({
 
 const Content = ({ notification }: { notification: Notification }) => {
   const { content, link, type, link_text } = notification;
-  console.log("link", link, "link_text", link_text);
   const linkSpan =
     link && link_text ? (
       <a className="underline" href={link} target="_blank">
         {link_text}.
       </a>
     ) : null;
-  console.log("linkSpan", linkSpan);
+
   switch (type) {
     case "custom":
       return (
@@ -165,7 +164,6 @@ export type NotificationsProps = {
 export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) => {
   const { notifications } = useNotifications();
   const hasNotifications = notifications.length > 0;
-  console.log("notifications", notifications);
   return (
     <div className="w-full flex justify-end z-10">
       <Popover className="relative">
