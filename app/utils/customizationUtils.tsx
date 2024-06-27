@@ -38,6 +38,11 @@ export type Customization = {
       action: {
         text: string;
         url: string;
+        type?: string; // TODO: @Larisa This should be only  "Simple Link" or "Onchain Push"
+      };
+      displayInfoTooltip?: {
+        shouldDisplay?: boolean;
+        text?: string;
       };
     };
   };
@@ -77,6 +82,11 @@ type CustomizationResponse = {
       action?: {
         text?: string;
         url?: string;
+        type?: string; // TODO: @Larisa This should be only  "Simple Link" or "Onchain Push"
+      };
+      displayInfoTooltip?: {
+        shouldDisplay?: boolean;
+        text?: string;
       };
     };
   };
@@ -141,6 +151,11 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
         action: {
           text: customizationResponse.dashboardPanel?.body?.action?.text || "",
           url: sanitize(customizationResponse.dashboardPanel?.body?.action?.url || ""),
+          type: customizationResponse.dashboardPanel?.body?.action?.type,
+        },
+        displayInfoTooltip: {
+          shouldDisplay: customizationResponse.dashboardPanel?.body?.displayInfoTooltip?.shouldDisplay || false,
+          text: customizationResponse.dashboardPanel?.body?.displayInfoTooltip?.text || "",
         },
       },
     },

@@ -1,9 +1,13 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, Ref } from "react";
 import { VeraxPanel } from "../components/VeraxPanel";
 import { TestingPanel } from "../components/TestingPanel";
 import { Button } from "../components/Button";
 import { CustomizationLogoBackground } from "../utils/customizationUtils";
 import { useCustomization } from "../hooks/useCustomization";
+import { OnchainSidebar } from "./OnchainSidebar";
+import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
+import { Popover } from "@headlessui/react";
+import { usePopper } from "react-popper";
 
 type CustomDashboardPanelProps = {
   logo: {
@@ -55,6 +59,8 @@ export const CustomDashboardPanel = ({ logo, className, children }: CustomDashbo
         {logoBackground && <div className="col-start-1 flex row-start-1 z-0">{logoBackground}</div>}
       </div>
       <div className="relative flex flex-col justify-start gap-2 bg-gradient-to-b from-transparent to-customization-background-2/[.26] p-6 w-full">
+        {/* <p>T</p> */}
+
         {children}
       </div>
     </div>
@@ -63,6 +69,20 @@ export const CustomDashboardPanel = ({ logo, className, children }: CustomDashbo
 
 export const DynamicCustomDashboardPanel = ({ className }: { className: string }) => {
   const customization = useCustomization();
+  const [showSidebar, setShowSidebar] = useState<boolean>(false);
+  const [referenceElement, setReferenceElement] = useState(null);
+  const [popperElement, setPopperElement] = useState(null);
+
+  const { styles, attributes } = usePopper(referenceElement, popperElement, {
+    modifiers: [
+      {
+        name: "preventOverflow",
+        options: {
+          padding: 24,
+        },
+      },
+    ],
+  });
 
   if (customization.key === "verax") {
     return <VeraxPanel className={className} />;
@@ -71,20 +91,47 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
   if (customization.key === "testing") {
     return <TestingPanel className={className} />;
   }
-
+  console.log("customization", customization);
   const { logo, body } = customization.dashboardPanel;
 
+  const onButtonClick = () => {
+    if (body.action.type === "Onchain Push") {
+      setShowSidebar(true);
+    } else {
+      window.open(body.action.url, "_blank");
+    }
+  };
   return (
     <CustomDashboardPanel className={className} logo={logo}>
+      {/* <p></p> */}
+      {body.displayInfoTooltip && body.displayInfoTooltip.shouldDisplay && body.displayInfoTooltip.text ? (
+        <Popover className={`group cursor-pointer px-2 self-end`}>
+          <Popover.Button as="div" ref={setReferenceElement as unknown as Ref<HTMLButtonElement>}>
+            <div className="mr-4 w-4 self-end">
+              <ExclamationCircleIcon height={24} color={"rgb(var(--color-customization-background-1))"} />
+            </div>
+          </Popover.Button>
+          <Popover.Panel
+            ref={setPopperElement as unknown as Ref<HTMLDivElement>}
+            className={`ml-24 invisible z-10  max-w-screen-md rounded-md border border-customization-background-1 bg-background-1 text-sm text-color-1 group-hover:visible`}
+            style={styles.popper}
+            {...attributes.popper}
+            static
+          >
+            <div className="px-4 py-2">Hekki</div>
+          </Popover.Panel>
+        </Popover>
+      ) : null}
       <div>{body.mainText}</div>
       <div className="text-sm grow">{body.subText}</div>
       <Button
         variant="custom"
         className={`rounded-s mr-2 mt-2 w-fit self-end bg-customization-background-1 text-customization-foreground-1 hover:bg-customization-background-1/75 enabled:hover:text-color-1 disabled:bg-customization-background-1 disabled:brightness-100`}
-        onClick={() => window.open(body.action.url, "_blank")}
+        onClick={onButtonClick}
       >
         {body.action.text}
       </Button>
+      <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
     </CustomDashboardPanel>
   );
 };
