@@ -103,9 +103,8 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
   };
   return (
     <CustomDashboardPanel className={className} logo={logo}>
-      {/* <p></p> */}
       {body.displayInfoTooltip && body.displayInfoTooltip.shouldDisplay && body.displayInfoTooltip.text ? (
-        <Popover className={`group cursor-pointer px-2 self-end`}>
+        <Popover className={`group cursor-pointer px-2 self-end  absolute top-0 right-0 p-2`}>
           <Popover.Button as="div" ref={setReferenceElement as unknown as Ref<HTMLButtonElement>}>
             <div className="mr-4 w-4 self-end">
               <ExclamationCircleIcon height={24} color={"rgb(var(--color-customization-background-1))"} />
@@ -113,12 +112,12 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
           </Popover.Button>
           <Popover.Panel
             ref={setPopperElement as unknown as Ref<HTMLDivElement>}
-            className={`ml-24 invisible z-10  max-w-screen-md rounded-md border border-customization-background-1 bg-background-1 text-sm text-color-1 group-hover:visible`}
+            className={`invisible z-20 max-w-screen-md rounded-md border border-customization-background-1 bg-background text-sm text-color-1 group-hover:visible`}
             style={styles.popper}
             {...attributes.popper}
             static
           >
-            <div className="px-4 py-2">Hekki</div>
+            <div className="px-4 py-2">{body.displayInfoTooltip.text}</div>
           </Popover.Panel>
         </Popover>
       ) : null}
@@ -126,7 +125,8 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
       <div className="text-sm grow">{body.subText}</div>
       <Button
         variant="custom"
-        className={`rounded-s mr-2 mt-2 w-fit self-end bg-customization-background-1 text-customization-foreground-1 hover:bg-customization-background-1/75 enabled:hover:text-color-1 disabled:bg-customization-background-1 disabled:brightness-100`}
+        // TODO: fix button text color text-customization-foreground-1
+        className={`rounded-s mr-2 mt-2 w-fit self-end bg-customization-background-3 text-customization-foreground-1 hover:bg-customization-background-3/75 enabled:hover:text-color-1 disabled:bg-customization-background-3 disabled:brightness-100`}
         onClick={onButtonClick}
       >
         {body.action.text}
