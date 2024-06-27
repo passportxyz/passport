@@ -21,20 +21,20 @@ export const getRPCProvider = (payload: RequestPayload): StaticJsonRpcProvider =
 };
 
 // get the address associated with the signer in the payload
-export const getAddressFromCredential = async ({ address, signer }: RequestPayload): Promise<string> => {
+export const getAddressFromCredential = async ({ address }: RequestPayload): Promise<string> => {
   // if signer proof is provided, check validity and return associated address instead of controller
-  if (signer && signer.challenge && signer.signature) {
-    // test the provided credential has not been tampered with
-    const verified = await verifyCredential(DIDKit, signer.challenge);
-    // check the credential was issued by us for this user...
-    // Regarding the issuer, this is not verified here. If the issuer is one of the valid (trusted)
-    // issuers should be checked before calling this function.
-    if (verified && address === signer.challenge.credentialSubject.address) {
-      // which ever wallet signed this message is the wallet we want to use in provider verifications
-      return getAddress(verifyMessage(signer.challenge.credentialSubject.challenge, signer.signature));
-    }
-  }
+  // if (signer && signer.challenge && signer.signature) {
+  //   // test the provided credential has not been tampered with
+  //   const verified = await verifyCredential(DIDKit, signer.challenge);
+  //   // check the credential was issued by us for this user...
+  //   // Regarding the issuer, this is not verified here. If the issuer is one of the valid (trusted)
+  //   // issuers should be checked before calling this function.
+  //   if (verified && address === signer.challenge.credentialSubject.address) {
+  //     // which ever wallet signed this message is the wallet we want to use in provider verifications
+  //     return getAddress(verifyMessage(signer.challenge.credentialSubject.challenge, signer.signature));
+  //   }
+  // }
 
   // proof was missing/invalid return controller address from the payload
-  return address;
+  return await Promise.resolve(address);
 };

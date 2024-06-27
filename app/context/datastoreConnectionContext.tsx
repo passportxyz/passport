@@ -7,13 +7,14 @@ import { DIDSession } from "did-session";
 import { DID } from "dids";
 import axios from "axios";
 import { AccountId } from "caip";
+import { MAX_VALID_DID_SESSION_AGE } from "@gitcoin/passport-identity";
 
 import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
 import { useToast } from "@chakra-ui/react";
 import { Eip1193Provider } from "ethers";
 import { createSignedPayload } from "../utils/helpers";
 import { datadogLogs } from "@datadog/browser-logs";
-import { AuthMethod } from "@didtools/cacao";
+import { ComposeDatabase } from "@gitcoin/passport-database-client";
 
 const BUFFER_TIME_BEFORE_EXPIRATION = 60 * 60 * 1000;
 
@@ -139,7 +140,7 @@ export const useDatastoreConnection = () => {
           });
           console.log("debug - 2")
           // Unfortunate workaround due to dependency issues
-          const authMethod = (await EthereumWebAuth.getAuthMethod(provider, accountId)) as any;
+          const authMethod = await EthereumWebAuth.getAuthMethod(provider, accountId);
           // Sessions will be serialized and stored in localhost
           // The sessions are bound to an ETH address, this is why we use the address in the session key
           console.log("debug - 3")

@@ -21,20 +21,20 @@ describe("getChallenge", () => {
     expect(challenge.record?.challenge).toMatch(/^I commit that this wallet is under my control/);
   });
 
-  it("returns a challenge for Signer", () => {
-    const requestPayload = {
-      type: "Signer",
-      address: "0x1234567890123456789012345678901234567890",
-      signer: { address: "0x1234567890123456789012345678901234567890" },
-    } as RequestPayload;
+  // it("returns a challenge for Signer", () => {
+  //   const requestPayload = {
+  //     type: "Signer",
+  //     address: "0x1234567890123456789012345678901234567890",
+  //     signer: { address: "0x1234567890123456789012345678901234567890" },
+  //   } as RequestPayload;
 
-    const challenge = getChallenge(requestPayload);
+  //   const challenge = getChallenge(requestPayload);
 
-    expect(challenge.valid).toBe(true);
-    expect(challenge.record?.address).toEqual(requestPayload.signer.address);
-    expect(challenge.record?.type).toEqual(requestPayload.type);
-    expect(challenge.record?.challenge).toMatch(/^I commit that I wish to register all ETH stamps/);
-  });
+  //   expect(challenge.valid).toBe(true);
+  //   expect(challenge.record?.address).toEqual(requestPayload.signer.address);
+  //   expect(challenge.record?.type).toEqual(requestPayload.type);
+  //   expect(challenge.record?.challenge).toMatch(/^I commit that I wish to register all ETH stamps/);
+  // });
 
   it("returns a challenge for EVMBulkVerify", () => {
     const requestPayload = {

@@ -11,7 +11,7 @@ import {
 import axios, { AxiosResponse } from "axios";
 import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 import { datadogRum } from "@datadog/browser-rum";
-import { Cacao } from "@didtools/cacao";
+// import { Cacao } from "@didtools/cacao";
 import { DID } from "dids";
 
 // --- Stamp Data Point Helpers
@@ -159,14 +159,14 @@ export const createSignedPayload = async (did: DID, data: any) => {
   // Get the JWS & serialize it (this is what we would send to the BE)
   const { link, payload, signatures } = jws;
 
-  const cacao = await Cacao.fromBlockBytes(cacaoBlock);
-  const issuer = cacao.p.iss;
+  // const cacao = await Cacao.fromBlockBytes(cacaoBlock);
+  // const issuer = cacao.p.iss;
 
   return {
-    signatures: signatures,
-    payload: payload,
+    signatures: [],
+    payload: {},
     cid: Array.from(link ? link.bytes : []),
     cacao: Array.from(cacaoBlock ? cacaoBlock : []),
-    issuer,
+    issuer: [],
   };
 };

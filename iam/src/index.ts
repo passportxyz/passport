@@ -191,10 +191,10 @@ const issueCredentials = async (
   payload: RequestPayload
 ): Promise<CredentialResponseBody[]> => {
   // if the payload includes an additional signer, use that to issue credential.
-  if (payload.signer) {
-    // We can assume that the signer is a valid address because the challenge was verified within the /verify endpoint
-    payload.address = payload.signer.address;
-  }
+  // if (payload.signer) {
+  //   // We can assume that the signer is a valid address because the challenge was verified within the /verify endpoint
+  //   payload.address = payload.signer.address;
+  // }
 
   const results = await verifyTypes(types, payload);
 
@@ -421,23 +421,23 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
         const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
 
         // if an additional signer is passed verify that message was signed by passed signer address
-        if (payload.signer) {
-          const additionalChallenge = payload.signer.challenge;
+        // if (payload.signer) {
+        //   const additionalChallenge = payload.signer.challenge;
 
-          const additionalSignerCredential = await verifyCredential(DIDKit, additionalChallenge);
+        //   const additionalSignerCredential = await verifyCredential(DIDKit, additionalChallenge);
 
-          // pull the address so that its stored in a predictable (checksummed) format
-          const verifiedAddress = getAddress(
-            verifyMessage(additionalChallenge.credentialSubject.challenge, payload.signer.signature)
-          );
+        //   // pull the address so that its stored in a predictable (checksummed) format
+        //   const verifiedAddress = getAddress(
+        //     verifyMessage(additionalChallenge.credentialSubject.challenge, payload.signer.signature)
+        //   );
 
-          // if verifiedAddress does not equal the additional signer address throw an error because signature is invalid
-          if (!additionalSignerCredential || verifiedAddress.toLowerCase() !== payload.signer.address.toLowerCase()) {
-            return void errorRes(res, "Unable to verify payload signer", 401);
-          }
+        //   // if verifiedAddress does not equal the additional signer address throw an error because signature is invalid
+        //   if (!additionalSignerCredential || verifiedAddress.toLowerCase() !== payload.signer.address.toLowerCase()) {
+        //     return void errorRes(res, "Unable to verify payload signer", 401);
+        //   }
 
-          payload.signer.address = verifiedAddress;
-        }
+        //   payload.signer.address = verifiedAddress;
+        // }
 
         const singleType = !payload.types?.length;
         const types = (!singleType ? payload.types : [payload.type]).filter((type) => type);

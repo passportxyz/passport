@@ -157,11 +157,6 @@ export type RequestPayload = {
   proofs?: {
     [k: string]: string;
   };
-  signer?: {
-    challenge: VerifiableCredential;
-    signature: string;
-    address: string;
-  };
   jsonRpcSigner?: JsonRpcSigner;
   challenge?: string;
   signatureType?: SignatureType;
