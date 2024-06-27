@@ -7,7 +7,6 @@ import Link from "next/link";
 // --Components
 import PageRoot from "../components/PageRoot";
 import { CardList } from "../components/CardList";
-import { JsonOutputModal } from "../components/JsonOutputModal";
 import WelcomeFooter from "../components/WelcomeFooter";
 import Header from "../components/Header";
 import BodyWrapper from "../components/BodyWrapper";
@@ -19,16 +18,7 @@ import { DashboardValidStampsPanel } from "../components/DashboardValidStampsPan
 import { ExpiredStampsPanel } from "../components/ExpiredStampsPanel";
 
 // --Chakra UI Elements
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalOverlay,
-  Spinner,
-  useDisclosure,
-  useToast,
-} from "@chakra-ui/react";
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalOverlay, useDisclosure, useToast } from "@chakra-ui/react";
 
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 import { useWalletStore } from "../context/walletStore";
@@ -52,7 +42,7 @@ const fail = "../assets/verification-failed-bright.svg";
 export default function Dashboard() {
   const customization = useCustomization();
   const { useCustomDashboardPanel } = customization;
-  const { passport, isLoadingPassport, allPlatforms, verifiedPlatforms, databaseReady } = useContext(CeramicContext);
+  const { isLoadingPassport, allPlatforms, verifiedPlatforms, databaseReady } = useContext(CeramicContext);
   const { disconnect, dbAccessTokenStatus, dbAccessToken, did } = useDatastoreConnectionContext();
   const address = useWalletStore((state) => state.address);
   const { initiateVerification } = useOneClickVerification();
@@ -92,8 +82,6 @@ export default function Dashboard() {
   }, [customization.key]);
 
   const { refreshScore } = useContext(ScorerContext);
-
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const navigateToPage = useNavigateToPage();
 
@@ -247,14 +235,6 @@ export default function Dashboard() {
         </ProcessingPopup>
       )}
 
-      <JsonOutputModal
-        isOpen={isOpen}
-        onClose={onClose}
-        title={"Passport JSON"}
-        subheading={"You can find the Passport JSON data below"}
-        jsonOutput={passport}
-      />
-
       {isLoadingPassport == IsLoadingPassportState.FailedToConnect && retryModal}
     </>
   );
@@ -269,23 +249,6 @@ export default function Dashboard() {
     <div className={className}>
       <div className="flex items-center ">
         <span className="mr-20 font-heading text-5xl">My {filterName && `${filterName} `}Stamps</span>
-        {passport ? (
-          <button
-            data-testid="button-passport-json"
-            className="h-8 w-8 rounded-md border border-background-2 bg-background-4 text-foreground-3"
-            onClick={onOpen}
-            title="View Passport JSON"
-          >
-            {`</>`}
-          </button>
-        ) : (
-          <div
-            data-testid="loading-spinner-passport"
-            className="flex flex-row items-center rounded-md border-2 border-background-2 bg-background-4 px-[6px] py-1"
-          >
-            <Spinner className="my-[2px]" thickness="2px" speed="0.65s" emptyColor="darkGray" color="gray" size="sm" />
-          </div>
-        )}
       </div>
       {filterName && (
         <div>
