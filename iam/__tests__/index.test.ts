@@ -1195,7 +1195,11 @@ describe("POST /eas", () => {
       .spyOn(easSchemaMock, "formatMultiAttestationRequest")
       .mockReturnValue(Promise.resolve(mockMultiAttestationRequestWithPassportAndScore));
     const nonce = 0;
-    const expectedFeeUsd = 2;
+    const expectedFeeUsd = parseFloat(process.env.EAS_FEE_USD);
+
+    expect(expectedFeeUsd).toBeDefined();
+    expect(typeof expectedFeeUsd).toBe("number");
+    expect(expectedFeeUsd).toBeGreaterThan(1);
 
     const credentials = [
       {

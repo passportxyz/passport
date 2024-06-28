@@ -86,10 +86,16 @@ if (!process.env.IAM_JWK_EIP712) {
   configErrors.push("IAM_JWK_EIP712 is required");
 }
 
+if (!process.env.EAS_FEE_USD) {
+  configErrors.push("EAS_FEE_USD is required");
+}
+
 if (configErrors.length > 0) {
   configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
   throw new Error("Missing required configuration");
 }
+
+const EAS_FEE_USD = parseFloat(process.env.EAS_FEE_USD);
 
 // Wallet to use for mainnets
 // Only functional in production (set to same as testnet for non-production environments)
@@ -511,7 +517,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           attestationChainIdHex
         );
 
-        const fee = await getEASFeeAmount(2);
+        const fee = await getEASFeeAmount(EAS_FEE_USD);
         const passportAttestation: PassportAttestation = {
           multiAttestationRequest,
           nonce: Number(nonce),
@@ -589,7 +595,7 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
           attestationChainIdHex
         );
 
-        const fee = await getEASFeeAmount(2);
+        const fee = await getEASFeeAmount(EAS_FEE_USD);
         const passportAttestation: PassportAttestation = {
           multiAttestationRequest,
           nonce: Number(nonce),
@@ -645,7 +651,7 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
         attestationChainIdHex
       );
 
-      const fee = await getEASFeeAmount(2);
+      const fee = await getEASFeeAmount(EAS_FEE_USD);
       const passportAttestation: PassportAttestation = {
         multiAttestationRequest,
         nonce: Number(nonce),
