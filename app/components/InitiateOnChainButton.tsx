@@ -6,21 +6,13 @@ import React, { useState } from "react";
 import { OnchainSidebar } from "./OnchainSidebar";
 import { Button } from "./Button";
 
-const InitiateOnChainButton = ({
-  className,
-  variant = "primary",
-  text = "Bring Passport onchain",
-}: {
-  className?: string;
-  variant?: "primary" | "secondary" | "custom";
-  text?: string;
-}) => {
+const InitiateOnChainButton = ({ className }: { className?: string }) => {
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
 
   return (
     <>
-      <Button className={`${className}`} variant={`${variant}`} onClick={() => setShowSidebar(true)}>
-        {text}
+      <Button className={`${className}`} onClick={() => setShowSidebar(true)}>
+        Bring Passport onchain
       </Button>
       <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
     </>

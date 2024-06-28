@@ -93,7 +93,7 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
   const { logo, body } = customization.dashboardPanel;
 
   const onButtonClick = () => {
-    if (body.action.type === "Onchain Push") {
+    if (body.action?.type === "Onchain Push") {
       setShowSidebar(true);
     } else {
       window.open(body.action.url, "_blank");
@@ -128,7 +128,6 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
       <div className="text-sm grow">{body.subText}</div>
       <Button
         variant="custom"
-        // TODO: fix button text color text-customization-foreground-1
         className={`rounded-s mr-2 mt-2 w-fit self-end bg-customization-background-3 text-customization-foreground-2 hover:bg-customization-background-3/75 disabled:bg-customization-background-1 disabled:brightness-100`}
         onClick={onButtonClick}
       >
