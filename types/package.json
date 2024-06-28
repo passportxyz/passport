@@ -9,7 +9,7 @@
     "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",
     "prettier": "prettier --write .",
     "precommit": "lint-staged",
-    "ethers": "^6.13.1"
+    "ethers": "^5.0.32"
   },
   "devDependencies": {
     "tslint": "^6.1.3",

@@ -1,15 +1,11 @@
 // ---- Testing libraries
 import request from "supertest";
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-// import { PassportCache, providers, verifyAttestation } from "@gitcoin/passport-platforms";
-import * as mockedPlatformModule from "@gitcoin/passport-platforms";
-import type { ethers } from "ethers";
-
-const { PassportCache, providers } = mockedPlatformModule;
+import { PassportCache, providers } from "@gitcoin/passport-platforms";
+import axios from "axios";
 
 // ---- Test subject
 import { app, getAttestationDomainSeparator, verifyTypes } from "../src/index";
-import { toJsonObject } from "../src/utils/json";
 
 // ---- Types
 import {
@@ -24,26 +20,25 @@ import {
 
 import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 
-import { parseEther, Signature } from "ethers";
+import { utils } from "ethers";
 import * as easFeesMock from "../src/utils/easFees";
 import * as identityMock from "@gitcoin/passport-identity";
 import * as easSchemaMock from "../src/utils/easStampSchema";
 import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
 import { IAMError } from "../src/utils/scorerService";
-import { VerifyDidChallengeBaseError } from "../src/utils/verifyDidChallenge";
-import { verifyDidChallenge } from "../src/utils/verifyDidChallenge";
+import { VerifyDidChallengeBaseError, verifyDidChallenge } from "../src/utils/verifyDidChallenge";
 import { getEip712Issuer } from "../src/issuers";
 
 const issuer = getEip712Issuer();
 
 jest.mock("../src/utils/verifyDidChallenge", () => ({
   verifyDidChallenge: jest.fn().mockImplementation(() => "0x0"),
-  VerifyDidChallengeBaseError: class VerifyDidChallengeBaseError extends Error {},
+  VerifyDidChallengeBaseError: jest.requireActual("../src/utils/verifyDidChallenge").VerifyDidChallengeBaseError,
 }));
 
 jest.mock("../src/index", () => {
   // Require the actual module
-  const actualModule = jest.requireActual<typeof import("../src/index")>("../src/index");
+  const actualModule = jest.requireActual("../src/index");
   return {
     ...actualModule, // Spread all original functions and attributes
     validIssuers: new Set([]),
@@ -51,19 +46,24 @@ jest.mock("../src/index", () => {
 });
 
 jest.mock("ethers", () => {
-  const ethers = jest.requireActual<typeof import("ethers")>("ethers");
+  const originalModule = jest.requireActual("ethers");
+  const ethers = originalModule.ethers;
+  const utils = originalModule.utils;
 
   return {
-    ...ethers,
-    getAddress: jest.fn().mockImplementation(() => {
-      return "0x0";
-    }),
-    verifyMessage: jest.fn().mockImplementation(() => {
-      return "string";
-    }),
-    splitSignature: jest.fn().mockImplementation(() => {
-      return { v: 0, r: "r", s: "s" };
-    }),
+    utils: {
+      ...utils,
+      getAddress: jest.fn().mockImplementation(() => {
+        return "0x0";
+      }),
+      verifyMessage: jest.fn().mockImplementation(() => {
+        return "string";
+      }),
+      splitSignature: jest.fn().mockImplementation(() => {
+        return { v: 0, r: "r", s: "s" };
+      }),
+    },
+    ethers,
   };
 });
 
@@ -380,7 +380,7 @@ describe("POST /verify", function () {
   });
 
   it("handles valid verify requests with EIP712 signature, and ethers can validate the credential", async () => {
-    const originalEthers = jest.requireActual<typeof import("ethers")>("ethers");
+    const originalEthers = jest.requireActual("ethers");
     // challenge received from the challenge endpoint
     const eip712Key = process.env.IAM_JWK_EIP712;
     const eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
@@ -424,7 +424,7 @@ describe("POST /verify", function () {
     // Delete EIP712Domain so that ethers does not complain about the ambiguous primary type
     delete standardizedTypes.EIP712Domain;
 
-    const signerAddress = originalEthers.verifyTypedData(
+    const signerAddress = originalEthers.utils.verifyTypedData(
       domain,
       standardizedTypes,
       signedCredential,
@@ -434,7 +434,7 @@ describe("POST /verify", function () {
     const signerIssuedCredential = signerAddress.toLowerCase() === signedCredential.issuer.split(":").pop();
 
     if (signerIssuedCredential) {
-      const splitSignature = Signature.from(signedCredential.proof.proofValue);
+      const splitSignature = originalEthers.utils.splitSignature(signedCredential.proof.proofValue);
       return splitSignature;
     }
   });
@@ -1013,10 +1013,10 @@ const mockMultiAttestationRequestWithPassportAndScore: MultiAttestationRequest[]
           score: 23.45,
           scorer_id: 123,
         }),
-        expirationTime: BigInt(NO_EXPIRATION), // We want explicit BigInt otherwise expect(...).toBe(...) will fail
+        expirationTime: NO_EXPIRATION,
         revocable: false,
         refUID: ZERO_BYTES32,
-        value: 25000000000000000n,
+        value: "25000000000000000",
       },
     ],
   },
@@ -1029,10 +1029,10 @@ const mockMultiAttestationRequestWithPassportAndScore: MultiAttestationRequest[]
           score: 23.45,
           scorer_id: 123,
         }),
-        expirationTime: BigInt(NO_EXPIRATION), // We want explicit BigInt otherwise expect(...).toBe(...) will fail
+        expirationTime: NO_EXPIRATION,
         revocable: true,
         refUID: ZERO_BYTES32,
-        value: 25000000000000000n,
+        value: "25000000000000000",
       },
     ],
   },
@@ -1045,7 +1045,7 @@ describe("POST /eas", () => {
   beforeEach(() => {
     getEASFeeAmountSpy = jest
       .spyOn(easFeesMock, "getEASFeeAmount")
-      .mockReturnValue(Promise.resolve(parseEther("0.025")));
+      .mockReturnValue(Promise.resolve(utils.parseEther("0.025")));
   });
 
   afterEach(() => {
@@ -1214,7 +1214,7 @@ describe("POST /eas", () => {
 
     const expectedPayload = {
       passport: {
-        multiAttestationRequest: toJsonObject(mockMultiAttestationRequestWithPassportAndScore),
+        multiAttestationRequest: mockMultiAttestationRequestWithPassportAndScore,
         fee: "25000000000000000",
         nonce,
       },
@@ -1399,9 +1399,7 @@ describe("POST /eas/passport", () => {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(response.body.passport.multiAttestationRequest).toEqual(
-      toJsonObject(mockMultiAttestationRequestWithPassportAndScore)
-    );
+    expect(response.body.passport.multiAttestationRequest).toEqual(mockMultiAttestationRequestWithPassportAndScore);
     expect(response.body.passport.nonce).toEqual(nonce);
     expect(identityMock.verifyCredential).toHaveBeenCalledTimes(credentials.length);
     expect(formatMultiAttestationRequestSpy).toHaveBeenCalled();
@@ -1469,64 +1467,3 @@ describe("POST /eas/passport", () => {
 });
 
 describe("verifyTypes", () => {});
-
-describe("GET /scroll/check", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(mockedPlatformModule, "getAttestations").mockResolvedValue([]);
-  });
-
-  it("should return eligibility true when parseScoreFromAttestation returns true", async () => {
-    jest.spyOn(mockedPlatformModule, "parseScoreFromAttestation").mockReturnValue(20);
-
-    const response = await request(app)
-      .get("/scroll/check")
-      .query({ badge: "testBadge", recipient: "0x1234567890123456789012345678901234567890" })
-      .expect(200);
-
-    expect(response.body).toEqual({
-      code: 1,
-      message: "success",
-      eligibility: true,
-    });
-  });
-
-  it("should return eligibility false when parseScoreFromAttestation returns false", async () => {
-    jest.spyOn(mockedPlatformModule, "parseScoreFromAttestation").mockReturnValue(null);
-
-    const response = await request(app)
-      .get("/scroll/check")
-      .query({ badge: "testBadge", recipient: "0x1234567890123456789012345678901234567890" })
-      .expect(200);
-
-    expect(response.body).toEqual({
-      code: 0,
-      message: "0x1234567890123456789012345678901234567890 does not have an attestation with a score above 20",
-      eligibility: false,
-    });
-  });
-
-  it("should return 400 error when badge or recipient is missing", async () => {
-    const response = await request(app)
-      .get("/scroll/check")
-      .query({ recipient: "0x1234567890123456789012345678901234567890" })
-      .expect(400);
-
-    expect(response.body).toEqual({
-      error: "Missing badge or recipient parameter",
-    });
-  });
-
-  it("should return 500 error when verifyAttestation throws an error", async () => {
-    jest.spyOn(mockedPlatformModule, "getAttestations").mockRejectedValue("Error");
-
-    const response = await request(app)
-      .get("/scroll/check")
-      .query({ badge: "testBadge", recipient: "0x1234567890123456789012345678901234567890" })
-      .expect(500);
-
-    expect(response.body).toEqual({
-      error: "Error verifying attestation",
-    });
-  });
-});

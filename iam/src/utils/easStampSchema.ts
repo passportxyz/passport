@@ -1,4 +1,4 @@
-import { keccak256, parseUnits, toUtf8Bytes } from "ethers";
+import { utils } from "ethers";
 import {
   NO_EXPIRATION,
   SchemaEncoder,
@@ -15,7 +15,7 @@ const attestationSchemaEncoder = new SchemaEncoder("bytes32 provider, bytes32 ha
 
 export const encodeEasStamp = (credential: VerifiableCredential): string => {
   // We hash the provider to get a bytes32 value
-  const providerValue = keccak256(toUtf8Bytes(credential.credentialSubject.provider));
+  const providerValue = utils.keccak256(utils.toUtf8Bytes(credential.credentialSubject.provider));
 
   // We decode the hash to get back the original bytes32 value
   // The format of the hash is: v0.0.0:BASE64_ENCODED_BYTES32
@@ -36,7 +36,7 @@ export type Score = {
 export const encodeEasScore = (score: Score): string => {
   const decimals = 18;
 
-  const bnScore = parseUnits(score.score.toString(), decimals);
+  const bnScore = utils.parseUnits(score.score.toString(), decimals);
 
   const schemaEncoder = new SchemaEncoder("uint256 score,uint32 scorer_id,uint8 score_decimals");
   const encodedData = schemaEncoder.encodeData([
@@ -63,7 +63,7 @@ export const formatMultiAttestationRequest = async (
     expirationTime: NO_EXPIRATION,
     revocable: true,
     refUID: ZERO_BYTES32,
-    value: BigInt(0),
+    value: 0,
   };
 
   const stampRequestData: AttestationRequestData[] = credentials

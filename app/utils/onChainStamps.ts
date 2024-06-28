@@ -1,4 +1,5 @@
-import { Contract, JsonRpcProvider, formatUnits, Signer, BrowserProvider, Eip1193Provider } from "ethers";
+import { Contract, JsonRpcProvider, formatUnits } from "ethers";
+import { JsonRpcProvider as V5JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
 import axios from "axios";
 import onchainInfo from "../../deployments/onchainInfo.json";
@@ -26,17 +27,16 @@ const SCORE_MAX_AGE_MILLISECONDS = 1000 * 60 * 60 * 24 * 90; // 90 days
 
 export async function getAttestationData(
   address: string,
-  chainId: keyof typeof onchainInfo,
-  provider: Eip1193Provider
+  chainId: keyof typeof onchainInfo
 ): Promise<AttestationData | undefined> {
   try {
     const activeChainRpc = chains.find((chain) => chain.id === chainId)?.rpcUrl;
+
     if (!activeChainRpc) {
       throw new Error(`No rpcUrl found for chainId ${chainId}`);
     }
 
-    const ethersProvider = new BrowserProvider(provider, "any");
-    const signer = await ethersProvider.getSigner();
+    const ethersProvider = new JsonRpcProvider(activeChainRpc);
 
     const resolverAddress = onchainInfo[chainId].GitcoinResolver.address;
     const resolverAbi = GitcoinResolverAbi[chainId];
@@ -50,7 +50,9 @@ export async function getAttestationData(
 
     const eas = new EAS(onchainInfo[chainId].EAS.address);
 
-    eas.connect(signer);
+    // needed for ethers v5 eas dependency
+    const ethersV5Provider = new V5JsonRpcProvider(activeChainRpc);
+    eas.connect(ethersV5Provider);
 
     return {
       passport: await eas.getAttestation(passportUid),
@@ -65,8 +67,8 @@ export async function getAttestationData(
 export async function decodeProviderInformation(attestation: Attestation): Promise<{
   onChainProviderInfo: DecodedProviderInfo[];
   hashes: string[];
-  issuanceDates: bigint[];
-  expirationDates: bigint[];
+  issuanceDates: BigNumber[];
+  expirationDates: BigNumber[];
 }> {
   if (attestation.data === "0x") {
     return {
@@ -94,9 +96,9 @@ export async function decodeProviderInformation(attestation: Attestation): Promi
     providerNumber: number;
   };
 
-  const providers = decodedData.find((data) => data.name === "providers")?.value.value as bigint[];
-  const issuanceDates = decodedData.find((data) => data.name === "issuanceDates")?.value.value as bigint[];
-  const expirationDates = decodedData.find((data) => data.name === "expirationDates")?.value.value as bigint[];
+  const providers = decodedData.find((data) => data.name === "providers")?.value.value as BigNumber[];
+  const issuanceDates = decodedData.find((data) => data.name === "issuanceDates")?.value.value as BigNumber[];
+  const expirationDates = decodedData.find((data) => data.name === "expirationDates")?.value.value as BigNumber[];
   const hashes = decodedData.find((data) => data.name === "hashes")?.value.value as string[];
 
   const onChainProviderInfo: DecodedProviderInfo[] = providerBitMapInfo.data
@@ -125,8 +127,8 @@ export function decodeScoreAttestation(attestation: Attestation): DecodedScoreAt
   const schemaEncoder = new SchemaEncoder("uint256 score,uint32 scorer_id,uint8 score_decimals");
   const decodedData = schemaEncoder.decodeData(attestation.data);
 
-  const score_as_integer = decodedData.find(({ name }) => name === "score")?.value.value as bigint;
-  const score_decimals = decodedData.find(({ name }) => name === "score_decimals")?.value.value as bigint;
+  const score_as_integer = (decodedData.find(({ name }) => name === "score")?.value.value as BigNumber)._hex;
+  const score_decimals = decodedData.find(({ name }) => name === "score_decimals")?.value.value as number;
 
   const score = parseFloat(formatUnits(score_as_integer, score_decimals));
   const issuanceDate = new Date(BigNumber.from(attestation.time).mul(1000).toNumber()) || undefined;
