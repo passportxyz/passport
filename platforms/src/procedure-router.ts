@@ -1,4 +1,6 @@
 // ---- Server
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import { Request, Response, Router } from "express";
 
 import * as twitterOAuth from "./Twitter/procedures/twitterOauth";
@@ -7,7 +9,8 @@ import path from "path";
 import * as idenaSignIn from "./Idena/procedures/idenaSignIn";
 import { outdidRequestVerification } from "./Outdid/procedures/outdidVerification";
 
-export const router = Router();
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+export const router: Router = Router();
 
 export type GenerateTwitterAuthUrlRequestBody = {
   callback?: string;

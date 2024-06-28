@@ -11,11 +11,26 @@
     "outDir": "dist/esm",
     "allowJs": true,
     "baseUrl": "src",
+    "types": [
+      "node",
+      "jest"
+    ],
     "paths": {
-      "*": ["../node_modules/*", "node_modules/*"]
+      "*": [
+        "../node_modules/*",
+        "node_modules/*"
+      ],
     },
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "lib": [
+      "es2020",
+      "dom"
+    ],
   },
-  "include": ["src/*", "___test___", "integration-tests"]
+  "include": [
+    "src/*",
+    "___test___",
+    "integration-tests"
+  ]
 }

@@ -1,5 +1,4 @@
 import { parseEther } from "ethers";
-import { BigNumber } from "@ethersproject/bignumber";
 import Moralis from "moralis";
 import { PassportCache } from "@gitcoin/passport-platforms";
 

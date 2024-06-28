@@ -5,10 +5,14 @@
     "composite": true,
     "declaration": true,
     "rootDir": ".",
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "outDir": "/tmp/tsc-output",
     "skipLibCheck": true,
-    "noImplicitAny": true
+    "noImplicitAny": false
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }

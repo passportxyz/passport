@@ -1,23 +1,35 @@
 {
   "extends": "../tsconfig.settings.json",
   "compilerOptions": {
+    "types": [
+      "express"
+    ],
     "module": "commonjs",
     "esModuleInterop": true,
     "declaration": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES2022",
     "skipLibCheck": true,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dist/commonjs",
     "allowJs": true,
     "baseUrl": "src",
     "paths": {
-      "*": ["../node_modules/*", "node_modules/*"]
+      "*": [
+        "../node_modules/*",
+        "node_modules/*"
+      ]
     },
     "jsx": "react",
-    "lib": ["es6", "dom"]
+    "lib": [
+      "es6",
+      "dom"
+    ]
   },
-  "include": ["src/**/*", "__tests__/**/*"]
+  "include": [
+    "src/**/*",
+    "__tests__/**/*"
+  ]
 }

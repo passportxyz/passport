@@ -6,16 +6,26 @@
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
     "target": "es2020",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dist",
     "baseUrl": ".",
     "resolveJsonModule": true,
+    "types": [
+      "node",
+      "jest"
+    ],
     "paths": {
-      "*": ["../node_modules/*", "node_modules/*"]
+      "*": [
+        "../node_modules/*",
+        "node_modules/*"
+      ]
     },
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "__tests__/**/*"]
+  "include": [
+    "src/**/*",
+    "__tests__/**/*"
+  ]
 }

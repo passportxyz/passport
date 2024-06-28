@@ -162,7 +162,7 @@ function groupProviderTypesByPlatform(types: string[]): string[][] {
 }
 
 // create the app and run on port
-export const app = express();
+export const app: express.Application = express();
 
 // parse JSON post bodies
 app.use(express.json());

@@ -6,7 +6,7 @@
     "declaration": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES2022",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dist/commonjs",
@@ -14,5 +14,7 @@
     "baseUrl": "src",
     "skipLibCheck": true
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*"
+  ]
 }

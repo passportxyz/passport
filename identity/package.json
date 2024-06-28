@@ -1,5 +1,6 @@
 {
   "name": "@gitcoin/passport-identity",
+  "private": true,
   "version": "1.0.0",
   "license": "MIT",
   "main": "dist/commonjs/index.js",
@@ -17,7 +18,7 @@
   "dependencies": {
     "@ethersproject/base64": "^5.6.1",
     "@ethersproject/providers": "^5.6.2",
-    "@gitcoin/passport-types": "^1.0.0",
+    "@gitcoin/passport-types": "workspace:*",
     "axios": "^0.26.1"
   },
   "devDependencies": {
@@ -26,7 +27,7 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "clean": "rimraf dist node_modules",
+    "clean": "rimraf dist",
     "build": "tsc",
     "test": "jest --verbose",
     "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",

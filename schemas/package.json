@@ -1,5 +1,6 @@
 {
   "name": "@gitcoin/passport-schemas",
+  "private": true,
   "version": "1.0.0",
   "license": "MIT",
   "main": "dist/commonjs/index.js",
@@ -12,11 +13,11 @@
     "dist"
   ],
   "injectEnvironmentFiles": [
-    ".env.yarn"
+    ".env.pnpm"
   ],
   "scripts": {
     "build": "tsc -b .",
-    "clean": "rimraf node_modules",
+    "clean": "rimraf dist",
     "models:create-composite": "composedb composite:create models/passportStamps.graphql --output=composites/gitcoin-passport-stamps-composite.json --did-private-key=${PRIVATE_KEY}",
     "models:deploy-composite": "composedb composite:deploy composites/gitcoin-passport-stamps-composite.json --ceramic-url=${CERAMIC_URL} --did-private-key=${PRIVATE_KEY}",
     "models:compile-composite": "composedb composite:compile composites/gitcoin-passport-stamps-composite.json src/definitions/ts/gitcoin-passport-stamps.ts --ceramic-url=${CERAMIC_URL} && composedb composite:compile composites/gitcoin-passport-stamps-composite.json src/definitions/json/gitcoin-passport-stamps.json --ceramic-url=${CERAMIC_URL}",
@@ -30,6 +31,7 @@
     "@ceramicnetwork/cli": "^2.3.1",
     "@composedb/cli": "^0.6.1",
     "@glazed/devtools": "^0.2.0",
-    "@types/node": "^16.11.6"
+    "@types/node": "^16.11.6",
+    "typescript": "^5.3.3"
   }
 }

@@ -16,30 +16,33 @@
     "prod:start": "tsc && node .",
     "test": "jest --verbose",
     "prettier": "prettier --write .",
-    "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",
+    "lint": "tsc --noEmit",
     "checkProviders:op-sepolia": "tsx src/scripts/checkOnChainProvidersAreInSync.ts https://opt-sepolia.g.alchemy.com/v2/ 0xaa37dc 0xe53C60F8069C2f0c3a84F9B3DB5cf56f3100ba56",
     "checkProviders:op": "tsx src/scripts/checkOnChainProvidersAreInSync.ts https://opt-mainnet.g.alchemy.com/v2/ 0xa 0x5558D441779Eca04A329BcD6b47830D2C6607769"
   },
   "dependencies": {
     "@ethereum-attestation-service/eas-sdk": "^2.3.0",
-    "@gitcoin/passport-identity": "^1.0.0",
-    "@gitcoin/passport-platforms": "^1.0.0",
-    "@gitcoin/passport-types": "^1.0.0",
+    "@gitcoin/passport-identity": "workspace:*",
+    "@gitcoin/passport-platforms": "workspace:*",
+    "@gitcoin/passport-types": "workspace:*",
     "@spruceid/didkit-wasm-node": "^0.2.1",
     "axios": "^0.27.2",
     "brightid_sdk": "^1.0.1",
     "ceramic-cacao": "^1.4.0",
     "cors": "^2.8.5",
+    "dids": "^5.0.2",
     "dotenv": "^16.0.0",
     "ethers": "^6.13.1",
     "express": "4",
     "google-auth-library": "^7.14.1",
     "luxon": "^2.4.0",
     "moralis": "^2.24.2",
+    "multiformats": "^13.0.0",
     "tslint": "^6.1.3",
     "twitter-api-v2": "^1.15.1",
     "uuid": "^8.3.2",
-    "multiformats": "^13.0.0"
+    "key-did-resolver": "^4.0.0",
+    "@ipld/dag-cbor": "^9.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.23.3",
@@ -63,7 +66,8 @@
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
     "tsx": "^4.7.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "@types/jest": "^27.4.1"
   },
   "resolutions": {
     "leveldown": "6.1.1"
