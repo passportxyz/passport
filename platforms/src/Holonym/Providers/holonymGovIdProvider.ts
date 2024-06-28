@@ -6,7 +6,7 @@ import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import axios from "axios";
 
 // ----- Credential verification
-import { getAddressFromCredential } from "../../utils/signer";
+import { getAddress } from "../../utils/signer";
 
 // ----- Utils
 import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
@@ -33,7 +33,7 @@ export class HolonymGovIdProvider implements Provider {
   // Verify that the address defined in the payload has proven uniqueness using Holonym
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     // if a signer is provider we will use that address to verify against
-    const address = (await getAddressFromCredential(payload)).toLowerCase();
+    const address = (await getAddress(payload)).toLowerCase();
     const errors = [];
     let record = undefined,
       valid = false;

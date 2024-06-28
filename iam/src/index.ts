@@ -1,11 +1,16 @@
+// import { EnsProvider } from './providers/ens';
+// Should this file be an app factory? If it was, we could move the provider config to main.ts and test in isolation
+
 // ---- Server
 import express, { Request } from "express";
 import { router as procedureRouter } from "@gitcoin/passport-platforms/procedure-router";
+import { TypedDataDomain } from "@ethersproject/abstract-signer";
 
 // ---- Production plugins
 import cors from "cors";
 
 // ---- Web3 packages
+import { utils, ethers } from "ethers";
 
 // ---- Types
 import { Response } from "express";
@@ -34,16 +39,12 @@ import * as DIDKit from "@spruceid/didkit-wasm-node";
 import { issueChallengeCredential, issueHashedCredential, verifyCredential } from "@gitcoin/passport-identity";
 
 // All provider exports from platforms
-import { providers, platforms, getAttestations, parseScoreFromAttestation } from "@gitcoin/passport-platforms";
+import { providers, platforms } from "@gitcoin/passport-platforms";
 
 import path from "path";
 import { fileURLToPath } from "url";
 import { IAMError } from "./utils/scorerService.js";
 import { VerifyDidChallengeBaseError } from "./utils/verifyDidChallenge.js";
-import { EIP712Proxy } from "@ethereum-attestation-service/eas-sdk/dist/eip712-proxy.js";
-import { SchemaEncoder, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
-import { getAddress, verifyMessage, Wallet, TypedDataDomain, Signature } from "ethers";
-import { toJsonObject } from "./utils/json.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -92,11 +93,11 @@ if (configErrors.length > 0) {
 
 // Wallet to use for mainnets
 // Only functional in production (set to same as testnet for non-production environments)
-const productionAttestationSignerWallet = new Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
+const productionAttestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
 // Wallet to use for testnets
-const testAttestationSignerWallet = new Wallet(process.env.TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY);
+const testAttestationSignerWallet = new ethers.Wallet(process.env.TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY);
 
-export const getAttestationSignerForChain = async (chainIdHex: keyof typeof onchainInfo): Promise<Wallet> => {
+const getAttestationSignerForChain = async (chainIdHex: keyof typeof onchainInfo): Promise<ethers.Wallet> => {
   const productionAttestationIssuerAddress = await productionAttestationSignerWallet.getAddress();
   const chainUsesProductionIssuer =
     onchainInfo[chainIdHex].issuer.address.toLowerCase() === productionAttestationIssuerAddress.toLowerCase();
@@ -262,7 +263,7 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
   // check for a valid payload
   if (payload.address && payload.type) {
     // ensure address is check-summed
-    payload.address = getAddress(payload.address);
+    payload.address = utils.getAddress(payload.address);
     // generate a challenge for the given payload
     const challenge = getChallenge(payload);
     // if the request is valid then proceed to generate a challenge credential
@@ -427,8 +428,8 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
           const additionalSignerCredential = await verifyCredential(DIDKit, additionalChallenge);
 
           // pull the address so that its stored in a predictable (checksummed) format
-          const verifiedAddress = getAddress(
-            verifyMessage(additionalChallenge.credentialSubject.challenge, payload.signer.signature)
+          const verifiedAddress = utils.getAddress(
+            utils.verifyMessage(additionalChallenge.credentialSubject.challenge, payload.signer.signature)
           );
 
           // if verifiedAddress does not equal the additional signer address throw an error because signature is invalid
@@ -522,9 +523,9 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
         const signer = await getAttestationSignerForChain(attestationChainIdHex);
 
         signer
-          .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+          ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {
-            const { v, r, s } = Signature.from(signature);
+            const { v, r, s } = utils.splitSignature(signature);
 
             const payload: EasPayload = {
               passport: passportAttestation,
@@ -532,7 +533,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
               invalidCredentials,
             };
 
-            return void res.type("application/json").send(toJsonObject(payload));
+            return void res.json(payload);
           })
           .catch(() => {
             return void errorRes(res, "Error signing passport", 500);
@@ -589,7 +590,6 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
         );
 
         const fee = await getEASFeeAmount(2);
-
         const passportAttestation: PassportAttestation = {
           multiAttestationRequest,
           nonce: Number(nonce),
@@ -601,9 +601,9 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
         const signer = await getAttestationSignerForChain(attestationChainIdHex);
 
         signer
-          .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+          ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {
-            const { v, r, s } = Signature.from(signature);
+            const { v, r, s } = utils.splitSignature(signature);
 
             const payload: EasPayload = {
               passport: passportAttestation,
@@ -611,10 +611,9 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
               invalidCredentials,
             };
 
-            return void res.json(toJsonObject(payload));
+            return void res.json(payload);
           })
-          .catch((e) => {
-            console.error("Error signing score", e);
+          .catch(() => {
             return void errorRes(res, "Error signing passport", 500);
           });
       })
@@ -656,10 +655,11 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
       const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
 
       const signer = await getAttestationSignerForChain(attestationChainIdHex);
+
       signer
-        .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+        ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
         .then((signature) => {
-          const { v, r, s } = Signature.from(signature);
+          const { v, r, s } = utils.splitSignature(signature);
 
           const payload: EasPayload = {
             passport: passportAttestation,
@@ -667,9 +667,9 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
             invalidCredentials: [],
           };
 
-          return void res.json(toJsonObject(payload));
+          return void res.json(payload);
         })
-        .catch((e) => {
+        .catch(() => {
           return void errorRes(res, "Error signing score", 500);
         });
     } catch (error) {
@@ -687,105 +687,3 @@ app.use("/procedure", procedureRouter);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use("/static", express.static(path.join(__dirname, "static")));
-
-// Check Eligibility For Minting Badge
-app.get("/scroll/check", async (req: Request, res: Response): Promise<void> => {
-  const { badge, recipient } = req.query;
-
-  if (!badge || !recipient || typeof recipient !== "string" || typeof badge !== "string") {
-    return void errorRes(res, "Missing badge or recipient parameter", 400);
-  }
-
-  try {
-    const attestations = await getAttestations(recipient, badge, process.env.SCROLL_EAS_SCAN_URL);
-    const score = parseScoreFromAttestation(attestations, process.env.SCROLL_BADGE_SCHEMA_UID);
-
-    const eligibility = Boolean(score && score >= 20);
-    return void res.json({
-      code: eligibility ? 1 : 0,
-      message: eligibility ? "success" : `${recipient} does not have an attestation with a score above 20`,
-      eligibility,
-    });
-  } catch (error) {
-    console.error("Error verifying attestation:", error);
-    return void errorRes(res, "Error verifying attestation", 500);
-  }
-});
-
-// Claim Badge
-app.get("/scroll/claim", async (req: Request, res: Response): Promise<void> => {
-  // See example implementation here: https://github.com/scroll-tech/canvas-contracts/blob/master/examples/src/attest-server.js
-  const { badge, recipient } = req.query;
-
-  if (!recipient || typeof recipient !== "string")
-    return void res.json({ code: 0, message: "missing query parameter 'recipient'" });
-  if (!badge || typeof badge !== "string") return void res.json({ code: 0, message: "missing parameter 'badge'" });
-
-  const attestations = await getAttestations(recipient, badge, process.env.SCROLL_EAS_SCAN_URL);
-  const score = parseScoreFromAttestation(attestations, process.env.SCROLL_BADGE_SCHEMA_UID);
-
-  const eligibility = score && score >= 20;
-  if (!eligibility) return void res.json({ eligibility, code: 0, message: "not eligible" });
-  if (typeof badge !== "string") return void res.json({ eligibility, code: 0, message: "invalid parameter 'badge'" });
-
-  try {
-    const proxy = new EIP712Proxy(badge);
-
-    const encoder = new SchemaEncoder(process.env.SCROLL_BADGE_SCHEMA);
-    const data = encoder.encodeData([
-      { name: "badge", value: badge, type: "address" },
-      { name: "payload", value: "0x", type: "bytes" },
-    ]);
-
-    const currentTime = Math.floor(new Date().getTime() / 1000);
-    const deadline = currentTime + 3600;
-
-    const SCROLL_CHAIN_ID: keyof typeof onchainInfo = "0x82750";
-    const signer = await getAttestationSignerForChain(SCROLL_CHAIN_ID);
-
-    const delegatedProxy = await proxy.connect(signer).getDelegated();
-    const attestation = {
-      // attestation data
-      schema: process.env.SCROLL_BADGE_SCHEMA_UID,
-      recipient,
-      data,
-
-      // unused fields
-      revocable: true,
-      refUID: ZERO_BYTES32,
-      value: BigInt(0),
-      expirationTime: NO_EXPIRATION,
-
-      // signature details
-      deadline: BigInt(deadline),
-      attester: signer.address,
-    };
-    const signature = await delegatedProxy.signDelegatedProxyAttestation(attestation, signer);
-
-    // claimer vs attester
-    const attestByDelegationInput = {
-      schema: attestation.schema,
-      data: attestation,
-      attester: attestation.attester,
-      signature: signature.signature,
-      deadline: attestation.deadline,
-    };
-    // const res = await attesterProxy.connect(claimer).attestByDelegationProxy(badge);
-    // proxy.connect(signer).attestByDelegationProxy(
-    //   {
-    //       schema: process.env.SCROLL_BADGE_SCHEMA_UID,
-    //       data,
-    //       attester: attestation.attester,
-    //       signature: signature.signature,
-    //       deadline: attestation.deadline,
-    //     }
-    // )
-
-    const tx = await proxy.contract.attestByDelegation.populateTransaction(attestByDelegationInput);
-    // const tx = await proxy.contract.populateTransaction.attestByDelegation(attestByDelegationInput);
-    return void res.json({ code: 1, message: "success", tx });
-  } catch (e) {
-    console.error("Error claiming badge:", e);
-    return void res.json({ code: 0, message: String(e) });
-  }
-});

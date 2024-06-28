@@ -175,8 +175,4 @@ export const getIamSecrets = (PASSPORT_VC_SECRETS_ARN: string, IAM_SERVER_SSM_AR
     name: "OUTDID_API_SECRET",
     valueFrom: `${IAM_SERVER_SSM_ARN}:OUTDID_API_SECRET::`,
   },
-  {
-    name: "SCROLL_EAS_SCAN_URL",
-    valueFrom: `${IAM_SERVER_SSM_ARN}:SCROLL_EAS_SCAN_URL::`,
-  }
 ];

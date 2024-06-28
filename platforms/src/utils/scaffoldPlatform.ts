@@ -79,11 +79,11 @@ function createStructure(basePath: string, structure: FileStructure): void {
       const dirPath = path.join(basePath, key);
       fs.mkdirSync(dirPath, { recursive: true });
       // Recursively create the inner directories or files
-      createStructure(dirPath, structure[key]);
+      createStructure(dirPath, structure[key] as FileStructure);
     } else {
       // If the value is not an object, it's a file
       const filePath = path.join(basePath, key);
-      fs.writeFileSync(filePath, structure[key]);
+      fs.writeFileSync(filePath, structure[key] as string);
     }
   }
 }

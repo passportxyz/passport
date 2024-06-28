@@ -1,5 +1,5 @@
 import { getEASFeeAmount } from "../src/utils/easFees";
-import { parseEther } from "ethers";
+import { utils } from "ethers";
 import Moralis from "moralis";
 import { PassportCache } from "@gitcoin/passport-platforms";
 
@@ -38,7 +38,7 @@ describe("EthPriceLoader", () => {
       const result = await getEASFeeAmount(usdFeeAmount);
 
       const expectedEthFeeAmount = usdFeeAmount / 3000;
-      const expectedBigNumberValue = parseEther(expectedEthFeeAmount.toFixed(18));
+      const expectedBigNumberValue = utils.parseEther(expectedEthFeeAmount.toFixed(18));
 
       expect(result).toEqual(expectedBigNumberValue);
     });

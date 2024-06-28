@@ -11,30 +11,30 @@ import * as identityMock from "@gitcoin/passport-identity";
 import * as easSchemaMock from "../src/utils/easStampSchema";
 import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
 import { IAMError } from "../src/utils/scorerService";
-import { toJsonObject } from "../src/utils/json";
-
-jest.mock("../src/utils/verifyDidChallenge", () => ({
-  verifyDidChallenge: jest.fn(),
-}));
 
 jest.mock("@gitcoin/passport-identity", () => ({
   ...jest.requireActual("@gitcoin/passport-identity"),
 }));
 
 jest.mock("ethers", () => {
-  const ethers = jest.requireActual<typeof import("ethers")>("ethers");
+  const originalModule = jest.requireActual("ethers");
+  const ethers = originalModule.ethers;
+  const utils = originalModule.utils;
 
   return {
-    ...ethers,
-    getAddress: jest.fn().mockImplementation(() => {
-      return "0x0";
-    }),
-    verifyMessage: jest.fn().mockImplementation(() => {
-      return "string";
-    }),
-    splitSignature: jest.fn().mockImplementation(() => {
-      return { v: 0, r: "r", s: "s" };
-    }),
+    utils: {
+      ...utils,
+      getAddress: jest.fn().mockImplementation(() => {
+        return "0x0";
+      }),
+      verifyMessage: jest.fn().mockImplementation(() => {
+        return "string";
+      }),
+      splitSignature: jest.fn().mockImplementation(() => {
+        return { v: 0, r: "r", s: "s" };
+      }),
+    },
+    ethers,
   };
 });
 
@@ -74,26 +74,7 @@ const mockMultiAttestationRequestWithScore: MultiAttestationRequest[] = [
           score: 23.45,
           scorer_id: 123,
         }),
-        expirationTime: BigInt(NO_EXPIRATION),
-        revocable: false,
-        refUID: ZERO_BYTES32,
-        value: 25000000000000000n,
-      },
-    ],
-  },
-];
-
-const mockSerializedMultiAttestationResponseWithScore = [
-  {
-    schema: "0x853a55f39e2d1bf1e6731ae7148976fbbb0c188a898a233dba61a233d8c0e4a4",
-    data: [
-      {
-        recipient: "0x0987654321098765432109876543210987654321",
-        data: easSchemaMock.encodeEasScore({
-          score: 23.45,
-          scorer_id: 123,
-        }),
-        expirationTime: NO_EXPIRATION.toString(),
+        expirationTime: NO_EXPIRATION,
         revocable: false,
         refUID: ZERO_BYTES32,
         value: "25000000000000000",
@@ -151,9 +132,9 @@ describe("POST /eas/score", () => {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(response.body.passport.multiAttestationRequest).toEqual(mockSerializedMultiAttestationResponseWithScore);
+    expect(response.body.passport.multiAttestationRequest).toEqual(mockMultiAttestationRequestWithScore);
     expect(response.body.passport.nonce).toEqual(nonce);
-    expect(formatMultiAttestationRequestSpy).toHaveBeenCalled();
+    expect(formatMultiAttestationRequestSpy).toBeCalled();
   });
 
   it("handles error during the formatting of the score", async () => {

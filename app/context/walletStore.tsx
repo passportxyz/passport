@@ -9,7 +9,7 @@ import { onboard } from "../utils/onboard";
 
 // --- Utils & configs
 import { create } from "zustand";
-import { WalletState } from "@web3-onboard/core";
+import { WalletState } from "@web3-onboard/core/dist/types";
 import { Eip1193Provider } from "ethers";
 
 const getPreviouslyUsedWalletLabel = () => window.localStorage.getItem("previouslyUsedWalletLabel") || "";
