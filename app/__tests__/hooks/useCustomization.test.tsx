@@ -107,6 +107,8 @@ jest.mock("axios", () => {
                 customizationBackground1: "255 136 70",
                 customizationBackground2: "255 136 70",
                 customizationForeground1: "255 255 255",
+                customizationForeground2: "255 255 255",
+                customizationBackground3: "255 136 70",
               },
             },
           },
@@ -125,6 +127,8 @@ const TestingComponent = ({ customizationKey }: { customizationKey?: string }) =
   useEffect(() => {
     setCustomizationKey(customizationKey);
   }, [customizationKey, setCustomizationKey]);
+
+  console.log("LARIAS KEY", key);
 
   return (
     <div>
