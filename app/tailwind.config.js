@@ -51,7 +51,9 @@ module.exports = {
         // colors defined by an API call
         "customization-background-1": "rgb(var(--color-customization-background-1) / <alpha-value>)",
         "customization-background-2": "rgb(var(--color-customization-background-2) / <alpha-value>)",
+        "customization-background-3": "rgb(var(--color-customization-background-3) / <alpha-value>)",
         "customization-foreground-1": "rgb(var(--color-customization-foreground-1) / <alpha-value>)",
+        "customization-foreground-2": "rgb(var(--color-customization-foreground-2) / <alpha-value>)",
 
         // Temporary, to be removed
         accent: "#000",

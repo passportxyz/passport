@@ -1,4 +1,4 @@
-import React, { useMemo, useState, Ref } from "react";
+import React, { useMemo, useState, Ref, ReactElement, JSXElementConstructor } from "react";
 import { VeraxPanel } from "../components/VeraxPanel";
 import { TestingPanel } from "../components/TestingPanel";
 import { Button } from "../components/Button";
@@ -8,6 +8,7 @@ import { OnchainSidebar } from "./OnchainSidebar";
 import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
 import { Popover } from "@headlessui/react";
 import { usePopper } from "react-popper";
+import { renderToString } from "react-dom/server";
 
 type CustomDashboardPanelProps = {
   logo: {
@@ -59,8 +60,6 @@ export const CustomDashboardPanel = ({ logo, className, children }: CustomDashbo
         {logoBackground && <div className="col-start-1 flex row-start-1 z-0">{logoBackground}</div>}
       </div>
       <div className="relative flex flex-col justify-start gap-2 bg-gradient-to-b from-transparent to-customization-background-2/[.26] p-6 w-full">
-        {/* <p>T</p> */}
-
         {children}
       </div>
     </div>
@@ -91,7 +90,6 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
   if (customization.key === "testing") {
     return <TestingPanel className={className} />;
   }
-  console.log("customization", customization);
   const { logo, body } = customization.dashboardPanel;
 
   const onButtonClick = () => {
@@ -121,12 +119,17 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
           </Popover.Panel>
         </Popover>
       ) : null}
-      <div>{body.mainText}</div>
+      <div
+        dangerouslySetInnerHTML={{
+          __html: renderToString(body.mainText as ReactElement<any, string | JSXElementConstructor<any>>) || "",
+        }}
+      />
+
       <div className="text-sm grow">{body.subText}</div>
       <Button
         variant="custom"
         // TODO: fix button text color text-customization-foreground-1
-        className={`rounded-s mr-2 mt-2 w-fit self-end bg-customization-background-3 text-customization-foreground-1 hover:bg-customization-background-3/75 enabled:hover:text-color-1 disabled:bg-customization-background-3 disabled:brightness-100`}
+        className={`rounded-s mr-2 mt-2 w-fit self-end bg-customization-background-3 text-customization-foreground-2 hover:bg-customization-background-3/75 disabled:bg-customization-background-1 disabled:brightness-100`}
         onClick={onButtonClick}
       >
         {body.action.text}
