@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { Contract, version, JsonRpcProvider, BaseContract } from "ethers";
+import { providers, Contract, version } from "ethers";
 import decoderAbi from "../../../deployments/abi/GitcoinPassportDecoder.json";
 
 import providerBitMapInfo from "../static/providerBitMapInfo.json";
@@ -23,14 +23,14 @@ function difference<T>(setA: Set<T>, setB: Set<T>): Set<T> {
   return diff;
 }
 
-interface CustomContract extends BaseContract {
-  getProviders(arg0: number): Promise<string[]>;
-  currentVersion(): Promise<string>;
+interface CustomContract extends Contract {
+  getProviders: (arg0: number) => Promise<string[]>;
+  currentVersion: () => Promise<string>;
 }
 
 async function main() {
   let exitCode = 0;
-  const provider = new JsonRpcProvider(apiUrl);
+  const provider = new providers.JsonRpcProvider(apiUrl);
   const decoderContract = new Contract(
     decoderContractAddress,
     decoderAbi[chainId],

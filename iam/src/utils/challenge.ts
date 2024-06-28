@@ -2,7 +2,7 @@
 import { ChallengePayload, RequestPayload, VerifyRequestBody } from "@gitcoin/passport-types";
 import crypto from "crypto";
 import { verifyDidChallenge } from "./verifyDidChallenge.js";
-import { getAddress, verifyMessage } from "ethers";
+import { utils } from "ethers";
 // request a challenge sig
 export const getChallenge = (payload: RequestPayload): ChallengePayload => {
   // @TODO - expand this to allow providers to set custom challanges?
@@ -47,7 +47,7 @@ export const verifyChallengeAndGetAddress = async ({
   // otherwise, use the old wallet signed challenge
   const uncheckedAddress = signedChallenge
     ? await verifyDidChallenge(signedChallenge, challenge.credentialSubject.challenge)
-    : verifyMessage(challenge.credentialSubject.challenge, payload.proofs.signature);
+    : utils.verifyMessage(challenge.credentialSubject.challenge, payload.proofs.signature);
 
-  return getAddress(uncheckedAddress);
+  return utils.getAddress(uncheckedAddress);
 };

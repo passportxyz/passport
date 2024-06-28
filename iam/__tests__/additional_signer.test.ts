@@ -13,27 +13,32 @@ jest.mock("../src/utils/verifyDidChallenge", () => ({
 }));
 
 jest.mock("ethers", () => {
-  const ethers = jest.requireActual<typeof import("ethers")>("ethers");
+  const originalModule = jest.requireActual("ethers") as any;
+  const ethers = originalModule.ethers;
+  const utils = originalModule.utils;
 
   return {
-    ...ethers,
-    getAddress: jest
-      .fn()
-      .mockImplementationOnce(() => {
-        return "0x1";
-      })
-      .mockImplementationOnce(() => {
-        return "0xAbC";
-      })
-      .mockImplementationOnce(() => {
-        return "0xAbC";
+    utils: {
+      ...utils,
+      getAddress: jest
+        .fn()
+        .mockImplementationOnce(() => {
+          return "0x1";
+        })
+        .mockImplementationOnce(() => {
+          return "0xAbC";
+        })
+        .mockImplementationOnce(() => {
+          return "0xAbC";
+        }),
+      verifyMessage: jest.fn().mockImplementation(() => {
+        return "string";
       }),
-    verifyMessage: jest.fn().mockImplementation(() => {
-      return "string";
-    }),
-    splitSignature: jest.fn().mockImplementation(() => {
-      return { v: 0, r: "r", s: "s" };
-    }),
+      splitSignature: jest.fn().mockImplementation(() => {
+        return { v: 0, r: "r", s: "s" };
+      }),
+    },
+    ethers,
   };
 });
 

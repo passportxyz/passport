@@ -12,7 +12,6 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { decodeProviderInformation, decodeScoreAttestation, getAttestationData } from "../utils/onChainStamps";
 import { FeatureFlags } from "../config/feature_flags";
 import { UseQueryResult, useQueries, useQueryClient } from "@tanstack/react-query";
-import { Eip1193Provider } from "ethers";
 
 const ENABLED_CHAIN_IDS = chains
   .filter(({ attestationProvider }) => attestationProvider?.status === "enabled")
@@ -62,13 +61,11 @@ type GetOnChainDataForChainResult = SingleChainData & { chainId: string };
 const getOnChainDataForChain = async ({
   address,
   chainId,
-  provider,
 }: {
   address: string;
   chainId: string;
-  provider: Eip1193Provider;
 }): Promise<GetOnChainDataForChainResult> => {
-  const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo, provider);
+  const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
   let providers: OnChainProviderType[] = [];
   let score = 0;
   let expirationDate: Date | undefined;
@@ -82,8 +79,8 @@ const getOnChainDataForChain = async ({
       .map((providerInfo, index) => ({
         providerName: providerInfo.providerName,
         credentialHash: `v0.0.0:${Buffer.from(hashes[index].slice(2), "hex").toString("base64")}`,
-        expirationDate: new Date(Number(expirationDates[index]) * 1000),
-        issuanceDate: new Date(Number(issuanceDates[index]) * 1000),
+        expirationDate: new Date(expirationDates[index].toNumber() * 1000),
+        issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
       }));
 
     ({ score, expirationDate } = decodeScoreAttestation(passportAttestationData.score));
@@ -98,7 +95,6 @@ const getOnChainDataForChain = async ({
 };
 
 const useOnChainDataQuery = (address?: string) => {
-  const provider = useWalletStore((state) => state.provider);
   // Combines results of all queries into a single object
   const combine = useCallback((results: UseQueryResult<GetOnChainDataForChainResult>[]) => {
     const isPending = results.some((result) => result.isPending);
@@ -126,9 +122,9 @@ const useOnChainDataQuery = (address?: string) => {
 
   return useQueries({
     queries: ENABLED_CHAIN_IDS.map((chainId) => ({
-      enabled: FeatureFlags.FF_CHAIN_SYNC && Boolean(address) && Boolean(provider),
+      enabled: FeatureFlags.FF_CHAIN_SYNC && Boolean(address),
       queryKey: [ALL_CHAIN_DATA_QUERY_KEY, address, chainId],
-      queryFn: () => getOnChainDataForChain({ address: address!, chainId, provider: provider! }),
+      queryFn: () => getOnChainDataForChain({ address: address!, chainId }),
     })),
     combine,
   });
