@@ -4,10 +4,10 @@
   "version": "1.0.0",
   "scripts": {
     "start": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next dev -p 3000",
-    "export": "ts-node ./scripts/preBuild.ts && NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next build && next export",
+    "export": "tsx ./scripts/preBuild.tsx && NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next build && next export",
     "build": "tsx ./scripts/preBuild.tsx && NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next build",
     "prod-start": "NEXT_PUBLIC_GIT_COMMIT_HASH=$(git rev-parse --short HEAD) next start",
-    "clean": "rimraf node_modules && rimraf .next",
+    "clean": "rimraf .next out",
     "lint": "next lint && prettier --check .",
     "lint:fix": "next lint && prettier --write .",
     "test": "jest"
@@ -21,10 +21,10 @@
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@ethereum-attestation-service/eas-sdk": "^2.3.0",
-    "@gitcoin/passport-database-client": "^1.0.0",
-    "@gitcoin/passport-identity": "^1.0.0",
-    "@gitcoin/passport-platforms": "^1.0.0",
-    "@gitcoin/passport-types": "^1.0.0",
+    "@gitcoin/passport-database-client": "workspace:*",
+    "@gitcoin/passport-identity": "workspace:*",
+    "@gitcoin/passport-platforms": "workspace:*",
+    "@gitcoin/passport-types": "workspace:*",
     "@headlessui/react": "^1.7.13",
     "@headlessui/tailwindcss": "^0.1.3",
     "@heroicons/react": "^2.0.17",
@@ -59,6 +59,7 @@
     "tailwind-gradient-mask-image": "^1.1.0",
     "ts-debounce": "^4.0.0",
     "ts-node": "^10.8.0",
+    "uint8arrays": "^5.1.0",
     "zustand": "^4.4.5"
   },
   "devDependencies": {
@@ -99,10 +100,13 @@
     "typescript": "^5.3.3",
     "yarn": "^1.22.21"
   },
-  "resolutions": {
-    "csstype": "3.0.10",
-    "**/@types/react": "18.2.34",
-    "leveldown": "6.1.1"
+  "pnpm": {
+    "overrides": {
+      "csstype": "3.0.10",
+      "@types/react": "18.2.34",
+      "leveldown": "6.1.1",
+      "uint8arrays": "^5.1.0"
+    }
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.7",

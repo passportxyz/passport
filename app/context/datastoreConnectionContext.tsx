@@ -30,8 +30,8 @@ export type DatastoreConnectionContextState = {
 
 export const DatastoreConnectionContext = createContext<DatastoreConnectionContextState>({
   dbAccessTokenStatus: "idle",
-  disconnect: async (address: string) => {},
-  connect: async () => {},
+  disconnect: async (address: string) => { },
+  connect: async () => { },
   checkSessionIsValid: () => false,
 });
 
@@ -125,6 +125,7 @@ export const useDatastoreConnection = () => {
 
   const connect = useCallback(
     async (address: string, provider: Eip1193Provider) => {
+      console.log({ provider })
       if (address) {
         let sessionKey = "";
         let dbCacheTokenKey = "";
@@ -138,13 +139,6 @@ export const useDatastoreConnection = () => {
             address,
           });
           console.log("debug - 2")
-          // Unfortunate workaround due to dependency issues
-          const authMethod = (await EthereumWebAuth.getAuthMethod(provider, accountId)) as any;
-          // Sessions will be serialized and stored in localhost
-          // The sessions are bound to an ETH address, this is why we use the address in the session key
-          console.log("debug - 3")
-          sessionKey = `didsession-${address}`;
-          dbCacheTokenKey = `dbcache-token-${address}`;
           // const sessionStr = window.localStorage.getItem(sessionKey);
           // let session: DIDSession | undefined = undefined;
           // try {
@@ -170,6 +164,14 @@ export const useDatastoreConnection = () => {
           //   // Store the session in localstorage
           //   // window.localStorage.setItem(sessionKey, session.serialize());
           // }
+          // / Unfortunate workaround due to dependency issues
+          // import { EthereumWebAuth } from "@didtools/pkh-ethereum";
+          const authMethod = (await EthereumWebAuth.getAuthMethod(provider, accountId));
+          // Sessions will be serialized and stored in localhost
+          // The sessions are bound to an ETH address, this is why we use the address in the session key
+          console.log("debug - 3")
+          sessionKey = `didsession-${address}`;
+          dbCacheTokenKey = `dbcache-token-${address}`;
 
           console.log("debug - 4")
 
@@ -189,6 +191,7 @@ export const useDatastoreConnection = () => {
             console.log("Buffer library is not injected` (this is good)");
           }
           console.log("debug - 7")
+          // import { DIDSession } from "did-session";
           let session: DIDSession = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
           console.log("debug - 8")
 
