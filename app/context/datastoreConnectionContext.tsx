@@ -130,19 +130,16 @@ export const useDatastoreConnection = () => {
         let dbCacheTokenKey = "";
 
         try {
-          console.log("debug - 1")
           const accountId = new AccountId({
             // We always use chain id 1 for now for all sessions, to avoid users
             // switching networks and not see their stamps any more
             chainId: "eip155:1",
             address,
           });
-          console.log("debug - 2")
           // Unfortunate workaround due to dependency issues
           const authMethod = (await EthereumWebAuth.getAuthMethod(provider, accountId)) as any;
           // Sessions will be serialized and stored in localhost
           // The sessions are bound to an ETH address, this is why we use the address in the session key
-          console.log("debug - 3")
           sessionKey = `didsession-${address}`;
           dbCacheTokenKey = `dbcache-token-${address}`;
           // const sessionStr = window.localStorage.getItem(sessionKey);
@@ -171,42 +168,31 @@ export const useDatastoreConnection = () => {
           //   // window.localStorage.setItem(sessionKey, session.serialize());
           // }
 
-          console.log("debug - 4")
-
           // Extensions which inject the Buffer library break the
           // did-session library, so we need to remove it
           if (globalThis.Buffer) {
-            console.log("debug - 5")
             datadogLogs.logger.warn("Buffer library is injected, setting to undefined", {
               buffer: `${globalThis.Buffer}`,
             });
             globalThis.Buffer = undefined as any;
-            console.log("debug - 6")
             console.log(
               "Warning: Buffer library is injected! This will be overwritten in order to avoid conflicts with did-session."
             );
           } else {
             console.log("Buffer library is not injected` (this is good)");
           }
-          console.log("debug - 7")
           let session: DIDSession = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
-          console.log("debug - 8")
 
           if (session) {
-            console.log("debug - 9")
             await loadDbAccessToken(address, session.did);
-            console.log("debug - 10")
             setDid(session.did);
-            console.log("debug - 11")
 
             // session.isExpired looks like a static variable so this looks like a bug,
             // but isExpired is a getter, so it's actually checking the current status
             // whenever checkSessionIsValid is called
             setCheckSessionIsValid(() => () => !session.isExpired);
-            console.log("debug - 12")
           }
         } catch (error) {
-          console.error("debug - 1", error)
           await handleConnectionError(sessionKey, dbCacheTokenKey);
           toast({
             duration: 6000,
