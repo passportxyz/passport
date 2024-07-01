@@ -86,7 +86,7 @@ export const VeraxPanel = ({ className }: { className: string }) => {
             to gain rewards for early adopters in the Linea ecosystem.
             <span className="text-xs text-customization-background-1 brightness-[1.4]">
               This action requires ETH bridged to Linea Mainnet to cover network fees, as well as a ${mintFee} mint fee
-              which goes to the Gitcoin treasury.
+              which goes to the Passport treasury.
             </span>
           </>
         ) : (
