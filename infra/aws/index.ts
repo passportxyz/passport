@@ -70,9 +70,9 @@ const serviceResources = Object({
   staging: PROVISION_STAGING_FOR_LOADTEST
     ? productionService
     : {
-        memory: 512, // 512 MiB
-        cpu: 256, // 0.25 vCPU
-      },
+      memory: 512, // 512 MiB
+      cpu: 256, // 0.25 vCPU
+    },
   production: productionService,
 });
 
@@ -319,6 +319,8 @@ const cluster = new aws.ecs.Cluster(`gitcoin`, {
     Name: `gitcoin`,
   },
 });
+
+export const passportClusterArn = cluster.arn;
 
 const serviceLogGroup = new aws.cloudwatch.LogGroup("passport-iam", {
   name: "passport-iam",
