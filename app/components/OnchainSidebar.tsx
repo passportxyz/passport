@@ -3,6 +3,7 @@ import { chains } from "../utils/chains";
 import { NetworkCard } from "./NetworkCard";
 import { useCustomization } from "../hooks/useCustomization";
 import { Customization } from "../utils/customizationUtils";
+import { mintFee } from "../config/mintFee";
 
 type OnchainSidebarProps = {
   isOpen: boolean;
@@ -43,8 +44,8 @@ export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
             <p className="text-base font-normal">
               Minting your Passport onchain creates a tamper-proof record of your Gitcoin Passport onchain. This is only
               required if you&apos;re using applications that fetch Gitcoin Passport data onchain. Note: Minting your
-              Passport onchain involves blockchain network fees and a $2 minting fee, which is directed to the Gitcoin
-              treasury.
+              Passport onchain involves blockchain network fees and a ${mintFee} minting fee, which is directed to the
+              Gitcoin treasury.
             </p>
           </div>
         </DrawerHeader>
