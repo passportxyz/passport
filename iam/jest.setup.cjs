@@ -13,3 +13,4 @@ process.env.SCORER_ENDPOINT = "http://127.0.0.1:8002";
 process.env.SCORER_API_KEY = "abcd";
 process.env.MORALIS_API_KEY = "abcd";
 process.env.EAS_GITCOIN_STAMP_SCHEMA = "0x";
+process.env.EAS_FEE_USD = "3";
