@@ -9,6 +9,7 @@ import { ScorerContext } from "../context/scorerContext";
 import { useContext, useState } from "react";
 import { CustomDashboardPanel } from "./CustomDashboardPanel";
 import { useOnChainStatus } from "../hooks/useOnChainStatus";
+import { mintFee } from "../config/mintFee";
 
 const VeraxLogo = () => (
   <svg width="64" height="56" viewBox="0 0 64 56" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -84,8 +85,8 @@ export const VeraxPanel = ({ className }: { className: string }) => {
             Verax is a community maintained public attestation registry on Linea. Push your Passport Stamps onto Verax
             to gain rewards for early adopters in the Linea ecosystem.
             <span className="text-xs text-customization-background-1 brightness-[1.4]">
-              This action requires ETH bridged to Linea Mainnet to cover network fees, as well as a $2 mint fee which
-              goes to the Gitcoin treasury.
+              This action requires ETH bridged to Linea Mainnet to cover network fees, as well as a ${mintFee} mint fee
+              which goes to the Passport treasury.
             </span>
           </>
         ) : (
