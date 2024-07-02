@@ -146,6 +146,18 @@ export const PlatformDetails = ({
           />
         )}
       </div>
+      {currentPlatform?.website ? (
+        <a
+          className="mt-8 inline-block text-base hover:underline md:w-8/12"
+          href={currentPlatform?.website}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {currentPlatform?.description}
+        </a>
+      ) : (
+        <p className="mt-8 text-base md:w-8/12">{currentPlatform?.description}</p>
+      )}
       {bannerConfig && <GenericBanner banner={bannerConfig} />}
       {hasStamps && (
         <>
