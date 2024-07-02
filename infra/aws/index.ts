@@ -70,9 +70,9 @@ const serviceResources = Object({
   staging: PROVISION_STAGING_FOR_LOADTEST
     ? productionService
     : {
-      memory: 512, // 512 MiB
-      cpu: 256, // 0.25 vCPU
-    },
+        memory: 512, // 512 MiB
+        cpu: 256, // 0.25 vCPU
+      },
   production: productionService,
 });
 
@@ -231,6 +231,7 @@ const albTargetGroup = new aws.lb.TargetGroup(`passport-iam`, {
 
 const albListenerRule = new aws.lb.ListenerRule(`passport-iam-https`, {
   listenerArn: albHttpsListenerArn,
+  priority: 100, // This needs to be grater than the priority number for passport-scroll-badge-service
   actions: [
     {
       type: "forward",
