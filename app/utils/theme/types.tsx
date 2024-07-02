@@ -36,5 +36,7 @@ export type CustomizationTheme = {
     customizationBackground1: string;
     customizationBackground2: string;
     customizationForeground1: string;
+    customizationForeground2: string;
+    customizationBackground3: string;
   };
 };

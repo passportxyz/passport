@@ -1,9 +1,14 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, Ref, ReactElement, JSXElementConstructor } from "react";
 import { VeraxPanel } from "../components/VeraxPanel";
 import { TestingPanel } from "../components/TestingPanel";
 import { Button } from "../components/Button";
 import { CustomizationLogoBackground } from "../utils/customizationUtils";
 import { useCustomization } from "../hooks/useCustomization";
+import { OnchainSidebar } from "./OnchainSidebar";
+import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
+import { Popover } from "@headlessui/react";
+import { usePopper } from "react-popper";
+import { renderToString } from "react-dom/server";
 
 type CustomDashboardPanelProps = {
   logo: {
@@ -63,6 +68,20 @@ export const CustomDashboardPanel = ({ logo, className, children }: CustomDashbo
 
 export const DynamicCustomDashboardPanel = ({ className }: { className: string }) => {
   const customization = useCustomization();
+  const [showSidebar, setShowSidebar] = useState<boolean>(false);
+  const [referenceElement, setReferenceElement] = useState(null);
+  const [popperElement, setPopperElement] = useState(null);
+
+  const { styles, attributes } = usePopper(referenceElement, popperElement, {
+    modifiers: [
+      {
+        name: "preventOverflow",
+        options: {
+          padding: 24,
+        },
+      },
+    ],
+  });
 
   if (customization.key === "verax") {
     return <VeraxPanel className={className} />;
@@ -71,20 +90,50 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
   if (customization.key === "testing") {
     return <TestingPanel className={className} />;
   }
-
   const { logo, body } = customization.dashboardPanel;
 
+  const onButtonClick = () => {
+    if (body.action?.type === "Onchain Push") {
+      setShowSidebar(true);
+    } else {
+      window.open(body.action.url, "_blank");
+    }
+  };
   return (
     <CustomDashboardPanel className={className} logo={logo}>
-      <div>{body.mainText}</div>
+      {body.displayInfoTooltip && body.displayInfoTooltip.shouldDisplay && body.displayInfoTooltip.text ? (
+        <Popover className={`group cursor-pointer px-2 self-end  absolute top-0 right-0 p-2`}>
+          <Popover.Button as="div" ref={setReferenceElement as unknown as Ref<HTMLButtonElement>}>
+            <div className="mr-4 w-4 self-end">
+              <ExclamationCircleIcon height={24} color={"rgb(var(--color-customization-background-1))"} />
+            </div>
+          </Popover.Button>
+          <Popover.Panel
+            ref={setPopperElement as unknown as Ref<HTMLDivElement>}
+            className={`invisible z-20 max-w-screen-md rounded-md border border-customization-background-1 bg-background text-sm text-color-1 group-hover:visible`}
+            style={styles.popper}
+            {...attributes.popper}
+            static
+          >
+            <div className="px-4 py-2">{body.displayInfoTooltip.text}</div>
+          </Popover.Panel>
+        </Popover>
+      ) : null}
+      <div
+        dangerouslySetInnerHTML={{
+          __html: renderToString(body.mainText as ReactElement<any, string | JSXElementConstructor<any>>) || "",
+        }}
+      />
+
       <div className="text-sm grow">{body.subText}</div>
       <Button
         variant="custom"
-        className={`rounded-s mr-2 mt-2 w-fit self-end bg-customization-background-1 text-customization-foreground-1 hover:bg-customization-background-1/75 enabled:hover:text-color-1 disabled:bg-customization-background-1 disabled:brightness-100`}
-        onClick={() => window.open(body.action.url, "_blank")}
+        className={`rounded-s mr-2 mt-2 w-fit self-end bg-customization-background-3 text-customization-foreground-2 hover:bg-customization-background-3/75 disabled:bg-customization-background-1 disabled:brightness-100`}
+        onClick={onButtonClick}
       >
         {body.action.text}
       </Button>
+      <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
     </CustomDashboardPanel>
   );
 };
