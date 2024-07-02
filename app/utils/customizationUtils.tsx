@@ -38,7 +38,7 @@ export type Customization = {
       action: {
         text: string;
         url: string;
-        type?: string; // TODO: @Larisa This should be only  "Simple Link" or "Onchain Push"
+        type?: "Simple Link" | "Onchain Push";
       };
       displayInfoTooltip?: {
         shouldDisplay?: boolean;
@@ -82,7 +82,7 @@ type CustomizationResponse = {
       action?: {
         text?: string;
         url?: string;
-        type?: string; // TODO: @Larisa This should be only  "Simple Link" or "Onchain Push"
+        type?: "Simple Link" | "Onchain Push";
       };
       displayInfoTooltip?: {
         shouldDisplay?: boolean;
