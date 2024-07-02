@@ -23,6 +23,14 @@ export function difference(setA: Set<PROVIDER_ID>, setB: Set<PROVIDER_ID>) {
   return _difference;
 }
 
+export function intersect<T>(setA: Set<T>, setB: Set<T>): Set<T> {
+  return new Set([...setA].filter((item) => setB.has(item)));
+}
+
+export function foo(a: number, b: number): number {
+  return a + b;
+}
+
 export function generateUID(length: number) {
   return window
     .btoa(

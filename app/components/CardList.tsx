@@ -97,7 +97,7 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
         return platforms;
       }, {} as SelectedProviders)
     );
-  }, [allProvidersState]);
+  }, [allProvidersState, customization]);
 
   const [verified, unverified] = scoredPlatforms.reduce(
     ([verified, unverified], platform): [PlatformScoreSpec[], PlatformScoreSpec[]] => {

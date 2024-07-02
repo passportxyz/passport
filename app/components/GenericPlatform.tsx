@@ -32,7 +32,7 @@ import { PlatformClass } from "@gitcoin/passport-platforms";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 
 // --- Helpers
-import { createSignedPayload, difference, generateUID } from "../utils/helpers";
+import { createSignedPayload, difference, intersect, generateUID } from "../utils/helpers";
 
 import { datadogRum } from "@datadog/browser-rum";
 import { PlatformScoreSpec } from "../context/scorerContext";
@@ -111,10 +111,9 @@ export const GenericPlatform = ({
 
   // Create Set to check initial verified providers
   const initialVerifiedProviders = new Set(verifiedProviders);
-  const hasExpiredProviders = useMemo(
-    () => new Set(verifiedProviders).intersection(new Set(expiredProviders)).size > 0,
-    [verifiedProviders, expiredProviders]
-  );
+  const hasExpiredProviders = useMemo(() => {
+    return intersect(new Set(expiredProviders), new Set(verifiedProviders)).size > 0;
+  }, [verifiedProviders, expiredProviders]);
 
   // any time we change selection state...
   useEffect(() => {
