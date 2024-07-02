@@ -53,7 +53,7 @@ export default function Welcome() {
               hasPassports={(passport && passport.stamps.length > 0) || false}
             />
           ) : (
-            <LoadingScreen />
+            <LoadingScreen className="mb-20" />
           )}
         </BodyWrapper>
         <WelcomeFooter displayPrivacyPolicy={true} fixed={true} />
