@@ -322,6 +322,7 @@ const cluster = new aws.ecs.Cluster(`gitcoin`, {
 });
 
 export const passportClusterArn = cluster.arn;
+export const passportClusterName = cluster.name;
 
 const serviceLogGroup = new aws.cloudwatch.LogGroup("passport-iam", {
   name: "passport-iam",
