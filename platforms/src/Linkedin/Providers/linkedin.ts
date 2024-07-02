@@ -96,7 +96,7 @@ const verifyLinkedin = async (code: string): Promise<LinkedinFindMyUserResponse>
     // retrieve user's auth bearer token to authenticate client
     const accessToken = await requestAccessToken(code);
     // Now that we have an access token fetch the user details
-    const userRequest = await axios.get("https://api.linkedin.com/rest/me", {
+    const userRequest = await axios.get("https://api.linkedin.com/v2/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Linkedin-Version": 202305,
