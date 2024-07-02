@@ -22,6 +22,7 @@ export const initializeDOMPurify = () => {
 };
 
 export type CustomizationLogoBackground = "dots" | "none";
+export type BodyActionType = "Simple Link" | "Onchain Push";
 
 export type Customization = {
   key: string;
@@ -38,7 +39,7 @@ export type Customization = {
       action: {
         text: string;
         url: string;
-        type?: "Simple Link" | "Onchain Push";
+        type?: BodyActionType;
       };
       displayInfoTooltip?: {
         shouldDisplay?: boolean;
@@ -82,7 +83,7 @@ type CustomizationResponse = {
       action?: {
         text?: string;
         url?: string;
-        type?: "Simple Link" | "Onchain Push";
+        type?: BodyActionType;
       };
       displayInfoTooltip?: {
         shouldDisplay?: boolean;
