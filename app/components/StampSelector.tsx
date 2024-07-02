@@ -27,7 +27,7 @@ const checkMark = () => (
 );
 
 export function StampSelector({ currentPlatform, currentProviders, verifiedProviders }: StampSelectorProps) {
-  const { allProvidersState } = useContext(CeramicContext);
+  const { allProvidersState, expiredProviders } = useContext(CeramicContext);
   const { activeChainProviders } = useOnChainData();
   const { stampWeights } = useContext(ScorerContext);
   const includedGroupsAndProviders = useIncludedGroupsAndProviders(currentProviders || []);
@@ -60,9 +60,11 @@ export function StampSelector({ currentPlatform, currentProviders, verifiedProvi
               if (!includedGroupsAndProviders[stamp.platformGroup].includes(provider.name)) {
                 return null;
               }
-              const verified = verifiedProviders?.indexOf(provider.name) !== -1;
+              const isVerified = verifiedProviders?.indexOf(provider.name) !== -1;
+              const isExpired = expiredProviders?.indexOf(provider.name) !== -1;
+              const isValid = isVerified && !isExpired;
 
-              let textColor = verified ? "text-color-1" : "text-color-2";
+              let textColor = isValid ? "text-color-1" : "text-color-2";
 
               const rawWeight = stampWeights?.[provider.name];
               const weight = rawWeight ? +parseFloat(rawWeight).toFixed(2) : 0;
@@ -71,20 +73,20 @@ export function StampSelector({ currentPlatform, currentProviders, verifiedProvi
                 <React.Fragment key={provider.name}>
                   <div
                     data-testid={`indicator-${provider.name}`}
-                    className={`relative rounded ${verified ? "border-foreground-2" : "border-color-3"} text-base ${textColor} flex justify-between items-stretch border text-color-3 mt-4 `}
+                    className={`relative rounded ${isValid ? "border-foreground-2" : "border-color-3"} text-base ${textColor} flex justify-between items-stretch border text-color-3 mt-4 `}
                   >
-                    <div className={`p-4 border-r w-3/4 ${verified && customSideBarGradient}`}>
-                      <p className={`${verified && "font-bold text-color-6"}`}>
-                        {verified && checkMark()} {provider.title}
+                    <div className={`p-4 border-r w-3/4 ${isValid && customSideBarGradient}`}>
+                      <p className={`${isValid && "font-bold text-color-6"}`}>
+                        {isValid && checkMark()} {provider.title}
                       </p>
                       {provider.description && <p className="my-2 text-sm leading-tight">{provider.description}</p>}
                     </div>
 
                     <div
-                      className={`${verified && "bg-gradient-to-r from-foreground-2 to-foreground-4"} w-1/4 flex items-center ${verified && "text-background-4"}`}
+                      className={`${isValid && "bg-gradient-to-r from-foreground-2 to-foreground-4"} w-1/4 flex items-center ${isValid && "text-background-4"}`}
                     >
                       <p className="text-2xl text-center w-full text-s leading-none">
-                        <span className={`${verified && "font-bold"}`}>{weight}</span> <br />
+                        <span className={`${isValid && "font-bold"}`}>{weight}</span> <br />
                         <span className="text-base">points</span>
                       </p>
                     </div>
