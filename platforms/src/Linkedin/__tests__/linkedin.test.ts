@@ -41,7 +41,7 @@ beforeEach(() => {
   });
 });
 
-describe("Attempt verification", function () {
+describe("Attempt verification", function() {
   it("handles valid verification attempt", async () => {
     const clientId = process.env.LINKEDIN_CLIENT_ID;
     const clientSecret = process.env.LINKEDIN_CLIENT_SECRET;
@@ -62,7 +62,7 @@ describe("Attempt verification", function () {
     );
 
     // Check the request to get the user
-    expect(mockedAxios.get).toHaveBeenCalledWith("https://api.linkedin.com/rest/me", {
+    expect(mockedAxios.get).toHaveBeenCalledWith("https://api.linkedin.com/v2/me", {
       headers: { Authorization: "Bearer 762165719dhiqudgasyuqwt6235", "Linkedin-Version": 202305 },
     });
 
