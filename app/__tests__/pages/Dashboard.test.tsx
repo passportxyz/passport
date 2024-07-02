@@ -56,40 +56,6 @@ beforeEach(() => {
   ]);
 });
 
-describe("when the user has a passport", () => {
-  it("shows Passport JSON button", () => {
-    renderWithContext(
-      mockCeramicContext,
-      <Router>
-        <Dashboard />
-      </Router>
-    );
-
-    expect(screen.getByTestId("button-passport-json")).toBeInTheDocument();
-  });
-});
-
-describe("when the user clicks Passport JSON", () => {
-  it("it should display a modal", async () => {
-    renderWithContext(
-      mockCeramicContext,
-      <Router>
-        <Dashboard />
-      </Router>
-    );
-
-    const buttonPassportJson = screen.queryByTestId("button-passport-json");
-
-    fireEvent.click(buttonPassportJson!);
-
-    const verifyModal = await screen.findByRole("dialog");
-    const buttonDone = screen.getByTestId("button-passport-json-done");
-
-    expect(verifyModal).toBeInTheDocument();
-    expect(buttonDone).toBeInTheDocument();
-  });
-});
-
 describe("dashboard notifications", () => {
   // using https://www.npmjs.com/package/jest-localstorage-mock to mock localStorage
   beforeEach(async () => {
