@@ -17,6 +17,7 @@ import { Eip1193Provider } from "ethers";
 import { createSignedPayload } from "../utils/helpers";
 import { ComposeDatabase } from "@gitcoin/passport-database-client";
 import { datadogLogs } from "@datadog/browser-logs";
+import { useDisconnect } from "@web3modal/ethers/react";
 
 const BUFFER_TIME_BEFORE_EXPIRATION = 60 * 60 * 1000;
 
@@ -42,7 +43,7 @@ export const DatastoreConnectionContext = createContext<DatastoreConnectionConte
 export const useDatastoreConnection = () => {
   const toast = useToast();
 
-  const disconnectWallet = useWalletStore((state) => state.disconnect);
+  const { disconnect: disconnectWallet } = useDisconnect();
   const chain = useWalletStore((state) => state.chain);
 
   const [dbAccessTokenStatus, setDbAccessTokenStatus] = useState<DbAuthTokenStatus>("idle");

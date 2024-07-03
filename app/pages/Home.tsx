@@ -1,66 +1,25 @@
-/* eslint-disable react-hooks/exhaustive-deps, @next/next/no-img-element */
 // --- React Methods
 import React, { useEffect, useState } from "react";
-
-// --- Shared data context
-import { useWalletStore } from "../context/walletStore";
 
 // --- Components
 import PageRoot from "../components/PageRoot";
 import SIWEButton from "../components/SIWEButton";
-import { checkShowOnboard } from "../utils/helpers";
-import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
-import { useToast } from "@chakra-ui/react";
-import { DoneToastContent } from "../components/DoneToastContent";
+import { isServerOnMaintenance } from "../utils/helpers";
 import { WebmVideo } from "../components/WebmVideo";
-import { DEFAULT_CUSTOMIZATION_KEY, useCustomization, useNavigateToPage } from "../hooks/useCustomization";
+import { DEFAULT_CUSTOMIZATION_KEY, useCustomization } from "../hooks/useCustomization";
 import WelcomeFooter from "../components/WelcomeFooter";
 
+import { useLoginFlow } from "../hooks/useLoginFlow";
+
 export default function Home() {
-  const address = useWalletStore((state) => state.address);
-  const connectWallet = useWalletStore((state) => state.connect);
-  const connectError = useWalletStore((state) => state.error);
-  const { connect: connectDatastore } = useDatastoreConnectionContext();
-  const toast = useToast();
+  const { isLoggingIn, signIn } = useLoginFlow();
   const [enableEthBranding, setEnableEthBranding] = useState(false);
   const customization = useCustomization();
-
-  const navigateToPage = useNavigateToPage();
-
-  // Route user to dashboard when wallet is connected
-  useEffect(() => {
-    if (address) {
-      if (checkShowOnboard()) {
-        navigateToPage("welcome");
-      } else {
-        navigateToPage("dashboard");
-      }
-    }
-  }, [address]);
 
   useEffect(() => {
     const usingCustomization = customization.key !== DEFAULT_CUSTOMIZATION_KEY;
     setEnableEthBranding(!usingCustomization);
   }, [customization.key]);
-
-  useEffect(() => {
-    if (connectError) {
-      console.log("displaying Connection Error", connectError);
-      console.log("displaying Connection Error", (connectError as Error).message);
-      toast({
-        duration: 6000,
-        isClosable: true,
-        render: (result: any) => (
-          <DoneToastContent
-            title={"Connection Error"}
-            body={(connectError as Error).message}
-            icon="../assets/verification-failed-bright.svg"
-            result={result}
-          />
-        ),
-      });
-    }
-  }, [connectError]);
 
   return (
     <PageRoot className="text-color-1 flex flex-col min-h-screen overflow-auto pb-32">
@@ -85,9 +44,11 @@ export default function Home() {
             Access a world of Web3 opportunities securely with a single sign-in.
           </div>
           <SIWEButton
+            disabled={isServerOnMaintenance()}
+            isLoading={isLoggingIn}
             enableEthBranding={enableEthBranding}
             data-testid="connectWalletButton"
-            onClick={() => connectWallet(connectDatastore)}
+            onClick={signIn}
             className="col-span-2 mt-4 lg:w-3/4"
           />
         </div>

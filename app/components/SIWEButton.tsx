@@ -1,10 +1,10 @@
 import React from "react";
-import { Button, ButtonProps } from "./Button";
+import { LoadButton, LoadingButtonProps } from "./LoadButton";
 
-const SIWEButton = (props: ButtonProps & { enableEthBranding: boolean }) => {
+const SIWEButton = (props: LoadingButtonProps & { enableEthBranding: boolean }) => {
   const { enableEthBranding, ...rest } = props;
   return (
-    <Button {...rest} className={(props.className || "") + " rounded-sm"}>
+    <LoadButton {...rest} className={(props.className || "") + " rounded-sm"}>
       {enableEthBranding && (
         <svg className="my-1" width="19" height="30" viewBox="0 0 19 30" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M9.22009 22.4887V30.0001L18.4402 17.0493L9.22009 22.4887Z" fill="#2F3030" />
@@ -19,7 +19,7 @@ const SIWEButton = (props: ButtonProps & { enableEthBranding: boolean }) => {
       <span className="inline group-disabled:hidden">
         Sign in {enableEthBranding ? "with Ethereum" : "using signature"}
       </span>
-    </Button>
+    </LoadButton>
   );
 };
 
