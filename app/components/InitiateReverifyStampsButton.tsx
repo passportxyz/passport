@@ -73,7 +73,7 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
     return possibleProviders.filter((provider) => expiredProviders.includes(provider)).length > 0;
   });
 
-  const handleClaimStep = async (step: number, error?: PLATFORM_ID | "EVMBulkVerify"): Promise<void> => {
+  const handleClaimStep = async (step: number): Promise<void> => {
     if (status === "in_progress") {
       setCurrentStepInProgress(true);
     } else {
