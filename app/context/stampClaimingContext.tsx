@@ -71,7 +71,7 @@ export type StampClaimForPlatform = {
 
 export interface StampClaimingContextState {
   claimCredentials: (
-    handleClaimStep: (step: number, error?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
+    handleClaimStep: (step: number) => Promise<void>,
     indicateError: (platform: PLATFORM_ID | "EVMBulkVerify") => void,
     platformGroups: StampClaimForPlatform[]
   ) => Promise<void>;
@@ -80,7 +80,7 @@ export interface StampClaimingContextState {
 
 const startingState: StampClaimingContextState = {
   claimCredentials: async (
-    handleClaimStep: (step: number, error?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
+    handleClaimStep: (step: number) => Promise<void>,
     indicateError: (platform: PLATFORM_ID | "EVMBulkVerify") => void,
     platformGroups: StampClaimForPlatform[]
   ) => {},
@@ -142,7 +142,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
 
   // fetch VCs from IAM server
   const claimCredentials = async (
-    handleClaimStep: (step: number, error?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
+    handleClaimStep: (step: number) => Promise<void>,
     indicateError: (platform: PLATFORM_ID | "EVMBulkVerify") => void,
     platformGroups: StampClaimForPlatform[]
   ): Promise<any> => {
@@ -161,7 +161,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
 
         if ((platform || platformId === "EVMBulkVerify") && selectedProviders.length > 0) {
           step++;
-          await handleClaimStep(step, platformId);
+          await handleClaimStep(step);
           datadogLogs.logger.info("Saving Stamp", { platform: platformId });
           setStatus(StampClaimProgressStatus.InProgress);
 
