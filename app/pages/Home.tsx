@@ -44,6 +44,7 @@ export default function Home() {
             Access a world of Web3 opportunities securely with a single sign-in.
           </div>
           <SIWEButton
+            loadIconPosition="right"
             disabled={isServerOnMaintenance()}
             isLoading={isLoggingIn}
             enableEthBranding={enableEthBranding}

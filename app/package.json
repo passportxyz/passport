@@ -99,12 +99,16 @@
     "tailwindcss": "^3.0.7",
     "ts-jest": "^27.1.4",
     "typescript": "^5.3.3",
+    "uint8arrays": "^5.1.0",
     "yarn": "^1.22.21"
   },
   "resolutions": {
     "csstype": "3.0.10",
     "**/@types/react": "18.2.34",
-    "leveldown": "6.1.1"
+    "leveldown": "6.1.1",
+    "did-session/uint8arrays": "^5.1.0",
+    "dids/uint8arrays": "^5.1.0",
+    "@didtools/**/uint8arrays": "^5.1.0"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.7",

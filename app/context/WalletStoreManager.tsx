@@ -2,9 +2,7 @@
 import React, { useEffect } from "react";
 
 // --- Utils & configs
-import { useWeb3ModalAccount, useWeb3ModalError, useWeb3ModalProvider } from "@web3modal/ethers/react";
-import { useToast } from "@chakra-ui/react";
-import { DoneToastContent } from "../components/DoneToastContent";
+import { useWeb3ModalAccount, useWeb3ModalProvider } from "@web3modal/ethers/react";
 import { useWalletStore } from "./walletStore";
 
 const WalletStoreSyncWithWeb3Modal = () => {
@@ -32,40 +30,13 @@ const WalletStoreSyncWithWeb3Modal = () => {
   return null;
 };
 
-const Web3ModalErrorDisplay = () => {
-  const { error } = useWeb3ModalError();
-  const toast = useToast();
-
-  useEffect(() => {
-    if (error) {
-      console.log("displaying web3modal error", error);
-      console.log("displaying web3modal error", (error as Error).message);
-      toast({
-        duration: 6000,
-        isClosable: true,
-        render: (result: any) => (
-          <DoneToastContent
-            title={"Connection Error"}
-            body={(error as Error).message}
-            icon="../assets/verification-failed-bright.svg"
-            result={result}
-          />
-        ),
-      });
-    }
-  }, [error]);
-
-  return null;
-};
-
 export const WalletStoreManager = ({ children }: { children: React.ReactNode }) => {
   // Don't add anything here that will cause a re-render of this component
 
   return (
     <>
-      {/* Render these components in parallel so they can't cause the whole app to re-render */}
+      {/* Render this component in parallel so it can't cause the whole app to re-render */}
       <WalletStoreSyncWithWeb3Modal />
-      <Web3ModalErrorDisplay />
       {children}
     </>
   );
