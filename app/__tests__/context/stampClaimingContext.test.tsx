@@ -6,7 +6,7 @@ import { CeramicContext } from "../../context/ceramicContext";
 import { StampClaimingContext, StampClaimingContextProvider } from "../../context/stampClaimingContext";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 
-import { PLATFORM_ID } from "@gitcoin/passport-types";
+import { PLATFORM_ID, ValidResponseBody } from "@gitcoin/passport-types";
 import { PlatformProps } from "../../components/GenericPlatform";
 import { AppContext, PlatformClass } from "@gitcoin/passport-platforms";
 import { DatastoreConnectionContext, DbAuthTokenStatus } from "../../context/datastoreConnectionContext";
@@ -51,6 +51,7 @@ jest.mock("../../context/ceramicContext", () => {
 });
 
 const handleClaimStep = jest.fn();
+const indicateError = jest.fn();
 
 const TestingComponent = () => {
   const { claimCredentials } = useContext(StampClaimingContext);
@@ -60,7 +61,7 @@ const TestingComponent = () => {
       <button
         data-testid="claim-button"
         onClick={() => {
-          claimCredentials(handleClaimStep, [
+          claimCredentials(handleClaimStep, indicateError, [
             {
               platformId: "Google",
               selectedProviders: ["Google"],
@@ -86,7 +87,7 @@ const TestingComponentWithEvmStamp = () => {
       <button
         data-testid="claim-button"
         onClick={() => {
-          claimCredentials(handleClaimStep, [
+          claimCredentials(handleClaimStep, indicateError, [
             {
               platformId: "Google",
               selectedProviders: ["Google"],
@@ -180,6 +181,31 @@ describe("<StampClaimingContext>", () => {
 
     // Verify that the `handlePatchStamps` function has been called for the ceramic context
     expect(mockCeramicContext.handlePatchStamps).toHaveBeenCalledTimes(2);
+    expect(indicateError).toHaveBeenCalled();
+  });
+
+  it("should not indicate error if verification was successful", async () => {
+    (fetchVerifiableCredential as jest.Mock).mockImplementation(() => {
+      return {
+        credentials: [
+          {
+            record: {
+              type: "Google",
+            },
+          } as ValidResponseBody,
+        ],
+      };
+    });
+
+    renderTestComponent();
+
+    // Click the claim button, which should call the `claimCredentials` function in the context
+    await waitFor(async () => {
+      const claimButton = screen.getByTestId("claim-button");
+      fireEvent.click(claimButton);
+    });
+
+    expect(indicateError).not.toHaveBeenCalled();
   });
 
   it("should fetch all credentials specified when calling claimCredentials (evm credentials included)", async () => {
