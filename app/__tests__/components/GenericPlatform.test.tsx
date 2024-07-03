@@ -29,18 +29,15 @@ jest.mock("@gitcoin/passport-identity", () => ({
   fetchVerifiableCredential: jest.fn(),
 }));
 
-jest.mock("../../utils/helpers.tsx", () => ({
-  createSignedPayload: jest.fn(),
-  generateUID: jest.fn(),
-  getProviderSpec: jest.fn(),
-  difference: (setA: any, setB: any) => {
-    const _difference = new Set(setA);
-    setB.forEach((elem: any) => {
-      _difference.delete(elem);
-    });
-    return _difference;
-  },
-}));
+jest.mock("../../utils/helpers.tsx", () => {
+  const originalModule = jest.requireActual("../../utils/helpers.tsx");
+  return {
+    ...originalModule,
+    createSignedPayload: jest.fn(),
+    generateUID: jest.fn(),
+    getProviderSpec: jest.fn(),
+  };
+});
 
 jest.mock("next/router", () => ({
   useRouter: () => ({

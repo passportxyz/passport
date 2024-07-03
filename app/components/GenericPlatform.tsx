@@ -32,7 +32,7 @@ import { PlatformClass } from "@gitcoin/passport-platforms";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 
 // --- Helpers
-import { createSignedPayload, difference, generateUID } from "../utils/helpers";
+import { createSignedPayload, difference, intersect, generateUID } from "../utils/helpers";
 
 import { datadogRum } from "@datadog/browser-rum";
 import { PlatformScoreSpec } from "../context/scorerContext";
@@ -83,7 +83,7 @@ export const GenericPlatform = ({
   onClose,
 }: GenericPlatformProps): JSX.Element => {
   const address = useWalletStore((state) => state.address);
-  const { handlePatchStamps, verifiedProviderIds, userDid, allPlatforms } = useContext(CeramicContext);
+  const { handlePatchStamps, verifiedProviderIds, userDid, expiredProviders } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -111,11 +111,17 @@ export const GenericPlatform = ({
 
   // Create Set to check initial verified providers
   const initialVerifiedProviders = new Set(verifiedProviders);
+  const hasExpiredProviders = useMemo(() => {
+    return intersect(new Set(expiredProviders), new Set(verifiedProviders)).size > 0;
+  }, [verifiedProviders, expiredProviders]);
 
   // any time we change selection state...
   useEffect(() => {
-    setCanSubmit(platformProviderIds.length > 0 && !arraysContainSameElements(platformProviderIds, verifiedProviders));
-  }, [platformProviderIds, verifiedProviders]);
+    setCanSubmit(
+      platformProviderIds.length > 0 &&
+        (!arraysContainSameElements(platformProviderIds, verifiedProviders) || hasExpiredProviders)
+    );
+  }, [platformProviderIds, verifiedProviders, hasExpiredProviders]);
 
   const handleSponsorship = async (result: string): Promise<void> => {
     if (result === "success") {
@@ -449,6 +455,7 @@ export const GenericPlatform = ({
     return "Verify";
   }, [isReverifying, isLoading, submitted, canSubmit, verifiedProviders.length, platformProviderIds.length]);
 
+  console.log("verify - submitted, canSubmit", submitted, canSubmit, !submitted && !canSubmit);
   return (
     <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose}>
       <DrawerOverlay />

@@ -342,7 +342,7 @@ export const cleanPassport = (
           tempExpiredProviders.push(providerId);
         }
 
-        return !has_expired && has_correct_issuer && has_correct_subject;
+        return has_correct_issuer && has_correct_subject;
       } else {
         return false;
       }

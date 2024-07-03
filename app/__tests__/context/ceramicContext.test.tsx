@@ -742,6 +742,7 @@ const mockComponent = ({ invalidSession }: { invalidSession?: boolean } = {}) =>
             return (
               <>
                 <div># Stamps = {value.passport && value.passport.stamps.length}</div>
+                <div>Expired providers: {value.expiredProviders.join(",")}</div>
                 <div onClick={() => value.handleAddStamps(stamps)}>handleAddStamps</div>
                 <div onClick={() => value.handleDeleteStamps(stampProviderIds)}>handleDeleteStamps</div>
                 <div onClick={() => value.handlePatchStamps(stampPatches)}>handlePatchStamps</div>
@@ -863,7 +864,8 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     });
     render(mockComponent());
 
-    await waitFor(() => expect(screen.getAllByText("# Stamps = 3")).toHaveLength(1));
+    await waitFor(() => expect(screen.getAllByText("# Stamps = 4")).toHaveLength(1));
+    await waitFor(() => expect(screen.getAllByText("Expired providers: Google")).toHaveLength(1));
   });
 
   it("should set passport to undefined if an exception is raised while fetching", async () => {
@@ -1189,7 +1191,7 @@ const mockProvidersState = {
 const mockValidProviders = ["Google", "ENS"] as PROVIDER_ID[];
 
 describe("cleanPassport function", () => {
-  it("removes expired stamps", () => {
+  it("keeps expired stamps and records expired providers", () => {
     const expiredStamp = {
       credential: {
         expirationDate: "2000-05-15T21:04:01.708Z",
@@ -1200,7 +1202,7 @@ describe("cleanPassport function", () => {
 
     const passport = { stamps: [expiredStamp] } as Passport;
     const result = cleanPassport(passport, mockDatabase, mockValidProviders);
-    expect(result.passport.stamps).toHaveLength(0);
+    expect(result.passport.stamps).toHaveLength(1);
     expect(result.expiredProviders).toContain("Google");
   });
 
