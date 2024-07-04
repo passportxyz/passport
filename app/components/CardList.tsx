@@ -44,7 +44,7 @@ export const PLATFORM_CATEGORIES: PLATFORM_CATEGORY[] = [
   {
     name: "Government IDs",
     description: "Use your government-issued IDs or complete a KYC process with our partners to verify your identity.",
-    platforms: ["Coinbase", "Holonym"],
+    platforms: ["Coinbase", "Holonym", "Outdid"],
   },
   {
     name: "Social & Professional Platforms",
