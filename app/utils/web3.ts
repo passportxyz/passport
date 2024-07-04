@@ -23,6 +23,9 @@ const ethersConfig = defaultConfig({
   metadata,
   rpcUrl: MAINNET_RPC_URL,
   defaultChainId: 1,
+  auth: {
+    email: false,
+  },
 });
 
 createWeb3Modal({

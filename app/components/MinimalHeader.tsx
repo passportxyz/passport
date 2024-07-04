@@ -20,7 +20,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
 
   return (
     <div className={`flex items-center h-16 ${className}`}>
-      <div className="flex-1 items-center">
+      <div className="flex-1 flex items-center">
         <img className="" src={assets.gitcoinLogo} alt="Gitcoin Logo" />
         <img className="mx-3 md:mx-6" src={assets.logoLine} alt="Logo Line" />
         <img className="h-8" src={assets.passportLogo} alt="Passport Logo" />

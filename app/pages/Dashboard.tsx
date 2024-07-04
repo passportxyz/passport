@@ -35,7 +35,6 @@ import hash from "object-hash";
 // --- GTM Module
 import TagManager from "react-gtm-module";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
-import LoadingScreen from "../components/LoadingScreen";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -133,7 +132,7 @@ export default function Dashboard() {
 
   // Route user to home when wallet is disconnected
   useEffect(() => {
-    if (!address) {
+    if (!address || dbAccessTokenStatus !== "connected") {
       navigateToPage("home");
     }
   }, [address]);
@@ -268,35 +267,31 @@ export default function Dashboard() {
       <HeaderContentFooterGrid>
         <Header />
         <BodyWrapper className="mt-4 md:mt-6">
-          {dbAccessTokenStatus === "connected" ? (
-            <PageWidthGrid>
-              <Subheader className={` ${useCustomDashboardPanel ? "col-span-full" : "col-span-7"}`} />
-              {useCustomDashboardPanel ? (
-                <DynamicCustomDashboardPanel className="col-start-1 col-end-[-1] xl:col-start-8 row-span-2 mt-6" />
-              ) : (
-                <DashboardIllustration className="col-span-5 row-span-5 hidden xl:block" />
-              )}
-              <DashboardScorePanel className="col-span-full xl:col-span-7" />
+          <PageWidthGrid>
+            <Subheader className={`${useCustomDashboardPanel ? "col-span-full" : "col-span-7"}`} />
+            {useCustomDashboardPanel ? (
+              <DynamicCustomDashboardPanel className="col-start-1 col-end-[-1] xl:col-start-8 row-span-2 mt-6" />
+            ) : (
+              <DashboardIllustration className="col-span-5 row-span-5 hidden xl:block" />
+            )}
+            <DashboardScorePanel className="col-span-full xl:col-span-7" />
 
-              <span className="col-start-1 col-end-12 font-heading text-4xl">Add Stamps</span>
-              <CardList
-                className="col-span-full"
-                isLoading={
-                  isLoadingPassport == IsLoadingPassportState.Loading ||
-                  isLoadingPassport == IsLoadingPassportState.CreatingPassport ||
-                  isLoadingPassport == IsLoadingPassportState.FailedToConnect
-                }
-              />
-              <span className="col-start-1 col-end-4 font-heading text-3xl">Add Collected Stamps</span>
-              <span className="col-end-[-1] self-center whitespace-nowrap text-right font-alt text-3xl text-foreground-2">
-                {numVerifiedPlatforms}/{numPlatforms}
-              </span>
-              <DashboardValidStampsPanel className="col-span-full" />
-              <ExpiredStampsPanel className="col-span-full" />
-            </PageWidthGrid>
-          ) : (
-            <LoadingScreen />
-          )}
+            <span className="col-start-1 col-end-12 font-heading text-4xl">Add Stamps</span>
+            <CardList
+              className="col-span-full"
+              isLoading={
+                isLoadingPassport == IsLoadingPassportState.Loading ||
+                isLoadingPassport == IsLoadingPassportState.CreatingPassport ||
+                isLoadingPassport == IsLoadingPassportState.FailedToConnect
+              }
+            />
+            <span className="col-start-1 col-end-4 font-heading text-3xl">Add Collected Stamps</span>
+            <span className="col-end-[-1] self-center whitespace-nowrap text-right font-alt text-3xl text-foreground-2">
+              {numVerifiedPlatforms}/{numPlatforms}
+            </span>
+            <DashboardValidStampsPanel className="col-span-full" />
+            <ExpiredStampsPanel className="col-span-full" />
+          </PageWidthGrid>
         </BodyWrapper>
         {/* This footer contains dark colored text and dark images */}
         <WelcomeFooter displayPrivacyPolicy={false} fixed={false} />

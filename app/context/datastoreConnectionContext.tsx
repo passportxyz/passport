@@ -1,8 +1,9 @@
-(globalThis.process.browser as any) = true;
-import { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
 import { datadogRum } from "@datadog/browser-rum";
 import { useWalletStore } from "./walletStore";
 import { EthereumWebAuth } from "@didtools/pkh-ethereum";
+import { Buffer } from "buffer";
+
 import { DIDSession } from "did-session";
 import { DID } from "dids";
 import axios from "axios";
@@ -11,7 +12,6 @@ import { AccountId } from "caip";
 import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
 import { Eip1193Provider } from "ethers";
 import { createSignedPayload } from "../utils/helpers";
-import { datadogLogs } from "@datadog/browser-logs";
 import { useDisconnect } from "@web3modal/ethers/react";
 
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
@@ -112,6 +112,9 @@ export const useDatastoreConnection = () => {
     async (address: string, provider: Eip1193Provider) => {
       if (address) {
         try {
+          // This is to fix issues with extensions that inject old versions of Buffer
+          globalThis.Buffer = Buffer;
+
           const accountId = new AccountId({
             // We always use chain id 1 for now for all sessions, to avoid users
             // switching networks and not see their stamps any more
@@ -119,10 +122,6 @@ export const useDatastoreConnection = () => {
             address,
           });
           const authMethod = await EthereumWebAuth.getAuthMethod(provider, accountId);
-
-          console.log("browser", globalThis.process.browser);
-          (globalThis.process.browser as any) = true;
-          console.log("browsernow", globalThis.process.browser);
 
           let session: DIDSession = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
 

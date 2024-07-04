@@ -10,9 +10,12 @@ import { DEFAULT_CUSTOMIZATION_KEY, useCustomization } from "../hooks/useCustomi
 import WelcomeFooter from "../components/WelcomeFooter";
 
 import { useLoginFlow } from "../hooks/useLoginFlow";
+import { useWeb3ModalAccount } from "@web3modal/ethers/react";
+import { AccountCenter } from "../components/AccountCenter";
 
 export default function Home() {
-  const { isLoggingIn, signIn } = useLoginFlow();
+  const { isLoggingIn, signIn, loginStep } = useLoginFlow();
+  const { isConnected } = useWeb3ModalAccount();
   const [enableEthBranding, setEnableEthBranding] = useState(false);
   const customization = useCustomization();
 
@@ -23,6 +26,7 @@ export default function Home() {
 
   return (
     <PageRoot className="text-color-1 flex flex-col min-h-screen overflow-auto pb-32">
+      {isConnected && <AccountCenter />}
       <div className="flex-grow items-center justify-center self-center p-8 overflow-auto">
         <div className="z-10 grid grid-flow-row grid-cols-2 gap-4 lg:grid-flow-col p-2">
           <div className="col-span-2 text-6xl md:text-7xl lg:row-start-2">
@@ -44,8 +48,15 @@ export default function Home() {
             Access a world of Web3 opportunities securely with a single sign-in.
           </div>
           <SIWEButton
+            subtext={(() => {
+              if (loginStep === "PENDING_WALLET_CONNECTION") {
+                return "Connect your wallet";
+              } else if (loginStep === "PENDING_DATABASE_CONNECTION") {
+                return "Sign message in wallet";
+              }
+            })()}
             loadIconPosition="right"
-            disabled={isServerOnMaintenance()}
+            disabled={isLoggingIn || isServerOnMaintenance()}
             isLoading={isLoggingIn}
             enableEthBranding={enableEthBranding}
             data-testid="connectWalletButton"

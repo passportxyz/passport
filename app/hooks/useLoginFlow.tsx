@@ -16,11 +16,12 @@ import {
   useWeb3Modal,
   useWeb3ModalAccount,
   useWeb3ModalError,
+  useWeb3ModalEvents,
   useWeb3ModalState,
 } from "@web3modal/ethers/react";
 import { datadogRum } from "@datadog/browser-rum";
 
-type LoginStep = "NOT_STARTED" | "OPENING_MODAL" | "PENDING_WALLET_CONNECTION" | "PENDING_DATABASE_CONNECTION" | "DONE";
+type LoginStep = "NOT_STARTED" | "PENDING_WALLET_CONNECTION" | "PENDING_DATABASE_CONNECTION" | "DONE";
 
 // Isolate login status updates and some workaround logic for web3modal
 export const useLoginFlow = (): {
@@ -33,7 +34,6 @@ export const useLoginFlow = (): {
   const { error } = useWeb3ModalError();
   const { isConnected } = useWeb3ModalAccount();
   const { open: web3ModalIsOpen } = useWeb3ModalState();
-  const [web3modalWasOpen, setWeb3modalWasOpen] = useState(false);
   const { disconnect } = useDisconnect();
   const { dbAccessTokenStatus } = useDatastoreConnectionContext();
   const [enabled, setEnabled] = useState(false);
@@ -43,6 +43,7 @@ export const useLoginFlow = (): {
   const isConnectingToDatabaseRef = useRef<boolean>(false);
   const toast = useToast();
   const navigateToPage = useNavigateToPage();
+  const web3modalEvent = useWeb3ModalEvents();
 
   const initiateLogin = useCallback(() => {
     setEnabled(true);
@@ -51,6 +52,13 @@ export const useLoginFlow = (): {
   const resetLogin = useCallback(() => {
     setEnabled(false);
   }, []);
+
+  useEffect(() => {
+    if (web3modalEvent.data.event === "MODAL_CLOSE" && web3modalEvent.data.properties.connected === false) {
+      console.log("MODAL_CLOSE");
+      resetLogin();
+    }
+  }, [web3modalEvent, resetLogin]);
 
   useEffect(() => {
     if (error) {
@@ -91,27 +99,13 @@ export const useLoginFlow = (): {
 
   useEffect(() => {
     const newLoginStep = (() => {
-      console.log("loginStep", enabled, isConnected, web3ModalIsOpen, web3modalWasOpen, dbAccessTokenStatus);
-      // Stop login if web3modal was closed
-      if (web3modalWasOpen && !web3ModalIsOpen && !isConnected && loginStep !== "OPENING_MODAL") {
-        resetLogin();
-        return "NOT_STARTED";
-      }
-
       if (!enabled) return "NOT_STARTED";
-      else if (!isConnected) return "OPENING_MODAL";
-      else if (!isConnected && web3ModalIsOpen) return "PENDING_WALLET_CONNECTION";
+      else if (!isConnected) return "PENDING_WALLET_CONNECTION";
       else if (dbAccessTokenStatus !== "connected") return "PENDING_DATABASE_CONNECTION";
       else return "DONE";
     })();
     setLoginStep(newLoginStep);
-  }, [enabled, isConnected, web3ModalIsOpen, web3modalWasOpen, dbAccessTokenStatus]);
-
-  // It takes a couple render cycles for web3ModalIsOpen to be
-  // updated, so we need to keep track of the previous state
-  useEffect(() => {
-    setWeb3modalWasOpen(web3ModalIsOpen);
-  }, [web3ModalIsOpen]);
+  }, [enabled, isConnected, dbAccessTokenStatus]);
 
   // Workaround for bug where if you disconnect from the modal on
   // the dashboard, the web3ModalIsOpen state is incorrect
@@ -145,8 +139,8 @@ export const useLoginFlow = (): {
           console.error("Error connecting to database", e);
           datadogRum.addError(error);
           showConnectionError(e);
+          isConnectingToDatabaseRef.current = false;
         }
-        isConnectingToDatabaseRef.current = false;
       }
     })();
   }, [loginStep, address, provider, connectDatastore, showConnectionError, resetLogin]);
