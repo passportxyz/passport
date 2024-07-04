@@ -13,6 +13,9 @@ import { customStampProviders, getStampProviderIds } from "../config/providers";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { useCustomization } from "../hooks/useCustomization";
 
+// --- Helpers
+import { intersect } from "../utils/helpers";
+
 const PlatformJsonButton = ({
   platformPassportData,
   platform,
@@ -91,12 +94,25 @@ const ExpirationIndicator = ({ expirationDate }: { expirationDate: Date | string
 
   const statusClass =
     daysUntilExpiration > 45 ? "text-color-8" : daysUntilExpiration > 10 ? "text-color-9" : "text-color-10";
-  return (
-    <div className="pl-4 flex items-center text-color-6 bg-gradient-to-b from-background via-background to-[#082F2A] border border-t-0 rounded-t-none rounded-b-lg border-foreground-5 py-2">
-      <span className={`text-3xl pr-2 ${statusClass}`}>{daysUntilExpiration}</span>{" "}
-      {daysUntilExpiration === 1 ? "day" : "days"} until stamps expire
-    </div>
-  );
+  if (daysUntilExpiration < 0) {
+    //     bg-gradient-to-b from-background to-background-5/30
+    // hover:bg-opacity-100 hover:from-transparent hover:shadow-even-md hover:border-background-5 hover:to-background-5/60 hover:shadow-background-5"
+    return (
+      <div
+        className="pl-4 flex items-center text-color-7 border-t-0 rounded-t-none rounded-b-lg py-2 
+        border border-background-5 bg-gradient-to-b from-background to-background-5/30"
+      >
+        Stamp expired
+      </div>
+    );
+  } else {
+    return (
+      <div className="pl-4 flex items-center text-color-6 bg-gradient-to-b from-background via-background to-[#082F2A] border border-t-0 rounded-t-none rounded-b-lg border-foreground-5 py-2">
+        <span className={`text-3xl pr-2 ${statusClass}`}>{daysUntilExpiration}</span>{" "}
+        {daysUntilExpiration === 1 ? "day" : "days"} until stamps expire
+      </div>
+    );
+  }
 };
 
 export const customSideBarGradient = "bg-gradient-to-b from-background via-background to-[#082F2A]";
@@ -113,13 +129,13 @@ export const PlatformDetails = ({
   onClose: () => void;
 }) => {
   const { scoredPlatforms } = useContext(ScorerContext);
-  const { passport, platformExpirationDates } = useContext(CeramicContext);
+  const { passport, platformExpirationDates, expiredProviders } = useContext(CeramicContext);
 
   const currentPlatformScoreSpec = scoredPlatforms.find((platform) => platform.name === currentPlatform.name);
 
   const platformPassportData = useMemo(
     () =>
-      verifiedProviders && passport && passport.stamps.filter((stamp) => verifiedProviders.includes(stamp.provider)),
+      verifiedProviders && passport && passport.stamps.filter((stamp) => verifiedProviders?.includes(stamp.provider)),
     [verifiedProviders, passport]
   );
 
@@ -130,6 +146,54 @@ export const PlatformDetails = ({
 
   const pointsGained = +earnedPoints.toFixed(2);
   const pointsAvailable = +Math.max(possiblePoints - earnedPoints, 0).toFixed(2);
+
+  verifiedProviders = verifiedProviders || [];
+  const hasExpiredProviders = useMemo(() => {
+    return intersect(new Set(expiredProviders), new Set(verifiedProviders)).size > 0;
+  }, [verifiedProviders, expiredProviders]);
+
+  const pointsBox = useMemo(() => {
+    if (!hasStamps) {
+      return null;
+    }
+
+    return hasExpiredProviders ? (
+      <>
+        <div className="mt-4 border-background-5 border rounded-t-lg px-4 py-2">
+          <div className="flex justify-between">
+            <p className="text-color-10">points gained</p>
+            <p className="text-color-7">points left</p>
+          </div>
+          <div className="flex justify-between text-5xl">
+            <p className="text-color-10">{pointsGained}</p>
+            <p className="text-color-7">{pointsAvailable}</p>
+          </div>
+          <ProgressBar
+            pointsGained={pointsGained}
+            pointsAvailable={pointsAvailable}
+            gainedBarColor="rgb(var(--color-text-7))"
+            availableBarColor="rgb(var(--color-text-10))"
+          />
+        </div>
+        <ExpirationIndicator expirationDate={platformExpirationDates[currentPlatform.platform as PLATFORM_ID] || ""} />
+      </>
+    ) : (
+      <>
+        <div className="mt-4 border-foreground-5 border rounded-t-lg px-4 py-2 bg-gradient-to-b from-background via-background to-[#082F2A]">
+          <div className="flex justify-between">
+            <p className="text-color-6">points gained</p>
+            <p className="text-color-2">points left</p>
+          </div>
+          <div className="flex justify-between text-5xl">
+            <p className="text-color-6">{pointsGained}</p>
+            <p className="text-color-2">{pointsAvailable}</p>
+          </div>
+          <ProgressBar pointsGained={pointsGained} pointsAvailable={pointsAvailable} />
+        </div>
+        <ExpirationIndicator expirationDate={platformExpirationDates[currentPlatform.platform as PLATFORM_ID] || ""} />
+      </>
+    );
+  }, [hasStamps, hasExpiredProviders]);
 
   return (
     <div className="w-full text-color-1">
@@ -159,24 +223,7 @@ export const PlatformDetails = ({
         <p className="mt-8 text-base md:w-8/12">{currentPlatform?.description}</p>
       )}
       {bannerConfig && <GenericBanner banner={bannerConfig} />}
-      {hasStamps && (
-        <>
-          <div className={`mt-4 border-foreground-5 border rounded-t-lg px-4 py-2 ${customSideBarGradient}`}>
-            <div className="flex justify-between">
-              <p className="text-color-6">points gained</p>
-              <p className="text-color-2">points left</p>
-            </div>
-            <div className="flex justify-between text-5xl">
-              <p className="text-color-6">{pointsGained}</p>
-              <p className="text-color-2">{pointsAvailable}</p>
-            </div>
-            <ProgressBar pointsGained={pointsGained} pointsAvailable={pointsAvailable} />
-          </div>
-          <ExpirationIndicator
-            expirationDate={platformExpirationDates[currentPlatform.platform as PLATFORM_ID] || ""}
-          />
-        </>
-      )}
+      {pointsBox}
     </div>
   );
 };

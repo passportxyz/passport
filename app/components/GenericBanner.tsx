@@ -1,7 +1,6 @@
 import { PlatformBanner, Hyperlink } from "@gitcoin/passport-platforms";
 
 export function GenericBanner({ banner }: { banner: PlatformBanner }) {
-  console.log("geri banner", banner);
   const heading = banner.heading ? <>{banner.heading} </> : null;
   return (
     <div className="mt-8 text-sm">
