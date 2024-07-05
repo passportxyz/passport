@@ -248,9 +248,6 @@ export default function Dashboard() {
 
   const Subheader = ({ className }: { className: string }) => (
     <div className={className}>
-      <div className="flex items-center ">
-        <span className="mr-20 font-heading text-5xl">My {filterName && `${filterName} `}Stamps</span>
-      </div>
       {filterName && (
         <div>
           <Link href="/#/dashboard">
