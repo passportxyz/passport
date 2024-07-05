@@ -62,37 +62,87 @@ export function StampSelector({ currentPlatform, currentProviders, verifiedProvi
               }
               const isVerified = verifiedProviders?.indexOf(provider.name) !== -1;
               const isExpired = expiredProviders?.indexOf(provider.name) !== -1;
-              const isValid = isVerified && !isExpired;
-
-              let textColor = isValid ? "text-color-1" : "text-color-2";
 
               const rawWeight = stampWeights?.[provider.name];
               const weight = rawWeight ? +parseFloat(rawWeight).toFixed(2) : 0;
 
-              return (
-                <React.Fragment key={provider.name}>
-                  <div
-                    data-testid={`indicator-${provider.name}`}
-                    className={`relative rounded ${isValid ? "border-foreground-2" : "border-color-3"} text-base ${textColor} flex justify-between items-stretch border text-color-3 mt-4 `}
-                  >
-                    <div className={`p-4 border-r w-3/4 ${isValid && customSideBarGradient}`}>
-                      <p className={`${isValid && "font-bold text-color-6"}`}>
-                        {isValid && checkMark()} {provider.title}
-                      </p>
-                      {provider.description && <p className="my-2 text-sm leading-tight">{provider.description}</p>}
-                    </div>
-
+              if (isExpired) {
+                // Return verified stamp
+                return (
+                  <React.Fragment key={provider.name}>
                     <div
-                      className={`${isValid && "bg-gradient-to-r from-foreground-2 to-foreground-4"} w-1/4 flex items-center ${isValid && "text-background-4"}`}
+                      data-testid={`indicator-${provider.name}`}
+                      className="relative rounded text-base flex justify-between items-stretch text-color-3 mt-4 border border-background-5 bg-gradient-to-b from-background to-background-5/30"
                     >
-                      <p className="text-2xl text-center w-full text-s leading-none">
-                        <span className={`${isValid && "font-bold"}`}>{weight}</span> <br />
-                        <span className="text-base">points</span>
-                      </p>
+                      <div className="p-4 border-r border-background-5 w-3/4">
+                        <p className="">
+                          {provider.title}
+                          <p
+                            className="text-xs bg-background-5 px-1 ml-2 rounded text-right font-alt text-black inline-block relative -top-0.5"
+                            data-testid="expired-label"
+                          >
+                            Expired
+                          </p>
+                        </p>
+                        {provider.description && <p className="my-2 text-sm leading-tight">{provider.description}</p>}
+                      </div>
+
+                      <div className="w-1/4 flex items-center text-color-7 py-3">
+                        <p className="text-2xl text-center w-full text-s leading-none">
+                          <span>{weight}</span> <br />
+                          <span className="text-base">points</span>
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </React.Fragment>
-              );
+                  </React.Fragment>
+                );
+              } else if (isVerified) {
+                // Return expired stamp
+                return (
+                  <React.Fragment key={provider.name}>
+                    <div
+                      data-testid={`indicator-${provider.name}`}
+                      className={`relative rounded border-foreground-2 text-base flex justify-between items-stretch border text-color-1 mt-4 `}
+                    >
+                      <div className={`p-4 border-r w-3/4 ${customSideBarGradient}`}>
+                        <p className="font-bold text-color-6">
+                          {checkMark()} {provider.title}
+                        </p>
+                        {provider.description && <p className="my-2 text-sm leading-tight">{provider.description}</p>}
+                      </div>
+
+                      <div className="bg-gradient-to-r from-foreground-2 to-foreground-4 w-1/4 flex items-center text-background-4 py-3">
+                        <p className="text-2xl text-center w-full text-s leading-none">
+                          <span className="font-bold">{weight}</span> <br />
+                          <span className="text-base">points</span>
+                        </p>
+                      </div>
+                    </div>
+                  </React.Fragment>
+                );
+              } else {
+                // Return unverified stamp
+                return (
+                  <React.Fragment key={provider.name}>
+                    <div
+                      data-testid={`indicator-${provider.name}`}
+                      className={`relative rounded border-color-3 text-base text-color-3 flex justify-between items-stretch border mt-4 `}
+                    >
+                      <div className="p-4 border-r w-3/4">
+                        <p>{provider.title}</p>
+                        {provider.description && <p className="my-2 text-sm leading-tight">{provider.description}</p>}
+                      </div>
+
+                      <div className="w-1/4 flex items-center py-3">
+                        <p className="text-2xl text-center w-full text-s leading-none">
+                          <span>{weight}</span> <br />
+                          <span className="text-base">points</span>
+                        </p>
+                      </div>
+                    </div>
+                  </React.Fragment>
+                );
+              }
             })}
           </div>
         );

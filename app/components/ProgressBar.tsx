@@ -4,9 +4,17 @@ interface ProgressBarProps {
   pointsGained: number;
   pointsAvailable: number;
   isSlim?: boolean;
+  gainedBarColor?: string;
+  availableBarColor?: string;
 }
 
-export const ProgressBar: React.FC<ProgressBarProps> = ({ pointsGained, pointsAvailable, isSlim = false }) => {
+export const ProgressBar: React.FC<ProgressBarProps> = ({
+  pointsGained,
+  pointsAvailable,
+  isSlim = false,
+  gainedBarColor = "rgb(var(--color-foreground-4))",
+  availableBarColor = "#C1F6FF",
+}) => {
   const percentGained = (pointsGained / (pointsGained + pointsAvailable)) * 100 || 0;
 
   const gainedBarWidth = isSlim ? 3 : 6;
@@ -24,7 +32,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ pointsGained, pointsAv
           y1="5"
           x2={100 + capDistance}
           y2="5"
-          stroke="rgb(var(--color-foreground-4))"
+          stroke={gainedBarColor}
           strokeWidth={remainingBarWidth}
           strokeLinecap="round"
         />
@@ -44,7 +52,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ pointsGained, pointsAv
           y1="5"
           x2={percentGained + capDistance}
           y2="5"
-          stroke="#C1F6FF"
+          stroke={availableBarColor}
           strokeWidth={gainedBarWidth}
           strokeLinecap="round"
         />
