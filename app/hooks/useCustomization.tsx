@@ -77,6 +77,8 @@ export const useSetCustomizationKey = (): ((customizationKey: string | undefined
           console.error("Failed to load customization config", e);
           setCustomizationConfig(DEFAULT_CUSTOMIZATION);
         }
+      } else {
+        setCustomizationConfig(DEFAULT_CUSTOMIZATION);
       }
     },
     [setCustomizationConfig]
