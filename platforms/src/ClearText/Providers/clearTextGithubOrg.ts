@@ -14,7 +14,8 @@ export type GithubFindMyUserResponse = {
 };
 
 export enum ClientType {
-  GrantHub,
+  GrantHub = 0,
+  GrantHubMACI = 1,
 }
 
 export type GHUserRequestPayload = RequestPayload & {
@@ -101,13 +102,27 @@ const verifyOrg = (data: Organization[], providedOrg: string): GithubMyOrg => {
   };
 };
 
+const getCredentials = (requestedClient: ClientType): { clientId: string; clientSecret: string } => {
+  switch (requestedClient) {
+    case ClientType.GrantHub:
+      return {
+        clientId: process.env.GRANT_HUB_GITHUB_CLIENT_ID,
+        clientSecret: process.env.GRANT_HUB_GITHUB_CLIENT_SECRET,
+      };
+    case ClientType.GrantHubMACI:
+      return {
+        clientId: process.env.GRANT_HUB_MACI_GITHUB_CLIENT_ID,
+        clientSecret: process.env.GRANT_HUB_MACI_GITHUB_CLIENT_SECRET,
+      };
+  }
+  return {
+    clientId: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
+  };
+};
+
 const requestAccessToken = async (code: string, requestedClient: ClientType): Promise<string> => {
-  const clientId =
-    requestedClient === ClientType.GrantHub ? process.env.GRANT_HUB_GITHUB_CLIENT_ID : process.env.GITHUB_CLIENT_ID;
-  const clientSecret =
-    requestedClient === ClientType.GrantHub
-      ? process.env.GRANT_HUB_GITHUB_CLIENT_SECRET
-      : process.env.GITHUB_CLIENT_SECRET;
+  const { clientId, clientSecret } = getCredentials(requestedClient);
 
   // Exchange the code for an access token
   const tokenRequest = await axios.post(
