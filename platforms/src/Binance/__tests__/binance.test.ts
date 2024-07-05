@@ -87,7 +87,7 @@ describe("BinanceProvider", () => {
 
       const expected = {
         valid: false,
-        errors: ["The wallet has not attested any SBT"],
+        errors: ["Error: The wallet has not attested any SBT"],
       };
 
       expect(result).toEqual(expected);
@@ -152,7 +152,7 @@ describe("BinanceProvider", () => {
 
       expect(await binanceProvider.getTokenId(mockAddress)).toEqual({
         tokenId: "",
-        error: ["The wallet has not attested any SBT"],
+        error: ["Error: The wallet has not attested any SBT"],
       });
     });
   });

@@ -103,8 +103,10 @@ export class BinanceProvider implements Provider {
       if (String(e).includes("The wallet has not attested any SBT")) {
         return {
           tokenId: "",
-          error: ["The wallet has not attested any SBT"],
+          error: [String(e)],
         };
+      } else {
+        throw e;
       }
     }
   }
