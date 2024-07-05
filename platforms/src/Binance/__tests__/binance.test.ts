@@ -78,7 +78,7 @@ describe("BinanceProvider", () => {
 
     it("should return invalid payload when an error occurs", async () => {
       (ethers.Contract as unknown as jest.Mock).mockImplementation(() => ({
-        tokenIdOf: jest.fn().mockRejectedValue(new Error("Contract error")),
+        tokenIdOf: jest.fn().mockRejectedValue(new Error("The wallet has not attested any SBT")),
       }));
 
       const result = await binanceProvider.verify({
@@ -87,7 +87,7 @@ describe("BinanceProvider", () => {
 
       const expected = {
         valid: false,
-        errors: ["Error: Contract error"],
+        errors: ["The wallet has not attested any SBT"],
       };
 
       expect(result).toEqual(expected);
@@ -136,7 +136,7 @@ describe("BinanceProvider", () => {
 
       const result = await binanceProvider.getTokenId(mockAddress);
 
-      expect(result).toBe(mockTokenId);
+      expect(result).toEqual({ tokenId: mockTokenId });
       expect(getRPCProvider).toHaveBeenCalledWith(expect.any(String));
       expect(ethers.Contract).toHaveBeenCalledWith(expect.any(String), expect.any(Array), expect.any(Object));
     });
@@ -147,10 +147,13 @@ describe("BinanceProvider", () => {
       (getRPCProvider as jest.Mock).mockReturnValue({});
 
       (ethers.Contract as unknown as jest.Mock).mockImplementation(() => ({
-        tokenIdOf: jest.fn().mockRejectedValue(new Error("Contract error")),
+        tokenIdOf: jest.fn().mockRejectedValue(new Error("The wallet has not attested any SBT")),
       }));
 
-      await expect(binanceProvider.getTokenId(mockAddress)).rejects.toThrow("Contract error");
+      expect(await binanceProvider.getTokenId(mockAddress)).toEqual({
+        tokenId: "",
+        error: ["The wallet has not attested any SBT"],
+      });
     });
   });
 });

@@ -3,6 +3,7 @@ import { Provider } from "../../types";
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { getRPCProvider } from "../../utils/signer";
 import { Contract, BigNumber } from "ethers";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 const abi = [
   {
@@ -37,33 +38,32 @@ export class BinanceProvider implements Provider {
   type = "BinanceBABT";
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    try {
-      const address = payload.address;
-      const tokenId = await this.getTokenId(address);
-
-      const babtId = await this.getBABTId(tokenId);
-
-      const valid = !!babtId;
-
-      if (!valid) {
-        return {
-          valid: false,
-          errors: ["BABT not found"],
-        };
-      }
-
-      return {
-        valid,
-        record: {
-          id: babtId,
-        },
-      };
-    } catch (error) {
+    const address = payload.address;
+    const tokenResponse = await this.getTokenId(address);
+    if (tokenResponse.error) {
       return {
         valid: false,
-        errors: [String(error)],
+        errors: tokenResponse.error,
       };
     }
+
+    const babtId = await this.getBABTId(tokenResponse.tokenId);
+
+    const valid = !!babtId;
+
+    if (!valid) {
+      return {
+        valid: false,
+        errors: ["BABT not found"],
+      };
+    }
+
+    return {
+      valid,
+      record: {
+        id: babtId,
+      },
+    };
   }
 
   async getBABTId(tokenId: string): Promise<string | undefined> {
@@ -76,18 +76,36 @@ export class BinanceProvider implements Provider {
     // "attributes": [],
     // "credentialList": []
     // }
-    const metaData: {
-      data: {
-        id?: string;
-      };
-    } = await axios.get(`${this.binanceSbtEndpoint}/${tokenId}`);
-    return metaData.data?.id;
+    try {
+      const metaData: {
+        data: {
+          id?: string;
+        };
+      } = await axios.get(`${this.binanceSbtEndpoint}/${tokenId}`);
+      return metaData.data?.id;
+    } catch (e) {
+      handleProviderAxiosError(e, "Binance");
+    }
   }
 
-  async getTokenId(address: string): Promise<string> {
-    const provider = getRPCProvider(this.binanceRpc);
-    const babtContract = new Contract(this.babTokenContractAddress, abi, provider) as unknown as ISBT721Contract;
-    const tokenId = await babtContract.tokenIdOf(address);
-    return tokenId.toString();
+  async getTokenId(address: string): Promise<{
+    tokenId: string;
+    error?: string[];
+  }> {
+    try {
+      const provider = getRPCProvider(this.binanceRpc);
+      const babtContract = new Contract(this.babTokenContractAddress, abi, provider) as unknown as ISBT721Contract;
+      const tokenId = await babtContract.tokenIdOf(address);
+      return {
+        tokenId: tokenId.toString(),
+      };
+    } catch (e) {
+      if (String(e).includes("The wallet has not attested any SBT")) {
+        return {
+          tokenId: "",
+          error: ["The wallet has not attested any SBT"],
+        };
+      }
+    }
   }
 }
