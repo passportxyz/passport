@@ -56,6 +56,14 @@ export const getIamSecrets = (PASSPORT_VC_SECRETS_ARN: string, IAM_SERVER_SSM_AR
     valueFrom: `${IAM_SERVER_SSM_ARN}:GRANT_HUB_GITHUB_CLIENT_SECRET::`,
   },
   {
+    name: "BUILDER_MACI_GITHUB_CLIENT_ID",
+    valueFrom: `${IAM_SERVER_SSM_ARN}:BUILDER_MACI_GITHUB_CLIENT_ID::`,
+  },
+  {
+    name: "BUILDER_MACI_GITHUB_CLIENT_SECRET",
+    valueFrom: `${IAM_SERVER_SSM_ARN}:BUILDER_MACI_GITHUB_CLIENT_SECRET::`,
+  },
+  {
     name: "LINKEDIN_CLIENT_ID",
     valueFrom: `${IAM_SERVER_SSM_ARN}:LINKEDIN_CLIENT_ID::`,
   },
