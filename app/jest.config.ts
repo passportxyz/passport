@@ -16,6 +16,7 @@ const customJestConfig = {
     // Handle module aliases
     "^@/components/(.*)$": "<rootDir>/components/$1",
     "^@/pages/(.*)$": "<rootDir>/pages/$1",
+    "@web3modal/ethers/react": "<rootDir>/__mocks__/web3modalMock.js",
   },
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   setupFiles: ["jest-localstorage-mock"],

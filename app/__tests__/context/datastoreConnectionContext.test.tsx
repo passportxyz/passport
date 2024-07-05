@@ -1,15 +1,14 @@
 import { render, waitFor, screen, fireEvent } from "@testing-library/react";
-import * as framework from "@self.id/framework";
 import { EthereumWebAuth } from "@didtools/pkh-ethereum";
 import { AccountId } from "caip";
 import { useEffect, useState } from "react";
-import { mockAddress, mockWallet } from "../../__test-fixtures__/onboardHookValues";
 import { makeTestCeramicContext } from "../../__test-fixtures__/contextTestHelpers";
 
 import {
   DatastoreConnectionContextProvider,
   useDatastoreConnectionContext,
 } from "../../context/datastoreConnectionContext";
+import { mockAddress } from "../../__mocks__/web3modalMock.js";
 import { CeramicContext } from "../../context/ceramicContext";
 import { Eip1193Provider } from "ethers";
 import { DIDSession } from "did-session";

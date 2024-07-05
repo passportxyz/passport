@@ -6,26 +6,12 @@ import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures
 import { CeramicContextState } from "../../context/ceramicContext";
 import { Chain } from "../../utils/chains";
 import { ChakraProvider } from "@chakra-ui/react";
-
-const mockSetChain = jest.fn();
-
-jest.mock("@web3-onboard/react", () => ({
-  init: () => ({
-    connectWallet: jest.fn(),
-    disconnectWallet: () => Promise.resolve(),
-    state: {
-      select: () => ({
-        subscribe: () => {},
-      }),
-    },
-  }),
-}));
+import { switchNetworkMock } from "../../__mocks__/web3modalMock";
 
 const mockWalletState = {
   address: "0x123",
   provider: jest.fn(),
   chain: "0x14a33",
-  setChain: mockSetChain,
 };
 
 jest.mock("../../context/walletStore", () => ({
@@ -79,6 +65,8 @@ const chainConfig = {
   label: "test",
   rpcUrl: "test",
   icon: "icon",
+  chainLink: "",
+  explorerUrl: "",
 };
 
 const chainWithoutEas = new Chain(chainConfig);
@@ -138,7 +126,7 @@ describe("SyncToChainButton component", () => {
     const btn = screen.getByTestId("sync-to-chain-button");
     expect(btn).toHaveTextContent("Mint");
     fireEvent.click(btn);
-    await waitFor(() => expect(mockSetChain).toHaveBeenCalled());
+    await waitFor(() => expect(switchNetworkMock).toHaveBeenCalled());
   });
   it("should render error toast if no stamps", async () => {
     renderWithContext(
