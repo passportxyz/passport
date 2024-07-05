@@ -55,29 +55,9 @@ export const useLoginFlow = (): {
 
   useEffect(() => {
     if (web3modalEvent.data.event === "MODAL_CLOSE" && web3modalEvent.data.properties.connected === false) {
-      console.log("MODAL_CLOSE");
       resetLogin();
     }
   }, [web3modalEvent, resetLogin]);
-
-  useEffect(() => {
-    if (error) {
-      console.error("Web3Modal error", error);
-      toast({
-        duration: 6000,
-        isClosable: true,
-        render: (result: any) => (
-          <DoneToastContent
-            title={"Connection Error"}
-            body={(error as Error).message}
-            icon="../assets/verification-failed-bright.svg"
-            result={result}
-          />
-        ),
-      });
-      resetLogin();
-    }
-  }, [error, toast, resetLogin]);
 
   const showConnectionError = useCallback(
     (e: any) => {
@@ -96,6 +76,14 @@ export const useLoginFlow = (): {
     },
     [toast]
   );
+
+  useEffect(() => {
+    if (error) {
+      console.error("Web3Modal error", error);
+      showConnectionError(error);
+      resetLogin();
+    }
+  }, [error, toast, resetLogin]);
 
   useEffect(() => {
     const newLoginStep = (() => {
@@ -129,9 +117,7 @@ export const useLoginFlow = (): {
   useEffect(() => {
     (async () => {
       if (!isConnectingToDatabaseRef.current && loginStep === "PENDING_DATABASE_CONNECTION" && address && provider) {
-        console.log("Connecting to database 1", isConnectingToDatabaseRef.current);
         isConnectingToDatabaseRef.current = true;
-        console.log("Connecting to database 2", isConnectingToDatabaseRef.current);
         try {
           await connectDatastore(address, provider);
         } catch (e) {

@@ -32,10 +32,9 @@ createWeb3Modal({
   ethersConfig,
   chains: web3modalChains,
   projectId,
-  // TODO
-  // themeMode: "dark",
+  themeMode: "dark",
   themeVariables: {
     "--w3m-font-family": "var(--font-body)",
-    //   "--w3m-accent": "rgb(var(--color-foreground-4))",
+    "--w3m-accent": "rgb(var(--color-foreground-4))",
   },
 });

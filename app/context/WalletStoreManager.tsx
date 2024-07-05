@@ -22,7 +22,7 @@ const WalletStoreSyncWithWeb3Modal = () => {
       _internalSync({
         provider: web3modalProvider,
         address: web3modalAccount.address,
-        chain: web3modalAccount.chainId?.toString(16),
+        chain: "0x" + web3modalAccount.chainId?.toString(16),
       });
     }
   }, [web3modalAccount.isConnected, web3modalProvider, web3modalAccount.address, web3modalAccount.chainId]);

@@ -1,7 +1,6 @@
 // --- Utils & configs
 import { create } from "zustand";
 import { Eip1193Provider } from "ethers";
-import { useSwitchNetwork } from "@web3modal/ethers/react";
 
 type InternalSyncParams = {
   address?: string;
@@ -9,9 +8,10 @@ type InternalSyncParams = {
   provider?: Eip1193Provider;
 };
 
+// Managed by ./WalletStoreManager
+
 const walletStore = create<{
   _internalSync: (params: InternalSyncParams) => void;
-  setChain: (chain: string) => Promise<boolean>;
   provider?: Eip1193Provider;
   chain?: string;
   address?: string;
@@ -20,15 +20,10 @@ const walletStore = create<{
   address: undefined,
   provider: undefined,
   _internalSync: async (params: InternalSyncParams) => {
-    // Only to be used as bridge between web3modal and walletStore, in WalletStoreSyncWithWeb3Modal
+    // Only to be used as bridge between web3modal and walletStore, in WalletStoreManager
     // Could be removed when switching to wagmi, since we'll probably go ahead and change
     // all the hooks at that point and likely even get rid of the walletStore
     set(params);
-  },
-  setChain: async (chainId: string) => {
-    const { switchNetwork } = useSwitchNetwork();
-    switchNetwork(parseInt(chainId));
-    return true;
   },
 }));
 
