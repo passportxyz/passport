@@ -12,8 +12,8 @@ export class BinancePlatform extends Platform {
     content: (
       <div>
         Obtain your <Hyperlink href="https://www.binance.com/en/babt">Binance Account Bound Token (BABT)</Hyperlink> by
-        verifying your identity and logging into your Binance account. This will prove you're verified by Binance and
-        have completed the KYC process.
+        verifying your identity and logging into your Binance account. This will prove you&apos;re verified by Binance
+        and have completed the KYC process.
       </div>
     ),
   };

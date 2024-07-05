@@ -131,5 +131,6 @@
   { "bit": 93, "index": 0, "name": "zkSyncScore#50" },
   { "bit": 94, "index": 0, "name": "NFTScore#50" },
   { "bit": 95, "index": 0, "name": "NFTScore#75" },
-  { "bit": 96, "index": 0, "name": "NFTScore#90" }
+  { "bit": 96, "index": 0, "name": "NFTScore#90" },
+  { "bit": 97, "index": 0, "name": "BinanceBABT" }
 ]
