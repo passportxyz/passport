@@ -11,11 +11,8 @@ import { verifyCredential } from "@gitcoin/passport-identity";
 // ----- Verify signed message with ethers
 import { utils } from "ethers";
 
-// set the network rpc url based on env
-const RPC_URL = process.env.RPC_URL;
-
-export const getRPCProvider = (payload: RequestPayload): StaticJsonRpcProvider => {
-  const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(RPC_URL);
+export const getRPCProvider = (rpc: string): StaticJsonRpcProvider => {
+  const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(rpc);
 
   return provider;
 };

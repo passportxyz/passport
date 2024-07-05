@@ -359,7 +359,8 @@ export type PLATFORM_ID =
   | "ZkSync"
   | "TrustaLabs"
   | "Outdid"
-  | "AllowList";
+  | "AllowList"
+  | "Binance";
 
 export type PLATFORM_CATEGORY = {
   name: string;
@@ -441,7 +442,8 @@ export type PROVIDER_ID =
   | "ETHnumTransactions#100"
   | "Outdid"
   | "AllowList"
-  | `AllowList#${string}`;
+  | `AllowList#${string}`
+  | "BinanceBABT";
 
 export type StampBit = {
   bit: number;

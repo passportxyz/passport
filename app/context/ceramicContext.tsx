@@ -43,6 +43,7 @@ const {
   TrustaLabs,
   Outdid,
   AllowList,
+  Binance,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -217,6 +218,13 @@ if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS === "on") {
   platforms.set("TrustaLabs", {
     platform: new TrustaLabs.TrustaLabsPlatform(),
     platFormGroupSpec: TrustaLabs.ProviderConfig,
+  });
+}
+
+if (process.env.NEXT_PUBLIC_FF_BINANCE_STAMPS === "on") {
+  platforms.set("Binance", {
+    platform: new Binance.BinancePlatform(),
+    platFormGroupSpec: Binance.ProviderConfig,
   });
 }
 
