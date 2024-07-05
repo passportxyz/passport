@@ -75,11 +75,19 @@ export function StampSelector({ currentPlatform, currentProviders, verifiedProvi
                       className="relative rounded text-base flex justify-between items-stretch text-color-3 mt-4 border border-background-5 bg-gradient-to-b from-background to-background-5/30"
                     >
                       <div className="p-4 border-r border-background-5 w-3/4">
-                        <p className="">{provider.title}</p>
+                        <p className="">
+                          {provider.title}
+                          <p
+                            className="text-xs bg-background-5 px-1 ml-2 rounded text-right font-alt text-black inline-block relative -top-0.5"
+                            data-testid="expired-label"
+                          >
+                            Expired
+                          </p>
+                        </p>
                         {provider.description && <p className="my-2 text-sm leading-tight">{provider.description}</p>}
                       </div>
 
-                      <div className="w-1/4 flex items-center text-color-7">
+                      <div className="w-1/4 flex items-center text-color-7 py-3">
                         <p className="text-2xl text-center w-full text-s leading-none">
                           <span>{weight}</span> <br />
                           <span className="text-base">points</span>
@@ -103,9 +111,7 @@ export function StampSelector({ currentPlatform, currentProviders, verifiedProvi
                         {provider.description && <p className="my-2 text-sm leading-tight">{provider.description}</p>}
                       </div>
 
-                      <div
-                        className="bg-gradient-to-r from-foreground-2 to-foreground-4 w-1/4 flex items-center text-background-4"
-                      >
+                      <div className="bg-gradient-to-r from-foreground-2 to-foreground-4 w-1/4 flex items-center text-background-4 py-3">
                         <p className="text-2xl text-center w-full text-s leading-none">
                           <span className="font-bold">{weight}</span> <br />
                           <span className="text-base">points</span>
@@ -123,15 +129,11 @@ export function StampSelector({ currentPlatform, currentProviders, verifiedProvi
                       className={`relative rounded border-color-3 text-base text-color-3 flex justify-between items-stretch border mt-4 `}
                     >
                       <div className="p-4 border-r w-3/4">
-                        <p>
-                           {provider.title}
-                        </p>
+                        <p>{provider.title}</p>
                         {provider.description && <p className="my-2 text-sm leading-tight">{provider.description}</p>}
                       </div>
 
-                      <div
-                        className="w-1/4 flex items-center"
-                      >
+                      <div className="w-1/4 flex items-center py-3">
                         <p className="text-2xl text-center w-full text-s leading-none">
                           <span>{weight}</span> <br />
                           <span className="text-base">points</span>
