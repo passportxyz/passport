@@ -28,7 +28,7 @@ describe("Notifications Component", () => {
     fireEvent.click(noteBell);
 
     await waitFor(() => {
-      expect(screen.getByText("Congrats! You have no notifications.")).toBeInTheDocument();
+      expect(screen.getByText("Congrats! You don't have any notifications.")).toBeInTheDocument();
     });
   });
   it("should render read notification", async () => {

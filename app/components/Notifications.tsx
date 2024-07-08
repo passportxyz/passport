@@ -207,7 +207,7 @@ export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) 
                       />
                     ))
                 ) : (
-                  <p className="p-2">Congrats! You have no notifications.</p>
+                  <p className="p-2">Congrats! You don&apos;t have any notifications.</p>
                 )}
               </div>
             </Popover.Panel>
