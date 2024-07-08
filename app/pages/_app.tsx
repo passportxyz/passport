@@ -1,5 +1,3 @@
-(globalThis.process.browser as any) = true;
-
 // --- React Methods
 import React, { useEffect } from "react";
 
@@ -14,7 +12,6 @@ import "../utils/web3";
 import { CeramicContextProvider } from "../context/ceramicContext";
 import { DatastoreConnectionContextProvider } from "../context/datastoreConnectionContext";
 import { ScorerContextProvider } from "../context/scorerContext";
-import { WalletStoreManager } from "../context/WalletStoreManager";
 
 // --- Ceramic Tools
 import { Provider as SelfIdProvider } from "@self.id/framework";
@@ -149,23 +146,21 @@ function App({ Component, pageProps }: AppProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
       </Head>
       <QueryClientProvider client={queryClient}>
-        <WalletStoreManager>
-          <SelfIdProvider client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}>
-            <DatastoreConnectionContextProvider>
-              <ScorerContextProvider>
-                <CeramicContextProvider>
-                  <StampClaimingContextProvider>
-                    <RenderOnlyOnClient>
-                      <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
-                        <Component {...pageProps} />
-                      </ThemeWrapper>
-                    </RenderOnlyOnClient>
-                  </StampClaimingContextProvider>
-                </CeramicContextProvider>
-              </ScorerContextProvider>
-            </DatastoreConnectionContextProvider>
-          </SelfIdProvider>
-        </WalletStoreManager>
+        <SelfIdProvider client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}>
+          <DatastoreConnectionContextProvider>
+            <ScorerContextProvider>
+              <CeramicContextProvider>
+                <StampClaimingContextProvider>
+                  <RenderOnlyOnClient>
+                    <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                      <Component {...pageProps} />
+                    </ThemeWrapper>
+                  </RenderOnlyOnClient>
+                </StampClaimingContextProvider>
+              </CeramicContextProvider>
+            </ScorerContextProvider>
+          </DatastoreConnectionContextProvider>
+        </SelfIdProvider>
       </QueryClientProvider>
     </>
   );

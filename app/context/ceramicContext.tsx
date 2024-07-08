@@ -448,14 +448,14 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   }, [address, dbAccessToken]);
 
   useEffect(() => {
-    if (database) {
+    if (database && address) {
       fetchPassport(database, false, true).then((passport) => {
         if (passport) {
           setInitialPassport(passport);
         }
       });
     }
-  }, [database]);
+  }, [database, address]);
 
   useEffect(() => {
     fetchStampWeights();

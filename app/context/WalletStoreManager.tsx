@@ -1,14 +1,17 @@
 // --- React Methods
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 // --- Utils & configs
 import { useWeb3ModalAccount, useWeb3ModalProvider } from "@web3modal/ethers/react";
 import { useWalletStore } from "./walletStore";
+import { useNavigateToPage } from "../hooks/useCustomization";
 
 const WalletStoreSyncWithWeb3Modal = () => {
   const _internalSync = useWalletStore((state) => state._internalSync);
-  const { walletProvider: web3modalProvider } = useWeb3ModalProvider();
+  const navigateToPage = useNavigateToPage();
+  const [connectedAddress, setConnectedAddress] = useState<string | undefined>(undefined);
 
+  const { walletProvider: web3modalProvider } = useWeb3ModalProvider();
   const web3modalAccount = useWeb3ModalAccount();
 
   useEffect(() => {
@@ -19,10 +22,22 @@ const WalletStoreSyncWithWeb3Modal = () => {
 
   useEffect(() => {
     if (web3modalAccount.isConnected) {
+      const { address, chainId } = web3modalAccount;
+
+      if (address) {
+        if (!connectedAddress) {
+          setConnectedAddress(address);
+        } else if (connectedAddress !== address) {
+          navigateToPage("home");
+        }
+      }
+
+      const chain = chainId ? "0x" + chainId.toString(16) : undefined;
+
       _internalSync({
         provider: web3modalProvider,
-        address: web3modalAccount.address,
-        chain: "0x" + web3modalAccount.chainId?.toString(16),
+        address,
+        chain,
       });
     }
   }, [web3modalAccount.isConnected, web3modalProvider, web3modalAccount.address, web3modalAccount.chainId]);

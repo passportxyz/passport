@@ -2,6 +2,7 @@
 // --- Methods
 import React from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import { WalletStoreManager } from "../context/WalletStoreManager";
 
 // -- Next Methods
 import type { NextPage } from "next";
@@ -50,18 +51,20 @@ const App: NextPage = () => {
   return (
     <div>
       <Router>
-        <Routes>
-          <Route path="/:key?" element={<CustomizationUrlLayoutRoute />}>
-            <Route path="" element={<Home />} />
-            <Route path="welcome" element={<Welcome />} />
-            <Route path="dashboard">
-              {/* This is here to support legacy customization paths */}
-              <Route path=":customizationKey" element={<Dashboard />} />
-              <Route path="" element={<Dashboard />} />
+        <WalletStoreManager>
+          <Routes>
+            <Route path="/:key?" element={<CustomizationUrlLayoutRoute />}>
+              <Route path="" element={<Home />} />
+              <Route path="welcome" element={<Welcome />} />
+              <Route path="dashboard">
+                {/* This is here to support legacy customization paths */}
+                <Route path=":customizationKey" element={<Dashboard />} />
+                <Route path="" element={<Dashboard />} />
+              </Route>
+              <Route path="privacy" element={<Privacy />} />
             </Route>
-            <Route path="privacy" element={<Privacy />} />
-          </Route>
-        </Routes>
+          </Routes>
+        </WalletStoreManager>
       </Router>
     </div>
   );
