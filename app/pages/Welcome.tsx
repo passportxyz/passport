@@ -29,7 +29,7 @@ export default function Welcome() {
 
   // Route user to home page when wallet is disconnected
   useEffect(() => {
-    if (!address) {
+    if (!address || dbAccessTokenStatus !== "connected") {
       navigateToPage("home");
     }
   }, [address]);
@@ -41,9 +41,8 @@ export default function Welcome() {
           <MinimalHeader className={`border-b border-foreground-6`} />
         </div>
         <BodyWrapper className="flex justify-center">
-          {(isLoadingPassport === IsLoadingPassportState.Idle ||
-            isLoadingPassport === IsLoadingPassportState.FailedToConnect) &&
-          dbAccessTokenStatus === "connected" ? (
+          {isLoadingPassport === IsLoadingPassportState.Idle ||
+          isLoadingPassport === IsLoadingPassportState.FailedToConnect ? (
             <InitialWelcome
               onBoardFinished={async () => {
                 if (address) {

@@ -1,24 +1,18 @@
 import { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
 import { datadogRum } from "@datadog/browser-rum";
 import { useWalletStore } from "./walletStore";
-import { DoneToastContent } from "../components/DoneToastContent";
-import { EthereumAuthProvider } from "@self.id/web";
-import { EthereumWebAuth, getAccountId } from "@didtools/pkh-ethereum";
-import { ComposeClient } from "@composedb/client";
+import { EthereumWebAuth } from "@didtools/pkh-ethereum";
+import { Buffer } from "buffer";
+
 import { DIDSession } from "did-session";
 import { DID } from "dids";
 import axios from "axios";
 import { AccountId } from "caip";
-import { MAX_VALID_DID_SESSION_AGE } from "@gitcoin/passport-identity";
 
 import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
-import { useToast } from "@chakra-ui/react";
 import { Eip1193Provider } from "ethers";
 import { createSignedPayload } from "../utils/helpers";
-import { ComposeDatabase } from "@gitcoin/passport-database-client";
-import { datadogLogs } from "@datadog/browser-logs";
-
-const BUFFER_TIME_BEFORE_EXPIRATION = 60 * 60 * 1000;
+import { useDisconnect } from "@web3modal/ethers/react";
 
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
@@ -40,9 +34,7 @@ export const DatastoreConnectionContext = createContext<DatastoreConnectionConte
 
 // In the app, the context hook should be used. This is only exported for testing
 export const useDatastoreConnection = () => {
-  const toast = useToast();
-
-  const disconnectWallet = useWalletStore((state) => state.disconnect);
+  const { disconnect: disconnectWallet } = useDisconnect();
   const chain = useWalletStore((state) => state.chain);
 
   const [dbAccessTokenStatus, setDbAccessTokenStatus] = useState<DbAuthTokenStatus>("idle");
@@ -58,15 +50,6 @@ export const useDatastoreConnection = () => {
       setDbAccessToken(undefined);
     }
   }, [chain, dbAccessTokenStatus]);
-
-  const handleConnectionError = useCallback(
-    async (sessionKey: string, dbCacheTokenKey: string) => {
-      await disconnectWallet();
-      window.localStorage.removeItem(sessionKey);
-      window.localStorage.removeItem(dbCacheTokenKey);
-    },
-    [disconnectWallet]
-  );
 
   const getPassportDatabaseAccessToken = async (did: DID): Promise<string> => {
     let nonce = null;
@@ -99,8 +82,6 @@ export const useDatastoreConnection = () => {
 
   const loadDbAccessToken = useCallback(async (address: string, did: DID) => {
     const dbCacheTokenKey = `dbcache-token-${address}`;
-    // TODO: if we load the token from the localstorage we should validate it
-    // let dbAccessToken = window.localStorage.getItem(dbCacheTokenKey);
     let dbAccessToken = null;
 
     // Here we try to get an access token for the Passport database
@@ -115,24 +96,25 @@ export const useDatastoreConnection = () => {
       // @ts-ignore
       window.localStorage.setItem(dbCacheTokenKey, dbAccessToken);
       setDbAccessToken(dbAccessToken || undefined);
-      const status = dbAccessToken ? "connected" : "failed";
       setDbAccessTokenStatus("connected");
     } catch (error) {
       setDbAccessTokenStatus("failed");
 
-      // Should we logout the user here? They will be unable to write to passport
       const msg = `Error getting access token for did: ${did}`;
+      console.error("Error getting access token for did:", error);
       datadogRum.addError(msg);
+
+      throw error;
     }
   }, []);
 
   const connect = useCallback(
     async (address: string, provider: Eip1193Provider) => {
       if (address) {
-        let sessionKey = "";
-        let dbCacheTokenKey = "";
-
         try {
+          // This is to fix issues with extensions that inject old versions of Buffer
+          globalThis.Buffer = Buffer;
+
           const accountId = new AccountId({
             // We always use chain id 1 for now for all sessions, to avoid users
             // switching networks and not see their stamps any more
@@ -140,79 +122,22 @@ export const useDatastoreConnection = () => {
             address,
           });
           const authMethod = await EthereumWebAuth.getAuthMethod(provider, accountId);
-          // Sessions will be serialized and stored in localhost
-          // The sessions are bound to an ETH address, this is why we use the address in the session key
-          sessionKey = `didsession-${address}`;
-          dbCacheTokenKey = `dbcache-token-${address}`;
-          // const sessionStr = window.localStorage.getItem(sessionKey);
-          // let session: DIDSession | undefined = undefined;
-          // try {
-          //   if (sessionStr) {
-          //     session = await DIDSession.fromSession(sessionStr);
-          //   }
-          // } catch (error) {
-          //   console.log("Error parsing session from localStorage:", error);
-          //   window.localStorage.removeItem(sessionKey);
-          // }
 
-          // if (
-          //   true
-          //   //  || // Hotfix: Hardcoding this here, as we always want a session created by DIDSession.get ... (at least for now)
-          //   // !session ||
-          //   // session.isExpired ||
-          //   // session.expireInSecs < 3600 ||
-          //   // !session.hasSession ||
-          //   // Date.now() - new Date(session?.cacao?.p?.iat).getTime() >
-          //   //   MAX_VALID_DID_SESSION_AGE - BUFFER_TIME_BEFORE_EXPIRATION
-          // ) {
-          //   // session = await DIDSession.authorize(authMethod, { resources: ["ceramic://*"] });
-          //   // Store the session in localstorage
-          //   // window.localStorage.setItem(sessionKey, session.serialize());
-          // }
-
-          // Extensions which inject the Buffer library break the
-          // did-session library, so we need to remove it
-          if (globalThis.Buffer) {
-            datadogLogs.logger.warn("Buffer library is injected, setting to undefined", {
-              buffer: `${globalThis.Buffer}`,
-            });
-            globalThis.Buffer = undefined as any;
-            console.log(
-              "Warning: Buffer library is injected! This will be overwritten in order to avoid conflicts with did-session."
-            );
-          } else {
-            console.log("Buffer library is not injected (this is good)");
-          }
           let session: DIDSession = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
 
           if (session) {
             await loadDbAccessToken(address, session.did);
             setDid(session.did);
 
-            // session.isExpired looks like a static variable so this looks like a bug,
-            // but isExpired is a getter, so it's actually checking the current status
-            // whenever checkSessionIsValid is called
             setCheckSessionIsValid(() => () => !session.isExpired);
           }
         } catch (error) {
-          await handleConnectionError(sessionKey, dbCacheTokenKey);
-          toast({
-            duration: 6000,
-            isClosable: true,
-            render: (result: any) => (
-              <DoneToastContent
-                title={"Connection Error"}
-                body={(error as Error).message}
-                icon="../assets/verification-failed-bright.svg"
-                result={result}
-              />
-            ),
-          });
-          datadogRum.addError(error);
+          await disconnectWallet();
+          throw error;
         }
       }
     },
-    [handleConnectionError, loadDbAccessToken, toast]
+    [disconnectWallet, loadDbAccessToken]
   );
 
   const disconnect = async (address: string) => {

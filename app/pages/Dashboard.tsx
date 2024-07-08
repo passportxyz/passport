@@ -1,8 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
 import React, { useContext, useEffect, useMemo, useRef } from "react";
-import { useRouter } from "next/router";
-import Link from "next/link";
 
 // --Components
 import PageRoot from "../components/PageRoot";
@@ -26,7 +24,6 @@ import { ScorerContext } from "../context/scorerContext";
 import { useOneClickVerification } from "../hooks/useOneClickVerification";
 
 import ProcessingPopup from "../components/ProcessingPopup";
-import { getFilterName } from "../config/filters";
 import { Button } from "../components/Button";
 import { DEFAULT_CUSTOMIZATION_KEY, useCustomization, useNavigateToPage } from "../hooks/useCustomization";
 import { DynamicCustomDashboardPanel } from "../components/CustomDashboardPanel";
@@ -35,7 +32,6 @@ import hash from "object-hash";
 // --- GTM Module
 import TagManager from "react-gtm-module";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
-import LoadingScreen from "../components/LoadingScreen";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -116,11 +112,6 @@ export default function Dashboard() {
   // ------------------- END Data items for Google Tag Manager -------------------
   const { isOpen: retryModalIsOpen, onOpen: onRetryModalOpen, onClose: onRetryModalClose } = useDisclosure();
 
-  // stamp filter
-  const router = useRouter();
-  const { filter } = router.query;
-  const filterName = filter?.length && typeof filter === "string" ? getFilterName(filter) : false;
-
   const toast = useToast();
 
   const numPlatforms = useMemo(() => {
@@ -133,7 +124,7 @@ export default function Dashboard() {
 
   // Route user to home when wallet is disconnected
   useEffect(() => {
-    if (!address) {
+    if (!address || dbAccessTokenStatus !== "connected") {
       navigateToPage("home");
     }
   }, [address]);
@@ -246,57 +237,37 @@ export default function Dashboard() {
     </div>
   );
 
-  const Subheader = ({ className }: { className: string }) => (
-    <div className={className}>
-      {filterName && (
-        <div>
-          <Link href="/#/dashboard">
-            <a>
-              <span data-testid="select-all" className={`pl-2 text-sm text-color-2`}>
-                see all my stamps
-              </span>
-            </a>
-          </Link>
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <PageRoot className="text-color-1">
       {modals}
       <HeaderContentFooterGrid>
         <Header />
         <BodyWrapper className="mt-4 md:mt-6">
-          {dbAccessTokenStatus === "connected" ? (
-            <PageWidthGrid>
-              <Subheader className={` ${useCustomDashboardPanel ? "col-span-full" : "col-span-7"}`} />
-              {useCustomDashboardPanel ? (
-                <DynamicCustomDashboardPanel className="col-start-1 col-end-[-1] xl:col-start-8 row-span-2 mt-6" />
-              ) : (
-                <DashboardIllustration className="col-span-5 row-span-5 hidden xl:block" />
-              )}
-              <DashboardScorePanel className="col-span-full xl:col-span-7" />
+          <PageWidthGrid>
+            {useCustomDashboardPanel || (
+              <DashboardIllustration className="col-span-5 row-span-5 col-end-[-1] hidden xl:block" />
+            )}
+            <DashboardScorePanel className="col-span-full xl:col-span-7" />
+            {useCustomDashboardPanel && (
+              <DynamicCustomDashboardPanel className="col-start-1 col-end-[-1] xl:col-start-8" />
+            )}
 
-              <span className="col-start-1 col-end-12 font-heading text-4xl">Add Stamps</span>
-              <CardList
-                className="col-span-full"
-                isLoading={
-                  isLoadingPassport == IsLoadingPassportState.Loading ||
-                  isLoadingPassport == IsLoadingPassportState.CreatingPassport ||
-                  isLoadingPassport == IsLoadingPassportState.FailedToConnect
-                }
-              />
-              <span className="col-start-1 col-end-4 font-heading text-3xl">Add Collected Stamps</span>
-              <span className="col-end-[-1] self-center whitespace-nowrap text-right font-alt text-3xl text-foreground-2">
-                {numVerifiedPlatforms}/{numPlatforms}
-              </span>
-              <DashboardValidStampsPanel className="col-span-full" />
-              <ExpiredStampsPanel className="col-span-full" />
-            </PageWidthGrid>
-          ) : (
-            <LoadingScreen />
-          )}
+            <span className="col-span-full font-heading text-4xl">Add Stamps</span>
+            <CardList
+              className="col-span-full"
+              isLoading={
+                isLoadingPassport == IsLoadingPassportState.Loading ||
+                isLoadingPassport == IsLoadingPassportState.CreatingPassport ||
+                isLoadingPassport == IsLoadingPassportState.FailedToConnect
+              }
+            />
+            <span className="col-start-1 col-end-4 font-heading text-3xl">Add Collected Stamps</span>
+            <span className="col-end-[-1] self-center whitespace-nowrap text-right font-alt text-3xl text-foreground-2">
+              {numVerifiedPlatforms}/{numPlatforms}
+            </span>
+            <DashboardValidStampsPanel className="col-span-full" />
+            <ExpiredStampsPanel className="col-span-full" />
+          </PageWidthGrid>
         </BodyWrapper>
         {/* This footer contains dark colored text and dark images */}
         <WelcomeFooter displayPrivacyPolicy={false} fixed={false} />

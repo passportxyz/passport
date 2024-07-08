@@ -8,10 +8,10 @@ import { AppProps } from "next/app";
 import Head from "next/head";
 
 import "../styles/globals.css";
+import "../utils/web3";
 import { CeramicContextProvider } from "../context/ceramicContext";
 import { DatastoreConnectionContextProvider } from "../context/datastoreConnectionContext";
 import { ScorerContextProvider } from "../context/scorerContext";
-import ManageAccountCenter from "../components/ManageAccountCenter";
 
 // --- Ceramic Tools
 import { Provider as SelfIdProvider } from "@self.id/framework";
@@ -151,13 +151,11 @@ function App({ Component, pageProps }: AppProps) {
             <ScorerContextProvider>
               <CeramicContextProvider>
                 <StampClaimingContextProvider>
-                  <ManageAccountCenter>
-                    <RenderOnlyOnClient>
-                      <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
-                        <Component {...pageProps} />
-                      </ThemeWrapper>
-                    </RenderOnlyOnClient>
-                  </ManageAccountCenter>
+                  <RenderOnlyOnClient>
+                    <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                      <Component {...pageProps} />
+                    </ThemeWrapper>
+                  </RenderOnlyOnClient>
                 </StampClaimingContextProvider>
               </CeramicContextProvider>
             </ScorerContextProvider>

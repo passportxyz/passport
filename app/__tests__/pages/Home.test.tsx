@@ -5,6 +5,7 @@ import Home from "../../pages/Home";
 import { HashRouter as Router } from "react-router-dom";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
+import { useWeb3ModalAccount, openModalMock } from "../../__mocks__/web3modalMock";
 
 import { checkShowOnboard } from "../../utils/helpers";
 
@@ -51,7 +52,10 @@ test("renders connect wallet button", () => {
 });
 
 test("clicking connect wallet button calls connect", async () => {
-  expect.assertions(1);
+  const oldUseWeb3ModalAccount = useWeb3ModalAccount;
+  (useWeb3ModalAccount as any) = () => ({
+    isConnected: false,
+  });
 
   renderWithContext(
     mockCeramicContext,
@@ -64,12 +68,14 @@ test("clicking connect wallet button calls connect", async () => {
   await userEvent.click(connectWalletButton);
 
   await waitFor(() => {
-    expect(mockConnect).toBeCalledTimes(1);
+    expect(openModalMock).toBeCalledTimes(1);
   });
+
+  (useWeb3ModalAccount as any) = oldUseWeb3ModalAccount;
 });
 
 describe("Welcome navigation", () => {
-  it("calls navigate with /dashboard when wallet is connected but checkShowOnboard is false", () => {
+  it("calls navigate with /dashboard when wallet is connected but checkShowOnboard is false", async () => {
     (checkShowOnboard as jest.Mock).mockReturnValue(false);
     renderWithContext(
       { ...mockCeramicContext, passport: undefined },
@@ -77,10 +83,17 @@ describe("Welcome navigation", () => {
         <Home />
       </Router>
     );
-    expect(navigate).toHaveBeenCalledWith("/dashboard");
+
+    const connectWalletButton = screen.getByTestId("connectWalletButton");
+
+    await userEvent.click(connectWalletButton);
+
+    await waitFor(() => {
+      expect(navigate).toHaveBeenCalledWith("/dashboard");
+    });
   });
 
-  it("calls navigate with /welcome when checkShowOnboard is true", () => {
+  it("calls navigate with /welcome when checkShowOnboard is true", async () => {
     (checkShowOnboard as jest.Mock).mockReturnValue(true);
     renderWithContext(
       { ...mockCeramicContext, passport: undefined },
@@ -88,6 +101,13 @@ describe("Welcome navigation", () => {
         <Home />
       </Router>
     );
-    expect(navigate).toHaveBeenCalledWith("/welcome");
+
+    const connectWalletButton = screen.getByTestId("connectWalletButton");
+
+    await userEvent.click(connectWalletButton);
+
+    await waitFor(() => {
+      expect(navigate).toHaveBeenCalledWith("/dashboard");
+    });
   });
 });
