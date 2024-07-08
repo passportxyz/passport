@@ -7,7 +7,11 @@ const { Ens } = platforms;
 
 import { CeramicContextState } from "../../context/ceramicContext";
 import { mockAddress } from "../../__test-fixtures__/onboardHookValues";
-import { UN_SUCCESSFUL_ENS_RESULT, SUCCESFUL_ENS_RESULTS } from "../../__test-fixtures__/verifiableCredentialResults";
+import {
+  UN_SUCCESSFUL_ENS_RESULT,
+  SUCCESFUL_ENS_RESULTS,
+  credential,
+} from "../../__test-fixtures__/verifiableCredentialResults";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { JsonRpcSigner } from "@ethersproject/providers";
@@ -154,7 +158,7 @@ describe("when user has previously verified with EnsProvider", () => {
   beforeEach(async () => {
     await closeAllToasts();
     (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
-      credentials: [UN_SUCCESSFUL_ENS_RESULT],
+      credentials: [SUCCESFUL_ENS_RESULTS],
     });
   });
 
@@ -191,8 +195,11 @@ describe("when user has previously verified with EnsProvider", () => {
 
     // Wait to see the done toast
     await waitFor(() => {
-      // Empty b/c don't qualify for any stamps but also don't want to delete any stamps
-      expect(handlePatchStampsMock).toHaveBeenCalledWith([]);
+      // extraProvider should be empty but ens should be there to delete expired stamp you no longer qualify for
+      expect(handlePatchStampsMock).toHaveBeenCalledWith([
+        { provider: "Ens", credential },
+        { provider: extraProvider },
+      ]);
 
       expect(screen.getByText("Successfully re-verified Ens data point.")).toBeInTheDocument();
       expect(fetchVerifiableCredential).toHaveBeenCalled();
