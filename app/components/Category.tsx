@@ -37,7 +37,6 @@ export const Category = ({
   const [dropDownOpen, setDropDownOpen] = useState<boolean>(false);
   const openRef = React.useRef(dropDownOpen);
   openRef.current = dropDownOpen;
-  const customization = useCustomization();
 
   const [panelMounted, setPanelMounted] = useState<boolean>(false);
 

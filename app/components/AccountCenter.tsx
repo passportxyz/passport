@@ -1,5 +1,6 @@
 // --- React components/methods
 import React, { useEffect, useState } from "react";
+import { useOneClickVerification } from "../hooks/useOneClickVerification";
 
 const shouldMinimize = () => {
   return window.scrollY > 120 || (window.screenY > 50 && window.innerWidth < 1024);
@@ -7,6 +8,7 @@ const shouldMinimize = () => {
 
 export const AccountCenter = () => {
   const [minimized, setMinimized] = useState(false);
+  const { verificationComplete } = useOneClickVerification();
 
   useEffect(() => {
     const onEvent = () => {
@@ -34,7 +36,9 @@ export const AccountCenter = () => {
   }, []);
 
   return (
-    <div className="fixed right-2 md:right-10 lg:right-20 top-3 rounded-2xl w-fit h-fit bg-background z-10 flex justify-end">
+    <div
+      className={`fixed top-3 rounded-2xl w-fit h-fit bg-background z-10 flex justify-end ${verificationComplete ? "right-14 md:right-20 lg:right-36" : "right-2 md:right-10 lg:right-20"}`}
+    >
       <div className="hidden xl:block">
         <w3m-button balance={minimized ? "hide" : "show"} size="sm" />
       </div>

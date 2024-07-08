@@ -1,5 +1,5 @@
 import { PROVIDER_ID, StampPatch, ValidResponseBody } from "@gitcoin/passport-types";
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { fetchPossibleEVMStamps } from "../signer/utils";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
@@ -30,6 +30,7 @@ export const useOneClickVerification = () => {
       if (possiblePlatforms.length === 0) {
         setUserVerificationState({
           ...verificationState,
+          success: true,
           loading: false,
         });
         // Nothing to do
@@ -103,5 +104,9 @@ export const useOneClickVerification = () => {
     }
   };
 
-  return { initiateVerification };
+  const verificationComplete = useMemo(() => {
+    return verificationState.error || verificationState.success;
+  }, [verificationState.error, verificationState.success]);
+
+  return { initiateVerification, verificationState, verificationComplete };
 };

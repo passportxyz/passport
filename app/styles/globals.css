@@ -31,7 +31,7 @@
 :root {
   --onboard-shadow-3: none;
   --account-center-position-top: -14px;
-  --account-center-position-right: 4.1rem;
+  --account-center-position-right: 8.5rem;
   --account-center-border-radius: 16px;
   --onboard-action-required-btn-text-color: #fff;
   --onboard-font-family-normal: var(--font-body);
@@ -43,13 +43,13 @@
 
 @media (max-width: 1020px /* md */) {
   :root {
-    --account-center-position-right: 24px;
+    --account-center-position-right: 80px;
   }
 }
 
 @media (max-width: 480px /* base */) {
   :root {
-    --account-center-position-right: 0px;
+    --account-center-position-right: 60px;
     --onboard-modal-top: 0;
   }
 }

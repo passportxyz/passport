@@ -1,6 +1,6 @@
 import { CredentialResponseBody, VerifiableCredential, VerifiableCredentialRecord } from "@gitcoin/passport-types";
 
-const credential: VerifiableCredential = {
+export const credential: VerifiableCredential = {
   "@context": ["https://www.w3.org/2018/credentials/v1"],
   type: ["VerifiableCredential"],
   credentialSubject: {

@@ -455,7 +455,6 @@ export const GenericPlatform = ({
     return "Verify";
   }, [isReverifying, isLoading, submitted, canSubmit, verifiedProviders.length, platformProviderIds.length]);
 
-  console.log("verify - submitted, canSubmit", submitted, canSubmit, !submitted && !canSubmit);
   return (
     <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose}>
       <DrawerOverlay />
