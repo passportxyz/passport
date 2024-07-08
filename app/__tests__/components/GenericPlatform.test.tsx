@@ -198,6 +198,52 @@ describe("when user has previously verified with EnsProvider", () => {
       expect(fetchVerifiableCredential).toHaveBeenCalled();
     });
   });
+  it("should remove expired stamps if the no longer qualify", async () => {
+    (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
+      credentials: [UN_SUCCESSFUL_ENS_RESULT],
+    });
+    const drawer = () => (
+      <ChakraProvider>
+        <GenericPlatform
+          isOpen={true}
+          platform={new Ens.EnsPlatform()}
+          platFormGroupSpec={[
+            {
+              ...Ens.ProviderConfig[0],
+              providers: [...Ens.ProviderConfig[0].providers],
+            },
+          ]}
+          platformScoreSpec={EnsScoreSpec}
+          onClose={() => {}}
+        />
+      </ChakraProvider>
+    );
+
+    const handlePatchStampsMock = jest.fn();
+    renderWithContext(
+      {
+        ...mockCeramicContext,
+        verifiedProviderIds: ["Ens"],
+        expiredProviders: ["Ens"],
+        handlePatchStamps: handlePatchStampsMock,
+      },
+      drawer()
+    );
+    const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
+    fireEvent.click(initialVerifyButton as HTMLElement);
+
+    // Wait to see the done toast
+    await waitFor(() => {
+      // extraProvider should be empty but ens should be there to delete expired stamp you no longer qualify for
+      expect(handlePatchStampsMock).toHaveBeenCalledWith([
+        {
+          provider: "Ens",
+        },
+      ]);
+
+      expect(fetchVerifiableCredential).toHaveBeenCalled();
+    });
+  });
 });
 
 describe("Mulitple EVM plaftorms", () => {

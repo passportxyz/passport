@@ -37,7 +37,11 @@ const ExpiryAction = ({
 
   const message = useMemo(() => {
     const refreshStamp = async (stamp: StampClaimForPlatform) => {
-      await claimCredentials(async () => await Promise.resolve(), [stamp]);
+      await claimCredentials(
+        async () => await Promise.resolve(),
+        () => {},
+        [stamp]
+      );
       deleteMutation.mutate();
     };
     const claim: StampClaimForPlatform = {

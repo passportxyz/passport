@@ -53,12 +53,27 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
     });
   };
 
+  const errorToast = (platform: string) => {
+    toast({
+      duration: 9000,
+      isClosable: true,
+      render: (result: any) => (
+        <DoneToastContent
+          title="Error"
+          message={`Failed to reverify stamps for ${platform}. Please double check eligibility and try again.`}
+          icon="../assets/verification-failed-bright.svg"
+          result={result}
+        />
+      ),
+    });
+  };
+
   const expiredPlatforms = Object.keys(STAMP_PROVIDERS).filter((provider) => {
     const possibleProviders = getProviderIdsFromPlatformId(provider as PLATFORM_ID);
     return possibleProviders.filter((provider) => expiredProviders.includes(provider)).length > 0;
   });
 
-  const handleClaimStep = async (step: number, platformId?: PLATFORM_ID | "EVMBulkVerify"): Promise<void> => {
+  const handleClaimStep = async (step: number): Promise<void> => {
     if (status === "in_progress") {
       setCurrentStepInProgress(true);
     } else {
@@ -74,6 +89,8 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
       });
     }
   };
+
+  const indicateError = (platform: PLATFORM_ID | "EVMBulkVerify") => errorToast(platform);
 
   const reverifyStamps = async () => {
     setIsReverifyingStamps(true);
@@ -100,7 +117,7 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
       }
     });
 
-    await claimCredentials(handleClaimStep, [evmStampClaim, ...stampClaims]);
+    await claimCredentials(handleClaimStep, indicateError, [evmStampClaim, ...stampClaims]);
 
     setIsReverifyingStamps(false);
     onClose();

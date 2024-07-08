@@ -35,6 +35,8 @@ export enum StampClaimProgressStatus {
   InProgress = "in_progress",
 }
 
+export type VerificationStatuses = { success: string[]; errors: string[] };
+
 export const waitForRedirect = (platform: Platform, timeout?: number): Promise<ProviderPayload> => {
   const channel = new BroadcastChannel(`${platform.path}_oauth_channel`);
   const waitForRedirect = new Promise<ProviderPayload>((resolve, reject) => {
@@ -69,7 +71,8 @@ export type StampClaimForPlatform = {
 
 export interface StampClaimingContextState {
   claimCredentials: (
-    handleClaimStep: (step: number, platformId?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
+    handleClaimStep: (step: number) => Promise<void>,
+    indicateError: (platform: PLATFORM_ID | "EVMBulkVerify") => void,
     platformGroups: StampClaimForPlatform[]
   ) => Promise<void>;
   status: StampClaimProgressStatus;
@@ -77,7 +80,8 @@ export interface StampClaimingContextState {
 
 const startingState: StampClaimingContextState = {
   claimCredentials: async (
-    handleClaimStep: (step: number, platformId?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
+    handleClaimStep: (step: number) => Promise<void>,
+    indicateError: (platform: PLATFORM_ID | "EVMBulkVerify") => void,
     platformGroups: StampClaimForPlatform[]
   ) => {},
   status: StampClaimProgressStatus.Idle,
@@ -138,7 +142,8 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
 
   // fetch VCs from IAM server
   const claimCredentials = async (
-    handleClaimStep: (step: number, platformId?: PLATFORM_ID | "EVMBulkVerify") => Promise<void>,
+    handleClaimStep: (step: number) => Promise<void>,
+    indicateError: (platform: PLATFORM_ID | "EVMBulkVerify") => void,
     platformGroups: StampClaimForPlatform[]
   ): Promise<any> => {
     if (!did) throw new Error("No DID found");
@@ -156,9 +161,8 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
 
         if ((platform || platformId === "EVMBulkVerify") && selectedProviders.length > 0) {
           step++;
-          await handleClaimStep(step, platformId);
+          await handleClaimStep(step);
           datadogLogs.logger.info("Saving Stamp", { platform: platformId });
-          await handleClaimStep(step, platformId);
           setStatus(StampClaimProgressStatus.InProgress);
 
           // We set the providerPayload to be {} by default
@@ -208,6 +212,10 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
                 []
               : [];
 
+          if (verifiedCredentials.length === 0) {
+            indicateError(platformId);
+          }
+
           const stampPatches: StampPatch[] = selectedProviders.map((provider: PROVIDER_ID) => {
             const cred = verifiedCredentials.find((cred: any) => cred.record?.type === provider);
             if (cred) return { provider, credential: cred.credential as VerifiableCredential };
@@ -223,7 +231,6 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
       }
     }
     setStatus(StampClaimProgressStatus.Idle);
-    await handleClaimStep(-1);
   };
 
   const providerProps = {

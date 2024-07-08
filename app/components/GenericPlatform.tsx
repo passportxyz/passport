@@ -220,12 +220,16 @@ export const GenericPlatform = ({
       // If the stamp was not selected, return {provider} to delete the stamp
       // If the stamp was selected but cannot be claimed, return null to do nothing and
       //   therefore keep any existing valid stamp if it exists
-      const stampPatches: StampPatch[] = platformProviderIds
+      const stampPatches = platformProviderIds
         .map((provider: PROVIDER_ID) => {
           const cred = verifiedCredentials.find((cred: any) => cred.record?.type === provider);
-          if (cred) return { provider, credential: cred.credential };
-          else if (!selectedProviders.includes(provider)) return { provider };
-          else return null;
+          if (cred) {
+            return { provider, credential: cred.credential };
+          } else if (expiredProviders.includes(provider)) {
+            return { provider };
+          } else {
+            return null;
+          }
         })
         .filter((patch): patch is StampPatch => Boolean(patch));
 
@@ -242,7 +246,11 @@ export const GenericPlatform = ({
       // can no longer claim the credential, but they still have a valid credential that
       // was previously verified, AND they had selected it, we want to keep it
       verifiedProviders.forEach((provider) => {
-        if (!actualVerifiedProviders.includes(provider) && selectedProviders.includes(provider)) {
+        if (
+          !actualVerifiedProviders.includes(provider) &&
+          selectedProviders.includes(provider) &&
+          !expiredProviders.includes(provider)
+        ) {
           actualVerifiedProviders.push(provider);
         }
       });
