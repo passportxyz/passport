@@ -21,6 +21,7 @@ const WalletStoreSyncWithWeb3Modal = () => {
   }, [web3modalAccount.isConnected]);
 
   useEffect(() => {
+    console.log("debug - web3modalAccount", web3modalAccount);
     if (web3modalAccount.isConnected) {
       const { address, chainId } = web3modalAccount;
 

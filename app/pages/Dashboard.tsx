@@ -32,6 +32,7 @@ import hash from "object-hash";
 // --- GTM Module
 import TagManager from "react-gtm-module";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
+import { useWeb3ModalError } from "@web3modal/ethers/react";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -43,10 +44,30 @@ export default function Dashboard() {
   const { disconnect, dbAccessTokenStatus, dbAccessToken, did } = useDatastoreConnectionContext();
   const address = useWalletStore((state) => state.address);
   const { initiateVerification } = useOneClickVerification();
+  const { error: web3ModalError } = useWeb3ModalError();
+  const toast = useToast();
 
   // This shouldn't be necessary, but using this to prevent unnecessary re-initialization
   // until ceramicContext is refactored and memoized
   const verifiedParamsHash = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (web3ModalError) {
+      console.error("Web3Modal error", web3ModalError);
+      toast({
+        duration: 6000,
+        isClosable: true,
+        render: (result: any) => (
+          <DoneToastContent
+            title={"Wallet Connection Error"}
+            body={(web3ModalError as Error).message}
+            icon="../assets/verification-failed-bright.svg"
+            result={result}
+          />
+        ),
+      });
+    }
+  }, [web3ModalError, toast]);
 
   useEffect(() => {
     if (did && address && databaseReady) {
@@ -111,8 +132,6 @@ export default function Dashboard() {
   }, []);
   // ------------------- END Data items for Google Tag Manager -------------------
   const { isOpen: retryModalIsOpen, onOpen: onRetryModalOpen, onClose: onRetryModalClose } = useDisclosure();
-
-  const toast = useToast();
 
   const numPlatforms = useMemo(() => {
     return Object.keys(Object.fromEntries(allPlatforms)).length;
