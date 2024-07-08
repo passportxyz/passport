@@ -7,11 +7,7 @@ const { Ens } = platforms;
 
 import { CeramicContextState } from "../../context/ceramicContext";
 import { mockAddress } from "../../__test-fixtures__/onboardHookValues";
-import {
-  UN_SUCCESSFUL_ENS_RESULT,
-  SUCCESFUL_ENS_RESULTS,
-  credential,
-} from "../../__test-fixtures__/verifiableCredentialResults";
+import { UN_SUCCESSFUL_ENS_RESULT, SUCCESFUL_ENS_RESULTS } from "../../__test-fixtures__/verifiableCredentialResults";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { JsonRpcSigner } from "@ethersproject/providers";
@@ -21,7 +17,7 @@ import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
 import { PlatformScoreSpec } from "../../context/scorerContext";
 import { getPlatformSpec } from "../../config/platforms";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
-import { PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
