@@ -37,8 +37,9 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
         <div className="flex-1">
           <AccountCenter />
         </div>
-        {verificationState.error !== undefined ||
-          (verificationState.success && <Notifications setShowSidebar={() => setShowSidebar(true)} />)}
+        {(verificationState.error !== undefined || verificationState.success) && (
+          <Notifications setShowSidebar={() => setShowSidebar(true)} />
+        )}
       </div>
     </>
   );
