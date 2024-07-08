@@ -195,7 +195,7 @@ export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) 
               <div className="w-full relative">
                 <div className="absolute top-[-6px] w-[10px] h-[10px] right-7 border-l bg-background border-b border-foreground-5 transform rotate-[135deg]"></div>
               </div>
-              <div className="overflow-y-auto max-h-[40vh]">
+              <div className="overflow-y-auto min-h-[120px] max-h-[40vh]">
                 {notifications.length > 0 ? (
                   notifications
                     .sort((a, b) => (a.is_read === b.is_read ? 0 : a.is_read ? 1 : -1))

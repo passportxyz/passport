@@ -30,6 +30,7 @@ export const useOneClickVerification = () => {
       if (possiblePlatforms.length === 0) {
         setUserVerificationState({
           ...verificationState,
+          success: true,
           loading: false,
         });
         // Nothing to do
