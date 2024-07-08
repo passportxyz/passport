@@ -220,14 +220,18 @@ export const GenericPlatform = ({
       // If the stamp was not selected, return {provider} to delete the stamp
       // If the stamp was selected but cannot be claimed, return null to do nothing and
       //   therefore keep any existing valid stamp if it exists
-      const stampPatches = platformProviderIds.map((provider: PROVIDER_ID) => {
-        const cred = verifiedCredentials.find((cred: any) => cred.record?.type === provider);
-        if (cred) {
-          return { provider, credential: cred.credential };
-        } else {
-          return { provider };
-        }
-      }) as StampPatch[];
+      const stampPatches = platformProviderIds
+        .map((provider: PROVIDER_ID) => {
+          const cred = verifiedCredentials.find((cred: any) => cred.record?.type === provider);
+          if (cred) {
+            return { provider, credential: cred.credential };
+          } else if (expiredProviders.includes(provider)) {
+            return { provider };
+          } else {
+            return null;
+          }
+        })
+        .filter((patch): patch is StampPatch => Boolean(patch));
 
       await handlePatchStamps(stampPatches);
 
@@ -237,6 +241,19 @@ export const GenericPlatform = ({
         (providerId: any) =>
           !!stampPatches.find((stampPatch) => stampPatch?.credential?.credentialSubject?.provider === providerId)
       );
+
+      // `verifiedProviders` still holds the previously verified providers. If the user
+      // can no longer claim the credential, but they still have a valid credential that
+      // was previously verified, AND they had selected it, we want to keep it
+      verifiedProviders.forEach((provider) => {
+        if (
+          !actualVerifiedProviders.includes(provider) &&
+          selectedProviders.includes(provider) &&
+          !expiredProviders.includes(provider)
+        ) {
+          actualVerifiedProviders.push(provider);
+        }
+      });
 
       // both verified and selected should look the same after save
       setVerifiedProviders([...actualVerifiedProviders]);
@@ -328,6 +345,8 @@ export const GenericPlatform = ({
       // dbl check below
     } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0 && platformProviderIds.length === 0) {
       return VerificationStatuses.AllRemoved;
+    } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
+      return VerificationStatuses.PartiallyRemoved;
     } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size > 0) {
       return VerificationStatuses.PartiallyRemovedAndVerified;
     } else {
