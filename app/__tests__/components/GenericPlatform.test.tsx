@@ -158,7 +158,7 @@ describe("when user has previously verified with EnsProvider", () => {
   beforeEach(async () => {
     await closeAllToasts();
     (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
-      credentials: [SUCCESFUL_ENS_RESULTS],
+      credentials: [UN_SUCCESSFUL_ENS_RESULT],
     });
   });
 
@@ -193,29 +193,10 @@ describe("when user has previously verified with EnsProvider", () => {
     const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
     fireEvent.click(initialVerifyButton as HTMLElement);
 
-    console.log([
-      {
-        provider: "Ens",
-        stamp: {
-          ...credential,
-        },
-      },
-      {
-        provider: "FakeExtraProviderRequiredForCanSubmitLogic",
-      },
-    ]);
     // Wait to see the done toast
     await waitFor(() => {
-      // Empty b/c don't qualify for any stamps but DO want to delete unqualified stamps
-      expect(handlePatchStampsMock).toHaveBeenCalledWith([
-        {
-          provider: "Ens",
-          credential,
-        },
-        {
-          provider: "FakeExtraProviderRequiredForCanSubmitLogic",
-        },
-      ]);
+      // Empty b/c don't qualify for any stamps but also don't want to delete any stamps
+      expect(handlePatchStampsMock).toHaveBeenCalledWith([]);
 
       expect(screen.getByText("Successfully re-verified Ens data point.")).toBeInTheDocument();
       expect(fetchVerifiableCredential).toHaveBeenCalled();
