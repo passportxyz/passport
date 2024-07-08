@@ -7,7 +7,11 @@ const { Ens } = platforms;
 
 import { CeramicContextState } from "../../context/ceramicContext";
 import { mockAddress } from "../../__test-fixtures__/onboardHookValues";
-import { UN_SUCCESSFUL_ENS_RESULT, SUCCESFUL_ENS_RESULTS } from "../../__test-fixtures__/verifiableCredentialResults";
+import {
+  UN_SUCCESSFUL_ENS_RESULT,
+  SUCCESFUL_ENS_RESULTS,
+  credential,
+} from "../../__test-fixtures__/verifiableCredentialResults";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { JsonRpcSigner } from "@ethersproject/providers";
@@ -17,7 +21,7 @@ import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
 import { PlatformScoreSpec } from "../../context/scorerContext";
 import { getPlatformSpec } from "../../config/platforms";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
-import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -154,7 +158,7 @@ describe("when user has previously verified with EnsProvider", () => {
   beforeEach(async () => {
     await closeAllToasts();
     (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
-      credentials: [UN_SUCCESSFUL_ENS_RESULT],
+      credentials: [SUCCESFUL_ENS_RESULTS],
     });
   });
 
@@ -189,10 +193,29 @@ describe("when user has previously verified with EnsProvider", () => {
     const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
     fireEvent.click(initialVerifyButton as HTMLElement);
 
+    console.log([
+      {
+        provider: "Ens",
+        stamp: {
+          ...credential,
+        },
+      },
+      {
+        provider: "FakeExtraProviderRequiredForCanSubmitLogic",
+      },
+    ]);
     // Wait to see the done toast
     await waitFor(() => {
-      // Empty b/c don't qualify for any stamps but also don't want to delete any stamps
-      expect(handlePatchStampsMock).toHaveBeenCalledWith([]);
+      // Empty b/c don't qualify for any stamps but DO want to delete unqualified stamps
+      expect(handlePatchStampsMock).toHaveBeenCalledWith([
+        {
+          provider: "Ens",
+          credential,
+        },
+        {
+          provider: "FakeExtraProviderRequiredForCanSubmitLogic",
+        },
+      ]);
 
       expect(screen.getByText("Successfully re-verified Ens data point.")).toBeInTheDocument();
       expect(fetchVerifiableCredential).toHaveBeenCalled();

@@ -220,14 +220,14 @@ export const GenericPlatform = ({
       // If the stamp was not selected, return {provider} to delete the stamp
       // If the stamp was selected but cannot be claimed, return null to do nothing and
       //   therefore keep any existing valid stamp if it exists
-      const stampPatches: StampPatch[] = platformProviderIds
-        .map((provider: PROVIDER_ID) => {
-          const cred = verifiedCredentials.find((cred: any) => cred.record?.type === provider);
-          if (cred) return { provider, credential: cred.credential };
-          else if (!selectedProviders.includes(provider)) return { provider };
-          else return null;
-        })
-        .filter((patch): patch is StampPatch => Boolean(patch));
+      const stampPatches = platformProviderIds.map((provider: PROVIDER_ID) => {
+        const cred = verifiedCredentials.find((cred: any) => cred.record?.type === provider);
+        if (cred) {
+          return { provider, credential: cred.credential };
+        } else {
+          return { provider };
+        }
+      }) as StampPatch[];
 
       await handlePatchStamps(stampPatches);
 
@@ -246,9 +246,6 @@ export const GenericPlatform = ({
           actualVerifiedProviders.push(provider);
         }
       });
-
-      // both verified and selected should look the same after save
-      setVerifiedProviders([...actualVerifiedProviders]);
 
       // Create Set to check changed providers after verification
       const updatedVerifiedProviders = new Set(actualVerifiedProviders);
@@ -337,8 +334,6 @@ export const GenericPlatform = ({
       // dbl check below
     } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0 && platformProviderIds.length === 0) {
       return VerificationStatuses.AllRemoved;
-    } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
-      return VerificationStatuses.PartiallyRemoved;
     } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size > 0) {
       return VerificationStatuses.PartiallyRemovedAndVerified;
     } else {
@@ -455,7 +450,6 @@ export const GenericPlatform = ({
     return "Verify";
   }, [isReverifying, isLoading, submitted, canSubmit, verifiedProviders.length, platformProviderIds.length]);
 
-  console.log("verify - submitted, canSubmit", submitted, canSubmit, !submitted && !canSubmit);
   return (
     <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose}>
       <DrawerOverlay />
