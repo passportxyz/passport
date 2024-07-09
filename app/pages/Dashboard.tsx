@@ -33,9 +33,12 @@ import hash from "object-hash";
 import TagManager from "react-gtm-module";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useWeb3ModalError } from "@web3modal/ethers/react";
+import Script from "next/script";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
+
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export default function Dashboard() {
   const customization = useCustomization();
@@ -258,6 +261,16 @@ export default function Dashboard() {
 
   return (
     <PageRoot className="text-color-1">
+      <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${GA_ID}');
+        `}
+      </Script>
       {modals}
       <HeaderContentFooterGrid>
         <Header />
