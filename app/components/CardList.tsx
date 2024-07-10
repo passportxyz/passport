@@ -39,6 +39,7 @@ export const PLATFORM_CATEGORIES: PLATFORM_CATEGORY[] = [
       "Brightid",
       "TrustaLabs",
       "Ens",
+      "Binance",
     ],
   },
   {
