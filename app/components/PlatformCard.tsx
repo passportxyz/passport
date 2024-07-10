@@ -36,7 +36,7 @@ const DefaultStamp = ({ idx, platform, className, onClick }: StampProps) => {
   return (
     <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
       <div
-        className="group relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-6 p-0 transition-all ease-out bg-gradient-to-b from-background to-background-2/70 
+        className="group relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-6 p-0 transition-all ease-out bg-gradient-to-b from-background to-background-2/70
         hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-transparent hover:shadow-even-md hover:border-background-3 hover:to-background-2 hover:shadow-background-3"
       >
         <img
@@ -111,7 +111,7 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick 
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
         className="group relative flex h-full cursor-pointer flex-col rounded-lg border p-0 transition-all ease-out
-        hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-transparent hover:shadow-even-md 
+        hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-transparent hover:shadow-even-md
         border-foreground-5 hover:border-foreground-4 hover:to-foreground-5/70 hover:shadow-foreground-4
         bg-gradient-to-b from-background to-foreground-5/40"
       >
@@ -195,8 +195,8 @@ const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick }
       <div
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
-        className="group relative flex h-full cursor-pointer flex-col rounded-lg border border-background-5 p-0 transition-all ease-out 
-        bg-gradient-to-b from-background to-background-5/30 
+        className="group relative flex h-full cursor-pointer flex-col rounded-lg border border-background-5 p-0 transition-all ease-out
+        bg-gradient-to-b from-background to-background-5/30
         hover:bg-opacity-100 hover:from-transparent hover:shadow-even-md hover:border-background-5 hover:to-background-5/60 hover:shadow-background-5"
       >
         <div className="m-6 flex h-full flex-col justify-between">

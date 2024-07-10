@@ -10,6 +10,8 @@ const ENS_PUBLIC_RESOLVERS = [
   "0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41",
 ];
 
+const RPC_URL = process.env.RPC_URL;
+
 // Export a Ens Provider to carry out Ens name check and return a record object
 export class EnsProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
@@ -30,7 +32,7 @@ export class EnsProvider implements Provider {
       record = undefined;
 
     try {
-      const provider = getRPCProvider(payload);
+      const provider = getRPCProvider(RPC_URL);
       reportedName = await provider.lookupAddress(payload.address);
 
       if (reportedName) {

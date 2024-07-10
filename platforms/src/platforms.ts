@@ -21,6 +21,7 @@ import * as Civic from "./Civic";
 import * as TrustaLabs from "./TrustaLabs";
 import * as Outdid from "./Outdid";
 import * as AllowList from "./AllowList";
+import * as Binance from "./Binance";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
 type PlatformConfig = {
@@ -54,6 +55,7 @@ const platforms: Record<string, PlatformConfig> = {
   TrustaLabs,
   Outdid,
   AllowList,
+  Binance,
 };
 
 if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {
