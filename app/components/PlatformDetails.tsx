@@ -99,7 +99,7 @@ const ExpirationIndicator = ({ expirationDate }: { expirationDate: Date | string
     // hover:bg-opacity-100 hover:from-transparent hover:shadow-even-md hover:border-background-5 hover:to-background-5/60 hover:shadow-background-5"
     return (
       <div
-        className="pl-4 flex items-center text-color-7 border-t-0 rounded-t-none rounded-b-lg py-2 
+        className="pl-4 flex items-center text-color-7 border-t-0 rounded-t-none rounded-b-lg py-2
         border border-background-5 bg-gradient-to-b from-background to-background-5/30"
       >
         Stamp expired
@@ -193,7 +193,14 @@ export const PlatformDetails = ({
         <ExpirationIndicator expirationDate={platformExpirationDates[currentPlatform.platform as PLATFORM_ID] || ""} />
       </>
     );
-  }, [hasStamps, hasExpiredProviders]);
+  }, [
+    hasStamps,
+    hasExpiredProviders,
+    pointsGained,
+    pointsAvailable,
+    platformExpirationDates,
+    currentPlatform.platform,
+  ]);
 
   return (
     <div className="w-full text-color-1">
