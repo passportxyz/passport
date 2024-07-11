@@ -39,13 +39,12 @@ export const PLATFORM_CATEGORIES: PLATFORM_CATEGORY[] = [
       "Brightid",
       "TrustaLabs",
       "Ens",
-      "Binance",
     ],
   },
   {
     name: "Government IDs",
     description: "Use your government-issued IDs or complete a KYC process with our partners to verify your identity.",
-    platforms: ["Coinbase", "Holonym", "Outdid"],
+    platforms: ["Coinbase", "Holonym", "Outdid", "Binance"],
   },
   {
     name: "Social & Professional Platforms",
