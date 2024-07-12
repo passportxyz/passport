@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useMemo } from "react";
+import React, { Fragment, useCallback, useContext, useMemo, useState } from "react";
 import { Popover, Transition } from "@headlessui/react";
 import { useNotifications, useDismissNotification, Notification } from "../hooks/useNotifications";
 import { StampClaimForPlatform, StampClaimingContext } from "../context/stampClaimingContext";
@@ -11,6 +11,13 @@ export type NotificationProps = {
   setShowSidebar: (show: boolean) => void;
 };
 
+enum ReverificationStatus {
+  INITIAL,
+  PENDING,
+  SUCCESSFUL,
+  REJECTED,
+}
+
 const ExpiryAction = ({
   content,
   provider,
@@ -20,30 +27,53 @@ const ExpiryAction = ({
   provider: PROVIDER_ID;
   notification_id: string;
 }) => {
+  const [reverificationStatus, setReverificationStatus] = useState(ReverificationStatus.INITIAL);
   const { claimCredentials } = useContext(StampClaimingContext);
   const { expiredPlatforms } = useContext(CeramicContext);
-
-  const platformId = Object.values(expiredPlatforms)
-    .filter((platform) => {
-      const providers = platform.platFormGroupSpec
-        .map((spec) => spec.providers.map((provider) => provider.name))
-        .flat();
-
-      return providers.includes(provider);
-    })
-    .map((platform) => platform.platform.platformId)[0];
-
   const deleteMutation = useDismissNotification(notification_id, "delete");
 
-  const message = useMemo(() => {
-    const refreshStamp = async (stamp: StampClaimForPlatform) => {
+  const platformId = useMemo(() => {
+    return Object.values(expiredPlatforms)
+      .filter((platform) => {
+        const providers = platform.platFormGroupSpec
+          .map((spec) => spec.providers.map((provider) => provider.name))
+          .flat();
+        return providers.includes(provider);
+      })
+      .map((platform) => platform.platform.platformId)[0];
+  }, [expiredPlatforms, provider]);
+
+  const refreshStamp = useCallback(
+    async (stamp: StampClaimForPlatform) => {
+      setReverificationStatus(ReverificationStatus.PENDING);
       await claimCredentials(
         async () => await Promise.resolve(),
-        () => {},
+        () => {
+          setReverificationStatus(ReverificationStatus.REJECTED);
+        },
         [stamp]
       );
+      if (reverificationStatus === ReverificationStatus.REJECTED) {
+        return;
+      }
+      setReverificationStatus(ReverificationStatus.SUCCESSFUL);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       deleteMutation.mutate();
-    };
+    },
+    [claimCredentials, deleteMutation, reverificationStatus]
+  );
+
+  const message = useMemo(() => {
+    if (reverificationStatus === ReverificationStatus.PENDING) {
+      return <div>Your stamp is being reverified</div>;
+    }
+    if (reverificationStatus === ReverificationStatus.REJECTED) {
+      return <div>There was an error re-verifying the stamp. Please double check your eligibility.</div>;
+    }
+    if (reverificationStatus === ReverificationStatus.SUCCESSFUL) {
+      return <div>Your expired stamp has been reverified!</div>;
+    }
+
     const claim: StampClaimForPlatform = {
       platformId: platformId as PLATFORM_ID,
       selectedProviders: [provider],
@@ -59,7 +89,7 @@ const ExpiryAction = ({
         part
       )
     );
-  }, [platformId, provider, content, claimCredentials, deleteMutation]);
+  }, [platformId, provider, reverificationStatus, content, refreshStamp]);
 
   return <>{message}</>;
 };
