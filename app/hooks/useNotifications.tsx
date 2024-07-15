@@ -6,6 +6,7 @@ import { useOnChainData } from "./useOnChainData";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { debug } from "console";
 import { chains } from "../utils/chains";
+import { useCustomization } from "./useCustomization";
 
 export type Notification = {
   notification_id: string;
@@ -25,11 +26,12 @@ type ExpiredChain = {
   name: string;
 };
 
-const fetchNotifications = async (expiredChains?: ExpiredChain[], dbAccessToken?: string) => {
+const fetchNotifications = async (expiredChains?: ExpiredChain[], dbAccessToken?: string, scorerId?: number) => {
   const res = await axios.post(
     `${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/passport-admin/notifications`,
     {
       expired_chain_ids: expiredChains || [],
+      scorer_id: scorerId || process.env.NEXT_PUBLIC_CERAMIC_CACHE_SCORER_ID,
     },
     {
       headers: {
@@ -81,6 +83,7 @@ export const useDismissNotification = (notification_id: string, dismissalType: "
 
 export const useNotifications = () => {
   const { dbAccessTokenStatus, dbAccessToken } = useDatastoreConnectionContext();
+  const { scorer } = useCustomization();
   const { data: onChainData } = useOnChainData();
 
   const [expiredChains, setExpiredChains] = useState<ExpiredChain[] | undefined>();
@@ -101,7 +104,7 @@ export const useNotifications = () => {
 
   const { data: notifications, error } = useQuery<Notifications, Error>({
     queryKey: ["notifications"],
-    queryFn: () => fetchNotifications(expiredChains, dbAccessToken),
+    queryFn: () => fetchNotifications(expiredChains, dbAccessToken, scorer?.id),
     enabled: !!dbAccessToken && dbAccessTokenStatus === "connected" && expiredChains !== undefined,
   });
 
