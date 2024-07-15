@@ -49,8 +49,6 @@ enum VerificationStatuses {
   AllVerified,
   ReVerified,
   PartiallyVerified,
-  AllRemoved,
-  PartiallyRemoved,
   PartiallyRemovedAndVerified,
   Failed,
 }
@@ -342,11 +340,6 @@ export const GenericPlatform = ({
       return VerificationStatuses.ReVerified;
     } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size === 0) {
       return VerificationStatuses.PartiallyVerified;
-      // dbl check below
-    } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0 && platformProviderIds.length === 0) {
-      return VerificationStatuses.AllRemoved;
-    } else if (initialMinusUpdated.size > 0 && updatedMinusInitial.size === 0) {
-      return VerificationStatuses.PartiallyRemoved;
     } else if (updatedMinusInitial.size > 0 && initialMinusUpdated.size > 0) {
       return VerificationStatuses.PartiallyRemovedAndVerified;
     } else {
@@ -384,22 +377,6 @@ export const GenericPlatform = ({
           title: "Success!",
           body: `Successfully verified ${platform.platformId} data ${
             updatedMinusInitial.size > 1 ? "points" : "point"
-          }.`,
-          icon: success,
-          platformId: platform.platformId as PLATFORM_ID,
-        };
-      case VerificationStatuses.AllRemoved:
-        return {
-          title: "Success!",
-          body: `All ${platform.platformId} data points removed.`,
-          icon: success,
-          platformId: platform.platformId as PLATFORM_ID,
-        };
-      case VerificationStatuses.PartiallyRemoved:
-        return {
-          title: "Success!",
-          body: `Successfully removed ${platform.platformId} data ${
-            initialMinusUpdated.size > 1 ? "points" : "point"
           }.`,
           icon: success,
           platformId: platform.platformId as PLATFORM_ID,
@@ -443,7 +420,7 @@ export const GenericPlatform = ({
 
     const hasStamps = verifiedProviders.length > 0;
 
-    if (hasStamps && platformProviderIds.length === verifiedProviders.length) {
+    if (hasStamps && platformProviderIds.length === verifiedProviders.length && !hasExpiredProviders) {
       return (
         <>
           <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
