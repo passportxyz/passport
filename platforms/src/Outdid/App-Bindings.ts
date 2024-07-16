@@ -11,6 +11,10 @@ export class OutdidPlatform extends Platform {
   banner = {
     heading:
       "Outdid is an app which scans the NFC chip of your passport and generates a Zero-Knowledge Proof that you are a unique human. Most importantly, all of your private data stays on your phone - not even Outdid can see it :)",
+    cta: {
+      label: "Learn more",
+      url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/guide-to-add-outdid-stamp-to-passport",
+    },
   };
 
   constructor(options: PlatformOptions = {}) {
