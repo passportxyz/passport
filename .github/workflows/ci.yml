@@ -45,9 +45,11 @@ jobs:
         env:
           CERAMIC_CLIENT_URL: http://localhost:7007
 
-  load-secrets:
+  check-provider-bitmap:
     runs-on: ubuntu-latest
+
     steps:
+      - uses: actions/checkout@v3
       - name: Load secret
         id: op-load-secret
         uses: 1password/load-secrets-action@v1
@@ -58,18 +60,12 @@ jobs:
           DATA_SCIENCE_API_URL: op://DevOps/passport-review/iam/DATA_SCIENCE_API_URL
           ALCHEMY_API_KEY_OP_SEPOLIA: op://DevOps/passport-review/iam/ALCHEMY_API_KEY_OP_SEPOLIA
           ALCHEMY_API_KEY_OP: op://DevOps/passport-review/iam/ALCHEMY_API_KEY_OP
-
-      - name: Print
+      - name: Print 1
         run: echo "ALCHEMY_API_KEY_OP=$ALCHEMY_API_KEY_OP"
-
-  check-provider-bitmap:
-    runs-on: ubuntu-latest
-
-    needs: [load-secrets]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Print
-        run: echo "ALCHEMY_API_KEY_OP=$ALCHEMY_API_KEY_OP"
+      - name: Print 2
+        run: echo "ALCHEMY_API_KEY_OP_SEPOLIA=$ALCHEMY_API_KEY_OP_SEPOLIA"
+      - name: Print 3
+        run: echo "DATA_SCIENCE_API_URL=$DATA_SCIENCE_API_URL"
       - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
