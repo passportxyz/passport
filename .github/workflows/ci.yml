@@ -45,6 +45,22 @@ jobs:
         env:
           CERAMIC_CLIENT_URL: http://localhost:7007
 
+  test_op:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Load secret
+        id: op-load-secret
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          DATA_SCIENCE_API_URL: op://DevOps/passport-review/iam/DATA_SCIENCE_API_URL
+
+      - name: Print secrets
+        run: 'echo "DATA_SCIENCE_API_URL: $DATA_SCIENCE_API_URL"'
+
+          
   check-provider-bitmap:
     runs-on: ubuntu-latest
     steps:
