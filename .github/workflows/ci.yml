@@ -76,5 +76,5 @@ jobs:
       - name: Check provider bitmaps
         uses: ./.github/actions/check-provider-bitmaps
         with:
-          ALCHEMY_API_KEY_OP: ${{ vars.ALCHEMY_API_KEY_OP }}
-          ALCHEMY_API_KEY_OP_SEPOLIA: ${{ vars.ALCHEMY_API_KEY_OP_SEPOLIA }}
+          ALCHEMY_API_KEY_OP: ${{ env.ALCHEMY_API_KEY_OP }}
+          ALCHEMY_API_KEY_OP_SEPOLIA: ${{ env.ALCHEMY_API_KEY_OP_SEPOLIA }}
