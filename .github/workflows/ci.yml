@@ -60,12 +60,7 @@ jobs:
           DATA_SCIENCE_API_URL: op://DevOps/passport-review/iam/DATA_SCIENCE_API_URL
           ALCHEMY_API_KEY_OP_SEPOLIA: op://DevOps/passport-review/iam/ALCHEMY_API_KEY_OP_SEPOLIA
           ALCHEMY_API_KEY_OP: op://DevOps/passport-review/iam/ALCHEMY_API_KEY_OP
-      - name: Print 1
-        run: echo "ALCHEMY_API_KEY_OP=$ALCHEMY_API_KEY_OP"
-      - name: Print 2
-        run: echo "ALCHEMY_API_KEY_OP_SEPOLIA=$ALCHEMY_API_KEY_OP_SEPOLIA"
-      - name: Print 3
-        run: echo "DATA_SCIENCE_API_URL=$DATA_SCIENCE_API_URL"
+
       - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
