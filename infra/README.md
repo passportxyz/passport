@@ -21,7 +21,7 @@ This will include authenticating the CLI with your 1Password account.
 
 Once the 1password cli is installed you can run `pulumi up`. All necessary env variables will be fetched from 1password and set in the environment.
 
-There is on exception to this. You should manually update the sha for `DOCKER_GTC_PASSPORT_IAM_IMAGE=op://DevOps/$APP_SECRETS/iam/ECR_BASE_URL/{update_me}` to pint to the image you would like to deploy.
+There is on exception to this. You should manually update the sha for `DOCKER_GTC_PASSPORT_IAM_IMAGE=op://DevOps/$APP_SECRETS/iam/ECR_BASE_URL/{update_me}` to point to the image you would like to deploy.
 
 
 
