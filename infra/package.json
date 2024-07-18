@@ -1,9 +1,9 @@
 {
   "name": "infra",
   "scripts": {
-    "pulumi:up:review": "dotenv -e .env.review -- pulumi up",
-    "pulumi:up:staging": "dotenv -e .env.staging -- pulumi up",
-    "pulumi:up:prod": "dotenv -e .env.production -- pulumi up"
+    "pulumi:up:review": "APP_SECRETS=passport-review-secrets APP_ENV=passport-review-env op run --env-file='.env.pulumi' --  pulumi up",
+    "pulumi:up:staging": "APP_SECRETS=passport-staging-secrets APP_ENV=passport-staging-env op run --env-file='.env.pulumi' --  pulumi up",
+    "pulumi:up:prod": "APP_SECRETS=passport-prod-secrets APP_ENV=passport-prod-env op run --env-file='.env.pulumi' --  pulumi up"
   },
   "devDependencies": {
     "@types/node": "^14",
