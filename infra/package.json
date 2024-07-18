@@ -1,7 +1,13 @@
 {
   "name": "infra",
+  "scripts": {
+    "pulumi:up:review": "dotenv -e .env.review -- pulumi up",
+    "pulumi:up:staging": "dotenv -e .env.staging -- pulumi up",
+    "pulumi:up:prod": "dotenv -e .env.production -- pulumi up"
+  },
   "devDependencies": {
-    "@types/node": "^14"
+    "@types/node": "^14",
+    "dotenv-cli": "^7.4.2"
   },
   "dependencies": {
     "@pulumi/aws": "^5.0.0",
