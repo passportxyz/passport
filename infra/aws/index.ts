@@ -6,12 +6,12 @@ import { createAmplifyStakingApp } from "../lib/staking/app";
 
 const stack = pulumi.getStack();
 const IAM_SERVER_SSM_ARN = op.read.parse(`op://DevOps/passport-${stack}-env/ci/IAM_SERVER_SSM_ARN`);
-const PASSPORT_VC_SECRETS_ARN = `${process.env["PASSPORT_VC_SECRETS_ARN"]}`;
+const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
 
 const route53Domain = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_DOMAIN`);
 const route53Zone = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_ZONE`);
 
-const dockerGtcPassportIamImage = op.read.parse(`op://DevOps/passport-${stack}-env/ci/DOCKER_GTC_PASSPORT_IAM_IMAGE`);
+const dockerGtcPassportIamImage = `${process.env["DOCKER_GTC_PASSPORT_IAM_IMAGE"]}`;
 
 const opSepoliaRpcUrl = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_OP_SEPOLIA_RPC_URL`);
 const opRpcUrl = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_OP_RPC_URL`);
