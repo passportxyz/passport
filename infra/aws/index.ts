@@ -42,8 +42,10 @@ const PROVISION_STAGING_FOR_LOADTEST =
 const walletConnectProjectId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_WALLET_CONNECT_PROJECT_ID`);
 const stakingIntercomAppId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_INTERCOM_APP_ID`);
 
-const region = aws.getRegion({});
-const regionId = region.then((r) => r.id);
+const STAKING_APP_GITHUB_URL = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_APP_GITHUB_URL`);
+const STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY = op.read.parse(
+  `op://DevOps/passport-${stack}-env/ci/STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY`
+);
 const coreInfraStack = new pulumi.StackReference(`gitcoin/core-infra/${stack}`);
 
 const vpcId = coreInfraStack.getOutput("vpcId");
@@ -574,8 +576,8 @@ const serviceRecord = new aws.route53.Record("passport-record", {
 
 const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((domainName) => {
   const stakingAppInfo = createAmplifyStakingApp(
-    `${process.env["STAKING_APP_GITHUB_URL"]}`,
-    `${process.env["STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY"]}`,
+    STAKING_APP_GITHUB_URL,
+    STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY,
     domainName,
     stack === "production" ? `passport.xyz` : "", // cloudflareDomain
     stack === "production" ? cloudflareZoneId : "", // cloudFlareZoneId
