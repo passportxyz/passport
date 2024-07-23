@@ -5,13 +5,19 @@ import { getIamSecrets } from "./iam_secrets";
 import { createAmplifyStakingApp } from "../lib/staking/app";
 
 const stack = pulumi.getStack();
+
+const current = aws.getCallerIdentity({});
+const regionData = aws.getRegion({});
+const PASSPORT_IMAGE_TAG = `${process.env.PASSPORT_IMAGE_TAG || ""}`;
+export const dockerGtcPassportIamImage = pulumi
+  .all([current, regionData])
+  .apply(([acc, region]) => `${acc.accountId}.dkr.ecr.${region.id}.amazonaws.com/passport:${PASSPORT_IMAGE_TAG}`);
+
 const IAM_SERVER_SSM_ARN = op.read.parse(`op://DevOps/passport-${stack}-env/ci/IAM_SERVER_SSM_ARN`);
 const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
 
 const route53Domain = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_DOMAIN`);
 const route53Zone = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_ZONE`);
-
-const dockerGtcPassportIamImage = `${process.env["DOCKER_GTC_PASSPORT_IAM_IMAGE"]}`;
 
 const opSepoliaRpcUrl = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_OP_SEPOLIA_RPC_URL`);
 const opRpcUrl = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_OP_RPC_URL`);
