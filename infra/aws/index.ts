@@ -1,30 +1,41 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
+import * as op from "@1password/op-js";
 import { getIamSecrets } from "./iam_secrets";
 import { createAmplifyStakingApp } from "../lib/staking/app";
 
-// Secret was created manually in Oregon `us-west-2`
-const IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
+const stack = pulumi.getStack();
+const IAM_SERVER_SSM_ARN = op.read.parse(`op://DevOps/passport-${stack}-env/ci/IAM_SERVER_SSM_ARN`);
 const PASSPORT_VC_SECRETS_ARN = `${process.env["PASSPORT_VC_SECRETS_ARN"]}`;
 
-const route53Domain = `${process.env["ROUTE_53_DOMAIN"]}`;
-const route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
-const dockerGtcPassportIamImage = `${process.env["DOCKER_GTC_PASSPORT_IAM_IMAGE"]}`;
+const route53Domain = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_DOMAIN`);
+const route53Zone = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_ZONE`);
 
-const opSepoliaRpcUrl = `${process.env["STAKING_OP_SEPOLIA_RPC_URL"]}`;
-const opRpcUrl = `${process.env["STAKING_OP_RPC_URL"]}`;
-const mainnetRpcUrl = `${process.env["STAKING_MAINNET_RPC_URL"]}`;
-const arbitrumRpcUrl = `${process.env["STAKING_ARBITRUM_RPC_URL"]}`;
-const dataDogClientTokenReview = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_REVIEW"]}`;
-const dataDogClientTokenStaging = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_STAGING"]}`;
-const dataDogClientTokenProduction = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_PRODUCTION"]}`;
-const cloudflareZoneId = `${process.env["CLOUDFLARE_ZONE_ID"]}`;
+const dockerGtcPassportIamImage = op.read.parse(`op://DevOps/passport-${stack}-env/ci/DOCKER_GTC_PASSPORT_IAM_IMAGE`);
 
-const PROVISION_STAGING_FOR_LOADTEST = `${process.env["PROVISION_STAGING_FOR_LOADTEST"]}`.toLowerCase() === "true";
-const walletConnectProjectId = `${process.env["STAKING_WALLET_CONNECT_PROJECT_ID"]}`;
-const stakingIntercomAppId = `${process.env["STAKING_INTERCOM_APP_ID"]}`;
+const opSepoliaRpcUrl = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_OP_SEPOLIA_RPC_URL`);
+const opRpcUrl = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_OP_RPC_URL`);
+const mainnetRpcUrl = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_MAINNET_RPC_URL`);
+const arbitrumRpcUrl = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_ARBITRUM_RPC_URL`);
 
-const stack = pulumi.getStack();
+const dataDogClientTokenReview = op.read.parse(
+  `op://DevOps/passport-${stack}-env/ci/STAKING_DATADOG_CLIENT_TOKEN_REVIEW`
+);
+const dataDogClientTokenStaging = op.read.parse(
+  `op://DevOps/passport-${stack}-env/ci/STAKING_DATADOG_CLIENT_TOKEN_STAGING`
+);
+const dataDogClientTokenProduction = op.read.parse(
+  `op://DevOps/passport-${stack}-env/ci/STAKING_DATADOG_CLIENT_TOKEN_PRODUCTION`
+);
+
+const cloudflareZoneId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
+
+const PROVISION_STAGING_FOR_LOADTEST =
+  op.read.parse(`op://DevOps/passport-${stack}-env/ci/PROVISION_STAGING_FOR_LOADTEST`).toLowerCase() === "true";
+
+const walletConnectProjectId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_WALLET_CONNECT_PROJECT_ID`);
+const stakingIntercomAppId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_INTERCOM_APP_ID`);
+
 const region = aws.getRegion({});
 const regionId = region.then((r) => r.id);
 const coreInfraStack = new pulumi.StackReference(`gitcoin/core-infra/${stack}`);
@@ -37,7 +48,6 @@ const redisConnectionUrl = pulumi.interpolate`${coreInfraStack.getOutput("static
 const albDnsName = coreInfraStack.getOutput("coreAlbDns");
 const albZoneId = coreInfraStack.getOutput("coreAlbZoneId");
 const albHttpsListenerArn = coreInfraStack.getOutput("coreAlbHttpsListenerArn");
-// const albData = coreInfraStack.getOutput("coreAlbData");
 
 const passportDataScienceStack = new pulumi.StackReference(`gitcoin/passport-data/${stack}`);
 const passportDataScienceEndpoint = passportDataScienceStack.getOutput("internalAlbBaseUrl");
@@ -51,6 +61,7 @@ const defaultTags = {
 };
 
 const containerInsightsStatus = stack == "production" ? "enabled" : "disabled";
+
 const logsRetention = Object({
   review: 1,
   staging: 7,
@@ -108,7 +119,7 @@ const stakingEnvVars = Object({
     NEXT_PUBLIC_ENABLE_ARBITRUM_MAINNET: "on",
     NEXT_PUBLIC_ARBITRUM_RPC_URL: arbitrumRpcUrl,
     NEXT_PUBLIC_GET_GTC_STAKE_API: "https://api.scorer.gitcoin.co/registry/gtc-stake/",
-    NEXT_PUBLIC_MAX_LEGACY_ROUND_ID: 7,    
+    NEXT_PUBLIC_MAX_LEGACY_ROUND_ID: 7,
     NEXT_PUBLIC_GA_ID: "",
   },
   staging: {

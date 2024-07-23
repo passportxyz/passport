@@ -4,6 +4,7 @@
     "@types/node": "^14"
   },
   "dependencies": {
+    "@1password/op-js": "^0.1.13",
     "@pulumi/aws": "^5.0.0",
     "@pulumi/awsx": "^0.40.0",
     "@pulumi/cloudflare": "^5.26.0",
