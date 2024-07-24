@@ -8,10 +8,13 @@ const stack = pulumi.getStack();
 
 const current = aws.getCallerIdentity({});
 const regionData = aws.getRegion({});
-const PASSPORT_IMAGE_TAG = `${process.env.PASSPORT_IMAGE_TAG || ""}`;
+const DOCKER_IMAGE_TAG = `${process.env.DOCKER_IMAGE_TAG || ""}`;
 export const dockerGtcPassportIamImage = pulumi
   .all([current, regionData])
-  .apply(([acc, region]) => `${acc.accountId}.dkr.ecr.${region.id}.amazonaws.com/passport:${PASSPORT_IMAGE_TAG}`);
+  .apply(([acc, region]) => `${acc.accountId}.dkr.ecr.${region.id}.amazonaws.com/passport:${DOCKER_IMAGE_TAG}`);
+
+const PROVISION_STAGING_FOR_LOADTEST =
+  op.read.parse(`op://DevOps/passport-${stack}-env/ci/PROVISION_STAGING_FOR_LOADTEST`).toLowerCase() === "true";
 
 const IAM_SERVER_SSM_ARN = op.read.parse(`op://DevOps/passport-${stack}-env/ci/IAM_SERVER_SSM_ARN`);
 const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
