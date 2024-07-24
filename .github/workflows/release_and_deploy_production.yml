@@ -1,0 +1,76 @@
+name: Release workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Leave blank to use current HEAD, or provide an override commit SHA"
+        type: string
+        required: false
+
+jobs:
+  ref:
+    name: Load Commit Ref
+    runs-on: ubuntu-latest
+    steps:
+      - id: ref
+        uses: passportxyz/gh-workflows/.github/actions/load_commit_ref@main
+        with:
+          commit: ${{ inputs.commit }}
+
+    outputs:
+      version_tag: ${{ steps.ref.outputs.version_tag }}
+      docker_tag: ${{ steps.ref.outputs.docker_tag }}
+      refspec: ${{ steps.ref.outputs.refspec }}
+
+  create-draft-release:
+    name: Create Draft Release
+    runs-on: ubuntu-latest
+    needs: [ref]
+    permissions: write-all
+    steps:
+      - name: Release
+        # https://github.com/ncipollo/release-action
+        uses: ncipollo/release-action@v1
+        with:
+          generateReleaseNotes: true
+          allowUpdates: true
+          token: ${{ secrets.github_token }}
+          tag: ${{ needs.ref.outputs.version_tag }}
+          commit: ${{ needs.ref.outputs.refspec }}
+          draft: true
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: [create-draft-release]
+    uses: ./.github/workflows/build_and_deploy_generic.yml
+    with:
+      commit: ${{ inputs.commit }}
+      environment: staging
+    secrets: inherit
+
+  deploy-production:
+    name: Deploy to Production
+    needs: [deploy-staging]
+    uses: ./.github/workflows/build_and_deploy_generic.yml
+    with:
+      commit: ${{ inputs.commit }}
+      environment: production
+    secrets: inherit
+
+  release:
+    name: Release
+    needs: [ref, create-draft-release, deploy-production]
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release
+        # https://github.com/ncipollo/release-action
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          omitBodyDuringUpdate: true
+          token: ${{ secrets.github_token }}
+          tag: ${{ needs.ref.outputs.version_tag }}
+          commit: ${{ needs.ref.outputs.refspec }}
+          draft: false

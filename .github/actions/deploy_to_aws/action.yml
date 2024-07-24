@@ -12,7 +12,7 @@ inputs:
     type: string
   pulumi_command:
     type: string
-    default: up
+    default: preview
   pulumi_diff:
     default: "false"
   PULUMI_ACCESS_TOKEN:
@@ -22,6 +22,8 @@ inputs:
   AWS_SECRET_ACCESS_KEY:
     required: true
   OP_SERVICE_ACCOUNT_TOKEN:
+    required: true
+  CLOUDFLARE_API_TOKEN:
     required: true
 runs:
   using: composite
@@ -46,5 +48,6 @@ runs:
         AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: ${{ inputs.aws_region }}
-        SCROLL_BADGE_SERVICE_IMAGE_TAG: ${{ inputs.docker_tag }}
+        PASSPORT_IMAGE_TAG: ${{ inputs.docker_tag }}
         OP_SERVICE_ACCOUNT_TOKEN: ${{ inputs.OP_SERVICE_ACCOUNT_TOKEN }}
+        CLOUDFLARE_API_TOKEN: ${{ inputs.CLOUDFLARE_API_TOKEN }}
