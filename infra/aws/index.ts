@@ -449,12 +449,12 @@ const moralisErrorAlarm = new aws.cloudwatch.MetricAlarm("moralisErrorsAlarm", {
 // ECS Task & Service
 //////////////////////////////////////////////////////////////
 const containerDefinitions = pulumi
-  .all([redisConnectionUrl, passportDataScienceEndpoint])
-  .apply(([_redisConnectionUrl, passportDataScienceEndpoint]) =>
+  .all([redisConnectionUrl, passportDataScienceEndpoint, dockerGtcPassportIamImage])
+  .apply(([_redisConnectionUrl, passportDataScienceEndpoint, _dockerGtcPassportIamImage]) =>
     JSON.stringify([
       {
         name: "iam",
-        image: dockerGtcPassportIamImage,
+        image: _dockerGtcPassportIamImage,
         cpu: serviceResources[stack]["cpu"],
         memory: serviceResources[stack]["memory"],
         links: [],
