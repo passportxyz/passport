@@ -1,8 +1,8 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as op from "@1password/op-js";
-import { getIamSecrets } from "./iam_secrets";
 import { createAmplifyStakingApp } from "../lib/staking/app";
+import { sortByName, syncSecretsAndGetRefs } from "./secrets";
 
 const stack = pulumi.getStack();
 
@@ -21,6 +21,10 @@ const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-${stack}-env
 
 const route53Domain = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_DOMAIN`);
 const route53Zone = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_ZONE`);
+const cloudflareZoneId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
+
+//////////////////////////////////////////////////////////////////////////////////////
+// TO BE MOVED TO STAKING APP
 
 const opSepoliaRpcUrl = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_OP_SEPOLIA_RPC_URL`);
 const opRpcUrl = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_OP_RPC_URL`);
@@ -37,11 +41,6 @@ const dataDogClientTokenProduction = op.read.parse(
   `op://DevOps/passport-${stack}-env/ci/STAKING_DATADOG_CLIENT_TOKEN_PRODUCTION`
 );
 
-const cloudflareZoneId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
-
-const PROVISION_STAGING_FOR_LOADTEST =
-  op.read.parse(`op://DevOps/passport-${stack}-env/ci/PROVISION_STAGING_FOR_LOADTEST`).toLowerCase() === "true";
-
 const walletConnectProjectId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_WALLET_CONNECT_PROJECT_ID`);
 const stakingIntercomAppId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_INTERCOM_APP_ID`);
 
@@ -49,6 +48,8 @@ const STAKING_APP_GITHUB_URL = op.read.parse(`op://DevOps/passport-${stack}-env/
 const STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY = op.read.parse(
   `op://DevOps/passport-${stack}-env/ci/STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY`
 );
+
+//////////////////////////////////////////////////////////////////////////////////////
 const coreInfraStack = new pulumi.StackReference(`gitcoin/core-infra/${stack}`);
 
 const vpcId = coreInfraStack.getOutput("vpcId");
@@ -72,6 +73,25 @@ const defaultTags = {
 };
 
 const containerInsightsStatus = stack == "production" ? "enabled" : "disabled";
+
+const awsSecrets = syncSecretsAndGetRefs({
+  vault: "DevOps",
+  repo: "passport",
+  env: stack,
+  section: "service",
+});
+
+const secrets = [
+  ...awsSecrets,
+  {
+    name: "IAM_JWK",
+    valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK::`,
+  },
+  {
+    name: "IAM_JWK_EIP712",
+    valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK_EIP712::`,
+  },
+].sort(sortByName);
 
 const logsRetention = Object({
   review: 1,
@@ -241,12 +261,6 @@ const albTargetGroup = new aws.lb.TargetGroup(`passport-iam`, {
   },
   port: 80,
   protocol: "HTTP",
-  // stickiness: { // is Stickiness required ?
-  //     type: "app_cookie",
-  //     cookieName: "gtc-passport",
-  //     cookieDuration: 86400,
-  //     enabled: true
-  // },
   targetType: "ip",
   tags: {
     ...defaultTags,
@@ -452,9 +466,9 @@ const moralisErrorAlarm = new aws.cloudwatch.MetricAlarm("moralisErrorsAlarm", {
 // ECS Task & Service
 //////////////////////////////////////////////////////////////
 const containerDefinitions = pulumi
-  .all([redisConnectionUrl, passportDataScienceEndpoint, dockerGtcPassportIamImage])
-  .apply(([_redisConnectionUrl, passportDataScienceEndpoint, _dockerGtcPassportIamImage]) =>
-    JSON.stringify([
+  .all([redisConnectionUrl, passportDataScienceEndpoint, dockerGtcPassportIamImage, secrets])
+  .apply(([_redisConnectionUrl, passportDataScienceEndpoint, _dockerGtcPassportIamImage, _secrets]) => {
+    return JSON.stringify([
       {
         name: "iam",
         image: _dockerGtcPassportIamImage,
@@ -488,12 +502,12 @@ const containerDefinitions = pulumi
             "awslogs-stream-prefix": "iam",
           },
         },
-        secrets: getIamSecrets(PASSPORT_VC_SECRETS_ARN, IAM_SERVER_SSM_ARN),
+        secrets: _secrets,
         mountPoints: [],
         volumesFrom: [],
       },
-    ])
-  );
+    ]);
+  });
 
 const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
   family: `passport-iam`,
