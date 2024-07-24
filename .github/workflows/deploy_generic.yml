@@ -1,4 +1,4 @@
-name: New Library - Deploy only
+name: New Library - Deploy only - Generic
 on:
   workflow_call:
     inputs:
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: ref
-        uses: ./.github/actions/load_commit_ref
+        uses: passportxyz/gh-workflows/.github/actions/load_commit_ref@main
         with:
           commit: ${{ inputs.commit }}
 
@@ -48,17 +48,17 @@ jobs:
         with:
           export-env: true
         env:
-          AWS_ACCESS_KEY_ID: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/AWS_ACCESS_KEY_ID
-          AWS_SECRET_ACCESS_KEY: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/AWS_SECRET_ACCESS_KEY
-          PULUMI_ACCESS_TOKEN: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/PULUMI_ACCESS_TOKEN
-          CLOUDFLARE_API_TOKEN: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/CLOUDFLARE_API_TOKEN
+          AWS_ACCESS_KEY_ID: op://DevOps/passport-${{ inputs.environment }}-secrets/service/AWS_ACCESS_KEY_ID
+          AWS_SECRET_ACCESS_KEY: op://DevOps/passport-${{ inputs.environment }}-secrets/service/AWS_SECRET_ACCESS_KEY
+          PULUMI_ACCESS_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/service/PULUMI_ACCESS_TOKEN
+          CLOUDFLARE_API_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/service/CLOUDFLARE_API_TOKEN
       - name: Prepare to Deploy to AWS
         uses: ./.github/actions/prepare_deploy_to_aws
       - name: Preview Deploy
         uses: ./.github/actions/deploy_to_aws
         with:
           docker_tag: ${{ needs.ref.outputs.docker_tag }}
-          stack_name: gitcoin/scroll-badge-service/${{ inputs.environment }}
+          stack_name: gitcoin/passport/${{ inputs.environment }}
           aws_region: us-west-2
           pulumi_command: preview
           pulumi_diff: true
@@ -99,17 +99,17 @@ jobs:
         with:
           export-env: true
         env:
-          AWS_ACCESS_KEY_ID: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/AWS_ACCESS_KEY_ID
-          AWS_SECRET_ACCESS_KEY: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/AWS_SECRET_ACCESS_KEY
-          PULUMI_ACCESS_TOKEN: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/PULUMI_ACCESS_TOKEN
-          CLOUDFLARE_API_TOKEN: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/CLOUDFLARE_API_TOKEN
+          AWS_ACCESS_KEY_ID: op://DevOps/passport-${{ inputs.environment }}-secrets/service/AWS_ACCESS_KEY_ID
+          AWS_SECRET_ACCESS_KEY: op://DevOps/passport-${{ inputs.environment }}-secrets/service/AWS_SECRET_ACCESS_KEY
+          PULUMI_ACCESS_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/service/PULUMI_ACCESS_TOKEN
+          CLOUDFLARE_API_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/service/CLOUDFLARE_API_TOKEN
       - name: Prepare to Deploy to AWS
         uses: ./.github/actions/prepare_deploy_to_aws
       - name: Deploy Review
         uses: ./.github/actions/deploy_to_aws
         with:
           docker_tag: ${{ needs.ref.outputs.docker_tag }}
-          stack_name: gitcoin/scroll-badge-service/${{ inputs.environment }}
+          stack_name: gitcoin/passport/${{ inputs.environment }}
           aws_region: us-west-2
           AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
