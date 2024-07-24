@@ -2,7 +2,7 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as op from "@1password/op-js";
 import { createAmplifyStakingApp } from "../lib/staking/app";
-import { sortByName, syncSecretsAndGetRefs } from "./secrets";
+import { secretsManager } from "infra-libs";
 
 const stack = pulumi.getStack();
 
@@ -16,7 +16,6 @@ export const dockerGtcPassportIamImage = pulumi
 const PROVISION_STAGING_FOR_LOADTEST =
   op.read.parse(`op://DevOps/passport-${stack}-env/ci/PROVISION_STAGING_FOR_LOADTEST`).toLowerCase() === "true";
 
-const IAM_SERVER_SSM_ARN = op.read.parse(`op://DevOps/passport-${stack}-env/ci/IAM_SERVER_SSM_ARN`);
 const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
 
 const route53Domain = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_DOMAIN`);
@@ -74,24 +73,61 @@ const defaultTags = {
 
 const containerInsightsStatus = stack == "production" ? "enabled" : "disabled";
 
-const awsSecrets = syncSecretsAndGetRefs({
-  vault: "DevOps",
-  repo: "passport",
-  env: stack,
-  section: "service",
+const iamSecretObject = new aws.secretsmanager.Secret("iam-secret", {
+  name: "iam-secret",
+  description: "Secrets for Passport IAM",
+  tags: {
+    ...defaultTags,
+  },
 });
 
-const secrets = [
-  ...awsSecrets,
-  {
-    name: "IAM_JWK",
-    valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK::`,
-  },
-  {
-    name: "IAM_JWK_EIP712",
-    valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK_EIP712::`,
-  },
-].sort(sortByName);
+const iamSecrets = secretsManager
+  .syncSecretsAndGetRefs({
+    vault: "DevOps",
+    repo: "passport",
+    env: stack,
+    section: "iam",
+    targetSecret: iamSecretObject,
+    secretVersionName: "passport-secret-version",
+  })
+  .apply((secretRefs) =>
+    [
+      ...secretRefs,
+      {
+        name: "IAM_JWK",
+        valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK::`,
+      },
+      {
+        name: "IAM_JWK_EIP712",
+        valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK_EIP712::`,
+      },
+    ].sort(secretsManager.sortByName)
+  );
+
+const iamEnvironment = pulumi
+  .all([
+    secretsManager.getEnvironmentVars({
+      vault: "DevOps",
+      repo: "passport",
+      env: stack,
+      section: "iam",
+    }),
+    redisConnectionUrl,
+    passportDataScienceEndpoint,
+  ])
+  .apply(([managedEnvVars, _redisConnectionUrl, passportDataScienceEndpoint]) =>
+    [
+      ...managedEnvVars,
+      {
+        name: "REDIS_URL",
+        value: _redisConnectionUrl,
+      },
+      {
+        name: "DATA_SCIENCE_API_URL",
+        value: passportDataScienceEndpoint,
+      },
+    ].sort(secretsManager.sortByName)
+  );
 
 const logsRetention = Object({
   review: 1,
@@ -223,16 +259,18 @@ const serviceRole = new aws.iam.Role("passport-ecs-role", {
   inlinePolicies: [
     {
       name: "allow_iam_secrets_access",
-      policy: JSON.stringify({
-        Version: "2012-10-17",
-        Statement: [
-          {
-            Action: ["secretsmanager:GetSecretValue"],
-            Effect: "Allow",
-            Resource: [IAM_SERVER_SSM_ARN, PASSPORT_VC_SECRETS_ARN],
-          },
-        ],
-      }),
+      policy: iamSecretObject.arn.apply((iamSecretArn) =>
+        JSON.stringify({
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Action: ["secretsmanager:GetSecretValue"],
+              Effect: "Allow",
+              Resource: [iamSecretArn, PASSPORT_VC_SECRETS_ARN],
+            },
+          ],
+        })
+      ),
     },
   ],
   managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"],
@@ -466,8 +504,8 @@ const moralisErrorAlarm = new aws.cloudwatch.MetricAlarm("moralisErrorsAlarm", {
 // ECS Task & Service
 //////////////////////////////////////////////////////////////
 const containerDefinitions = pulumi
-  .all([redisConnectionUrl, passportDataScienceEndpoint, dockerGtcPassportIamImage, secrets])
-  .apply(([_redisConnectionUrl, passportDataScienceEndpoint, _dockerGtcPassportIamImage, _secrets]) => {
+  .all([dockerGtcPassportIamImage, iamSecrets, iamEnvironment])
+  .apply(([_dockerGtcPassportIamImage, secrets, environment]) => {
     return JSON.stringify([
       {
         name: "iam",
@@ -483,16 +521,6 @@ const containerDefinitions = pulumi
             protocol: "tcp",
           },
         ],
-        environment: [
-          {
-            name: "REDIS_URL",
-            value: _redisConnectionUrl,
-          },
-          {
-            name: "DATA_SCIENCE_API_URL",
-            value: passportDataScienceEndpoint,
-          },
-        ],
         logConfiguration: {
           logDriver: "awslogs",
           options: {
@@ -502,9 +530,10 @@ const containerDefinitions = pulumi
             "awslogs-stream-prefix": "iam",
           },
         },
-        secrets: _secrets,
         mountPoints: [],
         volumesFrom: [],
+        environment,
+        secrets,
       },
     ]);
   });

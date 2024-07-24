@@ -10,6 +10,7 @@
     "@pulumi/cloudflare": "^5.26.0",
     "@pulumi/github": "^6.1.0",
     "@pulumi/pulumi": "^3.0.0",
-    "@pulumi/std": "^1.6.2"
+    "@pulumi/std": "^1.6.2",
+    "infra-libs": "github:passportxyz/infra-libs#semver:^1.0.0"
   }
 }
