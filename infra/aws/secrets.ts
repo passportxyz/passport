@@ -51,7 +51,7 @@ export const syncSecretsAndGetRefs = (params: GetEnvironmentVarsParams): SecretR
       secretId: awsServiceSecret.id,
       secretString,
       versionStages: ["AWSCURRENT"],
-    }
+    },
     { dependsOn: awsServiceSecret }
   );
 
