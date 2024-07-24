@@ -1,0 +1,17 @@
+name: New Deploy to Review
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Leave blank to use current HEAD, or provide an override commit SHA"
+        type: string
+        required: false
+
+jobs:
+  deploy:
+    name: Deploy
+    uses: ./.github/workflows/deploy_generic.yml
+    with:
+      commit: ${{ inputs.commit }}
+      environment: review
+    secrets: inherit
