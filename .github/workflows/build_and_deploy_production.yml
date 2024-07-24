@@ -8,6 +8,22 @@ on:
         required: false
 
 jobs:
+  check-provider-bitmap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.8
+          cache: "yarn"
+      - name: Install Packages
+        run: yarn install
+      - name: Check provider bitmaps
+        uses: ./.github/actions/check-provider-bitmaps
+        with:
+          ALCHEMY_API_KEY_OP: op://DevOps/passport-production-secrets/ci/ALCHEMY_API_KEY_OP
+          ALCHEMY_API_KEY_OP_SEPOLIA: op://DevOps/passport-production-secrets/ci/ALCHEMY_API_KEY_OP_SEPOLIA
   deploy:
     name: Deploy
     uses: ./.github/workflows/build_and_deploy_generic.yml
