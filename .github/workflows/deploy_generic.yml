@@ -55,7 +55,7 @@ jobs:
       - name: Prepare to Deploy to AWS
         uses: ./.github/actions/prepare_deploy_to_aws
       - name: Preview Deploy
-        uses: ./.github/actions/deploy_to_aws
+        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@main
         with:
           docker_tag: ${{ needs.ref.outputs.docker_tag }}
           stack_name: gitcoin/passport/${{ inputs.environment }}
@@ -107,7 +107,7 @@ jobs:
       - name: Prepare to Deploy to AWS
         uses: ./.github/actions/prepare_deploy_to_aws
       - name: Deploy Review
-        uses: ./.github/actions/deploy_to_aws
+        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@main
         with:
           docker_tag: ${{ needs.ref.outputs.docker_tag }}
           stack_name: gitcoin/passport/${{ inputs.environment }}
