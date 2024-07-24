@@ -78,6 +78,20 @@ jobs:
         run: |
           echo "Ref" ${{ needs.ref.outputs.refspec }}
 
+  deploy_frontend:
+    name: Deploying Frontend to ${{ inputs.environment }}-app
+    needs: [ref, deploy_preview, deploy_confirm]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Checkout ${{ inputs.environment }}-app
+        run: |
+          git fetch
+          git checkout -b ${{ inputs.environment }}-app origin/${{ inputs.environment }}-app
+          git reset --hard origin/main
+          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/passport.git
+          git push origin ${{ inputs.environment }}-app -f
+
   deploy_backends:
     name: Deploying AWS Infra
     needs: [ref, deploy_preview, deploy_confirm]
