@@ -1,4 +1,4 @@
-name: New Deploy to Production
+name: Deploy to Production
 on:
   workflow_dispatch:
     inputs:

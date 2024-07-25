@@ -1,4 +1,4 @@
-name: New Build and Deploy to Review
+name: Build and Deploy to Review
 on:
   push:
     branches: [main]

@@ -1,4 +1,4 @@
-name: New Deploy to Review
+name: Deploy to Review
 on:
   workflow_dispatch:
     inputs:
