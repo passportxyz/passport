@@ -1,4 +1,4 @@
-name: Library - Deploy only - Generic
+name: New Library - Deploy only - Generic
 on:
   workflow_call:
     inputs:

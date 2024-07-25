@@ -1,4 +1,4 @@
-name: Build and Deploy to Review
+name: New Build and Deploy to Review
 on:
   workflow_dispatch:
     inputs:

@@ -1,4 +1,4 @@
-name: Library - Build and Deploy - Generic
+name: New Library - Build and Deploy - Generic
 
 on:
   workflow_call:
