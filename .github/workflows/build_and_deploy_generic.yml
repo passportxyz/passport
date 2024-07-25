@@ -1,4 +1,4 @@
-name: New Library - Build and Deploy - Generic
+name: Library - Build and Deploy - Generic
 
 on:
   workflow_call:
@@ -150,7 +150,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
       - name: Prepare to Deploy to AWS
         uses: ./.github/actions/prepare_deploy_to_aws
-      - name: Deploy Review
+      - name: Deploy to AWS
         uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@main
         with:
           docker_tag: ${{ needs.ref.outputs.docker_tag }}

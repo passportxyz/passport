@@ -1,4 +1,4 @@
-name: New Library - Deploy only - Generic
+name: Library - Deploy only - Generic
 on:
   workflow_call:
     inputs:
@@ -120,12 +120,13 @@ jobs:
           CLOUDFLARE_API_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
       - name: Prepare to Deploy to AWS
         uses: ./.github/actions/prepare_deploy_to_aws
-      - name: Deploy Review
+      - name: Deploy to AWS
         uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@main
         with:
           docker_tag: ${{ needs.ref.outputs.docker_tag }}
           stack_name: gitcoin/passport/${{ inputs.environment }}
           aws_region: us-west-2
+          pulumi_command: up
           AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
           PULUMI_ACCESS_TOKEN: ${{ env.PULUMI_ACCESS_TOKEN }}
