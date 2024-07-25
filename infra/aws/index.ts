@@ -25,27 +25,9 @@ const cloudflareZoneId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/CLO
 //////////////////////////////////////////////////////////////////////////////////////
 // TO BE MOVED TO STAKING APP
 
-const opSepoliaRpcUrl = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_OP_SEPOLIA_RPC_URL`);
-const opRpcUrl = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_OP_RPC_URL`);
-const mainnetRpcUrl = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_MAINNET_RPC_URL`);
-const arbitrumRpcUrl = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_ARBITRUM_RPC_URL`);
-
-const dataDogClientTokenReview = op.read.parse(
-  `op://DevOps/passport-${stack}-env/ci/STAKING_DATADOG_CLIENT_TOKEN_REVIEW`
-);
-const dataDogClientTokenStaging = op.read.parse(
-  `op://DevOps/passport-${stack}-env/ci/STAKING_DATADOG_CLIENT_TOKEN_STAGING`
-);
-const dataDogClientTokenProduction = op.read.parse(
-  `op://DevOps/passport-${stack}-env/ci/STAKING_DATADOG_CLIENT_TOKEN_PRODUCTION`
-);
-
-const walletConnectProjectId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_WALLET_CONNECT_PROJECT_ID`);
-const stakingIntercomAppId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_INTERCOM_APP_ID`);
-
-const STAKING_APP_GITHUB_URL = op.read.parse(`op://DevOps/passport-${stack}-env/ci/STAKING_APP_GITHUB_URL`);
+const STAKING_APP_GITHUB_URL = op.read.parse(`op://DevOps/passport-${stack}-env/ci-staking/STAKING_APP_GITHUB_URL`);
 const STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY = op.read.parse(
-  `op://DevOps/passport-${stack}-env/ci/STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY`
+  `op://DevOps/passport-${stack}-secrets/ci-staking/STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY`
 );
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -129,6 +111,18 @@ const iamEnvironment = pulumi
     ].sort(secretsManager.sortByName)
   );
 
+const stakingEnvironment = secretsManager
+  .getEnvironmentVars({
+    vault: "DevOps",
+    repo: "passport",
+    env: stack,
+    section: "staking",
+  })
+  .reduce((acc, { name, value }) => {
+    acc[name] = value;
+    return acc;
+  }, {} as Record<string, string | pulumi.Output<any>>);
+
 const logsRetention = Object({
   review: 1,
   staging: 7,
@@ -167,69 +161,6 @@ const alarmConfigurations: AlarmConfigurations = {
   redisErrorThreshold: 1, // threshold for redis logged errors
   redisErrorPeriod: 1800, // period for redis logged errors, set to 30 min for now
 };
-
-const stakingEnvVars = Object({
-  review: {
-    NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.review.scorer.gitcoin.co/ceramic-cache",
-    NEXT_PUBLIC_SCORER_ENDPOINT: "https://api.review.scorer.gitcoin.co",
-    NEXT_PUBLIC_OP_SEPOLIA_RPC_URL: opSepoliaRpcUrl,
-    NEXT_PUBLIC_MAINNET_RPC_URL: mainnetRpcUrl,
-    NEXT_PUBLIC_OP_RPC_URL: opRpcUrl,
-    NEXT_PUBLIC_DATADOG_CLIENT_TOKEN: dataDogClientTokenReview,
-    NEXT_PUBLIC_DATADOG_SERVICE: "staking-app-review",
-    NEXT_PUBLIC_DATADOG_ENV: "review",
-    NEXT_PUBLIC_ENABLE_MAINNET: "on",
-    NEXT_PUBLIC_ENABLE_OP_MAINNET: "on",
-    NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "on",
-    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: walletConnectProjectId,
-    NEXT_PUBLIC_INTERCOM_APP_ID: stakingIntercomAppId,
-    NEXT_PUBLIC_ENABLE_ARBITRUM_MAINNET: "on",
-    NEXT_PUBLIC_ARBITRUM_RPC_URL: arbitrumRpcUrl,
-    NEXT_PUBLIC_GET_GTC_STAKE_API: "https://api.scorer.gitcoin.co/registry/gtc-stake/",
-    NEXT_PUBLIC_MAX_LEGACY_ROUND_ID: 7,
-    NEXT_PUBLIC_GA_ID: "",
-  },
-  staging: {
-    NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.staging.scorer.gitcoin.co/ceramic-cache",
-    NEXT_PUBLIC_SCORER_ENDPOINT: "https://api.staging.scorer.gitcoin.co",
-    NEXT_PUBLIC_OP_SEPOLIA_RPC_URL: opSepoliaRpcUrl,
-    NEXT_PUBLIC_MAINNET_RPC_URL: mainnetRpcUrl,
-    NEXT_PUBLIC_OP_RPC_URL: opRpcUrl,
-    NEXT_PUBLIC_DATADOG_CLIENT_TOKEN: dataDogClientTokenStaging,
-    NEXT_PUBLIC_DATADOG_SERVICE: "staking-app-staging",
-    NEXT_PUBLIC_DATADOG_ENV: "staging",
-    NEXT_PUBLIC_ENABLE_MAINNET: "on",
-    NEXT_PUBLIC_ENABLE_OP_MAINNET: "on",
-    NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "on",
-    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: walletConnectProjectId,
-    NEXT_PUBLIC_INTERCOM_APP_ID: stakingIntercomAppId,
-    NEXT_PUBLIC_ENABLE_ARBITRUM_MAINNET: "on",
-    NEXT_PUBLIC_ARBITRUM_RPC_URL: arbitrumRpcUrl,
-    NEXT_PUBLIC_GET_GTC_STAKE_API: "https://api.scorer.gitcoin.co/registry/gtc-stake/",
-    NEXT_PUBLIC_MAX_LEGACY_ROUND_ID: 7,
-    NEXT_PUBLIC_GA_ID: "",
-  },
-  production: {
-    NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.scorer.gitcoin.co/ceramic-cache",
-    NEXT_PUBLIC_SCORER_ENDPOINT: "https://api.scorer.gitcoin.co",
-    NEXT_PUBLIC_OP_SEPOLIA_RPC_URL: opSepoliaRpcUrl,
-    NEXT_PUBLIC_MAINNET_RPC_URL: mainnetRpcUrl,
-    NEXT_PUBLIC_OP_RPC_URL: opRpcUrl,
-    NEXT_PUBLIC_DATADOG_CLIENT_TOKEN: dataDogClientTokenProduction,
-    NEXT_PUBLIC_DATADOG_SERVICE: "staking-app-prod",
-    NEXT_PUBLIC_DATADOG_ENV: "prod",
-    NEXT_PUBLIC_ENABLE_MAINNET: "on",
-    NEXT_PUBLIC_ENABLE_OP_MAINNET: "on",
-    NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "off",
-    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: walletConnectProjectId,
-    NEXT_PUBLIC_INTERCOM_APP_ID: stakingIntercomAppId,
-    NEXT_PUBLIC_ENABLE_ARBITRUM_MAINNET: "on",
-    NEXT_PUBLIC_ARBITRUM_RPC_URL: arbitrumRpcUrl,
-    NEXT_PUBLIC_GET_GTC_STAKE_API: "https://api.scorer.gitcoin.co/registry/gtc-stake/",
-    NEXT_PUBLIC_MAX_LEGACY_ROUND_ID: 7,
-    NEXT_PUBLIC_GA_ID: "G-XHXGR14F2B",
-  },
-});
 
 const stakingBranches = Object({
   review: "main",
@@ -629,7 +560,7 @@ const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((doma
     stack === "production" ? cloudflareZoneId : "", // cloudFlareZoneId
     "stake",
     stakingBranches[stack],
-    stakingEnvVars[stack],
+    stakingEnvironment,
     { ...defaultTags, Name: "staking-app" },
     false,
     "",
