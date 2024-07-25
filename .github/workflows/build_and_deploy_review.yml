@@ -1,5 +1,7 @@
 name: New Build and Deploy to Review
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       commit:
