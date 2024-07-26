@@ -73,8 +73,8 @@ jobs:
       - id: build_and_push_docker_image
         uses: passportxyz/gh-workflows/.github/actions/build_and_push@v1
         with:
-          refspec: ${{ needs.ref.outputs.refspec }}
-          docker_tag: ${{ needs.ref.outputs.docker_tag }}
+          refspec: ${{ inputs.refspec }}
+          docker_tag: ${{ inputs.docker_tag }}
           ecr_repository_name: passport
           aws_region: us-west-2
           aws_access_key_id: ${{ env.AWS_ACCESS_KEY_ID }}
@@ -90,7 +90,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.ref.outputs.refspec }}
+          ref: ${{ inputs.refspec }}
           fetch-depth: 0
       - name: Install 1Password CLI
         uses: 1password/install-cli-action@v1
@@ -114,7 +114,7 @@ jobs:
         # uses: ./.github/actions/deploy_to_aws
         uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
         with:
-          docker_tag: ${{ needs.ref.outputs.docker_tag }}
+          docker_tag: ${{ inputs.docker_tag }}
           stack_name: gitcoin/passport/${{ inputs.environment }}
           aws_region: us-west-2
           pulumi_command: preview
@@ -133,7 +133,7 @@ jobs:
     steps:
       - name: Approve Release to Review (check pulumi preview)
         run: |
-          echo "Ref" ${{ needs.ref.outputs.refspec }}
+          echo "Ref" ${{ inputs.refspec }}
 
   # deploy_frontend:
   #   name: Deploying Frontend to ${{ inputs.environment }}-app
@@ -157,7 +157,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.ref.outputs.refspec }}
+          ref: ${{ inputs.refspec }}
           fetch-depth: 0
       - name: Install 1Password CLI
         uses: 1password/install-cli-action@v1
@@ -180,7 +180,7 @@ jobs:
       - name: Deploy to AWS
         uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
         with:
-          docker_tag: ${{ needs.ref.outputs.docker_tag }}
+          docker_tag: ${{ inputs.docker_tag }}
           stack_name: gitcoin/passport/${{ inputs.environment }}
           pulumi_command: up
           aws_region: us-west-2
