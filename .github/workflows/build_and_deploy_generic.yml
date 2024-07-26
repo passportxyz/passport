@@ -84,7 +84,7 @@ jobs:
 
   deploy_preview:
     name: Preview - Deploying AWS Infra
-    needs: [run-tests, docker]
+    needs: [run-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -127,7 +127,7 @@ jobs:
 
   deploy_confirm:
     name: Review Approval Pending
-    needs: [run-tests, deploy_preview]
+    needs: [run-tests, docker, deploy_preview]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
