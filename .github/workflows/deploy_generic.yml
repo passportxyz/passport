@@ -1,4 +1,4 @@
-name: Library - Deploy only - Generic
+name: Library - Deploy API only - Generic
 on:
   workflow_call:
     inputs:
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: ref
-        uses: passportxyz/gh-workflows/.github/actions/load_commit_ref@main
+        uses: passportxyz/gh-workflows/.github/actions/load_commit_ref@v1
         with:
           commit: ${{ inputs.commit }}
 
@@ -53,9 +53,9 @@ jobs:
           PULUMI_ACCESS_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
           CLOUDFLARE_API_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
       - name: Prepare to Deploy to AWS
-        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@main
+        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v1
       - name: Preview Deploy
-        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@main
+        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
         with:
           docker_tag: ${{ needs.ref.outputs.docker_tag }}
           stack_name: gitcoin/passport/${{ inputs.environment }}
@@ -119,9 +119,9 @@ jobs:
           PULUMI_ACCESS_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
           CLOUDFLARE_API_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
       - name: Prepare to Deploy to AWS
-        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@main
+        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v1
       - name: Deploy to AWS
-        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@main
+        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
         with:
           docker_tag: ${{ needs.ref.outputs.docker_tag }}
           stack_name: gitcoin/passport/${{ inputs.environment }}
