@@ -6,10 +6,6 @@ inputs:
     description: "Alchemy API key for Optimism"
     required: true
 
-  ALCHEMY_API_KEY_OP_SEPOLIA:
-    description: "Alchemy API key for Optimism Sepolia"
-    required: true
-
 runs:
   using: "composite"
   steps:
@@ -17,6 +13,41 @@ runs:
       run: |
         echo "📋📋📋 Check Optimism Onchain Provider Bitmaps"
         yarn workspace @gitcoin/passport-iam checkProviders:op
+      shell: bash
+      env:
+        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}
+    - name: Check Optimism Sepolia Onchain Provider Bitmaps
+      run: |
+        echo "📋📋📋 Check Optimism Sepolia Onchain Provider Bitmaps"
+        yarn workspace @gitcoin/passport-iam checkProviders:op-sepolia
+      shell: bash
+      env:
+        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}
+    - name: Check Arbitrum Onchain Provider Bitmaps
+      run: |
+        echo "📋📋📋 Check Arbitrum  Onchain Provider Bitmaps"
+        yarn workspace @gitcoin/passport-iam checkProviders:arb
+      shell: bash
+      env:
+        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}
+    - name: Check Arbitrum Onchain Provider Bitmaps
+      run: |
+        echo "📋📋📋 Check ZkSync Onchain Provider Bitmaps"
+        yarn workspace @gitcoin/passport-iam checkProviders:zksync
+      shell: bash
+      env:
+        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}
+    - name: Check Scroll Onchain Provider Bitmaps
+      run: |
+        echo "📋📋📋 Check Scroll Onchain Provider Bitmaps"
+        yarn workspace @gitcoin/passport-iam checkProviders:scroll
+      shell: bash
+      env:
+        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}
+    - name: Check Linea Onchain Provider Bitmaps
+      run: |
+        echo "📋📋📋 Check Scroll Onchain Provider Bitmaps"
+        yarn workspace @gitcoin/passport-iam checkProviders::linea
       shell: bash
       env:
         ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}
