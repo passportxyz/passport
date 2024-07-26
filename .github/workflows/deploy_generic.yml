@@ -2,39 +2,38 @@ name: Library - Deploy API only - Generic
 on:
   workflow_call:
     inputs:
-      commit:
-        description: "Leave blank to use current HEAD, or provide an override commit SHA"
+      refspec:
+        description: "The commit SHA"
         type: string
-        required: false
+        required: True
+      docker_tag:
+        description: "Docker tag"
+        type: string
+        required: True
       environment:
         description: "Environment to deploy to"
         type: string
         required: true
 
 jobs:
-  ref:
-    name: Load Commit Ref
+  run-tests:
     runs-on: ubuntu-latest
-    steps:
-      - id: ref
-        uses: passportxyz/gh-workflows/.github/actions/load_commit_ref@v1
-        with:
-          commit: ${{ inputs.commit }}
-
-    outputs:
-      version_tag: ${{ steps.ref.outputs.version_tag }}
-      docker_tag: ${{ steps.ref.outputs.sha_short }}
-      refspec: ${{ steps.ref.outputs.refspec }}
+    # Run a local ceramic nod to test against
+    services:
+      ceramic:
+        image: gitcoinpassport/js-ceramic:3.2.0
+        ports:
+          - 7007:7007
 
   deploy_preview:
     name: Preview - Deploying AWS Infra
-    needs: [ref]
+    needs: [run-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.ref.outputs.refspec }}
+          ref: ${{ inputs.refspec }}
           fetch-depth: 0
       - name: Install 1Password CLI
         uses: 1password/install-cli-action@v1
@@ -57,7 +56,7 @@ jobs:
       - name: Preview Deploy
         uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
         with:
-          docker_tag: ${{ needs.ref.outputs.docker_tag }}
+          docker_tag: ${{ inputs.docker_tag }}
           stack_name: gitcoin/passport/${{ inputs.environment }}
           aws_region: us-west-2
           pulumi_command: preview
@@ -70,37 +69,23 @@ jobs:
 
   deploy_confirm:
     name: Review Approval Pending
-    needs: [ref, deploy_preview]
+    needs: [run-tests, deploy_preview]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
       - name: Approve Release to Review (check pulumi preview)
         run: |
-          echo "Ref" ${{ needs.ref.outputs.refspec }}
-
-  deploy_frontend:
-    name: Deploying Frontend to ${{ inputs.environment }}-app
-    needs: [ref, deploy_preview, deploy_confirm]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Checkout ${{ inputs.environment }}-app
-        run: |
-          git fetch
-          git checkout -b ${{ inputs.environment }}-app origin/${{ inputs.environment }}-app
-          git reset --hard origin/main
-          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/passport.git
-          git push origin ${{ inputs.environment }}-app -f
+          echo "Ref" ${{ inputs.refspec }}
 
   deploy_backends:
     name: Deploying AWS Infra
-    needs: [ref, deploy_preview, deploy_confirm]
+    needs: [run-tests, deploy_preview, deploy_confirm]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.ref.outputs.refspec }}
+          ref: ${{ inputs.refspec }}
           fetch-depth: 0
       - name: Install 1Password CLI
         uses: 1password/install-cli-action@v1
@@ -123,7 +108,7 @@ jobs:
       - name: Deploy to AWS
         uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
         with:
-          docker_tag: ${{ needs.ref.outputs.docker_tag }}
+          docker_tag: ${{ inputs.docker_tag }}
           stack_name: gitcoin/passport/${{ inputs.environment }}
           aws_region: us-west-2
           pulumi_command: up
