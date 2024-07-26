@@ -19,4 +19,4 @@ jobs:
           - 7007:7007
 
     steps:
-      - uses: ./github/actions/test.yml
+      - uses: ./.github/actions/test.yml
