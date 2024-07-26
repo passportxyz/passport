@@ -1,8 +1,6 @@
-name: Deploy UI to Review
+name: Deploy UI to Production
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       commit:
@@ -77,4 +75,4 @@ jobs:
         with:
           commit: ${{ needs.ref.outputs.refspec }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          branch: review-app
+          branch: production-app
