@@ -1,8 +1,6 @@
 name: Deploy API to Review
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       commit:
