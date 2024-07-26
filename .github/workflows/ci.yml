@@ -39,7 +39,7 @@ jobs:
         run: yarn models:deploy-composite
         env:
           CERAMIC_URL: http://localhost:7007
-          PRIVATE_KEY: op://DevOps/passport-review-secrets/ci/CERAMIC_PRIVATE_KEY
+          PRIVATE_KEY: ${{secrets.CERAMIC_PRIVATE_KEY}}
       - name: Run Ceramic Integration Tests
         run: yarn test:ceramic-integration
         env:
