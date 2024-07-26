@@ -40,8 +40,8 @@ jobs:
           ALCHEMY_API_KEY_OP: op://DevOps/passport-staging-secrets/ci/ALCHEMY_API_KEY_OP
           ALCHEMY_API_KEY_OP_SEPOLIA: op://DevOps/passport-staging-secrets/ci/ALCHEMY_API_KEY_OP_SEPOLIA
 
-  deploy:
-    name: Deploy
+  deploy-api:
+    name: Deploy API to Staging
     needs: [ref, check-provider-bitmap]
     uses: ./.github/workflows/build_and_deploy_generic.yml
     with:

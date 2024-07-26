@@ -25,6 +25,7 @@ jobs:
 
   run-tests:
     runs-on: ubuntu-latest
+    needs: [ref]
     # Run a local ceramic nod to test against
     services:
       ceramic:
@@ -81,7 +82,7 @@ jobs:
   create-draft-release:
     name: Create Draft Release
     runs-on: ubuntu-latest
-    needs: [ref]
+    needs: [ref, run-tests, check-provider-bitmap]
     permissions: write-all
     steps:
       - name: Release
@@ -97,17 +98,25 @@ jobs:
 
   deploy-api-staging:
     name: Deploy API to Staging
-    needs: [create-draft-release]
+    needs: [ref, run-tests, check-provider-bitmap, create-draft-release]
     uses: ./.github/workflows/build_and_deploy_generic.yml
     with:
-      commit: ${{ inputs.commit }}
+      refspec: ${{ needs.ref.outputs.refspec }}
+      docker_tag: ${{ needs.ref.outputs.docker_tag }}
       environment: staging
     secrets: inherit
 
   deploy-ui-staging:
     name: Deploy UI to Staging - Push to branch
     runs-on: ubuntu-latest
-    needs: [ref, run-tests, deploy-api-staging]
+    needs:
+      [
+        ref,
+        run-tests,
+        check-provider-bitmap,
+        create-draft-release,
+        deploy-api-staging,
+      ]
     permissions:
       contents: write
     steps:
@@ -125,17 +134,35 @@ jobs:
 
   deploy-api-production:
     name: Deploy API to Production
-    needs: [ref, run-tests, deploy-api-staging, deploy-ui-staging]
+    needs:
+      [
+        ref,
+        run-tests,
+        check-provider-bitmap,
+        create-draft-release,
+        deploy-api-staging,
+        deploy-ui-staging,
+      ]
     uses: ./.github/workflows/build_and_deploy_generic.yml
     with:
-      commit: ${{ inputs.commit }}
+      refspec: ${{ needs.ref.outputs.refspec }}
+      docker_tag: ${{ needs.ref.outputs.docker_tag }}
       environment: production
     secrets: inherit
 
   deploy-ui-production:
     name: Deploy UI to Production - Push to branch
     runs-on: ubuntu-latest
-    needs: [ref, run-tests, deploy-api-production]
+    needs:
+      [
+        ref,
+        run-tests,
+        check-provider-bitmap,
+        create-draft-release,
+        deploy-api-staging,
+        deploy-ui-staging,
+        deploy-api-production,
+      ]
     permissions:
       contents: write
     steps:
@@ -150,10 +177,20 @@ jobs:
           commit: ${{ needs.ref.outputs.refspec }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           branch: production-app
+
   release:
     name: Release
     needs:
-      [ref, create-draft-release, deploy-api-production, deploy-ui-production]
+      [
+        ref,
+        run-tests,
+        check-provider-bitmap,
+        create-draft-release,
+        deploy-api-staging,
+        deploy-ui-staging,
+        deploy-api-production,
+        deploy-ui-production,
+      ]
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
