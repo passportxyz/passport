@@ -24,6 +24,33 @@ jobs:
         image: gitcoinpassport/js-ceramic:3.2.0
         ports:
           - 7007:7007
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.8.1
+          cache: "yarn"
+      - name: Install Packages
+        run: yarn install
+      - name: Run Tests
+        run: yarn test
+      - name: Run Linter
+        run: yarn lint
+      - name: Workarround for build error
+        run: rm -rf node_modules/@tendermint
+      - name: Run Build (ensure that build succeeds)
+        run: yarn build
+      - name: Deploy Ceramic Models
+        working-directory: ./schemas
+        run: yarn models:deploy-composite
+        env:
+          CERAMIC_URL: http://localhost:7007
+          PRIVATE_KEY: ${{secrets.CERAMIC_PRIVATE_KEY}}
+      - name: Run Ceramic Integration Tests
+        run: yarn test:ceramic-integration
+        env:
+          CERAMIC_CLIENT_URL: http://localhost:7007
 
   deploy_preview:
     name: Preview - Deploying AWS Infra
