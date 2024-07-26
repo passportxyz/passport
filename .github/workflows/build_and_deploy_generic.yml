@@ -18,6 +18,7 @@ on:
 
 jobs:
   run-tests:
+    name: Run Tests
     runs-on: ubuntu-latest
     # Run a local ceramic nod to test against
     services:

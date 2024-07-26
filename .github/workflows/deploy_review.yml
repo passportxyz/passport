@@ -22,8 +22,8 @@ jobs:
       docker_tag: ${{ steps.ref.outputs.docker_tag }}
       refspec: ${{ steps.ref.outputs.refspec }}
 
-  deploy:
-    name: Deploy to Review
+  deploy-api:
+    name: Deploy API to Review
     needs: [ref]
     uses: ./.github/workflows/deploy_generic.yml
     with:
