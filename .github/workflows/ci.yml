@@ -5,12 +5,6 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-  workflow_dispatch:
-    inputs:
-      commit:
-        description: "Leave blank to use current HEAD, or provide an override commit SHA"
-        type: string
-        required: false
 
 jobs:
   build:
@@ -28,7 +22,7 @@ jobs:
       - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: 20.8
+          node-version: 20.8.1
           cache: "yarn"
       - name: Install Packages
         run: yarn install
