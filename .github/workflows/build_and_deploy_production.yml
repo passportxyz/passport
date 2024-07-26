@@ -38,10 +38,13 @@ jobs:
         with:
           ALCHEMY_API_KEY_OP: op://DevOps/passport-production-secrets/ci/ALCHEMY_API_KEY_OP
           ALCHEMY_API_KEY_OP_SEPOLIA: op://DevOps/passport-production-secrets/ci/ALCHEMY_API_KEY_OP_SEPOLIA
+
   deploy:
     name: Deploy
+    needs: [ref, check-provider-bitmap]
     uses: ./.github/workflows/build_and_deploy_generic.yml
     with:
-      commit: ${{ inputs.commit }}
+      refspec: ${{ needs.ref.outputs.refspec }}
+      docker_tag: ${{ needs.ref.outputs.docker_tag }}
       environment: production
     secrets: inherit

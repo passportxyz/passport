@@ -22,10 +22,29 @@ jobs:
       docker_tag: ${{ steps.ref.outputs.docker_tag }}
       refspec: ${{ steps.ref.outputs.refspec }}
 
+  check-provider-bitmap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.8
+          cache: "yarn"
+      - name: Install Packages
+        run: yarn install
+      - name: Check provider bitmaps
+        uses: ./.github/actions/check-provider-bitmaps
+        with:
+          ALCHEMY_API_KEY_OP: op://DevOps/passport-staging-secrets/ci/ALCHEMY_API_KEY_OP
+          ALCHEMY_API_KEY_OP_SEPOLIA: op://DevOps/passport-staging-secrets/ci/ALCHEMY_API_KEY_OP_SEPOLIA
+
   deploy:
     name: Deploy
+    needs: [ref, check-provider-bitmap]
     uses: ./.github/workflows/build_and_deploy_generic.yml
     with:
-      commit: ${{ inputs.commit }}
+      refspec: ${{ needs.ref.outputs.refspec }}
+      docker_tag: ${{ needs.ref.outputs.docker_tag }}
       environment: staging
     secrets: inherit
