@@ -82,7 +82,7 @@ jobs:
           PULUMI_ACCESS_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
           CLOUDFLARE_API_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
       - name: Prepare to Deploy to AWS
-        uses: ./.github/actions/prepare_deploy_to_aws
+        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@main
       - name: Deploy Preview
         # uses: ./.github/actions/deploy_to_aws
         uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@main
@@ -149,7 +149,7 @@ jobs:
           PULUMI_ACCESS_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
           CLOUDFLARE_API_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
       - name: Prepare to Deploy to AWS
-        uses: ./.github/actions/prepare_deploy_to_aws
+        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@main
       - name: Deploy to AWS
         uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@main
         with:
