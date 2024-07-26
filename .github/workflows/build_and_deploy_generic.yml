@@ -1,35 +1,31 @@
-name: Library - Build and Deploy - Generic
+name: Library - Build and Deploy API - Generic
 
 on:
   workflow_call:
     inputs:
-      commit:
-        description: "Leave blank to use current HEAD, or provide an override commit SHA"
+      refspec:
+        description: "The commit SHA"
         type: string
-        required: false
+        required: True
+      docker_tag:
+        description: "Docker tag"
+        type: string
+        required: True
       environment:
         description: "Environment to deploy to"
         type: string
         required: true
 
 jobs:
-  ref:
-    name: Load Commit Ref
+  run-tests:
     runs-on: ubuntu-latest
     steps:
-      - id: ref
-        uses: passportxyz/gh-workflows/.github/actions/load_commit_ref@main
-        with:
-          commit: ${{ inputs.commit }}
-
-    outputs:
-      version_tag: ${{ steps.ref.outputs.version_tag }}
-      docker_tag: ${{ steps.ref.outputs.docker_tag }}
-      refspec: ${{ steps.ref.outputs.refspec }}
+      # run tests
+      - uses: ./.github/actions/test.yml
 
   docker:
     name: Build and push docker image
-    needs: [ref]
+    needs: [run-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Load secret
@@ -44,7 +40,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/AWS_SECRET_ACCESS_KEY
 
       - id: build_and_push_docker_image
-        uses: passportxyz/gh-workflows/.github/actions/build_and_push@main
+        uses: passportxyz/gh-workflows/.github/actions/build_and_push@v1
         with:
           refspec: ${{ needs.ref.outputs.refspec }}
           docker_tag: ${{ needs.ref.outputs.docker_tag }}
@@ -57,7 +53,7 @@ jobs:
 
   deploy_preview:
     name: Preview - Deploying AWS Infra
-    needs: [ref, docker]
+    needs: [run-tests, docker]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -82,10 +78,10 @@ jobs:
           PULUMI_ACCESS_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
           CLOUDFLARE_API_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
       - name: Prepare to Deploy to AWS
-        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@main
+        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v1
       - name: Deploy Preview
         # uses: ./.github/actions/deploy_to_aws
-        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@main
+        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
         with:
           docker_tag: ${{ needs.ref.outputs.docker_tag }}
           stack_name: gitcoin/passport/${{ inputs.environment }}
@@ -100,7 +96,7 @@ jobs:
 
   deploy_confirm:
     name: Review Approval Pending
-    needs: [ref, deploy_preview]
+    needs: [run-tests, deploy_preview]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
@@ -108,23 +104,23 @@ jobs:
         run: |
           echo "Ref" ${{ needs.ref.outputs.refspec }}
 
-  deploy_frontend:
-    name: Deploying Frontend to ${{ inputs.environment }}-app
-    needs: [ref, docker, deploy_preview, deploy_confirm]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Checkout ${{ inputs.environment }}-app
-        run: |
-          git fetch
-          git checkout -b ${{ inputs.environment }}-app origin/${{ inputs.environment }}-app
-          git reset --hard origin/main
-          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/passport.git
-          git push origin ${{ inputs.environment }}-app -f
+  # deploy_frontend:
+  #   name: Deploying Frontend to ${{ inputs.environment }}-app
+  #   needs: [run-tests, docker, deploy_preview, deploy_confirm]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Checkout ${{ inputs.environment }}-app
+  #       run: |
+  #         git fetch
+  #         git checkout -b ${{ inputs.environment }}-app origin/${{ inputs.environment }}-app
+  #         git reset --hard origin/main
+  #         git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/gitcoinco/passport.git
+  #         git push origin ${{ inputs.environment }}-app -f
 
   deploy_backends:
     name: Deploying AWS Infra
-    needs: [ref, docker, deploy_preview, deploy_confirm]
+    needs: [run-tests, docker, deploy_preview, deploy_confirm]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -149,9 +145,9 @@ jobs:
           PULUMI_ACCESS_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
           CLOUDFLARE_API_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
       - name: Prepare to Deploy to AWS
-        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@main
+        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v1
       - name: Deploy to AWS
-        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@main
+        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
         with:
           docker_tag: ${{ needs.ref.outputs.docker_tag }}
           stack_name: gitcoin/passport/${{ inputs.environment }}

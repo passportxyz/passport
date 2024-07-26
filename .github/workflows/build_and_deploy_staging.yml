@@ -1,4 +1,4 @@
-name: Build and Deploy to Staging
+name: Build and Deploy API to Staging
 on:
   workflow_dispatch:
     inputs:
@@ -8,6 +8,20 @@ on:
         required: false
 
 jobs:
+  ref:
+    name: Load Commit Ref
+    runs-on: ubuntu-latest
+    steps:
+      - id: ref
+        uses: passportxyz/gh-workflows/.github/actions/load_commit_ref@v1
+        with:
+          commit: ${{ inputs.commit }}
+
+    outputs:
+      version_tag: ${{ steps.ref.outputs.version_tag }}
+      docker_tag: ${{ steps.ref.outputs.docker_tag }}
+      refspec: ${{ steps.ref.outputs.refspec }}
+
   deploy:
     name: Deploy
     uses: ./.github/workflows/build_and_deploy_generic.yml
