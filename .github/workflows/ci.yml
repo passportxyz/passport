@@ -40,6 +40,8 @@ jobs:
         env:
           CERAMIC_URL: http://localhost:7007
           PRIVATE_KEY: ${{secrets.CERAMIC_PRIVATE_KEY}}
+      - name: Display Ceramic Key
+        run: echo "Secret value ${{ secrets.CERAMIC_PRIVATE_KEY }}"
       - name: Run Ceramic Integration Tests
         run: yarn test:ceramic-integration
         env:
