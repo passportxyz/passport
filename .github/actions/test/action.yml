@@ -10,6 +10,7 @@ runs:
         - 7007:7007
   
   steps:
+    - uses: actions/checkout@v3
     # run tests
     - name: Use Node.js 20
       uses: actions/setup-node@v3
