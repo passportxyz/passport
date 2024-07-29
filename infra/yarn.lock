@@ -1445,7 +1445,7 @@ inflight@^1.0.4:
     once "^1.3.0"
     wrappy "1"
 
-infra-libs@passportxyz/infra-libs#1.0.0:
+"infra-libs@passportxyz/infra-libs#semver:^1.0.0":
   version "1.0.0"
   resolved "https://codeload.github.com/passportxyz/infra-libs/tar.gz/f3072dc8d547529c5cb7200c02178046d2d47e0e"
   dependencies:

@@ -11,6 +11,6 @@
     "@pulumi/github": "^6.1.0",
     "@pulumi/pulumi": "^3.0.0",
     "@pulumi/std": "^1.6.2",
-    "infra-libs": "passportxyz/infra-libs#1.0.0"
+    "infra-libs": "passportxyz/infra-libs#semver:^1.0.0"
   }
 }
