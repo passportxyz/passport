@@ -54,21 +54,24 @@ jobs:
         id: aws_account_id
         run: |
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          echo "::set-output name=account_id::${ACCOUNT_ID}"
+          run: echo "account_id=ACCOUNT_ID" >> $ACCOUNT_ID
       - name: Check if ECR image exists
         id: ecr_check
+        shell: bash
         run: |
           IMAGE_TAG=${{ inputs.docker_tag }}
+          echo "IMAGE_TAG: ${IMAGE_TAG}"
           REGION=$(aws configure get region)
+          echo "REGION: ${REGION}"
           ACCOUNT_ID=${{ steps.aws_account_id.outputs.account_id }}
+          echo "ACCOUNT_ID: ${ACCOUNT_ID}"
           ECR_REPO_NAME=passport
+          echo "ECR_REPO_NAME: ${ECR_REPO_NAME}"
           IMAGE_URI=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
+          echo "IMAGE_URI: ${IMAGE_URI}"
 
-          aws ecr describe-images --repository-name ${ECR_REPO_NAME} --image-ids imageTag=${IMAGE_TAG} 
-          if [ $? -ne 0 ]; then
-            echo "Image not found in ECR"
-            exit 1
-          fi
+          aws ecr describe-images --repository-name ${ECR_REPO_NAME} --image-ids imageTag=${IMAGE_TAG}
+
   deploy_preview:
     name: Preview - Deploying AWS Infra
     needs: [verify_image_ecr]
