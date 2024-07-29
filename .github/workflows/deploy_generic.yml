@@ -50,20 +50,17 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y awscli
-      - name: Retrieve AWS Account ID
-        id: aws_account_id
-        run: |
-          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          run: echo "account_id=ACCOUNT_ID" >> $ACCOUNT_ID
+
       - name: Check if ECR image exists
         id: ecr_check
         shell: bash
+
         run: |
-          IMAGE_TAG=${{ inputs.docker_tag }}
+          IMAGE_TAG=45940fcf
           echo "IMAGE_TAG: ${IMAGE_TAG}"
           REGION=$(aws configure get region)
           echo "REGION: ${REGION}"
-          ACCOUNT_ID=${{ steps.aws_account_id.outputs.account_id }}
+          ACCOUNT_ID==$(aws sts get-caller-identity --query Account --output text)
           echo "ACCOUNT_ID: ${ACCOUNT_ID}"
           ECR_REPO_NAME=passport
           echo "ECR_REPO_NAME: ${ECR_REPO_NAME}"
