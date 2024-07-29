@@ -64,15 +64,11 @@ jobs:
           ECR_REPO_NAME=passport
           IMAGE_URI=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
 
-          if aws ecr describe-images --repository-name ${ECR_REPO_NAME} --image-ids imageTag=${IMAGE_TAG} > /dev/null 2>&1; then
-            echo "Image exists: ${IMAGE_URI}"
-            echo "::set-output name=image_exists::true"
-          else
-            echo "Image does not exist: ${IMAGE_URI}"
-            echo "::set-output name=image_exists::false"
+          aws ecr describe-images --repository-name ${ECR_REPO_NAME} --image-ids imageTag=${IMAGE_TAG} 
+          if [ $? -ne 0 ]; then
+            echo "Image not found in ECR"
             exit 1
           fi
-
   deploy_preview:
     name: Preview - Deploying AWS Infra
     needs: [verify_image_ecr]
