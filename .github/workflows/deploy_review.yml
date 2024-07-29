@@ -50,12 +50,20 @@ jobs:
         run: rm -rf node_modules/@tendermint
       - name: Run Build (ensure that build succeeds)
         run: yarn build
+      - name: Load Secrets
+        id: op-load-secret
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          CERAMIC_PRIVATE_KEY: op://DevOps/passport-review-secrets/ci/CERAMIC_PRIVATE_KEY
       - name: Deploy Ceramic Models
         working-directory: ./schemas
         run: yarn models:deploy-composite
         env:
           CERAMIC_URL: http://localhost:7007
-          PRIVATE_KEY: ${{secrets.CERAMIC_PRIVATE_KEY}}
+          PRIVATE_KEY: ${{env.CERAMIC_PRIVATE_KEY}}
       - name: Run Ceramic Integration Tests
         run: yarn test:ceramic-integration
         env:
