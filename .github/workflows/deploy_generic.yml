@@ -58,14 +58,10 @@ jobs:
         run: |
           IMAGE_TAG=45940fcf
           echo "IMAGE_TAG: ${IMAGE_TAG}"
-          REGION=$(aws configure get region)
-          echo "REGION: ${REGION}"
           ACCOUNT_ID==$(aws sts get-caller-identity --query Account --output text)
           echo "ACCOUNT_ID: ${ACCOUNT_ID}"
           ECR_REPO_NAME=passport
           echo "ECR_REPO_NAME: ${ECR_REPO_NAME}"
-          IMAGE_URI=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
-          echo "IMAGE_URI: ${IMAGE_URI}"
 
           aws ecr describe-images --repository-name ${ECR_REPO_NAME} --image-ids imageTag=${IMAGE_TAG}
 
