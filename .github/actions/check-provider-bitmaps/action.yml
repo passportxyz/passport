@@ -47,7 +47,7 @@ runs:
     - name: Check Linea Onchain Provider Bitmaps
       run: |
         echo "📋📋📋 Check Scroll Onchain Provider Bitmaps"
-        yarn workspace @gitcoin/passport-iam checkProviders::linea
+        yarn workspace @gitcoin/passport-iam checkProviders:linea
       shell: bash
       env:
         ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
