@@ -37,13 +37,13 @@ runs:
       shell: bash
       env:
         ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
-    - name: Check Scroll Onchain Provider Bitmaps
-      run: |
-        echo "📋📋📋 Check Scroll Onchain Provider Bitmaps"
-        yarn workspace @gitcoin/passport-iam checkProviders:scroll
-      shell: bash
-      env:
-        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
+    # - name: Check Scroll Onchain Provider Bitmaps
+    #   run: |
+    #     echo "📋📋📋 Check Scroll Onchain Provider Bitmaps"
+    #     yarn workspace @gitcoin/passport-iam checkProviders:scroll
+    #   shell: bash
+    #   env:
+    #     ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
     - name: Check Linea Onchain Provider Bitmaps
       run: |
         echo "📋📋📋 Check Scroll Onchain Provider Bitmaps"
