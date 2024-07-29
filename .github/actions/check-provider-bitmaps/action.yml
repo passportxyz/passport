@@ -2,8 +2,8 @@ name: "Check Provider Bitmaps"
 description: "Checkout that the onchai provider bitmaps are in sync with the configuration in the code"
 
 inputs:
-  ALCHEMY_API_KEY_OP:
-    description: "Alchemy API key for Optimism"
+  ALCHEMY_API_KEY:
+    description: "Alchemy API key"
     required: true
 
 runs:
@@ -15,39 +15,39 @@ runs:
         yarn workspace @gitcoin/passport-iam checkProviders:op
       shell: bash
       env:
-        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}
+        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
     - name: Check Optimism Sepolia Onchain Provider Bitmaps
       run: |
         echo "📋📋📋 Check Optimism Sepolia Onchain Provider Bitmaps"
         yarn workspace @gitcoin/passport-iam checkProviders:op-sepolia
       shell: bash
       env:
-        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}
+        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
     - name: Check Arbitrum Onchain Provider Bitmaps
       run: |
         echo "📋📋📋 Check Arbitrum  Onchain Provider Bitmaps"
         yarn workspace @gitcoin/passport-iam checkProviders:arb
       shell: bash
       env:
-        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}
+        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
     - name: Check Arbitrum Onchain Provider Bitmaps
       run: |
         echo "📋📋📋 Check ZkSync Onchain Provider Bitmaps"
         yarn workspace @gitcoin/passport-iam checkProviders:zksync
       shell: bash
       env:
-        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}
+        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
     - name: Check Scroll Onchain Provider Bitmaps
       run: |
         echo "📋📋📋 Check Scroll Onchain Provider Bitmaps"
         yarn workspace @gitcoin/passport-iam checkProviders:scroll
       shell: bash
       env:
-        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}
+        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
     - name: Check Linea Onchain Provider Bitmaps
       run: |
         echo "📋📋📋 Check Scroll Onchain Provider Bitmaps"
         yarn workspace @gitcoin/passport-iam checkProviders::linea
       shell: bash
       env:
-        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY_OP }}
+        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
