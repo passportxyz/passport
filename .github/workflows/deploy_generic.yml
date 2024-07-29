@@ -75,6 +75,7 @@ jobs:
 
   deploy_preview:
     name: Preview - Deploying AWS Infra
+    needs: [verify_image_ecr]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
