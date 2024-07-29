@@ -1,4 +1,4 @@
-name: New CI - build & test
+name: CI - build & test
 
 on:
   push:
