@@ -16,6 +16,63 @@ on:
         required: true
 
 jobs:
+  verify_image_ecr:
+    name: Verify given image tag exists in ECR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.refspec }}
+          fetch-depth: 0
+      # - name: Install 1Password CLI
+      #   uses: 1password/install-cli-action@v1
+      # - name: Configure 1Password Service Account
+      #   uses: 1password/load-secrets-action/configure@v1
+      #   with:
+      #     service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+      - name: Load secret
+        id: op-load-secret
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          AWS_ACCESS_KEY_ID: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/AWS_ACCESS_KEY_ID
+          AWS_SECRET_ACCESS_KEY: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/AWS_SECRET_ACCESS_KEY
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+      - name: Retrieve AWS Account ID
+        id: aws_account_id
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          echo "::set-output name=account_id::${ACCOUNT_ID}"
+      - name: Check if ECR image exists
+        id: ecr_check
+        run: |
+          IMAGE_TAG=${{ inputs.docker_tag }}
+          REGION=$(aws configure get region)
+          ACCOUNT_ID=${{ steps.aws_account_id.outputs.account_id }}
+          ECR_REPO_NAME=passport
+          IMAGE_URI=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
+
+          if aws ecr describe-images --repository-name ${ECR_REPO_NAME} --image-ids imageTag=${IMAGE_TAG} > /dev/null 2>&1; then
+            echo "Image exists: ${IMAGE_URI}"
+            echo "::set-output name=image_exists::true"
+          else
+            echo "Image does not exist: ${IMAGE_URI}"
+            echo "::set-output name=image_exists::false"
+            exit 1
+          fi
+
   deploy_preview:
     name: Preview - Deploying AWS Infra
     runs-on: ubuntu-latest
