@@ -1,32 +1,36 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
-import { getIamSecrets } from "./iam_secrets";
+import * as op from "@1password/op-js";
 import { createAmplifyStakingApp } from "../lib/staking/app";
-
-// Secret was created manually in Oregon `us-west-2`
-const IAM_SERVER_SSM_ARN = `${process.env["IAM_SERVER_SSM_ARN"]}`;
-const PASSPORT_VC_SECRETS_ARN = `${process.env["PASSPORT_VC_SECRETS_ARN"]}`;
-
-const route53Domain = `${process.env["ROUTE_53_DOMAIN"]}`;
-const route53Zone = `${process.env["ROUTE_53_ZONE"]}`;
-const dockerGtcPassportIamImage = `${process.env["DOCKER_GTC_PASSPORT_IAM_IMAGE"]}`;
-
-const opSepoliaRpcUrl = `${process.env["STAKING_OP_SEPOLIA_RPC_URL"]}`;
-const opRpcUrl = `${process.env["STAKING_OP_RPC_URL"]}`;
-const mainnetRpcUrl = `${process.env["STAKING_MAINNET_RPC_URL"]}`;
-const arbitrumRpcUrl = `${process.env["STAKING_ARBITRUM_RPC_URL"]}`;
-const dataDogClientTokenReview = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_REVIEW"]}`;
-const dataDogClientTokenStaging = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_STAGING"]}`;
-const dataDogClientTokenProduction = `${process.env["STAKING_DATADOG_CLIENT_TOKEN_PRODUCTION"]}`;
-const cloudflareZoneId = `${process.env["CLOUDFLARE_ZONE_ID"]}`;
-
-const PROVISION_STAGING_FOR_LOADTEST = `${process.env["PROVISION_STAGING_FOR_LOADTEST"]}`.toLowerCase() === "true";
-const walletConnectProjectId = `${process.env["STAKING_WALLET_CONNECT_PROJECT_ID"]}`;
-const stakingIntercomAppId = `${process.env["STAKING_INTERCOM_APP_ID"]}`;
+import { secretsManager } from "infra-libs";
 
 const stack = pulumi.getStack();
-const region = aws.getRegion({});
-const regionId = region.then((r) => r.id);
+
+const current = aws.getCallerIdentity({});
+const regionData = aws.getRegion({});
+const DOCKER_IMAGE_TAG = `${process.env.DOCKER_IMAGE_TAG || ""}`;
+export const dockerGtcPassportIamImage = pulumi
+  .all([current, regionData])
+  .apply(([acc, region]) => `${acc.accountId}.dkr.ecr.${region.id}.amazonaws.com/passport:${DOCKER_IMAGE_TAG}`);
+
+const PROVISION_STAGING_FOR_LOADTEST =
+  op.read.parse(`op://DevOps/passport-${stack}-env/ci/PROVISION_STAGING_FOR_LOADTEST`).toLowerCase() === "true";
+
+const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
+
+const route53Domain = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_DOMAIN`);
+const route53Zone = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_ZONE`);
+const cloudflareZoneId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
+
+//////////////////////////////////////////////////////////////////////////////////////
+// TO BE MOVED TO STAKING APP
+
+const STAKING_APP_GITHUB_URL = op.read.parse(`op://DevOps/passport-${stack}-env/ci-staking/STAKING_APP_GITHUB_URL`);
+const STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY = op.read.parse(
+  `op://DevOps/passport-${stack}-secrets/ci-staking/STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY`
+);
+
+//////////////////////////////////////////////////////////////////////////////////////
 const coreInfraStack = new pulumi.StackReference(`gitcoin/core-infra/${stack}`);
 
 const vpcId = coreInfraStack.getOutput("vpcId");
@@ -37,7 +41,6 @@ const redisConnectionUrl = pulumi.interpolate`${coreInfraStack.getOutput("static
 const albDnsName = coreInfraStack.getOutput("coreAlbDns");
 const albZoneId = coreInfraStack.getOutput("coreAlbZoneId");
 const albHttpsListenerArn = coreInfraStack.getOutput("coreAlbHttpsListenerArn");
-// const albData = coreInfraStack.getOutput("coreAlbData");
 
 const passportDataScienceStack = new pulumi.StackReference(`gitcoin/passport-data/${stack}`);
 const passportDataScienceEndpoint = passportDataScienceStack.getOutput("internalAlbBaseUrl");
@@ -51,6 +54,75 @@ const defaultTags = {
 };
 
 const containerInsightsStatus = stack == "production" ? "enabled" : "disabled";
+
+const iamSecretObject = new aws.secretsmanager.Secret("iam-secret", {
+  name: "iam-secret",
+  description: "Secrets for Passport IAM",
+  tags: {
+    ...defaultTags,
+  },
+});
+
+const iamSecrets = secretsManager
+  .syncSecretsAndGetRefs({
+    vault: "DevOps",
+    repo: "passport",
+    env: stack,
+    section: "iam",
+    targetSecret: iamSecretObject,
+    secretVersionName: "passport-secret-version",
+  })
+  .apply((secretRefs) =>
+    [
+      ...secretRefs,
+      {
+        name: "IAM_JWK",
+        valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK::`,
+      },
+      {
+        name: "IAM_JWK_EIP712",
+        valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK_EIP712::`,
+      },
+    ].sort(secretsManager.sortByName)
+  );
+
+const iamEnvironment = pulumi
+  .all([
+    secretsManager.getEnvironmentVars({
+      vault: "DevOps",
+      repo: "passport",
+      env: stack,
+      section: "iam",
+    }),
+    redisConnectionUrl,
+    passportDataScienceEndpoint,
+  ])
+  .apply(([managedEnvVars, _redisConnectionUrl, passportDataScienceEndpoint]) =>
+    [
+      ...managedEnvVars,
+      {
+        name: "REDIS_URL",
+        value: _redisConnectionUrl,
+      },
+      {
+        name: "DATA_SCIENCE_API_URL",
+        value: passportDataScienceEndpoint,
+      },
+    ].sort(secretsManager.sortByName)
+  );
+
+const stakingEnvironment = secretsManager
+  .getEnvironmentVars({
+    vault: "DevOps",
+    repo: "passport",
+    env: stack,
+    section: "staking",
+  })
+  .reduce((acc, { name, value }) => {
+    acc[name] = value;
+    return acc;
+  }, {} as Record<string, string | pulumi.Output<any>>);
+
 const logsRetention = Object({
   review: 1,
   staging: 7,
@@ -90,69 +162,6 @@ const alarmConfigurations: AlarmConfigurations = {
   redisErrorPeriod: 1800, // period for redis logged errors, set to 30 min for now
 };
 
-const stakingEnvVars = Object({
-  review: {
-    NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.review.scorer.gitcoin.co/ceramic-cache",
-    NEXT_PUBLIC_SCORER_ENDPOINT: "https://api.review.scorer.gitcoin.co",
-    NEXT_PUBLIC_OP_SEPOLIA_RPC_URL: opSepoliaRpcUrl,
-    NEXT_PUBLIC_MAINNET_RPC_URL: mainnetRpcUrl,
-    NEXT_PUBLIC_OP_RPC_URL: opRpcUrl,
-    NEXT_PUBLIC_DATADOG_CLIENT_TOKEN: dataDogClientTokenReview,
-    NEXT_PUBLIC_DATADOG_SERVICE: "staking-app-review",
-    NEXT_PUBLIC_DATADOG_ENV: "review",
-    NEXT_PUBLIC_ENABLE_MAINNET: "on",
-    NEXT_PUBLIC_ENABLE_OP_MAINNET: "on",
-    NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "on",
-    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: walletConnectProjectId,
-    NEXT_PUBLIC_INTERCOM_APP_ID: stakingIntercomAppId,
-    NEXT_PUBLIC_ENABLE_ARBITRUM_MAINNET: "on",
-    NEXT_PUBLIC_ARBITRUM_RPC_URL: arbitrumRpcUrl,
-    NEXT_PUBLIC_GET_GTC_STAKE_API: "https://api.scorer.gitcoin.co/registry/gtc-stake/",
-    NEXT_PUBLIC_MAX_LEGACY_ROUND_ID: 7,    
-    NEXT_PUBLIC_GA_ID: "",
-  },
-  staging: {
-    NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.staging.scorer.gitcoin.co/ceramic-cache",
-    NEXT_PUBLIC_SCORER_ENDPOINT: "https://api.staging.scorer.gitcoin.co",
-    NEXT_PUBLIC_OP_SEPOLIA_RPC_URL: opSepoliaRpcUrl,
-    NEXT_PUBLIC_MAINNET_RPC_URL: mainnetRpcUrl,
-    NEXT_PUBLIC_OP_RPC_URL: opRpcUrl,
-    NEXT_PUBLIC_DATADOG_CLIENT_TOKEN: dataDogClientTokenStaging,
-    NEXT_PUBLIC_DATADOG_SERVICE: "staking-app-staging",
-    NEXT_PUBLIC_DATADOG_ENV: "staging",
-    NEXT_PUBLIC_ENABLE_MAINNET: "on",
-    NEXT_PUBLIC_ENABLE_OP_MAINNET: "on",
-    NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "on",
-    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: walletConnectProjectId,
-    NEXT_PUBLIC_INTERCOM_APP_ID: stakingIntercomAppId,
-    NEXT_PUBLIC_ENABLE_ARBITRUM_MAINNET: "on",
-    NEXT_PUBLIC_ARBITRUM_RPC_URL: arbitrumRpcUrl,
-    NEXT_PUBLIC_GET_GTC_STAKE_API: "https://api.scorer.gitcoin.co/registry/gtc-stake/",
-    NEXT_PUBLIC_MAX_LEGACY_ROUND_ID: 7,
-    NEXT_PUBLIC_GA_ID: "",
-  },
-  production: {
-    NEXT_PUBLIC_CERAMIC_CACHE_ENDPOINT: "https://api.scorer.gitcoin.co/ceramic-cache",
-    NEXT_PUBLIC_SCORER_ENDPOINT: "https://api.scorer.gitcoin.co",
-    NEXT_PUBLIC_OP_SEPOLIA_RPC_URL: opSepoliaRpcUrl,
-    NEXT_PUBLIC_MAINNET_RPC_URL: mainnetRpcUrl,
-    NEXT_PUBLIC_OP_RPC_URL: opRpcUrl,
-    NEXT_PUBLIC_DATADOG_CLIENT_TOKEN: dataDogClientTokenProduction,
-    NEXT_PUBLIC_DATADOG_SERVICE: "staking-app-prod",
-    NEXT_PUBLIC_DATADOG_ENV: "prod",
-    NEXT_PUBLIC_ENABLE_MAINNET: "on",
-    NEXT_PUBLIC_ENABLE_OP_MAINNET: "on",
-    NEXT_PUBLIC_ENABLE_OP_SEPOLIA: "off",
-    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: walletConnectProjectId,
-    NEXT_PUBLIC_INTERCOM_APP_ID: stakingIntercomAppId,
-    NEXT_PUBLIC_ENABLE_ARBITRUM_MAINNET: "on",
-    NEXT_PUBLIC_ARBITRUM_RPC_URL: arbitrumRpcUrl,
-    NEXT_PUBLIC_GET_GTC_STAKE_API: "https://api.scorer.gitcoin.co/registry/gtc-stake/",
-    NEXT_PUBLIC_MAX_LEGACY_ROUND_ID: 7,
-    NEXT_PUBLIC_GA_ID: "G-XHXGR14F2B",
-  },
-});
-
 const stakingBranches = Object({
   review: "main",
   staging: "staging-app",
@@ -181,16 +190,18 @@ const serviceRole = new aws.iam.Role("passport-ecs-role", {
   inlinePolicies: [
     {
       name: "allow_iam_secrets_access",
-      policy: JSON.stringify({
-        Version: "2012-10-17",
-        Statement: [
-          {
-            Action: ["secretsmanager:GetSecretValue"],
-            Effect: "Allow",
-            Resource: [IAM_SERVER_SSM_ARN, PASSPORT_VC_SECRETS_ARN],
-          },
-        ],
-      }),
+      policy: iamSecretObject.arn.apply((iamSecretArn) =>
+        JSON.stringify({
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Action: ["secretsmanager:GetSecretValue"],
+              Effect: "Allow",
+              Resource: [iamSecretArn, PASSPORT_VC_SECRETS_ARN],
+            },
+          ],
+        })
+      ),
     },
   ],
   managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"],
@@ -219,12 +230,6 @@ const albTargetGroup = new aws.lb.TargetGroup(`passport-iam`, {
   },
   port: 80,
   protocol: "HTTP",
-  // stickiness: { // is Stickiness required ?
-  //     type: "app_cookie",
-  //     cookieName: "gtc-passport",
-  //     cookieDuration: 86400,
-  //     enabled: true
-  // },
   targetType: "ip",
   tags: {
     ...defaultTags,
@@ -430,12 +435,12 @@ const moralisErrorAlarm = new aws.cloudwatch.MetricAlarm("moralisErrorsAlarm", {
 // ECS Task & Service
 //////////////////////////////////////////////////////////////
 const containerDefinitions = pulumi
-  .all([redisConnectionUrl, passportDataScienceEndpoint])
-  .apply(([_redisConnectionUrl, passportDataScienceEndpoint]) =>
-    JSON.stringify([
+  .all([dockerGtcPassportIamImage, iamSecrets, iamEnvironment])
+  .apply(([_dockerGtcPassportIamImage, secrets, environment]) => {
+    return JSON.stringify([
       {
         name: "iam",
-        image: dockerGtcPassportIamImage,
+        image: _dockerGtcPassportIamImage,
         cpu: serviceResources[stack]["cpu"],
         memory: serviceResources[stack]["memory"],
         links: [],
@@ -447,16 +452,6 @@ const containerDefinitions = pulumi
             protocol: "tcp",
           },
         ],
-        environment: [
-          {
-            name: "REDIS_URL",
-            value: _redisConnectionUrl,
-          },
-          {
-            name: "DATA_SCIENCE_API_URL",
-            value: passportDataScienceEndpoint,
-          },
-        ],
         logConfiguration: {
           logDriver: "awslogs",
           options: {
@@ -466,12 +461,13 @@ const containerDefinitions = pulumi
             "awslogs-stream-prefix": "iam",
           },
         },
-        secrets: getIamSecrets(PASSPORT_VC_SECRETS_ARN, IAM_SERVER_SSM_ARN),
         mountPoints: [],
         volumesFrom: [],
+        environment,
+        secrets,
       },
-    ])
-  );
+    ]);
+  });
 
 const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
   family: `passport-iam`,
@@ -557,14 +553,14 @@ const serviceRecord = new aws.route53.Record("passport-record", {
 
 const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((domainName) => {
   const stakingAppInfo = createAmplifyStakingApp(
-    `${process.env["STAKING_APP_GITHUB_URL"]}`,
-    `${process.env["STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY"]}`,
+    STAKING_APP_GITHUB_URL,
+    STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY,
     domainName,
     stack === "production" ? `passport.xyz` : "", // cloudflareDomain
     stack === "production" ? cloudflareZoneId : "", // cloudFlareZoneId
     "stake",
     stakingBranches[stack],
-    stakingEnvVars[stack],
+    stakingEnvironment,
     { ...defaultTags, Name: "staking-app" },
     false,
     "",

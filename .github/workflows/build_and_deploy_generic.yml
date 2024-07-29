@@ -1,35 +1,24 @@
-name: New Library - Build and Deploy to Review
+name: Library - Build and Deploy API - Generic
 
 on:
   workflow_call:
     inputs:
-      commit:
-        description: "Leave blank to use current HEAD, or provide an override commit SHA"
+      refspec:
+        description: "The commit SHA"
         type: string
-        required: false
+        required: True
+      docker_tag:
+        description: "Docker tag"
+        type: string
+        required: True
       environment:
         description: "Environment to deploy to"
         type: string
         required: true
 
 jobs:
-  ref:
-    name: Load Commit Ref
-    runs-on: ubuntu-latest
-    steps:
-      - id: ref
-        uses: passportxyz/gh-workflows/.github/actions/load_commit_ref@main
-        with:
-          commit: ${{ inputs.commit }}
-
-    outputs:
-      version_tag: ${{ steps.ref.outputs.version_tag }}
-      docker_tag: ${{ steps.ref.outputs.docker_tag }}
-      refspec: ${{ steps.ref.outputs.refspec }}
-
   docker:
     name: Build and push docker image
-    needs: [ref]
     runs-on: ubuntu-latest
     steps:
       - name: Load secret
@@ -44,10 +33,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/AWS_SECRET_ACCESS_KEY
 
       - id: build_and_push_docker_image
-        uses: passportxyz/gh-workflows/.github/actions/build_and_push@main
+        uses: passportxyz/gh-workflows/.github/actions/build_and_push@v1
         with:
-          refspec: ${{ needs.ref.outputs.refspec }}
-          docker_tag: ${{ needs.ref.outputs.docker_tag }}
+          refspec: ${{ inputs.refspec }}
+          docker_tag: ${{ inputs.docker_tag }}
           ecr_repository_name: passport
           aws_region: us-west-2
           aws_access_key_id: ${{ env.AWS_ACCESS_KEY_ID }}
@@ -57,13 +46,12 @@ jobs:
 
   deploy_preview:
     name: Preview - Deploying AWS Infra
-    needs: [ref, docker]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.ref.outputs.refspec }}
+          ref: ${{ inputs.refspec }}
           fetch-depth: 0
       - name: Install 1Password CLI
         uses: 1password/install-cli-action@v1
@@ -82,15 +70,16 @@ jobs:
           PULUMI_ACCESS_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
           CLOUDFLARE_API_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
       - name: Prepare to Deploy to AWS
-        uses: ./.github/actions/prepare_deploy_to_aws
+        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v1
       - name: Deploy Preview
-        uses: ./.github/actions/deploy_to_aws
+        # uses: ./.github/actions/deploy_to_aws
+        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
         with:
-          docker_tag: ${{ needs.ref.outputs.docker_tag }}
+          docker_tag: ${{ inputs.docker_tag }}
           stack_name: gitcoin/passport/${{ inputs.environment }}
           aws_region: us-west-2
           pulumi_command: preview
-          pulumi_diff: "true"
+          pulumi_diff: true
           AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
           PULUMI_ACCESS_TOKEN: ${{ env.PULUMI_ACCESS_TOKEN }}
@@ -99,23 +88,23 @@ jobs:
 
   deploy_confirm:
     name: Review Approval Pending
-    needs: [ref, deploy_preview]
+    needs: [docker, deploy_preview]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
       - name: Approve Release to Review (check pulumi preview)
         run: |
-          echo "Ref" ${{ needs.ref.outputs.refspec }}
+          echo "Ref" ${{ inputs.refspec }}
 
   deploy_backends:
     name: Deploying AWS Infra
-    needs: [ref, docker, deploy_preview, deploy_confirm]
+    needs: [docker, deploy_preview, deploy_confirm]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.ref.outputs.refspec }}
+          ref: ${{ inputs.refspec }}
           fetch-depth: 0
       - name: Install 1Password CLI
         uses: 1password/install-cli-action@v1
@@ -134,11 +123,11 @@ jobs:
           PULUMI_ACCESS_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
           CLOUDFLARE_API_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
       - name: Prepare to Deploy to AWS
-        uses: ./.github/actions/prepare_deploy_to_aws
-      - name: Deploy Review
-        uses: ./.github/actions/deploy_to_aws
+        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v1
+      - name: Deploy to AWS
+        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
         with:
-          docker_tag: ${{ needs.ref.outputs.docker_tag }}
+          docker_tag: ${{ inputs.docker_tag }}
           stack_name: gitcoin/passport/${{ inputs.environment }}
           pulumi_command: up
           aws_region: us-west-2

@@ -1,4 +1,5 @@
-name: Build and Deploy API to Staging
+name: Deploy UI to Production
+
 on:
   workflow_dispatch:
     inputs:
@@ -23,8 +24,6 @@ jobs:
       refspec: ${{ steps.ref.outputs.refspec }}
 
   run-tests:
-    name: Run Tests
-    needs: [ref]
     runs-on: ubuntu-latest
     # Run a local ceramic nod to test against
     services:
@@ -69,38 +68,21 @@ jobs:
         env:
           CERAMIC_CLIENT_URL: http://localhost:7007
 
-  check-provider-bitmap:
-    name: Check Provider Bitmaps
+  deploy-ui:
+    name: Deploy UI to Production - Push to Branch
     runs-on: ubuntu-latest
-    needs: [ref]
+    needs: [ref, run-tests]
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js 20
-        uses: actions/setup-node@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
-          node-version: 20.8
-          cache: "yarn"
-      - name: Install Packages
-        run: yarn install
-      - name: Load Secrets
-        id: op-load-secret
-        uses: 1password/load-secrets-action@v1
+          ref: ${{ needs.ref.outputs.refspec }}
+          fetch-depth: 0
+      - name: Push code to branch
+        uses: passportxyz/gh-workflows/.github/actions/push_to_branch@v1
         with:
-          export-env: true
-        env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          ALCHEMY_API_KEY: op://DevOps/passport-review-secrets/ci/ALCHEMY_API_KEY
-      - name: Check provider bitmaps
-        uses: ./.github/actions/check-provider-bitmaps
-        with:
-          ALCHEMY_API_KEY: ${{ env.ALCHEMY_API_KEY }}
-
-  deploy-api:
-    name: Deploy API to Staging
-    needs: [ref, run-tests, check-provider-bitmap]
-    uses: ./.github/workflows/build_and_deploy_generic.yml
-    with:
-      refspec: ${{ needs.ref.outputs.refspec }}
-      docker_tag: ${{ needs.ref.outputs.docker_tag }}
-      environment: staging
-    secrets: inherit
+          commit: ${{ needs.ref.outputs.refspec }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          branch: production-app

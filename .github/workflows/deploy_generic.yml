@@ -1,40 +1,75 @@
-name: New Library - Deploy only
+name: Library - Deploy API only - Generic
 on:
   workflow_call:
     inputs:
-      commit:
-        description: "Leave blank to use current HEAD, or provide an override commit SHA"
+      refspec:
+        description: "The commit SHA"
         type: string
-        required: false
+        required: True
+      docker_tag:
+        description: "Docker tag"
+        type: string
+        required: True
       environment:
         description: "Environment to deploy to"
         type: string
         required: true
 
 jobs:
-  ref:
-    name: Load Commit Ref
-    runs-on: ubuntu-latest
-    steps:
-      - id: ref
-        uses: ./.github/actions/load_commit_ref
-        with:
-          commit: ${{ inputs.commit }}
-
-    outputs:
-      version_tag: ${{ steps.ref.outputs.version_tag }}
-      docker_tag: ${{ steps.ref.outputs.sha_short }}
-      refspec: ${{ steps.ref.outputs.refspec }}
-
-  deploy_preview:
-    name: Preview - Deploying AWS Infra
-    needs: [ref]
+  verify_image_ecr:
+    name: Verify given image tag exists in ECR
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.ref.outputs.refspec }}
+          ref: ${{ inputs.refspec }}
+          fetch-depth: 0
+      # - name: Install 1Password CLI
+      #   uses: 1password/install-cli-action@v1
+      # - name: Configure 1Password Service Account
+      #   uses: 1password/load-secrets-action/configure@v1
+      #   with:
+      #     service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+      - name: Load secret
+        id: op-load-secret
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          AWS_ACCESS_KEY_ID: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/AWS_ACCESS_KEY_ID
+          AWS_SECRET_ACCESS_KEY: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/AWS_SECRET_ACCESS_KEY
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+
+      - name: Check if ECR image exists
+        id: ecr_check
+        shell: bash
+
+        run: |
+          IMAGE_TAG=${{ inputs.docker_tag }}
+          ECR_REPO_NAME=passport
+
+          aws ecr describe-images --repository-name ${ECR_REPO_NAME} --image-ids imageTag=${IMAGE_TAG}
+
+  deploy_preview:
+    name: Preview - Deploying AWS Infra
+    needs: [verify_image_ecr]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.refspec }}
           fetch-depth: 0
       - name: Install 1Password CLI
         uses: 1password/install-cli-action@v1
@@ -48,44 +83,45 @@ jobs:
         with:
           export-env: true
         env:
-          AWS_ACCESS_KEY_ID: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/AWS_ACCESS_KEY_ID
-          AWS_SECRET_ACCESS_KEY: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/AWS_SECRET_ACCESS_KEY
-          PULUMI_ACCESS_TOKEN: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/PULUMI_ACCESS_TOKEN
-          CLOUDFLARE_API_TOKEN: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/CLOUDFLARE_API_TOKEN
+          AWS_ACCESS_KEY_ID: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/AWS_ACCESS_KEY_ID
+          AWS_SECRET_ACCESS_KEY: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/AWS_SECRET_ACCESS_KEY
+          PULUMI_ACCESS_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
+          CLOUDFLARE_API_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
       - name: Prepare to Deploy to AWS
-        uses: ./.github/actions/prepare_deploy_to_aws
+        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v1
       - name: Preview Deploy
-        uses: ./.github/actions/deploy_to_aws
+        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
         with:
-          docker_tag: ${{ needs.ref.outputs.docker_tag }}
-          stack_name: gitcoin/scroll-badge-service/${{ inputs.environment }}
+          docker_tag: ${{ inputs.docker_tag }}
+          stack_name: gitcoin/passport/${{ inputs.environment }}
           aws_region: us-west-2
           pulumi_command: preview
           pulumi_diff: true
           AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
           PULUMI_ACCESS_TOKEN: ${{ env.PULUMI_ACCESS_TOKEN }}
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
 
   deploy_confirm:
     name: Review Approval Pending
-    needs: [ref, deploy_preview]
+    needs: [deploy_preview]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
       - name: Approve Release to Review (check pulumi preview)
         run: |
-          echo "Ref" ${{ needs.ref.outputs.refspec }}
+          echo "Ref" ${{ inputs.refspec }}
 
   deploy_backends:
     name: Deploying AWS Infra
-    needs: [ref, deploy_preview, deploy_confirm]
+    needs: [deploy_preview, deploy_confirm]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.ref.outputs.refspec }}
+          ref: ${{ inputs.refspec }}
           fetch-depth: 0
       - name: Install 1Password CLI
         uses: 1password/install-cli-action@v1
@@ -99,19 +135,21 @@ jobs:
         with:
           export-env: true
         env:
-          AWS_ACCESS_KEY_ID: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/AWS_ACCESS_KEY_ID
-          AWS_SECRET_ACCESS_KEY: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/AWS_SECRET_ACCESS_KEY
-          PULUMI_ACCESS_TOKEN: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/PULUMI_ACCESS_TOKEN
-          CLOUDFLARE_API_TOKEN: op://DevOps/passport-scroll-badge-service-${{ inputs.environment }}-secrets/service/CLOUDFLARE_API_TOKEN
+          AWS_ACCESS_KEY_ID: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/AWS_ACCESS_KEY_ID
+          AWS_SECRET_ACCESS_KEY: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/AWS_SECRET_ACCESS_KEY
+          PULUMI_ACCESS_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
+          CLOUDFLARE_API_TOKEN: op://DevOps/passport-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
       - name: Prepare to Deploy to AWS
-        uses: ./.github/actions/prepare_deploy_to_aws
-      - name: Deploy Review
-        uses: ./.github/actions/deploy_to_aws
+        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v1
+      - name: Deploy to AWS
+        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
         with:
-          docker_tag: ${{ needs.ref.outputs.docker_tag }}
-          stack_name: gitcoin/scroll-badge-service/${{ inputs.environment }}
+          docker_tag: ${{ inputs.docker_tag }}
+          stack_name: gitcoin/passport/${{ inputs.environment }}
           aws_region: us-west-2
+          pulumi_command: up
           AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
           PULUMI_ACCESS_TOKEN: ${{ env.PULUMI_ACCESS_TOKEN }}
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
