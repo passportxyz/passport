@@ -44,6 +44,7 @@ const {
   Outdid,
   AllowList,
   Binance,
+  Uber,
 } = stampPlatforms;
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -225,6 +226,13 @@ if (process.env.NEXT_PUBLIC_FF_BINANCE_STAMPS === "on") {
   platforms.set("Binance", {
     platform: new Binance.BinancePlatform(),
     platFormGroupSpec: Binance.ProviderConfig,
+  });
+}
+
+if (process.env.NEXT_PUBLIC_FF_UBER_STAMPS === "on") {
+  platforms.set("Uber", {
+    platform: new Uber.UberPlatform(),
+    platFormGroupSpec: Uber.ProviderConfig,
   });
 }
 
