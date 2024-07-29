@@ -56,12 +56,8 @@ jobs:
         shell: bash
 
         run: |
-          IMAGE_TAG=45940fcf
-          echo "IMAGE_TAG: ${IMAGE_TAG}"
-          ACCOUNT_ID==$(aws sts get-caller-identity --query Account --output text)
-          echo "ACCOUNT_ID: ${ACCOUNT_ID}"
+          IMAGE_TAG=${{ inputs.docker_tag }}
           ECR_REPO_NAME=passport
-          echo "ECR_REPO_NAME: ${ECR_REPO_NAME}"
 
           aws ecr describe-images --repository-name ${ECR_REPO_NAME} --image-ids imageTag=${IMAGE_TAG}
 
