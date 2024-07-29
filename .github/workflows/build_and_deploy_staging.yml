@@ -75,8 +75,6 @@ jobs:
     needs: [ref]
     steps:
       - uses: actions/checkout@v3
-      # - name: Error Message
-      #   run: echo "FAILS!! Check Optimism Onchain Provider Bitmaps"
       - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
@@ -84,10 +82,18 @@ jobs:
           cache: "yarn"
       - name: Install Packages
         run: yarn install
+      - name: Load Secrets
+        id: op-load-secret
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          ALCHEMY_API_KEY: op://DevOps/passport-review-secrets/ci/ALCHEMY_API_KEY
       - name: Check provider bitmaps
         uses: ./.github/actions/check-provider-bitmaps
         with:
-          ALCHEMY_API_KEY: op://DevOps/passport-staging-secrets/ci/ALCHEMY_API_KEY
+          ALCHEMY_API_KEY: ${{ env.ALCHEMY_API_KEY }}
 
   deploy-api:
     name: Deploy API to Staging

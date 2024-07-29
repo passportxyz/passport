@@ -81,10 +81,18 @@ jobs:
           cache: "yarn"
       - name: Install Packages
         run: yarn install
+      - name: Load Secrets
+        id: op-load-secret
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          ALCHEMY_API_KEY: op://DevOps/passport-review-secrets/ci/ALCHEMY_API_KEY
       - name: Check provider bitmaps
         uses: ./.github/actions/check-provider-bitmaps
         with:
-          ALCHEMY_API_KEY_OP: op://DevOps/passport-production-secrets/ci/ALCHEMY_API_KEY_OP
+          ALCHEMY_API_KEY: ${{ env.ALCHEMY_API_KEY }}
 
   deploy-api:
     name: Deploy API to Production
