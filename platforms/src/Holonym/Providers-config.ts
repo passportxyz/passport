@@ -13,8 +13,10 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Government ID",
-    providers: [{ title: "Proven uniqueness using Holonym with government ID", name: "HolonymGovIdProvider" }],
+    platformGroup: "Holonym KYC",
+    providers: [
+      { title: "Proven uniqueness using Holonym KYC with government ID or ePassport", name: "HolonymGovIdProvider" },
+    ],
   },
 ];
 
