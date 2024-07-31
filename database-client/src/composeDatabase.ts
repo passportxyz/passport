@@ -169,6 +169,8 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
   };
 
   addStamp = async (stamp: Stamp): Promise<SecondaryStorageAddResponse> => {
+    this.logger.info(`[ComposeDB][addStamp] ${this.did} adding stamp`);
+
     let vcID;
     const input = this.formatCredentialInput(stamp);
     const result = (await this.compose.executeQuery(
@@ -191,12 +193,13 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
         result.errors
       )}`;
 
-      console.error(`[ComposeDB] ${this.did} addStamp ${secondaryStorageError}`);
-      this.logger.error(`[ComposeDB] ${this.did} addStamp failed to add stamp`, { error: result.errors });
+      console.error(`[ComposeDB][addStamp] ${this.did} failed to add stamp ${secondaryStorageError}`);
+      this.logger.error(`[ComposeDB][addStamp] ${this.did} failed to add stamp`, { error: result.errors });
     } else {
       vcID = result?.data?.createGitcoinPassportStamp?.document?.id;
 
       if (vcID) {
+        this.logger.info(`[ComposeDB][addStamp] ${this.did} adding stamp wrapper`);
         const wrapperRequest = (await this.compose.executeQuery(
           `
             mutation CreateGitcoinStampWrapper($wrapperInput: CreateGitcoinPassportStampWrapperInput!) {
@@ -228,19 +231,19 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
           secondaryStorageError = `[ComposeDB] error thrown from mutation CreateGitcoinStampWrapper, vcID: ${vcID} error: ${JSON.stringify(
             wrapperRequest.errors
           )}`;
-          console.error(`[ComposeDB] ${this.did} addStamp ${secondaryStorageError}`);
-          this.logger.error(`[ComposeDB] ${this.did} addStamp failed to add stamp wrapper`, {
+          console.error(`[ComposeDB][addStamp] ${this.did} ${secondaryStorageError}`);
+          this.logger.error(`[ComposeDB][addStamp] ${this.did} failed to add stamp wrapper`, {
             error: wrapperRequest.errors,
           });
         } else if (!streamId) {
           secondaryStorageError = `[ComposeDB] For vcID: ${vcID} error: streamId=${streamId}`;
-          console.error(`[ComposeDB] ${this.did} addStamp ${secondaryStorageError}`);
-          this.logger.error(`[ComposeDB] ${this.did} addStamp ${secondaryStorageError}`);
+          console.error(`[ComposeDB][addStamp] ${this.did} ${secondaryStorageError}`);
+          this.logger.error(`[ComposeDB][addStamp] ${this.did} ${secondaryStorageError}`);
         }
       } else {
         secondaryStorageError = `[ComposeDB] error: streamId=${vcID}`;
-        console.error(`[ComposeDB] ${this.did} addStamp ${secondaryStorageError}`);
-        this.logger.error(`[ComposeDB] ${this.did} addStamp ${secondaryStorageError}`);
+        console.error(`[ComposeDB][addStamp] ${this.did} ${secondaryStorageError}`);
+        this.logger.error(`[ComposeDB][addStamp] ${this.did} ${secondaryStorageError}`);
       }
     }
 
@@ -266,6 +269,8 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
   };
 
   deleteStamp = async (streamId: string): Promise<SecondaryStorageDeleteResponse> => {
+    this.logger.info(`[ComposeDB][deleteStamp] ${this.did} deleting stamp`);
+
     const deleteRequest = (await this.compose.executeQuery(
       `
       mutation SoftDeleteGitcoinStampWrapper($updateInput: UpdateGitcoinPassportStampWrapperInput!) {
@@ -293,8 +298,8 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
     let secondaryStorageError: string | undefined;
     if (deleteRequest.errors) {
       secondaryStorageError = `[ComposeDB] ${JSON.stringify(deleteRequest.errors)} for vcID: ${streamId}`;
-      console.error(`[ComposeDB] ${this.did} deleteStamp error`, deleteRequest.errors);
-      this.logger.error(`[ComposeDB] ${this.did} deleteStamp error`, { error: deleteRequest.errors });
+      console.error(`[ComposeDB][deleteStamp] ${this.did} error`, deleteRequest.errors);
+      this.logger.error(`[ComposeDB][deleteStamp] ${this.did} error`, { error: deleteRequest.errors });
     }
 
     return {
