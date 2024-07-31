@@ -22,15 +22,6 @@ const route53Domain = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_
 const route53Zone = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_ZONE`);
 const cloudflareZoneId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
 
-//////////////////////////////////////////////////////////////////////////////////////
-// TO BE MOVED TO STAKING APP
-
-const STAKING_APP_GITHUB_URL = op.read.parse(`op://DevOps/passport-${stack}-env/ci-staking/STAKING_APP_GITHUB_URL`);
-const STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY = op.read.parse(
-  `op://DevOps/passport-${stack}-secrets/ci-staking/STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY`
-);
-
-//////////////////////////////////////////////////////////////////////////////////////
 const coreInfraStack = new pulumi.StackReference(`gitcoin/core-infra/${stack}`);
 
 const vpcId = coreInfraStack.getOutput("vpcId");
@@ -161,12 +152,6 @@ const alarmConfigurations: AlarmConfigurations = {
   redisErrorThreshold: 1, // threshold for redis logged errors
   redisErrorPeriod: 1800, // period for redis logged errors, set to 30 min for now
 };
-
-const stakingBranches = Object({
-  review: "main",
-  staging: "staging-app",
-  production: "production-app",
-});
 
 //////////////////////////////////////////////////////////////
 // Service IAM Role
@@ -551,22 +536,41 @@ const serviceRecord = new aws.route53.Record("passport-record", {
   ],
 });
 
-const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((domainName) => {
-  const stakingAppInfo = createAmplifyStakingApp(
-    STAKING_APP_GITHUB_URL,
-    STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY,
-    domainName,
-    stack === "production" ? `passport.xyz` : "", // cloudflareDomain
-    stack === "production" ? cloudflareZoneId : "", // cloudFlareZoneId
-    "stake",
-    stakingBranches[stack],
-    stakingEnvironment,
-    { ...defaultTags, Name: "staking-app" },
-    false,
-    "",
-    ""
-  );
-  return stakingAppInfo;
+const PASSPORT_APP_GITHUB_URL = op.read.parse(`op://DevOps/passport-${stack}-env/ci/PASSPORT_APP_GITHUB_URL`);
+const PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY = op.read.parse(
+  `op://DevOps/passport-${stack}-secrets/ci/PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY`
+);
+
+// const CLOUDFLARE_DOMAIN = stack === "production" ? `passport.xyz` : "";
+// const CLOUDFLARE_ZONE_ID = op.read.parse(
+//   // TODO: this should be moved to id-staking-v2-${stack}-env/ci/CLOUDFLARE_ZONE_ID
+//   `op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`
+// );
+
+const ROUTE53_PASSPORT_DOMAIN = Object({
+  review: "review.passport.gitcoin.co",
+  staging: "staging.passport.gitcoin.co",
+  production: "passport.gitcoin.co",
 });
 
-export const amplifyAppHookUrl = pulumi.secret(amplifyAppInfo.webHook.url);
+const stakingBranches = Object({
+  review: "main",
+  staging: "staging-app",
+  production: "production-app",
+});
+
+const stakingAppInfo = createAmplifyStakingApp(
+  PASSPORT_APP_GITHUB_URL,
+  PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY,
+  ROUTE53_PASSPORT_DOMAIN[stack],
+  stack === "production" ? `passport.xyz` : "", // cloudflareDomain
+  stack === "production" ? cloudflareZoneId : "", // cloudFlareZoneId
+  stakingBranches[stack],
+  stakingEnvironment,
+  { ...defaultTags, Name: "staking-app" },
+  false,
+  "",
+  ""
+);
+
+export const amplifyAppHookUrl = pulumi.secret(stakingAppInfo.webHook.url);

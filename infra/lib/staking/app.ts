@@ -11,7 +11,6 @@ export function createAmplifyStakingApp(
   domainName: string,
   cloudflareDomain: string,
   cloudflareZoneId: string,
-  prefix: string,
   branchName: string,
   environmentVariables: Input<{
     [key: string]: Input<string>;
@@ -21,10 +20,10 @@ export function createAmplifyStakingApp(
   username?: string,
   password?: string
 ): { app: aws.amplify.App; webHook: aws.amplify.Webhook } {
-  const name = `${prefix}.${domainName}`;
+  // const name = `${prefix}.${domainName}`;
 
-  const amplifyApp = new aws.amplify.App(name, {
-    name: name,
+  const amplifyApp = new aws.amplify.App(domainName, {
+    name: domainName,
     repository: githubUrl,
     oauthToken: githubAccessToken,
     platform: "WEB_COMPUTE",
@@ -69,18 +68,18 @@ applications:
     tags: tags,
   });
 
-  const branch = new aws.amplify.Branch(`${name}-${branchName}`, {
+  const branch = new aws.amplify.Branch(`${domainName}-${branchName}`, {
     appId: amplifyApp.id,
     branchName: branchName,
   });
 
-  const prodDomainAssociation = new aws.amplify.DomainAssociation(name, {
+  const prodDomainAssociation = new aws.amplify.DomainAssociation(domainName, {
     appId: amplifyApp.id,
     domainName: domainName,
     subDomains: [
       {
         branchName: branch.branchName,
-        prefix: prefix,
+        prefix: "",
       },
     ],
   });
@@ -94,7 +93,7 @@ applications:
       subDomains: [
         {
           branchName: branch.branchName,
-          prefix: prefix,
+          prefix: "",
         },
       ],
     });
@@ -102,38 +101,39 @@ applications:
 
     // Manage CloudFlare  Records
 
-    const certRecord = domainCert.apply((_cert) => {
-      const certDetails = _cert.split(" "); // Name Type Value
-      const certRecord = new cloudflare.Record("cloudflare-certificate-record", {
-        name: certDetails[0].replace(`.${cloudflareDomain}.`, ''), // remove the autocomplete domain
-        zoneId: cloudflareZoneId,
-        type: certDetails[1],
-        value: certDetails[2],
-        allowOverwrite: true,
-        comment: `Certificate for *.${cloudflareDomain}`
+    // TODO: use once we move to passport.xyz
+    // const certRecord = domainCert.apply((_cert) => {
+    //   const certDetails = _cert.split(" "); // Name Type Value
+    //   const certRecord = new cloudflare.Record("cloudflare-certificate-record", {
+    //     name: certDetails[0].replace(`.${cloudflareDomain}.`, ''), // remove the autocomplete domain
+    //     zoneId: cloudflareZoneId,
+    //     type: certDetails[1],
+    //     value: certDetails[2],
+    //     allowOverwrite: true,
+    //     comment: `Certificate for *.${cloudflareDomain}`
 
-        // ttl: 3600
-      });
-      return certRecord;
-    });
+    //     // ttl: 3600
+    //   });
+    //   return certRecord;
+    // });
 
-    cloudFlareDomainAssociation.subDomains.apply((_subDomains) => {
-      _subDomains.map((_subD) => {
-        const domainDetails = _subD.dnsRecord.split(" "); // Name Type Value
-        const record = new cloudflare.Record(`${domainDetails[0]}-record`, {
-          name: domainDetails[0],
-          zoneId: cloudflareZoneId,
-          type: domainDetails[1],
-          value: domainDetails[2],
-          allowOverwrite: true,
-          comment: `Points to AWS Amplify for stake V2 app`
-        });
-        return record;
-      });
-    });
+    // cloudFlareDomainAssociation.subDomains.apply((_subDomains) => {
+    //   _subDomains.map((_subD) => {
+    //     const domainDetails = _subD.dnsRecord.split(" "); // Name Type Value
+    //     const record = new cloudflare.Record(`${domainDetails[0]}-record`, {
+    //       name: domainDetails[0],
+    //       zoneId: cloudflareZoneId,
+    //       type: domainDetails[1],
+    //       value: domainDetails[2],
+    //       allowOverwrite: true,
+    //       comment: `Points to AWS Amplify for stake V2 app`
+    //     });
+    //     return record;
+    //   });
+    // });
   }
 
-  const webHook = new aws.amplify.Webhook(`${name}-${branchName}`, {
+  const webHook = new aws.amplify.Webhook(branchName, {
     appId: amplifyApp.id,
     branchName: branchName,
     description: `trigger build from branch ${branchName}`,
