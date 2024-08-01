@@ -33,17 +33,17 @@ applications:
       phases:
         preBuild:
           commands:
-            - yarn install
+            - npm install --g lerna@6.6.2 && lerna bootstrap && rm -rf ./node_modules/@tendermint
         build:
           commands:
-            - yarn run build
+            - cd app
+            - npm run build
       artifacts:
         baseDirectory: .next
         files:
           - '**/*'
       cache:
         paths:
-          - .next/cache/**/*
           - node_modules/**/*
     appRoot: app
 `,
@@ -57,6 +57,7 @@ applications:
     environmentVariables: {
       AMPLIFY_DIFF_DEPLOY: "false",
       AMPLIFY_MONOREPO_APP_ROOT: "app",
+      _CUSTOM_IMAGE: "node:20.11",
       ...environmentVariables,
     },
     enableBasicAuth: enableBasicAuth,
@@ -101,36 +102,36 @@ applications:
 
     // Manage CloudFlare  Records
 
-    // TODO: use once we move to passport.xyz
-    // const certRecord = domainCert.apply((_cert) => {
-    //   const certDetails = _cert.split(" "); // Name Type Value
-    //   const certRecord = new cloudflare.Record("cloudflare-certificate-record", {
-    //     name: certDetails[0].replace(`.${cloudflareDomain}.`, ''), // remove the autocomplete domain
-    //     zoneId: cloudflareZoneId,
-    //     type: certDetails[1],
-    //     value: certDetails[2],
-    //     allowOverwrite: true,
-    //     comment: `Certificate for *.${cloudflareDomain}`
+    // Passport XYZ
+    const certRecord = domainCert.apply((_cert) => {
+      const certDetails = _cert.split(" "); // Name Type Value
+      const certRecord = new cloudflare.Record("cloudflare-certificate-record", {
+        name: certDetails[0].replace(`.${cloudflareDomain}.`, ''), // remove the autocomplete domain
+        zoneId: cloudflareZoneId,
+        type: certDetails[1],
+        value: certDetails[2],
+        allowOverwrite: true,
+        comment: `Certificate for *.${cloudflareDomain}`
 
-    //     // ttl: 3600
-    //   });
-    //   return certRecord;
-    // });
+        // ttl: 3600
+      });
+      return certRecord;
+    });
 
-    // cloudFlareDomainAssociation.subDomains.apply((_subDomains) => {
-    //   _subDomains.map((_subD) => {
-    //     const domainDetails = _subD.dnsRecord.split(" "); // Name Type Value
-    //     const record = new cloudflare.Record(`${domainDetails[0]}-record`, {
-    //       name: domainDetails[0],
-    //       zoneId: cloudflareZoneId,
-    //       type: domainDetails[1],
-    //       value: domainDetails[2],
-    //       allowOverwrite: true,
-    //       comment: `Points to AWS Amplify for stake V2 app`
-    //     });
-    //     return record;
-    //   });
-    // });
+    cloudFlareDomainAssociation.subDomains.apply((_subDomains) => {
+      _subDomains.map((_subD) => {
+        const domainDetails = _subD.dnsRecord.split(" "); // Name Type Value
+        const record = new cloudflare.Record(`${domainDetails[0]}-record`, {
+          name: domainDetails[0],
+          zoneId: cloudflareZoneId,
+          type: domainDetails[1],
+          value: domainDetails[2],
+          allowOverwrite: true,
+          comment: `Points to AWS Amplify for stake V2 app`
+        });
+        return record;
+      });
+    });
   }
 
   const webHook = new aws.amplify.Webhook(branchName, {

@@ -102,12 +102,12 @@ const iamEnvironment = pulumi
     ].sort(secretsManager.sortByName)
   );
 
-const stakingEnvironment = secretsManager
+const passportEnvironment = secretsManager
   .getEnvironmentVars({
     vault: "DevOps",
     repo: "passport",
     env: stack,
-    section: "staking",
+    section: "app",
   })
   .reduce((acc, { name, value }) => {
     acc[name] = value;
@@ -541,36 +541,42 @@ const PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY = op.read.parse(
   `op://DevOps/passport-${stack}-secrets/ci/PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY`
 );
 
-// const CLOUDFLARE_DOMAIN = stack === "production" ? `passport.xyz` : "";
-// const CLOUDFLARE_ZONE_ID = op.read.parse(
-//   // TODO: this should be moved to id-staking-v2-${stack}-env/ci/CLOUDFLARE_ZONE_ID
-//   `op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`
-// );
+const CLOUDFLARE_DOMAIN = stack === "production" ? `passport.xyz` : "";
+const CLOUDFLARE_ZONE_ID = op.read.parse(
+  `op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`
+);
 
-const ROUTE53_PASSPORT_DOMAIN = Object({
-  review: "review.passport.gitcoin.co",
-  staging: "staging.passport.gitcoin.co",
-  production: "passport.gitcoin.co",
-});
 
-const stakingBranches = Object({
+// If we need to support gitcoinco domain this is needed
+// const ROUTE53_PASSPORT_DOMAIN = Object({
+//   review: "review.passport.gitcoin.co",
+//   staging: "staging.passport.gitcoin.co",
+//   production: "passport.gitcoin.co",
+// });
+
+const passportBranches = Object({
   review: "main",
   staging: "staging-app",
   production: "production-app",
 });
 
-const stakingAppInfo = createAmplifyStakingApp(
-  PASSPORT_APP_GITHUB_URL,
-  PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY,
-  ROUTE53_PASSPORT_DOMAIN[stack],
-  stack === "production" ? `passport.xyz` : "", // cloudflareDomain
-  stack === "production" ? cloudflareZoneId : "", // cloudFlareZoneId
-  stakingBranches[stack],
-  stakingEnvironment,
-  { ...defaultTags, Name: "staking-app" },
-  false,
-  "",
-  ""
-);
+const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((domainName) => {
+  const stakingAppInfo = createAmplifyStakingApp(
+    PASSPORT_APP_GITHUB_URL,
+    PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY,
+    // ROUTE53_PASSPORT_DOMAIN[stack],
+    domainName,
+    stack === "production" ? `passport.xyz` : "", // cloudflareDomain
+    stack === "production" ? cloudflareZoneId : "", // cloudFlareZoneId
+    passportBranches[stack],
+    stakingEnvironment,
+    { ...defaultTags, Name: "staking-app" },
+    false,
+    "",
+    ""
+  );
+  return stakingAppInfo;
+});
 
-export const amplifyAppHookUrl = pulumi.secret(stakingAppInfo.webHook.url);
+
+export const amplifyAppHookUrl = pulumi.secret(amplifyAppInfo.webHook.url);
