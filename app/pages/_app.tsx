@@ -141,8 +141,8 @@ function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <link rel="shortcut icon" href="/favicon.ico" />
-        <title>Gitcoin Passport</title>
+        <link rel="shortcut icon" href="/favicon.png" />
+        <title>Passport XYZ</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
       </Head>
       <QueryClientProvider client={queryClient}>

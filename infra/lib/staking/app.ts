@@ -5,7 +5,7 @@ import * as std from "@pulumi/std";
 import * as cloudflare from "@pulumi/cloudflare";
 import * as github from "@pulumi/github";
 
-export function createAmplifyStakingApp(
+export function createAmplifyApp(
   githubUrl: string,
   githubAccessToken: string,
   domainName: string,
@@ -17,28 +17,30 @@ export function createAmplifyStakingApp(
   }>,
   tags: { [key: string]: string },
   enableBasicAuth: boolean,
+  prefix: string,
   username?: string,
   password?: string
 ): { app: aws.amplify.App; webHook: aws.amplify.Webhook } {
-  // const name = `${prefix}.${domainName}`;
+  const name = `${prefix}.${domainName}`;
 
-  const amplifyApp = new aws.amplify.App(domainName, {
-    name: domainName,
+  const amplifyApp = new aws.amplify.App(name, {
+    name,
     repository: githubUrl,
     oauthToken: githubAccessToken,
     platform: "WEB_COMPUTE",
     buildSpec: `version: 1
 applications:
   - frontend:
+      buildPath: /
       phases:
         preBuild:
           commands:
-            - cd ../
-            - npm install --g lerna@6.6.2 && lerna bootstrap && rm -rf ./node_modules/@tendermint
-            - cd app
+            - nvm use 20.9.0
+            - yarn
+            - rm -rf ./node_modules/@tendermint
         build:
           commands:
-            - npm run build
+            - yarn build
       artifacts:
         baseDirectory: app/out
         files:
@@ -48,7 +50,7 @@ applications:
           - .next/cache/**/*
           - node_modules/**/*
     appRoot: app
-`,
+    `,
     customRules: [
       {
         source: "/<*>",
@@ -59,30 +61,34 @@ applications:
     environmentVariables: {
       AMPLIFY_DIFF_DEPLOY: "false",
       AMPLIFY_MONOREPO_APP_ROOT: "app",
-      _CUSTOM_IMAGE: "node:20.11",
       ...environmentVariables,
     },
     enableBasicAuth: enableBasicAuth,
-    basicAuthCredentials: std
-      .base64encode({
-        input: `${username}:${password}`,
-      })
-      .then((invoke) => invoke.result),
     tags: tags,
-  });
+    }, { protect: true }
+  );
 
   const branch = new aws.amplify.Branch(`${domainName}-${branchName}`, {
     appId: amplifyApp.id,
     branchName: branchName,
+    displayName: branchName,
+    ttl: "5",
   });
 
-  const prodDomainAssociation = new aws.amplify.DomainAssociation(domainName, {
+  const webHook = new aws.amplify.Webhook(branchName, {
+    appId: amplifyApp.id,
+    branchName: branchName,
+    description: `trigger build from branch ${branchName}`,
+  });
+
+
+  const prodDomainAssociation = new aws.amplify.DomainAssociation(name, {
     appId: amplifyApp.id,
     domainName: domainName,
     subDomains: [
       {
         branchName: branch.branchName,
-        prefix: "",
+        prefix,
       },
     ],
   });
@@ -96,7 +102,7 @@ applications:
       subDomains: [
         {
           branchName: branch.branchName,
-          prefix: "",
+          prefix,
         },
       ],
     });
@@ -129,18 +135,12 @@ applications:
           type: domainDetails[1],
           value: domainDetails[2],
           allowOverwrite: true,
-          comment: `Points to AWS Amplify for stake V2 app`
+          comment: `Points to AWS Amplify for passport dashboard app`
         });
         return record;
       });
     });
   }
-
-  const webHook = new aws.amplify.Webhook(branchName, {
-    appId: amplifyApp.id,
-    branchName: branchName,
-    description: `trigger build from branch ${branchName}`,
-  });
 
   // Note!!!: at the moment this step is done manually & it is required to be configured only once / repository / environment
   //   - To be improved: investigate & automate github webhook creation

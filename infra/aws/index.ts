@@ -1,7 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as op from "@1password/op-js";
-import { createAmplifyStakingApp } from "../lib/staking/app";
+import { createAmplifyApp } from "../lib/staking/app";
 import { secretsManager } from "infra-libs";
 
 const stack = pulumi.getStack();
@@ -561,17 +561,18 @@ const passportBranches = Object({
 });
 
 const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((domainName) => {
-  const stakingAppInfo = createAmplifyStakingApp(
+  const prefix = 'app';
+  const stakingAppInfo = createAmplifyApp(
     PASSPORT_APP_GITHUB_URL,
     PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY,
-    // ROUTE53_PASSPORT_DOMAIN[stack],
     domainName,
-    stack === "production" ? `passport.xyz` : "", // cloudflareDomain
-    stack === "production" ? cloudflareZoneId : "", // cloudFlareZoneId
+    CLOUDFLARE_DOMAIN, // cloudflareDomain
+    CLOUDFLARE_ZONE_ID, // cloudFlareZoneId
     passportBranches[stack],
-    stakingEnvironment,
-    { ...defaultTags, Name: "staking-app" },
+    passportEnvironment,
+    { ...defaultTags, Name: `${prefix}.${domainName}` },
     false,
+    prefix,
     "",
     ""
   );
