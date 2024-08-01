@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
-  output: "export",
   exportPathMap: function () {
     return {
       "/": { page: "/" },

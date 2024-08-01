@@ -42,7 +42,7 @@ applications:
           commands:
             - yarn build
       artifacts:
-        baseDirectory: app/out
+        baseDirectory: app/.next
         files:
           - '**/*'
       cache:
