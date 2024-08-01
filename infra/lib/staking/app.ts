@@ -33,17 +33,19 @@ applications:
       phases:
         preBuild:
           commands:
+            - cd ../
             - npm install --g lerna@6.6.2 && lerna bootstrap && rm -rf ./node_modules/@tendermint
+            - cd app
         build:
           commands:
-            - cd app
             - npm run build
       artifacts:
-        baseDirectory: .next
+        baseDirectory: app/out
         files:
           - '**/*'
       cache:
         paths:
+          - .next/cache/**/*
           - node_modules/**/*
     appRoot: app
 `,
