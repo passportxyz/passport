@@ -36,8 +36,8 @@ applications:
         preBuild:
           commands:
             - nvm use 20.9.0
-            - yarn nuke
             - yarn install --frozen-lockfile
+            - yarn nuke
             - rm -rf ./node_modules/@tendermint
         build:
           commands:
