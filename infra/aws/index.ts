@@ -1,7 +1,6 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as op from "@1password/op-js";
-import { createAmplifyStakingApp } from "../lib/staking/app";
 import { secretsManager } from "infra-libs";
 
 const stack = pulumi.getStack();
@@ -20,17 +19,7 @@ const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-${stack}-env
 
 const route53Domain = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_DOMAIN`);
 const route53Zone = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_ZONE`);
-const cloudflareZoneId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
 
-//////////////////////////////////////////////////////////////////////////////////////
-// TO BE MOVED TO STAKING APP
-
-const STAKING_APP_GITHUB_URL = op.read.parse(`op://DevOps/passport-${stack}-env/ci-staking/STAKING_APP_GITHUB_URL`);
-const STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY = op.read.parse(
-  `op://DevOps/passport-${stack}-secrets/ci-staking/STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY`
-);
-
-//////////////////////////////////////////////////////////////////////////////////////
 const coreInfraStack = new pulumi.StackReference(`gitcoin/core-infra/${stack}`);
 
 const vpcId = coreInfraStack.getOutput("vpcId");
@@ -550,23 +539,3 @@ const serviceRecord = new aws.route53.Record("passport-record", {
     },
   ],
 });
-
-const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((domainName) => {
-  const stakingAppInfo = createAmplifyStakingApp(
-    STAKING_APP_GITHUB_URL,
-    STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY,
-    domainName,
-    stack === "production" ? `passport.xyz` : "", // cloudflareDomain
-    stack === "production" ? cloudflareZoneId : "", // cloudFlareZoneId
-    "stake",
-    stakingBranches[stack],
-    stakingEnvironment,
-    { ...defaultTags, Name: "staking-app" },
-    false,
-    "",
-    ""
-  );
-  return stakingAppInfo;
-});
-
-export const amplifyAppHookUrl = pulumi.secret(amplifyAppInfo.webHook.url);
