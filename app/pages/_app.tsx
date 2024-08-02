@@ -28,19 +28,19 @@ import Head from "next/head";
 
 // const queryClient = new QueryClient();
 
-// const RenderOnlyOnClient = ({ children }: { children: React.ReactNode }) => {
-//   const [isMounted, setIsMounted] = React.useState(false);
+const RenderOnlyOnClient = ({ children }: { children: React.ReactNode }) => {
+  const [isMounted, setIsMounted] = React.useState(false);
 
-//   useEffect(() => {
-//     setIsMounted(true);
-//   }, []);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-//   if (!isMounted) {
-//     return <h1>Yo</h1>;
-//   }
+  if (!isMounted) {
+    return <h1>Server</h1>;
+  }
 
-//   return <>{children}</>;
-// };
+  return <>{children}</>;
+};
 
 // Type definition for the window object
 declare global {
@@ -138,7 +138,7 @@ function App({ Component, pageProps }: AppProps) {
   //   }
   // }
 
-  console.log(process.env);
+  console.log(process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK, "NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK", process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID, "NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID")
   return (
     <>
       <Head>
@@ -146,7 +146,11 @@ function App({ Component, pageProps }: AppProps) {
         <title>Passport XYZ</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
       </Head>
-      BOdy
+      <>
+       <RenderOnlyOnClient>
+          <h1>Client</h1>
+       </RenderOnlyOnClient>
+      </>
       {/* <QueryClientProvider client={queryClient}>
         <SelfIdProvider client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}>
           <DatastoreConnectionContextProvider>
