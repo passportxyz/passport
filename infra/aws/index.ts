@@ -555,7 +555,7 @@ const CLOUDFLARE_ZONE_ID = op.read.parse(
 // });
 
 const passportBranches = Object({
-  review: "main",
+  review: "2730-amplify-mgration",
   staging: "staging-app",
   production: "production-app",
 });

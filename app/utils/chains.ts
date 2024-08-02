@@ -66,15 +66,15 @@ export class Chain {
 }
 
 const chainConfigs: ChainConfig[] = [
-  {
-    id: "0x1",
-    token: "ETH",
-    label: "Ethereum Mainnet",
-    rpcUrl: MAINNET_RPC_URL,
-    icon: "./assets/eth-network-logo.svg",
-    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
-    explorerUrl: "https://etherscan.io",
-  },
+  // {
+  //   id: "0x1",
+  //   token: "ETH",
+  //   label: "Ethereum Mainnet",
+  //   rpcUrl: MAINNET_RPC_URL,
+  //   icon: "./assets/eth-network-logo.svg",
+  //   chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
+  //   explorerUrl: "https://etherscan.io",
+  // },
 ];
 
 const usingTestEnvironment = process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on" || TEST_MODE;

@@ -40,6 +40,11 @@ applications:
             - rm -rf ./node_modules/@tendermint
         build:
           commands:
+            - env | grep -e NEXT_PUBLIC_ >> app/.env
+            - mkdir app/.next
+            - env | grep -e NEXT_PUBLIC_ >> app/.next/.env
+            - cat app/.env
+            - cat app/.next/.env
             - yarn build
       artifacts:
         baseDirectory: app/.next
