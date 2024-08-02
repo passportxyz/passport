@@ -197,7 +197,7 @@ export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) 
   const { notifications } = useNotifications();
   const hasNotifications = notifications.length > 0;
   return (
-    <div className="w-full flex justify-end z-20">
+    <div className="flex justify-end z-20">
       <Popover className="relative">
         <>
           <Popover.Button className="ml-auto p-6" data-testid="notification-bell">
