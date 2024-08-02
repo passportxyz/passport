@@ -139,7 +139,7 @@ function App({ Component, pageProps }: AppProps) {
   }
 
   console.log(process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK, "NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK", process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID, "NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID")
-  debugger
+
   return (
     <>
       <Head>
