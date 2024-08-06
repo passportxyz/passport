@@ -1,26 +1,28 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
 import { OutdidProvider } from "./Providers/outdid";
- 
+
 export const PlatformDetails: PlatformSpec = {
-    icon: "./assets/outdidStampIcon.svg",
-    platform: "Outdid",
-    name: "Outdid",
-    description: "Outdid's free ZK ID verification brings a strong sybil signal with complete privacy and anonymity.",
-    connectMessage: "Connect Account",
-    website: "https://outdid.io/",
+  icon: "./assets/outdidStampIcon.svg",
+  platform: "Outdid",
+  name: "Outdid",
+  description: "Outdid's free ZK ID verification brings a strong sybil signal with complete privacy and anonymity.",
+  connectMessage: "Connect Account",
+  website: "https://outdid.io/",
 };
-    
+
 export const ProviderConfig: PlatformGroupSpec[] = [
-    {
-    platformGroup: "Name of the Stamp platform group",
+  {
+    platformGroup: "ZK Passport",
     providers: [
-        {
-            title: "ZK-prove your identity with Outdid",
-            description: "Outdid uses zero-knowledge cryptography to ensure you are a unique human without revealing any personal information.",
-            name: "Outdid",
-        },
-    ]
-    },
+      {
+        title: "ZK-prove your identity with Outdid",
+        description:
+          "Outdid uses zero-knowledge cryptography to ensure you are a unique human without revealing any personal information.",
+        name: "Outdid",
+      },
+    ],
+  },
 ];
- 
-export const providers: Provider[] = [new OutdidProvider()]
+
+export const providers: Provider[] = [new OutdidProvider()];
+
