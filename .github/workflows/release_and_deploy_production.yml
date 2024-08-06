@@ -93,7 +93,7 @@ jobs:
       - name: Check provider bitmaps
         uses: ./.github/actions/check-provider-bitmaps
         with:
-          ALCHEMY_API_KEY_OP: ${{env.ALCHEMY_API_KEY}}
+          ALCHEMY_API_KEY: ${{env.ALCHEMY_API_KEY}}
 
   create-draft-release:
     name: Create Draft Release
