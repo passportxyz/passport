@@ -1,7 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as op from "@1password/op-js";
-import { createAmplifyApp } from "../lib/staking/app";
+import { createAmplifyApp } from "../lib/amplify/app";
 import { secretsManager } from "infra-libs";
 
 const stack = pulumi.getStack();
@@ -552,7 +552,7 @@ const CLOUDFLARE_ZONE_ID = op.read.parse(`op://DevOps/passport-${stack}-env/ci/C
 // });
 
 const passportBranches = Object({
-  review: "2730-amplify-mgration",
+  review: "review-app",
   staging: "staging-app",
   production: "production-app",
 });
@@ -565,11 +565,11 @@ const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((doma
     domainName,
     CLOUDFLARE_DOMAIN, // cloudflareDomain
     CLOUDFLARE_ZONE_ID, // cloudFlareZoneId
+    prefix,
     passportBranches[stack],
     passportEnvironment,
     { ...defaultTags, Name: `${prefix}.${domainName}` },
     false,
-    prefix,
     "",
     ""
   );
