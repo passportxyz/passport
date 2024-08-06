@@ -27,32 +27,23 @@ export function createAmplifyApp(
     name,
     repository: githubUrl,
     oauthToken: githubAccessToken,
-    platform: "WEB_COMPUTE",
+    platform: "WEB",
     buildSpec: `version: 1
 applications:
   - frontend:
-      buildPath: /
       phases:
         preBuild:
           commands:
             - nvm use 20.9.0
-            - yarn install --frozen-lockfile
-            - rm -rf ./node_modules/@tendermint
         build:
           commands:
-            - env | grep -e NEXT_PUBLIC_ >> app/.env
-            - mkdir app/.next
-            - env | grep -e NEXT_PUBLIC_ >> app/.next/.env
-            - cat app/.env
-            - cat app/.next/.env
-            - yarn build
+            - npm install --g lerna@6.6.2 && lerna bootstrap && rm -rf ../node_modules/@tendermint && npm run build
       artifacts:
-        baseDirectory: app/.next
+        baseDirectory: out
         files:
           - '**/*'
       cache:
         paths:
-          - .next/cache/**/*
           - node_modules/**/*
     appRoot: app
     `,
