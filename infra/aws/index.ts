@@ -1,6 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as op from "@1password/op-js";
+import { createAmplifyApp } from "../lib/staking/app";
 import { secretsManager } from "infra-libs";
 
 const stack = pulumi.getStack();
@@ -19,6 +20,7 @@ const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-${stack}-env
 
 const route53Domain = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_DOMAIN`);
 const route53Zone = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_ZONE`);
+const cloudflareZoneId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
 
 const coreInfraStack = new pulumi.StackReference(`gitcoin/core-infra/${stack}`);
 
@@ -100,12 +102,12 @@ const iamEnvironment = pulumi
     ].sort(secretsManager.sortByName)
   );
 
-const stakingEnvironment = secretsManager
+const passportEnvironment = secretsManager
   .getEnvironmentVars({
     vault: "DevOps",
     repo: "passport",
     env: stack,
-    section: "staking",
+    section: "app",
   })
   .reduce((acc, { name, value }) => {
     acc[name] = value;
@@ -150,12 +152,6 @@ const alarmConfigurations: AlarmConfigurations = {
   redisErrorThreshold: 1, // threshold for redis logged errors
   redisErrorPeriod: 1800, // period for redis logged errors, set to 30 min for now
 };
-
-const stakingBranches = Object({
-  review: "main",
-  staging: "staging-app",
-  production: "production-app",
-});
 
 //////////////////////////////////////////////////////////////
 // Service IAM Role
@@ -539,3 +535,45 @@ const serviceRecord = new aws.route53.Record("passport-record", {
     },
   ],
 });
+
+const PASSPORT_APP_GITHUB_URL = op.read.parse(`op://DevOps/passport-${stack}-env/ci/PASSPORT_APP_GITHUB_URL`);
+const PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY = op.read.parse(
+  `op://DevOps/passport-${stack}-secrets/ci/PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY`
+);
+
+const CLOUDFLARE_DOMAIN = stack === "production" ? `passport.xyz` : "";
+const CLOUDFLARE_ZONE_ID = op.read.parse(`op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
+
+// If we need to support gitcoinco domain this is needed
+// const ROUTE53_PASSPORT_DOMAIN = Object({
+//   review: "review.passport.gitcoin.co",
+//   staging: "staging.passport.gitcoin.co",
+//   production: "passport.gitcoin.co",
+// });
+
+const passportBranches = Object({
+  review: "2730-amplify-mgration",
+  staging: "staging-app",
+  production: "production-app",
+});
+
+const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((domainName) => {
+  const prefix = "app";
+  const stakingAppInfo = createAmplifyApp(
+    PASSPORT_APP_GITHUB_URL,
+    PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY,
+    domainName,
+    CLOUDFLARE_DOMAIN, // cloudflareDomain
+    CLOUDFLARE_ZONE_ID, // cloudFlareZoneId
+    passportBranches[stack],
+    passportEnvironment,
+    { ...defaultTags, Name: `${prefix}.${domainName}` },
+    false,
+    prefix,
+    "",
+    ""
+  );
+  return stakingAppInfo;
+});
+
+export const amplifyAppHookUrl = pulumi.secret(amplifyAppInfo.webHook.url);
