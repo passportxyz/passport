@@ -49,8 +49,8 @@ applications:
     `,
     customRules: [
       {
-        source: "/<*>",
-        status: "404",
+        source: "/",
+        status: "200",
         target: "/index.html",
       },
     ],
