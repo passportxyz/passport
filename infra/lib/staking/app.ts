@@ -27,24 +27,23 @@ export function createAmplifyStakingApp(
     name: name,
     repository: githubUrl,
     oauthToken: githubAccessToken,
-    platform: "WEB_COMPUTE",
+    platform: "WEB",
     buildSpec: `version: 1
 applications:
   - frontend:
       phases:
         preBuild:
           commands:
-            - yarn install
+            - nvm use 20.9.0
         build:
           commands:
-            - yarn run build
+            - npm install --g lerna@6.6.2 && lerna bootstrap && rm -rf ../node_modules/@tendermint && npm run build
       artifacts:
-        baseDirectory: .next
+        baseDirectory: out
         files:
           - '**/*'
       cache:
         paths:
-          - .next/cache/**/*
           - node_modules/**/*
     appRoot: app
 `,
