@@ -12,8 +12,8 @@ export class HolonymPlatform implements Platform {
     content: (
       <ul style={{ listStyleType: "disc", paddingLeft: "20px" }}>
         <li>
-          Have a smartphone, valid ID, and an Ethereum wallet with $0 (ePassport) or ~$10 in ETH or AVAX for Government
-          ID.
+          Have a smartphone, valid ID, and an Ethereum wallet with $0 (ePassport) or $0-$5 in ETH (mainnet, OP, or
+          Aurora), AVAX, or FTM for Government ID.
         </li>
         <li>
           Go to <Hyperlink href="https://holonym.id">Holonym's page</Hyperlink>, verify your ID by connecting your
