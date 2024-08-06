@@ -552,7 +552,7 @@ const CLOUDFLARE_ZONE_ID = op.read.parse(`op://DevOps/passport-${stack}-env/ci/C
 // });
 
 const passportBranches = Object({
-  review: "review-app",
+  review: "main",
   staging: "staging-app",
   production: "production-app",
 });
