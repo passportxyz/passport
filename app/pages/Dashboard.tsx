@@ -84,7 +84,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (customization.key !== DEFAULT_CUSTOMIZATION_KEY) {
-      document.title = `Gitcoin Passport | ${
+      document.title = `Passport XYZ | ${
         customization.key.charAt(0).toUpperCase() + customization.key.slice(1)
       } Dashboard`;
       TagManager.dataLayer({
@@ -93,7 +93,7 @@ export default function Dashboard() {
         },
       });
     } else {
-      document.title = `Gitcoin Passport | Dashboard`;
+      document.title = `Passport XYZ | Dashboard`;
       TagManager.dataLayer({
         dataLayer: {
           event: "default-dashboard-view",

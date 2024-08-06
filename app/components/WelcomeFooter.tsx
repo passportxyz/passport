@@ -66,7 +66,7 @@ const WelcomeFooter = ({ displayPrivacyPolicy, fixed }: { displayPrivacyPolicy: 
           Learn More
         </a>
         <a href="https://scorer.gitcoin.co/" className="hover:underline px-2">
-          Gitcoin Passport Scorer
+          Passport XYZ Scorer
         </a>
         <div className="flex items-end justify-end flex-wrap">
           <div className="px-2">

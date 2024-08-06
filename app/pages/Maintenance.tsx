@@ -28,7 +28,7 @@ export default function Maintenance() {
             className="col-span-2 w-full max-w-md lg:col-start-1 lg:row-span-6 lg:mr-8 lg:max-w-2xl"
           />
           <div className="col-span-2 max-w-md text-lg lg:max-w-sm">
-            Gitcoin Passport is currently down for scheduled maintenance. Please check back again as we will be back up
+            Passport XYZ is currently down for scheduled maintenance. Please check back again as we will be back up
             shortly. For more information, check{" "}
             <Hyperlink href="https://twitter.com/gitcoinpassport">@GitcoinPassport</Hyperlink> for updates.
           </div>
