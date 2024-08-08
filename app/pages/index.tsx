@@ -28,7 +28,7 @@ datadogRum.init({
   env: process.env.NEXT_PUBLIC_DATADOG_ENV || "",
   // Specify a version number to identify the deployed version of your application in Datadog
   // version: '1.0.0',
-  sampleRate: 100,
+  sampleRate: Number.parseInt(`${process.env.NEXT_PUBLIC_DATADOG_SAMPLE_RATE}`) || 0,
   premiumSampleRate: 0,
   trackInteractions: true,
   defaultPrivacyLevel: "mask-user-input",
