@@ -16,7 +16,7 @@ export class OutdidPlatform extends Platform {
         To get the Stamp:
         <br className="mb-1" />
         <ol>
-          <li className="mt-1">Step 1: Click the button below &ldquo;Get Stamp&rdquo;</li>
+          <li className="mt-1">Step 1: Click the button below &ldquo;Verify&rdquo;</li>
           <li className="mt-1">
             Step 2: Select the country of your identity document and the type of document (eg. Germany, passport)
           </li>
