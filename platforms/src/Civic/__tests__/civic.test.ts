@@ -24,7 +24,7 @@ const dummyPass: CivicPassLookupPass = {
   expiry: now + expirySeconds,
   state: "ACTIVE",
   type: {
-    slotId: 0,
+    slotId: "0x00",
     address: userAddress,
   },
   identifier: "0x456",
