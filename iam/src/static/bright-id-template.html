@@ -1,3 +1,7 @@
+<meta
+  http-equiv="Content-Security-Policy"
+  content="script-src 'self' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+/>
 <script src="https://cdn.tailwindcss.com"></script>
 <div class="px-8 pb-4 text-gray-500">
   <div>
@@ -348,8 +352,8 @@
         </p>
         <div class="mb-10 w-full justify-center object-center p-4">
           <button
+            id="button-sponsor-brightid"
             data-testid="button-sponsor-brightid"
-            onclick="initiateCallBack()"
             class="float-right mx-auto rounded-md bg-purple-900 py-2 px-2 text-white"
           >
             <span>Connect Bright ID</span>
@@ -364,31 +368,5 @@
     crossorigin="anonymous"
     referrerpolicy="no-referrer"
   ></script>
-  <script>
-    function initiateCallBack() {
-      const queryString = new URLSearchParams(window?.location?.search);
-      const callback = queryString.get("callback");
-      window.location.replace(
-        callback + "?error=false&code=null&state=brightid",
-      );
-    }
-
-    // Get User Did from URL
-    const queryString = new URLSearchParams(window?.location?.search);
-    const userDid = queryString.get("userDid");
-
-    // Generate QR Code
-    const qrcode = new QRCode(document.getElementById("brightid-qrcode"), {
-      text: `brightid://link-verification/http:%2f%2fnode.brightid.org/Gitcoin/${userDid}`,
-      width: 256,
-      height: 256,
-      colorDark: "#000000",
-      colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.H,
-    });
-
-    // Generate BrightId Link and append to anchor tag
-    const brightIdLink = document.getElementById("bright-id-link");
-    brightIdLink.href = `https://app.brightid.org/link-verification/http:%2f%2fnode.brightid.org/Gitcoin/${userDid}`;
-  </script>
+  <script src="./script.js"></script>
 </div>
