@@ -1,8 +1,9 @@
 // --- React Methods
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 
 // --- Utils & configs
-import { atom } from "jotai";
+import { atom, useAtom } from "jotai";
+import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 
 type UserWarningName = "expiredStamp" | "cacaoError";
 
@@ -34,3 +35,37 @@ export const mutableUserVerificationAtom = atom(
     set(userVerificationAtom, newState);
   }
 );
+
+export const userIntercomHashAtom = atom<string | undefined>(undefined);
+
+const useIntercom = () => {
+
+
+const UserStateManagerLogic = () => {
+  const { isConnected } = useWeb3ModalAccount();
+  const [_userIntercomHash, setUserIntercomHash] = useAtom(userIntercomHashAtom);
+
+  const onDisconnect = useCallback(() => {
+    setUserIntercomHash(undefined);
+  }, [setUserIntercomHash]);
+
+  useEffect(() => {
+    if (!isConnected) {
+      onDisconnect();
+    }
+  }, [isConnected]);
+
+  return null;
+};
+
+export const UserStateManager = ({ children }: { children: React.ReactNode }) => {
+  // Don't add anything here that will cause a re-render of this component
+
+  return (
+    <>
+      {/* Render this component in parallel so it can't cause the whole app to re-render */}
+      <UserStateManagerLogic />
+      {children}
+    </>
+  );
+};
