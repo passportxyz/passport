@@ -149,7 +149,7 @@ export default function Dashboard() {
     if (!address || dbAccessTokenStatus !== "connected") {
       navigateToPage("home");
     }
-  }, [address]);
+  }, [address, dbAccessTokenStatus]);
 
   // Fetch score on page load and when the customization key changes
   useEffect(() => {

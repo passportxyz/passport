@@ -29,6 +29,7 @@
     "@headlessui/react": "^1.7.13",
     "@headlessui/tailwindcss": "^0.1.3",
     "@heroicons/react": "^2.0.17",
+    "@intercom/messenger-js-sdk": "^0.0.13",
     "@popperjs/core": "^2.11.7",
     "@self.id/framework": "^0.4.0",
     "@tanstack/react-query": "^5.40.0",

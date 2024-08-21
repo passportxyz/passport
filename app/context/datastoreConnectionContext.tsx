@@ -12,7 +12,8 @@ import { AccountId } from "caip";
 import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
 import { Eip1193Provider } from "ethers";
 import { createSignedPayload } from "../utils/helpers";
-import { useDisconnect } from "@web3modal/ethers/react";
+import { useDisconnect, useWeb3ModalAccount } from "@web3modal/ethers/react";
+import { updateIntercomUserData } from "../hooks/useIntercom";
 
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
@@ -36,22 +37,29 @@ export const DatastoreConnectionContext = createContext<DatastoreConnectionConte
 export const useDatastoreConnection = () => {
   const { disconnect: disconnectWallet } = useDisconnect();
   const chain = useWalletStore((state) => state.chain);
+  const { isConnected, address: web3ModalAddress } = useWeb3ModalAccount();
 
   const [dbAccessTokenStatus, setDbAccessTokenStatus] = useState<DbAuthTokenStatus>("idle");
   const [dbAccessToken, setDbAccessToken] = useState<string | undefined>();
+  const [connectedAddress, setConnectedAddress] = useState<string | undefined>();
 
   const [did, setDid] = useState<DID>();
   const [checkSessionIsValid, setCheckSessionIsValid] = useState<() => boolean>(() => false);
 
   useEffect(() => {
     // Clear status when wallet disconnected
-    if (!chain && dbAccessTokenStatus === "connected") {
+    if (
+      (!chain || !isConnected || (connectedAddress && web3ModalAddress !== connectedAddress)) &&
+      dbAccessTokenStatus === "connected"
+    ) {
+      console.log("Clearing db access token", chain, isConnected, connectedAddress, web3ModalAddress);
+      setConnectedAddress(undefined);
       setDbAccessTokenStatus("idle");
       setDbAccessToken(undefined);
     }
-  }, [chain, dbAccessTokenStatus]);
+  }, [chain, dbAccessTokenStatus, isConnected, web3ModalAddress, connectedAddress]);
 
-  const getPassportDatabaseAccessToken = async (did: DID): Promise<string> => {
+  const getPassportDatabaseAccessToken = async (did: DID, address: string): Promise<string> => {
     let nonce = null;
     try {
       // Get nonce from server
@@ -72,6 +80,9 @@ export const useDatastoreConnection = () => {
     try {
       const authResponse = await axios.post(`${CERAMIC_CACHE_ENDPOINT}/authenticate`, payloadForVerifier);
       const accessToken = authResponse.data?.access as string;
+      const intercomUserHash = authResponse.data?.intercom_user_hash as string;
+      updateIntercomUserData({ did, hash: intercomUserHash });
+      setConnectedAddress(address);
       return accessToken;
     } catch (error) {
       const msg = `Failed to authenticate user with did: ${did.parent}`;
@@ -91,7 +102,7 @@ export const useDatastoreConnection = () => {
     // TODO: verifying the validity of the access token would also make sense => check the expiration data in the token
 
     try {
-      dbAccessToken = await getPassportDatabaseAccessToken(did);
+      dbAccessToken = await getPassportDatabaseAccessToken(did, address);
       // Store the session in localstorage
       // @ts-ignore
       window.localStorage.setItem(dbCacheTokenKey, dbAccessToken);
