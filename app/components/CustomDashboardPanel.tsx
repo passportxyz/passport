@@ -1,4 +1,4 @@
-import React, { useMemo, useState, Ref, ReactElement, JSXElementConstructor, useContext } from "react";
+import React, { useMemo, useState, Ref, ReactElement, JSXElementConstructor } from "react";
 import { VeraxPanel } from "../components/VeraxPanel";
 import { TestingPanel } from "../components/TestingPanel";
 import { Button } from "../components/Button";
@@ -9,7 +9,6 @@ import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
 import { Popover } from "@headlessui/react";
 import { usePopper } from "react-popper";
 import { renderToString } from "react-dom/server";
-import { ScorerContext } from "../context/scorerContext";
 
 type CustomDashboardPanelProps = {
   logo: {
@@ -68,10 +67,8 @@ export const CustomDashboardPanel = ({ logo, className, children }: CustomDashbo
 };
 
 export const DynamicCustomDashboardPanel = ({ className }: { className: string }) => {
-  const { score } = useContext(ScorerContext);
   const customization = useCustomization();
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
-  const [showLowScoreAlert, setShowLowScoreAlert] = useState<boolean>(false);
   const [referenceElement, setReferenceElement] = useState(null);
   const [popperElement, setPopperElement] = useState(null);
 
@@ -97,15 +94,12 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
 
   const onButtonClick = () => {
     if (body.action?.type === "Onchain Push") {
-      if (score < 20) {
-        setShowLowScoreAlert(true);
-      } else {
-        setShowSidebar(true);
-      }
+      setShowSidebar(true);
     } else {
       window.open(body.action.url, "_blank");
     }
   };
+
   return (
     <CustomDashboardPanel className={className} logo={logo}>
       {body.displayInfoTooltip && body.displayInfoTooltip.shouldDisplay && body.displayInfoTooltip.text ? (

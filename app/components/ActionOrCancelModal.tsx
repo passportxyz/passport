@@ -1,21 +1,15 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { PanelDiv } from "./PanelDiv";
-import { Button } from "../Button";
-import { LoadButton } from "../LoadButton";
-import { BackdropEnabler } from "./Backdrop";
+import { Backdrop } from "./Backdrop";
+import { LoadButton } from "./LoadButton";
+import { Button } from "./Button";
+import { useChakraPortalWorkaround } from "../hooks/useChakraPortalWorkaround";
 
-export const DataLine = ({ label, value }: { label: string; value: React.ReactNode }) => (
-  <div className="flex justify-between py-2">
-    <span className="text-color-6 text-xl font-bold">{label}</span>
-    <span>{value}</span>
-  </div>
-);
-
-export const StakeModal = ({
+// Modal with an action button and a cancel button
+// Pass the body content as children
+export const ActionOrCancelModal = ({
   title,
   buttonText,
-  buttonSubtext,
   onButtonClick,
   buttonLoading,
   buttonDisabled,
@@ -23,22 +17,22 @@ export const StakeModal = ({
   onClose,
   children,
 }: {
-  title: string;
+  title: React.ReactNode;
   buttonText: string;
-  buttonSubtext?: string;
   onButtonClick: () => void;
-  buttonLoading: boolean;
-  buttonDisabled?: boolean;
   isOpen: boolean;
   onClose: () => void;
+  buttonLoading?: boolean;
+  buttonDisabled?: boolean;
   children: React.ReactNode;
 }) => {
+  useChakraPortalWorkaround();
+
   return (
     <>
       <Transition appear show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-10" onClose={onClose}>
+        <Dialog as="div" className="relative z-100" onClose={onClose}>
           <Transition.Child
-            as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0"
             enterTo="opacity-100"
@@ -46,7 +40,7 @@ export const StakeModal = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-background/25" />
+            <Backdrop />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
@@ -60,21 +54,17 @@ export const StakeModal = ({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-lg overflow-hidden transition-all">
-                  <BackdropEnabler />
-                  <PanelDiv className="px-16 py-10 text-left text-color-1 align-middle">
-                    <Dialog.Title className="text-3xl text-center font-medium leading-6 text-color-6 my-12">
-                      {title}
-                    </Dialog.Title>
-                    <div className="mt-2">{children}</div>
+                <Dialog.Panel className="w-full max-w-sm overflow-hidden transition-all">
+                  <div className="p-7 text-base text-left text-color-1 align-middle w-full rounded-lg border border-foreground-5 bg-gradient-to-b from-background to-foreground-5">
+                    <Dialog.Title className="text-xl font-heading leading-tight text-focus my-4">{title}</Dialog.Title>
+                    <div>{children}</div>
 
-                    <div className="mt-4 flex flex-col items-center">
+                    <div className="mt-4 flex font-medium flex-col items-center">
                       <LoadButton
                         className="w-full"
                         onClick={onButtonClick}
                         isLoading={buttonLoading}
                         disabled={buttonDisabled}
-                        subtext={buttonSubtext}
                       >
                         {buttonText}
                       </LoadButton>
@@ -82,7 +72,7 @@ export const StakeModal = ({
                         Cancel
                       </Button>
                     </div>
-                  </PanelDiv>
+                  </div>
                 </Dialog.Panel>
               </Transition.Child>
             </div>

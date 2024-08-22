@@ -17,13 +17,14 @@ import { LoadButton } from "./LoadButton";
 
 // --- Style Components
 import { DoneToastContent } from "./DoneToastContent";
+import { ActionOrCancelModal } from "./ActionOrCancelModal";
+import { useChakraPortalWorkaround } from "../hooks/useChakraPortalWorkaround";
 
 export type RemoveStampModalProps = {
   isOpen: boolean;
   onClose: (result?: any) => void;
   title: string;
   body: string;
-  closeButtonText?: string;
   stampsToBeDeleted?: PROVIDER_ID[];
   handleDeleteStamps: Function;
   platformId: PLATFORM_ID;
@@ -34,11 +35,11 @@ export const RemoveStampModal = ({
   onClose,
   title,
   body,
-  closeButtonText,
   stampsToBeDeleted,
   handleDeleteStamps,
-  platformId,
 }: RemoveStampModalProps): JSX.Element => {
+  useChakraPortalWorkaround();
+
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
 
@@ -78,35 +79,20 @@ export const RemoveStampModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay width="100%" height="100%" />
-      <ModalContent
-        rounded={"none"}
-        padding={5}
-        maxW={{
-          sm: "100%",
-          md: "600px",
-        }}
-        maxH="80%"
-      >
-        <ModalHeader>
+    <ActionOrCancelModal
+      title={
+        <>
           <img alt="shield alert" src="../assets/shield-alert.svg" className="m-auto mb-4 w-10" />
           <p className="text-center">{title}</p>
-        </ModalHeader>
-        <ModalCloseButton />
-        <ModalBody color="#757087" className="mb-10 overflow-auto text-center">
-          {body}
-        </ModalBody>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Button data-testid="button-stamp-removal-cancel" variant="secondary" onClick={onClose}>
-            Cancel
-          </Button>
-          <LoadButton data-testid="button-stamp-removal" onClick={handleStampRemoval} isLoading={isLoading}>
-            {isLoading ? "Removing..." : closeButtonText || "Remove Stamp"}
-          </LoadButton>
-        </div>
-      </ModalContent>
-    </Modal>
+        </>
+      }
+      buttonText={isLoading ? "Removing..." : "Remove Stamp"}
+      onButtonClick={handleStampRemoval}
+      isOpen={isOpen}
+      onClose={onClose}
+      buttonLoading={isLoading}
+    >
+      {body}
+    </ActionOrCancelModal>
   );
 };

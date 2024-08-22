@@ -29,8 +29,7 @@ export const LUNARPUNK_DARK_MODE: Theme = {
   },
   fonts: {
     body: "Poppins",
-    // body: "futura-pt",
-    heading: "Poppins",
+    heading: "Unbounded",
     alt: "DM Mono",
   },
 };
