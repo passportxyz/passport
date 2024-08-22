@@ -20,7 +20,7 @@ import { DoneToastContent } from "./DoneToastContent";
 
 export type RemoveStampModalProps = {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (result?: any) => void;
   title: string;
   body: string;
   closeButtonText?: string;
