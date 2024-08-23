@@ -34,6 +34,7 @@ import TagManager from "react-gtm-module";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useWeb3ModalError } from "@web3modal/ethers/react";
 import Script from "next/script";
+import { Confetti } from "../components/Confetti";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -272,6 +273,7 @@ export default function Dashboard() {
       </Script>
       {modals}
       <HeaderContentFooterGrid>
+        <Confetti />
         <Header />
         <BodyWrapper className="mt-4 md:mt-6">
           <PageWidthGrid>

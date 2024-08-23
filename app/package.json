@@ -48,6 +48,7 @@
     "node-fetch": "^3.2.4",
     "object-hash": "^3.0.0",
     "react": "^18.2.0",
+    "react-confetti": "^6.1.0",
     "react-dom": "^18.2.0",
     "react-google-login": "^5.2.2",
     "react-gtm-module": "^2.0.11",
