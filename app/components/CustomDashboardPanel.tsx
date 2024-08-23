@@ -99,6 +99,7 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
       window.open(body.action.url, "_blank");
     }
   };
+
   return (
     <CustomDashboardPanel className={className} logo={logo}>
       {body.displayInfoTooltip && body.displayInfoTooltip.shouldDisplay && body.displayInfoTooltip.text ? (

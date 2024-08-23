@@ -28,7 +28,7 @@ const PlatformJsonButton = ({
   const { handleDeleteStamps } = useContext(CeramicContext);
   const customization = useCustomization();
   const [stampDetailsModal, setStampDetailsModal] = useState(false);
-  const [removeStampModal, setRemoveStampModal] = useState(false);
+  const [showRemoveStampModal, setShowRemoveStampModal] = useState(false);
   const [referenceElement, setReferenceElement] = useState(null);
 
   const providerIds = getStampProviderIds(platform.platform, customStampProviders(customization));
@@ -62,7 +62,7 @@ const PlatformJsonButton = ({
               <button onClick={() => setStampDetailsModal(true)} className="w-full text-left">
                 Stamp Details
               </button>
-              <button className="w-full text-left text-color-7" onClick={() => setRemoveStampModal(true)}>
+              <button className="w-full text-left text-color-7" onClick={() => setShowRemoveStampModal(true)}>
                 Remove Stamp
               </button>
             </Popover.Panel>
@@ -77,13 +77,12 @@ const PlatformJsonButton = ({
         jsonOutput={platformPassportData}
       />
       <RemoveStampModal
-        isOpen={removeStampModal}
-        onClose={onClose}
+        isOpen={showRemoveStampModal}
+        onClose={() => setShowRemoveStampModal(false)}
         title={`Remove ${platform.name} Stamp`}
         body={"This stamp will be removed from your Passport. You can still re-verify your stamp in the future."}
         stampsToBeDeleted={providerIds}
         handleDeleteStamps={onRemoveStamps}
-        platformId={platform.name as PLATFORM_ID}
       />
     </>
   );

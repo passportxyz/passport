@@ -10,9 +10,6 @@ import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { StampSelector } from "./StampSelector";
 import { PlatformDetails } from "./PlatformDetails";
 import { PlatformScoreSpec } from "../context/scorerContext";
-import { RemoveStampModal } from "./RemoveStampModal";
-import { STAMP_PROVIDERS } from "../config/providers";
-import { CeramicContext } from "../context/ceramicContext";
 
 export type SideBarContentProps = {
   currentPlatform: PlatformScoreSpec | undefined;
