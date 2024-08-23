@@ -2,32 +2,20 @@
 import React, { useState } from "react";
 
 // --- Chakra Elements
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  useToast,
-} from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
-import { Button } from "./Button";
-import { LoadButton } from "./LoadButton";
 
 // --- Style Components
 import { DoneToastContent } from "./DoneToastContent";
 import { ActionOrCancelModal } from "./ActionOrCancelModal";
-import { useChakraPortalWorkaround } from "../hooks/useChakraPortalWorkaround";
 
 export type RemoveStampModalProps = {
   isOpen: boolean;
-  onClose: (result?: any) => void;
+  onClose: () => void;
   title: string;
   body: string;
   stampsToBeDeleted?: PROVIDER_ID[];
   handleDeleteStamps: Function;
-  platformId: PLATFORM_ID;
 };
 
 export const RemoveStampModal = ({
@@ -38,8 +26,6 @@ export const RemoveStampModal = ({
   stampsToBeDeleted,
   handleDeleteStamps,
 }: RemoveStampModalProps): JSX.Element => {
-  useChakraPortalWorkaround();
-
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
 
@@ -80,12 +66,7 @@ export const RemoveStampModal = ({
 
   return (
     <ActionOrCancelModal
-      title={
-        <>
-          <img alt="shield alert" src="../assets/shield-alert.svg" className="m-auto mb-4 w-10" />
-          <p className="text-center">{title}</p>
-        </>
-      }
+      title={title}
       buttonText={isLoading ? "Removing..." : "Remove Stamp"}
       onButtonClick={handleStampRemoval}
       isOpen={isOpen}

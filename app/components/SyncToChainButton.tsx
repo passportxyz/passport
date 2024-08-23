@@ -6,6 +6,8 @@ import { useSyncToChainButton } from "../hooks/useSyncToChainButton";
 import { useCallback, useContext, useState } from "react";
 import { ScorerContext } from "../context/scorerContext";
 import { LowScoreAlertModal } from "./LowScoreAlertModal";
+import { atom, useAtom } from "jotai";
+import { datadogLogs } from "@datadog/browser-logs";
 
 export function getButtonMsg(onChainStatus: OnChainStatus): string {
   switch (onChainStatus) {
@@ -27,7 +29,10 @@ export type SyncToChainProps = {
   className?: string;
 };
 
+const userHasApprovedLowScoreMintAtom = atom<boolean>(false);
+
 export function SyncToChainButton({ onChainStatus, chain, className }: SyncToChainProps): JSX.Element {
+  const [userHasApprovedLowScoreMint, setUserHasApprovedLowScoreMint] = useAtom(userHasApprovedLowScoreMintAtom);
   const { score } = useContext(ScorerContext);
   const [showLowScoreAlert, setShowLowScoreAlert] = useState(false);
   const { props, syncingToChain, needToSwitchChain, text } = useSyncToChainButton({
@@ -39,19 +44,22 @@ export function SyncToChainButton({ onChainStatus, chain, className }: SyncToCha
   const { onClick, ...rest } = props;
 
   const onSyncButtonClick = useCallback(() => {
-    if (score < 20) {
+    if (score < 20 && !userHasApprovedLowScoreMint) {
       setShowLowScoreAlert(true);
     } else {
       onClick();
     }
   }, [score, onClick]);
 
-  const onCloseLowScoreAlert = useCallback(() => {
+  const onCancelLowScoreAlert = useCallback(() => {
+    datadogLogs.logger.info("User cancelled mint with low score");
     setShowLowScoreAlert(false);
   }, []);
 
   const onProceedLowScoreAlert = useCallback(() => {
-    onCloseLowScoreAlert();
+    datadogLogs.logger.info("User approved mint with low score");
+    setUserHasApprovedLowScoreMint(true);
+    setShowLowScoreAlert(false);
     onClick();
   }, [onClick]);
 
@@ -89,7 +97,7 @@ export function SyncToChainButton({ onChainStatus, chain, className }: SyncToCha
       <LowScoreAlertModal
         isOpen={showLowScoreAlert}
         onProceed={onProceedLowScoreAlert}
-        onCancel={onCloseLowScoreAlert}
+        onCancel={onCancelLowScoreAlert}
       />
     </>
   );
