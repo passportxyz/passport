@@ -33,7 +33,7 @@ const userHasApprovedLowScoreMintAtom = atom<boolean>(false);
 
 export function SyncToChainButton({ onChainStatus, chain, className }: SyncToChainProps): JSX.Element {
   const [userHasApprovedLowScoreMint, setUserHasApprovedLowScoreMint] = useAtom(userHasApprovedLowScoreMintAtom);
-  const { score } = useContext(ScorerContext);
+  const { rawScore, threshold, scoreState } = useContext(ScorerContext);
   const [showLowScoreAlert, setShowLowScoreAlert] = useState(false);
   const { props, syncingToChain, needToSwitchChain, text } = useSyncToChainButton({
     chain,
@@ -44,12 +44,12 @@ export function SyncToChainButton({ onChainStatus, chain, className }: SyncToCha
   const { onClick, ...rest } = props;
 
   const onSyncButtonClick = useCallback(() => {
-    if (score < 20 && !userHasApprovedLowScoreMint) {
+    if (rawScore < threshold && !userHasApprovedLowScoreMint) {
       setShowLowScoreAlert(true);
     } else {
       onClick();
     }
-  }, [score, onClick]);
+  }, [rawScore, threshold, onClick, userHasApprovedLowScoreMint]);
 
   const onCancelLowScoreAlert = useCallback(() => {
     datadogLogs.logger.info("User cancelled mint with low score");
@@ -63,7 +63,8 @@ export function SyncToChainButton({ onChainStatus, chain, className }: SyncToCha
     onClick();
   }, [onClick]);
 
-  const loading = showLowScoreAlert || syncingToChain || onChainStatus === OnChainStatus.LOADING;
+  const loading =
+    showLowScoreAlert || syncingToChain || onChainStatus === OnChainStatus.LOADING || scoreState !== "DONE";
   const expired = onChainStatus === OnChainStatus.MOVED_EXPIRED;
 
   return (
@@ -98,6 +99,7 @@ export function SyncToChainButton({ onChainStatus, chain, className }: SyncToCha
         isOpen={showLowScoreAlert}
         onProceed={onProceedLowScoreAlert}
         onCancel={onCancelLowScoreAlert}
+        threshold={threshold}
       />
     </>
   );

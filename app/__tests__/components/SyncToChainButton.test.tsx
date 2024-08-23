@@ -151,11 +151,34 @@ describe("SyncToChainButton component", () => {
       },
       <ChakraProvider>
         <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} />
-      </ChakraProvider>
+      </ChakraProvider>,
+      {},
+      { threshold: 10, rawScore: 20 }
     );
     const btn = screen.getByTestId("sync-to-chain-button");
     fireEvent.click(btn);
 
     await screen.findByText("Passport submitted to chain.");
+  });
+
+  it("should prompt user if score is low", async () => {
+    renderWithContext(
+      {
+        ...mockCeramicContext,
+        passport: { ...mockCeramicContext.passport, stamps: [{ id: "test" } as any] },
+      },
+      <ChakraProvider>
+        <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} />
+      </ChakraProvider>,
+      {},
+      { threshold: 15, rawScore: 10 }
+    );
+    const btn = screen.getByTestId("sync-to-chain-button");
+    fireEvent.click(btn);
+
+    await screen.findByText(
+      `While some benefits might be available with a lower score, many partners require a score of 15 or higher.`,
+      { exact: false }
+    );
   });
 });
