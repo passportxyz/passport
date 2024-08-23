@@ -83,7 +83,6 @@ const PlatformJsonButton = ({
         body={"This stamp will be removed from your Passport. You can still re-verify your stamp in the future."}
         stampsToBeDeleted={providerIds}
         handleDeleteStamps={onRemoveStamps}
-        platformId={platform.name as PLATFORM_ID}
       />
     </>
   );
