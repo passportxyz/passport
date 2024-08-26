@@ -158,7 +158,7 @@ describe("<CardList />", () => {
     const availablePnts = screen.getAllByTestId("available-points").map((el) => el.textContent);
 
     //the verified stamp no longer shows the score of availablepoints
-    expect(availablePnts).toEqual(["12.93", "7.44", "0.69"]);
+    expect(availablePnts).toEqual(["12.9", "7.4", "0.7"]);
   });
   it("renders allowList if stamp is present", () => {
     const scorerContext = {
