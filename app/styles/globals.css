@@ -18,6 +18,30 @@
   }
 }
 
+@property --loading-gradient-start-stop-position {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+@property --loading-gradient-end-stop-position {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+
+@property --loading-gradient-start-color {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: rgb(0, 0, 0 / 1);
+}
+
+@property --loading-gradient-end-color {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: rgb(255, 255, 255 / 1);
+}
+
 .step-icon-inner {
   width: 0.625rem;
   height: 0.625rem;

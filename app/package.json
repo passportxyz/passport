@@ -92,7 +92,7 @@
     "prettier": "^3.2.4",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "react-qr-code": "^2.0.7",
-    "tailwindcss": "^3.0.7",
+    "tailwindcss": "^3.4.10",
     "ts-jest": "^27.1.4",
     "typescript": "^5.3.3",
     "uint8arrays": "^5.1.0",

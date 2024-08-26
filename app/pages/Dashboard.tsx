@@ -11,7 +11,7 @@ import BodyWrapper from "../components/BodyWrapper";
 import PageWidthGrid from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import { DoneToastContent } from "../components/DoneToastContent";
-import { DashboardScorePanel } from "../components/DashboardScorePanel";
+import { DashboardScorePanel, DashboardScoreExplanationPanel } from "../components/DashboardScorePanel";
 import { DashboardValidStampsPanel } from "../components/DashboardValidStampsPanel";
 import { ExpiredStampsPanel } from "../components/ExpiredStampsPanel";
 
@@ -279,6 +279,7 @@ export default function Dashboard() {
               <DashboardIllustration className="col-span-5 row-span-5 col-end-[-1] hidden xl:block" />
             )}
             <DashboardScorePanel className="col-span-full xl:col-span-7" />
+            <DashboardScoreExplanationPanel className="col-span-full xl:col-span-7" />
             {useCustomDashboardPanel && (
               <DynamicCustomDashboardPanel className="col-start-1 col-end-[-1] xl:col-start-8" />
             )}
