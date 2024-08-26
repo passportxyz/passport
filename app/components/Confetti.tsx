@@ -3,6 +3,7 @@ import ReactConfetti from "react-confetti";
 import { mutableUserVerificationAtom } from "../context/userState";
 import { useAtom } from "jotai";
 import { ScorerContext } from "../context/scorerContext";
+import { colors } from "../utils/theme/palette";
 
 function getWindowDimensions() {
   const { innerWidth: width } = window;
@@ -33,7 +34,7 @@ export const Confetti: React.FC = () => {
       <ReactConfetti
         width={windowDimensions.width}
         height={windowDimensions.height}
-        numberOfPieces={2000}
+        numberOfPieces={4000}
         recycle={false}
         run={true}
         confettiSource={{
@@ -42,7 +43,7 @@ export const Confetti: React.FC = () => {
           w: windowDimensions.width,
           h: windowDimensions.height,
         }}
-        colors={["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff"]}
+        colors={Object.values(colors)}
       />
     </div>
   );
