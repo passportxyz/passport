@@ -64,7 +64,7 @@ export function StampSelector({ currentPlatform, currentProviders, verifiedProvi
               const isExpired = expiredProviders?.indexOf(provider.name) !== -1;
 
               const rawWeight = stampWeights?.[provider.name];
-              const weight = rawWeight ? +parseFloat(rawWeight).toFixed(2) : 0;
+              const weight = rawWeight ? +parseFloat(rawWeight).toFixed(1) : 0;
 
               if (isExpired) {
                 // Return verified stamp

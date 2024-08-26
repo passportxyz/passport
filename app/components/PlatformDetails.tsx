@@ -143,8 +143,8 @@ export const PlatformDetails = ({
   const earnedPoints = currentPlatformScoreSpec?.earnedPoints || 0;
   const possiblePoints = currentPlatformScoreSpec?.possiblePoints || 0;
 
-  const pointsGained = +earnedPoints.toFixed(2);
-  const pointsAvailable = +Math.max(possiblePoints - earnedPoints, 0).toFixed(2);
+  const pointsGained = +earnedPoints.toFixed(1);
+  const pointsAvailable = +Math.max(possiblePoints - earnedPoints, 0).toFixed(1);
 
   verifiedProviders = verifiedProviders || [];
   const hasExpiredProviders = useMemo(() => {

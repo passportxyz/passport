@@ -14,6 +14,8 @@ import { customStampProviders, getStampProviderIds } from "../config/providers";
 const scorerApiGetScore = CERAMIC_CACHE_ENDPOINT + "/score";
 const scorerApiGetWeights = CERAMIC_CACHE_ENDPOINT + "/weights";
 
+const parseFloatOneDecimal = (value: string) => parseFloat(parseFloat(value).toFixed(1));
+
 export type PassportSubmissionStateType =
   | "APP_INITIAL"
   | "APP_REQUEST_PENDING"
@@ -124,9 +126,9 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
         // We need to handle the 2 types the scorers that the backend allows: binary as well as not-binary
         if (response.data.evidence) {
           // This is a binary scorer (binary scorers have the evidence data)
-          const numRawScore = Number.parseFloat(response.data.evidence.rawScore);
-          const numThreshold = Number.parseFloat(response.data.evidence.threshold);
-          const numScore = Number.parseFloat(response.data.score);
+          const numRawScore = parseFloatOneDecimal(response.data.evidence.rawScore);
+          const numThreshold = parseFloatOneDecimal(response.data.evidence.threshold);
+          const numScore = parseFloatOneDecimal(response.data.score);
 
           setRawScore(numRawScore);
           setThreshold(numThreshold);
@@ -140,9 +142,9 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
           }
         } else {
           // This is not a binary scorer
-          const numRawScore = Number.parseFloat(response.data.score);
+          const numRawScore = parseFloatOneDecimal(response.data.score);
           const numThreshold = 0;
-          const numScore = Number.parseFloat(response.data.score);
+          const numScore = parseFloatOneDecimal(response.data.score);
 
           setRawScore(numRawScore);
           setThreshold(numThreshold);
