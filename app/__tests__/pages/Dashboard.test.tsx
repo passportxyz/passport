@@ -11,6 +11,8 @@ import { CeramicContextState, IsLoadingPassportState } from "../../context/ceram
 import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
 import { ChakraProvider } from "@chakra-ui/react";
 
+jest.mock("react-confetti");
+
 jest.mock("../../components/CardList", () => ({ CardList: () => <div>Card List</div> }));
 
 jest.mock("../../components/SyncToChainButton", () => <div>Sync to Chain</div>);
