@@ -1,4 +1,4 @@
-import { parseValidChains } from "../../components/OnchainSidebar";
+import { parseValidChains } from "../../hooks/useOnChainStatus";
 import { Customization } from "../../utils/customizationUtils";
 
 const customization = {
