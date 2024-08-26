@@ -130,11 +130,15 @@ applications:
     });
   }
 
-  const webHook = new aws.amplify.Webhook(`${name}-${branchName}`, {
-    appId: amplifyApp.id,
-    branchName: branchName,
-    description: `trigger build from branch ${branchName}`,
-  });
+  const webHook = new aws.amplify.Webhook(
+    `${name}-${branchName}`,
+    {
+      appId: amplifyApp.id,
+      branchName: branchName,
+      description: `trigger build from branch ${branchName}`,
+    },
+    { dependsOn: branch }
+  );
 
   // Note!!!: at the moment this step is done manually & it is required to be configured only once / repository / environment
   //   - To be improved: investigate & automate github webhook creation
