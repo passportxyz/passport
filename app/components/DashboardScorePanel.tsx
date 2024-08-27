@@ -78,7 +78,7 @@ export const DashboardScorePanel = ({ className }: { className?: string }) => {
 const LoadingBar = ({ className }: { className?: string }) => {
   return (
     <div
-      className={`h-10 w-full animated-background bg-gradient-to-r from-background via-[#22645C] to-background rounded-lg my-2 ${className}`}
+      className={`h-10 w-full bg-size-400 animate-[loading-gradient_5s_ease-in-out_infinite] bg-gradient-to-r from-background via-foreground-5 to-background rounded-lg my-2 ${className}`}
     />
   );
 };

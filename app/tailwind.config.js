@@ -55,9 +55,6 @@ module.exports = {
         "customization-foreground-1": "rgb(var(--color-customization-foreground-1) / <alpha-value>)",
         "customization-foreground-2": "rgb(var(--color-customization-foreground-2) / <alpha-value>)",
 
-        "loading-start": "var(--loading-gradient-start-color)",
-        "loading-end": "var(--loading-gradient-end-color)",
-
         // Temporary, to be removed
         accent: "#000",
         "accent-2": "#000",
@@ -73,6 +70,7 @@ module.exports = {
       },
       backgroundSize: {
         "size-200": "200% 200%",
+        "size-400": "400%",
       },
       backgroundPosition: {
         "pos-0": "0% 0%",
@@ -96,41 +94,13 @@ module.exports = {
           },
         },
         "loading-gradient": {
-          "0%": {
-            "--loading-gradient-start-color": "rgb(var(--color-foreground-5) / 0)",
-            "--loading-gradient-start-stop-position": "0%",
-            "--loading-gradient-end-color": "rgb(var(--color-foreground-5) / 1)",
-            "--loading-gradient-end-stop-position": "10%",
-          },
-          "40%": {
-            "--loading-gradient-start-color": "rgb(var(--color-foreground-5) / 0)",
-            "--loading-gradient-start-stop-position": "0%",
-            "--loading-gradient-end-color": "rgb(var(--color-foreground-5) / 1)",
-            "--loading-gradient-end-stop-position": "35%",
-          },
-          "42%": {
-            "--loading-gradient-start-color": "rgb(var(--color-foreground-5) / .25)",
-            "--loading-gradient-start-stop-position": "0%",
-            "--loading-gradient-end-color": "rgb(var(--color-foreground-5) / .75)",
-            "--loading-gradient-end-stop-position": "40%",
+          "0%,100%": {
+            "background-position": "0% 50%",
           },
           "50%": {
-            "--loading-gradient-start-color": "rgb(var(--color-foreground-5) / 1)",
-            "--loading-gradient-start-stop-position": "60%",
-            "--loading-gradient-end-color": "rgb(var(--color-foreground-5) / 0)",
-            "--loading-gradient-end-stop-position": "100%",
-          },
-          "100%": {
-            "--loading-gradient-start-color": "rgb(var(--color-foreground-5) / 1)",
-            "--loading-gradient-start-stop-position": "90%",
-            "--loading-gradient-end-color": "rgb(var(--color-foreground-5) / 0)",
-            "--loading-gradient-end-stop-position": "100%",
+            "background-position": "100% 50%",
           },
         },
-      },
-      gradientColorStopPositions: {
-        "loading-start-position": "var(--loading-gradient-start-stop-position)",
-        "loading-end-position": "var(--loading-gradient-end-stop-position)",
       },
     },
     fontSize: {

@@ -18,30 +18,6 @@
   }
 }
 
-@property --loading-gradient-start-stop-position {
-  syntax: "<percentage>";
-  inherits: false;
-  initial-value: 0%;
-}
-
-@property --loading-gradient-end-stop-position {
-  syntax: "<percentage>";
-  inherits: false;
-  initial-value: 100%;
-}
-
-@property --loading-gradient-start-color {
-  syntax: "<color>";
-  inherits: false;
-  initial-value: rgb(0, 0, 0 / 1);
-}
-
-@property --loading-gradient-end-color {
-  syntax: "<color>";
-  inherits: false;
-  initial-value: rgb(255, 255, 255 / 1);
-}
-
 .step-icon-inner {
   width: 0.625rem;
   height: 0.625rem;
@@ -90,23 +66,4 @@
 
 .rotate {
   animation: rotate 500ms linear infinite;
-}
-
-.animated-background {
-  background-size: 400%;
-
-  -webkit-animation: animation 5s ease infinite;
-  -moz-animation: animation 5s ease infinite;
-  animation: animation 5s ease infinite;
-}
-
-@keyframes animation {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
 }
