@@ -269,12 +269,12 @@ export default function Dashboard() {
         <Header />
         <BodyWrapper className="mt-4 md:mt-6">
           <PageWidthGrid>
-            <div className="col-span-full grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-              <DashboardScorePanel className="" />
-              <DashboardScoreExplanationPanel className={`col-span-1 ${useCustomDashboardPanel || "xl:col-span-2"}`} />
-              {useCustomDashboardPanel && (
-                <DynamicCustomDashboardPanel className="col-span-1 lg:col-span-2 xl:col-span-1" />
-              )}
+            <div className="col-span-full flex flex-col xl:flex-row gap-8">
+              <div className="col-span-full flex flex-col grow lg:flex-row gap-8">
+                <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
+                <DashboardScoreExplanationPanel />
+              </div>
+              {useCustomDashboardPanel && <DynamicCustomDashboardPanel className="max-w-full xl:max-w-md" />}
             </div>
 
             <span className="col-span-full font-heading text-4xl">Add Stamps</span>

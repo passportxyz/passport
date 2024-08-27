@@ -29,7 +29,7 @@ const Ellipsis = () => {
   );
 };
 
-export const DashboardScorePanel = ({ className }: { className: string }) => {
+export const DashboardScorePanel = ({ className }: { className?: string }) => {
   const { rawScore, passportSubmissionState, threshold } = React.useContext(ScorerContext);
   const [verificationState] = useAtom(mutableUserVerificationAtom);
   const [displayScore, setDisplayScore] = React.useState(0);
@@ -46,7 +46,7 @@ export const DashboardScorePanel = ({ className }: { className: string }) => {
 
   const customTitle = customization?.scorerPanel?.title;
 
-  const loading = true || passportSubmissionState === "APP_REQUEST_PENDING" || verificationState.loading;
+  const loading = passportSubmissionState === "APP_REQUEST_PENDING" || verificationState.loading;
 
   return (
     <PanelDiv className={`text-color-2 font-heading ${className}`}>
@@ -75,7 +75,7 @@ export const DashboardScorePanel = ({ className }: { className: string }) => {
   );
 };
 
-const LoadingBar = ({ className }: { className: string }) => {
+const LoadingBar = ({ className }: { className?: string }) => {
   return (
     <div
       className={`h-10 bg-gradient-to-r from-loading-start from-loading-start-position to-loading-end to-loading-end-position animate-[loading-gradient_1s_ease-in-out_infinite] rounded-lg ${className}`}
@@ -83,12 +83,12 @@ const LoadingBar = ({ className }: { className: string }) => {
   );
 };
 
-export const DashboardScoreExplanationPanel = ({ className }: { className: string }) => {
+export const DashboardScoreExplanationPanel = ({ className }: { className?: string }) => {
   const { passportSubmissionState } = React.useContext(ScorerContext);
   const [verificationState] = useAtom(mutableUserVerificationAtom);
   const customization = useCustomization();
 
-  const loading = true || passportSubmissionState === "APP_REQUEST_PENDING" || verificationState.loading;
+  const loading = passportSubmissionState === "APP_REQUEST_PENDING" || verificationState.loading;
 
   // TODO Do we display this instead of the standard success text when available? Or drop it from the customization in the scorer?
   const customText = customization?.scorerPanel?.text;
