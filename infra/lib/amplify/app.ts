@@ -1,11 +1,11 @@
 import * as aws from "@pulumi/aws";
-import { Input } from "@pulumi/pulumi";
+import { Input, Output } from "@pulumi/pulumi";
 import * as pulumi from "@pulumi/pulumi";
 import * as std from "@pulumi/std";
 import * as cloudflare from "@pulumi/cloudflare";
 import * as github from "@pulumi/github";
 
-export function createAmplifyStakingApp(
+export function createAmplifyApp(
   githubUrl: string,
   githubAccessToken: string,
   domainName: string,
@@ -13,9 +13,7 @@ export function createAmplifyStakingApp(
   cloudflareZoneId: string,
   prefix: string,
   branchName: string,
-  environmentVariables: Input<{
-    [key: string]: Input<string>;
-  }>,
+  environmentVariables: Record<string, string | Output<any>>,
   tags: { [key: string]: string },
   enableBasicAuth: boolean,
   username?: string,
@@ -27,31 +25,30 @@ export function createAmplifyStakingApp(
     name: name,
     repository: githubUrl,
     oauthToken: githubAccessToken,
-    platform: "WEB_COMPUTE",
+    platform: "WEB",
     buildSpec: `version: 1
 applications:
   - frontend:
       phases:
         preBuild:
           commands:
-            - yarn install
+            - nvm use 20.9.0
         build:
           commands:
-            - yarn run build
+            - npm install --g lerna@6.6.2 && lerna bootstrap && rm -rf ../node_modules/@tendermint && npm run build
       artifacts:
-        baseDirectory: .next
+        baseDirectory: out
         files:
           - '**/*'
       cache:
         paths:
-          - .next/cache/**/*
           - node_modules/**/*
     appRoot: app
 `,
     customRules: [
       {
-        source: "/<*>",
-        status: "404",
+        source: "/",
+        status: "200",
         target: "/index.html",
       },
     ],
@@ -105,12 +102,12 @@ applications:
     const certRecord = domainCert.apply((_cert) => {
       const certDetails = _cert.split(" "); // Name Type Value
       const certRecord = new cloudflare.Record("cloudflare-certificate-record", {
-        name: certDetails[0].replace(`.${cloudflareDomain}.`, ''), // remove the autocomplete domain
+        name: certDetails[0].replace(`.${cloudflareDomain}.`, ""), // remove the autocomplete domain
         zoneId: cloudflareZoneId,
         type: certDetails[1],
         value: certDetails[2],
         allowOverwrite: true,
-        comment: `Certificate for *.${cloudflareDomain}`
+        comment: `Certificate for *.${cloudflareDomain}`,
 
         // ttl: 3600
       });
@@ -126,18 +123,22 @@ applications:
           type: domainDetails[1],
           value: domainDetails[2],
           allowOverwrite: true,
-          comment: `Points to AWS Amplify for stake V2 app`
+          comment: `Points to AWS Amplify for stake V2 app`,
         });
         return record;
       });
     });
   }
 
-  const webHook = new aws.amplify.Webhook(`${name}-${branchName}`, {
-    appId: amplifyApp.id,
-    branchName: branchName,
-    description: `trigger build from branch ${branchName}`,
-  });
+  const webHook = new aws.amplify.Webhook(
+    `${name}-${branchName}`,
+    {
+      appId: amplifyApp.id,
+      branchName: branchName,
+      description: `trigger build from branch ${branchName}`,
+    },
+    { dependsOn: branch }
+  );
 
   // Note!!!: at the moment this step is done manually & it is required to be configured only once / repository / environment
   //   - To be improved: investigate & automate github webhook creation
