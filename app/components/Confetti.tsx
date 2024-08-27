@@ -33,7 +33,7 @@ export const Confetti: React.FC = () => {
     <div data-testid="react-confetti">
       <ReactConfetti
         width={windowDimensions.width}
-        height={windowDimensions.height}
+        height={windowDimensions.height - 100}
         numberOfPieces={4000}
         recycle={false}
         run={true}

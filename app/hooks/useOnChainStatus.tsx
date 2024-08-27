@@ -57,7 +57,7 @@ export const useAllOnChainStatus = () => {
   const { rawScore, scoreState } = useContext(ScorerContext);
   const customization = useCustomization();
 
-  const allChainStatus = useMemo(() => {
+  const allChainsUpToDate = useMemo(() => {
     if (isPending) return false;
     return chains
       .filter(
@@ -84,5 +84,5 @@ export const useAllOnChainStatus = () => {
       });
   }, [allProvidersState, customization, data, isPending, rawScore, scoreState]);
 
-  return { allChainStatus };
+  return { allChainsUpToDate };
 };
