@@ -91,3 +91,22 @@
 .rotate {
   animation: rotate 500ms linear infinite;
 }
+
+.animated-background {
+  background-size: 400%;
+
+  -webkit-animation: animation 5s ease infinite;
+  -moz-animation: animation 5s ease infinite;
+  animation: animation 5s ease infinite;
+}
+
+@keyframes animation {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
