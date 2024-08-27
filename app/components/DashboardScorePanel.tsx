@@ -88,7 +88,7 @@ export const DashboardScoreExplanationPanel = ({ className }: { className?: stri
   const [verificationState] = useAtom(mutableUserVerificationAtom);
   const customization = useCustomization();
 
-  const loading = true //passportSubmissionState === "APP_REQUEST_PENDING" || verificationState.loading;
+  const loading = passportSubmissionState === "APP_REQUEST_PENDING" || verificationState.loading;
 
   // TODO Do we display this instead of the standard success text when available? Or drop it from the customization in the scorer?
   const customText = customization?.scorerPanel?.text;
