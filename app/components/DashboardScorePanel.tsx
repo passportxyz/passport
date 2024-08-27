@@ -9,7 +9,7 @@ import Tooltip from "./Tooltip";
 const PanelDiv = ({ className, children }: { className: string; children: React.ReactNode }) => {
   return (
     <div
-      className={`flex flex-col items-center p-4 w-full rounded-lg bg-gradient-to-t from-background to-[#082F2A] ${className}`}
+      className={`flex flex-col items-center justify-center p-4 w-full rounded-lg bg-gradient-to-t from-background to-[#082F2A] ${className}`}
     >
       {children}
     </div>
@@ -75,6 +75,14 @@ export const DashboardScorePanel = ({ className }: { className: string }) => {
   );
 };
 
+const LoadingBar = ({ className }: { className: string }) => {
+  return (
+    <div
+      className={`h-10 bg-gradient-to-r from-loading-start from-loading-start-position to-loading-end to-loading-end-position animate-[loading-gradient_1s_ease-in-out_infinite] rounded-lg ${className}`}
+    />
+  );
+};
+
 export const DashboardScoreExplanationPanel = ({ className }: { className: string }) => {
   const { passportSubmissionState } = React.useContext(ScorerContext);
   const [verificationState] = useAtom(mutableUserVerificationAtom);
@@ -82,11 +90,20 @@ export const DashboardScoreExplanationPanel = ({ className }: { className: strin
 
   const loading = true || passportSubmissionState === "APP_REQUEST_PENDING" || verificationState.loading;
 
-  // TODO
+  // TODO Do we display this instead of the standard success text when available? Or drop it from the customization in the scorer?
   const customText = customization?.scorerPanel?.text;
+
   return (
-    <PanelDiv className={`px-6 ${className}`}>
-      <div className="h-10 w-full bg-gradient-to-r from-loading-start from-loading-start-position to-loading-end to-loading-end-position animate-[loading-gradient_1s_ease-in-out_infinite] transition-all rounded-lg" />
+    <PanelDiv className={`${className}`}>
+      {loading ? (
+        <div className="p-2 flex w-full flex-col gap-4">
+          <LoadingBar className="w-full" />
+          <LoadingBar className="w-full" />
+          <LoadingBar className="w-2/3" />
+        </div>
+      ) : (
+        "Placeholder"
+      )}
     </PanelDiv>
   );
 };

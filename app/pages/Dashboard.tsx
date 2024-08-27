@@ -253,12 +253,6 @@ export default function Dashboard() {
     </>
   );
 
-  const DashboardIllustration = ({ className }: { className: string }) => (
-    <div className={className}>
-      <img alt="Shield" src="/assets/dashboardIllustration.png" />
-    </div>
-  );
-
   return (
     <PageRoot className="text-color-1">
       <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
@@ -275,14 +269,13 @@ export default function Dashboard() {
         <Header />
         <BodyWrapper className="mt-4 md:mt-6">
           <PageWidthGrid>
-            {useCustomDashboardPanel || (
-              <DashboardIllustration className="col-span-5 row-span-5 col-end-[-1] hidden xl:block" />
-            )}
-            <DashboardScorePanel className="col-span-full xl:col-span-7" />
-            <DashboardScoreExplanationPanel className="col-span-full xl:col-span-7" />
-            {useCustomDashboardPanel && (
-              <DynamicCustomDashboardPanel className="col-start-1 col-end-[-1] xl:col-start-8" />
-            )}
+            <div className="col-span-full grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+              <DashboardScorePanel className="" />
+              <DashboardScoreExplanationPanel className={`col-span-1 ${useCustomDashboardPanel || "xl:col-span-2"}`} />
+              {useCustomDashboardPanel && (
+                <DynamicCustomDashboardPanel className="col-span-1 lg:col-span-2 xl:col-span-1" />
+              )}
+            </div>
 
             <span className="col-span-full font-heading text-4xl">Add Stamps</span>
             <CardList

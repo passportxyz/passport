@@ -102,13 +102,19 @@ module.exports = {
             "--loading-gradient-end-color": "rgb(var(--color-foreground-5) / 1)",
             "--loading-gradient-end-stop-position": "10%",
           },
-          "33%": {
+          "40%": {
             "--loading-gradient-start-color": "rgb(var(--color-foreground-5) / 0)",
             "--loading-gradient-start-stop-position": "0%",
             "--loading-gradient-end-color": "rgb(var(--color-foreground-5) / 1)",
+            "--loading-gradient-end-stop-position": "35%",
+          },
+          "42%": {
+            "--loading-gradient-start-color": "rgb(var(--color-foreground-5) / .25)",
+            "--loading-gradient-start-stop-position": "0%",
+            "--loading-gradient-end-color": "rgb(var(--color-foreground-5) / .75)",
             "--loading-gradient-end-stop-position": "40%",
           },
-          "66%": {
+          "50%": {
             "--loading-gradient-start-color": "rgb(var(--color-foreground-5) / 1)",
             "--loading-gradient-start-stop-position": "60%",
             "--loading-gradient-end-color": "rgb(var(--color-foreground-5) / 0)",
