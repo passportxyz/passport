@@ -11,7 +11,7 @@ import BodyWrapper from "../components/BodyWrapper";
 import PageWidthGrid from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import { DoneToastContent } from "../components/DoneToastContent";
-import { DashboardScorePanel } from "../components/DashboardScorePanel";
+import { DashboardScorePanel, DashboardScoreExplanationPanel } from "../components/DashboardScorePanel";
 import { DashboardValidStampsPanel } from "../components/DashboardValidStampsPanel";
 import { ExpiredStampsPanel } from "../components/ExpiredStampsPanel";
 
@@ -254,12 +254,6 @@ export default function Dashboard() {
     </>
   );
 
-  const DashboardIllustration = ({ className }: { className: string }) => (
-    <div className={className}>
-      <img alt="Shield" src="/assets/dashboardIllustration.png" />
-    </div>
-  );
-
   return (
     <PageRoot className="text-color-1">
       <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
@@ -277,13 +271,15 @@ export default function Dashboard() {
         <Header />
         <BodyWrapper className="mt-4 md:mt-6">
           <PageWidthGrid>
-            {useCustomDashboardPanel || (
-              <DashboardIllustration className="col-span-5 row-span-5 col-end-[-1] hidden xl:block" />
-            )}
-            <DashboardScorePanel className="col-span-full xl:col-span-7" />
-            {useCustomDashboardPanel && (
-              <DynamicCustomDashboardPanel className="col-start-1 col-end-[-1] xl:col-start-8" />
-            )}
+            <div className="col-span-full flex flex-col xl:flex-row gap-8">
+              <div className="col-span-full order-2 flex flex-col grow lg:flex-row gap-8">
+                <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
+                <DashboardScoreExplanationPanel />
+              </div>
+              {useCustomDashboardPanel && (
+                <DynamicCustomDashboardPanel className="order-1 lg:order-2 max-w-full xl:max-w-md" />
+              )}
+            </div>
 
             <span className="col-span-full font-heading text-4xl">Add Stamps</span>
             <CardList

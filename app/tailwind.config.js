@@ -70,10 +70,37 @@ module.exports = {
       },
       backgroundSize: {
         "size-200": "200% 200%",
+        "size-400": "400%",
       },
       backgroundPosition: {
         "pos-0": "0% 0%",
         "pos-100": "100% 100%",
+      },
+      keyframes: {
+        "visible-at-one-third": {
+          "0%": {
+            opacity: "0",
+          },
+          "33%": {
+            opacity: "1",
+          },
+        },
+        "visible-at-two-thirds": {
+          "0%": {
+            opacity: "0",
+          },
+          "66%": {
+            opacity: "1",
+          },
+        },
+        "loading-gradient": {
+          "0%,100%": {
+            "background-position": "0% 50%",
+          },
+          "50%": {
+            "background-position": "100% 50%",
+          },
+        },
       },
     },
     fontSize: {
