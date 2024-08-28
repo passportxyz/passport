@@ -2,20 +2,12 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerOverlay, DrawerC
 import { chains } from "../utils/chains";
 import { NetworkCard } from "./NetworkCard";
 import { useCustomization } from "../hooks/useCustomization";
-import { Customization } from "../utils/customizationUtils";
 import { mintFee } from "../config/mintFee";
+import { parseValidChains } from "../hooks/useOnChainStatus";
 
 type OnchainSidebarProps = {
   isOpen: boolean;
   onClose: () => void;
-};
-
-export const parseValidChains = (customization: Customization, id: string) => {
-  if (customization.includedChainIds && customization.includedChainIds?.length > 0) {
-    return customization.includedChainIds.includes(id);
-  } else {
-    return true;
-  }
 };
 
 export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {

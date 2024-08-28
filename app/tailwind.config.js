@@ -8,6 +8,7 @@ module.exports = {
     // Without this, classNames used only in /platforms wouldn't be included
     "../platforms/src/**/*.tsx",
   ],
+  safelist: ["shadow-background-5"],
   theme: {
     screens: {
       md: "480px",

@@ -272,7 +272,7 @@ export default function Dashboard() {
         <BodyWrapper className="mt-4 md:mt-6">
           <PageWidthGrid>
             <div className="col-span-full flex flex-col xl:flex-row gap-8">
-              <div className="col-span-full order-2 flex flex-col grow lg:flex-row gap-8">
+              <div className="col-span-full order-2 flex flex-col grow lg:flex-row gap-8 my-2.5">
                 <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
                 <DashboardScoreExplanationPanel />
               </div>
@@ -281,7 +281,9 @@ export default function Dashboard() {
               )}
             </div>
 
-            <span className="col-span-full font-heading text-4xl">Add Stamps</span>
+            <span id="add-stamps" className="col-span-full font-heading text-4xl">
+              Add Stamps
+            </span>
             <CardList
               className="col-span-full"
               isLoading={
