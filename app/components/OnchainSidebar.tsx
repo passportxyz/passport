@@ -5,20 +5,12 @@ import { useCustomization } from "../hooks/useCustomization";
 import { mintFee } from "../config/mintFee";
 import { parseValidChains } from "../hooks/useOnChainStatus";
 import { Button } from "./Button";
+import { CancelButton } from "./CancelButton";
 
 type OnchainSidebarProps = {
   isOpen: boolean;
   onClose: () => void;
 };
-
-const CancelButton = ({ onClose }: { onClose: () => void }) => (
-  <button onClick={onClose}>
-    <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M41.5 14.4131L14.0978 41.8153" stroke="#C1F6FF" stroke-width="2" stroke-linecap="round" />
-      <path d="M41.5 41.8154L14.0978 14.4132" stroke="#C1F6FF" stroke-width="2" stroke-linecap="round" />
-    </svg>
-  </button>
-);
 
 export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
   const customization = useCustomization();
