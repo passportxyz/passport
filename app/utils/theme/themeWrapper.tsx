@@ -5,6 +5,7 @@ import setTheme from "./setTheme";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import Menu from "./chakra/Menu";
 import Modal from "./chakra/Modal";
+import Drawer from "./chakra/Drawer";
 
 type ColorKey = keyof Theme["colors"];
 
@@ -46,7 +47,11 @@ const ThemeWrapper = ({
 
     const transposedColors = transposeColorsToChakraScheme(defaultTheme.colors);
 
-    return extendTheme({ colors: transposedColors, components: { Menu, Modal }, fonts: defaultTheme.fonts });
+    return extendTheme({
+      colors: transposedColors,
+      components: { Menu, Modal, Drawer },
+      fonts: defaultTheme.fonts,
+    });
   }, [defaultTheme, initChakra]);
 
   if (chakraTheme) {
