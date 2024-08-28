@@ -2,16 +2,16 @@
 import React, { useEffect, useState } from "react";
 
 // --- Components
-import PageRoot from "../components/PageRoot";
-import SIWEButton from "../components/SIWEButton";
+import PageRoot from "./PageRoot";
+import SIWEButton from "./SIWEButton";
 import { isServerOnMaintenance } from "../utils/helpers";
-import { WebmVideo } from "../components/WebmVideo";
+import { WebmVideo } from "./WebmVideo";
 import { DEFAULT_CUSTOMIZATION_KEY, useCustomization } from "../hooks/useCustomization";
-import WelcomeFooter from "../components/WelcomeFooter";
+import WelcomeFooter from "./WelcomeFooter";
 
 import { useLoginFlow } from "../hooks/useLoginFlow";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
-import { AccountCenter } from "../components/AccountCenter";
+import { AccountCenter } from "./AccountCenter";
 
 export default function Home() {
   const { isLoggingIn, signIn, loginStep } = useLoginFlow();

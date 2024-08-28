@@ -3,17 +3,17 @@
 import React, { useContext, useEffect, useMemo, useRef } from "react";
 
 // --Components
-import PageRoot from "../components/PageRoot";
-import { CardList } from "../components/CardList";
-import WelcomeFooter from "../components/WelcomeFooter";
-import Header from "../components/Header";
-import BodyWrapper from "../components/BodyWrapper";
-import PageWidthGrid from "../components/PageWidthGrid";
-import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
-import { DoneToastContent } from "../components/DoneToastContent";
-import { DashboardScorePanel, DashboardScoreExplanationPanel } from "../components/DashboardScorePanel";
-import { DashboardValidStampsPanel } from "../components/DashboardValidStampsPanel";
-import { ExpiredStampsPanel } from "../components/ExpiredStampsPanel";
+import PageRoot from "./PageRoot";
+import { CardList } from "./CardList";
+import WelcomeFooter from "./WelcomeFooter";
+import Header from "./Header";
+import BodyWrapper from "./BodyWrapper";
+import PageWidthGrid from "./PageWidthGrid";
+import HeaderContentFooterGrid from "./HeaderContentFooterGrid";
+import { DoneToastContent } from "./DoneToastContent";
+import { DashboardScorePanel, DashboardScoreExplanationPanel } from "./DashboardScorePanel";
+import { DashboardValidStampsPanel } from "./DashboardValidStampsPanel";
+import { ExpiredStampsPanel } from "./ExpiredStampsPanel";
 
 // --Chakra UI Elements
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalOverlay, useDisclosure, useToast } from "@chakra-ui/react";
@@ -23,10 +23,10 @@ import { useWalletStore } from "../context/walletStore";
 import { ScorerContext } from "../context/scorerContext";
 import { useOneClickVerification } from "../hooks/useOneClickVerification";
 
-import ProcessingPopup from "../components/ProcessingPopup";
-import { Button } from "../components/Button";
+import ProcessingPopup from "./ProcessingPopup";
+import { Button } from "./Button";
 import { DEFAULT_CUSTOMIZATION_KEY, useCustomization, useNavigateToPage } from "../hooks/useCustomization";
-import { DynamicCustomDashboardPanel } from "../components/CustomDashboardPanel";
+import { DynamicCustomDashboardPanel } from "./CustomDashboardPanel";
 import hash from "object-hash";
 
 // --- GTM Module
@@ -34,7 +34,7 @@ import TagManager from "react-gtm-module";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useWeb3ModalError } from "@web3modal/ethers/react";
 import Script from "next/script";
-import { Confetti } from "../components/Confetti";
+import { Confetti } from "./Confetti";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";

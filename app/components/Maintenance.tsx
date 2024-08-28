@@ -3,8 +3,8 @@
 import React from "react";
 
 // --- Components
-import PageRoot from "../components/PageRoot";
-import { WebmVideo } from "../components/WebmVideo";
+import PageRoot from "./PageRoot";
+import { WebmVideo } from "./WebmVideo";
 import { Hyperlink } from "@gitcoin/passport-platforms";
 
 export default function Maintenance() {

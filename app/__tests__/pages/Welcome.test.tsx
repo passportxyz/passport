@@ -1,6 +1,6 @@
 import React from "react";
 import { screen, fireEvent } from "@testing-library/react";
-import Welcome from "../../pages/Welcome";
+import Welcome from "../../components/Welcome";
 import { HashRouter as Router } from "react-router-dom";
 import * as framework from "@self.id/framework";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
