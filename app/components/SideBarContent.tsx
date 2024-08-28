@@ -56,7 +56,9 @@ export const SideBarContent = ({
             />
           </DrawerHeader>
           {verifyButton}
-          <Button variant="secondary" onClick={onClose} className="mt-4 w-full md:hidden">Close</Button>
+          <Button variant="secondary" onClick={onClose} className="mt-4 w-full md:hidden">
+            Close
+          </Button>
           <DrawerBody
             style={{
               padding: "0",
