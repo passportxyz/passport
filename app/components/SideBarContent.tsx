@@ -1,15 +1,15 @@
-import React, { useContext, useEffect, useState } from "react";
-
 // --- Chakra UI Elements
-import { DrawerBody, DrawerHeader, DrawerContent, DrawerCloseButton, useDisclosure } from "@chakra-ui/react";
+import { DrawerBody, DrawerHeader, DrawerContent } from "@chakra-ui/react";
 
 import { PlatformGroupSpec, PlatformBanner } from "@gitcoin/passport-platforms";
 
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 import { StampSelector } from "./StampSelector";
 import { PlatformDetails } from "./PlatformDetails";
 import { PlatformScoreSpec } from "../context/scorerContext";
+import { Button } from "./Button";
+import { CancelButton } from "./CancelButton";
 
 export type SideBarContentProps = {
   currentPlatform: PlatformScoreSpec | undefined;
@@ -38,7 +38,12 @@ export const SideBarContent = ({
         borderRadius: "6px",
       }}
     >
-      <DrawerCloseButton disabled={isLoading} className={`visible z-10 text-color-1 md:invisible`} />
+      <CancelButton
+        onClose={onClose}
+        className={`visible z-10 text-color-1 md:invisible absolute right-2 top-0`}
+        width={42}
+        height={42}
+      />
       {currentPlatform && currentProviders ? (
         <div className="overflow-auto p-10 text-color-1">
           <DrawerHeader
@@ -55,6 +60,9 @@ export const SideBarContent = ({
             />
           </DrawerHeader>
           {verifyButton}
+          <Button variant="secondary" onClick={onClose} className="mt-4 w-full md:hidden">
+            Close
+          </Button>
           <DrawerBody
             style={{
               padding: "0",
