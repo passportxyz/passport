@@ -169,15 +169,6 @@ export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
   name = "Verax, Ethereum Attestation Service (Score only)";
   attestationExplorerLinkText = "Check attestation on Verax";
 
-  async getMultiAttestationRequest(payload: {}): Promise<AxiosResponse<any, any>> {
-    return axios.post(`${iamUrl}v0.0.0/eas/score`, payload, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      transformRequest: [(data: any) => JSON.stringify(data, (_k, v) => (typeof v === "bigint" ? v.toString() : v))],
-    });
-  }
-
   viewerUrl(address: string): string {
     return this.easScanUrl;
   }
@@ -198,6 +189,20 @@ export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
     if (expirationDate && new Date() > expirationDate) return OnChainStatus.MOVED_EXPIRED;
 
     if (Number.isNaN(onChainScore)) return OnChainStatus.NOT_MOVED;
-    return rawScore !== onChainScore ? OnChainStatus.MOVED_OUT_OF_DATE : OnChainStatus.MOVED_UP_TO_DATE;
+
+    if (onChainProviders.length === 0) {
+      // This is a special case for users who previously pushed the score-only
+      // attestation to the chain, but have not yet pushed the passport attestation
+      return rawScore !== onChainScore ? OnChainStatus.MOVED_OUT_OF_DATE : OnChainStatus.MOVED_UP_TO_DATE;
+    }
+
+    return super.checkOnChainStatus(
+      allProvidersState,
+      onChainProviders,
+      rawScore,
+      scoreState,
+      onChainScore,
+      expirationDate
+    );
   }
 }
