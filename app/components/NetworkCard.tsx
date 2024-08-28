@@ -28,44 +28,40 @@ export function NetworkCard({ chain }: { chain: Chain }) {
     <div
       className={`${
         chain?.attestationProvider?.status === "enabled" && "bg-gradient-to-b from-background"
-      } ${expired ? "to-focus/25 border-focus text-focus" : "to-background-2/50 border-foreground-6 text-color-2"}
-      mb-6 rounded border p-2 align-middle`}
+      } ${expired ? "to-focus/25 border-focus text-focus" : "to-background-2/50 border-foreground-1 text-color-1"}
+      mb-6 rounded-lg border p-2 align-middle`}
     >
       <div className="mx-4 my-2">
-        <div className={`${isOnChain ? "grid-rows-2" : "grid-rows-1"} grid grid-flow-col  gap-4 space-y-2`}>
-          <div className="flex items-center">
-            <img className="h-10" src={chain.icon} alt={`${chain.label} logo`} />
-            <h1 className="ml-3 text-xl">{chain.label}</h1>
-          </div>
-          {isOnChain && (
-            <>
-              {address && (
-                <Hyperlink
-                  href={chain.attestationProvider?.viewerUrl(address) || ""}
-                  className={`pt-2 text-sm ${expired ? "text-inherit" : ""}`}
-                >
-                  {chain.attestationProvider?.attestationExplorerLinkText}
-                </Hyperlink>
-              )}
-              <div
-                className={`my-3 pt-2 text-right text-base ${expired ? "text-inherit" : "text-color-1"} leading-tight`}
-              >
-                {expired ? (
-                  "Expired"
-                ) : expirationDate ? (
-                  <>
-                    Expires
-                    <br />
-                    {formatDate(expirationDate)}
-                  </>
-                ) : (
-                  <Spinner size="sm" />
-                )}
-              </div>
-            </>
-          )}
-          <SyncToChainButton className="justify-self-end" onChainStatus={status} chain={chain} />
+        <div className="flex items-center">
+          <img className="h-10" src={chain.attestationProvider?.monochromeIcon} alt={`${chain.label} logo`} />
+          <h1 className="ml-3 grow text-base font-heading">{chain.label}</h1>
+          <SyncToChainButton onChainStatus={status} chain={chain} />
         </div>
+        {isOnChain && (
+          <div className="flex flex-row-reverse text-sm items-center mt-2">
+            <div className={`text-right grow ${expired ? "text-inherit" : "text-color-6"} leading-tight`}>
+              {expired ? (
+                "Expired"
+              ) : expirationDate ? (
+                <>
+                  Expires
+                  <br />
+                  {formatDate(expirationDate)}
+                </>
+              ) : (
+                <Spinner size="sm" />
+              )}
+            </div>
+            {address && (
+              <Hyperlink
+                href={chain.attestationProvider?.viewerUrl(address) || ""}
+                className={`font-alt leading-none w-[45%] ${expired ? "text-inherit" : ""}`}
+              >
+                {chain.attestationProvider?.attestationExplorerLinkText}
+              </Hyperlink>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

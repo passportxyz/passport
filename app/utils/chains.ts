@@ -111,6 +111,7 @@ if (usingTestEnvironment) {
       name: "Ethereum Attestation Service",
       status: "enabled",
       easScanUrl: "https://optimism-sepolia.easscan.org",
+      monochromeIcon: "./assets/op-logo-monochrome.svg",
     },
   });
 
@@ -126,6 +127,7 @@ if (usingTestEnvironment) {
       name: "Verax + EAS",
       status: "enabled",
       easScanUrl: "https://linea-goerli.easscan.org",
+      monochromeIcon: "./assets/linea-logo.png",
     },
   });
 }
@@ -164,6 +166,7 @@ if (!TEST_MODE) {
       name: "Ethereum Attestation Service",
       status: usingTestEnvironment ? "disabled" : "enabled",
       easScanUrl: "https://optimism.easscan.org",
+      monochromeIcon: "./assets/op-logo-monochrome.svg",
     },
   });
 
@@ -180,6 +183,7 @@ if (!TEST_MODE) {
         name: "Ethereum Attestation Service",
         status: usingTestEnvironment ? "disabled" : "enabled",
         easScanUrl: "https://zksync.easscan.org",
+        monochromeIcon: "./assets/zksync-logo-monochrome.svg",
       },
     });
   }
@@ -196,6 +200,7 @@ if (!TEST_MODE) {
       name: "Verax + EAS",
       status: "enabled",
       easScanUrl: "https://explorer.ver.ax/linea/attestations/my_attestations",
+      monochromeIcon: "./assets/linea-logo.png",
     },
   });
 
@@ -222,6 +227,7 @@ if (!TEST_MODE) {
       name: "Ethereum Attestation Service",
       status: usingTestEnvironment ? "disabled" : "enabled",
       easScanUrl: "https://arbitrum.easscan.org",
+      monochromeIcon: "./assets/arbitrum-logo-monochrome.svg",
     },
   });
 
@@ -238,6 +244,7 @@ if (!TEST_MODE) {
         name: "Ethereum Attestation Service",
         status: usingTestEnvironment ? "disabled" : "enabled",
         easScanUrl: "https://scroll.easscan.org",
+        monochromeIcon: "./assets/scroll-logo-monochrome.svg",
       },
     });
   }

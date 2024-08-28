@@ -15,6 +15,7 @@ type AttestationProviderStatus = "enabled" | "comingSoon" | "disabled";
 type BaseProviderConfig = {
   name: string;
   status: AttestationProviderStatus;
+  monochromeIcon: string;
 };
 
 type EASConfig = BaseProviderConfig & {
@@ -34,6 +35,7 @@ export interface AttestationProvider {
   status: AttestationProviderStatus;
   hasWebViewer: boolean;
   attestationExplorerLinkText: string;
+  monochromeIcon: string;
   viewerUrl: (address: string) => string;
   verifierAddress: () => string;
   verifierAbi: () => any;
@@ -54,10 +56,20 @@ class BaseAttestationProvider implements AttestationProvider {
   hasWebViewer = false;
   attestationExplorerLinkText = "Check attestation on EAS";
   chainId: string;
+  monochromeIcon: string;
 
-  constructor({ chainId, status }: { chainId: string; status: AttestationProviderStatus }) {
+  constructor({
+    chainId,
+    status,
+    monochromeIcon,
+  }: {
+    chainId: string;
+    status: AttestationProviderStatus;
+    monochromeIcon: string;
+  }) {
     this.chainId = chainId;
     this.status = status;
+    this.monochromeIcon = monochromeIcon;
   }
 
   viewerUrl(_address: string): string {
@@ -137,12 +149,14 @@ export class EASAttestationProvider extends BaseAttestationProvider {
     chainId,
     status,
     easScanUrl,
+    monochromeIcon,
   }: {
     chainId: string;
     status: AttestationProviderStatus;
     easScanUrl: string;
+    monochromeIcon: string;
   }) {
-    super({ status, chainId });
+    super({ status, chainId, monochromeIcon });
     this.easScanUrl = easScanUrl;
   }
 
