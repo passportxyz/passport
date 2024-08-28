@@ -8,17 +8,18 @@ import { WalletStoreManager } from "../context/WalletStoreManager";
 import type { NextPage } from "next";
 
 // -- Pages
-import Home from "./Home";
-import Welcome from "./Welcome";
-import Dashboard from "./Dashboard";
-import Privacy from "./privacy";
-import Maintenance from "./Maintenance";
+const Home = dynamic(() => import("../components/Home"));
+const Welcome = dynamic(() => import("../components/Welcome"));
+const Dashboard = dynamic(() => import("../components/Dashboard"));
+const Privacy = dynamic(() => import("../components/privacy"));
+const Maintenance = dynamic(() => import("../components/Maintenance"));
 
 // -- Datadog
 import { datadogRum } from "@datadog/browser-rum";
 import { datadogLogs } from "@datadog/browser-logs";
 import { isServerOnMaintenance } from "../utils/helpers";
 import { CustomizationUrlLayoutRoute } from "../hooks/useCustomization";
+import dynamic from "next/dynamic";
 
 datadogRum.init({
   applicationId: process.env.NEXT_PUBLIC_DATADOG_APPLICATION_ID || "",

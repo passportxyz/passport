@@ -1,7 +1,7 @@
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, screen, waitFor, render } from "@testing-library/react";
-import Dashboard from "../../pages/Dashboard";
+import Dashboard from "../../components/Dashboard";
 import { HashRouter as Router } from "react-router-dom";
 import * as framework from "@self.id/framework";
 import { mock } from "jest-mock-extended";

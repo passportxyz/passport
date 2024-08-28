@@ -3,22 +3,22 @@
 import React, { useContext, useEffect } from "react";
 
 // --Components
-import MinimalHeader from "../components/MinimalHeader";
-import { PAGE_PADDING } from "../components/PageWidthGrid";
-import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
-import PageRoot from "../components/PageRoot";
+import MinimalHeader from "./MinimalHeader";
+import { PAGE_PADDING } from "./PageWidthGrid";
+import HeaderContentFooterGrid from "./HeaderContentFooterGrid";
+import PageRoot from "./PageRoot";
 
 // --- Contexts
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 import { useWalletStore } from "../context/walletStore";
-import { InitialWelcome } from "../components/InitialWelcome";
-import LoadingScreen from "../components/LoadingScreen";
+import { InitialWelcome } from "./InitialWelcome";
+import LoadingScreen from "./LoadingScreen";
 
 // --- Utils
-import BodyWrapper from "../components/BodyWrapper";
+import BodyWrapper from "./BodyWrapper";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useNavigateToPage } from "../hooks/useCustomization";
-import WelcomeFooter from "../components/WelcomeFooter";
+import WelcomeFooter from "./WelcomeFooter";
 
 export default function Welcome() {
   const { passport, isLoadingPassport } = useContext(CeramicContext);
