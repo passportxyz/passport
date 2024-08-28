@@ -158,4 +158,37 @@ export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
   viewerUrl(address: string): string {
     return this.easScanUrl;
   }
+
+  checkOnChainStatus(
+    allProvidersState: AllProvidersState,
+    onChainProviders: OnChainProviderType[],
+    rawScore: number,
+    scoreState: ScoreStateType,
+    onChainScore: number,
+    expirationDate?: Date
+  ): OnChainStatus {
+    // This is specific implementation for Verax where we only check for the score to be different
+    if (scoreState !== "DONE" || onChainScore === undefined) {
+      return OnChainStatus.LOADING;
+    }
+
+    if (expirationDate && new Date() > expirationDate) return OnChainStatus.MOVED_EXPIRED;
+
+    if (Number.isNaN(onChainScore)) return OnChainStatus.NOT_MOVED;
+
+    if (onChainProviders.length === 0) {
+      // This is a special case for users who previously pushed the score-only
+      // attestation to the chain, but have not yet pushed the passport attestation
+      return rawScore !== onChainScore ? OnChainStatus.MOVED_OUT_OF_DATE : OnChainStatus.MOVED_UP_TO_DATE;
+    }
+
+    return super.checkOnChainStatus(
+      allProvidersState,
+      onChainProviders,
+      rawScore,
+      scoreState,
+      onChainScore,
+      expirationDate
+    );
+  }
 }
