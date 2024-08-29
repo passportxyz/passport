@@ -16,13 +16,13 @@ runs:
       shell: bash
       env:
         ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
-    # - name: Check Optimism Sepolia Onchain Provider Bitmaps # -> THIS FAILS
-    #   run: |
-    #     echo "📋📋📋 Check Optimism Sepolia Onchain Provider Bitmaps"
-    #     yarn workspace @gitcoin/passport-iam checkProviders:op-sepolia
-    #   shell: bash
-    #   env:
-    #     ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
+    - name: Check Optimism Sepolia Onchain Provider Bitmaps
+      run: |
+        echo "📋📋📋 Check Optimism Sepolia Onchain Provider Bitmaps"
+        yarn workspace @gitcoin/passport-iam checkProviders:op-sepolia
+      shell: bash
+      env:
+        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
     - name: Check Arbitrum Onchain Provider Bitmaps
       run: |
         echo "📋📋📋 Check Arbitrum  Onchain Provider Bitmaps"
@@ -44,10 +44,10 @@ runs:
       shell: bash
       env:
         ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
-    # - name: Check Linea Onchain Provider Bitmaps # -> THIS FAILS
-    #   run: |
-    #     echo "📋📋📋 Check Linea Onchain Provider Bitmaps"
-    #     yarn workspace @gitcoin/passport-iam checkProviders:linea
-    #   shell: bash
-    #   env:
-    #     ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
+    - name: Check Linea Onchain Provider Bitmaps
+      run: |
+        echo "📋📋📋 Check Linea Onchain Provider Bitmaps"
+        yarn workspace @gitcoin/passport-iam checkProviders:linea
+      shell: bash
+      env:
+        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
