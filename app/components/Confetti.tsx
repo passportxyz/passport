@@ -1,28 +1,55 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useCallback } from "react";
 import ReactConfetti from "react-confetti";
 import { mutableUserVerificationAtom } from "../context/userState";
 import { useAtom } from "jotai";
 import { ScorerContext } from "../context/scorerContext";
 import { colors } from "../utils/theme/palette";
 
-function getWindowDimensions() {
-  const { innerWidth: width } = window;
-  const scrollableHeight = document.body.offsetHeight;
-  return {
-    width,
-    height: scrollableHeight,
-  };
-}
+const useWindowDimensions = () => {
+  const getDimensions = useCallback(() => {
+    const width = document.documentElement.clientWidth;
+    const scrollableHeight = document.body.offsetHeight;
+    return {
+      width,
+      height: scrollableHeight,
+    };
+  }, []);
+
+  const [windowDimensions, setWindowDimensions] = useState(getDimensions());
+
+  useEffect(() => {
+    const onResize = () => {
+      setWindowDimensions(getDimensions());
+    };
+
+    // run on mount to set initial state
+    onResize();
+
+    // remove existing event listeners
+    window.removeEventListener("resize", onResize);
+
+    // add listeners
+    // passive stops the browser from waiting to see if the event
+    // listener will call preventDefault() -- better for performance
+    window.addEventListener("resize", onResize, { passive: true });
+
+    // clean up on dismount
+    return () => {
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
+  return { windowDimensions };
+};
 
 export const Confetti: React.FC = () => {
   const [verificationState] = useAtom(mutableUserVerificationAtom);
-  const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
+  const { windowDimensions } = useWindowDimensions();
   const [showConfetti, setShowConfetti] = useState(false);
   const { rawScore, threshold } = useContext(ScorerContext);
 
   useEffect(() => {
     setShowConfetti(!verificationState.loading && rawScore >= threshold);
-    setWindowDimensions(getWindowDimensions());
   }, [verificationState, rawScore, threshold]);
 
   if (!showConfetti) {
