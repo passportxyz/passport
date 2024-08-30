@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { autoUpdate, flip, offset, shift, useFloating } from "@floating-ui/react";
+import { twMerge } from "tailwind-merge";
 
 const TextAlignedInfoIcon = ({ className }: { className?: string }): JSX.Element => (
   <div className={`relative top-[.125em] h-[1em] w-[1em] text-color-2 ${className}`}>
@@ -36,7 +37,7 @@ const Tooltip = ({
     <>
       <button
         ref={refs.setReference}
-        className={`w-fit ${className}`}
+        className={twMerge("w-fit", className)}
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
         onFocus={() => setIsOpen(true)}
@@ -48,7 +49,10 @@ const Tooltip = ({
       {isOpen && (
         <div
           ref={refs.setFloating}
-          className={`z-10 w-4/5 px-4 py-2 max-w-screen-md rounded-md border border-foreground-6 bg-background text-sm text-color-1 ${panelClassName}`}
+          className={twMerge(
+            "z-10 w-4/5 px-4 py-2 max-w-screen-md rounded-md border border-foreground-6 bg-background text-sm text-color-1",
+            panelClassName
+          )}
           style={floatingStyles}
         >
           {children}

@@ -88,7 +88,13 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
   return (
     <CustomDashboardPanel className={className} logo={logo}>
       {body.displayInfoTooltip && body.displayInfoTooltip.shouldDisplay && body.displayInfoTooltip.text ? (
-        <Tooltip className="absolute top-2 right-2">{body.displayInfoTooltip.text}</Tooltip>
+        <Tooltip
+          iconClassName="text-customization-background-1"
+          className="absolute top-2 right-2"
+          panelClassName="border-customization-background-1"
+        >
+          {body.displayInfoTooltip.text}
+        </Tooltip>
       ) : null}
       <div
         dangerouslySetInnerHTML={{
