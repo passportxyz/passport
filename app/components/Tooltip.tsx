@@ -1,6 +1,5 @@
-import React, { useState, Ref } from "react";
-import { Popover } from "@headlessui/react";
-import { usePopper } from "react-popper";
+import React, { useState } from "react";
+import { autoUpdate, flip, offset, shift, useFloating } from "@floating-ui/react";
 
 const TextAlignedInfoIcon = ({ className }: { className?: string }): JSX.Element => (
   <div className={`relative top-[.125em] h-[1em] w-[1em] text-color-2 ${className}`}>
@@ -14,7 +13,7 @@ const TextAlignedInfoIcon = ({ className }: { className?: string }): JSX.Element
   </div>
 );
 
-const TooltipPopover = ({
+const Tooltip = ({
   children,
   className,
   panelClassName,
@@ -25,38 +24,38 @@ const TooltipPopover = ({
   panelClassName?: string;
   iconClassName?: string;
 }): JSX.Element => {
-  const [referenceElement, setReferenceElement] = useState(null);
-  const [popperElement, setPopperElement] = useState(null);
-
-  const { styles, attributes } = usePopper(referenceElement, popperElement, {
-    modifiers: [
-      {
-        name: "preventOverflow",
-        options: {
-          padding: 24,
-        },
-      },
-    ],
+  const { refs, floatingStyles } = useFloating({
+    placement: "bottom-start",
+    middleware: [offset(6), flip(), shift({ padding: 24 })],
+    whileElementsMounted: autoUpdate,
   });
 
-  return (
-    <Popover className={`group cursor-pointer px-2 ${className}`}>
-      {/* ref type stuff is a workaround for the weird way popper needs references */}
-      <Popover.Button as="div" ref={setReferenceElement as unknown as Ref<HTMLButtonElement>}>
-        <TextAlignedInfoIcon className={iconClassName} />
-      </Popover.Button>
+  const [isOpen, setIsOpen] = useState(false);
 
-      <Popover.Panel
-        ref={setPopperElement as unknown as Ref<HTMLDivElement>}
-        className={`invisible z-10 w-4/5 max-w-screen-md rounded-md border border-foreground-6 bg-background text-sm text-color-1 group-hover:visible ${panelClassName}`}
-        style={styles.popper}
-        {...attributes.popper}
-        static
+  return (
+    <>
+      <button
+        ref={refs.setReference}
+        className={`w-fit ${className}`}
+        onMouseEnter={() => setIsOpen(true)}
+        onMouseLeave={() => setIsOpen(false)}
+        onFocus={() => setIsOpen(true)}
+        onBlur={() => setIsOpen(false)}
       >
-        <div className="px-4 py-2">{children}</div>
-      </Popover.Panel>
-    </Popover>
+        <TextAlignedInfoIcon className={iconClassName} />
+      </button>
+
+      {isOpen && (
+        <div
+          ref={refs.setFloating}
+          className={`z-10 w-4/5 px-4 py-2 max-w-screen-md rounded-md border border-foreground-6 bg-background text-sm text-color-1 ${panelClassName}`}
+          style={floatingStyles}
+        >
+          {children}
+        </div>
+      )}
+    </>
   );
 };
 
-export default TooltipPopover;
+export default Tooltip;
