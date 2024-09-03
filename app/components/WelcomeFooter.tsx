@@ -42,7 +42,7 @@ const chainsForFooter = (
 const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
   return (
     <footer
-      className={`flex flex-col md:flex-row gap-y-1 bottom-0 items-center justify-between p-4 bg-black text-white text-sm w-full max-w-full overflow-auto relative md:fixed`}
+      className={`flex flex-col md:flex-row gap-y-1 bottom-0 items-center justify-between p-4 bg-black text-white text-sm w-full max-w-full overflow-auto relative`}
     >
       <div className="flex items-start justify-start lg:justify-between flex-wrap">
         <span className="lg:ml-10 self-center">Available on</span>

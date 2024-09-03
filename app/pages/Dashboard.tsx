@@ -301,7 +301,7 @@ export default function Dashboard() {
           </PageWidthGrid>
         </BodyWrapper>
         {/* This footer contains dark colored text and dark images */}
-        <WelcomeFooter displayPrivacyPolicy={false} fixed={false} />
+        <WelcomeFooter displayPrivacyPolicy={false} />
       </HeaderContentFooterGrid>
     </PageRoot>
   );
