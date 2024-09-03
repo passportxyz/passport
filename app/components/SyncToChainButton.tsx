@@ -61,7 +61,7 @@ export function SyncToChainButton({ onChainStatus, chain, className }: SyncToCha
     setUserHasApprovedLowScoreMint(true);
     setShowLowScoreAlert(false);
     onClick();
-  }, [onClick]);
+  }, [onClick, setUserHasApprovedLowScoreMint]);
 
   const loading =
     showLowScoreAlert || syncingToChain || onChainStatus === OnChainStatus.LOADING || scoreState !== "DONE";

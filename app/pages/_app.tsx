@@ -43,7 +43,7 @@ const RenderOnlyOnClient = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App({ Component, pageProps }: AppProps) {
-  const intercom = useIntercom();
+  const { initialize } = useIntercom();
 
   useEffect(() => {
     TagManager.initialize({
@@ -56,9 +56,9 @@ function App({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      intercom.initialize();
+      initialize();
     }
-  }, [intercom.initialize]);
+  }, [initialize]);
 
   if (typeof window !== "undefined") {
     // pull any search params
