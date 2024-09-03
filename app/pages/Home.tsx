@@ -29,14 +29,11 @@ export default function Home() {
       {isConnected && <AccountCenter />}
       <div className="flex-grow items-center justify-center self-center p-8 overflow-auto">
         <div className="z-10 grid grid-flow-row grid-cols-2 gap-4 lg:grid-flow-col p-2">
-          <div className="col-span-2 text-6xl md:text-7xl lg:row-start-2">
+          <div className="col-span-2 text-5xl md:text-7xl lg:row-start-2">
             <div className="grid grid-flow-col justify-start">
-              <img src="./assets/passportLogoWhite.svg" alt="Icon" className="h-20 self-center" />
+              <img src="./assets/passportLogoWhite.svg" alt="Icon" className="h-10 md:h-20 self-center" />
               <p className="p-2">Passport</p>
             </div>
-          </div>
-          <div className="col-span-2 mb-4 text-2xl leading-none text-foreground-2 md:text-5xl">
-            Unlock the best of web3
           </div>
           <WebmVideo
             src="/assets/splashPageLogo.webm"
@@ -44,28 +41,33 @@ export default function Home() {
             alt="Passport Logo"
             className="col-span-2 w-full max-w-md lg:col-start-3 lg:row-span-6 lg:mr-8 lg:max-w-2xl"
           />
+          <div className="col-span-2 mb-4 text-2xl leading-none text-foreground-2 md:text-5xl">
+            Unlock the best of web3
+          </div>
           <div className="col-span-2 max-w-md text-lg lg:max-w-sm">
             Access a world of Web3 opportunities securely with a single sign-in.
           </div>
-          <SIWEButton
-            subtext={(() => {
-              if (loginStep === "PENDING_WALLET_CONNECTION") {
-                return "Connect your wallet";
-              } else if (loginStep === "PENDING_DATABASE_CONNECTION") {
-                return "Sign message in wallet";
-              }
-            })()}
-            loadIconPosition="right"
-            disabled={isLoggingIn || isServerOnMaintenance()}
-            isLoading={isLoggingIn}
-            enableEthBranding={enableEthBranding}
-            data-testid="connectWalletButton"
-            onClick={signIn}
-            className="col-span-2 mt-4 lg:w-3/4"
-          />
+          <div className="z-20 col-span-2 flex justify-center lg:justify-start items-center fixed left-0 w-full bottom-8 md:bottom-0 md:relative">
+            <SIWEButton
+              subtext={(() => {
+                if (loginStep === "PENDING_WALLET_CONNECTION") {
+                  return "Connect your wallet";
+                } else if (loginStep === "PENDING_DATABASE_CONNECTION") {
+                  return "Sign message in wallet";
+                }
+              })()}
+              loadIconPosition="right"
+              disabled={isLoggingIn || isServerOnMaintenance()}
+              isLoading={isLoggingIn}
+              enableEthBranding={enableEthBranding}
+              data-testid="connectWalletButton"
+              onClick={signIn}
+              className="col-span-2 mt-4 lg:w-3/4"
+            />
+          </div>
         </div>
       </div>
-      <WelcomeFooter displayPrivacyPolicy={true} fixed={true} />
+      <WelcomeFooter displayPrivacyPolicy={true} />
     </PageRoot>
   );
 }
