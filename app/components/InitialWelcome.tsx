@@ -101,7 +101,7 @@ export const InitialWelcome = ({
   const welcomeSteps = hasPassports ? welcomeStepsReturningUser : welcomeStepsNewUser;
 
   const content = welcomeSteps[step];
-  const body = content.body;
+  const body = content?.body;
 
   return <WelcomeWrapper content={content}>{body}</WelcomeWrapper>;
 };

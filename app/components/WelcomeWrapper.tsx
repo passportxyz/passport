@@ -132,7 +132,7 @@ const WelcomePageButtons = ({
         {displaySkipBtn ? (
           <LoadButton
             data-testid="skip-for-now-button"
-            className="col-span-1 md:col-span-2 md:row-start-1"
+            className="col-span-1 md:row-start-1"
             variant="secondary"
             isLoading={isLoading}
             onClick={() => {

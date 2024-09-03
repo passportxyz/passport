@@ -39,7 +39,7 @@ const chainsForFooter = (
   ] as Chain[]
 ).concat(chains.filter((chain) => !!chain.attestationProvider));
 
-const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean; }) => {
+const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
   return (
     <footer
       className={`flex flex-col md:flex-row gap-y-1 bottom-0 items-center justify-between p-4 bg-black text-white text-sm w-full max-w-full overflow-auto relative md:fixed`}
