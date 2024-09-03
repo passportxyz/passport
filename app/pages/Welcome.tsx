@@ -55,7 +55,10 @@ export default function Welcome() {
             <LoadingScreen className="mb-20" />
           )}
         </BodyWrapper>
-        <WelcomeFooter displayPrivacyPolicy={true} fixed={true} />
+        <WelcomeFooter displayPrivacyPolicy={true} />
+        <div className="pb-28 md:pb-0">
+          {/* Just adding some spacing to make the footer visible above the fixed button area */}
+        </div>
       </HeaderContentFooterGrid>
     </PageRoot>
   );

@@ -56,10 +56,10 @@ const PlatformCard = ({}) => {
 
 export const WelcomeWrapper = ({ content, children }: WelcomeWrapperProps) => {
   return (
-    <div className="overflow-auto pb-32 inline-block md:grid grid-rows-[minmax(0,1fr)_min-content_minmax(0,2fr)] grid-flow-rows">
-      <div className="row-start-1 p-4 text-lg text-color-1 md:row-start-2">
+    <div className="overflow-auto md:pb-32 inline-block md:grid grid-rows-[minmax(0,1fr)_min-content_minmax(0,2fr)] grid-flow-rows">
+      <div className="row-start-1 p-4 text-sm md:text-lg text-color-1 md:row-start-2">
         <div className="flex h-full w-full auto-rows-min flex-col gap-2 md:grid md:grid-cols-2">
-          <div className="flex row-start-2 flex-col gap-2 place-items-start">
+          <div className="hidden md:flex row-start-2 flex-col gap-2 place-items-start">
             <div className="font-heading text-4xl text-foreground-2 md:text-5xl lg:text-7xl">{content.header}</div>
             <div className="flex justify-center gap-2 text-xl text-color-2 md:text-2xl lg:text-5xl">
               {content.subHeaderIconSrc ? (
@@ -70,7 +70,7 @@ export const WelcomeWrapper = ({ content, children }: WelcomeWrapperProps) => {
           </div>
 
           {/* Extra row span is for spacing */}
-          <div className="self-start md:col-start-2 md:row-span-5 relative w-full h-[610px]">
+          <div className="self-start md:col-start-2 md:row-span-5 relative w-full h-[270px] md:h-[610px]">
             <img className="absolute inset-0 w-full h-full" src={content.backgroudIconSrc} alt="Background Icon" />
             {content.stampIcon ? (
               <img className="absolute inset-0 w-[340px] h-[380px] m-auto" src={content.stampIcon} alt="Stamp" />
@@ -85,7 +85,17 @@ export const WelcomeWrapper = ({ content, children }: WelcomeWrapperProps) => {
             ) : null}
           </div>
 
-          <div className="flex grow flex-col justify-between gap-4 md:gap-8">
+          <div className="flex md:hidden row-start-2 flex-col gap-2 place-items-start z-10">
+            <div className="font-heading text-3xl text-foreground-2 ">{content.header}</div>
+            <div className="flex justify-center gap-2 text-l text-color-2 ">
+              {content.subHeaderIconSrc ? (
+                <img className="h-9 w-9" src={content.subHeaderIconSrc} alt="Subheader Icon" />
+              ) : null}
+              <p>{content.subHeader}</p>
+            </div>
+          </div>
+
+          <div className="flex grow flex-col justify-between gap-4 md:gap-8 z-10">
             <div>{children}</div>
             <WelcomePageButtons {...content.buttonsConfig} />
           </div>
@@ -130,12 +140,12 @@ const WelcomePageButtons = ({
   const [isLoading, setIsLoading] = useState(false);
   const [skipNextTime, setSkipNextTime] = useState(false);
   return (
-    <div>
+    <div className="fixed md:relative px-4 pt-1 pb-4 bottom-0 left-0 w-full bg-background">
       <div className="grid w-full grid-cols-2 gap-4">
         {displaySkipBtn ? (
           <LoadButton
             data-testid="skip-for-now-button"
-            className="col-span-full row-start-2 md:col-span-1 md:row-start-1"
+            className="col-span-1 md:col-span-2 md:row-start-1"
             variant="secondary"
             isLoading={isLoading}
             onClick={() => {
@@ -148,15 +158,14 @@ const WelcomePageButtons = ({
           </LoadButton>
         ) : null}
 
-        <Button data-testid="next-button" onClick={onNext} className="col-span-full md:col-span-1">
+        <Button data-testid="next-button" onClick={onNext} className={`${displaySkipBtn?'col-span-1':'col-span-2'} md:col-span-2`}>
           {nextButtonText || "Next"}
         </Button>
       </div>
 
       {showSkipNextTime ? (
-        <div className="mt-8 flex">
+        <div className="mt-8 flex justify-center">
           <Checkbox
-            className="my-5"
             id="skip-next-time"
             checked={skipNextTime}
             onChange={(checked) => {
@@ -170,7 +179,7 @@ const WelcomePageButtons = ({
               }
             }}
           />
-          <label htmlFor="skip-next-time" className={`my-5 pl-2 font-alt text-sm`}>
+          <label htmlFor="skip-next-time" className="pl-2 font-alt text-sm">
             Skip this screen next time
           </label>
         </div>

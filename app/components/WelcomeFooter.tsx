@@ -39,12 +39,12 @@ const chainsForFooter = (
   ] as Chain[]
 ).concat(chains.filter((chain) => !!chain.attestationProvider));
 
-const WelcomeFooter = ({ displayPrivacyPolicy, fixed }: { displayPrivacyPolicy: boolean; fixed: boolean }) => {
+const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean; }) => {
   return (
     <footer
-      className={`flex bottom-0 items-center justify-between p-4  bg-black text-white text-sm w-full max-w-full overflow-auto ${fixed ? "fixed" : ""}`}
+      className={`flex flex-col md:flex-row gap-y-1 bottom-0 items-center justify-between p-4 bg-black text-white text-sm w-full max-w-full overflow-auto relative md:fixed`}
     >
-      <div className="flex items-start  justify-start lg:justify-between flex-wrap">
+      <div className="flex items-start justify-start lg:justify-between flex-wrap">
         <span className="lg:ml-10 self-center">Available on</span>
         {chainsForFooter.map(({ chainLink, icon }, idx) => {
           return (
@@ -56,7 +56,7 @@ const WelcomeFooter = ({ displayPrivacyPolicy, fixed }: { displayPrivacyPolicy: 
           );
         })}
       </div>
-      <div className="flex items-end justify-center md:justify-end flex-wrap">
+      <div className="flex flex-col md:flex-row gap-y-1 items-center md:items-end justify-center md:justify-end flex-wrap">
         {displayPrivacyPolicy ? (
           <a href="https://www.gitcoin.co/privacy" className="hover:underline px-2  ">
             Privacy Policy
@@ -68,13 +68,13 @@ const WelcomeFooter = ({ displayPrivacyPolicy, fixed }: { displayPrivacyPolicy: 
         <a href="https://scorer.gitcoin.co/" className="hover:underline px-2">
           Passport XYZ Scorer
         </a>
-        <div className="flex items-end justify-end flex-wrap">
-          <div className="px-2">
+        <div className="flex flex-col md:flex-row gap-y-1 items-end justify-end flex-wrap">
+          <div className="md:px-2">
             <a href="https://passport.gitcoin.co/">
               <GitHubIcon />
             </a>
           </div>
-          <div className="px-2 mr-20">
+          <div className="pr-2 md:px-2 md:mr-20">
             <a href="https://docs.passport.xyz/">
               <SyncIcon />
             </a>
