@@ -44,8 +44,10 @@ export default function Home() {
           <div className="col-span-2 mb-4 text-2xl leading-none text-foreground-2 md:text-5xl">
             Unlock the best of web3
           </div>
-
-          <div className="z-20 col-span-2 flex justify-center md:justify-start items-center fixed left-0 w-full bottom-8 md:bottom-0 md:relative">
+          <div className="col-span-2 max-w-md text-lg lg:max-w-sm">
+            Access a world of Web3 opportunities securely with a single sign-in.
+          </div>
+          <div className="z-20 col-span-2 flex justify-center lg:justify-start items-center fixed left-0 w-full bottom-8 md:bottom-0 md:relative">
             <SIWEButton
               subtext={(() => {
                 if (loginStep === "PENDING_WALLET_CONNECTION") {
