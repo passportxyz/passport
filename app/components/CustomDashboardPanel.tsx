@@ -1,14 +1,12 @@
-import React, { useMemo, useState, Ref, ReactElement, JSXElementConstructor } from "react";
+import React, { useMemo, useState, ReactElement, JSXElementConstructor } from "react";
 import { VeraxPanel } from "../components/VeraxPanel";
 import { TestingPanel } from "../components/TestingPanel";
 import { Button } from "../components/Button";
 import { CustomizationLogoBackground } from "../utils/customizationUtils";
 import { useCustomization } from "../hooks/useCustomization";
 import { OnchainSidebar } from "./OnchainSidebar";
-import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
-import { Popover } from "@headlessui/react";
-import { usePopper } from "react-popper";
 import { renderToString } from "react-dom/server";
+import Tooltip from "./Tooltip";
 
 type CustomDashboardPanelProps = {
   logo: {
@@ -69,19 +67,6 @@ export const CustomDashboardPanel = ({ logo, className, children }: CustomDashbo
 export const DynamicCustomDashboardPanel = ({ className }: { className: string }) => {
   const customization = useCustomization();
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
-  const [referenceElement, setReferenceElement] = useState(null);
-  const [popperElement, setPopperElement] = useState(null);
-
-  const { styles, attributes } = usePopper(referenceElement, popperElement, {
-    modifiers: [
-      {
-        name: "preventOverflow",
-        options: {
-          padding: 24,
-        },
-      },
-    ],
-  });
 
   if (customization.key === "verax") {
     return <VeraxPanel className={className} />;
@@ -103,22 +88,13 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
   return (
     <CustomDashboardPanel className={className} logo={logo}>
       {body.displayInfoTooltip && body.displayInfoTooltip.shouldDisplay && body.displayInfoTooltip.text ? (
-        <Popover className={`group cursor-pointer px-2 self-end  absolute top-0 right-0 p-2`}>
-          <Popover.Button as="div" ref={setReferenceElement as unknown as Ref<HTMLButtonElement>}>
-            <div className="mr-4 w-4 self-end">
-              <ExclamationCircleIcon height={24} color={"rgb(var(--color-customization-background-1))"} />
-            </div>
-          </Popover.Button>
-          <Popover.Panel
-            ref={setPopperElement as unknown as Ref<HTMLDivElement>}
-            className={`invisible z-20 max-w-screen-md rounded-md border border-customization-background-1 bg-background text-sm text-color-1 group-hover:visible`}
-            style={styles.popper}
-            {...attributes.popper}
-            static
-          >
-            <div className="px-4 py-2">{body.displayInfoTooltip.text}</div>
-          </Popover.Panel>
-        </Popover>
+        <Tooltip
+          iconClassName="text-customization-background-1"
+          className="absolute top-2 right-2"
+          panelClassName="border-customization-background-1"
+        >
+          {body.displayInfoTooltip.text}
+        </Tooltip>
       ) : null}
       <div
         dangerouslySetInnerHTML={{
