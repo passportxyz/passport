@@ -93,7 +93,7 @@ jobs:
         uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
         with:
           docker_tag: ${{ inputs.docker_tag }}
-          stack_name: gitcoin/passport/${{ inputs.environment }}
+          stack_name: passportxyz/passport/${{ inputs.environment }}
           aws_region: us-west-2
           pulumi_command: preview
           pulumi_diff: true
@@ -145,7 +145,7 @@ jobs:
         uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
         with:
           docker_tag: ${{ inputs.docker_tag }}
-          stack_name: gitcoin/passport/${{ inputs.environment }}
+          stack_name: passportxyz/passport/${{ inputs.environment }}
           aws_region: us-west-2
           pulumi_command: up
           AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
