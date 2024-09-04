@@ -359,7 +359,7 @@ const albGitcoinTargetGroup = new aws.lb.TargetGroup(`passport-iam`, {
   targetType: "ip",
   tags: {
     ...defaultTags,
-    Name: `ppassport-iam`,
+    Name: `passport-iam`,
   },
 });
 
