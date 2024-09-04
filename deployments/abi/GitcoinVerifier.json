@@ -368,5 +368,33 @@
     "function upgradeToAndCall(address newImplementation, bytes data) payable",
     "function verifyAndAttest(((bytes32 schema, (address recipient, uint64 expirationTime, bool revocable, bytes32 refUID, bytes data, uint256 value)[] data)[] multiAttestationRequest, uint256 nonce, uint256 fee) attestationRequest, uint8 v, bytes32 r, bytes32 s) payable returns (bytes32[])",
     "function withdrawFees(uint256 _amount)"
+  ],
+  "0x168": [
+    "error InsufficientFee()",
+    "error InvalidNonce()",
+    "error InvalidSignature()",
+    "event AdminChanged(address previousAdmin, address newAdmin)",
+    "event BeaconUpgraded(address indexed beacon)",
+    "event Initialized(uint8 version)",
+    "event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)",
+    "event Paused(address account)",
+    "event Unpaused(address account)",
+    "event Upgraded(address indexed implementation)",
+    "function attester() view returns (address)",
+    "function initialize(address _issuer, address _attester)",
+    "function issuer() view returns (address)",
+    "function name() view returns (string)",
+    "function owner() view returns (address)",
+    "function pause()",
+    "function paused() view returns (bool)",
+    "function proxiableUUID() view returns (bytes32)",
+    "function recipientNonces(address) view returns (uint256)",
+    "function renounceOwnership()",
+    "function transferOwnership(address newOwner)",
+    "function unpause()",
+    "function upgradeTo(address newImplementation)",
+    "function upgradeToAndCall(address newImplementation, bytes data) payable",
+    "function verifyAndAttest(((bytes32 schema, (address recipient, uint64 expirationTime, bool revocable, bytes32 refUID, bytes data, uint256 value)[] data)[] multiAttestationRequest, uint256 nonce, uint256 fee) attestationRequest, uint8 v, bytes32 r, bytes32 s) payable returns (bytes32[])",
+    "function withdrawFees(uint256 _amount)"
   ]
 }
