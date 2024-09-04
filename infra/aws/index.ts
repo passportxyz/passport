@@ -22,7 +22,7 @@ const route53Domain = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_
 const route53Zone = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_ZONE`);
 const cloudflareZoneId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
 
-const coreInfraStack = new pulumi.StackReference(`gitcoin/core-infra/${stack}`);
+const coreInfraStack = new pulumi.StackReference(`passportxyz/core-infra/${stack}`);
 
 const vpcId = coreInfraStack.getOutput("vpcId");
 const vpcPrivateSubnets = coreInfraStack.getOutput("privateSubnetIds");
@@ -33,7 +33,7 @@ const albDnsName = coreInfraStack.getOutput("coreAlbDns");
 const albZoneId = coreInfraStack.getOutput("coreAlbZoneId");
 const albHttpsListenerArn = coreInfraStack.getOutput("coreAlbHttpsListenerArn");
 
-const passportDataScienceStack = new pulumi.StackReference(`gitcoin/passport-data/${stack}`);
+const passportDataScienceStack = new pulumi.StackReference(`passportxyz/passport-data/${stack}`);
 const passportDataScienceEndpoint = passportDataScienceStack.getOutput("internalAlbBaseUrl");
 
 const snsAlertsTopicArn = coreInfraStack.getOutput("snsAlertsTopicArn");
