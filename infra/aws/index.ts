@@ -327,7 +327,7 @@ const albPassportXyzListenerRule = new aws.lb.ListenerRule(`passport-xyz-iam-htt
   conditions: [
     {
       hostHeader: {
-        values: [passportXyzDomainName],
+        values: [passportXyzDomainName.apply((domain) => `iam.${domain}`)],
       },
       // pathPattern: {[]}
     },
