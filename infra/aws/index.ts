@@ -237,6 +237,47 @@ const alarmConfigurations: AlarmConfigurations = {
 // can be moved to core infrastructure if it is reused
 //////////////////////////////////////////////////////////////
 
+
+// const serviceRole = 
+//   pulumi.all([passportXyzIamSecretObject, gitcoinIamSecretObject])
+//   .apply(([passportXyzIamSecret, gitcoinIamSecret]) => { 
+//   return new aws.iam.Role("passport-ecs-role", {
+//     assumeRolePolicy: JSON.stringify({
+//       Version: "2012-10-17",
+//       Statement: [
+//         {
+//           Sid: "EcsAssume",
+//           Action: "sts:AssumeRole",
+//           Effect: "Allow",
+//           Principal: {
+//             Service: "ecs-tasks.amazonaws.com",
+//           },
+//         },
+//       ],
+//     }),
+//     inlinePolicies: [
+//       {
+//         name: "allow_iam_secrets_access",
+//         policy: 
+//           JSON.stringify({
+//             Version: "2012-10-17",
+//             Statement: [
+//               {
+//                 Action: ["secretsmanager:GetSecretValue"],
+//                 Effect: "Allow",
+//                 Resource: [passportXyzIamSecret.apply().arn, gitcoinIamSecret.arn, PASSPORT_VC_SECRETS_ARN],
+//               },
+//             ],
+//           })
+        
+//       },
+//     ],
+//     managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"],
+//     tags: {
+//       ...defaultTags,
+//     },
+// })});
+
 const serviceRole = new aws.iam.Role("passport-ecs-role", {
   assumeRolePolicy: JSON.stringify({
     Version: "2012-10-17",
@@ -359,7 +400,7 @@ const albGitcoinTargetGroup = new aws.lb.TargetGroup(`passport-iam`, {
   targetType: "ip",
   tags: {
     ...defaultTags,
-    Name: `passport-iam`,
+    Name: `ppassport-iam`,
   },
 });
 
