@@ -14,13 +14,13 @@ export const dockerGtcPassportIamImage = pulumi
   .apply(([acc, region]) => `${acc.accountId}.dkr.ecr.${region.id}.amazonaws.com/passport:${DOCKER_IMAGE_TAG}`);
 
 const PROVISION_STAGING_FOR_LOADTEST =
-  op.read.parse(`op://DevOps/passport-${stack}-env/ci/PROVISION_STAGING_FOR_LOADTEST`).toLowerCase() === "true";
+  op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PROVISION_STAGING_FOR_LOADTEST`).toLowerCase() === "true";
 
-const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
+const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
 
-const route53Domain = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_DOMAIN`);
-const route53Zone = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_ZONE`);
-const cloudflareZoneId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
+const route53Domain = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/ROUTE_53_DOMAIN`);
+const route53Zone = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/ROUTE_53_ZONE`);
+const cloudflareZoneId = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
 
 const coreInfraStack = new pulumi.StackReference(`passportxyz/core-infra/${stack}`);
 
@@ -311,7 +311,7 @@ const albPassportXyzTargetGroup = new aws.lb.TargetGroup(`passport-xyz-iam`, {
   targetType: "ip",
   tags: {
     ...defaultTags,
-    Name: `ppassport-xyz-iam`,
+    Name: `passport-xyz-iam`,
   },
 });
 
@@ -358,7 +358,7 @@ const albGitcoinTargetGroup = new aws.lb.TargetGroup(`passport-iam`, {
   targetType: "ip",
   tags: {
     ...defaultTags,
-    Name: `ppassport-iam`,
+    Name: `passport-iam`,
   },
 });
 
@@ -791,13 +791,13 @@ export const gitcoinServiceRecord = new aws.route53.Record("passport-record", {
   ],
 });
 
-const PASSPORT_APP_GITHUB_URL = op.read.parse(`op://DevOps/passport-${stack}-env/ci/PASSPORT_APP_GITHUB_URL`);
+const PASSPORT_APP_GITHUB_URL = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PASSPORT_APP_GITHUB_URL`);
 const PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY = op.read.parse(
-  `op://DevOps/passport-${stack}-secrets/ci/PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY`
+  `op://DevOps/passport-xyz-${stack}-secrets/ci/PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY`
 );
 
 const CLOUDFLARE_DOMAIN = stack === "production" ? `passport.xyz` : "";
-const CLOUDFLARE_ZONE_ID = op.read.parse(`op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
+const CLOUDFLARE_ZONE_ID = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
 
 
 // Passport XYZ
