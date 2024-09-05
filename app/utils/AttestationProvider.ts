@@ -15,6 +15,7 @@ type AttestationProviderStatus = "enabled" | "comingSoon" | "disabled";
 type BaseProviderConfig = {
   name: string;
   status: AttestationProviderStatus;
+  skipByDefault: boolean; // If true, only show this chain if explicitly listed in the chain list
   monochromeIcon: string;
 };
 
@@ -33,6 +34,7 @@ export type AttestationProviderConfig = EASConfig | VeraxAndEASConfig;
 export interface AttestationProvider {
   name: string;
   status: AttestationProviderStatus;
+  skipByDefault: boolean;
   hasWebViewer: boolean;
   attestationExplorerLinkText: string;
   monochromeIcon: string;
@@ -53,6 +55,7 @@ export interface AttestationProvider {
 class BaseAttestationProvider implements AttestationProvider {
   name = "Override this class";
   status: AttestationProviderStatus;
+  skipByDefault: boolean = false;
   hasWebViewer = false;
   attestationExplorerLinkText = "Check attestation on EAS";
   chainId: string;
@@ -62,14 +65,17 @@ class BaseAttestationProvider implements AttestationProvider {
     chainId,
     status,
     monochromeIcon,
+    skipByDefault = false,
   }: {
     chainId: string;
     status: AttestationProviderStatus;
     monochromeIcon: string;
+    skipByDefault: boolean;
   }) {
     this.chainId = chainId;
     this.status = status;
     this.monochromeIcon = monochromeIcon;
+    this.skipByDefault = skipByDefault;
   }
 
   viewerUrl(_address: string): string {
@@ -110,7 +116,7 @@ class BaseAttestationProvider implements AttestationProvider {
   ): OnChainStatus {
     // This is default implementation that will check for differences in
     // the on-chain providers and on-chain score
-    if (scoreState !== "DONE") return OnChainStatus.LOADING;
+    if (scoreState !== "DONE" && scoreState !== "ERROR") return OnChainStatus.LOADING;
 
     if (onChainProviders.length === 0) return OnChainStatus.NOT_MOVED;
 
@@ -150,13 +156,15 @@ export class EASAttestationProvider extends BaseAttestationProvider {
     status,
     easScanUrl,
     monochromeIcon,
+    skipByDefault = false,
   }: {
     chainId: string;
     status: AttestationProviderStatus;
     easScanUrl: string;
     monochromeIcon: string;
+    skipByDefault: boolean;
   }) {
-    super({ status, chainId, monochromeIcon });
+    super({ status, chainId, monochromeIcon, skipByDefault });
     this.easScanUrl = easScanUrl;
   }
 

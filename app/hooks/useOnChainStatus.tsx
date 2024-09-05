@@ -8,11 +8,25 @@ import { useOnChainData } from "./useOnChainData";
 import { useCustomization } from "./useCustomization";
 import { Customization } from "../utils/customizationUtils";
 
-export const parseValidChains = (customization: Customization, id: string) => {
-  if (customization.includedChainIds && customization.includedChainIds?.length > 0) {
-    return customization.includedChainIds.includes(id);
-  } else {
-    return true;
+export const parseValidChains = (customization: Customization, chainConfig: Chain) => {
+  if (
+    chainConfig.attestationProvider?.status === "comingSoon" ||
+    chainConfig.attestationProvider?.status === "enabled"
+  ) {
+    if (chainConfig.attestationProvider.skipByDefault) {
+      if (customization.includedChainIds && customization.includedChainIds?.length > 0) {
+        return customization.includedChainIds.includes(chainConfig.id);
+      } else {
+        // By default we don't want to show the mint button for chains labeled with `skipByDefault`
+        return false;
+      }
+    } else {
+      if (customization.includedChainIds && customization.includedChainIds?.length > 0) {
+        return customization.includedChainIds.includes(chainConfig.id);
+      } else {
+        return true;
+      }
+    }
   }
 };
 
@@ -46,7 +60,7 @@ export const useOnChainStatus = ({ chain }: { chain?: Chain }): OnChainStatus =>
       setOnChainStatus(status);
     };
     checkStatus();
-  }, [allProvidersState, chain?.id, data, isPending, rawScore, scoreState]);
+  }, [allProvidersState, chain, chain?.id, data, isPending, rawScore, scoreState]);
 
   return onChainStatus;
 };
@@ -60,11 +74,7 @@ export const useAllOnChainStatus = () => {
   const allChainsUpToDate = useMemo(() => {
     if (isPending) return false;
     return chains
-      .filter(
-        ({ attestationProvider, id }) =>
-          (attestationProvider?.status === "comingSoon" || attestationProvider?.status === "enabled") &&
-          parseValidChains(customization, id)
-      )
+      .filter((chain) => parseValidChains(customization, chain))
       .every((activeChain) => {
         const { score, providers, expirationDate } = data[activeChain.id] || { score: 0, providers: [] };
         const attestationProvider = activeChain.attestationProvider;

@@ -111,6 +111,7 @@ if (usingTestEnvironment) {
     attestationProviderConfig: {
       name: "Ethereum Attestation Service",
       status: "enabled",
+      skipByDefault: false,
       easScanUrl: "https://optimism-sepolia.easscan.org",
       monochromeIcon: "./assets/op-logo-monochrome.svg",
     },
@@ -127,6 +128,7 @@ if (usingTestEnvironment) {
     attestationProviderConfig: {
       name: "Verax + EAS",
       status: "enabled",
+      skipByDefault: false,
       easScanUrl: "https://linea-goerli.easscan.org",
       monochromeIcon: "./assets/linea-logo.png",
     },
@@ -166,6 +168,7 @@ if (!TEST_MODE) {
     attestationProviderConfig: {
       name: "Ethereum Attestation Service",
       status: usingTestEnvironment ? "disabled" : "enabled",
+      skipByDefault: false,
       easScanUrl: "https://optimism.easscan.org",
       monochromeIcon: "./assets/op-logo-monochrome.svg",
     },
@@ -183,6 +186,8 @@ if (!TEST_MODE) {
       attestationProviderConfig: {
         name: "Ethereum Attestation Service",
         status: usingTestEnvironment ? "disabled" : "enabled",
+        skipByDefault: false,
+
         easScanUrl: "https://zksync.easscan.org",
         monochromeIcon: "./assets/zksync-logo-monochrome.svg",
       },
@@ -200,6 +205,7 @@ if (!TEST_MODE) {
     attestationProviderConfig: {
       name: "Verax + EAS",
       status: "enabled",
+      skipByDefault: false,
       easScanUrl: "https://explorer.ver.ax/linea/attestations/my_attestations",
       monochromeIcon: "./assets/linea-logo.png",
     },
@@ -227,6 +233,7 @@ if (!TEST_MODE) {
     attestationProviderConfig: {
       name: "Ethereum Attestation Service",
       status: usingTestEnvironment ? "disabled" : "enabled",
+      skipByDefault: false,
       easScanUrl: "https://arbitrum.easscan.org",
       monochromeIcon: "./assets/arbitrum-logo-monochrome.svg",
     },
@@ -244,6 +251,7 @@ if (!TEST_MODE) {
       attestationProviderConfig: {
         name: "Ethereum Attestation Service",
         status: usingTestEnvironment ? "disabled" : "enabled",
+        skipByDefault: false,
         easScanUrl: "https://scroll.easscan.org",
         monochromeIcon: "./assets/scroll-logo-monochrome.svg",
       },
@@ -257,13 +265,14 @@ if (!TEST_MODE) {
       label: "Shape",
       rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SHAPE_RPC_URL as string,
       explorerUrl: "https://scrollscan.com/",
-      icon: "./assets/scroll-logo.svg",
+      icon: "./assets/shape-logo.svg",
       chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport/",
       attestationProviderConfig: {
         name: "Ethereum Attestation Service",
         status: usingTestEnvironment ? "disabled" : "enabled",
+        skipByDefault: true,
         easScanUrl: "https://scroll.easscan.org",
-        monochromeIcon: "./assets/scroll-logo-monochrome.svg",
+        monochromeIcon: "./assets/shape-logo.svg",
       },
     });
   }
