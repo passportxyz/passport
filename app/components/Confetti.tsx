@@ -37,7 +37,7 @@ const useWindowDimensions = () => {
     return () => {
       window.removeEventListener("resize", onResize);
     };
-  }, []);
+  }, [getDimensions]);
 
   return { windowDimensions };
 };

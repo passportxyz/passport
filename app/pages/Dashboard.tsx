@@ -35,6 +35,7 @@ import { useDatastoreConnectionContext } from "../context/datastoreConnectionCon
 import { useWeb3ModalError } from "@web3modal/ethers/react";
 import Script from "next/script";
 import { Confetti } from "../components/Confetti";
+import { PassportDetailsButton } from "../components/PassportDetailsButton";
 
 const success = "../../assets/check-icon2.svg";
 const fail = "../assets/verification-failed-bright.svg";
@@ -292,10 +293,8 @@ export default function Dashboard() {
                 isLoadingPassport == IsLoadingPassportState.FailedToConnect
               }
             />
-            <span className="col-start-1 col-end-4 font-heading text-3xl">Add Collected Stamps</span>
-            <span className="col-end-[-1] self-center whitespace-nowrap text-right font-alt text-3xl text-foreground-2">
-              {numVerifiedPlatforms}/{numPlatforms}
-            </span>
+            <span className="col-start-1 col-end-5 font-heading text-3xl">Collected Stamps</span>
+            <PassportDetailsButton className="col-end-[-1] col-start-1 md:col-start-[-3] justify-self-end self-center" />
             <DashboardValidStampsPanel className="col-span-full" />
             <ExpiredStampsPanel className="col-span-full" />
           </PageWidthGrid>

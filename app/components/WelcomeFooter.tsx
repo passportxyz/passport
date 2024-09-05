@@ -46,11 +46,11 @@ const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean
     >
       <div className="flex items-start justify-start lg:justify-between flex-wrap">
         <span className="lg:ml-10 self-center">Available on</span>
-        {chainsForFooter.map(({ chainLink, icon }, idx) => {
+        {chainsForFooter.map(({ chainLink, icon, label }, idx) => {
           return (
             <div key={idx} className="flex m-1 md:m-2 lg:m-3">
               <a className="self-start" target="_blank" href={chainLink}>
-                <img src={icon} className="w-[20px] md:w-[35px] h-[20px] md:h-[35px]" />
+                <img src={icon} className="w-[20px] md:w-[35px] h-[20px] md:h-[35px]" alt={`${label} Icon`} />
               </a>
             </div>
           );

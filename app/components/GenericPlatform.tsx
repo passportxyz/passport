@@ -438,7 +438,15 @@ export const GenericPlatform = ({
     }
 
     return "Verify";
-  }, [isReverifying, isLoading, submitted, canSubmit, verifiedProviders.length, platformProviderIds.length]);
+  }, [
+    isReverifying,
+    isLoading,
+    submitted,
+    canSubmit,
+    verifiedProviders.length,
+    platformProviderIds.length,
+    hasExpiredProviders,
+  ]);
 
   return (
     <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose}>
