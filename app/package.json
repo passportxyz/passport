@@ -35,7 +35,7 @@
     "@web3-onboard/injected-wallets": "2.10.7",
     "@web3-onboard/react": "2.8.13",
     "@web3-onboard/walletconnect": "2.4.7",
-    "@web3-onboard/walletlink": "2.1.3",
+    "@web3-onboard/walletlink": "2.1.8",
     "broadcast-channel": "^4.11.0",
     "did-session": "^3.0.2",
     "dids": "^5.0.2",
