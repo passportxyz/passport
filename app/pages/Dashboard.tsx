@@ -55,13 +55,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     // TODO
-    if (true || web3ModalError) {
+    if (web3ModalError) {
       console.error("Web3Modal error", web3ModalError);
       failure({
         duration: 6000,
         title: "Wallet Connection Error",
-        // message: (web3ModalError as Error).message
-        message: "Hello",
+        message: (web3ModalError as Error).message,
       });
     }
   }, [web3ModalError, failure]);
