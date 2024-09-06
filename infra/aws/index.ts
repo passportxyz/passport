@@ -672,6 +672,17 @@ export const serviceRecordXyz = new aws.route53.Record("passport-xyz-record", {
   records: [albDnsName],
 });
 
+// CloudFlare Record 
+
+const cloudflareIamRecord = stack === "production" ? new cloudflare.Record(`iam-passport-xyz-record`, {
+  name: `iam`,
+  zoneId: cloudflareZoneId,
+  type: "CNAME",
+  value: albDnsName,
+  allowOverwrite: true,
+  comment: `Points to IAM service running on AWS ECS task`,
+}) : "";
+
 // Gitcoin domain
 
 const gitcoinContainerDefinitions = pulumi
