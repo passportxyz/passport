@@ -8,15 +8,14 @@ import { CeramicContext } from "../context/ceramicContext";
 import { useAtom } from "jotai";
 import { mutableUserVerificationAtom } from "../context/userState";
 import { datadogLogs } from "@datadog/browser-logs";
-import { useToast } from "@chakra-ui/react";
-import { DoneToastContent } from "../components/DoneToastContent";
 import { DID } from "dids";
+import { useMessage } from "./useMessage";
 
 export const useOneClickVerification = () => {
   const [verificationState, setUserVerificationState] = useAtom(mutableUserVerificationAtom);
 
   const { passport, allPlatforms, handlePatchStamps } = useContext(CeramicContext);
-  const toast = useToast();
+  const { success } = useMessage();
 
   const initiateVerification = async function (did: DID, address: string) {
     datadogLogs.logger.info("Initiating one click verification", { address });
@@ -80,17 +79,9 @@ export const useOneClickVerification = () => {
         loading: false,
         success: true,
       });
-      toast({
-        duration: 9000,
-        isClosable: true,
-        render: (result: any) => (
-          <DoneToastContent
-            title="Success!"
-            message="Your stamps are verified!"
-            icon="../assets/check-icon2.svg"
-            result={result}
-          />
-        ),
+      success({
+        title: "Success!",
+        message: "Your stamps are verified!",
       });
       datadogLogs.logger.info("Successfully completed one click verification", { address });
     } catch (error) {

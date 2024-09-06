@@ -7,6 +7,7 @@ import { OnChainStatus } from "../utils/onChainStatus";
 import { Chain } from "../utils/chains";
 import { useOnChainData } from "./useOnChainData";
 import { useSwitchNetwork } from "@web3modal/ethers/react";
+import { useMessage } from "./useMessage";
 
 export const useSyncToChainButton = ({
   chain,
@@ -193,19 +194,16 @@ export const useSyncToChainButton = ({
             );
           }
 
-          toast({
-            duration: 9000,
-            isClosable: true,
-            render: (result: any) => (
-              <DoneToastContent title="Error" body={toastDescription} icon={fail} result={result} />
-            ),
+          failure({
+            title: "Error",
+            message: toastDescription,
           });
         } finally {
           setSyncingToChain(false);
         }
       }
     },
-    [address, chain?.attestationProvider, chain?.id, loadVerifierContract, refresh, toast]
+    [address, chain?.attestationProvider, chain?.id, loadVerifierContract, refresh, failure, success]
   );
 
   const onInitiateSyncToChain = useCallback(

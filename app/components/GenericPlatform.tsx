@@ -241,7 +241,14 @@ export const GenericPlatform = ({
         updatedMinusInitial
       );
 
-      message(getMessageParams(verificationStatus, updatedVerifiedProviders, initialMinusUpdated, updatedMinusInitial));
+      message(
+        getVerificationMessageParams(
+          verificationStatus,
+          updatedVerifiedProviders,
+          initialMinusUpdated,
+          updatedMinusInitial
+        )
+      );
 
       setLoading(false);
     } catch (e) {
@@ -290,7 +297,7 @@ export const GenericPlatform = ({
     }
   };
 
-  const getMessageParams = (
+  const getVerificationMessageParams = (
     verificationStatus: VerificationStatuses,
     initialMinusUpdated: Set<PROVIDER_ID>,
     updatedMinusInitial: Set<PROVIDER_ID>,
@@ -305,25 +312,30 @@ export const GenericPlatform = ({
       case VerificationStatuses.AllVerified:
         title = "Done!";
         message = `All ${platform.platformId} data points verified.`;
+        break;
       case VerificationStatuses.ReVerified:
         title = "Success!";
         message = `Successfully re-verified ${platform.platformId} data ${
           updatedVerifiedProviders.size > 1 ? "points" : "point"
         }.`;
+        break;
       case VerificationStatuses.PartiallyVerified:
         title = "Success!";
         message = `Successfully verified ${platform.platformId} data ${
           updatedMinusInitial.size > 1 ? "points" : "point"
         }.`;
+        break;
       case VerificationStatuses.PartiallyRemovedAndVerified:
         title = "Success!";
         message = `${initialMinusUpdated.size} ${platform.platformId} data ${
           initialMinusUpdated.size > 1 ? "points" : "point"
         } removed and ${updatedMinusInitial.size} verified.`;
+        break;
       case VerificationStatuses.Failed:
         title = "Verification Failed";
         status = "failure";
         message = "Please make sure you fulfill the requirements for this stamp.";
+        break;
     }
 
     return {

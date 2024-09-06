@@ -37,7 +37,8 @@ export const useMessage = () => {
 
   // This is to support circumstances where the message type is chosen dynamically
   const message = useCallback(
-    (props: Message & { status: "success" | "failure" }) => (status === "success" ? success(props) : failure(props)),
+    ({ status, ...props }: Message & { status: "success" | "failure" }) =>
+      status === "success" ? success(props) : failure(props),
     [showMessage]
   );
 

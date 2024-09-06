@@ -7,8 +7,6 @@ import { useWalletStore } from "../context/walletStore";
 // --- Components
 import { checkShowOnboard } from "../utils/helpers";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
-import { useToast } from "@chakra-ui/react";
-import { DoneToastContent } from "../components/DoneToastContent";
 import { useNavigateToPage } from "../hooks/useCustomization";
 
 import {
@@ -20,6 +18,7 @@ import {
   useWeb3ModalState,
 } from "@web3modal/ethers/react";
 import { datadogRum } from "@datadog/browser-rum";
+import { useMessage } from "./useMessage";
 
 type LoginStep = "NOT_STARTED" | "PENDING_WALLET_CONNECTION" | "PENDING_DATABASE_CONNECTION" | "DONE";
 
@@ -40,7 +39,7 @@ export const useLoginFlow = (): {
   const [loginStep, setLoginStep] = useState<LoginStep>("NOT_STARTED");
   const { open: openWeb3Modal } = useWeb3Modal();
   const isConnectingToDatabaseRef = useRef<boolean>(false);
-  const toast = useToast();
+  const { failure } = useMessage();
   const navigateToPage = useNavigateToPage();
   const web3modalEvent = useWeb3ModalEvents();
 
@@ -60,20 +59,12 @@ export const useLoginFlow = (): {
 
   const showConnectionError = useCallback(
     (e: any) => {
-      toast({
-        duration: 6000,
-        isClosable: true,
-        render: (result: any) => (
-          <DoneToastContent
-            title={"Connection Error"}
-            body={(e as Error).message}
-            icon="../assets/verification-failed-bright.svg"
-            result={result}
-          />
-        ),
+      failure({
+        title: "Connection Error",
+        message: (e as Error).message,
       });
     },
-    [toast]
+    [failure]
   );
 
   useEffect(() => {
@@ -82,7 +73,7 @@ export const useLoginFlow = (): {
       showConnectionError(error);
       resetLogin();
     }
-  }, [error, toast, resetLogin]);
+  }, [error, resetLogin]);
 
   useEffect(() => {
     const newLoginStep = (() => {

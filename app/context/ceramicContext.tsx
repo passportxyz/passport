@@ -391,7 +391,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     return providerSpecs;
   }, [allPlatforms]);
 
-  const { success, failure } = useMessage();
+  const { failure } = useMessage();
 
   useEffect(() => {
     if (customization.allowListProviders) {
