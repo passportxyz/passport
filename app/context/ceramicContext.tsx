@@ -49,9 +49,8 @@ import { PlatformProps } from "../components/GenericPlatform";
 
 import { CERAMIC_CACHE_ENDPOINT, IAM_VALID_ISSUER_DIDS } from "../config/stamp_config";
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
-import { useToast } from "@chakra-ui/react";
-import { DoneToastContent } from "../components/DoneToastContent";
 import { useCustomization } from "../hooks/useCustomization";
+import { useMessage } from "../hooks/useMessage";
 
 // -- Trusted IAM servers DID
 const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
@@ -392,7 +391,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     return providerSpecs;
   }, [allPlatforms]);
 
-  const toast = useToast();
+  const { success, failure } = useMessage();
 
   useEffect(() => {
     if (customization.allowListProviders) {
@@ -507,21 +506,13 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const checkAndAlertInvalidCeramicSession = useCallback(() => {
     if (!checkSessionIsValid()) {
-      toast({
-        render: (result: any) => (
-          <DoneToastContent
-            title="Ceramic Session Invalid"
-            body="Your update was not logged to Ceramic. Please refresh the page to reset your Ceramic session."
-            icon="../assets/verification-failed-bright.svg"
-            result={result}
-          />
-        ),
-        duration: 9000,
-        isClosable: true,
+      failure({
+        title: "Ceramic Session Invalid",
+        message: "Your update was not logged to Ceramic. Please refresh the page to reset your Ceramic session.",
       });
       throw new Error("Session Expired");
     }
-  }, [toast, checkSessionIsValid]);
+  }, [failure, checkSessionIsValid]);
 
   const passportLoadSuccess = (
     database: PassportDatabase,

@@ -1,4 +1,6 @@
-module.exports = {
+import type { Config } from "tailwindcss";
+
+export default {
   content: [
     "./pages/**/*.{ts,tsx}",
     "./config/**/*.{ts,tsx}",
@@ -126,4 +128,4 @@ module.exports = {
     },
   },
   plugins: [require("@headlessui/tailwindcss"), require("tailwind-gradient-mask-image")],
-};
+} satisfies Config;

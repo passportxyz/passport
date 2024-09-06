@@ -5,8 +5,7 @@ import React, { useContext, useState } from "react";
 // --- Style Components
 import { Button } from "./Button";
 import { CeramicContext, platforms } from "../context/ceramicContext";
-import { Modal, ModalContent, ModalOverlay, useToast } from "@chakra-ui/react";
-import { DoneToastContent } from "./DoneToastContent";
+import { Modal, ModalContent, ModalOverlay } from "@chakra-ui/react";
 import { STAMP_PROVIDERS } from "../config/providers";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { LoadButton } from "./LoadButton";
@@ -14,6 +13,7 @@ import { getPlatformSpec } from "../config/platforms";
 // -- Utils
 import { StampClaimForPlatform, StampClaimingContext } from "../context/stampClaimingContext";
 import { Hyperlink } from "@gitcoin/passport-platforms";
+import { useMessage } from "../hooks/useMessage";
 
 export const getProviderIdsFromPlatformId = (platformId: PLATFORM_ID): PROVIDER_ID[] => {
   return STAMP_PROVIDERS[platformId as PLATFORM_ID].flatMap((x) => x.providers.map((y) => y.name));
@@ -32,39 +32,21 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
   const { expiredProviders } = useContext(CeramicContext);
   const { claimCredentials, status } = useContext(StampClaimingContext);
   const [waitForNext, setWaitForNext] = useState<WaitCondition>();
-  // const [initialStepCompleted, setInitialStepCompleted] = useState(false);
-  const [currentStepInProgress, setCurrentStepInProgress] = useState(true);
   const [isReverifyingStamps, setIsReverifyingStamps] = useState(false);
 
-  const toast = useToast();
+  const { success, failure } = useMessage();
 
   const successToast = () => {
-    toast({
-      duration: 9000,
-      isClosable: true,
-      render: (result: any) => (
-        <DoneToastContent
-          title="Success"
-          message="Your expired stamps have been reverified."
-          icon="./assets/check-icon2.svg"
-          result={result}
-        />
-      ),
+    success({
+      title: "Success",
+      message: "Your expired stamps have been reverified.",
     });
   };
 
   const errorToast = (platform: string) => {
-    toast({
-      duration: 9000,
-      isClosable: true,
-      render: (result: any) => (
-        <DoneToastContent
-          title="Error"
-          message={`Failed to reverify stamps for ${platform}. Please double check eligibility and try again.`}
-          icon="../assets/verification-failed-bright.svg"
-          result={result}
-        />
-      ),
+    failure({
+      title: "Error",
+      message: `Failed to reverify stamps for ${platform}. Please double check eligibility and try again.`,
     });
   };
 
@@ -74,16 +56,13 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
   });
 
   const handleClaimStep = async (step: number): Promise<void> => {
-    if (status === "in_progress") {
-      setCurrentStepInProgress(true);
-    } else {
+    if (status !== "in_progress") {
       if (step == 0) {
         // We do not wait on the first step, the user has to click next only
         // before getting to the next one
         return;
       }
 
-      setCurrentStepInProgress(false);
       return new Promise<void>((resolve) => {
         setWaitForNext({ doContinue: resolve });
       });

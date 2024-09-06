@@ -1,17 +1,12 @@
-import { useToast } from "@chakra-ui/react";
 import { EasPayload, VerifiableCredential, Passport } from "@gitcoin/passport-types";
 import { ethers, EthersError, isError } from "ethers";
 import { useCallback, useContext, useState } from "react";
 import { CeramicContext } from "../context/ceramicContext";
 import { useWalletStore } from "../context/walletStore";
-import { DoneToastContent } from "../components/DoneToastContent";
 import { OnChainStatus } from "../utils/onChainStatus";
 import { Chain } from "../utils/chains";
 import { useOnChainData } from "./useOnChainData";
 import { useSwitchNetwork } from "@web3modal/ethers/react";
-
-const fail = "../assets/verification-failed-bright.svg";
-const success = "../../assets/check-icon2.svg";
 
 export const useSyncToChainButton = ({
   chain,
@@ -22,7 +17,7 @@ export const useSyncToChainButton = ({
   onChainStatus: OnChainStatus;
   getButtonMsg: (onChainStatus: OnChainStatus) => string;
 }) => {
-  const toast = useToast();
+  const { success, failure } = useMessage();
 
   const address = useWalletStore((state) => state.address);
   const provider = useWalletStore((state) => state.provider);
@@ -60,17 +55,9 @@ export const useSyncToChainButton = ({
 
           if (credentials.length === 0) {
             // Nothing to be brought onchain
-            toast({
-              duration: 9000,
-              isClosable: true,
-              render: (result: any) => (
-                <DoneToastContent
-                  title="Error"
-                  message="You do not have any Stamps to bring onchain."
-                  icon={fail}
-                  result={result}
-                />
-              ),
+            failure({
+              title: "Error",
+              message: "You do not have any Stamps to bring onchain.",
             });
             return;
           }
@@ -112,43 +99,30 @@ export const useSyncToChainButton = ({
                 value: data.passport.fee,
               });
 
-              toast({
-                duration: 9000,
-                isClosable: true,
-                render: (result: any) => (
-                  <DoneToastContent
-                    title="Submitted"
-                    message="Passport submitted to chain."
-                    icon={success}
-                    result={result}
-                  />
-                ),
+              success({
+                title: "Submitted",
+                message: "Passport submitted to chain.",
               });
               await transaction.wait();
 
               refresh(chain.id);
 
-              const successSubmit = (
-                <p>
-                  Passport successfully synced to chain.{" "}
-                  {chain?.attestationProvider?.hasWebViewer && address && (
-                    <a
-                      href={chain.attestationProvider.viewerUrl(address)}
-                      className="underline"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Check your attestations
-                    </a>
-                  )}
-                </p>
-              );
-
-              toast({
-                duration: 9000,
-                isClosable: true,
-                render: (result: any) => (
-                  <DoneToastContent title="Success" body={successSubmit} icon={success} result={result} />
+              success({
+                title: "Success",
+                message: (
+                  <p>
+                    Passport successfully synced to chain.{" "}
+                    {chain?.attestationProvider?.hasWebViewer && address && (
+                      <a
+                        href={chain.attestationProvider.viewerUrl(address)}
+                        className="underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Check your attestations
+                      </a>
+                    )}
+                  </p>
                 ),
               });
             }

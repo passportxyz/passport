@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // --- React Methods
-import React, { useContext, useEffect, useMemo, useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 
 // --Components
 import PageRoot from "../components/PageRoot";
@@ -10,13 +10,12 @@ import Header from "../components/Header";
 import BodyWrapper from "../components/BodyWrapper";
 import PageWidthGrid from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
-import { DoneToastContent } from "../components/DoneToastContent";
 import { DashboardScorePanel, DashboardScoreExplanationPanel } from "../components/DashboardScorePanel";
 import { DashboardValidStampsPanel } from "../components/DashboardValidStampsPanel";
 import { ExpiredStampsPanel } from "../components/ExpiredStampsPanel";
 
 // --Chakra UI Elements
-import { Modal, ModalBody, ModalContent, ModalFooter, ModalOverlay, useDisclosure, useToast } from "@chakra-ui/react";
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalOverlay, useDisclosure } from "@chakra-ui/react";
 
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 import { useWalletStore } from "../context/walletStore";
@@ -36,43 +35,36 @@ import { useWeb3ModalError } from "@web3modal/ethers/react";
 import Script from "next/script";
 import { Confetti } from "../components/Confetti";
 import { PassportDetailsButton } from "../components/PassportDetailsButton";
-
-const success = "../../assets/check-icon2.svg";
-const fail = "../assets/verification-failed-bright.svg";
+import { useMessage } from "../hooks/useMessage";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export default function Dashboard() {
   const customization = useCustomization();
   const { useCustomDashboardPanel } = customization;
-  const { isLoadingPassport, allPlatforms, verifiedPlatforms, databaseReady } = useContext(CeramicContext);
+  const { isLoadingPassport, allPlatforms, databaseReady } = useContext(CeramicContext);
   const { disconnect, dbAccessTokenStatus, dbAccessToken, did } = useDatastoreConnectionContext();
   const address = useWalletStore((state) => state.address);
   const { initiateVerification } = useOneClickVerification();
   const { error: web3ModalError } = useWeb3ModalError();
-  const toast = useToast();
+  const { success, failure } = useMessage();
 
   // This shouldn't be necessary, but using this to prevent unnecessary re-initialization
   // until ceramicContext is refactored and memoized
   const verifiedParamsHash = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    if (web3ModalError) {
+    // TODO
+    if (true || web3ModalError) {
       console.error("Web3Modal error", web3ModalError);
-      toast({
+      failure({
         duration: 6000,
-        isClosable: true,
-        render: (result: any) => (
-          <DoneToastContent
-            title={"Wallet Connection Error"}
-            body={(web3ModalError as Error).message}
-            icon="../assets/verification-failed-bright.svg"
-            result={result}
-          />
-        ),
+        title: "Wallet Connection Error",
+        // message: (web3ModalError as Error).message
+        message: "Hello",
       });
     }
-  }, [web3ModalError, toast]);
+  }, [web3ModalError, failure]);
 
   useEffect(() => {
     if (did && address && databaseReady) {
@@ -138,14 +130,6 @@ export default function Dashboard() {
   // ------------------- END Data items for Google Tag Manager -------------------
   const { isOpen: retryModalIsOpen, onOpen: onRetryModalOpen, onClose: onRetryModalClose } = useDisclosure();
 
-  const numPlatforms = useMemo(() => {
-    return Object.keys(Object.fromEntries(allPlatforms)).length;
-  }, [allPlatforms]);
-
-  const numVerifiedPlatforms = useMemo(() => {
-    return Object.keys(verifiedPlatforms).length;
-  }, [verifiedPlatforms]);
-
   // Route user to home when wallet is disconnected
   useEffect(() => {
     if (!address || dbAccessTokenStatus !== "connected") {
@@ -165,29 +149,18 @@ export default function Dashboard() {
   useEffect(() => {
     const oneClickRefresh = localStorage.getItem("successfulRefresh");
     if (oneClickRefresh && oneClickRefresh === "true") {
-      toast({
-        duration: 9000,
-        isClosable: true,
-        render: (result: any) => (
-          <DoneToastContent title="Success" message="Your stamps are verified!" icon={success} result={result} />
-        ),
+      success({
+        title: "Success",
+        message: "Your stamps are verified!",
       });
     } else if (oneClickRefresh && oneClickRefresh === "false") {
-      toast({
-        duration: 9000,
-        isClosable: true,
-        render: (result: any) => (
-          <DoneToastContent
-            title="Failure"
-            message="Stamps weren't verified. Please try again."
-            icon={fail}
-            result={result}
-          />
-        ),
+      failure({
+        title: "Failure",
+        message: "Stamps weren't verified. Please try again.",
       });
     }
     localStorage.removeItem("successfulRefresh");
-  }, []);
+  }, [success, failure]);
 
   // Allow user to retry Ceramic connection if failed
   const retryConnection = () => {
