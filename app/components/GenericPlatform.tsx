@@ -16,8 +16,7 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 
 // --- Style Components
 import { SideBarContent } from "./SideBarContent";
-import { DoneToastContent } from "./DoneToastContent";
-import { Drawer, DrawerOverlay, useToast } from "@chakra-ui/react";
+import { Drawer, DrawerOverlay } from "@chakra-ui/react";
 import { LoadButton } from "./LoadButton";
 import { JsonOutputModal } from "./JsonOutputModal";
 
@@ -39,6 +38,7 @@ import { PlatformScoreSpec } from "../context/scorerContext";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useAtom } from "jotai";
 import { mutableUserVerificationAtom } from "../context/userState";
+import { useMessage } from "../hooks/useMessage";
 
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
@@ -52,9 +52,6 @@ enum VerificationStatuses {
   PartiallyRemovedAndVerified,
   Failed,
 }
-
-const success = "../../assets/check-icon2.svg";
-const fail = "../assets/verification-failed-bright.svg";
 
 class InvalidSessionError extends Error {
   constructor() {
@@ -90,8 +87,7 @@ export const GenericPlatform = ({
   const { did, checkSessionIsValid } = useDatastoreConnectionContext();
   const [verificationState, _setUserVerificationState] = useAtom(mutableUserVerificationAtom);
 
-  // --- Chakra functions
-  const toast = useToast();
+  const { success, failure, message } = useMessage();
 
   // find all providerIds
   const platformProviderIds = useMemo(
@@ -123,42 +119,16 @@ export const GenericPlatform = ({
 
   const handleSponsorship = async (result: string): Promise<void> => {
     if (result === "success") {
-      toast({
-        duration: 9000,
-        isClosable: true,
-        render: (result: any) => (
-          <div className="rounded-md bg-color-1 text-background-2">
-            <div className="flex p-4">
-              <button className="inline-flex flex-shrink-0 cursor-not-allowed">
-                <img alt="information circle" className="sticky top-0 mb-20 p-2" src={success} />
-              </button>
-              <div className="flex-grow pl-6">
-                <h2 className="mb-2 text-lg font-bold">Sponsored through Gitcoin for Bright ID</h2>
-                <p className="text-base leading-relaxed">{`For verification status updates, check BrightID's App.`}</p>
-                <p className="text-base leading-relaxed">
-                  Once you are verified by BrightID - return here to complete this Stamp.
-                </p>
-              </div>
-              <button className="inline-flex flex-shrink-0 rounded-lg" onClick={result.onClose}>
-                <img alt="close button" className="rounded-lg p-2 hover:bg-gray-500" src="./assets/x-icon-black.svg" />
-              </button>
-            </div>
-          </div>
-        ),
+      success({
+        title: "Sponsored through Gitcoin for Bright ID",
+        message:
+          "For verification status updates, check BrightID's App. Once you are verified by BrightID - return here to complete this Stamp.",
       });
       datadogLogs.logger.info("Successfully sponsored user on BrightId", { platformId: platform.platformId });
     } else {
-      toast({
-        duration: 9000,
-        isClosable: true,
-        render: (result: any) => (
-          <DoneToastContent
-            title="Failure"
-            message="Failed to trigger BrightID Sponsorship"
-            icon={fail}
-            result={result}
-          />
-        ),
+      failure({
+        title: "Failure",
+        message: "Failed to trigger BrightID Sponsorship",
       });
       datadogLogs.logger.error("Error sponsoring user", { platformId: platform.platformId });
       datadogRum.addError("Failed to sponsor user on BrightId", { platformId: platform.platformId });
@@ -271,62 +241,42 @@ export const GenericPlatform = ({
         updatedMinusInitial
       );
 
-      // Get the done toast messages
-      const { title, body, icon, platformId } = getDoneToastMessages(
-        verificationStatus,
-        updatedVerifiedProviders,
-        initialMinusUpdated,
-        updatedMinusInitial
+      message(
+        getVerificationMessageParams(
+          verificationStatus,
+          updatedVerifiedProviders,
+          initialMinusUpdated,
+          updatedMinusInitial
+        )
       );
-
-      const bodyWithDetailsLink = (
-        <>
-          {body}
-          <a className="cursor-pointer underline" onClick={() => setPayloadModalIsOpen(true)}>
-            See Details
-          </a>
-        </>
-      );
-
-      // Display done toast
-      doneToast(title, bodyWithDetailsLink, icon, platformId);
 
       setLoading(false);
     } catch (e) {
       if (e instanceof InvalidSessionError) {
-        doneToast(
-          "Session Invalid",
-          "Please refresh the page to reset your session.",
-          fail,
-          platform.platformId as PLATFORM_ID
-        );
+        failure({
+          title: "Session Invalid",
+          message: "Please refresh the page to reset your session.",
+          testId: platform.platformId,
+        });
       } else if (e instanceof PlatformPreCheckError) {
-        doneToast("Verification Failed", e.message, fail, platform.platformId as PLATFORM_ID);
+        failure({
+          title: "Verification Failed",
+          message: e.message,
+          testId: platform.platformId,
+        });
       } else {
         console.error(e);
         datadogLogs.logger.error("Verification Error", { error: e, platform: platform.platformId });
-        doneToast(
-          "Verification Failed",
-          "There was an error verifying your stamp. Please try again.",
-          fail,
-          platform.platformId as PLATFORM_ID
-        );
+        failure({
+          title: "Verification Failed",
+          message: "There was an error verifying your stamp. Please try again.",
+          testId: platform.platformId,
+        });
       }
     } finally {
       setLoading(false);
       setSubmitted(true);
     }
-  };
-
-  // --- Done Toast Helper
-  const doneToast = (title: string, body: string | JSX.Element, icon: string, platformId: PLATFORM_ID) => {
-    toast({
-      duration: 9000,
-      isClosable: true,
-      render: (result: any) => (
-        <DoneToastContent title={title} body={body} icon={icon} platformId={platformId} result={result} />
-      ),
-    });
   };
 
   const getVerificationStatus = (
@@ -347,57 +297,60 @@ export const GenericPlatform = ({
     }
   };
 
-  // Done toast message getter
-  const getDoneToastMessages = (
+  const getVerificationMessageParams = (
     verificationStatus: VerificationStatuses,
     initialMinusUpdated: Set<PROVIDER_ID>,
     updatedMinusInitial: Set<PROVIDER_ID>,
     updatedVerifiedProviders: Set<PROVIDER_ID>
   ) => {
     // Switch statement to determine which toast message to display based on VerificationStatuses enum
+    let title, message;
+    const testId = platform.platformId as PLATFORM_ID;
+    let status: "success" | "failure" = "success";
+
     switch (verificationStatus) {
       case VerificationStatuses.AllVerified:
-        return {
-          title: "Done!",
-          body: `All ${platform.platformId} data points verified.`,
-          icon: success,
-          platformId: platform.platformId as PLATFORM_ID,
-        };
+        title = "Done!";
+        message = `All ${platform.platformId} data points verified.`;
+        break;
       case VerificationStatuses.ReVerified:
-        return {
-          title: "Success!",
-          body: `Successfully re-verified ${platform.platformId} data ${
-            updatedVerifiedProviders.size > 1 ? "points" : "point"
-          }.`,
-          icon: success,
-          platformId: platform.platformId as PLATFORM_ID,
-        };
+        title = "Success!";
+        message = `Successfully re-verified ${platform.platformId} data ${
+          updatedVerifiedProviders.size > 1 ? "points" : "point"
+        }.`;
+        break;
       case VerificationStatuses.PartiallyVerified:
-        return {
-          title: "Success!",
-          body: `Successfully verified ${platform.platformId} data ${
-            updatedMinusInitial.size > 1 ? "points" : "point"
-          }.`,
-          icon: success,
-          platformId: platform.platformId as PLATFORM_ID,
-        };
+        title = "Success!";
+        message = `Successfully verified ${platform.platformId} data ${
+          updatedMinusInitial.size > 1 ? "points" : "point"
+        }.`;
+        break;
       case VerificationStatuses.PartiallyRemovedAndVerified:
-        return {
-          title: "Success!",
-          body: `${initialMinusUpdated.size} ${platform.platformId} data ${
-            initialMinusUpdated.size > 1 ? "points" : "point"
-          } removed and ${updatedMinusInitial.size} verified.`,
-          icon: success,
-          platformId: platform.platformId as PLATFORM_ID,
-        };
+        title = "Success!";
+        message = `${initialMinusUpdated.size} ${platform.platformId} data ${
+          initialMinusUpdated.size > 1 ? "points" : "point"
+        } removed and ${updatedMinusInitial.size} verified.`;
+        break;
       case VerificationStatuses.Failed:
-        return {
-          title: "Verification Failed",
-          body: "Please make sure you fulfill the requirements for this stamp.",
-          icon: fail,
-          platformId: platform.platformId as PLATFORM_ID,
-        };
+        title = "Verification Failed";
+        status = "failure";
+        message = "Please make sure you fulfill the requirements for this stamp.";
+        break;
     }
+
+    return {
+      title,
+      status,
+      testId,
+      message: (
+        <>
+          {message}
+          <a className="cursor-pointer underline" onClick={() => setPayloadModalIsOpen(true)}>
+            See Details
+          </a>
+        </>
+      ),
+    };
   };
 
   const isReverifying = useMemo(

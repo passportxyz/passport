@@ -2,12 +2,11 @@
 import React, { useState } from "react";
 
 // --- Chakra Elements
-import { useToast } from "@chakra-ui/react";
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 // --- Style Components
-import { DoneToastContent } from "./DoneToastContent";
 import { ActionOrCancelModal } from "./ActionOrCancelModal";
+import { useMessage } from "../hooks/useMessage";
 
 export type RemoveStampModalProps = {
   isOpen: boolean;
@@ -27,36 +26,20 @@ export const RemoveStampModal = ({
   handleDeleteStamps,
 }: RemoveStampModalProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
-  const toast = useToast();
+  const { success, failure } = useMessage();
 
   const handleStampRemoval = async () => {
     try {
       setIsLoading(true);
       await handleDeleteStamps(stampsToBeDeleted);
-      toast({
-        duration: 9000,
-        isClosable: true,
-        render: (result: any) => (
-          <DoneToastContent
-            title="Success!"
-            message="Stamp data has been removed."
-            icon="../assets/check-icon2.svg"
-            result={result}
-          />
-        ),
+      success({
+        title: "Success!",
+        message: "Stamp data has been removed.",
       });
     } catch (error) {
-      toast({
-        duration: 9000,
-        isClosable: true,
-        render: (result: any) => (
-          <DoneToastContent
-            title="Error!"
-            message="Something went wrong. Please try again."
-            icon="../assets/verification-failed-bright.svg"
-            result={result}
-          />
-        ),
+      failure({
+        title: "Error!",
+        message: "Something went wrong. Please try again.",
       });
     } finally {
       setIsLoading(false);
