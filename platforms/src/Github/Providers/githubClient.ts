@@ -56,41 +56,245 @@ export interface Viewer {
 }
 
 export interface ContributionsCollection {
-  contributionCalendar: ContributionCalendar;
+  commitContributionsByRepository: CommitContributionsByRepository[];
 }
 
-export interface ContributionCalendar {
-  totalContributions: number;
-  weeks: Week[];
+interface CommitContributionsByRepository {
+  contributions: {
+    pageInfo: {
+      endCursor: string | null;
+      hasNextPage: boolean;
+    };
+    nodes: ContributionNode[];
+  };
 }
 
-interface Week {
-  contributionDays: ContributionDay[];
-}
-
-export interface ContributionDay {
-  contributionCount: number;
-  date: string;
+interface ContributionNode {
+  commitCount: number;
+  occurredAt: string;
+  repository: {
+    name: string;
+    createdAt: string;
+  };
 }
 
 type GithubContributionResponse = {
   data?: GitHubResponse;
 };
 
-export const queryFunc = async (fromDate: string, toDate: string, accessToken: string): Promise<Viewer> => {
+/*
+   // Bad (faked) repo
+ {
+  "data": {
+    "viewer": {
+      "createdAt": "2016-06-13T12:20:43Z",
+      "id": "MDQ6VXNlcjE5OTA4NzYy",
+      "contributionsCollection": {
+        "commitContributionsByRepository": [
+          {
+            "contributions": {
+              "nodes": [
+                {
+                  "commitCount": 2,
+                  "occurredAt": "1980-01-01T08:00:00Z",
+                  "repository": {
+                    "createdAt": "2024-09-04T14:13:54Z"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "contributions": {
+              "nodes": [
+                {
+                  "commitCount": 1,
+                  "occurredAt": "1980-01-01T08:00:00Z",
+                  "repository": {
+                    "createdAt": "2024-09-04T14:36:32Z"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+
+// Good, first page
+{
+  "data": {
+    "viewer": {
+      "createdAt": "2016-06-13T12:20:43Z",
+      "id": "MDQ6VXNlcjE5OTA4NzYy",
+      "contributionsCollection": {
+        "commitContributionsByRepository": [
+          {
+            "contributions": {
+              "pageInfo": {
+                "endCursor": "MQ",
+                "hasNextPage": true
+              },
+              "nodes": [
+                {
+                  "commitCount": 1,
+                  "occurredAt": "2024-09-06T07:00:00Z",
+                  "repository": {
+                    "name": "passport",
+                    "createdAt": "2022-03-14T17:57:02Z"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "contributions": {
+              "pageInfo": {
+                "endCursor": "MQ",
+                "hasNextPage": true
+              },
+              "nodes": [
+                {
+                  "commitCount": 3,
+                  "occurredAt": "2024-09-04T07:00:00Z",
+                  "repository": {
+                    "name": "passport-scorer",
+                    "createdAt": "2022-11-18T18:16:06Z"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "contributions": {
+              "pageInfo": {
+                "endCursor": "MQ",
+                "hasNextPage": false
+              },
+              "nodes": [
+                {
+                  "commitCount": 2,
+                  "occurredAt": "2024-09-04T07:00:00Z",
+                  "repository": {
+                    "name": "passport-scroll-badge-service",
+                    "createdAt": "2024-06-28T09:02:44Z"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "contributions": {
+              "pageInfo": {
+                "endCursor": "MQ",
+                "hasNextPage": false
+              },
+              "nodes": [
+                {
+                  "commitCount": 2,
+                  "occurredAt": "2024-09-04T07:00:00Z",
+                  "repository": {
+                    "name": "id-staking-v2-app",
+                    "createdAt": "2024-03-07T08:47:47Z"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+
+// Good, second page
+{
+  "data": {
+    "viewer": {
+      "createdAt": "2016-06-13T12:20:43Z",
+      "id": "MDQ6VXNlcjE5OTA4NzYy",
+      "contributionsCollection": {
+        "commitContributionsByRepository": [
+          {
+            "contributions": {
+              "pageInfo": {
+                "endCursor": "Mw",
+                "hasNextPage": true
+              },
+              "nodes": [
+                {
+                  "commitCount": 2,
+                  "occurredAt": "2024-09-04T07:00:00Z",
+                  "repository": {
+                    "name": "passport",
+                    "createdAt": "2022-03-14T17:57:02Z"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "contributions": {
+              "pageInfo": {
+                "endCursor": null,
+                "hasNextPage": false
+              },
+              "nodes": []
+            }
+          },
+          {
+            "contributions": {
+              "pageInfo": {
+                "endCursor": null,
+                "hasNextPage": false
+              },
+              "nodes": []
+            }
+          },
+          {
+            "contributions": {
+              "pageInfo": {
+                "endCursor": null,
+                "hasNextPage": false
+              },
+              "nodes": []
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+*/
+
+export const queryFunc = async (
+  fromDate: string,
+  toDate: string,
+  accessToken: string,
+  endCursor: string
+): Promise<Viewer> => {
   try {
     const query = `
-      query {
+      {
         viewer {
           createdAt
           id
           contributionsCollection(from: "${fromDate}", to: "${toDate}") {
-            contributionCalendar {
-              totalContributions
-              weeks {
-                contributionDays {
-                  contributionCount
-                  date
+            commitContributionsByRepository (maxRepositories: 100) {
+              contributions (first: 100, after: "${endCursor}") {
+                pageInfo {
+                  endCursor
+                  hasNextPage
+                }
+                nodes {
+                  commitCount
+                  occurredAt
+                  repository {
+                    name
+                    createdAt
+                  }
                 }
               }
             }
@@ -99,7 +303,7 @@ export const queryFunc = async (fromDate: string, toDate: string, accessToken: s
       }
     `;
 
-    const result: GithubContributionResponse = await axios.post(
+    const response: GithubContributionResponse = await axios.post(
       githubGraphEndpoint,
       {
         query,
@@ -109,10 +313,12 @@ export const queryFunc = async (fromDate: string, toDate: string, accessToken: s
       }
     );
 
+    const result = response?.data?.data?.viewer;
+
     return {
-      contributionsCollection: result?.data?.data?.viewer?.contributionsCollection,
-      createdAt: result?.data?.data?.viewer?.createdAt,
-      id: result?.data?.data?.viewer?.id,
+      contributionsCollection: result?.contributionsCollection,
+      createdAt: result?.createdAt,
+      id: result?.id,
     };
   } catch (error) {
     handleProviderAxiosError(error, "Github error retrieving contributions", [accessToken]);
