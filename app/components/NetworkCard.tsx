@@ -52,7 +52,7 @@ export function NetworkCard({ chain }: { chain: Chain }) {
                 <Spinner size="sm" />
               )}
             </div>
-            {address && (
+            {address && chain.attestationProvider?.hasWebViewer && (
               <Hyperlink
                 href={chain.attestationProvider?.viewerUrl(address) || ""}
                 className={`font-alt leading-none w-[45%] ${expired ? "text-inherit" : ""}`}

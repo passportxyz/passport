@@ -21,12 +21,12 @@ type BaseProviderConfig = {
 
 type EASConfig = BaseProviderConfig & {
   name: "Ethereum Attestation Service";
-  easScanUrl: string;
+  easScanUrl?: string;
 };
 
 type VeraxAndEASConfig = BaseProviderConfig & {
   name: "Verax + EAS";
-  easScanUrl: string;
+  easScanUrl?: string;
 };
 
 export type AttestationProviderConfig = EASConfig | VeraxAndEASConfig;
@@ -149,7 +149,7 @@ class BaseAttestationProvider implements AttestationProvider {
 export class EASAttestationProvider extends BaseAttestationProvider {
   name = "Ethereum Attestation Service (Score & Passport)";
   hasWebViewer = true;
-  easScanUrl: string;
+  easScanUrl?: string;
 
   constructor({
     chainId,
@@ -160,12 +160,13 @@ export class EASAttestationProvider extends BaseAttestationProvider {
   }: {
     chainId: string;
     status: AttestationProviderStatus;
-    easScanUrl: string;
+    easScanUrl?: string;
     monochromeIcon: string;
     skipByDefault: boolean;
   }) {
     super({ status, chainId, monochromeIcon, skipByDefault });
     this.easScanUrl = easScanUrl;
+    this.hasWebViewer = !!easScanUrl;
   }
 
   viewerUrl(address: string): string {
@@ -178,7 +179,7 @@ export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
   attestationExplorerLinkText = "Check attestation on Verax";
 
   viewerUrl(address: string): string {
-    return this.easScanUrl;
+    return this.easScanUrl || "";
   }
 
   checkOnChainStatus(

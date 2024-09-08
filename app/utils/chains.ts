@@ -271,7 +271,7 @@ if (!TEST_MODE) {
         name: "Ethereum Attestation Service",
         status: usingTestEnvironment ? "disabled" : "enabled",
         skipByDefault: true,
-        easScanUrl: "https://scroll.easscan.org",
+        easScanUrl: undefined,
         monochromeIcon: "./assets/shape-logo.svg",
       },
     });
