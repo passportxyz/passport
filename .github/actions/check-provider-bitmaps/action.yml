@@ -51,3 +51,10 @@ runs:
       shell: bash
       env:
         ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
+    - name: Check Shape Onchain Provider Bitmaps
+      run: |
+        echo "📋📋📋 Check Shape Onchain Provider Bitmaps"
+        yarn workspace @gitcoin/passport-iam checkProviders:shape
+      shell: bash
+      env:
+        ALCHEMY_API_KEY: ${{ inputs.ALCHEMY_API_KEY }}
