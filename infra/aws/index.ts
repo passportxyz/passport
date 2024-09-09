@@ -665,7 +665,7 @@ const ecsAutoScalingPolicyXyz = new aws.appautoscaling.Policy("passport-autoscal
   },
 });
 
-export const serviceRecordXyz = new aws.route53.Record("passport-xyz-record", {
+const serviceRecordXyz = new aws.route53.Record("passport-xyz-record", {
   name: "iam",
   zoneId: passportXyzHostedZoneId,
   type: "CNAME",
@@ -790,7 +790,7 @@ const gitcoinEcsAutoScalingPolicy = new aws.appautoscaling.Policy("passport-auto
   },
 });
 
-export const gitcoinServiceRecord = new aws.route53.Record("passport-record", {
+const gitcoinServiceRecord = new aws.route53.Record("passport-record", {
   name: route53Domain,
   zoneId: route53Zone,
   type: "A",
