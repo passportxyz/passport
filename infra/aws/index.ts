@@ -1,6 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as op from "@1password/op-js";
+import * as cloudflare from "@pulumi/cloudflare";
 import { createAmplifyApp } from "../lib/amplify/app";
 import { secretsManager } from "infra-libs";
 
@@ -14,13 +15,13 @@ export const dockerGtcPassportIamImage = pulumi
   .apply(([acc, region]) => `${acc.accountId}.dkr.ecr.${region.id}.amazonaws.com/passport:${DOCKER_IMAGE_TAG}`);
 
 const PROVISION_STAGING_FOR_LOADTEST =
-  op.read.parse(`op://DevOps/passport-${stack}-env/ci/PROVISION_STAGING_FOR_LOADTEST`).toLowerCase() === "true";
+  op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PROVISION_STAGING_FOR_LOADTEST`).toLowerCase() === "true";
 
-const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
+const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
 
-const route53Domain = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_DOMAIN`);
-const route53Zone = op.read.parse(`op://DevOps/passport-${stack}-env/ci/ROUTE_53_ZONE`);
-const cloudflareZoneId = op.read.parse(`op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
+const route53Domain = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/ROUTE_53_DOMAIN`);
+const route53Zone = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/ROUTE_53_ZONE`);
+const cloudflareZoneId = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
 
 const coreInfraStack = new pulumi.StackReference(`passportxyz/core-infra/${stack}`);
 
@@ -38,6 +39,9 @@ const passportDataScienceEndpoint = passportDataScienceStack.getOutput("internal
 
 const snsAlertsTopicArn = coreInfraStack.getOutput("snsAlertsTopicArn");
 
+const passportXyzDomainName = coreInfraStack.getOutput("passportXyzDomainName");
+const passportXyzHostedZoneId = coreInfraStack.getOutput("passportXyzHostedZoneId");
+
 const defaultTags = {
   ManagedBy: "pulumi",
   PulumiStack: stack,
@@ -46,22 +50,23 @@ const defaultTags = {
 
 const containerInsightsStatus = stack == "production" ? "enabled" : "disabled";
 
-const iamSecretObject = new aws.secretsmanager.Secret("iam-secret", {
-  name: "iam-secret",
-  description: "Secrets for Passport IAM",
+// Manage secrets & envs for Passport XYZ 
+const passportXyzIamSecretObject = new aws.secretsmanager.Secret("iam-secret-passport-xyz", {
+  name: "iam-secret-passport-xyz",
+  description: "Secrets for Passport IAM on Passport XYZ",
   tags: {
     ...defaultTags,
   },
 });
 
-const iamSecrets = secretsManager
+const passportXyzIamSecrets = secretsManager
   .syncSecretsAndGetRefs({
     vault: "DevOps",
-    repo: "passport",
+    repo: "passport-xyz",
     env: stack,
     section: "iam",
-    targetSecret: iamSecretObject,
-    secretVersionName: "passport-secret-version",
+    targetSecret: passportXyzIamSecretObject,
+    secretVersionName: "passport-xyz-secret-version",
   })
   .apply((secretRefs) =>
     [
@@ -77,11 +82,11 @@ const iamSecrets = secretsManager
     ].sort(secretsManager.sortByName)
   );
 
-const iamEnvironment = pulumi
+const passportXyzIamEnvironment = pulumi
   .all([
     secretsManager.getEnvironmentVars({
       vault: "DevOps",
-      repo: "passport",
+      repo: "passport-xyz",
       env: stack,
       section: "iam",
     }),
@@ -102,10 +107,11 @@ const iamEnvironment = pulumi
     ].sort(secretsManager.sortByName)
   );
 
-const passportEnvironment = secretsManager
+
+const passportXyzAppEnvironment = secretsManager
   .getEnvironmentVars({
     vault: "DevOps",
-    repo: "passport",
+    repo: "passport-xyz",
     env: stack,
     section: "app",
   })
@@ -113,6 +119,79 @@ const passportEnvironment = secretsManager
     acc[name] = value;
     return acc;
   }, {} as Record<string, string | pulumi.Output<any>>);
+
+// Manage secrets & envs for Gitcoin
+
+const gitcoinIamSecretObject = new aws.secretsmanager.Secret("iam-secret", {
+  name: "iam-secret",
+  description: "Secrets for Passport IAM",
+  tags: {
+    ...defaultTags,
+  },
+});
+
+const gitcoinIamSecrets = secretsManager
+  .syncSecretsAndGetRefs({
+    vault: "DevOps",
+    repo: "passport-gitcoin",
+    env: stack,
+    section: "iam",
+    targetSecret: gitcoinIamSecretObject,
+    secretVersionName: "passport-secret-version",
+  })
+  .apply((secretRefs) =>
+    [
+      ...secretRefs,
+      {
+        name: "IAM_JWK",
+        valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK::`,
+      },
+      {
+        name: "IAM_JWK_EIP712",
+        valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK_EIP712::`,
+      },
+    ].sort(secretsManager.sortByName)
+  );
+
+const gitcoinIamEnvironment = pulumi
+  .all([
+    secretsManager.getEnvironmentVars({
+      vault: "DevOps",
+      repo: "passport-gitcoin",
+      env: stack,
+      section: "iam",
+    }),
+    redisConnectionUrl,
+    passportDataScienceEndpoint,
+  ])
+  .apply(([managedEnvVars, _redisConnectionUrl, passportDataScienceEndpoint]) =>
+    [
+      ...managedEnvVars,
+      {
+        name: "REDIS_URL",
+        value: _redisConnectionUrl,
+      },
+      {
+        name: "DATA_SCIENCE_API_URL",
+        value: passportDataScienceEndpoint,
+      },
+    ].sort(secretsManager.sortByName)
+  );
+
+
+const gitcoinAppEnvironment = secretsManager
+  .getEnvironmentVars({
+    vault: "DevOps",
+    repo: "passport-gitcoin",
+    env: stack,
+    section: "app",
+  })
+  .reduce((acc, { name, value }) => {
+    acc[name] = value;
+    return acc;
+  }, {} as Record<string, string | pulumi.Output<any>>);
+
+
 
 const logsRetention = Object({
   review: 1,
@@ -174,8 +253,8 @@ const serviceRole = new aws.iam.Role("passport-ecs-role", {
   }),
   inlinePolicies: [
     {
-      name: "allow_iam_secrets_access",
-      policy: iamSecretObject.arn.apply((iamSecretArn) =>
+      name: "allow_iam_xyz_secrets_access",
+      policy: passportXyzIamSecretObject.arn.apply((iamSecretArn) =>
         JSON.stringify({
           Version: "2012-10-17",
           Statement: [
@@ -188,6 +267,21 @@ const serviceRole = new aws.iam.Role("passport-ecs-role", {
         })
       ),
     },
+    {
+      name: "allow_iam_secrets_access",
+      policy: gitcoinIamSecretObject.arn.apply((iamSecretArn) =>
+        JSON.stringify({
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Action: ["secretsmanager:GetSecretValue"],
+              Effect: "Allow",
+              Resource: [iamSecretArn, PASSPORT_VC_SECRETS_ARN],
+            },
+          ],
+        })
+      ),
+    }
   ],
   managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"],
   tags: {
@@ -199,7 +293,54 @@ const serviceRole = new aws.iam.Role("passport-ecs-role", {
 // Load Balancer listerner rule & target group
 //////////////////////////////////////////////////////////////
 
-const albTargetGroup = new aws.lb.TargetGroup(`passport-iam`, {
+const albPassportXyzTargetGroup = new aws.lb.TargetGroup(`passport-xyz-iam`, {
+  name: `passport-xyz-iam`,
+  vpcId: vpcId,
+  healthCheck: {
+    enabled: true,
+    healthyThreshold: 3,
+    interval: 30,
+    matcher: "200",
+    path: "/health",
+    port: "traffic-port",
+    protocol: "HTTP",
+    timeout: 5,
+    unhealthyThreshold: 5,
+  },
+  port: 80,
+  protocol: "HTTP",
+  targetType: "ip",
+  tags: {
+    ...defaultTags,
+    Name: `passport-xyz-iam`,
+  },
+});
+
+const albPassportXyzListenerRule = new aws.lb.ListenerRule(`passport-xyz-iam-https`, {
+  listenerArn: albHttpsListenerArn,
+  priority: 100, // This needs to be grater than the priority number for passport-scroll-badge-service
+  actions: [
+    {
+      type: "forward",
+      targetGroupArn: albPassportXyzTargetGroup.arn,
+    },
+  ],
+  conditions: [
+    {
+      hostHeader: {
+        values: [passportXyzDomainName.apply((domain) => `iam.${domain}`)],
+      },
+      // pathPattern: {[]}
+    },
+  ],
+  tags: {
+    ...defaultTags,
+    Name: `passport-xyz-iam-https`,
+  },
+});
+
+
+const albGitcoinTargetGroup = new aws.lb.TargetGroup(`passport-iam`, {
   name: `passport-iam`,
   vpcId: vpcId,
   healthCheck: {
@@ -222,13 +363,13 @@ const albTargetGroup = new aws.lb.TargetGroup(`passport-iam`, {
   },
 });
 
-const albListenerRule = new aws.lb.ListenerRule(`passport-iam-https`, {
+const albGitcoinListenerRule = new aws.lb.ListenerRule(`passport-iam-https`, {
   listenerArn: albHttpsListenerArn,
-  priority: 100, // This needs to be grater than the priority number for passport-scroll-badge-service
+  priority: 101, // This needs to be grater than the priority number for passport-scroll-badge-service
   actions: [
     {
       type: "forward",
-      targetGroupArn: albTargetGroup.arn,
+      targetGroupArn: albGitcoinTargetGroup.arn,
     },
   ],
   conditions: [
@@ -419,8 +560,9 @@ const moralisErrorAlarm = new aws.cloudwatch.MetricAlarm("moralisErrorsAlarm", {
 //////////////////////////////////////////////////////////////
 // ECS Task & Service
 //////////////////////////////////////////////////////////////
-const containerDefinitions = pulumi
-  .all([dockerGtcPassportIamImage, iamSecrets, iamEnvironment])
+// Passport XYZ 
+const passportXyzContainerDefinitions = pulumi
+  .all([dockerGtcPassportIamImage, passportXyzIamSecrets, passportXyzIamEnvironment])
   .apply(([_dockerGtcPassportIamImage, secrets, environment]) => {
     return JSON.stringify([
       {
@@ -454,9 +596,134 @@ const containerDefinitions = pulumi
     ]);
   });
 
-const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
+const passportXyzTaskDefinition = new aws.ecs.TaskDefinition(`passport-xyz-iam`, {
+  family: `passport-xyz-iam`,
+  containerDefinitions: passportXyzContainerDefinitions,
+  executionRoleArn: serviceRole.arn,
+  cpu: serviceResources[stack]["cpu"],
+  memory: serviceResources[stack]["memory"],
+  networkMode: "awsvpc",
+  requiresCompatibilities: ["FARGATE"],
+  tags: {
+    ...defaultTags,
+    EcsService: `passport-xyz-iam`,
+  },
+});
+
+const passportXyzService = new aws.ecs.Service(
+  `passport-xyz-iam`,
+  {
+    cluster: cluster.arn,
+    desiredCount: stack === "production" ? 2 : 1,
+    enableEcsManagedTags: true,
+    enableExecuteCommand: false,
+    launchType: "FARGATE",
+    loadBalancers: [
+      {
+        containerName: "iam",
+        containerPort: 80,
+        targetGroupArn: albPassportXyzTargetGroup.arn,
+      },
+    ],
+    name: `passport-xyz-iam`,
+    networkConfiguration: {
+      subnets: vpcPrivateSubnets,
+      securityGroups: [serviceSG.id],
+    },
+    propagateTags: "TASK_DEFINITION",
+    taskDefinition: passportXyzTaskDefinition.arn,
+    tags: {
+      ...defaultTags,
+      Name: `passport-xyz-iam`,
+    },
+  },
+  {
+    dependsOn: [albPassportXyzTargetGroup, passportXyzTaskDefinition],
+  }
+);
+
+const ecsAutoScalingTargetXyz = new aws.appautoscaling.Target("autoscaling_target_xyz", {
+  maxCapacity: 10,
+  minCapacity: 1,
+  resourceId: pulumi.interpolate`service/${cluster.name}/${passportXyzService.name}`,
+  scalableDimension: "ecs:service:DesiredCount",
+  serviceNamespace: "ecs",
+});
+
+const ecsAutoScalingPolicyXyz = new aws.appautoscaling.Policy("passport-autoscaling-policy-xyz", {
+  policyType: "TargetTrackingScaling",
+  resourceId: ecsAutoScalingTargetXyz.resourceId,
+  scalableDimension: ecsAutoScalingTargetXyz.scalableDimension,
+  serviceNamespace: ecsAutoScalingTargetXyz.serviceNamespace,
+  targetTrackingScalingPolicyConfiguration: {
+    predefinedMetricSpecification: {
+      predefinedMetricType: "ECSServiceAverageCPUUtilization",
+    },
+    targetValue: 50,
+    scaleInCooldown: 300,
+    scaleOutCooldown: 300,
+  },
+});
+
+const serviceRecordXyz = new aws.route53.Record("passport-xyz-record", {
+  name: "iam",
+  zoneId: passportXyzHostedZoneId,
+  type: "CNAME",
+  ttl: 300,
+  records: [albDnsName],
+});
+
+// CloudFlare Record 
+
+const cloudflareIamRecord = stack === "production" ? new cloudflare.Record(`iam-passport-xyz-record`, {
+  name: `iam`,
+  zoneId: cloudflareZoneId,
+  type: "CNAME",
+  value: albDnsName,
+  allowOverwrite: true,
+  comment: `Points to IAM service running on AWS ECS task`,
+}) : "";
+
+// Gitcoin domain
+
+const gitcoinContainerDefinitions = pulumi
+  .all([dockerGtcPassportIamImage, gitcoinIamSecrets, gitcoinIamEnvironment])
+  .apply(([_dockerGtcPassportIamImage, secrets, environment]) => {
+    return JSON.stringify([
+      {
+        name: "iam",
+        image: _dockerGtcPassportIamImage,
+        cpu: serviceResources[stack]["cpu"],
+        memory: serviceResources[stack]["memory"],
+        links: [],
+        essential: true,
+        portMappings: [
+          {
+            containerPort: 80,
+            hostPort: 80,
+            protocol: "tcp",
+          },
+        ],
+        logConfiguration: {
+          logDriver: "awslogs",
+          options: {
+            "awslogs-group": "passport-iam", // "${serviceLogGroup.name}`,
+            "awslogs-region": "us-west-2", // `${regionId}`,
+            "awslogs-create-group": "true",
+            "awslogs-stream-prefix": "iam",
+          },
+        },
+        mountPoints: [],
+        volumesFrom: [],
+        environment,
+        secrets,
+      },
+    ]);
+  });
+
+const gitcoinTaskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
   family: `passport-iam`,
-  containerDefinitions,
+  containerDefinitions: gitcoinContainerDefinitions,
   executionRoleArn: serviceRole.arn,
   cpu: serviceResources[stack]["cpu"],
   memory: serviceResources[stack]["memory"],
@@ -468,7 +735,7 @@ const taskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
   },
 });
 
-const service = new aws.ecs.Service(
+const gitcoinService = new aws.ecs.Service(
   `passport-iam`,
   {
     cluster: cluster.arn,
@@ -480,7 +747,7 @@ const service = new aws.ecs.Service(
       {
         containerName: "iam",
         containerPort: 80,
-        targetGroupArn: albTargetGroup.arn,
+        targetGroupArn: albGitcoinTargetGroup.arn,
       },
     ],
     name: `passport-iam`,
@@ -489,30 +756,30 @@ const service = new aws.ecs.Service(
       securityGroups: [serviceSG.id],
     },
     propagateTags: "TASK_DEFINITION",
-    taskDefinition: taskDefinition.arn,
+    taskDefinition: gitcoinTaskDefinition.arn,
     tags: {
       ...defaultTags,
       Name: `passport-iam`,
     },
   },
   {
-    dependsOn: [albTargetGroup, taskDefinition],
+    dependsOn: [albGitcoinTargetGroup, gitcoinTaskDefinition],
   }
 );
 
-const ecsAutoScalingTarget = new aws.appautoscaling.Target("autoscaling_target", {
+const gitcoinEcsAutoScalingTarget = new aws.appautoscaling.Target("autoscaling_target", {
   maxCapacity: 10,
   minCapacity: 1,
-  resourceId: pulumi.interpolate`service/${cluster.name}/${service.name}`,
+  resourceId: pulumi.interpolate`service/${cluster.name}/${gitcoinService.name}`,
   scalableDimension: "ecs:service:DesiredCount",
   serviceNamespace: "ecs",
 });
 
-const ecsAutoScalingPolicy = new aws.appautoscaling.Policy("passport-autoscaling-policy", {
+const gitcoinEcsAutoScalingPolicy = new aws.appautoscaling.Policy("passport-autoscaling-policy", {
   policyType: "TargetTrackingScaling",
-  resourceId: ecsAutoScalingTarget.resourceId,
-  scalableDimension: ecsAutoScalingTarget.scalableDimension,
-  serviceNamespace: ecsAutoScalingTarget.serviceNamespace,
+  resourceId: gitcoinEcsAutoScalingTarget.resourceId,
+  scalableDimension: gitcoinEcsAutoScalingTarget.scalableDimension,
+  serviceNamespace: gitcoinEcsAutoScalingTarget.serviceNamespace,
   targetTrackingScalingPolicyConfiguration: {
     predefinedMetricSpecification: {
       predefinedMetricType: "ECSServiceAverageCPUUtilization",
@@ -523,7 +790,7 @@ const ecsAutoScalingPolicy = new aws.appautoscaling.Policy("passport-autoscaling
   },
 });
 
-const serviceRecord = new aws.route53.Record("passport-record", {
+const gitcoinServiceRecord = new aws.route53.Record("passport-record", {
   name: route53Domain,
   zoneId: route53Zone,
   type: "A",
@@ -536,21 +803,16 @@ const serviceRecord = new aws.route53.Record("passport-record", {
   ],
 });
 
-const PASSPORT_APP_GITHUB_URL = op.read.parse(`op://DevOps/passport-${stack}-env/ci/PASSPORT_APP_GITHUB_URL`);
+const PASSPORT_APP_GITHUB_URL = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PASSPORT_APP_GITHUB_URL`);
 const PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY = op.read.parse(
-  `op://DevOps/passport-${stack}-secrets/ci/PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY`
+  `op://DevOps/passport-xyz-${stack}-secrets/ci/PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY`
 );
 
 const CLOUDFLARE_DOMAIN = stack === "production" ? `passport.xyz` : "";
-const CLOUDFLARE_ZONE_ID = op.read.parse(`op://DevOps/passport-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
+const CLOUDFLARE_ZONE_ID = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
 
-// If we need to support gitcoinco domain this is needed
-// const ROUTE53_PASSPORT_DOMAIN = Object({
-//   review: "review.passport.gitcoin.co",
-//   staging: "staging.passport.gitcoin.co",
-//   production: "passport.gitcoin.co",
-// });
 
+// Passport XYZ
 const passportBranches = Object({
   review: "main",
   staging: "staging-app",
@@ -567,7 +829,7 @@ const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((doma
     CLOUDFLARE_ZONE_ID, // cloudFlareZoneId
     prefix,
     passportBranches[stack],
-    passportEnvironment,
+    passportXyzAppEnvironment,
     { ...defaultTags, Name: `${prefix}.${domainName}` },
     false,
     "",
