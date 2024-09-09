@@ -23,7 +23,8 @@
     "checkProviders:arb": "tsx src/scripts/checkOnChainProvidersAreInSync.ts https://arb-mainnet.g.alchemy.com/v2/ 0xa4b1 0x2050256A91cbABD7C42465aA0d5325115C1dEB43",
     "checkProviders:zksync": "tsx src/scripts/checkOnChainProvidersAreInSync.ts https://zksync-mainnet.g.alchemy.com/v2/ 0x144 0x1166FCDCA3B04311Ba9E2eD5ad2c660E730e1386",
     "checkProviders:scroll": "tsx src/scripts/checkOnChainProvidersAreInSync.ts https://scroll-mainnet.g.alchemy.com/v2/ 0x82750 0x8A5820030188346cC9532a1dD9FD2EF8d8F464de",
-    "checkProviders:linea": "tsx src/scripts/checkOnChainProvidersAreInSync.ts https://linea-mainnet.g.alchemy.com/v2/ 0xe708 0x423cd60ab053F1b63D6F78c8c0c63e20F009d669"
+    "checkProviders:linea": "tsx src/scripts/checkOnChainProvidersAreInSync.ts https://linea-mainnet.g.alchemy.com/v2/ 0xe708 0x423cd60ab053F1b63D6F78c8c0c63e20F009d669",
+    "checkProviders:shape": "tsx src/scripts/checkOnChainProvidersAreInSync.ts https://shape-mainnet.g.alchemy.com/v2/ 0x168 0x2443D22Db6d25D141A1138D80724e3Eee54FD4C2"
   },
   "dependencies": {
     "@ethereum-attestation-service/eas-sdk": "^0.28.2",

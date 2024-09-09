@@ -14,11 +14,7 @@ type OnchainSidebarProps = {
 
 export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
   const customization = useCustomization();
-  const validChains = chains.filter(
-    ({ attestationProvider, id }) =>
-      (attestationProvider?.status === "comingSoon" || attestationProvider?.status === "enabled") &&
-      parseValidChains(customization, id)
-  );
+  const validChains = chains.filter((chain) => parseValidChains(customization, chain));
   return (
     <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose}>
       <DrawerOverlay />

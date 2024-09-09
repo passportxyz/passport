@@ -15,17 +15,18 @@ type AttestationProviderStatus = "enabled" | "comingSoon" | "disabled";
 type BaseProviderConfig = {
   name: string;
   status: AttestationProviderStatus;
+  skipByDefault: boolean; // If true, only show this chain if explicitly listed in the chain list
   monochromeIcon: string;
 };
 
 type EASConfig = BaseProviderConfig & {
   name: "Ethereum Attestation Service";
-  easScanUrl: string;
+  easScanUrl?: string;
 };
 
 type VeraxAndEASConfig = BaseProviderConfig & {
   name: "Verax + EAS";
-  easScanUrl: string;
+  easScanUrl?: string;
 };
 
 export type AttestationProviderConfig = EASConfig | VeraxAndEASConfig;
@@ -33,6 +34,7 @@ export type AttestationProviderConfig = EASConfig | VeraxAndEASConfig;
 export interface AttestationProvider {
   name: string;
   status: AttestationProviderStatus;
+  skipByDefault: boolean;
   hasWebViewer: boolean;
   attestationExplorerLinkText: string;
   monochromeIcon: string;
@@ -53,6 +55,7 @@ export interface AttestationProvider {
 class BaseAttestationProvider implements AttestationProvider {
   name = "Override this class";
   status: AttestationProviderStatus;
+  skipByDefault: boolean = false;
   hasWebViewer = false;
   attestationExplorerLinkText = "Check attestation on EAS";
   chainId: string;
@@ -62,14 +65,17 @@ class BaseAttestationProvider implements AttestationProvider {
     chainId,
     status,
     monochromeIcon,
+    skipByDefault = false,
   }: {
     chainId: string;
     status: AttestationProviderStatus;
     monochromeIcon: string;
+    skipByDefault: boolean;
   }) {
     this.chainId = chainId;
     this.status = status;
     this.monochromeIcon = monochromeIcon;
+    this.skipByDefault = skipByDefault;
   }
 
   viewerUrl(_address: string): string {
@@ -110,7 +116,7 @@ class BaseAttestationProvider implements AttestationProvider {
   ): OnChainStatus {
     // This is default implementation that will check for differences in
     // the on-chain providers and on-chain score
-    if (scoreState !== "DONE") return OnChainStatus.LOADING;
+    if (scoreState !== "DONE" && scoreState !== "ERROR") return OnChainStatus.LOADING;
 
     if (onChainProviders.length === 0) return OnChainStatus.NOT_MOVED;
 
@@ -143,21 +149,24 @@ class BaseAttestationProvider implements AttestationProvider {
 export class EASAttestationProvider extends BaseAttestationProvider {
   name = "Ethereum Attestation Service (Score & Passport)";
   hasWebViewer = true;
-  easScanUrl: string;
+  easScanUrl?: string;
 
   constructor({
     chainId,
     status,
     easScanUrl,
     monochromeIcon,
+    skipByDefault = false,
   }: {
     chainId: string;
     status: AttestationProviderStatus;
-    easScanUrl: string;
+    easScanUrl?: string;
     monochromeIcon: string;
+    skipByDefault: boolean;
   }) {
-    super({ status, chainId, monochromeIcon });
+    super({ status, chainId, monochromeIcon, skipByDefault });
     this.easScanUrl = easScanUrl;
+    this.hasWebViewer = !!easScanUrl;
   }
 
   viewerUrl(address: string): string {
@@ -170,7 +179,7 @@ export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
   attestationExplorerLinkText = "Check attestation on Verax";
 
   viewerUrl(address: string): string {
-    return this.easScanUrl;
+    return this.easScanUrl || "";
   }
 
   checkOnChainStatus(

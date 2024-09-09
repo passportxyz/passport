@@ -64,7 +64,10 @@ export function SyncToChainButton({ onChainStatus, chain, className }: SyncToCha
   }, [onClick, setUserHasApprovedLowScoreMint]);
 
   const loading =
-    showLowScoreAlert || syncingToChain || onChainStatus === OnChainStatus.LOADING || scoreState !== "DONE";
+    showLowScoreAlert ||
+    syncingToChain ||
+    onChainStatus === OnChainStatus.LOADING ||
+    (scoreState !== "DONE" && scoreState !== "ERROR");
   const expired = onChainStatus === OnChainStatus.MOVED_EXPIRED;
 
   return (
