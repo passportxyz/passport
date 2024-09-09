@@ -81,7 +81,7 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
   );
 
   useEffect(() => {
-    // update all verfied states
+    // update all verified states
     setSelectedProviders(
       PLATFORMS.reduce((platforms, platform) => {
         // get all providerIds for this platform
