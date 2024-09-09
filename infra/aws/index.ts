@@ -52,7 +52,7 @@ const containerInsightsStatus = stack == "production" ? "enabled" : "disabled";
 
 // Manage secrets & envs for Passport XYZ 
 const passportXyzIamSecretObject = new aws.secretsmanager.Secret("iam-secret-passport-xyz", {
-  name: "iam-secret-passport-xyz-1",
+  // name: "iam-secret-passport-xyz",
   description: "Secrets for Passport IAM on Passport XYZ",
   tags: {
     ...defaultTags,
