@@ -19,8 +19,7 @@ export class LinkedinPlatform extends Platform {
 
   async getOAuthUrl(state: string): Promise<string> {
     const linkedinUrl = await Promise.resolve(
-      // `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${this.clientId}&redirect_uri=${this.redirectUri}&state=${state}&scope=email%20profile`
-      `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${this.clientId}&redirect_uri=${this.redirectUri}&state=${state}&scope=r_emailaddress%20r_liteprofile`
+      `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${this.clientId}&redirect_uri=${this.redirectUri}&state=${state}&scope=email%20profile`
     );
     return linkedinUrl;
   }
