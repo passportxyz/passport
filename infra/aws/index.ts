@@ -1,6 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as op from "@1password/op-js";
+import * as cloudflare from "@pulumi/cloudflare";
 import { createAmplifyApp } from "../lib/amplify/app";
 import { secretsManager } from "infra-libs";
 
