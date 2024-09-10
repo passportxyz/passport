@@ -1,169 +1,416 @@
-import * as githubClient from "../githubClient";
+import axios from "axios";
+import {
+  fetchAndCheckContributions,
+  GithubContext,
+  GithubContributionResponse,
+  MAX_YEARS_TO_CHECK,
+} from "../githubClient";
 
-const mockCode = "code123";
-const mockContributionRange: githubClient.ContributionRange = {
-  from: "2022-07-01T00:00:00Z",
-  to: "2023-06-30T00:00:00Z",
-  iteration: 0,
-};
+jest.mock("axios");
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-const viewerResult = {
-  contributionsCollection: [{ collection: [] }],
-  createdAt: "2022-07-01T00:00:00Z",
-} as unknown as githubClient.Viewer;
+describe("fetchAndCheckContributions", () => {
+  const mockCode = "test-code";
+  const mockAccessToken = "test-access-token";
+  const mockUserId = "test-user-id";
 
-const mockContributionData: githubClient.GithubUserData = {
-  contributionData: {
-    contributionCollection: [viewerResult.contributionsCollection],
-    iteration: 0,
-  },
-  createdAt: "2022-07-01T00:00:00Z",
-};
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
 
-const mockGithubContext = {
-  accessToken: "abc",
-  clientId: "123",
-  clientSecret: "secret",
-  github: {
-    contributionData: {
-      contributionCollection: [],
-      iteration: 0,
-    },
-    createdAt: "2022-07-01T00:00:00Z",
-  },
-} as unknown as githubClient.GithubContext;
+  it("should fetch and check contributions successfully, counting commits from the same day together", async () => {
+    // Mock the access token request
+    mockedAxios.post.mockResolvedValueOnce({
+      data: { access_token: mockAccessToken },
+    });
 
-const mockContributionDay = (day: number): githubClient.ContributionDay => ({
-  contributionCount: 1,
-  date: `2020-01-${day}`,
-});
-
-const mockFetchGithubUserData = {
-  contributionData: {
-    contributionCollection: [
-      {
-        contributionCalendar: {
-          weeks: [
-            {
-              contributionDays: [mockContributionDay(1), mockContributionDay(2), mockContributionDay(3)],
+    // Mock the GitHub API requests
+    const mockApiResponse: GithubContributionResponse = {
+      data: {
+        data: {
+          viewer: {
+            id: mockUserId,
+            createdAt: "2024-01-01T00:00:00Z",
+            contributionsCollection: {
+              commitContributionsByRepository: [
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 1,
+                        occurredAt: "2024-09-05T12:00:00Z",
+                        repository: {
+                          createdAt: "2024-01-01T00:00:00Z",
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 2,
+                        occurredAt: "2024-09-05T13:00:00Z",
+                        repository: {
+                          createdAt: "2024-09-04T14:13:54Z",
+                        },
+                      },
+                      {
+                        commitCount: 6,
+                        occurredAt: "2024-09-08T13:00:00Z",
+                        repository: {
+                          createdAt: "2024-09-04T14:13:54Z",
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 2,
+                        occurredAt: "2024-09-06T13:00:00Z",
+                        repository: {
+                          createdAt: "2024-09-04T14:13:54Z",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
             },
-          ],
+          },
         },
       },
-    ],
-  },
-} as unknown as githubClient.GithubUserData;
+    };
 
-const mockFetchGithubUserDataCall = jest.spyOn(githubClient, "fetchGithubUserData");
+    mockedAxios.post.mockResolvedValue(mockApiResponse);
 
-describe("githubClient", function () {
-  describe("fetchAndCheckContributions", function () {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
+    const context: GithubContext = {};
+    const result = await fetchAndCheckContributions(context, mockCode);
 
-    it("validates contributions correctly", async () => {
-      mockFetchGithubUserDataCall.mockImplementation(() => {
-        return Promise.resolve(mockFetchGithubUserData);
-      });
-      const numDays = "1";
-      const result = await githubClient.fetchAndCheckContributions(mockGithubContext, "ABC123_ACCESSCODE", numDays, 3);
-      expect(result).toEqual({
-        contributionValid: true,
-        numberOfDays: numDays,
-      });
-    });
+    const expectedResult = {
+      userId: mockUserId,
+      contributionDays: 3,
+      hadBadCommits: false,
+    };
 
-    it("should not call fetchGithubUserData multiple times number of contribution days is valid", async () => {
-      const contributionsValidData = {
-        contributionData: {
-          contributionCollection: [
-            {
-              contributionCalendar: {
-                weeks: [
-                  {
-                    contributionDays: [mockContributionDay(1), mockContributionDay(2)], // Ensure that the contributions are valid
+    expect(result).toEqual(expectedResult);
+
+    expect(mockedAxios.post).toHaveBeenCalledTimes(MAX_YEARS_TO_CHECK + 1);
+
+    // Make sure it uses cache on second call
+
+    const anotherCallResult = await fetchAndCheckContributions(context, mockCode);
+
+    expect(anotherCallResult).toEqual(expectedResult);
+
+    expect(mockedAxios.post).toHaveBeenCalledTimes(MAX_YEARS_TO_CHECK + 1);
+  });
+
+  it("should use existing access token if available", async () => {
+    const context: GithubContext = {
+      github: {
+        accessToken: mockAccessToken,
+      },
+    };
+
+    // Mock the GitHub API requests
+    const mockApiResponse: GithubContributionResponse = {
+      data: {
+        data: {
+          viewer: {
+            id: mockUserId,
+            createdAt: "2024-01-01T00:00:00Z",
+            contributionsCollection: {
+              commitContributionsByRepository: [
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 2,
+                        occurredAt: "2024-09-05T00:00:00Z",
+                        repository: {
+                          createdAt: "2024-01-01T00:00:00Z",
+                        },
+                      },
+                    ],
                   },
-                ],
-              },
+                },
+              ],
             },
-          ],
+          },
         },
-      } as unknown as githubClient.GithubUserData;
+      },
+    };
 
-      mockFetchGithubUserDataCall.mockImplementation(() => {
-        return Promise.resolve(contributionsValidData);
-      });
+    mockedAxios.post.mockResolvedValue(mockApiResponse);
 
-      await githubClient.fetchAndCheckContributions(mockGithubContext, "ABC123_ACCESSCODE", "1", 3);
+    const result = await fetchAndCheckContributions(context, mockCode);
 
-      expect(mockFetchGithubUserDataCall).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      userId: mockUserId,
+      contributionDays: 1,
+      hadBadCommits: false,
     });
 
-    it("handles errors correctly", async () => {
-      mockFetchGithubUserDataCall.mockImplementation(() => {
-        return Promise.resolve({ errors: ["Some error"] });
-      });
+    expect(mockedAxios.post).toHaveBeenCalledTimes(MAX_YEARS_TO_CHECK);
+    expect(mockedAxios.post).not.toHaveBeenCalledWith(expect.stringContaining("login/oauth/access_token"));
+  });
 
-      const result = await githubClient.fetchAndCheckContributions(mockGithubContext, "ABC123_ACCESSCODE", "1", 3);
-
-      expect(result).toEqual({
-        contributionValid: false,
-        errors: ["Some error"],
-      });
+  it("should handle bad commits", async () => {
+    mockedAxios.post.mockResolvedValueOnce({
+      data: { access_token: mockAccessToken },
     });
 
-    it("handles insufficient contributions correctly", async () => {
-      mockFetchGithubUserDataCall.mockImplementation(() => {
-        return Promise.resolve(mockFetchGithubUserData);
-      });
+    const mockApiResponse: GithubContributionResponse = {
+      data: {
+        data: {
+          viewer: {
+            id: mockUserId,
+            createdAt: "2024-01-01T00:00:00Z",
+            contributionsCollection: {
+              commitContributionsByRepository: [
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 1,
+                        occurredAt: "2023-12-31T00:00:00Z", // Bad commit: before user creation
+                        repository: {
+                          createdAt: "2023-01-01T00:00:00Z",
+                        },
+                      },
+                      {
+                        commitCount: 1,
+                        occurredAt: "2024-09-08T00:00:00Z", // Bad commit: before repo creation
+                        repository: {
+                          createdAt: "2024-10-01T00:00:00Z",
+                        },
+                      },
+                      {
+                        commitCount: 1,
+                        occurredAt: "2024-09-05T00:00:00Z", // Good commit
+                        repository: {
+                          createdAt: "2024-01-01T00:00:00Z",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    };
 
-      const numDays = "4";
+    mockedAxios.post.mockResolvedValue(mockApiResponse);
 
-      const result = await githubClient.fetchAndCheckContributions(mockGithubContext, "ABC123_ACCESSCODE", numDays, 3);
+    const context: GithubContext = {};
+    const result = await fetchAndCheckContributions(context, mockCode);
 
-      expect(result).toEqual({
-        contributionValid: false,
-        numberOfDays: numDays,
-      });
+    expect(result).toEqual({
+      userId: mockUserId,
+      contributionDays: 1,
+      hadBadCommits: true,
     });
   });
 
-  describe("fetchGithubUserData", function () {
-    beforeEach(() => {
-      mockFetchGithubUserDataCall.mockRestore();
-      jest.spyOn(githubClient, "requestAccessToken").mockImplementation(() => {
-        return Promise.resolve("ABC123_ACCESSCODE");
-      });
+  it("should paginate", async () => {
+    // Mock the access token request
+    mockedAxios.post.mockResolvedValueOnce({
+      data: { access_token: mockAccessToken },
     });
-    it("should fetch a user's github data", async () => {
-      jest.spyOn(githubClient, "queryFunc").mockImplementationOnce(() => {
-        return Promise.resolve(viewerResult);
-      });
-      const result = await githubClient.fetchGithubUserData({ github: {} }, mockCode, mockContributionRange);
-      expect(result).toEqual(mockContributionData);
-    });
-    it("handles rate limit exceeded error correctly", async () => {
-      jest.spyOn(githubClient, "queryFunc").mockImplementationOnce(() => {
-        throw { response: { status: 429 } };
-      });
 
-      const result = await githubClient.fetchGithubUserData(mockGithubContext, mockCode, mockContributionRange);
+    // Mock the GitHub API requests
+    const firstPageMockResponse: GithubContributionResponse = {
+      data: {
+        data: {
+          viewer: {
+            id: mockUserId,
+            createdAt: "2024-01-01T00:00:00Z",
+            contributionsCollection: {
+              commitContributionsByRepository: [
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: "MQ",
+                      hasNextPage: true,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 1,
+                        occurredAt: "2024-09-06T07:00:00Z",
+                        repository: {
+                          createdAt: "2022-03-14T17:57:02Z",
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: "MQ",
+                      hasNextPage: true,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 3,
+                        occurredAt: "2024-09-05T07:00:00Z",
+                        repository: {
+                          createdAt: "2022-11-18T18:16:06Z",
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: "MQ",
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 2,
+                        occurredAt: "2024-09-04T07:00:00Z",
+                        repository: {
+                          createdAt: "2024-06-28T09:02:44Z",
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: "MQ",
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 2,
+                        occurredAt: "2024-09-04T07:00:00Z",
+                        repository: {
+                          createdAt: "2024-03-07T08:47:47Z",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    };
 
-      expect(result).toEqual({
-        errors: ["Error getting getting github info", "Rate limit exceeded"],
-      });
-    });
-    it("handles other errors correctly", async () => {
-      jest.spyOn(githubClient, "queryFunc").mockImplementationOnce(() => {
-        throw { response: { status: 401 }, message: "Some error" };
-      });
+    const secondPageMockResponse: GithubContributionResponse = {
+      data: {
+        data: {
+          viewer: {
+            id: mockUserId,
+            createdAt: "2024-01-01T00:00:00Z",
+            contributionsCollection: {
+              commitContributionsByRepository: [
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 2,
+                        occurredAt: "2024-09-04T07:00:00Z",
+                        repository: {
+                          createdAt: "2022-03-14T17:57:02Z",
+                        },
+                      },
+                      {
+                        commitCount: 2,
+                        occurredAt: "2024-09-10:00:00Z",
+                        repository: {
+                          createdAt: "2022-03-14T17:57:02Z",
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [],
+                  },
+                },
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [],
+                  },
+                },
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    };
 
-      const result = await githubClient.fetchGithubUserData(mockGithubContext, mockCode, mockContributionRange);
+    for (let i = 0; i < MAX_YEARS_TO_CHECK; i++) {
+      mockedAxios.post.mockResolvedValueOnce(firstPageMockResponse);
+      mockedAxios.post.mockResolvedValueOnce(secondPageMockResponse);
+    }
 
-      expect(result).toEqual({
-        errors: ["Error getting getting github info", "Some error"],
-      });
-    });
+    const context: GithubContext = {};
+    const result = await fetchAndCheckContributions(context, mockCode);
+
+    const expectedResult = {
+      userId: mockUserId,
+      contributionDays: 4,
+      hadBadCommits: false,
+    };
+
+    expect(result).toEqual(expectedResult);
+
+    expect(mockedAxios.post).toHaveBeenCalledTimes(MAX_YEARS_TO_CHECK * 2 + 1);
   });
 });

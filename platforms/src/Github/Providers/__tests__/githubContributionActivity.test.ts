@@ -30,7 +30,9 @@ describe("GithubContributionActivityProvider", function () {
   it("handles valid verification attempt", async () => {
     (fetchAndCheckContributions as jest.MockedFunction<typeof fetchAndCheckContributions>).mockImplementation(() => {
       return Promise.resolve({
-        contributionValid: true,
+        userId: "123",
+        contributionDays: 30,
+        hadBadCommits: false,
         errors: [],
       });
     });
@@ -49,18 +51,19 @@ describe("GithubContributionActivityProvider", function () {
   it("handles error during verification", async () => {
     (fetchAndCheckContributions as jest.MockedFunction<typeof fetchAndCheckContributions>).mockImplementation(() => {
       return Promise.resolve({
-        contributionValid: false,
-        errors: ["Some error"],
+        userId: "123",
+        contributionDays: 30,
+        hadBadCommits: false,
       });
     });
 
-    const provider = new GithubContributionActivityProvider({ threshold: "1" });
+    const provider = new GithubContributionActivityProvider({ threshold: "31" });
     const result: VerifiedPayload = await provider.verify(mockPayload, mockContext);
 
     expect(fetchAndCheckContributions).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: false,
-      errors: ["Your Github contributions did not qualify for this stamp."],
+      errors: ["You have contributed on 30 days, the minimum for this stamp is 31 days."],
       record: undefined,
     });
   });
@@ -68,8 +71,9 @@ describe("GithubContributionActivityProvider", function () {
   it("handles invalid contributions", async () => {
     (fetchAndCheckContributions as jest.MockedFunction<typeof fetchAndCheckContributions>).mockImplementation(() => {
       return Promise.resolve({
-        contributionValid: false,
-        errors: ["Your Github contributions did not qualify for this stamp."],
+        userId: "123",
+        contributionDays: 0,
+        hadBadCommits: true,
       });
     });
 
@@ -79,7 +83,9 @@ describe("GithubContributionActivityProvider", function () {
     expect(fetchAndCheckContributions).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: false,
-      errors: ["Your Github contributions did not qualify for this stamp."],
+      errors: [
+        "You have contributed on 30 days, the minimum for this stamp is 31 days. Some commits were ignored because they ocurred before the Github repo or user creation.",
+      ],
       record: undefined,
     });
   });

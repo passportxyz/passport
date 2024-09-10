@@ -33,6 +33,8 @@ ProviderConfig = [
   },
 ];
 
+export const MAX_CONTRIBUTION_DAYS = 120;
+
 providers = [
   new GithubContributionActivityProvider({
     threshold: "30",
@@ -41,7 +43,7 @@ providers = [
     threshold: "60",
   }),
   new GithubContributionActivityProvider({
-    threshold: "120",
+    threshold: MAX_CONTRIBUTION_DAYS.toString(),
   }),
 ];
 
