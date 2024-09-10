@@ -172,6 +172,7 @@ export const fetchGithubData = async (accessToken: string): Promise<GithubUserDa
   let allUniqueContributionDates = new Set<string>();
   let userId;
   let hadBadCommits = false;
+  let firstQuery = true;
 
   // Loop over the number of years
   for (let i = 0; i < MAX_YEARS_TO_CHECK; i++) {
@@ -183,16 +184,21 @@ export const fetchGithubData = async (accessToken: string): Promise<GithubUserDa
     };
 
     let endCursor = "";
-    while (true) {
+    let run = true;
+    while (run) {
+      if (firstQuery) {
+        firstQuery = false;
+      } else {
+        await avoidGithubRateLimit();
+      }
+
       const result = await queryFunc(contributionRange.from, contributionRange.to, endCursor, accessToken);
       userId = result.userId;
       endCursor = result.endCursor;
       allUniqueContributionDates = new Set([...allUniqueContributionDates, ...result.uniqueContributionDates]);
       if (result.hadBadCommits) hadBadCommits = true;
 
-      if (!result.hasNextPage || allUniqueContributionDates.size >= MAX_CONTRIBUTION_DAYS) break;
-
-      await avoidGithubRateLimit();
+      run = result.hasNextPage && allUniqueContributionDates.size < MAX_CONTRIBUTION_DAYS;
     }
 
     if (allUniqueContributionDates.size >= MAX_CONTRIBUTION_DAYS) break;

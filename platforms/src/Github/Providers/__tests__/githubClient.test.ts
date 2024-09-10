@@ -7,7 +7,7 @@ import {
 } from "../githubClient";
 
 jest.mock("axios");
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mockedPost = jest.spyOn(axios, "post");
 
 describe("fetchAndCheckContributions", () => {
   const mockCode = "test-code";
@@ -20,7 +20,7 @@ describe("fetchAndCheckContributions", () => {
 
   it("should fetch and check contributions successfully, counting commits from the same day together", async () => {
     // Mock the access token request
-    mockedAxios.post.mockResolvedValueOnce({
+    mockedPost.mockResolvedValueOnce({
       data: { access_token: mockAccessToken },
     });
 
@@ -98,7 +98,7 @@ describe("fetchAndCheckContributions", () => {
       },
     };
 
-    mockedAxios.post.mockResolvedValue(mockApiResponse);
+    mockedPost.mockResolvedValue(mockApiResponse);
 
     const context: GithubContext = {};
     const result = await fetchAndCheckContributions(context, mockCode);
@@ -111,7 +111,7 @@ describe("fetchAndCheckContributions", () => {
 
     expect(result).toEqual(expectedResult);
 
-    expect(mockedAxios.post).toHaveBeenCalledTimes(MAX_YEARS_TO_CHECK + 1);
+    expect(mockedPost).toHaveBeenCalledTimes(MAX_YEARS_TO_CHECK + 1);
 
     // Make sure it uses cache on second call
 
@@ -119,7 +119,7 @@ describe("fetchAndCheckContributions", () => {
 
     expect(anotherCallResult).toEqual(expectedResult);
 
-    expect(mockedAxios.post).toHaveBeenCalledTimes(MAX_YEARS_TO_CHECK + 1);
+    expect(mockedPost).toHaveBeenCalledTimes(MAX_YEARS_TO_CHECK + 1);
   });
 
   it("should use existing access token if available", async () => {
@@ -162,7 +162,7 @@ describe("fetchAndCheckContributions", () => {
       },
     };
 
-    mockedAxios.post.mockResolvedValue(mockApiResponse);
+    mockedPost.mockResolvedValue(mockApiResponse);
 
     const result = await fetchAndCheckContributions(context, mockCode);
 
@@ -172,12 +172,12 @@ describe("fetchAndCheckContributions", () => {
       hadBadCommits: false,
     });
 
-    expect(mockedAxios.post).toHaveBeenCalledTimes(MAX_YEARS_TO_CHECK);
-    expect(mockedAxios.post).not.toHaveBeenCalledWith(expect.stringContaining("login/oauth/access_token"));
+    expect(mockedPost).toHaveBeenCalledTimes(MAX_YEARS_TO_CHECK);
+    expect(mockedPost).not.toHaveBeenCalledWith(expect.stringContaining("login/oauth/access_token"));
   });
 
   it("should handle bad commits", async () => {
-    mockedAxios.post.mockResolvedValueOnce({
+    mockedPost.mockResolvedValueOnce({
       data: { access_token: mockAccessToken },
     });
 
@@ -227,7 +227,7 @@ describe("fetchAndCheckContributions", () => {
       },
     };
 
-    mockedAxios.post.mockResolvedValue(mockApiResponse);
+    mockedPost.mockResolvedValue(mockApiResponse);
 
     const context: GithubContext = {};
     const result = await fetchAndCheckContributions(context, mockCode);
@@ -241,7 +241,7 @@ describe("fetchAndCheckContributions", () => {
 
   it("should paginate", async () => {
     // Mock the access token request
-    mockedAxios.post.mockResolvedValueOnce({
+    mockedPost.mockResolvedValueOnce({
       data: { access_token: mockAccessToken },
     });
 
@@ -396,8 +396,8 @@ describe("fetchAndCheckContributions", () => {
     };
 
     for (let i = 0; i < MAX_YEARS_TO_CHECK; i++) {
-      mockedAxios.post.mockResolvedValueOnce(firstPageMockResponse);
-      mockedAxios.post.mockResolvedValueOnce(secondPageMockResponse);
+      mockedPost.mockResolvedValueOnce(firstPageMockResponse);
+      mockedPost.mockResolvedValueOnce(secondPageMockResponse);
     }
 
     const context: GithubContext = {};
@@ -411,6 +411,6 @@ describe("fetchAndCheckContributions", () => {
 
     expect(result).toEqual(expectedResult);
 
-    expect(mockedAxios.post).toHaveBeenCalledTimes(MAX_YEARS_TO_CHECK * 2 + 1);
+    expect(mockedPost).toHaveBeenCalledTimes(MAX_YEARS_TO_CHECK * 2 + 1);
   });
 });
