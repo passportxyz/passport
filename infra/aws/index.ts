@@ -52,7 +52,7 @@ const containerInsightsStatus = stack == "production" ? "enabled" : "disabled";
 
 // Manage secrets & envs for Passport XYZ 
 const passportXyzIamSecretObject = new aws.secretsmanager.Secret("iam-secret-passport-xyz", {
-  name: "iam-secret-passport-xyz",
+  // name: "iam-secret-passport-xyz",
   description: "Secrets for Passport IAM on Passport XYZ",
   tags: {
     ...defaultTags,
@@ -318,7 +318,7 @@ const albPassportXyzTargetGroup = new aws.lb.TargetGroup(`passport-xyz-iam`, {
 
 const albPassportXyzListenerRule = new aws.lb.ListenerRule(`passport-xyz-iam-https`, {
   listenerArn: albHttpsListenerArn,
-  priority: 100, // This needs to be grater than the priority number for passport-scroll-badge-service
+  priority: 102, // This needs to be grater than the priority number for passport-scroll-badge-service
   actions: [
     {
       type: "forward",
@@ -365,7 +365,7 @@ const albGitcoinTargetGroup = new aws.lb.TargetGroup(`passport-iam`, {
 
 const albGitcoinListenerRule = new aws.lb.ListenerRule(`passport-iam-https`, {
   listenerArn: albHttpsListenerArn,
-  priority: 101, // This needs to be grater than the priority number for passport-scroll-badge-service
+  priority: 100, // This needs to be grater than the priority number for passport-scroll-badge-service
   actions: [
     {
       type: "forward",
