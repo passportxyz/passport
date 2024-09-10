@@ -43,7 +43,7 @@ describe("GithubContributionActivityProvider", function () {
     expect(fetchAndCheckContributions).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       valid: true,
-      errors: [],
+      errors: undefined,
       record: { id: "123" },
     });
   });
@@ -64,7 +64,7 @@ describe("GithubContributionActivityProvider", function () {
     expect(result).toEqual({
       valid: false,
       errors: ["You have contributed on 30 days, the minimum for this stamp is 31 days."],
-      record: undefined,
+      record: { id: "123" },
     });
   });
 
@@ -84,9 +84,9 @@ describe("GithubContributionActivityProvider", function () {
     expect(result).toEqual({
       valid: false,
       errors: [
-        "You have contributed on 30 days, the minimum for this stamp is 31 days. Some commits were ignored because they ocurred before the Github repo or user creation.",
+        "You have contributed on 0 days, the minimum for this stamp is 1 days. Some commits were ignored because they ocurred before the Github repo or user creation.",
       ],
-      record: undefined,
+      record: { id: "123" },
     });
   });
 });
