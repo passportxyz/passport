@@ -328,7 +328,8 @@ const albPassportXyzListenerRule = new aws.lb.ListenerRule(`passport-xyz-iam-htt
   conditions: [
     {
       hostHeader: {
-        values: [passportXyzDomainName.apply((domain) => `iam.${domain}`)],
+        values: stack === "production" ? 
+        [passportXyzDomainName.apply((domain) => `iam.${domain}`), `iam.passport.xyz`] : [passportXyzDomainName.apply((domain) => `iam.${domain}`)], // if it is on production, it should be also iam.passport.xyz
       },
       // pathPattern: {[]}
     },
