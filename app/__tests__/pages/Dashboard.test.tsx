@@ -10,6 +10,8 @@ import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures
 import { CeramicContextState, IsLoadingPassportState } from "../../context/ceramicContext";
 import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
 import { ChakraProvider } from "@chakra-ui/react";
+import { DashboardCTAs } from "../../pages/Dashboard";
+import { Customization } from "../../utils/customizationUtils";
 
 jest.mock("react-confetti");
 
@@ -39,6 +41,25 @@ jest.mock("next/router", () => ({
   useRouter: () => ({
     query: { filter: "" },
   }),
+}));
+
+jest.mock("../../components/DashboardScorePanel", () => ({
+  DashboardScorePanel: ({ className }: { className: string }) => (
+    <div data-testid="dashboard-score-panel" className={className}>
+      DashboardScorePanel
+    </div>
+  ),
+  DashboardScoreExplanationPanel: () => (
+    <div data-testid="dashboard-score-explanation-panel">DashboardScoreExplanationPanel</div>
+  ),
+}));
+
+jest.mock("../../components/CustomDashboardPanel.tsx", () => ({
+  DynamicCustomDashboardPanel: ({ className }: { className: string }) => (
+    <div data-testid="dynamic-custom-dashboard-panel" className={className}>
+      DynamicCustomDashboardPanel
+    </div>
+  ),
 }));
 
 const mockToggleConnection = jest.fn();
@@ -125,6 +146,54 @@ describe("dashboard notifications", () => {
 
     const ceramicLoadingAlert = screen.getByTestId("initializing-alert");
     expect(ceramicLoadingAlert).toBeInTheDocument();
+  });
+});
+
+describe("DashboardCTAs", () => {
+  it("renders with default customization", () => {
+    render(<DashboardCTAs customization={{ key: "none" } as Customization} />);
+
+    expect(screen.getByTestId("dashboard-score-panel")).toHaveClass("w-full xl:w-1/2");
+    expect(screen.getByTestId("dashboard-score-explanation-panel")).toBeInTheDocument();
+    expect(screen.queryByTestId("dynamic-custom-dashboard-panel")).not.toBeInTheDocument();
+  });
+
+  it("renders with custom dashboard panel", () => {
+    render(
+      <DashboardCTAs
+        customization={{ key: "custom", useCustomDashboardPanel: true, showExplanationPanel: true } as Customization}
+      />
+    );
+
+    expect(screen.getByTestId("dashboard-score-panel")).toHaveClass("w-full");
+    expect(screen.getByTestId("dashboard-score-explanation-panel")).toBeInTheDocument();
+    expect(screen.getByTestId("dynamic-custom-dashboard-panel")).toHaveClass(
+      "order-1 lg:order-2 max-w-full xl:max-w-md"
+    );
+  });
+
+  it("renders without explanation panel", () => {
+    render(
+      <DashboardCTAs
+        customization={{ key: "custom", useCustomDashboardPanel: true, showExplanationPanel: false } as Customization}
+      />
+    );
+
+    expect(screen.getByTestId("dashboard-score-panel")).toHaveClass("w-full");
+    expect(screen.queryByTestId("dashboard-score-explanation-panel")).not.toBeInTheDocument();
+    expect(screen.getByTestId("dynamic-custom-dashboard-panel")).toHaveClass("order-1 lg:order-2 max-w-full xl:w-2/3");
+  });
+
+  it("applies correct CSS classes", () => {
+    render(<DashboardCTAs customization={{ key: "none" } as Customization} />);
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const container = screen.getByTestId("dashboard-score-panel").parentElement?.parentElement;
+    expect(container).toHaveClass("col-span-full flex flex-col xl:flex-row gap-8");
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const innerContainer = screen.getByTestId("dashboard-score-panel").parentElement;
+    expect(innerContainer).toHaveClass("col-span-full order-2 flex flex-col grow lg:flex-row gap-8 mt-0.5");
   });
 });
 

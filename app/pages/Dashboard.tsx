@@ -36,8 +36,27 @@ import Script from "next/script";
 import { Confetti } from "../components/Confetti";
 import { PassportDetailsButton } from "../components/PassportDetailsButton";
 import { useMessage } from "../hooks/useMessage";
+import { Customization } from "../utils/customizationUtils";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+
+export const DashboardCTAs = ({ customization }: { customization: Customization }) => {
+  const { useCustomDashboardPanel } = customization;
+  const explanationPanel = customization.key !== "none" ? customization?.showExplanationPanel : true;
+  return (
+    <div className="col-span-full flex flex-col xl:flex-row gap-8">
+      <div className="col-span-full order-2 flex flex-col grow lg:flex-row gap-8 mt-0.5">
+        <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
+        {explanationPanel && <DashboardScoreExplanationPanel />}
+      </div>
+      {useCustomDashboardPanel && (
+        <DynamicCustomDashboardPanel
+          className={`order-1 lg:order-2 max-w-full ${explanationPanel ? "xl:max-w-md" : "xl:w-2/3"}`}
+        />
+      )}
+    </div>
+  );
+};
 
 export default function Dashboard() {
   const customization = useCustomization();
@@ -244,15 +263,7 @@ export default function Dashboard() {
         <Header />
         <BodyWrapper className="mt-4 md:mt-6">
           <PageWidthGrid>
-            <div className="col-span-full flex flex-col xl:flex-row gap-8">
-              <div className="col-span-full order-2 flex flex-col grow lg:flex-row gap-8 my-2.5">
-                <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
-                <DashboardScoreExplanationPanel />
-              </div>
-              {useCustomDashboardPanel && (
-                <DynamicCustomDashboardPanel className="order-1 lg:order-2 max-w-full xl:max-w-md" />
-              )}
-            </div>
+            <DashboardCTAs customization={customization} />
 
             <span id="add-stamps" className="col-span-full font-heading text-4xl">
               Add Stamps
