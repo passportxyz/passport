@@ -22,6 +22,13 @@ export type GithubTokenResponse = {
   access_token: string;
 };
 
+export type GithubOrgMetaData = {
+  id?: number;
+  login?: string;
+  node_id?: string;
+  errors?: string[];
+};
+
 export interface Viewer {
   id: string;
   createdAt: string;
@@ -106,19 +113,31 @@ const parseContributions = ({
   };
 };
 
+/**
+ *
+ * @param fromDate
+ * @param toDate
+ * @endCursor string
+ * @param accessToken
+ * @param orgId - if specified this will only look at contributions to the specified org. This
+ * is expected to be the `node_id` form the org object as returned by  https://api.github.com/orgs/<org>  for example
+ * @returns
+ */
 export const queryFunc = async (
   fromDate: string,
   toDate: string,
   endCursor: string,
-  accessToken: string
+  accessToken: string,
+  orgId?: string // This is expected to be the `node_id` form the org object as returned by  https://api.github.com/orgs/<org>  for example
 ): Promise<ParsedContributions & { userId: string }> => {
   try {
     const query = `
       {
         viewer {
           id
+
           createdAt
-          contributionsCollection(from: "${fromDate}", to: "${toDate}") {
+          contributionsCollection(from: "${fromDate}" to: "${toDate} organizationID:"${orgId ? orgId : null}") {
             commitContributionsByRepository (maxRepositories: 100) {
               contributions (first: 100, after: "${endCursor}") {
                 pageInfo {
@@ -167,7 +186,7 @@ export const queryFunc = async (
   }
 };
 
-export const fetchGithubData = async (accessToken: string): Promise<GithubUserData> => {
+export const fetchGithubData = async (accessToken: string, orgId?: string): Promise<GithubUserData> => {
   const now = new Date();
   let allUniqueContributionDates = new Set<string>();
   let userId;
@@ -192,7 +211,7 @@ export const fetchGithubData = async (accessToken: string): Promise<GithubUserDa
         await avoidGithubRateLimit();
       }
 
-      const result = await queryFunc(contributionRange.from, contributionRange.to, endCursor, accessToken);
+      const result = await queryFunc(contributionRange.from, contributionRange.to, endCursor, accessToken, orgId);
       userId = result.userId;
       endCursor = result.endCursor;
       allUniqueContributionDates = new Set([...allUniqueContributionDates, ...result.uniqueContributionDates]);
@@ -237,15 +256,18 @@ export const requestAccessToken = async (code: string, context: GithubContext): 
 
   return context.github.accessToken;
 };
-
-export const fetchAndCheckContributions = async (context: GithubContext, code: string): Promise<GithubUserData> => {
+export const fetchAndCheckContributions = async (
+  context: GithubContext,
+  code: string,
+  orgId?: string
+): Promise<GithubUserData> => {
   if (context.github?.contributionDays === undefined) {
     if (!context.github) context.github = {};
 
     const accessToken = await requestAccessToken(code, context);
 
     // Fetch Github data
-    const { userId, contributionDays, hadBadCommits } = await fetchGithubData(accessToken);
+    const { userId, contributionDays, hadBadCommits } = await fetchGithubData(accessToken, orgId);
 
     context.github.contributionDays = contributionDays;
     context.github.userId = userId;
@@ -265,4 +287,63 @@ export const avoidGithubRateLimit = async (): Promise<void> => {
   if (process.env.NODE_ENV === "test") return;
 
   await new Promise((resolve) => setTimeout(resolve, 1000));
+};
+
+/**
+ *
+ * @param code
+ * @param context
+ * @param orgLogin - thie is the login of the org to get data for (typically the last segment of the URL to get an orgs data https://api.github.com/orgs/${orgLogin})
+ * @returns
+ */
+export const getGithubOrgData = async (
+  code: string,
+  context: GithubContext,
+  orgLogin: string
+): Promise<GithubOrgMetaData> => {
+  // TODO: fix & test this
+  return {};
+  // if (!context.github?.userData) {
+  //   try {
+  //     // retrieve user's auth bearer token to authenticate client
+  //     const accessToken = await requestAccessToken(code, context);
+
+  //     // Now that we have an access token fetch the user details
+  //     const userRequest = await axios.get(`https://api.github.com/orgs/${orgLogin}`, {
+  //       headers: { Authorization: `token ${accessToken}` },
+  //     });
+
+  //     if (!context.github) context.github = {};
+  //     context.github.userData = userRequest.data;
+  //   } catch (_error) {
+  //     const error = _error as ProviderError;
+  //     if (error?.response?.status === 429) {
+  //       return {
+  //         errors: ["Error getting getting github info", "Rate limit exceeded"],
+  //       };
+  //     }
+  //     handleProviderAxiosError(_error, "Error getting getting github info", [code]);
+  //   }
+  // }
+  // return context.github.userData;
+};
+
+export const fetchAndCheckContributionsToOrganisation = async (
+  context: GithubContext,
+  code: string,
+  numberOfDays: string,
+  iterations = 3,
+  orgLoginOrURL: string
+): Promise<GithubUserData> => {
+  const orgLogin = orgLoginOrURL.split("/").pop();
+  const orgData = await getGithubOrgData(code, context, orgLogin);
+  if (orgData.node_id) {
+    return fetchAndCheckContributions(context, code, orgData.node_id);
+  }
+  // TODO: geri - fix this, probably throw error 
+  return {
+    userId: context.github.userId,
+    contributionDays: 0,
+    hadBadCommits: true,
+  };
 };
