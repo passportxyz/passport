@@ -116,7 +116,7 @@ jest.mock("axios", () => {
           },
         });
       }
-      return Promise.reject();
+      return Promise.resolve({});
     }),
   };
 });
