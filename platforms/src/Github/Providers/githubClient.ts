@@ -31,6 +31,13 @@ export type GithubUserMetaData = {
   errors?: string[];
 };
 
+export type GithubOrgMetaData = {
+  id?: number;
+  login?: string;
+  node_id?: string;
+  errors?: string[];
+};
+
 export type GithubUserData = {
   createdAt?: string;
   id?: string;
@@ -77,14 +84,28 @@ type GithubContributionResponse = {
   data?: GitHubResponse;
 };
 
-export const queryFunc = async (fromDate: string, toDate: string, accessToken: string): Promise<Viewer> => {
+/**
+ *
+ * @param fromDate
+ * @param toDate
+ * @param accessToken
+ * @param orgId - if specified this will only look at contributions to the specified org. This
+ * is expected to be the `node_id` form the org object as returned by  https://api.github.com/orgs/<org>  for example
+ * @returns
+ */
+export const queryFunc = async (
+  fromDate: string,
+  toDate: string,
+  accessToken: string,
+  orgId?: string // This is expected to be the `node_id` form the org object as returned by  https://api.github.com/orgs/<org>  for example
+): Promise<Viewer> => {
   try {
     const query = `
       query {
         viewer {
           createdAt
           id
-          contributionsCollection(from: "${fromDate}", to: "${toDate}") {
+          contributionsCollection(from:"${fromDate}" to:"${toDate}" organizationID:"${orgId ? orgId : null}") {
             contributionCalendar {
               totalContributions
               weeks {
@@ -133,10 +154,19 @@ const defaultContributionRange: ContributionRange = {
   iteration: 0,
 };
 
+/**
+ *
+ * @param context
+ * @param code
+ * @param contributionRange
+ * @param orgId - this is expected to be the `node_id` form the org object as returned by  https://api.github.com/orgs/<org>  for example
+ * @returns
+ */
 export const fetchGithubUserData = async (
   context: GithubContext,
   code: string,
-  contributionRange: ContributionRange = defaultContributionRange
+  contributionRange: ContributionRange = defaultContributionRange,
+  orgId?: string
 ): Promise<GithubUserData> => {
   const accessToken = await requestAccessToken(code, context);
   if (
@@ -145,7 +175,7 @@ export const fetchGithubUserData = async (
     context.github.id === undefined
   ) {
     try {
-      const collection = await queryFunc(contributionRange.from, contributionRange.to, accessToken);
+      const collection = await queryFunc(contributionRange.from, contributionRange.to, accessToken, orgId);
       const existingCollection = context?.github?.contributionData?.contributionCollection || [];
 
       if (!context.github) context.github = {};
@@ -210,7 +240,8 @@ export const fetchAndCheckContributions = async (
   context: GithubContext,
   code: string,
   numberOfDays: string,
-  iterations = 3
+  iterations = 3,
+  orgId?: string
 ): Promise<{ contributionValid: boolean; numberOfDays?: string; errors?: string[] }> => {
   let contributionValid = false;
   // Initialize an object to keep track of unique contribution days
@@ -226,7 +257,7 @@ export const fetchAndCheckContributions = async (
     };
 
     // Fetch Github user data
-    const userData = await fetchGithubUserData(context, code, contributionRange);
+    const userData = await fetchGithubUserData(context, code, contributionRange, orgId);
 
     // If there are errors, return them
     if (userData.errors) {
@@ -295,4 +326,59 @@ export const avoidGithubRateLimit = async (): Promise<void> => {
   if (process.env.NODE_ENV === "test") return;
 
   await new Promise((resolve) => setTimeout(resolve, 1000));
+};
+
+/**
+ *
+ * @param code
+ * @param context
+ * @param orgLogin - thie is the login of the org to get data for (typically the last segment of the URL to get an orgs data https://api.github.com/orgs/${orgLogin})
+ * @returns
+ */
+export const getGithubOrgData = async (
+  code: string,
+  context: GithubContext,
+  orgLogin: string
+): Promise<GithubOrgMetaData> => {
+  if (!context.github?.userData) {
+    try {
+      // retrieve user's auth bearer token to authenticate client
+      const accessToken = await requestAccessToken(code, context);
+
+      // Now that we have an access token fetch the user details
+      const userRequest = await axios.get(`https://api.github.com/orgs/${orgLogin}`, {
+        headers: { Authorization: `token ${accessToken}` },
+      });
+
+      if (!context.github) context.github = {};
+      context.github.userData = userRequest.data;
+    } catch (_error) {
+      const error = _error as ProviderError;
+      if (error?.response?.status === 429) {
+        return {
+          errors: ["Error getting getting github info", "Rate limit exceeded"],
+        };
+      }
+      handleProviderAxiosError(_error, "Error getting getting github info", [code]);
+    }
+  }
+  return context.github.userData;
+};
+
+export const fetchAndCheckContributionsToOrganisation = async (
+  context: GithubContext,
+  code: string,
+  numberOfDays: string,
+  iterations = 3,
+  orgLoginOrURL: string
+): Promise<{ contributionValid: boolean; numberOfDays?: string; errors?: string[] }> => {
+  const orgLogin = orgLoginOrURL.split("/").pop();
+  const orgData = await getGithubOrgData(code, context, orgLogin);
+  if (orgData.node_id) {
+    return fetchAndCheckContributions(context, code, numberOfDays, iterations, orgData.node_id);
+  }
+  return {
+    contributionValid: false,
+    errors: ["Failed to check contribution to the organisation", ...orgData.errors],
+  };
 };

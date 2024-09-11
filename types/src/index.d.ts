@@ -360,6 +360,7 @@ export type PLATFORM_ID =
   | "TrustaLabs"
   | "Outdid"
   | "AllowList"
+  | "CustomGithub"
   | "Binance";
 
 export type PLATFORM_CATEGORY = {
@@ -443,7 +444,8 @@ export type PROVIDER_ID =
   | "Outdid"
   | "AllowList"
   | `AllowList#${string}`
-  | "BinanceBABT";
+  | "BinanceBABT"
+  | `Github#${string}#${string}`;
 
 export type StampBit = {
   bit: number;
