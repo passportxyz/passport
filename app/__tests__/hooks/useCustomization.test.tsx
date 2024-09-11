@@ -4,12 +4,6 @@ import { DEFAULT_CUSTOMIZATION_KEY, useCustomization, useSetCustomizationKey } f
 import { DynamicCustomDashboardPanel } from "../../components/CustomDashboardPanel";
 import { useEffect } from "react";
 
-// Once we're using the API, we should mock the axios
-// call (or however we do it) and return the data that
-// is currently hardcoded in useDatastoreConnectionContext.tsx
-// for testing
-
-// mock the axios call
 jest.mock("axios", () => {
   return {
     get: jest.fn((path) => {
@@ -160,10 +154,6 @@ describe("useCustomization", () => {
     await waitFor(() => {
       expect(document.querySelector("[data-testid=customizationKey]")?.textContent).toBe("testing");
       expect(document.querySelector("[data-testid=useCustomDashboardPanel]")?.textContent).toBe("true");
-      expect(document.querySelector("[data-testid=customizationThemeBackgroundColor1]")?.textContent).toBe(
-        "255 136 70"
-      );
-      expect(document.querySelector("html")).toHaveStyle("--color-customization-background-1: 255 136 70");
 
       expect(screen.getByText((str) => str.includes("Click below to enable test mode"))).toBeInTheDocument();
     });

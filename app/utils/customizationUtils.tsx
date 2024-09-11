@@ -58,6 +58,7 @@ export type Customization = {
   };
   allowListProviders?: PlatformGroupSpec[];
   includedChainIds?: string[];
+  showExplanationPanel?: boolean;
 };
 
 type CustomizationResponse = {
@@ -92,6 +93,7 @@ type CustomizationResponse = {
     };
   };
   includedChainIds?: string[];
+  showExplanationPanel?: boolean;
 };
 
 const SanitizedHTMLComponent = ({ html }: { html: string }) => {
@@ -162,5 +164,6 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
     },
     allowListProviders: allowListProviders.length ? allowListProviders : undefined,
     includedChainIds: customizationResponse.includedChainIds,
+    showExplanationPanel: customizationResponse.showExplanationPanel,
   };
 };
