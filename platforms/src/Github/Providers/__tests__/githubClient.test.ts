@@ -4,7 +4,7 @@ import {
   GithubContext,
   GithubContributionResponse,
   MAX_YEARS_TO_CHECK,
-} from "../githubClient";
+} from "../../../utils/githubClient";
 
 jest.mock("axios");
 const mockedPost = jest.spyOn(axios, "post");

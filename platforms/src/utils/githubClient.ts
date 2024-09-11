@@ -1,7 +1,11 @@
 import { ProviderContext } from "@gitcoin/passport-types";
+
 import axios from "axios";
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
-import { MAX_CONTRIBUTION_DAYS } from "../Providers-config";
+// TODO: geri fix the next line. Also 1 question: isn't this actually MIN_CONTRIBUTION_DAYS?
+// import { MAX_CONTRIBUTION_DAYS } from "../Providers-config";
+export const MAX_CONTRIBUTION_DAYS = 120; 
+
+import { handleProviderAxiosError } from "./handleProviderAxiosError";
 
 const githubGraphEndpoint = "https://api.github.com/graphql";
 
