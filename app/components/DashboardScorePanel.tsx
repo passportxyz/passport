@@ -138,9 +138,8 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
         {renderContent(
           "Congratulations. Your Passport is onchain.",
           undefined,
-          // Once link is available, add it here - issue #2763
-          undefined,
-          undefined
+          "Here’s what you can do with your passport!",
+          "https://www.passport.xyz/ecosystem"
         )}
         {renderButton("See onchain passport", () => setShowSidebar(true))}
       </>
@@ -153,9 +152,8 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
         {renderContent(
           "Congratulations. You have a passing score",
           "Next up, mint your passport onchain!",
-          // Once link is available, add it here - issue #2763
-          undefined,
-          undefined
+          "Here’s what you can do with your passport!",
+          "https://www.passport.xyz/ecosystem"
         )}
         {renderButton("Mint onchain", () => setShowSidebar(true))}
       </>
