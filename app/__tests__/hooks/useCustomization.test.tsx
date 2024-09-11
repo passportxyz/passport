@@ -119,7 +119,7 @@ describe("useCustomization", () => {
     });
   });
 
-  it.skip("should cleanly ignore invalid customizationKey", async () => {
+  it("should cleanly ignore invalid customizationKey", async () => {
     render(<TestingComponent customizationKey="invalid" />);
     await waitFor(() => {
       expect(document.querySelector("[data-testid=customizationKey]")?.textContent).toBe(DEFAULT_CUSTOMIZATION_KEY);
