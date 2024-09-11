@@ -25,6 +25,8 @@ jest.mock("@self.id/framework", () => {
   };
 });
 
+jest.mock("../../components/Header", () => () => null);
+
 jest.mock("@self.id/web", () => {
   return {
     EthereumAuthProvider: jest.fn(),
