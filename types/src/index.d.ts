@@ -445,7 +445,6 @@ export type PROVIDER_ID =
   | "AllowList"
   | `AllowList#${string}`
   | "BinanceBABT"
-  | "DeveloperList"
   | `DeveloperList#${string}#${string}`;
 
 export type StampBit = {

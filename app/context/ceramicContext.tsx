@@ -18,7 +18,7 @@ import { datadogRum } from "@datadog/browser-rum";
 import { useWalletStore } from "./walletStore";
 import { ScorerContext } from "./scorerContext";
 
-import { PlatformGroupSpec, platforms as stampPlatforms } from "@gitcoin/passport-platforms";
+import { PlatformClass, PlatformGroupSpec, platforms as stampPlatforms } from "@gitcoin/passport-platforms";
 const {
   Ens,
   Lens,
@@ -51,6 +51,7 @@ import { CERAMIC_CACHE_ENDPOINT, IAM_VALID_ISSUER_DIDS } from "../config/stamp_c
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 import { useCustomization } from "../hooks/useCustomization";
 import { useMessage } from "../hooks/useMessage";
+import { CUSTOM_PLATFORM_TYPE_INFO } from "../utils/customizationUtils";
 
 // -- Trusted IAM servers DID
 const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
@@ -405,6 +406,37 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     } else {
       platforms.delete("AllowList");
       setAllPlatforms(new Map(platforms));
+    }
+    if (customization.customStamps) {
+      for (const [_, { platformType, banner, credentials }] of Object.entries(customization.customStamps)) {
+        const platformTypeInfo = CUSTOM_PLATFORM_TYPE_INFO[platformType];
+        if (!platformTypeInfo) throw new Error(`Unknown custom platform type: ${platformType}`);
+
+        const platform = new platformTypeInfo.platformClass(platformTypeInfo.platformParams);
+
+        if (banner.header || banner.content || banner.cta.text || banner.cta.url) {
+          if (!platform.banner) platform.banner = {};
+          if (banner.header) platform.banner.heading = banner.header;
+          if (banner.content) platform.banner.content = banner.content;
+          if (banner.cta.text && banner.cta.url) platform.banner.cta = { label: banner.cta.text, url: banner.cta.url };
+        }
+
+        const platFormGroupSpec = [
+          {
+            platformGroup: "Credentials",
+            providers: credentials.map(({ providerId, displayName, description }) => ({
+              title: displayName,
+              description,
+              name: providerId,
+            })),
+          },
+        ];
+
+        platforms.set(platformTypeInfo.name, {
+          platform,
+          platFormGroupSpec,
+        });
+      }
     }
   }, [customization]);
 

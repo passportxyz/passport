@@ -9,7 +9,7 @@ import { Modal, ModalContent, ModalOverlay } from "@chakra-ui/react";
 import { STAMP_PROVIDERS } from "../config/providers";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { LoadButton } from "./LoadButton";
-import { getPlatformSpec } from "../config/platforms";
+import { usePlatformSpecs } from "../config/platforms";
 // -- Utils
 import { StampClaimForPlatform, StampClaimingContext } from "../context/stampClaimingContext";
 import { Hyperlink } from "@gitcoin/passport-platforms";
@@ -33,6 +33,7 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
   const { claimCredentials, status } = useContext(StampClaimingContext);
   const [waitForNext, setWaitForNext] = useState<WaitCondition>();
   const [isReverifyingStamps, setIsReverifyingStamps] = useState(false);
+  const getPlatformSpec = usePlatformSpecs();
 
   const { success, failure } = useMessage();
 
