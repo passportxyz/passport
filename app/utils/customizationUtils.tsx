@@ -4,8 +4,8 @@ import { CUSTOMIZATION_ENDPOINT } from "../config/customization_config";
 import axios from "axios";
 import * as DOMPurify from "dompurify";
 import parse from "html-react-parser";
-import { PROVIDER_ID } from "@gitcoin/passport-types";
-import { PlatformGroupSpec } from "@gitcoin/passport-platforms/*";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { PlatformClass, PlatformGroupSpec, platforms } from "@gitcoin/passport-platforms";
 
 const sanitize = DOMPurify.sanitize;
 
@@ -23,6 +23,26 @@ export const initializeDOMPurify = () => {
 
 export type CustomizationLogoBackground = "dots" | "none";
 export type BodyActionType = "Simple Link" | "Onchain Push";
+
+type CustomStamp = {
+  platformType: string;
+  iconUrl: string;
+  displayName: string;
+  description?: string;
+  banner: {
+    header?: string;
+    content?: string;
+    cta: {
+      text?: string;
+      url?: string;
+    };
+  };
+  credentials: {
+    providerId: PROVIDER_ID;
+    displayName: string;
+    description?: string;
+  }[];
+};
 
 export type Customization = {
   key: string;
@@ -58,6 +78,9 @@ export type Customization = {
   };
   allowListProviders?: PlatformGroupSpec[];
   includedChainIds?: string[];
+  customStamps?: {
+    [name: string]: CustomStamp;
+  };
 };
 
 type CustomizationResponse = {
@@ -92,6 +115,26 @@ type CustomizationResponse = {
     };
   };
   includedChainIds?: string[];
+};
+
+type CustomPlatformTypeInfo = {
+  name: PLATFORM_ID;
+  path: string;
+  platformClass: typeof PlatformClass;
+  platformParams: any;
+};
+
+export const CUSTOM_PLATFORM_TYPE_INFO: { [id: string]: CustomPlatformTypeInfo } = {
+  DEVEL: {
+    name: "DeveloperList",
+    // TODO we'll probably change these to a different path and platformClass, i.e. DeveloperListPlatform
+    path: "Github",
+    platformClass: platforms.Github.GithubPlatform,
+    platformParams: {
+      clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
+      redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+    },
+  },
 };
 
 const SanitizedHTMLComponent = ({ html }: { html: string }) => {

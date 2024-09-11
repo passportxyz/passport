@@ -1,22 +1,19 @@
 import React from "react";
-import { fireEvent, render, screen, waitFor, waitForElementToBeRemoved } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { GenericPlatform } from "../../components/GenericPlatform";
 
 import { platforms } from "@gitcoin/passport-platforms";
 const { Ens } = platforms;
 
 import { CeramicContextState } from "../../context/ceramicContext";
-import { mockAddress } from "../../__test-fixtures__/onboardHookValues";
 import { UN_SUCCESSFUL_ENS_RESULT, SUCCESFUL_ENS_RESULTS } from "../../__test-fixtures__/verifiableCredentialResults";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { mock } from "jest-mock-extended";
-import { Drawer, DrawerOverlay, ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider } from "@chakra-ui/react";
 import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
 import { PlatformScoreSpec } from "../../context/scorerContext";
-import { getPlatformSpec } from "../../config/platforms";
-import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 jest.mock("@didtools/cacao", () => ({
@@ -54,7 +51,7 @@ const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
 });
 
 const EnsScoreSpec: PlatformScoreSpec = {
-  ...(getPlatformSpec("Ens") as PlatformSpec),
+  ...platforms["Ens"].PlatformDetails,
   possiblePoints: 3,
   earnedPoints: 1,
 };

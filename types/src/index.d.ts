@@ -360,6 +360,7 @@ export type PLATFORM_ID =
   | "TrustaLabs"
   | "Outdid"
   | "AllowList"
+  | "DeveloperList"
   | "Binance";
 
 export type PLATFORM_CATEGORY = {
@@ -443,6 +444,7 @@ export type PROVIDER_ID =
   | "Outdid"
   | "AllowList"
   | `AllowList#${string}`
+  | `DeveloperList#${string}#${string}`
   | "BinanceBABT";
 
 export type StampBit = {
