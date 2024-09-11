@@ -1,11 +1,11 @@
 import * as githubContributionActivity from "../githubContributionActivity";
 
 import { RequestPayload, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
-import { fetchAndCheckContributions } from "../githubClient";
+import { fetchAndCheckContributions } from "../../../utils/githubClient";
 
 const { GithubContributionActivityProvider } = githubContributionActivity;
 
-jest.mock("../githubClient", () => ({
+jest.mock("../../../utils/githubClient", () => ({
   fetchAndCheckContributions: jest.fn(),
 }));
 

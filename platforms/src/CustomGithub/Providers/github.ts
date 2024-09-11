@@ -1,7 +1,7 @@
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { ProviderExternalVerificationError, type Provider } from "../../types";
-import { fetchAndCheckContributionsToOrganisation } from "../../Github/Providers/githubClient";
-import { GithubContext } from "../../Github/Providers/githubClient";
+import { fetchAndCheckContributionsToOrganisation } from "../../utils/githubClient";
+import { GithubContext } from "../../utils/githubClient";
 
 export const githubConditionEndpoint = `${process.env.PASSPORT_SCORER_BACKEND}account/custom-github-stamps/condition`;
 const apiKey = process.env.SCORER_API_KEY;

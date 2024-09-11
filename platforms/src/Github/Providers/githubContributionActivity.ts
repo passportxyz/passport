@@ -1,6 +1,6 @@
 import { ProviderExternalVerificationError, type Provider } from "../../types";
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import { fetchAndCheckContributions, GithubContext } from "./githubClient";
+import { fetchAndCheckContributions, GithubContext } from "../../utils/githubClient";
 
 export type GithubContributionActivityOptions = {
   threshold: string;

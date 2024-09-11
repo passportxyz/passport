@@ -1,4 +1,4 @@
-import * as githubClient from "../githubClient";
+import * as githubClient from "../../../utils/githubClient";
 
 const mockCode = "code123";
 const mockContributionRange: githubClient.ContributionRange = {

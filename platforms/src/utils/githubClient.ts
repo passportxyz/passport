@@ -1,7 +1,7 @@
 import { ProviderContext } from "@gitcoin/passport-types";
-import { ProviderError } from "../../utils/errors";
+import { ProviderError } from "./errors";
 import axios from "axios";
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+import { handleProviderAxiosError } from "./handleProviderAxiosError";
 
 const githubGraphEndpoint = "https://api.github.com/graphql";
 
