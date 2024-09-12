@@ -117,6 +117,14 @@ const parseContributions = ({
   };
 };
 
+type RepoCommit = {
+  commit: {
+    author: {
+      date: string;
+    };
+  };
+};
+
 /**
  *
  * @param fromDate
@@ -348,5 +356,65 @@ export const fetchAndCheckContributionsToOrganisation = async (
     userId: context.github.userId,
     contributionDays: 0,
     hadBadCommits: true,
+  };
+};
+
+export const fetchAndCheckContributionsToRepozitory = async (
+  context: GithubContext,
+  numberOfDays: number,
+  iterations = 3,
+  repoNameOrURL: string
+): Promise<{ contributionValid: boolean; numberOfDays?: number; errors?: string[] }> => {
+  const segments = repoNameOrURL.split("/");
+  const repo = segments.pop();
+  const owner = segments.pop();
+  const commitsUrl = `https://api.github.com/repos/${owner}/${repo}/commits`;
+  let page = 0;
+  const per_page = 100;
+  const daysWithCommits: Record<string, number> = {};
+  const accessToken = context.github?.accessToken;
+
+  try {
+    // retrieve user's auth bearer token to authenticate client
+
+    while (page <= iterations && Object.keys(daysWithCommits).length < numberOfDays) {
+      page += 1;
+      // Now that we have an access token fetch the user details
+      const commitsResponse = await axios.get(commitsUrl, {
+        headers: { Authorization: `token ${accessToken}` },
+        params: { page, per_page },
+      });
+
+      const commits = commitsResponse.data as RepoCommit[];
+      for (var i = 0; i < commits.length; i++) {
+        const commit = commits[i];
+        const date = new Date(commit.commit.author.date).toISOString().split("T")[0];
+
+        if (!daysWithCommits[date]) {
+          daysWithCommits[date] = 1;
+        } else {
+          daysWithCommits[date] += 1;
+        }
+      }
+    }
+
+    return {
+      contributionValid: Object.keys(daysWithCommits).length >= numberOfDays,
+      numberOfDays: Object.keys(daysWithCommits).length,
+    };
+  } catch (_error) {
+    const error = _error as ProviderError;
+    if (error?.response?.status === 429) {
+      return {
+        contributionValid: false,
+        errors: ["Error getting getting github info", "Rate limit exceeded"],
+      };
+    }
+    handleProviderAxiosError(_error, "Error getting getting github info", [accessToken]);
+  }
+
+  return {
+    contributionValid: false,
+    errors: ["Failed to check contribution to the organisation"],
   };
 };
