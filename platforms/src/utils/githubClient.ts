@@ -3,7 +3,7 @@ import { ProviderContext } from "@gitcoin/passport-types";
 import axios from "axios";
 // TODO: geri fix the next line. Also 1 question: isn't this actually MIN_CONTRIBUTION_DAYS?
 // import { MAX_CONTRIBUTION_DAYS } from "../Providers-config";
-export const MAX_CONTRIBUTION_DAYS = 120; 
+export const MAX_CONTRIBUTION_DAYS = 120;
 
 import { handleProviderAxiosError } from "./handleProviderAxiosError";
 
@@ -268,15 +268,11 @@ export const requestAccessToken = async (code: string, context: GithubContext): 
 
   return context.github.accessToken;
 };
-export const fetchAndCheckContributions = async (
-  context: GithubContext,
-  code: string,
-  orgId?: string
-): Promise<GithubUserData> => {
+export const fetchAndCheckContributions = async (context: GithubContext, orgId?: string): Promise<GithubUserData> => {
   if (context.github?.contributionDays === undefined) {
     if (!context.github) context.github = {};
 
-    const accessToken = await requestAccessToken(code, context);
+    const accessToken = context.github.accessToken;
 
     // Fetch Github data
     const { userId, contributionDays, hadBadCommits } = await fetchGithubData(accessToken, orgId);
@@ -308,36 +304,19 @@ export const avoidGithubRateLimit = async (): Promise<void> => {
  * @param orgLogin - thie is the login of the org to get data for (typically the last segment of the URL to get an orgs data https://api.github.com/orgs/${orgLogin})
  * @returns
  */
-export const getGithubOrgData = async (
-  code: string,
-  context: GithubContext,
-  orgLogin: string
-): Promise<GithubOrgMetaData> => {
-  // TODO: fix & test this
-  return {};
-  // if (!context.github?.userData) {
-  //   try {
-  //     // retrieve user's auth bearer token to authenticate client
-  //     const accessToken = await requestAccessToken(code, context);
+export const getGithubOrgData = async (context: GithubContext, orgLogin: string): Promise<GithubOrgMetaData> => {
+  const accessToken = context.github?.accessToken;
+  try {
+    // Now that we have an access token fetch the user details
+    const orgRequest = await axios.get(`https://api.github.com/orgs/${orgLogin}`, {
+      headers: { Authorization: `token ${accessToken}` },
+    });
 
-  //     // Now that we have an access token fetch the user details
-  //     const userRequest = await axios.get(`https://api.github.com/orgs/${orgLogin}`, {
-  //       headers: { Authorization: `token ${accessToken}` },
-  //     });
-
-  //     if (!context.github) context.github = {};
-  //     context.github.userData = userRequest.data;
-  //   } catch (_error) {
-  //     const error = _error as ProviderError;
-  //     if (error?.response?.status === 429) {
-  //       return {
-  //         errors: ["Error getting getting github info", "Rate limit exceeded"],
-  //       };
-  //     }
-  //     handleProviderAxiosError(_error, "Error getting getting github info", [code]);
-  //   }
-  // }
-  // return context.github.userData;
+    const orgData = orgRequest.data as GithubOrgMetaData;
+    return orgData;
+  } catch (error) {
+    handleProviderAxiosError(error, "Error getting getting github info", [accessToken]);
+  }
 };
 
 export const fetchAndCheckContributionsToOrganisation = async (
@@ -349,9 +328,9 @@ export const fetchAndCheckContributionsToOrganisation = async (
   const orgLogin = orgLoginOrURL.split("/").pop();
   const orgData = await getGithubOrgData(context, orgLogin);
   if (orgData.node_id) {
-    return fetchAndCheckContributions(context, code, orgData.node_id);
+    return fetchAndCheckContributions(context, orgData.node_id);
   }
-  // TODO: geri - fix this, probably throw error 
+  // TODO: geri - fix this, probably throw error
   return {
     userId: context.github.userId,
     contributionDays: 0,
@@ -402,15 +381,8 @@ export const fetchAndCheckContributionsToRepository = async (
       contributionValid: Object.keys(daysWithCommits).length >= numberOfDays,
       numberOfDays: Object.keys(daysWithCommits).length,
     };
-  } catch (_error) {
-    const error = _error as ProviderError;
-    if (error?.response?.status === 429) {
-      return {
-        contributionValid: false,
-        errors: ["Error getting getting github info", "Rate limit exceeded"],
-      };
-    }
-    handleProviderAxiosError(_error, "Error getting getting github info", [accessToken]);
+  } catch (error) {
+    handleProviderAxiosError(error, "Github error requesting access token", [accessToken]);
   }
 
   return {

@@ -108,7 +108,7 @@ export const evaluateRepositoryContributor = async (
 };
 
 export const evaluateOrganisationContributor = async (
-  condition:  { threshold: number; organisation: string },
+  condition: { threshold: number; organisation: string },
   evaluator: ConditionEvaluator,
   context: any
 ): Promise<boolean> => {
@@ -126,7 +126,7 @@ export const evaluateOrganisationContributor = async (
       organisation
     );
     // TODO: decide what to do with errors which could accumulate in contributionResult.error
-    return contributionResult.contributionValid;
+    return contributionResult.contributionDays >= threshold;
   } catch (_e: unknown) {
     const e = _e as Error;
     throw new Error("Error when evaluating OrganisationContributor condition: " + e?.message);
