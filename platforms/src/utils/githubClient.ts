@@ -359,7 +359,7 @@ export const fetchAndCheckContributionsToOrganisation = async (
   };
 };
 
-export const fetchAndCheckContributionsToRepozitory = async (
+export const fetchAndCheckContributionsToRepository = async (
   context: GithubContext,
   numberOfDays: number,
   iterations = 3,

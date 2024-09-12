@@ -414,7 +414,7 @@ describe("fetchAndCheckContributions", () => {
     expect(mockedPost).toHaveBeenCalledTimes(MAX_YEARS_TO_CHECK * 2 + 1);
   });
 
-  describe("fetchAndCheckContributionsToRepozitory", function () {
+  describe("fetchAndCheckContributionsToRepository", function () {
     beforeEach(() => {
       mockFetchGithubUserDataCall.mockRestore();
       jest.clearAllMocks();
@@ -452,7 +452,7 @@ describe("fetchAndCheckContributions", () => {
       });
 
       await expect(
-        githubClient.fetchAndCheckContributionsToRepozitory(mockGithubContext, 3, 5, "passportxyz/passport")
+        githubClient.fetchAndCheckContributionsToRepository(mockGithubContext, 3, 5, "passportxyz/passport")
       ).resolves.toEqual({
         contributionValid: true,
         numberOfDays: 3,
@@ -500,7 +500,7 @@ describe("fetchAndCheckContributions", () => {
       });
 
       await expect(
-        githubClient.fetchAndCheckContributionsToRepozitory(mockGithubContext, 3, 5, "passportxyz/passport")
+        githubClient.fetchAndCheckContributionsToRepository(mockGithubContext, 3, 5, "passportxyz/passport")
       ).resolves.toEqual({
         contributionValid: true,
         numberOfDays: 3,
@@ -531,7 +531,7 @@ describe("fetchAndCheckContributions", () => {
       });
 
       await expect(
-        githubClient.fetchAndCheckContributionsToRepozitory(mockGithubContext, 3, 5, "passportxyz/passport")
+        githubClient.fetchAndCheckContributionsToRepository(mockGithubContext, 3, 5, "passportxyz/passport")
       ).rejects.toEqual(error);
       expect(axios.get).toHaveBeenCalledTimes(1);
     });

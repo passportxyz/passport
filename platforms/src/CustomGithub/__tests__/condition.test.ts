@@ -1,7 +1,4 @@
-// Import the necessary modules and mock axios
 import { ConditionEvaluator, evaluateAND, evaluateOR } from "../Providers/condition";
-
-jest.mock("axios");
 
 const evaluateTrue = async (condition: any, evaluator: ConditionEvaluator, context: any): Promise<boolean> => {
   return true;
@@ -21,7 +18,6 @@ describe("ConditionEvaluator verification", function () {
   });
 
   it("handles valid allow list verification attempt", async () => {
-    // Mocking axios response for a valid case
     const evaluator = new ConditionEvaluator({
       AND: evaluateAND,
       OR: evaluateOR,
@@ -36,7 +32,6 @@ describe("ConditionEvaluator verification", function () {
   });
 
   it("handles deeply nested conditions", async () => {
-    // Mocking axios response for a valid case
     const evaluator = new ConditionEvaluator({
       AND: evaluateAND,
       OR: evaluateOR,
@@ -81,7 +76,6 @@ describe("ConditionEvaluator AND operator verification", function () {
   });
 
   it("handles valid allow list verification attempt", async () => {
-    // Mocking axios response for a valid case
     const evaluator = new ConditionEvaluator({
       AND: evaluateAND,
       OR: evaluateOR,
@@ -105,7 +99,6 @@ describe("ConditionEvaluator OR operator verification", function () {
   });
 
   it("handles valid allow list verification attempt", async () => {
-    // Mocking axios response for a valid case
     const evaluator = new ConditionEvaluator({
       AND: evaluateAND,
       OR: evaluateOR,
