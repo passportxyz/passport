@@ -1,4 +1,7 @@
+import exp from "constants";
 import * as githubClient from "../../../utils/githubClient";
+import axios from "axios";
+import { access } from "fs";
 
 const mockCode = "code123";
 const mockContributionRange: githubClient.ContributionRange = {
@@ -30,6 +33,7 @@ const mockGithubContext = {
       iteration: 0,
     },
     createdAt: "2022-07-01T00:00:00Z",
+    accessToken: "abc",
   },
 } as unknown as githubClient.GithubContext;
 
@@ -55,6 +59,8 @@ const mockFetchGithubUserData = {
 } as unknown as githubClient.GithubUserData;
 
 const mockFetchGithubUserDataCall = jest.spyOn(githubClient, "fetchGithubUserData");
+
+jest.mock("axios");
 
 describe("githubClient", function () {
   describe("fetchAndCheckContributions", function () {
@@ -160,6 +166,129 @@ describe("githubClient", function () {
       expect(result).toEqual({
         errors: ["Error getting getting github info", "Some error"],
       });
+    });
+  });
+
+  describe("fetchAndCheckContributionsToRepozitory", function () {
+    beforeEach(() => {
+      mockFetchGithubUserDataCall.mockRestore();
+      jest.clearAllMocks();
+    });
+
+    it("Should fetch a user github commits exactly once, if it contains commits on sufficient number of different days", async () => {
+      jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
+        return new Promise((resolve) => {
+          resolve({
+            data: [
+              {
+                commit: {
+                  author: {
+                    date: "2024-01-01T00:00:00Z",
+                  },
+                },
+              },
+              {
+                commit: {
+                  author: {
+                    date: "2024-01-02T00:00:00Z",
+                  },
+                },
+              },
+              {
+                commit: {
+                  author: {
+                    date: "2024-01-03T00:00:00Z",
+                  },
+                },
+              },
+            ],
+          });
+        });
+      });
+
+      await expect(
+        githubClient.fetchAndCheckContributionsToRepozitory(mockGithubContext, 3, 5, "passportxyz/passport")
+      ).resolves.toEqual({
+        contributionValid: true,
+        numberOfDays: 3,
+      });
+      expect(axios.get).toHaveBeenCalledTimes(1);
+
+      const expectedCommitsUrl = `https://api.github.com/repos/passportxyz/passport/commits`;
+      expect(axios.get).toHaveBeenCalledWith(expectedCommitsUrl, {
+        headers: { Authorization: `token ${mockGithubContext.github.accessToken}` },
+        params: { page: 1, per_page: 100 },
+      });
+    });
+
+    it("Should fetch a user github commits multiple times until it is determined the user has commits on a sufficient number of distinct days", async () => {
+      let day = 0;
+      jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
+        return new Promise((resolve) => {
+          day += 1;
+          resolve({
+            data: [
+              {
+                commit: {
+                  author: {
+                    date: `2024-01-${day.toString().padStart(2, "0")}T00:00:00Z`,
+                  },
+                },
+              },
+              {
+                commit: {
+                  author: {
+                    date: `2024-01-${day.toString().padStart(2, "0")}T01:00:00Z`,
+                  },
+                },
+              },
+              {
+                commit: {
+                  author: {
+                    date: `2024-01-${day.toString().padStart(2, "0")}T01:00:00Z`,
+                  },
+                },
+              },
+            ],
+          });
+        });
+      });
+
+      await expect(
+        githubClient.fetchAndCheckContributionsToRepozitory(mockGithubContext, 3, 5, "passportxyz/passport")
+      ).resolves.toEqual({
+        contributionValid: true,
+        numberOfDays: 3,
+      });
+      expect(axios.get).toHaveBeenCalledTimes(3);
+
+      const expectedCommitsUrl = `https://api.github.com/repos/passportxyz/passport/commits`;
+      expect(axios.get).toHaveBeenCalledWith(expectedCommitsUrl, {
+        headers: { Authorization: `token ${mockGithubContext.github.accessToken}` },
+        params: { page: 1, per_page: 100 },
+      });
+      expect(axios.get).toHaveBeenCalledWith(expectedCommitsUrl, {
+        headers: { Authorization: `token ${mockGithubContext.github.accessToken}` },
+        params: { page: 2, per_page: 100 },
+      });
+      expect(axios.get).toHaveBeenCalledWith(expectedCommitsUrl, {
+        headers: { Authorization: `token ${mockGithubContext.github.accessToken}` },
+        params: { page: 3, per_page: 100 },
+      });
+    });
+
+    it("Should report an error if fetching the github commits fails", async () => {
+      const error = new Error("Request failed");
+      jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
+        return new Promise((_, reject) => {
+          reject(error);
+        });
+      });
+
+      await expect(
+        githubClient.fetchAndCheckContributionsToRepozitory(mockGithubContext, 3, 5, "passportxyz/passport")
+      ).rejects.toEqual(error);
+      expect(axios.get).toHaveBeenCalledTimes(1);
     });
   });
 });
