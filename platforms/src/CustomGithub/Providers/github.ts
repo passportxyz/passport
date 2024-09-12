@@ -2,17 +2,24 @@ import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { ProviderExternalVerificationError, type Provider } from "../../types";
 import { fetchAndCheckContributionsToOrganisation, requestAccessToken } from "../../utils/githubClient";
 import { GithubContext } from "../../utils/githubClient";
-import { strict } from "assert";
+import axios from "axios";
+
 import {
   ConditionEvaluator,
   evaluateAND,
   evaluateOR,
   evaluateOrganisationContributor,
-  evaluateRepozitoryContributor,
+  evaluateRepositoryContributor,
 } from "./condition";
 
 export const githubConditionEndpoint = `${process.env.PASSPORT_SCORER_BACKEND}account/custom-github-stamps/condition`;
 const apiKey = process.env.SCORER_API_KEY;
+
+type ConditionResponse = {
+  data: {
+    condition: any;
+  };
+};
 
 export class CustomGithubProvider implements Provider {
   type = "Github";
@@ -25,42 +32,34 @@ export class CustomGithubProvider implements Provider {
       let record = undefined,
         valid = false,
         contributionResult;
+      const { conditionName } = payload.proofs;
 
       try {
+        // Query the condition that needs to be verified from the server
+        const response: ConditionResponse = await axios.get(`${githubConditionEndpoint}/${conditionName}`, {
+          headers: { Authorization: process.env.CGRANTS_API_TOKEN },
+        });
+
         // Call requestAccessToken to exchange the code for an access token and store it in the context
         await requestAccessToken(payload.proofs?.code, context);
 
         const evaluator = new ConditionEvaluator({
           AND: evaluateAND,
           OR: evaluateOR,
-          repozitory_contributor: evaluateRepozitoryContributor,
+          repository_contributor: evaluateRepositoryContributor,
           organisation_contributor: evaluateOrganisationContributor,
         });
 
-        const condition = {
-          contributed: {
-            repo: "https://github.com/passportxyz",
-            threshold: 10,
-          },
-        };
-        evaluator.evaluate(condition, context);
-
-        contributionResult = await fetchAndCheckContributionsToOrganisation(
-          context,
-          this._options.threshold,
-          3,
-          "https://github.com/passportxyz"
-        );
+        valid = await evaluator.evaluate(response.data.condition, context);
       } catch (e) {
         valid = false;
         errors.push(String(e));
       }
 
-      valid = contributionResult.contributionValid;
       const githubId = context.github.id;
 
-      if (valid) {
-        record = { id: githubId };
+      if (valid && githubId && conditionName) {
+        record = { id: githubId, conditionName: conditionName };
       } else {
         errors.push("Your Github contributions did not qualify for this stamp.");
       }
@@ -71,7 +70,7 @@ export class CustomGithubProvider implements Provider {
         record,
       };
     } catch (error: unknown) {
-      throw new ProviderExternalVerificationError(`Error verifying Github contributions: ${JSON.stringify(error)}`);
+      throw new ProviderExternalVerificationError(`Error verifying Github contributions: ${error}`);
     }
   }
 }
