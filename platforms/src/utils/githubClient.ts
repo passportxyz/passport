@@ -334,13 +334,12 @@ export const getGithubOrgData = async (
 
 export const fetchAndCheckContributionsToOrganisation = async (
   context: GithubContext,
-  code: string,
   numberOfDays: string,
   iterations = 3,
   orgLoginOrURL: string
 ): Promise<GithubUserData> => {
   const orgLogin = orgLoginOrURL.split("/").pop();
-  const orgData = await getGithubOrgData(code, context, orgLogin);
+  const orgData = await getGithubOrgData(context, orgLogin);
   if (orgData.node_id) {
     return fetchAndCheckContributions(context, code, orgData.node_id);
   }
