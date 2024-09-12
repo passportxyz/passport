@@ -1,6 +1,6 @@
 import { ProviderExternalVerificationError, type Provider } from "../../types";
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import { fetchAndCheckContributions, GithubContext } from "../../utils/githubClient";
+import { fetchAndCheckContributions, GithubContext, requestAccessToken } from "../../utils/githubClient";
 
 export type GithubContributionActivityOptions = {
   threshold: string;
@@ -27,7 +27,9 @@ export class GithubContributionActivityProvider implements Provider {
         contributionResult;
 
       try {
-        contributionResult = await fetchAndCheckContributions(context, payload.proofs.code, this._options.threshold);
+        // Call requestAccessToken to exchange the code for an access token and store it in the context
+        await requestAccessToken(payload.proofs?.code, context);
+        contributionResult = await fetchAndCheckContributions(context, this._options.threshold);
       } catch (e) {
         valid = false;
         errors.push(String(e));

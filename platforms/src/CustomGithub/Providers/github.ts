@@ -1,16 +1,18 @@
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { ProviderExternalVerificationError, type Provider } from "../../types";
-import { fetchAndCheckContributionsToOrganisation } from "../../utils/githubClient";
+import { fetchAndCheckContributionsToOrganisation, requestAccessToken } from "../../utils/githubClient";
 import { GithubContext } from "../../utils/githubClient";
+import { strict } from "assert";
+import {
+  ConditionEvaluator,
+  evaluateAND,
+  evaluateOR,
+  evaluateOrganisationContributor,
+  evaluateRepozitoryContributor,
+} from "./condition";
 
 export const githubConditionEndpoint = `${process.env.PASSPORT_SCORER_BACKEND}account/custom-github-stamps/condition`;
 const apiKey = process.env.SCORER_API_KEY;
-
-export interface AllowListResponse {
-  data: {
-    is_member: boolean;
-  };
-}
 
 export class CustomGithubProvider implements Provider {
   type = "Github";
@@ -25,9 +27,26 @@ export class CustomGithubProvider implements Provider {
         contributionResult;
 
       try {
+        // Call requestAccessToken to exchange the code for an access token and store it in the context
+        await requestAccessToken(payload.proofs?.code, context);
+
+        const evaluator = new ConditionEvaluator({
+          AND: evaluateAND,
+          OR: evaluateOR,
+          repozitory_contributor: evaluateRepozitoryContributor,
+          organisation_contributor: evaluateOrganisationContributor,
+        });
+
+        const condition = {
+          contributed: {
+            repo: "https://github.com/passportxyz",
+            threshold: 10,
+          },
+        };
+        evaluator.evaluate(condition, context);
+
         contributionResult = await fetchAndCheckContributionsToOrganisation(
           context,
-          payload.proofs.code,
           this._options.threshold,
           3,
           "https://github.com/passportxyz"

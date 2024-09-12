@@ -1,17 +1,21 @@
 import * as githubContributionActivity from "../githubContributionActivity";
 
 import { RequestPayload, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
-import { fetchAndCheckContributions } from "../../../utils/githubClient";
+import { fetchAndCheckContributions, requestAccessToken } from "../../../utils/githubClient";
 
 const { GithubContributionActivityProvider } = githubContributionActivity;
 
 jest.mock("../../../utils/githubClient", () => ({
   fetchAndCheckContributions: jest.fn(),
+  requestAccessToken: jest.fn(),
 }));
 
 describe("GithubContributionActivityProvider", function () {
   beforeEach(() => {
     jest.clearAllMocks();
+    (requestAccessToken as jest.MockedFunction<typeof requestAccessToken>).mockImplementation(() => {
+      return Promise.resolve("access-token");
+    });
   });
   const mockContext: ProviderContext = {
     github: {

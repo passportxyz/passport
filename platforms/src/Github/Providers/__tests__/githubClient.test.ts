@@ -67,7 +67,7 @@ describe("githubClient", function () {
         return Promise.resolve(mockFetchGithubUserData);
       });
       const numDays = "1";
-      const result = await githubClient.fetchAndCheckContributions(mockGithubContext, "ABC123_ACCESSCODE", numDays, 3);
+      const result = await githubClient.fetchAndCheckContributions(mockGithubContext, numDays, 3);
       expect(result).toEqual({
         contributionValid: true,
         numberOfDays: numDays,
@@ -95,7 +95,7 @@ describe("githubClient", function () {
         return Promise.resolve(contributionsValidData);
       });
 
-      await githubClient.fetchAndCheckContributions(mockGithubContext, "ABC123_ACCESSCODE", "1", 3);
+      await githubClient.fetchAndCheckContributions(mockGithubContext, "1", 3);
 
       expect(mockFetchGithubUserDataCall).toHaveBeenCalledTimes(1);
     });
@@ -105,7 +105,7 @@ describe("githubClient", function () {
         return Promise.resolve({ errors: ["Some error"] });
       });
 
-      const result = await githubClient.fetchAndCheckContributions(mockGithubContext, "ABC123_ACCESSCODE", "1", 3);
+      const result = await githubClient.fetchAndCheckContributions(mockGithubContext, "1", 3);
 
       expect(result).toEqual({
         contributionValid: false,
@@ -120,7 +120,7 @@ describe("githubClient", function () {
 
       const numDays = "4";
 
-      const result = await githubClient.fetchAndCheckContributions(mockGithubContext, "ABC123_ACCESSCODE", numDays, 3);
+      const result = await githubClient.fetchAndCheckContributions(mockGithubContext, numDays, 3);
 
       expect(result).toEqual({
         contributionValid: false,
@@ -132,35 +132,31 @@ describe("githubClient", function () {
   describe("fetchGithubUserData", function () {
     beforeEach(() => {
       mockFetchGithubUserDataCall.mockRestore();
-      jest.spyOn(githubClient, "requestAccessToken").mockImplementation(() => {
-        return Promise.resolve("ABC123_ACCESSCODE");
-      });
     });
+
     it("should fetch a user's github data", async () => {
       jest.spyOn(githubClient, "queryFunc").mockImplementationOnce(() => {
         return Promise.resolve(viewerResult);
       });
-      const result = await githubClient.fetchGithubUserData({ github: {} }, mockCode, mockContributionRange);
+      const result = await githubClient.fetchGithubUserData({ github: {} }, mockContributionRange);
       expect(result).toEqual(mockContributionData);
     });
+
     it("handles rate limit exceeded error correctly", async () => {
       jest.spyOn(githubClient, "queryFunc").mockImplementationOnce(() => {
         throw { response: { status: 429 } };
       });
-
-      const result = await githubClient.fetchGithubUserData(mockGithubContext, mockCode, mockContributionRange);
-
+      const result = await githubClient.fetchGithubUserData(mockGithubContext, mockContributionRange);
       expect(result).toEqual({
         errors: ["Error getting getting github info", "Rate limit exceeded"],
       });
     });
+
     it("handles other errors correctly", async () => {
       jest.spyOn(githubClient, "queryFunc").mockImplementationOnce(() => {
         throw { response: { status: 401 }, message: "Some error" };
       });
-
-      const result = await githubClient.fetchGithubUserData(mockGithubContext, mockCode, mockContributionRange);
-
+      const result = await githubClient.fetchGithubUserData(mockGithubContext, mockContributionRange);
       expect(result).toEqual({
         errors: ["Error getting getting github info", "Some error"],
       });

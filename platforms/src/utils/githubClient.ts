@@ -7,6 +7,7 @@ const githubGraphEndpoint = "https://api.github.com/graphql";
 
 export type GithubContext = ProviderContext & {
   github?: {
+    code?: string;
     createdAt?: string;
     id?: string;
     contributionData?: {
@@ -164,11 +165,10 @@ const defaultContributionRange: ContributionRange = {
  */
 export const fetchGithubUserData = async (
   context: GithubContext,
-  code: string,
   contributionRange: ContributionRange = defaultContributionRange,
   orgId?: string
 ): Promise<GithubUserData> => {
-  const accessToken = await requestAccessToken(code, context);
+  const accessToken = context.github?.accessToken;
   if (
     context.github.createdAt === undefined ||
     context.github.contributionData.contributionCollection.length < contributionRange.iteration + 1 ||
@@ -238,7 +238,6 @@ export const requestAccessToken = async (code: string, context: GithubContext): 
 
 export const fetchAndCheckContributions = async (
   context: GithubContext,
-  code: string,
   numberOfDays: string,
   iterations = 3,
   orgId?: string
@@ -257,7 +256,7 @@ export const fetchAndCheckContributions = async (
     };
 
     // Fetch Github user data
-    const userData = await fetchGithubUserData(context, code, contributionRange, orgId);
+    const userData = await fetchGithubUserData(context, contributionRange, orgId);
 
     // If there are errors, return them
     if (userData.errors) {
@@ -335,15 +334,11 @@ export const avoidGithubRateLimit = async (): Promise<void> => {
  * @param orgLogin - thie is the login of the org to get data for (typically the last segment of the URL to get an orgs data https://api.github.com/orgs/${orgLogin})
  * @returns
  */
-export const getGithubOrgData = async (
-  code: string,
-  context: GithubContext,
-  orgLogin: string
-): Promise<GithubOrgMetaData> => {
+export const getGithubOrgData = async (context: GithubContext, orgLogin: string): Promise<GithubOrgMetaData> => {
   if (!context.github?.userData) {
     try {
       // retrieve user's auth bearer token to authenticate client
-      const accessToken = await requestAccessToken(code, context);
+      const accessToken = context.github?.accessToken;
 
       // Now that we have an access token fetch the user details
       const userRequest = await axios.get(`https://api.github.com/orgs/${orgLogin}`, {
@@ -359,7 +354,7 @@ export const getGithubOrgData = async (
           errors: ["Error getting getting github info", "Rate limit exceeded"],
         };
       }
-      handleProviderAxiosError(_error, "Error getting getting github info", [code]);
+      handleProviderAxiosError(_error, "Error getting getting github info", [context.github?.accessToken]);
     }
   }
   return context.github.userData;
@@ -367,15 +362,14 @@ export const getGithubOrgData = async (
 
 export const fetchAndCheckContributionsToOrganisation = async (
   context: GithubContext,
-  code: string,
   numberOfDays: string,
   iterations = 3,
   orgLoginOrURL: string
 ): Promise<{ contributionValid: boolean; numberOfDays?: string; errors?: string[] }> => {
   const orgLogin = orgLoginOrURL.split("/").pop();
-  const orgData = await getGithubOrgData(code, context, orgLogin);
+  const orgData = await getGithubOrgData(context, orgLogin);
   if (orgData.node_id) {
-    return fetchAndCheckContributions(context, code, numberOfDays, iterations, orgData.node_id);
+    return fetchAndCheckContributions(context, numberOfDays, iterations, orgData.node_id);
   }
   return {
     contributionValid: false,
