@@ -421,7 +421,7 @@ describe("fetchAndCheckContributions", () => {
     });
 
     it("Should fetch a user github commits exactly once, if it contains commits on sufficient number of different days", async () => {
-      jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
+      jest.spyOn(axios, "get").mockImplementation((url: string): Promise<object> => {
         return new Promise((resolve) => {
           resolve({
             data: [
@@ -457,9 +457,10 @@ describe("fetchAndCheckContributions", () => {
         contributionValid: true,
         numberOfDays: 3,
       });
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(axios.get).toHaveBeenCalledTimes(1);
 
-      const expectedCommitsUrl = `https://api.github.com/repos/passportxyz/passport/commits`;
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(axios.get).toHaveBeenCalledWith(expectedCommitsUrl, {
         headers: { Authorization: `token ${mockGithubContext.github.accessToken}` },
         params: { page: 1, per_page: 100 },
@@ -468,7 +469,7 @@ describe("fetchAndCheckContributions", () => {
 
     it("Should fetch a user github commits multiple times until it is determined the user has commits on a sufficient number of distinct days", async () => {
       let day = 0;
-      jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
+      jest.spyOn(axios, "get").mockImplementation((url: string): Promise<object> => {
         return new Promise((resolve) => {
           day += 1;
           resolve({
@@ -505,17 +506,20 @@ describe("fetchAndCheckContributions", () => {
         contributionValid: true,
         numberOfDays: 3,
       });
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(axios.get).toHaveBeenCalledTimes(3);
 
-      const expectedCommitsUrl = `https://api.github.com/repos/passportxyz/passport/commits`;
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(axios.get).toHaveBeenCalledWith(expectedCommitsUrl, {
         headers: { Authorization: `token ${mockGithubContext.github.accessToken}` },
         params: { page: 1, per_page: 100 },
       });
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(axios.get).toHaveBeenCalledWith(expectedCommitsUrl, {
         headers: { Authorization: `token ${mockGithubContext.github.accessToken}` },
         params: { page: 2, per_page: 100 },
       });
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(axios.get).toHaveBeenCalledWith(expectedCommitsUrl, {
         headers: { Authorization: `token ${mockGithubContext.github.accessToken}` },
         params: { page: 3, per_page: 100 },
@@ -524,7 +528,7 @@ describe("fetchAndCheckContributions", () => {
 
     it("Should report an error if fetching the github commits fails", async () => {
       const error = new Error("Request failed");
-      jest.spyOn(axios, "get").mockImplementation((url: string): Promise<{}> => {
+      jest.spyOn(axios, "get").mockImplementation((url: string): Promise<object> => {
         return new Promise((_, reject) => {
           reject(error);
         });
@@ -533,6 +537,7 @@ describe("fetchAndCheckContributions", () => {
       await expect(
         githubClient.fetchAndCheckContributionsToRepository(mockGithubContext, 3, 5, "passportxyz/passport")
       ).rejects.toEqual(error);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(axios.get).toHaveBeenCalledTimes(1);
     });
   });

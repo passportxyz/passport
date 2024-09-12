@@ -386,7 +386,7 @@ export const fetchAndCheckContributionsToRepository = async (
       });
 
       const commits = commitsResponse.data as RepoCommit[];
-      for (var i = 0; i < commits.length; i++) {
+      for (let i = 0; i < commits.length; i++) {
         const commit = commits[i];
         const date = new Date(commit.commit.author.date).toISOString().split("T")[0];
 

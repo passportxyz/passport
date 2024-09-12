@@ -17,7 +17,7 @@ const apiKey = process.env.SCORER_API_KEY;
 
 type ConditionResponse = {
   data: {
-    condition: any;
+    condition: Record<string, object>;
   };
 };
 
@@ -70,8 +70,9 @@ export class CustomGithubProvider implements Provider {
         errors,
         record,
       };
-    } catch (error: unknown) {
-      throw new ProviderExternalVerificationError(`Error verifying Github contributions: ${error}`);
+    } catch (_error: unknown) {
+      const error = _error as Error;
+      throw new ProviderExternalVerificationError(`Error verifying Github contributions: ${error?.message}`);
     }
   }
 }

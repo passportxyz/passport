@@ -1,13 +1,15 @@
 import { ConditionEvaluator, evaluateAND, evaluateOR } from "../Providers/condition";
-
+// eslint-disable-next-line  @typescript-eslint/require-await
 const evaluateTrue = async (condition: any, evaluator: ConditionEvaluator, context: any): Promise<boolean> => {
   return true;
 };
 
+// eslint-disable-next-line  @typescript-eslint/require-await
 const evaluateFalse = async (condition: any, evaluator: ConditionEvaluator, context: any): Promise<boolean> => {
   return false;
 };
 
+// eslint-disable-next-line  @typescript-eslint/require-await
 const evaluateThrow = async (condition: any, evaluator: ConditionEvaluator, context: any): Promise<boolean> => {
   throw new Error("Error in evaluation");
 };

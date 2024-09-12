@@ -1,9 +1,14 @@
 import {
   fetchAndCheckContributionsToOrganisation,
   fetchAndCheckContributionsToRepository,
+  GithubContext,
 } from "../../utils/githubClient";
 
 type OperatorHandler = (condition: any, evaluator: ConditionEvaluator, context: any) => Promise<boolean>;
+
+const isObject = (variable: any): boolean => {
+  return typeof variable === "object" && !Array.isArray(variable) && variable !== null;
+};
 
 export class ConditionEvaluator {
   conditionOperators: Record<string, OperatorHandler> = {};
@@ -21,10 +26,13 @@ export class ConditionEvaluator {
   }
 
   async evaluate(condition: Record<string, object>, context: any): Promise<boolean> {
-    console.log("geri evaluate", condition);
+    if (!isObject(condition)) {
+      throw new Error(`condition expected to be an object, got ${JSON.stringify(condition)}`);
+    }
+
     const operatorNames = Object.keys(condition);
     if (operatorNames.length !== 1) {
-      throw new Error(`Only 1 operator (attribute) is allowed in ${condition}!`);
+      throw new Error(`Only 1 operator (attribute) is allowed in ${JSON.stringify(condition)}!`);
     }
 
     return await this.getEvaluator(operatorNames[0])(condition[operatorNames[0]], this, context);
@@ -33,12 +41,12 @@ export class ConditionEvaluator {
 
 export const evaluateAND = async (condition: any, evaluator: ConditionEvaluator, context: any): Promise<boolean> => {
   if (!Array.isArray(condition)) {
-    throw new Error(`AND condition must be an array, got ${condition}`);
+    throw new Error(`AND condition must be an array, got ${JSON.stringify(condition)}`);
   }
   try {
-    for (var i = 0; i < condition.length; i++) {
+    for (let i = 0; i < condition.length; i++) {
       const subCondition = condition[i];
-      const ret = await evaluator.evaluate(subCondition, context);
+      const ret = await evaluator.evaluate(subCondition as Record<string, object>, context);
 
       if (!ret) {
         return false;
@@ -46,8 +54,9 @@ export const evaluateAND = async (condition: any, evaluator: ConditionEvaluator,
     }
 
     return true;
-  } catch (e) {
-    throw new Error("Error when evaluating AND condition: " + e?.message);
+  } catch (_e: unknown) {
+    const e = _e as Error;
+    throw new Error(`Error when evaluating AND condition ${JSON.stringify(condition)}: ` + e?.message);
   }
 };
 
@@ -56,9 +65,9 @@ export const evaluateOR = async (condition: any, evaluator: ConditionEvaluator, 
     throw new Error(`OR condition must be an array, got ${condition}`);
   }
   try {
-    for (var i = 0; i < condition.length; i++) {
+    for (let i = 0; i < condition.length; i++) {
       const subCondition = condition[i];
-      const ret = await evaluator.evaluate(subCondition, context);
+      const ret = await evaluator.evaluate(subCondition as Record<string, object>, context);
 
       if (ret) {
         return true;
@@ -66,13 +75,14 @@ export const evaluateOR = async (condition: any, evaluator: ConditionEvaluator, 
     }
 
     return false;
-  } catch (e) {
-    throw new Error("Error when evaluating AND condition: " + e?.message);
+  } catch (_e: unknown) {
+    const e = _e as Error;
+    throw new Error(`Error when evaluating OR condition ${JSON.stringify(condition)}: ` + e?.message);
   }
 };
 
 export const evaluateRepositoryContributor = async (
-  condition: any,
+  condition: { threshold: number; repository: string },
   evaluator: ConditionEvaluator,
   context: any
 ): Promise<boolean> => {
@@ -80,19 +90,25 @@ export const evaluateRepositoryContributor = async (
   const repository = condition["repository"];
 
   if (!(threshold !== undefined && threshold !== null) || !repository) {
-    throw new Error(`Invalid threshold or repository, got threshold='${condition}' and repository='${repository}'`);
+    throw new Error(`Invalid threshold or repository, got threshold='${threshold}' and repository='${repository}'`);
   }
   try {
-    const contributionResult = await fetchAndCheckContributionsToRepository(context, threshold, 3, repository);
+    const contributionResult = await fetchAndCheckContributionsToRepository(
+      context as GithubContext,
+      threshold,
+      3,
+      repository
+    );
     // TODO: decide what to do with errors which could accumulate in contributionResult.error
     return contributionResult.contributionValid;
-  } catch (e) {
-    throw new Error("Error when evaluating AND condition: " + e?.message);
+  } catch (_e: unknown) {
+    const e = _e as Error;
+    throw new Error("Error when evaluating RepositoryContributor condition: " + e?.message);
   }
 };
 
 export const evaluateOrganisationContributor = async (
-  condition: any,
+  condition:  { threshold: number; organisation: string },
   evaluator: ConditionEvaluator,
   context: any
 ): Promise<boolean> => {
@@ -100,13 +116,19 @@ export const evaluateOrganisationContributor = async (
   const organisation = condition["organisation"];
 
   if (!(threshold !== undefined && threshold !== null) || !organisation) {
-    throw new Error(`Invalid threshold or organisation, got threshold='${condition}' and repository='${organisation}'`);
+    throw new Error(`Invalid threshold or organisation, got threshold='${threshold}' and repository='${organisation}'`);
   }
   try {
-    const contributionResult = await fetchAndCheckContributionsToOrganisation(context, threshold, 3, organisation);
+    const contributionResult = await fetchAndCheckContributionsToOrganisation(
+      context as GithubContext,
+      `${threshold}`,
+      3,
+      organisation
+    );
     // TODO: decide what to do with errors which could accumulate in contributionResult.error
     return contributionResult.contributionValid;
-  } catch (e) {
-    throw new Error("Error when evaluating AND condition: " + e?.message);
+  } catch (_e: unknown) {
+    const e = _e as Error;
+    throw new Error("Error when evaluating OrganisationContributor condition: " + e?.message);
   }
 };
