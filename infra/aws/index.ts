@@ -3,7 +3,7 @@ import * as aws from "@pulumi/aws";
 import * as op from "@1password/op-js";
 import * as cloudflare from "@pulumi/cloudflare";
 import { createAmplifyApp } from "../lib/amplify/app";
-import { secretsManager } from "infra-libs";
+import { secretsManager, amplify } from "infra-libs";
 
 const stack = pulumi.getStack();
 
@@ -822,21 +822,34 @@ const passportBranches = Object({
 
 const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((domainName) => {
   const prefix = "app";
-  const stakingAppInfo = createAmplifyApp(
-    PASSPORT_APP_GITHUB_URL,
-    PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY,
-    domainName,
-    CLOUDFLARE_DOMAIN, // cloudflareDomain
-    CLOUDFLARE_ZONE_ID, // cloudFlareZoneId
-    prefix,
-    passportBranches[stack],
-    passportXyzAppEnvironment,
-    { ...defaultTags, Name: `${prefix}.${domainName}` },
-    false,
-    "",
-    ""
-  );
-  return stakingAppInfo;
+  const amplifyAppConfig: amplify.AmplifyAppConfig = {
+    name: `${prefix}.${domainName}`,
+    githubUrl: PASSPORT_APP_GITHUB_URL,
+    githubAccessToken: PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY,
+    domainName: domainName,
+    cloudflareDomain: CLOUDFLARE_DOMAIN,
+    cloudflareZoneId: CLOUDFLARE_ZONE_ID,
+    prefix: prefix,
+    branchName: passportBranches[stack],
+    environmentVariables: passportXyzAppEnvironment,
+    tags: { ...defaultTags, Name: `${prefix}.${domainName}` },
+    enableBasicAuth: false,
+    basicAuthUsername: "",
+    basicAuthPassword: "",
+    buildCommand: "npm install --g lerna@6.6.2 && lerna bootstrap && rm -rf ../node_modules/@tendermint && npm run build",
+    preBuildCommand: "nvm use 20.9.0",
+    artifactsBaseDirectory: "out",
+    customRules: [
+      {
+        source: "/",
+        status: "200",
+        target: "/index.html",
+      },
+    ],
+    platform: "WEB",
+  };
+
+  return amplify.createAmplifyApp(amplifyAppConfig);
 });
 
 export const amplifyAppHookUrl = pulumi.secret(amplifyAppInfo.webHook.url);
