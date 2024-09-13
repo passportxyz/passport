@@ -1,15 +1,13 @@
 import { ProviderContext } from "@gitcoin/passport-types";
 
 import axios from "axios";
-// TODO: geri fix the next line. Also 1 question: isn't this actually MIN_CONTRIBUTION_DAYS?
-// import { MAX_CONTRIBUTION_DAYS } from "../Providers-config";
-export const MAX_CONTRIBUTION_DAYS = 120;
 
 import { handleProviderAxiosError } from "./handleProviderAxiosError";
 
 const githubGraphEndpoint = "https://api.github.com/graphql";
 
 export const MAX_YEARS_TO_CHECK = 3;
+export const MAX_CONTRIBUTION_DAYS = 120;
 
 export type GithubUserData = { userId: string; contributionDays: number; hadBadCommits: boolean };
 
@@ -149,7 +147,7 @@ export const queryFunc = async (
           id
 
           createdAt
-          contributionsCollection(from: "${fromDate}" to: "${toDate} organizationID:"${orgId ? orgId : null}") {
+          contributionsCollection(from: "${fromDate}" to: "${toDate}" organizationID:${orgId ? '"orgId"' : "null"}) {
             commitContributionsByRepository (maxRepositories: 100) {
               contributions (first: 100, after: "${endCursor}") {
                 pageInfo {
@@ -194,6 +192,7 @@ export const queryFunc = async (
       userId,
     };
   } catch (error) {
+    console.error(error);
     handleProviderAxiosError(error, "Github error retrieving contributions", [accessToken]);
   }
 };
@@ -295,6 +294,22 @@ export const avoidGithubRateLimit = async (): Promise<void> => {
   if (process.env.NODE_ENV === "test") return;
 
   await new Promise((resolve) => setTimeout(resolve, 1000));
+};
+
+export const getGithubUserData = async (context: GithubContext): Promise<string> => {
+  // retrieve user's auth bearer token to authenticate client
+  const accessToken = context.github.accessToken;
+  try {
+    // Now that we have an access token fetch the user details
+    const userRequest = await axios.get("https://api.github.com/user", {
+      headers: { Authorization: `token ${accessToken}` },
+    });
+
+    const githubUserData: { node_id: string } = userRequest.data as { node_id: string };
+    return githubUserData.node_id;
+  } catch (_error) {
+    handleProviderAxiosError(_error, "Error getting getting github info", [accessToken]);
+  }
 };
 
 /**

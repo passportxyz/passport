@@ -1,6 +1,10 @@
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { ProviderExternalVerificationError, type Provider } from "../../types";
-import { fetchAndCheckContributionsToOrganisation, requestAccessToken } from "../../utils/githubClient";
+import {
+  fetchAndCheckContributionsToOrganisation,
+  getGithubUserData,
+  requestAccessToken,
+} from "../../utils/githubClient";
 import { GithubContext } from "../../utils/githubClient";
 import axios from "axios";
 
@@ -30,9 +34,9 @@ export class CustomGithubProvider implements Provider {
     try {
       const errors: string[] = [];
       let record = undefined,
-        valid = false,
-        contributionResult;
+        valid = false;
       const { conditionName } = payload.proofs;
+      let githubId: string | null = null;
 
       try {
         // Query the condition that needs to be verified from the server
@@ -42,6 +46,8 @@ export class CustomGithubProvider implements Provider {
 
         // Call requestAccessToken to exchange the code for an access token and store it in the context
         await requestAccessToken(payload.proofs?.code, context);
+
+        githubId = await getGithubUserData(context);
 
         const evaluator = new ConditionEvaluator({
           AND: evaluateAND,
@@ -53,11 +59,9 @@ export class CustomGithubProvider implements Provider {
         valid = await evaluator.evaluate(response.data.condition, context);
       } catch (e) {
         valid = false;
+
         errors.push(String(e));
       }
-      // TODO: geri fix this
-      // valid = contributionResult.contributionValid;
-      // const githubId = context.github.id;
 
       if (valid && githubId && conditionName) {
         record = { id: githubId, conditionName: conditionName };

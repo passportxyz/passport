@@ -99,7 +99,6 @@ export const evaluateRepositoryContributor = async (
       3,
       repository
     );
-    // TODO: decide what to do with errors which could accumulate in contributionResult.error
     return contributionResult.contributionValid;
   } catch (_e: unknown) {
     const e = _e as Error;
@@ -125,7 +124,6 @@ export const evaluateOrganisationContributor = async (
       3,
       organisation
     );
-    // TODO: decide what to do with errors which could accumulate in contributionResult.error
     return contributionResult.contributionDays >= threshold;
   } catch (_e: unknown) {
     const e = _e as Error;

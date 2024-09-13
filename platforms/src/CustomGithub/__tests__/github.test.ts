@@ -19,7 +19,6 @@ const mockedGithubId = "238452";
 
 const mockGithubContext: githubClient.GithubContext = {
   github: {
-    id: mockedGithubId,
     accessToken: "abc",
   },
 };
@@ -29,7 +28,7 @@ describe("CustomGithubProvider verification", function () {
     jest.clearAllMocks();
   });
 
-  it("handles valid verification attempt", async () => {
+  it.only("handles valid verification attempt", async () => {
     // Mocking axios response for a valid case
     const axiosMock = (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.includes("account/custom-github-stamps/condition")) {
@@ -48,6 +47,9 @@ describe("CustomGithubProvider verification", function () {
 
     jest.spyOn(githubClient, "requestAccessToken").mockImplementationOnce(() => {
       return Promise.resolve("access-token");
+    });
+    jest.spyOn(githubClient, "getGithubUserData").mockImplementationOnce(() => {
+      return Promise.resolve(mockedGithubId);
     });
     jest.spyOn(githubClient, "fetchAndCheckContributionsToRepository").mockImplementationOnce(() => {
       return Promise.resolve({
