@@ -1,7 +1,7 @@
 import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import React, { useCallback, useContext, useMemo } from "react";
-import { usePlatformSpecs } from "../config/platforms";
+import { usePlatforms } from "../config/platforms";
 import { CeramicContext } from "../context/ceramicContext";
 import InitiateOnChainButton from "./InitiateOnChainButton";
 import { useOnChainData } from "../hooks/useOnChainData";
@@ -17,7 +17,7 @@ const OnchainMarker = ({ className }: { className?: string }) => (
 
 const StampsList = ({ className, onChainPlatformIds }: StampsListProps) => {
   const { verifiedPlatforms } = useContext(CeramicContext);
-  const getPlatformSpec = usePlatformSpecs();
+  const { getPlatformSpec } = usePlatforms();
 
   return (
     <div className={`flex flex-col items-center ${className}`}>

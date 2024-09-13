@@ -6,10 +6,9 @@ import axios, { AxiosError } from "axios";
 
 import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
-import { PLATFORMS } from "../config/platforms";
+import { usePlatforms } from "../config/platforms";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { useCustomization } from "../hooks/useCustomization";
-import { customStampProviders, getStampProviderIds } from "../config/providers";
 
 const scorerApiGetScore = CERAMIC_CACHE_ENDPOINT + "/score";
 const scorerApiGetWeights = CERAMIC_CACHE_ENDPOINT + "/weights";
@@ -82,6 +81,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const [stampWeights, setStampWeights] = useState<Partial<Weights>>({});
   const [scoredPlatforms, setScoredPlatforms] = useState<PlatformScoreSpec[]>([]);
   const customization = useCustomization();
+  const { platformSpecs, platformProviderIds, platforms, getPlatformSpec } = usePlatforms();
 
   const loadScore = async (
     address: string | undefined,
@@ -209,12 +209,14 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
 
   const calculatePlatformScore = useCallback(() => {
     if (stampScores && stampWeights) {
-      const scoredPlatforms = PLATFORMS.map((platform) => {
-        const providerIds = getStampProviderIds(platform.platform, customStampProviders(customization));
+      const scoredPlatforms = Array.from(platforms).map(([platformId, platform]) => {
+        const providerIds = platformProviderIds[platformId];
         const possiblePoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampWeights[key] || "0") || 0), 0);
         const earnedPoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampScores[key]) || 0), 0);
+        const platformSpec = getPlatformSpec(platformId);
+        console.log("SC", platform, possiblePoints, earnedPoints, providerIds);
         return {
-          ...platform,
+          ...platformSpec,
           possiblePoints,
           earnedPoints,
         };
@@ -225,7 +227,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
 
   useEffect(() => {
     if (!stampScores || !stampWeights) {
-      setScoredPlatforms(PLATFORMS.map((platform) => ({ ...platform, possiblePoints: 0, earnedPoints: 0 })));
+      setScoredPlatforms(platformSpecs.map((platform) => ({ ...platform, possiblePoints: 0, earnedPoints: 0 })));
       return;
     }
     calculatePlatformScore();

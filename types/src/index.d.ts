@@ -360,8 +360,8 @@ export type PLATFORM_ID =
   | "TrustaLabs"
   | "Outdid"
   | "AllowList"
-  | "DeveloperList"
-  | "Binance";
+  | "Binance"
+  | "DeveloperList";
 
 export type PLATFORM_CATEGORY = {
   name: string;

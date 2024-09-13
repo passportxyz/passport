@@ -117,6 +117,9 @@ type CustomizationResponse = {
   };
   includedChainIds?: string[];
   showExplanationPanel?: boolean;
+  customStamps?: {
+    [name: string]: CustomStamp;
+  };
 };
 
 type CustomPlatformTypeInfo = {
@@ -128,7 +131,7 @@ type CustomPlatformTypeInfo = {
 
 export const CUSTOM_PLATFORM_TYPE_INFO: { [id: string]: CustomPlatformTypeInfo } = {
   DEVEL: {
-    name: "DeveloperList",
+    name: "CustomGithub",
     // TODO we'll probably change these to a different path and platformClass, i.e. DeveloperListPlatform
     path: "Github",
     platformClass: platforms.Github.GithubPlatform,
@@ -208,5 +211,6 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
     allowListProviders: allowListProviders.length ? allowListProviders : undefined,
     includedChainIds: customizationResponse.includedChainIds,
     showExplanationPanel: customizationResponse.showExplanationPanel,
+    customStamps: customizationResponse.customStamps,
   };
 };

@@ -1,8 +1,7 @@
 // --- React Methods
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 
-import { PLATFORMS } from "../config/platforms";
-import { PlatformGroupSpec, customStampProviders, getStampProviderIds } from "../config/providers";
+import { usePlatforms } from "../config/platforms";
 
 // --- Chakra UI Elements
 import { useDisclosure } from "@chakra-ui/react";
@@ -22,6 +21,11 @@ export type CardListProps = {
 };
 
 export const PLATFORM_CATEGORIES: PLATFORM_CATEGORY[] = [
+  {
+    name: "Custom",
+    description: "Custom",
+    platforms: ["DeveloperList"],
+  },
   {
     name: "Blockchain & Crypto Networks",
     description: "Connect your blockchain-based profiles and assets to prove your identity.",
@@ -63,41 +67,20 @@ type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 export const CardList = ({ className, isLoading = false, initialOpen = true }: CardListProps): JSX.Element => {
   const { allProvidersState, allPlatforms } = useContext(CeramicContext);
   const { scoredPlatforms } = useContext(ScorerContext);
-  const customization = useCustomization();
+  const { platformProviderIds, platforms } = usePlatforms();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [currentPlatform, setCurrentPlatform] = useState<PlatformScoreSpec | undefined>();
 
-  const [selectedProviders, setSelectedProviders] = useState<SelectedProviders>(
-    PLATFORMS.reduce((platforms, platform) => {
-      // get all providerIds for this platform
-      const providerIds = getStampProviderIds(platform.platform, customStampProviders(customization));
-      // default to empty array for each platform
-      platforms[platform.platform] = providerIds.filter(
-        (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
-      );
-      // return all platforms
-      return platforms;
-    }, {} as SelectedProviders)
-  );
-
-  useEffect(() => {
-    // update all verfied states
-    setSelectedProviders(
-      PLATFORMS.reduce((platforms, platform) => {
-        // get all providerIds for this platform
-        const providerIds =
-          customStampProviders(customization)[platform.platform]?.reduce((all, stamp) => {
-            return all.concat(stamp.providers?.map((provider) => provider.name as PROVIDER_ID));
-          }, [] as PROVIDER_ID[]) || [];
-        // default to empty array for each platform
-        platforms[platform.platform] = providerIds.filter(
+  const selectedProviders: SelectedProviders = useMemo(
+    () =>
+      Array.from(platforms.keys()).reduce((providers, platformId) => {
+        providers[platformId] = platformProviderIds[platformId].filter(
           (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
         );
-        // return all platforms
-        return platforms;
-      }, {} as SelectedProviders)
-    );
-  }, [allProvidersState, customization]);
+        return providers;
+      }, {} as SelectedProviders),
+    [platforms]
+  );
 
   const [verified, unverified] = scoredPlatforms.reduce(
     ([verified, unverified], platform): [PlatformScoreSpec[], PlatformScoreSpec[]] => {
@@ -137,6 +120,9 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
       }
     });
   });
+
+  console.log("GP", groupedPlatforms);
+  console.log("SP", sortedPlatforms);
 
   const allowList = scoredPlatforms.find((platform) => platform.platform.startsWith("AllowList"));
   const platformProps = currentPlatform?.platform && allPlatforms.get(currentPlatform.platform);

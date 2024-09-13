@@ -6,7 +6,7 @@ import { Platform } from "../utils/platform";
 export class CustomGithubPlatform extends Platform {
   platformId = "DeveloperList";
   path = "DeveloperList";
-  isEVM = true;
+  isEVM = false;
   clientId: string = null;
 
   constructor(options: PlatformOptions = {}) {

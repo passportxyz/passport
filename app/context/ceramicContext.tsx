@@ -18,40 +18,14 @@ import { datadogRum } from "@datadog/browser-rum";
 import { useWalletStore } from "./walletStore";
 import { ScorerContext } from "./scorerContext";
 
-import { PlatformClass, PlatformGroupSpec, platforms as stampPlatforms } from "@gitcoin/passport-platforms";
-const {
-  Ens,
-  Lens,
-  Github,
-  Gitcoin,
-  NFT,
-  GnosisSafe,
-  Snapshot,
-  POAP,
-  ETH,
-  ZkSync,
-  Discord,
-  Linkedin,
-  GtcStaking,
-  Google,
-  Brightid,
-  Coinbase,
-  GuildXYZ,
-  Holonym,
-  Idena,
-  Civic,
-  TrustaLabs,
-  Outdid,
-  AllowList,
-  Binance,
-} = stampPlatforms;
+import { PlatformGroupSpec, platforms as stampPlatforms } from "@gitcoin/passport-platforms";
 import { PlatformProps } from "../components/GenericPlatform";
 
 import { CERAMIC_CACHE_ENDPOINT, IAM_VALID_ISSUER_DIDS } from "../config/stamp_config";
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 import { useCustomization } from "../hooks/useCustomization";
 import { useMessage } from "../hooks/useMessage";
-import { CUSTOM_PLATFORM_TYPE_INFO } from "../utils/customizationUtils";
+import { usePlatforms } from "../config/platforms";
 
 // -- Trusted IAM servers DID
 const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
@@ -75,157 +49,6 @@ export interface CeramicContextState {
   verifiedPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>>;
   platformExpirationDates: Partial<Record<PLATFORM_ID, Date>>; // the value should be the earliest expiration date
   databaseReady: boolean;
-}
-
-export const platforms = new Map<PLATFORM_ID, PlatformProps>();
-
-platforms.set("Ens", {
-  platform: new Ens.EnsPlatform(),
-  platFormGroupSpec: Ens.ProviderConfig,
-});
-
-platforms.set("NFT", {
-  platform: new NFT.NFTPlatform(),
-  platFormGroupSpec: NFT.ProviderConfig,
-});
-
-platforms.set("Github", {
-  platform: new Github.GithubPlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
-  }),
-  platFormGroupSpec: Github.ProviderConfig,
-});
-
-platforms.set("Gitcoin", {
-  platform: new Gitcoin.GitcoinPlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
-  }),
-  platFormGroupSpec: Gitcoin.ProviderConfig,
-});
-
-platforms.set("Snapshot", {
-  platform: new Snapshot.SnapshotPlatform(),
-  platFormGroupSpec: Snapshot.ProviderConfig,
-});
-
-platforms.set("ZkSync", {
-  platform: new ZkSync.ZkSyncPlatform(),
-  platFormGroupSpec: ZkSync.ProviderConfig,
-});
-
-platforms.set("Lens", {
-  platform: new Lens.LensPlatform(),
-  platFormGroupSpec: Lens.ProviderConfig,
-});
-
-platforms.set("GnosisSafe", {
-  platform: new GnosisSafe.GnosisSafePlatform(),
-  platFormGroupSpec: GnosisSafe.ProviderConfig,
-});
-
-platforms.set("ETH", {
-  platform: new ETH.ETHPlatform(),
-  platFormGroupSpec: ETH.ProviderConfig,
-});
-
-if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {
-  platforms.set("POAP", {
-    platform: new POAP.POAPPlatform(),
-    platFormGroupSpec: POAP.ProviderConfig,
-  });
-}
-
-platforms.set("Discord", {
-  platform: new Discord.DiscordPlatform(),
-  platFormGroupSpec: Discord.ProviderConfig,
-});
-
-platforms.set("Linkedin", {
-  platform: new Linkedin.LinkedinPlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
-  }),
-  platFormGroupSpec: Linkedin.ProviderConfig,
-});
-
-platforms.set("GtcStaking", {
-  platform: new GtcStaking.GTCStakingPlatform(),
-  platFormGroupSpec: GtcStaking.ProviderConfig,
-});
-
-platforms.set("Google", {
-  platform: new Google.GooglePlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CALLBACK,
-  }),
-  platFormGroupSpec: Google.ProviderConfig,
-});
-
-platforms.set("Brightid", {
-  platform: new Brightid.BrightidPlatform(),
-  platFormGroupSpec: Brightid.ProviderConfig,
-});
-
-platforms.set("Coinbase", {
-  platform: new Coinbase.CoinbasePlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK,
-  }),
-  platFormGroupSpec: Coinbase.ProviderConfig,
-});
-
-if (process.env.NEXT_PUBLIC_FF_OUTDID_STAMP === "on") {
-  platforms.set("Outdid", {
-    platform: new Outdid.OutdidPlatform({
-      clientId: process.env.NEXT_PUBLIC_OUTDID_API_KEY,
-      redirectUri: process.env.NEXT_PUBLIC_PASSPORT_OUTDID_CALLBACK,
-    }),
-    platFormGroupSpec: Outdid.ProviderConfig,
-  });
-}
-
-if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
-  platforms.set("GuildXYZ", {
-    platform: new GuildXYZ.GuildXYZPlatform(),
-    platFormGroupSpec: GuildXYZ.ProviderConfig,
-  });
-}
-
-if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP === "on") {
-  platforms.set("Holonym", {
-    platform: new Holonym.HolonymPlatform(),
-    platFormGroupSpec: Holonym.ProviderConfig,
-  });
-}
-
-if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP === "on") {
-  platforms.set("Idena", {
-    platform: new Idena.IdenaPlatform(),
-    platFormGroupSpec: Idena.ProviderConfig,
-  });
-}
-
-platforms.set("Civic", {
-  platform: new Civic.CivicPlatform({
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_CIVIC_CALLBACK,
-  }),
-  platFormGroupSpec: Civic.ProviderConfig,
-});
-
-if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS === "on") {
-  platforms.set("TrustaLabs", {
-    platform: new TrustaLabs.TrustaLabsPlatform(),
-    platFormGroupSpec: TrustaLabs.ProviderConfig,
-  });
-}
-
-if (process.env.NEXT_PUBLIC_FF_BINANCE_STAMPS === "on") {
-  platforms.set("Binance", {
-    platform: new Binance.BinancePlatform(),
-    platFormGroupSpec: Binance.ProviderConfig,
-  });
 }
 
 export enum IsLoadingPassportState {
@@ -302,7 +125,7 @@ const startingState: CeramicContextState = {
   passport: undefined,
   isLoadingPassport: IsLoadingPassportState.Loading,
   allProvidersState: startingAllProvidersState,
-  allPlatforms: platforms,
+  allPlatforms: new Map<PLATFORM_ID, PlatformProps>(),
   handleCreatePassport: async () => {},
   handleAddStamps: async () => {},
   handlePatchStamps: async () => {},
@@ -373,7 +196,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [passportLoadResponse, setPassportLoadResponse] = useState<PassportLoadResponse | undefined>();
   const [passportHasCacaoError, setPassportHasCacaoError] = useState<boolean>(false);
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
-  const [allPlatforms, setAllPlatforms] = useState<Map<PLATFORM_ID, PlatformProps>>(new Map());
+  const { platforms: allPlatforms } = usePlatforms();
 
   const address = useWalletStore((state) => state.address);
   const { dbAccessToken, did, checkSessionIsValid } = useDatastoreConnectionContext();
@@ -394,51 +217,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   const { failure } = useMessage();
 
-  useEffect(() => {
-    if (customization.allowListProviders) {
-      const { allowListProviders } = customization;
-      // Set AllowList platform providers based on customization
-      platforms.set("AllowList", {
-        platform: new AllowList.AllowListPlatform(),
-        platFormGroupSpec: allowListProviders,
-      });
-      setAllPlatforms(new Map(platforms));
-    } else {
-      platforms.delete("AllowList");
-      setAllPlatforms(new Map(platforms));
-    }
-    if (customization.customStamps) {
-      for (const [_, { platformType, banner, credentials }] of Object.entries(customization.customStamps)) {
-        const platformTypeInfo = CUSTOM_PLATFORM_TYPE_INFO[platformType];
-        if (!platformTypeInfo) throw new Error(`Unknown custom platform type: ${platformType}`);
-
-        const platform = new platformTypeInfo.platformClass(platformTypeInfo.platformParams);
-
-        if (banner.header || banner.content || banner.cta.text || banner.cta.url) {
-          if (!platform.banner) platform.banner = {};
-          if (banner.header) platform.banner.heading = banner.header;
-          if (banner.content) platform.banner.content = banner.content;
-          if (banner.cta.text && banner.cta.url) platform.banner.cta = { label: banner.cta.text, url: banner.cta.url };
-        }
-
-        const platFormGroupSpec = [
-          {
-            platformGroup: "Credentials",
-            providers: credentials.map(({ providerId, displayName, description }) => ({
-              title: displayName,
-              description,
-              name: providerId,
-            })),
-          },
-        ];
-
-        platforms.set(platformTypeInfo.name, {
-          platform,
-          platFormGroupSpec,
-        });
-      }
-    }
-  }, [customization]);
+  useEffect(() => {}, [customization]);
 
   useEffect(() => {
     return () => {

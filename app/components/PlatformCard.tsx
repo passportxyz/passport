@@ -12,7 +12,7 @@ import { useCustomization } from "../hooks/useCustomization";
 import { ProgressBar } from "./ProgressBar";
 import { getDaysToExpiration } from "../utils/duration";
 import { customStampProviders, getStampProviderIds } from "../config/providers";
-import { PLATFORMS } from "../config/platforms";
+import { usePlatforms } from "../config/platforms";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -270,8 +270,9 @@ export const PlatformCard = ({
   const platformIsExcluded = usePlatformIsExcluded(platform);
   const { platformExpirationDates, expiredPlatforms, allProvidersState } = useContext(CeramicContext);
   const customization = useCustomization();
+  const { platformSpecs } = usePlatforms();
 
-  const selectedProviders = PLATFORMS.reduce((platforms, platform) => {
+  const selectedProviders = platformSpecs.reduce((platforms, platform) => {
     const providerIds = getStampProviderIds(platform.platform, customStampProviders(customization));
     platforms[platform.platform] = providerIds.filter(
       (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"

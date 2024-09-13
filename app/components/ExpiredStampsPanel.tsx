@@ -1,6 +1,6 @@
 import { PlatformSpec } from "@gitcoin/passport-platforms";
 import React, { useContext } from "react";
-import { usePlatformSpecs } from "../config/platforms";
+import { usePlatforms } from "../config/platforms";
 import { CeramicContext } from "../context/ceramicContext";
 import InitiateReverifyStampsButton from "./InitiateReverifyStampsButton";
 
@@ -10,7 +10,7 @@ type StampsListProps = {
 
 const ExpiredStampsList = ({ className }: StampsListProps) => {
   const { expiredPlatforms } = useContext(CeramicContext);
-  const getPlatformSpec = usePlatformSpecs();
+  const { getPlatformSpec } = usePlatforms();
 
   return (
     <div className={`flex flex-col items-center ${className}`}>
