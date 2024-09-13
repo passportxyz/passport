@@ -141,6 +141,7 @@ export const queryFunc = async (
   orgId?: string // This is expected to be the `node_id` form the org object as returned by  https://api.github.com/orgs/<org>  for example
 ): Promise<ParsedContributions & { userId: string }> => {
   try {
+    /* eslint-disable */
     const query = `
       {
         viewer {
@@ -167,6 +168,7 @@ export const queryFunc = async (
         }
       }
     `;
+    /* eslint-enable */
 
     const response: GithubContributionResponse = await axios.post(
       githubGraphEndpoint,

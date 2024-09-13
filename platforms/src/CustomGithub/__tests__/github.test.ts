@@ -28,7 +28,7 @@ describe("CustomGithubProvider verification", function () {
     jest.clearAllMocks();
   });
 
-  it.only("handles valid verification attempt", async () => {
+  it("handles valid verification attempt", async () => {
     // Mocking axios response for a valid case
     const axiosMock = (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.includes("account/custom-github-stamps/condition")) {
@@ -71,7 +71,7 @@ describe("CustomGithubProvider verification", function () {
     });
   });
 
-  it("handles errors during allow list verification", async () => {
+  it("handles errors during verification", async () => {
     // Simulating an axios error
     (axios.get as jest.Mock).mockRejectedValue("Network error");
 

@@ -38,12 +38,12 @@ export class CustomGithubProvider implements Provider {
       const { conditionName } = payload.proofs;
       let githubId: string | null = null;
 
-      try {
-        // Query the condition that needs to be verified from the server
-        const response: ConditionResponse = await axios.get(`${githubConditionEndpoint}/${conditionName}`, {
-          headers: { Authorization: process.env.CGRANTS_API_TOKEN },
-        });
+      // Query the condition that needs to be verified from the server
+      const response: ConditionResponse = await axios.get(`${githubConditionEndpoint}/${conditionName}`, {
+        headers: { Authorization: process.env.CGRANTS_API_TOKEN },
+      });
 
+      try {
         // Call requestAccessToken to exchange the code for an access token and store it in the context
         await requestAccessToken(payload.proofs?.code, context);
 
