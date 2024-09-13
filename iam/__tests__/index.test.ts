@@ -935,10 +935,10 @@ describe("POST /check", function () {
     expect(response.body[1].type).toEqual("AllowList#test");
   });
 
-  it("handles valid check request with CustomGithub stamp", async () => {
-    const customGithubProvider = "CustomGithub#test#0xtest";
+  it("handles valid check request with DeveloperList stamp", async () => {
+    const customGithubProvider = "DeveloperList#test#0xtest";
     jest
-      .spyOn(providers._providers.CustomGithub, "verify")
+      .spyOn(providers._providers.DeveloperList, "verify")
       .mockImplementation(async (payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> => {
         return {
           valid: true,
@@ -964,7 +964,7 @@ describe("POST /check", function () {
       .expect("Content-Type", /json/);
 
     expect(response.body[1].valid).toBe(true);
-    expect(response.body[1].type).toEqual("CustomGithub#test#0xtest");
+    expect(response.body[1].type).toEqual("DeveloperList#test#0xtest");
   });
 
   it("handles valid check requests with multiple types", async () => {

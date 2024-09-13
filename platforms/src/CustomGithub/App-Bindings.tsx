@@ -4,8 +4,8 @@ import { AppContext, PlatformOptions, ProviderPayload } from "../types";
 import { Platform } from "../utils/platform";
 
 export class CustomGithubPlatform extends Platform {
-  platformId = "CustomGithub";
-  path = "CustomGithub";
+  platformId = "DeveloperList";
+  path = "DeveloperList";
   isEVM = true;
   clientId: string = null;
 

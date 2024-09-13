@@ -1,10 +1,6 @@
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { ProviderExternalVerificationError, type Provider } from "../../types";
-import {
-  fetchAndCheckContributionsToOrganisation,
-  getGithubUserData,
-  requestAccessToken,
-} from "../../utils/githubClient";
+import { getGithubUserData, requestAccessToken } from "../../utils/githubClient";
 import { GithubContext } from "../../utils/githubClient";
 import axios from "axios";
 
@@ -25,7 +21,7 @@ type ConditionResponse = {
 };
 
 export class CustomGithubProvider implements Provider {
-  type = "CustomGithub";
+  type = "DeveloperList";
   _options = {
     threshold: "1",
   };

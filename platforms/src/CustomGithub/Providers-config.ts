@@ -3,7 +3,7 @@ import { CustomGithubProvider } from "./Providers";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/star-light.svg",
-  platform: "CustomGithub",
+  platform: "DeveloperList",
   name: "Custom Github Stamp",
   description: "Verify you are part of a community",
   connectMessage: "Verify",
@@ -15,9 +15,9 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     platformGroup: "Guest List",
     providers: [
       {
-        title: "Allow List Provider",
+        title: "DeveloperList Provider",
         description: "Congrats! You are part of this community.",
-        name: "AllowList",
+        name: "DeveloperList",
       },
     ],
   },

@@ -24,18 +24,27 @@ function reportUnhandledError(type: string, address: string, e: unknown) {
   }
 }
 
-export const withTimeout = async (millis: number, promise: Promise<VerifiedPayload>, type: string): Promise<VerifiedPayload> => {
-  let timeoutPid : NodeJS.Timeout | null = null;
-  const timeout = new Promise<VerifiedPayload>((_resolve, reject) =>
-      timeoutPid = setTimeout(
-          () => reject( new ProviderExternalVerificationError(`Request timeout while verifying ${type}. It took over ${millis} ms to complete.`)),
-          millis));
-  const result = await Promise.race([
-      promise,
-      timeout
-  ])
+export const withTimeout = async (
+  millis: number,
+  promise: Promise<VerifiedPayload>,
+  type: string
+): Promise<VerifiedPayload> => {
+  let timeoutPid: NodeJS.Timeout | null = null;
+  const timeout = new Promise<VerifiedPayload>(
+    (_resolve, reject) =>
+      (timeoutPid = setTimeout(
+        () =>
+          reject(
+            new ProviderExternalVerificationError(
+              `Request timeout while verifying ${type}. It took over ${millis} ms to complete.`
+            )
+          ),
+        millis
+      ))
+  );
+  const result = await Promise.race([promise, timeout]);
   clearTimeout(timeoutPid);
-  return result
+  return result;
 };
 
 // Collate all Providers to abstract verify logic
