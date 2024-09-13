@@ -142,29 +142,23 @@ const ATTESTER_TYPES = {
   ],
 };
 
-const providerTypePlatformMap = Object.entries(platforms).reduce(
-  (acc, [platformName, { providers }]) => {
-    providers.forEach(({ type }) => {
-      acc[type] = platformName;
-    });
-    return acc;
-  },
-  {} as { [k: string]: string }
-);
+const providerTypePlatformMap = Object.entries(platforms).reduce((acc, [platformName, { providers }]) => {
+  providers.forEach(({ type }) => {
+    acc[type] = platformName;
+  });
+  return acc;
+}, {} as { [k: string]: string });
 
 function groupProviderTypesByPlatform(types: string[]): string[][] {
   return Object.values(
-    types.reduce(
-      (groupedProviders, type) => {
-        const platform = providerTypePlatformMap[type] || "generic";
+    types.reduce((groupedProviders, type) => {
+      const platform = providerTypePlatformMap[type] || "generic";
 
-        if (!groupedProviders[platform]) groupedProviders[platform] = [];
-        groupedProviders[platform].push(type);
+      if (!groupedProviders[platform]) groupedProviders[platform] = [];
+      groupedProviders[platform].push(type);
 
-        return groupedProviders;
-      },
-      {} as { [k: keyof typeof platforms]: string[] }
-    )
+      return groupedProviders;
+    }, {} as { [k: keyof typeof platforms]: string[] })
   );
 }
 
@@ -368,6 +362,15 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
             allowList: type.split("#")[1],
           };
           type = "AllowList";
+        } else if (type.startsWith("CustomGithub")) {
+          // Here we handle the custom CustomGithub stamps
+          const [_type, conditionName, conditionHash, ...rest] = type.split("#");
+          payload.proofs = {
+            ...payload.proofs,
+            conditionName,
+            conditionHash,
+          };
+          type = "CustomGithub";
         }
 
         try {
@@ -386,6 +389,8 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
           }
           if (type === "AllowList") {
             type = `AllowList#${verifyResult.record.allowList}`;
+          } else if (type === "CustomGithub") {
+            type = `CustomGithub#${verifyResult.record.conditionName}#${verifyResult.record.conditionHash}`;
           }
         } catch (e) {
           error = "Unable to verify provider";

@@ -13,6 +13,7 @@ const payload = {
   address: MOCK_ADDRESS,
   proofs: {
     conditionName: "test",
+    conditionHash: "0xtest",
   },
 } as unknown as RequestPayload;
 const mockedGithubId = "238452";
@@ -66,6 +67,7 @@ describe("CustomGithubProvider verification", function () {
       record: {
         id: mockedGithubId,
         conditionName: "test",
+        conditionHash: "0xtest",
       },
       errors: [],
     });

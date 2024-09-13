@@ -25,7 +25,7 @@ type ConditionResponse = {
 };
 
 export class CustomGithubProvider implements Provider {
-  type = "Github";
+  type = "CustomGithub";
   _options = {
     threshold: "1",
   };
@@ -34,13 +34,16 @@ export class CustomGithubProvider implements Provider {
       const errors: string[] = [];
       let record = undefined,
         valid = false;
-      const { conditionName } = payload.proofs;
+      const { conditionName, conditionHash } = payload.proofs;
       let githubId: string | null = null;
 
       // Query the condition that needs to be verified from the server
-      const response: ConditionResponse = await axios.get(`${githubConditionEndpoint}/${conditionName}`, {
-        headers: { Authorization: process.env.CGRANTS_API_TOKEN },
-      });
+      const response: ConditionResponse = await axios.get(
+        `${githubConditionEndpoint}/${this.type}#${conditionName}#${conditionHash}`,
+        {
+          headers: { Authorization: process.env.CGRANTS_API_TOKEN },
+        }
+      );
 
       try {
         // Call requestAccessToken to exchange the code for an access token and store it in the context
@@ -62,8 +65,8 @@ export class CustomGithubProvider implements Provider {
         errors.push(String(e));
       }
 
-      if (valid && githubId && conditionName) {
-        record = { id: githubId, conditionName: conditionName };
+      if (valid && githubId && conditionName && conditionHash) {
+        record = { id: githubId, conditionName, conditionHash };
       } else {
         errors.push("Your Github contributions did not qualify for this stamp.");
       }
