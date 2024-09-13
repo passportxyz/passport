@@ -31,7 +31,7 @@ describe("CustomGithubProvider verification", function () {
   it("handles valid verification attempt", async () => {
     // Mocking axios response for a valid case
     const axiosMock = (axios.get as jest.Mock).mockImplementation((url: string) => {
-      if (url.includes("account/custom-github-stamps/condition")) {
+      if (url.includes("customization/credential")) {
         return Promise.resolve({
           data: {
             condition: {

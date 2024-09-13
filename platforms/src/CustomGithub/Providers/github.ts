@@ -16,8 +16,7 @@ import {
   evaluateRepositoryContributor,
 } from "./condition";
 
-export const githubConditionEndpoint = `${process.env.PASSPORT_SCORER_BACKEND}account/custom-github-stamps/condition`;
-const apiKey = process.env.SCORER_API_KEY;
+export const githubConditionEndpoint = `${process.env.PASSPORT_SCORER_BACKEND}customization/credential`;
 
 type ConditionResponse = {
   data: {
