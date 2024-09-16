@@ -115,7 +115,7 @@ const parseContributions = ({
   };
 };
 
-type RepoCommit = {
+export type RepoCommit = {
   commit: {
     author: {
       date: string;
@@ -369,11 +369,12 @@ export const fetchAndCheckContributionsToRepository = async (
   const per_page = 100;
   const daysWithCommits: Record<string, number> = {};
   const accessToken = context.github?.accessToken;
+  let checkMoreCommits = true;
 
   try {
     // retrieve user's auth bearer token to authenticate client
 
-    while (page <= iterations && Object.keys(daysWithCommits).length < numberOfDays) {
+    while (page < iterations && Object.keys(daysWithCommits).length < numberOfDays && checkMoreCommits) {
       page += 1;
       // Now that we have an access token fetch the user details
       const commitsResponse = await axios.get(commitsUrl, {
@@ -382,6 +383,7 @@ export const fetchAndCheckContributionsToRepository = async (
       });
 
       const commits = commitsResponse.data as RepoCommit[];
+      checkMoreCommits = commits.length > 0; // We assume that there are no more commits if we received an empty list
       for (let i = 0; i < commits.length; i++) {
         const commit = commits[i];
         const date = new Date(commit.commit.author.date).toISOString().split("T")[0];
