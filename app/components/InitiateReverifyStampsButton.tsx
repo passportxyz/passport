@@ -8,7 +8,7 @@ import { CeramicContext } from "../context/ceramicContext";
 import { Modal, ModalContent, ModalOverlay } from "@chakra-ui/react";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { LoadButton } from "./LoadButton";
-import { usePlatforms } from "../config/platforms";
+import { usePlatforms } from "../hooks/usePlatforms";
 // -- Utils
 import { StampClaimForPlatform, StampClaimingContext } from "../context/stampClaimingContext";
 import { Hyperlink } from "@gitcoin/passport-platforms";

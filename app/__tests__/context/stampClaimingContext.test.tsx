@@ -19,11 +19,11 @@ jest.mock("@gitcoin/passport-identity", () => ({
   fetchVerifiableCredential: jest.fn(),
 }));
 
-jest.mock("../../context/ceramicContext", () => {
-  const originalModule = jest.requireActual("../../context/ceramicContext");
+jest.mock("../../config/platformMap", () => {
+  const originalModule = jest.requireActual("../../config/platformMap");
   let newPlatforms = new Map<PLATFORM_ID, PlatformProps>();
 
-  originalModule.platforms.forEach((value: PlatformProps, key: PLATFORM_ID) => {
+  originalModule.defaultPlatformMap.forEach((value: PlatformProps, key: PLATFORM_ID) => {
     let platform: PlatformClass = {
       ...value.platform,
       getProviderPayload: jest.fn(async (appContext: AppContext) => {
@@ -46,7 +46,7 @@ jest.mock("../../context/ceramicContext", () => {
   return {
     __esModule: true,
     ...originalModule,
-    platforms: newPlatforms,
+    defaultPlatformMap: newPlatforms,
   };
 });
 

@@ -13,7 +13,7 @@ import { PLATFORM_ID } from "@gitcoin/passport-types";
 
 // --- Helpers
 import { intersect } from "../utils/helpers";
-import { usePlatforms } from "../config/platforms";
+import { usePlatforms } from "../hooks/usePlatforms";
 
 const PlatformJsonButton = ({
   platformPassportData,

@@ -1,6 +1,6 @@
 import { ScorerContext, ScorerContextState } from "../context/scorerContext";
-import { CeramicContext, CeramicContextState, IsLoadingPassportState, platforms } from "../context/ceramicContext";
-import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
+import { CeramicContext, CeramicContextState, IsLoadingPassportState } from "../context/ceramicContext";
+import { platforms, ProviderSpec } from "@gitcoin/passport-platforms";
 import React from "react";
 import { render } from "@testing-library/react";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
@@ -14,9 +14,10 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export const getProviderSpec = (platform: PLATFORM_ID, provider: string): ProviderSpec => {
-  return STAMP_PROVIDERS[platform]
-    ?.find((i) => i.providers.find((p) => p.name == provider))
-    ?.providers.find((p) => p.name == provider) as ProviderSpec;
+  const platformDefinition = platforms[platform];
+  return platformDefinition?.ProviderConfig?.find((i) => i.providers.find((p) => p.name == provider))?.providers.find(
+    (p) => p.name == provider
+  ) as ProviderSpec;
 };
 
 export const makeTestCeramicContext = (initialState?: Partial<CeramicContextState>): CeramicContextState => {
@@ -32,7 +33,7 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
     allPlatforms: new Map<PLATFORM_ID, PlatformProps>(),
     allProvidersState: {
       Google: {
-        providerSpec: STAMP_PROVIDERS.Google as unknown as ProviderSpec,
+        providerSpec: getProviderSpec("Google", "Google"),
         stamp: undefined,
       },
       Ens: {
@@ -113,14 +114,10 @@ export const makeTestCeramicContextWithExpiredStamps = (
 ): CeramicContextState => {
   let expiredPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>> = {};
 
-  const ethPlatform = platforms.get("ETH");
-
-  if (ethPlatform) {
-    expiredPlatforms["ETH"] = {
-      platform: ethPlatform.platform,
-      platFormGroupSpec: ethPlatform.platFormGroupSpec,
-    };
-  }
+  expiredPlatforms["ETH"] = {
+    platform: new platforms.ETH.ETHPlatform(),
+    platFormGroupSpec: platforms.ETH.ProviderConfig,
+  };
 
   return {
     ...makeTestCeramicContext(initialState),

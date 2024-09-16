@@ -1,7 +1,7 @@
 // --- React Methods
 import React, { useContext, useMemo, useState } from "react";
 
-import { usePlatforms } from "../config/platforms";
+import { usePlatforms } from "../hooks/usePlatforms";
 
 // --- Chakra UI Elements
 import { useDisclosure } from "@chakra-ui/react";
@@ -36,7 +36,7 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
         );
         return providers;
       }, {} as SelectedProviders),
-    [platforms]
+    [platforms, allProvidersState, platformProviderIds]
   );
 
   const [verified, unverified] = scoredPlatforms.reduce(

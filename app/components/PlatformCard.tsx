@@ -2,7 +2,7 @@
 import { useMemo, useState, useContext } from "react";
 
 // --- Types
-import { PLATFORM_ID, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 
 // --- Components
 import { Button } from "./Button";
@@ -11,7 +11,7 @@ import { CeramicContext } from "../context/ceramicContext";
 import { useCustomization } from "../hooks/useCustomization";
 import { ProgressBar } from "./ProgressBar";
 import { getDaysToExpiration } from "../utils/duration";
-import { usePlatforms } from "../config/platforms";
+import { usePlatforms } from "../hooks/usePlatforms";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -350,7 +350,7 @@ const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
         return parseFloat(customization.scorer?.weights?.[provider] || "") > 0;
       })
     );
-  }, [customization, platform.earnedPoints, platform.platform]);
+  }, [customization, platform.earnedPoints, platform.platform, platformProviderIds]);
 
   const excludedByFeatureFlag = useMemo(() => {
     // Feature Flag Guild Stamp

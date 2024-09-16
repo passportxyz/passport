@@ -1,7 +1,7 @@
 import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import React, { useCallback, useContext, useMemo } from "react";
-import { usePlatforms } from "../config/platforms";
+import { usePlatforms } from "../hooks/usePlatforms";
 import { CeramicContext } from "../context/ceramicContext";
 import InitiateOnChainButton from "./InitiateOnChainButton";
 import { useOnChainData } from "../hooks/useOnChainData";

@@ -6,7 +6,7 @@ import axios, { AxiosError } from "axios";
 
 import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
-import { usePlatforms } from "../config/platforms";
+import { usePlatforms } from "../hooks/usePlatforms";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
 import { useCustomization } from "../hooks/useCustomization";
 

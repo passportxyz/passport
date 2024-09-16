@@ -25,7 +25,7 @@ import { CERAMIC_CACHE_ENDPOINT, IAM_VALID_ISSUER_DIDS } from "../config/stamp_c
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 import { useCustomization } from "../hooks/useCustomization";
 import { useMessage } from "../hooks/useMessage";
-import { usePlatforms } from "../config/platforms";
+import { usePlatforms } from "../hooks/usePlatforms";
 
 // -- Trusted IAM servers DID
 const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];

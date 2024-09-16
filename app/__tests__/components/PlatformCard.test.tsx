@@ -1,7 +1,7 @@
 import React from "react";
 import { screen, render } from "@testing-library/react";
 import { PlatformCard, SelectedProviders } from "../../components/PlatformCard";
-import { platforms } from "@gitcoin/passport-platforms/*";
+import { platforms } from "@gitcoin/passport-platforms";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { useCustomization } from "../../hooks/useCustomization";
 

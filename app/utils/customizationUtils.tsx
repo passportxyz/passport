@@ -5,7 +5,7 @@ import axios from "axios";
 import * as DOMPurify from "dompurify";
 import parse from "html-react-parser";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
-import { PlatformClass, PlatformGroupSpec, platforms } from "@gitcoin/passport-platforms";
+import { PlatformGroupSpec } from "@gitcoin/passport-platforms";
 
 const sanitize = DOMPurify.sanitize;
 
@@ -120,23 +120,6 @@ type CustomizationResponse = {
   customStamps?: {
     [name: string]: CustomStamp;
   };
-};
-
-type CustomPlatformTypeInfo = {
-  basePlatformName: string;
-  platformClass: typeof PlatformClass;
-  platformParams: any;
-};
-
-export const CUSTOM_PLATFORM_TYPE_INFO: { [id: string]: CustomPlatformTypeInfo } = {
-  DEVEL: {
-    basePlatformName: "CustomGithub",
-    platformClass: platforms.CustomGithub.CustomGithubPlatform,
-    platformParams: {
-      clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
-      redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
-    },
-  },
 };
 
 const SanitizedHTMLComponent = ({ html }: { html: string }) => {
