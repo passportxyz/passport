@@ -158,7 +158,7 @@ export const useOnChainData = (): OnChainData => {
       }
       queryClient.invalidateQueries({ queryKey });
     },
-    [queryClient]
+    [address, queryClient]
   );
 
   return useMemo(
