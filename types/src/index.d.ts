@@ -361,7 +361,8 @@ export type PLATFORM_ID =
   | "Outdid"
   | "AllowList"
   | "Binance"
-  | "DeveloperList";
+  | "DeveloperList"
+  | `Custom#${string}`;
 
 export type PLATFORM_CATEGORY = {
   name: string;

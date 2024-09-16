@@ -10,10 +10,12 @@ export class CustomGithubPlatform extends Platform {
   clientId: string = null;
 
   constructor(options: PlatformOptions = {}) {
+    // TODO need github client id and redirect uri ?
     super();
   }
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
+    // TODO github oauth ?
     const result = await Promise.resolve({});
     return result;
   }

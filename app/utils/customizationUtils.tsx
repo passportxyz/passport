@@ -4,7 +4,7 @@ import { CUSTOMIZATION_ENDPOINT } from "../config/customization_config";
 import axios from "axios";
 import * as DOMPurify from "dompurify";
 import parse from "html-react-parser";
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformClass, PlatformGroupSpec, platforms } from "@gitcoin/passport-platforms";
 
 const sanitize = DOMPurify.sanitize;
@@ -123,18 +123,15 @@ type CustomizationResponse = {
 };
 
 type CustomPlatformTypeInfo = {
-  name: PLATFORM_ID;
-  path: string;
+  basePlatformName: string;
   platformClass: typeof PlatformClass;
   platformParams: any;
 };
 
 export const CUSTOM_PLATFORM_TYPE_INFO: { [id: string]: CustomPlatformTypeInfo } = {
   DEVEL: {
-    name: "CustomGithub",
-    // TODO we'll probably change these to a different path and platformClass, i.e. DeveloperListPlatform
-    path: "Github",
-    platformClass: platforms.Github.GithubPlatform,
+    basePlatformName: "CustomGithub",
+    platformClass: platforms.CustomGithub.CustomGithubPlatform,
     platformParams: {
       clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
       redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,

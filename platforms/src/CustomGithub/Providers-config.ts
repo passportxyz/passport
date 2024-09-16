@@ -10,17 +10,6 @@ export const PlatformDetails: PlatformSpec = {
   isEVM: true,
 };
 
-export const ProviderConfig: PlatformGroupSpec[] = [
-  {
-    platformGroup: "Guest List",
-    providers: [
-      {
-        title: "DeveloperList Provider",
-        description: "Congrats! You are part of this community.",
-        name: "DeveloperList",
-      },
-    ],
-  },
-];
+export const ProviderConfig: PlatformGroupSpec[] = [];
 
 export const providers: Provider[] = [new CustomGithubProvider()];

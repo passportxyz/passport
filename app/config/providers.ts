@@ -25,6 +25,7 @@ export type { ProviderSpec, PlatformGroupSpec };
 //
 // export const STAMP_PROVIDERS: Readonly<Providers> = {
 //   ...providerConfigs,
+//   TODO is this needed?
 //   Signer: [
 //     {
 //       platformGroup: "Account Name",

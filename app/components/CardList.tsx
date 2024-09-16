@@ -1,16 +1,15 @@
 // --- React Methods
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 
 import { usePlatforms } from "../config/platforms";
 
 // --- Chakra UI Elements
 import { useDisclosure } from "@chakra-ui/react";
-import { PLATFORM_ID, PROVIDER_ID, PLATFORM_CATEGORY } from "@gitcoin/passport-types";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import PageWidthGrid from "../components/PageWidthGrid";
 import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
 import { Category } from "./Category";
 import { CeramicContext } from "../context/ceramicContext";
-import { useCustomization } from "../hooks/useCustomization";
 import { PlatformCard } from "./PlatformCard";
 import { GenericPlatform } from "./GenericPlatform";
 
@@ -20,61 +19,19 @@ export type CardListProps = {
   initialOpen?: boolean;
 };
 
-export const PLATFORM_CATEGORIES: PLATFORM_CATEGORY[] = [
-  {
-    name: "Custom",
-    description: "Custom",
-    platforms: ["DeveloperList"],
-  },
-  {
-    name: "Blockchain & Crypto Networks",
-    description: "Connect your blockchain-based profiles and assets to prove your identity.",
-    platforms: [
-      "ETH",
-      "NFT",
-      "GtcStaking",
-      "Idena",
-      "Gitcoin",
-      "ZkSync",
-      "GuildXYZ",
-      "Lens",
-      "Snapshot",
-      "GnosisSafe",
-      "Brightid",
-      "TrustaLabs",
-      "Ens",
-    ],
-  },
-  {
-    name: "Government IDs",
-    description: "Use your government-issued IDs or complete a KYC process with our partners to verify your identity.",
-    platforms: ["Coinbase", "Holonym", "Outdid", "Binance"],
-  },
-  {
-    name: "Social & Professional Platforms",
-    description: "Link your profiles from established social media and professional networking sites for verification.",
-    platforms: ["Github", "Linkedin", "Google", "Discord"],
-  },
-  {
-    name: "Biometric Verification",
-    description: "Connect your blockchain-based profiles and assets to prove your identity.",
-    platforms: ["Civic"],
-  },
-];
-
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
 export const CardList = ({ className, isLoading = false, initialOpen = true }: CardListProps): JSX.Element => {
   const { allProvidersState, allPlatforms } = useContext(CeramicContext);
   const { scoredPlatforms } = useContext(ScorerContext);
-  const { platformProviderIds, platforms } = usePlatforms();
+  const { platformProviderIds, platforms, platformCatagories } = usePlatforms();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [currentPlatform, setCurrentPlatform] = useState<PlatformScoreSpec | undefined>();
 
   const selectedProviders: SelectedProviders = useMemo(
     () =>
       Array.from(platforms.keys()).reduce((providers, platformId) => {
-        providers[platformId] = platformProviderIds[platformId].filter(
+        providers[platformId] = (platformProviderIds[platformId] || []).filter(
           (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
         );
         return providers;
@@ -84,7 +41,7 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
 
   const [verified, unverified] = scoredPlatforms.reduce(
     ([verified, unverified], platform): [PlatformScoreSpec[], PlatformScoreSpec[]] => {
-      return platform.earnedPoints === 0 && selectedProviders[platform.platform].length === 0
+      return platform.earnedPoints === 0 && (selectedProviders[platform.platform] || []).length === 0
         ? [verified, [...unverified, platform]]
         : [[...verified, platform], unverified];
     },
@@ -104,8 +61,10 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
     };
   } = {};
 
+  console.log("Platform Categories", platformCatagories);
+
   // Generate grouped stamps
-  PLATFORM_CATEGORIES.forEach((category) => {
+  platformCatagories.forEach((category) => {
     groupedPlatforms[category.name] = {
       name: category.name,
       description: category.description,
@@ -114,7 +73,7 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
   });
 
   sortedPlatforms.forEach((stamp) => {
-    PLATFORM_CATEGORIES.forEach((category) => {
+    platformCatagories.forEach((category) => {
       if (category.platforms.includes(stamp.platform)) {
         groupedPlatforms[category.name].sortedPlatforms.push(stamp);
       }

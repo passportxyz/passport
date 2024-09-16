@@ -9,7 +9,6 @@ import {
   VerifiableCredential,
 } from "@gitcoin/passport-types";
 import axios, { AxiosResponse } from "axios";
-import { ProviderSpec, STAMP_PROVIDERS } from "../config/providers";
 import { datadogRum } from "@datadog/browser-rum";
 import { Cacao } from "@didtools/cacao";
 import { DID } from "dids";
@@ -114,19 +113,6 @@ export const graphql_fetch = async (endpoint: URL, query: string, variables: obj
       throw new Error(`Request error: ${error.message}`);
     }
   }
-};
-
-/**
- * Retrieves the provider specification for a given platform and provider name.
- *
- * @param platform The platform ID.
- * @param provider The provider name.
- * @returns The provider specification if found, or undefined otherwise.
- */
-export const getProviderSpec = (platform: PLATFORM_ID, provider: string): ProviderSpec => {
-  return STAMP_PROVIDERS[platform]
-    ?.find((i) => i.providers.find((p) => p.name == provider))
-    ?.providers.find((p) => p.name == provider) as ProviderSpec;
 };
 
 /**

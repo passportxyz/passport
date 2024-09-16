@@ -4,20 +4,15 @@ import React, { useContext, useState } from "react";
 
 // --- Style Components
 import { Button } from "./Button";
-import { CeramicContext, platforms } from "../context/ceramicContext";
+import { CeramicContext } from "../context/ceramicContext";
 import { Modal, ModalContent, ModalOverlay } from "@chakra-ui/react";
-import { STAMP_PROVIDERS } from "../config/providers";
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
+import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { LoadButton } from "./LoadButton";
 import { usePlatforms } from "../config/platforms";
 // -- Utils
 import { StampClaimForPlatform, StampClaimingContext } from "../context/stampClaimingContext";
 import { Hyperlink } from "@gitcoin/passport-platforms";
 import { useMessage } from "../hooks/useMessage";
-
-export const getProviderIdsFromPlatformId = (platformId: PLATFORM_ID): PROVIDER_ID[] => {
-  return STAMP_PROVIDERS[platformId as PLATFORM_ID].flatMap((x) => x.providers.map((y) => y.name));
-};
 
 export type ExpiredStampModalProps = {
   isOpen: boolean;
@@ -33,7 +28,7 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
   const { claimCredentials, status } = useContext(StampClaimingContext);
   const [waitForNext, setWaitForNext] = useState<WaitCondition>();
   const [isReverifyingStamps, setIsReverifyingStamps] = useState(false);
-  const { getPlatformSpec } = usePlatforms();
+  const { getPlatformSpec, platformProviderIds, platforms } = usePlatforms();
 
   const { success, failure } = useMessage();
 
@@ -51,8 +46,8 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
     });
   };
 
-  const expiredPlatforms = Object.keys(STAMP_PROVIDERS).filter((provider) => {
-    const possibleProviders = getProviderIdsFromPlatformId(provider as PLATFORM_ID);
+  const expiredPlatforms = Array.from(platforms.keys()).filter((platform) => {
+    const possibleProviders = platformProviderIds[platform];
     return possibleProviders.filter((provider) => expiredProviders.includes(provider)).length > 0;
   });
 
@@ -81,9 +76,8 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
       selectedProviders: [],
     };
 
-    Object.keys(STAMP_PROVIDERS).forEach((_platformId) => {
-      const platformId = _platformId as PLATFORM_ID;
-      const possibleProviders = getProviderIdsFromPlatformId(platformId);
+    Array.from(platforms.keys()).forEach((platformId) => {
+      const possibleProviders = platformProviderIds[platformId];
       const expiredProvidersInPlatform = possibleProviders.filter((provider) => expiredProviders.includes(provider));
 
       const platform = platforms.get(platformId)?.platform;

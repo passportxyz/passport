@@ -11,7 +11,6 @@ import { CeramicContext } from "../context/ceramicContext";
 import { useCustomization } from "../hooks/useCustomization";
 import { ProgressBar } from "./ProgressBar";
 import { getDaysToExpiration } from "../utils/duration";
-import { customStampProviders, getStampProviderIds } from "../config/providers";
 import { usePlatforms } from "../config/platforms";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
@@ -269,11 +268,10 @@ export const PlatformCard = ({
 }: PlatformCardProps): JSX.Element => {
   const platformIsExcluded = usePlatformIsExcluded(platform);
   const { platformExpirationDates, expiredPlatforms, allProvidersState } = useContext(CeramicContext);
-  const customization = useCustomization();
-  const { platformSpecs } = usePlatforms();
+  const { platformSpecs, platformProviderIds } = usePlatforms();
 
   const selectedProviders = platformSpecs.reduce((platforms, platform) => {
-    const providerIds = getStampProviderIds(platform.platform, customStampProviders(customization));
+    const providerIds = platformProviderIds[platform.platform] || [];
     platforms[platform.platform] = providerIds.filter(
       (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
     );
@@ -336,9 +334,10 @@ export const PlatformCard = ({
 
 const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
   const customization = useCustomization();
+  const { platformProviderIds } = usePlatforms();
 
   const excludedByCustomization = useMemo(() => {
-    const providers = getStampProviderIds(platform.platform, customStampProviders(customization));
+    const providers = platformProviderIds[platform.platform];
 
     // Hide allow list if no points were earned when onboarding
     if (platform.platform.startsWith("AllowList") && platform.earnedPoints === 0) {

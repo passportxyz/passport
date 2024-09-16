@@ -22,8 +22,8 @@ const StampsList = ({ className, onChainPlatformIds }: StampsListProps) => {
   return (
     <div className={`flex flex-col items-center ${className}`}>
       <div className={`flex flex-wrap justify-center gap-8`}>
-        {Object.values(verifiedPlatforms)
-          .map((platform) => getPlatformSpec(platform.platform.platformId))
+        {Object.keys(verifiedPlatforms)
+          .map((platformId) => getPlatformSpec(platformId as PLATFORM_ID))
           .filter((platformSpec): platformSpec is PlatformSpec => !!platformSpec)
           .map((platformSpec) => {
             // check if platform has onchain providers

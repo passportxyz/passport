@@ -613,7 +613,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     [allProvidersState]
   );
 
-  const verifiedPlatforms = useMemo(
+  const verifiedPlatforms: Record<PLATFORM_ID, PlatformProps> = useMemo(
     () =>
       Object.entries(Object.fromEntries(allPlatforms)).reduce(
         (validPlatformProps, [platformKey, platformProps]) => {
