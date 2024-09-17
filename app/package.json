@@ -39,7 +39,7 @@
     "did-session": "^3.0.2",
     "dids": "^5.0.2",
     "dompurify": "^3.0.11",
-    "ethers": "^6.3.0",
+    "ethers": "^6.6.4",
     "framer-motion": "^6.3.0",
     "html-react-parser": "^5.1.9",
     "jotai": "^2.5.0",

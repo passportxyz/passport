@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { SyncToChainButton } from "./SyncToChainButton";
 import { Chain } from "../utils/chains";
 import { useOnChainStatus } from "../hooks/useOnChainStatus";
@@ -16,15 +16,14 @@ export function NetworkCard({ chain }: { chain: Chain }) {
   const { expirationDate } = useOnChainData().data[chain.id] || {};
   const address = useWalletStore((state) => state.address);
 
-  const isOnChain = useMemo(
-    () =>
-      [OnChainStatus.MOVED_OUT_OF_DATE, OnChainStatus.MOVED_UP_TO_DATE, OnChainStatus.MOVED_EXPIRED].includes(status),
-    [status]
-  );
+  const isOnChain = [
+    OnChainStatus.MOVED_OUT_OF_DATE,
+    OnChainStatus.MOVED_UP_TO_DATE,
+    OnChainStatus.MOVED_EXPIRED,
+  ].includes(status);
 
-  const expired = useMemo(() => status === OnChainStatus.MOVED_EXPIRED, [status]);
+  const expired = status === OnChainStatus.MOVED_EXPIRED;
 
-  console.log({ status });
   return (
     <div
       className={`${
