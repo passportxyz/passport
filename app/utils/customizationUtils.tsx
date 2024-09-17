@@ -5,7 +5,7 @@ import axios from "axios";
 import * as DOMPurify from "dompurify";
 import parse from "html-react-parser";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
-import { PlatformGroupSpec } from "@gitcoin/passport-platforms/*";
+import { PlatformGroupSpec } from "@gitcoin/passport-platforms";
 
 const sanitize = DOMPurify.sanitize;
 
@@ -24,8 +24,29 @@ export const initializeDOMPurify = () => {
 export type CustomizationLogoBackground = "dots" | "none";
 export type BodyActionType = "Simple Link" | "Onchain Push";
 
+type CustomStamp = {
+  platformType: string;
+  iconUrl: string;
+  displayName: string;
+  description?: string;
+  banner: {
+    header?: string;
+    content?: string;
+    cta: {
+      text?: string;
+      url?: string;
+    };
+  };
+  credentials: {
+    providerId: PROVIDER_ID;
+    displayName: string;
+    description?: string;
+  }[];
+};
+
 export type Customization = {
   key: string;
+  partnerName: string;
   useCustomDashboardPanel: boolean;
   dashboardPanel: {
     logo: {
@@ -59,9 +80,13 @@ export type Customization = {
   allowListProviders?: PlatformGroupSpec[];
   includedChainIds?: string[];
   showExplanationPanel?: boolean;
+  customStamps?: {
+    [name: string]: CustomStamp;
+  };
 };
 
 type CustomizationResponse = {
+  partnerName: string;
   customizationTheme?: CustomizationTheme;
   useCustomDashboardPanel?: boolean;
   scorer?: {
@@ -94,6 +119,9 @@ type CustomizationResponse = {
   };
   includedChainIds?: string[];
   showExplanationPanel?: boolean;
+  customStamps?: {
+    [name: string]: CustomStamp;
+  };
 };
 
 const SanitizedHTMLComponent = ({ html }: { html: string }) => {
@@ -130,6 +158,7 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
 
   return {
     key: customizationKey,
+    partnerName: customizationResponse.partnerName,
     customizationTheme: customizationResponse.customizationTheme,
     useCustomDashboardPanel: customizationResponse.useCustomDashboardPanel || false,
     scorer: {
@@ -165,5 +194,6 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
     allowListProviders: allowListProviders.length ? allowListProviders : undefined,
     includedChainIds: customizationResponse.includedChainIds,
     showExplanationPanel: customizationResponse.showExplanationPanel,
+    customStamps: customizationResponse.customStamps,
   };
 };

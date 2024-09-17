@@ -10,7 +10,7 @@ import { Platform, ProviderPayload } from "@gitcoin/passport-platforms";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 
 // --- Context
-import { CeramicContext, platforms } from "../context/ceramicContext";
+import { CeramicContext } from "../context/ceramicContext";
 import { useWalletStore } from "../context/walletStore";
 
 // --- Types
@@ -25,6 +25,7 @@ import { BroadcastChannel } from "broadcast-channel";
 import { datadogRum } from "@datadog/browser-rum";
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 import { useMessage } from "../hooks/useMessage";
+import { usePlatforms } from "../hooks/usePlatforms";
 
 export enum StampClaimProgressStatus {
   Idle = "idle",
@@ -91,6 +92,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
   const { did } = useDatastoreConnectionContext();
   const { success, failure } = useMessage();
   const [status, setStatus] = useState(StampClaimProgressStatus.Idle);
+  const { platforms } = usePlatforms();
 
   const handleSponsorship = async (platform: PlatformClass, result: string): Promise<void> => {
     if (result === "success") {

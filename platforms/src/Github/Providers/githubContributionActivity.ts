@@ -1,6 +1,11 @@
 import { ProviderExternalVerificationError, type Provider } from "../../types";
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import { fetchAndCheckContributions, GithubContext } from "./githubClient";
+import {
+  fetchAndCheckContributions,
+  getGithubUserData,
+  GithubContext,
+  requestAccessToken,
+} from "../../utils/githubClient";
 
 export type GithubContributionActivityOptions = {
   threshold: string;
@@ -22,7 +27,10 @@ export class GithubContributionActivityProvider implements Provider {
   async verify(payload: RequestPayload, context: GithubContext): Promise<VerifiedPayload> {
     const thresholdDays = parseInt(this._options.threshold);
 
-    const { contributionDays, userId, hadBadCommits } = await fetchAndCheckContributions(context, payload.proofs.code);
+    // Calling requestAccessToken will store the token in the ocntext
+    await requestAccessToken(payload.proofs.code, context);
+
+    const { contributionDays, userId, hadBadCommits } = await fetchAndCheckContributions(context);
 
     const valid = contributionDays >= thresholdDays;
 

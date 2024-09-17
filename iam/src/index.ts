@@ -362,12 +362,22 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
         let verifyResult: VerifiedPayload = { valid: false };
         let code, error;
 
+        const realType = type;
         if (type.startsWith("AllowList")) {
           payload.proofs = {
             ...payload.proofs,
             allowList: type.split("#")[1],
           };
           type = "AllowList";
+        } else if (type.startsWith("DeveloperList")) {
+          // Here we handle the custom DeveloperList stamps
+          const [_type, conditionName, conditionHash, ...rest] = type.split("#");
+          payload.proofs = {
+            ...payload.proofs,
+            conditionName,
+            conditionHash,
+          };
+          type = "DeveloperList";
         }
 
         try {
@@ -386,6 +396,8 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
           }
           if (type === "AllowList") {
             type = `AllowList#${verifyResult.record.allowList}`;
+          } else {
+            type = realType;
           }
         } catch (e) {
           error = "Unable to verify provider";

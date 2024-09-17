@@ -2,7 +2,7 @@
 import { useMemo, useState, useContext } from "react";
 
 // --- Types
-import { PLATFORM_ID, PROVIDER_ID, Stamp } from "@gitcoin/passport-types";
+import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 
 // --- Components
 import { Button } from "./Button";
@@ -11,8 +11,7 @@ import { CeramicContext } from "../context/ceramicContext";
 import { useCustomization } from "../hooks/useCustomization";
 import { ProgressBar } from "./ProgressBar";
 import { getDaysToExpiration } from "../utils/duration";
-import { customStampProviders, getStampProviderIds } from "../config/providers";
-import { PLATFORMS } from "../config/platforms";
+import { usePlatforms } from "../hooks/usePlatforms";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -269,10 +268,10 @@ export const PlatformCard = ({
 }: PlatformCardProps): JSX.Element => {
   const platformIsExcluded = usePlatformIsExcluded(platform);
   const { platformExpirationDates, expiredPlatforms, allProvidersState } = useContext(CeramicContext);
-  const customization = useCustomization();
+  const { platformSpecs, platformProviderIds } = usePlatforms();
 
-  const selectedProviders = PLATFORMS.reduce((platforms, platform) => {
-    const providerIds = getStampProviderIds(platform.platform, customStampProviders(customization));
+  const selectedProviders = platformSpecs.reduce((platforms, platform) => {
+    const providerIds = platformProviderIds[platform.platform] || [];
     platforms[platform.platform] = providerIds.filter(
       (providerId) => typeof allProvidersState[providerId]?.stamp?.credential !== "undefined"
     );
@@ -335,9 +334,10 @@ export const PlatformCard = ({
 
 const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
   const customization = useCustomization();
+  const { platformProviderIds } = usePlatforms();
 
   const excludedByCustomization = useMemo(() => {
-    const providers = getStampProviderIds(platform.platform, customStampProviders(customization));
+    const providers = platformProviderIds[platform.platform];
 
     // Hide allow list if no points were earned when onboarding
     if (platform.platform.startsWith("AllowList") && platform.earnedPoints === 0) {
@@ -350,7 +350,7 @@ const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
         return parseFloat(customization.scorer?.weights?.[provider] || "") > 0;
       })
     );
-  }, [customization, platform.earnedPoints, platform.platform]);
+  }, [customization, platform.earnedPoints, platform.platform, platformProviderIds]);
 
   const excludedByFeatureFlag = useMemo(() => {
     // Feature Flag Guild Stamp

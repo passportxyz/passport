@@ -1,4 +1,4 @@
-import React, { Fragment, Ref, useContext, useMemo, useState } from "react";
+import React, { Fragment, useContext, useMemo, useState } from "react";
 import { PlatformBanner, PlatformSpec } from "@gitcoin/passport-platforms";
 import { GenericBanner } from "./GenericBanner";
 import { JsonOutputModal } from "./JsonOutputModal";
@@ -9,12 +9,11 @@ import { Popover, Transition } from "@headlessui/react";
 import { RemoveStampModal } from "./RemoveStampModal";
 import { ProgressBar } from "./ProgressBar";
 import { getDaysToExpiration } from "../utils/duration";
-import { customStampProviders, getStampProviderIds } from "../config/providers";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
-import { useCustomization } from "../hooks/useCustomization";
 
 // --- Helpers
 import { intersect } from "../utils/helpers";
+import { usePlatforms } from "../hooks/usePlatforms";
 
 const PlatformJsonButton = ({
   platformPassportData,
@@ -26,12 +25,11 @@ const PlatformJsonButton = ({
   onClose: () => void;
 }) => {
   const { handleDeleteStamps } = useContext(CeramicContext);
-  const customization = useCustomization();
   const [stampDetailsModal, setStampDetailsModal] = useState(false);
   const [showRemoveStampModal, setShowRemoveStampModal] = useState(false);
-  const [referenceElement, setReferenceElement] = useState(null);
+  const { platformProviderIds } = usePlatforms();
 
-  const providerIds = getStampProviderIds(platform.platform, customStampProviders(customization));
+  const providerIds = platformProviderIds[platform.platform];
 
   const onRemoveStamps = async () => {
     await handleDeleteStamps(providerIds);
@@ -42,7 +40,7 @@ const PlatformJsonButton = ({
     <>
       <Popover className="relative">
         <>
-          <Popover.Button ref={setReferenceElement as unknown as Ref<HTMLButtonElement>} className="ml-auto p-2">
+          <Popover.Button className="ml-auto p-2">
             <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <ellipse cx="2" cy="2" rx="2" ry="2" fill="white" />
               <ellipse cx="2" cy="8" rx="2" ry="2" fill="white" />

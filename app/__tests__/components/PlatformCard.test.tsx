@@ -1,8 +1,7 @@
 import React from "react";
 import { screen, render } from "@testing-library/react";
-import { getPlatformSpec } from "../../config/platforms";
 import { PlatformCard, SelectedProviders } from "../../components/PlatformCard";
-import { PlatformSpec } from "@gitcoin/passport-platforms/*";
+import { platforms } from "@gitcoin/passport-platforms";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { useCustomization } from "../../hooks/useCustomization";
 
@@ -19,7 +18,7 @@ describe("<PlatformCard />", () => {
   describe("exclusion tests", () => {
     const renderTestComponent = (customization: any) => {
       (useCustomization as jest.Mock).mockReturnValue(customization);
-      const GtcStakingPlatform = getPlatformSpec("GtcStaking") as PlatformSpec;
+      const GtcStakingPlatform = platforms["GtcStaking"].PlatformDetails;
       const platformScoreSpec = {
         ...GtcStakingPlatform,
         possiblePoints: 6,
@@ -78,7 +77,7 @@ describe("<PlatformCard />", () => {
           },
         },
       });
-      const AllowListPlatform = getPlatformSpec("AllowList") as PlatformSpec;
+      const AllowListPlatform = platforms["AllowList"].PlatformDetails;
       const platformScoreSpec = {
         ...AllowListPlatform,
         possiblePoints: 6,
@@ -95,7 +94,7 @@ describe("<PlatformCard />", () => {
           },
         },
       });
-      const AllowListPlatform = getPlatformSpec("AllowList") as PlatformSpec;
+      const AllowListPlatform = platforms["AllowList"].PlatformDetails;
       const platformScoreSpec = {
         ...AllowListPlatform,
         possiblePoints: 6,

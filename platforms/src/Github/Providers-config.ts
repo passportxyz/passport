@@ -1,3 +1,4 @@
+import { MAX_CONTRIBUTION_DAYS } from "../utils/githubClient";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
 import { GithubContributionActivityProvider } from "./Providers/githubContributionActivity";
 
@@ -33,8 +34,6 @@ ProviderConfig = [
   },
 ];
 
-export const MAX_CONTRIBUTION_DAYS = 120;
-
 providers = [
   new GithubContributionActivityProvider({
     threshold: "30",
@@ -43,7 +42,7 @@ providers = [
     threshold: "60",
   }),
   new GithubContributionActivityProvider({
-    threshold: MAX_CONTRIBUTION_DAYS.toString(),
+    threshold: `${MAX_CONTRIBUTION_DAYS}`,
   }),
 ];
 

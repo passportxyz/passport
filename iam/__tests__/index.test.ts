@@ -935,6 +935,38 @@ describe("POST /check", function () {
     expect(response.body[1].type).toEqual("AllowList#test");
   });
 
+  it("handles valid check request with DeveloperList stamp", async () => {
+    const customGithubProvider = "DeveloperList#test#0xtest";
+    jest
+      .spyOn(providers._providers.DeveloperList, "verify")
+      .mockImplementation(async (payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> => {
+        return {
+          valid: true,
+          record: {
+            conditionName: "test",
+            conditionHash: "0xtest",
+          },
+        };
+      });
+    const payload = {
+      types: ["Simple", customGithubProvider],
+      address: "0x0",
+      proofs: {
+        valid: "true",
+      },
+    };
+
+    const response = await request(app)
+      .post("/api/v0.0.0/check")
+      .send({ payload })
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    expect(response.body[1].valid).toBe(true);
+    expect(response.body[1].type).toEqual("DeveloperList#test#0xtest");
+  });
+
   it("handles valid check requests with multiple types", async () => {
     const payload = {
       types: ["Simple", "AnotherType"],

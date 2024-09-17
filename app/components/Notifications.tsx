@@ -35,12 +35,11 @@ const ExpiryAction = ({
   const platformId = useMemo(() => {
     return Object.values(expiredPlatforms)
       .filter((platform) => {
-        const providers = platform.platFormGroupSpec
-          .map((spec) => spec.providers.map((provider) => provider.name))
-          .flat();
+        const providers =
+          platform?.platFormGroupSpec.map((spec) => spec.providers.map((provider) => provider.name)).flat() || [];
         return providers.includes(provider);
       })
-      .map((platform) => platform.platform.platformId)[0];
+      .map((platform) => platform?.platform.platformId)[0];
   }, [expiredPlatforms, provider]);
 
   const refreshStamp = useCallback(

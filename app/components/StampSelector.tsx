@@ -1,7 +1,6 @@
 import React, { useContext, useMemo } from "react";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
-import { PlatformSpec } from "@gitcoin/passport-platforms";
-import { PlatformGroupSpec } from "../config/providers";
+import { PlatformSpec, PlatformGroupSpec } from "@gitcoin/passport-platforms";
 import { useOnChainData } from "../hooks/useOnChainData";
 import { CeramicContext } from "../context/ceramicContext";
 import { ScorerContext } from "../context/scorerContext";
