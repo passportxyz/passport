@@ -362,6 +362,7 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
         let verifyResult: VerifiedPayload = { valid: false };
         let code, error;
 
+        const realType = type;
         if (type.startsWith("AllowList")) {
           payload.proofs = {
             ...payload.proofs,
@@ -395,8 +396,8 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
           }
           if (type === "AllowList") {
             type = `AllowList#${verifyResult.record.allowList}`;
-          } else if (type === "DeveloperList") {
-            type = `DeveloperList#${verifyResult.record.conditionName}#${verifyResult.record.conditionHash}`;
+          } else {
+            type = realType;
           }
         } catch (e) {
           error = "Unable to verify provider";

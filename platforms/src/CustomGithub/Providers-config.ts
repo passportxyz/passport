@@ -7,7 +7,7 @@ export const PlatformDetails: PlatformSpec = {
   name: "Custom Github Stamp",
   description: "Verify you are part of a community",
   connectMessage: "Verify",
-  isEVM: true,
+  isEVM: false,
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [];

@@ -35,10 +35,12 @@ describe("CustomGithubProvider verification", function () {
       if (url.includes("customization/credential")) {
         return Promise.resolve({
           data: {
-            condition: {
-              repository_contributor: {
-                repository: "passportxyz/passport",
-                threshold: 3,
+            ruleset: {
+              condition: {
+                repository_contributor: {
+                  repository: "passportxyz/passport",
+                  threshold: 3,
+                },
               },
             },
           },
@@ -75,9 +77,9 @@ describe("CustomGithubProvider verification", function () {
 
   it("handles errors during verification", async () => {
     // Simulating an axios error
-    (axios.get as jest.Mock).mockRejectedValue("Network error");
+    (axios.get as jest.Mock).mockRejectedValue(new Error("Network error"));
 
     const customGithubProvider = new CustomGithubProvider();
-    await expect(customGithubProvider.verify(payload, {})).rejects.toThrow(ProviderExternalVerificationError);
+    await expect(async () => await customGithubProvider.verify(payload, {})).rejects.toThrow("Network error");
   });
 });
