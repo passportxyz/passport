@@ -10,10 +10,11 @@ export const MAX_YEARS_TO_CHECK = 3;
 export const MAX_CONTRIBUTION_DAYS = 120;
 
 export type GithubUserData = { userId: string; contributionDays: number; hadBadCommits: boolean };
-
+export type GithubAccountData = { node_id: string; login: string };
 export type GithubContext = ProviderContext & {
   github?: {
     userId?: string;
+    login?: string;
     contributionDays?: number;
     accessToken?: string;
     hadBadCommits?: boolean;
@@ -298,7 +299,7 @@ export const avoidGithubRateLimit = async (): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 };
 
-export const getGithubUserData = async (context: GithubContext): Promise<string> => {
+export const getGithubUserData = async (context: GithubContext): Promise<GithubAccountData> => {
   // retrieve user's auth bearer token to authenticate client
   const accessToken = context.github.accessToken;
   try {
@@ -307,8 +308,12 @@ export const getGithubUserData = async (context: GithubContext): Promise<string>
       headers: { Authorization: `token ${accessToken}` },
     });
 
-    const githubUserData: { node_id: string } = userRequest.data as { node_id: string };
-    return githubUserData.node_id;
+    const githubUserData: { node_id: string; login: string } = userRequest.data as { node_id: string; login: string };
+
+    return {
+      node_id: githubUserData.node_id,
+      login: githubUserData.login,
+    };
   } catch (_error) {
     handleProviderAxiosError(_error, "Error getting getting github info", [accessToken]);
   }
@@ -370,6 +375,14 @@ export const fetchAndCheckContributionsToRepository = async (
   const daysWithCommits: Record<string, number> = {};
   const accessToken = context.github?.accessToken;
   let checkMoreCommits = true;
+  const author = context.github.login;
+
+  if (!author) {
+    return {
+      contributionValid: false,
+      errors: ["Failed to check contribution to the repository, user login is not set"],
+    };
+  }
 
   try {
     // retrieve user's auth bearer token to authenticate client
@@ -379,7 +392,7 @@ export const fetchAndCheckContributionsToRepository = async (
       // Now that we have an access token fetch the user details
       const commitsResponse = await axios.get(commitsUrl, {
         headers: { Authorization: `token ${accessToken}` },
-        params: { page, per_page },
+        params: { page, per_page, author },
       });
 
       const commits = commitsResponse.data as RepoCommit[];
@@ -406,6 +419,6 @@ export const fetchAndCheckContributionsToRepository = async (
 
   return {
     contributionValid: false,
-    errors: ["Failed to check contribution to the organisation"],
+    errors: ["Failed to check contribution to the repository"],
   };
 };

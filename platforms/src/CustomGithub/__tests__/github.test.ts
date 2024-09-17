@@ -17,6 +17,7 @@ const payload = {
   },
 } as unknown as RequestPayload;
 const mockedGithubId = "238452";
+const mockedGithubLogin = "238452-login";
 
 const mockGithubContext: githubClient.GithubContext = {
   github: {
@@ -52,7 +53,10 @@ describe("CustomGithubProvider verification", function () {
       return Promise.resolve("access-token");
     });
     jest.spyOn(githubClient, "getGithubUserData").mockImplementationOnce(() => {
-      return Promise.resolve(mockedGithubId);
+      return Promise.resolve({
+        login: mockedGithubLogin,
+        node_id: mockedGithubId,
+      });
     });
     jest.spyOn(githubClient, "fetchAndCheckContributionsToRepository").mockImplementationOnce(() => {
       return Promise.resolve({

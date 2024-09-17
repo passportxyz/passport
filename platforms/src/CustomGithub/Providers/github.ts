@@ -26,12 +26,10 @@ type ConditionResponse = {
 
 const getCondition = async (type: string, conditionName: string, conditionHash: string): Promise<Condition> => {
   try {
-    const response: ConditionResponse = await axios.get(
-      `${githubConditionEndpoint}/${type}%23${conditionName}%23${conditionHash}`,
-      {
-        headers: { Authorization: process.env.CGRANTS_API_TOKEN },
-      }
-    );
+    const url = `${githubConditionEndpoint}/${type}%23${conditionName}%23${conditionHash}`;
+    const response: ConditionResponse = await axios.get(url, {
+      headers: { Authorization: process.env.CGRANTS_API_TOKEN },
+    });
     return response.data.ruleset.condition;
   } catch (error) {
     handleProviderAxiosError(error, "custom stamp condition");
@@ -55,7 +53,9 @@ export class CustomGithubProvider implements Provider {
     // Call requestAccessToken to exchange the code for an access token and store it in the context
     await requestAccessToken(payload.proofs?.code, context);
 
-    githubId = await getGithubUserData(context);
+    const githubAccountData = await getGithubUserData(context);
+    githubId = githubAccountData.node_id;
+    context.github.login = githubAccountData.login;
 
     const evaluator = new ConditionEvaluator({
       AND: evaluateAND,
