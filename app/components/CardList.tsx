@@ -61,8 +61,6 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
     };
   } = {};
 
-  console.log("Platform Categories", platformCatagories);
-
   // Generate grouped stamps
   platformCatagories.forEach((category) => {
     groupedPlatforms[category.name] = {
@@ -79,9 +77,6 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
       }
     });
   });
-
-  console.log("GP", groupedPlatforms);
-  console.log("SP", sortedPlatforms);
 
   const allowList = scoredPlatforms.find((platform) => platform.platform.startsWith("AllowList"));
   const platformProps = currentPlatform?.platform && allPlatforms.get(currentPlatform.platform);

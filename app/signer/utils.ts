@@ -4,7 +4,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 // --- Identity tools
 import { CheckResponseBody, Passport, PLATFORM_ID, PROVIDER_ID, VerifiableCredential } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
-import { PlatformGroupSpec } from "../config/providers";
+import { PlatformGroupSpec } from "@gitcoin/passport-platforms";
 
 import axios from "axios";
 import { iamUrl } from "../config/stamp_config";

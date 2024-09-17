@@ -11,14 +11,13 @@ import {
   Stamp,
   StampPatch,
 } from "@gitcoin/passport-types";
-import { ProviderSpec } from "../config/providers";
 import { DataStorageBase, ComposeDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { useWalletStore } from "./walletStore";
 import { ScorerContext } from "./scorerContext";
 
-import { PlatformGroupSpec, platforms as stampPlatforms } from "@gitcoin/passport-platforms";
+import { PlatformGroupSpec, ProviderSpec, platforms as stampPlatforms } from "@gitcoin/passport-platforms";
 import { PlatformProps } from "../components/GenericPlatform";
 
 import { CERAMIC_CACHE_ENDPOINT, IAM_VALID_ISSUER_DIDS } from "../config/stamp_config";
