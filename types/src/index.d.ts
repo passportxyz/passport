@@ -366,6 +366,7 @@ export type PLATFORM_ID =
 
 export type PLATFORM_CATEGORY = {
   name: string;
+  id?: string;
   description: string;
   platforms: PLATFORM_ID[];
 };

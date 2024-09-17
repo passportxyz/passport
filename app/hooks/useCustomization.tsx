@@ -8,6 +8,7 @@ export const DEFAULT_CUSTOMIZATION_KEY = "none";
 
 const DEFAULT_CUSTOMIZATION: Customization = {
   key: DEFAULT_CUSTOMIZATION_KEY,
+  partnerName: "",
   useCustomDashboardPanel: false,
   dashboardPanel: {
     logo: {

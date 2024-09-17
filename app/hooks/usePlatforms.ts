@@ -11,12 +11,13 @@ export type Providers = {
   [platform in PLATFORM_ID]: PlatformGroupSpec[];
 };
 
-const CUSTOM_CATEGORY_NAME = "Custom";
+const CUSTOM_CATEGORY_ID = "Custom";
 
 const BASE_PLATFORM_CATAGORIES: PLATFORM_CATEGORY[] = [
   {
-    name: CUSTOM_CATEGORY_NAME,
-    description: "Custom",
+    name: "Partner Stamps",
+    description: "These are special stamps specific to each partner",
+    id: CUSTOM_CATEGORY_ID,
     platforms: [],
   },
   {
@@ -58,7 +59,7 @@ const BASE_PLATFORM_CATAGORIES: PLATFORM_CATEGORY[] = [
 const customPlatformNameToId = (name: string): PLATFORM_ID => `Custom#${name}`;
 
 export const usePlatforms = () => {
-  const { customStamps, allowListProviders } = useCustomization();
+  const { partnerName, customStamps, allowListProviders } = useCustomization();
 
   const allPlatformDefinitions = useMemo(() => {
     const customPlatformDefinitions = Object.entries(customStamps || {}).reduce(
@@ -169,9 +170,10 @@ export const usePlatforms = () => {
 
   const platformCatagories = useMemo(() => {
     return BASE_PLATFORM_CATAGORIES.map((category) => {
-      if (category.name === "Custom") {
+      if (category.id === CUSTOM_CATEGORY_ID) {
         return {
           ...category,
+          name: `${partnerName} Stamps`,
           platforms: [...category.platforms, ...Object.keys(customStamps || {}).map(customPlatformNameToId)],
         };
       } else {

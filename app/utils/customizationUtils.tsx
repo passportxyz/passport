@@ -46,6 +46,7 @@ type CustomStamp = {
 
 export type Customization = {
   key: string;
+  partnerName: string;
   useCustomDashboardPanel: boolean;
   dashboardPanel: {
     logo: {
@@ -85,6 +86,7 @@ export type Customization = {
 };
 
 type CustomizationResponse = {
+  partnerName: string;
   customizationTheme?: CustomizationTheme;
   useCustomDashboardPanel?: boolean;
   scorer?: {
@@ -156,6 +158,7 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
 
   return {
     key: customizationKey,
+    partnerName: customizationResponse.partnerName,
     customizationTheme: customizationResponse.customizationTheme,
     useCustomDashboardPanel: customizationResponse.useCustomDashboardPanel || false,
     scorer: {
