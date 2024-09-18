@@ -5,21 +5,17 @@ import { useAtom } from "jotai";
 import { ScorerContext } from "../context/scorerContext";
 import { colors } from "../utils/theme/palette";
 
-const useWindowDimensions = () => {
-  const getDimensions = useCallback(() => {
-    const width = document.documentElement.clientWidth;
-    const scrollableHeight = document.body.offsetHeight;
-    return {
-      width,
-      height: scrollableHeight,
-    };
-  }, []);
-
-  const [windowDimensions, setWindowDimensions] = useState(getDimensions());
+const useWindowDimensions = (showConfetti: boolean) => {
+  const [windowDimensions, setWindowDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
+    if (!showConfetti) {
+      return;
+    }
     const onResize = () => {
-      setWindowDimensions(getDimensions());
+      const width = document.documentElement.clientWidth;
+      const scrollableHeight = document.body.offsetHeight;
+      setWindowDimensions({ width, height: scrollableHeight });
     };
 
     // run on mount to set initial state
@@ -37,15 +33,15 @@ const useWindowDimensions = () => {
     return () => {
       window.removeEventListener("resize", onResize);
     };
-  }, [getDimensions]);
+  }, [showConfetti]);
 
   return { windowDimensions };
 };
 
 export const Confetti: React.FC = () => {
   const [verificationState] = useAtom(mutableUserVerificationAtom);
-  const { windowDimensions } = useWindowDimensions();
   const [showConfetti, setShowConfetti] = useState(false);
+  const { windowDimensions } = useWindowDimensions(showConfetti);
   const { rawScore, threshold } = useContext(ScorerContext);
 
   useEffect(() => {
