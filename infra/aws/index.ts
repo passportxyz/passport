@@ -3,8 +3,7 @@ import * as aws from "@pulumi/aws";
 import * as op from "@1password/op-js";
 import * as cloudflare from "@pulumi/cloudflare";
 import { secretsManager, amplify } from "infra-libs";
-
-const stack = pulumi.getStack();
+import {stack, defaultTags} from "../lib/tags";
 
 const current = aws.getCallerIdentity({});
 const regionData = aws.getRegion({});
@@ -41,14 +40,7 @@ const snsAlertsTopicArn = coreInfraStack.getOutput("snsAlertsTopicArn");
 const passportXyzDomainName = coreInfraStack.getOutput("passportXyzDomainName");
 const passportXyzHostedZoneId = coreInfraStack.getOutput("passportXyzHostedZoneId");
 
-const defaultTags = {
-  Application: "passport",
-  Repo: "https://github.com/passportxyz/passport",
-  PulumiStack: stack,
-  Environment: stack,
-  ManagedBy: "pulumi",
-  Name: "missing",
-};
+
 
 const containerInsightsStatus = stack == "production" ? "enabled" : "disabled";
 
