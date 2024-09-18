@@ -80,8 +80,7 @@ export const useDatastoreConnection = () => {
     try {
       const authResponse = await axios.post(`${CERAMIC_CACHE_ENDPOINT}/authenticate`, payloadForVerifier);
       const accessToken = authResponse.data?.access as string;
-      const intercomUserHash = authResponse.data?.intercom_user_hash as string;
-      updateIntercomUserData({ did, hash: intercomUserHash });
+      updateIntercomUserData({ address });
       setConnectedAddress(address);
       return accessToken;
     } catch (error) {

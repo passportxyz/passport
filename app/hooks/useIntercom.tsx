@@ -4,16 +4,14 @@ import React, { useCallback, useEffect } from "react";
 // --- Utils & configs
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import Intercom, { boot, shutdown } from "@intercom/messenger-js-sdk";
-import { DID } from "dids";
 
 const INTERCOM_APP_ID = process.env.NEXT_PUBLIC_INTERCOM_APP_ID || "";
 
-export const updateIntercomUserData = ({ did, hash }: { did?: DID; hash?: string }) => {
+export const updateIntercomUserData = ({ address }: { address?: string }) => {
   shutdown();
   boot({
     app_id: INTERCOM_APP_ID,
-    user_id: did?.id,
-    user_hash: hash,
+    name: address,
   });
 };
 
@@ -28,7 +26,7 @@ export const useIntercom = () => {
   }, []);
 
   const onDisconnect = useCallback(() => {
-    updateIntercomUserData({ did: undefined, hash: undefined });
+    updateIntercomUserData({ address: undefined });
   }, []);
 
   useEffect(() => {
