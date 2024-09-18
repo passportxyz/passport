@@ -10,7 +10,6 @@ import PageWidthGrid from "../components/PageWidthGrid";
 import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
 import { Category } from "./Category";
 import { CeramicContext } from "../context/ceramicContext";
-import { PlatformCard } from "./PlatformCard";
 import { GenericPlatform } from "./GenericPlatform";
 
 export type CardListProps = {
@@ -56,6 +55,7 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
   const groupedPlatforms: {
     [key: string]: {
       name: string;
+      id?: string;
       description: string;
       sortedPlatforms: PlatformScoreSpec[];
     };
@@ -65,6 +65,7 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
   platformCatagories.forEach((category) => {
     groupedPlatforms[category.name] = {
       name: category.name,
+      id: category.id,
       description: category.description,
       sortedPlatforms: [],
     };
@@ -80,20 +81,11 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
 
   const allowList = scoredPlatforms.find((platform) => platform.platform.startsWith("AllowList"));
   const platformProps = currentPlatform?.platform && allPlatforms.get(currentPlatform.platform);
+
   // Use as in id staking
   return (
     <>
       <PageWidthGrid className={className}>
-        {allowList && (
-          <PlatformCard
-            i={0}
-            key={0}
-            platform={allowList}
-            onOpen={onOpen}
-            setCurrentPlatform={setCurrentPlatform}
-            className="col-span-3 bg-[url('/assets/star.svg')] bg-auto bg-center bg-no-repeat"
-          />
-        )}
         {Object.keys(groupedPlatforms).map((category) => {
           const sortedPlatforms = groupedPlatforms[category].sortedPlatforms;
           const shouldDisplayCategory = sortedPlatforms.some((platform) => platform.possiblePoints > 0);

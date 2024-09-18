@@ -1,17 +1,16 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { LoadingCard } from "./LoadingCard";
 import { GenericPlatform } from "./GenericPlatform";
-import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { CeramicContext } from "../context/ceramicContext";
 import { PlatformCard } from "./PlatformCard";
-import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
+import { PlatformScoreSpec } from "../context/scorerContext";
 import { Disclosure } from "@headlessui/react";
 import { DropDownIcon } from "./DropDownIcon";
 import { useDisclosure } from "@chakra-ui/react";
-import { useCustomization } from "../hooks/useCustomization";
 
 export type Category = {
   name: string;
+  id?: string;
   description: string;
   sortedPlatforms: PlatformScoreSpec[];
 };
@@ -23,9 +22,9 @@ export type CategoryProps = {
   category: Category;
 };
 
-const cardClassName = "col-span-2 md:col-span-1 lg:col-span-1 xl:col-span-1";
+export const CUSTOM_CATEGORY_ID = "Custom";
 
-type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
+const cardClassName = "col-span-2 md:col-span-1 lg:col-span-1 xl:col-span-1";
 
 export const Category = ({
   className,
@@ -33,7 +32,7 @@ export const Category = ({
   isLoading = false,
   initialOpen = true,
 }: CategoryProps): JSX.Element => {
-  const { allProvidersState, allPlatforms } = useContext(CeramicContext);
+  const { allPlatforms } = useContext(CeramicContext);
   const [dropDownOpen, setDropDownOpen] = useState<boolean>(false);
   const openRef = React.useRef(dropDownOpen);
   openRef.current = dropDownOpen;
@@ -103,6 +102,7 @@ export const Category = ({
                     onOpen={onOpen}
                     setCurrentPlatform={setCurrentPlatform}
                     className={cardClassName}
+                    variant={category.id === CUSTOM_CATEGORY_ID ? "partner" : "default"}
                   />
                 );
               })}

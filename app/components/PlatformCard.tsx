@@ -15,10 +15,13 @@ import { usePlatforms } from "../hooks/usePlatforms";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
+type CardVariant = "default" | "partner";
+
 type PlatformCardProps = {
   i: number;
   platform: PlatformScoreSpec;
   onOpen: () => void;
+  variant?: CardVariant;
   setCurrentPlatform: React.Dispatch<React.SetStateAction<PlatformScoreSpec | undefined>>;
   className?: string;
 };
@@ -29,14 +32,22 @@ type StampProps = {
   daysUntilExpiration?: number;
   className?: string;
   onClick: () => void;
+  variant?: CardVariant;
 };
 
-const DefaultStamp = ({ idx, platform, className, onClick }: StampProps) => {
+const variantClasses: Record<CardVariant, string> = {
+  default: "bg-gradient-to-b from-background to-background-2/70 border-foreground-6",
+  partner:
+    "bg-gradient-to-t from-background-2 to-background-3 border-background-3 shadow-[0px_0px_24px_0px] shadow-background-3",
+};
+
+const DefaultStamp = ({ idx, platform, className, onClick, variant }: StampProps) => {
   return (
     <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
       <div
-        className="group relative flex h-full cursor-pointer flex-col rounded-lg border border-foreground-6 p-0 transition-all ease-out bg-gradient-to-b from-background to-background-2/70
-        hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-transparent hover:shadow-even-md hover:border-background-3 hover:to-background-2 hover:shadow-background-3"
+        className={`group relative flex h-full cursor-pointer flex-col rounded-lg border p-0 transition-all ease-out 
+        hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-transparent hover:shadow-even-md hover:border-background-3 hover:to-background-2 hover:shadow-background-3
+        ${variantClasses[variant || "default"]}`}
       >
         <img
           src="./assets/card-background.svg"
@@ -265,6 +276,7 @@ export const PlatformCard = ({
   onOpen,
   setCurrentPlatform,
   className,
+  variant,
 }: PlatformCardProps): JSX.Element => {
   const platformIsExcluded = usePlatformIsExcluded(platform);
   const { platformExpirationDates, expiredPlatforms, allProvidersState } = useContext(CeramicContext);
@@ -318,6 +330,7 @@ export const PlatformCard = ({
   } else {
     stamp = (
       <DefaultStamp
+        variant={variant}
         idx={i}
         platform={platform}
         className={className}

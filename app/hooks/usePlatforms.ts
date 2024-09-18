@@ -4,6 +4,7 @@ import { useCallback, useMemo } from "react";
 import { PLATFORM_CATEGORY, PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
 import { defaultPlatformMap, CUSTOM_PLATFORM_TYPE_INFO } from "../config/platformMap";
+import { CUSTOM_CATEGORY_ID } from "../components/Category";
 
 const { AllowList } = platformDefinitions;
 
@@ -11,14 +12,12 @@ export type Providers = {
   [platform in PLATFORM_ID]: PlatformGroupSpec[];
 };
 
-const CUSTOM_CATEGORY_ID = "Custom";
-
 const BASE_PLATFORM_CATAGORIES: PLATFORM_CATEGORY[] = [
   {
     name: "Partner Stamps",
     description: "These are special stamps specific to each partner",
     id: CUSTOM_CATEGORY_ID,
-    platforms: [],
+    platforms: ["AllowList"],
   },
   {
     name: "Blockchain & Crypto Networks",
@@ -98,7 +97,6 @@ export const usePlatforms = () => {
     }
 
     if (customStamps) {
-      console.log("customStamps", customStamps);
       for (const [platformId, { platformType, banner, credentials }] of Object.entries(customStamps)) {
         const platformTypeInfo = CUSTOM_PLATFORM_TYPE_INFO[platformType];
         if (!platformTypeInfo) throw new Error(`Unknown custom platform type: ${platformType}`);
