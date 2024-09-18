@@ -45,7 +45,7 @@ export const Confetti: React.FC = () => {
   const { rawScore, threshold } = useContext(ScorerContext);
 
   useEffect(() => {
-    setShowConfetti(!verificationState.loading && rawScore >= threshold);
+    setShowConfetti(!verificationState.loading && threshold > 0 && rawScore >= threshold);
   }, [verificationState, rawScore, threshold]);
 
   if (!showConfetti) {
