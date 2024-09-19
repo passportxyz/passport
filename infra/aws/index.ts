@@ -3,8 +3,7 @@ import * as aws from "@pulumi/aws";
 import * as op from "@1password/op-js";
 import * as cloudflare from "@pulumi/cloudflare";
 import { secretsManager, amplify } from "infra-libs";
-
-const stack = pulumi.getStack();
+import {stack, defaultTags} from "../lib/tags";
 
 const current = aws.getCallerIdentity({});
 const regionData = aws.getRegion({});
@@ -41,20 +40,17 @@ const snsAlertsTopicArn = coreInfraStack.getOutput("snsAlertsTopicArn");
 const passportXyzDomainName = coreInfraStack.getOutput("passportXyzDomainName");
 const passportXyzHostedZoneId = coreInfraStack.getOutput("passportXyzHostedZoneId");
 
-const defaultTags = {
-  ManagedBy: "pulumi",
-  PulumiStack: stack,
-  Project: "passport",
-};
+
 
 const containerInsightsStatus = stack == "production" ? "enabled" : "disabled";
 
-// Manage secrets & envs for Passport XYZ 
+// Manage secrets & envs for Passport XYZ
 const passportXyzIamSecretObject = new aws.secretsmanager.Secret("iam-secret-passport-xyz", {
   // name: "iam-secret-passport-xyz",
   description: "Secrets for Passport IAM on Passport XYZ",
   tags: {
     ...defaultTags,
+    Name: "iam-secret-passport-xyz",
   },
 });
 
@@ -106,7 +102,6 @@ const passportXyzIamEnvironment = pulumi
     ].sort(secretsManager.sortByName)
   );
 
-
 const passportXyzAppEnvironment = secretsManager
   .getEnvironmentVars({
     vault: "DevOps",
@@ -126,6 +121,7 @@ const gitcoinIamSecretObject = new aws.secretsmanager.Secret("iam-secret", {
   description: "Secrets for Passport IAM",
   tags: {
     ...defaultTags,
+    Name: "iam-secret",
   },
 });
 
@@ -177,7 +173,6 @@ const gitcoinIamEnvironment = pulumi
     ].sort(secretsManager.sortByName)
   );
 
-
 const gitcoinAppEnvironment = secretsManager
   .getEnvironmentVars({
     vault: "DevOps",
@@ -189,8 +184,6 @@ const gitcoinAppEnvironment = secretsManager
     acc[name] = value;
     return acc;
   }, {} as Record<string, string | pulumi.Output<any>>);
-
-
 
 const logsRetention = Object({
   review: 1,
@@ -280,11 +273,12 @@ const serviceRole = new aws.iam.Role("passport-ecs-role", {
           ],
         })
       ),
-    }
+    },
   ],
   managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"],
   tags: {
     ...defaultTags,
+    Name: "passport-ecs-role",
   },
 });
 
@@ -327,8 +321,10 @@ const albPassportXyzListenerRule = new aws.lb.ListenerRule(`passport-xyz-iam-htt
   conditions: [
     {
       hostHeader: {
-        values: stack === "production" ? 
-        [passportXyzDomainName.apply((domain) => `iam.${domain}`), `iam.passport.xyz`] : [passportXyzDomainName.apply((domain) => `iam.${domain}`)], // if it is on production, it should be also iam.passport.xyz
+        values:
+          stack === "production"
+            ? [passportXyzDomainName.apply((domain) => `iam.${domain}`), `iam.passport.xyz`]
+            : [passportXyzDomainName.apply((domain) => `iam.${domain}`)], // if it is on production, it should be also iam.passport.xyz
       },
       // pathPattern: {[]}
     },
@@ -338,7 +334,6 @@ const albPassportXyzListenerRule = new aws.lb.ListenerRule(`passport-xyz-iam-htt
     Name: `passport-xyz-iam-https`,
   },
 });
-
 
 const albGitcoinTargetGroup = new aws.lb.TargetGroup(`passport-iam`, {
   name: `passport-iam`,
@@ -463,6 +458,7 @@ const serviceLogGroup = new aws.cloudwatch.LogGroup("passport-iam", {
   retentionInDays: logsRetention[stack],
   tags: {
     ...defaultTags,
+    Name: "passport-iam",
   },
 });
 
@@ -497,6 +493,10 @@ const unhandledErrorsAlarm = new aws.cloudwatch.MetricAlarm("unhandledErrorsAlar
   statistic: "Sum",
   threshold: 1,
   treatMissingData: "notBreaching",
+  tags: {
+    ...defaultTags,
+    Name: "unhandledErrorsAlarm",
+  },
 });
 
 const redisFilter = new aws.cloudwatch.LogMetricFilter("redisConnectionErrors", {
@@ -526,6 +526,10 @@ const redisErrorAlarm = new aws.cloudwatch.MetricAlarm("redisConnectionErrorsAla
   statistic: "Sum",
   threshold: alarmConfigurations.redisErrorThreshold,
   treatMissingData: "notBreaching",
+  tags: {
+    ...defaultTags,
+    Name: "redisConnectionErrorsAlarm",
+  },
 });
 
 const moralisFilter = new aws.cloudwatch.LogMetricFilter("moralisErrors", {
@@ -555,12 +559,16 @@ const moralisErrorAlarm = new aws.cloudwatch.MetricAlarm("moralisErrorsAlarm", {
   statistic: "Sum",
   threshold: alarmConfigurations.moralisErrorThreshold,
   treatMissingData: "notBreaching",
+  tags: {
+    ...defaultTags,
+    Name: "moralisErrorsAlarm",
+  },
 });
 
 //////////////////////////////////////////////////////////////
 // ECS Task & Service
 //////////////////////////////////////////////////////////////
-// Passport XYZ 
+// Passport XYZ
 const passportXyzContainerDefinitions = pulumi
   .all([dockerGtcPassportIamImage, passportXyzIamSecrets, passportXyzIamEnvironment])
   .apply(([_dockerGtcPassportIamImage, secrets, environment]) => {
@@ -607,6 +615,7 @@ const passportXyzTaskDefinition = new aws.ecs.TaskDefinition(`passport-xyz-iam`,
   tags: {
     ...defaultTags,
     EcsService: `passport-xyz-iam`,
+    Name: `passport-xyz-iam`,
   },
 });
 
@@ -648,6 +657,10 @@ const ecsAutoScalingTargetXyz = new aws.appautoscaling.Target("autoscaling_targe
   resourceId: pulumi.interpolate`service/${cluster.name}/${passportXyzService.name}`,
   scalableDimension: "ecs:service:DesiredCount",
   serviceNamespace: "ecs",
+  tags: {
+    ...defaultTags,
+    Name: "autoscaling_target_xyz",
+  }
 });
 
 const ecsAutoScalingPolicyXyz = new aws.appautoscaling.Policy("passport-autoscaling-policy-xyz", {
@@ -673,16 +686,19 @@ const serviceRecordXyz = new aws.route53.Record("passport-xyz-record", {
   records: [albDnsName],
 });
 
-// CloudFlare Record 
+// CloudFlare Record
 
-const cloudflareIamRecord = stack === "production" ? new cloudflare.Record(`iam-passport-xyz-record`, {
-  name: `iam`,
-  zoneId: cloudflareZoneId,
-  type: "CNAME",
-  value: albDnsName,
-  allowOverwrite: true,
-  comment: `Points to IAM service running on AWS ECS task`,
-}) : "";
+const cloudflareIamRecord =
+  stack === "production"
+    ? new cloudflare.Record(`iam-passport-xyz-record`, {
+        name: `iam`,
+        zoneId: cloudflareZoneId,
+        type: "CNAME",
+        value: albDnsName,
+        allowOverwrite: true,
+        comment: `Points to IAM service running on AWS ECS task`,
+      })
+    : "";
 
 // Gitcoin domain
 
@@ -732,6 +748,7 @@ const gitcoinTaskDefinition = new aws.ecs.TaskDefinition(`passport-iam`, {
   tags: {
     ...defaultTags,
     EcsService: `passport-iam`,
+    Name: `passport-iam`,
   },
 });
 
@@ -773,6 +790,10 @@ const gitcoinEcsAutoScalingTarget = new aws.appautoscaling.Target("autoscaling_t
   resourceId: pulumi.interpolate`service/${cluster.name}/${gitcoinService.name}`,
   scalableDimension: "ecs:service:DesiredCount",
   serviceNamespace: "ecs",
+  tags: {
+    ...defaultTags,
+    Name: "autoscaling_target",
+  }
 });
 
 const gitcoinEcsAutoScalingPolicy = new aws.appautoscaling.Policy("passport-autoscaling-policy", {
@@ -810,7 +831,6 @@ const PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY = op.read.parse(
 
 const CLOUDFLARE_DOMAIN = stack === "production" ? `passport.xyz` : "";
 const CLOUDFLARE_ZONE_ID = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
-
 
 // Passport XYZ
 const passportBranches = Object({
