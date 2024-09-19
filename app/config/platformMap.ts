@@ -1,4 +1,4 @@
-import { PlatformClass, PlatformGroupSpec, platforms } from "@gitcoin/passport-platforms";
+import { PlatformClass, platforms } from "@gitcoin/passport-platforms";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { PlatformProps } from "../components/GenericPlatform";
 
@@ -28,10 +28,6 @@ const {
   Binance,
   CustomGithub,
 } = platforms;
-
-export type Providers = {
-  [platform in PLATFORM_ID]: PlatformGroupSpec[];
-};
 
 type CustomPlatformTypeInfo = {
   basePlatformName: string;
