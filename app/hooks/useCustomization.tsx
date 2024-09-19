@@ -6,7 +6,7 @@ import { Outlet, useNavigate, useParams } from "react-router-dom";
 
 export const DEFAULT_CUSTOMIZATION_KEY = "none";
 
-const DEFAULT_CUSTOMIZATION: Customization = {
+export const DEFAULT_CUSTOMIZATION: Customization = {
   key: DEFAULT_CUSTOMIZATION_KEY,
   partnerName: "",
   useCustomDashboardPanel: false,

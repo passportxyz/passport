@@ -1,5 +1,5 @@
 // --- React Methods
-import { useMemo, useState, useContext } from "react";
+import { useState, useContext } from "react";
 
 // --- Types
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
@@ -8,7 +8,6 @@ import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { Button } from "./Button";
 import { PlatformScoreSpec } from "../context/scorerContext";
 import { CeramicContext } from "../context/ceramicContext";
-import { useCustomization } from "../hooks/useCustomization";
 import { ProgressBar } from "./ProgressBar";
 import { getDaysToExpiration } from "../utils/duration";
 import { usePlatforms } from "../hooks/usePlatforms";
@@ -278,7 +277,6 @@ export const PlatformCard = ({
   className,
   variant,
 }: PlatformCardProps): JSX.Element => {
-  const platformIsExcluded = usePlatformIsExcluded(platform);
   const { platformExpirationDates, expiredPlatforms, allProvidersState } = useContext(CeramicContext);
   const { platformSpecs, platformProviderIds } = usePlatforms();
 
@@ -295,8 +293,6 @@ export const PlatformCard = ({
   const daysUntilExpiration = getDaysToExpiration({
     expirationDate: platformExpirationDates[platform.platform as PLATFORM_ID] || "",
   });
-
-  if (platformIsExcluded) return <></>;
 
   const verified = platform.earnedPoints > 0 || selectedProviders[platform.platform].length > 0;
   // returns a single Platform card
@@ -343,47 +339,4 @@ export const PlatformCard = ({
   }
 
   return stamp;
-};
-
-const usePlatformIsExcluded = (platform: PlatformScoreSpec) => {
-  const customization = useCustomization();
-  const { platformProviderIds } = usePlatforms();
-
-  const excludedByCustomization = useMemo(() => {
-    const providers = platformProviderIds[platform.platform];
-
-    // Hide allow list if no points were earned when onboarding
-    if (platform.platform.startsWith("AllowList") && platform.earnedPoints === 0) {
-      return true;
-    }
-
-    return (
-      customization.scorer?.weights &&
-      !providers.some((provider) => {
-        return parseFloat(customization.scorer?.weights?.[provider] || "") > 0;
-      })
-    );
-  }, [customization, platform.earnedPoints, platform.platform, platformProviderIds]);
-
-  const excludedByFeatureFlag = useMemo(() => {
-    // Feature Flag Guild Stamp
-    if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP !== "on" && platform.platform === "GuildXYZ") return true;
-
-    // Feature Flag Idena Stamp
-    if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP !== "on" && platform.platform === "Idena") return true;
-
-    // Feature Flag PHI Stamp
-    if (process.env.NEXT_PUBLIC_FF_PHI_STAMP !== "on" && platform.platform === "PHI") return true;
-
-    // Feature Flag Holonym Stamp
-    if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP !== "on" && platform.platform === "Holonym") return true;
-
-    if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS !== "on" && platform.platform === "TrustaLabs") return true;
-
-    if (process.env.NEXT_PUBLIC_FF_OUTDID_STAMP !== "on" && platform.platform === "Outdid") return true;
-
-    return false;
-  }, [platform.platform]);
-
-  return excludedByCustomization || excludedByFeatureFlag;
 };

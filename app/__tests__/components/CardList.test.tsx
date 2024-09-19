@@ -10,7 +10,9 @@ import {
 import { CeramicContext, CeramicContextState } from "../../context/ceramicContext";
 import { Category, CategoryProps } from "../../components/Category";
 import { PlatformCard } from "../../components/PlatformCard";
-import { PlatformScoreSpec } from "../../context/scorerContext";
+import { PlatformScoreSpec, ScorerContextState } from "../../context/scorerContext";
+import { DEFAULT_CUSTOMIZATION, useCustomization } from "../../hooks/useCustomization";
+import { platforms } from "@gitcoin/passport-platforms";
 
 jest.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -22,6 +24,10 @@ jest.mock("next/router", () => ({
   useRouter: () => ({
     query: { filter: "" },
   }),
+}));
+
+jest.mock("../../hooks/useCustomization", () => ({
+  useCustomization: jest.fn(),
 }));
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
@@ -69,6 +75,7 @@ let categoryProps: CategoryProps = {
 describe("<CardList />", () => {
   beforeEach(() => {
     cardListProps = {};
+    (useCustomization as jest.Mock).mockReturnValue({ ...DEFAULT_CUSTOMIZATION });
   });
 
   it("renders provider cards when loading state is not defined", () => {
@@ -194,4 +201,195 @@ test("renders Category component", () => {
 
   const cards = screen.getAllByTestId("platform-card");
   expect(cards).toHaveLength(categoryProps["category"].sortedPlatforms.length);
+});
+
+describe("show/hide tests", () => {
+  it("should show allow list stamp if user has points", () => {
+    (useCustomization as jest.Mock).mockReturnValue({
+      partnerName: "TestPartner",
+      scorer: {
+        weights: {
+          "AllowList#test": 10,
+        },
+      },
+      allowListProviders: [
+        {
+          platformGroup: "Custom Allow Lists",
+          providers: [
+            {
+              title: "Allow List Provider",
+              description: "Check to see if you are on the Guest List.",
+              name: "AllowList#test",
+            },
+          ],
+        },
+      ],
+    });
+    const scorerContext: Partial<ScorerContextState> = {
+      scoredPlatforms: [
+        {
+          possiblePoints: 10,
+          earnedPoints: 10,
+          platform: "AllowList",
+          name: "Allow List Platform",
+          description: "AllowList",
+          connectMessage: "Connect",
+        },
+      ],
+    };
+    renderWithContext(mockCeramicContext, <CardList {...cardListProps} />, {}, scorerContext);
+
+    // Platform card should be shown
+    expect(screen.queryByText("Allow List Platform")).toBeInTheDocument();
+
+    // Custom stamp section should be shown
+    expect(screen.queryByText("TestPartner Stamps")).toBeInTheDocument();
+  });
+
+  it("should hide allow list stamp if user has no points", () => {
+    (useCustomization as jest.Mock).mockReturnValue({
+      partnerName: "TestPartner",
+      scorer: {
+        weights: {
+          "AllowList#test": 10,
+        },
+      },
+      allowListProviders: [
+        {
+          platformGroup: "Custom Allow Lists",
+          providers: [
+            {
+              title: "Allow List Provider",
+              description: "Check to see if you are on the Guest List.",
+              name: "AllowList#test",
+            },
+          ],
+        },
+      ],
+    });
+    const scorerContext: Partial<ScorerContextState> = {
+      scoredPlatforms: [
+        {
+          possiblePoints: 10,
+          earnedPoints: 0,
+          platform: "AllowList",
+          name: "Allow List Platform",
+          description: "AllowList",
+          connectMessage: "Connect",
+        },
+      ],
+    };
+    renderWithContext(mockCeramicContext, <CardList {...cardListProps} />, {}, scorerContext);
+
+    // Platform card should be hidden
+    expect(screen.queryByText("Allow List Platform")).not.toBeInTheDocument();
+
+    // Custom stamp section should be hidden
+    expect(screen.queryByText("TestPartner Stamps")).not.toBeInTheDocument();
+  });
+
+  it("include platform if any stamps included", () => {
+    (useCustomization as jest.Mock).mockReturnValue({
+      scorer: {
+        weights: {
+          SelfStakingBronze: "1",
+          SelfStakingSilver: "1",
+          SelfStakingGold: "1",
+          BeginnerCommunityStaker: "1",
+          ExperiencedCommunityStaker: "1",
+          TrustedCitizen: "1",
+        },
+      },
+    });
+
+    const scorerContext: Partial<ScorerContextState> = {
+      scoredPlatforms: [
+        {
+          possiblePoints: 10,
+          earnedPoints: 2,
+          ...platforms["GtcStaking"].PlatformDetails,
+        },
+      ],
+    };
+
+    renderWithContext(mockCeramicContext, <CardList {...cardListProps} />, {}, scorerContext);
+
+    // Platform card should be shown
+    expect(screen.queryByText("GTC Staking")).toBeInTheDocument();
+
+    // Category should be shown
+    expect(screen.queryByText("Blockchain & Crypto Networks")).toBeInTheDocument();
+  });
+
+  it("exclude platform if no stamps included", () => {
+    (useCustomization as jest.Mock).mockReturnValue({
+      scorer: {
+        weights: {
+          ADifferentStamp: "1",
+        },
+      },
+    });
+
+    const scorerContext: Partial<ScorerContextState> = {
+      scoredPlatforms: [
+        {
+          possiblePoints: 10,
+          earnedPoints: 2,
+          ...platforms["GtcStaking"].PlatformDetails,
+        },
+      ],
+    };
+
+    renderWithContext(mockCeramicContext, <CardList {...cardListProps} />, {}, scorerContext);
+
+    // Platform card should be hidden
+    expect(screen.queryByText("GTC Staking")).not.toBeInTheDocument();
+
+    // Category should be hidden
+    expect(screen.queryByText("Blockchain & Crypto Networks")).not.toBeInTheDocument();
+  });
+
+  it("include platform if customization doesn't specify custom weights", () => {
+    (useCustomization as jest.Mock).mockReturnValue({});
+
+    const scorerContext: Partial<ScorerContextState> = {
+      scoredPlatforms: [
+        {
+          possiblePoints: 10,
+          earnedPoints: 2,
+          ...platforms["GtcStaking"].PlatformDetails,
+        },
+      ],
+    };
+
+    renderWithContext(mockCeramicContext, <CardList {...cardListProps} />, {}, scorerContext);
+
+    // Platform card should be shown
+    expect(screen.queryByText("GTC Staking")).toBeInTheDocument();
+
+    // Category should be shown
+    expect(screen.queryByText("Blockchain & Crypto Networks")).toBeInTheDocument();
+  });
+
+  it("hide platform if there are no possible points", () => {
+    (useCustomization as jest.Mock).mockReturnValue({});
+
+    const scorerContext: Partial<ScorerContextState> = {
+      scoredPlatforms: [
+        {
+          possiblePoints: 0,
+          earnedPoints: 0,
+          ...platforms["GtcStaking"].PlatformDetails,
+        },
+      ],
+    };
+
+    renderWithContext(mockCeramicContext, <CardList {...cardListProps} />, {}, scorerContext);
+
+    // Platform card should be hidden
+    expect(screen.queryByText("GTC Staking")).not.toBeInTheDocument();
+
+    // Category should be hidden
+    expect(screen.queryByText("Blockchain & Crypto Networks")).not.toBeInTheDocument();
+  });
 });
