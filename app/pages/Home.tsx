@@ -25,10 +25,10 @@ export default function Home() {
   }, [customization.key]);
 
   return (
-    <PageRoot className="text-color-1 flex flex-col min-h-screen overflow-auto pb-32">
+    <PageRoot className="text-color-1 flex flex-col min-h-screen overflow-auto pb-32 md:pb-0">
       {isConnected && <AccountCenter />}
-      <div className="flex-grow items-center justify-center self-center p-8 overflow-auto">
-        <div className="z-10 grid grid-flow-row grid-cols-2 gap-4 lg:grid-flow-col p-2">
+      <div className="flex-grow grid grid-rows-[2fr_auto_3fr] self-center p-8 overflow-auto">
+        <div className="z-10 grid grid-flow-row row-start-2 grid-cols-2 gap-4 lg:grid-flow-col p-2">
           <div className="col-span-2 text-5xl md:text-7xl lg:row-start-2">
             <div className="grid grid-flow-col justify-start">
               <img src="./assets/passportLogoWhite.svg" alt="Icon" className="h-10 md:h-20 self-center" />
