@@ -2,7 +2,7 @@
   "0xaa37dc": {
     "description": "Optimism Sepolia",
     "issuer": {
-      "address": "0x5f603Ed913738d9105bAf3BD981AA4750016B167"
+      "address": "0x7A67063c391F266D31eA6c9eC7C788c1323B7746"
     },
     "EAS": {
       "address": "0x4200000000000000000000000000000000000021"
@@ -11,23 +11,23 @@
       "address": "0x4200000000000000000000000000000000000020"
     },
     "GitcoinResolver": {
-      "address": "0x074761E1Dc6E6cF9cdeE67dd180E01E818716Ce0"
+      "address": "0x4b1171cD914c706850868149Ef9DF3b804896Fe9"
     },
     "GitcoinVerifier": {
-      "address": "0x8D21C3360dcE1a9EBD3Da4373c4dAB7F81dd7233"
+      "address": "0xf90b4f383244fdf9dF7a28b1e8030d130E7c9be5"
     },
     "GitcoinAttester": {
-      "address": "0x8B1A76795e3CbadD79C5410d2C4D4827D9C1503a"
+      "address": "0x5703DF89291e770B5A69FaD0a7c35155bc7b55A2"
     },
     "easSchemas": {
       "namingSchema": {
         "uid": ""
       },
       "passport": {
-        "uid": "0x7026a3d524ee3dae5859aa00cfc0f17a3dac05af70eb758b5c0a40692f1e60f3"
+        "uid": "0xa91f26205387bd3b7e49643426d3b238fefe8e506bcaaf939ec0ccb47ed3a54d"
       },
       "score": {
-        "uid": "0xe9071177c724d1bd712e4b05b4ce5426e60e141d8aaec86e4e03f25901d0cd91"
+        "uid": "0x82b3155830c25029826be47e4f77a093998df91021dae0ea99cccd91045ff6eb"
       }
     },
     "GitcoinPassportDecoder": {
