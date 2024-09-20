@@ -40,6 +40,12 @@ export const Category = ({
   const [panelMounted, setPanelMounted] = useState<boolean>(false);
 
   useEffect(() => {
+    // Emit resize event when panel is mounted or unmounted,
+    // to ensure that the layout is resized correctly
+    window.dispatchEvent(new Event("resize"));
+  }, [panelMounted]);
+
+  useEffect(() => {
     if (initialOpen) {
       handleOpen();
     }

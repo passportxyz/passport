@@ -1,5 +1,5 @@
 // --- React Methods
-import React, { useContext, useMemo, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 
 import { usePlatforms } from "../hooks/usePlatforms";
 
@@ -11,6 +11,7 @@ import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
 import { Category } from "./Category";
 import { CeramicContext } from "../context/ceramicContext";
 import { GenericPlatform } from "./GenericPlatform";
+import { useCustomization } from "../hooks/useCustomization";
 
 export type CardListProps = {
   isLoading?: boolean;
@@ -20,12 +21,61 @@ export type CardListProps = {
 
 type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
+const useShouldDisplayPlatform = () => {
+  const customization = useCustomization();
+  const { platformProviderIds } = usePlatforms();
+
+  const shouldDisplayPlatform = useCallback(
+    (platform: PlatformScoreSpec): boolean => {
+      const providers = platformProviderIds[platform.platform];
+
+      if (platform.possiblePoints <= 0) {
+        return false;
+      }
+
+      // Hide allow list if no points were earned when onboarding
+      if (platform.platform.startsWith("AllowList") && platform.earnedPoints === 0) {
+        return false;
+      }
+
+      if (
+        customization.scorer?.weights &&
+        !providers.some((provider) => parseFloat(customization.scorer?.weights?.[provider] || "") > 0)
+      ) {
+        return false;
+      }
+
+      // Feature Flag Guild Stamp
+      if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP !== "on" && platform.platform === "GuildXYZ") return false;
+
+      // Feature Flag Idena Stamp
+      if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP !== "on" && platform.platform === "Idena") return false;
+
+      // Feature Flag PHI Stamp
+      if (process.env.NEXT_PUBLIC_FF_PHI_STAMP !== "on" && platform.platform === "PHI") return false;
+
+      // Feature Flag Holonym Stamp
+      if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP !== "on" && platform.platform === "Holonym") return false;
+
+      if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS !== "on" && platform.platform === "TrustaLabs") return false;
+
+      if (process.env.NEXT_PUBLIC_FF_OUTDID_STAMP !== "on" && platform.platform === "Outdid") return false;
+
+      return true;
+    },
+    [customization, platformProviderIds]
+  );
+
+  return { shouldDisplayPlatform };
+};
+
 export const CardList = ({ className, isLoading = false, initialOpen = true }: CardListProps): JSX.Element => {
   const { allProvidersState, allPlatforms } = useContext(CeramicContext);
   const { scoredPlatforms } = useContext(ScorerContext);
   const { platformProviderIds, platforms, platformCatagories } = usePlatforms();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [currentPlatform, setCurrentPlatform] = useState<PlatformScoreSpec | undefined>();
+  const { shouldDisplayPlatform } = useShouldDisplayPlatform();
 
   const selectedProviders: SelectedProviders = useMemo(
     () =>
@@ -71,7 +121,7 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
     };
   });
 
-  sortedPlatforms.forEach((stamp) => {
+  sortedPlatforms.filter(shouldDisplayPlatform).forEach((stamp) => {
     platformCatagories.forEach((category) => {
       if (category.platforms.includes(stamp.platform)) {
         groupedPlatforms[category.name].sortedPlatforms.push(stamp);
@@ -79,17 +129,13 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
     });
   });
 
-  const allowList = scoredPlatforms.find((platform) => platform.platform.startsWith("AllowList"));
   const platformProps = currentPlatform?.platform && allPlatforms.get(currentPlatform.platform);
 
-  // Use as in id staking
   return (
     <>
       <PageWidthGrid className={className}>
         {Object.keys(groupedPlatforms).map((category) => {
-          const sortedPlatforms = groupedPlatforms[category].sortedPlatforms;
-          const shouldDisplayCategory = sortedPlatforms.some((platform) => platform.possiblePoints > 0);
-          if (!shouldDisplayCategory) return null;
+          if (!groupedPlatforms[category].sortedPlatforms.length) return null;
           return (
             <Category
               className={className}

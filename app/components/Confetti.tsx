@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useCallback } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import ReactConfetti from "react-confetti";
 import { mutableUserVerificationAtom } from "../context/userState";
 import { useAtom } from "jotai";
