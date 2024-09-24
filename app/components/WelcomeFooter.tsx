@@ -1,4 +1,4 @@
-import React from "react";
+import React, { LinkHTMLAttributes } from "react";
 import { Chain, chains } from "../utils/chains";
 
 const GitHubIcon = () => (
@@ -49,40 +49,44 @@ const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean
         {chainsForFooter.map(({ chainLink, icon, label }, idx) => {
           return (
             <div key={idx} className="flex m-1 md:m-2 lg:m-3">
-              <a className="self-start" target="_blank" href={chainLink}>
+              <Link className="self-start" href={chainLink}>
                 <img src={icon} className="w-[20px] md:w-[35px] h-[20px] md:h-[35px]" alt={`${label} Icon`} />
-              </a>
+              </Link>
             </div>
           );
         })}
       </div>
       <div className="flex flex-col md:flex-row gap-y-1 items-center md:items-end justify-center md:justify-end flex-wrap">
         {displayPrivacyPolicy ? (
-          <a href="https://www.gitcoin.co/privacy" className="hover:underline px-2  ">
+          <Link href="https://www.gitcoin.co/privacy" className="hover:underline px-2">
             Privacy Policy
-          </a>
+          </Link>
         ) : null}
-        <a href="https://support.passport.xyz/passport-knowledge-base" className="hover:underline px-2">
+        <Link href="https://support.passport.xyz/passport-knowledge-base" className="hover:underline px-2">
           Learn More
-        </a>
-        <a href="https://scorer.gitcoin.co/" className="hover:underline px-2">
+        </Link>
+        <Link href="https://scorer.gitcoin.co/" className="hover:underline px-2">
           Passport XYZ Scorer
-        </a>
+        </Link>
         <div className="flex flex-col md:flex-row gap-y-1 items-end justify-end flex-wrap">
           <div className="md:px-2">
-            <a href="https://passport.gitcoin.co/">
+            <Link href="https://github.com/passportxyz/passport">
               <GitHubIcon />
-            </a>
+            </Link>
           </div>
           <div className="pr-2 md:px-2 md:mr-20">
-            <a href="https://docs.passport.xyz/">
+            <Link href="https://docs.passport.xyz/">
               <SyncIcon />
-            </a>
+            </Link>
           </div>
         </div>
       </div>
     </footer>
   );
 };
+
+const Link = (props: LinkHTMLAttributes<HTMLAnchorElement>) => (
+  <a {...props} target="_blank" rel="noopener noreferrer" />
+);
 
 export default WelcomeFooter;
