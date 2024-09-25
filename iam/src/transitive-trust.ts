@@ -40,6 +40,7 @@ type TrustScores = {
   };
 };
 
+// Insert node that represents MDB score for each address that participated in staking
 mdbScores.map((row: { models: { ethereum_activity: { score: number } }; address: string }) => {
   const { score } = row.models.ethereum_activity;
   const positiveWeight = score < 0 || score < 50 ? 0 : row.models.ethereum_activity.score / 100;
@@ -62,22 +63,26 @@ mdbScores.map((row: { models: { ethereum_activity: { score: number } }; address:
   graph.addEdge(iamIssuer, row.address, positiveWeight, negativeWeight);
 });
 
+// Determine scores from passport perspective
 const initialTrustScores: TrustScores = graph.computeTrustScores(iamIssuer);
 
+// Insert edges that represent staking relationships - points are incremented for addresses that have been staked on.
 for (const stake of communityStakes) {
   const { current_amount } = stake;
   const staker = stake.staker.toLowerCase();
   const stakee = stake.stakee.toLowerCase();
-  const scale = 10;
+  const scale = 50;
   const positiveWeight = current_amount > scale ? 1 : current_amount / scale;
   const negativeWeight = 0;
 
   graph.addEdge(staker, stakee, positiveWeight, negativeWeight);
 }
 
+// Determine score after staking
 const trustScoresAfterStakeData: TrustScores = graph.computeTrustScores(iamIssuer);
 
-const beforeAfter = stakeeScores.map((scoreVal) => {
+// Determine difference in scores before and after
+const delta = stakeeScores.map((scoreVal) => {
   const { address, score } = scoreVal;
   const before = initialTrustScores[address].netScore;
   const after = trustScoresAfterStakeData[address].netScore;
@@ -89,7 +94,7 @@ const beforeAfter = stakeeScores.map((scoreVal) => {
   };
 });
 
-const differences = beforeAfter.filter((val) => val.before !== val.after);
+const differences = delta.filter((val) => val.before !== val.after);
 
 debugger;
 
