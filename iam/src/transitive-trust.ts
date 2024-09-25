@@ -1,3 +1,17 @@
+/*
+To start off with we give the network an initial score based on their MDB score for ethereum.
+We then open up the trust graph to include the one P2P metric we currently have. Community Staking.
+  - With community staking we give points to those who have had GTC staked on them.
+  - By staking your money on another address you are saying that you trust that address.
+Finally we apply a test score to each address in the network. For this test the first address in the list receives a negative one and the last address receives a positive one.
+  - By doing this we are seeing the impact of our scoring metric on an existing network of trust.
+
+This network derives its value from P2P trust. Ideally we can create a system that incentvises participation. We could provide an initial score for a set of addresses(passport score).
+Signifying our initial trust in the network(or set of eligible airdrop addresses). After the public is given time to participate we could then score every address with our MDB endpoint and furth analysis
+
+
+*/
+
 // To run script from iam dir `yarn node --loader ts-node/esm src/transitive-trust.ts`
 // 2024-09-23_23-23-12.csv can be pulled from https://api.staging.scorer.gitcoin.co/admin/registry/batchmodelscoringrequest/49/change/
 
@@ -43,10 +57,19 @@ type TrustScores = {
 // Insert node that represents MDB score for each address that participated in staking
 mdbScores.map((row: { models: { ethereum_activity: { score: number } }; address: string }) => {
   const { score } = row.models.ethereum_activity;
-  const positiveWeight = score < 0 || score < 50 ? 0 : row.models.ethereum_activity.score / 100;
+  let positiveWeight = 0;
+  if (score < 0 || score <= 20) {
+    positiveWeight = 0;
+  } else {
+    if (score > 20) {
+      positiveWeight = 1;
+    } else {
+      positiveWeight = score / 20;
+    }
+  }
   let negativeWeight = 0;
-  if (score > 0 && score < 50) {
-    negativeWeight = (50 - score) / 50;
+  if (score > 0 && score < 20) {
+    negativeWeight = (20 - score) / 20;
   }
 
   if (score > 95) {
@@ -81,6 +104,34 @@ for (const stake of communityStakes) {
 // Determine score after staking
 const trustScoresAfterStakeData: TrustScores = graph.computeTrustScores(iamIssuer);
 
+// Convert Sets to arrays
+const stakeeAddressesByStaker = Object.fromEntries(
+  Object.entries(getStakeeAddressesByStaker(communityStakes)).map(([staker, stakees]) => [staker, Array.from(stakees)])
+);
+
+console.log("Stakee Addresses by Staker:");
+console.log(JSON.stringify(stakeeAddressesByStaker, null, 2));
+
+// Here we will add a new edge that increments or decrements the score of each address.
+// This will test the impact of a score that we control and apply
+mdbScores.map((row: { models: { ethereum_activity: { score: number } }; address: string }, i) => {
+  const addressCount = mdbScores.length;
+  const bottomHalf = addressCount / 2;
+  if (i < bottomHalf) {
+    // give it a negative score between 0 and 1
+    const negativeScore = (bottomHalf - i) / bottomHalf;
+    console.log("negativeScore: ", negativeScore);
+    graph.addEdge(iamIssuer, row.address, 0, negativeScore);
+  } else {
+    // give it a positive score between 0 and 1, where the last value receives the highest value with a score of 1
+    const positiveScore = i / addressCount;
+    console.log("positiveScore: ", positiveScore, i, addressCount);
+    graph.addEdge(iamIssuer, row.address, positiveScore, 0);
+  }
+});
+
+const trustScoreAfterTestPassportScore: TrustScores = graph.computeTrustScores(iamIssuer);
+
 // Determine difference in scores before and after
 const delta = stakeeScores.map((scoreVal) => {
   const { address, score } = scoreVal;
@@ -96,11 +147,78 @@ const delta = stakeeScores.map((scoreVal) => {
 
 const differences = delta.filter((val) => val.before !== val.after);
 
+const trustScoreDifferences = calculateTrustScoreDifferences(
+  initialTrustScores,
+  trustScoresAfterStakeData,
+  trustScoreAfterTestPassportScore
+);
+
+console.log("Trust Score Differences:");
+console.log(JSON.stringify(trustScoreDifferences, null, 2));
+
 debugger;
 
 // // // // // // //
 // Utility Functions
 // // // // // // //
+
+type StakeObject = {
+  id: number;
+  chain: number;
+  lock_time: string;
+  unlock_time: string;
+  last_updated_in_block: number;
+  staker: string;
+  stakee: string;
+  current_amount: number;
+};
+
+function getStakeeAddressesByStaker(stakes: StakeObject[]): Record<string, Set<string>> {
+  return stakes.reduce(
+    (result, stake) => {
+      if (!result[stake.staker]) {
+        result[stake.staker] = new Set<string>();
+      }
+      result[stake.staker].add(stake.stakee);
+      return result;
+    },
+    {} as Record<string, Set<string>>
+  );
+}
+
+function calculateTrustScoreDifferences(
+  initialTrustScores: TrustScores,
+  trustScoresAfterStakeData: TrustScores,
+  trustScoreAfterTestPassportScore: TrustScores
+): { [address: string]: { initial: number; afterStake: number; afterPassportScore: number } } {
+  const differences: {
+    [address: string]: { initial: number; afterStake: number; afterPassportScore: number };
+  } = {};
+
+  // Combine all addresses from all three score objects
+  const allAddresses = new Set([
+    ...Object.keys(initialTrustScores),
+    ...Object.keys(trustScoresAfterStakeData),
+    ...Object.keys(trustScoreAfterTestPassportScore),
+  ]);
+
+  mdbScores
+    .map(({ address }: { address: string }) => address)
+    .filter((address) => stakees.includes(address))
+    .forEach((address) => {
+      const initial = initialTrustScores[address]?.netScore || 0;
+      const afterStake = trustScoresAfterStakeData[address]?.netScore || 0;
+      const afterPassportScore = trustScoreAfterTestPassportScore[address]?.netScore || 0;
+
+      differences[address] = {
+        initial,
+        afterStake,
+        afterPassportScore,
+      };
+    });
+
+  return differences;
+}
 
 const nonZeroTrustScores = (graph: {
   [target: string]: {
