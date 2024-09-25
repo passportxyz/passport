@@ -42,7 +42,6 @@ type Score = {
 
 const highScorers: Score[] = [];
 const lowScorers: Score[] = [];
-const stakeeScores: Score[] = [];
 
 const stakees = communityStakes.map((stake) => stake.stakee.toLowerCase());
 
@@ -54,33 +53,30 @@ type TrustScores = {
   };
 };
 
+// const mdbWe;
+
 // Insert node that represents MDB score for each address that participated in staking
 mdbScores.map((row: { models: { ethereum_activity: { score: number } }; address: string }) => {
   const { score } = row.models.ethereum_activity;
   let positiveWeight = 0;
-  if (score < 0 || score <= 20) {
-    positiveWeight = 0;
-  } else {
-    if (score > 20) {
-      positiveWeight = 1;
-    } else {
-      positiveWeight = score / 20;
-    }
-  }
   let negativeWeight = 0;
-  if (score > 0 && score < 20) {
-    negativeWeight = (20 - score) / 20;
-  }
-
-  if (score > 95) {
-    highScorers.push({ address: row.address, score });
-  }
-  if (score < 5) {
-    lowScorers.push({ address: row.address, score });
-  }
-
-  if (stakees.includes(row.address)) {
-    stakeeScores.push({ address: row.address, score });
+  const negativeScoreThreshold = 1;
+  const topScore = 100;
+  //  an error was thrown
+  if (score < 0) {
+    positiveWeight = 0;
+    negativeWeight = 0;
+  } else {
+    // Underthreshold
+    if (score < negativeScoreThreshold) {
+      positiveWeight = 0;
+      negativeWeight = score === 0 ? 1 : 0;
+    }
+    // Above Threshold
+    if (score >= negativeScoreThreshold) {
+      positiveWeight = score / topScore;
+      negativeWeight = 0;
+    }
   }
 
   graph.addEdge(iamIssuer, row.address, positiveWeight, negativeWeight);
@@ -114,47 +110,63 @@ console.log(JSON.stringify(stakeeAddressesByStaker, null, 2));
 
 // Here we will add a new edge that increments or decrements the score of each address.
 // This will test the impact of a score that we control and apply
+
+const mockScorePostiveScores: { [target: string]: number } = {};
+const mockScoreNegativeScores: { [target: string]: number } = {};
+
 mdbScores.map((row: { models: { ethereum_activity: { score: number } }; address: string }, i) => {
   const addressCount = mdbScores.length;
   const bottomHalf = addressCount / 2;
   if (i < bottomHalf) {
     // give it a negative score between 0 and 1
     const negativeScore = (bottomHalf - i) / bottomHalf;
-    console.log("negativeScore: ", negativeScore);
+    mockScoreNegativeScores[row.address] = negativeScore;
     graph.addEdge(iamIssuer, row.address, 0, negativeScore);
   } else {
     // give it a positive score between 0 and 1, where the last value receives the highest value with a score of 1
     const positiveScore = i / addressCount;
-    console.log("positiveScore: ", positiveScore, i, addressCount);
+    mockScorePostiveScores[row.address] = positiveScore;
     graph.addEdge(iamIssuer, row.address, positiveScore, 0);
   }
 });
 
 const trustScoreAfterTestPassportScore: TrustScores = graph.computeTrustScores(iamIssuer);
-
-// Determine difference in scores before and after
-const delta = stakeeScores.map((scoreVal) => {
-  const { address, score } = scoreVal;
-  const before = initialTrustScores[address].netScore;
-  const after = trustScoresAfterStakeData[address].netScore;
-  return {
-    address,
-    score,
-    before,
-    after,
-  };
-});
-
-const differences = delta.filter((val) => val.before !== val.after);
-
 const trustScoreDifferences = calculateTrustScoreDifferences(
   initialTrustScores,
   trustScoresAfterStakeData,
   trustScoreAfterTestPassportScore
 );
 
-console.log("Trust Score Differences:");
-console.log(JSON.stringify(trustScoreDifferences, null, 2));
+// 0x69f9e121702461eA52F627A6147ea3c6dc2DEF31 - MDB 56, Stakee of 20, Passport Score of 0
+const test1 = trustScoreDifferences["0x4d9ba778b7f121e58e5d3bb6aef514e035a7c7f5"];
+
+const scoresThatUpdatedEachEdgeAddition = Object.keys(trustScoreDifferences).filter(
+  (address) => trustScoreDifferences[address].initial !== trustScoreDifferences[address].afterStake
+);
+
+console.log("Scores that updated after staking:");
+
+scoresThatUpdatedEachEdgeAddition.forEach((address) => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const mdbScore = (
+    mdbScores.find(
+      (row: { models: { ethereum_activity: { score: number } }; address: string }) => row.address === address
+    ) as { models: { ethereum_activity: { score: number } } }
+  ).models.ethereum_activity?.score;
+  const stakes = communityStakes.filter((stake) => stake.stakee === address);
+
+  console.log({
+    address,
+    differences: trustScoreDifferences[address],
+    mdbScore,
+    stakes,
+    mockNegativePassportScore: mockScoreNegativeScores[address],
+    mockPositivePassportScore: mockScorePostiveScores[address],
+  });
+});
+console.log(scoresThatUpdatedEachEdgeAddition.length);
+
+const edges = graph.getEdges();
 
 debugger;
 
