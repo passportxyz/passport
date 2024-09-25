@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "../components/Button";
 import { useNavigateToPage } from "../hooks/useCustomization";
 
-const NotFound = () => {
+export const NotFound = () => {
   const navigateToPage = useNavigateToPage();
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background text-color-1">
@@ -17,5 +17,3 @@ const NotFound = () => {
     </div>
   );
 };
-
-export default NotFound;
