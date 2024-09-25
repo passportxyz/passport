@@ -21,7 +21,7 @@ Signifying our initial trust in the network(or set of eligible airdrop addresses
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { TransitiveTrustGraph } from "@ethereum-attestation-service/transitive-trust-sdk";
 import communityStakes from "../sample-community-stakes-above-1.json" assert { type: "json" };
-import fs from "fs";
+import * as fs from "fs";
 import * as path from "path";
 import { parse } from "csv-parse/sync";
 import { fileURLToPath } from "url";
@@ -105,9 +105,6 @@ const stakeeAddressesByStaker = Object.fromEntries(
   Object.entries(getStakeeAddressesByStaker(communityStakes)).map(([staker, stakees]) => [staker, Array.from(stakees)])
 );
 
-console.log("Stakee Addresses by Staker:");
-console.log(JSON.stringify(stakeeAddressesByStaker, null, 2));
-
 // Here we will add a new edge that increments or decrements the score of each address.
 // This will test the impact of a score that we control and apply
 
@@ -144,7 +141,9 @@ const scoresThatUpdatedEachEdgeAddition = Object.keys(trustScoreDifferences).fil
   (address) => trustScoreDifferences[address].initial !== trustScoreDifferences[address].afterStake
 );
 
-console.log("Scores that updated after staking:");
+console.log("Creating CSV file with scores that updated after staking...");
+
+let csvContent = "address,differences,mdbScore,stakes,mockNegativePassportScore,mockPositivePassportScore\n";
 
 scoresThatUpdatedEachEdgeAddition.forEach((address) => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -163,8 +162,13 @@ scoresThatUpdatedEachEdgeAddition.forEach((address) => {
     mockNegativePassportScore: mockScoreNegativeScores[address],
     mockPositivePassportScore: mockScorePostiveScores[address],
   });
+
+  csvContent += `${address},${JSON.stringify(trustScoreDifferences[address])},${mdbScore},${JSON.stringify(stakes)},${mockScoreNegativeScores[address]},${mockScorePostiveScores[address]}\n`;
 });
-console.log(scoresThatUpdatedEachEdgeAddition.length);
+
+fs.writeFileSync("transitive_trust_data.csv", csvContent, "utf8");
+console.log("CSV file has been created: transitive_trust_data.csv");
+console.log(`Total rows in CSV: ${scoresThatUpdatedEachEdgeAddition.length}`);
 
 const edges = graph.getEdges();
 
