@@ -79,6 +79,8 @@ mdbScores.map((row: { models: { ethereum_activity: { score: number } }; address:
     }
   }
 
+  console.log({ positiveWeight, negativeWeight, score });
+
   graph.addEdge(iamIssuer, row.address, positiveWeight, negativeWeight);
 });
 
@@ -143,7 +145,8 @@ const scoresThatUpdatedEachEdgeAddition = Object.keys(trustScoreDifferences).fil
 
 console.log("Creating CSV file with scores that updated after staking...");
 
-let csvContent = "address,differences,mdbScore,stakes,mockNegativePassportScore,mockPositivePassportScore\n";
+let csvContent =
+  "address,initialTrust,afterStakeTrust,afterPassportScoreTrust,mdbScore,mockNegativePassportScore,mockPositivePassportScore\n";
 
 scoresThatUpdatedEachEdgeAddition.forEach((address) => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -154,16 +157,16 @@ scoresThatUpdatedEachEdgeAddition.forEach((address) => {
   ).models.ethereum_activity?.score;
   const stakes = communityStakes.filter((stake) => stake.stakee === address);
 
-  console.log({
-    address,
-    differences: trustScoreDifferences[address],
-    mdbScore,
-    stakes,
-    mockNegativePassportScore: mockScoreNegativeScores[address],
-    mockPositivePassportScore: mockScorePostiveScores[address],
-  });
+  // console.log({
+  //   address,
+  //   differences: trustScoreDifferences[address],
+  //   mdbScore,
+  //   stakes,
+  //   mockNegativePassportScore: mockScoreNegativeScores[address],
+  //   mockPositivePassportScore: mockScorePostiveScores[address],
+  // });
 
-  csvContent += `${address},${JSON.stringify(trustScoreDifferences[address])},${mdbScore},${JSON.stringify(stakes)},${mockScoreNegativeScores[address]},${mockScorePostiveScores[address]}\n`;
+  csvContent += `${address},${trustScoreDifferences[address].initial},${trustScoreDifferences[address].afterStake},${trustScoreDifferences[address].afterPassportScore},${mdbScore},${mockScoreNegativeScores[address] ?? 0},${mockScorePostiveScores[address] ?? 0}\n`;
 });
 
 fs.writeFileSync("transitive_trust_data.csv", csvContent, "utf8");
