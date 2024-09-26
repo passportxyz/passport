@@ -29,6 +29,7 @@ type ChainConfig = {
   chainLink: string; // Link to which to redirect if a user clicks the chain icon in the footer for example
   explorerUrl: string;
   attestationProviderConfig?: AttestationProviderConfig;
+  useCustomCommunityId?: boolean;
 };
 
 export class Chain {
@@ -40,8 +41,19 @@ export class Chain {
   icon: string;
   chainLink: string; // Link to which to redirect if a user clicks the chain icon in the footer for example
   attestationProvider?: AttestationProvider;
+  useCustomCommunityId?: boolean;
 
-  constructor({ id, token, label, rpcUrl, explorerUrl, icon, attestationProviderConfig, chainLink }: ChainConfig) {
+  constructor({
+    id,
+    token,
+    label,
+    rpcUrl,
+    explorerUrl,
+    icon,
+    attestationProviderConfig,
+    chainLink,
+    useCustomCommunityId,
+  }: ChainConfig) {
     this.id = id;
     this.token = token;
     this.label = label;
@@ -49,6 +61,7 @@ export class Chain {
     this.icon = icon;
     this.explorerUrl = explorerUrl;
     this.chainLink = chainLink;
+    this.useCustomCommunityId = useCustomCommunityId;
 
     if (attestationProviderConfig) {
       const attestationConfig = { ...attestationProviderConfig, chainId: this.id };
@@ -274,6 +287,7 @@ if (!TEST_MODE) {
         easScanUrl: undefined,
         monochromeIcon: "./assets/shape-logo.svg",
       },
+      useCustomCommunityId: true,
     });
   }
 }
