@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useCallback, useState } from "react";
+import React from "react";
 import { useParams } from "react-router-dom";
 import NotFound from "../pages/NotFound";
 import PageRoot from "./PageRoot";
@@ -54,7 +54,7 @@ export const ScrollStepsBar = ({
       {SCROLL_STEP_NAMES.map((stepName, index) => (
         <div
           key={index}
-          className={`flex items-center ${highLightCurrentStep && index === (parseInt(step || "") || 0) ? "" : "brightness-50"}`}
+          className={`flex items-center ${index === (parseInt(step || "") || 0) ? "" : "brightness-50"}`}
         >
           <div className="w-6 h-6 mr-2 rounded-full flex items-center shrink-0 justify-center text-center bg-[#FF684B]">
             {index + 1}
@@ -151,7 +151,6 @@ const ScrollLogin = () => {
             </div>
             <div className="mt-8">
               <LoadButton
-                data-testid="connectWalletButton"
                 variant="custom"
                 onClick={signIn}
                 isLoading={isLoggingIn}
