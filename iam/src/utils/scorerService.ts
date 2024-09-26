@@ -21,7 +21,7 @@ type GetScoreResponse = {
 };
 
 // Use public endpoint and static api key to fetch score
-export async function fetchPassportScore(address: string): Promise<Score> {
+export async function fetchPassportScore(address: string, customScorerId?: number): Promise<Score> {
   const response = await requestScore(address);
 
   const { data } = response;
@@ -29,9 +29,11 @@ export async function fetchPassportScore(address: string): Promise<Score> {
     throw new IAMError(`Score not ready yet. Status: ${data.status}`);
   }
 
+  const scorer_id = customScorerId || Number(process.env.ALLO_SCORER_ID);
+
   const score: Score = {
     score: Number(data.evidence.rawScore),
-    scorer_id: Number(process.env.ALLO_SCORER_ID),
+    scorer_id,
   };
 
   return score;

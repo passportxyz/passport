@@ -167,7 +167,8 @@ type ValidatedCredential = {
 export const formatMultiAttestationRequestWithPassportAndScore = async (
   credentials: ValidatedCredential[],
   recipient: string,
-  chainIdHex: keyof typeof onchainInfo
+  chainIdHex: keyof typeof onchainInfo,
+  customScorerId?: number
 ): Promise<MultiAttestationRequest[]> => {
   const defaultRequestData = {
     recipient,

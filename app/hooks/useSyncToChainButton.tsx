@@ -70,6 +70,7 @@ export const useSyncToChainButton = ({
             credentials,
             nonce,
             chainIdHex: chain.id,
+            scorerId: 1,
           };
 
           if (chain && chain.attestationProvider) {

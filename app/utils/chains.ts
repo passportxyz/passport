@@ -264,7 +264,7 @@ if (!TEST_MODE) {
       token: "ETH",
       label: "Shape",
       rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SHAPE_RPC_URL as string,
-      explorerUrl: "https://scrollscan.com/",
+      explorerUrl: "https://shape.com/",
       icon: "./assets/shape-logo.svg",
       chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport/",
       attestationProviderConfig: {
