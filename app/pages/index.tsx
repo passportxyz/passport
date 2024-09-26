@@ -19,8 +19,8 @@ import { datadogRum } from "@datadog/browser-rum";
 import { datadogLogs } from "@datadog/browser-logs";
 import { isServerOnMaintenance } from "../utils/helpers";
 import { CustomizationUrlLayoutRoute } from "../hooks/useCustomization";
-import { Campaign } from "./Campaign";
-import { NotFound } from "./NotFound";
+import Campaign from "./Campaign";
+import NotFound from "./NotFound";
 
 datadogRum.init({
   applicationId: process.env.NEXT_PUBLIC_DATADOG_APPLICATION_ID || "",
