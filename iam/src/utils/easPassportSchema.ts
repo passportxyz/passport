@@ -194,7 +194,7 @@ export const formatMultiAttestationRequestWithPassportAndScore = async (
   const scoreRequestData: AttestationRequestData[] = [
     {
       ...defaultRequestData,
-      data: encodeEasScore(await fetchPassportScore(recipient)),
+      data: encodeEasScore(await fetchPassportScore(recipient, customScorerId)),
     },
   ];
 

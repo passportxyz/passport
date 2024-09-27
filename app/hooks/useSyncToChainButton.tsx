@@ -31,7 +31,7 @@ export const useSyncToChainButton = ({
   const [syncingToChain, setSyncingToChain] = useState(false);
   const { switchNetwork } = useSwitchNetwork();
 
-  const customScorerId = useMemo(
+  const scorerId = useMemo(
     () => (customization.scorer?.id && chain?.useCustomCommunityId ? customization.scorer.id : undefined),
     [chain?.useCustomCommunityId, customization?.scorer?.id]
   );
@@ -77,8 +77,7 @@ export const useSyncToChainButton = ({
             credentials,
             nonce,
             chainIdHex: chain.id,
-            scorerId: 1,
-            customScorerId,
+            scorerId,
           };
 
           if (chain && chain.attestationProvider) {

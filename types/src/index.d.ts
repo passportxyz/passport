@@ -325,7 +325,7 @@ export type EasRequestBody = {
   credentials?: VerifiableCredential[];
   dbAccessToken: string;
   chainIdHex: string;
-  customScorerId?: number;
+  scorerId: number;
 };
 
 // Passport DID

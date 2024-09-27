@@ -569,7 +569,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
   try {
-    const { recipient, credentials, nonce, chainIdHex, customScorerId } = req.body as EasRequestBody;
+    const { recipient, credentials, nonce, chainIdHex, scorerId } = req.body as EasRequestBody;
     if (!Object.keys(onchainInfo).includes(chainIdHex)) {
       return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
     }
@@ -605,7 +605,7 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
           credentialVerifications,
           recipient,
           attestationChainIdHex,
-          customScorerId
+          scorerId
         );
 
         const fee = await getEASFeeAmount(EAS_FEE_USD);
