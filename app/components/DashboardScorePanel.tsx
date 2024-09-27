@@ -150,9 +150,9 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
     return (
       <>
         {renderContent(
-          "Congratulations. You have a passing score",
-          "Next up, mint your passport onchain!",
-          "Here’s what you can do with your passport!",
+          "Congratulations. You have a passing Score",
+          "Next up, mint your Passport onchain!",
+          "Here’s what you can do with your Passport!",
           "https://www.passport.xyz/ecosystem"
         )}
         {renderButton("Mint onchain", () => setShowSidebar(true))}

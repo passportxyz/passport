@@ -184,7 +184,7 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick 
             </svg>
           </div>
           <div className="flex-1 pl-2 text-foreground-2 override-text-color">
-            {daysUntilExpiration} {daysUntilExpiration === 1 ? "day" : "days"} until stamps expire
+            {daysUntilExpiration} {daysUntilExpiration === 1 ? "day" : "days"} until Stamps expire
           </div>
         </div>
       </div>
