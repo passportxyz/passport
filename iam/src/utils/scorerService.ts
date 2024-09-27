@@ -18,6 +18,8 @@ type GetScoreResponse = {
   };
 };
 
+const apiKey = process.env.CGRANTS_API_TOKEN;
+
 // Use public endpoint and static api key to fetch score
 export async function fetchPassportScore(address: string, customScorerId?: number): Promise<Score> {
   const scorer_id = customScorerId || Number(process.env.ALLO_SCORER_ID);
@@ -38,14 +40,12 @@ export async function fetchPassportScore(address: string, customScorerId?: numbe
 }
 
 async function requestScore(address: string, scorerId: number): Promise<GetScoreResponse> {
-  const apiKey = process.env.SCORER_API_KEY;
-
-  const getScoreUrl = `${process.env.SCORER_ENDPOINT}/registry/score/${scorerId}/${address}`;
+  const getScoreUrl = `${process.env.SCORER_ENDPOINT}/ceramic-cache/score/${scorerId}/${address}`;
 
   try {
     return await axios.get(getScoreUrl, {
       headers: {
-        "X-API-Key": apiKey,
+        Authorization: apiKey,
       },
     });
   } catch (error) {
