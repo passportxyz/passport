@@ -7,17 +7,270 @@ import {
   ProviderContext,
   RequestPayload,
   VerifiedPayload,
+  OnChainVerifiableEip712Credential,
+  VerifiableEip712Credential,
 } from "@gitcoin/passport-types";
 import { platforms } from "@gitcoin/passport-platforms";
 const { Ens, Lens, Github } = platforms;
 import axios from "axios";
 import { _checkShowOnboard } from "../../utils/helpers";
 import { PlatformProps } from "../../components/GenericPlatform";
+import { formatEIP712CompatibleCredential, getCredentialSplitSignature } from "../../utils/vcs";
 
 const mockedAllPlatforms = new Map();
 mockedAllPlatforms.set("Ens", {
   platform: new Ens.EnsPlatform(),
   platFormGroupSpec: Ens.ProviderConfig,
+});
+
+const testCredentialconst: VerifiableEip712Credential = {
+  type: ["VerifiableCredential"],
+  proof: {
+    type: "EthereumEip712Signature2021",
+    created: "2024-09-27T17:14:37.290Z",
+    "@context": "https://w3id.org/security/suites/eip712sig-2021/v1",
+    proofValue:
+      "0x8994712895556c7916b52ede01f9a1f0b71d73e3dc6cd1318be1a56361a7791258352eac95e2507281cdf26ec891690952848b63006c2adeda30c217765f72a91b",
+    eip712Domain: {
+      types: {
+        Proof: [
+          {
+            name: "@context",
+            type: "string",
+          },
+          {
+            name: "created",
+            type: "string",
+          },
+          {
+            name: "proofPurpose",
+            type: "string",
+          },
+          {
+            name: "type",
+            type: "string",
+          },
+          {
+            name: "verificationMethod",
+            type: "string",
+          },
+        ],
+        "@context": [
+          {
+            name: "hash",
+            type: "string",
+          },
+          {
+            name: "provider",
+            type: "string",
+          },
+        ],
+        Document: [
+          {
+            name: "@context",
+            type: "string[]",
+          },
+          {
+            name: "credentialSubject",
+            type: "CredentialSubject",
+          },
+          {
+            name: "expirationDate",
+            type: "string",
+          },
+          {
+            name: "issuanceDate",
+            type: "string",
+          },
+          {
+            name: "issuer",
+            type: "string",
+          },
+          {
+            name: "proof",
+            type: "Proof",
+          },
+          {
+            name: "type",
+            type: "string[]",
+          },
+        ],
+        EIP712Domain: [
+          {
+            name: "name",
+            type: "string",
+          },
+        ],
+        CredentialSubject: [
+          {
+            name: "@context",
+            type: "@context",
+          },
+          {
+            name: "hash",
+            type: "string",
+          },
+          {
+            name: "id",
+            type: "string",
+          },
+          {
+            name: "provider",
+            type: "string",
+          },
+        ],
+      },
+      domain: {
+        name: "VerifiableCredential",
+      },
+      primaryType: "Document",
+    },
+    proofPurpose: "assertionMethod",
+    verificationMethod: "did:ethr:0xd6f8d6ca86aa01e551a311d670a0d1bd8577e5fb#controller",
+  },
+  issuer: "did:ethr:0xd6f8d6ca86aa01e551a311d670a0d1bd8577e5fb",
+  "@context": ["https://www.w3.org/2018/credentials/v1", "https://w3id.org/vc/status-list/2021/v1"],
+  issuanceDate: "2024-09-27T17:14:37.283Z",
+  expirationDate: "2024-12-26T17:14:37.283Z",
+  credentialSubject: {
+    id: "did:pkh:eip155:1:0x0636F974D29d947d4946b2091d769ec6D2d415DE",
+    hash: "v0.0.0:DuIuMoRGzEw9Is5C/uGkKxqzQBR+0BuUtMPsrFEkstc=",
+    "@context": {
+      hash: "https://schema.org/Text",
+      provider: "https://schema.org/Text",
+    },
+    provider: "ETHGasSpent#0.25",
+  },
+};
+
+describe("formatEIP712CompatibleCredential", () => {
+  it("should correctly format a basic VerifiableEip712Credential", () => {
+    const result = formatEIP712CompatibleCredential(testCredentialconst);
+
+    expect(result).toEqual({
+      _context: ["https://www.w3.org/2018/credentials/v1", "https://w3id.org/vc/status-list/2021/v1"],
+      _type: ["VerifiableCredential"],
+      credentialSubject: {
+        _context: {
+          _hash: "https://schema.org/Text",
+          provider: "https://schema.org/Text",
+        },
+        _hash: "v0.0.0:DuIuMoRGzEw9Is5C/uGkKxqzQBR+0BuUtMPsrFEkstc=",
+        id: "did:pkh:eip155:1:0x0636F974D29d947d4946b2091d769ec6D2d415DE",
+        provider: "ETHGasSpent#0.25",
+      },
+      expirationDate: "2024-12-26T17:14:37.283Z",
+      issuanceDate: "2024-09-27T17:14:37.283Z",
+      issuer: "did:ethr:0xd6f8d6ca86aa01e551a311d670a0d1bd8577e5fb",
+      proof: {
+        _context: "https://w3id.org/security/suites/eip712sig-2021/v1",
+        _type: "EthereumEip712Signature2021",
+        created: "2024-09-27T17:14:37.290Z",
+        eip712Domain: {
+          domain: {
+            name: "VerifiableCredential",
+          },
+          primaryType: "Document",
+          types: {
+            "@context": [
+              {
+                name: "hash",
+                type: "string",
+              },
+              {
+                name: "provider",
+                type: "string",
+              },
+            ],
+            CredentialSubject: [
+              {
+                name: "@context",
+                type: "@context",
+              },
+              {
+                name: "hash",
+                type: "string",
+              },
+              {
+                name: "id",
+                type: "string",
+              },
+              {
+                name: "provider",
+                type: "string",
+              },
+            ],
+            Document: [
+              {
+                name: "@context",
+                type: "string[]",
+              },
+              {
+                name: "credentialSubject",
+                type: "CredentialSubject",
+              },
+              {
+                name: "expirationDate",
+                type: "string",
+              },
+              {
+                name: "issuanceDate",
+                type: "string",
+              },
+              {
+                name: "issuer",
+                type: "string",
+              },
+              {
+                name: "proof",
+                type: "Proof",
+              },
+              {
+                name: "type",
+                type: "string[]",
+              },
+            ],
+            EIP712Domain: [
+              {
+                name: "name",
+                type: "string",
+              },
+            ],
+            Proof: [
+              {
+                name: "@context",
+                type: "string",
+              },
+              {
+                name: "created",
+                type: "string",
+              },
+              {
+                name: "proofPurpose",
+                type: "string",
+              },
+              {
+                name: "type",
+                type: "string",
+              },
+              {
+                name: "verificationMethod",
+                type: "string",
+              },
+            ],
+          },
+        },
+        proofPurpose: "assertionMethod",
+        proofValue:
+          "0x8994712895556c7916b52ede01f9a1f0b71d73e3dc6cd1318be1a56361a7791258352eac95e2507281cdf26ec891690952848b63006c2adeda30c217765f72a91b",
+        verificationMethod: "did:ethr:0xd6f8d6ca86aa01e551a311d670a0d1bd8577e5fb#controller",
+      },
+    });
+  });
+  it("should return a split signature", () => {
+    const { v, r, s } = getCredentialSplitSignature(testCredentialconst);
+    console.log({ v, r, s });
+  });
 });
 
 mockedAllPlatforms.set("Lens", {
