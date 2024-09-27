@@ -1,0 +1,144 @@
+fix this test should correctly format a basic VerifiableEip712Credential in app/__tests__/utils/utils.test.ts. Here is the test result 
+
+formatEIP712CompatibleCredential › should correctly format a basic VerifiableEip712Credential
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  10
+    + Received  + 105
+
+      Object {
+        "_context": Array [
+          "https://www.w3.org/2018/credentials/v1",
+    +     "https://w3id.org/vc/status-list/2021/v1",
+        ],
+        "_type": Array [
+          "VerifiableCredential",
+        ],
+        "credentialSubject": Object {
+          "_context": Object {
+            "hash": "https://schema.org/Text",
+            "provider": "https://schema.org/Text",
+          },
+    -     "_hash": "0x123456",
+    -     "id": "did:example:123",
+    -     "provider": "Example Provider",
+    +     "_hash": "v0.0.0:DuIuMoRGzEw9Is5C/uGkKxqzQBR+0BuUtMPsrFEkstc=",
+    +     "address": undefined,
+    +     "challenge": undefined,
+    +     "id": "did:pkh:eip155:1:0x0636F974D29d947d4946b2091d769ec6D2d415DE",
+    +     "metaPointer": undefined,
+    +     "provider": "ETHGasSpent#0.25",
+        },
+    -   "expirationDate": "2024-01-01T00:00:00Z",
+    -   "issuanceDate": "2023-01-01T00:00:00Z",
+    -   "issuer": "did:example:issuer",
+    +   "expirationDate": "2024-12-26T17:14:37.283Z",
+    +   "issuanceDate": "2024-09-27T17:14:37.283Z",
+    +   "issuer": "did:ethr:0xd6f8d6ca86aa01e551a311d670a0d1bd8577e5fb",
+        "proof": Object {
+          "_context": "https://w3id.org/security/suites/eip712sig-2021/v1",
+          "_type": "EthereumEip712Signature2021",
+    -     "created": "2023-01-01T00:00:00Z",
+    +     "created": "2024-09-27T17:14:37.290Z",
+          "eip712Domain": Object {
+    -       "name": "Example Domain",
+    +       "domain": Object {
+    +         "name": "VerifiableCredential",
+    +       },
+    +       "primaryType": "Document",
+    +       "types": Object {
+    +         "@context": Array [
+    +           Object {
+    +             "name": "hash",
+    +             "type": "string",
+    +           },
+    +           Object {
+    +             "name": "provider",
+    +             "type": "string",
+    +           },
+    +         ],
+    +         "CredentialSubject": Array [
+    +           Object {
+    +             "name": "@context",
+    +             "type": "@context",
+    +           },
+    +           Object {
+    +             "name": "hash",
+    +             "type": "string",
+    +           },
+    +           Object {
+    +             "name": "id",
+    +             "type": "string",
+    +           },
+    +           Object {
+    +             "name": "provider",
+    +             "type": "string",
+    +           },
+    +         ],
+    +         "Document": Array [
+    +           Object {
+    +             "name": "@context",
+    +             "type": "string[]",
+    +           },
+    +           Object {
+    +             "name": "credentialSubject",
+    +             "type": "CredentialSubject",
+    +           },
+    +           Object {
+    +             "name": "expirationDate",
+    +             "type": "string",
+    +           },
+    +           Object {
+    +             "name": "issuanceDate",
+    +             "type": "string",
+    +           },
+    +           Object {
+    +             "name": "issuer",
+    +             "type": "string",
+    +           },
+    +           Object {
+    +             "name": "proof",
+    +             "type": "Proof",
+    +           },
+    +           Object {
+    +             "name": "type",
+    +             "type": "string[]",
+    +           },
+    +         ],
+    +         "EIP712Domain": Array [
+    +           Object {
+    +             "name": "name",
+    +             "type": "string",
+    +           },
+    +         ],
+    +         "Proof": Array [
+    +           Object {
+    +             "name": "@context",
+    +             "type": "string",
+    +           },
+    +           Object {
+    +             "name": "created",
+    +             "type": "string",
+    +           },
+    +           Object {
+    +             "name": "proofPurpose",
+    +             "type": "string",
+    +           },
+    +           Object {
+    +             "name": "type",
+    +             "type": "string",
+    +           },
+    +           Object {
+    +             "name": "verificationMethod",
+    +             "type": "string",
+                },
+    +         ],
+    +       },
+    +     },
+          "proofPurpose": "assertionMethod",
+    -     "proofValue": "0x987654",
+    -     "verificationMethod": "did:example:verifier#key-1",
+    +     "proofValue": "0x8994712895556c7916b52ede01f9a1f0b71d73e3dc6cd1318be1a56361a7791258352eac95e2507281cdf26ec891690952848b63006c2adeda30c217765f72a91b",
+    +     "verificationMethod": "did:ethr:0xd6f8d6ca86aa01e551a311d670a0d1bd8577e5fb#controller",
+        },
