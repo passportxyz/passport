@@ -214,7 +214,8 @@ export const formatMultiAttestationRequestWithPassportAndScore = async (
 
 export const formatMultiAttestationRequestWithScore = async (
   recipient: string,
-  chainIdHex: keyof typeof onchainInfo
+  chainIdHex: keyof typeof onchainInfo,
+  customScorerId?: number
 ): Promise<MultiAttestationRequest[]> => {
   const defaultRequestData = {
     recipient,
@@ -227,7 +228,7 @@ export const formatMultiAttestationRequestWithScore = async (
   const scoreRequestData: AttestationRequestData[] = [
     {
       ...defaultRequestData,
-      data: encodeEasScore(await fetchPassportScore(recipient)),
+      data: encodeEasScore(await fetchPassportScore(recipient, customScorerId)),
     },
   ];
 

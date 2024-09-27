@@ -649,7 +649,7 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
 // Expose entry point for getting eas payload for moving only the score on-chain (Score Attestations)
 app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
   try {
-    const { recipient, nonce, chainIdHex } = req.body as EasRequestBody;
+    const { recipient, nonce, chainIdHex, scorerId } = req.body as EasRequestBody;
     if (!Object.keys(onchainInfo).includes(chainIdHex)) {
       return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
     }
@@ -661,7 +661,8 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
     try {
       const multiAttestationRequest = await passportSchema.formatMultiAttestationRequestWithScore(
         recipient,
-        attestationChainIdHex
+        attestationChainIdHex,
+        scorerId
       );
 
       const fee = await getEASFeeAmount(EAS_FEE_USD);
