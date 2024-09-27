@@ -323,9 +323,8 @@ export type EasRequestBody = {
   nonce: number;
   recipient: string;
   credentials?: VerifiableCredential[];
-  dbAccessToken: string;
   chainIdHex: string;
-  scorerId: number;
+  customScorerId?: number;
 };
 
 // Passport DID

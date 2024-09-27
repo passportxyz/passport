@@ -1,4 +1,4 @@
-import { EasPayload, VerifiableCredential, Passport } from "@gitcoin/passport-types";
+import { EasPayload, VerifiableCredential, Passport, EasRequestBody } from "@gitcoin/passport-types";
 import { ethers, EthersError, isError } from "ethers";
 import { useCallback, useContext, useMemo, useState } from "react";
 import { CeramicContext } from "../context/ceramicContext";
@@ -31,7 +31,7 @@ export const useSyncToChainButton = ({
   const [syncingToChain, setSyncingToChain] = useState(false);
   const { switchNetwork } = useSwitchNetwork();
 
-  const scorerId = useMemo(
+  const customScorerId = useMemo(
     () => (customization.scorer?.id && chain?.useCustomCommunityId ? customization.scorer.id : undefined),
     [chain?.useCustomCommunityId, customization?.scorer?.id]
   );
@@ -72,12 +72,12 @@ export const useSyncToChainButton = ({
 
           const nonce = await gitcoinVerifierContract.recipientNonces(address);
 
-          const payload = {
-            recipient: address,
+          const payload: EasRequestBody = {
+            recipient: address || "",
             credentials,
             nonce,
             chainIdHex: chain.id,
-            scorerId,
+            customScorerId,
           };
 
           if (chain && chain.attestationProvider) {
