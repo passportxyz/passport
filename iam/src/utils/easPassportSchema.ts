@@ -99,7 +99,6 @@ export const formatPassportAttestationData = (credentials: VerifiableCredential[
           stampInfo: stampInfo,
         });
       } else {
-        // TODO do we keep this?
         throw new Error(`Provider ${credential.credentialSubject.provider} not supported. Please contact support.`);
       }
       return acc;

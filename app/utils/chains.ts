@@ -129,23 +129,6 @@ if (usingTestEnvironment) {
       monochromeIcon: "./assets/op-logo-monochrome.svg",
     },
   });
-
-  chainConfigs.push({
-    id: lineaGoerliChainId,
-    token: "ETH",
-    label: "Linea Goerli",
-    rpcUrl: "https://rpc.goerli.linea.build",
-    explorerUrl: "https://explorer.goerli.linea.build/",
-    icon: "./assets/linea-logo.png",
-    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
-    attestationProviderConfig: {
-      name: "Verax + EAS",
-      status: "enabled",
-      skipByDefault: false,
-      easScanUrl: "https://linea-goerli.easscan.org",
-      monochromeIcon: "./assets/linea-logo.png",
-    },
-  });
 }
 
 if (!TEST_MODE) {
