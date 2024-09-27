@@ -1,6 +1,6 @@
-import { EasPayload, VerifiableCredential, Passport } from "@gitcoin/passport-types";
+import { EasPayload, VerifiableCredential, Passport, EasRequestBody } from "@gitcoin/passport-types";
 import { ethers, EthersError, isError } from "ethers";
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { CeramicContext } from "../context/ceramicContext";
 import { useWalletStore } from "../context/walletStore";
 import { OnChainStatus } from "../utils/onChainStatus";
@@ -8,6 +8,7 @@ import { Chain } from "../utils/chains";
 import { useOnChainData } from "./useOnChainData";
 import { useSwitchNetwork } from "@web3modal/ethers/react";
 import { useMessage } from "./useMessage";
+import { useCustomization } from "./useCustomization";
 
 export const useSyncToChainButton = ({
   chain,
@@ -23,11 +24,17 @@ export const useSyncToChainButton = ({
   const address = useWalletStore((state) => state.address);
   const provider = useWalletStore((state) => state.provider);
   const connectedChain = useWalletStore((state) => state.chain);
+  const customization = useCustomization();
 
   const { passport } = useContext(CeramicContext);
   const { refresh } = useOnChainData();
   const [syncingToChain, setSyncingToChain] = useState(false);
   const { switchNetwork } = useSwitchNetwork();
+
+  const customScorerId = useMemo(
+    () => (customization.scorer?.id && chain?.useCustomCommunityId ? customization.scorer.id : undefined),
+    [chain?.useCustomCommunityId, customization?.scorer?.id]
+  );
 
   const loadVerifierContract = useCallback(
     async (provider: ethers.Eip1193Provider) => {
@@ -65,11 +72,12 @@ export const useSyncToChainButton = ({
 
           const nonce = await gitcoinVerifierContract.recipientNonces(address);
 
-          const payload = {
-            recipient: address,
+          const payload: EasRequestBody = {
+            recipient: address || "",
             credentials,
             nonce,
             chainIdHex: chain.id,
+            customScorerId,
           };
 
           if (chain && chain.attestationProvider) {
