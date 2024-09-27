@@ -29,7 +29,7 @@ describe("<ExpiredStampsPanel />", () => {
     expect(screen.queryByText("Expired Stamps")).toBeInTheDocument();
     expect(screen.queryByText("Reverify stamps")).not.toBeInTheDocument();
     expect(screen.queryByAltText("Platform Icon")).not.toBeInTheDocument();
-    expect(screen.queryByText("You don't have any expired stamps")).toBeInTheDocument();
+    expect(screen.queryByText("You don't have any expired Stamps")).toBeInTheDocument();
   });
 
   it("renders the button to re-verify expired stamps, when there are expired stamps", () => {
@@ -37,6 +37,6 @@ describe("<ExpiredStampsPanel />", () => {
     expect(screen.queryByText("Expired Stamps")).toBeInTheDocument();
     expect(screen.queryByText("Reverify stamps")).toBeInTheDocument();
     expect(screen.queryByAltText("Platform Icon")).toBeInTheDocument();
-    expect(screen.queryByText("You don't have any expired stamps")).not.toBeInTheDocument();
+    expect(screen.queryByText("You don't have any expired Stamps")).not.toBeInTheDocument();
   });
 });
