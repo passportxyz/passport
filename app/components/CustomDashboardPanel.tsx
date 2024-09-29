@@ -51,7 +51,7 @@ export const CustomDashboardPanel = ({ logo, className, children }: CustomDashbo
   return (
     <div className={`${className} flex rounded border border-customization-background-1`}>
       <div className="grid shrink border-r border-customization-background-1 bg-gradient-to-b from-transparent to-customization-background-1/[.4]">
-        <div className="flex col-start-1 row-start-1 flex-col items-center justify-center p-6 z-10">
+        <div className="flex col-start-1 row-start-1 flex-col items-center justify-center p-6">
           {logo.image}
           {logo.caption && <span className="mt-1 text-3xl leading-none">{logo.caption}</span>}
         </div>
