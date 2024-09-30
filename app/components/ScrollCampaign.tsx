@@ -151,6 +151,7 @@ const ScrollLogin = () => {
             </div>
             <div className="mt-8">
               <LoadButton
+                data-testid="connectWalletButton"
                 variant="custom"
                 onClick={signIn}
                 isLoading={isLoggingIn}
