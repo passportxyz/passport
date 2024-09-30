@@ -6,11 +6,11 @@ import { AccountCenter } from "./AccountCenter";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { useLoginFlow } from "../hooks/useLoginFlow";
 import { LoadButton } from "./LoadButton";
-import { useNextCampaignStep } from "../pages/Campaign";
+import { useNextCampaignStep } from "../hooks/useNextCampaignStep";
 
 const SCROLL_STEP_NAMES = ["Connect Wallet", "Connect to Github", "Mint Badge"];
 
-const ScrollStepsBar = ({ className }: { className?: string }) => {
+export const ScrollStepsBar = ({ className }: { className?: string }) => {
   const { step } = useParams();
 
   return (
@@ -115,6 +115,7 @@ const ScrollLogin = () => {
             </div>
             <div className="mt-8">
               <LoadButton
+                data-testid="connectWalletButton"
                 variant="custom"
                 onClick={signIn}
                 isLoading={isLoggingIn}

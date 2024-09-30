@@ -45,6 +45,23 @@ datadogLogs.init({
   env: process.env.NEXT_PUBLIC_DATADOG_ENV || "",
 });
 
+export const AppRoutes = () => (
+  <Routes>
+    <Route path="/:key?" element={<CustomizationUrlLayoutRoute />}>
+      <Route path="" element={<Home />} />
+      <Route path="welcome" element={<Welcome />} />
+      <Route path="dashboard">
+        {/* This is here to support legacy customization paths */}
+        <Route path=":customizationKey" element={<Dashboard />} />
+        <Route path="" element={<Dashboard />} />
+      </Route>
+      <Route path="privacy" element={<Privacy />} />
+      <Route path="campaign/:campaignId/:step?" element={<Campaign />} />
+      <Route path="*" element={<NotFound />} />
+    </Route>
+  </Routes>
+);
+
 const App: NextPage = () => {
   if (isServerOnMaintenance()) {
     return <Maintenance />;
@@ -54,20 +71,7 @@ const App: NextPage = () => {
     <div>
       <Router>
         <WalletStoreManager>
-          <Routes>
-            <Route path="/:key?" element={<CustomizationUrlLayoutRoute />}>
-              <Route path="" element={<Home />} />
-              <Route path="welcome" element={<Welcome />} />
-              <Route path="dashboard">
-                {/* This is here to support legacy customization paths */}
-                <Route path=":customizationKey" element={<Dashboard />} />
-                <Route path="" element={<Dashboard />} />
-              </Route>
-              <Route path="privacy" element={<Privacy />} />
-              <Route path="campaign/:campaignId/:step?" element={<Campaign />} />
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
+          <AppRoutes />
         </WalletStoreManager>
       </Router>
     </div>
