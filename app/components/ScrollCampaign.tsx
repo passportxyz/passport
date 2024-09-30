@@ -140,60 +140,95 @@ const ScrollFooter = ({ className }: { className?: string }) => {
   );
 };
 
-const ScrollLogin = () => {
-  const nextStep = useNextCampaignStep();
+const ScrollCampaignPageRoot = ({ children }: { children: React.ReactNode }) => {
   const { isConnected } = useWeb3ModalAccount();
-  const { isLoggingIn, signIn, loginStep } = useLoginFlow({ onLoggedIn: nextStep });
-
   return (
     <PageRoot className="text-color-1">
       {isConnected && <AccountCenter />}
       <ScrollHeader className="fixed top-0 left-0 right-0" />
-      <div className="flex grow">
-        <div className="flex flex-col min-h-screen justify-center items-center shrink-0 grow w-1/2">
-          <div className="mt-24 mb-28 mx-8 lg:mr-1 lg:ml-8 flex flex-col items-start justify-center max-w-[572px]">
-            <ScrollStepsBar className="mb-8" />
-            <div className="text-5xl text-[#FFEEDA]">Developer Badge</div>
-            <div className="text-xl mt-2">
-              Connect your GitHub account to prove the number of contributions you have made, then mint your badge to
-              prove you are a Rust developer.
-            </div>
-            <div className="mt-8">
-              <LoadButton
-                data-testid="connectWalletButton"
-                variant="custom"
-                onClick={signIn}
-                isLoading={isLoggingIn}
-                className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200"
-              >
-                <div className="flex flex-col items-center justify-center">
-                  {isLoggingIn ? (
-                    <>
-                      <div>Connecting...</div>
-                      <div className="text-sm font-base">
-                        (
-                        {loginStep === "PENDING_WALLET_CONNECTION"
-                          ? "Connect your wallet"
-                          : loginStep === "PENDING_DATABASE_CONNECTION"
-                            ? "Sign message in wallet"
-                            : ""}
-                        )
-                      </div>
-                    </>
-                  ) : (
-                    "Connect Wallet"
-                  )}
-                </div>
-              </LoadButton>
-            </div>
-          </div>
-        </div>
-        <div className="hidden lg:block relative overflow-hidden h-screen w-full max-w-[779px]">
-          <img className="absolute top-0 left-0" src="/assets/campaignBackground.png" alt="Campaign Background Image" />
-        </div>
-      </div>
+      {children}
       <ScrollFooter className="absolute bottom-0 left-0 right-0 z-10" />
     </PageRoot>
+  );
+};
+
+const ScrollCampaignPage = ({
+  children,
+  fadeBackgroundImage,
+  emblemSrc,
+}: {
+  children: React.ReactNode;
+  fadeBackgroundImage?: boolean;
+  emblemSrc?: string;
+}) => {
+  return (
+    <ScrollCampaignPageRoot>
+      <div className="grow grid grid-cols-2 items-center justify-center">
+        {emblemSrc && (
+          <div className="hidden lg:flex col-start-2 row-start-1 justify-center xl:justify-start xl:ml-16 z-10 ml-2">
+            <img src={emblemSrc} alt="Campaign Emblem" />
+          </div>
+        )}
+        <div className="flex col-start-1 col-end-3 row-start-1">
+          <div className="flex flex-col min-h-screen justify-center items-center shrink-0 grow w-1/2">
+            <div className="mt-24 mb-28 mx-8 lg:mr-1 lg:ml-8 flex flex-col items-start justify-center max-w-[572px]">
+              <ScrollStepsBar className="mb-8" />
+              {children}
+            </div>
+          </div>
+          <div className="hidden lg:block relative overflow-hidden h-screen w-full max-w-[779px]">
+            <img
+              className={`absolute top-0 left-0 ${fadeBackgroundImage ? "opacity-50" : ""}`}
+              src="/assets/campaignBackground.png"
+              alt="Campaign Background Image"
+            />
+          </div>
+        </div>
+      </div>
+    </ScrollCampaignPageRoot>
+  );
+};
+
+const ScrollLogin = () => {
+  const nextStep = useNextCampaignStep();
+  const { isLoggingIn, signIn, loginStep } = useLoginFlow({ onLoggedIn: nextStep });
+
+  return (
+    <ScrollCampaignPage>
+      <div className="text-5xl text-[#FFEEDA]">Developer Badge</div>
+      <div className="text-xl mt-2">
+        Connect your GitHub account to prove the number of contributions you have made, then mint your badge to prove
+        you are a Rust developer.
+      </div>
+      <div className="mt-8">
+        <LoadButton
+          data-testid="connectWalletButton"
+          variant="custom"
+          onClick={signIn}
+          isLoading={isLoggingIn}
+          className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200"
+        >
+          <div className="flex flex-col items-center justify-center">
+            {isLoggingIn ? (
+              <>
+                <div>Connecting...</div>
+                <div className="text-sm font-base">
+                  (
+                  {loginStep === "PENDING_WALLET_CONNECTION"
+                    ? "Connect your wallet"
+                    : loginStep === "PENDING_DATABASE_CONNECTION"
+                      ? "Sign message in wallet"
+                      : ""}
+                  )
+                </div>
+              </>
+            ) : (
+              "Connect Wallet"
+            )}
+          </div>
+        </LoadButton>
+      </div>
+    </ScrollCampaignPage>
   );
 };
 
@@ -444,21 +479,57 @@ const ScrollMintedBadge = () => {
   );
 };
 
+const ScrollMintBadge = () => {
+  const nextStep = useNextCampaignStep();
+  const { isLoggingIn, signIn, loginStep } = useLoginFlow({ onLoggedIn: nextStep });
+
+  return (
+    <ScrollCampaignPage fadeBackgroundImage emblemSrc="/assets/scrollCampaignMint.svg">
+      <div className="text-5xl text-[#FFEEDA]">Developer Badge</div>
+      <div className="text-xl mt-2">
+        Connect your GitHub account to prove the number of contributions you have made, then mint your badge to prove
+        you are a Rust developer.
+      </div>
+      <div className="mt-8">
+        <LoadButton
+          data-testid="connectWalletButton"
+          variant="custom"
+          onClick={signIn}
+          isLoading={isLoggingIn}
+          className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200"
+        >
+          <div className="flex flex-col items-center justify-center">
+            {isLoggingIn ? (
+              <>
+                <div>Connecting...</div>
+                <div className="text-sm font-base">
+                  (
+                  {loginStep === "PENDING_WALLET_CONNECTION"
+                    ? "Connect your wallet"
+                    : loginStep === "PENDING_DATABASE_CONNECTION"
+                      ? "Sign message in wallet"
+                      : ""}
+                  )
+                </div>
+              </>
+            ) : (
+              "Connect Wallet"
+            )}
+          </div>
+        </LoadButton>
+      </div>
+    </ScrollCampaignPage>
+  );
+};
+
 export const ScrollCampaign = ({ step }: { step: number }) => {
   if (step === 0) {
     return <ScrollLogin />;
   } else if (step === 1) {
     return <ScrollConnectGithub />;
   } else if (step === 2) {
-    console.log("Mint your badge");
-    return (
-      <>
-        <h1>Mint your badge WIP...</h1>
-      </>
-    );
+    return <ScrollMintBadge />;
   } else if (step === 3) {
-    // Returning user
-    // Badge Minted
     return <ScrollMintedBadge />;
   }
   return <NotFound />;
