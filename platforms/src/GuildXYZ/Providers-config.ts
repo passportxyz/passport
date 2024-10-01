@@ -23,7 +23,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
   },
   {
     platformGroup: "Guild Passport Member",
-    providers: [{ title: "Member with 1 or more roles in Gitcoin Passport Guild", name: "GuildPassportMember" }],
+    providers: [{ title: "Member with 1 or more roles in Passport Guild", name: "GuildPassportMember" }],
   },
 ];
 
