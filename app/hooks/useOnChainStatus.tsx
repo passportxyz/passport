@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState, useMemo } from "react";
 import { CeramicContext } from "../context/ceramicContext";
-import { ScorerContext } from "../context/scorerContext";
+import { parseFloatOneDecimal, ScorerContext } from "../context/scorerContext";
 import { Chain, chains } from "../utils/chains";
 import { AttestationProvider } from "../utils/AttestationProvider";
 import { OnChainStatus } from "../utils/onChainStatus";
@@ -30,7 +30,7 @@ export const parseValidChains = (customization: Customization, chainConfig: Chai
   }
 };
 
-export const useOnChainStatus = ({ chain }: { chain?: Chain }): OnChainStatus => {
+export const useOnChainStatus = ({ chain }: { chain?: Chain }): { status: OnChainStatus; isPending: boolean } => {
   const { allProvidersState } = useContext(CeramicContext);
   const { data, isPending } = useOnChainData();
   const { rawScore, scoreState } = useContext(ScorerContext);
@@ -53,7 +53,7 @@ export const useOnChainStatus = ({ chain }: { chain?: Chain }): OnChainStatus =>
             providers,
             rawScore,
             scoreState,
-            score,
+            parseFloatOneDecimal(String(score)),
             expirationDate
           )
         : OnChainStatus.NOT_MOVED;
@@ -62,7 +62,7 @@ export const useOnChainStatus = ({ chain }: { chain?: Chain }): OnChainStatus =>
     checkStatus();
   }, [allProvidersState, chain, chain?.id, data, isPending, rawScore, scoreState]);
 
-  return onChainStatus;
+  return { isPending, status: onChainStatus };
 };
 
 export const useAllOnChainStatus = () => {
@@ -86,7 +86,7 @@ export const useAllOnChainStatus = () => {
           providers,
           rawScore,
           scoreState,
-          score,
+          parseFloatOneDecimal(String(score)),
           expirationDate
         );
 

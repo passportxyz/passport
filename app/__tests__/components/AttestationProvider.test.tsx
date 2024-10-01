@@ -22,10 +22,11 @@ const veraxAttestationProvider = new VeraxAndEASAttestationProvider({
   easScanUrl: "https://eas.scan.url",
 });
 
+const tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
 const issuanceDate0 = new Date();
-const expirationDate0 = new Date();
+const expirationDate0 = tomorrow;
 const issuanceDate1 = new Date();
-const expirationDate1 = new Date();
+const expirationDate1 = tomorrow;
 
 const mockAllProvidersState: AllProvidersState = {
   ["Google"]: {
@@ -72,7 +73,7 @@ const mockOnChainProviders: OnChainProviderType[] = [
 const onChainScore = 10.1;
 
 describe.each([easAttestationProvider, veraxAttestationProvider])("AttestationProviders", (attestationProvider) => {
-  describe("checkOnChainStatus", () => {
+  describe(`checkOnChainStatus ${attestationProvider.name}`, () => {
     it("should return MOVED_UP_TO_DATE when onChainProviders matches with allProvidersState", () => {
       expect(
         attestationProvider.checkOnChainStatus(
@@ -104,6 +105,8 @@ describe.each([easAttestationProvider, veraxAttestationProvider])("AttestationPr
           stamp: {
             provider: "Github",
             credential: {
+              expirationDate: expirationDate0,
+              issuanceDate: issuanceDate0,
               credentialSubject: {
                 hash: "hash2",
               },

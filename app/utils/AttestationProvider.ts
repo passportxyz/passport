@@ -128,19 +128,35 @@ class BaseAttestationProvider implements AttestationProvider {
       (provider): provider is ProviderWithStamp => provider?.stamp !== undefined
     );
 
-    const [equivalentProviders, differentProviders] = verifiedDbProviders.reduce(
-      ([eq, diff], provider): [ProviderWithStamp[], ProviderWithStamp[]] => {
-        const isEquivalent = onChainProviders.some(
+    const equivalentProviders = verifiedDbProviders.reduce((eq, provider) => {
+      if (
+        onChainProviders.some(
           (onChainProvider) =>
             onChainProvider.providerName === provider.stamp.provider &&
             onChainProvider.credentialHash === provider.stamp.credential.credentialSubject?.hash
-        );
-        return isEquivalent ? [[...eq, provider], diff] : [eq, [...diff, provider]];
-      },
-      [[], []] as [ProviderWithStamp[], ProviderWithStamp[]]
+        )
+      ) {
+        eq.add(provider.stamp.provider);
+      }
+      return eq;
+    }, new Set<string>());
+
+    const dbProviderNames = new Set(
+      verifiedDbProviders
+        // Ignore offchain expired credentials
+        .filter((provider) => new Date(provider.stamp.credential.expirationDate) > new Date())
+        .map((provider) => provider.stamp.provider)
     );
 
-    return equivalentProviders.length === onChainProviders.length && differentProviders.length === 0
+    const hasDbOnlyProviders = Array.from(dbProviderNames).some((provider) => !equivalentProviders.has(provider));
+
+    const onchainProviderNames = new Set(onChainProviders.map((provider) => provider.providerName));
+
+    const hasOnchainOnlyProviders = Array.from(onchainProviderNames).some(
+      (provider) => !equivalentProviders.has(provider)
+    );
+
+    return equivalentProviders.size === onChainProviders.length && !hasDbOnlyProviders && !hasOnchainOnlyProviders
       ? OnChainStatus.MOVED_UP_TO_DATE
       : OnChainStatus.MOVED_OUT_OF_DATE;
   }

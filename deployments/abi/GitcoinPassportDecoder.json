@@ -680,6 +680,7 @@
     "function getPassport(address user) view returns ((string provider, bytes32 hash, uint64 time, uint64 expirationTime)[])",
     "function getProviders(uint32 version) view returns (string[])",
     "function getScore(address user) view returns (uint256)",
+    "function getScore(uint32 communityId, address user) view returns (uint256)",
     "function gitcoinResolver() view returns (address)",
     "function initialize()",
     "function isHuman(address user) view returns (bool)",

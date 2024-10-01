@@ -13,7 +13,7 @@ import { useCustomization } from "../hooks/useCustomization";
 const scorerApiGetScore = CERAMIC_CACHE_ENDPOINT + "/score";
 const scorerApiGetWeights = CERAMIC_CACHE_ENDPOINT + "/weights";
 
-const parseFloatOneDecimal = (value: string) => parseFloat(parseFloat(value).toFixed(1));
+export const parseFloatOneDecimal = (value: string) => parseFloat(parseFloat(value).toFixed(1));
 
 export type PassportSubmissionStateType =
   | "APP_INITIAL"
