@@ -8,7 +8,7 @@ export class HolonymPlatform implements Platform {
   path = "Holonym";
 
   banner = {
-    heading: "To add the Holonym Stamp to your Gitcoin Passport...",
+    heading: "To add the Holonym Stamp to your Passport...",
     content: (
       <ul style={{ listStyleType: "disc", paddingLeft: "20px" }}>
         <li>
@@ -19,7 +19,7 @@ export class HolonymPlatform implements Platform {
           Go to <Hyperlink href="https://holonym.id">Holonym's page</Hyperlink>, verify your ID by connecting your
           wallet, and follow prompts to obtain the Government ID or ePassport Proofs
         </li>
-        <li>After verification, mint the SBT to your wallet, then link it to your Gitcoin Passport by verifying it.</li>
+        <li>After verification, mint the SBT to your wallet, then link it to your Passport by verifying it.</li>
       </ul>
     ),
     cta: {
