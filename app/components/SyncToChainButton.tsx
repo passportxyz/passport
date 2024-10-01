@@ -27,11 +27,12 @@ export type SyncToChainProps = {
   onChainStatus: OnChainStatus;
   chain: Chain;
   className?: string;
+  isLoading: boolean;
 };
 
 const userHasApprovedLowScoreMintAtom = atom<boolean>(false);
 
-export function SyncToChainButton({ onChainStatus, chain, className }: SyncToChainProps): JSX.Element {
+export function SyncToChainButton({ onChainStatus, chain, className, isLoading }: SyncToChainProps): JSX.Element {
   const [userHasApprovedLowScoreMint, setUserHasApprovedLowScoreMint] = useAtom(userHasApprovedLowScoreMintAtom);
   const { rawScore, threshold, scoreState } = useContext(ScorerContext);
   const [showLowScoreAlert, setShowLowScoreAlert] = useState(false);
@@ -64,6 +65,7 @@ export function SyncToChainButton({ onChainStatus, chain, className }: SyncToCha
   }, [onClick, setUserHasApprovedLowScoreMint]);
 
   const loading =
+    isLoading ||
     showLowScoreAlert ||
     syncingToChain ||
     onChainStatus === OnChainStatus.LOADING ||

@@ -9,13 +9,11 @@ import { chains } from "../utils/chains";
 
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
-import { decodeProviderInformation, decodeScoreAttestation, getAttestationData } from "../utils/onChainStamps";
+import { decodeProviderInformation, getAttestationData } from "../utils/onChainStamps";
 import { FeatureFlags } from "../config/feature_flags";
 import { UseQueryResult, useQueries, useQueryClient } from "@tanstack/react-query";
-
-const ENABLED_CHAIN_IDS = chains
-  .filter(({ attestationProvider }) => attestationProvider?.status === "enabled")
-  .map(({ id }) => id);
+import { parseValidChains } from "./useOnChainStatus";
+import { useCustomization } from "./useCustomization";
 
 export interface OnChainProviderMap {
   [chainId: string]: OnChainProviderType[];
@@ -61,15 +59,24 @@ type GetOnChainDataForChainResult = SingleChainData & { chainId: string };
 const getOnChainDataForChain = async ({
   address,
   chainId,
+  customScorerId,
 }: {
   address: string;
   chainId: string;
+  customScorerId?: number;
 }): Promise<GetOnChainDataForChainResult> => {
-  const passportAttestationData = await getAttestationData(address, chainId as keyof typeof onchainInfo);
+  const passportAttestationData = await getAttestationData(
+    address,
+    chainId as keyof typeof onchainInfo,
+    customScorerId
+  );
   let providers: OnChainProviderType[] = [];
   let score = 0;
   let expirationDate: Date | undefined;
   if (passportAttestationData) {
+    score = passportAttestationData.score.value;
+    expirationDate = passportAttestationData.score.expirationDate;
+
     const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
       passportAttestationData.passport
     );
@@ -82,8 +89,6 @@ const getOnChainDataForChain = async ({
         expirationDate: new Date(expirationDates[index].toNumber() * 1000),
         issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
       }));
-
-    ({ score, expirationDate } = decodeScoreAttestation(passportAttestationData.score));
   }
 
   return {
@@ -95,6 +100,11 @@ const getOnChainDataForChain = async ({
 };
 
 const useOnChainDataQuery = (address?: string) => {
+  const customization = useCustomization();
+  const enabledChains = chains
+    .filter(({ attestationProvider }) => attestationProvider?.status === "enabled")
+    .filter((chain) => parseValidChains(customization, chain));
+
   // Combines results of all queries into a single object
   const combine = useCallback((results: UseQueryResult<GetOnChainDataForChainResult>[]) => {
     const isPending = results.some((result) => result.isPending);
@@ -121,11 +131,14 @@ const useOnChainDataQuery = (address?: string) => {
   }, []);
 
   return useQueries({
-    queries: ENABLED_CHAIN_IDS.map((chainId) => ({
-      enabled: FeatureFlags.FF_CHAIN_SYNC && Boolean(address),
-      queryKey: [ALL_CHAIN_DATA_QUERY_KEY, address, chainId],
-      queryFn: () => getOnChainDataForChain({ address: address!, chainId }),
-    })),
+    queries: enabledChains.map((chain) => {
+      const customScorerId = chain.useCustomCommunityId && customization.scorer ? customization.scorer.id : undefined;
+      return {
+        enabled: FeatureFlags.FF_CHAIN_SYNC && Boolean(address),
+        queryKey: [ALL_CHAIN_DATA_QUERY_KEY, address, chain.id, customScorerId],
+        queryFn: () => getOnChainDataForChain({ address: address!, chainId: chain.id, customScorerId }),
+      };
+    }),
     combine,
   });
 };

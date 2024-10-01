@@ -22,10 +22,11 @@ const veraxAttestationProvider = new VeraxAndEASAttestationProvider({
   easScanUrl: "https://eas.scan.url",
 });
 
+const tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
 const issuanceDate0 = new Date();
-const expirationDate0 = new Date();
+const expirationDate0 = tomorrow;
 const issuanceDate1 = new Date();
-const expirationDate1 = new Date();
+const expirationDate1 = tomorrow;
 
 const mockAllProvidersState: AllProvidersState = {
   ["Google"]: {
@@ -103,6 +104,8 @@ describe.each([easAttestationProvider, veraxAttestationProvider])("AttestationPr
         ["Github"]: {
           stamp: {
             provider: "Github",
+            expirationDate: expirationDate0,
+            issuanceDate: issuanceDate0,
             credential: {
               credentialSubject: {
                 hash: "hash2",

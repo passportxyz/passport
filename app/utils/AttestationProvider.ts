@@ -128,19 +128,41 @@ class BaseAttestationProvider implements AttestationProvider {
       (provider): provider is ProviderWithStamp => provider?.stamp !== undefined
     );
 
-    const [equivalentProviders, differentProviders] = verifiedDbProviders.reduce(
-      ([eq, diff], provider): [ProviderWithStamp[], ProviderWithStamp[]] => {
-        const isEquivalent = onChainProviders.some(
+    const equivalentProviders = verifiedDbProviders.reduce((eq, provider) => {
+      if (
+        onChainProviders.some(
           (onChainProvider) =>
             onChainProvider.providerName === provider.stamp.provider &&
             onChainProvider.credentialHash === provider.stamp.credential.credentialSubject?.hash
-        );
-        return isEquivalent ? [[...eq, provider], diff] : [eq, [...diff, provider]];
-      },
-      [[], []] as [ProviderWithStamp[], ProviderWithStamp[]]
+        )
+      ) {
+        eq.add(provider.stamp.provider);
+      }
+      return eq;
+    }, new Set<string>());
+
+    const dbProviderNames = new Set(
+      verifiedDbProviders
+        // Ignore offchain expired credentials
+        .filter((provider) => new Date(provider.stamp.credential.expirationDate) > new Date())
+        .map((provider) => provider.stamp.provider)
     );
 
-    return equivalentProviders.length === onChainProviders.length && differentProviders.length === 0
+    console.log("verifiedDbProviders", verifiedDbProviders);
+    console.log("dbProviderNames", dbProviderNames);
+    console.log(
+      "expirations",
+      verifiedDbProviders.map((provider) => provider.stamp.credential.expirationDate)
+    );
+    const onlyDatabaseProviders = dbProviderNames.difference(equivalentProviders);
+
+    const onchainProviderNames = new Set(onChainProviders.map((provider) => provider.providerName));
+
+    const onlyOnChainProviders = onchainProviderNames.difference(equivalentProviders);
+
+    return equivalentProviders.size === onChainProviders.length &&
+      onlyDatabaseProviders.size === 0 &&
+      onlyOnChainProviders.size === 0
       ? OnChainStatus.MOVED_UP_TO_DATE
       : OnChainStatus.MOVED_OUT_OF_DATE;
   }

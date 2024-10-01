@@ -12,7 +12,7 @@ const formatDate = (date: Date): string =>
   Intl.DateTimeFormat("en-US", { month: "short", day: "2-digit", year: "numeric" }).format(date);
 
 export function NetworkCard({ chain }: { chain: Chain }) {
-  const status = useOnChainStatus({ chain });
+  const { status, isPending } = useOnChainStatus({ chain });
   const { expirationDate } = useOnChainData().data[chain.id] || {};
   const address = useWalletStore((state) => state.address);
 
@@ -35,7 +35,7 @@ export function NetworkCard({ chain }: { chain: Chain }) {
         <div className="flex items-center">
           <img className="h-10" src={chain.attestationProvider?.monochromeIcon} alt={`${chain.label} logo`} />
           <h1 className="ml-3 grow text-base font-heading">{chain.label}</h1>
-          <SyncToChainButton onChainStatus={status} chain={chain} />
+          <SyncToChainButton onChainStatus={status} chain={chain} isLoading={isPending} />
         </div>
         {isOnChain && (
           <div className="flex flex-row-reverse text-sm items-center mt-2">

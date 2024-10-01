@@ -42,7 +42,7 @@ const LINEA_CHAIN_NAME = process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on" ? "Line
 const chain = chains.find(({ label }) => label === LINEA_CHAIN_NAME);
 
 export const VeraxPanel = ({ className }: { className: string }) => {
-  const onChainStatus = useOnChainStatus({ chain });
+  const { status: onChainStatus } = useOnChainStatus({ chain });
   const { score } = useContext(ScorerContext);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
