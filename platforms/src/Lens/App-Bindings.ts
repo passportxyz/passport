@@ -9,7 +9,7 @@ export class LensPlatform extends Platform {
   isEVM = true;
 
   banner = {
-    content: `To add the Lens Stamp to your Gitcoin Passport, ensure you're using
+    content: `To add the Lens Stamp to your Passport, ensure you're using
     your Lens Handle, not your profile. A Lens Handle is your unique identifier on
     Lens, required for verification. Obtain a Handle either through the Lens beta or
     by purchasing one from NFT marketplaces. Note: Verification may be delayed after

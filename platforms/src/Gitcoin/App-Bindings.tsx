@@ -13,7 +13,7 @@ export class GitcoinPlatform extends Platform {
   banner = {
     heading: (
       <div>
-        To qualify for the Gitcoin stamp, your contributions must be made to grant rounds officially funded by Gitcoin.
+        To qualify for the Gitcoin Stamp, your contributions must be made to grant rounds officially funded by Gitcoin.
         This includes designated rounds such as Citizens rounds, GG18, GG19, among others, as detailed{" "}
         <Hyperlink href="https://github.com/ufkhan97/gitcoin-grants-heroku/blob/main/all_rounds.csv">here</Hyperlink>.
       </div>
