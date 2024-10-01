@@ -148,21 +148,15 @@ class BaseAttestationProvider implements AttestationProvider {
         .map((provider) => provider.stamp.provider)
     );
 
-    console.log("verifiedDbProviders", verifiedDbProviders);
-    console.log("dbProviderNames", dbProviderNames);
-    console.log(
-      "expirations",
-      verifiedDbProviders.map((provider) => provider.stamp.credential.expirationDate)
-    );
-    const onlyDatabaseProviders = dbProviderNames.difference(equivalentProviders);
+    const hasDbOnlyProviders = Array.from(dbProviderNames).some((provider) => !equivalentProviders.has(provider));
 
     const onchainProviderNames = new Set(onChainProviders.map((provider) => provider.providerName));
 
-    const onlyOnChainProviders = onchainProviderNames.difference(equivalentProviders);
+    const hasOnchainOnlyProviders = Array.from(onchainProviderNames).some(
+      (provider) => !equivalentProviders.has(provider)
+    );
 
-    return equivalentProviders.size === onChainProviders.length &&
-      onlyDatabaseProviders.size === 0 &&
-      onlyOnChainProviders.size === 0
+    return equivalentProviders.size === onChainProviders.length && !hasDbOnlyProviders && !hasOnchainOnlyProviders
       ? OnChainStatus.MOVED_UP_TO_DATE
       : OnChainStatus.MOVED_OUT_OF_DATE;
   }

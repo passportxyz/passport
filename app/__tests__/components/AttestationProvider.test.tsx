@@ -73,7 +73,7 @@ const mockOnChainProviders: OnChainProviderType[] = [
 const onChainScore = 10.1;
 
 describe.each([easAttestationProvider, veraxAttestationProvider])("AttestationProviders", (attestationProvider) => {
-  describe("checkOnChainStatus", () => {
+  describe(`checkOnChainStatus ${attestationProvider.name}`, () => {
     it("should return MOVED_UP_TO_DATE when onChainProviders matches with allProvidersState", () => {
       expect(
         attestationProvider.checkOnChainStatus(
@@ -104,9 +104,9 @@ describe.each([easAttestationProvider, veraxAttestationProvider])("AttestationPr
         ["Github"]: {
           stamp: {
             provider: "Github",
-            expirationDate: expirationDate0,
-            issuanceDate: issuanceDate0,
             credential: {
+              expirationDate: expirationDate0,
+              issuanceDate: issuanceDate0,
               credentialSubject: {
                 hash: "hash2",
               },
