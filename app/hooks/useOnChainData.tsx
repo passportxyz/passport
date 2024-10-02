@@ -135,7 +135,7 @@ const useOnChainDataQuery = (address?: string) => {
       const customScorerId = chain.useCustomCommunityId && customization.scorer ? customization.scorer.id : undefined;
       return {
         enabled: FeatureFlags.FF_CHAIN_SYNC && Boolean(address),
-        queryKey: [ALL_CHAIN_DATA_QUERY_KEY, address, chain.id, customScorerId],
+        queryKey: [...ALL_CHAIN_DATA_QUERY_KEY, address, chain.id, customScorerId],
         queryFn: () => getOnChainDataForChain({ address: address!, chainId: chain.id, customScorerId }),
       };
     }),
