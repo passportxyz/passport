@@ -7,7 +7,8 @@ import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { useLoginFlow } from "../hooks/useLoginFlow";
 import { LoadButton } from "./LoadButton";
 
-import { useNextCampaignStep, useNavigateToRootStep } from "../pages/Campaign";
+import { useNextCampaignStep, useNavigateToRootStep } from "../hooks/useNextCampaignStep";
+
 import { Badge1, Badge2, Badge3 } from "./campaign/scroll/badges";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { CeramicContext } from "../context/ceramicContext";
