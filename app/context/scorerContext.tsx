@@ -46,6 +46,7 @@ export interface ScorerContextState {
   refreshScore: (address: string | undefined, dbAccessToken: string, forceRescore?: boolean) => Promise<void>;
   fetchStampWeights: () => Promise<void>;
   stampWeights: Partial<Weights>;
+  stampScores: Partial<StampScores>;
   // submitPassport: (address: string | undefined) => Promise<void>;
 }
 
@@ -64,6 +65,7 @@ const startingState: ScorerContextState = {
   ): Promise<void> => {},
   fetchStampWeights: async (): Promise<void> => {},
   stampWeights: {},
+  stampScores: {},
   // submitPassport: async (address: string | undefined): Promise<void> => {},
 };
 

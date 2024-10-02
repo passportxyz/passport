@@ -1,12 +1,10 @@
-import React, { useEffect, useContext, useState, useCallback } from "react";
+import React, { useEffect, useContext, useMemo, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import NotFound from "../pages/NotFound";
 import PageRoot from "./PageRoot";
 import { AccountCenter } from "./AccountCenter";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { useLoginFlow } from "../hooks/useLoginFlow";
-import { useMessage } from "../hooks/useMessage";
 import { LoadButton } from "./LoadButton";
 import {
   useNextCampaignStep,
@@ -23,16 +21,21 @@ import { waitForRedirect } from "../context/stampClaimingContext";
 import { useWalletStore } from "../context/walletStore";
 
 import { CUSTOM_PLATFORM_TYPE_INFO } from "../config/platformMap";
-import { PROVIDER_ID, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
+import { EasPayload, PROVIDER_ID, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 import { createSignedPayload, generateUID } from "../utils/helpers";
 import { create } from "zustand";
 import { GitHubIcon } from "./WelcomeFooter";
 import { scrollCampaignBadgeProviders } from "../config/scroll_campaign";
-import { PassportDatabase } from "@gitcoin/passport-database-client";
-import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
 import { datadogLogs } from "@datadog/browser-logs";
+import { ScorerContext } from "../context/scorerContext";
+import { useSetCustomizationKey } from "../hooks/useCustomization";
+import { LoadingBarSection, LoadingBarSectionProps } from "./LoadingBar";
+import { useAttestation } from "../hooks/useSyncToChainButton";
+import { chains } from "../utils/chains";
+import { jsonRequest } from "../utils/AttestationProvider";
+import { useMessage } from "../hooks/useMessage";
 
 const SCROLL_STEP_NAMES = ["Connect Wallet", "Connect to Github", "Mint Badge"];
 const SCROLL_CONTRACT_ADDRESSES = JSON.parse(process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_CONTRACT_ADDRESSES || "[]");
@@ -233,15 +236,15 @@ const ScrollLogin = () => {
 };
 
 const ScrollConnectGithub = () => {
-  const goToLoginStep = useNavigateToRootStep();
   const goToNextStep = useNextCampaignStep();
   const goToLastStep = useNavigateToLastStep();
   const { isConnected } = useWeb3ModalAccount();
-  const { did, dbAccessToken, checkSessionIsValid } = useDatastoreConnectionContext();
+  const { did, checkSessionIsValid } = useDatastoreConnectionContext();
   const { userDid, database } = useContext(CeramicContext);
+  const goToLoginStep = useNavigateToRootStep();
   const address = useWalletStore((state) => state.address);
   const { setCredentials } = useScrollStampsStore();
-  const [noCredentialReceived, setNoCredentialReceieved] = useState(false);
+  const [noCredentialReceived, setNoCredentialReceived] = useState(false);
   const [msg, setMsg] = useState<string | undefined>("Verifying existing badges on chain ... ");
   const [isVerificationRunning, setIsVerificationRunning] = useState(false);
 
@@ -259,13 +262,6 @@ const ScrollConnectGithub = () => {
       setMsg(undefined);
     }
   }, [hasAtLeastOneBadge, badges, areBadgesLoading, errors, goToLastStep]);
-
-  useEffect(() => {
-    if (!dbAccessToken || !did) {
-      console.log("Access token or did are not present. Going back to login step!");
-      goToLoginStep();
-    }
-  }, [dbAccessToken, did, goToLoginStep]);
 
   const signInWithGithub = useCallback(async () => {
     setIsVerificationRunning(true);
@@ -325,7 +321,7 @@ const ScrollConnectGithub = () => {
         if (verifiedCredentials.length > 0) {
           goToNextStep();
         } else {
-          setNoCredentialReceieved(true);
+          setNoCredentialReceived(true);
         }
 
         if (database) {
@@ -479,50 +475,143 @@ const ScrollMintedBadge = () => {
   );
 };
 
+// TODO env?
+const SCROLL_BADGE_PROVIDER_NAMES: Partial<Record<PROVIDER_ID, string>> = {
+  NFT: "Rust Developer Badge (Level 1)",
+  "githubContributionActivityGte#120": "GitHub Contributor Badge (Level 2)",
+};
+
+const ScrollLoadingBarSection = (props: LoadingBarSectionProps) => (
+  <LoadingBarSection loadingBarClassName="h-10 via-[#FFEEDA] brightness-50" {...props} />
+);
+
 const ScrollMintBadge = () => {
-  const nextStep = useNextCampaignStep();
-  const { isLoggingIn, signIn, loginStep } = useLoginFlow({ onLoggedIn: nextStep });
+  const { failure } = useMessage();
+  const { passport } = useContext(CeramicContext);
+  const { stampScores, scoreState, refreshScore } = useContext(ScorerContext);
+  const address = useWalletStore((state) => state.address);
+  const { dbAccessToken } = useDatastoreConnectionContext();
+  const scrollChain = chains.find((chain) => chain.label === "Scroll");
+  const { nonce, issueAttestation } = useAttestation({ chain: scrollChain });
+  const [syncingToChain, setSyncingToChain] = useState(false);
+
+  useEffect(() => {
+    address && dbAccessToken && refreshScore(address, dbAccessToken);
+  }, [address, dbAccessToken]);
+
+  const badgeCredentials = useMemo(
+    () =>
+      passport && scoreState === "DONE"
+        ? passport.stamps.filter(({ provider }) => Object.keys(SCROLL_BADGE_PROVIDER_NAMES).includes(provider))
+        : [],
+    [passport, scoreState]
+  );
+
+  const deduplicatedBadgeCredentials = useMemo(
+    () => badgeCredentials.filter(({ provider }) => stampScores[provider] && parseFloat(stampScores[provider]) > 0),
+    [badgeCredentials, stampScores]
+  );
+
+  const hasBadge = deduplicatedBadgeCredentials.length > 0;
+  const hasMultipleBadges = deduplicatedBadgeCredentials.length > 1;
+  const hasIgnoredBadges = badgeCredentials.length > deduplicatedBadgeCredentials.length;
+  const loading = !(passport && scoreState === "DONE");
+
+  const onMint = async () => {
+    try {
+      setSyncingToChain(true);
+      const { data }: { data: EasPayload } = await jsonRequest("/TODO", {
+        recipient: address || "",
+        badgeCredentials,
+        nonce,
+      });
+
+      if (data.error) {
+        console.error("error syncing credentials to chain: ", data.error, "nonce:", nonce);
+        failure({
+          title: "Error",
+          message: "An unexpected error occurred while generating attestations.",
+        });
+      }
+
+      issueAttestation({ data });
+    } catch (error) {
+      console.error("Error minting badge", error);
+      failure({
+        title: "Error",
+        message: "An unexpected error occurred while trying to bring the data onchain.",
+      });
+    }
+    setSyncingToChain(false);
+  };
 
   return (
-    <ScrollCampaignPage fadeBackgroundImage emblemSrc="/assets/scrollCampaignMint.svg">
-      <div className="text-5xl text-[#FFEEDA]">Developer Badge</div>
-      <div className="text-xl mt-2">
-        Connect your GitHub account to prove the number of contributions you have made, then mint your badge to prove
-        you are a Rust developer.
-      </div>
-      <div className="mt-8">
-        <LoadButton
-          data-testid="connectWalletButton"
-          variant="custom"
-          onClick={signIn}
-          isLoading={isLoggingIn}
-          className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200"
-        >
-          <div className="flex flex-col items-center justify-center">
-            {isLoggingIn ? (
-              <>
-                <div>Connecting...</div>
-                <div className="text-sm font-base">
-                  (
-                  {loginStep === "PENDING_WALLET_CONNECTION"
-                    ? "Connect your wallet"
-                    : loginStep === "PENDING_DATABASE_CONNECTION"
-                      ? "Sign message in wallet"
-                      : ""}
-                  )
-                </div>
-              </>
-            ) : (
-              "Connect Wallet"
-            )}
+    <ScrollCampaignPage
+      fadeBackgroundImage={loading || hasBadge}
+      emblemSrc={hasBadge ? "/assets/scrollCampaignMint.svg" : undefined}
+    >
+      <ScrollLoadingBarSection
+        isLoading={loading}
+        className={`text-5xl ${hasBadge ? "text-[#FFEEDA]" : "text-[#FF684B]"}`}
+      >
+        {hasBadge ? "Congratulations!" : "We're sorry!"}
+      </ScrollLoadingBarSection>
+      <ScrollLoadingBarSection isLoading={loading} className="text-xl mt-2">
+        {hasBadge ? (
+          <div>
+            You qualify for:
+            <ul className="list-disc list-inside">
+              {deduplicatedBadgeCredentials.map(({ provider }) => (
+                <li key={provider}>{SCROLL_BADGE_PROVIDER_NAMES[provider] || provider}</li>
+              ))}
+            </ul>
+            Mint your badge
+            {hasMultipleBadges ? "s" : ""} and get a chance to work with us.
+            {hasIgnoredBadges
+              ? " (Some badge credentials could not be validated because they have already been claimed on another address.)"
+              : ""}
           </div>
-        </LoadButton>
-      </div>
+        ) : hasIgnoredBadges ? (
+          "Your badge credentials have already been claimed with another address."
+        ) : (
+          "You don't qualify for any badges."
+        )}
+      </ScrollLoadingBarSection>
+
+      {hasBadge && (
+        <div className="mt-8">
+          <LoadButton
+            variant="custom"
+            onClick={onMint}
+            isLoading={loading || syncingToChain}
+            className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200"
+          >
+            <div className="flex flex-col items-center justify-center">
+              {syncingToChain ? "Minting..." : "Mint Badge"}
+            </div>
+          </LoadButton>
+        </div>
+      )}
     </ScrollCampaignPage>
   );
 };
 
 export const ScrollCampaign = ({ step }: { step: number }) => {
+  const { did, dbAccessToken } = useDatastoreConnectionContext();
+  const goToLoginStep = useNavigateToRootStep();
+  const setCustomizationKey = useSetCustomizationKey();
+
+  useEffect(() => {
+    setCustomizationKey("scroll");
+  }, [setCustomizationKey]);
+
+  useEffect(() => {
+    if ((!dbAccessToken || !did) && step > 0) {
+      console.log("Access token or did are not present. Going back to login step!");
+      goToLoginStep();
+    }
+  }, [dbAccessToken, did, step, goToLoginStep]);
+
   if (step === 0) {
     return <ScrollLogin />;
   } else if (step === 1) {

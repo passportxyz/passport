@@ -52,6 +52,14 @@ export interface AttestationProvider {
   ) => OnChainStatus;
 }
 
+export const jsonRequest = (url: string, payload: any) =>
+  axios.post(url, payload, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    transformRequest: [(data: any) => JSON.stringify(data, (_k, v) => (typeof v === "bigint" ? v.toString() : v))],
+  });
+
 class BaseAttestationProvider implements AttestationProvider {
   name = "Override this class";
   status: AttestationProviderStatus;
@@ -98,12 +106,7 @@ class BaseAttestationProvider implements AttestationProvider {
   }
 
   async getMultiAttestationRequest(payload: {}): Promise<AxiosResponse<any, any>> {
-    return axios.post(`${iamUrl}v0.0.0/eas/passport`, payload, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      transformRequest: [(data: any) => JSON.stringify(data, (_k, v) => (typeof v === "bigint" ? v.toString() : v))],
-    });
+    return jsonRequest(`${iamUrl}v0.0.0/eas/passport`, payload);
   }
 
   checkOnChainStatus(

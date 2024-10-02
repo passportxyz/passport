@@ -275,4 +275,21 @@ if (!TEST_MODE) {
   }
 }
 
+chainConfigs.push({
+  id: scrollChainId,
+  token: "ETH",
+  label: "Scroll",
+  rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SCROLL_RPC_URL as string,
+  explorerUrl: "https://scrollscan.com/",
+  icon: "./assets/scroll-logo.svg",
+  chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
+  attestationProviderConfig: {
+    name: "Ethereum Attestation Service",
+    status: usingTestEnvironment ? "disabled" : "enabled",
+    skipByDefault: false,
+    easScanUrl: "https://scroll.easscan.org",
+    monochromeIcon: "./assets/scroll-logo-monochrome.svg",
+  },
+});
+
 export const chains: Chain[] = chainConfigs.map((config) => new Chain(config));
