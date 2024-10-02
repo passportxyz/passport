@@ -3,29 +3,6 @@ import { useParams } from "react-router-dom";
 import NotFound from "./NotFound";
 import { ScrollCampaign } from "../components/ScrollCampaign";
 
-export const useNextCampaignStep = () => {
-  const { step, campaignId } = useParams();
-  const navigateToPage = useNavigateToPage();
-
-  const nextPage = useCallback(() => {
-    const nextStep = parseInt(step || "0") + 1;
-    navigateToPage(`campaign/${campaignId}/${nextStep}`);
-  }, [navigateToPage, step, campaignId]);
-
-  return nextPage;
-};
-
-export const useNavigateToRootStep = () => {
-  const { campaignId } = useParams();
-  const navigateToPage = useNavigateToPage();
-
-  const rootPage = useCallback(() => {
-    navigateToPage(`campaign/${campaignId}`);
-  }, [navigateToPage, campaignId]);
-
-  return rootPage;
-};
-
 const CAMPAIGN_MAP: Record<string, React.FC<{ step: number }>> = {
   scroll: ScrollCampaign,
 };
