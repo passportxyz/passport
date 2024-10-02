@@ -23,7 +23,11 @@ import { useMessage } from "./useMessage";
 type LoginStep = "NOT_STARTED" | "PENDING_WALLET_CONNECTION" | "PENDING_DATABASE_CONNECTION" | "DONE";
 
 // Isolate login status updates and some workaround logic for web3modal
-export const useLoginFlow = (): {
+export const useLoginFlow = ({
+  onLoggedIn,
+}: {
+  onLoggedIn?: () => void;
+} = {}): {
   loginStep: LoginStep;
   isLoggingIn: boolean;
   signIn: () => void;
@@ -96,10 +100,14 @@ export const useLoginFlow = (): {
 
   useEffect(() => {
     if (loginStep === "DONE") {
-      if (checkShowOnboard()) {
-        navigateToPage("welcome");
+      if (onLoggedIn) {
+        onLoggedIn();
       } else {
-        navigateToPage("dashboard");
+        if (checkShowOnboard()) {
+          navigateToPage("welcome");
+        } else {
+          navigateToPage("dashboard");
+        }
       }
     }
   }, [loginStep, navigateToPage]);

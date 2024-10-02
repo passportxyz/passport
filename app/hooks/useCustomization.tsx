@@ -47,7 +47,7 @@ const useCustomizationKeyFromUrl = (): string | undefined => {
   return key ?? customizationKey;
 };
 
-type Page = "dashboard" | "welcome" | "home";
+type Page = "dashboard" | "welcome" | "home" | `campaign/${string}`;
 export const useNavigateToPage = () => {
   const navigate = useNavigate();
 

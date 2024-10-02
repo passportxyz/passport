@@ -71,6 +71,9 @@ export default {
       boxShadow: {
         "even-md": "0 0 12px",
       },
+      dropShadow: {
+        text: "2px 2px 1px #000000",
+      },
       backgroundSize: {
         "size-200": "200% 200%",
         "size-400": "400%",

@@ -19,6 +19,8 @@ import { datadogRum } from "@datadog/browser-rum";
 import { datadogLogs } from "@datadog/browser-logs";
 import { isServerOnMaintenance } from "../utils/helpers";
 import { CustomizationUrlLayoutRoute } from "../hooks/useCustomization";
+import Campaign from "./Campaign";
+import NotFound from "./NotFound";
 
 datadogRum.init({
   applicationId: process.env.NEXT_PUBLIC_DATADOG_APPLICATION_ID || "",
@@ -43,6 +45,23 @@ datadogLogs.init({
   env: process.env.NEXT_PUBLIC_DATADOG_ENV || "",
 });
 
+export const AppRoutes = () => (
+  <Routes>
+    <Route path="/:key?" element={<CustomizationUrlLayoutRoute />}>
+      <Route path="" element={<Home />} />
+      <Route path="welcome" element={<Welcome />} />
+      <Route path="dashboard">
+        {/* This is here to support legacy customization paths */}
+        <Route path=":customizationKey" element={<Dashboard />} />
+        <Route path="" element={<Dashboard />} />
+      </Route>
+      <Route path="privacy" element={<Privacy />} />
+      <Route path="campaign/:campaignId/:step?" element={<Campaign />} />
+      <Route path="*" element={<NotFound />} />
+    </Route>
+  </Routes>
+);
+
 const App: NextPage = () => {
   if (isServerOnMaintenance()) {
     return <Maintenance />;
@@ -52,18 +71,7 @@ const App: NextPage = () => {
     <div>
       <Router>
         <WalletStoreManager>
-          <Routes>
-            <Route path="/:key?" element={<CustomizationUrlLayoutRoute />}>
-              <Route path="" element={<Home />} />
-              <Route path="welcome" element={<Welcome />} />
-              <Route path="dashboard">
-                {/* This is here to support legacy customization paths */}
-                <Route path=":customizationKey" element={<Dashboard />} />
-                <Route path="" element={<Dashboard />} />
-              </Route>
-              <Route path="privacy" element={<Privacy />} />
-            </Route>
-          </Routes>
+          <AppRoutes />
         </WalletStoreManager>
       </Router>
     </div>
