@@ -1,7 +1,7 @@
 import React, { LinkHTMLAttributes } from "react";
 import { Chain, chains } from "../utils/chains";
 
-const GitHubIcon = () => (
+export const GitHubIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-6 h-6 mx-2">
     <path
       fill="white"

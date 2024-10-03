@@ -22,6 +22,7 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 import { createSignedPayload, generateUID } from "../utils/helpers";
 import { create } from "zustand";
+import { GitHubIcon } from "./WelcomeFooter";
 
 const SCROLL_STEP_NAMES = ["Connect Wallet", "Connect to Github", "Mint Badge"];
 
@@ -55,7 +56,13 @@ if (scrollCampaignBadgeProviders.length === 0) {
 // Use as hook
 export const useScrollStampsStore = scrollStampsStore;
 
-export const ScrollStepsBar = ({ className }: { className?: string }) => {
+export const ScrollStepsBar = ({
+  className,
+  highLightCurrentStep = true,
+}: {
+  className?: string;
+  highLightCurrentStep?: boolean;
+}) => {
   const { step } = useParams();
 
   return (
@@ -63,7 +70,7 @@ export const ScrollStepsBar = ({ className }: { className?: string }) => {
       {SCROLL_STEP_NAMES.map((stepName, index) => (
         <div
           key={index}
-          className={`flex items-center ${index === (parseInt(step || "") || 0) ? "" : "brightness-50"}`}
+          className={`flex items-center ${highLightCurrentStep && index === (parseInt(step || "") || 0) ? "" : "brightness-50"}`}
         >
           <div className="w-6 h-6 mr-2 rounded-full flex items-center shrink-0 justify-center text-center bg-[#FF684B]">
             {index + 1}
@@ -208,6 +215,7 @@ const ScrollConnectGithub = () => {
   const { setCredentials } = useScrollStampsStore();
   const [noCredentialReceived, setNoCredentialReceieved] = useState(false);
   const [msg, setMsg] = useState<string | undefined>();
+  const [isVerificationRunning, setIsVerificationRunning] = useState(false);
 
   useEffect(() => {
     if (!dbAccessToken || !did) {
@@ -217,86 +225,94 @@ const ScrollConnectGithub = () => {
   }, [dbAccessToken, did]);
 
   const signInWithGithub = useCallback(async () => {
-    if (did) {
-      const customGithubPlatform = new CUSTOM_PLATFORM_TYPE_INFO.DEVEL.platformClass(
-        // @ts-ignore
-        CUSTOM_PLATFORM_TYPE_INFO.DEVEL.platformParams
-      );
-      setMsg("Connecting to Github ...");
-      const state = `${customGithubPlatform.path}-` + generateUID(10);
-      const providerPayload = (await customGithubPlatform.getProviderPayload({
-        state,
-        window,
-        screen,
-        userDid,
-        callbackUrl: window.location.origin,
-        selectedProviders: scrollCampaignBadgeProviders,
-        waitForRedirect,
-      })) as {
-        [k: string]: string;
-      };
-
-      if (!checkSessionIsValid()) {
-        console.error(
-          "It seems that the session is not valid any more (it might have timed out). Going back to login screen."
+    setIsVerificationRunning(true);
+    try {
+      if (did) {
+        const customGithubPlatform = new CUSTOM_PLATFORM_TYPE_INFO.DEVEL.platformClass(
+          // @ts-ignore
+          CUSTOM_PLATFORM_TYPE_INFO.DEVEL.platformParams
         );
-        goToLoginStep();
+        setMsg("Connecting to Github ...");
+        const state = `${customGithubPlatform.path}-` + generateUID(10);
+        const providerPayload = (await customGithubPlatform.getProviderPayload({
+          state,
+          window,
+          screen,
+          userDid,
+          callbackUrl: window.location.origin,
+          selectedProviders: scrollCampaignBadgeProviders,
+          waitForRedirect,
+        })) as {
+          [k: string]: string;
+        };
+
+        if (!checkSessionIsValid()) {
+          console.error(
+            "It seems that the session is not valid any more (it might have timed out). Going back to login screen."
+          );
+          goToLoginStep();
+        }
+
+        setMsg("Please wait, we are checking your eligibility ...");
+        const verifyCredentialsResponse = await fetchVerifiableCredential(
+          iamUrl,
+          {
+            type: customGithubPlatform.platformId,
+            types: scrollCampaignBadgeProviders,
+            version: "0.0.0",
+            address: address || "",
+            proofs: providerPayload,
+            signatureType: IAM_SIGNATURE_TYPE,
+          },
+          (data: any) => createSignedPayload(did, data)
+        );
+
+        setMsg(undefined);
+        const verifiedCredentials =
+          scrollCampaignBadgeProviders.length > 0
+            ? verifyCredentialsResponse.credentials?.reduce((acc: VerifiableCredential[], cred: any) => {
+                if (!cred.error) {
+                  acc.push(cred.credential); // Accumulate only valid credentials
+                }
+                return acc;
+              }, [] as VerifiableCredential[]) || []
+            : [];
+
+        setCredentials(verifiedCredentials);
+        if (verifiedCredentials.length > 0) {
+          goToNextStep();
+        } else {
+          setNoCredentialReceieved(true);
+        }
       }
-
-      setMsg("Checking your eligibility ...");
-      const verifyCredentialsResponse = await fetchVerifiableCredential(
-        iamUrl,
-        {
-          type: customGithubPlatform.platformId,
-          types: scrollCampaignBadgeProviders,
-          version: "0.0.0",
-          address: address || "",
-          proofs: providerPayload,
-          signatureType: IAM_SIGNATURE_TYPE,
-        },
-        (data: any) => createSignedPayload(did, data)
-      );
-
-      setMsg(undefined);
-      const verifiedCredentials =
-        scrollCampaignBadgeProviders.length > 0
-          ? verifyCredentialsResponse.credentials?.reduce((acc: VerifiableCredential[], cred: any) => {
-              if (!cred.error) {
-                acc.push(cred.credential); // Accumulate only valid credentials
-              }
-              return acc;
-            }, [] as VerifiableCredential[]) || []
-          : [];
-
-      setCredentials(verifiedCredentials);
-      if (verifiedCredentials.length > 0) {
-        setNoCredentialReceieved(true);
-        // goToNextStep();
-      } else {
-        setNoCredentialReceieved(true);
-      }
+    } finally {
+      setIsVerificationRunning(false);
     }
   }, [did, address]);
 
+  const msgSpan = msg ? <span className="pt-4">{msg}</span> : null;
   const body = noCredentialReceived ? (
-    <>Sorry</>
+    <>
+      <div className="text-4xl text-[#FF684B]">We’re sorry!</div>
+      <div>You do not qualify because you do not have the minimum 10 contributions needed.</div>
+    </>
   ) : (
     <>
       <div className="text-5xl text-[#FFEEDA]">Connect to Github</div>
-      <div className="text-xl mt-2">
+      <div className="text-xl mt-2 max-w-4xl">
         Passport is privacy preserving and verifies you have 1 or more commits to the following Repos located here.
         Click below and obtain the specific developer credentials
       </div>
-      <div className="mt-8">
+      <div className="mt-8 flex flex-col items-center justify-center">
         <LoadButton
           variant="custom"
           onClick={signInWithGithub}
-          isLoading={false}
-          className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-200"
+          isLoading={isVerificationRunning}
+          className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-200 pl-3 pr-5"
         >
-          <div className="flex flex-col items-center justify-center">Connect to Github</div>
+          <GitHubIcon /> Connect to Github
         </LoadButton>
-        {msg}
+        {msgSpan}
       </div>
     </>
   );
@@ -305,14 +321,22 @@ const ScrollConnectGithub = () => {
       {isConnected && <AccountCenter />}
       <ScrollHeader className="fixed top-0 left-0 right-0" />
       <div className="flex grow">
-        <div className="flex flex-col min-h-screen justify-center items-center shrink-0 grow w-1/2 text-center">
-          <ScrollStepsBar className="mb-8" />
-
-          {body}
-          <div className="flex">
-            <Badge1 />
-            <Badge2 />
-            <Badge3 />
+        <div className="flex flex-col min-h-screen items-center shrink-0 grow w-1/2 text-center">
+          <ScrollStepsBar highLightCurrentStep={!noCredentialReceived} className="mb-8 pt-32 z-20" />
+          <div className="z-20">{body}</div>
+          <div className="max-w-[1440px] w-full">
+            <div className="absolute inset-0 bg-black bg-opacity-70 w-full h-full -z-10"></div>
+            <div className="grid grid-cols-3 pt-24 z-10">
+              <div className="flex justify-center items-center">
+                <Badge1 />
+              </div>
+              <div className="flex justify-center items-center">
+                <Badge2 />
+              </div>
+              <div className="flex justify-center items-center">
+                <Badge3 />
+              </div>
+            </div>
           </div>
         </div>
       </div>
