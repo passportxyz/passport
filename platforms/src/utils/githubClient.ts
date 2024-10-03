@@ -422,3 +422,57 @@ export const fetchAndCheckContributionsToRepository = async (
     errors: ["Failed to check contribution to the repository"],
   };
 };
+
+export const fetchAndCheckCommitCountToRepository = async (
+  context: GithubContext,
+  expectedNumberOfCommits: number,
+  iterations = 3,
+  repoNameOrURL: string
+): Promise<{ contributionValid: boolean; commitCount?: number; errors?: string[] }> => {
+  const segments = repoNameOrURL.split("/");
+  const repo = segments.pop();
+  const owner = segments.pop();
+  const commitsUrl = `https://api.github.com/repos/${owner}/${repo}/commits`;
+  let page = 0;
+  const per_page = 100;
+  const accessToken = context.github?.accessToken;
+  let checkMoreCommits = true;
+  const author = context.github.login;
+  let commitCount = 0;
+
+  if (!author) {
+    return {
+      contributionValid: false,
+      errors: ["Failed to check contribution to the repository, user login is not set"],
+    };
+  }
+
+  try {
+    // retrieve user's auth bearer token to authenticate client
+
+    while (page < iterations && commitCount < expectedNumberOfCommits && checkMoreCommits) {
+      page += 1;
+      // Now that we have an access token fetch the user details
+      const commitsResponse = await axios.get(commitsUrl, {
+        headers: { Authorization: `token ${accessToken}` },
+        params: { page, per_page, author },
+      });
+
+      const commits = commitsResponse.data as RepoCommit[];
+      checkMoreCommits = commits.length > 0; // We assume that there are no more commits if we received an empty list
+      commitCount += commits.length;
+    }
+
+    return {
+      contributionValid: commitCount >= expectedNumberOfCommits,
+      commitCount: commitCount,
+    };
+  } catch (error) {
+    handleProviderAxiosError(error, "Github error requesting access token", [accessToken]);
+  }
+
+  return {
+    contributionValid: false,
+    errors: ["Failed to check contribution to the repository"],
+  };
+};

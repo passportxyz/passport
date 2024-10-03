@@ -13,3 +13,25 @@ export const useNextCampaignStep = () => {
 
   return nextPage;
 };
+
+export const useNavigateToRootStep = () => {
+  const { campaignId } = useParams();
+  const navigateToPage = useNavigateToPage();
+
+  const rootPage = useCallback(() => {
+    navigateToPage(`campaign/${campaignId}`);
+  }, [navigateToPage, campaignId]);
+
+  return rootPage;
+};
+
+export const useNavigateToMintStep = () => {
+  const { campaignId } = useParams();
+  const navigateToPage = useNavigateToPage();
+
+  const rootPage = useCallback(() => {
+    navigateToPage(`campaign/${campaignId}/`);
+  }, [navigateToPage, campaignId]);
+
+  return rootPage;
+};

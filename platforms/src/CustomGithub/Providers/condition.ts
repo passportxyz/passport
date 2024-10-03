@@ -130,3 +130,28 @@ export const evaluateOrganisationContributor = async (
     throw new Error("Error when evaluating OrganisationContributor condition: " + e?.message);
   }
 };
+
+export const evaluateRepositoryCommiter = async (
+  condition: { threshold: number; repository: string },
+  evaluator: ConditionEvaluator,
+  context: any
+): Promise<boolean> => {
+  const threshold = condition["threshold"];
+  const repository = condition["repository"];
+
+  if (!(threshold !== undefined && threshold !== null) || !repository) {
+    throw new Error(`Invalid threshold or repository, got threshold='${threshold}' and repository='${repository}'`);
+  }
+  try {
+    const contributionResult = await fetchAndCheckContributionsToRepository(
+      context as GithubContext,
+      threshold,
+      3,
+      repository
+    );
+    return contributionResult.contributionValid;
+  } catch (_e: unknown) {
+    const e = _e as Error;
+    throw new Error("Error when evaluating RepositoryContributor condition: " + e?.message);
+  }
+};

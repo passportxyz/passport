@@ -33,7 +33,7 @@ describe("Landing page tests", () => {
 
     renderWithContext(
       mockCeramicContext,
-      <MemoryRouter initialEntries={["/campaign/scroll"]}>
+      <MemoryRouter initialEntries={["/campaign/scroll-developer"]}>
         <AppRoutes />
       </MemoryRouter>
     );
@@ -48,7 +48,7 @@ describe("Landing page tests", () => {
     await userEvent.click(connectWalletButton);
 
     await waitFor(() => {
-      expect(navigateMock).toHaveBeenCalledWith("/campaign/scroll/1");
+      expect(navigateMock).toHaveBeenCalledWith("/campaign/scroll-developer/1");
     });
   });
 });
