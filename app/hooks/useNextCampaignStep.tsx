@@ -24,3 +24,14 @@ export const useNavigateToRootStep = () => {
 
   return rootPage;
 };
+
+export const useNavigateToMintStep = () => {
+  const { campaignId } = useParams();
+  const navigateToPage = useNavigateToPage();
+
+  const rootPage = useCallback(() => {
+    navigateToPage(`campaign/${campaignId}/`);
+  }, [navigateToPage, campaignId]);
+
+  return rootPage;
+};

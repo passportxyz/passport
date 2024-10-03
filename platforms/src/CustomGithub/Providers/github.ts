@@ -9,6 +9,7 @@ import {
   evaluateAND,
   evaluateOR,
   evaluateOrganisationContributor,
+  evaluateRepositoryCommiter,
   evaluateRepositoryContributor,
 } from "./condition";
 import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
@@ -48,7 +49,9 @@ export class CustomGithubProvider implements Provider {
     const { conditionName, conditionHash } = payload.proofs;
     let githubId: string | null = null;
 
+    console.log("geri geting condition");
     const condition = await getCondition(this.type, conditionName, conditionHash);
+    console.log("geri condition: ", condition);
 
     // Call requestAccessToken to exchange the code for an access token and store it in the context
     await requestAccessToken(payload.proofs?.code, context);
@@ -62,6 +65,7 @@ export class CustomGithubProvider implements Provider {
       OR: evaluateOR,
       repository_contributor: evaluateRepositoryContributor,
       organisation_contributor: evaluateOrganisationContributor,
+      repository_commit_count: evaluateRepositoryCommiter,
     });
 
     valid = await evaluator.evaluate(condition, context);

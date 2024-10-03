@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext, useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 import NotFound from "../pages/NotFound";
 import PageRoot from "./PageRoot";
@@ -17,12 +17,43 @@ import { waitForRedirect } from "../context/stampClaimingContext";
 import { useWalletStore } from "../context/walletStore";
 
 import { CUSTOM_PLATFORM_TYPE_INFO } from "../config/platformMap";
-import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { PROVIDER_ID, VerifiableCredential } from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 import { createSignedPayload, generateUID } from "../utils/helpers";
+import { create } from "zustand";
 
 const SCROLL_STEP_NAMES = ["Connect Wallet", "Connect to Github", "Mint Badge"];
+
+const scrollStampsStore = create<{
+  credentials: VerifiableCredential[];
+  setCredentials: (credentials: VerifiableCredential[]) => {};
+}>((set) => ({
+  credentials: [] as VerifiableCredential[],
+  setCredentials: async (credentials: VerifiableCredential[]) => {
+    set({ credentials });
+  },
+}));
+
+function loadBadgeProviders() {
+  try {
+    return JSON.parse(process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_SELECTED_PROVIDERS || "[]");
+  } catch (e) {
+    console.error(
+      "Error parsing NEXT_PUBLIC_SCROLL_CAMPAIGN_SELECTED_PROVIDERS:",
+      process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_SELECTED_PROVIDERS
+    );
+    return [];
+  }
+}
+
+const scrollCampaignBadgeProviders: PROVIDER_ID[] = loadBadgeProviders();
+if (scrollCampaignBadgeProviders.length === 0) {
+  console.error("No NEXT_PUBLIC_SCROLL_CAMPAIGN_SELECTED_PROVIDERS have been configured");
+}
+
+// Use as hook
+export const useScrollStampsStore = scrollStampsStore;
 
 export const ScrollStepsBar = ({ className }: { className?: string }) => {
   const { step } = useParams();
@@ -169,49 +200,55 @@ const ScrollLogin = () => {
 // TODO
 const ScrollConnectGithub = () => {
   const goToLoginStep = useNavigateToRootStep();
+  const goToNextStep = useNextCampaignStep();
   const { isConnected } = useWeb3ModalAccount();
   const { did, dbAccessToken, checkSessionIsValid } = useDatastoreConnectionContext();
   const { userDid } = useContext(CeramicContext);
   const address = useWalletStore((state) => state.address);
+  const { setCredentials } = useScrollStampsStore();
+  const [noCredentialReceived, setNoCredentialReceieved] = useState(false);
+  const [msg, setMsg] = useState<string | undefined>();
 
   useEffect(() => {
     if (!dbAccessToken || !did) {
+      console.log("Access token or did are not present. Going back to login step!");
       goToLoginStep();
     }
   }, [dbAccessToken, did]);
 
-  const signInWithGithub = async () => {
+  const signInWithGithub = useCallback(async () => {
     if (did) {
       const customGithubPlatform = new CUSTOM_PLATFORM_TYPE_INFO.DEVEL.platformClass(
         // @ts-ignore
         CUSTOM_PLATFORM_TYPE_INFO.DEVEL.platformParams
       );
-      console.log("geri customGithubPlatform", customGithubPlatform);
+      setMsg("Connecting to Github ...");
       const state = `${customGithubPlatform.path}-` + generateUID(10);
-      // TODO geri: we should probably load this from config ... ???
-      // const selectedProviders: PROVIDER_ID[] = ["DeveloperList#${string}#${string}"];
-      const selectedProviders: PROVIDER_ID[] = ["githubContributionActivityGte#30"];
       const providerPayload = (await customGithubPlatform.getProviderPayload({
         state,
         window,
         screen,
         userDid,
         callbackUrl: window.location.origin,
-        selectedProviders,
+        selectedProviders: scrollCampaignBadgeProviders,
         waitForRedirect,
       })) as {
         [k: string]: string;
       };
-      console.log("geri providerPayload", providerPayload);
 
-      // TODO: geri throw exception here ...
-      // if (!checkSessionIsValid()) throw new InvalidSessionError();
+      if (!checkSessionIsValid()) {
+        console.error(
+          "It seems that the session is not valid any more (it might have timed out). Going back to login screen."
+        );
+        goToLoginStep();
+      }
 
+      setMsg("Checking your eligibility ...");
       const verifyCredentialsResponse = await fetchVerifiableCredential(
         iamUrl,
         {
           type: customGithubPlatform.platformId,
-          types: selectedProviders,
+          types: scrollCampaignBadgeProviders,
           version: "0.0.0",
           address: address || "",
           proofs: providerPayload,
@@ -219,12 +256,50 @@ const ScrollConnectGithub = () => {
         },
         (data: any) => createSignedPayload(did, data)
       );
-      console.log("geri verifyCredentialsResponse", verifyCredentialsResponse);
-    } else {
-      // TODO: geri handle error
-      throw "No DID";
+
+      setMsg(undefined);
+      const verifiedCredentials =
+        scrollCampaignBadgeProviders.length > 0
+          ? verifyCredentialsResponse.credentials?.reduce((acc: VerifiableCredential[], cred: any) => {
+              if (!cred.error) {
+                acc.push(cred.credential); // Accumulate only valid credentials
+              }
+              return acc;
+            }, [] as VerifiableCredential[]) || []
+          : [];
+
+      setCredentials(verifiedCredentials);
+      if (verifiedCredentials.length > 0) {
+        setNoCredentialReceieved(true);
+        // goToNextStep();
+      } else {
+        setNoCredentialReceieved(true);
+      }
     }
-  };
+  }, [did, address]);
+
+  const body = noCredentialReceived ? (
+    <>Sorry</>
+  ) : (
+    <>
+      <div className="text-5xl text-[#FFEEDA]">Connect to Github</div>
+      <div className="text-xl mt-2">
+        Passport is privacy preserving and verifies you have 1 or more commits to the following Repos located here.
+        Click below and obtain the specific developer credentials
+      </div>
+      <div className="mt-8">
+        <LoadButton
+          variant="custom"
+          onClick={signInWithGithub}
+          isLoading={false}
+          className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-200"
+        >
+          <div className="flex flex-col items-center justify-center">Connect to Github</div>
+        </LoadButton>
+        {msg}
+      </div>
+    </>
+  );
   return (
     <PageRoot className="text-color-1">
       {isConnected && <AccountCenter />}
@@ -232,21 +307,8 @@ const ScrollConnectGithub = () => {
       <div className="flex grow">
         <div className="flex flex-col min-h-screen justify-center items-center shrink-0 grow w-1/2 text-center">
           <ScrollStepsBar className="mb-8" />
-          <div className="text-5xl text-[#FFEEDA]">Connect to Github</div>
-          <div className="text-xl mt-2">
-            Passport is privacy preserving and verifies you have 1 or more commits to the following Repos located here.
-            Click below and obtain the specific developer credentials
-          </div>
-          <div className="mt-8">
-            <LoadButton
-              variant="custom"
-              onClick={signInWithGithub}
-              isLoading={false}
-              className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-200"
-            >
-              <div className="flex flex-col items-center justify-center">Connect to Github</div>
-            </LoadButton>
-          </div>
+
+          {body}
           <div className="flex">
             <Badge1 />
             <Badge2 />
