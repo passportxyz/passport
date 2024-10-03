@@ -4,7 +4,7 @@ import NotFound from "./NotFound";
 import { ScrollCampaign } from "../components/ScrollCampaign";
 
 const CAMPAIGN_MAP: Record<string, React.FC<{ step: number }>> = {
-  scroll: ScrollCampaign,
+  "scroll-developer": ScrollCampaign,
 };
 
 const Campaign = () => {
