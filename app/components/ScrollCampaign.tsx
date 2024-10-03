@@ -6,9 +6,7 @@ import { AccountCenter } from "./AccountCenter";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { useLoginFlow } from "../hooks/useLoginFlow";
 import { LoadButton } from "./LoadButton";
-
-import { useNextCampaignStep, useNavigateToRootStep } from "../hooks/useNextCampaignStep";
-
+import { useNextCampaignStep, useNavigateToRootStep, useNavigateToLastStep } from "../hooks/useNextCampaignStep";
 import { Badge1, Badge2, Badge3 } from "./campaign/scroll/badges";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { CeramicContext } from "../context/ceramicContext";
@@ -48,7 +46,6 @@ export const ScrollStepsBar = ({
   highLightCurrentStep?: boolean;
 }) => {
   const { step } = useParams();
-
   return (
     <div className={`flex flex-wrap gap-4 items-center ${className}`}>
       {SCROLL_STEP_NAMES.map((stepName, index) => (
@@ -136,6 +133,16 @@ const ScrollLogin = () => {
   const { isConnected } = useWeb3ModalAccount();
   const { isLoggingIn, signIn, loginStep } = useLoginFlow({ onLoggedIn: nextStep });
 
+  // useEffect(() => {
+  //   if (isConnected) {
+  //     const address = useWalletStore((state) => state.address);
+  //     const { hasBadge, badgeLevel, loading, error } = useScrollBadge(address);
+  //     if (hasBadge) {
+  //       nextStep();
+  //     }
+  //   }
+  // }, [isConnected]);
+
   return (
     <PageRoot className="text-color-1">
       {isConnected && <AccountCenter />}
@@ -188,7 +195,6 @@ const ScrollLogin = () => {
   );
 };
 
-// TODO
 const ScrollConnectGithub = () => {
   const goToLoginStep = useNavigateToRootStep();
   const goToNextStep = useNextCampaignStep();
@@ -330,12 +336,52 @@ const ScrollConnectGithub = () => {
   );
 };
 
+const ScrollMintedBadge = () => {
+  // const goToLoginStep = useNavigateToRootStep();
+  const { isConnected } = useWeb3ModalAccount();
+  // const address = useWalletStore((state) => state.address);
+
+  return (
+    <PageRoot className="text-color-1">
+      {isConnected && <AccountCenter />}
+      <ScrollHeader className="fixed top-0 left-0 right-0" />
+      <div className="flex grow">
+        <div className="flex flex-col min-h-screen justify-center items-center shrink-0 grow w-1/2 text-center">
+          <div className="text-5xl text-[#FFEEDA]">You already minted available badges!</div>
+          {/* <div className="text-xl mt-2">
+          You had more than 50 commits and contributions. Mint your badge and get a chance to work with us.
+          </div> */}
+          <div className="mt-8">Here are all your badges</div>
+          <div className="flex">
+            <div className="border rounded">
+              <Badge1 />{" "}
+            </div>
+            <div className="border rounded">
+              <Badge2 />
+            </div>
+            <div className="border rounded">
+              <Badge3 />
+            </div>
+          </div>
+        </div>
+      </div>
+      <ScrollFooter className="absolute bottom-0 left-0 right-0 z-10" />
+    </PageRoot>
+  );
+};
+
 export const ScrollCampaign = ({ step }: { step: number }) => {
   if (step === 0) {
     return <ScrollLogin />;
   } else if (step === 1) {
     return <ScrollConnectGithub />;
+  } else if (step === 2) {
+    console.log(" Mint your badge");
+    // return </>; Mint your badge
+  } else if (step === 3) {
+    // Returning user
+    // Badge Minted
+    return <ScrollMintedBadge />;
   }
-
   return <NotFound />;
 };

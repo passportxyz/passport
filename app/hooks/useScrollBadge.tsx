@@ -1,31 +1,54 @@
+import { ethers, JsonRpcProvider } from "ethers";
 import { useState, useEffect } from "react";
+import PassportScoreScrollBadgeAbi from "../abi/PassportScoreScrollBadge.json";
 
+const scrollRpcUrl = "https://scroll.drpc.org";
+const scrollRpcProvider = new JsonRpcProvider(scrollRpcUrl);
 
-// returns a list of badges that the user has minted
-const fetchUserBadgeStatus = async () => {
-    // Check if user has any badges minted
-}
+export const useScrollBadge = (address: string | undefined) => {
+  const [hasBadge, setHasBadge] = useState<boolean>(false);
+  const [badgeLevel, setBadgeLevel] = useState<number>(0); // TODO: define badge level type
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-
-// Custom hook to check badge minting status
-export const useBadgeStatus = () => {
-  const [badgesMinted, setBadgesMinted] = useState(false); 
-  const [loading, setLoading] = useState(true);
-
-  // Simulate badge status check
   useEffect(() => {
-    const checkBadgeStatus = async () => {
-      setLoading(true);
-      const hasMintedBadges = await fetchUserBadgeStatus();
-      setBadgesMinted(hasMintedBadges);
-      setLoading(false);
+    const checkBadge = async (address: string | undefined) => {
+      if (!address) {
+        setError("Invalid address");
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        const contractAddress = "TODO";
+        const scrollRpcUrl = "https://scroll.drpc.org";
+        const scrollRpcProvider = new JsonRpcProvider(scrollRpcUrl);
+
+        const contract = new ethers.Contract(contractAddress, PassportScoreScrollBadgeAbi.abi, scrollRpcProvider);
+
+        const resultHasBadge = await contract.hasBadge(address);
+
+        setHasBadge(resultHasBadge);
+        if (resultHasBadge) {
+          try {
+            console.log("User has badge... checking level");
+            const resultBadgeLevel = await contract.checkLevel(address);
+            setBadgeLevel(resultBadgeLevel);
+          } catch (err) {
+            console.error("Error checking badge level:", err);
+            setError("Failed to fetch badge level");
+          }
+        }
+      } catch (err) {
+        console.error("Error checking badge:", err);
+        setError("Failed to fetch badge status");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    checkBadgeStatus();
-  }, []);
+    checkBadge(address);
+  }, [address]);
 
-  return { badgesMinted, loading };
+  return { hasBadge, badgeLevel, loading, error };
 };
-
-
-  
