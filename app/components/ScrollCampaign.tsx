@@ -32,7 +32,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { ScorerContext } from "../context/scorerContext";
 import { useSetCustomizationKey } from "../hooks/useCustomization";
 import { LoadingBarSection, LoadingBarSectionProps } from "./LoadingBar";
-import { useAttestation } from "../hooks/useSyncToChainButton";
+import { useAttestation } from "../hooks/useAttestation";
 import { chains } from "../utils/chains";
 import { jsonRequest } from "../utils/AttestationProvider";
 import { useMessage } from "../hooks/useMessage";
@@ -492,7 +492,7 @@ const ScrollMintBadge = () => {
   const address = useWalletStore((state) => state.address);
   const { dbAccessToken } = useDatastoreConnectionContext();
   const scrollChain = chains.find((chain) => chain.label === "Scroll");
-  const { nonce, issueAttestation } = useAttestation({ chain: scrollChain });
+  const { getNonce, issueAttestation, needToSwitchChain } = useAttestation({ chain: scrollChain });
   const [syncingToChain, setSyncingToChain] = useState(false);
 
   useEffect(() => {
@@ -520,21 +520,31 @@ const ScrollMintBadge = () => {
   const onMint = async () => {
     try {
       setSyncingToChain(true);
-      const { data }: { data: EasPayload } = await jsonRequest("/TODO", {
-        recipient: address || "",
-        badgeCredentials,
-        nonce,
-      });
 
-      if (data.error) {
-        console.error("error syncing credentials to chain: ", data.error, "nonce:", nonce);
+      const nonce = await getNonce();
+
+      if (!nonce) {
         failure({
           title: "Error",
-          message: "An unexpected error occurred while generating attestations.",
+          message: "An unexpected error occurred while trying to get the nonce.",
         });
-      }
+      } else {
+        const { data }: { data: EasPayload } = await jsonRequest("/TODO", {
+          recipient: address || "",
+          badgeCredentials,
+          nonce,
+        });
 
-      issueAttestation({ data });
+        if (data.error) {
+          console.error("error syncing credentials to chain: ", data.error, "nonce:", nonce);
+          failure({
+            title: "Error",
+            message: "An unexpected error occurred while generating attestations.",
+          });
+        } else {
+          issueAttestation({ data });
+        }
+      }
     } catch (error) {
       console.error("Error minting badge", error);
       failure({
@@ -590,6 +600,11 @@ const ScrollMintBadge = () => {
               {syncingToChain ? "Minting..." : "Mint Badge"}
             </div>
           </LoadButton>
+          {needToSwitchChain && (
+            <div className="text-[#FF684B] mt-4">
+              You will be prompted to switch to the Scroll chain, and then to submit a transaction.
+            </div>
+          )}
         </div>
       )}
     </ScrollCampaignPage>
