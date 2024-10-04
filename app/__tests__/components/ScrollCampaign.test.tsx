@@ -27,6 +27,17 @@ jest.mock("../../utils/helpers", () => {
   };
 });
 
+jest.mock("../../config/scroll_campaign", () => {
+  const originalModule = jest.requireActual("../../config/scroll_campaign");
+  return {
+    ...originalModule,
+    scrollCampaignBadgeProviders: ["SomeDeveloperProvider"],
+    loadBadgeProviders: jest.fn().mockImplementation(() => {
+      return ["SomeDeveloperProvider"];
+    }),
+  };
+});
+
 jest.mock("../../config/platformMap", () => {
   const originalModule = jest.requireActual("../../config/platformMap");
   return {
@@ -103,8 +114,12 @@ describe("Landing page tests", () => {
 });
 
 describe("Component tests", () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
   it("shows step 0 correctly", () => {
-    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll", step: "0" });
+    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "0" });
 
     render(<ScrollStepsBar />);
 
@@ -122,7 +137,7 @@ describe("Component tests", () => {
   });
 
   it("shows step 1 correctly", () => {
-    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll", step: "1" });
+    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "1" });
 
     render(<ScrollStepsBar />);
 
@@ -142,11 +157,10 @@ describe("Component tests", () => {
 
 describe("Github Connect page tests", () => {
   beforeEach(() => {
-    // jest.resetAllMocks();
-    // jest.restoreAllMocks();
+    jest.restoreAllMocks();
     jest.clearAllMocks();
   });
-  it.only("redirects to the login page when did not present", async () => {
+  it("redirects to the login page when did not present", async () => {
     renderWithContext(
       mockCeramicContext,
       <MemoryRouter initialEntries={["/campaign/scroll-developer/1"]}>
@@ -163,7 +177,7 @@ describe("Github Connect page tests", () => {
     });
   });
 
-  it.only("displays the page correctly when logged in", async () => {
+  it("displays the page correctly when logged in", async () => {
     renderWithContext(
       mockCeramicContext,
       <MemoryRouter initialEntries={["/campaign/scroll-developer/1"]}>
@@ -176,7 +190,7 @@ describe("Github Connect page tests", () => {
     expect(navigateMock).not.toHaveBeenCalled();
   });
 
-  it.only("navigates to the success page in case the verification succeeded", async () => {
+  it("navigates to the success page in case the verification succeeded", async () => {
     renderWithContext(
       mockCeramicContext,
       <MemoryRouter initialEntries={["/campaign/scroll-developer/1"]}>
@@ -195,7 +209,7 @@ describe("Github Connect page tests", () => {
     });
   });
 
-  it.only("displays an error message if the verification failed", async () => {
+  it("displays an error message if the verification failed", async () => {
     jest.spyOn(passportIdentity, "fetchVerifiableCredential").mockImplementation(async () => {
       return { credentials: [] };
     });

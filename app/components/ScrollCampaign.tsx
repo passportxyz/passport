@@ -17,12 +17,13 @@ import { waitForRedirect } from "../context/stampClaimingContext";
 import { useWalletStore } from "../context/walletStore";
 
 import { CUSTOM_PLATFORM_TYPE_INFO } from "../config/platformMap";
-import { PROVIDER_ID, VerifiableCredential } from "@gitcoin/passport-types";
+import { VerifiableCredential } from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 import { createSignedPayload, generateUID } from "../utils/helpers";
 import { create } from "zustand";
 import { GitHubIcon } from "./WelcomeFooter";
+import { scrollCampaignBadgeProviders } from "../config/scroll_campaign";
 
 const SCROLL_STEP_NAMES = ["Connect Wallet", "Connect to Github", "Mint Badge"];
 
@@ -35,23 +36,6 @@ const scrollStampsStore = create<{
     set({ credentials });
   },
 }));
-
-function loadBadgeProviders() {
-  try {
-    return JSON.parse(process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_SELECTED_PROVIDERS || "[]");
-  } catch (e) {
-    console.error(
-      "Error parsing NEXT_PUBLIC_SCROLL_CAMPAIGN_SELECTED_PROVIDERS:",
-      process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_SELECTED_PROVIDERS
-    );
-    return [];
-  }
-}
-
-const scrollCampaignBadgeProviders: PROVIDER_ID[] = loadBadgeProviders();
-if (scrollCampaignBadgeProviders.length === 0) {
-  console.error("No NEXT_PUBLIC_SCROLL_CAMPAIGN_SELECTED_PROVIDERS have been configured");
-}
 
 // Use as hook
 export const useScrollStampsStore = scrollStampsStore;
