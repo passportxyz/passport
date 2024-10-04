@@ -1,22 +1,22 @@
-# Gitcoin Passport
+# Passport XYZ
 
 ## What is Passport?
 
 Many social organizations, online particularly, have difficulty ensuring that every participant is a unique human and does not have multiple participating accounts. Most existing digital identity solutions are either centralized (e.g., national identity cards) or individualistic (e.g., most “self-sovereign” identity models). However, identity is naturally [intersectional and social](https://www.radicalxchange.org/concepts/intersectional-social-identity/); everybody shares different data and relationships with a unique set of others. The Gitcoin Passport aims to provide a more collaborative and secure infrastructure for digital identity by capturing the richness of our diversely shared lives.
 
-The Gitcoin Passport is an identity verification application. We have written software enabling people to grow personal collections of [verifiable credentials](https://decentralized-id.com/web-standards/w3c/wg/vc/verifiable-credentials/) about themselves and organizations to assess their identities to coordinate rights and responsibilities. The institutions define, verify, and utilize identity as functions of the networked records of the individuals. While we build the Passport agnostic to specific applications, we are actively exploring its benefits for [personhood proofs](https://en.wikipedia.org/wiki/Proof_of_personhood) and [plurality](https://www.radicalxchange.org/media/blog/why-i-am-a-pluralist/) in organizational designs.
+Passport is an identity verification application. We have written software enabling people to grow personal collections of [verifiable credentials](https://decentralized-id.com/web-standards/w3c/wg/vc/verifiable-credentials/) about themselves and organizations to assess their identities to coordinate rights and responsibilities. The institutions define, verify, and utilize identity as functions of the networked records of the individuals. While we build Passport to be agnostic to specific applications, we are actively exploring its benefits for [personhood proofs](https://en.wikipedia.org/wiki/Proof_of_personhood) and [plurality](https://www.radicalxchange.org/media/blog/why-i-am-a-pluralist/) in organizational designs.
 
 ## Documentation
 
-Check out our documentation at https://docs.passport.gitcoin.co
+Check out our documentation at https://docs.passport.xyz
 
-## Contributing to Passport
+## Contributing
 
-We welcome everyone to contribute to the Passport project.
+We welcome everyone to contribute to Passport and the Scorer API! Please review our [contributing guidelines](./CONTRIBUTING.md) before proceeding.
 
-You can join our [Discord](https://discord.gg/gitcoin) and specifically the [passport-builders](https://discord.com/channels/562828676480237578/986222591096279040) channel (just be sure to select the builder role when you join the discord) to get help and discuss the project with the rest of the community.
+You can join our [Discord](https://discord.gg/passport) (just be sure to select the builder role when you join) to get help and discuss the project with the rest of the community.
 
-You can also familiarize yourself with our near term project roadmap in the passport [project backlog](https://github.com/orgs/gitcoinco/projects/6/views/3)
+You can also familiarize yourself with our near term project roadmap in the [project backlog](https://github.com/orgs/passportxyz/projects/1)
 
 ## Reviewing Changes
 
@@ -34,10 +34,10 @@ When the review finishes, your pull request will be squashed and merged into the
 
 Prerequisites: [Node (v16 LTS)](https://nodejs.org/en/download/) plus [Yarn](https://classic.yarnpkg.com/en/docs/install/) and [Git](https://git-scm.com/downloads)
 
-1. Install Gitcoin Passport (this will install all packages within the passport monorepo):
+1. Install Passport (this will install all packages within the passport monorepo):
 
 ```sh
-git clone https://github.com/gitcoinco/passport.git
+git clone https://github.com/passportxyz/passport.git
 cd passport
 npm install --global lerna
 lerna init
@@ -59,13 +59,15 @@ cp ./schemas/.env-example.env ./schemas/.env
 yarn start
 ```
 
-4. Run the [Passport Scorer API](https://github.com/gitcoinco/passport-scorer/tree/main/api) locally. Set up instructions are [here](https://github.com/gitcoinco/passport-scorer/blob/main/SETUP.md) 
+4. Run the [Passport Scorer API](https://github.com/passportxyz/passport-scorer/tree/main/api) locally. Set up instructions are [here](https://github.com/passportxyz/passport-scorer/blob/main/SETUP.md) 
 
 ## Passport Data
 
-A passport has two sources of data. The primary source is a postgres database that is hosted by gitcoin. To run the passport application locally you will need spin up the [Scorer API](https://github.com/gitcoinco/passport-scorer/tree/main/api). All relevant instructions to run the scorer api can be found [here](https://github.com/gitcoinco/passport-scorer/blob/main/SETUP.md). The sample environment variables in the .env-example.env files are configured to make requests to the scorer api running locally. Once the scorer api is running locally, you should have a reliable data source for development.
+A passport has three sources of data. The primary source is a postgres database that is hosted by Passport XYZ. To run the passport application locally you will need spin up the [Scorer API](https://github.com/passportxyz/passport-scorer/tree/main/api). All relevant instructions to run the scorer api can be found [here](https://github.com/passportxyz/passport-scorer/blob/main/SETUP.md). The sample environment variables in the .env-example.env files are configured to make requests to the scorer api running locally. Once the scorer api is running locally, you should have a reliable data source for development.
 
-The second source of data is the ceramic network. No steps are needed to run the ceramic network locally. The sample environment variables in the .env-example.env files are configured to make requests to a test version of the ceramic network.
+A second source of data is the Ceramic network. No steps are needed to run the ceramic network locally. The sample environment variables in the .env-example.env files are configured to make requests to a test version of the ceramic network.
+
+The third location is in onchain attestations that are made across about a dozen different networks. For more information on the onchain attestations, you can reference details [here](https://easscan.org/).
 
 ## Background Knowledge
 
@@ -77,7 +79,7 @@ The second source of data is the ceramic network. No steps are needed to run the
 
 ## app
 
-The web app allowing users to interact with their Gitcoin Passport. [README](app/README.md)
+The web app allowing users to interact with their Passport. [README](app/README.md)
 
 ## database-client
 
