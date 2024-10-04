@@ -45,6 +45,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { IAMError } from "./utils/scorerService.js";
 import { VerifyDidChallengeBaseError } from "./utils/verifyDidChallenge.js";
+import {
+  AttestationRequestData,
+  MultiAttestationRequest,
+  NO_EXPIRATION,
+  SchemaEncoder,
+  ZERO_BYTES32,
+} from "@ethereum-attestation-service/eas-sdk";
+import { encodeEasScore } from "./utils/easStampSchema.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -147,6 +155,7 @@ const providerTypePlatformMap = Object.entries(platforms).reduce(
     providers.forEach(({ type }) => {
       acc[type] = platformName;
     });
+
     return acc;
   },
   {} as { [k: string]: string }
@@ -563,6 +572,100 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
   } catch (error) {
     return void errorRes(res, String(error), 500);
   }
+});
+
+app.post("/api/v0.0.0/scroll/dev", (req: Request, res: Response) => {
+  const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
+  if (!Object.keys(onchainInfo).includes(chainIdHex)) {
+    return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
+  }
+  const attestationChainIdHex = chainIdHex as keyof typeof onchainInfo;
+
+  if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
+
+  const recipient = credentials[0].credentialSubject.id.split(":")[4];
+
+  if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
+    return void errorRes(res, "Invalid recipient", 400);
+
+  if (!credentials.every((credential) => credential.credentialSubject.id.split(":")[4] === recipient))
+    return void errorRes(res, "Every credential's id must be equivalent", 400);
+
+  Promise.all(
+    credentials.map(async (credential) => {
+      return {
+        credential,
+        verified: hasValidIssuer(credential.issuer) && (await verifyCredential(DIDKit, credential)),
+      };
+    })
+  )
+    .then(async (credentialVerifications) => {
+      const invalidCredentials = credentialVerifications
+        .filter(({ verified }) => !verified)
+        .map(({ credential }) => credential);
+
+      if (invalidCredentials.length > 0) {
+        return void errorRes(res, { invalidCredentials }, 400);
+      }
+
+      const defaultRequestData = {
+        recipient,
+        expirationTime: NO_EXPIRATION,
+        revocable: true,
+        refUID: ZERO_BYTES32,
+        value: 0,
+      };
+
+      const schemaEncoder = new SchemaEncoder("uint8 level");
+
+      const mockLevel = "1";
+
+      const badgeRequestData: AttestationRequestData[] = [
+        {
+          ...defaultRequestData,
+          data: schemaEncoder.encodeData([{ name: "level", value: mockLevel, type: "uint8" }]),
+        },
+      ];
+
+      const multiAttestationRequest: MultiAttestationRequest[] = [
+        {
+          schema: "0xbed807c107eec2a3b362280daeea502a4623e1e1d87db13d844c0a5deca168ce",
+          data: badgeRequestData,
+        },
+      ];
+
+      const fee = await getEASFeeAmount(1);
+      const passportAttestation: PassportAttestation = {
+        multiAttestationRequest,
+        nonce: Number(nonce),
+        fee: fee.toString(),
+      };
+
+      const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
+
+      const signer = await getAttestationSignerForChain(attestationChainIdHex);
+
+      signer
+        ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+        .then((signature) => {
+          const { v, r, s } = utils.splitSignature(signature);
+
+          const payload: EasPayload = {
+            passport: passportAttestation,
+            signature: { v, r, s },
+            invalidCredentials,
+          };
+
+          return void res.json(payload);
+        })
+        .catch(() => {
+          return void errorRes(res, "Error signing badge request", 500);
+        });
+    })
+    .catch((e) => {
+      console.log("Error formatting badge request", { e });
+      return void errorRes(res, "Error formatting badge request", 500);
+    });
 });
 
 // Expose entry point for getting eas payload for moving stamps on-chain (Passport Attestations)
