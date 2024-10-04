@@ -154,6 +154,14 @@ export const cleanPassport = (
   return { passport, expiredProviders: tempExpiredProviders, expirationDateProviders };
 };
 
+export const getStampsToRetry = (initialPassportStamps: Stamp[], initialCeramicStamps: Stamp[]): Stamp[] =>
+  initialPassportStamps.filter((stamp: Stamp) => {
+    const existingStamp = initialCeramicStamps.find((composeStamp: Stamp) => stamp.provider === composeStamp.provider);
+    if (!existingStamp || stamp.credential.issuanceDate !== existingStamp.credential.issuanceDate) {
+      return true;
+    }
+  });
+
 export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
   const resolveCancel = useRef<() => void>();
@@ -275,15 +283,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const handleComposeRetry = async (): Promise<SecondaryStorageBulkPatchResponse | void> => {
     if (initialPassport && ceramicClient && initialCeramicStamps) {
       try {
+        datadogLogs.logger.info("[ComposeDB] calling handleComposeRetry");
         // using stamps as the source of truth, filter stamps for where the issuanceDate does not match the composeStamp if there is a composeStamp with the same provider
-        const stampsToRetry = initialPassport.stamps.filter((stamp: Stamp) => {
-          const existingStamp = initialCeramicStamps.find(
-            (composeStamp: Stamp) => stamp.provider === composeStamp.provider
-          );
-          if (!existingStamp || stamp.credential.issuanceDate !== existingStamp.credential.issuanceDate) {
-            return true;
-          }
-        });
+        const stampsToRetry = getStampsToRetry(initialPassport.stamps, initialCeramicStamps);
         // then add the stamps to ComposeDB
         if (stampsToRetry.length > 0) {
           // perform an update using the stamps that need to be retried
@@ -296,6 +298,8 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         console.log("error adding ceramic stamps", e);
         datadogLogs.logger.error("Error adding ceramic stamps", { stamps: initialCeramicStamps, error: e });
       }
+    } else {
+      datadogLogs.logger.info("Did not attempt handleComposeRetry");
     }
   };
 
