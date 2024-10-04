@@ -1,5 +1,5 @@
 import { PROVIDER_ID, StampPatch, ValidResponseBody } from "@gitcoin/passport-types";
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import { fetchPossibleEVMStamps } from "../signer/utils";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
@@ -14,7 +14,7 @@ import { useMessage } from "./useMessage";
 export const useOneClickVerification = () => {
   const [verificationState, setUserVerificationState] = useAtom(mutableUserVerificationAtom);
 
-  const { passport, allPlatforms, handlePatchStamps } = useContext(CeramicContext);
+  const { passport, allPlatforms, handlePatchStamps, handleComposeRetry } = useContext(CeramicContext);
   const { success } = useMessage();
 
   const initiateVerification = async function (did: DID, address: string) {
@@ -98,6 +98,12 @@ export const useOneClickVerification = () => {
   const verificationComplete = useMemo(() => {
     return verificationState.error || verificationState.success;
   }, [verificationState.error, verificationState.success]);
+
+  useEffect(() => {
+    if (verificationComplete) {
+      handleComposeRetry();
+    }
+  }, [handleComposeRetry, verificationComplete]);
 
   return { initiateVerification, verificationState, verificationComplete };
 };
