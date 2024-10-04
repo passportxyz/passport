@@ -293,7 +293,7 @@ const ScrollConnectGithub = () => {
   const msgSpan = msg ? <span className="pt-4">{msg}</span> : null;
   const body = noCredentialReceived ? (
     <>
-      <div className="text-4xl text-[#FF684B]">We’re sorry!</div>
+      <div className="text-4xl text-[#FF684B]">We&apos;re sorry!</div>
       <div>You do not qualify because you do not have the minimum 10 contributions needed.</div>
     </>
   ) : (
@@ -305,6 +305,7 @@ const ScrollConnectGithub = () => {
       </div>
       <div className="mt-8 flex flex-col items-center justify-center">
         <LoadButton
+          data-testid="connectGithubButton"
           variant="custom"
           onClick={signInWithGithub}
           isLoading={isVerificationRunning}
