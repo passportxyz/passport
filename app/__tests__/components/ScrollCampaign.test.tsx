@@ -7,6 +7,9 @@ import { CeramicContextState } from "../../context/ceramicContext";
 import { AppRoutes } from "../../pages";
 import { ScrollStepsBar } from "../../components/ScrollCampaign";
 import { useParams } from "react-router-dom";
+import { CredentialResponseBody } from "@gitcoin/passport-types";
+import { googleStampFixture } from "../../__test-fixtures__/databaseStorageFixtures";
+import * as passportIdentity from "@gitcoin/passport-identity";
 
 const navigateMock = jest.fn();
 jest.mock("react-router-dom", () => ({
@@ -16,6 +19,63 @@ jest.mock("react-router-dom", () => ({
 }));
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
+
+jest.mock("../../utils/helpers", () => {
+  return {
+    ...jest.requireActual("../../utils/helpers"),
+    generateUID: jest.fn(() => "test"),
+  };
+});
+
+jest.mock("../../config/scroll_campaign", () => {
+  const originalModule = jest.requireActual("../../config/scroll_campaign");
+  return {
+    ...originalModule,
+    scrollCampaignBadgeProviders: ["SomeDeveloperProvider"],
+    loadBadgeProviders: jest.fn().mockImplementation(() => {
+      return ["SomeDeveloperProvider"];
+    }),
+  };
+});
+
+jest.mock("../../config/platformMap", () => {
+  const originalModule = jest.requireActual("../../config/platformMap");
+  return {
+    ...originalModule,
+    CUSTOM_PLATFORM_TYPE_INFO: {
+      ...originalModule.CUSTOM_PLATFORM_TYPE_INFO,
+      DEVEL: {
+        ...originalModule.CUSTOM_PLATFORM_TYPE_INFO.DEVEL,
+        platformClass: jest.fn().mockImplementation(() => ({
+          getProviderPayload: async () => {
+            return {
+              mockedProviderPayload: "Mock",
+            };
+          },
+        })),
+      },
+    },
+  };
+});
+
+jest.mock("@gitcoin/passport-identity", () => {
+  const originalModule = jest.requireActual("@gitcoin/passport-identity");
+  return {
+    ...originalModule,
+    fetchVerifiableCredential: jest.fn().mockImplementation(async () => {
+      const credentials: CredentialResponseBody[] = [
+        {
+          credential: googleStampFixture.credential,
+          record: {
+            type: "test",
+            version: "test",
+          },
+        },
+      ];
+      return { credentials };
+    }),
+  };
+});
 
 describe("Landing page tests", () => {
   it("goes to next page when login successful", async () => {
@@ -54,8 +114,12 @@ describe("Landing page tests", () => {
 });
 
 describe("Component tests", () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
   it("shows step 0 correctly", () => {
-    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll", step: "0" });
+    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "0" });
 
     render(<ScrollStepsBar />);
 
@@ -73,7 +137,7 @@ describe("Component tests", () => {
   });
 
   it("shows step 1 correctly", () => {
-    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll", step: "1" });
+    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "1" });
 
     render(<ScrollStepsBar />);
 
@@ -88,5 +152,82 @@ describe("Component tests", () => {
     const mintStep = screen.getByText("Mint Badge");
     expect(mintStep).toBeInTheDocument();
     expect(mintStep).toHaveClass("brightness-50");
+  });
+});
+
+describe("Github Connect page tests", () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
+  it("redirects to the login page when did not present", async () => {
+    renderWithContext(
+      mockCeramicContext,
+      <MemoryRouter initialEntries={["/campaign/scroll-developer/1"]}>
+        <AppRoutes />
+      </MemoryRouter>,
+      {
+        did: undefined,
+        dbAccessToken: undefined,
+      }
+    );
+
+    await waitFor(() => {
+      expect(navigateMock).toHaveBeenCalledWith("/campaign/scroll-developer");
+    });
+  });
+
+  it("displays the page correctly when logged in", async () => {
+    renderWithContext(
+      mockCeramicContext,
+      <MemoryRouter initialEntries={["/campaign/scroll-developer/1"]}>
+        <AppRoutes />
+      </MemoryRouter>
+    );
+
+    const connectGithubButton = screen.getByTestId("connectGithubButton");
+    expect(connectGithubButton).toBeInTheDocument();
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it("navigates to the success page in case the verification succeeded", async () => {
+    renderWithContext(
+      mockCeramicContext,
+      <MemoryRouter initialEntries={["/campaign/scroll-developer/1"]}>
+        <AppRoutes />
+      </MemoryRouter>
+    );
+
+    const connectGithubButton = screen.getByTestId("connectGithubButton");
+    expect(connectGithubButton).toBeInTheDocument();
+    expect(navigateMock).not.toHaveBeenCalled();
+
+    await userEvent.click(connectGithubButton);
+
+    await waitFor(() => {
+      expect(navigateMock).toHaveBeenCalledWith("/campaign/scroll-developer/2");
+    });
+  });
+
+  it("displays an error message if the verification failed", async () => {
+    jest.spyOn(passportIdentity, "fetchVerifiableCredential").mockImplementation(async () => {
+      return { credentials: [] };
+    });
+
+    renderWithContext(
+      mockCeramicContext,
+      <MemoryRouter initialEntries={["/campaign/scroll-developer/1"]}>
+        <AppRoutes />
+      </MemoryRouter>
+    );
+
+    const connectGithubButton = screen.getByTestId("connectGithubButton");
+    expect(connectGithubButton).toBeInTheDocument();
+    expect(navigateMock).not.toHaveBeenCalled();
+
+    await userEvent.click(connectGithubButton);
+    expect(navigateMock).not.toHaveBeenCalled();
+
+    expect(screen.getByText(/sorry/)).toBeInTheDocument();
   });
 });

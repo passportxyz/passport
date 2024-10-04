@@ -49,9 +49,7 @@ export class CustomGithubProvider implements Provider {
     const { conditionName, conditionHash } = payload.proofs;
     let githubId: string | null = null;
 
-    console.log("geri geting condition");
     const condition = await getCondition(this.type, conditionName, conditionHash);
-    console.log("geri condition: ", condition);
 
     // Call requestAccessToken to exchange the code for an access token and store it in the context
     await requestAccessToken(payload.proofs?.code, context);

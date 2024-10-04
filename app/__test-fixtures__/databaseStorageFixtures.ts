@@ -32,7 +32,6 @@ export const googleStampFixture: Stamp = {
   provider: "Google",
   credential: getCredential(),
 };
-console.log("googleStampFixture", googleStampFixture);
 
 export const ensStampFixture: Stamp = {
   provider: "Ens",
@@ -79,4 +78,3 @@ export const linkedinStampFixture: Stamp = {
   provider: "Linkedin",
   credential: getCredential(),
 };
-console.log("googleStampFixture", googleStampFixture);
