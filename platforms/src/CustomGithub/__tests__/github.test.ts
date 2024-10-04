@@ -79,6 +79,123 @@ describe("CustomGithubProvider verification", function () {
     });
   });
 
+  it("handles valid verification attempt for repository_commit_count", async () => {
+    // Mocking axios response for a valid case
+    const axiosMock = (axios.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.includes("customization/credential")) {
+        return Promise.resolve({
+          data: {
+            ruleset: {
+              condition: {
+                repository_commit_count: {
+                  repository: "passportxyz/passport",
+                  threshold: 3,
+                },
+              },
+            },
+          },
+        });
+      }
+    });
+
+    jest.spyOn(githubClient, "requestAccessToken").mockImplementationOnce(() => {
+      return Promise.resolve("access-token");
+    });
+    jest.spyOn(githubClient, "getGithubUserData").mockImplementationOnce(() => {
+      return Promise.resolve({
+        login: mockedGithubLogin,
+        node_id: mockedGithubId,
+      });
+    });
+    const fetchAndCheckCommitCountToRepositoryMock = jest
+      .spyOn(githubClient, "fetchAndCheckCommitCountToRepository")
+      .mockImplementationOnce(() => {
+        return Promise.resolve({
+          contributionValid: true,
+          commitCount: 3,
+        });
+      });
+
+    const customGithubProvider = new CustomGithubProvider();
+    const verification = await customGithubProvider.verify(payload, mockGithubContext);
+
+    expect(verification).toEqual({
+      valid: true,
+      record: {
+        id: mockedGithubId,
+        conditionName: "test",
+        conditionHash: "0xtest",
+      },
+      errors: [],
+    });
+    expect(fetchAndCheckCommitCountToRepositoryMock).toHaveBeenCalledWith(
+      mockGithubContext,
+      3,
+      3,
+      "passportxyz/passport",
+      undefined
+    );
+  });
+
+  it("handles valid verification attempt for repository_commit_count with cutoff_date", async () => {
+    // Mocking axios response for a valid case
+    const axiosMock = (axios.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.includes("customization/credential")) {
+        return Promise.resolve({
+          data: {
+            ruleset: {
+              condition: {
+                repository_commit_count: {
+                  repository: "passportxyz/passport",
+                  threshold: 3,
+                  cutoff_date: "2021-10-05T14:48:00.000Z",
+                },
+              },
+            },
+          },
+        });
+      }
+    });
+
+    jest.spyOn(githubClient, "requestAccessToken").mockImplementationOnce(() => {
+      return Promise.resolve("access-token");
+    });
+    jest.spyOn(githubClient, "getGithubUserData").mockImplementationOnce(() => {
+      return Promise.resolve({
+        login: mockedGithubLogin,
+        node_id: mockedGithubId,
+      });
+    });
+    const fetchAndCheckCommitCountToRepositoryMock = jest
+      .spyOn(githubClient, "fetchAndCheckCommitCountToRepository")
+      .mockImplementationOnce(() => {
+        return Promise.resolve({
+          contributionValid: true,
+          commitCount: 3,
+        });
+      });
+
+    const customGithubProvider = new CustomGithubProvider();
+    const verification = await customGithubProvider.verify(payload, mockGithubContext);
+
+    expect(verification).toEqual({
+      valid: true,
+      record: {
+        id: mockedGithubId,
+        conditionName: "test",
+        conditionHash: "0xtest",
+      },
+      errors: [],
+    });
+    expect(fetchAndCheckCommitCountToRepositoryMock).toHaveBeenCalledWith(
+      mockGithubContext,
+      3,
+      3,
+      "passportxyz/passport",
+      new Date("2021-10-05T14:48:00.000Z")
+    );
+  });
+
   it("handles errors during verification", async () => {
     // Simulating an axios error
     (axios.get as jest.Mock).mockRejectedValue(new Error("Network error"));

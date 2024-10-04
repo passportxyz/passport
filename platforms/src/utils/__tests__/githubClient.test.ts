@@ -1,5 +1,6 @@
 import axios from "axios";
 import {
+  fetchAndCheckCommitCountToRepository,
   fetchAndCheckContributions,
   fetchAndCheckContributionsToRepository,
   GithubContext,
@@ -11,7 +12,7 @@ import {
 jest.mock("axios");
 const mockedPost = jest.spyOn(axios, "post");
 const mockedGet = jest.spyOn(axios, "get");
-const mockGithubCOntext: GithubContext = {
+const mockGithubContext: GithubContext = {
   github: {
     accessToken: "github-access-token",
     login: "github-login",
@@ -104,7 +105,7 @@ describe("fetchAndCheckContributions", () => {
 
     mockedPost.mockResolvedValue(mockApiResponse);
 
-    const result = await fetchAndCheckContributions(mockGithubCOntext, mockCode);
+    const result = await fetchAndCheckContributions(mockGithubContext, mockCode);
 
     const expectedResult = {
       userId: mockUserId,
@@ -118,7 +119,7 @@ describe("fetchAndCheckContributions", () => {
 
     // Make sure it uses cache on second call
 
-    const anotherCallResult = await fetchAndCheckContributions(mockGithubCOntext, mockCode);
+    const anotherCallResult = await fetchAndCheckContributions(mockGithubContext, mockCode);
 
     expect(anotherCallResult).toEqual(expectedResult);
 
@@ -466,7 +467,7 @@ describe("fetchAndCheckContributionsToRepository", () => {
       }
     });
 
-    const result = await fetchAndCheckContributionsToRepository(mockGithubCOntext, 5, 10, "https://repo/name");
+    const result = await fetchAndCheckContributionsToRepository(mockGithubContext, 5, 10, "https://repo/name");
 
     const expectedResult = {
       contributionValid: true,
@@ -523,7 +524,7 @@ describe("fetchAndCheckContributionsToRepository", () => {
       return Promise.resolve(mockApiResponse);
     });
 
-    const result = await fetchAndCheckContributionsToRepository(mockGithubCOntext, 6, 1, "https://repo/name");
+    const result = await fetchAndCheckContributionsToRepository(mockGithubContext, 6, 1, "https://repo/name");
 
     const expectedResult = {
       contributionValid: false,
@@ -552,7 +553,7 @@ describe("fetchAndCheckContributionsToRepository", () => {
       return Promise.resolve(mockApiResponse);
     });
 
-    const result = await fetchAndCheckContributionsToRepository(mockGithubCOntext, 6, 2, "https://repo/name");
+    const result = await fetchAndCheckContributionsToRepository(mockGithubContext, 6, 2, "https://repo/name");
 
     expect(mockedGet).toHaveBeenCalledTimes(2); // We expect the axiosget to have been called 3 times (2 times it would get data, the 3rd time an empty list would be returned)
   });
@@ -581,7 +582,7 @@ describe("fetchAndCheckContributionsToRepository", () => {
       }
     });
 
-    const result = await fetchAndCheckContributionsToRepository(mockGithubCOntext, 10, 10, "https://repo/name");
+    const result = await fetchAndCheckContributionsToRepository(mockGithubContext, 10, 10, "https://repo/name");
 
     const expectedResult = {
       contributionValid: false,
@@ -616,13 +617,266 @@ describe("fetchAndCheckContributionsToRepository", () => {
       }
     });
 
-    await fetchAndCheckContributionsToRepository(mockGithubCOntext, 10, 1, "https://repo/name");
+    await fetchAndCheckContributionsToRepository(mockGithubContext, 10, 1, "https://repo/name");
 
     expect(mockedGet).toHaveBeenCalledWith("https://api.github.com/repos/repo/name/commits", {
       headers: {
-        Authorization: `token ${mockGithubCOntext.github.accessToken}`,
+        Authorization: `token ${mockGithubContext.github.accessToken}`,
       },
-      params: { page: 1, per_page: 100, author: mockGithubCOntext.github.login },
+      params: { page: 1, per_page: 100, author: mockGithubContext.github.login },
+    });
+  });
+});
+
+describe("fetchAndCheckCommitCountToRepository", () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it("should validate a proper user", async () => {
+    // Mock the GitHub API requests
+    const mockApiResponse: { data: RepoCommit[] } = {
+      data: [
+        {
+          commit: {
+            author: {
+              date: "2024-09-05T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-06T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-07T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-08T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-09T12:00:00Z",
+            },
+          },
+        },
+      ],
+    };
+
+    let numRequests = 0;
+    mockedGet.mockImplementation(() => {
+      numRequests += 1;
+      if (numRequests > 2) {
+        return Promise.resolve({ data: [] });
+      } else {
+        return Promise.resolve(mockApiResponse);
+      }
+    });
+
+    const result = await fetchAndCheckCommitCountToRepository(mockGithubContext, 5, 10, "https://repo/name");
+
+    const expectedResult = {
+      contributionValid: true,
+      commitCount: 5,
+    };
+
+    expect(result).toEqual(expectedResult);
+    expect(mockedGet).toHaveBeenCalledTimes(1); // We expect the axiosget to have been called 3 times (2 times it would get data, the 3rd time an empty list would be returned)
+  });
+
+  it("should fail if a user does not have sufficient contributions", async () => {
+    // Mock the GitHub API requests
+    const mockApiResponse: { data: RepoCommit[] } = {
+      data: [
+        {
+          commit: {
+            author: {
+              date: "2024-09-05T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-06T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-07T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-08T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-09T12:00:00Z",
+            },
+          },
+        },
+      ],
+    };
+
+    mockedGet.mockImplementation(() => {
+      return Promise.resolve(mockApiResponse);
+    });
+
+    const result = await fetchAndCheckCommitCountToRepository(mockGithubContext, 6, 1, "https://repo/name");
+
+    const expectedResult = {
+      contributionValid: false,
+      commitCount: 5,
+    };
+
+    expect(result).toEqual(expectedResult);
+    expect(mockedGet).toHaveBeenCalledTimes(1); // We expect the axiosget to have been called 3 times (2 times it would get data, the 3rd time an empty list would be returned)
+  });
+
+  it("should not make more requests than are allowed", async () => {
+    // Mock the GitHub API requests
+    const mockApiResponse: { data: RepoCommit[] } = {
+      data: [
+        {
+          commit: {
+            author: {
+              date: "2024-09-05T12:00:00Z",
+            },
+          },
+        },
+      ],
+    };
+
+    mockedGet.mockImplementation(() => {
+      return Promise.resolve(mockApiResponse);
+    });
+
+    const result = await fetchAndCheckCommitCountToRepository(mockGithubContext, 6, 2, "https://repo/name");
+
+    expect(mockedGet).toHaveBeenCalledTimes(2); // We expect the axiosget to have been called 3 times (2 times it would get data, the 3rd time an empty list would be returned)
+  });
+
+  it("should not make any more requests after an empty list has been received", async () => {
+    // Mock the GitHub API requests
+    const mockApiResponse: { data: RepoCommit[] } = {
+      data: [
+        {
+          commit: {
+            author: {
+              date: "2024-09-05T12:00:00Z",
+            },
+          },
+        },
+      ],
+    };
+
+    let numRequests = 0;
+    mockedGet.mockImplementation(() => {
+      numRequests += 1;
+      if (numRequests > 2) {
+        return Promise.resolve({ data: [] });
+      } else {
+        return Promise.resolve(mockApiResponse);
+      }
+    });
+
+    const result = await fetchAndCheckCommitCountToRepository(mockGithubContext, 10, 10, "https://repo/name");
+
+    const expectedResult = {
+      contributionValid: false,
+      commitCount: 2,
+    };
+
+    expect(result).toEqual(expectedResult);
+    expect(mockedGet).toHaveBeenCalledTimes(3); // We expect the axiosget to have been called 3 times (2 times it would get data, the 3rd time an empty list would be returned)
+  });
+
+  it("should filter the commits in the github API by the author", async () => {
+    // Mock the GitHub API requests
+    const mockApiResponse: { data: RepoCommit[] } = {
+      data: [
+        {
+          commit: {
+            author: {
+              date: "2024-09-05T12:00:00Z",
+            },
+          },
+        },
+      ],
+    };
+
+    let numRequests = 0;
+    mockedGet.mockImplementation(() => {
+      numRequests += 1;
+      if (numRequests > 2) {
+        return Promise.resolve({ data: [] });
+      } else {
+        return Promise.resolve(mockApiResponse);
+      }
+    });
+
+    await fetchAndCheckCommitCountToRepository(mockGithubContext, 10, 1, "https://repo/name");
+
+    expect(mockedGet).toHaveBeenCalledWith("https://api.github.com/repos/repo/name/commits", {
+      headers: {
+        Authorization: `token ${mockGithubContext.github.accessToken}`,
+      },
+      params: { page: 1, per_page: 100, author: mockGithubContext.github.login },
+    });
+  });
+
+  it("should filter the commits in the github API by the author and cut-off date if specified", async () => {
+    // Mock the GitHub API requests
+    const mockApiResponse: { data: RepoCommit[] } = {
+      data: [
+        {
+          commit: {
+            author: {
+              date: "2024-09-05T12:00:00Z",
+            },
+          },
+        },
+      ],
+    };
+
+    let numRequests = 0;
+    mockedGet.mockImplementation(() => {
+      numRequests += 1;
+      if (numRequests > 2) {
+        return Promise.resolve({ data: [] });
+      } else {
+        return Promise.resolve(mockApiResponse);
+      }
+    });
+
+    const cutOffDateStr = "2011-10-05T14:48:00.000Z";
+    await fetchAndCheckCommitCountToRepository(mockGithubContext, 10, 1, "https://repo/name", new Date(cutOffDateStr));
+
+    expect(mockedGet).toHaveBeenCalledWith("https://api.github.com/repos/repo/name/commits", {
+      headers: {
+        Authorization: `token ${mockGithubContext.github.accessToken}`,
+      },
+      params: { page: 1, per_page: 100, author: mockGithubContext.github.login, until: cutOffDateStr },
     });
   });
 });

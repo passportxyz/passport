@@ -352,7 +352,7 @@ export const fetchAndCheckContributionsToOrganisation = async (
   if (orgData.node_id) {
     return fetchAndCheckContributions(context, orgData.node_id);
   }
-  // TODO: geri - fix this, probably throw error
+
   return {
     userId: context.github.userId,
     contributionDays: 0,
@@ -427,7 +427,8 @@ export const fetchAndCheckCommitCountToRepository = async (
   context: GithubContext,
   expectedNumberOfCommits: number,
   iterations = 3,
-  repoNameOrURL: string
+  repoNameOrURL: string,
+  cutOffDate?: Date
 ): Promise<{ contributionValid: boolean; commitCount?: number; errors?: string[] }> => {
   const segments = repoNameOrURL.split("/");
   const repo = segments.pop();
@@ -455,7 +456,7 @@ export const fetchAndCheckCommitCountToRepository = async (
       // Now that we have an access token fetch the user details
       const commitsResponse = await axios.get(commitsUrl, {
         headers: { Authorization: `token ${accessToken}` },
-        params: { page, per_page, author },
+        params: { page, per_page, author, until: cutOffDate?.toISOString() },
       });
 
       const commits = commitsResponse.data as RepoCommit[];

@@ -1,4 +1,5 @@
 import {
+  fetchAndCheckCommitCountToRepository,
   fetchAndCheckContributionsToOrganisation,
   fetchAndCheckContributionsToRepository,
   GithubContext,
@@ -131,23 +132,27 @@ export const evaluateOrganisationContributor = async (
   }
 };
 
+/// Evaluate the number of commits to a repository by a user
+/// cutoff_date is an optional parameter. If specified, it needs to be an string in ISO format, for example: "2011-10-05T14:48:00.000Z"
 export const evaluateRepositoryCommiter = async (
-  condition: { threshold: number; repository: string },
+  condition: { threshold: number; repository: string; cutoff_date?: string },
   evaluator: ConditionEvaluator,
   context: any
 ): Promise<boolean> => {
   const threshold = condition["threshold"];
   const repository = condition["repository"];
+  const cutOffDate = condition["cutoff_date"] ? new Date(condition["cutoff_date"]) : undefined;
 
   if (!(threshold !== undefined && threshold !== null) || !repository) {
     throw new Error(`Invalid threshold or repository, got threshold='${threshold}' and repository='${repository}'`);
   }
   try {
-    const contributionResult = await fetchAndCheckContributionsToRepository(
+    const contributionResult = await fetchAndCheckCommitCountToRepository(
       context as GithubContext,
       threshold,
       3,
-      repository
+      repository,
+      cutOffDate
     );
     return contributionResult.contributionValid;
   } catch (_e: unknown) {
