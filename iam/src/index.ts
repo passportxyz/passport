@@ -575,97 +575,173 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 });
 
 app.post("/api/v0.0.0/scroll/dev", (req: Request, res: Response) => {
-  const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
-  if (!Object.keys(onchainInfo).includes(chainIdHex)) {
-    return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
+  try {
+    const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
+    if (!Object.keys(onchainInfo).includes(chainIdHex)) {
+      return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
+    }
+    const attestationChainIdHex = chainIdHex as keyof typeof onchainInfo;
+
+    if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
+
+    const recipient = credentials[0].credentialSubject.id.split(":")[4];
+
+    if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
+      return void errorRes(res, "Invalid recipient", 400);
+
+    if (!credentials.every((credential) => credential.credentialSubject.id.split(":")[4] === recipient))
+      return void errorRes(res, "Every credential's id must be equivalent", 400);
+
+    Promise.all(
+      credentials.map(async (credential) => {
+        return {
+          credential,
+          verified: hasValidIssuer(credential.issuer) && (await verifyCredential(DIDKit, credential)),
+        };
+      })
+    )
+      .then(async (credentialVerifications) => {
+        const SCROLL_BADGE_PROVIDER_INFO: Record<
+          string,
+          {
+            contractAddress: string;
+            level: number;
+          }
+        > = {
+          NFT: {
+            contractAddress: "0x96DB2c6D93A8a12089f7a6EdA5464e967308AdEd",
+            level: 1,
+          },
+          "githubContributionActivityGte#120": {
+            contractAddress: "0x96DB2c6D93A8a12089f7a6EdA5464e967308AdEd",
+            level: 2,
+          },
+        };
+
+        const badgeProviders = Object.keys(SCROLL_BADGE_PROVIDER_INFO);
+
+        const invalidCredentials = credentialVerifications
+          .filter(
+            ({ verified, credential }) => !verified || !badgeProviders.includes(credential.credentialSubject.provider)
+          )
+          .map(({ credential }) => credential);
+
+        if (invalidCredentials.length > 0) {
+          return void errorRes(res, { invalidCredentials }, 400);
+        }
+
+        const defaultRequestData = {
+          recipient,
+          expirationTime: NO_EXPIRATION,
+          revocable: true,
+          refUID: ZERO_BYTES32,
+          value: 0,
+        };
+
+        const badgeSchemaEncoder = new SchemaEncoder("address badge,bytes payload");
+        const badgePayloadSchemaEncoder = new SchemaEncoder("uint256 level,bytes32[] hashes");
+
+        const groupedBadgeData = credentialVerifications.reduce(
+          (acc, { credential }) => {
+            const provider = credential.credentialSubject.provider;
+            const { contractAddress, level } = SCROLL_BADGE_PROVIDER_INFO[provider];
+
+            if (!acc[contractAddress]) acc[contractAddress] = { level: 0, hashes: [] };
+
+            const hash = "0x" + Buffer.from(credential.credentialSubject.hash.split(":")[1], "base64").toString("hex");
+
+            acc[contractAddress].level = Math.max(acc[contractAddress].level, level);
+            acc[contractAddress].hashes.push(hash);
+
+            return acc;
+          },
+          {} as Record<string, { level: number; hashes: string[] }>
+        );
+
+        // TODO check onchain credentials and only include new ones, make sure
+        // have either onchain up to level or all credentials for max level
+        //
+        // const badgeContracts = Array.from(
+        //   new Set(
+        //     Object.entries(SCROLL_BADGE_PROVIDER_INFO)
+        //       .filter(([provider, _]) =>
+        //         credentialVerifications.some(({ credential }) => credential.credentialSubject.provider === provider)
+        //       )
+        //       .map(([_, { contractAddress }]) => contractAddress)
+        //   )
+        // );
+        //
+        // const currentLevels = badgeContracts.reduce((acc, contractAddress) => {
+        //   const badge = new Badge(contractAddress);
+        console.log("groupedBadgeData", JSON.stringify(groupedBadgeData, null, 2));
+
+        // TODO dynamic schema and data new vs upgrade
+
+        const badgeRequestData: AttestationRequestData[] = Object.entries(groupedBadgeData).map(
+          ([contractAddress, { level, hashes }]) => {
+            return {
+              ...defaultRequestData,
+              data: badgeSchemaEncoder.encodeData([
+                { name: "badge", value: contractAddress, type: "address" },
+                {
+                  name: "payload",
+                  type: "bytes",
+                  value: badgePayloadSchemaEncoder.encodeData([
+                    // TODO use correct level type
+                    { name: "level", value: level, type: "uint256" },
+                    { name: "hashes", value: hashes, type: "bytes32[]" },
+                  ]),
+                },
+              ]),
+            };
+          }
+        );
+
+        console.log("badgeRequestData", JSON.stringify(badgeRequestData, null, 2));
+
+        const multiAttestationRequest: MultiAttestationRequest[] = [
+          {
+            schema: "0xbed807c107eec2a3b362280daeea502a4623e1e1d87db13d844c0a5deca168ce",
+            data: badgeRequestData,
+          },
+        ];
+
+        const fee = await getEASFeeAmount(1);
+        const passportAttestation: PassportAttestation = {
+          multiAttestationRequest,
+          nonce: Number(nonce),
+          fee: fee.toString(),
+        };
+
+        const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
+
+        const signer = await getAttestationSignerForChain(attestationChainIdHex);
+
+        signer
+          ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+          .then((signature) => {
+            const { v, r, s } = utils.splitSignature(signature);
+
+            const payload: EasPayload = {
+              passport: passportAttestation,
+              signature: { v, r, s },
+              invalidCredentials,
+            };
+
+            return void res.json(payload);
+          })
+          .catch(() => {
+            return void errorRes(res, "Error signing badge request", 500);
+          });
+      })
+      .catch((e) => {
+        console.log("Error formatting badge request", { e });
+        return void errorRes(res, "Error formatting badge request", 500);
+      });
+  } catch (error) {
+    console.log("Unexpected error when processing scroll badge request", { error });
+    return void errorRes(res, String(error), 500);
   }
-  const attestationChainIdHex = chainIdHex as keyof typeof onchainInfo;
-
-  if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
-
-  const recipient = credentials[0].credentialSubject.id.split(":")[4];
-
-  if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
-    return void errorRes(res, "Invalid recipient", 400);
-
-  if (!credentials.every((credential) => credential.credentialSubject.id.split(":")[4] === recipient))
-    return void errorRes(res, "Every credential's id must be equivalent", 400);
-
-  Promise.all(
-    credentials.map(async (credential) => {
-      return {
-        credential,
-        verified: hasValidIssuer(credential.issuer) && (await verifyCredential(DIDKit, credential)),
-      };
-    })
-  )
-    .then(async (credentialVerifications) => {
-      const invalidCredentials = credentialVerifications
-        .filter(({ verified }) => !verified)
-        .map(({ credential }) => credential);
-
-      if (invalidCredentials.length > 0) {
-        return void errorRes(res, { invalidCredentials }, 400);
-      }
-
-      const defaultRequestData = {
-        recipient,
-        expirationTime: NO_EXPIRATION,
-        revocable: true,
-        refUID: ZERO_BYTES32,
-        value: 0,
-      };
-
-      const schemaEncoder = new SchemaEncoder("uint8 level");
-
-      const mockLevel = "1";
-
-      const badgeRequestData: AttestationRequestData[] = [
-        {
-          ...defaultRequestData,
-          data: schemaEncoder.encodeData([{ name: "level", value: mockLevel, type: "uint8" }]),
-        },
-      ];
-
-      const multiAttestationRequest: MultiAttestationRequest[] = [
-        {
-          schema: "0xbed807c107eec2a3b362280daeea502a4623e1e1d87db13d844c0a5deca168ce",
-          data: badgeRequestData,
-        },
-      ];
-
-      const fee = await getEASFeeAmount(1);
-      const passportAttestation: PassportAttestation = {
-        multiAttestationRequest,
-        nonce: Number(nonce),
-        fee: fee.toString(),
-      };
-
-      const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
-
-      const signer = await getAttestationSignerForChain(attestationChainIdHex);
-
-      signer
-        ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
-        .then((signature) => {
-          const { v, r, s } = utils.splitSignature(signature);
-
-          const payload: EasPayload = {
-            passport: passportAttestation,
-            signature: { v, r, s },
-            invalidCredentials,
-          };
-
-          return void res.json(payload);
-        })
-        .catch(() => {
-          return void errorRes(res, "Error signing badge request", 500);
-        });
-    })
-    .catch((e) => {
-      console.log("Error formatting badge request", { e });
-      return void errorRes(res, "Error formatting badge request", 500);
-    });
 });
 
 // Expose entry point for getting eas payload for moving stamps on-chain (Passport Attestations)

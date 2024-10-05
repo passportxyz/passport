@@ -36,6 +36,7 @@ import { useAttestation } from "../hooks/useAttestation";
 import { chains } from "../utils/chains";
 import { jsonRequest } from "../utils/AttestationProvider";
 import { useMessage } from "../hooks/useMessage";
+import { iamUrl } from "../config/stamp_config";
 
 const SCROLL_STEP_NAMES = ["Connect Wallet", "Connect to Github", "Mint Badge"];
 const SCROLL_CONTRACT_ADDRESSES = JSON.parse(process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_CONTRACT_ADDRESSES || "[]");
@@ -512,9 +513,12 @@ const ScrollMintBadge = () => {
     [badgeCredentials, stampScores]
   );
 
+  // TODO check badge contract for used hashes above current level
+  const hasIgnoredBadges = false;
+  //badgeCredentials.length > deduplicatedBadgeCredentials.length;
+
   const hasBadge = deduplicatedBadgeCredentials.length > 0;
   const hasMultipleBadges = deduplicatedBadgeCredentials.length > 1;
-  const hasIgnoredBadges = badgeCredentials.length > deduplicatedBadgeCredentials.length;
   const loading = !(passport && scoreState === "DONE");
 
   const onMint = async () => {
@@ -529,9 +533,11 @@ const ScrollMintBadge = () => {
           message: "An unexpected error occurred while trying to get the nonce.",
         });
       } else {
-        const { data }: { data: EasPayload } = await jsonRequest("/TODO", {
+        const url = `${iamUrl}v0.0.0/scroll/dev`;
+        const { data }: { data: EasPayload } = await jsonRequest(url, {
           recipient: address || "",
-          badgeCredentials,
+          credentials: badgeCredentials.map(({ credential }) => credential),
+          chainIdHex: scrollChain?.id,
           nonce,
         });
 

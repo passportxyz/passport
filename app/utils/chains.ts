@@ -285,7 +285,7 @@ chainConfigs.push({
   chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
   attestationProviderConfig: {
     name: "Ethereum Attestation Service",
-    status: usingTestEnvironment ? "disabled" : "enabled",
+    status: "enabled",
     skipByDefault: false,
     easScanUrl: "https://scroll.easscan.org",
     monochromeIcon: "./assets/scroll-logo-monochrome.svg",
