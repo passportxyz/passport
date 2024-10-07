@@ -1,5 +1,6 @@
 import React, { useEffect, useContext, useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
+import axios from "axios";
 import NotFound from "../pages/NotFound";
 import PageRoot from "./PageRoot";
 import { AccountCenter } from "./AccountCenter";
@@ -17,13 +18,16 @@ import { waitForRedirect } from "../context/stampClaimingContext";
 import { useWalletStore } from "../context/walletStore";
 
 import { CUSTOM_PLATFORM_TYPE_INFO } from "../config/platformMap";
-import { VerifiableCredential } from "@gitcoin/passport-types";
+import { PROVIDER_ID, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 import { createSignedPayload, generateUID } from "../utils/helpers";
 import { create } from "zustand";
 import { GitHubIcon } from "./WelcomeFooter";
 import { scrollCampaignBadgeProviders } from "../config/scroll_campaign";
+import { PassportDatabase } from "@gitcoin/passport-database-client";
+import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
+import { datadogLogs } from "@datadog/browser-logs";
 
 const SCROLL_STEP_NAMES = ["Connect Wallet", "Connect to Github", "Mint Badge"];
 
@@ -194,7 +198,7 @@ const ScrollConnectGithub = () => {
   const goToNextStep = useNextCampaignStep();
   const { isConnected } = useWeb3ModalAccount();
   const { did, dbAccessToken, checkSessionIsValid } = useDatastoreConnectionContext();
-  const { userDid } = useContext(CeramicContext);
+  const { userDid, database } = useContext(CeramicContext);
   const address = useWalletStore((state) => state.address);
   const { setCredentials } = useScrollStampsStore();
   const [noCredentialReceived, setNoCredentialReceieved] = useState(false);
@@ -267,6 +271,18 @@ const ScrollConnectGithub = () => {
           goToNextStep();
         } else {
           setNoCredentialReceieved(true);
+        }
+
+        if (database) {
+          const saveResult = await database.addStamps(
+            verifiedCredentials.map(
+              (credential): Stamp => ({ credential, provider: credential.credentialSubject.provider as PROVIDER_ID })
+            )
+          );
+
+          if (saveResult.status !== "Success") {
+            datadogLogs.logger.error("Error saving stamps to database: ", { address, saveResult });
+          }
         }
       }
     } finally {

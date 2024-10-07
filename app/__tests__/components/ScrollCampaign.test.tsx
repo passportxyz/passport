@@ -10,6 +10,7 @@ import { useParams } from "react-router-dom";
 import { CredentialResponseBody } from "@gitcoin/passport-types";
 import { googleStampFixture } from "../../__test-fixtures__/databaseStorageFixtures";
 import * as passportIdentity from "@gitcoin/passport-identity";
+import { PassportDatabase } from "@gitcoin/passport-database-client";
 
 const navigateMock = jest.fn();
 jest.mock("react-router-dom", () => ({
@@ -18,7 +19,15 @@ jest.mock("react-router-dom", () => ({
   useParams: jest.fn().mockImplementation(jest.requireActual("react-router-dom").useParams),
 }));
 
-const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
+jest.mock("@gitcoin/passport-database-client");
+const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
+  database: new PassportDatabase("test", "test", "test"),
+});
+
+console.log("geri mockCeramicContext", mockCeramicContext);
+console.log("geri mockCeramicContext.database", mockCeramicContext.database);
+console.log("geri PassportDatabase", PassportDatabase);
+console.log("geri instances: ", (PassportDatabase as jest.Mock).mock.instances);
 
 jest.mock("../../utils/helpers", () => {
   return {
@@ -190,7 +199,7 @@ describe("Github Connect page tests", () => {
     expect(navigateMock).not.toHaveBeenCalled();
   });
 
-  it("navigates to the success page in case the verification succeeded", async () => {
+  it.only("saves the stamps in the DB and navigates to the success page in case the verification succeeded", async () => {
     renderWithContext(
       mockCeramicContext,
       <MemoryRouter initialEntries={["/campaign/scroll-developer/1"]}>
@@ -201,6 +210,10 @@ describe("Github Connect page tests", () => {
     const connectGithubButton = screen.getByTestId("connectGithubButton");
     expect(connectGithubButton).toBeInTheDocument();
     expect(navigateMock).not.toHaveBeenCalled();
+
+
+    const mockPassportDatabase = (PassportDatabase as jest.Mock).mock.instances[0];
+    expect(mockPassportDatabase.addStamps).toHaveBeenCalled();
 
     await userEvent.click(connectGithubButton);
 

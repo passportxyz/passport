@@ -1,7 +1,6 @@
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 export function loadBadgeProviders() {
-  console.log("geri original loadBadgeProviders");
   try {
     return JSON.parse(process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_SELECTED_PROVIDERS || "[]");
   } catch (e) {
