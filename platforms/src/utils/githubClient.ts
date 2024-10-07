@@ -79,6 +79,10 @@ export type ContributionRange = {
   iteration: number;
 };
 
+function removeTrailingSlash(url: string): string {
+  return url.endsWith("/") ? url.slice(0, -1) : url;
+}
+
 const parseContributions = ({
   commitContributionsByRepository,
   userCreatedAt,
@@ -366,7 +370,7 @@ export const fetchAndCheckContributionsToRepository = async (
   iterations = 3,
   repoNameOrURL: string
 ): Promise<{ contributionValid: boolean; numberOfDays?: number; errors?: string[] }> => {
-  const segments = repoNameOrURL.split("/");
+  const segments = removeTrailingSlash(repoNameOrURL).split("/");
   const repo = segments.pop();
   const owner = segments.pop();
   const commitsUrl = `https://api.github.com/repos/${owner}/${repo}/commits`;
@@ -430,7 +434,7 @@ export const fetchAndCheckCommitCountToRepository = async (
   repoNameOrURL: string,
   cutOffDate?: Date
 ): Promise<{ contributionValid: boolean; commitCount?: number; errors?: string[] }> => {
-  const segments = repoNameOrURL.split("/");
+  const segments = removeTrailingSlash(repoNameOrURL).split("/");
   const repo = segments.pop();
   const owner = segments.pop();
   const commitsUrl = `https://api.github.com/repos/${owner}/${repo}/commits`;
