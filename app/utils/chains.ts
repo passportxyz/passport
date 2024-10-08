@@ -129,6 +129,23 @@ if (usingTestEnvironment) {
       monochromeIcon: "./assets/op-logo-monochrome.svg",
     },
   });
+
+  chainConfigs.push({
+    id: "0x8274f",
+    token: "ETH",
+    label: "Scroll Sepolia",
+    rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SCROLL_SEPOLIA_RPC_URL as string,
+    explorerUrl: "https://sepolia.scrollscan.com/",
+    icon: "./assets/scroll-logo.svg",
+    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
+    attestationProviderConfig: {
+      name: "Ethereum Attestation Service",
+      status: "enabled",
+      skipByDefault: false,
+      easScanUrl: "https://scroll-sepolia.easscan.org",
+      monochromeIcon: "./assets/scroll-logo-monochrome.svg",
+    },
+  });
 }
 
 if (!TEST_MODE) {
