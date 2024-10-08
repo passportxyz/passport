@@ -17,7 +17,7 @@ const optimismChainId = "0xa";
 const zkSyncChainId = "0x144";
 const sepoliaOPChainId = "0xaa37dc";
 const arbitrumChainId = "0xa4b1";
-const scrollChainId = "0x82750";
+export const scrollChainId = "0x82750";
 const shapeChainId = "0x168";
 
 type ChainConfig = {
@@ -274,22 +274,5 @@ if (!TEST_MODE) {
     });
   }
 }
-
-chainConfigs.push({
-  id: scrollChainId,
-  token: "ETH",
-  label: "Scroll",
-  rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SCROLL_RPC_URL as string,
-  explorerUrl: "https://scrollscan.com/",
-  icon: "./assets/scroll-logo.svg",
-  chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
-  attestationProviderConfig: {
-    name: "Ethereum Attestation Service",
-    status: "enabled",
-    skipByDefault: false,
-    easScanUrl: "https://scroll.easscan.org",
-    monochromeIcon: "./assets/scroll-logo-monochrome.svg",
-  },
-});
 
 export const chains: Chain[] = chainConfigs.map((config) => new Chain(config));

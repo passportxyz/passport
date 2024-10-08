@@ -72,7 +72,9 @@ export const useAttestation = ({ chain }: { chain?: Chain }) => {
       console.log("Unable to load verifierContract");
       return;
     }
-    return await verifierContract.recipientNonces(address);
+    const nonce = await verifierContract.recipientNonces(address);
+    console.log("nonce", nonce);
+    return nonce;
   }, [address, getVerifierContract]);
 
   const issueAttestation = useCallback(

@@ -49,7 +49,7 @@ export const useSyncToChainButton = ({
 
           const nonce = await getNonce();
 
-          if (!nonce) {
+          if (nonce === undefined) {
             console.log("Unable to load nonce");
             return;
           }

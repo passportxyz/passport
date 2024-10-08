@@ -4,13 +4,12 @@
 // ---- Server
 import express, { Request } from "express";
 import { router as procedureRouter } from "@gitcoin/passport-platforms/procedure-router";
-import { TypedDataDomain } from "@ethersproject/abstract-signer";
 
 // ---- Production plugins
 import cors from "cors";
 
 // ---- Web3 packages
-import { utils, ethers } from "ethers";
+import { utils } from "ethers";
 
 // ---- Types
 import { Response } from "express";
@@ -45,14 +44,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { IAMError } from "./utils/scorerService.js";
 import { VerifyDidChallengeBaseError } from "./utils/verifyDidChallenge.js";
-import {
-  AttestationRequestData,
-  MultiAttestationRequest,
-  NO_EXPIRATION,
-  SchemaEncoder,
-  ZERO_BYTES32,
-} from "@ethereum-attestation-service/eas-sdk";
-import { encodeEasScore } from "./utils/easStampSchema.js";
+import { errorRes } from "./utils/helpers.js";
+import { ATTESTER_TYPES, getAttestationDomainSeparator, getAttestationSignerForChain } from "./utils/attestations.js";
+import { scrollDevBadgeHandler } from "./utils/scrollDevBadge.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -98,57 +92,20 @@ if (!process.env.EAS_FEE_USD) {
   configErrors.push("EAS_FEE_USD is required");
 }
 
+if (!process.env.SCROLL_BADGE_PROVIDER_INFO) {
+  configErrors.push("SCROLL_BADGE_PROVIDER_INFO is required");
+}
+
+if (!process.env.SCROLL_BADGE_ATTESTATION_SCHEMA_UID) {
+  configErrors.push("SCROLL_BADGE_ATTESTATION_SCHEMA_UID is required");
+}
+
 if (configErrors.length > 0) {
   configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
   throw new Error("Missing required configuration");
 }
 
 const EAS_FEE_USD = parseFloat(process.env.EAS_FEE_USD);
-
-// Wallet to use for mainnets
-// Only functional in production (set to same as testnet for non-production environments)
-const productionAttestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
-// Wallet to use for testnets
-const testAttestationSignerWallet = new ethers.Wallet(process.env.TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY);
-
-const getAttestationSignerForChain = async (chainIdHex: keyof typeof onchainInfo): Promise<ethers.Wallet> => {
-  const productionAttestationIssuerAddress = await productionAttestationSignerWallet.getAddress();
-  const chainUsesProductionIssuer =
-    onchainInfo[chainIdHex].issuer.address.toLowerCase() === productionAttestationIssuerAddress.toLowerCase();
-
-  return chainUsesProductionIssuer ? productionAttestationSignerWallet : testAttestationSignerWallet;
-};
-
-export const getAttestationDomainSeparator = (chainIdHex: keyof typeof onchainInfo): TypedDataDomain => {
-  const verifyingContract = onchainInfo[chainIdHex].GitcoinVerifier.address;
-  const chainId = parseInt(chainIdHex, 16).toString();
-  return {
-    name: "GitcoinVerifier",
-    version: "1",
-    chainId,
-    verifyingContract,
-  };
-};
-
-const ATTESTER_TYPES = {
-  AttestationRequestData: [
-    { name: "recipient", type: "address" },
-    { name: "expirationTime", type: "uint64" },
-    { name: "revocable", type: "bool" },
-    { name: "refUID", type: "bytes32" },
-    { name: "data", type: "bytes" },
-    { name: "value", type: "uint256" },
-  ],
-  MultiAttestationRequest: [
-    { name: "schema", type: "bytes32" },
-    { name: "data", type: "AttestationRequestData[]" },
-  ],
-  PassportAttestationRequest: [
-    { name: "multiAttestationRequest", type: "MultiAttestationRequest[]" },
-    { name: "nonce", type: "uint256" },
-    { name: "fee", type: "uint256" },
-  ],
-};
 
 const providerTypePlatformMap = Object.entries(platforms).reduce(
   (acc, [platformName, { providers }]) => {
@@ -185,10 +142,6 @@ app.use(express.json());
 
 // set cors to accept calls from anywhere
 app.use(cors());
-
-// return a JSON error response with a 400 status
-const errorRes = (res: Response, error: string | object, errorCode: number): Response =>
-  res.status(errorCode).json({ error });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const addErrorDetailsToMessage = (message: string, error: any): string => {
@@ -380,7 +333,7 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
           type = "AllowList";
         } else if (type.startsWith("DeveloperList")) {
           // Here we handle the custom DeveloperList stamps
-          const [_type, conditionName, conditionHash, ...rest] = type.split("#");
+          const [_type, conditionName, conditionHash, ..._rest] = type.split("#");
           payload.proofs = {
             ...payload.proofs,
             conditionName,
@@ -574,175 +527,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
   }
 });
 
-app.post("/api/v0.0.0/scroll/dev", (req: Request, res: Response) => {
-  try {
-    const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
-    if (!Object.keys(onchainInfo).includes(chainIdHex)) {
-      return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
-    }
-    const attestationChainIdHex = chainIdHex as keyof typeof onchainInfo;
-
-    if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
-
-    const recipient = credentials[0].credentialSubject.id.split(":")[4];
-
-    if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
-      return void errorRes(res, "Invalid recipient", 400);
-
-    if (!credentials.every((credential) => credential.credentialSubject.id.split(":")[4] === recipient))
-      return void errorRes(res, "Every credential's id must be equivalent", 400);
-
-    Promise.all(
-      credentials.map(async (credential) => {
-        return {
-          credential,
-          verified: hasValidIssuer(credential.issuer) && (await verifyCredential(DIDKit, credential)),
-        };
-      })
-    )
-      .then(async (credentialVerifications) => {
-        const SCROLL_BADGE_PROVIDER_INFO: Record<
-          string,
-          {
-            contractAddress: string;
-            level: number;
-          }
-        > = {
-          NFT: {
-            contractAddress: "0x96DB2c6D93A8a12089f7a6EdA5464e967308AdEd",
-            level: 1,
-          },
-          "githubContributionActivityGte#120": {
-            contractAddress: "0x96DB2c6D93A8a12089f7a6EdA5464e967308AdEd",
-            level: 2,
-          },
-        };
-
-        const badgeProviders = Object.keys(SCROLL_BADGE_PROVIDER_INFO);
-
-        const invalidCredentials = credentialVerifications
-          .filter(
-            ({ verified, credential }) => !verified || !badgeProviders.includes(credential.credentialSubject.provider)
-          )
-          .map(({ credential }) => credential);
-
-        if (invalidCredentials.length > 0) {
-          return void errorRes(res, { invalidCredentials }, 400);
-        }
-
-        const defaultRequestData = {
-          recipient,
-          expirationTime: NO_EXPIRATION,
-          revocable: true,
-          refUID: ZERO_BYTES32,
-          value: 0,
-        };
-
-        const badgeSchemaEncoder = new SchemaEncoder("address badge,bytes payload");
-        const badgePayloadSchemaEncoder = new SchemaEncoder("uint256 level,bytes32[] hashes");
-
-        const groupedBadgeData = credentialVerifications.reduce(
-          (acc, { credential }) => {
-            const provider = credential.credentialSubject.provider;
-            const { contractAddress, level } = SCROLL_BADGE_PROVIDER_INFO[provider];
-
-            if (!acc[contractAddress]) acc[contractAddress] = { level: 0, hashes: [] };
-
-            const hash = "0x" + Buffer.from(credential.credentialSubject.hash.split(":")[1], "base64").toString("hex");
-
-            acc[contractAddress].level = Math.max(acc[contractAddress].level, level);
-            acc[contractAddress].hashes.push(hash);
-
-            return acc;
-          },
-          {} as Record<string, { level: number; hashes: string[] }>
-        );
-
-        // TODO check onchain credentials and only include new ones, make sure
-        // have either onchain up to level or all credentials for max level
-        //
-        // const badgeContracts = Array.from(
-        //   new Set(
-        //     Object.entries(SCROLL_BADGE_PROVIDER_INFO)
-        //       .filter(([provider, _]) =>
-        //         credentialVerifications.some(({ credential }) => credential.credentialSubject.provider === provider)
-        //       )
-        //       .map(([_, { contractAddress }]) => contractAddress)
-        //   )
-        // );
-        //
-        // const currentLevels = badgeContracts.reduce((acc, contractAddress) => {
-        //   const badge = new Badge(contractAddress);
-        console.log("groupedBadgeData", JSON.stringify(groupedBadgeData, null, 2));
-
-        // TODO dynamic schema and data new vs upgrade
-
-        const badgeRequestData: AttestationRequestData[] = Object.entries(groupedBadgeData).map(
-          ([contractAddress, { level, hashes }]) => {
-            return {
-              ...defaultRequestData,
-              data: badgeSchemaEncoder.encodeData([
-                { name: "badge", value: contractAddress, type: "address" },
-                {
-                  name: "payload",
-                  type: "bytes",
-                  value: badgePayloadSchemaEncoder.encodeData([
-                    // TODO use correct level type
-                    { name: "level", value: level, type: "uint256" },
-                    { name: "hashes", value: hashes, type: "bytes32[]" },
-                  ]),
-                },
-              ]),
-            };
-          }
-        );
-
-        console.log("badgeRequestData", JSON.stringify(badgeRequestData, null, 2));
-
-        const multiAttestationRequest: MultiAttestationRequest[] = [
-          {
-            schema: "0xbed807c107eec2a3b362280daeea502a4623e1e1d87db13d844c0a5deca168ce",
-            data: badgeRequestData,
-          },
-        ];
-
-        const fee = await getEASFeeAmount(1);
-        const passportAttestation: PassportAttestation = {
-          multiAttestationRequest,
-          nonce: Number(nonce),
-          fee: fee.toString(),
-        };
-
-        const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
-
-        const signer = await getAttestationSignerForChain(attestationChainIdHex);
-
-        signer
-          ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
-          .then((signature) => {
-            const { v, r, s } = utils.splitSignature(signature);
-
-            const payload: EasPayload = {
-              passport: passportAttestation,
-              signature: { v, r, s },
-              invalidCredentials,
-            };
-
-            return void res.json(payload);
-          })
-          .catch(() => {
-            return void errorRes(res, "Error signing badge request", 500);
-          });
-      })
-      .catch((e) => {
-        console.log("Error formatting badge request", { e });
-        return void errorRes(res, "Error formatting badge request", 500);
-      });
-  } catch (error) {
-    console.log("Unexpected error when processing scroll badge request", { error });
-    return void errorRes(res, String(error), 500);
-  }
-});
+app.post("/api/v0.0.0/scroll/dev", scrollDevBadgeHandler);
 
 // Expose entry point for getting eas payload for moving stamps on-chain (Passport Attestations)
 // This function will receive an array of stamps, validate them and return an array of eas payloads

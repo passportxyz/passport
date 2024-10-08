@@ -25,34 +25,20 @@ import { EasPayload, PROVIDER_ID, Stamp, VerifiableCredential } from "@gitcoin/p
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 import { createSignedPayload, generateUID } from "../utils/helpers";
-import { create } from "zustand";
 import { GitHubIcon } from "./WelcomeFooter";
-import { scrollCampaignBadgeProviders } from "../config/scroll_campaign";
 import { datadogLogs } from "@datadog/browser-logs";
-import { ScorerContext } from "../context/scorerContext";
 import { useSetCustomizationKey } from "../hooks/useCustomization";
 import { LoadingBarSection, LoadingBarSectionProps } from "./LoadingBar";
+import {
+  scrollCampaignBadgeProviders,
+  scrollCampaignBadgeProviderInfo,
+  scrollCampaignChain,
+} from "../config/scroll_campaign";
 import { useAttestation } from "../hooks/useAttestation";
-import { chains } from "../utils/chains";
 import { jsonRequest } from "../utils/AttestationProvider";
 import { useMessage } from "../hooks/useMessage";
-import { iamUrl } from "../config/stamp_config";
 
 const SCROLL_STEP_NAMES = ["Connect Wallet", "Connect to Github", "Mint Badge"];
-const SCROLL_CONTRACT_ADDRESSES = JSON.parse(process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_CONTRACT_ADDRESSES || "[]");
-
-const scrollStampsStore = create<{
-  credentials: VerifiableCredential[];
-  setCredentials: (credentials: VerifiableCredential[]) => {};
-}>((set) => ({
-  credentials: [] as VerifiableCredential[],
-  setCredentials: async (credentials: VerifiableCredential[]) => {
-    set({ credentials });
-  },
-}));
-
-// Use as hook
-export const useScrollStampsStore = scrollStampsStore;
 
 export const ScrollStepsBar = ({
   className,
@@ -244,16 +230,12 @@ const ScrollConnectGithub = () => {
   const { userDid, database } = useContext(CeramicContext);
   const goToLoginStep = useNavigateToRootStep();
   const address = useWalletStore((state) => state.address);
-  const { setCredentials } = useScrollStampsStore();
   const [noCredentialReceived, setNoCredentialReceived] = useState(false);
   const [msg, setMsg] = useState<string | undefined>("Verifying existing badges on chain ... ");
   const [isVerificationRunning, setIsVerificationRunning] = useState(false);
+  const { failure } = useMessage();
 
-  const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(
-    address,
-    SCROLL_CONTRACT_ADDRESSES,
-    process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_RPC_URL as string
-  );
+  const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(address);
 
   useEffect(() => {
     // If the user already has on chain badge redirect to final step
@@ -318,14 +300,7 @@ const ScrollConnectGithub = () => {
               }, [] as VerifiableCredential[]) || []
             : [];
 
-        setCredentials(verifiedCredentials);
-        if (verifiedCredentials.length > 0) {
-          goToNextStep();
-        } else {
-          setNoCredentialReceived(true);
-        }
-
-        if (database) {
+        if (verifiedCredentials.length > 0 && database) {
           const saveResult = await database.addStamps(
             verifiedCredentials.map(
               (credential): Stamp => ({ credential, provider: credential.credentialSubject.provider as PROVIDER_ID })
@@ -334,13 +309,21 @@ const ScrollConnectGithub = () => {
 
           if (saveResult.status !== "Success") {
             datadogLogs.logger.error("Error saving stamps to database: ", { address, saveResult });
+            failure({
+              title: "Error",
+              message: "An unexpected error occurred while saving the credentials",
+            });
           }
+
+          goToNextStep();
+        } else {
+          setNoCredentialReceived(true);
         }
       }
     } finally {
       setIsVerificationRunning(false);
     }
-  }, [did, address, checkSessionIsValid, goToLoginStep, goToNextStep, setCredentials, userDid]);
+  }, [did, address, checkSessionIsValid, goToLoginStep, goToNextStep, userDid]);
 
   const msgSpan = msg ? <span className="pt-4">{msg}</span> : null;
   const body = noCredentialReceived ? (
@@ -403,11 +386,7 @@ const ScrollMintedBadge = () => {
   const goToGithubConnectStep = useNavigateToGithubConnectStep();
   const { isConnected, address } = useWeb3ModalAccount();
   const { did, dbAccessToken, checkSessionIsValid } = useDatastoreConnectionContext();
-  const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(
-    address,
-    SCROLL_CONTRACT_ADDRESSES,
-    process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_RPC_URL as string
-  );
+  const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(address);
 
   const { success, failure } = useMessage();
 
@@ -476,12 +455,6 @@ const ScrollMintedBadge = () => {
   );
 };
 
-// TODO env?
-const SCROLL_BADGE_PROVIDER_NAMES: Partial<Record<PROVIDER_ID, string>> = {
-  NFT: "Rust Developer Badge (Level 1)",
-  "githubContributionActivityGte#120": "GitHub Contributor Badge (Level 2)",
-};
-
 const ScrollLoadingBarSection = (props: LoadingBarSectionProps) => (
   <LoadingBarSection loadingBarClassName="h-10 via-[#FFEEDA] brightness-50" {...props} />
 );
@@ -489,37 +462,44 @@ const ScrollLoadingBarSection = (props: LoadingBarSectionProps) => (
 const ScrollMintBadge = () => {
   const { failure } = useMessage();
   const { passport } = useContext(CeramicContext);
-  const { stampScores, scoreState, refreshScore } = useContext(ScorerContext);
   const address = useWalletStore((state) => state.address);
-  const { dbAccessToken } = useDatastoreConnectionContext();
-  const scrollChain = chains.find((chain) => chain.label === "Scroll");
-  const { getNonce, issueAttestation, needToSwitchChain } = useAttestation({ chain: scrollChain });
+  const { getNonce, issueAttestation, needToSwitchChain } = useAttestation({ chain: scrollCampaignChain });
   const [syncingToChain, setSyncingToChain] = useState(false);
 
-  useEffect(() => {
-    address && dbAccessToken && refreshScore(address, dbAccessToken);
-  }, [address, dbAccessToken]);
+  const badgeStamps = useMemo(
+    () => (passport ? passport.stamps.filter(({ provider }) => scrollCampaignBadgeProviders.includes(provider)) : []),
+    [passport, scrollCampaignBadgeProviders]
+  );
 
-  const badgeCredentials = useMemo(
+  const loading = !passport;
+
+  const deduplicatedBadgeStamps = useMemo(
+    // TODO Deduplicate by seeing if in burnedHashes but not user's hashes
+    () => badgeStamps.filter(({ provider }) => true),
+    [badgeStamps]
+  );
+
+  const hasDeduplicatedCredentials = badgeStamps.length > deduplicatedBadgeStamps.length;
+
+  const highestLevelBadgeStamps = useMemo(
     () =>
-      passport && scoreState === "DONE"
-        ? passport.stamps.filter(({ provider }) => Object.keys(SCROLL_BADGE_PROVIDER_NAMES).includes(provider))
-        : [],
-    [passport, scoreState]
+      Object.values(
+        deduplicatedBadgeStamps.reduce(
+          (acc, credential) => {
+            const { contractAddress, level } = scrollCampaignBadgeProviderInfo[credential.provider];
+            if (!acc[contractAddress] || level > acc[contractAddress].level) {
+              acc[contractAddress] = { level, credential };
+            }
+            return acc;
+          },
+          {} as Record<string, { level: number; credential: Stamp }>
+        )
+      ).map(({ credential }) => credential),
+    [badgeStamps, deduplicatedBadgeStamps]
   );
 
-  const deduplicatedBadgeCredentials = useMemo(
-    () => badgeCredentials.filter(({ provider }) => stampScores[provider] && parseFloat(stampScores[provider]) > 0),
-    [badgeCredentials, stampScores]
-  );
-
-  // TODO check badge contract for used hashes above current level
-  const hasIgnoredBadges = false;
-  //badgeCredentials.length > deduplicatedBadgeCredentials.length;
-
-  const hasBadge = deduplicatedBadgeCredentials.length > 0;
-  const hasMultipleBadges = deduplicatedBadgeCredentials.length > 1;
-  const loading = !(passport && scoreState === "DONE");
+  const hasBadge = highestLevelBadgeStamps.length > 0;
+  const hasMultipleBadges = highestLevelBadgeStamps.length > 1;
 
   const onMint = async () => {
     try {
@@ -527,7 +507,7 @@ const ScrollMintBadge = () => {
 
       const nonce = await getNonce();
 
-      if (!nonce) {
+      if (nonce === undefined) {
         failure({
           title: "Error",
           message: "An unexpected error occurred while trying to get the nonce.",
@@ -536,8 +516,8 @@ const ScrollMintBadge = () => {
         const url = `${iamUrl}v0.0.0/scroll/dev`;
         const { data }: { data: EasPayload } = await jsonRequest(url, {
           recipient: address || "",
-          credentials: badgeCredentials.map(({ credential }) => credential),
-          chainIdHex: scrollChain?.id,
+          credentials: deduplicatedBadgeStamps.map(({ credential }) => credential),
+          chainIdHex: scrollCampaignChain?.id,
           nonce,
         });
 
@@ -575,19 +555,13 @@ const ScrollMintBadge = () => {
       <ScrollLoadingBarSection isLoading={loading} className="text-xl mt-2">
         {hasBadge ? (
           <div>
-            You qualify for:
-            <ul className="list-disc list-inside">
-              {deduplicatedBadgeCredentials.map(({ provider }) => (
-                <li key={provider}>{SCROLL_BADGE_PROVIDER_NAMES[provider] || provider}</li>
-              ))}
-            </ul>
-            Mint your badge
+            You qualify for {highestLevelBadgeStamps.length} badge{hasMultipleBadges ? "s" : ""}. Mint your badge
             {hasMultipleBadges ? "s" : ""} and get a chance to work with us.
-            {hasIgnoredBadges
+            {hasDeduplicatedCredentials
               ? " (Some badge credentials could not be validated because they have already been claimed on another address.)"
               : ""}
           </div>
-        ) : hasIgnoredBadges ? (
+        ) : hasDeduplicatedCredentials ? (
           "Your badge credentials have already been claimed with another address."
         ) : (
           "You don't qualify for any badges."
@@ -619,6 +593,7 @@ const ScrollMintBadge = () => {
 
 export const ScrollCampaign = ({ step }: { step: number }) => {
   const { did, dbAccessToken } = useDatastoreConnectionContext();
+  const { database } = useContext(CeramicContext);
   const goToLoginStep = useNavigateToRootStep();
   const setCustomizationKey = useSetCustomizationKey();
 
@@ -627,7 +602,7 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
   }, [setCustomizationKey]);
 
   useEffect(() => {
-    if ((!dbAccessToken || !did) && step > 0) {
+    if ((!dbAccessToken || !did || !database) && step > 0) {
       console.log("Access token or did are not present. Going back to login step!");
       goToLoginStep();
     }

@@ -216,7 +216,6 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
         const possiblePoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampWeights[key] || "0") || 0), 0);
         const earnedPoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampScores[key]) || 0), 0);
         const platformSpec = getPlatformSpec(platformId);
-        console.log("SC", platform, possiblePoints, earnedPoints, providerIds);
         return {
           ...platformSpec,
           possiblePoints,

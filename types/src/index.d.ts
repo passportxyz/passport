@@ -91,43 +91,6 @@ export type VerifiableEip712Credential = {
   };
 };
 
-export type OnChainVerifiableEip712Credential = {
-  _context: string[];
-  _type: string[];
-  credentialSubject: {
-    id: string;
-    _context: { [key: string]: string };
-    _hash?: string;
-    provider?: string;
-    address?: string;
-    challenge?: string;
-    metaPointer?: string;
-  };
-  issuer: string;
-  issuanceDate: string;
-  expirationDate: string;
-  proof: {
-    _context: string;
-    _type: string;
-    proofPurpose: string;
-    proofValue: string;
-    verificationMethod: string;
-    created: string;
-    eip712Domain: {
-      domain: {
-        name: string;
-      };
-      primaryType: string;
-      types: {
-        [key: string]: {
-          name: string;
-          type: string;
-        }[];
-      };
-    };
-  };
-};
-
 /// Define a type for the credential as it is stored in compose
 /// This will be identical to VerifiableEip712Credential, with some characters like `@` escaped
 // being changed to `_`
