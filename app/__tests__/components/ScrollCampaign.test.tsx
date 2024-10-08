@@ -20,14 +20,18 @@ jest.mock("react-router-dom", () => ({
 }));
 
 jest.mock("@gitcoin/passport-database-client");
+
+(PassportDatabase as jest.Mock).mockImplementation(() => {
+  return {
+    addStamps: jest.fn().mockResolvedValue({
+      mocked: "response",
+    }),
+  };
+});
+
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
   database: new PassportDatabase("test", "test", "test"),
 });
-
-console.log("geri mockCeramicContext", mockCeramicContext);
-console.log("geri mockCeramicContext.database", mockCeramicContext.database);
-console.log("geri PassportDatabase", PassportDatabase);
-console.log("geri instances: ", (PassportDatabase as jest.Mock).mock.instances);
 
 jest.mock("../../utils/helpers", () => {
   return {
@@ -165,7 +169,7 @@ describe("Component tests", () => {
 });
 
 describe("Github Connect page tests", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
   });
@@ -199,7 +203,7 @@ describe("Github Connect page tests", () => {
     expect(navigateMock).not.toHaveBeenCalled();
   });
 
-  it.only("saves the stamps in the DB and navigates to the success page in case the verification succeeded", async () => {
+  it("saves the stamps in the DB and navigates to the success page in case the verification succeeded", async () => {
     renderWithContext(
       mockCeramicContext,
       <MemoryRouter initialEntries={["/campaign/scroll-developer/1"]}>
@@ -211,11 +215,11 @@ describe("Github Connect page tests", () => {
     expect(connectGithubButton).toBeInTheDocument();
     expect(navigateMock).not.toHaveBeenCalled();
 
-
-    const mockPassportDatabase = (PassportDatabase as jest.Mock).mock.instances[0];
-    expect(mockPassportDatabase.addStamps).toHaveBeenCalled();
-
     await userEvent.click(connectGithubButton);
+
+    expect(mockCeramicContext.database?.addStamps).toHaveBeenCalledWith([
+      { provider: "randomValuesProvider", credential: googleStampFixture.credential },
+    ]);
 
     await waitFor(() => {
       expect(navigateMock).toHaveBeenCalledWith("/campaign/scroll-developer/2");
