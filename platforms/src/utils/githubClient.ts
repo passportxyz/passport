@@ -292,7 +292,7 @@ export const fetchAndCheckContributions = async (
   // b. a value has been stored in the cache
   if (
     maxContributionDays !== undefined ||
-    maxContributionDays !== undefined ||
+    numYearsToCheck !== undefined ||
     context.github?.contributionDays === undefined
   ) {
     if (!context.github) context.github = {};
