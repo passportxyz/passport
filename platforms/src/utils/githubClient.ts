@@ -204,7 +204,12 @@ export const queryFunc = async (
   }
 };
 
-export const fetchGithubData = async (accessToken: string, orgId?: string): Promise<GithubUserData> => {
+export const fetchGithubData = async (
+  accessToken: string,
+  orgId?: string,
+  maxContributionDays: number = MAX_CONTRIBUTION_DAYS,
+  numYearsToCheck: number = MAX_YEARS_TO_CHECK
+): Promise<GithubUserData> => {
   const now = new Date();
   let allUniqueContributionDates = new Set<string>();
   let userId;
@@ -212,7 +217,7 @@ export const fetchGithubData = async (accessToken: string, orgId?: string): Prom
   let firstQuery = true;
 
   // Loop over the number of years
-  for (let i = 0; i < MAX_YEARS_TO_CHECK; i++) {
+  for (let i = 0; i < numYearsToCheck; i++) {
     // Define the range of dates for each iteration
     const contributionRange: ContributionRange = {
       from: new Date(new Date().setFullYear(now.getFullYear() - (i + 1))).toISOString(),
@@ -235,10 +240,10 @@ export const fetchGithubData = async (accessToken: string, orgId?: string): Prom
       allUniqueContributionDates = new Set([...allUniqueContributionDates, ...result.uniqueContributionDates]);
       if (result.hadBadCommits) hadBadCommits = true;
 
-      run = result.hasNextPage && allUniqueContributionDates.size < MAX_CONTRIBUTION_DAYS;
+      run = result.hasNextPage && allUniqueContributionDates.size < maxContributionDays;
     }
 
-    if (allUniqueContributionDates.size >= MAX_CONTRIBUTION_DAYS) break;
+    if (allUniqueContributionDates.size >= maxContributionDays) break;
   }
 
   return {
@@ -274,14 +279,33 @@ export const requestAccessToken = async (code: string, context: GithubContext): 
 
   return context.github.accessToken;
 };
-export const fetchAndCheckContributions = async (context: GithubContext, orgId?: string): Promise<GithubUserData> => {
-  if (context.github?.contributionDays === undefined) {
+export const fetchAndCheckContributions = async (
+  context: GithubContext,
+  orgId?: string,
+  maxContributionDays?: number,
+  numYearsToCheck?: number
+): Promise<GithubUserData> => {
+  // We read from cache only if:
+  // a. maxContributionDays and maxContributionDays have not been set (and defaults will be used).
+  // This typically indicates that the function is used for the standard github stamp frp the
+  // passport app)
+  // b. a value has been stored in the cache
+  if (
+    maxContributionDays !== undefined ||
+    maxContributionDays !== undefined ||
+    context.github?.contributionDays === undefined
+  ) {
     if (!context.github) context.github = {};
 
     const accessToken = context.github.accessToken;
 
     // Fetch Github data
-    const { userId, contributionDays, hadBadCommits } = await fetchGithubData(accessToken, orgId);
+    const { userId, contributionDays, hadBadCommits } = await fetchGithubData(
+      accessToken,
+      orgId,
+      maxContributionDays,
+      numYearsToCheck
+    );
 
     context.github.contributionDays = contributionDays;
     context.github.userId = userId;
@@ -347,14 +371,16 @@ export const getGithubOrgData = async (context: GithubContext, orgLogin: string)
 
 export const fetchAndCheckContributionsToOrganisation = async (
   context: GithubContext,
-  numberOfDays: string,
+  numberOfDays: number,
   iterations = 3,
-  orgLoginOrURL: string
+  orgURL: string
 ): Promise<GithubUserData> => {
-  const orgLogin = orgLoginOrURL.split("/").pop();
+  const orgLogin = removeTrailingSlash(orgURL).split("/").pop();
+
   const orgData = await getGithubOrgData(context, orgLogin);
+
   if (orgData.node_id) {
-    return fetchAndCheckContributions(context, orgData.node_id);
+    return fetchAndCheckContributions(context, orgData.node_id, numberOfDays, iterations);
   }
 
   return {
@@ -368,9 +394,9 @@ export const fetchAndCheckContributionsToRepository = async (
   context: GithubContext,
   numberOfDays: number,
   iterations = 3,
-  repoNameOrURL: string
+  repoURL: string
 ): Promise<{ contributionValid: boolean; numberOfDays?: number; errors?: string[] }> => {
-  const segments = removeTrailingSlash(repoNameOrURL).split("/");
+  const segments = removeTrailingSlash(repoURL).split("/");
   const repo = segments.pop();
   const owner = segments.pop();
   const commitsUrl = `https://api.github.com/repos/${owner}/${repo}/commits`;
