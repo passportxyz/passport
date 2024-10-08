@@ -49,6 +49,7 @@ export interface CeramicContextState {
   verifiedPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>>;
   platformExpirationDates: Partial<Record<PLATFORM_ID, Date>>; // the value should be the earliest expiration date
   databaseReady: boolean;
+  database: PassportDatabase | undefined;
 }
 
 export enum IsLoadingPassportState {
@@ -112,6 +113,7 @@ const startingState: CeramicContextState = {
   verifiedProviderIds: [],
   verifiedPlatforms: {},
   databaseReady: false,
+  database: undefined,
 };
 
 export const CeramicContext = createContext(startingState);
@@ -694,6 +696,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     verifiedPlatforms,
     platformExpirationDates,
     databaseReady: !!database,
+    database,
   };
 
   return <CeramicContext.Provider value={providerProps}>{children}</CeramicContext.Provider>;
