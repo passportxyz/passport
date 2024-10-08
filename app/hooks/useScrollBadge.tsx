@@ -2,53 +2,103 @@ import { ethers, JsonRpcProvider } from "ethers";
 import { useState, useEffect } from "react";
 import PassportScoreScrollBadgeAbi from "../abi/PassportScoreScrollBadge.json";
 
-const scrollRpcUrl = "https://scroll.drpc.org";
-const scrollRpcProvider = new JsonRpcProvider(scrollRpcUrl);
-
-export const useScrollBadge = (address: string | undefined) => {
-  const [hasBadge, setHasBadge] = useState<boolean>(false);
-  const [badgeLevel, setBadgeLevel] = useState<number>(0); // TODO: define badge level type
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+export const useScrollBadge = (address: string | undefined, contractAddresses: string[], rpcUrl: string) => {
+  const [areBadgesLoading, setBadgesLoading] = useState<boolean>(true);
+  const [badges, setBadges] = useState<{ contract: string; hasBadge: boolean; badgeLevel: number; badgeUri: string }[]>(
+    []
+  );
+  const [errors, setErrors] = useState<{ [key: string]: string } | {}>({});
 
   useEffect(() => {
+    if (!address) {
+      setErrors({
+        ...errors,
+        user_address: "Invalid address",
+      });
+      setBadgesLoading(false);
+      return;
+    }
+
+    if (contractAddresses.length < 1) {
+      setErrors({
+        ...errors,
+        user_address: "Invalid address",
+      });
+      setBadgesLoading(false);
+      return;
+    }
+
     const checkBadge = async (address: string | undefined) => {
-      if (!address) {
-        setError("Invalid address");
-        setLoading(false);
-        return;
-      }
       try {
-        setLoading(true);
-        const contractAddress = "TODO";
-        const scrollRpcUrl = "https://scroll.drpc.org";
-        const scrollRpcProvider = new JsonRpcProvider(scrollRpcUrl);
+        setBadgesLoading(true);
+        const scrollRpcProvider = new JsonRpcProvider(rpcUrl);
 
-        const contract = new ethers.Contract(contractAddress, PassportScoreScrollBadgeAbi.abi, scrollRpcProvider);
+        const badges = await Promise.all(
+          contractAddresses.map(async (contractAddress) => {
+            let resultHasBadge = false;
+            let resultBadgeLevel = 0;
+            let resultBadgeUri = "";
+            try {
+              const contract = new ethers.Contract(contractAddress, PassportScoreScrollBadgeAbi.abi, scrollRpcProvider);
+              resultHasBadge = await contract.hasBadge(address);
+              if (resultHasBadge) {
+                // Get badge level
+                try {
+                  console.log("Checking badge level for contract: ", contractAddress);
+                  resultBadgeLevel = await contract.checkLevel(address);
+                } catch (err) {
+                  console.error("Error checking badge level for contract", contractAddress, ":", err);
+                  setErrors((prevErrors) => ({
+                    ...prevErrors,
+                    [`badge_level_${contractAddress}`]: "Failed to fetch badge level",
+                  }));
+                }
+                // Get badge uri
+                try {
+                  console.log("Checking badge uri for contract: ", contractAddress);
+                  resultBadgeUri = await contract.badgeLevelImageURIs(resultBadgeLevel);
+                } catch (err) {
+                  console.error("Error getting badge uri for contract", contractAddress, ":", err);
+                  setErrors((prevErrors) => ({
+                    ...prevErrors,
+                    [`badge_uri_${contractAddress}`]: "Failed to fetch badge uri",
+                  }));
+                }
+              }
+            } catch (err) {
+              console.error("Error checking badge for contract", contractAddress, ":", err);
+              setErrors((prevErrors) => ({
+                ...prevErrors,
+                [`badge_${contractAddress}`]: "Failed to fetch badge",
+              }));
+            }
+            return {
+              contract: contractAddress,
+              hasBadge: resultHasBadge,
+              badgeLevel: resultBadgeLevel,
+              badgeUri: resultBadgeUri,
+            };
+          })
+        );
+        setBadges(badges);
 
-        const resultHasBadge = await contract.hasBadge(address);
-
-        setHasBadge(resultHasBadge);
-        if (resultHasBadge) {
-          try {
-            console.log("User has badge... checking level");
-            const resultBadgeLevel = await contract.checkLevel(address);
-            setBadgeLevel(resultBadgeLevel);
-          } catch (err) {
-            console.error("Error checking badge level:", err);
-            setError("Failed to fetch badge level");
-          }
-        }
+        console.log("badges", badges);
       } catch (err) {
-        console.error("Error checking badge:", err);
-        setError("Failed to fetch badge status");
+        console.error("Error checking badges:", err);
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          fetch_badges: "Failed to fetch badges",
+        }));
       } finally {
-        setLoading(false);
+        setBadgesLoading(false);
       }
     };
 
     checkBadge(address);
-  }, [address]);
+  }, [address, contractAddresses, rpcUrl, errors]);
 
-  return { hasBadge, badgeLevel, loading, error };
+  // Check if user has at least one badge
+  const hasAtLeastOneBadge = badges.some((badge) => badge.hasBadge);
+
+  return { badges, areBadgesLoading, errors, hasAtLeastOneBadge };
 };

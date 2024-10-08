@@ -25,6 +25,17 @@ export const useNavigateToRootStep = () => {
   return rootPage;
 };
 
+export const useNavigateToGithubConnectStep = () => {
+  const { campaignId } = useParams();
+  const navigateToPage = useNavigateToPage();
+
+  const rootPage = useCallback(() => {
+    navigateToPage(`campaign/${campaignId}/1`);
+  }, [navigateToPage, campaignId]);
+
+  return rootPage;
+};
+
 export const useNavigateToLastStep = () => {
   const { campaignId } = useParams();
   const navigateToPage = useNavigateToPage();

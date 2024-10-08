@@ -10,6 +10,7 @@ import { useParams } from "react-router-dom";
 import { CredentialResponseBody } from "@gitcoin/passport-types";
 import { googleStampFixture } from "../../__test-fixtures__/databaseStorageFixtures";
 import * as passportIdentity from "@gitcoin/passport-identity";
+import { useScrollBadge } from "../../hooks/useScrollBadge";
 
 const navigateMock = jest.fn();
 jest.mock("react-router-dom", () => ({
@@ -73,6 +74,19 @@ jest.mock("@gitcoin/passport-identity", () => {
         },
       ];
       return { credentials };
+    }),
+  };
+});
+
+jest.mock("../../hooks/useScrollBadge", () => {
+  return {
+    useScrollBadge: jest.fn().mockImplementation(() => {
+      return {
+        badges: [],
+        errors: {},
+        areBadgesLoading: false,
+        hasAtLeastOneBadge: false,
+      };
     }),
   };
 });
@@ -229,5 +243,28 @@ describe("Github Connect page tests", () => {
     expect(navigateMock).not.toHaveBeenCalled();
 
     expect(screen.getByText(/sorry/)).toBeInTheDocument();
+  });
+
+  it("navigates to the last step when the user already has at least a badge", async () => {
+    // Mocking the necessary context and hooks
+    (useScrollBadge as jest.Mock).mockReturnValue({
+      hasAtLeastOneBadge: true,
+      badges: [{ contract: "0X000", hasBadge: true, badgeLevel: 1, badgeUri: "https://example.com" }],
+      errors: {},
+      areBadgesLoading: false,
+      error: null,
+    });
+
+    renderWithContext(
+      mockCeramicContext,
+      <MemoryRouter initialEntries={["/campaign/scroll-developer/1"]}>
+        <AppRoutes />
+      </MemoryRouter>
+    );
+
+    // const canvasRedirectButton = screen.queryByTestId("canvasRedirectButton");
+    // expect(canvasRedirectButton).toBeInTheDocument();
+
+    expect(navigateMock).toHaveBeenCalledTimes(1);
   });
 });

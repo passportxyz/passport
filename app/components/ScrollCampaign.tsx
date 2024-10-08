@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import NotFound from "../pages/NotFound";
 import PageRoot from "./PageRoot";
@@ -6,7 +6,13 @@ import { AccountCenter } from "./AccountCenter";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { useLoginFlow } from "../hooks/useLoginFlow";
 import { LoadButton } from "./LoadButton";
-import { useNextCampaignStep, useNavigateToRootStep, useNavigateToLastStep } from "../hooks/useNextCampaignStep";
+import {
+  useNextCampaignStep,
+  useNavigateToRootStep,
+  useNavigateToLastStep,
+  useNavigateToGithubConnectStep,
+} from "../hooks/useNextCampaignStep";
+import { useScrollBadge } from "../hooks/useScrollBadge";
 import { Badge1, Badge2, Badge3 } from "./campaign/scroll/badges";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { CeramicContext } from "../context/ceramicContext";
@@ -24,6 +30,7 @@ import { GitHubIcon } from "./WelcomeFooter";
 import { scrollCampaignBadgeProviders } from "../config/scroll_campaign";
 
 const SCROLL_STEP_NAMES = ["Connect Wallet", "Connect to Github", "Mint Badge"];
+const contracAddresses = JSON.parse(process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_CONTRACT_ADDRESSES || "[]");
 
 const scrollStampsStore = create<{
   credentials: VerifiableCredential[];
@@ -133,16 +140,6 @@ const ScrollLogin = () => {
   const { isConnected } = useWeb3ModalAccount();
   const { isLoggingIn, signIn, loginStep } = useLoginFlow({ onLoggedIn: nextStep });
 
-  // useEffect(() => {
-  //   if (isConnected) {
-  //     const address = useWalletStore((state) => state.address);
-  //     const { hasBadge, badgeLevel, loading, error } = useScrollBadge(address);
-  //     if (hasBadge) {
-  //       nextStep();
-  //     }
-  //   }
-  // }, [isConnected]);
-
   return (
     <PageRoot className="text-color-1">
       {isConnected && <AccountCenter />}
@@ -198,21 +195,37 @@ const ScrollLogin = () => {
 const ScrollConnectGithub = () => {
   const goToLoginStep = useNavigateToRootStep();
   const goToNextStep = useNextCampaignStep();
+  const goToLastStep = useNavigateToLastStep();
   const { isConnected } = useWeb3ModalAccount();
   const { did, dbAccessToken, checkSessionIsValid } = useDatastoreConnectionContext();
   const { userDid } = useContext(CeramicContext);
   const address = useWalletStore((state) => state.address);
   const { setCredentials } = useScrollStampsStore();
   const [noCredentialReceived, setNoCredentialReceieved] = useState(false);
-  const [msg, setMsg] = useState<string | undefined>();
+  const [msg, setMsg] = useState<string | undefined>("Verifying existing badges on chain ... ");
   const [isVerificationRunning, setIsVerificationRunning] = useState(false);
+
+  const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(
+    address,
+    contracAddresses,
+    process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_RPC_URL as string
+  );
+
+  useEffect(() => {
+    // If the user already has on chain badge redirect to final step
+    if (hasAtLeastOneBadge) {
+      goToLastStep();
+    } else {
+      setMsg(undefined);
+    }
+  }, [hasAtLeastOneBadge, badges, areBadgesLoading, errors, goToLastStep]);
 
   useEffect(() => {
     if (!dbAccessToken || !did) {
       console.log("Access token or did are not present. Going back to login step!");
       goToLoginStep();
     }
-  }, [dbAccessToken, did]);
+  }, [dbAccessToken, did, goToLoginStep]);
 
   const signInWithGithub = useCallback(async () => {
     setIsVerificationRunning(true);
@@ -278,7 +291,7 @@ const ScrollConnectGithub = () => {
     } finally {
       setIsVerificationRunning(false);
     }
-  }, [did, address]);
+  }, [did, address, checkSessionIsValid, goToLoginStep, goToNextStep, setCredentials, userDid]);
 
   const msgSpan = msg ? <span className="pt-4">{msg}</span> : null;
   const body = noCredentialReceived ? (
@@ -298,7 +311,7 @@ const ScrollConnectGithub = () => {
           data-testid="connectGithubButton"
           variant="custom"
           onClick={signInWithGithub}
-          isLoading={isVerificationRunning}
+          isLoading={isVerificationRunning || areBadgesLoading}
           className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-200 pl-3 pr-5"
         >
           <GitHubIcon /> Connect to Github
@@ -337,9 +350,29 @@ const ScrollConnectGithub = () => {
 };
 
 const ScrollMintedBadge = () => {
-  // const goToLoginStep = useNavigateToRootStep();
-  const { isConnected } = useWeb3ModalAccount();
-  // const address = useWalletStore((state) => state.address);
+  const goToLoginStep = useNavigateToRootStep();
+  const goToGithubConnectStep = useNavigateToGithubConnectStep();
+  const { isConnected, address } = useWeb3ModalAccount();
+  const { did, dbAccessToken, checkSessionIsValid } = useDatastoreConnectionContext();
+  console.log("contractAddresses", contracAddresses);
+  const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(
+    address,
+    contracAddresses,
+    process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_RPC_URL as string
+  );
+
+  useEffect(() => {
+    if (!dbAccessToken || !did) {
+      console.log("Access token or did are not present. Going back to login step!");
+      goToLoginStep();
+    }
+  }, [dbAccessToken, did, goToLoginStep]);
+
+  useEffect(() => {
+    if (!hasAtLeastOneBadge) {
+      goToGithubConnectStep();
+    }
+  });
 
   return (
     <PageRoot className="text-color-1">
@@ -348,21 +381,33 @@ const ScrollMintedBadge = () => {
       <div className="flex grow">
         <div className="flex flex-col min-h-screen justify-center items-center shrink-0 grow w-1/2 text-center">
           <div className="text-5xl text-[#FFEEDA]">You already minted available badges!</div>
-          {/* <div className="text-xl mt-2">
-          You had more than 50 commits and contributions. Mint your badge and get a chance to work with us.
-          </div> */}
-          <div className="mt-8">Here are all your badges</div>
-          <div className="flex">
-            <div className="border rounded">
-              <Badge1 />{" "}
+          <div className="mb-8 ">Here are all your badges</div>
+          {areBadgesLoading ? (
+            <div>Loading badges...</div>
+          ) : badges.length === 0 ? (
+            <div>No badges found.</div>
+          ) : (
+            <div className="flex space-x-20">
+              {badges.map((badge, index) =>
+                badge.hasBadge ? (
+                  <div key={index} className="border rounded p-5">
+                    <img src={badge.badgeUri} alt={`Badge Level ${badge.badgeLevel}`} className="badge-image" />
+                    <div className="mt-2 text-lg">Level: {badge.badgeLevel}</div>
+                  </div>
+                ) : null
+              )}
             </div>
-            <div className="border rounded">
-              <Badge2 />
-            </div>
-            <div className="border rounded">
-              <Badge3 />
-            </div>
-          </div>
+          )}
+          <LoadButton
+            data-testid="canvasRedirectButton"
+            variant="custom"
+            onClick={() => {
+              window.open("https://scroll.io/canvas", "_blank", "noopener,noreferrer");
+            }}
+            className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-100 pl-3 pr-5 m-10"
+          >
+            See them on Canvas
+          </LoadButton>
         </div>
       </div>
       <ScrollFooter className="absolute bottom-0 left-0 right-0 z-10" />
@@ -376,8 +421,12 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
   } else if (step === 1) {
     return <ScrollConnectGithub />;
   } else if (step === 2) {
-    console.log(" Mint your badge");
-    // return </>; Mint your badge
+    console.log("Mint your badge");
+    return (
+      <>
+        <h1>Mint your badge WIP...</h1>
+      </>
+    );
   } else if (step === 3) {
     // Returning user
     // Badge Minted
