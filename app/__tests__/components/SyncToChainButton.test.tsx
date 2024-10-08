@@ -75,6 +75,8 @@ const chainWithEas = new Chain({
   ...chainConfig,
   id: "0x14a33",
   attestationProviderConfig: {
+    skipByDefault: false,
+    monochromeIcon: "/images/ethereum-icon.svg",
     status: "enabled",
     name: "Ethereum Attestation Service",
     easScanUrl: "test.com",
@@ -87,7 +89,7 @@ describe("SyncToChainButton component", () => {
   it("should show coming soon if in active", async () => {
     renderWithContext(
       mockCeramicContext,
-      <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithoutEas} />
+      <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithoutEas} isLoading={false} />
     );
 
     expect(screen.getByText("Coming Soon")).toBeInTheDocument();
@@ -95,7 +97,7 @@ describe("SyncToChainButton component", () => {
   it("should be disabled if not active", async () => {
     renderWithContext(
       mockCeramicContext,
-      <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithoutEas} />
+      <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithoutEas} isLoading={false} />
     );
     const btn = screen.getByTestId("sync-to-chain-button");
     expect(btn).toHaveAttribute("disabled");
@@ -103,7 +105,7 @@ describe("SyncToChainButton component", () => {
   it("should be disabled if up to date", async () => {
     renderWithContext(
       mockCeramicContext,
-      <SyncToChainButton onChainStatus={OnChainStatus.MOVED_UP_TO_DATE} chain={chainWithEas} />
+      <SyncToChainButton onChainStatus={OnChainStatus.MOVED_UP_TO_DATE} chain={chainWithEas} isLoading={false} />
     );
     const btn = screen.getByTestId("sync-to-chain-button");
     expect(btn).toHaveAttribute("disabled");
@@ -121,7 +123,7 @@ describe("SyncToChainButton component", () => {
 
     renderWithContext(
       mockCeramicContext,
-      <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={anotherChainWithEas} />
+      <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={anotherChainWithEas} isLoading={false} />
     );
     const btn = screen.getByTestId("sync-to-chain-button");
     expect(btn).toHaveTextContent("Mint");
@@ -132,12 +134,12 @@ describe("SyncToChainButton component", () => {
     renderWithContext(
       { ...mockCeramicContext },
       <ChakraProvider>
-        <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} />
+        <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} isLoading={false} />
       </ChakraProvider>
     );
     const btn = screen.getByTestId("sync-to-chain-button");
     fireEvent.click(btn);
-    await screen.findByText("You do not have any Stamps to bring onchain.");
+    await screen.findByText("You do not have any Stamps to bring onchain.", { exact: false });
   });
 
   it("should render success toast if stamps are brought on chain", async () => {
@@ -150,7 +152,7 @@ describe("SyncToChainButton component", () => {
         passport: { ...mockCeramicContext.passport, stamps: [{ id: "test" } as any] },
       },
       <ChakraProvider>
-        <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} />
+        <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} isLoading={false} />
       </ChakraProvider>,
       {},
       { threshold: 10, rawScore: 20 }
@@ -158,7 +160,7 @@ describe("SyncToChainButton component", () => {
     const btn = screen.getByTestId("sync-to-chain-button");
     fireEvent.click(btn);
 
-    await screen.findByText("Passport submitted to chain.");
+    await screen.findByText("Attestation submitted to chain.");
   });
 
   it("should prompt user if score is low", async () => {
@@ -168,7 +170,7 @@ describe("SyncToChainButton component", () => {
         passport: { ...mockCeramicContext.passport, stamps: [{ id: "test" } as any] },
       },
       <ChakraProvider>
-        <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} />
+        <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} isLoading={false} />
       </ChakraProvider>,
       {},
       { threshold: 15, rawScore: 10 }

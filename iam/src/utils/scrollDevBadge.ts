@@ -2,7 +2,7 @@
 import { Request } from "express";
 
 // ---- Web3 packages
-import { utils } from "ethers";
+import { BigNumber, utils } from "ethers";
 
 // ---- Types
 import { Response } from "express";
@@ -26,6 +26,70 @@ import {
 } from "@ethereum-attestation-service/eas-sdk";
 import { errorRes } from "./helpers.js";
 import { ATTESTER_TYPES, getAttestationDomainSeparator, getAttestationSignerForChain } from "./attestations.js";
+import { ethers } from "ethers";
+
+const BADGE_CONTRACT_ABI = [
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+    ],
+    name: "badgeLevel",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "badgeLevel",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+];
+
+const DEFAULT_REQUEST_DATA = {
+  expirationTime: NO_EXPIRATION,
+  revocable: true,
+  refUID: ZERO_BYTES32,
+  value: 0,
+};
+
+const BADGE_SCHEMA_ENCODER = new SchemaEncoder("address badge,bytes payload");
+const BADGE_PAYLOAD_SCHEMA_ENCODER = new SchemaEncoder("uint256 level,bytes32[] hashes");
+
+export function getScrollRpcUrl({ chainIdHex }: { chainIdHex: string }): string {
+  return `https://scroll-${chainIdHex === "0x82750" ? "mainnet" : "sepolia"}.g.alchemy.com/v2/${
+    process.env.ALCHEMY_API_KEY
+  }`;
+}
+
+interface BadgeContract extends ethers.Contract {
+  badgeLevel(address: string): Promise<ethers.BigNumber>;
+}
+
+async function queryBadgeLevel({
+  address,
+  contractAddress,
+  rpcUrl,
+}: {
+  address: string;
+  contractAddress: string;
+  rpcUrl: string;
+}): Promise<number> {
+  const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+
+  const badgeContract = new ethers.Contract(contractAddress, BADGE_CONTRACT_ABI, provider) as BadgeContract;
+
+  try {
+    const level: BigNumber = await badgeContract.badgeLevel(address);
+    return level.toNumber();
+  } catch (e) {
+    throw new Error(`Error querying badge level: ${e}`);
+  }
+}
 
 export const scrollDevBadgeHandler = (req: Request, res: Response): void => {
   try {
@@ -74,29 +138,6 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): void => {
           return void errorRes(res, { invalidCredentials }, 400);
         }
 
-        const defaultRequestData = {
-          recipient,
-          expirationTime: NO_EXPIRATION,
-          revocable: true,
-          refUID: ZERO_BYTES32,
-          value: 0,
-        };
-
-        const badgeSchemaEncoder = new SchemaEncoder("address badge,bytes payload");
-        const badgePayloadSchemaEncoder = new SchemaEncoder("uint256 level,bytes32[] hashes");
-
-        class Badge {
-          contractAddress: string;
-
-          constructor(contractAddress: string) {
-            this.contractAddress = contractAddress;
-          }
-
-          async level(recipient: string): Promise<number> {
-            return Promise.resolve(0);
-          }
-        }
-
         const groupedCredentialInfo = credentialVerifications.reduce(
           (acc, { credential }) => {
             const provider = credential.credentialSubject.provider;
@@ -121,50 +162,62 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): void => {
           >
         );
 
+        const rpcUrl = getScrollRpcUrl({ chainIdHex: attestationChainIdHex });
         const onchainBadgeData = await Promise.all(
           Object.keys(groupedCredentialInfo).map(async (contractAddress) => {
-            const badge = new Badge(contractAddress);
-            const onchainLevel = await badge.level(recipient);
+            const onchainLevel = await queryBadgeLevel({ address: recipient, contractAddress, rpcUrl });
             return { contractAddress, onchainLevel };
           })
         );
 
-        const badgeRequestData = onchainBadgeData.map(({ contractAddress, onchainLevel }) => {
-          const credentialInfo = groupedCredentialInfo[contractAddress];
+        const badgeRequestData = onchainBadgeData
+          .map(({ contractAddress, onchainLevel }) => {
+            const credentialInfo = groupedCredentialInfo[contractAddress];
 
-          const credentialLevels = credentialInfo.map(({ level }) => level);
-          const maxCredentialLevel = Math.max(...credentialLevels);
+            const credentialLevels = credentialInfo.map(({ level }) => level);
+            const maxCredentialLevel = Math.max(...credentialLevels);
 
-          // TODO dynamic schema and data new vs upgrade
-          const isUpgrade = onchainLevel > 0;
+            // TODO dynamic schema and data for new vs upgrade
+            // const isUpgrade = onchainLevel > 0;
 
-          const requiredLevels = [...Array(maxCredentialLevel).keys()]
-            .map((n) => n + 1)
-            .filter((n) => n > onchainLevel);
+            const requiredLevels = [...Array(maxCredentialLevel).keys()]
+              .map((n) => n + 1)
+              .filter((n) => n > onchainLevel);
 
-          requiredLevels.forEach((level) => {
-            if (!credentialLevels.includes(level)) {
-              throw new Error(`Missing credential for level ${level}, contract ${contractAddress}`);
-            }
-          });
+            // All credentials already claimed
+            if (requiredLevels.length === 0) return;
 
-          const hashes = credentialInfo.filter(({ level }) => requiredLevels.includes(level)).map(({ hash }) => hash);
+            requiredLevels.forEach((level) => {
+              if (!credentialLevels.includes(level)) {
+                throw new Error(`Missing credential for level ${level}, contract ${contractAddress}`);
+              }
+            });
 
-          return {
-            ...defaultRequestData,
-            data: badgeSchemaEncoder.encodeData([
+            const hashes = credentialInfo.filter(({ level }) => requiredLevels.includes(level)).map(({ hash }) => hash);
+
+            const data = BADGE_SCHEMA_ENCODER.encodeData([
               { name: "badge", value: contractAddress, type: "address" },
               {
                 name: "payload",
                 type: "bytes",
-                value: badgePayloadSchemaEncoder.encodeData([
+                value: BADGE_PAYLOAD_SCHEMA_ENCODER.encodeData([
                   { name: "level", value: maxCredentialLevel, type: "uint256" },
                   { name: "hashes", value: hashes, type: "bytes32[]" },
                 ]),
               },
-            ]),
-          };
-        });
+            ]);
+
+            return {
+              ...DEFAULT_REQUEST_DATA,
+              recipient,
+              data,
+            };
+          })
+          .filter(Boolean);
+
+        if (badgeRequestData.length === 0) {
+          return void errorRes(res, "All badges already claimed", 400);
+        }
 
         const multiAttestationRequest: MultiAttestationRequest[] = [
           {

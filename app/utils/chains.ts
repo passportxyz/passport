@@ -12,7 +12,6 @@ export const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL 
 const sepoliaChainId = "0xaa36a7";
 const hardhatChainId = "0x7a69";
 const lineaChainId = "0xe708";
-const lineaGoerliChainId = "0xe704";
 const optimismChainId = "0xa";
 const zkSyncChainId = "0x144";
 const sepoliaOPChainId = "0xaa37dc";
