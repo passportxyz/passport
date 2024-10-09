@@ -21,7 +21,7 @@ import { waitForRedirect } from "../context/stampClaimingContext";
 import { useWalletStore } from "../context/walletStore";
 
 import { CUSTOM_PLATFORM_TYPE_INFO } from "../config/platformMap";
-import { EasPayload, PROVIDER_ID, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
+import { EasPayload, Passport, PROVIDER_ID, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 import { createSignedPayload, generateUID } from "../utils/helpers";
@@ -37,6 +37,7 @@ import {
 import { useAttestation } from "../hooks/useAttestation";
 import { jsonRequest } from "../utils/AttestationProvider";
 import { useMessage } from "../hooks/useMessage";
+import { ScorerContext } from "../context/scorerContext";
 
 const SCROLL_STEP_NAMES = ["Connect Wallet", "Connect to Github", "Mint Badge"];
 
@@ -461,10 +462,28 @@ const ScrollLoadingBarSection = (props: LoadingBarSectionProps) => (
 
 const ScrollMintBadge = () => {
   const { failure } = useMessage();
-  const { passport } = useContext(CeramicContext);
+  const { database } = useContext(CeramicContext);
   const address = useWalletStore((state) => state.address);
   const { getNonce, issueAttestation, needToSwitchChain } = useAttestation({ chain: scrollCampaignChain });
   const [syncingToChain, setSyncingToChain] = useState(false);
+
+  const [passport, setPassport] = useState<Passport | undefined>(undefined);
+
+  useEffect(() => {
+    (async () => {
+      if (database) {
+        const passportLoadResponse = await database.getPassport();
+        if (passportLoadResponse.status === "Success") {
+          setPassport(passportLoadResponse.passport);
+        } else {
+          failure({
+            title: "Error",
+            message: "An unexpected error occurred while loading your Passport.",
+          });
+        }
+      }
+    })();
+  }, [database]);
 
   const badgeStamps = useMemo(
     () => (passport ? passport.stamps.filter(({ provider }) => scrollCampaignBadgeProviders.includes(provider)) : []),
