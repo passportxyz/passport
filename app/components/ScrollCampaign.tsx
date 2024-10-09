@@ -143,6 +143,16 @@ const ScrollCampaignPageRoot = ({ children }: { children: React.ReactNode }) => 
   );
 };
 
+const BackgroundImage = ({ fadeBackgroundImage }: { fadeBackgroundImage?: boolean }) => (
+  <div className="hidden lg:block relative overflow-hidden h-screen w-full max-w-[779px]">
+    <img
+      className={`absolute top-0 left-0 ${fadeBackgroundImage ? "opacity-50" : ""}`}
+      src="/assets/campaignBackground.png"
+      alt="Campaign Background Image"
+    />
+  </div>
+);
+
 const ScrollCampaignPage = ({
   children,
   fadeBackgroundImage,
@@ -167,13 +177,7 @@ const ScrollCampaignPage = ({
               {children}
             </div>
           </div>
-          <div className="hidden lg:block relative overflow-hidden h-screen w-full max-w-[779px]">
-            <img
-              className={`absolute top-0 left-0 ${fadeBackgroundImage ? "opacity-50" : ""}`}
-              src="/assets/campaignBackground.png"
-              alt="Campaign Background Image"
-            />
-          </div>
+          <BackgroundImage fadeBackgroundImage={fadeBackgroundImage} />
         </div>
       </div>
     </ScrollCampaignPageRoot>
@@ -326,7 +330,6 @@ const ScrollConnectGithub = () => {
     }
   }, [did, address, checkSessionIsValid, goToLoginStep, goToNextStep, userDid]);
 
-  const msgSpan = msg ? <span className="pt-4">{msg}</span> : null;
   const body = noCredentialReceived ? (
     <>
       <div className="text-4xl text-[#FF684B]">We&apos;re sorry!</div>
@@ -339,7 +342,7 @@ const ScrollConnectGithub = () => {
         Passport is privacy preserving and verifies you have 1 or more commits to the following Repos located here.
         Click below and obtain the specific developer credentials
       </div>
-      <div className="mt-8 flex flex-col items-center justify-center">
+      <div className="mt-8 flex items-center justify-start">
         <LoadButton
           data-testid="connectGithubButton"
           variant="custom"
@@ -347,9 +350,8 @@ const ScrollConnectGithub = () => {
           isLoading={isVerificationRunning || areBadgesLoading}
           className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-200 pl-3 pr-5"
         >
-          <GitHubIcon /> Connect to Github
+          <GitHubIcon /> {msg ? msg : "Connect to Github"}
         </LoadButton>
-        {msgSpan}
       </div>
     </>
   );
@@ -357,24 +359,29 @@ const ScrollConnectGithub = () => {
     <PageRoot className="text-color-1">
       {isConnected && <AccountCenter />}
       <ScrollHeader className="fixed top-0 left-0 right-0" />
-      <div className="flex grow">
-        <div className="flex flex-col min-h-screen items-center shrink-0 grow w-1/2 text-center">
-          <ScrollStepsBar highLightCurrentStep={!noCredentialReceived} className="mb-8 pt-32 z-20" />
-          <div className="z-20">{body}</div>
-          <div className="max-w-[1440px] w-full">
+      <div className="flex w-full min-h-screen shrink-0 grow">
+        <div className="flex flex-col justify-center items-start text-center ml-20 w-1/2">
+          <ScrollStepsBar highLightCurrentStep={!noCredentialReceived} className="mb-8 z-20" />
+          <div className="z-20 text-left">{body}</div>
+          <div className="w-full">
             <div className="absolute inset-0 bg-black bg-opacity-70 w-full h-full -z-10"></div>
-            <div className="grid grid-cols-3 pt-24 z-10">
-              <div className="flex justify-center items-center">
-                <Badge1 />
+            {/* {!noCredentialReceived && (
+              <div className="grid grid-cols-3 pt-24 z-10">
+                <div className="flex justify-center items-center">
+                  <Badge1 />
+                </div>
+                <div className="flex justify-center items-center">
+                  <Badge2 />
+                </div>
+                <div className="flex justify-center items-center">
+                  <Badge3 />
+                </div>
               </div>
-              <div className="flex justify-center items-center">
-                <Badge2 />
-              </div>
-              <div className="flex justify-center items-center">
-                <Badge3 />
-              </div>
-            </div>
+            )} */}
           </div>
+        </div>
+        <div className="flex justify-end h-full w-full">
+          <BackgroundImage />
         </div>
       </div>
       <ScrollFooter className="absolute bottom-0 left-0 right-0 z-10" />
@@ -487,7 +494,7 @@ const ScrollMintBadge = () => {
 
   const badgeStamps = useMemo(
     () => (passport ? passport.stamps.filter(({ provider }) => scrollCampaignBadgeProviders.includes(provider)) : []),
-    [passport, scrollCampaignBadgeProviders]
+    [passport]
   );
 
   const loading = !passport;
