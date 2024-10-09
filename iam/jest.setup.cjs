@@ -14,3 +14,7 @@ process.env.SCORER_API_KEY = "abcd";
 process.env.MORALIS_API_KEY = "abcd";
 process.env.EAS_GITCOIN_STAMP_SCHEMA = "0x";
 process.env.EAS_FEE_USD = "3";
+process.env.SCROLL_BADGE_PROVIDER_INFO =
+  '{"DeveloperList#PassportCommiterLevel1#6a51c84c":{"contractAddress":"0x71A848A38fFCcA5c7A431F2BB411Ab632Fa0c456","level":1}}';
+process.env.SCROLL_BADGE_ATTESTATION_SCHEMA_UID =
+  "0xa35b5470ebb301aa5d309a8ee6ea258cad680ea112c86e456d5f2254448afc74";
