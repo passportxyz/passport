@@ -79,7 +79,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const [scoreDescription, setScoreDescription] = useState("");
   const [passportSubmissionState, setPassportSubmissionState] = useState<PassportSubmissionStateType>("APP_INITIAL");
   const [scoreState, setScoreState] = useState<ScoreStateType>("APP_INITIAL");
-  const [stampScores, setStampScores] = useState<StampScores>();
+  const [stampScores, setStampScores] = useState<Partial<StampScores>>({});
   const [stampWeights, setStampWeights] = useState<Partial<Weights>>({});
   const [scoredPlatforms, setScoredPlatforms] = useState<PlatformScoreSpec[]>([]);
   const customization = useCustomization();
@@ -214,7 +214,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       const scoredPlatforms = Array.from(platforms).map(([platformId, platform]) => {
         const providerIds = platformProviderIds[platformId];
         const possiblePoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampWeights[key] || "0") || 0), 0);
-        const earnedPoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampScores[key]) || 0), 0);
+        const earnedPoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampScores[key] || "0") || 0), 0);
         const platformSpec = getPlatformSpec(platformId);
         return {
           ...platformSpec,
