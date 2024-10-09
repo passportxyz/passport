@@ -5,6 +5,7 @@ import PageRoot from "./PageRoot";
 import { AccountCenter } from "./AccountCenter";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { useLoginFlow } from "../hooks/useLoginFlow";
+import { useMessage } from "../hooks/useMessage";
 import { LoadButton } from "./LoadButton";
 import {
   useNextCampaignStep,
@@ -30,7 +31,7 @@ import { GitHubIcon } from "./WelcomeFooter";
 import { scrollCampaignBadgeProviders } from "../config/scroll_campaign";
 
 const SCROLL_STEP_NAMES = ["Connect Wallet", "Connect to Github", "Mint Badge"];
-const contracAddresses = JSON.parse(process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_CONTRACT_ADDRESSES || "[]");
+const SCROLL_CONTRACT_ADDRESSES = JSON.parse(process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_CONTRACT_ADDRESSES || "[]");
 
 const scrollStampsStore = create<{
   credentials: VerifiableCredential[];
@@ -207,7 +208,7 @@ const ScrollConnectGithub = () => {
 
   const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(
     address,
-    contracAddresses,
+    SCROLL_CONTRACT_ADDRESSES,
     process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_RPC_URL as string
   );
 
@@ -354,12 +355,13 @@ const ScrollMintedBadge = () => {
   const goToGithubConnectStep = useNavigateToGithubConnectStep();
   const { isConnected, address } = useWeb3ModalAccount();
   const { did, dbAccessToken, checkSessionIsValid } = useDatastoreConnectionContext();
-  console.log("contractAddresses", contracAddresses);
   const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(
     address,
-    contracAddresses,
+    SCROLL_CONTRACT_ADDRESSES,
     process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_RPC_URL as string
   );
+
+  const { success, failure } = useMessage();
 
   useEffect(() => {
     if (!dbAccessToken || !did) {
@@ -373,6 +375,17 @@ const ScrollMintedBadge = () => {
       goToGithubConnectStep();
     }
   });
+
+  useEffect(() => {
+    if (errors && Object.keys(errors).length > 0) {
+      Object.entries(errors).forEach(([key, value]) => {
+        failure({
+          title: `Error ${key}`,
+          message: value,
+        });
+      });
+    }
+  }, [errors, failure]);
 
   return (
     <PageRoot className="text-color-1">

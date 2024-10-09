@@ -15,10 +15,10 @@ export const useScrollBadge = (address: string | undefined, contractAddresses: s
       datadogLogs.logger.error(
         `[Scroll-Campaign] Invalid address: ${contractAddresses}. Address: ${address}. RPC URL: ${rpcUrl}`
       );
-      setErrors({
-        ...errors,
+      setErrors((prevErrors) => ({
+        ...prevErrors,
         user_address: "Invalid address",
-      });
+      }));
       setBadgesLoading(false);
       return;
     }
@@ -27,10 +27,10 @@ export const useScrollBadge = (address: string | undefined, contractAddresses: s
       datadogLogs.logger.error(
         `[Scroll-Campaign] Invalid contractAddresses: ${contractAddresses}. Address: ${address}. RPC URL: ${rpcUrl}`
       );
-      setErrors({
-        ...errors,
-        contractAddresses: "Invalid contractAddresses",
-      });
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        user_address: "Invalid address",
+      }));
       setBadgesLoading(false);
       return;
     }
@@ -118,7 +118,7 @@ export const useScrollBadge = (address: string | undefined, contractAddresses: s
     };
 
     checkBadge(address);
-  }, [address, contractAddresses, rpcUrl, errors]);
+  }, [address, contractAddresses, rpcUrl]);
 
   // Check if user has at least one badge
   const hasAtLeastOneBadge = badges.some((badge) => badge.hasBadge);
