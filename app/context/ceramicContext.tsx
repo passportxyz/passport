@@ -39,6 +39,7 @@ export interface CeramicContextState {
   handlePatchStamps: (stamps: StampPatch[]) => Promise<void>;
   handleDeleteStamps: (providerIds: PROVIDER_ID[]) => Promise<void>;
   cancelCeramicConnection: () => void;
+  handleComposeRetry: () => Promise<SecondaryStorageBulkPatchResponse | void>;
   userDid: string | undefined;
   expiredProviders: PROVIDER_ID[];
   expiredPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>>;
@@ -48,6 +49,7 @@ export interface CeramicContextState {
   verifiedPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>>;
   platformExpirationDates: Partial<Record<PLATFORM_ID, Date>>; // the value should be the earliest expiration date
   databaseReady: boolean;
+  database: PassportDatabase | undefined;
 }
 
 export enum IsLoadingPassportState {
@@ -91,35 +93,6 @@ const startingAllProvidersState: AllProvidersState = Object.values(stampPlatform
   {}
 );
 
-export const handleComposeRetry = async (
-  composeStamps: Stamp[],
-  passDbPassport: Passport,
-  ceramicClient?: ComposeDatabase
-): Promise<SecondaryStorageBulkPatchResponse | void> => {
-  if (ceramicClient) {
-    try {
-      // using stamps as the source of truth, filter stamps for where the issuanceDate does not match the composeStamp if there is a composeStamp with the same provider
-      const stampsToRetry = passDbPassport.stamps.filter((stamp: Stamp) => {
-        const existingStamp = composeStamps.find((composeStamp: Stamp) => stamp.provider === composeStamp.provider);
-        if (!existingStamp || stamp.credential.issuanceDate !== existingStamp.credential.issuanceDate) {
-          return true;
-        }
-      });
-      // then add the stamps to ComposeDB
-      if (stampsToRetry.length > 0) {
-        // perform an update using the stamps that need to be retried
-        const composeDBPatchResponse = await ceramicClient.patchStamps(stampsToRetry);
-        return composeDBPatchResponse;
-      } else {
-        console.log("No stamps to retry");
-      }
-    } catch (e) {
-      console.log("error adding ceramic stamps", e);
-      datadogLogs.logger.error("Error adding ceramic stamps", { stamps: composeStamps, error: e });
-    }
-  }
-};
-
 const startingState: CeramicContextState = {
   passport: undefined,
   isLoadingPassport: IsLoadingPassportState.Loading,
@@ -129,6 +102,7 @@ const startingState: CeramicContextState = {
   handleAddStamps: async () => {},
   handlePatchStamps: async () => {},
   handleDeleteStamps: async () => {},
+  handleComposeRetry: async () => {},
   passportHasCacaoError: false,
   cancelCeramicConnection: () => {},
   userDid: undefined,
@@ -139,6 +113,7 @@ const startingState: CeramicContextState = {
   verifiedProviderIds: [],
   verifiedPlatforms: {},
   databaseReady: false,
+  database: undefined,
 };
 
 export const CeramicContext = createContext(startingState);
@@ -180,6 +155,14 @@ export const cleanPassport = (
   }
   return { passport, expiredProviders: tempExpiredProviders, expirationDateProviders };
 };
+
+export const getStampsToRetry = (initialPassportStamps: Stamp[], initialCeramicStamps: Stamp[]): Stamp[] =>
+  initialPassportStamps.filter((stamp: Stamp) => {
+    const existingStamp = initialCeramicStamps.find((composeStamp: Stamp) => stamp.provider === composeStamp.provider);
+    if (!existingStamp || stamp.credential.issuanceDate !== existingStamp.credential.issuanceDate) {
+      return true;
+    }
+  });
 
 export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
@@ -299,20 +282,28 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     }
   }, [ceramicClient]);
 
-  useEffect(() => {
+  const handleComposeRetry = async (): Promise<SecondaryStorageBulkPatchResponse | void> => {
     if (initialPassport && ceramicClient && initialCeramicStamps) {
-      handleComposeRetry(initialCeramicStamps, initialPassport, ceramicClient)
-        .then((response) => {
-          if (response) {
-            console.log("retry response", response);
-          }
-        })
-        .catch((e) => {
-          console.log("error retrying stamps", e);
-          datadogLogs.logger.error("Error retrying stamps", { error: e });
-        });
+      try {
+        datadogLogs.logger.info("[ComposeDB] calling handleComposeRetry");
+        // using stamps as the source of truth, filter stamps for where the issuanceDate does not match the composeStamp if there is a composeStamp with the same provider
+        const stampsToRetry = getStampsToRetry(initialPassport.stamps, initialCeramicStamps);
+        // then add the stamps to ComposeDB
+        if (stampsToRetry.length > 0) {
+          // perform an update using the stamps that need to be retried
+          const composeDBPatchResponse = await ceramicClient.patchStamps(stampsToRetry);
+          return composeDBPatchResponse;
+        } else {
+          console.log("No stamps to retry");
+        }
+      } catch (e) {
+        console.log("error adding ceramic stamps", e);
+        datadogLogs.logger.error("Error adding ceramic stamps", { stamps: initialCeramicStamps, error: e });
+      }
+    } else {
+      datadogLogs.logger.info("Did not attempt handleComposeRetry");
     }
-  }, [initialCeramicStamps, initialPassport, ceramicClient]);
+  };
 
   const checkAndAlertInvalidCeramicSession = useCallback(() => {
     if (!checkSessionIsValid()) {
@@ -695,6 +686,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     handlePatchStamps,
     handleDeleteStamps,
     cancelCeramicConnection,
+    handleComposeRetry,
     userDid,
     expiredProviders,
     expiredPlatforms,
@@ -704,6 +696,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     verifiedPlatforms,
     platformExpirationDates,
     databaseReady: !!database,
+    database,
   };
 
   return <CeramicContext.Provider value={providerProps}>{children}</CeramicContext.Provider>;

@@ -6,6 +6,7 @@ import {
   CeramicContextState,
   handleComposeRetry,
   cleanPassport,
+  getStampsToRetry,
 } from "../../context/ceramicContext";
 import { ComposeDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
 import { useEffect, useContext } from "react";
@@ -1169,12 +1170,8 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
 
     await waitFor(() => fireEvent.click(screen.getByText("handlePatchStamps")));
     await waitFor(() => expect(patchStampsMock).toHaveBeenCalledWith(stampPatches));
-    await waitFor(() =>
-      expect(
-        screen.getByText(
-          "Your update was not logged to Ceramic. Please refresh the page to reset your Ceramic session."
-        )
-      ).toBeInTheDocument()
+    await screen.findByText(
+      "Your update was not logged to Ceramic. Please refresh the page to reset your Ceramic session."
     );
   });
 });
@@ -1238,11 +1235,11 @@ describe("cleanPassport function", () => {
 
 describe("handleComposeRetry function", () => {
   it("should detect a difference between the stamps in the database and the stamps in ceramic", async () => {
-    const result = handleComposeRetry(composeStamps, databasePassport);
-    expect(result).toBeInstanceOf(Promise<SecondaryStorageBulkPatchResponse>);
+    const result = getStampsToRetry(composeStamps, databasePassport.stamps);
+    expect(result).toHaveLength(2);
   });
   it("should not return anything if the stamps in the database and the stamps in ceramic are the same", async () => {
-    const result = handleComposeRetry(databasePassport.stamps, databasePassport);
-    expect(result).toBeInstanceOf(Promise<undefined>);
+    const result = getStampsToRetry(databasePassport.stamps, databasePassport.stamps);
+    expect(result).toHaveLength(0);
   });
 });

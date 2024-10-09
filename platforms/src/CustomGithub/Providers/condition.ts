@@ -121,7 +121,7 @@ export const evaluateOrganisationContributor = async (
   try {
     const contributionResult = await fetchAndCheckContributionsToOrganisation(
       context as GithubContext,
-      `${threshold}`,
+      threshold,
       3,
       organisation
     );

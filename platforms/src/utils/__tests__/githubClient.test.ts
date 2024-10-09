@@ -2,9 +2,11 @@ import axios from "axios";
 import {
   fetchAndCheckCommitCountToRepository,
   fetchAndCheckContributions,
+  fetchAndCheckContributionsToOrganisation,
   fetchAndCheckContributionsToRepository,
   GithubContext,
   GithubContributionResponse,
+  GithubOrgMetaData,
   MAX_YEARS_TO_CHECK,
   RepoCommit,
 } from "../githubClient";
@@ -410,6 +412,173 @@ describe("fetchAndCheckContributions", () => {
   });
 });
 
+describe("fetchAndCheckContributionsToOrganisation", () => {
+  const mockCode = "test-code";
+  const mockAccessToken = "test-access-token";
+  const mockUserId = "test-user-id";
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+
+    const mockeGetOrgDataResponse: { data: GithubOrgMetaData } = {
+      data: {
+        node_id: "test-org-id",
+      },
+    };
+    const mockApiResponse: GithubContributionResponse = {
+      data: {
+        data: {
+          viewer: {
+            id: mockUserId,
+            createdAt: "2024-01-01T00:00:00Z",
+            contributionsCollection: {
+              commitContributionsByRepository: [
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 1,
+                        occurredAt: "2024-09-05T12:00:00Z",
+                        repository: {
+                          createdAt: "2024-01-01T00:00:00Z",
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 2,
+                        occurredAt: "2024-09-05T13:00:00Z",
+                        repository: {
+                          createdAt: "2024-09-04T14:13:54Z",
+                        },
+                      },
+                      {
+                        commitCount: 6,
+                        occurredAt: "2024-09-08T13:00:00Z",
+                        repository: {
+                          createdAt: "2024-09-04T14:13:54Z",
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 2,
+                        occurredAt: "2024-09-06T13:00:00Z",
+                        repository: {
+                          createdAt: "2024-09-04T14:13:54Z",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    };
+
+    mockedGet.mockResolvedValue(mockeGetOrgDataResponse);
+    mockedPost.mockResolvedValue(mockApiResponse);
+  });
+
+  it("should fetch and check contributions successfully, counting commits from the same day together", async () => {
+    const result = await fetchAndCheckContributionsToOrganisation(
+      mockGithubContext,
+      3,
+      3,
+      "https://github.org/test-org"
+    );
+
+    const expectedResult = {
+      userId: mockUserId,
+      contributionDays: 3,
+      hadBadCommits: false,
+    };
+
+    expect(result).toEqual(expectedResult);
+
+    expect(mockedGet).toHaveBeenCalledTimes(1);
+    expect(mockedPost).toHaveBeenCalledTimes(1);
+
+    // Make sure it uses cache on second call
+    const anotherCallResult = await fetchAndCheckContributionsToOrganisation(
+      mockGithubContext,
+      3,
+      3,
+      "https://github.org/test-org"
+    );
+
+    expect(anotherCallResult).toEqual(expectedResult);
+
+    expect(mockedGet).toHaveBeenCalledTimes(2);
+    expect(mockedGet).toHaveBeenCalledWith("https://api.github.com/orgs/test-org", {
+      headers: {
+        Authorization: `token ${mockGithubContext.github.accessToken}`,
+      },
+    });
+    expect(mockedPost).toHaveBeenCalledTimes(2);
+  });
+
+  it("should fetch and check contributions successfully, counting commits from the same day together when the org url ends with '/'", async () => {
+    const result = await fetchAndCheckContributionsToOrganisation(
+      mockGithubContext,
+      3,
+      3,
+      "https://github.org/test-org"
+    );
+
+    const expectedResult = {
+      userId: mockUserId,
+      contributionDays: 3,
+      hadBadCommits: false,
+    };
+
+    expect(result).toEqual(expectedResult);
+
+    expect(mockedGet).toHaveBeenCalledTimes(1);
+    expect(mockedPost).toHaveBeenCalledTimes(1);
+
+    // Make sure it uses cache on second call
+    const anotherCallResult = await fetchAndCheckContributionsToOrganisation(
+      mockGithubContext,
+      3,
+      3,
+      "https://github.org/test-org"
+    );
+
+    expect(anotherCallResult).toEqual(expectedResult);
+
+    expect(mockedGet).toHaveBeenCalledTimes(2);
+    expect(mockedGet).toHaveBeenCalledWith("https://api.github.com/orgs/test-org", {
+      headers: {
+        Authorization: `token ${mockGithubContext.github.accessToken}`,
+      },
+    });
+    expect(mockedPost).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe("fetchAndCheckContributionsToRepository", () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -476,6 +645,75 @@ describe("fetchAndCheckContributionsToRepository", () => {
 
     expect(result).toEqual(expectedResult);
     expect(mockedGet).toHaveBeenCalledTimes(1); // We expect the axiosget to have been called 3 times (2 times it would get data, the 3rd time an empty list would be returned)
+  });
+
+  it("should validate a proper user when repo url ends with '/'", async () => {
+    // Mock the GitHub API requests
+    const mockApiResponse: { data: RepoCommit[] } = {
+      data: [
+        {
+          commit: {
+            author: {
+              date: "2024-09-05T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-06T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-07T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-08T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-09T12:00:00Z",
+            },
+          },
+        },
+      ],
+    };
+
+    let numRequests = 0;
+    mockedGet.mockImplementation(() => {
+      numRequests += 1;
+      if (numRequests > 2) {
+        return Promise.resolve({ data: [] });
+      } else {
+        return Promise.resolve(mockApiResponse);
+      }
+    });
+
+    const result = await fetchAndCheckContributionsToRepository(mockGithubContext, 5, 10, "https://repo/name/");
+
+    const expectedResult = {
+      contributionValid: true,
+      numberOfDays: 5,
+    };
+
+    expect(result).toEqual(expectedResult);
+    expect(mockedGet).toHaveBeenCalledTimes(1); // We expect the axiosget to have been called 3 times (2 times it would get data, the 3rd time an empty list would be returned)
+    expect(mockedGet).toHaveBeenCalledWith("https://api.github.com/repos/repo/name/commits", {
+      headers: {
+        Authorization: `token ${mockGithubContext.github.accessToken}`,
+      },
+      params: { page: 1, per_page: 100, author: mockGithubContext.github.login },
+    });
   });
 
   it("should fail if a user does not have sufficient contributions", async () => {
@@ -694,6 +932,75 @@ describe("fetchAndCheckCommitCountToRepository", () => {
 
     expect(result).toEqual(expectedResult);
     expect(mockedGet).toHaveBeenCalledTimes(1); // We expect the axiosget to have been called 3 times (2 times it would get data, the 3rd time an empty list would be returned)
+  });
+
+  it("should validate a proper user when repo url ends with '/'", async () => {
+    // Mock the GitHub API requests
+    const mockApiResponse: { data: RepoCommit[] } = {
+      data: [
+        {
+          commit: {
+            author: {
+              date: "2024-09-05T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-06T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-07T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-08T12:00:00Z",
+            },
+          },
+        },
+        {
+          commit: {
+            author: {
+              date: "2024-09-09T12:00:00Z",
+            },
+          },
+        },
+      ],
+    };
+
+    let numRequests = 0;
+    mockedGet.mockImplementation(() => {
+      numRequests += 1;
+      if (numRequests > 2) {
+        return Promise.resolve({ data: [] });
+      } else {
+        return Promise.resolve(mockApiResponse);
+      }
+    });
+
+    const result = await fetchAndCheckCommitCountToRepository(mockGithubContext, 5, 10, "https://repo/name/");
+
+    const expectedResult = {
+      contributionValid: true,
+      commitCount: 5,
+    };
+
+    expect(result).toEqual(expectedResult);
+    expect(mockedGet).toHaveBeenCalledTimes(1); // We expect the axiosget to have been called 3 times (2 times it would get data, the 3rd time an empty list would be returned)
+    expect(mockedGet).toHaveBeenCalledWith("https://api.github.com/repos/repo/name/commits", {
+      headers: {
+        Authorization: `token ${mockGithubContext.github.accessToken}`,
+      },
+      params: { page: 1, per_page: 100, author: mockGithubContext.github.login },
+    });
   });
 
   it("should fail if a user does not have sufficient contributions", async () => {

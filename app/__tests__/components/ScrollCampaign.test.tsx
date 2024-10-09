@@ -11,6 +11,7 @@ import { CredentialResponseBody } from "@gitcoin/passport-types";
 import { googleStampFixture } from "../../__test-fixtures__/databaseStorageFixtures";
 import * as passportIdentity from "@gitcoin/passport-identity";
 import { useScrollBadge } from "../../hooks/useScrollBadge";
+import { PassportDatabase } from "@gitcoin/passport-database-client";
 
 const navigateMock = jest.fn();
 jest.mock("react-router-dom", () => ({
@@ -19,7 +20,19 @@ jest.mock("react-router-dom", () => ({
   useParams: jest.fn().mockImplementation(jest.requireActual("react-router-dom").useParams),
 }));
 
-const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
+jest.mock("@gitcoin/passport-database-client");
+
+(PassportDatabase as jest.Mock).mockImplementation(() => {
+  return {
+    addStamps: jest.fn().mockResolvedValue({
+      mocked: "response",
+    }),
+  };
+});
+
+const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
+  database: new PassportDatabase("test", "test", "test"),
+});
 
 jest.mock("../../utils/helpers", () => {
   return {
@@ -170,7 +183,7 @@ describe("Component tests", () => {
 });
 
 describe("Github Connect page tests", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
   });
@@ -204,7 +217,7 @@ describe("Github Connect page tests", () => {
     expect(navigateMock).not.toHaveBeenCalled();
   });
 
-  it("navigates to the success page in case the verification succeeded", async () => {
+  it("saves the stamps in the DB and navigates to the success page in case the verification succeeded", async () => {
     renderWithContext(
       mockCeramicContext,
       <MemoryRouter initialEntries={["/campaign/scroll-developer/1"]}>
@@ -217,6 +230,10 @@ describe("Github Connect page tests", () => {
     expect(navigateMock).not.toHaveBeenCalled();
 
     await userEvent.click(connectGithubButton);
+
+    expect(mockCeramicContext.database?.addStamps).toHaveBeenCalledWith([
+      { provider: "randomValuesProvider", credential: googleStampFixture.credential },
+    ]);
 
     await waitFor(() => {
       expect(navigateMock).toHaveBeenCalledWith("/campaign/scroll-developer/2");
