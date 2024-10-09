@@ -4,13 +4,12 @@
 // ---- Server
 import express, { Request } from "express";
 import { router as procedureRouter } from "@gitcoin/passport-platforms/procedure-router";
-import { TypedDataDomain } from "@ethersproject/abstract-signer";
 
 // ---- Production plugins
 import cors from "cors";
 
 // ---- Web3 packages
-import { utils, ethers } from "ethers";
+import { utils } from "ethers";
 
 // ---- Types
 import { Response } from "express";
@@ -45,6 +44,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { IAMError } from "./utils/scorerService.js";
 import { VerifyDidChallengeBaseError } from "./utils/verifyDidChallenge.js";
+import { errorRes } from "./utils/helpers.js";
+import { ATTESTER_TYPES, getAttestationDomainSeparator, getAttestationSignerForChain } from "./utils/attestations.js";
+import { scrollDevBadgeHandler } from "./utils/scrollDevBadge.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -90,6 +92,14 @@ if (!process.env.EAS_FEE_USD) {
   configErrors.push("EAS_FEE_USD is required");
 }
 
+if (!process.env.SCROLL_BADGE_PROVIDER_INFO) {
+  configErrors.push("SCROLL_BADGE_PROVIDER_INFO is required");
+}
+
+if (!process.env.SCROLL_BADGE_ATTESTATION_SCHEMA_UID) {
+  configErrors.push("SCROLL_BADGE_ATTESTATION_SCHEMA_UID is required");
+}
+
 if (configErrors.length > 0) {
   configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
   throw new Error("Missing required configuration");
@@ -97,56 +107,12 @@ if (configErrors.length > 0) {
 
 const EAS_FEE_USD = parseFloat(process.env.EAS_FEE_USD);
 
-// Wallet to use for mainnets
-// Only functional in production (set to same as testnet for non-production environments)
-const productionAttestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
-// Wallet to use for testnets
-const testAttestationSignerWallet = new ethers.Wallet(process.env.TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY);
-
-const getAttestationSignerForChain = async (chainIdHex: keyof typeof onchainInfo): Promise<ethers.Wallet> => {
-  const productionAttestationIssuerAddress = await productionAttestationSignerWallet.getAddress();
-  const chainUsesProductionIssuer =
-    onchainInfo[chainIdHex].issuer.address.toLowerCase() === productionAttestationIssuerAddress.toLowerCase();
-
-  return chainUsesProductionIssuer ? productionAttestationSignerWallet : testAttestationSignerWallet;
-};
-
-export const getAttestationDomainSeparator = (chainIdHex: keyof typeof onchainInfo): TypedDataDomain => {
-  const verifyingContract = onchainInfo[chainIdHex].GitcoinVerifier.address;
-  const chainId = parseInt(chainIdHex, 16).toString();
-  return {
-    name: "GitcoinVerifier",
-    version: "1",
-    chainId,
-    verifyingContract,
-  };
-};
-
-const ATTESTER_TYPES = {
-  AttestationRequestData: [
-    { name: "recipient", type: "address" },
-    { name: "expirationTime", type: "uint64" },
-    { name: "revocable", type: "bool" },
-    { name: "refUID", type: "bytes32" },
-    { name: "data", type: "bytes" },
-    { name: "value", type: "uint256" },
-  ],
-  MultiAttestationRequest: [
-    { name: "schema", type: "bytes32" },
-    { name: "data", type: "AttestationRequestData[]" },
-  ],
-  PassportAttestationRequest: [
-    { name: "multiAttestationRequest", type: "MultiAttestationRequest[]" },
-    { name: "nonce", type: "uint256" },
-    { name: "fee", type: "uint256" },
-  ],
-};
-
 const providerTypePlatformMap = Object.entries(platforms).reduce(
   (acc, [platformName, { providers }]) => {
     providers.forEach(({ type }) => {
       acc[type] = platformName;
     });
+
     return acc;
   },
   {} as { [k: string]: string }
@@ -176,10 +142,6 @@ app.use(express.json());
 
 // set cors to accept calls from anywhere
 app.use(cors());
-
-// return a JSON error response with a 400 status
-const errorRes = (res: Response, error: string | object, errorCode: number): Response =>
-  res.status(errorCode).json({ error });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const addErrorDetailsToMessage = (message: string, error: any): string => {
@@ -371,7 +333,7 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
           type = "AllowList";
         } else if (type.startsWith("DeveloperList")) {
           // Here we handle the custom DeveloperList stamps
-          const [_type, conditionName, conditionHash, ...rest] = type.split("#");
+          const [_type, conditionName, conditionHash, ..._rest] = type.split("#");
           payload.proofs = {
             ...payload.proofs,
             conditionName,
@@ -564,6 +526,8 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
     return void errorRes(res, String(error), 500);
   }
 });
+
+app.post("/api/v0.0.0/scroll/dev", scrollDevBadgeHandler);
 
 // Expose entry point for getting eas payload for moving stamps on-chain (Passport Attestations)
 // This function will receive an array of stamps, validate them and return an array of eas payloads

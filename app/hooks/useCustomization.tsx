@@ -62,8 +62,9 @@ export const useNavigateToPage = () => {
   return navigateToPage;
 };
 
-// Don't use this directly, use the CustomizationUrlLayoutRoute component instead
-// This is only exported for testing purposes
+// Generally use the CustomizationUrlLayoutRoute component instead
+// This is only exported for testing purposes,or when you need to
+// override the customization key in
 export const useSetCustomizationKey = (): ((customizationKey: string | undefined) => Promise<void>) => {
   const setCustomizationConfig = useSetAtom(customizationConfigAtom);
 

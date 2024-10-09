@@ -1,13 +1,5 @@
 import { fetchPossibleEVMStamps, getTypesToCheck } from "../../signer/utils";
-import { providers } from "@gitcoin/passport-platforms";
-import {
-  CheckRequestBody,
-  CheckResponseBody,
-  Passport,
-  ProviderContext,
-  RequestPayload,
-  VerifiedPayload,
-} from "@gitcoin/passport-types";
+import { CheckResponseBody, Passport } from "@gitcoin/passport-types";
 import { platforms } from "@gitcoin/passport-platforms";
 const { Ens, Lens, Github } = platforms;
 import axios from "axios";

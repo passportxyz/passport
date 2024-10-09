@@ -47,6 +47,7 @@ datadogLogs.init({
 
 export const AppRoutes = () => (
   <Routes>
+    <Route path="campaign/:campaignId/:step?" element={<Campaign />} />
     <Route path="/:key?" element={<CustomizationUrlLayoutRoute />}>
       <Route path="" element={<Home />} />
       <Route path="welcome" element={<Welcome />} />
@@ -56,7 +57,6 @@ export const AppRoutes = () => (
         <Route path="" element={<Dashboard />} />
       </Route>
       <Route path="privacy" element={<Privacy />} />
-      <Route path="campaign/:campaignId/:step?" element={<Campaign />} />
       <Route path="*" element={<NotFound />} />
     </Route>
   </Routes>

@@ -2,8 +2,9 @@ import { ethers, JsonRpcProvider } from "ethers";
 import { useState, useEffect } from "react";
 import PassportScoreScrollBadgeAbi from "../abi/PassportScoreScrollBadge.json";
 import { datadogLogs } from "@datadog/browser-logs";
+import { scrollCampaignBadgeContractAddresses, scrollCampaignChain } from "../config/scroll_campaign";
 
-export const useScrollBadge = (address: string | undefined, contractAddresses: string[], rpcUrl: string) => {
+export const useScrollBadge = (address: string | undefined) => {
   const [areBadgesLoading, setBadgesLoading] = useState<boolean>(true);
   const [badges, setBadges] = useState<{ contract: string; hasBadge: boolean; badgeLevel: number; badgeUri: string }[]>(
     []
@@ -13,7 +14,7 @@ export const useScrollBadge = (address: string | undefined, contractAddresses: s
   useEffect(() => {
     if (!address) {
       datadogLogs.logger.error(
-        `[Scroll-Campaign] Invalid address: ${contractAddresses}. Address: ${address}. RPC URL: ${rpcUrl}`
+        `[Scroll-Campaign] Invalid address: ${scrollCampaignBadgeContractAddresses}. Address: ${address}.`
       );
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -23,9 +24,9 @@ export const useScrollBadge = (address: string | undefined, contractAddresses: s
       return;
     }
 
-    if (contractAddresses.length < 1) {
+    if (scrollCampaignBadgeContractAddresses.length < 1) {
       datadogLogs.logger.error(
-        `[Scroll-Campaign] Invalid contractAddresses: ${contractAddresses}. Address: ${address}. RPC URL: ${rpcUrl}`
+        `[Scroll-Campaign] Invalid contractAddresses: ${scrollCampaignBadgeContractAddresses}. Address: ${address}.`
       );
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -37,11 +38,15 @@ export const useScrollBadge = (address: string | undefined, contractAddresses: s
 
     const checkBadge = async (address: string | undefined) => {
       try {
+        if (!scrollCampaignChain) {
+          console.log("Scroll Campaign Chain not found");
+          return;
+        }
         setBadgesLoading(true);
-        const scrollRpcProvider = new JsonRpcProvider(rpcUrl);
+        const scrollRpcProvider = new JsonRpcProvider(scrollCampaignChain.rpcUrl);
 
         const badges = await Promise.all(
-          contractAddresses.map(async (contractAddress) => {
+          scrollCampaignBadgeContractAddresses.map(async (contractAddress) => {
             let resultHasBadge = false;
             let resultBadgeLevel = 0;
             let resultBadgeUri = "";
@@ -57,7 +62,7 @@ export const useScrollBadge = (address: string | undefined, contractAddresses: s
                 try {
                   console.log(`[Scroll-Campaign] Checking badge level for contract: ${contractAddress}`);
                   datadogLogs.logger.info(`[Scroll-Campaign] Checking badge level for contract: ${contractAddress}`);
-                  resultBadgeLevel = await contract.checkLevel(address);
+                  resultBadgeLevel = await contract.badgeLevel(address);
                 } catch (err) {
                   console.error(
                     `[Scroll-Campaign] Error checking badge level for contract ${contractAddress} : ${err}`
@@ -89,7 +94,7 @@ export const useScrollBadge = (address: string | undefined, contractAddresses: s
             } catch (err) {
               console.error("Error checking badge for contract", contractAddress, ":", err);
               datadogLogs.logger.error(
-                `[Scroll-Campaign] Error hecking if ${address} has badge level for contract: ${contractAddress}. Err : ${err}`
+                `[Scroll-Campaign] Error checking if ${address} has badge level for contract: ${contractAddress}. Err : ${err}`
               );
               setErrors((prevErrors) => ({
                 ...prevErrors,
@@ -118,7 +123,7 @@ export const useScrollBadge = (address: string | undefined, contractAddresses: s
     };
 
     checkBadge(address);
-  }, [address, contractAddresses, rpcUrl]);
+  }, [address]);
 
   // Check if user has at least one badge
   const hasAtLeastOneBadge = badges.some((badge) => badge.hasBadge);

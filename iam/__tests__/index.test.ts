@@ -2,10 +2,10 @@
 import request from "supertest";
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 import { PassportCache, providers } from "@gitcoin/passport-platforms";
-import axios from "axios";
 
 // ---- Test subject
-import { app, getAttestationDomainSeparator, verifyTypes } from "../src/index";
+import { app } from "../src/index";
+import { getAttestationDomainSeparator } from "../src/utils/attestations";
 
 // ---- Types
 import {

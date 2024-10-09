@@ -12,12 +12,11 @@ export const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL 
 const sepoliaChainId = "0xaa36a7";
 const hardhatChainId = "0x7a69";
 const lineaChainId = "0xe708";
-const lineaGoerliChainId = "0xe704";
 const optimismChainId = "0xa";
 const zkSyncChainId = "0x144";
 const sepoliaOPChainId = "0xaa37dc";
 const arbitrumChainId = "0xa4b1";
-const scrollChainId = "0x82750";
+export const scrollChainId = "0x82750";
 const shapeChainId = "0x168";
 
 type ChainConfig = {
@@ -127,6 +126,23 @@ if (usingTestEnvironment) {
       skipByDefault: false,
       easScanUrl: "https://optimism-sepolia.easscan.org",
       monochromeIcon: "./assets/op-logo-monochrome.svg",
+    },
+  });
+
+  chainConfigs.push({
+    id: "0x8274f",
+    token: "ETH",
+    label: "Scroll Sepolia",
+    rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SCROLL_SEPOLIA_RPC_URL as string,
+    explorerUrl: "https://sepolia.scrollscan.com/",
+    icon: "./assets/scroll-logo.svg",
+    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
+    attestationProviderConfig: {
+      name: "Ethereum Attestation Service",
+      status: "enabled",
+      skipByDefault: false,
+      easScanUrl: "https://scroll-sepolia.easscan.org",
+      monochromeIcon: "./assets/scroll-logo-monochrome.svg",
     },
   });
 }

@@ -9,6 +9,7 @@ import { useAllOnChainStatus } from "../hooks/useOnChainStatus";
 import { LoadButton } from "./LoadButton";
 import { Hyperlink } from "@gitcoin/passport-platforms";
 import { OnchainSidebar } from "./OnchainSidebar";
+import { LoadingBar } from "./LoadingBar";
 
 const PanelDiv = ({ className, children }: { className: string; children: React.ReactNode }) => {
   return (
@@ -89,14 +90,6 @@ export const DashboardScorePanel = ({ className }: { className?: string }) => {
         )}
       </div>
     </PanelDiv>
-  );
-};
-
-const LoadingBar = ({ className }: { className?: string }) => {
-  return (
-    <div
-      className={`h-10 w-full bg-size-400 animate-[loading-gradient_5s_ease-in-out_infinite] bg-gradient-to-r from-background via-foreground-5 to-background rounded-lg my-2 ${className}`}
-    />
   );
 };
 
