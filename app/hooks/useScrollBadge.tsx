@@ -1,6 +1,7 @@
 import { ethers, JsonRpcProvider } from "ethers";
 import { useState, useEffect } from "react";
 import PassportScoreScrollBadgeAbi from "../abi/PassportScoreScrollBadge.json";
+import { datadogLogs } from "@datadog/browser-logs";
 
 export const useScrollBadge = (address: string | undefined, contractAddresses: string[], rpcUrl: string) => {
   const [areBadgesLoading, setBadgesLoading] = useState<boolean>(true);
@@ -11,6 +12,9 @@ export const useScrollBadge = (address: string | undefined, contractAddresses: s
 
   useEffect(() => {
     if (!address) {
+      datadogLogs.logger.error(
+        `[Scroll-Campaign] Invalid address: ${contractAddresses}. Address: ${address}. RPC URL: ${rpcUrl}`
+      );
       setErrors({
         ...errors,
         user_address: "Invalid address",
@@ -20,9 +24,12 @@ export const useScrollBadge = (address: string | undefined, contractAddresses: s
     }
 
     if (contractAddresses.length < 1) {
+      datadogLogs.logger.error(
+        `[Scroll-Campaign] Invalid contractAddresses: ${contractAddresses}. Address: ${address}. RPC URL: ${rpcUrl}`
+      );
       setErrors({
         ...errors,
-        user_address: "Invalid address",
+        contractAddresses: "Invalid contractAddresses",
       });
       setBadgesLoading(false);
       return;
@@ -39,15 +46,25 @@ export const useScrollBadge = (address: string | undefined, contractAddresses: s
             let resultBadgeLevel = 0;
             let resultBadgeUri = "";
             try {
+              console.log(`[Scroll-Campaign] Checking if ${address} has badge level for contract: ${contractAddress}`);
+              datadogLogs.logger.info(
+                `[Scroll-Campaign] Checking if ${address} has badge level for contract: ${contractAddress}`
+              );
               const contract = new ethers.Contract(contractAddress, PassportScoreScrollBadgeAbi.abi, scrollRpcProvider);
               resultHasBadge = await contract.hasBadge(address);
               if (resultHasBadge) {
                 // Get badge level
                 try {
-                  console.log("Checking badge level for contract: ", contractAddress);
+                  console.log(`[Scroll-Campaign] Checking badge level for contract: ${contractAddress}`);
+                  datadogLogs.logger.info(`[Scroll-Campaign] Checking badge level for contract: ${contractAddress}`);
                   resultBadgeLevel = await contract.checkLevel(address);
                 } catch (err) {
-                  console.error("Error checking badge level for contract", contractAddress, ":", err);
+                  console.error(
+                    `[Scroll-Campaign] Error checking badge level for contract ${contractAddress} : ${err}`
+                  );
+                  datadogLogs.logger.error(
+                    `[Scroll-Campaign] Error checking badge level for contract ${contractAddress} : ${err}`
+                  );
                   setErrors((prevErrors) => ({
                     ...prevErrors,
                     [`badge_level_${contractAddress}`]: "Failed to fetch badge level",
@@ -56,9 +73,13 @@ export const useScrollBadge = (address: string | undefined, contractAddresses: s
                 // Get badge uri
                 try {
                   console.log("Checking badge uri for contract: ", contractAddress);
+                  datadogLogs.logger.info(`[Scroll-Campaign] Checking badge uri for contract ${contractAddress}`);
                   resultBadgeUri = await contract.badgeLevelImageURIs(resultBadgeLevel);
                 } catch (err) {
                   console.error("Error getting badge uri for contract", contractAddress, ":", err);
+                  datadogLogs.logger.error(
+                    `[Scroll-Campaign] Error getting badge uri for contract ${contractAddress} : ${err}`
+                  );
                   setErrors((prevErrors) => ({
                     ...prevErrors,
                     [`badge_uri_${contractAddress}`]: "Failed to fetch badge uri",
@@ -67,6 +88,9 @@ export const useScrollBadge = (address: string | undefined, contractAddresses: s
               }
             } catch (err) {
               console.error("Error checking badge for contract", contractAddress, ":", err);
+              datadogLogs.logger.error(
+                `[Scroll-Campaign] Error hecking if ${address} has badge level for contract: ${contractAddress}. Err : ${err}`
+              );
               setErrors((prevErrors) => ({
                 ...prevErrors,
                 [`badge_${contractAddress}`]: "Failed to fetch badge",
@@ -81,10 +105,9 @@ export const useScrollBadge = (address: string | undefined, contractAddresses: s
           })
         );
         setBadges(badges);
-
-        console.log("badges", badges);
       } catch (err) {
-        console.error("Error checking badges:", err);
+        console.error(`[Scroll-Campaign] Error checking badges : ${err}`);
+        datadogLogs.logger.error(`[Scroll-Campaign] Error checking badges : ${err}`);
         setErrors((prevErrors) => ({
           ...prevErrors,
           fetch_badges: "Failed to fetch badges",
