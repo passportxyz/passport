@@ -13,7 +13,6 @@ import {
   useNavigateToGithubConnectStep,
 } from "../hooks/useNextCampaignStep";
 import { useScrollBadge } from "../hooks/useScrollBadge";
-import { Badge1, Badge2, Badge3 } from "./campaign/scroll/badges";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { CeramicContext } from "../context/ceramicContext";
 import { waitForRedirect } from "../context/stampClaimingContext";
@@ -37,7 +36,6 @@ import {
 import { useAttestation } from "../hooks/useAttestation";
 import { jsonRequest } from "../utils/AttestationProvider";
 import { useMessage } from "../hooks/useMessage";
-import { ScorerContext } from "../context/scorerContext";
 
 const SCROLL_STEP_NAMES = ["Connect Wallet", "Connect to Github", "Mint Badge"];
 
@@ -240,16 +238,16 @@ const ScrollConnectGithub = () => {
   const [isVerificationRunning, setIsVerificationRunning] = useState(false);
   const { failure } = useMessage();
 
-  const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(address);
+  const { areBadgesLoading, hasAtLeastOneBadge } = useScrollBadge(address);
 
   useEffect(() => {
     // If the user already has on chain badge redirect to final step
-    if (hasAtLeastOneBadge) {
+    if (!areBadgesLoading && hasAtLeastOneBadge) {
       goToLastStep();
     } else {
       setMsg(undefined);
     }
-  }, [hasAtLeastOneBadge, badges, areBadgesLoading, errors, goToLastStep]);
+  }, [areBadgesLoading, hasAtLeastOneBadge, goToLastStep]);
 
   const signInWithGithub = useCallback(async () => {
     setIsVerificationRunning(true);
@@ -393,10 +391,10 @@ const ScrollMintedBadge = () => {
   const goToLoginStep = useNavigateToRootStep();
   const goToGithubConnectStep = useNavigateToGithubConnectStep();
   const { isConnected, address } = useWeb3ModalAccount();
-  const { did, dbAccessToken, checkSessionIsValid } = useDatastoreConnectionContext();
+  const { did, dbAccessToken } = useDatastoreConnectionContext();
   const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(address);
 
-  const { success, failure } = useMessage();
+  const { failure } = useMessage();
 
   useEffect(() => {
     if (!dbAccessToken || !did) {
@@ -406,10 +404,10 @@ const ScrollMintedBadge = () => {
   }, [dbAccessToken, did, goToLoginStep]);
 
   useEffect(() => {
-    if (!hasAtLeastOneBadge) {
+    if (!areBadgesLoading && !hasAtLeastOneBadge) {
       goToGithubConnectStep();
     }
-  });
+  }, [areBadgesLoading, hasAtLeastOneBadge, goToGithubConnectStep]);
 
   useEffect(() => {
     if (errors && Object.keys(errors).length > 0) {

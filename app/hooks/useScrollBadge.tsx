@@ -37,8 +37,11 @@ export const useScrollBadge = (address: string | undefined) => {
     }
 
     const checkBadge = async (address: string | undefined) => {
-      if (!scrollCampaignChain) return;
       try {
+        if (!scrollCampaignChain) {
+          console.log("Scroll Campaign Chain not found");
+          return;
+        }
         setBadgesLoading(true);
         const scrollRpcProvider = new JsonRpcProvider(scrollCampaignChain.rpcUrl);
 
@@ -59,7 +62,7 @@ export const useScrollBadge = (address: string | undefined) => {
                 try {
                   console.log(`[Scroll-Campaign] Checking badge level for contract: ${contractAddress}`);
                   datadogLogs.logger.info(`[Scroll-Campaign] Checking badge level for contract: ${contractAddress}`);
-                  resultBadgeLevel = await contract.checkLevel(address);
+                  resultBadgeLevel = await contract.badgeLevel(address);
                 } catch (err) {
                   console.error(
                     `[Scroll-Campaign] Error checking badge level for contract ${contractAddress} : ${err}`
@@ -120,7 +123,7 @@ export const useScrollBadge = (address: string | undefined) => {
     };
 
     checkBadge(address);
-  }, [address, scrollCampaignBadgeContractAddresses, scrollCampaignChain]);
+  }, [address]);
 
   // Check if user has at least one badge
   const hasAtLeastOneBadge = badges.some((badge) => badge.hasBadge);

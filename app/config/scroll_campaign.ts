@@ -44,7 +44,7 @@ export const scrollCampaignBadgeContractAddresses = badgeContractInfo.map(
   ({ badgeContractAddress }) => badgeContractAddress
 );
 
-const SCROLL_CHAIN_ID = process.env.NEXT_PUBLIC_SCROLL_CHAIN_ID || scrollChainId;
+const SCROLL_CHAIN_ID = process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_CHAIN_ID || scrollChainId;
 export const scrollCampaignChain = chains.find(({ id }) => id === SCROLL_CHAIN_ID);
 
 if (scrollCampaignBadgeProviders.length === 0) {
