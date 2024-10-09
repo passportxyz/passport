@@ -6,6 +6,7 @@ import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures
 import { CeramicContextState } from "../../context/ceramicContext";
 import { Chain } from "../../utils/chains";
 import { ChakraProvider } from "@chakra-ui/react";
+import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
 import { switchNetworkMock } from "../../__mocks__/web3modalMock";
 
 const mockWalletState = {
@@ -86,6 +87,10 @@ const chainWithEas = new Chain({
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 describe("SyncToChainButton component", () => {
+  beforeEach(() => {
+    closeAllToasts();
+  });
+
   it("should show coming soon if in active", async () => {
     renderWithContext(
       mockCeramicContext,
@@ -115,14 +120,23 @@ describe("SyncToChainButton component", () => {
       ...chainConfig,
       id: "0x123",
       attestationProviderConfig: {
+        skipByDefault: false,
+        monochromeIcon: "/images/ethereum-icon.svg",
         status: "enabled",
         name: "Ethereum Attestation Service",
         easScanUrl: "test.com",
       },
     });
 
+    jest
+      .spyOn(axios, "post")
+      .mockResolvedValueOnce({ data: { invalidCredentials: [], passport: [], signature: { v: 8, r: "s", s: "a" } } });
+
     renderWithContext(
-      mockCeramicContext,
+      {
+        ...mockCeramicContext,
+        passport: { ...mockCeramicContext.passport, stamps: [{ id: "test" } as any] },
+      },
       <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={anotherChainWithEas} isLoading={false} />
     );
     const btn = screen.getByTestId("sync-to-chain-button");
