@@ -393,6 +393,7 @@ const ScrollMintedBadge = () => {
   const { isConnected, address } = useWeb3ModalAccount();
   const { did, dbAccessToken } = useDatastoreConnectionContext();
   const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(address);
+  console.log({ badges });
 
   const { failure } = useMessage();
 
@@ -522,8 +523,8 @@ const ScrollMintBadge = () => {
     [badgeStamps, deduplicatedBadgeStamps]
   );
 
-  const hasBadge = highestLevelBadgeStamps.length > 0;
-  const hasMultipleBadges = highestLevelBadgeStamps.length > 1;
+  const hasBadge = deduplicatedBadgeStamps.length > 0;
+  const hasMultipleBadges = deduplicatedBadgeStamps.length > 1;
 
   const onMint = async () => {
     try {
@@ -579,7 +580,7 @@ const ScrollMintBadge = () => {
       <ScrollLoadingBarSection isLoading={loading} className="text-xl mt-2">
         {hasBadge ? (
           <div>
-            You qualify for {highestLevelBadgeStamps.length} badge{hasMultipleBadges ? "s" : ""}. Mint your badge
+            You qualify for {deduplicatedBadgeStamps.length} badge{hasMultipleBadges ? "s" : ""}. Mint your badge
             {hasMultipleBadges ? "s" : ""} and get a chance to work with us.
             {hasDeduplicatedCredentials
               ? " (Some badge credentials could not be validated because they have already been claimed on another address.)"
@@ -618,6 +619,7 @@ const ScrollMintBadge = () => {
 export const ScrollCampaign = ({ step }: { step: number }) => {
   const { did, dbAccessToken } = useDatastoreConnectionContext();
   const { database } = useContext(CeramicContext);
+  const { address } = useWeb3ModalAccount();
   const goToLoginStep = useNavigateToRootStep();
   const setCustomizationKey = useSetCustomizationKey();
 
