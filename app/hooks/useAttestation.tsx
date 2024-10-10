@@ -24,7 +24,7 @@ const useChainSwitch = ({ chain }: { chain?: Chain }) => {
     } catch {
       return false;
     }
-  }, [chain, switchNetwork]);
+  }, [chain, connectedChain, switchNetwork]);
 
   const needToSwitchChain = connectedChain !== chain?.id;
 
@@ -62,7 +62,7 @@ export const useAttestation = ({ chain }: { chain?: Chain }) => {
     const verifierAbi = chain.attestationProvider.verifierAbi();
 
     return new ethers.Contract(verifierAddress, verifierAbi, await ethersProvider.getSigner());
-  }, [chain, provider]);
+  }, [chain, failure, needToSwitchChain, provider, switchChain]);
 
   const getNonce = useCallback(async () => {
     if (!address) return;
@@ -195,7 +195,7 @@ export const useAttestation = ({ chain }: { chain?: Chain }) => {
         }
       }
     },
-    [address, chain?.attestationProvider, chain?.id, refresh, failure, success, provider]
+    [chain, getVerifierContract, success, refresh, address, failure]
   );
 
   return useMemo(
