@@ -458,7 +458,7 @@ const ScrollLoadingBarSection = (props: LoadingBarSectionProps) => (
   <LoadingBarSection loadingBarClassName="h-10 via-[#FFEEDA] brightness-50" {...props} />
 );
 
-const ScrollMintBadge = () => {
+export const ScrollMintBadge = () => {
   const { failure } = useMessage();
   const { database } = useContext(CeramicContext);
   const address = useWalletStore((state) => state.address);
