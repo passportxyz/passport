@@ -1,29 +1,23 @@
 import { useState } from "react";
 import { useAttestation } from "./useAttestation";
-import { useScrollStampsStore } from "../context/scrollCampaignStore";
 import { jsonRequest } from "../utils/AttestationProvider";
 import { useMessage } from "./useMessage";
 import { useNavigateToLastStep } from "./useNextCampaignStep";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { iamUrl } from "../config/stamp_config";
 import { scrollCampaignChain } from "../config/scroll_campaign";
-import { EasPayload } from "@gitcoin/passport-types";
-import { ProviderWithTitle } from "../components/ScrollCampaign";
+import { EasPayload, VerifiableCredential } from "@gitcoin/passport-types";
 
 export const useMintBadge = () => {
   const { getNonce, issueAttestation } = useAttestation({ chain: scrollCampaignChain });
-  const { credentials } = useScrollStampsStore();
   const { address } = useWeb3ModalAccount();
   const { failure } = useMessage();
   const goToLastStep = useNavigateToLastStep();
 
   const [syncingToChain, setSyncingToChain] = useState(false);
-  const [earnedBadges, setEarnedBadges] = useState<ProviderWithTitle[]>([]);
-  const [badgesFreshlyMinted, setBadgesFreshlyMinted] = useState(false);
 
-  const onMint = async (badges: ProviderWithTitle[]) => {
+  const onMint = async ({ credentials, onMinted }: { credentials: VerifiableCredential[]; onMinted: () => void }) => {
     try {
-      setEarnedBadges(badges);
       setSyncingToChain(true);
 
       const nonce = await getNonce();
@@ -38,8 +32,8 @@ export const useMintBadge = () => {
         const url = `${iamUrl}v0.0.0/scroll/dev`;
         const { data }: { data: EasPayload } = await jsonRequest(url, {
           recipient: address || "",
-          credentials: credentials,
           chainIdHex: scrollCampaignChain?.id,
+          credentials,
           nonce,
         });
 
@@ -53,7 +47,7 @@ export const useMintBadge = () => {
         } else {
           await issueAttestation({ data });
           setSyncingToChain(false);
-          setBadgesFreshlyMinted(true);
+          onMinted();
           goToLastStep();
         }
       }
@@ -70,7 +64,5 @@ export const useMintBadge = () => {
   return {
     onMint,
     syncingToChain,
-    earnedBadges,
-    badgesFreshlyMinted,
   };
 };
