@@ -32,6 +32,7 @@ import {
   scrollCampaignBadgeProviders,
   scrollCampaignBadgeProviderInfo,
   scrollCampaignChain,
+  badgeContractInfo,
 } from "../config/scroll_campaign";
 import { useAttestation } from "../hooks/useAttestation";
 import { jsonRequest } from "../utils/AttestationProvider";
@@ -387,12 +388,28 @@ const ScrollConnectGithub = () => {
   );
 };
 
+interface Provider {
+  name: PROVIDER_ID;
+  image: string;
+  level: number;
+}
+
+interface BadgeContract {
+  badgeContractAddress: string;
+  title: string;
+  providers: Provider[];
+}
+
+interface ProviderWithTitle extends Provider {
+  title: string;
+}
+
 const ScrollMintedBadge = () => {
   const goToLoginStep = useNavigateToRootStep();
   const goToGithubConnectStep = useNavigateToGithubConnectStep();
   const { isConnected, address } = useWeb3ModalAccount();
   const { did, dbAccessToken } = useDatastoreConnectionContext();
-  const { badges, areBadgesLoading, errors, hasAtLeastOneBadge, badgeLevelNames } = useScrollBadge(address);
+  const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(address);
   console.log({ badges });
 
   const { failure } = useMessage();
@@ -421,6 +438,26 @@ const ScrollMintedBadge = () => {
     }
   }, [errors, failure]);
 
+  const getHighestEarnedBadgeProviderInfo = (contractAddress: string, level: number) => {
+    const badgeContract = badgeContractInfo.find((contract) => contract.badgeContractAddress === contractAddress);
+    if (badgeContract) {
+      return badgeContract.providers.reduce<ProviderWithTitle>(
+        (acc, provider) => {
+          if (level < provider.level && provider.level > acc.level) {
+            acc = { title: badgeContract.title, ...provider };
+          }
+          return acc;
+        },
+        {
+          title: "",
+          name: "No Provider" as PROVIDER_ID,
+          image: "",
+          level: 0,
+        }
+      );
+    }
+  };
+
   return (
     <PageRoot className="text-color-1">
       {isConnected && <AccountCenter />}
@@ -435,24 +472,21 @@ const ScrollMintedBadge = () => {
             <div>No badges found.</div>
           ) : (
             <div className="flex flex-wrap justify-center gap-8">
-              asdfasfas
               {badges.map((badge, index) => {
-                console.log({ badge });
-                return badge.hasBadge
-                  ? badge.levelThresholds.map((levelThreshold, index) => {
-                      return (
-                        <div key={index} className="border rounded p-5 flex flex-col items-center">
-                          <img
-                            src={badge.badgeLevelImageURIs[index]}
-                            alt={`Badge Level ${badge.badgeLevel}`}
-                            className="badge-image w-32 h-32 object-contain"
-                          />
-                          <div className="mt-2 text-lg font-semibold">{badge.badgeLevelNames[index]}</div>
-                          <div className="text-sm">Level: {badge.badgeLevel}</div>
-                        </div>
-                      );
-                    })
-                  : null;
+                const badgeProviderInfo = getHighestEarnedBadgeProviderInfo(badge.contract, badge.badgeLevel);
+                return badge.hasBadge && badgeProviderInfo ? (
+                  <div key={index} className="border rounded p-5 flex flex-col items-center">
+                    <img
+                      src={badgeProviderInfo?.image}
+                      alt={`Badge Level ${badge.badgeLevel}`}
+                      className="badge-image w-32 h-32 object-contain"
+                    />
+                    <div className="mt-2 text-lg font-semibold">{badgeProviderInfo.title}</div>
+                    <div className="text-sm">Level: {badge.badgeLevel}</div>
+                  </div>
+                ) : (
+                  <></>
+                );
               })}
             </div>
           )}
