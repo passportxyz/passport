@@ -4,15 +4,21 @@ import PassportScoreScrollBadgeAbi from "../abi/PassportScoreScrollBadge.json";
 import { datadogLogs } from "@datadog/browser-logs";
 import { scrollCampaignBadgeContractAddresses, scrollCampaignChain } from "../config/scroll_campaign";
 
+export type BadgeInfo = {
+  contract: string;
+  hasBadge: boolean;
+  badgeLevel: number;
+  badgeUri: string;
+  levelThresholds: BigInt[];
+  badgeLevelImageURIs: string[];
+  badgeLevelNames: string[];
+  badgeLevelDescriptions: string[];
+};
+
 export const useScrollBadge = (address: string | undefined) => {
   const [areBadgesLoading, setBadgesLoading] = useState<boolean>(true);
-  const [badges, setBadges] = useState<
-    { contract: string; hasBadge: boolean; badgeLevel: number; badgeUri: string; levelThresholds: BigInt[] }[]
-  >([]);
+  const [badges, setBadges] = useState<BadgeInfo[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string } | {}>({});
-  const [badgeLevelImageURIs, setBadgeLevelImageURIs] = useState<string[]>([]);
-  const [badgeLevelNames, setBadgeLevelNames] = useState<string[]>([]);
-  const [badgeLevelDescriptions, setBadgeLevelDescriptions] = useState<string[]>([]);
 
   useEffect(() => {
     if (!address) {
@@ -82,9 +88,9 @@ export const useScrollBadge = (address: string | undefined) => {
 
         const badges = await Promise.all(
           scrollCampaignBadgeContractAddresses.map(async (contractAddress) => {
-            let resultHasBadge = false;
-            let resultBadgeLevel = 0;
-            let resultBadgeUri = "";
+            let resultHasBadge: boolean = false;
+            let resultBadgeLevel: number = 0;
+            let resultBadgeUri: string = "";
             let levelThresholds: BigInt[] = [];
             let badgeLevelImageURIs: string[] = [];
             let badgeLevelNames: string[] = [];
@@ -171,8 +177,5 @@ export const useScrollBadge = (address: string | undefined) => {
     areBadgesLoading,
     errors,
     hasAtLeastOneBadge,
-    badgeLevelImageURIs,
-    badgeLevelNames,
-    badgeLevelDescriptions,
   };
 };

@@ -392,7 +392,7 @@ const ScrollMintedBadge = () => {
   const goToGithubConnectStep = useNavigateToGithubConnectStep();
   const { isConnected, address } = useWeb3ModalAccount();
   const { did, dbAccessToken } = useDatastoreConnectionContext();
-  const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(address);
+  const { badges, areBadgesLoading, errors, hasAtLeastOneBadge, badgeLevelNames } = useScrollBadge(address);
   console.log({ badges });
 
   const { failure } = useMessage();
@@ -428,21 +428,32 @@ const ScrollMintedBadge = () => {
       <div className="flex grow">
         <div className="flex flex-col min-h-screen justify-center items-center shrink-0 grow w-1/2 text-center">
           <div className="text-5xl text-[#FFEEDA]">You already minted available badges!</div>
-          <div className="mb-8 ">Here are all your badges</div>
+          <div className="mb-8">Here are all your badges</div>
           {areBadgesLoading ? (
             <div>Loading badges...</div>
           ) : badges.length === 0 ? (
             <div>No badges found.</div>
           ) : (
-            <div className="flex space-x-20">
-              {badges.map((badge, index) =>
-                badge.hasBadge ? (
-                  <div key={index} className="border rounded p-5">
-                    <img src={badge.badgeUri} alt={`Badge Level ${badge.badgeLevel}`} className="badge-image" />
-                    <div className="mt-2 text-lg">Level: {badge.badgeLevel}</div>
-                  </div>
-                ) : null
-              )}
+            <div className="flex flex-wrap justify-center gap-8">
+              asdfasfas
+              {badges.map((badge, index) => {
+                console.log({ badge });
+                return badge.hasBadge
+                  ? badge.levelThresholds.map((levelThreshold, index) => {
+                      return (
+                        <div key={index} className="border rounded p-5 flex flex-col items-center">
+                          <img
+                            src={badge.badgeLevelImageURIs[index]}
+                            alt={`Badge Level ${badge.badgeLevel}`}
+                            className="badge-image w-32 h-32 object-contain"
+                          />
+                          <div className="mt-2 text-lg font-semibold">{badge.badgeLevelNames[index]}</div>
+                          <div className="text-sm">Level: {badge.badgeLevel}</div>
+                        </div>
+                      );
+                    })
+                  : null;
+              })}
             </div>
           )}
           <LoadButton
