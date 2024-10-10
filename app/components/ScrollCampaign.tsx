@@ -36,6 +36,8 @@ import {
 import { useAttestation } from "../hooks/useAttestation";
 import { jsonRequest } from "../utils/AttestationProvider";
 import { useMessage } from "../hooks/useMessage";
+import { ethers } from "ethers";
+import PassportScoreScrollBadgeAbi from "../abi/PassportScoreScrollBadge.json";
 
 const SCROLL_STEP_NAMES = ["Connect Wallet", "Connect to Github", "Mint Badge"];
 
@@ -388,20 +390,11 @@ const ScrollConnectGithub = () => {
 };
 
 const ScrollMintedBadge = () => {
-  const goToLoginStep = useNavigateToRootStep();
   const goToGithubConnectStep = useNavigateToGithubConnectStep();
   const { isConnected, address } = useWeb3ModalAccount();
-  const { did, dbAccessToken } = useDatastoreConnectionContext();
   const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(address);
 
   const { failure } = useMessage();
-
-  useEffect(() => {
-    if (!dbAccessToken || !did) {
-      console.log("Access token or did are not present. Going back to login step!");
-      goToLoginStep();
-    }
-  }, [dbAccessToken, did, goToLoginStep]);
 
   useEffect(() => {
     if (!areBadgesLoading && !hasAtLeastOneBadge) {
@@ -472,6 +465,9 @@ const ScrollMintBadge = () => {
   const { getNonce, issueAttestation, needToSwitchChain } = useAttestation({ chain: scrollCampaignChain });
   const [syncingToChain, setSyncingToChain] = useState(false);
 
+  const [checkingOnchainBadges, setCheckingOnchainBadges] = useState(true);
+  const [deduplicatedBadgeStamps, setDeduplicatedBadgeStamps] = useState<Stamp[]>([]);
+
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
 
   useEffect(() => {
@@ -495,13 +491,78 @@ const ScrollMintBadge = () => {
     [passport]
   );
 
-  const loading = !passport;
+  const loading = !passport || checkingOnchainBadges;
 
-  const deduplicatedBadgeStamps = useMemo(
-    // TODO Deduplicate by seeing if in burnedHashes but not user's hashes
-    () => badgeStamps.filter(({ provider }) => true),
-    [badgeStamps]
-  );
+  useEffect(() => {
+    (async () => {
+      try {
+        setCheckingOnchainBadges(true);
+
+        if (!scrollCampaignChain) return badgeStamps;
+
+        const validBadgeStamps: Stamp[] = [];
+
+        const cachedUserHashes: Record<string, string[]> = {};
+        const scrollRpcProvider = new ethers.JsonRpcProvider(scrollCampaignChain.rpcUrl);
+
+        await Promise.all(
+          badgeStamps.map(async (stamp) => {
+            const stampHash =
+              "0x" +
+              Buffer.from((stamp.credential.credentialSubject.hash || "").split(":")[1], "base64").toString("hex");
+
+            const { contractAddress } = scrollCampaignBadgeProviderInfo[stamp.provider];
+            const badgeContract = new ethers.Contract(
+              contractAddress,
+              PassportScoreScrollBadgeAbi.abi,
+              scrollRpcProvider
+            );
+
+            if (await badgeContract.burntProviderHashes(stampHash)) {
+              // If burned, check if it's burned by this user
+              let index = 0;
+              let userHash;
+              do {
+                if (!cachedUserHashes[contractAddress]) cachedUserHashes[contractAddress] = [];
+
+                if (cachedUserHashes[contractAddress][index] !== undefined) {
+                  // Already pulled from the contract
+                  userHash = cachedUserHashes[contractAddress][index];
+                } else {
+                  try {
+                    userHash = await badgeContract.userProviderHashes(address, index);
+                  } catch {
+                    userHash = 0;
+                  }
+                  cachedUserHashes[contractAddress][index] = userHash;
+                }
+
+                if (userHash === stampHash) {
+                  // If it's burned by this user, it's valid
+                  validBadgeStamps.push(stamp);
+                }
+
+                index++;
+              } while (userHash !== 0);
+            } else {
+              // If never burned, it's valid
+              validBadgeStamps.push(stamp);
+            }
+          })
+        );
+
+        setDeduplicatedBadgeStamps(validBadgeStamps);
+      } catch (error) {
+        console.error("Error checking onchain badges", error);
+        failure({
+          title: "Error",
+          message: "An unexpected error occurred while checking for existing onchain badges.",
+        });
+      } finally {
+        setCheckingOnchainBadges(false);
+      }
+    })();
+  }, [badgeStamps]);
 
   const hasDeduplicatedCredentials = badgeStamps.length > deduplicatedBadgeStamps.length;
 

@@ -279,9 +279,6 @@ describe("Github Connect page tests", () => {
       </MemoryRouter>
     );
 
-    // const canvasRedirectButton = screen.queryByTestId("canvasRedirectButton");
-    // expect(canvasRedirectButton).toBeInTheDocument();
-
     expect(navigateMock).toHaveBeenCalledTimes(1);
   });
 });
