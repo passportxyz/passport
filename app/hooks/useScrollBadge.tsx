@@ -8,11 +8,6 @@ export type BadgeInfo = {
   contract: string;
   hasBadge: boolean;
   badgeLevel: number;
-  badgeUri: string;
-  levelThresholds: BigInt[];
-  badgeLevelImageURIs: string[];
-  badgeLevelNames: string[];
-  badgeLevelDescriptions: string[];
 };
 
 export const useScrollBadge = (address: string | undefined) => {
@@ -46,122 +41,72 @@ export const useScrollBadge = (address: string | undefined) => {
     }
   }, []);
 
-  const fetchContractData = useCallback(async (contractAddress: string, scrollRpcProvider: JsonRpcProvider) => {
-    const contract = new ethers.Contract(contractAddress, PassportScoreScrollBadgeAbi.abi, scrollRpcProvider);
-
-    let levelThresholds: BigInt[] = [];
-    let imageURIs: string[] = [""]; // Initial value for "no score"
-    let names: string[] = ["No Badge"]; // Initial value for "no score"
-    let descriptions: string[] = ["No badge earned yet"]; // Initial value for "no score"
-
-    let index = 0;
-    while (true) {
-      try {
-        const threshold = await contract.levelThresholds(index);
-        const imageURI = await contract.badgeLevelImageURIs(index + 1);
-        const name = await contract.badgeLevelNames(index + 1);
-        const description = await contract.badgeLevelDescriptions(index + 1);
-
-        levelThresholds.push(threshold);
-        imageURIs.push(imageURI);
-        names.push(name);
-        descriptions.push(description);
-
-        index++;
-      } catch (error) {
-        break;
+  const checkBadge = useCallback(async (address: string | undefined) => {
+    try {
+      if (!scrollCampaignChain) {
+        console.log("Scroll Campaign Chain not found");
+        return;
       }
-    }
+      setBadgesLoading(true);
+      const scrollRpcProvider = new JsonRpcProvider(scrollCampaignChain.rpcUrl);
 
-    return { levelThresholds, imageURIs, names, descriptions };
-  }, []);
+      const badges = await Promise.all(
+        scrollCampaignBadgeContractAddresses.map(async (contractAddress) => {
+          let resultHasBadge: boolean = false;
+          let resultBadgeLevel: number = 0;
 
-  const checkBadge = useCallback(
-    async (address: string | undefined) => {
-      try {
-        if (!scrollCampaignChain) {
-          console.log("Scroll Campaign Chain not found");
-          return;
-        }
-        setBadgesLoading(true);
-        const scrollRpcProvider = new JsonRpcProvider(scrollCampaignChain.rpcUrl);
-
-        const badges = await Promise.all(
-          scrollCampaignBadgeContractAddresses.map(async (contractAddress) => {
-            let resultHasBadge: boolean = false;
-            let resultBadgeLevel: number = 0;
-            let resultBadgeUri: string = "";
-            let levelThresholds: BigInt[] = [];
-            let badgeLevelImageURIs: string[] = [];
-            let badgeLevelNames: string[] = [];
-            let badgeLevelDescriptions: string[] = [];
-
-            try {
-              console.log(`[Scroll-Campaign] Checking if ${address} has badge level for contract: ${contractAddress}`);
-              datadogLogs.logger.info(
-                `[Scroll-Campaign] Checking if ${address} has badge level for contract: ${contractAddress}`
-              );
-              const contract = new ethers.Contract(contractAddress, PassportScoreScrollBadgeAbi.abi, scrollRpcProvider);
-              resultHasBadge = await contract.hasBadge(address);
-              if (resultHasBadge) {
-                // Get badge level and other data
-                try {
-                  datadogLogs.logger.info(`[Scroll-Campaign] Fetching contract data for: ${contractAddress}`);
-                  const contractData = await fetchContractData(contractAddress, scrollRpcProvider);
-                  levelThresholds = contractData.levelThresholds;
-                  badgeLevelImageURIs = contractData.imageURIs;
-                  badgeLevelNames = contractData.names;
-                  badgeLevelDescriptions = contractData.descriptions;
-
-                  resultBadgeLevel = await contract.badgeLevel(address);
-                  resultBadgeUri = badgeLevelImageURIs[resultBadgeLevel];
-                } catch (err) {
-                  console.error(`[Scroll-Campaign] Error fetching contract data for ${contractAddress} : ${err}`);
-                  datadogLogs.logger.error(
-                    `[Scroll-Campaign] Error fetching contract data for ${contractAddress} : ${err}`
-                  );
-                  setErrors((prevErrors) => ({
-                    ...prevErrors,
-                    [`contract_data_${contractAddress}`]: "Failed to fetch contract data",
-                  }));
-                }
+          try {
+            console.log(`[Scroll-Campaign] Checking if ${address} has badge level for contract: ${contractAddress}`);
+            datadogLogs.logger.info(
+              `[Scroll-Campaign] Checking if ${address} has badge level for contract: ${contractAddress}`
+            );
+            const contract = new ethers.Contract(contractAddress, PassportScoreScrollBadgeAbi.abi, scrollRpcProvider);
+            resultHasBadge = await contract.hasBadge(address);
+            if (resultHasBadge) {
+              // Get badge level and other data
+              try {
+                datadogLogs.logger.info(`[Scroll-Campaign] Fetching contract data for: ${contractAddress}`);
+                resultBadgeLevel = await contract.badgeLevel(address);
+              } catch (err) {
+                console.error(`[Scroll-Campaign] Error fetching contract data for ${contractAddress} : ${err}`);
+                datadogLogs.logger.error(
+                  `[Scroll-Campaign] Error fetching contract data for ${contractAddress} : ${err}`
+                );
+                setErrors((prevErrors) => ({
+                  ...prevErrors,
+                  [`contract_data_${contractAddress}`]: "Failed to fetch contract data",
+                }));
               }
-            } catch (err) {
-              console.error("Error checking badge for contract", contractAddress, ":", err);
-              datadogLogs.logger.error(
-                `[Scroll-Campaign] Error checking if ${address} has badge level for contract: ${contractAddress}. Err : ${err}`
-              );
-              setErrors((prevErrors) => ({
-                ...prevErrors,
-                [`badge_${contractAddress}`]: "Failed to fetch badge",
-              }));
             }
-            return {
-              contract: contractAddress,
-              hasBadge: resultHasBadge,
-              badgeLevel: resultBadgeLevel,
-              badgeUri: resultBadgeUri,
-              levelThresholds,
-              badgeLevelImageURIs,
-              badgeLevelNames,
-              badgeLevelDescriptions,
-            };
-          })
-        );
-        setBadges(badges);
-      } catch (err) {
-        console.error(`[Scroll-Campaign] Error checking badges : ${err}`);
-        datadogLogs.logger.error(`[Scroll-Campaign] Error checking badges : ${err}`);
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          fetch_badges: "Failed to fetch badges",
-        }));
-      } finally {
-        setBadgesLoading(false);
-      }
-    },
-    [fetchContractData]
-  );
+          } catch (err) {
+            console.error("Error checking badge for contract", contractAddress, ":", err);
+            datadogLogs.logger.error(
+              `[Scroll-Campaign] Error checking if ${address} has badge level for contract: ${contractAddress}. Err : ${err}`
+            );
+            setErrors((prevErrors) => ({
+              ...prevErrors,
+              [`badge_${contractAddress}`]: "Failed to fetch badge",
+            }));
+          }
+          return {
+            contract: contractAddress,
+            hasBadge: resultHasBadge,
+            badgeLevel: resultBadgeLevel,
+          };
+        })
+      );
+      setBadges(badges);
+    } catch (err) {
+      console.error(`[Scroll-Campaign] Error checking badges : ${err}`);
+      datadogLogs.logger.error(`[Scroll-Campaign] Error checking badges : ${err}`);
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        fetch_badges: "Failed to fetch badges",
+      }));
+    } finally {
+      setBadgesLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (address) {

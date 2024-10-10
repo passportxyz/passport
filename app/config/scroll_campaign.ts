@@ -21,7 +21,7 @@ export function loadBadgeProviders(): {
   }
 }
 
-const badgeContractInfo = loadBadgeProviders();
+export const badgeContractInfo = loadBadgeProviders();
 
 export const scrollCampaignBadgeProviderInfo = badgeContractInfo.reduce(
   (acc, { badgeContractAddress, providers, title }) => {
