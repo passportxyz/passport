@@ -160,19 +160,43 @@ const ScrollCampaignPage = ({
   fadeBackgroundImage?: boolean;
   badgeUris?: string[];
 }) => {
+  const badgeCount = badgeUris.length;
   return (
     <ScrollCampaignPageRoot>
       <div className="grow grid grid-cols-2 items-center justify-center">
-        {badgeUris.map((uri, index) => {
-          return (
-            <div
-              key={index}
-              className="lg:flex col-start-2 row-start-1 justify-center xl:justify-start xl:ml-16 z-10 ml-2"
-            >
-              <img src={uri} alt="Campaign Badge ${index}" />
+        {badgeCount === 3 && (
+          <div className="lg:flex col-start-2 row-start-1 justify-center xl:justify-start xl:ml-16 z-10 ml-2">
+            <div className="flex flex-col items-center space-y-4">
+              {/* Adjustments for badge alignment */}
+              {badgeUris.map((uri, index) => (
+                <img
+                  key={index}
+                  src={uri}
+                  alt={`Campaign Badge ${index}`}
+                  className={`${
+                    index === 0 ? "ml-60" : "" // Apply margin-left to shift the first badge
+                  } ${
+                    index === 2 ? "ml-60" : "" // Apply margin-left to shift the last badge
+                  }`}
+                />
+              ))}
             </div>
-          );
-        })}
+          </div>
+        )}
+
+        {badgeCount === 2 && (
+          <div className="flex flex-col col-start-2 row-start-1 justify-center items-center xl:justify-start xl:ml-16 z-10 ml-2 space-y-4">
+            {badgeUris.map((uri, index) => (
+              <img key={index} src={uri} alt={`Campaign Badge ${index}`} />
+            ))}
+          </div>
+        )}
+
+        {badgeCount === 1 && (
+          <div className="flex col-start-2 row-start-1 justify-center xl:justify-start xl:ml-16 z-10 ml-2">
+            <img src={badgeUris[0]} alt="Campaign Badge 0" />
+          </div>
+        )}
 
         <div className="flex col-start-1 col-end-3 row-start-1">
           <div className="flex flex-col min-h-screen justify-center items-center shrink-0 grow w-1/2">
@@ -522,7 +546,7 @@ const ScrollMintBadge = () => {
   );
 
   const hasDeduplicatedCredentials = badgeStamps.length > deduplicatedBadgeStamps.length;
-  console.log("scrollCampaignBadgeProviderInfo = ", scrollCampaignBadgeProviderInfo);
+
   const highestLevelBadgeStamps = useMemo(
     () =>
       Object.values(
