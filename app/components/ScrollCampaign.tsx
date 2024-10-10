@@ -154,20 +154,26 @@ const BackgroundImage = ({ fadeBackgroundImage }: { fadeBackgroundImage?: boolea
 const ScrollCampaignPage = ({
   children,
   fadeBackgroundImage,
-  emblemSrc,
+  badgeUris = [],
 }: {
   children: React.ReactNode;
   fadeBackgroundImage?: boolean;
-  emblemSrc?: string;
+  badgeUris?: string[];
 }) => {
   return (
     <ScrollCampaignPageRoot>
       <div className="grow grid grid-cols-2 items-center justify-center">
-        {emblemSrc && (
-          <div className="hidden lg:flex col-start-2 row-start-1 justify-center xl:justify-start xl:ml-16 z-10 ml-2">
-            <img src={emblemSrc} alt="Campaign Emblem" />
-          </div>
-        )}
+        {badgeUris.map((uri, index) => {
+          return (
+            <div
+              key={index}
+              className="lg:flex col-start-2 row-start-1 justify-center xl:justify-start xl:ml-16 z-10 ml-2"
+            >
+              <img src={uri} alt="Campaign Badge ${index}" />
+            </div>
+          );
+        })}
+
         <div className="flex col-start-1 col-end-3 row-start-1">
           <div className="flex flex-col min-h-screen justify-center items-center shrink-0 grow w-1/2">
             <div className="mt-24 mb-28 mx-8 lg:mr-1 lg:ml-8 flex flex-col items-start justify-center max-w-[572px]">
@@ -516,12 +522,13 @@ const ScrollMintBadge = () => {
   );
 
   const hasDeduplicatedCredentials = badgeStamps.length > deduplicatedBadgeStamps.length;
-
+  console.log("scrollCampaignBadgeProviderInfo = ", scrollCampaignBadgeProviderInfo);
   const highestLevelBadgeStamps = useMemo(
     () =>
       Object.values(
         deduplicatedBadgeStamps.reduce(
           (acc, credential) => {
+            console.log("credential = ", credential);
             const { contractAddress, level } = scrollCampaignBadgeProviderInfo[credential.provider];
             if (!acc[contractAddress] || level > acc[contractAddress].level) {
               acc[contractAddress] = { level, credential };
@@ -537,6 +544,13 @@ const ScrollMintBadge = () => {
   const hasBadge = deduplicatedBadgeStamps.length > 0;
   const hasMultipleBadges = deduplicatedBadgeStamps.length > 1;
 
+  console.log("highestLevelBadgeStamps = ", highestLevelBadgeStamps);
+  const badgeLevelImageURIs = highestLevelBadgeStamps.map(({ provider }) => {
+    console.log("provider = ", provider);
+    return scrollCampaignBadgeProviderInfo[provider].image;
+  });
+
+  console.log("badgeLevelImageURIs = ", badgeLevelImageURIs);
   const onMint = async () => {
     try {
       setSyncingToChain(true);
@@ -578,10 +592,7 @@ const ScrollMintBadge = () => {
   };
 
   return (
-    <ScrollCampaignPage
-      fadeBackgroundImage={loading || hasBadge}
-      emblemSrc={hasBadge ? "/assets/scrollCampaignMint.svg" : undefined}
-    >
+    <ScrollCampaignPage fadeBackgroundImage={loading || hasBadge} badgeUris={badgeLevelImageURIs}>
       <ScrollLoadingBarSection
         isLoading={loading}
         className={`text-5xl ${hasBadge ? "text-[#FFEEDA]" : "text-[#FF684B]"}`}
