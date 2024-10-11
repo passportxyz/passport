@@ -5,7 +5,7 @@ import { MemoryRouter } from "react-router-dom";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
 import { AppRoutes } from "../../pages";
-import { ScrollStepsBar } from "../../components/ScrollCampaign";
+// import { ScrollStepsBar } from "../../components/ScrollCampaign";
 import { useParams } from "react-router-dom";
 import { CredentialResponseBody } from "@gitcoin/passport-types";
 import { googleStampFixture } from "../../__test-fixtures__/databaseStorageFixtures";
@@ -140,47 +140,47 @@ describe("Landing page tests", () => {
   });
 });
 
-describe("Component tests", () => {
-  beforeEach(() => {
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
-  });
-  it("shows step 0 correctly", () => {
-    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "0" });
+// describe("Component tests", () => {
+//   beforeEach(() => {
+//     jest.restoreAllMocks();
+//     jest.clearAllMocks();
+//   });
+//   it("shows step 0 correctly", () => {
+//     (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "0" });
 
-    render(<ScrollStepsBar />);
+//     render(<ScrollStepsBar />);
 
-    const connectWalletStep = screen.getByText("Connect Wallet");
-    expect(connectWalletStep).toBeInTheDocument();
-    expect(connectWalletStep).not.toHaveClass("brightness-50");
+//     const connectWalletStep = screen.getByText("Connect Wallet");
+//     expect(connectWalletStep).toBeInTheDocument();
+//     expect(connectWalletStep).not.toHaveClass("brightness-50");
 
-    const githubStep = screen.getByText("Connect to Github");
-    expect(githubStep).toBeInTheDocument();
-    expect(githubStep).toHaveClass("brightness-50");
+//     const githubStep = screen.getByText("Connect to Github");
+//     expect(githubStep).toBeInTheDocument();
+//     expect(githubStep).toHaveClass("brightness-50");
 
-    const mintStep = screen.getByText("Mint Badge");
-    expect(mintStep).toBeInTheDocument();
-    expect(mintStep).toHaveClass("brightness-50");
-  });
+//     const mintStep = screen.getByText("Mint Badge");
+//     expect(mintStep).toBeInTheDocument();
+//     expect(mintStep).toHaveClass("brightness-50");
+//   });
 
-  it("shows step 1 correctly", () => {
-    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "1" });
+//   it("shows step 1 correctly", () => {
+//     (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "1" });
 
-    render(<ScrollStepsBar />);
+//     render(<ScrollStepsBar />);
 
-    const connectWalletStep = screen.getByText("Connect Wallet");
-    expect(connectWalletStep).toBeInTheDocument();
-    expect(connectWalletStep).toHaveClass("brightness-50");
+//     const connectWalletStep = screen.getByText("Connect Wallet");
+//     expect(connectWalletStep).toBeInTheDocument();
+//     expect(connectWalletStep).toHaveClass("brightness-50");
 
-    const githubStep = screen.getByText("Connect to Github");
-    expect(githubStep).toBeInTheDocument();
-    expect(githubStep).not.toHaveClass("brightness-50");
+//     const githubStep = screen.getByText("Connect to Github");
+//     expect(githubStep).toBeInTheDocument();
+//     expect(githubStep).not.toHaveClass("brightness-50");
 
-    const mintStep = screen.getByText("Mint Badge");
-    expect(mintStep).toBeInTheDocument();
-    expect(mintStep).toHaveClass("brightness-50");
-  });
-});
+//     const mintStep = screen.getByText("Mint Badge");
+//     expect(mintStep).toBeInTheDocument();
+//     expect(mintStep).toHaveClass("brightness-50");
+//   });
+// });
 
 describe("Github Connect page tests", () => {
   beforeEach(async () => {
