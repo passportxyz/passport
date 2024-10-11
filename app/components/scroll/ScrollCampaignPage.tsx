@@ -13,7 +13,7 @@ export const ScrollCampaignPage = ({
   return (
     <ScrollCampaignPageRoot>
       <div className="grow grid grid-cols-2 items-center justify-center">
-        <div className="flex col-start-2 row-start-1 justify-center xl:justify-start xl:ml-16 z-10 ml-2">
+        <div className="hidden lg:flex col-start-2 row-start-1 justify-center xl:justify-start xl:ml-16 z-10 ml-2">
           <div className={`flex flex-col items-left w-full gap-y-0 ml-10`}>
             {earnedBadges &&
               earnedBadges.map((badge, index) => (

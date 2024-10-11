@@ -18,10 +18,8 @@ import { LoadButton } from "../LoadButton";
 
 export const ScrollMintBadge = ({
   onMintBadge,
-  onSetEarnedBadges,
 }: {
-  onMintBadge: () => Promise<void>;
-  onSetEarnedBadges: (earnedBadges: ProviderWithTitle[]) => void;
+  onMintBadge: (earnedBadges: ProviderWithTitle[]) => Promise<void>;
 }) => {
   const { failure } = useMessage();
   const { database } = useContext(CeramicContext);
@@ -80,50 +78,9 @@ export const ScrollMintBadge = ({
   );
 
   const earnedBadges = getEarnedBadges(badgeStamps);
-  onSetEarnedBadges(earnedBadges);
 
   const hasBadge = deduplicatedBadgeStamps.length > 0;
   const hasMultipleBadges = deduplicatedBadgeStamps.length > 1;
-
-  const onMint = async () => {
-    try {
-      setSyncingToChain(true);
-
-      const nonce = await getNonce();
-
-      if (nonce === undefined) {
-        failure({
-          title: "Error",
-          message: "An unexpected error occurred while trying to get the nonce.",
-        });
-      } else {
-        const url = `${iamUrl}v0.0.0/scroll/dev`;
-        const { data }: { data: EasPayload } = await jsonRequest(url, {
-          recipient: address || "",
-          credentials: deduplicatedBadgeStamps.map(({ credential }) => credential),
-          chainIdHex: scrollCampaignChain?.id,
-          nonce,
-        });
-
-        if (data.error) {
-          console.error("error syncing credentials to chain: ", data.error, "nonce:", nonce);
-          failure({
-            title: "Error",
-            message: "An unexpected error occurred while generating attestations.",
-          });
-        } else {
-          issueAttestation({ data });
-        }
-      }
-    } catch (error) {
-      console.error("Error minting badge", error);
-      failure({
-        title: "Error",
-        message: "An unexpected error occurred while trying to bring the data onchain.",
-      });
-    }
-    setSyncingToChain(false);
-  };
 
   const ScrollLoadingBarSection = (props: LoadingBarSectionProps) => (
     <LoadingBarSection loadingBarClassName="h-10 via-[#FFEEDA] brightness-50" {...props} />
@@ -140,7 +97,7 @@ export const ScrollMintBadge = ({
       <ScrollLoadingBarSection isLoading={loading} className="text-xl mt-2">
         {hasBadge ? (
           <div>
-            You qualify for {deduplicatedBadgeStamps.length} badge{hasMultipleBadges ? "s" : ""}. Mint your badge
+            You qualify for {highestLevelBadgeStamps.length} badge{hasMultipleBadges ? "s" : ""}. Mint your badge
             {hasMultipleBadges ? "s" : ""} and get a chance to work with us.
             {hasDeduplicatedCredentials
               ? " (Some badge credentials could not be validated because they have already been claimed on another address.)"
@@ -157,7 +114,7 @@ export const ScrollMintBadge = ({
         <div className="mt-8">
           <LoadButton
             variant="custom"
-            onClick={onMintBadge}
+            onClick={() => onMintBadge(earnedBadges)}
             isLoading={loading || syncingToChain}
             className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200"
           >

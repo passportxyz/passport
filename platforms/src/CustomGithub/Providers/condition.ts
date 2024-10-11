@@ -87,7 +87,7 @@ export const evaluateRepositoryContributor = async (
   evaluator: ConditionEvaluator,
   context: any
 ): Promise<boolean> => {
-  const threshold = 1; //condition["threshold"];
+  const threshold = condition["threshold"];
   const repository = condition["repository"];
 
   if (!(threshold !== undefined && threshold !== null) || !repository) {

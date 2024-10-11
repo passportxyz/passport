@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useMemo, useState } from "react";
+import React, { useEffect, useContext, useMemo, useState, useCallback } from "react";
 import NotFound from "../pages/NotFound";
 import PageRoot from "./PageRoot";
 import { AccountCenter } from "./AccountCenter";
@@ -9,6 +9,7 @@ import {
   useNextCampaignStep,
   useNavigateToRootStep,
   useNavigateToGithubConnectStep,
+  useNavigateToLastStep,
 } from "../hooks/useNextCampaignStep";
 import { useScrollBadge } from "../hooks/useScrollBadge";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
@@ -149,19 +150,14 @@ const ScrollMintingBadge = ({ earnedBadges }: { earnedBadges: ProviderWithTitle[
   );
 };
 
-const ScrollMintedBadge = () => {
+const ScrollMintedBadge = ({ badgesFreshlyMinted }: { badgesFreshlyMinted: boolean }) => {
   const goToLoginStep = useNavigateToRootStep();
   const goToGithubConnectStep = useNavigateToGithubConnectStep();
   const { isConnected, address } = useWeb3ModalAccount();
   const { did, dbAccessToken } = useDatastoreConnectionContext();
   const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(address);
-  const { database } = useContext(CeramicContext);
-  const { getNonce, issueAttestation, needToSwitchChain } = useAttestation({ chain: scrollCampaignChain });
-  const [syncingToChain, setSyncingToChain] = useState(false);
-
   const { failure } = useMessage();
 
-  console.log({ badges });
   useEffect(() => {
     if (!dbAccessToken || !did) {
       console.log("Access token or did are not present. Going back to login step!");
@@ -192,7 +188,36 @@ const ScrollMintedBadge = () => {
       <ScrollHeader className="fixed top-0 left-0 right-0" />
       <div className="flex grow">
         <div className="flex flex-col min-h-screen justify-center items-center shrink-0 grow w-1/2 text-center">
-          <div className="text-5xl text-[#FFEEDA]">You already minted available badges!</div>
+          <div className="mb-10">
+            {badgesFreshlyMinted ? (
+              <div className="text-5xl text-[#FFEEDA]">Badges minted!</div>
+            ) : (
+              <div className="text-5xl text-[#FFEEDA]">You already minted available badges!</div>
+            )}
+            {badgesFreshlyMinted && (
+              <p>
+                See it{" "}
+                <a
+                  className="underline text-[#93FBED]"
+                  href="https://scroll.io/canvas/mint"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  here
+                </a>
+                . Also do not forget to check the attestation{" "}
+                <a
+                  href={scrollCampaignChain?.attestationProvider?.viewerUrl(address!) ?? ""}
+                  className="underline text-[#93FBED]"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  here
+                </a>
+                .
+              </p>
+            )}
+          </div>
           {areBadgesLoading ? (
             <div>Loading badges...</div>
           ) : badges.length === 0 ? (
@@ -225,7 +250,7 @@ const ScrollMintedBadge = () => {
             }}
             className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-100 pl-3 pr-5 m-10"
           >
-            See them on Canvas
+            See badges on Canvas
           </LoadButton>
         </div>
       </div>
@@ -262,7 +287,6 @@ export const getEarnedBadges = (badgeStamps: Stamp[]): ProviderWithTitle[] => {
       },
       { level: -1, name: "No Provider" as PROVIDER_ID, image: "" }
     );
-    console.log({ highestLevelProvider });
 
     return {
       title: contract.title,
@@ -274,16 +298,16 @@ export const getEarnedBadges = (badgeStamps: Stamp[]): ProviderWithTitle[] => {
 export const ScrollCampaign = ({ step }: { step: number }) => {
   const setCustomizationKey = useSetCustomizationKey();
   const goToLoginStep = useNavigateToRootStep();
-  const goToGithubConnectStep = useNavigateToGithubConnectStep();
-  const { isConnected, address } = useWeb3ModalAccount();
+  const { address } = useWeb3ModalAccount();
   const { did, dbAccessToken } = useDatastoreConnectionContext();
-  const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(address);
   const { database } = useContext(CeramicContext);
-  const { getNonce, issueAttestation, needToSwitchChain } = useAttestation({ chain: scrollCampaignChain });
+  const { getNonce, issueAttestation } = useAttestation({ chain: scrollCampaignChain });
   const [syncingToChain, setSyncingToChain] = useState(false);
   const { credentials } = useScrollStampsStore();
   const { failure } = useMessage();
-  // const [earnedBadges, setEarnedBadges] = useState<ProviderWithTitle[]>([]);
+  const [earnedBadges, setEarnedBadges] = useState<ProviderWithTitle[]>([]);
+  const [badgesFreshlyMinted, setBadgesFreshlyMinted] = useState(false);
+  const goToLastStep = useNavigateToLastStep();
 
   useEffect(() => {
     setCustomizationKey("scroll");
@@ -309,13 +333,9 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
     [badgeStamps]
   );
 
-  const hasBadge = deduplicatedBadgeStamps.length > 0;
-  const hasMultipleBadges = deduplicatedBadgeStamps.length > 1;
-
-  const loading = !passport;
-
-  const onMint = async () => {
+  const onMint = async (badges: ProviderWithTitle[]) => {
     try {
+      setEarnedBadges(badges);
       setSyncingToChain(true);
 
       const nonce = await getNonce();
@@ -341,7 +361,10 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
             message: "An unexpected error occurred while generating attestations.",
           });
         } else {
-          issueAttestation({ data });
+          await issueAttestation({ data });
+          setSyncingToChain(false);
+          setBadgesFreshlyMinted(true);
+          goToLastStep();
         }
       }
     } catch (error) {
@@ -351,7 +374,6 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
         message: "An unexpected error occurred while trying to bring the data onchain.",
       });
     }
-    setSyncingToChain(false);
   };
 
   if (step === 0) {
@@ -359,11 +381,12 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
   } else if (step === 1) {
     return <ScrollConnectGithub />;
   } else if (step === 2) {
-    return <ScrollMintBadge onMintBadge={onMint} onSetEarnedBadges={() => console.log("on earned")} />;
+    if (syncingToChain) {
+      return <ScrollMintingBadge earnedBadges={earnedBadges} />;
+    }
+    return <ScrollMintBadge onMintBadge={onMint} />;
   } else if (step === 3) {
-    return <ScrollMintingBadge earnedBadges={[]} />;
-  } else if (step === 4) {
-    return <ScrollMintedBadge />;
+    return <ScrollMintedBadge badgesFreshlyMinted={badgesFreshlyMinted} />;
   }
   return <NotFound />;
 };
