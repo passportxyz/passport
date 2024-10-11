@@ -93,6 +93,7 @@ async function queryBadgeLevel({
 
 export const scrollDevBadgeHandler = (req: Request, res: Response): void => {
   try {
+    console.log("Processing scroll badge request");
     const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
     if (!Object.keys(onchainInfo).includes(chainIdHex)) {
       return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
@@ -109,8 +110,15 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): void => {
     if (!credentials.every((credential) => credential.credentialSubject.id.split(":")[4] === recipient))
       return void errorRes(res, "Every credential's id must be equivalent", 400);
 
+    console.log("A");
     Promise.all(
       credentials.map(async (credential) => {
+        console.log(
+          "Verifying credential",
+          credential,
+          hasValidIssuer(credential.issuer),
+          await verifyCredential(DIDKit, credential)
+        );
         return {
           credential,
           verified: hasValidIssuer(credential.issuer) && (await verifyCredential(DIDKit, credential)),
@@ -127,6 +135,7 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): void => {
         > = JSON.parse(process.env.SCROLL_BADGE_PROVIDER_INFO);
 
         const badgeProviders = Object.keys(SCROLL_BADGE_PROVIDER_INFO);
+        console.log("B");
 
         const invalidCredentials = credentialVerifications
           .filter(
@@ -134,9 +143,13 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): void => {
           )
           .map(({ credential }) => credential);
 
+        console.log("badgeProviders", badgeProviders);
+        console.log(JSON.stringify(invalidCredentials, null, 2));
         if (invalidCredentials.length > 0) {
           return void errorRes(res, { invalidCredentials }, 400);
         }
+
+        console.log("C");
 
         const groupedCredentialInfo = credentialVerifications.reduce(
           (acc, { credential }) => {
@@ -161,6 +174,8 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): void => {
             }[]
           >
         );
+
+        console.log({ groupedCredentialInfo });
 
         const rpcUrl = getScrollRpcUrl({ chainIdHex: attestationChainIdHex });
         const onchainBadgeData = await Promise.all(
@@ -195,6 +210,8 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): void => {
 
             const hashes = credentialInfo.filter(({ level }) => requiredLevels.includes(level)).map(({ hash }) => hash);
 
+            console.log({ contractAddress, maxCredentialLevel, hashes });
+
             const data = BADGE_SCHEMA_ENCODER.encodeData([
               { name: "badge", value: contractAddress, type: "address" },
               {
@@ -215,6 +232,7 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): void => {
           })
           .filter(Boolean);
 
+        console.log({ badgeRequestData });
         if (badgeRequestData.length === 0) {
           return void errorRes(res, "All badges already claimed", 400);
         }
@@ -233,6 +251,8 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): void => {
           fee: fee.toString(),
         };
 
+        console.log("passportAttestation", JSON.stringify(passportAttestation, null, 2));
+
         const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
 
         const signer = await getAttestationSignerForChain(attestationChainIdHex);
@@ -241,6 +261,8 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): void => {
           ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {
             const { v, r, s } = utils.splitSignature(signature);
+
+            console.log({ v, r, s });
 
             const payload: EasPayload = {
               passport: passportAttestation,
