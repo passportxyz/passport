@@ -130,7 +130,7 @@ describe("CustomGithubProvider verification", function () {
     });
     expect(fetchAndCheckCommitCountToRepositoryMock).toHaveBeenCalledWith(
       mockGithubContext,
-      3,
+      1,
       3,
       "passportxyz/passport",
       undefined
@@ -147,7 +147,7 @@ describe("CustomGithubProvider verification", function () {
               condition: {
                 repository_commit_count: {
                   repository: "passportxyz/passport",
-                  threshold: 3,
+                  threshold: 1,
                   cutoff_date: "2021-10-05T14:48:00.000Z",
                 },
               },
@@ -189,7 +189,7 @@ describe("CustomGithubProvider verification", function () {
     });
     expect(fetchAndCheckCommitCountToRepositoryMock).toHaveBeenCalledWith(
       mockGithubContext,
-      3,
+      1,
       3,
       "passportxyz/passport",
       new Date("2021-10-05T14:48:00.000Z")
