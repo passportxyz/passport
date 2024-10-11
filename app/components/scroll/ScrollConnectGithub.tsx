@@ -17,6 +17,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { LoadButton } from "../LoadButton";
 import { GitHubIcon } from "../WelcomeFooter";
 import { ScrollCampaignPage } from "./ScrollCampaignPage";
+import { useScrollStampsStore } from "../../context/scrollCampaignStore";
 
 export const ScrollConnectGithub = () => {
   const goToNextStep = useNextCampaignStep();
@@ -30,6 +31,7 @@ export const ScrollConnectGithub = () => {
   const [msg, setMsg] = useState<string | undefined>("Verifying existing badges on chain ... ");
   const [isVerificationRunning, setIsVerificationRunning] = useState(false);
   const { failure } = useMessage();
+  const { setCredentials } = useScrollStampsStore();
 
   const { areBadgesLoading, hasAtLeastOneBadge } = useScrollBadge(address);
 
@@ -111,6 +113,7 @@ export const ScrollConnectGithub = () => {
             });
           }
 
+          setCredentials(verifiedCredentials);
           goToNextStep();
         } else {
           setNoCredentialReceived(true);
