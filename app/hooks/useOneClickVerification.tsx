@@ -74,6 +74,9 @@ export const useOneClickVerification = () => {
         .filter((patch): patch is StampPatch => patch !== null);
 
       await handlePatchStamps(stampPatches);
+
+      // Attempt to retry writing stamps to compose db that have failed to write at some point in the past
+      handleComposeRetry();
       setUserVerificationState({
         ...verificationState,
         loading: false,
@@ -98,12 +101,6 @@ export const useOneClickVerification = () => {
   const verificationComplete = useMemo(() => {
     return verificationState.error || verificationState.success;
   }, [verificationState.error, verificationState.success]);
-
-  useEffect(() => {
-    if (verificationComplete) {
-      handleComposeRetry();
-    }
-  }, [handleComposeRetry, verificationComplete]);
 
   return { initiateVerification, verificationState, verificationComplete };
 };
