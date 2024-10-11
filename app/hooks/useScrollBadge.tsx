@@ -66,7 +66,7 @@ export const useScrollBadge = (address: string | undefined) => {
               // Get badge level and other data
               try {
                 datadogLogs.logger.info(`[Scroll-Campaign] Fetching contract data for: ${contractAddress}`);
-                resultBadgeLevel = await contract.badgeLevel(address);
+                resultBadgeLevel = Number(await contract.badgeLevel(address));
               } catch (err) {
                 console.error(`[Scroll-Campaign] Error fetching contract data for ${contractAddress} : ${err}`);
                 datadogLogs.logger.error(
