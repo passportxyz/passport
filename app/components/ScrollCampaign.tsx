@@ -33,12 +33,6 @@ interface Provider {
   level: number;
 }
 
-interface BadgeContract {
-  badgeContractAddress: string;
-  title: string;
-  providers: Provider[];
-}
-
 export interface ProviderWithTitle extends Provider {
   title: string;
 }
@@ -126,6 +120,35 @@ export const getHighestEarnedBadgeProviderInfo = (contractAddress: string, level
   }
 };
 
+const ScrollMintingBadge = ({ earnedBadges }: { earnedBadges: ProviderWithTitle[] }) => {
+  const { isConnected } = useWeb3ModalAccount();
+  return (
+    <PageRoot className="text-color-1">
+      {isConnected && <AccountCenter />}
+      <ScrollHeader className="fixed top-0 left-0 right-0" />
+      <div className="flex grow">
+        <div className="flex flex-col min-h-screen justify-center items-center shrink-0 grow w-1/2 text-center">
+          <div className="text-5xl text-[#FFEEDA]">Minting badges!</div>
+          <div className="flex flex-wrap justify-center items-end gap-8">
+            {earnedBadges.map((badge, index) => (
+              <div key={index} className={`flex flex-col items-center even:mb-10`}>
+                <img
+                  src={badge.image}
+                  alt={`Badge Level ${badge.level}`}
+                  className="badge-image w-32 h-32 object-contain"
+                />
+                <div className="mt-2 text-lg font-semibold">{badge.title}</div>
+                <div className="text-sm">Level: {badge.level}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <ScrollFooter className="absolute bottom-0 left-0 right-0 z-10" />
+    </PageRoot>
+  );
+};
+
 const ScrollMintedBadge = () => {
   const goToLoginStep = useNavigateToRootStep();
   const goToGithubConnectStep = useNavigateToGithubConnectStep();
@@ -138,6 +161,7 @@ const ScrollMintedBadge = () => {
 
   const { failure } = useMessage();
 
+  console.log({ badges });
   useEffect(() => {
     if (!dbAccessToken || !did) {
       console.log("Access token or did are not present. Going back to login step!");
@@ -231,7 +255,6 @@ export const getEarnedBadges = (badgeStamps: Stamp[]): ProviderWithTitle[] => {
     const highestLevelProvider = relevantStamps.reduce(
       (highest, stamp) => {
         const provider = contract.providers.find(({ name }) => name === stamp.provider);
-        console.log({ provider, highest });
         if (provider && provider.level > highest.level) {
           return provider;
         }
@@ -260,6 +283,7 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
   const [syncingToChain, setSyncingToChain] = useState(false);
   const { credentials } = useScrollStampsStore();
   const { failure } = useMessage();
+  // const [earnedBadges, setEarnedBadges] = useState<ProviderWithTitle[]>([]);
 
   useEffect(() => {
     setCustomizationKey("scroll");
@@ -335,8 +359,10 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
   } else if (step === 1) {
     return <ScrollConnectGithub />;
   } else if (step === 2) {
-    return <ScrollMintBadge onMintBadge={onMint} />;
+    return <ScrollMintBadge onMintBadge={onMint} onSetEarnedBadges={() => console.log("on earned")} />;
   } else if (step === 3) {
+    return <ScrollMintingBadge earnedBadges={[]} />;
+  } else if (step === 4) {
     return <ScrollMintedBadge />;
   }
   return <NotFound />;

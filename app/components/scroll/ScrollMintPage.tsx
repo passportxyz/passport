@@ -9,14 +9,20 @@ import {
   scrollCampaignBadgeProviders,
   scrollCampaignChain,
 } from "../../config/scroll_campaign";
-import { getEarnedBadges } from "../ScrollCampaign";
+import { ProviderWithTitle, getEarnedBadges } from "../ScrollCampaign";
 import { iamUrl } from "../../config/stamp_config";
 import { jsonRequest } from "../../utils/AttestationProvider";
 import { ScrollCampaignPage } from "./ScrollCampaignPage";
 import { LoadingBarSection, LoadingBarSectionProps } from "../LoadingBar";
 import { LoadButton } from "../LoadButton";
 
-export const ScrollMintBadge = ({ onMintBadge }: { onMintBadge: () => Promise<void> }) => {
+export const ScrollMintBadge = ({
+  onMintBadge,
+  onSetEarnedBadges,
+}: {
+  onMintBadge: () => Promise<void>;
+  onSetEarnedBadges: (earnedBadges: ProviderWithTitle[]) => void;
+}) => {
   const { failure } = useMessage();
   const { database } = useContext(CeramicContext);
   const address = useWalletStore((state) => state.address);
@@ -74,6 +80,7 @@ export const ScrollMintBadge = ({ onMintBadge }: { onMintBadge: () => Promise<vo
   );
 
   const earnedBadges = getEarnedBadges(badgeStamps);
+  onSetEarnedBadges(earnedBadges);
 
   const hasBadge = deduplicatedBadgeStamps.length > 0;
   const hasMultipleBadges = deduplicatedBadgeStamps.length > 1;
