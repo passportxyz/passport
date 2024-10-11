@@ -74,6 +74,17 @@ export const useOneClickVerification = () => {
         .filter((patch): patch is StampPatch => patch !== null);
 
       await handlePatchStamps(stampPatches);
+
+      try {
+        datadogLogs.logger.info(`Attempting to retry writing stamps to compose db ${address}`);
+        // Attempt to retry writing stamps to compose db that have failed to write at some point in the past
+        handleComposeRetry();
+      } catch (error) {
+        console.error("Error when attempting to retry writing stamps to compose db", error);
+        datadogLogs.logger.error("Error when attempting to retry writing stamps to compose db", {
+          error: String(error),
+        });
+      }
       setUserVerificationState({
         ...verificationState,
         loading: false,
@@ -98,12 +109,6 @@ export const useOneClickVerification = () => {
   const verificationComplete = useMemo(() => {
     return verificationState.error || verificationState.success;
   }, [verificationState.error, verificationState.success]);
-
-  useEffect(() => {
-    if (verificationComplete) {
-      handleComposeRetry();
-    }
-  }, [handleComposeRetry, verificationComplete]);
 
   return { initiateVerification, verificationState, verificationComplete };
 };
