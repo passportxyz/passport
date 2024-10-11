@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import { scrollDevBadgeHandler, getScrollRpcUrl } from "../src/utils/scrollDevBadge";
 import { getAttestationSignerForChain } from "../src/utils/attestations";
 import { hasValidIssuer } from "../src/issuers";
+import { getEASFeeAmount } from "../src/utils/easFees";
 
 // Mock external dependencies
 jest.mock("@spruceid/didkit-wasm-node");
@@ -19,11 +20,13 @@ describe("scrollDevBadgeHandler", () => {
 
   beforeEach(() => {
     const mockSigner = {
-      _signTypedData: jest.fn().mockResolvedValue("0xsignature"),
+      _signTypedData: jest.fn().mockResolvedValue("0xSignature"),
     };
     (getAttestationSignerForChain as jest.Mock).mockResolvedValue(mockSigner);
 
     (hasValidIssuer as jest.Mock).mockReturnValue(true);
+
+    (getEASFeeAmount as jest.Mock).mockReturnValue(1234);
 
     mockJson = jest.fn();
     mockStatus = jest.fn().mockReturnThis();
@@ -46,16 +49,16 @@ describe("scrollDevBadgeHandler", () => {
         level: 1,
       },
     });
-    process.env.SCROLL_BADGE_ATTESTATION_SCHEMA_UID = "0xschema";
+    process.env.SCROLL_BADGE_ATTESTATION_SCHEMA_UID = "0xSchema";
     process.env.ALCHEMY_API_KEY = "test-api-key";
 
-    (ethers.Contract as jest.Mock).mockImplementation(() => ({
+    (ethers.Contract as unknown as jest.Mock).mockImplementation(() => ({
       badgeLevel: jest.fn().mockResolvedValue({ toNumber: () => 0 }),
     }));
   });
 
   it("should return an error if no credentials are provided", async () => {
-    scrollDevBadgeHandler(mockReq as Request, mockRes as Response);
+    await scrollDevBadgeHandler(mockReq as Request, mockRes as Response);
     expect(mockStatus).toHaveBeenCalledWith(400);
     expect(mockJson).toHaveBeenCalledWith({ error: "No stamps provided" });
   });
@@ -72,16 +75,18 @@ describe("scrollDevBadgeHandler", () => {
       credentialSubject: {
         id: "did:pkh:eip155:1:0x1234567890123456789012345678901234567890",
         provider: "test-provider",
-        hash: "base64:dGVzdGhhc2g=",
+        hash: "v0.0.0:JnHtXuRm2roGRwbYfHtWYSwMma3Oeh3yUl3hmZ3k96U=",
       },
       issuer: "did:key:test",
     };
     mockReq.body.credentials = [mockCredential];
 
     // Mock the necessary functions
-    jest.spyOn(ethers.utils, "splitSignature").mockReturnValue({ v: 27, r: "0xr", s: "0xs" });
+    jest.spyOn(ethers.utils, "splitSignature").mockReturnValue({ v: 27, r: "0xr", s: "0xs" } as any);
 
     await scrollDevBadgeHandler(mockReq as Request, mockRes as Response);
+
+    await new Promise((resolve) => setTimeout(resolve, 400));
 
     expect(mockJson).toHaveBeenCalled();
     const response = mockJson.mock.calls[0][0];
