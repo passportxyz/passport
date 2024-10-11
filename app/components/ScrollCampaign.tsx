@@ -24,6 +24,7 @@ import { ScrollConnectGithub } from "./scroll/ScrollConnectGithub";
 import { ScrollMintBadge } from "./scroll/ScrollMintPage";
 import { useAttestation } from "../hooks/useAttestation";
 import { iamUrl } from "../config/stamp_config";
+import { useScrollStampsStore } from "../context/scrollCampaignStore";
 import { jsonRequest } from "../utils/AttestationProvider";
 
 interface Provider {
@@ -257,6 +258,7 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
   const { database } = useContext(CeramicContext);
   const { getNonce, issueAttestation, needToSwitchChain } = useAttestation({ chain: scrollCampaignChain });
   const [syncingToChain, setSyncingToChain] = useState(false);
+  const { credentials } = useScrollStampsStore();
   const { failure } = useMessage();
 
   useEffect(() => {
@@ -303,7 +305,7 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
         const url = `${iamUrl}v0.0.0/scroll/dev`;
         const { data }: { data: EasPayload } = await jsonRequest(url, {
           recipient: address || "",
-          credentials: deduplicatedBadgeStamps.map(({ credential }) => credential),
+          credentials: credentials, // deduplicatedBadgeStamps.map(({ credential }) => credential),
           chainIdHex: scrollCampaignChain?.id,
           nonce,
         });
