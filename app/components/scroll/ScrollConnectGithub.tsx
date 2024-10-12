@@ -121,36 +121,31 @@ export const ScrollConnectGithub = () => {
 
   return (
     <ScrollCampaignPage>
-      <div className="z-20 text-left">
-        {noCredentialReceived ? (
-          <>
-            <div className="text-4xl text-[#FF684B]">We&apos;re sorry!</div>
-            <div>You do not qualify because you do not have the minimum 10 contributions needed.</div>
-          </>
-        ) : (
-          <>
-            <div className="text-5xl text-[#FFEEDA]">Connect to Github</div>
-            <div className="text-xl mt-2 max-w-4xl">
-              Passport is privacy preserving and verifies you have 1 or more commits to the following Repos located
-              here. Click below and obtain the specific developer credentials
-            </div>
-            <div className="mt-8 flex items-center justify-start">
-              <LoadButton
-                data-testid="connectGithubButton"
-                variant="custom"
-                onClick={signInWithGithub}
-                isLoading={isVerificationRunning || areBadgesLoading}
-                className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-200 pl-3 pr-5"
-              >
-                <GitHubIcon /> {msg ? msg : "Connect to Github"}
-              </LoadButton>
-            </div>
-          </>
-        )}
-      </div>
-      <div className="w-full">
-        <div className="absolute inset-0 bg-black bg-opacity-70 w-full h-full -z-10"></div>
-      </div>
+      {noCredentialReceived ? (
+        <>
+          <div className="text-4xl text-[#FF684B]">We&apos;re sorry!</div>
+          <div>You do not qualify because you do not have the minimum 10 contributions needed.</div>
+        </>
+      ) : (
+        <>
+          <div className="text-5xl text-[#FFEEDA]">Connect to Github</div>
+          <div className="text-xl mt-2 max-w-4xl">
+            Passport is privacy preserving and verifies you have 1 or more commits to the following Repos located here.
+            Click below and obtain the specific developer credentials
+          </div>
+          <div className="mt-8 flex items-center justify-start">
+            <LoadButton
+              data-testid="connectGithubButton"
+              variant="custom"
+              onClick={signInWithGithub}
+              isLoading={isVerificationRunning || areBadgesLoading}
+              className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-200 pl-3 pr-5"
+            >
+              <GitHubIcon /> {msg ? msg : "Connect to Github"}
+            </LoadButton>
+          </div>
+        </>
+      )}
     </ScrollCampaignPage>
   );
 };

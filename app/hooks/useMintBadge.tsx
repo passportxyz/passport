@@ -15,8 +15,9 @@ export const useMintBadge = () => {
   const goToLastStep = useNavigateToLastStep();
 
   const [syncingToChain, setSyncingToChain] = useState(false);
+  const [badgesFreshlyMinted, setBadgesFreshlyMinted] = useState(false);
 
-  const onMint = async ({ credentials, onMinted }: { credentials: VerifiableCredential[]; onMinted: () => void }) => {
+  const onMint = async ({ credentials }: { credentials: VerifiableCredential[] }) => {
     try {
       setSyncingToChain(true);
 
@@ -47,7 +48,7 @@ export const useMintBadge = () => {
         } else {
           await issueAttestation({ data });
           setSyncingToChain(false);
-          onMinted();
+          setBadgesFreshlyMinted(true);
           goToLastStep();
         }
       }
@@ -64,5 +65,6 @@ export const useMintBadge = () => {
   return {
     onMint,
     syncingToChain,
+    badgesFreshlyMinted,
   };
 };

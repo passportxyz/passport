@@ -2,11 +2,12 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { useMessage } from "../../hooks/useMessage";
 import { CeramicContext } from "../../context/ceramicContext";
 import { useAttestation } from "../../hooks/useAttestation";
-import { Passport, Stamp } from "@gitcoin/passport-types";
+import { Passport, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 import {
   scrollCampaignBadgeProviderInfo,
   scrollCampaignBadgeProviders,
   scrollCampaignChain,
+  scrollCanvasProfileRegistryAddress,
 } from "../../config/scroll_campaign";
 import { ProviderWithTitle } from "../ScrollCampaign";
 import { ScrollCampaignPage } from "./ScrollCampaignPage";
@@ -16,10 +17,15 @@ import { useWalletStore } from "../../context/walletStore";
 import { ethers } from "ethers";
 import PassportScoreScrollBadgeAbi from "../../abi/PassportScoreScrollBadge.json";
 import { ScrollMintingBadge } from "./ScrollMintingBadge";
-import { useMintBadge } from "../../hooks/useMintBadge";
+import { Hyperlink } from "@gitcoin/passport-platforms";
 
-export const ScrollMintBadge = ({ onMinted }: { onMinted: () => void }) => {
-  const [minting, setMinting] = useState(false);
+export const ScrollMintBadge = ({
+  onMint,
+  syncingToChain,
+}: {
+  onMint: (args: { credentials: VerifiableCredential[] }) => Promise<void>;
+  syncingToChain: boolean;
+}) => {
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
   const { database } = useContext(CeramicContext);
   const { failure } = useMessage();
@@ -49,11 +55,10 @@ export const ScrollMintBadge = ({ onMinted }: { onMinted: () => void }) => {
   );
 
   useEffect(() => {
+    if (!scrollCampaignChain) return;
     (async () => {
       try {
         setCheckingOnchainBadges(true);
-
-        if (!scrollCampaignChain) return badgeStamps;
 
         const validBadgeStamps: Stamp[] = [];
 
@@ -137,7 +142,7 @@ export const ScrollMintBadge = ({ onMinted }: { onMinted: () => void }) => {
   );
 
   const loading = !passport || checkingOnchainBadges;
-  const hasDeduplicatedCredentials = badgeStamps.length > deduplicatedBadgeStamps.length;
+  const hasDeduplicatedCredentials = !checkingOnchainBadges && badgeStamps.length > deduplicatedBadgeStamps.length;
 
   const earnedBadges = useMemo(
     () =>
@@ -148,13 +153,12 @@ export const ScrollMintBadge = ({ onMinted }: { onMinted: () => void }) => {
     [highestLevelBadgeStamps]
   );
 
-  return minting ? (
+  return syncingToChain ? (
     <ScrollMintingBadge earnedBadges={earnedBadges} />
   ) : (
     <ScrollInitiateMintBadge
-      onMinted={onMinted}
-      setMinting={setMinting}
-      loading={loading}
+      onMint={onMint}
+      credentialsLoading={loading}
       hasDeduplicatedCredentials={hasDeduplicatedCredentials}
       deduplicatedBadgeStamps={deduplicatedBadgeStamps}
       highestLevelBadgeStamps={highestLevelBadgeStamps}
@@ -164,28 +168,94 @@ export const ScrollMintBadge = ({ onMinted }: { onMinted: () => void }) => {
 };
 
 export const ScrollInitiateMintBadge = ({
-  onMinted,
-  setMinting,
-  loading,
+  onMint,
+  credentialsLoading,
   hasDeduplicatedCredentials,
   deduplicatedBadgeStamps,
   highestLevelBadgeStamps,
   earnedBadges,
 }: {
-  onMinted: () => void;
-  setMinting: (minting: boolean) => void;
-  loading: boolean;
+  onMint: (args: { credentials: VerifiableCredential[] }) => Promise<void>;
+  credentialsLoading: boolean;
   hasDeduplicatedCredentials: boolean;
   highestLevelBadgeStamps: Stamp[];
   deduplicatedBadgeStamps: Stamp[];
   earnedBadges: ProviderWithTitle[];
 }) => {
   const { needToSwitchChain } = useAttestation({ chain: scrollCampaignChain });
-  const { onMint, syncingToChain } = useMintBadge();
+  const [hasCanvas, setHasCanvas] = useState<Boolean | undefined>(undefined);
+  const [canvasCheckPaused, setCanvasCheckPaused] = useState(false);
+  const { failure } = useMessage();
+  const address = useWalletStore((state) => state.address);
+
+  const loading = credentialsLoading || hasCanvas === undefined;
 
   useEffect(() => {
-    setMinting(syncingToChain);
-  }, [syncingToChain, setMinting]);
+    if (!scrollCampaignChain || !scrollCanvasProfileRegistryAddress || hasCanvas !== undefined) return;
+
+    (async () => {
+      try {
+        const scrollRpcProvider = new ethers.JsonRpcProvider(scrollCampaignChain.rpcUrl);
+        const badgeContract = new ethers.Contract(
+          scrollCanvasProfileRegistryAddress,
+          [
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "account",
+                  type: "address",
+                },
+              ],
+              name: "getProfile",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              name: "isProfileMinted",
+              outputs: [
+                {
+                  internalType: "bool",
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+          ],
+          scrollRpcProvider
+        );
+
+        const profileAddress = await badgeContract.getProfile(address);
+        const hasCanvas = await badgeContract.isProfileMinted(profileAddress);
+
+        setHasCanvas(hasCanvas);
+        setCanvasCheckPaused(true);
+        setTimeout(() => setCanvasCheckPaused(false), 10000);
+      } catch (error) {
+        console.error("Error checking for canvas profile", error);
+        failure({
+          title: "Error",
+          message: "An unexpected error occurred while checking for your Scroll Canvas profile.",
+        });
+      }
+    })();
+  }, [address, hasCanvas, failure]);
 
   const hasBadge = highestLevelBadgeStamps.length > 0;
   const hasMultipleBadges = highestLevelBadgeStamps.length > 1;
@@ -205,8 +275,17 @@ export const ScrollInitiateMintBadge = ({
       <ScrollLoadingBarSection isLoading={loading} className="text-xl mt-2">
         {hasBadge ? (
           <div>
-            You qualify for {highestLevelBadgeStamps.length} badge{hasMultipleBadges ? "s" : ""}. Mint your badge
-            {hasMultipleBadges ? "s" : ""} and get a chance to work with us.
+            You qualify for {highestLevelBadgeStamps.length} badge{hasMultipleBadges ? "s" : ""}.
+            {hasCanvas ? (
+              <> Mint your badge{hasMultipleBadges ? "s" : ""} and get a chance to work with us.</>
+            ) : (
+              <>
+                <br />
+                <br />
+                It looks like you don&apos;t have a Canvas yet. Get yours{" "}
+                <Hyperlink href="https://scroll.io/canvas">here</Hyperlink>!
+              </>
+            )}
             {hasDeduplicatedCredentials
               ? " (Some badge credentials could not be validated because they have already been claimed on another address.)"
               : ""}
@@ -220,23 +299,37 @@ export const ScrollInitiateMintBadge = ({
 
       {hasBadge && (
         <div className="mt-8">
-          <LoadButton
-            variant="custom"
-            onClick={() =>
-              onMint({
-                credentials: deduplicatedBadgeStamps.map(({ credential }) => credential),
-                onMinted,
-              })
-            }
-            isLoading={loading}
-            className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200"
-          >
-            <div className="flex flex-col items-center justify-center">Mint Badge</div>
-          </LoadButton>
-          {needToSwitchChain && (
-            <div className="text-[#FF684B] mt-4">
-              You will be prompted to switch to the Scroll chain, and then to submit a transaction.
-            </div>
+          {hasCanvas === true ? (
+            <>
+              <LoadButton
+                variant="custom"
+                onClick={() =>
+                  onMint({
+                    credentials: deduplicatedBadgeStamps.map(({ credential }) => credential),
+                  })
+                }
+                isLoading={loading}
+                className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200"
+              >
+                <div className="flex flex-col items-center justify-center">
+                  Mint Badge{hasMultipleBadges ? "s" : ""}
+                </div>
+              </LoadButton>
+              {needToSwitchChain && (
+                <div className="text-[#FF684B] mt-4">
+                  You will be prompted to switch to the Scroll chain, and then to submit a transaction.
+                </div>
+              )}
+            </>
+          ) : (
+            <LoadButton
+              variant="custom"
+              onClick={() => setHasCanvas(undefined)}
+              isLoading={hasCanvas === undefined || canvasCheckPaused}
+              className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200"
+            >
+              {hasCanvas === undefined ? "Checking..." : "Check Again"}
+            </LoadButton>
           )}
         </div>
       )}

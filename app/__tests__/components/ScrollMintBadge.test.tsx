@@ -35,6 +35,7 @@ jest.mock("../../config/scroll_campaign", () => ({
     provider2: { contractAddress: "0xContract2", level: 2 },
     provider3: { contractAddress: "0xContract3", level: 3 },
   },
+  scrollCanvasProfileRegistryAddress: "0xProfileRegistry",
 }));
 
 const mockGetPassport = jest.fn();
@@ -80,6 +81,8 @@ describe("ScrollMintBadge", () => {
     });
 
     const mockContract = {
+      getProfile: jest.fn().mockResolvedValue("0xMockProfileAddress"),
+      isProfileMinted: jest.fn().mockResolvedValue(true),
       burntProviderHashes: jest.fn().mockResolvedValue(false),
     };
 
@@ -90,8 +93,11 @@ describe("ScrollMintBadge", () => {
     await waitFor(() => {
       expect(screen.getByText("Congratulations!")).toBeInTheDocument();
       expect(
-        screen.getByText("You qualify for 1 badge. Mint your badge and get a chance to work with us.")
-      ).toBeInTheDocument();
+        screen.getAllByText(
+          (_, element) =>
+            element?.textContent === "You qualify for 1 badge. Mint your badge and get a chance to work with us."
+        )
+      ).not.toHaveLength(0);
       expect(screen.getByRole("button", { name: /mint badge/i })).toBeInTheDocument();
     });
   });
@@ -112,6 +118,8 @@ describe("ScrollMintBadge", () => {
     });
 
     const mockContract = {
+      getProfile: jest.fn().mockResolvedValue("0xMockProfileAddress"),
+      isProfileMinted: jest.fn().mockResolvedValue(true),
       burntProviderHashes: jest.fn().mockResolvedValue(false),
     };
 
@@ -155,6 +163,8 @@ describe("ScrollMintBadge", () => {
     });
 
     const mockContract = {
+      getProfile: jest.fn().mockResolvedValue("0xMockProfileAddress"),
+      isProfileMinted: jest.fn().mockResolvedValue(true),
       burntProviderHashes: jest.fn().mockResolvedValue(true),
       userProviderHashes: jest.fn().mockResolvedValueOnce(encodedHash).mockRejectedValue(new Error("Invalid")),
     };
@@ -195,6 +205,8 @@ describe("ScrollMintBadge", () => {
     });
 
     const mockContract = {
+      getProfile: jest.fn().mockResolvedValue("0xMockProfileAddress"),
+      isProfileMinted: jest.fn().mockResolvedValue(true),
       burntProviderHashes: jest.fn().mockResolvedValue(true),
       userProviderHashes: jest.fn().mockRejectedValue(new Error("Invalid")),
     };
@@ -257,6 +269,8 @@ describe("ScrollMintBadge", () => {
     });
 
     const mockContract = {
+      getProfile: jest.fn().mockResolvedValue("0xMockProfileAddress"),
+      isProfileMinted: jest.fn().mockResolvedValue(true),
       burntProviderHashes: jest
         .fn()
         .mockResolvedValueOnce(true)
@@ -275,10 +289,12 @@ describe("ScrollMintBadge", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(
-          "You qualify for 2 badges. Mint your badges and get a chance to work with us. (Some badge credentials could not be validated because they have already been claimed on another address.)"
+        screen.getAllByText(
+          (_, element) =>
+            element?.textContent ===
+            "You qualify for 2 badges. Mint your badges and get a chance to work with us. (Some badge credentials could not be validated because they have already been claimed on another address.)"
         )
-      ).toBeInTheDocument();
+      ).not.toHaveLength(0);
       expect(screen.queryByRole("button", { name: /mint badge/i })).toBeInTheDocument();
     });
   });
@@ -294,6 +310,73 @@ describe("ScrollMintBadge", () => {
       expect(failureMock).toHaveBeenCalledWith({
         title: "Error",
         message: "An unexpected error occurred while loading your Passport.",
+      });
+    });
+  });
+
+  it("renders 'Check Again' button when hasCanvas is false", async () => {
+    mockGetPassport.mockResolvedValue({
+      status: "Success",
+      passport: {
+        stamps: [
+          {
+            provider: "provider1",
+            credential: {
+              credentialSubject: { hash: "base64:MTIzNDU2Nzg5MA==" },
+            },
+          },
+        ],
+      },
+    });
+
+    const mockContract = {
+      burntProviderHashes: jest.fn().mockResolvedValue(false),
+      getProfile: jest.fn().mockResolvedValue("0xMockProfileAddress"),
+      isProfileMinted: jest.fn().mockResolvedValue(false),
+    };
+
+    (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
+    (ethers.JsonRpcProvider as jest.Mock).mockImplementation(() => ({}));
+
+    renderWithContext(mockCeramicContext, <ScrollMintBadge />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Congratulations!")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /check again/i })).toBeInTheDocument();
+    });
+    expect(screen.getByText(/It looks like you don't have a Canvas yet/)).toBeInTheDocument();
+    expect(screen.getByText("here")).toHaveAttribute("href", "https://scroll.io/canvas");
+  });
+
+  it("handles errors during Canvas check", async () => {
+    mockGetPassport.mockResolvedValue({
+      status: "Success",
+      passport: {
+        stamps: [
+          {
+            provider: "provider1",
+            credential: {
+              credentialSubject: { hash: "base64:MTIzNDU2Nzg5MA==" },
+            },
+          },
+        ],
+      },
+    });
+
+    const mockContract = {
+      burntProviderHashes: jest.fn().mockResolvedValue(false),
+      getProfile: jest.fn().mockRejectedValue(new Error("Canvas check failed")),
+    };
+
+    (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
+    (ethers.JsonRpcProvider as jest.Mock).mockImplementation(() => ({}));
+
+    renderWithContext(mockCeramicContext, <ScrollMintBadge />);
+
+    await waitFor(() => {
+      expect(failureMock).toHaveBeenCalledWith({
+        title: "Error",
+        message: "An unexpected error occurred while checking for your Scroll Canvas profile.",
       });
     });
   });

@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState, useCallback } from "react";
+import React, { useEffect, useContext } from "react";
 import NotFound from "../pages/NotFound";
 import { useLoginFlow } from "../hooks/useLoginFlow";
 import { LoadButton } from "./LoadButton";
@@ -11,6 +11,7 @@ import { ScrollCampaignPage } from "./scroll/ScrollCampaignPage";
 import { ScrollConnectGithub } from "./scroll/ScrollConnectGithub";
 import { ScrollMintBadge } from "./scroll/ScrollMintPage";
 import { ScrollMintedBadge } from "./scroll/ScrollMintedBadge";
+import { useMintBadge } from "../hooks/useMintBadge";
 
 interface Provider {
   name: PROVIDER_ID;
@@ -20,12 +21,6 @@ interface Provider {
 
 export interface ProviderWithTitle extends Provider {
   title: string;
-}
-
-interface TopBadges {
-  title: string;
-  level: number;
-  image: string;
 }
 
 const ScrollLogin = () => {
@@ -77,11 +72,7 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
   const { did, dbAccessToken } = useDatastoreConnectionContext();
   const { database } = useContext(CeramicContext);
 
-  const [badgesFreshlyMinted, setBadgesFreshlyMinted] = useState(false);
-
-  const onMinted = useCallback(() => {
-    setBadgesFreshlyMinted(true);
-  }, [setBadgesFreshlyMinted]);
+  const { onMint, syncingToChain, badgesFreshlyMinted } = useMintBadge();
 
   useEffect(() => {
     setCustomizationKey("scroll");
@@ -99,7 +90,7 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
   } else if (step === 1) {
     return <ScrollConnectGithub />;
   } else if (step === 2) {
-    return <ScrollMintBadge onMinted={onMinted} />;
+    return <ScrollMintBadge onMint={onMint} syncingToChain={syncingToChain} />;
   } else if (step === 3) {
     return <ScrollMintedBadge badgesFreshlyMinted={badgesFreshlyMinted} />;
   }
