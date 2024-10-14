@@ -20,6 +20,7 @@ import { useScrollStampsStore } from "../context/scrollCampaignStore";
 import { jsonRequest } from "../utils/AttestationProvider";
 import { ScrollMintingBadge } from "./scroll/ScrollMintingBadge";
 import { ScrollMintedBadge } from "./scroll/ScrollMintedBadge";
+import { useMintBadge } from "../hooks/useMintBadge";
 
 interface Provider {
   name: PROVIDER_ID;
@@ -83,16 +84,10 @@ const ScrollLogin = () => {
 export const ScrollCampaign = ({ step }: { step: number }) => {
   const setCustomizationKey = useSetCustomizationKey();
   const goToLoginStep = useNavigateToRootStep();
-  const { address } = useWeb3ModalAccount();
   const { did, dbAccessToken } = useDatastoreConnectionContext();
   const { database } = useContext(CeramicContext);
-  const { getNonce, issueAttestation } = useAttestation({ chain: scrollCampaignChain });
-  const [syncingToChain, setSyncingToChain] = useState(false);
-  const { credentials } = useScrollStampsStore();
-  const { failure } = useMessage();
-  const [earnedBadges, setEarnedBadges] = useState<ProviderWithTitle[]>([]);
-  const [badgesFreshlyMinted, setBadgesFreshlyMinted] = useState(false);
-  const goToLastStep = useNavigateToLastStep();
+
+  const { onMint, syncingToChain, earnedBadges, badgesFreshlyMinted } = useMintBadge();
 
   useEffect(() => {
     setCustomizationKey("scroll");
@@ -117,49 +112,6 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
     () => badgeStamps.filter(({ provider }) => true),
     [badgeStamps]
   );
-
-  const onMint = async (badges: ProviderWithTitle[]) => {
-    try {
-      setEarnedBadges(badges);
-      setSyncingToChain(true);
-
-      const nonce = await getNonce();
-
-      if (nonce === undefined) {
-        failure({
-          title: "Error",
-          message: "An unexpected error occurred while trying to get the nonce.",
-        });
-      } else {
-        const url = `${iamUrl}v0.0.0/scroll/dev`;
-        const { data }: { data: EasPayload } = await jsonRequest(url, {
-          recipient: address || "",
-          credentials: credentials, // deduplicatedBadgeStamps.map(({ credential }) => credential),
-          chainIdHex: scrollCampaignChain?.id,
-          nonce,
-        });
-
-        if (data.error) {
-          console.error("error syncing credentials to chain: ", data.error, "nonce:", nonce);
-          failure({
-            title: "Error",
-            message: "An unexpected error occurred while generating attestations.",
-          });
-        } else {
-          await issueAttestation({ data });
-          setSyncingToChain(false);
-          setBadgesFreshlyMinted(true);
-          goToLastStep();
-        }
-      }
-    } catch (error) {
-      console.error("Error minting badge", error);
-      failure({
-        title: "Error",
-        message: "An unexpected error occurred while trying to bring the data onchain.",
-      });
-    }
-  };
 
   if (step === 0) {
     return <ScrollLogin />;

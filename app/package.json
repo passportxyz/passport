@@ -34,6 +34,7 @@
     "@popperjs/core": "^2.11.8",
     "@self.id/framework": "^0.4.0",
     "@tanstack/react-query": "^5.40.0",
+    "@testing-library/react-hooks": "^8.0.1",
     "@web3modal/ethers": "^5.0.5",
     "broadcast-channel": "^4.11.0",
     "did-session": "^3.0.2",
