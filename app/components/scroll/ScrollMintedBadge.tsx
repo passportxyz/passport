@@ -109,7 +109,7 @@ export const ScrollMintedBadge = ({ badgesFreshlyMinted }: { badgesFreshlyMinted
               {badges.map((badge, index) => {
                 const badgeProviderInfo = getHighestEarnedBadgeProviderInfo(badge.contract, badge.badgeLevel);
                 return badge.hasBadge && badgeProviderInfo ? (
-                  <div key={index} className={`flex flex-col items-center even:mb-10`}>
+                  <div key={index} className={`flex flex-col items-center ${badges.length != 2 && "even:mb-10"}`}>
                     <img
                       src={badgeProviderInfo?.image}
                       alt={`Badge Level ${badge.badgeLevel}`}
