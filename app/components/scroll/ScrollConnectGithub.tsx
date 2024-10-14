@@ -1,4 +1,3 @@
-import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { useNavigateToLastStep, useNavigateToRootStep, useNextCampaignStep } from "../../hooks/useNextCampaignStep";
 import { useDatastoreConnectionContext } from "../../context/datastoreConnectionContext";
 import { useCallback, useContext, useEffect, useState } from "react";
@@ -22,7 +21,6 @@ import { useScrollStampsStore } from "../../context/scrollCampaignStore";
 export const ScrollConnectGithub = () => {
   const goToNextStep = useNextCampaignStep();
   const goToLastStep = useNavigateToLastStep();
-  const { isConnected } = useWeb3ModalAccount();
   const { did, checkSessionIsValid } = useDatastoreConnectionContext();
   const { userDid, database } = useContext(CeramicContext);
   const goToLoginStep = useNavigateToRootStep();

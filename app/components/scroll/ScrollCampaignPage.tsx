@@ -1,4 +1,4 @@
-import { ProviderWithTitle, getHighestEarnedBadgeProviderInfo } from "../ScrollCampaign";
+import { ProviderWithTitle } from "../ScrollCampaign";
 import { BackgroundImage, ScrollCampaignPageRoot, ScrollStepsBar } from "./ScrollLayout";
 
 export const ScrollCampaignPage = ({
