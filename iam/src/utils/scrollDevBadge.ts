@@ -182,7 +182,7 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): void => {
 
             const requiredLevels = [...Array(maxCredentialLevel).keys()]
               .map((n) => n + 1)
-              .filter((n) => n > onchainLevel);
+              .filter((n) => n > onchainLevel && credentialLevels.includes(n));
 
             // All credentials already claimed
             if (requiredLevels.length === 0) return;
