@@ -2,16 +2,12 @@
 import { renderHook, act } from "@testing-library/react-hooks";
 import { useMintBadge } from "../../hooks/useMintBadge";
 import { useAttestation } from "../../hooks/useAttestation";
-import { useScrollStampsStore } from "../../context/scrollCampaignStore";
 import { jsonRequest } from "../../utils/AttestationProvider";
 import { useMessage } from "../../hooks/useMessage";
 import { useNavigateToLastStep } from "../../hooks/useNextCampaignStep";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
-import { ProviderWithTitle } from "../../components/ScrollCampaign";
-import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 jest.mock("../../hooks/useAttestation");
-jest.mock("../../context/scrollCampaignStore");
 jest.mock("../../utils/AttestationProvider");
 jest.mock("../../hooks/useMessage");
 jest.mock("../../hooks/useNextCampaignStep");
@@ -32,10 +28,6 @@ describe("useMintBadge hook", () => {
       issueAttestation: mockIssueAttestation,
     });
 
-    (useScrollStampsStore as jest.Mock).mockReturnValue({
-      credentials: [{ credential: "testCredential" }],
-    });
-
     (useWeb3ModalAccount as jest.Mock).mockReturnValue({
       address: "0xTestAddress",
     });
@@ -51,8 +43,10 @@ describe("useMintBadge hook", () => {
 
   it("handles successful minting", async () => {
     // Arrange
-    const testBadges: ProviderWithTitle[] = [
-      { name: "Provider1" as PROVIDER_ID, title: "Badge Title", image: "", level: 1 },
+    const testCredentials = [
+      {
+        credential: "testCredential",
+      },
     ];
     const testNonce = 123;
     const testData = { attestation: "testAttestation" };
@@ -65,7 +59,7 @@ describe("useMintBadge hook", () => {
 
     // Act
     await act(async () => {
-      await result.current.onMint(testBadges);
+      await result.current.onMint({ credentials: testCredentials });
     });
 
     // Assert
@@ -82,14 +76,15 @@ describe("useMintBadge hook", () => {
 
     // Check state updates
     expect(result.current.syncingToChain).toBe(false);
-    expect(result.current.earnedBadges).toEqual(testBadges);
     expect(result.current.badgesFreshlyMinted).toBe(true);
   });
 
   it("shows failure message when nonce is undefined", async () => {
     // Arrange
-    const testBadges: ProviderWithTitle[] = [
-      { name: "Provider1" as PROVIDER_ID, title: "Badge Title", image: "", level: 1 },
+    const testCredentials = [
+      {
+        credential: "testCredential",
+      },
     ];
 
     mockGetNonce.mockResolvedValue(undefined);
@@ -98,7 +93,7 @@ describe("useMintBadge hook", () => {
 
     // Act
     await act(async () => {
-      await result.current.onMint(testBadges);
+      await result.current.onMint({ credentials: testCredentials });
     });
 
     // Assert
@@ -118,8 +113,10 @@ describe("useMintBadge hook", () => {
 
   it("shows failure message when attestation generation returns an error", async () => {
     // Arrange
-    const testBadges: ProviderWithTitle[] = [
-      { name: "Provider1" as PROVIDER_ID, title: "Badge Title", image: "", level: 1 },
+    const testCredentials = [
+      {
+        credential: "testCredential",
+      },
     ];
     const testNonce = 123;
 
@@ -130,7 +127,7 @@ describe("useMintBadge hook", () => {
 
     // Act
     await act(async () => {
-      await result.current.onMint(testBadges);
+      await result.current.onMint({ credentials: testCredentials });
     });
 
     // Assert
@@ -150,8 +147,10 @@ describe("useMintBadge hook", () => {
 
   it("shows failure message when issueAttestation throws an error", async () => {
     // Arrange
-    const testBadges: ProviderWithTitle[] = [
-      { name: "Provider1" as PROVIDER_ID, title: "Badge Title", image: "", level: 1 },
+    const testCredentials = [
+      {
+        credential: "testCredential",
+      },
     ];
     const testNonce = 123;
     const testData = { attestation: "testAttestation" };
@@ -164,7 +163,7 @@ describe("useMintBadge hook", () => {
 
     // Act
     await act(async () => {
-      await result.current.onMint(testBadges);
+      await result.current.onMint({ credentials: testCredentials });
     });
 
     // Assert
@@ -184,8 +183,10 @@ describe("useMintBadge hook", () => {
 
   it("handles general exception during onMint", async () => {
     // Arrange
-    const testBadges: ProviderWithTitle[] = [
-      { name: "Provider1" as PROVIDER_ID, title: "Badge Title", image: "", level: 1 },
+    const testCredentials = [
+      {
+        credential: "testCredential",
+      },
     ];
     const testNonce = 123;
 
@@ -196,7 +197,7 @@ describe("useMintBadge hook", () => {
 
     // Act
     await act(async () => {
-      await result.current.onMint(testBadges);
+      await result.current.onMint({ credentials: testCredentials });
     });
 
     // Assert

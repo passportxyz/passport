@@ -50,3 +50,5 @@ export const scrollCampaignChain = chains.find(({ id }) => id === SCROLL_CHAIN_I
 if (scrollCampaignBadgeProviders.length === 0) {
   console.error("No NEXT_PUBLIC_SCROLL_BADGE_PROVIDER_INFO has been configured");
 }
+
+export const scrollCanvasProfileRegistryAddress = process.env.NEXT_PUBLIC_SCROLL_CANVAS_PROFILE_REGISTRY_ADDRESS;

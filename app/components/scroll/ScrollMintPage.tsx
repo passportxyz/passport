@@ -1,65 +1,31 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useMessage } from "../../hooks/useMessage";
 import { CeramicContext } from "../../context/ceramicContext";
-import { useAttestation } from "../../hooks/useAttestation";
-import { PROVIDER_ID, Passport, Stamp } from "@gitcoin/passport-types";
+import { Passport, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 import {
-  badgeContractInfo,
   scrollCampaignBadgeProviderInfo,
   scrollCampaignBadgeProviders,
   scrollCampaignChain,
 } from "../../config/scroll_campaign";
-import { ProviderWithTitle } from "../ScrollCampaign";
-import { ScrollCampaignPage } from "./ScrollCampaignPage";
-import { LoadingBarSection, LoadingBarSectionProps } from "../LoadingBar";
-import { LoadButton } from "../LoadButton";
-
-export const getEarnedBadges = (badgeStamps: Stamp[]): ProviderWithTitle[] => {
-  if (badgeStamps.length === 0) {
-    return [];
-  }
-  return badgeContractInfo.map((contract) => {
-    const relevantStamps = badgeStamps.filter((stamp) =>
-      contract.providers.some(({ name }) => name === stamp.provider)
-    );
-
-    if (relevantStamps.length === 0) {
-      return {
-        title: contract.title,
-        name: "No Provider" as PROVIDER_ID,
-        image: "",
-        level: 0,
-      };
-    }
-
-    const highestLevelProvider = relevantStamps.reduce(
-      (highest, stamp) => {
-        const provider = contract.providers.find(({ name }) => name === stamp.provider);
-        if (provider && provider.level > highest.level) {
-          return provider;
-        }
-        return highest;
-      },
-      { level: -1, name: "No Provider" as PROVIDER_ID, image: "" }
-    );
-
-    return {
-      title: contract.title,
-      ...highestLevelProvider,
-    };
-  });
-};
+import { useWalletStore } from "../../context/walletStore";
+import { ethers } from "ethers";
+import PassportScoreScrollBadgeAbi from "../../abi/PassportScoreScrollBadge.json";
+import { ScrollMintingBadge } from "./ScrollMintingBadge";
+import { ScrollInitiateMintBadge } from "./ScrollInitiateMintBadge";
 
 export const ScrollMintBadge = ({
-  onMintBadge,
+  onMint,
+  syncingToChain,
 }: {
-  onMintBadge: (earnedBadges: ProviderWithTitle[]) => Promise<void>;
+  onMint: (args: { credentials: VerifiableCredential[] }) => Promise<void>;
+  syncingToChain: boolean;
 }) => {
-  const { failure } = useMessage();
-  const { database } = useContext(CeramicContext);
-  const { needToSwitchChain } = useAttestation({ chain: scrollCampaignChain });
-
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
+  const { database } = useContext(CeramicContext);
+  const { failure } = useMessage();
+  const [deduplicatedBadgeStamps, setDeduplicatedBadgeStamps] = useState<Stamp[]>([]);
+  const [checkingOnchainBadges, setCheckingOnchainBadges] = useState(true);
+  const address = useWalletStore((state) => state.address);
 
   useEffect(() => {
     (async () => {
@@ -82,15 +48,75 @@ export const ScrollMintBadge = ({
     [passport]
   );
 
-  const loading = !passport;
+  useEffect(() => {
+    if (!scrollCampaignChain) return;
+    (async () => {
+      try {
+        setCheckingOnchainBadges(true);
 
-  const deduplicatedBadgeStamps = useMemo(
-    // TODO Deduplicate by seeing if in burnedHashes but not user's hashes
-    () => badgeStamps.filter(({ provider }) => true),
-    [badgeStamps]
-  );
+        const validBadgeStamps: Stamp[] = [];
 
-  const hasDeduplicatedCredentials = badgeStamps.length > deduplicatedBadgeStamps.length;
+        const cachedUserHashes: Record<string, string[]> = {};
+        const scrollRpcProvider = new ethers.JsonRpcProvider(scrollCampaignChain.rpcUrl);
+
+        await Promise.all(
+          badgeStamps.map(async (stamp) => {
+            const stampHash =
+              "0x" +
+              Buffer.from((stamp.credential.credentialSubject.hash || "").split(":")[1], "base64").toString("hex");
+
+            const { contractAddress } = scrollCampaignBadgeProviderInfo[stamp.provider];
+            const badgeContract = new ethers.Contract(
+              contractAddress,
+              PassportScoreScrollBadgeAbi.abi,
+              scrollRpcProvider
+            );
+
+            if (await badgeContract.burntProviderHashes(stampHash)) {
+              // If burned, check if it's burned by this user
+              let index = 0;
+              let userHash;
+              do {
+                if (!cachedUserHashes[contractAddress]) cachedUserHashes[contractAddress] = [];
+
+                if (cachedUserHashes[contractAddress][index] !== undefined) {
+                  // Already pulled from the contract
+                  userHash = cachedUserHashes[contractAddress][index];
+                } else {
+                  try {
+                    userHash = await badgeContract.userProviderHashes(address, index);
+                  } catch {
+                    userHash = 0;
+                  }
+                  cachedUserHashes[contractAddress][index] = userHash;
+                }
+
+                if (userHash === stampHash) {
+                  // If it's burned by this user, it's valid
+                  validBadgeStamps.push(stamp);
+                }
+
+                index++;
+              } while (userHash !== 0);
+            } else {
+              // If never burned, it's valid
+              validBadgeStamps.push(stamp);
+            }
+          })
+        );
+
+        setDeduplicatedBadgeStamps(validBadgeStamps);
+      } catch (error) {
+        console.error("Error checking onchain badges", error);
+        failure({
+          title: "Error",
+          message: "An unexpected error occurred while checking for existing onchain badges.",
+        });
+      } finally {
+        setCheckingOnchainBadges(false);
+      }
+    })();
+  }, [badgeStamps, address, failure]);
 
   const highestLevelBadgeStamps = useMemo(
     () =>
@@ -109,56 +135,28 @@ export const ScrollMintBadge = ({
     [deduplicatedBadgeStamps]
   );
 
-  const earnedBadges = getEarnedBadges(badgeStamps);
+  const loading = !passport || checkingOnchainBadges;
+  const hasDeduplicatedCredentials = !checkingOnchainBadges && badgeStamps.length > deduplicatedBadgeStamps.length;
 
-  const hasBadge = deduplicatedBadgeStamps.length > 0;
-  const hasMultipleBadges = deduplicatedBadgeStamps.length > 1;
-
-  const ScrollLoadingBarSection = (props: LoadingBarSectionProps) => (
-    <LoadingBarSection loadingBarClassName="h-10 via-[#FFEEDA] brightness-50" {...props} />
+  const earnedBadges = useMemo(
+    () =>
+      highestLevelBadgeStamps.map(({ provider }) => ({
+        ...scrollCampaignBadgeProviderInfo[provider],
+        name: provider,
+      })),
+    [highestLevelBadgeStamps]
   );
 
-  return (
-    <ScrollCampaignPage fadeBackgroundImage={loading || hasBadge} earnedBadges={earnedBadges}>
-      <ScrollLoadingBarSection
-        isLoading={loading}
-        className={`text-5xl ${hasBadge ? "text-[#FFEEDA]" : "text-[#FF684B]"}`}
-      >
-        {hasBadge ? "Congratulations!" : "We're sorry!"}
-      </ScrollLoadingBarSection>
-      <ScrollLoadingBarSection isLoading={loading} className="text-xl mt-2">
-        {hasBadge ? (
-          <div>
-            You qualify for {highestLevelBadgeStamps.length} badge{hasMultipleBadges ? "s" : ""}. Mint your badge
-            {hasMultipleBadges ? "s" : ""} and get a chance to work with us.
-            {hasDeduplicatedCredentials
-              ? " (Some badge credentials could not be validated because they have already been claimed on another address.)"
-              : ""}
-          </div>
-        ) : hasDeduplicatedCredentials ? (
-          "Your badge credentials have already been claimed with another address."
-        ) : (
-          "You don't qualify for any badges."
-        )}
-      </ScrollLoadingBarSection>
-
-      {hasBadge && (
-        <div className="mt-8">
-          <LoadButton
-            variant="custom"
-            onClick={() => onMintBadge(earnedBadges)}
-            isLoading={loading}
-            className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200"
-          >
-            <div className="flex flex-col items-center justify-center">{"Mint Badge"}</div>
-          </LoadButton>
-          {needToSwitchChain && (
-            <div className="text-[#FF684B] mt-4">
-              You will be prompted to switch to the Scroll chain, and then to submit a transaction.
-            </div>
-          )}
-        </div>
-      )}
-    </ScrollCampaignPage>
+  return syncingToChain ? (
+    <ScrollMintingBadge earnedBadges={earnedBadges} />
+  ) : (
+    <ScrollInitiateMintBadge
+      onMint={onMint}
+      credentialsLoading={loading}
+      hasDeduplicatedCredentials={hasDeduplicatedCredentials}
+      deduplicatedBadgeStamps={deduplicatedBadgeStamps}
+      highestLevelBadgeStamps={highestLevelBadgeStamps}
+      earnedBadges={earnedBadges}
+    />
   );
 };

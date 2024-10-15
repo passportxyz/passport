@@ -91,7 +91,7 @@ async function queryBadgeLevel({
   }
 }
 
-export const scrollDevBadgeHandler = (req: Request, res: Response): void => {
+export const scrollDevBadgeHandler = (req: Request, res: Response): Promise<void> => {
   try {
     const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
     if (!Object.keys(onchainInfo).includes(chainIdHex)) {
