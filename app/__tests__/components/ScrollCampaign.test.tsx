@@ -13,8 +13,11 @@ import { useScrollBadge } from "../../hooks/useScrollBadge";
 import { ScrollStepsBar } from "../../components/scroll/ScrollLayout";
 import { useMintBadge } from "../../hooks/useMintBadge";
 import { ProviderWithTitle } from "../../components/ScrollCampaign";
+import { ethers } from "ethers";
+import { scrollCampaignChain } from "../../config/scroll_campaign";
 
 jest.mock("@gitcoin/passport-database-client");
+jest.mock("ethers");
 
 const navigateMock = jest.fn();
 jest.mock("react-router-dom", () => ({
@@ -49,8 +52,6 @@ jest.mock("../../utils/helpers", () => {
 });
 
 jest.mock("../../config/scroll_campaign", () => {
-  const originalModule = jest.requireActual("../../config/scroll_campaign");
-
   const mockBadgeProviders = [
     {
       badgeContractAddress: "0xMockContractAddress",
@@ -75,13 +76,13 @@ jest.mock("../../config/scroll_campaign", () => {
   };
 
   return {
-    ...originalModule,
     badgeContractInfo: mockBadgeProviders,
     scrollCampaignBadgeProviderInfo: mockScrollCampaignBadgeProviderInfo,
     scrollCampaignBadgeProviders: ["SomeDeveloperProvider"],
     loadBadgeProviders: jest.fn().mockImplementation(() => {
       return mockBadgeProviders;
     }),
+    scrollCampaignChain: { id: "0x1", rpcUrl: "https://example.com" },
   };
 });
 
@@ -400,21 +401,35 @@ describe("ScrollCampaign Step 2 (Mint Badge) tests", () => {
   it("renders ScrollMintingBadge when syncingToChain is true", async () => {
     (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "2" });
 
-    const earnedBadges: ProviderWithTitle[] = [
-      {
-        name: "SomeDeveloperProvider" as PROVIDER_ID,
-        title: "Mock Badge Title",
-        image: "mockImage.png",
-        level: 1,
+    (mockDatabase.getPassport as jest.Mock).mockResolvedValue({
+      status: "Success",
+      passport: {
+        stamps: [
+          {
+            provider: "SomeDeveloperProvider",
+            credential: {
+              credentialSubject: {
+                hash: "hash:0xMockHash",
+              },
+            },
+          },
+        ],
       },
-    ];
+    });
 
     (useMintBadge as jest.Mock).mockReturnValue({
       onMint: jest.fn(),
       syncingToChain: true,
-      earnedBadges: earnedBadges,
       badgesFreshlyMinted: false,
     });
+
+    const mockContract = {
+      getProfile: jest.fn().mockResolvedValue("0xMockProfileAddress"),
+      isProfileMinted: jest.fn().mockResolvedValue(true),
+      burntProviderHashes: jest.fn().mockResolvedValue(false),
+    };
+
+    (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
 
     renderWithContext(
       mockCeramicContext,
@@ -424,9 +439,11 @@ describe("ScrollCampaign Step 2 (Mint Badge) tests", () => {
     );
 
     // Verify that the ScrollMintingBadge component is rendered
-    expect(screen.getByText("Minting badges...")).toBeInTheDocument();
+    expect(screen.getByText("Minting badge...")).toBeInTheDocument();
 
     // Check that the badges are displayed
-    expect(screen.getByText("Mock Badge Title")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Mock Badge Title")).toBeInTheDocument();
+    });
   });
 });

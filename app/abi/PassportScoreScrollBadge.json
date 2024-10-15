@@ -2,6 +2,25 @@
   "abi": [
     {
       "type": "function",
+      "name": "hasBadge",
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
       "name": "badgeLevel",
       "inputs": [
         {

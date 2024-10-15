@@ -2,10 +2,12 @@ import React from "react";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ethers } from "ethers";
-import { ScrollMintBadge } from "../../components/ScrollCampaign";
+import { ScrollMintBadge } from "../../components/scroll/ScrollMintPage";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { PassportDatabase } from "@gitcoin/passport-database-client";
 import axios from "axios";
+import { useMintBadge } from "../../hooks/useMintBadge";
+import { MemoryRouter } from "react-router-dom";
 
 jest.mock("axios");
 
@@ -46,6 +48,19 @@ const mockCeramicContext = makeTestCeramicContext({
   }),
 });
 
+const InnerTestComponent = () => {
+  const { onMint, syncingToChain } = useMintBadge();
+  return <ScrollMintBadge onMint={onMint} syncingToChain={syncingToChain} />;
+};
+
+const TestComponent = () => {
+  return (
+    <MemoryRouter>
+      <InnerTestComponent />
+    </MemoryRouter>
+  );
+};
+
 describe("ScrollMintBadge", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,7 +72,7 @@ describe("ScrollMintBadge", () => {
       passport: { stamps: [] },
     });
 
-    renderWithContext(mockCeramicContext, <ScrollMintBadge />);
+    renderWithContext(mockCeramicContext, <TestComponent />);
 
     await waitFor(() => {
       expect(screen.getByText("We're sorry!")).toBeInTheDocument();
@@ -88,7 +103,7 @@ describe("ScrollMintBadge", () => {
 
     (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
 
-    renderWithContext(mockCeramicContext, <ScrollMintBadge />);
+    renderWithContext(mockCeramicContext, <TestComponent />);
 
     await waitFor(() => {
       expect(screen.getByText("Congratulations!")).toBeInTheDocument();
@@ -127,7 +142,7 @@ describe("ScrollMintBadge", () => {
 
     (axios.post as jest.Mock).mockResolvedValue({ data: { error: null } });
 
-    renderWithContext(mockCeramicContext, <ScrollMintBadge />);
+    renderWithContext(mockCeramicContext, <TestComponent />);
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: /mint badge/i })).toBeInTheDocument();
@@ -137,7 +152,7 @@ describe("ScrollMintBadge", () => {
     await userEvent.click(mintButton);
 
     await waitFor(() => {
-      expect(screen.getByText("Minting...")).toBeInTheDocument();
+      expect(screen.getByText("Minting badge...")).toBeInTheDocument();
     });
 
     await waitFor(() => {
@@ -171,7 +186,7 @@ describe("ScrollMintBadge", () => {
 
     (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
 
-    renderWithContext(mockCeramicContext, <ScrollMintBadge />);
+    renderWithContext(mockCeramicContext, <TestComponent />);
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: /mint badge/i })).toBeInTheDocument();
@@ -181,7 +196,7 @@ describe("ScrollMintBadge", () => {
     await userEvent.click(mintButton);
 
     await waitFor(() => {
-      expect(screen.getByText("Minting...")).toBeInTheDocument();
+      expect(screen.getByText("Minting badge...")).toBeInTheDocument();
     });
 
     await waitFor(() => {
@@ -213,7 +228,7 @@ describe("ScrollMintBadge", () => {
 
     (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
 
-    renderWithContext(mockCeramicContext, <ScrollMintBadge />);
+    renderWithContext(mockCeramicContext, <TestComponent />);
 
     await waitFor(() => {
       expect(
@@ -228,7 +243,7 @@ describe("ScrollMintBadge", () => {
       status: "Error",
     });
 
-    renderWithContext(mockCeramicContext, <ScrollMintBadge />);
+    renderWithContext(mockCeramicContext, <TestComponent />);
 
     await waitFor(() => {
       expect(failureMock).toHaveBeenCalledWith({
@@ -285,7 +300,7 @@ describe("ScrollMintBadge", () => {
 
     (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
 
-    renderWithContext(mockCeramicContext, <ScrollMintBadge />);
+    renderWithContext(mockCeramicContext, <TestComponent />);
 
     await waitFor(() => {
       expect(
@@ -304,7 +319,7 @@ describe("ScrollMintBadge", () => {
       status: "Error",
     });
 
-    renderWithContext(mockCeramicContext, <ScrollMintBadge />);
+    renderWithContext(mockCeramicContext, <TestComponent />);
 
     await waitFor(() => {
       expect(failureMock).toHaveBeenCalledWith({
@@ -338,7 +353,7 @@ describe("ScrollMintBadge", () => {
     (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
     (ethers.JsonRpcProvider as jest.Mock).mockImplementation(() => ({}));
 
-    renderWithContext(mockCeramicContext, <ScrollMintBadge />);
+    renderWithContext(mockCeramicContext, <TestComponent />);
 
     await waitFor(() => {
       expect(screen.getByText("Congratulations!")).toBeInTheDocument();
@@ -371,7 +386,7 @@ describe("ScrollMintBadge", () => {
     (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
     (ethers.JsonRpcProvider as jest.Mock).mockImplementation(() => ({}));
 
-    renderWithContext(mockCeramicContext, <ScrollMintBadge />);
+    renderWithContext(mockCeramicContext, <TestComponent />);
 
     await waitFor(() => {
       expect(failureMock).toHaveBeenCalledWith({
