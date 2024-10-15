@@ -5,13 +5,16 @@ import { MemoryRouter } from "react-router-dom";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
 import { AppRoutes } from "../../pages";
-import { ScrollStepsBar } from "../../components/ScrollCampaign";
 import { useParams } from "react-router-dom";
-import { CredentialResponseBody } from "@gitcoin/passport-types";
+import { CredentialResponseBody, PROVIDER_ID } from "@gitcoin/passport-types";
 import { googleStampFixture } from "../../__test-fixtures__/databaseStorageFixtures";
 import * as passportIdentity from "@gitcoin/passport-identity";
 import { useScrollBadge } from "../../hooks/useScrollBadge";
-import { PassportDatabase } from "@gitcoin/passport-database-client";
+import { ScrollStepsBar } from "../../components/scroll/ScrollLayout";
+import { useMintBadge } from "../../hooks/useMintBadge";
+import { ProviderWithTitle } from "../../components/ScrollCampaign";
+
+jest.mock("@gitcoin/passport-database-client");
 
 const navigateMock = jest.fn();
 jest.mock("react-router-dom", () => ({
@@ -22,16 +25,20 @@ jest.mock("react-router-dom", () => ({
 
 jest.mock("@gitcoin/passport-database-client");
 
-(PassportDatabase as jest.Mock).mockImplementation(() => {
-  return {
-    addStamps: jest.fn().mockResolvedValue({
-      mocked: "response",
-    }),
-  };
-});
+const mockDatabase = {
+  addStamps: jest.fn().mockResolvedValue({
+    mocked: "response",
+  }),
+  getPassport: jest.fn().mockResolvedValue({
+    status: "Success",
+    passport: {
+      stamps: [],
+    },
+  }),
+};
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
-  database: new PassportDatabase("test", "test", "test"),
+  database: mockDatabase as any,
 });
 
 jest.mock("../../utils/helpers", () => {
@@ -43,11 +50,37 @@ jest.mock("../../utils/helpers", () => {
 
 jest.mock("../../config/scroll_campaign", () => {
   const originalModule = jest.requireActual("../../config/scroll_campaign");
+
+  const mockBadgeProviders = [
+    {
+      badgeContractAddress: "0xMockContractAddress",
+      title: "Mock Badge Title",
+      providers: [
+        {
+          name: "SomeDeveloperProvider" as PROVIDER_ID,
+          image: "mockImage.png",
+          level: 1,
+        },
+      ],
+    },
+  ];
+
+  const mockScrollCampaignBadgeProviderInfo = {
+    SomeDeveloperProvider: {
+      contractAddress: "0xMockContractAddress",
+      level: 1,
+      image: "mockImage.png",
+      title: "Mock Badge Title",
+    },
+  };
+
   return {
     ...originalModule,
+    badgeContractInfo: mockBadgeProviders,
+    scrollCampaignBadgeProviderInfo: mockScrollCampaignBadgeProviderInfo,
     scrollCampaignBadgeProviders: ["SomeDeveloperProvider"],
     loadBadgeProviders: jest.fn().mockImplementation(() => {
-      return ["SomeDeveloperProvider"];
+      return mockBadgeProviders;
     }),
   };
 });
@@ -283,5 +316,120 @@ describe("Github Connect page tests", () => {
     // expect(canvasRedirectButton).toBeInTheDocument();
 
     expect(navigateMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+jest.mock("../../hooks/useMintBadge", () => {
+  return {
+    useMintBadge: jest.fn().mockReturnValue({
+      onMint: jest.fn(),
+      syncingToChain: false,
+      earnedBadges: [],
+      badgesFreshlyMinted: false,
+    }),
+  };
+});
+describe("ScrollCampaign Step 2 (Mint Badge) tests", () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
+
+  it("renders ScrollMintBadge component correctly at step 2", () => {
+    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "2" });
+
+    const mockOnMint = jest.fn();
+    (useMintBadge as jest.Mock).mockReturnValue({
+      onMint: mockOnMint,
+      syncingToChain: false,
+      earnedBadges: [],
+      badgesFreshlyMinted: false,
+    });
+
+    renderWithContext(
+      mockCeramicContext,
+      <MemoryRouter initialEntries={["/campaign/scroll-developer/2"]}>
+        <AppRoutes />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("We're sorry!")).toBeInTheDocument();
+  });
+
+  it("calls onMint when 'Mint Badge' button is clicked", async () => {
+    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "2" });
+
+    const mockOnMint = jest.fn();
+    const earnedBadges: ProviderWithTitle[] = [
+      {
+        name: "SomeDeveloperProvider" as PROVIDER_ID,
+        title: "Mock Badge Title",
+        image: "mockImage.png",
+        level: 1,
+      },
+    ];
+
+    (useMintBadge as jest.Mock).mockReturnValue({
+      onMint: mockOnMint,
+      syncingToChain: false,
+      earnedBadges: earnedBadges,
+      badgesFreshlyMinted: false,
+    });
+
+    (mockDatabase.getPassport as jest.Mock).mockResolvedValue({
+      status: "Success",
+      passport: {
+        stamps: [
+          {
+            provider: "SomeDeveloperProvider",
+            credential: "someCredential",
+            verified: true,
+          },
+        ],
+      },
+    });
+
+    renderWithContext(
+      mockCeramicContext,
+      <MemoryRouter initialEntries={["/campaign/scroll-developer/2"]}>
+        <AppRoutes />
+      </MemoryRouter>
+    );
+
+    const mintBadgeButton = screen.getByText("Mint Badge");
+    expect(mintBadgeButton).toBeInTheDocument();
+  });
+
+  it("renders ScrollMintingBadge when syncingToChain is true", async () => {
+    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "2" });
+
+    const earnedBadges: ProviderWithTitle[] = [
+      {
+        name: "SomeDeveloperProvider" as PROVIDER_ID,
+        title: "Mock Badge Title",
+        image: "mockImage.png",
+        level: 1,
+      },
+    ];
+
+    (useMintBadge as jest.Mock).mockReturnValue({
+      onMint: jest.fn(),
+      syncingToChain: true,
+      earnedBadges: earnedBadges,
+      badgesFreshlyMinted: false,
+    });
+
+    renderWithContext(
+      mockCeramicContext,
+      <MemoryRouter initialEntries={["/campaign/scroll-developer/2"]}>
+        <AppRoutes />
+      </MemoryRouter>
+    );
+
+    // Verify that the ScrollMintingBadge component is rendered
+    expect(screen.getByText("Minting badges...")).toBeInTheDocument();
+
+    // Check that the badges are displayed
+    expect(screen.getByText("Mock Badge Title")).toBeInTheDocument();
   });
 });

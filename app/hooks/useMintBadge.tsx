@@ -1,4 +1,3 @@
-// src/hooks/useMintBadge.ts
 import { useState } from "react";
 import { useAttestation } from "./useAttestation";
 import { useScrollStampsStore } from "../context/scrollCampaignStore";

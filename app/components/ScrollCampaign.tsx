@@ -1,23 +1,16 @@
 import React, { useEffect, useContext, useMemo, useState } from "react";
 import NotFound from "../pages/NotFound";
-import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { useLoginFlow } from "../hooks/useLoginFlow";
 import { LoadButton } from "./LoadButton";
-import { useNextCampaignStep, useNavigateToRootStep, useNavigateToLastStep } from "../hooks/useNextCampaignStep";
+import { useNextCampaignStep, useNavigateToRootStep } from "../hooks/useNextCampaignStep";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { CeramicContext } from "../context/ceramicContext";
-import { EasPayload, PROVIDER_ID, Passport, Stamp } from "@gitcoin/passport-types";
+import { PROVIDER_ID, Passport } from "@gitcoin/passport-types";
 import { useSetCustomizationKey } from "../hooks/useCustomization";
-import { scrollCampaignBadgeProviders, scrollCampaignChain } from "../config/scroll_campaign";
-
-import { useMessage } from "../hooks/useMessage";
+import { scrollCampaignBadgeProviders } from "../config/scroll_campaign";
 import { ScrollCampaignPage } from "./scroll/ScrollCampaignPage";
 import { ScrollConnectGithub } from "./scroll/ScrollConnectGithub";
 import { ScrollMintBadge } from "./scroll/ScrollMintPage";
-import { useAttestation } from "../hooks/useAttestation";
-import { iamUrl } from "../config/stamp_config";
-import { useScrollStampsStore } from "../context/scrollCampaignStore";
-import { jsonRequest } from "../utils/AttestationProvider";
 import { ScrollMintingBadge } from "./scroll/ScrollMintingBadge";
 import { ScrollMintedBadge } from "./scroll/ScrollMintedBadge";
 import { useMintBadge } from "../hooks/useMintBadge";

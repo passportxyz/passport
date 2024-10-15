@@ -32,6 +32,18 @@ export const getHighestEarnedBadgeProviderInfo = (contractAddress: string, level
   }
 };
 
+export const RenderedBadges = ({ badges }: { badges: ProviderWithTitle[] }) => (
+  <>
+    {badges.map((badge, index) => (
+      <div key={index} className={`flex flex-col items-center ${badges.length != 2 && "even:mb-10"}`}>
+        <img src={badge.image} alt={`Badge Level ${badge.level}`} className="badge-image w-32 h-32 object-contain" />
+        <div className="mt-2 text-lg font-semibold">{badge.title}</div>
+        <div className="text-sm">Level: {badge.level}</div>
+      </div>
+    ))}
+  </>
+);
+
 export const ScrollMintedBadge = ({ badgesFreshlyMinted }: { badgesFreshlyMinted: boolean }) => {
   const goToLoginStep = useNavigateToRootStep();
   const goToGithubConnectStep = useNavigateToGithubConnectStep();
@@ -106,22 +118,16 @@ export const ScrollMintedBadge = ({ badgesFreshlyMinted }: { badgesFreshlyMinted
             <div>No badges found.</div>
           ) : (
             <div className="flex flex-wrap justify-center items-end gap-8">
-              {badges.map((badge, index) => {
-                const badgeProviderInfo = getHighestEarnedBadgeProviderInfo(badge.contract, badge.badgeLevel);
-                return badge.hasBadge && badgeProviderInfo ? (
-                  <div key={index} className={`flex flex-col items-center ${badges.length != 2 && "even:mb-10"}`}>
-                    <img
-                      src={badgeProviderInfo?.image}
-                      alt={`Badge Level ${badge.badgeLevel}`}
-                      className="badge-image w-32 h-32 object-contain"
-                    />
-                    <div className="mt-2 text-lg font-semibold">{badgeProviderInfo.title}</div>
-                    <div className="text-sm">Level: {badge.badgeLevel}</div>
-                  </div>
-                ) : (
-                  <></>
-                );
-              })}
+              <RenderedBadges
+                badges={
+                  badges
+                    ? badges
+                        .filter((badge) => badge.hasBadge)
+                        .map((badge) => getHighestEarnedBadgeProviderInfo(badge.contract, badge.badgeLevel))
+                        .filter((badge): badge is ProviderWithTitle => badge !== null)
+                    : []
+                }
+              />
             </div>
           )}
           <LoadButton
