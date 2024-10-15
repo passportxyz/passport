@@ -17,6 +17,8 @@ jest.mock("../../hooks/useMessage");
 jest.mock("../../hooks/useNextCampaignStep");
 jest.mock("@web3modal/ethers/react");
 
+process.env.NEXT_PUBLIC_SCROLL_CAMPAIGN_CHAIN_ID = "0x8274f";
+
 describe("useMintBadge hook", () => {
   const mockGetNonce = jest.fn();
   const mockIssueAttestation = jest.fn();
@@ -73,7 +75,7 @@ describe("useMintBadge hook", () => {
     expect(mockJsonRequest).toHaveBeenCalledWith(expect.any(String), {
       recipient: "0xTestAddress",
       credentials: [{ credential: "testCredential" }],
-      chainIdHex: expect.anything(),
+      chainIdHex: "0x8274f",
       nonce: testNonce,
     });
     expect(mockIssueAttestation).toHaveBeenCalledWith({ data: testData });
