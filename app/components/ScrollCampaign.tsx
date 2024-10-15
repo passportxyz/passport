@@ -32,15 +32,15 @@ const ScrollLogin = () => {
       <div className="text-5xl text-[#FFEEDA]">Developer Badge</div>
       <div className="text-xl mt-2">
         Connect your GitHub account to prove the number of contributions you have made, then mint your badge to prove
-        you are a Rust developer.
+        you are a ZK developer.
       </div>
-      <div className="mt-8">
+      <div className="mt-8 w-full lg:w-auto">
         <LoadButton
           data-testid="connectWalletButton"
           variant="custom"
           onClick={signIn}
           isLoading={isLoggingIn}
-          className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200"
+          className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200 w-full"
         >
           <div className="flex flex-col items-center justify-center">
             {isLoggingIn ? (

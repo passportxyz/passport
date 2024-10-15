@@ -6,7 +6,7 @@ import { useMessage } from "../../hooks/useMessage";
 import { useEffect } from "react";
 import PageRoot from "../PageRoot";
 import { AccountCenter } from "../AccountCenter";
-import { ScrollFooter, ScrollHeader } from "./ScrollLayout";
+import { MobileBackgroundImage, ScrollCampaignPageRoot, ScrollFooter, ScrollHeader } from "./ScrollLayout";
 import { badgeContractInfo, scrollCampaignChain } from "../../config/scroll_campaign";
 import { LoadButton } from "../LoadButton";
 import { ProviderWithTitle } from "../ScrollCampaign";
@@ -35,9 +35,13 @@ export const getHighestEarnedBadgeProviderInfo = (contractAddress: string, level
 export const RenderedBadges = ({ badges }: { badges: ProviderWithTitle[] }) => (
   <>
     {badges.map((badge, index) => (
-      <div key={index} className={`flex flex-col items-center ${badges.length != 2 && "even:mb-10"}`}>
-        <img src={badge.image} alt={`Badge Level ${badge.level}`} className="badge-image w-32 h-32 object-contain" />
-        <div className="mt-2 text-lg font-semibold">{badge.title}</div>
+      <div key={index} className={`flex flex-col items-center ${badges.length != 2 && "even:mb-10"} w-20 md:w-auto`}>
+        <img
+          src={badge.image}
+          alt={`Badge Level ${badge.level}`}
+          className="w-24 md:w-32 h-20 md:h-32 object-contain"
+        />
+        <div className="mt-2 text-sm lg:text-lg font-semibold">{badge.title}</div>
         <div className="text-sm">Level: {badge.level}</div>
       </div>
     ))}
@@ -77,10 +81,8 @@ export const ScrollMintedBadge = ({ badgesFreshlyMinted }: { badgesFreshlyMinted
   }, [errors, failure]);
 
   return (
-    <PageRoot className="text-color-1">
-      {isConnected && <AccountCenter />}
-      <ScrollHeader className="fixed top-0 left-0 right-0" />
-      <div className="flex grow">
+    <ScrollCampaignPageRoot>
+      <div className="flex grow mx-8 md:mx-10 py-10 md:py-0">
         <div className="flex flex-col min-h-screen justify-center items-center shrink-0 grow w-1/2 text-center">
           <div className="mb-10">
             {badgesFreshlyMinted ? (
@@ -117,7 +119,7 @@ export const ScrollMintedBadge = ({ badgesFreshlyMinted }: { badgesFreshlyMinted
           ) : badges.length === 0 ? (
             <div>No badges found.</div>
           ) : (
-            <div className="flex flex-wrap justify-center items-end gap-8">
+            <div className="flex flex-wrap justify-center items-end gap-8 w-full">
               <RenderedBadges
                 badges={
                   badges
@@ -136,13 +138,13 @@ export const ScrollMintedBadge = ({ badgesFreshlyMinted }: { badgesFreshlyMinted
             onClick={() => {
               window.open("https://scroll.io/canvas", "_blank", "noopener,noreferrer");
             }}
-            className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-100 pl-3 pr-5 m-10"
+            className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-100 pl-3 pr-5 m-10 w-full md:w-3/4 lg:w-auto"
           >
             See badges on Canvas
           </LoadButton>
         </div>
       </div>
-      <ScrollFooter className="absolute bottom-0 left-0 right-0 z-10" />
-    </PageRoot>
+      <MobileBackgroundImage />
+    </ScrollCampaignPageRoot>
   );
 };

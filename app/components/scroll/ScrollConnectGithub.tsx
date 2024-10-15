@@ -133,13 +133,13 @@ export const ScrollConnectGithub = () => {
             Passport is privacy preserving and verifies you have 1 or more commits to the following Repos located here.
             Click below and obtain the specific developer credentials
           </div>
-          <div className="mt-8 flex items-center justify-start">
+          <div className="mt-8 flex items-center justify-start w-full lg:w-auto">
             <LoadButton
               data-testid="connectGithubButton"
               variant="custom"
               onClick={signInWithGithub}
               isLoading={isVerificationRunning || areBadgesLoading}
-              className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-200 pl-3 pr-5"
+              className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-200 pl-3 pr-5 w-full lg:w-auto"
             >
               <GitHubIcon /> {msg ? msg : "Connect to Github"}
             </LoadButton>
