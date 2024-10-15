@@ -139,7 +139,7 @@ export const evaluateRepositoryCommiter = async (
   evaluator: ConditionEvaluator,
   context: any
 ): Promise<boolean> => {
-  const threshold = 1; // condition["threshold"];
+  const threshold = condition["threshold"];
   const repository = condition["repository"];
   const cutOffDate = condition["cutoff_date"] ? new Date(condition["cutoff_date"]) : undefined;
 
