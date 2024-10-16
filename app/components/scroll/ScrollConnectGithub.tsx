@@ -16,7 +16,6 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { LoadButton } from "../LoadButton";
 import { GitHubIcon } from "../WelcomeFooter";
 import { ScrollCampaignPage } from "./ScrollCampaignPage";
-import { useScrollStampsStore } from "../../context/scrollCampaignStore";
 import { BadgeCTA } from "../ScrollCampaign";
 
 export const ScrollConnectGithub = () => {

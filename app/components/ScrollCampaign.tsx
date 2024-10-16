@@ -23,12 +23,6 @@ export interface ProviderWithTitle extends Provider {
   title: string;
 }
 
-interface TopBadges {
-  title: string;
-  level: number;
-  image: string;
-}
-
 export const BadgeCTA = ({ header, body }: { header: string; body: string }) => (
   <>
     <div className="text-3xl lg:text-5xl text-[#FFEEDA]">{header}</div>
