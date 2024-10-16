@@ -6,7 +6,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/githubWhiteStampIcon.svg",
   platform: "Github",
   name: "Github",
-  description: "Connect to GitHub to verify your code contributions.",
+  description: "Connect to GitHub to verify your activity based on days with active commits.",
   connectMessage: "Connect Account",
   website: "https://github.com",
 };
@@ -16,18 +16,18 @@ let ProviderConfig: PlatformGroupSpec[] = [];
 
 ProviderConfig = [
   {
-    platformGroup: "Contribution Activity",
+    platformGroup: "Commit Days Credentials:",
     providers: [
       {
-        title: "Contributions on at least 30 distinct days",
+        title: "Made commits on at least 30 distinct days",
         name: "githubContributionActivityGte#30",
       },
       {
-        title: "Contributions on at least 60 distinct days",
+        title: "Made commits on at least 60 distinct days",
         name: "githubContributionActivityGte#60",
       },
       {
-        title: "Contributions on at least 120 distinct days",
+        title: "Made commits on at least 120 distinct days",
         name: "githubContributionActivityGte#120",
       },
     ],
