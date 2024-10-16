@@ -29,7 +29,12 @@ const WalletStoreSyncWithWeb3Modal = () => {
         if (!connectedAddress) {
           setConnectedAddress(address);
         } else if (connectedAddress !== address) {
-          navigateToPage("home");
+          const campaignId = window.location.toString().match(/\/campaign\/([^/]+)/)?.[1] || null;
+          if (campaignId) {
+            navigateToPage(`campaign/${campaignId}`);
+          } else {
+            navigateToPage("home");
+          }
         }
       }
 
