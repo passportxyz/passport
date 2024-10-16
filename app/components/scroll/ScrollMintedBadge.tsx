@@ -4,9 +4,7 @@ import { useDatastoreConnectionContext } from "../../context/datastoreConnection
 import { useScrollBadge } from "../../hooks/useScrollBadge";
 import { useMessage } from "../../hooks/useMessage";
 import { useEffect } from "react";
-import PageRoot from "../PageRoot";
-import { AccountCenter } from "../AccountCenter";
-import { MobileBackgroundImage, ScrollCampaignPageRoot, ScrollFooter, ScrollHeader } from "./ScrollLayout";
+import { MobileBackgroundImage, ScrollCampaignPageRoot } from "./ScrollLayout";
 import { badgeContractInfo, scrollCampaignChain } from "../../config/scroll_campaign";
 import { LoadButton } from "../LoadButton";
 import { ProviderWithTitle } from "../ScrollCampaign";
@@ -51,7 +49,7 @@ export const RenderedBadges = ({ badges }: { badges: ProviderWithTitle[] }) => (
 export const ScrollMintedBadge = ({ badgesFreshlyMinted }: { badgesFreshlyMinted: boolean }) => {
   const goToLoginStep = useNavigateToRootStep();
   const goToGithubConnectStep = useNavigateToGithubConnectStep();
-  const { isConnected, address } = useWeb3ModalAccount();
+  const { address } = useWeb3ModalAccount();
   const { did, dbAccessToken } = useDatastoreConnectionContext();
   const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(address);
   const { failure } = useMessage();
@@ -83,12 +81,12 @@ export const ScrollMintedBadge = ({ badgesFreshlyMinted }: { badgesFreshlyMinted
   return (
     <ScrollCampaignPageRoot>
       <div className="flex grow mx-8 md:mx-10 py-10 md:py-0">
-        <div className="flex flex-col min-h-screen justify-center items-center shrink-0 grow w-1/2 text-center">
+        <div className="flex flex-col min-h-screen mt-16 lg:mt-0 justify-start lg:justify-center items-center shrink-0 grow w-1/2 text-center">
           <div className="mb-10">
             {badgesFreshlyMinted ? (
-              <div className="text-5xl text-[#FFEEDA]">Badges minted!</div>
+              <div className="text-3xl lg:text-5xl text-[#FFEEDA]">Badges minted!</div>
             ) : (
-              <div className="text-5xl text-[#FFEEDA]">You already minted available badges!</div>
+              <div className="text-3xl lg:text-5xl text-[#FFEEDA]">You already minted available badges!</div>
             )}
             {badgesFreshlyMinted && (
               <p>
@@ -138,7 +136,7 @@ export const ScrollMintedBadge = ({ badgesFreshlyMinted }: { badgesFreshlyMinted
             onClick={() => {
               window.open("https://scroll.io/canvas", "_blank", "noopener,noreferrer");
             }}
-            className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-100 pl-3 pr-5 m-10 w-full md:w-3/4 lg:w-auto"
+            className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-100 pl-3 pr-5 m-10 w-full md:w-3/4 lg:w-auto z-10"
           >
             See badges on Canvas
           </LoadButton>

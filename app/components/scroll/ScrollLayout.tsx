@@ -115,7 +115,7 @@ export const ScrollStepsBar = ({ className }: { className?: string }) => {
       {stepNames.map((stepName, index) => (
         <div key={index} className={`flex items-center ${!bright(index) && "brightness-50"}`}>
           <div className="w-6 h-6 mr-2 rounded-full flex items-center shrink-0 justify-center text-center bg-[#FF684B]">
-            {index + 1}
+            {SCROLL_STEP_NAMES.indexOf(stepName) + 1}
           </div>
           {stepName}
         </div>

@@ -32,9 +32,9 @@ export const ScrollCampaignPage = ({
           </div>
         </div>
         <div className="flex col-start-1 col-end-3 row-start-1">
-          <div className="flex flex-col min-h-screen justify-center items-center shrink-0 grow w-1/2">
+          <div className="flex flex-col min-h-screen justify-start lg:justify-center items-center shrink-0 grow w-1/2">
             <div className="mt-24 mb-28 mx-8 lg:mr-1 lg:ml-8 flex flex-col items-start justify-center max-w-[572px] z-10">
-              <ScrollStepsBar className="mb-8" />
+              <ScrollStepsBar className="mb-2 lg:mb-8" />
               {children}
             </div>
             <MobileBackgroundImage />

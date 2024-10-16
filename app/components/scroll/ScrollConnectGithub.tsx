@@ -16,6 +16,8 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { LoadButton } from "../LoadButton";
 import { GitHubIcon } from "../WelcomeFooter";
 import { ScrollCampaignPage } from "./ScrollCampaignPage";
+import { useScrollStampsStore } from "../../context/scrollCampaignStore";
+import { BadgeCTA } from "../ScrollCampaign";
 
 export const ScrollConnectGithub = () => {
   const goToNextStep = useNextCampaignStep();
@@ -128,11 +130,10 @@ export const ScrollConnectGithub = () => {
         </>
       ) : (
         <>
-          <div className="text-5xl text-[#FFEEDA]">Connect to Github</div>
-          <div className="text-xl mt-2 max-w-4xl">
-            Passport is privacy preserving and verifies you have 1 or more commits to the following Repos located here.
-            Click below and obtain the specific developer credentials
-          </div>
+          <BadgeCTA
+            header="Connect to Github"
+            body="Passport is privacy preserving and verifies you have 1 or more commits to the following Repos located here. Click below and obtain the specific developer credentials"
+          />
           <div className="mt-8 flex items-center justify-start w-full lg:w-auto">
             <LoadButton
               data-testid="connectGithubButton"
