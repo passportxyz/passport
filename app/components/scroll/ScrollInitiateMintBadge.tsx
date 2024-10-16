@@ -11,6 +11,8 @@ import { useWalletStore } from "../../context/walletStore";
 import { ethers } from "ethers";
 import { Hyperlink } from "@gitcoin/passport-platforms";
 import ScrollCanvasProfileRegistryAbi from "../../abi/ScrollCanvasProfileRegistry.json";
+import { RenderedBadges } from "./ScrollMintedBadge";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
 
 export const ScrollInitiateMintBadge = ({
   onMint,
@@ -32,6 +34,7 @@ export const ScrollInitiateMintBadge = ({
   const [canvasCheckPaused, setCanvasCheckPaused] = useState(false);
   const { failure } = useMessage();
   const address = useWalletStore((state) => state.address);
+  const isLg = useBreakpoint("lg");
 
   const loading = credentialsLoading || hasCanvas === undefined;
 
@@ -80,11 +83,11 @@ export const ScrollInitiateMintBadge = ({
     <ScrollCampaignPage fadeBackgroundImage={loading || hasBadge} earnedBadges={earnedBadges}>
       <ScrollLoadingBarSection
         isLoading={loading}
-        className={`text-5xl ${hasBadge ? "text-[#FFEEDA]" : "text-[#FF684B]"}`}
+        className={`text-3xl lg:text-5xl ${hasBadge ? "text-[#FFEEDA]" : "text-[#FF684B]"}`}
       >
         {hasBadge ? "Congratulations!" : "We're sorry!"}
       </ScrollLoadingBarSection>
-      <ScrollLoadingBarSection isLoading={loading} className="text-xl mt-2">
+      <ScrollLoadingBarSection isLoading={loading} className="text-lg lg:text-xl mt-2">
         {hasBadge ? (
           <div>
             You qualify for {highestLevelBadgeStamps.length} badge{hasMultipleBadges ? "s" : ""}.
@@ -110,7 +113,7 @@ export const ScrollInitiateMintBadge = ({
       </ScrollLoadingBarSection>
 
       {hasBadge && (
-        <div className="mt-8">
+        <div className="mt-8 w-full lg:w-aut">
           {hasCanvas === true ? (
             <>
               <LoadButton
@@ -121,12 +124,17 @@ export const ScrollInitiateMintBadge = ({
                   })
                 }
                 isLoading={loading}
-                className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200"
+                className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200 w-full lg:w-auto"
               >
                 <div className="flex flex-col items-center justify-center">
                   Mint Badge{hasMultipleBadges ? "s" : ""}
                 </div>
               </LoadButton>
+              {!isLg && (
+                <div className="flex flex-wrap justify-center items-end gap-8 text-center mt-6">
+                  <RenderedBadges badges={earnedBadges} />
+                </div>
+              )}
               {needToSwitchChain && (
                 <div className="text-[#FF684B] mt-4">
                   You will be prompted to switch to the Scroll chain, and then to submit a transaction.
@@ -138,7 +146,7 @@ export const ScrollInitiateMintBadge = ({
               variant="custom"
               onClick={() => setHasCanvas(undefined)}
               isLoading={hasCanvas === undefined || canvasCheckPaused}
-              className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200"
+              className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200 w-full lg:w-auto"
             >
               {hasCanvas === undefined ? "Checking..." : "Check Again"}
             </LoadButton>

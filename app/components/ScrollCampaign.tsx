@@ -23,24 +23,31 @@ export interface ProviderWithTitle extends Provider {
   title: string;
 }
 
+export const BadgeCTA = ({ header, body }: { header: string; body: string }) => (
+  <>
+    <div className="text-3xl lg:text-5xl text-[#FFEEDA]">{header}</div>
+    <div className="text-lg lg:text-xl text-[#FFEEDA] mt-2">{body}</div>
+  </>
+);
+
 const ScrollLogin = () => {
   const nextStep = useNextCampaignStep();
   const { isLoggingIn, signIn, loginStep } = useLoginFlow({ onLoggedIn: nextStep });
 
   return (
     <ScrollCampaignPage>
-      <div className="text-5xl text-[#FFEEDA]">Developer Badge</div>
-      <div className="text-xl mt-2">
-        Connect your GitHub account to prove the number of contributions you have made, then mint your badge to prove
-        you are a Rust developer.
-      </div>
-      <div className="mt-8">
+      <BadgeCTA
+        header="Developer Badge"
+        body="Connect your GitHub account to prove the number of contributions you have made, then mint your badge to prove
+        you are a ZK developer."
+      />
+      <div className="mt-8 w-full lg:w-auto">
         <LoadButton
           data-testid="connectWalletButton"
           variant="custom"
           onClick={signIn}
           isLoading={isLoggingIn}
-          className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200"
+          className="text-color-1 text-lg font-bold bg-[#FF684B] hover:brightness-150 py-3 transition-all duration-200 w-full"
         >
           <div className="flex flex-col items-center justify-center">
             {isLoggingIn ? (

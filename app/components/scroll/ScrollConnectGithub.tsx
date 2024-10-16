@@ -16,6 +16,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { LoadButton } from "../LoadButton";
 import { GitHubIcon } from "../WelcomeFooter";
 import { ScrollCampaignPage } from "./ScrollCampaignPage";
+import { BadgeCTA } from "../ScrollCampaign";
 
 export const ScrollConnectGithub = () => {
   const goToNextStep = useNextCampaignStep();
@@ -128,18 +129,17 @@ export const ScrollConnectGithub = () => {
         </>
       ) : (
         <>
-          <div className="text-5xl text-[#FFEEDA]">Connect to Github</div>
-          <div className="text-xl mt-2 max-w-4xl">
-            Passport is privacy preserving and verifies you have 1 or more commits to the following Repos located here.
-            Click below and obtain the specific developer credentials
-          </div>
-          <div className="mt-8 flex items-center justify-start">
+          <BadgeCTA
+            header="Connect to Github"
+            body="Passport is privacy preserving and verifies you have 1 or more commits to the following Repos located here. Click below and obtain the specific developer credentials"
+          />
+          <div className="mt-8 flex items-center justify-start w-full lg:w-auto">
             <LoadButton
               data-testid="connectGithubButton"
               variant="custom"
               onClick={signInWithGithub}
               isLoading={isVerificationRunning || areBadgesLoading}
-              className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-200 pl-3 pr-5"
+              className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-200 pl-3 pr-5 w-full lg:w-auto"
             >
               <GitHubIcon /> {msg ? msg : "Connect to Github"}
             </LoadButton>

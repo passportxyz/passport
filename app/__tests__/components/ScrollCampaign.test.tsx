@@ -15,6 +15,7 @@ import { useMintBadge } from "../../hooks/useMintBadge";
 import { ProviderWithTitle } from "../../components/ScrollCampaign";
 import { ethers } from "ethers";
 import { scrollCampaignChain } from "../../config/scroll_campaign";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
 
 jest.mock("@gitcoin/passport-database-client");
 jest.mock("ethers");
@@ -138,6 +139,8 @@ jest.mock("../../hooks/useScrollBadge", () => {
   };
 });
 
+jest.mock("../../hooks/useBreakpoint");
+
 describe("Landing page tests", () => {
   it("goes to next page when login successful", async () => {
     const mockUseLoginFlow = jest.fn().mockReturnValue({
@@ -181,6 +184,7 @@ describe("Component tests", () => {
   });
   it("shows step 0 correctly", () => {
     (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "0" });
+    (useBreakpoint as jest.Mock).mockReturnValue(true);
 
     render(<ScrollStepsBar />);
 
@@ -199,6 +203,7 @@ describe("Component tests", () => {
 
   it("shows step 1 correctly", () => {
     (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "1" });
+    (useBreakpoint as jest.Mock).mockReturnValue(true);
 
     render(<ScrollStepsBar />);
 

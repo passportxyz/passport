@@ -2,6 +2,7 @@ import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import PageRoot from "../PageRoot";
 import { AccountCenter } from "../AccountCenter";
 import { useParams } from "react-router-dom";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
 
 export const ScrollHeader = ({ className }: { className?: string }) => {
   return (
@@ -59,9 +60,9 @@ export const ScrollHeader = ({ className }: { className?: string }) => {
 export const ScrollFooter = ({ className }: { className?: string }) => {
   return (
     <div
-      className={`flex items-center justify-center drop-shadow-text md:justify-end mx-24 mb-12 text-color-1 text-alt ${className}`}
+      className={`flex items-center justify-center drop-shadow-text md:justify-end md:mx-24 mb-12 text-color-1 text-alt ${className}`}
     >
-      <div className="mr-3 hidden md:block">powered by</div>
+      <div className="mr-3">powered by</div>
       <img src="/assets/passportLogoWhite.svg" alt="Passport Logo" className="h-8 min-h-8 w-7 min-w-7" />
       <div className="font-body text-lg ml-1">Passport</div>
     </div>
@@ -90,24 +91,31 @@ export const BackgroundImage = ({ fadeBackgroundImage }: { fadeBackgroundImage?:
   </div>
 );
 
+export const MobileBackgroundImage = () => (
+  <img
+    className={`absolute bottom-0 left-0 w-full opacity-50 z-0 block lg:hidden`}
+    src="/assets/campaignBackgroundMobile.png"
+    alt="Campaign Background Image"
+  />
+);
+
 const SCROLL_STEP_NAMES = ["Connect Wallet", "Connect to Github", "Mint Badge"];
-export const ScrollStepsBar = ({
-  className,
-  highLightCurrentStep = true,
-}: {
-  className?: string;
-  highLightCurrentStep?: boolean;
-}) => {
+export const ScrollStepsBar = ({ className }: { className?: string }) => {
+  const isLg = useBreakpoint("lg");
   const { step } = useParams();
+  const stepNames = SCROLL_STEP_NAMES.filter((_, index) => isLg || index === (parseInt(step || "") || 0));
+  const bright = (index: number) => {
+    if (!isLg) {
+      return true;
+    }
+    return index === (parseInt(step || "") || 0);
+  };
   return (
     <div className={`flex flex-wrap gap-4 items-center ${className}`}>
-      {SCROLL_STEP_NAMES.map((stepName, index) => (
-        <div
-          key={index}
-          className={`flex items-center ${index === (parseInt(step || "") || 0) ? "" : "brightness-50"}`}
-        >
+      {stepNames.map((stepName, index) => (
+        <div key={index} className={`flex items-center ${!bright(index) && "brightness-50"}`}>
           <div className="w-6 h-6 mr-2 rounded-full flex items-center shrink-0 justify-center text-center bg-[#FF684B]">
-            {index + 1}
+            {SCROLL_STEP_NAMES.indexOf(stepName) + 1}
           </div>
           {stepName}
         </div>
