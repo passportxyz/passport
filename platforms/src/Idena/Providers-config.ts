@@ -9,7 +9,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/idenaStampIcon.svg",
   platform: "Idena",
   name: "Idena",
-  description: "Connect to Idena to verify your human identity.",
+  description: "Prove Your Unique Humanity with Idena",
   connectMessage: "Verify Identity",
   enablePlatformCardUpdate: true,
   website: "https://idena.io/",
@@ -19,9 +19,22 @@ export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Identity State",
     providers: [
-      { title: "Newbie", name: "IdenaState#Newbie" },
-      { title: "Verified", name: "IdenaState#Verified" },
-      { title: "Human", name: "IdenaState#Human" },
+      {
+        title: "Newbie",
+        name: "IdenaState#Newbie",
+        description:
+          "Granted after passing the initial validation, indicating your verification initiation in the Idena system.",
+      },
+      {
+        title: "Verified",
+        name: "IdenaState#Verified",
+        description: "Achieved by successfully completing three consecutive validations with a Total score >= 75%.",
+      },
+      {
+        title: "Human",
+        name: "IdenaState#Human",
+        description: "Earned through four consecutive successful validations and maintaining a Total score >= 92%.",
+      },
     ],
   },
 ];

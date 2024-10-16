@@ -22,9 +22,22 @@ export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Self GTC Staking",
     providers: [
-      { title: "5 GTC (Bronze)", name: "SelfStakingBronze" },
-      { title: "20 GTC (Silver)", name: "SelfStakingSilver" },
-      { title: "125 GTC (Gold)", name: "SelfStakingGold" },
+      {
+        title: "5 GTC (Bronze)",
+        name: "SelfStakingBronze",
+        description: "Beginner staking level showcasing initial commitment and engagement with the community.",
+      },
+      {
+        title: "20 GTC (Silver)",
+        name: "SelfStakingSilver",
+        description:
+          "Intermediate staking level demonstrating a stronger involvement and contribution to the Passport XYZ network.",
+      },
+      {
+        title: "125 GTC (Gold)",
+        name: "SelfStakingGold",
+        description: "Advanced staking level reflecting a substantial commitment and leadership within the community.",
+      },
     ],
   },
   {
