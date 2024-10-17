@@ -269,7 +269,7 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
   };
 
   deleteStamp = async (streamId: string): Promise<SecondaryStorageDeleteResponse> => {
-    this.logger.info(`[ComposeDB][deleteStamp] ${this.did} deleting stamp`);
+    this.logger.info(`[ComposeDB][deleteStamp] ${this.did} deleting stamp with streamId: ${streamId}`);
 
     const deleteRequest = (await this.compose.executeQuery(
       `
