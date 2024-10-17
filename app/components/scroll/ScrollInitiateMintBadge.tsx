@@ -35,9 +35,9 @@ export const ScrollInitiateMintBadge = ({
   const { failure } = useMessage();
   const address = useWalletStore((state) => state.address);
   const isLg = useBreakpoint("lg");
-
+  console.log("Staging debug address", address);
   const loading = credentialsLoading || hasCanvas === undefined;
-
+  console.log("Staging debug loading", loading);
   useEffect(() => {
     if (!scrollCampaignChain || hasCanvas !== undefined) return;
 
@@ -73,7 +73,10 @@ export const ScrollInitiateMintBadge = ({
   }, [address, hasCanvas, failure]);
 
   const hasBadge = highestLevelBadgeStamps.length > 0;
+  console.log("Staging debug hasBadge", hasBadge);
+
   const hasMultipleBadges = highestLevelBadgeStamps.length > 1;
+  console.log("Staging debug hasMultipleBadges", hasMultipleBadges);
 
   const ScrollLoadingBarSection = (props: LoadingBarSectionProps) => (
     <LoadingBarSection loadingBarClassName="h-10 via-[#FFEEDA] brightness-50" {...props} />
