@@ -400,6 +400,13 @@
   dependencies:
     "@pulumi/pulumi" "^3.0.0"
 
+"@pulumi/cloudflare@^5.38.0":
+  version "5.41.0"
+  resolved "https://registry.yarnpkg.com/@pulumi/cloudflare/-/cloudflare-5.41.0.tgz#47b81b97032d9578d9aef74a8270a9faa8e55e17"
+  integrity sha512-tquPVxxYZTiMgOmAPu2AIs1ndrf+GlztdWECScNzrllr5LUMHmbd2ZpifGQWh3GXqBwxPsWO1WoRIasLxKXJ/Q==
+  dependencies:
+    "@pulumi/pulumi" "^3.136.0"
+
 "@pulumi/docker@^3.0.0":
   version "3.6.1"
   resolved "https://registry.yarnpkg.com/@pulumi/docker/-/docker-3.6.1.tgz#a216c9bd2bbd35dd7091db2827a3a434adff021c"
@@ -419,6 +426,42 @@
   version "3.126.0"
   resolved "https://registry.npmjs.org/@pulumi/pulumi/-/pulumi-3.126.0.tgz"
   integrity sha512-NPYGHeavLh8Y2quOcx0KLMAM0WWES5RoJ9iywp953iL7hSqv1W77/GjvYuhj5jdm2O9Ty2AjYs74zpfeYzkOoQ==
+  dependencies:
+    "@grpc/grpc-js" "^1.10.1"
+    "@logdna/tail-file" "^2.0.6"
+    "@npmcli/arborist" "^7.3.1"
+    "@opentelemetry/api" "^1.9"
+    "@opentelemetry/exporter-zipkin" "^1.25"
+    "@opentelemetry/instrumentation" "^0.52"
+    "@opentelemetry/instrumentation-grpc" "^0.52"
+    "@opentelemetry/resources" "^1.25"
+    "@opentelemetry/sdk-trace-base" "^1.25"
+    "@opentelemetry/sdk-trace-node" "^1.25"
+    "@opentelemetry/semantic-conventions" "^1.25"
+    "@pulumi/query" "^0.3.0"
+    "@types/google-protobuf" "^3.15.5"
+    "@types/semver" "^7.5.6"
+    "@types/tmp" "^0.2.6"
+    execa "^5.1.0"
+    fdir "^6.1.1"
+    google-protobuf "^3.5.0"
+    got "^11.8.6"
+    ini "^2.0.0"
+    js-yaml "^3.14.0"
+    minimist "^1.2.6"
+    normalize-package-data "^6.0.0"
+    picomatch "^3.0.1"
+    pkg-dir "^7.0.0"
+    require-from-string "^2.0.1"
+    semver "^7.5.2"
+    source-map-support "^0.5.6"
+    tmp "^0.2.1"
+    upath "^1.1.0"
+
+"@pulumi/pulumi@^3.136.0":
+  version "3.137.0"
+  resolved "https://registry.yarnpkg.com/@pulumi/pulumi/-/pulumi-3.137.0.tgz#670636d20eb85880854a49623947d6ea23099742"
+  integrity sha512-YgvcPKxuE3X1Yi93W2qZuM43nELT1FEvz7J5IK1hAJPo+v9m2oAh5Vag1lNDPjM0+y7WDfFe0ODI+2way3quRw==
   dependencies:
     "@grpc/grpc-js" "^1.10.1"
     "@logdna/tail-file" "^2.0.6"
@@ -1445,13 +1488,15 @@ inflight@^1.0.4:
     once "^1.3.0"
     wrappy "1"
 
-"infra-libs@passportxyz/infra-libs#semver:^1.0.0":
+infra-libs@passportxyz/infra-libs#v1.3.0:
   version "1.0.0"
-  resolved "https://codeload.github.com/passportxyz/infra-libs/tar.gz/f3072dc8d547529c5cb7200c02178046d2d47e0e"
+  resolved "https://codeload.github.com/passportxyz/infra-libs/tar.gz/ec106f542b49a15a826639bef7bfbff0dc9da86b"
   dependencies:
     "@1password/op-js" "^0.1.13"
     "@pulumi/aws" "^6.45.0"
+    "@pulumi/cloudflare" "^5.38.0"
     "@pulumi/pulumi" "^3.126.0"
+    "@pulumi/std" "^1.6.2"
 
 inherits@2, inherits@^2.0.3:
   version "2.0.4"
