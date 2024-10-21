@@ -15,6 +15,7 @@ const {
   ZkSync,
   Discord,
   Linkedin,
+  LinkedinV2,
   GtcStaking,
   Google,
   Brightid,
@@ -107,6 +108,14 @@ defaultPlatformMap.set("Linkedin", {
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
   }),
   platFormGroupSpec: Linkedin.ProviderConfig,
+});
+
+defaultPlatformMap.set("LinkedinV2", {
+  platform: new LinkedinV2.LinkedinV2Platform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CLIENT_ID_V2,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
+  }),
+  platFormGroupSpec: LinkedinV2.ProviderConfig,
 });
 
 defaultPlatformMap.set("GtcStaking", {
