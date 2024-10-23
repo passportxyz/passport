@@ -77,9 +77,7 @@ describe("ScrollMintBadge", () => {
     await waitFor(() => {
       expect(screen.getByText("We're sorry!")).toBeInTheDocument();
       expect(
-        screen.getByText(
-          "Eligibility is limited to specific projects, and contributions had to be made by October 1st."
-        )
+        screen.getByText(/Eligibility is limited to specific projects, and contributions had to be made by October 1st/)
       ).toBeInTheDocument();
     });
   });
@@ -111,13 +109,7 @@ describe("ScrollMintBadge", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Congratulations!")).toBeInTheDocument();
-      expect(
-        screen.getAllByText(
-          (_, element) =>
-            element?.textContent ==
-            "You had enough commits and contributions to a qualifying project."
-        )
-      ).not.toHaveLength(0);
+      expect(screen.getByText(/You had enough commits and contributions to a qualifying project./)).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /mint badge/i })).toBeInTheDocument();
     });
   });
@@ -308,13 +300,7 @@ describe("ScrollMintBadge", () => {
     renderWithContext(mockCeramicContext, <TestComponent />);
 
     await waitFor(() => {
-      expect(
-        screen.getAllByText(
-          (_, element) =>
-            element?.textContent ==
-            "You had enough commits and contributions to a qualifying project."
-        )
-      ).not.toHaveLength(0);
+      expect(screen.getByText(/You had enough commits and contributions to a qualifying project./)).toBeInTheDocument();
       expect(screen.queryByRole("button", { name: /mint badge/i })).toBeInTheDocument();
     });
   });
