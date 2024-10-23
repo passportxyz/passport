@@ -26,7 +26,7 @@ export interface ProviderWithTitle extends Provider {
 export const BadgeCTA = ({ header, body }: { header: string; body: string }) => (
   <>
     <div className="text-3xl lg:text-5xl text-[#FFEEDA]">{header}</div>
-    <div className="text-lg lg:text-xl text-[#FFEEDA] mt-2">{body}</div>
+    <div className="text-lg lg:text-xl text-[#FFEEDA] mt-2" dangerouslySetInnerHTML={{ __html: body }} />
   </>
 );
 
@@ -38,8 +38,7 @@ const ScrollLogin = () => {
     <ScrollCampaignPage>
       <BadgeCTA
         header="Developer Badge"
-        body="Connect your GitHub account to prove the number of contributions you have made, then mint your badge to prove
-        you are a ZK developer."
+        body="Connect your wallet and GitHub to earn badges. These badges prove your development experience with zk projects. They help when you apply for a job at Scroll. We verify your GitHub contributions in a privacy-safe, non-doxxing way, so you can mint your badge without revealing who you are."
       />
       <div className="mt-8 w-full lg:w-auto">
         <LoadButton

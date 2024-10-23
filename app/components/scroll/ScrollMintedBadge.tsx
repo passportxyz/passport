@@ -86,20 +86,20 @@ export const ScrollMintedBadge = ({ badgesFreshlyMinted }: { badgesFreshlyMinted
             {badgesFreshlyMinted ? (
               <div className="text-3xl lg:text-5xl text-[#FFEEDA]">Badges minted!</div>
             ) : (
-              <div className="text-3xl lg:text-5xl text-[#FFEEDA]">You already minted available badges!</div>
+              <div className="text-3xl lg:text-5xl text-[#FFEEDA]">You Already Minted All Eligible Badges!</div>
             )}
             {badgesFreshlyMinted && (
               <p>
-                See it{" "}
+                You can see your badges on your{" "}
                 <a
                   className="underline text-[#93FBED]"
                   href="https://scroll.io/canvas/mint"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  here
+                  Scroll Canvas
                 </a>
-                . Also do not forget to check the attestation{" "}
+                , and you can also check the attestation{" "}
                 <a
                   href={scrollCampaignChain?.attestationProvider?.viewerUrl(address!) ?? ""}
                   className="underline text-[#93FBED]"
@@ -138,7 +138,7 @@ export const ScrollMintedBadge = ({ badgesFreshlyMinted }: { badgesFreshlyMinted
             }}
             className="text-color-1 text-lg border-2 border-white hover:brightness-150 py-3 transition-all duration-100 pl-3 pr-5 m-10 w-full md:w-3/4 lg:w-auto z-10"
           >
-            See badges on Canvas
+            My Canvas
           </LoadButton>
         </div>
       </div>
