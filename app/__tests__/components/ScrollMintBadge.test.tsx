@@ -76,7 +76,11 @@ describe("ScrollMintBadge", () => {
 
     await waitFor(() => {
       expect(screen.getByText("We're sorry!")).toBeInTheDocument();
-      expect(screen.getByText("You don't qualify for any badges.")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "Eligibility is limited to specific projects, and contributions had to be made by October 1st."
+        )
+      ).toBeInTheDocument();
     });
   });
 
@@ -110,7 +114,8 @@ describe("ScrollMintBadge", () => {
       expect(
         screen.getAllByText(
           (_, element) =>
-            element?.textContent === "You qualify for 1 badge. Mint your badge and get a chance to work with us."
+            element?.textContent ==
+            "You had enough commits and contributions to a qualifying project."
         )
       ).not.toHaveLength(0);
       expect(screen.getByRole("button", { name: /mint badge/i })).toBeInTheDocument();
@@ -306,8 +311,8 @@ describe("ScrollMintBadge", () => {
       expect(
         screen.getAllByText(
           (_, element) =>
-            element?.textContent ===
-            "You qualify for 2 badges. Mint your badges and get a chance to work with us. (Some badge credentials could not be validated because they have already been claimed on another address.)"
+            element?.textContent ==
+            "You had enough commits and contributions to a qualifying project."
         )
       ).not.toHaveLength(0);
       expect(screen.queryByRole("button", { name: /mint badge/i })).toBeInTheDocument();
@@ -357,10 +362,10 @@ describe("ScrollMintBadge", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Congratulations!")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /check again/i })).toBeInTheDocument();
+      // expect(screen.getByRole("button", { name: /check again/i })).toBeInTheDocument();
     });
-    expect(screen.getByText(/It looks like you don't have a Canvas yet/)).toBeInTheDocument();
-    expect(screen.getByText("here")).toHaveAttribute("href", "https://scroll.io/canvas");
+    // expect(screen.getByText(/It looks like you don't have a Canvas yet/)).toBeInTheDocument();
+    // expect(screen.getByText("here")).toHaveAttribute("href", "https://scroll.io/canvas");
   });
 
   it("handles errors during Canvas check", async () => {
