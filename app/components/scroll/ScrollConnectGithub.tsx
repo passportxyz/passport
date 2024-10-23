@@ -131,7 +131,15 @@ export const ScrollConnectGithub = () => {
         <>
           <BadgeCTA
             header="Connect to Github"
-            body="Passport is privacy preserving and verifies you have 1 or more commits to the following Repos located here. Click below and obtain the specific developer credentials"
+            body="Connect your GitHub account to prove your contributions to 
+            <a class='underline text-[#93FBED]' 
+              href='https://support.passport.xyz/passport-knowledge-base/partner-campaigns/scroll-developer-badges'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+            key projects</a>.
+            No personal info or account info is stored — we simply review contributions to determine whether you qualify for the badge. 
+            This helps us confirm if you're a zkTalent for the Scroll ecosystem."
           />
           <div className="mt-8 flex items-center justify-start w-full lg:w-auto">
             <LoadButton

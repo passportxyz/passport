@@ -90,17 +90,9 @@ export const ScrollInitiateMintBadge = ({
       <ScrollLoadingBarSection isLoading={loading} className="text-lg lg:text-xl mt-2">
         {hasBadge ? (
           <div>
-            You qualify for {highestLevelBadgeStamps.length} badge{hasMultipleBadges ? "s" : ""}.
-            {hasCanvas ? (
-              <> Mint your badge{hasMultipleBadges ? "s" : ""} and get a chance to work with us.</>
-            ) : (
-              <>
-                <br />
-                <br />
-                It looks like you don&apos;t have a Canvas yet. Get yours{" "}
-                <Hyperlink href="https://scroll.io/canvas">here</Hyperlink>!
-              </>
-            )}
+            You had enough commits and contributions to a qualifying project. To finish claiming your badge, and
+            increase your developer reputation, mint your badges now. The badges prove that you are qualified without
+            revealing any personal details from your GitHub account.
             {hasDeduplicatedCredentials
               ? " (Some badge credentials could not be validated because they have already been claimed on another address.)"
               : ""}
@@ -108,7 +100,19 @@ export const ScrollInitiateMintBadge = ({
         ) : hasDeduplicatedCredentials ? (
           "Your badge credentials have already been claimed with another address."
         ) : (
-          "You don't qualify for any badges."
+          <div>
+            Your GitHub profile doesn&apos;t meet the badge qualifications. Eligibility is limited to specific projects,
+            and contributions had to be made by October 1st. Check out the project list{" "}
+            <a
+              href="https://support.passport.xyz/passport-knowledge-base/partner-campaigns/scroll-developer-badges"
+              className="underline text-[#93FBED]"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              here
+            </a>{" "}
+            for more details.
+          </div>
         )}
       </ScrollLoadingBarSection>
 
