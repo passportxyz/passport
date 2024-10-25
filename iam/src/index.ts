@@ -24,6 +24,7 @@ import {
   PassportAttestation,
   EasRequestBody,
   VerifiedPayload,
+  PROVIDER_ID,
 } from "@gitcoin/passport-types";
 import onchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
 
@@ -374,6 +375,76 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
   return results;
 }
 
+interface SignerVerificationResult {
+  verifiedAddress: string;
+}
+
+interface ProcessedResponse {
+  credentials?: any[]; // Replace 'any' with your actual credential type
+  error?: {
+    message: string;
+    code: number;
+  };
+}
+
+const verifyAdditionalSigner = async (
+  signer: { challenge: any; signature: string; address: string },
+  DIDKit: any
+): Promise<SignerVerificationResult> => {
+  const additionalChallenge = signer.challenge;
+  const additionalSignerCredential = await verifyCredential(DIDKit, additionalChallenge);
+  const verifiedAddress = utils.getAddress(
+    utils.verifyMessage(additionalChallenge.credentialSubject.challenge, signer.signature)
+  );
+
+  if (!additionalSignerCredential || verifiedAddress.toLowerCase() !== signer.address.toLowerCase()) {
+    throw new Error("Unable to verify payload signer");
+  }
+
+  return { verifiedAddress };
+};
+
+const checkConditionsAndIssueCredentials = async (
+  payload: RequestPayload,
+  address: string,
+  DIDKit: any
+): Promise<ProcessedResponse> => {
+  // Verify additional signer if provided
+  if (payload.signer) {
+    const { verifiedAddress } = await verifyAdditionalSigner(payload.signer, DIDKit);
+    payload.signer.address = verifiedAddress;
+  }
+
+  const singleType = !payload.types?.length;
+  const types = (!singleType ? payload.types : [payload.type]).filter((type) => type);
+
+  // Validate requirements and issue credentials
+  if (payload && payload.type) {
+    const responses = await issueCredentials(types, address, payload);
+
+    if (singleType) {
+      const response = responses[0];
+      if ("error" in response && response.code && response.error) {
+        return {
+          error: {
+            message: response.error,
+            code: response.code,
+          },
+        };
+      }
+      return { credentials: [response] };
+    }
+    return { credentials: responses };
+  }
+
+  return {
+    error: {
+      message: "Invalid payload",
+      code: 400,
+    },
+  };
+};
+
 // expose verify entry point
 // verify a users claim to stamps and issue the stamps if the claim is valid
 app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
@@ -396,46 +467,28 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
           }
           throw error;
         }
+
         payload.address = address;
-        // the signer should be the address outlined in the challenge credential - rebuild the id to check for a full match
+
+        // Check signer and type
         const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
         const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
 
-        // if an additional signer is passed verify that message was signed by passed signer address
-        if (payload.signer) {
-          const additionalChallenge = payload.signer.challenge;
-
-          const additionalSignerCredential = await verifyCredential(DIDKit, additionalChallenge);
-
-          // pull the address so that its stored in a predictable (checksummed) format
-          const verifiedAddress = utils.getAddress(
-            utils.verifyMessage(additionalChallenge.credentialSubject.challenge, payload.signer.signature)
+        if (!isSigner || !isType) {
+          return void errorRes(
+            res,
+            "Invalid challenge " + (isSigner && isType ? "type" : isSigner ? "signer" : "signer and type"),
+            400
           );
-
-          // if verifiedAddress does not equal the additional signer address throw an error because signature is invalid
-          if (!additionalSignerCredential || verifiedAddress.toLowerCase() !== payload.signer.address.toLowerCase()) {
-            return void errorRes(res, "Unable to verify payload signer", 401);
-          }
-
-          payload.signer.address = verifiedAddress;
         }
 
-        const singleType = !payload.types?.length;
-        const types = (!singleType ? payload.types : [payload.type]).filter((type) => type);
+        const result = await checkConditionsAndIssueCredentials(payload, address, DIDKit);
 
-        // type is required because we need it to select the correct Identity Provider
-        if (isSigner && isType && payload && payload.type) {
-          const responses = await issueCredentials(types, address, payload);
-
-          if (singleType) {
-            const response = responses[0];
-            if ("error" in response && response.code && response.error)
-              return errorRes(res, response.error, response.code);
-            else return res.json(response);
-          } else {
-            return res.json(responses);
-          }
+        if (result.error) {
+          return void errorRes(res, result.error.message, result.error.code);
         }
+
+        return void res.json(result.credentials);
       }
 
       // error response
@@ -664,6 +717,46 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
     const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
     return void errorRes(res, message, 500);
   }
+});
+
+type AutoVerificationRequest = {
+  address: string;
+  scorerId: string;
+};
+
+// expose verify entry point
+// verify a users claim to stamps and issue the stamps if the claim is valid
+app.post("/api/v0.0.0/auto-verification", async (req: Request, res: Response): Promise<void> => {
+  const { address, scorerId } = req.body as AutoVerificationRequest;
+
+  const evmPlatforms = Object.values(platforms).filter(({ PlatformDetails }) => PlatformDetails.isEVM);
+
+  // TODO we should use the scorerId to check for any EVM stamps particular to a community, and include those
+  // here. We'll have to add an endpoint for this
+
+  const evmProviders: PROVIDER_ID[] = evmPlatforms
+    .map(({ ProviderConfig }) => ProviderConfig.map(({ providers }) => providers.map(({ name }) => name)))
+    .flat(2);
+
+  console.log("evmProviders", evmProviders);
+
+  const payload = {
+    address,
+    type: "EVMBulkVerify",
+    types: evmProviders,
+    version: "0.0.0",
+  };
+
+  const result = await checkConditionsAndIssueCredentials(payload, address, DIDKit);
+
+  if (result.error) {
+    return void errorRes(res, result.error.message, result.error.code);
+  }
+
+  const credentials = result.credentials || [];
+
+  // TODO send to scorer, get score
+  // TODO should we issue a score VC?
 });
 
 // procedure endpoints
