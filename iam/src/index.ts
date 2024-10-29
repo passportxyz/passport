@@ -25,6 +25,9 @@ import {
   EasRequestBody,
   VerifiedPayload,
   PROVIDER_ID,
+  VerifiableCredential,
+  ValidResponseBody,
+  SignatureType,
 } from "@gitcoin/passport-types";
 import onchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
 
@@ -48,6 +51,7 @@ import { VerifyDidChallengeBaseError } from "./utils/verifyDidChallenge.js";
 import { errorRes } from "./utils/helpers.js";
 import { ATTESTER_TYPES, getAttestationDomainSeparator, getAttestationSignerForChain } from "./utils/attestations.js";
 import { scrollDevBadgeHandler } from "./utils/scrollDevBadge.js";
+import axios from "axios";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -375,29 +379,19 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
   return results;
 }
 
-interface SignerVerificationResult {
-  verifiedAddress: string;
-}
+const verifyAdditionalSigner = async ({
+  challenge,
+  signature,
+  address,
+}: {
+  challenge: VerifiableCredential;
+  signature: string;
+  address: string;
+}): Promise<{ verifiedAddress: string }> => {
+  const additionalSignerCredential = await verifyCredential(DIDKit, challenge);
+  const verifiedAddress = utils.getAddress(utils.verifyMessage(challenge.credentialSubject.challenge, signature));
 
-interface ProcessedResponse {
-  credentials?: any[]; // Replace 'any' with your actual credential type
-  error?: {
-    message: string;
-    code: number;
-  };
-}
-
-const verifyAdditionalSigner = async (
-  signer: { challenge: any; signature: string; address: string },
-  DIDKit: any
-): Promise<SignerVerificationResult> => {
-  const additionalChallenge = signer.challenge;
-  const additionalSignerCredential = await verifyCredential(DIDKit, additionalChallenge);
-  const verifiedAddress = utils.getAddress(
-    utils.verifyMessage(additionalChallenge.credentialSubject.challenge, signer.signature)
-  );
-
-  if (!additionalSignerCredential || verifiedAddress.toLowerCase() !== signer.address.toLowerCase()) {
+  if (!additionalSignerCredential || verifiedAddress.toLowerCase() !== address.toLowerCase()) {
     throw new Error("Unable to verify payload signer");
   }
 
@@ -406,12 +400,17 @@ const verifyAdditionalSigner = async (
 
 const checkConditionsAndIssueCredentials = async (
   payload: RequestPayload,
-  address: string,
-  DIDKit: any
-): Promise<ProcessedResponse> => {
+  address: string
+): Promise<{
+  credentials?: CredentialResponseBody[];
+  error?: {
+    message: string;
+    code: number;
+  };
+}> => {
   // Verify additional signer if provided
   if (payload.signer) {
-    const { verifiedAddress } = await verifyAdditionalSigner(payload.signer, DIDKit);
+    const { verifiedAddress } = await verifyAdditionalSigner(payload.signer);
     payload.signer.address = verifiedAddress;
   }
 
@@ -477,12 +476,12 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
         if (!isSigner || !isType) {
           return void errorRes(
             res,
-            "Invalid challenge " + (isSigner && isType ? "type" : isSigner ? "signer" : "signer and type"),
+            "Invalid challenge " + [!isSigner && "signer", !isType && "type"].filter(Boolean).join(" and "),
             400
           );
         }
 
-        const result = await checkConditionsAndIssueCredentials(payload, address, DIDKit);
+        const result = await checkConditionsAndIssueCredentials(payload, address);
 
         if (result.error) {
           return void errorRes(res, result.error.message, result.error.code);
@@ -724,39 +723,80 @@ type AutoVerificationRequest = {
   scorerId: string;
 };
 
+const apiKey = process.env.SCORER_API_KEY;
+
 // expose verify entry point
 // verify a users claim to stamps and issue the stamps if the claim is valid
 app.post("/api/v0.0.0/auto-verification", async (req: Request, res: Response): Promise<void> => {
-  const { address, scorerId } = req.body as AutoVerificationRequest;
+  try {
+    const { address, scorerId } = req.body as AutoVerificationRequest;
 
-  const evmPlatforms = Object.values(platforms).filter(({ PlatformDetails }) => PlatformDetails.isEVM);
+    const evmPlatforms = Object.values(platforms).filter(({ PlatformDetails }) => PlatformDetails.isEVM);
 
-  // TODO we should use the scorerId to check for any EVM stamps particular to a community, and include those
-  // here. We'll have to add an endpoint for this
+    if (!utils.isAddress(address)) {
+      return void errorRes(res, "Invalid address", 400);
+    }
 
-  const evmProviders: PROVIDER_ID[] = evmPlatforms
-    .map(({ ProviderConfig }) => ProviderConfig.map(({ providers }) => providers.map(({ name }) => name)))
-    .flat(2);
+    // TODO we should use the scorerId to check for any EVM stamps particular to a community, and include those
+    // here. We'll have to add an endpoint for this
 
-  console.log("evmProviders", evmProviders);
+    const evmProviders: PROVIDER_ID[] = evmPlatforms
+      .map(({ ProviderConfig }) => ProviderConfig.map(({ providers }) => providers.map(({ name }) => name)))
+      .flat(2);
 
-  const payload = {
-    address,
-    type: "EVMBulkVerify",
-    types: evmProviders,
-    version: "0.0.0",
-  };
+    console.log("evmProviders", evmProviders);
 
-  const result = await checkConditionsAndIssueCredentials(payload, address, DIDKit);
+    const payload = {
+      address,
+      type: "EVMBulkVerify",
+      types: evmProviders,
+      version: "0.0.0",
+      signatureType: "EIP712" as SignatureType,
+    };
 
-  if (result.error) {
-    return void errorRes(res, result.error.message, result.error.code);
+    const result = await checkConditionsAndIssueCredentials(payload, address);
+
+    if (result.error) {
+      return void errorRes(res, result.error.message, result.error.code);
+    }
+
+    const validCredentials = (result.credentials || [])
+      .filter((cred): cred is ValidResponseBody => (cred as ValidResponseBody).credential !== undefined)
+      .map(({ credential }) => credential);
+
+    const scorerResponse: {
+      data?: {
+        score?: {
+          score?: string;
+          evidence?: {
+            rawScore?: string;
+          };
+        };
+      };
+    } = await axios.post(
+      `${process.env.SCORER_ENDPOINT}/internal/stamps/${address}`,
+      {
+        stamps: validCredentials,
+        scorer_id: scorerId,
+      },
+      {
+        headers: {
+          Authorization: apiKey,
+        },
+      }
+    );
+
+    const scoreData = scorerResponse.data?.score || {};
+
+    const score = String(scoreData.evidence?.rawScore || scoreData.score);
+
+    // TODO should we issue a score VC?
+
+    return void res.json({ score });
+  } catch (error) {
+    const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
+    return void errorRes(res, message, 500);
   }
-
-  const credentials = result.credentials || [];
-
-  // TODO send to scorer, get score
-  // TODO should we issue a score VC?
 });
 
 // procedure endpoints
