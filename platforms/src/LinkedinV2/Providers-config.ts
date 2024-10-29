@@ -1,5 +1,5 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { LinkedinV2Provider, LinkedinV2EmailVerifiedProvider } from "./Providers/linkedin";
+import { LinkedinV2Provider } from "./Providers/linkedin";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/linkedinStampIcon.svg",
@@ -12,8 +12,8 @@ export const PlatformDetails: PlatformSpec = {
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name V2",
-    providers: [{ title: "Encrypted", name: "LinkedinV2" }, { title: "Email Verified", name: "LinkedinV2EmailVerified" }],
+    providers: [{ title: "Encrypted", name: "LinkedinV2" }],
   },
 ];
 
-export const providers: Provider[] = [new LinkedinV2Provider(), new LinkedinV2EmailVerifiedProvider()];
+export const providers: Provider[] = [new LinkedinV2Provider()];
