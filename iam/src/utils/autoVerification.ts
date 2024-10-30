@@ -82,7 +82,8 @@ const getPassingEvmStamps = async ({ address, scorerId }: AutoVerificationFields
 
   const result = await checkConditionsAndIssueCredentials(credentialsInfo, address);
 
-  return (result || [])
+  return (result ? [result] : [])
+    .flat()
     .filter(
       (credentialResponse): credentialResponse is ValidResponseBody =>
         (credentialResponse as ValidResponseBody).credential !== undefined

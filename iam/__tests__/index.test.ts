@@ -653,6 +653,7 @@ describe("POST /verify", function () {
         challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
       },
     };
+
     // payload containing a signature of the challenge in the challenge credential
     const payload = {
       type: "Simple",
@@ -672,7 +673,7 @@ describe("POST /verify", function () {
       .expect(401)
       .expect("Content-Type", /json/);
 
-    expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify payload");
+    expect((response.body as ErrorResponseBody).error).toEqual("Invalid challenge 'signer' and 'provider'");
   });
 
   it("handles invalid challenge requests where 'valid' proof is passed as false (test against Simple Provider)", async () => {

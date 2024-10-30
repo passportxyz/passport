@@ -236,8 +236,10 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
         if (!isSigner || !isType) {
           return void errorRes(
             res,
-            "Invalid challenge " + [!isSigner && "signer", !isType && "type"].filter(Boolean).join(" and "),
-            400
+            "Invalid challenge '" +
+              [!isSigner && "signer", !isType && "provider"].filter(Boolean).join("' and '") +
+              "'",
+            401
           );
         }
 

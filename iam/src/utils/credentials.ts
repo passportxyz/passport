@@ -191,7 +191,7 @@ const verifyAdditionalSigner = async ({
   const verifiedAddress = utils.getAddress(utils.verifyMessage(challenge.credentialSubject.challenge, signature));
 
   if (!additionalSignerCredential || verifiedAddress.toLowerCase() !== address.toLowerCase()) {
-    throw new ApiError("Unable to verify payload signer", 400);
+    throw new ApiError("Unable to verify payload signer", 401);
   }
 
   return { verifiedAddress };
@@ -200,7 +200,7 @@ const verifyAdditionalSigner = async ({
 export const checkConditionsAndIssueCredentials = async (
   payload: RequestPayload,
   address: string
-): Promise<CredentialResponseBody[]> => {
+): Promise<CredentialResponseBody[] | CredentialResponseBody> => {
   // Verify additional signer if provided
   if (payload.signer) {
     const { verifiedAddress } = await verifyAdditionalSigner(payload.signer);
@@ -219,7 +219,7 @@ export const checkConditionsAndIssueCredentials = async (
       if ("error" in response && response.code && response.error) {
         throw new ApiError(response.error, response.code);
       }
-      return [response];
+      return response;
     }
     return responses;
   }
