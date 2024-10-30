@@ -24,10 +24,15 @@ type AutoVerificationFields = {
   scorerId: string;
 };
 
+type AutoVerificationResponseData = {
+  score: string;
+  threshold: string;
+};
+
 const apiKey = process.env.SCORER_API_KEY;
 
 export const autoVerificationHandler = async (
-  req: Request<ParamsDictionary, any, AutoVerificationFields>,
+  req: Request<ParamsDictionary, AutoVerificationResponseData, AutoVerificationFields>,
   res: Response
 ): Promise<void> => {
   try {
@@ -39,11 +44,11 @@ export const autoVerificationHandler = async (
 
     const stamps = await getPassingEvmStamps({ address, scorerId });
 
-    const score = await addStampsAndGetScore({ address, scorerId, stamps });
+    const { score, threshold } = await addStampsAndGetScore({ address, scorerId, stamps });
 
     // TODO should we issue a score VC?
 
-    return void res.json({ score });
+    return void res.json({ score, threshold });
   } catch (error) {
     if (error instanceof ApiError) {
       return void errorRes(res, error.message, error.code);
@@ -89,13 +94,17 @@ const addStampsAndGetScore = async ({
   address,
   scorerId,
   stamps,
-}: AutoVerificationFields & { stamps: VerifiableCredential[] }): Promise<string> => {
+}: AutoVerificationFields & { stamps: VerifiableCredential[] }): Promise<{
+  score: string;
+  threshold: string;
+}> => {
   const scorerResponse: {
     data?: {
       score?: {
         score?: string;
         evidence?: {
-          rawScore?: string;
+          rawScore?: string | number;
+          threshold?: string | number;
         };
       };
     };
@@ -114,5 +123,8 @@ const addStampsAndGetScore = async ({
 
   const scoreData = scorerResponse.data?.score || {};
 
-  return String(scoreData.evidence?.rawScore || scoreData.score);
+  const score = String(scoreData.evidence?.rawScore || scoreData.score);
+  const threshold = String(scoreData.evidence?.threshold || 20);
+
+  return { score, threshold };
 };

@@ -16,7 +16,10 @@ export const addErrorDetailsToMessage = (message: string, error: any): string =>
 };
 
 export class ApiError extends Error {
-  constructor(public message: string, public code: number) {
+  constructor(
+    public message: string,
+    public code: number
+  ) {
     super(message);
     this.name = this.constructor.name;
   }
