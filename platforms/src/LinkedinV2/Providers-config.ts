@@ -12,7 +12,7 @@ export const PlatformDetails: PlatformSpec = {
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Name V2",
-    providers: [{ title: "Encrypted", name: "LinkedinV2" }],
+    providers: [{ title: "Verified email address", name: "LinkedinV2" }],
   },
 ];
 

@@ -28,6 +28,9 @@ const useShouldDisplayPlatform = () => {
   const shouldDisplayPlatform = useCallback(
     (platform: PlatformScoreSpec): boolean => {
       const providers = platformProviderIds[platform.platform];
+      if (platform.platform === "Linkedin" && platform.earnedPoints <= 0) {
+        return false;
+      }
 
       if (platform.possiblePoints <= 0) {
         return false;
@@ -70,7 +73,7 @@ const useShouldDisplayPlatform = () => {
 };
 
 export const CardList = ({ className, isLoading = false, initialOpen = true }: CardListProps): JSX.Element => {
-  const { allProvidersState, allPlatforms } = useContext(CeramicContext);
+  const { allProvidersState, allPlatforms, expiredPlatforms } = useContext(CeramicContext);
   const { scoredPlatforms } = useContext(ScorerContext);
   const { platformProviderIds, platforms, platformCatagories } = usePlatforms();
   const { isOpen, onOpen, onClose } = useDisclosure();
