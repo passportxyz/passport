@@ -1,14 +1,8 @@
-// import { EnsProvider } from './providers/ens';
-// Should this file be an app factory? If it was, we could move the provider config to main.ts and test in isolation
-
-// ---- Server
-import { Request } from "express";
-
 // ---- Web3 packages
 import { utils } from "ethers";
 
 // ---- Types
-import { Response } from "express";
+import { Response, Request } from "express";
 import { PROVIDER_ID, ValidResponseBody, SignatureType, VerifiableCredential } from "@gitcoin/passport-types";
 import { ParamsDictionary } from "express-serve-static-core";
 
@@ -19,12 +13,14 @@ import { errorRes, addErrorDetailsToMessage, ApiError } from "./helpers.js";
 import axios from "axios";
 import { checkConditionsAndIssueCredentials } from "./credentials.js";
 
-type AutoVerificationFields = {
+type AutoVerificationRequestBodyType = {
   address: string;
   scorerId: string;
 };
 
-type AutoVerificationResponseData = {
+type AutoVerificationFields = AutoVerificationRequestBodyType;
+
+type AutoVerificationResponseBodyType = {
   score: string;
   threshold: string;
 };
@@ -32,7 +28,7 @@ type AutoVerificationResponseData = {
 const apiKey = process.env.SCORER_API_KEY;
 
 export const autoVerificationHandler = async (
-  req: Request<ParamsDictionary, AutoVerificationResponseData, AutoVerificationFields>,
+  req: Request<ParamsDictionary, AutoVerificationResponseBodyType, AutoVerificationRequestBodyType>,
   res: Response
 ): Promise<void> => {
   try {
