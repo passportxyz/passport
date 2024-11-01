@@ -7,7 +7,15 @@ import { getEASFeeAmount } from "../src/utils/easFees";
 
 // Mock external dependencies
 jest.mock("@spruceid/didkit-wasm-node");
-jest.mock("ethers");
+jest.mock("ethers", () => {
+  const originalModule = jest.requireActual("ethers");
+
+  return {
+    ...originalModule,
+    Contract: jest.fn(),
+  };
+});
+
 jest.mock("../src/utils/easFees");
 jest.mock("../src/issuers");
 jest.mock("../src/utils/attestations");

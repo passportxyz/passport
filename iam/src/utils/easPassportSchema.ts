@@ -174,7 +174,7 @@ export const formatMultiAttestationRequestWithPassportAndScore = async (
     expirationTime: NO_EXPIRATION,
     revocable: true,
     refUID: ZERO_BYTES32,
-    value: 0,
+    value: BigInt(0),
   };
 
   const stampRequestData: AttestationRequestData[] = [
@@ -221,7 +221,7 @@ export const formatMultiAttestationRequestWithScore = async (
     expirationTime: NO_EXPIRATION,
     revocable: true,
     refUID: ZERO_BYTES32,
-    value: 0,
+    value: BigInt(0),
   };
 
   const scoreRequestData: AttestationRequestData[] = [

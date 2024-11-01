@@ -28,6 +28,7 @@ import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
 import { IAMError } from "../src/utils/scorerService";
 import { VerifyDidChallengeBaseError, verifyDidChallenge } from "../src/utils/verifyDidChallenge";
 import { getEip712Issuer } from "../src/issuers";
+import { toJsonObject } from "../src/utils/json";
 
 const issuer = getEip712Issuer();
 
@@ -1041,7 +1042,7 @@ const mockMultiAttestationRequestWithPassportAndScore: MultiAttestationRequest[]
         expirationTime: NO_EXPIRATION,
         revocable: false,
         refUID: ZERO_BYTES32,
-        value: "25000000000000000",
+        value: BigInt("25000000000000000"),
       },
     ],
   },
@@ -1057,7 +1058,7 @@ const mockMultiAttestationRequestWithPassportAndScore: MultiAttestationRequest[]
         expirationTime: NO_EXPIRATION,
         revocable: true,
         refUID: ZERO_BYTES32,
-        value: "25000000000000000",
+        value: BigInt("25000000000000000"),
       },
     ],
   },
@@ -1243,7 +1244,7 @@ describe("POST /eas", () => {
 
     const expectedPayload = {
       passport: {
-        multiAttestationRequest: mockMultiAttestationRequestWithPassportAndScore,
+        multiAttestationRequest: toJsonObject(mockMultiAttestationRequestWithPassportAndScore),
         fee: "25000000000000000",
         nonce,
       },
@@ -1428,7 +1429,9 @@ describe("POST /eas/passport", () => {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(response.body.passport.multiAttestationRequest).toEqual(mockMultiAttestationRequestWithPassportAndScore);
+    expect(response.body.passport.multiAttestationRequest).toEqual(
+      toJsonObject(mockMultiAttestationRequestWithPassportAndScore)
+    );
     expect(response.body.passport.nonce).toEqual(nonce);
     expect(identityMock.verifyCredential).toHaveBeenCalledTimes(credentials.length);
     expect(formatMultiAttestationRequestSpy).toHaveBeenCalled();

@@ -45,6 +45,7 @@ import { errorRes, addErrorDetailsToMessage, ApiError } from "./utils/helpers.js
 import { ATTESTER_TYPES, getAttestationDomainSeparator, getAttestationSignerForChain } from "./utils/attestations.js";
 import { scrollDevBadgeHandler } from "./utils/scrollDevBadge.js";
 import { autoVerificationHandler } from "./utils/autoVerification.js";
+import { toJsonObject } from "./utils/json.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -326,7 +327,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
               invalidCredentials,
             };
 
-            return void res.json(payload);
+            return void res.type("application/json").send(toJsonObject(payload));
           })
           .catch(() => {
             return void errorRes(res, "Error signing passport", 500);
@@ -407,7 +408,7 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
               invalidCredentials,
             };
 
-            return void res.json(payload);
+            return void res.json(toJsonObject(payload));
           })
           .catch((): void => {
             return void errorRes(res, "Error signing passport", 500);
@@ -464,7 +465,7 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
             invalidCredentials: [],
           };
 
-          return void res.json(payload);
+          return void res.json(toJsonObject(payload));
         })
         .catch(() => {
           return void errorRes(res, "Error signing score", 500);

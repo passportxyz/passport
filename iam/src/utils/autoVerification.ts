@@ -1,5 +1,5 @@
 // ---- Web3 packages
-import { utils } from "ethers";
+import { isAddress } from "ethers";
 
 // ---- Types
 import { Response, Request } from "express";
@@ -34,7 +34,7 @@ export const autoVerificationHandler = async (
   try {
     const { address, scorerId } = req.body;
 
-    if (!utils.isAddress(address)) {
+    if (!isAddress(address)) {
       return void errorRes(res, "Invalid address", 400);
     }
 

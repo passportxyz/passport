@@ -12,9 +12,6 @@
     "outDir": "dist",
     "baseUrl": ".",
     "resolveJsonModule": true,
-    "paths": {
-      "*": ["node_modules/*", "../node_modules/*"]
-    },
     "skipLibCheck": true
   },
   "include": ["src/**/*", "__tests__/**/*"]

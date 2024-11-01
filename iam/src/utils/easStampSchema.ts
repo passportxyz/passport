@@ -41,8 +41,8 @@ export const encodeEasScore = (score: Score): string => {
   const schemaEncoder = new SchemaEncoder("uint256 score,uint32 scorer_id,uint8 score_decimals");
   const encodedData = schemaEncoder.encodeData([
     { name: "score", value: bnScore, type: "uint256" },
-    { name: "scorer_id", value: score.scorer_id, type: "uint32" },
-    { name: "score_decimals", value: decimals, type: "uint8" },
+    { name: "scorer_id", value: BigInt(score.scorer_id), type: "uint32" },
+    { name: "score_decimals", value: BigInt(decimals), type: "uint8" },
   ]);
 
   return encodedData;
@@ -63,7 +63,7 @@ export const formatMultiAttestationRequest = async (
     expirationTime: NO_EXPIRATION,
     revocable: true,
     refUID: ZERO_BYTES32,
-    value: 0,
+    value: BigInt(0),
   };
 
   const stampRequestData: AttestationRequestData[] = credentials

@@ -11,6 +11,7 @@ import * as identityMock from "@gitcoin/passport-identity";
 import * as easSchemaMock from "../src/utils/easStampSchema";
 import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
 import { IAMError } from "../src/utils/scorerService";
+import { serializeJson, toJsonObject } from "../src/utils/json";
 
 jest.mock("@gitcoin/passport-identity", () => ({
   ...jest.requireActual("@gitcoin/passport-identity"),
@@ -69,7 +70,7 @@ const mockMultiAttestationRequestWithScore: MultiAttestationRequest[] = [
         expirationTime: NO_EXPIRATION,
         revocable: false,
         refUID: ZERO_BYTES32,
-        value: "25000000000000000",
+        value: BigInt("25000000000000000"),
       },
     ],
   },
@@ -124,7 +125,7 @@ describe("POST /eas/score", () => {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(response.body.passport.multiAttestationRequest).toEqual(mockMultiAttestationRequestWithScore);
+    expect(response.body.passport.multiAttestationRequest).toEqual(toJsonObject(mockMultiAttestationRequestWithScore));
     expect(response.body.passport.nonce).toEqual(nonce);
     expect(formatMultiAttestationRequestSpy).toBeCalled();
   });

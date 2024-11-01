@@ -20,24 +20,30 @@ import { issueHashedCredential, verifyCredential } from "@gitcoin/passport-ident
 import { providers, platforms } from "@gitcoin/passport-platforms";
 import { ApiError } from "./helpers.js";
 
-const providerTypePlatformMap = Object.entries(platforms).reduce((acc, [platformName, { providers }]) => {
-  providers.forEach(({ type }) => {
-    acc[type] = platformName;
-  });
+const providerTypePlatformMap = Object.entries(platforms).reduce(
+  (acc, [platformName, { providers }]) => {
+    providers.forEach(({ type }) => {
+      acc[type] = platformName;
+    });
 
-  return acc;
-}, {} as { [k: string]: string });
+    return acc;
+  },
+  {} as { [k: string]: string }
+);
 
 function groupProviderTypesByPlatform(types: string[]): string[][] {
   return Object.values(
-    types.reduce((groupedProviders, type) => {
-      const platform = providerTypePlatformMap[type] || "generic";
+    types.reduce(
+      (groupedProviders, type) => {
+        const platform = providerTypePlatformMap[type] || "generic";
 
-      if (!groupedProviders[platform]) groupedProviders[platform] = [];
-      groupedProviders[platform].push(type);
+        if (!groupedProviders[platform]) groupedProviders[platform] = [];
+        groupedProviders[platform].push(type);
 
-      return groupedProviders;
-    }, {} as { [k: keyof typeof platforms]: string[] })
+        return groupedProviders;
+      },
+      {} as { [k: keyof typeof platforms]: string[] }
+    )
   );
 }
 

@@ -46,7 +46,7 @@ const defaultRequestData = {
   expirationTime: NO_EXPIRATION,
   revocable: true,
   refUID: ZERO_BYTES32,
-  value: 0,
+  value: BigInt(0),
 };
 
 describe("formatMultiAttestationRequestWithPassportAndScore", () => {

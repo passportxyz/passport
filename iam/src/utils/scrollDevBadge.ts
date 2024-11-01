@@ -53,7 +53,7 @@ const DEFAULT_REQUEST_DATA = {
   expirationTime: NO_EXPIRATION,
   revocable: true,
   refUID: ZERO_BYTES32,
-  value: 0,
+  value: BigInt(0),
 };
 
 const BADGE_SCHEMA_ENCODER = new SchemaEncoder("address badge,bytes payload");
@@ -196,7 +196,7 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): Promise<void
                 name: "payload",
                 type: "bytes",
                 value: BADGE_PAYLOAD_SCHEMA_ENCODER.encodeData([
-                  { name: "level", value: maxCredentialLevel, type: "uint256" },
+                  { name: "level", value: BigInt(maxCredentialLevel), type: "uint256" },
                   { name: "hashes", value: hashes, type: "bytes32[]" },
                 ]),
               },

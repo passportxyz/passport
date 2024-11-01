@@ -67,8 +67,8 @@ it("should use encodeEasScore to format score data correctly", () => {
   const decimals = 18;
 
   expect(decodedScoreData[0].value.value).toEqual(parseUnits(score.score.toString(), decimals));
-  expect(decodedScoreData[1].value.value).toEqual(score.scorer_id);
-  expect(decodedScoreData[2].value.value).toEqual(decimals);
+  expect(decodedScoreData[1].value.value).toEqual(BigInt(score.scorer_id));
+  expect(decodedScoreData[2].value.value).toEqual(BigInt(decimals));
 });
 
 const defaultRequestData = {
@@ -76,7 +76,7 @@ const defaultRequestData = {
   expirationTime: NO_EXPIRATION,
   revocable: true,
   refUID: ZERO_BYTES32,
-  value: 0,
+  value: BigInt(0),
 };
 
 describe("formatMultiAttestationRequest", () => {
