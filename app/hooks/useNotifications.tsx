@@ -81,6 +81,28 @@ export const useDismissNotification = (notification_id: string, dismissalType: "
   });
 };
 
+const deleteAllNotifications = async (dbAccessToken?: string) => {
+  if (!dbAccessToken) return;
+  const res = await axios.delete(`${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/passport-admin/notifications`, {
+    headers: {
+      Authorization: `Bearer ${dbAccessToken}`,
+    },
+  });
+  return res.data;
+};
+
+export const useDeleteAllNotifications = () => {
+  const { dbAccessToken } = useDatastoreConnectionContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => deleteAllNotifications(dbAccessToken),
+    onSuccess: () => {
+      queryClient.setQueryData(["notifications"], { items: [] });
+    },
+  });
+};
+
 export const useNotifications = () => {
   const { dbAccessTokenStatus, dbAccessToken } = useDatastoreConnectionContext();
   const { scorer } = useCustomization();
