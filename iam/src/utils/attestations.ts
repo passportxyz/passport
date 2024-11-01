@@ -1,6 +1,5 @@
 import onchainInfo from "../../../deployments/onchainInfo.json" assert { type: "json" };
-import { TypedDataDomain } from "@ethersproject/abstract-signer";
-import { ethers } from "ethers";
+import { Wallet, TypedDataDomain } from "ethers";
 
 export const getAttestationDomainSeparator = (chainIdHex: keyof typeof onchainInfo): TypedDataDomain => {
   const verifyingContract = onchainInfo[chainIdHex].GitcoinVerifier.address;
@@ -35,11 +34,11 @@ export const ATTESTER_TYPES = {
 
 // Wallet to use for mainnets
 // Only functional in production (set to same as testnet for non-production environments)
-const productionAttestationSignerWallet = new ethers.Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
+const productionAttestationSignerWallet = new Wallet(process.env.ATTESTATION_SIGNER_PRIVATE_KEY);
 // Wallet to use for testnets
-const testAttestationSignerWallet = new ethers.Wallet(process.env.TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY);
+const testAttestationSignerWallet = new Wallet(process.env.TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY);
 
-export const getAttestationSignerForChain = async (chainIdHex: keyof typeof onchainInfo): Promise<ethers.Wallet> => {
+export const getAttestationSignerForChain = async (chainIdHex: keyof typeof onchainInfo): Promise<Wallet> => {
   const productionAttestationIssuerAddress = await productionAttestationSignerWallet.getAddress();
   const chainUsesProductionIssuer =
     onchainInfo[chainIdHex].issuer.address.toLowerCase() === productionAttestationIssuerAddress.toLowerCase();

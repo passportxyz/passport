@@ -6,7 +6,6 @@ import {
   AttestationRequestData,
 } from "@ethereum-attestation-service/eas-sdk";
 import { VerifiableCredential, StampBit } from "@gitcoin/passport-types";
-import { BigNumber } from "@ethersproject/bignumber";
 
 import { fetchPassportScore } from "./scorerService.js";
 import { encodeEasScore } from "./easStampSchema.js";
@@ -17,12 +16,12 @@ import bitMapData from "../static/providerBitMapInfo.json" assert { type: "json"
 export type AttestationStampInfo = {
   hash: string;
   stampInfo: PassportAttestationStamp;
-  issuanceDate: BigNumber;
-  expirationDate: BigNumber;
+  issuanceDate: bigint;
+  expirationDate: bigint;
 };
 
 export type PassportAttestationData = {
-  providers: BigNumber[];
+  providers: bigint[];
   info: AttestationStampInfo[];
 };
 
@@ -82,10 +81,10 @@ export const formatPassportAttestationData = (credentials: VerifiableCredential[
         if (acc.providers.length <= index) {
           // We must add another element to the array of providers
           acc.providers.length = index + 1;
-          acc.providers[index] = BigNumber.from(0);
+          acc.providers[index] = BigInt(0);
         }
         // Shift the bit `1` to the left by the number of bits specified in the stamp info
-        acc.providers[index] = acc.providers[index].or(BigNumber.from(1).shl(stampInfo.bit));
+        acc.providers[index] = acc.providers[index] | (BigInt(1) << BigInt(stampInfo.bit));
 
         // We decode the original 256-bit hash value from the credential
         const hashValue = "0x" + Buffer.from(credential.credentialSubject.hash.split(":")[1], "base64").toString("hex");
@@ -94,8 +93,8 @@ export const formatPassportAttestationData = (credentials: VerifiableCredential[
         const expirationDate = Math.floor(new Date(credential.expirationDate).getTime() / 1000);
         acc.info.push({
           hash: hashValue,
-          issuanceDate: BigNumber.from(issuanceDate),
-          expirationDate: BigNumber.from(expirationDate),
+          issuanceDate: BigInt(issuanceDate),
+          expirationDate: BigInt(expirationDate),
           stampInfo: stampInfo,
         });
       } else {
@@ -112,8 +111,8 @@ export const formatPassportAttestationData = (credentials: VerifiableCredential[
 
 export type AttestationData = {
   hashes: string[];
-  issuancesDates: BigNumber[];
-  expirationDates: BigNumber[];
+  issuancesDates: bigint[];
+  expirationDates: bigint[];
 };
 
 export const sortPassportAttestationData = (attestation: PassportAttestationData): AttestationData => {
@@ -153,7 +152,7 @@ export const encodeEasPassport = (credentials: VerifiableCredential[]): string =
     { name: "expirationDates", value: expirationDates, type: "uint64[]" },
     // This will be used later for decoding provider mapping for scoring and within the resolver contract
     // Currently set to zero but should be updated whenever providerBitMapInfo.json is updated
-    { name: "providerMapVersion", value: BigNumber.from(0), type: "uint16" },
+    { name: "providerMapVersion", value: BigInt(0), type: "uint16" },
   ]);
 
   return encodedData;

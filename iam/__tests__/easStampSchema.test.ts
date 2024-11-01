@@ -2,7 +2,7 @@ import * as easStampModule from "../src/utils/easStampSchema";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 import { NO_EXPIRATION, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import { utils } from "ethers";
+import { parseUnits } from "ethers";
 import onchainInfo from "../../deployments/onchainInfo.json";
 
 jest.mock("../src/utils/scorerService", () => ({
@@ -66,7 +66,7 @@ it("should use encodeEasScore to format score data correctly", () => {
 
   const decimals = 18;
 
-  expect(decodedScoreData[0].value.value).toEqual(utils.parseUnits(score.score.toString(), decimals));
+  expect(decodedScoreData[0].value.value).toEqual(parseUnits(score.score.toString(), decimals));
   expect(decodedScoreData[1].value.value).toEqual(score.scorer_id);
   expect(decodedScoreData[2].value.value).toEqual(decimals);
 });

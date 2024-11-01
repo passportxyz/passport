@@ -18,23 +18,15 @@ jest.mock("@gitcoin/passport-identity", () => ({
 
 jest.mock("ethers", () => {
   const originalModule = jest.requireActual("ethers");
-  const ethers = originalModule.ethers;
-  const utils = originalModule.utils;
 
   return {
-    utils: {
-      ...utils,
-      getAddress: jest.fn().mockImplementation(() => {
-        return "0x0";
-      }),
-      verifyMessage: jest.fn().mockImplementation(() => {
-        return "string";
-      }),
-      splitSignature: jest.fn().mockImplementation(() => {
-        return { v: 0, r: "r", s: "s" };
-      }),
-    },
-    ethers,
+    getAddress: jest.fn().mockImplementation(() => {
+      return "0x0";
+    }),
+    verifyMessage: jest.fn().mockImplementation(() => {
+      return "string";
+    }),
+    ...originalModule,
   };
 });
 

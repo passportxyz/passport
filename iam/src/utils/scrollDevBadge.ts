@@ -2,7 +2,7 @@
 import { Request } from "express";
 
 // ---- Web3 packages
-import { BigNumber, utils } from "ethers";
+import { Signature, JsonRpcProvider, Contract } from "ethers";
 
 // ---- Types
 import { Response } from "express";
@@ -26,7 +26,6 @@ import {
 } from "@ethereum-attestation-service/eas-sdk";
 import { errorRes } from "./helpers.js";
 import { ATTESTER_TYPES, getAttestationDomainSeparator, getAttestationSignerForChain } from "./attestations.js";
-import { ethers } from "ethers";
 
 const BADGE_CONTRACT_ABI = [
   {
@@ -66,10 +65,6 @@ export function getScrollRpcUrl({ chainIdHex }: { chainIdHex: string }): string 
   }`;
 }
 
-interface BadgeContract extends ethers.Contract {
-  badgeLevel(address: string): Promise<ethers.BigNumber>;
-}
-
 async function queryBadgeLevel({
   address,
   contractAddress,
@@ -79,13 +74,13 @@ async function queryBadgeLevel({
   contractAddress: string;
   rpcUrl: string;
 }): Promise<number> {
-  const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+  const provider = new JsonRpcProvider(rpcUrl);
 
-  const badgeContract = new ethers.Contract(contractAddress, BADGE_CONTRACT_ABI, provider) as BadgeContract;
+  const badgeContract = new Contract(contractAddress, BADGE_CONTRACT_ABI, provider);
 
   try {
-    const level: BigNumber = await badgeContract.badgeLevel(address);
-    return level.toNumber();
+    const level: bigint = await badgeContract.badgeLevel(address);
+    return Number(level);
   } catch (e) {
     throw new Error(`Error querying badge level: ${e}`);
   }
@@ -238,9 +233,9 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): Promise<void
         const signer = await getAttestationSignerForChain(attestationChainIdHex);
 
         signer
-          ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+          .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {
-            const { v, r, s } = utils.splitSignature(signature);
+            const { v, r, s } = Signature.from(signature);
 
             const payload: EasPayload = {
               passport: passportAttestation,

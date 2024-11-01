@@ -1,5 +1,5 @@
 // ---- Web3 packages
-import { utils } from "ethers";
+import { getAddress, verifyMessage } from "ethers";
 
 // ---- Types
 import {
@@ -20,30 +20,24 @@ import { issueHashedCredential, verifyCredential } from "@gitcoin/passport-ident
 import { providers, platforms } from "@gitcoin/passport-platforms";
 import { ApiError } from "./helpers.js";
 
-const providerTypePlatformMap = Object.entries(platforms).reduce(
-  (acc, [platformName, { providers }]) => {
-    providers.forEach(({ type }) => {
-      acc[type] = platformName;
-    });
+const providerTypePlatformMap = Object.entries(platforms).reduce((acc, [platformName, { providers }]) => {
+  providers.forEach(({ type }) => {
+    acc[type] = platformName;
+  });
 
-    return acc;
-  },
-  {} as { [k: string]: string }
-);
+  return acc;
+}, {} as { [k: string]: string });
 
 function groupProviderTypesByPlatform(types: string[]): string[][] {
   return Object.values(
-    types.reduce(
-      (groupedProviders, type) => {
-        const platform = providerTypePlatformMap[type] || "generic";
+    types.reduce((groupedProviders, type) => {
+      const platform = providerTypePlatformMap[type] || "generic";
 
-        if (!groupedProviders[platform]) groupedProviders[platform] = [];
-        groupedProviders[platform].push(type);
+      if (!groupedProviders[platform]) groupedProviders[platform] = [];
+      groupedProviders[platform].push(type);
 
-        return groupedProviders;
-      },
-      {} as { [k: keyof typeof platforms]: string[] }
-    )
+      return groupedProviders;
+    }, {} as { [k: keyof typeof platforms]: string[] })
   );
 }
 
@@ -188,7 +182,7 @@ const verifyAdditionalSigner = async ({
   address: string;
 }): Promise<{ verifiedAddress: string }> => {
   const additionalSignerCredential = await verifyCredential(DIDKit, challenge);
-  const verifiedAddress = utils.getAddress(utils.verifyMessage(challenge.credentialSubject.challenge, signature));
+  const verifiedAddress = getAddress(verifyMessage(challenge.credentialSubject.challenge, signature));
 
   if (!additionalSignerCredential || verifiedAddress.toLowerCase() !== address.toLowerCase()) {
     throw new ApiError("Unable to verify payload signer", 401);
