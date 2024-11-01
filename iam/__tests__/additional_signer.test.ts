@@ -96,9 +96,9 @@ describe("POST /verify", function () {
     const res = await request(app)
       .post("/api/v0.0.0/verify")
       .send({ challenge: challengeForReqWithAdditionalSigner, payload: payloadWithAdditionalSigner })
-      .set("Accept", "application/json");
-
-    console.log("BPDY", res.body);
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/);
 
     const hashWithAdditionalSigner = res.body[0].credential.credentialSubject.hash;
 
