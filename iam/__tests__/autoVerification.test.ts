@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { utils } from "ethers";
+import { isAddress } from "ethers";
 import axios from "axios";
 import { autoVerificationHandler } from "../src/utils/autoVerification";
 import { ApiError } from "../src/utils/helpers.js";
@@ -8,9 +8,7 @@ import { VerifiableCredential } from "@gitcoin/passport-types";
 
 // Mock all external dependencies
 jest.mock("ethers", () => ({
-  utils: {
-    isAddress: jest.fn(),
-  },
+  isAddress: jest.fn(),
 }));
 
 jest.mock("axios");
@@ -92,7 +90,7 @@ describe("autoVerificationHandler", () => {
     };
 
     // Mock ethers address validation
-    (utils.isAddress as jest.Mock).mockReturnValue(true);
+    (isAddress as unknown as jest.Mock).mockReturnValue(true);
 
     // Mock credentials check
     (checkConditionsAndIssueCredentials as jest.Mock).mockResolvedValue([
@@ -144,7 +142,7 @@ describe("autoVerificationHandler", () => {
       },
     };
 
-    (utils.isAddress as jest.Mock).mockReturnValue(true);
+    (isAddress as unknown as jest.Mock).mockReturnValue(true);
 
     (checkConditionsAndIssueCredentials as jest.Mock).mockResolvedValue([
       {
@@ -186,7 +184,7 @@ describe("autoVerificationHandler", () => {
       },
     };
 
-    (utils.isAddress as jest.Mock).mockReturnValue(false);
+    (isAddress as unknown as jest.Mock).mockReturnValue(false);
 
     await autoVerificationHandler(mockReq as Request, mockRes as Response);
 
@@ -205,7 +203,7 @@ describe("autoVerificationHandler", () => {
       },
     };
 
-    (utils.isAddress as jest.Mock).mockReturnValue(true);
+    (isAddress as unknown as jest.Mock).mockReturnValue(true);
     (checkConditionsAndIssueCredentials as jest.Mock).mockRejectedValue(new ApiError("API Error", 403));
 
     await autoVerificationHandler(mockReq as Request, mockRes as Response);
@@ -225,7 +223,7 @@ describe("autoVerificationHandler", () => {
       },
     };
 
-    (utils.isAddress as jest.Mock).mockReturnValue(true);
+    (isAddress as unknown as jest.Mock).mockReturnValue(true);
     (checkConditionsAndIssueCredentials as jest.Mock).mockRejectedValue(new Error("Unexpected error"));
 
     await autoVerificationHandler(mockReq as Request, mockRes as Response);
@@ -246,7 +244,7 @@ describe("autoVerificationHandler", () => {
         },
       };
 
-      (utils.isAddress as jest.Mock).mockReturnValue(true);
+      (isAddress as unknown as jest.Mock).mockReturnValue(true);
       (checkConditionsAndIssueCredentials as jest.Mock).mockResolvedValue([]);
       (axios.post as jest.Mock).mockResolvedValue({
         data: {

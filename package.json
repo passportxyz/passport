@@ -63,7 +63,6 @@
   },
   "resolutions": {
     "csstype": "3.0.10",
-    "**/@types/react": "17.0.2",
     "leveldown": "6.1.1",
     "node-gyp": "^9.0.0",
     "did-session/uint8arrays": "^5.1.0",

@@ -1,6 +1,5 @@
 // ---- Testing libraries
 import request from "supertest";
-import * as DIDKit from "@spruceid/didkit-wasm-node";
 
 // ---- Test subject
 import { app } from "../src/index";
@@ -14,31 +13,23 @@ jest.mock("../src/utils/verifyDidChallenge", () => ({
 
 jest.mock("ethers", () => {
   const originalModule = jest.requireActual("ethers") as any;
-  const ethers = originalModule.ethers;
-  const utils = originalModule.utils;
 
   return {
-    utils: {
-      ...utils,
-      getAddress: jest
-        .fn()
-        .mockImplementationOnce(() => {
-          return "0x1";
-        })
-        .mockImplementationOnce(() => {
-          return "0xAbC";
-        })
-        .mockImplementationOnce(() => {
-          return "0xAbC";
-        }),
-      verifyMessage: jest.fn().mockImplementation(() => {
-        return "string";
+    ...originalModule,
+    getAddress: jest
+      .fn()
+      .mockImplementationOnce(() => {
+        return "0x1";
+      })
+      .mockImplementationOnce(() => {
+        return "0xAbC";
+      })
+      .mockImplementationOnce(() => {
+        return "0xAbC";
       }),
-      splitSignature: jest.fn().mockImplementation(() => {
-        return { v: 0, r: "r", s: "s" };
-      }),
-    },
-    ethers,
+    verifyMessage: jest.fn().mockImplementation(() => {
+      return "string";
+    }),
   };
 });
 

@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { providers, Contract, version } from "ethers";
+import { JsonRpcProvider, Contract, version } from "ethers";
 import decoderAbi from "../../../deployments/abi/GitcoinPassportDecoder.json";
 
 import providerBitMapInfo from "../static/providerBitMapInfo.json";
@@ -23,24 +23,15 @@ function difference<T>(setA: Set<T>, setB: Set<T>): Set<T> {
   return diff;
 }
 
-interface CustomContract extends Contract {
-  getProviders: (arg0: number) => Promise<string[]>;
-  currentVersion: () => Promise<string>;
-}
-
 async function main() {
   let exitCode = 0;
-  const provider = new providers.JsonRpcProvider(apiUrl);
-  const decoderContract = new Contract(
-    decoderContractAddress,
-    decoderAbi[chainId],
-    provider
-  ) as unknown as CustomContract;
+  const provider = new JsonRpcProvider(apiUrl);
+  const decoderContract = new Contract(decoderContractAddress, decoderAbi[chainId], provider);
 
   const latestOnChainProviderVersion = await decoderContract.currentVersion();
   console.log("latestOnChainProviderVersion:", latestOnChainProviderVersion);
 
-  const decoderProviders = await decoderContract.getProviders(Number(latestOnChainProviderVersion));
+  const decoderProviders: string[] = await decoderContract.getProviders(Number(latestOnChainProviderVersion));
   const onChainProviders = new Set(decoderProviders.map((p: string, idx: number) => `${idx} => ${p}`));
   const providerBitmapProviders = providerBitMapInfo.reduce((acc, cur) => {
     const idx = cur.index * 256 + cur.bit;

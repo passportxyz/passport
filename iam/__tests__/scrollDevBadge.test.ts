@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ethers } from "ethers";
+import { Signature, Contract } from "ethers";
 import { scrollDevBadgeHandler, getScrollRpcUrl } from "../src/utils/scrollDevBadge";
 import { getAttestationSignerForChain } from "../src/utils/attestations";
 import { hasValidIssuer } from "../src/issuers";
@@ -7,7 +7,15 @@ import { getEASFeeAmount } from "../src/utils/easFees";
 
 // Mock external dependencies
 jest.mock("@spruceid/didkit-wasm-node");
-jest.mock("ethers");
+jest.mock("ethers", () => {
+  const originalModule = jest.requireActual("ethers");
+
+  return {
+    ...originalModule,
+    Contract: jest.fn(),
+  };
+});
+
 jest.mock("../src/utils/easFees");
 jest.mock("../src/issuers");
 jest.mock("../src/utils/attestations");
@@ -20,7 +28,7 @@ describe("scrollDevBadgeHandler", () => {
 
   beforeEach(() => {
     const mockSigner = {
-      _signTypedData: jest.fn().mockResolvedValue("0xSignature"),
+      signTypedData: jest.fn().mockResolvedValue("0xSignature"),
     };
     (getAttestationSignerForChain as jest.Mock).mockResolvedValue(mockSigner);
 
@@ -52,8 +60,8 @@ describe("scrollDevBadgeHandler", () => {
     process.env.SCROLL_BADGE_ATTESTATION_SCHEMA_UID = "0xSchema";
     process.env.ALCHEMY_API_KEY = "test-api-key";
 
-    (ethers.Contract as unknown as jest.Mock).mockImplementation(() => ({
-      badgeLevel: jest.fn().mockResolvedValue({ toNumber: () => 0 }),
+    (Contract as unknown as jest.Mock).mockImplementation(() => ({
+      badgeLevel: jest.fn().mockResolvedValue(BigInt(0)),
     }));
   });
 
@@ -82,7 +90,7 @@ describe("scrollDevBadgeHandler", () => {
     mockReq.body.credentials = [mockCredential];
 
     // Mock the necessary functions
-    jest.spyOn(ethers.utils, "splitSignature").mockReturnValue({ v: 27, r: "0xr", s: "0xs" } as any);
+    jest.spyOn(Signature, "from").mockReturnValue({ v: 27, r: "0xr", s: "0xs" } as any);
 
     await scrollDevBadgeHandler(mockReq as Request, mockRes as Response);
 

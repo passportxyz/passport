@@ -11,9 +11,6 @@
     "outDir": "dist/esm",
     "allowJs": true,
     "baseUrl": "src",
-    "paths": {
-      "*": ["../node_modules/*", "node_modules/*"]
-    },
     "skipLibCheck": true,
     "resolveJsonModule": true
   },

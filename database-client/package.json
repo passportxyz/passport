@@ -24,8 +24,8 @@
     "test": "yarn node --experimental-vm-modules $(yarn bin jest) -c jest.config.cjs"
   },
   "dependencies": {
-    "@composedb/client": "^0.6.0",
-    "@composedb/types": "^0.6.0",
+    "@composedb/client": "^0.7.1",
+    "@composedb/types": "^0.7.1",
     "@glazed/datamodel": "^0.3.0",
     "@glazed/did-datastore": "^0.3.1",
     "@glazed/tile-loader": "^0.2.0",

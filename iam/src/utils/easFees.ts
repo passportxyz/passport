@@ -1,5 +1,4 @@
-import { utils } from "ethers";
-import { BigNumber } from "@ethersproject/bignumber";
+import { parseEther } from "ethers";
 import Moralis from "moralis";
 import { PassportCache } from "@gitcoin/passport-platforms";
 
@@ -56,9 +55,9 @@ class EthPriceLoader {
 
 const ethPriceLoader = new EthPriceLoader();
 
-export async function getEASFeeAmount(usdFeeAmount: number): Promise<BigNumber> {
+export async function getEASFeeAmount(usdFeeAmount: number): Promise<bigint> {
   await ethPriceLoader.init();
   const ethPrice = await ethPriceLoader.getPrice();
   const ethFeeAmount = usdFeeAmount / ethPrice;
-  return utils.parseEther(ethFeeAmount.toFixed(18));
+  return parseEther(ethFeeAmount.toFixed(18));
 }

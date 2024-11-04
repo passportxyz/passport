@@ -27,7 +27,7 @@
     "checkProviders:shape": "tsx src/scripts/checkOnChainProvidersAreInSync.ts https://shape-mainnet.g.alchemy.com/v2/ 0x168 0x2443D22Db6d25D141A1138D80724e3Eee54FD4C2"
   },
   "dependencies": {
-    "@ethereum-attestation-service/eas-sdk": "^0.28.2",
+    "@ethereum-attestation-service/eas-sdk": "^2.7.0",
     "@gitcoin/passport-identity": "^1.0.0",
     "@gitcoin/passport-platforms": "^1.0.0",
     "@gitcoin/passport-types": "^1.0.0",
@@ -36,7 +36,7 @@
     "brightid_sdk": "^1.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
-    "ethers": "^5.0.32",
+    "ethers": "^6.13.4",
     "express": "4",
     "google-auth-library": "^7.14.1",
     "luxon": "^2.4.0",

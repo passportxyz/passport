@@ -9,7 +9,7 @@ import { router as procedureRouter } from "@gitcoin/passport-platforms/procedure
 import cors from "cors";
 
 // ---- Web3 packages
-import { utils } from "ethers";
+import { getAddress, verifyMessage, Signature } from "ethers";
 
 // ---- Types
 import { Response } from "express";
@@ -45,6 +45,7 @@ import { errorRes, addErrorDetailsToMessage, ApiError } from "./utils/helpers.js
 import { ATTESTER_TYPES, getAttestationDomainSeparator, getAttestationSignerForChain } from "./utils/attestations.js";
 import { scrollDevBadgeHandler } from "./utils/scrollDevBadge.js";
 import { autoVerificationHandler } from "./utils/autoVerification.js";
+import { toJsonObject } from "./utils/json.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -133,7 +134,7 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
   // check for a valid payload
   if (payload.address && payload.type) {
     // ensure address is check-summed
-    payload.address = utils.getAddress(payload.address);
+    payload.address = getAddress(payload.address);
     // generate a challenge for the given payload
     const challenge = getChallenge(payload);
     // if the request is valid then proceed to generate a challenge credential
@@ -316,9 +317,9 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
         const signer = await getAttestationSignerForChain(attestationChainIdHex);
 
         signer
-          ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+          .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {
-            const { v, r, s } = utils.splitSignature(signature);
+            const { v, r, s } = Signature.from(signature);
 
             const payload: EasPayload = {
               passport: passportAttestation,
@@ -326,7 +327,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
               invalidCredentials,
             };
 
-            return void res.json(payload);
+            return void res.type("application/json").send(toJsonObject(payload));
           })
           .catch(() => {
             return void errorRes(res, "Error signing passport", 500);
@@ -397,9 +398,9 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
         const signer = await getAttestationSignerForChain(attestationChainIdHex);
 
         signer
-          ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+          .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
           .then((signature) => {
-            const { v, r, s } = utils.splitSignature(signature);
+            const { v, r, s } = Signature.from(signature);
 
             const payload: EasPayload = {
               passport: passportAttestation,
@@ -407,9 +408,9 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
               invalidCredentials,
             };
 
-            return void res.json(payload);
+            return void res.json(toJsonObject(payload));
           })
-          .catch(() => {
+          .catch((): void => {
             return void errorRes(res, "Error signing passport", 500);
           });
       })
@@ -454,9 +455,9 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
       const signer = await getAttestationSignerForChain(attestationChainIdHex);
 
       signer
-        ._signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+        .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
         .then((signature) => {
-          const { v, r, s } = utils.splitSignature(signature);
+          const { v, r, s } = Signature.from(signature);
 
           const payload: EasPayload = {
             passport: passportAttestation,
@@ -464,7 +465,7 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
             invalidCredentials: [],
           };
 
-          return void res.json(payload);
+          return void res.json(toJsonObject(payload));
         })
         .catch(() => {
           return void errorRes(res, "Error signing score", 500);

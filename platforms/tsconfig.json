@@ -13,9 +13,6 @@
     "outDir": "dist/commonjs",
     "allowJs": true,
     "baseUrl": "src",
-    "paths": {
-      "*": ["../node_modules/*", "node_modules/*"]
-    },
     "jsx": "react",
     "lib": ["es6", "dom"]
   },
