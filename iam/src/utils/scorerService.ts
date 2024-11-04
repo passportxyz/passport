@@ -18,7 +18,7 @@ type GetScoreResponse = {
   };
 };
 
-const apiKey = process.env.CGRANTS_API_TOKEN;
+const apiKey = process.env.SCORER_API_KEY;
 
 // Use public endpoint and static api key to fetch score
 export async function fetchPassportScore(address: string, customScorerId?: number): Promise<Score> {
