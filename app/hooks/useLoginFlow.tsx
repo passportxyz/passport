@@ -9,16 +9,9 @@ import { checkShowOnboard } from "../utils/helpers";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useNavigateToPage } from "../hooks/useCustomization";
 
-import {
-  useDisconnect,
-  useWeb3Modal,
-  useWeb3ModalAccount,
-  useWeb3ModalError,
-  useWeb3ModalEvents,
-  useWeb3ModalState,
-} from "@web3modal/ethers/react";
 import { datadogRum } from "@datadog/browser-rum";
 import { useMessage } from "./useMessage";
+import { useAppKit, useAppKitAccount, useAppKitEvents, useAppKitState, useDisconnect } from "@reown/appkit/react";
 
 type LoginStep = "NOT_STARTED" | "PENDING_WALLET_CONNECTION" | "PENDING_DATABASE_CONNECTION" | "DONE";
 
@@ -34,18 +27,17 @@ export const useLoginFlow = ({
 } => {
   const address = useWalletStore((state) => state.address);
   const provider = useWalletStore((state) => state.provider);
-  const { error } = useWeb3ModalError();
-  const { isConnected } = useWeb3ModalAccount();
-  const { open: web3ModalIsOpen } = useWeb3ModalState();
+  const { isConnected } = useAppKitAccount();
+  const { open: web3ModalIsOpen } = useAppKitState();
   const { disconnect } = useDisconnect();
   const { dbAccessTokenStatus, connect: connectDatastore } = useDatastoreConnectionContext();
   const [enabled, setEnabled] = useState(false);
   const [loginStep, setLoginStep] = useState<LoginStep>("NOT_STARTED");
-  const { open: openWeb3Modal } = useWeb3Modal();
+  const { open: openWeb3Modal } = useAppKit();
   const isConnectingToDatabaseRef = useRef<boolean>(false);
   const { failure } = useMessage();
   const navigateToPage = useNavigateToPage();
-  const web3modalEvent = useWeb3ModalEvents();
+  const web3modalEvent = useAppKitEvents();
 
   const initiateLogin = useCallback(() => {
     setEnabled(true);
@@ -56,6 +48,7 @@ export const useLoginFlow = ({
   }, []);
 
   useEffect(() => {
+    console.log("web3modalEvent", web3modalEvent);
     if (web3modalEvent.data.event === "MODAL_CLOSE" && web3modalEvent.data.properties.connected === false) {
       resetLogin();
     }
@@ -71,13 +64,15 @@ export const useLoginFlow = ({
     [failure]
   );
 
-  useEffect(() => {
-    if (error) {
-      console.error("Web3Modal error", error);
-      showConnectionError(error);
-      resetLogin();
-    }
-  }, [error, resetLogin]);
+  // TODO The useWeb3ModalError hook is gone. Could write a
+  // custom hook to poll modal.getError() ?
+  // useEffect(() => {
+  //   if (error) {
+  //     console.error("Web3Modal error", error);
+  //     showConnectionError(error);
+  //     resetLogin();
+  //   }
+  // }, [error, resetLogin]);
 
   useEffect(() => {
     const newLoginStep = (() => {
@@ -121,7 +116,7 @@ export const useLoginFlow = ({
         } catch (e) {
           resetLogin();
           console.error("Error connecting to database", e);
-          datadogRum.addError(error);
+          datadogRum.addError(e);
           showConnectionError(e);
           isConnectingToDatabaseRef.current = false;
         }

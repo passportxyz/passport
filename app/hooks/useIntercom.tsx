@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect } from "react";
 
 // --- Utils & configs
-import { useWeb3ModalAccount } from "@web3modal/ethers/react";
+import { useAppKitAccount } from "@reown/appkit/react";
 import Intercom, { boot, shutdown } from "@intercom/messenger-js-sdk";
 
 const INTERCOM_APP_ID = process.env.NEXT_PUBLIC_INTERCOM_APP_ID || "";
@@ -17,7 +17,7 @@ export const updateIntercomUserData = ({ address }: { address?: string }) => {
 
 // This should only be used once, at the top level of the app
 export const useIntercom = () => {
-  const { isConnected } = useWeb3ModalAccount();
+  const { isConnected } = useAppKitAccount();
 
   const initialize = useCallback(() => {
     Intercom({

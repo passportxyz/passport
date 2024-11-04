@@ -12,8 +12,8 @@ import { AccountId } from "caip";
 import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
 import { Eip1193Provider } from "ethers";
 import { createSignedPayload } from "../utils/helpers";
-import { useDisconnect, useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { updateIntercomUserData } from "../hooks/useIntercom";
+import { useAppKitAccount, useDisconnect } from "@reown/appkit/react";
 
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
@@ -37,7 +37,7 @@ export const DatastoreConnectionContext = createContext<DatastoreConnectionConte
 export const useDatastoreConnection = () => {
   const { disconnect: disconnectWallet } = useDisconnect();
   const chain = useWalletStore((state) => state.chain);
-  const { isConnected, address: web3ModalAddress } = useWeb3ModalAccount();
+  const { isConnected, address: web3ModalAddress } = useAppKitAccount();
 
   const [dbAccessTokenStatus, setDbAccessTokenStatus] = useState<DbAuthTokenStatus>("idle");
   const [dbAccessToken, setDbAccessToken] = useState<string | undefined>();

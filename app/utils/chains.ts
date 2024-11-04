@@ -1,3 +1,4 @@
+import { CaipNetwork } from "@reown/appkit";
 import { TEST_MODE } from "../context/testModeState";
 import {
   AttestationProvider,
@@ -5,6 +6,27 @@ import {
   EASAttestationProvider,
   VeraxAndEASAttestationProvider,
 } from "./AttestationProvider";
+
+import {
+  arbitrum,
+  mainnet,
+  sepolia,
+  hardhat,
+  optimismSepolia,
+  scrollSepolia,
+  polygon,
+  fantom,
+  optimism,
+  zksync,
+  linea,
+  avalanche,
+  scroll,
+  shape,
+  AppKitNetwork,
+} from "@reown/appkit/networks";
+
+// Weird type to match the library, forces at least 1 element
+export const networks: [AppKitNetwork, ...AppKitNetwork[]] = [mainnet];
 
 // RPC urls
 export const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL as string;
@@ -102,6 +124,8 @@ if (usingTestEnvironment) {
     icon: "./assets/eth-network-logo.svg",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
   });
+  networks.push(sepolia);
+
   chainConfigs.push({
     id: hardhatChainId,
     token: "ETH",
@@ -111,6 +135,7 @@ if (usingTestEnvironment) {
     icon: "./assets/eth-network-logo.svg",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
   });
+  networks.push(hardhat);
 
   chainConfigs.push({
     id: sepoliaOPChainId,
@@ -128,6 +153,7 @@ if (usingTestEnvironment) {
       monochromeIcon: "./assets/op-logo-monochrome.svg",
     },
   });
+  networks.push(optimismSepolia);
 
   chainConfigs.push({
     id: "0x8274f",
@@ -145,6 +171,7 @@ if (usingTestEnvironment) {
       monochromeIcon: "./assets/scroll-logo-monochrome.svg",
     },
   });
+  networks.push(scrollSepolia);
 }
 
 if (!TEST_MODE) {
@@ -158,6 +185,8 @@ if (!TEST_MODE) {
       icon: "./assets/eth-network-logo.svg",
       chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
     });
+    networks.push(polygon);
+
     chainConfigs.push({
       id: "0xfa",
       token: "FTM",
@@ -167,6 +196,7 @@ if (!TEST_MODE) {
       icon: "./assets/eth-network-logo.svg",
       chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
     });
+    networks.push(fantom);
   }
 
   chainConfigs.push({
@@ -185,6 +215,7 @@ if (!TEST_MODE) {
       monochromeIcon: "./assets/op-logo-monochrome.svg",
     },
   });
+  networks.push(optimism);
 
   if (process.env.NEXT_PUBLIC_FF_ONCHAIN_ZKSYNC === "on") {
     chainConfigs.push({
@@ -204,6 +235,7 @@ if (!TEST_MODE) {
         monochromeIcon: "./assets/zksync-logo-monochrome.svg",
       },
     });
+    networks.push(zksync);
   }
 
   chainConfigs.push({
@@ -222,6 +254,7 @@ if (!TEST_MODE) {
       monochromeIcon: "./assets/linea-logo.png",
     },
   });
+  networks.push(linea);
 
   chainConfigs.push({
     id: "0xa86a",
@@ -232,6 +265,7 @@ if (!TEST_MODE) {
     icon: "./assets/avax-logo.svg",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
   });
+  networks.push(avalanche);
 
   chainConfigs.push({
     id: arbitrumChainId,
@@ -250,6 +284,7 @@ if (!TEST_MODE) {
       monochromeIcon: "./assets/arbitrum-logo-monochrome.svg",
     },
   });
+  networks.push(arbitrum);
 
   if (process.env.NEXT_PUBLIC_FF_ONCHAIN_SCROLL === "on") {
     chainConfigs.push({
@@ -268,6 +303,7 @@ if (!TEST_MODE) {
         monochromeIcon: "./assets/scroll-logo-monochrome.svg",
       },
     });
+    networks.push(scroll);
   }
 
   if (process.env.NEXT_PUBLIC_FF_ONCHAIN_SHAPE === "on") {
@@ -288,7 +324,19 @@ if (!TEST_MODE) {
       },
       useCustomCommunityId: true,
     });
+    networks.push(shape);
   }
 }
+
+// Need to use the more restrictive "CaipNetwork" type in some places
+export const networkMap = networks
+  .filter((network): network is CaipNetwork => (network as CaipNetwork).caipNetworkId !== undefined)
+  .reduce(
+    (acc, network) => {
+      acc[network.id] = network;
+      return acc;
+    },
+    {} as Record<string, CaipNetwork>
+  );
 
 export const chains: Chain[] = chainConfigs.map((config) => new Chain(config));

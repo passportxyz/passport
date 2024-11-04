@@ -1,4 +1,4 @@
-import { useWeb3ModalAccount } from "@web3modal/ethers/react";
+import { useAppKitAccount } from "@reown/appkit/react";
 import { useNavigateToGithubConnectStep, useNavigateToRootStep } from "../../hooks/useNextCampaignStep";
 import { useDatastoreConnectionContext } from "../../context/datastoreConnectionContext";
 import { useScrollBadge } from "../../hooks/useScrollBadge";
@@ -49,7 +49,7 @@ export const RenderedBadges = ({ badges }: { badges: ProviderWithTitle[] }) => (
 export const ScrollMintedBadge = ({ badgesFreshlyMinted }: { badgesFreshlyMinted: boolean }) => {
   const goToLoginStep = useNavigateToRootStep();
   const goToGithubConnectStep = useNavigateToGithubConnectStep();
-  const { address } = useWeb3ModalAccount();
+  const { address } = useAppKitAccount();
   const { did, dbAccessToken } = useDatastoreConnectionContext();
   const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(address);
   const { failure } = useMessage();

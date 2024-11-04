@@ -31,7 +31,6 @@ import hash from "object-hash";
 // --- GTM Module
 import TagManager from "react-gtm-module";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
-import { useWeb3ModalError } from "@web3modal/ethers/react";
 import Script from "next/script";
 import { Confetti } from "../components/Confetti";
 import { PassportDetailsButton } from "../components/PassportDetailsButton";
@@ -60,29 +59,29 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
 
 export default function Dashboard() {
   const customization = useCustomization();
-  const { useCustomDashboardPanel } = customization;
   const { isLoadingPassport, allPlatforms, databaseReady } = useContext(CeramicContext);
   const { disconnect, dbAccessTokenStatus, dbAccessToken, did } = useDatastoreConnectionContext();
   const address = useWalletStore((state) => state.address);
   const { initiateVerification } = useOneClickVerification();
-  const { error: web3ModalError } = useWeb3ModalError();
+  // TODO
+  // const { error: web3ModalError } = useWeb3ModalError();
   const { success, failure } = useMessage();
 
   // This shouldn't be necessary, but using this to prevent unnecessary re-initialization
   // until ceramicContext is refactored and memoized
   const verifiedParamsHash = useRef<string | undefined>(undefined);
 
-  useEffect(() => {
-    // TODO
-    if (web3ModalError) {
-      console.error("Web3Modal error", web3ModalError);
-      failure({
-        duration: 6000,
-        title: "Wallet Connection Error",
-        message: (web3ModalError as Error).message,
-      });
-    }
-  }, [web3ModalError, failure]);
+  // useEffect(() => {
+  //   // TODO
+  //   if (web3ModalError) {
+  //     console.error("Web3Modal error", web3ModalError);
+  //     failure({
+  //       duration: 6000,
+  //       title: "Wallet Connection Error",
+  //       message: (web3ModalError as Error).message,
+  //     });
+  //   }
+  // }, [web3ModalError, failure]);
 
   useEffect(() => {
     if (did && address && databaseReady) {

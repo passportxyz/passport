@@ -1,4 +1,4 @@
-import { useWeb3ModalAccount } from "@web3modal/ethers/react";
+import { useAppKitAccount } from "@reown/appkit/react";
 import PageRoot from "../PageRoot";
 import { AccountCenter } from "../AccountCenter";
 import { useParams } from "react-router-dom";
@@ -70,7 +70,7 @@ export const ScrollFooter = ({ className }: { className?: string }) => {
 };
 
 export const ScrollCampaignPageRoot = ({ children }: { children: React.ReactNode }) => {
-  const { isConnected } = useWeb3ModalAccount();
+  const { isConnected } = useAppKitAccount();
   return (
     <PageRoot className="text-color-1">
       {isConnected && <AccountCenter />}

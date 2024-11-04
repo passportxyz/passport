@@ -3,14 +3,14 @@ import { useAttestation } from "./useAttestation";
 import { jsonRequest } from "../utils/AttestationProvider";
 import { useMessage } from "./useMessage";
 import { useNavigateToLastStep } from "./useNextCampaignStep";
-import { useWeb3ModalAccount } from "@web3modal/ethers/react";
+import { useAppKitAccount } from "@reown/appkit/react";
 import { iamUrl } from "../config/stamp_config";
 import { scrollCampaignChain } from "../config/scroll_campaign";
 import { EasPayload, VerifiableCredential } from "@gitcoin/passport-types";
 
 export const useMintBadge = () => {
   const { getNonce, issueAttestation } = useAttestation({ chain: scrollCampaignChain });
-  const { address } = useWeb3ModalAccount();
+  const { address } = useAppKitAccount();
   const { failure } = useMessage();
   const goToLastStep = useNavigateToLastStep();
 

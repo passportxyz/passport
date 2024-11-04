@@ -2,29 +2,28 @@
 import React, { useEffect, useState } from "react";
 
 // --- Utils & configs
-import { useWeb3ModalAccount, useWeb3ModalProvider } from "@web3modal/ethers/react";
+import { useAppKitAccount, useAppKitProvider, useAppKitState } from "@reown/appkit/react";
 import { useWalletStore } from "./walletStore";
 import { useNavigateToPage } from "../hooks/useCustomization";
+import { Eip1193Provider } from "ethers";
 
 const WalletStoreSyncWithWeb3Modal = () => {
   const _internalSync = useWalletStore((state) => state._internalSync);
   const navigateToPage = useNavigateToPage();
   const [connectedAddress, setConnectedAddress] = useState<string | undefined>(undefined);
 
-  const { walletProvider: web3modalProvider } = useWeb3ModalProvider();
-  const web3modalAccount = useWeb3ModalAccount();
+  const { address, isConnected } = useAppKitAccount();
+  const { activeChain } = useAppKitState();
+  const { walletProvider } = useAppKitProvider<Eip1193Provider>("eip155");
 
   useEffect(() => {
-    if (!web3modalAccount.isConnected) {
+    if (!isConnected) {
       _internalSync({ address: undefined, chain: undefined, provider: undefined });
     }
-  }, [web3modalAccount.isConnected]);
+  }, [isConnected]);
 
   useEffect(() => {
-    console.log("debug - web3modalAccount", web3modalAccount);
-    if (web3modalAccount.isConnected) {
-      const { address, chainId } = web3modalAccount;
-
+    if (isConnected) {
       if (address) {
         if (!connectedAddress) {
           setConnectedAddress(address);
@@ -38,15 +37,15 @@ const WalletStoreSyncWithWeb3Modal = () => {
         }
       }
 
-      const chain = chainId ? "0x" + chainId.toString(16) : undefined;
+      const chain = activeChain ? "0x" + parseInt(activeChain).toString(16) : undefined;
 
       _internalSync({
-        provider: web3modalProvider,
+        provider: walletProvider,
         address,
         chain,
       });
     }
-  }, [web3modalAccount.isConnected, web3modalProvider, web3modalAccount.address, web3modalAccount.chainId]);
+  }, [isConnected, walletProvider, address, activeChain]);
 
   return null;
 };

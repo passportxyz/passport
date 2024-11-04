@@ -2,14 +2,15 @@ import { EasPayload } from "@gitcoin/passport-types";
 import { ethers, EthersError, isError } from "ethers";
 import { useCallback, useMemo, useState } from "react";
 import { useWalletStore } from "../context/walletStore";
-import { Chain } from "../utils/chains";
+import { Chain, networkMap } from "../utils/chains";
+import { web3Modal } from "../utils/web3";
 import { useOnChainData } from "./useOnChainData";
-import { useSwitchNetwork } from "@web3modal/ethers/react";
 import { useMessage } from "./useMessage";
+
+const { switchNetwork } = web3Modal;
 
 const useChainSwitch = ({ chain }: { chain?: Chain }) => {
   const connectedChain = useWalletStore((state) => state.chain);
-  const { switchNetwork } = useSwitchNetwork();
 
   const switchChain = useCallback(async (): Promise<Boolean> => {
     if (!(connectedChain && chain)) {
@@ -19,7 +20,8 @@ const useChainSwitch = ({ chain }: { chain?: Chain }) => {
       return true;
     }
     try {
-      await switchNetwork(parseInt(chain.id, 16));
+      const network = networkMap[chain.id];
+      await switchNetwork(network);
       return true;
     } catch {
       return false;
