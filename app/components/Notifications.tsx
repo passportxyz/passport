@@ -1,6 +1,11 @@
 import React, { Fragment, useCallback, useContext, useMemo, useState } from "react";
 import { Popover, Transition } from "@headlessui/react";
-import { useNotifications, useDismissNotification, Notification } from "../hooks/useNotifications";
+import {
+  useNotifications,
+  useDismissNotification,
+  Notification,
+  useDeleteAllNotifications,
+} from "../hooks/useNotifications";
 import { StampClaimForPlatform, StampClaimingContext } from "../context/stampClaimingContext";
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { CeramicContext } from "../context/ceramicContext";
@@ -172,12 +177,28 @@ const NotificationComponent: React.FC<NotificationProps> = ({ notification, setS
                 leaveTo="opacity-0 translate-y-1"
               >
                 <Popover.Panel className="absolute w-48 right-1 bg-background flex flex-col justify-start text-left p-4 rounded">
-                  <button onClick={() => dismissMutation.mutate()} className="w-full text-left">
-                    Mark as Read
-                  </button>
-                  <button className="w-full text-left text-color-7" onClick={() => deleteMutation.mutate()}>
-                    Delete
-                  </button>
+                  {({ close }) => (
+                    <>
+                      <button
+                        onClick={() => {
+                          dismissMutation.mutate();
+                          close();
+                        }}
+                        className="w-full text-left"
+                      >
+                        Mark as Read
+                      </button>
+                      <button
+                        className="w-full text-left text-color-7"
+                        onClick={() => {
+                          deleteMutation.mutate();
+                          close();
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
                 </Popover.Panel>
               </Transition>
             </>
@@ -194,6 +215,7 @@ export type NotificationsProps = {
 
 export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) => {
   const { notifications } = useNotifications();
+  const deleteMutation = useDeleteAllNotifications();
   const hasNotifications = notifications.length > 0;
   return (
     <div className="flex justify-end z-20">
@@ -228,19 +250,36 @@ export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) 
               <div className="w-full relative">
                 <div className="absolute top-[-6px] w-[10px] h-[10px] right-7 border-l bg-background border-b border-foreground-5 transform rotate-[135deg]"></div>
               </div>
-              <div className="overflow-y-auto min-h-[120px] max-h-[40vh]">
+              <div className="absolute w-full pl-8 py-3 text-foreground-2 bg-background z-20 rounded-t">
+                Notifications
+              </div>
+              <div
+                className={`overflow-y-auto min-h-[120px] max-h-[40vh] ${notifications.length > 0 ? "pt-10 pb-10" : "pt-6"}`}
+              >
                 {notifications.length > 0 ? (
-                  notifications
-                    .sort((a, b) => (a.is_read === b.is_read ? 0 : a.is_read ? 1 : -1))
-                    .map((notification) => (
-                      <NotificationComponent
-                        key={notification.notification_id}
-                        notification={notification}
-                        setShowSidebar={() => setShowSidebar(true)}
-                      />
-                    ))
+                  <>
+                    {notifications
+                      .sort((a, b) => (a.is_read === b.is_read ? 0 : a.is_read ? 1 : -1))
+                      .map((notification) => (
+                        <NotificationComponent
+                          key={notification.notification_id}
+                          notification={notification}
+                          setShowSidebar={() => setShowSidebar(true)}
+                        />
+                      ))}
+                    <div
+                      onClick={() => {
+                        deleteMutation.mutate();
+                      }}
+                      className="cursor-pointer absolute bottom-0 w-full pl-8 py-3 text-foreground-2 bg-background z-20 rounded-b bg-gradient-to-b from-background via-background to-[#082F2A]"
+                    >
+                      Delete All
+                    </div>
+                  </>
                 ) : (
-                  <p className="p-2">Congrats! You don&apos;t have any notifications.</p>
+                  <p className="p-8 text-foreground-2">
+                    You have no notifications. We’ll let you know when there’s something.
+                  </p>
                 )}
               </div>
             </Popover.Panel>
