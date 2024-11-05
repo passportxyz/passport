@@ -5,7 +5,8 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/linkedinStampIcon.svg",
   platform: "LinkedinV2",
   name: "Linkedin V2",
-  description: "Connect your existing Linkedin account to verify.",
+  description:
+    "This stamp confirms that your LinkedIn account is verified and includes a valid, verified email address.",
   connectMessage: "Connect Account to V2",
 };
 
