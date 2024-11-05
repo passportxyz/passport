@@ -4,7 +4,7 @@ import { LinkedinProvider } from "./Providers/linkedin";
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/linkedinStampIcon.svg",
   platform: "Linkedin",
-  name: "[Deprecated] Linkedin",
+  name: "Linkedin",
   description: "Connect your existing Linkedin account to verify.",
   connectMessage: "Connect Account",
 };
