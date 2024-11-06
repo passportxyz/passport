@@ -3,17 +3,18 @@ import { useCallback, useEffect, useMemo } from "react";
 
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
-import { useWalletStore } from "../context/walletStore";
 import onchainInfo from "../../deployments/onchainInfo.json";
-import { chains } from "../utils/chains";
+import { ChainId, chains } from "../utils/chains";
 
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
-import { decodeProviderInformation, getAttestationData } from "../utils/onChainStamps";
+import { getAttestationData } from "../utils/onChainStamps";
 import { FeatureFlags } from "../config/feature_flags";
 import { UseQueryResult, useQueries, useQueryClient } from "@tanstack/react-query";
 import { parseValidChains } from "./useOnChainStatus";
 import { useCustomization } from "./useCustomization";
+import { useAccount, useChains } from "wagmi";
+import { createPublicClient, http, PublicClient } from "viem";
 
 export interface OnChainProviderMap {
   [chainId: string]: OnChainProviderType[];
@@ -44,7 +45,7 @@ export interface OnChainData {
   data: Record<string, SingleChainData | undefined>;
   activeChainProviders: OnChainProviderType[];
   isPending: boolean;
-  refresh: (chainId?: string) => void;
+  refresh: (chainId?: ChainId) => void;
 }
 
 export type DecodedProviderInfo = {
@@ -54,42 +55,29 @@ export type DecodedProviderInfo = {
 
 const ALL_CHAIN_DATA_QUERY_KEY = ["onChain", "passport"];
 
-type GetOnChainDataForChainResult = SingleChainData & { chainId: string };
+type GetOnChainDataForChainResult = SingleChainData & { chainId: ChainId };
 
 const getOnChainDataForChain = async ({
   address,
   chainId,
   customScorerId,
+  publicClient,
 }: {
   address: string;
-  chainId: string;
+  chainId: ChainId;
   customScorerId?: number;
+  publicClient: PublicClient;
 }): Promise<GetOnChainDataForChainResult> => {
-  const passportAttestationData = await getAttestationData(
+  const attestationData = await getAttestationData({
+    publicClient,
     address,
-    chainId as keyof typeof onchainInfo,
-    customScorerId
-  );
-  let providers: OnChainProviderType[] = [];
-  let score = 0;
-  let expirationDate: Date | undefined;
-  if (passportAttestationData) {
-    score = passportAttestationData.score.value;
-    expirationDate = passportAttestationData.score.expirationDate;
+    chainId: chainId as keyof typeof onchainInfo,
+    customScorerId,
+  });
 
-    const { onChainProviderInfo, hashes, issuanceDates, expirationDates } = await decodeProviderInformation(
-      passportAttestationData.passport
-    );
-
-    providers = onChainProviderInfo
-      .sort((a, b) => a.providerNumber - b.providerNumber)
-      .map((providerInfo, index) => ({
-        providerName: providerInfo.providerName,
-        credentialHash: `v0.0.0:${Buffer.from(hashes[index].slice(2), "hex").toString("base64")}`,
-        expirationDate: new Date(expirationDates[index].toNumber() * 1000),
-        issuanceDate: new Date(issuanceDates[index].toNumber() * 1000),
-      }));
-  }
+  const score = attestationData?.score.value || 0;
+  const expirationDate = attestationData?.score.expirationDate;
+  const providers = attestationData?.providers || [];
 
   return {
     chainId,
@@ -100,6 +88,7 @@ const getOnChainDataForChain = async ({
 };
 
 const useOnChainDataQuery = (address?: string) => {
+  const wagmiChains = useChains();
   const customization = useCustomization();
   const enabledChains = chains
     .filter(({ attestationProvider }) => attestationProvider?.status === "enabled")
@@ -119,7 +108,7 @@ const useOnChainDataQuery = (address?: string) => {
         }
         return acc;
       },
-      {} as Record<string, SingleChainData>
+      {} as Record<ChainId, SingleChainData>
     );
 
     return {
@@ -132,11 +121,22 @@ const useOnChainDataQuery = (address?: string) => {
 
   return useQueries({
     queries: enabledChains.map((chain) => {
+      const wagmiChain = wagmiChains.find(({ id }) => id === parseInt(chain.id));
+      if (!wagmiChain) throw new Error(`Chain ${chain.id} not found in wagmiChains`);
+
+      console.log("wagmiChain", wagmiChain);
+
+      const publicClient = createPublicClient({
+        chain: wagmiChain,
+        transport: http(String(wagmiChain.rpcUrls[0])),
+      });
+
       const customScorerId = chain.useCustomCommunityId && customization.scorer ? customization.scorer.id : undefined;
       return {
-        enabled: FeatureFlags.FF_CHAIN_SYNC && Boolean(address),
+        enabled: FeatureFlags.FF_CHAIN_SYNC && Boolean(address) && Boolean(publicClient),
         queryKey: [...ALL_CHAIN_DATA_QUERY_KEY, address, chain.id, customScorerId],
-        queryFn: () => getOnChainDataForChain({ address: address!, chainId: chain.id, customScorerId }),
+        queryFn: () =>
+          getOnChainDataForChain({ address: address!, chainId: chain.id, customScorerId, publicClient: publicClient! }),
       };
     }),
     combine,
@@ -144,15 +144,15 @@ const useOnChainDataQuery = (address?: string) => {
 };
 
 export const useOnChainData = (): OnChainData => {
-  const connectedChain = useWalletStore((state) => state.chain);
-  const address = useWalletStore((state) => state.address);
+  const { address, chain } = useAccount();
+  const chainId = chain?.id.toString(16) as ChainId;
   const queryClient = useQueryClient();
 
   const { data, isError, error, isPending } = useOnChainDataQuery(address);
 
   const activeChainProviders = useMemo(
-    () => (connectedChain && data ? data[connectedChain]?.providers : null) || [],
-    [connectedChain, data]
+    () => (chainId && data ? data[chainId]?.providers : null) || [],
+    [chainId, data]
   );
 
   useEffect(() => {

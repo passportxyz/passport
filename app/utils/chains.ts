@@ -41,11 +41,12 @@ const arbitrumChainId = "0xa4b1";
 export const scrollChainId = "0x82750";
 const shapeChainId = "0x168";
 
+export type ChainId = `0x${string}`;
+
 type ChainConfig = {
-  id: string;
+  id: ChainId;
   token: string;
   label: string;
-  rpcUrl: string;
   icon: string;
   chainLink: string; // Link to which to redirect if a user clicks the chain icon in the footer for example
   explorerUrl: string;
@@ -54,10 +55,9 @@ type ChainConfig = {
 };
 
 export class Chain {
-  id: string;
+  id: ChainId;
   token: string;
   label: string;
-  rpcUrl: string;
   explorerUrl: string;
   icon: string;
   chainLink: string; // Link to which to redirect if a user clicks the chain icon in the footer for example
@@ -68,7 +68,6 @@ export class Chain {
     id,
     token,
     label,
-    rpcUrl,
     explorerUrl,
     icon,
     attestationProviderConfig,
@@ -78,7 +77,6 @@ export class Chain {
     this.id = id;
     this.token = token;
     this.label = label;
-    this.rpcUrl = rpcUrl;
     this.icon = icon;
     this.explorerUrl = explorerUrl;
     this.chainLink = chainLink;
@@ -105,7 +103,6 @@ const chainConfigs: ChainConfig[] = [
     id: "0x1",
     token: "ETH",
     label: "Ethereum Mainnet",
-    rpcUrl: MAINNET_RPC_URL,
     icon: "./assets/eth-network-logo.svg",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
     explorerUrl: "https://etherscan.io",
@@ -119,7 +116,6 @@ if (usingTestEnvironment) {
     id: sepoliaChainId,
     token: "ETH",
     label: "Sepolia",
-    rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SEPOLIA_RPC_URL as string,
     explorerUrl: "https://sepolia.etherscan.io",
     icon: "./assets/eth-network-logo.svg",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
@@ -130,7 +126,6 @@ if (usingTestEnvironment) {
     id: hardhatChainId,
     token: "ETH",
     label: "Hardhat",
-    rpcUrl: "http://127.0.0.1:8545/",
     explorerUrl: "",
     icon: "./assets/eth-network-logo.svg",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
@@ -141,7 +136,6 @@ if (usingTestEnvironment) {
     id: sepoliaOPChainId,
     token: "ETH",
     label: "OP Sepolia Testnet",
-    rpcUrl: "https://sepolia.optimism.io",
     explorerUrl: "https://sepolia-optimism.etherscan.io/",
     icon: "./assets/op-logo.svg",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
@@ -159,7 +153,6 @@ if (usingTestEnvironment) {
     id: "0x8274f",
     token: "ETH",
     label: "Scroll Sepolia",
-    rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SCROLL_SEPOLIA_RPC_URL as string,
     explorerUrl: "https://sepolia.scrollscan.com/",
     icon: "./assets/scroll-logo.svg",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
@@ -180,7 +173,6 @@ if (!TEST_MODE) {
       id: "0x89",
       token: "MATIC",
       label: "Polygon Mainnet",
-      rpcUrl: "https://matic-mainnet.chainstacklabs.com",
       explorerUrl: "https://polygonscan.com",
       icon: "./assets/eth-network-logo.svg",
       chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
@@ -191,7 +183,6 @@ if (!TEST_MODE) {
       id: "0xfa",
       token: "FTM",
       label: "Fantom Mainnet",
-      rpcUrl: "https://rpc.ftm.tools/",
       explorerUrl: "https://ftmscan.com",
       icon: "./assets/eth-network-logo.svg",
       chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
@@ -203,7 +194,6 @@ if (!TEST_MODE) {
     id: optimismChainId,
     token: "ETH",
     label: "Optimism",
-    rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_OP_RPC_URL as string,
     explorerUrl: "https://optimistic.etherscan.io",
     icon: "./assets/op-logo.svg",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
@@ -222,7 +212,6 @@ if (!TEST_MODE) {
       id: zkSyncChainId,
       token: "ETH",
       label: "zkSync",
-      rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_ZKSYNC_RPC_URL as string,
       icon: "./assets/zksyncStampIcon.svg",
       chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
       explorerUrl: "https://explorer.zksync.io/",
@@ -242,7 +231,6 @@ if (!TEST_MODE) {
     id: lineaChainId,
     token: "ETH",
     label: "Linea",
-    rpcUrl: "https://rpc.linea.build",
     explorerUrl: "https://lineascan.build/",
     icon: "./assets/linea-logo.png",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
@@ -260,7 +248,6 @@ if (!TEST_MODE) {
     id: "0xa86a",
     token: "AVAX",
     label: "Avalanche",
-    rpcUrl: "https://api.avax.network/ext/bc/C/rpc",
     explorerUrl: "https://subnets.avax.network/",
     icon: "./assets/avax-logo.svg",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
@@ -271,8 +258,6 @@ if (!TEST_MODE) {
     id: arbitrumChainId,
     token: "ETH",
     label: "Arbitrum One",
-    // rpcUrl: "https://arb1.arbitrum.io/rpc",
-    rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_ARB_RPC_URL as string,
     explorerUrl: "https://arbiscan.io/",
     icon: "./assets/arbitrum-arb-logo.svg",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
@@ -291,7 +276,6 @@ if (!TEST_MODE) {
       id: scrollChainId,
       token: "ETH",
       label: "Scroll",
-      rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SCROLL_RPC_URL as string,
       explorerUrl: "https://scrollscan.com/",
       icon: "./assets/scroll-logo.svg",
       chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
@@ -311,7 +295,6 @@ if (!TEST_MODE) {
       id: shapeChainId,
       token: "ETH",
       label: "Shape",
-      rpcUrl: process.env.NEXT_PUBLIC_PASSPORT_SHAPE_RPC_URL as string,
       explorerUrl: "https://shapescan.xyz/",
       icon: "./assets/shape-logo.svg",
       chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport/",

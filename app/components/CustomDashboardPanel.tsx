@@ -1,4 +1,4 @@
-import React, { useMemo, useState, ReactElement, JSXElementConstructor } from "react";
+import React, { useMemo, useState } from "react";
 import { VeraxPanel } from "../components/VeraxPanel";
 import { TestingPanel } from "../components/TestingPanel";
 import { Button } from "../components/Button";
@@ -98,7 +98,7 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
       ) : null}
       <div
         dangerouslySetInnerHTML={{
-          __html: renderToString(body.mainText as ReactElement<any, string | JSXElementConstructor<any>>) || "",
+          __html: renderToString(<>body.mainText</>) || "",
         }}
       />
 

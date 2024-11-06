@@ -29,13 +29,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@ethersproject/base64": "^5.6.1",
-    "@ethersproject/providers": "^5.6.2",
     "@gitcoin/passport-types": "^1.0.0",
     "@guildxyz/sdk": "^2.5.0",
     "@spruceid/didkit-wasm": "^0.3.0-alpha0",
     "axios": "^0.26.1",
     "bignumber.js": "4.0.4",
+    "ethers": "^6.13.4",
     "multiformats": "^13.0.0",
     "redis": "^4.6.10",
     "typescript": "^5.3.3"

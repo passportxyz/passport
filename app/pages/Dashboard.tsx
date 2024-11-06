@@ -18,7 +18,6 @@ import { ExpiredStampsPanel } from "../components/ExpiredStampsPanel";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalOverlay, useDisclosure } from "@chakra-ui/react";
 
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
-import { useWalletStore } from "../context/walletStore";
 import { ScorerContext } from "../context/scorerContext";
 import { useOneClickVerification } from "../hooks/useOneClickVerification";
 
@@ -36,6 +35,7 @@ import { Confetti } from "../components/Confetti";
 import { PassportDetailsButton } from "../components/PassportDetailsButton";
 import { useMessage } from "../hooks/useMessage";
 import { Customization } from "../utils/customizationUtils";
+import { useAccount } from "wagmi";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
@@ -61,7 +61,7 @@ export default function Dashboard() {
   const customization = useCustomization();
   const { isLoadingPassport, allPlatforms, databaseReady } = useContext(CeramicContext);
   const { disconnect, dbAccessTokenStatus, dbAccessToken, did } = useDatastoreConnectionContext();
-  const address = useWalletStore((state) => state.address);
+  const { address } = useAccount();
   const { initiateVerification } = useOneClickVerification();
   // TODO
   // const { error: web3ModalError } = useWeb3ModalError();

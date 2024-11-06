@@ -14,7 +14,6 @@ import {
 import { DataStorageBase, ComposeDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
-import { useWalletStore } from "./walletStore";
 import { ScorerContext } from "./scorerContext";
 
 import { PlatformGroupSpec, ProviderSpec, platforms as stampPlatforms } from "@gitcoin/passport-platforms";
@@ -25,6 +24,7 @@ import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 import { useCustomization } from "../hooks/useCustomization";
 import { useMessage } from "../hooks/useMessage";
 import { usePlatforms } from "../hooks/usePlatforms";
+import { useAccount } from "wagmi";
 
 // -- Trusted IAM servers DID
 const CACAO_ERROR_STATUSES: PassportLoadStatus[] = ["PassportCacaoError", "StampCacaoError"];
@@ -180,7 +180,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [database, setDatabase] = useState<PassportDatabase | undefined>(undefined);
   const { platforms: allPlatforms } = usePlatforms();
 
-  const address = useWalletStore((state) => state.address);
+  const { address } = useAccount();
   const { dbAccessToken, did, checkSessionIsValid } = useDatastoreConnectionContext();
   const { refreshScore, fetchStampWeights } = useContext(ScorerContext);
   const customization = useCustomization();

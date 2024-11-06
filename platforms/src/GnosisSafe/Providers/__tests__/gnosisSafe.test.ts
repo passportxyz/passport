@@ -158,7 +158,7 @@ describe("Verification fails", function () {
       } as unknown as RequestPayload);
     }).rejects.toThrow(
       new ProviderExternalVerificationError(
-        `Error verifying Gnosis Safes: {"reason":"invalid address","code":"INVALID_ARGUMENT","argument":"address","value":""}`
+        `Error verifying Gnosis Safes: {"code":"INVALID_ARGUMENT","argument":"address","value":"","shortMessage":"invalid address"}`
       )
     );
     expect(axios.get).toHaveBeenCalledTimes(0);

@@ -30,7 +30,7 @@ describe("BinanceProvider", () => {
       const mockBABTId = "0x7163ade991102bea82c6c5321c0cfd742657a011948c2ded1a041b14f173f0f0";
 
       (ethers.Contract as unknown as jest.Mock).mockImplementation(() => ({
-        tokenIdOf: jest.fn().mockResolvedValue(ethers.BigNumber.from(mockTokenId)),
+        tokenIdOf: jest.fn().mockResolvedValue(BigInt(mockTokenId)),
       }));
 
       (axios.get as jest.Mock).mockResolvedValue({
@@ -57,7 +57,7 @@ describe("BinanceProvider", () => {
       const mockTokenId = "123456";
 
       (ethers.Contract as unknown as jest.Mock).mockImplementation(() => ({
-        tokenIdOf: jest.fn().mockResolvedValue(ethers.BigNumber.from(mockTokenId)),
+        tokenIdOf: jest.fn().mockResolvedValue(BigInt(mockTokenId)),
       }));
 
       (axios.get as jest.Mock).mockResolvedValue({
@@ -131,7 +131,7 @@ describe("BinanceProvider", () => {
       (getRPCProvider as jest.Mock).mockReturnValue({});
 
       (ethers.Contract as unknown as jest.Mock).mockImplementation(() => ({
-        tokenIdOf: jest.fn().mockResolvedValue(ethers.BigNumber.from(mockTokenId)),
+        tokenIdOf: jest.fn().mockResolvedValue(BigInt(mockTokenId)),
       }));
 
       const result = await binanceProvider.getTokenId(mockAddress);

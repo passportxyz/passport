@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAttestation } from "./useAttestation";
+import { useIssueAttestation, useAttestationNonce } from "./useIssueAttestation";
 import { jsonRequest } from "../utils/AttestationProvider";
 import { useMessage } from "./useMessage";
 import { useNavigateToLastStep } from "./useNextCampaignStep";
@@ -9,7 +9,8 @@ import { scrollCampaignChain } from "../config/scroll_campaign";
 import { EasPayload, VerifiableCredential } from "@gitcoin/passport-types";
 
 export const useMintBadge = () => {
-  const { getNonce, issueAttestation } = useAttestation({ chain: scrollCampaignChain });
+  const { nonce, isError, isLoading } = useAttestationNonce({ chain: scrollCampaignChain });
+  const { issueAttestation } = useIssueAttestation({ chain: scrollCampaignChain });
   const { address } = useAppKitAccount();
   const { failure } = useMessage();
   const goToLastStep = useNavigateToLastStep();
@@ -18,10 +19,9 @@ export const useMintBadge = () => {
   const [badgesFreshlyMinted, setBadgesFreshlyMinted] = useState(false);
 
   const onMint = async ({ credentials }: { credentials: VerifiableCredential[] }) => {
+    if (isLoading || isError) return;
     try {
       setSyncingToChain(true);
-
-      const nonce = await getNonce();
 
       if (nonce === undefined) {
         failure({

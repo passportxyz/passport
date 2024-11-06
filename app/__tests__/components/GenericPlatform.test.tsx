@@ -9,7 +9,7 @@ import { CeramicContextState } from "../../context/ceramicContext";
 import { UN_SUCCESSFUL_ENS_RESULT, SUCCESFUL_ENS_RESULTS } from "../../__test-fixtures__/verifiableCredentialResults";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
-import { JsonRpcSigner } from "@ethersproject/providers";
+import { JsonRpcSigner } from "ethers";
 import { mock } from "jest-mock-extended";
 import { ChakraProvider } from "@chakra-ui/react";
 import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";

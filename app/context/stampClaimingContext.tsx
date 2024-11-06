@@ -11,7 +11,6 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
-import { useWalletStore } from "../context/walletStore";
 
 // --- Types
 import { PlatformClass } from "@gitcoin/passport-platforms";
@@ -26,6 +25,7 @@ import { datadogRum } from "@datadog/browser-rum";
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 import { useMessage } from "../hooks/useMessage";
 import { usePlatforms } from "../hooks/usePlatforms";
+import { useAccount } from "wagmi";
 
 export enum StampClaimProgressStatus {
   Idle = "idle",
@@ -88,7 +88,7 @@ export const StampClaimingContext = createContext(startingState);
 
 export const StampClaimingContextProvider = ({ children }: { children: any }) => {
   const { handlePatchStamps, userDid } = useContext(CeramicContext);
-  const address = useWalletStore((state) => state.address);
+  const { address } = useAccount();
   const { did } = useDatastoreConnectionContext();
   const { success, failure } = useMessage();
   const [status, setStatus] = useState(StampClaimProgressStatus.Idle);

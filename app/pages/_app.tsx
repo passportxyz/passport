@@ -8,10 +8,11 @@ import { AppProps } from "next/app";
 import Head from "next/head";
 
 import "../styles/globals.css";
-import "../utils/web3";
+import { wagmiConfig } from "../utils/web3";
 import { CeramicContextProvider } from "../context/ceramicContext";
 import { DatastoreConnectionContextProvider } from "../context/datastoreConnectionContext";
 import { ScorerContextProvider } from "../context/scorerContext";
+import { WagmiProvider } from "wagmi";
 
 // --- Ceramic Tools
 import { Provider as SelfIdProvider } from "@self.id/framework";
@@ -96,23 +97,25 @@ function App({ Component, pageProps }: AppProps) {
         <title>Passport XYZ</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
       </Head>
-      <QueryClientProvider client={queryClient}>
-        <SelfIdProvider client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}>
-          <DatastoreConnectionContextProvider>
-            <ScorerContextProvider>
-              <CeramicContextProvider>
-                <StampClaimingContextProvider>
-                  <RenderOnlyOnClient>
-                    <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
-                      <Component {...pageProps} />
-                    </ThemeWrapper>
-                  </RenderOnlyOnClient>
-                </StampClaimingContextProvider>
-              </CeramicContextProvider>
-            </ScorerContextProvider>
-          </DatastoreConnectionContextProvider>
-        </SelfIdProvider>
-      </QueryClientProvider>
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <SelfIdProvider client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}>
+            <DatastoreConnectionContextProvider>
+              <ScorerContextProvider>
+                <CeramicContextProvider>
+                  <StampClaimingContextProvider>
+                    <RenderOnlyOnClient>
+                      <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                        <Component {...pageProps} />
+                      </ThemeWrapper>
+                    </RenderOnlyOnClient>
+                  </StampClaimingContextProvider>
+                </CeramicContextProvider>
+              </ScorerContextProvider>
+            </DatastoreConnectionContextProvider>
+          </SelfIdProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
     </>
   );
 }

@@ -2,7 +2,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // --- Shared data context
-import { useWalletStore } from "../context/walletStore";
 
 // --- Components
 import { checkShowOnboard } from "../utils/helpers";
@@ -12,6 +11,7 @@ import { useNavigateToPage } from "../hooks/useCustomization";
 import { datadogRum } from "@datadog/browser-rum";
 import { useMessage } from "./useMessage";
 import { useAppKit, useAppKitAccount, useAppKitEvents, useAppKitState, useDisconnect } from "@reown/appkit/react";
+import { useAccount, usePublicClient } from "wagmi";
 
 type LoginStep = "NOT_STARTED" | "PENDING_WALLET_CONNECTION" | "PENDING_DATABASE_CONNECTION" | "DONE";
 
@@ -25,8 +25,8 @@ export const useLoginFlow = ({
   isLoggingIn: boolean;
   signIn: () => void;
 } => {
-  const address = useWalletStore((state) => state.address);
-  const provider = useWalletStore((state) => state.provider);
+  const { address } = useAccount();
+  const publicClient = usePublicClient();
   const { isConnected } = useAppKitAccount();
   const { open: web3ModalIsOpen } = useAppKitState();
   const { disconnect } = useDisconnect();
@@ -88,9 +88,16 @@ export const useLoginFlow = ({
   // the dashboard, the web3ModalIsOpen state is incorrect
   // until we call disconnect
   useEffect(() => {
-    if (web3ModalIsOpen && loginStep === "NOT_STARTED") {
-      disconnect();
-    }
+    (async () => {
+      if (web3ModalIsOpen && loginStep === "NOT_STARTED") {
+        try {
+          await disconnect();
+        } catch (e) {
+          // TODO
+          console.error("Error disconnecting wallet", e);
+        }
+      }
+    })();
   }, [web3ModalIsOpen, loginStep]);
 
   useEffect(() => {
@@ -109,10 +116,15 @@ export const useLoginFlow = ({
 
   useEffect(() => {
     (async () => {
-      if (!isConnectingToDatabaseRef.current && loginStep === "PENDING_DATABASE_CONNECTION" && address && provider) {
+      if (
+        !isConnectingToDatabaseRef.current &&
+        loginStep === "PENDING_DATABASE_CONNECTION" &&
+        address &&
+        publicClient
+      ) {
         isConnectingToDatabaseRef.current = true;
         try {
-          await connectDatastore(address, provider);
+          await connectDatastore(address, publicClient);
         } catch (e) {
           resetLogin();
           console.error("Error connecting to database", e);
@@ -122,7 +134,7 @@ export const useLoginFlow = ({
         }
       }
     })();
-  }, [loginStep, address, provider, connectDatastore, showConnectionError, resetLogin]);
+  }, [loginStep, address, publicClient, connectDatastore, showConnectionError, resetLogin]);
 
   const isLoggingIn = loginStep !== "DONE" && loginStep !== "NOT_STARTED";
 

@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
 import { datadogRum } from "@datadog/browser-rum";
-import { useWalletStore } from "./walletStore";
 import { EthereumWebAuth } from "@didtools/pkh-ethereum";
 import { Buffer } from "buffer";
 
@@ -14,6 +13,8 @@ import { Eip1193Provider } from "ethers";
 import { createSignedPayload } from "../utils/helpers";
 import { updateIntercomUserData } from "../hooks/useIntercom";
 import { useAppKitAccount, useDisconnect } from "@reown/appkit/react";
+import { useAccount } from "wagmi";
+import { PublicClient } from "viem";
 
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
@@ -22,7 +23,7 @@ export type DatastoreConnectionContextState = {
   dbAccessToken?: string;
   did?: DID;
   disconnect: (address: string) => Promise<void>;
-  connect: (address: string, provider: Eip1193Provider) => Promise<void>;
+  connect: (address: string, publicClient: PublicClient) => Promise<void>;
   checkSessionIsValid: () => boolean;
 };
 
@@ -36,7 +37,7 @@ export const DatastoreConnectionContext = createContext<DatastoreConnectionConte
 // In the app, the context hook should be used. This is only exported for testing
 export const useDatastoreConnection = () => {
   const { disconnect: disconnectWallet } = useDisconnect();
-  const chain = useWalletStore((state) => state.chain);
+  const { chain } = useAccount();
   const { isConnected, address: web3ModalAddress } = useAppKitAccount();
 
   const [dbAccessTokenStatus, setDbAccessTokenStatus] = useState<DbAuthTokenStatus>("idle");
@@ -119,7 +120,7 @@ export const useDatastoreConnection = () => {
   }, []);
 
   const connect = useCallback(
-    async (address: string, provider: Eip1193Provider) => {
+    async (address: string, publicClient: PublicClient) => {
       if (address) {
         try {
           // This is to fix issues with extensions that inject old versions of Buffer
@@ -131,7 +132,7 @@ export const useDatastoreConnection = () => {
             chainId: "eip155:1",
             address,
           });
-          const authMethod = await EthereumWebAuth.getAuthMethod(provider, accountId);
+          const authMethod = await EthereumWebAuth.getAuthMethod(publicClient, accountId);
 
           let session: DIDSession = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
 

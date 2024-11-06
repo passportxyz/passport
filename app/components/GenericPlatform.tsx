@@ -22,7 +22,6 @@ import { JsonOutputModal } from "./JsonOutputModal";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
-import { useWalletStore } from "../context/walletStore";
 import { waitForRedirect } from "../context/stampClaimingContext";
 
 // --- Types
@@ -39,6 +38,7 @@ import { useDatastoreConnectionContext } from "../context/datastoreConnectionCon
 import { useAtom } from "jotai";
 import { mutableUserVerificationAtom } from "../context/userState";
 import { useMessage } from "../hooks/useMessage";
+import { useAccount } from "wagmi";
 
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
@@ -77,7 +77,7 @@ export const GenericPlatform = ({
   isOpen,
   onClose,
 }: GenericPlatformProps): JSX.Element => {
-  const address = useWalletStore((state) => state.address);
+  const { address } = useAccount();
   const { handlePatchStamps, verifiedProviderIds, userDid, expiredProviders } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);

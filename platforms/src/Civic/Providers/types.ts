@@ -1,6 +1,4 @@
 // Mapping civic passes to [EIP3525](https://eips.ethereum.org/EIPS/eip-3525) slotIDs
-import { BigNumber } from "@ethersproject/bignumber";
-
 export enum CivicPassType {
   CAPTCHA = 4,
   IDV = 6,
@@ -26,7 +24,7 @@ export const supportedChains = [
   "XDC_APOTHEM",
 ] as const;
 
-export type SupportedChain = typeof supportedChains[number];
+export type SupportedChain = (typeof supportedChains)[number];
 
 type CivicPassState = "ACTIVE" | "FROZEN" | "REVOKED";
 
@@ -45,7 +43,7 @@ export type PassesForAddress = { passes: Record<string, CivicPassLookupPass[]> }
 export type CivicPassLookupResponse = Record<string, PassesForAddress>;
 
 type PassDetails = {
-  expiry?: BigNumber;
+  expiry?: bigint;
   identifier: string;
   state: CivicPassState;
 };

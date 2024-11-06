@@ -1,7 +1,7 @@
 import { networks } from "./chains";
 
 import { createAppKit } from "@reown/appkit/react";
-import { EthersAdapter } from "@reown/appkit-adapter-ethers";
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 
 const projectId = (process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string) || "default-project-id";
 
@@ -12,28 +12,28 @@ const metadata = {
   icons: ["/assets/onboarding.svg"],
 };
 
-// const ethersConfig = defaultConfig({
-//   metadata,
-//   defaultChainId: 1,
-//   auth: {
-//     email: false,
-//   },
-// });
+export const wagmiAdapter = new WagmiAdapter({
+  projectId,
+  networks,
+  ssr: true,
+});
+
+export const wagmiConfig = wagmiAdapter.wagmiConfig;
 
 export const web3Modal = createAppKit({
-  adapters: [new EthersAdapter()],
-  networks,
-  metadata,
+  adapters: [wagmiAdapter],
   projectId,
-  themeMode: "dark",
-  themeVariables: {
-    "--w3m-font-family": "var(--font-body)",
-    "--w3m-accent": "rgb(var(--color-foreground-4))",
-  },
-  enableEIP6963: false,
+  networks,
+  defaultNetwork: networks[0],
+  metadata: metadata,
   features: {
     email: false,
     socials: [],
     emailShowWallets: false,
+  },
+  themeMode: "dark",
+  themeVariables: {
+    "--w3m-font-family": "var(--font-body)",
+    "--w3m-accent": "rgb(var(--color-foreground-4))",
   },
 });

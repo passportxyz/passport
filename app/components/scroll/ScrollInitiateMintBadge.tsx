@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
 import { useMessage } from "../../hooks/useMessage";
-import { useAttestation } from "../../hooks/useAttestation";
+import { useIssueAttestation } from "../../hooks/useIssueAttestation";
 import { Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 import { scrollCampaignChain, scrollCanvasProfileRegistryAddress } from "../../config/scroll_campaign";
 import { ProviderWithTitle } from "../ScrollCampaign";
 import { ScrollCampaignPage } from "./ScrollCampaignPage";
 import { LoadingBarSection, LoadingBarSectionProps } from "../LoadingBar";
 import { LoadButton } from "../LoadButton";
-import { useWalletStore } from "../../context/walletStore";
-import { ethers } from "ethers";
-import { Hyperlink } from "@gitcoin/passport-platforms";
 import ScrollCanvasProfileRegistryAbi from "../../abi/ScrollCanvasProfileRegistry.json";
 import { RenderedBadges } from "./ScrollMintedBadge";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
+import { useAccount, usePublicClient } from "wagmi";
 
 export const ScrollInitiateMintBadge = ({
   onMint,
@@ -29,17 +27,20 @@ export const ScrollInitiateMintBadge = ({
   deduplicatedBadgeStamps: Stamp[];
   earnedBadges: ProviderWithTitle[];
 }) => {
-  const { needToSwitchChain } = useAttestation({ chain: scrollCampaignChain });
+  const publicClient = usePublicClient({
+    chainId: parseInt(scrollCampaignChain?.id || ""),
+  });
+  const { needToSwitchChain } = useIssueAttestation({ chain: scrollCampaignChain });
   const [hasCanvas, setHasCanvas] = useState<Boolean | undefined>(undefined);
   const [canvasCheckPaused, setCanvasCheckPaused] = useState(false);
   const { failure } = useMessage();
-  const address = useWalletStore((state) => state.address);
+  const { address } = useAccount();
   const isLg = useBreakpoint("lg");
 
   const loading = credentialsLoading || hasCanvas === undefined;
 
   useEffect(() => {
-    if (!scrollCampaignChain || hasCanvas !== undefined) return;
+    if (!scrollCampaignChain || hasCanvas !== undefined || !publicClient) return;
 
     (async () => {
       try {
@@ -49,17 +50,24 @@ export const ScrollInitiateMintBadge = ({
           return;
         }
 
-        const scrollRpcProvider = new ethers.JsonRpcProvider(scrollCampaignChain.rpcUrl);
-        const badgeContract = new ethers.Contract(
-          scrollCanvasProfileRegistryAddress,
-          ScrollCanvasProfileRegistryAbi.abi,
-          scrollRpcProvider
-        );
+        // Deterministic profile "address" for a given user address
+        const profile = (await publicClient.readContract({
+          address: scrollCanvasProfileRegistryAddress as `0x${string}`,
+          abi: ScrollCanvasProfileRegistryAbi.abi,
+          functionName: "getProfile",
+          args: [address],
+        })) as string | undefined;
 
-        const profileAddress = await badgeContract.getProfile(address);
-        const hasCanvas = await badgeContract.isProfileMinted(profileAddress);
+        const hasCanvas =
+          Boolean(profile) &&
+          ((await publicClient.readContract({
+            address: scrollCanvasProfileRegistryAddress as `0x${string}`,
+            abi: ScrollCanvasProfileRegistryAbi.abi,
+            functionName: "isProfileMinted",
+            args: [profile],
+          })) as boolean | undefined);
 
-        setHasCanvas(hasCanvas);
+        setHasCanvas(Boolean(hasCanvas));
         setCanvasCheckPaused(true);
         setTimeout(() => setCanvasCheckPaused(false), 10000);
       } catch (error) {
@@ -70,7 +78,7 @@ export const ScrollInitiateMintBadge = ({
         });
       }
     })();
-  }, [address, hasCanvas, failure]);
+  }, [address, hasCanvas, failure, publicClient]);
 
   const hasBadge = highestLevelBadgeStamps.length > 0;
   const hasMultipleBadges = highestLevelBadgeStamps.length > 1;
