@@ -46,7 +46,7 @@ const BASE_PLATFORM_CATAGORIES: PLATFORM_CATEGORY[] = [
   {
     name: "Social & Professional Platforms",
     description: "Link your profiles from established social media and professional networking sites for verification.",
-    platforms: ["Github", "Linkedin", "LinkedinV2", "Google", "Discord"],
+    platforms: ["Github", "Linkedin", "Google", "Discord"],
   },
   {
     name: "Biometric Verification",

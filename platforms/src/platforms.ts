@@ -23,7 +23,6 @@ import * as Outdid from "./Outdid";
 import * as AllowList from "./AllowList";
 import * as Binance from "./Binance";
 import * as CustomGithub from "./CustomGithub";
-import * as LinkedinV2 from "./LinkedinV2";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types";
 
 type PlatformConfig = {
@@ -41,7 +40,6 @@ const platforms: Record<string, PlatformConfig> = {
   Google,
   Github,
   Linkedin,
-  LinkedinV2,
   Ens,
   Brightid,
   ETH,
@@ -59,7 +57,7 @@ const platforms: Record<string, PlatformConfig> = {
   Outdid,
   AllowList,
   Binance,
-  CustomGithub
+  CustomGithub,
 };
 
 if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {

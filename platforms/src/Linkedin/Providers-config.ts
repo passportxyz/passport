@@ -4,15 +4,16 @@ import { LinkedinProvider } from "./Providers/linkedin";
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/linkedinStampIcon.svg",
   platform: "Linkedin",
-  name: "Linkedin",
-  description: "Connect your existing Linkedin account to verify.",
-  connectMessage: "Connect Account",
+  name: "LinkedIn",
+  description:
+    "This stamp confirms that your LinkedIn account is verified and includes a valid, verified email address.",
+  connectMessage: "Connect Account to LinkedIn",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Account Name",
-    providers: [{ title: "Encrypted", name: "Linkedin" }],
+    platformGroup: "Account Verification",
+    providers: [{ title: "Verified email address", name: "Linkedin" }],
   },
 ];
 
