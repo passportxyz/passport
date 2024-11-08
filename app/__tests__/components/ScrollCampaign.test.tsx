@@ -1,3 +1,4 @@
+import { vi, describe, it, expect } from "vitest";
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -5,35 +6,39 @@ import { MemoryRouter } from "react-router-dom";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
 import { AppRoutes } from "../../pages";
-import { useParams } from "react-router-dom";
 import { CredentialResponseBody, PROVIDER_ID } from "@gitcoin/passport-types";
 import { googleStampFixture } from "../../__test-fixtures__/databaseStorageFixtures";
 import * as passportIdentity from "@gitcoin/passport-identity";
 import { useScrollBadge } from "../../hooks/useScrollBadge";
 import { ScrollStepsBar } from "../../components/scroll/ScrollLayout";
 import { useMintBadge } from "../../hooks/useMintBadge";
-import { ProviderWithTitle } from "../../components/ScrollCampaign";
-import { ethers } from "ethers";
-import { scrollCampaignChain } from "../../config/scroll_campaign";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
+import { useIssueAttestation, useAttestationNonce } from "../../hooks/useIssueAttestation";
+import { usePublicClient } from "wagmi";
 
-jest.mock("@gitcoin/passport-database-client");
-jest.mock("ethers");
+vi.mock("../../hooks/useIssueAttestation");
 
-const navigateMock = jest.fn();
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useNavigate: () => navigateMock,
-  useParams: jest.fn().mockImplementation(jest.requireActual("react-router-dom").useParams),
-}));
+vi.mock("@gitcoin/passport-database-client");
+vi.mock("wagmi", async (importActual) => ({ ...(await importActual()), usePublicClient: vi.fn() }));
 
-jest.mock("@gitcoin/passport-database-client");
+const navigateMock = vi.fn();
+const useParamsMock = vi.fn();
+vi.mock("react-router-dom", async (importActual) => {
+  const reactRouterDom = (await importActual()) as any;
+  return {
+    ...reactRouterDom,
+    useNavigate: () => navigateMock,
+    useParams: () => useParamsMock(),
+  };
+});
+
+vi.mock("@gitcoin/passport-database-client");
 
 const mockDatabase = {
-  addStamps: jest.fn().mockResolvedValue({
+  addStamps: vi.fn().mockResolvedValue({
     mocked: "response",
   }),
-  getPassport: jest.fn().mockResolvedValue({
+  getPassport: vi.fn().mockResolvedValue({
     status: "Success",
     passport: {
       stamps: [],
@@ -45,14 +50,12 @@ const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
   database: mockDatabase as any,
 });
 
-jest.mock("../../utils/helpers", () => {
-  return {
-    ...jest.requireActual("../../utils/helpers"),
-    generateUID: jest.fn(() => "test"),
-  };
-});
+vi.mock("../../utils/helpers", async (importActual) => ({
+  ...(await importActual()),
+  generateUID: vi.fn(() => "test"),
+}));
 
-jest.mock("../../config/scroll_campaign", () => {
+vi.mock("../../config/scroll_campaign", () => {
   const mockBadgeProviders = [
     {
       badgeContractAddress: "0xMockContractAddress",
@@ -80,22 +83,22 @@ jest.mock("../../config/scroll_campaign", () => {
     badgeContractInfo: mockBadgeProviders,
     scrollCampaignBadgeProviderInfo: mockScrollCampaignBadgeProviderInfo,
     scrollCampaignBadgeProviders: ["SomeDeveloperProvider"],
-    loadBadgeProviders: jest.fn().mockImplementation(() => {
+    loadBadgeProviders: vi.fn().mockImplementation(() => {
       return mockBadgeProviders;
     }),
     scrollCampaignChain: { id: "0x1", rpcUrl: "https://example.com" },
   };
 });
 
-jest.mock("../../config/platformMap", () => {
-  const originalModule = jest.requireActual("../../config/platformMap");
+vi.mock("../../config/platformMap", async (importActual) => {
+  const originalModule = (await importActual()) as any;
   return {
     ...originalModule,
     CUSTOM_PLATFORM_TYPE_INFO: {
       ...originalModule.CUSTOM_PLATFORM_TYPE_INFO,
       DEVEL: {
         ...originalModule.CUSTOM_PLATFORM_TYPE_INFO.DEVEL,
-        platformClass: jest.fn().mockImplementation(() => ({
+        platformClass: vi.fn().mockImplementation(() => ({
           getProviderPayload: async () => {
             return {
               mockedProviderPayload: "Mock",
@@ -107,11 +110,11 @@ jest.mock("../../config/platformMap", () => {
   };
 });
 
-jest.mock("@gitcoin/passport-identity", () => {
-  const originalModule = jest.requireActual("@gitcoin/passport-identity");
+vi.mock("@gitcoin/passport-identity", async (importActual) => {
+  const originalModule = (await importActual()) as any;
   return {
     ...originalModule,
-    fetchVerifiableCredential: jest.fn().mockImplementation(async () => {
+    fetchVerifiableCredential: vi.fn().mockImplementation(async () => {
       const credentials: CredentialResponseBody[] = [
         {
           credential: googleStampFixture.credential,
@@ -126,9 +129,9 @@ jest.mock("@gitcoin/passport-identity", () => {
   };
 });
 
-jest.mock("../../hooks/useScrollBadge", () => {
+vi.mock("../../hooks/useScrollBadge", () => {
   return {
-    useScrollBadge: jest.fn().mockImplementation(() => {
+    useScrollBadge: vi.fn().mockImplementation(() => {
       return {
         badges: [],
         errors: {},
@@ -139,21 +142,48 @@ jest.mock("../../hooks/useScrollBadge", () => {
   };
 });
 
-jest.mock("../../hooks/useBreakpoint");
+vi.mock("../../hooks/useBreakpoint");
+
+vi.mock("../../hooks/useMintBadge", () => {
+  return {
+    useMintBadge: vi.fn().mockReturnValue({
+      onMint: vi.fn(),
+      syncingToChain: false,
+      earnedBadges: [],
+      badgesFreshlyMinted: false,
+    }),
+  };
+});
+
+const mockIssueAttestation = vi.fn();
 
 describe("Landing page tests", () => {
-  it("goes to next page when login successful", async () => {
-    const mockUseLoginFlow = jest.fn().mockReturnValue({
-      isLoggingIn: true,
-      signIn: ({ onLoggedIn }: { onLoggedIn: () => void }) => {
-        onLoggedIn();
-      },
-      loginStep: "DONE",
+  beforeEach(() => {
+    vi.mocked(useIssueAttestation).mockReturnValue({
+      issueAttestation: mockIssueAttestation,
+      needToSwitchChain: false,
     });
 
-    jest.mock("../../hooks/useLoginFlow", () => ({
-      useLoginFlow: mockUseLoginFlow,
+    vi.mocked(useAttestationNonce).mockReturnValue({
+      nonce: 1,
+      isLoading: false,
+      isError: false,
+      refresh: vi.fn(),
+    });
+  });
+
+  it("goes to next page when login successful", async () => {
+    vi.mock("../../hooks/useLoginFlow", () => ({
+      useLoginFlow: vi.fn().mockImplementation(({ onLoggedIn }) => ({
+        isLoggingIn: false,
+        signIn: () => {
+          onLoggedIn();
+        },
+        loginStep: "DONE",
+      })),
     }));
+
+    useParamsMock.mockReturnValue({ campaignId: "scroll-developer" });
 
     renderWithContext(
       mockCeramicContext,
@@ -179,12 +209,22 @@ describe("Landing page tests", () => {
 
 describe("Component tests", () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+    vi.mocked(useIssueAttestation).mockReturnValue({
+      issueAttestation: mockIssueAttestation,
+      needToSwitchChain: false,
+    });
+    vi.mocked(useAttestationNonce).mockReturnValue({
+      nonce: 1,
+      isLoading: false,
+      isError: false,
+      refresh: vi.fn(),
+    });
   });
   it("shows step 0 correctly", () => {
-    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "0" });
-    (useBreakpoint as jest.Mock).mockReturnValue(true);
+    useParamsMock.mockReturnValue({ campaignId: "scroll-developer", step: "0" });
+
+    vi.mocked(useBreakpoint).mockReturnValue(true);
 
     render(<ScrollStepsBar />);
 
@@ -202,8 +242,8 @@ describe("Component tests", () => {
   });
 
   it("shows step 1 correctly", () => {
-    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "1" });
-    (useBreakpoint as jest.Mock).mockReturnValue(true);
+    useParamsMock.mockReturnValue({ campaignId: "scroll-developer", step: "1" });
+    vi.mocked(useBreakpoint).mockReturnValue(true);
 
     render(<ScrollStepsBar />);
 
@@ -223,8 +263,20 @@ describe("Component tests", () => {
 
 describe("Github Connect page tests", () => {
   beforeEach(async () => {
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+    useParamsMock.mockReturnValue({ campaignId: "scroll-developer", step: "1" });
+    const mockOnMint = vi.fn();
+    vi.mocked(useMintBadge).mockReturnValue({
+      onMint: mockOnMint,
+      syncingToChain: false,
+      badgesFreshlyMinted: false,
+    });
+    vi.mocked(useScrollBadge).mockReturnValue({
+      hasAtLeastOneBadge: false,
+      badges: [],
+      errors: {},
+      areBadgesLoading: false,
+    });
   });
   it("redirects to the login page when did not present", async () => {
     renderWithContext(
@@ -280,7 +332,7 @@ describe("Github Connect page tests", () => {
   });
 
   it("displays an error message if the verification failed", async () => {
-    jest.spyOn(passportIdentity, "fetchVerifiableCredential").mockImplementation(async () => {
+    vi.spyOn(passportIdentity, "fetchVerifiableCredential").mockImplementation(async () => {
       return { credentials: [] };
     });
 
@@ -303,12 +355,11 @@ describe("Github Connect page tests", () => {
 
   it("navigates to the last step when the user already has at least a badge", async () => {
     // Mocking the necessary context and hooks
-    (useScrollBadge as jest.Mock).mockReturnValue({
+    vi.mocked(useScrollBadge).mockReturnValue({
       hasAtLeastOneBadge: true,
-      badges: [{ contract: "0X000", hasBadge: true, badgeLevel: 1, badgeUri: "https://example.com" }],
+      badges: [{ contract: "0X000", hasBadge: true, badgeLevel: 1 }],
       errors: {},
       areBadgesLoading: false,
-      error: null,
     });
 
     renderWithContext(
@@ -322,30 +373,28 @@ describe("Github Connect page tests", () => {
   });
 });
 
-jest.mock("../../hooks/useMintBadge", () => {
-  return {
-    useMintBadge: jest.fn().mockReturnValue({
-      onMint: jest.fn(),
-      syncingToChain: false,
-      earnedBadges: [],
-      badgesFreshlyMinted: false,
-    }),
-  };
-});
 describe("ScrollCampaign Step 2 (Mint Badge) tests", () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+    vi.mocked(useIssueAttestation).mockReturnValue({
+      issueAttestation: mockIssueAttestation,
+      needToSwitchChain: false,
+    });
+    vi.mocked(useAttestationNonce).mockReturnValue({
+      nonce: 1,
+      isLoading: false,
+      isError: false,
+      refresh: vi.fn(),
+    });
   });
 
   it("renders ScrollMintBadge component correctly at step 2", () => {
-    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "2" });
+    useParamsMock.mockReturnValue({ campaignId: "scroll-developer", step: "2" });
 
-    const mockOnMint = jest.fn();
-    (useMintBadge as jest.Mock).mockReturnValue({
+    const mockOnMint = vi.fn();
+    vi.mocked(useMintBadge).mockReturnValue({
       onMint: mockOnMint,
       syncingToChain: false,
-      earnedBadges: [],
       badgesFreshlyMinted: false,
     });
 
@@ -360,26 +409,17 @@ describe("ScrollCampaign Step 2 (Mint Badge) tests", () => {
   });
 
   it("calls onMint when 'Mint Badge' button is clicked", async () => {
-    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "2" });
+    useParamsMock.mockReturnValue({ campaignId: "scroll-developer", step: "2" });
 
-    const mockOnMint = jest.fn();
-    const earnedBadges: ProviderWithTitle[] = [
-      {
-        name: "SomeDeveloperProvider" as PROVIDER_ID,
-        title: "Mock Badge Title",
-        image: "mockImage.png",
-        level: 1,
-      },
-    ];
+    const mockOnMint = vi.fn();
 
-    (useMintBadge as jest.Mock).mockReturnValue({
+    vi.mocked(useMintBadge).mockReturnValue({
       onMint: mockOnMint,
       syncingToChain: false,
-      earnedBadges: earnedBadges,
       badgesFreshlyMinted: false,
     });
 
-    (mockDatabase.getPassport as jest.Mock).mockResolvedValue({
+    vi.mocked(mockDatabase.getPassport).mockResolvedValue({
       status: "Success",
       passport: {
         stamps: [
@@ -404,9 +444,9 @@ describe("ScrollCampaign Step 2 (Mint Badge) tests", () => {
   });
 
   it("renders ScrollMintingBadge when syncingToChain is true", async () => {
-    (useParams as jest.Mock).mockReturnValue({ campaignId: "scroll-developer", step: "2" });
+    useParamsMock.mockReturnValue({ campaignId: "scroll-developer", step: "2" });
 
-    (mockDatabase.getPassport as jest.Mock).mockResolvedValue({
+    vi.mocked(mockDatabase.getPassport).mockResolvedValue({
       status: "Success",
       passport: {
         stamps: [
@@ -422,19 +462,23 @@ describe("ScrollCampaign Step 2 (Mint Badge) tests", () => {
       },
     });
 
-    (useMintBadge as jest.Mock).mockReturnValue({
-      onMint: jest.fn(),
+    vi.mocked(useMintBadge).mockReturnValue({
+      onMint: vi.fn(),
       syncingToChain: true,
       badgesFreshlyMinted: false,
     });
 
-    const mockContract = {
-      getProfile: jest.fn().mockResolvedValue("0xMockProfileAddress"),
-      isProfileMinted: jest.fn().mockResolvedValue(true),
-      burntProviderHashes: jest.fn().mockResolvedValue(false),
-    };
-
-    (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
+    vi.mocked(usePublicClient).mockReturnValue({
+      readContract: vi.fn().mockImplementation(({ functionName }) => {
+        if (functionName === "getProfile") {
+          return "0xMockProfileAddress";
+        } else if (functionName === "isProfileMinted") {
+          return true;
+        } else if (functionName === "burntProviderHashes") {
+          return false;
+        }
+      }),
+    } as any);
 
     renderWithContext(
       mockCeramicContext,
@@ -444,7 +488,9 @@ describe("ScrollCampaign Step 2 (Mint Badge) tests", () => {
     );
 
     // Verify that the ScrollMintingBadge component is rendered
-    expect(screen.getByText("Minting badge...")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Minting badge...")).toBeInTheDocument();
+    });
 
     // Check that the badges are displayed
     await waitFor(() => {

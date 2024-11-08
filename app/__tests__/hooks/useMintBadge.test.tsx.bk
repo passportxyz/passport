@@ -1,46 +1,44 @@
+// src/hooks/__tests__/useMintBadge.test.ts
 import { vi, describe, it, expect, Mock } from "vitest";
 import { renderHook, act } from "@testing-library/react-hooks";
 import { useMintBadge } from "../../hooks/useMintBadge";
 import { useIssueAttestation, useAttestationNonce } from "../../hooks/useIssueAttestation";
 import { jsonRequest } from "../../utils/AttestationProvider";
+import { useMessage } from "../../hooks/useMessage";
+import { useNavigateToLastStep } from "../../hooks/useNextCampaignStep";
+import { useAccount } from "wagmi";
 
-const mockIssueAttestation = vi.fn();
-const mockFailure = vi.fn();
-const mockGoToLastStep = vi.fn();
-
-vi.mock("../../hooks/useIssueAttestation");
-
+vi.mock("../../hooks/useIssueAttestation", () => ({
+  useIssueAttestation: vi.fn().mockReturnValue({
+    issueAttestation: vi.fn(),
+    needToSwitchChain: false,
+  }),
+  useAttestationNonce: vi.fn().mockReturnValue({
+    nonce: 1,
+    isLoading: false,
+    isError: false,
+    refresh: vi.fn(),
+  }),
+}));
 vi.mock("../../utils/AttestationProvider");
-
-vi.mock("../../hooks/useMessage", () => ({
-  useMessage: () => ({
-    failure: mockFailure,
-  }),
-}));
-
-vi.mock("../../hooks/useNextCampaignStep", () => ({
-  useNavigateToLastStep: () => mockGoToLastStep,
-}));
-
-vi.mock("wagmi", () => ({
-  useAccount: () => ({
-    address: "0xTestAddress",
-  }),
-}));
+vi.mock("../../hooks/useMessage");
+vi.mock("../../hooks/useNextCampaignStep");
 
 describe("useMintBadge hook", () => {
+  const mockJsonRequest = jsonRequest as Mock;
+  const mockFailure = vi.fn();
+  const mockGoToLastStep = vi.fn();
+
   beforeEach(() => {
     vi.resetAllMocks();
-    vi.mocked(useIssueAttestation).mockReturnValue({
-      issueAttestation: mockIssueAttestation,
-      needToSwitchChain: false,
+
+    mockJsonRequest.mockImplementation(() => {});
+
+    (useMessage as Mock).mockReturnValue({
+      failure: mockFailure,
     });
-    vi.mocked(useAttestationNonce).mockReturnValue({
-      nonce: 1,
-      isLoading: false,
-      isError: false,
-      refresh: vi.fn(),
-    });
+
+    (useNavigateToLastStep as Mock).mockReturnValue(mockGoToLastStep);
   });
 
   it("handles successful minting", async () => {
@@ -53,13 +51,9 @@ describe("useMintBadge hook", () => {
     const testNonce = 123;
     const testData = { attestation: "testAttestation" };
 
-    vi.mocked(useAttestationNonce).mockReturnValue({
-      nonce: testNonce,
-      isLoading: false,
-      isError: false,
-      refresh: vi.fn(),
-    });
-    vi.mocked(jsonRequest).mockResolvedValue({ data: testData });
+    mockGetNonce.mockResolvedValue(testNonce);
+    mockJsonRequest.mockResolvedValue({ data: testData });
+    mockIssueAttestation.mockResolvedValue(true);
 
     const { result } = renderHook(() => useMintBadge());
 
@@ -69,7 +63,8 @@ describe("useMintBadge hook", () => {
     });
 
     // Assert
-    expect(jsonRequest).toHaveBeenCalledWith(
+    expect(mockGetNonce).toHaveBeenCalled();
+    expect(mockJsonRequest).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({
         recipient: "0xTestAddress",
@@ -92,12 +87,7 @@ describe("useMintBadge hook", () => {
       },
     ];
 
-    vi.mocked(useAttestationNonce).mockReturnValue({
-      nonce: undefined,
-      isLoading: false,
-      isError: false,
-      refresh: vi.fn(),
-    });
+    mockGetNonce.mockResolvedValue(undefined);
 
     const { result } = renderHook(() => useMintBadge());
 
@@ -107,11 +97,12 @@ describe("useMintBadge hook", () => {
     });
 
     // Assert
+    expect(mockGetNonce).toHaveBeenCalled();
     expect(mockFailure).toHaveBeenCalledWith({
       title: "Error",
       message: "An unexpected error occurred while trying to get the nonce.",
     });
-    expect(jsonRequest).not.toHaveBeenCalled();
+    expect(mockJsonRequest).not.toHaveBeenCalled();
     expect(mockIssueAttestation).not.toHaveBeenCalled();
     expect(mockGoToLastStep).not.toHaveBeenCalled();
 
@@ -129,13 +120,8 @@ describe("useMintBadge hook", () => {
     ];
     const testNonce = 123;
 
-    vi.mocked(useAttestationNonce).mockReturnValue({
-      nonce: testNonce,
-      isLoading: false,
-      isError: false,
-      refresh: vi.fn(),
-    });
-    vi.mocked(jsonRequest).mockResolvedValue({ data: { error: "some error" } } as any);
+    mockGetNonce.mockResolvedValue(testNonce);
+    mockJsonRequest.mockResolvedValue({ data: { error: "some error" } });
 
     const { result } = renderHook(() => useMintBadge());
 
@@ -145,7 +131,8 @@ describe("useMintBadge hook", () => {
     });
 
     // Assert
-    expect(jsonRequest).toHaveBeenCalled();
+    expect(mockGetNonce).toHaveBeenCalled();
+    expect(mockJsonRequest).toHaveBeenCalled();
     expect(mockFailure).toHaveBeenCalledWith({
       title: "Error",
       message: "An unexpected error occurred while generating attestations.",
@@ -168,13 +155,8 @@ describe("useMintBadge hook", () => {
     const testNonce = 123;
     const testData = { attestation: "testAttestation" };
 
-    vi.mocked(useAttestationNonce).mockReturnValue({
-      nonce: testNonce,
-      isLoading: false,
-      isError: false,
-      refresh: vi.fn(),
-    });
-    vi.mocked(jsonRequest).mockResolvedValue({ data: testData } as any);
+    mockGetNonce.mockResolvedValue(testNonce);
+    mockJsonRequest.mockResolvedValue({ data: testData });
     mockIssueAttestation.mockRejectedValue(new Error("Attestation failed"));
 
     const { result } = renderHook(() => useMintBadge());
@@ -185,7 +167,8 @@ describe("useMintBadge hook", () => {
     });
 
     // Assert
-    expect(jsonRequest).toHaveBeenCalled();
+    expect(mockGetNonce).toHaveBeenCalled();
+    expect(mockJsonRequest).toHaveBeenCalled();
     expect(mockIssueAttestation).toHaveBeenCalledWith({ data: testData });
     expect(mockFailure).toHaveBeenCalledWith({
       title: "Error",
@@ -207,14 +190,8 @@ describe("useMintBadge hook", () => {
     ];
     const testNonce = 123;
 
-    vi.mocked(useAttestationNonce).mockReturnValue({
-      nonce: testNonce,
-      isLoading: false,
-      isError: false,
-      refresh: vi.fn(),
-    });
-
-    vi.mocked(jsonRequest).mockRejectedValue(new Error("Network error"));
+    mockGetNonce.mockResolvedValue(testNonce);
+    mockJsonRequest.mockRejectedValue(new Error("Network error"));
 
     const { result } = renderHook(() => useMintBadge());
 
@@ -224,7 +201,8 @@ describe("useMintBadge hook", () => {
     });
 
     // Assert
-    expect(jsonRequest).toHaveBeenCalled();
+    expect(mockGetNonce).toHaveBeenCalled();
+    expect(mockJsonRequest).toHaveBeenCalled();
     expect(mockIssueAttestation).not.toHaveBeenCalled();
     expect(mockFailure).toHaveBeenCalledWith({
       title: "Error",

@@ -10,7 +10,7 @@ import { useNavigateToPage } from "../hooks/useCustomization";
 
 import { datadogRum } from "@datadog/browser-rum";
 import { useMessage } from "./useMessage";
-import { useAppKit, useAppKitAccount, useAppKitEvents, useAppKitState, useDisconnect } from "@reown/appkit/react";
+import { useAppKit, useAppKitEvents, useAppKitState, useDisconnect } from "@reown/appkit/react";
 import { useAccount, usePublicClient } from "wagmi";
 
 type LoginStep = "NOT_STARTED" | "PENDING_WALLET_CONNECTION" | "PENDING_DATABASE_CONNECTION" | "DONE";
@@ -25,9 +25,8 @@ export const useLoginFlow = ({
   isLoggingIn: boolean;
   signIn: () => void;
 } => {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const publicClient = usePublicClient();
-  const { isConnected } = useAppKitAccount();
   const { open: web3ModalIsOpen } = useAppKitState();
   const { disconnect } = useDisconnect();
   const { dbAccessTokenStatus, connect: connectDatastore } = useDatastoreConnectionContext();
@@ -76,6 +75,7 @@ export const useLoginFlow = ({
 
   useEffect(() => {
     const newLoginStep = (() => {
+      console.log("enabled", enabled, "isConnected", isConnected, "dbAccessToken", dbAccessTokenStatus);
       if (!enabled) return "NOT_STARTED";
       else if (!isConnected) return "PENDING_WALLET_CONNECTION";
       else if (dbAccessTokenStatus !== "connected") return "PENDING_DATABASE_CONNECTION";

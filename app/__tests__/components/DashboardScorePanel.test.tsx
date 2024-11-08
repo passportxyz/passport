@@ -1,10 +1,10 @@
 // Added for document.getElementById since just testing invocation
 /* eslint-disable testing-library/no-node-access */
+import { vi, describe, it, expect, Mock } from "vitest";
 import React from "react";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DashboardScorePanel, OnchainCTA } from "../../components/DashboardScorePanel";
-import { ScorerContext } from "../../context/scorerContext";
 import { useAllOnChainStatus } from "../../hooks/useOnChainStatus";
 import { PlatformScoreSpec } from "../../context/scorerContext";
 
@@ -13,40 +13,37 @@ import { CeramicContextState } from "../../context/ceramicContext";
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
-jest.mock("../../context/userState", () => ({
+vi.mock("../../context/userState", () => ({
   mutableUserVerificationAtom: {
     toString: () => "mocked-user-verification-atom",
-    read: jest.fn(),
-    write: jest.fn(),
+    read: vi.fn(),
+    write: vi.fn(),
   },
 }));
 
 let mockLoadingState = { loading: true };
 
-jest.mock("jotai", () => ({
-  useAtom: jest.fn().mockImplementation((atom) => {
+vi.mock("jotai", () => ({
+  useAtom: vi.fn().mockImplementation((atom) => {
     if (atom.toString() === "mocked-user-verification-atom") {
-      return [mockLoadingState, jest.fn()];
+      return [mockLoadingState, vi.fn()];
     }
-    return [undefined, jest.fn()];
+    return [undefined, vi.fn()];
   }),
-  atom: jest.fn(),
-  useAtomValue: jest.fn(),
+  atom: vi.fn(),
+  useAtomValue: vi.fn(),
 }));
 
-jest.mock("../../hooks/useCustomization", () => ({
-  useCustomization: jest.fn(),
+vi.mock("../../hooks/useCustomization", () => ({
+  useCustomization: vi.fn(),
 }));
-
-// Add type definition for MockedFunction
-type MockedFunction<T extends (...args: any[]) => any> = jest.MockedFunction<T>;
 
 // Mock useAllOnChainStatus
-jest.mock("../../hooks/useOnChainStatus", () => ({
-  useAllOnChainStatus: jest.fn(),
+vi.mock("../../hooks/useOnChainStatus", () => ({
+  useAllOnChainStatus: vi.fn(),
 }));
 
-const mockedUseAllOnChainStatus = useAllOnChainStatus as MockedFunction<typeof useAllOnChainStatus>;
+const mockedUseAllOnChainStatus = useAllOnChainStatus as Mock<typeof useAllOnChainStatus>;
 
 describe("DashboardScorePanel", () => {
   it("should indicate the loading state", () => {
@@ -64,7 +61,7 @@ describe("DashboardScorePanel", () => {
 });
 
 describe("OnchainCTA", () => {
-  const mockSetShowSidebar = jest.fn();
+  const mockSetShowSidebar = vi.fn();
   const cardListProps = {}; // Add any necessary props for CardList
 
   const scorerContext = {
@@ -83,7 +80,7 @@ describe("OnchainCTA", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders content for above threshold and all chains up to date", async () => {
@@ -147,8 +144,8 @@ describe("OnchainCTA", () => {
   it("scrolls to 'add-stamps' element when 'Verify Stamps' button is clicked", async () => {
     mockedUseAllOnChainStatus.mockReturnValue({ allChainsUpToDate: false });
 
-    const mockScrollIntoView = jest.fn();
-    document.getElementById = jest.fn().mockReturnValue({ scrollIntoView: mockScrollIntoView });
+    const mockScrollIntoView = vi.fn();
+    document.getElementById = vi.fn().mockReturnValue({ scrollIntoView: mockScrollIntoView });
 
     renderWithContext(
       mockCeramicContext,

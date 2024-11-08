@@ -36,10 +36,6 @@ const useVerifierContractInfo = ({ chain }: { chain?: Chain }) => {
   const address = chain?.attestationProvider?.verifierAddress();
   const abi = chain?.attestationProvider?.verifierAbi();
 
-  if (chain && chain.attestationProvider?.status !== "enabled") {
-    throw new Error(`Active attestationProvider not found for chainId ${chain.id}`);
-  }
-
   return useMemo(() => ({ address, abi }), [address, abi]);
 };
 

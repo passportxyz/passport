@@ -22,14 +22,11 @@ import {
   avalanche,
   scroll,
   shape,
-  AppKitNetwork,
 } from "@reown/appkit/networks";
+import type { AppKitNetwork } from "@reown/appkit/networks";
 
 // Weird type to match the library, forces at least 1 element
 export const networks: [AppKitNetwork, ...AppKitNetwork[]] = [mainnet];
-
-// RPC urls
-export const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL as string;
 
 const sepoliaChainId = "0xaa36a7";
 const hardhatChainId = "0x7a69";

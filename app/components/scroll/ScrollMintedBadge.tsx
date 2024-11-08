@@ -1,4 +1,4 @@
-import { useAppKitAccount } from "@reown/appkit/react";
+import { useAccount } from "wagmi";
 import { useNavigateToGithubConnectStep, useNavigateToRootStep } from "../../hooks/useNextCampaignStep";
 import { useDatastoreConnectionContext } from "../../context/datastoreConnectionContext";
 import { useScrollBadge } from "../../hooks/useScrollBadge";
@@ -49,7 +49,7 @@ export const RenderedBadges = ({ badges }: { badges: ProviderWithTitle[] }) => (
 export const ScrollMintedBadge = ({ badgesFreshlyMinted }: { badgesFreshlyMinted: boolean }) => {
   const goToLoginStep = useNavigateToRootStep();
   const goToGithubConnectStep = useNavigateToGithubConnectStep();
-  const { address } = useAppKitAccount();
+  const { address } = useAccount();
   const { did, dbAccessToken } = useDatastoreConnectionContext();
   const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(address);
   const { failure } = useMessage();

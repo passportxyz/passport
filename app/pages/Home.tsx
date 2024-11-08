@@ -10,12 +10,12 @@ import { DEFAULT_CUSTOMIZATION_KEY, useCustomization } from "../hooks/useCustomi
 import WelcomeFooter from "../components/WelcomeFooter";
 
 import { useLoginFlow } from "../hooks/useLoginFlow";
-import { useAppKitAccount } from "@reown/appkit/react";
 import { AccountCenter } from "../components/AccountCenter";
+import { useAccount } from "wagmi";
 
 export default function Home() {
   const { isLoggingIn, signIn, loginStep } = useLoginFlow();
-  const { isConnected } = useAppKitAccount();
+  const { isConnected } = useAccount();
   const [enableEthBranding, setEnableEthBranding] = useState(false);
   const customization = useCustomization();
 

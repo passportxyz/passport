@@ -1,3 +1,4 @@
+import { vi, describe, it, expect } from "vitest";
 import React from "react";
 import { screen, render } from "@testing-library/react";
 
@@ -14,21 +15,19 @@ import { PlatformScoreSpec, ScorerContextState } from "../../context/scorerConte
 import { DEFAULT_CUSTOMIZATION, useCustomization } from "../../hooks/useCustomization";
 import { platforms } from "@gitcoin/passport-platforms";
 
-jest.mock("@didtools/cacao", () => ({
+vi.mock("@didtools/cacao", () => ({
   Cacao: {
-    fromBlockBytes: jest.fn(),
+    fromBlockBytes: vi.fn(),
   },
 }));
 
-jest.mock("next/router", () => ({
+vi.mock("next/router", () => ({
   useRouter: () => ({
     query: { filter: "" },
   }),
 }));
 
-jest.mock("../../hooks/useCustomization", () => ({
-  useCustomization: jest.fn(),
-}));
+vi.mock("../../hooks/useCustomization");
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
@@ -75,7 +74,7 @@ let categoryProps: CategoryProps = {
 describe("<CardList />", () => {
   beforeEach(() => {
     cardListProps = {};
-    (useCustomization as jest.Mock).mockReturnValue({ ...DEFAULT_CUSTOMIZATION });
+    vi.mocked(useCustomization).mockReturnValue({ ...DEFAULT_CUSTOMIZATION });
   });
 
   it("renders provider cards when loading state is not defined", () => {
@@ -126,8 +125,8 @@ describe("<CardList />", () => {
   it("should indicate on card whether or not it has been expired", () => {
     const mockCeramicContextWithExpiredStamps: CeramicContextState = makeTestCeramicContextWithExpiredStamps();
 
-    const mockSetCurrentPlatform = jest.fn();
-    const mockOnOpen = jest.fn();
+    const mockSetCurrentPlatform = vi.fn();
+    const mockOnOpen = vi.fn();
     render(
       <CeramicContext.Provider value={mockCeramicContextWithExpiredStamps}>
         <PlatformCard
@@ -205,7 +204,7 @@ test("renders Category component", () => {
 
 describe("show/hide tests", () => {
   it("should show allow list stamp if user has points", () => {
-    (useCustomization as jest.Mock).mockReturnValue({
+    vi.mocked(useCustomization).mockReturnValue({
       partnerName: "TestPartner",
       scorer: {
         weights: {
@@ -247,7 +246,7 @@ describe("show/hide tests", () => {
   });
 
   it("should hide allow list stamp if user has no points", () => {
-    (useCustomization as jest.Mock).mockReturnValue({
+    vi.mocked(useCustomization).mockReturnValue({
       partnerName: "TestPartner",
       scorer: {
         weights: {
@@ -289,7 +288,7 @@ describe("show/hide tests", () => {
   });
 
   it("include platform if any stamps included", () => {
-    (useCustomization as jest.Mock).mockReturnValue({
+    vi.mocked(useCustomization).mockReturnValue({
       scorer: {
         weights: {
           SelfStakingBronze: "1",
@@ -322,7 +321,7 @@ describe("show/hide tests", () => {
   });
 
   it("exclude platform if no stamps included", () => {
-    (useCustomization as jest.Mock).mockReturnValue({
+    vi.mocked(useCustomization).mockReturnValue({
       scorer: {
         weights: {
           ADifferentStamp: "1",
@@ -350,7 +349,7 @@ describe("show/hide tests", () => {
   });
 
   it("include platform if customization doesn't specify custom weights", () => {
-    (useCustomization as jest.Mock).mockReturnValue({});
+    vi.mocked(useCustomization).mockReturnValue({} as any);
 
     const scorerContext: Partial<ScorerContextState> = {
       scoredPlatforms: [
@@ -372,7 +371,7 @@ describe("show/hide tests", () => {
   });
 
   it("hide platform if there are no possible points", () => {
-    (useCustomization as jest.Mock).mockReturnValue({});
+    vi.mocked(useCustomization).mockReturnValue({} as any);
 
     const scorerContext: Partial<ScorerContextState> = {
       scoredPlatforms: [

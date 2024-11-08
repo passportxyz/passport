@@ -3,15 +3,15 @@ import { useIssueAttestation, useAttestationNonce } from "./useIssueAttestation"
 import { jsonRequest } from "../utils/AttestationProvider";
 import { useMessage } from "./useMessage";
 import { useNavigateToLastStep } from "./useNextCampaignStep";
-import { useAppKitAccount } from "@reown/appkit/react";
 import { iamUrl } from "../config/stamp_config";
 import { scrollCampaignChain } from "../config/scroll_campaign";
 import { EasPayload, VerifiableCredential } from "@gitcoin/passport-types";
+import { useAccount } from "wagmi";
 
 export const useMintBadge = () => {
   const { nonce, isError, isLoading } = useAttestationNonce({ chain: scrollCampaignChain });
   const { issueAttestation } = useIssueAttestation({ chain: scrollCampaignChain });
-  const { address } = useAppKitAccount();
+  const { address } = useAccount();
   const { failure } = useMessage();
   const goToLastStep = useNavigateToLastStep();
 
@@ -19,6 +19,7 @@ export const useMintBadge = () => {
   const [badgesFreshlyMinted, setBadgesFreshlyMinted] = useState(false);
 
   const onMint = async ({ credentials }: { credentials: VerifiableCredential[] }) => {
+    console.log("minting badge", isLoading, isError, nonce, credentials);
     if (isLoading || isError) return;
     try {
       setSyncingToChain(true);

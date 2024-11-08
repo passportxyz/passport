@@ -1,4 +1,5 @@
-import { render, waitFor, screen } from "@testing-library/react";
+import { vi, describe, it, expect, Mock } from "vitest";
+import { waitFor, screen } from "@testing-library/react";
 import { useOneClickVerification } from "../../hooks/useOneClickVerification";
 import { useEffect } from "react";
 import { useAtom } from "jotai";
@@ -11,15 +12,15 @@ import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { fetchPossibleEVMStamps } from "../../signer/utils";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 
-jest.mock("../../context/walletStore", () => ({
+vi.mock("../../context/walletStore", () => ({
   useWalletStore: () => "validAddress",
 }));
-jest.mock("../../utils/helpers", () => ({
-  createSignedPayload: jest.fn(),
+vi.mock("../../utils/helpers", () => ({
+  createSignedPayload: vi.fn(),
 }));
 
-jest.mock("@gitcoin/passport-identity", () => ({
-  fetchVerifiableCredential: jest.fn(),
+vi.mock("@gitcoin/passport-identity", () => ({
+  fetchVerifiableCredential: vi.fn(),
 }));
 
 const mockPossiblePlatforms = [
@@ -208,8 +209,8 @@ const mockPossiblePlatforms = [
   },
 ];
 
-jest.mock("../../signer/utils", () => ({
-  fetchPossibleEVMStamps: jest.fn(),
+vi.mock("../../signer/utils", () => ({
+  fetchPossibleEVMStamps: vi.fn(),
 }));
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
@@ -254,7 +255,7 @@ describe("useOneClickVerification", () => {
   });
   it("should attempt to issue credentials if possible stamps are found", async () => {
     renderWithContext(mockCeramicContext, <TestingComponent />);
-    (fetchPossibleEVMStamps as jest.Mock).mockResolvedValue(mockPossiblePlatforms);
+    (fetchPossibleEVMStamps as Mock).mockResolvedValue(mockPossiblePlatforms);
     await waitFor(() => {
       screen.getByText("Click me").click();
       expect(fetchVerifiableCredential).toHaveBeenCalledWith(
@@ -277,8 +278,8 @@ describe("useOneClickVerification", () => {
   });
   it("should indicate passport was successfully refreshed", async () => {
     renderWithContext(mockCeramicContext, <TestingComponent />);
-    (fetchPossibleEVMStamps as jest.Mock).mockResolvedValue(mockPossiblePlatforms);
-    (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
+    (fetchPossibleEVMStamps as Mock).mockResolvedValue(mockPossiblePlatforms);
+    (fetchVerifiableCredential as Mock).mockResolvedValue({
       credentials: [
         {
           record: {
@@ -326,8 +327,8 @@ describe("useOneClickVerification", () => {
   });
   it("should indicate that an error was thrown", async () => {
     renderWithContext(mockCeramicContext, <TestingComponent />);
-    (fetchPossibleEVMStamps as jest.Mock).mockResolvedValue(mockPossiblePlatforms);
-    (fetchVerifiableCredential as jest.Mock).mockRejectedValue(new Error("error"));
+    (fetchPossibleEVMStamps as Mock).mockResolvedValue(mockPossiblePlatforms);
+    (fetchVerifiableCredential as Mock).mockRejectedValue(new Error("error"));
     await waitFor(() => {
       screen.getByText("Click me").click();
       expect(screen.getByTestId("error").textContent).toBe("Error: error");

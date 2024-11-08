@@ -1,4 +1,4 @@
-import { useAppKitAccount } from "@reown/appkit/react";
+import { useAccount } from "wagmi";
 import PageRoot from "../PageRoot";
 import { AccountCenter } from "../AccountCenter";
 import { useParams } from "react-router-dom";
@@ -70,7 +70,7 @@ export const ScrollFooter = ({ className }: { className?: string }) => {
 };
 
 export const ScrollCampaignPageRoot = ({ children }: { children: React.ReactNode }) => {
-  const { isConnected } = useAppKitAccount();
+  const { isConnected } = useAccount();
   return (
     <PageRoot className="text-color-1">
       {isConnected && <AccountCenter />}

@@ -1,6 +1,7 @@
+import { vi, describe, it, expect } from "vitest";
 import { render, waitFor, screen, fireEvent } from "@testing-library/react";
 import { useContext } from "react";
-import { makeTestCeramicContext } from "../../__test-fixtures__/contextTestHelpers";
+import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 
 import { CeramicContext } from "../../context/ceramicContext";
 import { StampClaimingContext, StampClaimingContextProvider } from "../../context/stampClaimingContext";
@@ -11,31 +12,31 @@ import { PlatformProps } from "../../components/GenericPlatform";
 import { AppContext, PlatformClass } from "@gitcoin/passport-platforms";
 import { DatastoreConnectionContext, DbAuthTokenStatus } from "../../context/datastoreConnectionContext";
 
-jest.mock("../../utils/helpers", () => ({
-  generateUID: jest.fn((length: number) => "some random string"),
+vi.mock("../../utils/helpers", () => ({
+  generateUID: vi.fn((length: number) => "some random string"),
 }));
 
-jest.mock("@gitcoin/passport-identity", () => ({
-  fetchVerifiableCredential: jest.fn(),
+vi.mock("@gitcoin/passport-identity", () => ({
+  fetchVerifiableCredential: vi.fn(),
 }));
 
-jest.mock("../../config/platformMap", () => {
-  const originalModule = jest.requireActual("../../config/platformMap");
+vi.mock("../../config/platformMap", async (importActual) => {
+  const originalModule = (await importActual()) as any;
   let newPlatforms = new Map<PLATFORM_ID, PlatformProps>();
 
   originalModule.defaultPlatformMap.forEach((value: PlatformProps, key: PLATFORM_ID) => {
     let platform: PlatformClass = {
       ...value.platform,
-      getProviderPayload: jest.fn(async (appContext: AppContext) => {
+      getProviderPayload: vi.fn(async (appContext: AppContext) => {
         return {};
       }),
-      getOAuthUrl: jest.fn(async (state, providers) => {
+      getOAuthUrl: vi.fn(async (state, providers) => {
         return "";
       }),
     };
     let newValue: PlatformProps = { ...value };
 
-    platform.getProviderPayload = jest.fn(async (appContext: AppContext) => {
+    platform.getProviderPayload = vi.fn(async (appContext: AppContext) => {
       return {};
     });
 
@@ -50,8 +51,8 @@ jest.mock("../../config/platformMap", () => {
   };
 });
 
-const handleClaimStep = jest.fn();
-const indicateError = jest.fn();
+const handleClaimStep = vi.fn();
+const indicateError = vi.fn();
 
 const TestingComponent = () => {
   const { claimCredentials } = useContext(StampClaimingContext);
@@ -117,16 +118,19 @@ const mockCeramicContext = makeTestCeramicContext({
   },
 });
 
+const testCeramicContext = makeTestCeramicContext();
+
 describe("<StampClaimingContext>", () => {
   const renderTestComponent = () =>
-    render(
+    renderWithContext(
+      testCeramicContext,
       <DatastoreConnectionContext.Provider
         value={{
-          connect: jest.fn(),
-          disconnect: jest.fn(),
+          connect: vi.fn(),
+          disconnect: vi.fn(),
           dbAccessToken: "token",
           dbAccessTokenStatus: "idle" as DbAuthTokenStatus,
-          did: jest.fn() as any,
+          did: vi.fn() as any,
         }}
       >
         <CeramicContext.Provider value={mockCeramicContext}>
@@ -138,14 +142,15 @@ describe("<StampClaimingContext>", () => {
     );
 
   const renderTestComponentWithEvmStamp = () =>
-    render(
+    renderWithContext(
+      testCeramicContext,
       <DatastoreConnectionContext.Provider
         value={{
-          connect: jest.fn(),
-          disconnect: jest.fn(),
+          connect: vi.fn(),
+          disconnect: vi.fn(),
           dbAccessToken: "token",
           dbAccessTokenStatus: "idle" as DbAuthTokenStatus,
-          did: jest.fn() as any,
+          did: vi.fn() as any,
         }}
       >
         <CeramicContext.Provider value={mockCeramicContext}>
@@ -157,13 +162,13 @@ describe("<StampClaimingContext>", () => {
     );
 
   beforeEach(() => {
-    (fetchVerifiableCredential as jest.Mock).mockImplementation(() => {
-      return { credentials: [] };
+    vi.mocked(fetchVerifiableCredential).mockImplementation(() => {
+      return { credentials: [] } as any;
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should fetch all credentials specified when calling claimCredentials (non-EVM only)", async () => {
@@ -185,7 +190,7 @@ describe("<StampClaimingContext>", () => {
   });
 
   it("should not indicate error if verification was successful", async () => {
-    (fetchVerifiableCredential as jest.Mock).mockImplementation(() => {
+    vi.mocked(fetchVerifiableCredential).mockImplementation(() => {
       return {
         credentials: [
           {

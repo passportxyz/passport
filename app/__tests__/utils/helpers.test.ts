@@ -1,9 +1,10 @@
 import { createSignedPayload } from "../../utils/helpers";
+import { vi, describe, it, expect } from "vitest";
 import { Cacao } from "@didtools/cacao";
 
-jest.mock("@didtools/cacao", () => ({
+vi.mock("@didtools/cacao", () => ({
   Cacao: {
-    fromBlockBytes: jest.fn().mockImplementation((_) => {
+    fromBlockBytes: vi.fn().mockImplementation((_) => {
       return {
         p: {
           iss: "did:ethr:0x123",

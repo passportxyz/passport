@@ -1,3 +1,4 @@
+import { vi, describe, it, expect } from "vitest";
 import React from "react";
 import { screen } from "@testing-library/react";
 
@@ -9,7 +10,7 @@ import { CeramicContextState } from "../../context/ceramicContext";
 import { Drawer, DrawerOverlay } from "@chakra-ui/react";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
-jest.mock("next/router", () => ({
+vi.mock("next/router", () => ({
   useRouter: () => ({
     query: { filter: "" },
   }),

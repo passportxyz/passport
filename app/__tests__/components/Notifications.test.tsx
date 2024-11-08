@@ -1,3 +1,4 @@
+import { vi, describe, it, expect, Mock } from "vitest";
 import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Notifications } from "../../components/Notifications";
@@ -6,25 +7,25 @@ import { StampClaimingContext } from "../../context/stampClaimingContext";
 import { CeramicContext } from "../../context/ceramicContext";
 
 // Mock the hooks and contexts
-jest.mock("../../hooks/useNotifications", () => ({
-  useNotifications: jest.fn(),
-  useDismissNotification: jest.fn(),
-  useDeleteAllNotifications: jest.fn(),
+vi.mock("../../hooks/useNotifications", () => ({
+  useNotifications: vi.fn(),
+  useDismissNotification: vi.fn(),
+  useDeleteAllNotifications: vi.fn(),
 }));
-jest.mock("../../context/stampClaimingContext");
-jest.mock("../../context/ceramicContext");
+vi.mock("../../context/stampClaimingContext");
+vi.mock("../../context/ceramicContext");
 
-const mockSetShowSidebar = jest.fn();
-const mockDeleteMutation = { mutate: jest.fn() };
+const mockSetShowSidebar = vi.fn();
+const mockDeleteMutation = { mutate: vi.fn() };
 
 describe("Notifications Component", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useDeleteAllNotifications as jest.Mock).mockReturnValue(mockDeleteMutation);
+    vi.clearAllMocks();
+    (useDeleteAllNotifications as Mock).mockReturnValue(mockDeleteMutation);
   });
 
   it("should render without notifications", async () => {
-    (useNotifications as jest.Mock).mockReturnValue({ notifications: [] });
+    (useNotifications as Mock).mockReturnValue({ notifications: [] });
     render(<Notifications setShowSidebar={mockSetShowSidebar} />);
     await waitFor(() => {});
 
@@ -39,7 +40,7 @@ describe("Notifications Component", () => {
   });
 
   it("should render read notification", async () => {
-    (useNotifications as jest.Mock).mockReturnValue({
+    (useNotifications as Mock).mockReturnValue({
       notifications: [
         {
           notification_id: "1",
@@ -62,7 +63,7 @@ describe("Notifications Component", () => {
   });
 
   it("should render unread notification", async () => {
-    (useNotifications as jest.Mock).mockReturnValue({
+    (useNotifications as Mock).mockReturnValue({
       notifications: [
         {
           notification_id: "1",
@@ -85,7 +86,7 @@ describe("Notifications Component", () => {
   });
 
   it("should handle delete all notifications", async () => {
-    (useNotifications as jest.Mock).mockReturnValue({
+    (useNotifications as Mock).mockReturnValue({
       notifications: [
         {
           notification_id: "1",
@@ -111,7 +112,7 @@ describe("Notifications Component", () => {
   });
 
   it("should not show delete all button when there are no notifications", async () => {
-    (useNotifications as jest.Mock).mockReturnValue({ notifications: [] });
+    (useNotifications as Mock).mockReturnValue({ notifications: [] });
     render(<Notifications setShowSidebar={mockSetShowSidebar} />);
 
     const noteBell = screen.getByTestId("notification-bell");

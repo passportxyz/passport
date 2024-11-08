@@ -1,8 +1,8 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import { vi, beforeEach, afterEach, describe, it, expect } from "vitest";
 
 import { JsonOutputModal, JsonOutputModalProps } from "../../components/JsonOutputModal";
-import { ensStampFixture } from "../../__test-fixtures__/databaseStorageFixtures";
 
 let props: JsonOutputModalProps;
 const passport = {
@@ -14,7 +14,7 @@ const passport = {
 beforeEach(() => {
   props = {
     isOpen: true,
-    onClose: jest.fn(),
+    onClose: vi.fn(),
     subheading: "Custom subheading",
     title: "Modal Title",
     jsonOutput: passport,
@@ -23,7 +23,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe("displays the modal", () => {

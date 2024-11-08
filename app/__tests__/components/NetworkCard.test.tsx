@@ -1,4 +1,5 @@
 import React from "react";
+import { vi, describe, it, expect } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 
 import { NetworkCard } from "../../components/NetworkCard";
@@ -11,18 +12,18 @@ import { Drawer, DrawerOverlay } from "@chakra-ui/react";
 import { useOnChainData } from "../../hooks/useOnChainData";
 import { Chain } from "../../utils/chains";
 
-jest.mock("../../hooks/useOnChainData");
+vi.mock("../../hooks/useOnChainData");
 
-const mockUseOnChainData = jest.mocked(useOnChainData);
+const mockUseOnChainData = vi.mocked(useOnChainData);
 
-jest.mock("next/router", () => ({
+vi.mock("next/router", () => ({
   useRouter: () => ({
     query: { filter: "" },
   }),
 }));
 
 const chain = new Chain({
-  id: "12345",
+  id: "0xa",
   token: "SEP",
   label: "Sepolia Testnet",
   rpcUrl: "http://www.sepolia.com",
@@ -39,7 +40,7 @@ const defaultUseOnChainData = {
   data: {},
   activeChainProviders: [],
   isPending: false,
-  refresh: jest.fn(),
+  refresh: vi.fn(),
 };
 
 describe("OnChainSidebar", () => {
