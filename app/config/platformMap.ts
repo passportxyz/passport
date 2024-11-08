@@ -15,7 +15,6 @@ const {
   ZkSync,
   Discord,
   Linkedin,
-  LinkedinV2,
   GtcStaking,
   Google,
   Brightid,
