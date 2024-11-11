@@ -103,7 +103,7 @@ defaultPlatformMap.set("Discord", {
 
 defaultPlatformMap.set("Linkedin", {
   platform: new Linkedin.LinkedinPlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CLIENT_ID,
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CLIENT_ID_V2,
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
   }),
   platFormGroupSpec: Linkedin.ProviderConfig,
