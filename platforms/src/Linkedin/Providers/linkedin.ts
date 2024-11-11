@@ -72,15 +72,26 @@ const requestAccessToken = async (code: string): Promise<string> => {
   try {
     const clientId = process.env.LINKEDIN_CLIENT_ID_V2;
     const clientSecret = process.env.LINKEDIN_CLIENT_SECRET_V2;
+    const redirectUri = process.env.LINKEDIN_CALLBACK;
+    const tokenUrl = "https://www.linkedin.com/oauth/v2/accessToken";
+
+    const params = new URLSearchParams({
+      grant_type: "authorization_code",
+      code: code,
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: redirectUri,
+    });
+
+    const url = `${tokenUrl}?${params.toString()}`;
 
     const tokenRequest = await axios.post(
-      `https://www.linkedin.com/oauth/v2/accessToken?grant_type=authorization_code&code=${code}&client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${process.env.LINKEDIN_CALLBACK}`,
+      url,
       {},
       {
         headers: { Accept: "application/json", "Content-Type": "application/x-www-form-urlencoded" },
       }
     );
-
     if (tokenRequest.status != 200) {
       throw `Post for request returned status code ${tokenRequest.status} instead of the expected 200`;
     }
