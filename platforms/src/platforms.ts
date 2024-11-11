@@ -57,7 +57,7 @@ const platforms: Record<string, PlatformConfig> = {
   Outdid,
   AllowList,
   Binance,
-  CustomGithub
+  CustomGithub,
 };
 
 if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {

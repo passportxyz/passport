@@ -13,9 +13,12 @@ export type LinkedinTokenResponse = {
 };
 
 export type LinkedinFindMyUserResponse = {
-  id?: string;
-  firstName?: string;
-  lastName?: string;
+  sub?: string;
+  email_verified?: boolean;
+  name?: string;
+  given_name?: string;
+  family_name?: string;
+  email?: string;
   error?: string;
 };
 
@@ -42,11 +45,11 @@ export class LinkedinProvider implements Provider {
     try {
       if (payload.proofs) {
         verifiedPayload = await verifyLinkedin(payload.proofs.code);
-        valid = verifiedPayload && verifiedPayload.id ? true : false;
+        valid = verifiedPayload && verifiedPayload.sub && verifiedPayload.email_verified ? true : false;
 
         if (valid) {
           record = {
-            id: verifiedPayload.id,
+            sub: verifiedPayload.sub,
           };
         } else {
           errors.push(`We were unable to verify your LinkedIn account -- LinkedIn Account Valid: ${String(valid)}.`);
@@ -67,8 +70,8 @@ export class LinkedinProvider implements Provider {
 
 const requestAccessToken = async (code: string): Promise<string> => {
   try {
-    const clientId = process.env.LINKEDIN_CLIENT_ID;
-    const clientSecret = process.env.LINKEDIN_CLIENT_SECRET;
+    const clientId = process.env.LINKEDIN_CLIENT_ID_V2;
+    const clientSecret = process.env.LINKEDIN_CLIENT_SECRET_V2;
 
     const tokenRequest = await axios.post(
       `https://www.linkedin.com/oauth/v2/accessToken?grant_type=authorization_code&code=${code}&client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${process.env.LINKEDIN_CALLBACK}`,
@@ -96,7 +99,7 @@ const verifyLinkedin = async (code: string): Promise<LinkedinFindMyUserResponse>
     // retrieve user's auth bearer token to authenticate client
     const accessToken = await requestAccessToken(code);
     // Now that we have an access token fetch the user details
-    const userRequest = await axios.get("https://api.linkedin.com/v2/me", {
+    const userRequest = await axios.get("https://api.linkedin.com/v2/userinfo", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Linkedin-Version": 202305,

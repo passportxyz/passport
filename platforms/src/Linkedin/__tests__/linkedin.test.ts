@@ -14,9 +14,12 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const validLinkedinUserResponse = {
   data: {
-    id: "18723656",
-    firstName: "First",
-    lastName: "Last",
+    sub: "18723656",
+    email_verified: true,
+    name: "Foo",
+    given_name: "Foo",
+    family_name: "Bar",
+    email: "mail@mail.com",
   },
   status: 200,
 };
@@ -41,10 +44,10 @@ beforeEach(() => {
   });
 });
 
-describe("Attempt verification", function() {
+describe("Attempt verification", function () {
   it("handles valid verification attempt", async () => {
-    const clientId = process.env.LINKEDIN_CLIENT_ID;
-    const clientSecret = process.env.LINKEDIN_CLIENT_SECRET;
+    const clientId = process.env.LINKEDIN_CLIENT_ID_V2;
+    const clientSecret = process.env.LINKEDIN_CLIENT_SECRET_V2;
     const linkedin = new LinkedinProvider();
     const linkedinPayload = await linkedin.verify({
       proofs: {
@@ -62,7 +65,7 @@ describe("Attempt verification", function() {
     );
 
     // Check the request to get the user
-    expect(mockedAxios.get).toHaveBeenCalledWith("https://api.linkedin.com/v2/me", {
+    expect(mockedAxios.get).toHaveBeenCalledWith("https://api.linkedin.com/v2/userinfo", {
       headers: { Authorization: "Bearer 762165719dhiqudgasyuqwt6235", "Linkedin-Version": 202305 },
     });
 
@@ -70,7 +73,7 @@ describe("Attempt verification", function() {
       valid: true,
       errors: [],
       record: {
-        id: validLinkedinUserResponse.data.id,
+        sub: validLinkedinUserResponse.data.sub,
       },
     });
   });
@@ -94,9 +97,12 @@ describe("Attempt verification", function() {
     mockedAxios.get.mockImplementation(async () => {
       return {
         data: {
-          id: undefined,
-          firstName: "First",
-          lastName: "Last",
+          sub: undefined,
+          email_verified: false,
+          name: "Foo",
+          given_name: "Foo",
+          family_name: "Bar",
+          email: "mail@mail.com",
         },
         status: 200,
       };
