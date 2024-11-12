@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
 import { datadogRum } from "@datadog/browser-rum";
 import { EthereumWebAuth } from "@didtools/pkh-ethereum";
-import { Buffer } from "buffer";
 
 import { DIDSession } from "did-session";
 import { DID } from "dids";
@@ -13,7 +12,7 @@ import { createSignedPayload } from "../utils/helpers";
 import { updateIntercomUserData } from "../hooks/useIntercom";
 import { useDisconnect } from "@reown/appkit/react";
 import { useAccount } from "wagmi";
-import { PublicClient } from "viem";
+import { WalletClient } from "viem";
 
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
@@ -22,13 +21,13 @@ export type DatastoreConnectionContextState = {
   dbAccessToken?: string;
   did?: DID;
   disconnect: (address: string) => Promise<void>;
-  connect: (address: string, publicClient: PublicClient) => Promise<void>;
+  connect: (address: string, walletClient: WalletClient) => Promise<void>;
   checkSessionIsValid: () => boolean;
 };
 
 export const DatastoreConnectionContext = createContext<DatastoreConnectionContextState>({
   dbAccessTokenStatus: "idle",
-  disconnect: async (address: string) => {},
+  disconnect: async (_address: string) => {},
   connect: async () => {},
   checkSessionIsValid: () => false,
 });
@@ -67,7 +66,7 @@ export const useDatastoreConnection = () => {
     } catch (error) {
       const msg = `Failed to get nonce from server for user with did: ${did.parent}`;
       datadogRum.addError(msg);
-      throw msg;
+      throw new Error(msg);
     }
 
     const payloadToSign = { nonce };
@@ -85,7 +84,7 @@ export const useDatastoreConnection = () => {
     } catch (error) {
       const msg = `Failed to authenticate user with did: ${did.parent}`;
       datadogRum.addError(msg);
-      throw msg;
+      throw new Error(msg);
     }
   };
 
@@ -95,7 +94,7 @@ export const useDatastoreConnection = () => {
 
     // Here we try to get an access token for the Passport database
     // We should get a new access token:
-    // 1. if the user has nonde
+    // 1. if the user has none
     // 2. in case a new session has been created (access tokens should expire similar to sessions)
     // TODO: verifying the validity of the access token would also make sense => check the expiration data in the token
 
@@ -118,19 +117,16 @@ export const useDatastoreConnection = () => {
   }, []);
 
   const connect = useCallback(
-    async (address: string, publicClient: PublicClient) => {
+    async (address: string, walletClient: WalletClient) => {
       if (address) {
         try {
-          // This is to fix issues with extensions that inject old versions of Buffer
-          globalThis.Buffer = Buffer;
-
           const accountId = new AccountId({
             // We always use chain id 1 for now for all sessions, to avoid users
             // switching networks and not see their stamps any more
             chainId: "eip155:1",
             address,
           });
-          const authMethod = await EthereumWebAuth.getAuthMethod(publicClient, accountId);
+          const authMethod = await EthereumWebAuth.getAuthMethod(walletClient, accountId);
 
           let session: DIDSession = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
 

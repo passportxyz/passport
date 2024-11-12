@@ -17,8 +17,8 @@ const EthersGetResolverMock = jest.spyOn(JsonRpcProvider.prototype, "getResolver
 describe("Attempt verification", function () {
   beforeEach(() => {
     jest.clearAllMocks();
-    EthersLookupAddressMock.mockImplementation(async (address) => {
-      if (address === MOCK_ADDRESS) return MOCK_ENS;
+    EthersLookupAddressMock.mockImplementation((address) => {
+      if (address === MOCK_ADDRESS) return Promise.resolve(MOCK_ENS);
     });
     EthersGetResolverMock.mockImplementation(() => {
       return Promise.resolve({

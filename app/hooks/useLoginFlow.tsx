@@ -11,7 +11,7 @@ import { useNavigateToPage } from "../hooks/useCustomization";
 import { datadogRum } from "@datadog/browser-rum";
 import { useMessage } from "./useMessage";
 import { useAppKit, useAppKitEvents, useAppKitState, useDisconnect } from "@reown/appkit/react";
-import { useAccount, usePublicClient } from "wagmi";
+import { useAccount, useWalletClient } from "wagmi";
 
 type LoginStep = "NOT_STARTED" | "PENDING_WALLET_CONNECTION" | "PENDING_DATABASE_CONNECTION" | "DONE";
 
@@ -26,7 +26,7 @@ export const useLoginFlow = ({
   signIn: () => void;
 } => {
   const { address, isConnected } = useAccount();
-  const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
   const { open: web3ModalIsOpen } = useAppKitState();
   const { disconnect } = useDisconnect();
   const { dbAccessTokenStatus, connect: connectDatastore } = useDatastoreConnectionContext();
@@ -120,11 +120,11 @@ export const useLoginFlow = ({
         !isConnectingToDatabaseRef.current &&
         loginStep === "PENDING_DATABASE_CONNECTION" &&
         address &&
-        publicClient
+        walletClient
       ) {
         isConnectingToDatabaseRef.current = true;
         try {
-          await connectDatastore(address, publicClient);
+          await connectDatastore(address, walletClient);
         } catch (e) {
           resetLogin();
           console.error("Error connecting to database", e);
@@ -134,7 +134,7 @@ export const useLoginFlow = ({
         }
       }
     })();
-  }, [loginStep, address, publicClient, connectDatastore, showConnectionError, resetLogin]);
+  }, [loginStep, address, walletClient, connectDatastore, showConnectionError, resetLogin]);
 
   const isLoggingIn = loginStep !== "DONE" && loginStep !== "NOT_STARTED";
 
