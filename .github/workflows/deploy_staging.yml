@@ -88,7 +88,7 @@ jobs:
           export-env: true
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          ALCHEMY_API_KEY: op://DevOps/passport-review-secrets/ci/ALCHEMY_API_KEY
+          ALCHEMY_API_KEY: op://DevOps/passport-xyz-staging-secrets/ci/ALCHEMY_API_KEY
       - name: Check provider bitmaps
         uses: ./.github/actions/check-provider-bitmaps
         with:
