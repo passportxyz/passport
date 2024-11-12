@@ -118,7 +118,7 @@ export class GtcStakingProvider implements Provider {
         const communityStakesV2: StakeV2[] = [];
 
         const responseV2: StakeV2Response = await axios.get(`${gtcStakingEndpointV2}/${address}`, {
-          headers: { Authorization: process.env.CGRANTS_API_TOKEN },
+          headers: { Authorization: process.env.SCORER_API_KEY },
         });
         const resultsV2: StakeV2[] = responseV2?.data?.items || [];
 

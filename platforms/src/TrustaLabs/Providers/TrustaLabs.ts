@@ -36,7 +36,7 @@ interface AxiosResponse {
 const TRUSTA_LABS_API_ENDPOINT = "https://www.trustalabs.ai/service/openapi/queryRiskSummaryScore";
 
 const createUpdateDBScoreData = async (address: string, scoreData: TrustaLabsData) => {
-  const accessToken = process.env.CGRANTS_API_TOKEN;
+  const accessToken = process.env.SCORER_API_KEY;
   try {
     await axios.post(
       `${process.env.PASSPORT_SCORER_BACKEND}trusta_labs/trusta-labs-score`,
