@@ -384,15 +384,6 @@
     mime "^2.0.0"
     resolve "^1.7.1"
 
-"@pulumi/awsx@^0.40.0":
-  version "0.40.1"
-  resolved "https://registry.yarnpkg.com/@pulumi/awsx/-/awsx-0.40.1.tgz#999920bdf360ed6d9f6f809ef0c15fcbf6f4cf33"
-  integrity sha512-ws5pIxq4tghP6keXBHaSMhuEY0mcxD7kO31rJDjgRL10bqnRGTtblXssULEYMM0dQWTfxXhSeXGwWKSTkalLIw==
-  dependencies:
-    "@pulumi/docker" "^3.0.0"
-    "@types/aws-lambda" "8.10.93"
-    mime "^2.0.0"
-
 "@pulumi/cloudflare@^5.26.0":
   version "5.35.0"
   resolved "https://registry.yarnpkg.com/@pulumi/cloudflare/-/cloudflare-5.35.0.tgz#6e52718db22090be22695e68ffaa0f389328e485"
@@ -406,14 +397,6 @@
   integrity sha512-tquPVxxYZTiMgOmAPu2AIs1ndrf+GlztdWECScNzrllr5LUMHmbd2ZpifGQWh3GXqBwxPsWO1WoRIasLxKXJ/Q==
   dependencies:
     "@pulumi/pulumi" "^3.136.0"
-
-"@pulumi/docker@^3.0.0":
-  version "3.6.1"
-  resolved "https://registry.yarnpkg.com/@pulumi/docker/-/docker-3.6.1.tgz#a216c9bd2bbd35dd7091db2827a3a434adff021c"
-  integrity sha512-BZME50QkT556v+LvmTXPT8ssB2xxNkp9+msB5xYFEnUnWcdGAx5yUysQw70RJCb+U0GbkJSbxtlgMJgOQf/now==
-  dependencies:
-    "@pulumi/pulumi" "^3.0.0"
-    semver "^5.4.0"
 
 "@pulumi/github@^6.1.0":
   version "6.2.3"
@@ -574,11 +557,6 @@
   dependencies:
     "@tufjs/canonical-json" "2.0.0"
     minimatch "^9.0.3"
-
-"@types/aws-lambda@8.10.93":
-  version "8.10.93"
-  resolved "https://registry.npmjs.org/@types/aws-lambda/-/aws-lambda-8.10.93.tgz"
-  integrity sha512-Vsyi9ogDAY3REZDjYnXMRJJa62SDvxHXxJI5nGDQdZW058dDE+av/anynN2rLKbCKXDRNw3D/sQmqxVflZFi4A==
 
 "@types/cacheable-request@^6.0.1":
   version "6.0.3"
@@ -2422,7 +2400,7 @@ sax@>=0.6.0:
   resolved "https://registry.npmjs.org/sax/-/sax-1.3.0.tgz"
   integrity sha512-0s+oAmw9zLl1V1cS9BtZN7JAd0cW5e0QH4W3LWEK6a4LaLEA2OTpGYWDY+6XasBLtz6wkm3u1xRw95mRuJ59WA==
 
-"semver@2 || 3 || 4 || 5", semver@^5.4.0:
+"semver@2 || 3 || 4 || 5":
   version "5.7.2"
   resolved "https://registry.npmjs.org/semver/-/semver-5.7.2.tgz"
   integrity sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==
