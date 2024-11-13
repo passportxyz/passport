@@ -12,7 +12,7 @@ jest.mock("axios");
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 const userHandle = "my-login-handle";
-const cgrantsApiToken = process.env.CGRANTS_API_TOKEN;
+const cgrantsApiToken = process.env.SCORER_API_KEY;
 
 const address = "0x0";
 

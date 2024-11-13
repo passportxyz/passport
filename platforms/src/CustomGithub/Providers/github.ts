@@ -29,7 +29,7 @@ const getCondition = async (type: string, conditionName: string, conditionHash: 
   try {
     const url = `${githubConditionEndpoint}/${type}%23${conditionName}%23${conditionHash}`;
     const response: ConditionResponse = await axios.get(url, {
-      headers: { Authorization: process.env.CGRANTS_API_TOKEN },
+      headers: { Authorization: process.env.SCORER_API_KEY },
     });
     return response.data.ruleset.condition;
   } catch (error) {

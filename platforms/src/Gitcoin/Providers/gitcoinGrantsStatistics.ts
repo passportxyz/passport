@@ -96,7 +96,7 @@ const getGitcoinStatistics = async (
       if (!context.gitcoinGrantStatistics) context.gitcoinGrantStatistics = {};
 
       const grantStatisticsRequest = await axios.get(`${dataUrl}?address=${address}`, {
-        headers: { Authorization: process.env.CGRANTS_API_TOKEN },
+        headers: { Authorization: process.env.SCORER_API_KEY },
       });
 
       context.gitcoinGrantStatistics[dataUrl] = { record: grantStatisticsRequest.data } as GitcoinGrantStatistics;
