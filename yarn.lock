@@ -14457,10 +14457,10 @@ did-session@^0.1.1:
     key-did-resolver "^2.1.2"
     uint8arrays "^3.0.0"
 
-did-session@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/did-session/-/did-session-3.0.2.tgz#f44934accbd0759d651e7347b46423e3f6c289ad"
-  integrity sha512-TAvCBJ6FvKtA9MNSJzaC111zIPoUyB2hhtQEd/MzBYjcHnTnF9Arq6xqjSJUiL4Vqfap8Oj7y7vVOqHlgoubig==
+did-session@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/did-session/-/did-session-3.1.0.tgz#d63b4fe56b9a23cc07ead53e5d0810c8aa7aca49"
+  integrity sha512-EZAQHFqW08m8OuCU66i6qD2X7Xfqn18LwPLsH8qbV2LsyFCx5cyqgzg5UQFxziAQvMbvtXJ3YRNWk/b3bOJiaA==
   dependencies:
     "@didtools/key-webcrypto" "^0.2.0"
     "@stablelib/random" "^1.0.2"
@@ -14516,7 +14516,7 @@ dids@^4.0.0, dids@^4.0.4:
     rpc-utils "^0.6.1"
     uint8arrays "^4.0.3"
 
-dids@^5.0.0:
+dids@^5.0.0, dids@^5.0.3:
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/dids/-/dids-5.0.3.tgz#a29699877611ec64feaf4f8e4f0160e3a724d2d2"
   integrity sha512-VAgMnoD/DA8hZBZ9Km3M45jaeD3uRVo+GLT8dg8+SPECDPCzCqX/0eVSAHgEnppbP6+p297H2d826cS2Qmd6wg==

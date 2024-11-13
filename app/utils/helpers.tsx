@@ -1,13 +1,7 @@
 // import React from "react";
 
 // --- Types
-import {
-  PLATFORM_ID,
-  ValidResponseBody,
-  CredentialResponseBody,
-  PROVIDER_ID,
-  VerifiableCredential,
-} from "@gitcoin/passport-types";
+import { ValidResponseBody, CredentialResponseBody, PROVIDER_ID, VerifiableCredential } from "@gitcoin/passport-types";
 import axios, { AxiosResponse } from "axios";
 import { datadogRum } from "@datadog/browser-rum";
 import { Cacao } from "@didtools/cacao";

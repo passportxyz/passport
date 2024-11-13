@@ -35,6 +35,7 @@
     "axios": "^0.27.2",
     "brightid_sdk": "^1.0.1",
     "cors": "^2.8.5",
+    "dids": "^5.0.3",
     "dotenv": "^16.0.0",
     "ethers": "^6.13.4",
     "express": "4",
