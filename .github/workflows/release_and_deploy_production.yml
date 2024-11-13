@@ -210,6 +210,11 @@ jobs:
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.ref.outputs.refspec }}
+          fetch-depth: 0
       - name: Release
         # https://github.com/ncipollo/release-action
         uses: ncipollo/release-action@v1
