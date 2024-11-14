@@ -14,17 +14,17 @@ export class CoinbasePlatform extends Platform {
     content: (
       <div>
         <Hyperlink href="https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/guide-to-add-coinbase-stamp-to-passport">
-        Coinbase Stamp Guide
+          Coinbase Stamp Guide
         </Hyperlink>
         <br />
         <br />
         Obtain the Coinbase Stamp by completing the following 2 steps to prove your Coinbase Verified ID and Coinbase account:
         <br />
         <br />
-        <strong>Step 1:</strong> <Hyperlink href="https://www.coinbase.com/onchain-verify">Verify your Coinbase ID</Hyperlink> with the same address that you’re currently using with this Passport.
+        <strong>Step 1:</strong> <Hyperlink href="https://www.coinbase.com/onchain-verify">Verify your Coinbase ID</Hyperlink> with the same address that you&apos;re currently using with this Passport.
         <br />
         <br />
-        <strong>Step 2:</strong> Click “Verify” below to sign into your Coinbase account.
+        <strong>Step 2:</strong> Click &quot;Verify&quot; below to sign into your Coinbase account.
         <br />
         <br />
         Important considerations:
