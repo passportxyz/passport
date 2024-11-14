@@ -13,24 +13,27 @@ export class CoinbasePlatform extends Platform {
   banner = {
     content: (
       <div>
-        Obtain the Coinbase stamp by completing the following 2 steps to prove your Coinbase Verified ID and Coinbase
-        account: <br />
+        <Hyperlink href="https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/guide-to-add-coinbase-stamp-to-passport">
+          Coinbase Stamp Guide
+        </Hyperlink>
         <br />
-        Step 1:{" "}
-        <Hyperlink className="pl-1" href="https://www.coinbase.com/onchain-verify">
-          Verify Coinbase ID
-        </Hyperlink>{" "}
-        on this wallet address <br />
         <br />
-        Step 2: Click Verify below to sign into your Coinbase account <br />
-        You cannot complete without completing the Coinbase attestation onchain in Step 1. Ensure you have an active
-        Coinbase account with a verified government ID to mint your onchain attestation for free on base.
+        Obtain the Coinbase Stamp by completing the following 2 steps to prove your Coinbase Verified ID and Coinbase account:
+        <br />
+        <br />
+        <strong>Step 1:</strong> <Hyperlink href="https://www.coinbase.com/onchain-verify">Verify your Coinbase ID</Hyperlink> with the same address that you&apos;re currently using with this Passport.
+        <br />
+        <br />
+        <strong>Step 2:</strong> Click &quot;Verify&quot; below to sign into your Coinbase account.
+        <br />
+        <br />
+        Important considerations:
+        <ul>
+          <li>You <em>must</em> complete both steps to verify this Stamp.</li>
+          <li>You <em>must</em> have an active Coinbase account with a verified government ID to mint your onchain attestation for free on Base.</li>
+        </ul>
       </div>
     ),
-    cta: {
-      label: "Support guide on adding Coinbase",
-      url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/guide-to-add-coinbase-stamp-to-passport",
-    },
   };
 
   constructor(options: PlatformOptions = {}) {
