@@ -1,4 +1,4 @@
-import { networks } from "./chains";
+import { wagmiChains, wagmiTransports } from "./chains";
 
 import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
@@ -14,7 +14,9 @@ const metadata = {
 
 export const wagmiAdapter = new WagmiAdapter({
   projectId,
-  networks,
+  networks: wagmiChains,
+  transports: wagmiTransports,
+  // Prevents hydration mismatch errors
   ssr: true,
 });
 
@@ -23,8 +25,8 @@ export const wagmiConfig = wagmiAdapter.wagmiConfig;
 export const web3Modal = createAppKit({
   adapters: [wagmiAdapter],
   projectId,
-  networks,
-  defaultNetwork: networks[0],
+  networks: wagmiChains,
+  defaultNetwork: wagmiChains[0],
   metadata: metadata,
   features: {
     email: false,

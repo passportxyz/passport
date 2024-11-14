@@ -22,11 +22,14 @@ import {
   avalanche,
   scroll,
   shape,
+  type AppKitNetwork,
 } from "@reown/appkit/networks";
-import type { AppKitNetwork } from "@reown/appkit/networks";
+import { Config } from "wagmi";
+import { http, HttpTransport } from "viem";
 
-// Weird type to match the library, forces at least 1 element
-export const networks: [AppKitNetwork, ...AppKitNetwork[]] = [mainnet];
+// Type matches the library, forces at least 1 element
+export const wagmiChains: [AppKitNetwork, ...AppKitNetwork[]] = [mainnet];
+export let wagmiTransports: Record<Config["chains"][number]["id"], HttpTransport> = {};
 
 const sepoliaChainId = "0xaa36a7";
 const hardhatChainId = "0x7a69";
@@ -117,7 +120,8 @@ if (usingTestEnvironment) {
     icon: "./assets/eth-network-logo.svg",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
   });
-  networks.push(sepolia);
+  wagmiChains.push(sepolia);
+  wagmiTransports[sepolia.id] = http(process.env.NEXT_PUBLIC_PASSPORT_SEPOLIA_RPC_URL);
 
   chainConfigs.push({
     id: hardhatChainId,
@@ -127,7 +131,8 @@ if (usingTestEnvironment) {
     icon: "./assets/eth-network-logo.svg",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
   });
-  networks.push(hardhat);
+  wagmiChains.push(hardhat);
+  wagmiTransports[hardhat.id] = http("http://127.0.0.1:8545/");
 
   chainConfigs.push({
     id: sepoliaOPChainId,
@@ -144,7 +149,8 @@ if (usingTestEnvironment) {
       monochromeIcon: "./assets/op-logo-monochrome.svg",
     },
   });
-  networks.push(optimismSepolia);
+  wagmiChains.push(optimismSepolia);
+  wagmiTransports[optimismSepolia.id] = http("https://sepolia.optimism.io");
 
   chainConfigs.push({
     id: "0x8274f",
@@ -161,7 +167,8 @@ if (usingTestEnvironment) {
       monochromeIcon: "./assets/scroll-logo-monochrome.svg",
     },
   });
-  networks.push(scrollSepolia);
+  wagmiChains.push(scrollSepolia);
+  wagmiTransports[scrollSepolia.id] = http(process.env.NEXT_PUBLIC_PASSPORT_SCROLL_SEPOLIA_RPC_URL);
 }
 
 if (!TEST_MODE) {
@@ -174,7 +181,8 @@ if (!TEST_MODE) {
       icon: "./assets/eth-network-logo.svg",
       chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
     });
-    networks.push(polygon);
+    wagmiChains.push(polygon);
+    wagmiTransports[polygon.id] = http("https://matic-mainnet.chainstacklabs.com");
 
     chainConfigs.push({
       id: "0xfa",
@@ -184,7 +192,8 @@ if (!TEST_MODE) {
       icon: "./assets/eth-network-logo.svg",
       chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
     });
-    networks.push(fantom);
+    wagmiChains.push(fantom);
+    wagmiTransports[fantom.id] = http("https://rpc.ftm.tools/");
   }
 
   chainConfigs.push({
@@ -202,7 +211,8 @@ if (!TEST_MODE) {
       monochromeIcon: "./assets/op-logo-monochrome.svg",
     },
   });
-  networks.push(optimism);
+  wagmiChains.push(optimism);
+  wagmiTransports[optimism.id] = http(process.env.NEXT_PUBLIC_PASSPORT_OP_RPC_URL);
 
   if (process.env.NEXT_PUBLIC_FF_ONCHAIN_ZKSYNC === "on") {
     chainConfigs.push({
@@ -221,7 +231,8 @@ if (!TEST_MODE) {
         monochromeIcon: "./assets/zksync-logo-monochrome.svg",
       },
     });
-    networks.push(zksync);
+    wagmiChains.push(zksync);
+    wagmiTransports[zksync.id] = http(process.env.NEXT_PUBLIC_PASSPORT_ZKSYNC_RPC_URL);
   }
 
   chainConfigs.push({
@@ -239,7 +250,8 @@ if (!TEST_MODE) {
       monochromeIcon: "./assets/linea-logo.png",
     },
   });
-  networks.push(linea);
+  wagmiChains.push(linea);
+  wagmiTransports[linea.id] = http("https://rpc.linea.build");
 
   chainConfigs.push({
     id: "0xa86a",
@@ -249,7 +261,8 @@ if (!TEST_MODE) {
     icon: "./assets/avax-logo.svg",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
   });
-  networks.push(avalanche);
+  wagmiChains.push(avalanche);
+  wagmiTransports[avalanche.id] = http("https://api.avax.network/ext/bc/C/rpc");
 
   chainConfigs.push({
     id: arbitrumChainId,
@@ -266,7 +279,8 @@ if (!TEST_MODE) {
       monochromeIcon: "./assets/arbitrum-logo-monochrome.svg",
     },
   });
-  networks.push(arbitrum);
+  wagmiChains.push(arbitrum);
+  wagmiTransports[arbitrum.id] = http(process.env.NEXT_PUBLIC_PASSPORT_ARB_RPC_URL);
 
   if (process.env.NEXT_PUBLIC_FF_ONCHAIN_SCROLL === "on") {
     chainConfigs.push({
@@ -284,7 +298,8 @@ if (!TEST_MODE) {
         monochromeIcon: "./assets/scroll-logo-monochrome.svg",
       },
     });
-    networks.push(scroll);
+    wagmiChains.push(scroll);
+    wagmiTransports[scroll.id] = http(process.env.NEXT_PUBLIC_PASSPORT_SCROLL_RPC_URL);
   }
 
   if (process.env.NEXT_PUBLIC_FF_ONCHAIN_SHAPE === "on") {
@@ -304,12 +319,13 @@ if (!TEST_MODE) {
       },
       useCustomCommunityId: true,
     });
-    networks.push(shape);
+    wagmiChains.push(shape);
+    wagmiTransports[shape.id] = http(process.env.NEXT_PUBLIC_PASSPORT_SHAPE_RPC_URL);
   }
 }
 
 // Need to use the more restrictive "CaipNetwork" type in some places
-export const networkMap = networks
+export const networkMap = wagmiChains
   .filter((network): network is CaipNetwork => (network as CaipNetwork).caipNetworkId !== undefined)
   .reduce(
     (acc, network) => {

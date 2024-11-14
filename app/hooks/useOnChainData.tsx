@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import onchainInfo from "../../deployments/onchainInfo.json";
-import { ChainId, chains } from "../utils/chains";
+import { ChainId, chains, wagmiTransports } from "../utils/chains";
 
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
@@ -63,7 +63,7 @@ const getOnChainDataForChain = async ({
   customScorerId,
   publicClient,
 }: {
-  address: string;
+  address: `0x${string}`;
   chainId: ChainId;
   customScorerId?: number;
   publicClient: PublicClient;
@@ -124,11 +124,9 @@ const useOnChainDataQuery = (address?: string) => {
       const wagmiChain = wagmiChains.find(({ id }) => id === parseInt(chain.id));
       if (!wagmiChain) throw new Error(`Chain ${chain.id} not found in wagmiChains`);
 
-      console.log("wagmiChain", wagmiChain);
-
       const publicClient = createPublicClient({
         chain: wagmiChain,
-        transport: http(String(wagmiChain.rpcUrls[0])),
+        transport: wagmiTransports[wagmiChain.id],
       });
 
       const customScorerId = chain.useCustomCommunityId && customization.scorer ? customization.scorer.id : undefined;
@@ -136,7 +134,12 @@ const useOnChainDataQuery = (address?: string) => {
         enabled: FeatureFlags.FF_CHAIN_SYNC && Boolean(address) && Boolean(publicClient),
         queryKey: [...ALL_CHAIN_DATA_QUERY_KEY, address, chain.id, customScorerId],
         queryFn: () =>
-          getOnChainDataForChain({ address: address!, chainId: chain.id, customScorerId, publicClient: publicClient! }),
+          getOnChainDataForChain({
+            address: address as `0x${string}`,
+            chainId: chain.id,
+            customScorerId,
+            publicClient: publicClient!,
+          }),
       };
     }),
     combine,

@@ -1,10 +1,12 @@
 import { EasPayload } from "@gitcoin/passport-types";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useOnChainData } from "./useOnChainData";
 import { useMessage } from "./useMessage";
 import { useAccount, useReadContract, useSwitchChain, useWriteContract } from "wagmi";
 import { Chain } from "../utils/chains";
 import { useQueryClient } from "@tanstack/react-query";
+import { cleanAndParseAbi } from "../utils/helpers";
+import { ContractFunctionExecutionErrorType, WriteContractErrorType } from "viem";
 
 const useChainSwitch = ({ chain }: { chain?: Chain }) => {
   const { chain: connectedChain } = useAccount();
@@ -33,10 +35,10 @@ const useChainSwitch = ({ chain }: { chain?: Chain }) => {
 };
 
 const useVerifierContractInfo = ({ chain }: { chain?: Chain }) => {
-  const address = chain?.attestationProvider?.verifierAddress();
-  const abi = chain?.attestationProvider?.verifierAbi();
+  const contractAddress = (chain?.attestationProvider?.verifierAddress() as `0x${string}`) || undefined;
+  const abi = chain?.attestationProvider ? cleanAndParseAbi(chain.attestationProvider.verifierAbi()) : [];
 
-  return useMemo(() => ({ address, abi }), [address, abi]);
+  return useMemo(() => ({ contractAddress, abi }), [contractAddress, abi]);
 };
 
 export const useAttestationNonce = ({
@@ -49,7 +51,8 @@ export const useAttestationNonce = ({
   nonce?: number;
   refresh: () => void;
 } => {
-  const { address, abi } = useVerifierContractInfo({ chain });
+  const { address } = useAccount();
+  const { contractAddress, abi } = useVerifierContractInfo({ chain });
 
   if (!chain || !address || !abi) return { isLoading: true, refresh: () => {}, isError: false };
 
@@ -58,7 +61,7 @@ export const useAttestationNonce = ({
 
   const { data, isLoading, isError, error, queryKey } = useReadContract({
     abi,
-    address: address as `0x${string}`,
+    address: contractAddress,
     functionName: "recipientNonces",
     args: [address],
     chainId: parseInt(chain.id),
@@ -78,13 +81,14 @@ export const useAttestationNonce = ({
     }
   }, [isError, failure]);
 
-  const nonce = data ? Number(data as bigint) : undefined;
+  const nonce = data !== undefined ? Number(data as bigint) : undefined;
 
   return useMemo(() => ({ nonce, isLoading, refresh, isError }), [nonce, isLoading, refresh, isError]);
 };
 
 export const useIssueAttestation = ({ chain }: { chain?: Chain }) => {
-  const { address, abi } = useVerifierContractInfo({ chain });
+  const { address } = useAccount();
+  const { contractAddress, abi } = useVerifierContractInfo({ chain });
   const { success, failure } = useMessage();
   const { needToSwitchChain, switchChain } = useChainSwitch({ chain });
   const { writeContractAsync } = useWriteContract();
@@ -93,7 +97,7 @@ export const useIssueAttestation = ({ chain }: { chain?: Chain }) => {
 
   const issueAttestation = useCallback(
     async ({ data }: { data: EasPayload }) => {
-      if (chain && abi && address) {
+      if (chain && abi && contractAddress) {
         if (needToSwitchChain) {
           const switched = await switchChain();
           if (!switched) {
@@ -104,9 +108,9 @@ export const useIssueAttestation = ({ chain }: { chain?: Chain }) => {
         try {
           const { v, r, s } = data.signature;
 
-          const attestationTransaction = writeContractAsync({
+          await writeContractAsync({
             chainId: parseInt(chain.id),
-            address: address as `0x${string}`,
+            address: contractAddress,
             abi,
             functionName: "verifyAndAttest",
             args: [data.passport, v, r, s] as unknown[],
@@ -117,8 +121,6 @@ export const useIssueAttestation = ({ chain }: { chain?: Chain }) => {
             title: "Submitted",
             message: "Attestation submitted to chain.",
           });
-
-          await attestationTransaction;
 
           refreshNonce();
           refreshOnchainData(chain.id);
@@ -142,76 +144,31 @@ export const useIssueAttestation = ({ chain }: { chain?: Chain }) => {
             ),
           });
         } catch (e: any) {
+          const error = e as WriteContractErrorType | ContractFunctionExecutionErrorType;
+
           console.error("error syncing credentials to chain: ", e);
-          let toastDescription: string | JSX.Element =
+
+          let errorMessage: JSX.Element | string =
+            ("details" in error && error.details) ||
+            ("shortMessage" in error && error.shortMessage) ||
+            error.message ||
             "An unexpected error occurred while trying to bring the data onchain.";
-          // if (isError(e, "ACTION_REJECTED")) {
-          //   toastDescription = "Transaction rejected by user";
-          // } else if (
-          //   isError(e, "INSUFFICIENT_FUNDS") ||
-          //   e?.info?.error?.data?.message?.includes("insufficient funds")
-          // ) {
-          //   toastDescription =
-          //     "You don't have sufficient funds to bring your data onchain. Consider funding your wallet first.";
-          // } else if (isError(e, "CALL_EXCEPTION")) {
-          //   toastDescription = (
-          //     <ErrorDetails msg={"Error writing attestation to chain: " + (e.reason || e.data)} ethersError={e} />
-          //   );
-          // } else if (
-          //   isError(e, "NONCE_EXPIRED") ||
-          //   isError(e, "REPLACEMENT_UNDERPRICED") ||
-          //   isError(e, "TRANSACTION_REPLACED") ||
-          //   isError(e, "UNCONFIGURED_NAME") ||
-          //   isError(e, "OFFCHAIN_FAULT")
-          // ) {
-          //   toastDescription = (
-          //     <ErrorDetails
-          //       msg={"A Blockchain error occurred while executing this transaction. Please try again in a few minutes."}
-          //       ethersError={e}
-          //     />
-          //   );
-          // } else if (
-          //   isError(e, "INVALID_ARGUMENT") ||
-          //   isError(e, "MISSING_ARGUMENT") ||
-          //   isError(e, "UNEXPECTED_ARGUMENT") ||
-          //   isError(e, "VALUE_MISMATCH")
-          // ) {
-          //   toastDescription = (
-          //     <ErrorDetails
-          //       msg={
-          //         "Error calling the smart contract function. This is probably a fault in the app. Please try again or contact support if this does not work out."
-          //       }
-          //       ethersError={e}
-          //     />
-          //   );
-          // } else if (
-          //   isError(e, "UNKNOWN_ERROR") ||
-          //   isError(e, "NOT_IMPLEMENTED") ||
-          //   isError(e, "UNSUPPORTED_OPERATION") ||
-          //   isError(e, "NETWORK_ERROR") ||
-          //   isError(e, "SERVER_ERROR") ||
-          //   isError(e, "TIMEOUT") ||
-          //   isError(e, "BAD_DATA") ||
-          //   isError(e, "CANCELLED")
-          // ) {
-          //   toastDescription = (
-          //     <ErrorDetails
-          //       msg={"An unexpected error occurred while calling the smart contract function. Please contact support."}
-          //       ethersError={e}
-          //     />
-          //   );
-          // } else if (isError(e, "BUFFER_OVERRUN") || isError(e, "NUMERIC_FAULT")) {
-          //   toastDescription = (
-          //     <ErrorDetails
-          //       msg={"An operational error occurred while calling the smart contract. Please contact support."}
-          //       ethersError={e}
-          //     />
-          //   );
-          // }
+
+          if (errorMessage.includes("rejected") || errorMessage.includes("User denied transaction")) {
+            errorMessage = "Transaction rejected by user";
+          } else if (
+            errorMessage.includes("insufficient funds") ||
+            e?.info?.error?.data?.message?.includes("insufficient funds")
+          ) {
+            errorMessage =
+              "You don't have sufficient funds to bring your data onchain. Consider funding your wallet first.";
+          } else {
+            errorMessage = <ErrorDetails msg={errorMessage} error={e} />;
+          }
 
           failure({
             title: "Error",
-            message: toastDescription,
+            message: errorMessage,
           });
         }
       }
@@ -219,6 +176,7 @@ export const useIssueAttestation = ({ chain }: { chain?: Chain }) => {
     [
       chain,
       address,
+      contractAddress,
       abi,
       needToSwitchChain,
       switchChain,
@@ -233,47 +191,49 @@ export const useIssueAttestation = ({ chain }: { chain?: Chain }) => {
   return useMemo(() => ({ issueAttestation, needToSwitchChain }), [issueAttestation, needToSwitchChain]);
 };
 
-// export type ErrorDetailsProps = {
-//   msg: string;
-//   ethersError: EthersError;
-// };
-//
-// export const ErrorDetails = ({ msg, ethersError }: ErrorDetailsProps): JSX.Element => {
-//   const [displayDetails, setDisplayDetails] = useState<string>("none");
-//   const [textLabelDisplay, setTextLabelDisplay] = useState<string>("Show details");
-//
-//   const copyDetailsToClipboard = (e: React.MouseEvent<HTMLAnchorElement>) => {
-//     e.preventDefault();
-//     navigator.clipboard.writeText(ethersError.message);
-//   };
-//
-//   const toggleDetails = (e: React.MouseEvent<HTMLAnchorElement>) => {
-//     e.preventDefault();
-//     if (displayDetails === "none") {
-//       setDisplayDetails("block");
-//       setTextLabelDisplay("Hide details");
-//     } else {
-//       setDisplayDetails("none");
-//       setTextLabelDisplay("Show details");
-//     }
-//   };
-//   return (
-//     <div>
-//       <p>{msg}</p>
-//       <br></br>
-//       Please{" "}
-//       <b>
-//         <a href="#" onClick={copyDetailsToClipboard}>
-//           copy transaction details{" "}
-//         </a>
-//       </b>{" "}
-//       in case you contact our support.{" "}
-//       <b>
-//         <a href="#" onClick={toggleDetails}>
-//           {textLabelDisplay}
-//         </a>
-//       </b>
-//       <div style={{ display: displayDetails, overflowY: "scroll", maxHeight: "200px" }}>{ethersError.message}</div>
-//     </div>
-//   );
-// };
+export type ErrorDetailsProps = {
+  msg: string;
+  error: {
+    message: string;
+  };
+};
+
+export const ErrorDetails = ({ msg, error }: ErrorDetailsProps): JSX.Element => {
+  const [displayDetails, setDisplayDetails] = useState<string>("none");
+  const [textLabelDisplay, setTextLabelDisplay] = useState<string>("Show details");
+
+  const copyDetailsToClipboard = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    navigator.clipboard.writeText(error.message || error.toString());
+  };
+
+  const toggleDetails = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (displayDetails === "none") {
+      setDisplayDetails("block");
+      setTextLabelDisplay("Hide details");
+    } else {
+      setDisplayDetails("none");
+      setTextLabelDisplay("Show details");
+    }
+  };
+  return (
+    <div>
+      <p>{msg}</p>
+      <br></br>
+      Please{" "}
+      <b>
+        <a href="#" onClick={copyDetailsToClipboard}>
+          copy transaction details{" "}
+        </a>
+      </b>{" "}
+      in case you contact our support.{" "}
+      <b>
+        <a href="#" onClick={toggleDetails}>
+          {textLabelDisplay}
+        </a>
+      </b>
+      <div style={{ display: displayDetails, overflowY: "scroll", maxHeight: "200px" }}>{error.message}</div>
+    </div>
+  );
+};
