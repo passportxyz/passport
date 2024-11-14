@@ -11,12 +11,28 @@ export class BinancePlatform extends Platform {
   banner = {
     content: (
       <div>
-        Obtain your <Hyperlink href="https://www.binance.com/en/babt">Binance Account Bound Token (BABT)</Hyperlink> by
-        verifying your identity and logging into your Binance account. This will prove you&apos;re verified by Binance
-        and have completed the KYC process.{" "}
         <Hyperlink href="https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/guide-to-add-binance-stamp-to-passport">
-          Help
+        Binance Stamp Guide
         </Hyperlink>
+        <br />
+        <br />
+        Obtain your Binance Stamp by completing the following steps:
+        <br />
+        <br />
+        <strong>Step 1:</strong> Obtain your <Hyperlink href="https://www.binance.com/en/babt">Binance Account Bound Token (BABT)</Hyperlink> using the same address that you're currently using with this Passport.
+        <br />
+        <br />
+        <strong>Step 2:</strong> Click "Verify" below for the Stamp to check that BABT is owned by this wallet address.
+        <br />
+        <br />
+        This will prove you've completed the Government ID verification process (KYC) on Binance.
+        <br />
+        <br />
+        Important considerations:
+        <ul>
+          <li>You <em>must</em> attach the Binance Account Bound Token (BABT) to the same address that you are using with this Passport.</li>
+          <li>If you attached your BABT to your Binance wallet and aren't using that wallet with Passport, you will not be able to verify this Stamp.</li>
+        </ul>
       </div>
     ),
   };
