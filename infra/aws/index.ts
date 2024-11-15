@@ -3,7 +3,7 @@ import * as aws from "@pulumi/aws";
 import * as op from "@1password/op-js";
 import * as cloudflare from "@pulumi/cloudflare";
 import { secretsManager, amplify } from "infra-libs";
-import {stack, defaultTags} from "../lib/tags";
+import { stack, defaultTags } from "../lib/tags";
 
 const current = aws.getCallerIdentity({});
 const regionData = aws.getRegion({});
@@ -31,6 +31,7 @@ const redisConnectionUrl = pulumi.interpolate`${coreInfraStack.getOutput("static
 const albDnsName = coreInfraStack.getOutput("coreAlbDns");
 const albZoneId = coreInfraStack.getOutput("coreAlbZoneId");
 const albHttpsListenerArn = coreInfraStack.getOutput("coreAlbHttpsListenerArn");
+const coreAlbArn = coreInfraStack.getOutput("coreAlbArn");
 
 const passportDataScienceStack = new pulumi.StackReference(`passportxyz/passport-data/${stack}`);
 const passportDataScienceEndpoint = passportDataScienceStack.getOutput("internalAlbBaseUrl");
@@ -39,8 +40,6 @@ const snsAlertsTopicArn = coreInfraStack.getOutput("snsAlertsTopicArn");
 
 const passportXyzDomainName = coreInfraStack.getOutput("passportXyzDomainName");
 const passportXyzHostedZoneId = coreInfraStack.getOutput("passportXyzHostedZoneId");
-
-
 
 const containerInsightsStatus = stack == "production" ? "enabled" : "disabled";
 
@@ -307,6 +306,35 @@ const albPassportXyzTargetGroup = new aws.lb.TargetGroup(`passport-xyz-iam`, {
     ...defaultTags,
     Name: `passport-xyz-iam`,
   },
+});
+
+/*
+ * Alarm for monitoring target 5XX errors
+ */
+const coreAlbArnSuffix = coreAlbArn.apply((arn) => arn.split(":").pop());
+const http5xxTargetAlarm = new aws.cloudwatch.MetricAlarm(`HTTP-Target-5XX-passport-xyz-iam`, {
+  tags: { ...defaultTags, Name: `HTTP-Target-5XX-passport-xyz-iam` },
+  name: `HTTP-Target-5XX-passport-xyz-iam`,
+  alarmActions: [snsAlertsTopicArn],
+  okActions: [snsAlertsTopicArn],
+
+  period: 60,
+  statistic: "Sum",
+
+  datapointsToAlarm: 3,
+  evaluationPeriods: 5,
+
+  metricName: "HTTPCode_Target_5XX_Count",
+  namespace: "AWS/ApplicationELB",
+
+  dimensions: {
+    LoadBalancer: coreAlbArnSuffix,
+    TargetGroup: albPassportXyzTargetGroup.arnSuffix,
+  },
+
+  comparisonOperator: "GreaterThanThreshold",
+  threshold: 0,
+  treatMissingData: "notBreaching",
 });
 
 const albPassportXyzListenerRule = new aws.lb.ListenerRule(`passport-xyz-iam-https`, {
@@ -660,7 +688,7 @@ const ecsAutoScalingTargetXyz = new aws.appautoscaling.Target("autoscaling_targe
   tags: {
     ...defaultTags,
     Name: "autoscaling_target_xyz",
-  }
+  },
 });
 
 const ecsAutoScalingPolicyXyz = new aws.appautoscaling.Policy("passport-autoscaling-policy-xyz", {
@@ -793,7 +821,7 @@ const gitcoinEcsAutoScalingTarget = new aws.appautoscaling.Target("autoscaling_t
   tags: {
     ...defaultTags,
     Name: "autoscaling_target",
-  }
+  },
 });
 
 const gitcoinEcsAutoScalingPolicy = new aws.appautoscaling.Policy("passport-autoscaling-policy", {
@@ -852,7 +880,8 @@ const amplifyAppInfo = coreInfraStack.getOutput("newPassportDomain").apply((doma
     branchName: passportBranches[stack],
     environmentVariables: passportXyzAppEnvironment,
     tags: { ...defaultTags, Name: `${prefix}.${domainName}` },
-    buildCommand: "npm install --g lerna@6.6.2 && lerna bootstrap && rm -rf ../node_modules/@tendermint && npm run build",
+    buildCommand:
+      "npm install --g lerna@6.6.2 && lerna bootstrap && rm -rf ../node_modules/@tendermint && npm run build",
     preBuildCommand: "nvm use 20.9.0",
     artifactsBaseDirectory: "out",
     customRules: [
