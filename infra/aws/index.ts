@@ -311,7 +311,7 @@ const albPassportXyzTargetGroup = new aws.lb.TargetGroup(`passport-xyz-iam`, {
 /*
  * Alarm for monitoring target 5XX errors
  */
-const coreAlbArnPrefix = coreAlbArn.apply((arn) => arn.split(":").pop());
+const coreAlbArnSuffix = coreAlbArn.apply((arn) => arn.split(":").pop());
 const http5xxTargetAlarm = new aws.cloudwatch.MetricAlarm(`HTTP-Target-5XX-passport-xyz-iam`, {
   tags: { ...defaultTags, Name: `HTTP-Target-5XX-passport-xyz-iam` },
   name: `HTTP-Target-5XX-passport-xyz-iam`,
@@ -328,7 +328,7 @@ const http5xxTargetAlarm = new aws.cloudwatch.MetricAlarm(`HTTP-Target-5XX-passp
   namespace: "AWS/ApplicationELB",
 
   dimensions: {
-    LoadBalancer: coreAlbArnPrefix,
+    LoadBalancer: coreAlbArnSuffix,
     TargetGroup: albPassportXyzTargetGroup.arnSuffix,
   },
 
