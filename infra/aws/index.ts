@@ -31,6 +31,7 @@ const redisConnectionUrl = pulumi.interpolate`${coreInfraStack.getOutput("static
 const albDnsName = coreInfraStack.getOutput("coreAlbDns");
 const albZoneId = coreInfraStack.getOutput("coreAlbZoneId");
 const albHttpsListenerArn = coreInfraStack.getOutput("coreAlbHttpsListenerArn");
+const coreAlbArn = coreInfraStack.getOutput("coreAlbArn");
 
 const passportDataScienceStack = new pulumi.StackReference(`passportxyz/passport-data/${stack}`);
 const passportDataScienceEndpoint = passportDataScienceStack.getOutput("internalAlbBaseUrl");
@@ -310,7 +311,7 @@ const albPassportXyzTargetGroup = new aws.lb.TargetGroup(`passport-xyz-iam`, {
 /*
  * Alarm for monitoring target 5XX errors
  */
-const httpsListenerAlbPrefix = albHttpsListenerArn.apply((arn) => arn.split(":").pop());
+const coreAlbArnPrefix = coreAlbArn.apply((arn) => arn.split(":").pop());
 const http5xxTargetAlarm = new aws.cloudwatch.MetricAlarm(`HTTP-Target-5XX-passport-xyz-iam`, {
   tags: { ...defaultTags, Name: `HTTP-Target-5XX-passport-xyz-iam` },
   name: `HTTP-Target-5XX-passport-xyz-iam`,
@@ -325,6 +326,11 @@ const http5xxTargetAlarm = new aws.cloudwatch.MetricAlarm(`HTTP-Target-5XX-passp
 
   metricName: "HTTPCode_Target_5XX_Count",
   namespace: "AWS/ApplicationELB",
+
+  dimensions: {
+    LoadBalancer: coreAlbArnPrefix,
+    TargetGroup: albPassportXyzTargetGroup.arnSuffix,
+  },
 
   comparisonOperator: "GreaterThanThreshold",
   threshold: 0,
