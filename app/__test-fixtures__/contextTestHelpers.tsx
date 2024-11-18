@@ -13,8 +13,7 @@ import {
   DbAuthTokenStatus,
 } from "../context/datastoreConnectionContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createConfig, WagmiProvider } from "wagmi";
-import { createPublicClient, http } from "viem";
+import { WagmiProvider } from "wagmi";
 import { wagmiConfig } from "../utils/web3";
 
 export const getProviderSpec = (platform: PLATFORM_ID, provider: string): ProviderSpec => {

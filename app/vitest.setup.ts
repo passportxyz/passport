@@ -14,3 +14,9 @@ console.info = (...args) => filterIgnored(info, ...args);
 console.log = (...args) => filterIgnored(log, ...args);
 console.warn = (...args) => filterIgnored(warn, ...args);
 console.error = (...args) => filterIgnored(error, ...args);
+
+process.on("unhandledRejection", (reason) => {
+  // eslint-disable-next-line no-console
+  console.log(`FAILED TO HANDLE PROMISE REJECTION`);
+  throw reason;
+});

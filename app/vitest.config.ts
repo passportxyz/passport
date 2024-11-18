@@ -12,5 +12,10 @@ export default defineConfig({
         forcePolyfill: true,
       },
     },
+    server: {
+      deps: {
+        fallbackCJS: true,
+      },
+    },
   },
 });

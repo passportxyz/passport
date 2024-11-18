@@ -13,7 +13,7 @@ vi.mock("axios");
 
 vi.mock("wagmi", async (importActual) => ({ ...(await importActual()), usePublicClient: vi.fn() }));
 
-const issueAttestationMock = vi.fn().mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 25)));
+const issueAttestationMock = vi.fn().mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 1000)));
 
 vi.mock("../../hooks/useIssueAttestation", () => ({
   useIssueAttestation: () => ({
