@@ -597,7 +597,6 @@ export function setupIAM() {
         })
       : "";
 
-  // TODO: do we need this?
   const gitcoinServiceRecord = new aws.route53.Record("passport-record", {
     name: route53Domain,
     zoneId: route53Zone,
