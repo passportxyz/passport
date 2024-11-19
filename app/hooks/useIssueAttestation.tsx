@@ -2,7 +2,7 @@ import { EasPayload } from "@gitcoin/passport-types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useOnChainData } from "./useOnChainData";
 import { useMessage } from "./useMessage";
-import { useAccount, useReadContract, useSwitchChain, useWriteContract } from "wagmi";
+import { useAccount, usePublicClient, useReadContract, useSwitchChain, useWriteContract } from "wagmi";
 import { Chain } from "../utils/chains";
 import { useQueryClient } from "@tanstack/react-query";
 import { cleanAndParseAbi } from "../utils/helpers";
@@ -87,6 +87,9 @@ export const useIssueAttestation = ({ chain }: { chain?: Chain }) => {
   const { success, failure } = useMessage();
   const { needToSwitchChain, switchChain } = useChainSwitch({ chain });
   const { writeContractAsync } = useWriteContract();
+  const publicClient = usePublicClient({
+    chainId: parseInt(chain?.id || "1"),
+  });
   const { refresh: refreshNonce } = useAttestationNonce({ chain });
   const { refresh: refreshOnchainData } = useOnChainData();
 
@@ -101,10 +104,12 @@ export const useIssueAttestation = ({ chain }: { chain?: Chain }) => {
         try {
           const { v, r, s } = data.signature;
 
-          await writeContractAsync({
-            chainId: parseInt(chain.id),
-            address: contractAddress,
+          const chainId = parseInt(chain.id);
+
+          const txhash = await writeContractAsync({
             abi,
+            chainId,
+            address: contractAddress,
             functionName: "verifyAndAttest",
             args: [data.passport, v, r, s] as unknown[],
             value: data.passport.fee,
@@ -113,6 +118,10 @@ export const useIssueAttestation = ({ chain }: { chain?: Chain }) => {
           success({
             title: "Submitted",
             message: "Attestation submitted to chain.",
+          });
+
+          await publicClient?.waitForTransactionReceipt({
+            hash: txhash,
           });
 
           refreshNonce();
