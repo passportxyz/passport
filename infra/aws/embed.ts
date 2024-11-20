@@ -180,7 +180,7 @@ const serviceRole = new aws.iam.Role("passport-embed-ecs-role", {
   managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"],
   tags: {
     ...defaultTags,
-    Name: "passport-ecs-role",
+    Name: "passport-embed-ecs-role",
   },
 });
 
