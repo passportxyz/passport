@@ -46,7 +46,6 @@ const getPassport = async ({
   decoderAddress: string;
   decoderAbi: Abi;
 }): Promise<CachedStamp[]> => {
-  console.log("GP", publicClient?.chain?.id, decoderAbi, decoderAddress);
   try {
     return (await publicClient.readContract({
       abi: decoderAbi,

@@ -47,7 +47,6 @@ export const useLoginFlow = ({
   }, []);
 
   useEffect(() => {
-    console.log("web3modalEvent", web3modalEvent);
     if (web3modalEvent.data.event === "MODAL_CLOSE" && web3modalEvent.data.properties.connected === false) {
       resetLogin();
     }
@@ -63,19 +62,8 @@ export const useLoginFlow = ({
     [failure]
   );
 
-  // TODO The useWeb3ModalError hook is gone. Could write a
-  // custom hook to poll modal.getError() ?
-  // useEffect(() => {
-  //   if (error) {
-  //     console.error("Web3Modal error", error);
-  //     showConnectionError(error);
-  //     resetLogin();
-  //   }
-  // }, [error, resetLogin]);
-
   useEffect(() => {
     const newLoginStep = (() => {
-      console.log("enabled", enabled, "isConnected", isConnected, "dbAccessToken", dbAccessTokenStatus);
       if (!enabled) return "NOT_STARTED";
       else if (!isConnected) return "PENDING_WALLET_CONNECTION";
       else if (dbAccessTokenStatus !== "connected") return "PENDING_DATABASE_CONNECTION";
@@ -93,7 +81,6 @@ export const useLoginFlow = ({
         try {
           await disconnect();
         } catch (e) {
-          // TODO
           console.error("Error disconnecting wallet", e);
         }
       }

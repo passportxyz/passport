@@ -17,8 +17,8 @@ export const CancelButton = ({
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="M41.5 14.4131L14.0978 41.8153" stroke="#C1F6FF" stroke-width="2" stroke-linecap="round" />
-      <path d="M41.5 41.8154L14.0978 14.4132" stroke="#C1F6FF" stroke-width="2" stroke-linecap="round" />
+      <path d="M41.5 14.4131L14.0978 41.8153" stroke="#C1F6FF" strokeWidth="2" strokeLinecap="round" />
+      <path d="M41.5 41.8154L14.0978 14.4132" stroke="#C1F6FF" strokeWidth="2" strokeLinecap="round" />
     </svg>
   </button>
 );

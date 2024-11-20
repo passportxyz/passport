@@ -10,24 +10,19 @@ import { ContractFunctionExecutionErrorType, WriteContractErrorType } from "viem
 
 const useChainSwitch = ({ chain }: { chain?: Chain }) => {
   const { chain: connectedChain } = useAccount();
-  const { switchChainAsync } = useSwitchChain();
+  const { switchChain: walletSwitchChain } = useSwitchChain();
 
   const chainId = chain && parseInt(chain.id);
 
-  const switchChain = useCallback(async (): Promise<Boolean> => {
+  const switchChain = useCallback(async (): Promise<void> => {
     if (!(connectedChain && chainId)) {
-      return false;
+      return;
     }
     if (connectedChain.id === chainId) {
-      return true;
+      return;
     }
-    try {
-      await switchChainAsync({ chainId });
-      return true;
-    } catch {
-      return false;
-    }
-  }, [connectedChain, chain, switchChainAsync]);
+    walletSwitchChain({ chainId });
+  }, [connectedChain, chainId, walletSwitchChain]);
 
   const needToSwitchChain = connectedChain?.id !== chainId;
 
@@ -99,10 +94,8 @@ export const useIssueAttestation = ({ chain }: { chain?: Chain }) => {
     async ({ data }: { data: EasPayload }) => {
       if (chain && abi && contractAddress) {
         if (needToSwitchChain) {
-          const switched = await switchChain();
-          if (!switched) {
-            return;
-          }
+          switchChain();
+          return;
         }
 
         try {

@@ -63,25 +63,11 @@ export default function Dashboard() {
   const { disconnect, dbAccessTokenStatus, dbAccessToken, did } = useDatastoreConnectionContext();
   const { address } = useAccount();
   const { initiateVerification } = useOneClickVerification();
-  // TODO
-  // const { error: web3ModalError } = useWeb3ModalError();
   const { success, failure } = useMessage();
 
   // This shouldn't be necessary, but using this to prevent unnecessary re-initialization
   // until ceramicContext is refactored and memoized
   const verifiedParamsHash = useRef<string | undefined>(undefined);
-
-  // useEffect(() => {
-  //   // TODO
-  //   if (web3ModalError) {
-  //     console.error("Web3Modal error", web3ModalError);
-  //     failure({
-  //       duration: 6000,
-  //       title: "Wallet Connection Error",
-  //       message: (web3ModalError as Error).message,
-  //     });
-  //   }
-  // }, [web3ModalError, failure]);
 
   useEffect(() => {
     if (did && address && databaseReady) {

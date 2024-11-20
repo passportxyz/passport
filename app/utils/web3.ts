@@ -8,7 +8,7 @@ const projectId = (process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string) 
 const metadata = {
   name: "Passport",
   description: "Decentralized Identity Verification",
-  url: "http://localhost:3000/",
+  url: "https://app.passport.xyz",
   icons: ["/assets/onboarding.svg"],
 };
 
