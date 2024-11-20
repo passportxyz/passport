@@ -11,8 +11,8 @@ import { useAccount } from "wagmi";
 export const useMintBadge = () => {
   const { nonce, isError, isLoading } = useAttestationNonce({ chain: scrollCampaignChain });
   const { issueAttestation } = useIssueAttestation({ chain: scrollCampaignChain });
-  const { address } = useAccount();
   const { failure } = useMessage();
+  const { address } = useAccount();
   const goToLastStep = useNavigateToLastStep();
 
   const [syncingToChain, setSyncingToChain] = useState(false);

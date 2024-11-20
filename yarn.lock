@@ -9149,123 +9149,123 @@
   resolved "https://registry.yarnpkg.com/@remix-run/router/-/router-1.15.3.tgz#d2509048d69dbb72d5389a14945339f1430b2d3c"
   integrity sha512-Oy8rmScVrVxWZVOpEF57ovlnhpZ8CCPlnIIumVcV9nFdiSIrus99+Lw78ekXyGvVDlIsFJbSfmSovJUhCWYV3w==
 
-"@reown/appkit-adapter-wagmi@^1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@reown/appkit-adapter-wagmi/-/appkit-adapter-wagmi-1.4.1.tgz#6f36e5230f093ff19b7508d5786044fe110f1e3c"
-  integrity sha512-TVM/mmhXFnZZD7bwNDNFVj71nsjq+fre/CQQ90laeFd8lZUprIflkBJq+C7gKVAHMZdlJKJaSQUUJeHmUXqnpw==
+"@reown/appkit-adapter-wagmi@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@reown/appkit-adapter-wagmi/-/appkit-adapter-wagmi-1.5.0.tgz#dab3b5aee90c44246b23e5961ac2d61be23fa25b"
+  integrity sha512-me+mAwLaRk99xXnmVKjhhJ2XhCQmXomw5LsDWILDSGXlJmlYIT67zL2w6btGRzYARiRdGlfRBNw1RKX/2og3oA==
   dependencies:
-    "@reown/appkit" "1.4.1"
-    "@reown/appkit-common" "1.4.1"
-    "@reown/appkit-core" "1.4.1"
-    "@reown/appkit-polyfills" "1.4.1"
-    "@reown/appkit-scaffold-ui" "1.4.1"
-    "@reown/appkit-siwe" "1.4.1"
-    "@reown/appkit-ui" "1.4.1"
-    "@reown/appkit-utils" "1.4.1"
-    "@reown/appkit-wallet" "1.4.1"
+    "@reown/appkit" "1.5.0"
+    "@reown/appkit-common" "1.5.0"
+    "@reown/appkit-core" "1.5.0"
+    "@reown/appkit-polyfills" "1.5.0"
+    "@reown/appkit-scaffold-ui" "1.5.0"
+    "@reown/appkit-siwe" "1.5.0"
+    "@reown/appkit-ui" "1.5.0"
+    "@reown/appkit-utils" "1.5.0"
+    "@reown/appkit-wallet" "1.5.0"
     "@walletconnect/universal-provider" "2.17.0"
     "@walletconnect/utils" "2.17.0"
     valtio "1.11.2"
 
-"@reown/appkit-common@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@reown/appkit-common/-/appkit-common-1.4.1.tgz#6b3cc26f1ebc13b58ddd72c339f3dd02e1662665"
-  integrity sha512-fOplxylPoMtGHrcTQUDcRVRZ1zRA42hOlDLWYeXb31jEeIN6LzdWYtAiuGozE4VZ4g2fLYkpskbfE84bbSXRlA==
+"@reown/appkit-common@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@reown/appkit-common/-/appkit-common-1.5.0.tgz#b8b76560726207594a825e5d4a726db1a7d27ef2"
+  integrity sha512-ozF5yLcw2TyDs5mrAwZ2fNqhfcP/Z6iZmLGtnps7DU5V3bJWQZX/e6BRWl8eTj+cPMWM25CUJNsYFgFE86J1Vg==
   dependencies:
     bignumber.js "9.1.2"
     dayjs "1.11.10"
     viem "2.x"
 
-"@reown/appkit-core@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@reown/appkit-core/-/appkit-core-1.4.1.tgz#8d912b2699098da1a98be3df8b2d4419139b5171"
-  integrity sha512-CIxor0p+M3jjGxxxatkt5NYrp0WUhbn3EBY4FqUgzmIFpMe6mlAMtStufOQJJZn5jaXukdbwMjfYUC1TbkMMLw==
+"@reown/appkit-core@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@reown/appkit-core/-/appkit-core-1.5.0.tgz#b27876803ed2a298d3b3b7b10cdf134aa498ab68"
+  integrity sha512-sCxqPPJISqIlgcUiNVmei41LJfTMA2p9LfFdX37uds3OmDy2T37xK1RoS6rR7Ez2/gGSVxMx2308S5ammi4lTQ==
   dependencies:
-    "@reown/appkit-common" "1.4.1"
-    "@reown/appkit-wallet" "1.4.1"
+    "@reown/appkit-common" "1.5.0"
+    "@reown/appkit-wallet" "1.5.0"
     "@walletconnect/universal-provider" "2.17.0"
     valtio "1.11.2"
     viem "2.x"
 
-"@reown/appkit-polyfills@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@reown/appkit-polyfills/-/appkit-polyfills-1.4.1.tgz#9236a3af3e084f9f60dc2bb7cc590ecaf00c7d61"
-  integrity sha512-SlQtHPqfUySd9q1D7EMWZdmdcBi3Oa8QLl4+JemtjSDFQd/t6TYgtI8tYmK4glY1J9n4oiFiynQv2bEvxfLhiw==
+"@reown/appkit-polyfills@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@reown/appkit-polyfills/-/appkit-polyfills-1.5.0.tgz#692056290ae5e2b849960e3cf65cf501784f1e68"
+  integrity sha512-al8yHktJBQLEXq+GKMd11oF6HrlwObRPYiOt9e4gVwkDiYLA9Ly5CGtGPfAVIWhXHCVhCN8uFGnogiDWOghJtw==
   dependencies:
     buffer "6.0.3"
 
-"@reown/appkit-scaffold-ui@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@reown/appkit-scaffold-ui/-/appkit-scaffold-ui-1.4.1.tgz#b029dbe6c9a31ffb7101ba2857e97494dba2b45d"
-  integrity sha512-Yb17DmjlQCK0p3k3SDdpfR7leepX/lrhI0gEy7GQwBWjj2yCWNG4hufMvhOo/Zb+dkFLHYNOxHL77AmIA7gMHQ==
+"@reown/appkit-scaffold-ui@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@reown/appkit-scaffold-ui/-/appkit-scaffold-ui-1.5.0.tgz#d0d10b11bdc6fc516c9369dd14d3a8b2a445d0f4"
+  integrity sha512-tkbB+ZpT1PACpOUJ/N4LdXDC+01WStmuvFX07dmBWiRzu3lURmDtTuET3EgCdtCMC+bMh4a67bgl4iqAaSAnog==
   dependencies:
-    "@reown/appkit-common" "1.4.1"
-    "@reown/appkit-core" "1.4.1"
-    "@reown/appkit-siwe" "1.4.1"
-    "@reown/appkit-ui" "1.4.1"
-    "@reown/appkit-utils" "1.4.1"
-    "@reown/appkit-wallet" "1.4.1"
+    "@reown/appkit-common" "1.5.0"
+    "@reown/appkit-core" "1.5.0"
+    "@reown/appkit-siwe" "1.5.0"
+    "@reown/appkit-ui" "1.5.0"
+    "@reown/appkit-utils" "1.5.0"
+    "@reown/appkit-wallet" "1.5.0"
     lit "3.1.0"
 
-"@reown/appkit-siwe@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@reown/appkit-siwe/-/appkit-siwe-1.4.1.tgz#6ffd3617c46aaa36cef36440f35af56468bf5ae0"
-  integrity sha512-WxT/Kn3WTACwwv4FrIirBKvrd9bDPwjAdclZSjSzEE94PwgkqKZbSwtcnOPXD4jShXeTqDu0VGkhVT1tVUCvtg==
+"@reown/appkit-siwe@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@reown/appkit-siwe/-/appkit-siwe-1.5.0.tgz#fef194440d072b34de9602744bb41b9842726bb4"
+  integrity sha512-7qmvMJTKKgUGMH9wIwHf5XVxaf74weRHclwR1hmYm9kzyLyo1IiM+K0dDygEFc7cK5rVHVkGlPW7bir41Atmrw==
   dependencies:
-    "@reown/appkit-common" "1.4.1"
-    "@reown/appkit-core" "1.4.1"
-    "@reown/appkit-ui" "1.4.1"
-    "@reown/appkit-utils" "1.4.1"
-    "@reown/appkit-wallet" "1.4.1"
+    "@reown/appkit-common" "1.5.0"
+    "@reown/appkit-core" "1.5.0"
+    "@reown/appkit-ui" "1.5.0"
+    "@reown/appkit-utils" "1.5.0"
+    "@reown/appkit-wallet" "1.5.0"
     "@walletconnect/utils" "2.17.0"
     lit "3.1.0"
     valtio "1.11.2"
 
-"@reown/appkit-ui@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@reown/appkit-ui/-/appkit-ui-1.4.1.tgz#833e013f1291c13a0022af363da59c4a2196ce2c"
-  integrity sha512-6yf/OgjJeSG95RSYlxf3+cRyCkynAJSzQnjkyFejULk3twHVUMofPk1uY9U3BKU2faCn3kh4uomx2D2KT24YBg==
+"@reown/appkit-ui@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@reown/appkit-ui/-/appkit-ui-1.5.0.tgz#161f8172bf6c347246f2fc53391316519926e7c8"
+  integrity sha512-dNMcT/dqQ17qSzCFI3G6ygxkE9GxgPZHvJSi5r3DWQ1553ABWMaKfDl2yDVl6TkaMbOoSTwn/QD/mWK0hFa0xA==
   dependencies:
     lit "3.1.0"
     qrcode "1.5.3"
 
-"@reown/appkit-utils@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@reown/appkit-utils/-/appkit-utils-1.4.1.tgz#e4a8c8904c9edea1d65bbf798ddb947c776c5cee"
-  integrity sha512-/1CjiOI6K8erBqi+Tq/9ZgjSXmXsVArK9IRh13NDcb+CM/DAS29Re7I/sFacGWZvxER0e8n5XJMNyvUmsI+j8Q==
+"@reown/appkit-utils@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@reown/appkit-utils/-/appkit-utils-1.5.0.tgz#7207b127fbd31f70b906c86128354de30296eb18"
+  integrity sha512-hBTKui/ezHmLIydxYTeAbRD8WwP65RuJP3UspcysndOpkwkgAzj3UXeL+YrM21L1B2T/uplbtM7nxFoPdLfGYw==
   dependencies:
-    "@reown/appkit-common" "1.4.1"
-    "@reown/appkit-core" "1.4.1"
-    "@reown/appkit-polyfills" "1.4.1"
-    "@reown/appkit-wallet" "1.4.1"
+    "@reown/appkit-common" "1.5.0"
+    "@reown/appkit-core" "1.5.0"
+    "@reown/appkit-polyfills" "1.5.0"
+    "@reown/appkit-wallet" "1.5.0"
     "@walletconnect/logger" "2.1.2"
     "@walletconnect/universal-provider" "2.17.0"
     valtio "1.11.2"
     viem "2.x"
 
-"@reown/appkit-wallet@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@reown/appkit-wallet/-/appkit-wallet-1.4.1.tgz#c9880659665d6bad066199fdcbfaa5201735d551"
-  integrity sha512-YbEYM9o6jINC0ZF7BUpfdc8XT91ssWZqH/2kAWe15pleLS9UXmWJjh0NZCGFC08tnnm3cmfsQCkJZMH3Jp+CJQ==
+"@reown/appkit-wallet@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@reown/appkit-wallet/-/appkit-wallet-1.5.0.tgz#0ab88c2cbbe219154721b9e89e1fbb2746e6443c"
+  integrity sha512-Q2cNOLPYtzSPRjnhVjEvfOzWcmBO1FiOmf3D8dmjj8VrGHOmswT+E80qbxBBpC002JqP+gnviBAyQOfgf44GLg==
   dependencies:
-    "@reown/appkit-common" "1.4.1"
-    "@reown/appkit-polyfills" "1.4.1"
+    "@reown/appkit-common" "1.5.0"
+    "@reown/appkit-polyfills" "1.5.0"
     "@walletconnect/logger" "2.1.2"
     zod "3.22.4"
 
-"@reown/appkit@1.4.1", "@reown/appkit@^1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@reown/appkit/-/appkit-1.4.1.tgz#962fc08ecb57bda5f795e6c8b6237faf078edfdd"
-  integrity sha512-mrtanQ0kGlzeXSKrbna61/k2U0JYzcfMRFnQr9+SoJ0zpjDvSU8KFtvLEGQLiTU97lgRkT3JuXwKU2599P6B3w==
+"@reown/appkit@1.5.0", "@reown/appkit@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@reown/appkit/-/appkit-1.5.0.tgz#887f59899edd4b609b700f397c1d3164f92ea5ab"
+  integrity sha512-HgMQ4HQ+bKPaqxb/3HpYrxecTRLEVy/L2D1JCxqxZ5WkDNXIQ7cVpK8zQp7GZ4jwswv3wW9yk1rhRQc6TZSOxw==
   dependencies:
-    "@reown/appkit-common" "1.4.1"
-    "@reown/appkit-core" "1.4.1"
-    "@reown/appkit-polyfills" "1.4.1"
-    "@reown/appkit-scaffold-ui" "1.4.1"
-    "@reown/appkit-siwe" "1.4.1"
-    "@reown/appkit-ui" "1.4.1"
-    "@reown/appkit-utils" "1.4.1"
-    "@reown/appkit-wallet" "1.4.1"
+    "@reown/appkit-common" "1.5.0"
+    "@reown/appkit-core" "1.5.0"
+    "@reown/appkit-polyfills" "1.5.0"
+    "@reown/appkit-scaffold-ui" "1.5.0"
+    "@reown/appkit-siwe" "1.5.0"
+    "@reown/appkit-ui" "1.5.0"
+    "@reown/appkit-utils" "1.5.0"
+    "@reown/appkit-wallet" "1.5.0"
     "@walletconnect/types" "2.17.0"
     "@walletconnect/universal-provider" "2.17.0"
     "@walletconnect/utils" "2.17.0"

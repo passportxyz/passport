@@ -19,7 +19,11 @@ import { usePublicClient } from "wagmi";
 vi.mock("../../hooks/useIssueAttestation");
 
 vi.mock("@gitcoin/passport-database-client");
-vi.mock("wagmi", async (importActual) => ({ ...(await importActual()), usePublicClient: vi.fn() }));
+vi.mock("wagmi", async (importActual) => ({
+  ...(await importActual()),
+  usePublicClient: vi.fn(),
+  useAccount: vi.fn().mockReturnValue({ isConnected: true }),
+}));
 
 const navigateMock = vi.fn();
 const useParamsMock = vi.fn();

@@ -10,19 +10,24 @@ import { ContractFunctionExecutionErrorType, WriteContractErrorType } from "viem
 
 const useChainSwitch = ({ chain }: { chain?: Chain }) => {
   const { chain: connectedChain } = useAccount();
-  const { switchChain: walletSwitchChain } = useSwitchChain();
+  const { switchChainAsync } = useSwitchChain();
 
   const chainId = chain && parseInt(chain.id);
 
-  const switchChain = useCallback(async (): Promise<void> => {
+  const switchChain = useCallback(async (): Promise<Boolean> => {
     if (!(connectedChain && chainId)) {
-      return;
+      return false;
     }
     if (connectedChain.id === chainId) {
-      return;
+      return true;
     }
-    walletSwitchChain({ chainId });
-  }, [connectedChain, chainId, walletSwitchChain]);
+    try {
+      await switchChainAsync({ chainId });
+      return true;
+    } catch {
+      return false;
+    }
+  }, [connectedChain, chain, switchChainAsync]);
 
   const needToSwitchChain = connectedChain?.id !== chainId;
 
@@ -49,17 +54,18 @@ export const useAttestationNonce = ({
   const { address } = useAccount();
   const { contractAddress, abi } = useVerifierContractInfo({ chain });
 
-  if (!chain || !address || !abi) return { isLoading: true, refresh: () => {}, isError: false };
-
   const { failure } = useMessage();
   const queryClient = useQueryClient();
 
+  const enabled = Boolean(chain && address && abi && contractAddress);
+
   const { data, isLoading, isError, error, queryKey } = useReadContract({
+    query: { enabled },
     abi,
     address: contractAddress,
     functionName: "recipientNonces",
     args: [address],
-    chainId: parseInt(chain.id),
+    chainId: parseInt(chain?.id || "1"),
   });
 
   const refresh = useCallback(() => {
@@ -78,7 +84,10 @@ export const useAttestationNonce = ({
 
   const nonce = data !== undefined ? Number(data as bigint) : undefined;
 
-  return useMemo(() => ({ nonce, isLoading, refresh, isError }), [nonce, isLoading, refresh, isError]);
+  return useMemo(() => {
+    if (enabled) return { nonce, isLoading, refresh, isError };
+    else return { isLoading: true, refresh: () => {}, isError: false };
+  }, [nonce, isLoading, refresh, isError]);
 };
 
 export const useIssueAttestation = ({ chain }: { chain?: Chain }) => {
@@ -97,8 +106,10 @@ export const useIssueAttestation = ({ chain }: { chain?: Chain }) => {
     async ({ data }: { data: EasPayload }) => {
       if (chain && abi && contractAddress) {
         if (needToSwitchChain) {
-          switchChain();
-          return;
+          const switched = await switchChain();
+          if (!switched) {
+            return;
+          }
         }
 
         try {
