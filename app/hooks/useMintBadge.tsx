@@ -19,7 +19,6 @@ export const useMintBadge = () => {
   const [badgesFreshlyMinted, setBadgesFreshlyMinted] = useState(false);
 
   const onMint = async ({ credentials }: { credentials: VerifiableCredential[] }) => {
-    console.log("minting badge", isLoading, isError, nonce, credentials);
     if (isLoading || isError) return;
     try {
       setSyncingToChain(true);
