@@ -1,5 +1,15 @@
-import { setupIAM } from "../lib/iam";
-import { setupEmbed } from "../lib/embed";
+import * as pulumi from "@pulumi/pulumi";
+import { cluster } from "./cluster";
+import * as iam from "./iam";
+import * as embed from "./embed";
 
-setupIAM();
-// setupEmbed();
+// Passport Cluster
+export const passportClusterArn = cluster.arn;
+export const passportClusterName = cluster.name;
+
+// IAM
+export const amplifyAppHookUrl = pulumi.secret(iam.amplifyAppInfo.webHook.url);
+export const passportIamServiceName = iam.passportXyzService.name;
+
+// Embed
+export const passportEmbedServiceName = embed.passportEmbedService.name;
