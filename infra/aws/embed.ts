@@ -255,7 +255,7 @@ const albPassportEmbedListenerRule = new aws.lb.ListenerRule(`passport-embed-htt
         values:
           stack === "production"
             ? [passportXyzDomainName.apply((domain) => `embed.${domain}`), `embed.passport.xyz`]
-            : [passportXyzDomainName.apply((domain) => `embed.${domain}`)], // if it is on production, it should be also iam.passport.xyz
+            : [passportXyzDomainName.apply((domain) => `embed.${domain}`)], // if it is on production, it should be also embed.passport.xyz
       },
       // pathPattern: {[]}
     },
