@@ -23,7 +23,7 @@ const regionData = aws.getRegion({});
 const DOCKER_IMAGE_TAG = `${process.env.DOCKER_IMAGE_TAG || ""}`;
 export const dockerGtcPassportEmbedImage = pulumi
   .all([current, regionData])
-  .apply(([acc, region]) => `${acc.accountId}.dkr.ecr.${region.id}.amazonaws.com/passport:${DOCKER_IMAGE_TAG}`);
+  .apply(([acc, region]) => `${acc.accountId}.dkr.ecr.${region.id}.amazonaws.com/passport-embed:${DOCKER_IMAGE_TAG}`);
 
 const PROVISION_STAGING_FOR_LOADTEST =
   op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PROVISION_STAGING_FOR_LOADTEST`).toLowerCase() === "true";

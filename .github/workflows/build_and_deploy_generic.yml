@@ -17,8 +17,8 @@ on:
         required: true
 
 jobs:
-  docker:
-    name: Build and push docker image
+  docker_iam:
+    name: Build and push IAM docker image
     runs-on: ubuntu-latest
     steps:
       - name: Load secret
@@ -32,7 +32,7 @@ jobs:
           AWS_ACCESS_KEY_ID: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/AWS_ACCESS_KEY_ID
           AWS_SECRET_ACCESS_KEY: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/AWS_SECRET_ACCESS_KEY
 
-      - id: build_and_push_docker_image
+      - id: build_and_push_docker_iam_image
         uses: passportxyz/gh-workflows/.github/actions/build_and_push@v1
         with:
           refspec: ${{ inputs.refspec }}
@@ -42,6 +42,33 @@ jobs:
           aws_access_key_id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           dockerfile_name: iam/Dockerfile
+          build_dir: ./
+
+  docker_embed:
+    name: Build and push embed docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Load secret
+        id: op-load-secret
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          CLOUDFLARE_API_TOKEN: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
+          AWS_ACCESS_KEY_ID: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/AWS_ACCESS_KEY_ID
+          AWS_SECRET_ACCESS_KEY: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/AWS_SECRET_ACCESS_KEY
+        
+      - id: build_and_push_docker_embed_image
+        uses: passportxyz/gh-workflows/.github/actions/build_and_push@v1
+        with:
+          refspec: ${{ inputs.refspec }}
+          docker_tag: ${{ inputs.docker_tag }}
+          ecr_repository_name: passport-embed
+          aws_region: us-west-2
+          aws_access_key_id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          dockerfile_name: embed/Dockerfile
           build_dir: ./
 
   deploy_preview:
@@ -88,7 +115,7 @@ jobs:
 
   deploy_confirm:
     name: Review Approval Pending
-    needs: [docker, deploy_preview]
+    needs: [docker_iam, docker_embed, deploy_preview]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
@@ -98,7 +125,7 @@ jobs:
 
   deploy_backends:
     name: Deploying AWS Infra
-    needs: [docker, deploy_preview, deploy_confirm]
+    needs: [docker_iam, docker_embed, deploy_preview, deploy_confirm]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
