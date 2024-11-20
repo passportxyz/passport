@@ -417,7 +417,7 @@ const passportEmbedContainerDefinitions = pulumi
         logConfiguration: {
           logDriver: "awslogs",
           options: {
-            "awslogs-group": "passport-iam", // "${serviceLogGroup.name}`,
+            "awslogs-group": "passport-embed", // "${serviceLogGroup.name}`,
             "awslogs-region": "us-west-2", // `${regionId}`,
             "awslogs-create-group": "true",
             "awslogs-stream-prefix": "iam",
