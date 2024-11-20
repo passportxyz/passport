@@ -79,8 +79,8 @@ export async function getAttestationData({
     const cachedScore = (await publicClient.readContract({
       abi: resolverAbi,
       address: resolverAddress as `0x${string}`,
-      functionName: customScorerId ? "getCachedScore(uint32, address)" : "getCachedScore",
-      args: customScorerId ? [address, customScorerId] : [address],
+      functionName: "getCachedScore",
+      args: customScorerId ? [customScorerId, address] : [address],
     })) as CachedScore;
 
     const cachedPassport = await getPassport({
