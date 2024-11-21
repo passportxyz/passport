@@ -15,6 +15,7 @@
     "app",
     "database-client",
     "iam",
+    "embed",
     "identity",
     "schemas",
     "types",

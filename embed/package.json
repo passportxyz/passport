@@ -2,7 +2,7 @@
   "name": "@gitcoin/passport-embed",
   "private": true,
   "version": "1.0.0",
-  "main": "dist/main.js",
+  "main": "dist/src/main.js",
   "types": "src/types.d.ts",
   "type": "module",
   "license": "MIT",
@@ -20,11 +20,6 @@
     "lint:fix": "eslint --fix --ext .ts,.js,.tsx ."
   },
   "dependencies": {
-    "@ethereum-attestation-service/eas-sdk": "^2.7.0",
-    "@gitcoin/passport-identity": "^1.0.0",
-    "@gitcoin/passport-platforms": "^1.0.0",
-    "@gitcoin/passport-types": "^1.0.0",
-    "@spruceid/didkit-wasm-node": "^0.2.1",
     "axios": "^0.27.2",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
