@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import { isAddress } from "ethers";
 import axios from "axios";
 import { autoVerificationHandler } from "../src/utils/autoVerification";
-import { ApiError } from "../src/utils/helpers.js";
-import { checkConditionsAndIssueCredentials } from "../src/utils/credentials.js";
+import { ApiError } from "@gitcoin/passport-iam";
+import { checkConditionsAndIssueCredentials } from "@gitcoin/passport-iam";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 
 // Mock all external dependencies
@@ -12,7 +12,9 @@ jest.mock("ethers", () => ({
 }));
 
 jest.mock("axios");
-jest.mock("../src/utils/credentials");
+// jest.mock("@gitcoin/passport-iam", () => ({
+//   checkConditionsAndIssueCredentials: jest.fn(),
+// }));
 
 describe("autoVerificationHandler", () => {
   let mockReq: Partial<Request>;

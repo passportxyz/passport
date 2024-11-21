@@ -7,6 +7,9 @@ import express from "express";
 // ---- Production plugins
 import cors from "cors";
 
+// ---- Modules
+// import { autoVerificationHandler } from "./utils/autoVerification.js";
+
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
 const configErrors = [];
@@ -74,3 +77,5 @@ app.get("/health", (_req, res) => {
 
   res.status(200).send(data);
 });
+
+// app.post("/api/v0.0.0/auto-verification", autoVerificationHandler);

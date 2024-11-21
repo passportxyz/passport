@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.settings.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "esnext",
     "esModuleInterop": true,
     "declaration": true,
     "allowSyntheticDefaultImports": true,
@@ -12,7 +12,8 @@
     "outDir": "dist/commonjs",
     "allowJs": true,
     "baseUrl": "src",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
   },
   "include": ["src/**/*"]
 }

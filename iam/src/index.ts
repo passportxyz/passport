@@ -44,7 +44,6 @@ import { VerifyDidChallengeBaseError } from "./utils/verifyDidChallenge.js";
 import { errorRes, addErrorDetailsToMessage, ApiError } from "./utils/helpers.js";
 import { ATTESTER_TYPES, getAttestationDomainSeparator, getAttestationSignerForChain } from "./utils/attestations.js";
 import { scrollDevBadgeHandler } from "./utils/scrollDevBadge.js";
-import { autoVerificationHandler } from "./utils/autoVerification.js";
 import { toJsonObject } from "./utils/json.js";
 
 // ---- Config - check for all required env variables
@@ -479,8 +478,6 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
     return void errorRes(res, message, 500);
   }
 });
-
-app.post("/api/v0.0.0/auto-verification", autoVerificationHandler);
 
 // procedure endpoints
 app.use("/procedure", procedureRouter);
