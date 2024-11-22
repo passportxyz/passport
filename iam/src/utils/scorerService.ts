@@ -1,13 +1,7 @@
 import axios from "axios";
 import { Score } from "./easStampSchema";
 import { handleAxiosError } from "@gitcoin/passport-platforms";
-
-export class IAMError extends Error {
-  constructor(public message: string) {
-    super(message);
-    this.name = this.constructor.name;
-  }
-}
+import { IAMError } from "@gitcoin/passport-types";
 
 type GetScoreResponse = {
   data: {

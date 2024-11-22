@@ -25,7 +25,7 @@ import * as easFeesMock from "../src/utils/easFees";
 import * as identityMock from "@gitcoin/passport-identity";
 import * as easSchemaMock from "../src/utils/easStampSchema";
 import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
-import { IAMError } from "../src/utils/scorerService";
+import { IAMError } from "@gitcoin/passport-types";
 import { VerifyDidChallengeBaseError, verifyDidChallenge } from "../src/utils/verifyDidChallenge";
 import { getEip712Issuer } from "../src/issuers";
 import { toJsonObject } from "../src/utils/json";

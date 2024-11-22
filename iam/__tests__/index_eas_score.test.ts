@@ -10,7 +10,7 @@ import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-
 import * as identityMock from "@gitcoin/passport-identity";
 import * as easSchemaMock from "../src/utils/easStampSchema";
 import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
-import { IAMError } from "../src/utils/scorerService";
+import { IAMError } from "@gitcoin/passport-types";
 import { serializeJson, toJsonObject } from "../src/utils/json";
 
 jest.mock("@gitcoin/passport-identity", () => ({
@@ -127,7 +127,7 @@ describe("POST /eas/score", () => {
 
     expect(response.body.passport.multiAttestationRequest).toEqual(toJsonObject(mockMultiAttestationRequestWithScore));
     expect(response.body.passport.nonce).toEqual(nonce);
-    expect(formatMultiAttestationRequestSpy).toBeCalled();
+    expect(formatMultiAttestationRequestSpy).toHaveBeenCalled();
   });
 
   it("handles error during the formatting of the score", async () => {

@@ -454,3 +454,10 @@ export type StampBit = {
   index: number;
   name: string;
 };
+
+export class IAMError extends Error {
+  constructor(public message: string) {
+    super(message);
+    this.name = this.constructor.name;
+  }
+}
