@@ -7,6 +7,9 @@ import express from "express";
 // ---- Production plugins
 import cors from "cors";
 
+// --- Relative imports
+import { autoVerificationHandler } from "./autoVerification";
+
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
 const configErrors = [];
