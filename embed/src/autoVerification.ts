@@ -186,7 +186,7 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
 }
 
 // return response for given payload
-const issueCredentials = async (
+export const issueCredentials = async (
   types: string[],
   address: string,
   payload: RequestPayload
@@ -242,30 +242,6 @@ const issueCredentials = async (
       };
     })
   );
-};
-
-export const checkConditionsAndIssueCredentials = async (
-  payload: RequestPayload,
-  address: string
-): Promise<CredentialResponseBody[] | CredentialResponseBody> => {
-  const singleType = !payload.types?.length;
-  const types = (!singleType ? payload.types : [payload.type]).filter((type) => type);
-
-  // Validate requirements and issue credentials
-  if (payload && payload.type) {
-    const responses = await issueCredentials(types, address, payload);
-
-    if (singleType) {
-      const response = responses[0];
-      if ("error" in response && response.code && response.error) {
-        throw new ApiError(response.error, response.code);
-      }
-      return response;
-    }
-    return responses;
-  }
-
-  throw new ApiError("Invalid payload", 400);
 };
 
 type AutoVerificationRequestBodyType = {
