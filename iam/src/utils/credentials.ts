@@ -8,6 +8,7 @@ import {
   ProviderContext,
   VerifiedPayload,
   VerifiableCredential,
+  ValidResponseBody,
 } from "@gitcoin/passport-types";
 
 import { getIssuerKey } from "../issuers.js";
@@ -19,31 +20,28 @@ import { issueHashedCredential, verifyCredential } from "@gitcoin/passport-ident
 // All provider exports from platforms
 import { providers, platforms } from "@gitcoin/passport-platforms";
 import { ApiError } from "./helpers.js";
+import axios from "axios";
 
-const providerTypePlatformMap = Object.entries(platforms).reduce(
-  (acc, [platformName, { providers }]) => {
-    providers.forEach(({ type }) => {
-      acc[type] = platformName;
-    });
+const scorerApiKey = process.env.SCORER_API_KEY;
 
-    return acc;
-  },
-  {} as { [k: string]: string }
-);
+const providerTypePlatformMap = Object.entries(platforms).reduce((acc, [platformName, { providers }]) => {
+  providers.forEach(({ type }) => {
+    acc[type] = platformName;
+  });
+
+  return acc;
+}, {} as { [k: string]: string });
 
 function groupProviderTypesByPlatform(types: string[]): string[][] {
   return Object.values(
-    types.reduce(
-      (groupedProviders, type) => {
-        const platform = providerTypePlatformMap[type] || "generic";
+    types.reduce((groupedProviders, type) => {
+      const platform = providerTypePlatformMap[type] || "generic";
 
-        if (!groupedProviders[platform]) groupedProviders[platform] = [];
-        groupedProviders[platform].push(type);
+      if (!groupedProviders[platform]) groupedProviders[platform] = [];
+      groupedProviders[platform].push(type);
 
-        return groupedProviders;
-      },
-      {} as { [k: keyof typeof platforms]: string[] }
-    )
+      return groupedProviders;
+    }, {} as { [k: keyof typeof platforms]: string[] })
   );
 }
 
@@ -61,7 +59,7 @@ const issueCredentials = async (
 
   const results = await verifyTypes(types, payload);
 
-  return await Promise.all(
+  const credentials = await Promise.all(
     results.map(async ({ verifyResult, code: verifyCode, error: verifyError, type }) => {
       let code = verifyCode;
       let error = verifyError;
@@ -104,6 +102,65 @@ const issueCredentials = async (
       };
     })
   );
+
+  const credentialsWithBanInfo = await checkCredentialBans(credentials);
+
+  return credentialsWithBanInfo;
+};
+
+const checkCredentialBans = async (
+  credentialResponses: CredentialResponseBody[]
+): Promise<CredentialResponseBody[]> => {
+  const credentialsToCheck = credentialResponses.filter((credentialResponse): credentialResponse is ValidResponseBody =>
+    Boolean((credentialResponse as ValidResponseBody).credential)
+  );
+
+  const payload = credentialsToCheck.map(({ credential }, index) => {
+    const { hash, provider, address } = credential.credentialSubject;
+    return {
+      id: index.toString(),
+      credentialSubject: {
+        hash,
+        provider,
+        address,
+      },
+    };
+  });
+
+  const banResponse: {
+    data?: {
+      credential_id: string;
+      is_banned: boolean;
+      end_time?: string;
+      ban_type?: "account" | "hash" | "single_stamp";
+      reason?: string;
+    }[];
+  } = await axios.post(`${process.env.SCORER_ENDPOINT}/ceramic-cache/check-bans`, payload, {
+    headers: {
+      Authorization: scorerApiKey,
+    },
+  });
+
+  const bans = (banResponse.data || []).sort((a, b) => parseInt(a.credential_id) - parseInt(b.credential_id));
+
+  return credentialResponses.map((credentialResponse) => {
+    if (!(credentialResponse as ValidResponseBody).credential) {
+      return credentialResponse;
+    }
+
+    const ban = bans.shift();
+    if (ban && ban.is_banned) {
+      return {
+        error: `Credential is banned.
+                Type: ${ban.ban_type}
+                Reason: ${ban.reason}
+                End time: ${ban.end_time || "(indefinite)"}`.replace(/^\s+/gm, ""),
+        code: 403,
+      };
+    }
+
+    return credentialResponse;
+  });
 };
 
 type VerifyTypeResult = {
