@@ -24,3 +24,10 @@ export class ApiError extends Error {
     this.name = this.constructor.name;
   }
 }
+
+export class UnexpectedApiError extends ApiError {
+  constructor(message: string) {
+    super(message, 500);
+    this.name = this.constructor.name;
+  }
+}

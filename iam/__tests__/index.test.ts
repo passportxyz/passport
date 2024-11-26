@@ -32,6 +32,10 @@ import { toJsonObject } from "../src/utils/json";
 
 const issuer = getEip712Issuer();
 
+jest.mock("../src/utils/bans", () => ({
+  checkCredentialBans: jest.fn().mockImplementation((input) => input),
+}));
+
 jest.mock("../src/utils/verifyDidChallenge", () => ({
   verifyDidChallenge: jest.fn().mockImplementation(() => "0x0"),
   VerifyDidChallengeBaseError: jest.requireActual("../src/utils/verifyDidChallenge").VerifyDidChallengeBaseError,

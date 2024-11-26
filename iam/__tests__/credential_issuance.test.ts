@@ -1,5 +1,6 @@
 import axios from "axios";
-import { checkCredentialBans, CredentialResponseBody } from "./credentials";
+import { checkCredentialBans } from "../src/utils/bans";
+import { ErrorResponseBody } from "@gitcoin/passport-types";
 
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -50,7 +51,7 @@ describe("checkCredentialBans", () => {
       expect.stringContaining("/ceramic-cache/check-bans"),
       [
         {
-          id: "0",
+          credential_id: "0",
           credentialSubject: {
             hash: "hash123",
             provider: "provider123",
@@ -124,17 +125,28 @@ End time: (indefinite)`,
     const input = [validCredential, { ...validCredential }];
     const result = await checkCredentialBans(input);
 
-    expect(result[0].code).toBe(403);
-    expect(result[1].code).toBe(200);
+    expect((result[0] as ErrorResponseBody).code).toBe(403);
+    expect((result[1] as ErrorResponseBody).code).toBe(200);
   });
 
   it("should handle API errors gracefully", async () => {
-    mockedAxios.post.mockRejectedValueOnce(new Error("API Error"));
+    class MockAxiosError extends Error {
+      response: { data: string; status: number; headers: { [key: string]: string } };
+      request: string;
+      constructor() {
+        super("API Error");
+        this.response = { data: "response", status: 500, headers: { TEST: "header" } };
+        this.request = "request";
+      }
+      isAxiosError = true;
+    }
+    mockedAxios.post.mockImplementationOnce(() => {
+      throw new MockAxiosError();
+    });
 
-    const input = [validCredential];
-    const result = await checkCredentialBans(input);
-
-    expect(result).toEqual(input);
+    await expect(checkCredentialBans([validCredential])).rejects.toThrowError(
+      'Error making Bans request, received error response with code 500: "response", headers: {"TEST":"header"}'
+    );
   });
 
   it("should handle missing API response data", async () => {
