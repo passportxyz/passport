@@ -1,35 +1,35 @@
+import { vi, describe, it, expect } from "vitest";
 import React from "react";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ethers } from "ethers";
 import { ScrollMintBadge } from "../../components/scroll/ScrollMintPage";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
-import { PassportDatabase } from "@gitcoin/passport-database-client";
 import axios from "axios";
 import { useMintBadge } from "../../hooks/useMintBadge";
 import { MemoryRouter } from "react-router-dom";
+import { usePublicClient } from "wagmi";
 
-jest.mock("axios");
+vi.mock("axios");
 
-jest.mock("ethers");
+vi.mock("wagmi", async (importActual) => ({ ...(await importActual()), usePublicClient: vi.fn() }));
 
-const issueAttestationMock = jest.fn();
+const issueAttestationMock = vi.fn().mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 1000)));
 
-jest.mock("../../hooks/useAttestation", () => ({
-  useAttestation: () => ({
-    getNonce: jest.fn().mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve(0), 1000))),
+vi.mock("../../hooks/useIssueAttestation", () => ({
+  useIssueAttestation: () => ({
     issueAttestation: issueAttestationMock,
     needToSwitchChain: false,
   }),
+  useAttestationNonce: () => ({ nonce: 2, isLoading: false, isError: false, refresh: vi.fn() }),
 }));
 
-const successMock = jest.fn();
-const failureMock = jest.fn();
-jest.mock("../../hooks/useMessage", () => ({
+const successMock = vi.fn();
+const failureMock = vi.fn();
+vi.mock("../../hooks/useMessage", () => ({
   useMessage: () => ({ success: successMock, failure: failureMock }),
 }));
 
-jest.mock("../../config/scroll_campaign", () => ({
+vi.mock("../../config/scroll_campaign", () => ({
   scrollCampaignChain: { id: "0x1", rpcUrl: "https://example.com" },
   scrollCampaignBadgeProviders: ["provider1", "provider2", "provider3"],
   scrollCampaignBadgeProviderInfo: {
@@ -40,12 +40,17 @@ jest.mock("../../config/scroll_campaign", () => ({
   scrollCanvasProfileRegistryAddress: "0xProfileRegistry",
 }));
 
-const mockGetPassport = jest.fn();
+const mockGetPassport = vi.fn();
+
+const mockDatabase = {
+  addStamps: vi.fn().mockResolvedValue({
+    mocked: "response",
+  }),
+  getPassport: mockGetPassport,
+};
 
 const mockCeramicContext = makeTestCeramicContext({
-  database: Object.assign({}, new PassportDatabase("test", "test", "test"), {
-    getPassport: mockGetPassport,
-  }),
+  database: mockDatabase as any,
 });
 
 const InnerTestComponent = () => {
@@ -63,7 +68,7 @@ const TestComponent = () => {
 
 describe("ScrollMintBadge", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders no badges message when user does not qualify", async () => {
@@ -97,13 +102,17 @@ describe("ScrollMintBadge", () => {
       },
     });
 
-    const mockContract = {
-      getProfile: jest.fn().mockResolvedValue("0xMockProfileAddress"),
-      isProfileMinted: jest.fn().mockResolvedValue(true),
-      burntProviderHashes: jest.fn().mockResolvedValue(false),
-    };
-
-    (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
+    vi.mocked(usePublicClient).mockReturnValue({
+      readContract: vi.fn().mockImplementation(({ functionName }) => {
+        if (functionName === "getProfile") {
+          return "0xMockProfileAddress";
+        } else if (functionName === "isProfileMinted") {
+          return true;
+        } else if (functionName === "burntProviderHashes") {
+          return false;
+        }
+      }),
+    } as any);
 
     renderWithContext(mockCeramicContext, <TestComponent />);
 
@@ -129,15 +138,19 @@ describe("ScrollMintBadge", () => {
       },
     });
 
-    const mockContract = {
-      getProfile: jest.fn().mockResolvedValue("0xMockProfileAddress"),
-      isProfileMinted: jest.fn().mockResolvedValue(true),
-      burntProviderHashes: jest.fn().mockResolvedValue(false),
-    };
+    vi.mocked(usePublicClient).mockReturnValue({
+      readContract: vi.fn().mockImplementation(({ functionName }) => {
+        if (functionName === "getProfile") {
+          return Promise.resolve("0xMockProfileAddress");
+        } else if (functionName === "isProfileMinted") {
+          return Promise.resolve(true);
+        } else if (functionName === "burntProviderHashes") {
+          return Promise.resolve(false);
+        }
+      }),
+    } as any);
 
-    (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
-
-    (axios.post as jest.Mock).mockResolvedValue({ data: { error: null } });
+    vi.mocked(axios.post).mockResolvedValue({ data: { error: null } });
 
     renderWithContext(mockCeramicContext, <TestComponent />);
 
@@ -174,14 +187,25 @@ describe("ScrollMintBadge", () => {
       },
     });
 
-    const mockContract = {
-      getProfile: jest.fn().mockResolvedValue("0xMockProfileAddress"),
-      isProfileMinted: jest.fn().mockResolvedValue(true),
-      burntProviderHashes: jest.fn().mockResolvedValue(true),
-      userProviderHashes: jest.fn().mockResolvedValueOnce(encodedHash).mockRejectedValue(new Error("Invalid")),
-    };
-
-    (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
+    let userProviderHashesCalled = false;
+    vi.mocked(usePublicClient).mockReturnValue({
+      readContract: vi.fn().mockImplementation(({ functionName }) => {
+        if (functionName === "getProfile") {
+          return "0xMockProfileAddress";
+        } else if (functionName === "isProfileMinted") {
+          return true;
+        } else if (functionName === "burntProviderHashes") {
+          return true;
+        } else if (functionName === "userProviderHashes") {
+          if (!userProviderHashesCalled) {
+            userProviderHashesCalled = true;
+            return encodedHash;
+          } else {
+            throw new Error("Invalid");
+          }
+        }
+      }),
+    } as any);
 
     renderWithContext(mockCeramicContext, <TestComponent />);
 
@@ -216,14 +240,19 @@ describe("ScrollMintBadge", () => {
       },
     });
 
-    const mockContract = {
-      getProfile: jest.fn().mockResolvedValue("0xMockProfileAddress"),
-      isProfileMinted: jest.fn().mockResolvedValue(true),
-      burntProviderHashes: jest.fn().mockResolvedValue(true),
-      userProviderHashes: jest.fn().mockRejectedValue(new Error("Invalid")),
-    };
-
-    (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
+    vi.mocked(usePublicClient).mockReturnValue({
+      readContract: vi.fn().mockImplementation(({ functionName }) => {
+        if (functionName === "getProfile") {
+          return "0xMockProfileAddress";
+        } else if (functionName === "isProfileMinted") {
+          return true;
+        } else if (functionName === "burntProviderHashes") {
+          return true;
+        } else if (functionName === "userProviderHashes") {
+          throw new Error("Invalid");
+        }
+      }),
+    } as any);
 
     renderWithContext(mockCeramicContext, <TestComponent />);
 
@@ -280,22 +309,28 @@ describe("ScrollMintBadge", () => {
       },
     });
 
-    const mockContract = {
-      getProfile: jest.fn().mockResolvedValue("0xMockProfileAddress"),
-      isProfileMinted: jest.fn().mockResolvedValue(true),
-      burntProviderHashes: jest
-        .fn()
-        .mockResolvedValueOnce(true)
-        .mockResolvedValueOnce(false)
-        .mockResolvedValueOnce(true),
-      userProviderHashes: jest
-        .fn()
-        .mockRejectedValueOnce(new Error("Invalid"))
-        .mockResolvedValueOnce(encodedHash)
-        .mockRejectedValueOnce(new Error("Invalid")),
-    };
-
-    (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
+    let burntProviderHashesCallCount = 0;
+    let userProviderHashesCallCount = 0;
+    vi.mocked(usePublicClient).mockReturnValue({
+      readContract: vi.fn().mockImplementation(({ functionName }) => {
+        if (functionName === "getProfile") {
+          return "0xMockProfileAddress";
+        } else if (functionName === "isProfileMinted") {
+          return true;
+        } else if (functionName === "burntProviderHashes") {
+          const val = [true, false, true][burntProviderHashesCallCount];
+          burntProviderHashesCallCount++;
+          return val;
+        } else if (functionName === "userProviderHashes") {
+          userProviderHashesCallCount++;
+          if (userProviderHashesCallCount === 2) {
+            return encodedHash;
+          } else {
+            throw new Error("Invalid");
+          }
+        }
+      }),
+    } as any);
 
     renderWithContext(mockCeramicContext, <TestComponent />);
 
@@ -335,14 +370,17 @@ describe("ScrollMintBadge", () => {
       },
     });
 
-    const mockContract = {
-      burntProviderHashes: jest.fn().mockResolvedValue(false),
-      getProfile: jest.fn().mockResolvedValue("0xMockProfileAddress"),
-      isProfileMinted: jest.fn().mockResolvedValue(false),
-    };
-
-    (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
-    (ethers.JsonRpcProvider as jest.Mock).mockImplementation(() => ({}));
+    vi.mocked(usePublicClient).mockReturnValue({
+      readContract: vi.fn().mockImplementation(({ functionName }) => {
+        if (functionName === "getProfile") {
+          return "0xMockProfileAddress";
+        } else if (functionName === "isProfileMinted") {
+          return false;
+        } else if (functionName === "burntProviderHashes") {
+          return false;
+        }
+      }),
+    } as any);
 
     renderWithContext(mockCeramicContext, <TestComponent />);
 
@@ -369,13 +407,15 @@ describe("ScrollMintBadge", () => {
       },
     });
 
-    const mockContract = {
-      burntProviderHashes: jest.fn().mockResolvedValue(false),
-      getProfile: jest.fn().mockRejectedValue(new Error("Canvas check failed")),
-    };
-
-    (ethers.Contract as jest.Mock).mockImplementation(() => mockContract);
-    (ethers.JsonRpcProvider as jest.Mock).mockImplementation(() => ({}));
+    vi.mocked(usePublicClient).mockReturnValue({
+      readContract: vi.fn().mockImplementation(({ functionName }) => {
+        if (functionName === "getProfile") {
+          throw new Error("Canvas check failed");
+        } else if (functionName === "burntProviderHashes") {
+          return false;
+        }
+      }),
+    } as any);
 
     renderWithContext(mockCeramicContext, <TestComponent />);
 

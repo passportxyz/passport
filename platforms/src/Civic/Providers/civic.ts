@@ -45,7 +45,7 @@ export class CivicPassProvider implements Provider {
 
     const allPasses = await findAllPasses(address, this.includeTestnets, [this.passType]);
     const activePasses = allPasses.filter(({ state }) => state === "ACTIVE");
-    const validPasses = activePasses.filter(({ expiry }) => expiry.gt(now));
+    const validPasses = activePasses.filter(({ expiry }) => expiry > now);
 
     if (allPasses.length === 0) {
       errors = [`You do not have a ${CivicPassType[this.passType]} pass.`];

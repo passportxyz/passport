@@ -31,10 +31,10 @@ const chainsForFooter = (
     {
       icon: "/assets/ceramic-icon.svg",
       chainLink: "https://support.passport.xyz/passport-knowledge-base/faq/common-questions/what-is-ceramic",
-      id: "-",
+      id: "0x",
       token: "-",
       label: "Ceramic",
-      rpcUrl: "-",
+      explorerUrl: "https://cerscan.com/",
     },
   ] as Chain[]
 ).concat(chains.filter((chain) => !!chain.attestationProvider));

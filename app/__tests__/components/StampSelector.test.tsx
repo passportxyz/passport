@@ -1,34 +1,36 @@
+import { vi, describe, it, expect, Mock } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { useCustomization } from "../../hooks/useCustomization";
 import { platforms } from "@gitcoin/passport-platforms";
 import { StampSelector } from "../../components/StampSelector";
+import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 
 // mock useCustomization
-jest.mock("../../hooks/useCustomization");
+vi.mock("../../hooks/useCustomization");
 
 const GtcStaking = platforms.GtcStaking;
 
+const testCeramicContext = makeTestCeramicContext();
+
 describe("<StampSelector />", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("exclusion tests", () => {
     const renderTestComponent = (customization: any) => {
-      (useCustomization as jest.Mock).mockReturnValue(customization);
-      const queryClient = new QueryClient();
-      render(
-        <QueryClientProvider client={queryClient}>
-          <StampSelector
-            currentPlatform={GtcStaking.PlatformDetails}
-            currentProviders={GtcStaking.ProviderConfig}
-            selectedProviders={[] as PROVIDER_ID[]}
-            verifiedProviders={[] as PROVIDER_ID[]}
-            setSelectedProviders={() => {}}
-          />
-        </QueryClientProvider>
+      (useCustomization as Mock).mockReturnValue(customization);
+      renderWithContext(
+        testCeramicContext,
+        <StampSelector
+          currentPlatform={GtcStaking.PlatformDetails}
+          currentProviders={GtcStaking.ProviderConfig}
+          selectedProviders={[] as PROVIDER_ID[]}
+          verifiedProviders={[] as PROVIDER_ID[]}
+          setSelectedProviders={() => {}}
+        />
       );
     };
 

@@ -1,9 +1,10 @@
+import { vi, describe, it, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { RefreshMyStampsSelector } from "../../components/RefreshMyStampsSelector";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { ValidatedProviderGroup } from "../../signer/utils";
 
-const mockSetSelectedProviders = jest.fn();
+const mockSetSelectedProviders = vi.fn();
 
 const validPlatformGroups: ValidatedProviderGroup[] = [
   {

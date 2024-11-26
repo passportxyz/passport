@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { vi, describe, it, expect } from "vitest";
 import axios from "axios";
 import { useEffect } from "react";
 import { SupportBanner } from "../../components/SupportBanner";
@@ -29,14 +30,14 @@ const TestComponent = () => {
 
 describe("SupportBanner", () => {
   it("should render banner", async () => {
-    jest.spyOn(axios, "get").mockResolvedValueOnce({ data: mockBannerResponse });
+    vi.spyOn(axios, "get").mockResolvedValueOnce({ data: mockBannerResponse });
     renderWithContext(mockCeramicContext, <TestComponent />, { dbAccessTokenStatus: "connected" });
 
     await screen.findByText(mockBannerResponse[0].content);
   });
 
   it("should render banner with link", async () => {
-    jest.spyOn(axios, "get").mockResolvedValueOnce({ data: mockBannerResponse });
+    vi.spyOn(axios, "get").mockResolvedValueOnce({ data: mockBannerResponse });
     renderWithContext(mockCeramicContext, <TestComponent />, { dbAccessTokenStatus: "connected" });
 
     const link = await screen.findByText("More information.");
@@ -44,10 +45,10 @@ describe("SupportBanner", () => {
   });
 
   it("should dismiss banner", async () => {
-    const dismissCall = jest.spyOn(axios, "post");
+    const dismissCall = vi.spyOn(axios, "post");
     dismissCall.mockResolvedValueOnce({}); // Mock axios.post to resolve immediately
 
-    jest.spyOn(axios, "get").mockResolvedValueOnce({ data: mockBannerResponse });
+    vi.spyOn(axios, "get").mockResolvedValueOnce({ data: mockBannerResponse });
 
     renderWithContext(mockCeramicContext, <TestComponent />, { dbAccessTokenStatus: "connected" });
     const dismissBtn = await screen.findByText("Dismiss");

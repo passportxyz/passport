@@ -1,20 +1,21 @@
+import { describe, it, expect, vi, beforeEach, Mock } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useCustomization } from "../../hooks/useCustomization";
 import { usePlatforms } from "../../hooks/usePlatforms";
 
 // Mock the useCustomization hook
-jest.mock("../../hooks/useCustomization", () => ({
-  useCustomization: jest.fn(),
+vi.mock("../../hooks/useCustomization", () => ({
+  useCustomization: vi.fn(),
 }));
 
 describe("usePlatforms", () => {
   beforeEach(() => {
     // Reset mocks before each test
-    (useCustomization as jest.Mock).mockReset();
+    (useCustomization as Mock).mockReset();
   });
 
   it("should return default platforms when no customization is provided", () => {
-    (useCustomization as jest.Mock).mockReturnValue({});
+    (useCustomization as Mock).mockReturnValue({});
 
     const { result } = renderHook(() => usePlatforms());
 
@@ -38,7 +39,7 @@ describe("usePlatforms", () => {
       },
     ];
 
-    (useCustomization as jest.Mock).mockReturnValue({
+    (useCustomization as Mock).mockReturnValue({
       allowListProviders,
     });
 
@@ -49,7 +50,7 @@ describe("usePlatforms", () => {
   });
 
   it("should include custom stamps when provided", () => {
-    (useCustomization as jest.Mock).mockReturnValue({
+    (useCustomization as Mock).mockReturnValue({
       customStamps: {
         customPlatform: {
           platformType: "DEVEL",
@@ -66,7 +67,7 @@ describe("usePlatforms", () => {
   });
 
   it("should return correct platform specs", () => {
-    (useCustomization as jest.Mock).mockReturnValue({});
+    (useCustomization as Mock).mockReturnValue({});
 
     const { result } = renderHook(() => usePlatforms());
 
@@ -77,7 +78,7 @@ describe("usePlatforms", () => {
   });
 
   it("should return correct platform categories", () => {
-    (useCustomization as jest.Mock).mockReturnValue({ partnerName: "TestPartner" });
+    (useCustomization as Mock).mockReturnValue({ partnerName: "TestPartner" });
 
     const { result } = renderHook(() => usePlatforms());
 
@@ -87,7 +88,7 @@ describe("usePlatforms", () => {
   });
 
   it("should return correct platform provider IDs", () => {
-    (useCustomization as jest.Mock).mockReturnValue({});
+    (useCustomization as Mock).mockReturnValue({});
 
     const { result } = renderHook(() => usePlatforms());
 

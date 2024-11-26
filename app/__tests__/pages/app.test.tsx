@@ -1,19 +1,20 @@
 import { render } from "@testing-library/react";
+import { vi, describe, it, expect } from "vitest";
 import App from "../../pages/_app";
 import { AppProps } from "next/app";
 
-jest.mock("@datadog/browser-rum");
-jest.mock("@datadog/browser-logs");
-jest.mock("@didtools/cacao", () => ({
+vi.mock("@datadog/browser-rum");
+vi.mock("@datadog/browser-logs");
+vi.mock("@didtools/cacao", () => ({
   Cacao: {
-    fromBlockBytes: jest.fn(),
+    fromBlockBytes: vi.fn(),
   },
 }));
 
-const mockPostMessage = jest.fn();
-jest.mock("broadcast-channel", () => {
+const mockPostMessage = vi.fn();
+vi.mock("broadcast-channel", () => {
   return {
-    BroadcastChannel: jest.fn().mockImplementation(() => {
+    BroadcastChannel: vi.fn().mockImplementation(() => {
       return {
         postMessage: mockPostMessage,
       };
@@ -23,7 +24,7 @@ jest.mock("broadcast-channel", () => {
 
 describe("when index is provided queryParams matching twitters OAuth response", () => {
   it("should postMessage to opener and close window", async () => {
-    const mockCloseWindow = jest.fn();
+    const mockCloseWindow = vi.fn();
 
     // Mock query params
     Object.defineProperty(window, "location", {

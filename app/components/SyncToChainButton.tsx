@@ -77,7 +77,7 @@ export function SyncToChainButton({ onChainStatus, chain, className, isLoading }
       <button
         onClick={onSyncButtonClick}
         {...rest}
-        className={`center w-[98px] flex justify-center items-center p-2 ${className} ${props.className} h-11 w-fit rounded ${expired ? "bg-focus" : "disabled:bg-foreground-3 bg-foreground-2"}`}
+        className={`center w-[98px] flex justify-center items-center p-2 ${className} ${props.className} h-11 rounded ${expired ? "bg-focus" : "disabled:bg-foreground-3 bg-foreground-2"}`}
         data-testid="sync-to-chain-button"
       >
         <div className={`${loading ? "block" : "hidden"} relative top-1`}>

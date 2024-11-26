@@ -1,46 +1,46 @@
 import React from "react";
+import { vi, describe, Mock, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { Confetti } from "../../components/Confetti";
 import { ScorerContext, ScorerContextState } from "../../context/scorerContext";
-import { mutableUserVerificationAtom } from "../../context/userState";
 import { useAtom } from "jotai";
 
 // Mock the dependencies
-jest.mock("react-confetti", () => jest.fn(() => null));
+vi.mock("react-confetti", () => ({ default: vi.fn(() => null) }));
 let mockLoadingState = { loading: true };
 
-jest.mock("jotai", () => ({
-  useAtom: jest.fn(),
-  atom: jest.fn(),
-  useAtomValue: jest.fn(),
+vi.mock("jotai", () => ({
+  useAtom: vi.fn(),
+  atom: vi.fn(),
+  useAtomValue: vi.fn(),
 }));
-jest.mock("../../context/userState", () => ({
+vi.mock("../../context/userState", () => ({
   mutableUserVerificationAtom: {
     toString: () => "mocked-user-verification-atom",
-    read: jest.fn(),
-    write: jest.fn(),
+    read: vi.fn(),
+    write: vi.fn(),
   },
 }));
 
 describe("Confetti", () => {
-  const mockSetShowConfetti = jest.fn();
+  const mockSetShowConfetti = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     Object.defineProperty(window, "innerWidth", { writable: true, configurable: true, value: 1024 });
 
     // Update the mock implementation of useAtom
-    (useAtom as jest.Mock).mockImplementation((atom) => {
+    (useAtom as Mock).mockImplementation((atom) => {
       if (atom.toString() === "mocked-user-verification-atom") {
-        return [mockLoadingState, jest.fn()];
+        return [mockLoadingState, vi.fn()];
       }
-      return [undefined, jest.fn()];
+      return [undefined, vi.fn()];
     });
   });
 
   it("should render null when showConfetti is false", () => {
-    (useAtom as jest.Mock).mockReturnValue([{ loading: false }]);
-    const { container } = render(
+    (useAtom as Mock).mockReturnValue([{ loading: false }]);
+    render(
       <ScorerContext.Provider value={{ rawScore: 0, threshold: 100 } as unknown as ScorerContextState}>
         <Confetti />
       </ScorerContext.Provider>
@@ -49,9 +49,9 @@ describe("Confetti", () => {
   });
 
   it("should render ReactConfetti with a canvas element when showConfetti is true", () => {
-    (useAtom as jest.Mock).mockReturnValue([{ loading: false }]);
-    jest.spyOn(React, "useState").mockImplementation(() => [true, mockSetShowConfetti]);
-    const { container } = render(
+    (useAtom as Mock).mockReturnValue([{ loading: false }]);
+    vi.spyOn(React, "useState").mockImplementation(() => [true, mockSetShowConfetti]);
+    render(
       <ScorerContext.Provider value={{ rawScore: 150, threshold: 100 } as unknown as ScorerContextState}>
         <Confetti />
       </ScorerContext.Provider>

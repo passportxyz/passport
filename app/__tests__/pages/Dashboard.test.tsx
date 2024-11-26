@@ -1,11 +1,10 @@
+import { vi, describe, it, expect, Mock } from "vitest";
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, screen, waitFor, render } from "@testing-library/react";
 import Dashboard from "../../pages/Dashboard";
 import { HashRouter as Router } from "react-router-dom";
 import * as framework from "@self.id/framework";
-import { mock } from "jest-mock-extended";
-import { JsonRpcSigner } from "@ethersproject/providers";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState, IsLoadingPassportState } from "../../context/ceramicContext";
 import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
@@ -13,39 +12,39 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { DashboardCTAs } from "../../pages/Dashboard";
 import { Customization } from "../../utils/customizationUtils";
 
-jest.mock("react-confetti");
+vi.mock("react-confetti");
 
-jest.mock("../../components/CardList", () => ({ CardList: () => <div>Card List</div> }));
+vi.mock("../../components/CardList", () => ({ CardList: () => <div>Card List</div> }));
 
-jest.mock("../../components/SyncToChainButton", () => <div>Sync to Chain</div>);
+vi.mock("../../components/SyncToChainButton", () => <div>Sync to Chain</div>);
 
-jest.mock("@self.id/framework", () => {
+vi.mock("@self.id/framework", () => {
   return {
-    useViewerConnection: jest.fn(),
+    useViewerConnection: vi.fn(),
   };
 });
 
-jest.mock("../../components/Header", () => () => null);
+vi.mock("../../components/Header", () => ({ default: () => <div>Header</div> }));
 
-jest.mock("@self.id/web", () => {
+vi.mock("@self.id/web", () => {
   return {
-    EthereumAuthProvider: jest.fn(),
+    EthereumAuthProvider: vi.fn(),
   };
 });
 
-jest.mock("@didtools/cacao", () => ({
+vi.mock("@didtools/cacao", () => ({
   Cacao: {
-    fromBlockBytes: jest.fn(),
+    fromBlockBytes: vi.fn(),
   },
 }));
 
-jest.mock("next/router", () => ({
+vi.mock("next/router", () => ({
   useRouter: () => ({
     query: { filter: "" },
   }),
 }));
 
-jest.mock("../../components/DashboardScorePanel", () => ({
+vi.mock("../../components/DashboardScorePanel", () => ({
   DashboardScorePanel: ({ className }: { className: string }) => (
     <div data-testid="dashboard-score-panel" className={className}>
       DashboardScorePanel
@@ -56,7 +55,7 @@ jest.mock("../../components/DashboardScorePanel", () => ({
   ),
 }));
 
-jest.mock("../../components/CustomDashboardPanel.tsx", () => ({
+vi.mock("../../components/CustomDashboardPanel.tsx", () => ({
   DynamicCustomDashboardPanel: ({ className }: { className: string }) => (
     <div data-testid="dynamic-custom-dashboard-panel" className={className}>
       DynamicCustomDashboardPanel
@@ -64,25 +63,23 @@ jest.mock("../../components/CustomDashboardPanel.tsx", () => ({
   ),
 }));
 
-const mockToggleConnection = jest.fn();
-const mockHandleDisconnection = jest.fn();
-const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
+const mockToggleConnection = vi.fn();
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   (framework.useViewerConnection as jest.Mock).mockImplementation(() => [
     {
       status: "connected",
     },
-    jest.fn(),
-    jest.fn(),
+    vi.fn(),
+    vi.fn(),
   ]);
 });
 
 describe("dashboard notifications", () => {
-  // using https://www.npmjs.com/package/jest-localstorage-mock to mock localStorage
+  // using https://www.npmjs.com/package/vitest-localstorage-mock to mock localStorage
   beforeEach(async () => {
     await closeAllToasts();
     localStorage.removeItem("successfulRefresh");
@@ -90,7 +87,8 @@ describe("dashboard notifications", () => {
   it("should show success toast when stamps are verified", async () => {
     localStorage.setItem("successfulRefresh", "true");
     const queryClient = new QueryClient();
-    render(
+    renderWithContext(
+      mockCeramicContext,
       <QueryClientProvider client={queryClient}>
         <ChakraProvider>
           <Router>
@@ -104,7 +102,8 @@ describe("dashboard notifications", () => {
   it("should show error toast when stamps aren't verified", async () => {
     localStorage.setItem("successfulRefresh", "false");
     const queryClient = new QueryClient();
-    render(
+    renderWithContext(
+      mockCeramicContext,
       <QueryClientProvider client={queryClient}>
         <ChakraProvider>
           <Router>
@@ -116,7 +115,7 @@ describe("dashboard notifications", () => {
     expect(screen.getByText("Stamps weren't verified. Please try again.")).toBeInTheDocument();
   });
   it("should show a loading stamps alert", () => {
-    (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }]);
+    (framework.useViewerConnection as Mock).mockReturnValue([{ status: "connected" }]);
     renderWithContext(
       {
         ...mockCeramicContext,
@@ -134,7 +133,7 @@ describe("dashboard notifications", () => {
   });
 
   it("should show an initializing passport alert", () => {
-    (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }]);
+    (framework.useViewerConnection as Mock).mockReturnValue([{ status: "connected" }]);
     renderWithContext(
       {
         ...mockCeramicContext,
@@ -223,8 +222,8 @@ describe.skip("when app fails to load ceramic stream", () => {
   });
 
   it("when retry button is clicked, it should retry ceramic connection", () => {
-    const mockCeramicConnect = jest.fn();
-    (framework.useViewerConnection as jest.Mock).mockReturnValue([{ status: "connected" }, mockCeramicConnect]);
+    const mockCeramicConnect = vi.fn();
+    (framework.useViewerConnection as Mock).mockReturnValue([{ status: "connected" }, mockCeramicConnect]);
 
     renderWithContext(
       {

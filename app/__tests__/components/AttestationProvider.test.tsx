@@ -1,10 +1,11 @@
+import { vi, describe, it, expect } from "vitest";
 import { OnChainStatus } from "../../utils/onChainStatus";
 
 import { AllProvidersState, ProviderState } from "../../context/ceramicContext";
 import { OnChainProviderType } from "../../hooks/useOnChainData";
 import { EASAttestationProvider, VeraxAndEASAttestationProvider } from "../../utils/AttestationProvider";
 
-jest.mock("next/router", () => ({
+vi.mock("next/router", () => ({
   useRouter: () => ({
     query: { filter: "" },
   }),

@@ -2,23 +2,16 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // --- Shared data context
-import { useWalletStore } from "../context/walletStore";
 
 // --- Components
 import { checkShowOnboard } from "../utils/helpers";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useNavigateToPage } from "../hooks/useCustomization";
 
-import {
-  useDisconnect,
-  useWeb3Modal,
-  useWeb3ModalAccount,
-  useWeb3ModalError,
-  useWeb3ModalEvents,
-  useWeb3ModalState,
-} from "@web3modal/ethers/react";
 import { datadogRum } from "@datadog/browser-rum";
 import { useMessage } from "./useMessage";
+import { useAppKit, useAppKitEvents, useAppKitState, useDisconnect } from "@reown/appkit/react";
+import { useAccount, useWalletClient } from "wagmi";
 
 type LoginStep = "NOT_STARTED" | "PENDING_WALLET_CONNECTION" | "PENDING_DATABASE_CONNECTION" | "DONE";
 
@@ -32,20 +25,18 @@ export const useLoginFlow = ({
   isLoggingIn: boolean;
   signIn: () => void;
 } => {
-  const address = useWalletStore((state) => state.address);
-  const provider = useWalletStore((state) => state.provider);
-  const { error } = useWeb3ModalError();
-  const { isConnected } = useWeb3ModalAccount();
-  const { open: web3ModalIsOpen } = useWeb3ModalState();
+  const { address, isConnected } = useAccount();
+  const { data: walletClient } = useWalletClient();
+  const { open: web3ModalIsOpen } = useAppKitState();
   const { disconnect } = useDisconnect();
   const { dbAccessTokenStatus, connect: connectDatastore } = useDatastoreConnectionContext();
   const [enabled, setEnabled] = useState(false);
   const [loginStep, setLoginStep] = useState<LoginStep>("NOT_STARTED");
-  const { open: openWeb3Modal } = useWeb3Modal();
+  const { open: openWeb3Modal } = useAppKit();
   const isConnectingToDatabaseRef = useRef<boolean>(false);
   const { failure } = useMessage();
   const navigateToPage = useNavigateToPage();
-  const web3modalEvent = useWeb3ModalEvents();
+  const web3modalEvent = useAppKitEvents();
 
   const initiateLogin = useCallback(() => {
     setEnabled(true);
@@ -72,14 +63,6 @@ export const useLoginFlow = ({
   );
 
   useEffect(() => {
-    if (error) {
-      console.error("Web3Modal error", error);
-      showConnectionError(error);
-      resetLogin();
-    }
-  }, [error, resetLogin]);
-
-  useEffect(() => {
     const newLoginStep = (() => {
       if (!enabled) return "NOT_STARTED";
       else if (!isConnected) return "PENDING_WALLET_CONNECTION";
@@ -93,9 +76,15 @@ export const useLoginFlow = ({
   // the dashboard, the web3ModalIsOpen state is incorrect
   // until we call disconnect
   useEffect(() => {
-    if (web3ModalIsOpen && loginStep === "NOT_STARTED") {
-      disconnect();
-    }
+    (async () => {
+      if (web3ModalIsOpen && loginStep === "NOT_STARTED") {
+        try {
+          await disconnect();
+        } catch (e) {
+          console.error("Error disconnecting wallet", e);
+        }
+      }
+    })();
   }, [web3ModalIsOpen, loginStep]);
 
   useEffect(() => {
@@ -114,20 +103,25 @@ export const useLoginFlow = ({
 
   useEffect(() => {
     (async () => {
-      if (!isConnectingToDatabaseRef.current && loginStep === "PENDING_DATABASE_CONNECTION" && address && provider) {
+      if (
+        !isConnectingToDatabaseRef.current &&
+        loginStep === "PENDING_DATABASE_CONNECTION" &&
+        address &&
+        walletClient
+      ) {
         isConnectingToDatabaseRef.current = true;
         try {
-          await connectDatastore(address, provider);
+          await connectDatastore(address, walletClient);
         } catch (e) {
           resetLogin();
           console.error("Error connecting to database", e);
-          datadogRum.addError(error);
+          datadogRum.addError(e);
           showConnectionError(e);
           isConnectingToDatabaseRef.current = false;
         }
       }
     })();
-  }, [loginStep, address, provider, connectDatastore, showConnectionError, resetLogin]);
+  }, [loginStep, address, walletClient, connectDatastore, showConnectionError, resetLogin]);
 
   const isLoggingIn = loginStep !== "DONE" && loginStep !== "NOT_STARTED";
 

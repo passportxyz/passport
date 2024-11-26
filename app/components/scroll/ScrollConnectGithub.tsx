@@ -2,7 +2,6 @@ import { useNavigateToLastStep, useNavigateToRootStep, useNextCampaignStep } fro
 import { useDatastoreConnectionContext } from "../../context/datastoreConnectionContext";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { CeramicContext } from "../../context/ceramicContext";
-import { useWalletStore } from "../../context/walletStore";
 import { useMessage } from "../../hooks/useMessage";
 import { useScrollBadge } from "../../hooks/useScrollBadge";
 import { CUSTOM_PLATFORM_TYPE_INFO } from "../../config/platformMap";
@@ -17,6 +16,7 @@ import { LoadButton } from "../LoadButton";
 import { GitHubIcon } from "../WelcomeFooter";
 import { ScrollCampaignPage } from "./ScrollCampaignPage";
 import { BadgeCTA } from "../ScrollCampaign";
+import { useAccount } from "wagmi";
 
 export const ScrollConnectGithub = () => {
   const goToNextStep = useNextCampaignStep();
@@ -24,7 +24,7 @@ export const ScrollConnectGithub = () => {
   const { did, checkSessionIsValid } = useDatastoreConnectionContext();
   const { userDid, database } = useContext(CeramicContext);
   const goToLoginStep = useNavigateToRootStep();
-  const address = useWalletStore((state) => state.address);
+  const { address } = useAccount();
   const [noCredentialReceived, setNoCredentialReceived] = useState(false);
   const [msg, setMsg] = useState<string | undefined>("Verifying existing badges on chain ... ");
   const [isVerificationRunning, setIsVerificationRunning] = useState(false);

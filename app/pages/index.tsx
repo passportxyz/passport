@@ -2,7 +2,6 @@
 // --- Methods
 import React from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
-import { WalletStoreManager } from "../context/WalletStoreManager";
 
 // -- Next Methods
 import type { NextPage } from "next";
@@ -70,9 +69,7 @@ const App: NextPage = () => {
   return (
     <div>
       <Router>
-        <WalletStoreManager>
-          <AppRoutes />
-        </WalletStoreManager>
+        <AppRoutes />
       </Router>
     </div>
   );

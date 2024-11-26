@@ -1,3 +1,4 @@
+import { vi, describe, it, expect, Mock } from "vitest";
 import { render, waitFor, screen, fireEvent } from "@testing-library/react";
 import { EthereumWebAuth } from "@didtools/pkh-ethereum";
 import { AccountId } from "caip";
@@ -8,12 +9,13 @@ import {
   DatastoreConnectionContextProvider,
   useDatastoreConnectionContext,
 } from "../../context/datastoreConnectionContext";
-import { mockAddress } from "../../__mocks__/web3modalMock.js";
 import { CeramicContext } from "../../context/ceramicContext";
 import { Eip1193Provider } from "ethers";
 import { DIDSession } from "did-session";
 
-jest.mock("axios", () => ({
+const mockAddress = "0xfF7edbD01e9d044486781ff52c42EA7a01612644";
+
+vi.mock("axios", () => ({
   get: () => ({
     data: {
       nonce: "123",
@@ -26,15 +28,15 @@ jest.mock("axios", () => ({
   }),
 }));
 
-jest.mock("@didtools/pkh-ethereum", () => {
+vi.mock("@didtools/pkh-ethereum", () => {
   return {
     EthereumWebAuth: {
-      getAuthMethod: jest.fn(),
+      getAuthMethod: vi.fn(),
     },
   };
 });
 
-jest.mock("@didtools/cacao", () => ({
+vi.mock("@didtools/cacao", () => ({
   Cacao: {
     fromBlockBytes: () => ({
       p: {
@@ -44,11 +46,11 @@ jest.mock("@didtools/cacao", () => ({
   },
 }));
 
-jest.mock("../../context/walletStore", () => {
+vi.mock("../../context/walletStore", () => {
   return {
     useWalletStore: () => ({
       chain: "eip155:1",
-      disconnect: jest.fn(),
+      disconnect: vi.fn(),
     }),
   };
 });
@@ -66,15 +68,15 @@ const did = {
   }),
 };
 
-jest.mock("did-session", () => {
+vi.mock("did-session", () => {
   return {
     DIDSession: {
       authorize: () => ({
-        serialize: jest.fn(),
+        serialize: vi.fn(),
         did,
       }),
-      fromSession: jest.fn(() => ({
-        serialize: jest.fn(),
+      fromSession: vi.fn(() => ({
+        serialize: vi.fn(),
         did,
       })),
     },
@@ -86,7 +88,7 @@ const TestingComponent = () => {
   const [session, setSession] = useState("");
 
   useEffect(() => {
-    // using https://www.npmjs.com/package/jest-localstorage-mock to mock localStorage
+    // using https://www.npmjs.com/package/vitest-localstorage-mock to mock localStorage
     setSession(localStorage.getItem("didsession-0xmyAddress") ?? "");
   });
 
@@ -95,7 +97,7 @@ const TestingComponent = () => {
       <div data-testid="session-id">{session}</div>
       <div data-testid="db-access-token-status">Status: {dbAccessTokenStatus}</div>
       <div data-testid="db-access-token">{dbAccessToken}</div>
-      <button onClick={() => connect("0xmyAddress", jest.fn() as unknown as Eip1193Provider)}>Connect</button>
+      <button onClick={() => connect("0xmyAddress", vi.fn() as unknown as Eip1193Provider)}>Connect</button>
     </div>
   );
 };
@@ -124,7 +126,7 @@ describe("<UserContext>", () => {
 
   describe.skip("when using multichain", () => {
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it("should use chain id 1 in the DID regardless of the wallet chain", async () => {
@@ -136,7 +138,7 @@ describe("<UserContext>", () => {
         expect(screen.getByTestId("db-access-token-status").textContent).toContain("connected");
       });
 
-      expect(EthereumWebAuth.getAuthMethod as jest.Mock).toHaveBeenCalledWith(
+      expect(EthereumWebAuth.getAuthMethod as Mock).toHaveBeenCalledWith(
         expect.anything(),
         new AccountId({ address: mockAddress, chainId: "eip155:1" })
       );
@@ -154,7 +156,7 @@ describe("<UserContext>", () => {
       });
 
       await waitFor(() => {
-        expect(DIDSession.fromSession as jest.Mock).toHaveBeenCalled();
+        expect(DIDSession.fromSession as Mock).toHaveBeenCalled();
       });
     });
   });

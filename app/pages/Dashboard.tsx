@@ -18,7 +18,6 @@ import { ExpiredStampsPanel } from "../components/ExpiredStampsPanel";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalOverlay, useDisclosure } from "@chakra-ui/react";
 
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
-import { useWalletStore } from "../context/walletStore";
 import { ScorerContext } from "../context/scorerContext";
 import { useOneClickVerification } from "../hooks/useOneClickVerification";
 
@@ -31,12 +30,12 @@ import hash from "object-hash";
 // --- GTM Module
 import TagManager from "react-gtm-module";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
-import { useWeb3ModalError } from "@web3modal/ethers/react";
 import Script from "next/script";
 import { Confetti } from "../components/Confetti";
 import { PassportDetailsButton } from "../components/PassportDetailsButton";
 import { useMessage } from "../hooks/useMessage";
 import { Customization } from "../utils/customizationUtils";
+import { useAccount } from "wagmi";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
@@ -60,29 +59,15 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
 
 export default function Dashboard() {
   const customization = useCustomization();
-  const { useCustomDashboardPanel } = customization;
   const { isLoadingPassport, allPlatforms, databaseReady } = useContext(CeramicContext);
   const { disconnect, dbAccessTokenStatus, dbAccessToken, did } = useDatastoreConnectionContext();
-  const address = useWalletStore((state) => state.address);
+  const { address } = useAccount();
   const { initiateVerification } = useOneClickVerification();
-  const { error: web3ModalError } = useWeb3ModalError();
   const { success, failure } = useMessage();
 
   // This shouldn't be necessary, but using this to prevent unnecessary re-initialization
   // until ceramicContext is refactored and memoized
   const verifiedParamsHash = useRef<string | undefined>(undefined);
-
-  useEffect(() => {
-    // TODO
-    if (web3ModalError) {
-      console.error("Web3Modal error", web3ModalError);
-      failure({
-        duration: 6000,
-        title: "Wallet Connection Error",
-        message: (web3ModalError as Error).message,
-      });
-    }
-  }, [web3ModalError, failure]);
 
   useEffect(() => {
     if (did && address && databaseReady) {

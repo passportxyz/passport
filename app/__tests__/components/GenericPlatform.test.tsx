@@ -1,3 +1,4 @@
+import { vi, describe, it, expect } from "vitest";
 import React from "react";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { GenericPlatform } from "../../components/GenericPlatform";
@@ -9,42 +10,35 @@ import { CeramicContextState } from "../../context/ceramicContext";
 import { UN_SUCCESSFUL_ENS_RESULT, SUCCESFUL_ENS_RESULTS } from "../../__test-fixtures__/verifiableCredentialResults";
 import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
-import { JsonRpcSigner } from "@ethersproject/providers";
-import { mock } from "jest-mock-extended";
 import { ChakraProvider } from "@chakra-ui/react";
 import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
 import { PlatformScoreSpec } from "../../context/scorerContext";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
-jest.mock("@didtools/cacao", () => ({
+vi.mock("@didtools/cacao", () => ({
   Cacao: {
-    fromBlockBytes: jest.fn(),
+    fromBlockBytes: vi.fn(),
   },
 }));
 
-jest.mock("@gitcoin/passport-identity", () => ({
-  fetchVerifiableCredential: jest.fn(),
+vi.mock("@gitcoin/passport-identity", () => ({
+  fetchVerifiableCredential: vi.fn(),
 }));
 
-jest.mock("../../utils/helpers.tsx", () => {
-  const originalModule = jest.requireActual("../../utils/helpers.tsx");
-  return {
-    ...originalModule,
-    createSignedPayload: jest.fn(),
-    generateUID: jest.fn(),
-    getProviderSpec: jest.fn(),
-  };
-});
+vi.mock("../../utils/helpers.tsx", async (importActual) => ({
+  ...(await importActual()),
+  createSignedPayload: vi.fn(),
+  generateUID: vi.fn(),
+  getProviderSpec: vi.fn(),
+}));
 
-jest.mock("next/router", () => ({
+vi.mock("next/router", () => ({
   useRouter: () => ({
     query: { filter: "" },
   }),
 }));
 
-const mockToggleConnection = jest.fn();
-const mockCreatePassport = jest.fn();
-const mockSigner = mock(JsonRpcSigner) as unknown as JsonRpcSigner;
+const mockCreatePassport = vi.fn();
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
   handleCreatePassport: mockCreatePassport,
@@ -59,7 +53,7 @@ const EnsScoreSpec: PlatformScoreSpec = {
 describe("when user has not verified with EnsProvider", () => {
   beforeEach(async () => {
     await closeAllToasts();
-    (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
+    vi.mocked(fetchVerifiableCredential).mockResolvedValue({
       credentials: [SUCCESFUL_ENS_RESULTS],
     });
   });
@@ -150,7 +144,7 @@ describe("when user has not verified with EnsProvider", () => {
 describe("when user has previously verified with EnsProvider", () => {
   beforeEach(async () => {
     await closeAllToasts();
-    (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
+    vi.mocked(fetchVerifiableCredential).mockResolvedValue({
       credentials: [UN_SUCCESSFUL_ENS_RESULT],
     });
   });
@@ -174,7 +168,7 @@ describe("when user has previously verified with EnsProvider", () => {
       </ChakraProvider>
     );
 
-    const handlePatchStampsMock = jest.fn();
+    const handlePatchStampsMock = vi.fn();
     renderWithContext(
       {
         ...mockCeramicContext,
@@ -196,7 +190,7 @@ describe("when user has previously verified with EnsProvider", () => {
     });
   });
   it("should remove expired stamps if the no longer qualify", async () => {
-    (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
+    vi.mocked(fetchVerifiableCredential).mockResolvedValue({
       credentials: [UN_SUCCESSFUL_ENS_RESULT],
     });
     const drawer = () => (
@@ -216,7 +210,7 @@ describe("when user has previously verified with EnsProvider", () => {
       </ChakraProvider>
     );
 
-    const handlePatchStampsMock = jest.fn();
+    const handlePatchStampsMock = vi.fn();
     renderWithContext(
       {
         ...mockCeramicContext,
@@ -245,7 +239,7 @@ describe("when user has previously verified with EnsProvider", () => {
 
 describe("Mulitple EVM plaftorms", () => {
   it("Should show no stamp modal if the platform isEVM and no stamps were found", async () => {
-    (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
+    vi.mocked(fetchVerifiableCredential).mockResolvedValue({
       credentials: [UN_SUCCESSFUL_ENS_RESULT],
     });
     const drawer = () => (
@@ -281,7 +275,7 @@ it("should indicate that there was an error issuing the credential", async () =>
       />
     </ChakraProvider>
   );
-  renderWithContext({ ...mockCeramicContext, handlePatchStamps: jest.fn().mockRejectedValue(500) }, drawer());
+  renderWithContext({ ...mockCeramicContext, handlePatchStamps: vi.fn().mockRejectedValue(500) }, drawer());
   const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
 
   fireEvent.click(initialVerifyButton as HTMLElement);

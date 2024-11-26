@@ -1,27 +1,27 @@
 import { useState } from "react";
-import { useAttestation } from "./useAttestation";
+import { useIssueAttestation, useAttestationNonce } from "./useIssueAttestation";
 import { jsonRequest } from "../utils/AttestationProvider";
 import { useMessage } from "./useMessage";
 import { useNavigateToLastStep } from "./useNextCampaignStep";
-import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { iamUrl } from "../config/stamp_config";
 import { scrollCampaignChain } from "../config/scroll_campaign";
 import { EasPayload, VerifiableCredential } from "@gitcoin/passport-types";
+import { useAccount } from "wagmi";
 
 export const useMintBadge = () => {
-  const { getNonce, issueAttestation } = useAttestation({ chain: scrollCampaignChain });
-  const { address } = useWeb3ModalAccount();
+  const { nonce, isError, isLoading } = useAttestationNonce({ chain: scrollCampaignChain });
+  const { issueAttestation } = useIssueAttestation({ chain: scrollCampaignChain });
   const { failure } = useMessage();
+  const { address } = useAccount();
   const goToLastStep = useNavigateToLastStep();
 
   const [syncingToChain, setSyncingToChain] = useState(false);
   const [badgesFreshlyMinted, setBadgesFreshlyMinted] = useState(false);
 
   const onMint = async ({ credentials }: { credentials: VerifiableCredential[] }) => {
+    if (isLoading || isError) return;
     try {
       setSyncingToChain(true);
-
-      const nonce = await getNonce();
 
       if (nonce === undefined) {
         failure({

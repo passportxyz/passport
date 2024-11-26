@@ -1,17 +1,12 @@
 // import React from "react";
 
 // --- Types
-import {
-  PLATFORM_ID,
-  ValidResponseBody,
-  CredentialResponseBody,
-  PROVIDER_ID,
-  VerifiableCredential,
-} from "@gitcoin/passport-types";
+import { ValidResponseBody, CredentialResponseBody, PROVIDER_ID, VerifiableCredential } from "@gitcoin/passport-types";
 import axios, { AxiosResponse } from "axios";
 import { datadogRum } from "@datadog/browser-rum";
 import { Cacao } from "@didtools/cacao";
 import { DID } from "dids";
+import { parseAbi } from "viem";
 
 // --- Stamp Data Point Helpers
 export function difference(setA: Set<PROVIDER_ID>, setB: Set<PROVIDER_ID>) {
@@ -160,3 +155,6 @@ export const createSignedPayload = async (did: DID, data: any) => {
     issuer,
   };
 };
+
+// The parseAbi helper only works if we drop the word "tuple" from the human-readable abi
+export const cleanAndParseAbi = (abi: string[]) => parseAbi(abi.map((item) => item.replace(/tuple\(/g, "(")));

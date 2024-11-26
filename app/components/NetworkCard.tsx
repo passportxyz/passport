@@ -3,10 +3,10 @@ import { SyncToChainButton } from "./SyncToChainButton";
 import { Chain } from "../utils/chains";
 import { useOnChainStatus } from "../hooks/useOnChainStatus";
 import { OnChainStatus } from "../utils/onChainStatus";
-import { useWalletStore } from "../context/walletStore";
 import { useOnChainData } from "../hooks/useOnChainData";
 import { Spinner } from "@chakra-ui/react";
 import { Hyperlink } from "@gitcoin/passport-platforms";
+import { useAccount } from "wagmi";
 
 const formatDate = (date: Date): string =>
   Intl.DateTimeFormat("en-US", { month: "short", day: "2-digit", year: "numeric" }).format(date);
@@ -14,7 +14,7 @@ const formatDate = (date: Date): string =>
 export function NetworkCard({ chain }: { chain: Chain }) {
   const { status, isPending } = useOnChainStatus({ chain });
   const { expirationDate } = useOnChainData().data[chain.id] || {};
-  const address = useWalletStore((state) => state.address);
+  const { address } = useAccount();
 
   const isOnChain = [
     OnChainStatus.MOVED_OUT_OF_DATE,

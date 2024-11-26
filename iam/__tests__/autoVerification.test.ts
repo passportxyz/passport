@@ -8,6 +8,7 @@ import { VerifiableCredential } from "@gitcoin/passport-types";
 
 // Mock all external dependencies
 jest.mock("ethers", () => ({
+  ...jest.requireActual("ethers"),
   isAddress: jest.fn(),
 }));
 

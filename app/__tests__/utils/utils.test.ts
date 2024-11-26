@@ -1,4 +1,5 @@
 import { fetchPossibleEVMStamps, getTypesToCheck } from "../../signer/utils";
+import { vi, describe, it, expect } from "vitest";
 import { CheckResponseBody, Passport } from "@gitcoin/passport-types";
 import { platforms } from "@gitcoin/passport-platforms";
 const { Ens, Lens, Github } = platforms;
@@ -27,7 +28,7 @@ mockedAllPlatforms.set("Github", {
 
 describe("fetchPossibleEVMStamps", () => {
   beforeEach(() => {
-    jest.spyOn(axios, "post").mockImplementation(async (url, payload): Promise<{ data: CheckResponseBody[] }> => {
+    vi.spyOn(axios, "post").mockImplementation(async (): Promise<{ data: CheckResponseBody[] }> => {
       return {
         data: [
           {

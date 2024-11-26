@@ -1,8 +1,8 @@
-import { ethers, JsonRpcProvider } from "ethers";
 import { useState, useEffect, useCallback } from "react";
 import PassportScoreScrollBadgeAbi from "../abi/PassportScoreScrollBadge.json";
 import { datadogLogs } from "@datadog/browser-logs";
 import { scrollCampaignBadgeContractAddresses, scrollCampaignChain } from "../config/scroll_campaign";
+import { usePublicClient } from "wagmi";
 
 export type BadgeInfo = {
   contract: string;
@@ -11,6 +11,9 @@ export type BadgeInfo = {
 };
 
 export const useScrollBadge = (address: string | undefined) => {
+  const publicClient = usePublicClient({
+    chainId: parseInt(scrollCampaignChain?.id || ""),
+  });
   const [areBadgesLoading, setBadgesLoading] = useState<boolean>(true);
   const [badges, setBadges] = useState<BadgeInfo[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string } | {}>({});
@@ -43,30 +46,42 @@ export const useScrollBadge = (address: string | undefined) => {
 
   const checkBadge = useCallback(async (address: string | undefined) => {
     try {
-      if (!scrollCampaignChain) {
-        console.log("Scroll Campaign Chain not found");
+      if (!scrollCampaignChain || !publicClient) {
+        scrollCampaignChain || console.log("Scroll Campaign Chain not found");
+        publicClient || console.log("Public Client not found");
         return;
       }
       setBadgesLoading(true);
-      const scrollRpcProvider = new JsonRpcProvider(scrollCampaignChain.rpcUrl);
 
       const badges = await Promise.all(
         scrollCampaignBadgeContractAddresses.map(async (contractAddress) => {
           let resultHasBadge: boolean = false;
           let resultBadgeLevel: number = 0;
 
+          const badgeContract = {
+            address: contractAddress as `0x${string}`,
+            abi: PassportScoreScrollBadgeAbi.abi,
+          };
+
           try {
             console.log(`[Scroll-Campaign] Checking if ${address} has badge level for contract: ${contractAddress}`);
             datadogLogs.logger.info(
               `[Scroll-Campaign] Checking if ${address} has badge level for contract: ${contractAddress}`
             );
-            const contract = new ethers.Contract(contractAddress, PassportScoreScrollBadgeAbi.abi, scrollRpcProvider);
-            resultHasBadge = await contract.hasBadge(address);
+            resultHasBadge = (await publicClient.readContract({
+              ...badgeContract,
+              functionName: "hasBadge",
+              args: [address],
+            })) as boolean;
             if (resultHasBadge) {
               // Get badge level and other data
               try {
                 datadogLogs.logger.info(`[Scroll-Campaign] Fetching contract data for: ${contractAddress}`);
-                resultBadgeLevel = Number(await contract.badgeLevel(address));
+                resultBadgeLevel = (await publicClient.readContract({
+                  ...badgeContract,
+                  functionName: "badgeLevel",
+                  args: [address],
+                })) as number;
               } catch (err) {
                 console.error(`[Scroll-Campaign] Error fetching contract data for ${contractAddress} : ${err}`);
                 datadogLogs.logger.error(

@@ -1,21 +1,21 @@
+import { vi, describe, it, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { InitialWelcome } from "../../components/InitialWelcome";
 import { useNavigate } from "react-router-dom";
-import { textChangeRangeIsUnchanged } from "typescript";
 
-jest.mock("react-router-dom", () => ({
-  useNavigate: jest.fn(),
-  useParams: jest.fn(() => ({})),
+vi.mock("react-router-dom", () => ({
+  useNavigate: vi.fn(),
+  useParams: vi.fn(() => ({})),
 }));
 
 const defaultProps = {
-  onBoardFinished: jest.fn(),
+  onBoardFinished: vi.fn(),
   dashboardCustomizationKey: null,
   hasPassports: false,
 };
 
 const defaultPropsReturningUser = {
-  onBoardFinished: jest.fn(),
+  onBoardFinished: vi.fn(),
   dashboardCustomizationKey: null,
   hasPassports: true,
 };
@@ -48,8 +48,8 @@ describe("InitialWelcome", () => {
   });
 
   it("skips the onboarding steps and navigates to the dashboard", () => {
-    const navigateMock = jest.fn();
-    (useNavigate as jest.Mock).mockReturnValue(navigateMock);
+    const navigateMock = vi.fn();
+    (useNavigate as vi.Mock).mockReturnValue(navigateMock);
 
     render(<InitialWelcome {...defaultProps} />);
 
@@ -60,8 +60,8 @@ describe("InitialWelcome", () => {
   });
 
   it("navigates through the first steps & back & the skip the onboarding steps & navigates to the dashboard", () => {
-    const navigateMock = jest.fn();
-    (useNavigate as jest.Mock).mockReturnValue(navigateMock);
+    const navigateMock = vi.fn();
+    (useNavigate as vi.Mock).mockReturnValue(navigateMock);
 
     render(<InitialWelcome {...defaultProps} />);
 

@@ -1,5 +1,4 @@
 import { CivicPassLookupPass, CivicPassLookupResponse, CivicPassType, Pass, SupportedChain } from "./types";
-import { BigNumber } from "@ethersproject/bignumber";
 import axios from "axios";
 import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
@@ -8,19 +7,19 @@ const CIVIC_URL = "https://api.civic.com/pass-lookup";
 const isError = (e: unknown): e is Error => e instanceof Error;
 export const errorToString = (e: unknown): string => (isError(e) ? e.message : JSON.stringify(e));
 
-export const latestExpiry = (passes: Pass[]): BigNumber =>
-  passes.reduce((max, pass) => (pass.expiry.gt(max) ? pass.expiry : max), BigNumber.from(0));
+export const latestExpiry = (passes: Pass[]): bigint =>
+  passes.reduce((max, pass) => (pass.expiry > max ? pass.expiry : max), BigInt(0));
 
-export const getNowAsBigNumberSeconds = () => BigNumber.from(Math.floor(Date.now() / 1000));
+export const getNowAsBigNumberSeconds = () => BigInt(Math.floor(Date.now() / 1000));
 
-export const secondsFromNow = (expiry: BigNumber): number => expiry.sub(getNowAsBigNumberSeconds()).toNumber();
+export const secondsFromNow = (expiry: bigint): number => Number(expiry - getNowAsBigNumberSeconds());
 
 const passLookupResponseToPass =
   (passType: CivicPassType) =>
   (pass: CivicPassLookupPass): Pass => ({
     type: passType,
     chain: pass.chain as SupportedChain,
-    expiry: BigNumber.from(pass.expiry),
+    expiry: BigInt(pass.expiry),
     identifier: pass.identifier,
     state: pass.state,
   });

@@ -10,7 +10,6 @@ import PageRoot from "../components/PageRoot";
 
 // --- Contexts
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
-import { useWalletStore } from "../context/walletStore";
 import { InitialWelcome } from "../components/InitialWelcome";
 import LoadingScreen from "../components/LoadingScreen";
 
@@ -19,11 +18,12 @@ import BodyWrapper from "../components/BodyWrapper";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useNavigateToPage } from "../hooks/useCustomization";
 import WelcomeFooter from "../components/WelcomeFooter";
+import { useAccount } from "wagmi";
 
 export default function Welcome() {
   const { passport, isLoadingPassport } = useContext(CeramicContext);
   const { dbAccessTokenStatus } = useDatastoreConnectionContext();
-  const address = useWalletStore((state) => state.address);
+  const { address } = useAccount();
 
   const navigateToPage = useNavigateToPage();
 

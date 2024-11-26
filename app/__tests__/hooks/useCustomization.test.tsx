@@ -1,12 +1,13 @@
+import { vi, describe, it, expect } from "vitest";
 import { render, waitFor, screen } from "@testing-library/react";
 
 import { DEFAULT_CUSTOMIZATION_KEY, useCustomization, useSetCustomizationKey } from "../../hooks/useCustomization";
 import { DynamicCustomDashboardPanel } from "../../components/CustomDashboardPanel";
 import { useEffect } from "react";
 
-jest.mock("axios", () => {
-  return {
-    get: jest.fn((path) => {
+vi.mock("axios", () => ({
+  default: {
+    get: vi.fn((path) => {
       const key = path.split("/").slice(-1)[0];
       if (key === "avalanche") {
         return Promise.resolve({
@@ -112,8 +113,8 @@ jest.mock("axios", () => {
       }
       return Promise.reject();
     }),
-  };
-});
+  },
+}));
 
 const TestingComponent = ({ customizationKey }: { customizationKey?: string }) => {
   const customization = useCustomization();

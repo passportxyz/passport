@@ -2,7 +2,7 @@ import axios from "axios";
 import { Provider } from "../../types";
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { getRPCProvider } from "../../utils/signer";
-import { Contract, BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 const abi = [
@@ -28,7 +28,7 @@ const abi = [
 ];
 
 type ISBT721Contract = {
-  tokenIdOf(from: string): Promise<BigNumber>;
+  tokenIdOf(from: string): Promise<bigint>;
 };
 
 export class BinanceProvider implements Provider {

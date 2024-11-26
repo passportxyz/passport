@@ -10,12 +10,12 @@ import { DEFAULT_CUSTOMIZATION_KEY, useCustomization } from "../hooks/useCustomi
 import WelcomeFooter from "../components/WelcomeFooter";
 
 import { useLoginFlow } from "../hooks/useLoginFlow";
-import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { AccountCenter } from "../components/AccountCenter";
+import { useAccount } from "wagmi";
 
 export default function Home() {
   const { isLoggingIn, signIn, loginStep } = useLoginFlow();
-  const { isConnected } = useWeb3ModalAccount();
+  const { isConnected } = useAccount();
   const [enableEthBranding, setEnableEthBranding] = useState(false);
   const customization = useCustomization();
 

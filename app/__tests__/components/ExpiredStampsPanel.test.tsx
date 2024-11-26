@@ -1,4 +1,5 @@
 import React from "react";
+import { vi, describe, it, expect } from "vitest";
 import { screen } from "@testing-library/react";
 
 import {
@@ -9,13 +10,13 @@ import {
 import { CeramicContextState } from "../../context/ceramicContext";
 import { ExpiredStampsPanel } from "../../components/ExpiredStampsPanel";
 
-jest.mock("@didtools/cacao", () => ({
+vi.mock("@didtools/cacao", () => ({
   Cacao: {
-    fromBlockBytes: jest.fn(),
+    fromBlockBytes: vi.fn(),
   },
 }));
 
-jest.mock("next/router", () => ({
+vi.mock("next/router", () => ({
   useRouter: () => ({
     query: { filter: "" },
   }),

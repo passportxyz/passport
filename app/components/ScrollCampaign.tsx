@@ -12,6 +12,7 @@ import { ScrollConnectGithub } from "./scroll/ScrollConnectGithub";
 import { ScrollMintBadge } from "./scroll/ScrollMintPage";
 import { ScrollMintedBadge } from "./scroll/ScrollMintedBadge";
 import { useMintBadge } from "../hooks/useMintBadge";
+import { useAccount } from "wagmi";
 
 interface Provider {
   name: PROVIDER_ID;
@@ -75,6 +76,7 @@ const ScrollLogin = () => {
 export const ScrollCampaign = ({ step }: { step: number }) => {
   const setCustomizationKey = useSetCustomizationKey();
   const goToLoginStep = useNavigateToRootStep();
+  const { isConnected } = useAccount();
   const { did, dbAccessToken } = useDatastoreConnectionContext();
   const { database } = useContext(CeramicContext);
 
@@ -85,7 +87,7 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
   }, [setCustomizationKey]);
 
   useEffect(() => {
-    if ((!dbAccessToken || !did || !database) && step > 0) {
+    if ((!dbAccessToken || !did || !database || !isConnected) && step > 0) {
       console.log("Access token or did are not present. Going back to login step!");
       goToLoginStep();
     }

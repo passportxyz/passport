@@ -9,7 +9,6 @@ const CAMPAIGN_MAP: Record<string, React.FC<{ step: number }>> = {
 
 const Campaign = () => {
   const { campaignId, step } = useParams();
-
   const stepNumber = parseInt(step || "") || 0;
 
   if (campaignId && CAMPAIGN_MAP[campaignId]) {

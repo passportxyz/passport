@@ -1,16 +1,18 @@
+import { vi, describe, it, expect } from "vitest";
 import { fireEvent, render, screen, act } from "@testing-library/react";
 import {
   ReverifyStampsModal,
   InitiateReverifyStampsButton,
   ExpiredStampModalProps,
 } from "../../components/InitiateReverifyStampsButton";
-import { CeramicContextState, CeramicContext, platforms } from "../../context/ceramicContext";
+import { CeramicContextState, CeramicContext } from "../../context/ceramicContext";
 import { StampClaimingContext, StampClaimProgressStatus } from "../../context/stampClaimingContext";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { defaultPlatformMap } from "../../config/platformMap";
 
 const defaultProps: ExpiredStampModalProps = {
   isOpen: true,
-  onClose: jest.fn(),
+  onClose: vi.fn(),
 };
 
 enum IsLoadingPassportState {
@@ -28,7 +30,7 @@ const mockCeramicContext: CeramicContextState = {
   passport: undefined,
   isLoadingPassport: IsLoadingPassportState.Loading,
   allProvidersState: {},
-  allPlatforms: platforms,
+  allPlatforms: defaultPlatformMap,
   handleCreatePassport: async () => {},
   handleAddStamps: async () => {},
   handlePatchStamps: async () => {},
@@ -44,7 +46,7 @@ const mockCeramicContext: CeramicContextState = {
 };
 
 const mockStampClaimingContext = {
-  claimCredentials: jest.fn(),
+  claimCredentials: vi.fn(),
   status: StampClaimProgressStatus.Idle,
 };
 
@@ -66,7 +68,7 @@ describe("InitiateReverifyStampsButton", () => {
 
 describe("ReverifyStampsModal", () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it("renders the user's expired stamps", () => {

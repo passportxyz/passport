@@ -1,5 +1,6 @@
 import React from "react";
-import { screen, fireEvent } from "@testing-library/react";
+import { vi, describe, it, expect, Mock } from "vitest";
+import { screen } from "@testing-library/react";
 import Welcome from "../../pages/Welcome";
 import { HashRouter as Router } from "react-router-dom";
 import * as framework from "@self.id/framework";
@@ -7,15 +8,15 @@ import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures
 import { CeramicContextState } from "../../context/ceramicContext";
 import { Stamp } from "@gitcoin/passport-types";
 
-jest.mock("@didtools/cacao", () => ({
+vi.mock("@didtools/cacao", () => ({
   Cacao: {
-    fromBlockBytes: jest.fn(),
+    fromBlockBytes: vi.fn(),
   },
 }));
 
-jest.mock("@self.id/framework", () => {
+vi.mock("@self.id/framework", () => {
   return {
-    useViewerConnection: jest.fn(),
+    useViewerConnection: vi.fn(),
   };
 });
 
@@ -26,18 +27,18 @@ const ceramicWithPassport = {
   passport: { stamps: [{} as Stamp] },
 } as unknown as CeramicContextState;
 
-jest.mock("../../components/InitialWelcome.tsx", () => ({
+vi.mock("../../components/InitialWelcome.tsx", () => ({
   InitialWelcome: () => <div data-testid="initial-welcome" />,
 }));
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  (framework.useViewerConnection as jest.Mock).mockImplementation(() => [
+  vi.clearAllMocks();
+  (framework.useViewerConnection as Mock).mockImplementation(() => [
     {
       status: "connected",
     },
-    jest.fn(),
-    jest.fn(),
+    vi.fn(),
+    vi.fn(),
   ]);
 });
 

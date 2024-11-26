@@ -1,37 +1,38 @@
-import { chains, MAINNET_RPC_URL } from "./chains";
+import { wagmiChains, wagmiTransports } from "./chains";
 
-import { createWeb3Modal, defaultConfig } from "@web3modal/ethers/react";
+import { createAppKit } from "@reown/appkit/react";
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 
 const projectId = (process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string) || "default-project-id";
-
-const web3modalChains = chains.map(({ id, token, label, rpcUrl, explorerUrl }) => ({
-  chainId: parseInt(id, 16),
-  name: label,
-  currency: token,
-  rpcUrl,
-  explorerUrl,
-}));
 
 const metadata = {
   name: "Passport",
   description: "Decentralized Identity Verification",
-  url: "https://passport.gitcoin.co",
+  url: "https://app.passport.xyz",
   icons: ["/assets/onboarding.svg"],
 };
 
-const ethersConfig = defaultConfig({
-  metadata,
-  rpcUrl: MAINNET_RPC_URL,
-  defaultChainId: 1,
-  auth: {
-    email: false,
-  },
+export const wagmiAdapter = new WagmiAdapter({
+  projectId,
+  networks: wagmiChains,
+  transports: wagmiTransports,
+  // Prevents hydration mismatch errors
+  ssr: true,
 });
 
-createWeb3Modal({
-  ethersConfig,
-  chains: web3modalChains,
+export const wagmiConfig = wagmiAdapter.wagmiConfig;
+
+export const web3Modal = createAppKit({
+  adapters: [wagmiAdapter],
   projectId,
+  networks: wagmiChains,
+  defaultNetwork: wagmiChains[0],
+  metadata: metadata,
+  features: {
+    email: false,
+    socials: [],
+    emailShowWallets: false,
+  },
   themeMode: "dark",
   themeVariables: {
     "--w3m-font-family": "var(--font-body)",

@@ -8,7 +8,6 @@ import { AppProps } from "next/app";
 import Head from "next/head";
 
 import "../styles/globals.css";
-import "../utils/web3";
 import { CeramicContextProvider } from "../context/ceramicContext";
 import { DatastoreConnectionContextProvider } from "../context/datastoreConnectionContext";
 import { ScorerContextProvider } from "../context/scorerContext";
@@ -23,6 +22,7 @@ import { themes, ThemeWrapper } from "../utils/theme";
 import { StampClaimingContextProvider } from "../context/stampClaimingContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useIntercom } from "../hooks/useIntercom";
+import { Web3Context, Web3ErrorContext } from "../hooks/Web3Context";
 
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
 
@@ -96,23 +96,27 @@ function App({ Component, pageProps }: AppProps) {
         <title>Passport XYZ</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
       </Head>
-      <QueryClientProvider client={queryClient}>
-        <SelfIdProvider client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}>
-          <DatastoreConnectionContextProvider>
-            <ScorerContextProvider>
-              <CeramicContextProvider>
-                <StampClaimingContextProvider>
-                  <RenderOnlyOnClient>
-                    <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
-                      <Component {...pageProps} />
-                    </ThemeWrapper>
-                  </RenderOnlyOnClient>
-                </StampClaimingContextProvider>
-              </CeramicContextProvider>
-            </ScorerContextProvider>
-          </DatastoreConnectionContextProvider>
-        </SelfIdProvider>
-      </QueryClientProvider>
+      <Web3Context>
+        <QueryClientProvider client={queryClient}>
+          <SelfIdProvider client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}>
+            <DatastoreConnectionContextProvider>
+              <ScorerContextProvider>
+                <CeramicContextProvider>
+                  <StampClaimingContextProvider>
+                    <RenderOnlyOnClient>
+                      <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                        <Web3ErrorContext>
+                          <Component {...pageProps} />
+                        </Web3ErrorContext>
+                      </ThemeWrapper>
+                    </RenderOnlyOnClient>
+                  </StampClaimingContextProvider>
+                </CeramicContextProvider>
+              </ScorerContextProvider>
+            </DatastoreConnectionContextProvider>
+          </SelfIdProvider>
+        </QueryClientProvider>
+      </Web3Context>
     </>
   );
 }

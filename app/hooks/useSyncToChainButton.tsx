@@ -1,12 +1,12 @@
 import { EasPayload, VerifiableCredential, EasRequestBody, Passport } from "@gitcoin/passport-types";
 import { useCallback, useContext, useMemo, useState } from "react";
 import { CeramicContext } from "../context/ceramicContext";
-import { useWalletStore } from "../context/walletStore";
 import { OnChainStatus } from "../utils/onChainStatus";
 import { Chain } from "../utils/chains";
 import { useMessage } from "./useMessage";
 import { useCustomization } from "./useCustomization";
-import { useAttestation } from "./useAttestation";
+import { useIssueAttestation, useAttestationNonce } from "./useIssueAttestation";
+import { useAccount } from "wagmi";
 
 export const useSyncToChainButton = ({
   chain,
@@ -20,9 +20,10 @@ export const useSyncToChainButton = ({
   const { failure } = useMessage();
 
   const { passport } = useContext(CeramicContext);
-  const address = useWalletStore((state) => state.address);
+  const { address } = useAccount();
   const customization = useCustomization();
-  const { issueAttestation, getNonce, needToSwitchChain } = useAttestation({ chain });
+  const { nonce, isLoading, isError } = useAttestationNonce({ chain });
+  const { issueAttestation, needToSwitchChain } = useIssueAttestation({ chain });
 
   const [syncingToChain, setSyncingToChain] = useState(false);
 
@@ -33,7 +34,7 @@ export const useSyncToChainButton = ({
 
   const onInitiateSyncToChain = useCallback(
     async (passport: Passport | undefined | false) => {
-      if (passport && chain && chain.attestationProvider && !syncingToChain && address) {
+      if (passport && chain && chain.attestationProvider && !syncingToChain && address && !isLoading && !isError) {
         try {
           setSyncingToChain(true);
           const credentials = passport.stamps.map(({ credential }: { credential: VerifiableCredential }) => credential);
@@ -46,8 +47,6 @@ export const useSyncToChainButton = ({
             });
             return;
           }
-
-          const nonce = await getNonce();
 
           if (nonce === undefined) {
             console.log("Unable to load nonce");

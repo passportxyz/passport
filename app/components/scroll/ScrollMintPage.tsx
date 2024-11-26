@@ -7,11 +7,10 @@ import {
   scrollCampaignBadgeProviders,
   scrollCampaignChain,
 } from "../../config/scroll_campaign";
-import { useWalletStore } from "../../context/walletStore";
-import { ethers } from "ethers";
 import PassportScoreScrollBadgeAbi from "../../abi/PassportScoreScrollBadge.json";
 import { ScrollMintingBadge } from "./ScrollMintingBadge";
 import { ScrollInitiateMintBadge } from "./ScrollInitiateMintBadge";
+import { useAccount, usePublicClient } from "wagmi";
 
 export const ScrollMintBadge = ({
   onMint,
@@ -20,12 +19,15 @@ export const ScrollMintBadge = ({
   onMint: (args: { credentials: VerifiableCredential[] }) => Promise<void>;
   syncingToChain: boolean;
 }) => {
+  const publicClient = usePublicClient({
+    chainId: parseInt(scrollCampaignChain?.id || ""),
+  });
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
   const { database } = useContext(CeramicContext);
   const { failure } = useMessage();
   const [deduplicatedBadgeStamps, setDeduplicatedBadgeStamps] = useState<Stamp[]>([]);
   const [checkingOnchainBadges, setCheckingOnchainBadges] = useState(true);
-  const address = useWalletStore((state) => state.address);
+  const { address } = useAccount();
 
   useEffect(() => {
     (async () => {
@@ -49,7 +51,7 @@ export const ScrollMintBadge = ({
   );
 
   useEffect(() => {
-    if (!scrollCampaignChain) return;
+    if (!scrollCampaignChain || !publicClient) return;
     (async () => {
       try {
         setCheckingOnchainBadges(true);
@@ -57,7 +59,6 @@ export const ScrollMintBadge = ({
         const validBadgeStamps: Stamp[] = [];
 
         const cachedUserHashes: Record<string, string[]> = {};
-        const scrollRpcProvider = new ethers.JsonRpcProvider(scrollCampaignChain.rpcUrl);
 
         await Promise.all(
           badgeStamps.map(async (stamp) => {
@@ -66,13 +67,21 @@ export const ScrollMintBadge = ({
               Buffer.from((stamp.credential.credentialSubject.hash || "").split(":")[1], "base64").toString("hex");
 
             const { contractAddress } = scrollCampaignBadgeProviderInfo[stamp.provider];
-            const badgeContract = new ethers.Contract(
-              contractAddress,
-              PassportScoreScrollBadgeAbi.abi,
-              scrollRpcProvider
+
+            const badgeContract = {
+              address: contractAddress as `0x${string}`,
+              abi: PassportScoreScrollBadgeAbi.abi,
+            };
+
+            const isBurned = Boolean(
+              await publicClient.readContract({
+                ...badgeContract,
+                functionName: "burntProviderHashes",
+                args: [stampHash],
+              })
             );
 
-            if (await badgeContract.burntProviderHashes(stampHash)) {
+            if (isBurned) {
               // If burned, check if it's burned by this user
               let index = 0;
               let userHash;
@@ -84,9 +93,14 @@ export const ScrollMintBadge = ({
                   userHash = cachedUserHashes[contractAddress][index];
                 } else {
                   try {
-                    userHash = await badgeContract.userProviderHashes(address, index);
+                    userHash =
+                      ((await publicClient.readContract({
+                        ...badgeContract,
+                        functionName: "userProviderHashes",
+                        args: [address, index],
+                      })) as string) || "0x0";
                   } catch {
-                    userHash = 0;
+                    userHash = "0x0";
                   }
                   cachedUserHashes[contractAddress][index] = userHash;
                 }
@@ -97,7 +111,7 @@ export const ScrollMintBadge = ({
                 }
 
                 index++;
-              } while (userHash !== 0);
+              } while (userHash !== "0x0");
             } else {
               // If never burned, it's valid
               validBadgeStamps.push(stamp);
@@ -116,7 +130,7 @@ export const ScrollMintBadge = ({
         setCheckingOnchainBadges(false);
       }
     })();
-  }, [badgeStamps, address, failure]);
+  }, [badgeStamps, address, failure, publicClient]);
 
   const highestLevelBadgeStamps = useMemo(
     () =>

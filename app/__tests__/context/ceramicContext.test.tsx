@@ -1,44 +1,36 @@
-import { render, waitFor, screen, waitForElementToBeRemoved, fireEvent, act } from "@testing-library/react";
+import { vi, describe, it, expect } from "vitest";
+import { render, waitFor, screen, fireEvent } from "@testing-library/react";
 import {
-  AllProvidersState,
   CeramicContext,
   CeramicContextProvider,
   CeramicContextState,
-  handleComposeRetry,
   cleanPassport,
   getStampsToRetry,
 } from "../../context/ceramicContext";
 import { ComposeDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
-import { useEffect, useContext } from "react";
+import { useEffect } from "react";
 import {
   googleStampFixture,
   discordStampFixture,
   brightidStampFixture,
 } from "../../__test-fixtures__/databaseStorageFixtures";
-import { PROVIDER_ID, Passport, SecondaryStorageBulkPatchResponse, Stamp } from "@gitcoin/passport-types";
+import { PROVIDER_ID, Passport, Stamp } from "@gitcoin/passport-types";
 import { DatastoreConnectionContext } from "../../context/datastoreConnectionContext";
 import { DID } from "dids";
 import { ChakraProvider } from "@chakra-ui/react";
 
 process.env.NEXT_PUBLIC_FF_CERAMIC_CLIENT = "on";
 
-const viewerConnection = {
-  status: "connected",
-  selfID: "did:3:abc",
-};
-
-jest.mock("@didtools/cacao", () => ({
+vi.mock("@didtools/cacao", () => ({
   Cacao: {
-    fromBlockBytes: jest.fn(),
+    fromBlockBytes: vi.fn(),
   },
 }));
 
-const mockWalletState = {
-  address: "0x123",
-};
-
-jest.mock("../../context/walletStore", () => ({
-  useWalletStore: (callback: (state: any) => any) => callback(mockWalletState),
+vi.mock("wagmi", () => ({
+  useAccount: () => ({
+    address: "0x123",
+  }),
 }));
 
 const databasePassport: Passport = {
@@ -661,7 +653,7 @@ const composeStamps: Stamp[] = [
   },
 ];
 
-export const dbGetPassportMock = jest.fn().mockImplementation(async () => {
+export const dbGetPassportMock = vi.fn().mockImplementation(async () => {
   return {
     passport: {
       stamps: [],
@@ -670,11 +662,11 @@ export const dbGetPassportMock = jest.fn().mockImplementation(async () => {
     status: "Success",
   };
 });
-export const dbAddStampMock = jest.fn();
-export const dbAddStampsMock = jest.fn();
-export const dbDeleteStampMock = jest.fn();
-export const dbDeleteStampsMock = jest.fn();
-export const dbCreatePassportMock = jest.fn();
+export const dbAddStampMock = vi.fn();
+export const dbAddStampsMock = vi.fn();
+export const dbDeleteStampMock = vi.fn();
+export const dbDeleteStampsMock = vi.fn();
+export const dbCreatePassportMock = vi.fn();
 
 const stamps = [googleStampFixture, discordStampFixture, brightidStampFixture].map((stamp) => {
   stamp.credential.expirationDate = "2099-05-15T21:04:01.708Z";
@@ -696,7 +688,7 @@ const stampProviderIds = stamps.map((stamp) => stamp.provider);
 
 const passportDbMocks = {
   createPassport: dbCreatePassportMock,
-  getPassport: jest.fn(),
+  getPassport: vi.fn(),
   addStamp: dbAddStampMock,
   addStamps: dbAddStampsMock,
   deleteStamp: dbDeleteStampMock,
@@ -711,14 +703,14 @@ const ceramicDbMocks = {
   addStamps: dbAddStampsMock,
   deleteStamp: dbDeleteStampMock,
   deleteStamps: dbDeleteStampsMock,
-  patchStamps: jest.fn(),
+  patchStamps: vi.fn(),
   did: "test-user-did",
 };
 
-jest.mock("@gitcoin/passport-database-client", () => {
+vi.mock("@gitcoin/passport-database-client", () => {
   return {
-    ComposeDatabase: jest.fn().mockImplementation(() => ceramicDbMocks),
-    PassportDatabase: jest.fn().mockImplementation(() => passportDbMocks),
+    ComposeDatabase: vi.fn().mockImplementation(() => ceramicDbMocks),
+    PassportDatabase: vi.fn().mockImplementation(() => passportDbMocks),
   };
 });
 
@@ -759,24 +751,24 @@ const mockComponent = ({ invalidSession }: { invalidSession?: boolean } = {}) =>
 describe("CeramicContextProvider", () => {
   it("calls handleComposeRetry on useEffect trigger", async () => {
     // spy on handleComposeRetry
-    const handleComposeRetry = jest.fn();
+    const handleComposeRetry = vi.fn();
 
-    (PassportDatabase as jest.Mock).mockImplementation(() => {
+    vi.mocked(PassportDatabase).mockImplementation(() => {
       return {
         ...passportDbMocks,
-        getPassport: jest.fn().mockImplementation(async () => {
+        getPassport: vi.fn().mockImplementation(async () => {
           return {
             passport: databasePassport,
             errorDetails: {},
             status: "Success",
           };
         }),
-      };
+      } as any;
     });
-    (ComposeDatabase as jest.Mock).mockImplementation(() => {
+    vi.mocked(ComposeDatabase).mockImplementation(() => {
       return {
         ...ceramicDbMocks,
-        getPassport: jest.fn().mockImplementation(async () => {
+        getPassport: vi.fn().mockImplementation(async () => {
           return {
             passport: {
               stamps: composeStamps,
@@ -785,7 +777,7 @@ describe("CeramicContextProvider", () => {
             status: "Success",
           };
         }),
-      };
+      } as any;
     });
 
     const Component = () => {
@@ -822,14 +814,14 @@ describe("CeramicContextProvider", () => {
 
 describe("CeramicContextProvider syncs stamp state with ceramic", () => {
   beforeEach(() => {
-    (ComposeDatabase as jest.Mock).mockImplementation(() => ceramicDbMocks);
+    vi.mocked(ComposeDatabase).mockImplementation(() => ceramicDbMocks as any);
   });
 
   it("should return passport and stamps after successful fetch", async () => {
-    (PassportDatabase as jest.Mock).mockImplementation(() => {
+    vi.mocked(PassportDatabase).mockImplementation(() => {
       return {
         ...passportDbMocks,
-        getPassport: jest.fn().mockImplementation(async () => {
+        getPassport: vi.fn().mockImplementation(async () => {
           return {
             passport: {
               stamps,
@@ -838,7 +830,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
             status: "Success",
           };
         }),
-      };
+      } as any;
     });
     render(mockComponent());
 
@@ -849,10 +841,10 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
       ...googleStampFixture,
       credential: { ...googleStampFixture.credential, expirationDate: "2021-05-15T21:04:01.708Z" },
     };
-    (PassportDatabase as jest.Mock).mockImplementation(() => {
+    vi.mocked(PassportDatabase).mockImplementation(() => {
       return {
         ...passportDbMocks,
-        getPassport: jest.fn().mockImplementation(async () => {
+        getPassport: vi.fn().mockImplementation(async () => {
           return {
             passport: {
               stamps: [...stamps, expiredStamp],
@@ -861,7 +853,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
             status: "Success",
           };
         }),
-      };
+      } as any;
     });
     render(mockComponent());
 
@@ -870,27 +862,27 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
   });
 
   it("should set passport to undefined if an exception is raised while fetching", async () => {
-    (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
+    vi.mocked(PassportDatabase).mockImplementationOnce(() => {
       return {
         ...passportDbMocks,
-        getPassport: jest.fn().mockImplementation(async () => {
+        getPassport: vi.fn().mockImplementation(async () => {
           return {
             passport: {},
             errorDetails: {},
             status: "ExceptionRaised",
           };
         }),
-      };
+      } as any;
     });
     render(mockComponent());
 
     await waitFor(() => expect(screen.getAllByText("# Stamps =")).toHaveLength(1));
   });
   it("should attempt to create ceramic passport if passport from passport db DoesNotExist", async () => {
-    (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
+    vi.mocked(PassportDatabase).mockImplementationOnce(() => {
       return {
         ...passportDbMocks,
-        getPassport: jest
+        getPassport: vi
           .fn()
           .mockImplementationOnce(async () => {
             return {
@@ -908,12 +900,12 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
               status: "Success",
             };
           }),
-      };
+      } as any;
     });
-    (ComposeDatabase as jest.Mock).mockImplementationOnce(() => {
+    vi.mocked(ComposeDatabase).mockImplementationOnce(() => {
       return {
         ...ceramicDbMocks,
-        getPassport: jest.fn().mockImplementation(async () => {
+        getPassport: vi.fn().mockImplementation(async () => {
           return {
             passport: {
               stamps,
@@ -922,7 +914,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
             status: "Success",
           };
         }),
-      };
+      } as any;
     });
     render(mockComponent());
 
@@ -932,11 +924,11 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
   it("should attempt to add stamps to database and ceramic", async () => {
     const oldConsoleLog = console.log;
     try {
-      console.log = jest.fn();
+      console.log = vi.fn();
 
-      const addStampsMock = jest.fn();
-      const addStampMock = jest.fn().mockRejectedValue(new Error("Error"));
-      (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
+      const addStampsMock = vi.fn();
+      const addStampMock = vi.fn().mockRejectedValue(new Error("Error"));
+      vi.mocked(PassportDatabase).mockImplementationOnce(() => {
         return {
           ...passportDbMocks,
           addStamps: addStampsMock.mockImplementationOnce(async () => {
@@ -948,7 +940,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
               status: "Success",
             };
           }),
-          getPassport: jest.fn().mockImplementationOnce(async () => {
+          getPassport: vi.fn().mockImplementationOnce(async () => {
             return {
               passport: {
                 stamps: [],
@@ -957,12 +949,12 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
               status: "Success",
             };
           }),
-        };
+        } as any;
       });
-      (ComposeDatabase as jest.Mock).mockImplementationOnce(() => {
+      vi.mocked(ComposeDatabase).mockImplementationOnce(() => {
         return {
           ...ceramicDbMocks,
-          getPassport: jest.fn().mockImplementation(async () => {
+          getPassport: vi.fn().mockImplementation(async () => {
             return {
               passport: {
                 stamps,
@@ -972,7 +964,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
             };
           }),
           addStamps: addStampMock,
-        };
+        } as any;
       });
       render(mockComponent());
 
@@ -989,9 +981,9 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
   it("should attempt to delete stamps from database and ceramic", async () => {
     const oldConsoleLog = console.log;
     try {
-      console.log = jest.fn();
-      const deleteStampsMock = jest.fn().mockRejectedValue("Error");
-      (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
+      console.log = vi.fn();
+      const deleteStampsMock = vi.fn().mockRejectedValue("Error");
+      vi.mocked(PassportDatabase).mockImplementationOnce(() => {
         return {
           ...passportDbMocks,
           deleteStamps: deleteStampsMock.mockImplementationOnce(async () => {
@@ -1003,7 +995,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
               status: "Success",
             };
           }),
-          getPassport: jest.fn().mockImplementationOnce(async () => {
+          getPassport: vi.fn().mockImplementationOnce(async () => {
             return {
               passport: {
                 stamps: [],
@@ -1012,13 +1004,13 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
               status: "Success",
             };
           }),
-        };
+        } as any;
       });
-      (ComposeDatabase as jest.Mock).mockImplementationOnce(() => {
+      vi.mocked(ComposeDatabase).mockImplementationOnce(() => {
         return {
           ...ceramicDbMocks,
           deleteStamps: deleteStampsMock,
-        };
+        } as any;
       });
       render(mockComponent());
 
@@ -1035,8 +1027,8 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
   it("should patch stamps in database and delete + add stamps in ceramic", async () => {
     const added = stampPatches.filter(({ credential }) => credential);
 
-    const patchStampsMock = jest.fn();
-    (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
+    const patchStampsMock = vi.fn();
+    vi.mocked(PassportDatabase).mockImplementationOnce(() => {
       return {
         ...passportDbMocks,
         patchStamps: patchStampsMock.mockImplementationOnce(async () => {
@@ -1048,7 +1040,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
             status: "Success",
           };
         }),
-        getPassport: jest.fn().mockImplementationOnce(async () => {
+        getPassport: vi.fn().mockImplementationOnce(async () => {
           return {
             passport: {
               stamps: added,
@@ -1057,17 +1049,17 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
             status: "Success",
           };
         }),
-      };
+      } as any;
     });
 
-    const setStampMock = jest.fn();
-    const deleteStampsMock = jest.fn();
+    const setStampMock = vi.fn();
+    const deleteStampsMock = vi.fn();
 
-    (ComposeDatabase as jest.Mock).mockImplementationOnce(() => {
+    vi.mocked(ComposeDatabase).mockImplementationOnce(() => {
       return {
         ...ceramicDbMocks,
         deleteStampIDs: deleteStampsMock,
-      };
+      } as any;
     });
 
     render(mockComponent());
@@ -1081,10 +1073,10 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
   it("should log an error but continue if ceramic patch fails", async () => {
     const oldConsoleLog = console.log;
     try {
-      console.log = jest.fn();
+      console.log = vi.fn();
 
-      const patchStampsMock = jest.fn().mockRejectedValue(new Error("Error"));
-      (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
+      const patchStampsMock = vi.fn().mockRejectedValue(new Error("Error"));
+      vi.mocked(PassportDatabase).mockImplementationOnce(() => {
         return {
           ...passportDbMocks,
           patchStamps: patchStampsMock.mockImplementationOnce(async () => {
@@ -1096,7 +1088,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
               status: "Success",
             };
           }),
-          getPassport: jest.fn().mockImplementationOnce(async () => {
+          getPassport: vi.fn().mockImplementationOnce(async () => {
             return {
               passport: {
                 stamps,
@@ -1105,19 +1097,19 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
               status: "Success",
             };
           }),
-        };
+        } as any;
       });
 
-      const setStampMock = jest.fn().mockRejectedValue(new Error("Error"));
-      const deleteStampsMock = jest.fn();
+      const setStampMock = vi.fn().mockRejectedValue(new Error("Error"));
+      const deleteStampsMock = vi.fn();
 
-      (ComposeDatabase as jest.Mock).mockImplementationOnce(() => {
+      vi.mocked(ComposeDatabase).mockImplementationOnce(() => {
         return {
           ...ceramicDbMocks,
           setStamps: setStampMock,
           deleteStampIDs: deleteStampsMock,
           patchStamps: patchStampsMock,
-        };
+        } as any;
       });
 
       render(mockComponent());
@@ -1133,7 +1125,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
   });
 
   it("should show an error toast but continue if ceramic patch fails due to invalid session", async () => {
-    (PassportDatabase as jest.Mock).mockImplementationOnce(() => {
+    vi.mocked(PassportDatabase).mockImplementationOnce(() => {
       return {
         ...passportDbMocks,
         patchStamps: patchStampsMock.mockImplementationOnce(async () => {
@@ -1145,7 +1137,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
             status: "Success",
           };
         }),
-        getPassport: jest.fn().mockImplementationOnce(async () => {
+        getPassport: vi.fn().mockImplementationOnce(async () => {
           return {
             passport: {
               stamps,
@@ -1154,16 +1146,16 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
             status: "Success",
           };
         }),
-      };
+      } as any;
     });
 
-    const patchStampsMock = jest.fn();
+    const patchStampsMock = vi.fn();
 
-    (ComposeDatabase as jest.Mock).mockImplementationOnce(() => {
+    vi.mocked(ComposeDatabase).mockImplementationOnce(() => {
       return {
         ...ceramicDbMocks,
         patchStamps: patchStampsMock,
-      };
+      } as any;
     });
 
     render(mockComponent({ invalidSession: true }));
@@ -1180,10 +1172,6 @@ const userDid = "test-user-did";
 const mockDatabase = {
   did: userDid,
 } as PassportDatabase;
-const mockProvidersState = {
-  google: true,
-  ens: true,
-} as AllProvidersState;
 
 const mockValidProviders = ["Google", "ENS"] as PROVIDER_ID[];
 
