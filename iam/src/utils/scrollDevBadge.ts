@@ -26,7 +26,7 @@ import {
 } from "@ethereum-attestation-service/eas-sdk";
 import { errorRes } from "./helpers.js";
 import { ATTESTER_TYPES, getAttestationDomainSeparator, getAttestationSignerForChain } from "./attestations.js";
-import { toJsonObject } from "./json";
+import { toJsonObject } from "./json.js";
 
 const BADGE_CONTRACT_ABI = [
   {
