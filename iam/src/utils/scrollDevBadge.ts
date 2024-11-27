@@ -26,6 +26,7 @@ import {
 } from "@ethereum-attestation-service/eas-sdk";
 import { errorRes } from "./helpers.js";
 import { ATTESTER_TYPES, getAttestationDomainSeparator, getAttestationSignerForChain } from "./attestations.js";
+import { toJsonObject } from "./json";
 
 const BADGE_CONTRACT_ABI = [
   {
@@ -243,7 +244,7 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): Promise<void
               invalidCredentials,
             };
 
-            return void res.json(payload);
+            return void res.json(toJsonObject(payload));
           })
           .catch((e) => {
             console.log("Error signing badge request", { e });
