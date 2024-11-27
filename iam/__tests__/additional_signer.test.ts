@@ -8,7 +8,7 @@ import { getEip712Issuer } from "../src/issuers";
 const issuer = getEip712Issuer();
 
 jest.mock("../src/utils/bans", () => ({
-  checkCredentialBans: jest.fn().mockImplementation((input) => input),
+  checkCredentialBans: jest.fn().mockImplementation((input) => Promise.resolve(input)),
 }));
 
 jest.mock("../src/utils/verifyDidChallenge", () => ({

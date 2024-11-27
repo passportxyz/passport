@@ -1,7 +1,4 @@
-// ---- Types
-import { CredentialResponseBody, ValidResponseBody } from "@gitcoin/passport-types";
-
-// All provider exports from platforms
+import { CredentialResponseBody, ValidResponseBody, VerifiableCredential } from "@gitcoin/passport-types";
 import { handleAxiosError } from "@gitcoin/passport-platforms";
 import { UnexpectedApiError } from "./helpers.js";
 import axios from "axios";
@@ -10,7 +7,7 @@ const SCORER_ENDPOINT = process.env.SCORER_ENDPOINT;
 const SCORER_API_KEY = process.env.SCORER_API_KEY;
 
 type Ban = {
-  credential_id: string;
+  hash: string;
   is_banned: boolean;
   end_time?: string;
   ban_type?: "account" | "hash" | "single_stamp";
@@ -20,36 +17,40 @@ type Ban = {
 export const checkCredentialBans = async (
   credentialResponses: CredentialResponseBody[]
 ): Promise<CredentialResponseBody[]> => {
-  const credentialsToCheck = credentialResponses.filter((credentialResponse): credentialResponse is ValidResponseBody =>
-    Boolean((credentialResponse as ValidResponseBody).credential)
+  const credentialsToCheck = credentialResponses
+    .filter((credentialResponse): credentialResponse is ValidResponseBody =>
+      Boolean((credentialResponse as ValidResponseBody).credential)
+    )
+    .map(({ credential }) => credential);
+
+  const bans = await fetchBans(credentialsToCheck);
+  const bansByHash = bans.reduce(
+    (acc, ban) => {
+      acc[ban.hash] = ban;
+      return acc;
+    },
+    {} as Record<string, Ban>
   );
 
-  const payload = credentialsToCheck.map(({ credential }, index) => {
-    const { hash, provider, address } = credential.credentialSubject;
-    return {
-      credential_id: index.toString(),
-      credentialSubject: {
-        hash,
-        provider,
-        address,
-      },
-    };
-  });
-
-  const bans = (await fetchBans(payload)).sort((a, b) => parseInt(a.credential_id) - parseInt(b.credential_id));
-
   return credentialResponses.map((credentialResponse) => {
-    if (!(credentialResponse as ValidResponseBody).credential) {
+    const credential = (credentialResponse as ValidResponseBody).credential;
+    if (!credential) {
       return credentialResponse;
     }
 
-    const ban = bans.shift();
-    if (ban && ban.is_banned) {
+    const ban = bansByHash[credential.credentialSubject.hash];
+
+    if (!ban) {
+      throw new UnexpectedApiError(
+        `Ban not found for hash ${credential.credentialSubject.hash}. This should not happen.`
+      );
+    }
+
+    if (ban.is_banned) {
       return {
-        error: `Credential is banned.
-                Type: ${ban.ban_type}
-                Reason: ${ban.reason}
-                End time: ${ban.end_time || "(indefinite)"}`.replace(/^\s+/gm, ""),
+        error:
+          `Credential is banned. Type=${ban.ban_type}, End=${ban.end_time || "indefinite"},` +
+          (ban.reason ? ` Reason=${ban.reason}` : ""),
         code: 403,
       };
     }
@@ -58,25 +59,32 @@ export const checkCredentialBans = async (
   });
 };
 
-const fetchBans = async (
-  payload: { credential_id: string; credentialSubject: { hash: string; provider: string; address: string } }[]
-): Promise<Ban[]> => {
-  if (!payload.length) {
+const fetchBans = async (credentials: VerifiableCredential[]): Promise<Ban[]> => {
+  if (!credentials.length) {
     return [];
   }
+
+  const payload = credentials.map((credential) => {
+    const { hash, provider, id } = credential.credentialSubject;
+    return {
+      credentialSubject: {
+        hash,
+        provider,
+        id,
+      },
+    };
+  });
 
   try {
     const banResponse: {
       data?: Ban[];
-    } = await axios.post(`${SCORER_ENDPOINT}/ceramic-cache/check-bans`, payload, {
+    } = await axios.post(`${SCORER_ENDPOINT}/internal/check-bans`, payload, {
       headers: {
         Authorization: SCORER_API_KEY,
       },
     });
 
-    const bans = (banResponse.data || []).sort((a, b) => parseInt(a.credential_id) - parseInt(b.credential_id));
-
-    return bans;
+    return banResponse.data || [];
   } catch (e) {
     handleAxiosError(e, "Bans", UnexpectedApiError, [SCORER_API_KEY]);
   }

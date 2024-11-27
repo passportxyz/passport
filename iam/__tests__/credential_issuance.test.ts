@@ -1,6 +1,7 @@
 import axios from "axios";
 import { checkCredentialBans } from "../src/utils/bans";
 import { ErrorResponseBody } from "@gitcoin/passport-types";
+import { ApiError } from "../src/utils/helpers";
 
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -16,7 +17,7 @@ describe("checkCredentialBans", () => {
       credentialSubject: {
         hash: "hash123",
         provider: "provider123",
-        address: "0x123",
+        id: "did:0x123",
       },
     },
     code: 200,
@@ -38,7 +39,7 @@ describe("checkCredentialBans", () => {
     mockedAxios.post.mockResolvedValueOnce({
       data: [
         {
-          credential_id: "0",
+          hash: "hash123",
           is_banned: false,
         },
       ],
@@ -48,14 +49,13 @@ describe("checkCredentialBans", () => {
     const result = await checkCredentialBans(input);
 
     expect(mockedAxios.post).toHaveBeenCalledWith(
-      expect.stringContaining("/ceramic-cache/check-bans"),
+      expect.stringContaining("/internal/check-bans"),
       [
         {
-          credential_id: "0",
           credentialSubject: {
             hash: "hash123",
             provider: "provider123",
-            address: "0x123",
+            id: "did:0x123",
           },
         },
       ],
@@ -68,7 +68,7 @@ describe("checkCredentialBans", () => {
     mockedAxios.post.mockResolvedValueOnce({
       data: [
         {
-          credential_id: "0",
+          hash: "hash123",
           is_banned: true,
           ban_type: "hash",
           reason: "Suspicious activity",
@@ -82,10 +82,7 @@ describe("checkCredentialBans", () => {
 
     expect(result).toEqual([
       {
-        error: `Credential is banned.
-Type: hash
-Reason: Suspicious activity
-End time: 2024-12-31`,
+        error: "Credential is banned. Type=hash, End=2024-12-31, Reason=Suspicious activity",
         code: 403,
       },
     ]);
@@ -95,7 +92,7 @@ End time: 2024-12-31`,
     mockedAxios.post.mockResolvedValueOnce({
       data: [
         {
-          credential_id: "0",
+          hash: "hash123",
           is_banned: true,
           ban_type: "account",
           reason: "Violation",
@@ -106,23 +103,23 @@ End time: 2024-12-31`,
     const result = await checkCredentialBans([validCredential]);
 
     expect(result[0]).toEqual({
-      error: `Credential is banned.
-Type: account
-Reason: Violation
-End time: (indefinite)`,
+      error: `Credential is banned. Type=account, End=indefinite, Reason=Violation`,
       code: 403,
     });
   });
 
-  it("should process multiple credentials in correct order", async () => {
+  it("should process multiple credentials", async () => {
     mockedAxios.post.mockResolvedValueOnce({
       data: [
-        { credential_id: "0", is_banned: true, ban_type: "hash" },
-        { credential_id: "1", is_banned: false },
+        { hash: "hash123", is_banned: true, ban_type: "hash" },
+        { hash: "hash456", is_banned: false },
       ],
     });
 
-    const input = [validCredential, { ...validCredential }];
+    const anotherValidCredential = JSON.parse(JSON.stringify(validCredential));
+    anotherValidCredential.credential.credentialSubject.hash = "hash456";
+
+    const input = [validCredential, anotherValidCredential];
     const result = await checkCredentialBans(input);
 
     expect((result[0] as ErrorResponseBody).code).toBe(403);
@@ -153,8 +150,9 @@ End time: (indefinite)`,
     mockedAxios.post.mockResolvedValueOnce({});
 
     const input = [validCredential];
-    const result = await checkCredentialBans(input);
 
-    expect(result).toEqual(input);
+    await expect(checkCredentialBans(input)).rejects.toThrowError(
+      new ApiError("Ban not found for hash hash123. This should not happen.", 500)
+    );
   });
 });

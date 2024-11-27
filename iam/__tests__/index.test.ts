@@ -33,7 +33,11 @@ import { toJsonObject } from "../src/utils/json";
 const issuer = getEip712Issuer();
 
 jest.mock("../src/utils/bans", () => ({
-  checkCredentialBans: jest.fn().mockImplementation((input) => input),
+  checkCredentialBans: jest.fn().mockImplementation((input) => Promise.resolve(input)),
+}));
+
+jest.mock("../src/utils/revocations", () => ({
+  filterRevokedCredentials: jest.fn().mockImplementation((input) => Promise.resolve(input)),
 }));
 
 jest.mock("../src/utils/verifyDidChallenge", () => ({
