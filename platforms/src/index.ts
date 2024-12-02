@@ -29,15 +29,25 @@ Object.values(platforms).map(({ ProviderConfig }) => {
   });
 });
 
-export const providers = new Providers([
-  // Example provider which verifies the payload when `payload.proofs.valid === "true"`
-  new SimpleProvider(),
-  new SimpleEvmProvider(),
-  new ClearTextSimpleProvider(),
-  new ClearTextTwitterProvider(),
-  new ClearTextGithubOrgProvider(),
-  ...platformProviders,
-]);
+const deprecatedProviders = Object.values(platforms)
+  .map(({ ProviderConfig }) =>
+    ProviderConfig.map(({ providers }) => providers.filter(({ isDeprecated }) => isDeprecated))
+  )
+  .flat(3)
+  .map(({ name }) => name);
+
+export const providers = new Providers(
+  [
+    // Example provider which verifies the payload when `payload.proofs.valid === "true"`
+    new SimpleProvider(),
+    new SimpleEvmProvider(),
+    new ClearTextSimpleProvider(),
+    new ClearTextTwitterProvider(),
+    new ClearTextGithubOrgProvider(),
+    ...platformProviders,
+  ],
+  deprecatedProviders
+);
 
 export * from "./types";
 export { Platform as PlatformClass } from "./utils/platform";

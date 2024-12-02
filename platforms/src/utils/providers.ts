@@ -1,6 +1,6 @@
 // ---- Types
 import { Provider, ProviderExternalVerificationError, ProviderInternalVerificationError } from "../types";
-import type { RequestPayload, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
+import type { RequestPayload, VerifiedPayload, ProviderContext, PROVIDER_ID } from "@gitcoin/passport-types";
 
 class NoFailureReasonError extends Error {
   constructor() {
@@ -51,9 +51,10 @@ export const withTimeout = async (
 export class Providers {
   // collect providers against instance
   _providers: { [k: string]: Provider } = {};
+  deprecatedProviderIds: PROVIDER_ID[] = [];
 
   // construct an array of providers
-  constructor(_providers: Provider[]) {
+  constructor(_providers: Provider[], deprecatedProviderIds: PROVIDER_ID[]) {
     // reduce unique entries into _providers object
     this._providers = _providers.reduce((providers, provider) => {
       if (!providers[provider.type]) {
@@ -62,9 +63,18 @@ export class Providers {
 
       return providers;
     }, {} as { [k: string]: Provider });
+
+    this.deprecatedProviderIds = deprecatedProviderIds;
   }
 
   async verify(type: string, payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
+    if (this.deprecatedProviderIds.includes(type as PROVIDER_ID)) {
+      return {
+        valid: false,
+        errors: [`Provider ${type} is deprecated and no longer supported.`],
+      };
+    }
+
     const provider = this._providers[type];
 
     if (provider) {
