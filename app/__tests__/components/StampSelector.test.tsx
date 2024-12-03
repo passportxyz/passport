@@ -30,7 +30,18 @@ describe("<StampSelector />", () => {
           selectedProviders={[] as PROVIDER_ID[]}
           verifiedProviders={[] as PROVIDER_ID[]}
           setSelectedProviders={() => {}}
-        />
+        />,
+        undefined,
+        {
+          stampScores: {
+            SelfStakingBronze: "1",
+            SelfStakingSilver: "1",
+            SelfStakingGold: "1",
+            BeginnerCommunityStaker: "1",
+            ExperiencedCommunityStaker: "1",
+            TrustedCitizen: "1",
+          },
+        }
       );
     };
 
