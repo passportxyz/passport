@@ -19,6 +19,7 @@ import { issueHashedCredential, verifyCredential } from "@gitcoin/passport-ident
 // All provider exports from platforms
 import { providers, platforms } from "@gitcoin/passport-platforms";
 import { ApiError } from "./helpers.js";
+import { checkCredentialBans } from "./bans.js";
 
 const providerTypePlatformMap = Object.entries(platforms).reduce(
   (acc, [platformName, { providers }]) => {
@@ -61,7 +62,7 @@ const issueCredentials = async (
 
   const results = await verifyTypes(types, payload);
 
-  return await Promise.all(
+  const credentials = await Promise.all(
     results.map(async ({ verifyResult, code: verifyCode, error: verifyError, type }) => {
       let code = verifyCode;
       let error = verifyError;
@@ -104,6 +105,10 @@ const issueCredentials = async (
       };
     })
   );
+
+  const credentialsAfterBanCheck = await checkCredentialBans(credentials);
+
+  return credentialsAfterBanCheck;
 };
 
 type VerifyTypeResult = {

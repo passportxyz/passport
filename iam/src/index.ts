@@ -9,7 +9,7 @@ import { router as procedureRouter } from "@gitcoin/passport-platforms/procedure
 import cors from "cors";
 
 // ---- Web3 packages
-import { getAddress, verifyMessage, Signature } from "ethers";
+import { getAddress, Signature } from "ethers";
 
 // ---- Types
 import { Response } from "express";
@@ -46,6 +46,7 @@ import { ATTESTER_TYPES, getAttestationDomainSeparator, getAttestationSignerForC
 import { scrollDevBadgeHandler } from "./utils/scrollDevBadge.js";
 import { autoVerificationHandler } from "./utils/autoVerification.js";
 import { toJsonObject } from "./utils/json.js";
+import { filterRevokedCredentials } from "./utils/revocations.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -282,55 +283,61 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
     if (!credentials.every((credential) => credential.credentialSubject.id.split(":")[4] === recipient))
       return void errorRes(res, "Every credential's id must be equivalent", 400);
 
-    Promise.all(
-      credentials.map(async (credential) => {
-        return {
-          credential,
-          verified: hasValidIssuer(credential.issuer) && (await verifyCredential(DIDKit, credential)),
-        };
-      })
-    )
-      .then(async (credentialVerifications) => {
-        const invalidCredentials = credentialVerifications
-          .filter(({ verified }) => !verified)
-          .map(({ credential }) => credential);
+    filterRevokedCredentials(credentials)
+      .then((unrevokedCredentials) => {
+        Promise.all(
+          unrevokedCredentials.map(async (credential) => {
+            return {
+              credential,
+              verified: hasValidIssuer(credential.issuer) && (await verifyCredential(DIDKit, credential)),
+            };
+          })
+        )
+          .then(async (credentialVerifications) => {
+            const invalidCredentials = credentialVerifications
+              .filter(({ verified }) => !verified)
+              .map(({ credential }) => credential);
 
-        if (invalidCredentials.length > 0) {
-          return void errorRes(res, { invalidCredentials }, 400);
-        }
+            if (invalidCredentials.length > 0) {
+              return void errorRes(res, { invalidCredentials }, 400);
+            }
 
-        const multiAttestationRequest = await stampSchema.formatMultiAttestationRequest(
-          credentialVerifications,
-          recipient,
-          attestationChainIdHex
-        );
+            const multiAttestationRequest = await stampSchema.formatMultiAttestationRequest(
+              credentialVerifications,
+              recipient,
+              attestationChainIdHex
+            );
 
-        const fee = await getEASFeeAmount(EAS_FEE_USD);
-        const passportAttestation: PassportAttestation = {
-          multiAttestationRequest,
-          nonce: Number(nonce),
-          fee: fee.toString(),
-        };
-
-        const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
-
-        const signer = await getAttestationSignerForChain(attestationChainIdHex);
-
-        signer
-          .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
-          .then((signature) => {
-            const { v, r, s } = Signature.from(signature);
-
-            const payload: EasPayload = {
-              passport: passportAttestation,
-              signature: { v, r, s },
-              invalidCredentials,
+            const fee = await getEASFeeAmount(EAS_FEE_USD);
+            const passportAttestation: PassportAttestation = {
+              multiAttestationRequest,
+              nonce: Number(nonce),
+              fee: fee.toString(),
             };
 
-            return void res.type("application/json").send(toJsonObject(payload));
+            const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
+
+            const signer = await getAttestationSignerForChain(attestationChainIdHex);
+
+            signer
+              .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+              .then((signature) => {
+                const { v, r, s } = Signature.from(signature);
+
+                const payload: EasPayload = {
+                  passport: passportAttestation,
+                  signature: { v, r, s },
+                  invalidCredentials,
+                };
+
+                return void res.type("application/json").send(toJsonObject(payload));
+              })
+              .catch(() => {
+                return void errorRes(res, "Error signing passport", 500);
+              });
           })
           .catch(() => {
-            return void errorRes(res, "Error signing passport", 500);
+            return void errorRes(res, "Error formatting onchain passport", 500);
           });
       })
       .catch(() => {
@@ -366,52 +373,59 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
     )
       return void errorRes(res, "Every credential's id must be equivalent to that of the recipient", 400);
 
-    Promise.all(
-      credentials.map(async (credential) => {
-        return {
-          credential,
-          verified: hasValidIssuer(credential.issuer) && (await verifyCredential(DIDKit, credential)),
-        };
-      })
-    )
-      .then(async (credentialVerifications) => {
-        const invalidCredentials = credentialVerifications
-          .filter(({ verified }) => !verified)
-          .map(({ credential }) => credential);
+    filterRevokedCredentials(credentials)
+      .then((unrevokedCredentials) => {
+        Promise.all(
+          unrevokedCredentials.map(async (credential) => {
+            return {
+              credential,
+              verified: hasValidIssuer(credential.issuer) && (await verifyCredential(DIDKit, credential)),
+            };
+          })
+        )
+          .then(async (credentialVerifications) => {
+            const invalidCredentials = credentialVerifications
+              .filter(({ verified }) => !verified)
+              .map(({ credential }) => credential);
 
-        const multiAttestationRequest = await passportSchema.formatMultiAttestationRequestWithPassportAndScore(
-          credentialVerifications,
-          recipient,
-          attestationChainIdHex,
-          customScorerId
-        );
+            const multiAttestationRequest = await passportSchema.formatMultiAttestationRequestWithPassportAndScore(
+              credentialVerifications,
+              recipient,
+              attestationChainIdHex,
+              customScorerId
+            );
 
-        const fee = await getEASFeeAmount(EAS_FEE_USD);
-        const passportAttestation: PassportAttestation = {
-          multiAttestationRequest,
-          nonce: Number(nonce),
-          fee: fee.toString(),
-        };
-
-        const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
-
-        const signer = await getAttestationSignerForChain(attestationChainIdHex);
-
-        signer
-          .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
-          .then((signature) => {
-            const { v, r, s } = Signature.from(signature);
-
-            const payload: EasPayload = {
-              passport: passportAttestation,
-              signature: { v, r, s },
-              invalidCredentials,
+            const fee = await getEASFeeAmount(EAS_FEE_USD);
+            const passportAttestation: PassportAttestation = {
+              multiAttestationRequest,
+              nonce: Number(nonce),
+              fee: fee.toString(),
             };
 
-            return void res.json(toJsonObject(payload));
+            const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
+
+            const signer = await getAttestationSignerForChain(attestationChainIdHex);
+
+            signer
+              .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+              .then((signature) => {
+                const { v, r, s } = Signature.from(signature);
+
+                const payload: EasPayload = {
+                  passport: passportAttestation,
+                  signature: { v, r, s },
+                  invalidCredentials,
+                };
+
+                return void res.json(toJsonObject(payload));
+              })
+              .catch((): void => {
+                return void errorRes(res, "Error signing passport", 500);
+              });
           })
-          .catch((): void => {
-            return void errorRes(res, "Error signing passport", 500);
+          .catch((error) => {
+            const message = addErrorDetailsToMessage("Error formatting onchain passport", error);
+            return void errorRes(res, message, 500);
           });
       })
       .catch((error) => {
