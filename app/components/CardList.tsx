@@ -23,13 +23,24 @@ type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
 const useShouldDisplayPlatform = () => {
   const customization = useCustomization();
-  const { platformProviderIds } = usePlatforms();
+  const { platformProviderIds, platforms } = usePlatforms();
 
   const shouldDisplayPlatform = useCallback(
     (platform: PlatformScoreSpec): boolean => {
       const providers = platformProviderIds[platform.platform];
 
       if (platform.possiblePoints <= 0) {
+        return false;
+      }
+
+      const platformGroupSpec = platforms.get(platform.platform)?.platFormGroupSpec;
+
+      const allProvidersDeprecated = platformGroupSpec?.every((group) =>
+        group.providers.every((provider) => provider.isDeprecated)
+      );
+
+      // Hide if all providers are deprecated for this platform and no points were earned
+      if (platform.earnedPoints <= 0 && allProvidersDeprecated) {
         return false;
       }
 
@@ -70,10 +81,10 @@ const useShouldDisplayPlatform = () => {
 };
 
 export const CardList = ({ className, isLoading = false, initialOpen = true }: CardListProps): JSX.Element => {
-  const { allProvidersState, allPlatforms } = useContext(CeramicContext);
+  const { allProvidersState } = useContext(CeramicContext);
   const { scoredPlatforms } = useContext(ScorerContext);
   const { platformProviderIds, platforms, platformCatagories } = usePlatforms();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onClose } = useDisclosure();
   const [currentPlatform, setCurrentPlatform] = useState<PlatformScoreSpec | undefined>();
   const { shouldDisplayPlatform } = useShouldDisplayPlatform();
 
@@ -129,7 +140,7 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
     });
   });
 
-  const platformProps = currentPlatform?.platform && allPlatforms.get(currentPlatform.platform);
+  const platformProps = currentPlatform?.platform && platforms.get(currentPlatform.platform);
 
   return (
     <>

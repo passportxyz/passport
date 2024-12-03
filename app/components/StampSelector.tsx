@@ -152,21 +152,26 @@ export function StampSelector({ currentPlatform, currentProviders, verifiedProvi
 
 const useIncludedGroupsAndProviders = (specs: PlatformGroupSpec[]): Record<string, string[]> => {
   const customization = useCustomization();
+  const { stampScores } = useContext(ScorerContext);
 
   const included = useMemo(() => {
     const included: Record<string, string[]> = {};
-    specs.forEach((spec) => {
-      const providers = spec.providers?.map((p) => p.name) || [];
+    specs.forEach(({ platformGroup, providers }) => {
+      included[platformGroup] = providers.reduce((includedProviders, provider) => {
+        const hasCustomWeights = customization.scorer?.weights;
 
-      if (!customization.scorer?.weights) {
-        included[spec.platformGroup] = providers;
-        return;
-      }
+        // Hide if customization uses custom weights and this has a custom weight of 0
+        const checkHiddenByCustomization = () =>
+          hasCustomWeights && parseFloat(customization.scorer?.weights?.[provider.name] || "0") <= 0;
 
-      included[spec.platformGroup] = providers.reduce((includedProviders, provider) => {
-        if (parseFloat(customization.scorer?.weights?.[provider] || "0") > 0) {
-          includedProviders.push(provider);
+        // Hide if deprecated and score is 0
+        const checkHiddenByDeprecation = () =>
+          provider.isDeprecated && parseFloat(stampScores[provider.name] || "0") <= 0;
+
+        if (!checkHiddenByCustomization() && !checkHiddenByDeprecation()) {
+          includedProviders.push(provider.name);
         }
+
         return includedProviders;
       }, [] as string[]);
     });
