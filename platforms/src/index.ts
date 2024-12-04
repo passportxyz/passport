@@ -20,6 +20,7 @@ Object.values(platforms).map(({ ProviderConfig }) => {
   });
 });
 
+// This is used in tests & IAM only, not in the app
 export const providers = createProviders(platforms);
 
 export * from "./types";
