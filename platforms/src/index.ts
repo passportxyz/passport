@@ -1,7 +1,7 @@
 // Provider Utils
 import platforms from "./platforms";
+import { createProviders } from "./utils/createProviders";
 import { keccak256, toUtf8Bytes } from "ethers";
-import { createProviders } from "utils/createProviders";
 
 // Check that all platforms have a ProviderConfig, PlatformDetails, and providers
 Object.entries(platforms).map(([platformName, platform]) => {
