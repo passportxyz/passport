@@ -21,6 +21,7 @@ export type ProviderSpec = {
   hash?: string;
   icon?: string;
   description?: string;
+  isDeprecated?: boolean;
 };
 
 export type PlatformGroupSpec = {

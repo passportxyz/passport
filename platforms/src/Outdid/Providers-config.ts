@@ -19,10 +19,10 @@ export const ProviderConfig: PlatformGroupSpec[] = [
         description:
           "Outdid uses zero-knowledge cryptography to ensure you are a unique human without revealing any personal information.",
         name: "Outdid",
+        isDeprecated: true,
       },
     ],
   },
 ];
 
 export const providers: Provider[] = [new OutdidProvider()];
-

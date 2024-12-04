@@ -1,11 +1,6 @@
 // Provider Utils
-import { Providers } from "./utils/providers";
-import { SimpleProvider } from "./utils/simpleProvider";
-import { SimpleEvmProvider } from "./utils/simpleEvmProvider";
-import { ClearTextSimpleProvider } from "./utils/clearTextSimpleProvider";
-import { ClearTextTwitterProvider, ClearTextGithubOrgProvider } from "./ClearText";
-
 import platforms from "./platforms";
+import { createProviders } from "./utils/createProviders";
 import { keccak256, toUtf8Bytes } from "ethers";
 
 // Check that all platforms have a ProviderConfig, PlatformDetails, and providers
@@ -16,10 +11,6 @@ Object.entries(platforms).map(([platformName, platform]) => {
   if (!providers?.length) throw new Error(`No providers defined in ${platformName}/Providers-config.ts`);
 });
 
-const platformProviders = Object.values(platforms)
-  .map((platform) => platform.providers)
-  .flat();
-
 // Set hash on each provider spec
 Object.values(platforms).map(({ ProviderConfig }) => {
   ProviderConfig.map(({ providers }) => {
@@ -29,15 +20,8 @@ Object.values(platforms).map(({ ProviderConfig }) => {
   });
 });
 
-export const providers = new Providers([
-  // Example provider which verifies the payload when `payload.proofs.valid === "true"`
-  new SimpleProvider(),
-  new SimpleEvmProvider(),
-  new ClearTextSimpleProvider(),
-  new ClearTextTwitterProvider(),
-  new ClearTextGithubOrgProvider(),
-  ...platformProviders,
-]);
+// This is used in tests & IAM only, not in the app
+export const providers = createProviders(platforms);
 
 export * from "./types";
 export { Platform as PlatformClass } from "./utils/platform";
