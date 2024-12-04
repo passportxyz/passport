@@ -7,6 +7,7 @@ import { ClearTextTwitterProvider, ClearTextGithubOrgProvider } from "./ClearTex
 
 import platforms from "./platforms";
 import { keccak256, toUtf8Bytes } from "ethers";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 // Check that all platforms have a ProviderConfig, PlatformDetails, and providers
 Object.entries(platforms).map(([platformName, platform]) => {
@@ -29,7 +30,7 @@ Object.values(platforms).map(({ ProviderConfig }) => {
   });
 });
 
-const deprecatedProviders = Object.values(platforms)
+const deprecatedProviderIds = Object.values(platforms)
   .map(({ ProviderConfig }) =>
     ProviderConfig.map(({ providers }) => providers.filter(({ isDeprecated }) => isDeprecated))
   )
@@ -45,8 +46,7 @@ export const providers = new Providers(
     new ClearTextTwitterProvider(),
     new ClearTextGithubOrgProvider(),
     ...platformProviders,
-  ],
-  deprecatedProviders
+  ].filter(({ type }) => !deprecatedProviderIds.includes(type as PROVIDER_ID))
 );
 
 export * from "./types";

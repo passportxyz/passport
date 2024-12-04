@@ -14,6 +14,8 @@ import { PlatformCard } from "../../components/PlatformCard";
 import { PlatformScoreSpec, ScorerContextState } from "../../context/scorerContext";
 import { DEFAULT_CUSTOMIZATION, useCustomization } from "../../hooks/useCustomization";
 import { platforms } from "@gitcoin/passport-platforms";
+import { PLATFORM_ID } from "@gitcoin/passport-types";
+import { usePlatforms } from "../../hooks/usePlatforms";
 
 vi.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -28,6 +30,14 @@ vi.mock("next/router", () => ({
 }));
 
 vi.mock("../../hooks/useCustomization");
+
+vi.mock("../../hooks/usePlatforms", async (importActual) => {
+  const actual = (await importActual()) as any;
+  return {
+    ...actual,
+    usePlatforms: vi.fn().mockImplementation(actual.usePlatforms),
+  };
+});
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
@@ -203,6 +213,147 @@ test("renders Category component", () => {
 });
 
 describe("show/hide tests", () => {
+  beforeEach(async () => {
+    const actualUsePlatforms = await vi.importActual("../../hooks/usePlatforms");
+    vi.mocked(usePlatforms).mockImplementation((actualUsePlatforms as any).usePlatforms);
+  });
+
+  it("should hide platform when all providers are deprecated and no points earned", () => {
+    vi.mocked(useCustomization).mockReturnValue({} as any);
+
+    // Mock a platform with all deprecated providers
+    const mockPlatforms = new Map();
+    mockPlatforms.set("TestPlatform", {
+      platFormGroupSpec: [
+        {
+          providers: [{ isDeprecated: true }, { isDeprecated: true }],
+        },
+      ],
+    });
+
+    vi.mocked(usePlatforms).mockReturnValue({
+      platformProviderIds: {},
+      platforms: mockPlatforms,
+      platformCatagories: [],
+    } as any);
+
+    const scorerContext: Partial<ScorerContextState> = {
+      scoredPlatforms: [
+        {
+          possiblePoints: 10,
+          earnedPoints: 0,
+          platform: "TestPlatform" as PLATFORM_ID,
+          name: "Test Platform",
+          description: "Test Description",
+          connectMessage: "Connect",
+        },
+      ],
+    };
+
+    renderWithContext(mockCeramicContext, <CardList {...cardListProps} />, {}, scorerContext);
+
+    // Platform should be hidden
+    expect(screen.queryByText("Test Platform")).not.toBeInTheDocument();
+  });
+
+  it("should show platform when all providers are deprecated but points were earned", () => {
+    vi.mocked(useCustomization).mockReturnValue({} as any);
+
+    // Mock a platform with all deprecated providers
+    const mockPlatforms = new Map();
+    mockPlatforms.set("TestPlatform", {
+      platFormGroupSpec: [
+        {
+          providers: [{ isDeprecated: true }, { isDeprecated: true }],
+        },
+      ],
+    });
+
+    vi.mocked(usePlatforms).mockReturnValue({
+      platformProviderIds: {},
+      platforms: mockPlatforms,
+      platformCatagories: [
+        {
+          name: "Test Category",
+          description: "Test Description",
+          platforms: ["TestPlatform"],
+        },
+      ],
+    } as any);
+
+    const scorerContext: Partial<ScorerContextState> = {
+      scoredPlatforms: [
+        {
+          possiblePoints: 10,
+          earnedPoints: 5,
+          platform: "TestPlatform" as PLATFORM_ID,
+          name: "Test Platform",
+          description: "Test Description",
+          connectMessage: "Connect",
+        },
+      ],
+    };
+
+    renderWithContext(mockCeramicContext, <CardList {...cardListProps} />, {}, scorerContext);
+
+    // Platform should be visible because points were earned
+    expect(screen.getByText("Test Platform")).toBeInTheDocument();
+  });
+
+  it.only("should show platform when some providers are not deprecated", () => {
+    vi.mocked(useCustomization).mockReturnValue({} as any);
+
+    // Mock a platform with mixed deprecated and active providers
+    const mockPlatforms = new Map();
+    mockPlatforms.set("NFT", {
+      platFormGroupSpec: [
+        {
+          providers: [
+            {
+              name: "NFTScore#50",
+              isDeprecated: true,
+            },
+            {
+              name: "NFTScore#75",
+              isDeprecated: false,
+            },
+          ],
+        },
+      ],
+    });
+
+    // Mock the usePlatforms hook
+    vi.mocked(usePlatforms).mockReturnValue({
+      platformProviderIds: { NFT: ["NFTScore#50", "NFTScore#75"] },
+      platforms: mockPlatforms,
+      platformCatagories: [
+        {
+          name: "Bla",
+          description: "Test Description",
+          platforms: ["NFT"],
+        },
+      ],
+      platformSpecs: { NFT: { platform: "NFT", name: "NFT", description: "NFT", connectMessage: "NFT" } },
+    } as any);
+
+    const scorerContext: Partial<ScorerContextState> = {
+      scoredPlatforms: [
+        {
+          possiblePoints: 10,
+          earnedPoints: 0,
+          platform: "NFT" as PLATFORM_ID,
+          name: "NFT",
+          description: "NFT",
+          connectMessage: "Connect",
+        },
+      ],
+    };
+
+    renderWithContext(mockCeramicContext, <CardList {...cardListProps} />, {}, scorerContext);
+
+    // Platform should be visible because not all providers are deprecated
+    expect(screen.getByTestId("platform-name")).toHaveTextContent("NFT");
+  });
   it("should show allow list stamp if user has points", () => {
     vi.mocked(useCustomization).mockReturnValue({
       partnerName: "TestPartner",

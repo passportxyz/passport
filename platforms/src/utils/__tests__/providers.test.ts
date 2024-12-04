@@ -6,17 +6,16 @@ import { SimpleProvider, verifySimpleProvider } from "../simpleProvider";
 
 jest.spyOn(console, "error").mockImplementation(() => {});
 
+
 jest.useFakeTimers(); // Use Jest's timer mocks
 
 describe("withTimeout", () => {
   beforeAll(() => {
-    jest.spyOn(global, "clearTimeout");
+    jest.spyOn(global, 'clearTimeout');
   });
   it("should resolve with the correct value if the promise resolves before the timeout", async () => {
     const expectedValue = { valid: true };
-    const fastPromise = new Promise((resolve) =>
-      setTimeout(() => resolve(expectedValue), 1000)
-    ) as Promise<VerifiedPayload>;
+    const fastPromise = new Promise((resolve) => setTimeout(() => resolve(expectedValue), 1000)) as Promise<VerifiedPayload>;
 
     const resultPromise = withTimeout(3000, fastPromise, "testType");
     jest.advanceTimersByTime(1000); // Fast-forward until all timers are executed
@@ -26,17 +25,13 @@ describe("withTimeout", () => {
   });
 
   it("should reject with a timeout error if the promise does not resolve in time", async () => {
-    const slowPromise = new Promise((resolve) =>
-      setTimeout(() => resolve({ valid: true }), 5000)
-    ) as Promise<VerifiedPayload>;
+    const slowPromise = new Promise((resolve) => setTimeout(() => resolve({ valid: true }), 5000)) as Promise<VerifiedPayload>;
 
     const resultPromise = withTimeout(3000, slowPromise, "testType");
     jest.advanceTimersByTime(3001); // Fast-forward until the timeout should occur
 
     await expect(resultPromise).rejects.toThrow(ProviderExternalVerificationError);
-    await expect(resultPromise).rejects.toThrow(
-      "Request timeout while verifying testType. It took over 3000 ms to complete."
-    );
+    await expect(resultPromise).rejects.toThrow("Request timeout while verifying testType. It took over 3000 ms to complete.");
     expect(clearTimeout).toHaveBeenCalledTimes(1);
   });
 });
@@ -67,7 +62,7 @@ describe("Providers", function () {
     const unknownErrorMessagePartTwo = "unable to parse, not derived from Error";
 
     const provider = new SimpleProvider();
-    const providers = new Providers([provider], []);
+    const providers = new Providers([provider]);
     const result = await providers.verify(mockPayload.type, mockPayload, mockContext);
 
     expect(console.error).toHaveBeenCalledWith(unknownErrorMessagePartOne, unknownErrorMessagePartTwo);
@@ -91,7 +86,7 @@ describe("Providers", function () {
     const unknownErrorMessagePartOne = "UNHANDLED ERROR: for type Simple and address 0x0 -";
 
     const provider = new SimpleProvider();
-    const providers = new Providers([provider], []);
+    const providers = new Providers([provider]);
     const result = await providers.verify(mockPayload.type, mockPayload, mockContext);
 
     expect(console.error).toHaveBeenCalledWith(unknownErrorMessagePartOne, expect.stringContaining("MyError at"));
@@ -112,7 +107,7 @@ describe("Providers", function () {
     });
 
     const provider = new SimpleProvider();
-    const providers = new Providers([provider], []);
+    const providers = new Providers([provider]);
     const result = await providers.verify(mockPayload.type, mockPayload, mockContext);
 
     expect(console.error).not.toHaveBeenCalled();
@@ -125,7 +120,7 @@ describe("Providers", function () {
 
   it("should return missing provider error if type doesn't exist", async () => {
     const provider = new SimpleProvider();
-    const providers = new Providers([provider], []);
+    const providers = new Providers([provider]);
 
     const result = await providers.verify("nonExistentType", mockPayload, mockContext);
     expect(result.valid).toEqual(false);
