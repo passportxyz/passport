@@ -1,13 +1,7 @@
 // Provider Utils
-import { Providers } from "./utils/providers";
-import { SimpleProvider } from "./utils/simpleProvider";
-import { SimpleEvmProvider } from "./utils/simpleEvmProvider";
-import { ClearTextSimpleProvider } from "./utils/clearTextSimpleProvider";
-import { ClearTextTwitterProvider, ClearTextGithubOrgProvider } from "./ClearText";
-
 import platforms from "./platforms";
 import { keccak256, toUtf8Bytes } from "ethers";
-import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { createProviders } from "utils/createProviders";
 
 // Check that all platforms have a ProviderConfig, PlatformDetails, and providers
 Object.entries(platforms).map(([platformName, platform]) => {
@@ -16,10 +10,6 @@ Object.entries(platforms).map(([platformName, platform]) => {
   if (!PlatformDetails) throw new Error(`No PlatformDetails defined in ${platformName}/Providers-config.ts`);
   if (!providers?.length) throw new Error(`No providers defined in ${platformName}/Providers-config.ts`);
 });
-
-const platformProviders = Object.values(platforms)
-  .map((platform) => platform.providers)
-  .flat();
 
 // Set hash on each provider spec
 Object.values(platforms).map(({ ProviderConfig }) => {
@@ -30,24 +20,7 @@ Object.values(platforms).map(({ ProviderConfig }) => {
   });
 });
 
-const deprecatedProviderIds = Object.values(platforms)
-  .map(({ ProviderConfig }) =>
-    ProviderConfig.map(({ providers }) => providers.filter(({ isDeprecated }) => isDeprecated))
-  )
-  .flat(3)
-  .map(({ name }) => name);
-
-export const providers = new Providers(
-  [
-    // Example provider which verifies the payload when `payload.proofs.valid === "true"`
-    new SimpleProvider(),
-    new SimpleEvmProvider(),
-    new ClearTextSimpleProvider(),
-    new ClearTextTwitterProvider(),
-    new ClearTextGithubOrgProvider(),
-    ...platformProviders,
-  ].filter(({ type }) => !deprecatedProviderIds.includes(type as PROVIDER_ID))
-);
+export const providers = createProviders(platforms);
 
 export * from "./types";
 export { Platform as PlatformClass } from "./utils/platform";
