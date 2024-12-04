@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: ref
-        uses: passportxyz/gh-workflows/.github/actions/load_commit_ref@v1
+        uses: passportxyz/gh-workflows/.github/actions/load_commit_ref@main
         with:
           commit: ${{ inputs.commit }}
 
