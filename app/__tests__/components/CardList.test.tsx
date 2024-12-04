@@ -300,7 +300,7 @@ describe("show/hide tests", () => {
     expect(screen.getByText("Test Platform")).toBeInTheDocument();
   });
 
-  it.only("should show platform when some providers are not deprecated", () => {
+  it("should show platform when some providers are not deprecated", () => {
     vi.mocked(useCustomization).mockReturnValue({} as any);
 
     // Mock a platform with mixed deprecated and active providers
