@@ -46,7 +46,7 @@ export class ClearTextGithubOrgProvider implements Provider {
     this._options = { ...this._options, ...options };
   }
 
-  // verify that the Github user is a memeber of the provided organization
+  // verify that the Github user is a member of the provided organization
   async verify(_payload: RequestPayload): Promise<VerifiedPayload> {
     // TODO: geri review this
     const payload = _payload as GHUserRequestPayload;
