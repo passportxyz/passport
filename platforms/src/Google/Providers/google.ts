@@ -1,4 +1,4 @@
-// For details on the google oauth2 flow, please check the following ressources:
+// For details on the google oauth2 flow, please check the following resources:
 //  - https://developers.google.com/identity/protocols/oauth2
 //  - https://developers.google.com/oauthplayground/
 
