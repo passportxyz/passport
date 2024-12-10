@@ -197,7 +197,7 @@ describe("Attempt verification", function () {
     expect(mockedAxios.get).toBeCalledTimes(1);
     // Check the request to get the user
     expect(mockedAxios.get).toBeCalledWith("https://api.coinbase.com/v2/user", {
-      headers: { Authorization: "Bearer cnbstkn294745627362562" },
+      headers: { Authorization: "Bearer cnbstkn294745627362562", Accept: "application/json" },
     });
   });
 
@@ -236,7 +236,7 @@ describe("Attempt verification", function () {
     expect(mockedAxios.get).toBeCalledTimes(1);
     // Check the request to get the user
     expect(mockedAxios.get).toBeCalledWith("https://api.coinbase.com/v2/user", {
-      headers: { Authorization: "Bearer cnbstkn294745627362562" },
+      headers: { Authorization: "Bearer cnbstkn294745627362562", Accept: "application/json" },
     });
   });
 
@@ -267,7 +267,7 @@ describe("Attempt verification", function () {
     expect(mockedAxios.get).toBeCalledTimes(1);
     // Check the request to get the user
     expect(mockedAxios.get).toBeCalledWith("https://api.coinbase.com/v2/user", {
-      headers: { Authorization: "Bearer cnbstkn294745627362562" },
+      headers: { Authorization: "Bearer cnbstkn294745627362562", Accept: "application/json" },
     });
 
     expect(coinbasePayload).toMatchObject({
@@ -297,7 +297,7 @@ describe("Attempt verification", function () {
     expect(mockedAxios.get).toBeCalledTimes(1);
     // Check the request to get the user
     expect(mockedAxios.get).toBeCalledWith("https://api.coinbase.com/v2/user", {
-      headers: { Authorization: "Bearer cnbstkn294745627362562" },
+      headers: { Authorization: "Bearer cnbstkn294745627362562", Accept: "application/json" },
     });
 
     expect(coinbasePayload).toEqual(
