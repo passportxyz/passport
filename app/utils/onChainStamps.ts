@@ -91,7 +91,6 @@ export async function getAttestationData({
 
     const passportSchema = onchainInfo[chainId].easSchemas.passport.uid;
     // check if user has attestations
-    console.log("LARISA HERE 1");
     const passportUid = (await publicClient.readContract({
       abi: resolverAbi,
       address: resolverAddress as `0x${string}`,
@@ -99,10 +98,8 @@ export async function getAttestationData({
       args: [address, passportSchema], // Arguments to the function
     })) as `0x${string}`;
 
-    console.log("LARISA HERE 2 passportUid ", passportUid);
     let providers: AttestationData["providers"] = [];
     if (passportUid !== ZERO_BYTES32) {
-      console.log("LARISA HERE 3 passportUid  not zERO", passportUid);
       const cachedPassport = await getPassport({
         publicClient,
         address,
