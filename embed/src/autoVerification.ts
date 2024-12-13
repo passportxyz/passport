@@ -19,6 +19,7 @@ import { ParamsDictionary } from "express-serve-static-core";
 import { platforms } from "@gitcoin/passport-platforms";
 import { issueHashedCredential } from "@gitcoin/passport-identity";
 import { providers } from "@gitcoin/passport-platforms";
+import { checkConditionsAndIssueCredentials } from "../src/credentials";
 
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 
