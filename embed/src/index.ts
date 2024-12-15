@@ -6,10 +6,14 @@ import express from "express";
 
 // ---- Production plugins
 import cors from "cors";
+import { rateLimit } from "express-rate-limit";
+import { RedisStore } from "rate-limit-redis";
 
 // --- Relative imports
+import { apiKeyRateLimit } from "./rate-limiter.js";
 import { autoVerificationHandler } from "./autoVerification.js";
 import { metadataHandler } from "./metadata.js";
+import { redis } from "./redis.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -55,6 +59,11 @@ if (!process.env.EAS_FEE_USD) {
   configErrors.push("EAS_FEE_USD is required");
 }
 
+// Check for DB configuration
+if (!process.env.REDIS_URL) {
+  configErrors.push("Redis configuration is required: REDIS_URL");
+}
+
 if (configErrors.length > 0) {
   configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
   throw new Error("Missing required configuration");
@@ -68,6 +77,20 @@ app.use(express.json());
 
 // set cors to accept calls from anywhere
 app.use(cors());
+
+// Use the rate limiting middleware
+app.use(
+  rateLimit({
+    windowMs: 60 * 1000, // We claculate the limit for a 1 minute limit ...
+    limit: apiKeyRateLimit,
+    // Redis store configuration
+    keyGenerator: (req, _res) => req.headers["x-api-key"] as string,
+    store: new RedisStore({
+      // @ts-expect-error - Known issue: the `call` function is not present in @types/ioredis
+      sendCommand: (...args: string[]) => redis.call(...args),
+    }),
+  })
+);
 
 // health check endpoint
 app.get("/health", (_req, res) => {

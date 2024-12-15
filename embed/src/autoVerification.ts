@@ -342,7 +342,7 @@ const addStampsAndGetScore = async ({
       };
     };
   } = await axios.post(
-    `${process.env.SCORER_ENDPOINT}/internal/stamps/${address}`,
+    `${process.env.SCORER_ENDPOINT}/embed/stamps/${address}`,
     {
       stamps,
       scorer_id: scorerId,
