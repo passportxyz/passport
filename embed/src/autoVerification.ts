@@ -19,7 +19,6 @@ import { ParamsDictionary } from "express-serve-static-core";
 import { platforms } from "@gitcoin/passport-platforms";
 import { issueHashedCredential } from "@gitcoin/passport-identity";
 import { providers } from "@gitcoin/passport-platforms";
-import { checkConditionsAndIssueCredentials } from "../src/credentials";
 
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 
@@ -264,20 +263,25 @@ export const autoVerificationHandler = async (
   res: Response
 ): Promise<void> => {
   try {
+    console.log("====> step 1");
     const { address, scorerId } = req.body;
 
     if (!isAddress(address)) {
       return void errorRes(res, "Invalid address", 400);
     }
 
+    console.log("====> step 2");
     const stamps = await getPassingEvmStamps({ address, scorerId });
 
+    console.log("====> step 3");
     const { score, threshold } = await addStampsAndGetScore({ address, scorerId, stamps });
 
     // TODO should we issue a score VC?
 
+    console.log("====> step 4");
     return void res.json({ score, threshold });
   } catch (error) {
+    console.log("====> ERROR", error);
     if (error instanceof ApiError) {
       return void errorRes(res, error.message, error.code);
     }
@@ -356,4 +360,28 @@ const addStampsAndGetScore = async ({
   const threshold = String(scoreData.evidence?.threshold || 20);
 
   return { score, threshold };
+};
+
+export const checkConditionsAndIssueCredentials = async (
+  payload: RequestPayload,
+  address: string
+): Promise<CredentialResponseBody[] | CredentialResponseBody> => {
+  const singleType = !payload.types?.length;
+  const types = (!singleType ? payload.types : [payload.type]).filter((type) => type);
+
+  // Validate requirements and issue credentials
+  if (payload && payload.type) {
+    const responses = await issueCredentials(types, address, payload);
+
+    if (singleType) {
+      const response = responses[0];
+      if ("error" in response && response.code && response.error) {
+        throw new ApiError(response.error, response.code);
+      }
+      return response;
+    }
+    return responses;
+  }
+
+  throw new ApiError("Invalid payload", 400);
 };

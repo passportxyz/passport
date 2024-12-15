@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
 import { isAddress } from "ethers";
 import axios from "axios";
-import { autoVerificationHandler, ApiError } from "../src/autoVerification";
-import { checkConditionsAndIssueCredentials } from "../src/credentials";
+import { autoVerificationHandler, ApiError, checkConditionsAndIssueCredentials } from "../src/autoVerification";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 
 // Mock all external dependencies
@@ -83,7 +82,7 @@ describe("autoVerificationHandler", () => {
     },
   });
 
-  it.only("should handle valid request successfully", async () => {
+  it("should handle valid request successfully", async () => {
     const mockAddress = "0x123";
     const mockScorerId = "test-scorer";
     const mockStamp = createMockVerifiableCredential(mockAddress);

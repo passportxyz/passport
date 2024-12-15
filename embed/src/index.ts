@@ -8,7 +8,8 @@ import express from "express";
 import cors from "cors";
 
 // --- Relative imports
-import { autoVerificationHandler } from "./autoVerification";
+import { autoVerificationHandler } from "./autoVerification.js";
+import { metadataHandler } from "./metadata.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -79,3 +80,4 @@ app.get("/health", (_req, res) => {
 });
 
 app.post("/embed/verify", autoVerificationHandler);
+app.get("/embed/stamps/metadata", metadataHandler);
