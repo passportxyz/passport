@@ -13,11 +13,11 @@ export class HolonymPlatform implements Platform {
       <ul style={{ listStyleType: "disc", paddingLeft: "20px" }}>
         <li>
           Have a smartphone, valid ID, and an Ethereum wallet with $0 (ePassport) or $0-$5 in ETH (mainnet, OP, or
-          Aurora), AVAX, or FTM for Government ID.
+          Aurora), AVAX, or FTM for Government ID or Phone Verification.
         </li>
         <li>
           Go to <Hyperlink href="https://holonym.id">Holonym's page</Hyperlink>, verify your ID by connecting your
-          wallet, and follow prompts to obtain the Government ID or ePassport Proofs
+          wallet, and follow prompts to obtain the Government ID, ePassport or Phone Proofs
         </li>
         <li>After verification, mint the SBT to your wallet, then link it to your Passport by verifying it.</li>
       </ul>
