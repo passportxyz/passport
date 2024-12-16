@@ -17,7 +17,7 @@ import {
   snsAlertsTopicArn,
   passportXyzDomainName,
   passportXyzHostedZoneId,
-  newPassportDomain
+  newPassportDomain,
 } from "./stacks";
 
 const current = aws.getCallerIdentity({});
@@ -218,7 +218,12 @@ const albPassportXyzTargetGroup = new aws.lb.TargetGroup(`passport-xyz-iam`, {
 /*
  * Alarm for monitoring target 5XX errors
  */
-const coreAlbArnSuffix = coreAlbArn.apply((arn) => arn.split(":").pop());
+const coreAlbArnSuffix = coreAlbArn.apply((arn) => {
+  let ret = arn.split(":").pop();
+  const firstSlashIndex = ret.indexOf("/");
+  ret = firstSlashIndex !== -1 ? ret.substring(firstSlashIndex + 1) : "";
+  return ret;
+});
 const http5xxTargetAlarm = new aws.cloudwatch.MetricAlarm(`HTTP-Target-5XX-passport-xyz-iam`, {
   tags: { ...defaultTags, Name: `HTTP-Target-5XX-passport-xyz-iam` },
   name: `HTTP-Target-5XX-passport-xyz-iam`,
@@ -236,7 +241,6 @@ const http5xxTargetAlarm = new aws.cloudwatch.MetricAlarm(`HTTP-Target-5XX-passp
 
   dimensions: {
     LoadBalancer: coreAlbArnSuffix,
-    TargetGroup: albPassportXyzTargetGroup.arnSuffix,
   },
 
   comparisonOperator: "GreaterThanThreshold",
