@@ -67,13 +67,10 @@ describe("Attempt verification", function () {
 
     const holonym = new HolonymGovIdProvider();
 
-    const verifiedPayload = await holonym.verify({
-      address: UNREGISTERED_ADDRESS,
-    } as RequestPayload);
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      record: undefined,
-      errors: ["Internal Server Error"],
-    });
+    await expect(async () => {
+      return await holonym.verify({
+        address: UNREGISTERED_ADDRESS,
+      } as RequestPayload);
+    }).rejects.toThrow("Internal Server Error");
   });
 });

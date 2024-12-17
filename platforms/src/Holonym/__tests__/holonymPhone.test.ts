@@ -67,13 +67,10 @@ describe("Attempt verification", function () {
 
     const holonym = new HolonymPhone();
 
-    const verifiedPayload = await holonym.verify({
-      address: UNREGISTERED_ADDRESS,
-    } as RequestPayload);
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      errors: ["Internal Server Error"],
-      record: undefined,
-    });
+    await expect(
+      holonym.verify({
+        address: UNREGISTERED_ADDRESS,
+      } as RequestPayload)
+    ).rejects.toThrow("Internal Server Error");
   });
 });
