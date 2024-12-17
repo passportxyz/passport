@@ -6,6 +6,7 @@ import { Hyperlink } from "../utils/Hyperlink";
 export class HolonymPlatform implements Platform {
   platformId = "Holonym";
   path = "Holonym";
+  isEVM = true;
 
   banner = {
     heading: "To add the Holonym Stamp to your Passport...",
