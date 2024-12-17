@@ -134,7 +134,7 @@
   { "bit": 96, "index": 0, "name": "NFTScore#90" },
   { "bit": 97, "index": 0, "name": "BinanceBABT" },
   { "bit": 98, "index": 0, "name": "Outdid" },
-  { "bit": 98, "index": 0, "name": "CoinbaseDualVerification2" },
-  { "bit": 98, "index": 0, "name": "BinanceBABT2" },
-  { "bit": 98, "index": 0, "name": "HolonymPhone" }
+  { "bit": 99, "index": 0, "name": "CoinbaseDualVerification2" },
+  { "bit": 100, "index": 0, "name": "BinanceBABT2" },
+  { "bit": 101, "index": 0, "name": "HolonymPhone" }
 ]
