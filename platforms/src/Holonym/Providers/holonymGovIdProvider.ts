@@ -69,10 +69,6 @@ const getIsUnique = async (address: string): Promise<SybilResistanceResponse> =>
   try {
     const requestResponse = await axios.get(`${holonymApiEndpoint}?user=${address}&action-id=${actionId}`);
 
-    if (requestResponse.status != 200) {
-      throw [`HTTP Error '${requestResponse.status}'. Details: '${requestResponse.statusText}'.`];
-    }
-
     return requestResponse.data as SybilResistanceResponse;
   } catch (error: unknown) {
     handleProviderAxiosError(error, "holonym", [address]);

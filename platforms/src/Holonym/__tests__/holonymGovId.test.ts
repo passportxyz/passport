@@ -55,22 +55,15 @@ describe("Attempt verification", function () {
   });
 
   it("should return error response when isUniqueForAction call errors", async () => {
-    mockedAxios.get.mockRejectedValueOnce({
-      status: 500,
-      response: {
-        data: {
-          error: "Internal Server Error",
-        },
-      },
-    });
+    mockedAxios.get.mockRejectedValueOnce(new Error("Internal Server Error"));
     const UNREGISTERED_ADDRESS = "0xunregistered";
 
     const holonym = new HolonymGovIdProvider();
 
-    await expect(async () => {
-      return await holonym.verify({
+    await expect(
+      holonym.verify({
         address: UNREGISTERED_ADDRESS,
-      } as RequestPayload);
-    }).rejects.toThrow("Internal Server Error");
+      } as RequestPayload)
+    ).rejects.toThrow("Internal Server Error");
   });
 });
