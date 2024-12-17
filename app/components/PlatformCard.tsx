@@ -71,7 +71,7 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant }: StampProps
             )}
             <div className={`text-right`}>
               <h1 data-testid="available-points" className="text-2xl text-color-2">
-                {+Math.max(platform.possiblePoints - platform.earnedPoints, 0).toFixed(1)}
+                {+Math.max(platform.displayPossiblePoints - platform.earnedPoints, 0).toFixed(1)}
               </h1>
               <p className="text-xs">Available Points</p>
             </div>
@@ -169,7 +169,7 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick 
           <div className="text-2xl font-bold">{+platform.earnedPoints.toFixed(1)}</div>
           <ProgressBar
             pointsGained={platform.earnedPoints}
-            pointsAvailable={Math.max(platform.possiblePoints - platform.earnedPoints, 0)}
+            pointsAvailable={Math.max(platform.displayPossiblePoints - platform.earnedPoints, 0)}
             isSlim={true}
           />
         </div>
@@ -253,7 +253,7 @@ const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick }
           <div className="text-2xl font-bold">{+platform.earnedPoints.toFixed(1)}</div>
           <ProgressBar
             pointsGained={platform.earnedPoints}
-            pointsAvailable={Math.max(platform.possiblePoints - platform.earnedPoints, 0)}
+            pointsAvailable={Math.max(platform.displayPossiblePoints - platform.earnedPoints, 0)}
             isSlim={true}
           />
         </div>

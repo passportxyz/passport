@@ -55,6 +55,7 @@ let categoryProps: CategoryProps = {
         name: "Github",
         platform: "Github",
         possiblePoints: 7.0600000000000005,
+        displayPossiblePoints: 7.0600000000000005,
         website: "https://github.com",
       },
       {
@@ -65,6 +66,7 @@ let categoryProps: CategoryProps = {
         name: "Google",
         platform: "Google",
         possiblePoints: 0.525,
+        displayPossiblePoints: 0.525,
         website: "https://www.google.com/",
       },
       {
@@ -75,6 +77,7 @@ let categoryProps: CategoryProps = {
         name: "Discord",
         platform: "Discord",
         possiblePoints: 0.516,
+        displayPossiblePoints: 0.516,
         website: "https://discord.com/",
       },
     ],
@@ -147,6 +150,7 @@ describe("<CardList />", () => {
             description: "ETH",
             connectMessage: "ETH",
             possiblePoints: 10,
+            displayPossiblePoints: 10,
             earnedPoints: 7,
           }}
           onOpen={mockOnOpen}
@@ -187,6 +191,7 @@ describe("<CardList />", () => {
           connectMessage: "Verify",
           isEVM: true,
           possiblePoints: 100,
+          displayPossiblePoints: 100,
           earnedPoints: 100,
         },
       ] as PlatformScoreSpec[],
@@ -241,6 +246,7 @@ describe("show/hide tests", () => {
       scoredPlatforms: [
         {
           possiblePoints: 10,
+          displayPossiblePoints: 10,
           earnedPoints: 0,
           platform: "TestPlatform" as PLATFORM_ID,
           name: "Test Platform",
@@ -285,6 +291,7 @@ describe("show/hide tests", () => {
       scoredPlatforms: [
         {
           possiblePoints: 10,
+          displayPossiblePoints: 10,
           earnedPoints: 5,
           platform: "TestPlatform" as PLATFORM_ID,
           name: "Test Platform",
@@ -340,6 +347,7 @@ describe("show/hide tests", () => {
       scoredPlatforms: [
         {
           possiblePoints: 10,
+          displayPossiblePoints: 10,
           earnedPoints: 0,
           platform: "NFT" as PLATFORM_ID,
           name: "NFT",
@@ -379,6 +387,7 @@ describe("show/hide tests", () => {
       scoredPlatforms: [
         {
           possiblePoints: 10,
+          displayPossiblePoints: 10,
           earnedPoints: 10,
           platform: "AllowList",
           name: "Allow List Platform",
@@ -421,6 +430,7 @@ describe("show/hide tests", () => {
       scoredPlatforms: [
         {
           possiblePoints: 10,
+          displayPossiblePoints: 10,
           earnedPoints: 0,
           platform: "AllowList",
           name: "Allow List Platform",
@@ -456,6 +466,7 @@ describe("show/hide tests", () => {
       scoredPlatforms: [
         {
           possiblePoints: 10,
+          displayPossiblePoints: 10,
           earnedPoints: 2,
           ...platforms["GtcStaking"].PlatformDetails,
         },
@@ -484,6 +495,7 @@ describe("show/hide tests", () => {
       scoredPlatforms: [
         {
           possiblePoints: 10,
+          displayPossiblePoints: 10,
           earnedPoints: 2,
           ...platforms["GtcStaking"].PlatformDetails,
         },
@@ -506,6 +518,7 @@ describe("show/hide tests", () => {
       scoredPlatforms: [
         {
           possiblePoints: 10,
+          displayPossiblePoints: 10,
           earnedPoints: 2,
           ...platforms["GtcStaking"].PlatformDetails,
         },
@@ -528,6 +541,7 @@ describe("show/hide tests", () => {
       scoredPlatforms: [
         {
           possiblePoints: 0,
+          displayPossiblePoints: 10,
           earnedPoints: 0,
           ...platforms["GtcStaking"].PlatformDetails,
         },

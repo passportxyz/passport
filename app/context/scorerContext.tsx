@@ -32,6 +32,9 @@ export type StampScores = {
 
 export type PlatformScoreSpec = PlatformSpec & {
   possiblePoints: number;
+  // Possible points that we want to tell the user
+  // about (i.e. excluding deprecated providers)
+  displayPossiblePoints: number;
   earnedPoints: number;
 };
 
@@ -214,6 +217,10 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       const scoredPlatforms = [...platforms.keys()].map((platformId) => {
         const providers = platformProviders[platformId];
         const possiblePoints = providers.reduce(
+          (acc, { name }) => acc + (parseFloat(stampWeights[name] || "0") || 0),
+          0
+        );
+        const displayPossiblePoints = providers.reduce(
           (acc, { name, isDeprecated }) => acc + (isDeprecated ? 0 : parseFloat(stampWeights[name] || "0") || 0),
           0
         );
@@ -222,6 +229,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
         return {
           ...platformSpec,
           possiblePoints,
+          displayPossiblePoints,
           earnedPoints,
         };
       });
@@ -231,7 +239,9 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
 
   useEffect(() => {
     if (!stampScores || !stampWeights) {
-      setScoredPlatforms(platformSpecs.map((platform) => ({ ...platform, possiblePoints: 0, earnedPoints: 0 })));
+      setScoredPlatforms(
+        platformSpecs.map((platform) => ({ ...platform, possiblePoints: 0, earnedPoints: 0, displayPossiblePoints: 0 }))
+      );
       return;
     }
     calculatePlatformScore();

@@ -151,6 +151,7 @@ export const scorerContext = {
       connectMessage: "Verify amount",
       isEVM: true,
       possiblePoints: 7.4399999999999995,
+      displayPossiblePoints: 7.4399999999999995,
       earnedPoints: 0,
     },
     {
@@ -161,6 +162,7 @@ export const scorerContext = {
       connectMessage: "Connect Account",
       isEVM: true,
       possiblePoints: 12.93,
+      displayPossiblePoints: 12.93,
       earnedPoints: 0,
     },
     {
@@ -170,6 +172,7 @@ export const scorerContext = {
       description: "Connect your existing Twitter account to verify.",
       connectMessage: "Connect Account",
       possiblePoints: 3.63,
+      displayPossiblePoints: 3.63,
       earnedPoints: 3.63,
     },
     {
@@ -179,6 +182,7 @@ export const scorerContext = {
       description: "Connect your existing Discord account to verify.",
       connectMessage: "Connect Account",
       possiblePoints: 0.689,
+      displayPossiblePoints: 0.689,
       earnedPoints: 0,
     },
     {
@@ -188,6 +192,7 @@ export const scorerContext = {
       description: "Connect your existing Google Account to verify",
       connectMessage: "Connect Account",
       possiblePoints: 2.25,
+      displayPossiblePoints: 2.25,
       earnedPoints: 1,
     },
   ],
