@@ -18,7 +18,7 @@ export class HolonymPlatform implements Platform {
         </li>
         <li>
           Go to <Hyperlink href="https://holonym.id">Holonym's page</Hyperlink>, verify your ID by connecting your
-          wallet, and follow prompts to obtain the Government ID, ePassport or Phone Proofs
+          wallet, and follow prompts to obtain the Government ID, ePassport or Phone Proofs.
         </li>
         <li>After verification, mint the SBT to your wallet, then link it to your Passport by verifying it.</li>
       </ul>

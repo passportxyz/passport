@@ -139,7 +139,7 @@ export const PlatformDetails = ({
   const hasStamps = platformPassportData && !!platformPassportData.length;
 
   const earnedPoints = currentPlatformScoreSpec?.earnedPoints || 0;
-  const possiblePoints = currentPlatformScoreSpec?.possiblePoints || 0;
+  const possiblePoints = currentPlatformScoreSpec?.displayPossiblePoints || 0;
 
   const pointsGained = +earnedPoints.toFixed(1);
   const pointsAvailable = +Math.max(possiblePoints - earnedPoints, 0).toFixed(1);

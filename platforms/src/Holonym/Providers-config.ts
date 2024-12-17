@@ -17,8 +17,11 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     platformGroup: "Holonym KYC",
     providers: [
       { title: "Proven uniqueness using Holonym KYC with government ID or ePassport", name: "HolonymGovIdProvider" },
-      { title: "Proven uniqueness using Holonym Phone Verification", name: "HolonymPhone" },
     ],
+  },
+  {
+    platformGroup: "Phone Number",
+    providers: [{ title: "Proven uniqueness using Holonym Phone Verification", name: "HolonymPhone" }],
   },
 ];
 

@@ -109,8 +109,8 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
   );
 
   const sortedPlatforms = [
-    ...unverified.sort((a, b) => b.possiblePoints - a.possiblePoints),
-    ...verified.sort((a, b) => b.possiblePoints - b.earnedPoints - (a.possiblePoints - a.earnedPoints)),
+    ...unverified.sort((a, b) => b.displayPossiblePoints - a.displayPossiblePoints),
+    ...verified.sort((a, b) => b.displayPossiblePoints - b.earnedPoints - (a.displayPossiblePoints - a.earnedPoints)),
   ];
 
   const groupedPlatforms: {
