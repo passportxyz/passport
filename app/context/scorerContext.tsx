@@ -83,7 +83,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const [stampWeights, setStampWeights] = useState<Partial<Weights>>({});
   const [scoredPlatforms, setScoredPlatforms] = useState<PlatformScoreSpec[]>([]);
   const customization = useCustomization();
-  const { platformSpecs, platformProviderIds, platforms, getPlatformSpec } = usePlatforms();
+  const { platformSpecs, platformProviders, platforms, getPlatformSpec } = usePlatforms();
 
   const loadScore = async (
     address: string | undefined,
@@ -211,10 +211,13 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
 
   const calculatePlatformScore = useCallback(() => {
     if (stampScores && stampWeights) {
-      const scoredPlatforms = Array.from(platforms).map(([platformId, platform]) => {
-        const providerIds = platformProviderIds[platformId];
-        const possiblePoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampWeights[key] || "0") || 0), 0);
-        const earnedPoints = providerIds.reduce((acc, key) => acc + (parseFloat(stampScores[key] || "0") || 0), 0);
+      const scoredPlatforms = [...platforms.keys()].map((platformId) => {
+        const providers = platformProviders[platformId];
+        const possiblePoints = providers.reduce(
+          (acc, { name, isDeprecated }) => acc + (isDeprecated ? 0 : parseFloat(stampWeights[name] || "0") || 0),
+          0
+        );
+        const earnedPoints = providers.reduce((acc, { name }) => acc + (parseFloat(stampScores[name] || "0") || 0), 0);
         const platformSpec = getPlatformSpec(platformId);
         return {
           ...platformSpec,
