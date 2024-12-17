@@ -1,5 +1,5 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { BinanceProvider } from "./Providers/binance";
+import { BinanceProvider, BinanceProvider2 } from "./Providers/binance";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/binanceStamp.svg",
@@ -14,12 +14,19 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     platformGroup: "Confirm your Binance Account Bound Token (BABT)",
     providers: [
       {
-        title: "Verified Binance Account",
-        description: "Account has valid BABT",
+        title: "Binance – (Retired)",
+        description:
+          "You earned this credential before the December 2024 stamp weight updates. This will be removed when this credential expires.",
         name: "BinanceBABT",
+        isDeprecated: true,
+      },
+      {
+        title: "Binance BABT Verification",
+        description: "Verify your Binance Account Bound Token (BABT).",
+        name: "BinanceBABT2",
       },
     ],
   },
 ];
 
-export const providers: Provider[] = [new BinanceProvider()];
+export const providers: Provider[] = [new BinanceProvider(), new BinanceProvider2()];

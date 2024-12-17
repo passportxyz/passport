@@ -111,3 +111,7 @@ export class BinanceProvider implements Provider {
     }
   }
 }
+
+export class BinanceProvider2 extends BinanceProvider {
+  type = "BinanceBABT2";
+}

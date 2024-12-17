@@ -15,15 +15,15 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     platformGroup: "Account & Onchain Identity",
     providers: [
       {
-        title: "Privacy-First Verification (deprecated)",
-        description: "(Deprecated)",
+        title: "Coinbase – (Retired)",
+        description:
+          "You earned this credential before the December 2024 stamp weight updates. This will be removed when this credential expires.",
         name: "CoinbaseDualVerification",
         isDeprecated: true,
       },
       {
-        title: "Privacy-First Verification",
-        description:
-          "Your privacy is paramount. We only retain a unique hash to acknowledge your account's verification.",
+        title: "Coinbase Onchain Verification",
+        description: "Verify your Coinbase ID onchain and successfully login to the Coinbase platform.",
         name: "CoinbaseDualVerification2",
       },
     ],
