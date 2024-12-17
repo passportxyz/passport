@@ -25,6 +25,7 @@ const mockResponse = ({
   numberTransactions?: number;
 }): { data: ModelResponse } => ({
   data: {
+    status: 200,
     data: {
       human_probability: score || 0,
       gas_spent: gasSpent || 0,
