@@ -422,6 +422,7 @@ export type PROVIDER_ID =
   | "GuildPassportMember"
   | "Hypercerts"
   | "HolonymGovIdProvider"
+  | "HolonymPhone"
   | "IdenaState#Newbie"
   | "IdenaState#Verified"
   | "IdenaState#Human"
