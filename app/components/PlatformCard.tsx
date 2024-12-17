@@ -169,7 +169,7 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick 
           <div className="text-2xl font-bold">{+platform.earnedPoints.toFixed(1)}</div>
           <ProgressBar
             pointsGained={platform.earnedPoints}
-            pointsAvailable={platform.possiblePoints - platform.earnedPoints}
+            pointsAvailable={Math.max(platform.possiblePoints - platform.earnedPoints, 0)}
             isSlim={true}
           />
         </div>
@@ -253,7 +253,7 @@ const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick }
           <div className="text-2xl font-bold">{+platform.earnedPoints.toFixed(1)}</div>
           <ProgressBar
             pointsGained={platform.earnedPoints}
-            pointsAvailable={platform.possiblePoints - platform.earnedPoints}
+            pointsAvailable={Math.max(platform.possiblePoints - platform.earnedPoints, 0)}
             isSlim={true}
           />
         </div>

@@ -19,17 +19,22 @@ export const ProviderConfig: PlatformGroupSpec[] = [
       {
         title: "Engagement Explorer",
         name: "zkSyncScore#5",
-        description: "For users who authentically engage with the platform's varied features, showcasing unique, real-world usage.",
+        description:
+          "For users who authentically engage with the platform's varied features, showcasing unique, real-world usage.",
+        isDeprecated: true,
       },
       {
         title: "L2 Believer",
         name: "zkSyncScore#20",
-        description: "Rewards users who demonstrate genuine and consistent use, reflecting their true reliance on zkSync Era.",
+        description:
+          "Rewards users who demonstrate genuine and consistent use, reflecting their true reliance on zkSync Era.",
+        isDeprecated: true,
       },
       {
         title: "zkSync Champion",
         name: "zkSyncScore#50",
         description: "For leaders who contribute uniquely and authentically, positively impacting the community.",
+        isDeprecated: true,
       },
     ],
   },
@@ -41,6 +46,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
         name: "ZkSyncEra",
         description:
           "Recognizes users whose transactions on zkSync Era have achieved verified status, confirming their active participation and trust in the platform.",
+        isDeprecated: true,
       },
     ],
   },

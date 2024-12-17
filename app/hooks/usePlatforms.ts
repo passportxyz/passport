@@ -1,4 +1,9 @@
-import { PlatformGroupSpec, PlatformSpec, platforms as platformDefinitions } from "@gitcoin/passport-platforms";
+import {
+  PlatformGroupSpec,
+  PlatformSpec,
+  ProviderSpec,
+  platforms as platformDefinitions,
+} from "@gitcoin/passport-platforms";
 import { useCustomization } from "../hooks/useCustomization";
 import { useCallback, useMemo } from "react";
 import { PLATFORM_CATEGORY, PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
@@ -152,15 +157,24 @@ export const usePlatforms = () => {
     [allPlatformDefinitions]
   );
 
-  const platformProviderIds = useMemo(() => {
+  const platformProviders = useMemo(() => {
     return Array.from(allPlatformsMap).reduce(
       (platformProviderIds, [platformId, { platFormGroupSpec }]) => {
-        const thisPlatformProviderIds =
-          platFormGroupSpec.reduce((all, { providers }) => {
-            return all.concat(providers.map(({ name }) => name));
-          }, [] as PROVIDER_ID[]) || [];
+        const thisPlatformProviderIds = platFormGroupSpec.reduce((all, { providers }) => {
+          return all.concat(providers);
+        }, [] as ProviderSpec[]);
         platformProviderIds[platformId] = thisPlatformProviderIds;
         return platformProviderIds;
+      },
+      {} as Record<PLATFORM_ID, ProviderSpec[]>
+    );
+  }, [allPlatformsMap]);
+
+  const platformProviderIds = useMemo(() => {
+    return Object.entries(platformProviders).reduce(
+      (platformProviderIdMap, [platformId, providers]) => {
+        platformProviderIdMap[platformId as PLATFORM_ID] = providers.map(({ name }) => name);
+        return platformProviderIdMap;
       },
       {} as Record<PLATFORM_ID, PROVIDER_ID[]>
     );
@@ -185,6 +199,7 @@ export const usePlatforms = () => {
     platformSpecs,
     platformGroupSpecs,
     platformProviderIds,
+    platformProviders,
     platformCatagories,
     platforms: allPlatformsMap,
   };

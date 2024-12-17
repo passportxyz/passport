@@ -11,7 +11,10 @@ export const PlatformDetails: PlatformSpec = {
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
-  { platformGroup: "Trusta Labs", providers: [{ title: "TrustScan Non-Sybil Account", name: "TrustaLabs" }] },
+  {
+    platformGroup: "Trusta Labs",
+    providers: [{ title: "TrustScan Non-Sybil Account", name: "TrustaLabs", isDeprecated: true }],
+  },
 ];
 
 export const providers: Provider[] = [new TrustaLabsProvider()];
