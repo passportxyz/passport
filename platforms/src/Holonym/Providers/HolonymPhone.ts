@@ -38,44 +38,36 @@ export class HolonymPhone implements Provider {
     let record = undefined,
       valid = false;
 
-    try {
-      // Check if address is unique for default Holonym action ID
-      const response = await getIsPhoneValid(address);
-      valid = response.result;
+    // Check if address is unique for default Holonym action ID
+    const response = await getIsPhoneValid(address);
+    valid = response.result;
 
-      if (valid) {
-        record = {
-          // store the address into the proof records
-          address,
-        };
-      } else {
-        errors.push(
-          `We were unable to verify that your address was unique for action -- isUniqueForAction: ${String(valid)}.`
-        );
-      }
-
-      if (!valid && errors.length === 0) {
-        errors.push("We are unable to determine the error at this time.");
-      }
-
-      return {
-        valid,
-        record,
-        errors,
+    if (valid) {
+      record = {
+        // store the address into the proof records
+        address,
       };
-    } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(`Holonym Government ID verification failure: ${JSON.stringify(e)}.`);
+    } else {
+      errors.push(
+        `We were unable to verify that your address was unique for action -- isUniqueForAction: ${String(valid)}.`
+      );
     }
+
+    if (!valid && errors.length === 0) {
+      errors.push("We are unable to determine the error at this time.");
+    }
+
+    return {
+      valid,
+      record,
+      errors,
+    };
   }
 }
 
 const getIsPhoneValid = async (address: string): Promise<SybilResistanceResponse> => {
   try {
     const requestResponse = await axios.get(`${holonymApiPhoneEndpoint}?user=${address}&action-id=${actionId}`);
-
-    if (requestResponse.status != 200) {
-      throw [`HTTP Error '${requestResponse.status}'. Details: '${requestResponse.statusText}'.`];
-    }
 
     return requestResponse.data as SybilResistanceResponse;
   } catch (error: unknown) {
