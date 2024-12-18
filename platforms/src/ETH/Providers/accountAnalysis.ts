@@ -92,7 +92,7 @@ export async function fetchModelData<T>(address: string, url_subpath: string, da
     }
     const url = `http://${dataScienceEndpoint}/${url_subpath}`;
     const response = await axios.post<T>(url, payload);
-    console.log("geri axios response", response)
+   
     if (response.status !== 200) {
       throw new Error(`Failed to fetch data for model ${url}`);
     }
