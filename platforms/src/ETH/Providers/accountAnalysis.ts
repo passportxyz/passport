@@ -92,11 +92,8 @@ export async function fetchModelData<T>(address: string, url_subpath: string, da
     }
     const url = `http://${dataScienceEndpoint}/${url_subpath}`;
     const response = await axios.post<T>(url, payload);
-   
-    if (response.status !== 200) {
-      throw new Error(`Failed to fetch data for model ${url}`);
-    }
-return response.data;
+
+    return response.data;
   } catch (e) {
     handleProviderAxiosError(e, "model data (" + url_subpath + ")", [dataScienceEndpoint]);
   }
