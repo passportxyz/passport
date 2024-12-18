@@ -5,7 +5,6 @@ import axios from "axios";
 import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 
 export type ModelResponse = {
-  status: number;
   data: {
     human_probability: number;
     n_transactions: number;
@@ -66,10 +65,7 @@ export async function getAggregateAnalysis(address: string, context: ETHAnalysis
   if (!context?.aggregateAnalysis) {
     const results = await Promise.all(
       Object.entries(MODEL_SUBPATHS).map(async ([modelAbbreviation, subpath]) => {
-        const { status, data } = await fetchModelData<ModelResponse>(address, subpath);
-        if (status !== 200) {
-          throw new Error(`Failed to fetch data for model ${modelAbbreviation}`);
-        }
+        const { data } = await fetchModelData<ModelResponse>(address, subpath);
         return {
           [`score_${modelAbbreviation}`]: data.human_probability,
           [`txs_${modelAbbreviation}`]: data.n_transactions,
@@ -94,8 +90,13 @@ export async function fetchModelData<T>(address: string, url_subpath: string, da
     if (data) {
       payload["data"] = data;
     }
-    const response = await axios.post<T>(`http://${dataScienceEndpoint}/${url_subpath}`, payload);
-    return response.data;
+    const url = `http://${dataScienceEndpoint}/${url_subpath}`;
+    const response = await axios.post<T>(url, payload);
+    console.log("geri axios response", response)
+    if (response.status !== 200) {
+      throw new Error(`Failed to fetch data for model ${url}`);
+    }
+return response.data;
   } catch (e) {
     handleProviderAxiosError(e, "model data (" + url_subpath + ")", [dataScienceEndpoint]);
   }

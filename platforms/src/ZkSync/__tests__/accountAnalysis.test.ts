@@ -10,7 +10,8 @@ import {
 
 const mockAddress = "0x0";
 let mockContext = {};
-const mockResponse = (score: number): { data: ModelResponse } => ({
+const mockResponse = (score: number): { status:number, data: ModelResponse } => ({
+  status: 200,
   data: {
     data: {
       human_probability: score,
@@ -52,7 +53,7 @@ describe("AccountAnalysis Providers", () => {
   describe("should return valid/invalid based on score", () => {
     it.each(scoreTestCases)("score %i should return %s for %p", async (score, expected, provider) => {
       const mockedResponse = mockResponse(score);
-      mockedAxios.post.mockResolvedValueOnce(mockedResponse);
+      mockedAxios.post.mockResolvedValue(mockedResponse);
       const ethAdvocateProvider = new provider();
       const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
 
