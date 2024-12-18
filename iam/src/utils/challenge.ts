@@ -5,7 +5,7 @@ import { verifyDidChallenge } from "./verifyDidChallenge.js";
 import { getAddress, verifyMessage } from "ethers";
 // request a challenge sig
 export const getChallenge = (payload: RequestPayload): ChallengePayload => {
-  // @TODO - expand this to allow providers to set custom challanges?
+  // @TODO - expand this to allow providers to set custom challenges?
   const getChallengeString = (provider: string, nonce: string): string => {
     switch (provider) {
       case "SignerChallenge":
