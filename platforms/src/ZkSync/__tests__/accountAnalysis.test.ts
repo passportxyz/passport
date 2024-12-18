@@ -53,7 +53,7 @@ describe("AccountAnalysis Providers", () => {
   describe("should return valid/invalid based on score", () => {
     it.each(scoreTestCases)("score %i should return %s for %p", async (score, expected, provider) => {
       const mockedResponse = mockResponse(score);
-      mockedAxios.post.mockResolvedValue(mockedResponse);
+      mockedAxios.post.mockResolvedValueOnce(mockedResponse);
       const ethAdvocateProvider = new provider();
       const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
 
