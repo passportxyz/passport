@@ -7,9 +7,9 @@ import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
 export type ModelResponse = {
   data: {
     human_probability: number;
-    gas_spent: number;
-    n_days_active: number;
     n_transactions: number;
+    gas_spent?: number;
+    n_days_active?: number;
   };
 };
 
@@ -45,9 +45,37 @@ export async function getETHAnalysis(address: string, context: ETHAnalysisContex
   return context.ethAnalysis;
 }
 
+const MODEL_SUBPATHS = {
+  eth: "eth-stamp-v2-predict",
+  zk: "zksync-model-v2-predict",
+  polygon: "polygon-model-predict",
+  arb: "arbitrum-model-predict",
+  op: "optimism-model-predict",
+} as const;
+
+type ModelKeys = keyof typeof MODEL_SUBPATHS;
+
+type AggregateData = {
+  [K in ModelKeys as `score_${K}`]: number;
+} & {
+  [K in ModelKeys as `txs_${K}`]: number;
+};
+
 export async function getAggregateAnalysis(address: string, context: ETHAnalysisContext): Promise<AggregateAnalysis> {
   if (!context?.aggregateAnalysis) {
-    const { data } = await fetchModelData<ModelResponse>(address, "aggregate-model-predict");
+    const results = await Promise.all(
+      Object.entries(MODEL_SUBPATHS).map(async ([modelAbbreviation, subpath]) => {
+        const { data } = await fetchModelData<ModelResponse>(address, subpath);
+        return {
+          [`score_${modelAbbreviation}`]: data.human_probability,
+          [`txs_${modelAbbreviation}`]: data.n_transactions,
+        };
+      })
+    );
+
+    const aggregateData: AggregateData = Object.assign({}, ...results);
+
+    const { data } = await fetchModelData<ModelResponse>(address, "aggregate-model-predict", aggregateData);
 
     context.aggregateAnalysis = {
       humanProbability: data.human_probability,
@@ -56,12 +84,19 @@ export async function getAggregateAnalysis(address: string, context: ETHAnalysis
   return context.aggregateAnalysis;
 }
 
-export async function fetchModelData<T>(address: string, url_subpath: string): Promise<T> {
+export async function fetchModelData<T>(address: string, url_subpath: string, data?: AggregateData): Promise<T> {
   try {
-    const response = await axios.post(`http://${dataScienceEndpoint}/${url_subpath}`, {
-      address,
-    });
-    return response.data as T;
+    const payload: { address: string; data?: AggregateData } = { address };
+    if (data) {
+      payload["data"] = data;
+    }
+    const url = `http://${dataScienceEndpoint}/${url_subpath}`;
+    const response = await axios.post<T>(url, payload);
+   
+    if (response.status !== 200) {
+      throw new Error(`Failed to fetch data for model ${url}`);
+    }
+return response.data;
   } catch (e) {
     handleProviderAxiosError(e, "model data (" + url_subpath + ")", [dataScienceEndpoint]);
   }

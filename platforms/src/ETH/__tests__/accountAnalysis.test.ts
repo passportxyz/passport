@@ -23,7 +23,8 @@ const mockResponse = ({
   gasSpent?: number;
   numberDaysActive?: number;
   numberTransactions?: number;
-}): { data: ModelResponse } => ({
+}): { status:number, data: ModelResponse } => ({
+  status: 200,
   data: {
     data: {
       human_probability: score || 0,
@@ -65,7 +66,7 @@ describe("AccountAnalysis Providers", () => {
   describe("should check human_probability", () => {
     it.each(scoreTestCases)("for score %i should return %s for %p", async (score, expected, provider) => {
       const mockedResponse = mockResponse({ score });
-      mockedAxios.post.mockResolvedValueOnce(mockedResponse);
+      mockedAxios.post.mockResolvedValue(mockedResponse);
       const ethAdvocateProvider = new provider();
       const payload = await ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext);
 
@@ -143,7 +144,7 @@ describe("AccountAnalysis Providers", () => {
   describe("getETHAnalysis", () => {
     it("should use value from context if present", async () => {
       const mockedResponse = mockResponse({ score: 80 });
-      mockedAxios.post.mockResolvedValueOnce(mockedResponse);
+      mockedAxios.post.mockResolvedValue(mockedResponse);
       mockContext = {};
       const response1 = await getETHAnalysis(mockAddress, mockContext);
       const response2 = await getETHAnalysis(mockAddress, mockContext);
