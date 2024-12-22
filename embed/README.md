@@ -2,7 +2,6 @@
 
 The Passport Embed service implements the backend part used by the passport embed UI component.
 
-
 ```
 # Ensure you copy and update the required variables for the environment
 $ cp ./.env-example.env ./.env
@@ -40,3 +39,11 @@ There are a few options for adding the variable into the build process:
 
 Passport uses redis to handle caching. For local development you can spin up a redis instance using docker:
 `docker run -d -p 6379:6379 redis` or using whatever other method you prefer. The redis instance should be available at `localhost:6379` by default.
+
+## Example requests
+
+```bash
+curl -X POST http://localhost:80/embed/verify \
+     -H "Content-Type: application/json" \
+     -d '{"address":"0x85fF01cfF157199527528788ec4eA6336615C989", "scorerId":736}'
+```
