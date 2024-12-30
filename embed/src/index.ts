@@ -66,7 +66,7 @@ if (!process.env.REDIS_URL) {
 
 if (configErrors.length > 0) {
   configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
-  throw new Error("Missing required configuration");
+  throw new Error("Missing required configuration: " + configErrors.join(",\n"));
 }
 
 // create the app and run on port
