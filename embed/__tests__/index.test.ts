@@ -86,8 +86,6 @@ jest.mock("../src/rate-limiter", () => {
   };
 });
 
-
-
 jest.mock("../src/autoVerification", () => {
   const originalModule = jest.requireActual<typeof import("../src/autoVerification")>("../src/autoVerification");
 
@@ -98,7 +96,7 @@ jest.mock("../src/autoVerification", () => {
       (
         req: Request<ParamsDictionary, AutoVerificationResponseBodyType, AutoVerificationRequestBodyType>,
         res: Response
-      ) => {
+      ): Promise<void> => {
         return new Promise((resolve, reject) => {
           res.status(200).json(mockedScore);
           resolve();
@@ -107,8 +105,6 @@ jest.mock("../src/autoVerification", () => {
     ),
   };
 });
-
-
 
 import { app } from "../src/index";
 
