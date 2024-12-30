@@ -20,6 +20,9 @@ import * as base64 from "@ethersproject/base64";
 // --- Crypto lib for hashing
 import { createHash } from "crypto";
 
+import initMishtiWasm, { InitOutput, generate_oprf } from "@holonym-foundation/mishtiwasm";
+let mishti: InitOutput | undefined;
+
 // Keeping track of the hashing mechanism (algo + content)
 export const VERSION = "v0.0.0";
 
@@ -32,7 +35,7 @@ import {
   challengeSignatureDocument,
   DocumentType,
   stampCredentialDocument,
-} from "./signingDocuments";
+} from "./signingDocuments.js";
 
 // Control expiry times of issued credentials
 export const CHALLENGE_EXPIRES_AFTER_SECONDS = 60; // 1min
@@ -212,6 +215,21 @@ export const issueHashedCredential = async (
   // Generate a hash like SHA256(IAM_PRIVATE_KEY+PII), where PII is the (deterministic) JSON representation
   // of the PII object after transforming it to an array of the form [[key:string, value:string], ...]
   // with the elements sorted by key
+  // important to call init -- wasm is initialized asynchronously.
+  // without it, the other functions won't work
+  if (mishti === undefined) {
+    mishti = await initMishtiWasm();
+  }
+
+  const nullifier = await generate_oprf(
+    "0xde7642ddc5c6315505dd4ecd2d82a93cf2bc81ae1b1ca505f1a0647308a5da61",
+    // JSON.stringify(objToSortedArray(record)),
+    "usr:1234",
+    "OPRFSecp256k1",
+    "http://192.168.0.33:8081"
+  );
+
+  console.log("nullifier", nullifier);
   const hash = base64.encode(
     createHash("sha256")
       .update(key, "utf-8")
