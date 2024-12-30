@@ -93,6 +93,23 @@ type VerifyTypeResult = {
   code?: number;
 };
 
+export type PassportProviderPoints = {
+  score: string;
+  dedup: boolean;
+  expiration_date: string;
+};
+
+export type PassportScore = {
+  address: string;
+  score: string;
+  passing_score: boolean;
+  last_score_timestamp: string;
+  expiration_timestamp: string;
+  threshold: string;
+  error: string;
+  stamps: Record<string, PassportProviderPoints>;
+};
+
 const providerTypePlatformMap = Object.entries(platforms).reduce(
   (acc, [platformName, { providers }]) => {
     providers.forEach(({ type }) => {
@@ -244,14 +261,14 @@ export const issueCredentials = async (
   );
 };
 
-type AutoVerificationRequestBodyType = {
+export type AutoVerificationRequestBodyType = {
   address: string;
   scorerId: string;
 };
 
 type AutoVerificationFields = AutoVerificationRequestBodyType;
 
-type AutoVerificationResponseBodyType = {
+export type AutoVerificationResponseBodyType = {
   score: string;
   threshold: string;
 };
@@ -265,6 +282,7 @@ export const autoVerificationHandler = async (
   try {
     console.log("====> step 1");
     const { address, scorerId } = req.body;
+    console.log("====> step 1 --- ", address);
 
     if (!isAddress(address)) {
       return void errorRes(res, "Invalid address", 400);
@@ -274,19 +292,19 @@ export const autoVerificationHandler = async (
     const stamps = await getPassingEvmStamps({ address, scorerId });
 
     console.log("====> step 3");
-    const { score, threshold } = await addStampsAndGetScore({ address, scorerId, stamps });
+    const score = await addStampsAndGetScore({ address, scorerId, stamps });
 
     // TODO should we issue a score VC?
 
     console.log("====> step 4");
-    return void res.json({ score, threshold });
+    return void res.json(score);
   } catch (error) {
     console.log("====> ERROR", error);
-    if (error instanceof ApiError) {
-      return void errorRes(res, error.message, error.code);
-    }
-    const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
-    return void errorRes(res, message, 500);
+    // if (error instanceof ApiError) {
+    //   return void errorRes(res, error.message, error.code);
+    // }
+    // const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
+    // return void errorRes(res, message, 500);
   }
 };
 
@@ -301,7 +319,10 @@ const getEvmProviders = ({ scorerId }: { scorerId: string }): PROVIDER_ID[] => {
     .flat(2);
 };
 
-const getPassingEvmStamps = async ({ address, scorerId }: AutoVerificationFields): Promise<VerifiableCredential[]> => {
+export const getPassingEvmStamps = async ({
+  address,
+  scorerId,
+}: AutoVerificationFields): Promise<VerifiableCredential[]> => {
   const evmProviders = getEvmProviders({ scorerId });
 
   const credentialsInfo = {
@@ -327,10 +348,7 @@ const addStampsAndGetScore = async ({
   address,
   scorerId,
   stamps,
-}: AutoVerificationFields & { stamps: VerifiableCredential[] }): Promise<{
-  score: string;
-  threshold: string;
-}> => {
+}: AutoVerificationFields & { stamps: VerifiableCredential[] }): Promise<PassportScore> => {
   const scorerResponse: {
     data?: {
       score?: {
@@ -356,10 +374,11 @@ const addStampsAndGetScore = async ({
 
   const scoreData = scorerResponse.data?.score || {};
 
-  const score = String(scoreData.evidence?.rawScore || scoreData.score);
-  const threshold = String(scoreData.evidence?.threshold || 20);
+  console.log("geri scoreData", scoreData);
+  // const score = String(scoreData.evidence?.rawScore || scoreData.score);
+  // const threshold = String(scoreData.evidence?.threshold || 20);
 
-  return { score, threshold };
+  return scoreData as PassportScore;
 };
 
 export const checkConditionsAndIssueCredentials = async (

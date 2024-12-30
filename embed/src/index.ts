@@ -7,10 +7,10 @@ import express from "express";
 // ---- Production plugins
 import cors from "cors";
 import { rateLimit } from "express-rate-limit";
-import { RedisStore } from "rate-limit-redis";
+import { RedisReply, RedisStore } from "rate-limit-redis";
 
 // --- Relative imports
-import { apiKeyRateLimit } from "./rate-limiter.js";
+import { keyGenerator, apiKeyRateLimit } from "./rate-limiter.js";
 import { autoVerificationHandler } from "./autoVerification.js";
 import { metadataHandler } from "./metadata.js";
 import { redis } from "./redis.js";
@@ -81,14 +81,19 @@ app.use(cors());
 // Use the rate limiting middleware
 app.use(
   rateLimit({
-    windowMs: 60 * 1000, // We claculate the limit for a 1 minute limit ...
+    windowMs: 60 * 1000, // We calculate the limit for a 1 minute limit ...
     limit: apiKeyRateLimit,
     // Redis store configuration
-    keyGenerator: (req, _res) => req.headers["x-api-key"] as string,
+    keyGenerator: keyGenerator,
     store: new RedisStore({
-      // @ts-expect-error - Known issue: the `call` function is not present in @types/ioredis
-      sendCommand: (...args: string[]) => redis.call(...args),
+      sendCommand: async (...args: string[]): Promise<RedisReply> => {
+        // @ts-expect-error - Known issue: the `call` function is not present in @types/ioredis
+        return await redis.call(...args);
+      },
     }),
+    skip: (req, res): boolean => {
+      return req.path === "/health";
+    },
   })
 );
 
@@ -96,7 +101,6 @@ app.use(
 app.get("/health", (_req, res) => {
   const data = {
     message: "Ok",
-    date: new Date(),
   };
 
   res.status(200).send(data);
