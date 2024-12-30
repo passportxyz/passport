@@ -16,14 +16,14 @@ import {
 import { ParamsDictionary } from "express-serve-static-core";
 
 // All provider exports from platforms
-import { platforms } from "@gitcoin/passport-platforms";
+import { platforms, providers, handleAxiosError } from "@gitcoin/passport-platforms";
 import { issueHashedCredential } from "@gitcoin/passport-identity";
-import { providers } from "@gitcoin/passport-platforms";
 
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 
 import axios from "axios";
 
+const apiKey = process.env.SCORER_API_KEY;
 const key = process.env.IAM_JWK;
 const __issuer = DIDKit.keyToDID("key", key);
 const eip712Key = process.env.IAM_JWK_EIP712;
@@ -86,6 +86,13 @@ export class ApiError extends Error {
   }
 }
 
+export class UnexpectedApiError extends ApiError {
+  constructor(message: string) {
+    super(message, 500);
+    this.name = this.constructor.name;
+  }
+}
+
 type VerifyTypeResult = {
   verifyResult: VerifiedPayload;
   type: string;
@@ -110,34 +117,10 @@ export type PassportScore = {
   stamps: Record<string, PassportProviderPoints>;
 };
 
-const providerTypePlatformMap = Object.entries(platforms).reduce(
-  (acc, [platformName, { providers }]) => {
-    providers.forEach(({ type }) => {
-      acc[type] = platformName;
-    });
-
-    return acc;
-  },
-  {} as { [k: string]: string }
-);
-
-function groupProviderTypesByPlatform(types: string[]): string[][] {
-  return Object.values(
-    types.reduce(
-      (groupedProviders, type) => {
-        const platform = providerTypePlatformMap[type] || "generic";
-
-        if (!groupedProviders[platform]) groupedProviders[platform] = [];
-        groupedProviders[platform].push(type);
-
-        return groupedProviders;
-      },
-      {} as { [k: keyof typeof platforms]: string[] }
-    )
-  );
-}
-
-export async function verifyTypes(types: string[], payload: RequestPayload): Promise<VerifyTypeResult[]> {
+export async function verifyTypes(
+  typesByPlatform: PROVIDER_ID[][],
+  payload: RequestPayload
+): Promise<VerifyTypeResult[]> {
   // define a context to be shared between providers in the verify request
   // this is intended as a temporary storage for providers to share data
   const context: ProviderContext = {};
@@ -145,10 +128,11 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
 
   await Promise.all(
     // Run all platforms in parallel
-    groupProviderTypesByPlatform(types).map(async (platformTypes) => {
+    typesByPlatform.map(async (platformTypes) => {
       // Iterate over the types within a platform in series
       // This enables providers within a platform to reliably share context
-      for (let type of platformTypes) {
+      for (const _type of platformTypes) {
+        let type = _type as string;
         let verifyResult: VerifiedPayload = { valid: false };
         let code, error;
 
@@ -161,7 +145,7 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
           type = "AllowList";
         } else if (type.startsWith("DeveloperList")) {
           // Here we handle the custom DeveloperList stamps
-          const [_type, conditionName, conditionHash, ..._rest] = type.split("#");
+          const [__type, conditionName, conditionHash, ..._rest] = type.split("#");
           payload.proofs = {
             ...payload.proofs,
             conditionName,
@@ -204,7 +188,7 @@ export async function verifyTypes(types: string[], payload: RequestPayload): Pro
 
 // return response for given payload
 export const issueCredentials = async (
-  types: string[],
+  typesByPlatform: PROVIDER_ID[][],
   address: string,
   payload: RequestPayload
 ): Promise<CredentialResponseBody[]> => {
@@ -214,7 +198,7 @@ export const issueCredentials = async (
     payload.address = payload.signer.address;
   }
 
-  const results = await verifyTypes(types, payload);
+  const results = await verifyTypes(typesByPlatform, payload);
 
   return await Promise.all(
     results.map(async ({ verifyResult, code: verifyCode, error: verifyError, type }) => {
@@ -236,6 +220,7 @@ export const issueCredentials = async (
           };
 
           const currentKey = getIssuerKey(payload.signatureType);
+
           // generate a VC for the given payload
           ({ credential } = await issueHashedCredential(
             DIDKit,
@@ -273,134 +258,96 @@ export type AutoVerificationResponseBodyType = {
   threshold: string;
 };
 
-const apiKey = process.env.SCORER_API_KEY;
-
 export const autoVerificationHandler = async (
   req: Request<ParamsDictionary, AutoVerificationResponseBodyType, AutoVerificationRequestBodyType>,
   res: Response
 ): Promise<void> => {
   try {
-    console.log("====> step 1");
     const { address, scorerId } = req.body;
-    console.log("====> step 1 --- ", address);
 
     if (!isAddress(address)) {
       return void errorRes(res, "Invalid address", 400);
     }
 
-    console.log("====> step 2");
     const stamps = await getPassingEvmStamps({ address, scorerId });
 
-    console.log("====> step 3");
     const score = await addStampsAndGetScore({ address, scorerId, stamps });
 
     // TODO should we issue a score VC?
-
-    console.log("====> step 4");
     return void res.json(score);
   } catch (error) {
-    console.log("====> ERROR", error);
-    // if (error instanceof ApiError) {
-    //   return void errorRes(res, error.message, error.code);
-    // }
-    // const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
-    // return void errorRes(res, message, 500);
+    if (error instanceof ApiError || error instanceof UnexpectedApiError) {
+      return void errorRes(res, error.message, error.code);
+    }
+    const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
+    return void errorRes(res, message, 500);
   }
 };
 
-const getEvmProviders = ({ scorerId }: { scorerId: string }): PROVIDER_ID[] => {
+const getEvmProvidersByPlatform = ({ scorerId }: { scorerId: string }): PROVIDER_ID[][] => {
   const evmPlatforms = Object.values(platforms).filter(({ PlatformDetails }) => PlatformDetails.isEVM);
 
   // TODO we should use the scorerId to check for any EVM stamps particular to a community, and include those here
   scorerId;
 
-  return evmPlatforms
-    .map(({ ProviderConfig }) => ProviderConfig.map(({ providers }) => providers.map(({ name }) => name)))
-    .flat(2);
+  return evmPlatforms.map(({ ProviderConfig }) =>
+    ProviderConfig.reduce((acc, platformGroupSpec) => {
+      return acc.concat(platformGroupSpec.providers.map(({ name }) => name));
+    }, [] as PROVIDER_ID[])
+  );
 };
 
 export const getPassingEvmStamps = async ({
   address,
   scorerId,
 }: AutoVerificationFields): Promise<VerifiableCredential[]> => {
-  const evmProviders = getEvmProviders({ scorerId });
+  const evmProvidersByPlatform = getEvmProvidersByPlatform({ scorerId });
 
   const credentialsInfo = {
     address,
     type: "EVMBulkVerify",
-    types: evmProviders,
+    // types: evmProviders,
     version: "0.0.0",
     signatureType: "EIP712" as SignatureType,
   };
 
-  const result = await checkConditionsAndIssueCredentials(credentialsInfo, address);
+  const results = await issueCredentials(evmProvidersByPlatform, address, credentialsInfo);
 
-  return (result ? [result] : [])
+  const ret = results
     .flat()
     .filter(
       (credentialResponse): credentialResponse is ValidResponseBody =>
         (credentialResponse as ValidResponseBody).credential !== undefined
     )
     .map(({ credential }) => credential);
+  return ret;
 };
 
-const addStampsAndGetScore = async ({
+export const addStampsAndGetScore = async ({
   address,
   scorerId,
   stamps,
 }: AutoVerificationFields & { stamps: VerifiableCredential[] }): Promise<PassportScore> => {
-  const scorerResponse: {
-    data?: {
-      score?: {
-        score?: string;
-        evidence?: {
-          rawScore?: string | number;
-          threshold?: string | number;
-        };
+  try {
+    const scorerResponse: {
+      data?: {
+        score?: PassportScore;
       };
-    };
-  } = await axios.post(
-    `${process.env.SCORER_ENDPOINT}/embed/stamps/${address}`,
-    {
-      stamps,
-      scorer_id: scorerId,
-    },
-    {
-      headers: {
-        Authorization: apiKey,
+    } = await axios.post(
+      `${process.env.SCORER_ENDPOINT}/embed/stamps/${address}`,
+      {
+        stamps,
+        scorer_id: scorerId,
       },
-    }
-  );
-
-  const scoreData = scorerResponse.data?.score || {};
-
-  console.log("geri scoreData", scoreData);
-  // const score = String(scoreData.evidence?.rawScore || scoreData.score);
-  // const threshold = String(scoreData.evidence?.threshold || 20);
-
-  return scoreData as PassportScore;
-};
-
-export const checkConditionsAndIssueCredentials = async (
-  payload: RequestPayload,
-  address: string
-): Promise<CredentialResponseBody[] | CredentialResponseBody> => {
-  const singleType = !payload.types?.length;
-  const types = (!singleType ? payload.types : [payload.type]).filter((type) => type);
-
-  // Validate requirements and issue credentials
-  if (payload && payload.type) {
-    const responses = await issueCredentials(types, address, payload);
-
-    if (singleType) {
-      const response = responses[0];
-      if ("error" in response && response.code && response.error) {
-        throw new ApiError(response.error, response.code);
+      {
+        headers: {
+          Authorization: apiKey,
+        },
       }
-      return response;
-    }
-    return responses;
-  }
+    );
 
-  throw new ApiError("Invalid payload", 400);
+    return scorerResponse.data?.score;
+  } catch (error) {
+    handleAxiosError(error, "Scorer Embed API", UnexpectedApiError, [apiKey]);
+  }
 };

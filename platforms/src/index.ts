@@ -1,5 +1,6 @@
 // Provider Utils
 import platforms from "./platforms";
+import { PlatformConfig } from "./platforms";
 import { createProviders } from "./utils/createProviders";
 import { keccak256, toUtf8Bytes } from "ethers";
 import { PlatformGroupSpec } from "./types";
@@ -88,6 +89,7 @@ export const platformsData = Object.entries(platforms).reduce((data, [id, platfo
 }, [] as PlatformData[]);
 
 export * from "./types";
+export { type PlatformConfig };
 export { Platform as PlatformClass } from "./utils/platform";
 export { platforms as platforms };
 export { initCacheSession, loadCacheSession, clearCacheSession } from "./utils/platform-cache";
