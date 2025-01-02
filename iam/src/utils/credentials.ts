@@ -22,24 +22,30 @@ import { ApiError } from "./helpers.js";
 import { checkCredentialBans } from "./bans.js";
 import { readFileSync } from "fs";
 
-const providerTypePlatformMap = Object.entries(platforms).reduce((acc, [platformName, { providers }]) => {
-  providers.forEach(({ type }) => {
-    acc[type] = platformName;
-  });
+const providerTypePlatformMap = Object.entries(platforms).reduce(
+  (acc, [platformName, { providers }]) => {
+    providers.forEach(({ type }) => {
+      acc[type] = platformName;
+    });
 
-  return acc;
-}, {} as { [k: string]: string });
+    return acc;
+  },
+  {} as { [k: string]: string }
+);
 
 function groupProviderTypesByPlatform(types: string[]): string[][] {
   return Object.values(
-    types.reduce((groupedProviders, type) => {
-      const platform = providerTypePlatformMap[type] || "generic";
+    types.reduce(
+      (groupedProviders, type) => {
+        const platform = providerTypePlatformMap[type] || "generic";
 
-      if (!groupedProviders[platform]) groupedProviders[platform] = [];
-      groupedProviders[platform].push(type);
+        if (!groupedProviders[platform]) groupedProviders[platform] = [];
+        groupedProviders[platform].push(type);
 
-      return groupedProviders;
-    }, {} as { [k: keyof typeof platforms]: string[] })
+        return groupedProviders;
+      },
+      {} as { [k: keyof typeof platforms]: string[] }
+    )
   );
 }
 
@@ -96,15 +102,21 @@ const issueCredentials = async (
 
               console.log("Loaded wasm module");
 
-              mishtiWasm.initSync(wasmModuleBuffer);
+              mishtiWasm.initSync({ module: wasmModuleBuffer });
 
               console.log("Initialized wasm module");
 
-              const nullifier = await mishtiWasm.make_jwt_request("abc", "def");
+              const nullifier = await mishtiWasm.generate_oprf(
+                process.env.TMP_PRIVATE_KEY,
+                // JSON.stringify(objToSortedArray(record)),
+                "usr:1234",
+                "OPRFSecp256k1",
+                "http://127.0.0.1:8081"
+              );
 
               console.log("nullifier", nullifier);
 
-              return nullifier as string;
+              return nullifier;
             }
           ));
         }

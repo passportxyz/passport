@@ -31,7 +31,7 @@
     "@gitcoin/passport-identity": "^1.0.0",
     "@gitcoin/passport-platforms": "^1.0.0",
     "@gitcoin/passport-types": "^1.0.0",
-    "@holonym-foundation/mishtiwasm": "0.2.2",
+    "@holonym-foundation/mishtiwasm": "^0.3.0-robustnet",
     "@ipld/dag-cbor": "^7.0.3",
     "@spruceid/didkit-wasm-node": "^0.2.1",
     "axios": "^1.7.9",
