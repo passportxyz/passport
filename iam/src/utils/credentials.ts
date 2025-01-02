@@ -8,19 +8,45 @@ import {
   ProviderContext,
   VerifiedPayload,
   VerifiableCredential,
+  ProofRecord,
 } from "@gitcoin/passport-types";
 
 import { getIssuerKey } from "../issuers.js";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-import { issueHashedCredential, verifyCredential } from "@gitcoin/passport-identity";
+import { issueHashedCredential, objToSortedArray, verifyCredential } from "@gitcoin/passport-identity";
 
 // All provider exports from platforms
 import { providers, platforms } from "@gitcoin/passport-platforms";
 import { ApiError } from "./helpers.js";
 import { checkCredentialBans } from "./bans.js";
 import { readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+// Need to do this here instead of in the identity package
+// so that this isn't loaded in the browser
+import { initSync as mishtiInitSync, generate_oprf } from "@holonym-foundation/mishtiwasm";
+
+let mishtiInitialized = false;
+const initializeMishti = () => {
+  if (mishtiInitialized) return;
+
+  const __dirname = dirname(fileURLToPath(import.meta.url));
+  const modulePath = join(
+    __dirname,
+    "../../../../../",
+    "node_modules/@holonym-foundation/mishtiwasm/pkg/esm/mishtiwasm_bg.wasm"
+  );
+
+  // console.log("Loading wasm module", modulePath);
+  const wasmModuleBuffer = readFileSync(modulePath);
+
+  mishtiInitSync({ module: wasmModuleBuffer });
+
+  mishtiInitialized = true;
+};
 
 const providerTypePlatformMap = Object.entries(platforms).reduce(
   (acc, [platformName, { providers }]) => {
@@ -67,7 +93,8 @@ const issueCredentials = async (
     results.map(async ({ verifyResult, code: verifyCode, error: verifyError, type }) => {
       let code = verifyCode;
       let error = verifyError;
-      let record, credential;
+      let record: ProofRecord | undefined;
+      let credential;
 
       try {
         // check if the request is valid against the selected Identity Provider
@@ -92,24 +119,11 @@ const issueCredentials = async (
             verifyResult.expiresInSeconds,
             payload.signatureType,
             async () => {
-              // Need to do this here instead of in the identity package
-              // so that this isn't loaded in the browser
-              const mishtiWasm = await import("@holonym-foundation/mishtiwasm");
+              initializeMishti();
 
-              const wasmModuleBuffer = readFileSync(
-                "/Users/lucian/projects/passport/node_modules/@holonym-foundation/mishtiwasm/pkg/esm/mishtiwasm_bg.wasm"
-              );
-
-              console.log("Loaded wasm module");
-
-              mishtiWasm.initSync({ module: wasmModuleBuffer });
-
-              console.log("Initialized wasm module");
-
-              const nullifier = await mishtiWasm.generate_oprf(
-                process.env.TMP_PRIVATE_KEY,
-                // JSON.stringify(objToSortedArray(record)),
-                "usr:1234",
+              const nullifier = await generate_oprf(
+                process.env.MISHTI_CLIENT_PRIVATE_KEY,
+                JSON.stringify(objToSortedArray(record)),
                 "OPRFSecp256k1",
                 "http://127.0.0.1:8081"
               );

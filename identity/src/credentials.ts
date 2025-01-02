@@ -200,7 +200,15 @@ export const issueChallengeCredential = async (
   } as IssuedCredential;
 };
 
-const getNullifier = ({ key, record, oprf }: { key: string; record: ProofRecord; oprf?: () => Promise<string> }) => {
+const getNullifier = async ({
+  key,
+  record,
+  oprf,
+}: {
+  key: string;
+  record: ProofRecord;
+  oprf?: () => Promise<string>;
+}) => {
   if (oprf) {
     return oprf();
   } else {
@@ -226,7 +234,7 @@ export const issueHashedCredential = async (
   signatureType?: string,
   oprf?: () => Promise<string>
 ): Promise<IssuedCredential> => {
-  const hash = getNullifier({ key, record, oprf });
+  const hash = await getNullifier({ key, record, oprf });
 
   let credential: VerifiableCredential;
   if (signatureType === "EIP712") {
