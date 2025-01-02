@@ -12,11 +12,6 @@ import {
 
 import { getIssuerKey } from "../issuers.js";
 
-// Need to do this here instead of in the identity package
-// so that this isn't loaded in the browser
-import initMishtiWasm, { generate_oprf } from "@holonym-foundation/mishtiwasm";
-let mishtiWasmInitialized = false;
-
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 import { issueHashedCredential, verifyCredential } from "@gitcoin/passport-identity";
@@ -25,31 +20,26 @@ import { issueHashedCredential, verifyCredential } from "@gitcoin/passport-ident
 import { providers, platforms } from "@gitcoin/passport-platforms";
 import { ApiError } from "./helpers.js";
 import { checkCredentialBans } from "./bans.js";
+import { readFileSync } from "fs";
 
-const providerTypePlatformMap = Object.entries(platforms).reduce(
-  (acc, [platformName, { providers }]) => {
-    providers.forEach(({ type }) => {
-      acc[type] = platformName;
-    });
+const providerTypePlatformMap = Object.entries(platforms).reduce((acc, [platformName, { providers }]) => {
+  providers.forEach(({ type }) => {
+    acc[type] = platformName;
+  });
 
-    return acc;
-  },
-  {} as { [k: string]: string }
-);
+  return acc;
+}, {} as { [k: string]: string });
 
 function groupProviderTypesByPlatform(types: string[]): string[][] {
   return Object.values(
-    types.reduce(
-      (groupedProviders, type) => {
-        const platform = providerTypePlatformMap[type] || "generic";
+    types.reduce((groupedProviders, type) => {
+      const platform = providerTypePlatformMap[type] || "generic";
 
-        if (!groupedProviders[platform]) groupedProviders[platform] = [];
-        groupedProviders[platform].push(type);
+      if (!groupedProviders[platform]) groupedProviders[platform] = [];
+      groupedProviders[platform].push(type);
 
-        return groupedProviders;
-      },
-      {} as { [k: keyof typeof platforms]: string[] }
-    )
+      return groupedProviders;
+    }, {} as { [k: keyof typeof platforms]: string[] })
   );
 }
 
@@ -59,10 +49,6 @@ const issueCredentials = async (
   address: string,
   payload: RequestPayload
 ): Promise<CredentialResponseBody[]> => {
-  if (!mishtiWasmInitialized) {
-    await initMishtiWasm();
-    mishtiWasmInitialized = true;
-  }
   // if the payload includes an additional signer, use that to issue credential.
   if (payload.signer) {
     // We can assume that the signer is a valid address because the challenge was verified within the /verify endpoint
@@ -100,17 +86,25 @@ const issueCredentials = async (
             verifyResult.expiresInSeconds,
             payload.signatureType,
             async () => {
-              const nullifier = await generate_oprf(
-                process.env.TMP_PRIVATE_KEY,
-                // JSON.stringify(objToSortedArray(record)),
-                "usr:1234",
-                "OPRFSecp256k1",
-                "http://192.168.0.33:8081"
+              // Need to do this here instead of in the identity package
+              // so that this isn't loaded in the browser
+              const mishtiWasm = await import("@holonym-foundation/mishtiwasm");
+
+              const wasmModuleBuffer = readFileSync(
+                "/Users/lucian/projects/passport/node_modules/@holonym-foundation/mishtiwasm/pkg/esm/mishtiwasm_bg.wasm"
               );
+
+              console.log("Loaded wasm module");
+
+              mishtiWasm.initSync(wasmModuleBuffer);
+
+              console.log("Initialized wasm module");
+
+              const nullifier = await mishtiWasm.make_jwt_request("abc", "def");
 
               console.log("nullifier", nullifier);
 
-              return nullifier;
+              return nullifier as string;
             }
           ));
         }

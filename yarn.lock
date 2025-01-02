@@ -6046,10 +6046,10 @@
   resolved "https://registry.yarnpkg.com/@heroicons/react/-/react-2.0.17.tgz#42a8086bc434ceefc03592f20c4e81b11e915cf8"
   integrity sha512-90GMZktkA53YbNzHp6asVEDevUQCMtxWH+2UK2S8OpnLEu7qckTJPhNxNQG52xIR1WFTwFqtH6bt7a60ZNcLLA==
 
-"@holonym-foundation/mishtiwasm@^0.3.0-robustnet":
-  version "0.3.0-robustnet"
-  resolved "https://registry.yarnpkg.com/@holonym-foundation/mishtiwasm/-/mishtiwasm-0.3.0-robustnet.tgz#621cec90bae996aeb0eb396f77d256b3abe81668"
-  integrity sha512-0wCFQdeDx1XDsKcc7/jnnADY60kBf1HhbswS5rZ46kD9ZbPzm1LDYAmC5k7FLmgaCmyJdeGewLiSX1xSzFOFZQ==
+"@holonym-foundation/mishtiwasm@0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@holonym-foundation/mishtiwasm/-/mishtiwasm-0.2.2.tgz#1910c16c5f7cc606d26dbb91be69ddc5d420abd1"
+  integrity sha512-mVE5qGrOfqhruwm9sehrEjMLXrcsp0HbTIlkttvGOP6HNajMsyF53jRd+E77OgQuLARguhwgJJmvp4L5GVdcEA==
 
 "@humanwhocodes/config-array@^0.11.13":
   version "0.11.14"

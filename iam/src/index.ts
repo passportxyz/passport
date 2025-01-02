@@ -254,6 +254,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
       return void errorRes(res, "Unable to verify payload", 401);
     })
     .catch((error) => {
+      console.log("ERROR", error);
       if (error instanceof ApiError) {
         return void errorRes(res, error.message, error.code);
       }
