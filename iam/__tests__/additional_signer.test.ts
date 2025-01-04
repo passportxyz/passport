@@ -2,8 +2,8 @@
 import request from "supertest";
 
 // ---- Test subject
-import { app } from "../src/index";
-import { getEip712Issuer } from "../src/issuers";
+import { app } from "../src/index.js";
+import { getEip712Issuer } from "../src/issuers.js";
 
 const issuer = getEip712Issuer();
 
