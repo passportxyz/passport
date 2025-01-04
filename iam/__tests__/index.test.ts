@@ -831,12 +831,17 @@ describe("POST /verify", function () {
     jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true);
 
     // create a req against the express app
-    await request(app)
+    const response = await request(app)
       .post("/api/v0.0.0/verify")
       .send({ challenge, payload })
       .set("Accept", "application/json")
       .expect(200)
       .expect("Content-Type", /json/);
+
+    response.body.forEach((item: any) => {
+      expect(item).toHaveProperty("record");
+      expect(item.record).toMatchObject({ type: "Simple" });
+    });
   });
   it("should not issue credential for additional signer when invalid address is provided", async () => {
     (identityMock.verifyCredential as jest.Mock).mockResolvedValueOnce(true);
