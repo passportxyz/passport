@@ -64,6 +64,7 @@ const missingEnvVars = [
   "SCROLL_BADGE_PROVIDER_INFO",
   "SCROLL_BADGE_ATTESTATION_SCHEMA_UID",
   "MISHTI_CLIENT_PRIVATE_KEY",
+  "MISHTI_RELAY_URL",
 ].filter((env) => !process.env[env]);
 
 if (missingEnvVars.length > 0) {

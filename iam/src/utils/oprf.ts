@@ -1,9 +1,6 @@
 // Need to do this here instead of in the identity package
 // so that this isn't loaded in the browser
 
-// ---- Web3 packages
-import { keccak256 } from "ethers";
-
 // ---- Types
 import { ProofRecord } from "@gitcoin/passport-types";
 
@@ -13,7 +10,6 @@ import { objToSortedArray } from "@gitcoin/passport-identity";
 // All provider exports from platforms
 import { readFileSync } from "fs";
 import { join, dirname } from "path";
-import { fileURLToPath } from "url";
 
 import { initSync as mishtiInitSync, generate_oprf } from "@holonym-foundation/mishtiwasm";
 
@@ -35,21 +31,15 @@ const initializeMishti = async () => {
 
 export const recordToNullifier = async ({ record }: { record: ProofRecord }) => {
   const cleartextNullifier = JSON.stringify(objToSortedArray(record));
-  // TODO
-  if (process.env.NODE_ENV === "TEST") {
-    return keccak256(cleartextNullifier);
-  } else {
-    await initializeMishti();
+  await initializeMishti();
 
-    const nullifier = await generate_oprf(
-      process.env.MISHTI_CLIENT_PRIVATE_KEY,
-      cleartextNullifier,
-      "OPRFSecp256k1",
-      "http://127.0.0.1:8081"
-    );
+  const nullifier = await generate_oprf(
+    process.env.MISHTI_CLIENT_PRIVATE_KEY,
+    cleartextNullifier,
+    "OPRFSecp256k1",
+    process.env.MISHTI_RELAY_URL
+  );
 
-    console.log("nullifier", nullifier);
-
-    return nullifier;
-  }
+  // console.log("nullifier", nullifier);
+  return nullifier;
 };
