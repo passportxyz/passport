@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React from "react";
 import { AppContext, Platform, ProviderPayload } from "../types";
 import { Hyperlink } from "../utils/Hyperlink";
