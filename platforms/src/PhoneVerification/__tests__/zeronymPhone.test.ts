@@ -1,7 +1,6 @@
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
-import { ProviderExternalVerificationError } from "../../types";
-import { HolonymPhone } from "../Providers/HolonymPhone";
+import { ZeronymPhoneProvider } from "../Providers/zeronymPhone";
 
 // ----- Libs
 import axios from "axios";
@@ -25,7 +24,7 @@ describe("Attempt verification", function () {
       },
     });
 
-    const holonym = new HolonymPhone();
+    const holonym = new ZeronymPhoneProvider();
     const verifiedPayload = await holonym.verify({
       address: MOCK_ADDRESS,
     } as RequestPayload);
@@ -41,7 +40,7 @@ describe("Attempt verification", function () {
       },
     });
 
-    const holonym = new HolonymPhone();
+    const holonym = new ZeronymPhoneProvider();
     const verifiedPayload = await holonym.verify({
       address: MOCK_ADDRESS,
     } as RequestPayload);
@@ -58,7 +57,7 @@ describe("Attempt verification", function () {
     mockedAxios.get.mockRejectedValueOnce(new Error("Internal Server Error"));
     const UNREGISTERED_ADDRESS = "0xunregistered";
 
-    const holonym = new HolonymPhone();
+    const holonym = new ZeronymPhoneProvider();
 
     await expect(
       holonym.verify({

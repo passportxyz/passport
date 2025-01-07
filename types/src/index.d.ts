@@ -353,6 +353,7 @@ export type PLATFORM_ID =
   | "Hypercerts"
   | "PHI"
   | "Holonym"
+  | "PhoneVerification"
   | "Idena"
   | "Civic"
   | "GrantsStack"
