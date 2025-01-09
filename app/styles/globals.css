@@ -38,6 +38,10 @@
   --onboard-font-family-normal: var(--font-body);
 }
 
+body {
+  background-color: rgb(var(--color-background)) !important;
+}
+
 .override-text-color * {
   color: inherit !important;
 }
