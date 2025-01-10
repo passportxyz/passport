@@ -89,6 +89,59 @@ const formatCredentialFromCeramic = (
 
 export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
   did: string;
+  composeImpl: ComposeDatabaseImpl;
+  lastOp: Promise<any> | undefined;
+
+  constructor(did: DID, ceramicUrl: string = COMMUNITY_TESTNET_CERAMIC_CLIENT_URL, logger?: Logger) {
+    this.did = (did.hasParent ? did.parent : did.id).toLowerCase();
+    this.composeImpl = new ComposeDatabaseImpl(did, ceramicUrl, logger);
+  }
+
+  addStamps = async (stamps: Stamp[]): Promise<SecondaryStorageAddResponse[]> => {
+    if (this.lastOp) {
+      try {
+        await this.lastOp;
+      } catch (error) {
+        // It should be safe to ignore error error, they should be logged in the called functions
+      }
+    }
+    await this.composeImpl.getPassportWithWrapper();
+    const promiseToReturn = this.composeImpl.addStamps(stamps);
+    this.lastOp = promiseToReturn;
+    return promiseToReturn;
+  };
+
+  patchStamps = async (stampPatches: StampPatch[]): Promise<SecondaryStorageBulkPatchResponse> => {
+    if (this.lastOp) {
+      try {
+        await this.lastOp;
+      } catch (error) {
+        // It should be safe to ignore error error, they should be logged in the called functions
+      }
+    }
+    await this.composeImpl.getPassportWithWrapper();
+    const promiseToReturn = this.composeImpl.patchStamps(stampPatches);
+    this.lastOp = promiseToReturn;
+    return promiseToReturn;
+  };
+
+  deleteStamps = async (providers: PROVIDER_ID[]): Promise<SecondaryStorageDeleteResponse[]> => {
+    if (this.lastOp) {
+      try {
+        await this.lastOp;
+      } catch (error) {
+        // It should be safe to ignore error error, they should be logged in the called functions
+      }
+    }
+    // No need to call this.composeImpl.getPassportWithWrapper(); as it is already called in the deleteStamps function
+    const promiseToReturn = this.composeImpl.deleteStamps(providers);
+    this.lastOp = promiseToReturn;
+    return promiseToReturn;
+  };
+}
+
+export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
+  did: string;
   compose: ComposeClient;
   // logger should indicate with tag where error is coming from similar to: [Scorer]
   logger: Logger;
