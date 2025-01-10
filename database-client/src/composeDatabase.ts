@@ -138,6 +138,10 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
     this.lastOp = promiseToReturn;
     return promiseToReturn;
   };
+
+  getPassport = async (): Promise<PassportLoadResponse> => {
+    return this.composeImpl.getPassport();
+  };
 }
 
 export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
