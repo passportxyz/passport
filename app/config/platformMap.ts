@@ -21,6 +21,7 @@ const {
   Coinbase,
   GuildXYZ,
   Holonym,
+  PhoneVerification,
   Idena,
   Civic,
   TrustaLabs,
@@ -156,6 +157,11 @@ if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP === "on") {
   defaultPlatformMap.set("Holonym", {
     platform: new Holonym.HolonymPlatform(),
     platFormGroupSpec: Holonym.ProviderConfig,
+  });
+
+  defaultPlatformMap.set("PhoneVerification", {
+    platform: new PhoneVerification.PhoneVerificationPlatform(),
+    platFormGroupSpec: PhoneVerification.ProviderConfig,
   });
 }
 

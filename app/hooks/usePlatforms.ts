@@ -41,6 +41,7 @@ const BASE_PLATFORM_CATAGORIES: PLATFORM_CATEGORY[] = [
       "Brightid",
       "TrustaLabs",
       "Ens",
+      "PhoneVerification",
     ],
   },
   {

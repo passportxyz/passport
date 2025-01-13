@@ -1,5 +1,5 @@
 // ----- Types
-import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
+import { type Provider, type ProviderOptions } from "../../types";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
@@ -19,7 +19,7 @@ type SybilResistanceResponse = {
 
 const actionId = 123456789;
 
-export class HolonymPhone implements Provider {
+export class ZeronymPhoneProvider implements Provider {
   // Give the provider a type so that we can select it from a payload
   type = "HolonymPhone";
   // Options can be set here and/or via the constructor

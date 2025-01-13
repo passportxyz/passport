@@ -1,6 +1,5 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
 import { HolonymGovIdProvider } from "./Providers/holonymGovIdProvider";
-import { HolonymPhone } from "./Providers/HolonymPhone";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/holonymStampIcon.svg",
@@ -19,10 +18,6 @@ export const ProviderConfig: PlatformGroupSpec[] = [
       { title: "Proven uniqueness using Holonym KYC with government ID or ePassport", name: "HolonymGovIdProvider" },
     ],
   },
-  {
-    platformGroup: "Phone Number",
-    providers: [{ title: "Proven uniqueness using Holonym Phone Verification", name: "HolonymPhone" }],
-  },
 ];
 
-export const providers: Provider[] = [new HolonymGovIdProvider(), new HolonymPhone()];
+export const providers: Provider[] = [new HolonymGovIdProvider()];
