@@ -1,14 +1,14 @@
 import { ComposeClient } from "@composedb/client";
 import { PROVIDER_ID, Stamp, StampPatch, VerifiableCredential } from "@gitcoin/passport-types";
 import { DID } from "dids";
-import { ComposeDatabase, GraphqlResponse } from "../src/composeDatabase";
+import { ComposeDatabaseImpl, GraphqlResponse } from "../src/composeDatabase";
 import { jest } from "@jest/globals";
 import mockStamps from "./mockStamps.json";
 import { GraphQLError } from "graphql";
 import exp from "constants";
 import { debug } from "console";
 
-let database: ComposeDatabase;
+let database: ComposeDatabaseImpl;
 
 const mockComposeError = {
   errors: [
@@ -170,7 +170,7 @@ const executeQueryMockReturn = {
 
 describe("Compose Database", () => {
   beforeEach(() => {
-    database = new ComposeDatabase({ id: "id" } as unknown as DID);
+    database = new ComposeDatabaseImpl({ id: "id" } as unknown as DID);
     jest.clearAllMocks();
   });
   it("should format a vc to compose specifications", () => {
