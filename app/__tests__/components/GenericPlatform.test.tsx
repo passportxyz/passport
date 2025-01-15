@@ -8,7 +8,7 @@ const { Ens } = platforms;
 
 import { CeramicContextState } from "../../context/ceramicContext";
 import { UN_SUCCESSFUL_ENS_RESULT, SUCCESFUL_ENS_RESULTS } from "../../__test-fixtures__/verifiableCredentialResults";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
+import { fetchVerifiableCredential } from "../../utils/credentials";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { ChakraProvider } from "@chakra-ui/react";
 import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
@@ -21,7 +21,7 @@ vi.mock("@didtools/cacao", () => ({
   },
 }));
 
-vi.mock("@gitcoin/passport-identity", () => ({
+vi.mock("../../utils/credentials", () => ({
   fetchVerifiableCredential: vi.fn(),
 }));
 

@@ -2,7 +2,7 @@ import { vi, describe, it, expect } from "vitest";
 import { makeTestCeramicContext } from "../../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../../context/ceramicContext";
 
-vi.mock("@gitcoin/passport-identity", () => ({
+vi.mock("../../utils/credentials", () => ({
   fetchVerifiableCredential: vi.fn(),
 }));
 

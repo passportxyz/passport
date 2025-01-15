@@ -8,12 +8,11 @@ import { mockAddress } from "../../../__test-fixtures__/onboardHookValues";
 import { STAMP_PROVIDERS } from "../../../config/providers";
 import { ensStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
 import { SUCCESFUL_ENS_RESULT } from "../../../__test-fixtures__/verifiableCredentialResults";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
 import { makeTestCeramicContext, renderWithContext } from "../../../__test-fixtures__/contextTestHelpers";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { vi, describe, it, expect } from "vitest";
 
-vi.mock("@gitcoin/passport-identity", () => ({
+vi.mock("../../utils/credentials", () => ({
   fetchVerifiableCredential: vi.fn(),
 }));
 
